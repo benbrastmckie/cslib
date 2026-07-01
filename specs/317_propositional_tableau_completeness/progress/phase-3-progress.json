@@ -1,0 +1,49 @@
+{
+  "phase": 3,
+  "phase_name": "Re-verify countermodel/Hintikka conditions for reused worlds",
+  "status": "BLOCKED",
+  "objectives": [
+    {
+      "objective": "git log -1 -- Scheme.lean; scoped+grepped rebuild GREEN",
+      "status": "done_with_caveat",
+      "note": "Last touching commit 26508fe9 (predates Phase 2's 619acd3a). Scoped build of the Scheme target cannot reach Scheme.lean: it fails upstream at Intuitionistic/Soundness.lean (Phase 2's known/expected fallout, Phase 4's job). Ignored per dispatch instructions; not a Phase 3 blocker in itself, but means Phase 3's own build gate is untestable until Phase 4 lands."
+    },
+    {
+      "objective": "Enumerate lemmas reading world/accessibility structure",
+      "status": "done",
+      "note": "IBranchSaturation (sat_fimp field), sfSatisfied/IExpandedConsistent, IExpandedConsistent_sat, intExpandBranches_openBranch_sat, openBranch_countermodel. See handoff phase3.lemmas_enumerated for exact line ranges."
+    },
+    {
+      "objective": "Re-prove or confirm-unchanged each lemma under reused-world semantics",
+      "status": "blocked",
+      "note": "intExpandBranches_openBranch_sat's succ case does not yet case-split on newEdge/intFImpReuseWitness? (stale relative to post-dedup go). Attempting the reuse sub-case requires IExpandedConsistent bPers newExp, which requires sfSatisfied bPers sf for the discharged F(phi->psi)@w formula -- this demands an explicit F(psi)@x branch entry at the witness world (IBranchSaturation.sat_fimp), which intFImpReuseWitness? does NOT guarantee. Concrete counterexample constructed (Atom=Nat, bPers with T(atomQ)@1/F(atomR)@1 only, witness x=1 chosen for F(atomQ->atomP)@0 despite no F(atomP)@1 entry anywhere in the branch). Full detail in .orchestrator-handoff.json blockers[0]."
+    },
+    {
+      "objective": "Record task 430 accessibility-structure delta",
+      "status": "done",
+      "note": "Recorded in handoff phase3.task_430_accessibility_delta: reuse means a single witness world can serve many unrelated F(->) obligations and edges stops growing on those steps; 430's upward-closure argument must account for the shared/converging structure."
+    },
+    {
+      "objective": "STOP/[BLOCKED] if a reused world violates a Hintikka condition, do not weaken the countermodel lemma",
+      "status": "done",
+      "note": "Followed exactly: no edit made to sfSatisfied/IBranchSaturation/any countermodel lemma. Phase marked [BLOCKED] in the plan file with the recommendation to tighten intFImpReuseWitness? in a Phase 1/2 revisit."
+    },
+    {
+      "objective": "Scoped+grepped build GREEN; no new sorries",
+      "status": "not_attempted",
+      "note": "No Scheme.lean edit was made, so nothing to build/verify. Scheme.lean remains byte-identical to the 26508fe9 baseline; sorries unchanged at lines 330/985."
+    },
+    {
+      "objective": "Commit Scheme.lean only",
+      "status": "not_applicable",
+      "note": "No Scheme.lean changes exist to commit. Plan file update (status marker + blocker writeup) committed separately."
+    }
+  ],
+  "environment_issue": "lean-lsp MCP server in this session is configured against /home/benjamin/Projects/BimodalLogic, not cslib. lean_run_code and lean_goal do not work for cslib files in this session. All analysis was done by direct source inspection (Scheme.lean, Expansion.lean, Rules.lean) plus a hand-traced counterexample, not live Lean execution.",
+  "files_touched": [],
+  "files_read_only": [
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean"
+  ]
+}

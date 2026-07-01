@@ -314,39 +314,143 @@ no new axiom.
 
 ---
 
-### Phase 3: Re-verify countermodel / Hintikka conditions for reused worlds [NOT STARTED]
+### Phase 3: Re-verify countermodel / Hintikka conditions for reused worlds [BLOCKED]
 
 **Goal**: Prove the dedup preserves the completeness-side countermodel: a reused ancestor world
 still satisfies every saturation/Hintikka/countermodel condition that `openBranch_countermodel`,
 `IBranchSaturation`, and `intExtractValuation` depend on. (Second-highest risk, R2.)
 
 **Tasks**:
-- [ ] `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
-- [ ] Enumerate (windowed reads) every lemma that reads the world/accessibility structure of the
-      returned open branch: `IBranchSaturation`, `IExpandedConsistent_sat`, `intExtractValuation`,
-      the `openBranch_countermodel` chain.
-- [ ] For each, re-prove (or confirm unchanged) under the reused-world semantics: when F(φ→ψ)@w is
-      discharged by a reused ancestor `x`, the countermodel must have `x` accessible from `w`,
-      forcing φ and failing ψ — verify the `edges`/valuation extraction still yields a valid
-      Kripke countermodel. Reuse `any_mono_sub`/`sfSatisfied_mono` for branch-growth monotonicity.
-- [ ] **Record the accessibility-structure delta for task 430** (coordination note): document
-      precisely how reused worlds change `edges` and the world order that 430's
-      `intExtractValuation` upward-closure argument relies on.
-- [ ] If a reused world violates a Hintikka condition, the containment predicate is too aggressive
-      — tighten it (Phase 1/2 revisit) rather than weakening the countermodel lemma; STOP/[BLOCKED]
-      before weakening any lemma.
-- [ ] Scoped+grepped build GREEN; no new sorries.
-- [ ] Commit `Scheme.lean` only: `task 317 phase 3: countermodel re-verification under dedup`.
+- [x] `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN. Last touching commit: `26508fe9`
+      (Phase 1, predates the Phase 2 dedup at `619acd3a`). Scoped build of
+      `Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` currently CANNOT reach
+      `Scheme.lean` itself: `Scheme.lean` transitively imports `Minimal.Soundness` →
+      `Intuitionistic.Soundness`, and `Intuitionistic/Soundness.lean` is the file Phase 2's
+      dedup already broke (`intExpandBranches_closed_unsat`, known/expected, Phase 4's job).
+      `lake build` therefore fails at the `Soundness` target before ever attempting `Scheme`
+      (confirmed: full build log shows only `Soundness.lean:1396/1399/1458/1461` errors, no
+      `Scheme.lean` diagnostics at all — this is a pre-existing/expected cross-file build
+      ordering artifact, not a Phase-3-caused regression). Per dispatch instructions this is
+      IGNORED as a Phase-3 blocker (Phase 4's concurrent job); it does mean Phase 3's own
+      "scoped+grepped build GREEN" gate cannot be exercised until Phase 4 lands.
+      **NOTE for the orchestrator**: the `lean-lsp` MCP server in this session is pointed at
+      a *different* project (`/home/benjamin/Projects/BimodalLogic`), not `cslib`
+      (`lean_run_code` reports `unknown module prefix 'Cslib'`; `lean_goal` on cslib files
+      returns null goals). All analysis below is by direct source inspection only — no live
+      Lean feedback was available to double-check it in this session.
+- [x] Enumerate (windowed reads) every lemma that reads the world/accessibility structure of the
+      returned open branch: `IBranchSaturation` (`Scheme.lean:72-99`, esp. field `sat_fimp` —
+      the F(φ→ψ) Hintikka condition), `sfSatisfied`/`IExpandedConsistent`
+      (`Scheme.lean:478-503`), `IExpandedConsistent_sat` (`Scheme.lean:562-635`, not re-read in
+      detail — subsumed by the blocker below, since it consumes exactly the invariant that
+      fails to hold), `intExpandBranches_openBranch_sat` (`Scheme.lean:968-1095`, the lemma that
+      actually threads `IAllConsistent`/`IExpandedConsistent` through `go`'s cases — this is
+      where the break surfaces), `openBranch_countermodel` (`Scheme.lean:1245-1270`, not
+      reached — blocked upstream).
+- [x] **BLOCKER FOUND (R2 materialized) — the `Sfor`-containment predicate does not establish
+      the Hintikka condition it is relied on to establish.**
+      - `intExpandBranches_openBranch_sat`'s `succ` case (`Scheme.lean:1055-1074`, as committed
+        at `26508fe9`) is *itself* now stale/broken independent of any semantic question: it was
+        written against the PRE-dedup `go` (uniform `Branch.extendMany bPers newForms`/`nw'`
+        for both `newEdge = none` and `newEdge = some e`), but the POST-dedup `go`
+        (`Expansion.lean:320-355`) inserts a THIRD case inside `newEdge = some e`: a further
+        match on `intFImpReuseWitness? bPers edges newForms e`, where the `some _x` (reuse)
+        branch recurses on `bPers` UNCHANGED (not `Branch.extendMany bPers newForms`), with
+        `nw` unchanged (not `nw'`) and `edges` unchanged (not `edges ++ [e]`)
+        (`Expansion.lean:335-346`). The committed proof's `simp only at hgo` /
+        `exact ih _ _ _ _ hAC' hLen0' hgo` at line 1074 no longer matches `hgo`'s actual shape
+        once `go` unfolds — the case split must be extended to cover `newEdge`/witness
+        separately, requiring a **new** invariant-preservation fact for the reuse branch:
+        `IExpandedConsistent bPers newExp` (on the SAME `bPers`, just `newExp = eH ++ [sf]` per
+        `intStepBranch`'s definition, `Expansion.lean:150-157` — `sf` is included in `newExp`
+        unconditionally, regardless of what `go` later decides to do with it).
+      - That new fact is exactly where the semantic gap lives. `IExpandedConsistent bPers newExp`
+        requires `sfSatisfied bPers sf` for `sf = ⟨.neg, .imp φ ψ, w⟩` (`Scheme.lean:502-503`),
+        which for the `.neg, .imp` case (`Scheme.lean:495-498`) demands
+        `∃ w' ≥ w, T(φ)@w' ∈ bPers ∧ F(ψ)@w' ∈ bPers` — i.e. an *explicit* `.neg`-signed `ψ`
+        entry at the witness world, matching `IBranchSaturation.sat_fimp`'s requirement
+        verbatim (`Scheme.lean:91-95`: `F(φ→ψ)@w ∈ b → ∃ w' ≥ w, T(φ)@w' ∈ b ∧ F(ψ)@w' ∈ b`).
+      - `intFImpReuseWitness?` (`Expansion.lean:248-267`) only checks, for the witness `x`:
+        `isAccessible edges w x`, `Sfor(w') ⊆ posFormulasAt bPers x` (gives `T(φ)@x ∈ bPers`,
+        fine), and `ψ ∉ posFormulasAt bPers x` (i.e. **not** `T(ψ)@x`). This last condition is
+        NOT equivalent to "`F(ψ)@x ∈ bPers`" — a branch can (and generically does) simply have
+        *no* signed entry for `ψ` at `x` at all (neither `.pos` nor `.neg`), since
+        `propagatePersistence` only ever copies `.pos`-signed formulas
+        (`Rules.lean:139-141`) and nothing else adds an unprompted `F(ψ)@x` to an *existing*
+        ancestor world merely because it is chosen as a reuse witness.
+      - **Concrete counterexample** (by direct construction/inspection, not run — see the
+        MCP-misconfiguration note above): let `Atom := Nat`, `atomP := .atom 0`,
+        `atomQ := .atom 1`, `atomR := .atom 2`. Let
+        `bPers := [⟨.pos, atomQ, 1⟩, ⟨.neg, atomR, 1⟩]` (world `1 = x` was created earlier as
+        a witness for some unrelated `F(atomQ → atomR)` discharge; it carries `T(atomQ)@1` and
+        `F(atomR)@1` and says nothing whatsoever about `atomP`), `edges := [(1, 0)]` (`x = 1` is
+        a child of `w = 0`, so `isAccessible edges 0 1 = true`). Now suppose `F(atomQ → atomP)@0`
+        fires at `w = 0`, prospectively creating `w' = 2` with
+        `newForms := [⟨.pos, atomQ, 2⟩, ⟨.neg, atomP, 2⟩]` (so `Sfor(w') = {atomQ}`, obligation
+        `atomP`). Tracing `intFImpReuseWitness? bPers edges newForms (2, 0)` by hand: candidate
+        `x = 1` passes all three conditions (`isAccessible edges 0 1`; `sfor = [atomQ]`,
+        `forcedAtX = posFormulasAt bPers 1 = [atomQ]`, so `sfor.all (forcedAtX.contains ·)` is
+        `true`; `forcedAtX.contains atomP` is `false`, so `!(...)` is `true`) — the function
+        returns `some 1`. But `bPers.any (fun y => y.sign == .neg && y.formula == atomP &&
+        y.label == 1)` is `false` by literal inspection of `bPers`'s two entries: **`x = 1` has
+        no `F(atomP)@1` entry**, so `sat_fimp`/`sfSatisfied` genuinely fails at the reused
+        world for this `sf`, and no *other* world `w'' ≥ 0` in this branch has both `T(atomQ)`
+        and `F(atomP)` either. `IExpandedConsistent bPers newExp` is false; the invariant the
+        rest of the completeness chain depends on breaks at exactly this step.
+      - Per the plan's own contingency: **this predicate is too aggressive** — it establishes
+        "no vacuous closure" (`ψ ∉ Sfor(x)`) but not "the Hintikka witness for `ψ` already
+        exists at `x`". Recommended tightening for a Phase 1/2 revisit (NOT implemented here —
+        out of Phase 3 territory and explicitly forbidden to patch around): strengthen the third
+        conjunct in `intFImpReuseWitness?` from `!(forcedAtX.contains ψ)` to a check for an
+        **explicit** `F(ψ)@x` entry, e.g.
+        `bPers.any (fun y => y.sign == .neg && y.formula == ψ && y.label == x) = true`, i.e.
+        search only among worlds that already carry a live `F(ψ)` obligation matching the one
+        `w'` would have received, not merely worlds that happen not to force `ψ` positively.
+        (This is a strictly narrower — hence safe — search predicate; whether it still finds
+        enough witnesses to keep the world-bound argument for Phase 5 is an open question for
+        that Phase 1/2 revisit, not resolved here.)
+- [x] **Record the accessibility-structure delta for task 430** (coordination note, informational
+      only — not implemented): under the (currently broken) dedup design, a discharged
+      `F(φ→ψ)@w` no longer always produces a fresh leaf world with a single incoming edge from
+      `w`; instead it can be discharged by ANY already-accessible ancestor `x`, so a single
+      world `x` can end up serving as the Hintikka witness for MANY unrelated `F(→)` obligations
+      raised at different worlds/times, and `edges` stops growing on those steps entirely (no
+      new `(w', w)` pair is appended). Task 430's `intExtractValuation` upward-closure argument,
+      which presumably reasons "each obligation gets its own witness world reachable by one
+      hop from where it was raised", will need to instead reason over a shared/converging witness
+      structure where multiple obligations point at the same `x` and the tree is shallower and
+      more heavily cross-referenced than the pre-dedup one-obligation-one-child shape.
+- [x] Hintikka-condition verdict: **VIOLATED** for the world-creating case (see blocker above).
+      Per plan instruction: do NOT weaken `sfSatisfied`/`IBranchSaturation`/any countermodel
+      lemma to compensate. **STOPPING here, marking this phase [BLOCKED]**, and handing off the
+      concrete counterexample above recommending a Phase 1/2 tightening of
+      `intFImpReuseWitness?`.
+- [ ] Scoped+grepped build GREEN; no new sorries. **NOT ATTEMPTED** — no `Scheme.lean` edit was
+      made (correctly: any edit implementing the reuse case of
+      `intExpandBranches_openBranch_sat` would require either a new `sorry` (forbidden) or
+      weakening a countermodel lemma (forbidden)). `Scheme.lean` is byte-identical to the
+      `26508fe9` baseline; zero new sorries, zero new axioms, zero vacuous definitions (nothing
+      was written).
+- [ ] Commit `Scheme.lean` only — **N/A, no `Scheme.lean` changes to commit.**
 
 **Estimated output**: ~250-400 lines. **Done when**: the countermodel chain builds GREEN under
 the dedup and the task-430 accessibility delta is documented. If >400 lines emerge, split into
 3.1 (`IBranchSaturation`/`IExpandedConsistent_sat` re-proof) and 3.2 (`intExtractValuation`/
 `openBranch_countermodel` re-proof).
 
+**Phase 3 verdict: BLOCKED (R2).** The `Sfor`-containment predicate `intFImpReuseWitness?`
+(Expansion.lean, Phase 2) guarantees `T(φ)@x` at the reuse witness but NOT the explicit
+`F(ψ)@x` entry that `IBranchSaturation.sat_fimp`/`sfSatisfied`'s `.neg, .imp` case requires.
+Concrete counterexample recorded above. Recommend Phase 1/2 revisit: tighten the predicate to
+require an explicit `F(ψ)@x` branch entry (not merely `ψ ∉ posFormulasAt bPers x`), then
+re-dispatch Phase 3 against the tightened predicate. No `Scheme.lean` edits were made; the
+Preserved Assets and the `26508fe9` baseline are untouched.
+
 **Timing**: 2 hours. **Depends on**: 2.
 
 **Files to modify**: `Scheme.lean` (+ `Intuitionistic/Completeness.lean` only if a countermodel
-lemma lives there — flag if so).
+lemma lives there — flag if so). **No files were modified this dispatch** (blocked before any
+edit).
 
 ---
 

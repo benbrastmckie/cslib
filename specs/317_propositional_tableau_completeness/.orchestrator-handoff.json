@@ -13,7 +13,19 @@
     "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean": [110]
   },
   "sorry_relocations": 0,
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": 3,
+      "risk": "R2",
+      "status": "BLOCKED",
+      "title": "intFImpReuseWitness? does not establish the sat_fimp Hintikka condition it is relied on to establish",
+      "detail": "IExpandedConsistent bPers newExp (Scheme.lean:502-503) requires sfSatisfied bPers sf for the discharged sf = <.neg, .imp phi psi, w>, which for the .neg/.imp case (Scheme.lean:495-498, matching IBranchSaturation.sat_fimp at Scheme.lean:91-95) demands an EXPLICIT F(psi)@w' branch entry at the witness world. intFImpReuseWitness? (Expansion.lean:248-267) only checks isAccessible, Sfor(w') subseteq posFormulasAt bPers x (gives T(phi)@x), and psi not in posFormulasAt bPers x (i.e. NOT T(psi)@x) -- this does not imply F(psi)@x is present; propagatePersistence only ever copies .pos-signed formulas (Rules.lean:139-141), so a reuse witness x can lack any signed entry for psi whatsoever.",
+      "counterexample": "Atom := Nat. bPers := [<.pos, atom 1, 1>, <.neg, atom 2, 1>] (world x=1 carries T(atomQ)@1, F(atomR)@1 only). edges := [(1,0)]. F(atomQ -> atomP)@0 fires at w=0 with newForms := [<.pos, atom 1, 2>, <.neg, atom 0, 2>] (Sfor(w')={atomQ}, obligation atomP), newEdge := (2,0). By hand-trace, intFImpReuseWitness? bPers edges newForms (2,0) = some 1 (isAccessible edges 0 1 = true; sfor=[atomQ] all contained in posFormulasAt bPers 1=[atomQ]; atomP not in posFormulasAt bPers 1). But bPers has no <.neg, atom 0 (atomP), 1> entry -- sat_fimp/sfSatisfied genuinely fails at x=1 for this sf, and no other world in the branch has both T(atomQ) and F(atomP).",
+      "recommendation": "Phase 1/2 revisit (NOT implemented in Phase 3 -- out of territory and explicitly forbidden to patch around in the countermodel lemma): tighten intFImpReuseWitness?'s third conjunct from `!(forcedAtX.contains psi)` to an explicit check `bPers.any (fun y => y.sign == .neg && y.formula == psi && y.label == x) = true`, i.e. only reuse witnesses that already carry a live F(psi) obligation, not merely witnesses that happen not to force psi positively. Re-dispatch Phase 3 against the tightened predicate afterward.",
+      "action_taken": "None. No Scheme.lean edit was made this dispatch (any edit would require either a new sorry or weakening sfSatisfied/IBranchSaturation, both forbidden). Scheme.lean is byte-identical to the 26508fe9 baseline.",
+      "also_noted": "intExpandBranches_openBranch_sat's succ case (Scheme.lean:1055-1074, as committed at 26508fe9) is separately stale relative to the current post-dedup go (Expansion.lean:320-355): it does not yet case-split on newEdge/intFImpReuseWitness? at all, so it will not typecheck against the current go shape regardless of the semantic blocker above. Both issues must be fixed together once the predicate is tightened."
+    }
+  ],
   "preserved_asset_fallout": {
     "file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
     "lemma": "intExpandBranches_closed_unsat",
@@ -21,31 +33,50 @@
     "failing_unification_sites": [1396, 1461],
     "diagnosis": "The lemma's induction on intExpandBranches assumes that every `some (.linearResult newForms nw' (some newEdge), newExp)` step strictly extends the branch (Branch.extendMany bPers newForms) and appends the new edge. With the Sfor-containment reuse path now live, the `some x` witness case instead continues on `bPers` unchanged with `edges` unchanged and `nw` unconsumed -- a genuinely new case the induction does not yet cover.",
     "expected": true,
-    "action_taken": "none (recorded only, per territory contract: Soundness.lean is out of scope for Phase 2)",
+    "action_taken": "none (recorded only, per territory contract: Soundness.lean is out of scope for Phase 2 and Phase 3 alike)",
     "suggested_resolution_for_phase_3_or_4": "Add an induction case for the reuse (`some x`) branch showing satisfiability is preserved: since Sfor(w') subseteq posFormulasAt bPers x (the ancestor x already forces everything the fresh world would have forced) and x is accessible from w, any model satisfying the branch at x also witnesses whatever `intBranchSatisfied` needs from the (never-created) w' -- no fresh `worldOf'` is needed because x already serves that role. This likely requires a monotonicity/containment lemma relating `posFormulasAt` containment to `intBranchSatisfied` preservation, analogous to the existing persistence-preservation argument."
+  },
+  "phase3": {
+    "status": "BLOCKED",
+    "verdict": "R2 materialized: intFImpReuseWitness? guarantees T(phi)@x at the reuse witness but not the explicit F(psi)@x entry that IBranchSaturation.sat_fimp/sfSatisfied's .neg/.imp case requires. See top-level blockers[] entry for the full counterexample and recommendation.",
+    "lemmas_enumerated": [
+      "IBranchSaturation (Scheme.lean:72-99, field sat_fimp at 91-95)",
+      "sfSatisfied / IExpandedConsistent (Scheme.lean:478-503)",
+      "IExpandedConsistent_sat (Scheme.lean:562-635, not re-proved -- subsumed by the blocker)",
+      "intExpandBranches_openBranch_sat (Scheme.lean:968-1095, where the break surfaces)",
+      "openBranch_countermodel (Scheme.lean:1245-1270, not reached -- blocked upstream)"
+    ],
+    "task_430_accessibility_delta": "Under the (currently broken) dedup design, a discharged F(phi->psi)@w no longer always produces a fresh leaf world with one incoming edge from w; it can instead be discharged by any already-accessible ancestor x, so a single world x can serve as the Hintikka witness for many unrelated F(->) obligations raised at different worlds/times, and edges stops growing on those steps. Task 430's intExtractValuation upward-closure argument will need to reason over this shared/converging witness structure (shallower, more heavily cross-referenced tree) rather than the pre-dedup one-obligation-one-child shape.",
+    "environment_note": "The lean-lsp MCP server in this session is configured against /home/benjamin/Projects/BimodalLogic, not cslib -- lean_run_code reports 'unknown module prefix Cslib' and lean_goal on cslib files returns null goals. The counterexample above was verified by direct hand-trace/inspection of the source, not by live execution. The orchestrator may want to fix this MCP misconfiguration before the next dispatch on this task.",
+    "scheme_lean_build_note": "Scoped build of Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme currently cannot reach Scheme.lean at all: it fails upstream at Intuitionistic/Soundness.lean (Phase 2's known/expected fallout, Phase 4's job), so Scheme.lean's own compile status is untested by lake in this dispatch. No edits were made to Scheme.lean."
   },
   "continuation_context": {
     "is_successor_expected": true,
-    "next_action_hint": "implement",
-    "resume_at": "Phase 3 of plans/04_sfor-dedup-fuel-sufficiency.md: re-verify countermodel/Hintikka conditions for reused worlds (Scheme.lean side), in parallel with Phase 4 (soundness audit fixing intExpandBranches_closed_unsat in Soundness.lean per preserved_asset_fallout above).",
-    "last_good_commit": "272ab4f7 (Phase 1 GO verdict + stub); see this dispatch's final response for the Phase 2 commit hash."
+    "next_action_hint": "plan-revisit",
+    "resume_at": "Phase 1/2 revisit of plans/04_sfor-dedup-fuel-sufficiency.md to tighten intFImpReuseWitness? per the Phase 3 counterexample above, THEN re-dispatch Phase 3 (countermodel/Hintikka re-verification) against the tightened predicate. Phase 4 (soundness audit) may proceed independently in parallel as already scheduled.",
+    "last_good_commit": "619acd3a (Phase 2: implement Sfor-containment loop-check). No Phase 3 commit was made (blocked before any edit)."
   },
-  "task_430_gate": "still gated on B2-fuel0 (sorry 985), which is gated on Phase 3-7 of plan 04 completing",
+  "task_430_gate": "still gated on B2-fuel0 (sorry 985), which is gated on Phase 3-7 of plan 04 completing; Phase 3 is now BLOCKED pending a Phase 1/2 predicate tightening",
   "artifacts": [
     {
       "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
       "type": "plan",
-      "summary": "Phase 2 marked [COMPLETED]; all Phase 2 checklist items checked off with findings, including the Preserved-Asset fallout recorded for Phase 3/4."
+      "summary": "Phase 2 marked [COMPLETED] (unchanged this dispatch). Phase 3 marked [BLOCKED] with the full R2 counterexample, task-430 coordination note, and Phase 1/2 tightening recommendation recorded in its checklist."
     },
     {
       "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
       "type": "lean",
-      "summary": "intFImpReuseWitness? implemented for real (was a none-stub) and wired into go's linearResult/some-newEdge branch. Build GREEN, 0 new sorries, 0 new axioms, 0 vacuous defs."
+      "summary": "Unchanged this dispatch (Phase 2 artifact, read-only for Phase 3)."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/progress/phase-2-progress.json",
       "type": "progress",
       "summary": "Phase 2 objective-level progress tracking, all objectives done, including downstream_fallout record."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-3-progress.json",
+      "type": "progress",
+      "summary": "Phase 3 progress: BLOCKED at the Hintikka-condition re-verification step, with the R2 counterexample recorded."
     }
   ]
 }

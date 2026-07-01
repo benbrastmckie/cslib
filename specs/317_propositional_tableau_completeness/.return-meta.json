@@ -1,61 +1,58 @@
 {
   "status": "partial",
-  "started_at": "2026-07-01T13:39:45Z",
-  "agent_type": "cslib-implementation-hard-agent",
-  "task_number": 317,
-  "task_slug": "propositional_tableau_completeness",
-  "session_id": "sess_1782890716_9a7f59",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-  "plan_path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
-  "phase_number": 2,
+  "started_at": "2026-07-01T13:50:37Z",
+  "finished_at": "2026-07-01T14:35:00Z",
   "phases_completed": 2,
   "phases_total": 7,
-  "phase_2_verdict": "COMPLETED — Expansion.lean GREEN, dedup live, no signature change",
-  "commit": "272ab4f7 (phase 1); phase 2 commit hash reported in final response",
-  "partial_progress": {
-    "stage": "complete",
-    "details": "Phase 2 complete: intFImpReuseWitness? implemented and wired into go. Downstream Preserved-Asset fallout in Soundness.lean (intExpandBranches_closed_unsat) recorded for Phase 3/4, not fixed (out of territory)."
-  },
-  "memory_candidates": [
-    "In Cslib/Logics/Propositional/Tableau/Intuitionistic, go (intExpandBranches inner loop) already carries bPers and edges in scope at the exact point the F(phi->psi) world-creating rule fires (the .linearResult newForms nw' (some newEdge) branch), so any dedup/loop-check logic gated on accessibility (isAccessible edges w x) can live entirely in go without changing intFImpRule/intApplyRuleFull/intStepBranch signatures.",
-    "intFImpRule's newForms already contains Sfor(w') = {phi} union posFormulasAt bPers w as its sign=.pos sublist (via propagatePersistence), and the obligation psi as its sole sign=.neg entry -- both readable directly off newForms without recomputation.",
-    "Proposition Atom derives DecidableEq (not BEq) but Lean 4 core auto-derives a BEq instance from DecidableEq (instBEqOfDecidableEq), so `==`/`List.contains` work fine on Proposition Atom without an explicit BEq derivation.",
-    "Wiring a reuse/dedup path into intExpandBranches's go recursion breaks intExpandBranches_closed_unsat in Soundness.lean (induction assumed every world-creating step strictly grows the branch/edge set) -- this is expected fallout for any change that makes world-creation conditional, and must be fixed by adding an induction case for the reuse path, not by weakening the invariant."
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped Expansion module build GREEN, 0 new sorries/axioms/vacuous defs; downstream Soundness module build FAILS due to expected Preserved-Asset fallout in intExpandBranches_closed_unsat, recorded for Phase 3/4, not fixed per territory scope of this phase; full checkInitImports/lake lint/lake test not run this dispatch per scoped+grepped-only discipline)"
-  },
+  "requires_user_review": true,
   "artifacts": [
     {
       "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
       "type": "plan",
-      "summary": "Phase 2 marked [COMPLETED] with full findings including Preserved-Asset fallout"
+      "summary": "Phase 3 marked [BLOCKED] with the R2 counterexample, task-430 coordination note, and a Phase 1/2 tightening recommendation."
     },
     {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-      "type": "lean",
-      "summary": "intFImpReuseWitness? implemented for real (was none-stub) and wired into go's linearResult/some-newEdge branch"
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md",
-      "type": "summary",
-      "summary": "Phase 2 execution summary with Plan Deviations section (none)"
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/progress/phase-2-progress.json",
+      "path": "specs/317_propositional_tableau_completeness/progress/phase-3-progress.json",
       "type": "progress",
-      "summary": "Phase 2 objective-level progress tracking"
+      "summary": "Objective-level breakdown of Phase 3, all objectives done except the re-proof itself, which is blocked."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "H9 orchestrator handoff: status partial, next_action_hint implement (Phase 3, parallel with Phase 4 soundness audit)"
+      "summary": "Additive update: appended blockers[0] (full R2 counterexample) and a phase3 sub-object; phases_completed/summary/sorry_inventory left as Phase 2 set them (unregressed)."
     }
   ],
-  "next_steps": "Run /implement 317 --hard to execute Phase 3 (re-verify countermodel/Hintikka for reused worlds) and/or Phase 4 (soundness audit fixing intExpandBranches_closed_unsat)."
+  "partial_progress": {
+    "stage": "phase_3_blocked",
+    "details": "Phase 3 (countermodel/Hintikka re-verification under the Sfor-containment dedup) is BLOCKED. Enumerated all relevant lemmas (IBranchSaturation.sat_fimp, sfSatisfied/IExpandedConsistent, IExpandedConsistent_sat, intExpandBranches_openBranch_sat, openBranch_countermodel). Found that intFImpReuseWitness? (Expansion.lean:248-267, Phase 2's dedup predicate) guarantees T(phi)@x at a reuse witness x but does NOT guarantee the explicit F(psi)@x branch entry that IBranchSaturation.sat_fimp/sfSatisfied's .neg/.imp case requires -- propagatePersistence only ever copies .pos-signed formulas, so a reuse witness can lack any signed entry for psi whatsoever. Constructed a concrete hand-traced counterexample (Atom=Nat, a 2-entry bPers, a reuse witness x=1 chosen for F(atomQ->atomP)@0 despite bPers having no F(atomP)@1 entry anywhere). Per the plan's own contingency for this exact scenario, did NOT weaken sfSatisfied/IBranchSaturation/any countermodel lemma to compensate; instead marked Phase 3 [BLOCKED] in the plan file and recommended a Phase 1/2 tightening of intFImpReuseWitness? (require an explicit F(psi)@x entry, not merely psi not-forced-at-x). No Scheme.lean edit was made (any edit would have required a new sorry or a forbidden weakening). Zero new sorries, zero new axioms, zero vacuous definitions -- Scheme.lean is byte-identical to the 26508fe9 baseline. Also noted (informational, separate from the R2 blocker): intExpandBranches_openBranch_sat's succ case is independently stale relative to the current post-dedup go definition (does not yet case-split on newEdge/intFImpReuseWitness? at all) and will need repair alongside the predicate fix. Recorded the task-430 accessibility-structure coordination note as instructed. IMPORTANT ENVIRONMENT ISSUE: the lean-lsp MCP server in this session is configured against /home/benjamin/Projects/BimodalLogic, not cslib -- lean_run_code and lean_goal do not function for cslib files in this session, so all of the above was verified by direct source inspection and hand-tracing, not live Lean execution."
+  },
+  "sorry_inventory": [
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 330, "note": "B1 truthLemma T-imp -- out of scope for this whole task"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 985, "note": "B2 fuel=0 base case -- Phase 7's job, gated on this Phase 3 blocker being resolved"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean", "line": 113, "note": "pre-existing, out of scope"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean", "line": 110, "note": "pre-existing, out of scope"}
+  ],
+  "blockers": [
+    {
+      "phase": 3,
+      "risk": "R2",
+      "summary": "intFImpReuseWitness? does not establish IBranchSaturation.sat_fimp for the reused-world case; concrete counterexample constructed. Recommend tightening the predicate to require an explicit F(psi)@x branch entry, then re-dispatching Phase 3.",
+      "full_detail_path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json (blockers[0]) and plans/04_sfor-dedup-fuel-sufficiency.md (Phase 3 section)"
+    }
+  ],
+  "metadata": {
+    "session_id": "sess_1782890716_9a7f59",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation-hard", "cslib-implementation-hard-agent"]
+  },
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 4,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": false,
+    "ci_pipeline_passed": false,
+    "note": "Scheme.lean build untestable this dispatch (upstream Soundness.lean failure, Phase 4's concurrent job). No new sorries/axioms/vacuous defs were introduced; sorry_count reflects the pre-existing total across the 4 files checked."
+  }
 }

@@ -1,12 +1,63 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "agent_type": "general-implementation-agent",
-  "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
+  "delegation_path": ["orchestrator", "implement", "skill-implementer", "general-implementation-agent"],
   "session_id": "sess_1782935591_308002",
   "task_number": 464,
   "task_name": "typst_report_structure_first_mpl_arguments",
+  "task_type": "general",
   "artifact_number": "02",
-  "phases_completed": 0,
+  "model_flag": "opus",
+  "started_at": "2026-07-01T00:00:00Z",
+  "completed_at": "2026-07-01T07:00:00Z",
+  "phases_completed": 7,
   "phases_total": 7,
-  "started_at": "2026-07-01T00:00:00Z"
+  "verification": {
+    "compile": "pass",
+    "command": "typst compile MplReport.typ build/MplReport.pdf (from typst/MPL/)",
+    "exit_code": 0,
+    "pages": 24,
+    "warnings": "2 benign thmbox 'New Computer Modern Sans' title-font fallback warnings (Typst does not bundle NCM Sans; falls back cleanly; matches BimodalLogic baseline)",
+    "errors": "none",
+    "layout_check": "all 24 pages rendered to PNG and visually inspected; no #figure/#table overflow or overlap after fixing 3 defects; no external #link to break",
+    "citation_check": "every IsBotRuleFree cites NaturalDeduction/Basic.lean:223-235; both mpl-base-design-note.md:42 mentions are explicit stale-corrections; no categorical overclaim; informal-categorical caveat present inline; appendix anchor table consistent with in-chapter citations"
+  },
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+      "summary": "Implementation summary for the compile-clean structure-first MPL Typst report (7 phases, 24-page PDF)."
+    },
+    {
+      "type": "document",
+      "path": "typst/MPL/MplReport.typ",
+      "summary": "Main Typst document: title/abstract/ladder table, 7 chapters, source-anchor appendix; compiles clean to a 24-page PDF."
+    }
+  ],
+  "completion_data": {
+    "completion_summary": "Produced a compile-clean 24-page Typst report under typst/MPL/ arguing for the structure-first MPL design: elegant narrative (free monad on Sigma; MPL subset IPL subset CPL as a descending variety chain; KF6 keystone that leastness is a variety-defining identity only when bot is a nullary operation) with equal-weight Lean 4 engineering coverage (one gate across four proof systems, Option-C resolution, graded faithfulness, exact sorry-free scope) and a mandatory Honest-Limits chapter (O1-O5 + two caveats). Every Lean anchor cites source-of-truth code; all categorical claims carry the informal-reading caveat."
+  },
+  "memory_candidates": [
+    {
+      "content": "Typst figures (#figure blocks) are atomic and do NOT break across pages by default, so a table taller than one page overflows off the bottom and later rows overlap/collide instead of continuing. Fix: add `#show figure: set block(breakable: true)`. Additionally, `columns: (auto, ...)` lets a wide first column starve the rest; long unbreakable monospace tokens (file paths, `[Ident T]`) overflow into the next column. For A4 with wide margins, prefer 2 columns (merge description columns) and shorten path prefixes. Always render pages to PNG (pdftoppm) and inspect visually — Typst does not warn about table overflow.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["typst", "table overflow", "breakable figure", "pdftoppm", "layout verification", "column width"]
+    },
+    {
+      "content": "Typst bundles 'New Computer Modern' and 'New Computer Modern Math' as built-in fonts (verify with `typst fonts | grep -i 'new computer modern'`), so documents using `#set text(font: \"New Computer Modern\")` compile without external font install even when fc-list shows nothing. However thmbox 0.3.0's default theorem-title fonts request 'New Computer Modern Sans' (NOT bundled), producing two benign 'unknown font family' warnings that fall back cleanly. Also: `typst compile out.pdf` fails with 'No such file or directory' if the target directory (e.g. build/) does not exist — Typst does not create it; mkdir first.",
+      "category": "CONFIG",
+      "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["typst", "fonts", "new computer modern", "thmbox", "build directory", "compile"]
+    },
+    {
+      "content": "In Typst table/grid cells, a cell whose content string begins with `+ ` or `- ` is parsed as a list/enum item and renders as '1.' or a bullet. To show a literal leading '+ classicality' in a cell, reword (e.g. 'least, and classical') or escape the leading marker.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["typst", "table cell", "list item", "escaping", "leading plus"]
+    }
+  ]
 }

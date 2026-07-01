@@ -1,54 +1,82 @@
 {
-  "session_id": "sess_1782921600_c97381",
+  "session_id": "sess_1782924983_6bcecb",
   "task_numbers": [
-    457,
-    458,
-    459,
-    460
+    389,
+    391,
+    392,
+    405,
+    444,
+    454
   ],
   "waves": [
     [
-      457,
-      458,
-      459,
-      460
+      389,
+      405,
+      454
+    ],
+    [
+      391,
+      392,
+      444
     ]
   ],
-  "max_cycles": 20,
+  "dependency_graph": {
+    "389": [],
+    "391": [
+      389
+    ],
+    "392": [
+      389
+    ],
+    "405": [],
+    "444": [
+      454
+    ],
+    "454": []
+  },
+  "max_cycles": 25,
   "cycle_count": 4,
   "failed_tasks": [],
   "completed_tasks": [
-    457,
-    458,
-    459,
-    460
+    389,
+    391,
+    392,
+    405
   ],
   "current_statuses": {
-    "457": "completed",
-    "458": "completed",
-    "459": "completed",
-    "460": "completed"
+    "389": "completed",
+    "391": "completed",
+    "392": "completed",
+    "405": "pr_ready",
+    "444": "not_started",
+    "454": "implementing"
   },
   "task_dirs": {
-    "457": "specs/457_vet_299_shake_import_hygiene",
-    "458": "specs/458_vet_455_shake_import_hygiene",
-    "459": "specs/459_vet_299_longline_style",
-    "460": "specs/460_vet_455_classical_lint_warnings"
+    "389": "specs/389_docstrings_headers_citations_propfound",
+    "391": "specs/391_strip_docstring_jargon_fix_stale_counts",
+    "392": "specs/392_remove_deadcode_fix_naming",
+    "405": "specs/405_proof_style_cleanup_modal_soundness",
+    "444": "specs/444_fix_temporal_theorems_underscore_lint",
+    "454": "specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal"
   },
   "research_agents": {
-    "457": "cslib-research-agent",
-    "458": "cslib-research-agent",
-    "459": "cslib-research-agent",
-    "460": "cslib-research-agent"
+    "389": "cslib-research-agent",
+    "391": "cslib-research-agent",
+    "392": "cslib-research-agent",
+    "405": "cslib-research-agent",
+    "444": "cslib-research-agent",
+    "454": "cslib-research-agent"
   },
   "implement_agents": {
-    "457": "cslib-implementation-agent",
-    "458": "cslib-implementation-agent",
-    "459": "cslib-implementation-agent",
-    "460": "cslib-implementation-agent"
+    "389": "cslib-implementation-agent",
+    "391": "cslib-implementation-agent",
+    "392": "cslib-implementation-agent",
+    "405": "cslib-implementation-agent",
+    "444": "cslib-implementation-agent",
+    "454": "cslib-implementation-agent"
   },
-  "exit_status": "partial",
-  "exit_reason": "Stopped at user request with plan v6 ready. 317 [planned] (Route a, Wave A independently committable). 430/375 gated on 317 completeness green; both re-plan after Wave A lands.",
-  "notes": "Run outcome: 317 blocked->researched routes->re-planned v6. User chose not to implement yet. Resume: /implement 317 --hard (Wave A first).",
-  "in_flight": []
+  "impl_serialization_guards": [],
+  "redispatch_counts": {
+    "454": 1
+  }
 }

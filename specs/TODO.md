@@ -11,10 +11,10 @@ next_project_number: 464
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
-| 2 | 39,40,215,301,375,389,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
-| 3 | 41,391,392,413,454 | 39,40,375,389,450 | Foundations, Bimodal Logic, Code Hygiene |
-| 4 | 393,412,444 | 41,391,454 | Code Hygiene |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
+| 3 | 41,413,454 | 39,40,375,450 | Foundations, Bimodal Logic, Code Hygiene |
+| 4 | 412,444 | 41,454 | Code Hygiene |
 | 5 | 414 | 215,300,301,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -62,10 +62,7 @@ next_project_number: 464
 
 ### Code Hygiene
 
-389 [PLANNED] — [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAl
-  └─ 391 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Remove internal task/process ja
-    └─ 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
-  └─ 392 [NOT STARTED] — [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls
+393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -695,7 +692,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 392. Remove dead declarations and fix underscore/Extention naming
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
@@ -705,7 +702,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 391. Strip task-number jargon and fix stale docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
@@ -728,7 +725,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 389. Fix docBlame, barrel headers, unusedSectionVars, broken citation
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317

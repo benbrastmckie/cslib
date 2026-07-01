@@ -1,7 +1,7 @@
 # Implementation Plan: Task #392
 
 - **Task**: 392 - Remove dead code and fix naming (Propositional logic)
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: Task 386 (completed, owns LK/LJ cutAdm renames — OUT of scope here)
 - **Research Inputs**: specs/392_remove_deadcode_fix_naming/reports/01_deadcode-and-naming-verification.md

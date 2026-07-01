@@ -8,6 +8,7 @@ public import Cslib.Computability.Automata.DA.Basic
 public import Cslib.Computability.Automata.DA.Buchi
 public import Cslib.Computability.Automata.DA.BuchiChar
 public import Cslib.Computability.Automata.DA.BuchiClosure
+public import Cslib.Computability.Automata.DA.Choueka
 public import Cslib.Computability.Automata.DA.Concat
 public import Cslib.Computability.Automata.DA.Congr
 public import Cslib.Computability.Automata.DA.Conversions

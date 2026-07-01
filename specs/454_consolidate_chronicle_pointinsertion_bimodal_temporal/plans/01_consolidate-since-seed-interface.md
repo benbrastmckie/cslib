@@ -1,7 +1,7 @@
 # Implementation Plan: Task #454 — Consolidate Chronicle PointInsertion Since seed-consistency (Bimodal ↔ Temporal)
 
 - **Task**: 454 - Consolidate Chronicle PointInsertion Since helpers into a shared `SinceSeedInterface`
-- **Status**: [IMPLEMENTED]
+- **Status**: [COMPLETED]
 - **Effort**: 12 hours
 - **Dependencies**: None (recommend landing before 449-451; see Coordination Risk)
 - **Research Inputs**: specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/reports/01_consolidate-chronicle-pointinsertion.md

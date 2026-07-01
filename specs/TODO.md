@@ -13,9 +13,8 @@ next_project_number: 464
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463 | -- | Propositional Logic, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | Propositional Logic, Temporal Logic, Bimodal Logic, ... |
-| 3 | 41,413,454 | 39,40,375,450 | Foundations, Bimodal Logic, Code Hygiene |
-| 4 | 412,444 | 41,454 | Code Hygiene |
-| 5 | 414 | 215,300,301,444 | Code Hygiene |
+| 3 | 41,413,444 | 39,40,375,450 | Foundations, Code Hygiene |
+| 4 | 412,414 | 41,215,300,301,444 | Code Hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -55,7 +54,6 @@ next_project_number: 464
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-    └─ 454 [PLANNED] — From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimod
 449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
   └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
@@ -174,7 +172,7 @@ next_project_number: 464
 ---
 
 ### 454. Consolidate duplicated Chronicle PointInsertion helper families across Bimodal and Temporal
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: Task 449, Task 450

@@ -340,19 +340,26 @@ from Phase 3, so 3 and 4 may run in parallel.
 
 ---
 
-### Phase 5: Bimodal `lemma_2_8_since` wiring [NOT STARTED]
+### Phase 5: Bimodal `lemma_2_8_since` wiring [COMPLETED]
 
 **Goal**: Extend the Bimodal `fc`-family instance for 2_8 and wire the `lemma_2_8_since` wrapper;
 delete Bimodal's local 2_8 body; build Bimodal.
 
 **Tasks**:
-- [ ] Extend `bimodalSinceInterface (fc)` with any 2_8 fields added in Phase 4.
-- [ ] Keep public `lemma_2_8_since (fc) …` (and `lemma24*` if 2_8-routed) as thin wrappers via
+- [x] Extend `bimodalSinceInterface (fc)` with any 2_8 fields added in Phase 4. *(deviation:
+      already done in the Phase 4 commit, alongside Temporal's, to keep both logics green at
+      every checkpoint.)*
+- [x] Keep public `lemma_2_8_since (fc) …` (and `lemma24*` if 2_8-routed) as thin wrappers via
       `bimodalSinceInterface fc`.
-- [ ] Confirm all four public names (`lemma_2_7_since`, `lemma_2_8_since`, `lemma24SinceWithGuard`,
-      `lemma24WithGuard`) are now wrappers on both sides with original signatures.
-- [ ] Re-grep zero consumers; delete Bimodal's local 2_8 body.
-- [ ] `lake build` Bimodal `Since.lean` + `CounterexampleElimination/Interface.lean`.
+- [x] Confirm all four public names (`lemma_2_7_since`, `lemma_2_8_since`, `lemma24SinceWithGuard`,
+      `lemma24WithGuard`) are now wrappers on both sides with original signatures. *(Verified:
+      `lemma24SinceWithGuard`/`lemma24WithGuard` in both logics do NOT route through the generic
+      2_7/2_8 theorems -- per the Phase-2 note their proof strategies genuinely diverge -- but their
+      signatures are untouched and both logics' versions still compile against the now-thin
+      `lemma_2_7_since`/`lemma_2_8_since`.)*
+- [x] Re-grep zero consumers; delete Bimodal's local 2_8 body. *(deviation: altered -- one-line
+      delegation retained under the private name, same rationale as prior phases.)*
+- [x] `lake build` Bimodal `Since.lean` + `CounterexampleElimination/Interface.lean`.
 
 **Timing**: 2 hours
 

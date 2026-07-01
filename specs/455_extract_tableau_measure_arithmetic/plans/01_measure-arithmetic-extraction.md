@@ -170,26 +170,66 @@ and 3 (Propositional: Classical/Completeness) touch disjoint files once Phase 1 
 
 ---
 
-### Phase 4: Full CI pipeline verification [NOT STARTED]
+### Phase 4: Full CI pipeline verification [PARTIAL]
 
 - **Goal:** Prove the whole library is green, imports/lint/dependency checks pass, and no `modalCap`
   references or sorries remain.
 - **Tasks:**
-  - [ ] `lake exe mk_all --module` to ensure the barrel reflects the new file (no-op if already
-    registered in Phase 1).
-  - [ ] Full build: `lake build`.
-  - [ ] `lake exe checkInitImports`.
-  - [ ] `lake exe lint-style`.
-  - [ ] `lake shake --add-public --keep-implied --keep-prefix`; apply any suggested import fixes and
-    rebuild if changes are made.
-  - [ ] `grep -rn "modalCap" Cslib/` -> must return zero hits (rename complete, no stale comments).
-  - [ ] `grep -rn "sorry" Cslib/Foundations/Logic/Tableau/Measure.lean` -> zero hits; confirm no new
-    axioms (moved decls are pure arithmetic; optionally `#print axioms Cslib.Logic.Tableau.geomCap_le_pow`).
+  - [x] **Task 4.1**: `lake exe mk_all --module` -> "No update necessary" (barrel already registered
+    in Phase 1).
+  - [x] **Task 4.2**: Full build: `lake build` *(deviation: FAILS -- but the only failure is
+    `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (3 "Application type mismatch"
+    errors at lines 470, 1074, 1201), a file never touched by this task and unrelated to the
+    `modalCap`->`geomCap`/`Measure.lean` extraction. Confirmed pre-existing on `main`: `git diff
+    619acd3a HEAD -- .../Intuitionistic/Scheme.lean` is empty (last touched by task 317 phase 1,
+    commit `26508fe9`, already merged to `main` before this task began). This is a genuine,
+    reproducible build break belonging to task 317's scope, not task 455's. All 4 files this task
+    modified/created build individually with zero errors (see Phases 1-3 verifications, all green).)*
+  - [ ] **Task 4.3**: `lake exe checkInitImports` *(deviation: blocked -- tool requires all `.olean`
+    files to exist; aborts with "object file ... Scheme.olean does not exist" because the full build
+    in 4.2 did not complete. Cannot run standalone since it scans the whole build output.)*
+  - [x] **Task 4.4**: `lake exe lint-style` -> exits 0, no findings (text-based linter does not
+    require compiled `.olean`s, so it ran to completion over the whole tree unaffected by the
+    Scheme.lean build break).
+  - [ ] **Task 4.5**: `lake shake --add-public --keep-implied --keep-prefix` *(deviation: blocked --
+    aborts with "there are out of date oleans; run `lake build` or fetch them from a cache first",
+    same root cause as 4.3.)*
+  - [x] **Task 4.6**: `grep -rn "modalCap" Cslib/` -> **0 hits** (rename complete, no stale comments;
+    confirmed post-Phase-2/3 `sed`-driven rename plus manual doc-comment updates).
+  - [x] **Task 4.7**: `grep -n "sorry" Cslib/Foundations/Logic/Tableau/Measure.lean` -> **0 hits**;
+    also confirmed 0 hits for `\bsorry\b` and 0 hits for `^axiom ` across all four files this task
+    touched (`Measure.lean`, `FmpMeasure.lean`, `CompletenessLoop.lean`,
+    `Classical/Completeness.lean`).
 - **Timing:** ~30 minutes
 - **Depends on:** 2, 3
-- **Verification:** All of `lake build`, `lake exe checkInitImports`, `lake exe lint-style`, and
-  `lake shake ...` exit successfully; `grep` for `modalCap` and `sorry` (in the new module) return
-  zero hits.
+- **Verification:** `lake exe mk_all --module`, `lake exe lint-style`, and both `grep` guards (zero
+  `modalCap`, zero `sorry`/new axioms) all pass. `lake build` (full), `lake exe checkInitImports`,
+  and `lake shake ...` cannot complete due to a **pre-existing, unrelated build break** in
+  `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` (task 317 scope, untouched by this
+  task, already present on `main` before this task's first commit). Every module this task actually
+  modified builds green in isolation (Phase 1/2/3 scoped verifications). **BLOCKER** (Phase 4):
+  - **What failed**: `lake build` (whole-library), `lake exe checkInitImports`, `lake shake ...`,
+    and `lake test` all abort because
+    `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` fails to compile with 3
+    "Application type mismatch" errors (lines 470, 1074, 1201; each an `ih`-application inside an
+    induction proof for `intExpandBranches`/persistence-fixpoint reasoning).
+  - **What was tried**: Confirmed the file is byte-identical to the version at commit `619acd3a`
+    (pre-task-455 HEAD) via `git diff`; ran `lake exe cache get` to rule out a stale-cache artifact
+    (cache already current, "No files to download"); rebuilt the file in isolation twice to rule out
+    flakiness (reproduces identically both times).
+  - **Why it's stuck**: The failure lives entirely inside task 317's Intuitionistic tableau
+    completeness proof (`Scheme.lean`), a file with zero import/reference relationship to this
+    task's `Measure.lean`/`FmpMeasure.lean`/`CompletenessLoop.lean`/`Classical/Completeness.lean`
+    changes. Fixing it requires understanding task 317's in-progress persistence-fixpoint proof
+    strategy, which is out of scope for task 455 per the plan's Non-Goals ("No refactor of other
+    ... code beyond the moved decls").
+  - **What is needed**: Task 317 (or a dedicated fix task) needs to repair the `ih`-application
+    type mismatch in `Scheme.lean` at lines 470/1074/1201. Once that lands, re-run `lake build`,
+    `lake exe checkInitImports`, `lake shake --add-public --keep-implied --keep-prefix`, and
+    `lake test` -- all four are expected to pass immediately given this task's changes are complete
+    and self-contained.
+  - **Prohibited workarounds**: Did not touch `Scheme.lean`; did not use `sorry` or any vacuous
+    placeholder to paper over the unrelated failure.
 
 ## Testing & Validation
 

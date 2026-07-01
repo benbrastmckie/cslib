@@ -1,62 +1,74 @@
 {
   "task": 299,
+  "task_slug": "modal_k_tableau",
+  "dispatch": "phase-6-attempt (orchestrator_mode)",
+  "timestamp": "2026-07-01T00:55:33Z",
   "status": "partial",
+  "requires_user_review": true,
   "orchestrator_mode": true,
   "phases_completed": 5,
   "phases_total": 7,
+  "phase_detail": {
+    "1-4": "COMPLETED (soundness) — prior dispatches",
+    "5a-5d": "COMPLETED, GREEN, sorry-free (completeness truth lemma + countermodel wrapper)",
+    "6": "BLOCKED (definitional obstruction — see blockers[])",
+    "7": "NOT STARTED (gated on Phase 6)"
+  },
   "build_state": {
-    "target": "Cslib.Logics.Modal.Tableau.Completeness",
+    "scope": "lake build Cslib.Logics.Modal.Tableau.Completeness",
     "result": "GREEN",
-    "errors_fixed": 30,
-    "errors_remaining": 0,
-    "note": "Truth-lemma region fully repaired: modalTruthLemma, modalApplyOne_imp_pos/neg, tryAllPropRules_pos/neg, modalImpOf?_eq all compile. Scoped build passes."
+    "error_count": 0,
+    "warnings": "pre-existing style longLine warnings only (Completeness.lean lines 454/476/478/528); no errors",
+    "cache": "warm (lake exe cache get: no files to download)",
+    "note": "Baseline preserved unchanged this dispatch — NO Lean edits made (only plan + handoff + meta). Full `lake build` (CI) NOT run; deferred to Phase 7. Pre-existing out-of-scope RED in SoundnessStep.lean:82/85/91 remains (NOT in Completeness import chain)."
   },
   "zero_sorry_check": {
-    "sorry": 0,
-    "admit": 0,
-    "new_axioms": 0,
-    "scope": "Cslib/Logics/Modal/Tableau/ (grep clean)"
+    "modal_tableau_dir_sorry": 0,
+    "modal_tableau_dir_admit": 0,
+    "modal_tableau_dir_axiom": 0,
+    "verified_by": "grep -rn sorry|admit|axiom Cslib/Logics/Modal/Tableau/ => NONE FOUND",
+    "note": "modalTableau_complete not yet stated, so #print axioms not applicable. No debt introduced this dispatch."
   },
-  "error_clusters_resolved": [
-    "modalImpOf?_eq: split-failed on none=some -> nested split + simp",
-    "tryAllPropRules_pos/neg: unified nested rcases with h-names + simp incl SignedFormula.pos/neg unfold",
-    "modalApplyOne_imp_pos/neg: replaced fragile rw[<-] / .trans with have-happ + rw + discriminant rcases <;> rfl",
-    "unknown identifier x/y (8 sites): added .symm to modalXOf?_eq so subst eliminates a/c and keeps x/y",
-    "exfalso all-none impossible (4 sites): nested rcases c/a with a-consequent casing"
-  ],
   "blockers": [
     {
       "phase": 6,
-      "summary": "modalExpandBranches_hintikka requires a modal expansion-measure + fuel-sufficiency bound (accounting for K box-world-creation) that does not exist. At fuel=0 the loop returns an open-but-not-necessarily-saturated branch; proving it Hintikka needs measure <= modalFuel. All modal measure infra (modalExpMeasure, modalBranchComplexity, decrease lemma, modalStepBranch_none_saturated) is absent.",
-      "unblock_steps": [
-        "Define modalBranchComplexity / modalExpMeasure (count unexpanded formulas + worlds eligible for box re-firing)",
-        "Prove modalExpMeasure_step_lt (strict decrease; delicate diamondPos/boxNeg world-creation case)",
-        "Prove fuel bound: modalExpMeasure [initial] [[]] [empty] <= modalFuel phi (or revise modalFuel)",
-        "Prove modalStepBranch_none_saturated (modal analog of classicalStepBranch_none_saturated:694)",
-        "Prove modalExpandBranches_hintikka by fuel + Forall2-acc induction (mirror modalExpandBranches_closed_unsat)"
+      "title": "Polynomial modalFuel is PROVABLY insufficient for completeness (definitional obstruction; sharpens prior blocker)",
+      "summary": "modalExpandBranches_hintikka is FALSE AS STATED for the current modalFuel: the fuel is polynomial O(n^2) while K's exponential-model lower bound forces exponentially many worlds, so fuel=0 is reachable with an UNSATURATED open branch that is not a Hintikka set. The prior blocker's parenthetical 'or revise modalFuel' is thereby shown to be MANDATORY, not optional.",
+      "verified_facts": [
+        "modalComplexity (Defs.lean:63) = connective-node count => polynomial in |phi|.",
+        "modalFuel phi = (4n+4)(n+2)+2 = O(n^2) (Saturation.lean:89), polynomial.",
+        "modalNextWorld = modalMaxWorld+1 (Branch.lean:98); diamondPos/boxNeg (Rules.lean:91/117) mint a FRESH world every firing; NO subset-blocking in code (Saturation.lean:47-53 design comment is aspirational only).",
+        "Each fuel unit = one modalStepBranch=some expansion (Saturation.lean:170); saturating a branch costs >= #worlds steps.",
+        "K has exponential minimal-model lower bound (K-SAT PSPACE-complete; nested-box binary-tree formulas force 2^Omega(n) worlds) => #worlds >> O(n^2) fuel for such phi.",
+        "Therefore fuel=0 branch (Saturation.lean:141-146) is unsaturated => not modalHintikkaSet => modalExpandBranches_hintikka false; dually modalTableau_decides false (procedure returns openBranch for exponential-closure VALID formulas)."
       ],
-      "recommended_action": "/spawn 299 for a dedicated modal expansion-measure + fuel-sufficiency task (the true research-level blocker)"
+      "residual_obligation": {
+        "option_A_in_scope_but_multi_dispatch": "Revise modalFuel upward to an exponential/double-exponential bound (SOUNDNESS-SAFE: modalExpandBranches_closed_unsat Soundness.lean:226 is fuel-agnostic, only its value changes). THEN formalize the full FMP measure: fixed finite universe U(phi) of signed subformulas with a BOUNDED world-label range (needs an a-priori world-count bound since modalNextWorld labels are currently unbounded), a subformula-closure lemma covering all four modal rules' outputs (witness + boxProps + diaNegProps) plus propositional outputs, output-disjointness (new formulas fresh on branch), and a 3^R per-branch weight R=(|U|-|branch∩U|)+(|U|-|exp∩U|) to absorb <=2-way propositional branching. Est. 400-800 lines / multiple dispatches. The genuine research-level work.",
+        "option_B_out_of_scope": "Implement world-subset blocking in Rules.lean/modalNextWorld (reuse existing world when candidate formula-set subsumed), bounding #worlds by 2^(2|subf phi|). Rules/algorithm change = native refactor deferred to task 441 => OUT OF SCOPE ('No datatype change').",
+        "independent_subpart": "modalStepBranch_none_saturated (saturated-leaf openBranch case, Saturation.lean:167) is independent of the fuel obstruction and closeable alone, but does NOT discharge fuel=0 and cannot complete modalExpandBranches_hintikka by itself. Not attempted this dispatch to avoid a half-edited file for no phase-completing gain."
+      },
+      "recommended_action": "/spawn 299 for option (A): revise modalFuel to an exponential bound and formalize the FMP measure (world-count bound + subformula-closure universe + 3^R decrease). Alternatively fold world-blocking into task 441 and re-scope completeness. Do NOT retry Phase 6 with the current polynomial modalFuel."
     }
   ],
+  "error_clusters": [],
   "pre_existing_issues_discovered": [
     {
       "file": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
       "lines": [82, 85, 91],
-      "kind": "Application type mismatch / type mismatch (3 errors)",
-      "note": "RED in committed baseline (WIP checkpoint), NOT modified this dispatch, NOT in Completeness import chain (Saturation does not import Soundness/SoundnessStep). Blocks full `lake build` / Soundness rebuild but not the Completeness deliverable. Likely fallout of the option-(b) encoding refactor; needs a separate fix."
+      "kind": "3 type mismatches, RED in committed baseline (WIP checkpoint)",
+      "note": "NOT modified this dispatch, NOT in Completeness import chain. Blocks a full `lake build` (Phase 7 CI) but not the Completeness deliverable. Report as a SEPARATE blocker at Phase 7; do not sink Phase 6 into fixing it."
     }
   ],
   "continuation_context": {
-    "next_phase": 6,
-    "delivered_this_dispatch": "Phase 5c modalTruthLemma GREEN (30->0 errors), committed sorry-free",
-    "reduces_to": "modalOpenBranch_countermodel (5d) already reduces modalTableau_complete to modalExpandBranches_hintikka once Phase 6 item 5 lands",
-    "plan": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md (Phase 6 now [BLOCKED] with full obligation)"
+    "green_preserved": "Phase 5c modalTruthLemma + 5d modalOpenBranch_countermodel remain GREEN and committed sorry-free. Completeness.lean ends at line 570. No Lean files edited this dispatch.",
+    "infra_ready": "LoopInduction.lean hoist (forall2_* helpers) already DONE; Completeness imports it via Rules.lean. modalOpenBranch_countermodel already reduces modalTableau_complete to modalExpandBranches_hintikka once the measure lands.",
+    "plan": "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md — Phase 6 [BLOCKED] with DECISIVE FINDING addendum + residual obligation; Phase 7 [NOT STARTED] (gated on 6).",
+    "do_not": "Do not revert Phase 5c. Do not ship sorry/admit/axiom. Do not change the datatype (task 441). Do not retry Phase 6 with current polynomial modalFuel."
   },
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/Completeness.lean",
-    "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md"
+    "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
+    "specs/299_modal_k_tableau/.orchestrator-handoff.json",
+    "specs/299_modal_k_tableau/.return-meta.json"
   ],
-  "commits": [
-    "task 299 phase 5: completeness truth lemma GREEN (30 errors -> 0)"
-  ]
+  "commits": []
 }

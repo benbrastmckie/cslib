@@ -208,7 +208,7 @@
     {
       "project_number": 299,
       "project_name": "modal_k_tableau",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.",
@@ -233,7 +233,7 @@
       "dependencies": [],
       "parent_task": 296,
       "session_id": "sess_1782849708_71fa88",
-      "blockers": "Phase 5c (completeness truth lemma) DELIVERED GREEN + committed sorry-free: modalTruthLemma repaired 30->0 errors on the option-(b) Lukasiewicz encoding with modalComplexity strong induction; lake build Cslib.Logics.Modal.Tableau.Completeness passes; zero sorry/admit/axiom. Phase 6 BLOCKED (research-level, not mechanical): modalExpandBranches_hintikka needs a modal expansion-measure (modalExpMeasure/modalBranchComplexity) + strict-decrease lemma + fuel-sufficiency bound (measure <= modalFuel, accounting for K box-world-creation) + modalStepBranch_none_saturated + the final Forall2-acc induction. None of this infra exists. Phase 7 (decision procedure + barrel + CI) gated on Phase 6. Pre-existing (out of scope): SoundnessStep.lean RED at lines 82/85/91 (3 type mismatches) blocks full lake build. See .orchestrator-handoff.json."
+      "blockers": "Phase 5c completeness truth lemma DELIVERED GREEN + committed sorry-free (modalTruthLemma, 30->0 errors). Phase 6 BLOCKED by a DECISIVE definitional obstruction: the polynomial modalFuel = O(n^2) (Saturation.lean:89) is PROVABLY insufficient — K has an exponential minimal-model lower bound and diamondPos/boxNeg mint a fresh world per firing with no subset-blocking, so fuel=0 is reachable with an UNSATURATED (non-Hintikka) open branch. Hence modalExpandBranches_hintikka is FALSE as stated for the current fuel, and modalTableau_decides fails too. Zero-debt held (no sorry/admit/axiom; baseline green). Unblock (option A, in-scope, multi-dispatch ~400-800 lines): revise modalFuel upward to an exponential bound (soundness-safe — modalExpandBranches_closed_unsat is fuel-agnostic) THEN formalize the FMP measure (a-priori world-count bound + finite signed-subformula universe U(phi) + subformula-closure over all 4 modal rules + output-disjointness + 3^R per-branch weight). Option B (world-subset blocking) = rules/datatype refactor = task 441 (out of scope). Do NOT retry Phase 6 with the current polynomial fuel. Phase 7 (decision procedure + CI) gated on Phase 6. Pre-existing out-of-scope: SoundnessStep.lean RED lines 82/85/91."
     },
     {
       "project_number": 300,

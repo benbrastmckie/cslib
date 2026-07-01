@@ -437,6 +437,51 @@ Phase 5c restructure preserves verbatim — only the proof body changes — so 5
   placeholder, and do NOT introduce axioms. Recommend `/spawn 299` to create a dedicated task for
   the modal expansion-measure + fuel-sufficiency proof (items 1-3), which is the true blocker.
 
+- **DECISIVE FINDING (2026-06-30 dispatch — sharpens the blocker)**: The prior blocker left open
+  "prove `modalExpMeasure ≤ modalFuel φ` **(or revise `modalFuel`)**". This dispatch's analysis
+  proves the parenthetical is **mandatory, not optional**: the current polynomial fuel is
+  **provably insufficient**, so item 3 as literally stated (`… ≤ modalFuel φ` for the current
+  `modalFuel`) is **false and unprovable**. Chain of facts (all verified against the committed code):
+  1. `modalComplexity` (`Defs.lean:63`) is the count of connective nodes — **polynomial** in
+     formula size. Hence `modalFuel φ = (4n+4)(n+2)+2 = O(n²)` (`Saturation.lean:89`) is polynomial.
+  2. `modalNextWorld b = modalMaxWorld b + 1` (`Branch.lean:98`) always mints a **strictly fresh**
+     world. `Rules.lean` `diamondPos` (`:91`) and `boxNeg` (`:117`) create a fresh world on **every**
+     firing — there is **NO world-subset blocking** in the code (the blocking described in the
+     `Saturation.lean:47-53` design comment is *not implemented*).
+  3. Each fuel unit expands exactly one formula (one `modalStepBranch = some` step, `Saturation.lean:170`).
+     Saturating a branch therefore costs ≥ (#worlds created) steps.
+  4. Modal logic K has the **exponential-model lower bound**: there exist K-satisfiable formulas
+     (nested-box binary-tree / counter constructions; K-SAT is PSPACE-complete) whose smallest
+     models — and hence whose saturated open branches — have **exponentially many worlds** in `n`.
+     For such φ, #worlds = 2^Ω(n) ≫ O(n²) = `modalFuel φ`.
+  5. Consequently `modalExpandBranches … (modalFuel φ)` hits `fuel = 0` (`Saturation.lean:141-146`)
+     with an **unsaturated** open branch and returns it. That branch does **not** satisfy
+     `modalHintikkaSet`, so `modalExpandBranches_hintikka` is **false as stated** for the current
+     `modalFuel`; and dually, for exponential-closure *valid* formulas the procedure returns
+     `openBranch` for a valid φ, so `modalTableau_decides` is also **false** with the current fuel.
+- **Precise residual obligation (unblock requires ONE of the following, then the measure proof)**:
+  - **(A) Revise `modalFuel` upward to an exponential (or double-exponential) bound.** This is
+     **soundness-safe**: `modalExpandBranches_closed_unsat` (`Soundness.lean:226`) is fuel-agnostic
+     (closed ⇒ unsat for *arbitrary* fuel), so only its *value* changes, not any soundness proof.
+     THEN still formalize the full FMP measure: a **fixed finite universe** `U(φ)` of signed
+     subformulas paired with a **bounded world-label range** (labels are `modalNextWorld`-minted and
+     currently *unbounded a priori*, so `U` cannot be a fixed finite `SignedFormula … WorldIndex`
+     set without first proving a world-count bound), plus a **subformula-closure lemma** (all four
+     modal rules' outputs — witness + `boxProps` + `diaNegProps` — and all propositional outputs lie
+     in `U`), **output-disjointness** (new formulas are fresh on the branch), and a **`3^R`
+     per-branch weight** where `R(branch,exp) = (|U|−|branch∩U|)+(|U|−|exp∩U|)` (the exponential base
+     handles the ≤2-way propositional branching, exactly as classical `3^complexity`; modal rules are
+     all linear/persistent, so branching arity is unchanged from classical). Estimated **400–800
+     lines, multiple dispatches** — the genuinely hard, research-level part.
+  - **(B) Implement world-subset blocking** in `Rules.lean`/`modalNextWorld` (reuse an existing world
+     when the candidate world's formula-set is subsumed), bounding #worlds by the number of distinct
+     signed-subformula-sets ≤ 2^(2·|subf φ|). This is a **rules/algorithm change = the native
+     refactor deferred to task 441** and is therefore **out of scope** here ("No datatype change").
+  - Only `modalStepBranch_none_saturated` (item 4, the *saturated-leaf* `openBranch` case at
+     `Saturation.lean:167`) is independent of this obstruction and is closeable on its own; it does
+     **not** discharge the `fuel = 0` case and so cannot complete `modalExpandBranches_hintikka`
+     alone. Left unattempted this dispatch to avoid a half-edited file, since it cannot finish the phase.
+
 **Delivered before block**: Phase 5c `modalTruthLemma` is fully GREEN and committed sorry-free
 (30 compile errors → 0). `modalOpenBranch_countermodel` (5d) already reduces
 `modalTableau_complete` to `modalExpandBranches_hintikka` once item 5 lands.
@@ -459,8 +504,9 @@ theorem modalExpandBranches_hintikka (fuel : Nat) :
 ```
 
 **Tasks**:
-- [ ] Do the `forall₂_*` hoist into `LoopInduction.lean`; import it into `Completeness.lean` and
-  `Soundness.lean`.
+- [x] Do the `forall₂_*` hoist into `LoopInduction.lean`; import it into `Completeness.lean` and
+  `Soundness.lean`. *(deviation: DONE in a prior dispatch — `LoopInduction.lean` exists with all five
+  helpers; `Completeness.lean` imports it via `Rules.lean`; baseline builds green.)*
 - [ ] Mirror `modalExpandBranches_closed_unsat` (`Soundness.lean:226`) for the acc-threading: fuel
   induction + inner `processNext` induction over per-branch `List.Forall₂` accs, reusing the hoisted
   `forall₂_*` helpers and `accFreshInv`.
@@ -472,6 +518,11 @@ theorem modalExpandBranches_hintikka (fuel : Nat) :
   `classicalStepBranch_hintikka_inv` (`:722`) as the PATTERN (Unit-label-specific — reference only).
 - [ ] Handle world-creation interleaving (box-pos re-firing as new successors appear); the fuel bound
   `modalFuel φ` (`Saturation.lean:89`) should suffice; adjust ONLY if the invariant exposes a gap.
+  *(deviation: BLOCKED — invariant exposed a hard gap. `modalFuel` does NOT suffice: it is polynomial
+  O(n²) but K's exponential-model lower bound forces exponentially many worlds, so `fuel = 0` is
+  reachable with an unsaturated open branch. See the DECISIVE FINDING addendum above. Resolution
+  requires option (A) exponential-fuel + full FMP measure [multi-dispatch], or option (B) world
+  blocking [task 441, out of scope].)*
 - [ ] Discharge `modalTableau_complete` (contrapositive: open ⇒ Hintikka ⇒ countermodel via
   `modalOpenBranch_countermodel`). `#print axioms modalTableau_complete`.
 

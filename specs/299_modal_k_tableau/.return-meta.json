@@ -1,34 +1,34 @@
 {
   "status": "partial",
   "requires_user_review": true,
-  "review_reason": "Phase 6 (modalExpandBranches_hintikka) blocked on missing modal expansion-measure + fuel-sufficiency infrastructure; primary goal (truth-lemma GREEN) delivered.",
+  "started_at": "2026-07-01T00:55:33Z",
+  "review_reason": "Phase 6 BLOCKED by a definitional obstruction: modalFuel is polynomial O(n^2) but K's exponential-model lower bound forces exponentially many worlds, so modalExpandBranches_hintikka is false as stated. Resolution needs an exponential-fuel revision + full FMP measure (multi-dispatch) or world-blocking (task 441). No Lean edits made; baseline preserved green and sorry-free.",
   "blocked_phase": 6,
-  "partial_progress": {
-    "stage": "phase5c-green-phase6-blocked",
-    "phases_completed": 5,
-    "phases_total": 7,
-    "last_completed_phase": "5c truth lemma (modalTruthLemma)",
-    "details": "Completeness.lean truth-lemma region fixed 30->0 errors, GREEN, zero sorry/axiom. Phase 6 blocked (see .orchestrator-handoff.json)."
-  },
   "verification": {
     "verification_passed": false,
+    "mode": "scoped_baseline_only",
     "sorry_count": 0,
-    "vacuous_count": 0,
+    "admit_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "build_scope": "Cslib.Logics.Modal.Tableau.Completeness (GREEN)",
+    "build_scope": "lake build Cslib.Logics.Modal.Tableau.Completeness (GREEN, 480 jobs, 0 errors)",
     "ci_pipeline_passed": false,
-    "ci_note": "Full CI deferred: Phase 6/7 incomplete; pre-existing SoundnessStep.lean breakage (lines 82/85/91) blocks full lake build independently of this deliverable."
+    "note": "Full CI deferred (Phase 7 gated on Phase 6). Pre-existing out-of-scope RED at SoundnessStep.lean:82/85/91 not in Completeness import chain."
+  },
+  "partial_progress": {
+    "stage": "blocked",
+    "phases_completed": 5,
+    "phases_total": 7,
+    "last_completed_phase": "5d (countermodel wrapper, prior dispatch)",
+    "this_dispatch": "Serious analytical attempt at Phase 6; uncovered decisive fuel-insufficiency obstruction; sharpened blocker; no code edits (zero-debt fallback honored)."
   },
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/Completeness.lean",
     "specs/299_modal_k_tableau/plans/05_modal-k-tableau-plan.md",
     "specs/299_modal_k_tableau/.orchestrator-handoff.json"
   ],
   "metadata": {
     "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed (no sorry/admit/axiom introduced; no vacuous defs; baseline unchanged)"
   }
 }

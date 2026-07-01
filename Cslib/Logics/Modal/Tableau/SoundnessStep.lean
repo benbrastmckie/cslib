@@ -74,25 +74,16 @@ def branchSatisfiable
 
 /-- Helper: recover propositional equality from BEq equality for `Proposition Atom`.
 
-`Proposition Atom` derives `BEq` via structural recursion, which does not automatically
-generate `LawfulBEq`. This lemma provides `eq_of_beq` by structural induction. -/
+`Proposition Atom` derives `DecidableEq`, and its `BEq` instance is the generic
+`decide (a = b)` instance obtained from `DecidableEq` (`Init.Prelude`'s
+`instance (priority := 500) [DecidableEq α] : BEq α`). That same generic mechanism also
+provides a `LawfulBEq (Proposition Atom)` instance (`instance [DecidableEq α] : LawfulBEq α`
+in `Init.Core`), so `eq_of_beq` is available directly -- no structural induction on
+`Proposition` is needed (and the naive structural arms do not typecheck, since `==` on
+`Proposition Atom` does not definitionally reduce constructor-by-constructor). -/
 private def Proposition.beqToEq {Atom : Type*} [DecidableEq Atom] :
-    ∀ (a b : Proposition Atom), (a == b) = true → a = b
-  | .atom p, .atom q, h =>
-      congrArg Proposition.atom ((inferInstance : LawfulBEq _).eq_of_beq h)
-  | .bot, .bot, _ => rfl
-  | .imp a₁ a₂, .imp b₁ b₂, h => by
-      have h' : (BEq.beq a₁ b₁ && BEq.beq a₂ b₂) = true := h
-      rw [Bool.and_eq_true] at h'
-      exact congrArg₂ Proposition.imp
-        (Proposition.beqToEq a₁ b₁ h'.1)
-        (Proposition.beqToEq a₂ b₂ h'.2)
-  | .box a, .box b, h =>
-      congrArg Proposition.box (Proposition.beqToEq a b h)
-  | .atom _, .bot, h | .atom _, .imp _ _, h | .atom _, .box _, h
-  | .bot, .atom _, h | .bot, .imp _ _, h | .bot, .box _, h
-  | .imp _ _, .atom _, h | .imp _ _, .bot, h | .imp _ _, .box _, h
-  | .box _, .atom _, h | .box _, .bot, h | .box _, .imp _ _, h => nomatch h
+    ∀ (a b : Proposition Atom), (a == b) = true → a = b :=
+  fun _ _ h => LawfulBEq.eq_of_beq h
 
 /-- A modally closed branch is unsatisfiable with any accessibility relation.
 

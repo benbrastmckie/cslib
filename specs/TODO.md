@@ -28,7 +28,7 @@ next_project_number: 465
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-464 [NOT STARTED] — Create a Typst report presenting the best arguments in support of
+464 [RESEARCHED] — Create a Typst report presenting the best arguments in support of
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -82,10 +82,11 @@ next_project_number: 465
 ## Tasks
 
 ### 464. Typst report structure first mpl arguments
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: general
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [464_typst_report_structure_first_mpl_arguments/reports/01_team-research.md]
 
 **Description**: Create a Typst report presenting the best arguments in support of the structure-first MPL design, output to /home/benjamin/Projects/cslib/typst/MPL/ (directory to be created; this is a document-writing/synthesis task — the deliverable is a compiled-clean Typst document, not Lean proofs).
 

@@ -11,7 +11,7 @@ next_project_number: 452
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,447,448,449 | -- | Bimodal Porting, Foundations, Modal Logic, ... |
+| 1 | 36,37,180,226,317,390,396,400,404,407,415,438,440,442,447,449 | -- | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 2 | 39,40,181,215,299,375,389,405,409,430,439,450,451 | 36,37,180,317,404,407,442,449 | Bimodal Porting, Modal Logic, Temporal Logic, ... |
 | 3 | 41,300,391,392,413,426,441,444 | 39,40,299,375,389,439,450 | Foundations, Modal Logic, Temporal Logic, ... |
 | 4 | 393,412,425 | 41,391,426 | Foundations, Temporal Logic, PL-Hygiene |
@@ -30,7 +30,6 @@ next_project_number: 452
 
 ### Foundations
 
-448 [RESEARCHED] — Study whether to elevate the committed forward-only proof-system-
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
   └─ 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 
@@ -179,7 +178,7 @@ Definition of done: FrameClass.Metric and the 4 temporal uniformity axioms defin
 ---
 
 ### 448. Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None

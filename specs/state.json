@@ -1230,7 +1230,7 @@
       "project_number": 448,
       "project_name": "study_deriv_shared_metatheory_substrate",
       "title": "Study Deriv σ as a shared-metatheory substrate (proof-system morphism Vision B)",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "parent_task": 419,
@@ -1245,9 +1245,14 @@
         }
       ],
       "created": "2026-07-01T06:40:00Z",
-      "last_updated": "2026-07-01T07:21:23Z",
-      "session_id": "sess_1782889987_295b26",
-      "researched": "2026-07-01T07:21:23Z"
+      "last_updated": "2026-07-01T07:26:04Z",
+      "session_id": "sess_1782890764_c6488a",
+      "researched": "2026-07-01T07:21:23Z",
+      "completed": "2026-07-01T07:26:04Z",
+      "completion_summary": "Study concluded NO-GO on Vision B (Type-level Deriv sigma substrate). GenericMCS already provides the shared-metatheory substrate at the Prop level (generic deduction theorem + MCS, ~30 consumers across 6 logic configs); the ROI gate fails because the roadmap has no data-structural/proof-theoretic consumer. R1 Fin-index mechanic is feasible (compile-verified) but unwarranted. Keep Vision A (Deriv.map) as a complementary cross-system lift; redirect shared-metatheory effort to existing tasks 41 (completeness scaffold on GenericMCS) and 415 (conservativity-lift using Deriv.map).",
+      "roadmap_items": [
+        "Vision B (Deriv sigma as Type-level shared-metatheory substrate): declined. Guarded re-entry only if a future task needs a proof-theoretic obligation that inducts on derivation-as-data (cut elimination, normalization, interpolation-by-construction transported across logics). De-risk order at that point: prove target for ONE logic against a minimal Type-valued backward map BEFORE paying the R1 refactor across all three LiftViaMorphism overlays."
+      ]
     },
     {
       "project_number": 449,

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Benjamin Brast-McKie
 -/
 
--- DEPRECATED: This file is superseded by Cslib.Foundations.Logic.Tableau. See task 297.
+-- DEPRECATED: This file is superseded by Cslib.Foundations.Logic.Tableau.
 
 module
 

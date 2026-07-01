@@ -31,8 +31,8 @@ to a signed formula.
 | `persistent` | modal necessity | Formula persists across branch splits |
 | `notApplicable` | no match | Rule does not apply |
 
-The `persistent` variant is included from day one to support downstream modal and temporal
-tableau tasks (tasks 299-301), where box-rules produce signed formulas that must be available
+The `persistent` variant is included to support downstream modal and temporal tableau
+calculi, where box-rules produce signed formulas that must be available
 on every branch.
 
 ## References

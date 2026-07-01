@@ -1,0 +1,63 @@
+{
+  "task": 391,
+  "session_id": "sess_1782924983_6bcecb_391",
+  "orchestrator_mode": true,
+  "phase": "implement",
+  "status": "implemented",
+  "agent_type": "cslib-implementation-agent",
+  "plan": "specs/391_strip_docstring_jargon_fix_stale_counts/plans/01_strip-jargon-fix-counts.md",
+  "summary_artifact": "specs/391_strip_docstring_jargon_fix_stale_counts/summaries/01_strip-jargon-fix-counts-summary.md",
+  "summary": "Both phases complete. Phase 1 (A1-A6, B1-B6): jargon strips + stale-count/misattached-docstring/line-ref fixes across 12 files. Phase 2 (A7): 3 in-proof scratch-comment edits in ListImplication.lean, verified with full CSLib CI pipeline. Two minor plan deviations (documented): extra jargon strips in ClassicalConjImpBotCompleteness.lean (stale '4-for-4') and Minimal/Completeness.lean (3 more 'task 317' mentions) discovered by the whole-file residual-jargon grep gate and fixed for consistency.",
+  "scope_kind": "docstring_and_comment_only",
+  "proof_logic_changes": false,
+  "phase_count": 2,
+  "phases_completed": 2,
+  "files_modified": [
+    "Cslib/Foundations/Logic/PropositionalTableau.lean",
+    "Cslib/Foundations/Logic/Tableau/RuleResult.lean",
+    "Cslib/Foundations/Logic/Metalogic/ListImplication.lean",
+    "Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean",
+    "Cslib/Logics/Propositional/Metalogic/ClassicalConjImpBotCompleteness.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntSoundness.lean",
+    "Cslib/Logics/Propositional/Metalogic/MinSoundness.lean",
+    "Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/ConservativeChain.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/HilbertLindenbaumRel.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/DecisionProcedure.lean",
+    "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean"
+  ],
+  "sorry_inventory": {
+    "introduced": 0,
+    "note": "Pre-existing deferred sorries (Intuitionistic/Scheme.lean L409,L1070; Intuitionistic/Completeness.lean L106; Minimal/Completeness.lean L104) are only re-described more accurately in prose, not touched. Task 317 (on hold) owns filling them."
+  },
+  "hard_constraints_verified": {
+    "connectives_excluded": "Cslib/Foundations/Logic/Connectives.lean absent from git diff - CONFIRMED untouched",
+    "strongcompleteness_3case_correct": "IntStrongCompleteness.lean:107 and MinStrongCompleteness.lean:121 '(3 cases: atom, bot, imp)' - CONFIRMED no diff on either file",
+    "intlindenbaum_274_correct": "IntLindenbaum.lean:274 int_consistent docstring - CONFIRMED unchanged; only L262 (misattached, on lift_int_to_cl) was fixed",
+    "listimplication_comment_only": "git diff on ListImplication.lean shows only comment lines; no tactic/term lines changed - CONFIRMED"
+  },
+  "deviations": [
+    "A2: additionally stripped stale '4-for-4' phrase at ClassicalConjImpBotCompleteness.lean:479 (not in original site list; discovered by residual-jargon grep; table below lists exactly 3 items so phrase was inaccurate)",
+    "B6: additionally stripped 3 more 'task 317' mentions in Minimal/Completeness.lean (L69, L89, L103, L109) beyond the enumerated L49 (not in original site list; discovered by whole-file residual-jargon grep)"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_new": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "lake_build_full": "green (3189 jobs)",
+    "checkInitImports": "clean",
+    "lint_style": "clean",
+    "lake_lint": "0 findings in edited files (2 pre-existing unrelated errors in Cslib/Logics/Temporal/Theorems.lean, not touched)",
+    "lake_shake": "pre-existing repo-wide import-hygiene suggestions unrelated to this task (zero import lines changed by this task)",
+    "mk_all": "no update necessary",
+    "lake_test": "CslibTests suite passes",
+    "residual_jargon_grep": "0 hits across all 13 edited files"
+  },
+  "coordination_note": "Cslib/Logics/Propositional/Metalogic/IntLindenbaum.lean is also in task 392's file list (plans to rename lift_int_to_cl -> liftIntToCl). This task's edit to that file was docstring-only (fixed misattached consistency docstring at L262-263, did not touch the declaration name), so task 392's rename should apply cleanly on top. No conflict expected but flagged per instructions.",
+  "next_action": "none - task complete, ready for status transition to PR READY / COMPLETED per orchestrator workflow",
+  "delegation_path": ["orchestrator", "implement", "cslib-implementation-agent"]
+}

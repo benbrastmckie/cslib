@@ -15,12 +15,14 @@ This module proves that the classical conjunctive-implicational-bot fragment CPL
 axiomatized by K, S, Peirce's law, the three conjunction axioms (andI, andE1, andE2), and
 ex falso quodlibet (efq) — is complete for tautologies that involve only conjunction,
 implication, falsum, and atoms (i.e., or-free formulas). The proof extends the Kalmár /
-Tarski–Bernays truth-assignment method from the conjunction-implication case (task 378)
+Tarski–Bernays truth-assignment method from the conjunction-implication case (see
+`ClassicalConjImpCompleteness.lean`)
 with a new `bot` case.
 
 ## Strategy
 
-The proof is the CL-C rung above `classicalConjImp_completeness` (task 378), mirroring its
+The proof extends `classicalConjImp_completeness` (from
+`ClassicalConjImpCompleteness.lean`), mirroring its
 phase structure but widening the predicate from `IsOrBotFree` to `IsOrFree` and adding the
 `bot` case to the truth lemma:
 
@@ -34,7 +36,7 @@ phase structure but widening the predicate from `IsOrBotFree` to `IsOrFree` and 
 
 3. **Kalmár truth lemma** (`classicalConjImpBot_kalmar`): for or-free `φ`, the literal
    context derives either `(φ → goal) → goal` (if `v ⊨ φ`) or `φ → goal` (otherwise). The
-   `atom`, `imp`, and `and` cases are transcribed from `classicalConjImp_kalmar` (task 378);
+   `atom`, `imp`, and `and` cases are transcribed from `classicalConjImp_kalmar`;
    the `bot` case is new and trivial: the TRUE side is vacuous (⊥ is never true), and the
    FALSE side is immediate via the EFQ axiom.
 
@@ -49,18 +51,19 @@ phase structure but widening the predicate from `IsOrBotFree` to `IsOrFree` and 
 The proof uses the falsum-surrogate / double-negation method, not an algebraic route.
 Classical fragments are not Heyting-complete, so algebraic approaches fail here. The real `⊥`
 in the fragment enters only in the `bot` FALSE case of the truth lemma, where the EFQ axiom
-(`⊥ → goal`) directly closes the goal. This is the one genuine extension over task 378.
+(`⊥ → goal`) directly closes the goal. This is the one genuine extension over the
+conjunction-implication case.
 
 Peirce's law enters only in the `imp` TRUE-side false-antecedent subcase, exactly as in
-tasks 352 and 378.
+the implicational and conjunction-implication cases.
 
 ## References
 
 * Tarski–Bernays axiomatization of the classical implicational calculus.
 * Kalmár completeness method (falsum-surrogate variant).
-* Task 352: `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` —
+* `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` —
   the original template; `litCtx`, `litCtx_mem`, `Proposition.atoms` reused by import.
-* Task 378: `Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean` —
+* `Cslib/Logics/Propositional/Metalogic/ClassicalConjImpCompleteness.lean` —
   the ∧-extension this module builds on; atom/imp/and cases transcribed from there;
   `Proposition.atomsConjImp` reused by import. -/
 
@@ -175,11 +178,12 @@ then the context derives the double negation `(φ → goal) → goal`; otherwise
 `φ → goal`. The surrogate `goal` is fixed and arbitrary.
 
 Proved by induction on `φ`; the `or` case is excluded by `IsOrFree`. The `atom`, `imp`, and
-`and` cases are transcribed from `classicalConjImp_kalmar` (task 378), retargeted to
+`and` cases are transcribed from `classicalConjImp_kalmar`, retargeted to
 `ClassicalConjImpBotAxiom`. The `bot` case is the new content: the TRUE side is vacuous
 (`⊥` is never true, so the hypothesis `false = true` is contradictory), and the FALSE side
 uses `classicalConjImpBot_exfalso` to immediately supply `Γ ⊢ ⊥ → goal`. Peirce's law
-enters only in the `imp` TRUE-side false-antecedent subcase, as in tasks 352 and 378. -/
+enters only in the `imp` TRUE-side false-antecedent subcase, as in the implicational and
+conjunction-implication cases. -/
 theorem classicalConjImpBot_kalmar {v : BoolValuation Atom} {goal : PL.Proposition Atom}
     (as : List Atom) {φ : PL.Proposition Atom} (hOF : φ.IsOrFree = true)
     (hcov : ∀ p, p ∈ φ.atomsConjImp → p ∈ as) :
@@ -472,9 +476,9 @@ calculus, then it is derivable in the classical conjunctive-implicational-bot fr
 CPL⟨∧,→,⊥,⊤⟩ (K + S + Peirce + andI + andE1 + andE2 + efq). Proof: CPL soundness gives
 a tautology; then `classicalConjImpBot_completeness` yields a CPL⟨∧,→,⊥,⊤⟩ derivation.
 
-This completes the classical conservativity column to 4-for-4:
-- CL-A: `CPL⟨→,⊤⟩ ⊂ CPL` for imp-top-only formulas (task 352)
-- CL-B: `CPL⟨∧,→,⊤⟩ ⊂ CPL` for or-bot-free formulas (task 378)
+This completes all three classical conservativity results in the column:
+- CL-A: `CPL⟨→,⊤⟩ ⊂ CPL` for imp-top-only formulas
+- CL-B: `CPL⟨∧,→,⊤⟩ ⊂ CPL` for or-bot-free formulas
 - CL-C: `CPL⟨∧,→,⊥,⊤⟩ ⊂ CPL` for or-free formulas (this theorem) -/
 theorem cpl_conservative_over_classicalConjImpBot {φ : PL.Proposition Atom}
     (hOF : φ.IsOrFree = true) (h : Derivable PropositionalAxiom φ) :

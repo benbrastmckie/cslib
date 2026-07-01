@@ -18,8 +18,8 @@ of `Proposition Atom` by the equivalence relation `A ≈ B := SetDerivable Axiom
 SetDerivable Axioms Γ (B.imp A)`. In this algebra, every formula `ψ ∈ Γ` evaluates to `⊤`, which
 is the key property needed for the strong (context-parametric) completeness theorem.
 
-This is **Route A2** from the strong completeness proof strategy: a fresh relativized copy of
-the Lindenbaum construction, chosen to keep the original 341 proof files untouched.
+This is a fresh relativized copy of the Lindenbaum construction, chosen so that the existing
+(non-relativized) Lindenbaum development is reused unchanged rather than modified in place.
 
 ## Main Definitions
 

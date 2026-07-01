@@ -20,7 +20,8 @@ tableau and connects it to derivability via `min_soundness_completeness`.
 - `minimalTableau_sound`: Proved (sorry-free) in `Minimal.Soundness`. If
   `minimalTableau φ = closed`, then `MValid φ`.
 - `minimalTableau_complete`: In `Minimal.Completeness`; `MValid φ` implies
-  `minimalTableau φ = closed`. Currently rests on 4 sorries in `Minimal/Completeness.lean`.
+  `minimalTableau φ = closed`. Rests on the deferred completeness sorries (see "Notes on sorry"
+  below).
 - `minimalTableau_decides`: Biconditional combining soundness and completeness.
 - `instDecidableMValid`: A `Decidable (MValid φ)` instance via tableau (NEW to CSLib).
 - `instDecidableDerivableMinPropAxiom`: `Decidable (Derivable MinPropAxiom φ)` via tableau.
@@ -41,15 +42,16 @@ Soundness and completeness proofs are in the dedicated `Soundness.lean` and
 ## Notes on sorry
 
 `minimalTableau_sound` is sorry-free. The completeness direction
-(`minimalTableau_complete` in `Minimal/Completeness.lean`) rests on pre-existing 317 sorries:
-- `Scheme.lean:246` — parametric `truthLemma S b …` (the minimal tableau reuses
+(`minimalTableau_complete` in `Minimal/Completeness.lean`) rests on the deferred completeness
+sorries:
+- the parametric `truthLemma` in `Intuitionistic/Scheme.lean` (the minimal tableau reuses
   `truthLemma minScheme`, so it inherits this sorry)
-- `Scheme.lean:519` — open-branch countermodel structural property
-- `Minimal/Completeness.lean:110` — `MValid → forcing` bridge using `truthLemma minScheme`
+- the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
+- the `MValid → forcing` bridge in `Minimal/Completeness.lean` (uses `truthLemma minScheme`)
 
 The `Decidable` instance (`instDecidableDerivableMinPropAxiom`) carries the soundness branch
-clean and the countermodel branch with the pre-existing 317 `sorryAx`. This sorry-taint is
-pre-existing and not introduced by task 422; it will be resolved when task 317 lands.
+clean and the countermodel branch with the deferred completeness `sorryAx`. This sorry-taint is
+pre-existing and will be resolved once the deferred completeness sorries are filled.
 
 ## Two Decision Routes — Distinct Roles
 
@@ -60,10 +62,10 @@ CSLib contains **two independent decision procedures** for `Derivable MinPropAxi
 - **Mechanism**: Constructive signed-tableau proof-search/countermodel. Reuses the
   intuitionistic expansion (`intExpandBranches`) with `isMinimallyClosed` closure predicate.
   Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
-- **Axiom profile**: Carries pre-existing 317 `sorryAx` (see above). Will become sorry-free
-  when task 317 lands.
+- **Axiom profile**: Carries the deferred completeness `sorryAx` (see above). Will become
+  sorry-free once the deferred completeness sorries are filled.
 - **Exposed as**: `instDecidableDerivableMinPropAxiom` — the **sole registered `Decidable`
-  instance** for `Derivable MinPropAxiom φ` (as of task 422).
+  instance** for `Derivable MinPropAxiom φ`.
 - **Role**: Canonical extension-facing instance for minimal propositional logic.
 
 ### Route 2 (FMP — sorry-free, named def, not a registered instance)

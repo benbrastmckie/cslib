@@ -16,11 +16,13 @@ This module proves that the classical conjunction-implication fragment CPL⟨∧
 axiomatized by K, S, Peirce's law, and the three conjunction axioms (andI, andE1, andE2) —
 is complete for tautologies that involve only conjunction, implication, and atoms (i.e.,
 or-bot-free formulas). The proof extends the Kalmár / Tarski–Bernays truth-assignment
-method from the purely implicational case (task 352) with a new conjunction case.
+method from the purely implicational case (see
+`ClassicalImpCompleteness.lean`) with a new conjunction case.
 
 ## Strategy
 
-The proof is the CL-B rung above `classicalImp_completeness` (task 352), mirroring its
+The proof extends `classicalImp_completeness` (from
+`ClassicalImpCompleteness.lean`), mirroring its
 phase structure but adding the `and` case to the truth lemma:
 
 1. **Soundness** (`classicalConjImp_soundness`): every `ClassicalConjImpAxiom`-derivable
@@ -48,13 +50,13 @@ phase structure but adding the `and` case to the truth lemma:
 The proof uses the falsum-surrogate / double-negation method, not an algebraic
 free-completion route. Peirce's law is invalid in free Heyting completions, so algebraic
 approaches fail for the classical fragment. Peirce's law appears only in the `imp` TRUE
-subcase (false-antecedent branch), exactly as in task 352.
+subcase (false-antecedent branch), exactly as in the implicational case.
 
 ## References
 
 * Tarski–Bernays axiomatization of the classical implicational calculus.
 * Kalmár completeness method (falsum-surrogate variant).
-* Task 352: `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` —
+* `Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean` —
   the direct template; this module adds the `and` case. -/
 
 @[expose] public section

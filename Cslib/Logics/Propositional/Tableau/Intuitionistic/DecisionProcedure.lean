@@ -35,14 +35,16 @@ The `Derivable IntPropAxiom φ` instance uses `int_soundness_completeness` to re
 
 `intuitionisticTableau_sound` is now sorry-free. The completeness direction
 (`intuitionisticTableau_complete` in `Intuitionistic/Completeness.lean`) still rests on
-4 sorries tracked under task 317:
-- `Scheme.lean:246` — parametric `truthLemma S b …` (forcing ↔ membership, all connectives)
-- `Scheme.lean:519` — open-branch countermodel structural property
-- `Completeness.lean:113` — `IValid → forcing` bridge using the parametric `truthLemma`
-- `Minimal/Completeness.lean:110` — `MValid → forcing` bridge (reuses `truthLemma minScheme`)
+four deferred sorries in the completeness development:
+- the parametric `truthLemma` in `Intuitionistic/Scheme.lean` (forcing ↔ membership, all
+  connectives)
+- the open-branch countermodel structural property in `Intuitionistic/Scheme.lean`
+- the `IValid → forcing` bridge in `Intuitionistic/Completeness.lean` (uses the
+  parametric `truthLemma`)
+- the `MValid → forcing` bridge in `Minimal/Completeness.lean` (reuses `truthLemma minScheme`)
 
 The `Decidable` instance (`instDecidableDerivableIntPropAxiom`) carries the soundness branch
-clean and the countermodel branch with the pre-existing 317 `sorryAx`. This is not a
+clean and the countermodel branch with the deferred completeness `sorryAx`. This is not a
 regression introduced here; the sorry-taint pre-dates this task.
 
 ## Two Decision Routes — Distinct Roles
@@ -53,10 +55,10 @@ CSLib contains **two independent decision procedures** for `Derivable IntPropAxi
 - **Module**: `Tableau/Intuitionistic/DecisionProcedure.lean`
 - **Mechanism**: Constructive signed-tableau proof-search/countermodel. Decides via
   `instDecidableIValid` composed with `int_soundness_completeness`.
-- **Axiom profile**: Carries pre-existing 317 `sorryAx` (see above). Will become sorry-free
-  when task 317 lands.
+- **Axiom profile**: Carries the deferred completeness `sorryAx` (see above). Will become
+  sorry-free once the deferred completeness sorries are filled.
 - **Exposed as**: `instDecidableDerivableIntPropAxiom` — the **sole registered `Decidable`
-  instance** for `Derivable IntPropAxiom φ` (as of task 422).
+  instance** for `Derivable IntPropAxiom φ`.
 - **Role**: Canonical extension-facing instance; feeds the modal/temporal/bimodal extensions.
 
 ### Route 2 (FMP — sorry-free, named def, not a registered instance)

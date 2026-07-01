@@ -38,11 +38,9 @@ variable {Atom : Type*}
 
 /-- Every axiom of intuitionistic propositional logic is IValid.
 
-The 3 cases are:
-- **implyK**: `φ → (ψ → φ)` -- uses persistence to carry `φ` to successor worlds.
-- **implyS**: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -- uses transitivity of ≤.
-- **efq**: `⊥ → φ` -- `IForces w ⊥ = bot_forces w`, which is `False` for intuitionistic
-  semantics, so the premise is vacuously false. -/
+The axiom cases (implication K/S, EFQ, conjunction intro/elim, disjunction intro/elim) are
+each valid; the two implication cases use persistence and transitivity of ≤, EFQ is vacuous, and
+the ∧/∨ cases are structural. -/
 theorem int_axiom_sound {φ : PL.Proposition Atom}
     (h_ax : IntPropAxiom φ) : IValid.{_, v} φ := by
   intro World _ val v_uc w

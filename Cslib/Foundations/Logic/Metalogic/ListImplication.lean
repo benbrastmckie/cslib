@@ -80,7 +80,7 @@ theorem listImp_axiom_s (φ ψ : F) (Γ : List F) :
         (HasImp.imp (listImp Γ φ) (listImp Γ ψ))) := by
   induction Γ with
   | nil =>
-    -- Need: ⊢ (φ → ψ) → φ → ψ, which is identity on (φ → ψ)... no.
+    -- Base case: `listImp [] (φ → ψ) = φ → ψ`, so the goal is the identity `⊢ (φ → ψ) → (φ → ψ)`.
     -- listImp [] (φ → ψ) = (φ → ψ), listImp [] φ = φ, listImp [] ψ = ψ
     -- Need: ⊢ (φ → ψ) → φ → ψ, which is just identity
     exact identity _
@@ -128,9 +128,8 @@ theorem list_flip_implication1 (φ χ : F) : ∀ (Γ : List F),
     -- Step 1: flip gives ⊢ (φ → ψ → listImp Ψ χ) → ψ → φ → listImp Ψ χ
     --         i.e. ⊢ (φ → ψ → listImp Ψ χ) → ψ → listImp (φ :: Ψ) χ
     -- But we need the output under ψ, so we need:
-    --   from ⊢ (A → B) → C and ⊢ D → A, get ⊢ D → (B → C)... that's not right.
     --
-    -- Let me think differently. We need:
+    -- Correct route. We need:
     --   ⊢ (φ → ψ → listImp Ψ χ) → (ψ → listImp Ψ (φ → χ))
     --
     -- flip: ⊢ (φ → ψ → listImp Ψ χ) → (ψ → φ → listImp Ψ χ)

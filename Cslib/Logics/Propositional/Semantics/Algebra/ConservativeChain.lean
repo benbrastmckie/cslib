@@ -41,7 +41,7 @@ Each `⊂` denotes conservative extension for the smaller fragment's language:
 
 ## Classical Conservativity Column (Kalmár / Truth-Assignment Method)
 
-The classical column is 4-for-4: all classical conservativity results use the Kalmár /
+All three classical conservativity results (CL-A, CL-B, CL-C) use the Kalmár /
 Tarski–Bernays truth-assignment method, in contrast to the algebraic/Brouwerian route above.
 
 | Step (CL) | Theorem | Fragment | Condition |

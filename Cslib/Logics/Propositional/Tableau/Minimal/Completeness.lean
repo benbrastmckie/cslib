@@ -46,7 +46,7 @@ From an open saturated branch `b`, construct a Kripke model as follows:
 and `openBranch_countermodel minScheme` respectively, which carry the deferred sorries in
 `Scheme.lean`. The remaining sorry in `minimalTableau_complete` bridges `MValid φ` to the
 per-branch forcing hypothesis required by `tableau_complete minScheme`; this is part of the
-completeness obligations handed to task 317.
+deferred completeness obligations.
 
 ## References
 
@@ -66,7 +66,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-- The truth lemma for the minimal tableau.
 
 Delegates to `truthLemma minScheme`. The parametric sorry in `truthLemma` is the single
-deferred completeness obligation for task 317.
+deferred completeness obligation.
 
 If `b` is an open saturated branch, then for every signed formula on `b`, the extracted
 model (`intExtractValuation b`, `minBranchBotForces b`) satisfies positive formulas and
@@ -86,7 +86,7 @@ lemma minTruthLemma (b : IBranch Atom)
 /-- An open saturated branch from the minimal tableau yields a Kripke countermodel.
 
 Delegates to `openBranch_countermodel minScheme`. The structural sorries in
-`openBranch_countermodel` are deferred to task 317.
+`openBranch_countermodel` remain deferred.
 
 If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
 define a minimal Kripke model that falsifies `φ` at world 0. -/
@@ -100,13 +100,13 @@ tableau closes on `φ`.
 
 Delegates to `tableau_complete minScheme`. The remaining sorry bridges `MValid φ` to the
 per-branch forcing hypothesis `∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`
-required by `tableau_complete`; this is the core completeness obligation for task 317. -/
+required by `tableau_complete`; this is the core deferred completeness obligation. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
   intro _b
   -- Bridge: MValid φ → IForces (intExtractValuation b) (minBranchBotForces b) 0 φ
-  -- Requires: upward-closure of intExtractValuation b and minBranchBotForces b (task 317)
+  -- Requires: upward-closure of intExtractValuation b and minBranchBotForces b
   sorry
 
 end Cslib.Logic.PL

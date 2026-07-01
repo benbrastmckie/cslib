@@ -259,7 +259,8 @@ theorem int_prime_exclusion {S : Set (PL.Proposition Atom)}
 
 /-! ## Int Theorems Form a DCCS -/
 
-/-- IntPropAxiom is consistent: `[] ⊬ ⊥`. -/
+/-- Lift an `IntPropAxiom` derivation tree to a `PropositionalAxiom` derivation tree,
+recursing through the tree via `IntPropAxiom.toPropAxiom` on the axiom leaves. -/
 private noncomputable def lift_int_to_cl {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom}
     (d : DerivationTree IntPropAxiom Γ φ) :
     DerivationTree PropositionalAxiom Γ φ := by

@@ -39,9 +39,9 @@ variable {Atom : Type*}
 
 /-- Every axiom of minimal propositional logic is MValid.
 
-The 2 cases are:
-- **implyK**: `φ → (ψ → φ)` -- uses persistence to carry `φ` to successor worlds.
-- **implyS**: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -- uses transitivity of ≤. -/
+The axiom cases (implication K/S, conjunction intro/elim, disjunction intro/elim) are each
+valid; the implication cases use persistence and transitivity of ≤, and the ∧/∨ cases are
+structural. -/
 theorem min_axiom_sound {φ : PL.Proposition Atom}
     (h_ax : MinPropAxiom φ) : MValid.{_, v} φ := by
   intro World _ val bot_forces v_uc bf_uc w

@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 import Mathlib.Tactic.Ring
+import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Saturation
 public import Cslib.Logics.Modal.Tableau.LoopInduction
 
@@ -230,6 +231,139 @@ lemma modalExpMeasure_entry_le_fuel (φ : Proposition Atom) :
       ≤ 3 ^ (4 * (2 * modalComplexity φ + 1) * ((2 * modalComplexity φ + 1) ^
           (modalComplexity φ + 1) + 1)) := Nat.pow_le_pow_right (by norm_num) hfinal
     _ = modalFuel φ := rfl
+
+/-! ## Subformula-Closure: World-Preserving Rules (Phase 1a)
+
+This section proves that formulas emitted by the propositional (α/β) rules, `boxPos`, and
+`diamondNeg` — the three rule kinds that do NOT mint a fresh world — are structural
+subformulas of the source formula, at a world label that is either unchanged or an existing
+successor. This is the closure fact needed for the rule kinds that cannot breach the world
+bound, so no world-bound hypothesis is consumed here. The two fresh-world-minting rules
+(`diamondPos`, `boxNeg`) and the top-level dispatch lemma are Phase 1b's job. -/
+
+/-- Every `Proposition Atom` is a member of its own structural subformula list (the list
+always begins with the formula itself). Marked `@[simp]` so it discharges nested
+`modalSubfmls` membership goals as a rewrite. -/
+@[simp]
+lemma modalSubfmls_self_mem (φ : Proposition Atom) : φ ∈ modalSubfmls φ := by
+  cases φ <;> simp [modalSubfmls]
+
+/-- Every formula emitted by a propositional (α/β) rule application via `tryAllPropRules` is a
+structural subformula of `sf.formula`, at the unchanged world label `sf.label`. Mirrors the
+case-split shape of `classicalApplyOne_output_complexity`
+(`Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:609`), proving list membership
+in place of a complexity sum. -/
+lemma modalApplyOne_prop_outputs_subset
+    (sf : SignedFormula (Proposition Atom) WorldIndex) :
+    (match tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      | .linear formulas =>
+          ∀ x ∈ formulas, x.formula ∈ modalSubfmls sf.formula ∧ x.label = sf.label
+      | .branching branches =>
+          ∀ x ∈ branches.flatten, x.formula ∈ modalSubfmls sf.formula ∧ x.label = sf.label
+      | .persistent formulas =>
+          ∀ x ∈ formulas, x.formula ∈ modalSubfmls sf.formula ∧ x.label = sf.label
+      | .notApplicable => True) := by
+  obtain ⟨s, φ, l⟩ := sf
+  rcases s with _ | _
+  · rw [tryAllPropRules_pos]
+    rcases hA : modalAndOf? φ with _ | ⟨x, y⟩
+    · rcases hO : modalOrOf? φ with _ | ⟨x, y⟩
+      · rcases hI : modalImpOf? φ with _ | ⟨x, y⟩
+        · rcases hN : modalNegOf? φ with _ | x
+          · simp
+          · obtain rfl := modalNegOf?_eq hN
+            intro z hz
+            simp only [SignedFormula.formula, SignedFormula.label, List.mem_cons,
+              List.not_mem_nil, or_false] at hz ⊢
+            subst hz
+            simp [modalSubfmls]
+        · obtain rfl := modalImpOf?_eq hI
+          intro z hz
+          simp only [List.mem_flatten,
+            List.mem_cons, List.not_mem_nil, or_false] at hz ⊢
+          obtain ⟨t, ht, hzt⟩ := hz
+          rcases ht with rfl | rfl <;> simp_all [modalSubfmls]
+      · obtain rfl := modalOrOf?_eq hO
+        intro z hz
+        simp only [List.mem_flatten,
+          List.mem_cons, List.not_mem_nil, or_false] at hz ⊢
+        obtain ⟨t, ht, hzt⟩ := hz
+        rcases ht with rfl | rfl <;> simp_all [modalSubfmls]
+    · obtain rfl := modalAndOf?_eq hA
+      intro z hz
+      simp only [List.mem_cons,
+        List.not_mem_nil, or_false] at hz ⊢
+      rcases hz with rfl | rfl <;> simp [modalSubfmls]
+  · rw [tryAllPropRules_neg]
+    rcases hA : modalAndOf? φ with _ | ⟨x, y⟩
+    · rcases hO : modalOrOf? φ with _ | ⟨x, y⟩
+      · rcases hI : modalImpOf? φ with _ | ⟨x, y⟩
+        · rcases hN : modalNegOf? φ with _ | x
+          · simp
+          · obtain rfl := modalNegOf?_eq hN
+            intro z hz
+            simp only [List.mem_cons,
+              List.not_mem_nil, or_false] at hz ⊢
+            subst hz
+            simp [modalSubfmls]
+        · obtain rfl := modalImpOf?_eq hI
+          intro z hz
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hz ⊢
+          rcases hz with rfl | rfl <;> simp [modalSubfmls]
+      · obtain rfl := modalOrOf?_eq hO
+        intro z hz
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hz ⊢
+        rcases hz with rfl | rfl <;> simp [modalSubfmls]
+    · obtain rfl := modalAndOf?_eq hA
+      intro z hz
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hz ⊢
+      obtain ⟨t, ht, hzt⟩ := hz
+      rcases ht with rfl | rfl <;> simp_all [modalSubfmls]
+
+/-- `boxPos`: `T(□ψ)@w` propagates `T(ψ)@w'` for each recorded successor `w'` of `w`
+(`boxPropagation`, `Branch.lean:194-199`). Every emitted formula's formula-component is `ψ`, a
+structural subformula of the source `.box ψ`, at a world label that is an existing recorded
+successor of `w` (`Rules.lean:83-88`). -/
+lemma modalApplyOne_boxPos_outputs_subset
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ boxPropagation b acc ψ w,
+      x.formula ∈ modalSubfmls (Proposition.box ψ) ∧ x.label ∈ acc.successorsOf w := by
+  intro x hx
+  simp only [boxPropagation, List.mem_filterMap] at hx
+  obtain ⟨w', hw', hxeq⟩ := hx
+  split at hxeq
+  · simp at hxeq
+  · simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    exact ⟨by simp [modalSubfmls], hw'⟩
+
+/-- `diamondNeg`: `F(◇φ)@w = F((□(φ→⊥))→⊥)@w` emits `F(φ)@w'` for each recorded successor
+`w'` of `w` (`Rules.lean:142-151`). Every emitted formula's formula-component is `φ`, a
+structural subformula of the encoded source formula, at a world label that is an existing
+recorded successor of `w`. Stated directly over the rule's raw emission expression (rather than
+routed through `modalApplyOne`) because `tryAllPropRules`'s `negOf?` pattern also matches the
+`.imp (.box _) .bot` shape, so this match arm of `modalApplyOne` is not the reachable path for
+that shape — see `modalApplyOne_prop_outputs_subset` for the actually-dispatched pathway. This
+lemma records the closure fact for the rule *as written* at `Rules.lean:142-151`. -/
+lemma modalApplyOne_diamondNeg_outputs_subset
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ (acc.successorsOf w).filterMap (fun w' =>
+        let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
+        if b.any (· == sf') then none else some sf'),
+      x.formula ∈
+        modalSubfmls (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot))
+          Proposition.bot) ∧
+        x.label ∈ acc.successorsOf w := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨w', hw', hxeq⟩ := hx
+  split at hxeq
+  · simp at hxeq
+  · simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    exact ⟨by simp [modalSubfmls], hw'⟩
 
 end Cslib.Logic.Modal.Tableau
 

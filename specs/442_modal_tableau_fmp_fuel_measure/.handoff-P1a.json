@@ -1,0 +1,15 @@
+{
+  "status": "implemented",
+  "phase_label": "P1a",
+  "declarations_added": [
+    "modalSubfmls_self_mem",
+    "modalApplyOne_prop_outputs_subset",
+    "modalApplyOne_boxPos_outputs_subset",
+    "modalApplyOne_diamondNeg_outputs_subset"
+  ],
+  "green": true,
+  "blockers": [],
+  "sorry_inventory": [],
+  "commit": null,
+  "session_id": "sess_1782868458_ecfcce"
+}

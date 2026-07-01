@@ -24,8 +24,9 @@
 | P4   | ✅ COMPLETED | `3766e609` | Saturation characterisation (`Completeness.lean`). Green. Finding: Łukasiewicz diamond patterns never reach `acc`-dependent arms (prop dispatch exhaustive over `.imp`); only `boxNeg` needs invariant carve-out. |
 | P1b  | ✅ COMPLETED | `5d07fedf` | Fresh-world rule closure (`diamondPos`/`boxNeg`) + top-level `modalApplyOne_outputs_subset` dispatch. Green, axiom-clean (propext/Quot.sound only). Added `public import SoundnessStep` (acyclic) for `accFreshInv`; five small glue lemmas factored out (subformula transitivity, `modalUniverse` membership chars, `successorsOf`/`hasEdge` bridge, shared `boxProps`/`diaNegProps` closure). |
 | P2 (CRUX) | ✅ COMPLETED | `2f7a4d22` | World-count bound proved via potential-function invariant (plan's terse target was disproved; strengthened signature used). Obligations a–e all green: `expandedNodup` (`9f9134ad`), `rank'` invariant (`cd1cf73a`), `outDeg≤Sf` (`00ad6986`), potential defs+recurrence (`cb0c3e76`), Δ=0 step lemma `modalStepBranch_potential_step` (`70ca9693`), final `modalStepBranch_worldBound` (`2f7a4d22`). Exports reusable `ModalPotentialInv` (8-field structure) for P5a. Zero sorry, standard axioms only. Two design corrections banked (isMintingShaped=boxNeg-only; potential term 0-at-leaf). |
-| P3   | 🔄 IN PROGRESS | — | Strict-decrease engine `modalExpMeasure_step_lt` (port of classical :834). |
-| P5a/P5b/P6 | ⏳ pending | — | Relocated to new `CompletenessLoop.lean` (see architecture adjustment). |
+| P3   | ✅ COMPLETED | `af2369af` | Strict-decrease engine `modalExpMeasure_step_lt` green. Engine needs hb/hInv/hW hyps (P5a supplies via ModalPotentialInv + modalStepBranch_worldBound). |
+| P5a | 🔄 IN PROGRESS | — | Combined-invariant step preservation, in NEW `CompletenessLoop.lean` (NOT Completeness.lean — avoids FmpMeasure↔Completeness cycle). |
+| P5b/P6 | ⏳ pending | — | In `CompletenessLoop.lean`. |
 
 ### Architecture adjustment (settled during execution — supersedes P5 file placement)
 P1a introduced `FmpMeasure.lean → import Completeness.lean` (acyclic: Completeness does **not**
@@ -424,7 +425,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 3: Output-freshness + per-rule R-drop + strict-decrease [IN PROGRESS]
+### Phase 3: Output-freshness + per-rule R-drop + strict-decrease [COMPLETED]
 - **Goal:** Prove the counting measure strictly decreases on every `some` step (the engine), using
   closure (P1) and the world bound (P2).
 - **Territory:**
@@ -459,7 +460,7 @@ Territory legend: **[OWN]** = phase may create/edit; **[RO]** = read-only refere
 
 ---
 
-### Phase 5a: Combined-invariant single-step preservation [NOT STARTED]
+### Phase 5a: Combined-invariant single-step preservation [IN PROGRESS]
 - **Goal:** Prove that one `modalStepBranch` preserves the full bundled loop invariant (lengths,
   `Forall₂ accFreshInv`, world-bound, measure bound, Hintikka expanded-set inv), consuming P2 + P3
   + P4. This is the heavy inductive step, isolated from the fuel recursion.

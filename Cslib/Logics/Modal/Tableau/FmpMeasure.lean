@@ -13,6 +13,7 @@ import Batteries.Data.List.Perm
 import Mathlib.Data.Finset.Dedup
 import Mathlib.Data.Finset.Lattice.Lemmas
 import Mathlib.Algebra.BigOperators.Group.List.Basic
+public import Cslib.Foundations.Logic.Tableau.Measure
 import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
@@ -125,19 +126,6 @@ def modalUniverse (φ : Proposition Atom) :
     List (SignedFormula (Proposition Atom) WorldIndex) :=
   (List.range (modalWorldBound φ + 1)).flatMap (fun w =>
     (modalSubfmls φ).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
-
-/-- Helper: if every image element of `f` on `l` is bounded by `c`, the summed image is
-bounded by `l.length * c`. Self-contained (avoids hunting for the exact Mathlib name). -/
-private lemma sum_map_le_length_mul {α : Type*} (l : List α) (f : α → Nat) (c : Nat)
-    (h : ∀ x ∈ l, f x ≤ c) : (l.map f).sum ≤ l.length * c := by
-  induction l with
-  | nil => simp
-  | cons x xs ih =>
-    have hx : f x ≤ c := h x (by simp)
-    have hxs : (xs.map f).sum ≤ xs.length * c := ih (fun y hy => h y (by simp [hy]))
-    simp only [List.map_cons, List.sum_cons, List.length_cons]
-    have heq : (xs.length + 1) * c = xs.length * c + c := by ring
-    omega
 
 /-- The universe has length at most `2 * (2 * modalComplexity φ + 1) * (modalWorldBound φ + 1)`. -/
 lemma modalUniverse_length_le (φ : Proposition Atom) :
@@ -764,63 +752,10 @@ modalWorldBound φ0` alone as loop invariant) is **not sufficient**: a branch co
 a single not-yet-fired minting formula at label `modalWorldBound φ0 - 1`, satisfying the
 naive hypothesis, whose firing mints world `modalWorldBound φ0`, breaching the bound. The
 fix (research §6/C3 contingency) is a proof-only **rank map** recording, for each world, a
-remaining modal-depth budget, plus a counting potential `modalCap` bounding how many further
-worlds a given budget can spawn. `modalCap Sf k` is the exact geometric sum `Σ_{i≤k} Sf^i`,
-via the standard `1 + Sf * modalCap Sf (k-1)` recursion (one root plus up to `Sf` subtrees of
-budget `k-1`). -/
-
-/-- The exact geometric-sum capacity: `modalCap Sf k = Σ_{i=0}^{k} Sf^i`, the maximum size of
-a tree with branching factor `≤ Sf` and depth `≤ k` (root included). Defined recursively
-(`1` plus `Sf` copies of the one-shallower capacity) rather than via `Finset.sum` to keep the
-per-step potential-drop arithmetic (`modalCap_succ`) a definitional unfold. -/
-def modalCap (Sf : Nat) : Nat → Nat
-  | 0 => 1
-  | k + 1 => 1 + Sf * modalCap Sf k
-
-@[simp] lemma modalCap_zero (Sf : Nat) : modalCap Sf 0 = 1 := rfl
-
-lemma modalCap_succ (Sf k : Nat) :
-    modalCap Sf (k + 1) = 1 + Sf * modalCap Sf k := rfl
-
-/-- For branching factor `Sf ≥ 2`, the capacity stays strictly below `Sf ^ (k+1)` (with room
-`≥ 1`, stated additively to avoid `Nat` truncated-subtraction pitfalls): the exact geometric
-sum `Σ_{i≤k} Sf^i` satisfies `Σ + 1 ≤ Sf^{k+1}` once the branching factor is `≥ 2`. -/
-lemma modalCap_add_one_le_pow {Sf : Nat} (hSf : 2 ≤ Sf) :
-    ∀ k, modalCap Sf k + 1 ≤ Sf ^ (k + 1)
-  | 0 => by simp only [modalCap_zero, Nat.zero_add, pow_one]; omega
-  | k + 1 => by
-    have ih := modalCap_add_one_le_pow hSf k
-    have hmul : Sf * (modalCap Sf k + 1) ≤ Sf * Sf ^ (k + 1) :=
-      Nat.mul_le_mul_left Sf ih
-    have heq : Sf * Sf ^ (k + 1) = Sf ^ (k + 2) := by ring
-    have hexpand : Sf * (modalCap Sf k + 1) = Sf * modalCap Sf k + Sf := by ring
-    have hkey : Sf * modalCap Sf k + Sf ≤ Sf ^ (k + 2) := by
-      rw [← heq, ← hexpand]; exact hmul
-    have hsucc : modalCap Sf (k + 1) + 1 = Sf * modalCap Sf k + 2 := by
-      rw [modalCap_succ]; ring
-    have hgoal : k + 1 + 1 = k + 2 := rfl
-    rw [hsucc, hgoal]
-    omega
-
-/-- Degenerate branching factor `Sf ≤ 1` forces capacity `1` regardless of `k` when `k = 0`
-(the only case this lemma is ever invoked with, since `Sf = 1` forces `modalDepth φ0 = 0` in
-the application below). -/
-lemma modalCap_zero_le_pow {Sf : Nat} (hSf : 1 ≤ Sf) : modalCap Sf 0 ≤ Sf ^ 1 := by
-  simp only [modalCap_zero, pow_one]; omega
-
-/-- Unconditional capacity bound feeding the world-bound proof: `modalCap Sf k ≤ Sf ^ (k+1)`,
-for any `Sf ≥ 1` with `Sf = 1 → k = 0` (the only shape that ever arises, since
-`Sf(φ0) = 1 → modalDepth φ0 = 0` structurally — see `modalWorldBound`). -/
-lemma modalCap_le_pow {Sf k : Nat} (hSf : 1 ≤ Sf) (hdeg : Sf = 1 → k = 0) :
-    modalCap Sf k ≤ Sf ^ (k + 1) := by
-  rcases Nat.lt_or_ge Sf 2 with hlt | hge
-  · have hSf1 : Sf = 1 := by omega
-    subst hSf1
-    have hk0 : k = 0 := hdeg rfl
-    subst hk0
-    simpa using modalCap_zero_le_pow (Sf := 1) (le_refl 1)
-  · have := modalCap_add_one_le_pow hge k
-    omega
+remaining modal-depth budget, plus a counting potential `geomCap` (shared,
+`Cslib.Foundations.Logic.Tableau.Measure`) bounding how many further worlds a given budget can
+spawn. `geomCap Sf k` is the exact geometric sum `Σ_{i≤k} Sf^i`, via the standard
+`1 + Sf * geomCap Sf (k-1)` recursion (one root plus up to `Sf` subtrees of budget `k-1`). -/
 
 /-! ## World-Count Bound (Phase 2 continuation): out-degree and rank-map bookkeeping
 
@@ -1632,23 +1567,23 @@ lemma outDeg_le_of_expandedNodup
 
 The scalar potential offsetting `modalMaxWorld`'s growth. **Design correction discovered
 during formalization** (documented here for the next dispatch): the naive per-world term
-`(Sf − outDeg acc w) * modalCap Sf (rank w − 1)` is WRONG at a rank-0 ("leaf") world, because
+`(Sf − outDeg acc w) * geomCap Sf (rank w − 1)` is WRONG at a rank-0 ("leaf") world, because
 `Nat`'s truncated subtraction silently turns `rank w − 1` into `0` when `rank w = 0`, giving
-`modalCap Sf 0 = 1` and a spurious nonzero term `Sf * 1 = Sf` instead of the mathematically
+`geomCap Sf 0 = 1` and a spurious nonzero term `Sf * 1 = Sf` instead of the mathematically
 correct `0` (a leaf has no remaining capacity to contribute). This breaks the hand-verified
 "exact Δ = 0" step lemma in the `rank = 1`-child (i.e. `rank = 0`) sub-case: hand-tracing the
 mint step shows `Δ(maxWorld) + Δ(Φ) = 1 + (Sf − 1) = Sf ≠ 0` with the naive term, vs.
 `1 + (−1) = 0` with the corrected piecewise term below. The `rank ≥ 2` sub-case is unaffected
-either way (both formulas agree there) and closes via `modalCap_mul_eq_succ_sub_one`. -/
+either way (both formulas agree there) and closes via `geomCap_mul_eq_succ_sub_one`. -/
 
 /-- The per-world potential term, corrected for the `rank = 0` (leaf) boundary case: `0` when
 `w` has no remaining rank budget (a leaf can mint no further worlds), otherwise
-`(Sf − outDeg acc w) * modalCap Sf (rank w − 1)` (remaining successor slots times the capacity
+`(Sf − outDeg acc w) * geomCap Sf (rank w − 1)` (remaining successor slots times the capacity
 each could still spawn). See the section doc comment for why the `rank = 0` case must be `0`
 rather than the naive formula's Nat-truncation artifact. -/
 def modalPotentialTerm (Sf : Nat) (acc : Accessibility) (rank : WorldIndex → Nat)
     (w : WorldIndex) : Nat :=
-  if rank w = 0 then 0 else (Sf - outDeg acc w) * modalCap Sf (rank w - 1)
+  if rank w = 0 then 0 else (Sf - outDeg acc w) * geomCap Sf (rank w - 1)
 
 /-- The scalar potential `Φ := Σ_{w ∈ modalKnownWorlds b} modalPotentialTerm Sf acc rank w`,
 summing over the branch's distinct known world labels (`modalKnownWorlds`, `Branch.lean:87-89`).
@@ -1656,14 +1591,6 @@ summing over the branch's distinct known world labels (`modalKnownWorlds`, `Bran
 def modalPotential (Sf : Nat) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (rank : WorldIndex → Nat) : Nat :=
   ((modalKnownWorlds b).map (modalPotentialTerm Sf acc rank)).sum
-
-/-- The key arithmetic identity closing the mint-step potential-drop computation (the `rank ≥ 2`
-sub-case, and — via `modalCap_zero`, `Sf * 1 = Sf * modalCap Sf 0 = modalCap Sf 1 - 1` — also
-usable as the base case): `Sf * modalCap Sf k = modalCap Sf (k+1) - 1`, an immediate unfold of
-`modalCap`'s defining recursion. -/
-lemma modalCap_mul_eq_succ_sub_one (Sf k : Nat) :
-    Sf * modalCap Sf k = modalCap Sf (k + 1) - 1 := by
-  rw [modalCap_succ]; omega
 
 /-! ## Known-Worlds and Max-World Bookkeeping (Phase 2 continuation, obligation d — finish)
 
@@ -2240,8 +2167,8 @@ The fresh-world case's `modalMaxWorld` increment of exactly `1` is offset by an 
 decrement of exactly `1`: writing `k := rank' (modalNextWorld b)` (pinned down exactly via
 `rank'`'s edge invariant applied to the new edge, composed with its off-fresh-point agreement
 with `rank`), the per-world potential term at the mint source `l` drops by exactly
-`modalCap Sf k`, which equals the fresh world's own potential term plus `1`
-(`modalCap_zero`/`modalCap_succ`, matching the two rank sub-cases `k = 0` and `k = k' + 1`). -/
+`geomCap Sf k`, which equals the fresh world's own potential term plus `1`
+(`geomCap_zero`/`geomCap_succ`, matching the two rank sub-cases `k = 0` and `k = k' + 1`). -/
 lemma modalStepBranch_potential_step
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2278,7 +2205,7 @@ lemma modalStepBranch_potential_step
     have hrankeq : modalPotential Sf b acc rank' = modalPotential Sf b acc rank := by
       unfold modalPotential; rw [hmapeq]
     rw [hmw, hsame, hpermterm, hrankeq]
-  · -- mint: acc gains one edge l → modalNextWorld b; Φ drops by exactly modalCap Sf k + 1 - ... = 1
+  · -- mint: acc gains one edge l → modalNextWorld b; Φ drops by exactly geomCap Sf k + 1 - ... = 1
     intro b' hb'
     obtain ⟨hmw, hperm⟩ := hmax b' hb'
     have hlne : l ≠ modalNextWorld b := hnextne l hlknown
@@ -2343,7 +2270,7 @@ lemma modalStepBranch_potential_step
       have hSfbound : outDeg newAcc l ≤ Sf :=
         outDeg_le_of_expandedNodup φ0 (e ++ [sf]) newAcc l hnodupE' hclosureE' houtdegE'l
       -- core identity at the mint point: the drop in the term at `l` equals the fresh term
-      -- plus exactly 1 (modalCap's recurrence), matching Δ(maxWorld) = 1 exactly.
+      -- plus exactly 1 (geomCap's recurrence), matching Δ(maxWorld) = 1 exactly.
       have hlz : rank l ≠ 0 := by omega
       have hrank'l : rank' l ≠ 0 := by rw [hrankl]; exact hlz
       have hdSf : outDeg acc l + 1 ≤ Sf := by rw [← houtdeg_l]; exact hSfbound
@@ -2354,7 +2281,7 @@ lemma modalStepBranch_potential_step
         rcases Nat.eq_zero_or_pos (rank' (modalNextWorld b)) with hk0 | hkpos
         · rw [if_pos hk0]
           have hl1 : rank l = 1 := by omega
-          rw [hl1, show (1 : Nat) - 1 = 0 from rfl, modalCap_zero]
+          rw [hl1, show (1 : Nat) - 1 = 0 from rfl, geomCap_zero]
           omega
         · have hne0 : rank' (modalNextWorld b) ≠ 0 := Nat.pos_iff_ne_zero.mp hkpos
           rw [if_neg hne0]
@@ -2362,7 +2289,7 @@ lemma modalStepBranch_potential_step
           have hrl : rank l - 1 = k' + 1 := by omega
           rw [hrl, hk']
           simp only [Nat.sub_zero, Nat.succ_sub_one]
-          rw [modalCap_succ]
+          rw [geomCap_succ]
           set D := Sf - outDeg acc l - 1 with hDdef
           have hSfeq : Sf - outDeg acc l = D + 1 := by omega
           rw [hSfeq]
@@ -2409,7 +2336,7 @@ private lemma modalSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).le
 subformula distinct from itself, i.e. `φ0` is an atom or `⊥` (`imp`/`box` both strictly grow the
 subformula list, since each of their immediate constituents already contributes `≥ 1` via
 `modalSubfmls_self_mem`) — both leaf shapes have `modalDepth = 0`. This is the fact
-`modalCap_le_pow`'s `hdeg` hypothesis needs. -/
+`geomCap_le_pow`'s `hdeg` hypothesis needs. -/
 private lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
     (h : (modalSubfmls φ0).length = 1) : modalDepth φ0 = 0 := by
   cases φ0 with
@@ -2434,8 +2361,8 @@ private lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
 invariant of `modalStepBranch`, given the Φ-bound hypothesis `hPhiBound`
 (`Sf := (modalSubfmls φ0).length`) — the hand-verified invariant whose EXACT preservation
 (not merely non-increase) is `modalStepBranch_potential_step`'s payload. Chain: `Φ ≥ 0` (`Nat`)
-plus the exact Δ=0 identity give `modalMaxWorld b' + 1 ≤ modalCap Sf (modalDepth φ0)`, hence
-`modalMaxWorld b' < modalCap Sf (modalDepth φ0) ≤ Sf ^ (modalDepth φ0 + 1)` (`modalCap_le_pow`,
+plus the exact Δ=0 identity give `modalMaxWorld b' + 1 ≤ geomCap Sf (modalDepth φ0)`, hence
+`modalMaxWorld b' < geomCap Sf (modalDepth φ0) ≤ Sf ^ (modalDepth φ0 + 1)` (`geomCap_le_pow`,
 using `Sf ≥ 1` unconditionally and `Sf = 1 → modalDepth φ0 = 0`), `≤ (2 · modalComplexity φ0 +
 1) ^ (modalDepth φ0 + 1)` (`modalSubfmls_length_le` + pow monotonicity in the base), `≤
 (2 · modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1)` (`modalDepth_le_complexity` + pow
@@ -2456,24 +2383,24 @@ lemma modalStepBranch_worldBound
     (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
     (hinv : ModalPotentialInv φ0 b e acc rank)
     (hPhiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
-      modalCap (modalSubfmls φ0).length (modalDepth φ0)) :
+      geomCap (modalSubfmls φ0).length (modalDepth φ0)) :
     ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 := by
   obtain ⟨rank', -, -, -, hpotential⟩ :=
     modalStepBranch_potential_step φ0 b e acc newBs newExps newAcc rank hstep hinv
   intro b' hb'
   have heq := hpotential b' hb'
   have hcombined : modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' + 1
-      ≤ modalCap (modalSubfmls φ0).length (modalDepth φ0) := by rw [heq]; exact hPhiBound
+      ≤ geomCap (modalSubfmls φ0).length (modalDepth φ0) := by rw [heq]; exact hPhiBound
   have hle : modalMaxWorld b' + 1 ≤
       modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' + 1 :=
     Nat.add_le_add_right (Nat.le_add_right _ _) 1
-  have hmwlt : modalMaxWorld b' < modalCap (modalSubfmls φ0).length (modalDepth φ0) :=
+  have hmwlt : modalMaxWorld b' < geomCap (modalSubfmls φ0).length (modalDepth φ0) :=
     Nat.lt_of_succ_le (le_trans hle hcombined)
   have hSfpos : 1 ≤ (modalSubfmls φ0).length := modalSf_pos φ0
   have hSfdeg : (modalSubfmls φ0).length = 1 → modalDepth φ0 = 0 :=
     modalSf_one_imp_depth_zero φ0
-  have hcapbound : modalCap (modalSubfmls φ0).length (modalDepth φ0) ≤
-      (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := modalCap_le_pow hSfpos hSfdeg
+  have hcapbound : geomCap (modalSubfmls φ0).length (modalDepth φ0) ≤
+      (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := geomCap_le_pow hSfpos hSfdeg
   have hSfle : (modalSubfmls φ0).length ≤ 2 * modalComplexity φ0 + 1 :=
     modalSubfmls_length_le φ0
   have hpow1 : (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) ≤
@@ -2483,7 +2410,7 @@ lemma modalStepBranch_worldBound
       (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) :=
     Nat.pow_le_pow_right (by omega) (by omega)
   have hWB : modalWorldBound φ0 = (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := rfl
-  calc modalMaxWorld b' < modalCap (modalSubfmls φ0).length (modalDepth φ0) := hmwlt
+  calc modalMaxWorld b' < geomCap (modalSubfmls φ0).length (modalDepth φ0) := hmwlt
     _ ≤ (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := hcapbound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := hpow1
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
@@ -2984,27 +2911,6 @@ private lemma modalExpMeasure_const_exp
     modalExpMeasure U newBs (newBs.map (fun _ => newExp))
       = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
   simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
-
-/-- Base-3 decrease for a BETA (prop-branching) step (`Classical/Completeness.lean:674`,
-generic Nat fact, re-proved locally since the classical declaration is `private` to a
-different file): two children of `R`-value `≤ C - 1` plus the saved unit. -/
-private lemma pow3_two_add_one_le {a0 a1 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1)
-    (h1 : a1 ≤ C - 1) :
-    3 ^ a0 + 3 ^ a1 + 1 ≤ 3 ^ C := by
-  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
-  have h1' : 3 ^ a1 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h1
-  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
-  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
-  omega
-
-/-- Base-3 decrease for an ALPHA/persistent step (`:684`, generic Nat fact, re-proved locally):
-one child of `R`-value `≤ C - 1` plus the saved unit. -/
-private lemma pow3_add_one_le {a0 C : Nat} (hC : 1 ≤ C) (h0 : a0 ≤ C - 1) :
-    3 ^ a0 + 1 ≤ 3 ^ C := by
-  have h0' : 3 ^ a0 ≤ 3 ^ (C - 1) := Nat.pow_le_pow_right (by omega) h0
-  have hone : 1 ≤ 3 ^ (C - 1) := Nat.one_le_pow _ _ (by omega)
-  rw [show C = C - 1 + 1 from (Nat.sub_add_cancel hC).symm, pow_succ]
-  omega
 
 /-- **The strict-decrease engine** (research §3.6, port of `classicalExpMeasure_step_lt`,
 `Classical/Completeness.lean:834`): one `modalStepBranch` step strictly decreases the base-3

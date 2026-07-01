@@ -121,7 +121,7 @@ and 3 (Propositional: Classical/Completeness) touch disjoint files once Phase 1 
 
 ---
 
-### Phase 2: Update Modal consumers (FmpMeasure + CompletenessLoop) [NOT STARTED]
+### Phase 2: Update Modal consumers (FmpMeasure + CompletenessLoop) [COMPLETED]
 
 - **Goal:** Remove the moved decls from `FmpMeasure.lean`, rename all `modalCap*` -> `geomCap*`
   across FmpMeasure and CompletenessLoop, and repoint the moved-utility references to the shared

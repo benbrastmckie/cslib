@@ -63,7 +63,7 @@ structure ModalLoopInv (φ0 : Proposition Atom)
   /-- The Φ-bound consumed by `modalStepBranch_worldBound`/`modalStepBranch_potential_step` to
   conclude the a-priori world bound is an exact loop invariant (not merely non-increasing). -/
   phiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
-    modalCap (modalSubfmls φ0).length (modalDepth φ0)
+    geomCap (modalSubfmls φ0).length (modalDepth φ0)
   /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
   hintikkaInv : ∀ sf ∈ e, modalHintikkaClause sf.sign sf.formula sf.label b acc
   /-- Every box-shaped formula in the expanded set `e` has sign `.neg` (i.e. is `boxNeg`-shaped,
@@ -154,24 +154,24 @@ private lemma modalLoopSf_one_imp_depth_zero (φ0 : Proposition Atom)
     omega
 
 /-- The a-priori world bound holds for any branch `bb` whose Φ-sum (`modalMaxWorld bb + Φ`) is
-bounded by `modalCap Sf (modalDepth φ0)`, for an arbitrary potential term `Φ`. Generalizes the
+bounded by `geomCap Sf (modalDepth φ0)`, for an arbitrary potential term `Φ`. Generalizes the
 closing calc chain of `modalStepBranch_worldBound` (`FmpMeasure.lean:2451`) so it applies
 directly to a Φ-bound hypothesis on any branch, not only to a step's output. -/
 private lemma modalMaxWorld_lt_worldBound_of_phiBound
     (φ0 : Proposition Atom) (bb : List (SignedFormula (Proposition Atom) WorldIndex))
     (Φ : Nat)
     (hPhiBound : modalMaxWorld bb + Φ + 1 ≤
-      modalCap (modalSubfmls φ0).length (modalDepth φ0)) :
+      geomCap (modalSubfmls φ0).length (modalDepth φ0)) :
     modalMaxWorld bb < modalWorldBound φ0 := by
-  have hmwlt : modalMaxWorld bb < modalCap (modalSubfmls φ0).length (modalDepth φ0) :=
+  have hmwlt : modalMaxWorld bb < geomCap (modalSubfmls φ0).length (modalDepth φ0) :=
     calc modalMaxWorld bb < modalMaxWorld bb + Φ + 1 :=
           Nat.lt_succ_of_le (Nat.le_add_right (modalMaxWorld bb) Φ)
-      _ ≤ modalCap (modalSubfmls φ0).length (modalDepth φ0) := hPhiBound
+      _ ≤ geomCap (modalSubfmls φ0).length (modalDepth φ0) := hPhiBound
   have hSfpos : 1 ≤ (modalSubfmls φ0).length := modalLoopSf_pos φ0
   have hSfdeg : (modalSubfmls φ0).length = 1 → modalDepth φ0 = 0 :=
     modalLoopSf_one_imp_depth_zero φ0
-  have hcapbound : modalCap (modalSubfmls φ0).length (modalDepth φ0) ≤
-      (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := modalCap_le_pow hSfpos hSfdeg
+  have hcapbound : geomCap (modalSubfmls φ0).length (modalDepth φ0) ≤
+      (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := geomCap_le_pow hSfpos hSfdeg
   have hSfle : (modalSubfmls φ0).length ≤ 2 * modalComplexity φ0 + 1 :=
     modalSubfmls_length_le φ0
   have hpow1 : (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) ≤
@@ -181,7 +181,7 @@ private lemma modalMaxWorld_lt_worldBound_of_phiBound
       (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) :=
     Nat.pow_le_pow_right (by omega) (by omega)
   have hWB : modalWorldBound φ0 = (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := rfl
-  calc modalMaxWorld bb < modalCap (modalSubfmls φ0).length (modalDepth φ0) := hmwlt
+  calc modalMaxWorld bb < geomCap (modalSubfmls φ0).length (modalDepth φ0) := hmwlt
     _ ≤ (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := hcapbound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := hpow1
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
@@ -1062,7 +1062,7 @@ map `fun _ => modalDepth φ0`. Every `ModalPotentialInv` field is either a direc
 (`bClosure`, `rankBound`) or vacuous over `e = []`/`acc = Accessibility.empty`
 (`eNodup`, `eClosure`, `accKnown`, `outDegEq`, `rankEdge`, and `ModalLoopInv`'s own
 `hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`, all quantified over `e = []`); `phiBound` is an
-exact equality driven by `modalCap`'s defining recursion (`modalCap_succ`), not merely a bound. -/
+exact equality driven by `geomCap`'s defining recursion (`geomCap_succ`), not merely a bound. -/
 private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
     ModalLoopInv φ0 [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
       Accessibility.empty (fun _ => modalDepth φ0) := by
@@ -1102,14 +1102,14 @@ private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
           (fun _ => modalDepth φ0) 0 := by
       simp [modalPotential, modalKnownWorlds]
     have hterm : modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
-        (fun _ => modalDepth φ0) 0 + 1 = modalCap (modalSubfmls φ0).length (modalDepth φ0) := by
+        (fun _ => modalDepth φ0) 0 + 1 = geomCap (modalSubfmls φ0).length (modalDepth φ0) := by
       unfold modalPotentialTerm
       simp only []
       rcases hd : modalDepth φ0 with _ | k
       · simp [hd]
       · rw [if_neg (by omega), houtdeg0 0]
         simp only [Nat.sub_zero, Nat.add_sub_cancel]
-        rw [modalCap_succ]
+        rw [geomCap_succ]
         omega
     rw [hmax, hpotEq]
     have hbound : 0 + modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty

@@ -214,27 +214,40 @@ Phase 3's target.
 
 ---
 
-### Phase 3: Restructure the 6.4M and residual monolithic 3.2M offenders [IN PROGRESS]
+### Phase 3: Restructure the 6.4M and residual monolithic 3.2M offenders [COMPLETED]
 
 **Goal**: Lower the ceilings of the offenders that survive bisection by restructuring proof
 structure — the ONLY phase that changes proofs. Highest regression risk; isolated; done one
 declaration at a time with a rebuild after each.
 
 **Tasks**:
-- [ ] Lemma-extract `eliminatePotentialCounterexample` (`MainElimination.lean:38`, 6.4M): extract the
-      4 `match pc.kind` arms into top-level lemmas `eliminate_c5_forward`, `eliminate_c5_backward`,
-      `eliminate_c6_forward`, `eliminate_c6_backward`, each returning `EliminationResult χ pc` under
-      the appropriate `h_kind : pc.kind = …` hypothesis. Reduce `eliminatePotentialCounterexample`
-      to a thin dispatcher. Confirm each arm's exact hypothesis signature when extracting.
-- [ ] Rebuild after each arm extraction; set each extracted lemma's scoped `maxHeartbeats` to its
-      own bisected minimum (expected 800k–3.2M each rather than 6.4M for the whole); the dispatcher
-      should need at most the default or a small budget.
-- [ ] For residual monolithic 3.2M proofs that survived Phase 2 (candidates in `DedekindZ/Cases.lean`,
-      `Separation/Eliminations.lean`, `Hierarchy/HierarchyCaseSep.lean`, `RecursiveWalks.lean`):
-      run `lean_profile_proof <fully.qualified.name>` to find the dominating tactic/term, extract it
-      into an intermediate `have`/lemma, then re-bisect the (now smaller) proof's ceiling.
-- [ ] Keep all statements identical — extraction must be behavior-preserving (zero-debt).
-- [ ] Commit after each extracted declaration is green, so the phase is resumable.
+- [x] Lemma-extract `eliminatePotentialCounterexample` (`MainElimination.lean:38`, 6.4M) --
+      *(deviation: skipped -- the build-probe (delete option, rebuild) showed the declaration
+      builds clean at the 200000 default in ~7s. It was pure defensive inflation like every other
+      site in this task; there is no ceiling left to lower via lemma-extraction, so the 4-arm
+      extraction is unnecessary. The option and its stale comment were simply removed.)*
+- [ ] Rebuild after each arm extraction... *(deviation: skipped -- no extraction was performed,
+      see above; dispatcher already needs only the default budget as-is)*
+- [ ] For residual monolithic 3.2M proofs that survived Phase 2... *(deviation: skipped -- Phase 2
+      left ZERO surviving scoped sites in `DedekindZ/Cases.lean`, `Eliminations.lean`,
+      `HierarchyCaseSep.lean`, or `RecursiveWalks.lean`; every site in every one of these files was
+      removed as pure defensive inflation during Phase 2. There are no residual offenders to
+      profile or restructure.)*
+- [x] Keep all statements identical — extraction must be behavior-preserving (zero-debt).
+      *(trivially satisfied: no proof structure was changed anywhere in this task, only
+      `set_option maxHeartbeats` lines and their accompanying comments were removed)*
+- [x] Commit after each extracted declaration is green, so the phase is resumable. *(1 commit:
+      MainElimination.lean option removal)*
+
+**Outcome note**: Phase 3 as originally scoped (lemma-extraction + profiling-driven restructuring)
+turned out to be entirely unnecessary. The build-probe methodology used throughout phases 1-2
+already surfaced the true minimum for every single site in the inventory, and in every case
+(64/64 across the whole task) the true minimum was the 200000 default itself. The one declaration
+Phase 3 targeted (the worst offender, `eliminatePotentialCounterexample` at 6.4M / 32x default)
+was no exception. This means the entire 64-site `maxHeartbeats` inventory across
+`Cslib/Logics/{Bimodal,Temporal}/Metalogic/**` was defensive inflation with zero declarations
+actually requiring extra heartbeat budget -- confirmed by an actual `lake build` on every single
+site, not assumed.
 
 **Timing**: ~3 hours (extraction + per-arm rebuilds + targeted profiling; profiling is SLOW — reserve
 for residuals only).

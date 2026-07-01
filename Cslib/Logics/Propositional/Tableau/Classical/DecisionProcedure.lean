@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Propositional.Tableau.Classical.Completeness
+public import Cslib.Logics.Propositional.Tableau.Classical.Soundness
 public import Cslib.Logics.Propositional.Metalogic.StrongCompleteness
 
 /-! # Classical Tableau Decision Procedure

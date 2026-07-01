@@ -1,0 +1,47 @@
+{
+  "task_number": 458,
+  "session_id": "sess_1782921600_c97381_458",
+  "phase": "implement",
+  "status": "implemented",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "blocked_phase": null,
+  "sorry_inventory": {
+    "introduced": 0,
+    "resolved": 0,
+    "note": "Import-hygiene only; no proof obligations touched. Pre-existing sorry in Minimal/Completeness.lean:104 remains out of scope and untouched."
+  },
+  "axiom_inventory": {
+    "introduced": 0,
+    "note": "grep '^axiom ' on all three touched files returns zero."
+  },
+  "summary": "Applied both verified lake shake import-hygiene edits from the task 455 vet: removed the unused Mathlib.Algebra.BigOperators.Group.List.Basic import from Measure.lean, and replaced Completeness.lean's transitive public import of Soundness with direct public imports of Expansion and Semantics.Bool. Dependent-module verification (checking modules downstream of Completeness.lean, as instructed) surfaced a real transitive breakage in DecisionProcedure.lean (classicalTableau_sound became unavailable since it had only been reachable transitively through Completeness's old Soundness import). Fixed with one additional direct public import of Soundness in DecisionProcedure.lean -- no proof or declaration changes anywhere, only import lines.",
+  "verification": {
+    "scoped_build_passed": true,
+    "dependents_build_passed": true,
+    "warning_count_before": 52,
+    "warning_count_after": 52,
+    "sorry_count": 0,
+    "axiom_count": 0,
+    "init_import_preserved": true,
+    "full_checkInitImports_blocked_by": "concurrent session mid-editing Cslib/Logics/Modal/Tableau/* (task 457 territory), leaving missing/stale .olean files unrelated to this task's edits",
+    "full_shake_blocked_by": "same concurrent session's staleness reachable via the wider dependency closure lake shake traverses"
+  },
+  "files_changed": [
+    "Cslib/Foundations/Logic/Tableau/Measure.lean",
+    "Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean",
+    "Cslib/Logics/Propositional/Tableau/Classical/DecisionProcedure.lean"
+  ],
+  "plan_deviations": [
+    "Added a direct public import of Classical.Soundness to DecisionProcedure.lean (not in the original 2-edit plan) to fix a transitive-import breakage exposed by dependent-module verification.",
+    "Optional lake shake re-run skipped/incomplete due to concurrent-session blocking, exactly as the plan's contingency anticipated; scoped build used as the authoritative gate instead."
+  ],
+  "artifacts": [
+    "specs/458_vet_455_shake_import_hygiene/plans/01_shake-import-hygiene.md",
+    "specs/458_vet_455_shake_import_hygiene/summaries/01_shake-import-hygiene-summary.md"
+  ],
+  "requires_user_review": false,
+  "risk": "low",
+  "blocking": false,
+  "next_action": "Task 458 implementation complete; ready for standard postflight/status-sync handling."
+}

@@ -8,7 +8,6 @@ module
 
 import Cslib.Init
 import Mathlib.Tactic.Ring
-import Mathlib.Algebra.BigOperators.Group.List.Basic
 
 /-! # Shared Tableau Termination Measure Arithmetic
 

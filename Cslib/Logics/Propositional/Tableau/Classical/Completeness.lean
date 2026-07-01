@@ -8,7 +8,8 @@ module
 
 import Cslib.Init
 import Cslib.Foundations.Logic.Tableau.Measure
-public import Cslib.Logics.Propositional.Tableau.Classical.Soundness
+public import Cslib.Logics.Propositional.Tableau.Classical.Expansion
+public import Cslib.Logics.Propositional.Semantics.Bool
 
 /-! # Classical Tableau Completeness
 

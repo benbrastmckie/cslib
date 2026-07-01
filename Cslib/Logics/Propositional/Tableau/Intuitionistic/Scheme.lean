@@ -767,6 +767,81 @@ private lemma intStepBranch_linear_preserves
           obtain ⟨a, -, rfl⟩ := hpers
           exact Nat.le_succ nw
 
+omit [Hashable Atom] in
+/-- A `branchingResult` step preserves `IExpandedConsistent` and `ILabelBound` on every
+sub-branch: each sub-branch receives one disjunct of the processed formula's rule
+output, which is exactly what `sfSatisfied`'s disjunctive case requires. -/
+private lemma intStepBranch_branch_preserves
+    {b : IBranch Atom} {e : List (ISF Atom)} {nw : Nat}
+    {branches' : List (List (ISF Atom))} {nw' : Nat} {newExp : List (ISF Atom)}
+    (hIC : IExpandedConsistent b e) (hLB : ILabelBound b nw)
+    (hstep : intStepBranch b e nw = some (.branchingResult branches' nw', newExp)) :
+    ∀ br ∈ branches',
+      IExpandedConsistent (Branch.extendMany b br) newExp ∧
+        ILabelBound (Branch.extendMany b br) nw' := by
+  obtain ⟨sf, hsfb, hint, hnewExp⟩ := intStepBranch_some_exists hstep
+  have hsfl : sf.label ≤ nw := hLB sf hsfb
+  obtain ⟨s, ff, l⟩ := sf
+  simp only at hsfl hint
+  intro br hbr
+  have hmemOld : ∀ sf₀ ∈ b, sf₀ ∈ Branch.extendMany b br := fun sf₀ hsf₀ => by
+    simp only [Branch.extendMany, List.mem_append]; exact Or.inr hsf₀
+  cases s with
+  | pos =>
+    cases ff with
+    | atom x => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      obtain ⟨hbrs, hnw'⟩ := hint
+      subst hnw'; subst hnewExp
+      rw [← hbrs] at hbr
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      refine ⟨?_, ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · rcases hbr with rfl | rfl
+          · exact Or.inl (List.any_eq_true.mpr
+              ⟨⟨.pos, φ, l⟩, by simp [Branch.extendMany], by simp⟩)
+          · exact Or.inr (List.any_eq_true.mpr
+              ⟨⟨.pos, ψ, l⟩, by simp [Branch.extendMany], by simp⟩)
+      · intro sf' hsf'
+        rcases hbr with rfl | rfl <;>
+          simp only [Branch.extendMany, List.mem_cons, List.mem_nil_iff, List.mem_append,
+            or_false] at hsf' <;>
+          rcases hsf' with rfl | hsf' <;> first | exact hsfl | exact hLB sf' hsf'
+  | neg =>
+    cases ff with
+    | atom x => simp [intApplyRuleFull] at hint
+    | bot => simp [intApplyRuleFull] at hint
+    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | or φ ψ => simp [intApplyRuleFull] at hint
+    | and φ ψ =>
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      obtain ⟨hbrs, hnw'⟩ := hint
+      subst hnw'; subst hnewExp
+      rw [← hbrs] at hbr
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      refine ⟨?_, ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · rcases hbr with rfl | rfl
+          · exact Or.inl (List.any_eq_true.mpr
+              ⟨⟨.neg, φ, l⟩, by simp [Branch.extendMany], by simp⟩)
+          · exact Or.inr (List.any_eq_true.mpr
+              ⟨⟨.neg, ψ, l⟩, by simp [Branch.extendMany], by simp⟩)
+      · intro sf' hsf'
+        rcases hbr with rfl | rfl <;>
+          simp only [Branch.extendMany, List.mem_cons, List.mem_nil_iff, List.mem_append,
+            or_false] at hsf' <;>
+          rcases hsf' with rfl | hsf' <;> first | exact hsfl | exact hLB sf' hsf'
+
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).
 

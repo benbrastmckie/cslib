@@ -1,17 +1,17 @@
 ---
-next_project_number: 465
+next_project_number: 475
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-01. Generated from state.json dependency graph.*
+*Updated 2026-07-02. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,467,468,469,470,471,472,473,474 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -28,6 +28,8 @@ next_project_number: 465
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
+467 [NOT STARTED] — Polish PR #648 Lean sources: give the Gentzen1935 bib entry an En
+473 [NOT STARTED] — Prove the CPL implicational-fragment conservativity theorem promi
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -38,6 +40,11 @@ next_project_number: 465
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
+468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
+469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
+470 [NOT STARTED] — Restore grind and simp attributes on PR #662 derived-connective c
+471 [NOT STARTED] — Fix small PR #662 issues: restore Montesi attribution in Modal/Lo
+472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 
 ### Temporal Logic
 
@@ -67,6 +74,9 @@ next_project_number: 465
 
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
+465 [NOT STARTED] — Review PR #607 (logical operators): post GitHub review covering t
+466 [NOT STARTED] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
+474 [NOT STARTED] — Draft Zulip replies confirming CSLib meeting attendance to Montes
 
 ### Tableau Infrastructure
 
@@ -79,6 +89,106 @@ next_project_number: 465
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 474. Draft zulip replies meeting fragments
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: PR & Upstreaming
+- **Dependencies**: None
+
+**Description**: Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed
+
+---
+
+### 473. Prove cpl fragment conservativity
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Prove the CPL implicational-fragment conservativity theorem promised to Matthew Doty in the propositional Zulip thread
+
+---
+
+### 472. Restore model class equivalence pr 662
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement
+
+---
+
+### 471. Fix small pr 662 issues
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Fix small PR #662 issues: restore Montesi attribution in Modal/LogicalEquivalence.lean, remove the fork-language doc comment, align iff notation precedence with the propositional convention, and prune spurious Mathlib imports
+
+---
+
+### 470. Restore grind automation pr 662
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Restore grind and simp attributes on PR #662 derived-connective characterization lemmas (neg_iff, and_iff, or_iff, diamond_iff, plus a restored iff characterization) and re-golf the manual Lean proofs back to grind one-liners
+
+---
+
+### 469. Drop connectives typeclass layer pr 662
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy
+
+---
+
+### 468. Resync pr 662 with 648 head
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description
+
+---
+
+### 467. Polish pr 648 bib and binder cleanup
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Propositional Logic
+- **Dependencies**: None
+
+**Description**: Polish PR #648 Lean sources: give the Gentzen1935 bib entry an English title, revert the explicit Gamma binder and subscript rename churn, restore the contra and efqRule derived rules, remove Atom named-argument noise, unify the CPL set-builder idiom, and normalize copyright headers
+
+---
+
+### 466. Record zulip settlement pr 648
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: PR & Upstreaming
+- **Dependencies**: None
+
+**Description**: Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou
+
+---
+
+### 465. Review pr 607 logical operators
+- **Status**: [NOT STARTED]
+- **Task Type**: pr
+- **Topic**: PR & Upstreaming
+- **Dependencies**: None
+
+**Description**: Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file
+
+---
 
 ### 464. Typst report structure first mpl arguments
 - **Status**: [COMPLETED]

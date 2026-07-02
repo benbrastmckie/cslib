@@ -1,6 +1,106 @@
 {
-  "next_project_number": 465,
+  "next_project_number": 475,
   "active_projects": [
+    {
+      "project_number": 465,
+      "project_name": "review_pr_607_logical_operators",
+      "status": "not_started",
+      "task_type": "pr",
+      "topic": "PR & Upstreaming",
+      "description": "Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 466,
+      "project_name": "record_zulip_settlement_pr_648",
+      "status": "not_started",
+      "task_type": "pr",
+      "topic": "PR & Upstreaming",
+      "description": "Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 467,
+      "project_name": "polish_pr_648_bib_and_binder_cleanup",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Polish PR #648 Lean sources: give the Gentzen1935 bib entry an English title, revert the explicit Gamma binder and subscript rename churn, restore the contra and efqRule derived rules, remove Atom named-argument noise, unify the CPL set-builder idiom, and normalize copyright headers",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 468,
+      "project_name": "resync_pr_662_with_648_head",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 469,
+      "project_name": "drop_connectives_typeclass_layer_pr_662",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 470,
+      "project_name": "restore_grind_automation_pr_662",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Restore grind and simp attributes on PR #662 derived-connective characterization lemmas (neg_iff, and_iff, or_iff, diamond_iff, plus a restored iff characterization) and re-golf the manual Lean proofs back to grind one-liners",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 471,
+      "project_name": "fix_small_pr_662_issues",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Fix small PR #662 issues: restore Montesi attribution in Modal/LogicalEquivalence.lean, remove the fork-language doc comment, align iff notation precedence with the propositional convention, and prune spurious Mathlib imports",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 472,
+      "project_name": "restore_model_class_equivalence_pr_662",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 473,
+      "project_name": "prove_cpl_fragment_conservativity",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "description": "Prove the CPL implicational-fragment conservativity theorem promised to Matthew Doty in the propositional Zulip thread",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
+    {
+      "project_number": 474,
+      "project_name": "draft_zulip_replies_meeting_fragments",
+      "status": "not_started",
+      "task_type": "general",
+      "topic": "PR & Upstreaming",
+      "description": "Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-02T16:08:19Z"
+    },
     {
       "project_number": 464,
       "project_name": "typst_report_structure_first_mpl_arguments",

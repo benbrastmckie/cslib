@@ -33,7 +33,7 @@
       "description": "Polish PR #648 Lean sources: give the Gentzen1935 bib entry an English title, revert the explicit Gamma binder and subscript rename churn, restore the contra and efqRule derived rules, remove Atom named-argument noise, unify the CPL set-builder idiom, and normalize copyright headers",
       "created": "2026-07-02T16:08:19Z",
       "last_updated": "2026-07-02T17:31:34Z",
-      "completion_summary": "Polished PR #648 branch (commits bbcbef85, c69f1f7a on feat/propositional-v2): English Gentzen citation, implicit-Gamma binders restored, subscript names restored, contra/efqRule re-added with simplified pierce, explicit Atom on CPL/LEM/Pierce, set-builder CPL, standard copyright headers. Adversarially verified: all six items confirmed, no scope creep, full CI green including lake test. Not pushed."
+      "completion_summary": "Polished PR #648 branch (commits bbcbef85, c98c4348 (amended: English-only Gentzen note) on feat/propositional-v2): English Gentzen citation, implicit-Gamma binders restored, subscript names restored, contra/efqRule re-added with simplified pierce, explicit Atom on CPL/LEM/Pierce, set-builder CPL, standard copyright headers. Adversarially verified: all six items confirmed, no scope creep, full CI green including lake test. Not pushed."
     },
     {
       "project_number": 468,
@@ -70,17 +70,18 @@
       "description": "Restore grind and simp attributes on PR #662 derived-connective characterization lemmas (neg_iff, and_iff, or_iff, diamond_iff, plus a restored iff characterization) and re-golf the manual Lean proofs back to grind one-liners",
       "created": "2026-07-02T16:08:19Z",
       "last_updated": "2026-07-02T17:31:34Z",
-      "completion_summary": "Restored automation on PR #662 branch (commit 3cd73173 on feat/modal-formula-primitives) with strict upstream-parity tagging per user ruling: or_iff_or, and_iff_and, neg_denotation keep upstream tags; new characterization lemmas untagged; iff_iff_iff re-added untagged; 12 proofs re-golfed to grind, 3 kept manual with documented reasons. Full CI green (build 2735 jobs, lint, checkInitImports, lint-style). Not pushed."
+      "completion_summary": "Restored automation on PR #662 branch (commit 93cf984e (amended: and_iff_and and iff_iff_iff tags restored to true leanprover-main parity) on feat/modal-formula-primitives) with strict upstream-parity tagging per user ruling: or_iff_or, and_iff_and, neg_denotation keep upstream tags; new characterization lemmas untagged; iff_iff_iff re-added untagged; 12 proofs re-golfed to grind, 3 kept manual with documented reasons. Full CI green (build 2735 jobs, lint, checkInitImports, lint-style). Not pushed."
     },
     {
       "project_number": 471,
       "project_name": "fix_small_pr_662_issues",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Fix small PR #662 issues: restore Montesi attribution in Modal/LogicalEquivalence.lean, remove the fork-language doc comment, align iff notation precedence with the propositional convention, and prune spurious Mathlib imports",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T19:14:44Z",
+      "completion_summary": "Fixed small PR #662 issues (commit 3ff6d02d on feat/modal-formula-primitives): restored Montesi copyright/attribution in Modal/LogicalEquivalence.lean and normalized Basic/Denotation headers to single-copyright-holder convention, removed fork-language doc comment, aligned iff notation precedence to infix:20 matching propositional convention, and removed all five spurious Mathlib imports (all removable, zero re-additions). Full CI green: lake build 2735 jobs, checkInitImports, lint, lint-style. Not pushed."
     },
     {
       "project_number": 472,
@@ -98,12 +99,13 @@
     {
       "project_number": 473,
       "project_name": "prove_cpl_fragment_conservativity",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Prove the CPL implicational-fragment conservativity theorem promised to Matthew Doty in the propositional Zulip thread",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T19:14:44Z",
+      "completion_summary": "Verified the CPL implicational-fragment conservativity promised to Matthew Doty already exists sorry-free on main: cpl_conservative_over_imp (Tarski-Bernays via Kalmar completeness, line 381) and derivablePropOfDerivableClassicalImp (line 389) in Cslib/Logics/Propositional/Metalogic/ClassicalImpCompleteness.lean. Scoped build clean (757 jobs), zero sorries. No new code needed; the corrected task-474 Zulip draft informs Doty."
     },
     {
       "project_number": 474,

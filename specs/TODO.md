@@ -11,7 +11,7 @@ next_project_number: 475
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,471,473,474 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469,472 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -28,7 +28,6 @@ next_project_number: 475
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-473 [NOT STARTED] — Prove the CPL implicational-fragment conservativity theorem promi
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
@@ -40,7 +39,6 @@ next_project_number: 475
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
-471 [NOT STARTED] — Fix small PR #662 issues: restore Montesi attribution in Modal/Lo
 469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 
@@ -99,7 +97,7 @@ next_project_number: 475
 ---
 
 ### 473. Prove cpl fragment conservativity
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -119,7 +117,7 @@ next_project_number: 475
 ---
 
 ### 471. Fix small pr 662 issues
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

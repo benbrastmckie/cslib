@@ -11,8 +11,8 @@ next_project_number: 475
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,467,470,471,473,474 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,466,468,469,472 | 36,37,181,317,407,425,449,465,467 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,467,469,470,471,472,473 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,466,468 | 36,37,181,317,407,425,449,467 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
 
@@ -40,11 +40,11 @@ next_project_number: 475
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
+469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 470 [NOT STARTED] — Restore grind and simp attributes on PR #662 derived-connective c
 471 [NOT STARTED] — Fix small PR #662 issues: restore Montesi attribution in Modal/Lo
-468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
-469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
+468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
 
 ### Temporal Logic
 
@@ -74,8 +74,6 @@ next_project_number: 475
 
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
-465 [NOT STARTED] — Review PR #607 (logical operators): post GitHub review covering t
-474 [NOT STARTED] — Draft Zulip replies confirming CSLib meeting attendance to Montes
 466 [NOT STARTED] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
 
 ### Tableau Infrastructure
@@ -91,7 +89,7 @@ next_project_number: 475
 ## Tasks
 
 ### 474. Draft zulip replies meeting fragments
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
@@ -181,7 +179,7 @@ next_project_number: 475
 ---
 
 ### 465. Review pr 607 logical operators
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: pr
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None

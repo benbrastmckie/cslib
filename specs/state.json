@@ -4,12 +4,13 @@
     {
       "project_number": 465,
       "project_name": "review_pr_607_logical_operators",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "pr",
       "topic": "PR & Upstreaming",
       "description": "Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:34:43Z",
+      "completion_summary": "Drafted PR #607 review comment covering red CI (unmigrated HML LogicalEquivalence), label-parameterized box/diamond gap, imp vs impl naming, operator file layout, NOTATION.md precedences, and primitive-bot ownership of Propositional/Defs.lean. Draft at specs/465_review_pr_607_logical_operators/pr607-review-comment.md — NOT posted; awaiting user review."
     },
     {
       "project_number": 466,
@@ -106,12 +107,13 @@
     {
       "project_number": 474,
       "project_name": "draft_zulip_replies_meeting_fragments",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "general",
       "topic": "PR & Upstreaming",
       "description": "Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:34:43Z",
+      "completion_summary": "Drafted two Zulip messages: reply to Montesi confirming meeting attendance after 23 July, and fragment-design discussion opener per Doty. Draft at specs/474_draft_zulip_replies_meeting_fragments/zulip-drafts.md — NOT posted; awaiting user review."
     },
     {
       "project_number": 464,

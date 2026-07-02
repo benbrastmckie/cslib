@@ -19,7 +19,10 @@
       "topic": "PR & Upstreaming",
       "description": "Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:10:38Z",
+      "dependencies": [
+        467
+      ]
     },
     {
       "project_number": 467,
@@ -39,7 +42,10 @@
       "topic": "Modal Logic",
       "description": "Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:10:38Z",
+      "dependencies": [
+        467
+      ]
     },
     {
       "project_number": 469,
@@ -49,7 +55,10 @@
       "topic": "Modal Logic",
       "description": "Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:10:38Z",
+      "dependencies": [
+        465
+      ]
     },
     {
       "project_number": 470,
@@ -79,7 +88,10 @@
       "topic": "Modal Logic",
       "description": "Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T16:10:38Z",
+      "dependencies": [
+        465
+      ]
     },
     {
       "project_number": 473,

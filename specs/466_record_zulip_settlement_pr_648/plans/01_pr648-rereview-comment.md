@@ -1,7 +1,7 @@
 # Implementation Plan: Task #466 — Draft PR #648 re-review comment
 
 - **Task**: 466 - record_zulip_settlement_pr_648
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 1.25 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_pr-review-research.md
@@ -98,7 +98,7 @@ items.
 
 Phases within the same wave can execute in parallel.
 
-### Phase 1: Compose the draft comment body [NOT STARTED]
+### Phase 1: Compose the draft comment body [COMPLETED]
 
 **Goal**: Write the exact GitHub-comment prose Benjamin will paste, addressing ctchou,
 first-person and concise, with the correct settlement permalink and the three-item recap.
@@ -140,7 +140,7 @@ first-person and concise, with the correct settlement permalink and the three-it
 
 ---
 
-### Phase 2: Add reviewer notes and verify facts [NOT STARTED]
+### Phase 2: Add reviewer notes and verify facts [COMPLETED]
 
 **Goal**: Append a "Reviewer notes / decisions" section (separate from the comment body)
 capturing the open decisions and push-before-post ordering, and verify all permalinks and

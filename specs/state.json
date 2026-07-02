@@ -4,13 +4,12 @@
     {
       "project_number": 465,
       "project_name": "review_pr_607_logical_operators",
-      "status": "completed",
+      "status": "pr_ready",
       "task_type": "pr",
       "topic": "PR & Upstreaming",
       "description": "Review PR #607 (logical operators): post GitHub review covering the red CI from the unmigrated HML LogicalEquivalence instance, the imp vs impl naming decision, operator file layout, NOTATION.md precedence documentation, and primitive-bot ownership of the propositional definitions file",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:34:43Z",
-      "completion_summary": "Drafted PR #607 review comment covering red CI (unmigrated HML LogicalEquivalence), label-parameterized box/diamond gap, imp vs impl naming, operator file layout, NOTATION.md precedences, and primitive-bot ownership of Propositional/Defs.lean. Draft at specs/465_review_pr_607_logical_operators/pr607-review-comment.md — NOT posted; awaiting user review."
+      "last_updated": "2026-07-02T17:31:34Z"
     },
     {
       "project_number": 466,
@@ -28,12 +27,13 @@
     {
       "project_number": 467,
       "project_name": "polish_pr_648_bib_and_binder_cleanup",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Polish PR #648 Lean sources: give the Gentzen1935 bib entry an English title, revert the explicit Gamma binder and subscript rename churn, restore the contra and efqRule derived rules, remove Atom named-argument noise, unify the CPL set-builder idiom, and normalize copyright headers",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T17:31:34Z",
+      "completion_summary": "Polished PR #648 branch (commits bbcbef85, c69f1f7a on feat/propositional-v2): English Gentzen citation, implicit-Gamma binders restored, subscript names restored, contra/efqRule re-added with simplified pierce, explicit Atom on CPL/LEM/Pierce, set-builder CPL, standard copyright headers. Adversarially verified: all six items confirmed, no scope creep, full CI green including lake test. Not pushed."
     },
     {
       "project_number": 468,
@@ -64,12 +64,13 @@
     {
       "project_number": 470,
       "project_name": "restore_grind_automation_pr_662",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Restore grind and simp attributes on PR #662 derived-connective characterization lemmas (neg_iff, and_iff, or_iff, diamond_iff, plus a restored iff characterization) and re-golf the manual Lean proofs back to grind one-liners",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:08:19Z"
+      "last_updated": "2026-07-02T17:31:34Z",
+      "completion_summary": "Restored automation on PR #662 branch (commit 3cd73173 on feat/modal-formula-primitives) with strict upstream-parity tagging per user ruling: or_iff_or, and_iff_and, neg_denotation keep upstream tags; new characterization lemmas untagged; iff_iff_iff re-added untagged; 12 proofs re-golfed to grind, 3 kept manual with documented reasons. Full CI green (build 2735 jobs, lint, checkInitImports, lint-style). Not pushed."
     },
     {
       "project_number": 471,
@@ -107,13 +108,12 @@
     {
       "project_number": 474,
       "project_name": "draft_zulip_replies_meeting_fragments",
-      "status": "completed",
+      "status": "pr_ready",
       "task_type": "general",
       "topic": "PR & Upstreaming",
       "description": "Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:34:43Z",
-      "completion_summary": "Drafted two Zulip messages: reply to Montesi confirming meeting attendance after 23 July, and fragment-design discussion opener per Doty. Draft at specs/474_draft_zulip_replies_meeting_fragments/zulip-drafts.md — NOT posted; awaiting user review."
+      "last_updated": "2026-07-02T17:31:34Z"
     },
     {
       "project_number": 464,

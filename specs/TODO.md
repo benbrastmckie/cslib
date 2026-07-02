@@ -11,8 +11,8 @@ next_project_number: 475
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,467,469,470,471,472,473 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,466,468 | 36,37,181,317,407,425,449,467 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,471,473,474 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,469,472 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
 
@@ -28,7 +28,6 @@ next_project_number: 475
 317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-467 [NOT STARTED] — Polish PR #648 Lean sources: give the Gentzen1935 bib entry an En
 473 [NOT STARTED] — Prove the CPL implicational-fragment conservativity theorem promi
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -40,11 +39,10 @@ next_project_number: 475
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
-469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
-470 [NOT STARTED] — Restore grind and simp attributes on PR #662 derived-connective c
-471 [NOT STARTED] — Fix small PR #662 issues: restore Montesi attribution in Modal/Lo
-472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
+471 [NOT STARTED] — Fix small PR #662 issues: restore Montesi attribution in Modal/Lo
+469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
+472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 
 ### Temporal Logic
 
@@ -74,7 +72,9 @@ next_project_number: 475
 
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
+465 [PR READY] — Review PR #607 (logical operators): post GitHub review covering t
 466 [NOT STARTED] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
+474 [PR READY] — Draft Zulip replies confirming CSLib meeting attendance to Montes
 
 ### Tableau Infrastructure
 
@@ -89,7 +89,7 @@ next_project_number: 475
 ## Tasks
 
 ### 474. Draft zulip replies meeting fragments
-- **Status**: [COMPLETED]
+- **Status**: [PR READY]
 - **Task Type**: general
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
@@ -129,7 +129,7 @@ next_project_number: 475
 ---
 
 ### 470. Restore grind automation pr 662
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -159,7 +159,7 @@ next_project_number: 475
 ---
 
 ### 467. Polish pr 648 bib and binder cleanup
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -179,7 +179,7 @@ next_project_number: 475
 ---
 
 ### 465. Review pr 607 logical operators
-- **Status**: [COMPLETED]
+- **Status**: [PR READY]
 - **Task Type**: pr
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None

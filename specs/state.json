@@ -14,12 +14,12 @@
     {
       "project_number": 466,
       "project_name": "record_zulip_settlement_pr_648",
-      "status": "researched",
+      "status": "planned",
       "task_type": "pr",
       "topic": "PR & Upstreaming",
       "description": "Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T19:35:19Z",
+      "last_updated": "2026-07-02T19:45:48Z",
       "dependencies": [
         467
       ],
@@ -49,12 +49,17 @@
           }
         }
       ],
-      "session_id": "sess_1783020539_579550",
+      "session_id": "sess_1783021369_bece69",
       "artifacts": [
         {
           "type": "report",
           "path": "specs/466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md",
           "summary": "PR review research synthesizing 1 GitHub PR source (1 review, 3 conversation comments, 0 inline comments) and 1 Zulip thread source (35 messages); identifies the settlement message (Thomas Waring, 2026-06-28, id 606970606) and acceptance reply (id 607217129), the local unpushed branch delta (bbcbef85, c98c4348 vs GitHub head c9364b65), and prior draft material in specs/tmp/comment.md and specs/474"
+        },
+        {
+          "path": "specs/466_record_zulip_settlement_pr_648/plans/01_pr648-rereview-comment.md",
+          "type": "plan",
+          "summary": "Two-phase draft-only plan: compose first-person PR #648 re-review comment with settlement permalink, then reviewer-notes appendix with open decisions and push-before-post ordering"
         }
       ],
       "next_artifact_number": 2

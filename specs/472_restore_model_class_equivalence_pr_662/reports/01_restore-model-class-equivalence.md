@@ -210,6 +210,69 @@ Adopt **Option A (hybrid restore)**: keep #662's primitive/context refactor, re-
 already-solved congruence proof into `Congruence.elim` for the `{impL, impR, box}` cases.
 Optionally retain `LogicallyEquivalent` as an abbrev for `Proposition.Equiv Set.univ`.
 
+## Mathematical Elegance & Consistency Rationale
+
+Beyond the reuse-first argument, the parametric restoration is the *mathematically* correct
+object for this library — decided by three grounded facts, not by convention:
+
+### 1. The fork already commits to frame-class-relative reasoning everywhere except equivalence
+
+`Proposition.valid` is parametric over a model class `S` (`Modal/Basic.lean:443`), `logic S` is
+derived from it (`:448`), and `Cube.lean` builds the entire K/T/B/4/5/D hierarchy as model
+classes on top of that. Frame-relative truth *is* the point of modal logic and the reason the
+Cube exists in this fork. The standalone `LogicallyEquivalent` is hardwired to all models, so it
+can express only K-equivalences: **`◇□φ ≡ □φ` (an S5 fact) is literally inexpressible.** This
+leaves the library with a parametric notion of *validity* beside a non-parametric notion of
+*equivalence*, and the natural bridge between them —
+
+```
+equiv_valid : φ₁ ≡[S] φ₂ → (φ₁.valid S ↔ φ₂.valid S)
+```
+
+— cannot even be stated. Restoring `Equiv S` makes equivalence a graded family indexed by the
+same `S` that `valid`/`logic`/`Cube` already use, and `equiv_valid` is the morphism connecting
+the two families. That symmetry is the consistent design.
+
+### 2. The parametric form *subsumes* the HML pattern rather than conflicting with it
+
+HML's `Proposition.Equiv` (`HML/LogicalEquivalence.lean:22`) is `∀ lts, a.denotation lts =
+b.denotation lts` — quantified over *all* models, no class parameter, wired into the framework
+via `eqv := Proposition.Equiv`. HML has no `S` because process equivalence has no analog of
+frame conditions; Modal does (the Cube). So the elegant design is: the common core
+`≡ := Equiv Set.univ` is **definitionally the same shape as HML's all-models `Equiv`** and is what
+feeds the `LogicalEquivalence` instance (`eqv := Equiv Set.univ`), while the `≡[S]` index is a
+Modal-specific enrichment layered exactly where the mathematics demands it. HML-consistency at
+`S = Set.univ` *and* frame-class generality — not a trade-off.
+
+### 3. The standalone's `∀ (World : Type v)` quantifier is the actually-inelegant part — and a fork deviation, not upstream
+
+The standalone bakes a universe-polymorphic world-type quantifier *inside* the relation
+(`Modal/LogicalEquivalence.lean:58`). Equivalence over "all world-types at a pinned universe `v`"
+is a different mathematical object from "agreement over a model class on a given carrier," and it
+pins a universe parameter onto every downstream use. Montesi's original fixed `World` as the
+ambient section variable and quantified only over `m ∈ S` and `w` — the standard framing. Note
+the provenance: the parametric design *is* the upstream/author design (the diff `-` side); the
+standalone was introduced by this fork's own task-137 rewrite (`a084f9f2`). "Restore" therefore
+means realigning with upstream; the fork made the deviation.
+
+### Consequent refinements to the recommended move
+
+- **Fix `World`.** Define `Proposition.Equiv (S : Set (Model World Atom))` over the ambient
+  `World` section variable; **drop the `∀ World : Type v`** quantification. (Supersedes Open
+  Question 3 — this is now a decided design point, not merely "acceptable".)
+- **Drop `LogicallyEquivalent`, do not retain it as an abbrev.** `git grep` shows no external
+  users, and carrying a second name for `Equiv Set.univ` re-introduces the "two notions of
+  equivalence" smell the restoration exists to remove. Standardize on `≡`/`≡[S]`, matching HML and
+  CLL. (Supersedes the "Optional refinement" above and Open Question 2.)
+
+### The one condition that would flip this
+
+If upstream were deliberately deprecating the `LogicalEquivalence` framework, defending the
+standalone would become the forward-consistent choice. There is no such signal: HML and CLL both
+still instantiate the framework, and PR #662 has **0 reviews** endorsing the equivalence redesign
+— its body discusses only the `{atom,bot,imp,box}` primitive refactor, not the `Equiv` change,
+indicating the removal was incidental rather than intentional.
+
 ## Standards Notes (CONTRIBUTING / NOTATION / ORGANISATION)
 
 - Every touched file already begins with `import Cslib.Init` (transitively via `public import`);
@@ -236,8 +299,11 @@ Optionally retain `LogicallyEquivalent` as an abbrev for `Proposition.Equiv Set.
 ## Open Questions for User
 
 1. Confirm the goal is restoration of framework integration (Option A) vs. an explicit written
-   defense of the standalone (Option B). Recommendation is A.
-2. Keep the `LogicallyEquivalent` name (as an abbrev over `Set.univ`) for source compatibility,
-   or fully revert to `≡`/`≡[S]` notation only?
-3. The universe-polymorphic `World` quantification: confirm reverting to a fixed `World` section
-   variable is acceptable (recommended; standard modal semantics).
+   defense of the standalone (Option B). Recommendation is A. **(Open — the substantive
+   decision.)**
+2. ~~Keep the `LogicallyEquivalent` name as an abbrev, or revert to `≡`/`≡[S]` only?~~
+   **DECIDED (see Rationale §Consequent refinements): drop `LogicallyEquivalent`; standardize on
+   `≡`/`≡[S]`. No external users; retaining it re-introduces the two-notions smell.**
+3. ~~Is reverting to a fixed `World` section variable acceptable?~~ **DECIDED (see Rationale §3):
+   yes — fix `World`, drop the `∀ World : Type v` quantifier; it is the standard framing and the
+   universe-polymorphic version is a fork deviation.**

@@ -40,7 +40,7 @@ next_project_number: 475
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
 469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
-472 [RESEARCHED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
+472 [PLANNED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 
 ### Temporal Logic
 
@@ -107,11 +107,12 @@ next_project_number: 475
 ---
 
 ### 472. Restore model class equivalence pr 662
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 465
 - **Research**: [472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md]
+- **Plan**: [472_restore_model_class_equivalence_pr_662/plans/01_restore-model-class-equivalence.md]
 
 **Description**: Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement
 

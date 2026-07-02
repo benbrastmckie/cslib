@@ -152,21 +152,26 @@
     {
       "project_number": 472,
       "project_name": "restore_model_class_equivalence_pr_662",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T20:03:43Z",
+      "last_updated": "2026-07-02T20:50:26Z",
       "dependencies": [
         465
       ],
-      "session_id": "sess_1783022251_1a3cf2",
+      "session_id": "sess_1783025191_16f0e5",
       "artifacts": [
         {
           "path": "specs/472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md",
           "type": "report",
           "summary": "restore model class equivalence (backfilled by --sync)"
+        },
+        {
+          "path": "specs/472_restore_model_class_equivalence_pr_662/plans/01_restore-model-class-equivalence.md",
+          "type": "plan",
+          "summary": "Phased implementation plan (Option A hybrid restore) to re-add parametric Proposition.Equiv S, notation, lemmas, HasContext/IsEquiv/Congruence/HasHContext/LogicalEquivalence instances, and remove LogicallyEquivalent in Cslib/Logics/Modal/LogicalEquivalence.lean; zero-debt with full CSLib CI."
         }
       ]
     },

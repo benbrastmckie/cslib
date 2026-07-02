@@ -298,9 +298,11 @@ indicating the removal was incidental rather than intentional.
 
 ## Open Questions for User
 
-1. Confirm the goal is restoration of framework integration (Option A) vs. an explicit written
-   defense of the standalone (Option B). Recommendation is A. **(Open — the substantive
-   decision.)**
+1. ~~Confirm the goal is restoration of framework integration (Option A) vs. a written defense of
+   the standalone (Option B).~~ **DECIDED (user, 2026-07-02): Option A — restore the parametric
+   `Proposition.Equiv S` + `LogicalEquivalence` framework integration, in hybrid form (retain
+   #662's `{atom,bot,imp,box}` primitives and `{hole,impL,impR,box}` Context). All three open
+   questions are now resolved; the report is ready for `/plan`.**
 2. ~~Keep the `LogicallyEquivalent` name as an abbrev, or revert to `≡`/`≡[S]` only?~~
    **DECIDED (see Rationale §Consequent refinements): drop `LogicallyEquivalent`; standardize on
    `≡`/`≡[S]`. No external users; retaining it re-introduces the two-notions smell.**

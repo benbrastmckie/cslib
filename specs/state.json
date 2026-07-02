@@ -88,27 +88,43 @@
     {
       "project_number": 468,
       "project_name": "resync_pr_662_with_648_head",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:10:38Z",
+      "last_updated": "2026-07-02T20:03:56Z",
       "dependencies": [
         467
+      ],
+      "session_id": "sess_1783022251_1a3cf2",
+      "artifacts": [
+        {
+          "path": "specs/468_resync_pr_662_with_648_head/reports/01_resync-pr-662-with-648-head.md",
+          "type": "report",
+          "summary": "resync pr 662 with 648 head (backfilled by --sync)"
+        }
       ]
     },
     {
       "project_number": 469,
       "project_name": "drop_connectives_typeclass_layer_pr_662",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:10:38Z",
+      "last_updated": "2026-07-02T20:04:42Z",
       "dependencies": [
         465
+      ],
+      "session_id": "sess_1783022251_1a3cf2",
+      "artifacts": [
+        {
+          "path": "specs/469_drop_connectives_typeclass_layer_pr_662/reports/01_drop-connectives-typeclass-layer.md",
+          "type": "report",
+          "summary": "drop connectives typeclass layer (backfilled by --sync)"
+        }
       ]
     },
     {
@@ -136,14 +152,22 @@
     {
       "project_number": 472,
       "project_name": "restore_model_class_equivalence_pr_662",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:10:38Z",
+      "last_updated": "2026-07-02T20:03:43Z",
       "dependencies": [
         465
+      ],
+      "session_id": "sess_1783022251_1a3cf2",
+      "artifacts": [
+        {
+          "path": "specs/472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md",
+          "type": "report",
+          "summary": "restore model class equivalence (backfilled by --sync)"
+        }
       ]
     },
     {
@@ -199,6 +223,31 @@
           "path": "typst/MPL/MplReport.typ",
           "type": "document",
           "summary": "Main Typst document: structure-first MPL report; title/abstract/ladder table, 7 chapters, source-anchor appendix; compiles clean to a 24-page PDF."
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/reports/01_teammate-a-findings.md",
+          "type": "report",
+          "summary": "teammate a findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/reports/01_teammate-b-findings.md",
+          "type": "report",
+          "summary": "teammate b findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/reports/01_teammate-c-findings.md",
+          "type": "report",
+          "summary": "teammate c findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/reports/01_teammate-d-findings.md",
+          "type": "report",
+          "summary": "teammate d findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/464_typst_report_structure_first_mpl_arguments/reports/01_team-research.md",
+          "type": "report",
+          "summary": "team research (backfilled by --sync)"
         }
       ],
       "memory_candidates": [
@@ -284,7 +333,13 @@
       "created": "2026-07-01T15:46:37Z",
       "last_updated": "2026-07-01T16:19:11Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/457_vet_299_shake_import_hygiene/plans/01_shake-import-hygiene.md",
+          "type": "plan",
+          "summary": "shake import hygiene (backfilled by --sync)"
+        }
+      ],
       "parent_task": 299,
       "vet_origin": {
         "session": "sess_1782919557_8a4cc2",
@@ -305,7 +360,18 @@
       "created": "2026-07-01T15:46:37Z",
       "last_updated": "2026-07-01T16:19:14Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/458_vet_455_shake_import_hygiene/plans/01_shake-import-hygiene.md",
+          "type": "plan",
+          "summary": "shake import hygiene (backfilled by --sync)"
+        },
+        {
+          "path": "specs/458_vet_455_shake_import_hygiene/summaries/01_shake-import-hygiene-summary.md",
+          "type": "summary",
+          "summary": "shake import hygiene summary (backfilled by --sync)"
+        }
+      ],
       "parent_task": 455,
       "vet_origin": {
         "session": "sess_1782919557_8a4cc2",
@@ -359,7 +425,23 @@
       "created": "2026-07-01T15:46:37Z",
       "last_updated": "2026-07-01T16:37:32Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/460_vet_455_classical_lint_warnings/reports/01_classical-lint-warnings.md",
+          "type": "report",
+          "summary": "classical lint warnings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/460_vet_455_classical_lint_warnings/plans/01_classical-lint-cleanup.md",
+          "type": "plan",
+          "summary": "classical lint cleanup (backfilled by --sync)"
+        },
+        {
+          "path": "specs/460_vet_455_classical_lint_warnings/summaries/01_classical-lint-cleanup-summary.md",
+          "type": "summary",
+          "summary": "classical lint cleanup summary (backfilled by --sync)"
+        }
+      ],
       "parent_task": 455,
       "vet_origin": {
         "session": "sess_1782919557_8a4cc2",
@@ -459,6 +541,11 @@
           "path": "specs/455_extract_tableau_measure_arithmetic/plans/01_measure-arithmetic-extraction.md",
           "type": "plan",
           "summary": "4-phase extraction plan (Approach A full rename)"
+        },
+        {
+          "path": "specs/455_extract_tableau_measure_arithmetic/summaries/01_measure-arithmetic-extraction-summary.md",
+          "type": "summary",
+          "summary": "measure arithmetic extraction summary (backfilled by --sync)"
         }
       ],
       "blockers": null,
@@ -533,7 +620,23 @@
       "created": "2026-07-01T05:12:18Z",
       "last_updated": "2026-07-01T18:34:53Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/444_fix_temporal_theorems_underscore_lint/reports/01_temporal-naming-lint-uniformity.md",
+          "type": "report",
+          "summary": "temporal naming lint uniformity (backfilled by --sync)"
+        },
+        {
+          "path": "specs/444_fix_temporal_theorems_underscore_lint/plans/01_temporal-underscore-rename-docs.md",
+          "type": "plan",
+          "summary": "temporal underscore rename docs (backfilled by --sync)"
+        },
+        {
+          "path": "specs/444_fix_temporal_theorems_underscore_lint/summaries/01_temporal-underscore-rename-docs-summary.md",
+          "type": "summary",
+          "summary": "temporal underscore rename docs summary (backfilled by --sync)"
+        }
+      ],
       "dependencies": [
         181,
         449,
@@ -589,6 +692,16 @@
         {
           "type": "report",
           "path": "specs/389_docstrings_headers_citations_propfound/reports/01_docstrings-headers-citations.md"
+        },
+        {
+          "path": "specs/389_docstrings_headers_citations_propfound/plans/01_docstrings-headers-citations.md",
+          "type": "plan",
+          "summary": "docstrings headers citations (backfilled by --sync)"
+        },
+        {
+          "path": "specs/389_docstrings_headers_citations_propfound/summaries/01_docstrings-headers-citations-summary.md",
+          "type": "summary",
+          "summary": "docstrings headers citations summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1782924983_6bcecb_389",
@@ -637,7 +750,23 @@
       "created": "2026-06-28T12:53:27Z",
       "last_updated": "2026-07-01T17:45:53Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/391_strip_docstring_jargon_fix_stale_counts/reports/01_docstring-jargon-stale-counts.md",
+          "type": "report",
+          "summary": "docstring jargon stale counts (backfilled by --sync)"
+        },
+        {
+          "path": "specs/391_strip_docstring_jargon_fix_stale_counts/plans/01_strip-jargon-fix-counts.md",
+          "type": "plan",
+          "summary": "strip jargon fix counts (backfilled by --sync)"
+        },
+        {
+          "path": "specs/391_strip_docstring_jargon_fix_stale_counts/summaries/01_strip-jargon-fix-counts-summary.md",
+          "type": "summary",
+          "summary": "strip jargon fix counts summary (backfilled by --sync)"
+        }
+      ],
       "session_id": "sess_1782924983_6bcecb_391",
       "dependencies": [
         317,
@@ -656,7 +785,23 @@
       "created": "2026-06-28T12:53:27Z",
       "last_updated": "2026-07-01T18:07:30Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/392_remove_deadcode_fix_naming/reports/01_deadcode-and-naming-verification.md",
+          "type": "report",
+          "summary": "deadcode and naming verification (backfilled by --sync)"
+        },
+        {
+          "path": "specs/392_remove_deadcode_fix_naming/plans/01_deadcode-and-naming-fixes.md",
+          "type": "plan",
+          "summary": "deadcode and naming fixes (backfilled by --sync)"
+        },
+        {
+          "path": "specs/392_remove_deadcode_fix_naming/summaries/01_deadcode-and-naming-fixes-summary.md",
+          "type": "summary",
+          "summary": "deadcode and naming fixes summary (backfilled by --sync)"
+        }
+      ],
       "session_id": "sess_1782924983_6bcecb_392",
       "dependencies": [
         317,
@@ -696,6 +841,106 @@
           "type": "plan",
           "path": "plans/03_b2-fuel-sufficiency.md",
           "summary": "B2 fuel-sufficiency + none-case wiring plan (v3)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md",
+          "type": "report",
+          "summary": "tableau completeness research (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md",
+          "type": "report",
+          "summary": "tableau completeness approach (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md",
+          "type": "report",
+          "summary": "fuel sufficiency measure (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md",
+          "type": "report",
+          "summary": "fuel sufficiency literature (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md",
+          "type": "report",
+          "summary": "sfor dedup reuse abstraction (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md",
+          "type": "report",
+          "summary": "option b fuel bound (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md",
+          "type": "report",
+          "summary": "b1 truthlemma timp (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
+          "type": "report",
+          "summary": "phase2 escape routes (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md",
+          "type": "plan",
+          "summary": "tableau completeness plan (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md",
+          "type": "plan",
+          "summary": "tableau completeness unified (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md",
+          "type": "plan",
+          "summary": "b2 fuel sufficiency (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md",
+          "type": "plan",
+          "summary": "sfor dedup fuel sufficiency (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md",
+          "type": "plan",
+          "summary": "frame change and fuel raise (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
+          "type": "plan",
+          "summary": "route a frame plumbing (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md",
+          "type": "summary",
+          "summary": "b2 fuel sufficiency phase1 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase2a-blocked-summary.md",
+          "type": "summary",
+          "summary": "b2 fuel sufficiency phase2a blocked summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase1 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase2 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase4-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase4 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md",
+          "type": "summary",
+          "summary": "frame change and fuel raise summary (backfilled by --sync)"
         }
       ],
       "dependencies": [],
@@ -730,6 +975,36 @@
           "path": "specs/299_modal_k_tableau/summaries/06_finalization-summary.md",
           "type": "summary",
           "summary": "Finalization summary: Phases 1-7 complete, decision procedure + Decidable instance sorry-free"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/reports/01_modal-k-tableau-research.md",
+          "type": "report",
+          "summary": "modal k tableau research (backfilled by --sync)"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/reports/06_spawn-analysis.md",
+          "type": "report",
+          "summary": "spawn analysis (backfilled by --sync)"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/plans/01_modal-k-tableau-plan.md",
+          "type": "plan",
+          "summary": "modal k tableau plan (backfilled by --sync)"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/plans/02_modal-k-tableau-plan.md",
+          "type": "plan",
+          "summary": "modal k tableau plan (backfilled by --sync)"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/plans/04_modal-k-tableau-plan.md",
+          "type": "plan",
+          "summary": "modal k tableau plan (backfilled by --sync)"
+        },
+        {
+          "path": "specs/299_modal_k_tableau/summaries/06_final-verification-summary.md",
+          "type": "summary",
+          "summary": "final verification summary (backfilled by --sync)"
         }
       ],
       "dependencies": [
@@ -1043,6 +1318,21 @@
           "path": "specs/180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md",
           "type": "plan",
           "summary": "Hard-mode v2 plan (9 phases, one agent run each): starts from preserved WIP patch; carries the un-reached metalogic layer via four bridge axioms, two reusable MCS lemmas, and a TruthLemma reduction to existing standalone case lemmas; sequential build-exclusive phases, full CI green only at P9."
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md",
+          "type": "plan",
+          "summary": "primitive gh implementation (backfilled by --sync)"
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/summaries/03_phase8-tableau-subtree-summary.md",
+          "type": "summary",
+          "summary": "phase8 tableau subtree summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/180_temporal_primitive_always_historically/summaries/03_primitive-gh-metalogic-summary.md",
+          "type": "summary",
+          "summary": "primitive gh metalogic summary (backfilled by --sync)"
         }
       ],
       "topic": "Temporal Logic",
@@ -1131,7 +1421,13 @@
       "created": "2026-06-28T14:29:01Z",
       "last_updated": "2026-06-28T14:29:01Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md",
+          "type": "report",
+          "summary": "salvage 299 soundness lemmas (backfilled by --sync)"
+        }
+      ],
       "session_id": "sess_1782651208_1bb34c",
       "dependencies": [],
       "parent_task": 299
@@ -1292,6 +1588,11 @@
           "path": "specs/407_mpl_base_structure_first_redesign/summaries/05_initial-object-witness-summary.md",
           "type": "summary",
           "summary": "HasInitialBot initial-object witness added to BotProperties/BrouwerianBot/PointedBrouwerianCompleteness; explosion-soundness re-expressed via named categorical universal property; zero sorries, zero axioms, all touched modules green"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/plans/01_mpl-base-waves-1-4.md",
+          "type": "plan",
+          "summary": "mpl base waves 1 4 (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1782750230_3ec4a4_407plan",
@@ -1457,6 +1758,21 @@
           "type": "report",
           "path": "specs/415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md",
           "summary": "Audit: structure-first PL base does NOT lift naturally (CPL-only Lukasiewicz embedding); 3 findings confirmed; 5 ranked spawn tasks"
+        },
+        {
+          "path": "specs/415_audit_propositional_lifting_structure_first/reports/02_spawn-manifest.md",
+          "type": "report",
+          "summary": "spawn manifest (backfilled by --sync)"
+        },
+        {
+          "path": "specs/415_audit_propositional_lifting_structure_first/plans/01_lifting-audit-spawn.md",
+          "type": "plan",
+          "summary": "lifting audit spawn (backfilled by --sync)"
+        },
+        {
+          "path": "specs/415_audit_propositional_lifting_structure_first/summaries/01_lifting-audit-spawn-summary.md",
+          "type": "summary",
+          "summary": "lifting audit spawn summary (backfilled by --sync)"
         }
       ],
       "created": "2026-06-29T22:27:24Z",
@@ -1489,6 +1805,16 @@
           "number": 4,
           "type": "report",
           "path": "specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md"
+        },
+        {
+          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md",
+          "type": "report",
+          "summary": "derivation lifting spike (backfilled by --sync)"
+        },
+        {
+          "path": "specs/419_generalize_derivation_lifting_intersystem/reports/03_spike-verdict-current-source.md",
+          "type": "report",
+          "summary": "spike verdict current source (backfilled by --sync)"
         }
       ],
       "created": "2026-06-29T22:35:38Z",
@@ -1519,6 +1845,16 @@
         {
           "type": "summary",
           "path": "specs/426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md"
+        },
+        {
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md",
+          "type": "plan",
+          "summary": "ordering instant redesign (backfilled by --sync)"
+        },
+        {
+          "path": "specs/426_temporal_tableau_ordconstraints_redesign/summaries/01_ordering-instant-redesign-summary.md",
+          "type": "summary",
+          "summary": "ordering instant redesign summary (backfilled by --sync)"
         }
       ],
       "dependencies": [
@@ -1574,6 +1910,26 @@
           "type": "report",
           "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/03_falsification-spike.md",
           "summary": "Falsification spike (empirical): raw edge-UC FAILS; Route C (containment) REFUTED; Route A closure-valuation breaks atom-F. DECISION: edge ReflTransGen order + new sat_atom_persist saturation field on the returned branch (= task 317 B2 territory); else BLOCKED."
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-a-findings.md",
+          "type": "report",
+          "summary": "teammate a findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-b-findings.md",
+          "type": "report",
+          "summary": "teammate b findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-c-findings.md",
+          "type": "report",
+          "summary": "teammate c findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-d-findings.md",
+          "type": "report",
+          "summary": "teammate d findings (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1782818058_465873",
@@ -1770,6 +2126,26 @@
           "path": "specs/448_study_deriv_shared_metatheory_substrate/reports/01_team-research.md",
           "type": "research",
           "summary": "Team research (4 teammates): verdict DECLINE Vision B substrate; keep Vision A Deriv.map; redirect to task 41/415"
+        },
+        {
+          "path": "specs/448_study_deriv_shared_metatheory_substrate/reports/01_teammate-a-findings.md",
+          "type": "report",
+          "summary": "teammate a findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/448_study_deriv_shared_metatheory_substrate/reports/01_teammate-b-findings.md",
+          "type": "report",
+          "summary": "teammate b findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/448_study_deriv_shared_metatheory_substrate/reports/01_teammate-c-findings.md",
+          "type": "report",
+          "summary": "teammate c findings (backfilled by --sync)"
+        },
+        {
+          "path": "specs/448_study_deriv_shared_metatheory_substrate/reports/01_teammate-d-findings.md",
+          "type": "report",
+          "summary": "teammate d findings (backfilled by --sync)"
         }
       ],
       "created": "2026-07-01T06:40:00Z",
@@ -1845,7 +2221,23 @@
       "created": "2026-07-01T07:42:45Z",
       "last_updated": "2026-07-01T16:18:36Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/452_generalize_genericmcsbridge_foundations/reports/01_generalize-genericmcsbridge.md",
+          "type": "report",
+          "summary": "generalize genericmcsbridge (backfilled by --sync)"
+        },
+        {
+          "path": "specs/452_generalize_genericmcsbridge_foundations/plans/01_hoist-mcs-bridge-foundations.md",
+          "type": "plan",
+          "summary": "hoist mcs bridge foundations (backfilled by --sync)"
+        },
+        {
+          "path": "specs/452_generalize_genericmcsbridge_foundations/summaries/01_hoist-mcs-bridge-foundations-summary.md",
+          "type": "summary",
+          "summary": "hoist mcs bridge foundations summary (backfilled by --sync)"
+        }
+      ],
       "session_id": "sess_1782893288_776f6c"
     },
     {
@@ -1876,6 +2268,21 @@
           "type": "summary",
           "path": "summaries/01_reduce-maxheartbeats-inflation-summary.md",
           "summary": "All 64 sites eliminated; zero-debt reduction"
+        },
+        {
+          "path": "specs/453_audit_reduce_maxheartbeats_inflation/reports/01_maxheartbeats-audit.md",
+          "type": "report",
+          "summary": "maxheartbeats audit (backfilled by --sync)"
+        },
+        {
+          "path": "specs/453_audit_reduce_maxheartbeats_inflation/plans/01_reduce-maxheartbeats-inflation.md",
+          "type": "plan",
+          "summary": "reduce maxheartbeats inflation (backfilled by --sync)"
+        },
+        {
+          "path": "specs/453_audit_reduce_maxheartbeats_inflation/summaries/01_reduce-maxheartbeats-inflation-summary.md",
+          "type": "summary",
+          "summary": "reduce maxheartbeats inflation summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1782893289_453aaa",
@@ -1901,6 +2308,16 @@
         {
           "type": "report",
           "path": "specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/reports/01_consolidate-chronicle-pointinsertion.md"
+        },
+        {
+          "path": "specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/plans/01_consolidate-since-seed-interface.md",
+          "type": "plan",
+          "summary": "consolidate since seed interface (backfilled by --sync)"
+        },
+        {
+          "path": "specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/summaries/01_consolidate-since-seed-interface-summary.md",
+          "type": "summary",
+          "summary": "consolidate since seed interface summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1782924983_6bcecb_454"

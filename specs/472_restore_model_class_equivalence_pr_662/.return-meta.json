@@ -1,0 +1,24 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-02T19:58:58Z",
+  "completed_at": "2026-07-02T20:12:00Z",
+  "summary": "Researched PR #662 (leanprover/cslib, branch feat/modal-formula-primitives, OPEN). The PR's refactor to {atom,bot,imp,box} primitives also replaced Fabrizio Montesi's model-class-parametric Proposition.Equiv (S : Set (Model World Atom)) and its Cslib.Logic.LogicalEquivalence framework integration with a standalone, non-parametric LogicallyEquivalent. Current main already contains the standalone version (landed via task 137, commit a084f9f2). The Foundations LogicalEquivalence framework is still used by HML and CLL, so the standalone version violates reuse-first. Recommendation: Option A (hybrid restore) — keep the new Context/primitives, re-add parametric Proposition.Equiv, notation, equiv_valid bridge, IsEquiv/Congruence/HasHContext instances, and the Modal-K LogicalEquivalence instance; the congruence proof content already exists in the standalone theorem. Zero-debt: no sorry/axiom involved. No PR reviews/comments exist endorsing the standalone design.",
+  "artifacts": [
+    {
+      "path": "specs/472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md",
+      "type": "report",
+      "description": "Research report: PR #662 removal analysis, framework reuse check, Option A vs B evaluation with Lean-level API sketch, recommendation (Option A hybrid restore)"
+    }
+  ],
+  "partial_progress": {
+    "stage": "researched",
+    "details": "Report written and verified (243 lines). Recommendation: Option A restore."
+  },
+  "recommendation": "Option A: restore model-class-parametric Proposition.Equiv + LogicalEquivalence framework integration in hybrid form (retain PR #662 primitives/Context).",
+  "metadata": {
+    "session_id": "sess_1783022251_1a3cf2",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-02T00:00:00Z",
+  "completed_at": "2026-07-02T00:00:00Z",
+  "summary": "Compared PR #662 head (f46056b) embedded propositional files against PR #648 head (c9364b6). #662 carries the pre-refactor design (no primitive efq; IPL = Set.range; MPL, IsIntuitionistic, intuitionisticCompletion present; imports Connectives.lean). #648 head has primitive Derivation.efq (11 constructors), IPL = empty theory, and none of MPL/IsIntuitionistic/intuitionisticCompletion; Connectives.lean is deleted (404). Produced a file-by-file reconciliation plan for the three propositional files, flagged the Connectives.lean removal as a blocking cross-cutting dependency for #662's modal files, and listed PR-body corrections.",
+  "artifacts": [
+    "specs/468_resync_pr_662_with_648_head/reports/01_resync-pr-662-with-648-head.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Research report written with verified diffs and reconciliation plan"
+  },
+  "metadata": {
+    "session_id": "sess_1783022251_1a3cf2",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "pr_648_head": "c9364b65391b1cc2bfd211102a3deb86f3844d48",
+    "pr_662_head": "f46056b9b6ebf44c322e88278b64ada959dbf146"
+  }
+}

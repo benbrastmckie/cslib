@@ -1,0 +1,26 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-02T00:00:00Z",
+  "completed_at": "2026-07-02T00:00:00Z",
+  "summary": "Researched dropping Connectives.lean (PR #662) in favor of #607's Operators hierarchy. Key finding: the 'unused' premise is false in the working tree -- Connectives typeclasses (HasBot/HasImp/HasBox/PropositionalConnectives/ModalConnectives) are load-bearing across Axioms.lean, ProofSystem.lean, Theorems/Modal/*, and the neg/top defaults used by Bimodal/LTL/Temporal. 'Unused' holds only for PR #662 viewed in isolation against upstream/main. PR #607 is unmerged and NOT a drop-in replacement (no HasBot, no bundles, impl-vs-imp naming, primitive not vs bot, opposite Modal primitives). Recommend BLOCKED for literal deletion; preferred rescope decouples PR #662 branch from the foundations typeclass file.",
+  "artifacts": [
+    {
+      "path": "specs/469_drop_connectives_typeclass_layer_pr_662/reports/01_drop-connectives-typeclass-layer.md",
+      "type": "report",
+      "description": "CSLib research report on dropping the Connectives.lean typeclass layer in favor of the #607 Operators hierarchy"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Report written with grep-verified usage evidence, #607 vs Connectives comparison, migration sketch (two interpretations), risks/blockers, and recommendation"
+  },
+  "metadata": {
+    "session_id": "sess_1783022251_1a3cf2",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "recommendation": "blocked_or_rescope",
+    "pr_662_state": "open",
+    "pr_607_state": "open_not_merged"
+  }
+}

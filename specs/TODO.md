@@ -38,9 +38,9 @@ next_project_number: 475
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
-468 [NOT STARTED] — Re-sync PR #662 embedded propositional Lean files with the curren
-469 [NOT STARTED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
-472 [NOT STARTED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
+468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
+469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
+472 [RESEARCHED] — Restore the model-class-parametric Proposition.Equiv and LogicalE
 
 ### Temporal Logic
 
@@ -107,10 +107,11 @@ next_project_number: 475
 ---
 
 ### 472. Restore model class equivalence pr 662
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 465
+- **Research**: [472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md]
 
 **Description**: Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement
 
@@ -137,20 +138,22 @@ next_project_number: 475
 ---
 
 ### 469. Drop connectives typeclass layer pr 662
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 465
+- **Research**: [469_drop_connectives_typeclass_layer_pr_662/reports/01_drop-connectives-typeclass-layer.md]
 
 **Description**: Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy
 
 ---
 
 ### 468. Resync pr 662 with 648 head
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 467
+- **Research**: [468_resync_pr_662_with_648_head/reports/01_resync-pr-662-with-648-head.md]
 
 **Description**: Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description
 
@@ -195,7 +198,13 @@ next_project_number: 475
 - **Task Type**: general
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Research**: [464_typst_report_structure_first_mpl_arguments/reports/02_grounding-and-typst-scaffold.md]
+- **Research**:
+  - [464_typst_report_structure_first_mpl_arguments/reports/02_grounding-and-typst-scaffold.md]
+  - [464_typst_report_structure_first_mpl_arguments/reports/01_teammate-a-findings.md]
+  - [464_typst_report_structure_first_mpl_arguments/reports/01_teammate-b-findings.md]
+  - [464_typst_report_structure_first_mpl_arguments/reports/01_teammate-c-findings.md]
+  - [464_typst_report_structure_first_mpl_arguments/reports/01_teammate-d-findings.md]
+  - [464_typst_report_structure_first_mpl_arguments/reports/01_team-research.md]
 - **Plan**: [464_typst_report_structure_first_mpl_arguments/plans/02_mpl-structure-first-report.md]
 - **Summary**: [464_typst_report_structure_first_mpl_arguments/summaries/02_mpl-structure-first-report-summary.md]
 - **Document**: [typst/MPL/MplReport.typ]
@@ -245,6 +254,9 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [460_vet_455_classical_lint_warnings/reports/01_classical-lint-warnings.md]
+- **Plan**: [460_vet_455_classical_lint_warnings/plans/01_classical-lint-cleanup.md]
+- **Summary**: [460_vet_455_classical_lint_warnings/summaries/01_classical-lint-cleanup-summary.md]
 
 **Description**: Vet of task 455 found lint warnings in the repointed consumer Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean: wrap 16 flagged >100-char lines (119,140,158,161,218,237,256,360,377,400,421,641,912,961,979,987); line 799 drop unused `[DecidableEq Atom]` from `classicalApplyOne_branching_length` (or use `classical`); lines 810,837 trim unused simp args per `simp?`; line 1102 add `omit [Hashable Atom] in` before `classicalStepBranch_mem_preserved`; line 1267 replace `simp at he` with `simp only [...]` (linter.flexible). Non-blocking; confirm `lake build` green.
 
@@ -265,6 +277,8 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Plan**: [458_vet_455_shake_import_hygiene/plans/01_shake-import-hygiene.md]
+- **Summary**: [458_vet_455_shake_import_hygiene/summaries/01_shake-import-hygiene-summary.md]
 
 **Description**: Vet of task 455 (session sess_1782919557_8a4cc2) found 2 lake shake import findings. Cslib/Foundations/Logic/Tableau/Measure.lean:11 remove unused `import Mathlib.Algebra.BigOperators.Group.List.Basic`. Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:1 remove `public import Cslib.Logics.Propositional.Tableau.Classical.Soundness`, add `public import Cslib.Logics.Propositional.Tableau.Classical.Expansion` and `Cslib.Logics.Propositional.Semantics.Bool`. Re-run scoped `lake build` + `lake shake` to confirm. Non-blocking; CONTRIBUTING.md shake cleanliness.
 
@@ -274,6 +288,7 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Plan**: [457_vet_299_shake_import_hygiene/plans/01_shake-import-hygiene.md]
 
 **Description**: Vet of task 299 (session sess_1782919557_8a4cc2) found 6 lake shake import-hygiene findings (beyond the pre-existing systemic Cslib.Init pattern) in Cslib/Logics/Modal/Tableau/. Apply the shake-suggested add/remove: Defs.lean:17 remove unused `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`; Branch.lean:10 add missing `public import Cslib.Foundations.Logic.Tableau.SignedFormula`; Rules.lean:10 add missing `public import Cslib.Foundations.Logic.Tableau.PropositionalRules`; Closure.lean:10 remove `...Modal.Tableau.Rules`, add `...Modal.Tableau.Defs`; Completeness.lean:10 remove `...Modal.Tableau.LoopInduction`; FmpMeasure.lean:20 remove `...Modal.Tableau.LoopInduction`. Then `lake build` the scoped modules to confirm no regressions and re-run `lake shake --add-public --keep-implied --keep-prefix`. Non-blocking; CONTRIBUTING.md shake cleanliness for upstream PR.
 
@@ -296,6 +311,7 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Dependencies**: Task 317
 - **Research**: [455_extract_tableau_measure_arithmetic/reports/01_tableau-measure-arithmetic-extraction.md]
 - **Plan**: [455_extract_tableau_measure_arithmetic/plans/01_measure-arithmetic-extraction.md]
+- **Summary**: [455_extract_tableau_measure_arithmetic/summaries/01_measure-arithmetic-extraction-summary.md]
 
 **Description**: Extract the logic-agnostic measure arithmetic duplicated across the Modal K FMP measure (task 442) and the Classical propositional tableau into a new shared module Cslib/Foundations/Logic/Tableau/Measure.lean. Move: sum_map_le_length_mul (FmpMeasure.lean:131), the geometric-sum capacity family modalCap/modalCap_le_pow (FmpMeasure.lean:776-833), and a small base-3 domination API (3^a<=3^C, 1<=3^C, 3^a+3^b<=3^(1+max)) currently hand-rolled inline in Classical/Completeness.lean:677-687 and FmpMeasure.lean:238. Target API (all F/L-free, pure Nat/List): Tableau.sum_map_le_length_mul, Tableau.geomCap (Sum_{i<=k} base^i), Tableau.geomCap_le_pow. ~80-150 lines moved; zero semantic risk (pure arithmetic); de-duplicates modal<->classical and updates call sites to the shared lemmas. Independent of task 317 - can run anytime. Source: task 317 reuse/abstraction research report 06 (R1), specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md. Verify scoped + full lake build green, checkInitImports/lint-style/shake pass, zero sorry.
 
@@ -307,6 +323,8 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Topic**: Bimodal Logic
 - **Dependencies**: Task 449, Task 450
 - **Research**: [454_consolidate_chronicle_pointinsertion_bimodal_temporal/reports/01_consolidate-chronicle-pointinsertion.md]
+- **Plan**: [454_consolidate_chronicle_pointinsertion_bimodal_temporal/plans/01_consolidate-since-seed-interface.md]
+- **Summary**: [454_consolidate_chronicle_pointinsertion_bimodal_temporal/summaries/01_consolidate-since-seed-interface-summary.md]
 
 **Description**: From review 2026-07-01-2 (MEDIUM, finding #3). Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/PointInsertion/Since.lean (1019L) and Cslib/Logics/Temporal/Metalogic/Chronicle/PointInsertion/Since.lean (704L), plus sibling Burgess.lean and Seeds.lean in both trees, share an entire family of identically-named private helpers: lemma27SinceSeed, l27sC5EventList, l27sB5GuardList, l27s_c5_event_list_mem, l27s_b5_guard_list_mem, lemma24SinceWithGuard, lemma_2_7_since, lemma_2_8_since, lemma_2_7_since_seed_consistent, lemma_2_8_since_seed_consistent. Same duplication disease as the GenericMCSBridge work (task 452) but in the Chronicle point-insertion layer. The files have diverged (Bimodal is ~45% larger), so this is consolidation-with-care, not a mechanical merge: reconcile the diverged portions, then factor the shared lemma_2_7/lemma_2_8 seed-consistency helpers into a common Chronicle-support module parameterized over the frame/relation interface. NOT covered by task 415 (propositional->modal lifting stack) or 449-451 (which define a NEW base logic BX+ rather than dedup existing Chronicle machinery). IMPORTANT: coordinate with tasks 449-451 (BX+) since they may rewrite TemporalConservativity and adjacent Chronicle files -- best sequenced after the BX+ restructure settles, or done in lockstep. DoD: shared point-insertion helpers factored to one location, both logics reduced to thin instantiations of the common core, lake build/test/lint green, zero new sorries.
 
@@ -317,9 +335,15 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
-- **Plan**: [plans/01_reduce-maxheartbeats-inflation.md]
-- **Research**: [reports/01_maxheartbeats-audit.md]
-- **Summary**: [summaries/01_reduce-maxheartbeats-inflation-summary.md]
+- **Plan**:
+  - [plans/01_reduce-maxheartbeats-inflation.md]
+  - [453_audit_reduce_maxheartbeats_inflation/plans/01_reduce-maxheartbeats-inflation.md]
+- **Research**:
+  - [reports/01_maxheartbeats-audit.md]
+  - [453_audit_reduce_maxheartbeats_inflation/reports/01_maxheartbeats-audit.md]
+- **Summary**:
+  - [summaries/01_reduce-maxheartbeats-inflation-summary.md]
+  - [453_audit_reduce_maxheartbeats_inflation/summaries/01_reduce-maxheartbeats-inflation-summary.md]
 
 **Description**: From review 2026-07-01-2 (MEDIUM+LOW, findings #2+#4). 72 set_option maxHeartbeats sites in Cslib/Logics/{Bimodal,Temporal}/Metalogic/**, up to 32x the 200000 default: 3200000 x33, 1600000 x13, 800000 x12, 1200000 x3, 400000 x5, and 6400000 x1 (Temporal/Metalogic/Chronicle/CounterexampleElimination/MainElimination.lean:38). The mature upstream dirs (Foundations/Computability/Languages/Crypto) have ZERO maxHeartbeats settings -- this inflation is entirely in the active logic area and signals proof terms/tactics that should be restructured (intermediate haves, lemma extraction) rather than given more budget. ALSO (finding #4, LOW): 15 sites use file-wide unscoped 'set_option maxHeartbeats N' (masking which declaration is expensive) vs 54 declaration-scoped 'set_option ... in'; unscoped sites include Bimodal/Metalogic/Algebraic/{UltrafilterMCS.lean:34,BooleanStructure.lean:33} and Temporal/Metalogic/{Chronicle/TruthLemma.lean:40,Chronicle/RRelation.lean:29,DenseSoundness.lean:32,Completeness.lean:47,Soundness.lean:32,MCS.lean:38,WitnessSeed.lean:29,Chronicle/Frame.lean:28,Chronicle/PointInsertion/{Seeds,Burgess,Splitting,Since}.lean}. Approach: audit the 3.2M/6.4M offenders, restructure the worst to lower the ceiling (or document why irreducible); convert all unscoped sites to 'set_option ... in' on the specific expensive declaration. NOT covered by 412-414 (which target simp only [listImp_*, bigconj_*] lists, not heartbeat budgets). Self-contained, independent of other tasks. DoD: heartbeat ceilings reduced where feasible, all remaining high budgets documented, unscoped sites converted to scoped, lake build/test green.
 
@@ -330,6 +354,9 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [452_generalize_genericmcsbridge_foundations/reports/01_generalize-genericmcsbridge.md]
+- **Plan**: [452_generalize_genericmcsbridge_foundations/plans/01_hoist-mcs-bridge-foundations.md]
+- **Summary**: [452_generalize_genericmcsbridge_foundations/summaries/01_hoist-mcs-bridge-foundations-summary.md]
 
 **Description**: From review 2026-07-01-2 (HIGH). The four GenericMCSBridge.lean files (Propositional 256L, Modal 267L, Temporal 370L, Bimodal/Core 405L; 1298L total) share a near-verbatim skeleton: HilbertOf tag type -> InferenceSystem/ModusPonens/HasAxiomImplyK/HasAxiomImplyS/MinimalHilbert instances -> AlgDS alias -> derivTreeToList -> unfoldListImpInTree (~19L) -> listDerivToTree (~15L) -> {logic}_deriv_iff_algebraic / _setConsistent_iff_algebraic / _setMaxConsistent_iff_algebraic. The trio uses only assumption/modus_ponens/weakening (no logic-specific content). Temporal and Bimodal ADDITIONALLY duplicate their own base/Fc sections internally (e.g. Temporal L66-221 vs L239-370). Approach: (1) collapse Temporal's and Bimodal's intra-file base/Fc duplication first by making the base bridge a specialization of the Fc-parameterized one (fc := .Base) -- ~130-150L each, lowest risk, no cross-logic abstraction; (2) extract unfoldListImpInTree, listDerivToTree, and the three iff-theorems into Cslib/Foundations/Logic/Metalogic/GenericMCS.lean, parameterized over a typeclass capturing 'tree-shaped derivation with ax/assumption/mp/weakening constructors', with extra rules (necessitation, temporal duality) passed as an optional hypothesis/callback. Est. elimination ~300-450 lines. NOT covered by tasks 415/393/439 (which build ON the bridge as infrastructure, verified against their reports). Sequence to avoid collision with in-flight tasks 441/442 (Modal refactor) and 449-451 (BX+). DoD: shared abstraction in Foundations, all four per-logic bridges reduced to thin instantiations, lake build/test/lint green, zero new sorries or axioms.
 
@@ -412,7 +439,12 @@ Definition of done: FrameClass.Metric and the 4 temporal uniformity axioms defin
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
-- **Research**: [448_study_deriv_shared_metatheory_substrate/reports/01_team-research.md]
+- **Research**:
+  - [448_study_deriv_shared_metatheory_substrate/reports/01_team-research.md]
+  - [448_study_deriv_shared_metatheory_substrate/reports/01_teammate-a-findings.md]
+  - [448_study_deriv_shared_metatheory_substrate/reports/01_teammate-b-findings.md]
+  - [448_study_deriv_shared_metatheory_substrate/reports/01_teammate-c-findings.md]
+  - [448_study_deriv_shared_metatheory_substrate/reports/01_teammate-d-findings.md]
 
 **Description**: Study whether to elevate the committed forward-only proof-system-morphism layer (delivered by task 419) into a genuine SHARED-METATHEORY SUBSTRATE over Deriv sigma, and if so, do it in ROI-gated phases. Reference the definitive analysis in specs/419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md (fork framing, representation options R1/R2/R3, and the full result lattice Layers 0-3).
 
@@ -467,6 +499,9 @@ After edits, re-run: lake build, lake test, lake exe checkInitImports, lake exe 
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 181, Task 449, Task 450, Task 454
+- **Research**: [444_fix_temporal_theorems_underscore_lint/reports/01_temporal-naming-lint-uniformity.md]
+- **Plan**: [444_fix_temporal_theorems_underscore_lint/plans/01_temporal-underscore-rename-docs.md]
+- **Summary**: [444_fix_temporal_theorems_underscore_lint/summaries/01_temporal-underscore-rename-docs-summary.md]
 
 **Description**: Vet fix for task 180 (High), elevated scope. Do not merely rename the two flagged defs; bring the task-180 diff to a single, uniform, mathlib-conformant standard.
 
@@ -573,6 +608,10 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/01_atom-persistence-upward-closure.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_team-research.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/03_falsification-spike.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-a-findings.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-b-findings.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-c-findings.md]
+  - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-d-findings.md]
 
 **Description**: Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.
 
@@ -645,8 +684,12 @@ After implementation:
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 439
 - **Research**: [426_temporal_tableau_ordconstraints_redesign/reports/01_ordconstraints-redesign.md]
-- **Plan**: [426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md]
-- **Summary**: [426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md]
+- **Plan**:
+  - [426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-streamlined.md]
+  - [426_temporal_tableau_ordconstraints_redesign/plans/01_ordering-instant-redesign.md]
+- **Summary**:
+  - [426_temporal_tableau_ordconstraints_redesign/summaries/01_partial-summary.md]
+  - [426_temporal_tableau_ordconstraints_redesign/summaries/01_ordering-instant-redesign-summary.md]
 
 **Description**: [Decomposed from task 301, blocker A.] Redesign the time-ordering scheme in the temporal tableau so the ordering invariants hold. The lemma ordConstraints_strict (Cslib/Logics/Temporal/Tableau/Completeness.lean) is FALSE as stated: addPast t tNew adds the constraint (tNew, t) with tNew > t, violating the claimed invariant (a,b) in constraints -> a < b. Choose and implement a correct scheme (e.g. topological sort of the constraint graph, or a signed/relative integer time domain) so that extractModel builds a well-founded strict order, then prove the corrected ordConstraints lemma sorry-free. Start from green commit 7f052834. Independent of tasks 424 and 425.
 
@@ -670,6 +713,8 @@ After implementation:
 - **Research**:
   - [419_generalize_derivation_lifting_intersystem/reports/02_virtuous-unification.md]
   - [419_generalize_derivation_lifting_intersystem/reports/04_abstract-picture-and-result-inventory.md]
+  - [419_generalize_derivation_lifting_intersystem/reports/01_derivation-lifting-spike.md]
+  - [419_generalize_derivation_lifting_intersystem/reports/03_spike-verdict-current-source.md]
 - **Plan**: [419_generalize_derivation_lifting_intersystem/plans/02_proof-system-morphism-overlay.md]
 
 **Description**: [Spawned from task 415 audit — supports the structure-first vision; SPIKE.] Investigate hoisting liftDerivation / Derivable_mono (Modal/Metalogic/InterSystem/Lifting.lean:47) and Bimodal's liftDerivationWith onto the shared InferenceSystem / algebraicDerivationSystem abstraction already used by GenericMCSBridge, yielding ONE axiom-subsumption derivation-lifting result reusable by Modal, Bimodal, and PL. SPIKE FIRST: commit only if the necessitation / temporal_duality constructor variance is cleanly abstractable; otherwise document precisely why and stop (mark BLOCKED, never sorry). Benefits from task 417's Foundations placement (soft dependency). Effort L (abstraction risk). CI green if landed. Source: report §6, Rank 4.
@@ -681,7 +726,11 @@ After implementation:
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
-- **Research**: [415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md]
+- **Research**:
+  - [415_audit_propositional_lifting_structure_first/reports/01_lifting-audit.md]
+  - [415_audit_propositional_lifting_structure_first/reports/02_spawn-manifest.md]
+- **Plan**: [415_audit_propositional_lifting_structure_first/plans/01_lifting-audit-spawn.md]
+- **Summary**: [415_audit_propositional_lifting_structure_first/summaries/01_lifting-audit-spawn-summary.md]
 
 **Description**: Audit how the structure-first propositional base (MPL/IPL/CPL: primitive nullary bot, gated efq/botL, property-module typeclasses) actually LIFTS into the Modal, Temporal, and Bimodal logics, and assess the result against the CSLib Zulip "Propositional Logic" thread (606970606) structure-first / fragment-genericity expectations -- with the explicit goal of identifying where the architecture can SURPASS those expectations. This is an infrastructure-verification (research/review) task; it produces a report and SPAWNS concrete follow-on implementation tasks, it does not itself refactor proofs.
 
@@ -745,7 +794,9 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
   - [407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md]
   - [407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md]
   - [407_mpl_base_structure_first_redesign/reports/03_design-verification-plan-readiness.md]
-- **Plan**: [407_mpl_base_structure_first_redesign/plans/04_mpl-base-waves-1-4-v2.md]
+- **Plan**:
+  - [407_mpl_base_structure_first_redesign/plans/04_mpl-base-waves-1-4-v2.md]
+  - [407_mpl_base_structure_first_redesign/plans/01_mpl-base-waves-1-4.md]
 - **Summary**:
   - [407_mpl_base_structure_first_redesign/summaries/04_mpl-base-waves-1-4-v2-summary.md]
   - [407_mpl_base_structure_first_redesign/summaries/05_initial-object-witness-summary.md]
@@ -804,6 +855,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md]
 
 **Description**: Evaluate and salvage the architecture-independent proof-engineering lemmas left on branch wip/task-299-soundness-refactor (commit 27d93e2d) by the stopped task-299 modal-K soundness re-attempt. Portable (acc-free) candidates: sfSat, sfSat_pos, sfSat_neg, RuleResultSat, and recognizer characterization lemmas (e.g. modalNegOf?_eq_some) in Cslib/Logics/Modal/Tableau/Soundness.lean, plus the branchSatisfiable Type (vs Type*) universe simplification. The FULL 299 refactor is UNBUILT and rewrites modalStepBranch_preserves_sat on the now-superseded global-Accessibility architecture, so do NOT merge it wholesale. Goal: decide which lemmas help the modal-tableau soundness-gap-redesign effort (the per-branch Accessibility 'task 384' tracked in the cslib-364 worktree / branch task-364-soundness-drift) and cherry-pick or restate them there if the propositional-rule recognizer layer hits the 'stuck on variable antecedent / consumed-scrutinee' friction documented in specs/364_modal_tableau_soundness_drift_repair/handoffs/BLOCKED-repair-guide.md (section 4). NOTE: 'task 384' here means the soundness-gap-redesign task in the cslib-364 worktree, which is a DIFFERENT task than main's own #384 (tableau_completeness_sorries) — task numbering diverged across worktrees. Reference branch: wip/task-299-soundness-refactor. Parent context: task 299 modal_k_tableau.
 
@@ -824,6 +876,9 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
+- **Research**: [392_remove_deadcode_fix_naming/reports/01_deadcode-and-naming-verification.md]
+- **Plan**: [392_remove_deadcode_fix_naming/plans/01_deadcode-and-naming-fixes.md]
+- **Summary**: [392_remove_deadcode_fix_naming/summaries/01_deadcode-and-naming-fixes-summary.md]
 
 **Description**: [Reconciled by task 395.] Tier-3. Delete grep-verified dead decls: Tableau/Classical/Soundness.lean:73-136 (12 classicalApplyOne_* private simp lemmas, 0 calls) + :486, Classical/Completeness.lean:435/447, Tableau/Defs.lean:81 propImpOrNegOf?, Intuitionistic/Rules.lean:114/203, Intuitionistic/Soundness.lean:431/505, NaturalDeduction/Equivalence.lean:305 hilbertAxiomToND, LK/Completeness.lean:69/73 mem_insert_*. Fix Extention->Extension typo (Equivalence.lean:256-257, Defs.lean:190/195). Rename underscore defs: modus_ponens constructor (Derivation.lean:77), lift_int_to_cl, goodSelection_seq, HasFresh to_infinite, emptyHrelation_apply. The LK/LJ cutAdm_*/ljCutAdm_* renames are DROPPED from this task — task 386 OWNS them (defsWithUnderscore). Sequence after 386. Source: §5.3-5.4 + 395.
 
@@ -834,6 +889,9 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 389
+- **Research**: [391_strip_docstring_jargon_fix_stale_counts/reports/01_docstring-jargon-stale-counts.md]
+- **Plan**: [391_strip_docstring_jargon_fix_stale_counts/plans/01_strip-jargon-fix-counts.md]
+- **Summary**: [391_strip_docstring_jargon_fix_stale_counts/summaries/01_strip-jargon-fix-counts-summary.md]
 
 **Description**: [Reconciled by task 395.] Tier-3. Remove internal task/process jargon from public docstrings: ClassicalConjImpCompleteness.lean (task 352, CL-B rung), ClassicalConjImpBotCompleteness.lean (task 378, CL-C rung), ConservativeChain.lean:44-45, HilbertLindenbaumRel.lean:21-23 (Route A2, 341 proof files), Tableau/RuleResult.lean:35, Foundations/Logic/Tableau/PropositionalTableau.lean:7, ListImplication.lean:83-139. Connectives.lean jargon (PR#607/task 340/173) is OWNED by task 400 (Connectives owner) — coordinate, do NOT double-edit. Stale-count fixes: re-verify post-task-398. NOTE StrongCompleteness 3-case counts (atom/bot/imp) remain CORRECT (398 changed derivation constructors, not formula structure). Fix only genuinely-stale counts: IntSoundness, MinSoundness, IntLindenbaum:320 misattached docstring, Tableau Int/Min DecisionProcedure sorry counts, Minimal/Completeness:50-51. Source: §5.1-5.2 + 395.
 
@@ -858,6 +916,8 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317
 - **Research**: [389_docstrings_headers_citations_propfound/reports/01_docstrings-headers-citations.md]
+- **Plan**: [389_docstrings_headers_citations_propfound/plans/01_docstrings-headers-citations.md]
+- **Summary**: [389_docstrings_headers_citations_propfound/summaries/01_docstrings-headers-citations-summary.md]
 
 **Description**: [Reconciled by task 395.] Tier-2. (a) Foundations/Order/HilbertAlgebra/FreeMeetExtension.lean: add docstrings to 7 undocumented def/abbrev (fld:50 also rename himpFold, fmeLe:106, fmeEquiv:123, fmeSetoid:125, FreeMeetExtension:152, mk:159, freeMeetEmbed:257) — only hard docBlame in Foundations. (b) DROPPED — the 4 Tableau barrels already carry copyright + import Cslib.Init (verified post-merge). (c) Add omit for 14 unusedSectionVars (mostly Tableau/Classical/Completeness, Minimal/Soundness:118, Minimal/Completeness:89). (d) Add references.bib entry NegriVonPlato2001 (Negri & von Plato, Structural Proof Theory, CUP 2001) cited by OrImpConservative.lean. Sequence the Tableau/Classical+Minimal Completeness edits AFTER task 317. Source: §4.3-4.6 + 395.
 
@@ -878,7 +938,30 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
-- **Plan**: [plans/03_b2-fuel-sufficiency.md]
+- **Plan**:
+  - [plans/03_b2-fuel-sufficiency.md]
+  - [317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md]
+  - [317_propositional_tableau_completeness/plans/02_tableau-completeness-unified.md]
+  - [317_propositional_tableau_completeness/plans/03_b2-fuel-sufficiency.md]
+  - [317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md]
+  - [317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md]
+  - [317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md]
+- **Research**:
+  - [317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md]
+  - [317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md]
+  - [317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md]
+  - [317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md]
+  - [317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md]
+  - [317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md]
+  - [317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md]
+  - [317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md]
+- **Summary**:
+  - [317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md]
+  - [317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase2a-blocked-summary.md]
+  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md]
+  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md]
+  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase4-summary.md]
+  - [317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
 
@@ -914,8 +997,16 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 - **Research**:
   - [299_modal_k_tableau/reports/03_completeness-decomposition.md]
   - [299_modal_k_tableau/reports/04_truth-lemma-architecture.md]
-- **Plan**: [299_modal_k_tableau/plans/05_modal-k-tableau-plan.md]
-- **Summary**: [299_modal_k_tableau/summaries/06_finalization-summary.md]
+  - [299_modal_k_tableau/reports/01_modal-k-tableau-research.md]
+  - [299_modal_k_tableau/reports/06_spawn-analysis.md]
+- **Plan**:
+  - [299_modal_k_tableau/plans/05_modal-k-tableau-plan.md]
+  - [299_modal_k_tableau/plans/01_modal-k-tableau-plan.md]
+  - [299_modal_k_tableau/plans/02_modal-k-tableau-plan.md]
+  - [299_modal_k_tableau/plans/04_modal-k-tableau-plan.md]
+- **Summary**:
+  - [299_modal_k_tableau/summaries/06_finalization-summary.md]
+  - [299_modal_k_tableau/summaries/06_final-verification-summary.md]
 
 **Description**: Implement tableau decision procedure for basic modal logic K with world labels, box/diamond rules on top of propositional rules from shared infrastructure. Introduces world labels (accessibility relation tracking) and fundamental modal rule pattern: box-positive is universal/persistent, diamond-positive is existential (fresh accessible world). Use Lukasiewicz encoding for and/or. Prove soundness against Kripke semantics and completeness by extracting finite Kripke countermodels. Modal formula type: Cslib.Logic.Modal.Formula with atom, bot, imp, box primitives. Files under Cslib/Logics/Modal/Tableau/: Defs.lean, Rules.lean, Branch.lean, Closure.lean, Saturation.lean, Soundness.lean, Completeness.lean. Estimated: 1,500-2,000 lines.
 
@@ -1012,7 +1103,12 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
   - [180_temporal_primitive_always_historically/reports/01_primitive-always-historically-research.md]
   - [180_temporal_primitive_always_historically/reports/02_implementation-attempt-status.md]
   - [180_temporal_primitive_always_historically/reports/03_metalogic-obligations-research.md]
-- **Plan**: [180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md]
+- **Plan**:
+  - [180_temporal_primitive_always_historically/plans/03_primitive-gh-metalogic-plan.md]
+  - [180_temporal_primitive_always_historically/plans/01_primitive-gh-implementation.md]
+- **Summary**:
+  - [180_temporal_primitive_always_historically/summaries/03_phase8-tableau-subtree-summary.md]
+  - [180_temporal_primitive_always_historically/summaries/03_primitive-gh-metalogic-summary.md]
 
 **Description**: Add allFuture (G) and allPast (H) as primitive constructors to Temporal.Formula, giving {atom, bot, imp, and, or, untl, snce, allFuture, allPast}. Currently G is derived as neg(someFuture(neg phi)) and H as neg(somePast(neg phi)), which are only valid classically. Making them primitive enables intuitionistic temporal logics. Note: someFuture (F) and somePast (P) remain derivable without negation (F = top U phi, P = top S phi). Scope: (1) Syntax/Formula.lean: add .allFuture/.allPast constructors, update complexity, subst, atoms, encodeNat, temporalDepth, swapTemporal. (2) Semantics: structural clauses for universal future/past quantification. (3) ProofSystem: temporal axioms referencing G/H now use primitive constructors. (4) Metalogic: cases in Soundness, Chronicle/TruthLemma, MCS, Completeness. (5) Classical equivalences become theorems. Verify full CI. Reference: Boudou et al. for intuitionistic temporal logic.
 

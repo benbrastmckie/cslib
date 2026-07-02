@@ -71,7 +71,7 @@ next_project_number: 475
 438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
 440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
 465 [PR READY] — Review PR #607 (logical operators): post GitHub review covering t
-466 [NOT STARTED] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
+466 [RESEARCHED] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
 474 [PR READY] — Draft Zulip replies confirming CSLib meeting attendance to Montes
 
 ### Tableau Infrastructure
@@ -167,10 +167,11 @@ next_project_number: 475
 ---
 
 ### 466. Record zulip settlement pr 648
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: PR & Upstreaming
 - **Dependencies**: Task 467
+- **Research**: [466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md]
 
 **Description**: Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou
 

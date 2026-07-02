@@ -14,15 +14,50 @@
     {
       "project_number": 466,
       "project_name": "record_zulip_settlement_pr_648",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "topic": "PR & Upstreaming",
       "description": "Post comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Waring, 2026-06-28) and request re-review from ctchou",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T16:10:38Z",
+      "last_updated": "2026-07-02T19:35:19Z",
       "dependencies": [
         467
-      ]
+      ],
+      "sources": [
+        {
+          "type": "github_pr",
+          "url": "https://github.com/leanprover/cslib/pull/648",
+          "parsed": {
+            "owner": "leanprover",
+            "repo": "cslib",
+            "pr_number": 648
+          }
+        },
+        {
+          "type": "zulip_thread",
+          "url": "https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Propositional.20Logic",
+          "parsed": {
+            "stream": "CSLib",
+            "topic": "Propositional Logic"
+          }
+        },
+        {
+          "type": "description",
+          "url": null,
+          "parsed": {
+            "text": "Prepare (draft only, do NOT post) a comment on PR #648 linking the Zulip primitive-bot plus efq settlement (Thomas Waring, 2026-06-28) and requesting re-review from ctchou. Local branch feat/propositional-v2 has two unpushed polish commits (bbcbef85, c98c4348): English-only Gentzen citation, implicit-Gamma binders restored, subscript names restored, contra/efqRule re-added, explicit Atom on CPL/LEM/Pierce, set-builder CPL, standard copyright headers. Prior context: task 440 addressed ctchou CHANGES_REQUESTED review (2026-06-15); a reply draft exists at specs/tmp/comment.md."
+          }
+        }
+      ],
+      "session_id": "sess_1783020539_579550",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/466_record_zulip_settlement_pr_648/reports/01_pr-review-research.md",
+          "summary": "PR review research synthesizing 1 GitHub PR source (1 review, 3 conversation comments, 0 inline comments) and 1 Zulip thread source (35 messages); identifies the settlement message (Thomas Waring, 2026-06-28, id 606970606) and acceptance reply (id 607217129), the local unpushed branch delta (bbcbef85, c98c4348 vs GitHub head c9364b65), and prior draft material in specs/tmp/comment.md and specs/474"
+        }
+      ],
+      "next_artifact_number": 2
     },
     {
       "project_number": 467,

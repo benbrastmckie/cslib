@@ -152,16 +152,16 @@
     {
       "project_number": 472,
       "project_name": "restore_model_class_equivalence_pr_662",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Restore the model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration removed by PR #662 in the Modal Lean sources, or document a defense of the standalone replacement",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T20:50:26Z",
+      "last_updated": "2026-07-02T21:16:44Z",
       "dependencies": [
         465
       ],
-      "session_id": "sess_1783025191_16f0e5",
+      "session_id": "sess_1783025648_3ec6e0",
       "artifacts": [
         {
           "path": "specs/472_restore_model_class_equivalence_pr_662/reports/01_restore-model-class-equivalence.md",
@@ -172,8 +172,14 @@
           "path": "specs/472_restore_model_class_equivalence_pr_662/plans/01_restore-model-class-equivalence.md",
           "type": "plan",
           "summary": "Phased implementation plan (Option A hybrid restore) to re-add parametric Proposition.Equiv S, notation, lemmas, HasContext/IsEquiv/Congruence/HasHContext/LogicalEquivalence instances, and remove LogicallyEquivalent in Cslib/Logics/Modal/LogicalEquivalence.lean; zero-debt with full CSLib CI."
+        },
+        {
+          "path": "specs/472_restore_model_class_equivalence_pr_662/summaries/01_restore-model-class-equivalence-summary.md",
+          "type": "summary",
+          "summary": "Restored the model-class-parametric Proposition.Equiv S and its LogicalEquivalence framework integration in Cslib/Logics/Modal/LogicalEquivalence.lean (Option A hybrid restore over PR #662's {atom,bot,imp,box} primitives and {hole,impL,impR,box} Context), removing the standalone all-models LogicallyEquivalent. All 5 plan phases completed; full CSLib CI pipeline (build, checkInitImports, lint, lint-style, shake, mk_all, test) is green; zero sorry, zero new axioms, zero vacuous definitions. Only Cslib/Logics/Modal/LogicalEquivalence.lean was modified; it has no downstream importers so nothing else needed to change."
         }
-      ]
+      ],
+      "completion_summary": "Restored the model-class-parametric Proposition.Equiv S and its LogicalEquivalence framework integration in Cslib/Logics/Modal/LogicalEquivalence.lean (Option A hybrid restore over PR #662's {atom,bot,imp,box} primitives and {hole,impL,impR,box} Context), removing the standalone all-models LogicallyEquivalent. All 5 plan phases completed; full CSLib CI pipeline (build, checkInitImports, lint, lint-style, shake, mk_all, test) is green; zero sorry, zero new axioms, zero vacuous definitions. Only Cslib/Logics/Modal/LogicalEquivalence.lean was modified; it has no downstream importers so nothing else needed to change."
     },
     {
       "project_number": 473,

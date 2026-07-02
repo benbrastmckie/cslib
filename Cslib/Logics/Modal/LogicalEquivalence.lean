@@ -1,37 +1,50 @@
 /-
-Copyright (c) 2026 Benjamin Brast-McKie. All rights reserved.
+Copyright (c) 2026 Fabrizio Montesi, Benjamin Brast-McKie. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Benjamin Brast-McKie
+Authors: Fabrizio Montesi, Benjamin Brast-McKie
 -/
 
 module
 
 public import Cslib.Logics.Modal.Basic
+public import Cslib.Foundations.Logic.LogicalEquivalence
 
 /-! # Logical Equivalence for Modal Propositions
 
 This file defines a one-hole context for `Proposition`, a fill operation that substitutes a
-proposition into the hole, and proves that logical equivalence (agreement of satisfaction across all
-models and worlds) is a congruence with respect to contexts.
+proposition into the hole, and the model-class-parametric equivalence `Proposition.Equiv S`,
+which is instantiated as an instance of the `LogicalEquivalence` framework
+(`Cslib.Foundations.Logic.LogicalEquivalence`).
 
 ## Main Definitions
 
 * `Proposition.Context` -- a one-hole context matching the fork's `Proposition` constructors
 * `Proposition.Context.fill` -- substitute a proposition into the hole
-* `LogicallyEquivalent` -- two propositions are logically equivalent when they are satisfied by
-  exactly the same model-world pairs
-* `LogicallyEquivalent.congruence` -- logical equivalence is preserved under all contexts
+* `Proposition.Equiv S` -- two propositions are equivalent in the class of models `S`: they agree
+  on satisfaction at every model in `S` and every world
+* `≡[S]` / `≡` -- notation for `Proposition.Equiv S` / `Proposition.Equiv Set.univ`
+* `Satisfies.Context` -- a judgemental context for `Judgement`
+* The `LogicalEquivalence (Proposition Atom) (Judgement World Atom) Satisfies.Bundled` instance,
+  registering Modal logic K's equivalence with the shared Foundations framework
 
 ## Design Notes
 
 The `Context` constructors mirror the recursive positions of `Proposition`: `imp` has two
 sub-proposition positions (left and right), and `box` has one. The ground constructors `atom` and
 `bot` have no sub-propositions, so they do not appear in `Context`.
+
+`Proposition.Equiv` is parametric in the model class `S`, mirroring the parametricity of
+`Proposition.valid` (`Basic.lean`). This lets equivalence be stated relative to any frame class
+(e.g. the T/B/4/5/S4/S5 classes from `Cube.lean`), not just the class of all models: `◇□φ ≡[S] □φ`
+is an S5 fact that is inexpressible with an equivalence hardwired to all models. The unqualified
+`≡` is `Equiv Set.univ`, matching the all-models equivalence used by `Cslib.Logic.HML`.
 -/
 
 @[expose] public section
 
 namespace Cslib.Logic.Modal
+
+open scoped InferenceSystem Proposition
 
 /-- A one-hole context for `Proposition`. Each constructor corresponds to a recursive position
 in `Proposition`: `impL` is the left argument of `imp`, `impR` is the right argument, and `box`
@@ -53,31 +66,105 @@ def Proposition.Context.fill : Proposition.Context Atom → Proposition Atom →
   | .impR ψ c, φ => ψ → c.fill φ
   | .box c, φ => □(c.fill φ)
 
-/-- Two propositions are logically equivalent when they agree on satisfaction across all models
-and worlds. -/
-def LogicallyEquivalent.{v} {Atom : Type u} (φ ψ : Proposition Atom) : Prop :=
-  ∀ (World : Type v) (m : Model World Atom) (w : World), Satisfies m w φ ↔ Satisfies m w ψ
+instance : HasContext (Proposition Atom) := ⟨Proposition.Context Atom, Proposition.Context.fill⟩
 
-/-- Logical equivalence is a congruence: if `φ` and `ψ` are logically equivalent, then
-`c.fill φ` and `c.fill ψ` are logically equivalent for any context `c`. -/
-theorem LogicallyEquivalent.congruence.{v} {Atom : Type u} {φ ψ : Proposition Atom}
-    (c : Proposition.Context Atom) (h : LogicallyEquivalent.{v} φ ψ) :
-    LogicallyEquivalent.{v} (c.fill φ) (c.fill ψ) := by
-  intro World m
-  induction c with
-  | hole => exact h World m
-  | impL c _ ih =>
-    intro w
-    simp only [Proposition.Context.fill, Satisfies]
-    exact ⟨fun hf ha => hf ((ih w).mpr ha), fun hf ha => hf ((ih w).mp ha)⟩
-  | impR _ c ih =>
-    intro w
-    simp only [Proposition.Context.fill, Satisfies]
-    exact ⟨fun hf ha => (ih w).mp (hf ha), fun hf ha => (ih w).mpr (hf ha)⟩
-  | box c ih =>
-    intro w
-    simp only [Proposition.Context.fill, Satisfies]
-    exact ⟨fun hf w' hr => (ih w').mp (hf w' hr),
-           fun hf w' hr => (ih w').mpr (hf w' hr)⟩
+open scoped Proposition.Context
+
+/-- Two propositions `φ₁` and `φ₂` are logically equivalent in the class of models `S` when they
+agree on satisfaction at every model in `S` and every world. -/
+def Proposition.Equiv (S : Set (Model World Atom)) (φ₁ φ₂ : Proposition Atom) : Prop :=
+  ∀ m ∈ S, ∀ w : World, ⇓Modal[m,w ⊨ φ₁ ↔ φ₂]
+
+@[inherit_doc]
+scoped notation:50 φ₁ " ≡[" S "] " φ₂ => Proposition.Equiv S φ₁ φ₂
+
+@[inherit_doc]
+scoped notation:50 φ₁ " ≡ " φ₂ => Proposition.Equiv Set.univ φ₁ φ₂
+
+/-- Unfolding lemma for `Proposition.Equiv`. -/
+@[scoped grind =]
+theorem Proposition.equiv_def (S : Set (Model World Atom)) (φ₁ φ₂ : Proposition Atom) :
+    (φ₁ ≡[S] φ₂) ↔ (∀ m ∈ S, ∀ w : World, ⇓Modal[m,w ⊨ φ₁ ↔ φ₂]) := Iff.rfl
+
+/-- `Proposition.Equiv` characterised as agreement of satisfaction, splitting the object-level
+`↔` into the meta-level `Iff`. -/
+@[scoped grind =]
+theorem Proposition.equiv_iff (S : Set (Model World Atom)) (φ₁ φ₂ : Proposition Atom) :
+    (φ₁ ≡[S] φ₂) ↔ (∀ m ∈ S, ∀ w : World, ⇓Modal[m,w ⊨ φ₁] ↔ ⇓Modal[m,w ⊨ φ₂]) := by
+  simp only [Proposition.equiv_def]
+  constructor
+  · intro h m hm w
+    have hh := h m hm w
+    rw [Proposition.iff, Satisfies.and_iff_and, Satisfies.impl_iff_impl,
+      Satisfies.impl_iff_impl] at hh
+    rw [derivation_def, derivation_def]
+    exact ⟨hh.1, hh.2⟩
+  · intro h m hm w
+    have hh := h m hm w
+    rw [Proposition.iff, Satisfies.and_iff_and, Satisfies.impl_iff_impl, Satisfies.impl_iff_impl]
+    rw [derivation_def, derivation_def] at hh
+    exact ⟨hh.1, hh.2⟩
+
+/-- Logically equivalent propositions are valid in the same models: `Equiv` bridges to
+`Proposition.valid`. -/
+theorem Proposition.equiv_valid (S : Set (Model World Atom)) (φ₁ φ₂ : Proposition Atom)
+    (h : φ₁ ≡[S] φ₂) : φ₁.valid S ↔ φ₂.valid S := by
+  rw [Proposition.equiv_iff] at h
+  simp only [Proposition.valid]
+  exact ⟨fun hv m hm w => (h m hm w).mp (hv m hm w), fun hv m hm w => (h m hm w).mpr (hv m hm w)⟩
+
+instance (S : Set (Model World Atom)) : IsEquiv (Proposition Atom) (Proposition.Equiv S) where
+  refl a := by rw [Proposition.equiv_iff]; grind
+  symm a b h := by rw [Proposition.equiv_iff] at h ⊢; grind
+  trans a b c h1 h2 := by rw [Proposition.equiv_iff] at h1 h2 ⊢; grind
+
+instance (S : Set (Model World Atom)) : Congruence (Proposition Atom) (Proposition.Equiv S) where
+  elim :
+      Covariant (Proposition.Context Atom) (Proposition Atom) (Proposition.Context.fill)
+      (Proposition.Equiv S) := by
+    intro ctx φ₁ φ₂ heqv
+    rw [Proposition.equiv_iff] at heqv ⊢
+    intro m hm w
+    induction ctx generalizing w with
+    | hole => exact heqv m hm w
+    | impL c φ ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun hf ha => hf ((ih w).mpr ha), fun hf ha => hf ((ih w).mp ha)⟩
+    | impR φ c ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun hf ha => (ih w).mp (hf ha), fun hf ha => (ih w).mpr (hf ha)⟩
+    | box c ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun hf w' hr => (ih w').mp (hf w' hr), fun hf w' hr => (ih w').mpr (hf w' hr)⟩
+
+/-- Judgemental contexts for Modal logic: a model together with a world, into which a
+proposition is placed to form a `Judgement`. -/
+structure Satisfies.Context (World Atom : Type*) where
+  /-- The model to consider. -/
+  m : Model World Atom
+  /-- The world to check the proposition against. -/
+  w : World
+
+/-- Fills a judgemental context with a proposition. -/
+def Satisfies.Context.fill (c : Satisfies.Context World Atom) (φ : Proposition Atom) :
+    Judgement World Atom :=
+  Modal[c.m, c.w ⊨ φ]
+
+instance judgementalContext : HasHContext (Judgement World Atom) (Proposition Atom) :=
+  ⟨Satisfies.Context World Atom, Satisfies.Context.fill⟩
+
+/-- Modal logic K's equivalence, registered as an instance of the `LogicalEquivalence`
+framework: equivalence relative to the class of all models (`Proposition.Equiv Set.univ`)
+preserves validity of judgements under any judgemental context. -/
+instance : LogicalEquivalence (Proposition Atom) (Judgement World Atom) Satisfies.Bundled where
+  eqv := Proposition.Equiv Set.univ
+  eqvFillValid {φ₁ φ₂ : Proposition Atom} (heqv : φ₁ ≡ φ₂)
+      (c : HasHContext.Context (Judgement World Atom) (Proposition Atom))
+      (h : Satisfies.Bundled c<[φ₁]) : Satisfies.Bundled c<[φ₂] := by
+    rw [Proposition.equiv_iff] at heqv
+    have hw := heqv c.m (Set.mem_univ c.m) c.w
+    simp only [derivation_def] at hw
+    simp only [Satisfies.Bundled, HasHContext.fill, Satisfies.Context.fill] at h ⊢
+    exact hw.mp h
 
 end Cslib.Logic.Modal

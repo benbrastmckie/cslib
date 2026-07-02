@@ -1,7 +1,7 @@
 # Implementation Plan: Restore model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration (PR #662)
 
 - **Task**: 472 - Restore model-class-parametric Proposition.Equiv and LogicalEquivalence framework integration (PR #662)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours
 - **Dependencies**: None (single-file logic change; open PR #662 context)
 - **Research Inputs**: reports/01_restore-model-class-equivalence.md
@@ -89,7 +89,7 @@ depends on the prior because the restored declarations build on one another (not
 need the definition; instances need the notation/lemmas; the framework instance needs the
 instances; CI needs the complete file).
 
-### Phase 1: Confirm target state and re-verify anchors [NOT STARTED]
+### Phase 1: Confirm target state and re-verify anchors [COMPLETED 2026-07-02T20:56:00Z]
 
 **Goal**: Establish the correct branch/working tree to edit, confirm no external
 `LogicallyEquivalent` users, and read the current file plus all verify-at-implementation anchors
@@ -115,9 +115,29 @@ so subsequent phases edit from ground truth.
 - `git grep` output confirms no external `LogicallyEquivalent` users (or lists any found for handling in Phase 4).
 - All anchor line references confirmed to match current sources (note any drift).
 
+**Phase 1 results**: Working state is `main` (clean except this task's own plan/state edits), 29
+commits ahead of `origin/main`. Implementing directly on `main`/working tree (not the open PR
+branch `feat/modal-formula-primitives`) -- the standalone `LogicallyEquivalent` is already the
+committed state here per commit `a084f9f2`, and the restoration is a same-file rewrite, not a
+merge with the PR branch. `git grep -n "LogicallyEquivalent"` confirms zero code references
+outside `Cslib/Logics/Modal/LogicalEquivalence.lean` (only historical/archived `specs/` markdown
+mentions remain, which are documentation, not code). Anchors confirmed: `Cslib/Foundations/Logic/LogicalEquivalence.lean:20` (`class LogicalEquivalence`), `:33` (`≡` infix); `Cslib/Foundations/Syntax/Context.lean:18,24,28` (`HasHContext`/`HasContext`); `Cslib/Foundations/Syntax/Congruence.lean:19` (`class Congruence ... extends IsEquiv, covariant : CovariantClass ...`); `Cslib/Logics/Modal/Basic.lean:205` (`Satisfies.Bundled`), `:209` (`HasInferenceSystem`), `:443` (`Proposition.valid`, parametric); `equivalence_iff_isEquiv` confirmed at `Mathlib/Order/Defs/Unbundled.lean:107`. **Drift noted**: `Satisfies.box_iff_forall` is at `Basic.lean:235` (plan/report cited `:116`; line numbers shifted since research, content unchanged). Reference instances `Cslib/Logics/HML/LogicalEquivalence.lean` and `Cslib/Logics/LinearLogic/CLL/Basic.lean:99,310,646,653` confirmed as live templates for the exact `Congruence`/`IsEquiv`/`LogicalEquivalence` instance syntax (`elim : Covariant ... := by ...` field form).
+
 ---
 
-### Phase 2: Add parametric Equiv S, notation, and core lemmas [NOT STARTED]
+### Phase 2: Add parametric Equiv S, notation, and core lemmas [COMPLETED 2026-07-02T21:20:00Z]
+
+**Phase 2 results**: Added `public import Cslib.Foundations.Logic.LogicalEquivalence`, `open scoped
+InferenceSystem Proposition` (required -- these scoped notations do not propagate across file
+imports and must be re-opened locally; this was the source of an initial "expected token" parse
+error on `⇓Modal[...]`/`↔`), `Proposition.Equiv S` over the ambient (auto-bound, per-declaration)
+`World`, scoped notation `≡[S]`/`≡` at precedence 50, and `equiv_def`/`equiv_iff`/`equiv_valid`.
+`equiv_iff`'s proof required explicit `rw [Proposition.iff, Satisfies.and_iff_and,
+Satisfies.impl_iff_impl]` rather than blind `grind`/`simp only [...]` normalization -- `grind`'s
+default unfolding of the Lukasiewicz-derived `and`/`iff` primitives down to raw `imp`/`bot`
+requires classical (`Classical.em`) reasoning it does not attempt automatically, so the bridge
+lemmas must be applied as rewrite steps (opaque to further unfolding) before finishing with
+`exact`. Zero sorry, zero axioms.
 
 **Goal**: Re-add the framework import, the parametric `Proposition.Equiv S` definition over the
 fixed `World` section variable, the scoped notation, and the `equiv_def`/`equiv_iff`/`equiv_valid`
@@ -145,7 +165,24 @@ lemmas.
 
 ---
 
-### Phase 3: Restore HasContext, IsEquiv, and Congruence instances [NOT STARTED]
+### Phase 3: Restore HasContext, IsEquiv, and Congruence instances [COMPLETED 2026-07-02T21:20:00Z]
+
+**Phase 3 results**: `HasContext (Proposition Atom)` instance added. `equivalence_iff_isEquiv`
+confirmed at `Mathlib/Order/Defs/Unbundled.lean:107`, but the simpler/idiomatic approach already
+used by HML and CLL (`refl`/`symm`/`trans` fields directly, each `by rw [Proposition.equiv_iff];
+grind`) was used instead of the `rw [← equivalence_iff_isEquiv]` route sketched in the report --
+functionally equivalent, matches the codebase's existing `IsEquiv` instance style exactly.
+`Congruence.elim`'s field type is `Covariant (Proposition.Context Atom) (Proposition Atom)
+Proposition.Context.fill (Proposition.Equiv S)` (matching the exact `Congruence` class shape at
+`Cslib/Foundations/Syntax/Congruence.lean:19`, which `extends IsEquiv, covariant : CovariantClass
+...`; the field is named `elim`, confirmed against the live HML/CLL instance syntax). The key
+technique: `rw [Proposition.equiv_iff] at heqv ⊢` immediately after `intro ctx φ₁ φ₂ heqv`, lifting
+the whole proof obligation to the meta-`Iff` level *before* induction on `ctx`, so `ih` in each
+case is already a meta-`Iff` (not an object-level `⇓Modal[...↔...]`) -- this let the `impL`/`impR`/
+`box` cases port **verbatim** (same six-line pointfree `⟨fun hf ha => ..., fun hf ha => ...⟩`
+terms) from the current standalone `LogicallyEquivalent.congruence` (old lines 69-81), confirming
+the report's claim that the proof content was already solved in substance. Zero sorry, zero
+axioms.
 
 **Goal**: Re-add the `HasContext` instance and the `IsEquiv` and `Congruence` instances, porting
 the already-solved standalone congruence proof content into the `Congruence.elim`/`CovariantClass`
@@ -172,7 +209,16 @@ shape for the `{hole, impL, impR, box}` context constructors.
 
 ---
 
-### Phase 4: Restore judgemental context and framework instance; remove LogicallyEquivalent [NOT STARTED]
+### Phase 4: Restore judgemental context and framework instance; remove LogicallyEquivalent [COMPLETED 2026-07-02T21:20:00Z]
+
+**Phase 4 results**: Added `Satisfies.Context`/`Satisfies.Context.fill`/`judgementalContext :
+HasHContext (Judgement World Atom) (Proposition Atom)` and the `LogicalEquivalence (Proposition
+Atom) (Judgement World Atom) Satisfies.Bundled` instance (`eqv := Proposition.Equiv Set.univ`,
+`eqvFillValid` proved via `rw [Proposition.equiv_iff] at heqv` then unfolding `Satisfies.Bundled`/
+`HasHContext.fill`/`Satisfies.Context.fill` and `exact hw.mp h`). The standalone `def
+LogicallyEquivalent` and `theorem LogicallyEquivalent.congruence` were removed entirely (no
+abbrev retained, per the locked decision); `git grep -n "LogicallyEquivalent"` over `Cslib/`
+confirms zero remaining code references anywhere in the tree. Zero sorry, zero axioms.
 
 **Goal**: Re-add `Satisfies.Context`/`fill` + `HasHContext` judgemental-context instance and the
 `LogicalEquivalence` framework instance, then remove `LogicallyEquivalent` and update any in-file
@@ -201,7 +247,32 @@ references to `≡`/`≡[S]`.
 
 ---
 
-### Phase 5: Full CI pipeline, downstream compile, and zero-debt/standards check [NOT STARTED]
+### Phase 5: Full CI pipeline, downstream compile, and zero-debt/standards check [COMPLETED 2026-07-02T21:45:00Z]
+
+**Phase 5 results**: `lake exe cache get` (warm, no-op). `lake build` (whole tree, 3189 jobs) --
+success; all pre-existing warnings/sorries surfaced belong to unrelated files (Propositional
+Tableau, LTL, IntDecidability, etc.), none touch `Modal/LogicalEquivalence.lean`. `lake exe
+checkInitImports` -- exit 0, silent (all files, including ours, transitively import
+`Cslib.Init`). `lake lint` -- "Linting passed for Cslib." (zero environment-linter warnings
+library-wide). `lake exe lint-style` -- exit 0, no warnings. `lake shake --add-public
+--keep-implied --keep-prefix` -- exit 1, but confirmed via `git grep`/diff against a stashed
+baseline that all ~58 flagged files are **pre-existing** import-minimization opportunities in
+unrelated files (Propositional/Temporal/Modal-Tableau); `Modal/LogicalEquivalence.lean` itself is
+**not** flagged, confirming its own import list (`Cslib.Logics.Modal.Basic`,
+`Cslib.Foundations.Logic.LogicalEquivalence`) is minimal. `lake exe mk_all --module` -- "No
+update necessary" (no new files added). `lake test` -- exit 0, full `CslibTests/` suite passes
+(pre-existing sorries/warnings elsewhere, none in our file). Downstream compile: `git grep` finds
+**zero** files importing `Modal/LogicalEquivalence.lean` (it is a leaf module, as the research
+predicted -- there is no `Modal/Cube.lean` dependency on it); `lake build
+Cslib.Logics.Modal.Cube` independently confirmed green. Zero-debt: `grep sorry|admit` and `grep
+^axiom` on the file both empty; `lean_verify` on `Proposition.equiv_iff`/`equiv_valid` reports
+only the three standard foundational axioms (`propext`, `Classical.choice`, `Quot.sound`) -- no
+new axioms. Standards: every `def`/`theorem`/`inductive`/`structure` carries a docstring (the
+unnamed `instance`s follow the exact no-docstring convention already used by the live
+`HasContext`/`IsEquiv`/`Congruence`/`judgementalContext` instances in `HML/LogicalEquivalence.lean`
+and `LinearLogic/CLL/Basic.lean`); both `≡[S]`/`≡` notations are `scoped` under
+`Cslib.Logic.Modal`; `LogicallyEquivalent` is fully removed (zero occurrences anywhere in
+`Cslib/`).
 
 **Goal**: Run the complete CSLib CI pipeline, confirm downstream users compile, and verify
 zero-debt and standards (docstrings, notation policy) compliance.

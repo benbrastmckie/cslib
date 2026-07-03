@@ -1,19 +1,19 @@
 ---
-next_project_number: 475
+next_project_number: 476
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-02. Generated from state.json dependency graph.*
+*Updated 2026-07-03. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
+| 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
 | 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -40,6 +40,7 @@ next_project_number: 475
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
 469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
+475 [NOT STARTED] — Completely fix and finalize PR #662 (feat(Logics/Modal): refactor
 
 ### Temporal Logic
 
@@ -84,6 +85,16 @@ next_project_number: 475
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 475. Fix and stack pr 662 on 648
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 468, Task 469, Task 472
+
+**Description**: Completely fix and finalize PR #662 (feat(Logics/Modal): refactor formula primitives to {atom, bot, imp, box}) so it is cleanly reviewable and merge-ready, stacked on PR #648. Current state: #662 targets base=main, is ~10 commits behind upstream/main, is NOT a descendant of #648, and carries its own divergent/stale copies of #648's propositional files (Propositional/Defs.lean, NaturalDeduction/Basic.lean, Theory.lean, references.bib) with the old MPL/IsIntuitionistic/intuitionisticCompletion design; its modal layer has no functional dependency on those files. Work: (1) rebase #648 (feat/propositional-v2) then #662 (feat/modal-formula-primitives) onto current upstream/main; (2) stack #662 on #648 — retarget PR base to feat/propositional-v2 and drop #662's propositional-file changes so they are inherited from #648 (realizes task 468's resync goal); (3) cherry-pick the completed task-472 fix (restored model-class-parametric Proposition.Equiv + LogicalEquivalence framework integration, currently only on local main) onto the PR branch; (4) resolve the Connectives.lean typeclass-layer question (task 469) — self-own in #662 vs decouple vs coordinate with #607/@chenson2018 review; (5) slim #662 to its genuine modal contribution (Modal/Basic, Cube, Denotation, LogicalEquivalence, Connectives.lean, Cslib.lean) so it can be reviewed 'one at a time' per @fmontesi's 2026-07-02 Zulip feedback that he was overwhelmed by the PR size; (6) preserve the stated design rationale — box primitive (necessitation as pure rule), diamond derived as not-box-not, HasBox/ModalConnectives, K/T/B/4/5/D proofs via explicit 'simp only [Satisfies] + intro' rather than grind, classical-modal restriction with HasDia deferred for IK/CK; (7) correct the PR #662 body to accurately describe the stack-on-#648 relationship and design; (8) prepare a Zulip response to @fmontesi (CSLib > Modal Logic) taking points one at a time and offering to join a CSLib online meeting (he returns 23 July). Squash to a single clean commit and force-push ONLY with explicit user approval. Zulip ref: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603
+
+---
 
 ### 474. Draft zulip replies meeting fragments
 - **Status**: [PR READY]

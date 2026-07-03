@@ -2385,11 +2385,6 @@
           "path": "specs/476_divide_modal_prs_coordinate_607/reports/01_divide-modal-prs.md"
         },
         {
-          "path": "specs/476_divide_modal_prs_coordinate_607/plans/02_divide-modal-prs.md",
-          "type": "plan",
-          "summary": "Phased coordination plan: two approval-pending drafts (#607 review, Zulip note), HOLD gate, conditional gated #662-on-#607 migration (imp naming)."
-        },
-        {
           "type": "summary",
           "path": "specs/476_divide_modal_prs_coordinate_607/artifacts/pr-607-review.md"
         },
@@ -2400,8 +2395,18 @@
         {
           "type": "summary",
           "path": "specs/476_divide_modal_prs_coordinate_607/summaries/02_divide-modal-prs-summary.md"
+        },
+        {
+          "path": "specs/476_divide_modal_prs_coordinate_607/plans/03_divide-modal-prs.md",
+          "type": "plan"
         }
-      ]
+      ],
+      "next_artifact_number": 2,
+      "plan_metadata": {
+        "reports_integrated": [
+          "01_divide-modal-prs.md"
+        ]
+      }
     }
   ],
   "repository_health": {

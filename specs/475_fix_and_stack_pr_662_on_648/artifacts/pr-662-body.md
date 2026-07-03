@@ -1,24 +1,37 @@
-## Summary
+Refactors the modal formula type to the primitive set `{atom, bot, imp, box}` and builds out the modal cube and logical equivalence over it.
 
-Adds the modal-logic layer with formula primitives `{atom, bot, imp, box}`, **stacked on #648** (`feat/propositional-v2`) and slimmed to a single commit touching only the seven modal files below. All propositional files are inherited unchanged from #648.
+The original PR mixed this with propositional-logic changes and was large to review. Per reviewer feedback it is now slimmed to the modal layer only — a single commit touching the files below — and builds independently on `main`.
 
-**Review order:** GitHub can't base a PR on a fork branch, so this still targets `main` and shows the *combined* #648 + modal diff until #648 merges. Please **merge #648 first** — this PR's diff then collapses to just the modal contribution (7 files, +426/−189, one commit). A short rebase may be needed if #648 is squash-merged.
+### Files Changed
 
-### Files
+**`Cslib/Logics/Modal/Basic.lean`** (modified)
 
-- `Cslib/Logics/Modal/Basic.lean` — primitives; K/T/B/4/5/D validity + canonicity
-- `Cslib/Logics/Modal/LogicalEquivalence.lean` — parametric `Proposition.Equiv S` (task 472)
-- `Cslib/Foundations/Logic/Connectives.lean` — operator typeclasses (`HasBox`, …)
-- `Cslib/Logics/Modal/Denotation.lean` — semantics for the new primitives
-- `CslibTests/GrindLint.lean`, `Cslib/Logics/Modal/Cube.lean`, `Cslib.lean` — grind-lint skips + wiring
+`Modal.Proposition` uses `{atom, bot, imp, box}` as primitives; negation, conjunction, disjunction and diamond are derived (`◇φ := ¬□¬φ`). Box is kept primitive so necessitation and the K axiom stay pure rules on a single operator. Proves each of K/T/B/4/5/D valid under its frame condition, with canonicity (the condition is also necessary) for T/B/4/5/D. Diamond's derivation is classical-only; a primitive `HasDia` for intuitionistic/minimal modal logic is noted as future work.
 
-## Design notes
+**`Cslib/Logics/Modal/Cube.lean`** (modified)
 
-- **Box primitive, diamond derived** (`◇φ := ¬□¬φ`): keeps necessitation and K as pure rules on a single operator. The derivation is classical-only, so a primitive `HasDia` is deferred (TODO noted) for intuitionistic/minimal modal logic.
-- **`Connectives.lean` is self-owned**, following @fmontesi's #607 direction. Since #607 is unmerged and lacks `HasBot`/bundled classes, decoupling onto it is deferred to a follow-up — intentional, temporary duplication rather than a dependency on unmerged work.
-- **K/T/B/4/5/D**: each axiom proved valid under its frame condition, with canonicity (the condition is also necessary) for T/B/4/5/D. Mostly `grind`; `four` is written out explicitly. `Cube.lean` assembles the 15 cube logics and the standard inclusions.
-- **Logical equivalence**: `Proposition.Equiv S` is parametric in the model class `S` (previously fixed to `univ`), proved an equivalence relation and a congruence over one-hole contexts, and registered into the shared `LogicalEquivalence` framework.
+Assembles the fifteen named logics of the modal cube (K, T, B, 4, 5, D, D4, D5, D45, DB, TB, KB5, S4, S5, K45) as axiom-set unions over the relevant model classes, and proves the standard cube inclusions.
 
-## AI disclosure
+**`Cslib/Logics/Modal/LogicalEquivalence.lean`** (modified)
 
-Claude (Anthropic) assisted with the rebase, file transplantation, and CI verification. The Lean proofs are by the contributors listed in the file headers; AI use was limited to mechanical git work and drafting this description.
+Defines `Proposition.Equiv S`, parametric in the model class `S`, so equivalence can be stated relative to any modal-cube class (T/B/4/5/S4/S5, …) rather than only the class of all models. Proved to be an equivalence relation and a congruence over one-hole contexts, and registered into the shared `Cslib.Foundations.Logic.LogicalEquivalence` framework.
+
+**`Cslib/Logics/Modal/Denotation.lean`** (modified)
+
+Semantics/denotation for the new primitive set.
+
+**`Cslib/Foundations/Logic/Connectives.lean`** (new file)
+
+A small operator-typeclass hierarchy — `HasBot`, `HasImp`, `HasAnd`, `HasOr`, `HasBox`, bundled into `PropositionalConnectives` and `ModalConnectives`. This follows the one-class-per-operator direction of #607, but is self-owned here rather than depending on #607, which is not yet merged and does not currently carry `HasBot`/the bundled classes. Folding this onto #607's hierarchy once it lands is left to a follow-up.
+
+**`references.bib`** (modified)
+
+Adds `Avigad2022` and `ChagrovZakharyaschev1997` for the sources cited in the modal files.
+
+**`Cslib.lean`, `CslibTests/GrindLint.lean`** (modified)
+
+Module registration for the above, plus `#grind_lint skip` entries for the four new `@[scoped grind]` modal lemmas (the same mechanism already used by `Cslib.Logic.HML`).
+
+## AI Disclosure
+
+Claude (Anthropic) assisted with the rebase, file selection, and CI verification. The Lean proofs are by the contributors listed in the file headers; AI use was limited to mechanical git work and drafting this description.

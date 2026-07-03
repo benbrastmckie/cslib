@@ -1,21 +1,32 @@
 ## Summary
 
-This PR is now **stacked on #648** (`feat/propositional-v2`) rather than targeting `main`
-directly. It has been slimmed down to only the genuine modal-logic contribution — six files —
-so it can be reviewed independently of #648's propositional-logic churn.
+This PR is **stacked on #648** (`feat/propositional-v2`): its single commit is built directly on
+top of #648's branch, and it has been slimmed to only the genuine modal-logic contribution — the
+seven files listed below — with **no** propositional-file changes of its own (those are inherited
+unchanged from #648).
 
-**Base branch**: `feat/propositional-v2` (#648)
-**This branch**: `feat/modal-formula-primitives` (single squashed commit)
+> **Note on the diff view / review order.** Because GitHub requires a PR's base branch to live in
+> the upstream repo, this PR still technically targets `main` (the `feat/propositional-v2` branch
+> only exists on the fork, so it cannot be selected as a GitHub base). As a result, **until #648
+> merges, GitHub renders this PR as the *combined* diff of #648 + the modal work** (~11 files).
+> The stack is enforced by **merge order**: please review/merge **#648 first**, after which this
+> PR's diff automatically collapses to just the modal contribution below (7 files, +426/−189, one
+> commit). A short rebase onto the updated `main` may be needed after #648 lands if #648 is
+> squash-merged.
 
-Everything propositional (`Cslib/Logics/Propositional/*`) is inherited unchanged from #648; this
-PR touches only:
+**Depends on**: #648 (`feat/propositional-v2`) — merge first
+**This branch**: `feat/modal-formula-primitives` (single squashed commit, built on #648)
 
-- `Cslib/Logics/Modal/Basic.lean`
-- `Cslib/Logics/Modal/Cube.lean`
-- `Cslib/Logics/Modal/Denotation.lean`
-- `Cslib/Logics/Modal/LogicalEquivalence.lean`
-- `Cslib/Foundations/Logic/Connectives.lean`
-- `Cslib.lean` (module registration for the above)
+Everything propositional (`Cslib/Logics/Propositional/*`) is inherited unchanged from #648; the
+genuine modal contribution in this PR is exactly these seven files:
+
+- `Cslib/Logics/Modal/Basic.lean` (+183/−92) — primitives, K/T/B/4/5/D validity + canonicity
+- `Cslib/Logics/Modal/LogicalEquivalence.lean` (+128/−90) — parametric `Proposition.Equiv S` (task-472)
+- `Cslib/Foundations/Logic/Connectives.lean` (+91) — self-owned operator typeclasses (`HasBox`, …)
+- `Cslib/Logics/Modal/Denotation.lean` (+18/−7) — semantics for the new primitives
+- `CslibTests/GrindLint.lean` (+4) — `#grind_lint skip` for 4 new `@[scoped grind]` modal lemmas
+- `Cslib/Logics/Modal/Cube.lean` (+1) — module wiring
+- `Cslib.lean` (+1) — module registration for the above
 
 ## Design
 
@@ -114,8 +125,9 @@ instance of the shared `LogicalEquivalence` framework.
 @fmontesi flagged in [Zulip](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603)
 that the original PR was too large to review productively, mixing propositional-logic changes
 (from #648) with the modal-logic contribution. This PR is the result of stacking cleanly on
-#648: it now touches exactly the six files listed above, with no propositional-file changes and
-no duplication of #648's propositional work.
+#648: it now contains a single commit touching exactly the seven files listed above, with no
+propositional-file changes and no duplication of #648's propositional work. Once #648 is merged,
+this PR's diff is just that modal contribution — reviewable on its own.
 
 ## AI Disclosure
 

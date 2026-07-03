@@ -1,7 +1,7 @@
 # Implementation Plan: Task #476 — Divide Modal PRs & Coordinate with #607
 
 - **Task**: 476 - divide_modal_prs_coordinate_607
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: ~4.75 hours (Phases 4-5 conditional; gated on external agreement)
 - **Dependencies**: Task 475 (`specs/475_fix_and_stack_pr_662_on_648/`)
 - **Research Inputs**: `specs/476_divide_modal_prs_coordinate_607/reports/01_divide-modal-prs.md`
@@ -106,30 +106,32 @@ Phases within the same wave can execute in parallel. Phases 1 and 2 are independ
 Phases 4 and 5 are CONDITIONAL and remain [NOT STARTED] until the Phase 3 gate opens (design
 agreement reached, #607 landed, and explicit user approval given).
 
-### Phase 1: Draft #607 review comment [NOT STARTED]
+### Phase 1: Draft #607 review comment [COMPLETED]
+
+**Completed**: 2026-07-03T12:07:16Z
 
 **Goal**: Produce a polished, human-approval-pending review comment for PR #607 building on research
 §4.4 — leading with what's good, making the CI-drift point, and offering concrete help.
 
 **Tasks**:
-- [ ] Write draft to `specs/476_divide_modal_prs_coordinate_607/artifacts/pr-607-review.md` (create
+- [x] Write draft to `specs/476_divide_modal_prs_coordinate_607/artifacts/pr-607-review.md` (create
       `artifacts/` lazily).
-- [ ] Lead with genuine praise (research §4.1): clean one-class-per-operator layer, the
+- [x] Lead with genuine praise (research §4.1): clean one-class-per-operator layer, the
       `@[scoped grind =] _def` bridge-lemma pattern, Mathlib `Bot`/`Top` reuse, readable `rfl`
       characterisations.
-- [ ] Make the **CI-drift-is-not-#607's-fault** point (research §4.3): red `ci-checks` is
+- [x] Make the **CI-drift-is-not-#607's-fault** point (research §4.3): red `ci-checks` is
       `HML/LogicalEquivalence.lean` failing because the branch is ~15 commits behind `main` (Mathlib
       bumps + `Relation` split already fixed HML on `main`); a rebase onto `main` should turn it
       green. Frame as friendly and low-effort.
-- [ ] Offer the `HasBot` class plus bundled `PropositionalConnectives`/`ModalConnectives` classes
+- [x] Offer the `HasBot` class plus bundled `PropositionalConnectives`/`ModalConnectives` classes
       (research §2.3) so the operator layer lands complete in #607 and everything downstream imports
       it — answering the chenson2018/ctchou "should these be bundled?" and eric-wieser "one file"
       threads.
-- [ ] Surface the **`imp` naming suggestion**: note `HasImpl.impl` (#607) vs `HasImp.imp`
+- [x] Surface the **`imp` naming suggestion**: note `HasImpl.impl` (#607) vs `HasImp.imp`
       (downstream), state a lean toward `imp` with rationale, and explicitly frame it as **his call
       as owner of the layer** / a suggestion — NOT a code edit on his branch.
-- [ ] Reference the separate box-vs-diamond modal question (defer detail to the Zulip note).
-- [ ] Add a header banner: DRAFT — do NOT post; requires EXPLICIT user approval; post #1 as plain
+- [x] Reference the separate box-vs-diamond modal question (defer detail to the Zulip note).
+- [x] Add a header banner: DRAFT — do NOT post; requires EXPLICIT user approval; post #1 as plain
       comment and #2-#4 as review discussion, never as code "suggestions" on his branch.
 
 **Timing**: 1 hour
@@ -146,26 +148,28 @@ agreement reached, #607 landed, and explicit user approval given).
 
 ---
 
-### Phase 2: Draft Zulip coordination note [NOT STARTED]
+### Phase 2: Draft Zulip coordination note [COMPLETED]
+
+**Completed**: 2026-07-03T12:07:16Z
 
 **Goal**: Produce a polished, human-approval-pending Zulip note building on research §7, framing the
 box-vs-diamond decision as fmontesi's maintainer call and proposing the clean ownership division.
 
 **Tasks**:
-- [ ] Write draft to `specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md`,
+- [x] Write draft to `specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md`,
       reusing the task-475 `zulip-response.md` as the stylistic base.
-- [ ] Acknowledge the "one at a time" / PR-size-overwhelm ask; note the modal work is now split
+- [x] Acknowledge the "one at a time" / PR-size-overwhelm ask; note the modal work is now split
       cleanly: operator layer = #607 (his), modal semantics = #662, propositional = #648, LTL = #649
       (downstream) — research §2 layer map.
-- [ ] Present the **box-vs-diamond primitive** choice as *his* maintainer call, attaching the §5
+- [x] Present the **box-vs-diamond primitive** choice as *his* maintainer call, attaching the §5
       tradeoff summary (necessitation/K purity, `⊥`/free-algebra, IK/CK forward-compat vs. minimal
       near-term churn / `rfl` characterisations). Offer, do not assert; note downstream #648/#662
       already point box-primitive and are CI-green.
-- [ ] Offer the prototyped `HasBot` + bundled classes for #607; propose the clean ownership division
+- [x] Offer the prototyped `HasBot` + bundled classes for #607; propose the clean ownership division
       as a concrete suggestion.
-- [ ] Keep it short, defer to him on ordering and naming (`imp` mentioned but his call); offer to
+- [x] Keep it short, defer to him on ordering and naming (`imp` mentioned but his call); offer to
       sync at a CSLib meeting after the 23rd.
-- [ ] Add a header banner: DRAFT — not posted; requires EXPLICIT user approval AND must only be sent
+- [x] Add a header banner: DRAFT — not posted; requires EXPLICIT user approval AND must only be sent
       after any described PR actions are actually true at post time (task-475 accuracy discipline).
 
 **Timing**: 0.75 hour

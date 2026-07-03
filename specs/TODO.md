@@ -41,7 +41,7 @@ next_project_number: 477
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
 469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 475 [IMPLEMENTING] — Completely fix and finalize PR #662 (feat(Logics/Modal): refactor
-  └─ 476 [PLANNED] — Carefully research how to cleanly divide the overlapping open CSL
+  └─ 476 [IMPLEMENTING] — Carefully research how to cleanly divide the overlapping open CSL
 
 ### Temporal Logic
 
@@ -88,11 +88,15 @@ next_project_number: 477
 ## Tasks
 
 ### 476. Divide modal prs coordinate 607
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: Task 475
 - **Research**: [476_divide_modal_prs_coordinate_607/reports/01_divide-modal-prs.md]
 - **Plan**: [476_divide_modal_prs_coordinate_607/plans/02_divide-modal-prs.md]
+- **Summary**:
+  - [476_divide_modal_prs_coordinate_607/artifacts/pr-607-review.md]
+  - [476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md]
+  - [476_divide_modal_prs_coordinate_607/summaries/02_divide-modal-prs-summary.md]
 
 **Description**: Carefully research how to cleanly divide the overlapping open CSLib PRs (#607, #648, #649, #662) and use the findings to (a) offer a substantive, respectful review of @fmontesi's EARLIER PR #607 to help it land, and (b) base/restructure PR #662 on top of #607's operator layer accordingly. CORE CONFLICT: #607 (fmontesi/connectives; earlier; CHANGES_REQUESTED by eric-wieser; ~13 behind upstream) introduces the operator-typeclass layer as Cslib/Foundations/Logic/Operators/{And,Or,Not,Impl,Box,Diamond,Iff,Tensor}.lean (provides HasBox/HasImp/HasAnd/HasOr; LACKS HasBot and bundled PropositionalConnectives/ModalConnectives) and adapts the EXISTING not/and/or/impl/diamond-primitive modal Proposition (already merged via #528/#535/#632) to those classes via HasNot/HasDiamond/... instances. #662 instead REFACTORS the modal Proposition to primitives {atom,bot,imp,box} with not/and/or/diamond DERIVED (diamond = not-box-not; HasDiamond deferred; box primitive so necessitation/K stay pure rules). These are MUTUALLY EXCLUSIVE designs for Modal/Basic.lean: merging #662 would invalidate #607's HasDiamond/HasNot instances (no Proposition.diamond/.not constructors remain). The central modeling decision is therefore box-primitive (#662) vs the current diamond-inclusive primitive set (#607's basis) — @fmontesi's call as maintainer and owner of the earlier PR. RESEARCH MUST: (1) fully characterize each PR's design and file overlap (esp. Modal/Basic/Denotation/LogicalEquivalence and the Connectives-vs-Operators typeclass layer; plus references.bib ownership incl. triple-added Avigad2022 and #662-unique ChagrovZakharyaschev1997); (2) recommend a clean division — who owns the operator layer (likely #607: Operators/* plus the HasBot/bundles #662 already built and could offer to contribute), who owns the modal semantics (#662), and how #648 (propositional efq) and #649 (LTL) relate; (3) resolve/frame the box-vs-diamond primitive question with concrete tradeoffs for Fabrizio; (4) produce a substantive review of #607 (read + local build/test in a THROWAWAY checkout ONLY; feedback via GitHub review/comments/suggestions + Zulip); (5) specify concrete steps to base #662 off #607 once direction is agreed/landed (rebase #662 onto #607/main, drop interim Cslib/Foundations/Logic/Connectives.lean, import Operators/{Box,Impl,Bot}, register ModalConnectives, re-run full CI). HARD CONSTRAINTS: #607 is @fmontesi's PR — do NOT rebase, push to, or otherwise modify his branch; coordinate ONLY via review/comments/Zulip. The #662 code migration WAITS until the design is agreed (avoid prematurely coupling #662 to unmerged #607 — the reason task 469 chose self-own Option A). Any force-push to #662/#648, and any posting to GitHub or Zulip, requires EXPLICIT user approval. @fmontesi returns 23 July. Build on task 475 artifacts (specs/475_fix_and_stack_pr_662_on_648/). Zulip ref: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603
 

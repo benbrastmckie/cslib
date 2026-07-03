@@ -12,9 +12,8 @@ branch has since been rebased, drop or reword item 1.
 
 Hi Fabrizio — a few notes on this:
 
-1. **CI**: the red `ci-checks` is `HML/LogicalEquivalence.lean`, which this PR doesn't touch — it's
-   failing because the branch is ~15 behind `main` (already fixed there by the Mathlib bumps and the
-   `Relation` split). A rebase onto `main` should clear it.
+1. **CI**: the red check looks like pre-existing `main` drift rather than anything in this PR — a
+   rebase onto `main` should clear it.
 
 2. **Bundling** (re the "one file vs. split" / "should these be bundled?" thread): I have a `HasBot`
    class and bundled `PropositionalConnectives`/`ModalConnectives` — written for the modal PR

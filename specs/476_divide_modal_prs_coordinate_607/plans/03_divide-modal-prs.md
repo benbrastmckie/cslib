@@ -138,9 +138,16 @@ Phase 6 (CI verification + gated push of the #662 migration) depends only on Pha
 4-6 remain [NOT STARTED] until the Phase 3 gate opens (design agreement reached, #607 landed/back,
 and explicit user approval given).
 
-### Phase 1: Draft #607 review comment [COMPLETED]
+### Phase 1: Draft #607 review comment [COMPLETED — SUPERSEDED]
 
 **Completed**: 2026-07-03T12:07:16Z
+**Superseded**: 2026-07-04 — the substantive #607 coordination was carried by the already-posted
+comment https://github.com/leanprover/cslib/pull/607#issuecomment-4837502740 (benbrastmckie,
+2026-06-29), verified accurate against the current #607/#648 heads. The `pr-607-review.md` draft is
+retained for reference only and will NOT be posted (its box-vs-diamond point lives in the Zulip note;
+its bundle/`imp` nits are minor thread replies if they arise). Note: the draft's original CI point
+("just rebase") was found FALSE — the red `ci-checks` is #607's own `LogicalEquivalence`
+parametrisation leaving `HML/LogicalEquivalence.lean` on the old signature (an in-PR fix, not drift).
 
 **Goal**: Produce a polished, human-approval-pending review comment for PR #607 building on research
 §4.4 — leading with what's good, making the CI-drift point, and offering concrete help.
@@ -225,24 +232,26 @@ box-vs-diamond decision as fmontesi's maintainer call and proposing the clean ow
 
 ### Phase 3: Approval & coordination gate (HOLD) [NOT STARTED]
 
-**Goal**: Explicit HOLD point. Govern any posting of the Phase 1-2 drafts (only after EXPLICIT user
-approval) and hold BOTH the bundles-PR offer (Phase 4) and the #662 migration (Phases 5-6) until
-design direction is agreed and #607 is back / its operator layer is stable. This phase is a
-checkpoint, not automated work.
+**Goal**: Explicit HOLD point. The #607 review draft is SUPERSEDED (Phase 1 note) — the substantive
+propositional/#648 coordination is already posted (comment 4837502740), so the ONE live gated
+communication item is the Zulip note (`zulip-coordination.md`, box-vs-diamond). Govern its posting
+(only after EXPLICIT user approval) and hold BOTH the bundles-PR offer (Phase 4) and the #662
+migration (Phases 5-6) until design direction is agreed and #607 is back / its operator layer is
+stable. This phase is a checkpoint, not automated work.
 
 **Tasks**:
-- [ ] Present both drafts (pr-607-review.md, zulip-coordination.md) to the user for review.
-- [ ] HOLD: post NOTHING to GitHub or Zulip and touch NO branch until the user EXPLICITLY approves.
-- [ ] If/when the user approves posting: re-verify each draft's factual claims against live PR state
-      (`gh pr view 607` — including that its head branch is still in-org; #662 still stacked as
-      described) before posting; post the #607 review via review/comment only (never a code
-      suggestion on his branch) and/or send the Zulip note.
+- [x] Present both drafts to the user for review; the #607 review draft is superseded by the posted
+      comment and will not be posted. Zulip note remains the one live gated item.
+- [ ] HOLD: post NOTHING to Zulip and touch NO branch until the user EXPLICITLY approves.
+- [ ] If/when the user approves sending the Zulip note: re-verify its factual claims against live
+      state (done 2026-07-04 — #607 diamond-inclusive `{atom,not,and,diamond}`, #662 box-primitive
+      `{atom,bot,imp,box}`, #648/#662 CI-green, #649 LTL/downstream all confirmed) and re-confirm at
+      send time, then send.
 - [ ] Record the outstanding external preconditions that gate Phases 4-6: (a) fmontesi agrees the
       box-primitive direction / wants the bundles (or a joint plan is settled), AND (b) #607's
       operator layer is landing/stable and fmontesi is back (returns 23 July).
 - [ ] Do NOT open Phase 4 (bundles PR) or Phases 5-6 (migration) until the applicable preconditions
-      hold AND the user explicitly approves starting that specific work. Optionally note that the
-      review/Zulip drafts may mention the Phase 4 offer (see Phase 1 note), without rewriting them.
+      hold AND the user explicitly approves starting that specific work.
 
 **Timing**: 0.5 hour (excluding indefinite external wait)
 

@@ -39,7 +39,7 @@ next_project_number: 485
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
-477 [NOT STARTED] — Refactor PR #662 (leanprover/cslib) to stack on PR #607, which ma
+477 [PARTIAL] — Refactor PR #662 (leanprover/cslib) to stack on PR #607, which ma
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 480 [NOT STARTED] — Sound and complete axiomatization of intuitionistic modal logic o
@@ -166,10 +166,13 @@ next_project_number: 485
 ---
 
 ### 477. Refactor pr 662 stack on 607
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [477_refactor_pr_662_stack_on_607/reports/01_refactor-pr-662-stack-607.md]
+- **Plan**: [477_refactor_pr_662_stack_on_607/plans/01_refactor-pr-662-stack-607.md]
+- **Summary**: [477_refactor_pr_662_stack_on_607/summaries/01_refactor-pr-662-stack-607-summary.md]
 
 **Description**: Refactor PR #662 (leanprover/cslib) to stack on PR #607, which makes both □ (box) and ◇ (dia) primitive modal connectives. Rebase/rework #662's modal logic contribution onto #607's box+dia-primitive syntax, updating definitions and proofs accordingly. Keep the PR clean and concise (<500 LOC). See specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md for coordination context.
 

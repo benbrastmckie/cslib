@@ -1,0 +1,33 @@
+{
+  "status": "partial",
+  "summary": "Reworked PR #662's modal-primitives contribution to stack on PR #607 (both box and diamond primitive, {atom,not,and,diamond,box}) on a new local branch task-477-pr662-stack-607 (based on pr607, worktree /home/benjamin/Projects/cslib-task-477-pr662-stack-607) -- NOT on main, since main has diverged far past pr607/feat/modal-formula-primitives with unrelated local Tableau/Metalogic/ProofSystem development that would have made Phase 1's literal 'delete Connectives.lean' instruction a massive out-of-scope blocker. Phases 1-4 and 6 are fully complete and verified: Modal/Basic.lean, Denotation.lean, and LogicalEquivalence.lean all build green in isolation, net +49 LOC (well under the 500-LOC budget), zero sorry, zero new axioms. Phase 5 is PARTIAL: the Modal-scoped tasks (Cube.lean confirmed no-op, GrindLint.lean reasoned no-op, references.bib +ChagrovZakharyaschev1997) are done, but the full CI pipeline gate (lake exe checkInitImports, lake shake, lake test) is blocked by a pre-existing, out-of-scope defect discovered in PR #607's own Cslib/Logics/HML/LogicalEquivalence.lean (a different logic module, untouched by this task) -- confirmed via git-stash isolation that this defect exists on the unmodified pr607 base itself.",
+  "artifacts": [
+    {
+      "path": "specs/477_refactor_pr_662_stack_on_607/plans/01_refactor-pr-662-stack-607.md",
+      "type": "plan",
+      "summary": "Phases 1-4, 6 [COMPLETED]; Phase 5 [PARTIAL] with full BLOCKER writeup, deviation-annotated checklist, and LOC tally"
+    },
+    {
+      "path": "specs/477_refactor_pr_662_stack_on_607/summaries/01_refactor-pr-662-stack-607-summary.md",
+      "type": "summary",
+      "summary": "Full execution summary: what changed, decisions, impacts, follow-ups"
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 5,
+      "title": "Pre-existing, out-of-scope defect in PR #607's HML/LogicalEquivalence.lean blocks whole-library CI",
+      "description": "Cslib/Logics/HML/LogicalEquivalence.lean:105-106 instantiates the OLD 3-arg LogicalEquivalence class signature, but pr607's own Foundations/Logic/LogicalEquivalence.lean already upgraded that class to a NEW 4-arg signature (adds inference-system param S). This is a genuine bug in PR #607 itself (HML is a different logic module from Modal, untouched by task 477 or PR #662). Confirmed pre-existing via git stash of all task-477 edits + isolated rebuild -- identical error occurs on pristine pr607. Blocks lake exe checkInitImports, lake shake --add-public --keep-implied --keep-prefix, and lake test for the ENTIRE library (all require the Cslib.lean aggregator, which transitively imports the broken file), independent of anything in task 477's own diff.",
+      "requires": "Either (a) fmontesi fixes HML's LogicalEquivalence instantiation upstream in #607 (recommended -- this blocks #607's own CI independent of #662), or (b) a narrowly-scoped follow-up task to migrate HML/LogicalEquivalence.lean to the new 4-arg HasLogicalEquivalence API (mirroring what #607 already did correctly for Modal/LogicalEquivalence.lean and CLL). Task 477 deliberately did NOT touch this file since it is outside the plan's declared Non-Goals scope and is PR #607's own defect, not #662's.",
+      "not_a_task_477_defect": true
+    }
+  ],
+  "next_action_hint": "Consider spawning a follow-up task (via /spawn or /task) to fix Cslib/Logics/HML/LogicalEquivalence.lean's LogicalEquivalence instance migration -- this blocks CI for the whole pr607 base, not just task 477. Separately, flag it in the existing Zulip coordination draft (specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md) as a discovered issue with #607 itself, prior to/independent of any #662 stacking discussion. Once fixed, re-run the full CI pipeline (lake exe checkInitImports, lake shake, lake test) on branch task-477-pr662-stack-607 to complete Phase 5's verification gate and confirm GrindLint.lean truly needs no new skip entries (reasoned by analogy but not empirically run). The Modal-specific refactor itself (Phases 1-4, 6) requires no further work and is ready to serve as the reference diff when /pr later prepares the real #662-onto-#607 stacking submission.",
+  "phases_completed": 5,
+  "phases_total": 6,
+  "continuation_context": {
+    "handoff_path": "specs/477_refactor_pr_662_stack_on_607/plans/01_refactor-pr-662-stack-607.md",
+    "next_phase": "Phase 5 completion (blocked) -- re-run full CI pipeline once HML/LogicalEquivalence.lean is fixed upstream or via follow-up task",
+    "notes": "Branch task-477-pr662-stack-607 (based on pr607) and worktree /home/benjamin/Projects/cslib-task-477-pr662-stack-607 hold the completed Modal-specific diff (3 Lean files + references.bib, net +49 LOC, uncommitted in that worktree's git index -- changes are on-disk in the worktree but not yet git-committed there). Do NOT check out pr607 or task-477-pr662-stack-607 in the primary /home/benjamin/Projects/cslib checkout -- it must stay on main for specs/ tracking. No branch was pushed and no PR was touched; branch/PR submission remains deferred to /pr per task instructions."
+  }
+}

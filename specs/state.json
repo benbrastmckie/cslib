@@ -1,6 +1,86 @@
 {
-  "next_project_number": 477,
+  "next_project_number": 485,
   "active_projects": [
+    {
+      "project_number": 477,
+      "project_name": "refactor_pr_662_stack_on_607",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Refactor PR #662 (leanprover/cslib) to stack on PR #607, which makes both □ (box) and ◇ (dia) primitive modal connectives. Rebase/rework #662's modal logic contribution onto #607's box+dia-primitive syntax, updating definitions and proofs accordingly. Keep the PR clean and concise (<500 LOC). See specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md for coordination context.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 478,
+      "project_name": "metalogic_hilbert_completeness_framework",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Metalogic framework: generic Hilbert-style axiomatic calculus and canonical-model completeness machinery for modal logic, parameterized over frame conditions, with □ and ◇ both primitive (consistent with PR #607/#662). Provide the reusable soundness/completeness infrastructure that per-logic instantiations build on. Foundation for tasks 479-484.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 479,
+      "project_name": "metalogic_K_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Sound and complete axiomatization of the minimal classical modal logic K (□/◇ primitive), instantiating the generic completeness framework. Prove soundness over all Kripke frames and completeness via the canonical model. Depends on task 478.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 480,
+      "project_name": "metalogic_intuitionistic_modal_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Sound and complete axiomatization of intuitionistic modal logic over birelational (intuitionistic Kripke) semantics, with □ and ◇ primitive. Prove soundness and completeness, reusing the shared Hilbert-calculus infrastructure from task 478 where possible. Depends on task 478.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 481,
+      "project_name": "metalogic_T_reflexive_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Sound and complete axiomatization of modal logic T (reflexive frames) as a modular extension of K, via the axiom-T ↔ reflexivity frame-condition correspondence. Prove soundness and completeness by canonical model. Depends on tasks 478, 479.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 482,
+      "project_name": "metalogic_S4_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Sound and complete axiomatization of modal logic S4 (reflexive-transitive frames) via the T + 4 axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 481.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 483,
+      "project_name": "metalogic_S5_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Sound and complete axiomatization of modal logic S5 (equivalence frames) via the reflexive/symmetric/transitive (or euclidean) axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 482.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
+    {
+      "project_number": 484,
+      "project_name": "metalogic_conservative_extension_modularity",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Conservative-extension and modularity results across the modal extension lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric axiom-frame correspondences), ensuring each axiom-frame-condition module composes cleanly and stronger logics conservatively extend weaker ones; relate intuitionistic and classical modal logics. Establishes the compositional guarantees that make the axiomatizations modular. Depends on tasks 478-483.",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-12T18:05:54Z"
+    },
     {
       "project_number": 465,
       "project_name": "review_pr_607_logical_operators",

@@ -1,17 +1,17 @@
 ---
-next_project_number: 477
+next_project_number: 485
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-03. Generated from state.json dependency graph.*
+*Updated 2026-07-12. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,477,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
 | 4 | 412,476 | 41,475 | code hygiene |
@@ -39,6 +39,14 @@ next_project_number: 477
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
+477 [NOT STARTED] — Refactor PR #662 (leanprover/cslib) to stack on PR #607, which ma
+478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
+479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
+480 [NOT STARTED] — Sound and complete axiomatization of intuitionistic modal logic o
+481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
+482 [NOT STARTED] — Sound and complete axiomatization of modal logic S4 (reflexive-tr
+483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
+484 [NOT STARTED] — Conservative-extension and modularity results across the modal ex
 469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 475 [IMPLEMENTING] — Completely fix and finalize PR #662 (feat(Logics/Modal): refactor
   └─ 476 [IMPLEMENTING] — Carefully research how to cleanly divide the overlapping open CSL
@@ -86,6 +94,86 @@ next_project_number: 477
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 484. Metalogic conservative extension modularity
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Conservative-extension and modularity results across the modal extension lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric axiom-frame correspondences), ensuring each axiom-frame-condition module composes cleanly and stronger logics conservatively extend weaker ones; relate intuitionistic and classical modal logics. Establishes the compositional guarantees that make the axiomatizations modular. Depends on tasks 478-483.
+
+---
+
+### 483. Metalogic S5 soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Sound and complete axiomatization of modal logic S5 (equivalence frames) via the reflexive/symmetric/transitive (or euclidean) axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 482.
+
+---
+
+### 482. Metalogic S4 soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Sound and complete axiomatization of modal logic S4 (reflexive-transitive frames) via the T + 4 axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 481.
+
+---
+
+### 481. Metalogic T reflexive soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Sound and complete axiomatization of modal logic T (reflexive frames) as a modular extension of K, via the axiom-T ↔ reflexivity frame-condition correspondence. Prove soundness and completeness by canonical model. Depends on tasks 478, 479.
+
+---
+
+### 480. Metalogic intuitionistic modal soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Sound and complete axiomatization of intuitionistic modal logic over birelational (intuitionistic Kripke) semantics, with □ and ◇ primitive. Prove soundness and completeness, reusing the shared Hilbert-calculus infrastructure from task 478 where possible. Depends on task 478.
+
+---
+
+### 479. Metalogic K soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Sound and complete axiomatization of the minimal classical modal logic K (□/◇ primitive), instantiating the generic completeness framework. Prove soundness over all Kripke frames and completeness via the canonical model. Depends on task 478.
+
+---
+
+### 478. Metalogic hilbert completeness framework
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Metalogic framework: generic Hilbert-style axiomatic calculus and canonical-model completeness machinery for modal logic, parameterized over frame conditions, with □ and ◇ both primitive (consistent with PR #607/#662). Provide the reusable soundness/completeness infrastructure that per-logic instantiations build on. Foundation for tasks 479-484.
+
+---
+
+### 477. Refactor pr 662 stack on 607
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Refactor PR #662 (leanprover/cslib) to stack on PR #607, which makes both □ (box) and ◇ (dia) primitive modal connectives. Rebase/rework #662's modal logic contribution onto #607's box+dia-primitive syntax, updating definitions and proofs accordingly. Keep the PR clean and concise (<500 LOC). See specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md for coordination context.
+
+---
 
 ### 476. Divide modal prs coordinate 607
 - **Status**: [IMPLEMENTING]

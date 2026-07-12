@@ -1,41 +1,17 @@
 **Thread**: CSLib > Modal Logic
-**Reply to**: [@fmontesi](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603)
-**Status**: DRAFT — not posted. Requires EXPLICIT user approval before sending. Only send once the
-claims below are actually true at post time (task-475 accuracy discipline) — re-verify the current
-PR/CI state of #607, #648, #649, #662 and the layer split before sending, since any of these may
-have moved by approval time (fmontesi returns 23 July).
+**Reply to**: [@fmontesi](https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603) (his 2 July message — "overwhelmed… take these one at a time… back 23 July")
+**Status**: DRAFT — not posted. Requires EXPLICIT user approval before sending. Only send once the claims below are actually true at post time (task-475 accuracy discipline) — re-verify the current PR/CI state of #607, #648, #649, #662 and the layer split before sending, since any of these may have moved by approval time (fmontesi returns 23 July). This draft endorses making **both □ and ◇ primitive** in `Modal/Basic.lean` — converging #607's diamond basis with #662's box basis rather than deriving either — and so supersedes the earlier box-first framing. It keeps the necessitation/K signature point (12 June message) to a single reassurance clause and does not re-run the full argument.
+
+**Re-verify before posting** (as of 2026-07-11): #607 is CI-green and consolidated into `Foundations/Logic/Operators.lean` (adds `HasBox`/`HasDiamond`/dynamic-logic typeclasses; still ◇-primitive with `box := ¬◇¬φ`). #648 (box-primitive prop base), #662 (box-primitive modal), and #649 (LTL) were all rebased onto current upstream/main on 2026-07-11 and now report `mergeable=MERGEABLE`; CI was re-triggered on the new tips (`pending` at rebase time). Pre-rebase branch tips are preserved as `backup/{648,662,649}-pre-rebase-jul11`. Before posting, confirm all three CI runs went green.
 
 ---
 
-Hi Fabrizio — following up on the modal-logic thread, and picking up your "one at a time" ask: I've
-split the modal/propositional work so each PR owns one clean layer. The one thing I'd love your call
-on before you're back is the box-vs-diamond question.
+Hi @fmontesi,
 
-**The split:**
-- **#607 (yours)** — the operator-typeclass layer (`Foundations/Logic/Operators/*`); the foundation
-  everything else imports.
-- **#648** — the propositional formula type (primitive `⊥`) and its natural deduction.
-- **#662** — the modal semantics (`Modal/Basic.lean`, `Satisfies`, the K/T/B/4/5 cube).
-- **#649** — LTL, downstream; it rebases onto whichever of the above lands first.
+No worries at all, and sorry about the volume. I'd be glad to join a CSLib meeting once you're back on the 23rd, though I'm in SF so 3:30am meeting time might be tricky for me.
 
-The only place two designs can't coexist is `Modal/Basic.lean`, between #607's current basis and
-#662:
+To shrink the pile a little before then, I've tried to arrange things so each PR is one self-contained layer you can look at on its own: #648 is just the propositional formula type, #662 is just the modal semantics stacked on it, and #607 (yours) provides the operator-typeclass layer they both build on. #649 (LTL) sits downstream and rebases onto whichever lands first. All three are now rebased onto current main and CI-green, so none of this has to move together.
 
-**Box-vs-diamond — your call.** #607 currently assumes diamond-inclusive primitives
-(`{atom, not, and, diamond}`, `box := ¬◇¬`); #662 uses box-primitive (`{atom, bot, imp, box}`,
-`diamond := ¬□¬`). They define different constructors for the same `Proposition`, so only one can
-stand — and that's a maintainer decision, not something to pick downstream. Short version:
-- **Box-primitive**: pure necessitation/K on `box` alone, a genuine free-algebra formula type, and a
-  cleaner path to intuitionistic/minimal modal logics (IK/CK) later. Cost: #607's `HasDiamond`/
-  `HasNot` instances become derived defs, and some `rfl` characterisations turn into `simp; intro`.
-- **Diamond-inclusive** (#607 as-is): keeps the already-reviewed modal edits and `rfl` proofs
-  untouched. Cost: `⊥` riding on `atom` loses the free-algebra property, and a later IK/CK extension
-  is harder.
+I'm glad to see both □ and ◇ as primitive since we'll need both eventually for the intuitionistic and minimal systems (IK, CK). Necessitation and K still touch only □, so the proof theory doesn't get any heavier. I will refactor #662 onto a both-primitive basis so it lines up with #607.
 
-For what it's worth, #648 and #662 are both already CI-green and point box-primitive, so one option
-is to let your operator layer (#607) land independently and settle box-primitive for the modal
-layer — but that's genuinely yours to decide, I don't want to presume.
-
-No rush at all — happy to wait till you're back on the 23rd, or to talk it through at a CSLib meeting
-if one lands around then. Thanks for bearing with the PR-split — hopefully it makes each piece easier
-to review on its own.
+Everything else we can take one at a time, as you suggested — happy to walk through it whenever suits. Enjoy the time away, and talk on the 23rd.

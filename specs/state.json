@@ -2,17 +2,6 @@
   "next_project_number": 486,
   "active_projects": [
     {
-      "project_number": 485,
-      "project_name": "fix_pr607_hml_logicalequivalence_migration",
-      "status": "not_started",
-      "task_type": "cslib",
-      "topic": "PR & Upstreaming",
-      "description": "Fix pre-existing defect in PR #607 (leanprover/cslib): Cslib/Logics/HML/LogicalEquivalence.lean instantiates the old 3-arg LogicalEquivalence class, but #607 upgraded that class to a 4-arg signature (adds inference-system param S). Migrate the HML instance to the new HasLogicalEquivalence API, mirroring what #607 already did for Modal/LogicalEquivalence and CLL. This blocks whole-library CI (checkInitImports, shake, test) on the pr607 base, independent of #662. Discovered during task 477. (Follow-up from task #477)",
-      "parent_task": 477,
-      "created": "2026-07-12T19:01:39Z",
-      "last_updated": "2026-07-12T19:01:39Z"
-    },
-    {
       "project_number": 477,
       "project_name": "refactor_pr_662_stack_on_607",
       "status": "partial",

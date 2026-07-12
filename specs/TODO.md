@@ -11,7 +11,7 @@ next_project_number: 486
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,477,478,479,480,481,482,483,484,485 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,477,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
 | 4 | 412,476 | 41,475 | code hygiene |
@@ -82,7 +82,6 @@ next_project_number: 486
 465 [PR READY] — Review PR #607 (logical operators): post GitHub review covering t
 466 [PR READY] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
 474 [PR READY] — Draft Zulip replies confirming CSLib meeting attendance to Montes
-485 [NOT STARTED] — Fix pre-existing defect in PR #607 (leanprover/cslib): Cslib/Logi
 
 ### Tableau Infrastructure
 
@@ -95,16 +94,6 @@ next_project_number: 486
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
-
-### 485. Fix pr607 hml logicalequivalence migration
-- **Status**: [NOT STARTED]
-- **Task Type**: cslib
-- **Topic**: PR & Upstreaming
-- **Dependencies**: None
-
-**Description**: Fix pre-existing defect in PR #607 (leanprover/cslib): Cslib/Logics/HML/LogicalEquivalence.lean instantiates the old 3-arg LogicalEquivalence class, but #607 upgraded that class to a 4-arg signature (adds inference-system param S). Migrate the HML instance to the new HasLogicalEquivalence API, mirroring what #607 already did for Modal/LogicalEquivalence and CLL. This blocks whole-library CI (checkInitImports, shake, test) on the pr607 base, independent of #662. Discovered during task 477. (Follow-up from task #477)
-
----
 
 ### 484. Metalogic conservative extension modularity
 - **Status**: [NOT STARTED]

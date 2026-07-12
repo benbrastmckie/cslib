@@ -1,6 +1,17 @@
 {
-  "next_project_number": 486,
+  "next_project_number": 487,
   "active_projects": [
+    {
+      "project_number": 486,
+      "project_name": "rework_pr_662_modal_soundness_package",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607, choosing the most natural self-contained package. Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Operators.lean typeclasses. This is a PORT not a rebase (fork modal files use fork-local ModalConnectives typeclasses and sit ~522 commits behind upstream). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot propositional-type decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477.)",
+      "parent_task": 477,
+      "created": "2026-07-12T20:28:21Z",
+      "last_updated": "2026-07-12T20:28:21Z"
+    },
     {
       "project_number": 477,
       "project_name": "refactor_pr_662_stack_on_607",

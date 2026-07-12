@@ -1,5 +1,5 @@
 ---
-next_project_number: 486
+next_project_number: 487
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 486
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,478,479,480,481,482,483,484,486 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
 | 4 | 412,476 | 41,475 | code hygiene |
@@ -46,6 +46,7 @@ next_project_number: 486
 482 [NOT STARTED] — Sound and complete axiomatization of modal logic S4 (reflexive-tr
 483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
 484 [NOT STARTED] — Conservative-extension and modularity results across the modal ex
+486 [NOT STARTED] — Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC con
 469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
 475 [IMPLEMENTING] — Completely fix and finalize PR #662 (feat(Logics/Modal): refactor
   └─ 476 [IMPLEMENTING] — Carefully research how to cleanly divide the overlapping open CSL
@@ -93,6 +94,16 @@ next_project_number: 486
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 486. Rework pr 662 modal soundness package
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607, choosing the most natural self-contained package. Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Operators.lean typeclasses. This is a PORT not a rebase (fork modal files use fork-local ModalConnectives typeclasses and sit ~522 commits behind upstream). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot propositional-type decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477.)
+
+---
 
 ### 484. Metalogic conservative extension modularity
 - **Status**: [NOT STARTED]

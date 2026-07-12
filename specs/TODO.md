@@ -11,7 +11,7 @@ next_project_number: 487
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,486 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -45,7 +45,6 @@ next_project_number: 487
 482 [NOT STARTED] — Sound and complete axiomatization of modal logic S4 (reflexive-tr
 483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
 484 [NOT STARTED] — Conservative-extension and modularity results across the modal ex
-486 [NOT STARTED] — Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC con
 
 ### Temporal Logic
 
@@ -92,12 +91,12 @@ next_project_number: 487
 ## Tasks
 
 ### 486. Rework pr 662 modal soundness package
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 
-**Description**: Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607 (base fmontesi/connectives), choosing the most natural self-contained package. #648 (five-primitive primitive-bot propositional type) stays INDEPENDENT on main and is NOT a base for #662 — #648 and #607 both redefine Logics/Propositional/Defs.lean and are mutually exclusive, and #662's modal layer has no functional dependency on the propositional files (design decision deferred to fmontesi/Waring, back 23 July; downstream bridge = tasks 478-484). Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Foundations/Logic/Operators.lean typeclasses (HasBox/HasDiamond/HasImp/...). PORT not rebase (fork modal files use fork-local ModalConnectives typeclasses ~522 commits behind upstream): drop the fork-local ModalConnectives/Connectives.lean layer entirely and reuse #607's Operators typeclasses (resolves former task 469 — #607 has no Connectives.lean). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477; supersedes the abandoned #648-stacking tasks 468/469/475.)
+**Description**: Grow PR #662 (leanprover/cslib, head feat/modal-formula-primitives, base fmontesi/connectives=#607) into a substantive modal-cube COMPLETION on #607 — NOT a port/duplication. CORRECTED PREMISE (task-486 research + verification): #607 ALREADY ships the semantic modal cube — Modal/Basic.lean Satisfies.k/t/b/d/four/five soundness lemmas and Modal/Cube.lean with K.k_valid/T.t_valid. Task 477's both-primitive refactor (□ and ◇ both primitive, {atom,not,and,diamond,box} on #607 split Operators typeclasses) is ALREADY LIVE on the PR (origin/feat/modal-formula-primitives=70b7ec4d, +39/-17, intact — NOT lost). Option A scope (user-chosen 2026-07-12): (1) keep task 477's both-primitive refactor as the base of the PR; (2) COMPLETE Cube.lean's Validity section — add the wrappers #607 left out: B.b_valid, Four.four_valid, Five.five_valid, D.d_valid (#607 ships only k_valid/t_valid); (3) add a NEW Canonicity section giving the frame-determination correspondences (T<->reflexive, B<->symmetric, 4<->transitive, 5<->euclidean, D<->serial) as Cube-level wrappers (#607 ships zero). Reuse #607's verified relation infra: Relation.Serial, Relation.RightEuclidean, Std.Refl/Symm, IsTrans, Euclidean bridges, Classical.arbitrary spy-valuation. Net ~180-290 new LOC — honest extension, no padding. references.bib: add ChagrovZakharyaschev1997 (box-first) if not present; do NOT add Avigad2022. EXCLUDE FromPropositional.lean (#648-entangled), Metalogic/ (MCS/canonical Completeness/DeductionTheorem/proof-theoretic Soundness/Systems), InterSystem, ProofSystem/, Tableau/, fork-local Connectives.lean/ModalConnectives (dropped — reuse #607 Operators), and HML/LogicalEquivalence.lean (pre-existing #607 blocker). Base/worktree: branch off pr607 (NEVER main — diverged; NEVER the stale local feat/modal-formula-primitives=8d7a061e fork), reuse task-477 worktree pattern. Zero sorry/axioms; gate on module-scoped lake build Cslib.Logics.Modal.* (full-library CI blocked by out-of-scope #607 HML defect). Clean single-commit diff. Deferred to fmontesi (back 23 Jul): whether #662 should instead re-own the whole cube (Option B). #648 stays independent. (Follow-up from #477; supersedes abandoned 468/469/475.)
 
 ---
 

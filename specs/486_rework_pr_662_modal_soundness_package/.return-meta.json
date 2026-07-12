@@ -1,51 +1,7 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-12T21:50:09Z",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/486_rework_pr_662_modal_soundness_package/plans/01_modal-cube-completion.md",
-      "summary": "4-phase Option A plan: worktree off live PR head, Cube.lean B/4/5/D validity wrappers, new Canonicity section, references.bib + zero-sorry audit -- all 4 phases COMPLETED"
-    },
-    {
-      "type": "summary",
-      "path": "specs/486_rework_pr_662_modal_soundness_package/summaries/01_modal-cube-completion-summary.md",
-      "summary": "Full implementation summary: net diff vs #607 (file-by-file LOC), CI results, zero-sorry/axiom audit, plan deviations"
-    }
-  ],
-  "partial_progress": {
-    "stage": "all_phases_complete",
-    "details": "All 4 phases COMPLETED. Worktree /home/benjamin/Projects/cslib-task-486-pr662-modal-package, branch task-486-pr662-modal-package, single clean commit 4ebdba5 on top of origin/feat/modal-formula-primitives=70b7ec4d. Module-scoped and full-library CI (build/lint/lint-style/shake/checkInitImports/test) all green. Zero sorry, zero new axioms.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 4,
-    "last_completed_phase": "Phase 4: references.bib, docstrings, zero-sorry/axiom audit, single-commit prep"
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "note": "Full-library CI passed cleanly (contrary to plan's risk assessment of an HML-defect blocker, which did not reproduce on this base). Module-scoped gate also green at every phase."
-  },
+  "status": "completed",
   "metadata": {
-    "session_id": "sess_1783891828_7982f5_impl",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "task_type": "cslib",
-    "orchestrator_mode": true,
-    "lit_flag": false,
-    "compliance_check": "passed",
-    "worktree_path": "/home/benjamin/Projects/cslib-task-486-pr662-modal-package",
-    "worktree_branch": "task-486-pr662-modal-package",
-    "final_commit": "4ebdba5",
-    "no_push_no_pr": true
-  },
-  "memory_candidates": [
-    "Scoped notation defined via `open scoped X` in a Lean file is file-local -- it does not propagate to importing files even within the same enclosing namespace. Files using `⇓`/other scoped InferenceSystem-family notation in a *type signature* (not just inside a proof term fed to grind) need their own `open scoped InferenceSystem` line.",
-    "Anonymous instance-implicit arguments (e.g. `[Std.Symm m.r]` without a name) cannot be targeted by Lean's named-argument syntax (`(instSymm := ...)`); only explicitly named instance binders (`[instRefl : Std.Refl m.r]`) support that pattern. Fallback: `haveI : <Class> := h` then apply directly."
-  ]
+    "cycles_used": 3,
+    "final_state": "completed"
+  }
 }

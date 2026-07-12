@@ -7,10 +7,10 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Modal Logic",
-      "description": "Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607, choosing the most natural self-contained package. Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Operators.lean typeclasses. This is a PORT not a rebase (fork modal files use fork-local ModalConnectives typeclasses and sit ~522 commits behind upstream). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot propositional-type decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477.)",
+      "description": "Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607 (base fmontesi/connectives), choosing the most natural self-contained package. #648 (five-primitive primitive-bot propositional type) stays INDEPENDENT on main and is NOT a base for #662 — #648 and #607 both redefine Logics/Propositional/Defs.lean and are mutually exclusive, and #662's modal layer has no functional dependency on the propositional files (design decision deferred to fmontesi/Waring, back 23 July; downstream bridge = tasks 478-484). Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Foundations/Logic/Operators.lean typeclasses (HasBox/HasDiamond/HasImp/...). PORT not rebase (fork modal files use fork-local ModalConnectives typeclasses ~522 commits behind upstream): drop the fork-local ModalConnectives/Connectives.lean layer entirely and reuse #607's Operators typeclasses (resolves former task 469 — #607 has no Connectives.lean). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477; supersedes the abandoned #648-stacking tasks 468/469/475.)",
       "parent_task": 477,
       "created": "2026-07-12T20:28:21Z",
-      "last_updated": "2026-07-12T20:28:21Z"
+      "last_updated": "2026-07-12T21:29:49Z"
     },
     {
       "project_number": 477,
@@ -198,12 +198,12 @@
     {
       "project_number": 468,
       "project_name": "resync_pr_662_with_648_head",
-      "status": "researched",
+      "status": "abandoned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Re-sync PR #662 embedded propositional Lean files with the current #648 head (primitive efq rule, IPL as empty theory, delete MPL, IsIntuitionistic, and intuitionisticCompletion) and correct the PR body description",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T20:03:56Z",
+      "last_updated": "2026-07-12T21:29:49Z",
       "dependencies": [
         467
       ],
@@ -214,17 +214,18 @@
           "type": "report",
           "summary": "resync pr 662 with 648 head (backfilled by --sync)"
         }
-      ]
+      ],
+      "completion_summary": "Abandoned: moot after the #607 pivot (task 477). #662 no longer carries #648's propositional files, so there is nothing to re-sync with #648 head. The #648<->#607 propositional-basis bridge is deferred to the fmontesi/Waring design decision and downstream tasks 478-484."
     },
     {
       "project_number": 469,
       "project_name": "drop_connectives_typeclass_layer_pr_662",
-      "status": "researched",
+      "status": "abandoned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Drop the unused Connectives.lean typeclass layer from PR #662 in favor of the #607 Operators hierarchy",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T20:04:42Z",
+      "last_updated": "2026-07-12T21:29:49Z",
       "dependencies": [
         465
       ],
@@ -235,7 +236,8 @@
           "type": "report",
           "summary": "drop connectives typeclass layer (backfilled by --sync)"
         }
-      ]
+      ],
+      "completion_summary": "Abandoned: resolved and folded into task 486. #607 has no Connectives.lean (uses split Foundations/Logic/Operators.lean typeclasses); #662-on-#607 drops the fork-local ModalConnectives layer entirely and reuses #607's Operators typeclasses. No standalone work remains."
     },
     {
       "project_number": 470,
@@ -2446,12 +2448,12 @@
     {
       "project_number": 475,
       "project_name": "fix_and_stack_pr_662_on_648",
-      "status": "implementing",
+      "status": "abandoned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Completely fix and finalize PR #662 (feat(Logics/Modal): refactor formula primitives to {atom, bot, imp, box}) so it is cleanly reviewable and merge-ready, stacked on PR #648. Current state: #662 targets base=main, is ~10 commits behind upstream/main, is NOT a descendant of #648, and carries its own divergent/stale copies of #648's propositional files (Propositional/Defs.lean, NaturalDeduction/Basic.lean, Theory.lean, references.bib) with the old MPL/IsIntuitionistic/intuitionisticCompletion design; its modal layer has no functional dependency on those files. Work: (1) rebase #648 (feat/propositional-v2) then #662 (feat/modal-formula-primitives) onto current upstream/main; (2) stack #662 on #648 — retarget PR base to feat/propositional-v2 and drop #662's propositional-file changes so they are inherited from #648 (realizes task 468's resync goal); (3) cherry-pick the completed task-472 fix (restored model-class-parametric Proposition.Equiv + LogicalEquivalence framework integration, currently only on local main) onto the PR branch; (4) resolve the Connectives.lean typeclass-layer question (task 469) — self-own in #662 vs decouple vs coordinate with #607/@chenson2018 review; (5) slim #662 to its genuine modal contribution (Modal/Basic, Cube, Denotation, LogicalEquivalence, Connectives.lean, Cslib.lean) so it can be reviewed 'one at a time' per @fmontesi's 2026-07-02 Zulip feedback that he was overwhelmed by the PR size; (6) preserve the stated design rationale — box primitive (necessitation as pure rule), diamond derived as not-box-not, HasBox/ModalConnectives, K/T/B/4/5/D proofs via explicit 'simp only [Satisfies] + intro' rather than grind, classical-modal restriction with HasDia deferred for IK/CK; (7) correct the PR #662 body to accurately describe the stack-on-#648 relationship and design; (8) prepare a Zulip response to @fmontesi (CSLib > Modal Logic) taking points one at a time and offering to join a CSLib online meeting (he returns 23 July). Squash to a single clean commit and force-push ONLY with explicit user approval. Zulip ref: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603",
       "created": "2026-07-02T21:40:00Z",
-      "last_updated": "2026-07-03T00:44:04Z",
+      "last_updated": "2026-07-12T21:29:49Z",
       "dependencies": [
         468,
         469,
@@ -2476,18 +2478,19 @@
           "path": "specs/475_fix_and_stack_pr_662_on_648/reports/01_fix-and-stack-pr-662-on-648.md"
         }
       ],
-      "session_id": "sess_1783038723_6ac05b"
+      "session_id": "sess_1783038723_6ac05b",
+      "completion_summary": "Abandoned: superseded by tasks 477 + 486. Its premise (retarget #662 base to feat/propositional-v2, stack on #648, inherit #648's propositional files) contradicts the settled+Zulip-coordinated #607 pivot — #662 now bases on fmontesi/connectives (#607), #648 stays independent. Forward modal-package work continues in #486."
     },
     {
       "project_number": 476,
       "project_name": "divide_modal_prs_coordinate_607",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Carefully research how to cleanly divide the overlapping open CSLib PRs (#607, #648, #649, #662) and use the findings to (a) offer a substantive, respectful review of @fmontesi's EARLIER PR #607 to help it land, and (b) base/restructure PR #662 on top of #607's operator layer accordingly. CORE CONFLICT: #607 (fmontesi/connectives; earlier; CHANGES_REQUESTED by eric-wieser; ~13 behind upstream) introduces the operator-typeclass layer as Cslib/Foundations/Logic/Operators/{And,Or,Not,Impl,Box,Diamond,Iff,Tensor}.lean (provides HasBox/HasImp/HasAnd/HasOr; LACKS HasBot and bundled PropositionalConnectives/ModalConnectives) and adapts the EXISTING not/and/or/impl/diamond-primitive modal Proposition (already merged via #528/#535/#632) to those classes via HasNot/HasDiamond/... instances. #662 instead REFACTORS the modal Proposition to primitives {atom,bot,imp,box} with not/and/or/diamond DERIVED (diamond = not-box-not; HasDiamond deferred; box primitive so necessitation/K stay pure rules). These are MUTUALLY EXCLUSIVE designs for Modal/Basic.lean: merging #662 would invalidate #607's HasDiamond/HasNot instances (no Proposition.diamond/.not constructors remain). The central modeling decision is therefore box-primitive (#662) vs the current diamond-inclusive primitive set (#607's basis) — @fmontesi's call as maintainer and owner of the earlier PR. RESEARCH MUST: (1) fully characterize each PR's design and file overlap (esp. Modal/Basic/Denotation/LogicalEquivalence and the Connectives-vs-Operators typeclass layer; plus references.bib ownership incl. triple-added Avigad2022 and #662-unique ChagrovZakharyaschev1997); (2) recommend a clean division — who owns the operator layer (likely #607: Operators/* plus the HasBot/bundles #662 already built and could offer to contribute), who owns the modal semantics (#662), and how #648 (propositional efq) and #649 (LTL) relate; (3) resolve/frame the box-vs-diamond primitive question with concrete tradeoffs for Fabrizio; (4) produce a substantive review of #607 (read + local build/test in a THROWAWAY checkout ONLY; feedback via GitHub review/comments/suggestions + Zulip); (5) specify concrete steps to base #662 off #607 once direction is agreed/landed (rebase #662 onto #607/main, drop interim Cslib/Foundations/Logic/Connectives.lean, import Operators/{Box,Impl,Bot}, register ModalConnectives, re-run full CI). HARD CONSTRAINTS: #607 is @fmontesi's PR — do NOT rebase, push to, or otherwise modify his branch; coordinate ONLY via review/comments/Zulip. The #662 code migration WAITS until the design is agreed (avoid prematurely coupling #662 to unmerged #607 — the reason task 469 chose self-own Option A). Any force-push to #662/#648, and any posting to GitHub or Zulip, requires EXPLICIT user approval. @fmontesi returns 23 July. Build on task 475 artifacts (specs/475_fix_and_stack_pr_662_on_648/). Zulip ref: https://leanprover.zulipchat.com/#narrow/channel/513188-CSLib/topic/Modal.20Logic/near/607842603",
       "dependencies": [
         475
       ],
-      "last_updated": "2026-07-03T12:06:40Z",
+      "last_updated": "2026-07-12T21:29:49Z",
       "session_id": "sess_1783080383_2227b3",
       "artifacts": [
         {
@@ -2516,7 +2519,8 @@
         "reports_integrated": [
           "01_divide-modal-prs.md"
         ]
-      }
+      },
+      "completion_summary": "Divide/coordinate deliverables produced and reflect the final arrangement: #662 stacked on #607, #648/#649 kept independent on main pending the propositional-basis decision. Artifacts: pr-607-review.md, zulip-coordination.md (draft), plans 02/03. The Zulip post itself remains unposted (task 466, pending explicit approval + fmontesi return 23 July)."
     }
   ],
   "repository_health": {

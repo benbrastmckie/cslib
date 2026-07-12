@@ -11,10 +11,10 @@ next_project_number: 487
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,478,479,480,481,482,483,484,486 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
-| 4 | 412,476 | 41,475 | code hygiene |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,486 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
+| 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -38,7 +38,6 @@ next_project_number: 487
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
-468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 480 [NOT STARTED] — Sound and complete axiomatization of intuitionistic modal logic o
@@ -47,9 +46,6 @@ next_project_number: 487
 483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
 484 [NOT STARTED] — Conservative-extension and modularity results across the modal ex
 486 [NOT STARTED] — Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC con
-469 [RESEARCHED] — Drop the unused Connectives.lean typeclass layer from PR #662 in 
-475 [IMPLEMENTING] — Completely fix and finalize PR #662 (feat(Logics/Modal): refactor
-  └─ 476 [IMPLEMENTING] — Carefully research how to cleanly divide the overlapping open CSL
 
 ### Temporal Logic
 
@@ -101,7 +97,7 @@ next_project_number: 487
 - **Topic**: Modal Logic
 - **Dependencies**: None
 
-**Description**: Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607, choosing the most natural self-contained package. Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Operators.lean typeclasses. This is a PORT not a rebase (fork modal files use fork-local ModalConnectives typeclasses and sit ~522 commits behind upstream). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot propositional-type decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477.)
+**Description**: Rework PR #662 (leanprover/cslib) into a substantive ~300 LOC contribution (hard maximum 500 LOC) stacked on PR #607 (base fmontesi/connectives), choosing the most natural self-contained package. #648 (five-primitive primitive-bot propositional type) stays INDEPENDENT on main and is NOT a base for #662 — #648 and #607 both redefine Logics/Propositional/Defs.lean and are mutually exclusive, and #662's modal layer has no functional dependency on the propositional files (design decision deferred to fmontesi/Waring, back 23 July; downstream bridge = tasks 478-484). Recommended slice: the both-primitive modal Proposition + Kripke satisfaction lemmas (neg/and/or/box_iff_forall/diamond_iff_exists/impl_iff) + frame-condition SOUNDNESS/validity and canonicity for the modal-cube axioms (K on all frames, T reflexive, B symmetric, D serial, 4 transitive, 5 euclidean), ported from the fork's Cslib/Logics/Modal/{Basic,Denotation,Cube}.lean onto #607's Foundations/Logic/Operators.lean typeclasses (HasBox/HasDiamond/HasImp/...). PORT not rebase (fork modal files use fork-local ModalConnectives typeclasses ~522 commits behind upstream): drop the fork-local ModalConnectives/Connectives.lean layer entirely and reuse #607's Operators typeclasses (resolves former task 469 — #607 has no Connectives.lean). EXCLUDE FromPropositional.lean (entangled with the #648 primitive-bot decision) and the deeper Metalogic/ (MCS, canonical-model Completeness), ProofSystem/, Tableau/, and InterSystem conservativity — those are separate downstream PRs (cf. tasks 478-484). Deliver clean single-commit diff on base fmontesi/connectives, zero sorry/axioms, full lake build/test green. (Follow-up from task #477; supersedes the abandoned #648-stacking tasks 468/469/475.)
 
 ---
 
@@ -189,7 +185,7 @@ next_project_number: 487
 ---
 
 ### 476. Divide modal prs coordinate 607
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 475
 - **Research**: [476_divide_modal_prs_coordinate_607/reports/01_divide-modal-prs.md]
@@ -204,7 +200,7 @@ next_project_number: 487
 ---
 
 ### 475. Fix and stack pr 662 on 648
-- **Status**: [IMPLEMENTING]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 468, Task 469, Task 472
@@ -272,7 +268,7 @@ next_project_number: 487
 ---
 
 ### 469. Drop connectives typeclass layer pr 662
-- **Status**: [RESEARCHED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 465
@@ -283,7 +279,7 @@ next_project_number: 487
 ---
 
 ### 468. Resync pr 662 with 648 head
-- **Status**: [RESEARCHED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 467

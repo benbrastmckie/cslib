@@ -11,7 +11,7 @@ next_project_number: 486
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,477,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,468,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,469 | 36,37,181,317,407,425,449,465 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,475 | 39,40,181,215,300,301,375,468,469 | foundations, modal logic, code hygiene |
 | 4 | 412,476 | 41,475 | code hygiene |
@@ -39,7 +39,6 @@ next_project_number: 486
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 468 [RESEARCHED] — Re-sync PR #662 embedded propositional Lean files with the curren
-477 [PARTIAL] — Refactor PR #662 (leanprover/cslib) to stack on PR #607, which ma
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 480 [NOT STARTED] — Sound and complete axiomatization of intuitionistic modal logic o
@@ -166,7 +165,7 @@ next_project_number: 486
 ---
 
 ### 477. Refactor pr 662 stack on 607
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

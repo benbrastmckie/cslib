@@ -4,12 +4,12 @@
     {
       "project_number": 477,
       "project_name": "refactor_pr_662_stack_on_607",
-      "status": "partial",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Refactor PR #662 (leanprover/cslib) to stack on PR #607, which makes both □ (box) and ◇ (dia) primitive modal connectives. Rebase/rework #662's modal logic contribution onto #607's box+dia-primitive syntax, updating definitions and proofs accordingly. Keep the PR clean and concise (<500 LOC). See specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md for coordination context.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T20:10:00Z",
+      "last_updated": "2026-07-12T20:15:33Z",
       "session_id": "sess_1783880050_660057",
       "artifacts": [
         {
@@ -27,7 +27,8 @@
           "type": "summary",
           "summary": "5/6 phases; Modal refactor done, Phase 5 CI blocked by external #607 HML defect"
         }
-      ]
+      ],
+      "completion_summary": "Refactored #662 to make both box and diamond primitive and re-stacked it directly on #607 (PR base main->fmontesi/connectives). Clean single commit, 3 Modal files +22 LOC net, full lake build/test green on live #607 base, zero sorry/axioms. Force-pushed feat/modal-formula-primitives (backup/662-pre-stack-jul12=8d7a061e). #648/#649 kept independent pending propositional-type coordination; Zulip draft updated accordingly."
     },
     {
       "project_number": 478,

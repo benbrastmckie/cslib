@@ -27,31 +27,24 @@ necessity (`□φ`) and possibility `◇φ`.
 
 The formula type uses `{atom, bot, imp, and, or, box, diamond}` as native constructors,
 mirroring `PL.Proposition`'s native `and`/`or`. Negation and verum remain derived connectives
-via the Lukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
+via the Łukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
 
 **Why is diamond primitive here (unlike the historical CSLib presentation)?** Classically,
 diamond can be derived from box as `◇φ := ¬□¬φ`, and box alone suffices for necessitation and
-the K axiom. However, task 441 makes `diamond` a native constructor (alongside `and`/`or`) so
+the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so
 that: (1) the tableau and truth-lemma machinery get one decomposition rule per connective
-(structural induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal
+(structural induction, no Łukasiewicz-bridge lemmas), and (2) future non-classical modal
 logics (intuitionistic, minimal — see [Blackburn2001] Chapter 1, [ChagrovZakharyaschev1997]
 Section 3.1) can reuse this same datatype, since `□` and `◇` become independent operators in
 those settings. `HasDia` (`Foundations/Logic/Connectives.lean`) is instantiated below alongside
 `HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is recovered as a genuine *theorem*
-(`Satisfies.dual`, proved semantically) rather than holding definitionally; at the Hilbert
-proof-system level, the duality is recovered via the `AxiomDiaDualityFwd`/`AxiomDiaDualityBack`
-characterization schemata (see `Foundations/Logic/Axioms.lean`), instantiated for all systems
-in `ProofSystem/Instances/*.lean`.
-
-Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
-with `HasAnd`/`HasOr` instances; `Modal.Proposition` now mirrors this directly, additionally
-providing `HasDia`. The embedding `PL.Proposition.toModal` (in `FromPropositional`) still
-produces the raw nested-`imp`/`bot` shape for `and`/`or` on its RHS (a conservativity artifact
-of the shared `PL.Proposition.embed` skeleton), documented at its declaration site.
+(`Satisfies.dual`, proved semantically) rather than holding definitionally (the corresponding
+Hilbert proof-system characterization is left to later PRs).
 
 ## References
 
 * [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997]
 * The definitions of theory equivalence and the denotational semantics of worlds are inspired by
   the development of `Cslib.Logic.HML`.
 -/
@@ -110,13 +103,13 @@ instance : HasDia (Proposition Atom) where
 
 /-- Negation as derived connective: ¬φ := φ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.neg` default. -/
 abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom :=
   PropositionalConnectives.neg φ
 
 /-- Verum / top: ⊤ := ⊥ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.top` default. -/
 abbrev Proposition.top : Proposition Atom := PropositionalConnectives.top
 
 /-- Reduction lemma: `neg φ` unfolds to `.imp φ .bot`. -/
@@ -269,7 +262,7 @@ theorem Satisfies.k : ⇓Modal[m,w ⊨ □(φ₁ → φ₂) → (□φ₁ → �
 
 /-- The dual axiom, valid for all models.
 
-Since `diamond` is a native constructor (task 441), this is no longer a definitional
+Since `diamond` is a native constructor, this is no longer a definitional
 unfolding: it is proved as a genuine semantic theorem using excluded middle. -/
 theorem Satisfies.dual : ⇓Modal[m,w ⊨ ◇φ ↔ ¬□¬φ] := by
   change Satisfies m w (.iff (.diamond φ) (.neg (.box (.neg φ))))

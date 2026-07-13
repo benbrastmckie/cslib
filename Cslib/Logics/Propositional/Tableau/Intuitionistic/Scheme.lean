@@ -7,6 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Cslib.Foundations.Logic.Tableau.Measure
+import Mathlib.Tactic.Ring
 public import Cslib.Logics.Propositional.Tableau.Minimal.Soundness
 
 /-! # IntMinScheme: Parameterized Interface for Intuitionistic/Minimal Tableau
@@ -1824,6 +1826,114 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
   | openBranch b =>
     obtain ⟨edges, hcm⟩ := openBranch_countermodel S φ b hresult
     exact absurd (hvalid edges b) hcm
+
+/-! ## Fixed Finite Universe and Counting Work (task 317 phase 6, report 07 §Q4)
+
+This section defines the fixed finite `(sign, subformula, world)` cell universe
+`intUniverse φ` and the per-branch counting measure `intWork`, mirroring the proven
+Modal-K `FmpMeasure` pattern (`Cslib/Logics/Modal/Tableau/FmpMeasure.lean`: `modalSubfmls`,
+`modalUniverse`, `modalWork`). These are the building blocks for the base-3 damped worklist
+measure `intExpMeasure` (task 317 phase 7, not yet defined) that will certify `intFuel φ`
+is sufficient for the expansion loop to reach a Hintikka set before fuel is exhausted.
+
+The intuitionistic/minimal calculus differs from Modal K in its connective set (`imp`/
+`and`/`or`, no `box`/`diamond`), so `intSubfmls`/`intUniverse` are fresh List-recursive
+definitions (mirroring `modalSubfmls`/`modalUniverse`'s *shape*, not literal reuse) rather
+than reusing `Proposition.subformulas` (`Subformula.lean`), which is `Finset`-valued and
+the wrong shape for the counting-measure machinery below. `intUniverse`'s size bound
+(`intUniverse_length_le`) is exactly the quantity `intFuel φ := 3 ^ (2 * (2 * φ.complexity
++ 1) * (φ.complexity + 2))` (task 317 phase 5, `Expansion.lean:462-463`) was pre-sized
+against.
+
+## References
+
+* [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 4
+-/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Structural subformula list of a `Proposition Atom` (mirrors `modalSubfmls`,
+`FmpMeasure.lean:73-80`, restricted to the propositional connective set: `atom`/`bot`/`imp`/
+`and`/`or`, no `box`/`diamond`). Every node of `φ`'s syntax tree contributes exactly one
+entry. -/
+def intSubfmls : Proposition Atom → List (Proposition Atom)
+  | .atom p => [.atom p]
+  | .bot => [.bot]
+  | .imp a b => .imp a b :: intSubfmls a ++ intSubfmls b
+  | .and a b => .and a b :: intSubfmls a ++ intSubfmls b
+  | .or a b => .or a b :: intSubfmls a ++ intSubfmls b
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The subformula list has length at most `2 * φ.complexity + 1` (mirrors
+`modalSubfmls_length_le`, `FmpMeasure.lean:82-102`). -/
+lemma intSubfmls_length_le (φ : Proposition Atom) :
+    (intSubfmls φ).length ≤ 2 * φ.complexity + 1 := by
+  induction φ with
+  | atom p => simp [intSubfmls]
+  | bot => simp [intSubfmls]
+  | imp a b iha ihb =>
+    simp only [intSubfmls, List.length_cons, List.length_append, complexity_imp]
+    omega
+  | and a b iha ihb =>
+    simp only [intSubfmls, List.length_cons, List.length_append, complexity_and]
+    omega
+  | or a b iha ihb =>
+    simp only [intSubfmls, List.length_cons, List.length_append, complexity_or]
+    omega
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The fixed finite universe of `(sign, subformula, world)` cells for `φ`: both signs,
+every subformula of `φ`, at every world label `0 .. φ.complexity + 1` (mirrors
+`modalUniverse`, `FmpMeasure.lean:149-152`, using the linear intuitionistic world bound
+`φ.complexity + 1` -- report 07 §Q4 F5, `intExpandBranches_world_bound` (continuation,
+see handoff) -- in place of the Modal-K `modalWorldBound`). -/
+def intUniverse (φ : Proposition Atom) : List (ISF Atom) :=
+  (List.range (φ.complexity + 2)).flatMap (fun w =>
+    (intSubfmls φ).flatMap (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The universe has length at most `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)` --
+exactly the exponent `intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))`
+(task 317 phase 5, `Expansion.lean:462-463`) was pre-sized against (mirrors
+`modalUniverse_length_le`, `FmpMeasure.lean:154-186`). -/
+lemma intUniverse_length_le (φ : Proposition Atom) :
+    (intUniverse φ).length ≤
+      2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by
+  have hinner : ∀ w : Nat,
+      ((intSubfmls φ).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length
+        ≤ 2 * (2 * φ.complexity + 1) := by
+    intro w
+    rw [List.length_flatMap]
+    have hb : (List.map (fun ψ =>
+        ([(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩]).length)
+        (intSubfmls φ)).sum ≤ (intSubfmls φ).length * 2 :=
+      sum_map_le_length_mul (intSubfmls φ) _ 2 (fun ψ _ => by simp)
+    have hlen := intSubfmls_length_le φ
+    omega
+  unfold intUniverse
+  rw [List.length_flatMap]
+  have houter : (List.map (fun w =>
+      ((intSubfmls φ).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length)
+      (List.range (φ.complexity + 2))).sum
+      ≤ (List.range (φ.complexity + 2)).length * (2 * (2 * φ.complexity + 1)) :=
+    sum_map_le_length_mul (List.range (φ.complexity + 2)) _
+      (2 * (2 * φ.complexity + 1)) (fun w _ => hinner w)
+  rw [List.length_range] at houter
+  calc (List.map (fun w =>
+        ((intSubfmls φ).flatMap
+          (fun ψ => [(⟨.pos, ψ, w⟩ : ISF Atom), ⟨.neg, ψ, w⟩])).length)
+        (List.range (φ.complexity + 2))).sum
+      ≤ (φ.complexity + 2) * (2 * (2 * φ.complexity + 1)) := houter
+    _ = 2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
+
+omit [Hashable Atom] in
+/-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
+`FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus
+the number not yet expanded. Strictly decreases per expansion step despite persistence
+(task 317 phase 7, `intExpMeasure_step_lt`, not yet proved). -/
+def intWork (U b e : List (ISF Atom)) : Nat :=
+  U.countP (fun sf => !(b.any (· == sf))) + U.countP (fun sf => !(e.any (· == sf)))
 
 end Cslib.Logic.PL
 

@@ -99,60 +99,6 @@ holds directly from a Φ-bound witness (an exact copy of `modalStepBranch_worldB
 calc chain, generalized over an arbitrary potential term `Φ` so it applies to the pre-step branch
 `b` itself, not just a step's output). -/
 
-/-- When `modalStepBranch b e acc = none`, every formula on `b` is either already in the
-expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApplicable` (the
-branch is saturated). Local copy of the `private` `modalStepBranch_none_saturated`
-(`Completeness.lean:683`), reproduced here since that declaration is not reusable across
-files. -/
-private lemma modalLoop_stepBranch_none_saturated
-    {b e : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {acc : Accessibility}
-    (hstep : modalStepBranch b e acc = none)
-    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsfb : sf ∈ b) :
-    sf ∈ e ∨ (modalApplyOne sf b acc).1 = .notApplicable := by
-  simp only [modalStepBranch] at hstep
-  rw [List.findSome?_eq_none_iff] at hstep
-  have hbody := hstep sf hsfb
-  by_cases hany : e.any (· == sf) = true
-  · left
-    simp only [List.any_eq_true] at hany
-    obtain ⟨sf', hme, heq⟩ := hany
-    simp only [beq_iff_eq] at heq
-    exact heq ▸ hme
-  · right
-    simp only [Bool.not_eq_true] at hany
-    simp only [hany] at hbody
-    rcases hca : modalApplyOne sf b acc with ⟨res, newAcc⟩
-    simp only [hca] at hbody
-    rcases res with out | brs | out | _
-    · exact absurd hbody (by simp)
-    · exact absurd hbody (by simp)
-    · exact absurd hbody (by simp)
-    · rfl
-
-private lemma modalLoopSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).length :=
-  List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem φ0))
-
-private lemma modalLoopSf_one_imp_depth_zero (φ0 : Proposition Atom)
-    (h : (modalSubfmls φ0).length = 1) : modalDepth φ0 = 0 := by
-  cases φ0 with
-  | atom p => rfl
-  | bot => rfl
-  | imp a c =>
-    exfalso
-    simp only [modalSubfmls, List.length_cons, List.length_append] at h
-    have ha : 1 ≤ (modalSubfmls a).length :=
-      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
-    have hc : 1 ≤ (modalSubfmls c).length :=
-      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem c))
-    omega
-  | box a =>
-    exfalso
-    simp only [modalSubfmls, List.length_cons] at h
-    have ha : 1 ≤ (modalSubfmls a).length :=
-      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
-    omega
-
 /-- The a-priori world bound holds for any branch `bb` whose Φ-sum (`modalMaxWorld bb + Φ`) is
 bounded by `geomCap Sf (modalDepth φ0)`, for an arbitrary potential term `Φ`. Generalizes the
 closing calc chain of `modalStepBranch_worldBound` (`FmpMeasure.lean:2451`) so it applies
@@ -167,9 +113,9 @@ private lemma modalMaxWorld_lt_worldBound_of_phiBound
     calc modalMaxWorld bb < modalMaxWorld bb + Φ + 1 :=
           Nat.lt_succ_of_le (Nat.le_add_right (modalMaxWorld bb) Φ)
       _ ≤ geomCap (modalSubfmls φ0).length (modalDepth φ0) := hPhiBound
-  have hSfpos : 1 ≤ (modalSubfmls φ0).length := modalLoopSf_pos φ0
+  have hSfpos : 1 ≤ (modalSubfmls φ0).length := modalSf_pos φ0
   have hSfdeg : (modalSubfmls φ0).length = 1 → modalDepth φ0 = 0 :=
-    modalLoopSf_one_imp_depth_zero φ0
+    modalSf_one_imp_depth_zero φ0
   have hcapbound : geomCap (modalSubfmls φ0).length (modalDepth φ0) ≤
       (modalSubfmls φ0).length ^ (modalDepth φ0 + 1) := geomCap_le_pow hSfpos hSfdeg
   have hSfle : (modalSubfmls φ0).length ≤ 2 * modalComplexity φ0 + 1 :=
@@ -241,53 +187,6 @@ private lemma modalLoop_bClosure
     · exact hb x hx
   · rw [hfstc] at hsf; simp at hsf
 
-/-- Preservation of the expanded-set universe closure across a `modalStepBranch` step: an exact
-copy of the `private` `modalStepBranch_eClosure` (`FmpMeasure.lean:2166`), reproduced here since
-that declaration is not reusable across files. -/
-private lemma modalLoop_eClosure
-    (φ0 : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
-    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
-    (heclosure : ∀ x ∈ e, x ∈ modalUniverse φ0) :
-    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 := by
-  simp only [modalStepBranch] at hstep
-  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hsf with hexp
-  have hsfU : sf ∈ modalUniverse φ0 := hb sf hsfmem
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    simp only [List.mem_singleton] at he'
-    subst he'
-    intro x hx
-    simp only [List.mem_append, List.mem_singleton] at hx
-    rcases hx with hx | rfl
-    · exact heclosure x hx
-    · exact hsfU
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
-    intro x hx
-    simp only [List.mem_append, List.mem_singleton] at hx
-    rcases hx with hx | rfl
-    · exact heclosure x hx
-    · exact hsfU
-  · rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    simp only [List.mem_singleton] at he'
-    subst he'
-    exact heclosure
-  · rw [hfstc] at hsf; simp at hsf
-
 /-- Every `modalStepBranch` step produces children that all share the same freshly-expanded
 set `newExp` (either `e` unchanged, for the `.persistent` case, or `e ++ [sf]`, for the
 `.linear`/`.branching` cases), i.e. `newExps` is exactly `newBs.map (fun _ => newExp)`. This is
@@ -345,7 +244,7 @@ private lemma modalApplyOne_posBox_eq
   · right; rfl
 
 /-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
-`modalLoop_eClosure`'s case split, but for the persistent case the new expanded set is exactly
+`modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
 the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
 appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shaped — since if
 `sf_exp` were `.pos`-box-shaped, `modalApplyOne_posBox_eq` would force its own result to be
@@ -584,7 +483,7 @@ lemma modalStep_preserves_invariant
   have hBClosureAll : ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 :=
     modalLoop_bClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.accFresh hWb
   have hEClosureAll : ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
-    modalLoop_eClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.eClosure
+    modalStepBranch_eClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.eClosure
   have hHintikkaAll := modalStepBranch_hintikka_inv b e acc newBs newExps newAcc hstep hhint
   have hBoxNegAll := modalLoop_eBoxOnlyNeg b e acc newBs newExps newAcc hstep hboxneg
   have hBoxWitAll := modalLoop_eBoxNegWitness b e acc newBs newExps newAcc hstep hboxwit
@@ -619,7 +518,7 @@ Proved by induction on `fuel`, mirroring `classicalExpandBranches_hintikka`
 `.openBranch`); the `fuel = n + 1` case is an inner induction on the `processNext` worklist,
 mirroring `modalExpandBranches_closed_unsat`'s three-parallel-list threading
 (`Soundness.lean:164`) with an additional `ModalLoopInv`-existence hypothesis at every index.
-A `modalStepBranch = none` saturated leaf is closed via `modalLoop_stepBranch_none_saturated`
+A `modalStepBranch = none` saturated leaf is closed via `modalStepBranch_none_saturated`
 (each `sf ∈ b` is either in `e` — where `ModalLoopInv.hintikkaInv`/`.eBoxOnlyNeg` discharge
 `modalHintikkaSet`'s second conjunct — or has `modalApplyOne`-result `notApplicable`, discharging
 it directly) and `ModalLoopInv.eBoxNegWitness` (third conjunct, using that `boxNeg` is always
@@ -736,21 +635,21 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                 obtain ⟨s, φ, l⟩ := sf
                 cases φ with
                 | atom p =>
-                  rcases modalLoop_stepBranch_none_saturated hstep ⟨s, .atom p, l⟩ hsfmem
+                  rcases modalStepBranch_none_saturated hstep ⟨s, .atom p, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .atom p, l⟩ hine
                     simp only [modalHintikkaClause] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | bot =>
-                  rcases modalLoop_stepBranch_none_saturated hstep ⟨s, .bot, l⟩ hsfmem
+                  rcases modalStepBranch_none_saturated hstep ⟨s, .bot, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .bot, l⟩ hine
                     simp only [modalHintikkaClause] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | imp a c =>
-                  rcases modalLoop_stepBranch_none_saturated hstep ⟨s, .imp a c, l⟩ hsfmem
+                  rcases modalStepBranch_none_saturated hstep ⟨s, .imp a c, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .imp a c, l⟩ hine
                     simp only [modalHintikkaClause] at hc
@@ -760,7 +659,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                   cases s with
                   | pos =>
                     -- boxPos still falls into `_, _`; `eBoxOnlyNeg` rules out `sf ∈ e`
-                    rcases modalLoop_stepBranch_none_saturated hstep ⟨.pos, .box ψ', l⟩ hsfmem
+                    rcases modalStepBranch_none_saturated hstep ⟨.pos, .box ψ', l⟩ hsfmem
                       with hine | hna
                     · exact absurd (hinv.eBoxOnlyNeg ⟨.pos, .box ψ', l⟩ hine ψ' rfl) (by simp)
                     · simp [hna]
@@ -769,7 +668,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                     trivial
               · -- Conjunct 3: box-negative witness existence
                 intro ψ' w hmem
-                rcases modalLoop_stepBranch_none_saturated hstep _ hmem with hine | hna
+                rcases modalStepBranch_none_saturated hstep _ hmem with hine | hna
                 · exact hinv.eBoxNegWitness _ hine ψ' w rfl
                 · exfalso
                   obtain ⟨-, rest, hlin⟩ := modalApplyOne_boxNeg_witness bR aR ψ' w

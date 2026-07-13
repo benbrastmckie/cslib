@@ -157,7 +157,7 @@ keyword (files are already in `@[expose] public section`), and add the missing d
 
 ---
 
-### Phase 3: Item 2b — Delete CompletenessLoop local copies + repoint call sites [NOT STARTED]
+### Phase 3: Item 2b — Delete CompletenessLoop local copies + repoint call sites [COMPLETED]
 
 **Goal**: Remove the now-redundant exact-copy local lemmas in CompletenessLoop.lean and repoint all
 call sites to the de-privatized originals from Phase 2.

@@ -65,6 +65,7 @@ def extractModel
 
 /-! ## Basic Model Properties -/
 
+omit [Hashable Atom] in
 /-- Atom satisfaction in `extractModel b acc` at world `w` is equivalent to
 `T(atom p)@w` appearing on the branch `b`. -/
 lemma extractModel_atom_sat_iff
@@ -83,6 +84,7 @@ lemma extractModel_atomPos_sat
   rw [extractModel_atom_sat_iff, List.any_eq_true]
   exact ⟨⟨.pos, .atom p, w⟩, hmem, by simp⟩
 
+omit [Hashable Atom] in
 /-- `⊥` is never satisfied at any world in `extractModel b acc`. -/
 lemma extractModel_bot_false
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -92,6 +94,7 @@ lemma extractModel_bot_false
 
 /-! ## Open-Branch Helpers -/
 
+omit [Hashable Atom] in
 /-- An open modal branch contains no `T(⊥)@w` for any world `w`. -/
 lemma openBranch_noTBot
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -106,6 +109,7 @@ lemma openBranch_noTBot
     simp [SignedFormula.isPos, Sign.isPos] at hno
     exact hno rfl
 
+omit [Hashable Atom] in
 /-- If `T(φ)@w ∈ b` and the branch is open, then `F(φ)@w ∉ b`. -/
 lemma openBranch_noContradiction
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -132,6 +136,7 @@ lemma openBranch_noContradiction
 
 /-! ## Per-Rule Semantic Bridge Lemmas (Phase 5b) -/
 
+omit [Hashable Atom] in
 /-- Box-positive bridge: `T(□ψ)@w ∈ b`, `acc.hasEdge w w' = true`, `modalHintikkaSet b acc`
 imply `T(ψ)@w' ∈ b`.
 
@@ -187,6 +192,7 @@ lemma hintikka_box_pos
       simp only [boxPropagation, List.mem_filterMap]
       exact ⟨w', hw'_succ, if_neg hinb⟩
 
+omit [Hashable Atom] in
 /-- Box-negative bridge: `F(□ψ)@w ∈ b` implies `∃ w', acc.hasEdge w w' = true ∧ F(ψ)@w' ∈ b`.
 
 This follows directly from the third conjunct of `modalHintikkaSet`. -/
@@ -207,16 +213,19 @@ The truth lemma therefore cannot use uniform implication bridge lemmas; instead 
 `modalApplyOne` on an `imp` to a decomposer-driven case split and recurses with strong
 induction on `modalComplexity`. The lemmas below provide that reduction. -/
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Inversion: if `modalAndOf? φ` succeeds then `φ` is the encoded conjunction. -/
 lemma modalAndOf?_eq {φ x y : Proposition Atom} (h : modalAndOf? φ = some (x, y)) :
     φ = .imp (.imp x (.imp y .bot)) .bot := by
   unfold modalAndOf? at h; split at h <;> simp_all
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Inversion: if `modalOrOf? φ` succeeds then `φ` is the encoded disjunction. -/
 lemma modalOrOf?_eq {φ x y : Proposition Atom} (h : modalOrOf? φ = some (x, y)) :
     φ = .imp (.imp x .bot) y := by
   unfold modalOrOf? at h; split at h <;> simp_all
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Inversion: if `modalImpOf? φ` succeeds then `φ` is the proper implication `x → y`. -/
 lemma modalImpOf?_eq {φ x y : Proposition Atom} (h : modalImpOf? φ = some (x, y)) :
     φ = .imp x y := by
@@ -231,6 +240,7 @@ lemma modalImpOf?_eq {φ x y : Proposition Atom} (h : modalImpOf? φ = some (x, 
         obtain ⟨rfl, rfl⟩ := h; rfl
   · simp at h
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Inversion: if `modalNegOf? φ` succeeds then `φ` is the encoded negation `x → ⊥`. -/
 lemma modalNegOf?_eq {φ x : Proposition Atom} (h : modalNegOf? φ = some x) :
     φ = .imp x .bot := by
@@ -283,6 +293,7 @@ lemma tryAllPropRules_neg {F L : Type*}
     simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
       SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
 
+omit [Hashable Atom] in
 /-- When the propositional rules apply, `modalApplyOne` returns the propositional result. -/
 lemma modalApplyOne_eq_prop_of_applicable
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -684,6 +695,7 @@ private lemma modalHintikkaClause_lift
     · exact fun sf' h => hsub (hInv sf' h)
   · trivial
 
+omit [Hashable Atom] in
 /-- When `modalStepBranch b e acc = none`, every formula on `b` is either already in the
 expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApplicable`
 (the branch is saturated). Port of `classicalStepBranch_none_saturated`

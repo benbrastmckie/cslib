@@ -99,6 +99,7 @@ This guarantees the fresh world does not appear as a label in `b`. -/
 def modalNextWorld (b : List (SignedFormula (Proposition Atom) WorldIndex)) : WorldIndex :=
   modalMaxWorld b + 1
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalNextWorld b` is strictly greater than every world index in `b`.
 
 This property guarantees that fresh worlds do not collide with existing world labels. -/
@@ -130,6 +131,7 @@ lemma modalNextWorld_gt (b : List (SignedFormula (Proposition Atom) WorldIndex))
       | inr h => exact ih _ _ h
   exact Nat.lt_succ_of_le (key2 b 0 sf hmem)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every label in a branch is bounded by `modalMaxWorld b`.
 
 This is the membership bound; essentially `key2` from `modalNextWorld_gt`. -/

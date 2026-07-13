@@ -85,6 +85,7 @@ private def Proposition.beqToEq {Atom : Type*} [DecidableEq Atom] :
     ∀ (a b : Proposition Atom), (a == b) = true → a = b :=
   fun _ _ h => LawfulBEq.eq_of_beq h
 
+omit [Hashable Atom] in
 /-- A modally closed branch is unsatisfiable with any accessibility relation.
 
 Classical closure means T(⊥) is present (never satisfiable) or T(φ)/F(φ) coexist at the

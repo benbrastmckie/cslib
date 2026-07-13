@@ -1,34 +1,39 @@
 {
   "status": "partial",
   "started_at": "2026-07-13T00:00:00Z",
-  "completed_at": "2026-07-13T18:25:16Z",
+  "completed_at": "2026-07-13T00:00:00Z",
   "artifacts": [
+    {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+      "type": "implementation",
+      "summary": "Phase 8.0: doubled intFuel's exponent to 4*(2c+1)*(c+2), mirroring Modal-K's modalFuel factor-of-2. Commit 41d30054."
+    },
     {
       "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
       "type": "implementation",
-      "summary": "Added intExpMeasure_const_exp and intExpMeasure_step_lt_branch (Phase 7.2, BETA-arm strict-decrease lemma), sorry-free, additive. Commit b5d2fc86."
+      "summary": "Phase 8: proved intExpMeasure_init_le_fuel, sorry-free, additive. Commit e2c9bf3b."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
       "type": "plan",
-      "summary": "Phase 7 resolution note extended with 7.2 (landed). Phase 8 rewritten to [BLOCKED] with numeric evidence that intExpMeasure_init_le_fuel is false against the current intFuel definition, plus a new Phase 8.0 prerequisite recommendation."
+      "summary": "Phase 8 heading changed [BLOCKED] -> [COMPLETED] with resolution note; checklist items checked off."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "status=partial, phases_completed=6/11, blockers[0]=Phase 8 intFuel under-provisioning, sorry_inventory unchanged (4), world-bound necessity finding documented, next_action_hint points to Phase 8.0 (Expansion.lean fuel exponent fix)."
+      "summary": "status=partial, phases_completed=7/11, blockers cleared, sorry_inventory unchanged (4), next_action_hint points to Phase 9 (truthLemma T-imp sorry closure)."
     },
     {
-      "path": "specs/317_propositional_tableau_completeness/summaries/07_expmeasure-phase7_2-and-phase8-blocked-summary.md",
+      "path": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
       "type": "summary",
-      "summary": "Full writeup of Commit 1 (landed) and Commit 2 (blocked, with numeric proof)."
+      "summary": "Full writeup of both commits, decisions, impacts, and follow-ups."
     }
   ],
   "partial_progress": {
     "stage": "wrap-up",
-    "details": "Commit 1 (Phase 7.2) landed green. Commit 2 (Phase 8) blocked on a verified intFuel under-provisioning bug, documented, not force-proved or sorry'd."
+    "details": "Phase 8.0 (Expansion.lean, fuel exponent doubled) and Phase 8 (Scheme.lean, intExpMeasure_init_le_fuel) both landed green. Per H1 single-phase-focus, stopping here; Phase 9+ not started."
   },
-  "phases_completed": 6,
+  "phases_completed": 7,
   "phases_total": 11,
   "metadata": {
     "session_id": "sess_1783962327_d9c0b3",
@@ -37,16 +42,28 @@
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   },
   "memory_candidates": [
-    "CSLib task 317: intFuel (Expansion.lean) is under-provisioned by a factor-of-2 in its exponent relative to intExpMeasure's actual initial value (intWork_init = 2*|intUniverse phi| - 1, not |U|). Verified via #eval. Fix: double intFuel's exponent, mirroring Modal-K's modalFuel pattern (FmpMeasure.lean:231-242 hexp/heq step) which already builds in this factor of 2.",
-    "When porting a Modal-K FmpMeasure-style termination measure to a new calculus, always cross-check the fuel definition's exponent against the ENTRY-POINT measure bound derivation (the hexp/heq step), not just the universe-length bound alone -- the entry measure's initial intWork value is typically ~2x the universe size (one term per exclusion list, both near-maximal at the start), so the fuel exponent must be pre-sized with that doubling built in from the start."
+    {
+      "content": "When an `omega` call fails to close a Nat inequality even though `have` hypotheses appear to textually match the goal's subterms (per lean_goal), suspect atomization: omega treats syntactically-non-identical-but-print-identical terms (e.g. countP predicates elaborated in separate `have` statements vs. the goal produced by `unfold`) as distinct opaque atoms. Fix by `rw`-ing the goal into the exact hypothesis form (rw uses defeq-aware matching) instead of feeding independently-stated facts to omega. Seen in CSLib task 317 Phase 8 (Scheme.lean intExpMeasure_init_le_fuel).",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["omega", "atomization", "countP", "rw", "lean4", "tactic-debugging"]
+    },
+    {
+      "content": "The lean-lsp MCP tool lean_verify can report a spurious sorryAx axiom dependency for a declaration that is genuinely sorry-free; cross-check with a direct `#print axioms <name>` via `lake env lean` before trusting lean_verify's negative result. Seen in CSLib task 317 (intExpMeasure_init_le_fuel falsely flagged sorryAx by lean_verify, confirmed clean by #print axioms).",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
+      "confidence": 0.7,
+      "suggested_keywords": ["lean_verify", "mcp", "sorryAx", "print-axioms", "tool-caveat"]
+    }
   ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 4,
     "vacuous_count": 0,
-    "axiom_count": 3,
+    "axiom_count": 2,
     "build_passed": true,
     "ci_pipeline_passed": true
   },
-  "requires_user_review": true
+  "requires_user_review": false
 }

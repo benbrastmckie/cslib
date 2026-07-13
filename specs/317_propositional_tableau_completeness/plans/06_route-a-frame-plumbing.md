@@ -593,7 +593,22 @@ fact, before committing a dedicated sub-dispatch to it).
 
 ---
 
-### Phase 8: [Wave B / B2] `intExpMeasure_init_le_fuel` (initial measure ≤ raised fuel) [BLOCKED]
+### Phase 8: [Wave B / B2] `intExpMeasure_init_le_fuel` (initial measure ≤ raised fuel) [COMPLETED]
+
+**RESOLVED (Phase 8.0 + Phase 8, commits `41d30054` + `e2c9bf3b`)**: `intFuel`'s exponent was
+doubled from `2 * (2c+1) * (c+2)` to `4 * (2c+1) * (c+2)` in `Expansion.lean` (Phase 8.0),
+mirroring `modalFuel`'s factor-of-2 exactly. All fuel-pinned callers (`Intuitionistic`/`Minimal`
+`Completeness`, `DecisionProcedure`, `Soundness`) re-audited via full scoped build — GREEN, no
+edits needed beyond the one-line exponent change (Postmortem/R5 territory concern: no
+`Soundness.lean` edit was forced). `intExpMeasure_init_le_fuel` (Phase 8) then closed with
+EQUALITY (no extra slack needed, simpler than the modal analogue's messier world-bound formula):
+`intWork (intUniverse φ) [⟨.neg,φ,0⟩] [] ≤ 2·|intUniverse φ|` (via `List.countP_le_length` +
+the `e=[]` exact-length case) `≤ 4·(2c+1)·(c+2)` (via `intUniverse_length_le` + `ring`) `=` the
+doubled `intFuel` exponent exactly. Sorry-free, additive-only in `Scheme.lean`; axiom-clean
+(`propext`, `Quot.sound` only, confirmed via `#print axioms`). Full `lake build`/`lake test`
+green; four task-317 sorries unchanged. **World-bound necessity finding CONFIRMED**:
+`intExpandBranches_world_bound` was NOT needed — the fix was a pure scalar exponent doubling,
+orthogonal to distinct-world counting.
 
 - **Goal:** Prove the initial measure is bounded by the raised fuel, using `|U| = O(c²)` and the linear
   world bound. This is where the fuel-raise pays off (impossible at the old fuel, report 07 §Q2).
@@ -639,17 +654,16 @@ fact, before committing a dedicated sub-dispatch to it).
 - **Tasks:**
   - [x] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN (confirmed
         `b5d2fc86` before starting Phase 8 investigation).
-  - [ ] **NEW PREREQUISITE (Phase 8.0, not yet a phase file)**: fix `intFuel`'s exponent in
-        `Expansion.lean` (double it, matching the Modal-K `modalFuel` factor-of-2 pattern) and
-        re-audit all fuel-pinned callers.
-  - [ ] Prove `intExpMeasure_init_le_fuel φ : intExpMeasure (intUniverse φ) [[⟨.neg,φ,0⟩]] [[]] ≤ intFuel φ`
-        with SLACK (`≤`, R8), AFTER the fuel fix. Reuse arithmetic helpers `sum_map_le_length_mul`
-        and geometric caps (`FmpMeasure.lean:131,776-833`).
-  - [ ] Scoped+grepped build GREEN; four sorries unchanged; commit `Scheme.lean` only:
-        `task 317 phase 8: intExpMeasure_init_le_fuel`.
+  - [x] **Phase 8.0**: fixed `intFuel`'s exponent in `Expansion.lean` (doubled it, matching the
+        Modal-K `modalFuel` factor-of-2 pattern) and re-audited all fuel-pinned callers
+        (commit `41d30054`).
+  - [x] Proved `intExpMeasure_init_le_fuel φ : intExpMeasure (intUniverse φ) [[⟨.neg,φ,0⟩]] [[]] ≤ intFuel φ`
+        (closes with equality, no slack needed) after the fuel fix (commit `e2c9bf3b`).
+  - [x] Scoped+grepped build GREEN; full `lake build`/`lake test` GREEN; four sorries unchanged;
+        committed `Scheme.lean` only: `task 317 phase 8: intExpMeasure_init_le_fuel`.
 - **Estimated output:** ~150-300 lines (Phase 8 proper) + a small `Expansion.lean` fix (Phase 8.0,
   separate dispatch, `Expansion.lean` territory). **Done when:** `intExpMeasure_init_le_fuel` is
-  sorry-free — BLOCKED pending the `intFuel` exponent fix.
+  sorry-free — DONE.
 - **Timing:** 2.5 hours (Phase 8 proper) + ~1 hour (Phase 8.0 fix + re-audit). **Depends on:** 5
   (uses `intFuel`), 6 (uses `intUniverse`/world bound), and now a NEW dependency: the `intFuel`
   exponent fix (Phase 8.0). Logically parallel with Phase 7; R7-serialized (both `Scheme.lean`,

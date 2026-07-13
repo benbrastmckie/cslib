@@ -1,5 +1,5 @@
 ---
-next_project_number: 488
+next_project_number: 489
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 488
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,488 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -82,6 +82,10 @@ next_project_number: 488
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Modal Logic
+
+488 [NOT STARTED] — Add frame-correspondence biconditionals to PR #662's Cube.lean, u
+
 ### Uncategorized
 
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -89,6 +93,16 @@ next_project_number: 488
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 488. Cube correspondence biconditionals pr 662
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 487
+
+**Description**: Add frame-correspondence biconditionals to PR #662's Cube.lean, unifying the existing validity (frame property => axiom valid) and canonicity (axiom valid => frame property) directions into named iff theorems — the capstone of the cube's correspondence theory. For each of T/B/4/5/D (NOT K — K has no frame condition), add a per-frame iff: e.g. T.t_correspondence {r} [Nonempty Atom] : (global validity of φ→◇φ on frame r) ↔ Std.Refl r, proved as ⟨<axiom>_canonical, <forward via Satisfies.t/b/four/five/d + the relevant Std.Refl/Std.Symm/IsTrans/Relation.RightEuclidean/Relation.Serial instance>⟩. Backward direction reuses the existing T.t_canonical/B.b_canonical/Four.four_canonical/Five.five_canonical/D.d_canonical; forward reuses Satisfies.t/b/four/five/d (per-model, instance-parametric). Place in Cube.lean (new Correspondence section after Canonicity, or fold into Canonicity). ~5 small theorems, near-free. BASE: build on branch task-487-pr662-bot-primitive (commit 69db6de4 — the current #662 tip with the fully-primitive {atom,bot,imp,and,or,box,diamond} base + completed cube). Reuse the task-487 worktree or a new one branched from it. CONSTRAINTS: zero sorry, zero new axioms; module-scoped lake build Cslib.Logics.Modal.Cube green; single clean commit; NO push/PR. EXCLUDE everything already excluded (FromPropositional, Metalogic, ProofSystem, Tableau, InterSystem, HML). Also produces the updated #662 PR body (pr-description) describing the FINAL state: fully-primitive modal base + cube validity/canonicity/correspondence, stacked on #607, #648 independent. (Follow-up from #487; user-directed capstone before /pr.)
+
+---
 
 ### 487. Make bot primitive pr 662 modal base
 - **Status**: [COMPLETED]

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 488,
+  "next_project_number": 489,
   "active_projects": [
     {
       "project_number": 486,
@@ -2537,6 +2537,20 @@
       ],
       "topic": "modal-logic",
       "completion_summary": "Completed via /orchestrate (research->plan->implement). Refactored #662's modal Proposition to make bot primitive: {atom, not, and, diamond, box} -> {atom, bot, imp, and, or, box, diamond} (7 constructors all primitive), negation the sole derived connective (neg := imp . bot). Delivered on worktree branch task-487-pr662-bot-primitive (commit 69db6de4, off task-486 base 4ebdba54): Basic.lean (new inductive, Bot/HasImp/HasAnd/HasOr/HasBox/HasDiamond wired via #607 Operators, Satisfies bot=>False/imp/or clauses, or_iff_or/imp_iff_imp => Iff.rfl, not_iff_not now an explicit lemma, dual/box_iff_not_diamond_not routed through it), Denotation.lean + LogicalEquivalence.lean mechanical arm updates, CslibTests/GrindLint.lean +4 (grind_lint skip for not_denotation, mirrors existing HML/LTS exceptions). Cube.lean (task 486's cube) verified green with ZERO edits. Net +72/-52 across 4 files. Zero sorry, zero new axioms; full lake build 2759 + test + checkInitImports + lint-style + lint + shake all green. Both box_iff_forall and diamond_iff_exists remain Iff.rfl (both modalities primitive). This gives #662 the metalogic-ready modal base (matches #648's propositional core {atom,bot,imp,and,or} + modalities), so the proof-system+soundness slice can stack straight on it. NOT pushed -- local worktree, ready for user-approved /pr. FromPropositional bridge still deferred pending the #648 propositional-basis decision."
+    },
+    {
+      "project_number": 488,
+      "project_name": "cube_correspondence_biconditionals_pr_662",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Add frame-correspondence biconditionals to PR #662's Cube.lean, unifying the existing validity (frame property => axiom valid) and canonicity (axiom valid => frame property) directions into named iff theorems — the capstone of the cube's correspondence theory. For each of T/B/4/5/D (NOT K — K has no frame condition), add a per-frame iff: e.g. T.t_correspondence {r} [Nonempty Atom] : (global validity of φ→◇φ on frame r) ↔ Std.Refl r, proved as ⟨<axiom>_canonical, <forward via Satisfies.t/b/four/five/d + the relevant Std.Refl/Std.Symm/IsTrans/Relation.RightEuclidean/Relation.Serial instance>⟩. Backward direction reuses the existing T.t_canonical/B.b_canonical/Four.four_canonical/Five.five_canonical/D.d_canonical; forward reuses Satisfies.t/b/four/five/d (per-model, instance-parametric). Place in Cube.lean (new Correspondence section after Canonicity, or fold into Canonicity). ~5 small theorems, near-free. BASE: build on branch task-487-pr662-bot-primitive (commit 69db6de4 — the current #662 tip with the fully-primitive {atom,bot,imp,and,or,box,diamond} base + completed cube). Reuse the task-487 worktree or a new one branched from it. CONSTRAINTS: zero sorry, zero new axioms; module-scoped lake build Cslib.Logics.Modal.Cube green; single clean commit; NO push/PR. EXCLUDE everything already excluded (FromPropositional, Metalogic, ProofSystem, Tableau, InterSystem, HML). Also produces the updated #662 PR body (pr-description) describing the FINAL state: fully-primitive modal base + cube validity/canonicity/correspondence, stacked on #607, #648 independent. (Follow-up from #487; user-directed capstone before /pr.)",
+      "created": "2026-07-13T01:48:22Z",
+      "last_updated": "2026-07-13T01:48:22Z",
+      "parent_task": 487,
+      "dependencies": [
+        487
+      ],
+      "topic": "modal-logic"
     }
   ],
   "repository_health": {

@@ -68,13 +68,16 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Subformula List and Depth -/
 
-/-- Structural subformula list of a `Proposition Atom` (Lukasiewicz `imp`/`box`
-recursion). Every node of `φ`'s syntax tree contributes exactly one entry. -/
+/-- Structural subformula list of a `Proposition Atom` (native `and`/`or`/`box`/`diamond`
+recursion, task 441). Every node of `φ`'s syntax tree contributes exactly one entry. -/
 def modalSubfmls : Proposition Atom → List (Proposition Atom)
   | .atom p  => [.atom p]
   | .bot     => [.bot]
   | .imp a b => .imp a b :: modalSubfmls a ++ modalSubfmls b
+  | .and a b => .and a b :: modalSubfmls a ++ modalSubfmls b
+  | .or a b  => .or a b :: modalSubfmls a ++ modalSubfmls b
   | .box a   => .box a :: modalSubfmls a
+  | .diamond a => .diamond a :: modalSubfmls a
 
 /-- The subformula list has length at most `2 * modalComplexity φ + 1`. -/
 lemma modalSubfmls_length_le (φ : Proposition Atom) :
@@ -85,17 +88,30 @@ lemma modalSubfmls_length_le (φ : Proposition Atom) :
   | imp a b iha ihb =>
     simp only [modalSubfmls, List.length_cons, List.length_append, modalComplexity_imp]
     omega
+  | and a b iha ihb =>
+    simp only [modalSubfmls, List.length_cons, List.length_append, modalComplexity_and]
+    omega
+  | or a b iha ihb =>
+    simp only [modalSubfmls, List.length_cons, List.length_append, modalComplexity_or]
+    omega
   | box a iha =>
     simp only [modalSubfmls, List.length_cons, modalComplexity_box]
     omega
+  | diamond a iha =>
+    simp only [modalSubfmls, List.length_cons, modalComplexity_diamond]
+    omega
 
-/-- Modal (box-nesting) depth of a `Proposition Atom`: `box` adds one, `imp` takes the
-max of its two sub-depths. -/
+/-- Modal (box/diamond-nesting) depth of a `Proposition Atom`: `box`/`diamond` add one,
+`imp`/`and`/`or` take the max of their two sub-depths (task 441: `diamond` is native, and
+counts toward depth exactly like `box` since it also creates a fresh world in the tableau). -/
 def modalDepth : Proposition Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp a b => max (modalDepth a) (modalDepth b)
+  | .and a b => max (modalDepth a) (modalDepth b)
+  | .or a b => max (modalDepth a) (modalDepth b)
   | .box a => 1 + modalDepth a
+  | .diamond a => 1 + modalDepth a
 
 /-- Modal depth is bounded by structural complexity. -/
 lemma modalDepth_le_complexity (φ : Proposition Atom) :
@@ -106,8 +122,17 @@ lemma modalDepth_le_complexity (φ : Proposition Atom) :
   | imp a b iha ihb =>
     simp only [modalDepth, modalComplexity_imp]
     omega
+  | and a b iha ihb =>
+    simp only [modalDepth, modalComplexity_and]
+    omega
+  | or a b iha ihb =>
+    simp only [modalDepth, modalComplexity_or]
+    omega
   | box a iha =>
     simp only [modalDepth, modalComplexity_box]
+    omega
+  | diamond a iha =>
+    simp only [modalDepth, modalComplexity_diamond]
     omega
 
 /-! ## World Bound and Universe -/
@@ -383,7 +408,24 @@ private lemma modalSubfmls_trans {a b c : Proposition Atom}
     · exact hab
     · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
     · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | and x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | or x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
   | box x ihx =>
+    simp only [modalSubfmls, List.mem_cons] at hbc
+    rcases hbc with rfl | hx
+    · exact hab
+    · exact List.mem_cons_of_mem _ (ihx hx)
+  | diamond x ihx =>
     simp only [modalSubfmls, List.mem_cons] at hbc
     rcases hbc with rfl | hx
     · exact hab
@@ -881,7 +923,24 @@ private lemma modalDepth_le_of_mem_modalSubfmls {ψ φ : Proposition Atom}
     · exact le_refl _
     · have := iha ha; simp only [modalDepth]; omega
     · have := ihb hb; simp only [modalDepth]; omega
+  | and a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (rfl | ha) | hb
+    · exact le_refl _
+    · have := iha ha; simp only [modalDepth]; omega
+    · have := ihb hb; simp only [modalDepth]; omega
+  | or a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (rfl | ha) | hb
+    · exact le_refl _
+    · have := iha ha; simp only [modalDepth]; omega
+    · have := ihb hb; simp only [modalDepth]; omega
   | box a iha =>
+    simp only [modalSubfmls, List.mem_cons] at h
+    rcases h with rfl | ha
+    · exact le_refl _
+    · have := iha ha; simp only [modalDepth]; omega
+  | diamond a iha =>
     simp only [modalSubfmls, List.mem_cons] at h
     rcases h with rfl | ha
     · exact le_refl _
@@ -2351,7 +2410,29 @@ lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
     have hc : 1 ≤ (modalSubfmls c).length :=
       List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem c))
     omega
+  | and a c =>
+    exfalso
+    simp only [modalSubfmls, List.length_cons, List.length_append] at h
+    have ha : 1 ≤ (modalSubfmls a).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
+    have hc : 1 ≤ (modalSubfmls c).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem c))
+    omega
+  | or a c =>
+    exfalso
+    simp only [modalSubfmls, List.length_cons, List.length_append] at h
+    have ha : 1 ≤ (modalSubfmls a).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
+    have hc : 1 ≤ (modalSubfmls c).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem c))
+    omega
   | box a =>
+    exfalso
+    simp only [modalSubfmls, List.length_cons] at h
+    have ha : 1 ≤ (modalSubfmls a).length :=
+      List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem a))
+    omega
+  | diamond a =>
     exfalso
     simp only [modalSubfmls, List.length_cons] at h
     have ha : 1 ≤ (modalSubfmls a).length :=

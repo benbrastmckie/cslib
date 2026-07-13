@@ -606,18 +606,34 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 13: FmpMeasure port (3011 lines) [NOT STARTED]
+### Phase 13: FmpMeasure port (3011 lines) [PARTIAL]
+
+**Handoff**: `specs/441_modal_proposition_native_refactor/handoffs/02_phase13-fmpmeasure-partial.md`.
+Shape-lemma seam (5 exhaustive-match sites: `modalSubfmls`, `modalSubfmls_length_le`,
+`modalDepth`, `modalDepth_le_complexity`, `modalSubfmls_trans`,
+`modalDepth_le_of_mem_modalSubfmls`, `modalSf_one_imp_depth_zero`) is done and committed,
+mirroring the existing `.imp`/`.box` cases for `.and`/`.or`/`.diamond`. The
+decrease/termination-proof seam remains: ~98 errors, all proof-content (no more shape errors),
+clustering around deeply-nested `rcases` chains that disambiguate the OLD Lukasiewicz and/or/
+diamond encoding inside `.imp` (same pattern Phases 11-12 already fixed elsewhere) -- needs
+flattening to native 7-way `atom|bot|imp|and|or|box|diamond` case splits, not per-arm patching.
+See the handoff for the full triage and a recommended fix order.
 
 - **Goal:** `Tableau/FmpMeasure.lean` — added by tasks 442/462, absent from plan v1 — green on
   native constructors.
 - **Tasks:**
-  - [ ] Survey with `lean_file_outline` + `lake build ... | tail -60` FIRST; classify errors into
+  - [x] Survey with `lean_file_outline` + `lake build ... | tail -60` FIRST; classify errors into
     (a) exhaustive matches/inductions needing `.and/.or/.diamond` cases, (b) decomposer shape
-    lemmas, (c) measure-decrease proofs referencing encoded sizes.
-  - [ ] Extend every exhaustive match/induction; new cases for the measure functions follow the
-    binary (`imp`-like) and unary (`box`-like) templates already present.
+    lemmas, (c) measure-decrease proofs referencing encoded sizes. *(triage done: 5 sites in (a)/
+    (b), ~98 in (c); see handoff)*
+  - [x] Extend every exhaustive match/induction; new cases for the measure functions follow the
+    binary (`imp`-like) and unary (`box`-like) templates already present. *(all 5 shape-lemma
+    sites fixed and committed)*
   - [ ] Re-prove measure-decrease lemmas where `sizeOf`/complexity arithmetic changes (native
     `and/or/diamond` have direct subterm decrease — strictly simpler than the encoded nesting).
+    *(deferred to next dispatch -- see handoffs/02_phase13-fmpmeasure-partial.md; ~98 errors,
+    all clustering around deeply-nested rcases chains that need flattening to native 7-way case
+    splits, not per-arm patching)*
 - **Timing:** ~3.5 hours (pre-authorized second dispatch if error count after triage exceeds ~40)
 - **Depends on:** 12 (verify import direction at phase start; if FmpMeasure does not import
   Completeness, this phase may start after 11)

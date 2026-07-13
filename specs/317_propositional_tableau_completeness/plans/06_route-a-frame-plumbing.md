@@ -440,7 +440,19 @@ no new axioms). The bridge sorry is preserved (reshaped, not removed) at both si
 
 ---
 
-### Phase 5: [Wave B / B2] Raise the fuel to `intFuel φ` + audit downstream callers [NOT STARTED]
+### Phase 5: [Wave B / B2] Raise the fuel to `intFuel φ` + audit downstream callers [BLOCKED]
+
+**BLOCKED note**: `intFuel φ := 3 ^ (2·(2·φ.complexity+1)·(φ.complexity+2))` was implemented and
+verified to build GREEN in isolation, but landing it breaks `Completeness.lean`/
+`Minimal/Completeness.lean` because **Scheme.lean hardcodes the OLD fuel literal
+`2 ^ (2 * φ.complexity + 2)` directly in 3 theorem signatures** (`tableau_sound:252`,
+`openBranch_countermodel:1762`, `tableau_complete:1819,1822`) rather than calling
+`intuitionisticTableau`/`minimalTableau` opaquely (unlike `Soundness.lean`, which the plan
+correctly anticipated as generic). This is a scope discovery the plan did not anticipate.
+Scheme.lean is Phase 6 territory (do-not-edit per this dispatch's contract), so the change was
+**reverted** to keep the branch green; see `.orchestrator-handoff.json` for the exact 2-site
+Expansion.lean patch and the 4-site Scheme.lean literal-substitution needed to unblock. No file
+was committed this dispatch.
 
 - **Goal:** Change the fuel from `2^(2*φ.complexity+2)` to `intFuel φ ≈ 3^Θ(c²)` (report 07 §Q4) and
   re-verify every downstream fuel-pinned caller. TERRITORY HAZARD: task 316 (`Expansion.lean` +

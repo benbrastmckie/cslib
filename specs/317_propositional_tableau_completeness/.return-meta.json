@@ -1,50 +1,52 @@
 {
   "status": "partial",
   "started_at": "2026-07-13T00:00:00Z",
+  "completed_at": "2026-07-13T18:25:16Z",
   "artifacts": [
     {
       "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "lean_source",
-      "summary": "Added intSubfmls, intSubfmls_length_le, intUniverse, intUniverse_length_le, intWork (all sorry-free, additive-only)"
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/06_intuniverse-intwork-phase6-summary.md",
-      "type": "summary",
-      "summary": "Phase 6 partial completion summary"
+      "type": "implementation",
+      "summary": "Added intExpMeasure_const_exp and intExpMeasure_step_lt_branch (Phase 7.2, BETA-arm strict-decrease lemma), sorry-free, additive. Commit b5d2fc86."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
       "type": "plan",
-      "summary": "Phase 6 heading updated NOT STARTED -> PARTIAL with resolution note"
+      "summary": "Phase 7 resolution note extended with 7.2 (landed). Phase 8 rewritten to [BLOCKED] with numeric evidence that intExpMeasure_init_le_fuel is false against the current intFuel definition, plus a new Phase 8.0 prerequisite recommendation."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "Overwritten with Phase 6 partial status, blockers, and continuation_context"
+      "summary": "status=partial, phases_completed=6/11, blockers[0]=Phase 8 intFuel under-provisioning, sorry_inventory unchanged (4), world-bound necessity finding documented, next_action_hint points to Phase 8.0 (Expansion.lean fuel exponent fix)."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/07_expmeasure-phase7_2-and-phase8-blocked-summary.md",
+      "type": "summary",
+      "summary": "Full writeup of Commit 1 (landed) and Commit 2 (blocked, with numeric proof)."
     }
   ],
   "partial_progress": {
-    "stage": "phase_6_partial",
-    "details": "intUniverse/intUniverse_length_le/intWork/intSubfmls/intSubfmls_length_le landed sorry-free. intExpandBranches_world_bound deferred (requires new occurrence-tracking invariant, comparable in difficulty to Phase 7); no sorry introduced, declaration simply omitted with full analysis recorded in handoff blockers[0] and continuation_context."
+    "stage": "wrap-up",
+    "details": "Commit 1 (Phase 7.2) landed green. Commit 2 (Phase 8) blocked on a verified intFuel under-provisioning bug, documented, not force-proved or sorry'd."
   },
-  "phases_completed": 5,
+  "phases_completed": 6,
   "phases_total": 11,
-  "memory_candidates": [
-    "CSLib Propositional Intuitionistic tableau: F-and and T-or are BETA (branching) rules; F-or and T-and are ALPHA (non-branching) rules. This means a single tableau branch can accumulate multiple sibling worlds at the same creation-depth whenever F-imp obligations are combined via alpha-decomposable or/and connectives -- a naive ancestor-chain-depth argument is insufficient to bound total world count on one branch; an occurrence-tracking argument over the monotonically-growing `expanded` set is needed instead.",
-    "When a Lean file imports another file for a lemma used only inside a proof body (e.g. Cslib.Foundations.Logic.Tableau.Measure for sum_map_le_length_mul), also check whether that imported file's OWN tactic imports (e.g. Mathlib.Tactic.Ring) are private (plain `import`, not `public import`) -- if so, the tactic will not be transitively available and must be imported directly in the new file too."
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 4,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "partial (build + checkInitImports only; lint/shake/test not run per phase-scoped verification instructions)"
-  },
   "metadata": {
     "session_id": "sess_1783962327_d9c0b3",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  },
+  "memory_candidates": [
+    "CSLib task 317: intFuel (Expansion.lean) is under-provisioned by a factor-of-2 in its exponent relative to intExpMeasure's actual initial value (intWork_init = 2*|intUniverse phi| - 1, not |U|). Verified via #eval. Fix: double intFuel's exponent, mirroring Modal-K's modalFuel pattern (FmpMeasure.lean:231-242 hexp/heq step) which already builds in this factor of 2.",
+    "When porting a Modal-K FmpMeasure-style termination measure to a new calculus, always cross-check the fuel definition's exponent against the ENTRY-POINT measure bound derivation (the hexp/heq step), not just the universe-length bound alone -- the entry measure's initial intWork value is typically ~2x the universe size (one term per exclusion list, both near-maximal at the start), so the fuel exponent must be pre-sized with that doubling built in from the start."
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 4,
+    "vacuous_count": 0,
+    "axiom_count": 3,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "requires_user_review": true
 }

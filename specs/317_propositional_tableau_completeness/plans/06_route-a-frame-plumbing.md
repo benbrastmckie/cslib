@@ -574,26 +574,89 @@ fact, before committing a dedicated sub-dispatch to it).
 - **Estimated output:** ~300-500 lines (pre-split candidate). **Actual:** ~205 lines, no split needed.
   **Done when:** `intExpMeasure_step_lt` is sorry-free. ACHIEVED for the linear/reuse arm; BETA-arm
   wiring lemma deferred as a small, low-risk follow-up (core engine already supports it).
+  **Phase 7.2 resolution (landed)**: the deferred BETA-arm wiring lemma
+  `intExpMeasure_step_lt_branch` is now landed, sorry-free, additive (~128 lines), mirroring
+  `modalExpMeasure_step_lt`'s branching case (`FmpMeasure.lean:2921-2937`). Required one new
+  helper not needed by Phase 7's linear-arm lemma: `intExpMeasure_const_exp` (mirrors
+  `modalExpMeasure_const_exp`, `FmpMeasure.lean:2856`, using `List.map_prod_left_eq_zip` to
+  collapse `intExpMeasure U newBs (newBs.map (fun _ => newExp))` to a plain sum). Case-splits on
+  `intApplyRuleFull`'s two branching constructors (`.pos,.or` / F-or and `.neg,.and` / T-and, both
+  literal 2-element lists of singletons per `Rules.lean:254,260`), applying `intWork_drop` twice
+  (once per sub-branch) composed with `pow3_two_add_one_le`. Committed `Scheme.lean` only:
+  `task 317 phase 7.2: intExpMeasure_step_lt_branch (BETA arm)` (`b5d2fc86`). Scoped+grepped
+  build GREEN (`Intuitionistic.Completeness`, `Minimal.Completeness`); `checkInitImports` passes;
+  `lean_verify` on the new lemma shows only `[propext, Classical.choice, Quot.sound]` (no new
+  axioms); four inventory sorries unchanged (`Scheme.lean:535,1388`; `Completeness.lean:133`;
+  `Minimal/Completeness.lean:125`).
 - **Timing:** 4 hours. **Depends on:** 6 (uses `intUniverse`/`intWork`).
 - **Owned files:** `Scheme.lean`.
 
 ---
 
-### Phase 8: [Wave B / B2] `intExpMeasure_init_le_fuel` (initial measure ≤ raised fuel) [NOT STARTED]
+### Phase 8: [Wave B / B2] `intExpMeasure_init_le_fuel` (initial measure ≤ raised fuel) [BLOCKED]
 
 - **Goal:** Prove the initial measure is bounded by the raised fuel, using `|U| = O(c²)` and the linear
   world bound. This is where the fuel-raise pays off (impossible at the old fuel, report 07 §Q2).
+- **BLOCKER (verified empirically, not a proof-difficulty issue — the goal is FALSE as stated)**:
+  `intFuel φ := 3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (`Expansion.lean:462-463`)
+  is under-provisioned by roughly a squaring factor relative to `intExpMeasure`'s actual initial
+  value. `intWork U b []` with `b = [⟨.neg,φ,0⟩]` computes to `|U\b| + |U\∅| = (|U| - 1) + |U| =
+  2·|U| - 1` (both terms genuinely scale with `|U|`, since the "not yet expanded" term starts at
+  the FULL universe size when `e = []`) — NOT `≤ |U|` as the dispatch's proposed strategy assumed.
+  Verified via `lean_run_code #eval` on two examples (before any file edit, per H2):
+  - `φ = atom "p"` (complexity 0): `|intUniverse φ| = 4`, `intFuel φ = 3^4 = 81`,
+    `intWork_init = 7 = 2·4 - 1`, `intExpMeasure_init = 3^7 = 2187 > 81 = intFuel φ`.
+  - `φ = atom "p" → atom "q"` (complexity 1): `|intUniverse φ| = 18`, `intFuel φ = 3^18 =
+    387,420,489`, `intWork_init = 35 = 2·18 - 1`, `intExpMeasure_init = 3^35 =
+    50,031,545,098,999,707 ≫ intFuel φ`.
+  Both examples exactly match the closed form `intWork_init = 2·|intUniverse φ| - 1`, confirming
+  this is a systematic ~2x exponent gap, not a corner case. The Modal-K template does NOT have
+  this gap: `modalFuel`'s exponent (`4 * (2·modalComplexity φ + 1) * (modalWorldBound φ + 1)`,
+  `FmpMeasure.lean:232-233,249-251`) is already **2×** `modalUniverse_length_le`'s bound
+  (`2 * (2·modalComplexity φ + 1) * (modalWorldBound φ + 1)`, `FmpMeasure.lean:155-157`) — see
+  `modalExpMeasure_entry_le_fuel`'s own `hexp`/`heq` step (`FmpMeasure.lean:231-242`), which
+  derives exactly `2 · |modalUniverse φ|` as the needed bound before invoking
+  `Nat.pow_le_pow_right`. `intFuel`'s exponent (Phase 5, `Expansion.lean:462-463`,
+  "`intFuel φ` was pre-sized against" `intUniverse_length_le`'s bound, per `Scheme.lean:1894-1897`'s
+  doc comment) was set equal to the universe-length bound with NO doubling, apparently an
+  oversight carried since Phase 5 — first surfaced now because Phase 6/7 fixed `intUniverse`'s
+  concrete size and `intWork`'s concrete formula, making the gap computable.
+  **Fix required (out of this dispatch's territory — `Expansion.lean` is read-only under R7)**:
+  double `intFuel`'s exponent, e.g. `4 * (2 * φ.complexity + 1) * (φ.complexity + 2)` (mirroring
+  the modal factor-of-2 pattern exactly), OR a tighter closed form covering the `2·|U| - 1`
+  exact value. This requires a small `Expansion.lean` dispatch followed by RE-AUDITING all
+  fuel-pinned callers per Phase 5's own audit note (`Soundness.lean`, `DecisionProcedure.lean`
+  both variants, `Scheme.lean`'s hardcoded fuel-literal sites) — should be a safe increase (larger
+  fuel only helps termination), but must be re-verified, not assumed.
+  **World-bound necessity finding (as separately requested)**: this blocker is a pure scalar
+  sizing gap in `intFuel`'s exponent, orthogonal to `intExpandBranches_world_bound` (the
+  deferred distinct-label-count fact from Phase 6). The proposed Phase 8 strategy never
+  references distinct-world counting — only `intUniverse_length_le` (a plain size bound). This
+  is consistent with Phase 7's finding: `intExpandBranches_world_bound` remains UNNECESSARY for
+  the fuel-sufficiency chain; Phase 10 should still not need it once `intFuel` is corrected.
+  **No sorry, no vacuous statement, and no weakened restatement of `intExpMeasure_init_le_fuel`
+  was introduced.** No `Scheme.lean` edit was made for this phase.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
+  - [x] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN (confirmed
+        `b5d2fc86` before starting Phase 8 investigation).
+  - [ ] **NEW PREREQUISITE (Phase 8.0, not yet a phase file)**: fix `intFuel`'s exponent in
+        `Expansion.lean` (double it, matching the Modal-K `modalFuel` factor-of-2 pattern) and
+        re-audit all fuel-pinned callers.
   - [ ] Prove `intExpMeasure_init_le_fuel φ : intExpMeasure (intUniverse φ) [[⟨.neg,φ,0⟩]] [[]] ≤ intFuel φ`
-        with SLACK (`≤`, R8). Reuse arithmetic helpers `sum_map_le_length_mul` and geometric caps
-        (`FmpMeasure.lean:131,776-833`).
+        with SLACK (`≤`, R8), AFTER the fuel fix. Reuse arithmetic helpers `sum_map_le_length_mul`
+        and geometric caps (`FmpMeasure.lean:131,776-833`).
   - [ ] Scoped+grepped build GREEN; four sorries unchanged; commit `Scheme.lean` only:
         `task 317 phase 8: intExpMeasure_init_le_fuel`.
-- **Estimated output:** ~150-300 lines. **Done when:** `intExpMeasure_init_le_fuel` is sorry-free.
-- **Timing:** 2.5 hours. **Depends on:** 5 (uses `intFuel`), 6 (uses `intUniverse`/world bound).
-  Logically parallel with Phase 7; R7-serialized (both `Scheme.lean`).
-- **Owned files:** `Scheme.lean`.
+- **Estimated output:** ~150-300 lines (Phase 8 proper) + a small `Expansion.lean` fix (Phase 8.0,
+  separate dispatch, `Expansion.lean` territory). **Done when:** `intExpMeasure_init_le_fuel` is
+  sorry-free — BLOCKED pending the `intFuel` exponent fix.
+- **Timing:** 2.5 hours (Phase 8 proper) + ~1 hour (Phase 8.0 fix + re-audit). **Depends on:** 5
+  (uses `intFuel`), 6 (uses `intUniverse`/world bound), and now a NEW dependency: the `intFuel`
+  exponent fix (Phase 8.0). Logically parallel with Phase 7; R7-serialized (both `Scheme.lean`,
+  and Phase 8.0 touches `Expansion.lean`).
+- **Owned files:** `Scheme.lean` (Phase 8 proper); `Expansion.lean` (Phase 8.0 fix, + `Soundness.lean`/
+  `DecisionProcedure.lean` only if the re-audit forces it, separate commit, mirroring Phase 5's
+  own territory-expansion precedent).
 
 ---
 

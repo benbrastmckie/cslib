@@ -110,6 +110,54 @@ instance :
     ModalS5Hilbert Modal.HilbertS5
       (F := Modal.Proposition Atom) where
 
+instance :
+    HasAxiomAndI Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  andI := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  andE1 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  andE2 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  orI1 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  orI2 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  orE := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.orE _ _ _)⟩
+
+instance :
+    HasAxiomDiaDualityFwd Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.diaDualityFwd _)⟩
+
+instance :
+    HasAxiomDiaDualityBack Modal.HilbertS5
+      (F := Modal.Proposition Atom) where
+  diaDualityBack := ⟨Modal.DerivationTree.ax [] _
+    (Modal.ModalAxiom.diaDualityBack _)⟩
+
 end ModalInstances
 
 end Cslib.Logic.Modal

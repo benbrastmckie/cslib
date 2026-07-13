@@ -271,24 +271,24 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 2: Characterization schemata + HasAxiom discharges, group 1 (ModalAxiom, S5, S4, K, T, K4, B, TB) [NOT STARTED]
+### Phase 2: Characterization schemata + HasAxiom discharges, group 1 (ModalAxiom, S5, S4, K, T, K4, B, TB) [COMPLETED]
 
 - **Goal:** Extend the group-1 axiom inductives with the 8 canonical schemata and discharge the
   corresponding `HasAxiom*` typeclass instances. This phase sets the copy-paste pattern for
   Phase 3.
 - **Tasks:**
-  - [ ] `Metalogic/DerivationTree.lean` `ModalAxiom` (`:58`): add constructors `andI φ ψ :
+  - [x] `Metalogic/DerivationTree.lean` `ModalAxiom` (`:58`): add constructors `andI φ ψ :
     ModalAxiom (Axioms.AxiomAndI φ ψ)`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`,
     `diaDualityFwd φ : ModalAxiom (Axioms.AxiomDiaDualityFwd φ)`, `diaDualityBack` — 8 total,
     all via `Axioms.*` abbrevs, with doc comments citing the encoded-derivability
     conservativity argument.
-  - [ ] `ProofSystem/Instances/{S4,K,T,K4,B,TB}.lean`: same 8 constructors per axiom inductive.
+  - [x] `ProofSystem/Instances/{S4,K,T,K4,B,TB}.lean`: same 8 constructors per axiom inductive.
     (S5's instance file discharges via `ModalAxiom` — update its `HasAxiom*` discharge block
     (`S5.lean:95` region) with the new instances.)
-  - [ ] In each file's instance block (pattern: `(Modal.BAxiom.modalB _)⟩` at `B.lean:120`),
+  - [x] In each file's instance block (pattern: `(Modal.BAxiom.modalB _)⟩` at `B.lean:120`),
     discharge `HasAxiomAndI`, `HasAxiomAndE1`, `HasAxiomAndE2`, `HasAxiomOrI1`, `HasAxiomOrI2`,
     `HasAxiomOrE`, `HasAxiomDiaDualityFwd`, `HasAxiomDiaDualityBack` for the system.
-  - [ ] Verify no `HasAnd F`/`HasOr F`/`HasDia F` instance gaps: the schemata abbrevs require
+  - [x] Verify no `HasAnd F`/`HasOr F`/`HasDia F` instance gaps: the schemata abbrevs require
     them; Phase 1 provided them on `Proposition Atom`.
 - **Timing:** ~2 hours
 - **Depends on:** 1

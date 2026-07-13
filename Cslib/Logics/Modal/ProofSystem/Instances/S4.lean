@@ -53,6 +53,35 @@ inductive S4Axiom : Proposition Atom → Prop where
   /-- 4 / transitivity: `□φ → □□φ` -/
   | modalFour (φ : Proposition Atom) :
       S4Axiom (Proposition.imp (Proposition.box φ) (Proposition.box (Proposition.box φ)))
+  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)`.
+
+  Sanctioned schema (task 441): with native `and`/`or`/`diamond` constructors, this
+  characterization axiom is necessary (it was a derivable theorem under the prior
+  Łukasiewicz encoding, so this is conservative). See `Axioms.AndI`. -/
+  | andI (φ ψ : Proposition Atom) :
+      S4Axiom (Axioms.AndI φ ψ)
+  /-- Left conjunction elimination: `φ ∧ ψ → φ`. See `Axioms.AndE1`. -/
+  | andE1 (φ ψ : Proposition Atom) :
+      S4Axiom (Axioms.AndE1 φ ψ)
+  /-- Right conjunction elimination: `φ ∧ ψ → ψ`. See `Axioms.AndE2`. -/
+  | andE2 (φ ψ : Proposition Atom) :
+      S4Axiom (Axioms.AndE2 φ ψ)
+  /-- Left disjunction introduction: `φ → φ ∨ ψ`. See `Axioms.OrI1`. -/
+  | orI1 (φ ψ : Proposition Atom) :
+      S4Axiom (Axioms.OrI1 φ ψ)
+  /-- Right disjunction introduction: `ψ → φ ∨ ψ`. See `Axioms.OrI2`. -/
+  | orI2 (φ ψ : Proposition Atom) :
+      S4Axiom (Axioms.OrI2 φ ψ)
+  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`. See `Axioms.OrE`. -/
+  | orE (φ ψ χ : Proposition Atom) :
+      S4Axiom (Axioms.OrE φ ψ χ)
+  /-- Diamond duality, forward direction: `◇φ → ¬□¬φ`. See `Axioms.AxiomDiaDualityFwd`. -/
+  | diaDualityFwd (φ : Proposition Atom) :
+      S4Axiom (Axioms.AxiomDiaDualityFwd φ)
+  /-- Diamond duality, backward direction: `¬□¬φ → ◇φ`. See `Axioms.AxiomDiaDualityBack`. -/
+  | diaDualityBack (φ : Proposition Atom) :
+      S4Axiom (Axioms.AxiomDiaDualityBack φ)
+
 
 end Cslib.Logic.Modal
 
@@ -135,6 +164,55 @@ instance :
 instance :
     ModalS4Hilbert Modal.HilbertS4
       (F := Modal.Proposition Atom) where
+
+
+instance :
+    HasAxiomAndI Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  andI := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.andI _ _)⟩
+
+instance :
+    HasAxiomAndE1 Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  andE1 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.andE1 _ _)⟩
+
+instance :
+    HasAxiomAndE2 Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  andE2 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.andE2 _ _)⟩
+
+instance :
+    HasAxiomOrI1 Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  orI1 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.orI1 _ _)⟩
+
+instance :
+    HasAxiomOrI2 Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  orI2 := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.orI2 _ _)⟩
+
+instance :
+    HasAxiomOrE Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  orE := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.orE _ _ _)⟩
+
+instance :
+    HasAxiomDiaDualityFwd Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.diaDualityFwd _)⟩
+
+instance :
+    HasAxiomDiaDualityBack Modal.HilbertS4
+      (F := Modal.Proposition Atom) where
+  diaDualityBack := ⟨Modal.DerivationTree.ax [] _
+    (Modal.S4Axiom.diaDualityBack _)⟩
 
 end ModalInstances
 

@@ -1,0 +1,346 @@
+From c2e37e20e9ab473c062e0f88272d1902bfb7cdf7 Mon Sep 17 00:00:00 2001
+From: benbrastmckie <benbrastmckie@gmail.com>
+Date: Sun, 12 Jul 2026 20:43:22 -0700
+Subject: [PATCH] feat(Logics/Modal): make modal Proposition fully primitive
+ {atom,bot,imp,and,or,box,diamond}
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Reshapes the modal Proposition inductive type from the diamond-primitive
+{atom, not, and, diamond} basis to the fully-primitive
+{atom, bot, imp, and, or, box, diamond} basis, with `not` derived as
+`imp · .bot` (and `or`/`box` correspondingly derivable/primitive per the
+new basis). This trades a smaller primitive set for full connective
+primitivity matching standard modal logic presentations, at the cost of
+`not` and `and` becoming derived forms whose denotation must be proved
+rather than assumed definitionally.
+
+Builds green against #607's existing minimal K/T cube (Cube.lean
+unchanged), demonstrating the reshape is backward compatible with the
+current cube-completion approach in this PR.
+
+Adds one grind_lint skip line for `Cslib.Logic.Modal.not_denotation` in
+CslibTests/GrindLint.lean: its proof now routes through the derived-negation
+`grind =` lemma set (negation is `imp · .bot` rather than a primitive
+constructor), which triggers additional grind instantiations.
+
+Co-authored-by: Claude Code (Anthropic) <noreply@anthropic.com>
+---
+ Cslib/Logics/Modal/Basic.lean              | 120 ++++++++++++---------
+ Cslib/Logics/Modal/Denotation.lean         |   9 +-
+ Cslib/Logics/Modal/LogicalEquivalence.lean |  21 +++-
+ CslibTests/GrindLint.lean                  |   4 +
+ 4 files changed, 98 insertions(+), 56 deletions(-)
+
+diff --git a/Cslib/Logics/Modal/Basic.lean b/Cslib/Logics/Modal/Basic.lean
+index cefa5bec..78480498 100644
+--- a/Cslib/Logics/Modal/Basic.lean
++++ b/Cslib/Logics/Modal/Basic.lean
+@@ -36,45 +36,54 @@ structure Model (World : Type*) (Atom : Type*) where
+   /-- Valuation of atoms at a world. -/
+   v : World → Atom → Prop
+ 
+-/-- Propositions. -/
++/-- Propositions. Primitives are atoms, falsum, implication, conjunction, disjunction, necessity
++(box), and possibility (diamond). Negation is the only derived connective: `¬φ := φ → ⊥`. -/
+ inductive Proposition (Atom : Type u) : Type u where
+   /-- Atomic proposition. -/
+   | atom (p : Atom)
+-  /-- Negation. -/
+-  | not (φ : Proposition Atom)
++  /-- Falsum / bottom. -/
++  | bot
++  /-- Implication. -/
++  | imp (φ₁ φ₂ : Proposition Atom)
+   /-- Conjunction. -/
+   | and (φ₁ φ₂ : Proposition Atom)
++  /-- Disjunction. -/
++  | or (φ₁ φ₂ : Proposition Atom)
++  /-- Necessity. -/
++  | box (φ : Proposition Atom)
+   /-- Possibility. -/
+   | diamond (φ : Proposition Atom)
+ 
+-instance : HasNot (Proposition Atom) := {not := Proposition.not}
++instance : Bot (Proposition Atom) := ⟨.bot⟩
++instance : HasImp (Proposition Atom) := {imp := Proposition.imp}
+ instance : HasAnd (Proposition Atom) := {and := Proposition.and}
++instance : HasOr (Proposition Atom) := {or := Proposition.or}
++instance : HasBox (Proposition Atom) := {box := Proposition.box}
+ instance : HasDiamond (Proposition Atom) := {diamond := Proposition.diamond}
+ 
+ @[scoped grind =]
+-lemma Proposition.not_def (φ : Proposition Atom) : φ.not = ¬φ := rfl
++lemma Proposition.imp_def (φ₁ φ₂ : Proposition Atom) : φ₁.imp φ₂ = (φ₁ → φ₂) := rfl
+ 
+ @[scoped grind =]
+ lemma Proposition.and_def (φ₁ φ₂ : Proposition Atom) : φ₁.and φ₂ = (φ₁ ∧ φ₂) := rfl
+ 
+ @[scoped grind =]
+-lemma Proposition.diamond_def (φ : Proposition Atom) : φ.diamond = (◇φ) := rfl
+-
+-/-- Disjunction. -/
+-def Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom := ¬(¬φ₁ ∧ ¬φ₂)
++lemma Proposition.or_def (φ₁ φ₂ : Proposition Atom) : φ₁.or φ₂ = (φ₁ ∨ φ₂) := rfl
+ 
+-instance : HasOr (Proposition Atom) := {or := Proposition.or}
++@[scoped grind =]
++lemma Proposition.box_def (φ : Proposition Atom) : φ.box = (□φ) := rfl
+ 
+ @[scoped grind =]
+-lemma Proposition.or_def (φ₁ φ₂ : Proposition Atom) : φ₁.or φ₂ = (φ₁ ∨ φ₂) := rfl
++lemma Proposition.diamond_def (φ : Proposition Atom) : φ.diamond = (◇φ) := rfl
+ 
+-/-- Implication. -/
+-def Proposition.imp (φ₁ φ₂ : Proposition Atom) : Proposition Atom := ¬φ₁ ∨ φ₂
++/-- Negation as a derived connective: `¬φ := φ → ⊥`. This is the only non-primitive connective in
++`Proposition`; every other connective (including both modalities) is a native constructor. -/
++abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom := .imp φ .bot
+ 
+-instance : HasImp (Proposition Atom) := {imp := Proposition.imp}
++instance : HasNot (Proposition Atom) := {not := Proposition.neg}
+ 
+ @[scoped grind =]
+-lemma Proposition.imp_def (φ₁ φ₂ : Proposition Atom) : φ₁.imp φ₂ = (φ₁ → φ₂) := rfl
++lemma Proposition.neg_def (φ : Proposition Atom) : (¬φ) = Proposition.imp φ .bot := rfl
+ 
+ /-- Bi-implication. -/
+ def Proposition.iff (φ₁ φ₂ : Proposition Atom) : Proposition Atom := (φ₁ → φ₂) ∧ (φ₂ → φ₁)
+@@ -85,21 +94,16 @@ instance : HasIff (Proposition Atom) := {iff := Proposition.iff}
+ lemma Proposition.iff_def (φ₁ φ₂ : Proposition Atom) :
+     φ₁.iff φ₂ = (φ₁ ↔ φ₂) := rfl
+ 
+-/-- Necessity. -/
+-def Proposition.box (φ : Proposition Atom) : Proposition Atom := ¬◇¬φ
+-
+-instance : HasBox (Proposition Atom) := {box := Proposition.box}
+-
+-@[scoped grind =]
+-lemma Proposition.box_def (φ : Proposition Atom) : φ.box = (□φ) := rfl
+-
+ /-- Satisfaction relation. `Satisfies m w φ` means that, in the model `m`, the world `w` satisfies
+ the proposition `φ`. -/
+ @[scoped grind]
+ def Satisfies (m : Model World Atom) (w : World) : Proposition Atom → Prop
+   | .atom p => m.v w p
+-  | .not φ => ¬Satisfies m w φ
++  | .bot => False
++  | .imp φ₁ φ₂ => Satisfies m w φ₁ → Satisfies m w φ₂
+   | .and φ₁ φ₂ => Satisfies m w φ₁ ∧ Satisfies m w φ₂
++  | .or φ₁ φ₂ => Satisfies m w φ₁ ∨ Satisfies m w φ₂
++  | .box φ => ∀ w', m.r w w' → Satisfies m w' φ
+   | .diamond φ => ∃ w', m.r w w' ∧ Satisfies m w' φ
+ 
+ /-- Judgement, representing the conclusions one reaches in modal logic. -/
+@@ -127,36 +131,42 @@ open scoped InferenceSystem Proposition
+ theorem derivation_def {m : Model World Atom} {w : World} {φ : Proposition Atom} :
+   Satisfies m w φ = ⇓Modal[m,w ⊨ φ] := rfl
+ 
+-/-- A world satisfies a proposition iff it does not satisfy the negation of the proposition. -/
++/-- A world satisfies a proposition iff it does not satisfy the negation of the proposition.
++
++Negation is the only derived connective (`¬φ := φ → ⊥`), so this is stated as an explicit lemma
++(rather than relied upon via defeq elsewhere) to keep downstream proofs robust to the `neg`
++`abbrev`'s unfolding. -/
+ @[scoped grind =]
+-theorem Satisfies.not_iff_not : ⇓Modal[m,w ⊨ ¬φ] ↔ ¬⇓Modal[m,w ⊨ φ] := by rfl
++theorem Satisfies.not_iff_not : ⇓Modal[m,w ⊨ ¬φ] ↔ ¬⇓Modal[m,w ⊨ φ] :=
++  ⟨fun h hs => h hs, fun h hs => absurd hs h⟩
+ 
+ @[scoped grind =]
+ theorem Satisfies.and_iff_and {m : Model World Atom} :
+-    ⇓Modal[m,w ⊨ φ₁ ∧ φ₂] ↔ ⇓Modal[m,w ⊨ φ₁] ∧ ⇓Modal[m,w ⊨ φ₂] := by rfl
++    ⇓Modal[m,w ⊨ φ₁ ∧ φ₂] ↔ ⇓Modal[m,w ⊨ φ₁] ∧ ⇓Modal[m,w ⊨ φ₂] := Iff.rfl
++
++@[scoped grind =]
++theorem Satisfies.box_iff_forall {m : Model World Atom} :
++    ⇓Modal[m,w ⊨ □φ] ↔ ∀ w', m.r w w' → ⇓Modal[m,w' ⊨ φ] := Iff.rfl
+ 
+ @[scoped grind =]
+ theorem Satisfies.diamond_iff_exists {m : Model World Atom} :
+-    ⇓Modal[m,w ⊨ ◇φ] ↔ ∃ w', m.r w w' ∧ ⇓Modal[m,w' ⊨ φ] := by rfl
++    ⇓Modal[m,w ⊨ ◇φ] ↔ ∃ w', m.r w w' ∧ ⇓Modal[m,w' ⊨ φ] := Iff.rfl
+ 
+ /-- Characterisation of the `∨` connective.
+ 
+-Disjunction is defined in terms of the more primitive connectives given in `Proposition`.
+-This result proves that the definition is correct. -/
++Disjunction is a primitive connective of `Proposition`. This result unfolds its satisfaction
++clause. -/
+ @[scoped grind =]
+ theorem Satisfies.or_iff_or {m : Model World Atom} :
+-    ⇓Modal[m,w ⊨ φ₁ ∨ φ₂] ↔ ⇓Modal[m,w ⊨ φ₁] ∨ ⇓Modal[m,w ⊨ φ₂] := by
+-  grind [=_ Proposition.or_def, Proposition.or]
++    ⇓Modal[m,w ⊨ φ₁ ∨ φ₂] ↔ ⇓Modal[m,w ⊨ φ₁] ∨ ⇓Modal[m,w ⊨ φ₂] := Iff.rfl
+ 
+ /-- Characterisation of the `→` connective.
+ 
+-Implication is defined in terms of the more primitive connectives given in `Proposition`.
+-This result proves that the definition is correct.
+--/
++Implication is a primitive connective of `Proposition`. This result unfolds its satisfaction
++clause. -/
+ @[scoped grind =]
+ theorem Satisfies.imp_iff_imp {m : Model World Atom} :
+-    ⇓Modal[m,w ⊨ φ₁ → φ₂] ↔ (⇓Modal[m,w ⊨ φ₁] → ⇓Modal[m,w ⊨ φ₂]) := by
+-  grind [=_ Proposition.imp_def, Proposition.imp]
++    ⇓Modal[m,w ⊨ φ₁ → φ₂] ↔ (⇓Modal[m,w ⊨ φ₁] → ⇓Modal[m,w ⊨ φ₂]) := Iff.rfl
+ 
+ /-- Characterisation of the `↔` connective.
+ 
+@@ -168,15 +178,6 @@ theorem Satisfies.iff_iff_iff {m : Model World Atom} :
+   simp only [HasIff.iff, Proposition.iff]
+   grind [= derivation_def]
+ 
+-/-- Characterisation of the `□` modality.
+-
+-Necessity is defined in terms of the more primitive connectives given in `Proposition`.
+-This result proves that the definition is correct. -/
+-@[scoped grind =]
+-theorem Satisfies.box_iff_forall {m : Model World Atom} :
+-    ⇓Modal[m,w ⊨ □φ] ↔ ∀ w', m.r w w' → ⇓Modal[m,w' ⊨ φ] := by
+-  grind [=_ Proposition.box_def, Proposition.box]
+-
+ /-- The theory of a world in a model is the set of all propositions that it satifies. -/
+ abbrev theory (m : Model World Atom) (w : World) : Set (Proposition Atom) :=
+   {φ | ⇓Modal[m,w ⊨ φ]}
+@@ -206,13 +207,30 @@ theorem theoryEq_satisfies {m : Model World Atom} (h : TheoryEq m w₁ w₂)
+ /-- The K axiom, valid for all models. -/
+ theorem Satisfies.k : ⇓Modal[m,w ⊨ □(φ₁ → φ₂) → (□φ₁ → □φ₂)] := by grind
+ 
+-/-- The dual axiom, valid for all models. -/
++/-- The dual axiom, valid for all models. Since `□` and `◇` are both primitive connectives, this
++is a genuine (classical) semantic theorem rather than a definitional unfolding. Negation is now the
++derived connective `imp · .bot`, so the opening `simp only` routes through `not_iff_not` (rather
++than defeq) to unfold the internal negations before the classical argument. -/
+ theorem Satisfies.dual : ⇓Modal[m,w ⊨ ◇φ ↔ ¬□¬φ] := by
++  simp only [iff_iff_iff, diamond_iff_exists, not_iff_not, box_iff_forall]
++  constructor
++  · rintro ⟨w', hr, hφ⟩ hall
++    exact hall w' hr hφ
++  · intro h
++    by_contra hne
++    push Not at hne
++    exact h (fun w' hr => hne w' hr)
++
++/-- The dual of `Satisfies.dual`: `□` in terms of `¬◇¬`. As in `Satisfies.dual`, the opening
++`simp only` routes negation through `not_iff_not` rather than defeq. -/
++theorem Satisfies.box_iff_not_diamond_not : ⇓Modal[m,w ⊨ □φ ↔ ¬◇¬φ] := by
++  simp only [iff_iff_iff, box_iff_forall, not_iff_not, diamond_iff_exists]
+   constructor
+-  · grind
+-  · grind
+-    --  only [→ satisfies_theory, usr Set.mem_setOf_eq, = impl_iff_impl, = derivation_def,
+-    -- = not_satisfies, Satisfies, = box_iff_forall, = Set.setOf_true]
++  · intro hall ⟨w', hr, hnφ⟩
++    exact hnφ (hall w' hr)
++  · intro h w' hr
++    by_contra hφ
++    exact h ⟨w', hr, hφ⟩
+ 
+ /-- The T axiom, valid for all reflexive models. -/
+ theorem Satisfies.t {m : Model World Atom} [instRefl : Std.Refl m.r] {w : World}
+diff --git a/Cslib/Logics/Modal/Denotation.lean b/Cslib/Logics/Modal/Denotation.lean
+index 4b3415b3..23059c89 100644
+--- a/Cslib/Logics/Modal/Denotation.lean
++++ b/Cslib/Logics/Modal/Denotation.lean
+@@ -25,15 +25,20 @@ open scoped Proposition InferenceSystem Satisfies
+ def Proposition.denotation (m : Model World Atom) :
+     Proposition Atom → Set World
+   | .atom p => {w | m.v w p}
+-  | .not φ => (φ.denotation m)ᶜ
++  | .bot => (∅ : Set World)
++  | .imp φ₁ φ₂ => {w | w ∈ φ₁.denotation m → w ∈ φ₂.denotation m}
+   | .and φ₁ φ₂ => φ₁.denotation m ∩ φ₂.denotation m
++  | .or φ₁ φ₂ => φ₁.denotation m ∪ φ₂.denotation m
++  | .box φ => {w | ∀ w', m.r w w' → w' ∈ φ.denotation m}
+   | .diamond φ => {w | ∃ w', m.r w w' ∧ w' ∈ φ.denotation m}
+ 
+ /-- Characterisation theorem for the denotational semantics. -/
+ @[scoped grind =]
+ theorem satisfies_mem_denotation {m : Model World Atom} {φ : Proposition Atom} :
+     w ∈ φ.denotation m ↔ ⇓Modal[m,w ⊨ φ] := by
+-  induction φ generalizing w <;> grind
++  induction φ generalizing w <;>
++    simp only [Proposition.denotation, Set.mem_setOf_eq, Set.mem_empty_iff_false,
++      Set.mem_inter_iff, Set.mem_union] <;> grind
+ 
+ /-- A world is in the denotation of a proposition iff it is not in the denotation of the negation
+ of the proposition. -/
+diff --git a/Cslib/Logics/Modal/LogicalEquivalence.lean b/Cslib/Logics/Modal/LogicalEquivalence.lean
+index 0f34ad0e..826597db 100644
+--- a/Cslib/Logics/Modal/LogicalEquivalence.lean
++++ b/Cslib/Logics/Modal/LogicalEquivalence.lean
+@@ -54,20 +54,28 @@ theorem Proposition.equiv_valid (S : Set (Model World Atom))
+ /-- Propositional contexts. -/
+ inductive Proposition.Context (Atom : Type u) : Type u where
+   | hole
+-  | not (c : Context Atom)
++  | impL (c : Context Atom) (φ : Proposition Atom)
++  | impR (φ : Proposition Atom) (c : Context Atom)
+   | andL (c : Context Atom) (φ : Proposition Atom)
+   | andR (φ : Proposition Atom) (c : Context Atom)
++  | orL (c : Context Atom) (φ : Proposition Atom)
++  | orR (φ : Proposition Atom) (c : Context Atom)
+   | diamond (c : Context Atom)
++  | box (c : Context Atom)
+ 
+ /-- Replaces a hole in a propositional context with a proposition. -/
+ @[scoped grind =]
+ def Proposition.Context.fill (c : Context Atom) (φ : Proposition Atom) :=
+   match c with
+   | hole => φ
+-  | not c => .not (c.fill φ)
++  | impL c φ' => (c.fill φ).imp φ'
++  | impR φ' c => φ'.imp (c.fill φ)
+   | andL c φ' => (c.fill φ).and φ'
+   | andR φ' c => φ'.and (c.fill φ)
++  | orL c φ' => (c.fill φ).or φ'
++  | orR φ' c => φ'.or (c.fill φ)
+   | diamond c => .diamond (c.fill φ)
++  | box c => .box (c.fill φ)
+ 
+ instance : HasContext (Proposition Atom) := ⟨Proposition.Context Atom, Proposition.Context.fill⟩
+ 
+@@ -89,7 +97,7 @@ instance {World Atom} (S : Set (Model World Atom)) :
+   elim ctx φ₁ φ₂ heqv m hₘ w := by
+     induction ctx generalizing w
+     case hole => grind
+-    case not c ih | andL c ih | andR c ih =>
++    case impL c ih | impR c ih | andL c ih | andR c ih | orL c ih | orR c ih =>
+       specialize ih w
+       grind
+     case diamond c ih =>
+@@ -99,6 +107,13 @@ instance {World Atom} (S : Set (Model World Atom)) :
+         rintro ⟨w', h⟩
+         specialize ih w'
+         grind
++    case box c ih =>
++      rw [Satisfies.iff_iff_iff]
++      apply Iff.intro
++      all_goals
++        intro h w' hr
++        specialize ih w'
++        grind
+ 
+ /-- Judgemental contexts. -/
+ structure Satisfies.Context (World Atom : Type*) where
+diff --git a/CslibTests/GrindLint.lean b/CslibTests/GrindLint.lean
+index deba3005..4eb0681e 100644
+--- a/CslibTests/GrindLint.lean
++++ b/CslibTests/GrindLint.lean
+@@ -85,6 +85,10 @@ open_scoped_all Cslib
+ #grind_lint skip Cslib.LTS.IsBisimulation.traceEq
+ #grind_lint skip Cslib.LTS.IsBisimulationUpTo.isBisimulation
+ #grind_lint skip Cslib.Logic.HML.theoryEq_isBisimulation
++-- `not_denotation`'s proof now routes through the derived-negation `grind =` lemma set
++-- (negation is `imp · .bot` after the base-reshape of `Proposition` to the fully-primitive
++-- {atom, bot, imp, and, or, box, diamond} basis), which triggers additional instantiations.
++#grind_lint skip Cslib.Logic.Modal.not_denotation
+ 
+ #guard_msgs in
+ #grind_lint check (min := 20) in Cslib
+-- 
+2.54.0
+

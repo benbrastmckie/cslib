@@ -2556,16 +2556,17 @@
     {
       "project_number": 489,
       "project_name": "propose_modal_base_reshape_to_607",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Repackage the modal formula-base reshape as a maintainer-facing proposal: (1) a Zulip message to @fmontesi (CSLib > Modal Logic) proposing that the modal Proposition adopt the fully-primitive {atom,bot,imp,and,or,box,diamond} base (bot/imp primitive, neg derived) motivated by the incoming modal metalogic, framed decision-his/labor-yours with the semantic tradeoff (¬/∧ become derived) acknowledged, and tying in the companion propositional-⊥ question (#648 vs #607) for him and Thomas Waring; (2) a clean, build-verified STANDALONE patch of just the base reshape, branched off #607 (upstream/fmontesi/connectives=ddc2c9b8), containing ONLY the modal Proposition reshape (Basic/Denotation/LogicalEquivalence) WITHOUT the cube completion, so fmontesi can cherry-pick/PR it into #607 as his own. Goal: move the foundational base decision to the layer (#607) and owner (fmontesi) where it belongs, shrinking #662 to the user's additive cube contribution. Follow-up from #488; user-directed.",
       "created": "2026-07-13T03:28:03Z",
-      "last_updated": "2026-07-13T03:28:03Z",
+      "last_updated": "2026-07-13T03:45:39Z",
       "parent_task": 488,
       "dependencies": [
         488
       ],
-      "topic": "modal-logic"
+      "topic": "modal-logic",
+      "completion_summary": "Completed. Two maintainer-facing deliverables for moving the modal base decision to #607/@fmontesi. (1) Zulip draft (artifacts/zulip-base-proposal.md): proposes the fully-primitive {atom,bot,imp,and,or,box,diamond} modal base, framed decision-his/labor-yours, semantic tradeoff (¬/∧ derived) acknowledged, metalogic-motivated, with the #648 propositional-⊥ tie-in for him+Thomas Waring; marked draft-only pending patch confirmation + 23 July. (2) Standalone build-verified patch (artifacts/0001-feat-Logics-Modal-make-modal-Proposition-fully-primi.patch): branch modal-base-reshape-onto-607 (commit c2e37e20) off #607 head ddc2c9b8, single commit, ONLY the base reshape in Basic/Denotation/LogicalEquivalence (+ 1-line GrindLint skip), NO cube completion. Verified: #607's Cube.lean (K/T validity) is byte-identical and builds green on the reshaped base (full lake build 2759/2759 + test + lints + shake pass); zero sorry, zero new axioms. Diff +98/-56 across 4 files. Ready to hand to fmontesi (cherry-pick into #607 or PR against his branch). Effect: base decision moves to its proper layer/owner, shrinking #662 to the additive cube contribution. NOT pushed."
     }
   ],
   "repository_health": {

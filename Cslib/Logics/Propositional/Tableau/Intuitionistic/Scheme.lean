@@ -323,6 +323,107 @@ lemma intAccessPreorder_le_of_isAccessible {edges : IEdges} {w w' : Nat}
     @LE.le Nat (intAccessPreorder edges).toLE w w' :=
   Relation.ReflTransGen.single h
 
+/-! ### Edge-list monotonicity (task 317 phase 1)
+
+The expansion loop only ever APPENDS to `edges` (world-creation adds one parent-child pair;
+persistence/alpha/beta steps leave it unchanged), so any accessibility fact established at an
+earlier step must survive as `edges` grows into the final accumulated list. These two lemmas
+supply that survival fact: `isAccessible_one_step` (mirrors the identically-named private
+lemma in `Soundness.lean`, re-derived here since `private` declarations are file-local) gives
+a direct edge its one-hop accessibility; `isAccessible_append_mono` shows appending a new edge
+never loses an existing accessibility witness (the DFS's candidate-children list and fuel
+bound can only grow). Together with `Relation.ReflTransGen.mono`, these let
+`intAccessPreorder`-accessibility survive edge-list growth without needing to touch
+`Soundness.lean`'s (task 316, read-only) internal machinery. -/
+
+/-- A direct parent-child edge `(w', w) ∈ edges` gives one-hop accessibility `w ⤳ w'`. -/
+private lemma isAccessible_one_step {edges : IEdges} {w w' : Nat}
+    (hmem : (w', w) ∈ edges) : isAccessible edges w w' = true := by
+  simp only [isAccessible]
+  by_cases heq : w == w'
+  · simp [heq]
+  · simp only [heq, Bool.false_eq_true, ite_false]
+    have hne : edges ≠ [] := List.ne_nil_of_mem hmem
+    have hpos : 0 < edges.length := by rwa [List.length_pos_iff_ne_nil]
+    cases hn : edges.length with
+    | zero => omega
+    | succ m =>
+      rw [isAccessible.go, List.any_eq_true]
+      exact ⟨w', by simp only [List.mem_filterMap]; exact ⟨(w', w), hmem, by simp⟩, by simp⟩
+
+/-- `isAccessible.go` is monotone under appending a new edge: any reachability witness found
+using `edges` survives when `edges` grows to `edges ++ [newEdge]` (the DFS's per-step
+candidate-children list can only gain entries, never lose them). -/
+private lemma isAccessible_go_append_mono
+    (edges : IEdges) (newEdge : Nat × Nat) (target : Nat) :
+    ∀ (current fuel : Nat), isAccessible.go edges target current fuel = true →
+      isAccessible.go (edges ++ [newEdge]) target current fuel = true := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h ⊢
+    obtain ⟨child, hchild, hcond⟩ := h
+    simp only [List.mem_filterMap] at hchild
+    obtain ⟨⟨c, p⟩, hedges, hfilt⟩ := hchild
+    by_cases hp : p == current
+    · simp only [hp, ite_true, Option.some.injEq] at hfilt
+      refine ⟨child, ?_, ?_⟩
+      · simp only [List.mem_filterMap]
+        refine ⟨(c, p), List.mem_append_left _ hedges, ?_⟩
+        simp [hp, hfilt]
+      · by_cases hce : child == target
+        · simp [hce]
+        · simp only [hce, Bool.false_eq_true, ite_false] at hcond ⊢
+          exact ih child hcond
+    · simp only [Bool.not_eq_true] at hp
+      simp [hp] at hfilt
+
+/-- `isAccessible.go` is monotone in its fuel argument: extra fuel never turns a `true`
+result into `false` (the DFS just has slack left over). -/
+private lemma isAccessible_go_fuel_mono
+    (edges : IEdges) (target : Nat) :
+    ∀ (current fuel : Nat), isAccessible.go edges target current fuel = true →
+      isAccessible.go edges target current (fuel + 1) = true := by
+  intro current fuel
+  induction fuel generalizing current with
+  | zero => simp [isAccessible.go]
+  | succ k ih =>
+    simp only [isAccessible.go]
+    intro h
+    rw [List.any_eq_true] at h ⊢
+    obtain ⟨child, hchild, hcond⟩ := h
+    refine ⟨child, hchild, ?_⟩
+    by_cases hce : child == target
+    · simp [hce]
+    · simp only [hce, Bool.false_eq_true, ite_false] at hcond ⊢
+      exact ih child hcond
+
+/-- `isAccessible` is monotone under appending a new edge (the top-level wrapper combining
+`isAccessible_go_append_mono` with `isAccessible_go_fuel_mono`, since `isAccessible`'s fuel
+bound `edges.length` also grows by one when a new edge is appended; also handles the
+`w == w'` short-circuit case). -/
+private lemma isAccessible_append_mono {edges : IEdges} (newEdge : Nat × Nat) {w w' : Nat}
+    (h : isAccessible edges w w' = true) :
+    isAccessible (edges ++ [newEdge]) w w' = true := by
+  simp only [isAccessible] at h ⊢
+  by_cases heq : w == w'
+  · simp [heq]
+  · simp only [heq, Bool.false_eq_true, ite_false] at h ⊢
+    have h1 := isAccessible_go_append_mono edges newEdge w' w edges.length h
+    have h2 := isAccessible_go_fuel_mono (edges ++ [newEdge]) w' w edges.length h1
+    simpa [List.length_append] using h2
+
+/-- `intAccessPreorder`'s `≤` is monotone under appending a new edge: any accessibility fact
+established relative to `edges` remains true relative to `edges ++ [newEdge]`. Lifts
+`isAccessible_append_mono` through `Relation.ReflTransGen.mono`. -/
+lemma intAccessPreorder_mono_append {edges : IEdges} (newEdge : Nat × Nat) {w w' : Nat}
+    (h : @LE.le Nat (intAccessPreorder edges).toLE w w') :
+    @LE.le Nat (intAccessPreorder (edges ++ [newEdge])).toLE w w' :=
+  Relation.ReflTransGen.mono (fun _ _ hxy => isAccessible_append_mono newEdge hxy) h
+
 /-! ### `intExtractValuation` monotonicity — STOP-gate finding (task 317 plan v5 Phase 2, R1)
 
 **Blocker (documented, not a `sorry`; no lemma is stated below).** The remaining Phase 2 task —
@@ -611,6 +712,73 @@ omit [Hashable Atom] in
 private lemma IExpandedConsistent_mono {b b' : IBranch Atom} {e : List (ISF Atom)}
     (hmono : ∀ x ∈ b, x ∈ b') (h : IExpandedConsistent b e) : IExpandedConsistent b' e :=
   fun sf hsfin => sfSatisfied_mono hmono (h sf hsfin)
+
+/-! ### Edge-accessibility companion invariant (task 317 phase 1, Route (a))
+
+`sfSatisfied`'s `.neg, .imp` clause only records the numeric proxy `sf.label ≤ w'` (the
+literal `sat_fimp` field, kept as-is — no reformulation, per the Preserved Assets table). That
+proxy is exactly the "phantom worlds" gap report 08 identifies: it is NOT strong enough to
+instantiate `truthLemma`'s F-imp case over `intAccessPreorder edges` (which needs genuine
+edge-reachability of the witness, not merely a numeric bound). `sfAccessSat`/
+`IExpandedAccessConsistent` is a companion invariant threaded ALONGSIDE `sfSatisfied`/
+`IExpandedConsistent` (not replacing them) purely to upgrade the F(φ→ψ) witness to a real
+`isAccessible` fact. Both the fresh-world-creation site (`intFImpRule`'s new edge
+`(w', w)`, one-hop via `isAccessible_one_step`) and the Option-A dedup reuse site
+(`intFImpReuseWitness?_spec`'s `isAccessible` conjunct) already establish this fact at
+construction time; this invariant only threads it forward. -/
+
+/-- The `.neg, .imp` edge-accessibility obligation: vacuously `True` for every other
+sign/formula pair (mirrors `sfSatisfied`'s shape, restricted to the one case that needs
+upgrading). -/
+private def sfAccessSat (edges : IEdges) (b : IBranch Atom) (sf : ISF Atom) : Prop :=
+  match sf.sign, sf.formula with
+  | .neg, .imp φ ψ =>
+    ∃ w' : Nat, isAccessible edges sf.label w' = true ∧
+      b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
+      b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
+  | _, _ => True
+
+/-- The edge-accessibility companion of `IExpandedConsistent`: every formula in `e` has its
+F(φ→ψ) witness (if any) genuinely edge-accessible under `edges`. -/
+private def IExpandedAccessConsistent (edges : IEdges) (b : IBranch Atom)
+    (e : List (ISF Atom)) : Prop :=
+  ∀ sf ∈ e, sfAccessSat edges b sf
+
+omit [Hashable Atom] in
+/-- `sfAccessSat` is monotone under branch inclusion. -/
+private lemma sfAccessSat_mono {edges : IEdges} {b b' : IBranch Atom} {sf : ISF Atom}
+    (hmono : ∀ x ∈ b, x ∈ b') (h : sfAccessSat edges b sf) : sfAccessSat edges b' sf := by
+  rcases sf with ⟨s, f, l⟩
+  cases s <;> cases f <;> simp only [sfAccessSat] at * <;>
+    first
+    | exact h
+    | (obtain ⟨w', hacc, h1, h2⟩ := h
+       exact ⟨w', hacc, any_mono_sub hmono h1, any_mono_sub hmono h2⟩)
+
+/-- `sfAccessSat` is monotone under appending a new edge to `edges` (the accessibility
+witness survives, per `isAccessible_append_mono`). -/
+private lemma sfAccessSat_edges_mono {edges : IEdges} (newEdge : Nat × Nat) {b : IBranch Atom}
+    {sf : ISF Atom} (h : sfAccessSat edges b sf) : sfAccessSat (edges ++ [newEdge]) b sf := by
+  rcases sf with ⟨s, f, l⟩
+  cases s <;> cases f <;> simp only [sfAccessSat] at * <;>
+    first
+    | exact h
+    | (obtain ⟨w', hacc, h1, h2⟩ := h
+       exact ⟨w', isAccessible_append_mono newEdge hacc, h1, h2⟩)
+
+omit [Hashable Atom] in
+/-- `IExpandedAccessConsistent` is monotone under branch inclusion. -/
+private lemma IExpandedAccessConsistent_mono {edges : IEdges} {b b' : IBranch Atom}
+    {e : List (ISF Atom)} (hmono : ∀ x ∈ b, x ∈ b')
+    (h : IExpandedAccessConsistent edges b e) : IExpandedAccessConsistent edges b' e :=
+  fun sf hsfin => sfAccessSat_mono hmono (h sf hsfin)
+
+/-- `IExpandedAccessConsistent` is monotone under appending a new edge. -/
+private lemma IExpandedAccessConsistent_edges_mono {edges : IEdges} (newEdge : Nat × Nat)
+    {b : IBranch Atom} {e : List (ISF Atom)}
+    (h : IExpandedAccessConsistent edges b e) :
+    IExpandedAccessConsistent (edges ++ [newEdge]) b e :=
+  fun sf hsfin => sfAccessSat_edges_mono newEdge (h sf hsfin)
 
 omit [Hashable Atom] in
 /-- When `intStepBranch b e nw = none` and `sf ∈ b` with `intApplyRuleFull sf nw b ≠ .notApplicable`
@@ -1033,6 +1201,57 @@ private lemma IAllConsistent_map {branches' : List (IBranch Atom)} (f : IBranch 
     simp only [List.map_cons, IAllConsistent]
     exact ⟨(h bh (List.mem_cons_self ..)).1, (h bh (List.mem_cons_self ..)).2,
       ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
+
+/-- The edge-accessibility companion of `IAllConsistent` (task 317 phase 1): threaded
+ALONGSIDE it (not merged into it, to avoid touching `IAllConsistent`'s already-green call
+sites) through the same `branches`/`expandedSets`/`edgeSets` triple. -/
+private def IAllAccessConsistent (bs : List (IBranch Atom)) (es : List (List (ISF Atom)))
+    (edgeSets : List IEdges) : Prop :=
+  match bs, es, edgeSets with
+  | [], [], [] => True
+  | b :: bs', e :: es', edges :: edgeSets' =>
+      IExpandedAccessConsistent edges b e ∧ IAllAccessConsistent bs' es' edgeSets'
+  | _, _, _ => False
+
+omit [Hashable Atom] in
+/-- `IAllAccessConsistent` combines under list append (mirrors `IAllConsistent_append`). -/
+private lemma IAllAccessConsistent_append {bs1 bs2 : List (IBranch Atom)}
+    {es1 es2 : List (List (ISF Atom))} {edgeSets1 edgeSets2 : List IEdges}
+    (h1 : IAllAccessConsistent bs1 es1 edgeSets1) (h2 : IAllAccessConsistent bs2 es2 edgeSets2) :
+    IAllAccessConsistent (bs1 ++ bs2) (es1 ++ es2) (edgeSets1 ++ edgeSets2) := by
+  induction bs1 generalizing es1 edgeSets1 with
+  | nil =>
+    cases es1 with
+    | nil =>
+      cases edgeSets1 with
+      | nil => simpa using h2
+      | cons eh et => simp [IAllAccessConsistent] at h1
+    | cons eh et => simp [IAllAccessConsistent] at h1
+  | cons bh bt ih =>
+    cases es1 with
+    | nil => simp [IAllAccessConsistent] at h1
+    | cons eh et =>
+      cases edgeSets1 with
+      | nil => simp [IAllAccessConsistent] at h1
+      | cons edgesh edgest =>
+        simp only [IAllAccessConsistent] at h1
+        obtain ⟨hACC, hrest⟩ := h1
+        simp only [List.cons_append]
+        exact ⟨hACC, ih hrest⟩
+
+omit [Hashable Atom] in
+/-- `IAllAccessConsistent` holds along a uniform `map` (mirrors `IAllConsistent_map`; used
+for the branching-rule case, which never creates a world so `edges` is unchanged). -/
+private lemma IAllAccessConsistent_map {branches' : List (IBranch Atom)}
+    (f : IBranch Atom → IBranch Atom) {newExp : List (ISF Atom)} {edges : IEdges}
+    (h : ∀ br ∈ branches', IExpandedAccessConsistent edges (f br) newExp) :
+    IAllAccessConsistent (branches'.map f) (branches'.map (fun _ => newExp))
+      (branches'.map (fun _ => edges)) := by
+  induction branches' with
+  | nil => simp [IAllAccessConsistent]
+  | cons bh bt ih =>
+    simp only [List.map_cons, IAllAccessConsistent]
+    exact ⟨h bh (List.mem_cons_self ..), ih fun br hbr => h br (List.mem_cons_of_mem _ hbr)⟩
 
 /-- If `intExpandBranches` returns `.openBranch b`, then `b` is Hintikka-saturated:
 every compound formula on `b` has its rule-outputs also on `b` (see `IBranchSaturation`).

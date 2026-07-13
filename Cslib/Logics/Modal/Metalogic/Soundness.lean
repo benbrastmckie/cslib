@@ -76,6 +76,74 @@ lemma Satisfies.modalK_axiom {World : Type*} (m : Model World Atom) (w : World)
       (Proposition.imp (Proposition.box φ) (Proposition.box ψ))) := by
   intro h_box_imp h_box_phi w' hr; exact h_box_imp w' hr (h_box_phi w' hr)
 
+/-! ## Shared And/Or/Diamond-Duality Characterization Axiom Soundness Lemmas
+
+Semantic soundness for the 8 characterization schemata added in task 441 (native
+`and`/`or`/`diamond` constructors). Factored out here so every `Systems/*/Soundness.lean`
+file can reuse a single proof per schema rather than re-deriving it per system. -/
+
+/-- Conjunction introduction (`Axioms.AndI`) is valid on all frames. -/
+lemma Satisfies.andI_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp φ (Proposition.imp ψ (Proposition.and φ ψ))) := by
+  intro hφ hψ; exact ⟨hφ, hψ⟩
+
+/-- Left conjunction elimination (`Axioms.AndE1`) is valid on all frames. -/
+lemma Satisfies.andE1_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.and φ ψ) φ) := by
+  intro ⟨h1, _⟩; exact h1
+
+/-- Right conjunction elimination (`Axioms.AndE2`) is valid on all frames. -/
+lemma Satisfies.andE2_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.and φ ψ) ψ) := by
+  intro ⟨_, h2⟩; exact h2
+
+/-- Left disjunction introduction (`Axioms.OrI1`) is valid on all frames. -/
+lemma Satisfies.orI1_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp φ (Proposition.or φ ψ)) := by
+  intro h; exact Or.inl h
+
+/-- Right disjunction introduction (`Axioms.OrI2`) is valid on all frames. -/
+lemma Satisfies.orI2_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ : Proposition Atom) :
+    Satisfies m w (Proposition.imp ψ (Proposition.or φ ψ)) := by
+  intro h; exact Or.inr h
+
+/-- Disjunction elimination (`Axioms.OrE`) is valid on all frames. -/
+lemma Satisfies.orE_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ ψ χ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.imp φ χ)
+      (Proposition.imp (Proposition.imp ψ χ) (Proposition.imp (Proposition.or φ ψ) χ))) := by
+  intro h1 h2 h3
+  cases h3 with
+  | inl h => exact h1 h
+  | inr h => exact h2 h
+
+/-- Diamond duality, forward direction (`Axioms.AxiomDiaDualityFwd`): `◇φ → ¬□¬φ`, valid on all
+frames. -/
+lemma Satisfies.diaDualityFwd_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.diamond φ)
+      (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot)) := by
+  intro ⟨w', hr, hs⟩ hbox
+  exact hbox w' hr hs
+
+/-- Diamond duality, backward direction (`Axioms.AxiomDiaDualityBack`): `¬□¬φ → ◇φ`, valid on
+all frames (uses excluded middle, as diamond is classically the dual of box). -/
+lemma Satisfies.diaDualityBack_axiom {World : Type*} (m : Model World Atom) (w : World)
+    (φ : Proposition Atom) :
+    Satisfies m w (Proposition.imp
+      (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot)
+      (Proposition.diamond φ)) := by
+  intro h
+  by_contra hc
+  simp only [Satisfies] at hc
+  push Not at hc
+  exact h fun w' hr hs => hc w' hr hs
+
 /-! ## Parameterized Soundness Theorem -/
 
 /-- **Parameterized Soundness**: If `Gamma |- phi` (via `DerivationTree Axioms`), then

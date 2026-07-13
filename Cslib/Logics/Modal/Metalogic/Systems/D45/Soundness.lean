@@ -66,6 +66,15 @@ theorem d45_axiom_sound {World : Type*} {φ : Proposition Atom}
     apply hdiam
     intro u hru hsat
     exact hbox_neg_v u (h_eucl w v u hrv hru) hsat
+  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
+  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
+  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
+  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
+  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
+  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
+  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
+  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+
 
 /-! ## D45 Soundness Theorems -/
 

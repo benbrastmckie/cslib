@@ -320,17 +320,17 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 4: Systems soundness sweep (15 files, new schema cases + diamond-unfold repairs) [NOT STARTED]
+### Phase 4: Systems soundness sweep (15 files, new schema cases + diamond-unfold repairs) [COMPLETED]
 
 - **Goal:** Every `Systems/*/Soundness.lean` proves the 8 new axiom cases semantically and the
   previously-defeq diamond unfolds are repaired.
 - **Tasks:**
-  - [ ] All 15 `Metalogic/Systems/{K,T,K4,S4,S5,D,D4,D45,D5,DB,B,TB,K45,K5,KB5}/Soundness.lean`:
+  - [x] All 15 `Metalogic/Systems/{K,T,K4,S4,S5,D,D4,D45,D5,DB,B,TB,K45,K5,KB5}/Soundness.lean`:
     the soundness induction over the axiom inductive gains 8 uniform cases. Semantic content:
     `andI/andE1/andE2` via `Satisfies.and_iff`; `orI1/orI2/orE` via `Satisfies.or_iff`;
     `diaDualityFwd/diaDualityBack` via `Satisfies.dual` — each expected to close with
     `simp [Satisfies...] <;> tauto` or `grind` using the Phase 1 `@[grind =]` companions.
-  - [ ] Repair the known diamond-unfold breaks: `Systems/S5/Soundness.lean:57` `modalB` case
+  - [x] Repair the known diamond-unfold breaks: `Systems/S5/Soundness.lean:57` `modalB` case
     (`introN` failure per handoff) and the analogous `modalB` cases in
     `{B,DB,KB5,TB}/Soundness.lean` (`:48/:58/:60/:63`) and `modalD`/`modalFive` cases in the
     D/5-family — rewrite through `Satisfies.dual`/`diamond_iff` where the raw `Axioms.AxiomB/5/D`

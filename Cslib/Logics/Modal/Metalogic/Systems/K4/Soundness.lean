@@ -56,6 +56,15 @@ theorem k4_axiom_sound {World : Type*} {φ : Proposition Atom}
   | modalFour φ =>
     intro h_box w₁ hr₁ w₂ hr₂
     exact h_box w₂ (h_trans w w₁ w₂ hr₁ hr₂)
+  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
+  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
+  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
+  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
+  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
+  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
+  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
+  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+
 
 /-! ## K4 Soundness Theorems -/
 

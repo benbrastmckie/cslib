@@ -50,6 +50,15 @@ theorem k5_axiom_sound {World : Type*} {φ : Proposition Atom}
     intro h_diam w' hr h_box_neg_w'
     exact h_diam (fun w'' hr' h_phi =>
       h_box_neg_w' w'' (h_eucl w w' w'' hr hr') h_phi)
+  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
+  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
+  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
+  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
+  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
+  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
+  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
+  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+
 
 /-! ## K5 Soundness Theorems -/
 

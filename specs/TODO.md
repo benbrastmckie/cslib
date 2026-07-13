@@ -1,5 +1,5 @@
 ---
-next_project_number: 490
+next_project_number: 497
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 490
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
-| 4 | 412 | 41 | code hygiene |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,481,482,483,490,491 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,480 | 36,37,181,317,407,425,449,478,490 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,414,492,493,495 | 39,40,181,215,300,301,375,480,491 | foundations, code hygiene, modal-logic |
+| 4 | 412,484,494,496 | 41,479,481,482,483,492,495 | modal logic, code hygiene, modal-logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -40,11 +40,11 @@ next_project_number: 490
 441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
-480 [NOT STARTED] — Sound and complete axiomatization of intuitionistic modal logic o
 481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
 482 [NOT STARTED] — Sound and complete axiomatization of modal logic S4 (reflexive-tr
 483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
-484 [NOT STARTED] — Conservative-extension and modularity results across the modal ex
+480 [NOT STARTED] — Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/co
+484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
 
 ### Temporal Logic
 
@@ -82,6 +82,16 @@ next_project_number: 490
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Modal Logic
+
+490 [NOT STARTED] — Birelational (intuitionistic Kripke) modal SEMANTICS — the semant
+491 [NOT STARTED] — Minimal propositional base (efq-optional) — PREREQUISITE for the 
+  └─ 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
+    └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
+492 [NOT STARTED] — IK (intuitionistic modal logic K) soundness + completeness over b
+  └─ 494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
+493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
+
 ### Uncategorized
 
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -89,6 +99,76 @@ next_project_number: 490
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 496. Minimal modal extensions
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 495
+
+**Description**: Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.
+
+---
+
+### 495. Minimal modal K soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 491, Task 480, Task 490
+
+**Description**: Minimal modal logic MK soundness + completeness — the modal logic over MINIMAL propositional logic (no explosion / efq), instantiating the intuitionistic modal framework (task 480) MINUS the efq rule, over the birelational semantics (task 490) with the minimal-appropriate ⊥ treatment (⊥ an ordinary proposition, no ex-falso). Prove soundness and completeness via the (prime-theory) canonical model. REQUIRES the minimal propositional base (task 491). Depends on 491, 480, 490.
+
+---
+
+### 494. Intuitionistic modal extensions IT IS4 IS5
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 492
+
+**Description**: Intuitionistic modal extensions IT / IS4 / IS5 — sound and complete axiomatizations of the intuitionistic analogues of T / S4 / S5 as modular extensions of IK (task 492), via the intuitionistic axiom↔birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the ≤∘R conditions). Prove soundness and completeness by the birelational canonical model. Depends on 492.
+
+---
+
+### 493. CK constructive modal soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 480, Task 490
+
+**Description**: CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.
+
+---
+
+### 492. IK intuitionistic modal soundness completeness
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 480, Task 490
+
+**Description**: IK (intuitionistic modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). IK carries the full ◇/□ axiom set: K-□ (□(A→B)→□A→□B), K-◇ (□(A→B)→◇A→◇B), ◇⊥→⊥, and ◇(A∨B)→◇A∨◇B. Prove soundness over birelational frames and completeness via the birelational (prime-theory) canonical model. Depends on 480, 490.
+
+---
+
+### 491. Minimal propositional base efq optional
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: None
+
+**Description**: Minimal propositional base (efq-optional) — PREREQUISITE for the minimal modal track. Make ex-falso-quodlibet an OPTIONAL rule of the propositional derivation system so the strength hierarchy minimal ⊂ intuitionistic (efq / IsIntuitionistic) ⊂ classical (DNE / IsClassical) is cleanly representable. Current state: #648's propositional layer (Logics/Propositional/Defs.lean) builds efq in as a derivation rule (base = intuitionistic) and layers IsClassical (DNE) on top, with NO efq-free (minimal) variant. Step 1: confirm whether #648 already admits a minimal base; if not, gate/parameterize the efq rule (e.g. an IsMinimal marker, or an efq-free Derivation variant, mirroring the IsIntuitionistic/IsClassical typeclass pattern). Builds on #648's primitive-⊥ propositional Proposition. No intra-repo task dependency (tracks PR #648).
+
+---
+
+### 490. Birelational intuitionistic modal semantics
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 487
+
+**Description**: Birelational (intuitionistic Kripke) modal SEMANTICS — the semantic foundation for the intuitionistic and minimal modal metalogic, sibling to the classical Kripke cube. Define intuitionistic Kripke frames with TWO relations: the intuitionistic preorder ≤ and the modal accessibility R, plus the heredity/monotonicity condition and the F1/F2 (up-down) confluence conditions relating ≤ and R. Define Satisfies (forcing) for the fully-primitive modal Proposition {atom,bot,imp,and,or,box,diamond} (PR #662) over these frames: persistence of forcing under ≤, □ quantifying over ≤∘R, ◇ over R, intuitionistic → clause (∀ ≥-worlds). This is the layer that intuitionistic (tasks 492/493/494) and minimal (task 495) completeness build on. REQUIRES the primitive-◇/∨/⊥ base (tasks 477/487, in #662) — intuitionistically ◇≠¬□¬ and ∨ is not definable from →/∧/⊥, so both-primitive-modalities + primitive ∨/⊥ are hard prerequisites. Depends on 487 (fully-primitive modal base).
+
+---
 
 ### 489. Propose modal base reshape to 607
 - **Status**: [COMPLETED]
@@ -134,9 +214,9 @@ next_project_number: 490
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 478, Task 479, Task 480, Task 481, Task 482, Task 483, Task 492, Task 495
 
-**Description**: Conservative-extension and modularity results across the modal extension lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric axiom-frame correspondences), ensuring each axiom-frame-condition module composes cleanly and stronger logics conservatively extend weaker ones; relate intuitionistic and classical modal logics. Establishes the compositional guarantees that make the axiomatizations modular. Depends on tasks 478-483.
+**Description**: Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).
 
 ---
 
@@ -170,13 +250,13 @@ next_project_number: 490
 
 ---
 
-### 480. Metalogic intuitionistic modal soundness completeness
+### 480. Intuitionistic modal framework
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 478, Task 490
 
-**Description**: Sound and complete axiomatization of intuitionistic modal logic over birelational (intuitionistic Kripke) semantics, with □ and ◇ primitive. Prove soundness and completeness, reusing the shared Hilbert-calculus infrastructure from task 478 where possible. Depends on task 478.
+**Description**: Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/consistent/saturated set) machinery and the birelational canonical-model construction for intuitionistic modal logic; the intuitionistic analogue of task 478's classical MCS/canonical-model framework. Parameterized over modal frame conditions; reuses task 478's generic Hilbert-calculus infrastructure where the classical and intuitionistic bases agree. Provides the reusable soundness/completeness infrastructure the per-system intuitionistic instantiations build on (IK task 492, CK task 493, extensions task 494; minimal reuses it minus efq, task 495). Requires the both-primitive + primitive-∨/⊥ modal base (tasks 477/487, PR #662; ◇≠¬□¬ and ∨ not definable intuitionistically) and birelational semantics (task 490). Depends on 478, 490. RESTRUCTURED 2026-07-12 from the former monolithic 'intuitionistic modal soundness/completeness' — per-system results split into 492/493/494.
 
 ---
 

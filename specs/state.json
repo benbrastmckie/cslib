@@ -1,5 +1,5 @@
 {
-  "next_project_number": 490,
+  "next_project_number": 497,
   "active_projects": [
     {
       "project_number": 486,
@@ -64,13 +64,17 @@
     },
     {
       "project_number": 480,
-      "project_name": "metalogic_intuitionistic_modal_soundness_completeness",
+      "project_name": "intuitionistic_modal_framework",
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Modal Logic",
-      "description": "Sound and complete axiomatization of intuitionistic modal logic over birelational (intuitionistic Kripke) semantics, with □ and ◇ primitive. Prove soundness and completeness, reusing the shared Hilbert-calculus infrastructure from task 478 where possible. Depends on task 478.",
+      "description": "Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/consistent/saturated set) machinery and the birelational canonical-model construction for intuitionistic modal logic; the intuitionistic analogue of task 478's classical MCS/canonical-model framework. Parameterized over modal frame conditions; reuses task 478's generic Hilbert-calculus infrastructure where the classical and intuitionistic bases agree. Provides the reusable soundness/completeness infrastructure the per-system intuitionistic instantiations build on (IK task 492, CK task 493, extensions task 494; minimal reuses it minus efq, task 495). Requires the both-primitive + primitive-∨/⊥ modal base (tasks 477/487, PR #662; ◇≠¬□¬ and ∨ not definable intuitionistically) and birelational semantics (task 490). Depends on 478, 490. RESTRUCTURED 2026-07-12 from the former monolithic 'intuitionistic modal soundness/completeness' — per-system results split into 492/493/494.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-13T05:15:48Z",
+      "dependencies": [
+        478,
+        490
+      ]
     },
     {
       "project_number": 481,
@@ -108,9 +112,19 @@
       "status": "not_started",
       "task_type": "cslib",
       "topic": "Modal Logic",
-      "description": "Conservative-extension and modularity results across the modal extension lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric axiom-frame correspondences), ensuring each axiom-frame-condition module composes cleanly and stronger logics conservatively extend weaker ones; relate intuitionistic and classical modal logics. Establishes the compositional guarantees that make the axiomatizations modular. Depends on tasks 478-483.",
+      "description": "Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-13T05:15:48Z",
+      "dependencies": [
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        492,
+        495
+      ]
     },
     {
       "project_number": 465,
@@ -2567,6 +2581,106 @@
       ],
       "topic": "modal-logic",
       "completion_summary": "Completed. Two maintainer-facing deliverables for moving the modal base decision to #607/@fmontesi. (1) Zulip draft (artifacts/zulip-base-proposal.md): proposes the fully-primitive {atom,bot,imp,and,or,box,diamond} modal base, framed decision-his/labor-yours, semantic tradeoff (¬/∧ derived) acknowledged, metalogic-motivated, with the #648 propositional-⊥ tie-in for him+Thomas Waring; marked draft-only pending patch confirmation + 23 July. (2) Standalone build-verified patch (artifacts/0001-feat-Logics-Modal-make-modal-Proposition-fully-primi.patch): branch modal-base-reshape-onto-607 (commit c2e37e20) off #607 head ddc2c9b8, single commit, ONLY the base reshape in Basic/Denotation/LogicalEquivalence (+ 1-line GrindLint skip), NO cube completion. Verified: #607's Cube.lean (K/T validity) is byte-identical and builds green on the reshaped base (full lake build 2759/2759 + test + lints + shake pass); zero sorry, zero new axioms. Diff +98/-56 across 4 files. Ready to hand to fmontesi (cherry-pick into #607 or PR against his branch). Effect: base decision moves to its proper layer/owner, shrinking #662 to the additive cube contribution. NOT pushed."
+    },
+    {
+      "project_number": 490,
+      "project_name": "birelational_intuitionistic_modal_semantics",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 487,
+      "dependencies": [
+        487
+      ],
+      "description": "Birelational (intuitionistic Kripke) modal SEMANTICS — the semantic foundation for the intuitionistic and minimal modal metalogic, sibling to the classical Kripke cube. Define intuitionistic Kripke frames with TWO relations: the intuitionistic preorder ≤ and the modal accessibility R, plus the heredity/monotonicity condition and the F1/F2 (up-down) confluence conditions relating ≤ and R. Define Satisfies (forcing) for the fully-primitive modal Proposition {atom,bot,imp,and,or,box,diamond} (PR #662) over these frames: persistence of forcing under ≤, □ quantifying over ≤∘R, ◇ over R, intuitionistic → clause (∀ ≥-worlds). This is the layer that intuitionistic (tasks 492/493/494) and minimal (task 495) completeness build on. REQUIRES the primitive-◇/∨/⊥ base (tasks 477/487, in #662) — intuitionistically ◇≠¬□¬ and ∨ is not definable from →/∧/⊥, so both-primitive-modalities + primitive ∨/⊥ are hard prerequisites. Depends on 487 (fully-primitive modal base).",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 491,
+      "project_name": "minimal_propositional_base_efq_optional",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": null,
+      "dependencies": [],
+      "description": "Minimal propositional base (efq-optional) — PREREQUISITE for the minimal modal track. Make ex-falso-quodlibet an OPTIONAL rule of the propositional derivation system so the strength hierarchy minimal ⊂ intuitionistic (efq / IsIntuitionistic) ⊂ classical (DNE / IsClassical) is cleanly representable. Current state: #648's propositional layer (Logics/Propositional/Defs.lean) builds efq in as a derivation rule (base = intuitionistic) and layers IsClassical (DNE) on top, with NO efq-free (minimal) variant. Step 1: confirm whether #648 already admits a minimal base; if not, gate/parameterize the efq rule (e.g. an IsMinimal marker, or an efq-free Derivation variant, mirroring the IsIntuitionistic/IsClassical typeclass pattern). Builds on #648's primitive-⊥ propositional Proposition. No intra-repo task dependency (tracks PR #648).",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 492,
+      "project_name": "IK_intuitionistic_modal_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 480,
+      "dependencies": [
+        480,
+        490
+      ],
+      "description": "IK (intuitionistic modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). IK carries the full ◇/□ axiom set: K-□ (□(A→B)→□A→□B), K-◇ (□(A→B)→◇A→◇B), ◇⊥→⊥, and ◇(A∨B)→◇A∨◇B. Prove soundness over birelational frames and completeness via the birelational (prime-theory) canonical model. Depends on 480, 490.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 493,
+      "project_name": "CK_constructive_modal_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 480,
+      "dependencies": [
+        480,
+        490
+      ],
+      "description": "CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 494,
+      "project_name": "intuitionistic_modal_extensions_IT_IS4_IS5",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 492,
+      "dependencies": [
+        492
+      ],
+      "description": "Intuitionistic modal extensions IT / IS4 / IS5 — sound and complete axiomatizations of the intuitionistic analogues of T / S4 / S5 as modular extensions of IK (task 492), via the intuitionistic axiom↔birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the ≤∘R conditions). Prove soundness and completeness by the birelational canonical model. Depends on 492.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 495,
+      "project_name": "minimal_modal_K_soundness_completeness",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 480,
+      "dependencies": [
+        491,
+        480,
+        490
+      ],
+      "description": "Minimal modal logic MK soundness + completeness — the modal logic over MINIMAL propositional logic (no explosion / efq), instantiating the intuitionistic modal framework (task 480) MINUS the efq rule, over the birelational semantics (task 490) with the minimal-appropriate ⊥ treatment (⊥ an ordinary proposition, no ex-falso). Prove soundness and completeness via the (prime-theory) canonical model. REQUIRES the minimal propositional base (task 491). Depends on 491, 480, 490.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 496,
+      "project_name": "minimal_modal_extensions",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 495,
+      "dependencies": [
+        495
+      ],
+      "description": "Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-13T05:15:48Z"
     }
   ],
   "repository_health": {

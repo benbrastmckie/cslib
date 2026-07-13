@@ -303,11 +303,11 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 3: Characterization schemata + HasAxiom discharges, group 2 (D, D4, D45, D5, DB, K45, K5, KB5) [NOT STARTED]
+### Phase 3: Characterization schemata + HasAxiom discharges, group 2 (D, D4, D45, D5, DB, K45, K5, KB5) [COMPLETED]
 
 - **Goal:** Apply the Phase 2 pattern to the remaining 8 system files.
 - **Tasks:**
-  - [ ] `ProofSystem/Instances/{D,D4,D45,D5,DB,K45,K5,KB5}.lean`: add the same 8 constructors
+  - [x] `ProofSystem/Instances/{D,D4,D45,D5,DB,K45,K5,KB5}.lean`: add the same 8 constructors
     per axiom inductive + `HasAxiom*` discharges, copying Phase 2's committed pattern verbatim.
 - **Timing:** ~1.5 hours
 - **Depends on:** 1 (pattern from 2; file-disjoint, may run in parallel with 2 if the pattern is

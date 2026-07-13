@@ -1,5 +1,5 @@
 {
-  "next_project_number": 499,
+  "next_project_number": 500,
   "active_projects": [
     {
       "project_number": 486,
@@ -2708,6 +2708,36 @@
         }
       ],
       "completion_summary": "Reworked PR #662 into a self-contained ~300 LOC native-primitive foundational semantic layer slice of the task-441 modal metalogic (native Proposition {atom,bot,imp,and,or,box,diamond} + Satisfies/denotation + Satisfies.dual duality theorem + per-connective Iff.rfl decomposition + Satisfies.k K-validity + denotation bridge + valid/logic). Full CI green, zero-debt (0 sorries, 0 new axioms). Local squash-commit created (not pushed); push/re-stack GATED on #607 adopting native primitives. #607 recommendation and revised task-476 zulip-coordination prepared as DRAFTs (not posted, await user approval)."
+    },
+    {
+      "project_number": 499,
+      "project_name": "pr_662_contributing_compliance",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 498,
+      "description": "Fix CONTRIBUTING.md compliance issues in the PR #662 modal foundational-semantic-layer slice (specs/498_modal_foundational_semantic_layer_662/artifacts/pr-662-slice/Basic.lean, Denotation.lean; version B, the native 7-primitive {atom,bot,imp,and,or,box,diamond} layer). Documentation-only, no proof/definition changes; CI must stay green. Findings (see reports/01_contributing-compliance-audit.md): (1) MUST FIX — remove internal task-tracker numbers from published docstrings (Basic.lean:34,113,119,272 reference 'task 441'/'task 340'); also scrub the same strings from the live Cslib/Logics/Modal/Basic.lean on task-441-native-refactor. (2) SHOULD FIX — trim Basic.lean module docstring of dangling cross-references to machinery not in this PR (Axioms.lean/ProofSystem/Instances proof-system layer at lines 41-44; PL.Proposition.toModal/embed/'FromPropositional' Bimodal-embedding paragraph at lines 46-50; note there is no module literally named FromPropositional); slice-only, keep those refs valid in the live task-441 file. (3) MINOR — add [ChagrovZakharyaschev1997] to the ## References section (cited inline at line 37 but missing from References). (4) CONFIRM WITH MAINTAINER — copyright-holder line adds Benjamin Brast-McKie to Fabrizio's file; Authors-line addition is fine, holder-line addition needs Fabrizio's OK (no auto-change). (5) OPTIONAL — 'Lukasiewicz' -> 'Łukasiewicz' diacritic. Parent task 498; coordination 476; related 497 (imp/impl naming). A research/audit report is pre-seeded at reports/01_contributing-compliance-audit.md.",
+      "created": "2026-07-13T00:00:00Z",
+      "last_updated": "2026-07-13T22:45:32Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/499_pr_662_contributing_compliance/reports/01_contributing-compliance-audit.md",
+          "summary": "CONTRIBUTING.md compliance audit of the #662 native-primitive slice: 5 findings (internal task refs, dangling docstring cross-refs, incomplete References, copyright-holder confirmation, Lukasiewicz diacritic)."
+        },
+        {
+          "type": "plan",
+          "path": "specs/499_pr_662_contributing_compliance/plans/01_contributing-compliance.md",
+          "summary": "6-phase documentation-only compliance plan: MUST FIX task-number scrub (slice + live), SHOULD FIX cross-ref trim, MINOR/OPTIONAL references+diacritic, maintainer-confirm copyright, CI verification."
+        },
+        {
+          "type": "summary",
+          "path": "specs/499_pr_662_contributing_compliance/summaries/01_contributing-compliance-summary.md",
+          "summary": "Fixed CONTRIBUTING.md compliance in PR #662 native-primitive slice: scrubbed internal task numbers (slice + live Basic.lean), trimmed dangling cross-refs (slice), added [ChagrovZakharyaschev1997] reference + Łukasiewicz diacritic. Copyright-holder line left unchanged pending maintainer (Fabrizio Montesi) confirmation. Documentation-only; full CI green; local commits only, not pushed."
+        }
+      ],
+      "session_id": "sess_1783982014_f7ba1f",
+      "completion_summary": "Documentation-only CONTRIBUTING.md compliance fixes for PR #662 modal slice — all 6 phases complete, CI green, 3 local commits (not pushed). Phase 5 copyright-holder addition deliberately deferred pending maintainer confirmation."
     }
   ],
   "repository_health": {

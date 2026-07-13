@@ -1,5 +1,5 @@
 ---
-next_project_number: 499
+next_project_number: 500
 ---
 
 # TODO
@@ -100,6 +100,19 @@ next_project_number: 499
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 499. Pr 662 contributing compliance
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: None
+- **Research**: [499_pr_662_contributing_compliance/reports/01_contributing-compliance-audit.md]
+- **Plan**: [499_pr_662_contributing_compliance/plans/01_contributing-compliance.md]
+- **Summary**: [499_pr_662_contributing_compliance/summaries/01_contributing-compliance-summary.md]
+
+**Description**: Fix CONTRIBUTING.md compliance issues in the PR #662 modal foundational-semantic-layer slice (specs/498_modal_foundational_semantic_layer_662/artifacts/pr-662-slice/Basic.lean, Denotation.lean; version B, the native 7-primitive {atom,bot,imp,and,or,box,diamond} layer). Documentation-only, no proof/definition changes; CI must stay green. Findings (see reports/01_contributing-compliance-audit.md): (1) MUST FIX — remove internal task-tracker numbers from published docstrings (Basic.lean:34,113,119,272 reference 'task 441'/'task 340'); also scrub the same strings from the live Cslib/Logics/Modal/Basic.lean on task-441-native-refactor. (2) SHOULD FIX — trim Basic.lean module docstring of dangling cross-references to machinery not in this PR (Axioms.lean/ProofSystem/Instances proof-system layer at lines 41-44; PL.Proposition.toModal/embed/'FromPropositional' Bimodal-embedding paragraph at lines 46-50; note there is no module literally named FromPropositional); slice-only, keep those refs valid in the live task-441 file. (3) MINOR — add [ChagrovZakharyaschev1997] to the ## References section (cited inline at line 37 but missing from References). (4) CONFIRM WITH MAINTAINER — copyright-holder line adds Benjamin Brast-McKie to Fabrizio's file; Authors-line addition is fine, holder-line addition needs Fabrizio's OK (no auto-change). (5) OPTIONAL — 'Lukasiewicz' -> 'Łukasiewicz' diacritic. Parent task 498; coordination 476; related 497 (imp/impl naming). A research/audit report is pre-seeded at reports/01_contributing-compliance-audit.md.
+
+---
 
 ### 498. Modal foundational semantic layer 662
 - **Status**: [COMPLETED]

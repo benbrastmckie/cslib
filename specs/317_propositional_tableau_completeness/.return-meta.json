@@ -1,24 +1,52 @@
 {
-  "status": "planned",
+  "status": "partial",
+  "agent_type": "cslib-implementation-hard-agent",
   "task_number": 317,
+  "session_id": "sess_1783922075_911857_317",
+  "started_at": "2026-07-13T06:06:11Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
-      "summary": "Plan v6 (HARD): Route (a) frame plumbing (Wave A, Phases 1-4, B2-independent, lands independently) + report-07 fuel machinery and deferred-obligation discharge (Wave B, Phases 5-11). 11 phases across 9 dependency waves."
+      "type": "summary",
+      "path": "specs/317_propositional_tableau_completeness/handoffs/02_wave-a-complete.md",
+      "summary": "Wave A (Phases 1-4) completion handoff: design summary, deviation from the prior handoff (companion invariant IFimpAccess instead of an IBranchSaturation field), two non-obvious Lean issues discovered, and ordered next-steps for Wave B."
     }
   ],
-  "next_steps": "Run /implement 317 --hard. Wave A (Phases 1-4) is independently committable green progress; Wave B (Phases 5-11) closes all four sorries. Re-plan tasks 430 and 375 after Wave A lands.",
-  "metadata": {
-    "session_id": "sess_1782919268_2df8d8_317plan",
-    "agent_type": "planner-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
-    "phase_count": 11,
-    "estimated_hours": 24,
-    "postmortem_rules_count": 7,
-    "dependency_waves": [[1], [2], [3], [4], [5, 6], [7, 8], [9], [10], [11]],
-    "plan_version": 6,
-    "reference_grounding_tier": 1
-  }
+  "phases_completed": 4,
+  "phases_total": 11,
+  "partial_progress": {
+    "stage": "wave_a_complete",
+    "details": "Wave A (Phases 1-4) landed as one commit (19c68791) on top of the prior partial infrastructure commit (6e24520d). Wave B (Phases 5-11, fuel raise + measure machinery + sat_timp + convergence) not started this cycle -- substantial new mathematical content, judged out of budget. Wave A is a plan-endorsed valid terminal state."
+  },
+  "memory_candidates": [
+    {
+      "type": "pattern",
+      "content": "Lean 4 new module system ('module' + 'public import' + '@[expose] public section'): a private declaration cannot appear in a public lemma's stated type. When a hypothesis predicate (e.g. IFimpAccess) must be consumed by public lemmas or mirrored in downstream modules, declare it public from the start; discovering this late forces a def relocation + privacy change mid-implementation (task 317 Wave A, Scheme.lean).",
+      "keywords": ["lean4", "module-system", "private", "public-section", "cslib"]
+    },
+    {
+      "type": "pattern",
+      "content": "IForces (Cslib.Logic.PL) has explicit-instance argument order Atom-then-World, not World-then-Atom: '@IForces Atom Nat (intAccessPreorder edges) ...' is correct, '@IForces Nat Atom (intAccessPreorder edges) ...' fails with a confusing Preorder-universe mismatch. This is because 'variable {Atom : Type u}' is declared before IForces's own definition in Kripke.lean, so Atom is auto-bound ahead of World.",
+      "keywords": ["lean4", "iforces", "kripke", "explicit-instance", "auto-bound", "cslib"]
+    },
+    {
+      "type": "pattern",
+      "content": "Per-value Preorder installation pattern (task 317 Route a): 'letI : Preorder Nat := intAccessPreorder edges' placed in BOTH the lemma statement (before the conclusion) and the proof preamble pins a non-defeq instance without @-annotating every occurrence; downstream lemmas whose conclusions cross module boundaries should use the fully explicit '@IForces Atom Nat (intAccessPreorder edges) ...' form (never instance search) because the ambient Nat instance is not defeq.",
+      "keywords": ["lean4", "letI", "preorder", "instance-pinning", "kripke", "tableau"]
+    },
+    {
+      "type": "decision",
+      "content": "Task 317 Wave A superseded an earlier handoff's edges-as-field-of-IBranchSaturation design with a companion predicate (IFimpAccess edges b) conjoined in the saturation existential. Equivalent strength for the F-imp truth-lemma case, strictly lower ripple: IBranchSaturation stays byte-identical (5 fields, untouched), no consumer of IBranchSaturation needs updating. Prefer companion predicates over structure-field additions when only one consumer needs the strengthened fact.",
+      "keywords": ["cslib", "task-317", "design", "companion-predicate", "saturation"]
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 4,
+    "sorry_count_note": "unchanged from the confirmed inventory at dispatch start (4 sorries: Scheme.lean truthLemma T-imp + fuel-0 base case; Completeness.lean and Minimal/Completeness.lean deferred-monotonicity bridges)",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial: scoped builds (Scheme, Completeness x2, DecisionProcedure x2, IntDecidability, MinDecidability), checkInitImports, and lint-style on touched files all green; lake test / lake lint (full) / lake shake / lake exe mk_all were NOT run this cycle (deferred to /vet or final Wave B wrap-up per anti-overflow constraint -- only scoped+grepped builds used throughout)"
+  },
+  "next_steps": "Continue Wave B: /implement 317 --hard, starting at Phase 5 (Expansion.lean fuel raise, TERRITORY 316). Read handoffs/02_wave-a-complete.md first."
 }

@@ -1,68 +1,30 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 317,
-  "agent_type": "planner-hard-agent",
-  "session_id": "sess_1782919268_2df8d8_317plan",
-  "hard_mode": true,
-  "plan_version": 6,
-  "plan_artifact_path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
-  "phase_count": 11,
-  "estimated_hours": 24,
-  "reference_grounding_tier": 1,
-  "route_decision": "Route (a): un-pin completeness frame by restating internal openBranch_countermodel + its two *OpenBranch_countermodel corollaries over the existing intAccessPreorder edges instance of IForces. Route (b) (redefine IForces) REJECTED.",
-  "postmortem_5_revision": "REVISED for the internal countermodel family (openBranch_countermodel + intuitionisticOpenBranch_countermodel + minOpenBranch_countermodel): their conclusion may move to @IForces Nat _ (intAccessPreorder edges). Stable public contract stays byte-stable: tableau_complete/minimalTableau_complete (IValid/MValid->closed), Decidable (IValid phi), Decidable (Derivable IntPropAxiom phi), instDecidableIValid, all DecisionProcedure consumers. Justification (zero-debt): old global-preorder conclusion literally false (sorry-only closable); revision removes sorries, no new axioms, public contract and all soundness/FMP/strong-completeness/algebra code untouched.",
-  "waves": {
-    "A_frame_plumbing_independent": {
-      "phases": [1, 2, 3, 4],
-      "b2_independent": true,
-      "independently_committable": true,
-      "deferred_obligations": [
-        "intExtractValuation monotonicity along intAccessPreorder (carried as a private-bridge premise in Phase 4; discharged Phase 9, consumed Phase 10)",
-        "sat_timp field on IBranchSaturation (added + discharged Phase 9)"
-      ]
-    },
-    "B_fuel_machinery_and_discharge": {
-      "phases": [5, 6, 7, 8, 9, 10, 11],
-      "closes_all_four_sorries": true
+  "session_id": "sess_1783922075_911857_317",
+  "orchestrator_mode": true,
+  "plan_path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
+  "summary": "Wave A (Phases 1-4) of plan v6 is now fully COMPLETED and committed (commit 19c68791, on top of the prior partial infrastructure commit 6e24520d). Route (a) frame plumbing landed as one consistent commit: truthLemma now takes edges/hfimp and installs intAccessPreorder edges via letI, closing the F-imp case over genuine isAccessible (via a companion IExpandedAccessConsistent/IFimpAccess invariant threaded through intStepBranch_linear_preserves/intStepBranch_branch_preserves/intExpandBranches_openBranch_sat -- deliberately NOT merged into IBranchSaturation's structure, a design deviation from the prior handoff documented in handoffs/02_wave-a-complete.md, and independently confirmed sound by a concurrent adversarial-verification research pass -- see reports/10_wave-a-atomic-derisk.md). openBranch_countermodel's conclusion is now the Postmortem-5-revised existential over intAccessPreorder edges; tableau_complete's hvalid hypothesis reshaped to accept edges as a parameter. Completeness.lean and Minimal/Completeness.lean mirror all of this; intuitionisticTableau_complete/minimalTableau_complete retain their exact public IValid/MValid -> .closed types (stable public contract verified via green DecisionProcedure.lean builds). Four inventory sorries unchanged in count (Scheme.lean:533,1386; Completeness.lean:133; Minimal/Completeness.lean:125). Scoped builds green for Scheme, both Completeness files, both DecisionProcedure modules, and IntDecidability/MinDecidability. lean_verify shows no new axioms. Soundness.lean/Expansion.lean (task 316 territory) untouched. Wave B (Phases 5-11: fuel raise + measure machinery + sat_timp + convergence) was NOT started this cycle -- it involves substantial new mathematical content (not just plumbing) and was judged out of budget for this dispatch. Wave A is an explicitly plan-endorsed valid terminal state ('INDEPENDENTLY COMMITTABLE').",
+  "phases_completed": 4,
+  "phases_total": 11,
+  "artifacts": [
+    {
+      "path": "specs/317_propositional_tableau_completeness/handoffs/02_wave-a-complete.md",
+      "type": "summary",
+      "summary": "Wave A completion handoff: design summary, deviation from the prior handoff's IBranchSaturation-as-field sketch (kept as companion invariant instead), two non-obvious Lean issues discovered (private-in-public-signature restriction; IForces's Atom-then-World explicit argument order), and concrete ordered next-steps for Wave B (Phases 5-11)."
     }
-  },
-  "dependency_waves": [[1], [2], [3], [4], [5, 6], [7, 8], [9], [10], [11]],
-  "phase_titles": {
-    "1": "Re-thread truthLemma over intAccessPreorder edge frame (T-imp stays deferred sorry)",
-    "2": "Restate openBranch_countermodel conclusion over intAccessPreorder edges (Route a)",
-    "3": "Restate the two *OpenBranch_countermodel corollaries over the edge preorder",
-    "4": "Instantiate IValid/MValid at edge frame via deferred-monotonicity private bridge (public contract byte-stable); Wave A complete",
-    "5": "Raise fuel to intFuel + audit downstream callers (Expansion.lean; TERRITORY 316)",
-    "6": "intUniverse + intWork + linear world bound",
-    "7": "intExpMeasure_step_lt (per-step strict decrease; pre-split 7.1/7.2)",
-    "8": "intExpMeasure_init_le_fuel",
-    "9": "Add sat_timp + discharge, prove intExtractValuation monotonicity, close truthLemma T-imp (sorry 1)",
-    "10": "CONVERGENCE: reformulate intExpandBranches_openBranch_sat + close sorries 2-4 -> sorry-FREE",
-    "11": "Add load-bearing BibKeys (NegriVonPlato2001 et al.)"
-  },
-  "sorry_inventory_at_head": [
-    "Scheme.lean:409 truthLemma T-imp -> closes Phase 9",
-    "Scheme.lean:1070 intExpandBranches_openBranch_sat fuel-0 -> closes Phase 10",
-    "Completeness.lean:113 validity->forcing bridge -> closes Phase 10",
-    "Minimal/Completeness.lean:110 validity->forcing bridge -> closes Phase 10"
   ],
-  "preserved_assets": [
-    "v5 Phase 1 [COMPLETED]: branch edges exposed (commit d6d78714-lineage)",
-    "intAccessPreorder + intAccessPreorder_le_of_isAccessible (commit a1883c4e, Scheme.lean:309-323)",
-    "Option-A dedup (4202d1df); soundness fix (8a5c0250); IAllConsistent invariant (26508fe9); IExpandedConsistent_sat"
-  ],
-  "bibkey_status": {
-    "present": ["ChagrovZakharyaschev1997", "Fitting1983", "TroelstraSchwichtenberg2000"],
-    "absent_add_phase_11": ["NegriVonPlato2001", "GargGenoveseNegri2012", "DershowitzManna1979"]
+  "blockers": [],
+  "continuation_context": {
+    "handoff_path": "specs/317_propositional_tableau_completeness/handoffs/02_wave-a-complete.md",
+    "last_commit": "19c68791",
+    "notes": "Wave B (Phases 5-11) has not been started. Phase 5 (Expansion.lean fuel raise, TERRITORY 316) is the next phase in dependency order. Phases 7 and 9 are pre-split candidates per the plan (large, hard proofs). Phase 10 is the sole convergence point that actually closes all remaining sorries -- it consumes tableau_complete's new hvalid edges/b shape directly."
   },
-  "territory_hazards": [
-    "task 316: Expansion.lean fuel site + Soundness.lean fuel-pinned callers (Phase 5) -> separate scoped commit; read-only unless fuel-raise forces a re-pin"
-  ],
-  "roadmap_alignment": {
-    "task_430_atom_persistence": "RESHAPED by the frame change; re-plan after Wave A lands + consume Phase 9 intExtractValuation monotonicity",
-    "task_375_tfae_edges": "gated on 430 + 317 completeness green; re-plan after Wave A lands"
-  },
-  "single_writer_per_file_note": "R7 concurrent live sessions: never two writers on the same file; all Scheme.lean phases serialize; only Phase 5 (Expansion.lean) is truly concurrent with a Scheme.lean phase (Phase 6).",
-  "postmortem_rules_count": 7,
-  "next_steps": "Run /implement 317 --hard. Wave A (Phases 1-4) is a valid independently-committable terminal state (frame plumbing green, four edge-framed sorries). Wave B (Phases 5-11) closes all four sorries to sorry-FREE. Re-plan tasks 430 and 375 after Wave A."
+  "next_action_hint": "Run /implement 317 --hard to continue with Wave B, starting at Phase 5. Read specs/317_propositional_tableau_completeness/handoffs/02_wave-a-complete.md first for the design deviation notes and the two non-obvious Lean gotchas from this cycle. Re-verify git log -1 -- Scheme.lean Completeness.lean Minimal/Completeness.lean Expansion.lean before starting (R7 concurrent-writer check). Task 430 remains correctly gated behind Wave A landing (now done) -- re-plan it to consume the intAccessPreorder edges frame before dispatching it; do not implement it from this handoff.",
+  "sorry_inventory": [
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 533, "context": "truthLemma T-imp case, deferred to Phase 9 (sat_timp)"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean", "line": 1386, "context": "intExpandBranches_openBranch_sat fuel-0 base case, deferred to Phase 10 (measure <= fuel)"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean", "line": 133, "context": "intuitionisticTableau_complete deferred-monotonicity bridge, deferred to Phase 10"},
+    {"file": "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean", "line": 125, "context": "minimalTableau_complete deferred-monotonicity bridge, deferred to Phase 10"}
+  ]
 }

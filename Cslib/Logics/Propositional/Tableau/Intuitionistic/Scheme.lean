@@ -1935,6 +1935,211 @@ the number not yet expanded. Strictly decreases per expansion step despite persi
 def intWork (U b e : List (ISF Atom)) : Nat :=
   U.countP (fun sf => !(b.any (· == sf))) + U.countP (fun sf => !(e.any (· == sf)))
 
+omit [Hashable Atom] in
+/-- The base-3 damped worklist measure `Σ 3^(intWork U bᵢ eᵢ)` over the zipped
+branch/expanded-set worklist (mirrors `modalExpMeasure`, `FmpMeasure.lean:197-200`). -/
+def intExpMeasure (U : List (ISF Atom))
+    (branches expandedSets : List (List (ISF Atom))) : Nat :=
+  ((branches.zip expandedSets).map (fun p => 3 ^ intWork U p.1 p.2)).sum
+
+/-! ## Strict-Decrease Engine (task 317 phase 7) -/
+
+omit [Hashable Atom] in
+/-- **Combinatorial core** (mirrors `modalCount_notMem_append_drop`, `FmpMeasure.lean:2440`):
+appending `x` (a member of `U`, not yet in `l`) to the exclusion list `l` strictly drops, by at
+least one, the count of `U`-members excluded by `l`. -/
+private lemma intCount_notMem_append_drop
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U l : List α) (x : α)
+    (hxU : x ∈ U) (hxl : l.any (· == x) = false) :
+    U.countP (fun y => !((l ++ [x]).any (· == y))) + 1 ≤
+      U.countP (fun y => !(l.any (· == y))) := by
+  induction U with
+  | nil => simp at hxU
+  | cons u us ih =>
+    rcases List.mem_cons.mp hxU with rfl | hxU'
+    · have h1 : (x :: us).countP (fun y => !(l.any (· == y))) =
+          us.countP (fun y => !(l.any (· == y))) + 1 := by
+        rw [List.countP_cons]; simp [hxl]
+      have h2 : (x :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+          us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+        rw [List.countP_cons]; simp [List.any_append]
+      have hmono : us.countP (fun y => !((l ++ [x]).any (· == y))) ≤
+          us.countP (fun y => !(l.any (· == y))) := by
+        have hsub : List.Sublist (us.filter (fun y => !((l ++ [x]).any (· == y))))
+            (us.filter (fun y => !(l.any (· == y)))) := by
+          apply List.monotone_filter_right
+          intro y hy
+          simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+            Bool.not_or, Bool.and_eq_true] at hy
+          exact hy.1
+        simpa [List.countP_eq_length_filter] using hsub.length_le
+      omega
+    · by_cases hlu : l.any (· == u)
+      · have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+            us.countP (fun y => !(l.any (· == y))) := by
+          rw [List.countP_cons]; simp [hlu]
+        have hlu' : (l ++ [x]).any (· == u) = true := by
+          rw [List.any_append, hlu, Bool.true_or]
+        have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+            us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+          rw [List.countP_cons, hlu']; simp
+        have := ih hxU'
+        omega
+      · by_cases hux : u == x
+        · have hux' : u = x := LawfulBEq.eq_of_beq hux
+          subst hux'
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have h2 : (u :: us).countP (fun y => !((l ++ [u]).any (· == y))) =
+              us.countP (fun y => !((l ++ [u]).any (· == y))) := by
+            rw [List.countP_cons]; simp [List.any_append]
+          have hmono : us.countP (fun y => !((l ++ [u]).any (· == y))) ≤
+              us.countP (fun y => !(l.any (· == y))) := by
+            have hsub : List.Sublist (us.filter (fun y => !((l ++ [u]).any (· == y))))
+                (us.filter (fun y => !(l.any (· == y)))) := by
+              apply List.monotone_filter_right
+              intro y hy
+              simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+                Bool.not_or, Bool.and_eq_true] at hy
+              exact hy.1
+            simpa [List.countP_eq_length_filter] using hsub.length_le
+          omega
+        · simp only [Bool.not_eq_true] at hlu
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have hlux' : (l ++ [x]).any (· == u) = false := by
+            rw [List.any_append, hlu, Bool.false_or, List.any_cons, List.any_nil,
+              Bool.or_false, beq_eq_false_iff_ne]
+            simp only [beq_iff_eq] at hux
+            exact fun h => hux h.symm
+          have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+              us.countP (fun y => !((l ++ [x]).any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlux']
+          have := ih hxU'
+          omega
+
+omit [Hashable Atom] in
+/-- **Weak monotonicity** (mirrors `modalCount_notMem_mono`, `FmpMeasure.lean:2517`): growing
+the exclusion list's underlying membership set (`b ⊆ b'`) can only decrease (never increase)
+the count of `U`-members excluded by it. -/
+private lemma intCount_notMem_mono
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U b b' : List α)
+    (hsub : ∀ z ∈ b, z ∈ b') :
+    U.countP (fun y => !(b'.any (· == y))) ≤ U.countP (fun y => !(b.any (· == y))) := by
+  have hsubf : List.Sublist (U.filter (fun y => !(b'.any (· == y))))
+      (U.filter (fun y => !(b.any (· == y)))) := by
+    apply List.monotone_filter_right
+    intro y hy
+    rw [Bool.not_eq_true'] at hy ⊢
+    rw [List.any_eq_false] at hy ⊢
+    intro z hz
+    exact hy z (hsub z hz)
+  simpa [List.countP_eq_length_filter] using hsubf.length_le
+
+omit [Hashable Atom] in
+/-- **`R`-drop** (mirrors `modalWork_drop_linear`, `FmpMeasure.lean:2539`): when the fired
+formula `sf` is added to the expanded set (`e' = e ++ [sf]`) and the child branch `b'` weakly
+extends `b`, the counting measure strictly drops by at least one. Unlike the Modal-K template,
+the intuitionistic calculus has no separate "persistent" step kind (persistence is exhausted to
+fixpoint via `applyPersistenceFixpoint` BEFORE `intStepBranch` runs), so this single lemma covers
+every arm of `intExpandBranches`'s `go` -- ALPHA (`newEdge = none`), world-creation
+(`newEdge = some _`, no `Sfor`-reuse), and the `Sfor`-containment reuse case (`b' = b`, `hsub`
+trivial by reflexivity) -- as well as each BETA sub-branch. -/
+private lemma intWork_drop
+    (U b b' e : List (ISF Atom)) (sf : ISF Atom)
+    (hsfU : sf ∈ U) (hsfe : e.any (· == sf) = false) (hsub : ∀ z ∈ b, z ∈ b') :
+    intWork U b' (e ++ [sf]) + 1 ≤ intWork U b e := by
+  unfold intWork
+  have hb := intCount_notMem_mono U b b' hsub
+  have he := intCount_notMem_append_drop U e sf hsfU hsfe
+  omega
+
+omit [Hashable Atom] in
+/-- `intExpMeasure` splits over a single distinguished position, given length-aligned prefixes
+(mirrors `modalExpMeasure_split`, `FmpMeasure.lean:2826`). -/
+private lemma intExpMeasure_split
+    (U : List (ISF Atom))
+    (done : List (List (ISF Atom))) (doneExp : List (List (ISF Atom)))
+    (bh e : List (ISF Atom))
+    (rest : List (List (ISF Atom))) (restEs : List (List (ISF Atom)))
+    (hlen : done.length = doneExp.length) :
+    intExpMeasure U (done ++ bh :: rest) (doneExp ++ e :: restEs)
+      = intExpMeasure U done doneExp + 3 ^ intWork U bh e
+        + intExpMeasure U rest restEs := by
+  simp only [intExpMeasure, List.zip_append hlen, List.zip_cons_cons,
+             List.map_append, List.map_cons, List.sum_append, List.sum_cons]
+  omega
+
+omit [Hashable Atom] in
+/-- Additivity of `intExpMeasure` over list append (mirrors `modalExpMeasure_append`,
+`FmpMeasure.lean:2843`). -/
+private lemma intExpMeasure_append
+    (U : List (ISF Atom))
+    (l1 l2 : List (List (ISF Atom))) (e1 e2 : List (List (ISF Atom)))
+    (h : l1.length = e1.length) :
+    intExpMeasure U (l1 ++ l2) (e1 ++ e2)
+      = intExpMeasure U l1 e1 + intExpMeasure U l2 e2 := by
+  simp only [intExpMeasure, List.zip_append h, List.map_append, List.sum_append]
+
+omit [Hashable Atom] in
+/-- **The strict-decrease engine** (task 317 phase 7, mirrors `modalExpMeasure_step_lt`'s linear
+case, `FmpMeasure.lean:2873`): one `intExpandBranches`'s `go` step that replaces the single
+active branch `bh` by a single successor `b'` -- covering the ALPHA arm (`newEdge = none`,
+`b' = Branch.extendMany bh newForms`), the world-creating arm with no `Sfor`-reuse
+(`newEdge = some _`, `b' = Branch.extendMany bh newForms`), and the `Sfor`-containment reuse arm
+(`b' = bh` unchanged, `hsub` trivially reflexive) -- strictly decreases `intExpMeasure`. Takes the
+branch-containment invariant `hb` as a hypothesis (as the Modal-K template does for its own `hb`),
+NOT `intExpandBranches_world_bound` (a distinct, harder distinct-label-count fact this lemma does
+not need): only `sf ∈ intUniverse φ0` is required, obtained directly from `hb` together with
+`sf ∈ bh` (read off `intStepBranch`'s internal `findSome?` witness). -/
+lemma intExpMeasure_step_lt
+    (φ0 : Proposition Atom)
+    (done bt : List (List (ISF Atom)))
+    (doneExp es : List (List (ISF Atom)))
+    (newExp : List (ISF Atom))
+    (bh e : List (ISF Atom)) (nw nw' : Nat) (newForms : List (ISF Atom))
+    (newEdge : Option (Nat × Nat)) (b' : List (ISF Atom))
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ intUniverse φ0)
+    (hsub : ∀ z ∈ bh, z ∈ b')
+    (hstep : intStepBranch bh e nw = some (.linearResult newForms nw' newEdge, newExp)) :
+    intExpMeasure (intUniverse φ0) (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) + 1
+      ≤ intExpMeasure (intUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  set U := intUniverse φ0 with hUdef
+  have hrhs := intExpMeasure_split U done doneExp bh e bt es hdlen
+  have hlhs : intExpMeasure U (done ++ [b'] ++ bt) (doneExp ++ [newExp] ++ es) =
+      intExpMeasure U done doneExp + 3 ^ intWork U b' newExp + intExpMeasure U bt es := by
+    have hlen1 : (done ++ [b']).length = (doneExp ++ [newExp]).length := by simp [hdlen]
+    rw [intExpMeasure_append U (done ++ [b']) bt (doneExp ++ [newExp]) es hlen1,
+        intExpMeasure_append U done [b'] doneExp [newExp] hdlen]
+    simp [intExpMeasure]
+  rw [hrhs, hlhs]
+  suffices h : 3 ^ intWork U b' newExp + 1 ≤ 3 ^ intWork U bh e by omega
+  simp only [intStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hany
+  simp only [Bool.not_eq_true] at hany
+  have hsfU : sf ∈ U := hb sf hsfmem
+  cases hint : intApplyRuleFull sf nw bh with
+  | notApplicable => simp [hint] at hfound
+  | linearResult fs nw2 ne =>
+    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
+    obtain ⟨hfs, hexp⟩ := hfound
+    injection hfs with hfseq hnweq hneeq
+    subst hfseq; subst hexp
+    have hdrop : intWork U b' (e ++ [sf]) + 1 ≤ intWork U bh e :=
+      intWork_drop U bh b' e sf hsfU hany hsub
+    have hC : 1 ≤ intWork U bh e := by omega
+    have h0 : intWork U b' (e ++ [sf]) ≤ intWork U bh e - 1 := by omega
+    exact pow3_add_one_le hC h0
+  | branchingResult bs nw2 =>
+    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
+    exact absurd hfound.1 (by simp)
+
 end Cslib.Logic.PL
 
 end

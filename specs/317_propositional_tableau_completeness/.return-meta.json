@@ -1,69 +1,47 @@
 {
   "status": "partial",
-  "started_at": "2026-07-13T00:00:00Z",
-  "completed_at": "2026-07-13T00:00:00Z",
+  "started_at": "2026-07-13T18:51:47Z",
+  "completed_at": "2026-07-13T19:45:00Z",
+  "phases_completed": 7,
+  "phases_total": 11,
   "artifacts": [
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-      "type": "implementation",
-      "summary": "Phase 8.0: doubled intFuel's exponent to 4*(2c+1)*(c+2), mirroring Modal-K's modalFuel factor-of-2. Commit 41d30054."
-    },
-    {
-      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-      "type": "implementation",
-      "summary": "Phase 8: proved intExpMeasure_init_le_fuel, sorry-free, additive. Commit e2c9bf3b."
-    },
     {
       "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
       "type": "plan",
-      "summary": "Phase 8 heading changed [BLOCKED] -> [COMPLETED] with resolution note; checklist items checked off."
+      "summary": "Phase 6 section updated: containment sub-deliverable COMPLETE; world-bound sub-deliverable given a precise, verified continuation."
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/09_phase6-2-containment-worldbound-summary.md",
+      "type": "summary",
+      "summary": "Phase 6.2 dispatch summary: containment landed in full, world-bound continuation recorded."
     },
     {
       "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
       "type": "handoff",
-      "summary": "status=partial, phases_completed=7/11, blockers cleared, sorry_inventory unchanged (4), next_action_hint points to Phase 9 (truthLemma T-imp sorry closure)."
-    },
-    {
-      "path": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
-      "type": "summary",
-      "summary": "Full writeup of both commits, decisions, impacts, and follow-ups."
+      "summary": "Overwritten with Phase 6.2 status, sorry_inventory, blockers, and continuation_context."
     }
   ],
-  "partial_progress": {
-    "stage": "wrap-up",
-    "details": "Phase 8.0 (Expansion.lean, fuel exponent doubled) and Phase 8 (Scheme.lean, intExpMeasure_init_le_fuel) both landed green. Per H1 single-phase-focus, stopping here; Phase 9+ not started."
+  "memory_candidates": [
+    "Intuitionistic F-signed formulas never propagate via persistence (posFormulasAt/propagatePersistence/intTImpRule are .pos-only) -- this is the key fact enabling a positional-injection world-bound argument for tableau calculi with world-creating rules.",
+    "F-or (.neg,.or) is an ALPHA/linearResult rule in the intuitionistic tableau, not BETA -- this means a single world can accumulate multiple independent F-imp obligations, breaking naive depth-only world-count arguments."
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 118,
+    "task_317_sorry_count": 4,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
-  "phases_completed": 7,
-  "phases_total": 11,
+  "partial_progress": {
+    "stage": "phase_6_containment_complete_world_bound_continuation_recorded",
+    "details": "Commit 1 (bb4ffa3c): intApplyRuleFull_outputs_subset + supporting containment infrastructure, sorry-free, load-bearing for Phase 10. Commit 2 (015f81c1): intSubfmls_impCount_le supporting lemma, sorry-free. intExpandBranches_world_bound itself NOT landed -- precise continuation recorded in plan + handoff after genuine investigation determined it requires a new ~500-800 line positional-tracking induction exceeding H8's single-dispatch threshold."
+  },
   "metadata": {
     "session_id": "sess_1783962327_d9c0b3",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  },
-  "memory_candidates": [
-    {
-      "content": "When an `omega` call fails to close a Nat inequality even though `have` hypotheses appear to textually match the goal's subterms (per lean_goal), suspect atomization: omega treats syntactically-non-identical-but-print-identical terms (e.g. countP predicates elaborated in separate `have` statements vs. the goal produced by `unfold`) as distinct opaque atoms. Fix by `rw`-ing the goal into the exact hypothesis form (rw uses defeq-aware matching) instead of feeding independently-stated facts to omega. Seen in CSLib task 317 Phase 8 (Scheme.lean intExpMeasure_init_le_fuel).",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["omega", "atomization", "countP", "rw", "lean4", "tactic-debugging"]
-    },
-    {
-      "content": "The lean-lsp MCP tool lean_verify can report a spurious sorryAx axiom dependency for a declaration that is genuinely sorry-free; cross-check with a direct `#print axioms <name>` via `lake env lean` before trusting lean_verify's negative result. Seen in CSLib task 317 (intExpMeasure_init_le_fuel falsely flagged sorryAx by lean_verify, confirmed clean by #print axioms).",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
-      "confidence": 0.7,
-      "suggested_keywords": ["lean_verify", "mcp", "sorryAx", "print-axioms", "tool-caveat"]
-    }
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 4,
-    "vacuous_count": 0,
-    "axiom_count": 2,
-    "build_passed": true,
-    "ci_pipeline_passed": true
-  },
-  "requires_user_review": false
+  }
 }

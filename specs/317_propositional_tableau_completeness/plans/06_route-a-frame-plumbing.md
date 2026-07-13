@@ -491,20 +491,69 @@ Both `Intuitionistic.Completeness` and `Minimal.Completeness` build GREEN; `chec
 passes; four inventory sorries unchanged in count and location (only line-shifted by the 2 new
 import lines: `Scheme.lean:535,1388`; `Completeness.lean:133`; `Minimal/Completeness.lean:125`).
 
-**NOT landed this dispatch**: `intExpandBranches_world_bound` (the `eraseDups.length ≤
-φ.complexity + 1` bound). Investigation (see `.orchestrator-handoff.json` continuation_context
-for the full argument) found the true mathematical justification requires NEW infrastructure
-beyond a direct mirror of the Modal-K pattern: a world is created only by the `F(φ→ψ)`
-world-creating rule (never by persistence, which only copies `T`-formulas), and — because
-`F`-and/`T`-or are BETA/branching rules while `F`-or/`T`-and are ALPHA/non-branching — a single
-branch's full history can accumulate every world reachable via ALPHA-only decomposition
-sequences, requiring a genuine occurrence-tracking argument (each world-creation event consumes
-a distinct syntactic `.imp` occurrence of `φ`, tied to the monotonically-growing `expanded` set)
-rather than a simple depth argument. This is comparable in difficulty to Phase 7's
-`intExpMeasure_step_lt` and was not force-fit into this dispatch per the "do not entangle" /
-"land partial + continuation" guidance. See continuation_context for the recommended next step
-(re-verify whether Phase 7/8 actually need this exact lemma, vs. the weaker universe-containment
-fact, before committing a dedicated sub-dispatch to it).
+**Phase 6.2 resolution (this dispatch, commits `bb4ffa3c` + `015f81c1`)**:
+
+*Sub-deliverable 1 (load-bearing containment, COMPLETE)*: Landed the full branch-universe
+containment infrastructure mirroring Modal-K's `FmpMeasure.lean:266-754` subformula-closure
+development, adapted to the simpler propositional rule set: `intSubfmls_self_mem`,
+`intSubfmls_trans`, `mem_intUniverse_of[']`, `intUniverse_mem_formula`/`intUniverse_mem_label`
+(constructor/extraction infrastructure), `intTImpRule_outputs_subset` /
+`applyAllTImpRules_subset` / `applyPersistenceFixpoint_subset` (persistence-rule containment —
+the persistent `T(φ→ψ)` rule never mints a fresh label, so no world-bound hypothesis is
+needed there, mirroring Modal-K's `boxPos`/`diamondNeg` "world-preserving rules" P1a pattern),
+and the headline **`intApplyRuleFull_outputs_subset`**: the step-level containment dispatch
+covering all 5 rule arms (`T∧`/`F∨` ALPHA, `F∧`/`T∨` BETA, `F→` world-creating). This is
+EXACTLY the `hb : ∀ x ∈ bh, x ∈ intUniverse φ0` hypothesis `intExpMeasure_step_lt`/`_branch`
+already take as an assumption — Phase 10 discharges `hb` inductively over `go`'s recursion by
+citing this lemma (plus `applyPersistenceFixpoint_subset` for the pre-step persistence
+fixpoint) at each step, rather than re-deriving containment from scratch. Sorry-free,
+axiom-clean (`#print axioms` → `[propext, Quot.sound]` only), ~250 lines.
+
+*Sub-deliverable 2 (`intExpandBranches_world_bound`, NOT landed — precise continuation)*:
+Also landed `isImpShaped`/`intSubfmls_impCount_le` (the number of `.imp`-node POSITIONS, not
+distinct values, in `intSubfmls φ` is `≤ φ.complexity`) as verified supporting infrastructure.
+The FULL lemma remains open. Extensive investigation this dispatch (superseding the prior
+dispatch's vaguer "occurrence-tracking, comparable to Phase 7" note with a precise mechanism)
+found:
+- The naive "one world per syntactic occurrence, simple depth argument" is WRONG: `F∨` (the
+  `.neg, .or` rule) is `.linearResult` (ALPHA, non-branching, `Rules.lean:260`), so BOTH
+  `F(φ)@l` and `F(ψ)@l` land on the SAME branch — a single world CAN accumulate multiple
+  independent `F`-imp obligations (e.g. from `(a→b) ∨ (c→d)`), each capable of independently
+  firing to create a SIBLING world. So the bound requires a width-AND-depth argument, not
+  depth alone.
+- The CORRECT mechanism (verified against `Rules.lean`): `posFormulasAt`/
+  `propagatePersistence`/`intTImpRule` are ALL `.pos`-only (`Rules.lean:126,139-141,174-186`)
+  — **F-signed (negative) formulas never propagate across worlds via persistence**. So every
+  world's set of `F`-signed formulas is exactly the decomposition closure of that world's own
+  single "obligation" formula (`φ0` at world 0; the consequent `ψ` placed by the `F(φ→ψ)`
+  rule that created any other world). Since decomposition only ever exposes PROPER
+  subformulas (never duplicates a tree position into two lineage branches within one
+  completed branch: `F∧`/`T∨` BETA picks one child per split; `F∨`/`T∧` ALPHA keeps both
+  but at the SAME world, not a new one), the map `(world created) ↦ (the specific `.imp`
+  tree-POSITION of φ0 whose firing created it)` is INJECTIVE into φ0's `.imp`-node positions.
+  Combined with `intSubfmls_impCount_le` (`≤ φ.complexity` such positions), this gives
+  `(worlds created) ≤ φ.complexity`, hence `eraseDups.length ≤ φ.complexity + 1` (the `+1`
+  for world 0) — exactly the target bound.
+- **Why this is NOT force-fittable into this dispatch**: formalizing the injection requires a
+  NEW ghost/positional-tracking invariant threaded through an induction mirroring
+  `Soundness.lean`'s `intExpandBranches_closed_unsat` (~700 lines, `Soundness.lean:1039-1714`)
+  — i.e. a full top-level induction over `intExpandBranches`'s `go` recursion (outer induction
+  on `fuel`, inner induction on `pending`), tracking an auxiliary "available `.imp` positions"
+  ghost list/map alongside each branch, NOT a mirror of any existing Modal-K lemma (Modal-K's
+  own `modalWorldBound` is exponential, `Sf^(depth+1)`, and never needed this argument — this
+  is genuinely NEW mathematics for the intuitionistic calculus, not a port). Estimated
+  ~500-800 lines given the `intExpandBranches_closed_unsat` scale comparison, exceeding the
+  ~400-line H8 split threshold for a single dispatch.
+- **Recommended next-dispatch strategy**: define a ghost position-tracking predicate (e.g. an
+  injective labeling `originPos : Nat → List Nat` from world-label to a path-into-φ0's-tree,
+  or reuse a Finset-of-positions bookkeeping list threaded as an extra invariant parameter
+  alongside `hb`/`FreshAbove` in a `suffices`-based induction exactly matching
+  `intExpandBranches_closed_unsat`'s shape), then prove: (a) positions are consumed exactly
+  once (via the `expanded`-set + `.pos`-only-propagation facts above), (b) the ghost list's
+  length is bounded by `intSubfmls_impCount_le`, (c) `nextWorld - 1 ≤` ghost list length at
+  every reachable state. Re-verify against Phase 9/10's actual needs first (three independent
+  dispatches — Phase 7, 7.2, 8 — already confirmed this exact lemma was NOT needed for the
+  fuel-sufficiency argument; only the containment fact above was load-bearing).
 
 - **Goal:** Define the fixed finite universe and the counting-against-universe work, and prove the linear
   world bound (Modal-K `FmpMeasure` pattern). FILE-DISJOINT from Phase 5.
@@ -513,14 +562,22 @@ fact, before committing a dedicated sub-dispatch to it).
   - [x] Define `intUniverse φ : List (ISF Atom)` (the `(sign, subformula, world)` cells,
         `|U| ≤ 2·(2c+1)·(c+2)`) and `intWork U b e` (mirror `modalWork`, `FmpMeasure.lean:180-196`,
         using the proven `countP`/`any` pattern rather than `List.diff`).
+  - [x] Prove the branch-universe containment fact (`intApplyRuleFull_outputs_subset` +
+        persistence-containment infrastructure) discharging the `hb` hypothesis
+        `intExpMeasure_step_lt`/`_branch` take as an assumption. **COMPLETE, sorry-free.**
   - [ ] Prove `intExpandBranches_world_bound`: `(b.map (·.label)).eraseDups.length ≤ φ.complexity + 1`
         (report 07 §Q4 — holds with NO dedup; do NOT entangle with the Option-A dedup).
-        **DEFERRED — continuation needed, see resolution note above.**
+        **DEFERRED — precise continuation recorded above (position-injection argument,
+        supporting combinatorial lemma `intSubfmls_impCount_le` already landed).**
   - [x] Scoped+grepped build GREEN; four sorries unchanged; committed `Scheme.lean` only:
-        `task 317 phase 6: intUniverse + intWork + linear world bound`.
+        `task 317 phase 6.2: branch-universe containment (discharges step_lt hb)` (`bb4ffa3c`),
+        `task 317 phase 6.2: intSubfmls_impCount_le (world-bound combinatorial core)`
+        (`015f81c1`).
 - **Estimated output:** ~200-350 lines. **Done when:** `intUniverse`, `intWork`, and
-  `intExpandBranches_world_bound` are sorry-free. — `intUniverse`/`intWork` ACHIEVED;
-  `intExpandBranches_world_bound` DEFERRED (continuation).
+  `intExpandBranches_world_bound` are sorry-free. — `intUniverse`/`intWork`/containment
+  ACHIEVED (~290 lines this dispatch); `intExpandBranches_world_bound` DEFERRED (precise
+  continuation, see resolution note; estimated ~500-800 lines, a genuinely new
+  positional-tracking induction not present in the Modal-K template).
 - **Timing:** 3 hours. **Depends on:** 4. Logically parallel with Phase 5; R7-serialized only with
   other Scheme.lean phases (Phase 5 is `Expansion.lean` → truly concurrent).
 - **Owned files:** `Scheme.lean`.

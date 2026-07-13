@@ -453,6 +453,15 @@ predicate and countermodel `botForces`) into a single parameterized interface. -
 
 /-! ## Decision Procedures -/
 
+/-- Fuel bound for the intuitionistic/minimal tableau expansion loop, as a function of
+formula complexity. Set to `3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (task 317
+phase 5, per report 07 §Q4), replacing the earlier `2 ^ (2 * φ.complexity + 2)` bound which was
+insufficient to guarantee saturation. Shared by `intuitionisticTableau`, `minimalTableau`, and
+by the fuel-pinned lemmas in `Scheme.lean` (`tableau_sound`, `openBranch_countermodel`,
+`tableau_complete`) so that all fuel-dependent call sites stay in sync. -/
+def intFuel (φ : Proposition Atom) : Nat :=
+  3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))
+
 /-- The intuitionistic propositional tableau decision procedure.
 
 Given `φ`, starts with `F(φ)` at world 0 and expands using `IntuitionisticClosure`.
@@ -460,11 +469,11 @@ Given `φ`, starts with `F(φ)` at world 0 and expands using `IntuitionisticClos
 - Returns `openBranch b` iff `φ` is not intuitionistically valid, with `b` an open
   saturated branch giving a Kripke countermodel.
 
-The fuel bound `2 ^ (2 * φ.complexity + 2)` accounts for the exponential blowup
-possible in intuitionistic proofs (finite model property gives this bound). -/
+The fuel bound `intFuel φ` accounts for the exponential blowup possible in intuitionistic
+proofs (finite model property gives this bound). -/
 def intuitionisticTableau (φ : Proposition Atom) : IntTableauResult Atom :=
   let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
-  let fuel := 2 ^ (2 * φ.complexity + 2)
+  let fuel := intFuel φ
   intExpandBranches [initialBranch] [[]] [1] [[]] fuel isIntuitionisticallyClosed
 
 /-- The minimal propositional tableau decision procedure.
@@ -477,7 +486,7 @@ world for any formula φ (not only T(⊥)).
 - Returns `openBranch b` iff `φ` is not minimally valid. -/
 def minimalTableau (φ : Proposition Atom) : IntTableauResult Atom :=
   let initialBranch : IBranch Atom := [⟨.neg, φ, 0⟩]
-  let fuel := 2 ^ (2 * φ.complexity + 2)
+  let fuel := intFuel φ
   intExpandBranches [initialBranch] [[]] [1] [[]] fuel isMinimallyClosed
 
 end Cslib.Logic.PL

@@ -249,7 +249,7 @@ theorem tableau_sound.{u_world} (S : IntMinScheme Atom)
         S.closurePred b = true → ¬ intBranchSatisfied val (fun _ => False) worldOf b)
     (φ : Proposition Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .closed) :
+        (intFuel φ) S.closurePred = .closed) :
     IValid.{_, u_world} φ := by
   intro World _ val v_uc w₀
   by_contra hneg
@@ -1759,7 +1759,7 @@ packaging the `edges` the countermodel frame (`intAccessPreorder edges`) is inst
 lemma openBranch_countermodel (S : IntMinScheme Atom) (φ : Proposition Atom)
     (b : IBranch Atom)
     (h : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .openBranch b) :
+        (intFuel φ) S.closurePred = .openBranch b) :
     ∃ edges : IEdges,
       ¬ @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ
       := by
@@ -1816,10 +1816,10 @@ theorem tableau_complete (S : IntMinScheme Atom) (φ : Proposition Atom)
     (hvalid : ∀ (edges : IEdges) (b : IBranch Atom),
       @IForces Atom Nat (intAccessPreorder edges) (intExtractValuation b) (S.modelBot b) 0 φ) :
     intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-        (2 ^ (2 * φ.complexity + 2)) S.closurePred = .closed := by
+        (intFuel φ) S.closurePred = .closed := by
   by_contra hne
   cases hresult : intExpandBranches [[⟨.neg, φ, 0⟩]] [[]] [1] [[]]
-      (2 ^ (2 * φ.complexity + 2)) S.closurePred with
+      (intFuel φ) S.closurePred with
   | closed => exact hne hresult
   | openBranch b =>
     obtain ⟨edges, hcm⟩ := openBranch_countermodel S φ b hresult

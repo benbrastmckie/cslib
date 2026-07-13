@@ -731,7 +731,36 @@ orthogonal to distinct-world counting.
 
 ---
 
-### Phase 9: [Wave B / discharge deferred Wave-A obligations] Add `sat_timp` + discharge, prove `intExtractValuation` monotonicity, close truthLemma T-imp (sorry 1) [NOT STARTED]
+### Phase 9: [Wave B / discharge deferred Wave-A obligations] Add `sat_timp` + discharge, prove `intExtractValuation` monotonicity, close truthLemma T-imp (sorry 1) [BLOCKED]
+
+**RESOLUTION (dispatch `sess_1783962327_d9c0b3`, commit `969782b5`)**: genuinely BLOCKED, not
+deflected. Investigated all three deliverables against source (`Rules.lean`'s `intTImpRule`,
+`Expansion.lean`'s `applyPersistenceFixpoint`, the exact `IExpandedConsistent_sat` call site inside
+`intExpandBranches_openBranch_sat`) and found TWO independent gaps, neither closable without new
+infrastructure: **(1) fuel entanglement** — identical in kind to the pre-existing
+`intExtractValuation` monotonicity STOP-gate (`Scheme.lean:442-483`): `IExpandedConsistent_sat` is
+only ever called on `bPers = applyPersistenceFixpoint bh edgesH (fuel'+1)`, and genuineness of
+THAT fixpoint is not certified by any existing lemma — `intExpMeasure_step_lt` (Phase 7) bounds the
+OUTER alpha/beta/world-creation loop only, not the INNER T-imp persistence recursion; a NEW
+step-lt-style bound for `applyPersistenceFixpoint`'s own recursion is required, which is exactly
+Phase 10's `intExpMeasure ≤ fuel` invariant-threading job, one level deeper. **(2) determinacy
+(newly found, not in reports 08/09)**: even granting a genuine fixpoint, `intTImpRule` only
+certifies `T(φ)@w' ∈ b → T(ψ)@w' ∈ b`, strictly weaker than the needed
+`F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` (report 09 §a.4's proposed signature); bridging the two needs a
+`Sub(φ0)` determinacy/bivalence fact that exists nowhere in `IBranchSaturation` today. Full
+evidence trail recorded in a new STOP-gate block in `Scheme.lean` (immediately after the existing
+`intExtractValuation` monotonicity STOP-gate, before `## Parametric Truth Lemma`). Given the
+zero-debt invariant (no sorry / no vacuous / no new axiom), the field could NOT be added without
+forcing a new sorry at `IExpandedConsistent_sat`'s only construction site (currently sorry-free) —
+so NO field/proof edit was made; only the STOP-gate documentation (comment-only, scoped build
+GREEN, 807/807 jobs) was committed. Four inventory sorries UNCHANGED (line numbers shifted +50 in
+`Scheme.lean` from the doc insertion; re-grep before any further edit). **Recommendation: fold
+Phase 9's three deliverables into Phase 10**, which must additionally build (a) the
+persistence-loop step-lt lemma and (b) the determinacy fact (or a restated, weaker `sat_timp` plus
+a compensating completeness argument) before `sat_timp`/monotonicity/truthLemma-T-imp can close.
+See `.orchestrator-handoff.json` `continuation_context.next_phase_should_build` for the itemized
+list. This requires a `/plan`/`/revise` pass on this plan before the next `/implement --hard`
+dispatch, not another blind implementation attempt.
 
 - **Goal:** Discharge the TWO deferred Wave-A obligations using the fuel fixpoint (Phase 7): (i) add
   `sat_timp` to `IBranchSaturation` and discharge it in `IExpandedConsistent_sat`; (ii) prove

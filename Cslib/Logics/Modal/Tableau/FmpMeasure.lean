@@ -2089,7 +2089,7 @@ lemma modalStepBranch_knownWorlds
 `e'` is either `e` unchanged (persistent rules) or `e ++ [sf]` (linear/branching rules), and in
 the latter case `sf ∈ modalUniverse φ0` follows from `sf ∈ b` and the branch closure `hb`. Same
 shallow (top-level `RuleResult`-constructor-only) case split as P2-obl-a. -/
-private lemma modalStepBranch_eClosure
+lemma modalStepBranch_eClosure
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -2328,7 +2328,9 @@ lemma modalStepBranch_potential_step
 
 /-! ## World-Count Bound (Phase 2 continuation, obligation e — final composition) -/
 
-private lemma modalSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).length :=
+/-- `Sf(φ0) := (modalSubfmls φ0).length` is always positive: `φ0` is always a member of its own
+subformula list via `modalSubfmls_self_mem`. -/
+lemma modalSf_pos (φ0 : Proposition Atom) : 1 ≤ (modalSubfmls φ0).length :=
   List.length_pos_iff.mpr (List.ne_nil_of_mem (modalSubfmls_self_mem φ0))
 
 /-- `Sf(φ0) := (modalSubfmls φ0).length` can only equal `1` when `φ0` has no proper structural
@@ -2336,7 +2338,7 @@ subformula distinct from itself, i.e. `φ0` is an atom or `⊥` (`imp`/`box` bot
 subformula list, since each of their immediate constituents already contributes `≥ 1` via
 `modalSubfmls_self_mem`) — both leaf shapes have `modalDepth = 0`. This is the fact
 `geomCap_le_pow`'s `hdeg` hypothesis needs. -/
-private lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
+lemma modalSf_one_imp_depth_zero (φ0 : Proposition Atom)
     (h : (modalSubfmls φ0).length = 1) : modalDepth φ0 = 0 := by
   cases φ0 with
   | atom p => rfl

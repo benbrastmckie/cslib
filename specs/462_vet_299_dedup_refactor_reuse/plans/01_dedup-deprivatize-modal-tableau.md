@@ -125,7 +125,7 @@ preserving the theorem statement and zero-debt status.
 
 ---
 
-### Phase 2: Item 2a — De-privatize base lemmas in Completeness + FmpMeasure [NOT STARTED]
+### Phase 2: Item 2a — De-privatize base lemmas in Completeness + FmpMeasure [COMPLETED]
 
 **Goal**: Make the four re-used base lemmas cross-module accessible by removing the `private`
 keyword (files are already in `@[expose] public section`), and add the missing docstring so the

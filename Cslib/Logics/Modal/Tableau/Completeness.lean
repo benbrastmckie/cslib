@@ -700,7 +700,7 @@ omit [Hashable Atom] in
 expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApplicable`
 (the branch is saturated). Port of `classicalStepBranch_none_saturated`
 (`Classical/Completeness.lean:694`), threaded with `acc`. -/
-private lemma modalStepBranch_none_saturated
+lemma modalStepBranch_none_saturated
     {b e : List (SignedFormula (Proposition Atom) WorldIndex)}
     {acc : Accessibility}
     (hstep : modalStepBranch b e acc = none)

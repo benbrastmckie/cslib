@@ -482,6 +482,56 @@ alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or 
 orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
 dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
 
+/-! ### `sat_timp` discharge — STOP-gate finding (task 317 phase 9)
+
+**Blocker (documented, not a `sorry`; no field/lemma is stated below).** Phase 9's mandate ("add
+`sat_timp` to `IBranchSaturation`, discharge it in `IExpandedConsistent_sat`") is **entangled with
+the SAME fuel-sufficiency gap as the monotonicity STOP-gate above**, plus a SECOND, independent gap
+(determinacy). Both are verified against source, not assumed; neither is completable within this
+phase's scope.
+
+**Gap 1 (fuel entanglement, shared with monotonicity).** `IExpandedConsistent_sat`
+(`:840-…`) is called ONLY at `intExpandBranches_openBranch_sat`'s `none`-leaf case (`:1467`), on
+`bPers := applyPersistenceFixpoint bh edgesH (fuel'+1)` (`:1438`) — i.e. `fuel'+1` IS the outer
+`intExpandBranches.go` recursion's own remaining step-count (the SAME `Nat` `intExpMeasure_step_lt`
+bounds), reused verbatim as the inner persistence loop's fuel. `applyPersistenceFixpoint`
+(`Expansion.lean:133-139`) exits via exactly one of two paths: (a) the `b'.length == b.length`
+check succeeds, in which case `b' = b` **literally** (append of an empty `newForms.flatten`), a
+GENUINE, self-certifying fixpoint of `applyAllTImpRules`; or (b) fuel hits `0` before (a) ever
+fires, returning whatever intermediate branch was reached, with **no fixpoint guarantee at all**.
+Distinguishing (a) from (b) at a given call site requires an explicit numeric bound — "rounds
+needed (≤ `|intUniverse φ0|` by `applyPersistenceFixpoint_subset`, since each non-terminating
+round strictly grows `b` and stays inside the finite universe) ≤ remaining fuel at that point" —
+which is exactly the kind of `intExpMeasure ≤ fuel` INVARIANT-MAINTAINED-THROUGHOUT-THE-INDUCTION
+fact task 317 Phase 10 is scoped to build (`intExpandBranches_openBranch_sat`'s own `:1388` `sorry`
+is this same gap, one level up). No such invariant is threaded into `IExpandedConsistent_sat`'s
+signature today, and threading it requires a NEW step-lt-style lemma for
+`applyPersistenceFixpoint`'s OWN recursion (distinct from `intExpMeasure_step_lt`, which bounds
+outer alpha/beta/world-creation steps and says nothing about inner persistence rounds) — out of
+this phase's scope, comparable in size to Phase 7 itself.
+
+**Gap 2 (determinacy, independent of Gap 1 — NOT previously documented in reports 08/09).** Even
+GRANTING a genuine fixpoint of `applyAllTImpRules` on `bPers`, `intTImpRule`
+(`Rules.lean:174-187`) only ever ADDS `T(ψ)@w'` when `T(φ)@w'` is already present; a fixpoint
+therefore certifies exactly `T(φ)@w' ∈ b → T(ψ)@w' ∈ b` for every accessible `w'` — **not**
+`F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` (report 09 §a.4's proposed `sat_timp` signature, needed by
+`truthLemma`'s T-imp case: the goal supplies `IForces val w' φ'` semantically, not
+`T(φ')@w' ∈ b`, so the disjunction must hold unconditionally, not merely under `T(φ)@w' ∈ b`).
+Bridging `¬(T(φ)@w' ∈ b)` to `F(φ)@w' ∈ b` needs a determinacy/bivalence fact — "every subformula
+of `Sub(φ0)` is either `T`- or `F`-tagged at every branch-accessible world" — that no existing
+`IBranchSaturation` field or invariant in this file establishes (the `sat_tand`/`sat_fand`/…
+fields are all per-world decompositions of compounds already ON the branch, not a cross-world
+bivalence guarantee for arbitrary `Sub(φ0)` members). No lemma toward this exists at HEAD.
+
+**Recommendation for continuation**: fold `sat_timp`'s field + discharge into Phase 10 alongside
+monotonicity (same recommendation (a) as the STOP-gate above), with Phase 10 additionally scoped
+to either (i) prove the determinacy fact as a byproduct of full Hintikka saturation once the
+`measure ≤ fuel` invariant lets the induction reach every world, or (ii) restate `sat_timp` in the
+strictly-provable-at-fixpoint form `T(φ)@w' ∈ b → T(ψ)@w' ∈ b` and re-derive `truthLemma`'s T-imp
+case from THAT shape instead (would need re-deriving `T(φ')@w' ∈ b` from `IForces val w' φ'` via
+a separate completeness/adequacy argument — itself nontrivial). Do NOT attempt to force `sat_timp`
+via a weakened/vacuous statement or a `sorry`. -/
+
 /-! ## Parametric Truth Lemma -/
 
 /-- Parametric truth lemma (the single deferred completeness obligation, task 317).

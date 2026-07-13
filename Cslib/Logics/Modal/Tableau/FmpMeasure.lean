@@ -356,23 +356,18 @@ lemma modalApplyOne_boxPos_outputs_subset
     subst hxeq
     exact ⟨by simp [modalSubfmls], hw'⟩
 
-/-- `diamondNeg`: `F(◇φ)@w = F((□(φ→⊥))→⊥)@w` emits `F(φ)@w'` for each recorded successor
-`w'` of `w` (`Rules.lean:142-151`). Every emitted formula's formula-component is `φ`, a
-structural subformula of the encoded source formula, at a world label that is an existing
-recorded successor of `w`. Stated directly over the rule's raw emission expression (rather than
-routed through `modalApplyOne`) because `tryAllPropRules`'s `negOf?` pattern also matches the
-`.imp (.box _) .bot` shape, so this match arm of `modalApplyOne` is not the reachable path for
-that shape — see `modalApplyOne_prop_outputs_subset` for the actually-dispatched pathway. This
-lemma records the closure fact for the rule *as written* at `Rules.lean:142-151`. -/
+/-- `diamondNeg`: `F(◇φ)@w` emits `F(φ)@w'` for each recorded successor `w'` of `w`
+(`Rules.lean:144-153`). Every emitted formula's formula-component is `φ`, a structural
+subformula of the native source formula `◇φ`, at a world label that is an existing recorded
+successor of `w`. Task 441: `diamond` is a native constructor, so `negOf?` no longer matches
+this shape and this rule arm is the sole dispatch path for `F(◇φ)@w`. -/
 lemma modalApplyOne_diamondNeg_outputs_subset
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     ∀ x ∈ (acc.successorsOf w).filterMap (fun w' =>
         let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
         if b.any (· == sf') then none else some sf'),
-      x.formula ∈
-        modalSubfmls (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot))
-          Proposition.bot) ∧
+      x.formula ∈ modalSubfmls (Proposition.diamond φ) ∧
         x.label ∈ acc.successorsOf w := by
   intro x hx
   simp only [List.mem_filterMap] at hx
@@ -526,9 +521,9 @@ private lemma boxProps_outputs_subset (φ0 : Proposition Atom)
   · simp at heq
 
 /-- Shared closure fact for the `diaNegProps` group propagated by both fresh-world rules
-(`diamondPos`, `Rules.lean:105-113`; `boxNeg`, `Rules.lean:130-138`): each propagated
-`F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (encoded as `F((□(ψ→⊥))→⊥)@w`), hence `ψ` is a
-subformula of `φ0`. Factored out since the `diaNegProps` construction is byte-identical
+(`diamondPos`, `Rules.lean:107-115`; `boxNeg`, `Rules.lean:132-140`): each propagated
+`F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (native `diamond` constructor, task 441), hence `ψ`
+is a subformula of `φ0`. Factored out since the `diaNegProps` construction is byte-identical
 between the two rules. -/
 private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
@@ -537,7 +532,7 @@ private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
     ∀ x ∈ b.filterMap (fun sf' =>
         if sf'.sign == .neg && sf'.label == w then
           match sf'.formula with
-          | .imp (.box (.imp ψ .bot)) .bot =>
+          | .diamond ψ =>
             let prop : SignedFormula (Proposition Atom) WorldIndex :=
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
@@ -554,27 +549,26 @@ private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
       · simp at heq
       · simp only [Option.some.injEq] at heq
         subst heq
-        have hψsub : (Proposition.imp (Proposition.box (Proposition.imp ψ Proposition.bot))
-            Proposition.bot) ∈ modalSubfmls φ0 := by
+        have hψsub : (Proposition.diamond ψ) ∈ modalSubfmls φ0 := by
           have hmem := modalUniverse_mem_formula (hb sf' hsf'mem)
           rwa [hform] at hmem
-        have hψmem : ψ ∈ modalSubfmls (Proposition.imp (Proposition.box (Proposition.imp ψ
-            Proposition.bot)) Proposition.bot) := by simp [modalSubfmls]
+        have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) := by simp [modalSubfmls]
         exact mem_modalUniverse_of hwbound (modalSubfmls_trans hψmem hψsub)
     · simp at heq
   · simp at heq
 
-/-- `diamondPos`: `T(◇φ)@w = T((□(φ→⊥))→⊥)@w` creates a fresh world `w' = modalNextWorld b`
-and emits three groups at `w'` (`Rules.lean:91-114`): the witness `T(φ)@w'`, propagated
-box-positives `T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'`
+/-- `diamondPos`: `T(◇φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
+groups at `w'` (`Rules.lean:93-116`): the witness `T(φ)@w'`, propagated box-positives
+`T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'`
 (from `F(◇ψ)@w ∈ b`). All three groups stay inside `U(φ0)` given the branch invariant `hb`,
 the source membership `hsf`, and the world-bound hypothesis `hW` (consumed for the fresh
-label `w' ≤ W`). -/
+label `w' ≤ W`). Task 441: `diamond` is a native constructor, so the witness is directly a
+subformula of `◇φ` (no encoding to unwind). -/
 lemma modalApplyOne_diamondPos_outputs_subset
     (φ0 : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (φ : Proposition Atom) (w : WorldIndex)
     (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
-    (hsf : (⟨.pos, .imp (.box (.imp φ .bot)) .bot, w⟩ :
+    (hsf : (⟨.pos, .diamond φ, w⟩ :
       SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hW : modalMaxWorld b < modalWorldBound φ0) :
     ∀ x ∈ ((⟨.pos, φ, modalNextWorld b⟩ :
@@ -588,7 +582,7 @@ lemma modalApplyOne_diamondPos_outputs_subset
       b.filterMap (fun sf' =>
         if sf'.sign == .neg && sf'.label == w then
           match sf'.formula with
-          | .imp (.box (.imp ψ .bot)) .bot =>
+          | .diamond ψ =>
             let prop : SignedFormula (Proposition Atom) WorldIndex :=
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
@@ -597,12 +591,9 @@ lemma modalApplyOne_diamondPos_outputs_subset
     x ∈ modalUniverse φ0 := by
   have hwbound : modalNextWorld b ≤ modalWorldBound φ0 := by
     unfold modalNextWorld; exact hW
-  have hsrc : (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot))
-      Proposition.bot) ∈ modalSubfmls φ0 :=
+  have hsrc : (Proposition.diamond φ) ∈ modalSubfmls φ0 :=
     modalUniverse_mem_formula (hb _ hsf)
-  have hφmem : φ ∈ modalSubfmls
-      (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot))
-        Proposition.bot) := by simp [modalSubfmls]
+  have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) := by simp [modalSubfmls]
   intro x hx
   simp only [List.mem_cons, List.mem_append] at hx
   rcases hx with (rfl | hbox) | hdia
@@ -611,11 +602,10 @@ lemma modalApplyOne_diamondPos_outputs_subset
   · exact diaNegProps_outputs_subset φ0 b w hb hwbound x hdia
 
 /-- `boxNeg`: `F(□φ)@w` creates a fresh world `w' = modalNextWorld b` and emits three
-groups at `w'` (`Rules.lean:117-139`): the witness `F(φ)@w'`, propagated box-positives
+groups at `w'` (`Rules.lean:119-141`): the witness `F(φ)@w'`, propagated box-positives
 `T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'` (from
 `F(◇ψ)@w ∈ b`). Identical structure to `modalApplyOne_diamondPos_outputs_subset` except
-the witness is directly `φ` (a subformula of `.box φ` itself, no diamond-encoding to
-unwind) and negatively signed. -/
+the witness is directly `φ` (a subformula of `.box φ` itself) and negatively signed. -/
 lemma modalApplyOne_boxNeg_outputs_subset
     (φ0 : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (φ : Proposition Atom) (w : WorldIndex)
@@ -634,7 +624,7 @@ lemma modalApplyOne_boxNeg_outputs_subset
       b.filterMap (fun sf' =>
         if sf'.sign == .neg && sf'.label == w then
           match sf'.formula with
-          | .imp (.box (.imp ψ .bot)) .bot =>
+          | .diamond ψ =>
             let prop : SignedFormula (Proposition Atom) WorldIndex :=
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
@@ -715,27 +705,15 @@ lemma modalApplyOne_outputs_subset
   · rw [if_neg hpa]
     obtain ⟨s, ff, l⟩ := sf
     rcases s with _ | _
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+    · -- pos: only `.box`/`.diamond` match a K-rule arm; the rest fall through to
+      -- `modalApplyOne`'s `_, _ => .notApplicable` catch-all regardless of `hpa` (task 441:
+      -- `and`/`or`/`imp` are all native/non-diamond-encoded, so no disambiguation is needed).
+      rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp
       · simp
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp
-        · simp
-        · simp
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp
-          · simp
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp
-              · dsimp only
-                exact modalApplyOne_diamondPos_outputs_subset φ0 b a5 l hb hsf hW
-              · simp
-              · simp
-            · simp
-            · simp
-          · simp
+      · simp
+      · simp
+      · simp
       · dsimp only
         by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
         · simp only [if_pos hemp]
@@ -747,43 +725,33 @@ lemma modalApplyOne_outputs_subset
           have hxle : x.label ≤ modalMaxWorld b := Nat.lt_succ_iff.mp hxlt
           exact mem_modalUniverse_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
             (modalSubfmls_trans hxform (modalUniverse_mem_formula hsfU))
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · dsimp only
+        exact modalApplyOne_diamondPos_outputs_subset φ0 b φ l hb hsf hW
+    · -- neg: symmetric to the `pos` case above.
+      rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp
       · simp
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp
-        · simp
-        · simp
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp
-          · simp
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp
-              · dsimp only
-                by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-                    if b.any (· == (⟨.neg, a5, w'⟩ :
-                        SignedFormula (Proposition Atom) WorldIndex))
-                    then none
-                    else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-                  ).isEmpty = true
-                · simp only [if_pos hemp]
-                · simp only [if_neg hemp]
-                  intro x hx
-                  obtain ⟨hxform, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc a5 l x hx
-                  have hedge : acc.hasEdge l x.label = true := mem_successorsOf_hasEdge hxsucc
-                  have hxlt := (hInv l x.label hedge).2
-                  have hxle : x.label ≤ modalMaxWorld b := Nat.lt_succ_iff.mp hxlt
-                  exact mem_modalUniverse_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
-                    (modalSubfmls_trans hxform (modalUniverse_mem_formula hsfU))
-              · simp
-              · simp
-            · simp
-            · simp
-          · simp
+      · simp
+      · simp
+      · simp
       · dsimp only
         exact modalApplyOne_boxNeg_outputs_subset φ0 b φ l hb hsf hW
+      · dsimp only
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp]
+        · simp only [if_neg hemp]
+          intro x hx
+          obtain ⟨hxform, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
+          have hedge : acc.hasEdge l x.label = true := mem_successorsOf_hasEdge hxsucc
+          have hxlt := (hInv l x.label hedge).2
+          have hxle : x.label ≤ modalMaxWorld b := Nat.lt_succ_iff.mp hxlt
+          exact mem_modalUniverse_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
+            (modalSubfmls_trans hxform (modalUniverse_mem_formula hsfU))
 
 /-! ## World-Count Bound (Phase 2 — the CRUX)
 
@@ -806,22 +774,19 @@ The remaining Phase 2 obligations formalize the hand-verified potential-function
 counter derived from `acc`, and a **potential** `Φ` combining them that offsets `modalMaxWorld`'s
 growth exactly. This section is obligations (a)-(c): the supporting invariants. -/
 
-/-- `true` when `sf` matches `boxNeg`'s F-box shape `F(□φ)@w` (`Rules.lean:117-139`), the
-**only** rule shape that actually mints a fresh world at runtime. `diamondPos`'s T-diamond
-encoding `T((□(φ→⊥))→⊥)@w` (`Rules.lean:91-114`) is syntactically a `.imp _ .bot` pattern,
-which `modalNegOf?` matches *unconditionally* (`Defs.lean:110-113`, no exclusion for a `.box`
-antecedent), so `tryAllPropRules`'s `negPos` arm is *always* applicable first for this shape
-(verified: `(tryAllPropRules … ⟨.pos, .imp (.box (.imp φ .bot)) .bot, w⟩).isApplicable = true`
-unconditionally) — `modalApplyOne`'s `diamondPos` match arm is consequently dead code, never
-reached (`T(◇φ)@w` is instead decoded by `negPos` into `F(□¬φ)@w`, which fires `boxNeg`,
-matching the diamond's semantics via a 2-step composition). Symmetrically `diamondNeg`'s shape
-`F((□(φ→⊥))→⊥)@w` is always intercepted by `negNeg` (decoding into `T(□¬φ)@w`, firing `boxPos`).
-Only `boxNeg`'s `.neg, .box _` shape is never matched by any propositional rule (`.box` is a
-distinct top-level constructor from every prop-rule pattern's `.imp`-headed shape), so it alone
-correctly tracks every `acc`-mutating step. -/
+/-- `true` when `sf` matches a rule shape that actually mints a fresh world at runtime:
+`boxNeg`'s F-box shape `F(□φ)@w` (`Rules.lean:119-141`) or `diamondPos`'s T-diamond shape
+`T(◇φ)@w` (`Rules.lean:93-116`). Task 441: `diamond` is a native constructor, so `diamondPos`
+now genuinely fires (and mints `acc.addEdge w (modalNextWorld b)`, exactly like `boxNeg`) —
+unlike the pre-441 Lukasiewicz encoding `T((□(φ→⊥))→⊥)@w`, which was always intercepted by
+`tryAllPropRules`'s `negPos` arm before reaching `modalApplyOne`'s modal-rule dispatch (dead
+code). Neither shape is matched by any propositional rule (`.box`/`.diamond` are top-level
+constructors distinct from every prop-rule pattern's `.imp`/`.and`/`.or`-headed shape), so
+together they correctly track every `acc`-mutating step. -/
 def isMintingShaped (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
   match sf.sign, sf.formula with
   | .neg, .box _ => true
+  | .pos, .diamond _ => true
   | _, _ => false
 
 /-- Out-degree of world `w`: the number of successors recorded for `w` in `acc`. -/
@@ -983,10 +948,10 @@ private lemma boxProps_rank_bound
   · rw [if_neg hsw] at heq; simp at heq
 
 /-- Rank bound for the `diaNegProps` group propagated by both fresh-world rules (shared shape
-between `diamondPos` and `boxNeg`, `Rules.lean:105-113`/`130-138`): each propagated `F(ψ)@freshW`
+between `diamondPos` and `boxNeg`, `Rules.lean:107-115`/`132-140`): each propagated `F(ψ)@freshW`
 is exactly at label `freshW` and has `modalDepth ψ ≤ rank w − 1`, derived from the source
-`F(◇ψ)@w ∈ b`'s rank bound via
-`modalDepth (.imp (.box (.imp ψ .bot)) .bot) = 1 + modalDepth ψ ≤ rank w`. -/
+`F(◇ψ)@w ∈ b`'s rank bound via `modalDepth (.diamond ψ) = 1 + modalDepth ψ ≤ rank w` (task 441:
+`diamond` is a native constructor). -/
 private lemma diaNegProps_rank_bound
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w freshW : WorldIndex)
     (rank : WorldIndex → Nat)
@@ -994,7 +959,7 @@ private lemma diaNegProps_rank_bound
     ∀ x ∈ b.filterMap (fun sf' =>
         if sf'.sign == .neg && sf'.label == w then
           match sf'.formula with
-          | .imp (.box (.imp ψ .bot)) .bot =>
+          | .diamond ψ =>
             let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, freshW⟩
             if b.any (· == prop) then none else some prop
           | _ => none
@@ -1046,14 +1011,15 @@ private lemma boxPos_rank_bound
     omega
 
 /-- Rank bound for `diamondNeg`'s output (propagation to *existing* successors,
-`Rules.lean:142-151`): `F(◇φ)@w`'s propagated `F(φ)@w'` (for `w' ∈ acc.successorsOf w`) has
-`modalDepth φ ≤ rank w'`, transported across the recorded edge `w → w'`. -/
+`Rules.lean:144-153`): `F(◇φ)@w`'s propagated `F(φ)@w'` (for `w' ∈ acc.successorsOf w`) has
+`modalDepth φ ≤ rank w'`, transported across the recorded edge `w → w'` (task 441: `diamond`
+is a native constructor). -/
 private lemma diamondNeg_rank_bound
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) (rank : WorldIndex → Nat)
     (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
     (hedge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w)
-    (hφdia : (⟨.neg, .imp (.box (.imp φ .bot)) .bot, w⟩ :
+    (hφdia : (⟨.neg, .diamond φ, w⟩ :
       SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
     ∀ x ∈ (acc.successorsOf w).filterMap (fun w' =>
         let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
@@ -1067,8 +1033,7 @@ private lemma diamondNeg_rank_bound
   · simp only [Option.some.injEq] at hxeq
     subst hxeq
     have hedge' : acc.hasEdge w w' = true := mem_successorsOf_hasEdge hw'
-    have hdep : modalDepth (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot))
-        Proposition.bot) ≤ rank w := hbound _ hφdia
+    have hdep : modalDepth (Proposition.diamond φ) ≤ rank w := hbound _ hφdia
     have hre : rank w' + 1 = rank w := hedge w w' hedge'
     simp only [SignedFormula.formula, modalDepth] at hdep ⊢
     omega
@@ -1140,55 +1105,14 @@ lemma modalStepBranch_exists_rank'
     · rw [if_neg hpa]
       obtain ⟨s, ff, l⟩ := sf
       rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
         · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-                · dsimp only
-                  have hllt : l < modalNextWorld b :=
-                    Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
-                  have hsfd' : 1 + modalDepth a5 ≤ rank l := by
-                    have h := hsfd
-                    simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
-                    omega
-                  refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
-                    fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
-                  · intro w w' hw'
-                    rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
-                    · rw [Function.update_self, Function.update_of_ne hllt.ne]
-                      omega
-                    · rw [Function.update_of_ne (hInv w w' hold).1.ne,
-                          Function.update_of_ne (hInv w w' hold).2.ne]
-                      exact hedge w w' hold
-                  · intro x hx
-                    simp only [List.mem_cons, List.mem_append] at hx
-                    rcases hx with (rfl | hx) | hx
-                    · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
-                      omega
-                    · obtain ⟨hxlab, hxdep⟩ :=
-                        boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-                      rw [hxlab, Function.update_self]
-                      exact hxdep
-                    · obtain ⟨hxlab, hxdep⟩ :=
-                        diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-                      rw [hxlab, Function.update_self]
-                      exact hxdep
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · dsimp only
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · -- box φ (boxPos): propagates to *existing* successors.
+          dsimp only
           by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
           · simp only [if_pos hemp]
             exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
@@ -1197,41 +1121,44 @@ lemma modalStepBranch_exists_rank'
                 SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
             exact ⟨rank, fun _ _ => rfl, hedge,
               boxPos_rank_bound b acc φ l rank hbound hedge hψbox⟩
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · -- diamond φ (diamondPos): mints a fresh world (task 441: native constructor).
+          dsimp only
+          have hllt : l < modalNextWorld b :=
+            Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
+          have hsfd' : 1 + modalDepth φ ≤ rank l := by
+            have h := hsfd
+            simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
+            omega
+          refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
+            fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
+          · intro w w' hw'
+            rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
+            · rw [Function.update_self, Function.update_of_ne hllt.ne]
+              omega
+            · rw [Function.update_of_ne (hInv w w' hold).1.ne,
+                  Function.update_of_ne (hInv w w' hold).2.ne]
+              exact hedge w w' hold
+          · intro x hx
+            simp only [List.mem_cons, List.mem_append] at hx
+            rcases hx with (rfl | hx) | hx
+            · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
+              omega
+            · obtain ⟨hxlab, hxdep⟩ :=
+                boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+              rw [hxlab, Function.update_self]
+              exact hxdep
+            · obtain ⟨hxlab, hxdep⟩ :=
+                diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+              rw [hxlab, Function.update_self]
+              exact hxdep
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
         · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-                · dsimp only
-                  have hφdia : (⟨.neg, Proposition.imp (Proposition.box
-                      (Proposition.imp a5 Proposition.bot)) Proposition.bot, l⟩ :
-                      SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
-                  by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-                      if b.any (· == (⟨.neg, a5, w'⟩ :
-                          SignedFormula (Proposition Atom) WorldIndex))
-                      then none
-                      else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-                    ).isEmpty = true
-                  · simp only [if_pos hemp]
-                    exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-                  · simp only [if_neg hemp]
-                    exact ⟨rank, fun _ _ => rfl, hedge,
-                      diamondNeg_rank_bound b acc a5 l rank hbound hedge hφdia⟩
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-                · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-              · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-            · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · dsimp only
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · -- box φ (boxNeg): mints a fresh world, symmetric to diamondPos above.
+          dsimp only
           have hllt : l < modalNextWorld b :=
                     Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
           have hsfd' : 1 + modalDepth φ ≤ rank l := by
@@ -1260,6 +1187,21 @@ lemma modalStepBranch_exists_rank'
                 diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
               rw [hxlab, Function.update_self]
               exact hxdep
+        · -- diamond φ (diamondNeg): propagates to *existing* successors.
+          dsimp only
+          have hφdia : (⟨.neg, Proposition.diamond φ, l⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
+          by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+              if b.any (· == (⟨.neg, φ, w'⟩ :
+                  SignedFormula (Proposition Atom) WorldIndex))
+              then none
+              else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+            ).isEmpty = true
+          · simp only [if_pos hemp]
+            exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+          · simp only [if_neg hemp]
+            exact ⟨rank, fun _ _ => rfl, hedge,
+              diamondNeg_rank_bound b acc φ l rank hbound hedge hφdia⟩
 
   obtain ⟨rank', hragree, hredge, hrmatch⟩ := hcases
   have hnewAcc : newAcc = (modalApplyOne sf b acc).snd := by
@@ -1340,25 +1282,23 @@ private lemma isMintingShaped_not_prop_applicable
   unfold isMintingShaped at h
   obtain ⟨s, ff, l⟩ := sf
   rcases s with _ | _
-  · simp at h
-  · rcases ff with _ | _ | ⟨a, c⟩ | φ
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    · simp at h
+    · simp at h
+    · simp at h
+    · simp at h
+    · simp at h
+    · simp at h
+    · simp [tryAllPropRules_pos, modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?,
+        RuleResult.isApplicable]
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    · simp at h
+    · simp at h
     · simp at h
     · simp at h
     · simp at h
     · rfl
-
-omit [Hashable Atom] in
-/-- The `diamondPos` T-diamond shape `T((□(φ→⊥))→⊥)@w` always has an applicable propositional
-rule (`negPos`, since `modalNegOf?` matches `.imp _ .bot` unconditionally): verified by `rfl`,
-independent of `φ`. Used to discharge the vacuous `diamondPos` case-split leaf (dead code: this
-shape's `modalApplyOne` arm is never reached, since `tryAllPropRules` always intercepts it
-first). -/
-private lemma diamondPos_shape_prop_applicable
-    (φ : Proposition Atom) (l : WorldIndex) :
-    (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.pos, .imp (.box (.imp φ .bot)) .bot, l⟩ :
-        SignedFormula (Proposition Atom) WorldIndex)).isApplicable = true := by
-  rfl
+    · simp at h
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Appending a non-minting-shaped formula to the expanded set leaves the minting-filtered
@@ -1462,51 +1402,34 @@ lemma modalStepBranch_preserves_outDegEq
     · rw [if_neg hpa]
       obtain ⟨s, ff, l⟩ := sf
       rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact houtdeg w
         · exact houtdeg w
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact houtdeg w
-          · exact houtdeg w
-          · exact houtdeg w
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact houtdeg w
-            · exact houtdeg w
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact houtdeg w
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact houtdeg w
-                · dsimp only
-                  exact absurd (diamondPos_shape_prop_applicable a5 l) hpa
-                · exact houtdeg w
-                · exact houtdeg w
-              · exact houtdeg w
-              · exact houtdeg w
-            · exact houtdeg w
-        · dsimp only
+        · exact houtdeg w
+        · exact houtdeg w
+        · exact houtdeg w
+        · -- box φ (boxPos): propagates to existing successors, never mints.
+          dsimp only
           split <;> exact houtdeg w
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · -- diamond φ (diamondPos): mints a fresh world (task 441: native, genuinely minting).
+          dsimp only
+          by_cases hw : w = l
+          · rw [hw]
+            rw [outDeg_addEdge_self,
+              filter_minting_append_of_minting_at e ⟨.pos, Proposition.diamond φ, l⟩ (by rfl)]
+            simp only [List.length_append, List.length_singleton]
+            rw [houtdeg l]
+          · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
+            rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
+            exact houtdeg w
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact houtdeg w
         · exact houtdeg w
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact houtdeg w
-          · exact houtdeg w
-          · exact houtdeg w
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact houtdeg w
-            · exact houtdeg w
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact houtdeg w
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact houtdeg w
-                · dsimp only
-                  split <;> exact houtdeg w
-                · exact houtdeg w
-                · exact houtdeg w
-              · exact houtdeg w
-              · exact houtdeg w
-            · exact houtdeg w
-        · dsimp only
+        · exact houtdeg w
+        · exact houtdeg w
+        · exact houtdeg w
+        · -- box φ (boxNeg): mints a fresh world.
+          dsimp only
           by_cases hw : w = l
           · rw [hw]
             rw [outDeg_addEdge_self,
@@ -1516,6 +1439,9 @@ lemma modalStepBranch_preserves_outDegEq
           · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
             rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
             exact houtdeg w
+        · -- diamond φ (diamondNeg): propagates to existing successors, never mints.
+          dsimp only
+          split <;> exact houtdeg w
 
   rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hcases
@@ -1545,14 +1471,16 @@ lemma modalStepBranch_preserves_outDegEq
 
 
 omit [Hashable Atom] in
-/-- Inversion for `isMintingShaped`: a minting-shaped signed formula has sign `.neg` and its
-formula component is a box. -/
+/-- Inversion for `isMintingShaped`: a minting-shaped signed formula is either `boxNeg`-shaped
+(sign `.neg`, formula a box) or `diamondPos`-shaped (sign `.pos`, formula a diamond; task 441:
+native `diamond` genuinely mints). -/
 private lemma isMintingShaped_inv
     {sf : SignedFormula (Proposition Atom) WorldIndex} (h : isMintingShaped sf = true) :
-    sf.sign = .neg ∧ ∃ ψ, sf.formula = .box ψ := by
+    (sf.sign = .neg ∧ ∃ ψ, sf.formula = .box ψ) ∨
+      (sf.sign = .pos ∧ ∃ ψ, sf.formula = .diamond ψ) := by
   unfold isMintingShaped at h
   obtain ⟨s, ff, l⟩ := sf
-  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨_, _⟩ | ψ <;> simp_all
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩ | ψ | ψ <;> simp_all
 
 omit [Hashable Atom] in
 /-- Bridging fact: filtering then mapping equals a single `filterMap` with the predicate
@@ -1595,18 +1523,27 @@ lemma outDeg_le_of_expandedNodup
     simp only [Bool.and_eq_true] at hacond ha'cond
     obtain ⟨halw, hamint⟩ := hacond
     obtain ⟨ha'lw, ha'mint⟩ := ha'cond
-    obtain ⟨hasign, -, -⟩ := isMintingShaped_inv hamint
-    obtain ⟨ha'sign, -, -⟩ := isMintingShaped_inv ha'mint
     have hlab : a.label = a'.label :=
       (beq_iff_eq.mp halw).trans (beq_iff_eq.mp ha'lw).symm
     have hform : a.formula = a'.formula := haeq.trans ha'eq.symm
-    obtain ⟨as, af, al⟩ := a
-    obtain ⟨a's, a'f, a'l⟩ := a'
-    simp only [SignedFormula.sign] at hasign ha'sign
-    simp only [SignedFormula.formula] at hform
-    simp only [SignedFormula.label] at hlab
-    subst hasign; subst ha'sign; subst hform; subst hlab
-    rfl
+    rcases isMintingShaped_inv hamint with ⟨hasign, ψa, haform⟩ | ⟨hasign, ψa, haform⟩ <;>
+      rcases isMintingShaped_inv ha'mint with ⟨ha'sign, ψa', ha'form⟩ | ⟨ha'sign, ψa', ha'form⟩
+    · obtain ⟨as, af, al⟩ := a
+      obtain ⟨a's, a'f, a'l⟩ := a'
+      simp only [SignedFormula.sign] at hasign ha'sign
+      simp only [SignedFormula.formula] at hform
+      simp only [SignedFormula.label] at hlab
+      subst hasign; subst ha'sign; subst hform; subst hlab
+      rfl
+    · rw [haform, ha'form] at hform; exact absurd hform (by simp)
+    · rw [haform, ha'form] at hform; exact absurd hform (by simp)
+    · obtain ⟨as, af, al⟩ := a
+      obtain ⟨a's, a'f, a'l⟩ := a'
+      simp only [SignedFormula.sign] at hasign ha'sign
+      simp only [SignedFormula.formula] at hform
+      simp only [SignedFormula.label] at hlab
+      subst hasign; subst ha'sign; subst hform; subst hlab
+      rfl
   have hsub : ∀ x ∈ e.filterMap (fun x =>
       if x.label == w && isMintingShaped x then some x.formula else none),
       x ∈ modalSubfmls φ0 := by
@@ -1903,11 +1840,12 @@ lemma modalStepBranch_preserves_accTargetsKnown
       exact ⟨wsf, hwsfmem, rfl⟩
     · exact hbsub b' hb' (hknown w w' hold)
 
-/-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s dead-code shape and
-`boxNeg`'s live shape, `Rules.lean:91-139`): every emitted formula's label is exactly
-`modalNextWorld b`, since the witness, `boxProps`, and `diaNegProps` are all constructed at that
-one fresh label. Parametrized over the witness's sign/formula so both rule shapes share one
-proof (mirrors `boxProps_outputs_subset`/`diaNegProps_outputs_subset`'s factoring). -/
+/-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s live shape and
+`boxNeg`'s live shape, `Rules.lean:93-141`; task 441: `diamondPos` is native and genuinely
+mints): every emitted formula's label is exactly `modalNextWorld b`, since the witness,
+`boxProps`, and `diaNegProps` are all constructed at that one fresh label. Parametrized over
+the witness's sign/formula so both rule shapes share one proof (mirrors
+`boxProps_outputs_subset`/`diaNegProps_outputs_subset`'s factoring). -/
 private lemma mintGroup_label_eq_freshWorld
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
     (s0 : Sign) (ψ0 : Proposition Atom) :
@@ -1922,7 +1860,7 @@ private lemma mintGroup_label_eq_freshWorld
       b.filterMap (fun sf' =>
         if sf'.sign == .neg && sf'.label == w then
           match sf'.formula with
-          | .imp (.box (.imp ψ .bot)) .bot =>
+          | .diamond ψ =>
             let prop : SignedFormula (Proposition Atom) WorldIndex :=
               ⟨.neg, ψ, modalNextWorld b⟩
             if b.any (· == prop) then none else some prop
@@ -2012,30 +1950,14 @@ lemma modalStepBranch_knownWorlds
     · rw [if_neg hpa]
       obtain ⟨s, ff, l⟩ := sf
       rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact Or.inl ⟨rfl, trivial⟩
         · exact Or.inl ⟨rfl, trivial⟩
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact Or.inl ⟨rfl, trivial⟩
-          · exact Or.inl ⟨rfl, trivial⟩
-          · exact Or.inl ⟨rfl, trivial⟩
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact Or.inl ⟨rfl, trivial⟩
-            · exact Or.inl ⟨rfl, trivial⟩
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact Or.inl ⟨rfl, trivial⟩
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact Or.inl ⟨rfl, trivial⟩
-                · dsimp only
-                  right
-                  refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
-                  exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.pos a5 x hx
-                · exact Or.inl ⟨rfl, trivial⟩
-                · exact Or.inl ⟨rfl, trivial⟩
-              · exact Or.inl ⟨rfl, trivial⟩
-              · exact Or.inl ⟨rfl, trivial⟩
-            · exact Or.inl ⟨rfl, trivial⟩
-        · dsimp only
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · -- box φ (boxPos): propagates to existing successors.
+          dsimp only
           by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
           · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
           · simp only [if_neg hemp]
@@ -2043,42 +1965,36 @@ lemma modalStepBranch_knownWorlds
             intro x hx
             obtain ⟨-, hxsucc⟩ := modalApplyOne_boxPos_outputs_subset b acc φ l x hx
             exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
-      · rcases ff with _ | _ | ⟨a, c⟩ | φ
+        · -- diamond φ (diamondPos): mints a fresh world.
+          dsimp only
+          right
+          refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
+          exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.pos φ x hx
+      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
         · exact Or.inl ⟨rfl, trivial⟩
         · exact Or.inl ⟨rfl, trivial⟩
-        · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-          · exact Or.inl ⟨rfl, trivial⟩
-          · exact Or.inl ⟨rfl, trivial⟩
-          · exact Or.inl ⟨rfl, trivial⟩
-          · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-            · exact Or.inl ⟨rfl, trivial⟩
-            · exact Or.inl ⟨rfl, trivial⟩
-            · rcases a6 with _ | _ | ⟨_, _⟩ | _
-              · exact Or.inl ⟨rfl, trivial⟩
-              · rcases c with _ | _ | ⟨_, _⟩ | _
-                · exact Or.inl ⟨rfl, trivial⟩
-                · dsimp only
-                  by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-                      if b.any (· == (⟨.neg, a5, w'⟩ :
-                          SignedFormula (Proposition Atom) WorldIndex))
-                      then none
-                      else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-                    ).isEmpty = true
-                  · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
-                  · simp only [if_neg hemp]
-                    refine Or.inl ⟨trivial, ?_⟩
-                    intro x hx
-                    obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc a5 l x hx
-                    exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
-                · exact Or.inl ⟨rfl, trivial⟩
-                · exact Or.inl ⟨rfl, trivial⟩
-              · exact Or.inl ⟨rfl, trivial⟩
-              · exact Or.inl ⟨rfl, trivial⟩
-            · exact Or.inl ⟨rfl, trivial⟩
-        · dsimp only
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · exact Or.inl ⟨rfl, trivial⟩
+        · -- box φ (boxNeg): mints a fresh world.
+          dsimp only
           right
           refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
           exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.neg φ x hx
+        · -- diamond φ (diamondNeg): propagates to existing successors.
+          dsimp only
+          by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+              if b.any (· == (⟨.neg, φ, w'⟩ :
+                  SignedFormula (Proposition Atom) WorldIndex))
+              then none
+              else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+            ).isEmpty = true
+          · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
+          · simp only [if_neg hemp]
+            refine Or.inl ⟨trivial, ?_⟩
+            intro x hx
+            obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
+            exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
   have hlknown : sf.label ∈ modalKnownWorlds b := by
     rw [mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
   rcases hcases with ⟨hsame, hmatch⟩ | ⟨haddedge, hfreshall⟩
@@ -2810,27 +2726,13 @@ lemma modalApplyOne_persistent_props
   · rw [if_neg hpa] at hca
     obtain ⟨s, ff, l⟩ := sf
     rcases s with _ | _
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp at hca
       · simp at hca
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp at hca
-        · simp at hca
-        · simp at hca
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp at hca
-          · simp at hca
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp at hca
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp at hca
-              · dsimp only at hca; simp at hca
-              · simp at hca
-              · simp at hca
-            · simp at hca
-            · simp at hca
-          · simp at hca
-      · -- boxPos: T(box φ)@l
+      · simp at hca
+      · simp at hca
+      · simp at hca
+      · -- box φ (boxPos): persistent.
         dsimp only at hca
         by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
         · simp only [if_pos hemp] at hca; simp at hca
@@ -2840,40 +2742,31 @@ lemma modalApplyOne_persistent_props
           refine ⟨?_, boxPropagation_fresh b acc φ l⟩
           simp only [Bool.not_eq_true] at hemp
           exact List.isEmpty_eq_false_iff.mp hemp
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+      · -- diamond φ (diamondPos): linear, not persistent -- contradiction.
+        dsimp only at hca; simp at hca
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp at hca
       · simp at hca
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp at hca
-        · simp at hca
-        · simp at hca
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp at hca
-          · simp at hca
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp at hca
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp at hca
-              · dsimp only at hca
-                by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-                    if b.any (· == (⟨.neg, a5, w'⟩ :
-                        SignedFormula (Proposition Atom) WorldIndex))
-                    then none
-                    else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-                  ).isEmpty = true
-                · simp only [if_pos hemp] at hca; simp at hca
-                · simp only [if_neg hemp] at hca
-                  simp only [RuleResult.persistent.injEq] at hca
-                  subst hca
-                  refine ⟨?_, diamondNeg_filterMap_fresh b acc a5 l⟩
-                  simp only [Bool.not_eq_true] at hemp
-                  exact List.isEmpty_eq_false_iff.mp hemp
-              · simp at hca
-              · simp at hca
-            · simp at hca
-            · simp at hca
-          · simp at hca
-      · dsimp only at hca; simp at hca
+      · simp at hca
+      · simp at hca
+      · simp at hca
+      · -- box φ (boxNeg): linear, not persistent -- contradiction.
+        dsimp only at hca; simp at hca
+      · -- diamond φ (diamondNeg): persistent.
+        dsimp only at hca
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp] at hca; simp at hca
+        · simp only [if_neg hemp] at hca
+          simp only [RuleResult.persistent.injEq] at hca
+          subst hca
+          refine ⟨?_, diamondNeg_filterMap_fresh b acc φ l⟩
+          simp only [Bool.not_eq_true] at hemp
+          exact List.isEmpty_eq_false_iff.mp hemp
 
 omit [Hashable Atom] in
 /-- Whenever `modalApplyOne sf b acc` produces a `.branching` result, the result has exactly
@@ -2896,59 +2789,33 @@ lemma modalApplyOne_branching_length
   · rw [if_neg hpa] at hca
     obtain ⟨s, ff, l⟩ := sf
     rcases s with _ | _
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp at hca
       · simp at hca
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp at hca
-        · simp at hca
-        · simp at hca
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp at hca
-          · simp at hca
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp at hca
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp at hca
-              · dsimp only at hca; simp at hca
-              · simp at hca
-              · simp at hca
-            · simp at hca
-            · simp at hca
-          · simp at hca
+      · simp at hca
+      · simp at hca
+      · simp at hca
       · dsimp only at hca
         by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
         · simp only [if_pos hemp] at hca; simp at hca
         · simp only [if_neg hemp] at hca; simp at hca
-    · rcases ff with _ | _ | ⟨a, c⟩ | φ
-      · simp at hca
-      · simp at hca
-      · rcases a with _ | _ | ⟨a2, a3⟩ | a4
-        · simp at hca
-        · simp at hca
-        · simp at hca
-        · rcases a4 with _ | _ | ⟨a5, a6⟩ | a7
-          · simp at hca
-          · simp at hca
-          · rcases a6 with _ | _ | ⟨_, _⟩ | _
-            · simp at hca
-            · rcases c with _ | _ | ⟨_, _⟩ | _
-              · simp at hca
-              · dsimp only at hca
-                by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-                    if b.any (· == (⟨.neg, a5, w'⟩ :
-                        SignedFormula (Proposition Atom) WorldIndex))
-                    then none
-                    else some (⟨.neg, a5, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-                  ).isEmpty = true
-                · simp only [if_pos hemp] at hca; simp at hca
-                · simp only [if_neg hemp] at hca; simp at hca
-              · simp at hca
-              · simp at hca
-            · simp at hca
-            · simp at hca
-          · simp at hca
       · dsimp only at hca; simp at hca
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · simp at hca
+      · simp at hca
+      · simp at hca
+      · simp at hca
+      · simp at hca
+      · dsimp only at hca; simp at hca
+      · dsimp only at hca
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp] at hca; simp at hca
+        · simp only [if_neg hemp] at hca; simp at hca
 
 /-! ## Strict-Decrease Engine (Phase 3) -/
 

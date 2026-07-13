@@ -606,7 +606,7 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 13: FmpMeasure port (3011 lines) [PARTIAL]
+### Phase 13: FmpMeasure port (3011 lines) [COMPLETED]
 
 **Handoff**: `specs/441_modal_proposition_native_refactor/handoffs/02_phase13-fmpmeasure-partial.md`.
 Shape-lemma seam (5 exhaustive-match sites: `modalSubfmls`, `modalSubfmls_length_le`,
@@ -629,11 +629,21 @@ See the handoff for the full triage and a recommended fix order.
   - [x] Extend every exhaustive match/induction; new cases for the measure functions follow the
     binary (`imp`-like) and unary (`box`-like) templates already present. *(all 5 shape-lemma
     sites fixed and committed)*
-  - [ ] Re-prove measure-decrease lemmas where `sizeOf`/complexity arithmetic changes (native
+  - [x] Re-prove measure-decrease lemmas where `sizeOf`/complexity arithmetic changes (native
     `and/or/diamond` have direct subterm decrease — strictly simpler than the encoded nesting).
-    *(deferred to next dispatch -- see handoffs/02_phase13-fmpmeasure-partial.md; ~98 errors,
-    all clustering around deeply-nested rcases chains that need flattening to native 7-way case
-    splits, not per-arm patching)*
+    *(completed this dispatch: flattened all remaining nested-rcases sites to native 7-way
+    `atom|bot|imp|and|or|box|diamond` splits, following the Completeness.lean pattern
+    (tryAllPropRules_pos/_neg, modalApplyOne_imp/and/or_pos/_neg). Also found and fixed a genuine
+    mathematical gap: `isMintingShaped` only recognized `boxNeg` as world-minting; since native
+    `diamondPos` also mints a fresh world (Rules.lean:93-116), `isMintingShaped` needed a new
+    `.pos, .diamond _` case, with `isMintingShaped_inv` generalized to a disjunction and its
+    Nodup-injectivity call site (`outDeg_le_of_expandedNodup`) re-proved over 4 cases (2 real, 2
+    contradiction-by-constructor-mismatch). `modalApplyOne_diamondPos_outputs_subset`,
+    `modalApplyOne_boxNeg_outputs_subset`, `diaNegProps_outputs_subset`,
+    `modalApplyOne_diamondNeg_outputs_subset`, `diaNegProps_rank_bound`,
+    `diamondNeg_rank_bound`, and `mintGroup_label_eq_freshWorld` were restated over native
+    `.diamond ψ` instead of the dead pre-441 Lukasiewicz encoding. `FmpMeasure.lean` builds
+    green: zero sorry/admit, zero new axioms.)*
 - **Timing:** ~3.5 hours (pre-authorized second dispatch if error count after triage exceeds ~40)
 - **Depends on:** 12 (verify import direction at phase start; if FmpMeasure does not import
   Completeness, this phase may start after 11)

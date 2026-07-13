@@ -160,18 +160,58 @@ theorem mcs_box_box
     (□□φ) ∈ S :=
   mcs_mp_axiom h_implyK h_implyS h_mcs h_box (h_4 φ)
 
-/-- If `phi in S` and `S` is MCS, then `box diamond phi in S` (using axiom B). -/
+/-- If `phi in S` and `S` is MCS, then `box((box(phi -> bot)) -> bot) in S` (using axiom B,
+in its canonical **raw encoded** shape `Axioms.AxiomB`).
+
+Task 441: `diamond` is now a native constructor, no longer definitionally equal to
+`(box (phi -> bot)) -> bot`. `h_B` therefore stays in raw shape (matching how every
+`ModalAxiom`/`{Sys}Axiom.modalB` constructor is stated, see `ProofSystem/Instances/*.lean`),
+and the conclusion is the raw boxed shape rather than `(□◇φ) ∈ S`. Callers bridge to native
+`◇` membership only *after* unboxing through the canonical relation, using `mcs_raw_to_dia`
+(below) -- this avoids needing a separate boxed-duality axiom or necessitation-closure
+argument inside this parametric MCS framework. -/
 theorem mcs_box_diamond
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_B : ∀ (φ : Proposition Atom),
-      Axioms (φ.imp (Proposition.box (Proposition.diamond φ))))
+    (h_B : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomB φ))
     {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
     {φ : Proposition Atom} (h_phi : φ ∈ S) :
-    (□◇φ) ∈ S :=
+    (Proposition.box ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot)) ∈ S :=
   mcs_mp_axiom h_implyK h_implyS h_mcs h_phi (h_B φ)
+
+/-! ## Diamond Duality Bridges (task 441)
+
+`diamond` is a native constructor, so canonical-model reasoning about `◇φ` can no longer
+rely on `◇φ` unifying syntactically with the raw encoded shape `(□(φ → ⊥)) → ⊥`. These two
+lemmas bridge membership in an MCS between the native and raw shapes, using the
+`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata (Phase 2/3). -/
+
+/-- Bridge native `◇φ` membership to the raw encoded shape, via `AxiomDiaDualityFwd`. -/
+theorem mcs_dia_to_raw
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_dualFwd : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityFwd φ))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ : Proposition Atom} (h_dia : (◇φ) ∈ S) :
+    ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) ∈ S :=
+  mcs_mp_axiom h_implyK h_implyS h_mcs h_dia (h_dualFwd φ)
+
+/-- Bridge the raw encoded shape to native `◇φ` membership, via `AxiomDiaDualityBack`. -/
+theorem mcs_raw_to_dia
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_dualBack : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityBack φ))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ : Proposition Atom}
+    (h_raw : ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) ∈ S) :
+    (◇φ) ∈ S :=
+  mcs_mp_axiom h_implyK h_implyS h_mcs h_raw (h_dualBack φ)
 
 /-- If `box(phi -> psi) in S` and `box phi in S`, then `box psi in S` (using axiom K). -/
 theorem mcs_box_mp
@@ -228,6 +268,58 @@ theorem mcs_mem_iff_neg_not_mem
   · intro h; rcases modal_negation_complete h_implyK h_implyS h_mcs φ with h' | h'
     · exact h'
     · exact absurd h' h
+
+/-! ## And/Or MCS Closure (task 441)
+
+MCS-membership closure lemmas for the native `and`/`or` constructors, needed by the
+generic truth lemma's `.and`/`.or` cases (`Metalogic/Completeness.lean`). -/
+
+/-- `(φ ∧ ψ) ∈ S ↔ φ ∈ S ∧ ψ ∈ S` for MCS `S`, via `AndI`/`AndE1`/`AndE2`. -/
+theorem mcs_and_mem_iff
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ ψ : Proposition Atom} :
+    (φ ∧ ψ) ∈ S ↔ φ ∈ S ∧ ψ ∈ S := by
+  constructor
+  · intro h
+    exact ⟨mcs_mp_axiom h_implyK h_implyS h_mcs h (h_andE1 φ ψ),
+           mcs_mp_axiom h_implyK h_implyS h_mcs h (h_andE2 φ ψ)⟩
+  · intro ⟨h1, h2⟩
+    have step := mcs_mp_axiom h_implyK h_implyS h_mcs h1 (h_andI φ ψ)
+    exact modal_implication_property h_implyK h_implyS h_mcs step h2
+
+/-- `(φ ∨ ψ) ∈ S ↔ φ ∈ S ∨ ψ ∈ S` for MCS `S`, via `OrI1`/`OrI2`/`OrE`. -/
+theorem mcs_or_mem_iff
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ ψ : Proposition Atom} :
+    (φ ∨ ψ) ∈ S ↔ φ ∈ S ∨ ψ ∈ S := by
+  constructor
+  · intro h
+    by_contra hc
+    push Not at hc
+    obtain ⟨h1, h2⟩ := hc
+    have hn1 : (¬φ) ∈ S := mcs_neg_of_not_mem h_implyK h_implyS h_mcs h1
+    have hn2 : (¬ψ) ∈ S := mcs_neg_of_not_mem h_implyK h_implyS h_mcs h2
+    have step1 := mcs_mp_axiom h_implyK h_implyS h_mcs hn1 (h_orE φ ψ Proposition.bot)
+    have step2 := modal_implication_property h_implyK h_implyS h_mcs step1 hn2
+    exact mcs_bot_not_mem h_mcs (modal_implication_property h_implyK h_implyS h_mcs step2 h)
+  · intro h
+    cases h with
+    | inl h1 => exact mcs_mp_axiom h_implyK h_implyS h_mcs h1 (h_orI1 φ ψ)
+    | inr h2 => exact mcs_mp_axiom h_implyK h_implyS h_mcs h2 (h_orI2 φ ψ)
 
 /-! ## Derivation Helpers for Box Witness -/
 

@@ -348,21 +348,21 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 5: MCS duality bridges + and/or closure lemmas [NOT STARTED]
+### Phase 5: MCS duality bridges + and/or closure lemmas [COMPLETED]
 
 - **Goal:** `MCS.lean` provides the membership-level lemmas the canonical-model layer needs, so
   no proof ever again depends on `◇φ` unifying with an `.imp` node.
 - **Tasks:**
-  - [ ] `Metalogic/MCS.lean`: add `mcs_dia_to_raw` — from `h_dualFwd : ∀ φ, Axioms
+  - [x] `Metalogic/MCS.lean`: add `mcs_dia_to_raw` — from `h_dualFwd : ∀ φ, Axioms
     (Axioms.AxiomDiaDualityFwd φ)` and `(◇φ) ∈ S` conclude `((□(φ.imp .bot)).imp .bot) ∈ S`
     (one `mcs_mp_axiom` application); `mcs_raw_to_dia` — converse via `h_dualBack`.
-  - [ ] Restate `mcs_box_diamond` (`:164-174`): hypothesis `h_B` stays raw
+  - [x] Restate `mcs_box_diamond` (`:164-174`): hypothesis `h_B` stays raw
     (`∀ φ, Axioms (Axioms.AxiomB φ)`); conclusion becomes the raw boxed shape
     `(Proposition.box ((Proposition.box (φ.imp .bot)).imp .bot)) ∈ S`. Callers (Phase 6)
     unbox through canonical-R, then bridge with `mcs_raw_to_dia` where native `◇` membership is
     required. Keep a thin native-conclusion corollary ONLY if it can be derived without boxed
     duality (do not add boxed duality axioms).
-  - [ ] Add and/or MCS closure lemmas for the truth lemma: `mcs_and_mem_iff`
+  - [x] Add and/or MCS closure lemmas for the truth lemma: `mcs_and_mem_iff`
     (`(φ.and ψ) ∈ S ↔ φ ∈ S ∧ ψ ∈ S`, via `h_andI/h_andE1/h_andE2` + `mcs_mp_axiom`) and
     `mcs_or_mem_iff` (`(φ.or ψ) ∈ S ↔ φ ∈ S ∨ ψ ∈ S`; `←` via `h_orI1/h_orI2`; `→` via
     maximality/`modal_negation_complete` + `h_orE`), following the file's existing

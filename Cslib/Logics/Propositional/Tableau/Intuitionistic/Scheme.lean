@@ -1927,6 +1927,257 @@ lemma intUniverse_length_le (φ : Proposition Atom) :
       ≤ (φ.complexity + 2) * (2 * (2 * φ.complexity + 1)) := houter
     _ = 2 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
 
+/-! ## Branch-Universe Containment (task 317 phase 6.2, report 07 §Q4 / line 143)
+
+This section proves that every signed formula added to a branch by any intuitionistic
+tableau rule (ALPHA, BETA, world-creating F(φ→ψ), or the persistent T(φ→ψ) rule) stays
+inside the fixed finite `intUniverse φ0` -- the load-bearing "universe-containment" fact
+`intExpMeasure_step_lt`/`_branch` (above) take as the `hb` hypothesis. Mirrors the Modal-K
+`FmpMeasure.lean` subformula-closure development (`modalSubfmls_self_mem`,
+`modalSubfmls_trans`, `mem_modalUniverse_of[']`, `modalUniverse_mem_formula/label`,
+`modalApplyOne_outputs_subset`, `FmpMeasure.lean:266-754`), simplified for the propositional
+connective set (`imp`/`and`/`or`, no `box`/`diamond`) and the single world-creating rule
+(F(φ→ψ), vs. Modal-K's two: `diamondPos`/`boxNeg`). -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every `Proposition Atom` is a member of its own structural subformula list (mirrors
+`modalSubfmls_self_mem`, `FmpMeasure.lean:266`). -/
+@[simp]
+lemma intSubfmls_self_mem (φ : Proposition Atom) : φ ∈ intSubfmls φ := by
+  cases φ <;> simp [intSubfmls]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Transitivity of `intSubfmls`: a subformula of a subformula is a subformula (mirrors
+`modalSubfmls_trans`, `FmpMeasure.lean:393-427`). Needed because the world-creating
+`F(φ → ψ)` rule's persistence group derives its subformula bound from *other* branch
+members via the branch invariant, not from the source formula directly, so a two-step
+subformula chain must be composed. -/
+private lemma intSubfmls_trans {a b c : Proposition Atom}
+    (hab : a ∈ intSubfmls b) (hbc : b ∈ intSubfmls c) : a ∈ intSubfmls c := by
+  induction c with
+  | atom p =>
+    simp only [intSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | bot =>
+    simp only [intSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | imp x y ihx ihy =>
+    simp only [intSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | and x y ihx ihy =>
+    simp only [intSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | or x y ihx ihy =>
+    simp only [intSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Constructor direction for `intUniverse` membership: a signed formula with any sign, a
+subformula of `φ0`, at a world label within the linear bound, is in `U(φ0)` (mirrors
+`mem_modalUniverse_of`, `FmpMeasure.lean:432-437`). -/
+private lemma mem_intUniverse_of {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
+    {w : Nat} (hw : w ≤ φ0.complexity + 1) (hφ : φ ∈ intSubfmls φ0) :
+    (⟨s, φ, w⟩ : ISF Atom) ∈ intUniverse φ0 := by
+  have hlt : w < φ0.complexity + 2 := by omega
+  simp only [intUniverse, List.mem_flatMap, List.mem_range]
+  exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Generic form of `mem_intUniverse_of`, stated for an arbitrary signed formula `z` (mirrors
+`mem_modalUniverse_of'`, `FmpMeasure.lean:443-448`). -/
+private lemma mem_intUniverse_of' {φ0 : Proposition Atom} {z : ISF Atom}
+    (hw : z.label ≤ φ0.complexity + 1) (hφ : z.formula ∈ intSubfmls φ0) :
+    z ∈ intUniverse φ0 := by
+  obtain ⟨s, φ, w⟩ := z
+  exact mem_intUniverse_of hw hφ
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Extraction: the formula-component of any `intUniverse φ0` member is a subformula of
+`φ0` (mirrors `modalUniverse_mem_formula`, `FmpMeasure.lean:453-458`). -/
+private lemma intUniverse_mem_formula {φ0 : Proposition Atom} {x : ISF Atom}
+    (hx : x ∈ intUniverse φ0) : x.formula ∈ intSubfmls φ0 := by
+  simp only [intUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Extraction: the label-component of any `intUniverse φ0` member is bounded by
+`φ0.complexity + 1` (mirrors `modalUniverse_mem_label`, `FmpMeasure.lean:463-468`). -/
+private lemma intUniverse_mem_label {φ0 : Proposition Atom} {x : ISF Atom}
+    (hx : x ∈ intUniverse φ0) : x.label ≤ φ0.complexity + 1 := by
+  simp only [intUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;>
+    (subst heq; simp only [SignedFormula.label]; omega)
+
+omit [Hashable Atom] in
+/-- Containment for the persistent `T(φ → ψ)` rule (`Rules.lean:174-186`): every formula it
+emits stays inside `U(φ0)`, given the branch invariant `hb` and the source membership `hsf`
+(the exact `⟨.pos, .imp φ ψ, w⟩ ∈ b` the rule is fired from). The emitted label `w'` is always
+an EXISTING label already appearing on `b` (read off via `b.map (·.label)`, no fresh label is
+minted), so no world-bound hypothesis is needed here -- this mirrors the Modal-K "world-
+preserving rules" P1a pattern (`boxPos`/`diamondNeg`, `FmpMeasure.lean:253-260`), which also
+consume no world-bound hypothesis. -/
+private lemma intTImpRule_outputs_subset {φ0 : Proposition Atom} {b : IBranch Atom}
+    {edges : IEdges} {φ ψ : Proposition Atom} {w : Nat}
+    (hb : ∀ x ∈ b, x ∈ intUniverse φ0)
+    (hsf : (⟨.pos, .imp φ ψ, w⟩ : ISF Atom) ∈ b) :
+    ∀ x ∈ intTImpRule φ ψ w edges b, x ∈ intUniverse φ0 := by
+  have hψsub : ψ ∈ intSubfmls φ0 := by
+    have himp : (Proposition.imp φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula (hb _ hsf)
+    have hψmem : ψ ∈ intSubfmls (Proposition.imp φ ψ) := by simp [intSubfmls]
+    exact intSubfmls_trans hψmem himp
+  intro x hx
+  simp only [intTImpRule, List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+    List.mem_map] at hx
+  obtain ⟨w', ⟨⟨y, hymem, hyeq⟩, -⟩, hxeq⟩ := hx
+  have hwle : w' ≤ φ0.complexity + 1 := by
+    subst hyeq; exact intUniverse_mem_label (hb y hymem)
+  split at hxeq
+  · split at hxeq
+    · simp at hxeq
+    · simp only [Option.some.injEq] at hxeq
+      exact hxeq ▸ mem_intUniverse_of hwle hψsub
+  · simp at hxeq
+
+omit [Hashable Atom] in
+/-- Containment for one full round of `applyAllTImpRules` (`Expansion.lean:118-127`): the
+new formulas it appends stay inside `U(φ0)`, given the branch invariant `hb`. Dispatches to
+`intTImpRule_outputs_subset` for each `T(φ → ψ)`-shaped branch member that fires; all other
+members contribute nothing (the `match sf.sign, sf.formula with | .pos, .imp φ ψ => … | _, _
+=> none` filter). -/
+private lemma applyAllTImpRules_subset {φ0 : Proposition Atom} {b : IBranch Atom}
+    {edges : IEdges} (hb : ∀ x ∈ b, x ∈ intUniverse φ0) :
+    ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverse φ0 := by
+  intro x hx
+  simp only [applyAllTImpRules, List.mem_append] at hx
+  rcases hx with hxb | hxnew
+  · exact hb x hxb
+  · simp only [List.mem_flatten, List.mem_filterMap] at hxnew
+    obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxnew
+    obtain ⟨s, ff, l⟩ := sf
+    cases s with
+    | neg => simp at hsfeq
+    | pos =>
+      cases ff with
+      | atom p => simp at hsfeq
+      | bot => simp at hsfeq
+      | and a c => simp at hsfeq
+      | or a c => simp at hsfeq
+      | imp φ ψ =>
+        simp only at hsfeq
+        split at hsfeq
+        · simp at hsfeq
+        · simp only [Option.some.injEq] at hsfeq
+          rw [← hsfeq] at hxmem
+          exact intTImpRule_outputs_subset hb hsfmem x hxmem
+
+omit [Hashable Atom] in
+/-- Containment is a loop invariant of `applyPersistenceFixpoint` (`Expansion.lean:133-139`):
+iterating `applyAllTImpRules` to fixpoint never breaches `U(φ0)`, given the branch invariant
+holds at entry. Proved by induction on the fuel counter, re-applying
+`applyAllTImpRules_subset` at each non-fixpoint iteration. -/
+private lemma applyPersistenceFixpoint_subset {φ0 : Proposition Atom} (b : IBranch Atom)
+    (edges : IEdges) (fuel : Nat) (hb : ∀ x ∈ b, x ∈ intUniverse φ0) :
+    ∀ x ∈ applyPersistenceFixpoint b edges fuel, x ∈ intUniverse φ0 := by
+  induction fuel generalizing b with
+  | zero => simpa [applyPersistenceFixpoint] using hb
+  | succ fuel' ih =>
+    simp only [applyPersistenceFixpoint]
+    split
+    · exact hb
+    · exact ih _ (applyAllTImpRules_subset hb)
+
+omit [Hashable Atom] in
+/-- **Step-level containment dispatch** (task 317 phase 6.2, the load-bearing containment
+fact, report 07 line 143): every signed formula emitted by `intApplyRuleFull sf nextWorld b`
+stays inside `U(φ0)`, given the branch invariant `hb`, the source membership `hsf`, and the
+world-bound hypothesis `hnw` (consumed only by the world-creating `F(φ → ψ)` case, to show
+the freshly minted world label `nextWorld` stays inside `U(φ0)`'s label range). This is
+EXACTLY the `hb` hypothesis `intExpMeasure_step_lt`/`_branch` (above) take as an assumption:
+composed with `applyPersistenceFixpoint_subset` (persistence containment) via an outer
+induction over `intExpandBranches`'s `go` recursion (task 317 phase 10), this lemma lets
+`hb` be inductively re-established at every step, discharging the obligation those two
+lemmas currently assume. Mirrors `modalApplyOne_outputs_subset`, `FmpMeasure.lean:669-754`,
+simplified for the propositional connective set (2 ALPHA + 2 BETA rules, one world-creating
+rule) versus Modal-K's box/diamond rule set (2 persistent + 2 fresh-world-minting rules). -/
+lemma intApplyRuleFull_outputs_subset {φ0 : Proposition Atom} {sf : ISF Atom}
+    {nextWorld : Nat} {b : IBranch Atom}
+    (hb : ∀ x ∈ b, x ∈ intUniverse φ0) (hsf : sf ∈ b)
+    (hnw : nextWorld ≤ φ0.complexity + 1) :
+    (match intApplyRuleFull sf nextWorld b with
+      | .linearResult formulas _ _ => ∀ x ∈ formulas, x ∈ intUniverse φ0
+      | .branchingResult branches _ => ∀ x ∈ branches.flatten, x ∈ intUniverse φ0
+      | .notApplicable => True) := by
+  have hsfU : sf ∈ intUniverse φ0 := hb sf hsf
+  obtain ⟨s, ff, l⟩ := sf
+  unfold intApplyRuleFull
+  cases s with
+  | pos =>
+    cases ff with
+    | atom p => trivial
+    | bot => trivial
+    | imp φ ψ => trivial
+    | and φ ψ =>
+      have hsub : (Proposition.and φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
+      intro x hx
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+      rcases hx with rfl | rfl
+      · exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+      · exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+    | or φ ψ =>
+      have hsub : (Proposition.or φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
+  | neg =>
+    cases ff with
+    | atom p => trivial
+    | bot => trivial
+    | and φ ψ =>
+      have hsub : (Proposition.and φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
+    | or φ ψ =>
+      have hsub : (Proposition.or φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
+      intro x hx
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+      rcases hx with rfl | rfl
+      · exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+      · exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub)
+    | imp φ ψ =>
+      have himp : (Proposition.imp φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      simp only [intFImpRule, propagatePersistence, posFormulasAt]
+      intro x hx
+      simp only [List.mem_append, List.mem_cons, List.not_mem_nil, or_false,
+        List.mem_map, List.mem_filterMap] at hx
+      rcases hx with (rfl | rfl) | ⟨ψ', ⟨sf', hsf'mem, hsf'eq⟩, hxeq⟩
+      · exact mem_intUniverse_of hnw (intSubfmls_trans (by simp [intSubfmls]) himp)
+      · exact mem_intUniverse_of hnw (intSubfmls_trans (by simp [intSubfmls]) himp)
+      · split at hsf'eq
+        · simp only [Option.some.injEq] at hsf'eq
+          have hsf'U : sf' ∈ intUniverse φ0 := hb sf' hsf'mem
+          exact hxeq ▸ mem_intUniverse_of hnw (hsf'eq ▸ intUniverse_mem_formula hsf'U)
+        · simp at hsf'eq
+
 omit [Hashable Atom] in
 /-- The per-branch counting measure `R(b, e) := |U \ b| + |U \ e|` (mirrors `modalWork`,
 `FmpMeasure.lean:190-193`): the number of universe elements not yet on the branch, plus

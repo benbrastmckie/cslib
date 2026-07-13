@@ -31,7 +31,7 @@ via the Lukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
 
 **Why is diamond primitive here (unlike the historical CSLib presentation)?** Classically,
 diamond can be derived from box as `◇φ := ¬□¬φ`, and box alone suffices for necessitation and
-the K axiom. However, task 441 makes `diamond` a native constructor (alongside `and`/`or`) so
+the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so
 that: (1) the tableau and truth-lemma machinery get one decomposition rule per connective
 (structural induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal
 logics (intuitionistic, minimal — see [Blackburn2001] Chapter 1, [ChagrovZakharyaschev1997]
@@ -110,13 +110,13 @@ instance : HasDia (Proposition Atom) where
 
 /-- Negation as derived connective: ¬φ := φ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.neg` default. -/
 abbrev Proposition.neg (φ : Proposition Atom) : Proposition Atom :=
   PropositionalConnectives.neg φ
 
 /-- Verum / top: ⊤ := ⊥ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.top` default. -/
 abbrev Proposition.top : Proposition Atom := PropositionalConnectives.top
 
 /-- Reduction lemma: `neg φ` unfolds to `.imp φ .bot`. -/
@@ -269,7 +269,7 @@ theorem Satisfies.k : ⇓Modal[m,w ⊨ □(φ₁ → φ₂) → (□φ₁ → �
 
 /-- The dual axiom, valid for all models.
 
-Since `diamond` is a native constructor (task 441), this is no longer a definitional
+Since `diamond` is a native constructor, this is no longer a definitional
 unfolding: it is proved as a genuine semantic theorem using excluded middle. -/
 theorem Satisfies.dual : ⇓Modal[m,w ⊨ ◇φ ↔ ¬□¬φ] := by
   change Satisfies m w (.iff (.diamond φ) (.neg (.box (.neg φ))))

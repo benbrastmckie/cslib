@@ -2268,6 +2268,54 @@ lemma intExpMeasure_step_lt_branch
             (e ++ [⟨.neg, .and φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
         exact pow3_two_add_one_le hC h0 h1
 
+omit [Hashable Atom] in
+/-- At the tableau entry point, the worklist measure over the universe `intUniverse φ` is
+bounded by `intFuel φ` (task 317 phase 8; mirrors `modalExpMeasure_entry_le_fuel`,
+`FmpMeasure.lean:208-251`). The initial singleton branch `[⟨.neg, φ, 0⟩]` with empty
+expanded-set `[]` gives `intWork (intUniverse φ) [⟨.neg, φ, 0⟩] [] ≤ 2 * |intUniverse φ|`
+(the branch-exclusion term is bounded by `List.countP_le_length`, the expanded-set term is
+exactly the full length since `e = []` excludes nothing); `intUniverse_length_le` then bounds
+`|intUniverse φ|` by `2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, so `2 * |intUniverse φ|`
+is bounded by `4 * (2 * φ.complexity + 1) * (φ.complexity + 2)` -- exactly the doubled exponent
+`intFuel φ` was raised to in phase 8.0 (`Expansion.lean`), closing with equality (no slack
+needed, unlike the modal analogue's messier world-bound formula). -/
+lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
+    intExpMeasure (intUniverse φ) [[(⟨.neg, φ, 0⟩ : ISF Atom)]] [[]] ≤ intFuel φ := by
+  have hmeas : intExpMeasure (intUniverse φ) [[(⟨.neg, φ, 0⟩ : ISF Atom)]] [[]]
+      = 3 ^ intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] := by
+    simp [intExpMeasure]
+  rw [hmeas]
+  have hwork : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] ≤
+      2 * (intUniverse φ).length := by
+    have heq : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] =
+        (intUniverse φ).countP
+          (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) +
+        (intUniverse φ).countP
+          (fun sf => !((([] : List (ISF Atom))).any (· == sf))) := rfl
+    rw [heq]
+    have h2 : (intUniverse φ).countP
+        (fun sf => !((([] : List (ISF Atom))).any (· == sf))) = (intUniverse φ).length := by
+      simp
+    rw [h2]
+    have h1 : (intUniverse φ).countP
+        (fun sf => !(([(⟨.neg, φ, 0⟩ : ISF Atom)]).any (· == sf))) ≤
+        (intUniverse φ).length :=
+      List.countP_le_length
+    omega
+  have hUlen := intUniverse_length_le φ
+  have hfinal : intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] [] ≤
+      4 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by
+    have h2U : 2 * (intUniverse φ).length ≤
+        2 * (2 * (2 * φ.complexity + 1) * (φ.complexity + 2)) :=
+      Nat.mul_le_mul_left 2 hUlen
+    have heq : 2 * (2 * (2 * φ.complexity + 1) * (φ.complexity + 2)) =
+        4 * (2 * φ.complexity + 1) * (φ.complexity + 2) := by ring
+    omega
+  calc 3 ^ intWork (intUniverse φ) [(⟨.neg, φ, 0⟩ : ISF Atom)] []
+      ≤ 3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2)) :=
+        Nat.pow_le_pow_right (by norm_num) hfinal
+    _ = intFuel φ := rfl
+
 end Cslib.Logic.PL
 
 end

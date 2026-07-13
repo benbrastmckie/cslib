@@ -51,9 +51,9 @@ inductive TBAxiom : Proposition Atom → Prop where
   /-- T / reflexivity: `□φ → φ` -/
   | modalT (φ : Proposition Atom) :
       TBAxiom (Proposition.imp (Proposition.box φ) φ)
-  /-- B / symmetry: `φ → □◇φ` -/
+  /-- B / symmetry: `φ → □◇φ`, stated via `Axioms.AxiomB` (raw encoded shape; task 441). -/
   | modalB (φ : Proposition Atom) :
-      TBAxiom (φ.imp (Proposition.box (Proposition.diamond φ)))
+      TBAxiom (Axioms.AxiomB φ)
 
 end Cslib.Logic.Modal
 

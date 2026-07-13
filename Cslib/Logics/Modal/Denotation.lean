@@ -28,7 +28,10 @@ def Proposition.denotation (m : Model World Atom) :
   | .atom p => {w | m.v w p}
   | .bot => ∅
   | .imp φ₁ φ₂ => (φ₁.denotation m)ᶜ ∪ φ₂.denotation m
+  | .and φ₁ φ₂ => φ₁.denotation m ∩ φ₂.denotation m
+  | .or φ₁ φ₂ => φ₁.denotation m ∪ φ₂.denotation m
   | .box φ => {w | ∀ w', m.r w w' → w' ∈ φ.denotation m}
+  | .diamond φ => {w | ∃ w', m.r w w' ∧ w' ∈ φ.denotation m}
 
 /-- Characterisation theorem for the denotational semantics. -/
 @[scoped grind =]
@@ -48,9 +51,18 @@ theorem satisfies_mem_denotation {m : Model World Atom} {φ : Proposition Atom} 
       by_cases hs : w ∈ φ₁.denotation m
       · exact Or.inr (ih₂.mpr (h (ih₁.mp hs)))
       · exact Or.inl hs
+  | and φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Proposition.denotation, Set.mem_inter_iff, derivation_def, Satisfies]
+    exact ⟨fun ⟨h1, h2⟩ => ⟨ih₁.mp h1, ih₂.mp h2⟩, fun ⟨h1, h2⟩ => ⟨ih₁.mpr h1, ih₂.mpr h2⟩⟩
+  | or φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Proposition.denotation, Set.mem_union, derivation_def, Satisfies]
+    exact ⟨fun h => h.imp ih₁.mp ih₂.mp, fun h => h.imp ih₁.mpr ih₂.mpr⟩
   | box φ ih =>
     simp only [Proposition.denotation, Set.mem_setOf_eq, derivation_def, Satisfies]
     exact ⟨fun h w' hr => ih.mp (h w' hr), fun h w' hr => ih.mpr (h w' hr)⟩
+  | diamond φ ih =>
+    simp only [Proposition.denotation, Set.mem_setOf_eq, derivation_def, Satisfies]
+    exact ⟨fun ⟨w', hr, hs⟩ => ⟨w', hr, ih.mp hs⟩, fun ⟨w', hr, hs⟩ => ⟨w', hr, ih.mpr hs⟩⟩
 
 /-- A world is in the denotation of a proposition iff it is not in the denotation of the negation
 of the proposition. -/

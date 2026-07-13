@@ -52,9 +52,9 @@ inductive DBAxiom : Proposition Atom → Prop where
   | modalD (φ : Proposition Atom) :
       DBAxiom (Proposition.imp (Proposition.box φ)
         (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot))
-  /-- B / symmetry: `φ → □◇φ` -/
+  /-- B / symmetry: `φ → □◇φ`, stated via `Axioms.AxiomB` (raw encoded shape; task 441). -/
   | modalB (φ : Proposition Atom) :
-      DBAxiom (φ.imp (Proposition.box (Proposition.diamond φ)))
+      DBAxiom (Axioms.AxiomB φ)
 
 end Cslib.Logic.Modal
 

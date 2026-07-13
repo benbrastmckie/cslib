@@ -23,12 +23,20 @@ The embedding maps each modal primitive constructor to the corresponding bimodal
 
 namespace Cslib.Logic
 
-/-- Embed a modal formula into bimodal logic. -/
+/-- Embed a modal formula into bimodal logic.
+
+`Modal.Proposition` has native `and`/`or`/`diamond` constructors (task 441), while
+`Bimodal.Formula` still encodes them as derived Łukasiewicz `abbrev`s (`Formula.and`/`.or`/
+`.diamond`, `Formula.lean`); the embedding maps native Modal connectives to the corresponding
+Bimodal `abbrev`. -/
 def Modal.Proposition.toBimodal : Modal.Proposition Atom → Bimodal.Formula Atom
   | .atom p => .atom p
   | .bot => .bot
   | .imp φ₁ φ₂ => .imp (φ₁.toBimodal) (φ₂.toBimodal)
+  | .and φ₁ φ₂ => .and (φ₁.toBimodal) (φ₂.toBimodal)
+  | .or φ₁ φ₂ => .or (φ₁.toBimodal) (φ₂.toBimodal)
   | .box φ => .box (φ.toBimodal)
+  | .diamond φ => .diamond (φ.toBimodal)
 
 /-- Coercion from modal to bimodal formulas. -/
 instance instCoeModalToBimodal : Coe (Modal.Proposition Atom) (Bimodal.Formula Atom) where
@@ -49,6 +57,18 @@ theorem Modal.Proposition.toBimodal_bot :
 theorem Modal.Proposition.toBimodal_imp (φ₁ φ₂ : Modal.Proposition Atom) :
     (Modal.Proposition.imp φ₁ φ₂).toBimodal =
       Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves and. -/
+@[simp]
+theorem Modal.Proposition.toBimodal_and (φ₁ φ₂ : Modal.Proposition Atom) :
+    (Modal.Proposition.and φ₁ φ₂).toBimodal =
+      Bimodal.Formula.and φ₁.toBimodal φ₂.toBimodal := rfl
+
+/-- Embedding preserves or. -/
+@[simp]
+theorem Modal.Proposition.toBimodal_or (φ₁ φ₂ : Modal.Proposition Atom) :
+    (Modal.Proposition.or φ₁ φ₂).toBimodal =
+      Bimodal.Formula.or φ₁.toBimodal φ₂.toBimodal := rfl
 
 /-- Embedding preserves box. -/
 @[simp]

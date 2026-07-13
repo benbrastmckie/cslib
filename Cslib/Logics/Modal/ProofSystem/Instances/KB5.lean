@@ -48,9 +48,9 @@ inductive KB5Axiom : Proposition Atom → Prop where
   | modalK (φ ψ : Proposition Atom) :
       KB5Axiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
         (Proposition.imp (Proposition.box φ) (Proposition.box ψ)))
-  /-- B / symmetry: `φ → □◇φ` -/
+  /-- B / symmetry: `φ → □◇φ`, stated via `Axioms.AxiomB` (raw encoded shape; task 441). -/
   | modalB (φ : Proposition Atom) :
-      KB5Axiom (φ.imp (Proposition.box (Proposition.diamond φ)))
+      KB5Axiom (Axioms.AxiomB φ)
   /-- 5 / Euclideanness: `◇φ → □◇φ` -/
   | modalFive (φ : Proposition Atom) :
       KB5Axiom (((Proposition.box (φ.imp .bot)).imp .bot).imp

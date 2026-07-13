@@ -53,7 +53,7 @@ inductive BAxiom : Proposition Atom → Prop where
   This corresponds to symmetry of the accessibility relation (`r w v → r v w`).
   See [Blackburn2001] Section 1.4 and [ChagrovZakharyaschev1997] Section 3.2. -/
   | modalB (φ : Proposition Atom) :
-      BAxiom (φ.imp (Proposition.box (Proposition.diamond φ)))
+      BAxiom (Axioms.AxiomB φ)
 
 end Cslib.Logic.Modal
 

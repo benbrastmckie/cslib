@@ -25,28 +25,29 @@ necessity (`□φ`) and possibility `◇φ`.
 
 ## Primitives
 
-The formula type uses `{atom, bot, imp, box}` as primitive constructors (no native `and`/`or`).
-Negation, conjunction, disjunction, and diamond (possibility) are derived connectives via
-the Lukasiewicz convention: `¬φ := φ → ⊥`, `φ ∧ ψ := ¬(φ → ¬ψ)`, `φ ∨ ψ := ¬φ → ψ`.
+The formula type uses `{atom, bot, imp, and, or, box, diamond}` as native constructors,
+mirroring `PL.Proposition`'s native `and`/`or`. Negation and verum remain derived connectives
+via the Lukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
 
-**Why box, not diamond?** CSLib takes box as primitive because the necessitation rule
-(`if ⊢ φ then ⊢ □φ`) and the K axiom (`□(φ → ψ) → (□φ → □ψ)`) are pure proof rules on a
-single primitive; with diamond primitive, necessitation becomes the interaction law `¬◇¬`
-([P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001] Chapter 1 takes the
-diamond-first alternative). See [A. Chagrov, M. Zakharyaschev,
-*Modal Logic*][ChagrovZakharyaschev1997] Section 3.1 for the box-first presentation. Box
-corresponds to universal quantification over accessible worlds (`∀ w', r w w' → φ`),
-preserves conjunction (`□(φ ∧ ψ) ↔ □φ ∧ □ψ`), and distributes over implication (axiom K).
-Diamond is then derived classically as
-`◇φ := ¬□¬φ`, which corresponds to `(□(φ → ⊥)) → ⊥`. This derivation relies on excluded middle
-(`¬¬p ↔ p`) and fails in intuitionistic or minimal modal logic, where box and diamond are
-independent operators. Once non-classical modal logics are formalized in CSLib, `HasDia` should
-be added as a primitive typeclass alongside `HasBox`.
+**Why is diamond primitive here (unlike the historical CSLib presentation)?** Classically,
+diamond can be derived from box as `◇φ := ¬□¬φ`, and box alone suffices for necessitation and
+the K axiom. However, task 441 makes `diamond` a native constructor (alongside `and`/`or`) so
+that: (1) the tableau and truth-lemma machinery get one decomposition rule per connective
+(structural induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal
+logics (intuitionistic, minimal — see [Blackburn2001] Chapter 1, [ChagrovZakharyaschev1997]
+Section 3.1) can reuse this same datatype, since `□` and `◇` become independent operators in
+those settings. `HasDia` (`Foundations/Logic/Connectives.lean`) is instantiated below alongside
+`HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is recovered as a genuine *theorem*
+(`Satisfies.dual`, proved semantically) rather than holding definitionally; at the Hilbert
+proof-system level, the duality is recovered via the `AxiomDiaDualityFwd`/`AxiomDiaDualityBack`
+characterization schemata (see `Foundations/Logic/Axioms.lean`), instantiated for all systems
+in `ProofSystem/Instances/*.lean`.
 
 Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
-with `HasAnd`/`HasOr` instances. The Lukasiewicz convention here is specific to `Modal.Proposition`
-because it lacks those constructors. The embedding `PL.Proposition.toModal` (in `FromPropositional`)
-therefore encodes `and`/`or` using this convention when translating propositional formulas.
+with `HasAnd`/`HasOr` instances; `Modal.Proposition` now mirrors this directly, additionally
+providing `HasDia`. The embedding `PL.Proposition.toModal` (in `FromPropositional`) still
+produces the raw nested-`imp`/`bot` shape for `and`/`or` on its RHS (a conservativity artifact
+of the shared `PL.Proposition.embed` skeleton), documented at its declaration site.
 
 ## References
 
@@ -66,7 +67,8 @@ structure Model (World : Type*) (Atom : Type*) where
   /-- Valuation of atoms at a world. -/
   v : World → Atom → Prop
 
-/-- Propositions. Primitives are atoms, falsum, implication, and necessity (box). -/
+/-- Propositions. Primitives are atoms, falsum, implication, conjunction, disjunction,
+necessity (box), and possibility (diamond). -/
 inductive Proposition (Atom : Type u) : Type u where
   /-- Atomic proposition. -/
   | atom (p : Atom)
@@ -74,8 +76,14 @@ inductive Proposition (Atom : Type u) : Type u where
   | bot
   /-- Implication. -/
   | imp (φ₁ φ₂ : Proposition Atom)
+  /-- Conjunction. -/
+  | and (φ₁ φ₂ : Proposition Atom)
+  /-- Disjunction. -/
+  | or (φ₁ φ₂ : Proposition Atom)
   /-- Necessity / box. -/
   | box (φ : Proposition Atom)
+  /-- Possibility / diamond. -/
+  | diamond (φ : Proposition Atom)
   deriving DecidableEq
 
 /-- Register `Modal.Proposition` as an instance of `ModalConnectives`.
@@ -87,6 +95,18 @@ instance : ModalConnectives (Proposition Atom) where
   bot := .bot
   imp := .imp
   box := .box
+
+/-- Register `HasAnd` instance for `Proposition`. -/
+instance : HasAnd (Proposition Atom) where
+  and := .and
+
+/-- Register `HasOr` instance for `Proposition`. -/
+instance : HasOr (Proposition Atom) where
+  or := .or
+
+/-- Register `HasDia` instance for `Proposition`. -/
+instance : HasDia (Proposition Atom) where
+  dia := .diamond
 
 /-- Negation as derived connective: ¬φ := φ → ⊥.
 
@@ -104,25 +124,6 @@ abbrev Proposition.top : Proposition Atom := PropositionalConnectives.top
 
 /-- Reduction lemma: `top` unfolds to `.imp .bot .bot`. -/
 @[simp] lemma Proposition.top_def : (Proposition.top : Proposition Atom) = .imp .bot .bot := rfl
-
-/-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
-abbrev Proposition.or (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
-  .imp (.imp φ₁ .bot) φ₂
-
-/-- Conjunction: φ₁ ∧ φ₂ := ¬(φ₁ → ¬φ₂) -/
-abbrev Proposition.and (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
-  .imp (.imp φ₁ (.imp φ₂ .bot)) .bot
-
-/-- Possibility / diamond: `◇φ := ¬□¬φ = (□(φ → ⊥)) → ⊥`.
-
-Diamond is a derived connective in classical modal logic. It is defined via classical negation as
-`◇φ := ¬□¬φ`, which expands to `(□(φ → ⊥)) → ⊥`. The forward direction (`◇φ → ¬□¬φ`) holds by
-definition; the backward direction (`¬□¬φ → ◇φ`) uses excluded middle. This derivation fails in
-minimal modal logic, where `□` and `◇` are independent operators. [Blackburn2001] Chapter 1
-takes diamond as primitive; [ChagrovZakharyaschev1997] Section 3.1 takes box as primitive
-and derives diamond via classical negation. -/
-abbrev Proposition.diamond (φ : Proposition Atom) : Proposition Atom :=
-  .neg (.box (.neg φ))
 
 /-- Bi-implication. -/
 abbrev Proposition.iff (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
@@ -146,46 +147,26 @@ def Satisfies (m : Model World Atom) (w : World) : Proposition Atom → Prop
   | .atom p => m.v w p
   | .bot => False
   | .imp φ₁ φ₂ => Satisfies m w φ₁ → Satisfies m w φ₂
+  | .and φ₁ φ₂ => Satisfies m w φ₁ ∧ Satisfies m w φ₂
+  | .or φ₁ φ₂ => Satisfies m w φ₁ ∨ Satisfies m w φ₂
   | .box φ => ∀ w', m.r w w' → Satisfies m w' φ
+  | .diamond φ => ∃ w', m.r w w' ∧ Satisfies m w' φ
 
 /-- Satisfaction of negation. -/
 theorem Satisfies.neg_iff : Satisfies m w (¬φ) ↔ ¬Satisfies m w φ :=
   ⟨fun h hs => h hs, fun h hs => absurd hs h⟩
 
 /-- Satisfaction of diamond. -/
-theorem Satisfies.diamond_iff : Satisfies m w (◇φ) ↔ ∃ w', m.r w w' ∧ Satisfies m w' φ := by
-  change (Satisfies m w (.imp (.box (.imp φ .bot)) .bot)) ↔ ∃ w', m.r w w' ∧ Satisfies m w' φ
-  simp only [Satisfies]
-  constructor
-  · intro h
-    by_contra hc
-    push Not at hc
-    exact h fun w' hr hs => absurd hs (hc w' hr)
-  · intro ⟨w', hr, hs⟩ hbox
-    exact hbox w' hr hs
+theorem Satisfies.diamond_iff : Satisfies m w (◇φ) ↔ ∃ w', m.r w w' ∧ Satisfies m w' φ :=
+  Iff.rfl
 
 /-- Satisfaction of conjunction. -/
-theorem Satisfies.and_iff : Satisfies m w (φ₁ ∧ φ₂) ↔ Satisfies m w φ₁ ∧ Satisfies m w φ₂ := by
-  change ((Satisfies m w φ₁ → Satisfies m w φ₂ → False) → False) ↔ _
-  constructor
-  · intro h
-    constructor
-    · by_contra h1; exact h (fun hs => absurd hs h1)
-    · by_contra h2; exact h (fun _ hs => absurd hs h2)
-  · intro ⟨h1, h2⟩ hf; exact hf h1 h2
+theorem Satisfies.and_iff : Satisfies m w (φ₁ ∧ φ₂) ↔ Satisfies m w φ₁ ∧ Satisfies m w φ₂ :=
+  Iff.rfl
 
 /-- Satisfaction of disjunction. -/
-theorem Satisfies.or_iff : Satisfies m w (φ₁ ∨ φ₂) ↔ Satisfies m w φ₁ ∨ Satisfies m w φ₂ := by
-  change ((Satisfies m w φ₁ → False) → Satisfies m w φ₂) ↔ _
-  constructor
-  · intro h
-    rcases Classical.em (Satisfies m w φ₁) with h1 | h1
-    · exact Or.inl h1
-    · exact Or.inr (h h1)
-  · intro h hn
-    cases h with
-    | inl h => exact absurd h hn
-    | inr h => exact h
+theorem Satisfies.or_iff : Satisfies m w (φ₁ ∨ φ₂) ↔ Satisfies m w φ₁ ∨ Satisfies m w φ₂ :=
+  Iff.rfl
 
 /-- Judgement, representing the conclusions one reaches in modal logic. -/
 structure Judgement World Atom where
@@ -286,11 +267,20 @@ theorem Satisfies.k : ⇓Modal[m,w ⊨ □(φ₁ → φ₂) → (□φ₁ → �
   intro h1 h2 w' hr
   exact h1 w' hr (h2 w' hr)
 
-/-- The dual axiom, valid for all models. -/
+/-- The dual axiom, valid for all models.
+
+Since `diamond` is a native constructor (task 441), this is no longer a definitional
+unfolding: it is proved as a genuine semantic theorem using excluded middle. -/
 theorem Satisfies.dual : ⇓Modal[m,w ⊨ ◇φ ↔ ¬□¬φ] := by
   change Satisfies m w (.iff (.diamond φ) (.neg (.box (.neg φ))))
-  rw [and_iff]
-  exact ⟨id, id⟩
+  simp only [Proposition.neg_def, Satisfies]
+  constructor
+  · rintro ⟨w', hr, hs⟩ hbox
+    exact hbox w' hr hs
+  · intro h
+    by_contra hc
+    push Not at hc
+    exact h fun w' hr hs => hc w' hr hs
 
 /-- The T axiom, valid for all reflexive models. -/
 theorem Satisfies.t {m : Model World Atom} [instRefl : Std.Refl m.r] {w : World}

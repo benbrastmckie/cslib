@@ -214,39 +214,39 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 1: Native datatype base patch + typeclass instances + mechanical Hilbert sites [NOT STARTED]
+### Phase 1: Native datatype base patch + typeclass instances + mechanical Hilbert sites [COMPLETED]
 
 - **Goal:** Re-derive and apply the handoff's individually-verified-green base patch, plus the
   `HasAnd`/`HasOr`/`HasDia` instances, plus the 5 mechanical axiom-schema fixes. After this
   phase the seven owned Basic-layer files build green in isolation (the wider library is
   expected red until later phases).
 - **Tasks:**
-  - [ ] `Cslib/Logics/Modal/Basic.lean`: redefine the inductive (`:70`) with primitive
+  - [x] `Cslib/Logics/Modal/Basic.lean`: redefine the inductive (`:70`) with primitive
     `atom, bot, imp, and, or, box, diamond` (delete the derived abbrevs for `or` (`:109`),
     `and` (`:113`), `diamond` (`:124`); keep `neg`/`top`/`iff` abbrevs and `neg_def`/`top_def`).
     Preserve the `ModalConnectives` instance (`:86`), `Bot` instance, and all scoped notation.
-  - [ ] `Basic.lean`: add `instance : HasAnd (Proposition Atom) := ⟨.and⟩`,
+  - [x] `Basic.lean`: add `instance : HasAnd (Proposition Atom) := ⟨.and⟩`,
     `instance : HasOr (Proposition Atom) := ⟨.or⟩`,
     `instance : HasDia (Proposition Atom) := ⟨.diamond⟩` adjacent to the `ModalConnectives`
     instance (import `Cslib.Foundations.Logic.Connectives` is already in scope via
     ModalConnectives).
-  - [ ] `Basic.lean`: extend `Satisfies` (`:145-149`) with native `.and`/`.or`/`.diamond` cases;
+  - [x] `Basic.lean`: extend `Satisfies` (`:145-149`) with native `.and`/`.or`/`.diamond` cases;
     re-prove `Satisfies.and_iff`/`or_iff`/`diamond_iff` as `Iff.rfl`-style; rewrite
     `Satisfies.dual` (`:290`) as a genuine semantic proof (no longer definitional; handoff
     verified `rintro`/`push_neg` route); keep the `@[grind =]` companions (`:224-247`) with
     unchanged statements; verify the ~25 `rw [diamond_iff]`-style call sites in the K/T/4/5
     theorems still build.
-  - [ ] `Cslib/Logics/Modal/LogicalEquivalence.lean`: extend `Proposition.Context` (`:39`) with
+  - [x] `Cslib/Logics/Modal/LogicalEquivalence.lean`: extend `Proposition.Context` (`:39`) with
     `andL/andR/orL/orR/diamond`, extend `Context.fill` (`:50`), re-prove `congruence` (`:63`).
-  - [ ] `Cslib/Logics/Modal/Denotation.lean`: extend `Proposition.denotation` and
+  - [x] `Cslib/Logics/Modal/Denotation.lean`: extend `Proposition.denotation` and
     `satisfies_mem_denotation` with `.and`/`.or`/`.diamond` cases (handoff-identified gap).
-  - [ ] `Cslib/Logics/Modal/FromPropositional.lean`: restate `toModal_and`/`toModal_or` with
+  - [x] `Cslib/Logics/Modal/FromPropositional.lean`: restate `toModal_and`/`toModal_or` with
     raw nested-`imp`/`bot` RHS (the shared `PL.Proposition.embed` skeleton in
     `Propositional/Embedding.lean` is NOT touched); `modal_satisfies_toModal_iff_evaluate`
     body unchanged.
-  - [ ] `Cslib/Logics/Bimodal/Embedding/ModalEmbedding.lean`: add `.and/.or/.diamond` cases to
+  - [x] `Cslib/Logics/Bimodal/Embedding/ModalEmbedding.lean`: add `.and/.or/.diamond` cases to
     `toBimodal` (targets `Bimodal.Formula.and/or/diamond`, which remain encoded).
-  - [ ] Mechanical axiom sites (handoff-verified): `Metalogic/DerivationTree.lean:81`
+  - [x] Mechanical axiom sites (handoff-verified): `Metalogic/DerivationTree.lean:81`
     (`ModalAxiom.modalB` restated as `ModalAxiom (Axioms.AxiomB φ)`; add
     `public import Cslib.Foundations.Logic.Axioms`) and `ProofSystem/Instances/{B,TB,KB5,DB}.lean`
     `*.modalB` likewise. ALSO restate the diamond-mentioning `modalD` sites

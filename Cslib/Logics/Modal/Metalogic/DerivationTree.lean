@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Modal.Basic
 public import Cslib.Foundations.Logic.Metalogic.Consistency
+public import Cslib.Foundations.Logic.Axioms
 
 /-! # DerivationTree -- Parameterized Syntactic Proof System for Normal Modal Logics
 
@@ -77,9 +78,11 @@ inductive ModalAxiom : Proposition Atom → Prop where
   /-- 4 / transitivity: `□φ → □□φ` -/
   | modalFour (φ : Proposition Atom) :
       ModalAxiom ((Proposition.box φ).imp (Proposition.box (Proposition.box φ)))
-  /-- B / symmetry: `φ → □◇φ` -/
+  /-- B / symmetry: `φ → □◇φ`, stated via the canonical raw-encoded `Axioms.AxiomB` (task 441:
+  `diamond` is now a native constructor, so this axiom stays in the raw encoded shape; native
+  `◇` is bridged in via the duality schemata, see `Metalogic/MCS.lean`). -/
   | modalB (φ : Proposition Atom) :
-      ModalAxiom (φ.imp (Proposition.box (Proposition.diamond φ)))
+      ModalAxiom (Axioms.AxiomB φ)
 
 /-! ## Derivation Trees -/
 

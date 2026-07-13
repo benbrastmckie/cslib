@@ -60,15 +60,25 @@ theorem PL.Proposition.toModal_bot :
 theorem PL.Proposition.toModal_imp (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.imp φ₁ φ₂).toModal = Modal.Proposition.imp φ₁.toModal φ₂.toModal := rfl
 
-/-- Embedding preserves and (Lukasiewicz encoding). -/
+/-- Embedding preserves and (Lukasiewicz encoding).
+
+The RHS is stated in the *raw* nested `imp`/`bot` shape (not the native `Modal.Proposition.and`
+constructor introduced by task 441): the shared `PL.Proposition.embed` skeleton
+(`Cslib.Logics.Propositional.Embedding`) is classical-scope only and always emits the
+Łukasiewicz encoding for `and`/`or`, regardless of whether the target type has a native `and`.
+See the module-level docstring there for the encoding rationale. -/
 @[simp]
 theorem PL.Proposition.toModal_and (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.and φ₁ φ₂).toModal = φ₁.toModal.and φ₂.toModal := rfl
+    (PL.Proposition.and φ₁ φ₂).toModal =
+      .imp (.imp φ₁.toModal (.imp φ₂.toModal .bot)) .bot := rfl
 
-/-- Embedding preserves or (Lukasiewicz encoding). -/
+/-- Embedding preserves or (Lukasiewicz encoding).
+
+See `PL.Proposition.toModal_and` for why the RHS is the raw nested shape rather than the
+native `Modal.Proposition.or` constructor. -/
 @[simp]
 theorem PL.Proposition.toModal_or (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.or φ₁ φ₂).toModal = φ₁.toModal.or φ₂.toModal := rfl
+    (PL.Proposition.or φ₁ φ₂).toModal = .imp (.imp φ₁.toModal .bot) φ₂.toModal := rfl
 
 /-- Embedding preserves neg. -/
 theorem PL.Proposition.toModal_neg (φ : PL.Proposition Atom) :

@@ -47,8 +47,9 @@ namespace Cslib.Logic.Modal
 open scoped InferenceSystem Proposition
 
 /-- A one-hole context for `Proposition`. Each constructor corresponds to a recursive position
-in `Proposition`: `impL` is the left argument of `imp`, `impR` is the right argument, and `box`
-is the argument of `box`. The `hole` constructor marks the position to be filled. -/
+in `Proposition`: `impL`/`impR` are the arguments of `imp`, `andL`/`andR` of `and`, `orL`/`orR`
+of `or`, `box` is the argument of `box`, and `diamond` is the argument of `diamond`. The `hole`
+constructor marks the position to be filled. -/
 inductive Proposition.Context (Atom : Type u) : Type u where
   /-- The position to substitute. -/
   | hole
@@ -56,15 +57,30 @@ inductive Proposition.Context (Atom : Type u) : Type u where
   | impL (c : Context Atom) (φ : Proposition Atom)
   /-- Context in the right argument of `imp`. -/
   | impR (φ : Proposition Atom) (c : Context Atom)
+  /-- Context in the left argument of `and`. -/
+  | andL (c : Context Atom) (φ : Proposition Atom)
+  /-- Context in the right argument of `and`. -/
+  | andR (φ : Proposition Atom) (c : Context Atom)
+  /-- Context in the left argument of `or`. -/
+  | orL (c : Context Atom) (φ : Proposition Atom)
+  /-- Context in the right argument of `or`. -/
+  | orR (φ : Proposition Atom) (c : Context Atom)
   /-- Context under `box`. -/
   | box (c : Context Atom)
+  /-- Context under `diamond`. -/
+  | diamond (c : Context Atom)
 
 /-- Fill the hole in a context with a proposition. -/
 def Proposition.Context.fill : Proposition.Context Atom → Proposition Atom → Proposition Atom
   | .hole, φ => φ
   | .impL c ψ, φ => c.fill φ → ψ
   | .impR ψ c, φ => ψ → c.fill φ
+  | .andL c ψ, φ => c.fill φ ∧ ψ
+  | .andR ψ c, φ => ψ ∧ c.fill φ
+  | .orL c ψ, φ => c.fill φ ∨ ψ
+  | .orR ψ c, φ => ψ ∨ c.fill φ
   | .box c, φ => □(c.fill φ)
+  | .diamond c, φ => ◇(c.fill φ)
 
 instance : HasContext (Proposition Atom) := ⟨Proposition.Context Atom, Proposition.Context.fill⟩
 
@@ -133,9 +149,27 @@ instance (S : Set (Model World Atom)) : Congruence (Proposition Atom) (Propositi
     | impR φ c ih =>
       simp only [Proposition.Context.fill, derivation_def]
       exact ⟨fun hf ha => (ih w).mp (hf ha), fun hf ha => (ih w).mpr (hf ha)⟩
+    | andL c φ ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun ⟨h1, h2⟩ => ⟨(ih w).mp h1, h2⟩, fun ⟨h1, h2⟩ => ⟨(ih w).mpr h1, h2⟩⟩
+    | andR φ c ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun ⟨h1, h2⟩ => ⟨h1, (ih w).mp h2⟩, fun ⟨h1, h2⟩ => ⟨h1, (ih w).mpr h2⟩⟩
+    | orL c φ ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun h => h.elim (fun h1 => .inl ((ih w).mp h1)) .inr,
+        fun h => h.elim (fun h1 => .inl ((ih w).mpr h1)) .inr⟩
+    | orR φ c ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun h => h.elim .inl (fun h2 => .inr ((ih w).mp h2)),
+        fun h => h.elim .inl (fun h2 => .inr ((ih w).mpr h2))⟩
     | box c ih =>
       simp only [Proposition.Context.fill, derivation_def]
       exact ⟨fun hf w' hr => (ih w').mp (hf w' hr), fun hf w' hr => (ih w').mpr (hf w' hr)⟩
+    | diamond c ih =>
+      simp only [Proposition.Context.fill, derivation_def]
+      exact ⟨fun ⟨w', hr, hs⟩ => ⟨w', hr, (ih w').mp hs⟩,
+        fun ⟨w', hr, hs⟩ => ⟨w', hr, (ih w').mpr hs⟩⟩
 
 /-- Judgemental contexts for Modal logic: a model together with a world, into which a
 proposition is placed to form a `Judgement`. -/

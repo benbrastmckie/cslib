@@ -87,6 +87,28 @@ structure ModalLoopInv (φ0 : Proposition Atom)
     sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
     ∃ w', acc.hasEdge w w' = true ∧
       (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos` (i.e. is
+  `diamondPos`-shaped, `T(◇φ)@w`). Task 441: `diamond` is a native constructor, so
+  `diamondPos` genuinely mints a fresh world (symmetric to `boxNeg`) and needs the same
+  sign-discrimination invariant as `eBoxOnlyNeg`: `modalHintikkaClause` is vacuously `True` for
+  *any* diamond-shaped formula regardless of sign, whereas `modalHintikkaSet`'s second conjunct
+  only carves out `.pos, .diamond _`; the `.neg, .diamond _` (`diamondNeg`) case genuinely needs
+  its `.persistent` clause discharged. Sound because `diamondNeg`'s own `modalApplyOne` result
+  is always `.notApplicable` or `.persistent` (never `.linear`/`.branching`,
+  `modalApplyOne_negDia_eq` below), so a `diamondNeg`-shaped formula can never be the `sf_exp`
+  that gets appended to `e` by a `modalStepBranch` step. -/
+  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
+  /-- Every `diamondPos`-shaped formula `T(◇ψ)@w` in the expanded set `e` already has a witness
+  successor on the branch: `∃ w', acc.hasEdge w w' ∧ T(ψ)@w' ∈ b`. Needed for `modalHintikkaSet`'s
+  fourth conjunct (task 441), symmetric to `eBoxNegWitness`'s third conjunct. Sound because
+  `diamondPos` is *always* applicable (`Rules.lean:93-116` never checks an emptiness guard,
+  unlike `boxPos`/`diamondNeg`), so once `T(◇ψ)@w` is expanded (added to `e`), its witness
+  `T(ψ)@w'` and edge `w → w'` are created immediately (`modalApplyOne_diamondPos_witness` below)
+  and persist unchanged thereafter (branches only grow, `acc` edges are only added). -/
+  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
 
 /-! ## Local Helper Lemmas
 
@@ -243,6 +265,35 @@ private lemma modalApplyOne_posBox_eq
   · left; rfl
   · right; rfl
 
+/-- `diamondNeg`'s own rule-application result is always `.notApplicable` or `.persistent`,
+never `.linear`/`.branching`: a formula with sign `.neg` and formula-component `.diamond ψ`
+never matches any propositional decomposer (`.diamond` is a native constructor distinct from
+every prop-rule pattern, task 441), so `tryAllPropRules` is not applicable and `modalApplyOne`
+falls through to the `diamondNeg` dispatch arm (`Rules.lean:144-153`), which only ever produces
+`.notApplicable` or `.persistent` (symmetric to `modalApplyOne_posBox_eq`'s `boxPos`). -/
+private lemma modalApplyOne_negDia_eq
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .neg)
+    (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOne sf b acc).1 = .notApplicable ∨
+      (modalApplyOne sf b acc).1 = .persistent
+        ((acc.successorsOf sf.label).filterMap (fun w' =>
+          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
+          if b.any (· == sf') then none else some sf')) := by
+  obtain ⟨s, φ, l⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  simp only [modalApplyOne]
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .diamond ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  rw [if_neg (by simp [htry])]
+  split_ifs with hemp
+  · left; rfl
+  · right; rfl
+
 /-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
 `modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
 the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
@@ -296,6 +347,67 @@ private lemma modalLoop_eBoxOnlyNeg
       have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
       rcases modalApplyOne_posBox_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- persistent: newExps = [e] (unchanged)
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact he
+  · rw [hfstc] at hsf; simp at hsf
+
+/-- Preservation of the `eDiamondOnlyPos` invariant across a `modalStepBranch` step: mirrors
+`modalLoop_eBoxOnlyNeg`'s case split (task 441: `diamondNeg` is the symmetric never-linear/
+branching shape, dismissed via `modalApplyOne_negDia_eq`). -/
+private lemma modalLoop_eDiamondOnlyPos
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos) :
+    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newExps = [e ++ [sf_exp]]
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
+        | neg => rfl
+        | pos => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
+      rcases modalApplyOne_negDia_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
+        | neg => rfl
+        | pos => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
+      rcases modalApplyOne_negDia_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- persistent: newExps = [e] (unchanged)
     rw [hfstc] at hsf
@@ -445,6 +557,107 @@ private lemma modalLoop_eBoxNegWitness
       List.mem_append.mpr (Or.inr hwit)⟩
   · rw [hfstc] at hsf; simp at hsf
 
+/-- `diamondPos`'s own rule-application result, unfolded directly: `T(◇ψ)@w` always mints a
+fresh witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted
+`.linear` list with the witness `T(ψ)@w'` (`Rules.lean:93-116`; task 441: `diamondPos` is
+native and, like `boxNeg`, never checks an emptiness guard, so it is always applicable).
+Symmetric to `modalApplyOne_boxNeg_witness`. -/
+private lemma modalApplyOne_diamondPos_witness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOne (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  exact ⟨rfl, _, rfl⟩
+
+/-- Preservation of the `eDiamondPosWitness` invariant across a `modalStepBranch` step: mirrors
+`modalLoop_eBoxNegWitness`'s case split (task 441: `diamondPos` is the symmetric fresh-world
+witness rule, via `modalApplyOne_diamondPos_witness`). -/
+private lemma modalLoop_eDiamondPosWitness
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', acc.hasEdge w w' = true ∧
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ b' ∈ newBs, ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', newAcc.hasEdge w w' = true ∧
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' := by
+  simp only [modalStepBranch] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newBs = [nf ++ b], newExps = [e ++ [sf_exp]], newAcc from modalApplyOne's snd
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
+    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
+    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | hsfeq2
+    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+        List.mem_append.mpr (Or.inr hwit)⟩
+    · have hsfexp_eq : sf_exp =
+          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+        rw [← hsfeq2]; exact hsfeq
+      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+      rw [hsfexp_eq, hfsteq] at hfstc
+      simp only [RuleResult.linear.injEq] at hfstc
+      refine ⟨modalNextWorld b, ?_, ?_⟩
+      · rw [hnewAcc, hsfexp_eq, hsndeq]
+        simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, beq_self_eq_true,
+          Bool.true_and, Bool.true_or]
+      · rw [← hfstc]
+        exact List.mem_append.mpr (Or.inl (List.mem_cons_self))
+  · -- branching: newBs = brs.map (·++b), newExps = brs.map (fun _=>e++[sf_exp])
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'
+    obtain ⟨x, hxmem, rfl⟩ := List.mem_map.mp hb'
+    rw [← hsf.2.1] at he'; obtain ⟨x', -, rfl⟩ := List.mem_map.mp he'
+    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | hsfeq2
+    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+        List.mem_append.mpr (Or.inr hwit)⟩
+    · have hsfexp_eq : sf_exp =
+          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+        rw [← hsfeq2]; exact hsfeq
+      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+      rw [hsfexp_eq, hfsteq] at hfstc
+      -- diamondPos's own result is `.linear`, never `.branching`: contradiction
+      simp at hfstc
+  · -- persistent: newBs = [nf ++ b], newExps = [e] (unchanged), newAcc = acc
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
+    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
+    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+    exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+      List.mem_append.mpr (Or.inr hwit)⟩
+  · rw [hfstc] at hsf; simp at hsf
+
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 
 /-- **Combined-invariant single-step preservation** (task 442 Phase 5a): given the bundled loop
@@ -466,7 +679,7 @@ lemma modalStep_preserves_invariant
       (∀ p ∈ newBs.zip newExps, ModalLoopInv φ0 p.1 p.2 newAcc rank') ∧
       modalExpMeasure (modalUniverse φ0) newBs newExps + 1 ≤
         modalExpMeasure (modalUniverse φ0) [b] [e] := by
-  obtain ⟨hpot, hphi, hhint, hboxneg, hboxwit⟩ := hinv
+  obtain ⟨hpot, hphi, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩ := hinv
   have hWb : modalMaxWorld b < modalWorldBound φ0 :=
     modalMaxWorld_lt_worldBound_of_phiBound φ0 b _ hphi
   obtain ⟨rank', -, hrb', hre', hpotential⟩ :=
@@ -487,13 +700,15 @@ lemma modalStep_preserves_invariant
   have hHintikkaAll := modalStepBranch_hintikka_inv b e acc newBs newExps newAcc hstep hhint
   have hBoxNegAll := modalLoop_eBoxOnlyNeg b e acc newBs newExps newAcc hstep hboxneg
   have hBoxWitAll := modalLoop_eBoxNegWitness b e acc newBs newExps newAcc hstep hboxwit
+  have hDiaPosAll := modalLoop_eDiamondOnlyPos b e acc newBs newExps newAcc hstep hdiapos
+  have hDiaWitAll := modalLoop_eDiamondPosWitness b e acc newBs newExps newAcc hstep hdiawit
   refine ⟨rank', ?_, ?_⟩
   · intro p hp
     obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
     exact ⟨⟨hBClosureAll p.1 hp1, hNodupAll p.2 hp2, hEClosureAll p.2 hp2,
         hFreshAll p.1 hp1, hKnownAll p.1 hp1, hOutDegAll p.2 hp2, hrb' p.1 hp1, hre'⟩,
       by rw [hpotential p.1 hp1]; exact hphi, hHintikkaAll p hp, hBoxNegAll p.2 hp2,
-      hBoxWitAll p.1 hp1 p.2 hp2⟩
+      hBoxWitAll p.1 hp1 p.2 hp2, hDiaPosAll p.2 hp2, hDiaWitAll p.1 hp1 p.2 hp2⟩
   · obtain ⟨newExp, hNewExpEq⟩ :=
       modalStepBranch_newExps_const b e acc newBs newExps newAcc hstep
     have hstep' : modalStepBranch b e acc = some (newBs, newBs.map (fun _ => newExp), newAcc) := by
@@ -629,7 +844,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
               have ha_idx : (doneAccs ++ aR :: restAs)[done.length]? = some aR := by
                 rw [List.getElem?_append_right (by omega)]; simp [hdAccs, Nat.sub_self]
               obtain ⟨rank, hinv⟩ := hInv_all done.length bR e aR hbh_idx he_idx ha_idx
-              refine ⟨hcl, ?_, ?_⟩
+              refine ⟨hcl, ?_, ?_, ?_⟩
               · -- Conjunct 2: rule-application clause for every sf ∈ bR
                 intro sf hsfmem
                 obtain ⟨s, φ, l⟩ := sf
@@ -655,6 +870,20 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                     simp only [modalHintikkaClause] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
+                | and a c =>
+                  rcases modalStepBranch_none_saturated hstep ⟨s, .and a c, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .and a c, l⟩ hine
+                    simp only [modalHintikkaClause] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | or a c =>
+                  rcases modalStepBranch_none_saturated hstep ⟨s, .or a c, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .or a c, l⟩ hine
+                    simp only [modalHintikkaClause] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
                 | box ψ' =>
                   cases s with
                   | pos =>
@@ -666,12 +895,34 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                   | neg =>
                     -- boxNeg = F(□ψ')@w: matches `modalHintikkaSet`'s first branch directly
                     trivial
+                | diamond ψ' =>
+                  cases s with
+                  | pos =>
+                    -- diamondPos = T(◇ψ')@w: matches `modalHintikkaSet`'s second branch
+                    -- directly (task 441: native diamond, symmetric to boxNeg above).
+                    trivial
+                  | neg =>
+                    -- diamondNeg still falls into `_, _`; `eDiamondOnlyPos` rules out `sf ∈ e`
+                    rcases modalStepBranch_none_saturated hstep ⟨.neg, .diamond ψ', l⟩ hsfmem
+                      with hine | hna
+                    · exact absurd (hinv.eDiamondOnlyPos ⟨.neg, .diamond ψ', l⟩ hine ψ' rfl)
+                        (by simp)
+                    · simp [hna]
               · -- Conjunct 3: box-negative witness existence
                 intro ψ' w hmem
                 rcases modalStepBranch_none_saturated hstep _ hmem with hine | hna
                 · exact hinv.eBoxNegWitness _ hine ψ' w rfl
                 · exfalso
                   obtain ⟨-, rest, hlin⟩ := modalApplyOne_boxNeg_witness bR aR ψ' w
+                  rw [hlin] at hna
+                  simp at hna
+              · -- Conjunct 4: diamond-positive witness existence (task 441, symmetric to
+                -- Conjunct 3 above).
+                intro ψ' w hmem
+                rcases modalStepBranch_none_saturated hstep _ hmem with hine | hna
+                · exact hinv.eDiamondPosWitness _ hine ψ' w rfl
+                · exfalso
+                  obtain ⟨-, rest, hlin⟩ := modalApplyOne_diamondPos_witness bR aR ψ' w
                   rw [hlin] at hna
                   simp at hna
             | some step =>
@@ -973,7 +1224,8 @@ private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
   have hmax : modalMaxWorld [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] = 0 :=
     by simp [modalMaxWorld]
   have houtdeg0 : ∀ w : WorldIndex, outDeg Accessibility.empty w = 0 := fun w => rfl
-  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_⟩, ?_, ?_, ?_, ?_⟩
+  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_⟩,
+    ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro x hx
     simp only [List.mem_singleton] at hx
     subst hx
@@ -1016,6 +1268,10 @@ private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
         modalPotentialTerm (modalSubfmls φ0).length Accessibility.empty
           (fun _ => modalDepth φ0) 0 + 1 := by omega
     exact hterm ▸ hbound
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
   · intro sf hsf
     simp at hsf
   · intro sf hsf

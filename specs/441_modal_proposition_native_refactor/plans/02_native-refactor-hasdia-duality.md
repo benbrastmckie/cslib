@@ -658,14 +658,22 @@ See the handoff for the full triage and a recommended fix order.
 
 ---
 
-### Phase 14: CompletenessLoop port (1096 lines) [NOT STARTED]
+### Phase 14: CompletenessLoop port (1096 lines) [COMPLETED]
 
 - **Goal:** `Tableau/CompletenessLoop.lean` — added by tasks 442/462, absent from plan v1 —
   green; the whole Tableau directory builds.
 - **Tasks:**
-  - [ ] Port the file's 4 decomposer references and any exhaustive inductions (expected light:
-    grep found only 4 decomposer hits).
-  - [ ] `lake build` the full `Cslib/Logics/Modal/Tableau/` directory.
+  - [x] Port the file's 4 decomposer references and any exhaustive inductions (expected light:
+    grep found only 4 decomposer hits). *(actual: also uncovered a genuine mathematical gap --
+    `ModalLoopInv` tracked only the `boxNeg` fresh-world-minting witness invariant
+    (`eBoxOnlyNeg`/`eBoxNegWitness`), but native `diamondPos` also mints a fresh world and needed
+    symmetric `eDiamondOnlyPos`/`eDiamondPosWitness` fields, mirrored helper lemmas
+    (`modalApplyOne_negDia_eq`, `modalLoop_eDiamondOnlyPos`, `modalApplyOne_diamondPos_witness`,
+    `modalLoop_eDiamondPosWitness`), and updated `modalStep_preserves_invariant`/
+    `modalLoopInv_initial`/the final Hintikka-set derivation (now 4 conjuncts, not 3) to thread
+    them through. The `cases φ with` 4-way exhaustive match (atom|bot|imp|box) was extended to
+    native 7-way (atom|bot|imp|and|or|box|diamond).)*
+  - [x] `lake build` the full `Cslib/Logics/Modal/Tableau/` directory.
 - **Timing:** ~1.5 hours
 - **Depends on:** 13
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean`

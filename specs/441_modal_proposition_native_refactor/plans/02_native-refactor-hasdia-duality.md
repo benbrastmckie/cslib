@@ -582,17 +582,17 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 12: Tableau completeness port (Completeness.lean) [NOT STARTED]
+### Phase 12: Tableau completeness port (Completeness.lean) [COMPLETED]
 
 - **Goal:** `Tableau/Completeness.lean` (832 lines, 67 decomposer references) green.
 - **Tasks:**
-  - [ ] Port `extractModel` + Hintikka bridge lemmas to native constructors; where the file's
+  - [x] Port `extractModel` + Hintikka bridge lemmas to native constructors; where the file's
     truth-lemma/bridge structure did strong-induction or encoded-shape dispatch, simplify to
     structural cases when the port forces a rewrite (v1 Phase E payoff), otherwise port
     minimally.
-  - [ ] Add `.and/.or/.diamond` cases to every exhaustive match/induction; repair uses of the
+  - [x] Add `.and/.or/.diamond` cases to every exhaustive match/induction; repair uses of the
     reshaped `modalDiaOf?_dia`-family lemmas.
-  - [ ] Discharge the file's public completeness theorems against the ported Saturation layer.
+  - [x] Discharge the file's public completeness theorems against the ported Saturation layer.
 - **Timing:** ~3 hours
 - **Depends on:** 11
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/Completeness.lean`

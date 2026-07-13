@@ -110,8 +110,7 @@ theorem canonical_symm
     (h_K : ∀ (φ ψ : Proposition Atom),
       Axioms ((Proposition.box (φ.imp ψ)).imp
         ((Proposition.box φ).imp (Proposition.box ψ))))
-    (h_B : ∀ (φ : Proposition Atom),
-      Axioms (φ.imp (Proposition.box (Proposition.diamond φ))))
+    (h_B : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomB φ))
     (S T : CanonicalWorld Axioms) :
     (CanonicalModel Axioms).r S T →
     (CanonicalModel Axioms).r T S := by
@@ -146,8 +145,7 @@ theorem canonical_eucl
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
     (h_4 : ∀ (φ : Proposition Atom),
       Axioms ((Proposition.box φ).imp (Proposition.box (Proposition.box φ))))
-    (h_B : ∀ (φ : Proposition Atom),
-      Axioms (φ.imp (Proposition.box (Proposition.diamond φ))))
+    (h_B : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomB φ))
     (h_K : ∀ (φ ψ : Proposition Atom),
       Axioms ((Proposition.box (φ.imp ψ)).imp
         ((Proposition.box φ).imp (Proposition.box ψ))))
@@ -197,9 +195,7 @@ theorem canonical_eucl_from_5
     (h_K : ∀ (φ ψ : Proposition Atom),
       Axioms ((Proposition.box (φ.imp ψ)).imp
         ((Proposition.box φ).imp (Proposition.box ψ))))
-    (h_5 : ∀ (φ : Proposition Atom),
-      Axioms ((Proposition.diamond φ).imp
-        (Proposition.box (Proposition.diamond φ))))
+    (h_5 : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.Axiom5 φ))
     (S T U : CanonicalWorld Axioms) :
     (CanonicalModel Axioms).r S T →
     (CanonicalModel Axioms).r S U →
@@ -207,7 +203,9 @@ theorem canonical_eucl_from_5
   intro hST hSU φ h_box_T
   by_contra h_phi_not_U
   have h_neg_U := mcs_neg_of_not_mem h_implyK h_implyS U.property h_phi_not_U
-  have h_diam_S : (◇¬φ) ∈ S.val := by
+  -- Raw shape (`¬(□¬¬φ)`), matching `Axioms.Axiom5`'s LHS -- NOT native `◇¬φ` (task 441:
+  -- `diamond` is a native constructor, no longer defeq to this raw shape).
+  have h_diam_S : (¬(□¬¬φ)) ∈ S.val := by
     by_contra h_diam_not_S
     have h_neg_diam := mcs_neg_of_not_mem h_implyK h_implyS S.property h_diam_not_S
     have h_box_dne_S : (□¬¬φ) ∈ S.val := by

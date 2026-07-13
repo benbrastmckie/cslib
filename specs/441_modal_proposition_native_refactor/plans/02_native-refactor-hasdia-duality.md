@@ -380,21 +380,21 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 6: Canonical frame lemmas restated on duality bridging [NOT STARTED]
+### Phase 6: Canonical frame lemmas restated on duality bridging [COMPLETED]
 
 - **Goal:** `canonical_symm` (:105), `canonical_eucl` (:142), `canonical_eucl_from_5` (:192) in
   `Metalogic/Completeness.lean` build green with no syntactic diamond surgery — the exact v1
   break points (error sites :139, :170, :217, :240 per the handoff).
 - **Tasks:**
-  - [ ] Thread `h_dualFwd`/`h_dualBack` hypotheses (canonical `Axioms.*` shapes) through the
+  - [x] Thread `h_dualFwd`/`h_dualBack` hypotheses (canonical `Axioms.*` shapes) through the
     three frame lemmas' signatures.
-  - [ ] Replace each site that applied `modal_implication_property` directly to a `(◇ψ) ∈ T`
+  - [x] Replace each site that applied `modal_implication_property` directly to a `(◇ψ) ∈ T`
     term (expecting an `.imp` membership) with `mcs_dia_to_raw` first, then the unchanged raw
     reasoning; where the proof produced a raw shape and needed native `◇` membership, insert
     `mcs_raw_to_dia`.
-  - [ ] Adapt to the restated `mcs_box_diamond` (raw boxed conclusion): unbox via canonical-R
+  - [x] Adapt to the restated `mcs_box_diamond` (raw boxed conclusion): unbox via canonical-R
     membership, bridge after.
-  - [ ] Update the three lemmas' call sites within the same file (frame-condition bundles for
+  - [x] Update the three lemmas' call sites within the same file (frame-condition bundles for
     the per-system completeness instantiations) to supply the new hypotheses.
 - **Timing:** ~3 hours
 - **Depends on:** 5

@@ -6,7 +6,6 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Soundness
@@ -265,6 +264,7 @@ private lemma modalApplyOne_posBox_eq
   · left; rfl
   · right; rfl
 
+omit [Hashable Atom] in
 /-- `diamondNeg`'s own rule-application result is always `.notApplicable` or `.persistent`,
 never `.linear`/`.branching`: a formula with sign `.neg` and formula-component `.diamond ψ`
 never matches any propositional decomposer (`.diamond` is a native constructor distinct from
@@ -557,6 +557,7 @@ private lemma modalLoop_eBoxNegWitness
       List.mem_append.mpr (Or.inr hwit)⟩
   · rw [hfstc] at hsf; simp at hsf
 
+omit [Hashable Atom] in
 /-- `diamondPos`'s own rule-application result, unfolded directly: `T(◇ψ)@w` always mints a
 fresh witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted
 `.linear` list with the witness `T(ψ)@w'` (`Rules.lean:93-116`; task 441: `diamondPos` is

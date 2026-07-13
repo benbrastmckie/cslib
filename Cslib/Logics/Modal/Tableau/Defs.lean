@@ -6,9 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-import Cslib.Init
 public import Cslib.Logics.Modal.Basic
-public import Cslib.Foundations.Logic.Tableau.PropositionalRules
+public import Cslib.Foundations.Logic.Tableau.PropositionalRules -- shake: keep
 
 /-! # Modal K Tableau Definitions
 

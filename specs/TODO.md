@@ -1,17 +1,17 @@
 ---
-next_project_number: 487
+next_project_number: 488
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-12. Generated from state.json dependency graph.*
+*Updated 2026-07-13. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,487 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -82,6 +82,10 @@ next_project_number: 487
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Modal Logic
+
+487 [NOT STARTED] — Refactor PR #662's modal formula primitives to make bot primitive
+
 ### Uncategorized
 
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -89,6 +93,16 @@ next_project_number: 487
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 487. Make bot primitive pr 662 modal base
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 486
+
+**Description**: Refactor PR #662's modal formula primitives to make bot primitive: change Cslib/Logics/Modal/Basic.lean's Proposition inductive from the current {atom, not, and, diamond, box} to {atom, bot, imp, and, or, box, diamond} (7 constructors, all primitive), with negation the ONLY derived connective (abbrev neg := imp · bot; ¬A := A → ⊥). RATIONALE: the fork's modal metalogic (DerivationTree/MCS/Soundness/Completeness on local main) is written on a primitive-bot, primitive-imp basis; making #662's modal base match unblocks the soundness/proof-system slice without a later base refactor. This modal base = #648's propositional core {atom, bot, imp, and, or} + {box, diamond}, so the two Proposition types share one primitive discipline and the eventual FromPropositional bridge becomes a trivial constructor-to-constructor embedding; both modalities stay primitive (box_iff_forall AND diamond_iff_exists remain Iff.rfl). Concretely vs current #662: ADD bot, imp, or constructors; DROP not (now derived); keep atom, and, box, diamond. WORK: (1) new Satisfies clauses — bot (never satisfied), imp (→), or (∨); keep and/box/diamond; not_iff_not becomes a lemma about imp·bot. (2) Wire notation via #607's Operators typeclasses: HasImp, HasOr instances, unconditional instance : Bot (Proposition Atom) := ⟨.bot⟩ (drop any [Bot Atom]/atom-⊥ encoding), neg abbrev + HasNot instance. (3) Denotation.lean: clauses for bot (∅), imp, or; keep and/box/diamond. (4) LogicalEquivalence.lean: Context/fill/Congruence arms for bot/imp/or; drop not's arm (derived). (5) Re-derive task 486's cube validity + canonicity (Cube.lean) on the new base — the axioms are stated with →/◇/□ so primitive imp should make them cleaner; review Satisfies.dual and the K/T/B/4/5/D proofs. (6) docstrings + references.bib as needed. REFERENCES (port from, do not reinvent): benbrastmckie feat/propositional-v2 (#648) Cslib/Logics/Propositional/Defs.lean for the {atom,bot,imp,and,or}+neg-derived pattern (inductive, Bot instance, subst, HasNot); local main Cslib/Logics/Modal/Basic.lean for the modal bot/imp-primitive wiring (bot:=.bot, imp:=.imp, instance:Bot:=⟨.bot⟩, neg_def). BASE: build in a worktree branched from task-486-pr662-modal-package (commit 4ebdba54 — has the completed cube on the OLD base, which this task refactors underneath). NEVER main, NEVER the stale fork feat/modal-formula-primitives=8d7a061e. CONSTRAINTS: zero sorry, zero new axioms; gate on module-scoped lake build Cslib.Logics.Modal.* (486 found full CI green — re-verify); single clean commit; NO push/PR action (user runs /pr separately). EXCLUDE (unchanged from 486): FromPropositional.lean (still gated on the #648 propositional-basis decision — this task only aligns the MODAL base), Metalogic/**, InterSystem, ProofSystem/, Tableau/, HML/. This makes #662 land the metalogic-ready modal base; the proof-system+soundness slice stacks on it next. (Follow-up from #486; user-directed 2026-07-12.)
+
+---
 
 ### 486. Rework pr 662 modal soundness package
 - **Status**: [COMPLETED]

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 487,
+  "next_project_number": 488,
   "active_projects": [
     {
       "project_number": 486,
@@ -2522,6 +2522,20 @@
         ]
       },
       "completion_summary": "Divide/coordinate deliverables produced and reflect the final arrangement: #662 stacked on #607, #648/#649 kept independent on main pending the propositional-basis decision. Artifacts: pr-607-review.md, zulip-coordination.md (draft), plans 02/03. The Zulip post itself remains unposted (task 466, pending explicit approval + fmontesi return 23 July)."
+    },
+    {
+      "project_number": 487,
+      "project_name": "make_bot_primitive_pr_662_modal_base",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Refactor PR #662's modal formula primitives to make bot primitive: change Cslib/Logics/Modal/Basic.lean's Proposition inductive from the current {atom, not, and, diamond, box} to {atom, bot, imp, and, or, box, diamond} (7 constructors, all primitive), with negation the ONLY derived connective (abbrev neg := imp · bot; ¬A := A → ⊥). RATIONALE: the fork's modal metalogic (DerivationTree/MCS/Soundness/Completeness on local main) is written on a primitive-bot, primitive-imp basis; making #662's modal base match unblocks the soundness/proof-system slice without a later base refactor. This modal base = #648's propositional core {atom, bot, imp, and, or} + {box, diamond}, so the two Proposition types share one primitive discipline and the eventual FromPropositional bridge becomes a trivial constructor-to-constructor embedding; both modalities stay primitive (box_iff_forall AND diamond_iff_exists remain Iff.rfl). Concretely vs current #662: ADD bot, imp, or constructors; DROP not (now derived); keep atom, and, box, diamond. WORK: (1) new Satisfies clauses — bot (never satisfied), imp (→), or (∨); keep and/box/diamond; not_iff_not becomes a lemma about imp·bot. (2) Wire notation via #607's Operators typeclasses: HasImp, HasOr instances, unconditional instance : Bot (Proposition Atom) := ⟨.bot⟩ (drop any [Bot Atom]/atom-⊥ encoding), neg abbrev + HasNot instance. (3) Denotation.lean: clauses for bot (∅), imp, or; keep and/box/diamond. (4) LogicalEquivalence.lean: Context/fill/Congruence arms for bot/imp/or; drop not's arm (derived). (5) Re-derive task 486's cube validity + canonicity (Cube.lean) on the new base — the axioms are stated with →/◇/□ so primitive imp should make them cleaner; review Satisfies.dual and the K/T/B/4/5/D proofs. (6) docstrings + references.bib as needed. REFERENCES (port from, do not reinvent): benbrastmckie feat/propositional-v2 (#648) Cslib/Logics/Propositional/Defs.lean for the {atom,bot,imp,and,or}+neg-derived pattern (inductive, Bot instance, subst, HasNot); local main Cslib/Logics/Modal/Basic.lean for the modal bot/imp-primitive wiring (bot:=.bot, imp:=.imp, instance:Bot:=⟨.bot⟩, neg_def). BASE: build in a worktree branched from task-486-pr662-modal-package (commit 4ebdba54 — has the completed cube on the OLD base, which this task refactors underneath). NEVER main, NEVER the stale fork feat/modal-formula-primitives=8d7a061e. CONSTRAINTS: zero sorry, zero new axioms; gate on module-scoped lake build Cslib.Logics.Modal.* (486 found full CI green — re-verify); single clean commit; NO push/PR action (user runs /pr separately). EXCLUDE (unchanged from 486): FromPropositional.lean (still gated on the #648 propositional-basis decision — this task only aligns the MODAL base), Metalogic/**, InterSystem, ProofSystem/, Tableau/, HML/. This makes #662 land the metalogic-ready modal base; the proof-system+soundness slice stacks on it next. (Follow-up from #486; user-directed 2026-07-12.)",
+      "created": "2026-07-13T00:44:12Z",
+      "last_updated": "2026-07-13T00:44:12Z",
+      "parent_task": 486,
+      "dependencies": [
+        486
+      ],
+      "topic": "modal-logic"
     }
   ],
   "repository_health": {

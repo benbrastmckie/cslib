@@ -168,6 +168,64 @@ lemma accFreshInv_empty
   simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
   exact absurd hedge (by decide)
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Helper for the negative-implication α-rule (positive antecedent): if `F(A → C)` at world
+`lbl` fails to be satisfied by `(m, f)`, and `b` (with accessibility `acc`) is otherwise
+satisfiable via `(m, f)`, then `[T(A)@lbl, F(C)@lbl] ++ b` is satisfiable via `(m, f)`.
+
+This is the shared tail of the ~18 leaf case-arms of `modalStepBranch_preserves_sat` for the
+negative-implication α-rule where the antecedent `A` is not itself a negated implication
+(`A ≠ A₁ → ⊥`); see `negImp_alpha_preserved_neg` for that shape. -/
+private lemma negImp_alpha_preserved
+    {A C : Proposition Atom} {lbl : WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility}
+    {W : Type u} {m : Model W Atom} {f : WorldIndex → W}
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+                    (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
+    (hneg : ¬Satisfies m (f lbl) (Proposition.imp A C)) :
+    branchSatisfiable.{v, u} ([⟨.pos, A, lbl⟩, ⟨.neg, C, lbl⟩] ++ b) acc := by
+  simp only [Satisfies] at hneg
+  have hsa : Satisfies m (f lbl) A := by by_contra h; exact hneg (fun ha => absurd ha h)
+  have hnc : ¬Satisfies m (f lbl) C := fun hC => hneg (fun _ => hC)
+  refine ⟨W, m, f, hacc, ?_⟩
+  intro sf' hmem'
+  simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+  rcases hmem' with (rfl | rfl) | hmem_old
+  · exact ⟨fun _ => hsa, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun _ => hnc⟩
+  · exact hb sf' hmem_old
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Helper for the negative-implication α-rule (negation antecedent `A = A₁ → ⊥`): if
+`F((A₁ → ⊥) → C)` at world `lbl` fails to be satisfied by `(m, f)`, and `b` (with accessibility
+`acc`) is otherwise satisfiable via `(m, f)`, then `[F(A₁)@lbl, F(C)@lbl] ++ b` is satisfiable
+via `(m, f)`.
+
+This is the shared tail of the 4 leaf case-arms of `modalStepBranch_preserves_sat` for the
+negative-implication α-rule where the antecedent is a negated implication. -/
+private lemma negImp_alpha_preserved_neg
+    {A1 C : Proposition Atom} {lbl : WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility}
+    {W : Type u} {m : Model W Atom} {f : WorldIndex → W}
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+                    (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
+    (hneg : ¬Satisfies m (f lbl) (Proposition.imp (Proposition.imp A1 Proposition.bot) C)) :
+    branchSatisfiable.{v, u} ([⟨.neg, A1, lbl⟩, ⟨.neg, C, lbl⟩] ++ b) acc := by
+  simp only [Satisfies] at hneg
+  have hna1 : ¬Satisfies m (f lbl) A1 := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
+  have hnc : ¬Satisfies m (f lbl) C := fun hC => hneg (fun _ => hC)
+  refine ⟨W, m, f, hacc, ?_⟩
+  intro sf' hmem'
+  simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+  rcases hmem' with (rfl | rfl) | hmem_old
+  · exact ⟨fun h => by simp at h, fun _ => hna1⟩
+  · exact ⟨fun h => by simp at h, fun _ => hnc⟩
+  · exact hb sf' hmem_old
+
 /-- If `modalStepBranch b e acc = some (newBs, newExps, newAcc)` and `b` is satisfiable
 (with the freshness invariant `hInv`), then some branch in `newBs` is satisfiable.
 
@@ -1151,17 +1209,7 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.bot) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩, ⟨.neg, Proposition.bot, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun h => by simp at h, fun _ => hna1⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved_neg hacc hb hneg⟩
             | atom a2n =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
@@ -1278,60 +1326,21 @@ theorem modalStepBranch_preserves_sat
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.atom an) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
-                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | bot =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.bot) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
-                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | box ab =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.box ab) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
-                ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | imp a1 a2 =>
             cases a2 with
             | bot =>
@@ -1340,78 +1349,28 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩,
-                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun h => by simp at h, fun _ => hna1⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved_neg hacc hb hneg⟩
             | atom a2n =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
-                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | box a2b =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
-                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | imp b1 b2 =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.atom cn) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
-                  ⟨.neg, Proposition.atom cn, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
         | imp c1 c2 =>
           cases a with
           | atom an =>
@@ -1420,60 +1379,21 @@ theorem modalStepBranch_preserves_sat
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.atom an) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | bot =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.bot) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | box ab =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.box ab) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | imp a1 a2 =>
             cases a2 with
             | bot =>
@@ -1482,82 +1402,28 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
-                fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun h => by simp at h, fun _ => hna1⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved_neg hacc hb hneg⟩
             | atom a2n =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
-                fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | box a2b =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
-                fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | imp b1 b2 =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.imp c1 c2) :=
-                fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
-                ⟨.neg, Proposition.imp c1 c2, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
         | box cb =>
           cases a with
           | atom an =>
@@ -1566,60 +1432,21 @@ theorem modalStepBranch_preserves_sat
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.atom an) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.atom an, lbl⟩,
-              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | bot =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.bot) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.bot, lbl⟩,
-              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | box ab =>
             simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
               modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
               Option.some.injEq, Prod.mk.injEq] at hsf
             obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
             subst hnewBs hnewAcc
-            simp only [Satisfies] at hneg
-            have hsa : Satisfies m (f lbl) (Proposition.box ab) := by
-              by_contra h
-              exact hneg (fun ha => absurd ha h)
-            have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-            refine ⟨[⟨.pos, Proposition.box ab, lbl⟩,
-              ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-              List.mem_cons_self, W, m, f, hacc, ?_⟩
-            intro sf' hmem'
-            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-            rcases hmem' with (rfl | rfl) | hmem_old
-            · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-            · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-            · exact hb sf' hmem_old
+            exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
           | imp a1 a2 =>
             cases a2 with
             | bot =>
@@ -1628,78 +1455,28 @@ theorem modalStepBranch_preserves_sat
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hna1 : ¬Satisfies m (f lbl) (a1) := fun ha1 => hneg (fun hcon => absurd ha1 hcon)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.neg, a1, lbl⟩,
-                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun h => by simp at h, fun _ => hna1⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved_neg hacc hb hneg⟩
             | atom a2n =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.atom a2n)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.atom a2n), lbl⟩,
-                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | box a2b =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.box a2b)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.box a2b), lbl⟩,
-                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
             | imp b1 b2 =>
               simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
                 modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
                 Option.some.injEq, Prod.mk.injEq] at hsf
               obtain ⟨hnewBs, _, hnewAcc⟩ := hsf
               subst hnewBs hnewAcc
-              simp only [Satisfies] at hneg
-              have hsa : Satisfies m (f lbl) (Proposition.imp a1 (Proposition.imp b1 b2)) := by
-                by_contra h
-                exact hneg (fun ha => absurd ha h)
-              have hnc : ¬Satisfies m (f lbl) (Proposition.box cb) := fun hC => hneg (fun _ => hC)
-              refine ⟨[⟨.pos, Proposition.imp a1 (Proposition.imp b1 b2), lbl⟩,
-                ⟨.neg, Proposition.box cb, lbl⟩] ++ b,
-                List.mem_cons_self, W, m, f, hacc, ?_⟩
-              intro sf' hmem'
-              simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
-              rcases hmem' with (rfl | rfl) | hmem_old
-              · exact ⟨fun _ => hsa, fun h => by simp at h⟩
-              · exact ⟨fun h => by simp at h, fun _ => hnc⟩
-              · exact hb sf' hmem_old
+              exact ⟨_, List.mem_cons_self, negImp_alpha_preserved hacc hb hneg⟩
 end Cslib.Logic.Modal.Tableau
 
 end

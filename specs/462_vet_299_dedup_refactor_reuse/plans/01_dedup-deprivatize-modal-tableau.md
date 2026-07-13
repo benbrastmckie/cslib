@@ -188,7 +188,42 @@ call sites to the de-privatized originals from Phase 2.
 
 ---
 
-### Phase 4: CI verification and zero-debt confirmation [NOT STARTED]
+### Phase 4: CI verification and zero-debt confirmation [COMPLETED]
+
+**Deviation note**: `lake exe checkInitImports`, `lake test`, `lake shake`, and `lake exe
+mk_all --module` require a full-project build. At execution time,
+`Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` had substantial uncommitted,
+in-progress changes from a concurrent task-317 agent (215 insertions / 74 deletions, one
+active `sorry`, one broken type-mismatch), causing `lake build` (repo-wide) and every tool
+that depends on it to fail — entirely outside this task's territory
+(`Cslib/Logics/Modal/Tableau/`) and unrelated to these changes. *(deviation: substituted
+equivalent scoped/manual verification for the four full-repo-only steps — see below — since
+the repo-wide build was blocked by another task's concurrent uncommitted work, not by this
+task's changes)*
+
+Scoped/manual equivalents actually run:
+- `lake build` for all 11 `Cslib.Logics.Modal.Tableau.*` modules (the full Tableau tree, the
+  fully self-contained blast radius — grep confirms no file outside this directory imports it):
+  all green, zero errors.
+- `checkInitImports` manually verified: all 4 touched files begin with `import Cslib.Init`.
+- `lake exe lint-style`: ran repo-wide (a source-text scan, not gated on `lake build`); exit 0,
+  zero findings.
+- `lake shake --add-public --keep-implied --keep-prefix`: ran repo-wide; processed
+  `Completeness.lean` and `CompletenessLoop.lean` fully (replaying their existing lint
+  warnings) with zero new unused-import findings before erroring on the unrelated
+  out-of-date Propositional target.
+- `mk_all` (module listing): trivially satisfied — no files added/removed; grep confirms all
+  4 touched files already listed in `Cslib.lean`.
+- `lean_verify` on `modalStepBranch_preserves_sat`: axioms = `{propext, Classical.choice,
+  Quot.sound}` only (the three standard axioms) — zero new axioms, zero sorry.
+- `grep -rn sorry` / `grep -rn "^axiom "` on all 4 touched files: 0 matches each.
+- Grep for the 4 deleted lemma names (`modalLoop_stepBranch_none_saturated`,
+  `modalLoop_eClosure`, `modalLoopSf_pos`, `modalLoopSf_one_imp_depth_zero`) across all of
+  `Cslib/`: 0 residual references.
+
+Not run (blocked by the external issue, not re-attempted to avoid racing the concurrent
+agent's working tree): `lake test`, repo-wide `lake exe checkInitImports` binary, repo-wide
+`lake exe mk_all --module` binary invocation, full unblocked `lake shake` pass.
 
 **Goal**: Run the full CSLib CI pipeline across all touched modules and confirm the zero-debt
 invariant (no sorry, no axioms) holds end-to-end.

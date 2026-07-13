@@ -1,0 +1,25 @@
+{
+  "status": "implemented",
+  "summary": "Extracted 2 helper lemmas collapsing 22 duplicated leaf case-arms in SoundnessStep.lean (modalStepBranch_preserves_sat); de-privatized 4 reused base lemmas in Completeness.lean/FmpMeasure.lean; deleted 4 exact-copy local re-derivations in CompletenessLoop.lean and repointed call sites. Net -321 lines across 4 files. All 11 Modal.Tableau modules build clean; lean_verify: zero sorry, zero new axioms. Repo-wide CI steps (checkInitImports binary, lake test, lake shake full pass, mk_all binary) blocked by unrelated concurrent task-317 uncommitted changes outside this task's territory; scoped/manual equivalents substituted and passed.",
+  "phases_completed": 4,
+  "phases_total": 4,
+  "artifacts": [
+    {
+      "path": "specs/462_vet_299_dedup_refactor_reuse/plans/01_dedup-deprivatize-modal-tableau.md",
+      "type": "summary",
+      "summary": "Implementation plan, all 4 phases marked [COMPLETED] with Phase 4 deviation note documenting the CI substitution."
+    },
+    {
+      "path": "specs/462_vet_299_dedup_refactor_reuse/summaries/01_dedup-deprivatize-modal-tableau-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: per-phase description, line-count table, commit list, plan deviations."
+    }
+  ],
+  "blockers": [
+    "Full-repo-only CI steps (lake exe checkInitImports binary, lake test, lake shake full pass, lake exe mk_all --module binary) could not be executed because Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean has substantial uncommitted, in-progress changes from a concurrent task-317 agent (active sorry + type-mismatch build error), which breaks any repo-wide `lake build`. This is outside task 462's territory (Cslib/Logics/Modal/Tableau/) and not caused by these changes. Recommend re-running the 4 blocked CI steps once task 317's tree is committed/green."
+  ],
+  "continuation_context": null,
+  "next_action_hint": "Re-run `lake exe checkInitImports`, `lake test`, `lake shake --add-public --keep-implied --keep-prefix`, and `lake exe mk_all --module` once task 317's Scheme.lean/Completeness.lean tree is committed and green, to close out full repo-wide CI for task 462 (scoped equivalents already passed).",
+  "sorry_inventory": [],
+  "commits": ["f11e3a48", "38089c61", "b834fce6"]
+}

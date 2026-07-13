@@ -11,7 +11,7 @@ next_project_number: 497
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,481,482,483,490,491 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,463,465,466,474,478,479,481,482,483,490,491 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,480 | 36,37,181,317,407,425,449,478,490 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,492,493,495 | 39,40,181,215,300,301,375,480,491 | foundations, code hygiene, modal-logic |
 | 4 | 412,484,494,496 | 41,479,481,482,483,492,495 | modal logic, code hygiene, modal-logic |
@@ -25,19 +25,19 @@ next_project_number: 497
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [PLANNED] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
-430 [RESEARCHED] — Prove the atom-persistence / upward-closure structural lemma for 
+430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 
 ### Modal Logic
 
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
+441 [BLOCKED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
@@ -94,8 +94,6 @@ next_project_number: 497
 
 ### Uncategorized
 
-461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
-462 [NOT STARTED] — Vet of task 299 flagged two maintainability items (both non-block
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
@@ -472,18 +470,23 @@ CSLib Zulip AI policy: any prose intended for upstream posting must be human-aut
 ---
 
 ### 462. Refactor duplicated case-arms + eliminate private-lemma re-derivation in modal tableau (task 299 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
-- **Dependencies**: Task 457, Task 459
+- **Dependencies**: Task 457, Task 459, Task 461
+- **Research**: [462_vet_299_dedup_refactor_reuse/reports/01_dedup-refactor-and-deprivatize.md]
+- **Plan**: [462_vet_299_dedup_refactor_reuse/plans/01_dedup-deprivatize-modal-tableau.md]
+- **Summary**: [462_vet_299_dedup_refactor_reuse/summaries/01_dedup-deprivatize-modal-tableau-summary.md]
 
 **Description**: Vet of task 299 flagged two maintainability items (both non-blocking, build/lint green): (1) `modalStepBranch_preserves_sat` (Cslib/Logics/Modal/Tableau/SoundnessStep.lean:178-1626, ~1450 lines) has ~15 near-verbatim duplicated leaf case-arms (identical simp skeletons differing only by Proposition constructor, e.g. 1402-1626 repeat a 12-line pattern ~15×) — extract a shared helper lemma/tactic to collapse them. (2) CompletenessLoop.lean:91-131 re-derives `modalLoop_stepBranch_none_saturated` as a local copy of the `private modalStepBranch_none_saturated` (Completeness.lean:683) plus bClosure/eClosure/worldBound facts, solely because `private` blocks cross-file reuse — mark those lemmas `protected` in Completeness.lean/FmpMeasure.lean and import/reuse them. Preserve zero sorry/axioms; confirm scoped `lake build` green.
 
 ---
 
 ### 461. Add omit [...] annotations for unused section variables in tableau proofs (task 299/455 vet)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [461_vet_299_unused_section_vars/reports/01_unused-section-vars.md]
+- **Plan**: [461_vet_299_unused_section_vars/plans/01_omit-unused-section-vars.md]
 
 **Description**: Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] in` before each flagged lemma (matching the existing pattern already used elsewhere in these files): Cslib/Logics/Modal/Tableau/Branch.lean:104 (`modalNextWorld_gt`, omit [DecidableEq Atom] [Hashable Atom]), Branch.lean:132 (`label_le_modalMaxWorld`, omit [DecidableEq Atom]), Completeness.lean:71 (`extractModel_atom_sat_iff`, omit [Hashable Atom]), Completeness.lean:88 (`extractModel_bot_false`, omit [Hashable Atom]), SoundnessStep.lean:92 (`modalClosed_unsat`), and Cslib/Logics/Propositional/Tableau/Classical/Completeness.lean:1102 (`classicalStepBranch_mem_preserved`, omit [Hashable Atom]). Low severity, non-blocking.
 
@@ -779,11 +782,12 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 ---
 
 ### 441. Modal proposition native refactor
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 299
+- **Dependencies**: Task 299, Task 461, Task 462
 - **Plan**: [441_modal_proposition_native_refactor/plans/01_modal-proposition-native-refactor.md]
+- **Summary**: [441_modal_proposition_native_refactor/handoffs/01_scope-discovery-blocker.md]
 
 **Description**: Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.
 
@@ -839,7 +843,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
 
 ### 430. Prove atom persistence upward closure for intexpan
 - **Effort**: 2-3 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 317
@@ -851,6 +855,7 @@ Reference: specs/426_temporal_tableau_ordconstraints_redesign/plans/02_phase3-st
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-b-findings.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-c-findings.md]
   - [430_prove_atom_persistence_upward_closure_for_intexpan/reports/02_teammate-d-findings.md]
+- **Plan**: [430_prove_atom_persistence_upward_closure_for_intexpan/plans/03_upward-closure-bridge-discharge.md]
 
 **Description**: Prove the atom-persistence / upward-closure structural lemma for open branches produced by `intExpandBranches`, and use it to discharge the two validity-bridge sorries in task 317.
 
@@ -1173,7 +1178,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -1185,22 +1190,8 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
   - [317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md]
   - [317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md]
   - [317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md]
-- **Research**:
-  - [317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md]
-  - [317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md]
-  - [317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md]
-  - [317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md]
-  - [317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md]
-  - [317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md]
-  - [317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md]
-  - [317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md]
-- **Summary**:
-  - [317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md]
-  - [317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase2a-blocked-summary.md]
-  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md]
-  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md]
-  - [317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase4-summary.md]
-  - [317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md]
+- **Summary**: [317_propositional_tableau_completeness/handoffs/01_phase1-continuation.md]
+- **Research**: [317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md]
 
 **Description**: Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.
 

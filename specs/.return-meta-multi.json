@@ -1,0 +1,21 @@
+{
+  "status": "partial",
+  "metadata": {
+    "tasks_completed": [
+      461,
+      462
+    ],
+    "tasks_failed": [
+      441
+    ],
+    "tasks_partial": [
+      317
+    ],
+    "tasks_deferred": [
+      430,
+      456
+    ],
+    "cycles_used": 3,
+    "multi_task_mode": true
+  }
+}

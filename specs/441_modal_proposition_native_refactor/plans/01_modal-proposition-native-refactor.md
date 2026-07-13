@@ -165,7 +165,47 @@ established the set; re-verify against the working tree).
 
 ---
 
-### Phase A: Native datatype + Satisfies + complexity + downstream foundation [NOT STARTED]
+### Phase A: Native datatype + Satisfies + complexity + downstream foundation [BLOCKED]
+
+**BLOCKER** (discovered during implementation attempt, see
+`handoffs/01_scope-discovery-blocker.md` for full detail):
+- **What failed**: Making `Proposition.diamond` a primitive constructor (required by this
+  plan's design) breaks a definitional identity (`diamond φ` used to be defeq to the raw
+  Łukasiewicz shape `(□(φ → ⊥)) → ⊥`) that `Cslib/Logics/Modal/Metalogic/**` (MCS.lean,
+  Completeness.lean, DerivationTree.lean) and `Cslib/Logics/Modal/ProofSystem/Instances/
+  {B,TB,KB5,S5,DB}.lean` (and their `Systems/*/{Soundness,Completeness,
+  ConservativeExtension}.lean` counterparts) rely on structurally, not just by notation.
+  None of these files are in this plan's stated consumer set.
+- **What was tried**: Implemented and individually verified (green `lake build`) the full
+  Phase A patch for `Basic.lean`, `LogicalEquivalence.lean`, `ModalEmbedding.lean`,
+  `Denotation.lean` (not in original file list -- real gap), `FromPropositional.lean`.
+  Mechanically fixed 5 axiom-schema sites (`DerivationTree.lean`, `B/TB/KB5/DB.lean`) by
+  substituting the canonical `Axioms.AxiomB` abbrev for the manual `Proposition.diamond`
+  expansion -- this part worked and rebuilt green. Attempted the same for
+  `Metalogic/Completeness.lean`'s canonical-model proofs (`canonical_symm`,
+  `canonical_eucl`, `canonical_eucl_from_5`) and found they do syntactic surgery on the
+  diamond term's structure (expecting it to unify with an `.imp` pattern), which no
+  longer works once diamond is primitive -- this is NOT mechanical, it requires either
+  restating the canonical-model proofs around the raw encoding explicitly, or adding new
+  `HasDia`/`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` infrastructure across ~9 modal
+  systems (B, TB, KB5, S5, DB, D45, D5, K45, K5).
+- **Why it's stuck**: Fixing the canonical-model layer requires either genuine new
+  proof content (a native-diamond "existence lemma" for the canonical model) or new
+  axiom-schema design, neither of which this plan discusses or scopes. This is a design
+  decision, not an implementation detail, and the blast radius (~9 systems × 3 files) is
+  large enough to warrant its own phase/task rather than folding into Phase A.
+- **What is needed**: Re-plan (new plan version) that (1) explicitly scopes the
+  Metalogic/ProofSystem consumer set and picks a resolution strategy (raw-encoding
+  restatement vs. new HasDia axiomatic infrastructure), (2) adds `FmpMeasure.lean`
+  (3011 lines) and `CompletenessLoop.lean` (1096 lines) to the Phase E/F file lists --
+  these were added by tasks 442/462 after this plan was written and are not currently
+  scoped anywhere in this plan despite depending pervasively on the Łukasiewicz
+  decomposers. Consider splitting into task 441 (datatype + Basic-layer consumers,
+  self-contained and verified buildable) + a follow-on task for the Metalogic/Hilbert
+  layer + the original Tableau-focused phases B-F.
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous
+  placeholder. Did NOT invent new axiom schemata unilaterally. All working-tree changes
+  were reverted; `git status --short -- Cslib/` is clean at HEAD `ebd6bb1d`.
 
 **Goal**: Redefine `Modal.Proposition` with native constructors and bring every direct consumer of the
 datatype (`Basic.lean`, `LogicalEquivalence.lean`, `Bimodal/Embedding/ModalEmbedding.lean`) back to

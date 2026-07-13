@@ -1,0 +1,84 @@
+{
+  "session_id": "sess_1783922075_911857",
+  "task_numbers": [
+    317,
+    430,
+    441,
+    456,
+    461,
+    462
+  ],
+  "waves": [
+    [
+      317,
+      461
+    ],
+    [
+      430,
+      456,
+      462
+    ],
+    [
+      441
+    ]
+  ],
+  "dependency_graph": {
+    "317": [],
+    "430": [
+      317
+    ],
+    "441": [
+      461,
+      462
+    ],
+    "456": [
+      317
+    ],
+    "461": [],
+    "462": [
+      461
+    ]
+  },
+  "max_cycles": 25,
+  "cycle_count": 3,
+  "failed_tasks": [
+    441
+  ],
+  "completed_tasks": [
+    461,
+    462
+  ],
+  "current_statuses": {
+    "317": "implementing",
+    "430": "planned",
+    "441": "blocked",
+    "456": "not_started",
+    "461": "completed",
+    "462": "completed"
+  },
+  "task_dirs": {
+    "317": "specs/317_propositional_tableau_completeness",
+    "430": "specs/430_prove_atom_persistence_upward_closure_for_intexpan",
+    "441": "specs/441_modal_proposition_native_refactor",
+    "456": "specs/456_shared_tableau_containment_blocking",
+    "461": "specs/461_vet_299_unused_section_vars",
+    "462": "specs/462_vet_299_dedup_refactor_reuse"
+  },
+  "research_agents": {
+    "317": "cslib-research-agent",
+    "430": "cslib-research-agent",
+    "441": "cslib-research-agent",
+    "456": "cslib-research-agent",
+    "461": "cslib-research-agent",
+    "462": "cslib-research-agent"
+  },
+  "implement_agents": {
+    "317": "cslib-implementation-agent",
+    "430": "cslib-implementation-agent",
+    "441": "cslib-implementation-agent",
+    "456": "cslib-implementation-agent",
+    "461": "cslib-implementation-agent",
+    "462": "cslib-implementation-agent"
+  },
+  "notes": "461,462 COMPLETE. 317 BANKED at Wave A (Phases 1-4/11 green, commit 19c68791) after 3 solid Fable-assisted rounds; Wave B (5-11) NOT pushed this run per user guidance (multi-day task, diminishing returns). 430/456 remain deferred behind 317 Wave B+ (documented for future run). 441 implementation in flight = last completable task."
+}

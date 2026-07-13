@@ -1,0 +1,35 @@
+{
+  "status": "planned",
+  "summary": "Produced a 5-phase plan (plans/03_upward-closure-bridge-discharge.md) to close the two validity-bridge sorries (Intuitionistic/Completeness.lean:113, Minimal/Completeness.lean:110) via a single generic upward-closure corollary (posAtWorld_upward_closed) instantiated at the edge preorder. Verifying current code this session showed task 430 has been RESHAPED by task 317 plan v6 and is NOT an independent unblock of 317: (1) truthLemma/openBranch_countermodel/tableau_complete still use the default <=-on-Nat frame (Scheme.lean:387,1448) where the raw valuation is provably NOT upward-closed (siblings; falsification spike EXP1a); (2) the Route-A edge preorder intAccessPreorder exists (Scheme.lean:309) but is UNWIRED - wiring it is task 317 Wave A (not landed); (3) task 317 v6 Phase 10 already lists both bridge sorries as its own. The plan therefore front-loads a hard coordination gate (Phase 1) and makes Phases 2-5 conditional on 317 Wave A frame plumbing + Phase 9 monotonicity landing.",
+  "artifacts": [
+    {
+      "path": "specs/430_prove_atom_persistence_upward_closure_for_intexpan/plans/03_upward-closure-bridge-discharge.md",
+      "type": "plan",
+      "summary": "5-phase plan: (1) coordination/frame gate decision, (2) generic posAtWorld_upward_closed corollary in a new file, (3) discharge intuitionistic bridge at edge frame, (4) discharge minimal bridge (incl. minBranchBotForces UC), (5) CI + verification. Waves [[1],[2],[3,4],[5]]."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "B430-1",
+      "severity": "high",
+      "description": "Task 317 Wave A (frame plumbing, Phases 1-4) has NOT landed: truthLemma/openBranch_countermodel/tableau_complete still conclude/hypothesize over the default <=-on-Nat Preorder (Scheme.lean:387,1448), not intAccessPreorder edges. At that frame the raw valuation is provably not upward-closed (sibling worlds), so both bridge sorries are unclosable. 430 cannot proceed until 317 restates the completeness frame over the edge preorder.",
+      "blocks": "Phases 2-5",
+      "owner": "task 317"
+    },
+    {
+      "id": "B430-2",
+      "severity": "high",
+      "description": "Bridge-discharge ownership conflict: task 317 v6 Phase 10 already lists Completeness.lean:113 and Minimal/Completeness.lean:110 in its sorry_inventory ('closes Phase 10'). If 317 closes them first, task 430 collapses to verify-only (Phase 5). Ownership must be resolved with 317 before 430 edits these two files (single-writer-per-file rule).",
+      "blocks": "Phases 3-4",
+      "owner": "orchestrator / task 317 coordination"
+    },
+    {
+      "id": "B430-3",
+      "severity": "medium",
+      "description": "Task 430 consumes task 317 Phase 9's intExtractValuation monotonicity lemma (along intAccessPreorder). The spike proved this monotonicity is NOT a branch-local fact for arbitrary saturated branches; it is entangled with 317 B2 (sat_atom_persist / returned-branch invariant). 430 must not re-derive it from scratch.",
+      "blocks": "Phase 2",
+      "owner": "task 317"
+    }
+  ],
+  "next_action_hint": "Hold task 430 until task 317 Wave A lands and Phase 9 exposes intExtractValuation monotonicity, then run /implement 430 (Phase 1 gate re-checks the frame and bridge-ownership). If task 317 Phase 10 closes both bridges first, run only Phase 5 to verify and mark 430 satisfied-by-317. Recommended: sequence 317 before dispatching 430 implementation; consider marking 430 [BLOCKED] on 317 in state.json until Wave A is green."
+}

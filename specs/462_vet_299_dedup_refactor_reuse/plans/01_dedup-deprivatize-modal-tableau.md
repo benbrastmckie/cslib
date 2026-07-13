@@ -1,7 +1,7 @@
 # Implementation Plan: Task #462 — Dedup Case-Arms + De-privatize Reused Lemmas (Modal Tableau)
 
 - **Task**: 462 - vet_299_dedup_refactor_reuse
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: None (all target files under `Cslib/Logics/Modal/Tableau/`, disjoint from task 317)
 - **Research Inputs**: specs/462_vet_299_dedup_refactor_reuse/reports/01_dedup-refactor-and-deprivatize.md

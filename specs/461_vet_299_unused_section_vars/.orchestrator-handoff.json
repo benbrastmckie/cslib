@@ -1,0 +1,28 @@
+{
+  "status": "implemented",
+  "summary": "Inserted 15 `omit [...] in` clauses to silence linter.unusedSectionVars across Cslib/Logics/Modal/Tableau/Branch.lean (2), SoundnessStep.lean (1), and Completeness.lean (12), per the plan's comprehensive scope. Module-scoped build (the three touched files) passes with exit 0 and zero unusedSectionVars warnings for all 15 targeted lemmas. Committed as e04a2894, path-scoped to only the 3 Lean files. Full-library CI (lake test, checkInitImports, lint-style, shake) was deferred this pass per explicit coordinator instruction, since task 317 has concurrent uncommitted WIP in unrelated Propositional/Intuitionistic/Scheme.lean territory that transiently breaks whole-library builds through no fault of this change.",
+  "phases_completed": 3,
+  "phases_total": 3,
+  "artifacts": [
+    {
+      "path": "specs/461_vet_299_unused_section_vars/summaries/01_omit-unused-section-vars-summary.md",
+      "type": "summary",
+      "summary": "Full implementation summary: 15 insertions, 1 plan-clause correction (label_le_modalMaxWorld needed both binders), a documented-but-not-chased linter-batching cascade (3+ additional lemmas out of scope), and full-CI deferral rationale."
+    }
+  ],
+  "blockers": [],
+  "continuation_context": {
+    "deferred_ci_steps": ["lake test", "lake exe checkInitImports", "lake exe lint-style", "lake shake --add-public --keep-implied --keep-prefix"],
+    "reason": "task 317 concurrent uncommitted WIP in Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean transiently breaks whole-library build",
+    "action_needed": "Re-run the 4 deferred full-library CI commands once task 317 reaches a stable/committed state, then promote this task toward PR-ready if green."
+  },
+  "next_action_hint": "Run the deferred full-library CI pipeline (lake test, checkInitImports, lint-style, shake) once task 317's Scheme.lean WIP is committed/stable, then mark task 461 [PR READY]. Optionally spawn a follow-up lint task for the additional unusedSectionVars lemmas surfaced but not fixed (extractModel_atomPos_sat, modalApplyOne_imp_pos, modalApplyOne_imp_neg, and further cascade into modalTruthLemma / modalApplyOne_fst_eq_of_not_box).",
+  "sorry_inventory": [],
+  "context": {
+    "task_number": 461,
+    "session_id": "sess_1783922075_911857_461",
+    "orchestrator_mode": true,
+    "plan_path": "specs/461_vet_299_unused_section_vars/plans/01_omit-unused-section-vars.md",
+    "lit_flag": false
+  }
+}

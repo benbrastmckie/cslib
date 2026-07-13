@@ -556,19 +556,19 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 11: Tableau soundness + saturation port [NOT STARTED]
+### Phase 11: Tableau soundness + saturation port [COMPLETED]
 
 - **Goal:** `SoundnessStep`, `Soundness`, `Saturation`, `LoopInduction` green on the native
   rules.
 - **Tasks:**
-  - [ ] `Tableau/SoundnessStep.lean`: re-establish `modalStepBranch_preserves_sat` per-rule
+  - [x] `Tableau/SoundnessStep.lean`: re-establish `modalStepBranch_preserves_sat` per-rule
     obligations on native `Satisfies` cases (Phase 1 `@[grind =]` companions); keep
     `accFreshInv` freshness plumbing.
-  - [ ] `Tableau/Soundness.lean`: port `modalExpandBranches_closed_unsat` + `modalTableau_sound`
+  - [x] `Tableau/Soundness.lean`: port `modalExpandBranches_closed_unsat` + `modalTableau_sound`
     (worklist `forall₂_*` helpers are label-generic; verify signatures).
-  - [ ] `Tableau/Saturation.lean`: port the fuel loop, `modalHintikkaSet`, entry point; confirm
+  - [x] `Tableau/Saturation.lean`: port the fuel loop, `modalHintikkaSet`, entry point; confirm
     the fuel bound type-checks against the extended `modalComplexity`.
-  - [ ] `Tableau/LoopInduction.lean`: verify the `forall₂_*` helpers compile unchanged.
+  - [x] `Tableau/LoopInduction.lean`: verify the `forall₂_*` helpers compile unchanged.
 - **Timing:** ~3 hours
 - **Depends on:** 10
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/{SoundnessStep,Soundness,Saturation,LoopInduction}.lean`

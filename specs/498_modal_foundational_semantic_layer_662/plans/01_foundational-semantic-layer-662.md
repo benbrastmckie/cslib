@@ -1,7 +1,7 @@
 # Implementation Plan: Task #498 — Modal Foundational Semantic Layer for PR #662
 
 - **Task**: 498 - Contribute the modal metalogic foundational semantic layer to CSLib as PR #662, built on the native primitive set
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 5.5 hours
 - **Dependencies**: Gated externally on PR #607 adopting the native primitive set before #662 can be pushed/re-stacked (fmontesi back 23 July). Code preparation + squash-commit are doable now.
 - **Research Inputs**: specs/498_modal_foundational_semantic_layer_662/reports/01_modal-foundational-semantic-layer.md

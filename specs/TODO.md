@@ -1,5 +1,5 @@
 ---
-next_project_number: 498
+next_project_number: 499
 ---
 
 # TODO
@@ -100,6 +100,19 @@ next_project_number: 498
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 498. Modal foundational semantic layer 662
+- **Status**: [COMPLETED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: None
+- **Research**: [498_modal_foundational_semantic_layer_662/reports/01_modal-foundational-semantic-layer.md]
+- **Plan**: [498_modal_foundational_semantic_layer_662/plans/01_foundational-semantic-layer-662.md]
+- **Summary**: [498_modal_foundational_semantic_layer_662/summaries/01_foundational-semantic-layer-662-summary.md]
+
+**Description**: Contribute the modal metalogic foundational semantic layer to CSLib as PR #662, built on the native primitive set. Two coordinated deliverables: (1) Recommend on PR #607 that the modal Proposition adopt native primitives {atom, bot, imp, and, or, box, diamond} (native bot/imp/box/diamond, not the current not-based / box-derived form), with justification lifted from task-441 Modal/Basic.lean: one decomposition rule per connective for tableau/truth-lemma machinery (structural induction, no Lukasiewicz-bridge lemmas), reuse for intuitionistic/minimal modal systems (box and diamond independent), and duality box-diamond recovered as a theorem. (2) Rework PR #662 from its current trivial box-alongside-diamond delta into a self-contained ~300 LOC foundational semantic layer slice of the task-441 metalogic on those native primitives: native Proposition + Satisfies/denotation + duality theorem + per-connective decomposition + K-axiom validity. Source metalogic lives on branch task-441-native-refactor. #662 stacks on fmontesi/connectives (#607); the actual push/stack is gated on #607 adopting the primitives. TASK CONCLUDES by squash-committing #662 with the foundational-semantic-layer contribution, then revising specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md to reflect this strategy (recommend primitives to #607 + substantial #662 metalogic slice) in place of the current box-alongside-diamond description. Parent/coordination context: task 476. Related follow-up: task 497 (imp/impl naming).
+
+---
 
 ### 497. Reconcile imp naming
 - **Status**: [NOT STARTED]

@@ -1,5 +1,5 @@
 {
-  "next_project_number": 498,
+  "next_project_number": 499,
   "active_projects": [
     {
       "project_number": 486,
@@ -2678,6 +2678,36 @@
       "description": "Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.",
       "created": "2026-07-13T15:55:03Z",
       "last_updated": "2026-07-13T15:55:03Z"
+    },
+    {
+      "project_number": 498,
+      "project_name": "modal_foundational_semantic_layer_662",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 476,
+      "description": "Contribute the modal metalogic foundational semantic layer to CSLib as PR #662, built on the native primitive set. Two coordinated deliverables: (1) Recommend on PR #607 that the modal Proposition adopt native primitives {atom, bot, imp, and, or, box, diamond} (native bot/imp/box/diamond, not the current not-based / box-derived form), with justification lifted from task-441 Modal/Basic.lean: one decomposition rule per connective for tableau/truth-lemma machinery (structural induction, no Lukasiewicz-bridge lemmas), reuse for intuitionistic/minimal modal systems (box and diamond independent), and duality box-diamond recovered as a theorem. (2) Rework PR #662 from its current trivial box-alongside-diamond delta into a self-contained ~300 LOC foundational semantic layer slice of the task-441 metalogic on those native primitives: native Proposition + Satisfies/denotation + duality theorem + per-connective decomposition + K-axiom validity. Source metalogic lives on branch task-441-native-refactor. #662 stacks on fmontesi/connectives (#607); the actual push/stack is gated on #607 adopting the primitives. TASK CONCLUDES by squash-committing #662 with the foundational-semantic-layer contribution, then revising specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md to reflect this strategy (recommend primitives to #607 + substantial #662 metalogic slice) in place of the current box-alongside-diamond description. Parent/coordination context: task 476. Related follow-up: task 497 (imp/impl naming).",
+      "created": "2026-07-13T17:25:54Z",
+      "last_updated": "2026-07-13T18:05:39Z",
+      "session_id": "sess_1783963625_6aa0c8",
+      "artifacts": [
+        {
+          "path": "specs/498_modal_foundational_semantic_layer_662/reports/01_modal-foundational-semantic-layer.md",
+          "type": "report",
+          "summary": "Identified ~300 LOC foundational semantic layer slice; mapped 3 deliverables (#607 recommendation, #662 rework, zulip revision)"
+        },
+        {
+          "path": "specs/498_modal_foundational_semantic_layer_662/plans/01_foundational-semantic-layer-662.md",
+          "type": "plan",
+          "summary": "6-phase plan: rework #662 into ~300 LOC native-primitive semantic layer, CI-verify, squash-commit; prepare #607 recommendation draft; revise zulip-coordination draft"
+        },
+        {
+          "path": "specs/498_modal_foundational_semantic_layer_662/summaries/01_foundational-semantic-layer-662-summary.md",
+          "type": "summary",
+          "summary": "All 6 phases complete; ~300 LOC native-primitive semantic layer slice extracted, full CI green, zero-debt, local squash-commit, #607+zulip drafts prepared (not posted)"
+        }
+      ],
+      "completion_summary": "Reworked PR #662 into a self-contained ~300 LOC native-primitive foundational semantic layer slice of the task-441 modal metalogic (native Proposition {atom,bot,imp,and,or,box,diamond} + Satisfies/denotation + Satisfies.dual duality theorem + per-connective Iff.rfl decomposition + Satisfies.k K-validity + denotation bridge + valid/logic). Full CI green, zero-debt (0 sorries, 0 new axioms). Local squash-commit created (not pushed); push/re-stack GATED on #607 adopting native primitives. #607 recommendation and revised task-476 zulip-coordination prepared as DRAFTs (not posted, await user approval)."
     }
   ],
   "repository_health": {

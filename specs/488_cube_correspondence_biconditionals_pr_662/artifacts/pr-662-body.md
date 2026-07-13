@@ -41,6 +41,14 @@ The 15 cube logic definitions and the essential logic-inclusion lemmas from #607
 - **Independent of #648.** #648 reworks the *propositional* `Proposition` (primitive `⊥`); this PR's modal layer has no functional dependency on the propositional files, so the two do not stack — they are siblings on #607. The propositional-basis choice (#607's derived `⊥` vs #648's primitive `⊥`) is a separate discussion; nothing here forces it.
 - **Out of scope (follow-ups):** the proof system + soundness, MCS/canonical-model completeness, `FromPropositional`, and the inter-system/tableau development are deliberately excluded and will come as separate, smaller PRs.
 
+## A note on the cube (for @fmontesi)
+
+#607's `Cube.lean` deliberately ships only `K`/`T` validity ("showcases how to prove the expected validities"). This PR fills in the remaining `B`/`4`/`5`/`D` validity and adds the canonicity + correspondence directions. I read that as completing the natural unit rather than changing your design, but I'm very happy to trim it back, split it out, or hold it if you'd rather keep the cube minimal or develop it yourself — just say the word. Since this touches the shape of the modal `Proposition`, I'm treating it as a proposal to align on, not a fait accompli, and I'm keeping the propositional-basis question (#648 vs #607) open for you and Thomas.
+
+## AI Tools Used
+
+Per the [CSLib/Mathlib AI-use policy](https://leanprover-community.github.io/contribute/index.html#use-of-ai): this contribution was developed with **Claude Code** (Anthropic's agentic CLI, Claude Opus) used for research, planning, and implementation across the modal files, under my direction and review. Every proof was checked with `lake build`/`lake test` and the `lean-lsp` tooling; I verified the final result is `sorry`-free with no new axioms (`#print axioms` shows only `propext`/`Classical.choice`/`Quot.sound`). As the policy notes, AI tools make different mistakes than humans, so reviewers may want to pay particular attention to lemma statements and naming.
+
 ## Verification
 
 - Diff confined to `Logics/Modal/{Basic,Cube,Denotation,LogicalEquivalence}.lean`, `references.bib`, and one `CslibTests/GrindLint.lean` skip entry.

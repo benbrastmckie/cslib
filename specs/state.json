@@ -2541,16 +2541,17 @@
     {
       "project_number": 488,
       "project_name": "cube_correspondence_biconditionals_pr_662",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Add frame-correspondence biconditionals to PR #662's Cube.lean, unifying the existing validity (frame property => axiom valid) and canonicity (axiom valid => frame property) directions into named iff theorems — the capstone of the cube's correspondence theory. For each of T/B/4/5/D (NOT K — K has no frame condition), add a per-frame iff: e.g. T.t_correspondence {r} [Nonempty Atom] : (global validity of φ→◇φ on frame r) ↔ Std.Refl r, proved as ⟨<axiom>_canonical, <forward via Satisfies.t/b/four/five/d + the relevant Std.Refl/Std.Symm/IsTrans/Relation.RightEuclidean/Relation.Serial instance>⟩. Backward direction reuses the existing T.t_canonical/B.b_canonical/Four.four_canonical/Five.five_canonical/D.d_canonical; forward reuses Satisfies.t/b/four/five/d (per-model, instance-parametric). Place in Cube.lean (new Correspondence section after Canonicity, or fold into Canonicity). ~5 small theorems, near-free. BASE: build on branch task-487-pr662-bot-primitive (commit 69db6de4 — the current #662 tip with the fully-primitive {atom,bot,imp,and,or,box,diamond} base + completed cube). Reuse the task-487 worktree or a new one branched from it. CONSTRAINTS: zero sorry, zero new axioms; module-scoped lake build Cslib.Logics.Modal.Cube green; single clean commit; NO push/PR. EXCLUDE everything already excluded (FromPropositional, Metalogic, ProofSystem, Tableau, InterSystem, HML). Also produces the updated #662 PR body (pr-description) describing the FINAL state: fully-primitive modal base + cube validity/canonicity/correspondence, stacked on #607, #648 independent. (Follow-up from #487; user-directed capstone before /pr.)",
       "created": "2026-07-13T01:48:22Z",
-      "last_updated": "2026-07-13T01:48:22Z",
+      "last_updated": "2026-07-13T01:55:15Z",
       "parent_task": 487,
       "dependencies": [
         487
       ],
-      "topic": "modal-logic"
+      "topic": "modal-logic",
+      "completion_summary": "Completed. Added 5 frame-correspondence biconditionals to Cube.lean (new Correspondence section after Canonicity), unifying the cube's validity + canonicity directions: T.t_correspondence (<->Std.Refl), B.b_correspondence (<->Std.Symm), Four.four_correspondence (<->IsTrans), Five.five_correspondence (<->Relation.RightEuclidean), D.d_correspondence (<->Relation.Serial). Each = <axiom>_canonical paired with forward via Satisfies.t/b/four/five/d + instance. Committed on branch task-487-pr662-bot-primitive at b041c6f7 (on top of 69db6de4). Cube.lean +55 net; zero sorry, zero new axioms (lean_verify: only propext/Classical.choice/Quot.sound); full lake build 2759 + test 8790 + lints + shake green. Only Cube.lean touched. Also produced the updated #662 PR body (artifacts/pr-662-body.md) describing the final state: fully-primitive modal base {atom,bot,imp,and,or,box,diamond} + semantic cube (validity/canonicity/correspondence), stacked on #607, independent of #648, with follow-ups (proof system/soundness/completeness) excluded. FINAL #662 total vs #607: +233/-56 across 6 files. NOT pushed -- ready for user-approved /pr on branch task-487-pr662-bot-primitive."
     }
   ],
   "repository_health": {

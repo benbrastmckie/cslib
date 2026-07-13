@@ -1,0 +1,52 @@
+{
+  "status": "implemented",
+  "task_number": 488,
+  "task_type": "cslib",
+  "session_id": "sess_1783903472_6dffde_488impl",
+  "orchestrator_mode": true,
+  "lit_flag": false,
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "new_axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "steps": {
+      "scoped_build": "green (Cslib.Logics.Modal.Cube)",
+      "full_build": "green (2759/2759 jobs)",
+      "checkInitImports": "pass",
+      "lake_lint": "pass, no warnings",
+      "lint_style": "pass, no issues",
+      "lake_shake": "one pre-existing suggestion on Cube.lean, verified unchanged vs HEAD 69db6de4 (not introduced by this task)",
+      "mk_all": "no new file listing needed; unrelated CslibTests.lean drift reverted to keep diff scoped to Cube.lean only",
+      "lake_test": "green (8790/8790 jobs)"
+    }
+  },
+  "artifacts": [
+    "Cslib/Logics/Modal/Cube.lean",
+    "specs/488_cube_correspondence_biconditionals_pr_662/summaries/01_frame-correspondence-biconditionals.md"
+  ],
+  "theorems_added": [
+    "Cslib.Logic.Modal.T.t_correspondence",
+    "Cslib.Logic.Modal.B.b_correspondence",
+    "Cslib.Logic.Modal.Four.four_correspondence",
+    "Cslib.Logic.Modal.Five.five_correspondence",
+    "Cslib.Logic.Modal.D.d_correspondence"
+  ],
+  "loc_added_net": 55,
+  "files_touched": ["Cslib/Logics/Modal/Cube.lean"],
+  "branch": "task-487-pr662-bot-primitive",
+  "worktree": "/home/benjamin/Projects/cslib-task-487-pr662-bot-primitive",
+  "commit": "b041c6f7",
+  "base_commit": "69db6de4",
+  "pushed": false,
+  "pr_touched": false,
+  "requires_user_review": false,
+  "metadata": {
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

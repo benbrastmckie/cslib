@@ -11,7 +11,7 @@ next_project_number: 489
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,488 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -82,10 +82,6 @@ next_project_number: 489
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
-### Modal Logic
-
-488 [NOT STARTED] — Add frame-correspondence biconditionals to PR #662's Cube.lean, u
-
 ### Uncategorized
 
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -95,7 +91,7 @@ next_project_number: 489
 ## Tasks
 
 ### 488. Cube correspondence biconditionals pr 662
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: Task 487

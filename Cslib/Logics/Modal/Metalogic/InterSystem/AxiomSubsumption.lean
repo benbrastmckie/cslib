@@ -75,6 +75,14 @@ lemma KAxiom_implies_TAxiom {φ : Proposition Atom} (h : KAxiom φ) : TAxiom φ 
   | .efq φ => .efq φ
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K axioms are subsumed by D axioms: every K-axiom instance is a D-axiom instance. -/
 lemma KAxiom_implies_DAxiom {φ : Proposition Atom} (h : KAxiom φ) : DAxiom φ :=
@@ -84,6 +92,14 @@ lemma KAxiom_implies_DAxiom {φ : Proposition Atom} (h : KAxiom φ) : DAxiom φ 
   | .efq φ => .efq φ
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K axioms are subsumed by B (KB) axioms: every K-axiom instance is a B-axiom instance. -/
 lemma KAxiom_implies_BAxiom {φ : Proposition Atom} (h : KAxiom φ) : BAxiom φ :=
@@ -93,6 +109,14 @@ lemma KAxiom_implies_BAxiom {φ : Proposition Atom} (h : KAxiom φ) : BAxiom φ 
   | .efq φ => .efq φ
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K axioms are subsumed by K4 axioms: every K-axiom instance is a K4-axiom instance. -/
 lemma KAxiom_implies_K4Axiom {φ : Proposition Atom} (h : KAxiom φ) : K4Axiom φ :=
@@ -102,6 +126,14 @@ lemma KAxiom_implies_K4Axiom {φ : Proposition Atom} (h : KAxiom φ) : K4Axiom �
   | .efq φ => .efq φ
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K axioms are subsumed by K5 axioms: every K-axiom instance is a K5-axiom instance. -/
 lemma KAxiom_implies_K5Axiom {φ : Proposition Atom} (h : KAxiom φ) : K5Axiom φ :=
@@ -111,6 +143,14 @@ lemma KAxiom_implies_K5Axiom {φ : Proposition Atom} (h : KAxiom φ) : K5Axiom �
   | .efq φ => .efq φ
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## D-Based Edges -/
 
@@ -123,6 +163,14 @@ lemma DAxiom_implies_D4Axiom {φ : Proposition Atom} (h : DAxiom φ) : D4Axiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalD φ => .modalD φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- D axioms are subsumed by D5 axioms: every D-axiom instance is a D5-axiom instance. -/
 lemma DAxiom_implies_D5Axiom {φ : Proposition Atom} (h : DAxiom φ) : D5Axiom φ :=
@@ -133,6 +181,14 @@ lemma DAxiom_implies_D5Axiom {φ : Proposition Atom} (h : DAxiom φ) : D5Axiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalD φ => .modalD φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- D axioms are subsumed by DB axioms: every D-axiom instance is a DB-axiom instance. -/
 lemma DAxiom_implies_DBAxiom {φ : Proposition Atom} (h : DAxiom φ) : DBAxiom φ :=
@@ -143,6 +199,14 @@ lemma DAxiom_implies_DBAxiom {φ : Proposition Atom} (h : DAxiom φ) : DBAxiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalD φ => .modalD φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## T-Based Edges -/
 
@@ -155,6 +219,14 @@ lemma TAxiom_implies_S4Axiom {φ : Proposition Atom} (h : TAxiom φ) : S4Axiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalT φ => .modalT φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- T axioms are subsumed by TB axioms: every T-axiom instance is a TB-axiom instance. -/
 lemma TAxiom_implies_TBAxiom {φ : Proposition Atom} (h : TAxiom φ) : TBAxiom φ :=
@@ -165,6 +237,14 @@ lemma TAxiom_implies_TBAxiom {φ : Proposition Atom} (h : TAxiom φ) : TBAxiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalT φ => .modalT φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## B-Based Edges -/
 
@@ -177,6 +257,14 @@ lemma BAxiom_implies_TBAxiom {φ : Proposition Atom} (h : BAxiom φ) : TBAxiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalB φ => .modalB φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- B (KB) axioms are subsumed by DB axioms: every B-axiom instance is a DB-axiom instance. -/
 lemma BAxiom_implies_DBAxiom {φ : Proposition Atom} (h : BAxiom φ) : DBAxiom φ :=
@@ -187,6 +275,14 @@ lemma BAxiom_implies_DBAxiom {φ : Proposition Atom} (h : BAxiom φ) : DBAxiom �
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalB φ => .modalB φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- B (KB) axioms are subsumed by KB5 axioms: every B-axiom instance is a KB5-axiom instance. -/
 lemma BAxiom_implies_KB5Axiom {φ : Proposition Atom} (h : BAxiom φ) : KB5Axiom φ :=
@@ -197,6 +293,14 @@ lemma BAxiom_implies_KB5Axiom {φ : Proposition Atom} (h : BAxiom φ) : KB5Axiom
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalB φ => .modalB φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## K4-Based Edges -/
 
@@ -209,6 +313,14 @@ lemma K4Axiom_implies_S4Axiom {φ : Proposition Atom} (h : K4Axiom φ) : S4Axiom
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFour φ => .modalFour φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K4 axioms are subsumed by D4 axioms: every K4-axiom instance is a D4-axiom instance. -/
 lemma K4Axiom_implies_D4Axiom {φ : Proposition Atom} (h : K4Axiom φ) : D4Axiom φ :=
@@ -219,6 +331,14 @@ lemma K4Axiom_implies_D4Axiom {φ : Proposition Atom} (h : K4Axiom φ) : D4Axiom
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFour φ => .modalFour φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K4 axioms are subsumed by K45 axioms: every K4-axiom instance is a K45-axiom instance. -/
 lemma K4Axiom_implies_K45Axiom {φ : Proposition Atom} (h : K4Axiom φ) : K45Axiom φ :=
@@ -229,6 +349,14 @@ lemma K4Axiom_implies_K45Axiom {φ : Proposition Atom} (h : K4Axiom φ) : K45Axi
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFour φ => .modalFour φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## K5-Based Edges -/
 
@@ -241,6 +369,14 @@ lemma K5Axiom_implies_D5Axiom {φ : Proposition Atom} (h : K5Axiom φ) : D5Axiom
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFive φ => .modalFive φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K5 axioms are subsumed by K45 axioms: every K5-axiom instance is a K45-axiom instance. -/
 lemma K5Axiom_implies_K45Axiom {φ : Proposition Atom} (h : K5Axiom φ) : K45Axiom φ :=
@@ -251,6 +387,14 @@ lemma K5Axiom_implies_K45Axiom {φ : Proposition Atom} (h : K5Axiom φ) : K45Axi
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFive φ => .modalFive φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- K5 axioms are subsumed by KB5 axioms: every K5-axiom instance is a KB5-axiom instance. -/
 lemma K5Axiom_implies_KB5Axiom {φ : Proposition Atom} (h : K5Axiom φ) : KB5Axiom φ :=
@@ -261,6 +405,14 @@ lemma K5Axiom_implies_KB5Axiom {φ : Proposition Atom} (h : K5Axiom φ) : KB5Axi
   | .peirce φ ψ => .peirce φ ψ
   | .modalK φ ψ => .modalK φ ψ
   | .modalFive φ => .modalFive φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## K45-Based Edges -/
 
@@ -274,6 +426,14 @@ lemma K45Axiom_implies_D45Axiom {φ : Proposition Atom} (h : K45Axiom φ) : D45A
   | .modalK φ ψ => .modalK φ ψ
   | .modalFour φ => .modalFour φ
   | .modalFive φ => .modalFive φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## D4-Based Edges -/
 
@@ -287,6 +447,14 @@ lemma D4Axiom_implies_D45Axiom {φ : Proposition Atom} (h : D4Axiom φ) : D45Axi
   | .modalK φ ψ => .modalK φ ψ
   | .modalD φ => .modalD φ
   | .modalFour φ => .modalFour φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## D5-Based Edges -/
 
@@ -300,6 +468,14 @@ lemma D5Axiom_implies_D45Axiom {φ : Proposition Atom} (h : D5Axiom φ) : D45Axi
   | .modalK φ ψ => .modalK φ ψ
   | .modalD φ => .modalD φ
   | .modalFive φ => .modalFive φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-! ## Top-Level Edges (into S5) -/
 
@@ -314,6 +490,14 @@ lemma S4Axiom_implies_ModalAxiom {φ : Proposition Atom} (h : S4Axiom φ) : Moda
   | .modalK φ ψ => .modalK φ ψ
   | .modalT φ => .modalT φ
   | .modalFour φ => .modalFour φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 /-- TB axioms are subsumed by S5 (ModalAxiom): every TB-axiom instance is a ModalAxiom instance.
 S5 adds 4 (transitivity) to TB. -/
@@ -326,6 +510,14 @@ lemma TBAxiom_implies_ModalAxiom {φ : Proposition Atom} (h : TBAxiom φ) : Moda
   | .modalK φ ψ => .modalK φ ψ
   | .modalT φ => .modalT φ
   | .modalB φ => .modalB φ
+  | .andI φ ψ => .andI φ ψ
+  | .andE1 φ ψ => .andE1 φ ψ
+  | .andE2 φ ψ => .andE2 φ ψ
+  | .orI1 φ ψ => .orI1 φ ψ
+  | .orI2 φ ψ => .orI2 φ ψ
+  | .orE φ ψ χ => .orE φ ψ χ
+  | .diaDualityFwd φ => .diaDualityFwd φ
+  | .diaDualityBack φ => .diaDualityBack φ
 
 end Cslib.Logic.Modal
 

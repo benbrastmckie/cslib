@@ -475,7 +475,7 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 9: Systems completeness instantiations + ConservativeExtension + Metalogic sweep [NOT STARTED]
+### Phase 9: Systems completeness instantiations + ConservativeExtension + Metalogic sweep [COMPLETED]
 
 - **Scope correction discovered during Phase 7-8**: `Completeness.lean`'s module docstring
   (`:245-256`, pre-existing) documents **three** truth-lemma families, not one: the generic
@@ -496,18 +496,18 @@ consumer set at the start of each phase.
   InterSystem, GenericMCSBridge, DeductionTheorem, Cube all green — the entire
   Metalogic/ProofSystem subtree builds.
 - **Tasks:**
-  - [ ] 15 `Systems/*/Completeness.lean`: pass the new axiom callbacks
+  - [x] 15 `Systems/*/Completeness.lean`: pass the new axiom callbacks
     (`fun φ ψ => .andI φ ψ` style, matching each system's constructor names) to
     `truth_lemma`/`strong_completeness_iff` instantiations; supply `h_dualFwd`/`h_dualBack` to
     the frame-lemma bundles for the B/5-family systems (canonical_symm/eucl users).
-  - [ ] 15 `Systems/*/ConservativeExtension.lean`: extend the axiom-mapping proofs with the 8
+  - [x] 15 `Systems/*/ConservativeExtension.lean`: extend the axiom-mapping proofs with the 8
     new constructor cases (uniform constructor-to-constructor mapping).
-  - [ ] Sweep and repair: `Metalogic/InterSystem/{AxiomSubsumption,Conservativity,Lifting,
+  - [x] Sweep and repair: `Metalogic/InterSystem/{AxiomSubsumption,Conservativity,Lifting,
     LiftViaMorphism}.lean`, `Metalogic/GenericMCSBridge.lean`, `Metalogic/DeductionTheorem.lean`,
     `Metalogic/Soundness.lean`, `Cslib/Logics/Modal/Cube.lean` — grep confirmed no direct
     and/or/◇ dependence, but exhaustive matches and the new axiom constructors in subsumption
     proofs may surface; fix mechanically.
-  - [ ] `lake build` of the full `Cslib.Logics.Modal.Metalogic` + `...ProofSystem` + `...Cube`
+  - [x] `lake build` of the full `Cslib.Logics.Modal.Metalogic` + `...ProofSystem` + `...Cube`
     subtree.
 - **Timing:** ~3 hours
 - **Depends on:** 4, 8

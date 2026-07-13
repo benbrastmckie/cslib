@@ -161,6 +161,28 @@ theorem bimodal_truthAt_toBimodal_iff_satisfies {World Atom : Type}
     simp only [Modal.Proposition.toBimodal, truthAt, Modal.Satisfies]
     exact ⟨fun h he => (ih2 w).mp (h ((ih1 w).mpr he)),
            fun h hm => (ih2 w).mpr (h ((ih1 w).mp hm))⟩
+  | and φ ψ ih1 ih2 =>
+    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.and, truthAt, Modal.Satisfies]
+    constructor
+    · intro h
+      constructor
+      · by_contra h1
+        exact h (fun hs => absurd ((ih1 w).mp hs) h1)
+      · by_contra h2
+        exact h (fun _ hs => absurd ((ih2 w).mp hs) h2)
+    · intro ⟨h1, h2⟩ hf
+      exact hf ((ih1 w).mpr h1) ((ih2 w).mpr h2)
+  | or φ ψ ih1 ih2 =>
+    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.or, truthAt, Modal.Satisfies]
+    constructor
+    · intro h
+      rcases Classical.em (Modal.Satisfies m w φ) with h1 | h1
+      · exact Or.inl h1
+      · exact Or.inr ((ih2 w).mp (h (fun hs => absurd ((ih1 w).mp hs) h1)))
+    · intro h hn
+      cases h with
+      | inl h => exact absurd ((ih1 w).mpr h) hn
+      | inr h => exact (ih2 w).mpr h
   | box φ ih =>
     simp only [Modal.Proposition.toBimodal, truthAt, Modal.Satisfies]
     constructor
@@ -186,6 +208,25 @@ theorem bimodal_truthAt_toBimodal_iff_satisfies {World Atom : Type}
       -- Rewrite Omega back to kripkeAdapterOmega m w (S5 stability)
       rw [← kripkeAdapterOmega_eq_of_accessible m w w' h_trans h_eucl h_rw] at h_truth
       exact h_truth
+  | diamond φ ih =>
+    simp only [Modal.Proposition.toBimodal, Bimodal.Formula.diamond, Bimodal.Formula.neg,
+      Modal.Satisfies]
+    constructor
+    · -- Forward: ¬(∀ σ ∈ Omega, ¬truthAt ... φ.toBimodal) → ∃ w', m.r w w' ∧ Satisfies m w' φ
+      intro h
+      by_contra h_not_ex
+      push Not at h_not_ex
+      apply h
+      intro σ hσ hφσ
+      obtain ⟨w', h_rw, rfl⟩ := hσ
+      rw [kripkeAdapterOmega_eq_of_accessible m w w' h_trans h_eucl h_rw] at hφσ
+      exact h_not_ex w' h_rw ((ih w').mp hφσ)
+    · -- Backward: (∃ w', m.r w w' ∧ Satisfies m w' φ) → ¬(∀ σ ∈ Omega, ¬truthAt ... φ.toBimodal)
+      rintro ⟨w', h_rw, h_sat⟩ h_all
+      have h_mem : kripkeAdapterHistory w' ∈ kripkeAdapterOmega m w := ⟨w', h_rw, rfl⟩
+      have h_truth := (ih w').mpr h_sat
+      rw [← kripkeAdapterOmega_eq_of_accessible m w w' h_trans h_eucl h_rw] at h_truth
+      exact h_all (kripkeAdapterHistory w') h_mem h_truth
 
 /-! ## Main Conservativity Theorem -/
 

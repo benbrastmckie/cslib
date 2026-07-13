@@ -1,5 +1,5 @@
 ---
-next_project_number: 489
+next_project_number: 490
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 489
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,461,462,463,465,466,474,478,479,480,481,482,483,484,489 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456 | 36,37,181,317,407,425,449 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414 | 39,40,181,215,300,301,375 | foundations, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -82,6 +82,10 @@ next_project_number: 489
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Modal Logic
+
+489 [NOT STARTED] — Repackage the modal formula-base reshape as a maintainer-facing p
+
 ### Uncategorized
 
 461 [NOT STARTED] — Vet found 6 `linter.unusedSectionVars` warnings; add `omit [...] 
@@ -89,6 +93,16 @@ next_project_number: 489
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 489. Propose modal base reshape to 607
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 488
+
+**Description**: Repackage the modal formula-base reshape as a maintainer-facing proposal: (1) a Zulip message to @fmontesi (CSLib > Modal Logic) proposing that the modal Proposition adopt the fully-primitive {atom,bot,imp,and,or,box,diamond} base (bot/imp primitive, neg derived) motivated by the incoming modal metalogic, framed decision-his/labor-yours with the semantic tradeoff (¬/∧ become derived) acknowledged, and tying in the companion propositional-⊥ question (#648 vs #607) for him and Thomas Waring; (2) a clean, build-verified STANDALONE patch of just the base reshape, branched off #607 (upstream/fmontesi/connectives=ddc2c9b8), containing ONLY the modal Proposition reshape (Basic/Denotation/LogicalEquivalence) WITHOUT the cube completion, so fmontesi can cherry-pick/PR it into #607 as his own. Goal: move the foundational base decision to the layer (#607) and owner (fmontesi) where it belongs, shrinking #662 to the user's additive cube contribution. Follow-up from #488; user-directed.
+
+---
 
 ### 488. Cube correspondence biconditionals pr 662
 - **Status**: [COMPLETED]

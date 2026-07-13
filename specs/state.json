@@ -1,5 +1,5 @@
 {
-  "next_project_number": 489,
+  "next_project_number": 490,
   "active_projects": [
     {
       "project_number": 486,
@@ -2552,6 +2552,20 @@
       ],
       "topic": "modal-logic",
       "completion_summary": "Completed. Added 5 frame-correspondence biconditionals to Cube.lean (new Correspondence section after Canonicity), unifying the cube's validity + canonicity directions: T.t_correspondence (<->Std.Refl), B.b_correspondence (<->Std.Symm), Four.four_correspondence (<->IsTrans), Five.five_correspondence (<->Relation.RightEuclidean), D.d_correspondence (<->Relation.Serial). Each = <axiom>_canonical paired with forward via Satisfies.t/b/four/five/d + instance. Committed on branch task-487-pr662-bot-primitive at b041c6f7 (on top of 69db6de4). Cube.lean +55 net; zero sorry, zero new axioms (lean_verify: only propext/Classical.choice/Quot.sound); full lake build 2759 + test 8790 + lints + shake green. Only Cube.lean touched. Also produced the updated #662 PR body (artifacts/pr-662-body.md) describing the final state: fully-primitive modal base {atom,bot,imp,and,or,box,diamond} + semantic cube (validity/canonicity/correspondence), stacked on #607, independent of #648, with follow-ups (proof system/soundness/completeness) excluded. FINAL #662 total vs #607: +233/-56 across 6 files. NOT pushed -- ready for user-approved /pr on branch task-487-pr662-bot-primitive."
+    },
+    {
+      "project_number": 489,
+      "project_name": "propose_modal_base_reshape_to_607",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Repackage the modal formula-base reshape as a maintainer-facing proposal: (1) a Zulip message to @fmontesi (CSLib > Modal Logic) proposing that the modal Proposition adopt the fully-primitive {atom,bot,imp,and,or,box,diamond} base (bot/imp primitive, neg derived) motivated by the incoming modal metalogic, framed decision-his/labor-yours with the semantic tradeoff (¬/∧ become derived) acknowledged, and tying in the companion propositional-⊥ question (#648 vs #607) for him and Thomas Waring; (2) a clean, build-verified STANDALONE patch of just the base reshape, branched off #607 (upstream/fmontesi/connectives=ddc2c9b8), containing ONLY the modal Proposition reshape (Basic/Denotation/LogicalEquivalence) WITHOUT the cube completion, so fmontesi can cherry-pick/PR it into #607 as his own. Goal: move the foundational base decision to the layer (#607) and owner (fmontesi) where it belongs, shrinking #662 to the user's additive cube contribution. Follow-up from #488; user-directed.",
+      "created": "2026-07-13T03:28:03Z",
+      "last_updated": "2026-07-13T03:28:03Z",
+      "parent_task": 488,
+      "dependencies": [
+        488
+      ],
+      "topic": "modal-logic"
     }
   ],
   "repository_health": {

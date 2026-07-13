@@ -71,6 +71,14 @@ private theorem t_truth_lemma_applied (S : CanonicalWorld (@TAxiom Atom))
     (fun φ ψ => .peirce φ ψ)
     (fun φ ψ => .modalK φ ψ)
     (fun φ => .modalT φ)
+    (fun φ ψ => .andI φ ψ)
+    (fun φ ψ => .andE1 φ ψ)
+    (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ)
+    (fun φ ψ => .orI2 φ ψ)
+    (fun φ ψ χ => .orE φ ψ χ)
+    (fun φ => .diaDualityFwd φ)
+    (fun φ => .diaDualityBack φ)
     S φ
 
 /-- T soundness adapter matching the `strong_soundness` callback shape.

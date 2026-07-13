@@ -70,7 +70,10 @@ private theorem d4_truth_lemma_applied (S : CanonicalWorld (@D4Axiom Atom))
   d_truth_lemma
     (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
     (fun φ => .efq φ) (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ) (fun φ => .modalD φ) S φ
+    (fun φ ψ => .modalK φ ψ) (fun φ => .modalD φ)
+    (fun φ ψ => .andI φ ψ) (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ) (fun φ ψ => .orI2 φ ψ) (fun φ ψ χ => .orE φ ψ χ)
+    (fun φ => .diaDualityFwd φ) (fun φ => .diaDualityBack φ) S φ
 
 /-- D4 soundness adapter matching the `strong_soundness` callback shape. -/
 private theorem d4_sound_cb {World : Type u} (m : Model World Atom) (w : World)

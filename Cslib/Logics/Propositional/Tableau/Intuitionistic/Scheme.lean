@@ -2140,6 +2140,134 @@ lemma intExpMeasure_step_lt
     simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
     exact absurd hfound.1 (by simp)
 
+omit [Hashable Atom] in
+/-- `intExpMeasure` over a worklist of the form `newBs` zipped with a CONSTANT expanded set
+`newExp` collapses to a plain sum over `newBs` (mirrors `modalExpMeasure_const_exp`,
+`FmpMeasure.lean:2856`): needed by `intExpMeasure_step_lt_branch` to unfold the branching arm's
+`branches'.map (fun _ => newExp)` expanded-set shape. -/
+private lemma intExpMeasure_const_exp
+    (U : List (ISF Atom))
+    (newBs : List (List (ISF Atom)))
+    (newExp : List (ISF Atom)) :
+    intExpMeasure U newBs (newBs.map (fun _ => newExp))
+      = (newBs.map (fun child => 3 ^ intWork U child newExp)).sum := by
+  simp only [intExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
+
+omit [Hashable Atom] in
+/-- **The BETA-arm strict-decrease lemma** (task 317 phase 7.2, mirrors
+`modalExpMeasure_step_lt`'s branching case, `FmpMeasure.lean:2921-2937`): completes
+`intExpMeasure_step_lt`'s coverage of `intStepBranch`'s `.branchingResult` arm -- the two
+branching rules, `.pos, .or` (F-or) and `.neg, .and` (T-and), both producing a literal
+2-element list of singleton sub-branches directly in `intApplyRuleFull` (`Rules.lean:254,260`),
+with the next-world counter unchanged (`nw' = nw`, since branching never creates a world).
+Applies `intWork_drop` twice (once per sub-branch, each `hsub` trivial since every sub-branch is
+`bh` extended by exactly one new formula) and combines via `pow3_two_add_one_le`
+(`Cslib/Foundations/Logic/Tableau/Measure.lean:117`), exactly mirroring the Modal-K template's
+own branching case. -/
+lemma intExpMeasure_step_lt_branch
+    (φ0 : Proposition Atom)
+    (done bt : List (List (ISF Atom)))
+    (doneExp es : List (List (ISF Atom)))
+    (newExp : List (ISF Atom))
+    (bh e : List (ISF Atom)) (nw nw' : Nat)
+    (branches' : List (List (ISF Atom)))
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ intUniverse φ0)
+    (hstep : intStepBranch bh e nw = some (.branchingResult branches' nw', newExp)) :
+    intExpMeasure (intUniverse φ0)
+        (done ++ branches'.map (Branch.extendMany bh ·) ++ bt)
+        (doneExp ++ branches'.map (fun _ => newExp) ++ es) + 1
+      ≤ intExpMeasure (intUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  set U := intUniverse φ0 with hUdef
+  have hrhs := intExpMeasure_split U done doneExp bh e bt es hdlen
+  have hlhs : intExpMeasure U (done ++ branches'.map (Branch.extendMany bh ·) ++ bt)
+        (doneExp ++ branches'.map (fun _ => newExp) ++ es) =
+      intExpMeasure U done doneExp +
+        (branches'.map (fun br => 3 ^ intWork U (Branch.extendMany bh br) newExp)).sum +
+        intExpMeasure U bt es := by
+    have hlen1 : (done ++ branches'.map (Branch.extendMany bh ·)).length
+        = (doneExp ++ branches'.map (fun _ => newExp)).length := by
+      simp [List.length_append, hdlen]
+    rw [intExpMeasure_append U (done ++ branches'.map (Branch.extendMany bh ·)) bt
+          (doneExp ++ branches'.map (fun _ => newExp)) es hlen1,
+        intExpMeasure_append U done (branches'.map (Branch.extendMany bh ·))
+          doneExp (branches'.map (fun _ => newExp)) hdlen,
+        show branches'.map (fun (_ : List (ISF Atom)) => newExp)
+            = (branches'.map (Branch.extendMany bh ·)).map (fun _ => newExp) by
+          simp [Function.comp_def],
+        intExpMeasure_const_exp]
+    simp only [List.map_map, Function.comp_def]
+  rw [hrhs, hlhs]
+  suffices h : (branches'.map (fun br => 3 ^ intWork U (Branch.extendMany bh br) newExp)).sum + 1 ≤
+      3 ^ intWork U bh e by omega
+  simp only [intStepBranch] at hstep
+  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hfound with hany
+  simp only [Bool.not_eq_true] at hany
+  have hsfU : sf ∈ U := hb sf hsfmem
+  cases hint : intApplyRuleFull sf nw bh with
+  | notApplicable => simp [hint] at hfound
+  | linearResult fs nw2 ne =>
+    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
+    exact absurd hfound.1 (by simp)
+  | branchingResult bs nw2 =>
+    simp only [hint, Option.some.injEq, Prod.mk.injEq] at hfound
+    obtain ⟨hbs, hexp⟩ := hfound
+    injection hbs with hbseq hnweq
+    subst hbseq; subst hexp
+    obtain ⟨s, ff, l⟩ := sf
+    cases s with
+    | pos =>
+      cases ff with
+      | atom x => simp [intApplyRuleFull] at hint
+      | bot => simp [intApplyRuleFull] at hint
+      | imp φ ψ => simp [intApplyRuleFull] at hint
+      | and φ ψ => simp [intApplyRuleFull] at hint
+      | or φ ψ =>
+        simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+        obtain ⟨hbrs, hnw'eq⟩ := hint
+        subst hbrs
+        simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+        have hdrop0 : intWork U (Branch.extendMany bh [⟨.pos, φ, l⟩])
+            (e ++ [⟨.pos, .or φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.pos, φ, l⟩]) e ⟨.pos, .or φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hdrop1 : intWork U (Branch.extendMany bh [⟨.pos, ψ, l⟩])
+            (e ++ [⟨.pos, .or φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.pos, ψ, l⟩]) e ⟨.pos, .or φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hC : 1 ≤ intWork U bh e := by omega
+        have h0 : intWork U (Branch.extendMany bh [⟨.pos, φ, l⟩])
+            (e ++ [⟨.pos, .or φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        have h1 : intWork U (Branch.extendMany bh [⟨.pos, ψ, l⟩])
+            (e ++ [⟨.pos, .or φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        exact pow3_two_add_one_le hC h0 h1
+    | neg =>
+      cases ff with
+      | atom x => simp [intApplyRuleFull] at hint
+      | bot => simp [intApplyRuleFull] at hint
+      | imp φ ψ => simp [intApplyRuleFull] at hint
+      | or φ ψ => simp [intApplyRuleFull] at hint
+      | and φ ψ =>
+        simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+        obtain ⟨hbrs, hnw'eq⟩ := hint
+        subst hbrs
+        simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+        have hdrop0 : intWork U (Branch.extendMany bh [⟨.neg, φ, l⟩])
+            (e ++ [⟨.neg, .and φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.neg, φ, l⟩]) e ⟨.neg, .and φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hdrop1 : intWork U (Branch.extendMany bh [⟨.neg, ψ, l⟩])
+            (e ++ [⟨.neg, .and φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.neg, ψ, l⟩]) e ⟨.neg, .and φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hC : 1 ≤ intWork U bh e := by omega
+        have h0 : intWork U (Branch.extendMany bh [⟨.neg, φ, l⟩])
+            (e ++ [⟨.neg, .and φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        have h1 : intWork U (Branch.extendMany bh [⟨.neg, ψ, l⟩])
+            (e ++ [⟨.neg, .and φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        exact pow3_two_add_one_le hC h0 h1
+
 end Cslib.Logic.PL
 
 end

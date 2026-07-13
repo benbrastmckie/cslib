@@ -2124,23 +2124,22 @@
     {
       "project_number": 441,
       "project_name": "modal_proposition_native_refactor",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.",
       "created": "2026-06-30T20:48:25Z",
-      "last_updated": "2026-06-30T20:48:25Z",
-      "next_artifact_number": 2,
+      "last_updated": "2026-07-13T13:53:06Z",
+      "next_artifact_number": 3,
       "artifacts": [
-        {
-          "path": "specs/441_modal_proposition_native_refactor/plans/01_modal-proposition-native-refactor.md",
-          "type": "plan",
-          "summary": "Native-constructor refactor design (formerly task 299 plan v6)"
-        },
         {
           "path": "specs/441_modal_proposition_native_refactor/handoffs/01_scope-discovery-blocker.md",
           "type": "summary",
           "summary": "Scope-discovery blocker: diamond-as-primitive breaks canonical-model completeness (MCS/Completeness across ~9 systems); Phase A verified green but full refactor needs a design decision (HasDia/duality axioms vs proof restatement) + FmpMeasure/CompletenessLoop added to scope. Tree reverted clean."
+        },
+        {
+          "path": "specs/441_modal_proposition_native_refactor/plans/02_native-refactor-hasdia-duality.md",
+          "type": "plan"
         }
       ],
       "dependencies": [
@@ -2150,7 +2149,8 @@
       ],
       "parent_task": 299,
       "sources": [],
-      "blockers": "Plan under-scoped the blast radius of making diamond a primitive constructor. Phase A (Basic/LogicalEquivalence/Bimodal embedding/Denotation/FromPropositional + 5 Hilbert instance sites) verified green, but MCS.lean/Completeness.lean canonical-model completeness proofs (B/S4/S5/KB5/TB/DB) do syntactic surgery expecting diamond to unify as .imp — false after refactor. Needs a DESIGN DECISION: new HasDia/duality-axiom infrastructure across ~9 systems vs. native-diamond canonical-model restatement. Plan also predates tasks 442/462 (FmpMeasure.lean, CompletenessLoop.lean not in any phase file list). Tree reverted to clean HEAD ebd6bb1d. Next: /revise 441 to re-scope with the chosen approach."
+      "blockers": null,
+      "session_id": "sess_1783949998_0dedc2"
     },
     {
       "project_number": 442,

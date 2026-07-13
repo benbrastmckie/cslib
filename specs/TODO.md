@@ -37,7 +37,7 @@ next_project_number: 497
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-441 [BLOCKED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
+441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
@@ -782,12 +782,12 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 ---
 
 ### 441. Modal proposition native refactor
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 299, Task 461, Task 462
-- **Plan**: [441_modal_proposition_native_refactor/plans/01_modal-proposition-native-refactor.md]
 - **Summary**: [441_modal_proposition_native_refactor/handoffs/01_scope-discovery-blocker.md]
+- **Plan**: [441_modal_proposition_native_refactor/plans/02_native-refactor-hasdia-duality.md]
 
 **Description**: Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.
 

@@ -259,7 +259,19 @@ classical axioms; zero new axioms introduced; full CI pipeline green on the (unm
 
 ---
 
-### Phase 4: Squash-commit #662 with the foundational-semantic-layer contribution [NOT STARTED]
+### Phase 4: Squash-commit #662 with the foundational-semantic-layer contribution [COMPLETED]
+
+- [x] **Task 4.1**: Staged and reviewed `git diff --staged` scope -- confirmed only the two slice
+  artifact files (`pr-662-slice/Basic.lean`, `Denotation.lean`), no frame axioms, no unrelated files.
+- [x] **Task 4.2**: Created squash-commit `f2d92202` "task 498: rework #662 into foundational
+  semantic layer slice (native primitives)" with session ID and AI-disclosure note in the body.
+  *(deviation: committed to `specs/498_.../artifacts/pr-662-slice/` rather than
+  `Cslib/Logics/Modal/` directly -- see Phase 1/2 deviation notes; the commit body documents this
+  and the rationale.)*
+- [x] **Task 4.3**: No push performed (confirmed via `git status`/local-only commit); gating on
+  #607 native-primitive adoption documented in the commit body.
+- [x] **Task 4.4**: Fallback path (`backup/662-pre-rework-jul13` restore, or standalone contribution)
+  documented in the commit body.
 
 **Goal**: Land the reworked slice as a single clean squash-commit on the #662 head branch; leave
 push/stack GATED.
@@ -282,7 +294,17 @@ push/stack GATED.
 
 ---
 
-### Phase 5: Prepare the #607 native-primitives recommendation (comment-only draft) [NOT STARTED]
+### Phase 5: Prepare the #607 native-primitives recommendation (comment-only draft) [COMPLETED]
+
+- [x] Wrote `specs/498_modal_foundational_semantic_layer_662/artifacts/pr-607-recommendation.md`
+  with the DRAFT + comment-only + user-approval + re-verify + never-push banner.
+- [x] Content covers all five points: (1) adopt native 7-constructor `Proposition`; (2) three-point
+  justification (decomposition, IK/CK reuse, duality-as-theorem); (3) typeclass instances entailed;
+  (4) naming reconciliation flags (`HasDia`/`HasDiamond`, `HasBot` absent, deferred to task 497);
+  (5) proof-theoretic-weight reassurance. Grounded against the live `#607` base
+  (`upstream/fmontesi/connectives:Cslib/Foundations/Logic/Operators.lean`, confirmed no `HasBot`,
+  has `HasDiamond` not `HasDia`) and the task-441 `Connectives.lean` typeclass set.
+- [x] Explicitly framed as a single plain PR comment, not a suggested change/push/rebase.
 
 **Goal**: Author a comment-only recommendation that #607 adopt native `{atom, bot, imp, and, or, box,
 diamond}`, as a DRAFT artifact that is NOT posted.
@@ -304,7 +326,21 @@ diamond}`, as a DRAFT artifact that is NOT posted.
 
 ---
 
-### Phase 6: Revise the task-476 zulip-coordination draft [NOT STARTED]
+### Phase 6: Revise the task-476 zulip-coordination draft [COMPLETED]
+
+- [x] Replaced the box-alongside-diamond framing in the preamble, re-verify bullets, and body
+  paragraphs with (a) the native-primitive-set recommendation to #607 (three-point justification
+  condensed for the message body) and (b) #662 described as a substantial ~386-line foundational
+  semantic-layer slice, not a ~40-line delta.
+- [x] Preserved the accuracy-discipline preamble (DRAFT, requires user approval, re-verify PR/CI at
+  post time, fmontesi back 23 July) and added an explicit comment-only/never-push-to-`fmontesi/connectives`
+  line.
+- [x] Preserved both open coordination items: the #648 propositional-base decision (five-primitive,
+  Thomas-Waring-approved 2026-07-06) and the `imp`/`impl` naming follow-up (task 497); added the
+  `HasDia`/`HasDiamond` naming divergence (surfaced by the new recommendation) to the same task-497
+  follow-up note. Framed the modal-primitive recommendation and the propositional-base question as
+  two parallel asks to fmontesi.
+- [x] Did not post; DRAFT banner intact throughout.
 
 **Goal**: Replace the box-alongside-diamond framing in the zulip draft with the new strategy, preserving
 the accuracy-discipline preamble and open items; keep it a DRAFT.

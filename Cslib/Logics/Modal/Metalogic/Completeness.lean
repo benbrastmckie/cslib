@@ -260,7 +260,17 @@ from this file. Logics differ only in which frame properties are provable for
 the canonical accessibility relation. -/
 
 /-- **Truth Lemma**: For any canonical world `S` and formula `phi`,
-`Satisfies (CanonicalModel Axioms) S phi <-> phi in S.val`. -/
+`Satisfies (CanonicalModel Axioms) S phi <-> phi in S.val`.
+
+Task 441: gains `.and`/`.or`/`.diamond` cases (native constructors). The `.and`/`.or` cases use
+the `mcs_and_mem_iff`/`mcs_or_mem_iff` MCS closure lemmas (`MCS.lean`, Phase 5) plus the
+structural-recursion IHs at the immediate subformulas -- the payoff of native constructors: no
+Lukasiewicz-bridge lemma is needed. The `.diamond` case reuses `mcs_box_witness` (the same
+box-witness consistency lemma the `.box` case uses) applied to `¬φ` instead of `φ`, bridging to
+native `◇` membership via `mcs_dia_to_raw`/`mcs_raw_to_dia` (`MCS.lean`, Phase 5) -- this is the
+canonical "existence lemma" the plan anticipated as high-risk, but it turns out to need no new
+Lindenbaum-style argument: `mcs_box_witness`'s existing construction already produces exactly the
+witness world the diamond case needs. -/
 theorem truth_lemma
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -274,6 +284,14 @@ theorem truth_lemma
         ((Proposition.box φ).imp (Proposition.box ψ))))
     (h_T : ∀ (φ : Proposition Atom),
       Axioms ((Proposition.box φ).imp φ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_dualFwd : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityFwd φ))
+    (h_dualBack : ∀ (φ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AxiomDiaDualityBack φ))
     (S : CanonicalWorld Axioms) :
     (φ : Proposition Atom) →
     (Satisfies (CanonicalModel Axioms) S φ ↔ φ ∈ S.val)
@@ -316,9 +334,11 @@ theorem truth_lemma
             .weakening [] _ _ (.ax [] _ (h_peirce φ ψ)) (fun _ h => nomatch h)
           exact ⟨.modus_ponens _ _ _ d_peirce' d_dt⟩
         have h_sat_phi :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S φ).mpr h_phi_S
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h_phi_S
         have h_psi_S :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S ψ).mp
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp
             (h_sat h_sat_phi)
         have h_neg_psi_S : (¬ψ) ∈ S.val := by
           apply modal_closed_under_derivation h_implyK h_implyS S.property
@@ -344,10 +364,43 @@ theorem truth_lemma
           (modal_implication_property h_implyK h_implyS S.property
             h_neg_psi_S h_psi_S)
     · intro h_mem h_sat_phi
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S ψ).mpr
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr
         (modal_implication_property h_implyK h_implyS S.property h_mem
-          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T S φ).mp
+          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp
             h_sat_phi))
+  | .and φ ψ => by
+    constructor
+    · intro h_sat
+      exact (mcs_and_mem_iff h_implyK h_implyS h_andI h_andE1 h_andE2 S.property).mpr
+        ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp h_sat.1,
+         (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+            h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp h_sat.2⟩
+    · intro h_mem
+      obtain ⟨h1, h2⟩ :=
+        (mcs_and_mem_iff h_implyK h_implyS h_andI h_andE1 h_andE2 S.property).mp h_mem
+      exact ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+                h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h1,
+             (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+                h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr h2⟩
+  | .or φ ψ => by
+    constructor
+    · intro h_sat
+      apply (mcs_or_mem_iff h_implyK h_implyS h_orI1 h_orI2 h_orE S.property).mpr
+      cases h_sat with
+      | inl h1 => exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp h1)
+      | inr h2 => exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp h2)
+    · intro h_mem
+      rcases (mcs_or_mem_iff h_implyK h_implyS h_orI1 h_orI2 h_orE S.property).mp h_mem
+        with h1 | h2
+      · exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h1)
+      · exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr h2)
   | .box φ => by
     constructor
     · intro h_sat
@@ -357,10 +410,38 @@ theorem truth_lemma
           S.property h_not_box
       exact h_phi_not_T
         ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack
           ⟨T, hT_mcs⟩ φ).mp (h_sat ⟨T, hT_mcs⟩ hST))
     · intro h_box T hST
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T T φ).mpr
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack T φ).mpr
         (hST φ h_box)
+  | .diamond φ => by
+    constructor
+    · rintro ⟨T', hR, hSatT'⟩
+      have h_phi_T' : φ ∈ T'.val :=
+        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack T' φ).mp hSatT'
+      by_contra h_not_dia
+      have h_box_neg : (□¬φ) ∈ S.val := by
+        by_contra h_not_box_neg
+        exact h_not_dia (mcs_raw_to_dia h_implyK h_implyS h_dualBack S.property
+          (mcs_neg_of_not_mem h_implyK h_implyS S.property h_not_box_neg))
+      exact absurd h_phi_T'
+        (mcs_not_mem_of_neg h_implyK h_implyS T'.property (hR _ h_box_neg))
+    · intro h_dia
+      have h_box_neg_not_S : (□¬φ) ∉ S.val :=
+        mcs_not_mem_of_neg h_implyK h_implyS S.property
+          (mcs_dia_to_raw h_implyK h_implyS h_dualFwd S.property h_dia)
+      obtain ⟨T, hT_mcs, hST, h_neg_not_T⟩ :=
+        mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K h_T
+          S.property h_box_neg_not_S
+      have h_phi_T : φ ∈ T :=
+        (mcs_mem_iff_neg_not_mem h_implyK h_implyS hT_mcs).mpr h_neg_not_T
+      exact ⟨⟨T, hT_mcs⟩, hST,
+        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack
+          ⟨T, hT_mcs⟩ φ).mpr h_phi_T⟩
 
 /-! ## Consistency of Negation -/
 

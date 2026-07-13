@@ -411,19 +411,19 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 7: Generic truth lemma — and/or cases + callback threading [NOT STARTED]
+### Phase 7: Generic truth lemma — and/or cases + callback threading [COMPLETED]
 
 - **Goal:** `truth_lemma` (:266) covers `.and` and `.or`; all downstream generic theorems accept
   the new callbacks. (`.diamond` case is Phase 8; until then the truth lemma may carry the
   diamond case as a structured stub ONLY in the sense of Phase 8 doing it next — no `sorry` is
   ever committed: Phases 7 and 8 land as a single commit if needed, see fallback.)
 - **Tasks:**
-  - [ ] Extend `truth_lemma`'s hypothesis list with `h_andI, h_andE1, h_andE2, h_orI1, h_orI2,
+  - [x] Extend `truth_lemma`'s hypothesis list with `h_andI, h_andE1, h_andE2, h_orI1, h_orI2,
     h_orE, h_dualFwd, h_dualBack` (all `∀ ..., Axioms (Axioms.Axiom... ...)` shape).
-  - [ ] Add the `.and φ ψ` case: both directions via `mcs_and_mem_iff` + IHs (structural
+  - [x] Add the `.and φ ψ` case: both directions via `mcs_and_mem_iff` + IHs (structural
     recursion supplies IHs at φ, ψ directly — the native-constructor payoff).
-  - [ ] Add the `.or φ ψ` case via `mcs_or_mem_iff` + IHs.
-  - [ ] Thread the new callbacks through `strong_completeness` (:606),
+  - [x] Add the `.or φ ψ` case via `mcs_or_mem_iff` + IHs.
+  - [x] Thread the new callbacks through `strong_completeness` (:606),
     `strong_completeness_iff` (:645), `compactness` (:672), `weak_completeness` (:704), and the
     consistency helpers if their signatures constrain the axiom callbacks.
 - **Timing:** ~2.5 hours
@@ -440,22 +440,22 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 8: Truth lemma — canonical diamond existence lemma + diamond case [NOT STARTED]
+### Phase 8: Truth lemma — canonical diamond existence lemma + diamond case [COMPLETED]
 
 - **Goal:** The genuinely new proof content: `(◇φ) ∈ S → ∃ T, canonicalR S T ∧ φ ∈ T` and the
   `.diamond` truth-lemma case; the whole `Metalogic/Completeness.lean` module builds green.
 - **Tasks:**
-  - [ ] Prove the canonical existence lemma: from `(◇φ) ∈ S`, bridge to raw
+  - [x] Prove the canonical existence lemma: from `(◇φ) ∈ S`, bridge to raw
     (`mcs_dia_to_raw`), i.e. `¬□¬φ ∈ S`; show `{ψ | (□ψ) ∈ S} ∪ {φ}` is consistent (standard
     argument: a finite refutation would derive `□¬φ ∈ S` contra maximal consistency — reuse the
     unboxing/Lindenbaum machinery already in the box case of the current truth lemma and
     `modal_lindenbaum`); extend to an MCS `T` with `canonicalR S T` and `φ ∈ T`.
-  - [ ] `.diamond φ` case, `←` (membership to satisfaction): existence lemma + IH at `T` +
+  - [x] `.diamond φ` case, `←` (membership to satisfaction): existence lemma + IH at `T` +
     native `Satisfies` diamond case.
-  - [ ] `.diamond φ` case, `→` (satisfaction to membership): from a witness `T` with
+  - [x] `.diamond φ` case, `→` (satisfaction to membership): from a witness `T` with
     `canonicalR S T`, `φ ∈ T` (via IH), derive `(◇φ) ∈ S`: contrapositive — if `(◇φ) ∉ S` then
     `¬◇φ ∈ S`, bridge via `h_dualFwd`/`h_dualBack` to `□¬φ ∈ S`, hence `¬φ ∈ T`, contradiction.
-  - [ ] Whole-module build of `Metalogic/Completeness.lean`; fix the remaining exhaustive
+  - [x] Whole-module build of `Metalogic/Completeness.lean`; fix the remaining exhaustive
     `induction φ` sites in-module (handoff: :417, :640, :666 — expected to be consumers of the
     truth lemma / negation-completeness helpers needing only the new cases or the new
     callbacks).
@@ -477,7 +477,22 @@ consumer set at the start of each phase.
 
 ### Phase 9: Systems completeness instantiations + ConservativeExtension + Metalogic sweep [NOT STARTED]
 
-- **Goal:** All 15 `Systems/*/Completeness.lean` supply the new callbacks; ConservativeExtension,
+- **Scope correction discovered during Phase 7-8**: `Completeness.lean`'s module docstring
+  (`:245-256`, pre-existing) documents **three** truth-lemma families, not one: the generic
+  `truth_lemma` (this file, T-based, used by S5/T/S4/TB -- Phase 7-8 fixed this one), plus
+  `k_truth_lemma` (defined in `Systems/K/Completeness.lean`, K-based box-witness, used by
+  K/B/K4/K5/K45/KB5) and `d_truth_lemma` (defined in `Systems/D/Completeness.lean`, D-based
+  box-witness, used by D/D4/D5/D45/DB). Both are full structural-recursion copies of
+  `truth_lemma` parameterized the same way, and both therefore need the **identical** `.and`/
+  `.or`/`.diamond` case additions (mirroring Phase 7-8's pattern exactly: `mcs_and_mem_iff`/
+  `mcs_or_mem_iff` for `.and`/`.or`; for `.diamond`, whichever K-specific/D-specific box-witness
+  lemma each file already uses for its `.box` case, applied to `¬φ`, bridged via
+  `mcs_dia_to_raw`/`mcs_raw_to_dia`). This phase's file list and effort therefore implicitly
+  includes fully porting `k_truth_lemma` (in `Systems/K/Completeness.lean`) and `d_truth_lemma`
+  (in `Systems/D/Completeness.lean`) using the Phase 7-8 pattern, in addition to the 15 files'
+  `truth_lemma`/`strong_completeness_iff` instantiation-site callback threading below.
+- **Goal:** All 15 `Systems/*/Completeness.lean` supply the new callbacks (including the
+  `k_truth_lemma`/`d_truth_lemma` full ports called out above); ConservativeExtension,
   InterSystem, GenericMCSBridge, DeductionTheorem, Cube all green — the entire
   Metalogic/ProofSystem subtree builds.
 - **Tasks:**

@@ -15,25 +15,31 @@ public import Cslib.Foundations.Logic.Tableau.PropositionalRules
 This module provides foundational definitions for the modal K tableau decision procedure.
 It instantiates the label-generic Foundations tableau layer with
 `F = Cslib.Logic.Modal.Proposition Atom` and `L = WorldIndex` (Nat), and defines
-the Lukasiewicz decomposition functions for the modal formula type.
+the decomposition functions for the modal formula type.
 
 ## Main Definitions
 
 - `WorldIndex`: World labels for the tableau (just `Nat`).
 - `Proposition.complexity`: Size measure for fuel computation.
 - `Hashable (Proposition Atom)` instance: required by `Branch` and `SignedFormula` ops.
-- `modalNegOf?`, `modalOrOf?`, `modalAndOf?`, `modalImpOf?`: Lukasiewicz decomposition
-  functions for the Lukasiewicz-encoded connectives in `Proposition Atom`.
-- `modalBoxOf?`, `modalDiaOf?`: Decomposition functions for modal connectives.
+- `modalNegOf?`: decomposition for the derived Lukasiewicz negation `¬φ := φ → ⊥`.
+- `modalAndOf?`, `modalOrOf?`: decomposition for the native `and`/`or` constructors
+  (task 441).
+- `modalImpOf?`: decomposition for proper implication, excluding only the derived
+  negation shape (since `and`/`or` are now separate constructors, not encoded via `imp`).
+- `modalBoxOf?`, `modalDiaOf?`: decomposition for the native `box`/`diamond` constructors.
 
 ## Design
 
-`Proposition Atom` uses Lukasiewicz encoding: `¬φ := φ → ⊥`, `φ ∨ ψ := ¬φ → ψ`,
-`φ ∧ ψ := ¬(φ → ¬ψ)`, `◇φ := ¬□¬φ`. These are `abbrev`s, not constructors, so
-decomposition is by pattern-matching on the underlying `imp`/`box` constructors.
+Task 441 made `Proposition Atom`'s `and`, `or`, and `diamond` native constructors
+(mirroring `PL.Proposition`), so the decomposers below are one-to-one structural
+projections for those three connectives -- no Lukasiewicz bridging is needed. Only
+negation (`¬φ := φ → ⊥`) remains a derived `abbrev`, so `modalNegOf?`/`modalImpOf?`
+still pattern-match on the underlying `imp`/`bot` shape to detect it.
 
-The decomposition functions must be applied in the correct order to handle overlapping
-patterns. Specifically, `modalImpOf?` excludes all encoded neg/or/and shapes.
+The decomposer *names* and their `@[simp]` reduction-lemma names are preserved from the
+pre-441 encoded presentation (minimal-churn contract for the tableau completeness/FMP
+files that call them); only the bodies and statements change to match native shapes.
 
 ## References
 
@@ -58,13 +64,17 @@ abbrev WorldIndex := Nat
 /-- Structural complexity of a `Proposition Atom`, used as a fuel bound for the tableau loop.
 
 This measures the number of connective nodes. Atoms and bot have complexity 0;
-`imp` contributes 1 plus the complexities of its sub-formulas; `box` contributes
-1 plus the complexity of its sub-formula. -/
+binary connectives (`imp`, `and`, `or`) contribute 1 plus the complexities of their
+sub-formulas; unary modalities (`box`, `diamond`) contribute 1 plus the complexity of
+their sub-formula. -/
 def modalComplexity : Proposition Atom → Nat
   | .atom _ => 0
   | .bot => 0
   | .imp φ ψ => 1 + modalComplexity φ + modalComplexity ψ
+  | .and φ ψ => 1 + modalComplexity φ + modalComplexity ψ
+  | .or φ ψ => 1 + modalComplexity φ + modalComplexity ψ
   | .box φ => 1 + modalComplexity φ
+  | .diamond φ => 1 + modalComplexity φ
 
 /-- Complexity is zero for atoms. -/
 @[simp]
@@ -79,22 +89,40 @@ lemma modalComplexity_bot : modalComplexity (.bot : Proposition Atom) = 0 := rfl
 lemma modalComplexity_imp (φ ψ : Proposition Atom) :
     modalComplexity (Proposition.imp φ ψ) = 1 + modalComplexity φ + modalComplexity ψ := rfl
 
+/-- Complexity of conjunction is one plus the complexities of the sub-formulas. -/
+@[simp]
+lemma modalComplexity_and (φ ψ : Proposition Atom) :
+    modalComplexity (Proposition.and φ ψ) = 1 + modalComplexity φ + modalComplexity ψ := rfl
+
+/-- Complexity of disjunction is one plus the complexities of the sub-formulas. -/
+@[simp]
+lemma modalComplexity_or (φ ψ : Proposition Atom) :
+    modalComplexity (Proposition.or φ ψ) = 1 + modalComplexity φ + modalComplexity ψ := rfl
+
 /-- Complexity of box is one plus the complexity of the sub-formula. -/
 @[simp]
 lemma modalComplexity_box (φ : Proposition Atom) :
     modalComplexity (Proposition.box φ) = 1 + modalComplexity φ := rfl
 
+/-- Complexity of diamond is one plus the complexity of the sub-formula. -/
+@[simp]
+lemma modalComplexity_diamond (φ : Proposition Atom) :
+    modalComplexity (Proposition.diamond φ) = 1 + modalComplexity φ := rfl
+
 /-! ## Hashable Instance -/
 
 /-- A hash function for `Proposition Atom` using constructor-tag mixing.
 
-Constructor tags: atom=0, bot=1, imp=2, box=3.
+Constructor tags: atom=0, bot=1, imp=2, box=3, and=4, or=5, diamond=6.
 Subformula hashes are combined with `mixHash`. -/
 def modalPropHash [Hashable Atom] : Proposition Atom → UInt64
   | .atom x => mixHash 0 (hash x)
   | .bot => 1
   | .imp a b => mixHash (mixHash 2 (modalPropHash a)) (modalPropHash b)
   | .box a => mixHash 3 (modalPropHash a)
+  | .and a b => mixHash (mixHash 4 (modalPropHash a)) (modalPropHash b)
+  | .or a b => mixHash (mixHash 5 (modalPropHash a)) (modalPropHash b)
+  | .diamond a => mixHash 6 (modalPropHash a)
 
 /-- `Hashable` instance for `Proposition Atom`, required by `SignedFormula` and `Branch`
 when the formula type is `Proposition Atom`. -/
@@ -102,17 +130,18 @@ instance instHashableModalProposition [Hashable Atom] :
     Hashable (Proposition Atom) where
   hash := modalPropHash
 
-/-! ## Lukasiewicz Decomposition Functions -/
+/-! ## Decomposition Functions -/
 
 /-- Decompose `φ` as negation `¬ψ = ψ → ⊥`; returns `some ψ` or `none`.
 
-Only matches the pattern `imp a bot` (Lukasiewicz negation). -/
+Only matches the pattern `imp a bot` (negation remains a derived Lukasiewicz `abbrev`;
+task 441 did not change `neg`). -/
 def modalNegOf? (φ : Proposition Atom) : Option (Proposition Atom) :=
   match φ with
   | .imp a .bot => some a
   | _ => none
 
-/-- `modalNegOf?` decomposes Lukasiewicz negation. -/
+/-- `modalNegOf?` decomposes negation. -/
 @[simp]
 lemma modalNegOf?_neg (a : Proposition Atom) : modalNegOf? (.imp a .bot) = some a := rfl
 
@@ -124,52 +153,49 @@ lemma modalNegOf?_atom (p : Atom) : modalNegOf? (.atom p) = none := rfl
 @[simp]
 lemma modalNegOf?_bot : modalNegOf? (.bot : Proposition Atom) = none := rfl
 
-/-- Decompose `φ` as disjunction `ψ₁ ∨ ψ₂ = ¬ψ₁ → ψ₂ = (ψ₁ → ⊥) → ψ₂`;
+/-- Decompose `φ` as disjunction `ψ₁ ∨ ψ₂` (native constructor, task 441);
 returns `some (ψ₁, ψ₂)` or `none`. -/
 def modalOrOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
   match φ with
-  | .imp (.imp a .bot) b => some (a, b)
+  | .or a b => some (a, b)
   | _ => none
 
-/-- `modalOrOf?` decomposes Lukasiewicz disjunction. -/
+/-- `modalOrOf?` decomposes disjunction. -/
 @[simp]
 lemma modalOrOf?_or (a b : Proposition Atom) :
-    modalOrOf? (Proposition.imp (Proposition.imp a Proposition.bot) b) = some (a, b) := rfl
+    modalOrOf? (Proposition.or a b) = some (a, b) := rfl
 
 /-- `modalOrOf?` returns `none` for atoms. -/
 @[simp]
 lemma modalOrOf?_atom (p : Atom) : modalOrOf? (.atom p) = none := rfl
 
-/-- Decompose `φ` as conjunction `ψ₁ ∧ ψ₂ = ¬(ψ₁ → ¬ψ₂) = (ψ₁ → (ψ₂ → ⊥)) → ⊥`;
+/-- Decompose `φ` as conjunction `ψ₁ ∧ ψ₂` (native constructor, task 441);
 returns `some (ψ₁, ψ₂)` or `none`. -/
 def modalAndOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
   match φ with
-  | .imp (.imp a (.imp b .bot)) .bot => some (a, b)
+  | .and a b => some (a, b)
   | _ => none
 
-/-- `modalAndOf?` decomposes Lukasiewicz conjunction. -/
+/-- `modalAndOf?` decomposes conjunction. -/
 @[simp]
 lemma modalAndOf?_and (a b : Proposition Atom) :
-    modalAndOf? (.imp (.imp a (.imp b .bot)) .bot) = some (a, b) := rfl
+    modalAndOf? (.and a b) = some (a, b) := rfl
 
 /-- `modalAndOf?` returns `none` for atoms. -/
 @[simp]
 lemma modalAndOf?_atom (p : Atom) : modalAndOf? (.atom p) = none := rfl
 
-/-- Decompose `φ` as proper implication `ψ₁ → ψ₂`, excluding the encoded connectives:
-negation (`ψ₁ → ⊥`), and disjunction (`(ψ₁ → ⊥) → ψ₂`); returns `some (ψ₁, ψ₂)` or `none`.
+/-- Decompose `φ` as proper implication `ψ₁ → ψ₂`, excluding the derived negation shape
+(`ψ₁ → ⊥`); returns `some (ψ₁, ψ₂)` or `none`.
 
-Note: conjunction `(ψ₁ → (ψ₂ → ⊥)) → ⊥` IS a negation (consequent is `⊥`), so it is
-already excluded by the first pattern. -/
+Task 441: `and`/`or` are now separate native constructors (not encoded via `imp`), so
+`modalImpOf?` only needs to exclude negation, not the Lukasiewicz and/or shapes. -/
 def modalImpOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
   match φ with
   | .imp a b =>
     match b with
-    | .bot => none  -- Exclude negation and conjunction-encoded (conseq = ⊥)
-    | _ =>
-      match a with
-      | .imp _ .bot => none  -- Exclude disjunction (antecedent is negation)
-      | _ => some (a, b)
+    | .bot => none  -- Exclude negation (conseq = ⊥)
+    | _ => some (a, b)
   | _ => none
 
 /-- `modalImpOf?` returns `none` for negation (`ψ → ⊥`). -/
@@ -177,28 +203,13 @@ def modalImpOf? (φ : Proposition Atom) : Option (Proposition Atom × Propositio
 lemma modalImpOf?_neg (a : Proposition Atom) :
     modalImpOf? (Proposition.imp a Proposition.bot) = none := rfl
 
-/-- `modalImpOf?` returns `none` for Lukasiewicz disjunction (consequent is not bot). -/
+/-- `modalImpOf?` decomposes proper implication when the consequent is not `⊥`. -/
 @[simp]
-lemma modalImpOf?_or_nonbot (a b : Proposition Atom) (hb : b ≠ Proposition.bot) :
-    modalImpOf? (Proposition.imp (Proposition.imp a Proposition.bot) b) = none := by
-  cases b <;> simp_all [modalImpOf?]
-
-/-- `modalImpOf?` decomposes proper implication when consequent is not `⊥`
-and antecedent is not a negation. -/
-lemma modalImpOf?_imp {a b : Proposition Atom} (h1 : b ≠ Proposition.bot)
-    (h2 : ∀ c : Proposition Atom, a ≠ Proposition.imp c Proposition.bot) :
+lemma modalImpOf?_imp {a b : Proposition Atom} (h1 : b ≠ Proposition.bot) :
     modalImpOf? (Proposition.imp a b) = some (a, b) := by
-  -- modalImpOf? matches first on b (is it bot?), then on a (is it imp c bot?)
-  -- We case split in the same order
   cases hb : b with
   | bot => exact absurd hb h1
-  | _ =>
-    cases ha : a with
-    | imp c d =>
-      cases hd : d with
-      | bot => exact absurd (ha ▸ hd ▸ rfl) (h2 c)
-      | _ => simp [modalImpOf?]
-    | _ => simp [modalImpOf?]
+  | _ => simp [modalImpOf?]
 
 /-- Decompose `φ` as box `□ψ`; returns `some ψ` or `none`. -/
 def modalBoxOf? (φ : Proposition Atom) : Option (Proposition Atom) :=
@@ -218,17 +229,16 @@ lemma modalBoxOf?_atom (p : Atom) : modalBoxOf? (.atom p) = none := rfl
 @[simp]
 lemma modalBoxOf?_imp (a b : Proposition Atom) : modalBoxOf? (.imp a b) = none := rfl
 
-/-- Decompose `φ` as diamond `◇ψ = ¬□¬ψ = (□(ψ → ⊥)) → ⊥`;
-returns `some ψ` or `none`. -/
+/-- Decompose `φ` as diamond `◇ψ` (native constructor, task 441); returns `some ψ` or `none`. -/
 def modalDiaOf? (φ : Proposition Atom) : Option (Proposition Atom) :=
   match φ with
-  | .imp (.box (.imp a .bot)) .bot => some a
+  | .diamond a => some a
   | _ => none
 
-/-- `modalDiaOf?` decomposes diamond formulas (Lukasiewicz-encoded). -/
+/-- `modalDiaOf?` decomposes diamond formulas. -/
 @[simp]
 lemma modalDiaOf?_dia (a : Proposition Atom) :
-    modalDiaOf? (.imp (.box (.imp a .bot)) .bot) = some a := rfl
+    modalDiaOf? (.diamond a) = some a := rfl
 
 /-- `modalDiaOf?` returns `none` for atoms. -/
 @[simp]

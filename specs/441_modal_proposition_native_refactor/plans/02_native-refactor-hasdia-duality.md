@@ -524,25 +524,25 @@ consumer set at the start of each phase.
 
 ---
 
-### Phase 10: Tableau core port — Defs, Rules, Branch, Closure [NOT STARTED]
+### Phase 10: Tableau core port — Defs, Rules, Branch, Closure [COMPLETED]
 
 - **Goal:** Tableau front-end green on native constructors with the decomposer API names
   preserved (minimal-churn contract for Phases 12-14).
 - **Tasks:**
-  - [ ] `Tableau/Defs.lean`: redefine `modalNegOf?`/`modalAndOf?`/`modalOrOf?`/`modalImpOf?`/
+  - [x] `Tableau/Defs.lean`: redefine `modalNegOf?`/`modalAndOf?`/`modalOrOf?`/`modalImpOf?`/
     `modalBoxOf?`/`modalDiaOf?` to match native constructors exactly (keep names); update their
     `@[simp]` reduction lemmas — `modalDiaOf?_dia` (`:230`) becomes
     `modalDiaOf? (.diamond a) = some a` (statement changes shape; keep the lemma name); add
     `.and/.or/.diamond` cases to `modalComplexity` and `modalPropHash` exhaustive matches; keep
     `WorldIndex` and the `Hashable` instance.
-  - [ ] `Tableau/Rules.lean` `modalApplyOne`: replace the encoded matches
+  - [x] `Tableau/Rules.lean` `modalApplyOne`: replace the encoded matches
     (`.imp (.box (.imp φ .bot)) .bot` at `:91/:109/:134/:142`) with native per-connective rules —
     `andPos/andNeg`, `orPos/orNeg`, `impPos/impNeg`, `boxPos` (persistent), `boxNeg` (fresh
     successor), `diamondPos` (fresh successor, existential), `diamondNeg` (persistent) — per the
     v1 Phase B rule table (K-sound successor scoping).
-  - [ ] `Tableau/Branch.lean`: update `boxPositivesOf`/propagation `filterMap` matches
+  - [x] `Tableau/Branch.lean`: update `boxPositivesOf`/propagation `filterMap` matches
     (`:98-134`) to native `.box`/`.diamond`.
-  - [ ] `Tableau/Closure.lean`: update any connective-shape references (signed-atom/⊥
+  - [x] `Tableau/Closure.lean`: update any connective-shape references (signed-atom/⊥
     contradiction detection unchanged).
 - **Timing:** ~2.5 hours
 - **Depends on:** 1

@@ -60,7 +60,8 @@ Returns `(result, newAcc)` where:
 
 The dispatch priority is:
 1. Propositional rules (via `tryAllPropRules`), using `modalNegOf?`/`modalOrOf?`/
-   `modalAndOf?`/`modalImpOf?` for Lukasiewicz-encoded connectives.
+   `modalAndOf?`/`modalImpOf?` for the native `and`/`or` constructors and the derived
+   negation `abbrev` (task 441).
 2. K modal rules: `boxPos`, `diamondPos`, `boxNeg`, `diamondNeg`.
 
 IMPORTANT: `boxPos` and `diamondNeg` use `.persistent` (source stays on branch to re-fire
@@ -87,9 +88,9 @@ def modalApplyOne
         (.notApplicable, acc)
       else
         (.persistent newForms, acc)
-    -- diamondPos: T(◇φ)@w = T((□(φ→⊥))→⊥)@w → create fresh w', add edge w→w', T(φ)@w'
+    -- diamondPos: T(◇φ)@w → create fresh w', add edge w→w', T(φ)@w'
     -- Also propagate box-positives from w to w' (they must hold at all successors)
-    | .pos, .imp (.box (.imp φ .bot)) .bot =>
+    | .pos, .diamond φ =>
       let w' := modalNextWorld b
       let newAcc := acc.addEdge w w'
       -- The witness: T(φ) at the fresh world
@@ -101,13 +102,13 @@ def modalApplyOne
             let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, w'⟩
             if b.any (· == sf') then none else some sf'
           else none
-      -- Propagate all existing F(◇ψ)@w (i.e., F(□ψ→⊥ → ⊥)) to w' as F(ψ)@w'
+      -- Propagate all existing F(◇ψ)@w to w' as F(ψ)@w'
       -- Note: F(◇φ)@w means F(φ)@w' for all successors w'
       let diaNegProps : List (SignedFormula (Proposition Atom) WorldIndex) :=
         b.filterMap fun sf' =>
           if sf'.sign == .neg && sf'.label == w then
             match sf'.formula with
-            | .imp (.box (.imp ψ .bot)) .bot =>
+            | .diamond ψ =>
               let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
               if b.any (· == prop) then none else some prop
             | _ => none
@@ -132,15 +133,15 @@ def modalApplyOne
         b.filterMap fun sf' =>
           if sf'.sign == .neg && sf'.label == w then
             match sf'.formula with
-            | .imp (.box (.imp ψ .bot)) .bot =>
+            | .diamond ψ =>
               let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
               if b.any (· == prop) then none else some prop
             | _ => none
           else none
       (.linear (witness :: boxProps ++ diaNegProps), newAcc)
-    -- diamondNeg: F(◇φ)@w = F((□(φ→⊥))→⊥)@w → F(φ)@w' for each recorded successor w'
+    -- diamondNeg: F(◇φ)@w → F(φ)@w' for each recorded successor w'
     -- K-SOUND: propagate only to successorsOf w, not all worlds
-    | .neg, .imp (.box (.imp φ .bot)) .bot =>
+    | .neg, .diamond φ =>
       let succs := acc.successorsOf w
       let newForms : List (SignedFormula (Proposition Atom) WorldIndex) :=
         succs.filterMap fun w' =>

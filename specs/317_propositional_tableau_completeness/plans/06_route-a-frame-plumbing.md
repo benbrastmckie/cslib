@@ -440,58 +440,87 @@ no new axioms). The bridge sorry is preserved (reshaped, not removed) at both si
 
 ---
 
-### Phase 5: [Wave B / B2] Raise the fuel to `intFuel φ` + audit downstream callers [BLOCKED]
+### Phase 5: [Wave B / B2] Raise the fuel to `intFuel φ` + audit downstream callers [COMPLETED]
 
-**BLOCKED note**: `intFuel φ := 3 ^ (2·(2·φ.complexity+1)·(φ.complexity+2))` was implemented and
-verified to build GREEN in isolation, but landing it breaks `Completeness.lean`/
-`Minimal/Completeness.lean` because **Scheme.lean hardcodes the OLD fuel literal
-`2 ^ (2 * φ.complexity + 2)` directly in 3 theorem signatures** (`tableau_sound:252`,
-`openBranch_countermodel:1762`, `tableau_complete:1819,1822`) rather than calling
-`intuitionisticTableau`/`minimalTableau` opaquely (unlike `Soundness.lean`, which the plan
-correctly anticipated as generic). This is a scope discovery the plan did not anticipate.
-Scheme.lean is Phase 6 territory (do-not-edit per this dispatch's contract), so the change was
-**reverted** to keep the branch green; see `.orchestrator-handoff.json` for the exact 2-site
-Expansion.lean patch and the 4-site Scheme.lean literal-substitution needed to unblock. No file
-was committed this dispatch.
+**Resolution**: Orchestrator authorized a combined dual-file dispatch (expanded H7 territory
+covering `Expansion.lean` full + `Scheme.lean` limited to the 4 fuel-literal sites). Landed
+`intFuel φ := 3 ^ (2·(2·φ.complexity+1)·(φ.complexity+2))` in `Expansion.lean` alongside
+`intExpandBranches`, wired `intuitionisticTableau`/`minimalTableau` to it, and substituted the
+4 hardcoded `2 ^ (2 * φ.complexity + 2)` literals in `Scheme.lean` (`tableau_sound:252`,
+`openBranch_countermodel:1762`, `tableau_complete:1819,1822`) with `intFuel φ` in the SAME
+atomic commit (`7291c940`). Both `Completeness.lean` modules and both `DecisionProcedure.lean`
+modules build GREEN; four inventory sorries unchanged in count and location.
 
 - **Goal:** Change the fuel from `2^(2*φ.complexity+2)` to `intFuel φ ≈ 3^Θ(c²)` (report 07 §Q4) and
   re-verify every downstream fuel-pinned caller. TERRITORY HAZARD: task 316 (`Expansion.lean` +
   `Soundness.lean`). FILE-DISJOINT from the Scheme.lean track → truly concurrent with Phase 6.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Expansion.lean Soundness.lean`; scoped+grepped rebuild GREEN.
-  - [ ] Define `intFuel φ := 3 ^ (2·(2·φ.complexity+1)·(φ.complexity+2))` (or the exact bound Phase 8
-        needs — size for `intExpMeasure_init_le_fuel` with slack, R8). Change the fuel site at
-        `Expansion.lean:466` and the minimal analogue.
-  - [ ] AUDIT every downstream fuel-pinned caller: `intExpandBranches_closed_unsat` (`Soundness.lean`,
-        316), `DecisionProcedure.lean`, `Completeness.lean`. The change is monotone-safe for the
-        `openBranch → saturated` direction; confirm each still builds.
-  - [ ] STOP-gate (R5/TERRITORY 316): a non-trivial `Soundness.lean` caller edit → STOP/[BLOCKED]/escalate.
-        A mechanical re-pin → MINIMAL fix, `Soundness.lean` in a SEPARATE scoped commit with a coordination flag.
-  - [ ] Scoped+grepped builds (`Expansion`, then downstream) GREEN; four inventory sorries unchanged;
-        commit `Expansion.lean` only (+ separate `Soundness.lean` commit if forced):
-        `task 317 phase 5: raise fuel to intFuel (coordinates task 316)`.
+  - [x] PREFLIGHT (R7): `git log -1 -- Expansion.lean Soundness.lean`; scoped+grepped rebuild GREEN.
+  - [x] Define `intFuel φ := 3 ^ (2·(2·φ.complexity+1)·(φ.complexity+2))`. Changed the fuel site at
+        `Expansion.lean:467` (`intuitionisticTableau`) and `Expansion.lean:480` (`minimalTableau`).
+  - [x] AUDIT every downstream fuel-pinned caller: `Soundness.lean` (both) confirmed unaffected
+        (uses fuel-generic lemma); `Scheme.lean`'s 4 hardcoded literal sites patched to `intFuel φ`
+        in the SAME commit (orchestrator-authorized expanded territory); `DecisionProcedure.lean`
+        (both) build GREEN.
+  - [x] STOP-gate (R5/TERRITORY 316): no `Soundness.lean` edit was needed — confirmed unaffected.
+  - [x] Scoped+grepped builds (`Intuitionistic.Completeness`, `Minimal.Completeness`,
+        `Intuitionistic.DecisionProcedure`, `Minimal.DecisionProcedure`) GREEN; four inventory
+        sorries unchanged (Scheme.lean:533,1386; Completeness.lean:133; Minimal/Completeness.lean:125);
+        committed `Expansion.lean` + `Scheme.lean` together atomically: commit `7291c940`,
+        `task 317 phase 5: raise fuel to intFuel (atomic Expansion+Scheme fuel-literal)`.
 - **Estimated output:** ~100-200 lines + audit. **Done when:** the fuel is raised, all downstream callers
-  build, task-316 coordination flagged, four sorries unchanged.
+  build, task-316 coordination flagged, four sorries unchanged. — ACHIEVED.
 - **Timing:** 2 hours. **Depends on:** 4 (Wave A landed; sequenced after per the independent-landing narrative).
 - **Owned files:** `Expansion.lean` (+ `Soundness.lean` ONLY if forced, separate commit).
 
 ---
 
-### Phase 6: [Wave B / B2] `intUniverse` + `intWork` + the linear world bound [NOT STARTED]
+### Phase 6: [Wave B / B2] `intUniverse` + `intWork` + the linear world bound [PARTIAL]
+
+**Resolution (partial)**: Landed `intSubfmls`/`intSubfmls_length_le` (List-recursive subformula
+list, mirroring `modalSubfmls`/`modalSubfmls_length_le`, `FmpMeasure.lean:73-102`, restricted to
+the propositional connective set), `intUniverse`/`intUniverse_length_le` (fixed finite
+`(sign, subformula, world)` cell universe, world range `0..φ.complexity+1`, length bound
+`2·(2c+1)·(c+2)` — exactly matching the exponent `intFuel φ` was pre-sized against), and
+`intWork` (mirroring `modalWork`'s `countP`/`any` pattern exactly, NOT `List.diff`, since that
+is the proven repo pattern). All three are sorry-free, additive, in `Scheme.lean` only. Added two
+new imports to `Scheme.lean` (`Cslib.Foundations.Logic.Tableau.Measure` for
+`sum_map_le_length_mul`; `Mathlib.Tactic.Ring` for the `ring` tactic used in the length-bound
+proof, needed transitively since `Measure.lean`'s own `Mathlib.Tactic.Ring` import is private).
+Both `Intuitionistic.Completeness` and `Minimal.Completeness` build GREEN; `checkInitImports`
+passes; four inventory sorries unchanged in count and location (only line-shifted by the 2 new
+import lines: `Scheme.lean:535,1388`; `Completeness.lean:133`; `Minimal/Completeness.lean:125`).
+
+**NOT landed this dispatch**: `intExpandBranches_world_bound` (the `eraseDups.length ≤
+φ.complexity + 1` bound). Investigation (see `.orchestrator-handoff.json` continuation_context
+for the full argument) found the true mathematical justification requires NEW infrastructure
+beyond a direct mirror of the Modal-K pattern: a world is created only by the `F(φ→ψ)`
+world-creating rule (never by persistence, which only copies `T`-formulas), and — because
+`F`-and/`T`-or are BETA/branching rules while `F`-or/`T`-and are ALPHA/non-branching — a single
+branch's full history can accumulate every world reachable via ALPHA-only decomposition
+sequences, requiring a genuine occurrence-tracking argument (each world-creation event consumes
+a distinct syntactic `.imp` occurrence of `φ`, tied to the monotonically-growing `expanded` set)
+rather than a simple depth argument. This is comparable in difficulty to Phase 7's
+`intExpMeasure_step_lt` and was not force-fit into this dispatch per the "do not entangle" /
+"land partial + continuation" guidance. See continuation_context for the recommended next step
+(re-verify whether Phase 7/8 actually need this exact lemma, vs. the weaker universe-containment
+fact, before committing a dedicated sub-dispatch to it).
 
 - **Goal:** Define the fixed finite universe and the counting-against-universe work, and prove the linear
   world bound (Modal-K `FmpMeasure` pattern). FILE-DISJOINT from Phase 5.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
-  - [ ] Define `intUniverse φ : List (ISF Atom)` (the `(sign, subformula, world)` cells,
-        `|U| ≤ 2·(2c+1)·(c+2)`) and `intWork U b e := (U.diff b).length + (U.diff e).length`
-        (mirror `modalWork`, `FmpMeasure.lean:180-196`).
+  - [x] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
+  - [x] Define `intUniverse φ : List (ISF Atom)` (the `(sign, subformula, world)` cells,
+        `|U| ≤ 2·(2c+1)·(c+2)`) and `intWork U b e` (mirror `modalWork`, `FmpMeasure.lean:180-196`,
+        using the proven `countP`/`any` pattern rather than `List.diff`).
   - [ ] Prove `intExpandBranches_world_bound`: `(b.map (·.label)).eraseDups.length ≤ φ.complexity + 1`
         (report 07 §Q4 — holds with NO dedup; do NOT entangle with the Option-A dedup).
-  - [ ] Scoped+grepped build GREEN; four sorries unchanged; commit `Scheme.lean` only:
+        **DEFERRED — continuation needed, see resolution note above.**
+  - [x] Scoped+grepped build GREEN; four sorries unchanged; committed `Scheme.lean` only:
         `task 317 phase 6: intUniverse + intWork + linear world bound`.
 - **Estimated output:** ~200-350 lines. **Done when:** `intUniverse`, `intWork`, and
-  `intExpandBranches_world_bound` are sorry-free.
+  `intExpandBranches_world_bound` are sorry-free. — `intUniverse`/`intWork` ACHIEVED;
+  `intExpandBranches_world_bound` DEFERRED (continuation).
 - **Timing:** 3 hours. **Depends on:** 4. Logically parallel with Phase 5; R7-serialized only with
   other Scheme.lean phases (Phase 5 is `Expansion.lean` → truly concurrent).
 - **Owned files:** `Scheme.lean`.

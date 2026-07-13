@@ -1,52 +1,50 @@
 {
   "status": "partial",
-  "agent_type": "cslib-implementation-hard-agent",
-  "task_number": 317,
-  "session_id": "sess_1783922075_911857_317",
-  "started_at": "2026-07-13T06:06:11Z",
+  "started_at": "2026-07-13T00:00:00Z",
   "artifacts": [
     {
+      "path": "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+      "type": "lean_source",
+      "summary": "Added intSubfmls, intSubfmls_length_le, intUniverse, intUniverse_length_le, intWork (all sorry-free, additive-only)"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/summaries/06_intuniverse-intwork-phase6-summary.md",
       "type": "summary",
-      "path": "specs/317_propositional_tableau_completeness/handoffs/02_wave-a-complete.md",
-      "summary": "Wave A (Phases 1-4) completion handoff: design summary, deviation from the prior handoff (companion invariant IFimpAccess instead of an IBranchSaturation field), two non-obvious Lean issues discovered, and ordered next-steps for Wave B."
+      "summary": "Phase 6 partial completion summary"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md",
+      "type": "plan",
+      "summary": "Phase 6 heading updated NOT STARTED -> PARTIAL with resolution note"
+    },
+    {
+      "path": "specs/317_propositional_tableau_completeness/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Overwritten with Phase 6 partial status, blockers, and continuation_context"
     }
   ],
-  "phases_completed": 4,
-  "phases_total": 11,
   "partial_progress": {
-    "stage": "wave_a_complete",
-    "details": "Wave A (Phases 1-4) landed as one commit (19c68791) on top of the prior partial infrastructure commit (6e24520d). Wave B (Phases 5-11, fuel raise + measure machinery + sat_timp + convergence) not started this cycle -- substantial new mathematical content, judged out of budget. Wave A is a plan-endorsed valid terminal state."
+    "stage": "phase_6_partial",
+    "details": "intUniverse/intUniverse_length_le/intWork/intSubfmls/intSubfmls_length_le landed sorry-free. intExpandBranches_world_bound deferred (requires new occurrence-tracking invariant, comparable in difficulty to Phase 7); no sorry introduced, declaration simply omitted with full analysis recorded in handoff blockers[0] and continuation_context."
   },
+  "phases_completed": 5,
+  "phases_total": 11,
   "memory_candidates": [
-    {
-      "type": "pattern",
-      "content": "Lean 4 new module system ('module' + 'public import' + '@[expose] public section'): a private declaration cannot appear in a public lemma's stated type. When a hypothesis predicate (e.g. IFimpAccess) must be consumed by public lemmas or mirrored in downstream modules, declare it public from the start; discovering this late forces a def relocation + privacy change mid-implementation (task 317 Wave A, Scheme.lean).",
-      "keywords": ["lean4", "module-system", "private", "public-section", "cslib"]
-    },
-    {
-      "type": "pattern",
-      "content": "IForces (Cslib.Logic.PL) has explicit-instance argument order Atom-then-World, not World-then-Atom: '@IForces Atom Nat (intAccessPreorder edges) ...' is correct, '@IForces Nat Atom (intAccessPreorder edges) ...' fails with a confusing Preorder-universe mismatch. This is because 'variable {Atom : Type u}' is declared before IForces's own definition in Kripke.lean, so Atom is auto-bound ahead of World.",
-      "keywords": ["lean4", "iforces", "kripke", "explicit-instance", "auto-bound", "cslib"]
-    },
-    {
-      "type": "pattern",
-      "content": "Per-value Preorder installation pattern (task 317 Route a): 'letI : Preorder Nat := intAccessPreorder edges' placed in BOTH the lemma statement (before the conclusion) and the proof preamble pins a non-defeq instance without @-annotating every occurrence; downstream lemmas whose conclusions cross module boundaries should use the fully explicit '@IForces Atom Nat (intAccessPreorder edges) ...' form (never instance search) because the ambient Nat instance is not defeq.",
-      "keywords": ["lean4", "letI", "preorder", "instance-pinning", "kripke", "tableau"]
-    },
-    {
-      "type": "decision",
-      "content": "Task 317 Wave A superseded an earlier handoff's edges-as-field-of-IBranchSaturation design with a companion predicate (IFimpAccess edges b) conjoined in the saturation existential. Equivalent strength for the F-imp truth-lemma case, strictly lower ripple: IBranchSaturation stays byte-identical (5 fields, untouched), no consumer of IBranchSaturation needs updating. Prefer companion predicates over structure-field additions when only one consumer needs the strengthened fact.",
-      "keywords": ["cslib", "task-317", "design", "companion-predicate", "saturation"]
-    }
+    "CSLib Propositional Intuitionistic tableau: F-and and T-or are BETA (branching) rules; F-or and T-and are ALPHA (non-branching) rules. This means a single tableau branch can accumulate multiple sibling worlds at the same creation-depth whenever F-imp obligations are combined via alpha-decomposable or/and connectives -- a naive ancestor-chain-depth argument is insufficient to bound total world count on one branch; an occurrence-tracking argument over the monotonically-growing `expanded` set is needed instead.",
+    "When a Lean file imports another file for a lemma used only inside a proof body (e.g. Cslib.Foundations.Logic.Tableau.Measure for sum_map_le_length_mul), also check whether that imported file's OWN tactic imports (e.g. Mathlib.Tactic.Ring) are private (plain `import`, not `public import`) -- if so, the tactic will not be transitively available and must be imported directly in the new file too."
   ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 4,
-    "sorry_count_note": "unchanged from the confirmed inventory at dispatch start (4 sorries: Scheme.lean truthLemma T-imp + fuel-0 base case; Completeness.lean and Minimal/Completeness.lean deferred-monotonicity bridges)",
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial: scoped builds (Scheme, Completeness x2, DecisionProcedure x2, IntDecidability, MinDecidability), checkInitImports, and lint-style on touched files all green; lake test / lake lint (full) / lake shake / lake exe mk_all were NOT run this cycle (deferred to /vet or final Wave B wrap-up per anti-overflow constraint -- only scoped+grepped builds used throughout)"
+    "ci_pipeline_passed": "partial (build + checkInitImports only; lint/shake/test not run per phase-scoped verification instructions)"
   },
-  "next_steps": "Continue Wave B: /implement 317 --hard, starting at Phase 5 (Expansion.lean fuel raise, TERRITORY 316). Read handoffs/02_wave-a-complete.md first."
+  "metadata": {
+    "session_id": "sess_1783962327_d9c0b3",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

@@ -1880,6 +1880,44 @@ lemma intSubfmls_length_le (φ : Proposition Atom) :
     simp only [intSubfmls, List.length_cons, List.length_append, complexity_or]
     omega
 
+/-- Whether a `Proposition Atom` is `.imp`-shaped at its root (used to count `.imp`-node
+*positions*, not distinct values, in a subformula list -- `intSubfmls` is a raw,
+non-deduplicating list, so `List.countP isImpShaped (intSubfmls φ)` counts every syntactic
+`.imp` tree-node occurrence of `φ`, even when two occurrences share the same formula value
+(e.g. `(a→b) ∧ (a→b)` has two distinct `.imp`-node positions with identical value `a→b`). -/
+def isImpShaped : Proposition Atom → Bool
+  | .imp _ _ => true
+  | _ => false
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The number of `.imp`-node positions in `φ`'s subformula list is at most `φ.complexity`
+(mirrors `intSubfmls_length_le`'s induction shape, tracking a per-connective `imp`-count
+instead of total length). This is the key combinatorial fact underlying the linear world
+bound `intExpandBranches_world_bound` (report 07 §Q4 F5, continuation): world-creation
+fires *only* on a `.neg`-signed `.imp` formula (`Rules.lean:262-264`), and (per the
+occurrence-tracking argument recorded in the Phase 6.2 continuation) each world created
+during expansion can be injected into a DISTINCT `.imp`-node position of `φ0`'s own parse
+tree -- since F-signed formulas never propagate via persistence (`posFormulasAt`/
+`propagatePersistence`/`intTImpRule` are `.pos`-only, `Rules.lean:126,139-141,174-186`), a
+given `.imp` position's negative instance can only ever exist in the ONE world where its own
+decomposition lineage placed it. Combined with this bound, that injection gives
+`(number of worlds created) ≤ φ0.complexity`, hence `(distinct labels).length ≤
+φ0.complexity + 1` (the `+1` for the initial world `0`) -- the target bound. -/
+lemma intSubfmls_impCount_le (φ : Proposition Atom) :
+    (intSubfmls φ).countP isImpShaped ≤ φ.complexity := by
+  induction φ with
+  | atom p => simp [intSubfmls, isImpShaped]
+  | bot => simp [intSubfmls, isImpShaped]
+  | imp a b iha ihb =>
+    simp [intSubfmls, List.countP_append, isImpShaped, complexity_imp]
+    omega
+  | and a b iha ihb =>
+    simp [intSubfmls, List.countP_append, isImpShaped, complexity_and]
+    omega
+  | or a b iha ihb =>
+    simp [intSubfmls, List.countP_append, isImpShaped, complexity_or]
+    omega
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- The fixed finite universe of `(sign, subformula, world)` cells for `φ`: both signs,
 every subformula of `φ`, at every world label `0 .. φ.complexity + 1` (mirrors
@@ -2015,7 +2053,7 @@ private lemma intUniverse_mem_label {φ0 : Proposition Atom} {x : ISF Atom}
   simp only [intUniverse, List.mem_flatMap, List.mem_range, List.mem_cons,
     List.not_mem_nil, or_false] at hx
   obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;>
-    (subst heq; simp only [SignedFormula.label]; omega)
+    (subst heq; change w ≤ φ0.complexity + 1; omega)
 
 omit [Hashable Atom] in
 /-- Containment for the persistent `T(φ → ψ)` rule (`Rules.lean:174-186`): every formula it
@@ -2095,7 +2133,7 @@ private lemma applyPersistenceFixpoint_subset {φ0 : Proposition Atom} (b : IBra
     · exact hb
     · exact ih _ (applyAllTImpRules_subset hb)
 
-omit [Hashable Atom] in
+omit [Hashable Atom] [DecidableEq Atom] in
 /-- **Step-level containment dispatch** (task 317 phase 6.2, the load-bearing containment
 fact, report 07 line 143): every signed formula emitted by `intApplyRuleFull sf nextWorld b`
 stays inside `U(φ0)`, given the branch invariant `hb`, the source membership `hsf`, and the

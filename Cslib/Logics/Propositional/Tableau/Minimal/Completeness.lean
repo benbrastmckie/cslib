@@ -68,18 +68,24 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 Delegates to `truthLemma minScheme`. The parametric sorry in `truthLemma` is the single
 deferred completeness obligation.
 
+**Route (a) frame (task 317 phase 1)**: takes `edges`/`hfimp` and installs
+`intAccessPreorder edges` as the countermodel frame via `letI` (mirrors
+`Intuitionistic.Completeness.intTruthLemma`).
+
 If `b` is an open saturated branch, then for every signed formula on `b`, the extracted
 model (`intExtractValuation b`, `minBranchBotForces b`) satisfies positive formulas and
 falsifies negative formulas. -/
-lemma minTruthLemma (b : IBranch Atom)
+lemma minTruthLemma (b : IBranch Atom) (edges : IEdges)
     (hopen : isMinimallyClosed b = false)
     (hsat : IBranchSaturation Atom b)
+    (hfimp : IFimpAccess edges b)
     (φ : Proposition Atom) (w : Nat) :
+    letI : Preorder Nat := intAccessPreorder edges
     (b.any (fun sf => sf.sign == .pos && sf.formula == φ && sf.label == w) →
       IForces (intExtractValuation b) (minBranchBotForces b) w φ) ∧
     (b.any (fun sf => sf.sign == .neg && sf.formula == φ && sf.label == w) →
       ¬ IForces (intExtractValuation b) (minBranchBotForces b) w φ) := by
-  exact truthLemma minScheme b hopen hsat φ w
+  exact truthLemma minScheme b edges hopen hsat hfimp φ w
 
 /-! ## Completeness Theorems -/
 
@@ -88,25 +94,34 @@ lemma minTruthLemma (b : IBranch Atom)
 Delegates to `openBranch_countermodel minScheme`. The structural sorries in
 `openBranch_countermodel` remain deferred.
 
+**Route (a) frame (task 317 phase 1/3)**: mirrors
+`Intuitionistic.Completeness.intuitionisticOpenBranch_countermodel`'s existential exposure of
+`edges`.
+
 If `minimalTableau φ = openBranch b`, then `intExtractValuation b` and `minBranchBotForces b`
-define a minimal Kripke model that falsifies `φ` at world 0. -/
+define a minimal Kripke model that falsifies `φ` at world 0 (over edge-accessibility). -/
 lemma minOpenBranch_countermodel {b : IBranch Atom} (φ : Proposition Atom)
     (h : minimalTableau φ = .openBranch b) :
-    ¬ IForces (intExtractValuation b) (minBranchBotForces b) 0 φ := by
+    ∃ edges : IEdges,
+      ¬ @IForces Atom Nat (intAccessPreorder edges)
+        (intExtractValuation b) (minBranchBotForces b) 0 φ := by
   exact openBranch_countermodel minScheme φ b h
 
 /-- **Minimal Tableau Completeness**: If `φ` is minimally valid, then the minimal
 tableau closes on `φ`.
 
 Delegates to `tableau_complete minScheme`. The remaining sorry bridges `MValid φ` to the
-per-branch forcing hypothesis `∀ b, IForces (intExtractValuation b) (minBranchBotForces b) 0 φ`
-required by `tableau_complete`; this is the core deferred completeness obligation. -/
+per-`edges` forcing hypothesis `∀ edges b, @IForces Atom Nat (intAccessPreorder edges)
+(intExtractValuation b) (minBranchBotForces b) 0 φ` required by `tableau_complete` (task 317
+phase 4, Route (a), mirrors `intuitionisticTableau_complete`); this is the core deferred
+completeness obligation. -/
 theorem minimalTableau_complete (φ : Proposition Atom)
     (h : MValid φ) : minimalTableau φ = .closed := by
   apply tableau_complete minScheme
-  intro _b
-  -- Bridge: MValid φ → IForces (intExtractValuation b) (minBranchBotForces b) 0 φ
-  -- Requires: upward-closure of intExtractValuation b and minBranchBotForces b
+  intro edges _b
+  -- Bridge: MValid φ → IForces (intExtractValuation b) (minBranchBotForces b) 0 φ at the
+  -- intAccessPreorder edges frame. Requires: upward-closure of intExtractValuation b and
+  -- minBranchBotForces b ALONG THAT FRAME (task 317 phase 9/10 fuel-sufficiency fixpoint).
   sorry
 
 end Cslib.Logic.PL

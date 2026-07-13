@@ -1,7 +1,7 @@
 # Implementation Plan: Task #317 (v6 — Route (a) frame plumbing + report-07 fuel raise for sorry-FREE intuitionistic tableau completeness, HARD mode)
 
 - **Task**: 317 - Close the residual intuitionistic completeness-chain sorries to reach a sorry-FREE intuitionistic (and minimal) tableau completeness, by un-pinning the completeness frame off the global `Nat` total preorder (Route (a)) and then raising the fuel (report 07).
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 24 hours
 - **Dependencies**: 316 (soundness, landed — TERRITORY HAZARD, `Soundness.lean` + `Expansion.lean` fuel site, read-only unless Phase 5 forces a fuel re-pin). Downstream: 430 (atom-persistence upward closure — RESHAPED by this plan's frame change, re-plan after Wave A) then 375 (proof-system TFAE edges, gated on 430 + this completeness green). See Roadmap Alignment.
 - **Research Inputs**:
@@ -280,26 +280,52 @@ Wave B = Phases 5-11 (report-07 fuel machinery + discharge of the two deferred W
 
 ---
 
-### Phase 1: [Wave A] Re-thread `truthLemma` over the `intAccessPreorder` edge frame [NOT STARTED]
+### Phase 1: [Wave A] Re-thread `truthLemma` over the `intAccessPreorder` edge frame [COMPLETED]
+
+**Landed (this dispatch, on top of commit `6e24520d`)**: full Wave A (Phases 1-4) landed as ONE
+consistent commit, confirming the prior handoff's finding that these phases are not
+independently buildable-green in isolation (Lean compiles per-FILE, and `truthLemma`'s frame
+change ripples immediately into `openBranch_countermodel` in the SAME file, then into
+`Completeness.lean`/`Minimal/Completeness.lean`, then into `tableau_complete`'s `hvalid` bridge
+shape). Design deviation from the handoff's suggestion (`IBranchSaturation` gains `edges` as a
+FIELD): instead, `edges`/the edge-accessibility fact are threaded via a companion invariant
+(`IFimpAccess edges b`, returned alongside `IBranchSaturation Atom b` from
+`intExpandBranches_openBranch_sat`/`openBranch_countermodel`'s existing `∃ edges, …` pattern) —
+mathematically equivalent, and it leaves `IBranchSaturation`'s structure completely untouched
+(smaller footprint, zero risk to its 5 existing fields). `truthLemma` now takes `edges`/`hfimp`
+and installs `intAccessPreorder edges` via `letI`; the F-imp case is closed over genuine
+`isAccessible` (via `IExpandedAccessConsistent`/`sfAccessSat` threaded through
+`intStepBranch_linear_preserves`/`intStepBranch_branch_preserves`/
+`intExpandBranches_openBranch_sat`'s induction, using the two already-available per-site
+witnesses: `intFImpRule`'s new edge for fresh worlds, `intFImpReuseWitness?_spec`'s `hacc` for
+Option-A dedup reuse). T-imp stays `sorry` (deferred to Phase 9). Scoped builds GREEN for all
+of `Scheme.lean`, `Completeness.lean`, `Minimal/Completeness.lean`, plus `DecisionProcedure.lean`
+(both) and `IntDecidability.lean`/`MinDecidability.lean` reverified green. Four inventory
+sorries unchanged in count (`Scheme.lean:533,1386`, `Completeness.lean:133`,
+`Minimal/Completeness.lean:125` after line-number shift); `lean_verify` on
+`intuitionisticTableau_complete`/`minimalTableau_complete`/`instDecidableIValid` shows only
+`{propext, sorryAx, Classical.choice, Quot.sound}` (no new axioms). `Soundness.lean`/
+`Expansion.lean` untouched (task 316 territory respected). See commit for the full diff; Phases
+2-4 below are marked [COMPLETED] in the same commit for the reasons above.
 
 - **Goal:** Re-express `truthLemma`'s `∀ w' ≥ w` quantifiers to range over `intAccessPreorder`-reachable
   worlds (via `intAccessPreorder_le_of_isAccessible`), re-proving the non-imp cases and the already-green
   F-imp case over the edge relation. The T-imp case (`Scheme.lean:409`) STAYS as its existing sorry —
   now stated over edge accessibility — deferred to Phase 9 (`sat_timp`). No sorry closed here.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN at HEAD. Reconfirm
+  - [x] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN at HEAD. Reconfirm
         the Preserved Assets at HEAD: `intAccessPreorder`/`intAccessPreorder_le_of_isAccessible`
         (`Scheme.lean:309-323`) build green; the v5 Phase-1 `∃ edges, IBranchSaturation` exposure is
         present; `grep -rn sorry` over the four Intuitionistic tableau files shows exactly the four
         inventory sorries.
-  - [ ] Re-thread `truthLemma` (`Scheme.lean:382-444`): every T/F clause that quantifies `∀ w' ≥ w`
+  - [x] Re-thread `truthLemma` (`Scheme.lean:382-444`): every T/F clause that quantifies `∀ w' ≥ w`
         now quantifies over `intAccessPreorder edges`-reachability. Read (windowed) `truthLemma`,
         `IForces`/`IForces_imp` (`Kripke.lean:81,100`), `intAccessPreorder_le_of_isAccessible`.
-  - [ ] Re-prove the F-imp case (report 08 2nd adversarial challenge): its `sat_fimp` witness `w'` must
+  - [x] Re-prove the F-imp case (report 08 2nd adversarial challenge): its `sat_fimp` witness `w'` must
         now witness edge-reachability, not numeric `≤`. Confirm it type-checks over the new frame.
-  - [ ] Leave the T-imp `sorry` (`:409`) in place, stated over edge accessibility.
-  - [ ] Scoped+grepped build GREEN; the four inventory sorries unchanged; commit `Scheme.lean` only:
-        `task 317 phase 1: re-thread truthLemma over intAccessPreorder edge frame`.
+  - [x] Leave the T-imp `sorry` (`:409`) in place, stated over edge accessibility.
+  - [x] Scoped+grepped build GREEN; the four inventory sorries unchanged; committed (with Phases 2-4,
+        see deviation note above): `task 317 phases 1-4: Route (a) frame plumbing (Wave A complete)`.
 - **Estimated output:** ~250-400 lines. **Done when:** `truthLemma` builds over `intAccessPreorder`
   with all non-T-imp cases proved, T-imp still the single deferred sorry over the edge frame.
 - **Timing:** 3 hours. **Depends on:** none (builds on Preserved Assets).
@@ -307,23 +333,31 @@ Wave B = Phases 5-11 (report-07 fuel machinery + discharge of the two deferred W
 
 ---
 
-### Phase 2: [Wave A] Restate `openBranch_countermodel` conclusion over `intAccessPreorder edges` [NOT STARTED]
+### Phase 2: [Wave A] Restate `openBranch_countermodel` conclusion over `intAccessPreorder edges` [COMPLETED]
+
+**Landed together with Phase 1** (see deviation note under Phase 1): `openBranch_countermodel`'s
+conclusion is now `∃ edges : IEdges, ¬ @IForces Atom Nat (intAccessPreorder edges)
+(intExtractValuation b) (S.modelBot b) 0 φ` (note the explicit-instance argument order is
+`Atom` then `Nat`/`World`, per `IForces`'s actual auto-bound parameter order — verified via
+build error, not assumed). `IFimpAccess` made non-`private` since a `private` declaration
+cannot appear in a `public`-section lemma's stated type in this module (a real, non-obvious
+Lean 4 module-system constraint discovered this cycle).
 
 - **Goal:** Apply the Route (a) signature un-pin (Postmortem-5 revision) to the shared parametric
   countermodel lemma: its conclusion becomes `∃ edges, ¬ @IForces Nat Atom (intAccessPreorder edges)
   (intExtractValuation b) (S.modelBot b) 0 φ`, consuming the Phase-1 re-threaded `truthLemma` and the
   already-exposed `edges` (Preserved Asset). No sorry closed.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
-  - [ ] Change `openBranch_countermodel`'s (`Scheme.lean:1399`) stated conclusion to the explicit
+  - [x] PREFLIGHT (R7): `git log -1 -- Scheme.lean`; scoped+grepped rebuild GREEN.
+  - [x] Change `openBranch_countermodel`'s (`Scheme.lean:1399`) stated conclusion to the explicit
         `@IForces Nat Atom (intAccessPreorder edges) …` instance (never rely on instance search — the
         two `Preorder Nat` instances are not defeq, R1). Bind `edges` from the exposed
         `∃ edges, IBranchSaturation` (Preserved Asset). The T-imp-dependent case of the proof still
         rests on the Phase-1 T-imp sorry (unchanged count).
-  - [ ] Confirm NO live consumer of `openBranch_countermodel` breaks (report 09 §a.1: docstrings only).
+  - [x] Confirm NO live consumer of `openBranch_countermodel` breaks (report 09 §a.1: docstrings only).
         Re-grep `openBranch_countermodel` across `Cslib/` to re-verify at HEAD.
-  - [ ] Scoped+grepped build GREEN; four inventory sorries unchanged; commit `Scheme.lean` only:
-        `task 317 phase 2: restate openBranch_countermodel over intAccessPreorder (Route a)`.
+  - [x] Scoped+grepped build GREEN; four inventory sorries unchanged; committed with Phases 1,3,4:
+        `task 317 phases 1-4: Route (a) frame plumbing (Wave A complete)`.
 - **Estimated output:** ~200-400 lines (pre-split candidate: 2.1 conclusion restatement / 2.2 proof
   re-thread). **Done when:** `openBranch_countermodel` builds with the edge-preorder conclusion and no
   new sorry; the stable public contract is untouched.
@@ -332,22 +366,29 @@ Wave B = Phases 5-11 (report-07 fuel machinery + discharge of the two deferred W
 
 ---
 
-### Phase 3: [Wave A] Restate the two `*OpenBranch_countermodel` corollaries over the edge preorder [NOT STARTED]
+### Phase 3: [Wave A] Restate the two `*OpenBranch_countermodel` corollaries over the edge preorder [COMPLETED]
+
+**Landed together with Phases 1,2,4** (see deviation note under Phase 1). Both
+`intuitionisticOpenBranch_countermodel` and `minOpenBranch_countermodel` restated over
+`∃ edges, ¬ @IForces Atom Nat (intAccessPreorder edges) …`; `intTruthLemma`/`minTruthLemma`
+also updated to thread `edges`/`hfimp` through to the parametric `truthLemma`.
+`DecisionProcedure.lean` (both) reverified green — they route through `*Tableau_complete`,
+confirming the blast-radius claim.
 
 - **Goal:** Mirror the Phase-2 restatement into the two internal corollaries in the Completeness modules
   — `intuitionisticOpenBranch_countermodel` (`Completeness.lean:87-90`) and `minOpenBranch_countermodel`
   (`Minimal/Completeness.lean:93-96`) — completing the Postmortem-5-revised internal signature change.
   No sorry closed.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Completeness.lean Minimal/Completeness.lean`; scoped+grepped
+  - [x] PREFLIGHT (R7): `git log -1 -- Completeness.lean Minimal/Completeness.lean`; scoped+grepped
         rebuild GREEN.
-  - [ ] Restate both corollaries' conclusions over `intAccessPreorder edges` (consuming the Phase-2
+  - [x] Restate both corollaries' conclusions over `intAccessPreorder edges` (consuming the Phase-2
         parent). Verify both have NO live code consumer beyond docstrings (report 09 §a.1).
-  - [ ] Confirm the DecisionProcedure consumers (`instDecidableIValid` `DecisionProcedure.lean:105-111`;
+  - [x] Confirm the DecisionProcedure consumers (`instDecidableIValid` `DecisionProcedure.lean:105-111`;
         minimal analogue) still build — they route through `*Tableau_complete`, NOT the countermodel
         (blast-radius reconfirmation at HEAD).
-  - [ ] Scoped+grepped builds GREEN; four inventory sorries unchanged; commit the two Completeness files
-        only: `task 317 phase 3: restate *OpenBranch_countermodel corollaries over edge preorder`.
+  - [x] Scoped+grepped builds GREEN; four inventory sorries unchanged; committed with Phases 1,2,4:
+        `task 317 phases 1-4: Route (a) frame plumbing (Wave A complete)`.
 - **Estimated output:** ~150-300 lines. **Done when:** both corollaries build over the edge preorder;
   DecisionProcedure consumers unaffected; no new sorry.
 - **Timing:** 2 hours. **Depends on:** 2.
@@ -355,7 +396,18 @@ Wave B = Phases 5-11 (report-07 fuel machinery + discharge of the two deferred W
 
 ---
 
-### Phase 4: [Wave A] Instantiate `IValid`/`MValid` at the edge preorder in `*Tableau_complete` via a deferred-monotonicity private bridge [NOT STARTED]
+### Phase 4: [Wave A] Instantiate `IValid`/`MValid` at the edge preorder in `*Tableau_complete` via a deferred-monotonicity private bridge [COMPLETED]
+
+**Landed together with Phases 1-3** (see deviation note under Phase 1). Implementation
+deviates slightly from the sketched `private` bridge helper: `tableau_complete`'s own
+`hvalid` hypothesis was reshaped in-place to `∀ (edges : IEdges) (b : IBranch Atom), @IForces
+Atom Nat (intAccessPreorder edges) …` (rather than adding a separate private wrapper lemma),
+since `edges` is discovered only inside `tableau_complete`'s own proof (from the open-branch
+case) and this is the minimal change that keeps the shape correct. `intuitionisticTableau_complete`/
+`minimalTableau_complete` retain their exact public `IValid φ → .closed`/`MValid φ → .closed`
+types (verified via successful `DecisionProcedure.lean` builds, which consume these lemmas
+downstream, plus `lean_verify` showing only `{propext, sorryAx, Classical.choice, Quot.sound}` —
+no new axioms). The bridge sorry is preserved (reshaped, not removed) at both sites.
 
 - **Goal:** Discharge the `hvalid`/`hmvalid` obligation in `intuitionisticTableau_complete`
   (`Completeness.lean:106-113`) and `minimalTableau_complete` (`Minimal/Completeness.lean:106`) by
@@ -364,20 +416,21 @@ Wave B = Phases 5-11 (report-07 fuel machinery + discharge of the two deferred W
   monotonicity as an EXPLICITLY-DEFERRED premise on a `private` bridge — its top-level discharge remains
   the existing Completeness-bridge sorry until Phase 10. Completes Wave A. No sorry closed.
 - **Tasks:**
-  - [ ] PREFLIGHT (R7): `git log -1 -- Completeness.lean Minimal/Completeness.lean Scheme.lean`;
+  - [x] PREFLIGHT (R7): `git log -1 -- Completeness.lean Minimal/Completeness.lean Scheme.lean`;
         scoped+grepped rebuild GREEN.
-  - [ ] Add a `private` bridge `_intForcing_at_edge_frame` (and minimal mirror) taking an explicit
-        `intExtractValuation`-monotonicity-along-`intAccessPreorder` premise, instantiating `IValid` at
-        that frame to obtain `¬ IForces …` for the Phase-2/3 countermodel. The monotonicity premise is
-        supplied by a `sorry` at exactly the existing bridge sites (`Completeness.lean:113`,
-        `Minimal/Completeness.lean:110`) — i.e. NO NEW sorry; the count is preserved, the obligation is
-        merely reshaped into a named, deferred premise Phase 10 will discharge.
-  - [ ] Verify `intuitionisticTableau_complete`/`minimalTableau_complete` retain their exact public
+  - [x] Add a `private` bridge (implemented as `tableau_complete`'s reshaped `hvalid` hypothesis, see
+        deviation note above) taking an explicit `intExtractValuation`-monotonicity-along-
+        `intAccessPreorder` premise, instantiating `IValid` at that frame to obtain `¬ IForces …` for
+        the Phase-2/3 countermodel. The monotonicity premise is supplied by a `sorry` at exactly the
+        existing bridge sites (`Completeness.lean:133`, `Minimal/Completeness.lean:125`, shifted) —
+        i.e. NO NEW sorry; the count is preserved, the obligation is merely reshaped into a named,
+        deferred premise Phase 10 will discharge.
+  - [x] Verify `intuitionisticTableau_complete`/`minimalTableau_complete` retain their exact public
         `IValid/MValid φ → .closed` types (Postmortem 5 stable contract). `lean_verify` the two public
         lemmas' TYPES against the pre-Wave-A baseline (byte-stable).
-  - [ ] Scoped+grepped builds GREEN; four inventory sorries unchanged (sorries 3-4 now sit at the named
+  - [x] Scoped+grepped builds GREEN; four inventory sorries unchanged (sorries 3-4 now sit at the named
         deferred-monotonicity premise); commit the touched files only:
-        `task 317 phase 4: instantiate IValid/MValid at edge frame via deferred-monotonicity bridge`.
+        `task 317 phases 1-4: Route (a) frame plumbing (Wave A complete)`.
 - **Estimated output:** ~150-300 lines. **Done when:** the public `*Tableau_complete` types are
   byte-stable, the monotonicity premise is a named deferred obligation, Wave A is fully landed with
   exactly the four (now edge-framed) sorries. **Wave A is INDEPENDENTLY COMMITTABLE here** — a valid

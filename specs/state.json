@@ -1,5 +1,5 @@
 {
-  "next_project_number": 497,
+  "next_project_number": 498,
   "active_projects": [
     {
       "project_number": 486,
@@ -2124,12 +2124,12 @@
     {
       "project_number": 441,
       "project_name": "modal_proposition_native_refactor",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Refactor Modal.Proposition from the Lukasiewicz encoding (primitives atom/bot/imp/box; and/or/neg/diamond encoded as nested imp) to NATIVE constructors atom/bot/imp/and/or/box/diamond (diamond primitive), mirroring the propositional layer (PL.Proposition has native and/or). Goal: highest-quality mathematical foundations — one tableau rule/decomposer per connective, structural-induction truth lemma, no unsound uniform-imp bridge lemmas, no view/strong-induction workarounds. Cascades through Modal/Basic.lean (datatype+Satisfies+complexity+axiom theorems), Modal/LogicalEquivalence.lean (Context), all Modal/Tableau/*, and Bimodal/Embedding/ModalEmbedding.lean. Design captured in plans/01 (was task 299 plan v6). Depends on task 299 (encoding-based tableau) landing first; this then re-bases it onto native constructors. Zero sorry/admit/new-axiom. Est 1,500-2,000 lines touched.",
       "created": "2026-06-30T20:48:25Z",
-      "last_updated": "2026-07-13T13:53:06Z",
+      "last_updated": "2026-07-13T16:23:47Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -2150,7 +2150,8 @@
       "parent_task": 299,
       "sources": [],
       "blockers": null,
-      "session_id": "sess_1783949998_0dedc2"
+      "session_id": "sess_1783951001_fa3ce4",
+      "completion_summary": "Refactored Modal.Proposition to native constructors (atom/bot/imp/and/or/box/diamond, diamond primitive) across all 15 phases on branch task-441-native-refactor. Eliminated the Lukasiewicz encoding and its uniform-imp bridge lemmas; every connective now has its own tableau decomposer and structural-induction case. Uncovered and fixed two genuine mathematical gaps (diamondPos minting a fresh world in modalHintikkaSet/isMintingShaped, and the symmetric ModalLoopInv diamond-witness invariant). 68 files, +3938/-1985; zero sorry/admit/new-axiom; repo-wide CI green. Branch ready for /pr or /merge (not merged per repo convention)."
     },
     {
       "project_number": 442,
@@ -2667,6 +2668,16 @@
       "description": "Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.",
       "created": "2026-07-13T05:15:48Z",
       "last_updated": "2026-07-13T05:15:48Z"
+    },
+    {
+      "project_number": 497,
+      "project_name": "reconcile_imp_naming",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "propositional-logic",
+      "description": "Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.",
+      "created": "2026-07-13T15:55:03Z",
+      "last_updated": "2026-07-13T15:55:03Z"
     }
   ],
   "repository_health": {

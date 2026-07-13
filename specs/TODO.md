@@ -1,5 +1,5 @@
 ---
-next_project_number: 497
+next_project_number: 498
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 497
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,441,449,463,465,466,474,478,479,481,482,483,490,491 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,478,479,481,482,483,490,491,497 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,480 | 36,37,181,317,407,425,449,478,490 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,492,493,495 | 39,40,181,215,300,301,375,480,491 | foundations, code hygiene, modal-logic |
 | 4 | 412,484,494,496 | 41,479,481,482,483,492,495 | modal logic, code hygiene, modal-logic |
@@ -37,7 +37,6 @@ next_project_number: 497
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-441 [PLANNED] — Refactor Modal.Proposition from the Lukasiewicz encoding (primiti
 478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
 479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
 481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
@@ -92,11 +91,25 @@ next_project_number: 497
   └─ 494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
 
+### Propositional Logic
+
+497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
+
 ### Uncategorized
 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 497. Reconcile imp naming
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: propositional-logic
+- **Dependencies**: None
+
+**Description**: Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.
+
+---
 
 ### 496. Minimal modal extensions
 - **Status**: [NOT STARTED]
@@ -782,7 +795,7 @@ Definition of done: lake build, lake lint, lake exe lint-style green on every in
 ---
 
 ### 441. Modal proposition native refactor
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 299, Task 461, Task 462

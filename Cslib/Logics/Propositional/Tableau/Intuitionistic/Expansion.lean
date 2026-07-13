@@ -454,13 +454,19 @@ predicate and countermodel `botForces`) into a single parameterized interface. -
 /-! ## Decision Procedures -/
 
 /-- Fuel bound for the intuitionistic/minimal tableau expansion loop, as a function of
-formula complexity. Set to `3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (task 317
-phase 5, per report 07 §Q4), replacing the earlier `2 ^ (2 * φ.complexity + 2)` bound which was
-insufficient to guarantee saturation. Shared by `intuitionisticTableau`, `minimalTableau`, and
-by the fuel-pinned lemmas in `Scheme.lean` (`tableau_sound`, `openBranch_countermodel`,
-`tableau_complete`) so that all fuel-dependent call sites stay in sync. -/
+formula complexity. Set to `3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))` (task 317
+phase 8.0, doubling the phase-5 exponent to mirror the Modal-K `modalFuel`'s built-in
+factor-of-2, `FmpMeasure.lean:232-233`), replacing the earlier
+`2 ^ (2 * φ.complexity + 2)` bound which was insufficient to guarantee saturation. The
+phase-5 exponent (`2 * (2 * φ.complexity + 1) * (φ.complexity + 2)`, un-doubled) was verified
+insufficient for `intExpMeasure_init_le_fuel`: the initial worklist measure scales as
+`3 ^ (2 * |intUniverse φ| - 1)`, i.e. ~twice `intUniverse_length_le`'s bound, not once (see
+`Scheme.lean`'s `intExpMeasure_init_le_fuel`). Shared by `intuitionisticTableau`,
+`minimalTableau`, and by the fuel-pinned lemmas in `Scheme.lean` (`tableau_sound`,
+`openBranch_countermodel`, `tableau_complete`) so that all fuel-dependent call sites stay in
+sync. -/
 def intFuel (φ : Proposition Atom) : Nat :=
-  3 ^ (2 * (2 * φ.complexity + 1) * (φ.complexity + 2))
+  3 ^ (4 * (2 * φ.complexity + 1) * (φ.complexity + 2))
 
 /-- The intuitionistic propositional tableau decision procedure.
 

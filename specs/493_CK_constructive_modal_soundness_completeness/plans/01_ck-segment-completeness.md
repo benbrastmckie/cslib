@@ -203,14 +203,15 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 1.5-2.5h
 - **Depends on:** none
 
-### Phase 2: `CKSegment` structure, `cexpl`, accessibility, valuation [NOT STARTED]
+### Phase 2: `CKSegment` structure, `cexpl`, accessibility, valuation [COMPLETED]
 - **Goal:** Define the segment world type and the birelational model data over it.
 - **Tasks:**
-  - [ ] `QuasiPrime Axioms S := Prime … S ∨ S = Set.univ`.
-  - [ ] `structure CKSegment (Axioms)` with fields `head`, `tail`, `head_closed`, `head_qprime`, `tail_realizable`, `box_reflect`, `diam_witness` (per report §2.1 sketch).
-  - [ ] `def cexpl : CKSegment Axioms` with `head := univ`, `tail := {univ}`; discharge all field obligations (univ is quasi-prime, closed, reflects/witnesses trivially).
-  - [ ] `cireach P Q := P.head ⊆ Q.head` + `Preorder (CKSegment Axioms)` instance (pattern from `CanonicalModel.lean:85`).
-  - [ ] `cmreach P Q := Q.head ∈ P.tail`; `cval s p := Proposition.atom p ∈ s.head`.
+  - [x] `QuasiPrime Axioms S` := `Metalogic.PrimeAdmissible` at trivial `Cons` (closed + disjunction property; equivalent to prime-or-univ given efq, and directly usable with `prime_exclusion`).
+  - [x] `structure CKSegment (Axioms)` with fields `head`, `tail`, `head_qprime`, `tail_qprime`, `box_reflect`, `diam_witness` (closure subsumed by quasi-primality).
+  - [x] `def cexpl : CKSegment Axioms` with `head := univ`, `tail := {univ}`; all field obligations discharged.
+  - [x] `cireach P Q := P.head ⊆ Q.head` + `Preorder (CKSegment Axioms)` instance (pattern from `CanonicalModel.lean:85`).
+  - [x] `cmreach P Q := Q.head ∈ P.tail`; `cval s p := Proposition.atom p ∈ s.head`.
+  - [x] EXTRA (design correction): `Forcing.lean` with `CKForces`/`ckforces_persistence`/`CKValid`/`ckforces_of_exploding`; `CKSegment.ofHead` (maximal-tail realization of any quasi-prime head); `cbotForces` + the three canonical explosion-condition lemmas.
 - **Estimated output:** ~150-250 lines. **Done when:** file builds; `cexpl` fully constructed (no field left as `sorry`); `Preorder` instance accepted; gates pass.
 - **Timing:** 3-4h
 - **Depends on:** 1

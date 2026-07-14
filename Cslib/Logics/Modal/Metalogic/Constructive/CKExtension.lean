@@ -161,6 +161,46 @@ def cs5FC {World : Type*} [Preorder World] (r : World → World → Prop) : Prop
     ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → r w t)
     ∧ (∀ {w u u'}, r w u → u ≤ u' → r u' w)
 
+/-- **The weakened `CS5` frame condition** (task 509): reflexivity, *plain* transitivity, *plain*
+symmetry, the `cs4FC'` re-basing clause (`fourBox`), and the weakened ≤-composed symmetry
+`FCsym_box` (`bBox`). Per-clause axiom correspondence: `∀ w, r w w` validates `tBox`/`tDia`;
+plain transitivity `r w u → r u t → r w t` validates `fourDia`; plain symmetry
+`r w u → r u w` validates `bDia`; the `cs4FC'` re-basing clause
+`r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t` validates `fourBox`; and `FCsym_box`
+`r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t` validates `bBox`.
+
+**`cs5FC''` is not `cs5FCweak` corrected by relabelling — it fixes a genuine soundness gap.**
+Task 508's `cs5FCweak` is `cs5FC''` *minus* plain symmetry and *minus* plain transitivity; that
+omission, not any real obstruction, is why `bDia` was unsound over `cs5FCweak`
+(`bDia_not_valid_over_cs5FCweak`,
+`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean`). That
+countermodel's relation `wr'` is itself not plainly symmetric
+(`Cslib.Logic.Modal.wr'_not_symm`, `probes/cs5-symmetry-probe.lean`), so it says nothing about
+`cs5FC''`. All 17 `CS5` axioms are sound over `cs5FC''`
+(`Cslib.Logic.Modal.cs5_axiom_sound''`, `CS5.lean`) — see that theorem for the mechanized
+soundness proof. Validity over `cs5FC''` is a genuine weakening of validity over `cs5FC`
+(`cs5FC_implies_cs5FC''`), the same direction that makes `CS4` canonical completeness go
+through for `cs4FC'`. -/
+def cs5FC'' {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
+  (∀ w, r w w)
+    ∧ (∀ {w u t}, r w u → r u t → r w t)
+    ∧ (∀ {w u}, r w u → r u w)
+    ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t)
+    ∧ (∀ {w u u'}, r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t)
+
+/-- **`cs5FC''` genuinely weakens `cs5FC`**: every `cs5FC`-frame is a `cs5FC''`-frame, witnessed
+by specializing each ≤-composed clause at `u' := u` (or, for `FCsym_box`, at `t := w`). Validity
+over the weaker `cs5FC''` is therefore a *stronger* statement than validity over `cs5FC`:
+soundness is harder to prove (`cs5_axiom_sound''`) but completeness is easier — mirrors
+`cs4FC_implies_cs4FC'`. -/
+theorem cs5FC_implies_cs5FC'' {World : Type*} [Preorder World] {r : World → World → Prop}
+    (h : cs5FC r) : cs5FC'' r :=
+  ⟨h.1,
+   fun hwu hut => h.2.1 hwu (le_refl _) hut,
+   fun hwu => h.2.2 hwu (le_refl _),
+   fun hwu hle hu't => ⟨_, le_refl _, h.2.1 hwu hle hu't⟩,
+   fun hwu hle => ⟨_, h.2.2 hwu hle, le_refl _⟩⟩
+
 /-! ## Parametric Completeness over `FC`-Frames -/
 
 section ParametricFCCompleteness

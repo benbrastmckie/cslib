@@ -1,7 +1,7 @@
 # Implementation Plan: Task #494
 
 - **Task**: 494 - Intuitionistic modal extensions IT / IS4 / IS5 as modular extensions of IK, sound + complete via the birelational canonical model
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: Task 492 (IK: `IKModalAxiom`, `ik_axiom_sound`, `ik_soundness`, `ik_completeness`), Task 480 (birelational canonical model: `canonicalR`, `canonical_f1/f2`, `canonicalBModel`, `canonical_imp_property`, witnesses, `modal_prime_exclusion`)
 - **Research Inputs**: specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/reports/01_it-is4-is5-extensions.md
@@ -208,27 +208,27 @@ Phases are strictly sequential: each file's nested imports depend on the prior f
   - `is4_soundness_completeness` type-checks over the refl∧trans frame condition.
   - Zero `sorry`/`axiom`/vacuous def.
 
-### Phase 4: IS5.lean (reflexive+transitive+SYMMETRIC via B; A→□◇A, ◇□A→A) — HIGHEST RISK [NOT STARTED]
+### Phase 4: IS5.lean (reflexive+transitive+SYMMETRIC via B; A→□◇A, ◇□A→A) — HIGHEST RISK [COMPLETED]
 
 - **Goal:** Instantiate at IS5 via B/symmetry (equivalence relation), sound + complete. Highest
   risk step: the canonical symmetry-box clause.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5.lean`
+  - [x] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5.lean`
         (`import Cslib.Init`; `public import ...Intuitionistic.IS4`).
-  - [ ] Define `IS5ModalAxiom` = IS4 constructors + `bBox (φ) : φ.imp (□(◇φ))` and
+  - [x] Define `IS5ModalAxiom` = IS4 constructors + `bBox (φ) : φ.imp (□(◇φ))` and
         `bDia (φ) : (◇(□φ)).imp φ`. Do NOT add classical 5 (`◇A→□◇A`).
-  - [ ] Prove `is5_axiom_sound` over reflexive∧transitive∧symmetric: `bDia` (EASY:
+  - [x] Prove `is5_axiom_sound` over reflexive∧transitive∧symmetric: `bDia` (EASY:
         `hsymm hru`, then `hboxA u le_refl w (hsymm hru)`); `bBox` (EASY-MOD: persistence +
         symmetry witness `⟨w', hsymm hru, A@w'⟩`, no F-relocation). Reuse IS4/IT/IK cases.
-  - [ ] Prove canonical symmetry `Symmetric (@canonicalR Atom IS5ModalAxiom)`:
+  - [x] Prove canonical symmetry `Symmetric (@canonicalR Atom IS5ModalAxiom)`:
         - dia clause `φ∈w → ◇φ∈v`: `axiom_mem(bBox)`+MP ⇒ `□◇φ∈w`; box-clause `w→v` ⇒ `◇φ∈v`.
         - **box clause `□φ∈v → φ∈w` (HIGHEST RISK):** dia-clause `w→v` with ψ=□φ ⇒ `◇□φ∈w`;
           `axiom_mem(bDia)`+MP (`◇□φ→φ`) ⇒ `φ∈w`. Verify `bDia` instance shape is exactly
           `◇(□φ)→φ` before chaining. Still positive, one-line.
-  - [ ] Bundle `reflexive ∧ transitive ∧ symmetric`; prove `is5_completeness` via
+  - [x] Bundle `reflexive ∧ transitive ∧ symmetric`; prove `is5_completeness` via
         `ivalidFC_completeness` with `⟨canonicalReflexive, canonicalTransitive, canonicalSymmetric⟩`;
         add `is5_consistent`, `is5_soundness_completeness`.
-  - [ ] `lake build` scoped; zero-sorry verify; barrel register.
+  - [x] `lake build` scoped; zero-sorry verify; barrel register.
 - **Timing:** 3 hours
 - **Depends on:** 3
 - **STOP contingency:** If the symmetry-box clause (`□φ∈v → φ∈w`) cannot be discharged positively
@@ -253,16 +253,24 @@ Per-phase (each phase, before commit):
       on the new file is clean; `lean_verify` on each top-level theorem.
 
 Final (after Phase 4), full CSLib CI pipeline:
-- [ ] `lake exe cache get` (fetch Mathlib cache, once per branch).
-- [ ] `lake build` (whole project, syntax linters).
-- [ ] `lake exe checkInitImports` (all new files import `Cslib.Init`).
-- [ ] `lake lint` (environment linters).
-- [ ] `lake exe lint-style` (text linters).
-- [ ] `lake test` (CslibTests suite).
-- [ ] `lake exe mk_all --module` (barrel current for the four new files).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` (import minimization).
-- [ ] `git diff` confirms zero churn to task-480/492 files (`IValid`, `canonicalR`,
-      `canonical_imp_property`, IK.lean, etc.).
+- [x] `lake exe cache get` (fetch Mathlib cache, once per branch) — cache already present.
+- [x] `lake build` (whole project, syntax linters) — succeeds (3199 jobs); pre-existing
+      unrelated `sorry`s/warnings in `Propositional/Tableau/*` files, not task 494.
+- [x] `lake exe checkInitImports` (all new files import `Cslib.Init`) — clean, no errors.
+- [x] `lake lint` (environment linters) — one pre-existing error in
+      `Foundations/Logic/Metalogic/PrimeExclusion.lean` (untouched by this task; confirmed via
+      `git diff --stat`), not introduced by task 494.
+- [x] `lake exe lint-style` (text linters) — clean, no output.
+- [x] `lake test` (CslibTests suite) — succeeds.
+- [x] `lake exe mk_all --module` (barrel current for the four new files) — "No update
+      necessary" (manual barrel edit already matched).
+- [x] `lake shake --add-public --keep-implied --keep-prefix` (import minimization) — `IS5.lean`'s
+      suggestion profile matches its already-committed siblings (`IT.lean`/`IS4.lean`/
+      `Extension.lean`, which also flag "remove `import Cslib.Init`", never applied since it is
+      the mandatory CSLib import); no new debt.
+- [x] `git diff` confirms zero churn to task-480/492 files (`IValid`, `canonicalR`,
+      `canonical_imp_property`, IK.lean, etc.) — `git diff --stat` empty for all of
+      IK/IT/IS4/Extension/CanonicalModel/Completeness/TruthLemma/Birelational.lean.
 
 ## Artifacts & Outputs
 

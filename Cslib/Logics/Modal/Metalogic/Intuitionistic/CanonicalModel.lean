@@ -981,4 +981,293 @@ theorem canonical_diamond_witness
 
 end CanonicalDiamondWitness
 
+/-! ## Frame Confluence Conditions (Phase 2d)
+
+This section proves `canonical_f1` (up-confluence, matching `BFrame.f1`) and `canonical_f2`
+(down-confluence, matching `BFrame.f2`), completing the birelational frame data for the
+canonical model. Confirmed against `Cslib/Logics/Modal/Semantics/Birelational.lean`:
+
+- `BFrame.f1 : ∀ {w w' v}, w ≤ w' → r w v → ∃ v', r w' v' ∧ v ≤ v'` (up-confluence);
+- `BFrame.f2 : ∀ {w v v'}, r w v → v ≤ v' → ∃ w', w ≤ w' ∧ r w' v'` (down-confluence).
+
+**`canonical_f2` (down-confluence)** transports the box witness (Phase 2b) along the inclusion
+`v ≤ v'`: `canonicalR w v`'s box clause gives `{ψ|□ψ∈w.val}⊆v.val⊆v'.val`, exactly the `h_wu`
+precondition `box_witness_pair_underivable` needs (with `u := v'`), so `w'` is built by the same
+seeded prime extension as `canonical_box_witness`'s Step 2, with `u` already given instead of
+freshly constructed. Threads `h_K`, `h_Kdia`, `h_Idb` via `box_witness_pair_underivable`.
+
+**`canonical_f1` (up-confluence)** is the dual construction, generalizing the diamond witness
+(Phase 2c) from a singleton seed `{φ}` to the full prime theory `v.val` as seed: `v'` is the
+prime extension of `Γ := v.val ∪ {ψ|□ψ∈w'.val}` excluding `Σ := {χ|◇χ∉w'.val}`
+(`canonical_f1_underivable`). The key bridging step packs the finitely many `v.val`-drawn
+hypotheses into a single conjunction (`bigAnd`, `unpack_conj_partial`, reused from Phase
+2b-sublemma) so that `canonicalR w v`'s diamond clause applies to the SINGLE formula `bigAnd Lv`
+(via `bigAnd_mem_u`), avoiding the invalid "conjunction of diamonds implies diamond of
+conjunction" direction. Threads `h_K` (via `box_context_deriv`), `h_Kdia`, `h_Cd`, `h_dbot` (via
+`diaOr_of_diaDisj`, reused from Phase 2c).
+
+Reference: [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*]
+[Simpson1994], Ch. 3, F1/F2 confluence; ianshil/CK `CF_strong_Cd_weak_Idb`/`CF_CdIdb`. -/
+
+section CanonicalFrameConditions
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- Partitions a derivation context `L` into two sublists according to a pointwise disjunction of
+predicates `P`/`Q`: every element of `L` lies in `Lp ++ Lq` with `Lp`-elements satisfying `P` and
+`Lq`-elements satisfying `Q`. Generic 2-way analogue of `extract_split`/`extract_split_dia`, used
+by `canonical_f1_underivable` to split the up-confluence seed `v.val ∪ {ψ|□ψ∈w'.val}`. -/
+private theorem extract_split_union {P Q : Proposition Atom → Prop} :
+    ∀ (L : List (Proposition Atom)), (∀ x ∈ L, P x ∨ Q x) →
+      ∃ Lp Lq : List (Proposition Atom),
+        (∀ y ∈ Lp, P y) ∧ (∀ y ∈ Lq, Q y) ∧ (∀ x ∈ L, x ∈ Lp ++ Lq)
+  | [], _ => by
+      refine ⟨[], [], ?_, ?_, ?_⟩ <;> exact fun _ h => nomatch h
+  | x :: xs, hL => by
+      obtain ⟨Lp', Lq', hLp', hLq', hsub'⟩ :=
+        extract_split_union xs (fun y hy => hL y (List.mem_cons.mpr (Or.inr hy)))
+      rcases hL x (List.mem_cons.mpr (Or.inl rfl)) with hxP | hxQ
+      · refine ⟨x :: Lp', Lq', ?_, hLq', ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxP
+          · exact hLp' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inr h1)))
+            · exact List.mem_append.mpr (Or.inr h2)
+      · refine ⟨Lp', x :: Lq', hLp', ?_, ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxQ
+          · exact hLq' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl h1)
+            · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inr h2)))
+
+/-- **Up-confluence underivability** (Phase 2d): no finite disjunction of `Σ := {χ|◇χ∉w'.val}` is
+derivable from `Γ := v.val ∪ {ψ|□ψ∈w'.val}`, given `w ≤ w'` and `canonicalR w v`'s diamond clause.
+Generalizes `diamond_witness_underivable` from a singleton seed `{φ}` to the full prime theory
+`v.val`, packing the finitely many `v.val`-hypotheses into `bigAnd Lv` (`unpack_conj_partial`) so
+`canonicalR w v`'s diamond clause (`hdia_wv`) applies to this single formula. -/
+private theorem canonical_f1_underivable
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    {w w' v : CanonicalPrimeWorld Axioms} (hww' : w ≤ w')
+    (hdia_wv : ∀ ψ, ψ ∈ v.val → (◇ψ) ∈ w.val) :
+    Metalogic.DerivExcludes (modalDerivationSystem Axioms)
+      {χ | (◇χ) ∉ w'.val}
+      (modalDeductiveClosure Axioms (v.val ∪ {ψ | (□ψ) ∈ w'.val})) := by
+  intro l hlSig hmem
+  obtain ⟨L, hLΓ, hd⟩ := hmem
+  obtain ⟨d⟩ := hd
+  have hLΓ' : ∀ x ∈ L, x ∈ v.val ∨ (□x) ∈ w'.val := fun x hx => hLΓ x hx
+  obtain ⟨Lv, Lbox, hLv, hLbox, hsub⟩ := extract_split_union L hLΓ'
+  have d' : DerivationTree Axioms (Lv ++ Lbox) (Metalogic.bigOr l) := .weakening L _ _ d hsub
+  have d_unpack : DerivationTree Axioms (bigAnd Lv :: Lbox) (Metalogic.bigOr l) :=
+    unpack_conj_partial h_implyK h_implyS h_andE1 h_andE2 Lv Lbox _ d'
+  have d_disch : DerivationTree Axioms Lbox ((bigAnd Lv).imp (Metalogic.bigOr l)) :=
+    deductionTheorem h_implyK h_implyS Lbox (bigAnd Lv) (Metalogic.bigOr l) d_unpack
+  have d_box : DerivationTree Axioms (Lbox.map Proposition.box)
+      (Proposition.box ((bigAnd Lv).imp (Metalogic.bigOr l))) :=
+    box_context_deriv h_implyK h_implyS h_K Lbox _ d_disch
+  have hM : Proposition.box ((bigAnd Lv).imp (Metalogic.bigOr l)) ∈ w'.val :=
+    w'.2.1.2 (Lbox.map Proposition.box) _
+      (fun x hx => by
+        obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+        exact hLbox y hy)
+      ⟨d_box⟩
+  have hbridge : DerivationTree Axioms [Proposition.box ((bigAnd Lv).imp (Metalogic.bigOr l))]
+      ((◇ (bigAnd Lv)).imp (◇ (Metalogic.bigOr l))) :=
+    .modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (h_Kdia (bigAnd Lv) (Metalogic.bigOr l))) (fun _ h => nomatch h))
+      (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+  have hImp : (◇ (bigAnd Lv)).imp (◇ (Metalogic.bigOr l)) ∈ w'.val :=
+    w'.2.1.2 [Proposition.box ((bigAnd Lv).imp (Metalogic.bigOr l))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hM
+        · nomatch hx')
+      ⟨hbridge⟩
+  have hBigAndV : bigAnd Lv ∈ v.val := bigAnd_mem_u h_efq h_andI v Lv hLv
+  have hDiaBigAndV_w : (◇ (bigAnd Lv)) ∈ w.val := hdia_wv (bigAnd Lv) hBigAndV
+  have hDiaBigAndV_w' : (◇ (bigAnd Lv)) ∈ w'.val := hww' hDiaBigAndV_w
+  have hDiaBigOr : (◇ (Metalogic.bigOr l)) ∈ w'.val :=
+    w'.2.1.2 [(◇ (bigAnd Lv)).imp (◇ (Metalogic.bigOr l)), (◇ (bigAnd Lv))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hImp
+        · rcases List.mem_cons.mp hx' with rfl | hx''
+          · exact hDiaBigAndV_w'
+          · nomatch hx'')
+      ⟨.modus_ponens _ _ _ (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))))⟩
+  have hDistrib := diaOr_of_diaDisj h_implyK h_implyS h_orI1 h_orI2 h_orE h_Cd h_dbot l
+  have hBigOrDia : Metalogic.bigOr (l.map Proposition.diamond) ∈ w'.val :=
+    w'.2.1.2 [(◇ (Metalogic.bigOr l))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hDiaBigOr
+        · nomatch hx')
+      ⟨.modus_ponens _ _ _ (.weakening [] _ _ hDistrib (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩
+  obtain ⟨B, hBmem, hBu⟩ := bigOr_mem_disjunct w' (l.map Proposition.diamond) hBigOrDia
+  obtain ⟨B', hB'mem, rfl⟩ := List.mem_map.mp hBmem
+  exact (hlSig B' hB'mem) hBu
+
+/-- **`canonical_f1`** (Phase 2d, task 480): up-confluence, matching `BFrame.f1` exactly. From
+`w ≤ w'` and `canonicalR w v`, produces `v' ≥ v` with `canonicalR w' v'`. See the module docstring
+above for the construction (`canonical_f1_underivable` + `modal_set_exclusion`). -/
+theorem canonical_f1
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    {w w' v : CanonicalPrimeWorld Axioms} (hww' : w ≤ w') (hwv : canonicalR w v) :
+    ∃ v' : CanonicalPrimeWorld Axioms, canonicalR w' v' ∧ v ≤ v' := by
+  obtain ⟨_hbox_wv, hdia_wv⟩ := hwv
+  have hu := canonical_f1_underivable h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE
+    h_andI h_andE1 h_andE2 h_K h_Kdia h_Cd h_dbot (w := w) (w' := w') (v := v) hww' hdia_wv
+  have h_cons_raw : ModalSetConsistent Axioms (v.val ∪ {ψ | (□ψ) ∈ w'.val}) := by
+    intro L hL hd
+    have hbot_not_mem := hu [] (fun _ h => nomatch h)
+    rw [bigOr_nil_eq_bot] at hbot_not_mem
+    exact hbot_not_mem ⟨L, hL, hd⟩
+  have h_adm_raw : Metalogic.Admissible (modalDerivationSystem Axioms) (ModalSetConsistent Axioms)
+      (modalDeductiveClosure Axioms (v.val ∪ {ψ | (□ψ) ∈ w'.val})) :=
+    modalDeductiveClosure_is_admissible h_implyK h_implyS h_cons_raw
+  obtain ⟨Tval, hclosure_sub_T, hprimeT, hexclT⟩ :=
+    modal_set_exclusion h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_adm_raw hu
+  let v' : CanonicalPrimeWorld Axioms := ⟨Tval, hprimeT⟩
+  have hv_le_v' : v ≤ v' := fun x hx =>
+    hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_left _ hx))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w'.val → ψ ∈ v'.val := fun ψ hψ =>
+    hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_right _ hψ))
+  have hdia_clause : ∀ ψ, ψ ∈ v'.val → (◇ψ) ∈ w'.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notdia
+    have hsig : ∀ x ∈ [ψ], x ∈ {χ | (◇χ) ∉ w'.val} := by
+      intro x hx
+      rcases List.mem_cons.mp hx with rfl | hx'
+      · exact hψ_notdia
+      · nomatch hx'
+    have hOrI1_deriv : DerivationTree Axioms [ψ] (Metalogic.bigOr [ψ]) :=
+      .modus_ponens _ _ _
+        (.weakening [] _ _
+          (.ax [] _ (h_orI1 ψ (Metalogic.bigOr ([] : List (Proposition Atom)))))
+          (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+    have hbigOr_mem : Metalogic.bigOr [ψ] ∈ v'.val :=
+      v'.2.1.2 [ψ] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hψ_mem
+          · nomatch hx')
+        ⟨hOrI1_deriv⟩
+    exact hexclT [ψ] hsig hbigOr_mem
+  exact ⟨v', ⟨hbox_clause, hdia_clause⟩, hv_le_v'⟩
+
+/-- **`canonical_f2`** (Phase 2d, task 480): down-confluence, matching `BFrame.f2` exactly. From
+`canonicalR w v` and `v ≤ v'`, produces `w' ≥ w` with `canonicalR w' v'`. Transports the box
+witness's Step 2 construction (`canonical_box_witness`) along the inclusion `v ≤ v'`: since
+`canonicalR w v`'s box clause gives `{ψ|□ψ∈w.val}⊆v.val⊆v'.val`, `v'` already satisfies the
+`h_wu` precondition `box_witness_pair_underivable` needs (no fresh `u` construction required, `u`
+is `v'`, already given). -/
+theorem canonical_f2
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Idb : ∀ (φ ψ : Proposition Atom),
+      Axioms (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ))))
+    {w v v' : CanonicalPrimeWorld Axioms} (hwv : canonicalR w v) (hvv' : v ≤ v') :
+    ∃ w' : CanonicalPrimeWorld Axioms, w ≤ w' ∧ canonicalR w' v' := by
+  obtain ⟨hbox_wv, _hdia_wv⟩ := hwv
+  have h_wu : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ v'.val := fun ψ hψ => hvv' (hbox_wv ψ hψ)
+  have hbwu := box_witness_pair_underivable h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE
+    h_andI h_andE1 h_andE2 h_K h_Kdia h_Idb (w := w) (u := v') h_wu
+  have h_cons_raw : ModalSetConsistent Axioms
+      (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ v'.val}) := by
+    intro L hL hd
+    have hbot_not_mem := hbwu [] (fun _ h => nomatch h)
+    rw [bigOr_nil_eq_bot] at hbot_not_mem
+    exact hbot_not_mem ⟨L, hL, hd⟩
+  have h_adm_raw : Metalogic.Admissible (modalDerivationSystem Axioms) (ModalSetConsistent Axioms)
+      (modalDeductiveClosure Axioms (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ v'.val})) :=
+    modalDeductiveClosure_is_admissible h_implyK h_implyS h_cons_raw
+  obtain ⟨Tval, hclosure_sub_T, hprimeT, hexclT⟩ :=
+    modal_set_exclusion h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_adm_raw hbwu
+  let w' : CanonicalPrimeWorld Axioms := ⟨Tval, hprimeT⟩
+  have hw_le_w' : w ≤ w' := fun x hx =>
+    hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_left _ hx))
+  have hdia_clause : ∀ ψ, ψ ∈ v'.val → (◇ψ) ∈ w'.val := fun ψ hψ =>
+    hclosure_sub_T (modal_subset_deductive_closure Axioms _
+      (Set.mem_union_right _ ⟨ψ, rfl, hψ⟩))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w'.val → ψ ∈ v'.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notV'
+    have hsig : ∀ x ∈ [(□ψ)], x ∈ {χ | ∃ B, χ = (□B) ∧ B ∉ v'.val} := by
+      intro x hx
+      rcases List.mem_cons.mp hx with rfl | hx'
+      · exact ⟨ψ, rfl, hψ_notV'⟩
+      · nomatch hx'
+    have hOrI1_deriv : DerivationTree Axioms [(□ψ)] (Metalogic.bigOr [(□ψ)]) :=
+      .modus_ponens _ _ _
+        (.weakening [] _ _
+          (.ax [] _ (h_orI1 (□ψ) (Metalogic.bigOr ([] : List (Proposition Atom)))))
+          (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+    have hbigOr_mem : Metalogic.bigOr [(□ψ)] ∈ w'.val :=
+      w'.2.1.2 [(□ψ)] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hψ_mem
+          · nomatch hx')
+        ⟨hOrI1_deriv⟩
+    exact hexclT [(□ψ)] hsig hbigOr_mem
+  exact ⟨w', hw_le_w', ⟨hbox_clause, hdia_clause⟩⟩
+
+end CanonicalFrameConditions
+
 end Cslib.Logic.Modal

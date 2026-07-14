@@ -1,35 +1,36 @@
 {
   "status": "implemented",
-  "phase": "2c",
+  "phase": "2d",
   "task_number": 480,
   "session_id": "sess_1784011298_752245_480",
   "agent_type": "cslib-implementation-hard-agent",
   "plan_version": 4,
   "plan_path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md",
   "phases_total": 12,
-  "phases_completed": 6,
+  "phases_completed": 7,
   "completed_preserved": [
     {"phase": "1", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean", "commit": "be8f2eb0"},
     {"phase": "2a", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "4fd37213"},
     {"phase": "2-infra", "file": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean + references.bib", "commit": "4e3ef59c"},
     {"phase": "2b-sublemma", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "570109e3"},
-    {"phase": "2b", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "cdb0b635"}
+    {"phase": "2b", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "cdb0b635"},
+    {"phase": "2c", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "e2dffef6"}
   ],
-  "remaining_actionable": ["2d", "3a", "3b", "3c", "4"],
-  "remaining_actionable_count": 5,
-  "phase_2c_this_dispatch": {
-    "summary": "canonical_diamond_witness proved sorry-free, resolving the prior dispatch's Case A (cexpl/fallible-world) STOP contingency via a new parametric hypothesis h_dbot : Axioms ((diamond bot).imp bot) (IK's dbot axiom, dropped by bare CK). h_dbot precludes Case A by contradiction with world consistency, and structurally enters as the base case of a new dual helper diaOr_of_diaDisj (analogous to boxOr_of_boxDisj's h_efq base case) rather than as an explicit top-level case split. No CanonicalPrimeWorld/ModalPrimeTheory type revision was needed -- Phase 1/2a remain untouched.",
+  "remaining_actionable": ["3a", "3b", "3c", "4"],
+  "remaining_actionable_count": 4,
+  "phase_2d_this_dispatch": {
+    "summary": "canonical_f1 (up-confluence, BFrame.f1) and canonical_f2 (down-confluence, BFrame.f2) proved sorry-free, completing CanonicalModel.lean. canonical_f2 reuses box_witness_pair_underivable + modal_set_exclusion directly as black boxes (u := v', already given via canonicalR w v's box clause + v <= v', no fresh prime-extension construction needed). canonical_f1 generalizes diamond_witness_underivable from a singleton seed {phi} to the full prime theory v.val as seed, via a new private lemma canonical_f1_underivable: the finitely many v.val-drawn hypotheses are packed into bigAnd Lv (reusing unpack_conj_partial from 2b-sublemma) so canonicalR w v's diamond clause applies to this single conjunction formula, sidestepping the invalid 'conjunction of diamonds implies diamond of conjunction' direction. A new generic private helper extract_split_union (2-way list partition by pointwise P/Q disjunction) supports the split.",
     "deliverables": [
-      "diaOr_of_diaDisj (private, dual of boxOr_of_boxDisj: diamond-of-disjunction implies disjunction-of-diamonds, base case = h_dbot, inductive step = h_Cd + h_orI1/h_orI2/h_orE)",
-      "extract_split_dia (private, dual of extract_split, simpler: single extra seed element phi, no bigAnd packing)",
-      "diamond_witness_underivable (dual of box_witness_pair_underivable, DerivExcludes precondition for the seeded extension)",
-      "canonical_diamond_witness (single-v construction, not pair-shaped, since BForces_diamond is a bare existential over w's own successors)"
+      "extract_split_union (private, generic 2-way list partition, analogue of extract_split/extract_split_dia)",
+      "canonical_f1_underivable (private, up-confluence DerivExcludes precondition, generalizes diamond_witness_underivable to a general prime-theory seed)",
+      "canonical_f1 (public, up-confluence, matches BFrame.f1 exactly)",
+      "canonical_f2 (public, down-confluence, matches BFrame.f2 exactly, reuses box_witness_pair_underivable + modal_set_exclusion directly)"
     ],
-    "consumed_axiom_set_diamond_witness": {
-      "confirmed_by": "lean_verify (machine-checked, not just hand-tracing)",
-      "consumed": ["h_K (via box_context_deriv)", "h_Kdia (K-diamond bridge)", "h_Cd (iterated over h_orE)", "h_dbot (base case of diaOr_of_diaDisj)"],
-      "h_Idb_required": false,
-      "resolves_report_03_residual": "report 03's MEDIUM-HIGH residual ('diamond witness needs only Cd or also Idb') is definitively RESOLVED: only h_Cd (plus the new h_dbot) is needed; h_Idb is not a hypothesis of canonical_diamond_witness or diamond_witness_underivable."
+    "consumed_axiom_set": {
+      "confirmed_by": "lean_verify (machine-checked)",
+      "canonical_f1": ["h_implyK", "h_implyS", "h_efq", "h_orI1", "h_orI2", "h_orE", "h_andI", "h_andE1", "h_andE2", "h_K", "h_Kdia", "h_Cd", "h_dbot"],
+      "canonical_f2": ["h_implyK", "h_implyS", "h_efq", "h_orI1", "h_orI2", "h_orE", "h_andI", "h_andE1", "h_andE2", "h_K", "h_Kdia", "h_Idb"],
+      "note": "The plan v4 table highlighted only h_Kdia+h_Cd (f1) / h_Kdia+h_Idb (f2) as the 'new' modal hypotheses beyond intuitionistic base; both actually also thread h_K (box_context_deriv / box_witness_pair_underivable) and, for f1, h_dbot (via diaOr_of_diaDisj's empty-list base case, since Sigma-exclusion must also rule out the empty disjunction / raw inconsistency). This matches (does not exceed) the full axiom sets already established by canonical_diamond_witness (f1's underlying machinery) and canonical_box_witness (f2's underlying machinery) in Phases 2c/2b -- no axiom beyond the framework's confirmed minimal set {h_K, h_Kdia, h_Idb, h_Cd, h_dbot} is introduced."
     }
   },
   "minimal_axiom_set_framework_now": ["h_K", "h_Kdia", "h_Idb", "h_Cd", "h_dbot"],
@@ -38,20 +39,21 @@
   "verification": {
     "build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel -- succeeded (595 jobs), no warnings",
     "sorry_count": 0,
-    "lean_verify_canonical_diamond_witness": ["propext", "Classical.choice", "Quot.sound"],
-    "lean_verify_diamond_witness_underivable": ["propext", "Classical.choice", "Quot.sound"],
-    "check_init_imports": "passed silently",
+    "lean_verify_canonical_f1": ["propext", "Classical.choice", "Quot.sound"],
+    "lean_verify_canonical_f2": ["propext", "Classical.choice", "Quot.sound"],
+    "check_init_imports": "passed (exit 0)",
     "file_touched": true,
-    "git_diff_scope": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean (append-only, +~245 lines); specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md (Phase 2c section marked COMPLETED, axiom-set table updated to include h_dbot); specs/480_intuitionistic_modal_framework/progress/phase-2c-progress.json (new); this handoff."
+    "git_diff_scope": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean (append-only, +289 lines, 985 -> 1274 total); specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md (Phase 2d section marked COMPLETED with completion note); specs/480_intuitionistic_modal_framework/progress/phase-2d-progress.json (new); specs/480_intuitionistic_modal_framework/summaries/06_frame-confluence-conditions-summary.md (new); this handoff."
   },
-  "deliverable": "canonical_diamond_witness proved sorry-free in CanonicalModel.lean (Cslib.Logic.Modal namespace), plus its two new private helper lemmas and one new public underivability sub-lemma.",
+  "deliverable": "canonical_f1 and canonical_f2 proved sorry-free in CanonicalModel.lean (Cslib.Logic.Modal namespace). CanonicalModel.lean is now COMPLETE (all of Phase 2's definitions, witnesses, and frame conditions).",
   "blockers": [],
   "requires_user_review": false,
-  "next_action_hint": "Phase 2d (canonical_f1 up-confluence / canonical_f2 down-confluence frame conditions) is next. canonical_f1 threads h_Kdia + h_Cd via the diamond witness (this phase); canonical_f2 threads h_Kdia + h_Idb via the box witness (2b). Both are [NOT STARTED]. Recommended: /implement 480 --hard phase=2d.",
+  "next_action_hint": "Phase 3a (TruthLemma.lean -- 5 non-modal case helpers) is next: create a NEW file TruthLemma.lean importing CanonicalModel.lean, transliterating atom/bot/and/or/imp cases from IntStrongCompleteness.lean:108-214. None of the four modal axioms are needed for this phase (h_efq separable, botForces a parameter). CanonicalModel.lean itself is now frozen/complete -- Phase 3a must not modify it. Recommended: /implement 480 --hard phase=3a.",
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "type": "lean_source", "summary": "Appended CanonicalDiamondWitness section: diaOr_of_diaDisj, extract_split_dia, diamond_witness_underivable, canonical_diamond_witness. Sorry-free, no new axioms."},
-    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 2c marked [COMPLETED] with resolution note; framework minimal axiom set updated to { h_K, h_Kdia, h_Idb, h_Cd, h_dbot }; per-lemma axiom table row for Phase 2c updated to machine-confirmed { h_K, h_Kdia, h_Cd, h_dbot }, h_Idb not consumed."},
-    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-2c-progress.json", "type": "progress", "summary": "Phase 2c objective tracking, zero-debt verification record, consumed axiom set."},
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "type": "lean_source", "summary": "Appended CanonicalFrameConditions section: extract_split_union, canonical_f1_underivable, canonical_f1, canonical_f2. Sorry-free, no new axioms. File complete."},
+    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 2d marked [COMPLETED] with completion note on the actual (full) axiom sets threaded by canonical_f1/canonical_f2, machine-verified via lean_verify."},
+    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-2d-progress.json", "type": "progress", "summary": "Phase 2d objective tracking, zero-debt verification record, consumed axiom sets."},
+    {"path": "specs/480_intuitionistic_modal_framework/summaries/06_frame-confluence-conditions-summary.md", "type": "summary", "summary": "Phase 2d implementation summary."},
     {"path": "specs/480_intuitionistic_modal_framework/.orchestrator-handoff.json", "type": "handoff", "summary": "This file."}
   ]
 }

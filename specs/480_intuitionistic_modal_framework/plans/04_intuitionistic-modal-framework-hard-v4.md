@@ -554,7 +554,7 @@ new Lean `axiom`.
 - **Timing:** ~1.5 hours estimated; this re-dispatch (post-STOP, with the fix identified) closed in
   a single pass. **Depends on:** 2b (same file, sequential), 2-infra. Both satisfied.
 
-### Phase 2d: canonical_f1 (Cd_frame) + canonical_f2 (Idb_frame) [NOT STARTED]
+### Phase 2d: canonical_f1 (Cd_frame) + canonical_f2 (Idb_frame) [COMPLETED]
 
 - **Goal:** Prove the two frame conditions, completing `CanonicalModel.lean`.
 - **Single deliverable:** `canonical_f1` and `canonical_f2` proved; `CanonicalModel.lean` final.
@@ -562,14 +562,14 @@ new Lean `axiom`.
   `canonical_f1` (up-confluence = Cd_frame): `h_Kdia`, **`h_Cd`** (via the diamond witness 2c).
   `canonical_f2` (down-confluence = Idb_frame): `h_Kdia`, **`h_Idb`** (via the box witness 2b).
 - **Tasks:**
-  - [ ] Prove `canonical_f1` (up-confluence, Cd_frame): transport a diamond witness (2c) along
+  - [x] Prove `canonical_f1` (up-confluence, Cd_frame): transport a diamond witness (2c) along
         inclusion — Report 01 §6.6; report 03 §4 row 4. Consume the pair-shaped diamond witness
         correctly; thread `h_Kdia`, `h_Cd`.
-  - [ ] Prove `canonical_f2` (down-confluence, Idb_frame): via the box witness (2b) — Report 01 §6.6;
+  - [x] Prove `canonical_f2` (down-confluence, Idb_frame): via the box witness (2b) — Report 01 §6.6;
         report 03 §4 row 5. Consume the pair-shaped box witness (`⟨w', u⟩`); thread `h_Kdia`, `h_Idb`.
-  - [ ] Confirm both typecheck against the `BFrame.f1`/`BFrame.f2` obligation shapes (re-read from
+  - [x] Confirm both typecheck against the `BFrame.f1`/`BFrame.f2` obligation shapes (re-read from
         `Birelational.lean` if needed).
-  - [ ] Docstrings; `lake build` the module.
+  - [x] Docstrings; `lake build` the module.
 - **Reference grounding:** report 03 §4 rows 4-5; ianshil/CK `CF_strong_Cd_weak_Idb`/`CF_CdIdb`
   ~L298-395; `Simpson1994` F1/F2 confluence.
 - **Estimated output:** ~80-140 lines.
@@ -577,6 +577,18 @@ new Lean `axiom`.
   their threaded hypotheses; ZERO-DEBT; untouched-classical carried.
 - **Done when:** module builds; both frame conditions typecheck sorry-free.
 - **Timing:** ~1 hour. **Depends on:** 2b, 2c.
+- **Completion note (`sess_1784011298_752245_480`):** `canonical_f1` needed the FULL axiom set
+  `h_implyK, h_implyS, h_efq, h_orI1, h_orI2, h_orE, h_andI, h_andE1, h_andE2, h_K, h_Kdia, h_Cd,
+  h_dbot` (not just `h_Kdia, h_Cd`): the construction generalizes `diamond_witness_underivable`
+  from a singleton seed to the full prime theory `v.val` as seed, requiring `bigAnd` packing
+  (`h_andI/h_andE1/h_andE2`) and `box_context_deriv` (`h_K`) in addition to the table's
+  highlighted `h_Kdia, h_Cd, h_dbot`. `canonical_f2` needed `h_implyK, h_implyS, h_efq, h_orI1,
+  h_orI2, h_orE, h_andI, h_andE1, h_andE2, h_K, h_Kdia, h_Idb` (reusing `box_witness_pair_
+  underivable` + `modal_set_exclusion` directly, with `u := v'` already given via `canonicalR w v`'s
+  box clause + `v ≤ v'`). Both machine-verified via `lean_verify`: axioms `{propext,
+  Classical.choice, Quot.sound}` only, no new Lean `axiom`. `CanonicalModel.lean` is now COMPLETE
+  (985 -> 1274 lines, purely additive); the four-file `Intuitionistic/` subtree's second file is
+  finished.
 
 ### Phase 3a: TruthLemma.lean — 5 non-modal case helpers [NOT STARTED]
 

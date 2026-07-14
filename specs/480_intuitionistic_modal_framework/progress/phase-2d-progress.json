@@ -1,0 +1,24 @@
+{
+  "phase": "2d",
+  "task_number": 480,
+  "session_id": "sess_1784011298_752245_480",
+  "status": "completed",
+  "objectives": [
+    {"name": "canonical_f1 (up-confluence, BFrame.f1)", "status": "completed", "sorry_free": true},
+    {"name": "canonical_f2 (down-confluence, BFrame.f2)", "status": "completed", "sorry_free": true},
+    {"name": "confirm BFrame.f1/f2 obligation shapes against Birelational.lean", "status": "completed"},
+    {"name": "docstrings + lake build", "status": "completed"}
+  ],
+  "zero_debt_verification": {
+    "sorry_count": 0,
+    "new_axioms": 0,
+    "vacuous_definitions": 0,
+    "build_result": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel -- succeeded (595 jobs)",
+    "check_init_imports": "passed (exit 0)"
+  },
+  "consumed_axiom_set": {
+    "canonical_f1": ["h_implyK", "h_implyS", "h_efq", "h_orI1", "h_orI2", "h_orE", "h_andI", "h_andE1", "h_andE2", "h_K", "h_Kdia", "h_Cd", "h_dbot"],
+    "canonical_f2": ["h_implyK", "h_implyS", "h_efq", "h_orI1", "h_orI2", "h_orE", "h_andI", "h_andE1", "h_andE2", "h_K", "h_Kdia", "h_Idb"]
+  },
+  "file_final_state": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean is COMPLETE at 1274 lines (985 before this phase)."
+}

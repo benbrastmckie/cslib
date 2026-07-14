@@ -330,23 +330,24 @@ private lemma modalStepBranch_newExps_const
   modalStepBranchGen_newExps_const modalApplyOne b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep)
 
-/-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
-`modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
-the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
-appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shaped — since if
-`sf_exp` were `.pos`-box-shaped, `modalApplyOne_boxPos_eq` would force its own result to be
-`.notApplicable`/`.persistent`, contradicting the linear/branching case split. -/
-private lemma modalLoop_eBoxOnlyNeg
+/-- **Generic F9 discharge** (task 510): `modalLoopGen_eBoxOnlyNeg`, over an abstract
+`(apply, spec)`. The statement mentions no `apply` at all (already rule-agnostic); only the
+proof needs `spec.boxPosNotExpanding` (F9) to rule out `sf_exp`'s result being
+`.linear`/`.branching` when it is `boxPos`-shaped -- the payload (`out`/`kForms`) is discarded
+either way, which is exactly why F9's existential-payload form (rather than K's concrete
+`boxPropagation`) suffices unchanged here. -/
+private lemma modalLoopGen_eBoxOnlyNeg
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg) :
     ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .box ψ → sf.sign = .neg := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf_exp b acc).fst with nf | brs | nf | _
   · -- linear: newExps = [e ++ [sf_exp]]
     rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
@@ -364,7 +365,7 @@ private lemma modalLoop_eBoxOnlyNeg
         | neg => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
-      rcases modalApplyOne_boxPos_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
+      rcases spec.boxPosNotExpanding sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
     rw [hfstc] at hsf
@@ -382,7 +383,87 @@ private lemma modalLoop_eBoxOnlyNeg
         | neg => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
-      rcases modalApplyOne_boxPos_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
+      rcases spec.boxPosNotExpanding sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- persistent: newExps = [e] (unchanged)
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact he
+  · rw [hfstc] at hsf; simp at hsf
+
+/-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
+`modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
+the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
+appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shaped — since if
+`sf_exp` were `.pos`-box-shaped, `modalApplyOne_boxPos_eq` would force its own result to be
+`.notApplicable`/`.persistent`, contradicting the linear/branching case split.
+
+Byte-identical-statement corollary of `modalLoopGen_eBoxOnlyNeg` (task 510) via
+`modalStepBranch_eq`. -/
+private lemma modalLoop_eBoxOnlyNeg
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg) :
+    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .box ψ → sf.sign = .neg :=
+  modalLoopGen_eBoxOnlyNeg modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep) he
+
+/-- **Generic F10 discharge** (task 510): `modalLoopGen_eDiamondOnlyPos`, dual of
+`modalLoopGen_eBoxOnlyNeg` via `spec.diaNegNotExpanding`. -/
+private lemma modalLoopGen_eDiamondOnlyPos
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos) :
+    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (apply sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newExps = [e ++ [sf_exp]]
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
+        | neg => rfl
+        | pos => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
+      rcases spec.diaNegNotExpanding sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
+        rw [h] at hfstc <;> simp at hfstc
+  · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro e' he'
+    rw [← hsf.2.1] at he'
+    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
+    intro sf hsfin ψ hψ
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | heq
+    · exact he sf hsfin ψ hψ
+    · by_contra hcon
+      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
+        | neg => rfl
+        | pos => exact absurd hs hcon
+      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
+      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
+      rcases spec.diaNegNotExpanding sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- persistent: newExps = [e] (unchanged)
     rw [hfstc] at hsf
@@ -396,64 +477,19 @@ private lemma modalLoop_eBoxOnlyNeg
 
 /-- Preservation of the `eDiamondOnlyPos` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxOnlyNeg`'s case split (task 441: `diamondNeg` is the symmetric never-linear/
-branching shape, dismissed via `modalApplyOne_diamondNeg_eq`). -/
+branching shape, dismissed via `modalApplyOne_diamondNeg_eq`).
+
+Byte-identical-statement corollary of `modalLoopGen_eDiamondOnlyPos` (task 510) via
+`modalStepBranch_eq`. -/
 private lemma modalLoop_eDiamondOnlyPos
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
     (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
     (he : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos) :
-    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos := by
-  simp only [modalStepBranch] at hstep
-  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hsf with hexp
-  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
-  · -- linear: newExps = [e ++ [sf_exp]]
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    simp only [List.mem_singleton] at he'
-    subst he'
-    intro sf hsfin ψ hψ
-    simp only [List.mem_append, List.mem_singleton] at hsfin
-    rcases hsfin with hsfin | heq
-    · exact he sf hsfin ψ hψ
-    · by_contra hcon
-      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
-        | neg => rfl
-        | pos => exact absurd hs hcon
-      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
-      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
-      rcases modalApplyOne_diamondNeg_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
-        rw [h] at hfstc <;> simp at hfstc
-  · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'
-    intro sf hsfin ψ hψ
-    simp only [List.mem_append, List.mem_singleton] at hsfin
-    rcases hsfin with hsfin | heq
-    · exact he sf hsfin ψ hψ
-    · by_contra hcon
-      have hsneg : sf.sign = .neg := by cases hs : sf.sign with
-        | neg => rfl
-        | pos => exact absurd hs hcon
-      have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
-      have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
-      rcases modalApplyOne_diamondNeg_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
-        rw [h] at hfstc <;> simp at hfstc
-  · -- persistent: newExps = [e] (unchanged)
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro e' he'
-    rw [← hsf.2.1] at he'
-    simp only [List.mem_singleton] at he'
-    subst he'
-    exact he
-  · rw [hfstc] at hsf; simp at hsf
+    ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos :=
+  modalLoopGen_eDiamondOnlyPos modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep) he
 
 /-- An existing accessibility edge survives adding a new one. -/
 private lemma hasEdge_addEdge_mono {acc : Accessibility} {w w' x y : WorldIndex}
@@ -493,11 +529,93 @@ private lemma modalApplyOne_hasEdge_mono
     (modalApplyOne sf b acc).snd.hasEdge w w' = true :=
   modalApplyGen_hasEdge_mono modalApplyOne modalApplyOne_fresh_local sf b acc h
 
+/-- **Generic F11+freshLocal discharge** (task 510): `modalLoopGen_eBoxNegWitness`, over an
+abstract `(apply, spec)`. For old `e`-elements the witness/edge from `he` transfers to every
+child branch/accessibility via `b ⊆ b'` (branches only grow) and `modalApplyGen_hasEdge_mono`
+(`spec.freshLocal`, `acc`-edges only grow); for a freshly-appended `sf_exp` that is itself
+`boxNeg`-shaped, `spec.boxNegWitness` (F11) constructs the witness and edge directly. -/
+private lemma modalLoopGen_eBoxNegWitness
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', acc.hasEdge w w' = true ∧
+        (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ b' ∈ newBs, ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', newAcc.hasEdge w w' = true ∧
+        (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (apply sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newBs = [nf ++ b], newExps = [e ++ [sf_exp]], newAcc from apply's snd
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
+    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | hsfeq2
+    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+      exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
+        List.mem_append.mpr (Or.inr hwit)⟩
+    · have hsfexp_eq : sf_exp =
+          (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+        rw [← hsfeq2]; exact hsfeq
+      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.boxNegWitness b acc ψ w
+      rw [hsfexp_eq, hfsteq] at hfstc
+      simp only [RuleResult.linear.injEq] at hfstc
+      refine ⟨modalNextWorld b, ?_, ?_⟩
+      · rw [hnewAcc, hsfexp_eq, hsndeq]
+        simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, beq_self_eq_true,
+          Bool.true_and, Bool.true_or]
+      · rw [← hfstc]
+        exact List.mem_append.mpr (Or.inl (List.mem_cons_self))
+  · -- branching: newBs = brs.map (·++b), newExps = brs.map (fun _=>e++[sf_exp])
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'
+    obtain ⟨x, hxmem, rfl⟩ := List.mem_map.mp hb'
+    rw [← hsf.2.1] at he'; obtain ⟨x', -, rfl⟩ := List.mem_map.mp he'
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
+    simp only [List.mem_append, List.mem_singleton] at hsfin
+    rcases hsfin with hsfin | hsfeq2
+    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+      exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
+        List.mem_append.mpr (Or.inr hwit)⟩
+    · have hsfexp_eq : sf_exp =
+          (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+        rw [← hsfeq2]; exact hsfeq
+      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.boxNegWitness b acc ψ w
+      rw [hsfexp_eq, hfsteq] at hfstc
+      -- boxNeg's own result is `.linear`, never `.branching`: contradiction
+      simp at hfstc
+  · -- persistent: newBs = [nf ++ b], newExps = [e] (unchanged), newAcc = acc
+    rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb' e' he' sf hsfin ψ w hsfeq
+    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
+    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
+    obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
+    exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
+      List.mem_append.mpr (Or.inr hwit)⟩
+  · rw [hfstc] at hsf; simp at hsf
+
 /-- Preservation of the `eBoxNegWitness` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxOnlyNeg`'s case split. For old `e`-elements the witness/edge from `he` transfers
 to every child branch/accessibility via `b ⊆ b'` (branches only grow) and
 `modalApplyOne_hasEdge_mono` (`acc`-edges only grow); for a freshly-appended `sf_exp` that is
-itself `boxNeg`-shaped, `modalApplyOne_boxNeg_witness` constructs the witness and edge directly. -/
+itself `boxNeg`-shaped, `modalApplyOne_boxNeg_witness` constructs the witness and edge directly.
+
+Byte-identical-statement corollary of `modalLoopGen_eBoxNegWitness` (task 510) via
+`modalStepBranch_eq`. -/
 private lemma modalLoop_eBoxNegWitness
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -510,27 +628,46 @@ private lemma modalLoop_eBoxNegWitness
     ∀ b' ∈ newBs, ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ (ψ : Proposition Atom) (w : WorldIndex),
       sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
       ∃ w', newAcc.hasEdge w w' = true ∧
-        (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' := by
-  simp only [modalStepBranch] at hstep
+        (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' :=
+  modalLoopGen_eBoxNegWitness modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep) he
+
+/-- **Generic F12+freshLocal discharge** (task 510): `modalLoopGen_eDiamondPosWitness`, dual of
+`modalLoopGen_eBoxNegWitness` via `spec.diaPosWitness` (F12). -/
+private lemma modalLoopGen_eDiamondPosWitness
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (he : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', acc.hasEdge w w' = true ∧
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ b' ∈ newBs, ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', newAcc.hasEdge w w' = true ∧
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' := by
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
-  · -- linear: newBs = [nf ++ b], newExps = [e ++ [sf_exp]], newAcc from modalApplyOne's snd
+  rcases hfstc : (apply sf_exp b acc).fst with nf | brs | nf | _
+  · -- linear: newBs = [nf ++ b], newExps = [e ++ [sf_exp]], newAcc from apply's snd
     rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro b' hb' e' he' sf hsfin ψ w hsfeq
     rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
     rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
     simp only [List.mem_append, List.mem_singleton] at hsfin
     rcases hsfin with hsfin | hsfeq2
     · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+      exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
         List.mem_append.mpr (Or.inr hwit)⟩
     · have hsfexp_eq : sf_exp =
-          (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.diaPosWitness b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
       simp only [RuleResult.linear.injEq] at hfstc
       refine ⟨modalNextWorld b, ?_, ?_⟩
@@ -546,18 +683,18 @@ private lemma modalLoop_eBoxNegWitness
     rw [← hsf.1] at hb'
     obtain ⟨x, hxmem, rfl⟩ := List.mem_map.mp hb'
     rw [← hsf.2.1] at he'; obtain ⟨x', -, rfl⟩ := List.mem_map.mp he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
     simp only [List.mem_append, List.mem_singleton] at hsfin
     rcases hsfin with hsfin | hsfeq2
     · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+      exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
         List.mem_append.mpr (Or.inr hwit)⟩
     · have hsfexp_eq : sf_exp =
-          (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.diaPosWitness b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
-      -- boxNeg's own result is `.linear`, never `.branching`: contradiction
+      -- diamondPos's own result is `.linear`, never `.branching`: contradiction
       simp at hfstc
   · -- persistent: newBs = [nf ++ b], newExps = [e] (unchanged), newAcc = acc
     rw [hfstc] at hsf
@@ -565,15 +702,18 @@ private lemma modalLoop_eBoxNegWitness
     intro b' hb' e' he' sf hsfin ψ w hsfeq
     rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
     rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
+    have hnewAcc : newAcc = (apply sf_exp b acc).snd := hsf.2.2.symm
     obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-    exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
+    exact ⟨w', hnewAcc ▸ modalApplyGen_hasEdge_mono apply spec.freshLocal sf_exp b acc hedge,
       List.mem_append.mpr (Or.inr hwit)⟩
   · rw [hfstc] at hsf; simp at hsf
 
 /-- Preservation of the `eDiamondPosWitness` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxNegWitness`'s case split (task 441: `diamondPos` is the symmetric fresh-world
-witness rule, via `modalApplyOne_diamondPos_witness`). -/
+witness rule, via `modalApplyOne_diamondPos_witness`).
+
+Byte-identical-statement corollary of `modalLoopGen_eDiamondPosWitness` (task 510) via
+`modalStepBranch_eq`. -/
 private lemma modalLoop_eDiamondPosWitness
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -586,66 +726,9 @@ private lemma modalLoop_eDiamondPosWitness
     ∀ b' ∈ newBs, ∀ e' ∈ newExps, ∀ sf ∈ e', ∀ (ψ : Proposition Atom) (w : WorldIndex),
       sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
       ∃ w', newAcc.hasEdge w w' = true ∧
-        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' := by
-  simp only [modalStepBranch] at hstep
-  obtain ⟨sf_exp, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
-  split_ifs at hsf with hexp
-  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
-  · -- linear: newBs = [nf ++ b], newExps = [e ++ [sf_exp]], newAcc from modalApplyOne's snd
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro b' hb' e' he' sf hsfin ψ w hsfeq
-    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
-    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
-    simp only [List.mem_append, List.mem_singleton] at hsfin
-    rcases hsfin with hsfin | hsfeq2
-    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
-        List.mem_append.mpr (Or.inr hwit)⟩
-    · have hsfexp_eq : sf_exp =
-          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
-        rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_diamondPos_witness b acc ψ w
-      rw [hsfexp_eq, hfsteq] at hfstc
-      simp only [RuleResult.linear.injEq] at hfstc
-      refine ⟨modalNextWorld b, ?_, ?_⟩
-      · rw [hnewAcc, hsfexp_eq, hsndeq]
-        simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, beq_self_eq_true,
-          Bool.true_and, Bool.true_or]
-      · rw [← hfstc]
-        exact List.mem_append.mpr (Or.inl (List.mem_cons_self))
-  · -- branching: newBs = brs.map (·++b), newExps = brs.map (fun _=>e++[sf_exp])
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro b' hb' e' he' sf hsfin ψ w hsfeq
-    rw [← hsf.1] at hb'
-    obtain ⟨x, hxmem, rfl⟩ := List.mem_map.mp hb'
-    rw [← hsf.2.1] at he'; obtain ⟨x', -, rfl⟩ := List.mem_map.mp he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
-    simp only [List.mem_append, List.mem_singleton] at hsfin
-    rcases hsfin with hsfin | hsfeq2
-    · obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-      exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
-        List.mem_append.mpr (Or.inr hwit)⟩
-    · have hsfexp_eq : sf_exp =
-          (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
-        rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := modalApplyOne_diamondPos_witness b acc ψ w
-      rw [hsfexp_eq, hfsteq] at hfstc
-      -- diamondPos's own result is `.linear`, never `.branching`: contradiction
-      simp at hfstc
-  · -- persistent: newBs = [nf ++ b], newExps = [e] (unchanged), newAcc = acc
-    rw [hfstc] at hsf
-    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
-    intro b' hb' e' he' sf hsfin ψ w hsfeq
-    rw [← hsf.1] at hb'; simp only [List.mem_singleton] at hb'; subst hb'
-    rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; subst he'
-    have hnewAcc : newAcc = (modalApplyOne sf_exp b acc).snd := hsf.2.2.symm
-    obtain ⟨w', hedge, hwit⟩ := he sf hsfin ψ w hsfeq
-    exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
-      List.mem_append.mpr (Or.inr hwit)⟩
-  · rw [hfstc] at hsf; simp at hsf
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b' :=
+  modalLoopGen_eDiamondPosWitness modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep) he
 
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 

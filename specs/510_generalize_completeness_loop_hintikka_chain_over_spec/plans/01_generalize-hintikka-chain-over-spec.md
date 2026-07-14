@@ -449,7 +449,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 6: The four witness-invariant preservation helpers (F9-F12) [NOT STARTED]
+### Phase 6: The four witness-invariant preservation helpers (F9-F12) [COMPLETED]
 
 - **Goal:** Generalize the four `ModalLoopInv` rule-dependent conjunct-preservation helpers. Their
   **statements mention no `apply` at all** — they are already rule-agnostic; only their preservation

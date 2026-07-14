@@ -1,0 +1,50 @@
+{
+  "task_number": 496,
+  "task_slug": "minimal_modal_extensions",
+  "session_id": "sess_1784044271_09e821_496",
+  "status": "implemented",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "phases": [
+    {"n": 1, "name": "MinExtension.lean scaffold", "status": "COMPLETED"},
+    {"n": 2, "name": "MT.lean (reflexivity)", "status": "COMPLETED"},
+    {"n": 3, "name": "MS4.lean (transitivity)", "status": "COMPLETED"},
+    {"n": 4, "name": "MS5.lean (symmetry via B)", "status": "COMPLETED"},
+    {"n": 5, "name": "Barrel wiring + full CI", "status": "COMPLETED"}
+  ],
+  "sorry_inventory": {
+    "total_sorries": 0,
+    "files_with_sorries": [],
+    "new_axioms_introduced": 0,
+    "vacuous_placeholders": 0
+  },
+  "verification": {
+    "lake_build": "pass",
+    "checkInitImports": "pass",
+    "lake_lint": "pass (zero findings in new files)",
+    "lint_style": "pass",
+    "lake_shake": "pass (only pre-existing repo-wide Cslib.Init false positive, unrelated -- scripts/noshake.json absent from repo)",
+    "lake_test": "pass (exit 0)",
+    "lean_verify_axioms": ["propext", "Classical.choice", "Quot.sound"]
+  },
+  "artifacts": [
+    "Cslib/Logics/Modal/Metalogic/Minimal/MinExtension.lean",
+    "Cslib/Logics/Modal/Metalogic/Minimal/MT.lean",
+    "Cslib/Logics/Modal/Metalogic/Minimal/MS4.lean",
+    "Cslib/Logics/Modal/Metalogic/Minimal/MS5.lean",
+    "Cslib.lean",
+    "specs/496_minimal_modal_extensions/summaries/01_minimal-modal-extensions-summary.md"
+  ],
+  "blockers": [],
+  "continuation_context": null,
+  "plan_deviations": [
+    "Phase 1 required genericizing MK's canonical-model machinery over an abstract Axioms parameter (~1580 lines vs ~150 planned) since task 495's files were MKModalAxiom-specific rather than Axioms-generic like IK's base files. Phases 2-4 then proceeded as planned."
+  ],
+  "commits": [
+    "task 496 phase 1: MinExtension.lean scaffold (MValidFC, Axioms-generic mkvalidFC_completeness)",
+    "task 496 phase 2: MT.lean (reflexivity: soundness + completeness)",
+    "task 496 phase 3: MS4.lean (transitivity: soundness + completeness)",
+    "task 496 phase 4: MS5.lean (symmetry via B: soundness + completeness)",
+    "task 496: complete implementation (MT/MS4/MS5 modular extensions of MK)"
+  ]
+}

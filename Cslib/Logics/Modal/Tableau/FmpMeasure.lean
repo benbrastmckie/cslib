@@ -1452,27 +1452,38 @@ lemma modalApplyOne_outDeg_step
         dsimp only
         split <;> exact houtdeg w
 
-/-- **P2-obl-c** supporting invariant: `modalStepBranch` preserves the out-degree/expanded-set
-correspondence `outDeg acc w = |{formulas in e matching isMintingShaped at w}|` for every world
-`w`. Maintained by the same case-split shape as P2-obl-a/b: propositional-rule steps never fire
-on a minting-shaped formula (`isMintingShaped_not_prop_applicable`), so the filtered count is
-unaffected; `boxPos`/`diamondNeg` (persistent) touch neither `acc` nor `e`; the `diamondPos`
-shape is dead code (`diamondPos_shape_prop_applicable`, discharged by contradiction); only
-`boxNeg` mints, incrementing both sides by exactly 1 at `w = sf.label`. -/
-lemma modalStepBranch_preserves_outDegEq
+/-- **Task 507 Phase 2 (generic form)**: `modalStepBranchGen apply` preserves the out-degree/
+expanded-set correspondence for an abstract `apply : RuleApply Atom`, given its per-call
+outDeg-step obligation `hOutDegStep` (the raw hypothesis underlying
+`RuleApplicationSpec.outDegStep`, spelled out here rather than bundled to avoid an import cycle
+with `GenericDriver.lean` -- see the plan's "Architectural Note"). `modalStepBranch_preserves_outDegEq`
+(K) is the trivial instantiation at `apply := modalApplyOne`,
+`hOutDegStep := modalApplyOne_outDeg_step`. -/
+lemma modalStepBranch_preserves_outDegEq_gen
+    (apply : RuleApply Atom)
+    (hOutDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) →
+      ∀ w, outDeg (apply sf b acc).snd w =
+        (List.filter (fun x => x.label == w && isMintingShaped x)
+          (match (apply sf b acc).fst with
+            | .linear _ => e ++ [sf]
+            | .branching _ => e ++ [sf]
+            | .persistent _ => e
+            | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (houtdeg : ∀ w, outDeg acc w =
       (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
     ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
       (e'.filter (fun x => x.label == w && isMintingShaped x)).length := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases := modalApplyOne_outDeg_step sf b e acc houtdeg
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  have hcases := hOutDegStep sf b e acc houtdeg
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hcases
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     rw [hsf.2.2] at hcases
@@ -1497,6 +1508,23 @@ lemma modalStepBranch_preserves_outDegEq
     subst he'
     exact hcases
   · rw [hfstc] at hsf; simp at hsf
+
+/-- **P2-obl-c** supporting invariant: `modalStepBranch` preserves the out-degree/expanded-set
+correspondence `outDeg acc w = |{formulas in e matching isMintingShaped at w}|` for every world
+`w`. Zero-regression corollary of `modalStepBranch_preserves_outDegEq_gen` (task 507 Phase 2) at
+`apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_preserves_outDegEq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
+      (e'.filter (fun x => x.label == w && isMintingShaped x)).length := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_preserves_outDegEq_gen modalApplyOne modalApplyOne_outDeg_step
+    b e acc newBs newExps newAcc hstep houtdeg
 
 
 omit [Hashable Atom] in

@@ -1,80 +1,74 @@
 {
-  "session_id": "sess_1784051915_d00efb",
+  "session_id": "sess_1784054776_0fc973",
   "task_numbers": [
+    507,
     503,
-    504,
     505,
-    506
+    506,
+    300
   ],
   "waves": [
+    [
+      507
+    ],
     [
       503
     ],
     [
-      504,
       505,
       506
+    ],
+    [
+      300
     ]
   ],
   "dependency_graph": {
-    "503": [],
-    "504": [
-      "503"
+    "507": [],
+    "503": [
+      507
     ],
     "505": [
-      "503"
+      503
     ],
     "506": [
-      "503"
+      503
+    ],
+    "300": [
+      503,
+      505,
+      506
     ]
   },
-  "max_cycles": 20,
-  "cycle_count": 2,
-  "failed_tasks": [
-    {
-      "task": 503,
-      "reason": "Phase 3 termination-measure blocker; needs dedicated generic-tableau-termination task"
-    }
+  "max_cycles": 25,
+  "cycle_count": 11,
+  "failed_tasks": [],
+  "completed_tasks": [
+    496
   ],
-  "completed_tasks": [],
   "current_statuses": {
-    "503": "blocked",
-    "504": "researched",
-    "505": "researched",
-    "506": "researched",
-    "495": "completed",
-    "496": "planned"
+    "507": "planned",
+    "496": "completed",
+    "484": "researched"
   },
   "task_dirs": {
+    "507": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec",
     "503": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
-    "504": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_",
     "505": "specs/505_b_symmetric_decidability_via_generic_tableau_driver",
-    "506": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability"
+    "506": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability",
+    "300": "specs/300_modal_extensions_t_s4_s5"
   },
   "research_agents": {
+    "507": "cslib-research-agent",
     "503": "cslib-research-agent",
-    "504": "cslib-research-agent",
     "505": "cslib-research-agent",
-    "506": "cslib-research-agent"
+    "506": "cslib-research-agent",
+    "300": "cslib-research-agent"
   },
   "implement_agents": {
+    "507": "cslib-implementation-agent",
     "503": "cslib-implementation-agent",
-    "504": "cslib-implementation-agent",
     "505": "cslib-implementation-agent",
-    "506": "cslib-implementation-agent"
-  },
-  "gated_tasks": [
-    {
-      "task": 504,
-      "reason": "needs generic termination measure (503 Phase 3)"
-    },
-    {
-      "task": 505,
-      "reason": "needs generic termination measure (503 Phase 3)"
-    },
-    {
-      "task": 506,
-      "reason": "S4 excluded from interface; 503 driver defs (Phase 1) available but standalone termination work + user decision advised"
-    }
-  ]
+    "506": "cslib-implementation-agent",
+    "300": "cslib-implementation-agent"
+  }
 }

@@ -209,7 +209,41 @@ confirmation.
 
 ---
 
-### Phase 2: Generic outDeg-preservation cluster [NOT STARTED]
+### Architectural Note (discovered during Phase 2, applies to Phases 2-7)
+
+**Import-cycle constraint**: `GenericDriver.lean` (`public import
+Cslib.Logics.Modal.Tableau.FmpMeasure`) depends on `FmpMeasure.lean` to state
+`RuleApplicationSpec`'s fields (they mention `FmpMeasure.lean`-defined predicates:
+`accFreshInv`, `accTargetsKnown`, `modalKnownWorlds`, `isMintingShaped`, `modalUniverse`, etc.).
+Consequently `FmpMeasure.lean` **cannot** import `GenericDriver.lean` back (cycle), so a `_gen`
+lemma physically located in `FmpMeasure.lean` cannot take `spec : RuleApplicationSpec apply` as a
+bundled parameter — that type is not yet in scope at that point in the import graph.
+
+**Resolution** (verified against the actual file, no other file references `RuleApplicationSpec`
+or imports `GenericDriver.lean` yet, so this is a safe, purely-additive restructuring):
+each `_gen` lemma in `FmpMeasure.lean` takes the **raw per-field hypothesis** it needs as an
+explicit parameter (e.g. `hOutDegStep : ∀ sf b e acc, ... `, textually identical to
+`RuleApplicationSpec.outDegStep`'s field type) rather than a bundled `spec`. `GenericDriver.lean`
+(which legitimately imports `FmpMeasure.lean` and holds `RuleApplicationSpec`) then supplies a
+thin corollary wrapper unpacking `spec.field` into the raw hypothesis parameter. Concretely:
+
+- `FmpMeasure.lean`: `foo_gen (apply : RuleApply Atom) (hField : ...) ... := by <proof, generic
+  over apply/hField>`, plus the **existing** concrete `foo` lemma's proof body is replaced by a
+  one-line delegation `rw [modalStepBranch_eq] at hstep; exact foo_gen modalApplyOne
+  modalApplyOne_<field-witness> ... hstep ...` (statement byte-unchanged).
+- `GenericDriver.lean`: `theorem foo_spec (apply) (spec : RuleApplicationSpec apply) ... := foo_gen
+  apply spec.field ...` — the `(apply, spec)`-parametrized form the plan originally specified,
+  available here for downstream (T/S5/B) reuse.
+
+This preserves every hard requirement (zero sorry/axiom, K statements byte-unchanged, full reuse
+for downstream instances via the `GenericDriver.lean` wrapper) while resolving the cycle. All
+phase task descriptions below should be read with this adjustment: "Files to modify:
+`FmpMeasure.lean`" additionally implies a corresponding thin wrapper addition in
+`GenericDriver.lean`.
+
+---
+
+### Phase 2: Generic outDeg-preservation cluster [IN PROGRESS]
 
 - **Goal:** Re-derive the outDeg-bookkeeping helpers generically over `(apply, spec)` and
   re-instantiate their K versions. Cluster: `FmpMeasure.lean` lines ~1281–1580.

@@ -1,0 +1,63 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-14T12:11:09-07:00",
+  "completed_at": "2026-07-14T12:22:00-07:00",
+  "artifacts": [
+    "specs/484_metalogic_conservative_extension_modularity/reports/01_conservative-extension-modularity.md"
+  ],
+  "partial_progress": {
+    "stage": "report_written",
+    "details": "Full research report written; three parallel Explore inventories synthesized"
+  },
+  "metadata": {
+    "session_id": "sess_1784044271_09e821_484",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  },
+  "orchestrator_handoff": {
+    "task": 484,
+    "task_type": "cslib",
+    "phase": "research_complete",
+    "next_action": "plan",
+    "recommended_command": "/plan 484",
+    "report_path": "specs/484_metalogic_conservative_extension_modularity/reports/01_conservative-extension-modularity.md",
+    "summary": "Capstone is ~80% synthesis of existing assets plus mechanical inclusion lemmas. The shared DerivationTree/Derivable framework + generic Derivable_mono lift make most cross-lattice monotonicity cheap cases-subsumptions. One genuinely hard direction (IK->K, Fischer-Servi primitive-diamond vs classical dual-diamond) is isolated and BLOCKED-gated.",
+    "reuse_first_findings": {
+      "already_built": [
+        "Generic axiom->axiom lift Derivable_mono / liftDerivation (InterSystem/Lifting.lean:66)",
+        "Classical modal-cube monotonicity, all 24 edges (InterSystem/AxiomSubsumption.lean + Conservativity.lean)",
+        "Modal-over-CPL conservative extension, classical 15 systems (Metalogic/ConservativeExtension.lean)",
+        "Propositional-strength subsumption at PL level (Propositional/ProofSystem/Axioms.lean:155,168)",
+        "PL derivability monotonicity chain (ConservativeChain.lean:129,139)",
+        "PL fragment conservativity converses via algebra + Glivenko (HilbertConservativeGlivenko.lean)",
+        "Bimodal/temporal conservative-over-CPL semantic-embedding precedent",
+        "Parametric completeness cores for all four bases (strong_completeness_iff, ivalidFC_completeness, mkvalidFC_completeness, ckvalidFC_completeness)"
+      ],
+      "missing_and_recommended": [
+        "Per-base modal-cube monotonicity for minimal/intuitionistic/constructive (MK->MT->MS4->MS5, IK->IT->IS4->IS5, CK->CT->CS4->CS5) -- CHEAP cases-subsumptions",
+        "Cross-base monotonicity into intuitionistic: MK->IK, CK->IK and per-rung -- CHEAP",
+        "Generalized lift Derivable_of_axiom_derivable (axiom->derivation) -- new foundational lemma, needed for IK->K",
+        "Int->Classical bridge IK->K via per-axiom classical derivations of kdia/cd/idb/dbot/tDia/fourDia/bDia -- MODERATE/HARD, BLOCKED-gated"
+      ]
+    },
+    "key_conceptual_findings": [
+      "Three distinct axes: (A) modal-axiom lattice, (B) propositional strength, (C) modal-over-propositional. Only Axis C and PL fragments are genuinely CONSERVATIVE (have converses); Axes A/B deliver MONOTONICITY only -- same-language converse is FALSE (T proves box-phi->phi; classical proves Peirce).",
+      "All four bases + all modal systems share ONE DerivationTree/Derivable framework over Proposition Atom, parameterized by Axioms predicate -- conservativity phrasable as axiom-predicate inclusion.",
+      "MK and CK are INCOMPARABLE (MK has cd/idb no efq; CK has efq no cd/idb); both embed into IK.",
+      "IK/MK/CK use PRIMITIVE diamond with Fischer-Servi axioms; classical K uses DUAL diamond (=not-box-not) with diaDuality -- so IK->K is not a rename.",
+      "CS4/CS5 completeness is BLOCKED upstream (task 501) but does NOT obstruct constructive-cube monotonicity (which is purely syntactic)."
+    ],
+    "recommended_phases": [
+      {"phase": 1, "name": "Per-base modal-cube monotonicity (min/int/constr)", "difficulty": "cheap", "zero_debt_risk": "none", "parallelizable": true},
+      {"phase": 2, "name": "Cross-base monotonicity into intuitionistic (MK->IK, CK->IK, per-rung)", "difficulty": "cheap", "zero_debt_risk": "none"},
+      {"phase": 3, "name": "Int->Classical bridge (generalized lift + per-axiom classical derivations)", "difficulty": "moderate-hard", "zero_debt_risk": "isolated, STOP/BLOCKED-gated per schema", "optional": true},
+      {"phase": 4, "name": "Capstone modularity synthesis + documentation", "difficulty": "cheap", "zero_debt_risk": "none"}
+    ],
+    "mvp_scope": "Phases 1, 2, 4 (all cheap, all Zero-Debt-safe). Phase 3 optional separate wave, consider --hard.",
+    "new_file_placement": "Cslib/Logics/Modal/Metalogic/InterSystem/ (existing home of classical lattice)",
+    "mathlib_api": "minimal; inductive cases/match on in-repo predicates; only Relation.Serial and And projections; no new imports anticipated",
+    "blocked": false,
+    "requires_user_review": false
+  }
+}

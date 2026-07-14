@@ -338,7 +338,7 @@ unblocked and eligible.
 
 ---
 
-### Phase 4: Generalize CompletenessLoop + instantiate the T driver [IN PROGRESS]
+### Phase 4: Generalize CompletenessLoop + instantiate the T driver [COMPLETED]
 
 - **Goal:** Thread `apply` + `spec` through `CompletenessLoop.lean`'s fuel loop and its top
   theorems, re-derive K, then instantiate the generic stack with `modalApplyOneT` to obtain
@@ -349,29 +349,54 @@ unblocked and eligible.
     `ModalLoopInv`, `modalExpandBranches_hintikka`, `modalExpandBranches_openBranch_initial_mem`,
     and the `modalTableau_complete`/`modalTableau_decides` bodies at lines 1290/1334) over
     `apply`/`spec`, re-deriving the K versions as trivial instances (statements unchanged).
-  - [ ] In a new `Cslib/Logics/Modal/Tableau/TDriver.lean` (or an agreed file per ORGANISATION.md),
+    *(deviation: skipped -- `ModalLoopInv`'s box-negative/diamond-positive witness invariants
+    (`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`) are tied to concrete
+    rule-shape facts (`modalApplyOne_posBox_eq`/`modalApplyOne_negDia_eq`/
+    `modalApplyOne_boxNeg_witness`/`modalApplyOne_diamondPos_witness`) that the current
+    seven-field `RuleApplicationSpec` does not capture -- genuinely generalizing `ModalLoopInv`
+    over an abstract `apply` would require extending the spec with several more fields, a
+    crux-sized undertaking mirroring task 507's own scope, and is unneeded for T specifically:
+    `modalApplyOneT` agrees with `modalApplyOne` *exactly* on the box-negative/diamond-positive
+    shapes (`modalApplyOneT_eq_of_not_boxPos_diaNeg`), so T's own completeness development
+    (Phase 5) reuses `CompletenessLoop.lean`'s/`Completeness.lean`'s K-specific witness lemmas
+    directly via that agreement rather than through a generic abstraction. Recommend a dedicated
+    `generic-completeness-loop` follow-up task if S5/B (504/505) need the fully generic form.)*
+  - [x] In a new `Cslib/Logics/Modal/Tableau/TDriver.lean` (per ORGANISATION.md),
     define `modalStepBranchT := modalStepBranchGen modalApplyOneT`, `modalExpandBranchesT`,
     `modalTableauT` (each `= …Gen modalApplyOneT`).
-  - [ ] Prove `modalApplyOneT_spec : RuleApplicationSpec modalApplyOneT`: discharge
+  - [x] Prove `modalApplyOneT_spec : RuleApplicationSpec modalApplyOneT`: discharge
     world-creation-confinement and catalog-membership using `modalApplyOneT_eq_of_not_boxPos_diaNeg`
     (T agrees with `modalApplyOne` outside the two T-relevant persistent shapes, so all minting
     happens in the shared K arms) and the T rules' "outputs at existing worlds, drawn from the
-    enlarged `modalUniverse`" property; enlarge `modalUniverse` if a T output formula is not yet a
-    member (add a `modalUniverse` closure lemma, keeping the finite bound).
-  - [ ] Obtain the terminating `modalTableauT` decision procedure (fuel sufficiency) as
-    `<generic> modalApplyOneT modalApplyOneT_spec`.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom; full CI.
+    enlarged `modalUniverse`" property. *(discharged all seven fields
+    `freshLocal`/`outputsSubsetUniverse`/`persistentFresh`/`rankStep`/`outDegStep`/
+    `knownWorldsStep`/`branchingLength`; added two small public downstream-reuse helpers to
+    `FmpMeasure.lean` -- `modalUniverse_mem_of_sameWorld_subfml`, `label_mem_modalKnownWorlds` --
+    rather than enlarging `modalUniverse` itself, since T's self-propagated formula is already a
+    subformula at an *existing* world, already inside the unchanged universe.)*
+  - [x] Obtain the terminating `modalTableauT` decision procedure (fuel sufficiency) as
+    `<generic> modalApplyOneT modalApplyOneT_spec`. *(available via `GenericDriver.lean`'s
+    `(apply, spec)`-bundled wrapper theorems, e.g. `modalStepBranchGen_worldBound modalApplyOneT
+    modalApplyOneT_spec`; termination itself is exercised concretely in Phase 5/6.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom; full CI.
 - **Timing:** 2.5 hours
 - **Depends on:** 3
 - **Files to modify:**
-  - `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean` — generalize loop + top theorems; re-derive K.
-  - `Cslib/Logics/Modal/Tableau/TDriver.lean` (new) — T driver instances + `modalApplyOneT_spec`.
-  - `Cslib/Logics/Modal/Tableau/FmpMeasure.lean` — a `modalUniverse` enlargement/closure lemma if a
-    T output formula needs catalog membership (bounded).
-  - `Cslib.lean` — register new file.
+  - `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean` — **not touched** (deviation above).
+  - `Cslib/Logics/Modal/Tableau/TDriver.lean` (new) — T driver instances + `modalApplyOneT_spec`
+    (770 lines: shape lemmas for the two T-relevant signed-formula shapes, unfold lemmas for
+    `modalApplyOneT`'s `.fst`/`.snd` at each shape, and the seven field proofs).
+  - `Cslib/Logics/Modal/Tableau/FmpMeasure.lean` — two new public downstream-reuse helper lemmas
+    (`modalUniverse_mem_of_sameWorld_subfml`, `label_mem_modalKnownWorlds`); no `modalUniverse`
+    enlargement was needed.
+  - `Cslib.lean` — registered `TDriver.lean`.
 - **Verification:**
-  - `lake build` green; K top theorems unchanged; `modalApplyOneT_spec` sorry-free;
-    `modalTableauT` terminates. Full CI clean.
+  - `lake build` (full project, 3232 jobs) green; K top theorems unchanged (K files untouched
+    apart from the two additive `FmpMeasure.lean` helpers); `modalApplyOneT_spec` sorry-free/
+    axiom-free (`grep sorry`/`grep axiom` on `TDriver.lean` clean). Full CI clean:
+    `checkInitImports`, `lint-style`, `lake lint` (zero new warnings on touched files), `lake
+    test` (exit 0), `mk_all --module` (no update needed, confirming manual registration),
+    `lake shake` (zero suggestions on touched files).
 
 ---
 

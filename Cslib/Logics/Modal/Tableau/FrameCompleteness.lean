@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.FrameSoundness
+public import Cslib.Logics.Modal.Tableau.TDriver
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
 
@@ -403,6 +404,516 @@ theorem modalOpenBranchS4_countermodel
     (¬ Satisfies (extractModelS4 b acc) 0 φ₀) ∧ s4FC (extractModelS4 b acc).r :=
   ⟨(modalTruthLemmaS4 φ₀ b acc hH φ₀ 0).2 hF,
     ⟨extractModelS4_refl b acc, extractModelS4_trans b acc⟩⟩
+
+/-! ## T Modal Truth Lemma (task 503 Phase 5)
+
+`modalExpandBranchesT_hintikka` (`TDriver.lean`, delivered by task 510) produces a
+`modalHintikkaSetGen modalApplyOneT bR aR` witness from an open `modalExpandBranchesT` result.
+This section closes the remaining gap: the T truth lemma against `extractModelT` and `tValid`
+completeness.
+
+`modalApplyOneT` agrees with `modalApplyOne` outside the box-positive/diamond-negative shapes
+(`modalApplyOneT_eq_of_not_boxPos_diaNeg`, `FrameRules.lean`), so every propositional case and
+the box-negative/diamond-positive modal cases reduce to exactly the K argument (the latter two
+via the free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`,
+`Completeness.lean`, task 510). The box-positive and diamond-negative cases are genuinely new:
+`hintikkaT_box_pos`/`hintikkaT_diamond_neg` below combine the K argument (raw recorded edge,
+`Relation.ReflGen.single`) with the T self-propagation conjunct (reflexive self-edge,
+`Relation.ReflGen.refl`), as task 510's own research anticipated
+(`hintikka_box_pos`/`hintikka_diamond_neg` are payload-reading and irreducibly K-specific). -/
+
+omit [Hashable Atom] in
+/-- `modalApplyOneT` agrees with `modalApplyOne` on every signed formula whose formula
+component is neither `box`- nor `diamond`-shaped (regardless of sign) -- specialization of
+`modalApplyOneT_eq_of_not_boxPos_diaNeg` (`FrameRules.lean`) used by the propositional cases of
+`modalTruthLemmaT` below (mirrors `FrameSoundness.lean`'s S4 analog
+`modalApplyOneS4_eq_of_not_modal_shaped`, simplified to T's single-layer dispatch). -/
+private lemma modalApplyOneT_eq_of_not_box_diamond
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hnb : ∀ φ, sf.formula ≠ .box φ) (hnd : ∀ φ, sf.formula ≠ .diamond φ) :
+    modalApplyOneT sf b acc = modalApplyOne sf b acc :=
+  modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc
+    ⟨fun ⟨_, φ, h⟩ => hnb φ h, fun ⟨_, φ, h⟩ => hnd φ h⟩
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `TDriver.lean`'s `private lemma modalApplyOneT_boxPos_fst` (that
+lemma is `private` to its own file, hence unavailable here): direct unfolding of
+`modalApplyOneT`'s `.fst` component at a box-positive shaped signed formula, in terms of the
+underlying `modalApplyOne` (K) result. Proof reproduced verbatim (three lines), not
+re-designed. -/
+private lemma modalApplyOneT_boxPos_fst'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOne (⟨.pos, .box φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent kForms =>
+            .persistent (kForms ++
+              (modalTBoxSelf b φ w).filter (fun x => !(kForms.any (· == x))))
+          | .notApplicable =>
+            if (modalTBoxSelf b φ w).isEmpty then .notApplicable
+            else .persistent (modalTBoxSelf b φ w)
+          | other => other) := by
+  simp only [modalApplyOneT]
+  cases (modalApplyOne (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalApplyOneT_boxPos_fst'` for the diamond-negative shape. -/
+private lemma modalApplyOneT_diamondNeg_fst'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent kForms =>
+            .persistent (kForms ++
+              (modalTDiaNegSelf b φ w).filter (fun x => !(kForms.any (· == x))))
+          | .notApplicable =>
+            if (modalTDiaNegSelf b φ w).isEmpty then .notApplicable
+            else .persistent (modalTDiaNegSelf b φ w)
+          | other => other) := by
+  simp only [modalApplyOneT]
+  cases (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- `modalTBoxSelf b φ w = []` iff `T(φ)@w` is already on the branch (direct unfolding of
+`modalTBoxSelf`'s `if`-guard). -/
+private lemma modalTBoxSelf_eq_nil_iff
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    modalTBoxSelf b φ w = [] ↔
+      (⟨.pos, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  simp only [modalTBoxSelf]
+  split_ifs with h
+  · simpa using h
+  · simp only [false_iff]
+    simpa using h
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalTBoxSelf_eq_nil_iff` for `modalTDiaNegSelf`. -/
+private lemma modalTDiaNegSelf_eq_nil_iff
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    modalTDiaNegSelf b φ w = [] ↔
+      (⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  simp only [modalTDiaNegSelf]
+  split_ifs with h
+  · simpa using h
+  · simp only [false_iff]
+    simpa using h
+
+omit [Hashable Atom] in
+/-- If `modalTBoxSelf b φ w ≠ []`, it is exactly the singleton `[T(φ)@w]`, with `T(φ)@w ∉ b`
+(the negation of `modalTBoxSelf_eq_nil_iff`, unfolded to expose the singleton payload). -/
+private lemma modalTBoxSelf_cases_of_ne_nil
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {φ : Proposition Atom}
+    {w : WorldIndex} (hself : modalTBoxSelf b φ w ≠ []) :
+    modalTBoxSelf b φ w = [(⟨.pos, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)] ∧
+      (⟨.pos, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b := by
+  simp only [modalTBoxSelf] at hself ⊢
+  split_ifs at hself ⊢ with h
+  · exact absurd rfl hself
+  · exact ⟨rfl, by simpa using h⟩
+
+omit [Hashable Atom] in
+/-- Symmetric to `modalTBoxSelf_cases_of_ne_nil` for `modalTDiaNegSelf`. -/
+private lemma modalTDiaNegSelf_cases_of_ne_nil
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {φ : Proposition Atom}
+    {w : WorldIndex} (hself : modalTDiaNegSelf b φ w ≠ []) :
+    modalTDiaNegSelf b φ w = [(⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)] ∧
+      (⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b := by
+  simp only [modalTDiaNegSelf] at hself ⊢
+  split_ifs at hself ⊢ with h
+  · exact absurd rfl hself
+  · exact ⟨rfl, by simpa using h⟩
+
+/-- **T-analog of `hintikka_box_pos`** (`Completeness.lean`, genuinely new content -- not
+inherited from K, per task 510's research note that this bridge is payload-reading and
+irreducibly K-specific): `T(□ψ)@w ∈ b` together with the reflexive closure
+`Relation.ReflGen acc.hasEdge w w'` (i.e. `w' = w` or a raw recorded edge `w → w'`) and
+`modalHintikkaSetGen modalApplyOneT b acc` imply `T(ψ)@w' ∈ b`.
+
+The `.refl` case (`w' = w`) is the genuinely-new T box-positive self-propagation conjunct: either
+`modalTBoxSelf b ψ w = []` (meaning `T(ψ)@w` is already on the branch,
+`modalTBoxSelf_eq_nil_iff`) or `modalApplyOneT`'s merged persistent output forces it in
+(`modalApplyOneT_boxPos_fst'`). The `.single` case (raw edge) reduces to the same
+`boxPropagation`-membership argument `hintikka_box_pos` inlines, since T's persistent output at
+this shape is K's own `kForms` merged with the self-conjunct at a possibly-different world, so
+`kForms` (hence the K successor witness) survives into T's merged forcing list unchanged. -/
+lemma hintikkaT_box_pos
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneT b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hr : Relation.ReflGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hcond := hH.2.1 (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond
+  cases hr with
+  | refl =>
+    rcases eq_or_ne (modalTBoxSelf b ψ w) [] with hself | hself
+    · exact (modalTBoxSelf_eq_nil_iff b ψ w).mp hself
+    · rw [modalApplyOneT_boxPos_fst'] at hcond
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box ψ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+      · rw [hk] at hcond
+        simp only [List.isEmpty_iff, hself, if_false] at hcond
+        obtain ⟨heq, -⟩ := modalTBoxSelf_cases_of_ne_nil hself
+        exact hcond (⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) (by rw [heq]; simp)
+      · rw [hk] at hcond
+        obtain ⟨heq, hnotin⟩ := modalTBoxSelf_cases_of_ne_nil hself
+        by_cases hkf : (⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ kForms
+        · exact hcond _ (List.mem_append_left _ hkf)
+        · refine hcond (⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            (List.mem_append_right kForms ?_)
+          rw [heq]
+          simp only [List.mem_filter, List.mem_singleton, true_and]
+          simp only [List.any_eq_false, Bool.not_eq_eq_eq_not, Bool.not_true, beq_iff_eq]
+          intro x hx heq
+          exact hkf (heq ▸ hx)
+  | single hedge =>
+    by_contra hnotin
+    have hw'_succ : w' ∈ acc.successorsOf w := by
+      simp only [Accessibility.successorsOf, List.mem_filterMap]
+      simp only [Accessibility.hasEdge, List.any_eq_true] at hedge
+      obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hedge
+      simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
+      exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
+    have hmemBP : (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+        boxPropagation b acc ψ w := by
+      simp only [boxPropagation, List.mem_filterMap]
+      refine ⟨w', hw'_succ, ?_⟩
+      rw [if_neg]
+      simp only [List.any_eq_true, not_exists]
+      rintro x ⟨hx, heq⟩
+      rw [beq_iff_eq] at heq
+      exact hnotin (heq ▸ hx)
+    have hne : boxPropagation b acc ψ w ≠ [] := fun h => by simp [h] at hmemBP
+    have hk : (modalApplyOne (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).fst = .persistent (boxPropagation b acc ψ w) := by
+      simp only [modalApplyOne]
+      have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+          (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+          = false := by
+        rw [tryAllPropRules_pos]
+        simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+      rw [if_neg (by simp [htry]), if_neg (by simpa using hne)]
+    rw [modalApplyOneT_boxPos_fst', hk] at hcond
+    exact hnotin (hcond (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      (List.mem_append_left _ hmemBP))
+
+/-- **T-analog of `hintikka_diamond_neg`** (`Completeness.lean`, genuinely new content, dual of
+`hintikkaT_box_pos`): `F(◇ψ)@w ∈ b` together with `Relation.ReflGen acc.hasEdge w w'` imply
+`F(ψ)@w' ∈ b`. -/
+lemma hintikkaT_diamond_neg
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneT b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hr : Relation.ReflGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hcond := hH.2.1 (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond
+  cases hr with
+  | refl =>
+    rcases eq_or_ne (modalTDiaNegSelf b ψ w) [] with hself | hself
+    · exact (modalTDiaNegSelf_eq_nil_iff b ψ w).mp hself
+    · rw [modalApplyOneT_diamondNeg_fst'] at hcond
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond ψ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+      · rw [hk] at hcond
+        simp only [List.isEmpty_iff, hself, if_false] at hcond
+        obtain ⟨heq, -⟩ := modalTDiaNegSelf_cases_of_ne_nil hself
+        exact hcond (⟨.neg, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) (by rw [heq]; simp)
+      · rw [hk] at hcond
+        obtain ⟨heq, hnotin⟩ := modalTDiaNegSelf_cases_of_ne_nil hself
+        by_cases hkf : (⟨.neg, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ kForms
+        · exact hcond _ (List.mem_append_left _ hkf)
+        · refine hcond (⟨.neg, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            (List.mem_append_right kForms ?_)
+          rw [heq]
+          simp only [List.mem_filter, List.mem_singleton, true_and]
+          simp only [List.any_eq_false, Bool.not_eq_eq_eq_not, Bool.not_true, beq_iff_eq]
+          intro x hx heq
+          exact hkf (heq ▸ hx)
+  | single hedge =>
+    by_contra hnotin
+    have hw'_succ : w' ∈ acc.successorsOf w := by
+      simp only [Accessibility.successorsOf, List.mem_filterMap]
+      simp only [Accessibility.hasEdge, List.any_eq_true] at hedge
+      obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hedge
+      simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
+      exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
+    have hmemDN : (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+        (acc.successorsOf w).filterMap (fun w'' =>
+          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w''⟩
+          if b.any (· == sf') then none else some sf') := by
+      simp only [List.mem_filterMap]
+      refine ⟨w', hw'_succ, ?_⟩
+      rw [if_neg]
+      simp only [List.any_eq_true, not_exists]
+      rintro x ⟨hx, heq⟩
+      rw [beq_iff_eq] at heq
+      exact hnotin (heq ▸ hx)
+    have hne : (acc.successorsOf w).filterMap (fun w'' =>
+        let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w''⟩
+        if b.any (· == sf') then none else some sf') ≠ [] :=
+      fun h => by rw [h] at hmemDN; exact absurd hmemDN (List.not_mem_nil)
+    have hk : (modalApplyOne (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst =
+        .persistent ((acc.successorsOf w).filterMap (fun w'' =>
+          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w''⟩
+          if b.any (· == sf') then none else some sf')) := by
+      simp only [modalApplyOne]
+      have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+          (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+          = false := by
+        rw [tryAllPropRules_neg]
+        simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+      rw [if_neg (by simp [htry]), if_neg (by simpa using hne)]
+    rw [modalApplyOneT_diamondNeg_fst', hk] at hcond
+    exact hnotin (hcond (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      (List.mem_append_left _ hmemDN))
+
+/-- **T Modal Truth Lemma**: membership in a T Hintikka branch tracks satisfaction in the
+extracted reflexive Kripke model `extractModelT b acc`.
+
+Proof by strong induction on `modalComplexity φ`, mirroring `modalTruthLemma` (`Completeness.lean`):
+the propositional cases (`atom`/`bot`/`imp`/`and`/`or`) reuse the public, apply-agnostic
+consistency kit and K's `modalApplyOne_*` bridge lemmas verbatim, routed through
+`modalApplyOneT_eq_of_not_box_diamond`; the box-negative/diamond-positive cases reuse the free
+generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (task 510) directly
+(unaffected minting shapes); the box-positive/diamond-negative cases consume the genuinely-new
+`hintikkaT_box_pos`/`hintikkaT_diamond_neg` bridges above, with the model's `r w w'` unfolding to
+exactly the `Relation.ReflGen` hypothesis those bridges want (`extractModelT_r`). -/
+lemma modalTruthLemmaT
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneT b acc) :
+    ∀ (φ : Proposition Atom) (w : WorldIndex),
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelT b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelT b acc) w φ) := by
+  suffices H : ∀ (n : Nat) (φ : Proposition Atom), modalComplexity φ = n → ∀ w,
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelT b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelT b acc) w φ) by
+    intro φ w; exact H (modalComplexity φ) φ rfl w
+  intro n
+  induction n using Nat.strongRecOn with
+  | ind n IHn =>
+    intro φ hφ w
+    have IH : ∀ (ψ : Proposition Atom), modalComplexity ψ < n → ∀ w',
+        (⟨.pos, ψ, w'⟩ ∈ b → Satisfies (extractModelT b acc) w' ψ) ∧
+        (⟨.neg, ψ, w'⟩ ∈ b → ¬ Satisfies (extractModelT b acc) w' ψ) :=
+      fun ψ hlt w' => IHn (modalComplexity ψ) hlt ψ rfl w'
+    have hHopen : isModalClosed b = false := hH.1
+    have hHrule := hH.2.1
+    cases φ with
+    | atom p =>
+      refine ⟨?_, ?_⟩
+      · intro hmem
+        simp only [Satisfies, extractModelT, extractModelWith]
+        exact List.any_eq_true.mpr ⟨⟨.pos, .atom p, w⟩, hmem, by simp⟩
+      · intro hmem hsat
+        simp only [Satisfies, extractModelT, extractModelWith, List.any_eq_true] at hsat
+        obtain ⟨sf, hsf_mem, hcond⟩ := hsat
+        simp only [Bool.and_eq_true] at hcond
+        obtain ⟨⟨hsign, hform⟩, hlab⟩ := hcond
+        have hsign_eq : sf.sign = .pos := eq_of_beq hsign
+        have hform_eq : sf.formula = .atom p := eq_of_beq hform
+        have hlab_eq : sf.label = w := eq_of_beq hlab
+        have hpos : (⟨.pos, .atom p, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+          convert hsf_mem using 1; rcases sf with ⟨s, f, l⟩; simp_all
+        exact openBranch_noContradiction b hHopen (.atom p) w hpos hmem
+    | bot =>
+      refine ⟨fun hmem => absurd hmem (openBranch_noTBot b hHopen w), ?_⟩
+      intro _ hsat
+      exact hsat
+    | imp a c =>
+      rcases eq_or_ne c Proposition.bot with rfl | hne
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.neg, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, a, w⟩ (by simp)
+          intro hsa
+          exact (IH a (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega)
+            w).2 hxmem hsa
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          intro hna
+          have hlt : modalComplexity a < n := by
+            rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega
+          exact hna ((IH a hlt w).1 hxmem)
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_imp hne] at hcond
+          intro hsa
+          obtain ⟨br, hbr_mem, hbr⟩ := hcond
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+          rcases hbr_mem with rfl | rfl
+          · exact absurd hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2
+              (hbr ⟨.neg, a, w⟩ (by simp)))
+          · exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1
+              (hbr ⟨.pos, c, w⟩ (by simp))
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_imp hne] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          have hymem : (⟨.neg, c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, c, w⟩ (by simp)
+          intro hsa
+          exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2 hymem
+            (hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1 hxmem))
+    | and φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_and_pos] at hcond
+        exact ⟨(IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, φ', w⟩ (by simp)),
+          (IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, ψ', w⟩ (by simp))⟩
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_and_neg] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rintro ⟨hsφ, hsψ⟩
+        rcases hbr_mem with rfl | rfl
+        · exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, φ', w⟩ (by simp)))
+        · exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, ψ', w⟩ (by simp)))
+    | or φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_or_pos] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rcases hbr_mem with rfl | rfl
+        · exact Or.inl ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, φ', w⟩ (by simp)))
+        · exact Or.inr ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, ψ', w⟩ (by simp)))
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneT_eq_of_not_box_diamond _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_or_neg] at hcond
+        intro hs
+        cases hs with
+        | inl hsφ => exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, φ', w⟩ (by simp)))
+        | inr hsψ => exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, ψ', w⟩ (by simp)))
+    | box ψ =>
+      constructor
+      · intro hmem w' hr
+        have hpath : Relation.ReflGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelT_r b acc ▸ hr
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').1
+          (hintikkaT_box_pos b acc hH ψ w w' hmem hpath)
+      · intro hmem hall
+        obtain ⟨w', hw', hF⟩ := hintikka_box_neg_gen modalApplyOneT b acc hH ψ w hmem
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').2 hF
+          (hall w' (extractModelT_hasEdge_imp_r b acc hw'))
+    | diamond ψ =>
+      constructor
+      · intro hmem
+        obtain ⟨w', hw', hT⟩ := hintikka_diamond_pos_gen modalApplyOneT b acc hH ψ w hmem
+        exact ⟨w', extractModelT_hasEdge_imp_r b acc hw',
+          (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').1 hT⟩
+      · intro hmem
+        rintro ⟨w', hw', hsψ⟩
+        have hpath : Relation.ReflGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelT_r b acc ▸ hw'
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
+          (hintikkaT_diamond_neg b acc hH ψ w w' hmem hpath) hsψ
+
+/-- An open T Hintikka branch with `F(φ)@0 ∈ b` yields a reflexive Kripke countermodel to `φ`.
+Mirrors `modalOpenBranch_countermodel` (`Completeness.lean`). -/
+theorem modalOpenBranchT_countermodel
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom)
+    (hH : modalHintikkaSetGen modalApplyOneT b acc)
+    (hF : (⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ¬ Satisfies (extractModelT b acc) 0 φ :=
+  (modalTruthLemmaT b acc hH φ 0).2 hF
+
+/-! ## `tValid` Completeness -/
+
+/-- **T-completeness of the modal tableau** (task 503 Phase 5): if the T tableau on `φ0` returns
+an open branch, `φ0` is not T-valid. Mirrors `modalTableau_complete`
+(`CompletenessLoop.lean`): combines `modalExpandBranchesT_hintikka` (task 510, `TDriver.lean`)
+instantiated at the initial configuration (via `modalLoopInvGen_initial` and the fuel bridge
+`modalExpMeasure_entry_le_fuel`, both un-privatized for this purpose per their own docstrings),
+the generic initial-branch membership persistence lemma
+(`modalExpandBranchesGen_openBranch_initial_mem`, likewise), and the T countermodel extraction
+above. -/
+theorem modalTableauT_complete (φ0 : Proposition Atom)
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {a : Accessibility}
+    (h : modalTableauT φ0 = .openBranch b a) :
+    ¬ tValid φ0 := by
+  have h' : modalExpandBranchesT
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] (modalFuel φ0) = .openBranch b a := h
+  have hmeas := modalExpMeasure_entry_le_fuel φ0
+  have hInv : ∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+      (ai : Accessibility),
+      ([[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]])[i]? = some bi →
+      (([[]] : List (List (SignedFormula (Proposition Atom) WorldIndex))))[i]? = some ei →
+      ([Accessibility.empty])[i]? = some ai →
+      ∃ rank, ModalLoopInvGen modalApplyOneT φ0 bi ei ai rank := by
+    intro i bi ei ai hib hie hia
+    match i with
+    | 0 =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+      subst hib; subst hie; subst hia
+      exact ⟨fun _ => modalDepth φ0, modalLoopInvGen_initial modalApplyOneT φ0⟩
+    | n + 1 => simp at hib
+  have hH : modalHintikkaSetGen modalApplyOneT b a :=
+    modalExpandBranchesT_hintikka φ0 (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl hmeas hInv b a h'
+  have hmemInit : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalExpandBranchesGen_openBranch_initial_mem modalApplyOneT (modalFuel φ0)
+      (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (fun b₀ hb₀ => by
+        simp only [List.mem_singleton] at hb₀
+        subst hb₀
+        simp)
+      b a h'
+  have hnot := modalOpenBranchT_countermodel b a φ0 hH hmemInit
+  intro htv
+  exact hnot (htv WorldIndex (extractModelT b a) (extractModelT_refl b a) 0)
 
 end Cslib.Logic.Modal.Tableau
 

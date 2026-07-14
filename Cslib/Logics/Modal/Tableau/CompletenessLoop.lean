@@ -1292,8 +1292,11 @@ private lemma modalStepBranch_mem_preserved
 
 /-- **Generic initial-branch membership persistence** (task 510): `modalExpandBranchesGen_
 openBranch_initial_mem`, over an abstract `apply`. Takes **no** field -- driver-structural, needed
-by 503 for its own T-system truth lemma. -/
-private lemma modalExpandBranchesGen_openBranch_initial_mem
+by 503 for its own T-system truth lemma. Not `private` (task 503 Phase 5): the proof is genuinely
+`apply`-agnostic (never inspects `apply`'s output shape), so `modalTableauT_complete`
+(`FrameCompleteness.lean`) reuses it directly at `apply := modalApplyOneT` rather than
+re-deriving an identical T-specific copy. -/
+lemma modalExpandBranchesGen_openBranch_initial_mem
     (apply : RuleApply Atom) (fuel : Nat)
     (sf : SignedFormula (Proposition Atom) WorldIndex) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -1433,8 +1436,9 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
 
 /-- **Generic initial-configuration loop invariant** (task 510): `modalLoopInvGen_initial`, over
 an abstract `apply`. Takes **no** field -- the five rule-dependent conjuncts are all vacuous over
-`e = []`, so nothing about `apply` is ever consulted. -/
-private lemma modalLoopInvGen_initial (apply : RuleApply Atom) (φ0 : Proposition Atom) :
+`e = []`, so nothing about `apply` is ever consulted. Not `private` (task 503 Phase 5): reused
+directly at `apply := modalApplyOneT` by `modalTableauT_complete` (`FrameCompleteness.lean`). -/
+lemma modalLoopInvGen_initial (apply : RuleApply Atom) (φ0 : Proposition Atom) :
     ModalLoopInvGen apply φ0
       [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
       Accessibility.empty (fun _ => modalDepth φ0) := by

@@ -400,7 +400,36 @@ unblocked and eligible.
 
 ---
 
-### Phase 5: T truth lemma and `tValid` completeness [BLOCKED]
+### Phase 5: T truth lemma and `tValid` completeness [COMPLETED]
+
+**UNBLOCKED (task 510)**: task 510 delivered `modalExpandBranchesT_hintikka` in
+`TDriver.lean` (a one-liner over the generic `modalExpandBranchesGen_hintikka`), which is
+exactly the Hintikka-set-production prerequisite the blocker below identifies as missing.
+Resumed this phase to close the T truth lemma and `tValid` completeness per the "Once the
+Hintikka-set prerequisite above is available" scoped work below.
+
+**Delivered** (this session): `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` gained a new
+"T Modal Truth Lemma" section (~340 lines): `hintikkaT_box_pos`/`hintikkaT_diamond_neg` (the two
+genuinely-new bridges, combining `Relation.ReflGen`'s `.refl`/`.single` cases — the reflexive
+self-conjunct forced via `modalApplyOneT`'s merged persistent output, and the raw-edge case
+reduced to the same `boxPropagation`-membership argument `hintikka_box_pos` inlines), reusing
+the free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (task 510)
+for the two unaffected minting shapes; `modalTruthLemmaT` (strong induction on
+`modalComplexity`, propositional cases routed through `modalApplyOneT_eq_of_not_box_diamond`);
+`modalOpenBranchT_countermodel`; and `modalTableauT_complete` (the phase's headline result,
+`modalTableauT φ0 = .openBranch b a → ¬ tValid φ0`), assembled from
+`modalExpandBranchesT_hintikka` (task 510) plus two CompletenessLoop.lean lemmas that were
+`private` but genuinely `apply`-agnostic (`modalLoopInvGen_initial`,
+`modalExpandBranchesGen_openBranch_initial_mem` — both explicitly flagged "needed by 503" in
+task 510's own docstrings) — un-privatized (visibility-only change, no re-derivation) so
+`modalTableauT_complete` can reuse them at `apply := modalApplyOneT`. Local re-derivations of
+two small shape lemmas from `TDriver.lean` (`modalApplyOneT_boxPos_fst'`/`_diamondNeg_fst'`,
+which are `private` to that file) were added as `private` lemmas inside `FrameCompleteness.lean`
+rather than editing `TDriver.lean`'s privacy, since their proofs are 3-line verbatim unfoldings.
+Zero sorry, zero new axiom (verified via `lean_verify`: standard `propext`/`Classical.choice`/
+`Quot.sound` trio only). Full CI green (`lake build`, `checkInitImports`, `lint-style`,
+`lake lint` clean on touched files, `lake test`, `mk_all --module` no-op, `lake shake` clean on
+touched files).
 
 **BLOCKER**:
 - **What failed**: Producing a `modalHintikkaSetT` witness from an open `modalExpandBranchesT`
@@ -475,18 +504,33 @@ scoped and was NOT blocked** (retained here for the follow-up task to execute di
   completeness (`modalTableauT φ = .openBranch b a → ¬ tValid φ`), mirroring
   `modalTableau_complete` (line 1290).
 - **Tasks:**
-  - [ ] Define `modalHintikkaSetT` (the T-Hintikka predicate: K-saturation plus the reflexive
+  - [x] Define `modalHintikkaSetT` (the T-Hintikka predicate: K-saturation plus the reflexive
     box-positive self-conjunct) and prove `modalExpandBranchesT` produces a `modalHintikkaSetT`
-    branch (needs the blocked prerequisite above).
-  - [ ] Prove the T truth lemma against `extractModelT` (already in `FrameCompleteness.lean`, with
+    branch (needs the blocked prerequisite above). *(deviation: altered -- the prerequisite was
+    delivered by task 510 as `modalExpandBranchesT_hintikka`, concluding in the already-generic
+    `modalHintikkaSetGen modalApplyOneT bR aR` rather than a bespoke `modalHintikkaSetT`
+    predicate; no separate `modalHintikkaSetT` alias was needed since the generic predicate
+    already has exactly the right shape.)*
+  - [x] Prove the T truth lemma against `extractModelT` (already in `FrameCompleteness.lean`, with
     free `Std.Refl` via `Relation.ReflGen`): for the **box-positive** case at the reflexive
     self-edge, use `extractModelT_refl` + the T self-propagation conjunct; reduce **all other**
     cases (diamond-pos, box-neg, diamond-neg, propositional) to the existing K bridge lemmas via
     `modalApplyOneT_eq_of_not_boxPos_diaNeg` (T output = K output outside the two T shapes) and
-    `extractModelT_hasEdge_imp_r`.
-  - [ ] State and prove `tValid` completeness using the T truth lemma + the terminating
-    `modalTableauT` from Phase 4 (analog of `modalTableau_complete`).
-  - [ ] `lake build`; `lean_verify` no sorry/axiom; full CI.
+    `extractModelT_hasEdge_imp_r`. *(deviation: altered -- the genuinely-new reflexive-self-edge
+    reasoning is required for BOTH box-positive (`T(□ψ)@w`) and diamond-negative (`F(◇ψ)@w`), not
+    box-positive alone: these are exactly the two shapes `modalApplyOneT` self-propagates on
+    (`modalTBoxSelf`/`modalTDiaNegSelf`). Box-negative and diamond-positive (the two minting
+    shapes) reduce to the free generic projection bridges `hintikka_box_neg_gen`/
+    `hintikka_diamond_pos_gen` (task 510) rather than needing
+    `modalApplyOneT_eq_of_not_boxPos_diaNeg` directly; the propositional cases route through a
+    local `modalApplyOneT_eq_of_not_box_diamond` specialization of that lemma.)*
+  - [x] State and prove `tValid` completeness using the T truth lemma + the terminating
+    `modalTableauT` from Phase 4 (analog of `modalTableau_complete`). *(delivered as
+    `modalTableauT_complete`; required un-privatizing two genuinely `apply`-agnostic
+    `CompletenessLoop.lean` lemmas that task 510 had explicitly flagged "needed by 503" in their
+    own docstrings -- `modalLoopInvGen_initial`, `modalExpandBranchesGen_openBranch_initial_mem`
+    -- a visibility-only change, not a re-derivation.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom; full CI.
 - **Timing:** 2 hours (for this remainder only; the blocked prerequisite above is additional,
   estimated 4-6+ hours).
 - **Depends on:** 4

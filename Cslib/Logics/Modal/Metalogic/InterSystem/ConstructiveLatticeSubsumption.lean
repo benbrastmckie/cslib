@@ -21,11 +21,12 @@ the same-named constructor of the stronger axiom predicate, since `CTModalAxiom`
 `CS4ModalAxiom`/`CS5ModalAxiom` are each defined as the previous rung's constructors
 verbatim plus new ones (see `CT.lean`/`CS4.lean`/`CS5.lean` module docstrings).
 
-**Note (task 501 independence)**: this module is purely syntactic (`cases`/`match` on the
-axiom predicates); it does not depend on `CKValidFC`/`ckvalidFC_completeness` in any way,
-and is therefore entirely independent of the CS4/CS5 completeness blocker tracked in
-task 501. The blocker concerns semantic completeness of `CS4`/`CS5`, not the syntactic
-derivability monotonicity proved here.
+**Note (task 501/508 independence)**: this module is purely syntactic (`cases`/`match` on the
+axiom predicates); it does not depend on `CKValidFC`/`ckvalidFC_completeness` in any way, and is
+therefore entirely independent of `CS4`/`CS5` semantic completeness (`CS4` completeness is now
+established, task 508; `CS5` completeness remains open — see `CS5.lean`'s module docstring for
+the mechanized obstruction). Neither status affects the syntactic derivability monotonicity
+proved here.
 
 **Framing**: these are same-language edges within the constructive propositional base, so
 the converse is false (e.g. `CT` proves `□φ → φ`, which is not `CK`-derivable). The results

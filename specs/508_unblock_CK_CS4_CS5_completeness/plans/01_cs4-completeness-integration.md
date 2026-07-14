@@ -1,7 +1,7 @@
 # Implementation Plan: CS4 Completeness Integration
 
 - **Task**: 508 - unblock_CK_CS4_CS5_completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 7 hours
 - **Dependencies**: None
 - **Research Inputs**: `specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md`
@@ -449,7 +449,26 @@ completeness content. No `sorry`, no axioms, no vacuous definitions.
 
 ---
 
-### Phase 8: Downstream migration check and full CI pipeline [NOT STARTED]
+### Phase 8: Downstream migration check and full CI pipeline [COMPLETED]
+
+CI results: `lake build` (full, 3232 jobs) exit 0, zero errors, zero warnings in touched files
+(pre-existing warnings/sorries in unrelated Tableau/Propositional files, untouched by this task).
+`lake exe checkInitImports` exit 0. `lake exe lint-style` exit 0. `lake test` exit 0 (CslibTests
+suite green). `lake shake --add-public --keep-implied --keep-prefix` exit 0 -- the only
+suggestion touching our files is the universal "remove import Cslib.Init" false-positive shared
+by dozens of unrelated files across the codebase (e.g. `CT.lean`); not applied, per CSLib's
+mandatory `Cslib.Init` import convention and the plan's "no import changes expected" prediction.
+`lake lint` reports one pre-existing, unrelated error in `PrimeExclusion.lean` (confirmed
+untouched via `git log`; not in the orchestrator's CI "must pass" list). Downstream check: `grep
+cs4FC` confirms `ConstructiveLatticeMonotonicity.lean:72,77,82,84` (the three pre-existing users)
+are untouched and still compile.
+
+*(Deviation: the optional `cs5FC_implies_cs4FC'` convenience lemma was **skipped** -- the plan
+marks it optional/skippable and the plan's Non-Goals explicitly excludes changes to
+`ConstructiveLatticeMonotonicity.lean`; skipping satisfies Phase 8's own verification that this
+file "compiles with no edits forced by this task". Deviation: a docstring-only update was made
+to `ConstructiveLatticeSubsumption.lean` -- not in the Non-Goals list -- to refresh its "task 501
+independence" note now that CS4 completeness is resolved; purely prose, zero proof risk.)*
 
 **Goal**: Prove zero downstream breakage and green CI.
 

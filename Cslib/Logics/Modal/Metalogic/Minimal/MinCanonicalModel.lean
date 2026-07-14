@@ -348,4 +348,181 @@ private theorem bigAnd1_mem_u {u : MinCanonicalPrimeWorld Atom} (x : Proposition
 
 end NonemptyCombinators
 
+/-! ## Nonempty Lindenbaum-Pair Exclusion
+
+The efq-free "Lindenbaum-pair" set-exclusion lemma: given a deductively-closed `S` deriving no
+*nonempty* finite disjunction of `E`, there is a quasi-prime `T ⊇ S` still deriving no nonempty
+finite disjunction of `E`. This is the direct, `efq`-free analogue of
+`Metalogic.prime_set_exclusion`/`modal_set_exclusion` (`Intuitionistic/CanonicalModel.lean:585`),
+specialized to `Cons := fun _ => True` (no consistency predicate is threaded -- quasi-prime
+worlds carry none, so the Zorn argument below never needs a `¬Cons` case split, unlike the
+generic framework). -/
+
+section NonemptyPairExclusion
+
+/-- `T` derives no *nonempty* finite disjunction of `E`: for every `x ∈ E` and every list `xs`
+drawn from `E`, `bigOr1 x xs ∉ T`. The nonempty-list analogue of `Metalogic.DerivExcludes`
+(`Foundations/Logic/Metalogic/PrimeExclusion.lean:328`), which never touches the empty-list
+(`⊥`) case. -/
+private def DerivExcludes1 (T E : Set (Proposition Atom)) : Prop :=
+  ∀ (x : Proposition Atom) (xs : List (Proposition Atom)),
+    x ∈ E → (∀ y ∈ xs, y ∈ E) → bigOr1 x xs ∉ T
+
+/-- The collection of deductively-closed, `E`-excluding (nonempty-disjunction) supersets of `S`.
+The Zorn domain for `quasi_prime_set_exclusion1`. -/
+private def QPExcludingSupersets (S E : Set (Proposition Atom)) : Set (Set (Proposition Atom)) :=
+  {T | S ⊆ T ∧ Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom) T ∧
+    DerivExcludes1 T E}
+
+private theorem qp_excluding_base_mem {S E : Set (Proposition Atom)}
+    (hS : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom) S)
+    (h_excl : DerivExcludes1 S E) : S ∈ QPExcludingSupersets S E :=
+  ⟨Set.Subset.refl S, hS, h_excl⟩
+
+private theorem qp_excluding_chain_union {S E : Set (Proposition Atom)}
+    {C : Set (Set (Proposition Atom))}
+    (hCsub : C ⊆ QPExcludingSupersets S E)
+    (hchain : IsChain (· ⊆ ·) C) (hCne : C.Nonempty) :
+    (⋃₀ C) ∈ QPExcludingSupersets S E := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro x hx
+    obtain ⟨T, hT⟩ := hCne
+    exact Set.mem_sUnion.mpr ⟨T, hT, (hCsub hT).1 hx⟩
+  · exact deductivelyClosed_chain_union (modalDerivationSystem MKModalAxiom) hchain hCne
+      (fun T hTC => (hCsub hTC).2.1)
+  · intro x xs hxE hxsE hmem
+    obtain ⟨T, hTC, hTmem⟩ := Set.mem_sUnion.mp hmem
+    exact (hCsub hTC).2.2 x xs hxE hxsE hTmem
+
+/-- **Nonempty Lindenbaum-pair exclusion** (efq-free): given a deductively-closed `S` with
+`DerivExcludes1 S E`, there is a quasi-prime `T ⊇ S` with `DerivExcludes1 T E`. Proved by Zorn's
+lemma over `QPExcludingSupersets`; the disjunction property of the maximal element `T` is proved
+exactly as `set_maximal_is_prime`'s (`PrimeExclusion.lean:428`) but combining the two branches'
+witnesses via `bigOr1_append_left`/`bigOr1_append_right` instead of
+`bigOr_append_left`/`bigOr_append_right` -- no `efq`, and no `Cons`/inconsistency case split
+(quasi-prime worlds carry no consistency predicate, so `insert X T`'s closure is *always*
+admissible; the generic framework's `¬Cons` branch never arises here). -/
+private theorem quasi_prime_set_exclusion1 {S E : Set (Proposition Atom)}
+    (hS : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom) S)
+    (h_excl : DerivExcludes1 S E) :
+    ∃ T, S ⊆ T ∧ QuasiPrime (MKModalAxiom (Atom := Atom)) T ∧ DerivExcludes1 T E := by
+  obtain ⟨T, hST, hTmax⟩ := zorn_subset_nonempty (QPExcludingSupersets S E)
+    (fun C hCsub hchain hCne =>
+      ⟨⋃₀ C, qp_excluding_chain_union hCsub hchain hCne,
+        fun s hs => Set.subset_sUnion_of_mem hs⟩)
+    S (qp_excluding_base_mem hS h_excl)
+  obtain ⟨_, hTclosed, hTexcl⟩ := hTmax.prop
+  refine ⟨T, hST, ⟨⟨trivial, hTclosed⟩, ?_⟩, hTexcl⟩
+  -- Disjunction property of `T`.
+  intro A B h_or
+  by_contra h_not
+  push Not at h_not
+  obtain ⟨hA, hB⟩ := h_not
+  have branch : ∀ X : Proposition Atom, X ∉ T →
+      ∃ (x0 : Proposition Atom) (xs0 L0 : List (Proposition Atom)),
+        x0 ∈ E ∧ (∀ y ∈ xs0, y ∈ E) ∧ (∀ z ∈ L0, z ∈ insert X T) ∧
+        (modalDerivationSystem MKModalAxiom).Deriv L0 (bigOr1 x0 xs0) := by
+    intro X hXT
+    have hTX_sup : T ⊆ modalDeductiveClosure MKModalAxiom (insert X T) :=
+      Set.Subset.trans (Set.subset_insert X T) (modal_subset_deductive_closure MKModalAxiom _)
+    have hX_in : X ∈ modalDeductiveClosure MKModalAxiom (insert X T) :=
+      modal_subset_deductive_closure MKModalAxiom _ (Set.mem_insert X T)
+    have hnotmem :
+        modalDeductiveClosure MKModalAxiom (insert X T) ∉ QPExcludingSupersets S E := by
+      intro hmem
+      exact hXT ((hTmax.eq_of_ge hmem hTX_sup) ▸ hX_in)
+    have h_sub_cl : S ⊆ modalDeductiveClosure MKModalAxiom (insert X T) :=
+      hST.trans hTX_sup
+    have h_closed_cl : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom)
+        (modalDeductiveClosure MKModalAxiom (insert X T)) :=
+      fun L φ hL hd =>
+        modalDeductiveClosure_closed (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) L φ hL hd
+    have h_fail : ¬ DerivExcludes1 (modalDeductiveClosure MKModalAxiom (insert X T)) E := by
+      intro hexcl; exact hnotmem ⟨h_sub_cl, h_closed_cl, hexcl⟩
+    unfold DerivExcludes1 at h_fail
+    push Not at h_fail
+    obtain ⟨x0, xs0, hx0E, hxs0E, hmemcl⟩ := h_fail
+    obtain ⟨L0, hL0_sub, hL0_deriv⟩ := hmemcl
+    exact ⟨x0, xs0, L0, hx0E, hxs0E, hL0_sub, hL0_deriv⟩
+  obtain ⟨xA, xsA, LA0, hxAE, hxsAE, hLA0_sub, hLA0_deriv⟩ := branch A hA
+  obtain ⟨xB, xsB, LB0, hxBE, hxsBE, hLB0_sub, hLB0_deriv⟩ := branch B hB
+  obtain ⟨dLA0⟩ := hLA0_deriv
+  obtain ⟨dLB0⟩ := hLB0_deriv
+  set χ : Proposition Atom := bigOr1 xA (xsA ++ (xB :: xsB)) with hχdef
+  have hAchi : ∃ LA', (∀ x ∈ LA', x ∈ T) ∧
+      (modalDerivationSystem MKModalAxiom).Deriv LA' (A.imp χ) := by
+    have d1w : DerivationTree MKModalAxiom (A :: LA0) (bigOr1 xA xsA) :=
+      DerivationTree.weakening LA0 _ _ dLA0 (fun x hx => List.mem_cons.mpr (Or.inr hx))
+    obtain ⟨d2⟩ : (modalDerivationSystem MKModalAxiom).Deriv [] ((bigOr1 xA xsA).imp χ) :=
+      bigOr1_append_left xA xsA (xB :: xsB)
+    have d2w : DerivationTree MKModalAxiom (A :: LA0) ((bigOr1 xA xsA).imp χ) :=
+      DerivationTree.weakening [] _ _ d2 (fun _ h => nomatch h)
+    have d3 : DerivationTree MKModalAxiom (A :: LA0) χ :=
+      DerivationTree.modus_ponens _ _ _ d2w d1w
+    exact hCutMK (U := T) (L := A :: LA0) (a := A) (b := χ)
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with heq | hx'
+        · exact heq ▸ Set.mem_insert A T
+        · exact hLA0_sub x hx')
+      ⟨d3⟩
+  have hBchi : ∃ LB', (∀ x ∈ LB', x ∈ T) ∧
+      (modalDerivationSystem MKModalAxiom).Deriv LB' (B.imp χ) := by
+    have d1w : DerivationTree MKModalAxiom (B :: LB0) (bigOr1 xB xsB) :=
+      DerivationTree.weakening LB0 _ _ dLB0 (fun x hx => List.mem_cons.mpr (Or.inr hx))
+    obtain ⟨d2⟩ : (modalDerivationSystem MKModalAxiom).Deriv [] ((bigOr1 xB xsB).imp χ) :=
+      bigOr1_append_right xA xsA xB xsB
+    have d2w : DerivationTree MKModalAxiom (B :: LB0) ((bigOr1 xB xsB).imp χ) :=
+      DerivationTree.weakening [] _ _ d2 (fun _ h => nomatch h)
+    have d3 : DerivationTree MKModalAxiom (B :: LB0) χ :=
+      DerivationTree.modus_ponens _ _ _ d2w d1w
+    exact hCutMK (U := T) (L := B :: LB0) (a := B) (b := χ)
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with heq | hx'
+        · exact heq ▸ Set.mem_insert B T
+        · exact hLB0_sub x hx')
+      ⟨d3⟩
+  obtain ⟨LA', hLA'_sub, hLA'_deriv⟩ := hAchi
+  obtain ⟨LB', hLB'_sub, hLB'_deriv⟩ := hBchi
+  obtain ⟨dA'⟩ := hLA'_deriv
+  obtain ⟨dB'⟩ := hLB'_deriv
+  have hOrMem : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB') (A.or B) :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hAchi' : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB') (A.imp χ) :=
+    .weakening LA' _ _ dA'
+      (fun x hx => List.mem_cons.mpr
+        (Or.inr (List.mem_append.mpr (Or.inl hx))))
+  have hBchi' : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB') (B.imp χ) :=
+    .weakening LB' _ _ dB'
+      (fun x hx => List.mem_cons.mpr
+        (Or.inr (List.mem_append.mpr (Or.inr hx))))
+  have hOrEax : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB')
+      ((A.imp χ).imp ((B.imp χ).imp ((A.or B).imp χ))) :=
+    .weakening [] _ _ (.ax [] _ (MKModalAxiom.orE A B χ)) (fun _ h => nomatch h)
+  have hstep1 : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB')
+      ((B.imp χ).imp ((A.or B).imp χ)) :=
+    .modus_ponens _ _ _ hOrEax hAchi'
+  have hstep2 : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB') ((A.or B).imp χ) :=
+    .modus_ponens _ _ _ hstep1 hBchi'
+  have hχderiv : DerivationTree MKModalAxiom (A.or B :: LA' ++ LB') χ :=
+    .modus_ponens _ _ _ hstep2 hOrMem
+  have hχmem : χ ∈ T :=
+    hTclosed (A.or B :: LA' ++ LB') χ
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact h_or
+        · rcases List.mem_append.mp hx' with h1 | h2
+          · exact hLA'_sub x h1
+          · exact hLB'_sub x h2)
+      ⟨hχderiv⟩
+  refine hTexcl xA (xsA ++ (xB :: xsB)) hxAE ?_ hχmem
+  intro y hy
+  rcases List.mem_append.mp hy with h1 | h2
+  · exact hxsAE y h1
+  · rcases List.mem_cons.mp h2 with rfl | h3
+    · exact hxBE
+    · exact hxsBE y h3
+
+end NonemptyPairExclusion
+
 end Cslib.Logic.Modal

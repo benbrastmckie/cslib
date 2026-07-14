@@ -239,6 +239,113 @@ private noncomputable def diaOr1_of_diaDisj (base : Proposition Atom) :
       exact Classical.choice
         (empty_imp_trans (modalDerivationSystem MKModalAxiom) hCutMK ⟨hCd⟩ ⟨step2⟩)
 
+/-- Combines a *nonempty* list of separately-derived hypotheses `x :: xs` (with leftover context
+`Lw`) into a single conjunction hypothesis: `(x::xs) ++ Lw ⊢ ψ` implies
+`bigAnd1 x xs :: Lw ⊢ ψ`. Base case (`xs = []`): `bigAnd1 x [] = x`, so the goal is definitionally
+the hypothesis itself -- no weakening needed (contrast `unpack_conj_partial`'s base case, which
+weakens in an unused `bigAnd []` hypothesis). Inductive step mirrors `unpack_conj_partial`'s. -/
+private noncomputable def unpackConj1 :
+    ∀ (x : Proposition Atom) (xs Lw : List (Proposition Atom)) (ψ : Proposition Atom),
+      DerivationTree MKModalAxiom ((x :: xs) ++ Lw) ψ →
+      DerivationTree MKModalAxiom (bigAnd1 x xs :: Lw) ψ
+  | _x, [], _Lw, _ψ, d => d
+  | x, y :: ys, Lw, ψ, d => by
+      have dt : DerivationTree MKModalAxiom ((y :: ys) ++ Lw) (x.imp ψ) :=
+        deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) ((y :: ys) ++ Lw) x ψ d
+      have ihres : DerivationTree MKModalAxiom (bigAnd1 y ys :: Lw) (x.imp ψ) :=
+        unpackConj1 y ys Lw (x.imp ψ) dt
+      have ihres0 : DerivationTree MKModalAxiom Lw ((bigAnd1 y ys).imp (x.imp ψ)) :=
+        deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) Lw (bigAnd1 y ys) (x.imp ψ) ihres
+      have hmem : DerivationTree MKModalAxiom (bigAnd1 x (y :: ys) :: Lw) (bigAnd1 x (y :: ys)) :=
+        .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+      have hx : DerivationTree MKModalAxiom (bigAnd1 x (y :: ys) :: Lw) x :=
+        .modus_ponens _ (bigAnd1 x (y :: ys)) x
+          (.weakening [] _ _ (.ax [] _ (MKModalAxiom.andE1 x (bigAnd1 y ys)))
+            (fun _ h => nomatch h))
+          hmem
+      have hRest : DerivationTree MKModalAxiom (bigAnd1 x (y :: ys) :: Lw) (bigAnd1 y ys) :=
+        .modus_ponens _ (bigAnd1 x (y :: ys)) (bigAnd1 y ys)
+          (.weakening [] _ _ (.ax [] _ (MKModalAxiom.andE2 x (bigAnd1 y ys)))
+            (fun _ h => nomatch h))
+          hmem
+      have hximpψ : DerivationTree MKModalAxiom (bigAnd1 x (y :: ys) :: Lw) (x.imp ψ) :=
+        .modus_ponens _ (bigAnd1 y ys) (x.imp ψ)
+          (.weakening Lw _ _ ihres0 (fun z hz => List.mem_cons.mpr (Or.inr hz)))
+          hRest
+      exact .modus_ponens _ x ψ hximpψ hx
+
+/-- **Diamond/conjunction bridge, nonempty**: `⊢ (◇ (bigAnd1 x xs)) → (bigAnd1 (◇x)
+(xs.map diamond))` -- the diamond of a conjunction implies the conjunction of the diamonds (the
+VALID monotonicity direction). Base case (`xs = []`): the identity `◇x → ◇x` (via `idDeriv` +
+`diaMonoDeriv`) -- **no `efq`** (unlike `dia_bigAnd_to_bigAnd_dia`'s `⊤`-via-`efq` base case,
+`Intuitionistic/CanonicalModel.lean:327-331`; report 01 confirmed this base case is not a true
+obstruction). Inductive step: identical shape, via `Kdia` + `AndE1`/`AndE2`/`AndI`. -/
+private noncomputable def diaBigAnd1ToBigAnd1Dia (x : Proposition Atom) :
+    ∀ (xs : List (Proposition Atom)),
+      DerivationTree MKModalAxiom []
+        ((◇ (bigAnd1 x xs)).imp (bigAnd1 (◇x) (xs.map Proposition.diamond)))
+  | [] => diaMonoDeriv (idDeriv x)
+  | y :: ys => by
+      have f1 : DerivationTree MKModalAxiom [] ((◇ (bigAnd1 x (y :: ys))).imp (◇x)) :=
+        diaMonoDeriv (.ax [] _ (MKModalAxiom.andE1 x (bigAnd1 y ys)))
+      have f2 : DerivationTree MKModalAxiom []
+          ((◇ (bigAnd1 x (y :: ys))).imp (◇ (bigAnd1 y ys))) :=
+        diaMonoDeriv (.ax [] _ (MKModalAxiom.andE2 x (bigAnd1 y ys)))
+      have ih := diaBigAnd1ToBigAnd1Dia y ys
+      have f2' : DerivationTree MKModalAxiom []
+          ((◇ (bigAnd1 x (y :: ys))).imp (bigAnd1 (◇y) (ys.map Proposition.diamond))) :=
+        Classical.choice (empty_imp_trans (modalDerivationSystem MKModalAxiom) hCutMK ⟨f2⟩ ⟨ih⟩)
+      have hXmem :
+          DerivationTree MKModalAxiom [◇ (bigAnd1 x (y :: ys))] (◇ (bigAnd1 x (y :: ys))) :=
+        .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+      have hdiaX : DerivationTree MKModalAxiom [◇ (bigAnd1 x (y :: ys))] (◇x) :=
+        .modus_ponens _ _ _ (.weakening [] _ _ f1 (fun _ h => nomatch h)) hXmem
+      have hrest : DerivationTree MKModalAxiom [◇ (bigAnd1 x (y :: ys))]
+          (bigAnd1 (◇y) (ys.map Proposition.diamond)) :=
+        .modus_ponens _ _ _ (.weakening [] _ _ f2' (fun _ h => nomatch h)) hXmem
+      have andI_ax : DerivationTree MKModalAxiom [◇ (bigAnd1 x (y :: ys))]
+          ((◇x).imp ((bigAnd1 (◇y) (ys.map Proposition.diamond)).imp
+            ((◇x).and (bigAnd1 (◇y) (ys.map Proposition.diamond))))) :=
+        .weakening [] _ _
+          (.ax [] _ (MKModalAxiom.andI (◇x) (bigAnd1 (◇y) (ys.map Proposition.diamond))))
+          (fun _ h => nomatch h)
+      have step1 := DerivationTree.modus_ponens _ _ _ andI_ax hdiaX
+      have step2 := DerivationTree.modus_ponens _ _ _ step1 hrest
+      exact deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+        (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) [] (◇ (bigAnd1 x (y :: ys))) _ step2
+
+/-- `bigAnd1 x xs ∈ u.val` whenever `x` and every element of `xs` are in `u.val` (using `AndI`
+and the deductive closure of the quasi-prime theory `u.val`). Base case (`xs = []`) is
+definitional (`bigAnd1 x [] = x`) -- no `AndI`/`efq` step needed, unlike `bigAnd_mem_u`'s
+`efq`-based `⊤`-membership base case. -/
+private theorem bigAnd1_mem_u {u : MinCanonicalPrimeWorld Atom} (x : Proposition Atom) :
+    ∀ (xs : List (Proposition Atom)), x ∈ u.val → (∀ A ∈ xs, A ∈ u.val) →
+      bigAnd1 x xs ∈ u.val
+  | [], hx, _ => hx
+  | y :: ys, hx, hxs => by
+      have hy : y ∈ u.val := hxs y (List.mem_cons.mpr (Or.inl rfl))
+      have hRest : bigAnd1 y ys ∈ u.val :=
+        bigAnd1_mem_u y ys hy (fun B hB => hxs B (List.mem_cons.mpr (Or.inr hB)))
+      have h1 : DerivationTree MKModalAxiom [x, bigAnd1 y ys] x :=
+        .assumption _ x (List.mem_cons.mpr (Or.inl rfl))
+      have h2 : DerivationTree MKModalAxiom [x, bigAnd1 y ys] (bigAnd1 y ys) :=
+        .assumption _ (bigAnd1 y ys) (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
+      have hax : DerivationTree MKModalAxiom [x, bigAnd1 y ys]
+          (x.imp ((bigAnd1 y ys).imp (x.and (bigAnd1 y ys)))) :=
+        .weakening [] _ _ (.ax [] _ (MKModalAxiom.andI x (bigAnd1 y ys))) (fun _ h => nomatch h)
+      have hderiv : DerivationTree MKModalAxiom [x, bigAnd1 y ys] (x.and (bigAnd1 y ys)) :=
+        .modus_ponens _ _ _ (.modus_ponens _ _ _ hax h1) h2
+      exact u.property.closed [x, bigAnd1 y ys] _
+        (fun z hz => by
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact hx
+          · rcases List.mem_cons.mp hz' with rfl | hz''
+            · exact hRest
+            · nomatch hz'')
+        ⟨hderiv⟩
+
 end NonemptyCombinators
 
 end Cslib.Logic.Modal

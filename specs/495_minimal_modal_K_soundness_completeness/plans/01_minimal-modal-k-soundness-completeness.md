@@ -200,7 +200,18 @@ First attempt the `dia_refuting_theory`-based diamond witness (and the `box_refu
 
 ---
 
-### Phase 5: `MinCompleteness.lean` + barrel wiring [IN PROGRESS]
+### Phase 5: `MinCompleteness.lean` + barrel wiring [COMPLETED]
+
+Full CI green: `lake build` (whole project), `lake test`, `lake exe checkInitImports`,
+`lake exe lint-style` (all 5 new files), `lake shake` (only the expected repo-wide
+`import Cslib.Init` false-positive, matching every other file in the project -- no other
+finding), `lake lint` (single pre-existing unrelated finding in
+`Foundations/Logic/Metalogic/PrimeExclusion.lean`, not touched by this task). Zero `sorry`,
+zero vacuous placeholders, zero new `axiom` declarations in `Minimal/`. `mk_soundness_completeness
+: MValid.{u,u} φ ↔ Derivable MKModalAxiom φ` type-checks as specified. A post-Phase-3 name
+collision (`canonicalR`/`canonicalVal`/`canonicalVal_upward_closed` vs `IK`'s identically-named
+declarations in the same namespace) was caught by the whole-project `lake build` and fixed by
+renaming to `minCanonicalR`/`minCanonicalVal`/`minCanonicalVal_upward_closed`.
 
 **Goal**: Prove single-branch MK completeness, package `mk_soundness_completeness`, and wire all five files into `Cslib.lean`. Full CI green.
 

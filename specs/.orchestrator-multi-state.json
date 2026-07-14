@@ -94,5 +94,6 @@
     493,
     501
   ],
-  "task_493_awaiting_authorization": true
+  "task_493_awaiting_authorization": false,
+  "final_disposition": "IK line complete (490,480,492,494); CK line 493 PLANNED + 501 not_started, deferred by user"
 }

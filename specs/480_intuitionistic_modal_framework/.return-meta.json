@@ -1,17 +1,17 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-14T10:43:37Z",
-  "completed_at": "2026-07-14T11:30:00Z",
-  "phases_completed": 5,
+  "started_at": "2026-07-14T00:00:00Z",
+  "completed_at": "2026-07-14T00:00:00Z",
+  "phases_completed": 6,
   "phases_total": 12,
   "memory_candidates": [
-    "Modal box-witness Step 1 admissibility of {psi | box psi in w.val} needs a bespoke K-closure helper (push necessitation through a whole derivation context via the deduction theorem + AxiomK) plus a self-referential consistency argument (an inconsistency would force box phi in w.val via EFQ+necessitation+K, contradicting the standing hypothesis) -- neither is spelled out verbatim in the source report but requires no new axiom."
+    "The diamond-witness dual of a box-witness's 'combine multiple boxed-disjuncts, bridge via a Fischer-Servi axiom' construction can need a DIFFERENT axiom on each side: box_witness (Kb/Kd/Idb) needs Idb because box distributes INTO disjunctions 'for free' via K + necessitated OrI, but the box-of-disjuncts must still be BRIDGED via the box-side Fischer-Servi axiom; diamond_witness (Kb/Kd/Cd/dbot) needs Cd because diamond distributing OUT of disjunctions is the HARD direction (not valid from K-diamond alone), and needs an extra base-case axiom (dbot: diamond-bot -> bot) for the length-zero disjunction case, exactly where the classical reference's LEM-based cexpl/fallible-world case split would otherwise be needed. This means dbot is not merely an IK-only frame condition (as report 03 first classified it under the Nd label) -- it is core-framework-load-bearing for the diamond witness whenever the canonical worlds are consistency-baked (no fallible-world escape hatch)."
   ],
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "type": "lean-implementation", "summary": "Added canonical_box_witness (Phase 2b), modal_set_exclusion wrapper, and private helper box_context_deriv."},
-    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 2b marked [COMPLETED]."},
-    {"path": "specs/480_intuitionistic_modal_framework/summaries/05_box-witness-summary.md", "type": "summary", "summary": "Phase 2b implementation summary."},
-    {"path": "specs/480_intuitionistic_modal_framework/.orchestrator-handoff.json", "type": "handoff", "summary": "H9 orchestrator handoff for Phase 2b."}
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "type": "lean-implementation", "summary": "Added canonical_diamond_witness (Phase 2c), diamond_witness_underivable, and private helpers diaOr_of_diaDisj + extract_split_dia, threading a new h_dbot hypothesis."},
+    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 2c marked [COMPLETED]; framework minimal axiom set updated to { h_K, h_Kdia, h_Idb, h_Cd, h_dbot }."},
+    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-2c-progress.json", "type": "progress", "summary": "Phase 2c objective tracking and zero-debt verification record."},
+    {"path": "specs/480_intuitionistic_modal_framework/.orchestrator-handoff.json", "type": "handoff", "summary": "H9 orchestrator handoff for Phase 2c."}
   ],
   "verification": {
     "verification_passed": true,
@@ -19,7 +19,7 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": true
+    "ci_pipeline_passed": false
   },
   "metadata": {
     "session_id": "sess_1784011298_752245_480",

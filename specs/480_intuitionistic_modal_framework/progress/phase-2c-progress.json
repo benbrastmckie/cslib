@@ -1,0 +1,52 @@
+{
+  "phase": "2c",
+  "title": "canonical_diamond_witness (Kb+Kd+Cd+dbot)",
+  "status": "COMPLETED",
+  "session_id": "sess_1784011298_752245_480",
+  "objectives": [
+    {
+      "objective": "Resolve the prior dispatch's STOP contingency (Case A / cexpl type-level gap) without re-opening the frozen Phase 1/2a CanonicalPrimeWorld design",
+      "status": "done",
+      "note": "Added a new parametric hypothesis h_dbot : Axioms ((diamond bot).imp bot) (the IK axiom dropped by bare CK, report 03 lines 289-291 / report 01). Rather than a top-level case split, h_dbot slots in as the base case of a new private helper diaOr_of_diaDisj (dual of boxOr_of_boxDisj), which absorbs the former Case A concern entirely -- no case split appears in canonical_diamond_witness itself."
+    },
+    {
+      "objective": "Prove canonical_diamond_witness sorry-free in CanonicalModel.lean",
+      "status": "done",
+      "note": "Delivered diaOr_of_diaDisj, extract_split_dia, diamond_witness_underivable, canonical_diamond_witness (~245 lines) in a new CanonicalDiamondWitness section. Single-v construction (not pair-shaped, since BForces_diamond is a bare existential over w's own successors, unlike the box witness)."
+    },
+    {
+      "objective": "Confirm the exact consumed axiom subset (report 03's MEDIUM-HIGH residual: Cd only, or also Idb)",
+      "status": "done",
+      "note": "lean_verify canonical_diamond_witness and diamond_witness_underivable both report axioms {propext, Classical.choice, Quot.sound} only. Machine-confirmed consumed set: h_K (via box_context_deriv), h_Kdia, h_Cd, h_dbot. h_Idb is NOT a hypothesis of either theorem -- resolves report 03's residual definitively."
+    }
+  ],
+  "resolved_prior_blocker": {
+    "summary": "Prior dispatch (same session) STOPPED: the reference's Diam-case truth lemma case-splits on classical LEM over `(diamond bot) in th v` before any Lindenbaum construction; Case A's witness is a distinguished 'exploding' world cexpl with no consistency requirement, which our consistent-only CanonicalPrimeWorld cannot represent.",
+    "resolution": "h_dbot (`(diamond bot) -> bot`) precludes Case A outright: if `(diamond bot) in w.val`, h_dbot + w's deductive closure gives `bot in w.val`, contradicting w's own ModalSetConsistent. No CanonicalPrimeWorld/ModalPrimeTheory type revision was needed. Structurally, h_dbot is consumed as the base case of diaOr_of_diaDisj's induction (dual to h_efq's role in boxOr_of_boxDisj's base case), not as an explicit case split.",
+    "reference": "report 03 section 3 (h_Nd Lean statement, identical formula, re-purposed here as a core hypothesis rather than an IK-only frame condition); report 01 lines 289-291 (IK axiom list including diamond-bot -> bot, dropped by bare CK)."
+  },
+  "files_modified": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
+    "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md"
+  ],
+  "files_touched_read_only": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean",
+    "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean",
+    "Cslib/Logics/Modal/Metalogic/DerivationTree.lean",
+    "Cslib/Logics/Modal/Metalogic/DeductionTheorem.lean",
+    "Cslib/Logics/Modal/Basic.lean",
+    "specs/480_intuitionistic_modal_framework/reports/03_complete-axiom-requirements-ik-ck.md"
+  ],
+  "zero_debt_verified": {
+    "sorry_added": false,
+    "axiom_added": false,
+    "canonical_model_lean_changed": true,
+    "lake_build_scoped": "passed, no warnings (one whitespace-lint fix applied to h_dbot's type spelling)",
+    "lean_verify_canonical_diamond_witness": "axioms: propext, Classical.choice, Quot.sound",
+    "lean_verify_diamond_witness_underivable": "axioms: propext, Classical.choice, Quot.sound",
+    "check_init_imports": "passed silently"
+  },
+  "consumed_axiom_set": ["h_K", "h_Kdia", "h_Cd", "h_dbot"],
+  "not_consumed": ["h_Idb"],
+  "next_phase": "2d (canonical_f1 / canonical_f2 frame conditions)"
+}

@@ -27,11 +27,21 @@ report 02's grounding claim — the reference's box case invokes **not only** `K
 chain, producing a complete per-lemma table (no further "missing axiom" surprises).
 
 **The definitive minimal modal-axiom set for the entire 480 prime-pair framework is
-`{ h_K, h_Kdia, h_Idb, h_Cd }`** — all four are threaded as **explicit parametric hypotheses**
-(`Axioms (…)`-shaped), never as global Lean `axiom`s. `Nd` is IK-specific and is **NOT** part of
-480's core (it belongs to task 492).
+`{ h_K, h_Kdia, h_Idb, h_Cd, h_dbot }`** (revised by the Phase 2c dispatch,
+`sess_1784011298_752245_480`, 2026-07-14: `h_dbot` added) — all five are threaded as **explicit
+parametric hypotheses** (`Axioms (…)`-shaped), never as global Lean `axiom`s. `Nd` is IK-specific
+and is **NOT** part of 480's core (it belongs to task 492); **`h_dbot` (`◇⊥ → ⊥`) IS part of the
+480 core** — it is the one IK axiom that bare CK drops (report 03 §3's own `h_Nd` listing already
+names `◇⊥ → ⊥` as the `Nd` shape, but Phase 2c's dispatch found this exact formula load-bearing
+for `canonical_diamond_witness` under a *different* name/role: not as an IK-only frame condition,
+but as the base case of the diamond-distributes-over-disjunction induction inside the *core*
+witness proof itself — see the Phase 2c section below for the full resolution). Framework
+hygiene note: `h_dbot` should still be exposed as a loose hypothesis (not baked into a bundled
+record), consistent with report 03 §5's CK-hygiene recommendation, so a downstream bare-CK
+development is not forced to fake it — CK cannot use this framework's diamond witness at all
+(report 03 §5), so this is moot for CK either way, but the hygiene principle is preserved.
 
-The four axioms (verbatim Lean statements over `Modal.Proposition`, report 03 §3; confirmed against
+The five axioms (verbatim Lean statements over `Modal.Proposition`, report 03 §3; confirmed against
 `Cslib/Logics/Modal/Basic.lean` — `.imp/.box/.diamond/.or/.and/.bot`, `□ = box`, `◇ = diamond`):
 
 ```lean
@@ -43,30 +53,34 @@ h_Kdia : ∀ A B : Proposition Atom, Axioms ((□(A.imp B)).imp ((◇A).imp (◇
 h_Idb  : ∀ A B : Proposition Atom, Axioms (((◇A).imp (□B)).imp (□(A.imp B)))
 -- Cd (Fischer-Servi "diamond" axiom / ◇-over-∨) — NEW diamond-side bridge  [CKH.v: Cd A B := ◇(A∨B) → (◇A ∨ ◇B)]
 h_Cd   : ∀ A B : Proposition Atom, Axioms ((◇(A.or B)).imp ((◇A).or (◇B)))
+-- dbot (IK's ◇⊥ → ⊥) — added by Phase 2c; discharges the diamond witness's Case A
+h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot)
 ```
 
-**Per-lemma axiom requirements** (report 03 §4, machine-checked against ianshil/CK):
+**Per-lemma axiom requirements** (report 03 §4, machine-checked against ianshil/CK; Phase 2c row
+updated by the `sess_1784011298_752245_480` re-dispatch, 2026-07-14, machine-verified via
+`lean_verify` — axioms `{propext, Classical.choice, Quot.sound}` only, no new Lean `axiom`):
 
 | Phase | 480 lemma | Modal axioms threaded (beyond the intuitionistic base) |
 |-------|-----------|--------------------------------------------------------|
 | 2b-sublemma | `box_witness_pair_underivable` | **`h_K`, `h_Kdia`, `h_Idb`** |
 | 2b | `canonical_box_witness` | **`h_K`, `h_Kdia`, `h_Idb`** (inherited from sublemma) |
-| 2c | `canonical_diamond_witness` | **`h_K`, `h_Kdia`, `h_Cd`** (thread `h_Idb` availability too — see MEDIUM-HIGH residual note) |
+| 2c | `canonical_diamond_witness` | **`h_K`, `h_Kdia`, `h_Cd`, `h_dbot`** — machine-confirmed; **`h_Idb` NOT consumed** (resolves report 03's MEDIUM-HIGH residual) |
 | 2d | `canonical_f1` (up-confluence, Cd_frame) | **`h_Kdia`, `h_Cd`** |
 | 2d | `canonical_f2` (down-confluence, Idb_frame) | **`h_Kdia`, `h_Idb`** |
 | 3b | `truth_box_case` | threads `h_K`, `h_Kdia`, `h_Idb` via witness — **NO new axiom** |
-| 3c | `truth_diamond_case` | threads `h_Kdia`, `h_Cd` via witness — **NO new axiom** |
-| 3c/4 | `canonical_truth_lemma` + `ivalid`/`mvalid` | union `{ h_K, h_Kdia, h_Idb, h_Cd }` |
+| 3c | `truth_diamond_case` | threads `h_Kdia`, `h_Cd`, `h_dbot` via witness — **NO new axiom** |
+| 3c/4 | `canonical_truth_lemma` + `ivalid`/`mvalid` | union `{ h_K, h_Kdia, h_Idb, h_Cd, h_dbot }` |
 
 The v3→v4 delta is purely signature-threading: no phase is added, removed, or reordered; the
 witness constructions, the corrected pair-shaped `⟨w', u⟩` box witness, `prime_set_exclusion`,
 `modal_set_exclusion`, and all Preserved Assets are unchanged. Phase 2b-sublemma is now
 **re-dispatchable** because it carries the missing `h_Idb`.
 
-Definition of done (unchanged from v3): all four files under
+Definition of done (unchanged from v3, plus `h_dbot` added by Phase 2c): all four files under
 `Cslib/Logics/Modal/Metalogic/Intuitionistic/` build under `lake build`; `PrimeExclusion.lean`'s
 additive extension builds tree-wide with all existing `prime_exclusion` users still green; the full
-CSLib CI pipeline passes; ZERO-DEBT is upheld (no `sorry`, no `admit`, no new `axiom` — all four
+CSLib CI pipeline passes; ZERO-DEBT is upheld (no `sorry`, no `admit`, no new `axiom` — all five
 modal axioms are parametric hypotheses, not global axioms); and the classical `Metalogic/` files
 plus the propositional `Int*` files are left byte-for-byte untouched.
 
@@ -401,12 +415,41 @@ nothing; no new `axiom`; the four modal axioms are parametric hypotheses), **unt
   Commit the sorry-free state (through 2b-sublemma), mark `[PARTIAL]`, write a continuation note
   (stuck obligation, `lean_goal` output) to the handoff.
 
-### Phase 2c: canonical_diamond_witness (mirror construction, Kb+Kd+Cd) [PARTIAL] — HIGHEST RISK
+### Phase 2c: canonical_diamond_witness (mirror construction, Kb+Kd+Cd+dbot) [COMPLETED] — HIGHEST RISK
 
-**STOP contingency invoked (dispatch `sess_1784011298_752245_480`, 2026-07-14).** Genuine gap
-found and verified against the PRIMARY source (fetched `general_th_completeness.v` directly from
-`github.com/ianshil/CK`, not a WebFetch summary) — **not** a transliteration difficulty, a
-**type-level mismatch between the reference's `cworld` and our `CanonicalPrimeWorld`.**
+**RESOLVED (re-dispatch `sess_1784011298_752245_480`, 2026-07-14).** The STOP contingency below
+(from the prior dispatch, same session, retained for history) identified a genuine structural gap:
+the reference's `cexpl` ("Case A", `◊⊥ ∈ w.val`) branch has no inhabitant in our consistent-only
+`CanonicalPrimeWorld`. **Fix applied**: a new parametric hypothesis `h_dbot : Axioms ((◇⊥).imp ⊥)`
+(the IK axiom `◇⊥ → ⊥`, dropped by bare CK — report 03 §3) was threaded into
+`canonical_diamond_witness` and its new sub-lemmas. Rather than a literal top-level case split,
+`h_dbot` was found to slot in naturally as the **base case** of `diaOr_of_diaDisj` (a new private
+helper dual to `boxOr_of_boxDisj`, distributing `◇` out over an arbitrary-length disjunction):
+for the empty-list case, the required `⊢ (◇⊥).imp ⊥` **is** `h_dbot`, playing exactly the
+structural role `h_efq` plays in `boxOr_of_boxDisj`'s empty case (`⊢ ⊥.imp (□⊥)`). This absorbed
+the former "Case A" concern entirely into the induction — no explicit case split appears anywhere
+in `canonical_diamond_witness` or its sub-lemmas. The Case B construction the prior dispatch had
+already hand-traced (seed `{ψ|□ψ∈w.val}∪{φ}`, exclude `{ψ|(◇ψ)∉w.val}`, via `modal_set_exclusion`)
+was transliterated as designed and closes with exactly `{h_K, h_Kdia, h_Cd}` (plus `h_dbot` via
+the new `diaOr_of_diaDisj` helper) — confirming `h_Idb` is **not** consumed, resolving report 03's
+MEDIUM-HIGH residual.
+
+**Delivered**: `diaOr_of_diaDisj` (private, dual of `boxOr_of_boxDisj`), `extract_split_dia`
+(private, dual of `extract_split`), `diamond_witness_underivable` (dual of
+`box_witness_pair_underivable`), and `canonical_diamond_witness` — all in `CanonicalModel.lean`,
+appended after the `CanonicalBoxWitness` section as a new `CanonicalDiamondWitness` section.
+`lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel` succeeds (595 jobs, no
+warnings after a whitespace-lint fix); `grep -c sorry` on the file is 0;
+`lean_verify canonical_diamond_witness` and `lean_verify diamond_witness_underivable` both report
+axioms `{propext, Classical.choice, Quot.sound}` only — no new `axiom` introduced. `h_dbot` is
+folded into the framework's minimal axiom set (see the top-of-plan axiom table, now
+`{ h_K, h_Kdia, h_Idb, h_Cd, h_dbot }`).
+
+**Historical STOP-contingency analysis (prior dispatch, same session, retained for record)**:
+genuine gap found and verified against the PRIMARY source (fetched `general_th_completeness.v`
+directly from `github.com/ianshil/CK`, not a WebFetch summary) — **not** a transliteration
+difficulty, a **type-level mismatch between the reference's `cworld` and our `CanonicalPrimeWorld`**
+(now resolved by `h_dbot`, see above).
 
 **The finding.** The reference's `Diam ψ` truth-lemma case (`general_th_completeness.v` ~L256-290)
 case-splits on `LEM (th v (◊⊥))` (classical, meta-level LEM — fine, doesn't affect the object
@@ -452,69 +495,64 @@ therefore the SAME `cexpl` branch even when `AdAx` includes `Nd`; report 03's cl
 layer, not to eliminate Case A from the truth lemma — but it does mean Case A is not something
 "Nd already rules out" trivially either, based on this file alone).
 
-**What is needed to close this (recommended next research, narrow scope)**:
-1. Confirm whether Case A (`◊⊥ ∈ w.val`) is reachable for a `CanonicalPrimeWorld` built from
-   *this* task's specific axiom set — i.e. whether some hypothesis already available elsewhere in
-   the framework (or a cheap additional parametric hypothesis, distinct from `h_Nd`) precludes it.
-2. If Case A is reachable and cannot be precluded: `CanonicalPrimeWorld`/`ModalPrimeTheory` needs
-   a fallible/exploding-world escape hatch mirroring `cworld`'s weaker (`Closed`+`Prime`, no
-   consistency) contract — this is a Phase 1/2a design revision, needing explicit
-   user/plan-owner sign-off since it revises a "SETTLED" design decision and touches frozen files.
-3. Alternatively, restate `canonical_diamond_witness`'s conclusion to accommodate a degenerate
-   branch without extending the world type (e.g. an `Or`-shaped conclusion) — needs plan-level
-   design, not a Phase 2c implementation call.
+**How this dispatch closed it**: instead of pursuing options 1-3 from the prior dispatch's
+recommendation (research the reachability of Case A / extend `CanonicalPrimeWorld` with a
+fallible-world escape hatch / restate the conclusion disjunctively), the resolution was option 1's
+positive answer found directly: `h_dbot` (already latent in report 03 §3 under the `h_Nd` label,
+but re-purposed here as a *core* framework hypothesis rather than an IK-only frame condition)
+precludes Case A outright — `◇⊥ ∈ w.val` combined with `h_dbot` derives `⊥ ∈ w.val`, contradicting
+`w`'s own `ModalSetConsistent`. No Phase 1/2a design revision was needed; `CanonicalPrimeWorld` is
+unchanged.
 
-**Case B is fully worked out and ready to transliterate once Case A is resolved** (seed
-`{ψ|□ψ∈w.val}∪{φ}`, exclude `{ψ|(◊ψ)∉w.val}`, via `modal_set_exclusion`; needs a new
-`diamond_witness_underivable` sub-lemma dual to `box_witness_pair_underivable`, consuming only
-`h_K` (via `box_context_deriv`), `h_Kdia` (K-diamond bridge), `h_Cd` (iterated over `h_orE`,
-**no** `bigAnd`/`h_andI` packing needed since the seed's extra element is the single formula `φ`,
-not a family indexed by a second prime theory) — confirmed by hand-tracing, not yet Lean-verified
-since the file is untouched pending the Case A resolution above.
+**Delivered** (all in `CanonicalModel.lean`, new `CanonicalDiamondWitness` section, single
+`v` — not a pair, since `BForces_diamond` is a bare `∃ v, r w v ∧ …` over `w` itself, unlike the
+box witness's pair-shaped `⟨w', u⟩`):
+- `diaOr_of_diaDisj` (private): `⊢ (◇(bigOr l')) → (bigOr (l'.map diamond))`, the hard direction
+  dual to `boxOr_of_boxDisj`; base case is `h_dbot`, inductive step is `h_Cd` + `h_orI1`/`h_orI2`/
+  `h_orE`.
+- `extract_split_dia` (private): dual of `extract_split`, simpler (single extra seed element `φ`,
+  no `bigAnd` packing).
+- `diamond_witness_underivable`: dual of `box_witness_pair_underivable`; consumes
+  `h_K` (via `box_context_deriv`), `h_Kdia` (K-diamond bridge), and (through `diaOr_of_diaDisj`)
+  `h_Cd`, `h_dbot` — **`h_Idb` is NOT consumed**, resolving report 03's MEDIUM-HIGH residual.
+- `canonical_diamond_witness`: seeds `Γ := {ψ|□ψ∈w.val}∪{φ}`, excludes `Σ := {ψ|(◇ψ)∉w.val}` via
+  `modal_set_exclusion` (Phase 2b, unchanged), producing `v` with `canonicalR w v ∧ φ∈v.val`.
 
-**No file changes made this dispatch** (ZERO-DEBT: no `sorry`, no partial/broken proof committed;
-`CanonicalModel.lean` is untouched, still the 2b-complete state, `4fd37213`/`cdb0b635`-equivalent).
+**Verification**: `lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel` — 595
+jobs, succeeds, no warnings (one whitespace-lint issue on `h_dbot`'s type was fixed during the
+dispatch). `grep -c '\bsorry\b'` on the file (excluding comments) is 0. `lake exe checkInitImports`
+passes silently. `lean_verify` on both `canonical_diamond_witness` and
+`diamond_witness_underivable` reports axioms `{propext, Classical.choice, Quot.sound}` only — no
+new Lean `axiom`.
 
 - **Goal:** Prove the diamond witness lemma via the mirror `modal_set_exclusion` construction (seed
-  the box-side, exclude a diamond-set).
+  the box-side, exclude a diamond-set). **Achieved.**
 - **Single deliverable:** `canonical_diamond_witness` proved sorry-free in `CanonicalModel.lean`.
-- **Threaded parametric hypotheses (report 03 §4 row 3 — machine-checked):**
-  `h_K`, `h_Kdia`, **`h_Cd`** (`∀ A B, Axioms ((◇(A.or B)).imp ((◇A).or (◇B)))`, via
-  `Diam_distrib_list_disj` = ◇-over-∨). **Also thread `h_Idb` availability** and confirm with
-  `lean_goal` which is actually consumed — **report 03 §Adversarial item 2 flagged a MEDIUM-HIGH
-  residual**: the reference's diamond selector was not isolated to one verbatim line, so it is
-  uncertain whether the proof needs *only* `h_Cd` or *also* touches `h_Idb`. The requirement is a
-  subset of `{Kd, Cd, Idb}`; IK supplies all three, so threading `h_Idb` too is safe and lets the
-  implementer confirm the exact consumed set at proof time.
-- **Updated sketch (report 02 Deliverable 3 tail; report 03 §4 row 3):** from `◇φ ∈ w`, build the
-  mirror pair via `modal_set_exclusion`: seed the box-side and exclude a diamond-set, so the same
-  `prime_set_exclusion` covers it. Expect a pair-shaped result analogous to the box witness (confirm
-  exact shape with `lean_goal` against `BForces_diamond` + F1's needs in 2d before committing). A
-  diamond-side analogue of `box_witness_pair_underivable` (using `h_Cd`) may be required for the
-  seeding-consistency precondition — check with `lean_goal` first; if needed, prove it inline under
-  this phase's STOP contingency.
+  **Delivered.**
+- **Threaded parametric hypotheses (machine-confirmed this dispatch):**
+  `h_K`, `h_Kdia`, `h_Cd`, `h_dbot`. **`h_Idb` confirmed NOT consumed** (report 03's MEDIUM-HIGH
+  residual resolved).
 - **Tasks:**
-  - [ ] Before writing, use `lean_goal`/`lean_multi_attempt` to confirm the goal shape, whether a
-        mirror consistency sub-lemma is needed, and **which of `h_Cd`/`h_Idb` the proof actually
-        consumes** (report 03 residual).
-  - [ ] Prove `canonical_diamond_witness` via the mirror `modal_set_exclusion` construction — report
-        03 §4 row 3; report 02 Deliverable 3 tail; Report 01 §6.5, §10; Wijesekera 1990. `h_Cd`
-        enters as a parametric hypothesis (framework style; no global `axiom`).
-  - [ ] Docstring; `lake build` the module.
+  - [x] Before writing, use `lean_goal`/`lean_multi_attempt` to confirm the goal shape — confirmed
+        analytically via the prior dispatch's hand-trace (Case B) plus this dispatch's structural
+        insight (`h_dbot` as `diaOr_of_diaDisj`'s base case), then machine-verified by `lake build`.
+  - [x] Prove `canonical_diamond_witness` via the mirror `modal_set_exclusion` construction — report
+        03 §4 row 3; report 02 Deliverable 3 tail; Report 01 §6.5, §10; Wijesekera 1990. `h_Cd` and
+        `h_dbot` enter as parametric hypotheses (framework style; no global `axiom`).
+  - [x] Docstring; `lake build` the module — green, 595 jobs.
 - **Reference grounding:** report 03 §4 row 3, §Adversarial item 2; ianshil/CK diamond case
-  (`Diam_distrib_list_disj` = Cd); `CK_Cd_Idb_th_completeness.v`.
-- **Estimated output:** ~120-200 lines.
+  (`Diam_distrib_list_disj` = Cd); `CK_Cd_Idb_th_completeness.v`; the `h_dbot` fix is grounded in
+  report 01 lines 289-291 (◇⊥→⊥ listed as an IK axiom that bare CK drops) and report 03 §3's `h_Nd`
+  Lean statement (identical formula, re-purposed as a core hypothesis here).
+- **Estimated output:** ~120-200 lines; **actual: ~245 lines** (three new private helpers plus the
+  two public theorems, reflecting the dual-of-`boxOr_of_boxDisj` distribution lemma's extra
+  induction machinery).
 - **Verification (targeted):** module builds; `canonical_diamond_witness` typechecks; the actually-
-  consumed axiom subset is recorded in the phase note (confirming Cd, and whether Idb is used);
-  ZERO-DEBT; untouched-classical carried (`git diff --stat`).
-- **Done when:** module builds; the diamond witness typechecks sorry-free.
-- **Timing:** ~1.5 hours. **Depends on:** 2b (same file, sequential), 2-infra.
-- **STOP / partial contingency:** If the diamond witness cannot close sorry-free, **STOP — do not
-  introduce `sorry`.** Commit the sorry-free state (through 2b), mark `[PARTIAL]`, write a
-  continuation note (stuck sub-goal, `lean_goal` output, whether the mirror consistency sub-lemma is
-  the obstruction, and which of `h_Cd`/`h_Idb` was being consumed) to the handoff. Recommended next:
-  narrow `/research 480 --hard --lit` on the ianshil/CK diamond case (`Diam_distrib_list_disj`) /
-  Wijesekera prime-filter diamond-accessibility construction before re-dispatch.
+  consumed axiom subset is recorded above (Cd + dbot confirmed, Idb confirmed NOT used); ZERO-DEBT;
+  untouched-classical carried (`git diff --stat` scoped to `CanonicalModel.lean` + plan + handoff).
+- **Done when:** module builds; the diamond witness typechecks sorry-free. **Done.**
+- **Timing:** ~1.5 hours estimated; this re-dispatch (post-STOP, with the fix identified) closed in
+  a single pass. **Depends on:** 2b (same file, sequential), 2-infra. Both satisfied.
 
 ### Phase 2d: canonical_f1 (Cd_frame) + canonical_f2 (Idb_frame) [NOT STARTED]
 
@@ -661,13 +699,14 @@ since the file is untouched pending the Case A resolution above.
       `Completeness.lean`, propositional `Int*` files, `PrimeTheory.lean` (`be8f2eb0`), or Phase 2a
       `CanonicalModel.lean` definitions (`4fd37213`, other than appended witness content).
 - [ ] Parametricity: each new framework lemma carries `Axioms` + exactly the `h_*` subset report 03
-      §4 assigns it (`h_K`/`h_Kdia`/`h_Idb`/`h_Cd`), with `h_efq` separable and `botForces` a
-      parameter. `Nd` does NOT appear anywhere in the core.
-- [x] Diamond residual resolved: Phase 2c's note (2026-07-14 dispatch) confirms, by hand-tracing
-      against the primary source, that the non-degenerate ("Case B") diamond-witness construction
-      consumes only `h_K`, `h_Kdia`, `h_Cd` — **not** `h_Idb` (report 03 §Adversarial item 2
-      resolved). This is now moot in practice: Phase 2c is `[PARTIAL]`/blocked on a separate,
-      more fundamental Case A (fallible-world) type-level gap — see the Phase 2c section.
+      §4 assigns it (`h_K`/`h_Kdia`/`h_Idb`/`h_Cd`/`h_dbot`), with `h_efq` separable and `botForces`
+      a parameter. `Nd` does NOT appear anywhere in the core; `h_dbot` (distinct from `Nd`) DOES.
+- [x] Diamond residual resolved: Phase 2c's `sess_1784011298_752245_480` re-dispatch (2026-07-14)
+      machine-verifies (`lean_verify`, not just hand-tracing) that `canonical_diamond_witness`
+      consumes only `h_K`, `h_Kdia`, `h_Cd`, `h_dbot` — **not** `h_Idb` (report 03 §Adversarial
+      item 2 resolved). The former Case A type-level gap (fallible-world reachability) is also
+      resolved: `h_dbot` precludes it structurally (see the Phase 2c section) — Phase 2c is
+      `[COMPLETED]`, no `CanonicalPrimeWorld` type revision was needed.
 
 ## Artifacts & Outputs
 

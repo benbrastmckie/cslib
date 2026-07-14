@@ -735,4 +735,250 @@ theorem canonical_box_witness
 
 end CanonicalBoxWitness
 
+/-! ## Diamond Witness (Phase 2c)
+
+This section proves `canonical_diamond_witness`: from `(◇φ) ∈ w.val`, it produces a single
+prime world `v` with `canonicalR w v` and `φ ∈ v.val`. Unlike the box witness (Phase 2b), no
+extension of `w` itself is needed -- `BForces_diamond` is a bare `∃ v, r w v ∧ …`, so the
+construction is a single seeded prime extension, not a pair.
+
+**Resolution of the Phase 2c STOP contingency** (prior dispatch, plan v4 note): the reference
+mechanization's `cexpl` ("Case A", `◇⊥ ∈ w.val`) branch is **not** reachable for our
+consistent-only `CanonicalPrimeWorld` once a new parametric hypothesis `h_dbot : Axioms
+((◇⊥).imp ⊥)` (the IK axiom `◇⊥ → ⊥`, dropped by bare CK -- report 03 §3) is threaded in. Rather
+than a top-level case split, `h_dbot` slots in as the **base case** of `diaOr_of_diaDisj` (the
+lemma dual to `boxOr_of_boxDisj`, distributing `◇` out over an arbitrary-length disjunction): for
+the empty list, `⊢ (◇⊥).imp ⊥` is exactly `h_dbot`, playing the same structural role there that
+`h_efq` plays in `boxOr_of_boxDisj`'s empty case (`⊢ ⊥.imp (□⊥)`). This absorbs the former "Case
+A" concern entirely into the induction, with no separate branch needed in
+`canonical_diamond_witness` itself.
+
+**Construction** (dual of `canonical_box_witness`, ianshil/CK `general_th_completeness.v`
+diamond case; report 03 §4 row 3): `v` is the prime extension (`modal_set_exclusion`) of the
+deductive closure of `Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, excluding `Σ := {ψ | (◇ψ) ∉ w.val}`. The
+`DerivExcludes Σ Γ` precondition is `diamond_witness_underivable`. The three witness obligations
+then hold by construction: `φ ∈ v.val` and the box clause (`□ψ ∈ w.val → ψ ∈ v.val`) follow from
+the seeding (`Γ ⊆ closure Γ ⊆ v.val`); the diamond clause (`ψ ∈ v.val → ◇ψ ∈ w.val`) follows from
+`Σ`-exclusion (contrapositive, mirroring `canonical_box_witness`'s `hbox_clause`). -/
+
+section CanonicalDiamondWitness
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- **Diamond-of-disjuncts, hard direction**: `⊢ (◇(bigOr l')) → (bigOr (l'.map diamond))` -- the
+diamond of a disjunction implies the disjunction of the diamonds. Unlike `boxOr_of_boxDisj`
+(the dual, "free" direction, needing only `h_K` + necessitated `OrI1`/`OrI2`), this direction is
+**not** valid for bare K◇ alone: it requires `h_Cd` (Fischer-Servi diamond bridge, ◇-over-∨) at
+each inductive step, and, for the empty list (`bigOr [] = ⊥`), `h_dbot` (`◇⊥ → ⊥`) -- this is
+precisely where "Case A" (`◇⊥` reachable) would obstruct the construction if `h_dbot` were
+unavailable; IK supplies it, bare CK does not (report 03 §3, §5). Analogue of ianshil/CK's
+`Diam_distrib_list_disj`. -/
+private noncomputable def diaOr_of_diaDisj
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_Cd : ∀ (φ ψ : Proposition Atom),
+      Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot)) :
+    ∀ (l' : List (Proposition Atom)),
+      DerivationTree Axioms []
+        ((◇ (Metalogic.bigOr l')).imp (Metalogic.bigOr (l'.map Proposition.diamond)))
+  | [] => by
+      simp only [List.map_nil, bigOr_nil_eq_bot]
+      exact .ax [] _ h_dbot
+  | B :: rest => by
+      have hCd : DerivationTree Axioms []
+          ((◇ (B.or (Metalogic.bigOr rest))).imp ((◇B).or (◇ (Metalogic.bigOr rest)))) :=
+        .ax [] _ (h_Cd B (Metalogic.bigOr rest))
+      have ih := diaOr_of_diaDisj h_implyK h_implyS h_orI1 h_orI2 h_orE h_Cd h_dbot rest
+      have branch1 : DerivationTree Axioms []
+          ((◇B).imp ((◇B).or (Metalogic.bigOr (rest.map Proposition.diamond)))) :=
+        .ax [] _ (h_orI1 (◇B) (Metalogic.bigOr (rest.map Proposition.diamond)))
+      have branch2 : DerivationTree Axioms []
+          ((◇ (Metalogic.bigOr rest)).imp
+            ((◇B).or (Metalogic.bigOr (rest.map Proposition.diamond)))) :=
+        imp_trans0 h_implyK h_implyS ih
+          (.ax [] _ (h_orI2 (◇B) (Metalogic.bigOr (rest.map Proposition.diamond))))
+      have step1 := DerivationTree.modus_ponens [] _ _
+        (.ax [] _ (h_orE (◇B) (◇ (Metalogic.bigOr rest))
+          ((◇B).or (Metalogic.bigOr (rest.map Proposition.diamond)))))
+        branch1
+      have step2 := DerivationTree.modus_ponens [] _ _ step1 branch2
+      exact imp_trans0 h_implyK h_implyS hCd step2
+
+/-- Splits a derivation context `L` (drawn from `{ψ|□ψ∈w.val} ∪ {φ}`) into the sublist `Lw` of
+`{ψ|□ψ∈w.val}`-members, such that every element of `L` lies in `φ :: Lw`. Simpler than the box
+witness's `extract_split`, since the seed adds only the single extra formula `φ`, not a family
+indexed by a second prime theory. -/
+private theorem extract_split_dia (w : CanonicalPrimeWorld Axioms) (φ : Proposition Atom) :
+    ∀ (L : List (Proposition Atom)),
+      (∀ x ∈ L, (□x) ∈ w.val ∨ x = φ) →
+      ∃ Lw : List (Proposition Atom), (∀ y ∈ Lw, (□y) ∈ w.val) ∧ (∀ x ∈ L, x ∈ φ :: Lw)
+  | [], _ => by refine ⟨[], ?_, ?_⟩ <;> exact fun _ h => nomatch h
+  | x :: xs, hL => by
+      obtain ⟨Lw', hLw', hsub'⟩ :=
+        extract_split_dia w φ xs (fun y hy => hL y (List.mem_cons.mpr (Or.inr hy)))
+      rcases hL x (List.mem_cons.mpr (Or.inl rfl)) with hxbox | hxeq
+      · refine ⟨x :: Lw', ?_, ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxbox
+          · exact hLw' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_cons.mp (hsub' z hz') with rfl | hz''
+            · exact List.mem_cons.mpr (Or.inl rfl)
+            · exact List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inr hz'')))
+      · refine ⟨Lw', hLw', ?_⟩
+        intro z hz
+        rcases List.mem_cons.mp hz with rfl | hz'
+        · rw [hxeq]; exact List.mem_cons.mpr (Or.inl rfl)
+        · exact hsub' z hz'
+
+/-- **Diamond Witness Underivability Sub-Lemma** (Phase 2c, task 480): no finite disjunction of
+`Σ := {ψ | (◇ψ) ∉ w.val}` is derivable from the deductive closure of
+`Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, given `(◇φ) ∈ w.val`. Dual of `box_witness_pair_underivable`, but
+simpler: the seed's extra element is the single formula `φ` (not a family indexed by a second
+prime theory), so no `bigAnd`/`h_andI` packing is needed -- confirming the plan v4 hand-trace.
+Consumes only `h_K` (via `box_context_deriv`), `h_Kdia` (K-diamond bridge), and (through
+`diaOr_of_diaDisj`) `h_Cd` and `h_dbot`; **`h_Idb` is not consumed**. -/
+theorem diamond_witness_underivable
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    {w : CanonicalPrimeWorld Axioms} {φ : Proposition Atom} (h_diaphi : (◇φ) ∈ w.val) :
+    Metalogic.DerivExcludes (modalDerivationSystem Axioms)
+      {χ | (◇χ) ∉ w.val}
+      (modalDeductiveClosure Axioms ({ψ | (□ψ) ∈ w.val} ∪ {φ})) := by
+  intro l hlSig hmem
+  obtain ⟨L, hLΓ, hd⟩ := hmem
+  obtain ⟨d⟩ := hd
+  have hLΓ' : ∀ x ∈ L, (□x) ∈ w.val ∨ x = φ := fun x hx => hLΓ x hx
+  obtain ⟨Lw, hLw, hsub⟩ := extract_split_dia w φ L hLΓ'
+  have d' : DerivationTree Axioms (φ :: Lw) (Metalogic.bigOr l) := .weakening L _ _ d hsub
+  have d_disch : DerivationTree Axioms Lw (φ.imp (Metalogic.bigOr l)) :=
+    deductionTheorem h_implyK h_implyS Lw φ (Metalogic.bigOr l) d'
+  have d_box : DerivationTree Axioms (Lw.map Proposition.box)
+      (Proposition.box (φ.imp (Metalogic.bigOr l))) :=
+    box_context_deriv h_implyK h_implyS h_K Lw (φ.imp (Metalogic.bigOr l)) d_disch
+  have hM : Proposition.box (φ.imp (Metalogic.bigOr l)) ∈ w.val :=
+    w.2.1.2 (Lw.map Proposition.box) _
+      (fun x hx => by
+        obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+        exact hLw y hy)
+      ⟨d_box⟩
+  have hbridge : DerivationTree Axioms [Proposition.box (φ.imp (Metalogic.bigOr l))]
+      ((◇φ).imp (◇ (Metalogic.bigOr l))) :=
+    .modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (h_Kdia φ (Metalogic.bigOr l))) (fun _ h => nomatch h))
+      (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+  have hImp : (◇φ).imp (◇ (Metalogic.bigOr l)) ∈ w.val :=
+    w.2.1.2 [Proposition.box (φ.imp (Metalogic.bigOr l))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hM
+        · nomatch hx')
+      ⟨hbridge⟩
+  have hDiaBigOr : (◇ (Metalogic.bigOr l)) ∈ w.val :=
+    w.2.1.2 [(◇φ).imp (◇ (Metalogic.bigOr l)), (◇φ)] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hImp
+        · rcases List.mem_cons.mp hx' with rfl | hx''
+          · exact h_diaphi
+          · nomatch hx'')
+      ⟨.modus_ponens _ _ _ (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))))⟩
+  have hDistrib := diaOr_of_diaDisj h_implyK h_implyS h_orI1 h_orI2 h_orE h_Cd h_dbot l
+  have hBigOrDia : Metalogic.bigOr (l.map Proposition.diamond) ∈ w.val :=
+    w.2.1.2 [(◇ (Metalogic.bigOr l))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hDiaBigOr
+        · nomatch hx')
+      ⟨.modus_ponens _ _ _ (.weakening [] _ _ hDistrib (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩
+  obtain ⟨B, hBmem, hBu⟩ := bigOr_mem_disjunct w (l.map Proposition.diamond) hBigOrDia
+  obtain ⟨B', hB'mem, rfl⟩ := List.mem_map.mp hBmem
+  exact (hlSig B' hB'mem) hBu
+
+/-- **Diamond Witness** (Phase 2c, task 480): from `(◇φ) ∈ w.val`, produces a single prime world
+`v` with `canonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box
+witness), since `BForces_diamond` is a bare existential over successors of `w` itself.
+
+See [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
+Ch. 3; ianshil/CK `general_th_completeness.v`, diamond case. -/
+theorem canonical_diamond_witness
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    {w : CanonicalPrimeWorld Axioms} {φ : Proposition Atom} (h_diaphi : (◇φ) ∈ w.val) :
+    ∃ v : CanonicalPrimeWorld Axioms, canonicalR w v ∧ φ ∈ v.val := by
+  have hdwu := diamond_witness_underivable h_implyK h_implyS h_orI1 h_orI2 h_orE
+    h_K h_Kdia h_Cd h_dbot (w := w) h_diaphi
+  have h_cons_raw : ModalSetConsistent Axioms ({ψ | (□ψ) ∈ w.val} ∪ {φ}) := by
+    intro L hL hd
+    have hbot_not_mem := hdwu [] (fun _ h => nomatch h)
+    rw [bigOr_nil_eq_bot] at hbot_not_mem
+    exact hbot_not_mem ⟨L, hL, hd⟩
+  have h_adm_raw : Metalogic.Admissible (modalDerivationSystem Axioms) (ModalSetConsistent Axioms)
+      (modalDeductiveClosure Axioms ({ψ | (□ψ) ∈ w.val} ∪ {φ})) :=
+    modalDeductiveClosure_is_admissible h_implyK h_implyS h_cons_raw
+  obtain ⟨Tval, hclosure_sub_T, hprimeT, hexclT⟩ :=
+    modal_set_exclusion h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_adm_raw hdwu
+  let v : CanonicalPrimeWorld Axioms := ⟨Tval, hprimeT⟩
+  have hphi_v : φ ∈ v.val :=
+    hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_right _ rfl))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ v.val := by
+    intro ψ hψ
+    exact hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_left _ hψ))
+  have hdia_clause : ∀ ψ, ψ ∈ v.val → (◇ψ) ∈ w.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notdia
+    have hsig : ∀ x ∈ [ψ], x ∈ {χ | (◇χ) ∉ w.val} := by
+      intro x hx
+      rcases List.mem_cons.mp hx with rfl | hx'
+      · exact hψ_notdia
+      · nomatch hx'
+    have hOrI1_deriv : DerivationTree Axioms [ψ] (Metalogic.bigOr [ψ]) :=
+      .modus_ponens _ _ _
+        (.weakening [] _ _
+          (.ax [] _ (h_orI1 ψ (Metalogic.bigOr ([] : List (Proposition Atom)))))
+          (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+    have hbigOr_mem : Metalogic.bigOr [ψ] ∈ v.val :=
+      v.2.1.2 [ψ] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hψ_mem
+          · nomatch hx')
+        ⟨hOrI1_deriv⟩
+    exact hexclT [ψ] hsig hbigOr_mem
+  exact ⟨v, ⟨hbox_clause, hdia_clause⟩, hphi_v⟩
+
+end CanonicalDiamondWitness
+
 end Cslib.Logic.Modal

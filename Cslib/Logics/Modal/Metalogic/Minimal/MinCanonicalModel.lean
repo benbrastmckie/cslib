@@ -742,4 +742,166 @@ theorem min_canonical_box_witness {w : MinCanonicalPrimeWorld Atom} {φ : Propos
 
 end CanonicalBoxWitness
 
+/-! ## Diamond Witness -/
+
+section CanonicalDiamondWitness
+
+/-- **`□`-closure**: if `L ⊢ ψ`, then `(L.map box) ⊢ box ψ` -- pushing necessitation through a
+whole derivation context via the deduction theorem and `k`, one hypothesis at a time. `efq`-free
+by construction (necessitation + `k` only). Local copy of `box_context_deriv`
+(`Intuitionistic/CanonicalModel.lean:551-577`, private to that file). -/
+private noncomputable def boxContextDeriv :
+    ∀ (L : List (Proposition Atom)) (ψ : Proposition Atom),
+      DerivationTree MKModalAxiom L ψ →
+      DerivationTree MKModalAxiom (L.map Proposition.box) (Proposition.box ψ)
+  | [], ψ, d => .necessitation ψ d
+  | A :: L', ψ, d => by
+      have dt : DerivationTree MKModalAxiom L' (A.imp ψ) :=
+        deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) L' A ψ d
+      have ihres : DerivationTree MKModalAxiom (L'.map Proposition.box)
+          (Proposition.box (A.imp ψ)) :=
+        boxContextDeriv L' (A.imp ψ) dt
+      have hKax : DerivationTree MKModalAxiom (L'.map Proposition.box)
+          ((Proposition.box (A.imp ψ)).imp
+            ((Proposition.box A).imp (Proposition.box ψ))) :=
+        .weakening [] _ _ (.ax [] _ (MKModalAxiom.k A ψ)) (fun _ h => nomatch h)
+      have hstep : DerivationTree MKModalAxiom (L'.map Proposition.box)
+          ((Proposition.box A).imp (Proposition.box ψ)) :=
+        .modus_ponens _ _ _ hKax ihres
+      have hstep_w : DerivationTree MKModalAxiom
+          (Proposition.box A :: L'.map Proposition.box)
+          ((Proposition.box A).imp (Proposition.box ψ)) :=
+        .weakening _ _ _ hstep (fun x hx => List.mem_cons.mpr (Or.inr hx))
+      have hboxA : DerivationTree MKModalAxiom (Proposition.box A :: L'.map Proposition.box)
+          (Proposition.box A) :=
+        .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+      exact .modus_ponens _ _ _ hstep_w hboxA
+
+/-- Splits a derivation context `L` (drawn from `{ψ | □ψ ∈ w.val} ∪ {φ}`) into the sublist `Lw`
+of `{ψ | □ψ ∈ w.val}`-members, such that every element of `L` lies in `φ :: Lw`. List-only,
+`efq`-free by construction (mirrors `extract_split_dia`,
+`Intuitionistic/CanonicalModel.lean:816-840`). -/
+private theorem extract_split_dia1 (w : MinCanonicalPrimeWorld Atom) (φ : Proposition Atom) :
+    ∀ (L : List (Proposition Atom)),
+      (∀ x ∈ L, (□x) ∈ w.val ∨ x = φ) →
+      ∃ Lw : List (Proposition Atom), (∀ y ∈ Lw, (□y) ∈ w.val) ∧ (∀ x ∈ L, x ∈ φ :: Lw)
+  | [], _ => by refine ⟨[], ?_, ?_⟩ <;> exact fun _ h => nomatch h
+  | x :: xs, hL => by
+      obtain ⟨Lw', hLw', hsub'⟩ :=
+        extract_split_dia1 w φ xs (fun y hy => hL y (List.mem_cons.mpr (Or.inr hy)))
+      rcases hL x (List.mem_cons.mpr (Or.inl rfl)) with hxbox | hxeq
+      · refine ⟨x :: Lw', ?_, ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxbox
+          · exact hLw' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_cons.mp (hsub' z hz') with rfl | hz''
+            · exact List.mem_cons.mpr (Or.inl rfl)
+            · exact List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inr hz'')))
+      · refine ⟨Lw', hLw', ?_⟩
+        intro z hz
+        rcases List.mem_cons.mp hz with rfl | hz'
+        · rw [hxeq]; exact List.mem_cons.mpr (Or.inl rfl)
+        · exact hsub' z hz'
+
+/-- **Diamond witness underivability, nonempty** (efq-free analogue of
+`diamond_witness_underivable`, `Intuitionistic/CanonicalModel.lean:849`): no nonempty
+`bigOr1`-disjunction of `Σ := {χ | (◇χ) ∉ w.val}` is a member of the deductive closure of
+`Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, given `(◇φ) ∈ w.val`. Simpler than the box case: the seed's extra
+element is the single formula `φ` (not a family indexed by a second quasi-prime theory), so no
+`bigAnd1`/`AndI` packing is needed -- mirrors the box case's structure with `diaOr1_of_diaDisj`
+in place of `boxOr1_of_boxDisj` and `Kdia` in place of `Idb`. -/
+private theorem diamond_witness_underivable1 {w : MinCanonicalPrimeWorld Atom}
+    {φ : Proposition Atom} (h_diaphi : (◇φ) ∈ w.val) :
+    DerivExcludes1
+      (modalDeductiveClosure MKModalAxiom ({ψ | (□ψ) ∈ w.val} ∪ {φ}))
+      {χ | (◇χ) ∉ w.val} := by
+  intro x0 xs0 hx0Sig hxs0Sig hmem
+  obtain ⟨L, hLΓ, hd⟩ := hmem
+  obtain ⟨d⟩ := hd
+  have hLΓ' : ∀ x ∈ L, (□x) ∈ w.val ∨ x = φ := fun x hx => hLΓ x hx
+  obtain ⟨Lw, hLw, hsub⟩ := extract_split_dia1 w φ L hLΓ'
+  have d' : DerivationTree MKModalAxiom (φ :: Lw) (bigOr1 x0 xs0) :=
+    .weakening L _ _ d hsub
+  have d_disch : DerivationTree MKModalAxiom Lw (φ.imp (bigOr1 x0 xs0)) :=
+    deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+      (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) Lw φ (bigOr1 x0 xs0) d'
+  have d_box : DerivationTree MKModalAxiom (Lw.map Proposition.box)
+      (Proposition.box (φ.imp (bigOr1 x0 xs0))) :=
+    boxContextDeriv Lw (φ.imp (bigOr1 x0 xs0)) d_disch
+  have hM : Proposition.box (φ.imp (bigOr1 x0 xs0)) ∈ w.val :=
+    w.property.closed (Lw.map Proposition.box) _
+      (fun x hx => by
+        obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+        exact hLw y hy)
+      ⟨d_box⟩
+  have hbridge : DerivationTree MKModalAxiom [Proposition.box (φ.imp (bigOr1 x0 xs0))]
+      ((◇φ).imp (◇ (bigOr1 x0 xs0))) :=
+    .modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (MKModalAxiom.kdia φ (bigOr1 x0 xs0)))
+        (fun _ h => nomatch h))
+      (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+  have hImp : (◇φ).imp (◇ (bigOr1 x0 xs0)) ∈ w.val :=
+    w.property.closed [Proposition.box (φ.imp (bigOr1 x0 xs0))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hM
+        · nomatch hx')
+      ⟨hbridge⟩
+  have hDiaBigOr : (◇ (bigOr1 x0 xs0)) ∈ w.val :=
+    w.property.closed [(◇φ).imp (◇ (bigOr1 x0 xs0)), (◇φ)] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hImp
+        · rcases List.mem_cons.mp hx' with rfl | hx''
+          · exact h_diaphi
+          · nomatch hx'')
+      ⟨.modus_ponens _ _ _ (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))))⟩
+  have hDistrib := diaOr1_of_diaDisj x0 xs0
+  have hBigOrDia : bigOr1 (◇x0) (xs0.map Proposition.diamond) ∈ w.val :=
+    w.property.closed [(◇ (bigOr1 x0 xs0))] _
+      (fun x hx => by
+        rcases List.mem_cons.mp hx with rfl | hx'
+        · exact hDiaBigOr
+        · nomatch hx')
+      ⟨.modus_ponens _ _ _ (.weakening [] _ _ hDistrib (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩
+  rcases bigOr1_mem_disjunct w (◇x0) (xs0.map Proposition.diamond) hBigOrDia with h | ⟨C, hC, hCu⟩
+  · exact hx0Sig h
+  · obtain ⟨D, hD, rfl⟩ := List.mem_map.mp hC
+    exact (hxs0Sig D hD) hCu
+
+/-- **Diamond Witness**: from `(◇φ) ∈ w.val`, produces a single quasi-prime world `v` with
+`canonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box witness), since
+the diamond truth-lemma case is a bare existential over successors of `w` itself. Mirrors
+`canonical_diamond_witness` (`Intuitionistic/CanonicalModel.lean:924`) but with neither `efq`
+nor `h_dbot`. -/
+theorem min_canonical_diamond_witness {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
+    (h_diaphi : (◇φ) ∈ w.val) :
+    ∃ v : MinCanonicalPrimeWorld Atom, canonicalR w v ∧ φ ∈ v.val := by
+  have hdwu := diamond_witness_underivable1 h_diaphi
+  have hSclosed : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom)
+      (modalDeductiveClosure MKModalAxiom ({ψ | (□ψ) ∈ w.val} ∪ {φ})) :=
+    fun L φ' hL hd =>
+      modalDeductiveClosure_closed (fun φ ψ => MKModalAxiom.implyK φ ψ)
+        (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) L φ' hL hd
+  obtain ⟨Tval, hTsup, hTqp, hTexcl⟩ := quasi_prime_set_exclusion1 hSclosed hdwu
+  let v : MinCanonicalPrimeWorld Atom := ⟨Tval, hTqp⟩
+  have hphi_v : φ ∈ v.val :=
+    hTsup (modal_subset_deductive_closure MKModalAxiom _ (Set.mem_union_right _ rfl))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ v.val := fun ψ hψ =>
+    hTsup (modal_subset_deductive_closure MKModalAxiom _ (Set.mem_union_left _ hψ))
+  have hdia_clause : ∀ ψ, ψ ∈ v.val → (◇ψ) ∈ w.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notdia
+    exact (hTexcl ψ [] hψ_notdia (fun _ h => nomatch h)) hψ_mem
+  exact ⟨v, ⟨hbox_clause, hdia_clause⟩, hphi_v⟩
+
+end CanonicalDiamondWitness
+
 end Cslib.Logic.Modal

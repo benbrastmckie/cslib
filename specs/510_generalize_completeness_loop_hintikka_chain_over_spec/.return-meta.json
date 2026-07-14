@@ -1,37 +1,39 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "task_number": 510,
-  "task_title": "generalize_completeness_loop_hintikka_chain_over_spec",
-  "task_type": "cslib",
-  "artifact_number": 1,
+  "status": "implemented",
+  "started_at": "2026-07-14T21:51:11Z",
   "artifacts": [
-    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md"
+    "Cslib/Logics/Modal/Tableau/Rules.lean",
+    "Cslib/Logics/Modal/Tableau/Completeness.lean",
+    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+    "Cslib/Logics/Modal/Tableau/TDriver.lean",
+    "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "Cslib/Logics/Modal/Tableau/Saturation.lean",
+    "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
+    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/summaries/01_generalize-hintikka-chain-over-spec-summary.md"
   ],
-  "plan_path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
-  "orchestrator_handoff": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/.orchestrator-handoff.json",
-  "research_inputs": [
-    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/reports/01_generalize-hintikka-chain-over-spec.md"
-  ],
-  "phase_count": 9,
-  "estimated_hours": 18,
-  "dependency_waves": [[1, 4], [2], [3], [5], [6], [7], [8], [9]],
-  "memory_candidates": [
-    {
-      "content": "When generalizing a Lean development over a structure-bundled interface (e.g. RuleApplicationSpec), interface fields whose payload is discarded at every use site MUST be stated with an existentially-quantified payload (`exists out, f x = .persistent out`), not the reference instance's concrete payload. The concrete form typechecks and passes CI for the reference instance while making every OTHER instance's discharge impossible -- a silent regression to a single-instance refactor with green CI. Diagnostic: check whether use sites read the payload or only use it to contradict a case split; if only the latter, quantify it. Corroborating instance in cslib: TDriver.lean:96's modalApplyOne_boxPos_shape was independently restated with an opaque `kForms` witness precisely because the T discharge forced it, while CompletenessLoop.lean:248's modalApplyOne_posBox_eq kept the concrete boxPropagation payload.",
-      "category": "PATTERN",
-      "source_artifact": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
-      "confidence": 0.85,
-      "suggested_keywords": ["lean4", "interface-generalization", "existential-payload", "structure-fields", "silent-regression", "ruleapplicationspec"]
-    },
-    {
-      "content": "Adding fields to a Lean `structure` breaks EVERY existing instance in the same build. When planning an interface extension, enumerate all instances first (grep for the structure name) and discharge the new fields for ALL of them in the SAME phase -- otherwise the phase cannot end at a green build. This is easy to miss when a research report treats the reference instance's discharge as the field-addition phase and defers other instances to a later 'optional' phase. In cslib task 510 this moved T's five field discharges from an optional final phase into the field-addition phase, which had the beneficial side effect of turning the final T instantiation into a one-liner that structurally tests the earlier phases' acceptance criteria.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["lean4", "structure-extension", "phase-sequencing", "green-build", "instance-enumeration", "planning"]
-    }
-  ],
-  "next_steps": "Run /implement 510 to execute the plan"
+  "partial_progress": {
+    "stage": "all_phases_complete",
+    "details": "All 9 phases committed and green: 6ac19353, 639779f5, e4a7dd0e, c3f32a61, 0c2c8fd2, e11096f7, 9ac0ef09, bddc26fb, a383163e. AC1/AC2/AC3 all confirmed by direct source inspection. Byte-identity gate confirmed by diff against baseline 64be55dc. Full CSLib CI green (build 3233/3233, checkInitImports, lint, lint-style, shake, test).",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 9,
+    "last_completed_phase": "Phase 9: T instantiation -- deliver modalExpandBranchesT_hintikka"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "metadata": {
+    "session_id": "sess_task510",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
 }

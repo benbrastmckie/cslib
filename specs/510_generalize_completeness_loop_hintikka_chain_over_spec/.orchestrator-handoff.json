@@ -1,139 +1,107 @@
 {
-  "status": "planned",
+  "status": "implemented",
   "task_number": 510,
   "task_title": "generalize_completeness_loop_hintikka_chain_over_spec",
-  "stage": "plan",
-  "agent_type": "planner-agent",
+  "stage": "implement",
+  "agent_type": "cslib-implementation-agent",
   "requires_user_review": false,
-  "artifact_path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
-  "artifacts": [
-    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
-    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/reports/01_generalize-hintikka-chain-over-spec.md"
-  ],
-  "plan_metadata": {
-    "phases": 9,
-    "total_effort_hours": 18,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1, 4], [2], [3], [5], [6], [7], [8], [9]],
-    "reports_integrated": [
-      {
-        "path": "reports/01_generalize-hintikka-chain-over-spec.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-07-14"
-      }
-    ]
+  "phases_completed": 9,
+  "phases_total": 9,
+  "phase_status": {
+    "1": "COMPLETED",
+    "2": "COMPLETED",
+    "3": "COMPLETED",
+    "4": "COMPLETED",
+    "5": "COMPLETED",
+    "6": "COMPLETED",
+    "7": "COMPLETED",
+    "8": "COMPLETED",
+    "9": "COMPLETED"
+  },
+  "blockers": [],
+  "acceptance_criteria": {
+    "AC1": {
+      "description": "RuleApplicationSpec fields F9 (boxPosNotExpanding) / F10 (diaNegNotExpanding) stated with an existentially-quantified payload (exists out, (apply sf b acc).1 = .persistent out), not K's concrete boxPropagation payload.",
+      "status": "pass",
+      "evidence": "Cslib/Logics/Modal/Tableau/GenericDriver.lean: boxPosNotExpanding/diaNegNotExpanding fields use `.notApplicable OR exists out, (apply sf b acc).1 = .persistent out`. Both modalApplyOne_spec (K, GenericDriver.lean) and modalApplyOneT_spec (T, TDriver.lean) discharge these fields -- the T discharge would be impossible with a concrete payload, which is itself the structural proof this is correct."
+    },
+    "AC2": {
+      "description": "modalExpandBranchesGen_hintikka concludes in modalHintikkaSetGen apply bR aR, not the concrete modalHintikkaSet bR aR.",
+      "status": "pass",
+      "evidence": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean: `lemma modalExpandBranchesGen_hintikka (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) ... : ... modalHintikkaSetGen apply bR aR`. K's modalExpandBranches_hintikka recovers the concrete form as a byte-identical-statement corollary via modalHintikkaSet_eq (rfl)."
+    },
+    "AC3": {
+      "description": "modalExpandBranchesT_hintikka (TDriver.lean) typechecks as a genuine one-liner instantiation, the structural test that AC1 and AC2 were both met.",
+      "status": "pass",
+      "evidence": "Cslib/Logics/Modal/Tableau/TDriver.lean: `theorem modalExpandBranchesT_hintikka (φ0 : Proposition Atom) (fuel : Nat) : ... := modalExpandBranchesGen_hintikka modalApplyOneT modalApplyOneT_spec φ0 fuel`. Compiled clean with zero additional proof content; verified by direct lake build of Cslib.Logics.Modal.Tableau.TDriver."
+    }
   },
   "sorry_inventory": {
     "new_sorries_introduced": 0,
     "new_axioms_introduced": 0,
-    "files_touched": [],
-    "verification": "Planning stage only; no Lean files modified. The plan mandates zero sorry / zero axiom / zero vacuous placeholders at every phase boundary, with [BLOCKED] plus a documented goal state as the only acceptable non-close."
+    "files_touched": [
+      "Cslib/Logics/Modal/Tableau/Rules.lean",
+      "Cslib/Logics/Modal/Tableau/Saturation.lean",
+      "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
+      "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+      "Cslib/Logics/Modal/Tableau/Completeness.lean",
+      "Cslib/Logics/Modal/Tableau/Soundness.lean",
+      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+      "Cslib/Logics/Modal/Tableau/TDriver.lean"
+    ],
+    "verification": "grep -rn 'sorry|axiom' on all eight touched files: zero matches except one docstring mention (GenericDriver.lean line noting the file is sorry-free/axiom-free). Full CSLib CI (lake build 3233/3233, checkInitImports, lint, lint-style, shake, test) green as of the final verification pass."
   },
-  "blocking_acceptance_criteria": [
+  "byte_identity_verification": {
+    "baseline_commit": "64be55dc877f72da4024f81ed96a4e65609d84b2",
+    "method": "git show <baseline>:<file> diffed against current file, per-declaration",
+    "byte_for_byte_identical_including_proof": ["kValid", "modalTableau_decides", "instDecidableKValid"],
+    "byte_identical_statement_only_reason": "proof re-derived as a corollary via _eq/_iff_gen bridges",
+    "byte_identical_statements": [
+      "ModalLoopInv",
+      "modalHintikkaSet",
+      "modalHintikkaClause",
+      "modalExpandBranches_hintikka",
+      "modalStep_preserves_invariant",
+      "modalStepBranch_hintikka_inv",
+      "modalStepBranch_none_saturated",
+      "modalStepBranch_preserves_accFreshInv",
+      "modalTableau_complete"
+    ]
+  },
+  "plan_deviations": [
     {
-      "id": "AC1",
+      "phase": 1,
+      "deviation": "Relocated tryAllPropRules_pos/_neg from Completeness.lean to Rules.lean alongside the four shape/witness lemmas -- discovered they were needed upstream by the relocated lemmas, but were entirely generic (no Atom-specific content). Pure relocation, zero proof-content change."
+    },
+    {
       "phase": 2,
-      "criterion": "RuleApplicationSpec fields F9 (boxPosNotExpanding) and F10 (diaNegNotExpanding) MUST be stated as `(apply sf b acc).1 = .notApplicable OR exists out, (apply sf b acc).1 = .persistent out` -- an EXISTENTIALLY QUANTIFIED payload, never K's concrete `boxPropagation b acc psi sf.label`.",
-      "failure_mode": "If stated concretely, T/B/S5 discharge becomes impossible (T's payload is `kForms ++ selfNew.filter ...`) and the task silently regresses to a K-only refactor that still lands green CI.",
-      "corroboration_found_during_planning": "TDriver.lean:96 ALREADY carries `modalApplyOne_boxPos_shape` in exactly this `exists kForms` form, with a docstring stating the T spec-discharge never needs the concrete boxPropagation shape, only the dichotomy. A prior implementer independently reached the research's conclusion BECAUSE T's discharge forced it. Proof delta from the concrete form is one tactic token: `right; rfl` -> `right; exact <_, rfl>`."
+      "deviation": "Flipped FmpMeasure.lean:17's import of Completeness.lean from `import` to `public import` -- discovered modalApplyOne_fst_eq_of_not_box (F8's K discharge) was not transitively reachable from GenericDriver.lean despite Completeness.lean being file-order upstream, because the intervening import was non-public. Pure visibility fix."
     },
     {
-      "id": "AC2",
-      "phase": 7,
-      "criterion": "modalExpandBranchesGen_hintikka MUST conclude in `modalHintikkaSetGen apply bR aR`, NOT the concrete `modalHintikkaSet bR aR`.",
-      "failure_mode": "If it concludes concretely, task 510 lands green with passing CI while tasks 503/505/506 STAY BLOCKED -- total mission failure despite green CI.",
-      "mitigation": "K's corollary recovers the concrete form via modalHintikkaSet_eq (a rfl), so zero-regression is unaffected."
-    },
-    {
-      "id": "AC3",
-      "phase": 9,
-      "criterion": "modalExpandBranchesT_hintikka MUST typecheck as a one-liner instantiation `modalExpandBranchesGen_hintikka modalApplyOneT modalApplyOneT_spec ...`.",
-      "note": "This is the STRUCTURAL acceptance test for AC1 and AC2 -- it cannot typecheck if either was violated. A failure here means fixing the upstream phase, NOT working around it with a T-specific re-derivation (which would reproduce the exact ~850-line duplication this task exists to eliminate)."
+      "phase": 3,
+      "deviation": "Skipped separate bundled spec-taking wrapper theorems in GenericDriver.lean for the three new Completeness.lean _gen lemmas (naming collision with GenericDriver.lean's established bundled-wrapper convention); de-privatized modalStepBranchGen_hintikka_inv instead so CompletenessLoop.lean calls it directly with spec.localShapeInvariance inline. Functionally equivalent."
     }
   ],
-  "planning_verification_performed": {
-    "import_topology": "CONFIRMED. FmpMeasure.lean:17 imports Completeness; GenericDriver.lean:10 imports FmpMeasure -- so Completeness.lean is strictly upstream of the spec and must take raw hypotheses (needs only F8). CompletenessLoop.lean is imported ONLY by the Cslib.lean barrel (line 464) -- confirmed leaf, may import GenericDriver and take a bundled spec (~700 of ~850 lines).",
-    "existential_payload_decision": "CORROBORATED BY EXISTING SOURCE -- see AC1 corroboration. This upgrades the research's load-bearing design decision from a recommendation to an observed necessity.",
-    "relocation_necessity": "CONFIRMED. modalApplyOne_posBox_eq (CompletenessLoop.lean:248), _negDia_eq (:274), _boxNeg_witness (:464), _diamondPos_witness (:566) are all private in CompletenessLoop.lean, downstream of GenericDriver.lean:223's modalApplyOne_spec. Rules.lean (159 lines, holds `def modalApplyOne` at :70) reaches both spec witnesses.",
-    "crux_re_derivation": "CONFIRMED. modalExpandBranchesGen (Saturation.lean:197) and modalExpandBranches (:259) are separate defs, each with its own well-founded processNext helper. The Phase 7 proof must be re-derived, not reused.",
-    "frame_completeness_seam": "NEW FINDING (not in the research). FrameCompleteness.lean also imports Completeness.lean, but references NONE of modalHintikkaSet/modalHintikkaClause/modalStepBranch/modalApplyOne (verified by grep). No regression surface; Phase 8 need not investigate it.",
-    "spec_instance_enumeration": "CONFIRMED EXHAUSTIVE. Exactly TWO RuleApplicationSpec instances exist: modalApplyOne_spec (GenericDriver.lean:223) and modalApplyOneT_spec (TDriver.lean:759), each currently with 7 fields (freshLocal, outputsSubsetUniverse, persistentFresh, rankStep, outDegStep, knownWorldsStep, branchingLength)."
+  "concurrency_notes": "Concurrent sessions (tasks 506, 509) were actively editing Cslib/Logics/Modal/Tableau/LoopChecking.lean, FrameCompleteness.lean, and Cslib/Logics/Modal/Metalogic/Constructive/*.lean throughout this implementation. Several full-project lake build/lake test invocations transiently failed due to those files' uncommitted, in-progress state -- verified in each case (via scoped builds over exactly this task's eight files) to be unrelated to and not caused by this task's changes. Every git add was scoped narrowly to this task's own files; no other session's files were ever staged, committed, reverted, or restaged.",
+  "downstream_impact": {
+    "unblocks_503": "modalExpandBranchesT_hintikka delivered as a one-liner in TDriver.lean -- the exact lemma task 503 Phase 5 was blocked on.",
+    "unblocks_505": "Full generic chain + spec discharge path available; B is a legitimate RuleApplicationSpec instance. Must still write its own payload-reading truth-lemma bridges.",
+    "gates_506_phase_9": "modalHintikkaSetGen (Saturation.lean) is spec-free and available for S4 to consume at the statement level, per GenericDriver.lean's explicit S4 exclusion from RuleApplicationSpec."
   },
-  "correction_to_research_phase_plan": {
-    "issue": "Report section 8 puts the F8-F12 field addition in P2 and T's discharges in an OPTIONAL P9. That ordering CANNOT produce a green build.",
-    "reason": "Adding fields to a Lean `structure` breaks every instance immediately. modalApplyOneT_spec (TDriver.lean:759) would fail to elaborate with 5 missing fields the moment Phase 2 lands.",
-    "resolution": "Phase 2 discharges F8-F12 for BOTH modalApplyOne AND modalApplyOneT in the same phase. This is not extra work, only re-sequenced -- per report section 9 T's discharges are mechanical, and the TDriver helpers they need (modalApplyOneT_boxPos_fst :214, modalApplyOneT_diamondNeg_fst :249, modalApplyOneT_eq_of_not_boxPos_diaNeg) already exist.",
-    "beneficial_side_effect": "It makes the final T phase a genuine one-liner and turns AC3 into a real structural test of AC1 and AC2 rather than a review check.",
-    "additional_consequence": "Any later phase that discovers a needed new field must re-discharge it for BOTH K and T in that same phase to stay green."
-  },
-  "phase_summary": [
-    {"phase": 1, "name": "Relocate K shape/witness lemmas to Rules.lean with payload weakening", "hours": 2, "depends_on": [], "files": ["Rules.lean", "Completeness.lean", "CompletenessLoop.lean", "TDriver.lean"], "risk": "low"},
-    {"phase": 2, "name": "Extend RuleApplicationSpec to 11 fields; modalHintikkaSetGen", "hours": 3, "depends_on": [1], "files": ["Saturation.lean", "GenericDriver.lean", "TDriver.lean"], "risk": "medium", "carries": "AC1"},
-    {"phase": 3, "name": "Completeness.lean layer -- clause lift, saturation, hintikka_inv (raw F8)", "hours": 2.5, "depends_on": [2], "files": ["Completeness.lean", "GenericDriver.lean"], "risk": "low-medium"},
-    {"phase": 4, "name": "Close the 507 accFreshInv gap in Soundness.lean", "hours": 1, "depends_on": [], "files": ["Soundness.lean"], "risk": "low"},
-    {"phase": 5, "name": "CompletenessLoop.lean layer -- import GenericDriver, ModalLoopInvGen", "hours": 2, "depends_on": [3], "files": ["CompletenessLoop.lean"], "risk": "low-medium"},
-    {"phase": 6, "name": "The four witness-invariant preservation helpers (F9-F12)", "hours": 2.5, "depends_on": [5], "files": ["CompletenessLoop.lean"], "risk": "medium"},
-    {"phase": 7, "name": "CRUX -- modalStepGen_preserves_invariant + modalExpandBranchesGen_hintikka", "hours": 3.5, "depends_on": [4, 6], "files": ["CompletenessLoop.lean"], "risk": "high", "carries": "AC2", "split_authorized": "7a = modalStepGen_preserves_invariant, 7b = modalExpandBranchesGen_hintikka", "blocked_fallback": "required"},
-    {"phase": 8, "name": "K re-instantiation and zero-regression verification", "hours": 1.5, "depends_on": [7], "files": ["CompletenessLoop.lean", "GenericDriver.lean", "Saturation.lean", "Completeness.lean"], "risk": "low"},
-    {"phase": 9, "name": "T instantiation -- deliver modalExpandBranchesT_hintikka", "hours": 1, "depends_on": [8], "files": ["TDriver.lean"], "risk": "low", "carries": "AC3"}
+  "commits": [
+    "6ac19353 task 510 phase 1: relocate K shape/witness lemmas to Rules.lean",
+    "639779f5 task 510 phase 4: generalize modalStepBranch_preserves_accFreshInv",
+    "e4a7dd0e task 510 phase 2: extend RuleApplicationSpec to 11 fields; add modalHintikkaSetGen",
+    "c3f32a61 task 510 phase 3: generalize Completeness.lean Hintikka clause layer",
+    "0c2c8fd2 task 510 phase 5: import GenericDriver into CompletenessLoop; add ModalLoopInvGen",
+    "e11096f7 task 510 phase 6: generalize the four witness-invariant preservation helpers",
+    "9ac0ef09 task 510 phase 7: generic modalExpandBranchesGen_hintikka over the spec (the crux)",
+    "bddc26fb task 510 phase 8: K re-instantiation and zero-regression verification",
+    "a383163e task 510 phase 9: deliver modalExpandBranchesT_hintikka (unblocks task 503 phase 5)"
   ],
-  "wave_note": "Phases 1 and 4 are genuinely independent: Phase 4 consumes only the EXISTING freshLocal field via a raw hypothesis and touches only Soundness.lean, disjoint from Phase 1's territory (Rules.lean, Completeness.lean, CompletenessLoop.lean, TDriver.lean). If run in parallel, hold file territories strictly. Everything else is intrinsically sequential.",
-  "main_risk": {
-    "phase": 7,
-    "lemma": "modalExpandBranchesGen_hintikka",
-    "size_lines": 380,
-    "why": "Triple-nested induction (outer `induction fuel`, a `suffices key` inner induction over the processNext worklist, three-parallel-list threading) that must be re-derived against modalExpandBranchesGen.processNext because modalExpandBranches is a SEPARATE definition -- no proof reuse. Mechanical but bulky; the only plausible [BLOCKED] site.",
-    "mitigation": "Pre-authorized 7a/7b split. Pure substitution port except the saturated-leaf discharge (CompletenessLoop.lean:849-928), which report section 4 maps exactly onto F9-F12. modalExpandBranches_eq (Saturation.lean:308, already proved via a processNext-level agreement lemma) guarantees K's corollary lands.",
-    "blocked_fallback_requires": ["exact open lemma name", "full goal state at the failing step", "which spec field is insufficient and what statement would suffice", "whether 7a landed"],
-    "judged_likelihood": "low -- every rule-specific step in the leaf discharge is already mapped to a field"
-  },
-  "critical_design_decision": "F9/F10 MUST be stated with an existentially-quantified payload (exists out, (apply sf b acc).1 = .persistent out) rather than K's concrete boxPropagation payload. Every use site (CompletenessLoop.lean:331,349,392,410) discards the payload -- it only contradicts the .linear/.branching case split. Stating F9/F10 with K's concrete payload would make T/B/S5 discharge IMPOSSIBLE and silently regress the task to a K-only refactor. Verified during planning: TDriver.lean:96 already carries this exact form for precisely this reason.",
-  "central_finding": "The saturation layer CAN be abstracted. RuleApplicationSpec grows 7 -> 11 (F8 localShapeInvariance, F9 boxPosNotExpanding, F10 diaNegNotExpanding, F11 boxNegWitness, F12 diaPosWitness). The original task description's hypothesis (abstract saturation predicate + noneIffSaturated + Hintikka-lift hook) is directionally right but wrong in specifics and is NOT implemented as stated: modalHintikkaSetGen is a definition obtained by substitution (no field); noneIffSaturated is a free rule-agnostic lemma (no field, and only the none->saturated direction is used); the lift hook is branch-independence (F8), not saturation-implies-clause. The four unanticipated shape-class fields F9-F12 are the actual content. FOLLOW THE RESEARCH, NOT THE TASK DESCRIPTION.",
-  "field_not_needed": "A candidate 'accMonotone' field is NOT needed: modalLoop_snd_eq_or_addEdge (CompletenessLoop.lean:432) is verbatim the existing freshLocal field, so modalApplyOne_hasEdge_mono (:451) derives from freshLocal + hasEdge_addEdge_mono (:423). Field count lands at 11, not 12; modalLoop_snd_eq_or_addEdge is DELETED in Phase 5.",
-  "scope_seam": {
-    "out_of_scope": ["hintikka_box_pos (Completeness.lean:146)", "hintikka_diamond_neg (Completeness.lean:230)"],
-    "reason": "Both unfold modalApplyOne and read the Propagating payload -- irreducibly per-system. They are the exact complement of the exists-out weakening: the Hintikka chain never reads the payload (which is why it abstracts), the truth-lemma bridges do nothing but read it (which is why they cannot). This is the correct seam, not a design defect.",
-    "consequence": "T (503 Phase 5), B (505), and S4 (506) must EACH budget their own analogues. 510 does NOT deliver them. Do not attempt them in this task.",
-    "delivered_free_instead": ["hintikka_box_neg_gen", "hintikka_diamond_pos_gen"],
-    "delivered_free_reason": "Pure projections of modalHintikkaSetGen conjuncts 3/4 (`hH.2.2.1 psi w hmem` / `hH.2.2.2 psi w hmem`); mention no apply; ~6 lines each; 505/506 will want them. Delivered in Phase 3."
-  },
-  "downstream_effects": {
-    "unblocks_503": "Phase 9 delivers modalExpandBranchesT_hintikka -- the exact lemma task 503 Phase 5 is blocked on -- as a one-liner (TDriver.lean:76 defines modalExpandBranchesT := modalExpandBranchesGen modalApplyOneT ... DEFINITIONALLY). 503's remaining Phase 5 work is its own hintikka_box_pos/hintikka_diamond_neg analogues plus its truth lemma, already scoped in 503's remainder.",
-    "unblocks_505": "Full generic chain + spec discharge (B is a legitimate RuleApplicationSpec instance: .persistent propagation along SymmGen, never mints) -> modalExpandBranchesB_hintikka as a one-liner. Must still write its own payload-reading bridges and truth lemma.",
-    "gates_506": "STATEMENT SHAPE ONLY. modalHintikkaSetGen is spec-free and lives upstream in Saturation.lean, so S4 can consume the statement shape without discharging the spec it is explicitly excluded from (GenericDriver.lean:105-108). S4 produces its own modalHintikkaSetGen (modalApplyOneS4 phi0) b acc witness by its own means and interoperates at the statement level. 506 Phase 9 is unblocked AT THE TYPE LEVEL by 510, not delivered by it -- the most 510 can honestly offer S4, and what 506's planner asked for.",
-    "task_507_reuse": "modalStepBranchGen_potential_step (GenericDriver:341), _preserves_accTargetsKnown (:284), _preserves_outDegEq (:241), _eClosure (:319), _expMeasure_step_lt (:386), _worldBound (:365), and modalStepBranch_preserves_expandedNodup_gen (FmpMeasure:825) are already bundled and cover the entire non-Hintikka half of ModalLoopInv (7 of the 8 step lemmas modalStep_preserves_invariant composes). The single gap -- modalStepBranch_preserves_accFreshInv (Soundness:113) -- is closed by Phase 4."
-  },
-  "zero_regression_expectation": {
-    "untouched_entirely": ["kValid", "modalTableau_decides (CompletenessLoop.lean:1334)", "instDecidableKValid (:1346)"],
-    "note": "These reference only modalTableau_complete/modalTableau_sound, whose statements are preserved -- a STRONGER result than task 507's, which had to re-prove its three corollaries.",
-    "definitions": "Keep modalHintikkaSet / modalHintikkaClause as-is and add the Gen forms alongside with rfl bridges -- mirrors the deliberate modalStepBranch/modalStepBranchGen + modalStepBranch_eq precedent (Saturation.lean:140-178), whose docstring records that 14+ call sites rely on the exact unfold shape.",
-    "at_risk_declaration": "ModalLoopInv (CompletenessLoop.lean:57) -- a public structure in the module's Main Definitions. Resolution: keep it as its own byte-identical structure, add ModalLoopInvGen alongside, bridge with ModalLoopInv_iff_gen (~6 lines). Do NOT take the `abbrev ModalLoopInv := ModalLoopInvGen modalApplyOne` shortcut: it changes the declaration kind and risks the 7-field anonymous destructure at :683 and the 7-field `refine <...>` at :1228.",
-    "verification": "Phase 8 diffs against the pre-510 baseline rather than asserting."
-  },
-  "counter_finding_sought_not_found": "The research looked for (a) a lemma where the chain READS a Propagating payload, and (b) a divergence in the Minting-shape set between K and T/B/S5. Either would have sunk the abstraction. Neither exists: the Propagating payload is discarded at all four use sites (CompletenessLoop.lean:331,349,392,410), and T's minting shapes are literally K's (FrameRules.lean:79,87 guard on .pos,.box / .neg,.diamond -- the complements of the Minting pair).",
-  "concurrency_note": "Concurrent sessions run in this repo. Every phase must scope `git add` to its named files only -- never `git add -A` or `git add .` -- and commit incrementally at each green milestone. Never revert or restage another session's files; task 507 Phase 8 hit exactly this when `lake exe mk_all --module` wanted to reorder unrelated concurrent-session imports in Cslib.lean.",
-  "ci_pipeline": [
-    "lake build",
-    "lake exe checkInitImports",
-    "lake lint",
-    "lake exe lint-style",
-    "lake test",
-    "lake shake --add-public --keep-implied --keep-prefix"
+  "artifacts": [
+    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
+    "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/summaries/01_generalize-hintikka-chain-over-spec-summary.md"
   ],
-  "ci_notes": {
-    "mk_all": "No new files are added by this task (the research recommends extending the six existing files in place; new Gen files buy nothing and add barrel churn), so `lake exe mk_all --module` should be a no-op.",
-    "axiom_check": "Prefer `lake env lean` + `#print axioms` over the lean_verify MCP tool -- task 507 Phase 2 caught lean_verify reporting a spurious stale sorryAx immediately after an edit; direct #print axioms is authoritative.",
-    "known_unrelated_failure": "lake lint has a pre-existing unrelated failure in PrimeExclusion.lean (recorded by task 507). Not ours."
-  },
-  "reference_precedent": {
-    "task": 507,
-    "plan": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/plans/01_generalize-fmp-termination-measure.md",
-    "commit": "009cc348",
-    "relevance": "Same play one layer down (generalizing FmpMeasure.lean's termination measure over RuleApplicationSpec). 8 phases, CI-green, zero sorry/axiom. Phase structure adopted: front-load the field extension, allow incremental field refinement in later phases, isolate the crux with a [BLOCKED] fallback, end with a dedicated verification phase.",
-    "calibration_lesson": "507's Phase 7 discovered a genuinely NEW needed field (branchingLength) at its LAST implementation phase and added it green. Field-set provisionality here is expected, not a planning failure -- but each addition must re-discharge for BOTH K and T in-phase."
-  },
-  "next_steps": "Run /implement 510 to execute the plan (9 phases, waves [[1,4],[2],[3],[5],[6],[7],[8],[9]]). Recommend --hard for Phase 7 (the crux).",
-  "commits": []
+  "next_steps": "Task 503 Phase 5 can now proceed using modalExpandBranchesT_hintikka. Tasks 505 and 506 can build on the generic chain per the downstream_impact notes above."
 }

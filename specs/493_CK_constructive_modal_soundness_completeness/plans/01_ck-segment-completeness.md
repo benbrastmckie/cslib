@@ -76,6 +76,34 @@ No new BibKey required.
 
 ---
 
+## DESIGN CORRECTION (implementation dispatch 1, counterexample-backed)
+
+Two settled premises of this plan are mathematically false and were corrected during
+implementation (both within `Constructive/` territory; no frozen file touched):
+
+1. **`MValid` soundness is false.** `efq` (`⊥ → p`) is refuted by `botForces ≡ True`,
+   `val ≡ False`. Fallible-model explosion conditions are required (ianshil `kripke_sem.v`:
+   `val_expl`/`mreach_expl`/`ireach_expl`). Fixed by `EValid` (BForces + explosion).
+2. **`MValid`/`EValid` completeness is false — reusing `BForces` at all is impossible for
+   bare CK.** `Cd = ◇(p∨q) → ◇p∨◇q` is `MValid` (the `ik_axiom_sound` `cd` case uses no frame
+   condition and no `botForces` facts — the `∃`-diamond clause distributes over `∨` outright),
+   and `Idb` is `MValid` via the `f2` argument baked into `MValid`. Neither is CK-derivable
+   (ianshil treats CK+Cd, CK+Idb as proper extensions). `BForces`+F1/F2 characterizes
+   CK+Cd+Idb, not CK. Ground truth (ianshil `kripke_sem.v`, fetched verbatim): bare CK's
+   forcing uses the **∀∃ diamond clause** (`◊ψ: ∀ v ≥ w, ∃ u, mreachable v u ∧ forces u ψ`)
+   over frames with **no F1/F2 conditions**.
+
+**Corrected targets** (new file `Constructive/Forcing.lean`; 5 new files total, not 4):
+`CKForces` (Wijesekera/ianshil forcing: BForces clauses with ∀∃ diamond), `CKValid`
+(explosion-conditioned validity, no frame conditions), headline pair
+`ck_soundness : Derivable CKModalAxiom φ → CKValid φ` and
+`ck_completeness : CKValid φ → Derivable CKModalAxiom φ`. The already-proved `EValid`
+soundness is kept as a secondary result (CK is sound but NOT complete for the birelational
+`∃`-clause semantics). Phase 5 (f1/f2 for the segment model) is OBSOLETE: `CKForces`
+persistence needs no frame conditions, and the canonical segment model provably does NOT
+satisfy F1 (tails of head-⊆-comparable segments are unrelated). The truth lemma proceeds via
+maximal-tail segments (`ofHead`) and comprehension tails, per ianshil.
+
 ## Postmortem Constraints
 
 Binding rules for all implementation dispatches. No prior CK implementation attempts exist; these
@@ -187,7 +215,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 3-4h
 - **Depends on:** 1
 
-### Phase 3: `ck_axiom_sound` / `ck_soundness` over `MValid` [IN PROGRESS]
+### Phase 3: `ck_axiom_sound` / `ck_soundness` over `MValid` [COMPLETED] (over `EValid`, see deviation)
 
 > **DEVIATION (counterexample-backed, ground-truth-verified)**: soundness over raw `MValid` is
 > FALSE: `⊥ → p` is a CK axiom (`efq`) but with `botForces ≡ True`, `val ≡ False` it is not
@@ -199,9 +227,9 @@ the remainder is a tight proof-dependency chain.
 > corollary. No frozen file touched.
 - **Goal:** Prove soundness (the easy direction) directly over arbitrary `botForces`.
 - **Tasks:**
-  - [ ] Adapt `ik_axiom_sound`'s `k`/`kdia` + 9 non-modal cases (`IK.lean:137-170`) to `CKModalAxiom`, re-generalized to arbitrary upward-closed `botForces` (non-modal cases route through `bforces_persistence`, generic over `botForces`).
-  - [ ] Drop the `idb` case (used `f2`) and the vacuous `dbot` case — CK has neither.
-  - [ ] Conclude `ck_soundness : Derivable CKModalAxiom φ → MValid φ` and `ck_soundness_derivable` helper.
+  - [x] Adapt `ik_axiom_sound`'s `k`/`kdia` + 9 non-modal cases (`IK.lean:137-170`) to `CKModalAxiom`, re-generalized to arbitrary upward-closed `botForces` (non-modal cases route through `bforces_persistence`, generic over `botForces`). (`efq` additionally consumes new `bforces_of_exploding` — the ianshil `Expl` lemma.)
+  - [x] Drop the `idb` case (used `f2`) and the vacuous `dbot` case — CK has neither.
+  - [x] Conclude `ck_soundness : Derivable CKModalAxiom φ → EValid φ` and `ck_soundness_derivable` helper (over `EValid`, not `MValid` — see deviation note; `MValid` soundness is false).
 - **Estimated output:** ~120-200 lines. **Done when:** `ck_soundness` builds sorry-free over `MValid`; no `IValid` anywhere; gates pass.
 - **Timing:** 2-3h
 - **Depends on:** 1 (independent of the segment construction — runs parallel to Phase 2; wave-serialized on `CK.lean` after Phase 1)

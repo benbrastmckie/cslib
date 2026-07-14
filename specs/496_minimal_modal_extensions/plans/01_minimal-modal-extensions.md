@@ -108,7 +108,7 @@ extends MS4's, and barrel wiring depends on all files existing. (Phases 2–4 co
 parallelized on independent axiom bases, but the axiom-inheritance chain and the single shared
 `Cslib.lean` touch make strict sequencing the safe default under concurrent-session pressure.)
 
-### Phase 1: MinExtension.lean scaffold [NOT STARTED]
+### Phase 1: MinExtension.lean scaffold [IN PROGRESS]
 
 **Goal**: Create the FC-parameterized completeness scaffold — the birelational analogue of IK's
 `Extension.lean`, keeping arbitrary `botForces`.

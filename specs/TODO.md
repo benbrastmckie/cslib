@@ -1,5 +1,5 @@
 ---
-next_project_number: 507
+next_project_number: 508
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 507
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,496,497,501,502,503 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,484,504,505,506 | 36,37,181,317,407,425,449,496,503 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
-| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,496,497,501,502,507 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,484,503 | 36,37,181,317,407,425,449,496,507 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,504,505,506 | 39,40,375,503 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -39,13 +40,14 @@ next_project_number: 507
 496 [PLANNED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
   └─ 484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
-503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
-  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-  └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-  └─ 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+507 [RESEARCHED] — Complete task 503's Phase 3 (plans/01_generalize-tableau-driver-t
+  └─ 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+    └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+    └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+    └─ 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
 ### Temporal Logic
 
@@ -88,6 +90,18 @@ next_project_number: 507
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
 ## Tasks
+
+### 507. Generalize k fmp termination measure over ruleapplicationspec
+- **Effort**: 12-16 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]
+
+**Description**: Complete task 503's Phase 3 (plans/01_generalize-tableau-driver-tsystem.md): generalize Cslib/Logics/Modal/Tableau/FmpMeasure.lean's rule-dependent termination/FMP step lemmas -- modalStepBranch_potential_step (~line 2146), modalStepBranch_worldBound (~line 2376), and modalExpMeasure_step_lt (~line 2873) -- to take an abstract (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) in place of the concrete modalApplyOne, defined in Cslib/Logics/Modal/Tableau/GenericDriver.lean (commit d5b24e67). Before attempting the top-level lemmas, first re-derive the ~900-line dependency chain generically: modalStepBranch_exists_rank' (~line 1058), modalStepBranch_knownWorlds (~line 1901), modalStepBranch_preserves_outDegEq (~line 1365), outDeg_le_of_expandedNodup (~line 1509), and ~10 further private helpers (FmpMeasure.lean lines ~1058-2415), each of which today independently rcases on modalApplyOne's four concrete RuleResult shapes (propositional/boxPos/diamondNeg/diamondPos/boxNeg) rather than going through RuleApplicationSpec. This will likely require extending RuleApplicationSpec (GenericDriver.lean) with additional fields capturing the exact outDeg/rank-map interaction at the fresh-world mint point (not just 'a fresh edge is added', but 'the fresh edge's source outDeg was < Sf beforehand, by exactly the amount the catalog bounds') so the existing geomCap-based EXACT potential-drop identity (lines ~2251-2270) can be replayed generically, not merely bounded. Keep modalUniverse/modalWork/modalExpMeasure/modalFuel (world-agnostic size bounds) unchanged -- only the rule-dependent step lemmas move behind the interface. Re-instantiate K's termination lemmas as the generic lemmas applied to modalApplyOne + the already-proved modalApplyOne_spec witness (Phase 2), and confirm FmpMeasure.lean's existing K corollaries and CompletenessLoop.lean's uses still typecheck via the Phase-1 modalStepBranch_eq/modalExpandBranches_eq/modalTableau_eq bridge lemmas (Saturation.lean, commit e9f350c7). Zero regression to K's public theorem statements; zero sorry; zero axiom. If any sub-piece cannot close sorry-free, mark the affected sub-goal [BLOCKED] with the exact open lemma name and goal state documented, and sequence the remainder into further phases within this task's own plan rather than deferring silently. Run the full CSLib CI (lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake exe mk_all --module, lake shake) at every milestone. On completion this unblocks task 503's Phases 4-7 (T driver instantiation, T truth lemma, Decidable (tValid phi)) and is a prerequisite for tasks 504 (S5/KB5) and 505 (B), which are documented to reuse the same generic termination measure. Task 506 (S4) is explicitly out of scope -- its transitive-box termination argument is structurally different and not an instance of this interface.
+
+---
 
 ### 506. S4 loopchecking machinery termination bound and decidability
 - **Effort**: 8-12 hours
@@ -139,7 +153,7 @@ next_project_number: 507
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 507
 - **Research**:
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]

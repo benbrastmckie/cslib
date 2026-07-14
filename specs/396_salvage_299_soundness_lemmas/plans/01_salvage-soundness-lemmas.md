@@ -192,7 +192,7 @@ monomorphic `{W : Type}` convention.
 
 ---
 
-### Phase 4: Propositional-Rule Satisfaction Bridge [NOT STARTED]
+### Phase 4: Propositional-Rule Satisfaction Bridge [COMPLETED]
 
 **Goal**: Add `applyPropRule_sat` and `tryAllPropRules_sat` — the reusable bridge theorem that
 applying a propositional rule to a satisfied signed formula preserves satisfiability — with and/or

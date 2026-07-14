@@ -180,6 +180,204 @@ def RuleResultSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
   | .persistent newForms => ∀ sf ∈ newForms, sfSat m f sf
   | .notApplicable => True
 
+/-- Applying any single propositional rule to a satisfied signed formula preserves
+satisfiability of its output.
+
+The `andPos`/`andNeg`/`orPos`/`orNeg` arms consume the native-restated
+`modalAndOf?_eq_some` / `modalOrOf?_eq_some` (task 441: `Satisfies` unfolds `.and`/`.or`
+directly to `∧`/`∨`, so these arms are simpler than the pre-441 Lukasiewicz-encoded
+version: `andNeg`/`orPos`/`impPos` still need `Classical.em` to pick a branch, but
+`andPos`/`orNeg` extract components/de Morgan constructively with no classical step).
+The `negPos`/`negNeg`/`impPos`/`impNeg` arms transfer directly from the branch reference,
+since negation/implication are unaffected by task 441. -/
+lemma applyPropRule_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (rule : PropTableauRule)
+    (hsf : sfSat m f sf) :
+    RuleResultSat m f (applyPropRule modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf rule) := by
+  obtain ⟨hP, hN⟩ := hsf
+  cases rule with
+  | andPos =>
+    cases hs : sf.sign with
+    | neg => simp [applyPropRule, hs, RuleResultSat]
+    | pos =>
+      have hsat := hP hs
+      simp only [applyPropRule, hs]
+      cases hd : modalAndOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalAndOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        obtain ⟨hψ, hχ⟩ := hsat
+        simp only [RuleResultSat]
+        intro x hx
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+        rcases hx with rfl | rfl
+        · exact sfSat_pos m f ψ sf.label hψ
+        · exact sfSat_pos m f χ sf.label hχ
+  | andNeg =>
+    cases hs : sf.sign with
+    | pos => simp [applyPropRule, hs, RuleResultSat]
+    | neg =>
+      have hsat := hN hs
+      simp only [applyPropRule, hs]
+      cases hd : modalAndOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalAndOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        rcases Classical.em (Satisfies m (f sf.label) ψ) with hψ | hψ
+        · refine ⟨[SignedFormula.neg χ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_neg m f χ sf.label (fun hχ => hsat ⟨hψ, hχ⟩)
+        · refine ⟨[SignedFormula.neg ψ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_neg m f ψ sf.label hψ
+  | orPos =>
+    cases hs : sf.sign with
+    | neg => simp [applyPropRule, hs, RuleResultSat]
+    | pos =>
+      have hsat := hP hs
+      simp only [applyPropRule, hs]
+      cases hd : modalOrOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalOrOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        rcases hsat with hψ | hχ
+        · refine ⟨[SignedFormula.pos ψ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_pos m f ψ sf.label hψ
+        · refine ⟨[SignedFormula.pos χ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_pos m f χ sf.label hχ
+  | orNeg =>
+    cases hs : sf.sign with
+    | pos => simp [applyPropRule, hs, RuleResultSat]
+    | neg =>
+      have hsat := hN hs
+      simp only [applyPropRule, hs]
+      cases hd : modalOrOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalOrOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [not_or] at hsat
+        obtain ⟨hψ, hχ⟩ := hsat
+        simp only [RuleResultSat]
+        intro x hx
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+        rcases hx with rfl | rfl
+        · exact sfSat_neg m f ψ sf.label hψ
+        · exact sfSat_neg m f χ sf.label hχ
+  | impPos =>
+    cases hs : sf.sign with
+    | neg => simp [applyPropRule, hs, RuleResultSat]
+    | pos =>
+      have hsat := hP hs
+      simp only [applyPropRule, hs]
+      cases hd : modalImpOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalImpOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        rcases Classical.em (Satisfies m (f sf.label) ψ) with hψ | hψ
+        · refine ⟨[SignedFormula.pos χ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_pos m f χ sf.label (hsat hψ)
+        · refine ⟨[SignedFormula.neg ψ sf.label], by simp, ?_⟩
+          intro x hx
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hx
+          subst hx
+          exact sfSat_neg m f ψ sf.label hψ
+  | impNeg =>
+    cases hs : sf.sign with
+    | pos => simp [applyPropRule, hs, RuleResultSat]
+    | neg =>
+      have hsat := hN hs
+      simp only [applyPropRule, hs]
+      cases hd : modalImpOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some p =>
+        obtain ⟨ψ, χ⟩ := p
+        rw [modalImpOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        intro x hx
+        simp only [SignedFormula.pos, SignedFormula.neg, List.mem_cons,
+          List.not_mem_nil, or_false] at hx
+        rcases hx with rfl | rfl
+        · exact sfSat_pos m f ψ sf.label
+            (Classical.byContradiction fun hnp => hsat fun hp => absurd hp hnp)
+        · exact sfSat_neg m f χ sf.label (fun hχ => hsat fun _ => hχ)
+  | negPos =>
+    cases hs : sf.sign with
+    | neg => simp [applyPropRule, hs, RuleResultSat]
+    | pos =>
+      have hsat := hP hs
+      simp only [applyPropRule, hs]
+      cases hd : modalNegOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some ψ =>
+        rw [modalNegOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        intro x hx
+        simp only [SignedFormula.neg, List.mem_cons, List.not_mem_nil, or_false] at hx
+        subst hx
+        exact sfSat_neg m f ψ sf.label hsat
+  | negNeg =>
+    cases hs : sf.sign with
+    | pos => simp [applyPropRule, hs, RuleResultSat]
+    | neg =>
+      have hsat := hN hs
+      simp only [applyPropRule, hs]
+      cases hd : modalNegOf? sf.formula with
+      | none => simp [RuleResultSat]
+      | some ψ =>
+        rw [modalNegOf?_eq_some hd] at hsat
+        simp only [Satisfies] at hsat
+        simp only [RuleResultSat]
+        intro x hx
+        simp only [SignedFormula.pos, List.mem_cons, List.not_mem_nil, or_false] at hx
+        subst hx
+        exact sfSat_pos m f ψ sf.label (Classical.byContradiction hsat)
+
+/-- The first applicable propositional rule found by `tryAllPropRules` preserves
+satisfiability of a satisfied signed formula. -/
+lemma tryAllPropRules_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsf : sfSat m f sf) :
+    RuleResultSat m f (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf) := by
+  simp only [tryAllPropRules]
+  cases hfind : ([PropTableauRule.andPos, .andNeg, .orPos, .orNeg, .impPos, .impNeg, .negPos,
+      .negNeg].map (applyPropRule modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf ·)).find?
+      (·.isApplicable) with
+  | none => simp [RuleResultSat]
+  | some r =>
+    simp only [Option.getD_some]
+    have hmem := List.mem_of_find?_eq_some hfind
+    simp only [List.mem_map] at hmem
+    obtain ⟨rule, -, hr⟩ := hmem
+    rw [← hr]
+    exact applyPropRule_sat m f sf rule hsf
+
 /-! ## Rule-Application Semantic Preservation -/
 
 /-- The freshness invariant: all world indices in `acc` are strictly below `modalNextWorld b`.

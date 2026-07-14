@@ -289,19 +289,33 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 3: Generic rank-existence + accessibility helpers [NOT STARTED]
+### Phase 3: Generic rank-existence + accessibility helpers [COMPLETED]
 
 - **Goal:** Re-derive the rank-existence machinery generically. Cluster: `FmpMeasure.lean`
   lines ~1019–1280 (plus the pure edge helper at 1047).
 - **Tasks:**
-  - [ ] Generalize `modalStepBranch_exists_rank'` (line 1060, ~220 lines) to `_gen` over
+  - [x] Generalize `modalStepBranch_exists_rank'` (line 1060, ~220 lines) to `_gen` over
     `modalStepBranchGen apply` + `spec`, discharging its `(modalApplyOne …).fst/.snd` `rcases` from
     `spec.freshLocal` (the mint-vs-no-mint dichotomy) and the Phase-1 mint-point rank field.
-  - [ ] Generalize/reuse the supporting helpers `diamondNeg_rank_bound` (1019) and
+    *(finding: no separate `freshLocal`/mint-point field needed here — the whole body, once the
+    Phase-1 `rankStep` per-call fact is available, only case-splits on `RuleResult`'s 4
+    constructor shapes (rule-agnostic) plus one straightforward `(apply sf b acc).snd` rewrite;
+    `modalStepBranch_exists_rank'_gen` added in `FmpMeasure.lean` takes the raw `hRankStep`
+    hypothesis per the Architectural Note; `GenericDriver.lean`'s
+    `modalStepBranchGen_exists_rank'` supplies the `(apply, spec)`-bundled wrapper.)*
+  - [x] Generalize/reuse the supporting helpers `diamondNeg_rank_bound` (1019) and
     `hasEdge_addEdge_cases_local` (1047, pure `Accessibility` — reuse unchanged if rule-agnostic).
-  - [ ] Re-derive the concrete K `modalStepBranch_exists_rank'` as
-    `_gen … modalApplyOne modalApplyOne_spec`; keep the internal callers green.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom.
+    *(deviation: skipped — both are already fully rule-agnostic private helpers with no
+    `modalApplyOne`/`modalStepBranch` reference; reused unchanged.)*
+  - [x] Re-derive the concrete K `modalStepBranch_exists_rank'` as
+    `_gen … modalApplyOne modalApplyOne_spec`; keep the internal callers green. *(realized as
+    `modalStepBranch_exists_rank' := by rw [modalStepBranch_eq] at hstep; exact
+    modalStepBranch_exists_rank'_gen modalApplyOne modalApplyOne_rank_step ...` — statement
+    byte-unchanged.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom. *(confirmed via `lake env lean` + `#print
+    axioms`: all three of `modalStepBranch_exists_rank'_gen`/`modalStepBranch_exists_rank'`/
+    `modalStepBranchGen_exists_rank'` = `{propext, Quot.sound}`, zero sorry. Full CI green;
+    `lake shake` warning count on the two files unchanged at 82.)*
 - **Timing:** 2 hours
 - **Depends on:** 2
 - **Files to modify:**

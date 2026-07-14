@@ -1199,15 +1199,34 @@ lemma modalApplyOne_rank_step
           exact ⟨rank, fun _ _ => rfl, hedge,
             diamondNeg_rank_bound b acc φ l rank hbound hedge hφdia⟩
 
-/-- **P2-obl-b**: given `rank` satisfying the rank-bound and rank-edge invariants pre-step,
-`modalStepBranch` produces a `rank'` (agreeing with `rank` off the single fresh point
-`modalNextWorld b`, when a world is minted by `diamondPos`/`boxNeg`) satisfying both invariants
-on every child branch and the post-step accessibility relation `newAcc`. -/
-lemma modalStepBranch_exists_rank'
+/-- **Task 507 Phase 3 (generic form)**: given `rank` satisfying the rank-bound and rank-edge
+invariants pre-step, `modalStepBranchGen apply` produces a `rank'` (agreeing with `rank` off the
+single fresh point `modalNextWorld b`) satisfying both invariants on every child branch and the
+post-step accessibility relation `newAcc`, given the per-call rank-step obligation `hRankStep`
+(the raw hypothesis underlying `RuleApplicationSpec.rankStep`, spelled out here rather than
+bundled to avoid the import cycle with `GenericDriver.lean` -- see the plan's "Architectural
+Note"). `modalStepBranch_exists_rank'` (K) is the trivial instantiation at
+`apply := modalApplyOne`, `hRankStep := modalApplyOne_rank_step`. -/
+lemma modalStepBranch_exists_rank'_gen
+    (apply : RuleApply Atom)
+    (hRankStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accFreshInv b acc →
+      ∀ (rank : WorldIndex → Nat),
+      (∀ x ∈ b, modalDepth x.formula ≤ rank x.label) →
+      (∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) →
+      ∃ rank' : WorldIndex → Nat,
+        (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+        (∀ w w', (apply sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+          | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .notApplicable => True))
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hInv : accFreshInv b acc)
     (rank : WorldIndex → Nat)
     (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
@@ -1216,13 +1235,13 @@ lemma modalStepBranch_exists_rank'
       (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
       (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
       (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases := modalApplyOne_rank_step sf b acc hsfmem hInv rank hbound hedge
+  have hcases := hRankStep sf b acc hsfmem hInv rank hbound hedge
   obtain ⟨rank', hragree, hredge, hrmatch⟩ := hcases
-  have hnewAcc : newAcc = (modalApplyOne sf b acc).snd := by
-    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  have hnewAcc : newAcc = (apply sf b acc).snd := by
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
     · rw [hfstc] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       exact hsf.2.2.symm
@@ -1234,7 +1253,7 @@ lemma modalStepBranch_exists_rank'
       exact hsf.2.2.symm
     · rw [hfstc] at hsf; simp at hsf
   refine ⟨rank', hragree, ?_, hnewAcc ▸ hredge⟩
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hrmatch
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro b' hb'
@@ -1277,6 +1296,29 @@ lemma modalStepBranch_exists_rank'
       rw [hragree x.label hxlab]
       exact hbound x hx
   · rw [hfstc] at hsf; simp at hsf
+
+/-- **P2-obl-b**: given `rank` satisfying the rank-bound and rank-edge invariants pre-step,
+`modalStepBranch` produces a `rank'` (agreeing with `rank` off the single fresh point
+`modalNextWorld b`, when a world is minted by `diamondPos`/`boxNeg`) satisfying both invariants
+on every child branch and the post-step accessibility relation `newAcc`. Zero-regression
+corollary of `modalStepBranch_exists_rank'_gen` (task 507 Phase 3) at `apply := modalApplyOne`
+via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_exists_rank'
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hInv : accFreshInv b acc)
+    (rank : WorldIndex → Nat)
+    (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
+    (hedge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
+      (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_exists_rank'_gen modalApplyOne modalApplyOne_rank_step
+    b e acc newBs newExps newAcc hstep hInv rank hbound hedge
 
 
 /-! ## Out-Degree Bound (Phase 2 continuation, obligation c)

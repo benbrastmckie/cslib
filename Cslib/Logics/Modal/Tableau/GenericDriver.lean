@@ -240,6 +240,30 @@ theorem modalStepBranchGen_preserves_outDegEq
   modalStepBranch_preserves_outDegEq_gen apply spec.outDegStep
     b e acc newBs newExps newAcc hstep houtdeg
 
+/-! ## Task 507 Phase 3: Generic Rank-Existence (spec-bundled) -/
+
+/-- **Task 507 Phase 3**: given `rank` satisfying the rank-bound/rank-edge invariants pre-step,
+`modalStepBranchGen apply` produces a `rank'` satisfying both invariants on every child branch,
+bundled via `RuleApplicationSpec` (thin wrapper around `modalStepBranch_exists_rank'_gen`,
+`FmpMeasure.lean`, which takes the raw `rankStep` hypothesis directly to avoid the import cycle
+documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_exists_rank'
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hInv : accFreshInv b acc)
+    (rank : WorldIndex → Nat)
+    (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
+    (hedge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
+      (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) :=
+  modalStepBranch_exists_rank'_gen apply spec.rankStep
+    b e acc newBs newExps newAcc hstep hInv rank hbound hedge
+
 end Cslib.Logic.Modal.Tableau
 
 end

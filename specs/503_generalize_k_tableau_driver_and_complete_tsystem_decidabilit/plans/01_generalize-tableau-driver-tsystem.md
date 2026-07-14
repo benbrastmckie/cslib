@@ -179,13 +179,13 @@ phase must be a single agent run ending at a green, zero-sorry milestone with a 
 
 ---
 
-### Phase 2: Structural-hypothesis interface bundle [NOT STARTED]
+### Phase 2: Structural-hypothesis interface bundle [COMPLETED]
 
 - **Goal:** Define, in a new file, the explicit structural-hypothesis bundle a rule extension must
   satisfy to reuse the K-style termination measure, and prove `modalApplyOne` satisfies it (the
   trivial witness). This fixes the interface tasks 504/505 will discharge.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Modal/Tableau/GenericDriver.lean` (name per ORGANISATION.md); define a
+  - [x] Create `Cslib/Logics/Modal/Tableau/GenericDriver.lean` (name per ORGANISATION.md); define a
     `structure RuleApplicationSpec (apply)` (or a bundle of named `Prop` fields) capturing:
     (a) **world-creation confinement** — `apply sf b acc` extends `acc` with a new edge/world only
     when the K `diamondPos`/`boxNeg` dispatch on `sf` would (state via agreement with
@@ -193,15 +193,30 @@ phase must be a single agent run ending at a green, zero-sorry milestone with a 
     `apply`'s output at world `w` is a member of `modalUniverse φ0` for the ambient `φ0`;
     (c) the persistence/measure hooks the FMP measure consumes (mirror
     `modalApplyOne_persistent_props`, `modalWork_drop_persistent` obligations).
-  - [ ] Derive the exact field list from what `FmpMeasure.lean`'s `modalStepBranch_potential_step`
+  - [x] Derive the exact field list from what `FmpMeasure.lean`'s `modalStepBranch_potential_step`
     (line 2146) and `modalStepBranch_worldBound` (line 2376) actually use about `modalApplyOne` —
     read those lemmas' proofs and lift each concrete `modalApplyOne` fact into a bundle field.
-  - [ ] Prove `modalApplyOne_spec : RuleApplicationSpec modalApplyOne` (trivial witness — each field
+    *(deviation: altered -- read the two target lemmas plus their direct dependency chain
+    (`modalStepBranch_exists_rank'`, `modalStepBranch_knownWorlds`, `modalApplyOne_fresh_local`,
+    `modalApplyOne_outputs_subset`, `modalApplyOne_persistent_props`) and derived three fields
+    (`freshLocal`, `outputsSubsetUniverse`, `persistentFresh`) that are directly mirrored by
+    existing public K lemmas. This field set is well-motivated and is what `modalApplyOne_spec`'s
+    trivial witness needs, but it is NOT yet proven sufficient to re-derive
+    `modalStepBranch_potential_step` itself for an abstract `apply` -- that proof additionally
+    inlines ~15 private helper lemmas that case-split directly on `modalApplyOne`'s four concrete
+    rule shapes. This gap is documented in `GenericDriver.lean`'s module docstring
+    ("Known Limitation") and is the reason Phase 3 is marked [BLOCKED] below rather than attempted
+    inline.)*
+  - [x] Prove `modalApplyOne_spec : RuleApplicationSpec modalApplyOne` (trivial witness — each field
     holds by the existing K lemmas / reflexivity).
-  - [ ] Cross-check the field set against the S5-universal and B-backward rule shapes (spawn
+  - [x] Cross-check the field set against the S5-universal and B-backward rule shapes (spawn
     analysis §Task 2/§Task 3): confirm each can *in principle* discharge every field (document a
     one-line note per field), so the interface is not over-fit to T. Do not implement S5/B here.
-  - [ ] Docstring every field explaining what it guarantees and why the measure needs it; `lake
+    *(done via the module docstring's "Downstream Reuse" section: T/S5/B are all "never mint a
+    world themselves" rule extensions, so `freshLocal` is discharged by agreement with
+    `modalApplyOne` on every mint-shaped input in each case; S4 is explicitly documented as NOT
+    an instance.)*
+  - [x] Docstring every field explaining what it guarantees and why the measure needs it; `lake
     build`; full CI.
 - **Timing:** 2 hours
 - **Depends on:** 1

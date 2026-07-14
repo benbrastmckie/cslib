@@ -796,8 +796,10 @@ omit [Hashable Atom] in
 /-- Structural dispatch of `modalApplyOne`'s accessibility output, restated locally (mirrors
 the private `modalApplyOne_fresh` in `Soundness.lean:87`, which cannot be imported across
 files): the result is either `acc` unchanged, or `acc.addEdge sf.label wsf.label` with a
-`.linear` result headed by the fresh witness `wsf`. -/
-private lemma modalApplyOne_fresh_local
+`.linear` result headed by the fresh witness `wsf`. Not `private`: reused by
+`GenericDriver.lean`'s `modalApplyOne_spec` (task 503) to witness the
+`RuleApplicationSpec.freshLocal` field. -/
+lemma modalApplyOne_fresh_local
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) :

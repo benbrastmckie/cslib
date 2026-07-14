@@ -213,7 +213,7 @@ same `noncomputable`/Zorn's-lemma technique). `lean_verify` confirms the axiom f
 
 ---
 
-### Phase 3: MS4.lean (reflexivity + transitivity) [NOT STARTED]
+### Phase 3: MS4.lean (reflexivity + transitivity) [COMPLETED]
 
 **Goal**: Deliver MS4 — MT + transitivity (4 axiom).
 

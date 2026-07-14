@@ -590,7 +590,7 @@ new Lean `axiom`.
   (985 -> 1274 lines, purely additive); the four-file `Intuitionistic/` subtree's second file is
   finished.
 
-### Phase 3a: TruthLemma.lean — 5 non-modal case helpers [NOT STARTED]
+### Phase 3a: TruthLemma.lean — 5 non-modal case helpers [COMPLETED]
 
 - **Goal:** Create `TruthLemma.lean` and prove the five non-modal truth-lemma cases as standalone
   helper lemmas.
@@ -601,16 +601,24 @@ new Lean `axiom`.
   before the full recursion exists (assembled in 3c). Confirm each signature with `lean_goal`.
 - **Single deliverable:** `TruthLemma.lean` builds green containing the five helpers.
 - **Tasks:**
-  - [ ] Create `TruthLemma.lean` importing `CanonicalModel.lean` (Phase 2).
-  - [ ] Transliterate `atom`/`bot`/`and`/`or`/`imp` line-for-line from
+  - [x] Create `TruthLemma.lean` importing `CanonicalModel.lean` (Phase 2).
+  - [x] Transliterate `atom`/`bot`/`and`/`or`/`imp` line-for-line from
         `IntStrongCompleteness.lean:108-214` (`PL.Proposition`→`Modal.Proposition`,
         `IntPropAxiom`→`Axioms`) into helper lemmas; keep `botForces` a parameter (NOT hard-coded).
         Explicit `DerivationTree` term-mode style; no `simp`/`aesop`.
-  - [ ] Docstrings; `lake build` the module.
-- **Estimated output:** ~150-250 lines.
-- **Verification (targeted):** module builds; five helpers typecheck; `botForces` a parameter;
-  ZERO-DEBT; untouched-classical carried.
-- **Done when:** module builds; five helpers typecheck sorry-free.
+  - [x] Docstrings; `lake build` the module.
+- **Estimated output:** ~150-250 lines. **Actual:** ~330 lines (incl. docstrings + two supporting
+  helpers `canonical_bot_not_mem`/`canonical_imp_property`, both modal analogues of existing
+  `IntLindenbaum.lean` helpers, needed to keep the case proofs `simp`/`aesop`-free).
+- **Verification (targeted):** module builds (`lake build
+  Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma`, scoped, green, no warnings); five
+  helpers (`truth_atom_case`, `truth_bot_case`, `truth_and_case`, `truth_or_case`,
+  `truth_imp_case`) typecheck sorry-free; `botForces` a loose parameter throughout (bridged via an
+  explicit `h_bot` hypothesis in `truth_bot_case`, not hard-coded `fun _ => False`); `lean_verify`
+  on all five cases + the two helpers reports only `{propext, Classical.choice, Quot.sound}` (no
+  new axiom); `lake exe checkInitImports` and `lake exe lint-style` both pass with no output;
+  ZERO-DEBT; `CanonicalModel.lean` untouched (`git diff --stat` shows no change to that file).
+- **Done when:** module builds; five helpers typecheck sorry-free. -- **DONE.**
 - **Timing:** ~1.25 hours. **Depends on:** 2d.
 
 ### Phase 3b: .box case helper (threads Kb+Kd+Idb via witness) [NOT STARTED]

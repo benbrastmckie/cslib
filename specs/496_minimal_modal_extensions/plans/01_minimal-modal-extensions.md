@@ -178,7 +178,7 @@ same `noncomputable`/Zorn's-lemma technique). `lean_verify` confirms the axiom f
 
 ---
 
-### Phase 2: MT.lean (reflexivity) [NOT STARTED]
+### Phase 2: MT.lean (reflexivity) [COMPLETED]
 
 **Goal**: Deliver MT — MK + reflexivity (T axiom), the lowest-risk per-system file.
 

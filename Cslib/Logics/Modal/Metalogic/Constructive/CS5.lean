@@ -930,4 +930,71 @@ theorem cs5_diam_witness {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5Moda
             (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩)
     · exact hST (modal_subset_deductive_closure _ _ (Or.inr rfl))
 
+/-! ## The `CS5` World Type
+
+Lands the `CS5Segment` machinery deferred from Phase 5 (see that section's plan-ordering note):
+`cs5Seg`'s `diam_witness` field needs exactly `cs5_diam_witness` (Phase 6, now available).
+Mirrors `CS4.lean:341-455`/`:526-550`, but with **no** exclusion parameter — `cs5Tail` is
+determined by the head alone, so `CS5Segment` carries only its underlying segment and the
+tail-shape invariant. -/
+
+/-- The `CS5` canonical segment at head `H`: tail is exactly `cs5Tail H`. Unlike `cs4Seg`, needs
+no excluded-diamond parameter — `diam_witness` is `cs5_diam_witness` directly. -/
+def cs5Seg {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    CKSegment (@CS5ModalAxiom Atom) where
+  head := H
+  tail := cs5Tail H
+  head_qprime := hH
+  tail_qprime := fun _ ht => ht.1
+  box_reflect := fun _ hB _ ht => ht.2.1 hB
+  diam_witness := fun _A hA => cs5_diam_witness hH hA
+
+/-- `CS5` canonical worlds: segments whose tail is exactly the symmetric tail of their head. -/
+structure CS5Segment (Atom : Type u) where
+  /-- The underlying segment. -/
+  seg : CKSegment (@CS5ModalAxiom Atom)
+  /-- The tail is exactly the symmetric tail of the head. -/
+  tail_eq : seg.tail = cs5Tail seg.head
+
+instance : Preorder (CS5Segment Atom) := Preorder.lift (fun s : CS5Segment Atom => s.seg)
+
+/-- Canonical accessibility. -/
+def cs5Mreach (P Q : CS5Segment Atom) : Prop := cmreach P.seg Q.seg
+
+/-- The canonical world at head `H`. -/
+def CS5Segment.ofHead {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    CS5Segment Atom where
+  seg := cs5Seg hH
+  tail_eq := rfl
+
+/-- Canonical valuation. -/
+def cs5Val (s : CS5Segment Atom) (p : Atom) : Prop := cval s.seg p
+
+/-- Canonical fallibility. -/
+def cs5Bot (s : CS5Segment Atom) : Prop := cbotForces s.seg
+
+/-- `cs5Val` is upward-closed (segment analogue of `cval_upward_closed`). -/
+theorem cs5Val_upward_closed {w w' : CS5Segment Atom} (p : Atom) (h : w ≤ w')
+    (hv : cs5Val w p) : cs5Val w' p := cval_upward_closed p h hv
+
+/-- `cs5Bot` is upward-closed (segment analogue of `cbotForces_upward_closed`). -/
+theorem cs5Bot_upward_closed {w w' : CS5Segment Atom} (h : w ≤ w') (hb : cs5Bot w) :
+    cs5Bot w' := cbotForces_upward_closed h hb
+
+/-- Every atom is forced at an exploding world. -/
+theorem cs5Bot_val {w : CS5Segment Atom} (p : Atom) (hb : cs5Bot w) : cs5Val w p :=
+  cbotForces_val (fun φ => .efq φ) p hb
+
+/-- `cs5Bot` propagates along `cs5Mreach`. -/
+theorem cs5Bot_mreach {w u : CS5Segment Atom} (hb : cs5Bot w) (hr : cs5Mreach w u) :
+    cs5Bot u := cbotForces_mreach (fun φ => .efq φ) hb hr
+
+/-- Every exploding world has an exploding `cs5Mreach`-successor. -/
+theorem cs5Bot_mreach_wit {w : CS5Segment Atom} (hb : cs5Bot w) :
+    ∃ u : CS5Segment Atom, cs5Mreach w u ∧ cs5Bot u := by
+  obtain ⟨t, ht_mem, ht_bot⟩ :=
+    w.seg.diam_witness _ (mem_of_bot_mem (fun φ => .efq φ) w.seg.head_qprime.closed hb
+      (◇Proposition.bot))
+  exact ⟨CS5Segment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
+
 end Cslib.Logic.Modal

@@ -31,20 +31,19 @@ via the Łukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
 
 **Why is diamond primitive here (unlike the historical CSLib presentation)?** Classically,
 diamond can be derived from box as `◇φ := ¬□¬φ`, and box alone suffices for necessitation and
-the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so
-that: (1) the tableau and truth-lemma machinery get one decomposition rule per connective
-(structural induction, no Łukasiewicz-bridge lemmas), and (2) future non-classical modal
-logics (intuitionistic, minimal — see [Blackburn2001] Chapter 1, [ChagrovZakharyaschev1997]
-Section 3.1) can reuse this same datatype, since `□` and `◇` become independent operators in
-those settings. `HasDia` (`Foundations/Logic/Connectives.lean`) is instantiated below alongside
-`HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is recovered as a genuine *theorem*
-(`Satisfies.dual`, proved semantically) rather than holding definitionally (the corresponding
-Hilbert proof-system characterization is left to later PRs).
+the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so that:
+(1) the tableau and truth-lemma machinery get one decomposition rule per connective (structural
+induction, no Łukasiewicz-bridge lemmas), and (2) future non-classical modal logics
+(intuitionistic, minimal — see [Simpson1994]) can reuse this same datatype, since `□` and `◇`
+become independent operators in those settings. `HasDia` (`Foundations/Logic/Connectives.lean`)
+is instantiated below alongside `HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is
+recovered as a genuine *theorem* (`Satisfies.dual`, proved semantically) rather than holding
+definitionally (the corresponding Hilbert proof-system characterization is left to later PRs).
 
 ## References
 
 * [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
-* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997]
+* [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994]
 * The definitions of theory equivalence and the denotational semantics of worlds are inspired by
   the development of `Cslib.Logic.HML`.
 -/

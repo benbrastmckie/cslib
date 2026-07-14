@@ -31,17 +31,16 @@ via the Lukasiewicz convention: `¬φ := φ → ⊥`, `⊤ := ⊥ → ⊥`.
 
 **Why is diamond primitive here (unlike the historical CSLib presentation)?** Classically,
 diamond can be derived from box as `◇φ := ¬□¬φ`, and box alone suffices for necessitation and
-the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so
-that: (1) the tableau and truth-lemma machinery get one decomposition rule per connective
-(structural induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal
-logics (intuitionistic, minimal — see [Blackburn2001] Chapter 1, [ChagrovZakharyaschev1997]
-Section 3.1) can reuse this same datatype, since `□` and `◇` become independent operators in
-those settings. `HasDia` (`Foundations/Logic/Connectives.lean`) is instantiated below alongside
-`HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is recovered as a genuine *theorem*
-(`Satisfies.dual`, proved semantically) rather than holding definitionally; at the Hilbert
-proof-system level, the duality is recovered via the `AxiomDiaDualityFwd`/`AxiomDiaDualityBack`
-characterization schemata (see `Foundations/Logic/Axioms.lean`), instantiated for all systems
-in `ProofSystem/Instances/*.lean`.
+the K axiom. However, `diamond` is a native constructor (alongside `and`/`or`) so that:
+(1) the tableau and truth-lemma machinery get one decomposition rule per connective (structural
+induction, no Lukasiewicz-bridge lemmas), and (2) future non-classical modal logics
+(intuitionistic, minimal — see [Simpson1994]) can reuse this same datatype, since `□` and `◇`
+become independent operators in those settings. `HasDia` (`Foundations/Logic/Connectives.lean`)
+is instantiated below alongside `HasAnd`/`HasOr`. Classically, the duality `◇φ ↔ ¬□¬φ` is
+recovered as a genuine *theorem* (`Satisfies.dual`, proved semantically) rather than holding
+definitionally; at the Hilbert proof-system level, the duality is recovered via the
+`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata (see
+`Foundations/Logic/Axioms.lean`), instantiated for all systems in `ProofSystem/Instances/*.lean`.
 
 Note: The propositional formula type `PL.Proposition` has `and`/`or` as native constructors
 with `HasAnd`/`HasOr` instances; `Modal.Proposition` now mirrors this directly, additionally
@@ -52,6 +51,7 @@ of the shared `PL.Proposition.embed` skeleton), documented at its declaration si
 ## References
 
 * [P. Blackburn, M. de Rijke, Y. Venema, *Modal Logic*][Blackburn2001]
+* [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994]
 * The definitions of theory equivalence and the denotational semantics of worlds are inspired by
   the development of `Cslib.Logic.HML`.
 -/

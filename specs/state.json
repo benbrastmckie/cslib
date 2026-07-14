@@ -1,5 +1,5 @@
 {
-  "next_project_number": 500,
+  "next_project_number": 501,
   "active_projects": [
     {
       "project_number": 486,
@@ -2738,6 +2738,24 @@
       ],
       "session_id": "sess_1783982014_f7ba1f",
       "completion_summary": "Documentation-only CONTRIBUTING.md compliance fixes for PR #662 modal slice — all 6 phases complete, CI green, 3 local commits (not pushed). Phase 5 copyright-holder addition deliberately deferred pending maintainer confirmation."
+    },
+    {
+      "project_number": 500,
+      "project_name": "pr662_branch_reconciliation",
+      "status": "researched",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 498,
+      "description": "Reconcile the PR #662 branch so it is up to date with upstream and correctly stacked on #607 before any force-push. Investigation (see reports/01_branch-state-audit.md) found FOUR competing primitive designs across branches — live PR origin/feat/modal-formula-primitives is 5-primitive {atom,not,and,diamond,box} (8 behind upstream/main); local feat/modal-formula-primitives + v2 are 4-primitive {atom,bot,imp,box} (local diverged 24-behind/5-ahead of origin); task-441-native-refactor (where the task-499 citation/compliance work sits, uncommitted) is 7-primitive {atom,bot,imp,and,or,box,diamond} = slice 'version B' and has NO common git ancestor with the PR branch; base fmontesi/connectives (#607) and pr607 are 4-primitive {atom,not,and,diamond}. BLOCKING DECISION: choose the canonical design for PR #662 (needs user + likely maintainer Fabrizio input). Then rebuild a single PR-head branch rebased onto upstream/fmontesi/connectives, up to date w.r.t. upstream/main, carrying the chosen design + the task-499 compliance/citation work, resolving the task-441 disjoint-history problem; run full CSLib CI; only then force-push. Out of scope until confirmed: any push/push --force/rebase/reset, and the copyright-holder line change (separate maintainer gate). Related: 498 (modal foundational layer), 499 (CONTRIBUTING compliance + citations), 476 (PR coordination), 607/662 stacking.",
+      "created": "2026-07-13T00:00:00Z",
+      "last_updated": "2026-07-13T00:00:00Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/500_pr662_branch_reconciliation/reports/01_branch-state-audit.md",
+          "summary": "Audit of PR #662 branch state: 4 competing primitive designs, task-441 disjoint history, 8-commit upstream staleness, and where the task-499 work sits; lists the canonical-design decision and reconciliation steps needed before any force-push."
+        }
+      ]
     }
   ],
   "repository_health": {

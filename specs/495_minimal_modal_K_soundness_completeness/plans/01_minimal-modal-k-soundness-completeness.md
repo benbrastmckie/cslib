@@ -124,7 +124,22 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 
 ---
 
-### Phase 3: `MinCanonicalModel.lean` — canonical R + witnesses (CRUX, highest risk) [NOT STARTED]
+### Phase 3: `MinCanonicalModel.lean` — canonical R + witnesses (CRUX, highest risk) [COMPLETED]
+
+**Deviation note**: the plan anticipated reusing `box_refuting_theory`/`dia_refuting_theory`
+alone for both witnesses. Genuine effort revealed a real gap: `dia_refuting_theory`/
+`box_refuting_theory` alone establish only the "near" `canonicalR` clause; the "far" clause
+(diamond-image at the box witness, box-membership at the diamond witness) requires a
+Lindenbaum-**pair** (set-)exclusion construction, structurally analogous to IK's
+`Metalogic.prime_set_exclusion`/`modal_set_exclusion` -- but that machinery is *structurally*
+`efq`-dependent (its disjunction-property proof needs `bigOr_append_left`, whose empty-list base
+case is `⊥ → φ`). Resolution (implemented, not a placeholder): a bespoke, self-contained,
+**nonempty**-list reimplementation of the Lindenbaum-pair machinery (`bigOr1`/`bigAnd1`,
+terminating at the list *head* rather than at `⊥`), added entirely within
+`MinCanonicalModel.lean` (~650 new lines beyond the plan's ~150-350 estimate). This is *not* a
+duplication of `Constructive/Segment.lean` (which solves the different, single-clause `CKValid`
+problem) and *not* a duplication of `Intuitionistic/CanonicalModel.lean` (efq-dependent). All
+Phase 3 obligations close sorry-free; the Zero-Debt STOP clause was not triggered.
 
 **Goal**: Build the birelational ∃-diamond canonical accessibility relation over quasi-prime worlds and the box/diamond witnesses + F1/F2 confluence, using ONLY the efq-free segment lemmas. This is the single highest-risk phase.
 
@@ -158,7 +173,7 @@ First attempt the `dia_refuting_theory`-based diamond witness (and the `box_refu
 
 ---
 
-### Phase 4: `MinTruthLemma.lean` — canonical truth lemma [NOT STARTED]
+### Phase 4: `MinTruthLemma.lean` — canonical truth lemma [COMPLETED]
 
 **Goal**: Prove the canonical truth lemma over quasi-prime worlds by induction on the proposition.
 

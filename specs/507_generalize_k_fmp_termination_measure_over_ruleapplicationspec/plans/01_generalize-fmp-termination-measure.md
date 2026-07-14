@@ -369,23 +369,40 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 5: Generic potential-step crux (geomCap exact drop) [NOT STARTED]
+### Phase 5: Generic potential-step crux (geomCap exact drop) [COMPLETED]
 
 - **Goal:** Generalize the crux lemma `modalStepBranch_potential_step` (line 2148, ~160 lines) and
   the `ModalPotentialInv` structure (2118) over `(apply, spec)`, replaying the EXACT `geomCap`-based
   potential-drop identity (lines ~2251–2270) generically — not merely as a bound. This is the make-
   or-break phase the whole re-derivation was gated on.
 - **Tasks:**
-  - [ ] Generalize `structure ModalPotentialInv` (2118) if it references `modalApplyOne`; otherwise
+  - [x] Generalize `structure ModalPotentialInv` (2118) if it references `modalApplyOne`; otherwise
     reuse. Generalize `modalStepBranch_potential_step` to `_gen` over `modalStepBranchGen apply` +
     `spec`, feeding each mint-arm obligation from the Phase-1 mint-point field(s) and the generic
     Phase-2/3/4 results (`modalStepBranch_preserves_outDegEq_gen`, `modalStepBranch_exists_rank'_gen`,
-    `modalStepBranch_knownWorlds_gen`).
-  - [ ] Reproduce the `geomCap` EXACT numeric decrease from the spec's exact outDeg-at-mint field; if
+    `modalStepBranch_knownWorlds_gen`). *(confirmed: `ModalPotentialInv` is already fully
+    rule-agnostic — none of its 8 fields reference `modalApplyOne`/`modalStepBranch` — reused
+    unchanged. `modalStepBranch_potential_step_gen` added in `FmpMeasure.lean`, taking the four raw
+    hypotheses `hFreshLocal`/`hRankStep`/`hOutDegStep`/`hKnownWorldsStep` per the Architectural Note.
+    Also generalized `modalStepBranch_preserves_expandedNodup` to `_gen` here (needed by the crux;
+    fully rule-agnostic, no extra hypothesis) — the one residual generalization not finished in
+    Phases 2-4.)*
+  - [x] Reproduce the `geomCap` EXACT numeric decrease from the spec's exact outDeg-at-mint field; if
     the current field only yields a bound, extend `RuleApplicationSpec` with the missing exact-equality
     field, re-discharge it for `modalApplyOne` in `GenericDriver.lean`, and continue (stay green).
-  - [ ] Re-derive concrete K `modalStepBranch_potential_step` as `_gen … modalApplyOne modalApplyOne_spec`.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom.
+    *(confirmed: NO additional field was needed — the Phase-1 finding fully validated.
+    `RuleApplicationSpec`'s three original fields plus the three Phase-1 per-call step fields
+    (`rankStep`/`outDegStep`/`knownWorldsStep`) are jointly sufficient; the crux body, once its five
+    callee lemmas are generalized, is pure arithmetic (`geomCap_zero`/`geomCap_succ`/`Nat`/`ring`)
+    independent of `apply`.)*
+  - [x] Re-derive concrete K `modalStepBranch_potential_step` as `_gen … modalApplyOne modalApplyOne_spec`.
+    *(byte-identical-statement corollary via the `modalStepBranch_eq` bridge, as in Phases 2-4;
+    `GenericDriver.lean`'s `modalStepBranchGen_potential_step` supplies the `(apply, spec)`-bundled
+    wrapper.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom. *(confirmed via `lake env lean` + `#print axioms`:
+    all new/changed declarations `{propext, Classical.choice, Quot.sound}` or `{propext,
+    Quot.sound}`, zero sorry. Full CI green on first build attempt; `lake shake` warning count
+    still 81.)*
 - **Timing:** 3 hours (exceeds the 1–2h guideline by design — this is the crux; single-agent-run
   bounded; write an 80%-context handoff if approaching the limit).
 - **Depends on:** 4
@@ -396,10 +413,13 @@ phase task descriptions below should be read with this adjustment: "Files to mod
     if Phase-1 fields prove insufficient.
 - **Verification:**
   - `lake build` green; zero sorry/axiom; concrete K potential-step statement unchanged. Full CI clean.
-- **[BLOCKED] fallback:** If the EXACT `geomCap` identity cannot be replayed sorry-free (only bounded,
-  or a required exact field is unprovable for `modalApplyOne`), mark this phase **[BLOCKED]** with the
-  exact open lemma name, the goal state at the failing step, and which spec field is insufficient
-  (identity-vs-bound gap). Preserve Phases 1–4 green and committed. Never introduce `sorry`/`axiom`.
+- **[BLOCKED] fallback:** NOT triggered — the crux closed sorry-free on the first attempt, using
+  exactly the fields Phases 1-4 already established. No field-set insufficiency was found; the
+  `[BLOCKED]` contingency below is retained for the record but was not needed. If the EXACT
+  `geomCap` identity cannot be replayed sorry-free (only bounded, or a required exact field is
+  unprovable for `modalApplyOne`), mark this phase **[BLOCKED]** with the exact open lemma name,
+  the goal state at the failing step, and which spec field is insufficient (identity-vs-bound gap).
+  Preserve Phases 1–4 green and committed. Never introduce `sorry`/`axiom`.
 
 ---
 

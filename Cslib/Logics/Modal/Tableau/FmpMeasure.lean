@@ -817,30 +817,26 @@ lemma modalApplyOne_fresh_local
     | exact Or.inr ⟨_, _, rfl, rfl⟩
     | (left; simp only [apply_ite Prod.snd, ite_self])
 
-omit [Hashable Atom] in
-/-- **P2-obl-a** (precision refinement of the plan's "branch Nodup" shorthand): `modalStepBranch`
-preserves `Nodup`-ness of the **expanded set** `e`, not the raw branch `b`. This is the
-mathematically load-bearing fact for the out-degree bound (P2-obl-c): `b` itself is NOT
-generally `Nodup` (propositional α/β rule outputs, e.g. `andPos`'s `T(φ∧ψ)@w ↦ [T(φ)@w,
-T(ψ)@w]`, are emitted unconditionally with no `b`-membership filter, so duplicate branch
-entries can arise when `φ` or `ψ` coincides with an already-present formula — unlike the modal
-rules, which all filter their outputs against `b`). `e`, by contrast, IS exactly `Nodup`: a
-formula is appended to `e` only after the `¬(expanded.any (· == sf))` gate confirms it is not
-already present, so every append extends a `Nodup` list by a genuinely-new element. -/
-lemma modalStepBranch_preserves_expandedNodup
+/-- **Task 507 Phase 5 (generic form)**: `modalStepBranchGen apply` preserves `Nodup`-ness of the
+expanded set `e`, for **any** `apply : RuleApply Atom` -- fully rule-agnostic, no per-call
+obligation about `apply` needed (only the top-level `RuleResult`-constructor shape matters).
+`modalStepBranch_preserves_expandedNodup` (K) is the trivial instantiation at
+`apply := modalApplyOne`. -/
+lemma modalStepBranch_preserves_expandedNodup_gen
+    (apply : RuleApply Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hnodup : e.Nodup) :
     ∀ e' ∈ newExps, e'.Nodup := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hsfnotmem : sf ∉ e := by
     intro hmem
     exact hexp (by simp only [List.any_eq_true]; exact ⟨sf, hmem, by simp⟩)
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     obtain ⟨-, rfl, -⟩ := hsf
@@ -864,6 +860,28 @@ lemma modalStepBranch_preserves_expandedNodup
     subst he'
     exact hnodup
   · rw [hfstc] at hsf; simp at hsf
+
+/-- **P2-obl-a** (precision refinement of the plan's "branch Nodup" shorthand): `modalStepBranch`
+preserves `Nodup`-ness of the **expanded set** `e`, not the raw branch `b`. This is the
+mathematically load-bearing fact for the out-degree bound (P2-obl-c): `b` itself is NOT
+generally `Nodup` (propositional α/β rule outputs, e.g. `andPos`'s `T(φ∧ψ)@w ↦ [T(φ)@w,
+T(ψ)@w]`, are emitted unconditionally with no `b`-membership filter, so duplicate branch
+entries can arise when `φ` or `ψ` coincides with an already-present formula — unlike the modal
+rules, which all filter their outputs against `b`). `e`, by contrast, IS exactly `Nodup`: a
+formula is appended to `e` only after the `¬(expanded.any (· == sf))` gate confirms it is not
+already present, so every append extends a `Nodup` list by a genuinely-new element.
+Zero-regression corollary of `modalStepBranch_preserves_expandedNodup_gen` (task 507 Phase 5) at
+`apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_preserves_expandedNodup
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hnodup : e.Nodup) :
+    ∀ e' ∈ newExps, e'.Nodup := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_preserves_expandedNodup_gen modalApplyOne b e acc newBs newExps newAcc
+    hstep hnodup
 
 
 /-! ## Rank-Map Invariant (Phase 2 continuation, obligation b)
@@ -2325,22 +2343,75 @@ structure ModalPotentialInv (φ0 : Proposition Atom)
   /-- The rank map decreases by exactly 1 across every recorded accessibility edge (P2-obl-b). -/
   rankEdge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w
 
-/-- **P2-obl-d (finish)**: the exact single-step potential-drop identity. `modalStepBranch`
-preserves `modalMaxWorld b + modalPotential Sf b acc rank` EXACTLY (`Sf := (modalSubfmls
-φ0).length`), composing `modalStepBranch_exists_rank'` (P2-obl-b) for the rank map and
-`modalStepBranch_knownWorlds` (this file, above) for the known-worlds/max-world bookkeeping.
-The fresh-world case's `modalMaxWorld` increment of exactly `1` is offset by an exact `Φ`
-decrement of exactly `1`: writing `k := rank' (modalNextWorld b)` (pinned down exactly via
-`rank'`'s edge invariant applied to the new edge, composed with its off-fresh-point agreement
-with `rank`), the per-world potential term at the mint source `l` drops by exactly
-`geomCap Sf k`, which equals the fresh world's own potential term plus `1`
-(`geomCap_zero`/`geomCap_succ`, matching the two rank sub-cases `k = 0` and `k = k' + 1`). -/
-lemma modalStepBranch_potential_step
+/-- **Task 507 Phase 5 (generic form, the crux)**: the exact single-step potential-drop
+identity for an abstract `apply : RuleApply Atom`, given its four per-call/aggregate step
+obligations `hFreshLocal`/`hRankStep`/`hOutDegStep`/`hKnownWorldsStep` (the raw hypotheses
+underlying `RuleApplicationSpec.freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep`, spelled
+out here rather than bundled to avoid the import cycle with `GenericDriver.lean` -- see the
+plan's "Architectural Note"). `modalStepBranchGen apply` preserves `modalMaxWorld b +
+modalPotential Sf b acc rank` EXACTLY (`Sf := (modalSubfmls φ0).length`), composing
+`modalStepBranch_exists_rank'_gen` for the rank map and `modalStepBranch_knownWorlds_gen` for the
+known-worlds/max-world bookkeeping. The fresh-world case's `modalMaxWorld` increment of exactly
+`1` is offset by an exact `Φ` decrement of exactly `1`: writing `k := rank' (modalNextWorld b)`
+(pinned down exactly via `rank'`'s edge invariant applied to the new edge, composed with its
+off-fresh-point agreement with `rank`), the per-world potential term at the mint source `l` drops
+by exactly `geomCap Sf k`, which equals the fresh world's own potential term plus `1`
+(`geomCap_zero`/`geomCap_succ`, matching the two rank sub-cases `k = 0` and `k = k' + 1`). This
+is the **crux confirmation**: no field beyond these four (already established by Phases 1-4) is
+needed to replay the EXACT potential-drop identity generically -- the whole argument beyond the
+four composed helper calls is pure arithmetic (`geomCap`/`Nat`/`ring`), independent of `apply`.
+`modalStepBranch_potential_step` (K) is the trivial instantiation at `apply := modalApplyOne`. -/
+lemma modalStepBranch_potential_step_gen
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (hRankStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accFreshInv b acc →
+      ∀ (rank : WorldIndex → Nat),
+      (∀ x ∈ b, modalDepth x.formula ≤ rank x.label) →
+      (∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) →
+      ∃ rank' : WorldIndex → Nat,
+        (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+        (∀ w w', (apply sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+          | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .notApplicable => True))
+    (hOutDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) →
+      ∀ w, outDeg (apply sf b acc).snd w =
+        (List.filter (fun x => x.label == w && isMintingShaped x)
+          (match (apply sf b acc).fst with
+            | .linear _ => e ++ [sf]
+            | .branching _ => e ++ [sf]
+            | .persistent _ => e
+            | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length)
+    (hKnownWorldsStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accTargetsKnown b acc →
+      ((apply sf b acc).snd = acc ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((apply sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False)))
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility) (rank : WorldIndex → Nat)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hinv : ModalPotentialInv φ0 b e acc rank) :
     ∃ rank' : WorldIndex → Nat,
       (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
@@ -2351,13 +2422,14 @@ lemma modalStepBranch_potential_step
           modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank) := by
   obtain ⟨hb, hnodup, heclosure, hInv, hknown, houtdeg, hrankbound, hrankedge⟩ := hinv
   obtain ⟨rank', hragree, hrb', hre'⟩ :=
-    modalStepBranch_exists_rank' b e acc newBs newExps newAcc hstep hInv rank hrankbound
-      hrankedge
+    modalStepBranch_exists_rank'_gen apply hRankStep b e acc newBs newExps newAcc hstep hInv rank
+      hrankbound hrankedge
   refine ⟨rank', hragree, hrb', hre', ?_⟩
   set Sf := (modalSubfmls φ0).length with hSfdef
   have hnextne : ∀ w ∈ modalKnownWorlds b, w ≠ modalNextWorld b := fun w hw heq =>
     modalNextWorld_not_mem_modalKnownWorlds b (heq ▸ hw)
-  rcases modalStepBranch_knownWorlds b e acc newBs newExps newAcc hstep hknown with
+  rcases modalStepBranch_knownWorlds_gen apply hKnownWorldsStep b e acc newBs newExps newAcc
+      hstep hknown with
     ⟨hsame, hmax⟩ | ⟨l, hlknown, haddedge, hmax⟩
   · -- non-mint: acc and rank are unchanged on the relevant domain
     intro b' hb'
@@ -2395,13 +2467,14 @@ lemma modalStepBranch_potential_step
       rw [haddedge, outDeg_addEdge_ne acc l (modalNextWorld b) (modalNextWorld b) hlne.symm]
       exact houtdeg_fresh0
     -- bound outDeg acc l < Sf via the post-state e' and P2-obl-c
-    have heclosure' := modalStepBranch_eClosure φ0 b e acc newBs newExps newAcc hstep hb heclosure
-    have hnodup' := modalStepBranch_preserves_expandedNodup b e acc newBs newExps newAcc hstep
-      hnodup
-    have houtdegeq' := modalStepBranch_preserves_outDegEq b e acc newBs newExps newAcc hstep
-      houtdeg
+    have heclosure' := modalStepBranch_eClosure_gen apply φ0 b e acc newBs newExps newAcc hstep hb
+      heclosure
+    have hnodup' := modalStepBranch_preserves_expandedNodup_gen apply b e acc newBs newExps newAcc
+      hstep hnodup
+    have houtdegeq' := modalStepBranch_preserves_outDegEq_gen apply hOutDegStep b e acc newBs
+      newExps newAcc hstep houtdeg
     have hstepcopy := hstep
-    simp only [modalStepBranch] at hstepcopy
+    simp only [modalStepBranchGen] at hstepcopy
     obtain ⟨sf, hsfmem, hsf0⟩ := List.exists_of_findSome?_eq_some hstepcopy
     split_ifs at hsf0 with hexp
     have hsfU : sf ∈ modalUniverse φ0 := hb sf hsfmem
@@ -2413,10 +2486,10 @@ lemma modalStepBranch_potential_step
       have hlen := congrArg List.length hedges
       simp only [List.length_cons] at hlen
       omega
-    rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+    rcases hFreshLocal sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
     · exfalso
       apply hnewAccne
-      rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+      rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
       · rw [hfstc] at hsf0; simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
         exact hsf0.2.2.symm.trans hsame
       · rw [hfstc] at hsf0; simp only [Option.some.injEq, Prod.mk.injEq] at hsf0
@@ -2492,6 +2565,28 @@ lemma modalStepBranch_potential_step
       have hw'eq : modalNextWorld b = modalMaxWorld b + 1 := rfl
       rw [hmw, hstep1, hstep2, herase_eq, hstep2', ← hcore, hw'eq]
       ring
+
+/-- **P2-obl-d (finish)**: the exact single-step potential-drop identity. Zero-regression
+corollary of `modalStepBranch_potential_step_gen` (task 507 Phase 5) at `apply := modalApplyOne`
+via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_potential_step
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
+      (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+      (∀ b' ∈ newBs,
+        modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' =
+          modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank) := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_potential_step_gen modalApplyOne modalApplyOne_fresh_local
+    modalApplyOne_rank_step modalApplyOne_outDeg_step modalApplyOne_knownWorlds_step
+    φ0 b e acc newBs newExps newAcc rank hstep hinv
 
 /-! ## World-Count Bound (Phase 2 continuation, obligation e — final composition) -/
 

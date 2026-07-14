@@ -317,6 +317,34 @@ theorem modalStepBranchGen_eClosure
     ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
   modalStepBranch_eClosure_gen apply φ0 b e acc newBs newExps newAcc hstep hb heclosure
 
+/-! ## Task 507 Phase 5: Generic Potential-Step Crux (spec-bundled) -/
+
+/-- **Task 507 Phase 5 (the crux, spec-bundled)**: the exact single-step potential-drop identity
+for `modalStepBranchGen apply`, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalStepBranch_potential_step_gen`, `FmpMeasure.lean`, which takes the four raw hypotheses
+`freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep` directly to avoid the import cycle
+documented in the plan's "Architectural Note"). This is the crux confirmation for the whole
+task: `RuleApplicationSpec`'s three original fields plus the three Phase-1 per-call step fields
+are jointly **sufficient** to replay the EXACT `geomCap`-based potential-drop identity
+generically -- no further field is needed. -/
+theorem modalStepBranchGen_potential_step
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ b' ∈ newBs, ∀ x ∈ b', modalDepth x.formula ≤ rank' x.label) ∧
+      (∀ w w', newAcc.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+      (∀ b' ∈ newBs,
+        modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' =
+          modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank) :=
+  modalStepBranch_potential_step_gen apply spec.freshLocal spec.rankStep spec.outDegStep
+    spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv
+
 end Cslib.Logic.Modal.Tableau
 
 end

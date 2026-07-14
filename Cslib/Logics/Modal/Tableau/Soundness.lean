@@ -105,25 +105,35 @@ private lemma modalApplyOne_fresh
         | exact Or.inr ⟨_, _, rfl, rfl⟩
         | (left; simp only [apply_ite Prod.snd, ite_self])
 
-/-- **Freshness maintenance** (task-364 obligation 1): `modalStepBranch` preserves the per-branch
-freshness invariant `accFreshInv`. Every child branch produced satisfies `accFreshInv` against the
-post-step accessibility relation. This is the only genuinely new semantic obligation; the
-anti-monotonicity obligations of the original design are eliminated structurally by the per-branch
-`accs` scheme. -/
-lemma modalStepBranch_preserves_accFreshInv
+/-- **Freshness maintenance, generic (task 510)**: `modalStepBranchGen apply` preserves the
+per-branch freshness invariant `accFreshInv`, given the raw `freshLocal`-shaped hypothesis
+`hFreshLocal` for `apply` (`RuleApplicationSpec`'s F1 field, `GenericDriver.lean`). Kept as a raw
+hypothesis rather than a bundled `spec : RuleApplicationSpec apply` argument: `RuleApplicationSpec`
+is defined in `GenericDriver.lean`, which this file must stay upstream of (`Soundness.lean`'s own
+import surface is `Saturation`/`SoundnessStep`/`LoopInduction` only) -- mirrors 507's
+"Architectural Note" pattern in `GenericDriver.lean`. Body is `modalStepBranch_preserves_
+accFreshInv`'s exact proof with `modalApplyOne ↦ apply` and `modalApplyOne_fresh sf b acc ↦
+hFreshLocal sf b acc`. -/
+lemma modalStepBranch_preserves_accFreshInv_gen
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
     (b e : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hInv : accFreshInv b acc) :
     ∀ b' ∈ newBs, accFreshInv b' newAcc := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  rcases modalApplyOne_fresh sf b acc with hacc | ⟨wsf, rest, hfst, hacc⟩
+  rcases hFreshLocal sf b acc with hacc | ⟨wsf, rest, hfst, hacc⟩
   · -- accessibility unchanged: every child branch has the form `xs ++ b`
-    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
     · rw [hfstc, hacc] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       obtain ⟨rfl, _, rfl⟩ := hsf
@@ -153,6 +163,26 @@ lemma modalStepBranch_preserves_accFreshInv
     · obtain ⟨ha, ha'⟩ := hInv a a' hold
       exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append (wsf :: rest) b),
              Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append (wsf :: rest) b)⟩
+
+/-- **Freshness maintenance** (task-364 obligation 1): `modalStepBranch` preserves the per-branch
+freshness invariant `accFreshInv`. Every child branch produced satisfies `accFreshInv` against the
+post-step accessibility relation. This is the only genuinely new semantic obligation; the
+anti-monotonicity obligations of the original design are eliminated structurally by the per-branch
+`accs` scheme.
+
+Byte-identical-statement corollary of `modalStepBranch_preserves_accFreshInv_gen` (task 510),
+recovered via `modalStepBranch_eq` and K's own `modalApplyOne_fresh` (which is exactly the
+`freshLocal`-shaped hypothesis the generic lemma needs). -/
+lemma modalStepBranch_preserves_accFreshInv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hInv : accFreshInv b acc) :
+    ∀ b' ∈ newBs, accFreshInv b' newAcc :=
+  modalStepBranch_preserves_accFreshInv_gen modalApplyOne modalApplyOne_fresh b e acc newBs
+    newExps newAcc (modalStepBranch_eq b e acc ▸ hstep) hInv
 
 /-! ## Main Fuel-Induction Soundness Lemma -/
 

@@ -358,7 +358,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 4: Close the 507 accFreshInv gap in Soundness.lean [NOT STARTED]
+### Phase 4: Close the 507 accFreshInv gap in Soundness.lean [COMPLETED]
 
 - **Goal:** Deliver `modalStepBranch_preserves_accFreshInv_gen` — the one step lemma
   `modalStep_preserves_invariant` composes that task 507 did not generalize (report §6). Needs only the

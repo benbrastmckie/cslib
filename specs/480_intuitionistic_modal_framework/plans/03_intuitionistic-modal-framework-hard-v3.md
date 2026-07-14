@@ -307,7 +307,38 @@ declarations**.
   existing decls byte-for-byte unchanged; `Wijesekera1990` in `references.bib`. **DONE.**
 - **Timing:** ~2 hours. **Depends on:** none new (do FIRST after 2a; blocks 2b-sublemma/2b).
 
-### Phase 2b-sublemma: box_witness_pair_underivable (K◇) [NOT STARTED] — HIGHEST RISK
+### Phase 2b-sublemma: box_witness_pair_underivable (K◇) [PARTIAL] — HIGHEST RISK
+
+- **STOP CONTINGENCY INVOKED (dispatch `sess_1784011298_752245_480`)**: real, sustained effort was
+  spent attempting a sorry-free proof of `box_witness_pair_underivable` using only the hypotheses
+  scoped in this phase (`h_implyK/S`, `h_efq`, `h_orE/h_orI1/h_orI2`, `h_K`, `h_Kdia`). The proof
+  genuinely resists closing with exactly these hypotheses, and — crucially — this was tracked down
+  to a **concrete, citable counterexample to the report's H3 grounding claim**, not implementer
+  error. Full detail in `.orchestrator-handoff.json` (`blockers[0]`) and the summary below. In
+  short: the reference mechanization this phase is grounded on
+  (`ianshil/CK`, `theories/Completeness_th/general_th_completeness.v`, Box case, lines ~211–249)
+  proves the exact analogue of `box_witness_pair_underivable` using **not only** `Kd` (K◇, our
+  `h_Kdia`) **but also** the Fischer-Servi axiom `Idb A B := (◇A → □B) → □(A → B)`
+  (`theories/GHC/CKH.v:34`), invoked at line 231
+  (`apply Ax ; right ; right ; eexists ; eexists ; right ; reflexivity`) to convert the derived
+  fact `◇(⋀ dl') → □(list_disj l')` into `□(⋀dl' → list_disj l')` — precisely the step needed to
+  then invoke `h_sub`/`{ψ|□ψ∈w}⊆u`. Report 02's claim that the sub-lemma "depends only on the
+  axioms `AxiomK` and K◇" is **not supported by the very reference it cites**; the reference
+  needs a THIRD hypothesis (`h_Idb`) that is absent from this phase's (and Phase 2b's) scoped
+  hypothesis list. No amount of re-deriving from `h_Kdia`+`h_K`+`h_orE`+`h_efq` alone closes the
+  multi-diamond-witness case (`m ≥ 1` uses of `{◇A|A∈u.val}` in a single derivation) without
+  either (a) an `Idb`-shaped bridge hypothesis, or (b) conjunction (`h_andI`) to combine multiple
+  diamond witnesses into one — neither of which this phase's settled design supplies.
+- **Recommended next action**: re-plan (via `/revise 480` or `/research 480 --hard --lit`,
+  narrowly scoped) to add `h_Idb : ∀ A B, Axioms (((◇A).imp (□B)).imp (□(A.imp B)))` as an
+  explicit parametric hypothesis to `box_witness_pair_underivable`/`canonical_box_witness` (and
+  check whether `canonical_diamond_witness`, Phase 2c, needs the dual `Cd A B := ◇(A∨B)→(◇A∨◇B)`
+  as `h_Cd` — `Cd` did not appear in the Box case excerpt read this dispatch, but the diamond case
+  was not re-read for it; verify before 2c). This is a genuine settled-design gap, not a re-litigation
+  of an already-closed decision: the counterexample is the reference mechanization itself.
+- **What was NOT done**: no code was written to `CanonicalModel.lean` (zero-debt: no sorry, no
+  changed lines). Phase 2-infra's committed state (`PrimeExclusion.lean`, `references.bib`) is
+  untouched and remains COMPLETED.
 
 - **Goal:** Prove the modal consistency sub-lemma establishing the `DerivExcludes Σ Γ` precondition
   that Phase 2b's seeded-`w'` construction needs. This is the delicate K◇ argument.

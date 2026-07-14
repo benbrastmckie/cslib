@@ -277,4 +277,161 @@ theorem segment_realization
   obtain ⟨T, hT, hφT⟩ := quasi_head_realization h_implyK h_implyS h_orE h_nd
   exact ⟨CKSegment.ofHead hT, hφT⟩
 
+/-! ## List Splitting and Finite Conjunction (task 509)
+
+Bookkeeping helpers for the `CS5` canonical-relation obligations (`CS5.lean` Phases 6-7), which
+instantiate `prime_set_exclusion`'s base set `S` at a **union of two sets**
+(`boxInv u'.head ∪ w.head`, `w.head ∪ boxInv t.head`). `prime_set_exclusion`'s `hCut` parameter
+already takes the singleton form `S ∪ {a}` (`modal_deriv_imp_of_union`, reused unchanged above),
+so no new `hCut` supplier is needed — the gap is purely at the *call sites*: discharging a
+concrete side condition over `S := X ∪ Y` needs a derivation context `L ⊆ X ∪ Y` split into an
+`X`-sublist and a `Y`-sublist, with the `Y`-part collapsed into a single formula so it can be
+handled by the deduction theorem. Reuse search (`lean_local_search`/`grep`): a matching `bigAnd`
+former and an `unpack_conj_partial`-style discharge lemma already exist in
+`Intuitionistic/CanonicalModel.lean`, but both are `private` to that file (and pinned to the
+`w.val ∪ {◇A | A ∈ u.val}` shape for `extract_split`), so they are not reusable here; the
+declarations below are fresh, minimal, and modelled directly on that precedent. -/
+
+/-- **List splitting over a union.** Any derivation context `L` drawn from `X ∪ Y` splits into an
+`X`-sublist `L₁` and a `Y`-sublist `L₂` covering `L` (`∀ x ∈ L, x ∈ L₁ ++ L₂`). Purely
+list-theoretic (no proof-theoretic content, no classical choice — `x ∈ X ∪ Y` unfolds to
+`x ∈ X ∨ x ∈ Y` directly). Modelled on `Intuitionistic/CanonicalModel.lean`'s private
+`extract_split`, generalized from its fixed union shape to an arbitrary `X ∪ Y`. -/
+theorem list_split_union {X Y : Set (Proposition Atom)} :
+    ∀ (L : List (Proposition Atom)), (∀ x ∈ L, x ∈ X ∪ Y) →
+      ∃ L₁ L₂ : List (Proposition Atom),
+        (∀ x ∈ L₁, x ∈ X) ∧ (∀ x ∈ L₂, x ∈ Y) ∧ (∀ x ∈ L, x ∈ L₁ ++ L₂)
+  | [], _ => by refine ⟨[], [], ?_, ?_, ?_⟩ <;> exact fun _ h => nomatch h
+  | x :: xs, hL => by
+      obtain ⟨L₁', L₂', hL₁', hL₂', hsub'⟩ :=
+        list_split_union xs (fun y hy => hL y (List.mem_cons.mpr (Or.inr hy)))
+      rcases hL x (List.mem_cons.mpr (Or.inl rfl)) with hxX | hxY
+      · refine ⟨x :: L₁', L₂', ?_, hL₂', ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxX
+          · exact hL₁' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inr h1)))
+            · exact List.mem_append.mpr (Or.inr h2)
+      · refine ⟨L₁', x :: L₂', hL₁', ?_, ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxY
+          · exact hL₂' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl h1)
+            · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inr h2)))
+
+/-- Finite conjunction of a list of formulas; `bigAnd [] = ⊥ → ⊥` (a trivial, `efq`-derivable
+tautology) and `bigAnd (A :: As) = A ∧ bigAnd As`. Fresh, minimal, public declaration (the
+`private` analogue in `Intuitionistic/CanonicalModel.lean` is not reusable — see the section
+docstring above). Dual of `Metalogic.bigOr`. -/
+def bigAnd : List (Proposition Atom) → Proposition Atom
+  | [] => Proposition.bot.imp Proposition.bot
+  | A :: As => A.and (bigAnd As)
+
+/-- `bigAnd L ∈ H` whenever every element of `L` is in a deductively closed `H` admitting `efq`
+and `andI`. Modelled on `Intuitionistic/CanonicalModel.lean`'s private `bigAnd_mem_u`. -/
+theorem bigAnd_mem_of_forall_mem
+    {Axioms : Proposition Atom → Prop}
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    {H : Set (Proposition Atom)}
+    (h_closed : Metalogic.DeductivelyClosed (modalDerivationSystem Axioms) H) :
+    ∀ (L : List (Proposition Atom)), (∀ A ∈ L, A ∈ H) → bigAnd L ∈ H
+  | [], _ =>
+      h_closed [] _ (fun _ h => nomatch h) ⟨.ax [] _ (h_efq Proposition.bot)⟩
+  | A :: As', hAs => by
+      have hA : A ∈ H := hAs A (List.mem_cons.mpr (Or.inl rfl))
+      have hRest : bigAnd As' ∈ H :=
+        bigAnd_mem_of_forall_mem h_efq h_andI h_closed As'
+          (fun B hB => hAs B (List.mem_cons.mpr (Or.inr hB)))
+      have h1 : DerivationTree Axioms [A, bigAnd As'] A :=
+        .assumption _ A (List.mem_cons.mpr (Or.inl rfl))
+      have h2 : DerivationTree Axioms [A, bigAnd As'] (bigAnd As') :=
+        .assumption _ (bigAnd As') (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
+      have hax : DerivationTree Axioms [A, bigAnd As']
+          (A.imp ((bigAnd As').imp (A.and (bigAnd As')))) :=
+        .weakening [] _ _ (.ax [] _ (h_andI A (bigAnd As'))) (fun _ h => nomatch h)
+      have hderiv : DerivationTree Axioms [A, bigAnd As'] (A.and (bigAnd As')) :=
+        .modus_ponens _ _ _ (.modus_ponens _ _ _ hax h1) h2
+      exact h_closed [A, bigAnd As'] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hA
+          · rcases List.mem_cons.mp hx' with rfl | hx''
+            · exact hRest
+            · nomatch hx'')
+        ⟨hderiv⟩
+
+/-- Combines a list of separately-used hypotheses `Ds` (with leftover context `Lw`) into a
+single conjunction hypothesis: `Ds ++ Lw ⊢ ψ` implies `bigAnd Ds :: Lw ⊢ ψ`. Uses `h_andE1`/
+`h_andE2` to recover each `Ds`-member from the single `bigAnd Ds` assumption. Modelled on
+`Intuitionistic/CanonicalModel.lean`'s private `unpack_conj_partial`. -/
+noncomputable def unpack_conj_partial
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ)) :
+    ∀ (Ds Lw : List (Proposition Atom)) (ψ : Proposition Atom),
+      DerivationTree Axioms (Ds ++ Lw) ψ → DerivationTree Axioms (bigAnd Ds :: Lw) ψ
+  | [], Lw, ψ, d =>
+      .weakening Lw (bigAnd ([] : List (Proposition Atom)) :: Lw) ψ d
+        (fun x hx => List.mem_cons.mpr (Or.inr hx))
+  | D :: Ds', Lw, ψ, d => by
+      have dt := deductionTheorem h_implyK h_implyS (Ds' ++ Lw) D ψ d
+      have ihres := unpack_conj_partial h_implyK h_implyS h_andE1 h_andE2 Ds' Lw (D.imp ψ) dt
+      have ihres0 : DerivationTree Axioms Lw ((bigAnd Ds').imp (D.imp ψ)) :=
+        deductionTheorem h_implyK h_implyS Lw (bigAnd Ds') (D.imp ψ) ihres
+      have hmem : DerivationTree Axioms (bigAnd (D :: Ds') :: Lw) (bigAnd (D :: Ds')) :=
+        .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+      have hD : DerivationTree Axioms (bigAnd (D :: Ds') :: Lw) D :=
+        .modus_ponens _ (bigAnd (D :: Ds')) D
+          (.weakening [] _ _ (.ax [] _ (h_andE1 D (bigAnd Ds'))) (fun _ h => nomatch h))
+          hmem
+      have hConjRest : DerivationTree Axioms (bigAnd (D :: Ds') :: Lw) (bigAnd Ds') :=
+        .modus_ponens _ (bigAnd (D :: Ds')) (bigAnd Ds')
+          (.weakening [] _ _ (.ax [] _ (h_andE2 D (bigAnd Ds'))) (fun _ h => nomatch h))
+          hmem
+      have hDimpψ : DerivationTree Axioms (bigAnd (D :: Ds') :: Lw) (D.imp ψ) :=
+        .modus_ponens _ (bigAnd Ds') (D.imp ψ)
+          (.weakening Lw _ _ ihres0 (fun x hx => List.mem_cons.mpr (Or.inr hx)))
+          hConjRest
+      exact .modus_ponens _ D ψ hDimpψ hD
+
+/-- **The discharge lemma**: `D.Deriv (L₁ ++ L₂) b → D.Deriv L₁ (⋀L₂ → b)`. Packs the `L₂`-part
+of a derivation context into a single `bigAnd L₂` hypothesis (`unpack_conj_partial`, after
+permuting `L₁ ++ L₂` to `L₂ ++ L₁` since context membership is set-like, via `.weakening`), then
+discharges it via the deduction theorem. This is the tool Phases 6-7 apply at
+`S := X ∪ Y` (`X := boxInv u'.head` or `w.head`, `Y` the other summand): given a derivation from
+a context split by `list_split_union` into `L₁ ⊆ X`, `L₂ ⊆ Y`, this produces a derivation from
+`L₁` alone of `bigAnd L₂ → b`, which (with `bigAnd_mem_of_forall_mem` placing `bigAnd L₂` in the
+appropriate theory) is what discharges the `DerivExcludes`/side-condition obligations there. -/
+noncomputable def deriv_imp_bigAnd_of_append
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (L₁ L₂ : List (Proposition Atom)) (b : Proposition Atom)
+    (d : DerivationTree Axioms (L₁ ++ L₂) b) :
+    DerivationTree Axioms L₁ ((bigAnd L₂).imp b) :=
+  deductionTheorem h_implyK h_implyS L₁ (bigAnd L₂) b
+    (unpack_conj_partial h_implyK h_implyS h_andE1 h_andE2 L₂ L₁ b
+      (.weakening (L₁ ++ L₂) (L₂ ++ L₁) b d
+        (fun x hx => by
+          rcases List.mem_append.mp hx with h1 | h2
+          · exact List.mem_append.mpr (Or.inr h1)
+          · exact List.mem_append.mpr (Or.inl h2))))
+
 end Cslib.Logic.Modal

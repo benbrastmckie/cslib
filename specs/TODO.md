@@ -1,5 +1,5 @@
 ---
-next_project_number: 502
+next_project_number: 503
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 502
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,497,501 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,497,501,502 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,495 | 36,37,181,317,407,425,449,491 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,495 | foundations, modal logic, code hygiene, ... |
 | 4 | 412 | 41 | code hygiene |
@@ -89,8 +89,18 @@ next_project_number: 502
 ### Uncategorized
 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
+502 [NOT STARTED] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
 
 ## Tasks
+
+### 502. Minimize Segment.lean imports per lake shake recommendation
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.
+
+---
 
 ### 501. CK constructive modal extensions CT CS4 CS5
 - **Status**: [NOT STARTED]

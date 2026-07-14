@@ -1,6 +1,19 @@
 {
-  "next_project_number": 502,
+  "next_project_number": 503,
   "active_projects": [
+    {
+      "project_number": 502,
+      "project_name": "fix_segment_import_minimization",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Minimize Segment.lean imports per lake shake recommendation",
+      "description": "lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.",
+      "parent_task": 493,
+      "created": "2026-07-14T15:19:36Z",
+      "last_updated": "2026-07-14T15:19:36Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
     {
       "project_number": 486,
       "project_name": "rework_pr_662_modal_soundness_package",

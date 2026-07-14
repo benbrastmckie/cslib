@@ -221,6 +221,25 @@ theorem modalApplyOne_spec : RuleApplicationSpec (Atom := Atom) modalApplyOne wh
   knownWorldsStep := fun sf b acc hsfmem hknown =>
     modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
 
+/-! ## Task 507 Phase 2: Generic outDeg-Preservation (spec-bundled) -/
+
+/-- **Task 507 Phase 2**: `modalStepBranchGen apply` preserves the out-degree/expanded-set
+correspondence, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalStepBranch_preserves_outDegEq_gen`, `FmpMeasure.lean`, which takes the raw `outDegStep`
+hypothesis directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_preserves_outDegEq
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
+      (e'.filter (fun x => x.label == w && isMintingShaped x)).length :=
+  modalStepBranch_preserves_outDegEq_gen apply spec.outDegStep
+    b e acc newBs newExps newAcc hstep houtdeg
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -7,11 +7,11 @@
     "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/handoffs/phase1-handoff.md"
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 (RuleApplicationSpec extension: rankStep/outDegStep/knownWorldsStep) complete, green CI, committed.",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 (generic outDeg-preservation cluster) complete, green CI, committed. outDeg_le_of_expandedNodup found already rule-agnostic (no change needed).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1
+    "phases_completed": 2
   },
   "metadata": {
     "session_id": "sess_cslib_impl_507",

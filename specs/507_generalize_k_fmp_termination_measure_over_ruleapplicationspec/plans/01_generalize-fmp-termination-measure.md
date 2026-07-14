@@ -243,23 +243,43 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 2: Generic outDeg-preservation cluster [IN PROGRESS]
+### Phase 2: Generic outDeg-preservation cluster [COMPLETED]
 
 - **Goal:** Re-derive the outDeg-bookkeeping helpers generically over `(apply, spec)` and
   re-instantiate their K versions. Cluster: `FmpMeasure.lean` lines ~1281–1580.
 - **Tasks:**
-  - [ ] Generalize `modalStepBranch_preserves_outDegEq` (line 1367, ~110 lines) and
+  - [x] Generalize `modalStepBranch_preserves_outDegEq` (line 1367, ~110 lines) and
     `outDeg_le_of_expandedNodup` (line 1511, ~70 lines) to `_gen` versions over
     `modalStepBranchGen apply` + `spec`, discharging each former `modalApplyOne`-shape `rcases` from
-    `spec.freshLocal` and the Phase-1 mint-point field(s).
-  - [ ] Generalize the supporting private helpers in the cluster: `isMintingShaped_not_prop_applicable`
+    `spec.freshLocal` and the Phase-1 mint-point field(s). *(deviation: altered —
+    `outDeg_le_of_expandedNodup` needs no `_gen` version: on inspection its statement never
+    mentions `modalApplyOne`/`modalStepBranch` at all (pure `Accessibility`/list fact given
+    `e.Nodup` + closure + the outDeg/e-filter correspondence as hypotheses), so it is already
+    fully rule-agnostic and reused as-is. `modalStepBranch_preserves_outDegEq_gen` added in
+    `FmpMeasure.lean` takes the raw `hOutDegStep` hypothesis rather than a bundled `spec`, per the
+    Architectural Note above; `GenericDriver.lean`'s `modalStepBranchGen_preserves_outDegEq`
+    supplies the `(apply, spec)`-bundled wrapper.)*
+  - [x] Generalize the supporting private helpers in the cluster: `isMintingShaped_not_prop_applicable`
     (1281), `filter_minting_append_of_not_minting`/`_at`/`_ne` (1309/1321/1333), `outDeg_addEdge_self`
     (1347), `outDeg_addEdge_ne` (1353), `isMintingShaped_inv` (1479), `filter_map_eq_filterMap`
     (1492) — those that reference `modalApplyOne`'s shape move behind `spec`; pure-`Accessibility`
     helpers (`outDeg_addEdge_self`/`_ne`) are already rule-agnostic and may be reused unchanged.
-  - [ ] Re-derive each concrete K helper as `_gen … modalApplyOne modalApplyOne_spec` (or rewire the
-    internal callers directly to the `_gen` form) so the file stays green.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom on each new `_gen` lemma.
+    *(deviation: skipped — none of these private helpers reference `modalApplyOne` or
+    `modalStepBranch` at all; all are already fully rule-agnostic (pure `isMintingShaped`/list/
+    `Accessibility` facts) and are reused unchanged by `modalStepBranch_preserves_outDegEq_gen`
+    with zero edits.)*
+  - [x] Re-derive each concrete K helper as `_gen … modalApplyOne modalApplyOne_spec` (or rewire the
+    internal callers directly to the `_gen` form) so the file stays green. *(realized as
+    `modalStepBranch_preserves_outDegEq := by rw [modalStepBranch_eq] at hstep; exact
+    modalStepBranch_preserves_outDegEq_gen modalApplyOne modalApplyOne_outDeg_step ...` — statement
+    byte-unchanged, proof now delegates to the generic lemma.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom on each new `_gen` lemma. *(confirmed via direct
+    `lake env lean` + `#print axioms`: `modalStepBranch_preserves_outDegEq_gen` = `{propext,
+    Quot.sound}`; `modalStepBranchGen_preserves_outDegEq` = `{propext, Quot.sound}`;
+    `modalStepBranch_preserves_outDegEq` = `{propext, Classical.choice, Quot.sound}` — all
+    standard, zero sorry. Note: the `lean_verify` MCP tool transiently reported a spurious
+    `sorryAx` for `modalStepBranchGen_preserves_outDegEq` immediately after the edit — confirmed
+    stale/incorrect against direct `lake env lean #print axioms`, which is authoritative.)*
 - **Timing:** 2 hours
 - **Depends on:** 1
 - **Files to modify:**

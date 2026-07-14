@@ -1,7 +1,7 @@
 # Implementation Plan: CK Soundness + Completeness via Segment / Fallible-World Construction
 
 - **Task**: 493 - CK (constructive modal logic K) soundness + completeness over birelational semantics
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 22-32 hours (9 phases + 1 conditional contingency phase; see Effort Estimate)
 - **Dependencies**: 480 (IK framework — reference/pattern only, NOT instantiated), 490 (Birelational.lean — reused verbatim)
 - **Research Inputs**: reports/01_ck-segment-construction-scope.md (Tier 1, adversarially verified)
@@ -235,7 +235,14 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 2-3h
 - **Depends on:** 1 (independent of the segment construction — runs parallel to Phase 2; wave-serialized on `CK.lean` after Phase 1)
 
-### Phase 4: Segment saturation / realization lemma [NOT STARTED] — HIGHEST RISK
+### Phase 4: Segment saturation / realization lemma [COMPLETED] — HIGHEST RISK (resolved without STOP; Phase 4a NOT triggered)
+
+> Outcome: the feared two-level tail-assembly fixpoint does not exist in the corrected
+> (ianshil-faithful) design — tails are set comprehensions. Delivered in
+> `SegmentLindenbaum.lean`: `quasi_prime_exclusion` (prime_exclusion at trivial `Cons`),
+> `box_mem_of_boxed_context` (closed-set K-lemma), `imp/box/dia_refuting_theory`,
+> `quasi_head_realization`, `segment_realization`. All sorry-free; `PrimeExclusion.lean`
+> untouched.
 - **Goal:** Given a formula `φ` underivable in CK, build a `CKSegment` whose `head` is quasi-prime,
   deductively closed, excludes `φ`, and whose `tail` simultaneously (a) witnesses every `◇A ∈ head`
   with some `t ∈ tail, A ∈ t`, (b) makes every `t ∈ tail` itself a realizable (quasi-prime, closed)
@@ -255,7 +262,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 6-9h (dominant uncertainty of the whole plan)
 - **Depends on:** 2
 
-### Phase 4a (CONDITIONAL — only if Phase 4 STOPs): additive Foundations "saturated witness-family" lemma [NOT STARTED]
+### Phase 4a (CONDITIONAL — only if Phase 4 STOPs): additive Foundations "saturated witness-family" lemma [NOT STARTED] — NOT TRIGGERED (Phase 4 completed inline)
 - **Goal:** Lift the reusable core of the two-level construction into a generic, append-only lemma in
   `Cslib/Foundations/Logic/Metalogic/` (a "saturated witness-family" analogous to how 480 needed the
   new `prime_set_exclusion` infra), then discharge Phase 4 by instantiating it.
@@ -270,7 +277,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** +6-10h **if triggered** (this is the plan's largest schedule risk; see Effort Estimate).
 - **Depends on:** 4 (STOP signal). **Escalation note for the user:** authorizing this plan authorizes Phase 4a *only if* Phase 4 hits its STOP condition; the orchestrator/user should be re-prompted before committing the Foundations edit.
 
-### Phase 5: `f1` / `f2` up-down confluence for the segment model [NOT STARTED]
+### Phase 5: `f1` / `f2` up-down confluence for the segment model [COMPLETED] — OBSOLETE under the corrected semantics (see DESIGN CORRECTION): `CKForces` needs no frame conditions; `ckforces_persistence` (Forcing.lean) replaces this phase. The segment model provably does NOT satisfy F1, which is consistent because `CKValid` imposes no confluence.
 - **Goal:** Prove the Birelational frame conditions (F1 up-confluence, F2 down-confluence) relating
   `cireach` (head-inclusion) and `cmreach` (tail-membership), including the `cexpl` corner.
 - **Tasks:**
@@ -281,7 +288,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 2.5-4h
 - **Depends on:** 2
 
-### Phase 6: Non-modal truth-lemma cases over `cmreach`/`cval` [NOT STARTED]
+### Phase 6: Non-modal truth-lemma cases over `cmreach`/`cval` [COMPLETED] (inside `ck_truth_lemma`, CKTruthLemma.lean; `truth_bot_case` bridge is `Iff.rfl` as planned)
 - **Goal:** Transliterate `truth_atom/bot/and/or/imp_case` from `Intuitionistic/TruthLemma.lean`,
   re-stated over `cmreach`/`cval` with `botForces := (⊥ ∈ ·.head)`.
 - **Tasks:**
@@ -291,7 +298,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 3-4h
 - **Depends on:** 2, 5
 
-### Phase 7: Box/diamond truth-lemma cases + assemble `ck_truth_lemma` [NOT STARTED]
+### Phase 7: Box/diamond truth-lemma cases + assemble `ck_truth_lemma` [COMPLETED] (box via `CKSegment.ofHead` + `box_refuting_theory`; diamond via `diamRefutingSegment` + `dia_refuting_theory`)
 - **Goal:** Prove the `.box` and `.diamond` cases via the structural `box_reflect`/`diam_witness`
   fields (+ IH + saturation), and assemble the full `ck_truth_lemma : BForces cmreach cval (⊥∈·.head) s φ ↔ φ ∈ s.head`.
 - **Tasks:**
@@ -302,7 +309,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 3-4.5h
 - **Depends on:** 4, 6
 
-### Phase 8: `ck_completeness` [NOT STARTED]
+### Phase 8: `ck_completeness` [COMPLETED] (over `CKValid`; explosion obligations discharged by `cbotForces_val`/`cbotForces_mreach`/`cbotForces_mreach_wit`)
 - **Goal:** Assemble the canonical segment model + realization lemma + truth lemma into
   `ck_completeness : MValid φ → Derivable CKModalAxiom φ`.
 - **Tasks:**
@@ -312,7 +319,7 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 3-4h
 - **Depends on:** 7
 
-### Phase 9: Capstone — `ck_soundness_completeness`, `ck_consistent`, import wiring, full CI [NOT STARTED]
+### Phase 9: Capstone — `ck_soundness_completeness`, `ck_consistent`, import wiring, full CI [COMPLETED]
 - **Goal:** Bi-conditional, consistency corollary, module aggregation, and the full CI pipeline green.
 - **Tasks:**
   - [ ] `ck_soundness_completeness : Derivable CKModalAxiom φ ↔ MValid φ`; `ck_consistent : ¬ Derivable CKModalAxiom ⊥`.

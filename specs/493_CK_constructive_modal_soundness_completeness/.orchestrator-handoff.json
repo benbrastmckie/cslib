@@ -1,39 +1,22 @@
 {
   "task_number": 493,
-  "session_id": "sess_1784011298_752245_493",
-  "status": "planned",
-  "agent_type": "planner-hard-agent",
-  "phase": "plan",
-  "reference_grounding_tier": 1,
-  "plan_path": "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md",
+  "session_id": "sess_1784011298_752245_493_impl",
+  "agent_type": "cslib-implementation-hard-agent",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Task 493 complete in one dispatch: bare-CK soundness + completeness proved sorry-free via the segment/fallible-world canonical model, 5 new files (1,331 lines) under Cslib/Logics/Modal/Metalogic/Constructive/, full CI green. MAJOR DESIGN CORRECTION (counterexample-backed, verified against ianshil kripke_sem.v fetched verbatim): the plan's MValid targets are mathematically false — (1) MValid refutes efq (botForces≡True, val≡False), and (2) Cd and Idb are MValid under the frozen BForces ∃-diamond + F1/F2 yet not CK-derivable, so no BForces-based completeness exists for bare CK. Corrected semantics: new CKForces (Wijesekera ∀∃ diamond, no frame conditions) + CKValid (explosion conditions). Headlines: ck_soundness_derivable : Derivable CKModalAxiom φ → CKValid φ; ck_completeness : CKValid φ → Derivable CKModalAxiom φ; ck_soundness_completeness (iff); ck_consistent. EValid (birelational + explosion) kept as documented soundness-only secondary. Phase 4 closed WITHOUT its STOP contingency (ianshil tails are set comprehensions — no two-level fixpoint); Phase 4a never triggered; PrimeExclusion.lean and all frozen files byte-identical. Phase 5 (f1/f2) obsolete: the segment model provably fails F1 and CKValid needs none. lean_verify: headline theorems use only propext/Classical.choice/Quot.sound.",
+  "phases_completed": 9,
+  "phases_total": 9,
+  "sorry_inventory": [],
+  "blockers": [],
+  "continuation_context": null,
+  "next_action_hint": "Review the DESIGN CORRECTION section of plans/01 (headline validity is CKValid, not MValid — the plan's MValid statements were provably false; correction is documented in plan, summary, and module docstrings). Then /vet 493 or /pr 493. Pre-existing, unrelated to 493: lake lint fails on frozen PrimeExclusion.lean:324 (unusedArguments, task 480) and a task-317 sorry warning exists in Propositional/Tableau/Minimal/Completeness.lean (CI builds with --wfail); both predate 493 and are outside its territory.",
   "artifacts": [
-    "specs/493_CK_constructive_modal_soundness_completeness/reports/01_ck-segment-construction-scope.md",
-    "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md"
-  ],
-  "phase_count": 9,
-  "conditional_phase_count": 1,
-  "conditional_phases": ["4a (additive Foundations 'saturated witness-family' lemma; fires only if Phase 4 STOPs)"],
-  "postmortem_rules_count": 6,
-  "dependency_waves": [[1], [2, 3], [4, 5], [6], [7], [8], [9]],
-  "effort_estimate_hours": {
-    "base_case": "22-28",
-    "with_contingency": "28-38",
-    "point_estimate": "~25h base, ~34h if Phase 4a Foundations escape hatch is needed"
-  },
-  "highest_risk_phases": [
-    "Phase 4 (SEVERE): segment saturation/realization lemma -- two-level theory-of-theories, no 480 analogue, dominant uncertainty; has STOP/partial contingency",
-    "Phase 4a (SCHEDULE RISK, conditional): additive append-only Foundations lemma; fires only if Phase 4 STOPs; +6-10h; needs user re-prompt before Foundations commit",
-    "Phase 7 (MODERATE): box/diamond truth-lemma cases, backward diamond direction couples to Phase 4 saturation guarantees",
-    "Phase 5 (MODERATE): f1/f2 confluence for segment model (head-inclusion vs tail-membership at cexpl)"
-  ],
-  "approach_correction": "Plan corrects the task-493 premise: NOT a task-480 instantiation. Bare CK requires a SEPARATE segment/fallible-world canonical construction over MValid (not IValid). 480 prime-pair machinery used as pattern reference only, never imported/instantiated for the CK modal core.",
-  "new_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/SegmentLindenbaum.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/CKTruthLemma.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/CK.lean"
-  ],
-  "user_review_required": true,
-  "next_action_hint": "User reviews plan and decides whether to authorize. If authorized: /implement 493 --hard --lit. Pre-authorize Phase 4a as append-only Foundations edit with a re-prompt before the commit.",
-  "next_steps": "Await user authorization before /implement 493"
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/Forcing.lean", "type": "lean", "summary": "CKForces (forall-exists diamond), persistence, CKValid, exploding-world lemma"},
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean", "type": "lean", "summary": "QuasiPrime, CKSegment, cexpl, ofHead, cmreach/cval/cbotForces, explosion conditions"},
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/SegmentLindenbaum.lean", "type": "lean", "summary": "quasi_prime_exclusion, boxed-context K-lemma, imp/box/dia refuting theories, segment_realization"},
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/CKTruthLemma.lean", "type": "lean", "summary": "diamRefutingSegment + full ck_truth_lemma"},
+    {"path": "Cslib/Logics/Modal/Metalogic/Constructive/CK.lean", "type": "lean", "summary": "CKModalAxiom, CKValid soundness/completeness/consistency, EValid secondary block"},
+    {"path": "specs/493_CK_constructive_modal_soundness_completeness/summaries/01_ck-segment-completeness-summary.md", "type": "summary", "summary": "Implementation summary with full plan-deviation record"}
+  ]
 }

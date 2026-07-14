@@ -2,20 +2,16 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      461,
-      462
+      480,
+      490,
+      492,
+      494
     ],
-    "tasks_failed": [
-      441
+    "tasks_blocked_pending_rescope": [
+      493,
+      501
     ],
-    "tasks_partial": [
-      317
-    ],
-    "tasks_deferred": [
-      430,
-      456
-    ],
-    "cycles_used": 3,
+    "cycles_used": 20,
     "multi_task_mode": true
   }
 }

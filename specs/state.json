@@ -2687,7 +2687,7 @@
     {
       "project_number": 494,
       "project_name": "intuitionistic_modal_extensions_IT_IS4_IS5",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 492,
@@ -2696,7 +2696,25 @@
       ],
       "description": "Intuitionistic modal extensions IT / IS4 / IS5 — sound and complete axiomatizations of the intuitionistic analogues of T / S4 / S5 as modular extensions of IK (task 492), via the intuitionistic axiom↔birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the ≤∘R conditions). Prove soundness and completeness by the birelational canonical model. Depends on 492.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T13:44:59Z",
+      "session_id": "sess_1784011298_752245_494",
+      "artifacts": [
+        {
+          "path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/reports/01_it-is4-is5-extensions.md",
+          "type": "report",
+          "summary": "IT/IS4/IS5 extensions research"
+        },
+        {
+          "path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md",
+          "type": "plan",
+          "summary": "IT/IS4/IS5 extensions 4-phase plan"
+        },
+        {
+          "path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/summaries/03_is4-lean-phase3-summary.md",
+          "type": "summary",
+          "summary": "IT/IS4/IS5 extensions (sound+complete)"
+        }
+      ]
     },
     {
       "project_number": 495,

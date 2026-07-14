@@ -11,7 +11,7 @@ next_project_number: 502
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,493,494,497 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,493,497 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,495,501 | 36,37,181,317,407,425,449,491,493 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,495 | foundations, modal logic, code hygiene, ... |
 | 4 | 412 | 41 | code hygiene |
@@ -82,7 +82,6 @@ next_project_number: 502
     └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
 493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
   └─ 501 [NOT STARTED] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
-494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 
 ### Propositional Logic
 
@@ -173,10 +172,13 @@ next_project_number: 502
 ---
 
 ### 494. Intuitionistic modal extensions IT IS4 IS5
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: Task 492
+- **Research**: [494_intuitionistic_modal_extensions_IT_IS4_IS5/reports/01_it-is4-is5-extensions.md]
+- **Plan**: [494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md]
+- **Summary**: [494_intuitionistic_modal_extensions_IT_IS4_IS5/summaries/03_is4-lean-phase3-summary.md]
 
 **Description**: Intuitionistic modal extensions IT / IS4 / IS5 — sound and complete axiomatizations of the intuitionistic analogues of T / S4 / S5 as modular extensions of IK (task 492), via the intuitionistic axiom↔birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the ≤∘R conditions). Prove soundness and completeness by the birelational canonical model. Depends on 492.
 

@@ -525,4 +525,221 @@ private theorem quasi_prime_set_exclusion1 {S E : Set (Proposition Atom)}
 
 end NonemptyPairExclusion
 
+/-! ## Box Witness -/
+
+section CanonicalBoxWitness
+
+/-- Extracts the bare witnesses `bs` of a nonempty list `xs` drawn from
+`{χ | ∃ B, χ = □B ∧ B ∉ u.val}`, so that `xs = bs.map box` with every element of `bs` excluded
+from `u.val`. List-only, `efq`-free by construction (mirrors `extract_box_list`,
+`Intuitionistic/CanonicalModel.lean:189-202`). -/
+private theorem extract_box_list1 (u : MinCanonicalPrimeWorld Atom) :
+    ∀ (xs : List (Proposition Atom)), (∀ x ∈ xs, ∃ B, x = (□B) ∧ B ∉ u.val) →
+      ∃ bs : List (Proposition Atom), xs = bs.map Proposition.box ∧ ∀ B ∈ bs, B ∉ u.val
+  | [], _ => ⟨[], rfl, fun _ h => nomatch h⟩
+  | x :: xs, hl => by
+      obtain ⟨B, hxeq, hBnu⟩ := hl x (List.mem_cons.mpr (Or.inl rfl))
+      obtain ⟨bs, heq, hbs⟩ :=
+        extract_box_list1 u xs (fun y hy => hl y (List.mem_cons.mpr (Or.inr hy)))
+      refine ⟨B :: bs, ?_, ?_⟩
+      · rw [hxeq, heq, List.map_cons]
+      · intro C hC
+        rcases List.mem_cons.mp hC with rfl | hC'
+        · exact hBnu
+        · exact hbs C hC'
+
+/-- Splits a derivation context `L` (drawn from `w.val ∪ {◇A | A ∈ u.val}`) into the sublist of
+`w.val`-members `Lw` and the bare diamond witnesses `As` (each `A ∈ u.val`), such that every
+element of `L` lies in `(As.map diamond) ++ Lw`. List-only, `efq`-free by construction (mirrors
+`extract_split`, `Intuitionistic/CanonicalModel.lean:151-185`). -/
+private theorem extract_split1 (w u : MinCanonicalPrimeWorld Atom) :
+    ∀ (L : List (Proposition Atom)),
+      (∀ x ∈ L, x ∈ w.val ∨ ∃ A, x = (◇A) ∧ A ∈ u.val) →
+      ∃ Lw As : List (Proposition Atom),
+        (∀ y ∈ Lw, y ∈ w.val) ∧ (∀ A ∈ As, A ∈ u.val) ∧
+        (∀ x ∈ L, x ∈ (As.map Proposition.diamond) ++ Lw)
+  | [], _ => by
+      refine ⟨[], [], ?_, ?_, ?_⟩ <;> exact fun _ h => nomatch h
+  | x :: xs, hL => by
+      obtain ⟨Lw', As', hLw', hAs', hsub'⟩ :=
+        extract_split1 w u xs (fun y hy => hL y (List.mem_cons.mpr (Or.inr hy)))
+      rcases hL x (List.mem_cons.mpr (Or.inl rfl)) with hxw | ⟨A, hxeq, hAu⟩
+      · refine ⟨x :: Lw', As', ?_, hAs', ?_⟩
+        · intro y hy
+          rcases List.mem_cons.mp hy with rfl | hy'
+          · exact hxw
+          · exact hLw' y hy'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl h1)
+            · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inr h2)))
+      · refine ⟨Lw', A :: As', hLw', ?_, ?_⟩
+        · intro B hB
+          rcases List.mem_cons.mp hB with rfl | hB'
+          · exact hAu
+          · exact hAs' B hB'
+        · intro z hz
+          rcases List.mem_cons.mp hz with rfl | hz'
+          · rw [hxeq]
+            exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inl rfl)))
+          · rcases List.mem_append.mp (hsub' z hz') with h1 | h2
+            · exact List.mem_append.mpr (Or.inl (List.mem_cons.mpr (Or.inr h1)))
+            · exact List.mem_append.mpr (Or.inr h2)
+
+/-- If `u.val` has the disjunction property and `bigOr1 x0 xs0 ∈ u.val`, some disjunct
+(`x0` or a member of `xs0`) is in `u.val`. -/
+private theorem bigOr1_mem_disjunct (u : MinCanonicalPrimeWorld Atom) :
+    ∀ (x0 : Proposition Atom) (xs0 : List (Proposition Atom)), bigOr1 x0 xs0 ∈ u.val →
+      x0 ∈ u.val ∨ ∃ C ∈ xs0, C ∈ u.val
+  | x0, [], hmem => Or.inl hmem
+  | x0, y :: ys, hmem => by
+      rcases u.property.disj hmem with h | h
+      · exact Or.inl h
+      · rcases bigOr1_mem_disjunct u y ys h with h' | ⟨C, hC, hCu⟩
+        · exact Or.inr ⟨y, List.mem_cons.mpr (Or.inl rfl), h'⟩
+        · exact Or.inr ⟨C, List.mem_cons.mpr (Or.inr hC), hCu⟩
+
+/-- **Box witness underivability, nonempty** (efq-free analogue of
+`box_witness_pair_underivable`, `Intuitionistic/CanonicalModel.lean:431`): no nonempty
+`bigOr1`-disjunction of `Σ := {χ | ∃ B, χ = □B ∧ B ∉ u.val}` is a member of the deductive
+closure of `Γ := w.val ∪ {χ | ∃ A, χ = ◇A ∧ A ∈ u.val}`, given the box clause
+`∀ψ, □ψ ∈ w.val → ψ ∈ u.val`. Case-splits on whether the diamond-witness list `As`
+(extracted from a hypothetical derivation) is empty (direct via `h_wu`) or nonempty (combine via
+`unpackConj1` + `diaBigAnd1ToBigAnd1Dia` + `Idb`, exactly as `box_witness_pair_underivable`'s
+single-combined-diamond step, but never touching `efq`/`bigAnd []`). -/
+private theorem box_witness_pair_underivable1 {w u : MinCanonicalPrimeWorld Atom}
+    (h_wu : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ u.val) :
+    DerivExcludes1
+      (modalDeductiveClosure MKModalAxiom (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ u.val}))
+      {χ | ∃ B, χ = (□B) ∧ B ∉ u.val} := by
+  intro x0 xs0 hx0Sig hxs0Sig hmem
+  obtain ⟨B0, hB0eq, hB0nu⟩ := hx0Sig
+  obtain ⟨bs, hbseq, hbsnu⟩ := extract_box_list1 u xs0 hxs0Sig
+  obtain ⟨L, hLΓ, hd⟩ := hmem
+  obtain ⟨d⟩ := hd
+  subst hB0eq
+  have bridge0 := boxOr1_of_boxDisj B0 bs
+  rw [hbseq] at d
+  have d_box : DerivationTree MKModalAxiom L (Proposition.box (bigOr1 B0 bs)) :=
+    DerivationTree.modus_ponens L _ _
+      (DerivationTree.weakening [] L _ bridge0 (fun _ h => nomatch h)) d
+  have hLΓ' : ∀ x ∈ L, x ∈ w.val ∨ ∃ A, x = (◇A) ∧ A ∈ u.val := fun x hx => hLΓ x hx
+  obtain ⟨Lw, As, hLw, hAs, hsub⟩ := extract_split1 w u L hLΓ'
+  have d_box' : DerivationTree MKModalAxiom ((As.map Proposition.diamond) ++ Lw)
+      (Proposition.box (bigOr1 B0 bs)) :=
+    DerivationTree.weakening L _ _ d_box hsub
+  have hcontra : bigOr1 B0 bs ∈ u.val → False := by
+    intro hmemU
+    rcases bigOr1_mem_disjunct u B0 bs hmemU with h | ⟨C, hC, hCu⟩
+    · exact hB0nu h
+    · exact hbsnu C hC hCu
+  cases As with
+  | nil =>
+      have d_box'' : DerivationTree MKModalAxiom Lw (Proposition.box (bigOr1 B0 bs)) := d_box'
+      exact hcontra (h_wu _ (w.property.closed Lw _ hLw ⟨d_box''⟩))
+  | cons x xs =>
+      have d_box'' : DerivationTree MKModalAxiom (((◇x) :: xs.map Proposition.diamond) ++ Lw)
+          (Proposition.box (bigOr1 B0 bs)) := d_box'
+      have d_unpack : DerivationTree MKModalAxiom (bigAnd1 (◇x) (xs.map Proposition.diamond) :: Lw)
+          (Proposition.box (bigOr1 B0 bs)) :=
+        unpackConj1 (◇x) (xs.map Proposition.diamond) Lw _ d_box''
+      have d_disch : DerivationTree MKModalAxiom Lw
+          ((bigAnd1 (◇x) (xs.map Proposition.diamond)).imp (Proposition.box (bigOr1 B0 bs))) :=
+        deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) Lw
+          (bigAnd1 (◇x) (xs.map Proposition.diamond)) (Proposition.box (bigOr1 B0 bs)) d_unpack
+      have hM : (bigAnd1 (◇x) (xs.map Proposition.diamond)).imp (Proposition.box (bigOr1 B0 bs))
+          ∈ w.val :=
+        w.property.closed Lw _ hLw ⟨d_disch⟩
+      have bridge1 := diaBigAnd1ToBigAnd1Dia x xs
+      set X : Proposition Atom := ◇ (bigAnd1 x xs) with hXdef
+      set M : Proposition Atom :=
+        (bigAnd1 (◇x) (xs.map Proposition.diamond)).imp (Proposition.box (bigOr1 B0 bs))
+        with hMdef
+      have step : DerivationTree MKModalAxiom [X, M] (Proposition.box (bigOr1 B0 bs)) := by
+        have hXmem : DerivationTree MKModalAxiom [X, M] X :=
+          .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+        have hMmem : DerivationTree MKModalAxiom [X, M] M :=
+          .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
+        have hBD : DerivationTree MKModalAxiom [X, M]
+            (bigAnd1 (◇x) (xs.map Proposition.diamond)) :=
+          .modus_ponens _ _ _ (.weakening [] _ _ bridge1 (fun _ h => nomatch h)) hXmem
+        exact .modus_ponens _ _ _ hMmem hBD
+      have step_disch : DerivationTree MKModalAxiom [M]
+          (X.imp (Proposition.box (bigOr1 B0 bs))) :=
+        deductionTheorem (fun φ ψ => MKModalAxiom.implyK φ ψ)
+          (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) [M] X (Proposition.box (bigOr1 B0 bs)) step
+      have hXimpBOX : X.imp (Proposition.box (bigOr1 B0 bs)) ∈ w.val :=
+        w.property.closed [M] _
+          (fun y hy => by
+            rcases List.mem_cons.mp hy with rfl | hy'
+            · exact hM
+            · exact absurd hy' (by simp))
+          ⟨step_disch⟩
+      have hBoxImp : Proposition.box ((bigAnd1 x xs).imp (bigOr1 B0 bs)) ∈ w.val :=
+        w.property.closed [X.imp (Proposition.box (bigOr1 B0 bs))] _
+          (fun y hy => by
+            rcases List.mem_cons.mp hy with rfl | hy'
+            · exact hXimpBOX
+            · exact absurd hy' (by simp))
+          ⟨.modus_ponens _ _ _
+            (.ax _ _ (MKModalAxiom.idb (bigAnd1 x xs) (bigOr1 B0 bs)))
+            (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩
+      have hInU : (bigAnd1 x xs).imp (bigOr1 B0 bs) ∈ u.val := h_wu _ hBoxImp
+      have hBigAndXsU : bigAnd1 x xs ∈ u.val :=
+        bigAnd1_mem_u x xs (hAs x (List.mem_cons.mpr (Or.inl rfl)))
+          (fun A hA => hAs A (List.mem_cons.mpr (Or.inr hA)))
+      have hBigOrU : bigOr1 B0 bs ∈ u.val :=
+        u.property.closed [(bigAnd1 x xs).imp (bigOr1 B0 bs), bigAnd1 x xs] _
+          (fun y hy => by
+            rcases List.mem_cons.mp hy with rfl | hy'
+            · exact hInU
+            · rcases List.mem_cons.mp hy' with rfl | hy''
+              · exact hBigAndXsU
+              · nomatch hy'')
+          ⟨.modus_ponens _ _ _
+            (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+            (.assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl)))))⟩
+      exact hcontra hBigOrU
+
+/-- **Box Witness**: from `(□φ) ∉ w.val`, produces `w' ≥ w` (a seeded quasi-prime extension)
+and a quasi-prime `u` with `canonicalR w' u` and `φ ∉ u.val`. Step 1 builds `u` directly via
+`box_refuting_theory` (`SegmentLindenbaum.lean:168`, efq-free) as the quasi-prime extension of
+`boxInv w.val` omitting `φ`; Step 2 builds `w'` via `quasi_prime_set_exclusion1`
+(this file), seeded with `w.val ∪ {◇A | A ∈ u.val}` and excluded from `{□B | B ∉ u.val}` via
+`box_witness_pair_underivable1`. Mirrors `canonical_box_witness`
+(`Intuitionistic/CanonicalModel.lean:636`) but with neither `efq` nor a consistency
+side-condition. -/
+theorem min_canonical_box_witness {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
+    (h_notbox : (□φ) ∉ w.val) :
+    ∃ w' u : MinCanonicalPrimeWorld Atom, w ≤ w' ∧ canonicalR w' u ∧ φ ∉ u.val := by
+  obtain ⟨Uval, hUsup, hUqp, hUphi⟩ :=
+    box_refuting_theory (fun φ ψ => MKModalAxiom.implyK φ ψ)
+      (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) (fun A B χ => MKModalAxiom.orE A B χ)
+      (fun φ ψ => MKModalAxiom.k φ ψ) w.property h_notbox
+  let u : MinCanonicalPrimeWorld Atom := ⟨Uval, hUqp⟩
+  have hSu : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ u.val := fun ψ hψ => hUsup hψ
+  have hexcl := box_witness_pair_underivable1 hSu
+  have hSclosed : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom)
+      (modalDeductiveClosure MKModalAxiom (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ u.val})) :=
+    fun L φ' hL hd =>
+      modalDeductiveClosure_closed (fun φ ψ => MKModalAxiom.implyK φ ψ)
+        (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) L φ' hL hd
+  obtain ⟨Tval, hTsup, hTqp, hTexcl⟩ := quasi_prime_set_exclusion1 hSclosed hexcl
+  let w' : MinCanonicalPrimeWorld Atom := ⟨Tval, hTqp⟩
+  have hw_le_w' : w ≤ w' := fun x hx =>
+    hTsup (modal_subset_deductive_closure MKModalAxiom _ (Set.mem_union_left _ hx))
+  have hdia_clause : ∀ ψ, ψ ∈ u.val → (◇ψ) ∈ w'.val := fun ψ hψ =>
+    hTsup (modal_subset_deductive_closure MKModalAxiom _
+      (Set.mem_union_right _ ⟨ψ, rfl, hψ⟩))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w'.val → ψ ∈ u.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notU
+    exact (hTexcl (□ψ) [] ⟨ψ, rfl, hψ_notU⟩ (fun _ h => nomatch h)) hψ_mem
+  exact ⟨w', u, hw_le_w', ⟨hbox_clause, hdia_clause⟩, hUphi⟩
+
+end CanonicalBoxWitness
+
 end Cslib.Logic.Modal

@@ -11,11 +11,10 @@ next_project_number: 511
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,506,509,510 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,503 | 36,37,181,317,407,425,449,510 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
-| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
-| 5 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,506,509 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,504,505 | 36,37,181,317,407,425,449,503 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
+| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,14 +36,14 @@ next_project_number: 511
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-506 [PLANNED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-509 [PLANNED] — OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from ta
-503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+503 [IMPLEMENTING] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
   └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+506 [PLANNED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+509 [IMPLEMENTING] — OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from ta
 
 ### Temporal Logic
 
@@ -86,15 +85,10 @@ next_project_number: 511
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
-### Uncategorized
-
-510 [PLANNED] — Generalize the Hintikka-set / saturation-characterisation chain o
-  └─ 503 [BLOCKED] — (Modal Logic: Parametrize the K tableau driver (Cslib/) (see above)
-
 ## Tasks
 
 ### 510. Generalize completeness loop hintikka chain over spec
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Dependencies**: Task 507
 
@@ -104,7 +98,7 @@ next_project_number: 511
 
 ### 509. Rescope CK CS5 constructive completeness
 - **Effort**: 12-20 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 508
@@ -187,10 +181,10 @@ next_project_number: 511
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 507, Task 510
+- **Dependencies**: None
 - **Research**:
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]

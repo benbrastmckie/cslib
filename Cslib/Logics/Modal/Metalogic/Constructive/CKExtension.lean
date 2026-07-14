@@ -27,7 +27,7 @@ relation additionally satisfies `FC`.
 
 **The completeness scaffold is deliberately abstract over the canonical `World` type** (not
 pinned to `CKSegment Axioms`): the primary implementation challenge of task 501 is that the frame
-conditions `ctFC`/`cs4FC`/`cs5FC` do **not** hold globally on raw `CKSegment Axioms` (a
+conditions `ctFC`/`cs4FC`/`cs4FC'`/`cs5FC` do **not** hold globally on raw `CKSegment Axioms` (a
 consistent-head segment with tail `{Set.univ}` is well-formed but not `cmreach`-reflexive, e.g.).
 Each per-system file therefore builds its canonical model over a **restricted world subtype**
 (e.g. `CTSegment`) carrying the frame condition as an invariant, and supplies
@@ -45,6 +45,11 @@ projection — the truth lemma itself (`ck_truth_lemma`) is reused unchanged on 
   (`tDia`/`fourDia`/`bDia`) need only the plain clause, which the ≤-composed one implies via
   `le_refl`. Defined locally over `[Preorder World]` — **not** Mathlib's deprecated
   `Reflexive`/`Transitive`/`Symmetric`.
+- `cs4FC'` (task 508): a **weakened** `CS4` frame condition, replacing `cs4FC`'s blanket
+  ≤-composed transitivity with two existential clauses. `cs4FC_implies_cs4FC'` witnesses that
+  every `cs4FC`-frame is a `cs4FC'`-frame. Validity over the weaker `cs4FC'` is what makes `CS4`
+  canonical completeness go through (see `CS4.lean`); `cs4FC` is retained unchanged for its
+  existing soundness theorems and downstream users in `ConstructiveLatticeMonotonicity.lean`.
 - `ckvalidFC_completeness`: a segment analogue of `ivalidFC_completeness`
   (`Intuitionistic/Extension.lean:97`), abstracted over an arbitrary canonical `World` type
   (rather than committed to `CKSegment Axioms`) so that it can be instantiated over a world
@@ -118,6 +123,32 @@ specialization, via `le_refl`); `fourBox` (`□A → □□A`) needs the full �
 (`IS4`) setting. Defined locally — not Mathlib's deprecated `Transitive`. -/
 def cs4FC {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   (∀ w, r w w) ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → r w t)
+
+/-- The **weakened** `CS4` frame condition (task 508): reflexivity plus two existential
+clauses replacing `cs4FC`'s blanket ≤-composed transitivity. `fourBox` (`□A → □□A`) is
+discharged at a *re-based* world `v ≥ w''` rather than at `w''` itself, since `□A@w'`
+quantifies over all `z ≥ w'` (so any `v ≥ w''` still forces `A` there). `fourDia`
+(`◇◇A → ◇A`) needs a genuine `r`-successor of `w''`, but may unfold `◇A@u` at any
+`u' ≥ u` — the frame condition supplies a good `u'` for which every `r`-successor `t`
+of `u'` is already an `r`-successor of `w''` directly. Validity over `cs4FC'` is a
+**stronger** statement than validity over `cs4FC` (the class of `cs4FC'`-frames is larger,
+so soundness is *harder* to prove but completeness is *easier* to prove) — this is exactly
+what makes canonical completeness for `CS4` go through (see `CS4.lean`). -/
+def cs4FC' {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
+  (∀ w, r w w)
+    ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t)
+    ∧ (∀ {w u}, r w u → ∃ u', u ≤ u' ∧ ∀ t, r u' t → r w t)
+
+/-- **`cs4FC'` genuinely weakens `cs4FC`** (task 508): every `cs4FC`-frame is a `cs4FC'`-frame,
+witnessed by the trivial choices `v := w` (for the first existential clause) and `u' := u`
+(for the second). Used to re-derive `CS4.lean`'s existing `cs4FC`-soundness theorems as
+corollaries of the (stronger) `cs4FC'`-soundness theorems, and to compose with
+`cs5FC_implies_cs4FC` in `ConstructiveLatticeMonotonicity.lean`. -/
+theorem cs4FC_implies_cs4FC' {World : Type*} [Preorder World] {r : World → World → Prop}
+    (h : cs4FC r) : cs4FC' r :=
+  ⟨h.1,
+   fun hwu hle hu't => ⟨_, le_refl _, h.2 hwu hle hu't⟩,
+   fun hwu => ⟨_, le_refl _, fun _ hut => h.2 hwu (le_refl _) hut⟩⟩
 
 /-- The `CS5` frame condition: reflexivity, ≤-composed transitivity, **and** ≤-composed
 ("order-saturated") symmetry of the modal relation `r`. `bDia` (`◇□A → A`) needs only plain

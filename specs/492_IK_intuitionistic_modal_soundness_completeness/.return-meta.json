@@ -1,0 +1,35 @@
+{
+  "status": "planned",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/492_IK_intuitionistic_modal_soundness_completeness/plans/01_ik-soundness-completeness.md",
+      "summary": "3-phase sequential plan for IK soundness+completeness as a single-file instantiation of the task-480 framework plus one new birelational soundness proof"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/492_IK_intuitionistic_modal_soundness_completeness/.orchestrator-handoff.json",
+      "summary": "Orchestrator handoff: per-phase dispatch spec, waves [[1],[2],[3]], zero-debt + full-CI gates"
+    }
+  ],
+  "next_steps": "Run /implement 492 to execute the plan",
+  "metadata": {
+    "session_id": "sess_1784011298_752245_492",
+    "agent_type": "planner-agent",
+    "task_number": 492,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "phase_count": 3,
+    "estimated_hours": 2.5,
+    "dependency_waves": [[1], [2], [3]]
+  },
+  "memory_candidates": [
+    {
+      "content": "When a completeness metatheorem is already parametrized over an abstract axiom set (as in the task-480 birelational intuitionistic modal framework's ivalid_completeness/mvalid_completeness), instantiating a concrete logic (IK) collapses completeness to a ONE-LINER: define the concrete axiom inductive, then apply the parametric theorem with one discharger lambda per framework hypothesis. The only genuinely new proof work is soundness for the new axioms. Plan such instantiation tasks as: (P1) axiom datatype, (P2) soundness, (P3) trivial completeness/consistency instantiation + barrel — not as a from-scratch completeness effort.",
+      "category": "PATTERN",
+      "source_artifact": "specs/492_IK_intuitionistic_modal_soundness_completeness/plans/01_ik-soundness-completeness.md",
+      "confidence": 0.82,
+      "suggested_keywords": ["instantiation", "parametric-completeness", "modal-logic", "phase-decomposition", "soundness", "axiom-datatype"]
+    }
+  ]
+}

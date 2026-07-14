@@ -11,9 +11,9 @@ next_project_number: 502
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,492,493,497 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,494,495,501 | 36,37,181,317,407,425,449,491,492,493 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,492,495 | foundations, modal logic, code hygiene, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,493,494,497 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,495,501 | 36,37,181,317,407,425,449,491,493 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,495 | foundations, modal logic, code hygiene, ... |
 | 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -80,10 +80,9 @@ next_project_number: 502
 491 [NOT STARTED] — Minimal propositional base (efq-optional) — PREREQUISITE for the 
   └─ 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
     └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
-492 [NOT STARTED] — IK (intuitionistic modal logic K) soundness + completeness over b
-  └─ 494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
   └─ 501 [NOT STARTED] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
+494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 
 ### Propositional Logic
 
@@ -194,10 +193,13 @@ next_project_number: 502
 ---
 
 ### 492. IK intuitionistic modal soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: Task 480, Task 490
+- **Research**: [492_IK_intuitionistic_modal_soundness_completeness/reports/01_ik-instantiation-map.md]
+- **Plan**: [492_IK_intuitionistic_modal_soundness_completeness/plans/01_ik-soundness-completeness.md]
+- **Summary**: [492_IK_intuitionistic_modal_soundness_completeness/summaries/01_ik-soundness-completeness-summary.md]
 
 **Description**: IK (intuitionistic modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). IK carries the full ◇/□ axiom set: K-□ (□(A→B)→□A→□B), K-◇ (□(A→B)→◇A→◇B), ◇⊥→⊥, and ◇(A∨B)→◇A∨◇B. Prove soundness over birelational frames and completeness via the birelational (prime-theory) canonical model. Depends on 480, 490.
 

@@ -2639,7 +2639,7 @@
     {
       "project_number": 492,
       "project_name": "IK_intuitionistic_modal_soundness_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 480,
@@ -2649,7 +2649,25 @@
       ],
       "description": "IK (intuitionistic modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). IK carries the full ◇/□ axiom set: K-□ (□(A→B)→□A→□B), K-◇ (□(A→B)→◇A→◇B), ◇⊥→⊥, and ◇(A∨B)→◇A∨◇B. Prove soundness over birelational frames and completeness via the birelational (prime-theory) canonical model. Depends on 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T13:00:38Z",
+      "session_id": "sess_1784011298_752245_492",
+      "artifacts": [
+        {
+          "path": "specs/492_IK_intuitionistic_modal_soundness_completeness/reports/01_ik-instantiation-map.md",
+          "type": "report",
+          "summary": "IK instantiation map + soundness research"
+        },
+        {
+          "path": "specs/492_IK_intuitionistic_modal_soundness_completeness/plans/01_ik-soundness-completeness.md",
+          "type": "plan",
+          "summary": "IK soundness+completeness 3-phase plan"
+        },
+        {
+          "path": "specs/492_IK_intuitionistic_modal_soundness_completeness/summaries/01_ik-soundness-completeness-summary.md",
+          "type": "summary",
+          "summary": "IK soundness+completeness (instantiates 480)"
+        }
+      ]
     },
     {
       "project_number": 493,

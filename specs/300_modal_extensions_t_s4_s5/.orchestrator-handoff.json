@@ -1,14 +1,53 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 300,
   "session_id": "sess_1784044325_11ad9e_300",
-  "summary": "Phased implementation plan for frame-specific modal tableau extensions (T/S4/S5/B/5), ordered by research risk gradient. Wave 1: shared frameValid scaffolding. Wave 2 (low/moderate): T (ReflGen), S5 (universal-cluster, no loop-check), B (SymmGen). Wave 3: S4 rules + equality-blocking loop-checking machinery (structure), and 5/Euclidean via KB5/S5 EqvGen route. Wave 4: S4 termination bound (2^|Sf|) + decidability. Strategy B closure-at-extraction adopted; frame conditions free from Mathlib closure operators. Every phase ends green (lake build, zero sorry/axiom). Explicit [BLOCKED] fallbacks for S4 termination (Phase 6) and pure-K5 (Phase 7) with task-split recommendations; no sorry/axiom permitted.",
+  "summary": "Resumed after a prior session's session-limit termination. Recovered Phase 2 (T system) WIP that had been temporarily git-stashed by a concurrent task-396 session, fixed two subst-tactic build breaks in FrameSoundness.lean, and committed the recovered T rules + rule-level soundness lemmas. Added extractModelT (Relation.ReflGen closure; Std.Refl free) to FrameCompleteness.lean. Investigated the remaining Phase 2 work (T truth-lemma bridge + Decidable (tValid phi)) and determined it requires a from-scratch T-specific tableau driver (modalStepBranchT/modalExpandBranchesT/modalTableauT) plus a K-scale termination re-derivation (existing K driver is 8,066 lines across Saturation.lean/Completeness.lean/FmpMeasure.lean/CompletenessLoop.lean, with modalApplyOne hard-coded at 91 call sites, not parametrized) -- an order of magnitude larger than the plan's LOW-risk/2-hour estimate. Marked Phase 2 [BLOCKED] with full documentation in the plan file rather than force completion with sorry/axiom. Did not attempt Phases 3-7 (same root-cause blocker would recur). Full CSLib CI pipeline (build, checkInitImports, lint, lint-style, shake, test) is green; zero sorry/axiom in all task-300 files.",
+  "phases_completed": 1,
   "phases_total": 7,
-  "artifacts": [
+  "phase_detail": {
+    "1": "COMPLETED (prior session, commit 6496d277) -- frameValid/branchSatisfiableIn scaffolding, K re-derivation through frameValid",
+    "2": "BLOCKED -- T rules (FrameRules.lean) and rule-level T soundness (FrameSoundness.lean) and extractModelT (FrameCompleteness.lean) are done and green; the T truth-lemma bridge, branch-level fuel-induction soundness, tValid completeness, and Decidable (tValid phi) are blocked on a from-scratch T-tableau driver (see blockers)",
+    "3": "NOT STARTED",
+    "4": "NOT STARTED",
+    "5": "NOT STARTED",
+    "6": "NOT STARTED",
+    "7": "NOT STARTED"
+  },
+  "blockers": [
     {
-      "path": "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
-      "type": "plan",
-      "summary": "7-phase risk-ordered plan: (1) shared frameValid/branchSatisfiableIn scaffolding; (2) T reflexive via ReflGen; (3) S5 universal-cluster simplification; (4) B symmetric via SymmGen; (5) S4 rules + equality-blocking loop-checking structure + soundness/truth lemma; (6) S4 termination bound 2^|Sf| + Decidable (crux); (7) 5/Euclidean via KB5/S5 EqvGen route. Zero-debt: [BLOCKED] fallbacks for S4 termination and pure-K5."
+      "phase": 2,
+      "what_failed": "Decidable (tValid phi) requires an actual terminating decision procedure producing a branch satisfying the T-Hintikka property, not just a conditional truth lemma.",
+      "why_stuck": "The K tableau driver (modalStepBranch/modalExpandBranches/modalTableau in Saturation.lean/FmpMeasure.lean/CompletenessLoop.lean, 8,066 lines total) hard-codes modalApplyOne at 91 call sites, not parametrized. A T-specific driver needs an analogous modalStepBranchT/modalExpandBranchesT/modalTableauT built on the already-written modalApplyOneT (FrameRules.lean), plus a from-scratch re-derivation of the FmpMeasure.lean-style termination/fuel-sufficiency argument. This is necessary (not optional) because the T self-propagation rule can introduce a formula T(psi)@w that was never previously processed at w; if psi is itself diamond-shaped, the ordinary K diamond-positive rule (reached via modalApplyOneT's fall-through) can mint a NEW witness world in response, so 'the T rule never mints new worlds' is true only of the atomic self-propagation step, not its transitive saturation closure.",
+      "what_was_tried": "(1) A bounded post-processing T-closure over the K algorithm's already-terminated output branch was considered and rejected as unsound (cannot ignore cascading diamond-rule world-minting). (2) Confirmed modalApplyOneT_eq_of_not_boxPos_diaNeg (already proved in FrameRules.lean) would let a conditional T truth lemma reuse most of the existing K bridge lemmas (hintikka_box_pos, hintikka_diamond_pos, etc.) for non-box-positive cases -- promising for the truth lemma itself, but does not supply the termination/existence argument Decidable needs.",
+      "what_is_needed": "A dedicated task-scale effort (comparable in size to the original K tableau build) to construct modalStepBranchT/modalExpandBranchesT/modalTableauT and their termination proof. Recommend splitting into a dedicated task (e.g. t-frame-tableau-decidability) rather than continuing inline as Phase 2 of a five-system umbrella task.",
+      "prohibited_workarounds_used": "none -- no sorry, no axiom, no vacuous definition was introduced anywhere"
     }
-  ]
+  ],
+  "continuation_context": {
+    "resume_phase": 2,
+    "resume_point": "T truth-lemma bridge (modalTruthLemmaT) and modalStepBranchT/modalExpandBranchesT/modalTableauT driver construction",
+    "recommendation": "Split Phase 2's remaining work (and likely Phases 3-7 each) into their own dedicated tasks rather than sub-phases of task 300; each per-system decidability result appears to require K-tableau-scale (1000s of lines) new driver + termination infrastructure, not a lightweight generalization of the existing K machinery.",
+    "plan_path": "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
+    "handoff_doc": "specs/300_modal_extensions_t_s4_s5/handoffs/phase2-blocked-handoff.md"
+  },
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib.lean",
+    "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
+    "specs/300_modal_extensions_t_s4_s5/handoffs/phase2-blocked-handoff.md"
+  ],
+  "sorry_inventory": [],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake lint reports 2 pre-existing errors unrelated to task 300 (PrimeExclusion.lean, CKExtension.lean, owned by other concurrent tasks); lake shake reports no suggestions for FrameRules.lean/FrameSoundness.lean/FrameCompleteness.lean; lake test exit 0; whole-repo grep for sorry finds pre-existing sorries only in unrelated Bimodal/Propositional-Tableau modules (tasks 36/37/317), none in task 300's files."
+  },
+  "requires_user_review": true
 }

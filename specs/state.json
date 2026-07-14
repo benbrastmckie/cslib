@@ -1169,7 +1169,7 @@
     {
       "project_number": 300,
       "project_name": "modal_extensions_t_s4_s5",
-      "status": "planned",
+      "status": "partial",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.",
@@ -1575,13 +1575,13 @@
     {
       "project_number": 396,
       "project_name": "salvage_299_soundness_lemmas",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "title": "Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign",
       "description": "Evaluate and salvage the architecture-independent proof-engineering lemmas left on branch wip/task-299-soundness-refactor (commit 27d93e2d) by the stopped task-299 modal-K soundness re-attempt. Portable (acc-free) candidates: sfSat, sfSat_pos, sfSat_neg, RuleResultSat, and recognizer characterization lemmas (e.g. modalNegOf?_eq_some) in Cslib/Logics/Modal/Tableau/Soundness.lean, plus the branchSatisfiable Type (vs Type*) universe simplification. The FULL 299 refactor is UNBUILT and rewrites modalStepBranch_preserves_sat on the now-superseded global-Accessibility architecture, so do NOT merge it wholesale. Goal: decide which lemmas help the modal-tableau soundness-gap-redesign effort (the per-branch Accessibility 'task 384' tracked in the cslib-364 worktree / branch task-364-soundness-drift) and cherry-pick or restate them there if the propositional-rule recognizer layer hits the 'stuck on variable antecedent / consumed-scrutinee' friction documented in specs/364_modal_tableau_soundness_drift_repair/handoffs/BLOCKED-repair-guide.md (section 4). NOTE: 'task 384' here means the soundness-gap-redesign task in the cslib-364 worktree, which is a DIFFERENT task than main's own #384 (tableau_completeness_sorries) — task numbering diverged across worktrees. Reference branch: wip/task-299-soundness-refactor. Parent context: task 299 modal_k_tableau.",
       "created": "2026-06-28T14:29:01Z",
-      "last_updated": "2026-07-14T16:08:17Z",
+      "last_updated": "2026-07-14T17:10:35Z",
       "next_artifact_number": 1,
       "artifacts": [
         {

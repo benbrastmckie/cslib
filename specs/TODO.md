@@ -11,7 +11,7 @@ next_project_number: 503
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,495,497,501,502 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,400,405,407,425,438,440,449,463,465,466,474,495,497,501,502 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,496 | 36,37,181,317,407,425,449,495 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,484 | 39,40,181,215,300,301,375,496 | foundations, modal logic, code hygiene |
 | 4 | 412 | 41 | code hygiene |
@@ -35,8 +35,7 @@ next_project_number: 503
 
 ### Modal Logic
 
-300 [PLANNED] — Extend modal K tableau (task 299) with frame-specific rules for r
-396 [IMPLEMENTING] — Evaluate and salvage the architecture-independent proof-engineeri
+300 [PARTIAL] — Extend modal K tableau (task 299) with frame-specific rules for r
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
   └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
@@ -1170,7 +1169,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 396. Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -1286,7 +1285,7 @@ DELIVERABLE: a report at specs/415_*/reports/01_*.md that (a) verifies/refutes e
 ---
 
 ### 300. Modal extensions t s4 s5
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 299

@@ -16,13 +16,19 @@
   },
   "max_cycles": 10,
   "cycle_count": 3,
-  "failed_tasks": [],
+  "failed_tasks": [
+    {
+      "task": 300,
+      "reason": "Phase 2 [BLOCKED]: Decidable (tValid) needs a from-scratch T-tableau driver + termination re-derivation (K-scale). T rules/soundness/extractModelT committed green, zero sorry. Recommend dedicated per-system tasks."
+    }
+  ],
   "completed_tasks": [
+    396,
     491
   ],
   "current_statuses": {
-    "396": "planned",
-    "300": "planned",
+    "396": "completed",
+    "300": "partial",
     "491": "completed",
     "501": "implementing"
   },

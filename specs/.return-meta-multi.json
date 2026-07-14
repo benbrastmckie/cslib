@@ -1,12 +1,13 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [491],
-    "tasks_partial": [501],
-    "tasks_blocked_by_limit": [495, 496, 484],
-    "tasks_failed": [],
+    "tasks_completed": [
+      396
+    ],
+    "tasks_failed": [
+      300
+    ],
     "cycles_used": 3,
-    "multi_task_mode": true,
-    "pause_reason": "API session limit reached (resets 12pm America/Los_Angeles) — not a code blocker"
+    "multi_task_mode": true
   }
 }

@@ -99,7 +99,7 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 
 ---
 
-### Phase 2: `MinPrimeTheory.lean` — quasi-prime canonical worlds [NOT STARTED]
+### Phase 2: `MinPrimeTheory.lean` — quasi-prime canonical worlds [COMPLETED]
 
 **Goal**: Assemble the canonical-world scaffolding by REUSING the delivered efq-free quasi-prime machinery; add only thin wrappers. No new abstractions.
 

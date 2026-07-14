@@ -11,7 +11,7 @@ next_project_number: 511
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,501,502,506,509,510 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,506,509,510 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,503 | 36,37,181,317,407,425,449,510 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
@@ -37,10 +37,9 @@ next_project_number: 511
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 506 [PLANNED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-509 [NOT STARTED] — Re-scope and close CK constructive CS5 completeness (task 508 fol
+509 [NOT STARTED] — OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from ta
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
@@ -110,7 +109,7 @@ next_project_number: 511
 - **Topic**: Modal Logic
 - **Dependencies**: Task 508
 
-**Description**: Re-scope and close CK constructive CS5 completeness (task 508 follow-up) — task 508 closed CS4 completeness sorry-free by weakening the frame condition to cs4FC' plus a hereditary diamond-exclusion tail, but proved that this technique provably does NOT extend to CS5. Mechanized negative results from 508 (in specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean, both compiling): (1) bDia_not_valid_over_cs5FCweak — a two-world Bool countermodel satisfying reflexivity, both cs4FC' clauses, and weakened symmetry, yet refuting the-diamond-of-box-p implies p; so bDia is UNSOUND over the weakened condition that makes CS4 work. (2) cs5_dia_bot_imp_bot — CS5 proves the-diamond-of-bot implies bot (unlike CK/CT/CS4), which is a NEW lead enabling a Set.univ-free tail redesign. The remaining gap: the frame condition that would validate bDia (FCbdia: r w u implies exists u' >= u and t <= w with r u' t) fails canonically because u := cexpl forces Set.univ into every realized tail; discharging it needs genuine canonical symmetry (boxInv(u.head) subset w.head), whose classical proof requires maximality (B not in head implies not-B in head) — unavailable for quasi-prime (intuitionistic) heads. IMPORTANT: 508 established that the frame condition is the free parameter, not the tail construction — do not repeat 501's mistake of holding FC fixed. Investigate whether the cs5_dia_bot_imp_bot lead supports a Set.univ-free canonical world type that admits symmetry without maximality, or whether CS5 constructive completeness requires a different semantics (e.g. birelational models with a separate intuitionistic preorder). Honest negative results are acceptable and valuable: if CS5 completeness is not achievable over the current CK segment/fallible-world model, document the obstruction as a mechanized theorem and leave CS5.lean completeness BLOCKED with that citation. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean. Depends on 508.
+**Description**: OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from task 501; task 508 follow-up). This task is the sole owner of CS5 completeness for the CK column of the constructive modal cube — task 501 delivered CS5 axioms + soundness (cs5_soundness, landed and axiom-free) and is now CLOSED with CS5 completeness explicitly out of its scope. Task 508 closed CS4 completeness sorry-free by weakening the frame condition to cs4FC' plus a hereditary diamond-exclusion tail, but proved that technique provably does NOT extend to CS5. Mechanized negative results from 508 (specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean, compiling): (1) bDia_not_valid_over_cs5FCweak — a two-world Bool countermodel satisfying reflexivity, both cs4FC' clauses, and weakened symmetry, yet refuting the-diamond-of-box-p implies p; so bDia is UNSOUND over the weakened condition that makes CS4 work. (2) cs5_dia_bot_imp_bot — CS5 proves the-diamond-of-bot implies bot (unlike CK/CT/CS4), a NEW lead enabling a Set.univ-free tail redesign. Remaining gap: the frame condition that would validate bDia (FCbdia: r w u implies exists u' >= u and t <= w with r u' t) fails canonically because u := cexpl forces Set.univ into every realized tail; discharging it needs genuine canonical symmetry (boxInv(u.head) subset w.head), whose classical proof requires maximality (B not in head implies not-B in head) — unavailable for quasi-prime (intuitionistic) heads. IMPORTANT — do not repeat prior mistakes: 501 held the frame condition FIXED and searched for a better tail construction, and 508 proved the frame condition is the FREE PARAMETER. Also note 501 Phase 7 wrongly asserted CS5 shares CS4's root cause; 508 refuted this — CS5's obstruction is different and deeper. SCOPE CAVEAT: the countermodel rules out the CS4 technique, NOT CS5 completeness as such; the broader infeasibility verdict is a limitation-of-known-technique argument, not an impossibility theorem. Investigate whether cs5_dia_bot_imp_bot supports a Set.univ-free canonical world type admitting symmetry without maximality, or whether CS5 constructive completeness requires different semantics (e.g. birelational models with a separate intuitionistic preorder). A rigorous NEGATIVE result is an ACCEPTABLE and VALUABLE outcome: if CS5 completeness is not achievable over the CK segment/fallible-world model, document the obstruction as a mechanized theorem and leave CS5.lean completeness BLOCKED citing it. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean. Depends on 508.
 
 ---
 
@@ -212,14 +211,14 @@ next_project_number: 511
 ---
 
 ### 501. CK constructive modal extensions CT CS4 CS5
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 493, Task 508
 - **Research**: [501_CK_constructive_modal_extensions_CT_CS4_CS5/reports/01_ct-cs4-cs5-segment-extensions.md]
 - **Plan**: [501_CK_constructive_modal_extensions_CT_CS4_CS5/plans/01_ct-cs4-cs5-extensions.md]
 
-**Description**: CK constructive modal extensions CT / CS4 / CS5 — sound and complete axiomatizations of the constructive (CK-based) analogues of T / S4 / S5 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the <=-R confluence) over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. Completes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal). Depends on 493.
+**Description**: CK constructive modal extensions CT / CS4 (+ CS5 soundness) — RE-SCOPED: CS5 completeness moved to task 509, which owns it entirely. 501 scope is now: sound and complete axiomatizations of the constructive (CK-based) analogues of T and S4 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480), PLUS CS5 axioms + soundness. CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. DELIVERED: CKExtension.lean; CT soundness+completeness; CS4 soundness+completeness (completeness closed by task 508 via the weakened frame condition cs4FC' + hereditary diamond-refuting tail); CS5 axioms + soundness (cs5_soundness, no axioms). NOT IN SCOPE: CS5 completeness — see task 509 and the mechanized obstruction bDia_not_valid_over_cs5FCweak. Contributes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal); the column is CT+CS4-complete with CS5 completeness outstanding under 509. Depends on 493.
 
 ---
 

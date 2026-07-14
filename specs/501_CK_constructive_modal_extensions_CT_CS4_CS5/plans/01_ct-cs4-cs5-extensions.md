@@ -262,7 +262,22 @@ using ≤-composed transitivity for the box-form.
   `lean_goal`); `fourDia` uses the plain specialization.
 - Zero errors/warnings/`sorry`; docstrings present.
 
-### Phase 5: CS4 transitivity invariant + completeness [BLOCKED]
+### Phase 5: CS4 transitivity invariant + completeness [COMPLETED]
+
+**RESOLVED BY TASK 508.** `cs4_completeness` and `cs4_soundness_completeness` are landed in
+`Cslib/Logics/Modal/Metalogic/Constructive/CS4.lean`, sorry-free, with axioms exactly
+`[propext, Classical.choice, Quot.sound]` (independently verified via `lake env lean`).
+
+The blocker recorded below was real but rested on a false premise: it held the frame condition
+`cs4FC` fixed and searched for a better tail construction. Task 508 established that **the frame
+condition is the free parameter**. Weakening `cs4FC` to `cs4FC'` (which still validates
+`fourBox`/`fourDia`) and replacing the one-step `A`-exclusion with a hereditary `◇A`-exclusion
+closes completeness while reusing `dia_refuting_theory` unchanged at `A := ◇A₀`. The new
+Lindenbaum machinery this phase predicted was necessary turned out not to be. `cs4FC` is retained
+and bridged via `cs4FC_implies_cs4FC'`, so the `cs5FC → cs4FC → ctFC` inclusion chain in
+`ConstructiveLatticeMonotonicity.lean` is preserved unchanged.
+
+Historical blocker record (superseded — retained for provenance):
 
 **BLOCKER**:
 - **What failed**: No per-segment invariant makes `cs4FC cs4Mreach` (≤-composed transitivity of
@@ -382,6 +397,29 @@ two new B cases, using ≤-composed symmetry for the box-form.
 - Zero errors/warnings/`sorry`; docstrings present.
 
 ### Phase 7: CS5 symmetry invariant + completeness (HIGHEST RISK — STOP/[BLOCKED] contingency) [BLOCKED]
+
+**OWNERSHIP MOVED TO TASK 509.** CS5 completeness is out of scope for task 501. This phase stays
+`[BLOCKED]` because the work is genuinely not done — it is not counted against 501, whose scope is
+now CKExtension + CT + CS4 (soundness *and* completeness) + CS5 **soundness**. Task 509
+(`rescope_CK_CS5_constructive_completeness`) owns CS5 completeness end to end. Do not attempt CS5
+completeness under 501.
+
+**CORRECTION — the premise below is now known to be false.** This phase's blocker asserts "same
+underlying obstruction as Phase 5" and declined to re-attempt CS5 on that basis. Task 508 refuted
+that shared-root-cause claim in both directions:
+- Phase 5's CS4 obstruction was **surmountable** — weakening the frame condition closed it.
+- CS5's obstruction is **different and deeper**, not the same one. Task 508 mechanized
+  `bDia_not_valid_over_cs5FCweak`: a two-world countermodel proving `bDia` is *unsound* over the
+  weakened frame condition that makes CS4 work. So the CS4 fix provably does **not** transfer.
+  The real CS5 gap is canonical symmetry (`boxInv(u.head) ⊆ w.head`), whose classical proof needs
+  maximality — unavailable for quasi-prime (intuitionistic) heads.
+
+Caveat for 509: the countermodel rules out *this technique*, not CS5 completeness as such. The
+broader infeasibility verdict rests on a limitation-of-known-technique argument, not an
+impossibility theorem. Task 508 also recorded a live lead (`cs5_dia_bot_imp_bot`: CS5 proves
+`◇⊥ → ⊥`, unlike CK/CT/CS4), enabling a `Set.univ`-free tail redesign.
+
+Historical blocker record (premise superseded — retained for provenance):
 
 **BLOCKER**:
 - **What failed**: Same underlying obstruction as Phase 5 (CS4 transitivity), now confirmed to

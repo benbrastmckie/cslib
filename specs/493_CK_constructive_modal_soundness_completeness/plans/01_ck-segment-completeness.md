@@ -165,12 +165,12 @@ the remainder is a tight proof-dependency chain.
 
 ---
 
-### Phase 1: `CKModalAxiom` — pin the exact bare-CK axiom list [IN PROGRESS]
+### Phase 1: `CKModalAxiom` — pin the exact bare-CK axiom list [COMPLETED]
 - **Goal:** Define `CKModalAxiom : Proposition Atom → Prop` = `IKModalAxiom` minus `cd`, `idb`, `dbot`, with a provenance comment tying each constructor to ianshil `CKH.v`/`NoAdAx` and `Wijesekera1990`.
 - **Tasks:**
-  - [ ] Read `IK.lean`'s `IKModalAxiom` constructor list; enumerate the 9 int-prop + `k` + `kdia` to keep and the 3 (`cd`/`idb`/`dbot`) to drop.
-  - [ ] Confirm bare CK excludes Nd (resolve the "some authors call CK+Nd `CK`" caveat from report §5 against ianshil `NoAdAx`); record the decision in a doc comment.
-  - [ ] Create `Cslib/Logics/Modal/Metalogic/Constructive/CK.lean` with `namespace Cslib.Logic.Modal`, imports, and only `CKModalAxiom`.
+  - [x] Read `IK.lean`'s `IKModalAxiom` constructor list; enumerate the 9 int-prop + `k` + `kdia` to keep and the 3 (`cd`/`idb`/`dbot`) to drop.
+  - [x] Confirm bare CK excludes Nd (resolve the "some authors call CK+Nd `CK`" caveat from report §5 against ianshil `NoAdAx`); record the decision in a doc comment. (Nd not MValid via `botForces := fun _ => True`; doc comment in CK.lean records this.)
+  - [x] Create `Cslib/Logics/Modal/Metalogic/Constructive/CK.lean` with `namespace Cslib.Logic.Modal`, imports, and only `CKModalAxiom`.
 - **Estimated output:** ~80-140 lines. **Done when:** `CKModalAxiom` compiles; no `cd`/`idb`/`dbot`; provenance comment present; ZERO-DEBT + gates pass.
 - **Timing:** 1.5-2.5h
 - **Depends on:** none
@@ -187,7 +187,16 @@ the remainder is a tight proof-dependency chain.
 - **Timing:** 3-4h
 - **Depends on:** 1
 
-### Phase 3: `ck_axiom_sound` / `ck_soundness` over `MValid` [NOT STARTED]
+### Phase 3: `ck_axiom_sound` / `ck_soundness` over `MValid` [IN PROGRESS]
+
+> **DEVIATION (counterexample-backed, ground-truth-verified)**: soundness over raw `MValid` is
+> FALSE: `⊥ → p` is a CK axiom (`efq`) but with `botForces ≡ True`, `val ≡ False` it is not
+> forced (`MValid` lacks explosion conditions). ianshil `Kripke/kripke_sem.v` (fetched verbatim)
+> confirms the sound model class carries `val_expl`/`mreach_expl`/`ireach_expl` exploding-node
+> conditions and an `Expl` lemma. Fix: new `EValid` in `Constructive/CK.lean` =
+> `MValid` + 3 explosion hypotheses (predicate form). `MValid → EValid → IValid`. Soundness over
+> `EValid`; completeness proved from `EValid` with the plan's `MValid → Derivable` kept as a
+> corollary. No frozen file touched.
 - **Goal:** Prove soundness (the easy direction) directly over arbitrary `botForces`.
 - **Tasks:**
   - [ ] Adapt `ik_axiom_sound`'s `k`/`kdia` + 9 non-modal cases (`IK.lean:137-170`) to `CKModalAxiom`, re-generalized to arbitrary upward-closed `botForces` (non-modal cases route through `bforces_persistence`, generic over `botForces`).

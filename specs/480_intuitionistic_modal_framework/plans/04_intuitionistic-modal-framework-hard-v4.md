@@ -621,7 +621,7 @@ new Lean `axiom`.
 - **Done when:** module builds; five helpers typecheck sorry-free. -- **DONE.**
 - **Timing:** ~1.25 hours. **Depends on:** 2d.
 
-### Phase 3b: .box case helper (threads Kb+Kd+Idb via witness) [NOT STARTED]
+### Phase 3b: .box case helper (threads Kb+Kd+Idb via witness) [COMPLETED]
 
 - **Goal:** Prove the `.box` truth-lemma case as a helper lemma, consuming the corrected pair-shaped
   box witness.
@@ -629,19 +629,25 @@ new Lean `axiom`.
 - **Threaded parametric hypotheses (report 03 §4 row 6):** threads `h_K`, `h_Kdia`, `h_Idb` **via the
   call to `canonical_box_witness`** — NO new axiom introduced in this phase.
 - **Tasks:**
-  - [ ] Prove the `.box` helper using `canonical_box_witness` (2b) — consume the `⟨w', u⟩` PAIR:
+  - [x] Prove the `.box` helper using `canonical_box_witness` (2b) — consume the `⟨w', u⟩` PAIR:
         `BForces_box` unfolds to `∀ w'≥w, ∀ u, r w' u → force u φ`, so the outer `∀ w'≥w` is
         load-bearing and matches the witness's `w ≤ w'` (report 02 Deliverable 3). Heredity over
         `≤∘R`. Take the IH as an explicit hypothesis (3a design note). Pass `h_K`, `h_Kdia`, `h_Idb`
         through to the witness.
-  - [ ] Docstring; `lake build` the module.
+  - [x] Docstring; `lake build` the module.
 - **Reference grounding:** report 03 §4 row 6; Report 01 §6.7; report 02 Deliverable 3; `Simpson1994`
   clause 3.2.
-- **Estimated output:** ~60-120 lines.
-- **Verification (targeted):** module builds; box helper typechecks consuming the pair witness with
-  the threaded hypotheses; ZERO-DEBT; untouched-classical carried.
-- **Done when:** module builds; box helper typechecks sorry-free.
-- **Timing:** ~0.75 hour. **Depends on:** 3a.
+- **Estimated output:** ~60-120 lines. **Actual:** ~68 lines (`truth_box_case` incl. docstring).
+- **Verification (targeted):** module builds (`lake build
+  Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma`, scoped, green, no warnings); full
+  `lake build` (3190 jobs) green, no new warnings/sorries introduced; `truth_box_case` typechecks
+  consuming the pair witness with the threaded hypotheses; `lean_verify` on `truth_box_case`
+  reports only `{propext, Classical.choice, Quot.sound}` (no new axiom); `lake exe
+  checkInitImports` and `lake exe lint-style` both pass with no output; ZERO-DEBT; no sorry in
+  `TruthLemma.lean`; `CanonicalModel.lean` and the 3a helpers untouched (`git status` shows only
+  additive edits to `TruthLemma.lean` in `Cslib/`).
+- **Done when:** module builds; box helper typechecks sorry-free. -- **DONE.**
+- **Timing:** ~0.5 hour. **Depends on:** 3a.
 
 ### Phase 3c: .diamond case helper (threads Kd+Cd) + assemble canonical_truth_lemma [NOT STARTED] — HIGHEST RISK
 

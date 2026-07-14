@@ -1,0 +1,30 @@
+{
+  "task_number": 480,
+  "phase": "3b",
+  "session_id": "sess_1784011298_752245_480",
+  "status": "completed",
+  "objectives": [
+    {
+      "objective": "Prove truth_box_case (.box constructor case of the truth lemma) consuming canonical_box_witness and heredity over <=oR",
+      "status": "done",
+      "notes": "Single theorem, forward direction by contrapositive via canonical_box_witness's pair-shaped w'/u witness + ih at u; backward direction via subset-heredity of box membership across w<=w' plus canonicalR's box clause + ih.mpr at u."
+    }
+  ],
+  "zero_debt_verification": {
+    "sorry_count": 0,
+    "vacuous_definitions": 0,
+    "new_axioms": 0,
+    "lean_verify_truth_box_case": ["propext", "Classical.choice", "Quot.sound"],
+    "scoped_build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma -- succeeded (596 jobs), no warnings",
+    "full_build": "lake build -- succeeded (3190 jobs); only pre-existing unrelated warnings/sorries in Cslib/Logics/Propositional/Tableau/* (not this task's scope)",
+    "check_init_imports": "passed (no output)",
+    "lint_style": "passed (no output)"
+  },
+  "files_touched": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean"
+  ],
+  "files_untouched_confirmed": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean"
+  ]
+}

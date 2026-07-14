@@ -11,12 +11,14 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
 
 /-! # Truth Lemma for Intuitionistic Modal Logic (Non-Modal Cases)
 
-This module is Phase 3a of the birelational canonical-model truth lemma (task 480 plan v4):
-it proves the **five non-modal cases** (`atom`, `bot`, `and`, `or`, `imp`) as standalone named
-helper lemmas, transliterated line-for-line from
+This module contains Phase 3a and Phase 3b of the birelational canonical-model truth lemma
+(task 480 plan v4). Phase 3a proves the **five non-modal cases** (`atom`, `bot`, `and`, `or`,
+`imp`) as standalone named helper lemmas, transliterated line-for-line from
 `Cslib.Logic.PL.int_truth_lemma`
 (`Cslib/Logics/Propositional/Metalogic/IntStrongCompleteness.lean:108-214`,
-`PL.Proposition Atom` → `Proposition Atom`, `IntPropAxiom` → `Axioms`).
+`PL.Proposition Atom` → `Proposition Atom`, `IntPropAxiom` → `Axioms`). Phase 3b adds
+`truth_box_case`, the `.box` constructor case, consuming the pair-shaped
+`canonical_box_witness` (Phase 2b) and heredity over `≤ ∘ R`.
 
 Each case is a **named helper lemma** taking the induction hypothesis (for the `and`/`or`/`imp`
 cases, which recurse on strict subformulas) as an explicit hypothesis parameter, rather than
@@ -43,7 +45,8 @@ intuitionistic instantiation (`botForces := fun _ => False`) discharges it using
 - `canonical_imp_property`: modus-ponens closure for canonical prime worlds (modal analogue of
   `Cslib.Logic.PL.int_dccs_imp_property`).
 - `truth_atom_case`, `truth_bot_case`, `truth_and_case`, `truth_or_case`, `truth_imp_case`: the
-  five non-modal truth-lemma case helpers.
+  five non-modal truth-lemma case helpers (Phase 3a).
+- `truth_box_case`: the `.box` truth-lemma case helper (Phase 3b).
 
 ## References
 
@@ -282,5 +285,78 @@ theorem truth_imp_case
     exact (ihψ T).mpr h_ψ_T
 
 end TruthLemmaCases
+
+/-! ## Box Truth-Lemma Case (Phase 3b) -/
+
+section TruthLemmaBoxCase
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- **Box case** of the (to-be-assembled) `canonical_truth_lemma`: forcing of `□φ` at a
+canonical world coincides with `□φ ∈ w.val`, given the induction hypothesis for `φ`
+**universally quantified over all canonical worlds** (task 480 Phase 3a design note, reused
+here exactly as in `truth_imp_case`: this lets the case build sorry-free before
+`canonical_truth_lemma` itself is assembled in Phase 3c).
+
+Unfolds via `BForces_box` (`∀ w' ≥ w, ∀ u, r w' u → BForces … u φ`, [Simpson1994] clause 3.2).
+
+**Forward direction** (contrapositive): if `□φ ∉ w.val`, `canonical_box_witness` (Phase 2b)
+produces `w' ≥ w` and a prime `u` with `canonicalR w' u` and `φ ∉ u.val`; instantiating the
+forcing hypothesis at this `w'`/`u` and applying `ih u` yields `φ ∈ u.val`, contradicting
+`φ ∉ u.val`.
+
+**Backward direction** (heredity over `≤ ∘ R`): given `□φ ∈ w.val`, any `w' ≥ w` inherits
+`□φ ∈ w'.val` by set inclusion; `canonicalR w' u`'s box clause then gives `φ ∈ u.val` for any
+`u` with `canonicalR w' u`, and `ih u` transports this to forcing.
+
+Threads `h_K`, `h_Kdia`, `h_Idb` (report 03 §4 row 6) -- together with the base intuitionistic
+hypotheses `h_implyK`/`h_implyS`/`h_efq`/`h_orI1`/`h_orI2`/`h_orE`/`h_andI`/`h_andE1`/`h_andE2`
+that `canonical_box_witness` itself requires -- **solely via the call to
+`canonical_box_witness`**; no new axiom is introduced in this phase.
+
+## References
+
+* [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
+  Chapter 3, clause 3.2.
+* ianshil/CK `general_th_completeness.v`, box case (~L211-249). -/
+theorem truth_box_case
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Idb : ∀ (φ ψ : Proposition Atom),
+      Axioms (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ))))
+    {botForces : CanonicalPrimeWorld Axioms → Prop}
+    {w : CanonicalPrimeWorld Axioms} {φ : Proposition Atom}
+    (ih : ∀ T : CanonicalPrimeWorld Axioms,
+      BForces canonicalR canonicalVal botForces T φ ↔ φ ∈ T.val) :
+    BForces canonicalR canonicalVal botForces w (Proposition.box φ) ↔
+      (Proposition.box φ) ∈ w.val := by
+  simp only [BForces_box]
+  constructor
+  · -- Forward: (∀ w' ≥ w, ∀ u, canonicalR w' u → BForces … u φ) → □φ ∈ w.val
+    intro h_forces
+    by_contra h_notbox
+    obtain ⟨w', u, hww', hRw'u, hphi_notU⟩ :=
+      canonical_box_witness h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_andI h_andE1 h_andE2
+        h_K h_Kdia h_Idb (w := w) (φ := φ) h_notbox
+    exact hphi_notU ((ih u).mp (h_forces w' hww' u hRw'u))
+  · -- Backward: □φ ∈ w.val → ∀ w' ≥ w, ∀ u, canonicalR w' u → BForces … u φ
+    intro h_mem w' hww' u hRw'u
+    have hbox_w' : (Proposition.box φ) ∈ w'.val := hww' h_mem
+    have hphi_u : φ ∈ u.val := hRw'u.1 φ hbox_w'
+    exact (ih u).mpr hphi_u
+
+end TruthLemmaBoxCase
 
 end Cslib.Logic.Modal

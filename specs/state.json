@@ -2742,7 +2742,7 @@
     {
       "project_number": 500,
       "project_name": "pr662_branch_reconciliation",
-      "status": "researched",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 498,
@@ -2754,7 +2754,18 @@
           "type": "report",
           "path": "specs/500_pr662_branch_reconciliation/reports/01_branch-state-audit.md",
           "summary": "Audit of PR #662 branch state: 4 competing primitive designs, task-441 disjoint history, 8-commit upstream staleness, and where the task-499 work sits; lists the canonical-design decision and reconciliation steps needed before any force-push."
+        },
+        {
+          "type": "summary",
+          "path": "specs/500_pr662_branch_reconciliation/summaries/01_reconstruction-summary.md",
+          "summary": "Reconstruction summary: 7-primitive main-based #662 rebuild, force-pushed with approval; deferred cleanup follow-ups."
         }
+      ],
+      "completion_summary": "PR #662 rebuilt as single squashed commit 24825833 on main (7-primitive native Proposition), CI-green, force-pushed to fork #662 head with user approval; PR retargeted fmontesi/connectives->main with updated title/body. Copyright deferred. Branch cleanup/preservation deferred per user.",
+      "roadmap_items": [
+        "Branch preservation+cleanup: merge useful branches into main if not represented, then reduce to three PR branches (648/649/662)",
+        "Remove worktree cslib-662-rebuild + branch rebuild/662-main-7prim once PR settled",
+        "Add contributor copyright-holder line pending Fabrizio confirmation"
       ]
     }
   ],

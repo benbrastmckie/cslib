@@ -11,7 +11,7 @@ next_project_number: 501
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,478,479,481,482,483,490,491,497,500 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,478,479,481,482,483,490,491,497 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,480 | 36,37,181,317,407,425,449,478,490 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,414,492,493,495 | 39,40,181,215,300,301,375,480,491 | foundations, code hygiene, modal-logic |
 | 4 | 412,484,494,496 | 41,479,481,482,483,492,495 | modal logic, code hygiene, modal-logic |
@@ -87,7 +87,6 @@ next_project_number: 501
 491 [NOT STARTED] — Minimal propositional base (efq-optional) — PREREQUISITE for the 
   └─ 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
     └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
-500 [RESEARCHED] — Reconcile the PR #662 branch so it is up to date with upstream an
 492 [NOT STARTED] — IK (intuitionistic modal logic K) soundness + completeness over b
   └─ 494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
@@ -103,11 +102,12 @@ next_project_number: 501
 ## Tasks
 
 ### 500. Pr662 branch reconciliation
-- **Status**: [RESEARCHED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: None
 - **Research**: [500_pr662_branch_reconciliation/reports/01_branch-state-audit.md]
+- **Summary**: [500_pr662_branch_reconciliation/summaries/01_reconstruction-summary.md]
 
 **Description**: Reconcile the PR #662 branch so it is up to date with upstream and correctly stacked on #607 before any force-push. Investigation (see reports/01_branch-state-audit.md) found FOUR competing primitive designs across branches — live PR origin/feat/modal-formula-primitives is 5-primitive {atom,not,and,diamond,box} (8 behind upstream/main); local feat/modal-formula-primitives + v2 are 4-primitive {atom,bot,imp,box} (local diverged 24-behind/5-ahead of origin); task-441-native-refactor (where the task-499 citation/compliance work sits, uncommitted) is 7-primitive {atom,bot,imp,and,or,box,diamond} = slice 'version B' and has NO common git ancestor with the PR branch; base fmontesi/connectives (#607) and pr607 are 4-primitive {atom,not,and,diamond}. BLOCKING DECISION: choose the canonical design for PR #662 (needs user + likely maintainer Fabrizio input). Then rebuild a single PR-head branch rebased onto upstream/fmontesi/connectives, up to date w.r.t. upstream/main, carrying the chosen design + the task-499 compliance/citation work, resolving the task-441 disjoint-history problem; run full CSLib CI; only then force-push. Out of scope until confirmed: any push/push --force/rebase/reset, and the copyright-holder line change (separate maintainer gate). Related: 498 (modal foundational layer), 499 (CONTRIBUTING compliance + citations), 476 (PR coordination), 607/662 stacking.
 

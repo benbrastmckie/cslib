@@ -160,7 +160,7 @@ constructors.
 
 ---
 
-### Phase 3: Satisfaction Predicates (Encoding-Independent) [NOT STARTED]
+### Phase 3: Satisfaction Predicates (Encoding-Independent) [COMPLETED]
 
 **Goal**: Add the encoding-independent satisfaction-predicate scaffolding
 (`sfSat`, `sfSat_pos`, `sfSat_neg`, `RuleResultSat`) to `SoundnessStep.lean` using the

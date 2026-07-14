@@ -146,6 +146,40 @@ lemma modalClosed_unsat
         | pos => exact absurd hsf hpos
         | neg => simp [hsf, Sign.isPos] at hsfcond
 
+/-! ## Propositional Rule Soundness -/
+
+/-- A signed formula `sf` is satisfied by model `m` under world assignment `f`:
+a positive formula must hold at its world, a negative formula must fail there.
+
+Deliberately monomorphic in `{W : Type}` (encoding-independent scaffolding salvaged from
+`wip/task-299-soundness-refactor`); this does not replace or downgrade the shared
+`branchSatisfiable.{v, u}` predicate above, which the completeness loop instantiates at
+explicit universes. -/
+def sfSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) : Prop :=
+  (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+  (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula)
+
+/-- Build `sfSat` for a positive signed formula. -/
+lemma sfSat_pos {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (l : WorldIndex) (h : Satisfies m (f l) φ) :
+    sfSat m f ⟨.pos, φ, l⟩ := ⟨fun _ => h, fun hc => by simp at hc⟩
+
+/-- Build `sfSat` for a negative signed formula. -/
+lemma sfSat_neg {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (l : WorldIndex) (h : ¬Satisfies m (f l) φ) :
+    sfSat m f ⟨.neg, φ, l⟩ := ⟨fun hc => by simp at hc, fun _ => h⟩
+
+/-- A `RuleResult` preserves satisfiability at `(m, f)`: every output of a linear or
+persistent rule is satisfied, and some output branch of a branching rule is satisfied. -/
+def RuleResultSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (R : RuleResult (Proposition Atom) WorldIndex) : Prop :=
+  match R with
+  | .linear newForms => ∀ sf ∈ newForms, sfSat m f sf
+  | .branching brs => ∃ br ∈ brs, ∀ sf ∈ br, sfSat m f sf
+  | .persistent newForms => ∀ sf ∈ newForms, sfSat m f sf
+  | .notApplicable => True
+
 /-! ## Rule-Application Semantic Preservation -/
 
 /-- The freshness invariant: all world indices in `acc` are strictly below `modalNextWorld b`.

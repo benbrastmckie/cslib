@@ -230,7 +230,7 @@ transport the truth lemma, and prove completeness/consistency/biconditional.
 - `lake build …Constructive.CT` green; `ct_soundness_completeness` type-checks as a biconditional.
 - Zero errors/warnings/`sorry`; no deprecated-API warnings; docstrings present.
 
-### Phase 4: CS4 axioms + soundness [IN PROGRESS]
+### Phase 4: CS4 axioms + soundness [COMPLETED]
 
 **Goal**: Define `CS4ModalAxiom` and prove soundness over `CKForces` for the two new 4 cases,
 using ≤-composed transitivity for the box-form.

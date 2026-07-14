@@ -1,0 +1,25 @@
+{
+  "task_number": 494,
+  "phase": 1,
+  "phase_name": "Extension.lean scaffold",
+  "status": "completed",
+  "session_id": "sess_1784011298_752245_494",
+  "objectives": [
+    {"name": "Create Extension.lean with Cslib.Init import + IK import", "done": true},
+    {"name": "Define IValidFC", "done": true},
+    {"name": "Prove ivalidFC_completeness (~2-line diff over ivalid_completeness)", "done": true},
+    {"name": "Add axiom_mem helper", "done": true},
+    {"name": "Module docstring citing Simpson1994", "done": true},
+    {"name": "lake build scoped + zero-sorry/axiom verify", "done": true},
+    {"name": "Register in Cslib.lean barrel", "done": true}
+  ],
+  "verification": {
+    "lake_build": "passed",
+    "checkInitImports": "passed",
+    "mk_all_module": "passed (barrel already correctly placed)",
+    "sorry_count": 0,
+    "axiom_count_new": 0,
+    "zero_churn_480_492": true
+  },
+  "deviations": []
+}

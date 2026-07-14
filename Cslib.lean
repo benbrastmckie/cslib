@@ -359,6 +359,7 @@ public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma

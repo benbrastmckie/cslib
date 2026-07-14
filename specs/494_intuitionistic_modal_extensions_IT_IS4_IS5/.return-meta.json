@@ -1,0 +1,55 @@
+{
+  "status": "partial",
+  "artifacts": [
+    {
+      "type": "lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/Extension.lean",
+      "summary": "Phase 1 scaffold: IValidFC (frame-condition-parametrized birelational validity), ivalidFC_completeness (~2-line generalization of ivalid_completeness), axiom_mem helper"
+    },
+    {
+      "type": "barrel",
+      "path": "Cslib.lean",
+      "summary": "Registered Extension.lean import (alphabetical slot between Completeness and IK)"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/.orchestrator-handoff.json",
+      "summary": "Phase 1 complete handoff; sorry_inventory empty; next_action_hint points to Phase 2 (IT.lean)"
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 4,
+  "next_steps": "Run /implement 494 to execute Phase 2 (IT.lean: reflexive frame condition)",
+  "metadata": {
+    "session_id": "sess_1784011298_752245_494",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+    "phase_count": 4,
+    "phase_executed": 1
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "memory_candidates": [
+    {
+      "content": "Modular intuitionistic modal extensions (IT/IS4/IS5) over an existing IK birelational canonical model are best structured as one small shared scaffold Extension.lean (a frame-condition-parametrized validity IValidFC = IValid + one binder FC r, plus ivalidFC_completeness = ivalid_completeness + hypothesis FC canonicalR threaded into the h_valid application, ~2-line diff, plus an axiom_mem helper) followed by three thin nested-import files IT<-IS4<-IS5, mirroring classical Systems/{T,S4,S5}. Each extension's only genuinely new proofs are the per-axiom soundness cases and one positive canonical-closure lemma per frame condition (Reflexive/Transitive/Symmetric via canonical_imp_property MP-closure). This keeps task-480/492 assets zero-churn. A generic frame-condition typeclass is NOT worth it - it obscures the concrete instantiations reviewers expect.",
+      "category": "PATTERN",
+      "source_artifact": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["intuitionistic modal", "IValidFC", "frame condition", "canonical closure", "modular extension", "Extension.lean"]
+    },
+    {
+      "content": "IValidFC's frame-condition parameter FC must be typed as {World : Type v} -> (World -> World -> Prop) -> Prop (implicit World) so that Mathlib's Reflexive/Transitive/Symmetric (already polymorphic over an implicit carrier) can be passed directly as FC instantiations without any adapter or new predicate definitions.",
+      "category": "PATTERN",
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Intuitionistic/Extension.lean",
+      "confidence": 0.75,
+      "suggested_keywords": ["IValidFC", "frame condition", "Reflexive", "Transitive", "Symmetric", "implicit universe"]
+    }
+  ]
+}

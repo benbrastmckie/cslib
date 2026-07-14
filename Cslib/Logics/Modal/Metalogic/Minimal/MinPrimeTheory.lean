@@ -26,7 +26,7 @@ the propositional `MinStrongCompleteness.lean:74-114`.
   (`QuasiPrime MKModalAxiom`) -- deductively closed with the disjunction property, **no**
   consistency requirement (fallible worlds admitted).
 - The canonical `Preorder` instance: `≤` is set inclusion on the underlying theory.
-- `canonicalVal`: the canonical valuation, `atom p` forced at `w` iff `atom p ∈ w.val`.
+- `minCanonicalVal`: the canonical valuation, `atom p` forced at `w` iff `atom p ∈ w.val`.
 - `minBotForces`: `⊥` is forced at `w` iff `⊥ ∈ w.val` -- a genuine (non-trivial) predicate,
   upward-closed for free via `≤ = ⊆`.
 - `min_head_realization`: any `MKModalAxiom`-underivable formula is omitted by the head of some
@@ -74,16 +74,18 @@ theorem MinCanonicalPrimeWorld.le_iff {w w' : MinCanonicalPrimeWorld Atom} :
 /-! ## Canonical Valuation -/
 
 /-- The canonical valuation: atom `p` is forced at world `w` iff `atom p` is a member of the
-quasi-prime theory underlying `w`. Mirrors `canonicalVal` (`Intuitionistic/CanonicalModel.lean:94`)
-and `minCanonicalVal` (`MinStrongCompleteness.lean:84`). -/
-def canonicalVal (w : MinCanonicalPrimeWorld Atom) (p : Atom) : Prop :=
+quasi-prime theory underlying `w`. Mirrors `canonicalVal`
+(`Intuitionistic/CanonicalModel.lean:94`) and `minCanonicalVal` (`MinStrongCompleteness.lean:84`).
+Named `minCanonicalVal` (not `canonicalVal`) to avoid a name clash with `IK`'s `canonicalVal` in
+the same `Cslib.Logic.Modal` namespace. -/
+def minCanonicalVal (w : MinCanonicalPrimeWorld Atom) (p : Atom) : Prop :=
   Proposition.atom p ∈ w.val
 
 /-- The canonical valuation is upward-closed with respect to the canonical preorder, as required
 by `BModel.v_upward_closed`. -/
-theorem canonicalVal_upward_closed
-    {w w' : MinCanonicalPrimeWorld Atom} (p : Atom) (hw : w ≤ w') (hv : canonicalVal w p) :
-    canonicalVal w' p :=
+theorem minCanonicalVal_upward_closed
+    {w w' : MinCanonicalPrimeWorld Atom} (p : Atom) (hw : w ≤ w') (hv : minCanonicalVal w p) :
+    minCanonicalVal w' p :=
   hw hv
 
 /-! ## Canonical `botForces` -/

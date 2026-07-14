@@ -27,7 +27,7 @@ worlds, by structural induction on `Proposition`. It mirrors
 
 ## Main Definitions
 
-- `min_canonical_truth_lemma`: `BForces canonicalR canonicalVal minBotForces w φ ↔ φ ∈ w.val`.
+- `min_canonical_truth_lemma`: `BForces minCanonicalR minCanonicalVal minBotForces w φ ↔ φ ∈ w.val`.
 
 ## References
 
@@ -67,9 +67,9 @@ theorem min_canonical_imp_property {w : MinCanonicalPrimeWorld Atom} {φ ψ : Pr
 /-! ## Non-Modal Truth-Lemma Cases -/
 
 /-- **Atom case**: forcing of an atom at a canonical world coincides with membership, by
-definition of `canonicalVal`. -/
+definition of `minCanonicalVal`. -/
 theorem min_truth_atom_case (w : MinCanonicalPrimeWorld Atom) (p : Atom) :
-    BForces canonicalR canonicalVal minBotForces w (Proposition.atom p) ↔
+    BForces minCanonicalR minCanonicalVal minBotForces w (Proposition.atom p) ↔
       (Proposition.atom p) ∈ w.val :=
   Iff.rfl
 
@@ -79,7 +79,7 @@ argument, no `efq` -- the key simplification over `IK`'s `canonical_bot_not_mem`
 case (`Intuitionistic/TruthLemma.lean:132-148`), matching `min_truth_lemma`'s `.bot` case
 (`MinStrongCompleteness.lean:128`). -/
 theorem min_truth_bot_case (w : MinCanonicalPrimeWorld Atom) :
-    BForces canonicalR canonicalVal minBotForces w Proposition.bot ↔
+    BForces minCanonicalR minCanonicalVal minBotForces w Proposition.bot ↔
       (Proposition.bot : Proposition Atom) ∈ w.val :=
   Iff.rfl
 
@@ -89,9 +89,9 @@ induction-hypothesis parameters. Transliterated from `truth_and_case`
 `w.property.1.2` → `w.property.closed`. -/
 theorem min_truth_and_case
     {w : MinCanonicalPrimeWorld Atom} {φ ψ : Proposition Atom}
-    (ihφ : BForces canonicalR canonicalVal minBotForces w φ ↔ φ ∈ w.val)
-    (ihψ : BForces canonicalR canonicalVal minBotForces w ψ ↔ ψ ∈ w.val) :
-    BForces canonicalR canonicalVal minBotForces w (φ.and ψ) ↔ (φ.and ψ) ∈ w.val := by
+    (ihφ : BForces minCanonicalR minCanonicalVal minBotForces w φ ↔ φ ∈ w.val)
+    (ihψ : BForces minCanonicalR minCanonicalVal minBotForces w ψ ↔ ψ ∈ w.val) :
+    BForces minCanonicalR minCanonicalVal minBotForces w (φ.and ψ) ↔ (φ.and ψ) ∈ w.val := by
   constructor
   · intro ⟨hφ, hψ⟩
     have h_phi_w := ihφ.mp hφ
@@ -135,9 +135,9 @@ property (`w.property.disj`). Transliterated from `truth_or_case`
 (`Intuitionistic/TruthLemma.lean:211-243`). -/
 theorem min_truth_or_case
     {w : MinCanonicalPrimeWorld Atom} {φ ψ : Proposition Atom}
-    (ihφ : BForces canonicalR canonicalVal minBotForces w φ ↔ φ ∈ w.val)
-    (ihψ : BForces canonicalR canonicalVal minBotForces w ψ ↔ ψ ∈ w.val) :
-    BForces canonicalR canonicalVal minBotForces w (φ.or ψ) ↔ (φ.or ψ) ∈ w.val := by
+    (ihφ : BForces minCanonicalR minCanonicalVal minBotForces w φ ↔ φ ∈ w.val)
+    (ihψ : BForces minCanonicalR minCanonicalVal minBotForces w ψ ↔ ψ ∈ w.val) :
+    BForces minCanonicalR minCanonicalVal minBotForces w (φ.or ψ) ↔ (φ.or ψ) ∈ w.val := by
   constructor
   · intro h_or
     rcases h_or with hφ | hψ
@@ -173,10 +173,10 @@ separate "witness then extend to prime" is needed, unlike `truth_imp_case`'s
 theorem min_truth_imp_case
     {w : MinCanonicalPrimeWorld Atom} {φ ψ : Proposition Atom}
     (ihφ : ∀ T : MinCanonicalPrimeWorld Atom,
-      BForces canonicalR canonicalVal minBotForces T φ ↔ φ ∈ T.val)
+      BForces minCanonicalR minCanonicalVal minBotForces T φ ↔ φ ∈ T.val)
     (ihψ : ∀ T : MinCanonicalPrimeWorld Atom,
-      BForces canonicalR canonicalVal minBotForces T ψ ↔ ψ ∈ T.val) :
-    BForces canonicalR canonicalVal minBotForces w (φ.imp ψ) ↔ (φ.imp ψ) ∈ w.val := by
+      BForces minCanonicalR minCanonicalVal minBotForces T ψ ↔ ψ ∈ T.val) :
+    BForces minCanonicalR minCanonicalVal minBotForces w (φ.imp ψ) ↔ (φ.imp ψ) ∈ w.val := by
   constructor
   · intro h_forces
     by_contra h_not_mem
@@ -199,12 +199,12 @@ theorem min_truth_imp_case
 
 /-- **Box case**: forcing of `□φ` coincides with `□φ ∈ w.val`, given the induction hypothesis
 for `φ` universally quantified over all canonical worlds. Forward direction (contrapositive) via
-`min_canonical_box_witness`; backward direction is heredity over `≤ ∘ canonicalR`. -/
+`min_canonical_box_witness`; backward direction is heredity over `≤ ∘ minCanonicalR`. -/
 theorem min_truth_box_case
     {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
     (ih : ∀ T : MinCanonicalPrimeWorld Atom,
-      BForces canonicalR canonicalVal minBotForces T φ ↔ φ ∈ T.val) :
-    BForces canonicalR canonicalVal minBotForces w (Proposition.box φ) ↔
+      BForces minCanonicalR minCanonicalVal minBotForces T φ ↔ φ ∈ T.val) :
+    BForces minCanonicalR minCanonicalVal minBotForces w (Proposition.box φ) ↔
       (Proposition.box φ) ∈ w.val := by
   simp only [BForces_box]
   constructor
@@ -219,13 +219,13 @@ theorem min_truth_box_case
 
 /-- **Diamond case**: forcing of `◇φ` coincides with `◇φ ∈ w.val`, given the induction
 hypothesis for `φ` universally quantified over all canonical worlds. Forward direction uses
-`canonicalR`'s diamond clause directly (no modal axiom needed); backward direction via
+`minCanonicalR`'s diamond clause directly (no modal axiom needed); backward direction via
 `min_canonical_diamond_witness`. -/
 theorem min_truth_diamond_case
     {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
     (ih : ∀ T : MinCanonicalPrimeWorld Atom,
-      BForces canonicalR canonicalVal minBotForces T φ ↔ φ ∈ T.val) :
-    BForces canonicalR canonicalVal minBotForces w (Proposition.diamond φ) ↔
+      BForces minCanonicalR minCanonicalVal minBotForces T φ ↔ φ ∈ T.val) :
+    BForces minCanonicalR minCanonicalVal minBotForces w (Proposition.diamond φ) ↔
       (Proposition.diamond φ) ∈ w.val := by
   simp only [BForces_diamond]
   constructor
@@ -244,7 +244,7 @@ on `φ`, dispatching each of the seven `Proposition` constructors to its helper.
 to `minBotForces` (not a loose parameter -- the `.bot` case is `Iff.rfl`), and no `efq`/`h_dbot`
 hypothesis is threaded anywhere. -/
 theorem min_canonical_truth_lemma (φ : Proposition Atom) (w : MinCanonicalPrimeWorld Atom) :
-    BForces canonicalR canonicalVal minBotForces w φ ↔ φ ∈ w.val := by
+    BForces minCanonicalR minCanonicalVal minBotForces w φ ↔ φ ∈ w.val := by
   induction φ generalizing w with
   | atom p => exact min_truth_atom_case w p
   | bot => exact min_truth_bot_case w

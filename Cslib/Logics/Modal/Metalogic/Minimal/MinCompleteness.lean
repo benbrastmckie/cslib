@@ -49,20 +49,20 @@ variable {Atom : Type u}
 /-- **Completeness for `MK`**: any `MValid` formula is derivable from `MKModalAxiom`.
 Single-branch (no consistency case split, `Role C` of the research report's `efq` analysis):
 by contrapositive, `min_head_realization` extends `cl ∅` to a quasi-prime theory `T` omitting
-`φ`; instantiate `MValid` at the canonical model (`canonicalR`, `min_canonical_f1`/
-`min_canonical_f2`, `canonicalVal`, `minBotForces`) rooted at `⟨T, hT⟩`, apply
+`φ`; instantiate `MValid` at the canonical model (`minCanonicalR`, `min_canonical_f1`/
+`min_canonical_f2`, `minCanonicalVal`, `minBotForces`) rooted at `⟨T, hT⟩`, apply
 `min_canonical_truth_lemma`, and contradict `φ ∉ T`. -/
 theorem mk_completeness {φ : Proposition Atom} (h_valid : MValid.{u, u} φ) :
     Derivable MKModalAxiom φ := by
   by_contra h_not_deriv
   obtain ⟨T, hT_qp, hT_excl⟩ := min_head_realization h_not_deriv
   let w0 : MinCanonicalPrimeWorld Atom := ⟨T, hT_qp⟩
-  have h_forces : BForces canonicalR canonicalVal minBotForces w0 φ :=
-    h_valid (MinCanonicalPrimeWorld Atom) canonicalR
+  have h_forces : BForces minCanonicalR minCanonicalVal minBotForces w0 φ :=
+    h_valid (MinCanonicalPrimeWorld Atom) minCanonicalR
       (fun {w w' v} hww' hwv => min_canonical_f1 hww' hwv)
       (fun {w v v'} hwv hvv' => min_canonical_f2 hwv hvv')
-      canonicalVal minBotForces
-      (fun {_ _} p hw hv => canonicalVal_upward_closed p hw hv)
+      minCanonicalVal minBotForces
+      (fun {_ _} p hw hv => minCanonicalVal_upward_closed p hw hv)
       (fun {_ _} hw hbf => minBotForces_upward_closed hw hbf) w0
   exact hT_excl ((min_canonical_truth_lemma φ w0).mp h_forces)
 

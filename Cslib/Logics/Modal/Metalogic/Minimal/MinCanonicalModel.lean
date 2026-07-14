@@ -32,12 +32,12 @@ plan Phase 3 Zero-Debt clause), not a duplication of `Constructive/Segment.lean`
 
 ## Main Definitions
 
-- `canonicalR`: the two-clause canonical accessibility relation (box clause + diamond-image
+- `minCanonicalR`: the two-clause canonical accessibility relation (box clause + diamond-image
   clause), required because `MK`'s semantics is `MValid` (∃-diamond, F1/F2), not `CKValid`.
 - `min_canonical_box_witness`/`min_canonical_diamond_witness`: the witness lemmas, built from
   `box_refuting_theory`/`dia_refuting_theory` (`Constructive/SegmentLindenbaum.lean`) for the
   "near side" and the bespoke nonempty Lindenbaum-pair construction for the "far side"
-  (preserving the opposite clause of `canonicalR` under extension).
+  (preserving the opposite clause of `minCanonicalR` under extension).
 - `min_canonical_f1`/`min_canonical_f2`: up/down confluence, matching `BFrame.f1`/`BFrame.f2`.
 
 ## References
@@ -69,8 +69,10 @@ only for the weaker `CKValid`):
 - diamond-image clause (`φ ∈ v.val → ◇φ ∈ w.val`): every formula true at `v` is possible at `w`.
 
 Mirrors `canonicalR` (`Intuitionistic/CanonicalModel.lean:117-118`) verbatim, at
-`MinCanonicalPrimeWorld` (quasi-prime, not prime) worlds. -/
-def canonicalR (w v : MinCanonicalPrimeWorld Atom) : Prop :=
+`MinCanonicalPrimeWorld` (quasi-prime, not prime) worlds. Named `minCanonicalR` (not
+`canonicalR`) to avoid a name clash with `IK`'s `canonicalR` in the same `Cslib.Logic.Modal`
+namespace. -/
+def minCanonicalR (w v : MinCanonicalPrimeWorld Atom) : Prop :=
   (∀ φ, (□φ) ∈ w.val → φ ∈ v.val) ∧ (∀ φ, φ ∈ v.val → (◇φ) ∈ w.val)
 
 /-! ## Nonempty Disjunction / Conjunction (efq-free Lindenbaum-pair machinery)
@@ -705,7 +707,7 @@ private theorem box_witness_pair_underivable1 {w u : MinCanonicalPrimeWorld Atom
       exact hcontra hBigOrU
 
 /-- **Box Witness**: from `(□φ) ∉ w.val`, produces `w' ≥ w` (a seeded quasi-prime extension)
-and a quasi-prime `u` with `canonicalR w' u` and `φ ∉ u.val`. Step 1 builds `u` directly via
+and a quasi-prime `u` with `minCanonicalR w' u` and `φ ∉ u.val`. Step 1 builds `u` directly via
 `box_refuting_theory` (`SegmentLindenbaum.lean:168`, efq-free) as the quasi-prime extension of
 `boxInv w.val` omitting `φ`; Step 2 builds `w'` via `quasi_prime_set_exclusion1`
 (this file), seeded with `w.val ∪ {◇A | A ∈ u.val}` and excluded from `{□B | B ∉ u.val}` via
@@ -714,7 +716,7 @@ and a quasi-prime `u` with `canonicalR w' u` and `φ ∉ u.val`. Step 1 builds `
 side-condition. -/
 theorem min_canonical_box_witness {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
     (h_notbox : (□φ) ∉ w.val) :
-    ∃ w' u : MinCanonicalPrimeWorld Atom, w ≤ w' ∧ canonicalR w' u ∧ φ ∉ u.val := by
+    ∃ w' u : MinCanonicalPrimeWorld Atom, w ≤ w' ∧ minCanonicalR w' u ∧ φ ∉ u.val := by
   obtain ⟨Uval, hUsup, hUqp, hUphi⟩ :=
     box_refuting_theory (fun φ ψ => MKModalAxiom.implyK φ ψ)
       (fun φ ψ χ => MKModalAxiom.implyS φ ψ χ) (fun A B χ => MKModalAxiom.orE A B χ)
@@ -877,13 +879,13 @@ private theorem diamond_witness_underivable1 {w : MinCanonicalPrimeWorld Atom}
     exact (hxs0Sig D hD) hCu
 
 /-- **Diamond Witness**: from `(◇φ) ∈ w.val`, produces a single quasi-prime world `v` with
-`canonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box witness), since
+`minCanonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box witness), since
 the diamond truth-lemma case is a bare existential over successors of `w` itself. Mirrors
 `canonical_diamond_witness` (`Intuitionistic/CanonicalModel.lean:924`) but with neither `efq`
 nor `h_dbot`. -/
 theorem min_canonical_diamond_witness {w : MinCanonicalPrimeWorld Atom} {φ : Proposition Atom}
     (h_diaphi : (◇φ) ∈ w.val) :
-    ∃ v : MinCanonicalPrimeWorld Atom, canonicalR w v ∧ φ ∈ v.val := by
+    ∃ v : MinCanonicalPrimeWorld Atom, minCanonicalR w v ∧ φ ∈ v.val := by
   have hdwu := diamond_witness_underivable1 h_diaphi
   have hSclosed : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom)
       (modalDeductiveClosure MKModalAxiom ({ψ | (□ψ) ∈ w.val} ∪ {φ})) :=
@@ -948,7 +950,7 @@ private theorem extract_split_union1 {P Q : Proposition Atom → Prop} :
 /-- **Up-confluence underivability, nonempty** (efq-free analogue of `canonical_f1_underivable`,
 `Intuitionistic/CanonicalModel.lean:1058`): no nonempty `bigOr1`-disjunction of
 `Σ := {χ | (◇χ) ∉ w'.val}` is a member of the deductive closure of
-`Γ := v.val ∪ {ψ | □ψ ∈ w'.val}`, given `w ≤ w'` and `canonicalR w v`'s diamond clause. Always
+`Γ := v.val ∪ {ψ | □ψ ∈ w'.val}`, given `w ≤ w'` and `minCanonicalR w v`'s diamond clause. Always
 prepends a fixed derivable "dummy" formula `θ := ⊥ → ⊥` (unconditionally in `v.val` by
 deductive closure) as the `bigAnd1` head, sidestepping the "is the `v.val`-drawn sublist
 empty?" case split that IK's `⊤`-via-`efq` `bigAnd []` base case handled implicitly. -/
@@ -1028,12 +1030,12 @@ private theorem canonical_f1_underivable1 {w w' v : MinCanonicalPrimeWorld Atom}
     exact (hxs0Sig D hD) hCu
 
 /-- **`min_canonical_f1`**: up-confluence, matching `BFrame.f1` exactly. From `w ≤ w'` and
-`canonicalR w v`, produces `v' ≥ v` with `canonicalR w' v'`. Mirrors `canonical_f1`
+`minCanonicalR w v`, produces `v' ≥ v` with `minCanonicalR w' v'`. Mirrors `canonical_f1`
 (`Intuitionistic/CanonicalModel.lean:1140`) but `efq`-free
 (`canonical_f1_underivable1` + `quasi_prime_set_exclusion1`). -/
 theorem min_canonical_f1 {w w' v : MinCanonicalPrimeWorld Atom}
-    (hww' : w ≤ w') (hwv : canonicalR w v) :
-    ∃ v' : MinCanonicalPrimeWorld Atom, canonicalR w' v' ∧ v ≤ v' := by
+    (hww' : w ≤ w') (hwv : minCanonicalR w v) :
+    ∃ v' : MinCanonicalPrimeWorld Atom, minCanonicalR w' v' ∧ v ≤ v' := by
   obtain ⟨_hbox_wv, hdia_wv⟩ := hwv
   have hu := canonical_f1_underivable1 hww' hdia_wv
   have hSclosed : Metalogic.DeductivelyClosed (modalDerivationSystem MKModalAxiom)
@@ -1053,14 +1055,14 @@ theorem min_canonical_f1 {w w' v : MinCanonicalPrimeWorld Atom}
     exact (hTexcl ψ [] hψ_notdia (fun _ h => nomatch h)) hψ_mem
   exact ⟨v', ⟨hbox_clause, hdia_clause⟩, hv_le_v'⟩
 
-/-- **`min_canonical_f2`**: down-confluence, matching `BFrame.f2` exactly. From `canonicalR w v`
-and `v ≤ v'`, produces `w' ≥ w` with `canonicalR w' v'`. Reuses `box_witness_pair_underivable1`
-directly with `u := v'` (no fresh `u` construction: `canonicalR w v`'s box clause already gives
+/-- **`min_canonical_f2`**: down-confluence, matching `BFrame.f2` exactly. From `minCanonicalR w v`
+and `v ≤ v'`, produces `w' ≥ w` with `minCanonicalR w' v'`. Reuses `box_witness_pair_underivable1`
+directly with `u := v'` (no fresh `u` construction: `minCanonicalR w v`'s box clause already gives
 `{ψ | □ψ ∈ w.val} ⊆ v.val ⊆ v'.val`, exactly the `h_wu` precondition needed). Mirrors
 `canonical_f2` (`Intuitionistic/CanonicalModel.lean:1207`) but `efq`-free. -/
 theorem min_canonical_f2 {w v v' : MinCanonicalPrimeWorld Atom}
-    (hwv : canonicalR w v) (hvv' : v ≤ v') :
-    ∃ w' : MinCanonicalPrimeWorld Atom, w ≤ w' ∧ canonicalR w' v' := by
+    (hwv : minCanonicalR w v) (hvv' : v ≤ v') :
+    ∃ w' : MinCanonicalPrimeWorld Atom, w ≤ w' ∧ minCanonicalR w' v' := by
   obtain ⟨hbox_wv, _hdia_wv⟩ := hwv
   have h_wu : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ v'.val := fun ψ hψ => hvv' (hbox_wv ψ hψ)
   have hexcl := box_witness_pair_underivable1 h_wu

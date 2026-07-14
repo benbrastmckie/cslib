@@ -254,7 +254,7 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 1: 4-rule in FrameRules.lean [NOT STARTED]
+### Phase 1: 4-rule in FrameRules.lean [COMPLETED]
 
 - **Goal**: Add the S4 transitive propagation helpers and `modalApplyOneS4Rules` to
   FrameRules.lean, reducing to `modalApplyOneT` outside the two 4-relevant shapes.

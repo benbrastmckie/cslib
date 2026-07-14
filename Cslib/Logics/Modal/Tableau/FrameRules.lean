@@ -18,6 +18,14 @@ condition (`Std.Refl`) that will hold of the *extracted* model's relation, not b
 recorded in `acc`. This mirrors a self-loop `w → w` that reflexive closure (`Relation.ReflGen`)
 adds "for free" at model-extraction time.
 
+This module also adds the S4 4-rule (transitive-frame box/diamond propagation) on top of
+the T rules. The 4-rule propagates the *box itself* (not its unwrapped body) to every
+recorded successor: `T(□φ)@w` with an edge `w → w'` yields `T(□φ)@w'` (not `T(φ)@w'`,
+which is already produced by the K `boxPos` arm). This is what lets a later
+`Relation.ReflTransGen`-closed reachability bridge (`LoopChecking.lean`) carry `T(□φ)`
+along an entire path by induction, recovering transitivity without any transitive-closure
+reasoning baked into `acc` itself.
+
 ## Main Definitions
 
 - `modalTBoxSelf`/`modalTDiaNegSelf`: the two T-specific propagation helpers (self-world,
@@ -25,6 +33,11 @@ adds "for free" at model-extraction time.
 - `modalApplyOneT`: apply the K rules (`modalApplyOne`) together with the T self-propagation
   arms, merging persistent-rule outputs. Reduces to `modalApplyOne` exactly outside the two
   T-relevant signed-formula shapes (`T(□φ)@w`, `F(◇φ)@w`).
+- `modalFourBoxProp`/`modalFourDiaNegProp`: the two S4-specific propagation helpers
+  (box-itself across a recorded successor edge, unconditional on any T arm).
+- `modalApplyOneS4Rules`: apply `modalApplyOneT` (K + T) together with the 4-rule
+  propagation arms, merging persistent-rule outputs. Reduces to `modalApplyOneT` exactly
+  outside the two 4-relevant signed-formula shapes (`T(□φ)@w`, `F(◇φ)@w`).
 
 ## References
 
@@ -105,6 +118,79 @@ lemma modalApplyOneT_eq_of_not_boxPos_diaNeg
     modalApplyOneT sf b acc = modalApplyOne sf b acc := by
   obtain ⟨h1, h2⟩ := h
   unfold modalApplyOneT
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
+/-! ## S4-Specific (4-Rule) Propagation Helpers -/
+
+/-- The 4-rule propagation for box-positives: from `T(□φ)@w`, generate `T(□φ)@w'` (the box
+formula *itself*, not its unwrapped body) for each recorded successor `w'` of `w`, filtered
+to exclude formulas already present on the branch.
+
+This is the S4-specific content: K's `boxPos` arm (`Rules.lean`) already produces
+`T(φ)@w'`; the 4-rule additionally propagates the box itself so it can fire again at `w'`,
+recovering transitivity along a path of edges without ever transitively closing `acc`. -/
+def modalFourBoxProp (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (acc.successorsOf w).filterMap fun w' =>
+    let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, .box φ, w'⟩
+    if b.any (· == sf) then none else some sf
+
+/-- The 4-rule propagation for diamond-negatives: from `F(◇φ)@w`, generate `F(◇φ)@w'` (the
+diamond formula *itself*) for each recorded successor `w'` of `w`, filtered to exclude
+formulas already present on the branch. Dual of `modalFourBoxProp`. -/
+def modalFourDiaNegProp (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (acc.successorsOf w).filterMap fun w' =>
+    let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, .diamond φ, w'⟩
+    if b.any (· == sf) then none else some sf
+
+/-! ## S4-Augmented Rule Application -/
+
+/-- Apply `modalApplyOneT` (K + T) together with the 4-rule propagation arms. For the two
+4-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the 4-rule propagation formulas are merged into
+the T-augmented rule's `persistent` output (deduplicated); for every other signed-formula
+shape, `modalApplyOneS4Rules` reduces to exactly `modalApplyOneT`. This wraps
+`modalApplyOneT` rather than `modalApplyOne` so the reflexive (T) component is inherited
+alongside the transitive (4) component, giving the reflexive-transitive S4 rule set. -/
+def modalApplyOneS4Rules
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let (tResult, tAcc) := modalApplyOneT sf b acc
+  match sf.sign, sf.formula with
+  | .pos, .box φ =>
+    let fourNew := modalFourBoxProp b acc φ sf.label
+    match tResult with
+    | .persistent tForms =>
+      (.persistent (tForms ++ fourNew.filter (fun x => !(tForms.any (· == x)))), tAcc)
+    | .notApplicable =>
+      if fourNew.isEmpty then (.notApplicable, tAcc) else (.persistent fourNew, tAcc)
+    | other => (other, tAcc)
+  | .neg, .diamond φ =>
+    let fourNew := modalFourDiaNegProp b acc φ sf.label
+    match tResult with
+    | .persistent tForms =>
+      (.persistent (tForms ++ fourNew.filter (fun x => !(tForms.any (· == x)))), tAcc)
+    | .notApplicable =>
+      if fourNew.isEmpty then (.notApplicable, tAcc) else (.persistent fourNew, tAcc)
+    | other => (other, tAcc)
+  | _, _ => (tResult, tAcc)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4Rules` agrees with `modalApplyOneT` outside the two 4-relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): the 4-rule arms never affect any other rule dispatch. -/
+lemma modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneS4Rules sf b acc = modalApplyOneT sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneS4Rules
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 

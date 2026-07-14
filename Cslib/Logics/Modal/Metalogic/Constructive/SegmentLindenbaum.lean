@@ -287,7 +287,7 @@ so no new `hCut` supplier is needed — the gap is purely at the *call sites*: d
 concrete side condition over `S := X ∪ Y` needs a derivation context `L ⊆ X ∪ Y` split into an
 `X`-sublist and a `Y`-sublist, with the `Y`-part collapsed into a single formula so it can be
 handled by the deduction theorem. Reuse search (`lean_local_search`/`grep`): a matching `bigAnd`
-former and an `unpack_conj_partial`-style discharge lemma already exist in
+former and an `unpackConjPartial`-style discharge lemma already exist in
 `Intuitionistic/CanonicalModel.lean`, but both are `private` to that file (and pinned to the
 `w.val ∪ {◇A | A ∈ u.val}` shape for `extract_split`), so they are not reusable here; the
 declarations below are fresh, minimal, and modelled directly on that precedent. -/
@@ -374,8 +374,8 @@ theorem bigAnd_mem_of_forall_mem
 /-- Combines a list of separately-used hypotheses `Ds` (with leftover context `Lw`) into a
 single conjunction hypothesis: `Ds ++ Lw ⊢ ψ` implies `bigAnd Ds :: Lw ⊢ ψ`. Uses `h_andE1`/
 `h_andE2` to recover each `Ds`-member from the single `bigAnd Ds` assumption. Modelled on
-`Intuitionistic/CanonicalModel.lean`'s private `unpack_conj_partial`. -/
-noncomputable def unpack_conj_partial
+`Intuitionistic/CanonicalModel.lean`'s private `unpackConjPartial`. -/
+noncomputable def unpackConjPartial
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -389,7 +389,7 @@ noncomputable def unpack_conj_partial
         (fun x hx => List.mem_cons.mpr (Or.inr hx))
   | D :: Ds', Lw, ψ, d => by
       have dt := deductionTheorem h_implyK h_implyS (Ds' ++ Lw) D ψ d
-      have ihres := unpack_conj_partial h_implyK h_implyS h_andE1 h_andE2 Ds' Lw (D.imp ψ) dt
+      have ihres := unpackConjPartial h_implyK h_implyS h_andE1 h_andE2 Ds' Lw (D.imp ψ) dt
       have ihres0 : DerivationTree Axioms Lw ((bigAnd Ds').imp (D.imp ψ)) :=
         deductionTheorem h_implyK h_implyS Lw (bigAnd Ds') (D.imp ψ) ihres
       have hmem : DerivationTree Axioms (bigAnd (D :: Ds') :: Lw) (bigAnd (D :: Ds')) :=
@@ -409,14 +409,14 @@ noncomputable def unpack_conj_partial
       exact .modus_ponens _ D ψ hDimpψ hD
 
 /-- **The discharge lemma**: `D.Deriv (L₁ ++ L₂) b → D.Deriv L₁ (⋀L₂ → b)`. Packs the `L₂`-part
-of a derivation context into a single `bigAnd L₂` hypothesis (`unpack_conj_partial`, after
+of a derivation context into a single `bigAnd L₂` hypothesis (`unpackConjPartial`, after
 permuting `L₁ ++ L₂` to `L₂ ++ L₁` since context membership is set-like, via `.weakening`), then
 discharges it via the deduction theorem. This is the tool Phases 6-7 apply at
 `S := X ∪ Y` (`X := boxInv u'.head` or `w.head`, `Y` the other summand): given a derivation from
 a context split by `list_split_union` into `L₁ ⊆ X`, `L₂ ⊆ Y`, this produces a derivation from
 `L₁` alone of `bigAnd L₂ → b`, which (with `bigAnd_mem_of_forall_mem` placing `bigAnd L₂` in the
 appropriate theory) is what discharges the `DerivExcludes`/side-condition obligations there. -/
-noncomputable def deriv_imp_bigAnd_of_append
+noncomputable def derivImpBigAndOfAppend
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -427,7 +427,7 @@ noncomputable def deriv_imp_bigAnd_of_append
     (d : DerivationTree Axioms (L₁ ++ L₂) b) :
     DerivationTree Axioms L₁ ((bigAnd L₂).imp b) :=
   deductionTheorem h_implyK h_implyS L₁ (bigAnd L₂) b
-    (unpack_conj_partial h_implyK h_implyS h_andE1 h_andE2 L₂ L₁ b
+    (unpackConjPartial h_implyK h_implyS h_andE1 h_andE2 L₂ L₁ b
       (.weakening (L₁ ++ L₂) (L₂ ++ L₁) b d
         (fun x hx => by
           rcases List.mem_append.mp hx with h1 | h2

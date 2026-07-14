@@ -1003,7 +1003,7 @@ Proves `cs5_fcsymbox_theory`, the theory-level content of `bBox`'s canonical cla
 `boxInv w ⊆ u`, `u ⊆ u'` (all quasi-prime) ⟹ `∃ t ∈ cs5Tail u', w ⊆ t`. Instantiates
 `prime_set_exclusion` (via `quasi_prime_set_exclusion`) at `S := boxInv u' ∪ w`,
 `E := {□B | B ∉ u'}` — a union of two *substantial* sets, needing Phase 4's `list_split_union`/
-`bigAnd`/`deriv_imp_bigAnd_of_append` (unlike Phase 6's `S := boxInv H ∪ {A}`, a substantial-set-
+`bigAnd`/`derivImpBigAndOfAppend` (unlike Phase 6's `S := boxInv H ∪ {A}`, a substantial-set-
 plus-singleton). Step 3 of the four-step discharge: from `L₂ ⊆ w`, pack `C := bigAnd L₂ ∈ w`;
 `bBox` gives `□◇C ∈ w`; `boxInv w ⊆ u ⊆ u'` gives `◇C ∈ u'`. Same exploding-head case split as
 Phase 6 (`u'` exploding ⟹ `T := Set.univ` directly). -/
@@ -1026,7 +1026,7 @@ theorem cs5_fcsymbox_theory {w u u' : Set (Proposition Atom)}
         .weakening Lctx (L₁ ++ L₂) _ d hsub
       have dC : DerivationTree (@CS5ModalAxiom Atom) L₁
           ((bigAnd L₂).imp (Metalogic.bigOr l)) :=
-        deriv_imp_bigAnd_of_append (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+        derivImpBigAndOfAppend (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
           (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ) L₁ L₂ (Metalogic.bigOr l) d'
       have hboxC : Proposition.box ((bigAnd L₂).imp (Metalogic.bigOr l)) ∈ u' :=
         box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
@@ -1106,7 +1106,7 @@ theorem cs5_fc4_theory {w u u' t : Set (Proposition Atom)}
         .weakening Lctx (L₁ ++ L₂) _ d hsub
       have dC : DerivationTree (@CS5ModalAxiom Atom) L₁
           ((bigAnd L₂).imp (Metalogic.bigOr l)) :=
-        deriv_imp_bigAnd_of_append (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+        derivImpBigAndOfAppend (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
           (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ) L₁ L₂ (Metalogic.bigOr l) d'
       have hboxC : Proposition.box ((bigAnd L₂).imp (Metalogic.bigOr l)) ∈ t :=
         box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)

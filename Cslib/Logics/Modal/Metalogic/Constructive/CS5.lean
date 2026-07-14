@@ -563,4 +563,126 @@ theorem cs5_boxInv_subset_iff {H T : Set (Proposition Atom)}
   · intro h B hB
     exact mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.bDia B)) (h hB)
 
+/-! ## The Symmetric Tail
+
+**Plan-ordering note (task 509 Phase 5)**: the plan's Phase 5 task list additionally includes
+`cs5Seg`/`CS5Segment`/`cs5Mreach`/`CS5Segment.ofHead`/`cs5Val`/`cs5Bot` and the upward-closure
+lemmas. Building those requires a proof of `cs5Seg`'s `CKSegment.diam_witness` field
+(`∀ A, ◇A ∈ head → ∃ t ∈ tail, A ∈ t`), which is exactly `cs5_diam_witness` — the deliverable of
+Phase 6, not yet available at this point. (Unlike `CS4.lean`'s `cs4Seg`, which discharges
+`diam_witness` inline from the *pre-existing* `dia_refuting_theory`, `CS5` has no such
+pre-existing ingredient; `cs5_diam_witness` is exactly what Phase 6 builds.) This is a genuine
+dependency-ordering correction relative to the plan's literal Phase 5 task list (whose own
+dependency table has Phase 6 depending on Phase 5, not vice versa): the segment-type
+declarations below are landed immediately after `cs5_diam_witness` (Phase 6), not in this
+section. Everything in this section is independent of `CS5Segment` and is fully landed now. -/
+
+/-- `□B ∈ H → □□B ∈ H` — axiom `4` (box form). Transcribed from `probes/cs5-tail-probe.lean`
+(verified, axiom-free). -/
+theorem cs5_box_four {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    {B : Proposition Atom} (h : Proposition.box B ∈ H) :
+    Proposition.box (Proposition.box B) ∈ H :=
+  mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.fourBox B)) h
+
+/-- `boxInv H ⊆ H` — axiom `T` (box form). Transcribed from `probes/cs5-tail-probe.lean`
+(verified, axiom-free). -/
+theorem cs5_boxInv_subset {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) : boxInv H ⊆ H :=
+  fun B hB => mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.tBox B)) hB
+
+/-- **The `CS5` symmetric tail.** `boxInv H ⊆ t` is the ordinary tail-membership clause
+(`cs4Tail`'s analogue); `boxInv t ⊆ H` is the clause that makes symmetry *definitional*
+(`cs5Tail_symm`, below) rather than derived. This clause is **not** a design choice:
+`fcbdia_forces_symmetry` (below) shows every `bDia`-adequate frame condition forces it on any
+segment-based world type. Note `CS5` needs **no** `E`/exclusion parameter, unlike `cs4Tail` —
+the tail is determined by the head alone. Transcribed from `probes/cs5-tail-probe.lean`
+(verified). -/
+def cs5Tail (H : Set (Proposition Atom)) : Set (Set (Proposition Atom)) :=
+  {t | QuasiPrime (@CS5ModalAxiom Atom) t ∧ boxInv H ⊆ t ∧ boxInv t ⊆ H}
+
+/-- **Reflexivity**: `H ∈ cs5Tail H`, from `tBox` on both clauses. Transcribed from
+`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+theorem cs5Tail_refl {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    H ∈ cs5Tail H :=
+  ⟨hH, cs5_boxInv_subset hH, cs5_boxInv_subset hH⟩
+
+/-- **Symmetry, definitional.** The two tail clauses simply swap. No axiom, no maximality,
+nothing derived — this is the step task 508 called "the known-hard core of constructive `S5`
+canonical completeness". Hard gate (task 509): must report **no axiom dependencies at all**.
+Transcribed from `probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+theorem cs5Tail_symm {H T : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    (h : T ∈ cs5Tail H) : H ∈ cs5Tail T :=
+  ⟨hH, h.2.2, h.2.1⟩
+
+/-- **Transitivity.** Uses `cs5_box_four` on each side: forward, `□B ∈ H → □□B ∈ H → □B ∈ U →
+B ∈ T`; backward, `□B ∈ T → □□B ∈ T → □B ∈ U → B ∈ H`. Transcribed from
+`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+theorem cs5Tail_trans {H U T : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (hT : QuasiPrime (@CS5ModalAxiom Atom) T)
+    (h1 : U ∈ cs5Tail H) (h2 : T ∈ cs5Tail U) : T ∈ cs5Tail H :=
+  ⟨hT,
+   fun _B hB => h2.2.1 (h1.2.1 (cs5_box_four hH hB)),
+   fun _B hB => h1.2.2 (h2.2.2 (cs5_box_four hT hB))⟩
+
+/-- **`Set.univ`-freeness is free.** `boxInv Set.univ = Set.univ`, so an exploding tail member
+forces an exploding head. Hence for every consistent head the symmetric tail contains no
+exploding member — with **no** appeal to `cs5_dia_bot_imp_bot` (task 508's nominated "one
+lead", which turned out to be unnecessary). This is what voids 508's canonical refutation of
+`FCbdia` (which took `u := cexpl ∈ w.tail` for consistent `w`). Transcribed from
+`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+theorem cs5Tail_univ_free {H : Set (Proposition Atom)}
+    (h : (Set.univ : Set (Proposition Atom)) ∈ cs5Tail H) : H = Set.univ :=
+  Set.eq_univ_of_univ_subset (fun _B _ => h.2.2 (Set.mem_univ _))
+
+/-- **The truth lemma's diamond-backward case is free.** If any member of `H`'s symmetric tail
+contains `A`, then `◇A ∈ H` — by `bBox` (`A → □◇A`) and the `boxInv t ⊆ H` clause. So `◇A ∉ H`
+refutes `◇A` at `H` *itself* (take the witness world `:= H`, no separate refuting segment
+needed). Consequence: `CS5` needs **no** exclusion parameter, no `cs5Tail` `E` argument, no
+`dia_refuting_theory`, no `diamRefutingSegment` — all of which `CS4` required. The tail is
+determined by the head alone, which is exactly what makes symmetry definitional. Transcribed
+from `probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+theorem cs5Tail_dia_of_mem {H T : Set (Proposition Atom)}
+    (hT : QuasiPrime (@CS5ModalAxiom Atom) T) (h : T ∈ cs5Tail H)
+    {A : Proposition Atom} (hA : A ∈ T) : (◇A) ∈ H :=
+  h.2.2 (mem_head_mp hT.closed (mem_of_axiom hT.closed (CS5ModalAxiom.bBox A)) hA)
+
+/-- **Any frame condition adequate for `bDia` forces the canonical tail to be symmetric.**
+`FCbdia` (`r w u → ∃ u' ≥ u, ∃ t, r u' t ∧ t ≤ w`) is the *minimal* requirement for `bDia`
+(`◇□A → A`): forcing `A` at `w` is only obtainable by persistence from some `t ≤ w`. On any
+segment-based world type, `FCbdia` implies `boxInv u.head ⊆ w.head` whenever `r w u` — because
+`box_reflect` gives `boxInv u'.head ⊆ t.head` and `t ≤ w` gives `t.head ⊆ w.head`. So the
+symmetric tail is not one design among many: it is *forced*. Task 508 read this as an
+obstruction; it is in fact a specification. Transcribed from `probes/cs5-canonical-probe.lean`
+(verified, axiom-free). -/
+theorem fcbdia_forces_symmetry {Axioms : Proposition Atom → Prop}
+    {w u : CKSegment Axioms} (hru : cmreach w u)
+    (hfc : ∀ {w u : CKSegment Axioms}, cmreach w u →
+      ∃ u', u ≤ u' ∧ ∃ t, cmreach u' t ∧ t ≤ w) :
+    boxInv u.head ⊆ w.head := by
+  obtain ⟨u', hle, t, hrt, htw⟩ := hfc hru
+  intro B hB
+  exact htw (u'.box_reflect B (hle hB) t.head hrt)
+
+/-- **The remaining gap, mechanized.** In the symmetric tail
+`cs5Tail H = {t | QuasiPrime t ∧ boxInv H ⊆ t ∧ boxInv t ⊆ H}`, if `□(p ∨ □q) ∈ H` and `q ∉ H`,
+then **every** tail member `T` of `H` contains `p`.
+
+Consequence: for `H` prime with `□(p ∨ □q) ∈ H`, `□p ∉ H`, `q ∉ H`, the truth lemma's
+box-backward case has **no** witness at `H` itself — no `T` in `H`'s symmetric tail omits `p`.
+The box-backward case must therefore move to a strictly larger head `H' ⊇ H` (here: one
+containing `q`), which enlarges `boxInv H'` in turn. That circularity is the real open problem:
+`H'` and `T` must be built as a simultaneous maximal pair, not sequentially (Phases 8-10).
+
+This argument is purely structural — it uses only primality of `T` and the two tail clauses, no
+`CS5` axiom. It therefore applies to every symmetric-tail design, and by `fcbdia_forces_symmetry`
+the tail must be symmetric. Transcribed from `probes/cs5-canonical-probe.lean` (verified,
+axiom-free). -/
+theorem cs5_symmetric_tail_box_gap {H T : Set (Proposition Atom)}
+    (hT : QuasiPrime (@CS5ModalAxiom Atom) T) {p q : Proposition Atom}
+    (hbox : Proposition.box (p.or (Proposition.box q)) ∈ H)
+    (hsub : boxInv H ⊆ T) (hsym : boxInv T ⊆ H) (hq : q ∉ H) : p ∈ T := by
+  rcases hT.disj (hsub hbox) with h | h
+  · exact h
+  · exact absurd (hsym h) hq
+
 end Cslib.Logic.Modal

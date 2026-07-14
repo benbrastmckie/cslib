@@ -1,36 +1,50 @@
 {
   "schema_version": "1.0",
   "task_number": 507,
-  "status": "planned",
-  "phase": "plan",
-  "agent_type": "planner-agent",
+  "status": "implemented",
+  "phase": "implement",
+  "agent_type": "cslib-implementation-agent",
+  "phases_completed": 8,
+  "phases_total": 8,
+  "blockers": [],
   "artifact_path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/plans/01_generalize-fmp-termination-measure.md",
-  "artifact_number": 1,
-  "plan_metadata": {
-    "phases": 8,
-    "total_effort_hours": 14,
-    "complexity": "complex",
-    "research_integrated": true,
-    "plan_version": 1,
-    "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8]],
-    "reports_integrated": [
-      {
-        "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md",
-        "integrated_in_plan_version": 1,
-        "integrated_date": "2026-07-14"
-      }
-    ]
-  },
-  "crux_phase": 5,
-  "blocked_fallback_phases": [5],
-  "files_in_scope": [
+  "summary_path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/summaries/01_generalize-fmp-termination-measure-summary.md",
+  "files_changed": [
     "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
     "Cslib/Logics/Modal/Tableau/FmpMeasure.lean"
   ],
-  "files_read_only": [
-    "Cslib/Logics/Modal/Tableau/Saturation.lean",
-    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "k_statements_byte_unchanged": true,
+    "lake_shake_warning_count": 81,
+    "lake_shake_baseline_pre_507": 82
+  },
+  "commits": [
+    "aa4d42ef task 507 phase 1: extend RuleApplicationSpec with rankStep/outDegStep/knownWorldsStep",
+    "85f0dd2c task 507 phase 2: annotate plan for generic outDeg-preservation cluster (Lean changes swept into a concurrent session's commits a8c02061/f34b815e)",
+    "bc42683f task 507 phase 3: generalize modalStepBranch_exists_rank' via rankStep",
+    "7bb33029 task 507 phase 4: generalize accTargetsKnown/knownWorlds/eClosure clusters",
+    "50e5883f task 507 phase 5: generalize modalStepBranch_potential_step (the crux)",
+    "4c473b04 task 507 phase 6: generalize modalStepBranch_worldBound",
+    "5cce8a98 task 507 phase 7: generalize modalExpMeasure_step_lt counting-measure engine",
+    "718b9a43 task 507 phase 8: finalize interface docstring, confirm sufficiency, write summary"
   ],
-  "next_steps": "Run /implement 507 to execute the plan (start Phase 1: extend RuleApplicationSpec).",
-  "do_not_implement": true
+  "key_findings": [
+    "The Phase 5 crux (modalStepBranch_potential_step) closed sorry-free on the first attempt using only the fields established by Phases 1-4 -- no [BLOCKED] fallback was needed.",
+    "An import-cycle constraint (GenericDriver.lean imports FmpMeasure.lean to state RuleApplicationSpec) required the _gen lemmas in FmpMeasure.lean to take raw unbundled hypotheses rather than a bundled spec parameter; GenericDriver.lean supplies (apply, spec)-bundled wrapper theorems for downstream reuse. Documented as an 'Architectural Note' in the plan.",
+    "RuleApplicationSpec grew from 3 to 7 fields: 3 new per-call step fields in Phase 1 (rankStep/outDegStep/knownWorldsStep, anticipated by the plan) and 1 further field in Phase 7 (branchingLength, a fixed-arity catalog fact not anticipated by name but allowed for by the plan's risk analysis).",
+    "outDeg_le_of_expandedNodup, modalStepBranch_eClosure, and modalStepBranch_preserves_expandedNodup were found to be already fully rule-agnostic, requiring no generalization at all.",
+    "modalStepBranch_preserves_accTargetsKnown needed only the existing freshLocal field, no new field."
+  ],
+  "downstream_unblocked": [
+    "task 503 Phase 3 (T driver instantiation) and Phases 4-7 (T truth lemma, Decidable (tValid phi))",
+    "task 504 (S5/KB5)",
+    "task 505 (B)"
+  ],
+  "next_steps": "Task 507 is complete. Task 503's Phase 3 blocker is resolved; task 503 can now proceed to instantiate RuleApplicationSpec for T (TDriver.lean) using the discharge pattern documented in GenericDriver.lean's module docstring."
 }

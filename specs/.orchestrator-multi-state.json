@@ -45,14 +45,15 @@
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 0,
+  "cycle_count": 7,
   "failed_tasks": [],
   "completed_tasks": [
+    480,
     490
   ],
   "current_statuses": {
     "490": "completed",
-    "480": "not_started",
+    "480": "completed",
     "492": "not_started",
     "493": "not_started",
     "494": "not_started",
@@ -81,5 +82,9 @@
     "493": "cslib-implementation-agent",
     "494": "cslib-implementation-agent",
     "501": "cslib-implementation-agent"
-  }
+  },
+  "task_480_plan": "v2-hard",
+  "task_480_blocker": "needs set-exclusion (Lindenbaum-pair) infra in Foundations/PrimeExclusion.lean before Phase 2b seeded-w construction",
+  "task_493_note": "CK bare needs SEPARATE segment/fallible-world construction, cannot route through 480 prime-pair witnesses (Fischer-Servi Cd+Idb required). Re-scope 493/501 CK line.",
+  "task_480_axioms": "parametric {h_K,h_Kdia,h_Idb,h_Cd}"
 }

@@ -67,15 +67,33 @@
     {
       "project_number": 480,
       "project_name": "intuitionistic_modal_framework",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/consistent/saturated set) machinery and the birelational canonical-model construction for intuitionistic modal logic; the intuitionistic analogue of task 478's classical MCS/canonical-model framework. Parameterized over modal frame conditions; reuses task 478's generic Hilbert-calculus infrastructure where the classical and intuitionistic bases agree. Provides the reusable soundness/completeness infrastructure the per-system intuitionistic instantiations build on (IK task 492, CK task 493, extensions task 494; minimal reuses it minus efq, task 495). Requires the both-primitive + primitive-∨/⊥ modal base (tasks 477/487, PR #662; ◇≠¬□¬ and ∨ not definable intuitionistically) and birelational semantics (task 490). Depends on 478, 490. RESTRUCTURED 2026-07-12 from the former monolithic 'intuitionistic modal soundness/completeness' — per-system results split into 492/493/494.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-14T12:35:55Z",
       "dependencies": [
         478,
         490
+      ],
+      "session_id": "sess_1784011298_752245_480",
+      "artifacts": [
+        {
+          "path": "specs/480_intuitionistic_modal_framework/reports/01_intuitionistic-modal-framework.md",
+          "type": "report",
+          "summary": "Intuitionistic modal framework research"
+        },
+        {
+          "path": "specs/480_intuitionistic_modal_framework/plans/01_intuitionistic-modal-framework.md",
+          "type": "plan",
+          "summary": "Intuitionistic modal framework 4-phase plan"
+        },
+        {
+          "path": "specs/480_intuitionistic_modal_framework/summaries/10_completeness-phase4-final-summary.md",
+          "type": "summary",
+          "summary": "Intuitionistic modal framework (12-phase hard-mode completion)"
+        }
       ]
     },
     {

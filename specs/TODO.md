@@ -11,9 +11,9 @@ next_project_number: 502
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,480,491,497 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,492,493,495 | 36,37,181,317,407,425,449,480,491 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,414,484,494,496,501 | 39,40,181,215,300,301,375,492,493,495 | foundations, modal logic, code hygiene, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,492,493,497 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,494,495,501 | 36,37,181,317,407,425,449,491,492,493 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,492,495 | foundations, modal logic, code hygiene, ... |
 | 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -37,7 +37,6 @@ next_project_number: 502
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-480 [NOT STARTED] — Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/co
 484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
 
 ### Temporal Logic
@@ -308,10 +307,13 @@ next_project_number: 502
 ---
 
 ### 480. Intuitionistic modal framework
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 478, Task 490
+- **Research**: [480_intuitionistic_modal_framework/reports/01_intuitionistic-modal-framework.md]
+- **Plan**: [480_intuitionistic_modal_framework/plans/01_intuitionistic-modal-framework.md]
+- **Summary**: [480_intuitionistic_modal_framework/summaries/10_completeness-phase4-final-summary.md]
 
 **Description**: Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/consistent/saturated set) machinery and the birelational canonical-model construction for intuitionistic modal logic; the intuitionistic analogue of task 478's classical MCS/canonical-model framework. Parameterized over modal frame conditions; reuses task 478's generic Hilbert-calculus infrastructure where the classical and intuitionistic bases agree. Provides the reusable soundness/completeness infrastructure the per-system intuitionistic instantiations build on (IK task 492, CK task 493, extensions task 494; minimal reuses it minus efq, task 495). Requires the both-primitive + primitive-∨/⊥ modal base (tasks 477/487, PR #662; ◇≠¬□¬ and ∨ not definable intuitionistically) and birelational semantics (task 490). Depends on 478, 490. RESTRUCTURED 2026-07-12 from the former monolithic 'intuitionistic modal soundness/completeness' — per-system results split into 492/493/494.
 

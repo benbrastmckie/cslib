@@ -38,7 +38,7 @@ next_project_number: 511
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
-506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+506 [PLANNED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 509 [NOT STARTED] — Re-scope and close CK constructive CS5 completeness (task 508 fol
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
@@ -141,7 +141,7 @@ next_project_number: 511
 
 ### 506. S4 loopchecking machinery termination bound and decidability
 - **Effort**: 8-12 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

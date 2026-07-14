@@ -160,11 +160,13 @@ def sfSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
   (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
   (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Build `sfSat` for a positive signed formula. -/
 lemma sfSat_pos {W : Type} (m : Model W Atom) (f : WorldIndex → W)
     (φ : Proposition Atom) (l : WorldIndex) (h : Satisfies m (f l) φ) :
     sfSat m f ⟨.pos, φ, l⟩ := ⟨fun _ => h, fun hc => by simp at hc⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Build `sfSat` for a negative signed formula. -/
 lemma sfSat_neg {W : Type} (m : Model W Atom) (f : WorldIndex → W)
     (φ : Proposition Atom) (l : WorldIndex) (h : ¬Satisfies m (f l) φ) :
@@ -180,6 +182,7 @@ def RuleResultSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
   | .persistent newForms => ∀ sf ∈ newForms, sfSat m f sf
   | .notApplicable => True
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Applying any single propositional rule to a satisfied signed formula preserves
 satisfiability of its output.
 
@@ -360,6 +363,7 @@ lemma applyPropRule_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
         subst hx
         exact sfSat_pos m f ψ sf.label (Classical.byContradiction hsat)
 
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- The first applicable propositional rule found by `tryAllPropRules` preserves
 satisfiability of a satisfied signed formula. -/
 lemma tryAllPropRules_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)

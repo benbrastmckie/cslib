@@ -10,9 +10,10 @@
       "description": "lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.",
       "parent_task": 493,
       "created": "2026-07-14T15:19:36Z",
-      "last_updated": "2026-07-14T15:19:36Z",
+      "last_updated": "2026-07-14T15:24:20Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 486,
@@ -150,7 +151,7 @@
       "topic": "Modal Logic",
       "description": "Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-14T15:27:45Z",
       "dependencies": [
         478,
         479,
@@ -159,7 +160,9 @@
         482,
         483,
         492,
-        495
+        494,
+        495,
+        496
       ]
     },
     {
@@ -710,7 +713,7 @@
       "title": "Docs: update ORGANISATION.md Tableau/ tree sketches + strip internal task refs from public docstrings (task 299/455 vet)",
       "description": "Vet found low-severity documentation gaps (code placement itself is correct/idiomatic): (1) ORGANISATION.md:148 Modal/ tree sketch omits the `Tableau/` subdirectory; ORGANISATION.md:26 Foundations/Logic/ tree sketch omits `Tableau/` (Sign.lean, SignedFormula.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean, Measure.lean, PropositionalRules.lean) — add these entries to document existing placement. (2) Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:1178 and nearby: permanent public docstrings for `modalTableau_complete`/`modalTableau_decides` embed ephemeral internal notes like '(task 442 Phase 6, FINAL)', '(task 442 Phase 5a)' — replace with plain, durable mathematical descriptions.",
       "created": "2026-07-01T15:46:37Z",
-      "last_updated": "2026-07-01T15:46:37Z",
+      "last_updated": "2026-07-14T15:24:20Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "parent_task": 299,
@@ -720,7 +723,8 @@
           299,
           455
         ]
-      }
+      },
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 455,
@@ -1165,18 +1169,30 @@
     {
       "project_number": 300,
       "project_name": "modal_extensions_t_s4_s5",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.",
       "created": "2026-06-23T17:47:17Z",
-      "last_updated": "2026-06-23T17:47:17Z",
+      "last_updated": "2026-07-14T16:08:27Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/300_modal_extensions_t_s4_s5/reports/01_frame-specific-tableau-extensions.md",
+          "type": "report",
+          "summary": "Research report: existing K tableau architecture (verified decl names/lines for soundness, completeness, FMP termination); reusable Mathlib closure operators with free frame-property instances; reusable CSLib frame typeclasses/Cube frame classes/axiom-validity theorems; per-system formalization direction (T/B/S4/S5/5) with Lean sketches; detailed S4 loop-checking problem and required new scaffolding; 5-file plan mapped to FrameRules/LoopChecking/S5Simplification/FrameSoundness/FrameCompleteness; risk-based decomposition; zero-debt/lint compliance; open planning questions."
+        },
+        {
+          "path": "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
+          "type": "plan",
+          "summary": "7-phase risk-ordered plan: (1) shared frameValid/branchSatisfiableIn scaffolding; (2) T reflexive via ReflGen; (3) S5 universal-cluster simplification; (4) B symmetric via SymmGen; (5) S4 rules + equality-blocking loop-checking structure + soundness/truth lemma; (6) S4 termination bound 2^|Sf| + Decidable (crux); (7) 5/Euclidean via KB5/S5 EqvGen route. Zero-debt: [BLOCKED] fallbacks for S4 termination and pure-K5."
+        }
+      ],
       "dependencies": [
         299
       ],
-      "parent_task": 296
+      "parent_task": 296,
+      "session_id": "sess_1784044325_11ad9e_300"
     },
     {
       "project_number": 301,
@@ -1559,22 +1575,27 @@
     {
       "project_number": 396,
       "project_name": "salvage_299_soundness_lemmas",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "title": "Salvage reusable lemmas from task-299 Soundness refactor for the per-branch-accessibility soundness redesign",
       "description": "Evaluate and salvage the architecture-independent proof-engineering lemmas left on branch wip/task-299-soundness-refactor (commit 27d93e2d) by the stopped task-299 modal-K soundness re-attempt. Portable (acc-free) candidates: sfSat, sfSat_pos, sfSat_neg, RuleResultSat, and recognizer characterization lemmas (e.g. modalNegOf?_eq_some) in Cslib/Logics/Modal/Tableau/Soundness.lean, plus the branchSatisfiable Type (vs Type*) universe simplification. The FULL 299 refactor is UNBUILT and rewrites modalStepBranch_preserves_sat on the now-superseded global-Accessibility architecture, so do NOT merge it wholesale. Goal: decide which lemmas help the modal-tableau soundness-gap-redesign effort (the per-branch Accessibility 'task 384' tracked in the cslib-364 worktree / branch task-364-soundness-drift) and cherry-pick or restate them there if the propositional-rule recognizer layer hits the 'stuck on variable antecedent / consumed-scrutinee' friction documented in specs/364_modal_tableau_soundness_drift_repair/handoffs/BLOCKED-repair-guide.md (section 4). NOTE: 'task 384' here means the soundness-gap-redesign task in the cslib-364 worktree, which is a DIFFERENT task than main's own #384 (tableau_completeness_sorries) — task numbering diverged across worktrees. Reference branch: wip/task-299-soundness-refactor. Parent context: task 299 modal_k_tableau.",
       "created": "2026-06-28T14:29:01Z",
-      "last_updated": "2026-06-28T14:29:01Z",
+      "last_updated": "2026-07-14T16:08:17Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
           "path": "specs/396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md",
           "type": "report",
-          "summary": "salvage 299 soundness lemmas (backfilled by --sync)"
+          "summary": "Prior-session catalog: per-lemma acc-free vs architecture-coupled classification, reuse-first Foundations mapping, 3-phase salvage plan. Sound except its Phase A recommends adding modalOrOf?_eq_some/modalAndOf?_eq_some verbatim (corrected in report 02)."
+        },
+        {
+          "path": "specs/396_salvage_299_soundness_lemmas/plans/01_salvage-soundness-lemmas.md",
+          "type": "plan",
+          "summary": "5-phase implementation plan salvaging the acc-free payload (four *_eq_some recognizer lemmas to Defs.lean; sfSat/RuleResultSat/applyPropRule_sat/tryAllPropRules_sat bridge to SoundnessStep.lean) with or/and restated for native constructors; zero-debt, per-phase green milestones, full CI in final phase."
         }
       ],
-      "session_id": "sess_1782651208_1bb34c",
+      "session_id": "sess_1784044325_11ad9e_396",
       "dependencies": [],
       "parent_task": 299
     },
@@ -2567,12 +2588,12 @@
       "task_type": "cslib",
       "description": "Refactor PR #662's modal formula primitives to make bot primitive: change Cslib/Logics/Modal/Basic.lean's Proposition inductive from the current {atom, not, and, diamond, box} to {atom, bot, imp, and, or, box, diamond} (7 constructors, all primitive), with negation the ONLY derived connective (abbrev neg := imp · bot; ¬A := A → ⊥). RATIONALE: the fork's modal metalogic (DerivationTree/MCS/Soundness/Completeness on local main) is written on a primitive-bot, primitive-imp basis; making #662's modal base match unblocks the soundness/proof-system slice without a later base refactor. This modal base = #648's propositional core {atom, bot, imp, and, or} + {box, diamond}, so the two Proposition types share one primitive discipline and the eventual FromPropositional bridge becomes a trivial constructor-to-constructor embedding; both modalities stay primitive (box_iff_forall AND diamond_iff_exists remain Iff.rfl). Concretely vs current #662: ADD bot, imp, or constructors; DROP not (now derived); keep atom, and, box, diamond. WORK: (1) new Satisfies clauses — bot (never satisfied), imp (→), or (∨); keep and/box/diamond; not_iff_not becomes a lemma about imp·bot. (2) Wire notation via #607's Operators typeclasses: HasImp, HasOr instances, unconditional instance : Bot (Proposition Atom) := ⟨.bot⟩ (drop any [Bot Atom]/atom-⊥ encoding), neg abbrev + HasNot instance. (3) Denotation.lean: clauses for bot (∅), imp, or; keep and/box/diamond. (4) LogicalEquivalence.lean: Context/fill/Congruence arms for bot/imp/or; drop not's arm (derived). (5) Re-derive task 486's cube validity + canonicity (Cube.lean) on the new base — the axioms are stated with →/◇/□ so primitive imp should make them cleaner; review Satisfies.dual and the K/T/B/4/5/D proofs. (6) docstrings + references.bib as needed. REFERENCES (port from, do not reinvent): benbrastmckie feat/propositional-v2 (#648) Cslib/Logics/Propositional/Defs.lean for the {atom,bot,imp,and,or}+neg-derived pattern (inductive, Bot instance, subst, HasNot); local main Cslib/Logics/Modal/Basic.lean for the modal bot/imp-primitive wiring (bot:=.bot, imp:=.imp, instance:Bot:=⟨.bot⟩, neg_def). BASE: build in a worktree branched from task-486-pr662-modal-package (commit 4ebdba54 — has the completed cube on the OLD base, which this task refactors underneath). NEVER main, NEVER the stale fork feat/modal-formula-primitives=8d7a061e. CONSTRAINTS: zero sorry, zero new axioms; gate on module-scoped lake build Cslib.Logics.Modal.* (486 found full CI green — re-verify); single clean commit; NO push/PR action (user runs /pr separately). EXCLUDE (unchanged from 486): FromPropositional.lean (still gated on the #648 propositional-basis decision — this task only aligns the MODAL base), Metalogic/**, InterSystem, ProofSystem/, Tableau/, HML/. This makes #662 land the metalogic-ready modal base; the proof-system+soundness slice stacks on it next. (Follow-up from #486; user-directed 2026-07-12.)",
       "created": "2026-07-13T00:44:12Z",
-      "last_updated": "2026-07-13T01:11:46Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "parent_task": 486,
       "dependencies": [
         486
       ],
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "completion_summary": "Completed via /orchestrate (research->plan->implement). Refactored #662's modal Proposition to make bot primitive: {atom, not, and, diamond, box} -> {atom, bot, imp, and, or, box, diamond} (7 constructors all primitive), negation the sole derived connective (neg := imp . bot). Delivered on worktree branch task-487-pr662-bot-primitive (commit 69db6de4, off task-486 base 4ebdba54): Basic.lean (new inductive, Bot/HasImp/HasAnd/HasOr/HasBox/HasDiamond wired via #607 Operators, Satisfies bot=>False/imp/or clauses, or_iff_or/imp_iff_imp => Iff.rfl, not_iff_not now an explicit lemma, dual/box_iff_not_diamond_not routed through it), Denotation.lean + LogicalEquivalence.lean mechanical arm updates, CslibTests/GrindLint.lean +4 (grind_lint skip for not_denotation, mirrors existing HML/LTS exceptions). Cube.lean (task 486's cube) verified green with ZERO edits. Net +72/-52 across 4 files. Zero sorry, zero new axioms; full lake build 2759 + test + checkInitImports + lint-style + lint + shake all green. Both box_iff_forall and diamond_iff_exists remain Iff.rfl (both modalities primitive). This gives #662 the metalogic-ready modal base (matches #648's propositional core {atom,bot,imp,and,or} + modalities), so the proof-system+soundness slice can stack straight on it. NOT pushed -- local worktree, ready for user-approved /pr. FromPropositional bridge still deferred pending the #648 propositional-basis decision."
     },
     {
@@ -2582,12 +2603,12 @@
       "task_type": "cslib",
       "description": "Add frame-correspondence biconditionals to PR #662's Cube.lean, unifying the existing validity (frame property => axiom valid) and canonicity (axiom valid => frame property) directions into named iff theorems — the capstone of the cube's correspondence theory. For each of T/B/4/5/D (NOT K — K has no frame condition), add a per-frame iff: e.g. T.t_correspondence {r} [Nonempty Atom] : (global validity of φ→◇φ on frame r) ↔ Std.Refl r, proved as ⟨<axiom>_canonical, <forward via Satisfies.t/b/four/five/d + the relevant Std.Refl/Std.Symm/IsTrans/Relation.RightEuclidean/Relation.Serial instance>⟩. Backward direction reuses the existing T.t_canonical/B.b_canonical/Four.four_canonical/Five.five_canonical/D.d_canonical; forward reuses Satisfies.t/b/four/five/d (per-model, instance-parametric). Place in Cube.lean (new Correspondence section after Canonicity, or fold into Canonicity). ~5 small theorems, near-free. BASE: build on branch task-487-pr662-bot-primitive (commit 69db6de4 — the current #662 tip with the fully-primitive {atom,bot,imp,and,or,box,diamond} base + completed cube). Reuse the task-487 worktree or a new one branched from it. CONSTRAINTS: zero sorry, zero new axioms; module-scoped lake build Cslib.Logics.Modal.Cube green; single clean commit; NO push/PR. EXCLUDE everything already excluded (FromPropositional, Metalogic, ProofSystem, Tableau, InterSystem, HML). Also produces the updated #662 PR body (pr-description) describing the FINAL state: fully-primitive modal base + cube validity/canonicity/correspondence, stacked on #607, #648 independent. (Follow-up from #487; user-directed capstone before /pr.)",
       "created": "2026-07-13T01:48:22Z",
-      "last_updated": "2026-07-13T01:55:15Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "parent_task": 487,
       "dependencies": [
         487
       ],
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "completion_summary": "Completed. Added 5 frame-correspondence biconditionals to Cube.lean (new Correspondence section after Canonicity), unifying the cube's validity + canonicity directions: T.t_correspondence (<->Std.Refl), B.b_correspondence (<->Std.Symm), Four.four_correspondence (<->IsTrans), Five.five_correspondence (<->Relation.RightEuclidean), D.d_correspondence (<->Relation.Serial). Each = <axiom>_canonical paired with forward via Satisfies.t/b/four/five/d + instance. Committed on branch task-487-pr662-bot-primitive at b041c6f7 (on top of 69db6de4). Cube.lean +55 net; zero sorry, zero new axioms (lean_verify: only propext/Classical.choice/Quot.sound); full lake build 2759 + test 8790 + lints + shake green. Only Cube.lean touched. Also produced the updated #662 PR body (artifacts/pr-662-body.md) describing the final state: fully-primitive modal base {atom,bot,imp,and,or,box,diamond} + semantic cube (validity/canonicity/correspondence), stacked on #607, independent of #648, with follow-ups (proof system/soundness/completeness) excluded. FINAL #662 total vs #607: +233/-56 across 6 files. NOT pushed -- ready for user-approved /pr on branch task-487-pr662-bot-primitive."
     },
     {
@@ -2597,12 +2618,12 @@
       "task_type": "cslib",
       "description": "Repackage the modal formula-base reshape as a maintainer-facing proposal: (1) a Zulip message to @fmontesi (CSLib > Modal Logic) proposing that the modal Proposition adopt the fully-primitive {atom,bot,imp,and,or,box,diamond} base (bot/imp primitive, neg derived) motivated by the incoming modal metalogic, framed decision-his/labor-yours with the semantic tradeoff (¬/∧ become derived) acknowledged, and tying in the companion propositional-⊥ question (#648 vs #607) for him and Thomas Waring; (2) a clean, build-verified STANDALONE patch of just the base reshape, branched off #607 (upstream/fmontesi/connectives=ddc2c9b8), containing ONLY the modal Proposition reshape (Basic/Denotation/LogicalEquivalence) WITHOUT the cube completion, so fmontesi can cherry-pick/PR it into #607 as his own. Goal: move the foundational base decision to the layer (#607) and owner (fmontesi) where it belongs, shrinking #662 to the user's additive cube contribution. Follow-up from #488; user-directed.",
       "created": "2026-07-13T03:28:03Z",
-      "last_updated": "2026-07-13T03:45:39Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "parent_task": 488,
       "dependencies": [
         488
       ],
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "completion_summary": "Completed. Two maintainer-facing deliverables for moving the modal base decision to #607/@fmontesi. (1) Zulip draft (artifacts/zulip-base-proposal.md): proposes the fully-primitive {atom,bot,imp,and,or,box,diamond} modal base, framed decision-his/labor-yours, semantic tradeoff (¬/∧ derived) acknowledged, metalogic-motivated, with the #648 propositional-⊥ tie-in for him+Thomas Waring; marked draft-only pending patch confirmation + 23 July. (2) Standalone build-verified patch (artifacts/0001-feat-Logics-Modal-make-modal-Proposition-fully-primi.patch): branch modal-base-reshape-onto-607 (commit c2e37e20) off #607 head ddc2c9b8, single commit, ONLY the base reshape in Basic/Denotation/LogicalEquivalence (+ 1-line GrindLint skip), NO cube completion. Verified: #607's Cube.lean (K/T validity) is byte-identical and builds green on the reshaped base (full lake build 2759/2759 + test + lints + shake pass); zero sorry, zero new axioms. Diff +98/-56 across 4 files. Ready to hand to fmontesi (cherry-pick into #607 or PR against his branch). Effect: base decision moves to its proper layer/owner, shrinking #662 to the additive cube contribution. NOT pushed."
     },
     {
@@ -2610,14 +2631,14 @@
       "project_name": "birelational_intuitionistic_modal_semantics",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 487,
       "dependencies": [
         487
       ],
       "description": "Birelational (intuitionistic Kripke) modal SEMANTICS — the semantic foundation for the intuitionistic and minimal modal metalogic, sibling to the classical Kripke cube. Define intuitionistic Kripke frames with TWO relations: the intuitionistic preorder ≤ and the modal accessibility R, plus the heredity/monotonicity condition and the F1/F2 (up-down) confluence conditions relating ≤ and R. Define Satisfies (forcing) for the fully-primitive modal Proposition {atom,bot,imp,and,or,box,diamond} (PR #662) over these frames: persistence of forcing under ≤, □ quantifying over ≤∘R, ◇ over R, intuitionistic → clause (∀ ≥-worlds). This is the layer that intuitionistic (tasks 492/493/494) and minimal (task 495) completeness build on. REQUIRES the primitive-◇/∨/⊥ base (tasks 477/487, in #662) — intuitionistically ◇≠¬□¬ and ∨ is not definable from →/∧/⊥, so both-primitive-modalities + primitive ∨/⊥ are hard prerequisites. Depends on 487 (fully-primitive modal base).",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-14T06:59:52Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "session_id": "sess_1784011298_752245_490",
       "artifacts": [
         {
@@ -2640,21 +2661,34 @@
     {
       "project_number": 491,
       "project_name": "minimal_propositional_base_efq_optional",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": null,
       "dependencies": [],
       "description": "Minimal propositional base (efq-optional) — PREREQUISITE for the minimal modal track. Make ex-falso-quodlibet an OPTIONAL rule of the propositional derivation system so the strength hierarchy minimal ⊂ intuitionistic (efq / IsIntuitionistic) ⊂ classical (DNE / IsClassical) is cleanly representable. Current state: #648's propositional layer (Logics/Propositional/Defs.lean) builds efq in as a derivation rule (base = intuitionistic) and layers IsClassical (DNE) on top, with NO efq-free (minimal) variant. Step 1: confirm whether #648 already admits a minimal base; if not, gate/parameterize the efq rule (e.g. an IsMinimal marker, or an efq-free Derivation variant, mirroring the IsIntuitionistic/IsClassical typeclass pattern). Builds on #648's primitive-⊥ propositional Proposition. No intra-repo task dependency (tracks PR #648).",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T15:29:45Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/491_minimal-propositional-base/reports/01_minimal-propositional-base.md",
+          "summary": "Minimal base already implemented; efq optional in both proof systems"
+        },
+        {
+          "type": "plan",
+          "path": "specs/491_minimal-propositional-base/plans/01_minimal-propositional-base.md",
+          "summary": "Verification-only, 2 phases, no new definitions"
+        }
+      ],
+      "completion_summary": "Verification-only: minimal propositional base already exists on main (efq optional in both proof systems; IsMinimal/MinimalHilbert hierarchy present). Scoped build green (729 jobs), min_consistent type-checks with only standard axioms, zero source diff. NOTE: requires_user_review=true — research recommended closing as already-satisfied; full-repo CI blocked by unrelated concurrent WIP in Modal/Tableau/Defs.lean (not task 491)."
     },
     {
       "project_number": 492,
       "project_name": "IK_intuitionistic_modal_soundness_completeness",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 480,
       "dependencies": [
         480,
@@ -2662,7 +2696,7 @@
       ],
       "description": "IK (intuitionistic modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). IK carries the full ◇/□ axiom set: K-□ (□(A→B)→□A→□B), K-◇ (□(A→B)→◇A→◇B), ◇⊥→⊥, and ◇(A∨B)→◇A∨◇B. Prove soundness over birelational frames and completeness via the birelational (prime-theory) canonical model. Depends on 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-14T13:00:38Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "session_id": "sess_1784011298_752245_492",
       "artifacts": [
         {
@@ -2687,7 +2721,7 @@
       "project_name": "CK_constructive_modal_soundness_completeness",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 480,
       "dependencies": [
         480,
@@ -2695,7 +2729,7 @@
       ],
       "description": "CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-14T15:04:28Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "session_id": "sess_1784038832_edcb55",
       "artifacts": [
         {
@@ -2721,14 +2755,14 @@
       "project_name": "intuitionistic_modal_extensions_IT_IS4_IS5",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 492,
       "dependencies": [
         492
       ],
       "description": "Intuitionistic modal extensions IT / IS4 / IS5 — sound and complete axiomatizations of the intuitionistic analogues of T / S4 / S5 as modular extensions of IK (task 492), via the intuitionistic axiom↔birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the ≤∘R conditions). Prove soundness and completeness by the birelational canonical model. Depends on 492.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-14T13:44:59Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "session_id": "sess_1784011298_752245_494",
       "artifacts": [
         {
@@ -2753,7 +2787,7 @@
       "project_name": "minimal_modal_K_soundness_completeness",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 480,
       "dependencies": [
         491,
@@ -2762,42 +2796,42 @@
       ],
       "description": "Minimal modal logic MK soundness + completeness — the modal logic over MINIMAL propositional logic (no explosion / efq), instantiating the intuitionistic modal framework (task 480) MINUS the efq rule, over the birelational semantics (task 490) with the minimal-appropriate ⊥ treatment (⊥ an ordinary proposition, no ex-falso). Prove soundness and completeness via the (prime-theory) canonical model. REQUIRES the minimal propositional base (task 491). Depends on 491, 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T15:29:45Z"
     },
     {
       "project_number": 496,
       "project_name": "minimal_modal_extensions",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 495,
       "dependencies": [
         495
       ],
       "description": "Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T15:29:45Z"
     },
     {
       "project_number": 497,
       "project_name": "reconcile_imp_naming",
       "status": "not_started",
       "task_type": "cslib",
-      "topic": "propositional-logic",
+      "topic": "Propositional Logic",
       "description": "Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.",
       "created": "2026-07-13T15:55:03Z",
-      "last_updated": "2026-07-13T15:55:03Z"
+      "last_updated": "2026-07-14T15:29:45Z"
     },
     {
       "project_number": 498,
       "project_name": "modal_foundational_semantic_layer_662",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 476,
       "description": "Contribute the modal metalogic foundational semantic layer to CSLib as PR #662, built on the native primitive set. Two coordinated deliverables: (1) Recommend on PR #607 that the modal Proposition adopt native primitives {atom, bot, imp, and, or, box, diamond} (native bot/imp/box/diamond, not the current not-based / box-derived form), with justification lifted from task-441 Modal/Basic.lean: one decomposition rule per connective for tableau/truth-lemma machinery (structural induction, no Lukasiewicz-bridge lemmas), reuse for intuitionistic/minimal modal systems (box and diamond independent), and duality box-diamond recovered as a theorem. (2) Rework PR #662 from its current trivial box-alongside-diamond delta into a self-contained ~300 LOC foundational semantic layer slice of the task-441 metalogic on those native primitives: native Proposition + Satisfies/denotation + duality theorem + per-connective decomposition + K-axiom validity. Source metalogic lives on branch task-441-native-refactor. #662 stacks on fmontesi/connectives (#607); the actual push/stack is gated on #607 adopting the primitives. TASK CONCLUDES by squash-committing #662 with the foundational-semantic-layer contribution, then revising specs/476_divide_modal_prs_coordinate_607/artifacts/zulip-coordination.md to reflect this strategy (recommend primitives to #607 + substantial #662 metalogic slice) in place of the current box-alongside-diamond description. Parent/coordination context: task 476. Related follow-up: task 497 (imp/impl naming).",
       "created": "2026-07-13T17:25:54Z",
-      "last_updated": "2026-07-13T18:05:39Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "session_id": "sess_1783963625_6aa0c8",
       "artifacts": [
         {
@@ -2823,11 +2857,11 @@
       "project_name": "pr_662_contributing_compliance",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 498,
       "description": "Fix CONTRIBUTING.md compliance issues in the PR #662 modal foundational-semantic-layer slice (specs/498_modal_foundational_semantic_layer_662/artifacts/pr-662-slice/Basic.lean, Denotation.lean; version B, the native 7-primitive {atom,bot,imp,and,or,box,diamond} layer). Documentation-only, no proof/definition changes; CI must stay green. Findings (see reports/01_contributing-compliance-audit.md): (1) MUST FIX — remove internal task-tracker numbers from published docstrings (Basic.lean:34,113,119,272 reference 'task 441'/'task 340'); also scrub the same strings from the live Cslib/Logics/Modal/Basic.lean on task-441-native-refactor. (2) SHOULD FIX — trim Basic.lean module docstring of dangling cross-references to machinery not in this PR (Axioms.lean/ProofSystem/Instances proof-system layer at lines 41-44; PL.Proposition.toModal/embed/'FromPropositional' Bimodal-embedding paragraph at lines 46-50; note there is no module literally named FromPropositional); slice-only, keep those refs valid in the live task-441 file. (3) MINOR — add [ChagrovZakharyaschev1997] to the ## References section (cited inline at line 37 but missing from References). (4) CONFIRM WITH MAINTAINER — copyright-holder line adds Benjamin Brast-McKie to Fabrizio's file; Authors-line addition is fine, holder-line addition needs Fabrizio's OK (no auto-change). (5) OPTIONAL — 'Lukasiewicz' -> 'Łukasiewicz' diacritic. Parent task 498; coordination 476; related 497 (imp/impl naming). A research/audit report is pre-seeded at reports/01_contributing-compliance-audit.md.",
       "created": "2026-07-13T00:00:00Z",
-      "last_updated": "2026-07-13T22:45:32Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "artifacts": [
         {
           "type": "report",
@@ -2853,11 +2887,11 @@
       "project_name": "pr662_branch_reconciliation",
       "status": "completed",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 498,
       "description": "Reconcile the PR #662 branch so it is up to date with upstream and correctly stacked on #607 before any force-push. Investigation (see reports/01_branch-state-audit.md) found FOUR competing primitive designs across branches — live PR origin/feat/modal-formula-primitives is 5-primitive {atom,not,and,diamond,box} (8 behind upstream/main); local feat/modal-formula-primitives + v2 are 4-primitive {atom,bot,imp,box} (local diverged 24-behind/5-ahead of origin); task-441-native-refactor (where the task-499 citation/compliance work sits, uncommitted) is 7-primitive {atom,bot,imp,and,or,box,diamond} = slice 'version B' and has NO common git ancestor with the PR branch; base fmontesi/connectives (#607) and pr607 are 4-primitive {atom,not,and,diamond}. BLOCKING DECISION: choose the canonical design for PR #662 (needs user + likely maintainer Fabrizio input). Then rebuild a single PR-head branch rebased onto upstream/fmontesi/connectives, up to date w.r.t. upstream/main, carrying the chosen design + the task-499 compliance/citation work, resolving the task-441 disjoint-history problem; run full CSLib CI; only then force-push. Out of scope until confirmed: any push/push --force/rebase/reset, and the copyright-holder line change (separate maintainer gate). Related: 498 (modal foundational layer), 499 (CONTRIBUTING compliance + citations), 476 (PR coordination), 607/662 stacking.",
       "created": "2026-07-13T00:00:00Z",
-      "last_updated": "2026-07-13T00:00:00Z",
+      "last_updated": "2026-07-14T15:29:45Z",
       "artifacts": [
         {
           "type": "report",
@@ -2880,16 +2914,29 @@
     {
       "project_number": 501,
       "project_name": "CK_constructive_modal_extensions_CT_CS4_CS5",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
-      "topic": "modal-logic",
+      "topic": "Modal Logic",
       "parent_task": 493,
       "dependencies": [
         493
       ],
       "description": "CK constructive modal extensions CT / CS4 / CS5 — sound and complete axiomatizations of the constructive (CK-based) analogues of T / S4 / S5 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the <=-R confluence) over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. Completes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal). Depends on 493.",
       "created": "2026-07-14T06:35:23Z",
-      "last_updated": "2026-07-14T06:35:23Z"
+      "last_updated": "2026-07-14T16:12:27Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/reports/01_ct-cs4-cs5-segment-extensions.md",
+          "summary": "CT/CS4/CS5 segment-extension research with 8-phase decomposition"
+        },
+        {
+          "type": "plan",
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/plans/01_ct-cs4-cs5-extensions.md",
+          "summary": "8 phases, CK segment reuse, CS5 via B/symmetry, STOP contingency at Phase 7"
+        }
+      ],
+      "session_id": "sess_1784044271_09e821_501"
     }
   ],
   "repository_health": {

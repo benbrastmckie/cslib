@@ -1,13 +1,25 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-14T16:11:29Z",
-  "artifacts": [],
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Tableau/Defs.lean",
+      "type": "lean_source",
+      "summary": "Added modalNegOf?_eq_some, modalOrOf?_eq_some (restated .or), modalAndOf?_eq_some (restated .and), modalImpOf?_eq_some"
+    },
+    {
+      "path": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+      "type": "lean_source",
+      "summary": "Added sfSat, sfSat_pos, sfSat_neg, RuleResultSat, applyPropRule_sat, tryAllPropRules_sat (monomorphic {W : Type}, acc-free)"
+    }
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context, plan read",
+    "stage": "phase_4_complete",
+    "details": "applyPropRule_sat and tryAllPropRules_sat added; and/or arms reworked for native constructors (simpler than branch, no Classical.em needed for andPos/orNeg); neg/imp arms transferred directly. lake build green; zero sorry/axiom; confirmed acc-free. All four phases of proof work complete; proceeding to Phase 5 full CI.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 4,
+    "last_completed_phase": "Phase 4: Propositional-Rule Satisfaction Bridge"
   },
   "metadata": {
     "session_id": "sess_1784044325_11ad9e_396",

@@ -1,11 +1,28 @@
 {
-  "status": "researched",
-  "summary": "Portable acc-free lemmas (sfSat, sfSat_pos/neg, RuleResultSat, applyPropRule_sat, modal*Of?_eq_some) are salvageable; branchSatisfiable/modalClosed_unsat/modalStepBranch_preserves_sat are global-Accessibility-coupled and must not be merged.",
+  "status": "planned",
+  "task_number": 396,
+  "session_id": "sess_1784044325_11ad9e_396",
+  "phases_total": 5,
+  "summary": "Phased salvage plan for the task-299 (27d93e2d) acc-free soundness payload into current main. Five phases, each bounded to one agent run ending at a green lake build: (1) baseline build + git-show reference extraction of the payload block; (2) add four modal{Neg,Imp,Or,And}Of?_eq_some inverse-characterization lemmas to Defs.lean -- neg/imp port cleanly, or/and RESTATED against native .or/.and per report 02 (branch versions are FALSE on post-441 main); (3) add encoding-independent satisfaction predicates sfSat/sfSat_pos/sfSat_neg/RuleResultSat to SoundnessStep.lean with monomorphic {W:Type}; (4) add applyPropRule_sat + tryAllPropRules_sat with and/or proof-arms reworked to consume the restated characterizations and native constructors; (5) full CI pipeline (build, test, checkInitImports, lint-style, shake) + zero-sorry/axiom verification + summary. Dependency waves: [1],[2,3],[4],[5] -- Phases 2 (Defs.lean) and 3 (SoundnessStep.lean) are parallel-safe (disjoint files). Excluded per research: modalStepBranch_preserves_sat (global-Accessibility, superseded), Proposition.beqToEq (main has better LawfulBEq.eq_of_beq), branchSatisfiable/modalClosed_unsat (already current on main). Grounding confirmed this session: native .or/.and recognizers + forward lemmas exist in Defs.lean with no inverse lemmas; the prop-rule engine (applyPropRule/tryAllPropRules/RuleResult) is already imported and used across the modal soundness stack, so Phase-B bridge dependencies resolve on main.",
   "artifacts": [
-    {"path": "specs/396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md", "type": "report", "summary": "Per-lemma portability classification and 3-phase salvage plan (Phase A: recognizer _eq_some lemmas to Defs.lean; Phase B: sfSat/RuleResultSat/applyPropRule_sat block to cslib-364; Phase C: restate branch-sat glue)."}
+    {
+      "path": "specs/396_salvage_299_soundness_lemmas/plans/01_salvage-soundness-lemmas.md",
+      "type": "plan",
+      "summary": "5-phase implementation plan salvaging the acc-free payload (four *_eq_some recognizer lemmas to Defs.lean; sfSat/RuleResultSat/applyPropRule_sat/tryAllPropRules_sat bridge to SoundnessStep.lean) with or/and restated for native constructors; zero-debt, per-phase green milestones, full CI in final phase."
+    }
   ],
-  "next_action_hint": "Plan Phase A (add four modal*Of?_eq_some inverse lemmas to Cslib/Logics/Modal/Tableau/Defs.lean) independently; Phase B/B cherry-pick requires cslib-364 worktree.",
-  "blockers": [
-    "cslib-364 worktree, branch task-364-soundness-drift, and specs/364.../handoffs/BLOCKED-repair-guide.md are absent from this checkout; target architecture and section-4 friction could not be directly verified."
-  ]
+  "estimated_hours": 4.5,
+  "dependency_waves": [[1], [2, 3], [4], [5]],
+  "next_action_hint": "Run /implement 396 to execute the plan. Phases 2 and 3 are parallel-safe (Defs.lean vs SoundnessStep.lean). Enforce the report-02 correction in Phase 2: modalOrOf?_eq_some must conclude phi = .or a b and modalAndOf?_eq_some must conclude phi = .and a b -- do NOT cherry-pick the branch's Lukasiewicz statements.",
+  "blockers": [],
+  "metadata": {
+    "agent_type": "planner-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
+    "reference_commit": "27d93e2d",
+    "reports_integrated": [
+      "specs/396_salvage_299_soundness_lemmas/reports/01_salvage-299-soundness-lemmas.md",
+      "specs/396_salvage_299_soundness_lemmas/reports/02_encoding-staleness-correction.md"
+    ]
+  }
 }

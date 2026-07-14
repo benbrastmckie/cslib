@@ -1,99 +1,41 @@
 {
-  "session_id": "sess_1784011298_752245",
+  "session_id": "sess_1784044325_11ad9e",
   "task_numbers": [
-    490,
-    480,
-    492,
-    493,
-    494,
-    501
+    396,
+    300
   ],
   "waves": [
     [
-      490
-    ],
-    [
-      480
-    ],
-    [
-      492,
-      493
-    ],
-    [
-      494,
-      501
+      396,
+      300
     ]
   ],
   "dependency_graph": {
-    "490": [],
-    "480": [
-      "490"
-    ],
-    "492": [
-      "480",
-      "490"
-    ],
-    "493": [
-      "480",
-      "490"
-    ],
-    "494": [
-      "492"
-    ],
-    "501": [
-      "493"
-    ]
+    "396": [],
+    "300": []
   },
-  "max_cycles": 25,
-  "cycle_count": 7,
+  "max_cycles": 10,
+  "cycle_count": 3,
   "failed_tasks": [],
   "completed_tasks": [
-    480,
-    490,
-    492,
-    494
+    491
   ],
   "current_statuses": {
-    "490": "completed",
-    "480": "completed",
-    "492": "completed",
-    "493": "planned",
-    "494": "completed",
-    "501": "not_started"
+    "396": "planned",
+    "300": "planned",
+    "491": "completed",
+    "501": "implementing"
   },
   "task_dirs": {
-    "490": "specs/490_birelational_intuitionistic_modal_semantics",
-    "480": "specs/480_intuitionistic_modal_framework",
-    "492": "specs/492_IK_intuitionistic_modal_soundness_completeness",
-    "493": "specs/493_CK_constructive_modal_soundness_completeness",
-    "494": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5",
-    "501": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5"
+    "396": "specs/396_salvage_299_soundness_lemmas",
+    "300": "specs/300_modal_extensions_t_s4_s5"
   },
   "research_agents": {
-    "490": "cslib-research-agent",
-    "480": "cslib-research-agent",
-    "492": "cslib-research-agent",
-    "493": "cslib-research-agent",
-    "494": "cslib-research-agent",
-    "501": "cslib-research-agent"
+    "396": "cslib-research-agent",
+    "300": "cslib-research-agent"
   },
   "implement_agents": {
-    "490": "cslib-implementation-agent",
-    "480": "cslib-implementation-agent",
-    "492": "cslib-implementation-agent",
-    "493": "cslib-implementation-agent",
-    "494": "cslib-implementation-agent",
-    "501": "cslib-implementation-agent"
-  },
-  "task_480_plan": "v2-hard",
-  "task_480_blocker": "needs set-exclusion (Lindenbaum-pair) infra in Foundations/PrimeExclusion.lean before Phase 2b seeded-w construction",
-  "task_493_note": "CK bare needs SEPARATE segment/fallible-world construction, cannot route through 480 prime-pair witnesses (Fischer-Servi Cd+Idb required). Re-scope 493/501 CK line.",
-  "task_480_axioms": "parametric {h_K,h_Kdia,h_Idb,h_Cd}",
-  "task_493_501_status": "PARKED — CK bare needs separate segment/fallible-world construction, not the 480 prime-pair framework; awaiting user re-scope decision",
-  "blocked_tasks": [
-    493,
-    501
-  ],
-  "task_493_awaiting_authorization": false,
-  "final_disposition": "IK line complete (490,480,492,494); CK line 493 PLANNED + 501 not_started, deferred by user"
+    "396": "cslib-implementation-agent",
+    "300": "cslib-implementation-agent"
+  }
 }

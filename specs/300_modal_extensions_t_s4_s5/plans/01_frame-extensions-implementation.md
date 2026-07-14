@@ -146,7 +146,7 @@ milestone with a task-scoped commit.
 
 ---
 
-### Phase 2: T system (reflexive) — LOW risk [NOT STARTED]
+### Phase 2: T system (reflexive) — LOW risk [IN PROGRESS]
 
 - **Goal:** Deliver self-contained `Decidable (tValid φ)` with reflexive-frame countermodel.
 - **Tasks:**

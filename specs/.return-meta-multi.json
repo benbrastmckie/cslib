@@ -1,17 +1,12 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [
-      480,
-      490,
-      492,
-      494
-    ],
-    "tasks_blocked_pending_rescope": [
-      493,
-      501
-    ],
-    "cycles_used": 20,
-    "multi_task_mode": true
+    "tasks_completed": [491],
+    "tasks_partial": [501],
+    "tasks_blocked_by_limit": [495, 496, 484],
+    "tasks_failed": [],
+    "cycles_used": 3,
+    "multi_task_mode": true,
+    "pause_reason": "API session limit reached (resets 12pm America/Los_Angeles) — not a code blocker"
   }
 }

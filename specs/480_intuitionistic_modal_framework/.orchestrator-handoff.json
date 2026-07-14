@@ -5,28 +5,40 @@
   "mode": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "status": "implemented",
-  "phase": "2a",
+  "status": "partial",
+  "phase": "2b",
   "phases_completed": 2,
   "phases_total": 9,
   "plan": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
-  "summary": "Phase 2a complete: created Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean defining CanonicalPrimeWorld (prime-theory worlds), the canonical Preorder (set inclusion) instance, canonicalVal (atom-membership valuation) with canonicalVal_upward_closed, and canonicalR (box clause + diamond clause, both required since diamond is primitive per Wijesekera). Definitions only, no witness proofs (2b/2c/2d deferred as planned). Module builds green via lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel; zero sorry/admit/new axioms; classical Metalogic/, MCS.lean, propositional Int*, and PrimeTheory.lean left untouched (git diff --stat confirms no changes to those paths).",
+  "summary": "Phases 1 (PrimeTheory.lean, commit be8f2eb0) and 2a (CanonicalModel.lean definitions: CanonicalPrimeWorld, Preorder, canonicalVal, canonicalR; commit 4fd37213) remain green and untouched. Phase 2b (canonical_box_witness) is BLOCKED: partial progress established that {psi | box psi in w} is ModalSetConsistent (via a deductively-closed variant of derive_box_from_box_context plus a K-distribution+EFQ argument), but the prime extension via modal_prime_exclusion only secures canonicalR's box clause, not its diamond clause (every prime theory contains the bare theorem top, forcing dia-top in w.val as a precondition of canonicalR w v holding for ANY v -- a precondition not obviously discharged by the reported IK/CK axiom set without an explicit seriality-style axiom). This same obstruction blocks canonical_diamond_witness (2c), canonical_f1/f2 (2d), and everything downstream (3a-4) since TruthLemma.lean/Completeness.lean cannot be assembled without the witnesses. No sorry/admit/axiom was introduced; CanonicalModel.lean is unchanged from its Phase 2a committed state.",
   "sorry_inventory": [],
   "new_sorries": 0,
   "new_axioms": 0,
-  "blockers": [],
-  "requires_user_review": false,
-  "continuation_context": null,
+  "blockers": [
+    {
+      "phase": "2b",
+      "lemma": "canonical_box_witness",
+      "description": "Securing canonicalR's diamond clause (forall psi in v.val, dia psi in w.val) for a box-clause witness v requires dia-top in w.val as a precondition (since top is always in v.val for any deductively-closed v). Could not establish, from the reported IK/CK axiom set (K-box, K-dia, dia-bot->bot, dia(A or B)->diaA or diaB), that dia-top in w.val (or an equivalent seriality-style fact) is always available when box-phi not in w.val. Simpson 1994's own proof of the analogous F2 confluence fact (chunk_0223-0227) invokes an unidentified 'axiom 5 of IK' in a multi-step argument that could not be reconstructed with confidence from the available OCR (ambiguous box/diamond glyphs).",
+      "full_note": "See Phase 2b BLOCKER note in specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md for the complete technical writeup, including the 5 investigative steps taken and 3 candidate resolutions (a/b/c)."
+    }
+  ],
+  "requires_user_review": true,
+  "continuation_context": "Dispatch /research 480 --hard --lit focused NARROWLY on: whether/how the IK-dia axiom set discharges a seriality-style precondition (dia-top, or equivalent) needed by canonical_box_witness and canonical_diamond_witness simultaneously to satisfy BOTH clauses of canonicalR for the same witness world. Consult wijesekera_1990_constructivemodallogicsi chunks ~0040-0045 (prime-filter accessibility) and simpson_1994_intuitionisticmodallogic chunks 0215-0230 (Lemma 3.3.1 Monotonicity, Lemma 3.3.2 Prime lemma, F2 proof using 'axiom 5 of IK') -- ideally cross-referenced against a cleaner secondary source (e.g. Wolter & Zakharyaschev survey of IK canonical models) since the current OCR is ambiguous on box vs diamond glyphs in the crucial multi-step F2 argument. Do NOT re-attempt Phase 2b/2c without this research resolving the precondition question -- re-attempting blind risks either an incorrect canonicalR definition or an unclosable proof.",
   "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean",
+      "type": "lean_module",
+      "summary": "Phase 1, COMPLETED, commit be8f2eb0. Unchanged this dispatch."
+    },
     {
       "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
       "type": "lean_module",
-      "summary": "Phase 2a: CanonicalPrimeWorld, Preorder (inclusion) instance, canonicalVal, canonicalVal_upward_closed, canonicalR (box+diamond clauses). Builds green, no sorry/admit/axiom. Not yet registered in Cslib.lean barrel (deferred to Phase 4 per dispatch scope)."
+      "summary": "Phase 2a, COMPLETED, commit 4fd37213. Unchanged this dispatch (no new content added; Phase 2b could not be safely attempted in-file without risking sorry)."
     },
     {
       "path": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
       "type": "plan",
-      "summary": "Phase 2a heading marked [COMPLETED]; all Phase 2a checklist items checked off."
+      "summary": "Phase 2b marked [BLOCKED] with full blocker documentation (partial ModalSetConsistent progress + the diamond-clause precondition obstruction)."
     }
   ],
   "verification": {
@@ -36,7 +48,7 @@
     "axiom_count": 0,
     "vacuous_count": 0,
     "untouched_classical_verified": true,
-    "note": "Only the scoped module build was run this dispatch, per plan instruction; full CI pipeline deferred to Phase 4."
+    "note": "No Lean files modified this dispatch; only the plan file was updated. Build status inherited from Phase 2a commit 4fd37213."
   },
-  "next_action_hint": "Dispatch Phase 2b next: prove canonical_box_witness in the same CanonicalModel.lean (from a box formula not in w, build {psi | box psi in w}, show non-derivation via derive_box_from_box_context (MCS.lean), then apply modal_prime_exclusion (PrimeTheory.lean) to get a prime v excluding the target formula, and verify the diamond clause holds on v). Depends only on 2a (now complete). Do not attempt 2c in the same dispatch -- 2a-2d are same-file, strictly sequential phases."
+  "next_action_hint": "Dispatch /research 480 --hard --lit per continuation_context above before resuming implementation at Phase 2b."
 }

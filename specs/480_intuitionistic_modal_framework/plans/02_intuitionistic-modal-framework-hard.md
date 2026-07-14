@@ -204,19 +204,87 @@ nothing; no new `axiom`), **untouched-classical** (`git diff --stat` shows no ch
 - **Timing:** ~1 hour
 - **Depends on:** 1
 
-### Phase 2b: canonical_box_witness [NOT STARTED]
+### Phase 2b: canonical_box_witness [BLOCKED]
 
 - **Goal:** Prove the box witness lemma.
 - **Single deliverable:** `canonical_box_witness` proved sorry-free in `CanonicalModel.lean`.
 - **Tasks:**
-  - [ ] Prove `canonical_box_witness`: from `□φ ∉ w` build `{ψ | □ψ ∈ w}`, show it cannot derive `φ`
-        via the imported `derive_box_from_box_context` (implyK/implyS/K only — no Peirce), then apply
-        `modal_prime_exclusion` to obtain a prime `v ⊇ {ψ|□ψ∈w}` with `φ ∉ v`; verify the diamond
-        clause holds on `v` — report §6.5.
+  - [x] Prove `ModalSetConsistent Axioms {ψ | □ψ ∈ w.val}` from `□φ ∉ w.val`: this direction closes
+        cleanly. A deductively-closed (not MCS-based) variant of `derive_box_from_box_context` was
+        devised (`derive_box_from_box_context` itself needs `SetMaximalConsistent`, unavailable for
+        prime theories; the deductively-closed variant only needs `Metalogic.DeductivelyClosed`,
+        which `ModalPrimeTheory`/`Admissible` already provides) plus a K-distribution + EFQ argument
+        that `□⊥ ∈ w.val → □χ ∈ w.val` for every `χ`, giving `□⊥ ∉ w.val` (hence `⊥ ∉ W`) from the
+        `□φ ∉ w.val` hypothesis.
+  - [ ] **BLOCKED**: apply `modal_prime_exclusion` to `W = {ψ|□ψ∈w.val}` and verify the resulting
+        prime `v ⊇ W` (excluding `φ`) satisfies **both** clauses of `canonicalR w v` — not just the
+        box clause. See blocker note below; this blocks the remainder of Phase 2b and all of
+        2c/2d/3b/3c/4.
   - [ ] Docstring; `lake build` the module.
 - **Estimated output:** ~80-140 lines. **Done when:** module builds; `canonical_box_witness` typechecks; no `sorry`.
 - **Timing:** ~1 hour
 - **Depends on:** 2a
+
+**BLOCKER** (Phase 2b):
+- **What failed**: `modal_prime_exclusion` applied to `modalDeductiveClosure Axioms W` (or any prime
+  extension of it) only secures the **box clause** of `canonicalR w v`
+  (`∀ψ, □ψ ∈ w.val → ψ ∈ v.val`, by construction of `W`). It does **not** secure the **diamond
+  clause** (`∀ψ, ψ ∈ v.val → ◇ψ ∈ w.val`), which `canonicalR`'s definition (Simpson 1994, Ch. 3,
+  p. 53: `X R Y iff {□A|A∈Y}⊆X and {◇A|A∈Y}⊆X`, i.e. box-clause AND diamond-clause) requires
+  simultaneously for the SAME pair `(w, v)`.
+- **What was tried**:
+  1. Confirmed the exact two-clause `canonicalR` definition against literature (Simpson 1994,
+     `~/Projects/Literature/simpson_1994_intuitionisticmodallogic/chunk_0223.md`, the canonical
+     birelational model `B=(W,≤,R,V)` for IK), resolving OCR ambiguity (□ vs ◇ glyphs) via
+     cross-checking against the box truth-lemma's well-known standard direction.
+  2. Analyzed the truth lemma dependency: both directions of the `.box` case and both directions of
+     the `.diamond` case require a witness world `v` satisfying the *full* `canonicalR w v` (both
+     clauses simultaneously) — there is no way to discharge either truth-lemma direction using only
+     one clause.
+  3. Identified the specific obstruction: since `v.val` is deductively closed, it always contains
+     `⊤` (`⊥→⊥`, a bare `implyK`/`implyS` theorem, `S K K`-style, independent of any world). The
+     diamond clause therefore always demands `◇⊤ ∈ w.val` as a precondition of `canonicalR w v`
+     holding for *any* `v`. `◇⊤` is not a bare `implyK`/`implyS`/`efq`/`orE` theorem, nor (as far as
+     could be established) a consequence of the reported IK axiom set (`K-□`, `K-◇`
+     (`□(A→B)→(◇A→◇B)`), `◇⊥→⊥`, `◇(A∨B)→◇A∨◇B`) without an explicit seriality-style axiom
+     (`□φ→◇φ`), which the report does not list as part of IK's base and which CK explicitly does
+     not have (CK is reported to be weaker than IK, admitting fallible/exploding worlds).
+  4. Showed `◇⊤ ∉ w.val → ∀φ, ◇φ ∉ w.val` follows from `K-◇` (instantiating `A:=φ,B:=⊤` against the
+     bare theorem `⊢φ→⊤`), i.e. a world lacking `◇⊤` lacks *every* diamond fact — consistent, but
+     does not resolve whether such a world can simultaneously have `□φ ∉ w.val` for some `φ` (which
+     is exactly the scenario `canonical_box_witness` must handle, and for which it would need to
+     produce a witness it cannot semantically produce without `◇⊤ ∈ w.val`).
+  5. Considered moving the witness to some `w' ⊋ w` (rather than `w' := w`) where `◇⊤` might hold,
+     but could not establish, from the base axioms alone, that such an extension is always
+     available whenever `□φ ∉ w.val`, nor rule out a prime theory `w` with `□φ ∉ w.val` for some
+     `φ` for which **no** extension secures `◇⊤` (which would make the birelational truth lemma
+     false as stated for such `w`, not merely hard to formalize).
+- **Why it's stuck**: this is a genuine mathematical question about the IK/CK axiomatization (not a
+  Lean tactic/API problem): whether the reported axiom set forces every prime theory with
+  `□φ ∉ w.val` (for some `φ`) to also satisfy `◇⊤ ∈ w.val`, and if not, what the correct
+  (axiom-parametric) precondition or alternative `canonicalR` formulation is. Simpson's own proof
+  of the analogous fact for **F2** (down-confluence; chunk_0223-0227) invokes "axiom 5 of IK" in a
+  multi-step, OCR-garbled derivation (ambiguous `□`/`◇`/`Q`/`O` glyphs, uncertain premise counts)
+  that could not be reconstructed with confidence sufficient for a zero-debt Lean proof.
+- **What is needed**: a literature-grounded resolution of one of:
+  (a) an explicit derivation, from IK's/CK's stated axioms, that `◇⊤` (or an equivalent
+      seriality-like fact) is always available when needed by `canonical_box_witness`/
+      `canonical_diamond_witness`/`canonical_f1`/`canonical_f2`; or
+  (b) a corrected `canonicalR` definition (still matching [Simpson1994]/[Wijesekera1990]) under
+      which the witness constructions do not require this precondition; or
+  (c) confirmation (with a cleaner, non-OCR source if available — e.g. a secondary paper
+      reproducing Simpson's Definition/Lemma 3.3.x verbatim, or Wolter & Zakharyaschev's survey of
+      IK-style canonical models) of the exact multi-step argument Simpson uses for `(F2)` (and by
+      analogy the box/diamond witnesses), so it can be transliterated faithfully.
+  Recommended: `/research 480 --hard --lit` focused narrowly on this specific question (not the
+  general "diamond witness has no classical analogue" framing from the v1/v2 plans — the finding
+  above is more precise: **whether/how the IK-◇ axiom set discharges a seriality-style precondition
+  needed by *both* witnesses**), consulting `wijesekera_1990_constructivemodallogicsi` chunks
+  around 0040-0045 (prime-filter accessibility) and any secondary IK-canonical-model source with
+  cleaner OCR/typesetting than the current `simpson_1994_intuitionisticmodallogic` scan.
+- **Prohibited workarounds**: did NOT use `sorry`, `def X := True`, or any vacuous placeholder to
+  paper over this. `CanonicalModel.lean` remains exactly as committed at Phase 2a (`4fd37213`):
+  definitions only, no witness proofs attempted in the file itself.
 
 ### Phase 2c: canonical_diamond_witness [NOT STARTED] — HIGHEST RISK
 

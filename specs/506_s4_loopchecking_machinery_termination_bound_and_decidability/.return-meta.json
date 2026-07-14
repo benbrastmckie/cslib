@@ -9,12 +9,12 @@
     "Cslib.lean"
   ],
   "partial_progress": {
-    "stage": "phase_7_starting",
-    "details": "Phases 1-6 complete; committing phase 6 now. LoopChecking.lean is 854 lines (Phases 2,5,6). Phase 6 (the mathematical heart) complete: hintikkaS4_box_pos_step/_self, hintikkaS4_dia_neg_step/_self, hintikkaS4_box_neg/hintikkaS4_diamond_pos (one-line projections), and the crux hintikkaS4_box_pos_reflTransGen/hintikkaS4_dia_neg_reflTransGen via Relation.ReflTransGen.head_induction_on. Zero sorry/axiom (propext/Classical.choice/Quot.sound only). Starting Phase 7 (modalTruthLemmaS4 + open-branch countermodel in FrameCompleteness.lean) -- the last phase of guaranteed-landable work.",
+    "stage": "phases_1_7_complete",
+    "details": "Phases 1-7 (the mandatory, guaranteed-landable work per the plan's Definition of Done) are all complete, green, and committed. This is the landing milestone: 4-rule, LoopChecking machinery, extractModelS4 + free frame instances, S4 frame vocabulary + 4-rule semantic soundness, minting guard + modalApplyOneS4 + driver + modalHintikkaSetS4, S4 Hintikka bridges + ReflTransGen path bridge, modalTruthLemmaS4 + open-branch countermodel. Zero sorry/axiom throughout (propext/Classical.choice/Quot.sound only). Now attempting Phase 8 (HIGH RISK, standing [BLOCKED] permission): the 2^|Sf| termination bound (S4LoopInv, worldSetsDistinct preservation, pigeonhole).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 6,
-    "last_completed_phase": "Phase 6: S4 Hintikka bridges and the ReflTransGen path bridge"
+    "phases_completed": 7,
+    "last_completed_phase": "Phase 7: modalTruthLemmaS4 and open-branch countermodel"
   },
   "metadata": {
     "session_id": "sess_506_impl",

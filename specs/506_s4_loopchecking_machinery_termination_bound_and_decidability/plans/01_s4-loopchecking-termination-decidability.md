@@ -496,15 +496,15 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 7: `modalTruthLemmaS4` and open-branch countermodel [NOT STARTED]
+### Phase 7: `modalTruthLemmaS4` and open-branch countermodel [COMPLETED]
 
 - **Goal**: The S4 truth lemma against `extractModelS4`, and the countermodel corollary.
   This is the last phase of guaranteed-landable work.
 - **Tasks**:
-  - [ ] Read `modalTruthLemma` (Completeness.lean:474-625) as the template. Note it is
+  - [x] Read `modalTruthLemma` (Completeness.lean:474-625) as the template. Note it is
         unusable directly: it is pinned to `extractModel` (`r := acc.hasEdge`), whereas the
         S4 model's `r` is `ReflTransGen`. This is a new induction, not a reuse.
-  - [ ] `modalTruthLemmaS4 phi0 b acc (hH : modalHintikkaSetS4 phi0 b acc) ...`: induction
+  - [x] `modalTruthLemmaS4 phi0 b acc (hH : modalHintikkaSetS4 phi0 b acc) ...`: induction
         on the formula. Reuse the **public, apply-agnostic** consistency kit verbatim —
         `openBranch_noTBot` (Completeness.lean:98) and `openBranch_noContradiction` (:113)
         depend only on `isModalClosed b = false`. Atom/bot cases reuse
@@ -512,17 +512,28 @@ this repo. Message: `task 506 phase {P}: {name}`.
         (note: these are stated for `extractModel`; check whether they transfer to
         `extractModelS4` by `rfl` — the valuation clause is preserved verbatim by
         `extractModelWith`, so they should; if not, prove the two-line analogues).
-  - [ ] Box-positive case: consume `hintikkaS4_box_pos_reflTransGen` (Phase 6) — the
+        *(deviation: altered -- the propositional cases (imp/and/or) also needed a new
+        private lemma `modalApplyOneS4_eq_of_not_modal_shaped`, chaining the three existing
+        "not-shaped" equation lemmas (`modalApplyOneS4_eq_of_not_boxNeg_diaPos`,
+        `modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg`, `modalApplyOneT_eq_of_not_boxPos_diaNeg`)
+        to show `modalApplyOneS4 φ₀ sf b acc = modalApplyOne sf b acc` for any non-box/
+        non-diamond-shaped `sf`. This is what lets K's `modalApplyOne_imp_pos` etc. bridge
+        lemmas be reused verbatim inside `modalHintikkaSetS4`'s conjunct 2. Also required
+        adding `public import Cslib.Logics.Modal.Tableau.LoopChecking` and `public import
+        Cslib.Logics.Modal.Tableau.FrameSoundness` to FrameCompleteness.lean, since the S4
+        truth lemma needs `modalHintikkaSetS4`/the bridge lemmas (LoopChecking.lean) and
+        `s4FC` (FrameSoundness.lean) in scope -- neither was previously imported here.)*
+  - [x] Box-positive case: consume `hintikkaS4_box_pos_reflTransGen` (Phase 6) — the
         model's `r w w'` unfolds by `extractModelS4_r` to exactly the `ReflTransGen`
         hypothesis the bridge wants.
-  - [ ] Box-negative / diamond-positive cases: consume `hintikkaS4_box_neg` /
+  - [x] Box-negative / diamond-positive cases: consume `hintikkaS4_box_neg` /
         `hintikkaS4_diamond_pos`, lifting the raw edge into the closure via
         `extractModelS4_hasEdge_imp_r` (Phase 3).
-  - [ ] `modalOpenBranchS4_countermodel` — mirror `modalOpenBranch_countermodel`
+  - [x] `modalOpenBranchS4_countermodel` — mirror `modalOpenBranch_countermodel`
         (Completeness.lean:627): a `modalHintikkaSetS4` containing `F(phi0)@0` yields a
         reflexive-transitive countermodel, discharging the `s4FC` witness from
         `extractModelS4_refl` + `extractModelS4_trans` (Phase 3, both free).
-  - [ ] CI gate; commit `FrameCompleteness.lean` only.
+  - [x] CI gate; commit `FrameCompleteness.lean` only.
 - **Timing**: 3 hours (~400 lines)
 - **Depends on**: 6
 - **Files to modify**: `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`.

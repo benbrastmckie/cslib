@@ -7,6 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Tableau.Completeness
+public import Cslib.Logics.Modal.Tableau.LoopChecking
+public import Cslib.Logics.Modal.Tableau.FrameSoundness
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
 
@@ -182,6 +184,225 @@ lemma extractModelS4_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) W
     (extractModelS4 b acc).r w w' := by
   rw [extractModelS4_r]
   exact Relation.ReflTransGen.single h
+
+/-! ## S4 Modal Truth Lemma -/
+
+/-- `modalApplyOneS4 φ₀` agrees with the plain K dispatch `modalApplyOne` on every
+non-modal-shaped signed formula (i.e. neither `box`- nor `diamond`-shaped, regardless of
+sign): none of the guard's two minting shapes (`F(□·)`, `T(◇·)`) or the 4-rule/T-self
+shapes (`T(□·)`, `F(◇·)`) apply, so the three-layer dispatch
+(`modalApplyOneS4` → `modalApplyOneS4Rules` → `modalApplyOneT` → `modalApplyOne`) collapses
+via `modalApplyOneS4_eq_of_not_boxNeg_diaPos`, `modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg`,
+and `modalApplyOneT_eq_of_not_boxPos_diaNeg` chained together. This is exactly what lets the
+S4 truth lemma's propositional cases (`imp`/`and`/`or`/`atom`/`bot`) reuse K's
+`modalApplyOne_imp_pos` etc. bridge lemmas verbatim. -/
+private lemma modalApplyOneS4_eq_of_not_modal_shaped
+    (φ₀ : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hnb : ∀ φ, sf.formula ≠ .box φ) (hnd : ∀ φ, sf.formula ≠ .diamond φ) :
+    modalApplyOneS4 φ₀ sf b acc = modalApplyOne sf b acc := by
+  have hguard : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+      ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+    ⟨fun ⟨_, φ, h⟩ => hnb φ h, fun ⟨_, φ, h⟩ => hnd φ h⟩
+  have hfour : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+      ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+    ⟨fun ⟨_, φ, h⟩ => hnb φ h, fun ⟨_, φ, h⟩ => hnd φ h⟩
+  rw [modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc hguard,
+    modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc hfour,
+    modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc hfour]
+
+/-- Modal Truth Lemma for S4: membership in an S4 Hintikka branch tracks satisfaction in the
+extracted reflexive-transitive Kripke model `extractModelS4 b acc`.
+
+For every formula `φ` and world `w`, `T(φ)@w ∈ b` implies `φ` is satisfied at `w` in
+`extractModelS4 b acc`, and `F(φ)@w ∈ b` implies it is not. Proof by strong induction on
+`modalComplexity φ`, mirroring `modalTruthLemma` (`Completeness.lean`): the propositional
+cases (`atom`/`bot`/`imp`/`and`/`or`) reuse the public, apply-agnostic consistency kit
+(`openBranch_noTBot`/`openBranch_noContradiction`) and K's `modalApplyOne_*` bridge lemmas
+verbatim, routed through `modalApplyOneS4_eq_of_not_modal_shaped`; the box/diamond cases
+consume the S4-specific `hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_box_neg`/
+`hintikkaS4_diamond_pos`/`hintikkaS4_dia_neg_reflTransGen` bridges (`LoopChecking.lean`),
+with the model's `r w w'` unfolding to exactly the `ReflTransGen` hypothesis those bridges
+want (`extractModelS4_r`). This is a genuinely new induction, not a reuse of
+`modalTruthLemma`: that lemma is pinned to `extractModel` (`r := acc.hasEdge`), whereas
+`extractModelS4`'s `r` is the reflexive-transitive closure -- different propositions. -/
+lemma modalTruthLemmaS4
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc) :
+    ∀ (φ : Proposition Atom) (w : WorldIndex),
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelS4 b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelS4 b acc) w φ) := by
+  suffices H : ∀ (n : Nat) (φ : Proposition Atom), modalComplexity φ = n → ∀ w,
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelS4 b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelS4 b acc) w φ) by
+    intro φ w; exact H (modalComplexity φ) φ rfl w
+  intro n
+  induction n using Nat.strongRecOn with
+  | ind n IHn =>
+    intro φ hφ w
+    have IH : ∀ (ψ : Proposition Atom), modalComplexity ψ < n → ∀ w',
+        (⟨.pos, ψ, w'⟩ ∈ b → Satisfies (extractModelS4 b acc) w' ψ) ∧
+        (⟨.neg, ψ, w'⟩ ∈ b → ¬ Satisfies (extractModelS4 b acc) w' ψ) :=
+      fun ψ hlt w' => IHn (modalComplexity ψ) hlt ψ rfl w'
+    have hHopen : isModalClosed b = false := hH.1
+    have hHrule := hH.2.1
+    cases φ with
+    | atom p =>
+      refine ⟨?_, ?_⟩
+      · intro hmem
+        simp only [Satisfies, extractModelS4, extractModelWith]
+        exact List.any_eq_true.mpr ⟨⟨.pos, .atom p, w⟩, hmem, by simp⟩
+      · intro hmem hsat
+        simp only [Satisfies, extractModelS4, extractModelWith, List.any_eq_true] at hsat
+        obtain ⟨sf, hsf_mem, hcond⟩ := hsat
+        simp only [Bool.and_eq_true] at hcond
+        obtain ⟨⟨hsign, hform⟩, hlab⟩ := hcond
+        have hsign_eq : sf.sign = .pos := eq_of_beq hsign
+        have hform_eq : sf.formula = .atom p := eq_of_beq hform
+        have hlab_eq : sf.label = w := eq_of_beq hlab
+        have hpos : (⟨.pos, .atom p, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+          convert hsf_mem using 1; rcases sf with ⟨s, f, l⟩; simp_all
+        exact openBranch_noContradiction b hHopen (.atom p) w hpos hmem
+    | bot =>
+      refine ⟨fun hmem => absurd hmem (openBranch_noTBot b hHopen w), ?_⟩
+      intro _ hsat
+      exact hsat
+    | imp a c =>
+      rcases eq_or_ne c Proposition.bot with rfl | hne
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.neg, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, a, w⟩ (by simp)
+          intro hsa
+          exact (IH a (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega)
+            w).2 hxmem hsa
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          intro hna
+          have hlt : modalComplexity a < n := by
+            rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega
+          exact hna ((IH a hlt w).1 hxmem)
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_imp hne] at hcond
+          intro hsa
+          obtain ⟨br, hbr_mem, hbr⟩ := hcond
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+          rcases hbr_mem with rfl | rfl
+          · exact absurd hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2
+              (hbr ⟨.neg, a, w⟩ (by simp)))
+          · exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1
+              (hbr ⟨.pos, c, w⟩ (by simp))
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_imp hne] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          have hymem : (⟨.neg, c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, c, w⟩ (by simp)
+          intro hsa
+          exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2 hymem
+            (hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1 hxmem))
+    | and φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_and_pos] at hcond
+        exact ⟨(IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, φ', w⟩ (by simp)),
+          (IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, ψ', w⟩ (by simp))⟩
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_and_neg] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rintro ⟨hsφ, hsψ⟩
+        rcases hbr_mem with rfl | rfl
+        · exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, φ', w⟩ (by simp)))
+        · exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, ψ', w⟩ (by simp)))
+    | or φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_or_pos] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rcases hbr_mem with rfl | rfl
+        · exact Or.inl ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, φ', w⟩ (by simp)))
+        · exact Or.inr ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, ψ', w⟩ (by simp)))
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneS4_eq_of_not_modal_shaped φ₀ _ b acc (by simp) (by simp)] at hcond
+        simp only [modalApplyOne_or_neg] at hcond
+        intro hs
+        cases hs with
+        | inl hsφ => exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, φ', w⟩ (by simp)))
+        | inr hsψ => exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, ψ', w⟩ (by simp)))
+    | box ψ =>
+      constructor
+      · intro hmem w' hr
+        have hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelS4_r b acc ▸ hr
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').1
+          (hintikkaS4_box_pos_reflTransGen φ₀ b acc hH ψ w w' hmem hpath)
+      · intro hmem hall
+        obtain ⟨w', hw', hF⟩ := hintikkaS4_box_neg φ₀ b acc hH ψ w hmem
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').2 hF
+          (hall w' (extractModelS4_hasEdge_imp_r b acc hw'))
+    | diamond ψ =>
+      constructor
+      · intro hmem
+        obtain ⟨w', hw', hT⟩ := hintikkaS4_diamond_pos φ₀ b acc hH ψ w hmem
+        exact ⟨w', extractModelS4_hasEdge_imp_r b acc hw',
+          (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').1 hT⟩
+      · intro hmem
+        rintro ⟨w', hw', hsψ⟩
+        have hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelS4_r b acc ▸ hw'
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
+          (hintikkaS4_dia_neg_reflTransGen φ₀ b acc hH ψ w w' hmem hpath) hsψ
+
+/-- An open S4 Hintikka branch with `F(φ₀)@0 ∈ b` yields a reflexive-transitive Kripke
+countermodel to `φ₀`. The extracted model `extractModelS4 b acc` falsifies `φ₀` at world
+`0`, and its relation satisfies `s4FC` "for free" (`extractModelS4_refl`/
+`extractModelS4_trans`, both discharged with no manual frame reasoning). Mirrors
+`modalOpenBranch_countermodel` (`Completeness.lean`). -/
+theorem modalOpenBranchS4_countermodel
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility)
+    (hH : modalHintikkaSetS4 φ₀ b acc)
+    (hF : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (¬ Satisfies (extractModelS4 b acc) 0 φ₀) ∧ s4FC (extractModelS4 b acc).r :=
+  ⟨(modalTruthLemmaS4 φ₀ b acc hH φ₀ 0).2 hF,
+    ⟨extractModelS4_refl b acc, extractModelS4_trans b acc⟩⟩
 
 end Cslib.Logic.Modal.Tableau
 

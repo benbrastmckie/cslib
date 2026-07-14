@@ -10,6 +10,7 @@ import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.GenericDriver
 public import Cslib.Logics.Modal.Tableau.FrameRules
 import Cslib.Logics.Modal.Tableau.Completeness
+public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 
 /-! # T-System Tableau Driver
 
@@ -849,6 +850,58 @@ theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT 
   diaNegNotExpanding := modalApplyOneT_diaNegNotExpanding
   boxNegWitness := modalApplyOneT_boxNegWitness
   diaPosWitness := modalApplyOneT_diaPosWitness
+
+/-! ## T Instantiation of the Generic Hintikka/Saturation Chain (task 510) -/
+
+/-- `modalStepBranchT` is exactly `modalStepBranchGen modalApplyOneT` -- true `rfl`, since
+`modalStepBranchT` is *defined* as that instantiation (`TDriver.lean:67-72`). Convenience bridge
+for 503. -/
+theorem modalStepBranchT_eq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalStepBranchT b e acc = modalStepBranchGen modalApplyOneT b e acc := rfl
+
+/-- `modalExpandBranchesT` is exactly `modalExpandBranchesGen modalApplyOneT` -- true `rfl`.
+Convenience bridge for 503. -/
+theorem modalExpandBranchesT_eq
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) :
+    modalExpandBranchesT branches expandedSets accs fuel =
+      modalExpandBranchesGen modalApplyOneT branches expandedSets accs fuel := rfl
+
+/-- `modalTableauT` is exactly `modalTableauGen modalApplyOneT` -- true `rfl`. Convenience bridge
+for 503. -/
+theorem modalTableauT_eq (φ : Proposition Atom) :
+    modalTableauT φ = modalTableauGen modalApplyOneT φ := rfl
+
+/-- **`modalExpandBranchesT_hintikka`** (task 510, delivering task 503 Phase 5's blocking
+lemma): the T-system instantiation of the generic top-loop Hintikka lemma
+(`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), concluding in
+`modalHintikkaSetGen modalApplyOneT bR aR`.
+
+**This is a genuine one-liner** -- direct application of `modalExpandBranchesGen_hintikka` at
+`(modalApplyOneT, modalApplyOneT_spec)`, with no T-specific proof content whatsoever. This is
+the acceptance test for the whole task: it can only typecheck as a one-liner if (a) F9/F10
+(`GenericDriver.lean`) were stated with the existentially-quantified `∃ out` payload rather than
+K's concrete `boxPropagation` shape (AC1), and (b) the crux `modalExpandBranchesGen_hintikka`
+concluded in the generic `modalHintikkaSetGen apply bR aR` rather than the concrete
+`modalHintikkaSet bR aR` (AC2). Had either upstream criterion been violated, T's own `.persistent
+(kForms ++ selfNew.filter …)` payload (`modalApplyOneT_boxPos_fst` above) could not unify with a
+K-shaped field, and this theorem would fail to elaborate -- forcing a T-specific re-derivation
+that would reproduce the exact ~850-line duplication task 510 exists to eliminate. -/
+theorem modalExpandBranchesT_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      modalExpMeasure (modalUniverse φ0) branches expandedSets ≤ fuel →
+      (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+          (ai : Accessibility),
+        branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+        ∃ rank, ModalLoopInvGen modalApplyOneT φ0 bi ei ai rank) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesT branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSetGen modalApplyOneT bR aR :=
+  modalExpandBranchesGen_hintikka modalApplyOneT modalApplyOneT_spec φ0 fuel
 
 end Cslib.Logic.Modal.Tableau
 

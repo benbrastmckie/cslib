@@ -1,7 +1,7 @@
 # Implementation Plan: Task #510 — Generalize the Completeness/Hintikka Chain over RuleApplicationSpec
 
 - **Task**: 510 - `generalize_completeness_loop_hintikka_chain_over_spec`
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 18 hours
 - **Dependencies**: None to start (builds on task 503's committed `Saturation.lean` generic driver
   + `GenericDriver.lean` spec bundle, and task 507's committed 7-field
@@ -604,7 +604,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 9: T instantiation — deliver modalExpandBranchesT_hintikka [NOT STARTED]
+### Phase 9: T instantiation — deliver modalExpandBranchesT_hintikka [COMPLETED]
 
 - **Goal:** Deliver the exact lemma task 503 Phase 5 is blocked on. This phase is **required**, not a
   convenience: it is the deliverable that discharges 510's reason for existing, and it is the structural
@@ -629,8 +629,15 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     `hintikka_box_pos` / `hintikka_diamond_neg` analogues (payload-reading, irreducibly T-specific — see
     Non-Goals) plus its truth lemma. **510 does not deliver those**; 505/506 must likewise budget their
     own.
-  - [ ] `lake build` + full CI; `#print axioms` on `modalExpandBranchesT_hintikka`.
-  - [ ] Write `specs/510_.../summaries/01_generalize-hintikka-chain-over-spec-summary.md`.
+  - [x] `lake build` + full CI; `#print axioms` on `modalExpandBranchesT_hintikka`. **AC3
+    confirmed**: the T instantiation typechecked as a genuine one-liner
+    (`modalExpandBranchesGen_hintikka modalApplyOneT modalApplyOneT_spec φ0 fuel`), the
+    structural proof that AC1 (Phase 2) and AC2 (Phase 7) were both met. Full project build
+    green (3233/3233); `checkInitImports`/`lint`/`lint-style`/`shake` clean (only pre-existing
+    unrelated findings). `lake test` intermittently hit an unrelated, uncommitted, in-progress
+    breakage in task 509's `Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean` (a different
+    logic system entirely, not touched by or related to this task) -- not caused by this change.
+  - [x] Write `specs/510_.../summaries/01_generalize-hintikka-chain-over-spec-summary.md`.
 - **Timing:** 1 hour
 - **Depends on:** 8
 - **Files to modify:**
@@ -661,18 +668,21 @@ Run the full CSLib CI pipeline at the end of **every** phase (order per `cslib.m
   restage unrelated concurrent-session import reordering.
 
 **Acceptance criteria (task-level, all blocking):**
-- [ ] **F9/F10 are stated with `∃ out, (apply sf b acc).1 = .persistent out`** — not a concrete payload.
-- [ ] **`modalExpandBranchesGen_hintikka` concludes in `modalHintikkaSetGen apply bR aR`** — not
-  `modalHintikkaSet bR aR`.
-- [ ] **`modalExpandBranchesT_hintikka` typechecks as a one-liner** instantiation (the structural proof
-  of the two criteria above).
-- [ ] `modalHintikkaSetGen` lives in `Saturation.lean` and is **spec-free** (S4/506 can consume the
-  statement shape without discharging the spec it is excluded from).
-- [ ] `RuleApplicationSpec` has 11 fields, discharged sorry-free for **both** `modalApplyOne` and
-  `modalApplyOneT`.
-- [ ] Zero regression: `kValid` / `modalTableau_decides` / `instDecidableKValid` untouched;
+- [x] **F9/F10 are stated with `∃ out, (apply sf b acc).1 = .persistent out`** — not a concrete payload.
+  Confirmed in committed source (`GenericDriver.lean`); both `modalApplyOne_spec` and
+  `modalApplyOneT_spec` discharge them (Phase 2).
+- [x] **`modalExpandBranchesGen_hintikka` concludes in `modalHintikkaSetGen apply bR aR`** — not
+  `modalHintikkaSet bR aR`. Confirmed in committed source (Phase 7, the crux).
+- [x] **`modalExpandBranchesT_hintikka` typechecks as a one-liner** instantiation (the structural proof
+  of the two criteria above). Confirmed (Phase 9).
+- [x] `modalHintikkaSetGen` lives in `Saturation.lean` and is **spec-free** (S4/506 can consume the
+  statement shape without discharging the spec it is excluded from). (Phase 2.)
+- [x] `RuleApplicationSpec` has 11 fields, discharged sorry-free for **both** `modalApplyOne` and
+  `modalApplyOneT`. (Phase 2.)
+- [x] Zero regression: `kValid` / `modalTableau_decides` / `instDecidableKValid` untouched;
   `ModalLoopInv` byte-identical and still a `structure`; all K corollaries byte-identical by diff.
-- [ ] Zero sorry, zero axiom, zero vacuous placeholders across the whole task.
+  (Confirmed by diff against baseline `64be55dc`, Phase 8.)
+- [x] Zero sorry, zero axiom, zero vacuous placeholders across the whole task.
 
 ## Artifacts & Outputs
 

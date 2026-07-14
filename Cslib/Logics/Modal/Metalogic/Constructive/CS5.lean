@@ -258,4 +258,251 @@ theorem cs5_soundness_derivable {φ : Proposition Atom}
   exact cs5_soundness d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
     (fun _ h => nomatch h)
 
+/-! ## Soundness over `cs5FC''` -/
+
+/-- **Every `CS5ModalAxiom` instance is `CKValidFC cs5FC''`** (the weakened frame condition:
+reflexivity, plain transitivity, plain symmetry, the `cs4FC'` re-basing clause, and the
+weakened ≤-composed symmetry `FCsym_box`). This is the half task 508 declared impossible. It is
+`cs5_axiom_sound`'s proof with exactly four cases changed relative to the `cs5FC` version above:
+- `fourDia` (`◇◇A → ◇A`): uses **plain** transitivity `htrans hru hut` directly (no `≤`-chaining
+  needed, since `cs5FC''`'s transitivity clause is already the plain `u' := u` form).
+- `fourBox` (`□A → □□A`): uses `hfour hru hu' hrt`, the `cs4FC'` re-basing clause, to obtain a
+  witness `v ≥ w''` at which `□A@w'` (quantified over all `z ≥ w'`) still discharges `A@t`.
+- `bDia` (`◇□A → A`): uses **plain** symmetry `hsymm hru` directly (no `le_refl` padding needed).
+- `bBox` (`A → □◇A`): uses `hsymbox hru hu'`, the weakened ≤-composed symmetry, to obtain a
+  witness `t` with `w'' ≤ t`; `A@t` follows from `A@w'` by persistence along `w'' ≤ t`.
+The other 13 cases are verbatim from `cs5_axiom_sound`. Transcribed from
+`probes/cs5-symmetry-probe.lean` (verified, axiom-free). -/
+theorem cs5_axiom_sound'' {φ : Proposition Atom} (h_ax : CS5ModalAxiom φ) :
+    CKValidFC.{u, v} cs5FC'' φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨hrefl, htrans, hsymm, hfour, hsymbox⟩ := hfc
+  cases h_ax with
+  | implyK φ ψ =>
+    intro w' _ hφ w'' hw' _
+    exact ckforces_persistence v_uc bf_uc hw' hφ
+  | implyS φ ψ χ =>
+    intro w₁ hw₁ h_pqr w₂ hw₂ h_pq w₃ hw₃ h_p
+    have h₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pqr w₃ h₁₃ h_p w₃ (le_refl w₃) (h_pq w₃ hw₃ h_p)
+  | efq φ =>
+    intro w' _ hbot
+    exact ckforces_of_exploding bf_uc bf_val bf_r bf_r_wit hbot φ
+  | andI φ ψ =>
+    intro w₁ _ hφ w₂ hw₂ hψ
+    exact ⟨ckforces_persistence v_uc bf_uc hw₂ hφ, hψ⟩
+  | andE1 φ ψ => intro _ _ h; exact h.1
+  | andE2 φ ψ => intro _ _ h; exact h.2
+  | orI1 φ ψ => intro _ _ h; exact Or.inl h
+  | orI2 φ ψ => intro _ _ h; exact Or.inr h
+  | orE φ ψ χ =>
+    intro w₁ _ h_pq w₂ hw₂ h_rq w₃ hw₃ h_pr
+    have hw₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pr.elim (fun hp => h_pq w₃ hw₁₃ hp) (fun hr => h_rq w₃ hw₃ hr)
+  | k φ ψ =>
+    intro w' _ hbox_imp w'' hw' hbox_phi w1 hw1 u hru
+    exact hbox_imp w1 (le_trans hw' hw1) u hru u (le_refl u) (hbox_phi w1 hw1 u hru)
+  | kdia φ ψ =>
+    intro w' _ hbox_imp w'' hw' hdia_phi w₃ hw₃
+    obtain ⟨u, hru, hφu⟩ := hdia_phi w₃ hw₃
+    exact ⟨u, hru, hbox_imp w₃ (le_trans hw' hw₃) u hru u (le_refl u) hφu⟩
+  | tBox φ =>
+    intro w' _ hbox
+    exact hbox w' (le_refl w') w' (hrefl w')
+  | tDia φ =>
+    intro w' _ hφ w'' hw''
+    exact ⟨w'', hrefl w'', ckforces_persistence v_uc bf_uc hw'' hφ⟩
+  | fourDia φ =>
+    intro w' _ hdidia w'' hw''
+    obtain ⟨u, hru, hdia_u⟩ := hdidia w'' hw''
+    obtain ⟨t, hut, hφt⟩ := hdia_u u (le_refl u)
+    exact ⟨t, htrans hru hut, hφt⟩
+  | fourBox φ =>
+    intro w' _ hbox w'' hw'' u hru u' hu' t hrt
+    obtain ⟨v, hwv, hrvt⟩ := hfour hru hu' hrt
+    exact hbox v (le_trans hw'' hwv) t hrvt
+  | bDia φ =>
+    intro w' _ hdia
+    obtain ⟨u, hru, hboxA⟩ := hdia w' (le_refl w')
+    exact hboxA u (le_refl u) w' (hsymm hru)
+  | bBox φ =>
+    intro w' _ hφ w'' hw'' u hru u' hu'
+    obtain ⟨t, hru't, hw''t⟩ := hsymbox hru hu'
+    exact ⟨t, hru't, ckforces_persistence v_uc bf_uc (le_trans hw'' hw''t) hφ⟩
+
+/-- **Soundness over `cs5FC''`**: if `DerivationTree CS5ModalAxiom Γ φ`, then in any
+fallible-world model whose modal relation satisfies `cs5FC''`, at any world `w` where all
+formulas in `Γ` are forced, `φ` is also forced. Structural analogue of `cs5_soundness`,
+threading `hfc` through unused except at the `.ax` case. -/
+theorem cs5_soundness''
+    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (d : DerivationTree CS5ModalAxiom Γ φ)
+    {World : Type v} [Preorder World]
+    (r : World → World → Prop) (hfc : cs5FC'' r)
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_val : ∀ {w : World} (p : Atom), botForces w → val w p)
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    (bf_r_wit : ∀ {w : World}, botForces w → ∃ u, r w u ∧ botForces u)
+    (w : World)
+    (h_ctx : ∀ ψ, ψ ∈ Γ → CKForces r val botForces w ψ) :
+    CKForces r val botForces w φ := by
+  match d with
+  | .ax _ ψ h_ax =>
+    exact cs5_axiom_sound'' h_ax World r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  | .assumption _ ψ h_mem =>
+    exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    exact cs5_soundness'' d₁ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx
+      w (le_refl w)
+      (cs5_soundness'' d₂ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx)
+  | .necessitation ψ d' =>
+    intro w' _hle u _hru
+    exact cs5_soundness'' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit u
+      (fun _ h => nomatch h)
+  | .weakening Γ' Δ ψ d' h_sub =>
+    exact cs5_soundness'' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+      (fun x hx => h_ctx x (h_sub x hx))
+
+/-- **Soundness for derivable formulas over `cs5FC''`**: if `Derivable CS5ModalAxiom φ`, then
+`φ` is `CKValidFC cs5FC''`. -/
+theorem cs5_soundness_derivable'' {φ : Proposition Atom}
+    (h : Derivable CS5ModalAxiom φ) : CKValidFC.{u, v} cs5FC'' φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨d⟩ := h
+  exact cs5_soundness'' d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+    (fun _ h => nomatch h)
+
+/-! ## The Disjunction-of-Boxes Identity -/
+
+/-- `⊢ □B → □(B ∨ B')` — necessitation + `Kb` on `orI1`. Private helper for
+`or_box_imp_box_or`. -/
+private def box_mono_or_left (B B' : Proposition Atom) :
+    DerivationTree (@CS5ModalAxiom Atom) []
+      ((Proposition.box B).imp (Proposition.box (B.or B'))) :=
+  .modus_ponens _ _ _ (.ax [] _ (.k B (B.or B')))
+    (.necessitation _ (.ax [] _ (.orI1 B B')))
+
+/-- `⊢ □B' → □(B ∨ B')` — necessitation + `Kb` on `orI2`. Private helper for
+`or_box_imp_box_or`. -/
+private def box_mono_or_right (B B' : Proposition Atom) :
+    DerivationTree (@CS5ModalAxiom Atom) []
+      ((Proposition.box B').imp (Proposition.box (B.or B'))) :=
+  .modus_ponens _ _ _ (.ax [] _ (.k B' (B.or B')))
+    (.necessitation _ (.ax [] _ (.orI2 B B')))
+
+/-- **`⊢ (□B ∨ □B') → □(B ∨ B')`** — a *disjunction of boxes* implies the *box of the
+disjunction*. Pure `CK` (necessitation + `Kb` + `orI`/`orE`); no `T`/`4`/`B`. This is the
+identity that lets an n-ary `DerivExcludes` side condition against an exclusion set of *boxes*
+`E := {□B | B ∉ H}` be collapsed to the single formula `□(⋁Bᵢ)` for `prime_set_exclusion`
+(Phase 6). It is exactly the step task 508 §4(c) believed was unavailable: that section rejected
+simultaneous exclusion because `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in bare `CK`, but
+irrelevant here, since the exclusion set in this construction is a set of **boxes**, not
+diamonds, and boxes distribute the right way. Transcribed from `probes/cs5-canonical-probe.lean`
+(verified, axiom-free). -/
+private def or_box_box_or (B B' : Proposition Atom) :
+    DerivationTree (@CS5ModalAxiom Atom) []
+      (((Proposition.box B).or (Proposition.box B')).imp (Proposition.box (B.or B'))) :=
+  .modus_ponens _ _ _
+    (.modus_ponens _ _ _ (.ax [] _ (.orE (Proposition.box B) (Proposition.box B')
+      (Proposition.box (B.or B')))) (box_mono_or_left B B'))
+    (box_mono_or_right B B')
+
+theorem or_box_imp_box_or (B B' : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((Proposition.box B).or (Proposition.box B')).imp (Proposition.box (B.or B'))) :=
+  ⟨or_box_box_or B B'⟩
+
+/-- **`⊢ ◇(□B ∨ □B') → (B ∨ B')`** in `CS5`. Chain: `or_box_imp_box_or` under `◇` (necessitation
++ `Kd`), then `bDia` at `B ∨ B'`. Together with primality of a head `H`, this discharges the
+`DerivExcludes` precondition of `prime_set_exclusion` against `E := {□B | B ∉ H}` (Phase 6): if
+`◇(⋁□Bᵢ) ∈ H` then `⋁Bᵢ ∈ H`, so some `Bᵢ ∈ H` — contradicting `Bᵢ ∉ H`. Transcribed from
+`probes/cs5-canonical-probe.lean` (verified, axiom-free). -/
+theorem dia_or_box_imp_or (B B' : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((◇((Proposition.box B).or (Proposition.box B'))).imp (B.or B')) := by
+  obtain ⟨d4⟩ := or_box_imp_box_or B B'
+  have hkd : DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇((Proposition.box B).or (Proposition.box B'))).imp
+        (◇(Proposition.box (B.or B')))) :=
+    .modus_ponens _ _ _
+      (.ax [] _ (.kdia ((Proposition.box B).or (Proposition.box B'))
+        (Proposition.box (B.or B'))))
+      (.necessitation _ d4)
+  have hbd : DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇(Proposition.box (B.or B'))).imp (B.or B')) := .ax [] _ (.bDia (B.or B'))
+  let X := ◇((Proposition.box B).or (Proposition.box B'))
+  have hctx : DerivationTree (@CS5ModalAxiom Atom) [X] (B.or B') := by
+    have a0 : DerivationTree (@CS5ModalAxiom Atom) [X] X :=
+      .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+    exact .modus_ponens _ _ _ (.weakening [] [X] _ hbd (fun _ h => nomatch h))
+      (.modus_ponens _ _ _ (.weakening [] [X] _ hkd (fun _ h => nomatch h)) a0)
+  exact ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) []
+    X (B.or B') hctx⟩
+
+/-! ## `k3`: CS5 Derives Diamond-Distributes-over-Disjunction -/
+
+/-- Chain two empty-context implications. Private helper for `cs5_dia_or`. -/
+private noncomputable def cs5_impTrans {a b c : Proposition Atom}
+    (h1 : DerivationTree (@CS5ModalAxiom Atom) [] (a.imp b))
+    (h2 : DerivationTree (@CS5ModalAxiom Atom) [] (b.imp c)) :
+    DerivationTree (@CS5ModalAxiom Atom) [] (a.imp c) :=
+  deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) [] a c
+    (.modus_ponens _ _ _ (.weakening [] [a] _ h2 (fun _ h => nomatch h))
+      (.modus_ponens _ _ _ (.weakening [] [a] _ h1 (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))))
+
+/-- **`CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B`** — the `k3`/`Cd` axiom that bare `CK` deliberately lacks.
+Arisaka–Das–Straßburger (`ArisakaDasStrassburger2015`) report that the `B` axioms entail `k3`
+and `k5` (`◇⊥ → ⊥`, task 508's `cs5_dia_bot_imp_bot`) — the very two axioms `CK` drops. This
+matters beyond the derivation itself: task 508 §4(c) rejected simultaneous Lindenbaum exclusion
+on the ground that `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in `CK`/`CT`/`CS4`, **false in
+`CS5`**, so that impossibility argument never applied to `CS5` at all.
+
+Derivation: `bBox` on each disjunct, then `or_box_imp_box_or`, then necessitation + `Kd`, then
+`bDia`. Transcribed from `probes/cs5-k3-probe.lean` (verified, axiom-free). -/
+theorem cs5_dia_or (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) ((◇(A.or B)).imp ((◇A).or (◇B))) := by
+  have hA : DerivationTree (@CS5ModalAxiom Atom) []
+      (A.imp ((Proposition.box (◇A)).or (Proposition.box (◇B)))) :=
+    cs5_impTrans (.ax [] _ (.bBox A)) (.ax [] _ (.orI1 (Proposition.box (◇A))
+      (Proposition.box (◇B))))
+  have hB : DerivationTree (@CS5ModalAxiom Atom) []
+      (B.imp ((Proposition.box (◇A)).or (Proposition.box (◇B)))) :=
+    cs5_impTrans (.ax [] _ (.bBox B)) (.ax [] _ (.orI2 (Proposition.box (◇A))
+      (Proposition.box (◇B))))
+  have h1 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((A.or B).imp ((Proposition.box (◇A)).or (Proposition.box (◇B)))) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.ax [] _ (.orE A B ((Proposition.box (◇A)).or (Proposition.box (◇B))))) hA) hB
+  have h2 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((A.or B).imp (Proposition.box ((◇A).or (◇B)))) :=
+    cs5_impTrans h1 (or_box_box_or (◇A) (◇B))
+  have h3 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇(A.or B)).imp (◇(Proposition.box ((◇A).or (◇B))))) :=
+    .modus_ponens _ _ _
+      (.ax [] _ (.kdia (A.or B) (Proposition.box ((◇A).or (◇B)))))
+      (.necessitation _ h2)
+  exact ⟨cs5_impTrans h3 (.ax [] _ (.bDia ((◇A).or (◇B))))⟩
+
+/-! ## The Box-Inverse / Diamond-Inverse Identity -/
+
+/-- **`boxInv T ⊆ H ↔ T ⊆ diaInv H`** for quasi-prime `H`, `T`. `→` is `bBox`; `←` is `bDia`.
+Pacheco (`Pacheco2024`, chunk `01990319adea2569`) defines the `CKB` canonical relation as
+`Γ ∼c ∆ iff Γ□ ⊆ ∆ and ∆ ⊆ Γ♦` — a **diamond**-inverse containment on the right, where the
+symmetric tail (Phase 5) uses a **box**-inverse containment (`boxInv t ⊆ H`). This lemma shows
+the two are the *same relation* over `CS5`: `cs5Tail H = {t | QuasiPrime t ∧ boxInv H ⊆ t ∧
+boxInv t ⊆ H}` and Pacheco's `∼c` coincide, and his Lemma 15 ("`∼c` is symmetric") is `cs5Tail`'s
+definitional symmetry with the equivalence inlined. Transcribed from `probes/cs5-tail-probe.lean`
+(verified, axiom-free). `diaInv` is defined at `Segment.lean:106`. -/
+theorem cs5_boxInv_subset_iff {H T : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (hT : QuasiPrime (@CS5ModalAxiom Atom) T) :
+    boxInv T ⊆ H ↔ T ⊆ diaInv H := by
+  constructor
+  · intro h A hA
+    exact h (mem_head_mp hT.closed (mem_of_axiom hT.closed (CS5ModalAxiom.bBox A)) hA)
+  · intro h B hB
+    exact mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.bDia B)) (h hB)
+
 end Cslib.Logic.Modal

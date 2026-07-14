@@ -1,11 +1,15 @@
 {
   "status": "in_progress",
   "started_at": "2026-07-14T00:00:00Z",
-  "artifacts": [],
+  "artifacts": [
+    "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/CT.lean"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, plan and reference files read (Forcing, Segment, SegmentLindenbaum, CKTruthLemma, CK, Extension, IS5)",
-    "phases_completed": 0
+    "stage": "phase_4_in_progress",
+    "details": "Phases 1-3 complete and committed (CKExtension scaffold, CT axioms+soundness, CT world subtype+completeness). Beginning CS4.",
+    "phases_completed": 3,
+    "last_completed_phase": "Phase 3: CT world subtype + completeness"
   },
   "metadata": {
     "session_id": "sess_1784044271_09e821_501",

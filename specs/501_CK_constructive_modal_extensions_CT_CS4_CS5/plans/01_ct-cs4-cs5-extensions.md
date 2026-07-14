@@ -160,7 +160,7 @@ skeleton, and the segment `axiom_mem` analogue. No axioms/soundness yet.
 - `CKValid = CKValidFC (fun _ => True)` checks (definitional or one-line proof).
 - `lean_diagnostic_messages` on the file shows no issues; docstrings present (no docBlame).
 
-### Phase 2: CT axioms + soundness [IN PROGRESS]
+### Phase 2: CT axioms + soundness [COMPLETED]
 
 **Goal**: Define `CTModalAxiom` and prove soundness over `CKForces` for the two new T cases.
 
@@ -192,7 +192,7 @@ skeleton, and the segment `axiom_mem` analogue. No axioms/soundness yet.
   report D3.3 (verify goal states with `lean_goal` if needed).
 - Zero errors/warnings/`sorry`; docstrings present.
 
-### Phase 3: CT world subtype + completeness [NOT STARTED]
+### Phase 3: CT world subtype + completeness [COMPLETED]
 
 **Goal**: Build the CT canonical model over a restricted world subtype carrying the T-invariant,
 transport the truth lemma, and prove completeness/consistency/biconditional.
@@ -230,7 +230,7 @@ transport the truth lemma, and prove completeness/consistency/biconditional.
 - `lake build …Constructive.CT` green; `ct_soundness_completeness` type-checks as a biconditional.
 - Zero errors/warnings/`sorry`; no deprecated-API warnings; docstrings present.
 
-### Phase 4: CS4 axioms + soundness [NOT STARTED]
+### Phase 4: CS4 axioms + soundness [IN PROGRESS]
 
 **Goal**: Define `CS4ModalAxiom` and prove soundness over `CKForces` for the two new 4 cases,
 using ≤-composed transitivity for the box-form.

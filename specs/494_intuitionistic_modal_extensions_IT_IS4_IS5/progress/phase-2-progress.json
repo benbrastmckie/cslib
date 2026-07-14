@@ -1,0 +1,38 @@
+{
+  "phase": 2,
+  "phase_name": "IT.lean (reflexive; □A→A, A→◇A)",
+  "status": "completed",
+  "objectives": [
+    {"item": "Create IT.lean with import Cslib.Init + Extension import", "done": true},
+    {"item": "Define ITModalAxiom (14 IK constructors + tBox + tDia)", "done": true},
+    {"item": "Prove it_axiom_sound (extends ik_axiom_sound cases + tBox/tDia)", "done": true},
+    {"item": "Prove it_canonical_reflexive (positive, via axiom_mem + canonical_imp_property)", "done": true},
+    {"item": "Prove it_completeness via ivalidFC_completeness instantiation", "done": true},
+    {"item": "Prove it_consistent (trivial reflexive one-point frame on ℕ)", "done": true},
+    {"item": "Prove it_soundness_completeness biconditional", "done": true},
+    {"item": "Register IT.lean in Cslib.lean barrel", "done": true},
+    {"item": "lake build scoped: zero sorry, zero warnings", "done": true}
+  ],
+  "deviations": [
+    {
+      "what": "Frame condition named itFC (local def, ∀ w, r w w) instead of Mathlib Reflexive",
+      "why": "Reflexive is @[deprecated] in the pinned Mathlib version (superseded by Std.Refl, a typeclass shape mismatched to IValidFC's bare-predicate FC parameter); using the deprecated name would emit a warning per use site, violating zero-warnings gate",
+      "precedent": "mirrors classical Systems/T/Completeness.lean's own local tFC convention",
+      "semantic_change": false
+    }
+  ],
+  "verification": {
+    "build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.IT -- succeeded, 600/600 jobs, no warnings",
+    "checkInitImports": "passed (no output)",
+    "sorry_count": 0,
+    "lean_verify": {
+      "it_axiom_sound": {"axioms": [], "warnings": []},
+      "it_canonical_reflexive": {"axioms": ["propext"], "warnings": []},
+      "it_consistent": {"axioms": [], "warnings": []},
+      "it_soundness_completeness": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "warnings": []}
+    },
+    "git_diff_scope": ["Cslib.lean (+1 import line)", "Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean (new)"],
+    "task_480_492_extension_files_touched": false
+  },
+  "next_action_hint": "Phase 3 (IS4.lean): reflexive+transitive frame class, fourBox/fourDia axioms, canonical transitivity closure via nested import of IT.lean."
+}

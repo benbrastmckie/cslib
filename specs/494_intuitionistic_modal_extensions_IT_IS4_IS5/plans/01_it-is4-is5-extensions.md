@@ -139,24 +139,35 @@ Phases are strictly sequential: each file's nested imports depend on the prior f
   - No `sorry`/`axiom`/vacuous def (`grep -n "sorry\|:= True\|:= trivial"` clean; `lean_verify`).
   - `IValid` and IK definitions unchanged (`git diff` touches only new file + barrel).
 
-### Phase 2: IT.lean (reflexive; □A→A, A→◇A) [NOT STARTED]
+### Phase 2: IT.lean (reflexive; □A→A, A→◇A) [COMPLETED]
 
 - **Goal:** Instantiate the scaffold at IT: reflexive frame class, sound + complete.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean`
+  - [x] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean`
         (`import Cslib.Init`; `public import ...Intuitionistic.Extension`).
-  - [ ] Define `ITModalAxiom : Proposition Atom → Prop` = the 14 `IKModalAxiom` constructors
+  - [x] Define `ITModalAxiom : Proposition Atom → Prop` = the 14 `IKModalAxiom` constructors
         verbatim plus `tBox (φ) : (□φ).imp φ` and `tDia (φ) : φ.imp (◇φ)` (report Deliverable 1).
-  - [ ] Prove `it_axiom_sound` extending `ik_axiom_sound`'s `cases` with the reflexive frame
-        condition as hypothesis, via `IValidFC Reflexive`: `tDia` (EASY, persistence witness);
-        `tBox` (EASY, `hbox w' le_refl w' (hrefl w')`). Reuse the 14 IK cases verbatim.
-  - [ ] Prove canonical reflexivity `canonicalReflexive : Reflexive (@canonicalR Atom ITModalAxiom)`
-        i.e. `canonicalR w w`: box clause via `axiom_mem (tBox φ)` + `canonical_imp_property`;
+  - [x] Prove `it_axiom_sound` extending `ik_axiom_sound`'s `cases` with the reflexive frame
+        condition as hypothesis, via `IValidFC itFC`: `tDia` (EASY, direct witness at `w'` via
+        `hrefl w'` -- no persistence needed, since the single `imp`-unfold already delivers `φ`
+        forced at the target world itself); `tBox` (EASY, `hbox w' le_refl w' (hrefl w')`).
+        Reuse the 14 IK cases verbatim.
+  - [x] Prove canonical reflexivity `it_canonical_reflexive : itFC (@canonicalR Atom ITModalAxiom)`
+        i.e. `∀ w, canonicalR w w`: box clause via `axiom_mem (tBox φ)` + `canonical_imp_property`;
         dia clause via `axiom_mem (tDia φ)` + `canonical_imp_property` (report Deliverable 4).
-  - [ ] Prove `it_completeness` = `ivalidFC_completeness` instantiated with `canonicalReflexive`
-        as `h_canonFC`; add `it_consistent` (mirror `ik_consistent`, trivial reflexive one-point
-        frame) and `it_soundness_completeness`.
-  - [ ] `lake build` scoped; zero-sorry verify; barrel register.
+        **Deviation from plan**: named the frame condition `itFC` (locally defined,
+        `∀ w, r w w`) rather than Mathlib's `Reflexive`, because `Reflexive` is
+        `@[deprecated]` in the Mathlib version pinned by this project (superseded by the
+        typeclass `Std.Refl`, whose shape does not match `IValidFC`'s bare-predicate `FC`
+        parameter) -- using the deprecated name would emit a warning at every use site,
+        violating the zero-warnings build gate. `itFC` mirrors the classical
+        `Systems/T/Completeness.lean` file's own local `tFC` convention: same semantic content
+        (`∀ w, r w w`), no design change, only a naming substitution forced by the pinned
+        Mathlib version.
+  - [x] Prove `it_completeness` = `ivalidFC_completeness` instantiated with
+        `it_canonical_reflexive` as `h_canonFC`; add `it_consistent` (mirror `ik_consistent`,
+        trivial reflexive one-point frame on `ℕ`) and `it_soundness_completeness`.
+  - [x] `lake build` scoped; zero-sorry verify; barrel register.
 - **Timing:** 2 hours
 - **Depends on:** 1
 - **Files to modify:**
@@ -164,7 +175,7 @@ Phases are strictly sequential: each file's nested imports depend on the prior f
   - `Cslib.lean` (barrel)
 - **Verification:**
   - `lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.IT` succeeds.
-  - `it_soundness_completeness : IValidFC Reflexive φ ↔ Derivable ITModalAxiom φ` type-checks.
+  - `it_soundness_completeness : IValidFC itFC φ ↔ Derivable ITModalAxiom φ` type-checks.
   - Zero `sorry`/`axiom`/vacuous def.
 
 ### Phase 3: IS4.lean (reflexive+transitive; □A→□□A, ◇◇A→◇A) [NOT STARTED]

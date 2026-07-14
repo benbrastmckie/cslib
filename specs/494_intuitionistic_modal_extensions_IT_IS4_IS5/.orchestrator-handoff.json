@@ -1,12 +1,12 @@
 {
   "task_number": 494,
   "status": "implemented",
-  "phase": "1",
+  "phase": "2",
   "agent_type": "cslib-implementation-hard-agent",
   "session_id": "sess_1784011298_752245_494",
   "plan_path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md",
-  "summary": "Phase 1 complete: created Cslib/Logics/Modal/Metalogic/Intuitionistic/Extension.lean with IValidFC (frame-condition-parametrized birelational validity), ivalidFC_completeness (~2-line generalization of ivalid_completeness threading h_canonFC : FC canonicalR into the h_valid application), and axiom_mem (one-line canonical-prime-world axiom-membership helper). Registered in Cslib.lean barrel (verified alphabetically correct via lake exe mk_all --module, 1-line diff only). Zero churn to task-480/492 files (canonicalR, canonical_f1/f2, canonicalBModel, canonical_imp_property, modal_prime_exclusion, IValid, IK.lean all untouched -- confirmed via git diff).",
-  "phases_completed": 1,
+  "summary": "Phase 2 complete: created Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean instantiating the Phase 1 scaffold at IT = IK + reflexivity. ITModalAxiom extends IKModalAxiom's 14 constructors with tBox (□A→A) and tDia (A→◇A). it_axiom_sound extends ik_axiom_sound's 14 cases verbatim plus the two new T cases (tBox: hbox w' le_refl w' (hrefl w'); tDia: direct witness ⟨w', hrefl w', hφ⟩, no persistence needed). it_canonical_reflexive proves itFC (@canonicalR Atom ITModalAxiom) fully positively (axiom_mem + canonical_imp_property, no by_contra/negation). it_completeness/it_consistent/it_soundness_completeness instantiate ivalidFC_completeness with it_canonical_reflexive as h_canonFC. Zero sorry, zero new axioms beyond propext/Classical.choice/Quot.sound, zero build warnings. Task-480/492/Phase-1-Extension files untouched (git diff confirms only Cslib.lean +1 import line and the new IT.lean file).",
+  "phases_completed": 2,
   "phases_total": 4,
   "sorry_inventory": [],
   "blockers": [],
@@ -18,13 +18,27 @@
     "axiom_count_new": 0,
     "axioms_used": ["propext", "Classical.choice", "Quot.sound"],
     "checkInitImports_passed": true,
-    "mk_all_diff": "1 insertion (Extension.lean import line, already present from manual insert)",
+    "lean_verify": {
+      "it_axiom_sound": {"axioms": [], "warnings": []},
+      "it_canonical_reflexive": {"axioms": ["propext"], "warnings": []},
+      "it_consistent": {"axioms": [], "warnings": []},
+      "it_soundness_completeness": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "warnings": []}
+    },
     "zero_churn_verified": true
   },
-  "reuse_unchanged": ["canonicalR", "canonical_f1", "canonical_f2", "canonicalBModel", "canonical_imp_property", "modal_prime_exclusion", "IValid", "canonicalVal", "canonical_truth_lemma", "modalDeductiveClosure", "modal_deriv_from_closure_to_S"],
-  "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/Extension.lean", "type": "lean", "summary": "IValidFC + ivalidFC_completeness + axiom_mem scaffold"},
-    {"path": "Cslib.lean", "type": "barrel", "summary": "Registered Extension.lean import, alphabetical slot between Completeness and IK"}
+  "deviations": [
+    {
+      "what": "Frame condition named itFC (local def, ∀ w, r w w) instead of Mathlib's Reflexive",
+      "why": "Reflexive is @[deprecated] in the pinned Mathlib version (superseded by Std.Refl, a typeclass whose shape does not match IValidFC's bare-predicate FC parameter); using the deprecated name would emit a build warning at every use site, violating the zero-warnings gate. itFC mirrors the classical Systems/T/Completeness.lean file's own local tFC convention -- same semantic content, no design change."
+    }
   ],
-  "next_action_hint": "Run /implement 494 to execute Phase 2 (IT.lean: reflexive frame condition, ITModalAxiom = IK + tBox + tDia, it_axiom_sound, canonical reflexivity via axiom_mem(tBox)/axiom_mem(tDia) + canonical_imp_property, it_completeness via ivalidFC_completeness, it_consistent, it_soundness_completeness). Depends only on this Phase 1 scaffold."
+  "reuse_unchanged": ["canonicalR", "canonical_f1", "canonical_f2", "canonicalBModel", "canonical_imp_property", "modal_prime_exclusion", "IValid", "IValidFC", "ivalidFC_completeness", "axiom_mem", "IKModalAxiom", "ik_axiom_sound"],
+  "artifacts": [
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean", "type": "lean", "summary": "ITModalAxiom, itFC, it_axiom_sound, it_soundness, it_soundness_derivable, it_canonical_reflexive, it_completeness, it_consistent, it_soundness_completeness"},
+    {"path": "Cslib.lean", "type": "barrel", "summary": "Registered IT.lean import, alphabetical slot between IK and PrimeTheory"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md", "type": "plan", "summary": "Phase 2 marked [COMPLETED], checklist checked, deviation documented"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/progress/phase-2-progress.json", "type": "progress", "summary": "Phase 2 objective-by-objective completion record"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/summaries/02_it-lean-phase2-summary.md", "type": "summary", "summary": "Phase 2 execution summary"}
+  ],
+  "next_action_hint": "Run /implement 494 to execute Phase 3 (IS4.lean: reflexive+transitive frame condition, IS4ModalAxiom = IT + fourBox/fourDia, is4_axiom_sound (fourDia easy; fourBox needs F2 relocation mirroring IK's idb case), canonical transitivity via axiom_mem(fourBox)/axiom_mem(fourDia) chained through canonicalR's box/dia clauses, is4_completeness via ivalidFC_completeness with a reflexive∧transitive bundle, is4_consistent, is4_soundness_completeness). Depends on this Phase 2 IT.lean file."
 }

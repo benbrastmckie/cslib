@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "task_number": 507,
+  "status": "planned",
+  "phase": "plan",
+  "agent_type": "planner-agent",
+  "artifact_path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/plans/01_generalize-fmp-termination-measure.md",
+  "artifact_number": 1,
+  "plan_metadata": {
+    "phases": 8,
+    "total_effort_hours": 14,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1],[2],[3],[4],[5],[6],[7],[8]],
+    "reports_integrated": [
+      {
+        "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-07-14"
+      }
+    ]
+  },
+  "crux_phase": 5,
+  "blocked_fallback_phases": [5],
+  "files_in_scope": [
+    "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FmpMeasure.lean"
+  ],
+  "files_read_only": [
+    "Cslib/Logics/Modal/Tableau/Saturation.lean",
+    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
+  ],
+  "next_steps": "Run /implement 507 to execute the plan (start Phase 1: extend RuleApplicationSpec).",
+  "do_not_implement": true
+}

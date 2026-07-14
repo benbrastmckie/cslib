@@ -1053,6 +1053,152 @@ private lemma hasEdge_addEdge_cases_local {acc : Accessibility} {w w' a a' : Wor
   · exact Or.inl ⟨hw.symm, hw'.symm⟩
   · exact Or.inr h
 
+/-- **Task 507 (generic per-call rank-step obligation)**: the single-call rank-preservation fact
+`modalStepBranch_exists_rank'`'s proof needs about `modalApplyOne` at each firing, extracted as
+its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only inspects the
+four `RuleResult` constructor shapes) can be replayed for an abstract `apply` given this fact as
+a `RuleApplicationSpec` field (`rankStep`, `GenericDriver.lean`). Witnesses `rank'`, agreeing with
+`rank` off the fresh point `modalNextWorld b`, satisfying the rank-edge invariant on
+`(modalApplyOne sf b acc).snd` and the rank-bound on `(modalApplyOne sf b acc).fst`'s output. -/
+lemma modalApplyOne_rank_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hInv : accFreshInv b acc)
+    (rank : WorldIndex → Nat)
+    (hbound : ∀ x ∈ b, modalDepth x.formula ≤ rank x.label)
+    (hedge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+      (∀ w w', (modalApplyOne sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+      (match (modalApplyOne sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+        | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+        | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+        | .notApplicable => True) := by
+  have hsfd : modalDepth sf.formula ≤ rank sf.label := hbound sf hsfmem
+  have hprop := modalApplyOne_prop_outputs_subset sf
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true]
+    refine ⟨rank, fun _ _ => rfl, hedge, ?_⟩
+    rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      formulas | branches | formulas | -
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
+    · rw [hpr] at hpa
+      simp [RuleResult.isApplicable] at hpa
+  · rw [if_neg hpa]
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · -- box φ (boxPos): propagates to *existing* successors.
+        dsimp only
+        by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+        · simp only [if_pos hemp]
+          exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · simp only [if_neg hemp]
+          have hψbox : (⟨.pos, Proposition.box φ, l⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
+          exact ⟨rank, fun _ _ => rfl, hedge,
+            boxPos_rank_bound b acc φ l rank hbound hedge hψbox⟩
+      · -- diamond φ (diamondPos): mints a fresh world (task 441: native constructor).
+        dsimp only
+        have hllt : l < modalNextWorld b :=
+          Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
+        have hsfd' : 1 + modalDepth φ ≤ rank l := by
+          have h := hsfd
+          simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
+          omega
+        refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
+          fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
+        · intro w w' hw'
+          rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
+          · rw [Function.update_self, Function.update_of_ne hllt.ne]
+            omega
+          · rw [Function.update_of_ne (hInv w w' hold).1.ne,
+                Function.update_of_ne (hInv w w' hold).2.ne]
+            exact hedge w w' hold
+        · intro x hx
+          simp only [List.mem_cons, List.mem_append] at hx
+          rcases hx with (rfl | hx) | hx
+          · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
+            omega
+          · obtain ⟨hxlab, hxdep⟩ :=
+              boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+            rw [hxlab, Function.update_self]
+            exact hxdep
+          · obtain ⟨hxlab, hxdep⟩ :=
+              diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+            rw [hxlab, Function.update_self]
+            exact hxdep
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+      · -- box φ (boxNeg): mints a fresh world, symmetric to diamondPos above.
+        dsimp only
+        have hllt : l < modalNextWorld b :=
+                  Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
+        have hsfd' : 1 + modalDepth φ ≤ rank l := by
+          have h := hsfd
+          simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
+          omega
+        refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
+          fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
+        · intro w w' hw'
+          rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
+          · rw [Function.update_self, Function.update_of_ne hllt.ne]
+            omega
+          · rw [Function.update_of_ne (hInv w w' hold).1.ne,
+                Function.update_of_ne (hInv w w' hold).2.ne]
+            exact hedge w w' hold
+        · intro x hx
+          simp only [List.mem_cons, List.mem_append] at hx
+          rcases hx with (rfl | hx) | hx
+          · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
+            omega
+          · obtain ⟨hxlab, hxdep⟩ :=
+              boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+            rw [hxlab, Function.update_self]
+            exact hxdep
+          · obtain ⟨hxlab, hxdep⟩ :=
+              diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
+            rw [hxlab, Function.update_self]
+            exact hxdep
+      · -- diamond φ (diamondNeg): propagates to *existing* successors.
+        dsimp only
+        have hφdia : (⟨.neg, Proposition.diamond φ, l⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp]
+          exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
+        · simp only [if_neg hemp]
+          exact ⟨rank, fun _ _ => rfl, hedge,
+            diamondNeg_rank_bound b acc φ l rank hbound hedge hφdia⟩
+
 /-- **P2-obl-b**: given `rank` satisfying the rank-bound and rank-edge invariants pre-step,
 `modalStepBranch` produces a `rank'` (agreeing with `rank` off the single fresh point
 `modalNextWorld b`, when a world is minted by `diamondPos`/`boxNeg`) satisfying both invariants
@@ -1073,138 +1219,7 @@ lemma modalStepBranch_exists_rank'
   simp only [modalStepBranch] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases : ∃ rank' : WorldIndex → Nat,
-      (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
-      (∀ w w', (modalApplyOne sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
-      (match (modalApplyOne sf b acc).fst with
-        | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
-        | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
-        | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
-        | .notApplicable => True) := by
-    have hsfd : modalDepth sf.formula ≤ rank sf.label := hbound sf hsfmem
-    have hprop := modalApplyOne_prop_outputs_subset sf
-    unfold modalApplyOne
-    by_cases hpa :
-        (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
-    · simp only [hpa, if_true]
-      refine ⟨rank, fun _ _ => rfl, hedge, ?_⟩
-      rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
-        formulas | branches | formulas | -
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨hzform, hzlabel⟩ := hprop z hz
-        rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨hzform, hzlabel⟩ := hprop z hz
-        rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨hzform, hzlabel⟩ := hprop z hz
-        rw [hzlabel]; exact le_trans (modalDepth_le_of_mem_modalSubfmls hzform) hsfd
-      · rw [hpr] at hpa
-        simp [RuleResult.isApplicable] at hpa
-    · rw [if_neg hpa]
-      obtain ⟨s, ff, l⟩ := sf
-      rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · -- box φ (boxPos): propagates to *existing* successors.
-          dsimp only
-          by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
-          · simp only [if_pos hemp]
-            exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · simp only [if_neg hemp]
-            have hψbox : (⟨.pos, Proposition.box φ, l⟩ :
-                SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
-            exact ⟨rank, fun _ _ => rfl, hedge,
-              boxPos_rank_bound b acc φ l rank hbound hedge hψbox⟩
-        · -- diamond φ (diamondPos): mints a fresh world (task 441: native constructor).
-          dsimp only
-          have hllt : l < modalNextWorld b :=
-            Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
-          have hsfd' : 1 + modalDepth φ ≤ rank l := by
-            have h := hsfd
-            simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
-            omega
-          refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
-            fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
-          · intro w w' hw'
-            rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
-            · rw [Function.update_self, Function.update_of_ne hllt.ne]
-              omega
-            · rw [Function.update_of_ne (hInv w w' hold).1.ne,
-                  Function.update_of_ne (hInv w w' hold).2.ne]
-              exact hedge w w' hold
-          · intro x hx
-            simp only [List.mem_cons, List.mem_append] at hx
-            rcases hx with (rfl | hx) | hx
-            · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
-              omega
-            · obtain ⟨hxlab, hxdep⟩ :=
-                boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-              rw [hxlab, Function.update_self]
-              exact hxdep
-            · obtain ⟨hxlab, hxdep⟩ :=
-                diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-              rw [hxlab, Function.update_self]
-              exact hxdep
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-        · -- box φ (boxNeg): mints a fresh world, symmetric to diamondPos above.
-          dsimp only
-          have hllt : l < modalNextWorld b :=
-                    Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
-          have hsfd' : 1 + modalDepth φ ≤ rank l := by
-            have h := hsfd
-            simp only [SignedFormula.formula, SignedFormula.label, modalDepth] at h
-            omega
-          refine ⟨Function.update rank (modalNextWorld b) (rank l - 1),
-            fun w hw => Function.update_of_ne hw _ _, ?_, ?_⟩
-          · intro w w' hw'
-            rcases hasEdge_addEdge_cases_local hw' with ⟨rfl, rfl⟩ | hold
-            · rw [Function.update_self, Function.update_of_ne hllt.ne]
-              omega
-            · rw [Function.update_of_ne (hInv w w' hold).1.ne,
-                  Function.update_of_ne (hInv w w' hold).2.ne]
-              exact hedge w w' hold
-          · intro x hx
-            simp only [List.mem_cons, List.mem_append] at hx
-            rcases hx with (rfl | hx) | hx
-            · simp only [SignedFormula.formula, SignedFormula.label, Function.update_self]
-              omega
-            · obtain ⟨hxlab, hxdep⟩ :=
-                boxProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-              rw [hxlab, Function.update_self]
-              exact hxdep
-            · obtain ⟨hxlab, hxdep⟩ :=
-                diaNegProps_rank_bound b l (modalNextWorld b) rank hbound x hx
-              rw [hxlab, Function.update_self]
-              exact hxdep
-        · -- diamond φ (diamondNeg): propagates to *existing* successors.
-          dsimp only
-          have hφdia : (⟨.neg, Proposition.diamond φ, l⟩ :
-              SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
-          by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-              if b.any (· == (⟨.neg, φ, w'⟩ :
-                  SignedFormula (Proposition Atom) WorldIndex))
-              then none
-              else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-            ).isEmpty = true
-          · simp only [if_pos hemp]
-            exact ⟨rank, fun _ _ => rfl, hedge, trivial⟩
-          · simp only [if_neg hemp]
-            exact ⟨rank, fun _ _ => rfl, hedge,
-              diamondNeg_rank_bound b acc φ l rank hbound hedge hφdia⟩
-
+  have hcases := modalApplyOne_rank_step sf b acc hsfmem hInv rank hbound hedge
   obtain ⟨rank', hragree, hredge, hrmatch⟩ := hcases
   have hnewAcc : newAcc = (modalApplyOne sf b acc).snd := by
     rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
@@ -1357,6 +1372,86 @@ private lemma outDeg_addEdge_ne (acc : Accessibility) (w wf w' : WorldIndex) (h 
   simp [this]
 
 
+omit [Hashable Atom] in
+/-- **Task 507 (generic per-call outDeg-step obligation)**: the single-call outDeg/expanded-set
+counting fact `modalStepBranch_preserves_outDegEq`'s proof needs about `modalApplyOne` at each
+firing, extracted as its own lemma so the surrounding driver-unfolding argument (rule-agnostic:
+it only inspects the four `RuleResult` constructor shapes) can be replayed for an abstract
+`apply` given this fact as a `RuleApplicationSpec` field (`outDegStep`, `GenericDriver.lean`). -/
+lemma modalApplyOne_outDeg_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (houtdeg : ∀ w, outDeg acc w =
+      (e.filter (fun x => x.label == w && isMintingShaped x)).length) :
+    ∀ w, outDeg (modalApplyOne sf b acc).snd w =
+      (List.filter (fun x => x.label == w && isMintingShaped x)
+        (match (modalApplyOne sf b acc).fst with
+          | .linear _ => e ++ [sf]
+          | .branching _ => e ++ [sf]
+          | .persistent _ => e
+          | .notApplicable =>
+            (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length := by
+  intro w
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true]
+    have hnm : isMintingShaped sf = false := by
+      by_contra hc
+      simp only [Bool.not_eq_false] at hc
+      have hcontra := isMintingShaped_not_prop_applicable sf hc
+      rw [hcontra] at hpa
+      simp at hpa
+    rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      formulas | branches | formulas | -
+    · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
+    · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
+    · exact houtdeg w
+    · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
+  · rw [if_neg hpa]
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · -- box φ (boxPos): propagates to existing successors, never mints.
+        dsimp only
+        split <;> exact houtdeg w
+      · -- diamond φ (diamondPos): mints a fresh world (task 441: native, genuinely minting).
+        dsimp only
+        by_cases hw : w = l
+        · rw [hw]
+          rw [outDeg_addEdge_self,
+            filter_minting_append_of_minting_at e ⟨.pos, Proposition.diamond φ, l⟩ (by rfl)]
+          simp only [List.length_append, List.length_singleton]
+          rw [houtdeg l]
+        · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
+          rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
+          exact houtdeg w
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · exact houtdeg w
+      · -- box φ (boxNeg): mints a fresh world.
+        dsimp only
+        by_cases hw : w = l
+        · rw [hw]
+          rw [outDeg_addEdge_self,
+            filter_minting_append_of_minting_at e ⟨.neg, Proposition.box φ, l⟩ (by rfl)]
+          simp only [List.length_append, List.length_singleton]
+          rw [houtdeg l]
+        · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
+          rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
+          exact houtdeg w
+      · -- diamond φ (diamondNeg): propagates to existing successors, never mints.
+        dsimp only
+        split <;> exact houtdeg w
+
 /-- **P2-obl-c** supporting invariant: `modalStepBranch` preserves the out-degree/expanded-set
 correspondence `outDeg acc w = |{formulas in e matching isMintingShaped at w}|` for every world
 `w`. Maintained by the same case-split shape as P2-obl-a/b: propositional-rule steps never fire
@@ -1376,75 +1471,7 @@ lemma modalStepBranch_preserves_outDegEq
   simp only [modalStepBranch] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases : ∀ w, outDeg (modalApplyOne sf b acc).snd w =
-      (List.filter (fun x => x.label == w && isMintingShaped x)
-        (match (modalApplyOne sf b acc).fst with
-          | .linear _ => e ++ [sf]
-          | .branching _ => e ++ [sf]
-          | .persistent _ => e
-          | .notApplicable =>
-            (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length := by
-    intro w
-    unfold modalApplyOne
-    by_cases hpa :
-        (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
-    · simp only [hpa, if_true]
-      have hnm : isMintingShaped sf = false := by
-        by_contra hc
-        simp only [Bool.not_eq_false] at hc
-        have hcontra := isMintingShaped_not_prop_applicable sf hc
-        rw [hcontra] at hpa
-        simp at hpa
-      rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
-        formulas | branches | formulas | -
-      · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
-      · rw [filter_minting_append_of_not_minting e sf w hnm]; exact houtdeg w
-      · exact houtdeg w
-      · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
-    · rw [if_neg hpa]
-      obtain ⟨s, ff, l⟩ := sf
-      rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · -- box φ (boxPos): propagates to existing successors, never mints.
-          dsimp only
-          split <;> exact houtdeg w
-        · -- diamond φ (diamondPos): mints a fresh world (task 441: native, genuinely minting).
-          dsimp only
-          by_cases hw : w = l
-          · rw [hw]
-            rw [outDeg_addEdge_self,
-              filter_minting_append_of_minting_at e ⟨.pos, Proposition.diamond φ, l⟩ (by rfl)]
-            simp only [List.length_append, List.length_singleton]
-            rw [houtdeg l]
-          · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
-            rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
-            exact houtdeg w
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · exact houtdeg w
-        · -- box φ (boxNeg): mints a fresh world.
-          dsimp only
-          by_cases hw : w = l
-          · rw [hw]
-            rw [outDeg_addEdge_self,
-              filter_minting_append_of_minting_at e ⟨.neg, Proposition.box φ, l⟩ (by rfl)]
-            simp only [List.length_append, List.length_singleton]
-            rw [houtdeg l]
-          · rw [outDeg_addEdge_ne acc l (modalNextWorld b) w hw]
-            rw [filter_minting_append_of_minting_ne e _ w (by simpa using hw)]
-            exact houtdeg w
-        · -- diamond φ (diamondNeg): propagates to existing successors, never mints.
-          dsimp only
-          split <;> exact houtdeg w
-
+  have hcases := modalApplyOne_outDeg_step sf b e acc houtdeg
   rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hcases
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
@@ -1891,6 +1918,100 @@ private lemma mintGroup_label_eq_freshWorld
       · simp at heq
     · simp at heq
 
+/-- **Task 507 (generic per-call knownWorlds-step obligation)**: the single-call known-worlds
+dichotomy `modalStepBranch_knownWorlds`'s proof needs about `modalApplyOne` at each firing,
+extracted as its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only
+inspects the four `RuleResult` constructor shapes) can be replayed for an abstract `apply` given
+this fact as a `RuleApplicationSpec` field (`knownWorldsStep`, `GenericDriver.lean`). Either
+`apply sf b acc` leaves `acc` unchanged and its output's labels all lie in `modalKnownWorlds b`,
+or it mints exactly one edge `sf.label → modalNextWorld b` with a nonempty `.linear` result
+entirely labeled at `modalNextWorld b`. -/
+lemma modalApplyOne_knownWorlds_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    ((modalApplyOne sf b acc).snd = acc ∧
+      (match (modalApplyOne sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOne sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOne sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  have hprop := modalApplyOne_prop_outputs_subset sf
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true]
+    refine Or.inl ⟨trivial, ?_⟩
+    rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      formulas | branches | formulas | -
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
+  · rw [if_neg hpa]
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · -- box φ (boxPos): propagates to existing successors.
+        dsimp only
+        by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+        · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
+        · simp only [if_neg hemp]
+          refine Or.inl ⟨trivial, ?_⟩
+          intro x hx
+          obtain ⟨-, hxsucc⟩ := modalApplyOne_boxPos_outputs_subset b acc φ l x hx
+          exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
+      · -- diamond φ (diamondPos): mints a fresh world.
+        dsimp only
+        right
+        refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
+        exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.pos φ x hx
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · exact Or.inl ⟨rfl, trivial⟩
+      · -- box φ (boxNeg): mints a fresh world.
+        dsimp only
+        right
+        refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
+        exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.neg φ x hx
+      · -- diamond φ (diamondNeg): propagates to existing successors.
+        dsimp only
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
+        · simp only [if_neg hemp]
+          refine Or.inl ⟨trivial, ?_⟩
+          intro x hx
+          obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
+          exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
+
 /-- **P2-obl-d prerequisite**: the known-worlds/max-world dichotomy for a single
 `modalStepBranch` step. Either (non-mint: propositional rules, `boxPos`, `diamondNeg`) `acc` is
 unchanged and every child branch's known-worlds/max-world are unchanged (up to `Perm`); or
@@ -1915,88 +2036,7 @@ lemma modalStepBranch_knownWorlds
   simp only [modalStepBranch] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases :
-      ((modalApplyOne sf b acc).snd = acc ∧
-        (match (modalApplyOne sf b acc).fst with
-          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
-          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-          | .notApplicable => True)) ∨
-      ((modalApplyOne sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
-        (match (modalApplyOne sf b acc).fst with
-          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
-          | .branching _ => False
-          | .persistent _ => False
-          | .notApplicable => False)) := by
-    have hprop := modalApplyOne_prop_outputs_subset sf
-    unfold modalApplyOne
-    by_cases hpa :
-        (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
-    · simp only [hpa, if_true]
-      refine Or.inl ⟨trivial, ?_⟩
-      rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
-        formulas | branches | formulas | -
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨-, hzlabel⟩ := hprop z hz
-        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨-, hzlabel⟩ := hprop z hz
-        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
-      · rw [hpr] at hprop
-        intro z hz
-        obtain ⟨-, hzlabel⟩ := hprop z hz
-        rw [hzlabel, mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
-      · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
-    · rw [if_neg hpa]
-      obtain ⟨s, ff, l⟩ := sf
-      rcases s with _ | _
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · -- box φ (boxPos): propagates to existing successors.
-          dsimp only
-          by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
-          · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
-          · simp only [if_neg hemp]
-            refine Or.inl ⟨trivial, ?_⟩
-            intro x hx
-            obtain ⟨-, hxsucc⟩ := modalApplyOne_boxPos_outputs_subset b acc φ l x hx
-            exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
-        · -- diamond φ (diamondPos): mints a fresh world.
-          dsimp only
-          right
-          refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
-          exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.pos φ x hx
-      · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · exact Or.inl ⟨rfl, trivial⟩
-        · -- box φ (boxNeg): mints a fresh world.
-          dsimp only
-          right
-          refine ⟨rfl, List.cons_ne_nil _ _, ?_⟩
-          exact fun x hx => mintGroup_label_eq_freshWorld b l Sign.neg φ x hx
-        · -- diamond φ (diamondNeg): propagates to existing successors.
-          dsimp only
-          by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
-              if b.any (· == (⟨.neg, φ, w'⟩ :
-                  SignedFormula (Proposition Atom) WorldIndex))
-              then none
-              else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-            ).isEmpty = true
-          · simp only [if_pos hemp]; exact Or.inl ⟨trivial, trivial⟩
-          · simp only [if_neg hemp]
-            refine Or.inl ⟨trivial, ?_⟩
-            intro x hx
-            obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
-            exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
+  have hcases := modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
   have hlknown : sf.label ∈ modalKnownWorlds b := by
     rw [mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
   rcases hcases with ⟨hsame, hmatch⟩ | ⟨haddedge, hfreshall⟩

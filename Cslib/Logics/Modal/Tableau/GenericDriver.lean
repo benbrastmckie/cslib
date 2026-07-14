@@ -64,18 +64,45 @@ The field set is extracted from what `FmpMeasure.lean`'s `modalStepBranch_potent
   presupposes via `outputsSubsetUniverse`'s reliance on `modalApplyOne_outputs_subset`-style
   world-bound hypotheses; S4 needs a structurally different termination argument.
 
-## Known Limitation (documented for Phase 3 continuation)
+## Task 507: Per-Call Step Fields (`rankStep`/`outDegStep`/`knownWorldsStep`)
+
+The three fields above restate *conclusions* about `apply`'s aggregate behaviour
+(freshness/catalog-membership/persistence), but three of `FmpMeasure.lean`'s private helper
+lemmas (`modalStepBranch_exists_rank'`, `modalStepBranch_preserves_outDegEq`,
+`modalStepBranch_knownWorlds`) additionally need a **per-single-call** structural fact that
+genuinely depends on which of `modalApplyOne`'s five internal rule shapes
+(propositional/boxPos/diamondNeg/diamondPos/boxNeg) fired -- not merely on the four top-level
+`RuleResult` constructor shapes (`.linear`/`.branching`/`.persistent`/`.notApplicable`), which
+*are* rule-agnostic and need no interface support. Task 507 adds exactly these three fields:
+
+- **`rankStep`**: given a `rank` map satisfying the depth-bound/edge invariants pre-call, `apply`
+  produces a `rank'` (agreeing with `rank` off `modalNextWorld b`) satisfying both invariants on
+  `(apply sf b acc).snd`/`.fst`. Discharged for `modalApplyOne` by `modalApplyOne_rank_step`
+  (`FmpMeasure.lean`), whose body is the exact proof that was formerly inlined inside
+  `modalStepBranch_exists_rank'`.
+- **`outDegStep`**: given the outDeg/expanded-set counting correspondence pre-call, `apply`
+  preserves it on `(apply sf b acc).snd`/`.fst`. Discharged by `modalApplyOne_outDeg_step`.
+- **`knownWorldsStep`**: the known-worlds dichotomy for a single call -- either `apply` leaves
+  `acc` unchanged with all output labels already known, or it mints exactly one edge
+  `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely labeled at the fresh
+  point. Discharged by `modalApplyOne_knownWorlds_step`.
+
+Each field's *statement* is rule-agnostic (parametrized over `apply`); each field's *discharge*
+for `modalApplyOne` reuses the pre-existing K-specific proof verbatim (now a standalone lemma).
+This is the intended shape of downstream (T/S5/B) discharge too: reuse `modalApplyOne`'s own
+per-call facts on every input where the new rule agrees with `modalApplyOne` (per the
+`freshLocal` docstring above), and supply fresh reasoning only where the new rule's own catalog
+(box propagation to existing successors, etc.) differs.
+
+## Known Limitation (documented for Phase 5 continuation)
 
 This bundle is **necessary but not yet proven sufficient** to re-derive
-`modalStepBranch_potential_step` (`FmpMeasure.lean:2146`) for an abstract `apply`: that proof
-additionally inlines case-specific facts from ~15 private helper lemmas
-(`modalStepBranch_exists_rank'`, `modalStepBranch_knownWorlds`,
-`modalStepBranch_preserves_outDegEq`, `outDeg_le_of_expandedNodup`, ...) that case-split
-directly on `modalApplyOne`'s four concrete rule shapes rather than going through a
-`RuleApplicationSpec` hypothesis. Generalizing that ~900-line potential-function argument
-(`FmpMeasure.lean` lines ~1058–2415) over this interface is task 503 Phase 3, tracked
-separately; if a future continuation finds the three fields above insufficient, extend this
-bundle (do not weaken `modalApplyOne_spec`'s proof with `sorry`).
+`modalStepBranch_potential_step` (`FmpMeasure.lean:2146`) for an abstract `apply`: the crux
+lemma's own body (once its helper lemmas are generalized via the six fields above) is expected
+to need no further field beyond `freshLocal`, but this is confirmed only once
+`modalStepBranch_potential_step` itself is re-derived generically (task 507 Phase 5). If a
+future continuation finds the six fields above insufficient, extend this bundle (do not weaken
+`modalApplyOne_spec`'s proof with `sorry`).
 -/
 
 @[expose] public section
@@ -126,6 +153,57 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop where
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
       (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
       (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b
+  /-- Per-call rank-step (task 507): given `rank` satisfying the depth-bound/edge invariants
+  pre-call, `apply sf b acc` yields a `rank'` (agreeing with `rank` off `modalNextWorld b`)
+  satisfying the edge invariant on `(apply sf b acc).snd` and the depth bound on
+  `(apply sf b acc).fst`'s output. Mirrors `modalApplyOne_rank_step`. -/
+  rankStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accFreshInv b acc →
+      ∀ (rank : WorldIndex → Nat),
+      (∀ x ∈ b, modalDepth x.formula ≤ rank x.label) →
+      (∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) →
+      ∃ rank' : WorldIndex → Nat,
+        (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+        (∀ w w', (apply sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+          | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .notApplicable => True)
+  /-- Per-call outDeg-step (task 507): given the outDeg/expanded-set minting-count
+  correspondence pre-call, `apply sf b acc` preserves it on `(apply sf b acc).snd`, counted
+  against the post-call expanded set implied by `(apply sf b acc).fst`'s shape. Mirrors
+  `modalApplyOne_outDeg_step`. -/
+  outDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) →
+      ∀ w, outDeg (apply sf b acc).snd w =
+        (List.filter (fun x => x.label == w && isMintingShaped x)
+          (match (apply sf b acc).fst with
+            | .linear _ => e ++ [sf]
+            | .branching _ => e ++ [sf]
+            | .persistent _ => e
+            | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length
+  /-- Per-call knownWorlds-step (task 507): either `apply sf b acc` leaves `acc` unchanged with
+  every output label already known on `b`, or it mints exactly one edge
+  `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely labeled at the fresh
+  point. Mirrors `modalApplyOne_knownWorlds_step`. -/
+  knownWorldsStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accTargetsKnown b acc →
+      ((apply sf b acc).snd = acc ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((apply sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False))
 
 /-! ## The Trivial K Witness -/
 
@@ -137,6 +215,11 @@ theorem modalApplyOne_spec : RuleApplicationSpec (Atom := Atom) modalApplyOne wh
   outputsSubsetUniverse := fun φ0 sf b acc hb hsf hInv hW =>
     modalApplyOne_outputs_subset φ0 sf b acc hb hsf hInv hW
   persistentFresh := fun sf b acc nf hca => modalApplyOne_persistent_props sf b acc nf hca
+  rankStep := fun sf b acc hsfmem hInv rank hbound hedge =>
+    modalApplyOne_rank_step sf b acc hsfmem hInv rank hbound hedge
+  outDegStep := fun sf b e acc houtdeg => modalApplyOne_outDeg_step sf b e acc houtdeg
+  knownWorldsStep := fun sf b acc hsfmem hknown =>
+    modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
 
 end Cslib.Logic.Modal.Tableau
 

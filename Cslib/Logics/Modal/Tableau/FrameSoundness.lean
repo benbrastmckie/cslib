@@ -228,6 +228,129 @@ lemma modalTDiaNegSelf_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_reflFC_diaNeg_mem h hmem
 
+/-! ## S4 (Reflexive-Transitive Frame) -/
+
+/-- The reflexive-transitive frame condition: `Std.Refl m.r ∧ IsTrans World m.r`.
+Instantiates `frameValid`/`branchSatisfiableIn` for the modal logic S4 (`Cube.S4`,
+`K ∪ T ∪ Four`, `Cube.lean:81`). -/
+def s4FC : FrameCondition := fun {World} r => Std.Refl r ∧ IsTrans World r
+
+/-- S4-validity: `φ` is satisfied in every reflexive-transitive Kripke model, at every
+world. Matches `Cube.S4`. -/
+def s4Valid (φ : Proposition Atom) : Prop := frameValid s4FC φ
+
+/-! ### 4-Rule Semantic Soundness
+
+The two 4-specific tableau arms (`modalFourBoxProp`, `modalFourDiaNegProp` in
+`FrameRules.lean`) propagate the box/diamond formula *itself* (not its unwrapped body)
+across a recorded successor edge: `T(□φ)@w`, `w → w'` yields `T(□φ)@w'`, and dually for
+`F(◇φ)@w`. Their soundness reduces directly to transitivity of `m.r`, **not** to
+`Satisfies.four` (`Basic.lean:348`, stated in diamond form `◇◇φ → ◇φ`, with no box-side
+dual): given `Satisfies m (f w) (□φ)` and `m.r (f w) (f w')` (from the recorded edge), every
+`m.r`-successor `u` of `f w'` is also an `m.r`-successor of `f w` by `IsTrans.trans`, so
+`Satisfies m (f w') (□φ)` -- this mirrors the T arms' direct appeal to `Std.Refl` above,
+generalized to `IsTrans`. -/
+
+/-- Bridge from `Accessibility.successorsOf` membership to `hasEdge`: if `w'` is returned by
+`successorsOf acc w`, the edge `w → w'` is recorded in `acc`. Local mirror of
+`FmpMeasure.lean`'s private `mem_successorsOf_hasEdge`, restated here since that lemma is
+private to its own file. -/
+private lemma mem_successorsOf_hasEdge' {acc : Accessibility} {w w' : WorldIndex}
+    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
+  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
+  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
+  split at heq
+  · rename_i hsrc
+    simp only [Option.some.injEq] at heq
+    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
+    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
+  · simp at heq
+
+/-- Adding `T(□φ)@w'` to a branch witnessing `branchSatisfiableIn s4FC` preserves
+`branchSatisfiableIn s4FC`, given `T(□φ)@w` is already on the branch and `w → w'` is a
+recorded edge: the semantic core of the 4-rule box-positive propagation arm
+(`modalFourBoxProp`). Proved directly from `IsTrans.trans`, per the module-docstring note
+above (not via `Satisfies.four`). -/
+lemma branchSatisfiableIn_s4FC_boxPos_trans_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc)
+    {φ : Proposition Atom} {w w' : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge w w' = true) :
+    branchSatisfiableIn s4FC (⟨.pos, .box φ, w'⟩ :: b) acc := by
+  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hb⟩ := h
+  refine ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun _ => ?_, fun hcontra => by simp at hcontra⟩
+    have hbox : Satisfies m (f w) (.box φ) := (hb _ hmem).1 rfl
+    intro u hu
+    exact hbox u (htrans.trans (f w) (f w') u (hedges w w' hedge) hu)
+  · exact hb sf hold
+
+/-- Adding `F(◇φ)@w'` to a branch witnessing `branchSatisfiableIn s4FC` preserves
+`branchSatisfiableIn s4FC`, given `F(◇φ)@w` is already on the branch and `w → w'` is a
+recorded edge: the semantic core of the 4-rule diamond-negative propagation arm
+(`modalFourDiaNegProp`). Dual of `branchSatisfiableIn_s4FC_boxPos_trans_mem`. -/
+lemma branchSatisfiableIn_s4FC_diaNeg_trans_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc)
+    {φ : Proposition Atom} {w w' : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge w w' = true) :
+    branchSatisfiableIn s4FC (⟨.neg, .diamond φ, w'⟩ :: b) acc := by
+  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hb⟩ := h
+  refine ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun hcontra => by simp at hcontra, fun _ => ?_⟩
+    have hdianeg : ¬ Satisfies m (f w) (.diamond φ) := (hb _ hmem).2 rfl
+    intro hdia'
+    apply hdianeg
+    obtain ⟨u, hu, hφu⟩ := Satisfies.diamond_iff.mp hdia'
+    exact Satisfies.diamond_iff.mpr ⟨u, htrans.trans (f w) (f w') u (hedges w w' hedge) hu, hφu⟩
+  · exact hb sf hold
+
+/-- Rule-level 4-soundness for the box-positive arm: every formula produced by
+`modalFourBoxProp` (given `T(□φ)@w` already on the branch) preserves `branchSatisfiableIn
+s4FC` when added to the branch. Connects `FrameRules.lean`'s concrete rule output to the
+semantic soundness lemma `branchSatisfiableIn_s4FC_boxPos_trans_mem`. -/
+lemma modalFourBoxProp_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalFourBoxProp b acc φ w, branchSatisfiableIn s4FC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalFourBoxProp at hsf
+  simp only [List.mem_filterMap] at hsf
+  obtain ⟨w', hw', hsf⟩ := hsf
+  by_cases hcase :
+      b.any (· == (⟨.pos, .box φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
+    subst hsf
+    exact branchSatisfiableIn_s4FC_boxPos_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
+
+/-- Rule-level 4-soundness for the diamond-negative arm: every formula produced by
+`modalFourDiaNegProp` (given `F(◇φ)@w` already on the branch) preserves `branchSatisfiableIn
+s4FC` when added to the branch. Connects `FrameRules.lean`'s concrete rule output to the
+semantic soundness lemma `branchSatisfiableIn_s4FC_diaNeg_trans_mem`. -/
+lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalFourDiaNegProp b acc φ w, branchSatisfiableIn s4FC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalFourDiaNegProp at hsf
+  simp only [List.mem_filterMap] at hsf
+  obtain ⟨w', hw', hsf⟩ := hsf
+  by_cases hcase :
+      b.any (· == (⟨.neg, .diamond φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, Option.some.injEq] at hsf
+    subst hsf
+    exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
+
 end Cslib.Logic.Modal.Tableau
 
 end

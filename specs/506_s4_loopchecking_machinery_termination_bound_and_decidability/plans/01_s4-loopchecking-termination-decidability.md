@@ -354,7 +354,7 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 4: S4 frame vocabulary and 4-rule semantic soundness [NOT STARTED]
+### Phase 4: S4 frame vocabulary and 4-rule semantic soundness [COMPLETED]
 
 - **Goal**: Add `s4FC`/`s4Valid` and prove the 4-rule's rule-level soundness from
   `IsTrans` directly (per Correction 2).

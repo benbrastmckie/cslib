@@ -4,15 +4,17 @@
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/FrameRules.lean",
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "Cslib.lean"
   ],
   "partial_progress": {
-    "stage": "phase_3_starting",
-    "details": "Phase 1 (4-rule) and Phase 2 (LoopChecking foundation) complete and committed (e6dfa582, d9df271e). Note: a concurrent session is actively editing Rules.lean/CompletenessLoop.lean/Completeness.lean/TDriver.lean (outside this task's territory) -- Phase 2 was verified in an isolated git worktree. Starting Phase 3 (extractModelS4).",
+    "stage": "phase_5_starting",
+    "details": "Phases 1-4 complete and committed (e6dfa582, d9df271e, 8aba9fb2, pending phase 4 commit). Task 510 concurrent session committed its phase 1 (6ac19353); working tree is clean of interference now. Starting Phase 5 (minting guard, modalApplyOneS4, driver defs, modalHintikkaSetS4).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Phase 2: LoopChecking.lean foundation"
+    "phases_completed": 4,
+    "last_completed_phase": "Phase 4: S4 frame vocabulary and 4-rule semantic soundness"
   },
   "metadata": {
     "session_id": "sess_506_impl",

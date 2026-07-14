@@ -1,0 +1,35 @@
+{
+  "status": "implemented",
+  "phases_completed": 5,
+  "phases_total": 5,
+  "sorry_inventory": {
+    "new_sorries": 0,
+    "new_axioms": 0,
+    "vacuous_definitions": 0,
+    "pre_existing_unrelated_sorries_noted": [
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:556",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:1420",
+      "Cslib/Logics/Propositional/Tableau/Intuitionistic/Completeness.lean:124",
+      "Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118"
+    ]
+  },
+  "artifacts": [
+    "Cslib/Logics/Modal/Semantics/Birelational.lean",
+    "Cslib.lean",
+    "specs/490_birelational_intuitionistic_modal_semantics/plans/01_birelational-modal-semantics.md",
+    "specs/490_birelational_intuitionistic_modal_semantics/summaries/01_birelational-modal-semantics-summary.md"
+  ],
+  "ci_pipeline": {
+    "cache_get": "pass (already warm)",
+    "mk_all_module": "pass (single-line barrel addition)",
+    "lake_build": "pass (3190/3190 jobs)",
+    "check_init_imports": "pass",
+    "lake_lint": "pass (zero warnings)",
+    "lint_style": "pass (after one --fix round for space-before-semicolon in docstrings)",
+    "lake_shake": "pass (no suggestions for new file)",
+    "lake_test": "pass (9181/9181 jobs)",
+    "lean_verify_bforces_persistence": "no sorryAx, no suspicious axioms",
+    "lean_verify_mvalid_implies_ivalid": "no sorryAx, no suspicious axioms"
+  },
+  "next_action_hint": "Task 490 is ready for PR preparation (skill-pr-implementation / /pr) or for task-status transition to [PR READY]. No blockers, no follow-up work required for this task's scope. Downstream tasks 492-495 (intuitionistic/minimal completeness) can now build on BFrame/BModel/BForces/bforces_persistence/IValid/MValid."
+}

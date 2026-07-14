@@ -1,5 +1,5 @@
 ---
-next_project_number: 501
+next_project_number: 502
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 501
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,478,479,481,482,483,490,491,497 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,480 | 36,37,181,317,407,425,449,478,490 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,414,492,493,495 | 39,40,181,215,300,301,375,480,491 | foundations, code hygiene, modal-logic |
-| 4 | 412,484,494,496 | 41,479,481,482,483,492,495 | modal logic, code hygiene, modal-logic |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,480,491,497 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,492,493,495 | 36,37,181,317,407,425,449,480,491 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,414,484,494,496,501 | 39,40,181,215,300,301,375,492,493,495 | foundations, modal logic, code hygiene, ... |
+| 4 | 412 | 41 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,11 +37,6 @@ next_project_number: 501
 300 [NOT STARTED] — Extend modal K tableau (task 299) with frame-specific rules for r
 396 [NOT STARTED] — Evaluate and salvage the architecture-independent proof-engineeri
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-478 [NOT STARTED] — Metalogic framework: generic Hilbert-style axiomatic calculus and
-479 [NOT STARTED] — Sound and complete axiomatization of the minimal classical modal 
-481 [NOT STARTED] — Sound and complete axiomatization of modal logic T (reflexive fra
-482 [NOT STARTED] — Sound and complete axiomatization of modal logic S4 (reflexive-tr
-483 [NOT STARTED] — Sound and complete axiomatization of modal logic S5 (equivalence 
 480 [NOT STARTED] — Intuitionistic modal metalogic FRAMEWORK — prime-theory (prime/co
 484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
 
@@ -83,13 +78,13 @@ next_project_number: 501
 
 ### Modal Logic
 
-490 [NOT STARTED] — Birelational (intuitionistic Kripke) modal SEMANTICS — the semant
 491 [NOT STARTED] — Minimal propositional base (efq-optional) — PREREQUISITE for the 
   └─ 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
     └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
 492 [NOT STARTED] — IK (intuitionistic modal logic K) soundness + completeness over b
   └─ 494 [NOT STARTED] — Intuitionistic modal extensions IT / IS4 / IS5 — sound and comple
 493 [NOT STARTED] — CK (constructive modal logic K) soundness + completeness over bir
+  └─ 501 [NOT STARTED] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 
 ### Propositional Logic
 
@@ -100,6 +95,16 @@ next_project_number: 501
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 
 ## Tasks
+
+### 501. CK constructive modal extensions CT CS4 CS5
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: modal-logic
+- **Dependencies**: Task 493
+
+**Description**: CK constructive modal extensions CT / CS4 / CS5 — sound and complete axiomatizations of the constructive (CK-based) analogues of T / S4 / S5 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the <=-R confluence) over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. Completes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal). Depends on 493.
+
+---
 
 ### 500. Pr662 branch reconciliation
 - **Status**: [COMPLETED]
@@ -210,10 +215,13 @@ next_project_number: 501
 ---
 
 ### 490. Birelational intuitionistic modal semantics
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: Task 487
+- **Research**: [490_birelational_intuitionistic_modal_semantics/reports/01_birelational-intuitionistic-modal-semantics.md]
+- **Plan**: [490_birelational_intuitionistic_modal_semantics/plans/01_birelational-modal-semantics.md]
+- **Summary**: [490_birelational_intuitionistic_modal_semantics/summaries/01_birelational-modal-semantics-summary.md]
 
 **Description**: Birelational (intuitionistic Kripke) modal SEMANTICS — the semantic foundation for the intuitionistic and minimal modal metalogic, sibling to the classical Kripke cube. Define intuitionistic Kripke frames with TWO relations: the intuitionistic preorder ≤ and the modal accessibility R, plus the heredity/monotonicity condition and the F1/F2 (up-down) confluence conditions relating ≤ and R. Define Satisfies (forcing) for the fully-primitive modal Proposition {atom,bot,imp,and,or,box,diamond} (PR #662) over these frames: persistence of forcing under ≤, □ quantifying over ≤∘R, ◇ over R, intuitionistic → clause (∀ ≥-worlds). This is the layer that intuitionistic (tasks 492/493/494) and minimal (task 495) completeness build on. REQUIRES the primitive-◇/∨/⊥ base (tasks 477/487, in #662) — intuitionistically ◇≠¬□¬ and ∨ is not definable from →/∧/⊥, so both-primitive-modalities + primitive ∨/⊥ are hard prerequisites. Depends on 487 (fully-primitive modal base).
 
@@ -270,7 +278,7 @@ next_project_number: 501
 ---
 
 ### 483. Metalogic S5 soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -280,7 +288,7 @@ next_project_number: 501
 ---
 
 ### 482. Metalogic S4 soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -290,7 +298,7 @@ next_project_number: 501
 ---
 
 ### 481. Metalogic T reflexive soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -310,7 +318,7 @@ next_project_number: 501
 ---
 
 ### 479. Metalogic K soundness completeness
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -320,7 +328,7 @@ next_project_number: 501
 ---
 
 ### 478. Metalogic hilbert completeness framework
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

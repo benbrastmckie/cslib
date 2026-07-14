@@ -1,84 +1,85 @@
 {
-  "session_id": "sess_1783922075_911857",
+  "session_id": "sess_1784011298_752245",
   "task_numbers": [
-    317,
-    430,
-    441,
-    456,
-    461,
-    462
+    490,
+    480,
+    492,
+    493,
+    494,
+    501
   ],
   "waves": [
     [
-      317,
-      461
+      490
     ],
     [
-      430,
-      456,
-      462
+      480
     ],
     [
-      441
+      492,
+      493
+    ],
+    [
+      494,
+      501
     ]
   ],
   "dependency_graph": {
-    "317": [],
-    "430": [
-      317
+    "490": [],
+    "480": [
+      "490"
     ],
-    "441": [
-      461,
-      462
+    "492": [
+      "480",
+      "490"
     ],
-    "456": [
-      317
+    "493": [
+      "480",
+      "490"
     ],
-    "461": [],
-    "462": [
-      461
+    "494": [
+      "492"
+    ],
+    "501": [
+      "493"
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 3,
-  "failed_tasks": [
-    441
-  ],
+  "cycle_count": 0,
+  "failed_tasks": [],
   "completed_tasks": [
-    461,
-    462
+    490
   ],
   "current_statuses": {
-    "317": "implementing",
-    "430": "planned",
-    "441": "blocked",
-    "456": "not_started",
-    "461": "completed",
-    "462": "completed"
+    "490": "completed",
+    "480": "not_started",
+    "492": "not_started",
+    "493": "not_started",
+    "494": "not_started",
+    "501": "not_started"
   },
   "task_dirs": {
-    "317": "specs/317_propositional_tableau_completeness",
-    "430": "specs/430_prove_atom_persistence_upward_closure_for_intexpan",
-    "441": "specs/441_modal_proposition_native_refactor",
-    "456": "specs/456_shared_tableau_containment_blocking",
-    "461": "specs/461_vet_299_unused_section_vars",
-    "462": "specs/462_vet_299_dedup_refactor_reuse"
+    "490": "specs/490_birelational_intuitionistic_modal_semantics",
+    "480": "specs/480_intuitionistic_modal_framework",
+    "492": "specs/492_IK_intuitionistic_modal_soundness_completeness",
+    "493": "specs/493_CK_constructive_modal_soundness_completeness",
+    "494": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5",
+    "501": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5"
   },
   "research_agents": {
-    "317": "cslib-research-agent",
-    "430": "cslib-research-agent",
-    "441": "cslib-research-agent",
-    "456": "cslib-research-agent",
-    "461": "cslib-research-agent",
-    "462": "cslib-research-agent"
+    "490": "cslib-research-agent",
+    "480": "cslib-research-agent",
+    "492": "cslib-research-agent",
+    "493": "cslib-research-agent",
+    "494": "cslib-research-agent",
+    "501": "cslib-research-agent"
   },
   "implement_agents": {
-    "317": "cslib-implementation-agent",
-    "430": "cslib-implementation-agent",
-    "441": "cslib-implementation-agent",
-    "456": "cslib-implementation-agent",
-    "461": "cslib-implementation-agent",
-    "462": "cslib-implementation-agent"
-  },
-  "notes": "461,462 COMPLETE. 317 BANKED at Wave A (Phases 1-4/11 green, commit 19c68791) after 3 solid Fable-assisted rounds; Wave B (5-11) NOT pushed this run per user guidance (multi-day task, diminishing returns). 430/456 remain deferred behind 317 Wave B+ (documented for future run). 441 implementation in flight = last completable task."
+    "490": "cslib-implementation-agent",
+    "480": "cslib-implementation-agent",
+    "492": "cslib-implementation-agent",
+    "493": "cslib-implementation-agent",
+    "494": "cslib-implementation-agent",
+    "501": "cslib-implementation-agent"
+  }
 }

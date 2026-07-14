@@ -1,5 +1,5 @@
 {
-  "next_project_number": 501,
+  "next_project_number": 502,
   "active_projects": [
     {
       "project_number": 486,
@@ -45,22 +45,24 @@
     {
       "project_number": 478,
       "project_name": "metalogic_hilbert_completeness_framework",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Metalogic framework: generic Hilbert-style axiomatic calculus and canonical-model completeness machinery for modal logic, parameterized over frame conditions, with □ and ◇ both primitive (consistent with PR #607/#662). Provide the reusable soundness/completeness infrastructure that per-logic instantiations build on. Foundation for tasks 479-484.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-14T06:35:23Z",
+      "completion_summary": "Generic Hilbert-style canonical-model completeness framework implemented sorry-free on main (Cslib/Logics/Modal/Metalogic/: MCS.lean, Completeness.lean ~802L, GenericMCSBridge, DeductionTheorem, Soundness) on the 7-primitive base {atom,bot,imp,and,or,box,diamond}, parameterized over frame conditions via InterSystem lifting. Reconciled to completed: code exists (produced under the task-441/486/488/498 reconstruction); upstreaming to the PR track is tracked separately."
     },
     {
       "project_number": 479,
       "project_name": "metalogic_K_soundness_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Sound and complete axiomatization of the minimal classical modal logic K (□/◇ primitive), instantiating the generic completeness framework. Prove soundness over all Kripke frames and completeness via the canonical model. Depends on task 478.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-14T06:35:23Z",
+      "completion_summary": "Classical modal K soundness + canonical-model completeness implemented sorry-free on main (Modal/Metalogic/Systems/K: k_strong_soundness, k_strong_completeness, k_completeness). Reconciled to completed; upstreaming tracked separately."
     },
     {
       "project_number": 480,
@@ -79,32 +81,35 @@
     {
       "project_number": 481,
       "project_name": "metalogic_T_reflexive_soundness_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Sound and complete axiomatization of modal logic T (reflexive frames) as a modular extension of K, via the axiom-T ↔ reflexivity frame-condition correspondence. Prove soundness and completeness by canonical model. Depends on tasks 478, 479.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-14T06:35:23Z",
+      "completion_summary": "Classical modal T (reflexive) soundness + completeness implemented sorry-free on main (Modal/Metalogic/Systems/T: t_strong_soundness/completeness, t_completeness) as a modular K-extension. Reconciled to completed; upstreaming tracked separately."
     },
     {
       "project_number": 482,
       "project_name": "metalogic_S4_soundness_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Sound and complete axiomatization of modal logic S4 (reflexive-transitive frames) via the T + 4 axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 481.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-14T06:35:23Z",
+      "completion_summary": "Classical modal S4 (reflexive-transitive) soundness + completeness implemented sorry-free on main (Modal/Metalogic/Systems/S4). Reconciled to completed; upstreaming tracked separately."
     },
     {
       "project_number": 483,
       "project_name": "metalogic_S5_soundness_completeness",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Sound and complete axiomatization of modal logic S5 (equivalence frames) via the reflexive/symmetric/transitive (or euclidean) axiom-frame-condition correspondences, as a modular extension. Prove soundness and completeness by canonical model. Depends on tasks 478, 479, 482.",
       "created": "2026-07-12T18:05:54Z",
-      "last_updated": "2026-07-12T18:05:54Z"
+      "last_updated": "2026-07-14T06:35:23Z",
+      "completion_summary": "Classical modal S5 (equivalence) soundness + completeness implemented sorry-free on main (Modal/Metalogic/Systems/S5). Also present on main beyond these tasks: the full cube (D, B, K4, K5, K45, KB5, TB, D4, D5, D45, DB) with Soundness/Completeness/ConservativeExtension. Reconciled to completed; upstreaming tracked separately."
     },
     {
       "project_number": 484,
@@ -2572,7 +2577,7 @@
     {
       "project_number": 490,
       "project_name": "birelational_intuitionistic_modal_semantics",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 487,
@@ -2581,7 +2586,25 @@
       ],
       "description": "Birelational (intuitionistic Kripke) modal SEMANTICS — the semantic foundation for the intuitionistic and minimal modal metalogic, sibling to the classical Kripke cube. Define intuitionistic Kripke frames with TWO relations: the intuitionistic preorder ≤ and the modal accessibility R, plus the heredity/monotonicity condition and the F1/F2 (up-down) confluence conditions relating ≤ and R. Define Satisfies (forcing) for the fully-primitive modal Proposition {atom,bot,imp,and,or,box,diamond} (PR #662) over these frames: persistence of forcing under ≤, □ quantifying over ≤∘R, ◇ over R, intuitionistic → clause (∀ ≥-worlds). This is the layer that intuitionistic (tasks 492/493/494) and minimal (task 495) completeness build on. REQUIRES the primitive-◇/∨/⊥ base (tasks 477/487, in #662) — intuitionistically ◇≠¬□¬ and ∨ is not definable from →/∧/⊥, so both-primitive-modalities + primitive ∨/⊥ are hard prerequisites. Depends on 487 (fully-primitive modal base).",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T06:59:52Z",
+      "session_id": "sess_1784011298_752245_490",
+      "artifacts": [
+        {
+          "path": "specs/490_birelational_intuitionistic_modal_semantics/reports/01_birelational-intuitionistic-modal-semantics.md",
+          "type": "report",
+          "summary": "Birelational intuitionistic modal semantics research"
+        },
+        {
+          "path": "specs/490_birelational_intuitionistic_modal_semantics/plans/01_birelational-modal-semantics.md",
+          "type": "plan",
+          "summary": "Birelational modal semantics 5-phase plan"
+        },
+        {
+          "path": "specs/490_birelational_intuitionistic_modal_semantics/summaries/01_birelational-modal-semantics-summary.md",
+          "type": "summary",
+          "summary": "Birelational modal semantics implementation"
+        }
+      ]
     },
     {
       "project_number": 491,
@@ -2767,6 +2790,20 @@
         "Remove worktree cslib-662-rebuild + branch rebuild/662-main-7prim once PR settled",
         "Add contributor copyright-holder line pending Fabrizio confirmation"
       ]
+    },
+    {
+      "project_number": 501,
+      "project_name": "CK_constructive_modal_extensions_CT_CS4_CS5",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "modal-logic",
+      "parent_task": 493,
+      "dependencies": [
+        493
+      ],
+      "description": "CK constructive modal extensions CT / CS4 / CS5 — sound and complete axiomatizations of the constructive (CK-based) analogues of T / S4 / S5 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences (reflexive / transitive / euclidean R, compatible with the <=-R confluence) over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. Completes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal). Depends on 493.",
+      "created": "2026-07-14T06:35:23Z",
+      "last_updated": "2026-07-14T06:35:23Z"
     }
   ],
   "repository_health": {

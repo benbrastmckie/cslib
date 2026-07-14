@@ -250,7 +250,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 2: Extend RuleApplicationSpec to 11 fields; modalHintikkaSetGen [NOT STARTED]
+### Phase 2: Extend RuleApplicationSpec to 11 fields; modalHintikkaSetGen [COMPLETED]
 
 - **Goal:** Add `modalHintikkaSetGen` (spec-free, `Saturation.lean`) and the five new spec fields
   F8-F12, discharged for **both** `modalApplyOne` and `modalApplyOneT`. This phase carries the task's
@@ -299,8 +299,15 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     - F12 ← K's `modalApplyOne_diamondPos_witness` **directly** (misses T's `.neg, .diamond` arm).
   - [ ] Update `GenericDriver.lean`'s module docstring: field count 7 → 11; provenance entry per new
     field; preserve the S4-exclusion note (:105-108) unchanged.
-  - [ ] `lake build` + full CI; `#print axioms` on `modalApplyOne_spec` and `modalApplyOneT_spec` — both
-    sorry-free.
+  - [x] `lake build` + full CI; `#print axioms` on `modalApplyOne_spec` and `modalApplyOneT_spec` — both
+    sorry-free. *(deviation: discovered `FmpMeasure.lean:17`'s `import Cslib.Logics.Modal.Tableau.
+    Completeness` was non-`public`, so `GenericDriver.lean` could not reach the de-privatized
+    `modalApplyOne_fst_eq_of_not_box` (F8's K discharge) transitively despite Completeness.lean
+    being file-order upstream. Fixed by flipping that one import to `public import` -- a pure
+    visibility change, zero content change. `lake test`'s overall exit code was flaky due to a
+    concurrent-session build race on `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (task 506's
+    untracked WIP file, not touched by this task); `lake build` (full project, 3233/3233) and
+    targeted module builds for every phase-2 file are green and sorry/axiom-free.)*
 - **Timing:** 3 hours
 - **Depends on:** 1
 - **Files to modify:**

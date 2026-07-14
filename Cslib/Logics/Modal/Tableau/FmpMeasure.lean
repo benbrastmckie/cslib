@@ -14,7 +14,7 @@ import Mathlib.Data.Finset.Dedup
 import Mathlib.Data.Finset.Lattice.Lemmas
 import Mathlib.Algebra.BigOperators.Group.List.Basic
 public import Cslib.Foundations.Logic.Tableau.Measure
-import Cslib.Logics.Modal.Tableau.Completeness
+public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.SoundnessStep
 public import Cslib.Logics.Modal.Tableau.Saturation
 

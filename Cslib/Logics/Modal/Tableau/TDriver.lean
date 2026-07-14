@@ -718,11 +718,124 @@ private lemma modalApplyOneT_branchingLength
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)] at hbr
     exact modalApplyOne_branching_length sf b acc brs hbr
 
-/-- **`modalApplyOneT` satisfies `RuleApplicationSpec`** (task 503 Phases 4-5): the interface
-witness for the T driver, combining the seven fields discharged above. This is the T-system
-analogue of `GenericDriver.lean`'s `modalApplyOne_spec` (K), and unblocks reusing the K-style FMP
-termination measure (`FmpMeasure.lean`/`GenericDriver.lean`, task 507) for `modalTableauT` via
-the `(apply, spec)`-bundled wrapper theorems. -/
+/-! ## Discharging F8-F12 (task 510: the Hintikka/saturation chain fields) -/
+
+/-- **F8 (`localShapeInvariance`)**: outside the two T-relevant shapes (guaranteed here, since
+`φ` is neither box- nor diamond-shaped), `modalApplyOneT` agrees with `modalApplyOne` on both
+calls (`modalApplyOneT_eq_of_not_boxPos_diaNeg`), so K's own `modalApplyOne_fst_eq_of_not_box`
+transports directly. -/
+private lemma modalApplyOneT_localShapeInvariance
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) :
+    (modalApplyOneT ⟨s, φ, w⟩ b acc).1 = (modalApplyOneT ⟨s, φ, w⟩ b' acc').1 := by
+  have hnotshape : ∀ (b'' : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc'' : Accessibility),
+      modalApplyOneT (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc''
+        = modalApplyOne (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b'' acc'' := by
+    intro b'' acc''
+    apply modalApplyOneT_eq_of_not_boxPos_diaNeg
+    refine ⟨?_, ?_⟩
+    · rintro ⟨-, ψ, hform⟩; exact hnb ψ hform
+    · rintro ⟨-, ψ, hform⟩; exact hnd ψ hform
+  rw [hnotshape b acc, hnotshape b' acc']
+  exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
+
+omit [Hashable Atom] in
+/-- **F9 (`boxPosNotExpanding`)**: `modalApplyOneT`'s box-positive dispatch
+(`modalApplyOneT_boxPos_fst`) maps K's `.persistent kForms ↦ .persistent (kForms ++ selfNew...)`
+and `.notApplicable ↦ .notApplicable | .persistent selfNew` -- **stays in the Propagating class**
+either way, with a different (but still existentially-quantifiable) payload than K's. -/
+private lemma modalApplyOneT_boxPosNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .pos)
+    (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneT sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneT sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneT_boxPos_fst]
+  rcases modalApplyOne_boxPos_eq (⟨.pos, .box ψ, w⟩) rfl ψ rfl b acc with hk | ⟨kForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- **F10 (`diaNegNotExpanding`)**: dual of F9 for the diamond-negative shape, via
+`modalApplyOneT_diamondNeg_fst`. -/
+private lemma modalApplyOneT_diaNegNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .neg)
+    (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneT sf b acc).1 = .notApplicable ∨
+      ∃ out, (modalApplyOneT sf b acc).1 = .persistent out := by
+  obtain ⟨s, φ, w⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  rw [modalApplyOneT_diamondNeg_fst]
+  rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond ψ, w⟩) rfl ψ rfl b acc with
+      hk | ⟨kForms, hk⟩
+  · simp only [hk]; split_ifs with hemp
+    · exact Or.inl rfl
+    · exact Or.inr ⟨_, rfl⟩
+  · simp only [hk]; exact Or.inr ⟨_, rfl⟩
+
+omit [Hashable Atom] in
+/-- **F11 (`boxNegWitness`)**: `⟨.neg, .box ψ, w⟩` has sign `.neg`, so it misses T's
+`.pos, .box` self-propagation arm entirely (`FrameRules.lean`'s dispatch only touches
+`.pos, .box`/`.neg, .diamond`) -- `modalApplyOneT` agrees with `modalApplyOne` here
+(`modalApplyOneT_eq_of_not_boxPos_diaNeg`), so K's own `modalApplyOne_boxNeg_witness`
+transports directly. -/
+private lemma modalApplyOneT_boxNegWitness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneT (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  have heq : modalApplyOneT
+      (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOne (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
+    modalApplyOneT_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩
+  rw [heq]
+  exact modalApplyOne_boxNeg_witness b acc ψ w
+
+omit [Hashable Atom] in
+/-- **F12 (`diaPosWitness`)**: dual of F11 -- `⟨.pos, .diamond ψ, w⟩` misses T's
+`.neg, .diamond` self-propagation arm, so `modalApplyOneT` agrees with `modalApplyOne` here too. -/
+private lemma modalApplyOneT_diaPosWitness
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneT (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w (modalNextWorld b) ∧
+      ∃ rest,
+        (modalApplyOneT (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+                rest) := by
+  have heq : modalApplyOneT
+      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOne (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc :=
+    modalApplyOneT_eq_of_not_boxPos_diaNeg _ b acc ⟨by simp, by simp⟩
+  rw [heq]
+  exact modalApplyOne_diamondPos_witness b acc ψ w
+
+/-- **`modalApplyOneT` satisfies `RuleApplicationSpec`** (task 503 Phases 4-5; extended to eleven
+fields by task 510): the interface witness for the T driver, combining the eleven fields
+discharged above. This is the T-system analogue of `GenericDriver.lean`'s
+`modalApplyOne_spec` (K), and unblocks reusing the K-style FMP termination measure
+(`FmpMeasure.lean`/`GenericDriver.lean`, task 507) and the generic Hintikka/saturation chain
+(`CompletenessLoop.lean`, task 510) for `modalTableauT` via the `(apply, spec)`-bundled wrapper
+theorems. Adding F8-F12 here is what makes `modalExpandBranchesT_hintikka` (below) a one-liner. -/
 theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT where
   freshLocal := modalApplyOneT_freshLocal
   outputsSubsetUniverse := modalApplyOneT_outputsSubsetUniverse
@@ -731,6 +844,11 @@ theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT 
   outDegStep := modalApplyOneT_outDegStep
   knownWorldsStep := modalApplyOneT_knownWorldsStep
   branchingLength := modalApplyOneT_branchingLength
+  localShapeInvariance := modalApplyOneT_localShapeInvariance
+  boxPosNotExpanding := modalApplyOneT_boxPosNotExpanding
+  diaNegNotExpanding := modalApplyOneT_diaNegNotExpanding
+  boxNegWitness := modalApplyOneT_boxNegWitness
+  diaPosWitness := modalApplyOneT_diaPosWitness
 
 end Cslib.Logic.Modal.Tableau
 

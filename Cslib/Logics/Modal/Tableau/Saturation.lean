@@ -21,6 +21,10 @@ It defines the main `modalTableau` entry point and the `ModalTableauResult` type
 - `modalFuel`: Fuel bound (FMP-derived).
 - `modalTableau`: Entry point for the decision procedure.
 - `modalHintikkaSet`: Saturation predicate for open branches.
+- `modalHintikkaSetGen`: `modalHintikkaSet`, generalized over an abstract `apply : RuleApply Atom`
+  (task 510). Spec-free (no `RuleApplicationSpec` obligation) -- lives here, upstream of
+  `GenericDriver.lean`, precisely so any system (including S4, which discharges no spec) can
+  consume the generic Hintikka-set *statement shape*.
 
 ## Design
 
@@ -441,6 +445,45 @@ def modalHintikkaSet
   -- Diamond-positive witness: T(◇φ)@w on the branch implies a successor world with T(φ)
   (∀ (φ : Proposition Atom) (w : WorldIndex),
     ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
+
+/-- **Generic Hintikka set** (task 510): `modalHintikkaSet`, generalized over an abstract
+`apply : RuleApply Atom`. A one-token substitution (`modalApplyOne ↦ apply` in conjunct 2's
+`let (result, _) := apply sf b acc`); conjuncts 1, 3, 4 mention no rule function at all. This
+definition is **spec-free** -- it depends on nothing from `RuleApplicationSpec`
+(`GenericDriver.lean`) -- and lives here, upstream of `GenericDriver.lean`, so that any system
+(including S4, which is explicitly excluded from discharging `RuleApplicationSpec`,
+`GenericDriver.lean`'s module docstring) can consume the *statement shape* of a generic Hintikka
+set without discharging the spec. `modalHintikkaSet` is retained unchanged (its `unfold`/
+`simp only` call sites rely on its exact normal form, mirroring the deliberate
+`modalStepBranch`/`modalStepBranchGen` + `modalStepBranch_eq` precedent above); see
+`modalHintikkaSet_eq` for the bridge. -/
+def modalHintikkaSetGen (apply : RuleApply Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  isModalClosed b = false ∧
+  (∀ sf ∈ b,
+    let (result, _) := apply sf b acc
+    match sf.sign, sf.formula with
+    | .neg, .box _ => True    -- F(□φ): fresh-world rule; handled by conjunct 3
+    | .pos, .diamond _ => True  -- T(◇φ): fresh-world rule; handled by conjunct 4
+    | _, _ =>
+      match result with
+      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .notApplicable => True) ∧
+  -- Box-negative witness: F(□φ)@w on the branch implies a successor world with F(φ)
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.neg, .box φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.neg, φ, w'⟩ ∈ b) ∧
+  -- Diamond-positive witness: T(◇φ)@w on the branch implies a successor world with T(φ)
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
+
+/-- Bridge (task 510): `modalHintikkaSet` is exactly `modalHintikkaSetGen modalApplyOne`. Closes
+by `rfl`, confirming the substitution in `modalHintikkaSetGen` is faithful. Lets K's
+`modalTableau_complete` recover the concrete `modalHintikkaSet` form from a generic conclusion. -/
+theorem modalHintikkaSet_eq (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : modalHintikkaSet b acc = modalHintikkaSetGen modalApplyOne b acc := rfl
 
 end Cslib.Logic.Modal.Tableau
 

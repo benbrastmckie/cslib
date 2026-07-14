@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "description": "Per-repo literature sub-index for cslib Temporal/Bimodal metalogic work (tasks 180, 444-446). Reference-only doc_id pointers into the global Literature/ repo.",
+  "description": "Per-repo literature sub-index for cslib metalogic work. Temporal/Bimodal (tasks 180, 444-446, 464) and Constructive Modal CK-cube (tasks 501, 508, 509). Reference-only doc_id pointers into the global Literature/ repo.",
   "entries": [
     {
       "doc_id": "burgess_1982_i",
@@ -61,6 +61,14 @@
     {
       "doc_id": "simpson_1994_intuitionisticmodallogic",
       "relevance": "Simpson, Proof Theory and Semantics of Intuitionistic Modal Logic (PhD thesis, Edinburgh 1994): the canonical reference for independent, non-interdefinable box/diamond; primary replacement citation for the modal Basic.lean primitive-design rationale (task 499)."
+    },
+    {
+      "doc_id": "pacheco_2024_collapsingconstructiveandintuitionisticmodallogics",
+      "relevance": "Pacheco, Collapsing Constructive and Intuitionistic Modal Logics (arXiv:2408.16428, 2024) — PRIMARY SOURCE for task 509. Works in the CK fallible-world / primitive-diamond setting with CKB := CK + {B_box, B_dia}, exactly the cslib bBox/bDia axioms. Theorem 13: CKB proves phi iff IKB proves phi iff CKB validates phi. Canonical model built over prime, CONSISTENT, NON-MAXIMAL theories. Lemma 15 derives symmetry directly from B_dia (dia box P implies P) by using the DIAMOND-inverse relation (Gamma ~ Delta iff Gamma subset Delta and Delta subset Gamma-dia), sidestepping the maximality obstruction that blocks the box-inverse definition. Canonical W_bot is empty, which explains task 508 cs5_dia_bot_imp_bot and the Set.univ-free tail lead."
+    },
+    {
+      "doc_id": "arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics",
+      "relevance": "Arisaka, Das, Strassburger, On Nested Sequents for Constructive Modal Logics (LMCS 11(3:7), 2015) — deepest proof-theoretic treatment of the fallible-world constructive modal cube including CS5. Section 4.3 proves B entails k3 (diamond distribution) and k5 (not dia bot) constructively, corroborating the collapse result. Explicitly disclaims Kripke-semantic completeness for CS5, supporting the scope caveat in task 509."
     }
   ]
 }

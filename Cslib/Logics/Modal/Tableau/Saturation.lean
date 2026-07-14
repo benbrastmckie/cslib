@@ -95,9 +95,55 @@ def modalFuel (φ : Proposition Atom) : Nat :=
   let n := modalComplexity φ
   3 ^ (4 * (2 * n + 1) * ((2 * n + 1) ^ (n + 1) + 1))
 
+/-! ## Rule-Application Function Shape -/
+
+/-- The shape of a rule-application function, matching `modalApplyOne`'s signature. Any
+function of this type can be threaded through the generic driver `modalStepBranchGen` /
+`modalExpandBranchesGen` / `modalTableauGen` below. -/
+@[nolint unusedArguments]
+abbrev RuleApply (Atom : Type*) [DecidableEq Atom] [Hashable Atom] : Type _ :=
+  SignedFormula (Proposition Atom) WorldIndex →
+  List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility →
+  RuleResult (Proposition Atom) WorldIndex × Accessibility
+
 /-! ## Branch Step -/
 
+/-- Generic one-step branch expansion, parametrized over an abstract rule-application
+function `apply` with `modalApplyOne`'s signature. `modalStepBranch` (K) is the trivial
+instantiation `modalStepBranchGen modalApplyOne` (see `modalStepBranch_eq`); T's driver
+instantiates it with `modalApplyOneT` (see `TDriver.lean`).
+
+Returns `some (newBranches, newExpandedSets, newAcc)` if a formula was expanded,
+or `none` if the branch is saturated. -/
+def modalStepBranchGen
+    (apply : RuleApply Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (expanded : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility) :=
+  b.findSome? fun sf =>
+    if expanded.any (· == sf) then none
+    else
+      let (result, newAcc) := apply sf b acc
+      match result with
+      | .linear newForms =>
+        some ([newForms ++ b], [expanded ++ [sf]], newAcc)
+      | .branching branches =>
+        some (branches.map (· ++ b), branches.map (fun _ => expanded ++ [sf]), newAcc)
+      | .persistent newForms =>
+        -- Persistent: keep sf on branch (don't add to expanded), add consequences
+        some ([newForms ++ b], [expanded], newAcc)
+      | .notApplicable => none
+
 /-- Apply one expansion step to a branch, using the accumulated accessibility relation.
+Kept as the exact original definition (not a wrapper around `modalStepBranchGen`) so that
+every existing K proof's `simp only [modalStepBranch]`/`unfold modalStepBranch` continues to
+unfold to the identical normal form (14+ call sites across `Completeness.lean`,
+`CompletenessLoop.lean`, `FmpMeasure.lean`, `Soundness.lean`, `SoundnessStep.lean` rely on this
+exact unfold shape). `modalStepBranch` and `modalStepBranchGen modalApplyOne` compute the same
+result on every input; see `modalStepBranch_eq`.
 
 Returns `some (newBranches, newExpandedSets, newAcc)` if a formula was expanded,
 or `none` if the branch is saturated. -/
@@ -122,9 +168,82 @@ def modalStepBranch
         some ([newForms ++ b], [expanded], newAcc)
       | .notApplicable => none
 
+/-- `modalStepBranch` is the trivial instantiation of `modalStepBranchGen` at
+`apply := modalApplyOne`. Zero-regression bridge lemma: all downstream K proofs may rewrite
+via this equation to reach the generic driver. -/
+theorem modalStepBranch_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (expanded : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    modalStepBranch b expanded acc = modalStepBranchGen modalApplyOne b expanded acc := rfl
+
 /-! ## Main Expansion Loop -/
 
-/-- Fuel-based expansion of a list of modal K branches.
+/-- Generic fuel-based expansion of a list of modal branches, parametrized over an abstract
+rule-application function `apply`. `modalExpandBranches` (K) is the trivial instantiation
+`modalExpandBranchesGen modalApplyOne` (see `modalExpandBranches_eq`).
+
+Processes each branch in a worklist:
+- If the branch is closed, skip it.
+- If the branch has no more applicable rules (saturated and open), return it as a
+  countermodel together with the branch-local accessibility relation.
+- Otherwise apply one expansion step and recurse with remaining fuel.
+
+Each branch carries its own `Accessibility` relation in the parallel list `accs`
+(with `accs.length = branches.length`), so an existential-rule edge fired on one
+branch cannot pollute sibling branches.
+
+Termination is guaranteed by the fuel parameter. -/
+def modalExpandBranchesGen
+    (apply : RuleApply Atom)
+    (branches : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (fuel : Nat) : ModalTableauResult Atom :=
+  match fuel with
+  | 0 =>
+    -- Fuel exhausted: return first open branch with its local accessibility relation
+    match (branches.zip accs) |>.findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | some (b, a) => .openBranch b a
+    | none => .closed
+  | fuel' + 1 =>
+    -- processNext: iterate through branches, finding the first open one to expand
+    let rec @[nolint docBlame] processNext
+        (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        : ModalTableauResult Atom :=
+      match pending, pendingExp, pendingAccs with
+      | [], _, _ => .closed  -- All branches closed
+      | b :: restBs, e :: restEs, a :: restAs =>
+        if isModalClosed b then
+          -- Branch is closed: skip it, carry its acc to done
+          processNext restBs restEs restAs (done ++ [b]) (doneExp ++ [e]) (doneAccs ++ [a])
+        else
+          match modalStepBranchGen apply b e a with
+          | none =>
+            -- Branch is saturated and open: return with this branch's local acc
+            .openBranch b a
+          | some (newBs, newExps, newAcc) =>
+            -- Expanded: recurse with new branches using newAcc for each child
+            modalExpandBranchesGen apply
+              (done ++ newBs ++ restBs)
+              (doneExp ++ newExps ++ restEs)
+              (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+              fuel'
+      | _, _, _ => .closed  -- malformed (length invariant rules this out)
+    processNext branches expandedSets accs [] [] []
+
+/-- Fuel-based expansion of a list of modal K branches. Kept as the exact original recursive
+definition (with its own `modalExpandBranches.processNext` well-founded-recursion helper, which
+`Soundness.lean`/`CompletenessLoop.lean` reference by name) rather than a wrapper around
+`modalExpandBranchesGen`, so every existing K proof continues to see the identical elaborated
+term with zero regression. `modalExpandBranches` and `modalExpandBranchesGen modalApplyOne`
+compute the same result on every input; see `modalExpandBranches_eq`.
 
 Processes each branch in a worklist:
 - If the branch is closed, skip it.
@@ -180,7 +299,67 @@ def modalExpandBranches
       | _, _, _ => .closed  -- malformed (length invariant rules this out)
     processNext branches expandedSets accs [] [] []
 
+/-- `modalExpandBranches` computes the same result as the trivial instantiation of
+`modalExpandBranchesGen` at `apply := modalApplyOne`. Zero-regression bridge lemma: any proof
+about the generic driver at `modalApplyOne` transports to a K fact via this equation (and
+conversely). Proved by induction on `fuel`, with an inner induction on the worklist (mirroring
+each `processNext`'s own recursion) since `modalStepBranch b e a` and
+`modalStepBranchGen modalApplyOne b e a` are definitionally equal (`modalStepBranch_eq`). -/
+theorem modalExpandBranches_eq
+    (branches : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (fuel : Nat) :
+    modalExpandBranches branches expandedSets accs fuel =
+      modalExpandBranchesGen modalApplyOne branches expandedSets accs fuel := by
+  induction fuel generalizing branches expandedSets accs with
+  | zero => simp [modalExpandBranches, modalExpandBranchesGen]
+  | succ fuel' ih =>
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        modalExpandBranches.processNext fuel' pending pendingExp pendingAccs done doneExp
+            doneAccs =
+          modalExpandBranchesGen.processNext modalApplyOne fuel' pending pendingExp pendingAccs
+            done doneExp doneAccs by
+      have hkey := key branches expandedSets accs [] [] []
+      simpa [modalExpandBranches, modalExpandBranchesGen] using hkey
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+      simp [modalExpandBranches.processNext, modalExpandBranchesGen.processNext]
+    | cons b restBs ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+      cases pendingExp with
+      | nil => simp [modalExpandBranches.processNext, modalExpandBranchesGen.processNext]
+      | cons e restEs =>
+        cases pendingAccs with
+        | nil => simp [modalExpandBranches.processNext, modalExpandBranchesGen.processNext]
+        | cons a restAs =>
+          simp only [modalExpandBranches.processNext, modalExpandBranchesGen.processNext]
+          by_cases hc : isModalClosed b
+          · simp only [hc, if_true]
+            exact ih_inner restEs restAs (done ++ [b]) (doneExp ++ [e]) (doneAccs ++ [a])
+          · simp only [hc]
+            rw [show modalStepBranch b e a = modalStepBranchGen modalApplyOne b e a from rfl]
+            cases modalStepBranchGen modalApplyOne b e a with
+            | none => rfl
+            | some x =>
+              obtain ⟨newBs, newExps, newAcc⟩ := x
+              exact ih _ _ _
+
 /-! ## Entry Point -/
+
+/-- The modal decision procedure driven by an abstract rule-application function `apply`,
+starting the signed tableau from `F(φ)` at world `0`. `modalTableau` (K) is the trivial
+instantiation `modalTableauGen modalApplyOne` (see `modalTableau_eq`). -/
+def modalTableauGen (apply : RuleApply Atom) (φ : Proposition Atom) : ModalTableauResult Atom :=
+  let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
+    [⟨.neg, φ, 0⟩]
+  modalExpandBranchesGen apply [initialBranch] [[]] [Accessibility.empty] (modalFuel φ)
 
 /-- The modal K tableau decision procedure.
 
@@ -190,11 +369,21 @@ Given a formula `φ`, runs the signed tableau starting from `F(φ)` at world `0`
   encode a finite Kripke model refuting `φ` (see `Completeness.lean`).
 
 Note: For K, "the tableau for φ closes" means "φ is K-valid" (true in all K-models),
-which by K-completeness equals "φ is K-provable". -/
+which by K-completeness equals "φ is K-provable". Kept as the exact original definition (not a
+wrapper around `modalTableauGen`) so that `simp only [modalTableau]` (used in
+`Soundness.lean`) continues to unfold to the identical `modalExpandBranches [...] ...` normal
+form; see `modalTableau_eq` for the (non-defeq) bridge to the generic driver. -/
 def modalTableau (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
     [⟨.neg, φ, 0⟩]
   modalExpandBranches [initialBranch] [[]] [Accessibility.empty] (modalFuel φ)
+
+/-- `modalTableau` computes the same result as the trivial instantiation of `modalTableauGen`
+at `apply := modalApplyOne`. Zero-regression bridge lemma. -/
+theorem modalTableau_eq (φ : Proposition Atom) :
+    modalTableau φ = modalTableauGen modalApplyOne φ := by
+  simp only [modalTableau, modalTableauGen]
+  exact modalExpandBranches_eq _ _ _ _
 
 /-! ## Hintikka Set Predicate -/
 

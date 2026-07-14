@@ -1,7 +1,7 @@
 # Implementation Plan: Salvage task-299 Soundness Proof-Engineering Lemmas
 
 - **Task**: 396 - Evaluate and salvage architecture-independent proof-engineering lemmas from the stopped task-299 modal-K soundness re-attempt (`wip/task-299-soundness-refactor` @ `27d93e2d`) into current main modal-tableau soundness code
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 4.5 hours
 - **Dependencies**: None (all salvage dependencies already resolve on main)
 - **Research Inputs**:
@@ -224,20 +224,21 @@ proof-arms reworked for native constructors.
 
 ---
 
-### Phase 5: Full CI Verification and Summary [IN PROGRESS]
+### Phase 5: Full CI Verification and Summary [COMPLETED]
 
 **Goal**: Run the complete CSLib CI pipeline over the changed modules, confirm zero technical
 debt, and write the execution summary.
 
 **Tasks**:
-- [ ] `lake build` (full) green.
-- [ ] `lake test` (CslibTests) green.
-- [ ] `lake exe checkInitImports` green.
-- [ ] `lake exe lint-style` green.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — resolve any import findings on the
-      touched files.
-- [ ] Grep the two changed files for `sorry`/`admit`/`axiom` — confirm none.
-- [ ] Write `summaries/01_salvage-soundness-lemmas-summary.md` cataloging salvaged vs excluded
+- [x] `lake build` (full) green.
+- [x] `lake test` (CslibTests) green.
+- [x] `lake exe checkInitImports` green.
+- [x] `lake exe lint-style` green.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — resolve any import findings on the
+      touched files. *(zero findings on `Defs.lean`/`SoundnessStep.lean`; unrelated pre-existing
+      findings elsewhere in the library left untouched, out of scope)*
+- [x] Grep the two changed files for `sorry`/`admit`/`axiom` — confirm none.
+- [x] Write `summaries/01_salvage-soundness-lemmas-summary.md` cataloging salvaged vs excluded
       items and CI results.
 
 **Timing**: 0.75 hours
@@ -256,14 +257,14 @@ debt, and write the execution summary.
 
 ## Testing & Validation
 
-- [ ] `lake build` full green (all Modal tableau modules recompile).
-- [ ] `lake test` green.
-- [ ] `lake exe checkInitImports` green.
-- [ ] `lake exe lint-style` green.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` clean on touched files.
-- [ ] Four `*_eq_some` lemmas conclude native/target shapes (no Łukasiewicz).
-- [ ] `#print axioms` on all salvaged declarations shows no `sorryAx`.
-- [ ] New bridge block contains no `Accessibility`/`acc`/`m.r` token.
+- [x] `lake build` full green (all Modal tableau modules recompile).
+- [x] `lake test` green.
+- [x] `lake exe checkInitImports` green.
+- [x] `lake exe lint-style` green.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` clean on touched files.
+- [x] Four `*_eq_some` lemmas conclude native/target shapes (no Łukasiewicz).
+- [x] `#print axioms` on all salvaged declarations shows no `sorryAx`.
+- [x] New bridge block contains no `Accessibility`/`acc`/`m.r` token.
 
 ## Artifacts & Outputs
 

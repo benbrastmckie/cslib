@@ -1,13 +1,13 @@
 {
   "status": "implemented",
-  "phase": "3b",
+  "phase": "3c",
   "task_number": 480,
   "session_id": "sess_1784011298_752245_480",
   "agent_type": "cslib-implementation-hard-agent",
   "plan_version": 4,
   "plan_path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md",
   "phases_total": 12,
-  "phases_completed": 9,
+  "phases_completed": 10,
   "completed_preserved": [
     {"phase": "1", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean", "commit": "be8f2eb0"},
     {"phase": "2a", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "4fd37213"},
@@ -16,38 +16,44 @@
     {"phase": "2b", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "cdb0b635"},
     {"phase": "2c", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "e2dffef6"},
     {"phase": "2d", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "10730569"},
-    {"phase": "3a", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "commit": "f7c85a12"}
+    {"phase": "3a", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "commit": "f7c85a12"},
+    {"phase": "3b", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "commit": "eb7a9c14"}
   ],
-  "remaining_actionable": ["3c", "4"],
-  "remaining_actionable_count": 2,
-  "phase_3b_this_dispatch": {
-    "summary": "Appended truth_box_case to Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean: the .box constructor case of the (to-be-assembled) canonical_truth_lemma. BForces canonicalR canonicalVal botForces w (box phi) <-> (box phi) in w.val, unfolded via BForces_box (the only simp use). Forward direction: contrapositive via canonical_box_witness (Phase 2b) producing w'>=w and prime u with canonicalR w' u and phi not in u.val, instantiated against the forcing hypothesis and ih u for a contradiction. Backward direction: heredity over <=oR -- box phi in w.val persists to w'>=w by set inclusion, canonicalR w' u's box clause (.1) gives phi in u.val, ih.mpr transports to forcing. Takes the IH as an explicit hypothesis universally quantified over canonical worlds (matching 3a's truth_imp_case style) so 3b builds independently; recursion assembles in 3c. Threads h_K, h_Kdia, h_Idb solely via the call to canonical_box_witness (which also needs the base intuitionistic hypotheses h_implyK/h_implyS/h_efq/h_orI1/h_orI2/h_orE/h_andI/h_andE1/h_andE2) -- no new axiom introduced. CanonicalModel.lean and the 3a helpers untouched, only appended to TruthLemma.lean.",
-    "deliverable": "truth_box_case",
+  "remaining_actionable": ["4"],
+  "remaining_actionable_count": 1,
+  "phase_3c_this_dispatch": {
+    "summary": "Appended truth_diamond_case and canonical_truth_lemma to Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean, completing TruthLemma.lean. truth_diamond_case: BForces canonicalR canonicalVal botForces w (diamond phi) <-> (diamond phi) in w.val, unfolded via BForces_diamond. Forward direction closes with NO modal axiom -- canonicalR w u's diamond clause (.2) plus ih u transports directly. Backward direction consumes canonical_diamond_witness (Phase 2c, single witness v, no pair) plus ih.mpr. Threads h_Kdia, h_Cd (and h_K, h_dbot transitively via the witness call) -- h_Idb confirmed NOT consumed. canonical_truth_lemma: assembled by 'induction phi generalizing w with | atom | bot | and | or | imp | box | diamond', each case an exact call to its Phase 3a/3b/3c helper (and/or cases instantiate the universally-quantified IH at w; imp/box/diamond pass it through directly). Carries the full four-axiom union {h_K, h_Kdia, h_Idb, h_Cd} plus h_dbot; botForces remains a loose parameter bridged via h_bot. This is the payoff lemma Phase 4 (Completeness.lean) consumes. CanonicalModel.lean and the 3a/3b helpers untouched, only appended to TruthLemma.lean.",
+    "deliverables": ["truth_diamond_case", "canonical_truth_lemma"],
     "no_new_axiom_introduced": true,
-    "threaded_hypotheses": ["h_K", "h_Kdia", "h_Idb"]
+    "threaded_hypotheses_diamond_case": ["h_Kdia", "h_Cd", "h_K", "h_dbot"],
+    "threaded_hypotheses_assembled_lemma": ["h_K", "h_Kdia", "h_Idb", "h_Cd", "h_dbot"],
+    "stop_contingency_triggered": false,
+    "all_seven_constructors_covered": true
   },
   "minimal_axiom_set_framework_now": ["h_K", "h_Kdia", "h_Idb", "h_Cd", "h_dbot"],
   "sorry_inventory": [],
   "new_axioms_introduced": [],
   "verification": {
     "build_scoped": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma -- succeeded (596 jobs), no warnings",
-    "build_full": "lake build -- succeeded (3190 jobs); only pre-existing unrelated warnings/sorries in Cslib/Logics/Propositional/Tableau/* (outside this task's scope)",
+    "build_full": "lake build -- succeeded (3190 jobs); only pre-existing unrelated warnings/sorries in Cslib/Logics/Propositional/Tableau/Intuitionistic/{Scheme,Completeness}.lean and Tableau/Minimal/Completeness.lean (outside this task's scope)",
     "sorry_count": 0,
-    "lean_verify_truth_box_case": ["propext", "Classical.choice", "Quot.sound"],
+    "lean_verify_truth_diamond_case": ["propext", "Classical.choice", "Quot.sound"],
+    "lean_verify_canonical_truth_lemma": ["propext", "Classical.choice", "Quot.sound"],
     "check_init_imports": "passed (no output)",
-    "lint_style": "passed (no output)",
+    "lint": "passed (no output, scoped to TruthLemma.lean)",
+    "lint_style": "passed (no output, scoped to TruthLemma.lean)",
     "file_touched": true,
-    "git_diff_scope": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean (additive, ~68 new lines); specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md (Phase 3b section marked COMPLETED); specs/480_intuitionistic_modal_framework/progress/phase-3b-progress.json (new); specs/480_intuitionistic_modal_framework/summaries/08_truth-lemma-box-case-summary.md (new); this handoff. CanonicalModel.lean and PrimeTheory.lean untouched (git status shows no changes to either)."
+    "git_diff_scope": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean (additive, ~135 new lines); specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md (Phase 3c section marked COMPLETED); specs/480_intuitionistic_modal_framework/progress/phase-3c-progress.json (new); specs/480_intuitionistic_modal_framework/summaries/09_truth-lemma-diamond-case-and-assembly-summary.md (new); this handoff. CanonicalModel.lean and PrimeTheory.lean untouched (git status shows no changes to either)."
   },
-  "deliverable": "truth_box_case proved sorry-free in TruthLemma.lean, consuming canonical_box_witness's pair-shaped w'/u witness and heredity over <=oR. CanonicalModel.lean (Phase 2, frozen) and the 3a helpers untouched.",
+  "deliverable": "truth_diamond_case and canonical_truth_lemma proved sorry-free in TruthLemma.lean. TruthLemma.lean is now COMPLETE (all Phase 3 sub-phases done): the full canonical truth lemma covers all seven Proposition constructors, carrying the four-axiom union {h_K, h_Kdia, h_Idb, h_Cd} plus h_dbot as parametric hypotheses, with botForces kept a loose parameter throughout. CanonicalModel.lean (Phase 2, frozen) untouched.",
   "blockers": [],
   "requires_user_review": false,
-  "next_action_hint": "Phase 3c (HIGHEST RISK) is next: prove truth_diamond_case (threading h_Kdia, h_Cd, and confirm via lean_goal whether h_Idb is also consumed -- report 03 flagged a MEDIUM-HIGH residual on this), consuming canonical_diamond_witness (Phase 2c, single-world witness, no pair). Then assemble canonical_truth_lemma by induction on Proposition, dispatching all seven constructors (truth_atom_case/truth_bot_case/truth_and_case/truth_or_case/truth_imp_case/truth_box_case/truth_diamond_case) and threading the four-axiom union {h_K, h_Kdia, h_Idb, h_Cd}. STOP contingency applies if the diamond case will not close sorry-free: commit the 3a+3b sorry-free state, mark [PARTIAL], write a continuation note with the stuck lean_goal output. Recommended: /implement 480 --hard phase=3c.",
+  "next_action_hint": "Phase 4 (Completeness.lean, final core phase): create Completeness.lean importing TruthLemma.lean; assemble the canonical BModel from CanonicalPrimeWorld, the Preorder, canonicalR, canonicalVal, and canonical_f1/canonical_f2; state parametric ivalid_completeness/mvalid_completeness (from canonical_truth_lemma + modal_prime_exclusion on the underivable formula) with the four-axiom hypotheses + h_efq (IValid) / arbitrary-botForces (MValid) exposed for tasks 492-495; expose a consistency hook (parametric, discharged downstream). Docstrings; lake build; run the full CI pipeline (lake build, checkInitImports, lake lint, lake exe lint-style, lake shake, lake exe mk_all --module, lake test); confirm ZERO-DEBT + untouched-classical. Recommended: /implement 480 --hard phase=4.",
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "type": "lean_source", "summary": "Added truth_box_case (.box constructor case), sorry-free, no new axioms. .diamond case and canonical_truth_lemma assembly deferred to 3c."},
-    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 3b marked [COMPLETED] with verification note."},
-    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-3b-progress.json", "type": "progress", "summary": "Phase 3b objective tracking, zero-debt verification record."},
-    {"path": "specs/480_intuitionistic_modal_framework/summaries/08_truth-lemma-box-case-summary.md", "type": "summary", "summary": "Phase 3b implementation summary."},
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "type": "lean_source", "summary": "Added truth_diamond_case (.diamond constructor case) and canonical_truth_lemma (full recursive assembly over all seven constructors), both sorry-free, no new axioms. TruthLemma.lean is complete."},
+    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 3c marked [COMPLETED] with verification and completion notes."},
+    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-3c-progress.json", "type": "progress", "summary": "Phase 3c objective tracking, zero-debt verification record."},
+    {"path": "specs/480_intuitionistic_modal_framework/summaries/09_truth-lemma-diamond-case-and-assembly-summary.md", "type": "summary", "summary": "Phase 3c implementation summary."},
     {"path": "specs/480_intuitionistic_modal_framework/.orchestrator-handoff.json", "type": "handoff", "summary": "This file."}
   ]
 }

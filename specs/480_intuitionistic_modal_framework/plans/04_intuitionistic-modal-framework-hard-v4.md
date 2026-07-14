@@ -649,7 +649,7 @@ new Lean `axiom`.
 - **Done when:** module builds; box helper typechecks sorry-free. -- **DONE.**
 - **Timing:** ~0.5 hour. **Depends on:** 3a.
 
-### Phase 3c: .diamond case helper (threads Kd+Cd) + assemble canonical_truth_lemma [NOT STARTED] — HIGHEST RISK
+### Phase 3c: .diamond case helper (threads Kd+Cd) + assemble canonical_truth_lemma [COMPLETED] — HIGHEST RISK
 
 - **Goal:** Prove the `.diamond` truth-lemma case (consuming the pair-shaped diamond witness), then
   assemble the full parametric `canonical_truth_lemma` dispatching to all seven helpers.
@@ -659,27 +659,43 @@ new Lean `axiom`.
   `canonical_diamond_witness`** — NO new axiom (report 03 §4 row 7). The assembled
   `canonical_truth_lemma` carries the **union `{ h_K, h_Kdia, h_Idb, h_Cd }`** (report 03 §4 row 8).
 - **Tasks:**
-  - [ ] Before writing, confirm the diamond helper goal shape with `lean_goal` (`BForces_diamond`
+  - [x] Before writing, confirm the diamond helper goal shape with `lean_goal` (`BForces_diamond`
         unfold; IH over `R`; consume the pair-shaped `canonical_diamond_witness`).
-  - [ ] Prove the `.diamond` helper using `canonical_diamond_witness` (2c), passing `h_Kdia`, `h_Cd`
+  - [x] Prove the `.diamond` helper using `canonical_diamond_witness` (2c), passing `h_Kdia`, `h_Cd`
         (and `h_Idb` if 2c's residual determined it is consumed) — Report 01 §6.7, §10; Wijesekera
         1990; report 03 §4 row 7.
-  - [ ] Assemble `canonical_truth_lemma` by induction on `Proposition`, dispatching each constructor
+  - [x] Assemble `canonical_truth_lemma` by induction on `Proposition`, dispatching each constructor
         to its helper (3a/3b + this) and threading the four-axiom union. Confirm all seven
         constructors covered (no missing-case warning). Mechanical once all helpers typecheck.
-  - [ ] Docstrings; `lake build` the module.
+  - [x] Docstrings; `lake build` the module.
 - **Reference grounding:** report 03 §4 rows 7-8; Report 01 §6.7, §10; Wijesekera 1990.
-- **Estimated output:** ~100-180 lines.
-- **Verification (targeted):** module builds; `canonical_truth_lemma` covers all seven constructors
-  and carries the four-axiom union; `botForces` still a parameter; ZERO-DEBT; untouched-classical
-  carried.
+- **Estimated output:** ~100-180 lines. **Actual:** ~135 lines (`truth_diamond_case` + docstring,
+  `canonical_truth_lemma` + docstring).
+- **Verification (targeted):** module builds (`lake build
+  Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma`, scoped, green, no warnings); full
+  `lake build` (3190 jobs) green (pre-existing unrelated `sorry`s in `Tableau/Intuitionistic/`
+  and `Tableau/Minimal/` files, untouched by this dispatch); `canonical_truth_lemma` covers all
+  seven constructors (no missing-case warning) and carries the four-axiom union `{h_K, h_Kdia,
+  h_Idb, h_Cd}` (plus `h_dbot` transitively via the diamond case); `botForces` still a loose
+  parameter (bridged via `h_bot`); `lean_verify` on `truth_diamond_case` and
+  `canonical_truth_lemma` both report only `{propext, Classical.choice, Quot.sound}` (no new
+  axiom); `lake exe checkInitImports` and file-scoped `lake lint`/`lake exe lint-style` both
+  clean; ZERO-DEBT (no `sorry`, no new `axiom`); `CanonicalModel.lean` and the 3a/3b helpers
+  untouched (`git status` shows only `TruthLemma.lean` modified in `Cslib/`).
+- **Completion note (`sess_1784011298_752245_480`):** the diamond forward direction needed
+  **no modal axiom at all** — `canonicalR w u`'s diamond clause (`.2 : ∀ ψ, ψ ∈ u.val → (◇ψ) ∈
+  w.val`) closes it directly once `ih u` transports forcing to membership. Only the backward
+  direction (constructing the witness via `canonical_diamond_witness`) threads `h_Kdia`, `h_Cd`,
+  `h_K`, `h_dbot` (transitively); `h_Idb` is confirmed NOT consumed by the diamond side (per
+  Phase 2c's completion note). The assembly (`canonical_truth_lemma`) was mechanical: `induction
+  φ generalizing w with | atom | bot | and | or | imp | box | diamond`, each case an `exact` call
+  to its Phase 3a/3b/3c helper, instantiating the universally-quantified IH at `w` for the
+  `and`/`or` cases (which need only the current world) and passing it through directly for
+  `imp`/`box`/`diamond` (which need it at arbitrary successor worlds). No STOP contingency
+  triggered — the HIGHEST-RISK phase closed in a single pass.
 - **Done when:** module builds; `canonical_truth_lemma` typechecks sorry-free over all constructors.
+  -- **DONE.**
 - **Timing:** ~1 hour. **Depends on:** 3a, 3b.
-- **STOP / partial contingency:** If the diamond case cannot close sorry-free, **STOP — do not
-  introduce `sorry`.** Commit the sorry-free state (3a+3b helpers), mark `[PARTIAL]`, write a
-  continuation note (stuck sub-goal, `lean_goal` output) to the handoff; the `canonical_truth_lemma`
-  assembly defers with it. Recommended next: narrow `/research 480 --hard --lit` on the Wijesekera
-  `.diamond` forcing clause before re-dispatch.
 
 ### Phase 4: Completeness.lean — parametric packaging (four-axiom hypotheses) [NOT STARTED]
 

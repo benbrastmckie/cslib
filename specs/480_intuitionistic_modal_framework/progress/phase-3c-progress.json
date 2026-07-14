@@ -1,0 +1,37 @@
+{
+  "task_number": 480,
+  "phase": "3c",
+  "session_id": "sess_1784011298_752245_480",
+  "status": "completed",
+  "objectives": [
+    {
+      "objective": "Prove truth_diamond_case (.diamond constructor case of the truth lemma) consuming canonical_diamond_witness",
+      "status": "done",
+      "notes": "Single theorem, forward direction closes with no modal axiom (canonicalR's diamond clause .2 + ih at u); backward direction via canonical_diamond_witness (single witness, no pair) + ih.mpr at v. Threads h_Kdia, h_Cd (and h_K, h_dbot transitively) via the witness call; h_Idb confirmed NOT consumed."
+    },
+    {
+      "objective": "Assemble canonical_truth_lemma by structural induction on Proposition, dispatching all seven constructors to their Phase 3a/3b/3c helpers",
+      "status": "done",
+      "notes": "induction phi generalizing w with | atom | bot | and | or | imp | box | diamond, each an exact call to the corresponding helper. and/or cases instantiate the universally-quantified IH at w; imp/box/diamond pass it through directly. Carries the full four-axiom union {h_K, h_Kdia, h_Idb, h_Cd} plus h_dbot; botForces remains a loose parameter bridged via h_bot."
+    }
+  ],
+  "zero_debt_verification": {
+    "sorry_count": 0,
+    "vacuous_definitions": 0,
+    "new_axioms": 0,
+    "lean_verify_truth_diamond_case": ["propext", "Classical.choice", "Quot.sound"],
+    "lean_verify_canonical_truth_lemma": ["propext", "Classical.choice", "Quot.sound"],
+    "scoped_build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma -- succeeded (596 jobs), no warnings",
+    "full_build": "lake build -- succeeded (3190 jobs); only pre-existing unrelated warnings/sorries in Cslib/Logics/Propositional/Tableau/{Intuitionistic/Scheme,Intuitionistic/Completeness,Minimal/Completeness}.lean (not this task's scope)",
+    "check_init_imports": "passed (no output)",
+    "lint_style": "passed (no output)",
+    "all_seven_constructors_covered": true
+  },
+  "files_touched": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean"
+  ],
+  "files_untouched_confirmed": [
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean"
+  ]
+}

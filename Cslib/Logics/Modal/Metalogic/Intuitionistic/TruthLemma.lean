@@ -9,22 +9,26 @@ module
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
 
-/-! # Truth Lemma for Intuitionistic Modal Logic (Non-Modal Cases)
+/-! # Truth Lemma for Intuitionistic Modal Logic
 
-This module contains Phase 3a and Phase 3b of the birelational canonical-model truth lemma
+This module contains Phases 3a, 3b, and 3c of the birelational canonical-model truth lemma
 (task 480 plan v4). Phase 3a proves the **five non-modal cases** (`atom`, `bot`, `and`, `or`,
 `imp`) as standalone named helper lemmas, transliterated line-for-line from
 `Cslib.Logic.PL.int_truth_lemma`
 (`Cslib/Logics/Propositional/Metalogic/IntStrongCompleteness.lean:108-214`,
 `PL.Proposition Atom` → `Proposition Atom`, `IntPropAxiom` → `Axioms`). Phase 3b adds
 `truth_box_case`, the `.box` constructor case, consuming the pair-shaped
-`canonical_box_witness` (Phase 2b) and heredity over `≤ ∘ R`.
+`canonical_box_witness` (Phase 2b) and heredity over `≤ ∘ R`. Phase 3c adds `truth_diamond_case`,
+the `.diamond` constructor case, consuming the single-witness `canonical_diamond_witness`
+(Phase 2c), and assembles all seven cases into the full recursive `canonical_truth_lemma` by
+structural induction on `Proposition`.
 
-Each case is a **named helper lemma** taking the induction hypothesis (for the `and`/`or`/`imp`
-cases, which recurse on strict subformulas) as an explicit hypothesis parameter, rather than
-being folded into a single recursive definition. This lets Phase 3a build sorry-free
-independently of the `.box`/`.diamond` cases (Phase 3b/3c), which are assembled together with
-these helpers into the full `canonical_truth_lemma` in Phase 3c.
+Each case is a **named helper lemma** taking the induction hypothesis (for the `and`/`or`/`imp`/
+`box`/`diamond` cases, which recurse on strict subformulas) as an explicit hypothesis parameter,
+rather than being folded directly into a single recursive definition. This let Phases 3a/3b/3c
+build sorry-free independently before assembly. `canonical_truth_lemma` (Phase 3c) is the payoff:
+it dispatches each constructor to its helper, threading the induction hypothesis obtained from
+`induction φ generalizing w`.
 
 None of the four modal axiom hypotheses (`h_K`, `h_Kdia`, `h_Idb`, `h_Cd`) are threaded here:
 the non-modal cases require no modal axiom (report 03 §4 row 8). `h_efq` is threaded only by
@@ -47,6 +51,9 @@ intuitionistic instantiation (`botForces := fun _ => False`) discharges it using
 - `truth_atom_case`, `truth_bot_case`, `truth_and_case`, `truth_or_case`, `truth_imp_case`: the
   five non-modal truth-lemma case helpers (Phase 3a).
 - `truth_box_case`: the `.box` truth-lemma case helper (Phase 3b).
+- `truth_diamond_case`: the `.diamond` truth-lemma case helper (Phase 3c).
+- `canonical_truth_lemma`: the assembled truth lemma over all seven `Proposition` constructors
+  (Phase 3c), the payoff Phase 4 (`Completeness.lean`) consumes.
 
 ## References
 
@@ -358,5 +365,140 @@ theorem truth_box_case
     exact (ih u).mpr hphi_u
 
 end TruthLemmaBoxCase
+
+/-! ## Diamond Truth-Lemma Case (Phase 3c) -/
+
+section TruthLemmaDiamondCase
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- **Diamond case** of the (to-be-assembled) `canonical_truth_lemma`: forcing of `◇φ` at a
+canonical world coincides with `◇φ ∈ w.val`, given the induction hypothesis for `φ`
+**universally quantified over all canonical worlds** (same Phase 3a design note reused for
+`truth_imp_case`/`truth_box_case`).
+
+Unfolds via `BForces_diamond` (`∃ u, r w u ∧ BForces … u φ`, [Simpson1994] clause 3.5). Unlike
+`truth_box_case`, `canonicalR w v` is a **single witness**, not a pair `⟨w', u⟩` --
+`BForces_diamond` is a bare existential over successors of `w` itself, so no outer `∀ w' ≥ w`
+quantifier appears.
+
+**Forward direction**: given `u` with `canonicalR w u` and `φ` forced at `u`, `ih u` transports
+forcing to `φ ∈ u.val`; `canonicalR w u`'s diamond clause (`.2`, `∀ ψ, ψ ∈ u.val → (◇ψ) ∈ w.val`)
+then gives `◇φ ∈ w.val` directly -- **no modal axiom is needed for this direction**.
+
+**Backward direction**: given `◇φ ∈ w.val`, `canonical_diamond_witness` (Phase 2c) produces a
+single prime `v` with `canonicalR w v` and `φ ∈ v.val`; `ih v` transports this to forcing,
+witnessing the existential.
+
+Threads `h_Kdia`, `h_Cd` (and `h_dbot`, `h_K` via `diamond_witness_underivable`; report 03 §4
+row 7) **solely via the call to `canonical_diamond_witness`**; no new axiom is introduced in
+this phase. `h_Idb` is **not** threaded (Phase 2c's completion note: confirmed not consumed by
+the diamond side).
+
+## References
+
+* [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
+  Chapter 3, clause 3.5.
+* ianshil/CK `general_th_completeness.v`, diamond case. -/
+theorem truth_diamond_case
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    {botForces : CanonicalPrimeWorld Axioms → Prop}
+    {w : CanonicalPrimeWorld Axioms} {φ : Proposition Atom}
+    (ih : ∀ T : CanonicalPrimeWorld Axioms,
+      BForces canonicalR canonicalVal botForces T φ ↔ φ ∈ T.val) :
+    BForces canonicalR canonicalVal botForces w (Proposition.diamond φ) ↔
+      (Proposition.diamond φ) ∈ w.val := by
+  simp only [BForces_diamond]
+  constructor
+  · -- Forward: (∃ u, canonicalR w u ∧ BForces … u φ) → ◇φ ∈ w.val
+    rintro ⟨u, hRwu, hforces_u⟩
+    exact hRwu.2 φ ((ih u).mp hforces_u)
+  · -- Backward: ◇φ ∈ w.val → ∃ u, canonicalR w u ∧ BForces … u φ
+    intro h_mem
+    obtain ⟨v, hRwv, hphi_v⟩ :=
+      canonical_diamond_witness h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE
+        h_K h_Kdia h_Cd h_dbot (w := w) (φ := φ) h_mem
+    exact ⟨v, hRwv, (ih v).mpr hphi_v⟩
+
+end TruthLemmaDiamondCase
+
+/-! ## Assembled Truth Lemma (Phase 3c) -/
+
+section TruthLemmaAssembly
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- **The canonical truth lemma** (task 480, Phase 3c payoff): forcing of any proposition `φ` at
+any canonical prime world `w` coincides with membership `φ ∈ w.val`. Assembled by structural
+induction on `φ`, dispatching each of the seven `Proposition` constructors to its Phase 3a/3b/3c
+helper, threading the induction hypothesis (generalized over all worlds, matching the `imp`/
+`box`/`diamond` cases' universally-quantified IH requirement) at the point of use.
+
+Carries the **union of the four modal axioms** `{ h_K, h_Kdia, h_Idb, h_Cd }` (plus `h_dbot`,
+needed transitively by the diamond witness -- report 03 §4 row 8) as parametric hypotheses:
+`h_K`/`h_Kdia`/`h_Idb` are used only by the `box` case (via `truth_box_case`), `h_Kdia`/`h_Cd`/
+`h_dbot` only by the `diamond` case (via `truth_diamond_case`); the non-modal cases (`atom`,
+`bot`, `and`, `or`, `imp`) use none of the four. `botForces` remains a loose parameter throughout
+(bridged by the explicit `h_bot` hypothesis, per Phase 3a's design note), so the minimal (495)
+and CK (493) fallible-world instantiations can reuse this lemma unmodified.
+
+This is the payoff lemma Phase 4 (`Completeness.lean`) consumes to build `ivalid_completeness`/
+`mvalid_completeness`.
+
+## References
+
+* [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Theorem 2.43.
+* [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
+  Chapter 3 (birelational truth lemma, assembled statement). -/
+theorem canonical_truth_lemma
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Idb : ∀ (φ ψ : Proposition Atom),
+      Axioms (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ))))
+    (h_Cd : ∀ (φ ψ : Proposition Atom), Axioms ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ))))
+    (h_dbot : Axioms ((◇Proposition.bot).imp Proposition.bot))
+    (botForces : CanonicalPrimeWorld Axioms → Prop)
+    (h_bot : ∀ w : CanonicalPrimeWorld Axioms,
+      botForces w ↔ (Proposition.bot : Proposition Atom) ∈ w.val)
+    (φ : Proposition Atom) (w : CanonicalPrimeWorld Axioms) :
+    BForces canonicalR canonicalVal botForces w φ ↔ φ ∈ w.val := by
+  induction φ generalizing w with
+  | atom p => exact truth_atom_case botForces w p
+  | bot => exact truth_bot_case botForces h_bot w
+  | and φ ψ ihφ ihψ => exact truth_and_case h_andI h_andE1 h_andE2 (ihφ w) (ihψ w)
+  | or φ ψ ihφ ihψ => exact truth_or_case h_orI1 h_orI2 (ihφ w) (ihψ w)
+  | imp φ ψ ihφ ihψ => exact truth_imp_case h_implyK h_implyS h_efq h_orE ihφ ihψ
+  | box φ ihφ =>
+      exact truth_box_case h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_andI h_andE1 h_andE2
+        h_K h_Kdia h_Idb ihφ
+  | diamond φ ihφ =>
+      exact truth_diamond_case h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE
+        h_K h_Kdia h_Cd h_dbot ihφ
+
+end TruthLemmaAssembly
 
 end Cslib.Logic.Modal

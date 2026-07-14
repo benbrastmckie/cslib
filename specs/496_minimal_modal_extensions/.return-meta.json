@@ -1,0 +1,46 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-14T18:11:11Z",
+  "completed_at": "2026-07-14T18:20:00Z",
+  "artifacts": [
+    "specs/496_minimal_modal_extensions/reports/01_minimal-modal-extensions.md"
+  ],
+  "partial_progress": {
+    "stage": "research_complete",
+    "details": "Research report delivered. Verdict: MT/MS4/MS5 completeness is TRACTABLE and zero-debt, mirroring IK/task-494 (not blocked like CK/task-501)."
+  },
+  "metadata": {
+    "session_id": "sess_1784044271_09e821_496",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "task_number": 496,
+    "task_type": "cslib"
+  },
+  "handoff": {
+    "verdict": "MT/MS4/MS5 completeness TRACTABLE and zero-debt; mirrors IK/task-494 birelational positive-FC-closure pattern, does NOT inherit CS4/CS5 (task-501) segment-model blocker.",
+    "key_findings": [
+      "MK reuses IK's single-world two-clause minCanonicalR over quasi-prime worlds WITH F1/F2 confluence (MValid), not CK's segment model.",
+      "Frame conditions are PLAIN on raw r (reflexive/transitive/symmetric), NOT the CK ≤-composed form; F1/F2 absorb the ≤-composition in box-form soundness (as MK.idb uses f2).",
+      "FC closures are positive (min_axiom_mem + min_imp_property via QuasiPrime.closed deductive closure); no consistency, no efq, no world-subtype invariant, no diamRefutingSegment.",
+      "mk_completeness is already single-branch, so mkvalidFC_completeness is simpler than IK's ivalidFC_completeness (no inconsistent/efq branch).",
+      "Axiomatize MS5 via B (symmetry), NOT euclidean-5 (quasi-prime theories are far from negation-complete).",
+      "No new Mathlib API; do NOT use deprecated Mathlib Reflexive/Transitive/Symmetric — define local mtFC/ms4FC/ms5FC predicates."
+    ],
+    "recommended_files": [
+      "Cslib/Logics/Modal/Metalogic/Minimal/MinExtension.lean (scaffold: MValidFC, mkvalidFC_completeness, min_axiom_mem, min_imp_property)",
+      "Cslib/Logics/Modal/Metalogic/Minimal/MT.lean",
+      "Cslib/Logics/Modal/Metalogic/Minimal/MS4.lean",
+      "Cslib/Logics/Modal/Metalogic/Minimal/MS5.lean"
+    ],
+    "phases": [
+      {"n": 1, "name": "MinExtension.lean scaffold", "risk": "LOW"},
+      {"n": 2, "name": "MT.lean (reflexivity)", "risk": "LOW"},
+      {"n": 3, "name": "MS4.lean (transitivity)", "risk": "LOW-MODERATE", "stop_clause": true},
+      {"n": 4, "name": "MS5.lean (symmetry via B, crux)", "risk": "MODERATE", "stop_clause": true},
+      {"n": 5, "name": "Barrel wiring + full CI", "risk": "LOW"}
+    ],
+    "zero_debt": "No sorry/axiom/vacuous-def recommended. Phases 3 and 4 carry explicit STOP/[BLOCKED]-escalation clauses; confidence a sorry-free construction exists is HIGH (verbatim ports of already-compiled IK it_/is4_/is5_canonical_* proofs).",
+    "next_step": "/plan 496"
+  }
+}

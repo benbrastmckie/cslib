@@ -187,7 +187,7 @@ consumes it in Phase 4 and `ConstructiveLatticeMonotonicity` imports CS4 (transi
 
 ---
 
-### Phase 2: Transcribe probe Parts A-C into CS4.lean (closure lemmas, tail, segment, world type) [NOT STARTED]
+### Phase 2: Transcribe probe Parts A-C into CS4.lean (closure lemmas, tail, segment, world type) [COMPLETED]
 
 **Goal**: Establish the CS4 canonical world type and its constructors.
 

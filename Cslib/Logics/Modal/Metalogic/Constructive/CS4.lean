@@ -222,4 +222,105 @@ theorem cs4_soundness_derivable {φ : Proposition Atom}
   exact cs4_soundness d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
     (fun _ h => nomatch h)
 
+/-! ## Canonical Model -/
+
+/-! ### Part A: head-theory closure facts from the CS4 axioms -/
+
+/-- `4`-box closure: `□B ∈ H → □□B ∈ H`. -/
+theorem cs4_box_four {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {B : Proposition Atom} (hB : Proposition.box B ∈ H) :
+    Proposition.box (Proposition.box B) ∈ H :=
+  mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.fourBox B)) hB
+
+/-- `4`-diamond contrapositive: `◇A ∉ H → ◇◇A ∉ H`. THE hereditary step that makes the
+diamond-refuting construction below propagate through the transitive closure of the tail
+(unlike a one-step `A`-exclusion, which does not propagate — see the module docstring). -/
+theorem cs4_not_dia_dia {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : (◇(◇A)) ∉ H :=
+  fun h =>
+    h_not (mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.fourDia A)) h)
+
+/-- `T`-diamond: `A ∈ H → ◇A ∈ H`. -/
+theorem cs4_dia_of_mem {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (hA : A ∈ H) : (◇A) ∈ H :=
+  mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.tDia A)) hA
+
+/-- `T`-box: `boxInv H ⊆ H`. -/
+theorem cs4_boxInv_subset {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H) :
+    boxInv H ⊆ H :=
+  fun _ hB => mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.tBox _)) hB
+
+/-- The `4`-transfer chain used by every frame-condition proof: `boxInv` propagates through
+two composed inclusions via one application of `4`-box closure. -/
+theorem cs4_boxInv_trans {H K t : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    (h1 : boxInv H ⊆ K) (h2 : boxInv K ⊆ t) : boxInv H ⊆ t :=
+  fun _ hB => h2 (h1 (cs4_box_four hH hB))
+
+/-! ### Part B: the `◇`-exclusion tail and its segment -/
+
+/-- Tail determined by head `H` and an optional excluded diamond `E`. -/
+def cs4Tail (H : Set (Proposition Atom)) (E : Option (Proposition Atom)) :
+    Set (Set (Proposition Atom)) :=
+  {t | QuasiPrime CS4ModalAxiom t ∧ boxInv H ⊆ t ∧ ∀ A, E = some A → (◇A) ∉ t}
+
+/-- The `CS4` canonical segment at head `H` excluding the diamond `E`.
+KEY: `diam_witness` for `E = some A` needs `◇◇A ∉ H`, supplied by `fourDia` via
+`cs4_not_dia_dia`, so the hereditary exclusion propagates to the witness theory `T`. -/
+def cs4Seg {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    (E : Option (Proposition Atom)) (hE : ∀ A, E = some A → (◇A) ∉ H) :
+    CKSegment (@CS4ModalAxiom Atom) where
+  head := H
+  tail := cs4Tail H E
+  head_qprime := hH
+  tail_qprime := fun _ ht => ht.1
+  box_reflect := fun _ hB _ ht => ht.2.1 hB
+  diam_witness := fun B hB => by
+    cases hE_eq : E with
+    | none =>
+      refine ⟨Set.univ, ⟨quasiPrime_univ, Set.subset_univ _, ?_⟩, Set.mem_univ _⟩
+      rintro A ⟨⟩
+    | some A =>
+      obtain ⟨T, hsub, hT, hBT, hAT⟩ :=
+        dia_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) (fun φ ψ => .k φ ψ) (fun φ ψ => .kdia φ ψ)
+          hH hB (cs4_not_dia_dia hH (hE A hE_eq))
+      refine ⟨T, ⟨hT, hsub, ?_⟩, hBT⟩
+      rintro A' ⟨rfl⟩
+      exact hAT
+
+/-! ### Part C: the `CS4` world type -/
+
+/-- `CS4` canonical worlds: `◇`-exclusion-shaped segments. -/
+structure CS4Segment (Atom : Type u) where
+  /-- The underlying segment. -/
+  seg : CKSegment (@CS4ModalAxiom Atom)
+  /-- The optional excluded diamond. -/
+  excl : Option (Proposition Atom)
+  /-- The excluded diamond is absent from the head (hereditary invariant). -/
+  excl_head : ∀ A, excl = some A → (◇A) ∉ seg.head
+  /-- The tail is exactly the `◇`-exclusion tail. -/
+  tail_eq : seg.tail = cs4Tail seg.head excl
+
+instance : Preorder (CS4Segment Atom) := Preorder.lift (fun s : CS4Segment Atom => s.seg)
+
+/-- Canonical accessibility. -/
+def cs4Mreach (P Q : CS4Segment Atom) : Prop := cmreach P.seg Q.seg
+
+/-- Maximal-tail world (no excluded diamond). -/
+def CS4Segment.ofHead {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H) :
+    CS4Segment Atom where
+  seg := cs4Seg hH none (by rintro A ⟨⟩)
+  excl := none
+  excl_head := by rintro A ⟨⟩
+  tail_eq := rfl
+
+/-- The hereditary diamond-refuting world: excludes `A` from every world in its transitive
+closure (via `cs4_not_dia_dia`), unlike a one-step `A`-exclusion. -/
+def CS4Segment.diaRefuting {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : CS4Segment Atom where
+  seg := cs4Seg hH (some A) (by rintro A' ⟨rfl⟩; exact h_not)
+  excl := some A
+  excl_head := by rintro A' ⟨rfl⟩; exact h_not
+  tail_eq := rfl
+
 end Cslib.Logic.Modal

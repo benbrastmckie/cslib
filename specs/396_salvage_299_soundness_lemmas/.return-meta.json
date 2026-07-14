@@ -1,6 +1,7 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-14T16:11:29Z",
+  "completed_at": "2026-07-14T17:05:00Z",
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Tableau/Defs.lean",
@@ -11,20 +12,39 @@
       "path": "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
       "type": "lean_source",
       "summary": "Added sfSat, sfSat_pos, sfSat_neg, RuleResultSat, applyPropRule_sat, tryAllPropRules_sat (monomorphic {W : Type}, acc-free)"
+    },
+    {
+      "path": "specs/396_salvage_299_soundness_lemmas/plans/01_salvage-soundness-lemmas.md",
+      "type": "plan",
+      "summary": "All 5 phases marked [COMPLETED]; all Testing & Validation items checked"
+    },
+    {
+      "path": "specs/396_salvage_299_soundness_lemmas/summaries/01_salvage-soundness-lemmas-summary.md",
+      "type": "summary",
+      "summary": "Completion summary with CI results and resumption/concurrency notes"
     }
   ],
   "partial_progress": {
-    "stage": "phase_4_complete",
-    "details": "applyPropRule_sat and tryAllPropRules_sat added; and/or arms reworked for native constructors (simpler than branch, no Classical.em needed for andPos/orNeg); neg/imp arms transferred directly. lake build green; zero sorry/axiom; confirmed acc-free. All four phases of proof work complete; proceeding to Phase 5 full CI.",
+    "stage": "phase_5_complete",
+    "details": "Verified phases 1-4 (already committed by prior session) build correctly and satisfy the CRITICAL or/and native-constructor constraint. Completed Phase 5: full CI pipeline green (lake build, lake test, checkInitImports, lint-style, lint, shake) against a clean committed working tree; zero sorry/admit/axiom in changed files; no Accessibility/acc/m.r tokens in the bridge block; #print axioms clean (standard axioms only) on all 8 salvaged declarations. Wrote summary and updated plan markers. Recovered cleanly from an unrelated concurrent-agent git stash collision with no data loss.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4,
-    "last_completed_phase": "Phase 4: Propositional-Rule Satisfaction Bridge"
+    "phases_completed": 5,
+    "last_completed_phase": "Phase 5: Full CI Verification and Summary"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
   "metadata": {
     "session_id": "sess_1784044325_11ad9e_396",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

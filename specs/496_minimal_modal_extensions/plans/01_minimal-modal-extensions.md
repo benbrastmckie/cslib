@@ -108,7 +108,35 @@ extends MS4's, and barrel wiring depends on all files existing. (Phases 2–4 co
 parallelized on independent axiom bases, but the axiom-inheritance chain and the single shared
 `Cslib.lean` touch make strict sequencing the safe default under concurrent-session pressure.)
 
-### Phase 1: MinExtension.lean scaffold [IN PROGRESS]
+### Phase 1: MinExtension.lean scaffold [COMPLETED]
+
+**Deviation note**: The plan's Phase 1 text described a small (~120-160 line) scaffold reusing
+task 495's MK canonical-model machinery directly. During implementation this proved infeasible:
+`MinCanonicalPrimeWorld`/`minCanonicalR`/`min_canonical_f1`/`min_canonical_f2`/
+`min_canonical_truth_lemma`/`min_head_realization` in `MinCanonicalModel.lean`/`MinTruthLemma.lean`/
+`MinCompleteness.lean` are hard-coded to `MKModalAxiom` (never touched `Axioms` as a free
+parameter, unlike IK's *own* base canonical-model files `Intuitionistic/{CanonicalModel,
+PrimeTheory,TruthLemma}.lean`, which task 480/492 built generically over `Axioms` from the start
+-- that is precisely why IK's `Extension.lean` could stay a ~150-line wrapper for task 494).
+`mkvalidFC_completeness` must produce `Derivable Axioms φ` for `Axioms := MTModalAxiom` /
+`MS4ModalAxiom` / `MS5ModalAxiom` in Phases 2-4, which is impossible while reusing MK's
+`MKModalAxiom`-fixed worlds verbatim. The actual, necessary Phase 1 scope was therefore to
+*genericize* task 495's ~1090-line efq-free "nonempty Lindenbaum-pair" canonical-model
+construction over an abstract `Axioms : Proposition Atom → Prop` (threading the 12 MK-core
+axiom-schema witnesses `h_implyK, h_implyS, h_andI, h_andE1, h_andE2, h_orI1, h_orI2, h_orE, h_k,
+h_kdia, h_cd, h_idb` explicitly through every canonical-model theorem, exactly mirroring IK's own
+`canonical_f1`/`canonical_box_witness` convention in `Intuitionistic/CanonicalModel.lean:636,1140`)
+-- not merely adding an `FC` parameter to an already-generic scaffold. This is a like-for-like
+repeat, at MK's scale, of the genericization work IK's base task already performed; it was not
+optional, since Phases 2-4 depend on it for their `mkvalidFC_completeness` calls to type-check at
+`Axioms := MTModalAxiom` etc. All declarations were placed under a nested `Cslib.Logic.Modal.MinExt`
+namespace to avoid name collision with task 495's `MKModalAxiom`-specific declarations of the same
+short name in the same outer namespace; `MValidFC`, `mkvalidFC_completeness`, `min_axiom_mem`,
+`min_imp_property` are exposed unqualified in `Cslib.Logic.Modal` per the plan. Result:
+`MinExtension.lean` is ~1580 lines (not ~150), zero sorry, zero new axioms (only
+`propext`/`Classical.choice`/`Quot.sound`, matching MK's own `mk_completeness` footprint via the
+same `noncomputable`/Zorn's-lemma technique). `lean_verify` confirms the axiom footprint on
+`mkvalidFC_completeness`; `lake build`/`checkInitImports` are green.
 
 **Goal**: Create the FC-parameterized completeness scaffold — the birelational analogue of IK's
 `Extension.lean`, keeping arbitrary `botForces`.

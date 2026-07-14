@@ -477,7 +477,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 7: CRUX — modalStepGen_preserves_invariant + modalExpandBranchesGen_hintikka [NOT STARTED]
+### Phase 7: CRUX — modalStepGen_preserves_invariant + modalExpandBranchesGen_hintikka [COMPLETED]
 
 - **Goal:** The task's crux and its bulk (~380 lines). Deliver the generic top-loop lemma concluding in
   the **generic** Hintikka set.
@@ -518,7 +518,11 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
   - [ ] Re-derive K's `modalExpandBranches_hintikka` as a byte-identical-statement corollary via
     `modalExpandBranches_eq` (Sat:308, already proved via a processNext-level agreement lemma) +
     `modalHintikkaSet_eq`.
-  - [ ] `lake build` + full CI; `#print axioms` on both new lemmas.
+  - [x] `lake build` + full CI; `#print axioms` on both new lemmas. Full project build (3233/3233),
+    `checkInitImports`, `lake lint` (only pre-existing/unrelated findings: PrimeExclusion.lean and
+    two concurrent-session `defsWithUnderscore` findings in task 509's `SegmentLindenbaum.lean`,
+    neither touched by this task), `lint-style`, and `lake test` all green. The port compiled
+    clean on first full attempt with zero new warnings beyond the established baseline.
 - **Timing:** 3.5 hours (exceeds the 1-2h guideline by design — this is the crux; single-agent-run
   bounded; write an 80%-context handoff at a green intermediate lemma if approaching the limit).
 - **Depends on:** 4, 6

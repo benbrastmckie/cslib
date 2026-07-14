@@ -732,13 +732,92 @@ private lemma modalLoop_eDiamondPosWitness
 
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 
+/-- **Generic combined-invariant single-step preservation** (task 510, the composition crux):
+`modalStepGen_preserves_invariant`, over an abstract `(apply, spec)`. Composes exactly eight
+step lemmas -- seven already available from task 507 as bundled `(apply, spec)` forms
+(`modalStepBranchGen_potential_step`, `_preserves_accTargetsKnown`, `_preserves_outDegEq`,
+`modalStepBranch_preserves_expandedNodup_gen` [no field], `_eClosure`, `_expMeasure_step_lt`, and
+the rule-agnostic `modalMaxWorld_lt_worldBound_of_phiBound`); the eighth,
+`modalStepBranch_preserves_accFreshInv_gen`, comes from Phase 4 (`Soundness.lean`), called with
+`spec.freshLocal`. The five rule-dependent conjuncts (`modalLoopGen_bClosure`,
+`modalStepBranchGen_hintikka_inv` [raw F8, `spec.localShapeInvariance`],
+`modalLoopGen_eBoxOnlyNeg`/`_eBoxNegWitness`/`_eDiamondOnlyPos`/`_eDiamondPosWitness`) are fed
+from Phases 3, 5, 6. -/
+lemma modalStepGen_preserves_invariant
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (rank : WorldIndex → Nat)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalLoopInvGen apply φ0 b e acc rank) :
+    ∃ rank' : WorldIndex → Nat,
+      (∀ p ∈ newBs.zip newExps, ModalLoopInvGen apply φ0 p.1 p.2 newAcc rank') ∧
+      modalExpMeasure (modalUniverse φ0) newBs newExps + 1 ≤
+        modalExpMeasure (modalUniverse φ0) [b] [e] := by
+  obtain ⟨hpot, hphi, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩ := hinv
+  have hWb : modalMaxWorld b < modalWorldBound φ0 :=
+    modalMaxWorld_lt_worldBound_of_phiBound φ0 b _ hphi
+  obtain ⟨rank', -, hrb', hre', hpotential⟩ :=
+    modalStepBranchGen_potential_step apply spec φ0 b e acc newBs newExps newAcc rank hstep hpot
+  have hFreshAll : ∀ b' ∈ newBs, accFreshInv b' newAcc :=
+    modalStepBranch_preserves_accFreshInv_gen apply spec.freshLocal b e acc newBs newExps newAcc
+      hstep hpot.accFresh
+  have hKnownAll : ∀ b' ∈ newBs, accTargetsKnown b' newAcc :=
+    modalStepBranchGen_preserves_accTargetsKnown apply spec b e acc newBs newExps newAcc hstep
+      hpot.accKnown
+  have hOutDegAll : ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
+      (e'.filter (fun x => x.label == w && isMintingShaped x)).length :=
+    modalStepBranchGen_preserves_outDegEq apply spec b e acc newBs newExps newAcc hstep
+      hpot.outDegEq
+  have hNodupAll : ∀ e' ∈ newExps, e'.Nodup :=
+    modalStepBranch_preserves_expandedNodup_gen apply b e acc newBs newExps newAcc hstep
+      hpot.eNodup
+  have hBClosureAll : ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 :=
+    modalLoopGen_bClosure apply spec φ0 b e acc newBs newExps newAcc hstep hpot.bClosure
+      hpot.accFresh hWb
+  have hEClosureAll : ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
+    modalStepBranchGen_eClosure apply spec φ0 b e acc newBs newExps newAcc hstep hpot.bClosure
+      hpot.eClosure
+  have hHintikkaAll :=
+    modalStepBranchGen_hintikka_inv apply spec.localShapeInvariance b e acc newBs newExps newAcc
+      hstep hhint
+  have hBoxNegAll := modalLoopGen_eBoxOnlyNeg apply spec b e acc newBs newExps newAcc hstep hboxneg
+  have hBoxWitAll :=
+    modalLoopGen_eBoxNegWitness apply spec b e acc newBs newExps newAcc hstep hboxwit
+  have hDiaPosAll :=
+    modalLoopGen_eDiamondOnlyPos apply spec b e acc newBs newExps newAcc hstep hdiapos
+  have hDiaWitAll :=
+    modalLoopGen_eDiamondPosWitness apply spec b e acc newBs newExps newAcc hstep hdiawit
+  refine ⟨rank', ?_, ?_⟩
+  · intro p hp
+    obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
+    exact ⟨⟨hBClosureAll p.1 hp1, hNodupAll p.2 hp2, hEClosureAll p.2 hp2,
+        hFreshAll p.1 hp1, hKnownAll p.1 hp1, hOutDegAll p.2 hp2, hrb' p.1 hp1, hre'⟩,
+      by rw [hpotential p.1 hp1]; exact hphi, hHintikkaAll p hp, hBoxNegAll p.2 hp2,
+      hBoxWitAll p.1 hp1 p.2 hp2, hDiaPosAll p.2 hp2, hDiaWitAll p.1 hp1 p.2 hp2⟩
+  · obtain ⟨newExp, hNewExpEq⟩ :=
+      modalStepBranchGen_newExps_const apply b e acc newBs newExps newAcc hstep
+    have hstep' : modalStepBranchGen apply b e acc =
+        some (newBs, newBs.map (fun _ => newExp), newAcc) := by
+      rw [hNewExpEq] at hstep; exact hstep
+    have hdrop := modalStepBranchGen_expMeasure_step_lt apply spec φ0 [] [] newBs [] [] newExp b e
+      acc newAcc rfl hpot.bClosure hpot.accFresh hWb hstep'
+    simp only [List.nil_append, List.append_nil] at hdrop
+    rw [hNewExpEq]
+    exact hdrop
+
 /-- **Combined-invariant single-step preservation** (task 442 Phase 5a): given the bundled loop
 invariant `ModalLoopInv` holds pre-step and `modalStepBranch b e acc = some (newBs, newExps,
 newAcc)`, there is a single shared rank map `rank'` under which the bundle holds on every child
 branch/expanded-set pair, and the base-3 counting measure `modalExpMeasure` strictly decreases.
 Composes P2 (`modalStepBranch_worldBound`, `modalStepBranch_potential_step`), P3
 (`modalExpMeasure_step_lt`, supplying its `hb`/`hInv`/`hW` hypotheses from the bundle), P4
-(`modalStepBranch_hintikka_inv`), and the green `modalStepBranch_preserves_accFreshInv`. -/
+(`modalStepBranch_hintikka_inv`), and the green `modalStepBranch_preserves_accFreshInv`.
+
+Byte-identical-statement corollary of `modalStepGen_preserves_invariant` (task 510) via
+`modalStepBranch_eq`/`ModalLoopInv_iff_gen`. -/
 lemma modalStep_preserves_invariant
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -751,70 +830,37 @@ lemma modalStep_preserves_invariant
       (∀ p ∈ newBs.zip newExps, ModalLoopInv φ0 p.1 p.2 newAcc rank') ∧
       modalExpMeasure (modalUniverse φ0) newBs newExps + 1 ≤
         modalExpMeasure (modalUniverse φ0) [b] [e] := by
-  obtain ⟨hpot, hphi, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩ := hinv
-  have hWb : modalMaxWorld b < modalWorldBound φ0 :=
-    modalMaxWorld_lt_worldBound_of_phiBound φ0 b _ hphi
-  obtain ⟨rank', -, hrb', hre', hpotential⟩ :=
-    modalStepBranch_potential_step φ0 b e acc newBs newExps newAcc rank hstep hpot
-  have hFreshAll : ∀ b' ∈ newBs, accFreshInv b' newAcc :=
-    modalStepBranch_preserves_accFreshInv b e acc newBs newExps newAcc hstep hpot.accFresh
-  have hKnownAll : ∀ b' ∈ newBs, accTargetsKnown b' newAcc :=
-    modalStepBranch_preserves_accTargetsKnown b e acc newBs newExps newAcc hstep hpot.accKnown
-  have hOutDegAll : ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
-      (e'.filter (fun x => x.label == w && isMintingShaped x)).length :=
-    modalStepBranch_preserves_outDegEq b e acc newBs newExps newAcc hstep hpot.outDegEq
-  have hNodupAll : ∀ e' ∈ newExps, e'.Nodup :=
-    modalStepBranch_preserves_expandedNodup b e acc newBs newExps newAcc hstep hpot.eNodup
-  have hBClosureAll : ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 :=
-    modalLoop_bClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.accFresh hWb
-  have hEClosureAll : ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
-    modalStepBranch_eClosure φ0 b e acc newBs newExps newAcc hstep hpot.bClosure hpot.eClosure
-  have hHintikkaAll := modalStepBranch_hintikka_inv b e acc newBs newExps newAcc hstep hhint
-  have hBoxNegAll := modalLoop_eBoxOnlyNeg b e acc newBs newExps newAcc hstep hboxneg
-  have hBoxWitAll := modalLoop_eBoxNegWitness b e acc newBs newExps newAcc hstep hboxwit
-  have hDiaPosAll := modalLoop_eDiamondOnlyPos b e acc newBs newExps newAcc hstep hdiapos
-  have hDiaWitAll := modalLoop_eDiamondPosWitness b e acc newBs newExps newAcc hstep hdiawit
-  refine ⟨rank', ?_, ?_⟩
-  · intro p hp
-    obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
-    exact ⟨⟨hBClosureAll p.1 hp1, hNodupAll p.2 hp2, hEClosureAll p.2 hp2,
-        hFreshAll p.1 hp1, hKnownAll p.1 hp1, hOutDegAll p.2 hp2, hrb' p.1 hp1, hre'⟩,
-      by rw [hpotential p.1 hp1]; exact hphi, hHintikkaAll p hp, hBoxNegAll p.2 hp2,
-      hBoxWitAll p.1 hp1 p.2 hp2, hDiaPosAll p.2 hp2, hDiaWitAll p.1 hp1 p.2 hp2⟩
-  · obtain ⟨newExp, hNewExpEq⟩ :=
-      modalStepBranch_newExps_const b e acc newBs newExps newAcc hstep
-    have hstep' : modalStepBranch b e acc = some (newBs, newBs.map (fun _ => newExp), newAcc) := by
-      rw [hNewExpEq] at hstep; exact hstep
-    have hdrop := modalExpMeasure_step_lt φ0 [] [] newBs [] [] newExp b e acc newAcc
-      rfl hpot.bClosure hpot.accFresh hWb hstep'
-    simp only [List.nil_append, List.append_nil] at hdrop
-    rw [hNewExpEq]
-    exact hdrop
+  obtain ⟨rank', hAll, hmeas⟩ :=
+    modalStepGen_preserves_invariant modalApplyOne modalApplyOne_spec φ0 b e acc rank newBs
+      newExps newAcc (modalStepBranch_eq b e acc ▸ hstep)
+      ((ModalLoopInv_iff_gen φ0 b e acc rank).mp hinv)
+  exact ⟨rank', fun p hp => (ModalLoopInv_iff_gen φ0 p.1 p.2 newAcc rank').mpr (hAll p hp), hmeas⟩
 
-/-! ## The Top-Loop Hintikka Lemma (task 442 Phase 5b) -/
+/-! ## The Top-Loop Hintikka Lemma (task 442 Phase 5b; generalized task 510) -/
 
-/-- **Top-loop Hintikka lemma** (task 442 Phase 5b): if `modalExpandBranches` returns an open
-branch, that branch (with its accessibility relation) is a modal Hintikka set, provided the
-bundled loop invariant `ModalLoopInv` (Phase 5a) holds for every branch/expanded-set/`acc` triple
-in the initial worklist under *some* per-index rank map, and the worklist's `modalExpMeasure` is
-bounded by the available fuel.
+/-- **Generic top-loop Hintikka lemma** (task 510, the crux): if `modalExpandBranchesGen apply`
+returns an open branch, that branch (with its accessibility relation) is a **generic** modal
+Hintikka set, `modalHintikkaSetGen apply bR aR` -- **not** the concrete `modalHintikkaSet bR aR`.
+This is the acceptance-critical conclusion type: `modalHintikkaSetGen` is spec-free
+(`Saturation.lean`), so 505/506 can consume this statement shape at their own `apply`, and T's
+one-liner discharge (`TDriver.lean`) is the structural proof this criterion was met.
 
-Proved by induction on `fuel`, mirroring `classicalExpandBranches_hintikka`
-(`Classical/Completeness.lean:924`): the `fuel = 0` case is vacuous (the measure bound forces
-`branches = []`, so `modalExpandBranches`'s fuel-exhausted lookup returns `.closed`, never
-`.openBranch`); the `fuel = n + 1` case is an inner induction on the `processNext` worklist,
-mirroring `modalExpandBranches_closed_unsat`'s three-parallel-list threading
-(`Soundness.lean:164`) with an additional `ModalLoopInv`-existence hypothesis at every index.
-A `modalStepBranch = none` saturated leaf is closed via `modalStepBranch_none_saturated`
-(each `sf ∈ b` is either in `e` — where `ModalLoopInv.hintikkaInv`/`.eBoxOnlyNeg` discharge
-`modalHintikkaSet`'s second conjunct — or has `modalApplyOne`-result `notApplicable`, discharging
-it directly) and `ModalLoopInv.eBoxNegWitness` (third conjunct, using that `boxNeg` is always
-applicable so a saturated `F(□ψ)@w` is necessarily in `e`). An expansion step advances via
-`modalStep_preserves_invariant` (P5a) for the invariant and `modalExpMeasure_step_lt` for the
-measure bound, splitting the new worklist's indices into the unchanged `done`/`bt` regions and
-the freshly-produced `newBs` region (all sharing the single constant expanded-set `newExp` and
-accessibility relation `newAcc`, `modalStepBranch_newExps_const`). -/
-lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
+Re-derived against `modalExpandBranchesGen.processNext` (a separate well-founded-recursion
+helper from `modalExpandBranches.processNext` -- no proof reuse possible) by a pure substitution
+port of `modalExpandBranches_hintikka`'s proof (`modalApplyOne ↦ apply`,
+`modalStepBranch ↦ modalStepBranchGen apply`, `modalHintikkaSet ↦ modalHintikkaSetGen apply`,
+`modalHintikkaClause ↦ modalHintikkaClauseGen apply`, `ModalLoopInv ↦ ModalLoopInvGen apply`).
+The only semantically-loaded region is the saturated-leaf discharge, which reduces exactly to
+F9-F12 (`RuleApplicationSpec`, `GenericDriver.lean`): Structural shapes close via `hintikkaInv`
+(definitionally the `modalHintikkaSetGen` conjunct-2 body) or `.notApplicable`; Minting shapes
+(`boxNeg`/`diamondPos`) are `trivial` (carved out of conjunct 2); Propagating shapes
+(`boxPos`/`diamondNeg`) are ruled out by `eBoxOnlyNeg`/`eDiamondOnlyPos` (F9/F10, via
+`modalLoopGen_eBoxOnlyNeg`/`_eDiamondOnlyPos`, Phase 6) contradicting `sf ∈ e`; conjuncts 3/4 use
+`eBoxNegWitness`/`eDiamondPosWitness` plus `spec.boxNegWitness`/`spec.diaPosWitness` (F11/F12) to
+rule out `.notApplicable`. -/
+lemma modalExpandBranchesGen_hintikka
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
       expandedSets.length = branches.length →
@@ -823,10 +869,10 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
       (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
           (ai : Accessibility),
         branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
-        ∃ rank, ModalLoopInv φ0 bi ei ai rank) →
+        ∃ rank, ModalLoopInvGen apply φ0 bi ei ai rank) →
       ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
-        modalExpandBranches branches expandedSets accs fuel = .openBranch bR aR →
-        modalHintikkaSet bR aR := by
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSetGen apply bR aR := by
   induction fuel with
   | zero =>
     intro branches expandedSets accs hlen hlenA hfuel _hInv bR aR h
@@ -842,10 +888,10 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
           have h3 := Nat.one_le_pow (modalWork (modalUniverse φ0) bh e) 3 (by omega)
           omega
     subst hbranches
-    simp [modalExpandBranches] at h
+    simp [modalExpandBranchesGen] at h
   | succ fuel' ih =>
     intro branches expandedSets accs hlen hlenA hfuel hInv bR aR h
-    simp only [modalExpandBranches] at h
+    simp only [modalExpandBranchesGen] at h
     suffices key : ∀ (pending pendingExp :
           List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (pendingAccs : List Accessibility)
@@ -859,19 +905,19 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
             (ai : Accessibility),
           (done ++ pending)[i]? = some bi → (doneExp ++ pendingExp)[i]? = some ei →
           (doneAccs ++ pendingAccs)[i]? = some ai →
-          ∃ rank, ModalLoopInv φ0 bi ei ai rank) →
+          ∃ rank, ModalLoopInvGen apply φ0 bi ei ai rank) →
         modalExpMeasure (modalUniverse φ0) (done ++ pending) (doneExp ++ pendingExp) ≤
           fuel' + 1 →
-        modalExpandBranches.processNext fuel' pending pendingExp pendingAccs done doneExp
+        modalExpandBranchesGen.processNext apply fuel' pending pendingExp pendingAccs done doneExp
             doneAccs = .openBranch bR aR →
-        modalHintikkaSet bR aR from
+        modalHintikkaSetGen apply bR aR from
       key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hInv hfuel
-        (by simpa [modalExpandBranches] using h)
+        (by simpa [modalExpandBranchesGen] using h)
     intro pending
     induction pending with
     | nil =>
       intro pendingExp pendingAccs done doneExp doneAccs _ _ _ _ _ _ hinner
-      simp [modalExpandBranches.processNext] at hinner
+      simp [modalExpandBranchesGen.processNext] at hinner
     | cons bh bt ih_inner =>
       intro pendingExp pendingAccs done doneExp doneAccs
         hlength_p hlenP_accs hdlength hdAccs hInv_all hmeas hinner
@@ -882,7 +928,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
         | nil => simp at hlength_p
         | cons e es =>
           simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
-          simp only [modalExpandBranches.processNext] at hinner
+          simp only [modalExpandBranchesGen.processNext] at hinner
           by_cases hcl : isModalClosed bh = true
           · -- Closed branch: skip and recurse on the inner induction
             rw [if_pos hcl] at hinner
@@ -900,7 +946,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
             · exact hinner
           · simp only [Bool.not_eq_true] at hcl
             rw [if_neg (by simp [hcl])] at hinner
-            cases hstep : modalStepBranch bh e a with
+            cases hstep : modalStepBranchGen apply bh e a with
             | none =>
               -- Saturated open branch: bh/a are the returned bR/aR
               rw [hstep] at hinner
@@ -922,85 +968,86 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                 obtain ⟨s, φ, l⟩ := sf
                 cases φ with
                 | atom p =>
-                  rcases modalStepBranch_none_saturated hstep ⟨s, .atom p, l⟩ hsfmem
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .atom p, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .atom p, l⟩ hine
-                    simp only [modalHintikkaClause] at hc
+                    simp only [modalHintikkaClauseGen] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | bot =>
-                  rcases modalStepBranch_none_saturated hstep ⟨s, .bot, l⟩ hsfmem
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .bot, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .bot, l⟩ hine
-                    simp only [modalHintikkaClause] at hc
+                    simp only [modalHintikkaClauseGen] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | imp a c =>
-                  rcases modalStepBranch_none_saturated hstep ⟨s, .imp a c, l⟩ hsfmem
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .imp a c, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .imp a c, l⟩ hine
-                    simp only [modalHintikkaClause] at hc
+                    simp only [modalHintikkaClauseGen] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | and a c =>
-                  rcases modalStepBranch_none_saturated hstep ⟨s, .and a c, l⟩ hsfmem
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .and a c, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .and a c, l⟩ hine
-                    simp only [modalHintikkaClause] at hc
+                    simp only [modalHintikkaClauseGen] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | or a c =>
-                  rcases modalStepBranch_none_saturated hstep ⟨s, .or a c, l⟩ hsfmem
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .or a c, l⟩ hsfmem
                     with hine | hna
                   · have hc := hinv.hintikkaInv ⟨s, .or a c, l⟩ hine
-                    simp only [modalHintikkaClause] at hc
+                    simp only [modalHintikkaClauseGen] at hc
                     cases s <;> exact hc
                   · cases s <;> simp [hna]
                 | box ψ' =>
                   cases s with
                   | pos =>
                     -- boxPos still falls into `_, _`; `eBoxOnlyNeg` rules out `sf ∈ e`
-                    rcases modalStepBranch_none_saturated hstep ⟨.pos, .box ψ', l⟩ hsfmem
+                    rcases modalStepBranchGen_none_saturated apply hstep ⟨.pos, .box ψ', l⟩ hsfmem
                       with hine | hna
                     · exact absurd (hinv.eBoxOnlyNeg ⟨.pos, .box ψ', l⟩ hine ψ' rfl) (by simp)
                     · simp [hna]
                   | neg =>
-                    -- boxNeg = F(□ψ')@w: matches `modalHintikkaSet`'s first branch directly
+                    -- boxNeg = F(□ψ')@w: matches `modalHintikkaSetGen`'s first branch directly
                     trivial
                 | diamond ψ' =>
                   cases s with
                   | pos =>
-                    -- diamondPos = T(◇ψ')@w: matches `modalHintikkaSet`'s second branch
+                    -- diamondPos = T(◇ψ')@w: matches `modalHintikkaSetGen`'s second branch
                     -- directly (task 441: native diamond, symmetric to boxNeg above).
                     trivial
                   | neg =>
                     -- diamondNeg still falls into `_, _`; `eDiamondOnlyPos` rules out `sf ∈ e`
-                    rcases modalStepBranch_none_saturated hstep ⟨.neg, .diamond ψ', l⟩ hsfmem
-                      with hine | hna
+                    rcases modalStepBranchGen_none_saturated apply hstep ⟨.neg, .diamond ψ', l⟩
+                        hsfmem with hine | hna
                     · exact absurd (hinv.eDiamondOnlyPos ⟨.neg, .diamond ψ', l⟩ hine ψ' rfl)
                         (by simp)
                     · simp [hna]
               · -- Conjunct 3: box-negative witness existence
                 intro ψ' w hmem
-                rcases modalStepBranch_none_saturated hstep _ hmem with hine | hna
+                rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
                 · exact hinv.eBoxNegWitness _ hine ψ' w rfl
                 · exfalso
-                  obtain ⟨-, rest, hlin⟩ := modalApplyOne_boxNeg_witness bR aR ψ' w
+                  obtain ⟨-, rest, hlin⟩ := spec.boxNegWitness bR aR ψ' w
                   rw [hlin] at hna
                   simp at hna
               · -- Conjunct 4: diamond-positive witness existence (task 441, symmetric to
                 -- Conjunct 3 above).
                 intro ψ' w hmem
-                rcases modalStepBranch_none_saturated hstep _ hmem with hine | hna
+                rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
                 · exact hinv.eDiamondPosWitness _ hine ψ' w rfl
                 · exfalso
-                  obtain ⟨-, rest, hlin⟩ := modalApplyOne_diamondPos_witness bR aR ψ' w
+                  obtain ⟨-, rest, hlin⟩ := spec.diaPosWitness bR aR ψ' w
                   rw [hlin] at hna
                   simp at hna
             | some step =>
               obtain ⟨newBs, newExps, newAcc⟩ := step
               rw [hstep] at hinner
-              have hstepEq : modalStepBranch bh e a = some (newBs, newExps, newAcc) := hstep
+              have hstepEq : modalStepBranchGen apply bh e a = some (newBs, newExps, newAcc) :=
+                hstep
               obtain ⟨rank, hinv⟩ :=
                 hInv_all done.length bh e a
                   (by rw [List.getElem?_append_right (Nat.le_refl done.length)]
@@ -1008,19 +1055,20 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                   (by rw [List.getElem?_append_right (by omega)]; simp [hdlength, Nat.sub_self])
                   (by rw [List.getElem?_append_right (by omega)]; simp [hdAccs, Nat.sub_self])
               obtain ⟨newExp, hNewExpEq⟩ :=
-                modalStepBranch_newExps_const bh e a newBs newExps newAcc hstepEq
+                modalStepBranchGen_newExps_const apply bh e a newBs newExps newAcc hstepEq
               subst hNewExpEq
               have hstepEq' :
-                  modalStepBranch bh e a = some (newBs, newBs.map (fun _ => newExp), newAcc) :=
+                  modalStepBranchGen apply bh e a =
+                    some (newBs, newBs.map (fun _ => newExp), newAcc) :=
                 hstepEq
               obtain ⟨rank', hinvAll, -⟩ :=
-                modalStep_preserves_invariant φ0 bh e a rank newBs (newBs.map (fun _ => newExp))
-                  newAcc hstepEq' hinv
+                modalStepGen_preserves_invariant apply spec φ0 bh e a rank newBs
+                  (newBs.map (fun _ => newExp)) newAcc hstepEq' hinv
               have hWb : modalMaxWorld bh < modalWorldBound φ0 :=
                 modalMaxWorld_lt_worldBound_of_phiBound φ0 bh _ hinv.phiBound
-              have hstep_lt := modalExpMeasure_step_lt φ0 done bt newBs doneExp es newExp bh e a
-                newAcc hdlength.symm hinv.potentialInv.bClosure hinv.potentialInv.accFresh hWb
-                hstepEq'
+              have hstep_lt := modalStepBranchGen_expMeasure_step_lt apply spec φ0 done bt newBs
+                doneExp es newExp bh e a newAcc hdlength.symm hinv.potentialInv.bClosure
+                hinv.potentialInv.accFresh hWb hstepEq'
               apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
                 (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
               · simp only [List.length_append, List.length_map, hdlength]
@@ -1119,6 +1167,56 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
                             doneAccs.length = (i - done.length - newBs.length) + 1 from by omega]
                       rw [List.getElem?_cons_succ]; exact hai_restAs
               · exact hinner
+
+/-- **Top-loop Hintikka lemma** (task 442 Phase 5b): if `modalExpandBranches` returns an open
+branch, that branch (with its accessibility relation) is a modal Hintikka set, provided the
+bundled loop invariant `ModalLoopInv` (Phase 5a) holds for every branch/expanded-set/`acc` triple
+in the initial worklist under *some* per-index rank map, and the worklist's `modalExpMeasure` is
+bounded by the available fuel.
+
+Proved by induction on `fuel`, mirroring `classicalExpandBranches_hintikka`
+(`Classical/Completeness.lean:924`): the `fuel = 0` case is vacuous (the measure bound forces
+`branches = []`, so `modalExpandBranches`'s fuel-exhausted lookup returns `.closed`, never
+`.openBranch`); the `fuel = n + 1` case is an inner induction on the `processNext` worklist,
+mirroring `modalExpandBranches_closed_unsat`'s three-parallel-list threading
+(`Soundness.lean:164`) with an additional `ModalLoopInv`-existence hypothesis at every index.
+A `modalStepBranch = none` saturated leaf is closed via `modalStepBranch_none_saturated`
+(each `sf ∈ b` is either in `e` — where `ModalLoopInv.hintikkaInv`/`.eBoxOnlyNeg` discharge
+`modalHintikkaSet`'s second conjunct — or has `modalApplyOne`-result `notApplicable`, discharging
+it directly) and `ModalLoopInv.eBoxNegWitness` (third conjunct, using that `boxNeg` is always
+applicable so a saturated `F(□ψ)@w` is necessarily in `e`). An expansion step advances via
+`modalStep_preserves_invariant` (P5a) for the invariant and `modalExpMeasure_step_lt` for the
+measure bound, splitting the new worklist's indices into the unchanged `done`/`bt` regions and
+the freshly-produced `newBs` region (all sharing the single constant expanded-set `newExp` and
+accessibility relation `newAcc`, `modalStepBranch_newExps_const`).
+
+Byte-identical-statement corollary of `modalExpandBranchesGen_hintikka` (task 510, the crux) via
+`modalExpandBranches_eq`/`modalHintikkaSet_eq`/`ModalLoopInv_iff_gen`. -/
+lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      modalExpMeasure (modalUniverse φ0) branches expandedSets ≤ fuel →
+      (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+          (ai : Accessibility),
+        branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+        ∃ rank, ModalLoopInv φ0 bi ei ai rank) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranches branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSet bR aR := by
+  intro branches expandedSets accs hlen hlenA hfuel hInv bR aR h
+  have hInv' : ∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+      (ai : Accessibility),
+      branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+      ∃ rank, ModalLoopInvGen modalApplyOne φ0 bi ei ai rank := by
+    intro i bi ei ai hib hie hia
+    obtain ⟨rank, hinv⟩ := hInv i bi ei ai hib hie hia
+    exact ⟨rank, (ModalLoopInv_iff_gen φ0 bi ei ai rank).mp hinv⟩
+  rw [modalExpandBranches_eq] at h
+  rw [modalHintikkaSet_eq]
+  exact modalExpandBranchesGen_hintikka modalApplyOne modalApplyOne_spec φ0 fuel branches
+    expandedSets accs hlen hlenA hfuel hInv' bR aR h
 
 /-! ## Initial-Branch Membership Persistence (task 442 Phase 6) -/
 

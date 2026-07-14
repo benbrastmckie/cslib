@@ -1,54 +1,39 @@
 {
+  "status": "implemented",
+  "phase": "2-infra",
   "task_number": 480,
-  "task_type": "cslib",
   "session_id": "sess_1784011298_752245_480",
-  "mode": "hard",
-  "lit_flag": true,
-  "orchestrator_mode": true,
-  "status": "partial",
-  "phase": "2b",
-  "phases_completed": 2,
-  "phases_total": 9,
-  "plan": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
-  "summary": "Phases 1 (PrimeTheory.lean, commit be8f2eb0) and 2a (CanonicalModel.lean definitions, commit 4fd37213) remain green and untouched. Phase 2b (canonical_box_witness) was previously BLOCKED on an apparent 'diamond-top precondition' (see prior handoff / commit d5a3101b). This second dispatch identified the ROOT CAUSE: that framing assumed the witness pair is (w, v) with w unchanged, which is false. Cross-checked against a working reference formalization (github.com/ianshil/CK, Coq mechanization of CK/IK completeness with a definitionally-identical canonical relation) confirms the correct construction needs an existentially-quantified EXTENDED world w' >= w (seeded with the diamond-image of the box-witness world u), not w itself -- this fully resolves the diamond-top red herring. However, building w' requires excluding an entire SET of formulas {psi | box psi not in u} simultaneously (a 'Lindenbaum pair' construction), which is infrastructure that does not currently exist anywhere in Cslib (modal_prime_exclusion and Metalogic.prime_exclusion both only exclude a single formula). Adding this generalization is a substantial (150+ line), foundational, shared-infrastructure change to Foundations/Logic/Metalogic/PrimeExclusion.lean, out of scope for this single-file-territory, single-phase dispatch. No sorry/admit/axiom introduced; CanonicalModel.lean is unchanged from its Phase 2a committed state (verified via git diff --stat and a clean lake build).",
+  "agent_type": "cslib-implementation-hard-agent",
+  "plan_version": 3,
+  "plan_path": "specs/480_intuitionistic_modal_framework/plans/03_intuitionistic-modal-framework-hard-v3.md",
+  "phases_completed": 3,
+  "phases_total": 11,
+  "reference_grounding_tier": 1,
+  "completed_preserved_phases": ["1", "2a", "2-infra"],
+  "dispatch_order": ["2-infra", "2b-sublemma", "2b", "2c", "2d", "3a", "3b", "3c", "4"],
+  "highest_risk_phases": ["2b-sublemma", "2c", "3c"],
+  "phases": [
+    {"id": "1", "title": "PrimeTheory.lean prime-theory machinery", "status": "COMPLETED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean", "commit": "be8f2eb0"},
+    {"id": "2a", "title": "CanonicalModel.lean worlds/order/valuation/canonicalR (defs only)", "status": "COMPLETED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "4fd37213"},
+    {"id": "2-infra", "title": "prime_set_exclusion + bigOr helpers + DerivExcludes (additive) + Wijesekera1990 bib", "status": "COMPLETED", "file": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean, references.bib", "lines_added": 338, "verification": "full lake build whole-tree PASSED (3190 jobs); lake exe checkInitImports PASSED; lake exe lint-style PASSED; lake shake (scoped) no unused-import findings; grep sorry/admit EMPTY; git diff additive-only (338 insertions, 0 deletions in PrimeExclusion.lean)"},
+    {"id": "2b-sublemma", "title": "box_witness_pair_underivable (K-diamond consistency)", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "60-120", "risk": "HIGHEST", "stop_contingency": true},
+    {"id": "2b", "title": "canonical_box_witness corrected pair (w',u) + modal_set_exclusion wrapper", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "120-180"},
+    {"id": "2c", "title": "canonical_diamond_witness (mirror seeded construction)", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "120-200", "risk": "HIGHEST", "stop_contingency": true},
+    {"id": "2d", "title": "canonical_f1 + canonical_f2", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "80-140"},
+    {"id": "3a", "title": "TruthLemma.lean 5 non-modal case helpers", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "150-250"},
+    {"id": "3b", "title": ".box case helper (consumes pair witness)", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "60-120"},
+    {"id": "3c", "title": ".diamond case helper + assemble canonical_truth_lemma", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "100-180", "risk": "HIGHEST", "stop_contingency": true},
+    {"id": "4", "title": "Completeness.lean parametric packaging + CI", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/Completeness.lean", "est_lines": "80-150"}
+  ],
   "sorry_inventory": [],
-  "new_sorries": 0,
-  "new_axioms": 0,
-  "blockers": [
-    {
-      "phase": "2b",
-      "lemma": "canonical_box_witness",
-      "description": "canonical_box_witness's TRUE conclusion is `exists w' v : CanonicalPrimeWorld Axioms, w <= w' /\\ canonicalR w' v /\\ phi not in v.val` (an extended w', NOT `exists v, canonicalR w v /\\ phi not in v.val` as the v1/v2 plan/report sketch assumed). Building w' requires a 'Lindenbaum pair' prime-exclusion lemma (exclude a whole set Sigma = {box B | B not in u.val} simultaneously, not a single formula) which does not exist in PrimeTheory.lean or Foundations/Logic/Metalogic/PrimeExclusion.lean. modal_prime_exclusion / Metalogic.prime_exclusion only support single-formula exclusion.",
-      "full_note": "See the 'UPDATE (second Phase 2b dispatch)' block appended after the original BLOCKER note for Phase 2b in specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md for the complete technical writeup: the step-by-step construction (seed w' with diamond-images of u, exclude Sigma via the missing pair-exclusion lemma), the reference formalization cross-check (ianshil/CK, theories/Completeness_th/general_th_completeness.v, cmreach + truth_lemma Box case), why this resolves the prior 'diamond-top precondition' framing, and the concrete recommended next steps."
-    }
+  "blockers": [],
+  "plan_deviations": [
+    "prime_set_exclusion takes one additional explicit hypothesis beyond report 02's literal Deliverable-1 signature: bot_mem_cl_of_not_cons : forall {X}, not (Cons X) -> HasBot.bot in cl X. This is the set-exclusion analogue of prime_exclusion's phi_mem_cl_of_not_cons bridge (targeting the canonical bigOr [] = bot rather than a fixed phi). Report 02's sketch says the inconsistent branch gets 'insert X T |- bot' for free, but a fully generic Cons predicate cannot supply that without an explicit bridge hypothesis; this addition keeps the lemma correct, zero-debt, and instantiable exactly as modal_prime_exclusion instantiates the analogous phi_mem_cl_of_not_cons (trivially, from the definition of ModalSetConsistent)."
   ],
-  "requires_user_review": true,
-  "continuation_context": "The literature/mathematical question from the PRIOR handoff is now RESOLVED (no further /research needed on 'does IK/CK force diamond-top'). What remains is an infrastructure gap: add a Lindenbaum-pair / set-exclusion generalization of Metalogic.prime_exclusion (e.g. `Metalogic.prime_pair_exclusion`) to Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean -- given Admissible D Cons S, S consistent with excluding a SET Sigma (no finite subset of S derives any finite disjunction of Sigma), produce a prime T extending S with T disjoint from Sigma. Mirror the existing Zorn's-lemma argument in prime_exclusion (swap 'phi not in T' for 'Sigma inter T = empty' throughout, generalize the cut/EFQ-bridge hypotheses from single-formula to finite-disjunction form); cross-reference github.com/ianshil/CK's `Lindenbaum_pair`/`pair_extCKH_prv` for the exact formulation shape that composes cleanly with Zorn's lemma. This is foundational shared infrastructure (used by every Metalogic file), so it likely warrants its OWN task/phase with its own review, separate from task 480's Intuitionistic/ subtree. Once available, re-dispatch Phase 2b using the seeded-w' construction documented in the plan's Phase 2b UPDATE block; canonical_diamond_witness (2c) will need the mirror-image construction (seed the box-side instead of the diamond-side) using the same new lemma.",
   "artifacts": [
-    {
-      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean",
-      "type": "lean_module",
-      "summary": "Phase 1, COMPLETED, commit be8f2eb0. Unchanged this dispatch."
-    },
-    {
-      "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
-      "type": "lean_module",
-      "summary": "Phase 2a, COMPLETED, commit 4fd37213. Unchanged this dispatch -- verified canonicalR's definition against the ianshil/CK reference formalization's cmreach (definitionally identical), confirming Phase 2a is correct as committed. No new content added; Phase 2b's actual proof needs infrastructure not yet present (see blockers)."
-    },
-    {
-      "path": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
-      "type": "plan",
-      "summary": "Phase 2b's BLOCKER note extended with an 'UPDATE (second Phase 2b dispatch)' block: root-cause identification (seeded w' extension, not w itself), reference-formalization cross-check, and concrete infrastructure recommendation. Still marked [BLOCKED]."
-    }
+    {"path": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean", "type": "lean_source", "summary": "Additive extension: bigOr, DerivExcludes, SetExcludingSupersets, empty_imp_trans, empty_imp_id, or_right_mono, bigOr_append_right, bigOr_append_left, set_excluding_base_mem, set_excluding_chain_union, set_maximal_is_prime, prime_set_exclusion. All existing declarations (prime_exclusion, prime_maximal_is_prime, etc.) left byte-for-byte unchanged."},
+    {"path": "references.bib", "type": "bibliography", "summary": "Added Wijesekera1990 (Constructive Modal Logics I, APAL 50(3):271-301, 1990) entry, previously cited textually in CanonicalModel.lean but missing from the bib file."}
   ],
-  "verification": {
-    "build_command": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel",
-    "build_passed": true,
-    "sorry_count": 0,
-    "axiom_count": 0,
-    "vacuous_count": 0,
-    "untouched_classical_verified": true,
-    "note": "No Lean files modified this dispatch (git diff --stat confirms zero changes under Cslib/); only the plan file and this handoff were updated. Build reverified clean via `lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel` (595 jobs, success) at the start of this dispatch."
-  },
-  "next_action_hint": "Add a Lindenbaum-pair (set-exclusion) generalization of Metalogic.prime_exclusion to Foundations/Logic/Metalogic/PrimeExclusion.lean (likely its own task, given it is shared foundational infrastructure), then re-dispatch Phase 2b using the seeded-w' construction documented in the plan."
+  "next_action_hint": "Phase 2b-sublemma: prove box_witness_pair_underivable in CanonicalModel.lean (HIGHEST RISK, own STOP contingency). Depends on prime_set_exclusion/DerivExcludes now available from this phase.",
+  "next_steps": "Run /implement 480 --hard to dispatch Phase 2b-sublemma next (box_witness_pair_underivable, the K-diamond consistency sub-lemma)."
 }

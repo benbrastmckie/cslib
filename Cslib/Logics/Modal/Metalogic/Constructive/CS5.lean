@@ -27,14 +27,37 @@ equivalence relation, Simpson's constructive `S5` frame class.
 frames whose modal relation `r` is reflexive, ≤-composed-transitive, and ≤-composed-symmetric
 (`cs5FC`, `CKExtension.lean`).
 
-**Completeness for `CS5` is not established in this module.** `CS5` inherits `CS4`'s open
-completeness blocker (task 501 Phase 5 — the restricted-tail diamond-refuting witness
-`diamRefutingSegment` cannot be shown compatible with any world-subtype invariant that also
-makes `cs5FC`'s ≤-composed relational clauses hold globally; see `CS4.lean`'s module docstring
-and the task 501 implementation summary for the full analysis). The additional
-≤-composed-symmetry clause would face the same "one-step exclusion does not propagate through
-further ≤-composed relational steps" obstruction, so Phase 7 (the CS5-specific symmetry-invariant
-closure) was not separately attempted once Phase 5 confirmed the shared underlying blocker.
+**Completeness for `CS5` is not established in this module.** Unlike `CS4` (whose completeness
+task 508 mechanizes — see `CS4.lean`), `CS5` is **not** closable by the same technique: this is
+now a mechanized negative result, not merely an unattempted extension.
+
+`bDia` (`◇□A → A`) is **not sound** over `cs5FCweak`, the natural `CS5` analogue of the weakened
+frame condition that makes `CS4` work (reflexivity + both `cs4FC'` clauses + a weakened
+≤-composed symmetry `FCsym_box : r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t`). Witness: a two-world
+`Bool` countermodel (`false` consistent, `true` exploding) in which `◇□p → p` fails — see
+`bDia_not_valid_over_cs5FCweak` in
+`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean`. So the `CS4`
+technique **cannot** be extended to `CS5`: this is a *soundness* failure of the weakened frame
+condition, which no amount of canonical-model work on the completeness side can fix.
+
+The frame condition strong enough to validate `bDia` canonically, `FCbdia`, fails on the
+canonical model: at `w := ofHead(H)` with `H` consistent and `u := cexpl` (the exploding
+world), any `u' ≥ cexpl` has head `Set.univ`, forcing the witness `t` in `FCbdia`'s clause to
+equal `cexpl`; but `t ≤ w` would then give `Set.univ ⊆ H`, contradicting `H`'s consistency.
+
+One lead remains for future work: **`CS5 ⊢ ◇⊥ → ⊥`** (mechanized as `cs5_dia_bot_imp_bot` in the
+same probe file — unlike `CK`/`CT`/`CS4`, none of which prove this), which may permit a
+`Set.univ`-free tail redesign. It does not finish the job on its own: `FCbdia` still needs
+genuine canonical symmetry, whose classical proof needs negation-completeness
+(`B ∉ w.head ⇒ ¬B ∈ w.head`), unavailable for quasi-prime heads. This is the known-hard core of
+constructive `S5` canonical completeness. Note that `bBox` (`A → □◇A`) is *not* the problem
+(the weakened symmetry `FCsym_box` validates it fine); `bDia` alone is the blocker.
+
+`CS5` completeness is **genuinely open** and is re-scoped to a separate research task, not
+deferred with placeholders. See
+`specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md` §5 and
+`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean` for the full
+mechanized analysis.
 
 ## Main Definitions
 

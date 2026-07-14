@@ -378,7 +378,7 @@ deleted from the public API; ~90 lines of duplication are avoided.
 
 ---
 
-### Phase 7: Re-ground CS5.lean's blocking comment on the mechanized obstruction [NOT STARTED]
+### Phase 7: Re-ground CS5.lean's blocking comment on the mechanized obstruction [COMPLETED]
 
 **Goal**: Leave CS5 completeness **BLOCKED**, but cite the correct, newly mechanized reason.
 

@@ -262,7 +262,61 @@ using ≤-composed transitivity for the box-form.
   `lean_goal`); `fourDia` uses the plain specialization.
 - Zero errors/warnings/`sorry`; docstrings present.
 
-### Phase 5: CS4 transitivity invariant + completeness [NOT STARTED]
+### Phase 5: CS4 transitivity invariant + completeness [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: No per-segment invariant makes `cs4FC cs4Mreach` (≤-composed transitivity of
+  the canonical accessibility) hold globally on any world-subtype construction that also admits
+  the `diamRefutingSegment` witness the truth lemma's diamond-backward case requires.
+- **What was tried**:
+  1. Derived (and mechanically verified via a standalone probe file, `lake env lean`, zero
+     errors) the general fact `cs4_boxInv_mreach_subset`: for **any** `P U : CKSegment
+     CS4ModalAxiom` with `cmreach P U`, `boxInv P.head ⊆ boxInv U.head` (using only `P`'s
+     `box_reflect` field plus `fourBox`-closure of `P.head`, no invariant needed).
+  2. Identified the natural per-segment invariant that would make ≤-composed transitivity hold:
+     `P` is "maximal" — `∀ t, QuasiPrime CS4ModalAxiom t → boxInv P.head ⊆ t → t ∈ P.tail` (`P`'s
+     tail contains *every* quasi-prime superset of `boxInv P.head`, i.e. `P` is `.ofHead`-shaped).
+     Mechanically verified (`probe_maximal_suffices_for_transitivity`, zero errors) that this
+     invariant, combined with (1) and `U.box_reflect`, DOES suffice: `cmreach P U → U ≤ U' →
+     cmreach U' T → cmreach P T`.
+  3. Mechanically verified (`probe_diamRefuting_not_maximal`, zero errors) that
+     `diamRefutingSegment s h_not` — the restricted-tail witness `CKTruthLemma.lean` builds for
+     the truth lemma's diamond-backward case (`¬((◇A) ∈ s.head)` from `CKForces (.diamond A)@s`)
+     — **cannot** satisfy "maximal": its tail is `{t | QuasiPrime t ∧ boxInv s.head ⊆ t ∧ A ∉ t}`,
+     which structurally excludes `t := Set.univ` (quasi-prime, `boxInv s.head ⊆ Set.univ`
+     trivially, but `A ∈ Set.univ`) — a counterexample to maximality that exists for *every*
+     choice of `s`/`A`.
+  4. Explored weaker/alternative invariants (tail-closure under further `boxInv`-successors,
+     "hereditary" `A`-exclusion propagated through 4-closure, an intensional
+     `boxInv`-inclusion-based accessibility relation mirroring `canonicalR`) — all either (a)
+     still fail to admit `diamRefutingSegment`, or (b) make the diamond clause degenerate
+     (`Set.univ` is always a valid `boxInv`-superset extension containing any formula, so an
+     intensional relation trivially forces every `◇A` everywhere, breaking the discriminating
+     power needed for completeness).
+- **Why it's stuck**: `cs4FC` (`CKExtension.lean`) is a *blanket* hypothesis
+  (`CKValidFC`/`ckvalidFC_completeness` require `FC r` to hold for the *whole* relation on the
+  *whole* chosen world type, not per-world). The restricted-tail diamond-refuting witness is
+  structurally necessary (an unrestricted/maximal-tail witness always contains `Set.univ` in its
+  tail and therefore trivially forces every diamond, which would make the canonical model
+  degenerate and break completeness for diamond-containing formulas). But the restricted witness's
+  `A`-exclusion is a *one-step* property that does not propagate through further ≤-composed
+  transitive successors (nothing prevents a later successor from being, or extending to,
+  `Set.univ`, which always contains `A`). These two requirements are in direct tension: whatever
+  makes the diamond-refutation witness admissible into the world type breaks the transitivity
+  invariant, and whatever restores transitivity breaks diamond-refutation. Resolving this would
+  require a substantially more sophisticated ("hereditary"/generated-submodel) diamond-refuting
+  construction — new Lindenbaum-style machinery beyond `dia_refuting_theory`/`diamRefutingSegment`
+  as provided by task 493 — which is a research-scale extension, not a single-lemma fix.
+- **What is needed**: Either (a) a hereditary diamond-refuting theory construction that propagates
+  `A`-exclusion through the full ≤-composed-transitive closure of the restricted tail (extending
+  `SegmentLindenbaum.lean`'s `dia_refuting_theory` with a stronger invariant baked in from the
+  start), or (b) an entirely different canonical-model technique for `S4`-style fallible-world
+  segment completeness (e.g. filtration, or a generated/unraveled countermodel) not present in the
+  task 493/494 asset base. Flagged as a follow-up research item.
+- **Prohibited workarounds**: No `sorry`, no `def X := True`/vacuous placeholder, no new axiom —
+  none introduced. `CS4.lean` contains only `CS4ModalAxiom`/`cs4_axiom_sound`/`cs4_soundness`/
+  `cs4_soundness_derivable` (Phase 4, complete and committed); no `CS4Segment`/completeness
+  declarations were added.
 
 **Goal**: Build the CS4 canonical model over a subtype carrying the ≤-composed transitivity
 invariant, handle the restricted-tail closure, and prove completeness/consistency/biconditional.
@@ -296,7 +350,7 @@ invariant, handle the restricted-tail closure, and prove completeness/consistenc
 - Zero errors/warnings/`sorry`; docstrings present. If a frame-condition-aware refuting segment was
   needed, note it in the phase status line for reuse in Phase 7.
 
-### Phase 6: CS5 axioms + soundness [NOT STARTED]
+### Phase 6: CS5 axioms + soundness [COMPLETED]
 
 **Goal**: Define `CS5ModalAxiom` via **B (symmetry)** and prove soundness over `CKForces` for the
 two new B cases, using ≤-composed symmetry for the box-form.
@@ -327,7 +381,40 @@ two new B cases, using ≤-composed symmetry for the box-form.
 - `lake build …Constructive.CS5` green; `bBox` uses ≤-composed symmetry, `bDia` plain symmetry.
 - Zero errors/warnings/`sorry`; docstrings present.
 
-### Phase 7: CS5 symmetry invariant + completeness (HIGHEST RISK — STOP/[BLOCKED] contingency) [NOT STARTED]
+### Phase 7: CS5 symmetry invariant + completeness (HIGHEST RISK — STOP/[BLOCKED] contingency) [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: Same underlying obstruction as Phase 5 (CS4 transitivity), now confirmed to
+  also block CS5's ≤-composed symmetry clause — not separately re-attempted with fresh
+  construction effort once Phase 5 confirmed the shared root cause (see Phase 5's Blocker entry
+  for the full mechanically-verified analysis).
+- **What was tried**: Phase 5's analysis generalizes directly: `cs5FC` requires `∀ w, r w w` (holds,
+  same as `ctFC`/reflexivity — this part is not the issue) **and** the ≤-composed transitivity
+  clause (Phase 5's blocker) **and** the ≤-composed symmetry clause `r w u → u ≤ u' → r u' w`.
+  Any world-subtype invariant strong enough to make transitivity hold globally (i.e. "maximal"
+  tails) structurally excludes `diamRefutingSegment`-shaped worlds (Phase 5, mechanically
+  verified); since `cs5FC` is a strict conjunction that *includes* the transitivity clause, `cs5FC`
+  inherits the exact same non-satisfiability by any world type admitting the required
+  diamond-refuting witness. The symmetry clause specifically would face an analogous "one-step
+  exclusion vs. relational closure" tension: `is5_canonical_symmetric`'s positive
+  `bDia`/`bBox`-routed argument (`IS5.lean:341`) relies on `canonicalR` being *intensional*
+  (defined directly by box/dia membership conditions over the *whole* `CanonicalPrimeWorld` type,
+  no subtype), which is unavailable here because `cmreach` is *extensional* (tail membership) and
+  an intensional substitute was shown (Phase 5, point 4) to make the diamond clause degenerate.
+- **Why it's stuck**: `cs5FC` is strictly stronger than `cs4FC` (same transitivity conjunct plus
+  symmetry), so it cannot be satisfied by any world type that already fails to satisfy `cs4FC`
+  (Phase 5). Fixing Phase 5's blocker (a hereditary diamond-refuting construction or a different
+  canonical-model technique) is a precondition for even attempting Phase 7's symmetry-specific
+  closure.
+- **What is needed**: Resolution of Phase 5's blocker first (a hereditary diamond-refuting theory
+  construction, or a different completeness technique for `S4`-style fallible-world segment
+  models); Phase 7's symmetry closure would then need its own additional positive argument
+  (routing box membership through the diamond clause via `bDia`/`bBox`, per
+  `is5_canonical_symmetric`'s pattern) built on top of that resolution.
+- **Prohibited workarounds**: No `sorry`, no `def X := True`/vacuous placeholder, no new axiom —
+  none introduced. `CS5.lean` contains only `CS5ModalAxiom`/`cs5_axiom_sound`/`cs5_soundness`/
+  `cs5_soundness_derivable` (Phase 6, complete and committed); no `CS5Segment`/completeness
+  declarations were added.
 
 **Goal**: Build the CS5 canonical model over a subtype carrying the ≤-composed symmetry invariant
 (plus reflexivity + transitivity) and prove completeness/consistency/biconditional — OR mark

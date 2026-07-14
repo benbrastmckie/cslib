@@ -1,38 +1,75 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 506,
   "task_slug": "s4_loopchecking_machinery_termination_bound_and_decidability",
   "task_type": "cslib",
-  "artifact_path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md",
+  "phases_completed": 7,
+  "phases_total": 9,
+  "phase_status": {
+    "1": "COMPLETED",
+    "2": "COMPLETED",
+    "3": "COMPLETED",
+    "4": "COMPLETED",
+    "5": "COMPLETED",
+    "6": "COMPLETED",
+    "7": "COMPLETED",
+    "8": "BLOCKED",
+    "9": "BLOCKED"
+  },
+  "blockers": [
+    {
+      "phase": 8,
+      "name": "S4LoopInv.worldSetsDistinct preservation under modalStepBranchS4",
+      "summary": "worldSetsDistinct is not, as currently designed, an actual per-step loop invariant of modalStepBranchS4. Two independent gaps: (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule's box-itself propagation) add formulas to an already-known world's relevant set without re-checking distinctness against other known worlds -- the plan's own anticipated hard sub-goal, confirmed real on inspection; (2) the minting guard (blockingWorld) checks the SOURCE world's uniqueness against existing worlds, not the freshly-minted world's own prospective content, so a new world is not guaranteed distinct from existing ones at the moment of creation. Full detail in plans/01_s4-loopchecking-termination-decidability.md under Phase 8's BLOCKER note.",
+      "recommended_followon_task": "s4-loop-checking-termination",
+      "recommended_scope": "Redesign the minting guard (check prospective new-world content, not just source) and/or restate S4LoopInv over a saturation-stable notion; then worldSetsDistinct preservation, the pigeonhole bound, and modalStepBranchS4_worldBound."
+    },
+    {
+      "phase": 9,
+      "name": "Unreachable -- depends on Phase 8's open bound",
+      "summary": "Phase 9 (fuel sufficiency, s4Valid, Decidable (s4Valid phi)) is doubly gated: on Phase 8's termination bound (blocked, see above) and on task 510's generalized Hintikka chain. Task 510 completed all 9 of its own phases during this run (commit 817a5b45), but its generalized-predicate requirement (modalHintikkaSetGen vs modalHintikkaSet) was not verified this run since Phase 8 blocked first. No writing was done in FrameCompleteness.lean for Phase 9.",
+      "recommended_followon_task": "s4-loop-checking-termination (Phase 9 re-attempt should follow Phase 8's closure)",
+      "recommended_scope": "After Phase 8 closes: verify task 510's generalized loop lemma concludes in modalHintikkaSetGen apply bR aR, then modalFuelS4, modalExpMeasureS4_entry_le_fuel, modalExpandBranchesS4_hintikka, modalTableauS4_sound/_complete/_decides, instDecidableS4Valid."
+    }
+  ],
+  "sorry_inventory": [],
+  "axiom_inventory": {
+    "new_axioms_introduced": 0,
+    "standard_axioms_used": ["propext", "Classical.choice", "Quot.sound"]
+  },
+  "vacuous_definitions": [],
   "artifacts": [
-    {
-      "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md",
-      "type": "plan",
-      "summary": "9-phase S4 tableau plan: 4-rule, LoopChecking.lean equality-blocking machinery, ReflTransGen countermodel extraction, S4 soundness, truth-lemma bridge (Phases 1-7 green/landable), then the high-risk 2^|Sf| termination bound (Phase 8) and 510-gated decidability (Phase 9)."
-    }
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib.lean",
+    "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/summaries/01_s4-loopchecking-termination-decidability-summary.md"
   ],
-  "phase_count": 9,
-  "estimated_hours": 19,
-  "complexity": "complex",
-  "dependency_waves": [[1, 2, 3], [4, 5], [6], [7], [8], [9]],
-  "landing_milestone_phase": 7,
-  "high_risk_phases": [8, 9],
-  "blocked_permission_phases": [8, 9],
-  "external_dependencies": [
-    {
-      "task": 510,
-      "gates_phase": 9,
-      "requirement": "Task 510's generalized loop lemma MUST conclude in `modalHintikkaSetGen apply bR aR`, not `modalHintikkaSet bR aR`. If 510 generalizes only modalHintikkaClause/ModalLoopInv and leaves modalHintikkaSet (Saturation.lean:423) K-only, its conclusion remains unusable for S4 and Phase 9 stays blocked even after 510 completes. Raise this with task 510 before it plans.",
-      "blocks_boundary": "modalExpandBranchesS4_hintikka"
-    }
+  "commits": [
+    "e6dfa582 task 506 phase 1: 4-rule in FrameRules.lean",
+    "d9df271e task 506 phase 2: LoopChecking.lean foundation",
+    "8aba9fb2 task 506 phase 3: extractModelS4 and free frame instances",
+    "6aeca343 task 506 phase 4: S4 frame vocabulary and 4-rule semantic soundness",
+    "444bcd58 task 506 phase 5: minting guard, modalApplyOneS4, driver defs, modalHintikkaSetS4",
+    "6c31dca0 task 506 phase 6: S4 Hintikka bridges and the ReflTransGen path bridge",
+    "bf3892fe task 506 phase 7: modalTruthLemmaS4 and open-branch countermodel",
+    "02011e2f task 506 phase 8 [BLOCKED]: S4 termination bound mechanical portion landed"
   ],
-  "plan_corrections_to_task_description": [
-    "Do NOT extend ModalPotentialInv (FmpMeasure.lean:2326): its rankBound/rankEdge fields are exactly what transitive box propagation breaks. Build a sibling S4LoopInv in LoopChecking.lean instead; FmpMeasure.lean stays untouched.",
-    "Do NOT prove 4-rule soundness via Satisfies.four (Basic.lean:348): it is stated in diamond form (<><>phi -> <>phi); the 4-rule is box-side and the box dual does not exist in Basic.lean. Prove directly from IsTrans.trans, mirroring the T arm's use of hrefl.refl.",
-    "S4 cannot discharge RuleApplicationSpec (GenericDriver.lean:105-108 names task 506 explicitly; fields outputsSubsetUniverse and rankStep are unsatisfiable). S4 reuses the generic driver definitionally only, via a phi0-parameterized modalApplyOneS4."
-  ],
-  "next_steps": "Run /implement 506 to execute the plan",
-  "session_id": null,
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "agent_type": "planner-agent"
+  "verification": {
+    "verification_passed": false,
+    "reason": "Phases 1-7 fully verified (full CI pipeline green: lake build, checkInitImports, lake lint, lake exe lint-style, lake test, lake shake, zero sorry/axiom beyond propext/Classical.choice/Quot.sound). Phase 8's landed portion also fully verified. Phases 8-9's remaining lemmas are absent (not sorry'd), so overall task verification cannot report full pass.",
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "new_axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "phases_1_to_7_fully_green": true
+  },
+  "requires_user_review": true,
+  "review_reason": "Phase 8 (high-risk, standing BLOCKED permission per plan) hit a genuine, well-documented mathematical obstacle requiring either a guard redesign or an invariant restatement -- not something to force in this run. Recommend creating the s4-loop-checking-termination follow-on task per the plan's own instruction.",
+  "next_steps": "Create follow-on task s4-loop-checking-termination scoped to Phase 8's blocker (and Phase 9's re-attempt once Phase 8 closes). Phases 1-7 need no further action -- they are the plan's Definition of Done and are complete.",
+  "session_id": "sess_506_impl",
+  "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+  "agent_type": "cslib-implementation-agent"
 }

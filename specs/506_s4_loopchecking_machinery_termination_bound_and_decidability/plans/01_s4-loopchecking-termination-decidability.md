@@ -663,7 +663,7 @@ green and committed regardless of this phase's outcome.
 
 ---
 
-### Phase 9: Fuel sufficiency, `s4Valid`, and `Decidable (s4Valid phi)` — HIGH RISK, 510-GATED [NOT STARTED]
+### Phase 9: Fuel sufficiency, `s4Valid`, and `Decidable (s4Valid phi)` — HIGH RISK, 510-GATED [BLOCKED]
 
 - **Goal**: Close the decidability endgame. **Doubly gated**: needs Phase 8's bound *and*
   task 510's generalized Hintikka chain.
@@ -699,6 +699,17 @@ green and committed regardless of this phase's outcome.
   concluded in the wrong predicate), mark `[BLOCKED]` at
   `modalExpandBranchesS4_hintikka`, record the exact 510 requirement, and add it to the
   recommended follow-on task. Phases 1-8 remain green.
+
+**BLOCKED (this run)**: Phase 8 is `[BLOCKED]` (see its BLOCKER note), so per this phase's
+own fallback text, Phase 9 is unreachable this run -- not attempted, not sorry'd. No writing
+was done in `FrameCompleteness.lean` for Phase 9. Recorded for the follow-on task's benefit:
+task 510 (`generalize_completeness_loop_hintikka_chain_over_spec`) **completed all 9 phases
+during this run** (commit `817a5b45`, "task 510: complete generic Hintikka/saturation chain;
+unblock task 503 Phase 5"). The follow-on task `s4-loop-checking-termination` should verify,
+once Phase 8's bound closes, whether task 510's generalized loop lemma concludes in
+`modalHintikkaSetGen apply bR aR` (the requirement this plan's gate section raised on 510
+before it planned) before attempting `modalExpandBranchesS4_hintikka` -- this was not
+verified in this run since Phase 8 blocked first.
 
 ---
 

@@ -456,23 +456,38 @@ two new B cases, using ≤-composed symmetry for the box-form.
   is recorded; no `sorry`/axiom introduced (if compilation requires it, leave the completeness
   declarations out and mark the phase [BLOCKED] rather than committing a `sorry`).
 
-### Phase 8: Barrel wiring + full CI [NOT STARTED]
+### Phase 8: Barrel wiring + full CI [COMPLETED]
 
 **Goal**: Wire the new files into `Cslib.lean` and run the full CI pipeline to green.
 
 **Tasks**:
-- [ ] Regenerate the barrel: `lake exe mk_all --module` (or add the four imports to `Cslib.lean`
-      after `Cslib.lean:353–357` where the task 493 `Constructive/` modules are wired). Confirm
-      `CKExtension`, `CT`, `CS4`, `CS5` all appear.
-- [ ] Run the full CSLib CI pipeline: `lake build`, `lake exe checkInitImports`, `lake exe
-      lint-style`, `lake shake --add-public --keep-implied --keep-prefix`, `lake test`.
-- [ ] Resolve any `shake` import-minimization findings and any `lint-style`/`checkInitImports`
-      issues across the four new files.
-- [ ] If Phase 7 is [BLOCKED]: wire and CI-check Phases 1-6 deliverables (CKExtension + CT + CS4
-      full; CS5 axioms/soundness), leave CS5 completeness out of the barrel-facing surface as
-      appropriate, and record CS5 completeness as the single open item in the summary.
-- [ ] Confirm zero `sorry` and zero new axioms across all four files (spot-check with
-      `lean_verify` on the top-level theorems).
+- [x] **Task 8.1**: Regenerate the barrel: `lake exe mk_all --module` (or add the four imports to
+      `Cslib.lean` after `Cslib.lean:353–357` where the task 493 `Constructive/` modules are
+      wired). Confirm `CKExtension`, `CT`, `CS4`, `CS5` all appear. -- all four already present
+      (`Cslib.lean:354,356-358`); `mk_all --module` reported "No update necessary".
+- [x] **Task 8.2**: Run the full CSLib CI pipeline: `lake build`, `lake exe checkInitImports`,
+      `lake exe lint-style`, `lake shake --add-public --keep-implied --keep-prefix`, `lake test`
+      -- all green (`lake lint` also run and green, beyond the pipeline's minimum).
+- [x] **Task 8.3**: Resolve any `shake` import-minimization findings and any
+      `lint-style`/`checkInitImports` issues across the four new files -- fixed an
+      `unusedArguments` lint warning on `ctFC`'s unused `[Preorder World]` instance
+      (`@[nolint unusedArguments]`, documented) and a `shake` finding for `CS4.lean`/`CS5.lean`
+      (both copy their predecessor's axiom constructors verbatim rather than referencing them as
+      terms, so neither literally needs the transitive `CT`/`CS4` import; both now import
+      `CKExtension` directly, matching what they actually use).
+- [x] **Task 8.4**: *(deviation: altered)* If Phase 7 is [BLOCKED]: wire and CI-check Phases 1-6
+      deliverables (CKExtension + CT + CS4 full; CS5 axioms/soundness) -- both Phase 5 (CS4
+      completeness) and Phase 7 (CS5 completeness) ended up [BLOCKED] (see their Blocker entries);
+      CKExtension + CT are fully complete (axioms, soundness, world-subtype completeness); CS4 and
+      CS5 axioms/soundness are complete; CS4/CS5 completeness (`CS4Segment`/`CS5Segment`,
+      `cs4_completeness`/`cs5_completeness`, etc.) was never added to either file, so there is no
+      partial/vacuous surface to exclude from the barrel -- all four files as they stand are fully
+      wired and CI-green.
+- [x] **Task 8.5**: Confirm zero `sorry` and zero new axioms across all four files (spot-check with
+      `lean_verify` on the top-level theorems) -- `grep` confirms zero `sorry`/vacuous-def
+      matches in all four files; `lean_verify` on `ct_soundness_completeness` shows only the three
+      standard foundational axioms (`propext`, `Classical.choice`, `Quot.sound`); `lean_verify` on
+      `cs4_soundness_derivable`/`cs5_soundness_derivable` shows zero axioms.
 
 **Timing**: 1 hour
 
@@ -483,20 +498,26 @@ two new B cases, using ≤-composed symmetry for the box-form.
 
 **Verification**:
 - Full pipeline green: `lake build` && `lake exe checkInitImports` && `lake exe lint-style` &&
-  `lake shake --add-public --keep-implied --keep-prefix` && `lake test`.
-- Zero `sorry`, zero new axioms, zero warnings.
+  `lake shake --add-public --keep-implied --keep-prefix` && `lake test`. -- CONFIRMED green.
+- Zero `sorry`, zero new axioms, zero warnings. -- CONFIRMED.
 
 ## Testing & Validation
 
-- [ ] `lake build` (whole library) succeeds with zero errors and zero warnings.
-- [ ] `lake exe checkInitImports` passes for all four new files.
-- [ ] `lake exe lint-style` passes (style + docstring/docBlame).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no import-minimization issues.
-- [ ] `lake test` (CslibTests) passes.
-- [ ] Each system's `x_soundness_completeness` type-checks as a biconditional (soundness ∧
-      completeness), except CS5 if Phase 7 is [BLOCKED].
-- [ ] No `sorry`, no new `axiom`, no use of deprecated Mathlib `Reflexive`/`Transitive`/`Symmetric`.
-- [ ] Every new declaration has a docstring; declaration names follow the existing `ck_`/`it_`
+- [x] `lake build` (whole library) succeeds with zero errors and zero warnings (pre-existing
+      warnings/`sorry`s in unrelated `Propositional/Tableau/` files are untouched by this task).
+- [x] `lake exe checkInitImports` passes for all four new files.
+- [x] `lake exe lint-style` passes (style + docstring/docBlame).
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no import-minimization issues
+      beyond the same `import Cslib.Init`-redundancy false-positive every pre-existing file in the
+      library (including task 493's own `Constructive/` files) already carries -- ignored per
+      established codebase precedent, since `checkInitImports` mandates the explicit import.
+- [x] `lake test` (CslibTests) passes.
+- [x] Each system's `x_soundness_completeness` type-checks as a biconditional (soundness ∧
+      completeness) -- **true only for `CT`** (`ct_soundness_completeness`); `CS4`/`CS5` have
+      soundness only (`cs4_soundness_derivable`/`cs5_soundness_derivable`), no
+      `cs4_soundness_completeness`/`cs5_soundness_completeness` -- Phases 5 and 7 [BLOCKED].
+- [x] No `sorry`, no new `axiom`, no use of deprecated Mathlib `Reflexive`/`Transitive`/`Symmetric`.
+- [x] Every new declaration has a docstring; declaration names follow the existing `ck_`/`it_`
       convention.
 
 ## Artifacts & Outputs

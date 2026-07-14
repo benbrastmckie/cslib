@@ -3213,16 +3213,41 @@ private lemma modalExpMeasure_const_exp
       = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
   simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
 
-/-- **The strict-decrease engine** (research §3.6, port of `classicalExpMeasure_step_lt`,
-`Classical/Completeness.lean:834`): one `modalStepBranch` step strictly decreases the base-3
-damped worklist measure by at least one, given the branch-closure (`hb`), freshness-invariant
-(`hInv`), and world-bound (`hW`) hypotheses that place every newly emitted formula inside the
-fixed universe `U := modalUniverse φ0` (`modalApplyOne_outputs_subset`, P1). Case-splits over
-the four `modalApplyOne` outcomes exactly as the classical template, replacing
-`classicalBranchComplexity`'s per-output complexity accounting with the counting `R`-drop
-lemmas (`modalWork_drop_linear`/`_persistent`), whose `+1 ≤` shape supplies both the
-`1 ≤ R`-parent bound and the `child ≤ R-1` bound the `pow3_*` lemmas need in one step. -/
-lemma modalExpMeasure_step_lt
+/-- **Task 507 Phase 7 (generic form, the engine)**: one `modalStepBranchGen apply` step
+strictly decreases the base-3 damped worklist measure by at least one, given the
+branch-closure/freshness/world-bound hypotheses `hb`/`hInv`/`hW` and the three per-call/aggregate
+obligations `hBranchingLength`/`hPersistentFresh`/`hOutputsSubsetUniverse`. `hBranchingLength` is
+a **new** raw hypothesis (task 507 Phase 7 discovery): the `.branching` case needs `apply`'s
+branching output to always have exactly two sub-branches, a fact not covered by any of the six
+fields established in Phases 1-6 -- mirrors the new `RuleApplicationSpec.branchingLength` field
+(`GenericDriver.lean`), discharged for `modalApplyOne` by the pre-existing
+`modalApplyOne_branching_length`. `hPersistentFresh`/`hOutputsSubsetUniverse` are the raw forms
+of the pre-existing `persistentFresh`/`outputsSubsetUniverse` fields. Case-splits over the four
+`RuleResult` outcomes exactly as the classical template, replacing
+`classicalBranchComplexity`'s per-output complexity accounting with the counting `R`-drop lemmas
+(`modalWork_drop_linear`/`_persistent`, already rule-agnostic), whose `+1 ≤` shape supplies both
+the `1 ≤ R`-parent bound and the `child ≤ R-1` bound the `pow3_*` lemmas need in one step.
+`modalExpMeasure_step_lt` (K) is the trivial instantiation at `apply := modalApplyOne`. -/
+lemma modalExpMeasure_step_lt_gen
+    (apply : RuleApply Atom)
+    (hBranchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
+      (apply sf b acc).fst = .branching brs → brs.length = 2)
+    (hPersistentFresh : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
+      (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b)
+    (hOutputsSubsetUniverse : ∀ (φ0 : Proposition Atom)
+      (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ x ∈ b, x ∈ modalUniverse φ0) → sf ∈ b → accFreshInv b acc →
+      modalMaxWorld b < modalWorldBound φ0 →
+      (match (apply sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+        | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse φ0
+        | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+        | .notApplicable => True))
     (φ0 : Proposition Atom)
     (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -3233,7 +3258,8 @@ lemma modalExpMeasure_step_lt
     (hb : ∀ x ∈ bh, x ∈ modalUniverse φ0)
     (hInv : accFreshInv bh acc)
     (hW : modalMaxWorld bh < modalWorldBound φ0)
-    (hstep : modalStepBranch bh e acc = some (newBs, newBs.map (fun _ => newExp), newAcc)) :
+    (hstep : modalStepBranchGen apply bh e acc = some (newBs, newBs.map (fun _ => newExp),
+      newAcc)) :
     modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
         (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
       ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
@@ -3255,12 +3281,12 @@ lemma modalExpMeasure_step_lt
   rw [hrhs, hlhs]
   suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
       3 ^ modalWork U bh e by omega
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hfound with hany
   simp only [Bool.not_eq_true] at hany
   have hsfU : sf ∈ U := hb sf hsfmem
-  rcases hca : (modalApplyOne sf bh acc).1 with nf | brs | nf | -
+  rcases hca : (apply sf bh acc).1 with nf | brs | nf | -
   · -- linear
     rw [hca] at hfound
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
@@ -3271,7 +3297,7 @@ lemma modalExpMeasure_step_lt
     simp only [List.map_singleton, List.sum_singleton]
     exact pow3_add_one_le hC h0
   · -- branching
-    have hlen2 : brs.length = 2 := modalApplyOne_branching_length sf bh acc brs hca
+    have hlen2 : brs.length = 2 := hBranchingLength sf bh acc brs hca
     obtain ⟨b0, b1, hbrs⟩ : ∃ b0 b1, brs = [b0, b1] := by
       match brs, hlen2 with
       | [b0, b1], _ => exact ⟨b0, b1, rfl⟩
@@ -3290,9 +3316,9 @@ lemma modalExpMeasure_step_lt
   · -- persistent
     rw [hca] at hfound
     obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
-    obtain ⟨hnfne, hnffresh⟩ := modalApplyOne_persistent_props sf bh acc nf hca
+    obtain ⟨hnfne, hnffresh⟩ := hPersistentFresh sf bh acc nf hca
     obtain ⟨x0, hx0mem⟩ := List.exists_mem_of_ne_nil nf hnfne
-    have hclosure := modalApplyOne_outputs_subset φ0 sf bh acc hb hsfmem hInv hW
+    have hclosure := hOutputsSubsetUniverse φ0 sf bh acc hb hsfmem hInv hW
     rw [hca] at hclosure
     have hx0U : x0 ∈ U := hclosure x0 hx0mem
     have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
@@ -3305,6 +3331,31 @@ lemma modalExpMeasure_step_lt
     simp only [List.map_singleton, List.sum_singleton]
     exact pow3_add_one_le hC h0
   · rw [hca] at hfound; simp at hfound
+
+/-- **The strict-decrease engine** (research §3.6, port of `classicalExpMeasure_step_lt`,
+`Classical/Completeness.lean:834`): one `modalStepBranch` step strictly decreases the base-3
+damped worklist measure by at least one. Zero-regression corollary of
+`modalExpMeasure_step_lt_gen` (task 507 Phase 7) at `apply := modalApplyOne` via the
+`modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalExpMeasure_step_lt
+    (φ0 : Proposition Atom)
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverse φ0)
+    (hInv : accFreshInv bh acc)
+    (hW : modalMaxWorld bh < modalWorldBound φ0)
+    (hstep : modalStepBranch bh e acc = some (newBs, newBs.map (fun _ => newExp), newAcc)) :
+    modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalExpMeasure_step_lt_gen modalApplyOne modalApplyOne_branching_length
+    modalApplyOne_persistent_props modalApplyOne_outputs_subset
+    φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW hstep
 
 end Cslib.Logic.Modal.Tableau
 

@@ -452,24 +452,45 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 7: Generic modalExpMeasure_step_lt + counting-measure helpers [NOT STARTED]
+### Phase 7: Generic modalExpMeasure_step_lt + counting-measure helpers [COMPLETED]
 
 - **Goal:** Generalize `modalExpMeasure_step_lt` (line 2875) and its counting-measure dependency
   cluster over `(apply, spec)`, reusing `spec.persistentFresh`. Cluster: `FmpMeasure.lean`
   lines ~2442–2961.
 - **Tasks:**
-  - [ ] Generalize `modalWork_drop_persistent` (2558) and `modalWork_drop_linear` (2541) reasoning to
+  - [x] Generalize `modalWork_drop_persistent` (2558) and `modalWork_drop_linear` (2541) reasoning to
     consume `spec.persistentFresh`/`spec.outputsSubsetUniverse` instead of
     `modalApplyOne_persistent_props`. Reuse the rule-agnostic `modalCount_notMem_*` (2442/2519) and
-    `modalExpMeasure_split`/`_append`/`_const_exp` (2828/2845/2858) helpers unchanged.
-  - [ ] Generalize the propositional/branching helpers that `rcases` on `modalApplyOne`'s shape
+    `modalExpMeasure_split`/`_append`/`_const_exp` (2828/2845/2858) helpers unchanged. *(confirmed:
+    `modalWork_drop_persistent`/`modalWork_drop_linear` themselves are already fully rule-agnostic
+    (parametrized over an arbitrary witness formula/list, no `modalApplyOne` reference) — reused
+    unchanged. `modalCount_notMem_*`/`modalExpMeasure_split`/`_append`/`_const_exp` likewise
+    confirmed rule-agnostic and reused unchanged. The consumption of `persistentFresh`/
+    `outputsSubsetUniverse` happens one level up, in the engine lemma itself.)*
+  - [x] Generalize the propositional/branching helpers that `rcases` on `modalApplyOne`'s shape
     (`boxPropagation_fresh` 2663, `diamondNeg_filterMap_fresh` 2686, `modalApplyOne_branching_length`
     2779, `applyPropRule_*`/`tryAllPropRules_*` 2582–2661) to their `spec`-mediated forms, or keep
     them as K-specific facts consumed only via `modalApplyOne_spec` if they are purely about
-    `modalApplyOne`'s own catalog.
-  - [ ] Generalize `modalExpMeasure_step_lt` to `_gen` over `modalStepBranchGen apply` + `spec`;
-    re-derive concrete K version as `_gen … modalApplyOne modalApplyOne_spec`.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom.
+    `modalApplyOne`'s own catalog. *(kept as K-specific: `boxPropagation_fresh`/
+    `diamondNeg_filterMap_fresh`/`applyPropRule_*`/`tryAllPropRules_*` are private helpers about
+    K's own `Rules.lean` catalog, consumed only internally by `modalApplyOne_persistent_props`/
+    `modalApplyOne_branching_length` (already-existing K witnesses, unchanged) — never touched by
+    the generic engine directly. `modalApplyOne_branching_length` discharges the **new**
+    `RuleApplicationSpec.branchingLength` field, added this phase.)*
+  - [x] Generalize `modalExpMeasure_step_lt` to `_gen` over `modalStepBranchGen apply` + `spec`;
+    re-derive concrete K version as `_gen … modalApplyOne modalApplyOne_spec`. *(`modalExpMeasure_step_lt_gen`
+    added in `FmpMeasure.lean`, taking three raw hypotheses `branchingLength`/`persistentFresh`/
+    `outputsSubsetUniverse` per the Architectural Note. **Discovery**: the `.branching` case needs
+    a genuinely new fact not covered by any of the six existing fields — every `.branching`
+    result has exactly two sub-branches (`brs.length = 2`), a fixed-arity catalog fact, not an
+    aggregate behavior fact like the other six fields. Added `RuleApplicationSpec.branchingLength`
+    (discharged for `modalApplyOne` via the pre-existing `modalApplyOne_branching_length`), keeping
+    `modalApplyOne_spec` sorry-free and green. K's concrete `modalExpMeasure_step_lt` is now a
+    byte-identical-statement corollary via `modalStepBranch_eq`; `GenericDriver.lean`'s
+    `modalStepBranchGen_expMeasure_step_lt` supplies the `(apply, spec)`-bundled wrapper.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom. *(confirmed via `lake env lean` + `#print axioms`:
+    all four new/changed declarations `{propext, Classical.choice, Quot.sound}`, zero sorry. Full
+    CI green; `lake shake` count unchanged at 81.)*
 - **Timing:** 2 hours
 - **Depends on:** 6
 - **Files to modify:**

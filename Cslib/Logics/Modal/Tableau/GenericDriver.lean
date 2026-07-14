@@ -94,15 +94,24 @@ per-call facts on every input where the new rule agrees with `modalApplyOne` (pe
 `freshLocal` docstring above), and supply fresh reasoning only where the new rule's own catalog
 (box propagation to existing successors, etc.) differs.
 
-## Known Limitation (documented for Phase 5 continuation)
+## Task 507 Phase 5 Confirmation: the Crux Needs No Further Field
 
-This bundle is **necessary but not yet proven sufficient** to re-derive
-`modalStepBranch_potential_step` (`FmpMeasure.lean:2146`) for an abstract `apply`: the crux
-lemma's own body (once its helper lemmas are generalized via the six fields above) is expected
-to need no further field beyond `freshLocal`, but this is confirmed only once
-`modalStepBranch_potential_step` itself is re-derived generically (task 507 Phase 5). If a
-future continuation finds the six fields above insufficient, extend this bundle (do not weaken
-`modalApplyOne_spec`'s proof with `sorry`).
+`modalStepBranch_potential_step_gen`'s own body (`FmpMeasure.lean`), once its helper lemmas are
+generalized via `freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep`, needs no field beyond
+`freshLocal` -- the crux's arithmetic core (`geomCap_zero`/`geomCap_succ`/`Nat`/`ring`) is
+entirely independent of `apply`. This confirms the six fields above are **sufficient** for the
+termination-measure crux.
+
+## Task 507 Phase 7: `branchingLength` (Counting-Measure Engine)
+
+The strict-decrease engine `modalExpMeasure_step_lt` needs one further per-call fact its
+`.branching` case relies on that is not covered by any of the six fields above: every
+`.branching` result `apply` can produce has **exactly two** sub-branches (`brs.length = 2`).
+This is genuinely catalog-specific (only the 3 branching propositional rules
+`andNeg`/`orPos`/`impPos` ever produce `.branching`, and each is hard-coded to a 2-element
+list) -- unlike `freshLocal`/`outputsSubsetUniverse`/`persistentFresh`, it is not a fact about
+*aggregate* behaviour but a fixed-arity shape constraint. Discharged for `modalApplyOne` by the
+pre-existing `modalApplyOne_branching_length`.
 -/
 
 @[expose] public section
@@ -204,6 +213,13 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop where
           | .branching _ => False
           | .persistent _ => False
           | .notApplicable => False))
+  /-- Branching arity (task 507 Phase 7): every `.branching` result `apply sf b acc` can
+  produce has exactly two sub-branches. Needed by the counting-measure engine
+  `modalExpMeasure_step_lt`'s `.branching` case. Mirrors `modalApplyOne_branching_length`. -/
+  branchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
+      (apply sf b acc).fst = .branching brs → brs.length = 2
 
 /-! ## The Trivial K Witness -/
 
@@ -220,6 +236,7 @@ theorem modalApplyOne_spec : RuleApplicationSpec (Atom := Atom) modalApplyOne wh
   outDegStep := fun sf b e acc houtdeg => modalApplyOne_outDeg_step sf b e acc houtdeg
   knownWorldsStep := fun sf b acc hsfmem hknown =>
     modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+  branchingLength := fun sf b acc brs hca => modalApplyOne_branching_length sf b acc brs hca
 
 /-! ## Task 507 Phase 2: Generic outDeg-Preservation (spec-bundled) -/
 
@@ -364,6 +381,34 @@ theorem modalStepBranchGen_worldBound
     ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 :=
   modalStepBranch_worldBound_gen apply spec.freshLocal spec.rankStep spec.outDegStep
     spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv hPhiBound
+
+/-! ## Task 507 Phase 7: Generic Counting-Measure Engine (spec-bundled) -/
+
+/-- **Task 507 Phase 7**: one `modalStepBranchGen apply` step strictly decreases the base-3
+damped worklist measure by at least one, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean`, which takes the three raw hypotheses
+`branchingLength`/`persistentFresh`/`outputsSubsetUniverse` directly to avoid the import cycle
+documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_expMeasure_step_lt
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom)
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverse φ0)
+    (hInv : accFreshInv bh acc)
+    (hW : modalMaxWorld bh < modalWorldBound φ0)
+    (hstep : modalStepBranchGen apply bh e acc = some (newBs, newBs.map (fun _ => newExp),
+      newAcc)) :
+    modalExpMeasure (modalUniverse φ0) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverse φ0) (done ++ bh :: bt) (doneExp ++ e :: es) :=
+  modalExpMeasure_step_lt_gen apply spec.branchingLength spec.persistentFresh
+    spec.outputsSubsetUniverse φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW
+    hstep
 
 end Cslib.Logic.Modal.Tableau
 

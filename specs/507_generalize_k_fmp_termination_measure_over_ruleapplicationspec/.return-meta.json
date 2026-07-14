@@ -7,11 +7,11 @@
     "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/handoffs/phase1-handoff.md"
   ],
   "partial_progress": {
-    "stage": "phase_6_complete",
-    "details": "Phase 6 (generic modalStepBranch_worldBound) complete, green CI, committed.",
+    "stage": "phase_7_complete",
+    "details": "Phase 7 (generic modalExpMeasure_step_lt engine) complete, green CI, committed. Discovered and added a new RuleApplicationSpec field (branchingLength) discharged for modalApplyOne.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 6
+    "phases_completed": 7
   },
   "metadata": {
     "session_id": "sess_cslib_impl_507",

@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Minimal.MinCompleteness
+public import Cslib.Logics.Modal.Semantics.Birelational
 public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum
 
 /-! # Frame-Condition-Parametrized, Axioms-Generic Extensions of the Minimal Canonical Model

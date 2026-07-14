@@ -305,7 +305,30 @@ confidence zero bespoke lemmas are needed: MEDIUM-HIGH.
 
 ---
 
-### Phase 5: Barrel wiring + full CI [NOT STARTED]
+### Phase 5: Barrel wiring + full CI [COMPLETED]
+
+**Note on shake's `import Cslib.Init` suggestions**: `lake shake --add-public --keep-implied
+--keep-prefix` flags `remove #[import Cslib.Init]` on all four new files. This is a pre-existing,
+repo-wide false positive (also flagged on task-495's own `MinPrimeTheory.lean` and unrelated files
+across `Propositional/SequentCalculus/{LK,LJ}` and `Temporal/Tableau`): `scripts/noshake.json`
+(the config file meant to suppress exactly this class of false positive, since `Cslib.Init` is
+required by `checkInitImports` for its linter/tactic-setup side effects, not for any declaration
+reference `shake`'s dependency analysis can see) is absent from the repository (confirmed via
+`git log --all -- scripts/noshake.json`: deleted at some prior point, unrelated to task 496). No
+other import-minimization findings were raised against the four new files -- confirming their
+import chains (`MinExtension.lean` -> `Semantics/Birelational` + `Constructive/SegmentLindenbaum`;
+`MT`/`MS4`/`MS5.lean` -> `MinExtension.lean` only, per the plan's import-chain caveat) are already
+minimal. (Mid-verification, `MinExtension.lean`'s import was also corrected from
+`Minimal.MinCompleteness` -- an unnecessarily heavy, MK-specific transitive import providing
+nothing actually used -- to the direct `Semantics.Birelational` + `Constructive.SegmentLindenbaum`
+it needs.)
+
+**Note on concurrent-session interference**: mid-Phase-5, `lake build`/`checkInitImports` briefly
+failed due to an unrelated, actively-being-edited file (`Cslib/Logics/Modal/Tableau/FmpMeasure.lean`,
+task 507, a different concurrent session) being left in a transiently broken state. This resolved
+itself once that session's edit stabilized (confirmed via polling `git diff --stat`); no task-496
+file was implicated. Full pipeline (`lake build`, `checkInitImports`, `lake lint`, `lake exe
+lint-style`, `lake shake`, `lake test`) is green; `lake test` exits 0.
 
 **Goal**: Register all four new files in `Cslib.lean` and pass the complete CSLib CI pipeline.
 

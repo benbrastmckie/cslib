@@ -175,7 +175,7 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 
 ---
 
-### Phase 5: Capstone modularity synthesis + Axis-C conservativity reuse [NOT STARTED]
+### Phase 5: Capstone modularity synthesis + Axis-C conservativity reuse [COMPLETED]
 
 **Goal**: The green, valuable capstone. A single `InterSystem/Modularity.lean` module that re-exports the Phase 1-4 monotonicity results, reuses the existing Axis-C `modal_conservative_extension`, and documents the three-axis framing precisely. This lands and commits green BEFORE the risky bridge, so a bridge block still leaves a complete monotone lattice + modularity synthesis. (Report Phase 4.)
 
@@ -183,7 +183,7 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 - [ ] Read `Metalogic/ConservativeExtension.lean:54` (`modal_conservative_extension`) to confirm the reuse surface for Axis C.
 - [ ] Create `Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean`. Docstring = the lattice map: three axes with their distinct Lean shapes — (A) modal-axiom lattice: **monotonicity** only (converse false, T proves `□φ→φ`); (B) propositional strength: **monotonicity** only into IK (converse false, classical proves Peirce; genuine converses exist only at PL level via Glivenko/bot-free, out of scope here); (C) modal-over-propositional: genuine **conservativity**, reused verbatim from `modal_conservative_extension`.
 - [ ] Re-export / restate the Phase 1-4 monotonicity theorems as the consolidated lattice statement; reference the reused Axis-C conservativity. Do NOT re-prove anything.
-- [ ] (Optional, gate as time permits) instantiate the existing `conservative_over_cpl` bridge (`ConservativityLift.lean:108`) at IPL/MPL completeness for modal-over-IPL / modal-over-MPL conservativity; if it does not close cleanly, omit — do NOT `sorry`.
+- [ ] (Optional, gate as time permits) instantiate the existing `conservative_over_cpl` bridge (`ConservativityLift.lean:108`) at IPL/MPL completeness for modal-over-IPL / modal-over-MPL conservativity; if it does not close cleanly, omit — do NOT `sorry`. *(deviation: skipped -- optional per plan; the mandatory capstone (docstring + monotonicity re-export + Axis-C K reuse) is complete and green; the IPL/MPL bridge is left as clean future work, not required for this task's definition of done)*
 - [ ] Re-read `Cslib.lean`; append `public import` line.
 - [ ] Run CI; commit green: `task 484 phase 5: capstone modularity synthesis (monotonicity + Axis-C conservativity)`.
 

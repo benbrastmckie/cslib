@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Soundness
+public import Cslib.Logics.Modal.Tableau.GenericDriver
 
 /-! # Modal K Tableau Completeness Loop: Combined-Invariant Single-Step Preservation
 
@@ -109,6 +110,61 @@ structure ModalLoopInv (φ0 : Proposition Atom)
     ∃ w', acc.hasEdge w w' = true ∧
       (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
 
+/-- **Generic bundled loop invariant** (task 510): `ModalLoopInv`, generalized over an abstract
+`apply : RuleApply Atom`. Only `hintikkaInv` mentions `apply` (via `modalHintikkaClauseGen`); the
+other six conjuncts are already rule-agnostic (statements mention no rule function at all). Kept
+as its own `structure` (not derived from `ModalLoopInv`) to preserve K's byte-identical public
+surface; bridged via `ModalLoopInv_iff_gen`. -/
+structure ModalLoopInvGen (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (rank : WorldIndex → Nat) : Prop where
+  /-- The `ModalPotentialInv` bundle: universe closure, `acc` bookkeeping, rank map. -/
+  potentialInv : ModalPotentialInv φ0 b e acc rank
+  /-- The Φ-bound consumed by `modalStepBranch_worldBound`/`modalStepBranch_potential_step` to
+  conclude the a-priori world bound is an exact loop invariant (not merely non-increasing). -/
+  phiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
+    geomCap (modalSubfmls φ0).length (modalDepth φ0)
+  /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
+  hintikkaInv : ∀ sf ∈ e, modalHintikkaClauseGen apply sf.sign sf.formula sf.label b acc
+  /-- Every box-shaped formula in the expanded set `e` has sign `.neg`. -/
+  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
+  /-- Every `boxNeg`-shaped formula `F(□ψ)@w` in the expanded set `e` already has a witness
+  successor on the branch. -/
+  eBoxNegWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos`. -/
+  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
+  /-- Every `diamondPos`-shaped formula `T(◇ψ)@w` in the expanded set `e` already has a witness
+  successor on the branch. -/
+  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+
+/-- Bridge (task 510): `ModalLoopInv` and `ModalLoopInvGen modalApplyOne` are logically
+equivalent (constructor/destructor on the seven fields, each field either `Iff.rfl`-trivial or
+`modalHintikkaClause_eq`-rewritten). Kept as an `Iff` rather than an `abbrev`/definitional
+identification so `ModalLoopInv` stays a genuinely distinct `structure` -- the anonymous
+7-field destructure and `refine ⟨…⟩` constructor call sites elsewhere in this file are
+unaffected. -/
+theorem ModalLoopInv_iff_gen (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (rank : WorldIndex → Nat) :
+    ModalLoopInv φ0 b e acc rank ↔ ModalLoopInvGen modalApplyOne φ0 b e acc rank := by
+  constructor
+  · intro h
+    exact ⟨h.potentialInv, h.phiBound,
+      fun sf hsf => modalHintikkaClause_eq sf.sign sf.formula sf.label b acc ▸
+        h.hintikkaInv sf hsf,
+      h.eBoxOnlyNeg, h.eBoxNegWitness, h.eDiamondOnlyPos, h.eDiamondPosWitness⟩
+  · intro h
+    exact ⟨h.potentialInv, h.phiBound,
+      fun sf hsf => (modalHintikkaClause_eq sf.sign sf.formula sf.label b acc).symm ▸
+        h.hintikkaInv sf hsf,
+      h.eBoxOnlyNeg, h.eBoxNegWitness, h.eDiamondOnlyPos, h.eDiamondPosWitness⟩
+
 /-! ## Local Helper Lemmas
 
 These re-derive three facts that are `private` to `FmpMeasure.lean` (hence unavailable across
@@ -154,26 +210,27 @@ private lemma modalMaxWorld_lt_worldBound_of_phiBound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
     _ = modalWorldBound φ0 := hWB.symm
 
-/-- Preservation of the branch-side universe closure across a `modalStepBranch` step: every
-formula on each child branch stays inside `U(φ0)`, combining the source branch-closure `hb` with
-`modalApplyOne_outputs_subset` (P1) applied to the consumed formula. Mirrors the shallow
-top-level case split of the `private` `modalStepBranch_eClosure` (`FmpMeasure.lean:2166`), but
-for the branch side rather than the expanded-set side. -/
-private lemma modalLoop_bClosure
+/-- **Generic branch-side universe-closure preservation** (task 510):
+`modalLoopGen_bClosure`, over an abstract `(apply, spec)`, discharged by
+`spec.outputsSubsetUniverse`. Body is `modalLoop_bClosure`'s exact proof with
+`modalApplyOne ↦ apply`, `modalStepBranch ↦ modalStepBranchGen apply`, and
+`modalApplyOne_outputs_subset ↦ spec.outputsSubsetUniverse`. -/
+private lemma modalLoopGen_bClosure
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
     (hAccInv : accFreshInv b acc)
     (hW : modalMaxWorld b < modalWorldBound φ0) :
     ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hclosure := modalApplyOne_outputs_subset φ0 sf b acc hb hsfmem hAccInv hW
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  have hclosure := spec.outputsSubsetUniverse φ0 sf b acc hb hsfmem hAccInv hW
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf hclosure
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro b' hb'
@@ -208,21 +265,40 @@ private lemma modalLoop_bClosure
     · exact hb x hx
   · rw [hfstc] at hsf; simp at hsf
 
-/-- Every `modalStepBranch` step produces children that all share the same freshly-expanded
-set `newExp` (either `e` unchanged, for the `.persistent` case, or `e ++ [sf]`, for the
-`.linear`/`.branching` cases), i.e. `newExps` is exactly `newBs.map (fun _ => newExp)`. This is
-the generic fact `modalExpMeasure_step_lt`'s hypothesis shape (`FmpMeasure.lean:3029`) assumes as
-given; here it is derived from a generic `hstep`. -/
-private lemma modalStepBranch_newExps_const
+/-- Preservation of the branch-side universe closure across a `modalStepBranch` step: every
+formula on each child branch stays inside `U(φ0)`, combining the source branch-closure `hb` with
+`modalApplyOne_outputs_subset` (P1) applied to the consumed formula. Mirrors the shallow
+top-level case split of the `private` `modalStepBranch_eClosure` (`FmpMeasure.lean:2166`), but
+for the branch side rather than the expanded-set side.
+
+Byte-identical-statement corollary of `modalLoopGen_bClosure` (task 510) via `modalStepBranch_eq`
+and K's `modalApplyOne_spec`. -/
+private lemma modalLoop_bClosure
+    (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc)) :
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
+    (hAccInv : accFreshInv b acc)
+    (hW : modalMaxWorld b < modalWorldBound φ0) :
+    ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverse φ0 :=
+  modalLoopGen_bClosure modalApplyOne modalApplyOne_spec φ0 b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep) hb hAccInv hW
+
+/-- **Generic constant-expanded-set fact** (task 510): `modalStepBranchGen_newExps_const`, over
+an abstract `apply`. Takes **no** field -- driver-structural. -/
+private lemma modalStepBranchGen_newExps_const
+    (apply : RuleApply Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc)) :
     ∃ newExp, newExps = newBs.map (fun _ => newExp) := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     obtain ⟨rfl, rfl, -⟩ := hsf
@@ -236,6 +312,23 @@ private lemma modalStepBranch_newExps_const
     obtain ⟨rfl, rfl, -⟩ := hsf
     exact ⟨e, rfl⟩
   · rw [hfstc] at hsf; simp at hsf
+
+/-- Every `modalStepBranch` step produces children that all share the same freshly-expanded
+set `newExp` (either `e` unchanged, for the `.persistent` case, or `e ++ [sf]`, for the
+`.linear`/`.branching` cases), i.e. `newExps` is exactly `newBs.map (fun _ => newExp)`. This is
+the generic fact `modalExpMeasure_step_lt`'s hypothesis shape (`FmpMeasure.lean:3029`) assumes as
+given; here it is derived from a generic `hstep`.
+
+Byte-identical-statement corollary of `modalStepBranchGen_newExps_const` (task 510) via
+`modalStepBranch_eq`. -/
+private lemma modalStepBranch_newExps_const
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc)) :
+    ∃ newExp, newExps = newBs.map (fun _ => newExp) :=
+  modalStepBranchGen_newExps_const modalApplyOne b e acc newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep)
 
 /-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
 `modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
@@ -368,37 +461,37 @@ private lemma hasEdge_addEdge_mono {acc : Accessibility} {w w' x y : WorldIndex}
   simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
   simp [h]
 
-/-- Local restatement of `modalApplyOne`'s accessibility-output dichotomy (mirrors the `private`
-`modalApplyOne_fresh_local`, `FmpMeasure.lean:859`, not reusable across files): the resulting
-`acc` component is either unchanged, or `acc.addEdge sf.label wsf.label` for some fresh witness
-`wsf` heading a `.linear` result. -/
-private lemma modalLoop_snd_eq_or_addEdge
+/-- **Generic accessibility-edge monotonicity** (task 510): `modalApplyGen_hasEdge_mono`, over an
+abstract `apply`, given the raw `hFreshLocal` hypothesis (`RuleApplicationSpec`'s existing F1
+`freshLocal` field, `GenericDriver.lean`). **No new field** -- `freshLocal`'s own dichotomy is
+exactly what the deleted `modalLoop_snd_eq_or_addEdge` restated verbatim for K, so this
+generalizes directly from it plus the rule-agnostic `hasEdge_addEdge_mono` above. -/
+private lemma modalApplyGen_hasEdge_mono
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
     (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOne sf b acc).snd = acc ∨
-    (∃ wsf rest, (modalApplyOne sf b acc).fst = RuleResult.linear (wsf :: rest)
-      ∧ (modalApplyOne sf b acc).snd = acc.addEdge sf.label wsf.label) := by
-  unfold modalApplyOne
-  extract_lets w propResult
-  repeat' first
-    | exact Or.inl rfl
-    | exact Or.inr ⟨_, _, rfl, rfl⟩
-    | split
-  all_goals first
-    | exact Or.inl rfl
-    | exact Or.inr ⟨_, _, rfl, rfl⟩
-    | (left; simp only [apply_ite Prod.snd, ite_self])
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (apply sf b acc).snd.hasEdge w w' = true := by
+  rcases hFreshLocal sf b acc with heq | ⟨wsf, rest, -, heq⟩
+  · rw [heq]; exact h
+  · rw [heq]; exact hasEdge_addEdge_mono h
 
 /-- Accessibility edges only grow across one `modalApplyOne` application: an edge present
-before the step is still present in the (possibly-updated) accessibility relation afterward. -/
+before the step is still present in the (possibly-updated) accessibility relation afterward.
+
+Byte-identical-statement corollary of `modalApplyGen_hasEdge_mono` (task 510) via K's own
+`modalApplyOne_fresh_local`. -/
 private lemma modalApplyOne_hasEdge_mono
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
-    (modalApplyOne sf b acc).snd.hasEdge w w' = true := by
-  rcases modalLoop_snd_eq_or_addEdge sf b acc with heq | ⟨wsf, rest, -, heq⟩
-  · rw [heq]; exact h
-  · rw [heq]; exact hasEdge_addEdge_mono h
+    (modalApplyOne sf b acc).snd.hasEdge w w' = true :=
+  modalApplyGen_hasEdge_mono modalApplyOne modalApplyOne_fresh_local sf b acc h
 
 /-- Preservation of the `eBoxNegWitness` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxOnlyNeg`'s case split. For old `e`-elements the witness/edge from `he` transfers

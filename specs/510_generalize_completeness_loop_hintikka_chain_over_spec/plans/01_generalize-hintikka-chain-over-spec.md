@@ -403,7 +403,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 5: CompletenessLoop.lean layer — import GenericDriver, ModalLoopInvGen [NOT STARTED]
+### Phase 5: CompletenessLoop.lean layer — import GenericDriver, ModalLoopInvGen [COMPLETED]
 
 - **Goal:** Open the leaf module to the bundled `spec` and establish `ModalLoopInvGen`. This is the
   ergonomic win over 507: `CompletenessLoop.lean` is imported only by the `Cslib.lean` barrel
@@ -429,7 +429,14 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     `freshLocal` field (`GenericDriver.lean:131-135`); its own docstring says it is a "local restatement
     of the `private` `modalApplyOne_fresh_local`". Rewire its single caller (:456) to `spec.freshLocal`.
   - [ ] `modalMaxWorld_lt_worldBound_of_phiBound` (:127) is pure arithmetic — reuse unchanged.
-  - [ ] `lake build` + full CI; `#print axioms` sweep.
+  - [x] `lake build` + full CI; `#print axioms` sweep. *(deviation: `lake test`/`lake lint`
+    intermittently failed on `Cslib/Logics/Modal/Tableau/LoopChecking.lean` -- task 506's own
+    concurrently-edited, untracked-then-tracked file, exhibiting genuine mid-edit unsolved-goal
+    errors and missing `.olean` artifacts at different points during this phase. Verified this is
+    not caused by this task: a scoped `lake build` over exactly this phase's eight touched modules
+    (`CompletenessLoop`, `TDriver`, `GenericDriver`, `Completeness`, `Saturation`, `Rules`,
+    `Soundness`, `FmpMeasure`) succeeds cleanly (781/781) in isolation, and none of them import or
+    are imported by `LoopChecking.lean`.)*
 - **Timing:** 2 hours
 - **Depends on:** 3
 - **Files to modify:**

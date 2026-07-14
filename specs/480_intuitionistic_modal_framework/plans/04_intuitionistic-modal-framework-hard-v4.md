@@ -401,7 +401,79 @@ nothing; no new `axiom`; the four modal axioms are parametric hypotheses), **unt
   Commit the sorry-free state (through 2b-sublemma), mark `[PARTIAL]`, write a continuation note
   (stuck obligation, `lean_goal` output) to the handoff.
 
-### Phase 2c: canonical_diamond_witness (mirror construction, Kb+Kd+Cd) [NOT STARTED] — HIGHEST RISK
+### Phase 2c: canonical_diamond_witness (mirror construction, Kb+Kd+Cd) [PARTIAL] — HIGHEST RISK
+
+**STOP contingency invoked (dispatch `sess_1784011298_752245_480`, 2026-07-14).** Genuine gap
+found and verified against the PRIMARY source (fetched `general_th_completeness.v` directly from
+`github.com/ianshil/CK`, not a WebFetch summary) — **not** a transliteration difficulty, a
+**type-level mismatch between the reference's `cworld` and our `CanonicalPrimeWorld`.**
+
+**The finding.** The reference's `Diam ψ` truth-lemma case (`general_th_completeness.v` ~L256-290)
+case-splits on `LEM (th v (◊⊥))` (classical, meta-level LEM — fine, doesn't affect the object
+logic) BEFORE attempting any seeded construction:
+- **Case A** (`th v (◊⊥)` holds — `v` already derives "possibly false"): the witness is `cexpl`,
+  a **distinguished "exploding" world** where `th cexpl = AllForm` (literally every formula).
+  `mreach v cexpl` is proved via `Kd` + `Nec(EFQ)`: `□(⊥→A)` (necessitated EFQ) combined with `Kd`
+  gives `(◊⊥)→(◊A)` for **every** `A`; MP with the Case-A hypothesis gives `◊A ∈ th v` for
+  **every** `A` — i.e. once `◊⊥ ∈ th v`, `v` already derives `◊(anything)`, so the box/dia clauses
+  toward `cexpl` are free, and `cexpl` (needing no consistency) closes the case trivially.
+- **Case B** (`¬(th v (◊⊥))`): the seeded Lindenbaum construction (mirroring our
+  `modal_set_exclusion` route, seed `{ψ|□ψ∈th v}∪{ψ}`, exclude `{B|¬(th v (◊B))}`) goes through
+  cleanly — this is the case I *can* transliterate, and its `DerivExcludes` sub-argument (traced
+  by hand) consumes only **`h_K`, `h_Kdia`, `h_Cd`** — confirming report 03's guess and resolving
+  its residual: **`h_Idb` is NOT consumed by the diamond witness.**
+
+**Why Case A cannot be dropped (it is load-bearing, not an artifact of classical LEM).** Verified
+`cworld`'s definition directly (`general_th_completeness.v` ~L23-30): `Class cworld := { th :
+Ensemble form ; Closed : closed AdAxCdIdb th ; Prime : prime th }` — **no consistency field.**
+`cexpl` (`th := AllForm`) is a legitimate `cworld` precisely *because* `cworld` never requires
+`¬(th ⊢ ⊥)`. Our `CanonicalPrimeWorld Axioms := {S // ModalPrimeTheory Axioms S}`
+(`PrimeTheory.lean:71`) is **strictly narrower**: `ModalPrimeTheory` is
+`Metalogic.PrimeAdmissible … (ModalSetConsistent Axioms) …`, which *does* bake in genuine
+consistency. `AllForm`/`cexpl` is inconsistent (derives everything, including `⊥`) and therefore
+**cannot be represented as a `CanonicalPrimeWorld` inhabitant at all** — the type has no room for
+a fallible/exploding world. This is a Phase 1 (`PrimeTheory.lean`, `ModalPrimeTheory`) /
+Phase 2a (`CanonicalPrimeWorld`) type-design gap, not a Phase 2c proof-technique gap — both are
+frozen/COMPLETED and off-limits to re-open under this phase's territory.
+
+**Confirmed NOT an artifact of my own construction choice**: I re-derived, independently, that
+`Γ₀ := {g|□g∈w.val}∪{φ}`'s consistency proof genuinely requires ruling out `◇⊥∈w.val` first
+(the same by-contradiction argument that closes Case B — deriving `◊⊥∈w.val` from an assumed
+`Γ₀⊢⊥` and refuting it via `¬(◊⊥∈w.val)` — produces **no contradiction** in Case A, since `◊⊥∈w.val`
+is already true there; nothing else in `{h_K,h_Kdia,h_Idb,h_Cd}` yields `⊢(◊⊥)→⊥` as a bare
+Hilbert theorem, and it must not (Fischer-Servi IK is not serial — a world may see only fallible
+successors). Setting `φ := ⊥` directly in the *fully general* statement `∀φ, ◊φ∈w.val→∃v,
+canonicalR w v ∧ φ∈v.val` makes this vivid: no consistent `v` can ever satisfy `⊥∈v.val`, so if
+`◊⊥∈w.val` is ever reachable for a genuine `CanonicalPrimeWorld` `w`, the fully general theorem is
+**false**, not merely hard, unless Case A is structurally impossible for our worlds (unverified —
+also unlikely, since `IK_th_completeness.v` reuses this SAME `general_th_completeness` lemma and
+therefore the SAME `cexpl` branch even when `AdAx` includes `Nd`; report 03's claim that Nd is
+"not required anywhere in the framework" is *not* rebutted by this, since Nd is used in the frame
+layer, not to eliminate Case A from the truth lemma — but it does mean Case A is not something
+"Nd already rules out" trivially either, based on this file alone).
+
+**What is needed to close this (recommended next research, narrow scope)**:
+1. Confirm whether Case A (`◊⊥ ∈ w.val`) is reachable for a `CanonicalPrimeWorld` built from
+   *this* task's specific axiom set — i.e. whether some hypothesis already available elsewhere in
+   the framework (or a cheap additional parametric hypothesis, distinct from `h_Nd`) precludes it.
+2. If Case A is reachable and cannot be precluded: `CanonicalPrimeWorld`/`ModalPrimeTheory` needs
+   a fallible/exploding-world escape hatch mirroring `cworld`'s weaker (`Closed`+`Prime`, no
+   consistency) contract — this is a Phase 1/2a design revision, needing explicit
+   user/plan-owner sign-off since it revises a "SETTLED" design decision and touches frozen files.
+3. Alternatively, restate `canonical_diamond_witness`'s conclusion to accommodate a degenerate
+   branch without extending the world type (e.g. an `Or`-shaped conclusion) — needs plan-level
+   design, not a Phase 2c implementation call.
+
+**Case B is fully worked out and ready to transliterate once Case A is resolved** (seed
+`{ψ|□ψ∈w.val}∪{φ}`, exclude `{ψ|(◊ψ)∉w.val}`, via `modal_set_exclusion`; needs a new
+`diamond_witness_underivable` sub-lemma dual to `box_witness_pair_underivable`, consuming only
+`h_K` (via `box_context_deriv`), `h_Kdia` (K-diamond bridge), `h_Cd` (iterated over `h_orE`,
+**no** `bigAnd`/`h_andI` packing needed since the seed's extra element is the single formula `φ`,
+not a family indexed by a second prime theory) — confirmed by hand-tracing, not yet Lean-verified
+since the file is untouched pending the Case A resolution above.
+
+**No file changes made this dispatch** (ZERO-DEBT: no `sorry`, no partial/broken proof committed;
+`CanonicalModel.lean` is untouched, still the 2b-complete state, `4fd37213`/`cdb0b635`-equivalent).
 
 - **Goal:** Prove the diamond witness lemma via the mirror `modal_set_exclusion` construction (seed
   the box-side, exclude a diamond-set).
@@ -591,8 +663,11 @@ nothing; no new `axiom`; the four modal axioms are parametric hypotheses), **unt
 - [ ] Parametricity: each new framework lemma carries `Axioms` + exactly the `h_*` subset report 03
       §4 assigns it (`h_K`/`h_Kdia`/`h_Idb`/`h_Cd`), with `h_efq` separable and `botForces` a
       parameter. `Nd` does NOT appear anywhere in the core.
-- [ ] Diamond residual resolved: Phase 2c's note records whether `canonical_diamond_witness` consumes
-      only `h_Cd` or also `h_Idb` (per report 03 §Adversarial item 2).
+- [x] Diamond residual resolved: Phase 2c's note (2026-07-14 dispatch) confirms, by hand-tracing
+      against the primary source, that the non-degenerate ("Case B") diamond-witness construction
+      consumes only `h_K`, `h_Kdia`, `h_Cd` — **not** `h_Idb` (report 03 §Adversarial item 2
+      resolved). This is now moot in practice: Phase 2c is `[PARTIAL]`/blocked on a separate,
+      more fundamental Case A (fallible-world) type-level gap — see the Phase 2c section.
 
 ## Artifacts & Outputs
 

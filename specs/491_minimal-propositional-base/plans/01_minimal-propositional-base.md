@@ -127,22 +127,35 @@ infrastructure and its efq-free regression lemma build green.
 
 ---
 
-### Phase 2: Documentation Note and Full CI Confirmation [NOT STARTED]
+### Phase 2: Documentation Note and Full CI Confirmation [PARTIAL]
 
 **Goal**: Optionally record a brief cross-reference note pointing at the three existing encodings,
 and confirm the full CSLib CI pipeline stays green. This phase is OPTIONAL — if the implementer
 judges a doc note redundant with existing module docstrings, it may add nothing and simply run CI.
 
 **Tasks**:
-- [ ] (Optional) Add a short doc/comment note — in the module docstring of
-      `Cslib/Logics/Propositional/NaturalDeduction/Equivalence.lean` (which already hosts the
-      `minimal`/`IsMinimal` API) or `Defs.lean` header — cross-linking the three encodings of the
-      strength hierarchy: Hilbert axiom predicate (`ProofSystem/Axioms.lean`), bundled typeclass
-      (`Foundations/Logic/ProofSystem.lean`), and ND gated rule (`NaturalDeduction/Basic.lean`).
-      Docstring/comment text only; no code, no new declarations.
-- [ ] Run the CSLib CI pipeline and confirm green:
+- [x] (Optional) Add a short doc/comment note *(deviation: skipped -- judged redundant.
+      `Equivalence.lean` already documents `minimal`/`IsMinimal` and the Hilbert/ND bridge
+      extensively at lines 13-35 and 158-189, substantially overlapping the proposed
+      cross-reference content. Zero-diff outcome preferred per plan's own permission and the
+      reuse-first / zero-debt policy.)*
+- [~] Run the CSLib CI pipeline and confirm green:
       `lake build`, `lake test`, `lake exe checkInitImports`, `lake exe lint-style`,
       `lake shake --add-public --keep-implied --keep-prefix`.
+      *(deviation: partial -- `lake exe lint-style` ran clean (no output). `lake build`,
+      `lake test`, `lake exe checkInitImports`, `lake shake` all fail identically at
+      `Cslib/Logics/Modal/Tableau/Defs.lean:244:6` (`split` tactic failure). Root-caused via
+      `git diff -- Cslib/Logics/Modal/Tableau/Defs.lean`: this file has 37 lines of
+      **uncommitted, in-progress edits** (new `_eq_some` lemmas) that predate this session and
+      belong to an unrelated, concurrently in-flight task (Modal Tableau, not Propositional).
+      `git log` confirms the last *committed* change to this file was task 441; nothing in task
+      491's scope touches Modal/Tableau. This is an out-of-scope, pre-existing, environmental
+      blocker in the shared working tree, not a regression caused by or discoverable within
+      task 491's target modules. Per plan guidance ("do NOT close the gap by adding new
+      definitions -- capture it as a distinct regression... and stop"), this is reported, not
+      fixed, and the unrelated file is left untouched. Task 491's own scoped build target
+      (Phase 1, four modules, 729 jobs) remains independently green and was re-confirmed
+      unaffected.)*
 - [ ] If the doc note was added, confirm `lint-style` and `checkInitImports` still pass with the
       edited file.
 

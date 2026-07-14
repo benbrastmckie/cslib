@@ -152,6 +152,11 @@ lemma modalNegOf?_atom (p : Atom) : modalNegOf? (.atom p) = none := rfl
 @[simp]
 lemma modalNegOf?_bot : modalNegOf? (.bot : Proposition Atom) = none := rfl
 
+/-- `modalNegOf?` only succeeds on the negation shape `ψ → ⊥`. -/
+lemma modalNegOf?_eq_some {φ ψ : Proposition Atom} (h : modalNegOf? φ = some ψ) :
+    φ = .imp ψ .bot := by
+  unfold modalNegOf? at h; split at h <;> simp_all
+
 /-- Decompose `φ` as disjunction `ψ₁ ∨ ψ₂` (native constructor, task 441);
 returns `some (ψ₁, ψ₂)` or `none`. -/
 def modalOrOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
@@ -168,6 +173,15 @@ lemma modalOrOf?_or (a b : Proposition Atom) :
 @[simp]
 lemma modalOrOf?_atom (p : Atom) : modalOrOf? (.atom p) = none := rfl
 
+/-- `modalOrOf?` only succeeds on the native disjunction shape `a ∨ b`.
+
+Restated against the native `Proposition.or` constructor (task 441); the pre-441
+Lukasiewicz-encoded characterization (`φ = .imp (.imp a .bot) b`) is false on this
+version of `Proposition Atom` and must not be used. -/
+lemma modalOrOf?_eq_some {φ a b : Proposition Atom} (h : modalOrOf? φ = some (a, b)) :
+    φ = .or a b := by
+  unfold modalOrOf? at h; split at h <;> simp_all
+
 /-- Decompose `φ` as conjunction `ψ₁ ∧ ψ₂` (native constructor, task 441);
 returns `some (ψ₁, ψ₂)` or `none`. -/
 def modalAndOf? (φ : Proposition Atom) : Option (Proposition Atom × Proposition Atom) :=
@@ -183,6 +197,15 @@ lemma modalAndOf?_and (a b : Proposition Atom) :
 /-- `modalAndOf?` returns `none` for atoms. -/
 @[simp]
 lemma modalAndOf?_atom (p : Atom) : modalAndOf? (.atom p) = none := rfl
+
+/-- `modalAndOf?` only succeeds on the native conjunction shape `a ∧ b`.
+
+Restated against the native `Proposition.and` constructor (task 441); the pre-441
+Lukasiewicz-encoded characterization (`φ = .imp (.imp a (.imp b .bot)) .bot`) is false on
+this version of `Proposition Atom` and must not be used. -/
+lemma modalAndOf?_eq_some {φ a b : Proposition Atom} (h : modalAndOf? φ = some (a, b)) :
+    φ = .and a b := by
+  unfold modalAndOf? at h; split at h <;> simp_all
 
 /-- Decompose `φ` as proper implication `ψ₁ → ψ₂`, excluding the derived negation shape
 (`ψ₁ → ⊥`); returns `some (ψ₁, ψ₂)` or `none`.
@@ -209,6 +232,17 @@ lemma modalImpOf?_imp {a b : Proposition Atom} (h1 : b ≠ Proposition.bot) :
   cases hb : b with
   | bot => exact absurd hb h1
   | _ => simp [modalImpOf?]
+
+/-- `modalImpOf?` only succeeds on a proper implication `a → b`. -/
+lemma modalImpOf?_eq_some {φ a b : Proposition Atom} (h : modalImpOf? φ = some (a, b)) :
+    φ = .imp a b := by
+  unfold modalImpOf? at h
+  split at h
+  · split at h
+    · exact absurd h (by simp)
+    · simp only [Option.some.injEq, Prod.mk.injEq] at h
+      obtain ⟨rfl, rfl⟩ := h; rfl
+  · exact absurd h (by simp)
 
 /-- Decompose `φ` as box `□ψ`; returns `some ψ` or `none`. -/
 def modalBoxOf? (φ : Proposition Atom) : Option (Proposition Atom) :=

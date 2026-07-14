@@ -1,0 +1,22 @@
+{
+  "task_number": 491,
+  "session_id": "sess_1784044271_09e821_491",
+  "status": "implemented",
+  "requires_user_review": true,
+  "review_reason": "Verification-only task: (1) research question of whether 491 should be closed as already-satisfied by prior tasks 185/187/191/367/409 remains open for user decision; (2) an unrelated, pre-existing, uncommitted WIP file (Cslib/Logics/Modal/Tableau/Defs.lean, belonging to a different concurrent task) blocks full-repo lake build/test/shake -- not a defect in task 491's scope, flagged for visibility.",
+  "phases_completed": [
+    "Phase 1: Verify Existing Minimal-Base Infrastructure Compiles [COMPLETED]",
+    "Phase 2: Documentation Note and Full CI Confirmation [PARTIAL]"
+  ],
+  "verification_passed": true,
+  "scoped_build": "729 jobs, success",
+  "sorry_count": 0,
+  "axiom_count": 0,
+  "vacuous_count": 0,
+  "source_diff": "zero -- no changes to Cslib/",
+  "artifacts": [
+    "specs/491_minimal-propositional-base/plans/01_minimal-propositional-base.md",
+    "specs/491_minimal-propositional-base/summaries/01_minimal-propositional-base-summary.md"
+  ],
+  "next_action_recommendation": "User decision: close 491 as already-satisfied, or re-run full CI once the unrelated Modal Tableau WIP is committed/reverted."
+}

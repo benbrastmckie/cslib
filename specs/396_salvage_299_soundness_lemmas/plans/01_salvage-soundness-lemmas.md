@@ -127,7 +127,7 @@ source of the salvage payload as a read-only reference (no production edits).
 
 ---
 
-### Phase 2: Recognizer Inverse-Characterization Lemmas [NOT STARTED]
+### Phase 2: Recognizer Inverse-Characterization Lemmas [COMPLETED]
 
 **Goal**: Add the four `modal{Neg,Imp,Or,And}Of?_eq_some` inverse lemmas to `Defs.lean` — the
 highest-value, lowest-risk, friction-relieving deliverable — with or/and restated against native

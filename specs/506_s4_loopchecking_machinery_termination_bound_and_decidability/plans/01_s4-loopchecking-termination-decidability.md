@@ -285,7 +285,7 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 2: LoopChecking.lean foundation — per-world formula sets and the equality test [NOT STARTED]
+### Phase 2: LoopChecking.lean foundation — per-world formula sets and the equality test [COMPLETED]
 
 - **Goal**: Create `LoopChecking.lean` with the per-world relevant-formula-set extractor
   and a decidable equality test over `modalSubfmls phi0`. Land the new file green and in

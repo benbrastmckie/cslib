@@ -537,6 +537,117 @@ theorem itDerivable_implies_tDerivable {φ : Proposition Atom} (h : Derivable IT
     Derivable (@TAxiom Atom) φ :=
   Derivable_of_axiom_derivable (fun _ hax => itAxiom_derivable_in_T hax) h
 
+/-! ## Rung Bridge: `IS4 → S4` -/
+
+/-- `¬◇X → □¬X` in classical `S4` (same construction as `k_dualNeg`, instantiated at
+`S := Modal.HilbertS4`). -/
+theorem s4_dualNeg {X : Proposition Atom} :
+    Derivable (@S4Axiom Atom)
+      (((◇X).imp Proposition.bot).imp (Proposition.box (X.imp Proposition.bot))) := by
+  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertS4) (φ := X)
+  have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
+    (S := Modal.HilbertS4) back
+  have dne := @Cslib.Logic.Theorems.Propositional.Core.double_negation
+    (Proposition Atom) _ _ Modal.HilbertS4 _ _ (Proposition.box (X.imp Proposition.bot))
+  have goal := Cslib.Logic.Theorems.Combinators.imp_trans contra dne
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- `□¬X → ¬◇X` in classical `S4` (converse of `s4_dualNeg`): from `dni` composed with
+the contraposition of `diaDualityFwd`. -/
+theorem s4_boxNegToNotDia {X : Proposition Atom} :
+    Derivable (@S4Axiom Atom)
+      ((Proposition.box (X.imp Proposition.bot)).imp ((◇X).imp Proposition.bot)) := by
+  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertS4) (φ := X)
+  have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
+    (S := Modal.HilbertS4) fwd
+  have dni := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS4) (F := Proposition Atom)
+    (Proposition.box (X.imp Proposition.bot))
+  have goal := Cslib.Logic.Theorems.Combinators.imp_trans dni contra
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- `IS4`'s `fourDia` (`◇◇φ → ◇φ`) is **derivable** in classical `S4`, proved via its
+contrapositive plus `rcp`:
+
+1. `dualNegPhi := s4_dualNeg φ : ¬◇φ → □¬φ`.
+2. `four := HasAxiom4.four (φ := ¬φ) : □¬φ → □□¬φ`.
+3. `boxMono4 : □□¬φ → □¬◇φ`, necessitating `s4_boxNegToNotDia φ : □¬φ → ¬◇φ` and applying
+   `HasAxiomK.K`.
+4. `notDiaDia := s4_boxNegToNotDia (X := ◇φ) : □¬◇φ → ¬◇◇φ`.
+5. Chain 1–4: `contrapositive := ¬◇φ → ¬◇◇φ`; `rcp contrapositive : ◇◇φ → ◇φ`. -/
+theorem s4_derivable_of_is4_fourDia {φ : Proposition Atom} :
+    Derivable (@S4Axiom Atom) ((◇(◇φ)).imp (◇φ)) := by
+  have dualNegPhi := s4_dualNeg (X := φ)
+  obtain ⟨dDN⟩ := dualNegPhi
+  have dualNegPhiIS : InferenceSystem.DerivableIn Modal.HilbertS4
+      (((◇φ).imp Proposition.bot).imp (Proposition.box (φ.imp Proposition.bot))) := ⟨dDN⟩
+  have four := HasAxiom4.four (S := Modal.HilbertS4) (φ := φ.imp Proposition.bot)
+  have boxNegToNotDiaPhi := s4_boxNegToNotDia (X := φ)
+  obtain ⟨dBNTD⟩ := boxNegToNotDiaPhi
+  have boxNegToNotDiaPhiIS : InferenceSystem.DerivableIn Modal.HilbertS4
+      ((Proposition.box (φ.imp Proposition.bot)).imp ((◇φ).imp Proposition.bot)) := ⟨dBNTD⟩
+  have necBNTD := Necessitation.nec boxNegToNotDiaPhiIS
+  have kBNTD := HasAxiomK.K (S := Modal.HilbertS4)
+    (φ := Proposition.box (φ.imp Proposition.bot)) (ψ := (◇φ).imp Proposition.bot)
+  have boxMono4 := ModusPonens.mp kBNTD necBNTD
+  have chain1 := Cslib.Logic.Theorems.Combinators.imp_trans four boxMono4
+  have notDiaDia := s4_boxNegToNotDia (X := ◇φ)
+  obtain ⟨dND⟩ := notDiaDia
+  have notDiaDiaIS : InferenceSystem.DerivableIn Modal.HilbertS4
+      ((Proposition.box ((◇φ).imp Proposition.bot)).imp ((◇(◇φ)).imp Proposition.bot)) := ⟨dND⟩
+  have chain2 := Cslib.Logic.Theorems.Combinators.imp_trans chain1 notDiaDiaIS
+  have contrapositive := Cslib.Logic.Theorems.Combinators.imp_trans dualNegPhiIS chain2
+  have goal := @Cslib.Logic.Theorems.Propositional.Core.rcp
+    (Proposition Atom) _ _ Modal.HilbertS4 _ _
+    (φ := ◇φ) (ψ := ◇(◇φ)) contrapositive
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- Every `IS4ModalAxiom` instance is `Derivable` in classical `S4`: the 16 `IT`-inherited
+constructors lift via `Derivable_mono (fun _ => TAxiom_implies_S4Axiom)` composed with
+`itAxiom_derivable_in_T`; `fourBox` is a literal `S4Axiom.modalFour` instance; `fourDia` is
+`s4_derivable_of_is4_fourDia`. -/
+theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) :
+    Derivable (@S4Axiom Atom) φ :=
+  match h with
+  | .implyK _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.implyK _ _))
+  | .implyS _ _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.implyS _ _ _))
+  | .efq _ => Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.efq _))
+  | .andI _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.andI _ _))
+  | .andE1 _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.andE1 _ _))
+  | .andE2 _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.andE2 _ _))
+  | .orI1 _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.orI1 _ _))
+  | .orI2 _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.orI2 _ _))
+  | .orE _ _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.orE _ _ _))
+  | .k _ _ => Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.k _ _))
+  | .kdia _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.kdia _ _))
+  | .cd _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.cd _ _))
+  | .idb _ _ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.idb _ _))
+  | .dbot => Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T .dbot)
+  | .tBox φ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tBox φ))
+  | .tDia φ =>
+      Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tDia φ))
+  | .fourBox φ => ⟨.ax [] _ (S4Axiom.modalFour φ)⟩
+  | .fourDia _ => s4_derivable_of_is4_fourDia
+
+/-- **The `IS4 → S4` bridge**: every `IS4`-derivable formula is `S4`-derivable. -/
+theorem is4Derivable_implies_s4Derivable {φ : Proposition Atom} (h : Derivable IS4ModalAxiom φ) :
+    Derivable (@S4Axiom Atom) φ :=
+  Derivable_of_axiom_derivable (fun _ hax => is4Axiom_derivable_in_S4 hax) h
+
 end Cslib.Logic.Modal
 
 end

@@ -1,12 +1,12 @@
 {
   "task_number": 494,
   "status": "implemented",
-  "phase": "2",
+  "phase": "3",
   "agent_type": "cslib-implementation-hard-agent",
   "session_id": "sess_1784011298_752245_494",
   "plan_path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md",
-  "summary": "Phase 2 complete: created Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean instantiating the Phase 1 scaffold at IT = IK + reflexivity. ITModalAxiom extends IKModalAxiom's 14 constructors with tBox (□A→A) and tDia (A→◇A). it_axiom_sound extends ik_axiom_sound's 14 cases verbatim plus the two new T cases (tBox: hbox w' le_refl w' (hrefl w'); tDia: direct witness ⟨w', hrefl w', hφ⟩, no persistence needed). it_canonical_reflexive proves itFC (@canonicalR Atom ITModalAxiom) fully positively (axiom_mem + canonical_imp_property, no by_contra/negation). it_completeness/it_consistent/it_soundness_completeness instantiate ivalidFC_completeness with it_canonical_reflexive as h_canonFC. Zero sorry, zero new axioms beyond propext/Classical.choice/Quot.sound, zero build warnings. Task-480/492/Phase-1-Extension files untouched (git diff confirms only Cslib.lean +1 import line and the new IT.lean file).",
-  "phases_completed": 2,
+  "summary": "Phase 3 complete: created Cslib/Logics/Modal/Metalogic/Intuitionistic/IS4.lean instantiating the Phase 1 scaffold at IS4 = IT + fourBox/fourDia (the '4' axiom). IS4ModalAxiom extends ITModalAxiom's 16 constructors with fourBox (□A→□□A) and fourDia (◇◇A→◇A). is4_axiom_sound extends it_axiom_sound's 16 cases verbatim (htrans threaded unused) plus the two new '4' cases: fourDia composes two diamond witnesses directly via htrans (⟨t, htrans hru hut, hφt⟩); fourBox relocates the nested box goal via F2 (down-confluence, exactly the IK.lean idb pattern) to a world w2 where htrans composes r w2 w''' with r w''' v. is4_canonical_reflexive is the verbatim it_canonical_reflexive proof (tBox/tDia + axiom_mem + canonical_imp_property). is4_canonical_transitive is new and fully positive: box clause via axiom_mem(fourBox)+MP => □□φ∈w, then two box-clause applications (hwu.1, huv.1) => φ∈v; dia clause via two dia-clause applications (huv.2, hwu.2) => ◇◇φ∈w, then axiom_mem(fourDia)+MP => ◇φ∈w. is4FC bundles reflexivity+transitivity as a local predicate (∀ w, r w w) ∧ (∀ {w x y}, r w x → r x y → r w y), following IT.lean's itFC convention (not Mathlib's deprecated Reflexive/Transitive). is4_completeness/is4_consistent/is4_soundness_completeness instantiate ivalidFC_completeness with is4_canonical_fc := ⟨is4_canonical_reflexive, is4_canonical_transitive⟩ as h_canonFC. Zero sorry, zero new axioms beyond propext/Classical.choice/Quot.sound, zero build warnings. Task-480/492/Phase-1-Extension/Phase-2-IT.lean files untouched (git diff confirms only Cslib.lean +1 import line, plan checklist edits, and the new IS4.lean file).",
+  "phases_completed": 3,
   "phases_total": 4,
   "sorry_inventory": [],
   "blockers": [],
@@ -19,26 +19,24 @@
     "axioms_used": ["propext", "Classical.choice", "Quot.sound"],
     "checkInitImports_passed": true,
     "lean_verify": {
-      "it_axiom_sound": {"axioms": [], "warnings": []},
-      "it_canonical_reflexive": {"axioms": ["propext"], "warnings": []},
-      "it_consistent": {"axioms": [], "warnings": []},
-      "it_soundness_completeness": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "warnings": []}
+      "is4_axiom_sound": {"axioms": [], "warnings": []},
+      "is4_soundness_completeness": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "warnings": []}
     },
     "zero_churn_verified": true
   },
   "deviations": [
     {
-      "what": "Frame condition named itFC (local def, ∀ w, r w w) instead of Mathlib's Reflexive",
-      "why": "Reflexive is @[deprecated] in the pinned Mathlib version (superseded by Std.Refl, a typeclass whose shape does not match IValidFC's bare-predicate FC parameter); using the deprecated name would emit a build warning at every use site, violating the zero-warnings gate. itFC mirrors the classical Systems/T/Completeness.lean file's own local tFC convention -- same semantic content, no design change."
+      "what": "Frame condition named is4FC (local def, (∀ w, r w w) ∧ (∀ {w x y}, r w x → r x y → r w y)) instead of Mathlib's Reflexive ∧ Transitive",
+      "why": "Reflexive/Transitive are deprecated in the pinned Mathlib version; using them would emit build warnings at every use site, violating the zero-warnings gate. is4FC mirrors IT.lean's own itFC local-predicate convention (already established in Phase 2) -- same semantic content, no design change, and consistent with the codebase convention this dispatch was explicitly instructed to follow."
     }
   ],
-  "reuse_unchanged": ["canonicalR", "canonical_f1", "canonical_f2", "canonicalBModel", "canonical_imp_property", "modal_prime_exclusion", "IValid", "IValidFC", "ivalidFC_completeness", "axiom_mem", "IKModalAxiom", "ik_axiom_sound"],
+  "reuse_unchanged": ["canonicalR", "canonical_f1", "canonical_f2", "canonicalBModel", "canonical_imp_property", "modal_prime_exclusion", "IValid", "IValidFC", "ivalidFC_completeness", "axiom_mem", "IKModalAxiom", "ik_axiom_sound", "ITModalAxiom", "itFC", "it_axiom_sound", "it_canonical_reflexive"],
   "artifacts": [
-    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IT.lean", "type": "lean", "summary": "ITModalAxiom, itFC, it_axiom_sound, it_soundness, it_soundness_derivable, it_canonical_reflexive, it_completeness, it_consistent, it_soundness_completeness"},
-    {"path": "Cslib.lean", "type": "barrel", "summary": "Registered IT.lean import, alphabetical slot between IK and PrimeTheory"},
-    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md", "type": "plan", "summary": "Phase 2 marked [COMPLETED], checklist checked, deviation documented"},
-    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/progress/phase-2-progress.json", "type": "progress", "summary": "Phase 2 objective-by-objective completion record"},
-    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/summaries/02_it-lean-phase2-summary.md", "type": "summary", "summary": "Phase 2 execution summary"}
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS4.lean", "type": "lean", "summary": "IS4ModalAxiom, is4FC, is4_axiom_sound, is4_soundness, is4_soundness_derivable, is4_canonical_reflexive, is4_canonical_transitive, is4_canonical_fc, is4_completeness, is4_consistent, is4_soundness_completeness"},
+    {"path": "Cslib.lean", "type": "barrel", "summary": "Registered IS4.lean import via lake exe mk_all --module"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/plans/01_it-is4-is5-extensions.md", "type": "plan", "summary": "Phase 3 marked [COMPLETED], checklist checked, deviation documented inline"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/progress/phase-3-progress.json", "type": "progress", "summary": "Phase 3 objective-by-objective completion record"},
+    {"path": "specs/494_intuitionistic_modal_extensions_IT_IS4_IS5/summaries/03_is4-lean-phase3-summary.md", "type": "summary", "summary": "Phase 3 execution summary with plan deviations section"}
   ],
-  "next_action_hint": "Run /implement 494 to execute Phase 3 (IS4.lean: reflexive+transitive frame condition, IS4ModalAxiom = IT + fourBox/fourDia, is4_axiom_sound (fourDia easy; fourBox needs F2 relocation mirroring IK's idb case), canonical transitivity via axiom_mem(fourBox)/axiom_mem(fourDia) chained through canonicalR's box/dia clauses, is4_completeness via ivalidFC_completeness with a reflexive∧transitive bundle, is4_consistent, is4_soundness_completeness). Depends on this Phase 2 IT.lean file."
+  "next_action_hint": "Run /implement 494 to execute Phase 4 (IS5.lean, HIGHEST RISK: reflexive+transitive+SYMMETRIC frame condition via B axiom, A→□◇A and ◇□A→A; IS5ModalAxiom = IS4 constructors + bBox/bDia; canonical symmetry proof will need care since canonicalR's two-clause box/dia shape does not obviously symmetrize the way reflexivity/transitivity did -- research report 01 should be consulted for the specific canonical-symmetry strategy before starting). Depends on this Phase 3 IS4.lean file (is4FC/is4_canonical_reflexive/is4_canonical_transitive proof patterns are the templates to extend, not modify)."
 }

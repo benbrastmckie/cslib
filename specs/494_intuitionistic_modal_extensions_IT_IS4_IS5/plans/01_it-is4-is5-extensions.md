@@ -178,24 +178,26 @@ Phases are strictly sequential: each file's nested imports depend on the prior f
   - `it_soundness_completeness : IValidFC itFC φ ↔ Derivable ITModalAxiom φ` type-checks.
   - Zero `sorry`/`axiom`/vacuous def.
 
-### Phase 3: IS4.lean (reflexive+transitive; □A→□□A, ◇◇A→◇A) [NOT STARTED]
+### Phase 3: IS4.lean (reflexive+transitive; □A→□□A, ◇◇A→◇A) [COMPLETED]
 
 - **Goal:** Instantiate at IS4: transitive (+ reflexive) frame class, sound + complete.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS4.lean`
+  - [x] Create `Cslib/Logics/Modal/Metalogic/Intuitionistic/IS4.lean`
         (`import Cslib.Init`; `public import ...Intuitionistic.IT`).
-  - [ ] Define `IS4ModalAxiom` = IT constructors + `fourBox (φ) : (□φ).imp (□(□φ))` and
+  - [x] Define `IS4ModalAxiom` = IT constructors + `fourBox (φ) : (□φ).imp (□(□φ))` and
         `fourDia (φ) : (◇(◇φ)).imp (◇φ)`.
-  - [ ] Prove `is4_axiom_sound` over a conjoined reflexive∧transitive frame condition: `fourDia`
+  - [x] Prove `is4_axiom_sound` over a conjoined reflexive∧transitive frame condition: `fourDia`
         (EASY: `⟨t, htrans hru hut, hAt⟩`); `fourBox` (MODERATE: F2 relocation exactly as IK
         `idb`, `IK.lean:178-184`, then `htrans`). Reuse IT/IK cases.
-  - [ ] Prove canonical transitivity `Transitive (@canonicalR Atom IS4ModalAxiom)` (box:
+  - [x] Prove canonical transitivity `is4_canonical_transitive` (local predicate, mirroring
+        `itFC`'s convention rather than Mathlib's deprecated `Transitive`) (box:
         `axiom_mem(fourBox)`+MP ⇒ `□□φ∈w`, then two box-clause applications; dia: two dia-clause
-        applications ⇒ `◇◇φ∈w`, then `axiom_mem(fourDia)`+MP) — report Deliverable 4.
-  - [ ] Bundle the frame condition as `reflexive ∧ transitive`; prove `is4_completeness` via
-        `ivalidFC_completeness` with `⟨canonicalReflexive, canonicalTransitive⟩`; add
-        `is4_consistent`, `is4_soundness_completeness`.
-  - [ ] `lake build` scoped; zero-sorry verify; barrel register.
+        applications ⇒ `◇◇φ∈w`, then `axiom_mem(fourDia)`+MP).
+  - [x] Bundle the frame condition as `is4FC := (∀ w, r w w) ∧ (∀ {w x y}, r w x → r x y → r w y)`;
+        prove `is4_completeness` via `ivalidFC_completeness` with `is4_canonical_fc :=
+        ⟨is4_canonical_reflexive, is4_canonical_transitive⟩`; add `is4_consistent`,
+        `is4_soundness_completeness`.
+  - [x] `lake build` scoped; zero-sorry verify; barrel register (`lake exe mk_all --module`).
 - **Timing:** 2 hours
 - **Depends on:** 2
 - **Files to modify:**

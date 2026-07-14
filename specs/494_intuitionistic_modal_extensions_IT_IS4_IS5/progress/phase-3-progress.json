@@ -1,0 +1,20 @@
+{
+  "phase": 3,
+  "status": "completed",
+  "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/IS4.lean",
+  "objectives": [
+    {"id": "IS4ModalAxiom", "status": "done", "detail": "16 ITModalAxiom constructors + fourBox + fourDia"},
+    {"id": "is4FC", "status": "done", "detail": "local reflexive+transitive predicate, mirrors itFC convention (not deprecated Mathlib Transitive)"},
+    {"id": "is4_axiom_sound", "status": "done", "detail": "fourDia via htrans composition; fourBox via F2 relocation + htrans (IK idb pattern)"},
+    {"id": "is4_canonical_reflexive", "status": "done", "detail": "verbatim it_canonical_reflexive proof over tBox/tDia"},
+    {"id": "is4_canonical_transitive", "status": "done", "detail": "box: fourBox axiom_mem+MP then two box-clause applications; dia: two dia-clause applications then fourDia axiom_mem+MP"},
+    {"id": "is4_completeness/is4_consistent/is4_soundness_completeness", "status": "done"},
+    {"id": "barrel registration", "status": "done", "detail": "lake exe mk_all --module"}
+  ],
+  "verification": {
+    "build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4 -- succeeded",
+    "checkInitImports": "clean",
+    "sorry_count": 0,
+    "axioms": ["propext", "Classical.choice", "Quot.sound"]
+  }
+}

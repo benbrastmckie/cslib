@@ -1,0 +1,14 @@
+{
+  "status": "planned",
+  "task_number": 300,
+  "session_id": "sess_1784044325_11ad9e_300",
+  "summary": "Phased implementation plan for frame-specific modal tableau extensions (T/S4/S5/B/5), ordered by research risk gradient. Wave 1: shared frameValid scaffolding. Wave 2 (low/moderate): T (ReflGen), S5 (universal-cluster, no loop-check), B (SymmGen). Wave 3: S4 rules + equality-blocking loop-checking machinery (structure), and 5/Euclidean via KB5/S5 EqvGen route. Wave 4: S4 termination bound (2^|Sf|) + decidability. Strategy B closure-at-extraction adopted; frame conditions free from Mathlib closure operators. Every phase ends green (lake build, zero sorry/axiom). Explicit [BLOCKED] fallbacks for S4 termination (Phase 6) and pure-K5 (Phase 7) with task-split recommendations; no sorry/axiom permitted.",
+  "phases_total": 7,
+  "artifacts": [
+    {
+      "path": "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
+      "type": "plan",
+      "summary": "7-phase risk-ordered plan: (1) shared frameValid/branchSatisfiableIn scaffolding; (2) T reflexive via ReflGen; (3) S5 universal-cluster simplification; (4) B symmetric via SymmGen; (5) S4 rules + equality-blocking loop-checking structure + soundness/truth lemma; (6) S4 termination bound 2^|Sf| + Decidable (crux); (7) 5/Euclidean via KB5/S5 EqvGen route. Zero-debt: [BLOCKED] fallbacks for S4 termination and pure-K5."
+    }
+  ]
+}

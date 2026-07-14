@@ -351,7 +351,9 @@ public import Cslib.Logics.Modal.Metalogic
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.ConservativeExtension
 public import Cslib.Logics.Modal.Metalogic.Constructive.CK
+public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKTruthLemma
+public import Cslib.Logics.Modal.Metalogic.Constructive.CT
 public import Cslib.Logics.Modal.Metalogic.Constructive.Forcing
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment
 public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum
@@ -441,6 +443,8 @@ public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
+public import Cslib.Logics.Modal.Tableau.FrameCompleteness
+public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.LoopInduction
 public import Cslib.Logics.Modal.Tableau.Rules
 public import Cslib.Logics.Modal.Tableau.Saturation

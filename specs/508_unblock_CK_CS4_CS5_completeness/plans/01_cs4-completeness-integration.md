@@ -253,7 +253,12 @@ should-be-`change`. Purely mechanical, same proof term, required for zero-warnin
 
 ---
 
-### Phase 4: Soundness reconciliation — add primed soundness, re-derive existing soundness [NOT STARTED]
+### Phase 4: Soundness reconciliation — add primed soundness, re-derive existing soundness [COMPLETED]
+
+*(Deviation: the `## Soundness` section was reordered so the primed trio (`cs4_axiom_sound'`,
+`cs4_soundness'`, `cs4_soundness_derivable'`) precedes the unprimed corollary trio, since Lean
+requires the primed theorems to be declared before the unprimed corollaries reference them.
+No universe friction encountered — the fallback was not needed.)*
 
 **Goal**: Resolve the overlap between CS4.lean's existing soundness section (over `cs4FC`) and the
 probe's soundness section (over `cs4FC'`) **without duplicating ~90 lines of near-identical proof**.

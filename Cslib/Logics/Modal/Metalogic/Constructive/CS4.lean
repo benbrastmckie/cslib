@@ -115,21 +115,24 @@ inductive CS4ModalAxiom : Proposition Atom → Prop where
 
 /-! ## Soundness -/
 
-/-- Every `CS4ModalAxiom` instance is `CKValidFC cs4FC` (Wijesekera-style fallible-world validity
-over reflexive, ≤-composed-transitive frames). The 13 non-`4` cases are `ct_axiom_sound`'s cases
-verbatim (`CT.lean`), with the transitivity component of `hfc` threaded through unused. The two
-new cases:
+/-- Every `CS4ModalAxiom` instance is `CKValidFC cs4FC'` (Wijesekera-style fallible-world
+validity over frames satisfying the **weakened** `CS4` frame condition `cs4FC'`). The 13 non-`4`
+cases are `ct_axiom_sound`'s cases verbatim (`CT.lean`), with the `cs4FC'` components of `hfc`
+threaded through unused. The two new cases:
 - `fourDia` (`◇◇A → ◇A`): the ∀∃ diamond clause introduces `w'' ≥ w'`; unfolding `◇◇A@w''` at
-  `w''` (`le_refl`) gives a witness `u` with `r w'' u ∧ (◇A)@u`; unfolding `◇A@u` at `u`
-  (`le_refl`) gives `t` with `r u t ∧ A@t`; witness `t` via **plain** transitivity
-  (`htrans hru (le_refl u) hut`, the `u' := u` specialization).
+  `w''` (`le_refl`) gives a witness `u` with `r w'' u ∧ (◇A)@u`; `hfcdia` on `r w'' u` supplies
+  `u' ≥ u` such that every `r`-successor of `u'` is an `r`-successor of `w''`; unfolding `◇A@u`
+  at `u'` gives `t` with `r u t ∧ A@t`, and `hprop t hu't` transports the `r`-edge to `w''`.
 - `fourBox` (`□A → □□A`): the nested box goal introduces `w'' ≥ w'`, `u` with `r w'' u`,
-  `u' ≥ u`, `t` with `r u' t`; supply `A@t` from `□A@w'` at `w''` (`≥ w'`) and `t`, using the
-  **≤-composed** transitivity clause `r w'' u → u ≤ u' → r u' t → r w'' t`. -/
-theorem cs4_axiom_sound {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
-    CKValidFC.{u, v} cs4FC φ := by
+  `u' ≥ u`, `t` with `r u' t`; `hfc4` on `r w'' u`, `u ≤ u'`, `r u' t` supplies a re-based world
+  `v ≥ w''` with `r v t`; supply `A@t` from `□A@w'` at `v` (`≥ w'`, by transitivity of `≤`) and
+  `t`. This is *harder* than the plain-`cs4FC` case (needs the existential re-basing), which is
+  exactly the soundness cost of the weakened frame condition — see `cs4FC'`'s docstring
+  (`CKExtension.lean`). -/
+theorem cs4_axiom_sound' {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
+    CKValidFC.{u, v} cs4FC' φ := by
   intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
-  obtain ⟨hrefl, htrans⟩ := hfc
+  obtain ⟨hrefl, hfc4, hfcdia⟩ := hfc
   cases h_ax with
   | implyK φ ψ =>
     intro w' _ hφ w'' hw' _
@@ -144,14 +147,10 @@ theorem cs4_axiom_sound {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
   | andI φ ψ =>
     intro w₁ _ hφ w₂ hw₂ hψ
     exact ⟨ckforces_persistence v_uc bf_uc hw₂ hφ, hψ⟩
-  | andE1 φ ψ =>
-    intro _ _ h; exact h.1
-  | andE2 φ ψ =>
-    intro _ _ h; exact h.2
-  | orI1 φ ψ =>
-    intro _ _ h; exact Or.inl h
-  | orI2 φ ψ =>
-    intro _ _ h; exact Or.inr h
+  | andE1 φ ψ => intro _ _ h; exact h.1
+  | andE2 φ ψ => intro _ _ h; exact h.2
+  | orI1 φ ψ => intro _ _ h; exact Or.inl h
+  | orI2 φ ψ => intro _ _ h; exact Or.inr h
   | orE φ ψ χ =>
     intro w₁ _ h_pq w₂ hw₂ h_rq w₃ hw₃ h_pr
     have hw₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
@@ -172,16 +171,64 @@ theorem cs4_axiom_sound {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
   | fourDia φ =>
     intro w' _ hdidia w'' hw''
     obtain ⟨u, hru, hdia_u⟩ := hdidia w'' hw''
-    obtain ⟨t, hut, hφt⟩ := hdia_u u (le_refl u)
-    exact ⟨t, htrans hru (le_refl u) hut, hφt⟩
+    obtain ⟨u', hle, hprop⟩ := hfcdia hru
+    obtain ⟨t, hu't, hφt⟩ := hdia_u u' hle
+    exact ⟨t, hprop t hu't, hφt⟩
   | fourBox φ =>
     intro w' _ hbox w'' hw'' u hru u' hu' t hrt
-    exact hbox w'' hw'' t (htrans hru hu' hrt)
+    obtain ⟨v, hwv, hvt⟩ := hfc4 hru hu' hrt
+    exact hbox v (le_trans hw'' hwv) t hvt
 
-/-- **Soundness**: if `DerivationTree CS4ModalAxiom Γ φ`, then in any fallible-world model whose
-modal relation is reflexive and ≤-composed-transitive (`cs4FC`), at any world `w` where all
-formulas in `Γ` are forced, `φ` is also forced. Structural analogue of `ct_soundness`
-(`CT.lean`), threading `hfc` through unused except at the `.ax` case. -/
+/-- **Soundness for `cs4FC`** (corollary of `cs4_axiom_sound'` via `cs4FC_implies_cs4FC'`):
+every `CS4ModalAxiom` instance is `CKValidFC cs4FC` — Wijesekera-style fallible-world validity
+over the stronger frame class `cs4FC` (reflexive, ≤-composed-transitive). Retained for the
+`ConstructiveLatticeMonotonicity` inclusion chain (`cs5FC_implies_cs4FC`, `cs4FC_implies_ctFC`);
+the primed `cs4_axiom_sound'` is the primary proof since `cs4FC'`-validity is a stronger
+statement (soundness over more frames). -/
+theorem cs4_axiom_sound {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
+    CKValidFC.{u, v} cs4FC φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  exact cs4_axiom_sound' h_ax World r (cs4FC_implies_cs4FC' hfc) val botForces v_uc bf_uc bf_val
+    bf_r bf_r_wit w
+
+/-- **Soundness for `cs4FC'`**: if `DerivationTree CS4ModalAxiom Γ φ`, then in any fallible-world
+model satisfying the weakened frame condition `cs4FC'`, at any world `w` where all formulas in
+`Γ` are forced, `φ` is also forced. Structural analogue of `ct_soundness` (`CT.lean`), threading
+`hfc` through unused except at the `.ax` case. -/
+theorem cs4_soundness'
+    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (d : DerivationTree CS4ModalAxiom Γ φ)
+    {World : Type v} [Preorder World]
+    (r : World → World → Prop) (hfc : cs4FC' r)
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_val : ∀ {w : World} (p : Atom), botForces w → val w p)
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    (bf_r_wit : ∀ {w : World}, botForces w → ∃ u, r w u ∧ botForces u)
+    (w : World)
+    (h_ctx : ∀ ψ, ψ ∈ Γ → CKForces r val botForces w ψ) :
+    CKForces r val botForces w φ := by
+  match d with
+  | .ax _ ψ h_ax =>
+    exact cs4_axiom_sound' h_ax World r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    exact cs4_soundness' d₁ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx
+      w (le_refl w)
+      (cs4_soundness' d₂ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx)
+  | .necessitation ψ d' =>
+    intro w' _hle u _hru
+    exact cs4_soundness' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit u
+      (fun _ h => nomatch h)
+  | .weakening Γ' Δ ψ d' h_sub =>
+    exact cs4_soundness' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+      (fun x hx => h_ctx x (h_sub x hx))
+
+/-- **Soundness for `cs4FC`** (corollary of `cs4_soundness'` via `cs4FC_implies_cs4FC'`):
+if `DerivationTree CS4ModalAxiom Γ φ`, then in any fallible-world model whose modal relation is
+reflexive and ≤-composed-transitive (`cs4FC`), at any world `w` where all formulas in `Γ` are
+forced, `φ` is also forced. Retained for the `ConstructiveLatticeMonotonicity` inclusion chain. -/
 theorem cs4_soundness
     {Γ : List (Proposition Atom)} {φ : Proposition Atom}
     (d : DerivationTree CS4ModalAxiom Γ φ)
@@ -195,32 +242,27 @@ theorem cs4_soundness
     (bf_r_wit : ∀ {w : World}, botForces w → ∃ u, r w u ∧ botForces u)
     (w : World)
     (h_ctx : ∀ ψ, ψ ∈ Γ → CKForces r val botForces w ψ) :
-    CKForces r val botForces w φ := by
-  match d with
-  | .ax _ ψ h_ax =>
-    exact cs4_axiom_sound h_ax World r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
-  | .assumption _ ψ h_mem =>
-    exact h_ctx ψ h_mem
-  | .modus_ponens _ ψ χ d₁ d₂ =>
-    exact cs4_soundness d₁ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx
-      w (le_refl w)
-      (cs4_soundness d₂ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx)
-  | .necessitation ψ d' =>
-    intro w' _hle u _hru
-    exact cs4_soundness d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit u
-      (fun _ h => nomatch h)
-  | .weakening Γ' Δ ψ d' h_sub =>
-    exact cs4_soundness d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
-      (fun x hx => h_ctx x (h_sub x hx))
+    CKForces r val botForces w φ :=
+  cs4_soundness' d r (cs4FC_implies_cs4FC' hfc) val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+    h_ctx
 
-/-- **Soundness for derivable formulas**: if `Derivable CS4ModalAxiom φ`, then `φ` is
-`CKValidFC cs4FC`. -/
+/-- **Soundness for derivable formulas over `cs4FC'`**: if `Derivable CS4ModalAxiom φ`, then `φ`
+is `CKValidFC cs4FC'`. -/
+theorem cs4_soundness_derivable' {φ : Proposition Atom}
+    (h : Derivable CS4ModalAxiom φ) : CKValidFC.{u, v} cs4FC' φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨d⟩ := h
+  exact cs4_soundness' d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+    (fun _ h => nomatch h)
+
+/-- **Soundness for derivable formulas over `cs4FC`** (corollary of `cs4_soundness_derivable'`
+via `cs4FC_implies_cs4FC'`): if `Derivable CS4ModalAxiom φ`, then `φ` is `CKValidFC cs4FC`.
+Retained for the `ConstructiveLatticeMonotonicity` inclusion chain. -/
 theorem cs4_soundness_derivable {φ : Proposition Atom}
     (h : Derivable CS4ModalAxiom φ) : CKValidFC.{u, v} cs4FC φ := by
   intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
-  obtain ⟨d⟩ := h
-  exact cs4_soundness d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
-    (fun _ h => nomatch h)
+  exact cs4_soundness_derivable' h World r (cs4FC_implies_cs4FC' hfc) val botForces v_uc bf_uc
+    bf_val bf_r bf_r_wit w
 
 /-! ## Canonical Model -/
 

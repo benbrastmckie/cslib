@@ -15,12 +15,21 @@ This module provides the saturation/realization layer for the `CK` canonical seg
 quasi-prime extension (Lindenbaum at the trivially-true consistency predicate) and the three
 *refuting-theory* lemmas consumed by the backward truth-lemma cases (`CKTruthLemma.lean`).
 
-The plan's feared "two-level tail-assembly fixpoint" does not arise: following ianshil/CK
-`general_seg_completeness.v`, tails are set comprehensions (`CKSegment.ofHead`'s maximal
-tail, and the diamond-refuting restricted tail built in `CKTruthLemma.lean`), so the only
-constructions needed here are *single-theory* prime extensions plus the boxed-context
-transfer lemma (`box_mem_of_boxed_context`, the `K`-rule analogue for deductively closed
-sets).
+**For `CK`/`CT`/`CS4`, the plan's feared "two-level tail-assembly fixpoint" does not arise**:
+following ianshil/CK `general_seg_completeness.v`, tails are set comprehensions
+(`CKSegment.ofHead`'s maximal tail, and the diamond-refuting restricted tail built in
+`CKTruthLemma.lean`), so the only constructions needed here are *single-theory* prime extensions
+plus the boxed-context transfer lemma (`box_mem_of_boxed_context`, the `K`-rule analogue for
+deductively closed sets).
+
+**This is false for `CS5`** (task 509): the symmetric tail's truth-lemma box-backward case can
+require enlarging a head `H` to `H' ⊇ H` and its tail `T` *simultaneously* — enlarging `H'`
+enlarges `boxInv H'` in turn, so `H'` and `T` cannot be built as two sequential single-theory
+extensions (`cs5_symmetric_tail_box_gap`,
+`Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean`, mechanizes why the sequential route fails).
+`CS5`'s box-backward case therefore needs a genuine simultaneous-pair construction, the one
+two-level fixpoint this module's single-theory lemmas do not by themselves supply — see
+`CS5.lean`'s module docstring for the current status.
 
 ## Main Results
 

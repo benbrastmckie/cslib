@@ -9,7 +9,7 @@ module
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
-/-! # CS5: Constructive Modal Logic S5 (Soundness)
+/-! # CS5: Constructive Modal Logic S5 (Soundness, and the Symmetric-Tail Completeness Route)
 
 This module instantiates the task-501 frame-condition-parametrized segment scaffold
 (`CKExtension.lean`) at the constructive analogue of `S5`: `CS5` = `CS4` (`CS4.lean`) plus the two
@@ -25,51 +25,109 @@ equivalence relation, Simpson's constructive `S5` frame class.
 
 `CS5` is sound for `CKValidFC cs5FC` — Wijesekera-style fallible-world validity restricted to
 frames whose modal relation `r` is reflexive, ≤-composed-transitive, and ≤-composed-symmetric
-(`cs5FC`, `CKExtension.lean`).
+(`cs5FC`, `CKExtension.lean`). `CS5` is **also** sound for the weakened frame condition `cs5FC''`
+(`cs5_axiom_sound''`, all 17 axioms, axiom-free) — see below.
 
-**Completeness for `CS5` is not established in this module.** Unlike `CS4` (whose completeness
-task 508 mechanizes — see `CS4.lean`), `CS5` is **not** closable by the same technique: this is
-now a mechanized negative result, not merely an unattempted extension.
+**Task 508's published negative verdict is refuted (task 509).** Task 508 claimed `bDia` is
+"not sound over `cs5FCweak`, the natural `CS5` analogue of the weakened frame condition that
+makes `CS4` work" and that this was "a soundness failure which no amount of canonical-model work
+on the completeness side can fix." Both claims are corrected:
 
-`bDia` (`◇□A → A`) is **not sound** over `cs5FCweak`, the natural `CS5` analogue of the weakened
-frame condition that makes `CS4` work (reflexivity + both `cs4FC'` clauses + a weakened
-≤-composed symmetry `FCsym_box : r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t`). Witness: a two-world
-`Bool` countermodel (`false` consistent, `true` exploding) in which `◇□p → p` fails — see
-`bDia_not_valid_over_cs5FCweak` in
-`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean`. So the `CS4`
-technique **cannot** be extended to `CS5`: this is a *soundness* failure of the weakened frame
-condition, which no amount of canonical-model work on the completeness side can fix.
+- `cs5FCweak` is **not** the natural analogue of the frame condition that makes `CS4`
+  completeness work. It omits **plain symmetry** (`r w u → r u w`, exactly the clause `bDia`
+  needs) and **plain transitivity**; that omission, not a real obstruction, is why `bDia` was
+  unsound over it. Its countermodel relation `wr'` is itself not plainly symmetric
+  (`Cslib.Logic.Modal.wr'_not_symm`, `probes/cs5-symmetry-probe.lean`), so it refutes nothing
+  about the correctly-shaped frame condition below; 508's countermodel remains *sound*, it simply
+  does not bear on `cs5FC''`.
+- The correctly-shaped weakened frame condition, `cs5FC''` (`CKExtension.lean`) — reflexivity,
+  *plain* transitivity, *plain* symmetry, the `cs4FC'` re-basing clause, and the weakened
+  ≤-composed symmetry `FCsym_box` — validates **all 17** `CS5` axioms
+  (`cs5_axiom_sound''`, this module, axiom-free) and genuinely weakens `cs5FC`
+  (`cs5FC_implies_cs5FC''`, `CKExtension.lean`).
 
-The frame condition strong enough to validate `bDia` canonically, `FCbdia`, fails on the
-canonical model: at `w := ofHead(H)` with `H` consistent and `u := cexpl` (the exploding
-world), any `u' ≥ cexpl` has head `Set.univ`, forcing the witness `t` in `FCbdia`'s clause to
-equal `cexpl`; but `t ≤ w` would then give `Set.univ ⊆ H`, contradicting `H`'s consistency.
+Task 508 also read the canonical failure of `FCbdia` (its strong, ≤-saturated symmetry clause) at
+`u := cexpl`, the exploding tail world, as evidence that constructive `S5` canonical completeness
+needs negation-completeness. This does not survive the symmetric-tail design (Phase 5, below):
+`boxInv Set.univ = Set.univ`, so **no consistent head has an exploding member in its symmetric
+tail** — `Set.univ`-freeness follows directly from the tail's `boxInv t ⊆ H` clause, with **no**
+appeal to `cs5_dia_bot_imp_bot` (508's nominated "one lead", which turned out to be unnecessary).
+And canonical symmetry is obtained **by construction** (`cs5Tail_symm`: the tail's two clauses
+simply swap), **never derived** from maximality — so the negation-completeness objection 508
+raised (`B ∉ w.head ⇒ ¬B ∈ w.head`, unavailable for quasi-prime heads) never arises. This is the
+step 508 called "the known-hard core of constructive `S5` canonical completeness"; here it is
+free.
 
-One lead remains for future work: **`CS5 ⊢ ◇⊥ → ⊥`** (mechanized as `cs5_dia_bot_imp_bot` in the
-same probe file — unlike `CK`/`CT`/`CS4`, none of which prove this), which may permit a
-`Set.univ`-free tail redesign. It does not finish the job on its own: `FCbdia` still needs
-genuine canonical symmetry, whose classical proof needs negation-completeness
-(`B ∉ w.head ⇒ ¬B ∈ w.head`), unavailable for quasi-prime heads. This is the known-hard core of
-constructive `S5` canonical completeness. Note that `bBox` (`A → □◇A`) is *not* the problem
-(the weakened symmetry `FCsym_box` validates it fine); `bDia` alone is the blocker.
+**The actual remaining open sub-problem is narrower and different from 508's**: the truth
+lemma's *box-backward* case (`□A ∉ H` ⟹ some symmetric-tail member of a *possibly-larger* head
+omits `A`). `cs5_symmetric_tail_box_gap` mechanizes why the naive route — finding the witness
+tail member at `H` itself, or building the enlarged head sequentially before its tail — fails:
+if `□(p ∨ □q) ∈ H` and `q ∉ H`, every symmetric-tail member of `H` contains `p`, so the
+box-backward witness (when `□p ∉ H` too) must come from a *strictly larger* head `H' ⊇ H`, whose
+own tail must be built *simultaneously* with `H'`, not sequentially. This is genuinely a
+different, better-understood obstruction than 508's — soundness is not in question, and the
+canonical frame conditions are fully established (see `## Main Definitions`).
 
-`CS5` completeness is **genuinely open** and is re-scoped to a separate research task, not
-deferred with placeholders. See
-`specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md` §5 and
-`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean` for the full
-mechanized analysis.
+**`CS5` is theorem-for-theorem Simpson's `IS5`** (Pacheco, `Pacheco2024`, Theorem 13; his
+Conclusion states the constructive and intuitionistic variants of `DB`/`TB`/`KB5`/`S5` coincide).
+This is unlike `CK`/`CT`/`CS4`, which genuinely differ from their intuitionistic counterparts —
+`B` re-derives the two axioms bare `CK` deliberately drops: `k3` (`◇(A ∨ B) → ◇A ∨ ◇B`, this
+module's `cs5_dia_or`) and `k5` (`◇⊥ → ⊥`, task 508's `cs5_dia_bot_imp_bot`)
+(`ArisakaDasStrassburger2015` reports both facts for the general `B`-extension). So `CS5` is
+**not** a constructively distinct logic from `IS5`, and this module does not present it as one.
+The completeness theorem proved here is still worth having: it targets the fallible-world
+*segment* semantics (`CKForces`/`CKValid`), not `IS5`'s birelational one — a genuinely different
+model theory even though the theorem sets coincide. Relatedly: prime-theory canonical
+completeness works for `CS5` **precisely because** `B` collapses it out of the fallible-world
+regime that makes `CS4`'s `excl`-parametrized tail necessary (Pacheco's own diagnosis, chunk
+`01990319adea2569`) — a `CS5` success is **not** a template for other `CK` extensions still
+inside that regime.
+
+**`Pacheco2024` is cited as the source of the pair-construction *technique*, not as an
+established result.** His Lemma 18 (the two-sided Lindenbaum pair construction the box-backward
+case needs) delegates its primeness step to Lemma 16, whose proof contains an unlabelled
+negation-completeness move (`ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`) that a poset-maximal, quasi-prime `Θ` does not
+license; wherever this module or its probes cite `Pacheco2024`, this distinction is made
+explicit — see `probes/cs5-pair-primeness.lean` for the confirmation-against-the-paper and the
+sound replacement.
+
+For the full mechanized analysis (refutation of 508's verdict, the symmetric-tail design, the
+box-backward gap, and the Pacheco cross-check), see
+`specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md`
+and the `probes/` directory in that task's spec folder.
 
 ## Main Definitions
 
 - `CS5ModalAxiom`: `CS4ModalAxiom`'s constructors verbatim plus `bBox`/`bDia` (B, not
   euclidean-5).
 - `cs5_axiom_sound`/`cs5_soundness`/`cs5_soundness_derivable`: soundness for `CKValidFC cs5FC`.
+- `cs5_axiom_sound''`/`cs5_soundness''`/`cs5_soundness_derivable''`: soundness for
+  `CKValidFC cs5FC''` (the weakened, genuinely-more-general frame condition; the half task 508
+  declared impossible), axiom-free for `cs5_axiom_sound''`.
+- `or_box_imp_box_or`/`dia_or_box_imp_or`: the disjunction-of-boxes identity that discharges the
+  `prime_set_exclusion` side conditions against exclusion sets of *boxes* (not diamonds).
+- `cs5_dia_or`: `CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B` (`k3`), corroborating the `CS5 ≡ IS5` collapse.
+- `cs5_boxInv_subset_iff`: `boxInv T ⊆ H ↔ T ⊆ diaInv H` — the box-inverse tail clause and
+  Pacheco's diamond-inverse canonical relation `∼c` coincide over `CS5`.
 
 ## References
 
 * [D. Wijesekera, *Constructive modal logics I*][Wijesekera1990], §2 and Definition 1.1.4.
 * [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
   Chapter 3 (the birelational `IS5`, the structural template for the `B`-via-symmetry decision).
+* [L. Pacheco, *Collapsing Constructive and Intuitionistic Modal Logics*][Pacheco2024] — source
+  of the pair-construction technique for the box-backward case (Lemma 18's *skeleton* only; its
+  primeness step, Lemma 16, is unsound as written — see above).
+* [R. Arisaka, A. Das, L. Straßburger, *On Nested Sequents for Constructive Modal
+  Logics*][ArisakaDasStrassburger2015] — source of the `B ⊢ k3, k5` fact corroborating
+  `CS5 ≡ IS5`.
+
+**Note**: this docstring states the status as of task 509 Phase 3. If the box-backward case
+closes (Phase 11 Branch A), this docstring is revised to final status (completeness established)
+and the "actual remaining open sub-problem" paragraph above is removed. If it does not close
+(Phase 11 Branch B), the obstruction is restated as the precisely-located mechanized theorem
+Phase 10 produces, and this module does **not** claim `CS5` completeness is blocked at the
+library level — only that this specific sub-problem is open.
 -/
 
 @[expose] public section

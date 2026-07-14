@@ -366,6 +366,7 @@ public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.ConstructiveLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.ConstructiveLatticeSubsumption
+public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism

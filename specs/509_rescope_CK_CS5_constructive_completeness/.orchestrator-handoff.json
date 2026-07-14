@@ -1,44 +1,59 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
-  "summary": "Task 508's CS5 negative verdict is refuted, mechanically. Its candidate frame condition cs5FCweak omitted plain symmetry (r w u -> r u w), which is exactly the clause bDia needs; the countermodel relation is itself non-symmetric (wr'_not_symm). Restoring plain symmetry and plain transitivity gives cs5FC'', over which all 17 CS5 axioms are proved sound with zero sorry and zero axiom dependencies (cs5_axiom_sound''). A concrete canonical construction follows via the symmetric tail cs5Tail H = {t | QuasiPrime t and boxInv H subset t and boxInv t subset H}, reusing the pre-existing prime_set_exclusion. One genuinely open sub-problem remains: the truth lemma's box-backward case needs a simultaneous (H', T) pair construction.",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "11-phase plan for CS5 constructive completeness via the symmetric tail (cs5FC'' + cs5Tail). Phases 1-3 transcribe already-verified probe code (cs5FC''; cs5_axiom_sound'' over all 17 axioms; or_box_imp_box_or, dia_or_box_imp_or; and the two new verified lemmas cs5_dia_or (k3) and cs5_boxInv_subset_iff), correct the CS5.lean docstring that publishes task 508's refuted negative verdict, and document the confirmed CS5==IS5 collapse (Pacheco Thm 13, corroborated by k3+k5 both derivable) -- a self-contained, sorry-free increment landed before any research risk. Phases 4-7 are ordinary canonical-model work reusing prime_set_exclusion: list-splitting/finite-conjunction helpers, cs5Tail/CS5Segment with DEFINITIONAL symmetry, cs5_diam_witness, canonical FCsym_box/FC4' giving cs5FC''_cs5Mreach. Phase 7 is the last guaranteed-green milestone. Phases 8-10 attack the single open sub-problem (truth-lemma box-backward pair construction = Pacheco Lemma 18): Phase 8 builds the REPAIRED primeness-from-pair-maximality lemma (Pacheco's Lemma 16 is CONFIRMED unsound -- it uses negation-completeness; repair modelled on the in-library set_maximal_is_prime), Phases 9-10 build the pair poset and extract cs5_box_backward. Phase 11 assembles (Branch A) or states the obstruction as a mechanized theorem (Branch B). No sorry, no vacuous definition, no new axiom in either branch. Effort ~20h.",
   "artifacts": [
     {
+      "type": "plan",
+      "path": "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
+      "summary": "11-phase plan. Waves: [1,4] parallel (disjoint territory: CKExtension.lean+references.bib vs SegmentLindenbaum.lean), then 2,3,5,6,7 serialized on CS5.lean, then research-risk 8->9->10->11. Phase 7 (cs5FC''_cs5Mreach) is the last guaranteed-green milestone. Phase 8 delivers the repaired primeness lemma, Phases 9-10 the pair construction, Phase 11 assembles or states the mechanized obstruction. Zero-debt: no sorry/vacuous-def/axiom in either outcome branch."
+    },
+    {
       "type": "report",
-      "path": "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md"
+      "path": "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md",
+      "summary": "Refutes task 508's CS5 negative verdict (mechanized: cs5FCweak omitted plain symmetry). Establishes a concrete Lean construction path for CS5 completeness over cs5FC'' via the symmetric tail cs5Tail; soundness and the tail's refl/symm/trans/univ-freeness/diamond-backward all verified. Section 4 locates the single gap (box-backward pair Zorn) and mechanically excludes its naive route. Section 4.5 grounds it in Pacheco arXiv:2408.16428v2: our tail IS his relation (verified), his Lemma 18 is our missing step but its primeness (Lemma 16) is unsound (negation-completeness), and his Theorem 13 collapse means CS5 == IS5. 12 work items; five corrections to the 501/508 record."
     }
   ],
   "blockers": [
     {
-      "description": "Truth lemma box-backward case for the symmetric-tail CS5 canonical model. Requires: given prime H with box-A not in H, build prime H' superset H and prime T SIMULTANEOUSLY with boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap: if box(p or box q) in H and q not in H then every symmetric-tail member of H contains p), and the gap is non-vacuous (three-world cs5FC'' countermodel realizes exactly that configuration). Enlarging H' also enlarges boxInv H', so a two-sided/maximal-pair Zorn argument is needed. This is the single research risk; everything else has a complete path.",
-      "phase": "phase-9 (projected)",
+      "description": "Truth lemma box-backward case for the symmetric-tail CS5 canonical model. Requires: given prime H with box-A not in H, build prime H' superset H and prime T SIMULTANEOUSLY with boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap) and the gap is non-vacuous (three-world cs5FC'' countermodel). Scoped to plan Phases 8-10: Phase 8 builds the repaired primeness lemma (Pacheco Lemma 16's negation-completeness argument is confirmed unsound; repair modelled on the in-library set_maximal_is_prime, PrimeExclusion.lean:428), Phases 9-10 build the pair poset (= Pacheco Lemma 18 skeleton, chunks 39fb2b22fa8afe5a) and extract cs5_box_backward. Fallback (Phase 11 Branch B) is mandatory and specified: state the obstruction as a mechanized theorem, never a sorry. Soft: a published skeleton exists and the one-sided primeness analogue is already correct in-library.",
+      "phase": "phase-10",
       "severity": "soft"
     }
   ],
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "files_modified": [
-    "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-symmetry-probe.lean",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-canonical-probe.lean",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-boxgap-countermodel.lean"
+    "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
+    "specs/509_rescope_CK_CS5_constructive_completeness/.return-meta.json",
+    "specs/509_rescope_CK_CS5_constructive_completeness/.orchestrator-handoff.json"
   ],
   "decisions_made": [
-    "Vary the frame condition cs5FC -> cs5FC'' (refl + plain trans + plain symm + cs4FC' re-basing clause + FCsym_box); soundness of all 17 axioms already verified.",
-    "Canonical world type: CS5Segment over the symmetric tail cs5Tail H = {t | QuasiPrime t and boxInv H subset t and boxInv t subset H}. Symmetry is definitional, not derived, so the maximality objection never arises.",
+    "Vary the frame condition cs5FC -> cs5FC'' (refl + plain trans + plain symm + cs4FC' re-basing clause + FCsym_box). Soundness of all 17 axioms already verified (cs5_axiom_sound'').",
+    "Canonical world type: CS5Segment over cs5Tail H = {t | QuasiPrime t and boxInv H subset t and boxInv t subset H}. Symmetry definitional, never derived, so maximality is never needed.",
     "The symmetric tail is FORCED, not chosen: fcbdia_forces_symmetry shows any bDia-adequate frame condition implies boxInv u.head subset w.head on any segment-based world type.",
-    "Reuse Cslib.Logic.Metalogic.prime_set_exclusion (PrimeExclusion.lean:558, from task 480) for diam_witness, FCsym_box and FC4'; discharge its DerivExcludes precondition via or_box_imp_box_or + Kd + bDia + primality.",
-    "CS5 needs NO exclusion parameter and no dia_refuting_theory (unlike CS4): the diamond-backward case is free via bBox plus the tail's boxInv t subset H clause.",
-    "Land items 1-4 (cs5FC'', cs5_axiom_sound'', the two derivability lemmas, and the CS5.lean docstring correction) as a self-contained increment; scope the box-backward pair construction as a separate research item.",
-    "Do NOT mark CS5 completeness BLOCKED; re-plan it around the report's section 5 work items."
+    "Reuse Cslib.Logic.Metalogic.prime_set_exclusion (PrimeExclusion.lean:558, task 480) for diam_witness, FCsym_box and FC4'; discharge DerivExcludes via or_box_imp_box_or + Kd + bDia + primality.",
+    "CS5 needs NO exclusion parameter, no dia_refuting_theory, no diamRefutingSegment (unlike CS4): the diamond-backward case is free (cs5Tail_dia_of_mem).",
+    "Land items 1-4, 6, 12 (cs5FC'', cs5_axiom_sound'', or_box_imp_box_or, dia_or_box_imp_or, cs5_dia_or, the cs5Tail frame lemmas, and the CS5.lean docstring correction) as a self-contained increment; scope the box-backward pair construction as a separate research item.",
+    "Do NOT mark CS5 completeness BLOCKED; re-plan around report section 5 (12 items), item 9 the single research risk.",
+    "DESIGN: document in CS5.lean that CS5 == IS5 (Pacheco Thm 13). CS5 is not a constructively distinct logic; do not present it as one. The completeness theorem is still worth having because it targets the fallible-world segment semantics, not IS5's birelational one.",
+    "DESIGN: do not read a CS5 success as a template for other CK extensions — prime-theory canonical completeness works here only because B collapses CS5 out of the fallible-world regime (Pacheco's own remark, chunk 01990319adea2569).",
+    "PLAN: 11 phases, ~20h. Phases 1-3 (transcription + docstring correction + collapse documentation) land a self-contained sorry-free increment before any research risk. Phase 7 (cs5FC''_cs5Mreach) is the designated last guaranteed-green milestone.",
+    "PLAN: Phase 8 is reframed from 'audit' to 'repair' -- the Lemma 16 unsoundness verdict is already established by the research report, so Phase 8 confirms it against the paper (one read) and delivers the repaired primeness lemma as a standalone probe (cs5-pair-primeness.lean), isolated before the pair poset consumes it. First check whether set_maximal_is_prime already subsumes the component-primeness step.",
+    "PLAN: Phase 9 carries a mandatory collapse check -- surface explicitly if the pair construction would establish a CKB/IKB collapse as a byproduct, rather than land it silently.",
+    "PLAN: only Waves 1 has real parallelism (Phase 1 owns CKExtension.lean+references.bib; Phase 4 owns SegmentLindenbaum.lean helpers -- disjoint). Phases 2,3,5,6,7 serialize on CS5.lean. Phase 7 carries a file-size split decision (>~700 lines -> CS5Canonical.lean + mk_all)."
   ],
   "dead_ends": [
-    "task 508's cs5FCweak: omits plain symmetry, so bDia is unsound over it. Its countermodel bDia_not_valid_over_cs5FCweak is sound but says nothing about cs5FC''. Do not treat it as ruling out the CS4 technique.",
-    "Set.univ-free tail redesign via cs5_dia_bot_imp_bot (508's nominated 'one lead'): unnecessary. Set.univ-freeness for consistent heads follows directly from the tail's boxInv t subset H clause, since boxInv Set.univ = Set.univ.",
-    "Deriving canonical symmetry from maximality (508's stated blocker): a non-problem. Symmetry is obtained by construction, never derived, so negation-completeness of quasi-prime heads is never needed.",
-    "508 section 4(c)'s rejection of simultaneous Lindenbaum exclusion: correct only for exclusion sets of DIAMONDS (dia(A or B) -> dia A or dia B is underivable). Irrelevant here: the exclusion set is a set of BOXES, and (box B or box B') -> box(B or B') IS derivable (or_box_imp_box_or, pure CK).",
-    "Sequential Lindenbaum for the box-backward case (build H' first, then T): provably fails per cs5_symmetric_tail_box_gap. Do not retry; a simultaneous pair construction is required.",
-    "Proving box(A or box D) -> box A or D as a route to the box-backward case: not valid over cs5FC'' (mechanized three-world countermodel)."
+    "task 508's cs5FCweak: omits plain symmetry, so bDia is unsound over it. bDia_not_valid_over_cs5FCweak is sound but says nothing about cs5FC''. Do not treat it as ruling out the CS4 technique.",
+    "Set.univ-free tail redesign via cs5_dia_bot_imp_bot (508's nominated 'one lead'): unnecessary. Set.univ-freeness follows from the tail's boxInv t subset H clause, since boxInv Set.univ = Set.univ (cs5Tail_univ_free). Matches Pacheco's Wc-bot = empty.",
+    "Deriving canonical symmetry from maximality (508's stated blocker): a non-problem. Symmetry is by construction, so negation-completeness of quasi-prime heads is never needed.",
+    "508 section 4(c)'s rejection of simultaneous Lindenbaum exclusion: void twice over. It targets exclusion sets of DIAMONDS, whereas ours are BOXES and (box B or box B') -> box(B or B') is derivable; AND its premise is false for CS5 anyway — cs5_dia_or proves CS5 |- dia(A or B) -> dia A or dia B.",
+    "Sequential Lindenbaum for the box-backward case (build H' first, then T): provably fails per cs5_symmetric_tail_box_gap. A simultaneous pair construction is required.",
+    "Proving box(A or box D) -> box A or D as a route to the box-backward case: not valid over cs5FC'' (mechanized three-world countermodel).",
+    "Transcribing Pacheco Lemma 18 / Lemma 16 primeness verbatim: the published argument is unsound (uses negation-completeness). Port the pair-Zorn skeleton only; reprove primeness.",
+    "Choosing between Pacheco's diamond-inverse relation and our box-inverse one: a non-choice. cs5_boxInv_subset_iff proves boxInv T subset H <-> T subset diaInv H over CS5 — they are the same relation.",
+    "Transcribing Pacheco Lemma 18's primeness step (Lemma 16) verbatim into any phase: forbidden. The published argument is confirmed unsound (negation-completeness). Phase 8 supplies the sound replacement; Phase 10 consumes it. Do not fall back to the negation-completeness route at any phase.",
+    "Silently landing a CKB/IKB collapse theorem: forbidden. The collapse is documented (Phase 3) and corroborated (k3/k5), but CKB<->IKB is not re-proved; any collapse byproduct of the Phase 9 construction must be flagged explicitly."
   ],
-  "plan_markers_verified": false
+  "plan_markers_verified": true
 }

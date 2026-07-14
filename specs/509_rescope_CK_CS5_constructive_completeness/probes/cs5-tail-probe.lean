@@ -78,8 +78,33 @@ theorem cs5Tail_dia_of_mem {H T : Set (Proposition Atom)}
     {A : Proposition Atom} (hA : A ∈ T) : (◇A) ∈ H :=
   h.2.2 (mem_head_mp hT.closed (mem_of_axiom hT.closed (CS5ModalAxiom.bBox A)) hA)
 
+/-! ## D6 — the tail condition IS Pacheco's, in box-inverse form -/
+
+/-- **D6 — `boxInv T ⊆ H ↔ T ⊆ diaInv H`** for quasi-prime `H`, `T`.
+
+Pacheco (arXiv:2408.16428v2, chunk `01990319adea2569`) defines the CKB canonical relation as
+`Γ ∼c ∆ iff Γ□ ⊆ ∆ and ∆ ⊆ Γ♦` — a **diamond**-inverse containment on the right, where this
+report's `cs5Tail` uses a **box**-inverse containment (`boxInv t ⊆ H`). This lemma shows the two
+are **equivalent** over CS5: `→` is `bBox` (his Lemma 15, second half); `←` is `bDia` (his Lemma
+15, first half). So `cs5Tail H = {t | QuasiPrime t ∧ boxInv H ⊆ t ∧ boxInv t ⊆ H}` and Pacheco's
+`∼c` are the *same relation*, and his Lemma 15 ("`∼c` is symmetric") is this report's
+`cs5Tail_symm` with the equivalence inlined.
+
+The presentations differ in what comes free: Pacheco derives symmetry (two `B` applications);
+the box-inverse form makes it definitional but must pay `bBox` back at the diamond clause
+(`cs5Tail_dia_of_mem`). Same content, different bookkeeping. -/
+theorem cs5_boxInv_subset_iff {H T : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (hT : QuasiPrime (@CS5ModalAxiom Atom) T) :
+    boxInv T ⊆ H ↔ T ⊆ diaInv H := by
+  constructor
+  · intro h A hA
+    exact h (mem_head_mp hT.closed (mem_of_axiom hT.closed (CS5ModalAxiom.bBox A)) hA)
+  · intro h B hB
+    exact mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.bDia B)) (h hB)
+
 end Cslib.Logic.Modal
 
+#print axioms Cslib.Logic.Modal.cs5_boxInv_subset_iff
 #print axioms Cslib.Logic.Modal.cs5Tail_refl
 #print axioms Cslib.Logic.Modal.cs5Tail_symm
 #print axioms Cslib.Logic.Modal.cs5Tail_trans

@@ -1,27 +1,36 @@
 {
-  "status": "researched",
+  "status": "planned",
   "started_at": "2026-07-14T00:00:00Z",
+  "completed_at": "2026-07-14T00:00:00Z",
   "artifacts": [
+    "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
     "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-symmetry-probe.lean",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-canonical-probe.lean",
-    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-boxgap-countermodel.lean",
     "specs/509_rescope_CK_CS5_constructive_completeness/.orchestrator-handoff.json"
   ],
-  "partial_progress": {
-    "stage": "research_delivered",
-    "details": "Verdict (a): concrete Lean construction path. Task 508's CS5 negative result refuted mechanically (cs5FCweak omitted plain symmetry). cs5_axiom_sound'' proves all 17 CS5 axioms sound over cs5FC'' with zero axiom dependencies. Symmetric-tail canonical construction specified; prime_set_exclusion reused. Single open sub-problem: box-backward pair construction, with its naive route mechanically excluded and shown non-vacuous."
-  },
-  "verification": {
-    "probes_compile": true,
-    "sorry_count": 0,
-    "new_axioms": 0,
-    "reproduce": "lake env lean specs/509_rescope_CK_CS5_constructive_completeness/probes/<file>.lean"
-  },
+  "phase_count": 11,
+  "estimated_hours": 20,
+  "dependency_waves": [[1, 4], [2], [3], [5], [6], [7], [8], [9], [10], [11]],
+  "next_steps": "Run /implement 509 to execute the plan",
   "metadata": {
     "session_id": "sess_1784065982_0f4e12",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "planner-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "plan", "planner-agent"]
+  },
+  "memory_candidates": [
+    {
+      "content": "In constructive/intuitionistic modal-logic canonical completeness, a frame condition can be genuinely WEAKENED to make soundness hold and completeness EASIER without weakening the logic: task 509's cs5FC'' drops task 508's cs5FCweak defect (it omitted plain symmetry r w u -> r u w, the exact clause the bDia axiom needs) and adds it back. A published 'this cannot be done by canonical-model work' negative verdict was refuted purely by locating one missing frame clause. Lesson: when a soundness-side impossibility claim rests on a specific candidate frame condition, audit that condition clause-by-clause against each axiom before accepting the impossibility.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
+      "confidence": 0.72,
+      "suggested_keywords": ["constructive modal logic", "canonical model", "frame condition", "symmetry", "completeness", "CS5"]
+    },
+    {
+      "content": "When porting a published proof into a proof assistant, treat the primeness/maximality lemma as the highest-risk step: Pacheco 2024's Lemma 16 (reused by his pair-Zorn Lemma 18) derives primeness from 'phi not in Theta => not-phi in Theta', which is negation-completeness and is unsound for prime/quasi-prime theories in a constructive setting. The correct pattern derives the disjunction property from poset-invariant violations under maximality (as CSLib's set_maximal_is_prime does for the one-sided Lindenbaum case), never from negation-completeness. Plan a dedicated repair phase for any imported primeness-from-maximality step rather than transcribing it on faith.",
+      "category": "PATTERN",
+      "source_artifact": "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
+      "confidence": 0.8,
+      "suggested_keywords": ["Lindenbaum", "primeness", "Zorn maximality", "negation-completeness", "paper-to-code", "prime theory"]
+    }
+  ]
 }

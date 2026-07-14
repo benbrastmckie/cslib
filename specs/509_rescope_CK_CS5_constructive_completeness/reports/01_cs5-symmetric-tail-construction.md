@@ -156,12 +156,23 @@ Writing `r w u ↔ boxInv w ⊆ u ∧ boxInv u ⊆ w` (heads elided):
 
 | Clause | Canonical proof | Status |
 |---|---|---|
-| refl `r w w` | `boxInv H ⊆ H` — `tBox` | routine |
-| plain symm | definitional (§3.1) | **free** |
-| plain trans | `□B ∈ w →(4) □□B ∈ w → □B ∈ u → B ∈ t`; and `□B ∈ t →(4) □□B ∈ t → □B ∈ u → B ∈ w` | routine, uses `4` **twice** |
+| refl `r w w` | `boxInv H ⊆ H` — `tBox` | **verified** (`cs5Tail_refl`) |
+| plain symm | definitional (§3.1) | **verified** (`cs5Tail_symm` — *no axiom dependencies at all*) |
+| plain trans | `□B ∈ w →(4) □□B ∈ w → □B ∈ u → B ∈ t`; and symmetrically | **verified** (`cs5Tail_trans`; uses `4` **twice**) |
+| `Set.univ`-freeness | `boxInv Set.univ = Set.univ` | **verified** (`cs5Tail_univ_free`) |
+| diamond-backward | `bBox` + `boxInv t ⊆ H` | **verified** (`cs5Tail_dia_of_mem`) |
 | `FC4'` (`fourBox`) | `prime_set_exclusion` (§3.4) | new work |
 | `FCsym_box` (`bBox`) | `prime_set_exclusion` (§3.4) | new work |
 | `diam_witness` | `prime_set_exclusion` (§3.4) | new work |
+
+The first five rows are mechanized in `probes/cs5-tail-probe.lean` against
+
+```lean
+def cs5Tail (H : Set (Proposition Atom)) : Set (Set (Proposition Atom)) :=
+  {t | QuasiPrime (@CS5ModalAxiom Atom) t ∧ boxInv H ⊆ t ∧ boxInv t ⊆ H}
+```
+
+They are all one-liners. `cs5Tail_symm` is `⟨hH, h.2.2, h.2.1⟩` — the two clauses simply swap.
 
 Note that `r` becomes a genuine **equivalence relation** on CS5 segments — reflexive, symmetric,
 transitive — which is Simpson's constructive S5 frame class, as `CS5.lean`'s docstring already
@@ -253,6 +264,102 @@ module docstring states "the plan's feared *two-level tail-assembly fixpoint* do
 true for CK, and **false for CS5**. That sentence is the precise boundary between what is done and
 what is open.
 
+## 4.5 Literature: this construction is Pacheco's, and his version of §4 has a gap
+
+**Source**: Leonardo Pacheco, *Collapsing Constructive and Intuitionistic Modal Logics*,
+arXiv:2408.16428v2 (1 Oct 2024), TU Wien. Ingested as
+`doc_id: pacheco_2024_collapsingconstructiveandintuitionisticmodallogics` (19 chunks). Navigate
+with `bash .claude/scripts/literature-search.sh --toc <doc_id>` / `--read <chunk_id>`. He works in
+**exactly** our setting: CK-models `⟨W, W⊥, ≼, ∼, V⟩` with fallible worlds and the primitive ∀∃
+diamond, and `CKB := CK + {B□, B◇}` where `B□ := P → □◇P`, `B◇ := ◇□P → P` — literally our
+`bBox`/`bDia`.
+
+Four things follow, and each is now verified against the chunks rather than paraphrased.
+
+### 4.5.1 Our tail is his relation (verified)
+
+Pacheco (chunk `01990319adea2569`) defines `Γ ∼c ∆ iff Γ□ ⊆ ∆ and ∆ ⊆ Γ♦` — a **diamond**-inverse
+containment where §3 uses a **box**-inverse one. `cs5_boxInv_subset_iff` (verified) proves
+`boxInv T ⊆ H ↔ T ⊆ diaInv H` for quasi-prime `H`, `T`: `→` is `bBox`, `←` is `bDia`. **They are
+the same relation.** His Lemma 15 ("∼c is symmetric", chunks `01990319adea2569` +
+`459c68faae4c8a86`) is our `cs5Tail_symm` with that equivalence inlined — and, as our teammate
+noted, he *derives* symmetry from `B◇`+MP where we get it definitionally. Both routes avoid
+maximality; §6.3's correction stands, and is now independently corroborated.
+
+His `Wc⊥ = ∅` (chunk `01990319adea2569`) is our `cs5Tail_univ_free`.
+
+### 4.5.2 The collapse — design-relevant, not a footnote
+
+Pacheco's Theorem 13 gives `CKB ⊢ φ ⟺ IKB ⊢ φ ⟺ CKB ⊨ φ ⟺ IKB ⊨ φ`, and his Conclusion (chunk
+`ea99f6447f6e2b11`) states: *"This also implies that constructive and intuitionistic variations of
+DB, TB, KB5, and S5 coincide."* **So our CS5 is theorem-for-theorem Simpson's IS5** — CS5 is
+**not a distinct logic** from IS5 in the CK column, unlike CK/CT/CS4 which genuinely differ from
+their intuitionistic counterparts.
+
+Corroborated independently and mechanically: Arisaka–Das–Straßburger (LMCS 11(3:7) 2015) report
+that `B` entails `k3` (`◇`-distribution) and `k5` (`◇⊥ → ⊥`) — the axioms CK deliberately drops.
+Both are now proved in our own system: `k5` is 508's `cs5_dia_bot_imp_bot`, and **`k3` is
+`cs5_dia_or`** (`probes/cs5-k3-probe.lean`, verified): `⊢ ◇(A ∨ B) → ◇A ∨ ◇B`, via `bBox` +
+`or_box_imp_box_or` + `Kd` + `bDia`. Adding `B` re-derives CK's dropped axioms, which is *why*
+the collapse happens.
+
+**This does not weaken the verdict.** Our theorem is `Derivable CS5ModalAxiom φ ↔ CKValidFC cs5FC'' φ`
+— completeness for the *fallible-world segment* semantics, which is a different semantics from
+IS5's birelational one. The theorem remains meaningful and is the natural capstone of the CK
+column. But `CS5.lean` should **document** that CS5 ≡ IS5 as a theorem set, and the library
+should not present CS5 as a constructively distinct system. That is a design decision for the
+planner, not something to bury.
+
+Pacheco's own diagnostic (chunk `01990319adea2569`) is worth quoting in full, because it is a
+warning about *method*, not about CS5:
+
+> *"The definition of the CKB-canonical model Mc is standard for intuitionistic modal logics. In
+> general, using only theories for worlds is not sufficient for constructive modal logics; **it
+> works here because CKB and IKB coincide.**"*
+
+So prime-theory canonical completeness works for CS5 **precisely because B collapses us out of
+the fallible-world regime**. It is not evidence that the technique generalizes. CS4's `excl`
+field exists because CS4 does *not* collapse.
+
+### 4.5.3 `cs5_dia_or` voids 508 §4(c) a second time
+
+508 §4(c) rejected simultaneous Lindenbaum exclusion *because* `◇(A ∨ B) → ◇A ∨ ◇B` is
+underivable. §3.4 already showed that argument targets the wrong exclusion set (boxes, not
+diamonds). `cs5_dia_or` shows the premise is **also false for CS5**. Consequence: Pacheco's
+`◇`-inverse presentation is viable here too, and by §4.5.1 it is the same construction — so
+there is no presentation choice to agonize over.
+
+### 4.5.4 His Lemma 18 is §4's missing step — and its primeness proof is broken
+
+Pacheco's **Lemma 18** is our §4 gap verbatim: *"Let ϕ be a formula and Γ be a CKB-theory. Then
+□ϕ ∉ Γ implies that there are CKB-theories ∆ and Σ such that Γ ≼c ∆ ∼c Σ and ϕ ∉ Σ."* His method
+(chunk `39fb2b22fa8afe5a`) is the pair-Zorn we independently concluded was necessary: pairs
+`⟨X, Y⟩` with the cross-conditions `Y□ ⊆ X`, `Y ⊆ X♦`, `ϕ ∉ X ∪ Y`, `⊥ ∉ X ∪ Y` carried as poset
+invariants, ordered componentwise, maximal element by Zorn. Both sides grow together — exactly
+the "cannot do it sequentially" fact our `cs5_symmetric_tail_box_gap` mechanizes.
+
+**But the primeness step is unsound as written.** Lemma 18 says "As in the proof of Lemma 16, if
+ϕ ∨ ψ ∈ Σ then ϕ ∈ Σ or ψ ∈ Σ", and Lemma 16's argument (chunk `ec3a8bddd907f0c4`) reads:
+
+> *"Suppose ϕ ∨ ψ ∈ Θ. Then if ϕ ∉ Θ and ψ ∉ Θ, we would have that ¬ϕ ∈ Θ and ¬ψ ∈ Θ. By MP, we
+> would have ¬(ϕ ∨ ψ) ∈ Θ, a contradiction."*
+
+The step `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` **is negation-completeness** — precisely the move prime theories do not
+license, and precisely the move this whole construction exists to avoid. `Θ` is Zorn-maximal *in
+the pair poset*, which does not make it negation-complete. (Lemma 16's statement is also garbled:
+it writes `Υ` where `Θ` is meant throughout the maximality clause.)
+
+**The repair** (not carried out by us or the paper): from `≤`-maximality, adding `ϕ` to `Θ` must
+violate some poset invariant and adding `ψ` must violate some invariant; derive the contradiction
+from those two failures rather than from `¬ϕ, ¬ψ ∈ Θ`. This is the standard Lindenbaum-pair
+maximality argument, and it is what `prime_set_exclusion`'s `set_maximal_is_prime`
+(`PrimeExclusion.lean`) already does correctly for the **one-sided** case — which is why item 9
+is plausible rather than speculative.
+
+**Treat Lemma 18 as unverified and reprove it.** Do not transcribe it. This is exactly where the
+formalization earns its keep: a published proof of the one step we could not do has a hole in it,
+and CSLib would be the first to close it.
+
 ## 5. Work Items, in Dependency Order
 
 | # | Item | Risk | Notes |
@@ -262,16 +369,20 @@ what is open.
 | 3 | Correct `CS5.lean`'s module docstring (§6.4) | none | it currently asserts a false negative result |
 | 4 | `or_box_imp_box_or`, `dia_or_box_imp_or` | none | verified |
 | 5 | Finite-conjunction + list-splitting helpers (generalize `modal_deriv_imp_of_union` from a singleton to a set) | low-med | 508 §5.1 flagged this; pure bookkeeping |
-| 6 | `cs5Tail`, `CS5Segment`, `Preorder` instance; refl/symm/trans | low | symm free; refl `tBox`; trans `4` twice |
+| 6 | `cs5Tail`, `CS5Segment`, `Preorder` instance; refl/symm/trans | none | **verified** (`cs5-tail-probe.lean`); only the `CS5Segment` wrapper + `Preorder.lift` remain |
 | 7 | `diam_witness` via `prime_set_exclusion` | medium | needs 5 |
 | 8 | `FCsym_box`, `FC4'` canonically | medium | needs 5, 7 |
-| 9 | **Box-backward pair construction** (§4) | **high — genuinely open** | needs a simultaneous `(H', T)` Zorn argument |
+| 9 | **Box-backward pair construction** (§4) | **high — published but with a hole** | = Pacheco Lemma 18 (§4.5.4). Port the pair-Zorn skeleton; **reprove primeness** — his argument uses negation-completeness. Model the repair on `set_maximal_is_prime` |
+| 11 | Document in `CS5.lean` that CS5 ≡ IS5 (Pacheco Thm 13, §4.5.2) | none | design-relevant; CS5 is not constructively distinct |
+| 12 | `cs5_dia_or` (`k3`) and optionally `cs5_boxInv_subset_iff` as library lemmas | none | **verified**; `k3` is independently interesting (CS5 ⊢ `◇(A∨B) → ◇A ∨ ◇B`) |
 | 10 | `cs5_truth_lemma`, `cs5_completeness`, `cs5_soundness_completeness` | low | assembly, given 6–9 |
 
-The diamond-backward case is **free** and needs no exclusion parameter (unlike CS4): if
-`A ∈ t` and `t ∈ cs5Tail H`, then `bBox` gives `□◇A ∈ t`, so `◇A ∈ boxInv t ⊆ H`. So
-`◇A ∉ H` immediately refutes `◇A` at `H` itself with `s' := s`. CS4's `excl` field, `cs4Tail`'s
-`E` parameter, and `dia_refuting_theory` are all **not needed** for CS5.
+The diamond-backward case is **free** and needs no exclusion parameter (unlike CS4):
+`cs5Tail_dia_of_mem` (verified) — if `A ∈ t` and `t ∈ cs5Tail H`, then `bBox` gives `□◇A ∈ t`,
+so `◇A ∈ boxInv t ⊆ H`. Hence `◇A ∉ H` refutes `◇A` at `H` itself with `s' := s`. CS4's `excl`
+field, `cs4Tail`'s `E` parameter, `dia_refuting_theory` and `diamRefutingSegment` are all **not
+needed** for CS5. This is why the tail can be head-determined, which in turn is why symmetry is
+definitional.
 
 **Recommendation on sequencing**: items 1–4 are verified and can land immediately as a
 self-contained increment (CS5 soundness over the weakened condition + the corrected docstring +
@@ -347,13 +458,55 @@ theorem cs5_soundness_completeness {φ : Proposition Atom} :
 
 Soundness (the direction 508 claimed was impossible) is **already proved**. Of the completeness
 direction, the frame conditions and the diamond-backward case have complete paths; the
-box-backward case (§4) is one genuinely open sub-problem, precisely stated, with its naive route
+box-backward case (§4) is the single sub-problem, precisely stated, with its naive route
 mechanically excluded.
+
+**The verdict does not rest on Pacheco's collapse.** It rests on our own machine-checked results:
+`cs5_axiom_sound''`, `cs5Tail_refl/symm/trans/univ_free/dia_of_mem`, `fcbdia_forces_symmetry`.
+Pacheco arrived independently at the same canonical relation (§4.5.1, verified by
+`cs5_boxInv_subset_iff`), which corroborates the construction and supplies a published skeleton
+for item 9 — but his Lemma 18's primeness proof uses negation-completeness and **must be reproved**
+(§4.5.4), so item 9 remains real work rather than transcription.
+
+**Two facts the planner must carry forward, not bury:**
+
+1. **CS5 ≡ IS5** (Pacheco Thm 13). Our CS5 is not a constructively distinct logic; `B` re-derives
+   CK's dropped `k3`/`k5` (`cs5_dia_or`, `cs5_dia_bot_imp_bot`, both mechanized). The completeness
+   theorem is still worth having — it is for the fallible-world segment semantics, not the
+   birelational one — but `CS5.lean` must say so (item 11).
+2. **This technique does not generalize.** Prime-theory canonical completeness works for CS5
+   *because* B collapses it out of the fallible-world regime (Pacheco's own remark, §4.5.2). Do
+   not read a CS5 success as a template for other CK extensions.
 
 CS5 completeness should **not** be marked BLOCKED. It should be re-planned around §5, with item 9
 as the single research risk.
 
 ## References
+
+**Literature corpus** (navigate: `bash .claude/scripts/literature-search.sh --toc <doc_id>` /
+`--read <chunk_id>`; both registered in `specs/literature-index.json`, so `--lit` runs pick them
+up). Cite doc_ids/chunk_ids, never scratchpad paths.
+
+- **`pacheco_2024_collapsingconstructiveandintuitionisticmodallogics`** — L. Pacheco, *Collapsing
+  Constructive and Intuitionistic Modal Logics*, arXiv:2408.16428v2 (2024). **The key source.**
+  Load-bearing chunks:
+  - `01990319adea2569` — CKB def; canonical model def (`Γ ∼c ∆ iff Γ□ ⊆ ∆ and ∆ ⊆ Γ♦`);
+    `Wc⊥ = ∅`; the "it works here because CKB and IKB coincide" remark; Lemma 15 (start)
+  - `459c68faae4c8a86` — Lemma 15 symmetry proof (via `B◇`/`B□` + MP, no maximality)
+  - `ec3a8bddd907f0c4` — Lemma 16 proof (**contains the negation-completeness step**); Lemma 17;
+    Lemma 18 statement
+  - `213bb5de73fe3e7a`, `39fb2b22fa8afe5a` — Lemma 18's pair-Zorn construction
+  - `f90131e694c8b77a`, `ea99f6447f6e2b11` — Truth Lemma 19; Lemma 20; **Conclusion (the collapse
+    to DB/TB/KB5/S5)**
+- **`arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics`** — Arisaka, Das,
+  Straßburger, *On Nested Sequents for Constructive Modal Logics*, LMCS 11(3:7) 2015 (40 chunks).
+  `B` entails `k3`/`k5`; questions the "constructiveness" of logics including `b`; no standard
+  Kripke semantics offered.
+- G. Fischer Servi, *Axiomatizations for some intuitionistic modal logics*, Rend. Sem. Mat. Univers.
+  Politecn. Torino **42** (1984) 179–194 — IS5 canonical completeness over prime theories,
+  birelational family. **Unverified** (source not obtained); reported via Simpson thesis Thm 3.3.4.
+
+**Task artifacts and code**
 
 - `specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md` §5
 - `specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean` — `cs5FCweak`
@@ -373,6 +526,14 @@ as the single research risk.
 - `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-canonical-probe.lean` —
   `or_box_imp_box_or`, `dia_or_box_imp_or`, `fcbdia_forces_symmetry`,
   `cs5_symmetric_tail_box_gap`. Compiles clean.
+- `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-tail-probe.lean` —
+  `cs5_box_four`, `cs5_boxInv_subset`, `cs5Tail`, **`cs5Tail_refl`**, **`cs5Tail_symm`**,
+  **`cs5Tail_trans`**, **`cs5Tail_univ_free`**, **`cs5Tail_dia_of_mem`**,
+  **`cs5_boxInv_subset_iff`** (= our tail is Pacheco's `∼c`, §4.5.1). The core of the
+  construction. Compiles clean; `cs5Tail_symm` depends on **no axioms**.
+- `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-k3-probe.lean` —
+  **`cs5_dia_or`**: `CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B`. Voids 508 §4(c)'s premise and mechanizes half of
+  the Arisaka–Das–Straßburger collapse diagnosis. Compiles clean.
 - `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-boxgap-countermodel.lean` —
   `w3r_fc`, `w3_box_p_or_box_q_at_w`, `w3_not_box_p_at_w`, `w3_not_q_at_w`, `w3val_uc`. The
   three-world model showing §4's gap is real and its naive route unrecoverable. Compiles clean.

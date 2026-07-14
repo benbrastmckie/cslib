@@ -372,6 +372,8 @@ public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeSubsumption
+public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthMonotonicity
+public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthSubsumption
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Extension

@@ -150,7 +150,7 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 
 ---
 
-### Phase 4: Cross-base propositional-strength monotonicity into intuitionistic [IN PROGRESS]
+### Phase 4: Cross-base propositional-strength monotonicity into intuitionistic [COMPLETED]
 
 **Goal**: Monotonicity into the intuitionistic base from the minimal and constructive bases: `MKModalAxiom → IKModalAxiom`, `CKModalAxiom → IKModalAxiom`, and per-rung `{MT,CT}→IT`, `{MS4,CS4}→IS4`, `{MS5,CS5}→IS5`. Document the MK/CK incomparability. (Report Phase 2.)
 

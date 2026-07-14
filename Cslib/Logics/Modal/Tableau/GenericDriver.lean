@@ -19,28 +19,71 @@ the K-style FMP termination measure (`modalUniverse`/`modalWork`/`modalExpMeasur
 
 ## Main Definitions
 
-- `RuleApplicationSpec apply`: the structural-hypothesis bundle.
+- `RuleApplicationSpec apply`: the structural-hypothesis bundle (seven fields, see below).
 - `modalApplyOne_spec`: `modalApplyOne` (K) trivially satisfies the bundle.
+- `modalStepBranchGen_preserves_outDegEq`/`_exists_rank'`/`_preserves_accTargetsKnown`/
+  `_knownWorlds`/`_eClosure`/`_potential_step`/`_worldBound`/`_expMeasure_step_lt`: the
+  `(apply, spec)`-bundled wrappers around `FmpMeasure.lean`'s `_gen` lemmas, available for
+  downstream (T/S5/B) reuse.
 
-## Design
+## Sufficiency (task 507: all three K termination lemmas generalized)
 
-The field set is extracted from what `FmpMeasure.lean`'s `modalStepBranch_potential_step`
-(the termination-measure crux) and its supporting lemmas actually use about `modalApplyOne`:
+Task 503 Phases 1-2 delivered the generic driver and this file's three original fields
+(`freshLocal`/`outputsSubsetUniverse`/`persistentFresh`), sufficient to *state* the three K
+termination lemmas (`modalStepBranch_potential_step`/`_worldBound`, `modalExpMeasure_step_lt`)
+generically but not to *replay their proofs* -- roughly fifteen private helper lemmas in
+`FmpMeasure.lean` additionally `rcases` directly on `modalApplyOne`'s five internal rule shapes
+(propositional/boxPos/diamondNeg/diamondPos/boxNeg), not merely on the four top-level
+`RuleResult` constructor shapes (which *are* rule-agnostic and need no interface support). Task
+507 closed this gap by adding four further fields, and **all three termination lemmas are now
+proven generically** (`FmpMeasure.lean`'s `_gen` lemmas), confirmed sorry-free/axiom-free and
+CI-clean at every step:
 
 1. **`freshLocal`** (world-creation confinement): `apply sf b acc` either leaves `acc`
    unchanged, or adds exactly one edge from `sf`'s own world to a single fresh witness world,
-   with a `.linear` result headed by that witness. This is the exact dichotomy
-   `modalStepBranch_knownWorlds`/`modalStepBranch_exists_rank'` case-split on, mirroring the
-   local restatement `modalApplyOne_fresh_local`.
+   with a `.linear` result headed by that witness. Mirrors `modalApplyOne_fresh_local`.
 2. **`outputsSubsetUniverse`** (catalog membership): every formula `apply` can emit (across all
    four `RuleResult` shapes) stays inside the finite universe `modalUniverse φ0`, given the
-   branch/source/freshness/world-bound hypotheses `modalApplyOne_outputs_subset` needs. This is
-   what the potential-step lemma's closure obligations (`ModalPotentialInv.bClosure`/`eClosure`
-   propagation) consume at every step.
+   branch/source/freshness/world-bound hypotheses `modalApplyOne_outputs_subset` needs. Mirrors
+   `modalApplyOne_outputs_subset`.
 3. **`persistentFresh`** (persistence hook): whenever `apply` produces a `.persistent` result,
-   the emitted formulas are nonempty and fresh (not already on the branch). This drives the
-   counting-measure strict-decrease argument `modalWork_drop_persistent` needs, mirroring
+   the emitted formulas are nonempty and fresh (not already on the branch). Mirrors
    `modalApplyOne_persistent_props`.
+4. **`rankStep`** (task 507 Phase 1): given a `rank` map satisfying the depth-bound/edge
+   invariants pre-call, `apply` produces a `rank'` (agreeing with `rank` off `modalNextWorld b`)
+   satisfying both invariants on `(apply sf b acc).snd`/`.fst`. Needed by
+   `modalStepBranch_exists_rank'_gen`. Discharged by `modalApplyOne_rank_step`, whose body is the
+   exact proof formerly inlined inside `modalStepBranch_exists_rank'`.
+5. **`outDegStep`** (task 507 Phase 1): given the outDeg/expanded-set counting correspondence
+   pre-call, `apply` preserves it on `(apply sf b acc).snd`/`.fst`. Needed by
+   `modalStepBranch_preserves_outDegEq_gen`. Discharged by `modalApplyOne_outDeg_step`.
+6. **`knownWorldsStep`** (task 507 Phase 1): the known-worlds dichotomy for a single call --
+   either `apply` leaves `acc` unchanged with all output labels already known, or it mints
+   exactly one edge `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely
+   labeled at the fresh point. Needed by `modalStepBranch_knownWorlds_gen`. Discharged by
+   `modalApplyOne_knownWorlds_step`.
+7. **`branchingLength`** (task 507 Phase 7): every `.branching` result `apply` can produce has
+   exactly two sub-branches. A fixed-arity catalog fact (not an aggregate-behaviour fact like
+   the other six), needed by `modalExpMeasure_step_lt_gen`'s `.branching` case. Discharged by
+   `modalApplyOne_branching_length`.
+
+Fields 1-3 restate *conclusions* about `apply`'s aggregate behaviour; fields 4-6 are
+**per-single-call** structural facts (needed because ~15 helper lemmas case-split on
+`modalApplyOne`'s five internal rule shapes, not just the four `RuleResult` constructors); field
+7 is a fixed-arity shape constraint. Each field's *statement* is rule-agnostic (parametrized over
+`apply`); each field's *discharge* for `modalApplyOne` reuses the pre-existing K-specific proof
+verbatim (as a standalone lemma in `FmpMeasure.lean`). The crux `modalStepBranch_potential_step`
+itself needs no field beyond `freshLocal` once its three callees (rank/outDeg/knownWorlds) are
+generalized -- its arithmetic core (`geomCap_zero`/`geomCap_succ`/`Nat`/`ring`) is entirely
+independent of `apply`.
+
+**Architectural note**: `FmpMeasure.lean`'s `_gen` lemmas take these seven facts as *raw,
+unbundled hypothesis parameters* rather than a `spec : RuleApplicationSpec apply` argument,
+because `RuleApplicationSpec` is defined in *this* file, which imports `FmpMeasure.lean` --
+bundling would create an import cycle. This file supplies the `(apply, spec)`-bundled wrapper
+theorems (listed under Main Definitions) that unpack `spec.field` into each `_gen` lemma's raw
+parameters, giving downstream instances (T/S5/B) the ergonomic `(apply, spec)` calling
+convention the plan originally specified.
 
 ## Downstream Reuse (tasks 504, 505; not 506)
 
@@ -49,13 +92,13 @@ The field set is extracted from what `FmpMeasure.lean`'s `modalStepBranch_potent
   (`modalApplyOneT_eq_of_not_boxPos_diaNeg`, `FrameRules.lean`), and those two shapes only add
   formulas at **existing** worlds drawn from the (possibly closure-enlarged) universe -- so
   `freshLocal` is discharged by agreement with `modalApplyOne` on every mint-shaped input, and
-  `outputsSubsetUniverse`/`persistentFresh` are discharged by the same agreement plus the T
-  rules' own catalog-membership facts.
+  the remaining six fields are discharged by the same agreement plus T's own catalog-membership
+  facts (its own propositional/box-propagation-to-existing-successors reasoning).
 - **S5 / KB5** (task 504, universal rule): the universal rule only adds formulas at existing
   worlds (drawn from the finite catalog, since it propagates along `EqvGen`-closed pairs of
   labels already on the branch); it never mints a world itself, so `freshLocal` is discharged
-  trivially (agreement with `modalApplyOne` on every mint-shaped input) and
-  `outputsSubsetUniverse`/`persistentFresh` follow the same shape as T's discharge.
+  trivially (agreement with `modalApplyOne` on every mint-shaped input) and the remaining fields
+  follow the same shape as T's discharge.
 - **B** (task 505, backward/symmetric rule): the backward rule only adds formulas at existing
   worlds reachable via the symmetric closure `SymmGen` of already-recorded edges; likewise never
   mints a world, so the same discharge pattern as S5 applies.
@@ -63,55 +106,6 @@ The field set is extracted from what `FmpMeasure.lean`'s `modalStepBranch_potent
   loop-checking (`#worlds ≤ 2^|Sf|`) rather than the depth-based `modalWorldBound` this bundle
   presupposes via `outputsSubsetUniverse`'s reliance on `modalApplyOne_outputs_subset`-style
   world-bound hypotheses; S4 needs a structurally different termination argument.
-
-## Task 507: Per-Call Step Fields (`rankStep`/`outDegStep`/`knownWorldsStep`)
-
-The three fields above restate *conclusions* about `apply`'s aggregate behaviour
-(freshness/catalog-membership/persistence), but three of `FmpMeasure.lean`'s private helper
-lemmas (`modalStepBranch_exists_rank'`, `modalStepBranch_preserves_outDegEq`,
-`modalStepBranch_knownWorlds`) additionally need a **per-single-call** structural fact that
-genuinely depends on which of `modalApplyOne`'s five internal rule shapes
-(propositional/boxPos/diamondNeg/diamondPos/boxNeg) fired -- not merely on the four top-level
-`RuleResult` constructor shapes (`.linear`/`.branching`/`.persistent`/`.notApplicable`), which
-*are* rule-agnostic and need no interface support. Task 507 adds exactly these three fields:
-
-- **`rankStep`**: given a `rank` map satisfying the depth-bound/edge invariants pre-call, `apply`
-  produces a `rank'` (agreeing with `rank` off `modalNextWorld b`) satisfying both invariants on
-  `(apply sf b acc).snd`/`.fst`. Discharged for `modalApplyOne` by `modalApplyOne_rank_step`
-  (`FmpMeasure.lean`), whose body is the exact proof that was formerly inlined inside
-  `modalStepBranch_exists_rank'`.
-- **`outDegStep`**: given the outDeg/expanded-set counting correspondence pre-call, `apply`
-  preserves it on `(apply sf b acc).snd`/`.fst`. Discharged by `modalApplyOne_outDeg_step`.
-- **`knownWorldsStep`**: the known-worlds dichotomy for a single call -- either `apply` leaves
-  `acc` unchanged with all output labels already known, or it mints exactly one edge
-  `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely labeled at the fresh
-  point. Discharged by `modalApplyOne_knownWorlds_step`.
-
-Each field's *statement* is rule-agnostic (parametrized over `apply`); each field's *discharge*
-for `modalApplyOne` reuses the pre-existing K-specific proof verbatim (now a standalone lemma).
-This is the intended shape of downstream (T/S5/B) discharge too: reuse `modalApplyOne`'s own
-per-call facts on every input where the new rule agrees with `modalApplyOne` (per the
-`freshLocal` docstring above), and supply fresh reasoning only where the new rule's own catalog
-(box propagation to existing successors, etc.) differs.
-
-## Task 507 Phase 5 Confirmation: the Crux Needs No Further Field
-
-`modalStepBranch_potential_step_gen`'s own body (`FmpMeasure.lean`), once its helper lemmas are
-generalized via `freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep`, needs no field beyond
-`freshLocal` -- the crux's arithmetic core (`geomCap_zero`/`geomCap_succ`/`Nat`/`ring`) is
-entirely independent of `apply`. This confirms the six fields above are **sufficient** for the
-termination-measure crux.
-
-## Task 507 Phase 7: `branchingLength` (Counting-Measure Engine)
-
-The strict-decrease engine `modalExpMeasure_step_lt` needs one further per-call fact its
-`.branching` case relies on that is not covered by any of the six fields above: every
-`.branching` result `apply` can produce has **exactly two** sub-branches (`brs.length = 2`).
-This is genuinely catalog-specific (only the 3 branching propositional rules
-`andNeg`/`orPos`/`impPos` ever produce `.branching`, and each is hard-coded to a 2-element
-list) -- unlike `freshLocal`/`outputsSubsetUniverse`/`persistentFresh`, it is not a fact about
-*aggregate* behaviour but a fixed-arity shape constraint. Discharged for `modalApplyOne` by the
-pre-existing `modalApplyOne_branching_length`.
 -/
 
 @[expose] public section

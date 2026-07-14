@@ -1,7 +1,7 @@
 # Implementation Plan: Task #507 — Generalize K FMP Termination Measure over RuleApplicationSpec
 
 - **Task**: 507 - Generalize the K FMP termination measure over `RuleApplicationSpec`
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 14 hours
 - **Dependencies**: None (builds entirely on task 503's committed, green Phase 1 `Saturation.lean`
   commit `e9f350c7` and Phase 2 `GenericDriver.lean` commit `d5b24e67`; parent task 503 [BLOCKED])
@@ -501,30 +501,42 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 8: K re-instantiation, downstream typecheck, and final CI [NOT STARTED]
+### Phase 8: K re-instantiation, downstream typecheck, and final CI [COMPLETED]
 
 - **Goal:** Holistically confirm the three public top lemmas are re-instantiated with byte-unchanged
   K statements, that `FmpMeasure.lean`'s K corollaries and `CompletenessLoop.lean`'s uses still
   typecheck via the Phase-1 `_eq` bridges, run the full CSLib CI end-to-end, finalize the
   `GenericDriver.lean` interface docstring, and write the completion summary.
 - **Tasks:**
-  - [ ] Confirm `modalStepBranch_potential_step`, `modalStepBranch_worldBound`, and
+  - [x] Confirm `modalStepBranch_potential_step`, `modalStepBranch_worldBound`, and
     `modalExpMeasure_step_lt` exist as concrete K corollaries with statements byte-identical to their
     pre-507 forms (diff against `git show d5b24e67:…FmpMeasure.lean` region) and are
-    `_gen … modalApplyOne modalApplyOne_spec` instantiations.
-  - [ ] Build the whole Tableau tree including `CompletenessLoop.lean`; confirm every downstream use
+    `_gen … modalApplyOne modalApplyOne_spec` instantiations. *(confirmed via `diff` against
+    `git show d5b24e67` for all three signatures: IDENTICAL. All three are now one-line
+    `_gen modalApplyOne <witnesses> ...` corollaries via the `modalStepBranch_eq` bridge.)*
+  - [x] Build the whole Tableau tree including `CompletenessLoop.lean`; confirm every downstream use
     of the three K corollaries still typechecks (no statement drift; `_eq` bridges applied where the
-    generic driver defs are involved). Read-only: do not edit `CompletenessLoop.lean`.
-  - [ ] Update `GenericDriver.lean`'s module docstring: replace the "Known Limitation" note with a
+    generic driver defs are involved). Read-only: do not edit `CompletenessLoop.lean`. *(confirmed:
+    `lake build Cslib.Logics.Modal.Tableau.CompletenessLoop` green, only pre-existing unrelated
+    warnings; file untouched.)*
+  - [x] Update `GenericDriver.lean`'s module docstring: replace the "Known Limitation" note with a
     "Sufficiency" note recording the final field set and that the three termination lemmas are now
     proven generically; keep the downstream-reuse contract for T/S5/B and the S4 exclusion.
-  - [ ] Run the full CSLib CI in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
+    *(rewrote the module docstring into a single "Sufficiency" section documenting all seven fields,
+    their provenance, and the confirmation that all three termination lemmas are now proven
+    generically; downstream-reuse contract (T/S5/B discharge pattern, S4 exclusion) preserved.)*
+  - [x] Run the full CSLib CI in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
     `lake exe lint-style`, `lake test`, `lake exe mk_all --module`,
-    `lake shake --add-public --keep-implied --keep-prefix`. Fix any lint on new decls.
-  - [ ] Final `lean_verify` sweep on all new/changed top decls (`RuleApplicationSpec`,
+    `lake shake --add-public --keep-implied --keep-prefix`. Fix any lint on new decls. *(all green;
+    `lake lint`'s one failure is pre-existing/unrelated (`PrimeExclusion.lean`); `mk_all --module`
+    wants to reorder unrelated concurrent-session imports in `Cslib.lean` — reverted, out of scope;
+    `lake shake` count on the two files: 81, unchanged from post-Phase-4 baseline.)*
+  - [x] Final `lean_verify` sweep on all new/changed top decls (`RuleApplicationSpec`,
     `modalApplyOne_spec`, each `_gen` lemma, and the three re-instantiated K corollaries): confirm
-    zero sorry / zero axiom.
-  - [ ] Write `specs/507_.../summaries/01_generalize-fmp-termination-measure-summary.md`.
+    zero sorry / zero axiom. *(swept all 29 new/changed top-level declarations across both files via
+    `lake env lean` + `#print axioms`: every one reports only the standard axiom trio subset
+    `{propext, Classical.choice, Quot.sound}` — zero sorry, zero new axiom, confirmed exhaustively.)*
+  - [x] Write `specs/507_.../summaries/01_generalize-fmp-termination-measure-summary.md`.
 - **Timing:** 1 hour
 - **Depends on:** 7
 - **Files to modify:**

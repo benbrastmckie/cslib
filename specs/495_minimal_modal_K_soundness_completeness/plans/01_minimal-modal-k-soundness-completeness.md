@@ -200,7 +200,7 @@ First attempt the `dia_refuting_theory`-based diamond witness (and the `box_refu
 
 ---
 
-### Phase 5: `MinCompleteness.lean` + barrel wiring [NOT STARTED]
+### Phase 5: `MinCompleteness.lean` + barrel wiring [IN PROGRESS]
 
 **Goal**: Prove single-branch MK completeness, package `mk_soundness_completeness`, and wire all five files into `Cslib.lean`. Full CI green.
 

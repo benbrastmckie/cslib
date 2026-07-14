@@ -376,6 +376,11 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma
 public import Cslib.Logics.Modal.Metalogic.MCS
+public import Cslib.Logics.Modal.Metalogic.Minimal.MK
+public import Cslib.Logics.Modal.Metalogic.Minimal.MinCanonicalModel
+public import Cslib.Logics.Modal.Metalogic.Minimal.MinCompleteness
+public import Cslib.Logics.Modal.Metalogic.Minimal.MinPrimeTheory
+public import Cslib.Logics.Modal.Metalogic.Minimal.MinTruthLemma
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.ConservativeExtension

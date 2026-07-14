@@ -1,50 +1,40 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "phase": "2b-sublemma",
   "task_number": 480,
   "session_id": "sess_1784011298_752245_480",
   "agent_type": "cslib-implementation-hard-agent",
-  "plan_version": 3,
-  "plan_path": "specs/480_intuitionistic_modal_framework/plans/03_intuitionistic-modal-framework-hard-v3.md",
-  "phases_completed": 3,
-  "phases_total": 11,
-  "reference_grounding_tier": 1,
-  "completed_preserved_phases": ["1", "2a", "2-infra"],
-  "dispatch_order": ["2-infra", "2b-sublemma", "2b", "2c", "2d", "3a", "3b", "3c", "4"],
-  "highest_risk_phases": ["2b-sublemma", "2c", "3c"],
-  "phases": [
-    {"id": "1", "title": "PrimeTheory.lean prime-theory machinery", "status": "COMPLETED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean", "commit": "be8f2eb0"},
-    {"id": "2a", "title": "CanonicalModel.lean worlds/order/valuation/canonicalR (defs only)", "status": "COMPLETED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "4fd37213"},
-    {"id": "2-infra", "title": "prime_set_exclusion + bigOr helpers + DerivExcludes (additive) + Wijesekera1990 bib", "status": "COMPLETED", "file": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean, references.bib", "lines_added": 338, "verification": "full lake build whole-tree PASSED (3190 jobs); lake exe checkInitImports PASSED; lake exe lint-style PASSED; lake shake (scoped) no unused-import findings; grep sorry/admit EMPTY; git diff additive-only (338 insertions, 0 deletions in PrimeExclusion.lean)"},
-    {"id": "2b-sublemma", "title": "box_witness_pair_underivable (K-diamond consistency)", "status": "PARTIAL", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "60-120", "risk": "HIGHEST", "stop_contingency": true, "stop_contingency_invoked": true},
-    {"id": "2b", "title": "canonical_box_witness corrected pair (w',u) + modal_set_exclusion wrapper", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "120-180", "note": "Blocked transitively on 2b-sublemma's design gap."},
-    {"id": "2c", "title": "canonical_diamond_witness (mirror seeded construction)", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "120-200", "risk": "HIGHEST", "stop_contingency": true},
-    {"id": "2d", "title": "canonical_f1 + canonical_f2", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "est_lines": "80-140"},
-    {"id": "3a", "title": "TruthLemma.lean 5 non-modal case helpers", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "150-250"},
-    {"id": "3b", "title": ".box case helper (consumes pair witness)", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "60-120"},
-    {"id": "3c", "title": ".diamond case helper + assemble canonical_truth_lemma", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean", "est_lines": "100-180", "risk": "HIGHEST", "stop_contingency": true},
-    {"id": "4", "title": "Completeness.lean parametric packaging + CI", "status": "NOT STARTED", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/Completeness.lean", "est_lines": "80-150"}
+  "plan_version": 4,
+  "plan_path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md",
+  "phases_total": 12,
+  "phases_completed": 4,
+  "completed_preserved": [
+    {"phase": "1", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean", "commit": "be8f2eb0"},
+    {"phase": "2a", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "4fd37213"},
+    {"phase": "2-infra", "file": "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean + references.bib", "commit": "4e3ef59c"},
+    {"phase": "2b-sublemma", "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "commit": "pending (this dispatch)"}
   ],
+  "remaining_actionable": ["2b", "2c", "2d", "3a", "3b", "3c", "4"],
+  "remaining_actionable_count": 7,
   "sorry_inventory": [],
-  "blockers": [
-    {
-      "phase": "2b-sublemma",
-      "title": "box_witness_pair_underivable resists proof with the scoped hypothesis list; the multi-diamond-witness case needs a hypothesis beyond h_Kdia",
-      "goal_shape": "DerivExcludes (modalDerivationSystem Axioms) {phi | exists B, phi = Proposition.box B and B not in u.val} (modalDeductiveClosure Axioms (w.val union {phi | exists A, phi = Proposition.diamond A and A in u.val})), given h_sub : forall psi, (Proposition.box psi) in w.val -> psi in u.val",
-      "what_was_tried": "Extensive manual derivation attempting to discharge each diamond hypothesis (diamond A_j, for A_j in u.val) used in a finite witness list via the ordinary deduction theorem (hasDeductionTheorem), aiming to necessitate the resulting implication chain and invoke K-diamond (h_Kdia : box(A -> B) -> (diamond A -> diamond B)) to relate the boxed disjunction bigOr l to something concluding B_i in u.val via h_sub + u's disjunction property. This structurally fails: discharging 'diamond A_j' via the deduction theorem always yields 'diamond A_j' (not plain 'A_j') as the antecedent of the resulting implication, and K-diamond's hypothesis position requires an UNMODALIZED antecedent inside the box (box(A -> B), not box(diamond A -> B)). No sequence of discharge orders or necessitation placements resolves this shape mismatch using only h_implyK, h_implyS, h_efq, h_orE, h_orI1, h_orI2, h_K, h_Kdia.",
-      "root_cause_found": "Fetched and read the actual reference mechanization this phase is grounded on (ianshil/CK, theories/Completeness_th/general_th_completeness.v, Box case, lines ~211-249, via raw.githubusercontent.com/ianshil/CK/main/theories/Completeness_th/general_th_completeness.v). It proves the exact analogue of this sub-lemma using NOT ONLY Kd (K-diamond, matches our h_Kdia exactly per theories/GHC/CKH.v:25) BUT ALSO the Fischer-Servi axiom Idb A B := (diamond A -> box B) -> box (A -> B) (theories/GHC/CKH.v:34), invoked at general_th_completeness.v:231 via 'apply Ax ; right ; right ; eexists ; eexists ; right ; reflexivity' to convert a derived fact of shape '(diamond (conj of witnesses)) -> (box (list_disj l'))' into 'box ((conj of witnesses) -> (list_disj l'))' -- precisely the missing bridge step. Report 02's claim that this sub-lemma 'depends only on the axioms AxiomK and K-diamond' is not supported by the very reference it cites for the construction.",
-      "recommended_fix": "Add h_Idb : forall A B, Axioms (((Proposition.diamond A).imp (Proposition.box B)).imp (Proposition.box (A.imp B))) as an explicit new parametric hypothesis to box_witness_pair_underivable and (downstream) canonical_box_witness (Phase 2b). Re-plan via /revise 480 or a narrowly-scoped /research 480 --hard --lit pass on 'Idb / Fischer-Servi axiom, ianshil/CK Idb, theories/GHC/CKH.v' before re-dispatching Phase 2b-sublemma. Also verify (not done this dispatch) whether Phase 2c (canonical_diamond_witness) needs the dual axiom Cd A B := diamond(A or B) -> (diamond A or diamond B) (theories/GHC/CKH.v:33) -- the diamond case of general_th_completeness.v was not read closely enough this dispatch to confirm either way.",
-      "postmortem_note": "This is not a re-litigation of an already-settled design decision under the 'no re-opening without a concrete counterexample' rule -- the counterexample is the reference mechanization itself, fetched and read in this dispatch, showing the report's H3 hypothesis-list claim for this specific sub-lemma was incomplete."
-    }
-  ],
-  "plan_deviations": [
-    "prime_set_exclusion takes one additional explicit hypothesis beyond report 02's literal Deliverable-1 signature: bot_mem_cl_of_not_cons : forall {X}, not (Cons X) -> HasBot.bot in cl X. This is the set-exclusion analogue of prime_exclusion's phi_mem_cl_of_not_cons bridge (targeting the canonical bigOr [] = bot rather than a fixed phi). Report 02's sketch says the inconsistent branch gets 'insert X T |- bot' for free, but a fully generic Cons predicate cannot supply that without an explicit bridge hypothesis; this addition keeps the lemma correct, zero-debt, and instantiable exactly as modal_prime_exclusion instantiates the analogous phi_mem_cl_of_not_cons (trivially, from the definition of ModalSetConsistent)."
-  ],
+  "new_axioms_introduced": [],
+  "verification": {
+    "build": "lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel -- succeeded, no warnings",
+    "checkInitImports": "passed",
+    "sorry_count": 0,
+    "axiom_check": "lean_verify on box_witness_pair_underivable -> axioms: [propext, Classical.choice] only (no new/global axioms)",
+    "git_diff_scope": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean only (additive; Phase 2a defs above the new content untouched)"
+  },
+  "deliverable": "box_witness_pair_underivable proved sorry-free in CanonicalModel.lean. Establishes DerivExcludes (modalDerivationSystem Axioms) {chi | exists B, chi = box B and B not in u.val} (modalDeductiveClosure Axioms (w.val union {chi | exists A, chi = dia A and A in u.val})), given {psi | box psi in w.val} subseteq u.val.",
+  "h_idb_resolved_shape_mismatch": true,
+  "h_idb_note": "h_Idb closed exactly the antecedent-shape mismatch flagged by the prior (v3) STOP: after combining the finitely many diamond hypotheses used by a derivation into one via bigAnd, Idb converts (dia(bigAnd As) -> box psi) into box(bigAnd As -> psi), which the {psi|box psi in w.val} subseteq u.val bridge then places directly in u.val. Transliterated from ianshil/CK general_th_completeness.v box case (~L211-249, Idb selector ~L231).",
+  "deviation_from_report_03": "The general (multi-hypothesis) case additionally needed h_andI/h_andE1/h_andE2 (Cslib.Logic.Axioms.AndI/AndE1/AndE2) as three more parametric hypotheses, to combine finitely many separately-used diamond context members into one `bigAnd` conjunction before h_Idb applies (mirrors ianshil/CK's prv_list_left_conj + list_conj_Diam_obj; Kdia gives the valid diamond-of-conjunction -> conjunction-of-diamonds direction). These are pre-existing And-schemata already used elsewhere in the framework (e.g. MCS.lean mcs_and_mem_iff), not new axioms. The four-axiom modal set {h_K, h_Kdia, h_Idb, h_Cd} from report 03 is unchanged; only the base intuitionistic hypothesis list threaded through this one lemma (and, transitively, canonical_box_witness in Phase 2b) grew by three. Recorded in the plan v4 file under Phase 2b-sublemma's task list.",
+  "blockers": [],
+  "next_action_hint": "Phase 2b: canonical_box_witness + modal_set_exclusion wrapper in CanonicalModel.lean. Reuse box_witness_pair_underivable directly for the DerivExcludes precondition. Thread h_K, h_Kdia, h_Idb, PLUS h_andI/h_andE1/h_andE2 (new, see deviation_from_report_03) into canonical_box_witness's signature. Dispatch via /implement 480 --hard --lit, phase=2b.",
+  "requires_user_review": false,
   "artifacts": [
-    {"path": "specs/480_intuitionistic_modal_framework/plans/03_intuitionistic-modal-framework-hard-v3.md", "type": "plan", "summary": "Phase 2b-sublemma heading marked [PARTIAL] with a detailed STOP-contingency note documenting the Idb gap, citing exact reference file/line numbers."},
-    {"path": "specs/480_intuitionistic_modal_framework/progress/phase-2b-sublemma-progress.json", "type": "progress", "summary": "Structured record of the design blocker and files read (read-only) this dispatch."}
-  ],
-  "requires_user_review": true,
-  "next_action_hint": "Phase 2b-sublemma is PARTIAL, blocked on a settled-design gap (missing h_Idb hypothesis), not a Lean-tactic difficulty. Recommended: /revise 480 (or /research 480 --hard --lit scoped to 'Idb Fischer-Servi ianshil/CK') to add h_Idb to box_witness_pair_underivable/canonical_box_witness's hypothesis list, then re-dispatch /implement 480 --hard for Phase 2b-sublemma.",
-  "next_steps": "Do NOT re-dispatch Phase 2b-sublemma with the current (v3, unrevised) hypothesis list -- it will hit the same wall. Revise the plan first."
+    {"path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean", "type": "lean-implementation", "summary": "Added box_witness_pair_underivable (Phase 2b-sublemma) plus private helper lemmas (bigAnd, extract_split, extract_box_list, box_mono, dia_mono, imp_trans0, boxOr_of_boxDisj, unpack_conj_partial, dia_bigAnd_to_bigAnd_dia, bigAnd_mem_u, bigOr_mem_disjunct) inside a new `BoxWitnessSublemma` section. Sorry-free, no new axioms."},
+    {"path": "specs/480_intuitionistic_modal_framework/plans/04_intuitionistic-modal-framework-hard-v4.md", "type": "plan", "summary": "Phase 2b-sublemma marked [COMPLETED]; task checklist checked off; implementation-note deviation (h_andI/h_andE1/h_andE2) recorded."},
+    {"path": "specs/480_intuitionistic_modal_framework/summaries/04_box-witness-sublemma-summary.md", "type": "summary", "summary": "Phase 2b-sublemma implementation summary."}
+  ]
 }

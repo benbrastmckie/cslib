@@ -11,11 +11,10 @@ next_project_number: 509
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,484,497,502,507,508 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,501,503 | 36,37,181,317,407,425,449,507,508 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,504,505,506 | 39,40,375,503 | foundations, modal logic, code hygiene |
-| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
-| 5 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,484,497,502,503,508 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,501,504,505,506 | 36,37,181,317,407,425,449,503,508 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
+| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -37,15 +36,14 @@ next_project_number: 509
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-484 [RESEARCHED] — Conservative-extension and modularity results across the FULL pro
-507 [PLANNED] — Complete task 503's Phase 3 (plans/01_generalize-tableau-driver-t
-  └─ 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
-    └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-    └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
-      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-    └─ 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+484 [PLANNED] — Conservative-extension and modularity results across the FULL pro
+503 [IMPLEMENTING] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+  └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+  └─ 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 
 ### Temporal Logic
@@ -106,7 +104,7 @@ next_project_number: 509
 
 ### 507. Generalize k fmp termination measure over ruleapplicationspec
 - **Effort**: 12-16 hours
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -163,7 +161,7 @@ next_project_number: 509
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 507
@@ -224,11 +222,12 @@ next_project_number: 509
 ---
 
 ### 484. Metalogic conservative extension modularity
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 478, Task 479, Task 480, Task 481, Task 482, Task 483, Task 492, Task 494, Task 495, Task 496
 - **Research**: [484_metalogic_conservative_extension_modularity/reports/01_conservative-extension-modularity.md]
+- **Plan**: [484_metalogic_conservative_extension_modularity/plans/01_conservative-extension-modularity.md]
 
 **Description**: Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).
 

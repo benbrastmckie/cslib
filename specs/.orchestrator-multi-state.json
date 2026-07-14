@@ -40,15 +40,16 @@
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 11,
+  "cycle_count": 2,
   "failed_tasks": [],
   "completed_tasks": [
-    496
+    507
   ],
   "current_statuses": {
-    "507": "planned",
+    "507": "completed",
     "496": "completed",
-    "484": "researched"
+    "484": "planned",
+    "503": "implementing"
   },
   "task_dirs": {
     "507": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec",

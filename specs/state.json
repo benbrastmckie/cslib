@@ -18,7 +18,7 @@
     {
       "project_number": 484,
       "project_name": "metalogic_conservative_extension_modularity",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).",
@@ -41,6 +41,11 @@
           "type": "report",
           "path": "specs/484_metalogic_conservative_extension_modularity/reports/01_conservative-extension-modularity.md",
           "summary": "Lattice already unified over Derivable Axioms; monotonicity lemmas cheap; only IK->K hard; 4-phase plan, Phase 3 gated"
+        },
+        {
+          "type": "plan",
+          "path": "specs/484_metalogic_conservative_extension_modularity/plans/01_conservative-extension-modularity.md",
+          "summary": "7 phases/4 waves; monotonicity cubes + Modularity.lean, then gated IK->K bridge (full scope)"
         }
       ]
     },
@@ -1119,7 +1124,7 @@
     {
       "project_number": 503,
       "project_name": "generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
-      "status": "blocked",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Saturation.lean's modalStepBranch/modalExpandBranches/modalTableau and Cslib/Logics/Modal/Tableau/FmpMeasure.lean's termination measure, currently hard-coding modalApplyOne at 91 call sites across Saturation.lean/FmpMeasure.lean/CompletenessLoop.lean) over an abstract rule-application function matching modalApplyOne's signature, together with a small set of explicit structural hypotheses (no world creation outside the unmodified K diamondPos/boxNeg arms; all added formulas drawn from the finite modalUniverse phi0 catalog). Re-derive K itself as the trivial instantiation (must stay green, zero regression, zero sorry/axiom). Then instantiate the generic driver with the already-proved modalApplyOneT (Cslib/Logics/Modal/Tableau/FrameRules.lean) to build modalStepBranchT/modalExpandBranchesT/modalTableauT, discharge the T-specific structural hypotheses, close the T truth-lemma box-positive case (reflexive self-edge; reuse modalApplyOneT_eq_of_not_boxPos_diaNeg to reduce other cases to existing K bridge lemmas per specs/300_modal_extensions_t_s4_s5/handoffs/phase2-blocked-handoff.md), and state tValid's completeness + Decidable (tValid phi). This completes Phase 2 of the original task 300 plan (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md). Build on the already-committed, green rule-level work in FrameRules.lean/FrameSoundness.lean/FrameCompleteness.lean (do not re-derive it). Every delivered result must be genuinely sorry-free/axiom-free; if the T truth-lemma or termination re-derivation cannot close, mark [BLOCKED] with a documented open goal state rather than introduce debt. Files: Cslib/Logics/Modal/Tableau/Saturation.lean, Cslib/Logics/Modal/Tableau/FmpMeasure.lean, Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, Cslib/Logics/Modal/Tableau/FrameSoundness.lean.",
       "effort": "10-14 hours",
@@ -1157,7 +1162,7 @@
           "summary": "7-phase plan: parametrize K driver over abstract RuleApplicationSpec, re-derive K trivially, instantiate T, close T truth lemma + Decidable(tValid). Reuse interface validated for 504/505."
         }
       ],
-      "blockers": "Phase 3 [BLOCKED]: generalizing FmpMeasure.lean's termination measure (modalStepBranch_potential_step + ~900-line dependency chain, lines ~1058-2415) over RuleApplicationSpec is a from-scratch re-derivation, not a mechanical substitution. Phases 1-2 (generic driver defs + RuleApplicationSpec interface) delivered CI-green, committed e9f350c7/d5b24e67, zero debt. Requires a dedicated 'generic-tableau-termination' task (recommend /spawn 503) before Phases 4-7 (T instantiation, truth lemma, Decidable) can proceed.",
+      "blockers": "RESOLVED by task 507 (completed): Phase 3 FmpMeasure termination-measure generalization over RuleApplicationSpec delivered CI-green, zero sorry/axiom. Phases 4-7 (T driver instantiation, T truth lemma, Decidable (tValid phi)) now unblocked.",
       "previous_status": "planned",
       "session_id": "sess_1784054130_39201a"
     },
@@ -1260,7 +1265,7 @@
     {
       "project_number": 507,
       "project_name": "generalize_k_fmp_termination_measure_over_ruleapplicationspec",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Complete task 503's Phase 3 (plans/01_generalize-tableau-driver-tsystem.md): generalize Cslib/Logics/Modal/Tableau/FmpMeasure.lean's rule-dependent termination/FMP step lemmas -- modalStepBranch_potential_step (~line 2146), modalStepBranch_worldBound (~line 2376), and modalExpMeasure_step_lt (~line 2873) -- to take an abstract (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) in place of the concrete modalApplyOne, defined in Cslib/Logics/Modal/Tableau/GenericDriver.lean (commit d5b24e67). Before attempting the top-level lemmas, first re-derive the ~900-line dependency chain generically: modalStepBranch_exists_rank' (~line 1058), modalStepBranch_knownWorlds (~line 1901), modalStepBranch_preserves_outDegEq (~line 1365), outDeg_le_of_expandedNodup (~line 1509), and ~10 further private helpers (FmpMeasure.lean lines ~1058-2415), each of which today independently rcases on modalApplyOne's four concrete RuleResult shapes (propositional/boxPos/diamondNeg/diamondPos/boxNeg) rather than going through RuleApplicationSpec. This will likely require extending RuleApplicationSpec (GenericDriver.lean) with additional fields capturing the exact outDeg/rank-map interaction at the fresh-world mint point (not just 'a fresh edge is added', but 'the fresh edge's source outDeg was < Sf beforehand, by exactly the amount the catalog bounds') so the existing geomCap-based EXACT potential-drop identity (lines ~2251-2270) can be replayed generically, not merely bounded. Keep modalUniverse/modalWork/modalExpMeasure/modalFuel (world-agnostic size bounds) unchanged -- only the rule-dependent step lemmas move behind the interface. Re-instantiate K's termination lemmas as the generic lemmas applied to modalApplyOne + the already-proved modalApplyOne_spec witness (Phase 2), and confirm FmpMeasure.lean's existing K corollaries and CompletenessLoop.lean's uses still typecheck via the Phase-1 modalStepBranch_eq/modalExpandBranches_eq/modalTableau_eq bridge lemmas (Saturation.lean, commit e9f350c7). Zero regression to K's public theorem statements; zero sorry; zero axiom. If any sub-piece cannot close sorry-free, mark the affected sub-goal [BLOCKED] with the exact open lemma name and goal state documented, and sequence the remainder into further phases within this task's own plan rather than deferring silently. Run the full CSLib CI (lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake exe mk_all --module, lake shake) at every milestone. On completion this unblocks task 503's Phases 4-7 (T driver instantiation, T truth lemma, Decidable (tValid phi)) and is a prerequisite for tasks 504 (S5/KB5) and 505 (B), which are documented to reuse the same generic termination measure. Task 506 (S4) is explicitly out of scope -- its transitive-box termination argument is structurally different and not an instance of this interface.",
       "effort": "12-16 hours",
@@ -1268,7 +1273,7 @@
       "topic": "Modal Logic",
       "dependencies": [],
       "created": "2026-07-14T18:39:26Z",
-      "last_updated": "2026-07-14T18:52:52Z",
+      "last_updated": "2026-07-14T20:24:24Z",
       "artifacts": [
         {
           "type": "research",

@@ -226,7 +226,7 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 
 ---
 
-### Phase 7: IK→K completion (cd, idb) + classical rung bridges [NOT STARTED]
+### Phase 7: IK→K completion (cd, idb) + classical rung bridges [IN PROGRESS]
 
 **Goal**: Complete the IK→K bridge (report Phase 3, part 2): the two fiddly Fischer-Servi schemata `cd` (`◇(φ∨ψ)→(◇φ∨◇ψ)`) and `idb` (`(◇φ→□ψ)→□(φ→ψ)`) as classical K derivations; assemble `∀ φ, IKModalAxiom φ → Derivable KAxiom φ`; conclude `Derivable IKModalAxiom φ → Derivable KAxiom φ` via the Phase 6 lift. Then the rung diamond schemata (`tDia`, `fourDia`, `bDia`) for classical T/S4/S5, yielding IT→T, IS4→S4, IS5→S5. HARD / Zero-Debt-gated; the heaviest phase — if it cannot complete in one dispatch, mark `[PARTIAL]` and resume. (Report Phase 3, remainder of 3b.)
 

@@ -7,8 +7,12 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.ProofSystem.Instances.K
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
+public import Cslib.Logics.Modal.ProofSystem.Instances.T
+public import Cslib.Logics.Modal.ProofSystem.Instances.S4
+public import Cslib.Logics.Modal.ProofSystem.Instances.S5
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
+public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Foundations.Logic.Theorems.Modal.Basic
 public import Cslib.Foundations.Logic.Theorems.Combinators
 
@@ -489,6 +493,49 @@ diamond, but only propositionally, not syntactically. -/
 theorem ikDerivable_implies_kDerivable {φ : Proposition Atom} (h : Derivable IKModalAxiom φ) :
     Derivable (@KAxiom Atom) φ :=
   Derivable_of_axiom_derivable (fun _ hax => ikAxiom_derivable_in_K hax) h
+
+/-! ## Rung Bridge: `IT → T` -/
+
+/-- `IT`'s `tDia` (`φ → ◇φ`) is **derivable** in classical `T`: `modalT` at `¬φ` gives
+`□¬φ → ¬φ`; `flip` gives `φ → ¬□¬φ`; compose with `diaDualityBack` to reach `φ → ◇φ`. -/
+theorem t_derivable_of_it_tDia {φ : Proposition Atom} :
+    Derivable (@TAxiom Atom) (φ.imp (◇φ)) := by
+  have modalTNeg := HasAxiomT.T (S := Modal.HilbertT) (φ := φ.imp Proposition.bot)
+  have flipped := ModusPonens.mp
+    (Cslib.Logic.Theorems.Combinators.flip (S := Modal.HilbertT)) modalTNeg
+  have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertT) (φ := φ)
+  have goal := Cslib.Logic.Theorems.Combinators.imp_trans flipped back
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- Every `ITModalAxiom` instance is `Derivable` in classical `T`: the 14 `IK`-inherited
+constructors lift via `Derivable_mono (fun _ => KAxiom_implies_TAxiom)` composed with
+`ikAxiom_derivable_in_K`; `tBox` is a literal `TAxiom.modalT` instance; `tDia` is
+`t_derivable_of_it_tDia`. -/
+theorem itAxiom_derivable_in_T {φ : Proposition Atom} (h : ITModalAxiom φ) :
+    Derivable (@TAxiom Atom) φ :=
+  match h with
+  | .implyK _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_implyK
+  | .implyS _ _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_implyS
+  | .efq _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_efq
+  | .andI _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_andI
+  | .andE1 _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_andE1
+  | .andE2 _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_andE2
+  | .orI1 _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_orI1
+  | .orI2 _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_orI2
+  | .orE _ _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_orE
+  | .k _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_k
+  | .kdia _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_kdia
+  | .cd _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_cd
+  | .idb _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_idb
+  | .dbot => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_dbot
+  | .tBox φ => ⟨.ax [] _ (TAxiom.modalT φ)⟩
+  | .tDia _ => t_derivable_of_it_tDia
+
+/-- **The `IT → T` bridge**: every `IT`-derivable formula is `T`-derivable. -/
+theorem itDerivable_implies_tDerivable {φ : Proposition Atom} (h : Derivable ITModalAxiom φ) :
+    Derivable (@TAxiom Atom) φ :=
+  Derivable_of_axiom_derivable (fun _ hax => itAxiom_derivable_in_T hax) h
 
 end Cslib.Logic.Modal
 

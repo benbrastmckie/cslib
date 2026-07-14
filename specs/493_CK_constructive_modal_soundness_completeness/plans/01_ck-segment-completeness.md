@@ -165,7 +165,7 @@ the remainder is a tight proof-dependency chain.
 
 ---
 
-### Phase 1: `CKModalAxiom` — pin the exact bare-CK axiom list [NOT STARTED]
+### Phase 1: `CKModalAxiom` — pin the exact bare-CK axiom list [IN PROGRESS]
 - **Goal:** Define `CKModalAxiom : Proposition Atom → Prop` = `IKModalAxiom` minus `cd`, `idb`, `dbot`, with a provenance comment tying each constructor to ianshil `CKH.v`/`NoAdAx` and `Wijesekera1990`.
 - **Tasks:**
   - [ ] Read `IK.lean`'s `IKModalAxiom` constructor list; enumerate the 9 int-prop + `k` + `kdia` to keep and the 3 (`cd`/`idb`/`dbot`) to drop.

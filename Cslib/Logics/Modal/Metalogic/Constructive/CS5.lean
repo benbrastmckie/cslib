@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Constructive.CS4
+public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
 /-! # CS5: Constructive Modal Logic S5 (Soundness)
 

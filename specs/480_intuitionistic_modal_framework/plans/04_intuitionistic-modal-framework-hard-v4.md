@@ -1,8 +1,8 @@
 # Implementation Plan (v4, HARD): Task #480 — Intuitionistic Modal Metalogic Framework
 
 - **Task**: 480 - Intuitionistic modal metalogic FRAMEWORK (prime-theory machinery + birelational canonical-model construction)
-- **Status**: [IN PROGRESS]
-- **Effort**: ~8.5 hours remaining (Phases 1 + 2a + 2-infra complete; the v3→v4 delta is axiom-threading only, no new phases)
+- **Status**: [COMPLETED]
+- **Effort**: 0 hours remaining (all phases, including Phase 4, complete; framework is sorry-free and axiom-free)
 - **Dependencies**: Task 478 (classical Hilbert/metalogic framework, COMPLETED), Task 490 (birelational semantics `Birelational.lean`, present in-tree)
 - **Research Inputs**: reports/01_intuitionistic-modal-framework.md; reports/02_set-exclusion-infra-box-witness.md; **reports/03_complete-axiom-requirements-ik-ck.md** (NEW — definitive machine-checked axiom-requirement map, Tier-1 grounded on ianshil/CK)
 - **Artifacts**: plans/04_intuitionistic-modal-framework-hard-v4.md (this file); supersedes plans/03_intuitionistic-modal-framework-hard-v3.md (v3, retained for history), plans/02 (v2), plans/01 (v1)
@@ -697,7 +697,7 @@ new Lean `axiom`.
   -- **DONE.**
 - **Timing:** ~1 hour. **Depends on:** 3a, 3b.
 
-### Phase 4: Completeness.lean — parametric packaging (four-axiom hypotheses) [NOT STARTED]
+### Phase 4: Completeness.lean — parametric packaging (four-axiom hypotheses) [COMPLETED]
 
 - **Goal:** Package the canonical `BModel` and expose parametric `ivalid`/`mvalid` completeness plus
   the consistency hook for tasks 492-495.
@@ -706,41 +706,63 @@ new Lean `axiom`.
   intuitionistic base, `h_efq`, `botForces` parameter), exposed as loose hypotheses so 492/Cd+Idb
   extensions supply them and bare-CK 493 never calls the modal lemmas (Downstream-Impact Note).
 - **Tasks:**
-  - [ ] Create `Completeness.lean` importing `TruthLemma.lean` (Phase 3).
-  - [ ] Assemble the canonical `BModel` from `CanonicalPrimeWorld`, the `Preorder`, `canonicalR`,
-        `canonicalVal`, and `canonical_f1`/`f2`.
-  - [ ] State parametric `ivalid_completeness` / `mvalid_completeness` (from `canonical_truth_lemma`
+  - [x] Create `Completeness.lean` importing `TruthLemma.lean` (Phase 3).
+  - [x] Assemble the canonical `BModel` from `CanonicalPrimeWorld`, the `Preorder`, `canonicalR`,
+        `canonicalVal`, and `canonical_f1`/`f2` (`canonicalBModel`, threading a parametric
+        `botForces` + upward-closure proof, verified against `BModel`'s exact field names/shapes
+        in `Birelational.lean`).
+  - [x] State parametric `ivalid_completeness` / `mvalid_completeness` (from `canonical_truth_lemma`
         + `modal_prime_exclusion` on the underivable formula) with the four-axiom hypotheses +
-        `h_efq` (IValid) / arbitrary-`botForces` (MValid) exposed for 492-495 — Report 01 §7.
-  - [ ] Expose a consistency hook (parametric statement, discharged by 492/493, not here) — §10.
-  - [ ] Docstrings; `lake build`; run the full CI pipeline; confirm ZERO-DEBT + untouched-classical.
-- **Estimated output:** ~80-150 lines.
+        `h_efq` (IValid, `botForces := fun _ => False`) / arbitrary-`botForces` (MValid,
+        `botForces := fun w => ⊥ ∈ w.val`) exposed for 492-495 — Report 01 §7. Both proved by
+        contrapositive with a consistent/inconsistent case split on the closure of `∅` (mirroring
+        `Cslib.Logic.PL.int_strong_completeness`'s `Γ = ∅` instantiation), so no separate global
+        consistency hypothesis is needed on the completeness statements themselves.
+  - [x] Expose a consistency hook (parametric statement, discharged by 492/493, not here) — §10:
+        `canonical_prime_world_nonempty_of_consistent`, `¬Derivable Axioms ⊥ →
+        Nonempty (CanonicalPrimeWorld Axioms)`.
+  - [x] Docstrings; `lake build`; run the full CI pipeline; confirm ZERO-DEBT + untouched-classical.
+- **Estimated output:** ~80-150 lines. **Actual:** ~340 lines (4 declarations: `canonicalBModel`,
+  `canonical_prime_world_nonempty_of_consistent`, `ivalid_completeness`, `mvalid_completeness`).
 - **Verification (targeted + full):** module builds; `ivalid_completeness`/`mvalid_completeness`
   typecheck as parametric statements carrying the four-axiom union; full CI green; ZERO-DEBT;
-  untouched-classical carried.
-- **Done when:** module builds; both completeness statements typecheck; full CI green.
+  untouched-classical carried. `lean_verify` on all four declarations: axioms =
+  `{propext, Classical.choice, Quot.sound}` only.
+- **Done when:** module builds; both completeness statements typecheck; full CI green. **CONFIRMED**
+  (2026-07-14, `sess_1784011298_752245_480`): whole-tree `lake build`/`lake test` green;
+  `checkInitImports`/`lint-style` clean; `lake lint` shows one pre-existing, out-of-scope
+  `unusedArguments` finding in the frozen `PrimeExclusion.lean` (zero diff on that file, dated to
+  commit `4e3ef59c`, unrelated to this phase); `lake shake` flags only the standard/ignorable
+  `Cslib.Init` false-positive on the new file (per `ci-pipeline.md`'s documented exception) plus
+  import-minimization suggestions on the frozen Phase 1/2a/3 files, out of scope for this dispatch.
+  All four `Intuitionistic/` modules registered in the `Cslib.lean` barrel via `mk_all --module`.
 - **Timing:** ~1.25 hours. **Depends on:** 3c.
 
 ## Testing & Validation
 
-- [ ] `lake build` succeeds tree-wide (Foundations `PrimeExclusion.lean` frozen extension + all four
+- [x] `lake build` succeeds tree-wide (Foundations `PrimeExclusion.lean` frozen extension + all four
       `Intuitionistic/` modules green).
-- [ ] All existing `prime_exclusion` users still build (whole-tree green).
-- [ ] `lake test` (CslibTests) passes.
-- [ ] `lake exe checkInitImports` passes.
-- [ ] `lake exe lint-style` passes (all new decls docstringed; no unused-hypothesis lint from the
+- [x] All existing `prime_exclusion` users still build (whole-tree green).
+- [x] `lake test` (CslibTests) passes.
+- [x] `lake exe checkInitImports` passes.
+- [x] `lake exe lint-style` passes (all new decls docstringed; no unused-hypothesis lint from the
       threaded axioms).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no unused-import issues on the
-      new/extended files.
-- [ ] ZERO-DEBT: `grep -rnE "sorry|admit" Cslib/Logics/Modal/Metalogic/Intuitionistic/` and
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no unused-import issues on the
+      new/extended files (the sole finding on `Completeness.lean` is the standard, documented
+      `Cslib.Init` false-positive; `ci-pipeline.md` confirms this exception applies project-wide).
+- [x] ZERO-DEBT: `grep -rnE "sorry|admit" Cslib/Logics/Modal/Metalogic/Intuitionistic/` and
       `Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean` return nothing; no new `axiom`
       declarations (the four modal axioms are parametric `h_*` hypotheses, not global axioms).
-- [ ] Frozen Phase 2-infra: `git diff Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean` shows
+      `lean_verify` on all four Phase 4 declarations confirms axioms = `{propext, Classical.choice,
+      Quot.sound}` only.
+- [x] Frozen Phase 2-infra: `git diff Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean` shows
       NO change (COMPLETED `4e3ef59c`).
-- [ ] Untouched-classical: `git diff --stat` shows no changes to `MCS.lean`, classical
+- [x] Untouched-classical: `git diff --stat` shows no changes to `MCS.lean`, classical
       `Completeness.lean`, propositional `Int*` files, `PrimeTheory.lean` (`be8f2eb0`), or Phase 2a
-      `CanonicalModel.lean` definitions (`4fd37213`, other than appended witness content).
-- [ ] Parametricity: each new framework lemma carries `Axioms` + exactly the `h_*` subset report 03
+      `CanonicalModel.lean` definitions (`4fd37213`, other than appended witness content). Phase 4's
+      own diff is additive-only: one new file (`Intuitionistic/Completeness.lean`) plus four new
+      barrel lines in `Cslib.lean`.
+- [x] Parametricity: each new framework lemma carries `Axioms` + exactly the `h_*` subset report 03
       §4 assigns it (`h_K`/`h_Kdia`/`h_Idb`/`h_Cd`/`h_dbot`), with `h_efq` separable and `botForces`
       a parameter. `Nd` does NOT appear anywhere in the core; `h_dbot` (distinct from `Nd`) DOES.
 - [x] Diamond residual resolved: Phase 2c's `sess_1784011298_752245_480` re-dispatch (2026-07-14)

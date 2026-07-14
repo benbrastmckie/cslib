@@ -357,6 +357,10 @@ public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Completeness

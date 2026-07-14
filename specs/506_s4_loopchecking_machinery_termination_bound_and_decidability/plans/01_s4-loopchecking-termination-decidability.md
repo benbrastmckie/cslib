@@ -449,34 +449,43 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 6: S4 Hintikka bridges and the `ReflTransGen` path bridge [NOT STARTED]
+### Phase 6: S4 Hintikka bridges and the `ReflTransGen` path bridge [COMPLETED]
 
 - **Goal**: Prove the S4 bridge lemmas and the box-positive bridge across `ReflTransGen`
   paths — the mathematical heart of the task.
 - **Tasks**:
-  - [ ] Single-edge 4-rule bridge `hintikkaS4_box_pos_step`: `modalHintikkaSetS4 phi0 b acc`,
+  - [x] Single-edge 4-rule bridge `hintikkaS4_box_pos_step`: `modalHintikkaSetS4 phi0 b acc`,
         `T(box psi)@w in b`, `acc.hasEdge w w'` -> `T(box psi)@w' in b`. Proof shape copies
         `hintikka_box_pos` (Completeness.lean:146-195): unfold, kill the propositional
         rules via the **public** `tryAllPropRules_pos`/`modalApplyOne_eq_prop_of_applicable`
         kit, land in `.persistent`, contradiction. Budget generously — this is the fiddliest
-        proof in the phase.
-  - [ ] `hintikkaS4_box_pos_self` (T-rule endpoint): `T(box psi)@w in b` -> `T(psi)@w in b`.
+        proof in the phase. *(deviation: altered -- an orchestrator correction mid-run
+        (from task 510's research) clarified that `hintikka_box_neg`/`hintikka_diamond_pos`
+        are the ONLY pure structural projections; `hintikka_box_pos`/`hintikka_diamond_neg`
+        unfold `modalApplyOne` concretely and do not transfer. This matches exactly what
+        this phase's own text already anticipated ("fiddliest proof") -- no plan change
+        needed, just confirmation. The actual proof required one more unfolding layer than
+        K's original (`modalApplyOneS4` -> `modalApplyOneS4Rules` -> `modalApplyOneT` ->
+        `modalApplyOne`), resolved via three chained `have` equations (`hshape`/`htR`/`hk`)
+        and a generic two-case "append-then-filter" membership lemma (`hmem_merge`) that
+        avoids needing to know the K/T layers' exact list contents.)*
+  - [x] `hintikkaS4_box_pos_self` (T-rule endpoint): `T(box psi)@w in b` -> `T(psi)@w in b`.
         Follows from the `modalTBoxSelf` arm inherited via `modalApplyOneT`.
-  - [ ] `hintikkaS4_dia_neg_step` / `_self` — duals for `F(diamond psi)`.
-  - [ ] `hintikkaS4_box_neg` / `hintikkaS4_diamond_pos` — one-line projections
+  - [x] `hintikkaS4_dia_neg_step` / `_self` — duals for `F(diamond psi)`.
+  - [x] `hintikkaS4_box_neg` / `hintikkaS4_diamond_pos` — one-line projections
         (`hH.2.2.1` / `hH.2.2.2`), mirroring Completeness.lean:206/:228.
-  - [ ] **The crux**: `hintikkaS4_box_pos_reflTransGen`: `modalHintikkaSetS4 phi0 b acc`,
+  - [x] **The crux**: `hintikkaS4_box_pos_reflTransGen`: `modalHintikkaSetS4 phi0 b acc`,
         `T(box psi)@w in b`, `Relation.ReflTransGen (fun a b => acc.hasEdge a b = true) w w'`
         -> `T(psi)@w' in b`. Prove by `Relation.ReflTransGen.head_induction_on`, carrying
         `T(box psi)` along each edge via `hintikkaS4_box_pos_step` and discharging the
         endpoint (including the reflexive `w = w'` base case) via `hintikkaS4_box_pos_self`.
         The induction carries `T(box psi)@·`, not `T(psi)@·` — that is why the 4-rule must
         propagate the box itself, and is the whole reason S4 needs the 4-rule.
-  - [ ] Dual `hintikkaS4_dia_neg_reflTransGen`.
-  - [ ] Confirm explicitly (in a docstring note) that loop-back cycles in `acc` are
+  - [x] Dual `hintikkaS4_dia_neg_reflTransGen`.
+  - [x] Confirm explicitly (in a docstring note) that loop-back cycles in `acc` are
         harmless: `ReflTransGen` is a closure, so a cycle adds no new reachable worlds
         beyond those already related; the induction is on the *path*, not the graph.
-  - [ ] CI gate; commit `LoopChecking.lean` only.
+  - [x] CI gate; commit `LoopChecking.lean` only.
 - **Timing**: 2.5 hours (~350 lines)
 - **Depends on**: 3, 5
 - **Files to modify**: `Cslib/Logics/Modal/Tableau/LoopChecking.lean`.

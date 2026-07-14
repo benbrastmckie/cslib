@@ -1,0 +1,24 @@
+{
+  "task_number": 493,
+  "agent_type": "planner-hard-agent",
+  "session_id": "sess_1784011298_752245_493",
+  "status": "planned",
+  "phase": "plan",
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+  "started_at": "2026-07-14",
+  "reference_grounding_tier": 1,
+  "artifacts": [
+    "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md"
+  ],
+  "research_artifacts": [
+    "specs/493_CK_constructive_modal_soundness_completeness/reports/01_ck-segment-construction-scope.md"
+  ],
+  "plan_path": "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md",
+  "phase_count": 9,
+  "conditional_phase_count": 1,
+  "postmortem_rules_count": 6,
+  "estimated_hours": "22-28 base; 28-38 with Phase 4a contingency",
+  "highest_risk_phases": ["Phase 4 (segment saturation)", "Phase 4a (conditional Foundations lemma)", "Phase 7", "Phase 5"],
+  "user_review_required": true,
+  "next_steps": "Await user authorization before /implement 493 --hard --lit"
+}

@@ -57,7 +57,7 @@
     "490": "completed",
     "480": "completed",
     "492": "completed",
-    "493": "not_started",
+    "493": "planned",
     "494": "completed",
     "501": "not_started"
   },
@@ -93,5 +93,6 @@
   "blocked_tasks": [
     493,
     501
-  ]
+  ],
+  "task_493_awaiting_authorization": true
 }

@@ -2672,7 +2672,7 @@
     {
       "project_number": 493,
       "project_name": "CK_constructive_modal_soundness_completeness",
-      "status": "not_started",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 480,
@@ -2682,7 +2682,20 @@
       ],
       "description": "CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-13T05:15:48Z"
+      "last_updated": "2026-07-14T14:02:21Z",
+      "session_id": "sess_1784011298_752245_493",
+      "artifacts": [
+        {
+          "path": "specs/493_CK_constructive_modal_soundness_completeness/reports/01_ck-segment-construction-scope.md",
+          "type": "report",
+          "summary": "CK segment/fallible-world construction scope"
+        },
+        {
+          "path": "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md",
+          "type": "plan",
+          "summary": "CK segment-completeness hard plan (awaiting authorization)"
+        }
+      ]
     },
     {
       "project_number": 494,

@@ -196,7 +196,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 1: Relocate K shape/witness lemmas to Rules.lean with payload weakening [NOT STARTED]
+### Phase 1: Relocate K shape/witness lemmas to Rules.lean with payload weakening [COMPLETED]
 
 - **Goal:** Make the four K shape/witness facts reachable from `modalApplyOne_spec`
   (`GenericDriver.lean:223`) by relocating them upstream to `Rules.lean`, stating the two Propagating
@@ -226,7 +226,14 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     relocate them too if still needed, or re-derive locally from the canonical shape lemmas.)
   - [ ] De-privatize `modalApplyOne_fst_eq_of_not_box` (`Completeness.lean:684`) and docstring it —
     this is F8's K discharge, already upstream of `GenericDriver.lean`; no relocation needed.
-  - [ ] `lake build` + full CI; `#print axioms` on each relocated lemma.
+  - [x] `lake build` + full CI; `#print axioms` on each relocated lemma. *(deviation: the four
+    relocated shape/witness lemmas' proofs call `tryAllPropRules_pos`/`tryAllPropRules_neg`, which
+    were previously defined in `Completeness.lean` -- downstream of `Rules.lean` in the import
+    chain. Discovered only when building `Rules.lean` after the initial relocation. Both lemmas
+    are entirely generic (`{F L : Type*}`, no `Atom`-specific content), so they were additionally
+    relocated to `Rules.lean` (ahead of the four shape/witness lemmas); `Completeness.lean` retains
+    access transitively via `Completeness → Saturation → Rules`. This is a pure relocation with
+    zero proof-content change, consistent with the phase's stated scope.)*
 - **Timing:** 2 hours
 - **Depends on:** none
 - **Files to modify:**

@@ -85,58 +85,18 @@ K `diamondPos`/`boxNeg` arms, so `modalFuel` is sufficient here too). -/
 def modalTableauT (φ : Proposition Atom) : ModalTableauResult Atom :=
   modalTableauGen modalApplyOneT φ
 
-/-! ## Shape Lemmas for the Two T-Relevant Signed-Formula Shapes -/
+/-! ## Shape Lemmas for the Two T-Relevant Signed-Formula Shapes
 
-omit [Hashable Atom] in
-/-- `modalApplyOne`'s own dispatch on a box-positive shaped signed formula is always
-`.notApplicable` or `.persistent`, never `.linear`/`.branching` (mirrors the private
-`modalApplyOne_posBox_eq` in `CompletenessLoop.lean`, restated here with an opaque `kForms`
-witness since the T spec-discharge below never needs the concrete `boxPropagation` shape, only
-this dichotomy). -/
-private lemma modalApplyOne_boxPos_shape
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-        = .notApplicable ∨
-      ∃ kForms, (modalApplyOne (⟨.pos, .box φ, w⟩ :
-          SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .persistent kForms := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = false := by
-    rw [tryAllPropRules_pos]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  split_ifs with hemp
-  · left; rfl
-  · right; exact ⟨_, rfl⟩
-
-omit [Hashable Atom] in
-/-- `modalApplyOne`'s own dispatch on a diamond-negative shaped signed formula is always
-`.notApplicable` or `.persistent`, never `.linear`/`.branching` (mirrors the private
-`modalApplyOne_negDia_eq` in `CompletenessLoop.lean`, symmetric to `modalApplyOne_boxPos_shape`).
--/
-private lemma modalApplyOne_diamondNeg_shape
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
-        SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .notApplicable ∨
-      ∃ kForms, (modalApplyOne (⟨.neg, .diamond φ, w⟩ :
-          SignedFormula (Proposition Atom) WorldIndex) b acc).fst = .persistent kForms := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
-      = false := by
-    rw [tryAllPropRules_neg]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  split_ifs with hemp
-  · left; rfl
-  · right; exact ⟨_, rfl⟩
+Task 510: the box-positive/diamond-negative shape dichotomies formerly private to this file
+(`modalApplyOne_boxPos_shape`/`_diamondNeg_shape`) are now the canonical, existentially-quantified
+`modalApplyOne_boxPos_eq`/`_diamondNeg_eq` in `Rules.lean` (the K discharges for
+`RuleApplicationSpec`'s F9/F10 fields), reached here via the `Rules → Saturation → Completeness →
+FmpMeasure → GenericDriver → TDriver` import chain. -/
 
 omit [Hashable Atom] in
 /-- The accessibility component of `modalApplyOne` at a box-positive shaped signed formula is
-always unchanged: combines `modalApplyOne_boxPos_shape` (ruling out the `.linear` shape
-`modalApplyOne_fresh_local` needs for a new edge) with `modalApplyOne_fresh_local` itself. -/
+always unchanged: combines `modalApplyOne_boxPos_eq` (`Rules.lean`, ruling out the `.linear`
+shape `modalApplyOne_fresh_local` needs for a new edge) with `modalApplyOne_fresh_local` itself. -/
 private lemma modalApplyOne_boxPos_acc_eq
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -146,7 +106,8 @@ private lemma modalApplyOne_boxPos_acc_eq
       (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc with
     heq | ⟨wsf, rest, hfst, -⟩
   · exact heq
-  · rcases modalApplyOne_boxPos_shape b acc φ w with h | ⟨_, h⟩ <;> rw [h] at hfst <;> simp at hfst
+  · rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with h | ⟨_, h⟩ <;>
+      rw [h] at hfst <;> simp at hfst
 
 omit [Hashable Atom] in
 /-- Symmetric to `modalApplyOne_boxPos_acc_eq` for the diamond-negative shape. -/
@@ -159,8 +120,8 @@ private lemma modalApplyOne_diamondNeg_acc_eq
       (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc with
     heq | ⟨wsf, rest, hfst, -⟩
   · exact heq
-  · rcases modalApplyOne_diamondNeg_shape b acc φ w with h | ⟨_, h⟩ <;> rw [h] at hfst <;>
-      simp at hfst
+  · rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with h | ⟨_, h⟩ <;>
+      rw [h] at hfst <;> simp at hfst
 
 omit [Hashable Atom] in
 /-- `modalTBoxSelf`'s output dichotomy: either empty, or the singleton self-propagated formula
@@ -350,7 +311,7 @@ private lemma modalApplyOneT_outputsSubsetUniverse
           simp only [List.mem_singleton] at hx
           subst hx
           exact modalUniverse_mem_of_sameWorld_subfml hb hsf hφ .pos
-      rcases modalApplyOne_boxPos_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
       · rw [hk]; split_ifs with hemp
         · trivial
         · exact hself
@@ -377,7 +338,8 @@ private lemma modalApplyOneT_outputsSubsetUniverse
           simp only [List.mem_singleton] at hx
           subst hx
           exact modalUniverse_mem_of_sameWorld_subfml hb hsf hφ .neg
-      rcases modalApplyOne_diamondNeg_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+          hk | ⟨kForms, hk⟩
       · rw [hk]; split_ifs with hemp
         · trivial
         · exact hself
@@ -415,7 +377,7 @@ private lemma modalApplyOneT_persistentFresh
       simp only at hsign hform
       subst hsign; subst hform
       rw [modalApplyOneT_boxPos_fst] at hpers
-      rcases modalApplyOne_boxPos_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
       · simp only [hk] at hpers
         split_ifs at hpers with hemp
         simp only [RuleResult.persistent.injEq] at hpers
@@ -440,7 +402,8 @@ private lemma modalApplyOneT_persistentFresh
       simp only at hsign hform
       subst hsign; subst hform
       rw [modalApplyOneT_diamondNeg_fst] at hpers
-      rcases modalApplyOne_diamondNeg_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+          hk | ⟨kForms, hk⟩
       · simp only [hk] at hpers
         split_ifs at hpers with hemp
         simp only [RuleResult.persistent.injEq] at hpers
@@ -508,7 +471,7 @@ private lemma modalApplyOneT_rankStep
       refine ⟨rank', hagree, ?_, ?_⟩
       · rw [modalApplyOneT_boxPos_snd]; exact hedge'
       · rw [modalApplyOneT_boxPos_fst]
-        rcases modalApplyOne_boxPos_shape b acc φ w with hk | ⟨kForms, hk⟩
+        rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
         · simp only [hk] at hdepth ⊢
           split_ifs with hemp
           · trivial
@@ -548,7 +511,8 @@ private lemma modalApplyOneT_rankStep
       refine ⟨rank', hagree, ?_, ?_⟩
       · rw [modalApplyOneT_diamondNeg_snd]; exact hedge'
       · rw [modalApplyOneT_diamondNeg_fst]
-        rcases modalApplyOne_diamondNeg_shape b acc φ w with hk | ⟨kForms, hk⟩
+        rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+            hk | ⟨kForms, hk⟩
         · simp only [hk] at hdepth ⊢
           split_ifs with hemp
           · trivial
@@ -601,7 +565,7 @@ private lemma modalApplyOneT_outDegStep
       simp only at hsign hform
       subst hsign; subst hform
       rw [modalApplyOneT_boxPos_snd, modalApplyOne_boxPos_acc_eq, modalApplyOneT_boxPos_fst]
-      rcases modalApplyOne_boxPos_shape b acc φ wl with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, wl⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
       · simp only [hk]
         split_ifs <;> exact houtdeg w
       · simp only [hk]
@@ -611,7 +575,8 @@ private lemma modalApplyOneT_outDegStep
       subst hsign; subst hform
       rw [modalApplyOneT_diamondNeg_snd, modalApplyOne_diamondNeg_acc_eq,
         modalApplyOneT_diamondNeg_fst]
-      rcases modalApplyOne_diamondNeg_shape b acc φ wl with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, wl⟩) rfl φ rfl b acc with
+          hk | ⟨kForms, hk⟩
       · simp only [hk]
         split_ifs <;> exact houtdeg w
       · simp only [hk]
@@ -662,7 +627,7 @@ private lemma modalApplyOneT_knownWorldsStep
             subst hx
             exact label_mem_modalKnownWorlds
               (sf := (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
-        rcases modalApplyOne_boxPos_shape b acc φ w with hk | ⟨kForms, hk⟩
+        rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
         · simp only [hk]
           split_ifs with hemp
           · trivial
@@ -694,7 +659,8 @@ private lemma modalApplyOneT_knownWorldsStep
             subst hx
             exact label_mem_modalKnownWorlds
               (sf := (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
-        rcases modalApplyOne_diamondNeg_shape b acc φ w with hk | ⟨kForms, hk⟩
+        rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+            hk | ⟨kForms, hk⟩
         · simp only [hk]
           split_ifs with hemp
           · trivial
@@ -734,7 +700,7 @@ private lemma modalApplyOneT_branchingLength
       simp only at hsign hform
       subst hsign; subst hform
       rw [modalApplyOneT_boxPos_fst] at hbr
-      rcases modalApplyOne_boxPos_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_boxPos_eq (⟨.pos, .box φ, w⟩) rfl φ rfl b acc with hk | ⟨kForms, hk⟩
       · simp only [hk] at hbr
         split_ifs at hbr
       · simp only [hk] at hbr
@@ -743,7 +709,8 @@ private lemma modalApplyOneT_branchingLength
       simp only at hsign hform
       subst hsign; subst hform
       rw [modalApplyOneT_diamondNeg_fst] at hbr
-      rcases modalApplyOne_diamondNeg_shape b acc φ w with hk | ⟨kForms, hk⟩
+      rcases modalApplyOne_diamondNeg_eq (⟨.neg, .diamond φ, w⟩) rfl φ rfl b acc with
+          hk | ⟨kForms, hk⟩
       · simp only [hk] at hbr
         split_ifs at hbr
       · simp only [hk] at hbr

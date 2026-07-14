@@ -71,8 +71,8 @@ structure ModalLoopInv (φ0 : Proposition Atom)
   only carves out `.neg, .box _`; the `.pos, .box _` (`boxPos`) case genuinely needs its
   `.persistent` clause discharged. This is sound because `boxPos`'s own `modalApplyOne` result
   is always `.notApplicable` or `.persistent` (never `.linear`/`.branching`,
-  `modalApplyOne_posBox_eq` below), so a `boxPos`-shaped formula can never be the `sf_exp` that
-  gets appended to `e` by a `modalStepBranch` step. -/
+  `modalApplyOne_boxPos_eq` (`Rules.lean`), so a `boxPos`-shaped formula can never be the
+  `sf_exp` that gets appended to `e` by a `modalStepBranch` step. -/
   eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
   /-- Every `boxNeg`-shaped formula `F(□ψ)@w` in the expanded set `e` already has a witness
   successor on the branch: `∃ w', acc.hasEdge w w' ∧ F(ψ)@w' ∈ b`. Needed for `modalHintikkaSet`'s
@@ -94,8 +94,8 @@ structure ModalLoopInv (φ0 : Proposition Atom)
   only carves out `.pos, .diamond _`; the `.neg, .diamond _` (`diamondNeg`) case genuinely needs
   its `.persistent` clause discharged. Sound because `diamondNeg`'s own `modalApplyOne` result
   is always `.notApplicable` or `.persistent` (never `.linear`/`.branching`,
-  `modalApplyOne_negDia_eq` below), so a `diamondNeg`-shaped formula can never be the `sf_exp`
-  that gets appended to `e` by a `modalStepBranch` step. -/
+  `modalApplyOne_diamondNeg_eq` (`Rules.lean`), so a `diamondNeg`-shaped formula can never be
+  the `sf_exp` that gets appended to `e` by a `modalStepBranch` step. -/
   eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
   /-- Every `diamondPos`-shaped formula `T(◇ψ)@w` in the expanded set `e` already has a witness
   successor on the branch: `∃ w', acc.hasEdge w w' ∧ T(ψ)@w' ∈ b`. Needed for `modalHintikkaSet`'s
@@ -237,68 +237,11 @@ private lemma modalStepBranch_newExps_const
     exact ⟨e, rfl⟩
   · rw [hfstc] at hsf; simp at hsf
 
-/-- `boxPos`'s own rule-application result is always `.notApplicable` or `.persistent`, never
-`.linear`/`.branching`: a formula with sign `.pos` and formula-component `.box ψ` never matches
-any of the four Lukasiewicz-encoded propositional decomposers (all match only `.imp`-headed
-formulas, `Defs.lean:110-172`), so `tryAllPropRules` is not applicable and `modalApplyOne` falls
-through to the `boxPos` dispatch arm (`Rules.lean:83-88`), which only ever produces
-`.notApplicable` or `.persistent`. Stated against an opaque `sf` (rather than a literal
-`⟨.pos, .box ψ, w⟩` constructor) so call sites never need to destructure a signed formula whose
-components are entangled with an unrelated `rfl`-substitution elsewhere in the proof. -/
-private lemma modalApplyOne_posBox_eq
-    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .pos)
-    (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOne sf b acc).1 = .notApplicable ∨
-      (modalApplyOne sf b acc).1 = .persistent (boxPropagation b acc ψ sf.label) := by
-  obtain ⟨s, φ, l⟩ := sf
-  simp only at hsign hform
-  subst hsign; subst hform
-  simp only [modalApplyOne]
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.pos, .box ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = false := by
-    rw [tryAllPropRules_pos]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  rw [if_neg (by simp [htry])]
-  split_ifs with hemp
-  · left; rfl
-  · right; rfl
-
-omit [Hashable Atom] in
-/-- `diamondNeg`'s own rule-application result is always `.notApplicable` or `.persistent`,
-never `.linear`/`.branching`: a formula with sign `.neg` and formula-component `.diamond ψ`
-never matches any propositional decomposer (`.diamond` is a native constructor distinct from
-every prop-rule pattern, task 441), so `tryAllPropRules` is not applicable and `modalApplyOne`
-falls through to the `diamondNeg` dispatch arm (`Rules.lean:144-153`), which only ever produces
-`.notApplicable` or `.persistent` (symmetric to `modalApplyOne_posBox_eq`'s `boxPos`). -/
-private lemma modalApplyOne_negDia_eq
-    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsign : sf.sign = .neg)
-    (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOne sf b acc).1 = .notApplicable ∨
-      (modalApplyOne sf b acc).1 = .persistent
-        ((acc.successorsOf sf.label).filterMap (fun w' =>
-          let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
-          if b.any (· == sf') then none else some sf')) := by
-  obtain ⟨s, φ, l⟩ := sf
-  simp only at hsign hform
-  subst hsign; subst hform
-  simp only [modalApplyOne]
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.neg, .diamond ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
-      = false := by
-    rw [tryAllPropRules_neg]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  rw [if_neg (by simp [htry])]
-  split_ifs with hemp
-  · left; rfl
-  · right; rfl
-
 /-- Preservation of the `eBoxOnlyNeg` invariant across a `modalStepBranch` step: mirrors
 `modalStepBranch_eClosure`'s case split, but for the persistent case the new expanded set is exactly
 the old one (`eBoxOnlyNeg` transfers directly), while for the linear/branching cases the freshly
 appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shaped — since if
-`sf_exp` were `.pos`-box-shaped, `modalApplyOne_posBox_eq` would force its own result to be
+`sf_exp` were `.pos`-box-shaped, `modalApplyOne_boxPos_eq` would force its own result to be
 `.notApplicable`/`.persistent`, contradicting the linear/branching case split. -/
 private lemma modalLoop_eBoxOnlyNeg
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -328,7 +271,7 @@ private lemma modalLoop_eBoxOnlyNeg
         | neg => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
-      rcases modalApplyOne_posBox_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+      rcases modalApplyOne_boxPos_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
     rw [hfstc] at hsf
@@ -346,7 +289,7 @@ private lemma modalLoop_eBoxOnlyNeg
         | neg => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.box ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.pos := by rw [← heq]; exact hspos
-      rcases modalApplyOne_posBox_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+      rcases modalApplyOne_boxPos_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- persistent: newExps = [e] (unchanged)
     rw [hfstc] at hsf
@@ -360,7 +303,7 @@ private lemma modalLoop_eBoxOnlyNeg
 
 /-- Preservation of the `eDiamondOnlyPos` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxOnlyNeg`'s case split (task 441: `diamondNeg` is the symmetric never-linear/
-branching shape, dismissed via `modalApplyOne_negDia_eq`). -/
+branching shape, dismissed via `modalApplyOne_diamondNeg_eq`). -/
 private lemma modalLoop_eDiamondOnlyPos
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -389,7 +332,7 @@ private lemma modalLoop_eDiamondOnlyPos
         | pos => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
-      rcases modalApplyOne_negDia_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+      rcases modalApplyOne_diamondNeg_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- branching: newExps = brs.map (fun _ => e ++ [sf_exp])
     rw [hfstc] at hsf
@@ -407,7 +350,7 @@ private lemma modalLoop_eDiamondOnlyPos
         | pos => exact absurd hs hcon
       have hform_exp : sf_exp.formula = Proposition.diamond ψ := by rw [← heq]; exact hψ
       have hsign_exp : sf_exp.sign = Sign.neg := by rw [← heq]; exact hsneg
-      rcases modalApplyOne_negDia_eq sf_exp hsign_exp ψ hform_exp b acc with h | h <;>
+      rcases modalApplyOne_diamondNeg_eq sf_exp hsign_exp ψ hform_exp b acc with h | ⟨_, h⟩ <;>
         rw [h] at hfstc <;> simp at hfstc
   · -- persistent: newExps = [e] (unchanged)
     rw [hfstc] at hsf
@@ -456,28 +399,6 @@ private lemma modalApplyOne_hasEdge_mono
   rcases modalLoop_snd_eq_or_addEdge sf b acc with heq | ⟨wsf, rest, -, heq⟩
   · rw [heq]; exact h
   · rw [heq]; exact hasEdge_addEdge_mono h
-
-/-- `boxNeg`'s own rule-application result, unfolded directly: `F(□ψ)@w` always mints a fresh
-witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted `.linear`
-list with the witness `F(ψ)@w'` (`Rules.lean:115-139`; unlike `boxPos`/`diamondNeg`, `boxNeg`
-never checks an emptiness guard, so it is always applicable). -/
-private lemma modalApplyOne_boxNeg_witness
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (ψ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
-        = acc.addEdge w (modalNextWorld b) ∧
-      ∃ rest,
-        (modalApplyOne (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-          = RuleResult.linear
-              ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
-                rest) := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable = false := by
-    rw [tryAllPropRules_neg]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  exact ⟨rfl, _, rfl⟩
 
 /-- Preservation of the `eBoxNegWitness` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxOnlyNeg`'s case split. For old `e`-elements the witness/edge from `he` transfers
@@ -556,32 +477,6 @@ private lemma modalLoop_eBoxNegWitness
     exact ⟨w', hnewAcc ▸ modalApplyOne_hasEdge_mono sf_exp b acc hedge,
       List.mem_append.mpr (Or.inr hwit)⟩
   · rw [hfstc] at hsf; simp at hsf
-
-omit [Hashable Atom] in
-/-- `diamondPos`'s own rule-application result, unfolded directly: `T(◇ψ)@w` always mints a
-fresh witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted
-`.linear` list with the witness `T(ψ)@w'` (`Rules.lean:93-116`; task 441: `diamondPos` is
-native and, like `boxNeg`, never checks an emptiness guard, so it is always applicable).
-Symmetric to `modalApplyOne_boxNeg_witness`. -/
-private lemma modalApplyOne_diamondPos_witness
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (ψ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOne (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-        b acc).snd = acc.addEdge w (modalNextWorld b) ∧
-      ∃ rest,
-        (modalApplyOne (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-            b acc).fst
-          = RuleResult.linear
-              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
-                rest) := by
-  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
-      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
-      = false := by
-    rw [tryAllPropRules_pos]
-    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
-  simp only [modalApplyOne]
-  rw [if_neg (by simp [htry])]
-  exact ⟨rfl, _, rfl⟩
 
 /-- Preservation of the `eDiamondPosWitness` invariant across a `modalStepBranch` step: mirrors
 `modalLoop_eBoxNegWitness`'s case split (task 441: `diamondPos` is the symmetric fresh-world

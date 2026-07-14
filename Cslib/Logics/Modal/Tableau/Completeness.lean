@@ -291,52 +291,9 @@ lemma modalNegOf?_eq {φ x : Proposition Atom} (h : modalNegOf? φ = some x) :
     φ = .imp x .bot := by
   unfold modalNegOf? at h; split at h <;> simp_all
 
-/-- Reduction of `tryAllPropRules` on a positively-signed formula to a priority-ordered
-case split on the four decomposition functions (and > or > imp > neg). -/
-lemma tryAllPropRules_pos {F L : Type*}
-    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
-    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
-    (φ : F) (l : L) :
-    tryAllPropRules andOf? orOf? impOf? negOf? ⟨.pos, φ, l⟩ =
-      match andOf? φ with
-      | some (x, y) => .linear [⟨.pos, x, l⟩, ⟨.pos, y, l⟩]
-      | none =>
-        match orOf? φ with
-        | some (x, y) => .branching [[⟨.pos, x, l⟩], [⟨.pos, y, l⟩]]
-        | none =>
-          match impOf? φ with
-          | some (x, y) => .branching [[⟨.neg, x, l⟩], [⟨.pos, y, l⟩]]
-          | none =>
-            match negOf? φ with
-            | some x => .linear [⟨.neg, x, l⟩]
-            | none => .notApplicable := by
-  rcases hA : andOf? φ with _ | ⟨x, y⟩ <;> rcases hO : orOf? φ with _ | ⟨x, y⟩ <;>
-    rcases hI : impOf? φ with _ | ⟨x, y⟩ <;> rcases hN : negOf? φ with _ | x <;>
-    simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
-      SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
-
-/-- Reduction of `tryAllPropRules` on a negatively-signed formula. -/
-lemma tryAllPropRules_neg {F L : Type*}
-    (andOf? : F → Option (F × F)) (orOf? : F → Option (F × F))
-    (impOf? : F → Option (F × F)) (negOf? : F → Option F)
-    (φ : F) (l : L) :
-    tryAllPropRules andOf? orOf? impOf? negOf? ⟨.neg, φ, l⟩ =
-      match andOf? φ with
-      | some (x, y) => .branching [[⟨.neg, x, l⟩], [⟨.neg, y, l⟩]]
-      | none =>
-        match orOf? φ with
-        | some (x, y) => .linear [⟨.neg, x, l⟩, ⟨.neg, y, l⟩]
-        | none =>
-          match impOf? φ with
-          | some (x, y) => .linear [⟨.pos, x, l⟩, ⟨.neg, y, l⟩]
-          | none =>
-            match negOf? φ with
-            | some x => .linear [⟨.pos, x, l⟩]
-            | none => .notApplicable := by
-  rcases hA : andOf? φ with _ | ⟨x, y⟩ <;> rcases hO : orOf? φ with _ | ⟨x, y⟩ <;>
-    rcases hI : impOf? φ with _ | ⟨x, y⟩ <;> rcases hN : negOf? φ with _ | x <;>
-    simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
-      SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
+-- `tryAllPropRules_pos`/`_neg` relocated to `Rules.lean` (task 510): they are entirely generic
+-- (no `Atom`-specific content) and needed upstream by `Rules.lean`'s Propagating-class shape
+-- lemmas. Reached here transitively (`Completeness → Saturation → Rules`).
 
 omit [Hashable Atom] in
 /-- When the propositional rules apply, `modalApplyOne` returns the propositional result. -/
@@ -680,8 +637,12 @@ depend on the branch or accessibility relation. Propositional rules are formula-
 themselves independent of `b`/`acc`), and `.atom`/`.bot` formulas never match a propositional
 rule nor a modal rule, so `modalApplyOne` returns the constant `.notApplicable` for them
 regardless of `b`/`acc`. Task 441: `diamond` is excluded alongside `box` since `diamondPos`
-now genuinely mints a fresh world (`modalNextWorld b`), depending on `b`. -/
-private lemma modalApplyOne_fst_eq_of_not_box
+now genuinely mints a fresh world (`modalNextWorld b`), depending on `b`.
+
+De-privatized (task 510): this is the K discharge for `RuleApplicationSpec`'s F8
+`localShapeInvariance` field (`GenericDriver.lean`), which needs to reach this lemma from
+downstream via `modalApplyOne_spec`. -/
+theorem modalApplyOne_fst_eq_of_not_box
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
     (b b' : List (SignedFormula (Proposition Atom) WorldIndex))

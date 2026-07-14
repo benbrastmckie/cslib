@@ -105,7 +105,9 @@ theorem ckValid_iff_ckValidFC_true {φ : Proposition Atom} :
 /-- The `CT` frame condition: reflexivity of the modal relation `r`. Both `tBox` (`□A → A`) and
 `tDia` (`A → ◇A`) need only the plain clause `∀ w, r w w` (no `≤`-saturation is needed for
 reflexivity itself). Defined locally over `[Preorder World]` rather than Mathlib's deprecated
-`Reflexive`. -/
+`Reflexive`. The `[Preorder World]` instance is unused (plain reflexivity needs no `≤`) but is
+required to match `CKValidFC`'s shared `FC` shape (`cs4FC`/`cs5FC` do use `≤`). -/
+@[nolint unusedArguments]
 def ctFC {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   ∀ w, r w w
 

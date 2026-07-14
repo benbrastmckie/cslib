@@ -349,7 +349,11 @@ both report exactly `[propext, Classical.choice, Quot.sound]`, matching the prob
 
 ---
 
-### Phase 6: CS4.lean module docstring rewrite and docstring/lint pass [NOT STARTED]
+### Phase 6: CS4.lean module docstring rewrite and docstring/lint pass [COMPLETED]
+
+`lake lint` clean for CS4.lean/CS5.lean/CKExtension.lean (one pre-existing, unrelated error in
+`Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean`, untouched by this task).
+`lake exe lint-style` exits 0. No "not established"/"open item" strings remain in CS4.lean.
 
 **Goal**: Bring CS4.lean to CSLib house style and remove the obsolete blocker narrative.
 

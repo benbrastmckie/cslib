@@ -9,7 +9,7 @@ module
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
-/-! # CS4: Constructive Modal Logic S4 (Soundness)
+/-! # CS4: Constructive Modal Logic S4 (Soundness and Completeness)
 
 This module instantiates the task-501 frame-condition-parametrized segment scaffold
 (`CKExtension.lean`) at the constructive analogue of `S4`: `CS4` = `CT` (`CT.lean`) plus the two
@@ -17,30 +17,67 @@ This module instantiates the task-501 frame-condition-parametrized segment scaff
 
 `CS4` is sound for `CKValidFC cs4FC` — Wijesekera-style fallible-world validity restricted to
 frames whose modal relation `r` is reflexive and ≤-composed-transitive (`cs4FC`,
-`CKExtension.lean`).
+`CKExtension.lean`) — and **sound and complete for `CKValidFC cs4FC'`**, a **weakened** frame
+condition (`cs4FC'`, `CKExtension.lean`) that replaces `cs4FC`'s blanket ≤-composed transitivity
+with two existential clauses (task 508).
 
-**Completeness for `CS4` is not established in this module** (see the task 501 implementation
-summary for the recorded blocker). The obstruction: `ck_completeness`'s canonical model needs the
+## Completeness (task 508)
+
+Task 501 left `CS4` completeness unresolved: `ck_completeness`'s canonical model needed the
 diamond-backward truth-lemma case to refute an unwarranted `◇A` via a *restricted*-tail witness
-segment (`diamRefutingSegment`, `CKTruthLemma.lean`) whose tail excludes `A`. This exclusion is a
-*one-step* property (`A ∉ t` for `t` a *direct* tail member) and does not propagate through the
-further ≤-composed-transitive successors `cs4FC` universally quantifies over: writing
-`P := diamRefutingSegment s h_not`, for `u ∈ P.tail` (so `A ∉ u.head`), an arbitrary `u' ≥ u` and
-`t ∈ u'.tail` need not satisfy `A ∉ t.head` — nothing in the construction prevents `t` from being
-(or extending to) the exploding theory `Set.univ`, which always contains `A`. Consequently `P`
-itself cannot be shown to satisfy `cs4FC`'s ≤-composed-transitivity clause as a *source*, and
-`cs4FC` must hold **globally** on whatever world type is chosen (it is a blanket hypothesis of
-`CKValidFC`/`ckvalidFC_completeness`, not a per-world side condition). Resolving this requires a
-*hereditary* diamond-refuting construction (propagating the `A`-exclusion through the transitive
-closure of the restricted tail, not just one step) — substantially more machinery than
-`dia_refuting_theory`/`diamRefutingSegment` provide as-is, and out of scope for a single-lemma
-fix. Per the escalation protocol, no `sorry` or axiom is introduced; `CS4` completeness is left
-as an open item (task 501 implementation summary, Phase 5).
+segment (`diamRefutingSegment`, `CKTruthLemma.lean`) whose tail excludes `A`. That exclusion was a
+*one-step* property (`A ∉ t` for `t` a *direct* tail member) that does not propagate through the
+further ≤-composed-transitive successors `cs4FC` universally quantifies over — nothing in the
+one-step construction prevents a further successor from being (or extending to) the exploding
+theory `Set.univ`, which always contains `A`. This was a real obstruction, but it was an
+obstruction **to `cs4FC` specifically** (the frame condition, held fixed as `cs4FC` in task 501),
+not an inherent obstruction to `CS4` completeness — the frame condition is the free parameter.
+
+Task 508 resolves it with two changes:
+
+1. **Weaken the frame condition** to `cs4FC'` (`CKExtension.lean`), replacing blanket
+   ≤-composed transitivity with two existential clauses that the canonical model can actually
+   satisfy. `cs4FC_implies_cs4FC'` witnesses that `cs4FC'` is a genuine weakening, so every
+   `cs4FC`-sound theorem still holds (as a corollary via this bridge).
+2. **Make the diamond-refuting exclusion hereditary**: `cs4Tail`/`CS4Segment` carry the excluded
+   diamond `A` as an invariant (`excl_head`) that propagates through the *entire* transitive
+   closure of the tail, not just one step. The key closure fact, `cs4_not_dia_dia`
+   (`◇A ∉ H → ◇◇A ∉ H`, via `fourDia` contraposition), is what makes the hereditary exclusion
+   self-propagate: `dia_refuting_theory` is reused **unchanged** at `A := ◇A₀`.
+
+With these two changes, `cs4FC'_cs4Mreach` shows the canonical model satisfies `cs4FC'`, and
+`cs4_truth_lemma` + `ckvalidFC_completeness` (`CKExtension.lean`) yield `cs4_completeness` and
+the soundness-completeness biconditional `cs4_soundness_completeness`. See
+`specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md` for the
+full research analysis. `CT.lean`, `CK.lean`, `Segment.lean`, `SegmentLindenbaum.lean`, and
+`CKTruthLemma.lean` are untouched by this technique — no new foundational abstraction was needed.
+
+**`CS5` cannot be closed by this same technique** — see `CS5.lean`'s module docstring for the
+mechanized negative result (`bDia` fails soundness over the natural `CS5` analogue of `cs4FC'`).
 
 ## Main Definitions
 
 - `CS4ModalAxiom`: `CTModalAxiom`'s constructors verbatim plus `fourBox`/`fourDia`.
-- `cs4_axiom_sound`/`cs4_soundness`/`cs4_soundness_derivable`: soundness for `CKValidFC cs4FC`.
+- `cs4_axiom_sound`/`cs4_soundness`/`cs4_soundness_derivable`: soundness for `CKValidFC cs4FC`
+  (corollaries of the primed versions below, retained for the
+  `ConstructiveLatticeMonotonicity` frame-condition inclusion chain).
+- `cs4_axiom_sound'`/`cs4_soundness'`/`cs4_soundness_derivable'`: soundness for the weakened
+  `CKValidFC cs4FC'` (the primary proofs).
+- `cs4Tail`/`cs4Seg`/`CS4Segment`/`cs4Mreach`: the hereditary `◇`-exclusion canonical world type
+  and its accessibility relation.
+- `cs4Val`/`cs4Bot`: canonical valuation and fallibility on `CS4Segment`.
+- `cs4_truth_lemma`: `CKForces` agrees with head membership on the canonical model.
+- `cs4_completeness`/`cs4_soundness_completeness`: **completeness** and the full
+  soundness-completeness biconditional for `CKValidFC cs4FC'`.
+
+## Main Results
+
+- `cs4_axiom_sound`, `cs4_soundness`, `cs4_soundness_derivable` (over `cs4FC`).
+- `cs4_axiom_sound'`, `cs4_soundness'`, `cs4_soundness_derivable'` (over the weaker `cs4FC'`).
+- `cs4FC'_cs4Mreach`: the canonical model satisfies `cs4FC'`.
+- `cs4_truth_lemma`: the truth lemma for the `CS4` canonical model.
+- `cs4_completeness`: **completeness** for `CKValidFC cs4FC'`.
+- `cs4_soundness_completeness`: the soundness-completeness biconditional for `CKValidFC cs4FC'`.
 
 ## References
 

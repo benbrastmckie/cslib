@@ -1,5 +1,5 @@
 ---
-next_project_number: 509
+next_project_number: 511
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 509
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,508 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,501,504,505,506 | 36,37,181,317,407,425,449,503,508 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
-| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,506,508,510 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,501,503,509 | 36,37,181,317,407,425,449,508,510 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,14 +37,16 @@ next_project_number: 509
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-503 [IMPLEMENTING] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+508 [PLANNED] — Unblock CK constructive CS4/CS5 completeness (task 501 follow-up)
+  └─ 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
+  └─ 509 [NOT STARTED] — Re-scope and close CK constructive CS5 completeness (task 508 fol
+503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
   └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-  └─ 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 
 ### Temporal Logic
 
@@ -87,15 +90,38 @@ next_project_number: 509
 
 ### Uncategorized
 
-508 [NOT STARTED] — Unblock CK constructive CS4/CS5 completeness (task 501 follow-up)
-  └─ 501 [PARTIAL] — (Modal Logic: CK constructive modal extensions CT / CS) (see above)
+510 [NOT STARTED] — Generalize the Hintikka-set / saturation-characterisation chain o
+  └─ 503 [BLOCKED] — (Modal Logic: Parametrize the K tableau driver (Cslib/) (see above)
 
 ## Tasks
 
-### 508. Unblock CK CS4 CS5 completeness
+### 510. Generalize completeness loop hintikka chain over spec
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Dependencies**: Task 507
+
+**Description**: Generalize the Hintikka-set / saturation-characterisation chain over the abstract rule-application interface, so that T (503), B (505), and S5 (504) all instantiate ONE generic development rather than each re-deriving an ~850-line system-specific analog. This is the direct successor to task 507 (which generalized FmpMeasure.lean's termination measure over RuleApplicationSpec, CI-green, zero sorry/axiom, commit 009cc348) and applies the same play one layer up. Blocker origin: task 503 Phase 5 (see specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/.orchestrator-handoff.json and plan Phase 5) -- producing a modalHintikkaSetT witness from an open modalExpandBranchesT result requires modalExpandBranches_hintikka and its entire private dependency chain, all stated directly against the concrete modalApplyOne rather than an abstract apply. Scope: (1) Extend RuleApplicationSpec (Cslib/Logics/Modal/Tableau/GenericDriver.lean, currently 7 fields after task 507) with a saturation component -- an abstract saturation predicate plus a noneIffSaturated characterisation (apply returns none iff the branch is saturated w.r.t. that predicate) and a Hintikka-lift hook (the saturation predicate implies the Hintikka clause conditions). "Saturated" is genuinely rule-dependent -- T's saturation includes the T-rule self-conjunct -- so this MUST be abstracted, not assumed. Expect the interface may need a further field round; that is anticipated, not a failure. (2) Generalize Completeness.lean:665-778 (modalHintikkaClause / modalApplyOne_fst_eq_of_not_box / modalHintikkaClause_lift) over (apply, spec). (3) Generalize Completeness.lean:784-935 (modalStepBranch_none_saturated / modalStepBranch_hintikka_inv). (4) Generalize CompletenessLoop.lean:57-712 (ModalLoopInv, modalStep_preserves_invariant, the ~6 private witness-invariant helpers) over (apply, spec), reusing the already-generic modalStepBranchGen_potential_step / modalStepBranchGen_worldBound from task 507 for the potential/world-bound conjuncts. (5) Generalize modalExpandBranches_hintikka (CompletenessLoop.lean:746) as modalExpandBranchesGen_hintikka. (6) Re-instantiate K as the trivial instance at modalApplyOne + modalApplyOne_spec: K's public theorem statements (kValid, modalTableau_decides, instDecidableKValid) must stay byte-identical, zero regression. (7) Instantiate at modalApplyOneT + modalApplyOneT_spec (already delivered in Cslib/Logics/Modal/Tableau/TDriver.lean by task 503 Phase 4) to expose modalExpandBranchesT_hintikka, the exact lemma task 503 Phase 5 is blocked on. Note the known import-cycle constraint discovered by task 507: GenericDriver.lean -> FmpMeasure.lean forces _gen lemmas to take raw hypotheses with bundled (apply, spec) wrappers living in GenericDriver.lean; follow the same pattern. Zero sorry, zero axiom, zero regression to K. Run the full CSLib CI (lake build, lake exe checkInitImports, lake exe lint-style, lake lint, lake test, lake exe mk_all --module, lake shake) at every phase milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions run in this repo). If a sub-piece cannot close sorry-free, mark it [BLOCKED] with the exact open lemma name and goal state documented -- never introduce a sorry or axiom. On completion this unblocks task 503 Phases 5-7 (T truth lemma, Decidable (tValid phi), downstream contract docs) and is the shared prerequisite for tasks 505 (B) and 504 (S5/KB5). Task 506 (S4) is out of scope -- its loop-checking termination is structurally different. Files: Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/Completeness.lean, Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/TDriver.lean.
+
+---
+
+### 509. Rescope CK CS5 constructive completeness
+- **Effort**: 12-20 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 508
+
+**Description**: Re-scope and close CK constructive CS5 completeness (task 508 follow-up) — task 508 closed CS4 completeness sorry-free by weakening the frame condition to cs4FC' plus a hereditary diamond-exclusion tail, but proved that this technique provably does NOT extend to CS5. Mechanized negative results from 508 (in specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean, both compiling): (1) bDia_not_valid_over_cs5FCweak — a two-world Bool countermodel satisfying reflexivity, both cs4FC' clauses, and weakened symmetry, yet refuting the-diamond-of-box-p implies p; so bDia is UNSOUND over the weakened condition that makes CS4 work. (2) cs5_dia_bot_imp_bot — CS5 proves the-diamond-of-bot implies bot (unlike CK/CT/CS4), which is a NEW lead enabling a Set.univ-free tail redesign. The remaining gap: the frame condition that would validate bDia (FCbdia: r w u implies exists u' >= u and t <= w with r u' t) fails canonically because u := cexpl forces Set.univ into every realized tail; discharging it needs genuine canonical symmetry (boxInv(u.head) subset w.head), whose classical proof requires maximality (B not in head implies not-B in head) — unavailable for quasi-prime (intuitionistic) heads. IMPORTANT: 508 established that the frame condition is the free parameter, not the tail construction — do not repeat 501's mistake of holding FC fixed. Investigate whether the cs5_dia_bot_imp_bot lead supports a Set.univ-free canonical world type that admits symmetry without maximality, or whether CS5 constructive completeness requires a different semantics (e.g. birelational models with a separate intuitionistic preorder). Honest negative results are acceptable and valuable: if CS5 completeness is not achievable over the current CK segment/fallible-world model, document the obstruction as a mechanized theorem and leave CS5.lean completeness BLOCKED with that citation. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean. Depends on 508.
+
+---
+
+### 508. Unblock CK CS4 CS5 completeness
+- **Status**: [PLANNED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md]
+- **Plan**: [508_unblock_CK_CS4_CS5_completeness/plans/01_cs4-completeness-integration.md]
 
 **Description**: Unblock CK constructive CS4/CS5 completeness (task 501 follow-up) — task 501 delivered CT/CS4/CS5 soundness and CT completeness, but CS4/CS5 completeness is [BLOCKED] on a mechanically-verified obstruction: over CK's segment/fallible-world model, the diamRefutingSegment tail-exclusion witness needed for the truth lemma's diamond-backward 'far' clause cannot be shown to propagate through further relational steps (no maximal-tail invariant makes cs4FC transitivity / cs5FC symmetry hold globally on the restricted canonical world type). Research and implement an alternative canonical-model technique to close CS4/CS5 completeness sorry-free: candidate approaches (a) a hereditary/maximal diamond-refuting construction that keeps the exclusion invariant stable under cmreach steps, or (b) filtration over the CK segment model. Files: Cslib/Logics/Modal/Metalogic/Constructive/{CS4,CS5}.lean (currently soundness-only + BLOCKED completeness sections). Depends on 501.
 
@@ -118,7 +144,7 @@ next_project_number: 509
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 503
+- **Dependencies**: None
 - **Research**:
   - [506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/01_frame-specific-tableau-extensions.md]
   - [506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/02_spawn-analysis.md]
@@ -160,10 +186,10 @@ next_project_number: 509
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 507
+- **Dependencies**: Task 507, Task 510
 - **Research**:
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]

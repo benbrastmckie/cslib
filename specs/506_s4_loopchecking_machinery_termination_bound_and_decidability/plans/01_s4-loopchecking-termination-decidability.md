@@ -325,7 +325,7 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 3: `extractModelS4` and free frame instances [NOT STARTED]
+### Phase 3: `extractModelS4` and free frame instances [COMPLETED]
 
 - **Goal**: Instantiate the existing `extractModelWith` skeleton at `Relation.ReflTransGen`
   and harvest `Std.Refl` + `IsTrans` for free.

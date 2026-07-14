@@ -2,15 +2,17 @@
   "status": "in_progress",
   "started_at": "2026-07-14T21:37:15Z",
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FrameRules.lean"
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib.lean"
   ],
   "partial_progress": {
-    "stage": "phase_2_starting",
-    "details": "Phase 1 (4-rule in FrameRules.lean) complete and committed (e6dfa582). Starting Phase 2 (LoopChecking.lean foundation).",
+    "stage": "phase_3_starting",
+    "details": "Phase 1 (4-rule) and Phase 2 (LoopChecking foundation) complete and committed (e6dfa582, d9df271e). Note: a concurrent session is actively editing Rules.lean/CompletenessLoop.lean/Completeness.lean/TDriver.lean (outside this task's territory) -- Phase 2 was verified in an isolated git worktree. Starting Phase 3 (extractModelS4).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1,
-    "last_completed_phase": "Phase 1: 4-rule in FrameRules.lean"
+    "phases_completed": 2,
+    "last_completed_phase": "Phase 2: LoopChecking.lean foundation"
   },
   "metadata": {
     "session_id": "sess_506_impl",

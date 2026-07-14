@@ -7,11 +7,11 @@
     "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/handoffs/phase1-handoff.md"
   ],
   "partial_progress": {
-    "stage": "phase_5_complete",
-    "details": "Phase 5 (crux: modalStepBranch_potential_step_gen) complete, green CI, committed. Crux closed sorry-free on first attempt using only Phase 1-4 fields -- no additional RuleApplicationSpec field was needed.",
+    "stage": "phase_6_complete",
+    "details": "Phase 6 (generic modalStepBranch_worldBound) complete, green CI, committed.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5
+    "phases_completed": 6
   },
   "metadata": {
     "session_id": "sess_cslib_impl_507",

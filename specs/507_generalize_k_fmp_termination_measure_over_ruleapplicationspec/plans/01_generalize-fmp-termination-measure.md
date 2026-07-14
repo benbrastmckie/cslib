@@ -423,17 +423,26 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 6: Generic modalStepBranch_worldBound [NOT STARTED]
+### Phase 6: Generic modalStepBranch_worldBound [COMPLETED]
 
 - **Goal:** Generalize `modalStepBranch_worldBound` (line 2378, ~60 lines) and its supporting
   `modalSf` helpers over `(apply, spec)`, reusing the generic rank/knownWorlds results from Phases 3–4.
 - **Tasks:**
-  - [ ] Confirm `modalSf_pos` (2310) and `modalSf_one_imp_depth_zero` (2318) are rule-agnostic
+  - [x] Confirm `modalSf_pos` (2310) and `modalSf_one_imp_depth_zero` (2318) are rule-agnostic
     (reuse unchanged). Generalize `modalStepBranch_worldBound` to `_gen`, discharging its mint-arm
     reasoning from `spec.freshLocal` + the Phase-1 mint-point field and the generic
-    `modalStepBranch_knownWorlds_gen`/`modalStepBranch_exists_rank'_gen`.
-  - [ ] Re-derive concrete K `modalStepBranch_worldBound` as `_gen … modalApplyOne modalApplyOne_spec`.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom.
+    `modalStepBranch_knownWorlds_gen`/`modalStepBranch_exists_rank'_gen`. *(confirmed rule-agnostic,
+    reused unchanged. `modalStepBranch_worldBound_gen` added, taking the same four raw hypotheses
+    as the Phase-5 crux and delegating its single internal call directly to
+    `modalStepBranch_potential_step_gen`; the rest of the body is pure arithmetic
+    (`geomCap_le_pow`/pow monotonicity), unchanged from K.)*
+  - [x] Re-derive concrete K `modalStepBranch_worldBound` as `_gen … modalApplyOne modalApplyOne_spec`.
+    *(byte-identical-statement corollary via `modalStepBranch_eq`;
+    `GenericDriver.lean`'s `modalStepBranchGen_worldBound` supplies the `(apply, spec)`-bundled
+    wrapper.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom. *(confirmed via `lake env lean` + `#print axioms`:
+    both `{propext, Classical.choice, Quot.sound}`, zero sorry. Full CI green; `lake shake` count
+    unchanged at 81.)*
 - **Timing:** 1.5 hours
 - **Depends on:** 5
 - **Files to modify:**

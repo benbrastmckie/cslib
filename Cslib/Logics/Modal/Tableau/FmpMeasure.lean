@@ -2660,18 +2660,64 @@ satisfying the naive hypothesis, whose firing mints world `modalWorldBound φ0`,
 bound (see the doc-comment preceding `isMintingShaped` for the full counterexample argument).
 The invariant that actually survives a step is the `Φ`-bound proved here, carried via the
 `ModalPotentialInv` bundle (which P5a threads across the whole saturation-loop induction). -/
-lemma modalStepBranch_worldBound
+lemma modalStepBranch_worldBound_gen
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (hRankStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accFreshInv b acc →
+      ∀ (rank : WorldIndex → Nat),
+      (∀ x ∈ b, modalDepth x.formula ≤ rank x.label) →
+      (∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w) →
+      ∃ rank' : WorldIndex → Nat,
+        (∀ w, w ≠ modalNextWorld b → rank' w = rank w) ∧
+        (∀ w w', (apply sf b acc).snd.hasEdge w w' → rank' w' + 1 = rank' w) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
+          | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
+          | .notApplicable => True))
+    (hOutDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length) →
+      ∀ w, outDeg (apply sf b acc).snd w =
+        (List.filter (fun x => x.label == w && isMintingShaped x)
+          (match (apply sf b acc).fst with
+            | .linear _ => e ++ [sf]
+            | .branching _ => e ++ [sf]
+            | .persistent _ => e
+            | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length)
+    (hKnownWorldsStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accTargetsKnown b acc →
+      ((apply sf b acc).snd = acc ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((apply sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False)))
     (φ0 : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility) (rank : WorldIndex → Nat)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hinv : ModalPotentialInv φ0 b e acc rank)
     (hPhiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
       geomCap (modalSubfmls φ0).length (modalDepth φ0)) :
     ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 := by
   obtain ⟨rank', -, -, -, hpotential⟩ :=
-    modalStepBranch_potential_step φ0 b e acc newBs newExps newAcc rank hstep hinv
+    modalStepBranch_potential_step_gen apply hFreshLocal hRankStep hOutDegStep hKnownWorldsStep
+      φ0 b e acc newBs newExps newAcc rank hstep hinv
   intro b' hb'
   have heq := hpotential b' hb'
   have hcombined : modalMaxWorld b' + modalPotential (modalSubfmls φ0).length b' newAcc rank' + 1
@@ -2700,6 +2746,25 @@ lemma modalStepBranch_worldBound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := hpow1
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
     _ = modalWorldBound φ0 := hWB.symm
+
+/-- **P2-obl-e (final)**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
+invariant of `modalStepBranch`. Zero-regression corollary of `modalStepBranch_worldBound_gen`
+(task 507 Phase 6) at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
+byte-unchanged. -/
+lemma modalStepBranch_worldBound
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank)
+    (hPhiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
+      geomCap (modalSubfmls φ0).length (modalDepth φ0)) :
+    ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_worldBound_gen modalApplyOne modalApplyOne_fresh_local
+    modalApplyOne_rank_step modalApplyOne_outDeg_step modalApplyOne_knownWorlds_step
+    φ0 b e acc newBs newExps newAcc rank hstep hinv hPhiBound
 
 /-! ## Output-Freshness and Per-Rule R-Drop (Phase 3)
 

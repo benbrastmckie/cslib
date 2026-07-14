@@ -345,6 +345,26 @@ theorem modalStepBranchGen_potential_step
   modalStepBranch_potential_step_gen apply spec.freshLocal spec.rankStep spec.outDegStep
     spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv
 
+/-! ## Task 507 Phase 6: Generic World-Bound Preservation (spec-bundled) -/
+
+/-- **Task 507 Phase 6**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
+invariant of `modalStepBranchGen apply`, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalStepBranch_worldBound_gen`, `FmpMeasure.lean`, which takes the four raw hypotheses
+directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_worldBound
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (rank : WorldIndex → Nat)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hinv : ModalPotentialInv φ0 b e acc rank)
+    (hPhiBound : modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
+      geomCap (modalSubfmls φ0).length (modalDepth φ0)) :
+    ∀ b' ∈ newBs, modalMaxWorld b' < modalWorldBound φ0 :=
+  modalStepBranch_worldBound_gen apply spec.freshLocal spec.rankStep spec.outDegStep
+    spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv hPhiBound
+
 end Cslib.Logic.Modal.Tableau
 
 end

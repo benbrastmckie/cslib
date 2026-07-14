@@ -1,0 +1,44 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Task 508's CS5 negative verdict is refuted, mechanically. Its candidate frame condition cs5FCweak omitted plain symmetry (r w u -> r u w), which is exactly the clause bDia needs; the countermodel relation is itself non-symmetric (wr'_not_symm). Restoring plain symmetry and plain transitivity gives cs5FC'', over which all 17 CS5 axioms are proved sound with zero sorry and zero axiom dependencies (cs5_axiom_sound''). A concrete canonical construction follows via the symmetric tail cs5Tail H = {t | QuasiPrime t and boxInv H subset t and boxInv t subset H}, reusing the pre-existing prime_set_exclusion. One genuinely open sub-problem remains: the truth lemma's box-backward case needs a simultaneous (H', T) pair construction.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "Truth lemma box-backward case for the symmetric-tail CS5 canonical model. Requires: given prime H with box-A not in H, build prime H' superset H and prime T SIMULTANEOUSLY with boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap: if box(p or box q) in H and q not in H then every symmetric-tail member of H contains p), and the gap is non-vacuous (three-world cs5FC'' countermodel realizes exactly that configuration). Enlarging H' also enlarges boxInv H', so a two-sided/maximal-pair Zorn argument is needed. This is the single research risk; everything else has a complete path.",
+      "phase": "phase-9 (projected)",
+      "severity": "soft"
+    }
+  ],
+  "next_action_hint": "plan",
+  "files_modified": [
+    "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md",
+    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-symmetry-probe.lean",
+    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-canonical-probe.lean",
+    "specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-boxgap-countermodel.lean"
+  ],
+  "decisions_made": [
+    "Vary the frame condition cs5FC -> cs5FC'' (refl + plain trans + plain symm + cs4FC' re-basing clause + FCsym_box); soundness of all 17 axioms already verified.",
+    "Canonical world type: CS5Segment over the symmetric tail cs5Tail H = {t | QuasiPrime t and boxInv H subset t and boxInv t subset H}. Symmetry is definitional, not derived, so the maximality objection never arises.",
+    "The symmetric tail is FORCED, not chosen: fcbdia_forces_symmetry shows any bDia-adequate frame condition implies boxInv u.head subset w.head on any segment-based world type.",
+    "Reuse Cslib.Logic.Metalogic.prime_set_exclusion (PrimeExclusion.lean:558, from task 480) for diam_witness, FCsym_box and FC4'; discharge its DerivExcludes precondition via or_box_imp_box_or + Kd + bDia + primality.",
+    "CS5 needs NO exclusion parameter and no dia_refuting_theory (unlike CS4): the diamond-backward case is free via bBox plus the tail's boxInv t subset H clause.",
+    "Land items 1-4 (cs5FC'', cs5_axiom_sound'', the two derivability lemmas, and the CS5.lean docstring correction) as a self-contained increment; scope the box-backward pair construction as a separate research item.",
+    "Do NOT mark CS5 completeness BLOCKED; re-plan it around the report's section 5 work items."
+  ],
+  "dead_ends": [
+    "task 508's cs5FCweak: omits plain symmetry, so bDia is unsound over it. Its countermodel bDia_not_valid_over_cs5FCweak is sound but says nothing about cs5FC''. Do not treat it as ruling out the CS4 technique.",
+    "Set.univ-free tail redesign via cs5_dia_bot_imp_bot (508's nominated 'one lead'): unnecessary. Set.univ-freeness for consistent heads follows directly from the tail's boxInv t subset H clause, since boxInv Set.univ = Set.univ.",
+    "Deriving canonical symmetry from maximality (508's stated blocker): a non-problem. Symmetry is obtained by construction, never derived, so negation-completeness of quasi-prime heads is never needed.",
+    "508 section 4(c)'s rejection of simultaneous Lindenbaum exclusion: correct only for exclusion sets of DIAMONDS (dia(A or B) -> dia A or dia B is underivable). Irrelevant here: the exclusion set is a set of BOXES, and (box B or box B') -> box(B or B') IS derivable (or_box_imp_box_or, pure CK).",
+    "Sequential Lindenbaum for the box-backward case (build H' first, then T): provably fails per cs5_symmetric_tail_box_gap. Do not retry; a simultaneous pair construction is required.",
+    "Proving box(A or box D) -> box A or D as a route to the box-backward case: not valid over cs5FC'' (mechanized three-world countermodel)."
+  ],
+  "plan_markers_verified": false
+}

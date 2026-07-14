@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Tableau.Soundness
+public import Cslib.Logics.Modal.Tableau.FrameRules
 
 /-! # Frame-Relativized Modal Tableau Soundness
 
@@ -136,6 +137,96 @@ theorem modalTableau_sound_frame [DecidableEq Atom] [Hashable Atom] (φ : Propos
     frameValid trivialFC φ := by
   rw [frameValid_trivialFC_iff_kValid]
   exact modalTableau_sound φ h
+
+/-! ## T (Reflexive Frame) -/
+
+/-- The reflexive frame condition: `Std.Refl m.r`. Instantiates `frameValid`/
+`branchSatisfiableIn` for the modal logic T (`Cube.T`, `{m | Std.Refl m.r}`). -/
+def reflFC : FrameCondition := fun {_} r => Std.Refl r
+
+/-- T-validity: `φ` is satisfied in every reflexive Kripke model, at every world. Matches
+`Cube.T`. -/
+def tValid (φ : Proposition Atom) : Prop := frameValid reflFC φ
+
+/-! ### T-Rule Semantic Soundness
+
+The two T-specific tableau arms (`modalTBoxSelf`, `modalTDiaNegSelf` in `FrameRules.lean`)
+propagate `T(□φ)@w ⊢ T(φ)@w` and `F(◇φ)@w ⊢ F(φ)@w` unconditionally at the *same* world `w`.
+Their soundness reduces directly to reflexivity: in a reflexive model, `w` is always its own
+successor, so `Satisfies m (f w) (□φ)` already gives `Satisfies m (f w) φ` (and dually for
+`◇`) -- no accessibility edge or fuel-induction argument is needed at the rule level. -/
+
+/-- Adding `T(φ)@w` to a branch witnessing `branchSatisfiableIn reflFC` preserves
+`branchSatisfiableIn reflFC`, given `T(□φ)@w` is already on the branch: the semantic core of
+the T box-positive self-propagation arm (`modalTBoxSelf`). -/
+lemma branchSatisfiableIn_reflFC_boxPos_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn reflFC b acc)
+    {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchSatisfiableIn reflFC (⟨.pos, φ, w⟩ :: b) acc := by
+  obtain ⟨W, m, f, hrefl, hedges, hb⟩ := h
+  refine ⟨W, m, f, hrefl, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun _ => ?_, fun hcontra => by simp at hcontra⟩
+    have hbox : Satisfies m (f w) (.box φ) := (hb _ hmem).1 rfl
+    exact hbox (f w) (hrefl.refl (f w))
+  · exact hb sf hold
+
+/-- Adding `F(φ)@w` to a branch witnessing `branchSatisfiableIn reflFC` preserves
+`branchSatisfiableIn reflFC`, given `F(◇φ)@w` is already on the branch: the semantic core of
+the T diamond-negative self-propagation arm (`modalTDiaNegSelf`). -/
+lemma branchSatisfiableIn_reflFC_diaNeg_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn reflFC b acc)
+    {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchSatisfiableIn reflFC (⟨.neg, φ, w⟩ :: b) acc := by
+  obtain ⟨W, m, f, hrefl, hedges, hb⟩ := h
+  refine ⟨W, m, f, hrefl, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun hcontra => by simp at hcontra, fun _ hφ => ?_⟩
+    have hdianeg : ¬ Satisfies m (f w) (.diamond φ) := (hb _ hmem).2 rfl
+    exact hdianeg (Satisfies.diamond_iff.mpr ⟨f w, hrefl.refl (f w), hφ⟩)
+  · exact hb sf hold
+
+/-- Rule-level T soundness for the box-positive arm: every formula produced by
+`modalTBoxSelf` (given `T(□φ)@w` already on the branch) preserves `branchSatisfiableIn
+reflFC` when added to the branch. Connects `FrameRules.lean`'s concrete rule output to the
+semantic soundness lemma `branchSatisfiableIn_reflFC_boxPos_mem`. -/
+lemma modalTBoxSelf_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn reflFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalTBoxSelf b φ w, branchSatisfiableIn reflFC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalTBoxSelf at hsf
+  by_cases hcase :
+      b.any (· == (⟨.pos, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, List.mem_singleton] at hsf
+    subst hsf
+    exact branchSatisfiableIn_reflFC_boxPos_mem h hmem
+
+/-- Rule-level T soundness for the diamond-negative arm: every formula produced by
+`modalTDiaNegSelf` (given `F(◇φ)@w` already on the branch) preserves `branchSatisfiableIn
+reflFC` when added to the branch. Connects `FrameRules.lean`'s concrete rule output to the
+semantic soundness lemma `branchSatisfiableIn_reflFC_diaNeg_mem`. -/
+lemma modalTDiaNegSelf_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn reflFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalTDiaNegSelf b φ w, branchSatisfiableIn reflFC (sf :: b) acc := by
+  intro sf hsf
+  unfold modalTDiaNegSelf at hsf
+  by_cases hcase :
+      b.any (· == (⟨.neg, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex))
+  · simp [hcase] at hsf
+  · simp only [hcase, Bool.false_eq_true, if_false, List.mem_singleton] at hsf
+    subst hsf
+    exact branchSatisfiableIn_reflFC_diaNeg_mem h hmem
 
 end Cslib.Logic.Modal.Tableau
 

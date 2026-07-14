@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
+public import Cslib.Logics.Modal.Tableau.FrameRules
 
 /-! # S4 Loop-Checking Machinery
 
@@ -31,6 +32,16 @@ possible relevant-formula sets) instead of the K/T rank-decrease argument.
 - `sameRelevantSet`: the decidable equality-of-relevant-formula-set test over
   `modalSubfmls φ₀`, used by the S4 minting guard to detect a "loop" (an existing world
   that already witnesses everything the current world would witness).
+- `blockingWorld`: search `modalKnownWorlds b` for an existing world with the same
+  relevant formula set as `w` -- the concrete minting guard.
+- `modalApplyOneS4`: the `φ₀`-parameterized S4 rule-application function (Decision D1):
+  at the two minting shapes, consult `blockingWorld` before falling through to the
+  underlying rule's fresh-world minting.
+- `modalStepBranchS4`/`modalExpandBranchesS4`/`modalTableauS4`: the S4 driver, reusing
+  `Saturation.lean`'s generic driver **definitionally only** (no `RuleApplicationSpec`
+  instance -- Correction 3).
+- `modalHintikkaSetS4`: the S4 Hintikka-set characterization, a small delta over
+  `modalHintikkaSet` (Decision D3).
 
 ## Strategy
 
@@ -173,6 +184,228 @@ lemma sameRelevantSet_trans (φ₀ : Proposition Atom)
   rw [sameRelevantSet_iff] at h1 h2 ⊢
   intro s ψ hψ
   exact (h1 s ψ hψ).trans (h2 s ψ hψ)
+
+/-! ## Minting Guard -/
+
+/-- The concrete minting guard: the least world `w' ∈ modalKnownWorlds b` (other than `w`
+itself) whose relevant formula set matches `w`'s, if any exists. `none` means no blocking
+world exists (the underlying rule should mint a fresh world); `some wBlock` means `w` should
+be closed back to `wBlock` via a loop-back edge instead of minting a new world. -/
+def blockingWorld (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (w : WorldIndex) : Option WorldIndex :=
+  ((modalKnownWorlds b).filter (fun w' => w' != w && sameRelevantSet φ₀ b w w')).min?
+
+omit [Hashable Atom] in
+/-- If `blockingWorld` returns a world, it is a known world of the branch. -/
+lemma blockingWorld_mem_modalKnownWorlds (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
+    (h : blockingWorld φ₀ b w = some wBlock) : wBlock ∈ modalKnownWorlds b := by
+  have hmem := List.min?_mem h
+  exact (List.mem_filter.mp hmem).1
+
+omit [Hashable Atom] in
+/-- If `blockingWorld` returns a world, it is distinct from `w`. -/
+lemma blockingWorld_ne (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
+    (h : blockingWorld φ₀ b w = some wBlock) : wBlock ≠ w := by
+  have hmem := List.min?_mem h
+  have hpred := (List.mem_filter.mp hmem).2
+  simp only [Bool.and_eq_true, bne_iff_ne] at hpred
+  exact hpred.1
+
+omit [Hashable Atom] in
+/-- If `blockingWorld` returns a world, that world has an equal relevant formula set to
+`w`: this is the property Phase 8's pigeonhole argument needs. -/
+lemma blockingWorld_sameRelevantSet (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
+    (h : blockingWorld φ₀ b w = some wBlock) : sameRelevantSet φ₀ b w wBlock = true := by
+  have hmem := List.min?_mem h
+  have hpred := (List.mem_filter.mp hmem).2
+  simp only [Bool.and_eq_true, bne_iff_ne] at hpred
+  exact hpred.2
+
+/-! ## S4 Rule Application -/
+
+/-- The `φ₀`-parameterized S4 rule-application function (Decision D1). Wraps
+`modalApplyOneS4Rules` (K + T + 4, `FrameRules.lean`). At the two **minting** shapes
+(`F(□φ)@w`, `T(◇φ)@w` -- the shapes where the underlying K rule would create a fresh
+world), consults `blockingWorld`:
+- **blocked** (`some wBlock`): returns `.linear []` and `acc.addEdge w wBlock` -- a
+  loop-back edge to the existing blocking world, minting **no** new world.
+- **unblocked** (`none`): falls through unchanged to `modalApplyOneS4Rules` (hence to the
+  underlying rule's fresh-world minting, `modalApplyOneS4_unblocked_eq` below).
+
+This is the one place S4 departs structurally from K: everywhere else, `modalApplyOneS4`
+is exactly `modalApplyOneS4Rules`.
+
+**Design note (deviation from a literal reading of the plan)**: the blocked case uses
+`RuleResult.linear []`, not `.persistent []` or `.notApplicable`. This matters:
+`modalStepBranchGen` (`Saturation.lean`) discards the rule's returned accessibility
+component entirely when the result is `.notApplicable` (its `.notApplicable => none` arm
+never touches `newAcc`), which would silently drop the loop-back edge. And `.persistent []`
+never marks the source formula as expanded, which would cause the *same* blocked formula to
+be re-selected by `b.findSome?` on every subsequent fuel step (wastefully re-adding the same
+edge, and potentially starving other branch formulas of ever being processed within the
+fuel budget). `.linear []` is what K's own fresh-world rules use for exactly this
+one-shot-consumption shape (`Rules.lean`'s `diamondPos`/`boxNeg` arms), and correctly both
+threads `newAcc` through and marks the source formula expanded. -/
+def modalApplyOneS4 (φ₀ : Proposition Atom) : RuleApply Atom :=
+  fun sf b acc =>
+    match sf.sign, sf.formula with
+    | .neg, .box _ =>
+      match blockingWorld φ₀ b sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
+      | none => modalApplyOneS4Rules sf b acc
+    | .pos, .diamond _ =>
+      match blockingWorld φ₀ b sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
+      | none => modalApplyOneS4Rules sf b acc
+    | _, _ => modalApplyOneS4Rules sf b acc
+
+/-- Guard spec (a)/(b), box-negative shape: `modalApplyOneS4 φ₀` at `F(□φ)@w` either (a)
+blocks -- adding exactly one loop-back edge to an existing known world and minting no new
+world -- or (b) does not block, in which case it reduces to the underlying K rule
+(`modalApplyOne`), which mints exactly `modalNextWorld b`. This is Phase 8's dispatch entry
+point for the box-negative minting shape. -/
+lemma modalApplyOneS4_boxNeg_blocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (hblock : blockingWorld φ₀ b w = some wBlock) :
+    modalApplyOneS4 φ₀ ⟨.neg, .box φ, w⟩ b acc = (.linear [], acc.addEdge w wBlock) := by
+  unfold modalApplyOneS4
+  simp [hblock]
+
+/-- Guard spec (b), box-negative shape, unblocked case: reduces to the underlying K rule. -/
+lemma modalApplyOneS4_boxNeg_unblocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorld φ₀ b w = none) :
+    modalApplyOneS4 φ₀ ⟨.neg, .box φ, w⟩ b acc = modalApplyOne ⟨.neg, .box φ, w⟩ b acc := by
+  unfold modalApplyOneS4
+  simp only [hblock]
+  rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg, modalApplyOneT_eq_of_not_boxPos_diaNeg]
+  · exact ⟨by simp, by simp⟩
+  · exact ⟨by simp, by simp⟩
+
+/-- Guard spec (a)/(b), diamond-positive shape (dual of the box-negative pair): blocked case
+adds exactly one loop-back edge and mints no new world. -/
+lemma modalApplyOneS4_diaPos_blocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (hblock : blockingWorld φ₀ b w = some wBlock) :
+    modalApplyOneS4 φ₀ ⟨.pos, .diamond φ, w⟩ b acc = (.linear [], acc.addEdge w wBlock) := by
+  unfold modalApplyOneS4
+  simp [hblock]
+
+/-- Guard spec (b), diamond-positive shape, unblocked case: reduces to the underlying K
+rule, which mints exactly `modalNextWorld b`. -/
+lemma modalApplyOneS4_diaPos_unblocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorld φ₀ b w = none) :
+    modalApplyOneS4 φ₀ ⟨.pos, .diamond φ, w⟩ b acc = modalApplyOne ⟨.pos, .diamond φ, w⟩ b acc := by
+  unfold modalApplyOneS4
+  simp only [hblock]
+  rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg, modalApplyOneT_eq_of_not_boxPos_diaNeg]
+  · exact ⟨by simp, by simp⟩
+  · exact ⟨by simp, by simp⟩
+
+/-- `modalApplyOneS4` agrees with `modalApplyOneS4Rules` (hence with the K/T/4 rule set)
+outside the two minting shapes: the guard only ever intervenes at `F(□φ)@w`/`T(◇φ)@w`. -/
+lemma modalApplyOneS4_eq_of_not_boxNeg_diaPos
+    (φ₀ : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneS4 φ₀ sf b acc = modalApplyOneS4Rules sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneS4
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
+/-! ## S4 Driver -/
+
+/-- One-step branch expansion for the S4 (reflexive-transitive) tableau: the generic driver
+(`modalStepBranchGen`, `Saturation.lean`) instantiated at `apply := modalApplyOneS4 φ₀`.
+Mirrors `modalStepBranchT` (`TDriver.lean`). -/
+def modalStepBranchS4 (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility) :=
+  modalStepBranchGen (modalApplyOneS4 φ₀) b e acc
+
+/-- Fuel-based expansion of a list of S4-system branches: the generic driver
+(`modalExpandBranchesGen`, `Saturation.lean`) instantiated at `apply := modalApplyOneS4 φ₀`.
+Mirrors `modalExpandBranchesT`. -/
+def modalExpandBranchesS4 (φ₀ : Proposition Atom)
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) : ModalTableauResult Atom :=
+  modalExpandBranchesGen (modalApplyOneS4 φ₀) branches expandedSets accs fuel
+
+/-- The S4 (reflexive-transitive) modal tableau decision procedure: the generic entry point
+(`modalTableauGen`, `Saturation.lean`) instantiated at `apply := modalApplyOneS4 φ`, starting
+the signed tableau from `F(φ)` at world `0`. `φ` is in scope as the guard's `φ₀` parameter
+(Decision D1) throughout the run. **No** `RuleApplicationSpec` instance exists for
+`modalApplyOneS4` (Correction 3) -- S4 reuses the generic driver definitionally only. -/
+def modalTableauS4 (φ : Proposition Atom) : ModalTableauResult Atom :=
+  modalTableauGen (modalApplyOneS4 φ) φ
+
+/-! ## S4 Hintikka Set -/
+
+/-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),
+with `modalApplyOne` replaced by `modalApplyOneS4 φ₀` in conjunct 2 (Decision D3).
+Conjuncts 1, 3, 4 are unchanged and apply-agnostic:
+
+1. The branch is not closed.
+2. Every non-minting-shaped formula's `modalApplyOneS4 φ₀` output is already present on
+   the branch (the saturation condition, now stated against the S4 rule set: K + T + 4 +
+   the minting guard).
+3. Box-negative witness: `F(□φ)@w ∈ b` implies some successor `w'` of `w` has `F(φ)@w' ∈ b`.
+4. Diamond-positive witness: `T(◇φ)@w ∈ b` implies some successor `w'` of `w` has
+   `T(φ)@w' ∈ b`.
+
+Conjuncts 3/4 are existential over successors, and a **loop-back edge satisfies them
+natively** (Decision D3): this is the favourable accident that makes equality-blocking
+compatible with the Hintikka characterization without any change to its shape. Per Decision
+D4, this predicate is consumed as a *hypothesis* by the bridge lemmas in this file (not
+proved from the driver here) -- `modalExpandBranchesS4_hintikka` (Phase 9, 510-gated) is
+where a completed S4 tableau's open branch is shown to satisfy it. -/
+def modalHintikkaSetS4 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  isModalClosed b = false ∧
+  (∀ sf ∈ b,
+    let (result, _) := modalApplyOneS4 φ₀ sf b acc
+    match sf.sign, sf.formula with
+    | .neg, .box _ => True    -- F(□φ): minting-guarded rule; handled by conjunct 3
+    | .pos, .diamond _ => True  -- T(◇φ): minting-guarded rule; handled by conjunct 4
+    | _, _ =>
+      match result with
+      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .notApplicable => True) ∧
+  -- Box-negative witness: F(□φ)@w on the branch implies a successor world with F(φ)
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.neg, .box φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.neg, φ, w'⟩ ∈ b) ∧
+  -- Diamond-positive witness: T(◇φ)@w on the branch implies a successor world with T(φ)
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
+
+/-! ## Sanity Checks
+
+`modalTableauS4` was confirmed to evaluate and close exactly on the T and 4 components via
+an interactive `#eval` session (not embedded in this file as a permanent `#eval`/`#guard`/
+`native_decide` declaration: this file's `module`/`public meta import` boundary makes all
+three of those forms either fail to elaborate (`Proposition.atom` is not `meta`-accessible
+without an additional `public meta import`) or fail at the native-code-lookup stage
+(`modalFuel`'s compiled implementation is not resolvable in this configuration) -- no
+existing file in `Cslib/Logics/Modal/Tableau/` uses any of these forms, confirming this is a
+structural constraint of the module system here, not specific to this phase's code).
+Confirmed interactively:
+- `□p → p` (the T schema) evaluates to `.closed`: S4 is reflexive.
+- `□p → □□p` (the 4 schema) evaluates to `.closed`: S4 is transitive -- this is the
+  component that distinguishes S4 from T, and the entire reason this task's 4-rule exists.
+- A bare atom `p` evaluates to `.openBranch _ _`: S4 does not prove arbitrary atoms. -/
 
 end Cslib.Logic.Modal.Tableau
 

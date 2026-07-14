@@ -388,16 +388,16 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 5: Minting guard, `modalApplyOneS4`, driver defs, `modalHintikkaSetS4` [NOT STARTED]
+### Phase 5: Minting guard, `modalApplyOneS4`, driver defs, `modalHintikkaSetS4` [COMPLETED]
 
 - **Goal**: Build the loop-checking minting guard and assemble the complete S4 driver.
   This is the phase that makes S4 a real, executable tableau.
 - **Tasks**:
-  - [ ] `blockingWorld phi0 b w : Option WorldIndex` — search `modalKnownWorlds b`
+  - [x] `blockingWorld phi0 b w : Option WorldIndex` — search `modalKnownWorlds b`
         (Branch.lean:89) for the least `w'` with `sameRelevantSet phi0 b w w' = true` and
         `w' != w`. Prove: result is in `modalKnownWorlds b`, and the returned world has an
         equal relevant set.
-  - [ ] `modalApplyOneS4 (phi0 : Proposition Atom) : RuleApply Atom` (Decision D1 —
+  - [x] `modalApplyOneS4 (phi0 : Proposition Atom) : RuleApply Atom` (Decision D1 —
         `phi0`-parameterized, partially applied). Wrap `modalApplyOneS4Rules`. At the two
         **minting** shapes (`isMintingShaped`: `(.neg, .box _)` and `(.pos, .diamond _)`,
         FmpMeasure.lean:786), consult `blockingWorld`:
@@ -405,29 +405,47 @@ this repo. Message: `task 506 phase {P}: {name}`.
           `acc.addEdge w wBlock` (loop-back edge, **no** new world);
         - unblocked -> fall through to the underlying rule's fresh-world minting.
         Record in the docstring that this is the one place S4 departs structurally from K.
-  - [ ] `modalStepBranchS4 phi0 := modalStepBranchGen (modalApplyOneS4 phi0)`,
+        *(deviation: altered -- the blocked case uses `RuleResult.linear []`, not
+        `.persistent []` or `.notApplicable`. `modalStepBranchGen` discards the returned
+        accessibility component entirely when the result is `.notApplicable` (its
+        `.notApplicable => none` arm never references `newAcc`), which would silently drop
+        the loop-back edge; and `.persistent []` never marks the source formula expanded,
+        which would cause `b.findSome?` to re-select the same blocked formula on every
+        subsequent fuel step. `.linear []` is what K's own fresh-world rules
+        (`diamondPos`/`boxNeg`) use for exactly this one-shot-consumption shape, and
+        correctly both threads `newAcc` through and marks the source formula expanded.
+        Documented in `modalApplyOneS4`'s docstring.)*
+  - [x] `modalStepBranchS4 phi0 := modalStepBranchGen (modalApplyOneS4 phi0)`,
         `modalExpandBranchesS4 phi0 := modalExpandBranchesGen (modalApplyOneS4 phi0)`,
         `modalTableauS4 phi := modalTableauGen (modalApplyOneS4 phi) phi`. Mirror
         TDriver.lean:62-86, where the three driver defs come first, before any lemma.
         **Do not** attempt `RuleApplicationSpec` (Correction 3).
-  - [ ] Guard spec lemmas: (a) every step either adds no world or adds exactly
+  - [x] Guard spec lemmas: (a) every step either adds no world or adds exactly
         `modalNextWorld b`; (b) when blocked, `acc` gains exactly one edge to an existing
         known world and `b` gains no new label. These are Phase 8's inputs — state them to
         be consumed there.
-  - [ ] `modalHintikkaSetS4 phi0 b acc` — copy `modalHintikkaSet`'s four conjuncts
+  - [x] `modalHintikkaSetS4 phi0 b acc` — copy `modalHintikkaSet`'s four conjuncts
         (Saturation.lean:423-443) with `modalApplyOne` replaced by `modalApplyOneS4 phi0`
         in conjunct 2. Conjuncts 1/3/4 are unchanged and apply-agnostic. Docstring must
         record the D3 observation: conjuncts 3/4 are existential over successors, so a
         loop-back edge satisfies them natively — this is why blocking is compatible with
         the Hintikka characterization.
-  - [ ] CI gate; commit `LoopChecking.lean` only.
+  - [x] CI gate; commit `LoopChecking.lean` only.
 - **Timing**: 2.5 hours (~400 lines)
 - **Depends on**: 1, 2
 - **Files to modify**: `Cslib/Logics/Modal/Tableau/LoopChecking.lean`.
 - **Verification**: `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; zero sorry;
   `modalTableauS4` typechecks and **evaluates** — sanity-check with `#eval modalTableauS4`
   on `box p -> p` (should close) and on `p` (should return an open branch). No
-  `RuleApplicationSpec` instance exists for S4.
+  `RuleApplicationSpec` instance exists for S4. *(deviation: altered -- the sanity checks
+  were confirmed interactively via `lean_run_code`/`#eval` (T-schema `□p → p` closes,
+  4-schema `□p → □□p` closes, bare atom `p` stays open) rather than embedded as permanent
+  `#eval`/`#guard`/`native_decide` declarations in LoopChecking.lean: all three forms fail
+  in this file's `module` compilation context -- `#guard`/`native_decide` fail at either
+  `meta`-accessibility or native-symbol-lookup for `modalFuel`, and `decide` cannot
+  kernel-reduce `modalFuel`'s triple-exponential closed form in reasonable time even for
+  tiny formulas. No existing file in `Cslib/Logics/Modal/Tableau/` uses any of these forms,
+  confirming this is a structural constraint, not a defect introduced here.)*
 
 ---
 

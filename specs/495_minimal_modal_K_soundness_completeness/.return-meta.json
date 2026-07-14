@@ -1,0 +1,59 @@
+{
+  "status": "researched",
+  "started_at": "2026-07-14T00:00:00Z",
+  "completed_at": "2026-07-14T00:00:00Z",
+  "artifacts": [
+    "specs/495_minimal_modal_K_soundness_completeness/reports/01_minimal-modal-k-soundness-completeness.md"
+  ],
+  "partial_progress": {
+    "stage": "research_done",
+    "details": "Framework located; efq-dependency analysis complete; MK design + 5-phase decomposition delivered"
+  },
+  "metadata": {
+    "session_id": "sess_1784044271_09e821_495",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "task": 495,
+    "phase": "research",
+    "task_type": "cslib",
+    "reuse_first": {
+      "new_abstractions_recommended": false,
+      "primary_reuse": [
+        "QuasiPrime + quasi_prime_exclusion + imp_refuting_theory + box_refuting_theory + dia_refuting_theory (Constructive/Segment.lean, SegmentLindenbaum.lean)",
+        "MValid + BForces + bforces_persistence (Semantics/Birelational.lean)",
+        "botForces-parametric truth_bot_case (Intuitionistic/TruthLemma.lean)",
+        "structural templates: MinLindenbaum.lean, MinStrongCompleteness.lean, IK.lean"
+      ]
+    },
+    "crux": {
+      "question": "which IK steps depend on efq/explosion and how they change over minimal base",
+      "roleA_consistency": "REMOVED: worlds = quasi-prime (Cons=fun _ => True); modal_imp_witness/prime_exclusion consistency args vanish; already delivered efq-free in SegmentLindenbaum",
+      "roleB_bot_base_cases": "OBSTRUCTION: boxOr_of_boxDisj base = (bot -> box bot) [efq, not MK theorem]; diaOr_of_diaDisj base = (dia bot -> bot) [Nd/h_dbot, not MK axiom]; resolved via fallible worlds + dia_refuting_theory, NOT IK bigOr machinery",
+      "roleC_completeness_split": "REMOVED: no consistency case split; single-branch contrapositive like min_strong_completeness",
+      "toplevel_toon_base_cases": "REPLACEABLE: bigAnd/top-via-efq base cases derive top=bot->bot, provable in minimal from implyK+implyS"
+    },
+    "minimal_bot_treatment": {
+      "worlds": "quasi-prime theories (deductively closed + disjunction property, NO consistency; fallible worlds admitted, Set.univ quasi-prime)",
+      "botForces": "fun w => bot in w.val",
+      "bot_truth_case": "Iff.rfl (no canonical_bot_not_mem, no efq)",
+      "semantics": "MValid (birelational, exists-diamond, F1/F2 confluence) -- NOT CKValid; MK keeps Cd+Idb which are MValid-valid, drops efq+Nd"
+    },
+    "design": {
+      "namespace": "Cslib.Logic.Modal",
+      "new_subtree": "Cslib/Logics/Modal/Metalogic/Minimal/",
+      "axiom_datatype": "MKModalAxiom = IKModalAxiom minus efq minus dbot (8 MinPropAxiom schemata + k,kdia,cd,idb)",
+      "phases": [
+        "P1 MK.lean: MKModalAxiom + mk_axiom_sound(MValid)/mk_soundness/mk_soundness_derivable/mk_consistent (~150-200L, low risk)",
+        "P2 MinPrimeTheory.lean: reuse QuasiPrime+quasi_prime_exclusion; add MinCanonicalPrimeWorld, Preorder, canonicalVal, minBotForces, min_head_realization",
+        "P3 MinCanonicalModel.lean: canonicalR (box+diamond clause), box/diamond witnesses from box_refuting_theory/dia_refuting_theory, f1/f2 -- CRUX/highest risk",
+        "P4 MinTruthLemma.lean: min_canonical_truth_lemma (bot=Iff.rfl; imp/box/diamond via quasi-prime witnesses)",
+        "P5 MinCompleteness.lean: mk_completeness/mk_soundness_completeness single-branch; wire Cslib.lean barrel"
+      ]
+    },
+    "mathlib_needed": [],
+    "sorry_risk": "P1/P2/P4/P5 low; P3 diamond-witness medium (no line-for-line exists-diamond-over-quasi-prime precedent; CK uses segments, prop Min has no modality). Zero-debt: if P3 unclosable, mark [BLOCKED] + escalate, never sorry.",
+    "bibkeys_verified": ["Simpson1994", "Wijesekera1990", "ChagrovZakharyaschev1997", "Johansson1937"],
+    "recommended_next_action": "/plan 495 (consider --hard for P3)"
+  }
+}

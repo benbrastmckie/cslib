@@ -10,7 +10,7 @@
   "phases_completed": 2,
   "phases_total": 9,
   "plan": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
-  "summary": "Phases 1 (PrimeTheory.lean, commit be8f2eb0) and 2a (CanonicalModel.lean definitions: CanonicalPrimeWorld, Preorder, canonicalVal, canonicalR; commit 4fd37213) remain green and untouched. Phase 2b (canonical_box_witness) is BLOCKED: partial progress established that {psi | box psi in w} is ModalSetConsistent (via a deductively-closed variant of derive_box_from_box_context plus a K-distribution+EFQ argument), but the prime extension via modal_prime_exclusion only secures canonicalR's box clause, not its diamond clause (every prime theory contains the bare theorem top, forcing dia-top in w.val as a precondition of canonicalR w v holding for ANY v -- a precondition not obviously discharged by the reported IK/CK axiom set without an explicit seriality-style axiom). This same obstruction blocks canonical_diamond_witness (2c), canonical_f1/f2 (2d), and everything downstream (3a-4) since TruthLemma.lean/Completeness.lean cannot be assembled without the witnesses. No sorry/admit/axiom was introduced; CanonicalModel.lean is unchanged from its Phase 2a committed state.",
+  "summary": "Phases 1 (PrimeTheory.lean, commit be8f2eb0) and 2a (CanonicalModel.lean definitions, commit 4fd37213) remain green and untouched. Phase 2b (canonical_box_witness) was previously BLOCKED on an apparent 'diamond-top precondition' (see prior handoff / commit d5a3101b). This second dispatch identified the ROOT CAUSE: that framing assumed the witness pair is (w, v) with w unchanged, which is false. Cross-checked against a working reference formalization (github.com/ianshil/CK, Coq mechanization of CK/IK completeness with a definitionally-identical canonical relation) confirms the correct construction needs an existentially-quantified EXTENDED world w' >= w (seeded with the diamond-image of the box-witness world u), not w itself -- this fully resolves the diamond-top red herring. However, building w' requires excluding an entire SET of formulas {psi | box psi not in u} simultaneously (a 'Lindenbaum pair' construction), which is infrastructure that does not currently exist anywhere in Cslib (modal_prime_exclusion and Metalogic.prime_exclusion both only exclude a single formula). Adding this generalization is a substantial (150+ line), foundational, shared-infrastructure change to Foundations/Logic/Metalogic/PrimeExclusion.lean, out of scope for this single-file-territory, single-phase dispatch. No sorry/admit/axiom introduced; CanonicalModel.lean is unchanged from its Phase 2a committed state (verified via git diff --stat and a clean lake build).",
   "sorry_inventory": [],
   "new_sorries": 0,
   "new_axioms": 0,
@@ -18,12 +18,12 @@
     {
       "phase": "2b",
       "lemma": "canonical_box_witness",
-      "description": "Securing canonicalR's diamond clause (forall psi in v.val, dia psi in w.val) for a box-clause witness v requires dia-top in w.val as a precondition (since top is always in v.val for any deductively-closed v). Could not establish, from the reported IK/CK axiom set (K-box, K-dia, dia-bot->bot, dia(A or B)->diaA or diaB), that dia-top in w.val (or an equivalent seriality-style fact) is always available when box-phi not in w.val. Simpson 1994's own proof of the analogous F2 confluence fact (chunk_0223-0227) invokes an unidentified 'axiom 5 of IK' in a multi-step argument that could not be reconstructed with confidence from the available OCR (ambiguous box/diamond glyphs).",
-      "full_note": "See Phase 2b BLOCKER note in specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md for the complete technical writeup, including the 5 investigative steps taken and 3 candidate resolutions (a/b/c)."
+      "description": "canonical_box_witness's TRUE conclusion is `exists w' v : CanonicalPrimeWorld Axioms, w <= w' /\\ canonicalR w' v /\\ phi not in v.val` (an extended w', NOT `exists v, canonicalR w v /\\ phi not in v.val` as the v1/v2 plan/report sketch assumed). Building w' requires a 'Lindenbaum pair' prime-exclusion lemma (exclude a whole set Sigma = {box B | B not in u.val} simultaneously, not a single formula) which does not exist in PrimeTheory.lean or Foundations/Logic/Metalogic/PrimeExclusion.lean. modal_prime_exclusion / Metalogic.prime_exclusion only support single-formula exclusion.",
+      "full_note": "See the 'UPDATE (second Phase 2b dispatch)' block appended after the original BLOCKER note for Phase 2b in specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md for the complete technical writeup: the step-by-step construction (seed w' with diamond-images of u, exclude Sigma via the missing pair-exclusion lemma), the reference formalization cross-check (ianshil/CK, theories/Completeness_th/general_th_completeness.v, cmreach + truth_lemma Box case), why this resolves the prior 'diamond-top precondition' framing, and the concrete recommended next steps."
     }
   ],
   "requires_user_review": true,
-  "continuation_context": "Dispatch /research 480 --hard --lit focused NARROWLY on: whether/how the IK-dia axiom set discharges a seriality-style precondition (dia-top, or equivalent) needed by canonical_box_witness and canonical_diamond_witness simultaneously to satisfy BOTH clauses of canonicalR for the same witness world. Consult wijesekera_1990_constructivemodallogicsi chunks ~0040-0045 (prime-filter accessibility) and simpson_1994_intuitionisticmodallogic chunks 0215-0230 (Lemma 3.3.1 Monotonicity, Lemma 3.3.2 Prime lemma, F2 proof using 'axiom 5 of IK') -- ideally cross-referenced against a cleaner secondary source (e.g. Wolter & Zakharyaschev survey of IK canonical models) since the current OCR is ambiguous on box vs diamond glyphs in the crucial multi-step F2 argument. Do NOT re-attempt Phase 2b/2c without this research resolving the precondition question -- re-attempting blind risks either an incorrect canonicalR definition or an unclosable proof.",
+  "continuation_context": "The literature/mathematical question from the PRIOR handoff is now RESOLVED (no further /research needed on 'does IK/CK force diamond-top'). What remains is an infrastructure gap: add a Lindenbaum-pair / set-exclusion generalization of Metalogic.prime_exclusion (e.g. `Metalogic.prime_pair_exclusion`) to Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean -- given Admissible D Cons S, S consistent with excluding a SET Sigma (no finite subset of S derives any finite disjunction of Sigma), produce a prime T extending S with T disjoint from Sigma. Mirror the existing Zorn's-lemma argument in prime_exclusion (swap 'phi not in T' for 'Sigma inter T = empty' throughout, generalize the cut/EFQ-bridge hypotheses from single-formula to finite-disjunction form); cross-reference github.com/ianshil/CK's `Lindenbaum_pair`/`pair_extCKH_prv` for the exact formulation shape that composes cleanly with Zorn's lemma. This is foundational shared infrastructure (used by every Metalogic file), so it likely warrants its OWN task/phase with its own review, separate from task 480's Intuitionistic/ subtree. Once available, re-dispatch Phase 2b using the seeded-w' construction documented in the plan's Phase 2b UPDATE block; canonical_diamond_witness (2c) will need the mirror-image construction (seed the box-side instead of the diamond-side) using the same new lemma.",
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/PrimeTheory.lean",
@@ -33,12 +33,12 @@
     {
       "path": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
       "type": "lean_module",
-      "summary": "Phase 2a, COMPLETED, commit 4fd37213. Unchanged this dispatch (no new content added; Phase 2b could not be safely attempted in-file without risking sorry)."
+      "summary": "Phase 2a, COMPLETED, commit 4fd37213. Unchanged this dispatch -- verified canonicalR's definition against the ianshil/CK reference formalization's cmreach (definitionally identical), confirming Phase 2a is correct as committed. No new content added; Phase 2b's actual proof needs infrastructure not yet present (see blockers)."
     },
     {
       "path": "specs/480_intuitionistic_modal_framework/plans/02_intuitionistic-modal-framework-hard.md",
       "type": "plan",
-      "summary": "Phase 2b marked [BLOCKED] with full blocker documentation (partial ModalSetConsistent progress + the diamond-clause precondition obstruction)."
+      "summary": "Phase 2b's BLOCKER note extended with an 'UPDATE (second Phase 2b dispatch)' block: root-cause identification (seeded w' extension, not w itself), reference-formalization cross-check, and concrete infrastructure recommendation. Still marked [BLOCKED]."
     }
   ],
   "verification": {
@@ -48,7 +48,7 @@
     "axiom_count": 0,
     "vacuous_count": 0,
     "untouched_classical_verified": true,
-    "note": "No Lean files modified this dispatch; only the plan file was updated. Build status inherited from Phase 2a commit 4fd37213."
+    "note": "No Lean files modified this dispatch (git diff --stat confirms zero changes under Cslib/); only the plan file and this handoff were updated. Build reverified clean via `lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel` (595 jobs, success) at the start of this dispatch."
   },
-  "next_action_hint": "Dispatch /research 480 --hard --lit per continuation_context above before resuming implementation at Phase 2b."
+  "next_action_hint": "Add a Lindenbaum-pair (set-exclusion) generalization of Metalogic.prime_exclusion to Foundations/Logic/Metalogic/PrimeExclusion.lean (likely its own task, given it is shared foundational infrastructure), then re-dispatch Phase 2b using the seeded-w' construction documented in the plan."
 }

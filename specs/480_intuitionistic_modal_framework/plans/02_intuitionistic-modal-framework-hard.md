@@ -286,6 +286,75 @@ nothing; no new `axiom`), **untouched-classical** (`git diff --stat` shows no ch
   paper over this. `CanonicalModel.lean` remains exactly as committed at Phase 2a (`4fd37213`):
   definitions only, no witness proofs attempted in the file itself.
 
+**UPDATE (second Phase 2b dispatch) — root cause identified, concrete fix known, still BLOCKED
+on missing infrastructure**:
+
+- **The `◇⊤` framing above was a red herring caused by an unnecessary assumption.** The prior
+  dispatch implicitly assumed the witness pair must be `(w, v)` with `w` **unchanged** (`w' := w`).
+  That assumption is false and is exactly why the `◇⊤`-precondition seemed unavoidable: with `w`
+  fixed, `v`'s content (beyond `{ψ|□ψ∈w.val}`) is uncontrolled, so nothing forces `∀χ∈v, ◇χ∈w.val`.
+- **Verified fix, cross-checked against a working reference formalization**
+  (`github.com/ianshil/CK`, Coq mechanization of CK/IK completeness for exactly this birelational,
+  prime-theory canonical model; file `theories/Completeness_th/general_th_completeness.v`, the
+  `cmreach`/`truth_lemma` "Box ψ" case, lines ~140-200). Its `cmreach` relation is *definitionally
+  identical* to our `canonicalR` (`(∀A,□A∈th P0→A∈th P1) ∧ (∀A,A∈th P1→◇A∈th P0)`), confirming
+  Phase 2a's `canonicalR` is correct. Its box-witness construction, transliterated to our setting:
+  1. **Step 1** (this is exactly the already-`[x]`-checked task above): build `u` via
+     `modal_prime_exclusion` on `{ψ|□ψ∈w.val}` excluding `φ`, giving `{ψ|□ψ∈w.val} ⊆ u.val` and
+     `φ ∉ u.val`. (Matches Coq's `Lindenbaum_cworld` call producing `w` there.)
+  2. **Step 2 (the missing piece)**: build a **second, SEEDED world `w'`** extending `w` — i.e.
+     `w' ≥ w` in the canonical `Preorder`, **not `w' = w`** — as a prime extension of
+     `w.val ∪ {◇A | A ∈ u.val}` (seeding `w'` with the diamond-image of `u`'s content *directly
+     secures the diamond clause of `canonicalR w' u` by construction*, since every `A ∈ u.val` then
+     has `◇A ∈ w'.val` trivially), **while simultaneously excluding the whole set**
+     `Σ := {□B | B ∉ u.val}` (so that `w'`'s box-context stays bounded by `u.val`, securing the
+     *box* clause of `canonicalR w' u`). Consistency of `w.val ∪ {◇A|A∈u.val}` relative to
+     excluding `Σ` is where axiom `K◇` (`□(A→B)→(◇A→◇B)`) is used (Coq's proof, same file, uses the
+     analogous `Kd`/`K_rule` lemmas).
+  3. The final witness is `⟨w', u⟩` with `w ≤ w'` and `canonicalR w' u ∧ φ ∉ u.val` — **not**
+     `⟨w, v⟩` as the v1/v2 plan sketch and report §6.5 assumed. This is consistent with `BForces_box`
+     unfolding to `∀w'≥w, ∀u, r w' u → force u φ` (already documented in the Phase 2a docstring) —
+     the outer `∀w'≥w` is not vacuous/decorative, it is *load-bearing* and is exactly what the truth
+     lemma's box case (Phase 3b) will consume.
+  4. **This resolves the `◇⊤` framing entirely**: `w'` is built fresh with whatever diamond content
+     `u` needs; `w`'s own pre-existing content is never required to already contain `◇⊤` or any
+     other diamond fact.
+- **The genuine remaining gap is infrastructure, not mathematics**: step 2's "exclude the whole set
+  `Σ = {□B|B∉u.val}`" cannot be done with `modal_prime_exclusion` (`PrimeTheory.lean`) or
+  `Metalogic.prime_exclusion` (`Foundations/Logic/Metalogic/PrimeExclusion.lean`) as they exist
+  today — both exclude a **single** formula `phi`, not an arbitrary set `Σ`. The Coq reference uses
+  a strictly more general "Lindenbaum pair" lemma (`Lindenbaum_pair` / `pair_extCKH_prv`: given
+  `Γ ⊬ Σ` — no finite subset of `Γ` derives any finite disjunction of `Σ` — produce a prime
+  `T ⊇ Γ` with `T ∩ Σ = ∅`). **No such lemma currently exists anywhere in Cslib.** Adding it is a
+  natural, self-contained generalization of `Metalogic.prime_exclusion`'s existing Zorn's-lemma
+  argument (swap the domain `{T|S⊆T∧Admissible D Cons T∧phi∉T}` for
+  `{T|S⊆T∧Admissible D Cons T∧Σ∩T=∅}` and adapt the cut/EFQ-bridge lemmas from single-formula to
+  finite-disjunction form), but it is foundational, shared (`Foundations/Logic/Metalogic/`), and
+  estimated at 150+ lines — well beyond one bounded phase, and out of the single-file scope this
+  dispatch was territory-bounded to (`CanonicalModel.lean` only; `PrimeExclusion.lean` is
+  load-bearing shared infrastructure used by every other Metalogic file in the repo, so extending it
+  needs its own reviewed phase).
+- **Recommended concrete next steps** (supersedes the "narrow `/research`" recommendation above,
+  which is no longer necessary — the literature question is resolved):
+  1. New phase (or new task, e.g. via `/spawn 480 "need Lindenbaum-pair prime exclusion"`): add
+     `Metalogic.prime_pair_exclusion` (name illustrative) to `PrimeExclusion.lean`:
+     `Admissible D Cons S → S ∩ Σ = ∅ → (∀ Σ' : List F, (∀x∈Σ',x∈Σ) → ¬ D.Deriv (S-as-context) (list_disj Σ')) → ∃ T, S⊆T ∧ PrimeAdmissible D Cons T ∧ T∩Σ=∅`
+     (exact non-derivability hypothesis shape TBD by whoever implements it; mirror
+     `Lindenbaum_pair`/`pair_extCKH_prv` from `ianshil/CK` for the precise formulation that composes
+     cleanly with Zorn's lemma).
+  2. Re-dispatch Phase 2b (and, by the same construction, 2c) using the seeded-`w'` technique above
+     plus the new lemma. Expect `canonical_box_witness`'s corrected signature to be
+     `∃ w' v : CanonicalPrimeWorld Axioms, w ≤ w' ∧ canonicalR w' v ∧ φ ∉ v.val` (not
+     `∃ v, canonicalR w v ∧ φ∉v.val` as originally sketched) — Phase 3b's "`canonical_box_witness` +
+     heredity over `≤∘R`" note already anticipated needing a `≤`-step, so this is a **refinement of
+     the plan, not a re-opening**: no design decision listed in Postmortem Constraints is
+     contradicted; `canonicalR`'s two-clause definition (Phase 2a) is unchanged and confirmed correct
+     by the reference formalization.
+  3. `canonical_diamond_witness` (2c) will need the mirror-image construction (seed the *box*-side
+     instead of the diamond-side); the same new pair-exclusion lemma covers it.
+- Still **no `sorry`/`admit`/`axiom` introduced**; `CanonicalModel.lean` is still byte-for-byte
+  unchanged from Phase 2a (`4fd37213`).
+
 ### Phase 2c: canonical_diamond_witness [NOT STARTED] — HIGHEST RISK
 
 - **Goal:** Prove the diamond witness lemma (primitive `◇`, no classical analogue).

@@ -220,7 +220,11 @@ consumes it in Phase 4 and `ConstructiveLatticeMonotonicity` imports CS4 (transi
 
 ---
 
-### Phase 3: Transcribe probe Part D (canonical frame-condition verification) [NOT STARTED]
+### Phase 3: Transcribe probe Part D (canonical frame-condition verification) [COMPLETED]
+
+*(Deviation: three `show` tactics from the probe were changed to `change` — CSLib's
+`linter.style.show` flags `show` invocations that change the goal via defeq unfolding as
+should-be-`change`. Purely mechanical, same proof term, required for zero-warning `lake build`.)*
 
 **Goal**: Prove the canonical CS4 model satisfies `cs4FC'`.
 

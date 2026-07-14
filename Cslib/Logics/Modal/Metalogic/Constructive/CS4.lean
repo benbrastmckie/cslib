@@ -323,4 +323,43 @@ def CS4Segment.diaRefuting {H : Set (Proposition Atom)} (hH : QuasiPrime CS4Moda
   excl_head := by rintro A' ⟨rfl⟩; exact h_not
   tail_eq := rfl
 
+/-! ### Part D: the weakened frame condition and its canonical verification -/
+
+/-- `cs4Mreach` is reflexive: derived from `boxInv H ⊆ H` (`tBox`, via `cs4_boxInv_subset`)
+plus `excl_head`. This T-invariant comes for free from the axioms, so unlike `CTSegment`,
+`CS4Segment` needs no separate `refl` field. -/
+theorem cs4_refl (P : CS4Segment Atom) : cs4Mreach P P := by
+  change P.seg.head ∈ P.seg.tail
+  rw [P.tail_eq]
+  exact ⟨P.seg.head_qprime, cs4_boxInv_subset P.seg.head_qprime, P.excl_head⟩
+
+/-- The canonical model satisfies `cs4FC'`'s first (transitivity-style) existential clause.
+Discharges its `boxInv` obligation via `cs4_boxInv_trans`. -/
+theorem cs4_fc4 {w u u' t : CS4Segment Atom} (hwu : cs4Mreach w u) (hle : u ≤ u')
+    (hu't : cs4Mreach u' t) : ∃ v : CS4Segment Atom, w ≤ v ∧ cs4Mreach v t := by
+  refine ⟨CS4Segment.ofHead w.seg.head_qprime, Set.Subset.refl _, ?_⟩
+  change t.seg.head ∈ cs4Tail w.seg.head none
+  refine ⟨t.seg.head_qprime, ?_, by rintro A ⟨⟩⟩
+  refine cs4_boxInv_trans (K := u'.seg.head) w.seg.head_qprime ?_ ?_
+  · exact fun B hB => hle (w.seg.box_reflect B hB u.seg.head hwu)
+  · exact fun B hB => u'.seg.box_reflect B hB t.seg.head hu't
+
+/-- The canonical model satisfies `cs4FC'`'s second (fourDia-style) existential clause.
+Discharges its `boxInv` obligation via `cs4_boxInv_trans`. -/
+theorem cs4_fcdia {w u : CS4Segment Atom} (hwu : cs4Mreach w u) :
+    ∃ u' : CS4Segment Atom, u ≤ u' ∧ ∀ t : CS4Segment Atom, cs4Mreach u' t → cs4Mreach w t := by
+  have hmem : u.seg.head ∈ cs4Tail w.seg.head w.excl := w.tail_eq ▸ hwu
+  refine ⟨⟨cs4Seg u.seg.head_qprime w.excl hmem.2.2, w.excl, hmem.2.2, rfl⟩,
+    Set.Subset.refl _, ?_⟩
+  intro t hu't
+  have hu't' : t.seg.head ∈ cs4Tail u.seg.head w.excl := hu't
+  change t.seg.head ∈ w.seg.tail
+  rw [w.tail_eq]
+  exact ⟨t.seg.head_qprime,
+    cs4_boxInv_trans w.seg.head_qprime hmem.2.1 hu't'.2.1, hu't'.2.2⟩
+
+/-- **The canonical CS4 model satisfies the weakened frame condition.** -/
+theorem cs4FC'_cs4Mreach : cs4FC' (@cs4Mreach Atom) :=
+  ⟨cs4_refl, fun h1 h2 h3 => cs4_fc4 h1 h2 h3, fun h => cs4_fcdia h⟩
+
 end Cslib.Logic.Modal

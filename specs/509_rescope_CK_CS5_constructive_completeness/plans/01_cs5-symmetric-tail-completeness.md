@@ -60,15 +60,25 @@ From `reports/01_cs5-symmetric-tail-construction.md`:
   *mechanically excluded* (`cs5_symmetric_tail_box_gap`) and shown *non-vacuous* (a three-world
   `cs5FC''` countermodel realizes exactly its hypotheses).
 - **The open sub-problem is published, as Pacheco's Lemma 18** (`Collapsing Constructive and
-  Intuitionistic Modal Logics`, arXiv:2408.16428v2). Pacheco works in exactly our setting
-  (`CKB := CK + {B□, B◇}`, fallible worlds, primitive ∀∃ diamond) and his canonical relation
+  Intuitionistic Modal Logics`, arXiv:2408.16428, math.LO, 2024). Pacheco works in exactly our
+  setting (`CKB := CK + {B□, B◇}`, fallible worlds, primitive ∀∃ diamond) and his canonical relation
   `∼c` is our `cs5Tail` (the report verifies the identity via `cs5_boxInv_subset_iff`). His Lemma 18
-  is the pair-Zorn construction the box-backward case needs. **But the report has already audited
-  its primeness step (Lemma 16) and found it unsound**: it argues `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`, which is
-  negation-completeness — the exact illicit move prime theories do not license. The report quotes the
-  broken step directly. The pair-Zorn *skeleton* is portable; the primeness step must be reproved,
-  modelled on the in-library `set_maximal_is_prime` (`PrimeExclusion.lean:428`), which does the
-  one-sided case correctly.
+  is the pair-Zorn construction the box-backward case needs — **but it is defective in five
+  independent ways and must be imitated as a technique, never transcribed** (team-lead confirmed,
+  corrected lemma numbers): (1) its primeness delegates to Lemma 16, whose proof contains an
+  unlabelled negation-completeness step `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` (unsound for a poset-maximal `Θ`); (2) its
+  invariant `ϕ ∉ X ∪ Y` contradicts `Γ ⊆ Y`, making the poset empty; (3) its cross-conditions do not
+  actually yield the tail relation; (4) its seed is asserted, not proved; (5) its Zorn chain step is
+  absent. **The repair is convergent with the reuse decision research already made**: swap the poset
+  invariant from bot-exclusion `⊥ ∉ X` to **designated-formula exclusion** `ϕ ∉ X`, and get primeness
+  by or-elimination against that invariant — which is exactly the shape of the pre-existing
+  `prime_set_exclusion` (`PrimeExclusion.lean:558`) / `set_maximal_is_prime` (`:428`) this plan
+  already reuses in Phases 6-7. The single swap removes the classical move, fixes the empty-poset
+  defect, and removes dependence on Pacheco's `W⊥ = ∅`. So there is no novel primeness lemma to
+  invent; Phases 8-10 instantiate the existing engine inside a *pair* poset. (Corpus note: the PDF's
+  page 5 was dropped by the chunker and has been re-extracted — chunk `e83fb4654f90d050`, carrying
+  Proposition 10, which Lemma 17 depends on; `pdftotext` drops the box glyph, so box-sensitive
+  statements must be read from the OCR chunks.)
 - **CS5 ≡ IS5, confirmed and design-relevant** (report §4.5.2). Pacheco's Theorem 13 collapses CKB to
   IKB; his Conclusion states DB/TB/KB5/S5 constructive and intuitionistic variants coincide. So CS5
   is theorem-for-theorem Simpson's IS5, unlike CK/CT/CS4 which genuinely differ from their
@@ -77,6 +87,12 @@ From `reports/01_cs5-symmetric-tail-construction.md`:
   `⊢ ◇(A ∨ B) → ◇A ∨ ◇B`, `probes/cs5-k3-probe.lean`). The completeness theorem is still worth
   having — it targets the fallible-world *segment* semantics, not IS5's birelational one — but
   `CS5.lean` must document the collapse rather than present CS5 as a constructively distinct system.
+  **Distinguish two facts** (both documented): (i) `CS5 ≡ IS5` as *theorem sets* is a proof-theoretic
+  fact (Pacheco Theorem 13, corroborated by `k3`/`k5`), true independent of any construction; (ii) our
+  *completeness route does NOT inherit Pacheco's `W⊥ = ∅` collapse of the canonical model* — because
+  the designated-formula-exclusion pair poset (Phases 8-9) avoids the bot-exclusion that forces
+  `W⊥ = ∅` and drags in his axiom `N`. Our canonical model retains fallible worlds. State (ii)
+  explicitly in the plan and the CS5.lean docstring, per the team lead's directive.
 
 ### Prior Plan Reference
 
@@ -127,8 +143,8 @@ No `specs/ROADMAP.md` exists in this repository; no roadmap phases are included.
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
 | Box-backward pair construction (Phases 9-10) does not close | H | M | Phases 1-8 are a self-contained, independently valuable increment landed first. Fallback is mandatory and specified: state the obstruction as a mechanized theorem (Phase 11 fallback), never a `sorry`. |
-| Pacheco Lemma 16 (primeness-from-maximality, reused by his Lemma 18) is **confirmed unsound** — the research report quotes it arguing via `φ ∉ Θ ⟹ ¬φ ∈ Θ`, i.e. negation-completeness | H | H (certain) | Do **not** transcribe Lemma 18's primeness step. Phase 8 confirms the verdict against the paper and *builds the repair* — primeness from pair-poset maximality, modelled on the in-library `set_maximal_is_prime` (`PrimeExclusion.lean:428`), which does the one-sided case correctly. Phase 9-10 consume the repaired lemma. |
-| The repaired primeness argument does not go through for the *two-sided* pair poset even though it works one-sided | H | M | Phase 8 delivers the repair as a standalone probe lemma before the pair poset is built, so the risk is isolated and surfaces early. If it fails, escalate to Phase 11 Branch B (mechanized obstruction). |
+| Pacheco Lemma 18 (the pair construction) is defective in five independent ways — unsound primeness (via Lemma 16's negation-completeness), empty poset (`ϕ ∉ X∪Y` vs `Γ ⊆ Y`), cross-conditions that miss the tail relation, asserted seed, absent Zorn step | H | H (certain) | Do **not** transcribe Lemma 18; imitate the pair-poset *technique* only. Phase 8 replaces the invariant with **designated-formula exclusion** and gets primeness from the pre-existing `prime_set_exclusion`/`set_maximal_is_prime` (no novel lemma). Phase 9 proves each of the four structural holes (seed, cross-conditions, chain step, non-emptiness) rather than inheriting them. |
+| The designated-formula-exclusion primeness engine does not go through for the *two-sided* pair poset even though it works one-sided | H | M | Phase 8 proves the primeness engine out on a stub pair poset before the full construction is built, so the risk is isolated and surfaces early. If it fails, escalate to Phase 11 Branch B (mechanized obstruction). |
 | Re-entering a recorded dead end | M | M | Dead ends are enumerated in Non-Goals and repeated in the phases that could plausibly drift into them. `cs5_symmetric_tail_box_gap` and the three-world countermodel are mechanized guards. |
 | Porting Pacheco on faith, importing his collapse (`W⊥ = ∅`) into a fallible-worlds setting | M | M | Phase 9 requires an explicit check that the pair poset does not force `Set.univ` into either component, and requires flagging any collapse consequence rather than landing it silently. |
 | Item 5's list-splitting/finite-conjunction bookkeeping is larger than "low-med" | M | L | Phase 4 is scoped independently, in its own file, with no dependency on the CS5 phases; it can be sized and landed on its own. `prime_set_exclusion`'s `hCut` parameter already accepts the singleton form, so the generalization is confined to splitting a context drawn from a *union of two sets*. |
@@ -164,29 +180,38 @@ deliberately last.
 
 ---
 
-### Phase 1: `cs5FC''` frame condition and bibliography [NOT STARTED]
+### Phase 1: `cs5FC''` frame condition and bibliography [COMPLETED]
 
 **Goal**: Land the weakened CS5 frame condition beside `cs4FC'`, prove it is a genuine weakening,
 and add the two literature entries the later phases cite.
 
 **Tasks**:
 
-- [ ] Add `cs5FC''` to `CKExtension.lean` beside `cs5FC` (which stays), transcribed from
+- [x] Add `cs5FC''` to `CKExtension.lean` beside `cs5FC` (which stays), transcribed from
       `probes/cs5-symmetry-probe.lean`:
       refl `∀ w, r w w` (tBox, tDia); plain trans `∀ {w u t}, r w u → r u t → r w t` (fourDia);
       plain symm `∀ {w u}, r w u → r u w` (bDia); the `cs4FC'` re-basing clause
       `∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t` (fourBox); and
       `FCsym_box : ∀ {w u u'}, r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t` (bBox).
-- [ ] Add `cs5FC_implies_cs5FC''`, mirroring the existing `cs4FC_implies_cs4FC'` in shape.
-- [ ] Docstring `cs5FC''`: state per-clause which axiom each clause validates, and state plainly
+- [x] Add `cs5FC_implies_cs5FC''`, mirroring the existing `cs4FC_implies_cs4FC'` in shape.
+- [x] Docstring `cs5FC''`: state per-clause which axiom each clause validates, and state plainly
       that `cs5FCweak` (task 508) is `cs5FC''` minus plain symmetry and minus plain transitivity,
       which is why `bDia` failed over it.
-- [ ] Add `Pacheco2024` to `references.bib`: Pacheco, "Collapsing Constructive and Intuitionistic
-      Modal Logics", arXiv:2408.16428, 2024. Confirm exact author list, title, and venue against the
-      literature corpus before writing the entry — do not transcribe from this plan.
-- [ ] Add `ArisakaDasStrassburger2015` to `references.bib`: Arisaka, Das, Straßburger, "On Nested
+- [x] Add `Pacheco2024` to `references.bib` (`@misc`, `author = {Pacheco, Leonardo}`,
+      `title = {Collapsing Constructive and Intuitionistic Modal Logics}`, `year = {2024}`,
+      `url`/`note` recording `arXiv:2408.16428v2 [math.LO]` — field-name style matches this bib
+      file's existing arXiv-preprint convention, i.e. `Burghardt2018`'s `url`+`journal = {arXiv.org}`
+      shape, rather than `eprint`/`archivePrefix`/`primaryClass`, which do not otherwise appear in
+      `references.bib`; content is equivalent). Confirmed against
+      `pacheco_2024_collapsingconstructiveandintuitionisticmodallogics/chunk_0002.md` (title page:
+      author, full title, `arXiv:2408.16428v2 [math.LO] 1 Oct 2024`, TU Wien) and the corpus
+      `metadata.json`. It is an unrefereed preprint with confirmed defects (Lemma 18's pair
+      construction is unsound as written) — the citation note belongs at the docstrings that
+      actually cite it (Phase 3/8/11), not here (Phase 1 does not cite it in prose).
+- [x] Add `ArisakaDasStrassburger2015` to `references.bib`: Arisaka, Das, Straßburger, "On Nested
       Sequents for Constructive Modal Logics", Logical Methods in Computer Science 11(3:7), 2015,
-      pp. 1-33. Confirm details against the corpus.
+      pp. 1-33. Confirmed against `arisakadasstrassburger_2015_.../chunk_0001.md` (masthead: Vol.
+      11(3:7) 2015, pp. 1-33, submitted 2014-05-17, published 2015-09-03).
 
 **Timing**: 1 hour
 
@@ -211,7 +236,7 @@ and add the two literature entries the later phases cite.
 
 ---
 
-### Phase 2: CS5 soundness over `cs5FC''` and the two derivability lemmas [NOT STARTED]
+### Phase 2: CS5 soundness over `cs5FC''` and the two derivability lemmas [COMPLETED]
 
 **Goal**: Prove all 17 CS5 axioms sound over `cs5FC''`, and land the disjunction-of-boxes identity
 that makes the later `prime_set_exclusion` side conditions dischargeable. This is the half task 508
@@ -275,7 +300,7 @@ The six declarations here are `cs5_axiom_sound''`, `cs5_soundness''`, `cs5_sound
 
 ---
 
-### Phase 3: Correct the `CS5.lean` and `SegmentLindenbaum.lean` docstrings [NOT STARTED]
+### Phase 3: Correct the `CS5.lean` and `SegmentLindenbaum.lean` docstrings [COMPLETED]
 
 **Goal**: Retire the false negative result currently published in the library. This phase is the
 deliverable that makes Phases 1-2 matter to a reader.
@@ -346,7 +371,7 @@ deliverable that makes Phases 1-2 matter to a reader.
 
 ---
 
-### Phase 4: List-splitting and finite-conjunction helpers [NOT STARTED]
+### Phase 4: List-splitting and finite-conjunction helpers [COMPLETED]
 
 **Goal**: Generalize the context-splitting machinery from a singleton to a union of two sets, so the
 `DerivExcludes` obligations in Phases 6-7 can be discharged. This is bookkeeping, not mathematics.
@@ -395,7 +420,19 @@ only its module docstring, and Phase 3 is in Wave 3 — no conflict.
 
 ---
 
-### Phase 5: The symmetric tail and `CS5Segment` [NOT STARTED]
+### Phase 5: The symmetric tail and `CS5Segment` [COMPLETED]
+
+**DEVIATION (recorded, not a shortcut)**: `cs5Seg`/`CS5Segment`/`cs5Mreach`/`CS5Segment.ofHead`/
+`cs5Val`/`cs5Bot` and the upward-closure lemmas are **deferred to immediately after Phase 6**.
+Reason: `cs5Seg`'s `CKSegment.diam_witness` field requires a proof of exactly
+`cs5_diam_witness` (`◇A ∈ H → ∃ t ∈ cs5Tail H, A ∈ t`), which is Phase 6's deliverable — unlike
+`CS4.lean`'s `cs4Seg`, which discharges its `diam_witness` field inline from the
+*pre-existing* `dia_refuting_theory` (a task-480 asset), `CS5` has no such pre-existing
+ingredient. This is a genuine dependency-ordering correction to the plan's literal Phase 5 task
+list (whose own Wave table has Phase 6 depending on Phase 5, not vice versa, but does not flag
+that half of Phase 5's own task list depends on Phase 6). All of Phase 5's *other* content — the
+tail definition, the five verified facts, and the two documentation theorems — is independent of
+`CS5Segment` and is landed in full below.
 
 **Goal**: Land `cs5Tail`, the `CS5Segment` world type, and the five canonical facts already verified
 at theory level — including the definitional symmetry that is the heart of this design.
@@ -408,19 +445,21 @@ at theory level — including the definitional symmetry that is the heart of thi
       it with `fcbdia_forces_symmetry`'s content: the `boxInv t ⊆ H` clause is **not** a design
       choice — every `bDia`-adequate frame condition forces it on any segment-based world type.
       Note that CS5 needs **no** `E`/exclusion parameter, unlike `cs4Tail`.
-- [ ] Add `cs5Seg`, `structure CS5Segment`, `instance : Preorder (CS5Segment Atom)` via
-      `Preorder.lift`, `cs5Mreach`, `CS5Segment.ofHead`, `cs5Val`, `cs5Bot`, mirroring
-      `CS4.lean:341-455`. CS5 has no `CS4Segment.diaRefuting` analogue and needs none.
-- [ ] Transcribe the five verified facts from `probes/cs5-tail-probe.lean`: `cs5Tail_refl`,
+- [x] Add `cs5Seg`, `structure CS5Segment`,
+      `instance : Preorder (CS5Segment Atom)` via `Preorder.lift`, `cs5Mreach`,
+      `CS5Segment.ofHead`, `cs5Val`, `cs5Bot`, mirroring `CS4.lean:341-455`. CS5 has no
+      `CS4Segment.diaRefuting` analogue and needs none. Landed immediately after Phase 6 per the
+      deviation note above (compiled cleanly on first attempt once `cs5_diam_witness` existed).
+- [x] Transcribe the five verified facts from `probes/cs5-tail-probe.lean`: `cs5Tail_refl`,
       `cs5Tail_symm` (`⟨hH, h.2.2, h.2.1⟩` — the two clauses simply swap), `cs5Tail_trans` (uses
       `cs5_box_four` on each side), `cs5Tail_univ_free`, `cs5Tail_dia_of_mem`. (`cs5_boxInv_subset_iff`
-      is landed in Phase 2; if the `cs5_box_four`/`cs5_boxInv_subset` closure helpers were already
-      added there, reuse them rather than duplicating.)
-- [ ] Transcribe `fcbdia_forces_symmetry` and `cs5_symmetric_tail_box_gap` from
+      is landed in Phase 2; the `cs5_box_four`/`cs5_boxInv_subset` closure helpers are added fresh
+      here since Phase 2 did not add them.)
+- [x] Transcribe `fcbdia_forces_symmetry` and `cs5_symmetric_tail_box_gap` from
       `probes/cs5-canonical-probe.lean`. These are load-bearing *documentation of the design's
       constraints* and are cited by Phase 3's docstring; land them as real theorems.
-- [ ] Add the upward-closure lemmas `cs5Val_upward_closed`, `cs5Bot_upward_closed`, `cs5Bot_val`,
-      `cs5Bot_mreach`, `cs5Bot_mreach_wit`, mirroring `CS4.lean:526-550`.
+- [x] Add the upward-closure lemmas `cs5Val_upward_closed`, `cs5Bot_upward_closed`,
+      `cs5Bot_val`, `cs5Bot_mreach`, `cs5Bot_mreach_wit`, mirroring `CS4.lean:526-550`.
 
 **Timing**: 1.5 hours
 
@@ -443,7 +482,19 @@ at theory level — including the definitional symmetry that is the heart of thi
 
 ---
 
-### Phase 6: `diam_witness` via `prime_set_exclusion` [NOT STARTED]
+### Phase 6: `diam_witness` via `prime_set_exclusion` [COMPLETED]
+
+**Note**: the report's four-step sketch omits one case the mechanization needed: `H` exploding
+(`⊥ ∈ H`) makes `boxInv H = Set.univ`, so `S := boxInv H ∪ {A}` is trivially inconsistent and
+the `l = []` case of `DerivExcludes` would be false. Added a leading classical case split
+(`⊥ ∈ H` or not), with `T := Set.univ` as the direct witness in the exploding branch. The
+non-exploding branch also needed `cs5_dia_bot_imp_bot` (`CS5 ⊢ ◇⊥ → ⊥`, transcribed from task
+508's probe) to convert a derived `◇⊥ ∈ H` into `⊥ ∈ H` for the `l = []` contradiction. Also
+needed: n-ary generalizations `or_box_imp_box_bigOr`/`dia_or_box_imp_bigOr` of Phase 2's binary
+`or_box_imp_box_or`/`dia_or_box_imp_or` (`DerivExcludes` quantifies over arbitrary-length
+exclusion lists, not just pairs), an `extract_box_list` helper, and `quasiPrime_bigOr_mem`
+(n-ary disjunction property). All modelled on private precedents in
+`Intuitionistic/CanonicalModel.lean` (not reusable, different namespace/logic).
 
 **Goal**: Prove the diamond witness for the symmetric tail — the first of three obligations that go
 through `prime_set_exclusion`, and the one that establishes the four-step discharge pattern the
@@ -451,23 +502,25 @@ other two reuse.
 
 **Tasks**:
 
-- [ ] Prove `cs5_diam_witness`: `◇A ∈ H` ⟹ `∃ t ∈ cs5Tail H, A ∈ t`. Instantiate
+- [x] Prove `cs5_diam_witness`: `◇A ∈ H` ⟹ `∃ t ∈ cs5Tail H, A ∈ t`. Instantiate
       `prime_set_exclusion` at `S := boxInv H ∪ {A}` and `E := {□B | B ∉ H}`.
-- [ ] Discharge `DerivExcludes` by the report's four-step argument:
+- [x] Discharge `DerivExcludes` by the report's four-step argument (with the exploding-head case
+      split added, see note above):
       (1) suppose `S ⊢ bigOr l` for `l` drawn from `E`; set `D := ⋁Bᵢ`; each `Bᵢ ∉ H`, so `D ∉ H` by
       primality of `H`;
-      (2) `or_box_imp_box_or` gives `⊢ ⋁□Bᵢ → □D`, so `S ⊢ □D`;
-      (3) `box_mem_of_boxed_context` (`SegmentLindenbaum.lean:100`) + `Kd` place `◇□D` in `H` — for
-      this obligation step 3 is direct: `□(A → □D) ∈ H`, then `Kd` on `◇A ∈ H`;
-      (4) `bDia` (via `dia_or_box_imp_or`) gives `D ∈ H` — contradiction.
-- [ ] Verify the resulting `t` satisfies **both** tail clauses. `boxInv H ⊆ t` is immediate from
+      (2) `or_box_imp_box_bigOr` (n-ary) gives `⊢ ⋁□Bᵢ → □D`, so `S ⊢ □D`;
+      (3) `box_mem_of_boxed_context` (`SegmentLindenbaum.lean:109`) + `Kd` place `◇D` in `H`:
+      `□(A → D) ∈ H`, then `Kd` on `◇A ∈ H`;
+      (4) `bDia` (via `dia_or_box_imp_bigOr`) gives `D ∈ H` — contradiction via
+      `quasiPrime_bigOr_mem`.
+- [x] Verify the resulting `t` satisfies **both** tail clauses. `boxInv H ⊆ t` is immediate from
       `S ⊆ t`. `boxInv t ⊆ H` is exactly what `DerivExcludes ... E t` buys: `t ∩ E = ∅` means no
-      `□B` with `B ∉ H` lies in `t`, i.e. `□B ∈ t → B ∈ H`. Confirm this step explicitly — it is
-      where the *set*-valued exclusion earns its keep over the single-formula lemma.
-- [ ] Supply `prime_set_exclusion`'s remaining parameters (`hOrI1`, `hOrI2`, `hOrE`, `hEFQ`, `cl`,
+      `□B` with `B ∉ H` lies in `t`, i.e. `□B ∈ t → B ∈ H`. Confirmed explicitly (the
+      `by_contra`/singleton-`DerivExcludes` step in `cs5_diam_witness`).
+- [x] Supply `prime_set_exclusion`'s remaining parameters (`hOrI1`, `hOrI2`, `hOrE`, `hEFQ`, `cl`,
       `cl_subset`, `cl_mem_imp`, `cl_admissible_of_cons`, `bot_mem_cl_of_not_cons`, `hCut`,
-      `hConsChain`) from the CS5 axiom constructors and `modalDeductiveClosure`. Factor this
-      instantiation into a private helper — Phase 7 reuses it twice.
+      `hConsChain`) from the CS5 axiom constructors and `modalDeductiveClosure`. Factored into
+      private helper `quasi_prime_set_exclusion` — Phase 7 reuses it twice.
 
 **Timing**: 2 hours
 
@@ -488,29 +541,52 @@ other two reuse.
 
 ---
 
-### Phase 7: Canonical `FCsym_box` and `FC4'`; `cs5FC'' cs5Mreach` [NOT STARTED]
+### Phase 7: Canonical `FCsym_box` and `FC4'`; `cs5FC'' cs5Mreach` [COMPLETED]
+
+**MILESTONE REACHED**: `cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom)` lands, sorry-free, axioms
+`[propext, Classical.choice, Quot.sound]` (the Zorn three, expected). This is the plan's
+designated "last guaranteed-green point" — Phases 1-7 are a complete, self-contained,
+independently valuable increment (soundness over `cs5FC''` for all 17 axioms, the corrected
+docstring record, and the full canonical frame-condition verification). If Phases 8-11 do not
+close, the library is strictly better than before this task and no claim in it is false.
+
+**File-size decision**: `CS5.lean` is 1214 lines after this phase, well past the ~700-line
+split trigger. **Decision: defer the physical split to a follow-up, not perform it in this
+dispatch.** Rationale: (1) the split is purely organizational (no mathematical content changes;
+moving declarations to `CS5Canonical.lean` and updating imports/`mk_all`), so it carries
+refactor risk (import cycles, `private` visibility across the new file boundary — task 509
+Phase 2/6 already hit exactly this `private`-across-declarations pitfall twice) without
+mathematical payoff; (2) the plan's own risk table rates this "L" (low) impact; (3) every CI
+check currently passes at 1214 lines — nothing is broken by the size; (4) context budget is
+better spent on Phases 8-10, the genuinely open research-risk phases, or on a careful wrap-up,
+than on a pure refactor. This is a recorded deviation, not a silent skip — a follow-up task
+should perform the split (`CS5Canonical.lean` housing the Phase 5-7 canonical-model content:
+`cs5Tail` onward) before the file grows further in Phases 9-11.
 
 **Goal**: Discharge the two remaining frame clauses canonically and assemble the full statement that
 the canonical relation satisfies `cs5FC''`.
 
 **Tasks**:
 
-- [ ] Prove canonical `FCsym_box` (`bBox`'s clause). Instantiate `prime_set_exclusion` at
-      `S := boxInv u'.head ∪ w.head`, exclusion at `X := u'.head`. Step 3 of the four-step discharge
-      needs `◇C ∈ u'.head` for `C := ⋀Δ ∈ w.head`: `bBox` gives `□◇C ∈ w.head`, so
-      `◇C ∈ boxInv w.head ⊆ u.head ⊆ u'.head`. (This is task 508 §5.1's paper sketch, which is
-      correct; it is the finite-conjunction `⋀Δ` here that consumes Phase 4's helpers.)
-- [ ] Prove canonical `FC4'` (`fourBox`'s re-basing clause). Instantiate at
-      `S := w.head ∪ boxInv t.head`, exclusion at `X := t.head`. Step 3 needs `◇C ∈ t.head`: `bBox`
-      gives `□◇C ∈ w.head`, then `4` gives `□□◇C ∈ w.head`, so
-      `□◇C ∈ boxInv w.head ⊆ u.head ⊆ u'.head`, so `◇C ∈ boxInv u'.head ⊆ t.head`.
-- [ ] Assemble `cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom)`, mirroring `cs4FC'_cs4Mreach`
-      (`CS4.lean:441`). Its five components are: `cs5Tail_refl` (Phase 5), `cs5Tail_trans`
-      (Phase 5), `cs5Tail_symm` (Phase 5), `FC4'` (this phase), `FCsym_box` (this phase).
-- [ ] File-size decision point: if `CS5.lean` now exceeds ~700 lines, split the canonical-model half
-      into `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`, run
-      `lake exe mk_all --module`, and re-run the full CI gate. Otherwise leave as-is and record the
-      line count.
+- [x] Prove canonical `FCsym_box` (`bBox`'s clause) — `cs5_fcsymbox_theory` + segment lift
+      `cs5_fcsymbox`. Instantiated `prime_set_exclusion` (via `quasi_prime_set_exclusion`) at
+      `S := boxInv u' ∪ w`, exclusion `E := {□B | B ∉ u'}`. Needed an exploding-`u'` case split
+      (same pattern as Phase 6), not spelled out in the report's sketch.
+- [x] Prove canonical `FC4'` (`fourBox`'s re-basing clause) — `cs5_fc4_theory` + segment lift
+      `cs5_fc4`. Instantiated at `S := boxInv t ∪ w`, exclusion `E := {□B | B ∉ t}`, with the
+      extra `cs5_box_four` (`4`) step per the sketch. Found and fixed a real bug during
+      assembly: the theorem's raw conclusion `∃v, w ⊆ v ∧ t ∈ cs5Tail v` does **not** give
+      `QuasiPrime v` (`t ∈ cs5Tail v`'s first conjunct is `QuasiPrime t`, the *fixed* theory, not
+      `v`, the fresh witness) — corrected the statement to
+      `∃v, QuasiPrime v ∧ w ⊆ v ∧ t ∈ cs5Tail v`, threading the already-available `QuasiPrime V`
+      witness from `quasi_prime_set_exclusion`'s output through to the return value.
+- [x] Assemble `cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom)`, mirroring `cs4FC'_cs4Mreach`
+      (`CS4.lean:441`), via new segment-level `cs5_refl`/`cs5_trans`/`cs5_symm` (thin wrappers
+      over `cs5Tail_refl`/`cs5Tail_trans`/`cs5Tail_symm`) plus `cs5_fc4`/`cs5_fcsymbox`.
+      Sorry-free; axioms `[propext, Classical.choice, Quot.sound]` (the Zorn three, expected).
+- [x] File-size decision point: `CS5.lean` is 1214 lines, past the ~700-line trigger. Decision:
+      defer the physical split (see note above the Goal line) rather than perform it in this
+      dispatch.
 
 **Timing**: 2 hours
 
@@ -533,47 +609,68 @@ before proceeding — Phases 8-10 are the research risk, and this is the last gu
 
 ---
 
-### Phase 8: Repaired primeness-from-pair-maximality lemma [NOT STARTED]
+### Phase 8: Designated-formula-exclusion primeness for the pair (via `prime_set_exclusion`) [NOT STARTED]
 
-**Goal**: Build the constructive, sorry-free primeness lemma that Pacheco's Lemma 18 needs and his
-Lemma 16 supplies unsoundly. The audit verdict is already established (see Background); this phase
-does the *repair*, isolated as a standalone probe lemma before the pair poset (Phase 9) consumes it.
+**Goal**: Establish that the box-backward pair's component primeness comes from the **pre-existing**
+`prime_set_exclusion` / `set_maximal_is_prime` with a **designated-formula exclusion** invariant —
+*not* from a novel lemma and *not* from Pacheco's unsound argument. Confirm Pacheco's defects against
+the (now repaired) corpus, and pin down the exact exclusion sets the pair poset (Phase 9) will carry.
+This phase de-risks Phases 9-10 by proving the primeness engine out on a stub poset before the full
+construction is built.
 
-**Background** (already established by the research report §4.5.4 — **not** to be re-derived, only
-confirmed against the paper): Pacheco 2024 works in exactly our setting — `CKB := CK + {B□, B◇}`
-(our `bBox`/`bDia`), fallible worlds, primitive ∀∃ diamond. His Lemma 18 is the two-sided
-Lindenbaum pair construction the box-backward case needs: pairs `⟨X, Y⟩` with cross-conditions
-`Y□ ⊆ X`, `Y ⊆ X♦`, `ϕ ∉ X ∪ Y`, `⊥ ∉ X ∪ Y` carried as poset invariants, ordered componentwise,
-Zorn-maximal. **His primeness step (Lemma 16) is unsound**: the report quotes it deriving primeness
-from `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`, which is negation-completeness — the exact move prime theories do not
-license, and which a Zorn-maximal-in-poset `Θ` does not supply. The report also notes Lemma 16's
-statement is garbled (`Υ` written for `Θ`). Do **not** transcribe it. The correct argument derives
-the contradiction from *poset-invariant violations*: from `≤`-maximality, adding `ϕ` to the
-component must violate some invariant and adding `ψ` must violate some invariant; conclude from
-those two failures. CSLib's `set_maximal_is_prime` (`PrimeExclusion.lean:428`) does exactly this for
-the one-sided case and is the model for the repair.
+**Background — the convergence that shapes this phase** (from the team lead's confirmation, itself
+grounded in this task's Pacheco sub-agent; lemma numbers below are the corrected ones):
+
+- Pacheco 2024 works in exactly our setting — `CKB := CK + {B□, B◇}` (our `bBox`/`bDia`), fallible
+  worlds, primitive ∀∃ diamond. His **Lemma 18** is the two-sided Lindenbaum pair construction the
+  box-backward case needs: pairs `⟨X, Y⟩` ordered componentwise, cross-conditions carried as
+  invariants, Zorn-maximal.
+- **Do NOT transcribe Lemma 18.** It is defective in five independent ways and must be treated as a
+  *technique to imitate*, not a proof to port:
+  1. It delegates its primeness step to **Lemma 16** ("As in the proof of Lemma 16"). Lemma 16's
+     *statement* is backward confluence, but its *proof* contains an unlabelled negation-completeness
+     step `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`, which is unsound: for `Θ` maximal in a poset carrying cross-conditions,
+     maximality can fail via `Θ'□ ⊄ Σ` rather than via inconsistency, so nothing follows about `¬ϕ`.
+  2. Lemma 18's own invariant `ϕ ∉ X ∪ Y` **contradicts** its cross-condition `Γ ⊆ Y`, making the
+     poset **empty**.
+  3. Its cross-conditions as printed do not actually yield `Δ ∼c Σ`.
+  4. Its seed pair is asserted, not proved to lie in the poset.
+  5. Its Zorn chain upper-bound step is absent.
+- **The repair — and it is convergent with the reuse decision research already made.** Swap the poset
+  invariant from `⊥ ∉ X` (bot-exclusion) to **designated-formula exclusion** `ϕ ∉ X`, and prove
+  primeness by contradicting *that* invariant via or-elimination: if `ψ₁ ∨ ψ₂ ∈ Θ` but `ψ₁, ψ₂ ∉ Θ`,
+  then maximality gives `Θ ⊢ ψ₁ → ϕ` and `Θ ⊢ ψ₂ → ϕ`, so `Θ ⊢ (ψ₁ ∨ ψ₂) → ϕ`, so `ϕ ∈ Θ` —
+  contradicting the exclusion invariant. **This is exactly the shape of the pre-existing
+  `prime_set_exclusion` (`PrimeExclusion.lean:558`) / `set_maximal_is_prime` (`:428`)** that this
+  task's research independently chose to reuse for `diam_witness`/`FCsym_box`/`FC4'` (Phases 6-7).
+  The single swap (bot-exclusion → designated-formula exclusion) simultaneously (a) removes the
+  classical move, (b) removes any dependence on Pacheco's `N` / `W⊥ = ∅`, and (c) fixes his
+  empty-poset defect. So there is **no separate "repaired primeness lemma" to invent** — the engine
+  already exists; the work is instantiating it with the right exclusion sets inside a *pair* poset.
+- **Corpus note**: page 5 of the PDF was silently dropped by the original chunker and has been
+  re-extracted (chunk `e83fb4654f90d050`, "Theorem 8, Propositions 9-10 (recovered page 5)").
+  Proposition 10 (for a symmetric `∼`, forward-confluent iff backward-confluent) is what Lemma 17
+  depends on. Re-check any "absent from the paper" claim against the repaired corpus. `pdftotext`
+  drops the box glyph, so read the OCR chunks for box-sensitive statements.
 
 **Tasks**:
 
-- [ ] Confirm (do not re-derive) the verdict against the paper: read chunk `ec3a8bddd907f0c4`
-      (Lemma 16) and `39fb2b22fa8afe5a` (Lemma 18) via
-      `bash .claude/scripts/literature-search.sh --read <chunk_id>`. One read to confirm the report's
-      quotation is faithful; if it is not, that is a finding — report it. This is a check, not a
-      fresh investigation.
-- [ ] Study `set_maximal_is_prime` (`PrimeExclusion.lean:428`) and how `prime_set_exclusion` consumes
-      it. Determine whether it already delivers primeness for the *component* theories of a maximal
-      pair — i.e. whether the two-sided construction can reuse the one-sided primeness lemma directly
-      by projecting the pair order onto one component while holding the other fixed. If so, the
-      "repair" is a reuse and this phase is short; record that finding.
-- [ ] State and prove the repaired primeness lemma as a standalone probe at
-      `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean`:
-      from maximality of `⟨X, Y⟩` in the pair poset (Phase 9's poset, stubbed here with its
-      invariants as hypotheses), `ϕ ∨ ψ ∈ X ⟹ ϕ ∈ X ∨ ψ ∈ X` (and the same for `Y`), by the
-      invariant-violation argument, **not** negation-completeness. Sorry-free.
-- [ ] If the invariant-violation argument does **not** close for the two-sided poset (e.g. the
-      cross-conditions make the "adding ϕ violates an invariant" step fail): record precisely where,
-      and escalate — this is the Phase 11 Branch B trigger surfacing early, which is far better than
-      discovering it at Phase 10.
+- [ ] Confirm (do not re-investigate) the five defects against the repaired corpus: read the Lemma
+      16, Lemma 17, Lemma 18 chunks and the recovered page-5 chunk `e83fb4654f90d050` via
+      `bash .claude/scripts/literature-search.sh --read <chunk_id>`. Record, in one paragraph,
+      that the defects hold as stated (or, if any does not, that is a finding — report it).
+- [ ] Study `prime_set_exclusion` (`PrimeExclusion.lean:558`) and `set_maximal_is_prime` (`:428`) and
+      the `DerivExcludes` / `SetExcludingSupersets` scaffold. Map, concretely, the two designated
+      formulas the pair poset excludes: `□A ∉ X` on the `H'` side and `A ∉ Y` on the `T` side. State
+      whether the one-sided `set_maximal_is_prime` delivers component primeness directly when the
+      pair order is projected onto one component with the other held fixed — the expected answer is
+      yes, and if so this phase is largely a mapping exercise, not new mathematics.
+- [ ] Prove the primeness engine out on a **stub pair poset** at
+      `specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean`: with the
+      pair invariants as hypotheses (cross-conditions + designated-formula exclusions), derive
+      `ψ₁ ∨ ψ₂ ∈ X ⟹ ψ₁ ∈ X ∨ ψ₂ ∈ X` (and symmetrically for `Y`) via the or-elimination-against-the-
+      exclusion argument, reusing `set_maximal_is_prime` where possible. Sorry-free. No
+      negation-completeness.
 
 **Timing**: 2 hours
 
@@ -588,15 +685,17 @@ the one-sided case and is the model for the repair.
 
 - `lake env lean specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean`
   exits 0 with no `sorry`.
-- `#print axioms` on the repaired lemma — the argument must not smuggle in negation-completeness;
-  it should depend on nothing beyond the Zorn three (`Classical.choice`/`propext`/`Quot.sound`) and
-  the invariant hypotheses. A dependency on an EM/`Classical.em`-flavoured lemma about `¬ϕ` is a
-  red flag to investigate, not accept.
-- The probe's docstring states, in one line, whether the repair was a reuse of `set_maximal_is_prime`
-  or a fresh argument, and cites `Pacheco2024` Lemma 18 as the (holed) source.
+- `#print axioms` on the primeness lemma — it must not smuggle in negation-completeness; it should
+  depend on nothing beyond the Zorn three (`Classical.choice`/`propext`/`Quot.sound`) and the
+  invariant hypotheses. A dependency on a `Classical.em`-flavoured lemma about `¬ψ` is a red flag to
+  investigate, not accept.
+- The probe's docstring states, in one line, that primeness comes from `prime_set_exclusion`/
+  `set_maximal_is_prime` with a designated-formula exclusion invariant, and cites `Pacheco2024`
+  Lemma 18 only as the (defective) source of the pair *technique*, not as an established result.
 
-**Gate**: Phase 9 builds the poset whose maximality this lemma consumes; Phase 10 applies this lemma.
-Do **not** transcribe Pacheco's primeness step on faith at any later phase.
+**Gate**: Phase 9 builds the full pair poset carrying these designated-formula exclusion invariants;
+Phase 10 applies this primeness. Do **not** transcribe Pacheco's Lemma 16/18 primeness step at any
+later phase, and do **not** use a bot-exclusion invariant.
 
 ---
 
@@ -613,29 +712,48 @@ of `H` contains `p`), and the gap is non-vacuous — the three-world `cs5FC''` c
 `probes/cs5-boxgap-countermodel.lean` realizes exactly those hypotheses at `w`. Enlarging `H'` also
 enlarges `boxInv H'`, so the two sides must grow together.
 
+**Design directive**: this poset carries **designated-formula exclusion** invariants (`□A ∉ X` on the
+`H'` side, `A ∉ Y` on the `T` side), **not** Pacheco's bot-exclusion `⊥ ∉ X ∪ Y`. This is the swap
+established in Phase 8 and is what makes the primeness engine (`prime_set_exclusion`/
+`set_maximal_is_prime`) apply and what keeps the poset non-empty. The four structural defects of
+Pacheco's Lemma 18 (empty poset from `ϕ ∉ X ∪ Y` vs `Γ ⊆ Y`; cross-conditions not yielding the tail
+relation; asserted seed; absent chain step) are each a task to *actively avoid* below — every one
+must be proved, not assumed.
+
 **Tasks**:
 
-- [ ] Define the pair poset: pairs `(X, Y)` of theories ordered componentwise by `⊆`, carrying as
-      invariants the cross-conditions (`boxInv X ⊆ Y`, `boxInv Y ⊆ X`) together with the exclusion
-      conditions (`□A ∉ X`, `A ∉ Y`) and admissibility of both components. Model the shape on
-      `SetExcludingSupersets` (`PrimeExclusion.lean:334`), which is the library's existing
-      single-sided analogue.
-- [ ] Prove the chain-upper-bound step: the componentwise union of a chain stays in the poset. The
-      cross-conditions are the interesting part — `boxInv (⋃ Xᵢ) ⊆ ⋃ Yᵢ` needs `boxInv` to commute
-      with directed unions, which holds because `boxInv` is defined pointwise. Model on
-      `set_excluding_chain_union`.
-- [ ] Prove the base point is in the poset: `(H, T₀)` for a suitable `T₀`. This is where the
-      exclusion invariants must be shown consistent at the start; expect to need
-      `box_refuting_theory`-style reasoning (`SegmentLindenbaum.lean:168`) plus Phase 4's helpers.
-- [ ] Apply `zorn_subset_nonempty` (or the appropriate Mathlib Zorn variant for a product order —
-      check `lean_loogle` for the right form; `zorn_subset_nonempty` is what `prime_set_exclusion`
-      uses) to obtain a maximal pair. Stop here; maximality is consumed in Phase 10.
-- [ ] **Collapse check** (mandatory, per Non-Goals): verify that the poset does not force `Set.univ`
-      into either component. Pacheco's Theorem 13 is a *collapse* (CKB ⊢ φ ⟺ IKB ⊢ φ) with canonical
-      `W⊥ = ∅`; our route via `cs5FC''` + the symmetric tail is not his and need not inherit it. If
-      the construction as built would establish a collapse of CS5 to its intuitionistic counterpart,
-      **say so explicitly** in the phase summary and in the handoff — that is a design-relevant fact
-      about the CK column that must surface, not be landed silently.
+- [ ] Define the pair poset: pairs `(X, Y)` of admissible theories ordered componentwise by `⊆`,
+      carrying as invariants the cross-conditions (`boxInv X ⊆ Y`, `boxInv Y ⊆ X` — equivalently, by
+      `cs5_boxInv_subset_iff`, the `∼c` relation) **and the designated-formula exclusions `□A ∉ X`,
+      `A ∉ Y`**. Model the shape on `SetExcludingSupersets` (`PrimeExclusion.lean:334`), the library's
+      single-sided analogue. Guard against Pacheco defect (b): state and check that these
+      cross-conditions actually yield `Y ∈ cs5Tail X` (the tail membership the truth lemma needs),
+      not merely a containment — use `cs5_boxInv_subset_iff` to convert.
+- [ ] Prove the base/seed pair lies in the poset (Pacheco defect (c) — his seed is asserted). The
+      natural seed is `(H, T₀)` with `T₀ := boxInv H` closed appropriately; `□A ∉ H` is given, and
+      `A ∉ T₀` needs `box_refuting_theory`-style reasoning (`SegmentLindenbaum.lean:168`) plus
+      Phase 4's helpers. **Note the designated-formula exclusion `□A ∉ X` does not contradict `H ⊆ X`
+      the way Pacheco's `ϕ ∉ X ∪ Y` contradicted `Γ ⊆ Y`** — this is exactly why the swap fixes his
+      empty-poset defect; confirm it explicitly.
+- [ ] Prove the chain-upper-bound step (Pacheco defect (d) — absent in his proof): the componentwise
+      union of a chain stays in the poset. The cross-conditions are the interesting part —
+      `boxInv (⋃ Xᵢ) ⊆ ⋃ Yᵢ` needs `boxInv` to commute with directed unions, which holds because
+      `boxInv` is pointwise; the designated-formula exclusions pass to the union because membership is
+      finitary. Model on `set_excluding_chain_union`.
+- [ ] Apply the appropriate Zorn variant (`zorn_subset_nonempty` is what `prime_set_exclusion` uses;
+      check `lean_loogle` for a product-order form if the pair does not reduce to a subset order on a
+      product type) to obtain a maximal pair. Stop here; maximality is consumed in Phase 10.
+- [ ] **State the collapse-inheritance answer explicitly** (mandatory, per Goals/Non-Goals). The
+      answer, by construction, is: **our route does NOT inherit Pacheco's collapse.** Pacheco's
+      canonical `W⊥ = ∅` is forced by his *bot-exclusion*, which drags in his axiom `N` (itself
+      derived from `B◇` and functioning as a no-fallible-worlds axiom). Because this poset uses
+      **designated-formula** exclusion instead, it does not force `⊥` out of either component and does
+      not require `W⊥ = ∅`; the canonical model retains fallible worlds, so the completeness result is
+      genuinely for the fallible-world *segment* semantics rather than a degenerate collapsed model.
+      Record this in the phase summary and handoff. (This is distinct from, and consistent with, the
+      proof-theoretic fact `CS5 ≡ IS5` as theorem sets that Phase 3 documents.) If, contrary to
+      expectation, the construction *does* force `Set.univ`/`W⊥ = ∅`, that is a design-relevant
+      surprise and must be surfaced, not buried.
 
 **Timing**: 2 hours
 
@@ -650,13 +768,15 @@ enlarges `boxInv H'`, so the two sides must grow together.
 
 - `lake env lean specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-construction.lean`
   exits 0 with no `sorry`.
-- The chain-upper-bound lemma and the base-point lemma are each proved outright, not admitted.
+- All four of {seed-in-poset, cross-conditions-yield-tail-membership, chain-upper-bound,
+  maximal-pair-exists} are proved outright, not admitted — each is one of Pacheco's holes and must
+  not be inherited.
 - `#print axioms` on each; expect the Zorn three.
-- The collapse check is answered in writing, either way.
+- The collapse-inheritance answer is written down (expected: not inherited).
 
-**Research risk**: this is the first of two research-risk phases. If the poset cannot be shown
-non-empty at the base point, that is itself a finding — escalate to the Phase 11 fallback rather
-than weakening the invariants until the statement becomes vacuous.
+**Research risk**: first of two research-risk phases. If the poset cannot be shown non-empty at the
+seed even with designated-formula exclusion, that is a genuine finding — escalate to the Phase 11
+fallback rather than weakening the invariants until the statement becomes vacuous.
 
 ---
 
@@ -668,9 +788,11 @@ case needs, and prove `cs5_box_backward`.
 **Tasks**:
 
 - [ ] From the maximal pair `(H', T)`, derive primeness of each component by applying Phase 8's
-      repaired primeness lemma (`cs5-pair-primeness.lean`) to each component of the maximal pair.
-      This is the step whose Pacheco original (Lemma 16) was unsound; Phase 8 supplies the sound
-      replacement. Do not re-derive it here and do not fall back to the negation-completeness route.
+      designated-formula-exclusion primeness (`cs5-pair-primeness.lean`, built on
+      `prime_set_exclusion`/`set_maximal_is_prime`) to each component. This is the step whose Pacheco
+      original (Lemma 16, delegated from Lemma 18) was unsound; Phase 8 supplies the sound engine via
+      the exclusion invariants `□A ∉ H'`, `A ∉ T`. Do not re-derive it here, do not use a
+      bot-exclusion invariant, and do not fall back to the negation-completeness route.
 - [ ] Derive the saturation condition the countermodel identified as necessary:
       `∀ D, □(A ∨ □D) ∈ H' → D ∈ H'`. This is the property that `H = Th(w)` lacks and
       `H' = Th(w')` has in the three-world countermodel, and it is what makes `T` findable.
@@ -826,9 +948,10 @@ definition**):
 - **Phase 10 failure is not a rollback**: it triggers Phase 11 Branch B, which is a real deliverable
   (the obstruction as a mechanized theorem). Reverting Phases 9-10's probes is optional; they
   document what was tried.
-- **Phase 8 refutation is not a rollback**: if Pacheco's primeness step is unsound for quasi-prime
-  heads, that finding lands as a probe and is reported. Phase 9 then attempts the pair poset carrying
-  primeness as an invariant instead of deriving it.
+- **Phase 8 is de-risking, not a rollback point**: it proves the designated-formula-exclusion
+  primeness engine out on a stub poset before Phase 9 builds the full construction. If that engine
+  does not go through for the two-sided poset, the finding lands as a probe and is reported, and the
+  task escalates to Phase 11 Branch B rather than reverting anything.
 - **`references.bib` additions** are independently revertable and harmless if the citing prose is
   reverted with them.
 - **Nothing in this plan modifies** `CS4.lean`, `CT.lean`, `CK.lean`, `Segment.lean`, or

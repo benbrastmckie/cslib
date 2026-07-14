@@ -1,0 +1,351 @@
+import Cslib.Logics.Modal.Metalogic.Constructive.CS4
+
+/-! Probe for task 508: CS4 completeness via (i) weakened frame condition `cs4FC'`
+and (ii) hereditary `◇A`-exclusion diamond-refuting segments. -/
+
+namespace Cslib.Logic.Modal
+
+open Cslib.Logic
+
+universe u v
+
+variable {Atom : Type u}
+
+/-! ## Part A: head-theory closure facts from the CS4 axioms -/
+
+/-- `4`-box closure: `□B ∈ H → □□B ∈ H`. -/
+theorem cs4_box_four {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {B : Proposition Atom} (hB : Proposition.box B ∈ H) :
+    Proposition.box (Proposition.box B) ∈ H :=
+  mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.fourBox B)) hB
+
+/-- `4`-diamond contrapositive: `◇A ∉ H → ◇◇A ∉ H`. THE hereditary step. -/
+theorem cs4_not_dia_dia {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : (◇(◇A)) ∉ H :=
+  fun h =>
+    h_not (mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.fourDia A)) h)
+
+/-- `T`-diamond: `A ∈ H → ◇A ∈ H`. -/
+theorem cs4_dia_of_mem {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (hA : A ∈ H) : (◇A) ∈ H :=
+  mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.tDia A)) hA
+
+/-- `T`-box: `boxInv H ⊆ H`. -/
+theorem cs4_boxInv_subset {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H) :
+    boxInv H ⊆ H :=
+  fun _ hB => mem_head_mp hH.closed (axiom_mem_head (s := CKSegment.ofHead hH) (.tBox _)) hB
+
+/-- The `4`-transfer chain used by every frame-condition proof. -/
+theorem cs4_boxInv_trans {H K t : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    (h1 : boxInv H ⊆ K) (h2 : boxInv K ⊆ t) : boxInv H ⊆ t :=
+  fun _ hB => h2 (h1 (cs4_box_four hH hB))
+
+/-! ## Part B: the `◇`-exclusion tail and its segment -/
+
+/-- Tail determined by head `H` and an optional excluded diamond `E`. -/
+def cs4Tail (H : Set (Proposition Atom)) (E : Option (Proposition Atom)) :
+    Set (Set (Proposition Atom)) :=
+  {t | QuasiPrime CS4ModalAxiom t ∧ boxInv H ⊆ t ∧ ∀ A, E = some A → (◇A) ∉ t}
+
+/-- The `CS4` canonical segment at head `H` excluding the diamond `E`.
+KEY: `diam_witness` for `E = some A` needs `◇◇A ∉ H`, supplied by `fourDia`. -/
+def cs4Seg {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    (E : Option (Proposition Atom)) (hE : ∀ A, E = some A → (◇A) ∉ H) :
+    CKSegment (@CS4ModalAxiom Atom) where
+  head := H
+  tail := cs4Tail H E
+  head_qprime := hH
+  tail_qprime := fun _ ht => ht.1
+  box_reflect := fun _ hB _ ht => ht.2.1 hB
+  diam_witness := fun B hB => by
+    cases hE_eq : E with
+    | none =>
+      refine ⟨Set.univ, ⟨quasiPrime_univ, Set.subset_univ _, ?_⟩, Set.mem_univ _⟩
+      rintro A ⟨⟩
+    | some A =>
+      obtain ⟨T, hsub, hT, hBT, hAT⟩ :=
+        dia_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) (fun φ ψ => .k φ ψ) (fun φ ψ => .kdia φ ψ)
+          hH hB (cs4_not_dia_dia hH (hE A hE_eq))
+      refine ⟨T, ⟨hT, hsub, ?_⟩, hBT⟩
+      rintro A' ⟨rfl⟩
+      exact hAT
+
+/-! ## Part C: the `CS4` world type -/
+
+/-- `CS4` canonical worlds: `◇`-exclusion-shaped segments. -/
+structure CS4Segment (Atom : Type u) where
+  /-- The underlying segment. -/
+  seg : CKSegment (@CS4ModalAxiom Atom)
+  /-- The optional excluded diamond. -/
+  excl : Option (Proposition Atom)
+  /-- The excluded diamond is absent from the head (hereditary invariant). -/
+  excl_head : ∀ A, excl = some A → (◇A) ∉ seg.head
+  /-- The tail is exactly the `◇`-exclusion tail. -/
+  tail_eq : seg.tail = cs4Tail seg.head excl
+
+instance : Preorder (CS4Segment Atom) := Preorder.lift (fun s : CS4Segment Atom => s.seg)
+
+/-- Canonical accessibility. -/
+def cs4Mreach (P Q : CS4Segment Atom) : Prop := cmreach P.seg Q.seg
+
+/-- Maximal-tail world. -/
+def CS4Segment.ofHead {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H) :
+    CS4Segment Atom where
+  seg := cs4Seg hH none (by rintro A ⟨⟩)
+  excl := none
+  excl_head := by rintro A ⟨⟩
+  tail_eq := rfl
+
+/-- The hereditary diamond-refuting world. -/
+def CS4Segment.diaRefuting {H : Set (Proposition Atom)} (hH : QuasiPrime CS4ModalAxiom H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : CS4Segment Atom where
+  seg := cs4Seg hH (some A) (by rintro A' ⟨rfl⟩; exact h_not)
+  excl := some A
+  excl_head := by rintro A' ⟨rfl⟩; exact h_not
+  tail_eq := rfl
+
+/-! ## Part D: the weakened frame condition and its canonical verification -/
+
+/-- The weakened `CS4` frame condition. -/
+def cs4FC' {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
+  (∀ w, r w w)
+    ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t)
+    ∧ (∀ {w u}, r w u → ∃ u', u ≤ u' ∧ ∀ t, r u' t → r w t)
+
+theorem cs4_refl (P : CS4Segment Atom) : cs4Mreach P P := by
+  show P.seg.head ∈ P.seg.tail
+  rw [P.tail_eq]
+  exact ⟨P.seg.head_qprime, cs4_boxInv_subset P.seg.head_qprime, P.excl_head⟩
+
+theorem cs4_fc4 {w u u' t : CS4Segment Atom} (hwu : cs4Mreach w u) (hle : u ≤ u')
+    (hu't : cs4Mreach u' t) : ∃ v : CS4Segment Atom, w ≤ v ∧ cs4Mreach v t := by
+  refine ⟨CS4Segment.ofHead w.seg.head_qprime, Set.Subset.refl _, ?_⟩
+  show t.seg.head ∈ cs4Tail w.seg.head none
+  refine ⟨t.seg.head_qprime, ?_, by rintro A ⟨⟩⟩
+  refine cs4_boxInv_trans (K := u'.seg.head) w.seg.head_qprime ?_ ?_
+  · exact fun B hB => hle (w.seg.box_reflect B hB u.seg.head hwu)
+  · exact fun B hB => u'.seg.box_reflect B hB t.seg.head hu't
+
+theorem cs4_fcdia {w u : CS4Segment Atom} (hwu : cs4Mreach w u) :
+    ∃ u' : CS4Segment Atom, u ≤ u' ∧ ∀ t : CS4Segment Atom, cs4Mreach u' t → cs4Mreach w t := by
+  have hmem : u.seg.head ∈ cs4Tail w.seg.head w.excl := w.tail_eq ▸ hwu
+  refine ⟨⟨cs4Seg u.seg.head_qprime w.excl hmem.2.2, w.excl, hmem.2.2, rfl⟩,
+    Set.Subset.refl _, ?_⟩
+  intro t hu't
+  have hu't' : t.seg.head ∈ cs4Tail u.seg.head w.excl := hu't
+  show t.seg.head ∈ w.seg.tail
+  rw [w.tail_eq]
+  exact ⟨t.seg.head_qprime,
+    cs4_boxInv_trans w.seg.head_qprime hmem.2.1 hu't'.2.1, hu't'.2.2⟩
+
+/-- **The canonical CS4 model satisfies the weakened frame condition.** -/
+theorem cs4FC'_cs4Mreach : cs4FC' (@cs4Mreach Atom) :=
+  ⟨cs4_refl, fun h1 h2 h3 => cs4_fc4 h1 h2 h3, fun h => cs4_fcdia h⟩
+
+/-! ## Part E: soundness of the CS4 axioms over the WEAKENED frame condition -/
+
+theorem cs4_axiom_sound' {φ : Proposition Atom} (h_ax : CS4ModalAxiom φ) :
+    CKValidFC.{u, v} cs4FC' φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨hrefl, hfc4, hfcdia⟩ := hfc
+  cases h_ax with
+  | implyK φ ψ =>
+    intro w' _ hφ w'' hw' _
+    exact ckforces_persistence v_uc bf_uc hw' hφ
+  | implyS φ ψ χ =>
+    intro w₁ hw₁ h_pqr w₂ hw₂ h_pq w₃ hw₃ h_p
+    have h₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pqr w₃ h₁₃ h_p w₃ (le_refl w₃) (h_pq w₃ hw₃ h_p)
+  | efq φ =>
+    intro w' _ hbot
+    exact ckforces_of_exploding bf_uc bf_val bf_r bf_r_wit hbot φ
+  | andI φ ψ =>
+    intro w₁ _ hφ w₂ hw₂ hψ
+    exact ⟨ckforces_persistence v_uc bf_uc hw₂ hφ, hψ⟩
+  | andE1 φ ψ => intro _ _ h; exact h.1
+  | andE2 φ ψ => intro _ _ h; exact h.2
+  | orI1 φ ψ => intro _ _ h; exact Or.inl h
+  | orI2 φ ψ => intro _ _ h; exact Or.inr h
+  | orE φ ψ χ =>
+    intro w₁ _ h_pq w₂ hw₂ h_rq w₃ hw₃ h_pr
+    have hw₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pr.elim (fun hp => h_pq w₃ hw₁₃ hp) (fun hr => h_rq w₃ hw₃ hr)
+  | k φ ψ =>
+    intro w' _ hbox_imp w'' hw' hbox_phi w1 hw1 u hru
+    exact hbox_imp w1 (le_trans hw' hw1) u hru u (le_refl u) (hbox_phi w1 hw1 u hru)
+  | kdia φ ψ =>
+    intro w' _ hbox_imp w'' hw' hdia_phi w₃ hw₃
+    obtain ⟨u, hru, hφu⟩ := hdia_phi w₃ hw₃
+    exact ⟨u, hru, hbox_imp w₃ (le_trans hw' hw₃) u hru u (le_refl u) hφu⟩
+  | tBox φ =>
+    intro w' _ hbox
+    exact hbox w' (le_refl w') w' (hrefl w')
+  | tDia φ =>
+    intro w' _ hφ w'' hw''
+    exact ⟨w'', hrefl w'', ckforces_persistence v_uc bf_uc hw'' hφ⟩
+  | fourDia φ =>
+    intro w' _ hdidia w'' hw''
+    obtain ⟨u, hru, hdia_u⟩ := hdidia w'' hw''
+    obtain ⟨u', hle, hprop⟩ := hfcdia hru
+    obtain ⟨t, hu't, hφt⟩ := hdia_u u' hle
+    exact ⟨t, hprop t hu't, hφt⟩
+  | fourBox φ =>
+    intro w' _ hbox w'' hw'' u hru u' hu' t hrt
+    obtain ⟨v, hwv, hvt⟩ := hfc4 hru hu' hrt
+    exact hbox v (le_trans hw'' hwv) t hvt
+
+theorem cs4_soundness'
+    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (d : DerivationTree CS4ModalAxiom Γ φ)
+    {World : Type v} [Preorder World]
+    (r : World → World → Prop) (hfc : cs4FC' r)
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_val : ∀ {w : World} (p : Atom), botForces w → val w p)
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    (bf_r_wit : ∀ {w : World}, botForces w → ∃ u, r w u ∧ botForces u)
+    (w : World)
+    (h_ctx : ∀ ψ, ψ ∈ Γ → CKForces r val botForces w ψ) :
+    CKForces r val botForces w φ := by
+  match d with
+  | .ax _ ψ h_ax =>
+    exact cs4_axiom_sound' h_ax World r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  | .assumption _ ψ h_mem => exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    exact cs4_soundness' d₁ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx
+      w (le_refl w)
+      (cs4_soundness' d₂ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx)
+  | .necessitation ψ d' =>
+    intro w' _hle u _hru
+    exact cs4_soundness' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit u
+      (fun _ h => nomatch h)
+  | .weakening Γ' Δ ψ d' h_sub =>
+    exact cs4_soundness' d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+      (fun x hx => h_ctx x (h_sub x hx))
+
+/-! ## Part F: the truth lemma on the CS4 world type -/
+
+/-- Canonical valuation. -/
+def cs4Val (s : CS4Segment Atom) (p : Atom) : Prop := cval s.seg p
+
+/-- Canonical fallibility. -/
+def cs4Bot (s : CS4Segment Atom) : Prop := cbotForces s.seg
+
+theorem cs4_truth_lemma (s : CS4Segment Atom) (φ : Proposition Atom) :
+    CKForces cs4Mreach cs4Val cs4Bot s φ ↔ φ ∈ s.seg.head := by
+  induction φ generalizing s with
+  | atom p => exact Iff.rfl
+  | bot => exact Iff.rfl
+  | imp φ ψ ihφ ihψ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨T, hHT, hT, hφT, hψT⟩ :=
+        imp_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) s.seg.head_qprime h_not
+      exact hψT ((ihψ (CS4Segment.ofHead hT)).mp
+        (hf (CS4Segment.ofHead hT) hHT ((ihφ (CS4Segment.ofHead hT)).mpr hφT)))
+    · intro hmem s' hle hfφ
+      exact (ihψ s').mpr
+        (mem_head_mp s'.seg.head_qprime.closed (hle hmem) ((ihφ s').mp hfφ))
+  | and φ ψ ihφ ihψ =>
+    constructor
+    · rintro ⟨hfφ, hfψ⟩
+      exact mem_head_mp s.seg.head_qprime.closed
+        (mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andI φ ψ))
+          ((ihφ s).mp hfφ))
+        ((ihψ s).mp hfψ)
+    · intro hmem
+      exact ⟨(ihφ s).mpr (mem_head_mp s.seg.head_qprime.closed
+                (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andE1 φ ψ)) hmem),
+             (ihψ s).mpr (mem_head_mp s.seg.head_qprime.closed
+                (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andE2 φ ψ)) hmem)⟩
+  | or φ ψ ihφ ihψ =>
+    constructor
+    · rintro (hfφ | hfψ)
+      · exact mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.orI1 φ ψ)) ((ihφ s).mp hfφ)
+      · exact mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.orI2 φ ψ)) ((ihψ s).mp hfψ)
+    · intro hmem
+      rcases s.seg.head_qprime.disj hmem with h | h
+      · exact Or.inl ((ihφ s).mpr h)
+      · exact Or.inr ((ihψ s).mpr h)
+  | box φ ihφ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨T, hsub, hT, hAT⟩ :=
+        box_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) (fun φ ψ => .k φ ψ) s.seg.head_qprime h_not
+      have hr : cs4Mreach (CS4Segment.ofHead s.seg.head_qprime) (CS4Segment.ofHead hT) :=
+        ⟨hT, hsub, by rintro A ⟨⟩⟩
+      exact hAT ((ihφ (CS4Segment.ofHead hT)).mp
+        (hf (CS4Segment.ofHead s.seg.head_qprime) (Set.Subset.refl _)
+          (CS4Segment.ofHead hT) hr))
+    · intro hmem s' hle Q hr
+      exact (ihφ Q).mpr (s'.seg.box_reflect φ (hle hmem) Q.seg.head hr)
+  | diamond φ ihφ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨Q, hr, hfQ⟩ :=
+        hf (CS4Segment.diaRefuting s.seg.head_qprime h_not) (Set.Subset.refl _)
+      exact hr.2.2 φ rfl (cs4_dia_of_mem Q.seg.head_qprime ((ihφ Q).mp hfQ))
+    · intro hmem s' hle
+      obtain ⟨t, ht_mem, hφt⟩ := s'.seg.diam_witness φ (hle hmem)
+      exact ⟨CS4Segment.ofHead (s'.seg.tail_qprime t ht_mem), ht_mem, (ihφ _).mpr hφt⟩
+
+/-! ## Part G: full CS4 completeness -/
+
+theorem cs4Val_upward_closed {w w' : CS4Segment Atom} (p : Atom) (h : w ≤ w')
+    (hv : cs4Val w p) : cs4Val w' p := cval_upward_closed p h hv
+
+theorem cs4Bot_upward_closed {w w' : CS4Segment Atom} (h : w ≤ w') (hb : cs4Bot w) :
+    cs4Bot w' := cbotForces_upward_closed h hb
+
+theorem cs4Bot_val {w : CS4Segment Atom} (p : Atom) (hb : cs4Bot w) : cs4Val w p :=
+  cbotForces_val (fun φ => .efq φ) p hb
+
+theorem cs4Bot_mreach {w u : CS4Segment Atom} (hb : cs4Bot w) (hr : cs4Mreach w u) :
+    cs4Bot u := cbotForces_mreach (fun φ => .efq φ) hb hr
+
+theorem cs4Bot_mreach_wit {w : CS4Segment Atom} (hb : cs4Bot w) :
+    ∃ u : CS4Segment Atom, cs4Mreach w u ∧ cs4Bot u := by
+  obtain ⟨t, ht_mem, ht_bot⟩ :=
+    w.seg.diam_witness _ (mem_of_bot_mem (fun φ => .efq φ) w.seg.head_qprime.closed hb
+      (◇Proposition.bot))
+  exact ⟨CS4Segment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
+
+/-- **COMPLETENESS FOR CS4** over the weakened frame condition. -/
+theorem cs4_completeness {φ : Proposition Atom} (h_valid : CKValidFC.{u, u} cs4FC' φ) :
+    Derivable CS4ModalAxiom φ :=
+  ckvalidFC_completeness cs4FC' cs4Mreach cs4Val cs4Bot
+    cs4Val_upward_closed cs4Bot_upward_closed cs4Bot_val cs4Bot_mreach cs4Bot_mreach_wit
+    cs4FC'_cs4Mreach
+    (fun {φ} h_nd => by
+      obtain ⟨T, hT, hφT⟩ := quasi_head_realization (fun φ ψ => .implyK φ ψ)
+        (fun φ ψ χ => .implyS φ ψ χ) (fun A B χ => .orE A B χ) h_nd
+      exact ⟨CS4Segment.ofHead hT,
+        fun hf => hφT ((cs4_truth_lemma (CS4Segment.ofHead hT) φ).mp hf)⟩)
+    h_valid
+
+theorem cs4_soundness_derivable' {φ : Proposition Atom}
+    (h : Derivable CS4ModalAxiom φ) : CKValidFC.{u, v} cs4FC' φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨d⟩ := h
+  exact cs4_soundness' d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+    (fun _ h => nomatch h)
+
+/-- **SOUNDNESS-COMPLETENESS BICONDITIONAL FOR CS4.** -/
+theorem cs4_soundness_completeness {φ : Proposition Atom} :
+    Derivable CS4ModalAxiom φ ↔ CKValidFC.{u, u} cs4FC' φ :=
+  ⟨cs4_soundness_derivable', cs4_completeness⟩
+
+end Cslib.Logic.Modal
+
+#print axioms Cslib.Logic.Modal.cs4_completeness
+#print axioms Cslib.Logic.Modal.cs4_soundness_completeness

@@ -11,8 +11,8 @@ next_project_number: 511
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,506,508,510 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,501,503,509 | 36,37,181,317,407,425,449,508,510 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,501,502,506,509,510 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,503 | 36,37,181,317,407,425,449,510 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
 | 5 | 414 | 181,215,300,301 | code hygiene |
@@ -37,11 +37,10 @@ next_project_number: 511
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
+501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 506 [RESEARCHED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-508 [PLANNED] — Unblock CK constructive CS4/CS5 completeness (task 501 follow-up)
-  └─ 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
-  └─ 509 [NOT STARTED] — Re-scope and close CK constructive CS5 completeness (task 508 fol
+509 [NOT STARTED] — Re-scope and close CK constructive CS5 completeness (task 508 fol
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
@@ -116,12 +115,13 @@ next_project_number: 511
 ---
 
 ### 508. Unblock CK CS4 CS5 completeness
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md]
 - **Plan**: [508_unblock_CK_CS4_CS5_completeness/plans/01_cs4-completeness-integration.md]
+- **Summary**: [508_unblock_CK_CS4_CS5_completeness/summaries/01_cs4-completeness-integration-summary.md]
 
 **Description**: Unblock CK constructive CS4/CS5 completeness (task 501 follow-up) — task 501 delivered CT/CS4/CS5 soundness and CT completeness, but CS4/CS5 completeness is [BLOCKED] on a mechanically-verified obstruction: over CK's segment/fallible-world model, the diamRefutingSegment tail-exclusion witness needed for the truth lemma's diamond-backward 'far' clause cannot be shown to propagate through further relational steps (no maximal-tail invariant makes cs4FC transitivity / cs5FC symmetry hold globally on the restricted canonical world type). Research and implement an alternative canonical-model technique to close CS4/CS5 completeness sorry-free: candidate approaches (a) a hereditary/maximal diamond-refuting construction that keeps the exclusion invariant stable under cmreach steps, or (b) filtration over the CK segment model. Files: Cslib/Logics/Modal/Metalogic/Constructive/{CS4,CS5}.lean (currently soundness-only + BLOCKED completeness sections). Depends on 501.
 

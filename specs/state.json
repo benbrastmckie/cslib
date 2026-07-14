@@ -1303,13 +1303,13 @@
     {
       "project_number": 508,
       "project_name": "unblock_CK_CS4_CS5_completeness",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Unblock CK constructive CS4/CS5 completeness (task 501 follow-up) — task 501 delivered CT/CS4/CS5 soundness and CT completeness, but CS4/CS5 completeness is [BLOCKED] on a mechanically-verified obstruction: over CK's segment/fallible-world model, the diamRefutingSegment tail-exclusion witness needed for the truth lemma's diamond-backward 'far' clause cannot be shown to propagate through further relational steps (no maximal-tail invariant makes cs4FC transitivity / cs5FC symmetry hold globally on the restricted canonical world type). Research and implement an alternative canonical-model technique to close CS4/CS5 completeness sorry-free: candidate approaches (a) a hereditary/maximal diamond-refuting construction that keeps the exclusion invariant stable under cmreach steps, or (b) filtration over the CK segment model. Files: Cslib/Logics/Modal/Metalogic/Constructive/{CS4,CS5}.lean (currently soundness-only + BLOCKED completeness sections). Depends on 501.",
       "dependencies": [],
       "parent_task": 501,
       "topic": "Modal Logic",
-      "last_updated": "2026-07-14T21:13:30Z",
+      "last_updated": "2026-07-14T21:29:34Z",
       "session_id": "sess_1784061933_322282",
       "artifacts": [
         {
@@ -1321,8 +1321,14 @@
           "path": "specs/508_unblock_CK_CS4_CS5_completeness/plans/01_cs4-completeness-integration.md",
           "type": "plan",
           "summary": "8-phase CS4 transcription+integration plan; cs4FC kept with compile-verified cs4FC_implies_cs4FC' bridge; CS5 left blocked."
+        },
+        {
+          "path": "specs/508_unblock_CK_CS4_CS5_completeness/summaries/01_cs4-completeness-integration-summary.md",
+          "type": "summary",
+          "summary": "CS4 completeness landed sorry-free across 8 phases; CS5 re-scoped to task 509."
         }
-      ]
+      ],
+      "completion_summary": "CS4 constructive completeness CLOSED sorry-free: cs4_completeness and cs4_soundness_completeness land in CS4.lean with axioms exactly [propext, Classical.choice, Quot.sound] (orchestrator-verified). Technique: weakened frame condition cs4FC' plus a hereditary diamond-refuting tail, with cs4FC retained and bridged via cs4FC_implies_cs4FC' so the cs5FC->cs4FC->ctFC inclusion chain in ConstructiveLatticeMonotonicity.lean is preserved unchanged. CS5 completeness is NOT closed and was re-scoped to task 509: it is provably unreachable by this technique per the mechanized countermodel bDia_not_valid_over_cs5FCweak. Full CI pipeline green."
     },
     {
       "project_number": 509,

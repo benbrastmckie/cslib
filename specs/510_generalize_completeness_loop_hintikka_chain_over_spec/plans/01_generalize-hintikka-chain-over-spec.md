@@ -547,7 +547,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 8: K re-instantiation and zero-regression verification [NOT STARTED]
+### Phase 8: K re-instantiation and zero-regression verification [COMPLETED]
 
 - **Goal:** Deliver the remaining free generics and prove the zero-regression claim by diff, not by
   assertion.
@@ -573,8 +573,24 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     `lake exe lint-style`, `lake test`, `lake shake --add-public --keep-implied --keep-prefix`. No new
     files were added, so `lake exe mk_all --module` should be a no-op — if it wants to reorder unrelated
     imports in `Cslib.lean` from concurrent sessions, **leave them alone** (507 Phase 8 hit exactly this).
-  - [ ] Exhaustive `#print axioms` sweep over every new/changed top-level declaration: zero sorry, zero
-    new axiom.
+  - [x] Exhaustive `#print axioms` sweep over every new/changed top-level declaration: zero sorry, zero
+    new axiom. *(deviation: full-project `lake build`/`lake test`/`checkInitImports` intermittently
+    blocked by a concurrent, uncommitted breakage in `FrameCompleteness.lean` (task 506's reserved
+    territory, actively mid-edit -- `s4FC`/`extractModelS4` unknown-identifier errors, not touched
+    by this task and unrelated to any of this task's eight files). Verified via a scoped
+    `lake build` over exactly this task's eight touched modules (781/781, clean) plus `lake
+    exe lint-style` (clean, does not require a full build) and the byte-identity diff below,
+    which is authoritative regardless of the concurrent file's state. Phase 7's full-project
+    build/CI (3233/3233) already confirmed everything through the crux was green before this
+    unrelated breakage appeared.)*
+  - [x] **Byte-identity gate, confirmed by diff (not assertion)** against baseline commit
+    `64be55dc` (parent of Phase 1's `6ac19353`): `kValid`, `modalTableau_decides`,
+    `instDecidableKValid` are **byte-for-byte identical including proof bodies** (`diff` exit 0).
+    `ModalLoopInv`, `modalHintikkaSet`, `modalHintikkaClause`, `modalExpandBranches_hintikka`,
+    `modalStep_preserves_invariant`, `modalStepBranch_hintikka_inv`,
+    `modalStepBranch_none_saturated`, `modalStepBranch_preserves_accFreshInv`, and
+    `modalTableau_complete` all have **byte-identical statements** (normalized-whitespace
+    signature diff, zero drift).
 - **Timing:** 1.5 hours
 - **Depends on:** 7
 - **Files to modify:**

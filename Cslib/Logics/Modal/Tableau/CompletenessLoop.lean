@@ -25,12 +25,27 @@ step preserves this bundle on every child branch it produces, while the base-3 c
 
 - `ModalLoopInv`: the bundled per-branch loop invariant threaded across the completeness
   fuel-induction.
+- `ModalLoopInvGen` (task 510): `ModalLoopInv`, generalized over an abstract
+  `apply : RuleApply Atom`. Only `hintikkaInv` mentions `apply`; the other six conjuncts are
+  already rule-agnostic. Bridged to `ModalLoopInv` via `ModalLoopInv_iff_gen` rather than
+  identified definitionally, so `ModalLoopInv` stays byte-identical.
 
 ## Main Results
 
 - `modalStep_preserves_invariant`: one `modalStepBranch` step preserves `ModalLoopInv` (under a
   single shared rank map `rank'`) on every child branch/expanded-set pair, and strictly decreases
   `modalExpMeasure` by at least one.
+- `modalExpandBranchesGen_hintikka` (task 510, the crux): the generic top-loop Hintikka lemma,
+  over an abstract `(apply, spec)`, concluding in `modalHintikkaSetGen apply bR aR` (not the
+  concrete `modalHintikkaSet bR aR`) -- this is what lets 503 (T), 505 (B), and 506 (S4) consume
+  the generic Hintikka-set statement shape. `TDriver.lean`'s `modalExpandBranchesT_hintikka`
+  one-liner is the structural proof this generalization succeeded. `RuleApplicationSpec` grows
+  from seven fields (task 507) to eleven (F8 `localShapeInvariance` through F12 `diaPosWitness`,
+  `GenericDriver.lean`) to support this. K's `modalExpandBranches_hintikka`,
+  `modalStep_preserves_invariant`, `ModalLoopInv`, and every other public K declaration in this
+  module retain byte-identical statements, re-derived as corollaries via `modalStepBranch_eq`/
+  `modalExpandBranches_eq`/`modalHintikkaSet_eq`/`ModalLoopInv_iff_gen`; `kValid`,
+  `modalTableau_decides`, and `instDecidableKValid` are untouched entirely.
 
 ## References
 
@@ -1224,17 +1239,18 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
 branch: mirrors `modalLoop_bClosure`'s case split (every child branch is `newForms ++ b` or
 `br ++ b` for some `br`/`newForms`, so any pre-existing branch member survives via
 `List.mem_append_right`). -/
-private lemma modalStepBranch_mem_preserved
+private lemma modalStepBranchGen_mem_preserved
+    (apply : RuleApply Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (sf : SignedFormula (Proposition Atom) WorldIndex) (hsf : sf ∈ b)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc)) :
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc)) :
     ∀ b' ∈ newBs, sf ∈ b' := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf_exp, hsfmem, hsf'⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf' with hexp
-  rcases hfstc : (modalApplyOne sf_exp b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf_exp b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf'
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf'
     intro b' hb'
@@ -1257,12 +1273,28 @@ private lemma modalStepBranch_mem_preserved
     exact List.mem_append_right _ hsf
   · rw [hfstc] at hsf'; simp at hsf'
 
-/-- Every formula in every initial branch appears in the open branch returned by
-`modalExpandBranches`. Mirrors the classical propositional tableau's
-`classicalExpandBranches_openBranch_initial_mem`
-(`Classical/Completeness.lean:1164`), extended with the per-branch `acc` parallel list. Used to
-show `F(φ0)@0` is on the countermodel branch (task 442 Phase 6). -/
-private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
+/-- Every `modalStepBranch` step preserves membership of a fixed formula `sf` already on the
+branch: mirrors `modalLoop_bClosure`'s case split (every child branch is `newForms ++ b` or
+`br ++ b` for some `br`/`newForms`, so any pre-existing branch member survives via
+`List.mem_append_right`).
+
+Byte-identical-statement corollary of `modalStepBranchGen_mem_preserved` (task 510) via
+`modalStepBranch_eq`. -/
+private lemma modalStepBranch_mem_preserved
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsf : sf ∈ b)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc)) :
+    ∀ b' ∈ newBs, sf ∈ b' :=
+  modalStepBranchGen_mem_preserved modalApplyOne b e acc sf hsf newBs newExps newAcc
+    (modalStepBranch_eq b e acc ▸ hstep)
+
+/-- **Generic initial-branch membership persistence** (task 510): `modalExpandBranchesGen_
+openBranch_initial_mem`, over an abstract `apply`. Takes **no** field -- driver-structural, needed
+by 503 for its own T-system truth lemma. -/
+private lemma modalExpandBranchesGen_openBranch_initial_mem
+    (apply : RuleApply Atom) (fuel : Nat)
     (sf : SignedFormula (Proposition Atom) WorldIndex) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
@@ -1270,12 +1302,12 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
       accs.length = branches.length →
       (∀ b₀ ∈ branches, sf ∈ b₀) →
       ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
-        modalExpandBranches branches expandedSets accs fuel = .openBranch bR aR →
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
         sf ∈ bR := by
   induction fuel with
   | zero =>
     intro branches expandedSets accs _hlen _hlenA hAll bR aR h
-    simp only [modalExpandBranches] at h
+    simp only [modalExpandBranchesGen] at h
     cases hfs : (branches.zip accs).findSome? (fun (b, a) =>
         if isModalClosed b then none else some (b, a)) with
     | none => simp only [hfs] at h; exact absurd h (by simp)
@@ -1299,7 +1331,7 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
         exact hAll bR hq0mem
   | succ fuel' ih =>
     intro branches expandedSets accs hlen hlenA hAll bR aR h
-    simp only [modalExpandBranches] at h
+    simp only [modalExpandBranchesGen] at h
     suffices key : ∀ (pending pendingExp :
           List (List (SignedFormula (Proposition Atom) WorldIndex)))
         (pendingAccs : List Accessibility)
@@ -1311,16 +1343,16 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
         doneAccs.length = done.length →
         (∀ bp ∈ pending, sf ∈ bp) →
         (∀ bd ∈ done, sf ∈ bd) →
-        modalExpandBranches.processNext fuel' pending pendingExp pendingAccs done doneExp
+        modalExpandBranchesGen.processNext apply fuel' pending pendingExp pendingAccs done doneExp
             doneAccs = .openBranch bR aR →
         sf ∈ bR from
       key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hAll (by simp)
-        (by simpa [modalExpandBranches] using h)
+        (by simpa [modalExpandBranchesGen] using h)
     intro pending
     induction pending with
     | nil =>
       intro pendingExp pendingAccs done doneExp doneAccs _ _ _ _ _ _ hinner
-      simp [modalExpandBranches.processNext] at hinner
+      simp [modalExpandBranchesGen.processNext] at hinner
     | cons bh bt ih_inner =>
       intro pendingExp pendingAccs done doneExp doneAccs
         hlength_p hlenP_accs hdlength hdAccs hAll_p hAll_d hinner
@@ -1331,7 +1363,7 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
         | nil => simp at hlength_p
         | cons e es =>
           simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
-          simp only [modalExpandBranches.processNext] at hinner
+          simp only [modalExpandBranchesGen.processNext] at hinner
           by_cases hcl : isModalClosed bh = true
           · rw [if_pos hcl] at hinner
             have hAll_bt : ∀ bp ∈ bt, sf ∈ bp := fun bp hbp => hAll_p bp (by simp [hbp])
@@ -1346,7 +1378,7 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
               hAll_bt hAll_done_bh hinner
           · simp only [Bool.not_eq_true] at hcl
             rw [if_neg (by simp [hcl])] at hinner
-            cases hstep : modalStepBranch bh e a with
+            cases hstep : modalStepBranchGen apply bh e a with
             | none =>
               rw [hstep] at hinner
               have hbeq : bh = bR ∧ a = aR := by cases hinner; exact ⟨rfl, rfl⟩
@@ -1356,10 +1388,10 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
               rw [hstep] at hinner
               have hbh_sf : sf ∈ bh := hAll_p bh (by simp)
               have hNewBs_sf : ∀ b' ∈ newBs, sf ∈ b' :=
-                modalStepBranch_mem_preserved bh e a sf hbh_sf newBs newExps newAcc hstep
+                modalStepBranchGen_mem_preserved apply bh e a sf hbh_sf newBs newExps newAcc hstep
               have hLenNBE : newExps.length = newBs.length := by
                 obtain ⟨newExp, hEq⟩ :=
-                  modalStepBranch_newExps_const bh e a newBs newExps newAcc hstep
+                  modalStepBranchGen_newExps_const apply bh e a newBs newExps newAcc hstep
                 simp [hEq]
               exact ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
                 (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
@@ -1373,18 +1405,38 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
                   · exact hAll_p b' (by simp [hbt]))
                 bR aR hinner
 
+/-- Every formula in every initial branch appears in the open branch returned by
+`modalExpandBranches`. Mirrors the classical propositional tableau's
+`classicalExpandBranches_openBranch_initial_mem`
+(`Classical/Completeness.lean:1164`), extended with the per-branch `acc` parallel list. Used to
+show `F(φ0)@0` is on the countermodel branch (task 442 Phase 6).
+
+Byte-identical-statement corollary of `modalExpandBranchesGen_openBranch_initial_mem` (task 510)
+via `modalExpandBranches_eq`. -/
+private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ b₀ ∈ branches, sf ∈ b₀) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranches branches expandedSets accs fuel = .openBranch bR aR →
+        sf ∈ bR := by
+  intro branches expandedSets accs hlen hlenA hAll bR aR h
+  rw [modalExpandBranches_eq] at h
+  exact modalExpandBranchesGen_openBranch_initial_mem modalApplyOne fuel sf branches expandedSets
+    accs hlen hlenA hAll bR aR h
+
 /-! ## Initial Loop Invariant and the Public Completeness/Decidability Results
 (task 442 Phase 6, FINAL) -/
 
-/-- The bundled loop invariant `ModalLoopInv` holds at the tableau's initial configuration:
-branch `[F(φ0)@0]`, empty expanded set, empty accessibility relation, and the constant rank
-map `fun _ => modalDepth φ0`. Every `ModalPotentialInv` field is either a direct computation
-(`bClosure`, `rankBound`) or vacuous over `e = []`/`acc = Accessibility.empty`
-(`eNodup`, `eClosure`, `accKnown`, `outDegEq`, `rankEdge`, and `ModalLoopInv`'s own
-`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`, all quantified over `e = []`); `phiBound` is an
-exact equality driven by `geomCap`'s defining recursion (`geomCap_succ`), not merely a bound. -/
-private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
-    ModalLoopInv φ0 [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+/-- **Generic initial-configuration loop invariant** (task 510): `modalLoopInvGen_initial`, over
+an abstract `apply`. Takes **no** field -- the five rule-dependent conjuncts are all vacuous over
+`e = []`, so nothing about `apply` is ever consulted. -/
+private lemma modalLoopInvGen_initial (apply : RuleApply Atom) (φ0 : Proposition Atom) :
+    ModalLoopInvGen apply φ0
+      [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
       Accessibility.empty (fun _ => modalDepth φ0) := by
   have hmemU : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
       modalUniverse φ0 := by
@@ -1448,6 +1500,21 @@ private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
     simp at hsf
   · intro sf hsf
     simp at hsf
+
+/-- The bundled loop invariant `ModalLoopInv` holds at the tableau's initial configuration:
+branch `[F(φ0)@0]`, empty expanded set, empty accessibility relation, and the constant rank
+map `fun _ => modalDepth φ0`. Every `ModalPotentialInv` field is either a direct computation
+(`bClosure`, `rankBound`) or vacuous over `e = []`/`acc = Accessibility.empty`
+(`eNodup`, `eClosure`, `accKnown`, `outDegEq`, `rankEdge`, and `ModalLoopInv`'s own
+`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`, all quantified over `e = []`); `phiBound` is an
+exact equality driven by `geomCap`'s defining recursion (`geomCap_succ`), not merely a bound.
+
+Byte-identical-statement corollary of `modalLoopInvGen_initial` (task 510) via
+`ModalLoopInv_iff_gen`. -/
+private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
+    ModalLoopInv φ0 [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty (fun _ => modalDepth φ0) :=
+  (ModalLoopInv_iff_gen φ0 _ _ _ _).mpr (modalLoopInvGen_initial modalApplyOne φ0)
 
 /-- **K-completeness of the modal tableau** (task 442 Phase 6, FINAL): if the tableau on `φ0`
 returns an open branch, `φ0` is not K-valid. Combines the top-loop Hintikka lemma

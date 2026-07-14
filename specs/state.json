@@ -2672,7 +2672,7 @@
     {
       "project_number": 493,
       "project_name": "CK_constructive_modal_soundness_completeness",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "modal-logic",
       "parent_task": 480,
@@ -2682,8 +2682,8 @@
       ],
       "description": "CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.",
       "created": "2026-07-13T05:15:48Z",
-      "last_updated": "2026-07-14T14:02:21Z",
-      "session_id": "sess_1784011298_752245_493",
+      "last_updated": "2026-07-14T15:04:28Z",
+      "session_id": "sess_1784038832_edcb55",
       "artifacts": [
         {
           "path": "specs/493_CK_constructive_modal_soundness_completeness/reports/01_ck-segment-construction-scope.md",
@@ -2694,8 +2694,14 @@
           "path": "specs/493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md",
           "type": "plan",
           "summary": "CK segment-completeness hard plan (awaiting authorization)"
+        },
+        {
+          "path": "specs/493_CK_constructive_modal_soundness_completeness/summaries/01_ck-segment-completeness-summary.md",
+          "type": "summary",
+          "summary": "CK segment-completeness implementation summary"
         }
-      ]
+      ],
+      "completion_summary": "Bare-CK constructive modal soundness+completeness proved sorry-free via a segment/fallible-world canonical model (5 new files, 1331 lines). Plan-corrected semantics: headline validity is CKValid (Wijesekera forall-exists diamond) not MValid, which was counterexample-proven false. CI fully green. User review of the statement change recommended before PR."
     },
     {
       "project_number": 494,

@@ -11,8 +11,8 @@ next_project_number: 502
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,493,497 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,495,501 | 36,37,181,317,407,425,449,491,493 | propositional logic, temporal logic, bimodal logic, ... |
+| 1 | 36,37,181,226,300,317,393,396,400,405,407,425,438,440,449,463,465,466,474,491,497,501 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,495 | 36,37,181,317,407,425,449,491 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,414,484,496 | 39,40,181,215,300,301,375,495 | foundations, modal logic, code hygiene, ... |
 | 4 | 412 | 41 | code hygiene |
 
@@ -80,8 +80,7 @@ next_project_number: 502
 491 [NOT STARTED] — Minimal propositional base (efq-optional) — PREREQUISITE for the 
   └─ 495 [NOT STARTED] — Minimal modal logic MK soundness + completeness — the modal logic
     └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
-493 [PLANNED] — CK (constructive modal logic K) soundness + completeness over bir
-  └─ 501 [NOT STARTED] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
+501 [NOT STARTED] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
 
 ### Propositional Logic
 
@@ -185,12 +184,13 @@ next_project_number: 502
 ---
 
 ### 493. CK constructive modal soundness completeness
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: modal-logic
 - **Dependencies**: Task 480, Task 490
 - **Research**: [493_CK_constructive_modal_soundness_completeness/reports/01_ck-segment-construction-scope.md]
 - **Plan**: [493_CK_constructive_modal_soundness_completeness/plans/01_ck-segment-completeness.md]
+- **Summary**: [493_CK_constructive_modal_soundness_completeness/summaries/01_ck-segment-completeness-summary.md]
 
 **Description**: CK (constructive modal logic K) soundness + completeness over birelational semantics (task 490), instantiating the intuitionistic modal framework (task 480). CK is the weaker constructive base that DROPS IK's ◇⊥→⊥ and ◇(A∨B)→◇A∨◇B axioms, leaving ◇ and □ fully independent (the case that most needs primitive ◇). Prove soundness and completeness; contrast the frame conditions / canonical-model construction with IK (task 492). Depends on 480, 490.
 

@@ -325,22 +325,37 @@ phase task descriptions below should be read with this adjustment: "Files to mod
 
 ---
 
-### Phase 4: Generic knownWorlds + accTargetsKnown cluster [NOT STARTED]
+### Phase 4: Generic knownWorlds + accTargetsKnown cluster [COMPLETED]
 
 - **Goal:** Re-derive the known-worlds / accessibility-target machinery generically. Cluster:
   `FmpMeasure.lean` lines ~1581–2117 (small `modalKnownWorlds`/`modalMaxWorld` helpers plus the two
   larger lemmas).
 - **Tasks:**
-  - [ ] Confirm the `modalPotentialTerm`/`modalPotential` defs (1581/1588) and the `modalKnownWorlds`
+  - [x] Confirm the `modalPotentialTerm`/`modalPotential` defs (1581/1588) and the `modalKnownWorlds`
     /`modalMaxWorld` private helpers (1598–1780) are rule-agnostic; reuse unchanged where they do not
-    mention `modalApplyOne`.
-  - [ ] Generalize `modalStepBranch_preserves_accTargetsKnown` (1788, ~60 lines),
+    mention `modalApplyOne`. *(confirmed: none reference `modalApplyOne`/`modalStepBranch`; reused
+    unchanged. `mintGroup_label_eq_freshWorld` likewise reused unchanged — it is already
+    parametrized over an arbitrary sign/formula pair, not `modalApplyOne`-specific.)*
+  - [x] Generalize `modalStepBranch_preserves_accTargetsKnown` (1788, ~60 lines),
     `mintGroup_label_eq_freshWorld` (1851), `modalStepBranch_knownWorlds` (1903, ~160 lines), and
     `modalStepBranch_eClosure` (2069, ~50 lines) to `_gen` over `modalStepBranchGen apply` + `spec`,
     discharging each `modalApplyOne`-shape `rcases` from `spec.freshLocal` /
-    `spec.outputsSubsetUniverse` / the Phase-1 mint-point field(s).
-  - [ ] Re-derive the concrete K versions as `_gen … modalApplyOne modalApplyOne_spec`; keep callers green.
-  - [ ] `lake build`; `lean_verify` no sorry/axiom.
+    `spec.outputsSubsetUniverse` / the Phase-1 mint-point field(s). *(realized per the
+    Architectural Note: `modalStepBranch_preserves_accTargetsKnown_gen` takes the raw
+    `hFreshLocal` hypothesis; `modalStepBranch_knownWorlds_gen` takes the raw
+    `hKnownWorldsStep` hypothesis; `modalStepBranch_eClosure_gen` needs no hypothesis about
+    `apply` at all (fully rule-agnostic, its conclusion only concerns `sf` itself via `sf ∈ b`).
+    `GenericDriver.lean` supplies the three `(apply, spec)`-bundled wrappers
+    `modalStepBranchGen_preserves_accTargetsKnown`/`_knownWorlds`/`_eClosure`.)*
+  - [x] Re-derive the concrete K versions as `_gen … modalApplyOne modalApplyOne_spec`; keep callers green.
+    *(realized as byte-identical-statement corollaries via the `modalStepBranch_eq` bridge, as in
+    Phases 2-3.)*
+  - [x] `lake build`; `lean_verify` no sorry/axiom. *(confirmed via `lake env lean` + `#print
+    axioms` on all 9 new/changed declarations: all `{propext, Quot.sound}` or `{propext,
+    Classical.choice, Quot.sound}`, zero sorry. Full CI green. Caught and fixed one genuinely new
+    `lake build` style-linter warning (a doc-comment line exceeding the 100-char limit,
+    `FmpMeasure.lean:1501`, introduced in Phase 2's docstring) — `lake shake` warning count on the
+    two files now 81 (one BELOW the 82 baseline).)*
 - **Timing:** 2.5 hours
 - **Depends on:** 3
 - **Files to modify:**

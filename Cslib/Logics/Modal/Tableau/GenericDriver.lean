@@ -264,6 +264,59 @@ theorem modalStepBranchGen_exists_rank'
   modalStepBranch_exists_rank'_gen apply spec.rankStep
     b e acc newBs newExps newAcc hstep hInv rank hbound hedge
 
+/-! ## Task 507 Phase 4: Generic knownWorlds/accTargetsKnown/eClosure (spec-bundled) -/
+
+/-- **Task 507 Phase 4**: `modalStepBranchGen apply` preserves `accTargetsKnown`, bundled via
+`RuleApplicationSpec` (thin wrapper around `modalStepBranch_preserves_accTargetsKnown_gen`,
+`FmpMeasure.lean`, which takes the raw `freshLocal` hypothesis directly to avoid the import
+cycle documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_preserves_accTargetsKnown
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    ∀ b' ∈ newBs, accTargetsKnown b' newAcc :=
+  modalStepBranch_preserves_accTargetsKnown_gen apply spec.freshLocal
+    b e acc newBs newExps newAcc hstep hknown
+
+/-- **Task 507 Phase 4**: the known-worlds/max-world dichotomy for a single
+`modalStepBranchGen apply` step, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalStepBranch_knownWorlds_gen`, `FmpMeasure.lean`, which takes the raw `knownWorldsStep`
+hypothesis directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+theorem modalStepBranchGen_knownWorlds
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    (newAcc = acc ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalMaxWorld b ∧
+        (modalKnownWorlds b').Perm (modalKnownWorlds b)) ∨
+    (∃ l ∈ modalKnownWorlds b, newAcc = acc.addEdge l (modalNextWorld b) ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalNextWorld b ∧
+        (modalKnownWorlds b').Perm (modalNextWorld b :: modalKnownWorlds b)) :=
+  modalStepBranch_knownWorlds_gen apply spec.knownWorldsStep
+    b e acc newBs newExps newAcc hstep hknown
+
+/-- **Task 507 Phase 4**: the expanded set's `modalUniverse` closure is preserved across a
+`modalStepBranchGen apply` step, bundled via `RuleApplicationSpec` (thin wrapper around
+`modalStepBranch_eClosure_gen`, `FmpMeasure.lean`, which needs no `spec` field at all -- see its
+docstring). -/
+theorem modalStepBranchGen_eClosure
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
+    (heclosure : ∀ x ∈ e, x ∈ modalUniverse φ0) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
+  modalStepBranch_eClosure_gen apply φ0 b e acc newBs newExps newAcc hstep hb heclosure
+
 end Cslib.Logic.Modal.Tableau
 
 end

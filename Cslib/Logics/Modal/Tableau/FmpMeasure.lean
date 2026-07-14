@@ -1498,9 +1498,9 @@ lemma modalApplyOne_outDeg_step
 expanded-set correspondence for an abstract `apply : RuleApply Atom`, given its per-call
 outDeg-step obligation `hOutDegStep` (the raw hypothesis underlying
 `RuleApplicationSpec.outDegStep`, spelled out here rather than bundled to avoid an import cycle
-with `GenericDriver.lean` -- see the plan's "Architectural Note"). `modalStepBranch_preserves_outDegEq`
-(K) is the trivial instantiation at `apply := modalApplyOne`,
-`hOutDegStep := modalApplyOne_outDeg_step`. -/
+with `GenericDriver.lean` -- see the plan's "Architectural Note").
+`modalStepBranch_preserves_outDegEq` (K) is the trivial instantiation at
+`apply := modalApplyOne`, `hOutDegStep := modalApplyOne_outDeg_step`. -/
 lemma modalStepBranch_preserves_outDegEq_gen
     (apply : RuleApply Atom)
     (hOutDegStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -1878,22 +1878,32 @@ def accTargetsKnown (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : Prop :=
   ∀ w w', acc.hasEdge w w' → w' ∈ modalKnownWorlds b
 
-/-- **P2-obl-d prerequisite**: `modalStepBranch` preserves `accTargetsKnown`. Old edges' targets
-remain known since the branch only grows (`modalKnownWorlds_mono_append`); the one possible new
-edge (`boxNeg`'s mint step) targets the freshly-minted witness world, which is immediately
-present on the new branch. -/
-lemma modalStepBranch_preserves_accTargetsKnown
+/-- **Task 507 Phase 4 (generic form)**: `modalStepBranchGen apply` preserves `accTargetsKnown`,
+given the per-call freshness dichotomy `hFreshLocal` (the raw hypothesis underlying
+`RuleApplicationSpec.freshLocal`, spelled out here rather than bundled to avoid the import cycle
+with `GenericDriver.lean` -- see the plan's "Architectural Note"). Old edges' targets remain
+known since the branch only grows (`modalKnownWorlds_mono_append`); the one possible new edge
+targets the freshly-minted witness world, which is immediately present on the new branch.
+`modalStepBranch_preserves_accTargetsKnown` (K) is the trivial instantiation at
+`apply := modalApplyOne`, `hFreshLocal := modalApplyOne_fresh_local`. -/
+lemma modalStepBranch_preserves_accTargetsKnown_gen
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hknown : accTargetsKnown b acc) :
     ∀ b' ∈ newBs, accTargetsKnown b' newAcc := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hbsub : ∀ b' ∈ newBs, modalKnownWorlds b ⊆ modalKnownWorlds b' := by
-    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
     · rw [hfstc] at hsf
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       intro b' hb'
@@ -1915,15 +1925,15 @@ lemma modalStepBranch_preserves_accTargetsKnown
       subst hb'
       exact modalKnownWorlds_mono_append nf b
     · rw [hfstc] at hsf; simp at hsf
-  have hnewAcc : newAcc = (modalApplyOne sf b acc).snd := by
-    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  have hnewAcc : newAcc = (apply sf b acc).snd := by
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
     · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
     · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
     · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
     · rw [hfstc] at hsf; simp at hsf
   intro b' hb' w w' hedge
   rw [hnewAcc] at hedge
-  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  rcases hFreshLocal sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
   · rw [hsame] at hedge
     exact hbsub b' hb' (hknown w w' hedge)
   · rw [hsnd] at hedge
@@ -1938,6 +1948,20 @@ lemma modalStepBranch_preserves_accTargetsKnown
       rw [mem_modalKnownWorlds]
       exact ⟨wsf, hwsfmem, rfl⟩
     · exact hbsub b' hb' (hknown w w' hold)
+
+/-- **P2-obl-d prerequisite**: `modalStepBranch` preserves `accTargetsKnown`. Zero-regression
+corollary of `modalStepBranch_preserves_accTargetsKnown_gen` (task 507 Phase 4) at
+`apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_preserves_accTargetsKnown
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    ∀ b' ∈ newBs, accTargetsKnown b' newAcc := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_preserves_accTargetsKnown_gen modalApplyOne modalApplyOne_fresh_local
+    b e acc newBs newExps newAcc hstep hknown
 
 /-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s live shape and
 `boxNeg`'s live shape, `Rules.lean:93-141`; task 441: `diamondPos` is native and genuinely
@@ -2082,20 +2106,36 @@ lemma modalApplyOne_knownWorlds_step
           obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
           exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
 
-/-- **P2-obl-d prerequisite**: the known-worlds/max-world dichotomy for a single
-`modalStepBranch` step. Either (non-mint: propositional rules, `boxPos`, `diamondNeg`) `acc` is
-unchanged and every child branch's known-worlds/max-world are unchanged (up to `Perm`); or
-(mint: `boxNeg`, `diamondPos`'s dead-code shape) `acc` gains exactly one edge from some known
-world `l` to the fresh world `modalNextWorld b`, and every child branch's known-worlds/max-world
-gain exactly that one fresh world. Same 5-way `modalApplyOne` case-split shape as (a)-(c),
-reusing the P1a closure lemmas (`modalApplyOne_boxPos_outputs_subset`,
-`modalApplyOne_diamondNeg_outputs_subset`) via `accTargetsKnown` for the successor-propagation
-cases, and `mintGroup_label_eq_freshWorld` for the two fresh-world cases. -/
-lemma modalStepBranch_knownWorlds
+/-- **Task 507 Phase 4 (generic form)**: the known-worlds/max-world dichotomy for a single
+`modalStepBranchGen apply` step, given the per-call known-worlds-step obligation
+`hKnownWorldsStep` (the raw hypothesis underlying `RuleApplicationSpec.knownWorldsStep`, spelled
+out here rather than bundled to avoid the import cycle with `GenericDriver.lean` -- see the
+plan's "Architectural Note"). Either `acc` is unchanged and every child branch's known-worlds/
+max-world are unchanged (up to `Perm`); or `acc` gains exactly one edge from some known world `l`
+to the fresh world `modalNextWorld b`, and every child branch's known-worlds/max-world gain
+exactly that one fresh world. `modalStepBranch_knownWorlds` (K) is the trivial instantiation at
+`apply := modalApplyOne`, `hKnownWorldsStep := modalApplyOne_knownWorlds_step`. -/
+lemma modalStepBranch_knownWorlds_gen
+    (apply : RuleApply Atom)
+    (hKnownWorldsStep : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      sf ∈ b → accTargetsKnown b acc →
+      ((apply sf b acc).snd = acc ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+          | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+          | .notApplicable => True)) ∨
+      ((apply sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+        (match (apply sf b acc).fst with
+          | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+          | .branching _ => False
+          | .persistent _ => False
+          | .notApplicable => False)))
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hknown : accTargetsKnown b acc) :
     (newAcc = acc ∧
       ∀ b' ∈ newBs, modalMaxWorld b' = modalMaxWorld b ∧
@@ -2103,23 +2143,23 @@ lemma modalStepBranch_knownWorlds
     (∃ l ∈ modalKnownWorlds b, newAcc = acc.addEdge l (modalNextWorld b) ∧
       ∀ b' ∈ newBs, modalMaxWorld b' = modalNextWorld b ∧
         (modalKnownWorlds b').Perm (modalNextWorld b :: modalKnownWorlds b)) := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
-  have hcases := modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+  have hcases := hKnownWorldsStep sf b acc hsfmem hknown
   have hlknown : sf.label ∈ modalKnownWorlds b := by
     rw [mem_modalKnownWorlds]; exact ⟨sf, hsfmem, rfl⟩
   rcases hcases with ⟨hsame, hmatch⟩ | ⟨haddedge, hfreshall⟩
   · left
     have hnewAcc : newAcc = acc := by
-      rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _ <;>
+      rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _ <;>
         · rw [hfstc] at hsf
           simp only [Option.some.injEq, Prod.mk.injEq] at hsf
           first
           | exact hsf.2.2.symm.trans hsame
           | simp at hsf
     refine ⟨hnewAcc, ?_⟩
-    rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
     · rw [hfstc] at hsf hmatch
       simp only [Option.some.injEq, Prod.mk.injEq] at hsf
       intro b' hb'
@@ -2151,13 +2191,13 @@ lemma modalStepBranch_knownWorlds
     · rw [hfstc] at hsf; simp at hsf
   · right
     refine ⟨sf.label, hlknown, ?_, ?_⟩
-    · rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _ <;>
+    · rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _ <;>
         · rw [hfstc] at hsf
           simp only [Option.some.injEq, Prod.mk.injEq] at hsf
           first
           | exact hsf.2.2.symm.trans haddedge
           | simp at hsf
-    · rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+    · rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
       · rw [hfstc] at hsf hfreshall
         simp only [Option.some.injEq, Prod.mk.injEq] at hsf
         intro b' hb'
@@ -2172,24 +2212,48 @@ lemma modalStepBranch_knownWorlds
       · rw [hfstc] at hfreshall; exact hfreshall.elim
       · rw [hfstc] at hsf; simp at hsf
 
-/-- The expanded set's `modalUniverse` closure is preserved across a `modalStepBranch` step:
-`e'` is either `e` unchanged (persistent rules) or `e ++ [sf]` (linear/branching rules), and in
-the latter case `sf ∈ modalUniverse φ0` follows from `sf ∈ b` and the branch closure `hb`. Same
-shallow (top-level `RuleResult`-constructor-only) case split as P2-obl-a. -/
-lemma modalStepBranch_eClosure
-    (φ0 : Proposition Atom)
+/-- **P2-obl-d prerequisite**: the known-worlds/max-world dichotomy for a single
+`modalStepBranch` step. Zero-regression corollary of `modalStepBranch_knownWorlds_gen`
+(task 507 Phase 4) at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
+byte-unchanged. -/
+lemma modalStepBranch_knownWorlds
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
     (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    (newAcc = acc ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalMaxWorld b ∧
+        (modalKnownWorlds b').Perm (modalKnownWorlds b)) ∨
+    (∃ l ∈ modalKnownWorlds b, newAcc = acc.addEdge l (modalNextWorld b) ∧
+      ∀ b' ∈ newBs, modalMaxWorld b' = modalNextWorld b ∧
+        (modalKnownWorlds b').Perm (modalNextWorld b :: modalKnownWorlds b)) := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_knownWorlds_gen modalApplyOne modalApplyOne_knownWorlds_step
+    b e acc newBs newExps newAcc hstep hknown
+
+/-- **Task 507 Phase 4 (generic form)**: the expanded set's `modalUniverse` closure is preserved
+across a `modalStepBranchGen apply` step, for **any** `apply : RuleApply Atom` -- this fact needs
+no per-call obligation about `apply` at all, since `e'` is either `e` unchanged (persistent
+rules) or `e ++ [sf]` (linear/branching rules), and in the latter case `sf ∈ modalUniverse φ0`
+follows from `sf ∈ b` and the branch closure `hb`, never from anything `apply` itself produces.
+Same shallow (top-level `RuleResult`-constructor-only) case split as P2-obl-a.
+`modalStepBranch_eClosure` (K) is the trivial instantiation at `apply := modalApplyOne`. -/
+lemma modalStepBranch_eClosure_gen
+    (apply : RuleApply Atom)
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
     (heclosure : ∀ x ∈ e, x ∈ modalUniverse φ0) :
     ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 := by
-  simp only [modalStepBranch] at hstep
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
   have hsfU : sf ∈ modalUniverse φ0 := hb sf hsfmem
-  rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
   · rw [hfstc] at hsf
     simp only [Option.some.injEq, Prod.mk.injEq] at hsf
     intro e' he'
@@ -2219,6 +2283,22 @@ lemma modalStepBranch_eClosure
     subst he'
     exact heclosure
   · rw [hfstc] at hsf; simp at hsf
+
+/-- The expanded set's `modalUniverse` closure is preserved across a `modalStepBranch` step.
+Zero-regression corollary of `modalStepBranch_eClosure_gen` (task 507 Phase 4) at
+`apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
+lemma modalStepBranch_eClosure
+    (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
+    (heclosure : ∀ x ∈ e, x ∈ modalUniverse φ0) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 := by
+  rw [modalStepBranch_eq] at hstep
+  exact modalStepBranch_eClosure_gen modalApplyOne φ0 b e acc newBs newExps newAcc hstep hb
+    heclosure
 
 /-- **Reusable invariant bundle** (P2-obl-d/e, threaded onward by P5a across the whole
 saturation-loop induction): the branch/expanded-set closure facts, the freshness and

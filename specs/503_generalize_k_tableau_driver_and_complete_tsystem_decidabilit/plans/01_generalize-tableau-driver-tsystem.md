@@ -400,16 +400,84 @@ unblocked and eligible.
 
 ---
 
-### Phase 5: T truth lemma and `tValid` completeness [NOT STARTED]
+### Phase 5: T truth lemma and `tValid` completeness [BLOCKED]
 
+**BLOCKER**:
+- **What failed**: Producing a `modalHintikkaSetT` witness from an open `modalExpandBranchesT`
+  result (the prerequisite for the T truth lemma), i.e. a T-analog of the top-loop lemma
+  `modalExpandBranches_hintikka` (`CompletenessLoop.lean:746`).
+- **What was tried**: Read the full dependency chain the K top-loop lemma needs:
+  `ModalLoopInv` (`CompletenessLoop.lean:57`, the bundled per-branch loop invariant),
+  `modalStep_preserves_invariant` (`:671`, one-step preservation), and — critically — the six
+  *private* helper lemmas `modalLoop_bClosure`, `modalStepBranch_newExps_const`,
+  `modalApplyOne_posBox_eq`/`modalApplyOne_negDia_eq` (already re-derived for T in `TDriver.lean`
+  as `modalApplyOne_boxPos_shape`/`_diamondNeg_shape`), and — the genuinely new obstruction —
+  `modalLoop_eBoxOnlyNeg`/`modalLoop_eBoxNegWitness`/`modalLoop_eDiamondOnlyPos`/
+  `modalLoop_eDiamondPosWitness` (`:303`-`:660`), each of which is a `private lemma` in
+  `CompletenessLoop.lean` proved by direct case-analysis on `modalApplyOne`'s box-negative/
+  diamond-positive dispatch (`modalApplyOne_boxNeg_witness`/`modalApplyOne_diamondPos_witness`,
+  also `private`). Also read `Completeness.lean`'s parallel saturation-characterisation section
+  (`modalHintikkaClause`, `modalApplyOne_fst_eq_of_not_box`, `modalHintikkaClause_lift`,
+  `modalStepBranch_none_saturated`, `modalStepBranch_hintikka_inv`, lines 635-935), all likewise
+  stated directly against `modalApplyOne` (not parametrized).
+- **Why it's stuck**: Phase 4 (as delivered, see its documented deviation) did **not** generalize
+  `CompletenessLoop.lean`'s `ModalLoopInv` over an abstract `apply`/`spec` — this was a deliberate,
+  documented scope cut, since T's own `RuleApplicationSpec` witness (`modalApplyOneT_spec`) does
+  not need it (T's fuel-sufficiency is already available generically via
+  `GenericDriver.lean`'s `(apply, spec)`-bundled wrapper theorems). But `ModalLoopInv`'s Hintikka
+  witness invariants (`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`) and
+  `Completeness.lean`'s `modalHintikkaClause` machinery are the actual prerequisite for *any*
+  system's top-loop Hintikka lemma (T's included), and every one of the ~12 lemmas in that chain
+  is `private` and stated directly against the concrete `modalApplyOne` symbol — not against an
+  opaque `apply` and not against `modalApplyOneT`. Producing `modalExpandBranchesT`'s Hintikka
+  guarantee therefore requires either (a) making all ~12 lemmas public and re-deriving T-specific
+  copies substituting `modalApplyOneT`, re-proving each via `modalApplyOneT_eq_of_not_boxPos_diaNeg`
+  (agreement) for box-negative/diamond-positive shapes plus the already-established T-shape facts
+  (`modalApplyOne_boxPos_shape`/`_diamondNeg_shape` in `TDriver.lean`) for the two T-relevant
+  shapes, or (b) the originally-scoped generic `apply`/`spec` parametrization (extending
+  `RuleApplicationSpec` with several more fields to capture the witness-invariant obligations, a
+  crux-sized undertaking in its own right, mirroring task 507's scope for `FmpMeasure.lean`).
+  Either path is a several-hundred-line, multi-lemma development (Completeness.lean's saturation
+  section alone is ~300 lines; `CompletenessLoop.lean`'s witness-invariant section is ~550 lines)
+  fully comparable in size to Phase 4's own `TDriver.lean` delivery (770 lines) — not a one-case
+  fix. The plan's own `[BLOCKED]` fallback anticipated this risk only for the truth lemma's
+  genuinely-new box-positive reflexive-self-edge case (which **is** tractable and fully scoped,
+  see below); the actual obstruction surfaced one layer earlier, at the Hintikka-set-production
+  prerequisite the truth lemma needs as its hypothesis.
+- **What is needed**: A dedicated follow-up task scoped to producing `modalHintikkaSetT` from an
+  open `modalExpandBranchesT` result, i.e. re-deriving (route (a) above, recommended as the
+  lower-risk path since it reuses proof *content* verbatim, only substituting the rule symbol):
+  1. `modalHintikkaClauseT`/`modalApplyOneT_fst_eq_of_not_boxPos_diaNeg`/
+     `modalHintikkaClauseT_lift` (T-analogs of `Completeness.lean:665-778`, using
+     `modalApplyOneT_eq_of_not_boxPos_diaNeg` in place of `modalApplyOne_fst_eq_of_not_box`'s
+     box/diamond exclusion — note T's clause must exclude *all four* modal shapes, not just
+     box/diamond, since box-positive/diamond-negative now also become branch/`acc`-independent
+     only up to the self-conjunct, which is NOT `acc`-independent-free in the same way).
+  2. `modalStepBranchT_none_saturated`/`modalStepBranchT_hintikka_inv` (T-analogs of
+     `Completeness.lean:784-935`).
+  3. `ModalLoopInvT`, `modalLoop{bClosure,eBoxOnlyNeg,eBoxNegWitness,eDiamondOnlyPos,
+     eDiamondPosWitness}T`, `modalStepT_preserves_invariant` (T-analogs of
+     `CompletenessLoop.lean:57-712`), reusing `modalStepBranchGen_potential_step`/`_worldBound`
+     (`GenericDriver.lean`, already generic over `(apply, spec)`) for the potential/world-bound
+     conjuncts, and direct case-analysis (mirroring the K proofs, substituting
+     `modalApplyOneT`/`modalApplyOne_boxPos_shape`/`_diamondNeg_shape`) for the witness conjuncts.
+  4. `modalExpandBranchesT_hintikka` (T-analog of `CompletenessLoop.lean:746`), then the truth
+     lemma and `tValid` completeness as originally scoped below.
+  Budget this as its own multi-phase task (at least 4-6 hours, likely more given the parent
+  task's own postmortem pattern of underestimated driver/loop-rebuild costs).
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous placeholder.
+  Phase 4 (T driver instantiation, `modalApplyOneT_spec`) is preserved green and committed
+  (`305356e2`).
+
+**Once the Hintikka-set prerequisite above is available, the remainder of this phase is fully
+scoped and was NOT blocked** (retained here for the follow-up task to execute directly):
 - **Goal:** Prove the T Hintikka/truth lemma over the reflexive-closed model and derive `tValid`
   completeness (`modalTableauT φ = .openBranch b a → ¬ tValid φ`), mirroring
   `modalTableau_complete` (line 1290).
 - **Tasks:**
-  - [ ] Define/adapt `modalHintikkaSetT` (the T-Hintikka predicate: K-saturation plus the reflexive
+  - [ ] Define `modalHintikkaSetT` (the T-Hintikka predicate: K-saturation plus the reflexive
     box-positive self-conjunct) and prove `modalExpandBranchesT` produces a `modalHintikkaSetT`
-    branch (reuse the generalized `modalExpandBranches_hintikka` from Phase 4 for the K conjuncts;
-    add the T self-propagation conjunct from the `modalApplyOneT` self-rule).
+    branch (needs the blocked prerequisite above).
   - [ ] Prove the T truth lemma against `extractModelT` (already in `FrameCompleteness.lean`, with
     free `Std.Refl` via `Relation.ReflGen`): for the **box-positive** case at the reflexive
     self-edge, use `extractModelT_refl` + the T self-propagation conjunct; reduce **all other**
@@ -419,17 +487,23 @@ unblocked and eligible.
   - [ ] State and prove `tValid` completeness using the T truth lemma + the terminating
     `modalTableauT` from Phase 4 (analog of `modalTableau_complete`).
   - [ ] `lake build`; `lean_verify` no sorry/axiom; full CI.
-- **Timing:** 2 hours
+- **Timing:** 2 hours (for this remainder only; the blocked prerequisite above is additional,
+  estimated 4-6+ hours).
 - **Depends on:** 4
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — `modalHintikkaSetT`, T truth lemma,
     `tValid` completeness (reusing committed `extractModelT`/`extractModelT_refl`/
     `extractModelT_hasEdge_imp_r`).
+  - A new file (e.g. `Cslib/Logics/Modal/Tableau/CompletenessLoopT.lean`) for the blocked
+    prerequisite's T-analogs of `Completeness.lean`'s saturation section and
+    `CompletenessLoop.lean`'s `ModalLoopInv`/fuel-induction machinery.
 - **Verification:**
   - `lake build` green; zero sorry/axiom; T truth lemma + `tValid` completeness type-check. CI clean.
-- **[BLOCKED] fallback:** If the box-positive reflexive-self-edge case cannot be closed sorry-free,
-  mark this phase **[BLOCKED]** with the documented open goal state (the exact truth-lemma case and
-  hypotheses available), preserve Phases 1–4 green, and recommend continuation. Never `sorry`/`axiom`.
+
+**Phases 6 and 7 both depend on Phase 5's T truth lemma / `tValid` completeness** (Phase 6's
+`tValid_decides`/`instDecidableTValid` need the completeness direction; Phase 7's final CI sweep
+and downstream-contract docs are the closing phase). They are therefore also not attempted and
+left `[NOT STARTED]` below, in dependency order, rather than worked out of sequence.
 
 ---
 

@@ -229,7 +229,56 @@ phase must be a single agent run ending at a green, zero-sorry milestone with a 
 
 ---
 
-### Phase 3: Generalize the FMP / termination measure over the interface [NOT STARTED]
+### Phase 3: Generalize the FMP / termination measure over the interface [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: Generalizing `modalStepBranch_potential_step` (`FmpMeasure.lean:2146`) and
+  `modalStepBranch_worldBound` (`FmpMeasure.lean:2376`) to take an abstract `(apply, spec :
+  RuleApplicationSpec apply)` in place of the concrete `modalApplyOne`.
+- **What was tried**: Read the full proof of `modalStepBranch_potential_step` (~160 lines) and
+  its direct dependency chain -- `modalStepBranch_exists_rank'` (~line 1058, ~35 lines),
+  `modalStepBranch_knownWorlds` (~line 1901, ~40 lines), `modalStepBranch_preserves_outDegEq`
+  (~line 1365), `outDeg_le_of_expandedNodup` (~line 1509), `modalApplyOne_fresh_local`,
+  `modalApplyOne_persistent_props`, `modalApplyOne_outputs_subset` -- to derive the Phase 2
+  `RuleApplicationSpec` field list from what these lemmas actually consume. Phase 2's three
+  fields (`freshLocal`, `outputsSubsetUniverse`, `persistentFresh`) were derived this way and
+  are committed (`GenericDriver.lean`).
+- **Why it's stuck**: `modalStepBranch_potential_step`'s proof (and its dependency chain above,
+  spanning `FmpMeasure.lean` lines ~1058-2415, ~900 lines total) does not thread through any
+  hypothesis bundle today. It `rcases`es directly on `(modalApplyOne sf b acc).fst`/`.snd`
+  (e.g. `rcases hfstc : (modalApplyOne sf b acc).fst with nf | brs | nf | _` at line 2080/2227)
+  and exploits the *exact* four concrete `RuleResult` shapes together with fine-grained
+  `outDeg`/`modalKnownWorlds`/rank-map bookkeeping specific to K's own `diamondPos`/`boxNeg`
+  mint arms (e.g. the `geomCap`-based potential-drop identity at lines 2251-2270, which computes
+  an EXACT numeric decrease, not just a bound). The three Phase-2 spec fields are sufficient to
+  restate the lemma's *type* generically but are NOT sufficient to replay its *proof*:
+  `modalStepBranch_exists_rank'`'s and `modalStepBranch_knownWorlds`'s own proofs also directly
+  `rcases` on `modalApplyOne`'s output shape (not through the spec), so generalizing the
+  top-level lemma requires FIRST generalizing these ~10-15 helper lemmas, each of which has its
+  own case-specific reasoning about which rule (propositional/boxPos/diamondNeg/diamondPos/
+  boxNeg) produced which result shape. This is a from-scratch re-derivation of an intricate
+  potential-function argument (not a mechanical `apply`-for-`modalApplyOne` substitution), sized
+  at least on the order of the original ~900-line development, and does not fit in the remaining
+  budget of this implementation run without unacceptable risk of introducing `sorry`/shortcuts.
+- **What is needed**: A dedicated follow-up task (matching the plan's own contingency:
+  "recommend a dedicated `generic-tableau-termination` task") scoped specifically to
+  generalizing lines ~1058-2415 of `FmpMeasure.lean` over `RuleApplicationSpec`, likely needing
+  to (a) extend `RuleApplicationSpec` with additional fields capturing the exact
+  `outDeg`/rank-map interaction the mint case needs (not just "a fresh edge is added", but "the
+  fresh edge's source `outDeg` was `< Sf` beforehand, by exactly the amount the catalog bounds"),
+  and (b) re-derive `modalStepBranch_exists_rank'`/`modalStepBranch_knownWorlds`/
+  `modalStepBranch_preserves_outDegEq` generically before attempting the top-level potential-step
+  lemma. Recommend budgeting this as its own multi-phase task (the original plan's single "3
+  hour" Phase-3 estimate was itself likely an order of magnitude too small, mirroring the
+  parent task 300 postmortem note about the original 2-hour Phase-2 driver-rebuild estimate).
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous placeholder.
+  Phases 1-2 are preserved green and committed.
+
+**Phases 4, 5, and 6 all depend sequentially on Phase 3's generic termination measure**
+(Phase 4 instantiates the generic driver with `modalApplyOneT` and needs the generalized fuel
+loop; Phase 5's truth lemma needs the terminating `modalTableauT`; Phase 6's decidability needs
+Phase 5). They are therefore also blocked and left `[NOT STARTED]` below rather than attempted
+out of dependency order.
 
 - **Goal:** Parametrize `FmpMeasure.lean`'s termination measure and its step lemmas over
   `(apply, spec : RuleApplicationSpec apply)` and re-derive K's termination as the trivial

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #506
 
 - **Task**: 506 - s4_loopchecking_machinery_termination_bound_and_decidability
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 19 hours
 - **Dependencies**: None hard. Phase 9 is gated on task 510 (see "The Task 510 Gate").
 - **Research Inputs**:

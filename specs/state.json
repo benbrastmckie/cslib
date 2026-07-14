@@ -1,6 +1,15 @@
 {
-  "next_project_number": 511,
+  "next_project_number": 512,
   "active_projects": [
+    {
+      "project_number": 511,
+      "project_name": "s4_loop_checking_termination",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
+      "dependencies": [],
+      "parent_task": 506
+    },
     {
       "project_number": 510,
       "project_name": "generalize_completeness_loop_hintikka_chain_over_spec",
@@ -1250,15 +1259,17 @@
     {
       "project_number": 506,
       "project_name": "s4_loopchecking_machinery_termination_bound_and_decidability",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the S4 (reflexive-transitive) system, the acknowledged crux of the task. This is deliberately NOT an instantiation of the generic driver built in the prerequisite task -- S4's termination argument (loop-checking / subset-blocking) is structurally different from the K-style finite-catalog counting measure, because K's depth-based modalWorldBound provably breaks under transitive box propagation. It does reuse the T-rule (modalApplyOneT, delivered by the prerequisite task) for its reflexive component and follows the same frame-specific driver-variant file/module conventions. Add the 4-rule to FrameRules.lean: T(box phi)@w + edge w->w' gives T(box phi)@w' and T(phi)@w' (propagate the box itself transitively), dually F(diamond phi)@w gives F(diamond phi)@w'. Build the equality-of-formula-set blocking machinery in a new Cslib/Logics/Modal/Tableau/LoopChecking.lean: formulasAtWorld, an equality test over modalSubfmls phi0, and the diamond-rule minting guard that adds a loop-back edge instead of minting a new world when an equal-set world exists. Extract the countermodel via Relation.ReflTransGen (Std.Refl + IsTrans free). Prove the box-positive truth-lemma bridge by induction on the ReflTransGen path (ReflTransGen.head_induction_on), carrying T(box phi) via the 4-rule and discharging the reflexive endpoint via the T-rule. Prove S4 soundness via Satisfies.four (Basic.lean). If the termination bound closes, prove #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the equality-blocking guard, extend ModalPotentialInv (FmpMeasure.lean), establish fuel sufficiency, and state s4Valid / Decidable (s4Valid phi) against Cube.S4. This task carries explicit permission to land at [BLOCKED] (S4 rules/soundness/truth-lemma green, termination bound left open, documented goal state) rather than introduce a sorry or axiom -- do not force the 2^|Sf| invariant if it does not close within the run; document a recommended follow-on s4-loop-checking-termination task instead. Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (4-rule), Cslib/Logics/Modal/Tableau/LoopChecking.lean (new), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelS4, S4 bridge), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (S4 arm), Cslib/Logics/Modal/Tableau/FmpMeasure.lean (ModalPotentialInv extension, if termination closes).",
       "effort": "8-12 hours",
       "parent_task": 300,
       "topic": "Modal Logic",
-      "dependencies": [],
+      "dependencies": [
+        511
+      ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-14T21:36:09Z",
+      "last_updated": "2026-07-14T23:27:26Z",
       "artifacts": [
         {
           "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/01_frame-specific-tableau-extensions.md",
@@ -1276,7 +1287,7 @@
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
         }
       ],
-      "blockers": "Gate released by orchestrator: 506 (S4) is explicitly NOT an instance of the generic driver. Its stated prerequisites were the T-rule (modalApplyOneT) and the frame-specific driver-variant conventions, both delivered by task 503 Phase 4 (TDriver.lean, commit 305356e2). S4 builds its own LoopChecking.lean with a structurally different termination argument, so it does not depend on task 510 or on 503 Phases 5-7.",
+      "blockers": "Phase 8 [BLOCKED]: #worlds <= 2^|Sf| termination bound. worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 (persistent firings mutate known-world sets without re-checking distinctness; minting guard checks source not new-world content). Phases 1-7 delivered green (Definition of Done met), zero sorry/axiom. Phase 9 (Decidable (s4Valid phi)) unreachable without the bound. Escalated to follow-on task 511 with documented goal state; standing [BLOCKED] permission exercised per plan.",
       "session_id": "sess_1784054776_0fc973_506"
     },
     {

@@ -997,4 +997,218 @@ theorem cs5Bot_mreach_wit {w : CS5Segment Atom} (hb : cs5Bot w) :
       (◇Proposition.bot))
   exact ⟨CS5Segment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
 
+/-! ## Canonical `FCsym_box` (Phase 7)
+
+Proves `cs5_fcsymbox_theory`, the theory-level content of `bBox`'s canonical clause:
+`boxInv w ⊆ u`, `u ⊆ u'` (all quasi-prime) ⟹ `∃ t ∈ cs5Tail u', w ⊆ t`. Instantiates
+`prime_set_exclusion` (via `quasi_prime_set_exclusion`) at `S := boxInv u' ∪ w`,
+`E := {□B | B ∉ u'}` — a union of two *substantial* sets, needing Phase 4's `list_split_union`/
+`bigAnd`/`deriv_imp_bigAnd_of_append` (unlike Phase 6's `S := boxInv H ∪ {A}`, a substantial-set-
+plus-singleton). Step 3 of the four-step discharge: from `L₂ ⊆ w`, pack `C := bigAnd L₂ ∈ w`;
+`bBox` gives `□◇C ∈ w`; `boxInv w ⊆ u ⊆ u'` gives `◇C ∈ u'`. Same exploding-head case split as
+Phase 6 (`u'` exploding ⟹ `T := Set.univ` directly). -/
+
+theorem cs5_fcsymbox_theory {w u u' : Set (Proposition Atom)}
+    (hw : QuasiPrime (@CS5ModalAxiom Atom) w) (hu' : QuasiPrime (@CS5ModalAxiom Atom) u')
+    (hwu_sub : boxInv w ⊆ u) (hle : u ⊆ u') :
+    ∃ t, t ∈ cs5Tail u' ∧ w ⊆ t := by
+  by_cases hex : (Proposition.bot : Proposition Atom) ∈ u'
+  · exact ⟨Set.univ, ⟨quasiPrime_univ, Set.subset_univ _,
+      fun B _ => mem_of_bot_mem (fun φ => .efq φ) hu'.closed hex B⟩, Set.subset_univ _⟩
+  · have hExcl : Metalogic.DerivExcludes (modalDerivationSystem (@CS5ModalAxiom Atom))
+        {x | ∃ B, x = Proposition.box B ∧ B ∉ u'}
+        (modalDeductiveClosure CS5ModalAxiom (boxInv u' ∪ w)) := by
+      intro l hl hmem
+      obtain ⟨Lctx, hLctx, hd⟩ := hmem
+      obtain ⟨L₁, L₂, hL₁, hL₂, hsub⟩ := list_split_union (X := boxInv u') (Y := w) Lctx hLctx
+      obtain ⟨d⟩ := hd
+      have d' : DerivationTree (@CS5ModalAxiom Atom) (L₁ ++ L₂) (Metalogic.bigOr l) :=
+        .weakening Lctx (L₁ ++ L₂) _ d hsub
+      have dC : DerivationTree (@CS5ModalAxiom Atom) L₁
+          ((bigAnd L₂).imp (Metalogic.bigOr l)) :=
+        deriv_imp_bigAnd_of_append (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ) L₁ L₂ (Metalogic.bigOr l) d'
+      have hboxC : Proposition.box ((bigAnd L₂).imp (Metalogic.bigOr l)) ∈ u' :=
+        box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun φ ψ => .k φ ψ) hu'.closed L₁ dC hL₁
+      have hCmem : bigAnd L₂ ∈ w :=
+        bigAnd_mem_of_forall_mem (fun φ => .efq φ) (fun φ ψ => .andI φ ψ) hw.closed L₂ hL₂
+      have hboxDiaC : Proposition.box (◇(bigAnd L₂)) ∈ w :=
+        mem_head_mp hw.closed (mem_of_axiom hw.closed (CS5ModalAxiom.bBox (bigAnd L₂))) hCmem
+      have hdiaC_u' : (◇(bigAnd L₂)) ∈ u' := hle (hwu_sub hboxDiaC)
+      have hdiaBigOr : (◇(Metalogic.bigOr l)) ∈ u' :=
+        mem_head_mp hu'.closed
+          (mem_head_mp hu'.closed (mem_of_axiom hu'.closed
+            (CS5ModalAxiom.kdia (bigAnd L₂) (Metalogic.bigOr l))) hboxC) hdiaC_u'
+      rcases l with _ | ⟨x, xs⟩
+      · have hdbot : ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) ∈ u' :=
+          hu'.closed [] _ (fun _ h => nomatch h) cs5_dia_bot_imp_bot
+        exact hex (mem_head_mp hu'.closed hdbot hdiaBigOr)
+      · obtain ⟨Bs, hBseq, hBsH⟩ := extract_box_list (H := u') (x :: xs) hl
+        have hdiaBigOr' : (◇(Metalogic.bigOr (Bs.map Proposition.box))) ∈ u' :=
+          hBseq ▸ hdiaBigOr
+        have hchain : ((◇(Metalogic.bigOr (Bs.map Proposition.box))).imp
+            (Metalogic.bigOr Bs)) ∈ u' :=
+          hu'.closed [] _ (fun _ h => nomatch h) ⟨dia_or_box_imp_bigOr Bs⟩
+        have hBigOrBs : Metalogic.bigOr Bs ∈ u' := mem_head_mp hu'.closed hchain hdiaBigOr'
+        rcases Bs with _ | ⟨B, rest⟩
+        · exact absurd hBseq (List.cons_ne_nil x xs)
+        · obtain ⟨C, hCmem, hCu'⟩ := quasiPrime_bigOr_mem hu' B rest hBigOrBs
+          exact absurd hCu' (hBsH C hCmem)
+    obtain ⟨T, hST, hTprime, hTexcl⟩ :=
+      quasi_prime_set_exclusion
+        (modalDeductiveClosure_closed (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ))
+        hExcl
+    refine ⟨T, ⟨hTprime, ?_, ?_⟩, fun B hB => hST (modal_subset_deductive_closure _ _ (Or.inr hB))⟩
+    · exact fun B hB => hST (modal_subset_deductive_closure _ _ (Or.inl hB))
+    · intro B hBT
+      by_contra hBu'
+      have hBoxBmemE : Proposition.box B ∈ {x | ∃ B, x = Proposition.box B ∧ B ∉ u'} :=
+        ⟨B, rfl, hBu'⟩
+      have hdisjT : Proposition.box B ∈ T :=
+        hTprime.closed [Proposition.box B] _
+          (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBT, nomatch h])
+          ⟨.assumption _ _ (List.mem_cons.mpr (Or.inl rfl))⟩
+      refine hTexcl [Proposition.box B]
+        (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBoxBmemE, nomatch h])
+        (hTprime.closed [Proposition.box B] _
+          (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hdisjT, nomatch h])
+          ⟨.modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.orI1 (Proposition.box B)
+            (Proposition.bot))) (fun _ h => nomatch h))
+            (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩)
+
+/-! ## Canonical `FC4'` (Phase 7)
+
+Proves `cs5_fc4_theory`, the theory-level content of `fourBox`'s re-basing clause: `boxInv w ⊆
+u`, `u ⊆ u'`, `boxInv u' ⊆ t`, `boxInv t ⊆ u'` (all quasi-prime) ⟹ `∃ v, w ⊆ v ∧ t ∈ cs5Tail v`.
+Instantiates `prime_set_exclusion` at `S := boxInv t ∪ w`, `E := {□B | B ∉ t}` — the *other* way
+round from `FCsym_box`: the `boxInv t ⊆ V` half of `t ∈ cs5Tail V` and `w ⊆ V` both come free
+from the seed; only `boxInv V ⊆ t` needs the exclusion argument. Step 3 needs `◇C ∈ t` for `C :=
+⋀Δ ∈ w`: `bBox` gives `□◇C ∈ w`; `4` (`cs5_box_four`) gives `□□◇C ∈ w`, i.e. `□◇C ∈ boxInv w ⊆ u
+⊆ u'`, i.e. `◇C ∈ boxInv u' ⊆ t`. Same exploding-`t` case split as `FCsym_box`/Phase 6. -/
+
+theorem cs5_fc4_theory {w u u' t : Set (Proposition Atom)}
+    (hw : QuasiPrime (@CS5ModalAxiom Atom) w) (ht : QuasiPrime (@CS5ModalAxiom Atom) t)
+    (hwu_sub : boxInv w ⊆ u) (hle : u ⊆ u')
+    (hu't_sub1 : boxInv u' ⊆ t) (_hu't_sub2 : boxInv t ⊆ u') :
+    ∃ v, QuasiPrime (@CS5ModalAxiom Atom) v ∧ w ⊆ v ∧ t ∈ cs5Tail v := by
+  by_cases hex : (Proposition.bot : Proposition Atom) ∈ t
+  · exact ⟨Set.univ, quasiPrime_univ, Set.subset_univ _, ht,
+      fun B _ => mem_of_bot_mem (fun φ => .efq φ) ht.closed hex B, Set.subset_univ _⟩
+  · have hExcl : Metalogic.DerivExcludes (modalDerivationSystem (@CS5ModalAxiom Atom))
+        {x | ∃ B, x = Proposition.box B ∧ B ∉ t}
+        (modalDeductiveClosure CS5ModalAxiom (boxInv t ∪ w)) := by
+      intro l hl hmem
+      obtain ⟨Lctx, hLctx, hd⟩ := hmem
+      obtain ⟨L₁, L₂, hL₁, hL₂, hsub⟩ := list_split_union (X := boxInv t) (Y := w) Lctx hLctx
+      obtain ⟨d⟩ := hd
+      have d' : DerivationTree (@CS5ModalAxiom Atom) (L₁ ++ L₂) (Metalogic.bigOr l) :=
+        .weakening Lctx (L₁ ++ L₂) _ d hsub
+      have dC : DerivationTree (@CS5ModalAxiom Atom) L₁
+          ((bigAnd L₂).imp (Metalogic.bigOr l)) :=
+        deriv_imp_bigAnd_of_append (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ) L₁ L₂ (Metalogic.bigOr l) d'
+      have hboxC : Proposition.box ((bigAnd L₂).imp (Metalogic.bigOr l)) ∈ t :=
+        box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun φ ψ => .k φ ψ) ht.closed L₁ dC hL₁
+      have hCmem : bigAnd L₂ ∈ w :=
+        bigAnd_mem_of_forall_mem (fun φ => .efq φ) (fun φ ψ => .andI φ ψ) hw.closed L₂ hL₂
+      have hboxDiaC : Proposition.box (◇(bigAnd L₂)) ∈ w :=
+        mem_head_mp hw.closed (mem_of_axiom hw.closed (CS5ModalAxiom.bBox (bigAnd L₂))) hCmem
+      have hboxboxDiaC : Proposition.box (Proposition.box (◇(bigAnd L₂))) ∈ w :=
+        cs5_box_four hw hboxDiaC
+      have hdiaC_t : (◇(bigAnd L₂)) ∈ t := hu't_sub1 (hle (hwu_sub hboxboxDiaC))
+      have hdiaBigOr : (◇(Metalogic.bigOr l)) ∈ t :=
+        mem_head_mp ht.closed
+          (mem_head_mp ht.closed (mem_of_axiom ht.closed
+            (CS5ModalAxiom.kdia (bigAnd L₂) (Metalogic.bigOr l))) hboxC) hdiaC_t
+      rcases l with _ | ⟨x, xs⟩
+      · have hdbot : ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) ∈ t :=
+          ht.closed [] _ (fun _ h => nomatch h) cs5_dia_bot_imp_bot
+        exact hex (mem_head_mp ht.closed hdbot hdiaBigOr)
+      · obtain ⟨Bs, hBseq, hBsH⟩ := extract_box_list (H := t) (x :: xs) hl
+        have hdiaBigOr' : (◇(Metalogic.bigOr (Bs.map Proposition.box))) ∈ t :=
+          hBseq ▸ hdiaBigOr
+        have hchain : ((◇(Metalogic.bigOr (Bs.map Proposition.box))).imp
+            (Metalogic.bigOr Bs)) ∈ t :=
+          ht.closed [] _ (fun _ h => nomatch h) ⟨dia_or_box_imp_bigOr Bs⟩
+        have hBigOrBs : Metalogic.bigOr Bs ∈ t := mem_head_mp ht.closed hchain hdiaBigOr'
+        rcases Bs with _ | ⟨B, rest⟩
+        · exact absurd hBseq (List.cons_ne_nil x xs)
+        · obtain ⟨C, hCmem, hCt⟩ := quasiPrime_bigOr_mem ht B rest hBigOrBs
+          exact absurd hCt (hBsH C hCmem)
+    obtain ⟨V, hSV, hVprime, hVexcl⟩ :=
+      quasi_prime_set_exclusion
+        (modalDeductiveClosure_closed (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ))
+        hExcl
+    refine ⟨V, hVprime, fun B hB => hSV (modal_subset_deductive_closure _ _ (Or.inr hB)), ht,
+      ?_, fun B hB => hSV (modal_subset_deductive_closure _ _ (Or.inl hB))⟩
+    intro B hBV
+    by_contra hBt
+    have hBoxBmemE : Proposition.box B ∈ {x | ∃ B, x = Proposition.box B ∧ B ∉ t} := ⟨B, rfl, hBt⟩
+    have hdisjV : Proposition.box B ∈ V :=
+      hVprime.closed [Proposition.box B] _
+        (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBV, nomatch h])
+        ⟨.assumption _ _ (List.mem_cons.mpr (Or.inl rfl))⟩
+    refine hVexcl [Proposition.box B]
+      (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBoxBmemE, nomatch h])
+      (hVprime.closed [Proposition.box B] _
+        (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hdisjV, nomatch h])
+        ⟨.modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.orI1 (Proposition.box B)
+          (Proposition.bot))) (fun _ h => nomatch h))
+          (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩)
+
+/-! ## `cs5FC''_cs5Mreach`: the Canonical Model Satisfies `cs5FC''` -/
+
+/-- `cs5Mreach` is reflexive: `cs5Tail_refl` plus `tail_eq`. -/
+theorem cs5_refl (P : CS5Segment Atom) : cs5Mreach P P := by
+  change P.seg.head ∈ P.seg.tail
+  rw [P.tail_eq]
+  exact cs5Tail_refl P.seg.head_qprime
+
+/-- `cs5Mreach` is plainly transitive: `cs5Tail_trans` plus `tail_eq`. -/
+theorem cs5_trans {P Q R : CS5Segment Atom} (hPQ : cs5Mreach P Q) (hQR : cs5Mreach Q R) :
+    cs5Mreach P R := by
+  change R.seg.head ∈ P.seg.tail
+  rw [P.tail_eq]
+  have hPQ' : Q.seg.head ∈ cs5Tail P.seg.head := P.tail_eq ▸ hPQ
+  have hQR' : R.seg.head ∈ cs5Tail Q.seg.head := Q.tail_eq ▸ hQR
+  exact cs5Tail_trans P.seg.head_qprime R.seg.head_qprime hPQ' hQR'
+
+/-- `cs5Mreach` is plainly symmetric: `cs5Tail_symm` plus `tail_eq` — definitional, not derived. -/
+theorem cs5_symm {P Q : CS5Segment Atom} (hPQ : cs5Mreach P Q) : cs5Mreach Q P := by
+  change P.seg.head ∈ Q.seg.tail
+  rw [Q.tail_eq]
+  have hPQ' : Q.seg.head ∈ cs5Tail P.seg.head := P.tail_eq ▸ hPQ
+  exact cs5Tail_symm P.seg.head_qprime hPQ'
+
+/-- The canonical model satisfies `cs5FC''`'s `FCsym_box` clause (`bBox`'s clause). Segment
+lift of `cs5_fcsymbox_theory`. -/
+theorem cs5_fcsymbox {w u u' : CS5Segment Atom} (hwu : cs5Mreach w u) (hle : u ≤ u') :
+    ∃ t : CS5Segment Atom, cs5Mreach u' t ∧ w ≤ t := by
+  have hwu' : u.seg.head ∈ cs5Tail w.seg.head := w.tail_eq ▸ hwu
+  obtain ⟨T, hTmem, hwT⟩ :=
+    cs5_fcsymbox_theory w.seg.head_qprime u'.seg.head_qprime hwu'.2.1 hle
+  refine ⟨CS5Segment.ofHead hTmem.1, ?_, hwT⟩
+  change T ∈ u'.seg.tail
+  rw [u'.tail_eq]
+  exact hTmem
+
+/-- The canonical model satisfies `cs5FC''`'s `FC4'` clause (`fourBox`'s re-basing clause).
+Segment lift of `cs5_fc4_theory`. -/
+theorem cs5_fc4 {w u u' t : CS5Segment Atom} (hwu : cs5Mreach w u) (hle : u ≤ u')
+    (hu't : cs5Mreach u' t) : ∃ v : CS5Segment Atom, w ≤ v ∧ cs5Mreach v t := by
+  have hwu' : u.seg.head ∈ cs5Tail w.seg.head := w.tail_eq ▸ hwu
+  have hu't' : t.seg.head ∈ cs5Tail u'.seg.head := u'.tail_eq ▸ hu't
+  obtain ⟨V, hVprime, hwV, hVmem⟩ :=
+    cs5_fc4_theory w.seg.head_qprime t.seg.head_qprime hwu'.2.1 hle hu't'.2.1 hu't'.2.2
+  refine ⟨CS5Segment.ofHead hVprime, ?_, hVmem⟩
+  change w.seg.head ⊆ V
+  exact hwV
+
+/-- **The canonical `CS5` model satisfies the weakened frame condition `cs5FC''`.** -/
+theorem cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom) :=
+  ⟨cs5_refl, fun h1 h2 => cs5_trans h1 h2, fun h => cs5_symm h,
+   fun h1 h2 h3 => cs5_fc4 h1 h2 h3, fun h1 h2 => cs5_fcsymbox h1 h2⟩
+
 end Cslib.Logic.Modal

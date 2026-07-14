@@ -1,17 +1,12 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [],
-    "tasks_failed": [
-      503
-    ],
-    "tasks_gated": [
-      504,
-      505,
-      506
-    ],
-    "cycles_used": 2,
+    "tasks_completed": [491, 495, 496, 484],
+    "tasks_partial": [501],
+    "tasks_failed": [],
+    "tasks_spawned": [508],
+    "cycles_used": 13,
     "multi_task_mode": true,
-    "halt_reason": "unrecoverable blocker in Wave 0 (task 503 Phase 3) invalidates Wave 1 precondition"
+    "note": "4/5 completed. 501 partial at 6/8 (CS4/CS5 completeness BLOCKED on verified obstruction); follow-up task 508 spawned to unblock, with 501 depending on 508."
   }
 }

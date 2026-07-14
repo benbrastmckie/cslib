@@ -338,7 +338,7 @@ unblocked and eligible.
 
 ---
 
-### Phase 4: Generalize CompletenessLoop + instantiate the T driver [NOT STARTED]
+### Phase 4: Generalize CompletenessLoop + instantiate the T driver [IN PROGRESS]
 
 - **Goal:** Thread `apply` + `spec` through `CompletenessLoop.lean`'s fuel loop and its top
   theorems, re-derive K, then instantiate the generic stack with `modalApplyOneT` to obtain

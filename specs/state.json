@@ -18,7 +18,7 @@
     {
       "project_number": 484,
       "project_name": "metalogic_conservative_extension_modularity",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).",
@@ -46,8 +46,14 @@
           "type": "plan",
           "path": "specs/484_metalogic_conservative_extension_modularity/plans/01_conservative-extension-modularity.md",
           "summary": "7 phases/4 waves; monotonicity cubes + Modularity.lean, then gated IK->K bridge (full scope)"
+        },
+        {
+          "type": "summary",
+          "path": "specs/484_metalogic_conservative_extension_modularity/summaries/01_conservative-extension-modularity-summary.md",
+          "summary": "7/7 phases, IK->K bridge complete, CI green"
         }
-      ]
+      ],
+      "completion_summary": "All 7 phases complete, full scope including the hard IK->K bridge. New InterSystem/ files: per-base modal-cube monotonicity (Minimal/Intuitionistic/Constructive Lattice{Monotonicity,Subsumption}.lean), cross-base MK/CK->IK, Modularity.lean capstone (three-axis framing: Axis A/B monotonicity, Axis C reused conservativity), generalized Derivable_of_axiom_derivable lift in Lifting.lean, and IntToClassical.lean (~650 lines, 36 theorems) proving all 14 IKModalAxiom constructors (incl. Fischer-Servi cd/idb) are Derivable KAxiom -> ikDerivable_implies_kDerivable, plus rung bridges IT->T, IS4->S4, IS5->S5. Zero sorry, zero new axioms, full CI green. STOP/[BLOCKED] clause never needed."
     },
     {
       "project_number": 465,

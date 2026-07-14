@@ -3357,6 +3357,36 @@ lemma modalExpMeasure_step_lt
     modalApplyOne_persistent_props modalApplyOne_outputs_subset
     φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW hstep
 
+/-! ## Downstream Reuse Helpers (task 503: T, S5, B existing-world propagation)
+
+The two facts below are public (unlike the closely-related private helpers
+`mem_modalUniverse_of'`/`mem_modalKnownWorlds` they are built from) because they are exactly
+what a "persistent-only" frame extension (T, S5, B) needs to discharge
+`RuleApplicationSpec.outputsSubsetUniverse`/`.knownWorldsStep` for a rule that propagates a
+subformula at an existing world (its own world, for T's self propagation; a related world for
+S5 and B), rather than minting a fresh one. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Same-world subformula membership: given `sf ∈ b` with `b ⊆ modalUniverse φ0`, any
+subformula `ψ` of `sf.formula`, at `sf`'s own world label and with an arbitrary sign, stays
+inside `modalUniverse φ0`. -/
+lemma modalUniverse_mem_of_sameWorld_subfml {φ0 : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0)
+    {sf : SignedFormula (Proposition Atom) WorldIndex} (hsf : sf ∈ b)
+    {ψ : Proposition Atom} (hψ : ψ ∈ modalSubfmls sf.formula) (s : Sign) :
+    (⟨s, ψ, sf.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 := by
+  have hlabel : sf.label ≤ modalWorldBound φ0 := modalUniverse_mem_label (hb sf hsf)
+  have hform : sf.formula ∈ modalSubfmls φ0 := modalUniverse_mem_formula (hb sf hsf)
+  exact mem_modalUniverse_of' hlabel (modalSubfmls_trans hψ hform)
+
+/-- Membership in `modalKnownWorlds`: the label of any branch member is a known world of that
+branch. -/
+lemma label_mem_modalKnownWorlds
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {sf : SignedFormula (Proposition Atom) WorldIndex} (hsf : sf ∈ b) :
+    sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds b sf.label).mpr ⟨sf, hsf, rfl⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

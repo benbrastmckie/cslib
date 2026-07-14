@@ -1,13 +1,17 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [
-      396
-    ],
+    "tasks_completed": [],
     "tasks_failed": [
-      300
+      503
     ],
-    "cycles_used": 3,
-    "multi_task_mode": true
+    "tasks_gated": [
+      504,
+      505,
+      506
+    ],
+    "cycles_used": 2,
+    "multi_task_mode": true,
+    "halt_reason": "unrecoverable blocker in Wave 0 (task 503 Phase 3) invalidates Wave 1 precondition"
   }
 }

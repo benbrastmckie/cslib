@@ -1,0 +1,55 @@
+{
+  "task": 503,
+  "task_slug": "generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
+  "phase": "implement",
+  "status": "partial",
+  "plan_path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md",
+  "summary_path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/summaries/01_generalize-tableau-driver-tsystem-summary.md",
+  "task_type": "cslib",
+  "phases_total": 7,
+  "phases_completed": 2,
+  "phase_status": {
+    "1": "COMPLETED",
+    "2": "COMPLETED",
+    "3": "BLOCKED",
+    "4": "NOT STARTED",
+    "5": "NOT STARTED",
+    "6": "NOT STARTED",
+    "7": "NOT STARTED"
+  },
+  "blockers": [
+    {
+      "phase": 3,
+      "name": "Generalize the FMP / termination measure over the interface",
+      "what_failed": "Generalizing FmpMeasure.lean's modalStepBranch_potential_step (line ~2146) and modalStepBranch_worldBound (line ~2376) to take an abstract (apply, spec : RuleApplicationSpec apply) in place of the concrete modalApplyOne.",
+      "what_was_tried": "Read the full proof of modalStepBranch_potential_step (~160 lines) plus its dependency chain (modalStepBranch_exists_rank' ~line 1058, modalStepBranch_knownWorlds ~line 1901, modalStepBranch_preserves_outDegEq ~line 1365, outDeg_le_of_expandedNodup ~line 1509, modalApplyOne_fresh_local, modalApplyOne_persistent_props, modalApplyOne_outputs_subset). Derived the Phase 2 RuleApplicationSpec field list (freshLocal/outputsSubsetUniverse/persistentFresh) from this reading and proved modalApplyOne_spec as the trivial K witness.",
+      "why_stuck": "modalStepBranch_potential_step's proof (and its ~900-line dependency chain, FmpMeasure.lean lines ~1058-2415) does not thread through any hypothesis bundle today -- it rcases directly on (modalApplyOne sf b acc).fst/.snd and exploits the exact four concrete RuleResult shapes together with fine-grained outDeg/modalKnownWorlds/rank-map bookkeeping (an EXACT numeric potential-drop identity via geomCap, not just a bound). The Phase 2 spec fields restate the lemma's type generically but are not sufficient to replay its proof: the ~10-15 helper lemmas it depends on each independently case-split on modalApplyOne's concrete rule shapes rather than going through the spec. Generalizing this is a from-scratch re-derivation on the order of the original ~900-line development.",
+      "what_is_needed": "A dedicated follow-up task (generic-tableau-termination) scoped to generalizing FmpMeasure.lean lines ~1058-2415 over RuleApplicationSpec: likely needs (a) extending RuleApplicationSpec with additional fields capturing the exact outDeg/rank-map interaction at the mint point, and (b) re-deriving modalStepBranch_exists_rank'/modalStepBranch_knownWorlds/modalStepBranch_preserves_outDegEq generically before the top-level potential-step lemma can be attempted.",
+      "prohibited_workarounds_avoided": "No sorry, no axiom, no vacuous placeholder introduced. Phases 1-2 preserved green and committed."
+    }
+  ],
+  "continuation_context": {
+    "preserved_assets": [
+      "Cslib/Logics/Modal/Tableau/Saturation.lean -- RuleApply, modalStepBranchGen, modalExpandBranchesGen, modalTableauGen, and zero-regression bridge theorems modalStepBranch_eq/modalExpandBranches_eq/modalTableau_eq (committed e9f350c7)",
+      "Cslib/Logics/Modal/Tableau/GenericDriver.lean -- RuleApplicationSpec, modalApplyOne_spec, downstream-reuse contract for 504/505, S4 (506) exclusion note, 'Known Limitation' section describing Phase 3's exact gap (committed d5b24e67)",
+      "specs/503_.../handoffs/phase1-handoff.md and phase2-handoff.md -- detailed rationale for the deviation strategies used"
+    ],
+    "next_steps": "Either (a) spawn a dedicated generic-tableau-termination task scoped to Phase 3's blocker per the recommendation above, then resume this plan's Phases 4-7 once it lands, or (b) if tasks 504/505 (S5, B) turn out to need a differently-shaped RuleApplicationSpec than what Phase 2 delivered, revise GenericDriver.lean's bundle before attempting Phase 3 generalization rather than after.",
+    "reuse_note": "The RuleApplicationSpec interface (Phase 2, committed) is available now for tasks 504/505 to begin discharging their own instantiation's fields (freshLocal/outputsSubsetUniverse/persistentFresh) even though Phase 3's generic termination measure is not yet built -- but note per the Known Limitation that RuleApplicationSpec may need extension once Phase 3 is actually attempted, so 504/505 should coordinate rather than assume the current field set is final."
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "note": "CI verification passed for the delivered Phases 1-2. Phase 3-7 deliverables do not exist (blocked/not started), so there is nothing further to verify for them."
+  },
+  "metadata": {
+    "session_id": "sess_503_implement",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
+}

@@ -1,59 +1,61 @@
 {
-  "status": "researched",
-  "started_at": "2026-07-14T00:00:00Z",
-  "completed_at": "2026-07-14T00:00:00Z",
+  "status": "implemented",
+  "started_at": "2026-07-14T17:29:00Z",
+  "completed_at": "2026-07-14T18:12:00Z",
   "artifacts": [
-    "specs/495_minimal_modal_K_soundness_completeness/reports/01_minimal-modal-k-soundness-completeness.md"
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Minimal/MK.lean", "summary": "MKModalAxiom + MValid soundness + mk_consistent"},
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Minimal/MinPrimeTheory.lean", "summary": "MinCanonicalPrimeWorld, minCanonicalVal, minBotForces, min_head_realization"},
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean", "summary": "minCanonicalR + box/diamond witnesses + F1/F2, via bespoke efq-free nonempty Lindenbaum-pair construction (bigOr1/bigAnd1/quasi_prime_set_exclusion1) -- the Phase-3 crux, resolved sorry-free"},
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Minimal/MinTruthLemma.lean", "summary": "min_canonical_truth_lemma"},
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Minimal/MinCompleteness.lean", "summary": "mk_completeness (single-branch) + mk_soundness_completeness"},
+    {"type": "lean_file", "path": "Cslib.lean", "summary": "barrel registration of the 5 new Minimal/ modules (single shared-file edit)"},
+    {"type": "plan", "path": "specs/495_minimal_modal_K_soundness_completeness/plans/01_minimal-modal-k-soundness-completeness.md"},
+    {"type": "summary", "path": "specs/495_minimal_modal_K_soundness_completeness/summaries/01_minimal-modal-k-soundness-completeness-summary.md"}
   ],
-  "partial_progress": {
-    "stage": "research_done",
-    "details": "Framework located; efq-dependency analysis complete; MK design + 5-phase decomposition delivered"
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_steps": {
+      "lake_build_full": "green",
+      "lake_test": "green",
+      "checkInitImports": "green",
+      "lint_style": "green (5/5 new modules)",
+      "shake": "clean (only the repo-wide expected import Cslib.Init false-positive, shared by every other file in the project)",
+      "lake_lint": "green (0 findings in Minimal/; 1 pre-existing unrelated finding in Foundations/Logic/Metalogic/PrimeExclusion.lean, not touched by this task)"
+    }
   },
+  "partial_progress": {
+    "phases_completed": 5,
+    "phases_total": 5,
+    "last_completed_phase": "Phase 5: MinCompleteness.lean + barrel wiring"
+  },
+  "deviation_note": "Phase 3 required a bespoke, self-contained, nonempty-list Lindenbaum-pair Lindenbaum exclusion construction (bigOr1/bigAnd1/quasi_prime_set_exclusion1, ~650 lines beyond the plan's ~150-350 estimate) because IK's box_refuting_theory/dia_refuting_theory alone establish only the 'near' canonicalR clause; the 'far' clause needs a pair-exclusion lemma, and IK's existing one is structurally efq-dependent (bigOr_append_left's empty-list base case is bot->phi). This is documented in the plan's Phase 3 and Phase 5 sections and the implementation summary. The Zero-Debt STOP clause was NOT triggered -- every obligation closed sorry-free.",
   "metadata": {
     "session_id": "sess_1784044271_09e821_495",
-    "agent_type": "cslib-research-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "task": 495,
-    "phase": "research",
-    "task_type": "cslib",
-    "reuse_first": {
-      "new_abstractions_recommended": false,
-      "primary_reuse": [
-        "QuasiPrime + quasi_prime_exclusion + imp_refuting_theory + box_refuting_theory + dia_refuting_theory (Constructive/Segment.lean, SegmentLindenbaum.lean)",
-        "MValid + BForces + bforces_persistence (Semantics/Birelational.lean)",
-        "botForces-parametric truth_bot_case (Intuitionistic/TruthLemma.lean)",
-        "structural templates: MinLindenbaum.lean, MinStrongCompleteness.lean, IK.lean"
-      ]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  },
+  "next_steps": "Task 495 fully implemented (all 5 phases green). Ready for /pr or task completion workflow.",
+  "memory_candidates": [
+    {
+      "content": "When building an efq-free birelational canonical model with a TWO-CLAUSE canonicalR (box clause + diamond-image clause, needed for MValid/Cd/Idb-bearing systems), box_refuting_theory/dia_refuting_theory (SegmentLindenbaum.lean) alone are NOT sufficient -- they only establish the box clause (or the seeded membership), not the diamond-image clause under witness extension. The 'far' clause requires a Lindenbaum-PAIR (set-)exclusion lemma (excluding an entire target SET of formulas via a disjunction argument, not just one formula). IK's existing prime_set_exclusion/modal_set_exclusion is structurally efq-dependent (its disjunction-property proof needs bigOr_append_left, whose empty-list base case is bot->phi) and CANNOT be reused efq-free. Resolution: reimplement the Lindenbaum-pair machinery over NONEMPTY lists represented as an explicit (head, tail) pair, with iterated disjunction/conjunction (bigOr1/bigAnd1) terminating at the head instead of at bot -- every step IK discharged via efq at the empty-list base case is discharged instead via OrI1/OrI2/the identity implication (x->x via implyK+implyS). This pattern (task 495, MinCanonicalModel.lean) is reusable for any future efq-free two-clause canonicalR construction, e.g. task 501's CT/CS4/CS5 if built atop MK rather than IK.",
+      "category": "INSIGHT",
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean",
+      "confidence": 0.85,
+      "suggested_keywords": ["efq-free", "canonical-model", "lindenbaum-pair", "bigOr1", "nonempty-list", "birelational", "quasi-prime", "MK", "minimal-modal-logic"]
     },
-    "crux": {
-      "question": "which IK steps depend on efq/explosion and how they change over minimal base",
-      "roleA_consistency": "REMOVED: worlds = quasi-prime (Cons=fun _ => True); modal_imp_witness/prime_exclusion consistency args vanish; already delivered efq-free in SegmentLindenbaum",
-      "roleB_bot_base_cases": "OBSTRUCTION: boxOr_of_boxDisj base = (bot -> box bot) [efq, not MK theorem]; diaOr_of_diaDisj base = (dia bot -> bot) [Nd/h_dbot, not MK axiom]; resolved via fallible worlds + dia_refuting_theory, NOT IK bigOr machinery",
-      "roleC_completeness_split": "REMOVED: no consistency case split; single-branch contrapositive like min_strong_completeness",
-      "toplevel_toon_base_cases": "REPLACEABLE: bigAnd/top-via-efq base cases derive top=bot->bot, provable in minimal from implyK+implyS"
-    },
-    "minimal_bot_treatment": {
-      "worlds": "quasi-prime theories (deductively closed + disjunction property, NO consistency; fallible worlds admitted, Set.univ quasi-prime)",
-      "botForces": "fun w => bot in w.val",
-      "bot_truth_case": "Iff.rfl (no canonical_bot_not_mem, no efq)",
-      "semantics": "MValid (birelational, exists-diamond, F1/F2 confluence) -- NOT CKValid; MK keeps Cd+Idb which are MValid-valid, drops efq+Nd"
-    },
-    "design": {
-      "namespace": "Cslib.Logic.Modal",
-      "new_subtree": "Cslib/Logics/Modal/Metalogic/Minimal/",
-      "axiom_datatype": "MKModalAxiom = IKModalAxiom minus efq minus dbot (8 MinPropAxiom schemata + k,kdia,cd,idb)",
-      "phases": [
-        "P1 MK.lean: MKModalAxiom + mk_axiom_sound(MValid)/mk_soundness/mk_soundness_derivable/mk_consistent (~150-200L, low risk)",
-        "P2 MinPrimeTheory.lean: reuse QuasiPrime+quasi_prime_exclusion; add MinCanonicalPrimeWorld, Preorder, canonicalVal, minBotForces, min_head_realization",
-        "P3 MinCanonicalModel.lean: canonicalR (box+diamond clause), box/diamond witnesses from box_refuting_theory/dia_refuting_theory, f1/f2 -- CRUX/highest risk",
-        "P4 MinTruthLemma.lean: min_canonical_truth_lemma (bot=Iff.rfl; imp/box/diamond via quasi-prime witnesses)",
-        "P5 MinCompleteness.lean: mk_completeness/mk_soundness_completeness single-branch; wire Cslib.lean barrel"
-      ]
-    },
-    "mathlib_needed": [],
-    "sorry_risk": "P1/P2/P4/P5 low; P3 diamond-witness medium (no line-for-line exists-diamond-over-quasi-prime precedent; CK uses segments, prop Min has no modality). Zero-debt: if P3 unclosable, mark [BLOCKED] + escalate, never sorry.",
-    "bibkeys_verified": ["Simpson1994", "Wijesekera1990", "ChagrovZakharyaschev1997", "Johansson1937"],
-    "recommended_next_action": "/plan 495 (consider --hard for P3)"
-  }
+    {
+      "content": "When adding a new Modal/Metalogic subtree that reuses shapes from an existing sibling development (e.g. IK's CanonicalModel.lean), watch for NAME COLLISIONS in the shared Cslib.Logic.Modal namespace: canonicalR, canonicalVal, canonicalVal_upward_closed are already taken by Intuitionistic/CanonicalModel.lean. A per-file `lake build` will NOT catch this (it only surfaces when the whole project is built and both files' declarations land in the same namespace via Cslib.lean's transitive imports) -- always run a full `lake build` (not just the scoped module build) before declaring a new modal metalogic file complete, and prefix new declarations with a scope-specific prefix (e.g. `min`) from the start rather than after the fact.",
+      "category": "GOTCHA",
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean",
+      "confidence": 0.9,
+      "suggested_keywords": ["name-collision", "namespace", "lake-build", "modal-metalogic", "full-build-required"]
+    }
+  ]
 }

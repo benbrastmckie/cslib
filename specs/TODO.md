@@ -11,9 +11,9 @@ next_project_number: 507
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,495,497,501,502,503 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,496,504,505,506 | 36,37,181,317,407,425,449,495,503 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413,484 | 39,40,375,496,504,505,506 | foundations, modal logic, code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,496,497,501,502,503 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,484,504,505,506 | 36,37,181,317,407,425,449,496,503 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -36,11 +36,10 @@ next_project_number: 507
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-495 [PLANNED] — Minimal modal logic MK soundness + completeness — the modal logic
-  └─ 496 [NOT STARTED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
-    └─ 484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
+496 [PLANNED] — Minimal modal extensions — minimal-base analogues of T / S4 / S5 
+  └─ 484 [NOT STARTED] — Conservative-extension and modularity results across the FULL pro
 501 [PARTIAL] — CK constructive modal extensions CT / CS4 / CS5 — sound and compl
-503 [RESEARCHED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
   └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
@@ -96,7 +95,10 @@ next_project_number: 507
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 503
-- **Research**: [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]
+- **Research**:
+  - [506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/01_frame-specific-tableau-extensions.md]
+  - [506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/02_spawn-analysis.md]
+  - [506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/03_parent-phase-plan-reference.md]
 
 **Description**: Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the S4 (reflexive-transitive) system, the acknowledged crux of the task. This is deliberately NOT an instantiation of the generic driver built in the prerequisite task -- S4's termination argument (loop-checking / subset-blocking) is structurally different from the K-style finite-catalog counting measure, because K's depth-based modalWorldBound provably breaks under transitive box propagation. It does reuse the T-rule (modalApplyOneT, delivered by the prerequisite task) for its reflexive component and follows the same frame-specific driver-variant file/module conventions. Add the 4-rule to FrameRules.lean: T(box phi)@w + edge w->w' gives T(box phi)@w' and T(phi)@w' (propagate the box itself transitively), dually F(diamond phi)@w gives F(diamond phi)@w'. Build the equality-of-formula-set blocking machinery in a new Cslib/Logics/Modal/Tableau/LoopChecking.lean: formulasAtWorld, an equality test over modalSubfmls phi0, and the diamond-rule minting guard that adds a loop-back edge instead of minting a new world when an equal-set world exists. Extract the countermodel via Relation.ReflTransGen (Std.Refl + IsTrans free). Prove the box-positive truth-lemma bridge by induction on the ReflTransGen path (ReflTransGen.head_induction_on), carrying T(box phi) via the 4-rule and discharging the reflexive endpoint via the T-rule. Prove S4 soundness via Satisfies.four (Basic.lean). If the termination bound closes, prove #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the equality-blocking guard, extend ModalPotentialInv (FmpMeasure.lean), establish fuel sufficiency, and state s4Valid / Decidable (s4Valid phi) against Cube.S4. This task carries explicit permission to land at [BLOCKED] (S4 rules/soundness/truth-lemma green, termination bound left open, documented goal state) rather than introduce a sorry or axiom -- do not force the 2^|Sf| invariant if it does not close within the run; document a recommended follow-on s4-loop-checking-termination task instead. Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (4-rule), Cslib/Logics/Modal/Tableau/LoopChecking.lean (new), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelS4, S4 bridge), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (S4 arm), Cslib/Logics/Modal/Tableau/FmpMeasure.lean (ModalPotentialInv extension, if termination closes).
 
@@ -108,7 +110,10 @@ next_project_number: 507
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 503
-- **Research**: [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]
+- **Research**:
+  - [505_b_symmetric_decidability_via_generic_tableau_driver/reports/01_frame-specific-tableau-extensions.md]
+  - [505_b_symmetric_decidability_via_generic_tableau_driver/reports/02_spawn-analysis.md]
+  - [505_b_symmetric_decidability_via_generic_tableau_driver/reports/03_parent-phase-plan-reference.md]
 
 **Description**: Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the B (symmetric-frame) system. Add the symmetric box rule to Cslib/Logics/Modal/Tableau/FrameRules.lean: box-positives propagate backward along recorded edges (T(box phi)@w + edge v->w gives T(phi)@v), dually for F(diamond); add the backward-propagation saturation conjunct. Extract the countermodel via Relation.SymmGen (Std.Symm free from Relation.SymmGen.instSymm). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (backward propagation adds formulas only at existing worlds, so the K world bound and finite formula catalog survive unchanged). Prove the B truth-lemma bridge over the symmetric closure. State bValid / Decidable (bValid phi) against Cube.B / Satisfies.b (Basic.lean). Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (B arms), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelB, B bridge, bValid + Decidable), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (B arm).
 
@@ -120,7 +125,10 @@ next_project_number: 507
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 503
-- **Research**: [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]
+- **Research**:
+  - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md]
+  - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/02_spawn-analysis.md]
+  - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/03_parent-phase-plan-reference.md]
 
 **Description**: Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): S5 universal-cluster simplification (no loop-checking needed) and 5/Euclidean coverage via the KB5/S5 equivalence route. Implement the 'propagate box to ALL branch worlds' universal rule in a new Cslib/Logics/Modal/Tableau/S5Simplification.lean; extract the countermodel via Relation.EqvGen (Std.Refl+IsTrans+IsSymm/IsEquiv free). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (world creation confined to the unmodified K diamondPos/boxNeg arms; each diamond mints at most once per formula). Prove the truth lemma over the universal relation; state s5Valid / Decidable (s5Valid phi) against Cube.S5. Additionally expose the Euclidean frame condition (Relation.RightEuclidean) for the equivalence-extracted model (every equivalence relation is Euclidean) and state 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean's API (RightEuclidean.symm, refl_serial). Document in-file that genuine pure-K5 (Euclidean without full equivalence; no Mathlib closure operator) remains out of scope, per the parent plan's non-goals. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean (new), Cslib/Logics/Modal/Tableau/FrameSoundness.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean.
 
@@ -128,11 +136,16 @@ next_project_number: 507
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]
+- **Research**:
+  - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
+  - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]
+  - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/03_parent-phase-plan-reference.md]
+  - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/handoffs/phase2-blocked-handoff.md]
+- **Plan**: [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md]
 
 **Description**: Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Saturation.lean's modalStepBranch/modalExpandBranches/modalTableau and Cslib/Logics/Modal/Tableau/FmpMeasure.lean's termination measure, currently hard-coding modalApplyOne at 91 call sites across Saturation.lean/FmpMeasure.lean/CompletenessLoop.lean) over an abstract rule-application function matching modalApplyOne's signature, together with a small set of explicit structural hypotheses (no world creation outside the unmodified K diamondPos/boxNeg arms; all added formulas drawn from the finite modalUniverse phi0 catalog). Re-derive K itself as the trivial instantiation (must stay green, zero regression, zero sorry/axiom). Then instantiate the generic driver with the already-proved modalApplyOneT (Cslib/Logics/Modal/Tableau/FrameRules.lean) to build modalStepBranchT/modalExpandBranchesT/modalTableauT, discharge the T-specific structural hypotheses, close the T truth-lemma box-positive case (reflexive self-edge; reuse modalApplyOneT_eq_of_not_boxPos_diaNeg to reduce other cases to existing K bridge lemmas per specs/300_modal_extensions_t_s4_s5/handoffs/phase2-blocked-handoff.md), and state tValid's completeness + Decidable (tValid phi). This completes Phase 2 of the original task 300 plan (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md). Build on the already-committed, green rule-level work in FrameRules.lean/FrameSoundness.lean/FrameCompleteness.lean (do not re-derive it). Every delivered result must be genuinely sorry-free/axiom-free; if the T truth-lemma or termination re-derivation cannot close, mark [BLOCKED] with a documented open goal state rather than introduce debt. Files: Cslib/Logics/Modal/Tableau/Saturation.lean, Cslib/Logics/Modal/Tableau/FmpMeasure.lean, Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, Cslib/Logics/Modal/Tableau/FrameSoundness.lean.
 
@@ -209,22 +222,25 @@ next_project_number: 507
 ---
 
 ### 496. Minimal modal extensions
-- **Status**: [NOT STARTED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 495
+- **Research**: [496_minimal_modal_extensions/reports/01_minimal-modal-extensions.md]
+- **Plan**: [496_minimal_modal_extensions/plans/01_minimal-modal-extensions.md]
 
 **Description**: Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.
 
 ---
 
 ### 495. Minimal modal K soundness completeness
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 491, Task 480, Task 490
 - **Research**: [495_minimal_modal_K_soundness_completeness/reports/01_minimal-modal-k-soundness-completeness.md]
 - **Plan**: [495_minimal_modal_K_soundness_completeness/plans/01_minimal-modal-k-soundness-completeness.md]
+- **Summary**: [495_minimal_modal_K_soundness_completeness/summaries/01_minimal-modal-k-soundness-completeness-summary.md]
 
 **Description**: Minimal modal logic MK soundness + completeness — the modal logic over MINIMAL propositional logic (no explosion / efq), instantiating the intuitionistic modal framework (task 480) MINUS the efq rule, over the birelational semantics (task 490) with the minimal-appropriate ⊥ treatment (⊥ an ordinary proposition, no ex-falso). Prove soundness and completeness via the (prime-theory) canonical model. REQUIRES the minimal propositional base (task 491). Depends on 491, 480, 490.
 

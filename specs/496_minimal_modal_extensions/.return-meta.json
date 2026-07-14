@@ -1,38 +1,48 @@
 {
-  "status": "researched",
+  "status": "planned",
   "started_at": "2026-07-14T18:11:11Z",
-  "completed_at": "2026-07-14T18:20:00Z",
+  "completed_at": "2026-07-14T18:35:00Z",
   "artifacts": [
-    "specs/496_minimal_modal_extensions/reports/01_minimal-modal-extensions.md"
+    "specs/496_minimal_modal_extensions/reports/01_minimal-modal-extensions.md",
+    "specs/496_minimal_modal_extensions/plans/01_minimal-modal-extensions.md"
   ],
   "partial_progress": {
-    "stage": "research_complete",
-    "details": "Research report delivered. Verdict: MT/MS4/MS5 completeness is TRACTABLE and zero-debt, mirroring IK/task-494 (not blocked like CK/task-501)."
+    "stage": "plan_complete",
+    "details": "5-phase implementation plan delivered. Zero-debt, tractable (mirrors IK/task-494). Phases 3 and 4 carry Zero-Debt STOP/[BLOCKED] clauses; Phase 4 (MS5 symmetry port) is the crux."
   },
   "metadata": {
     "session_id": "sess_1784044271_09e821_496",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "agent_type": "planner-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "plan", "planner-agent"],
     "task_number": 496,
-    "task_type": "cslib"
+    "task_type": "cslib",
+    "phase_count": 5,
+    "estimated_hours": 9,
+    "dependency_waves": [[1], [2], [3], [4], [5]]
   },
+  "plan_metadata": {
+    "phases": 5,
+    "total_effort_hours": 9,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2], [3], [4], [5]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_minimal-modal-extensions.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-07-14"
+      }
+    ]
+  },
+  "memory_candidates": [],
+  "next_steps": "Run /implement 496 to execute the plan",
   "handoff": {
-    "verdict": "MT/MS4/MS5 completeness TRACTABLE and zero-debt; mirrors IK/task-494 birelational positive-FC-closure pattern, does NOT inherit CS4/CS5 (task-501) segment-model blocker.",
-    "key_findings": [
-      "MK reuses IK's single-world two-clause minCanonicalR over quasi-prime worlds WITH F1/F2 confluence (MValid), not CK's segment model.",
-      "Frame conditions are PLAIN on raw r (reflexive/transitive/symmetric), NOT the CK ≤-composed form; F1/F2 absorb the ≤-composition in box-form soundness (as MK.idb uses f2).",
-      "FC closures are positive (min_axiom_mem + min_imp_property via QuasiPrime.closed deductive closure); no consistency, no efq, no world-subtype invariant, no diamRefutingSegment.",
-      "mk_completeness is already single-branch, so mkvalidFC_completeness is simpler than IK's ivalidFC_completeness (no inconsistent/efq branch).",
-      "Axiomatize MS5 via B (symmetry), NOT euclidean-5 (quasi-prime theories are far from negation-complete).",
-      "No new Mathlib API; do NOT use deprecated Mathlib Reflexive/Transitive/Symmetric — define local mtFC/ms4FC/ms5FC predicates."
-    ],
-    "recommended_files": [
-      "Cslib/Logics/Modal/Metalogic/Minimal/MinExtension.lean (scaffold: MValidFC, mkvalidFC_completeness, min_axiom_mem, min_imp_property)",
-      "Cslib/Logics/Modal/Metalogic/Minimal/MT.lean",
-      "Cslib/Logics/Modal/Metalogic/Minimal/MS4.lean",
-      "Cslib/Logics/Modal/Metalogic/Minimal/MS5.lean"
-    ],
+    "status": "planned",
+    "plan_path": "specs/496_minimal_modal_extensions/plans/01_minimal-modal-extensions.md",
+    "phase_count": 5,
+    "estimated_hours": 9,
     "phases": [
       {"n": 1, "name": "MinExtension.lean scaffold", "risk": "LOW"},
       {"n": 2, "name": "MT.lean (reflexivity)", "risk": "LOW"},
@@ -40,7 +50,8 @@
       {"n": 4, "name": "MS5.lean (symmetry via B, crux)", "risk": "MODERATE", "stop_clause": true},
       {"n": 5, "name": "Barrel wiring + full CI", "risk": "LOW"}
     ],
-    "zero_debt": "No sorry/axiom/vacuous-def recommended. Phases 3 and 4 carry explicit STOP/[BLOCKED]-escalation clauses; confidence a sorry-free construction exists is HIGH (verbatim ports of already-compiled IK it_/is4_/is5_canonical_* proofs).",
-    "next_step": "/plan 496"
+    "zero_debt": "No sorry/axiom/vacuous-def. Phases 3 and 4 carry explicit STOP/[BLOCKED]-escalation clauses. Confine edits to Minimal/ subtree; re-read Cslib.lean before each barrel edit; per-phase green commits.",
+    "territory": "NEW files only under Cslib/Logics/Modal/Metalogic/Minimal/ (MinExtension, MT, MS4, MS5) plus shared Cslib.lean barrel via lake exe mk_all --module.",
+    "next_step": "/implement 496"
   }
 }

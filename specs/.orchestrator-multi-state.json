@@ -1,47 +1,80 @@
 {
-  "session_id": "sess_1784044325_11ad9e",
+  "session_id": "sess_1784051915_d00efb",
   "task_numbers": [
-    396,
-    300
+    503,
+    504,
+    505,
+    506
   ],
   "waves": [
     [
-      396,
-      300
+      503
+    ],
+    [
+      504,
+      505,
+      506
     ]
   ],
   "dependency_graph": {
-    "396": [],
-    "300": []
+    "503": [],
+    "504": [
+      "503"
+    ],
+    "505": [
+      "503"
+    ],
+    "506": [
+      "503"
+    ]
   },
-  "max_cycles": 10,
-  "cycle_count": 3,
+  "max_cycles": 20,
+  "cycle_count": 2,
   "failed_tasks": [
     {
-      "task": 300,
-      "reason": "Phase 2 [BLOCKED]: Decidable (tValid) needs a from-scratch T-tableau driver + termination re-derivation (K-scale). T rules/soundness/extractModelT committed green, zero sorry. Recommend dedicated per-system tasks."
+      "task": 503,
+      "reason": "Phase 3 termination-measure blocker; needs dedicated generic-tableau-termination task"
     }
   ],
-  "completed_tasks": [
-    396,
-    491
-  ],
+  "completed_tasks": [],
   "current_statuses": {
-    "396": "completed",
-    "300": "partial",
-    "491": "completed",
-    "501": "implementing"
+    "503": "blocked",
+    "504": "researched",
+    "505": "researched",
+    "506": "researched",
+    "495": "completed",
+    "496": "planned"
   },
   "task_dirs": {
-    "396": "specs/396_salvage_299_soundness_lemmas",
-    "300": "specs/300_modal_extensions_t_s4_s5"
+    "503": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
+    "504": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_",
+    "505": "specs/505_b_symmetric_decidability_via_generic_tableau_driver",
+    "506": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability"
   },
   "research_agents": {
-    "396": "cslib-research-agent",
-    "300": "cslib-research-agent"
+    "503": "cslib-research-agent",
+    "504": "cslib-research-agent",
+    "505": "cslib-research-agent",
+    "506": "cslib-research-agent"
   },
   "implement_agents": {
-    "396": "cslib-implementation-agent",
-    "300": "cslib-implementation-agent"
-  }
+    "503": "cslib-implementation-agent",
+    "504": "cslib-implementation-agent",
+    "505": "cslib-implementation-agent",
+    "506": "cslib-implementation-agent"
+  },
+  "gated_tasks": [
+    {
+      "task": 504,
+      "reason": "needs generic termination measure (503 Phase 3)"
+    },
+    {
+      "task": 505,
+      "reason": "needs generic termination measure (503 Phase 3)"
+    },
+    {
+      "task": 506,
+      "reason": "S4 excluded from interface; 503 driver defs (Phase 1) available but standalone termination work + user decision advised"
+    }
+  ]
 }

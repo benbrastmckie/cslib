@@ -455,6 +455,41 @@ theorem k_derivable_of_ik_idb {φ ψ : Proposition Atom} :
   obtain ⟨d⟩ := goal
   exact ⟨d⟩
 
+/-! ## Assembly: The `IK → K` Bridge -/
+
+/-- Every `IKModalAxiom` instance is `Derivable` in classical `K`. Assembles the 14
+per-axiom derivations above (the 12 from `IntToClassical.lean`'s Phase-6 section plus
+`cd`/`idb` from this phase) into the total axiom→derivation map required by
+`Derivable_of_axiom_derivable`. -/
+theorem ikAxiom_derivable_in_K {φ : Proposition Atom} (h : IKModalAxiom φ) :
+    Derivable (@KAxiom Atom) φ :=
+  match h with
+  | .implyK _ _ => k_derivable_of_ik_implyK
+  | .implyS _ _ _ => k_derivable_of_ik_implyS
+  | .efq _ => k_derivable_of_ik_efq
+  | .andI _ _ => k_derivable_of_ik_andI
+  | .andE1 _ _ => k_derivable_of_ik_andE1
+  | .andE2 _ _ => k_derivable_of_ik_andE2
+  | .orI1 _ _ => k_derivable_of_ik_orI1
+  | .orI2 _ _ => k_derivable_of_ik_orI2
+  | .orE _ _ _ => k_derivable_of_ik_orE
+  | .k _ _ => k_derivable_of_ik_k
+  | .kdia _ _ => k_derivable_of_ik_kdia
+  | .cd _ _ => k_derivable_of_ik_cd
+  | .idb _ _ => k_derivable_of_ik_idb
+  | .dbot => k_derivable_of_ik_dbot
+
+/-- **The `IK → K` bridge**: every `IK`-derivable formula is `K`-derivable. Concludes the
+generalized axiom→derivation lift `Derivable_of_axiom_derivable`
+(`InterSystem/Lifting.lean`) applied to `ikAxiom_derivable_in_K`. This is the "honest"
+Intuitionistic-to-Classical bridge: adding `peirce` (DNE) to `IK`'s Fischer-Servi
+primitive-diamond axioms collapses them to classical `K`'s dual-diamond axiomatization
+(`diaDualityFwd`/`diaDualityBack`); the two axiomatizations characterize the same classical
+diamond, but only propositionally, not syntactically. -/
+theorem ikDerivable_implies_kDerivable {φ : Proposition Atom} (h : Derivable IKModalAxiom φ) :
+    Derivable (@KAxiom Atom) φ :=
+  Derivable_of_axiom_derivable (fun _ hax => ikAxiom_derivable_in_K hax) h
+
 end Cslib.Logic.Modal
 
 end

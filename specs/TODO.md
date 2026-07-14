@@ -89,13 +89,13 @@ next_project_number: 511
 
 ### Uncategorized
 
-510 [NOT STARTED] — Generalize the Hintikka-set / saturation-characterisation chain o
+510 [RESEARCHED] — Generalize the Hintikka-set / saturation-characterisation chain o
   └─ 503 [BLOCKED] — (Modal Logic: Parametrize the K tableau driver (Cslib/) (see above)
 
 ## Tasks
 
 ### 510. Generalize completeness loop hintikka chain over spec
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: Task 507
 

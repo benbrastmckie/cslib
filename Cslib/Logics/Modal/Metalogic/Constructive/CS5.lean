@@ -685,4 +685,249 @@ theorem cs5_symmetric_tail_box_gap {H T : Set (Proposition Atom)}
   · exact h
   · exact absurd (hsym h) hq
 
+/-! ## `diam_witness` via `prime_set_exclusion` (Phase 6)
+
+Proves `cs5_diam_witness`: `◇A ∈ H ⟹ ∃ t ∈ cs5Tail H, A ∈ t`. Instantiates `prime_set_exclusion`
+at `S := boxInv H ∪ {A}`, `E := {□B | B ∉ H}`. Discharges `DerivExcludes` by the report's
+four-step argument: (1) `S ⊢ bigOr l` for `l` drawn from `E` splits (`modal_deriv_imp_of_union`)
+into `L' ⊆ boxInv H` deriving `A → bigOr l`; (2) `box_mem_of_boxed_context` places
+`□(A → bigOr l) ∈ H`; (3) `Kd` on `◇A ∈ H` gives `◇(bigOr l) ∈ H`; (4) since `l`'s elements are
+all `□`-shaped with un-boxed witnesses excluded from `H`, `or_box_imp_box_bigOr`/`bDia` give
+`bigOr Bs ∈ H`, and primality of `H` finds a witness `B ∈ Bs` with `B ∈ H` — contradicting
+`Bs`'s exclusion. **One case the report's sketch does not spell out**: `H` exploding (`⊥ ∈ H`)
+makes `S` itself inconsistent (`boxInv H = Set.univ`), so `DerivExcludes` at `l := []` would be
+false; handled by a leading case split, with `T := Set.univ` as the direct witness when `H`
+explodes (mirrors `CKSegment.ofHead`'s `cexpl`-style base case). The non-exploding branch also
+needs `CS5 ⊢ ◇⊥ → ⊥` (`cs5_dia_bot_imp_bot`, transcribed from `specs/508_.../probes/
+cs5-obstruction-verified.lean`, verified) to convert `◇⊥ ∈ H` into `⊥ ∈ H`. -/
+
+/-- **`CS5 ⊢ ◇⊥ → ⊥`** (unlike `CK`/`CT`/`CS4`). Derivation: `efq` gives `⊥ → □⊥`; necessitation
+gives `□(⊥ → □⊥)`; `Kd` gives `◇⊥ → ◇□⊥`; `bDia` at `⊥` gives `◇□⊥ → ⊥`. Transcribed from
+`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean` (verified),
+now load-bearing (Phase 6's exploding-head case split) rather than a merely-mentioned fact. -/
+theorem cs5_dia_bot_imp_bot :
+    Derivable (@CS5ModalAxiom Atom)
+      ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) := by
+  have d1 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((Proposition.bot : Proposition Atom).imp (Proposition.box Proposition.bot)) :=
+    .ax [] _ (.efq (Proposition.box Proposition.bot))
+  have d2 : DerivationTree (@CS5ModalAxiom Atom) []
+      (Proposition.box ((Proposition.bot : Proposition Atom).imp
+        (Proposition.box Proposition.bot))) :=
+    .necessitation _ d1
+  have d3 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((Proposition.box ((Proposition.bot : Proposition Atom).imp
+        (Proposition.box Proposition.bot))).imp
+        ((◇(Proposition.bot : Proposition Atom)).imp
+          (◇(Proposition.box (Proposition.bot : Proposition Atom))))) :=
+    .ax [] _ (.kdia Proposition.bot (Proposition.box Proposition.bot))
+  have d4 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇(Proposition.bot : Proposition Atom)).imp
+        (◇(Proposition.box (Proposition.bot : Proposition Atom)))) :=
+    .modus_ponens _ _ _ d3 d2
+  have d5 : DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇(Proposition.box (Proposition.bot : Proposition Atom))).imp Proposition.bot) :=
+    .ax [] _ (.bDia Proposition.bot)
+  have hctx : DerivationTree (@CS5ModalAxiom Atom) [◇(Proposition.bot : Proposition Atom)]
+      (Proposition.bot : Proposition Atom) := by
+    have a0 : DerivationTree (@CS5ModalAxiom Atom) [◇(Proposition.bot : Proposition Atom)]
+        (◇(Proposition.bot : Proposition Atom)) :=
+      .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+    have w4 := DerivationTree.weakening [] [◇(Proposition.bot : Proposition Atom)] _ d4
+      (fun _ h => nomatch h)
+    have w5 := DerivationTree.weakening [] [◇(Proposition.bot : Proposition Atom)] _ d5
+      (fun _ h => nomatch h)
+    exact .modus_ponens _ _ _ w5 (.modus_ponens _ _ _ w4 a0)
+  exact ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) []
+    (◇(Proposition.bot : Proposition Atom)) Proposition.bot hctx⟩
+
+/-- `⊢ □B → □(bigOr (B :: rest))` — box-monotonicity of a single axiom instance, via
+necessitation + `Kb`. Private helper for `or_box_imp_box_bigOr`. -/
+private def cs5_box_mono {A B : Proposition Atom} (hAB : CS5ModalAxiom (A.imp B)) :
+    DerivationTree (@CS5ModalAxiom Atom) [] ((Proposition.box A).imp (Proposition.box B)) :=
+  .modus_ponens [] _ _ (.ax [] _ (.k A B)) (.necessitation _ (.ax [] _ hAB))
+
+/-- **Box-of-disjuncts, n-ary**: `⊢ (bigOr (Bs.map box)) → (□ (bigOr Bs))` — a disjunction of
+already-boxed formulas implies the box of the (unboxed) disjunction. The n-ary generalization
+of `or_box_imp_box_or` that `DerivExcludes`'s arbitrary-length exclusion lists need. Proved by
+induction on `Bs` via `cs5_box_mono` (K + necessitation of `orI1`/`orI2`) combined through
+`orE`; base case is `efq`. Modelled on `Intuitionistic/CanonicalModel.lean`'s private
+`boxOr_of_boxDisj` (not reusable — different namespace/logic), specialized to `CS5ModalAxiom`. -/
+private noncomputable def or_box_imp_box_bigOr :
+    ∀ (Bs : List (Proposition Atom)),
+      DerivationTree (@CS5ModalAxiom Atom) []
+        ((Metalogic.bigOr (Bs.map Proposition.box)).imp (Proposition.box (Metalogic.bigOr Bs)))
+  | [] => .ax [] _ (.efq (Proposition.box (Metalogic.bigOr ([] : List (Proposition Atom)))))
+  | B :: rest => by
+      have f1 : DerivationTree (@CS5ModalAxiom Atom) []
+          ((Proposition.box B).imp (Proposition.box (Metalogic.bigOr (B :: rest)))) :=
+        cs5_box_mono (.orI1 B (Metalogic.bigOr rest))
+      have f2a : DerivationTree (@CS5ModalAxiom Atom) []
+          ((Proposition.box (Metalogic.bigOr rest)).imp
+            (Proposition.box (Metalogic.bigOr (B :: rest)))) :=
+        cs5_box_mono (.orI2 B (Metalogic.bigOr rest))
+      have ih := or_box_imp_box_bigOr rest
+      have f2 : DerivationTree (@CS5ModalAxiom Atom) []
+          ((Metalogic.bigOr (rest.map Proposition.box)).imp
+            (Proposition.box (Metalogic.bigOr (B :: rest)))) :=
+        cs5_impTrans ih f2a
+      have step1 := DerivationTree.modus_ponens [] _ _
+        (DerivationTree.ax [] _
+          (CS5ModalAxiom.orE (Proposition.box B) (Metalogic.bigOr (rest.map Proposition.box))
+            (Proposition.box (Metalogic.bigOr (B :: rest)))))
+        f1
+      exact DerivationTree.modus_ponens [] _ _ step1 f2
+
+/-- **`⊢ ◇(bigOr (Bs.map box)) → bigOr Bs`**, the n-ary generalization of `dia_or_box_imp_or`.
+Chain: `Kd` on `or_box_imp_box_bigOr`, then `bDia` at `bigOr Bs`. -/
+private noncomputable def dia_or_box_imp_bigOr (Bs : List (Proposition Atom)) :
+    DerivationTree (@CS5ModalAxiom Atom) []
+      ((◇(Metalogic.bigOr (Bs.map Proposition.box))).imp (Metalogic.bigOr Bs)) :=
+  cs5_impTrans
+    (.modus_ponens [] _ _
+      (.ax [] _ (.kdia (Metalogic.bigOr (Bs.map Proposition.box))
+        (Proposition.box (Metalogic.bigOr Bs))))
+      (.necessitation _ (or_box_imp_box_bigOr Bs)))
+    (.ax [] _ (.bDia (Metalogic.bigOr Bs)))
+
+/-- Extracts the bare witnesses `Bs` of a list `l` drawn from `E := {□B | B ∉ H}`, so that
+`l = Bs.map box` with every element of `Bs` excluded from `H`. Modelled on
+`Intuitionistic/CanonicalModel.lean`'s private `extract_box_list`. -/
+private theorem extract_box_list {H : Set (Proposition Atom)} :
+    ∀ (l : List (Proposition Atom)),
+      (∀ x ∈ l, ∃ B, x = Proposition.box B ∧ B ∉ H) →
+      ∃ Bs : List (Proposition Atom), l = Bs.map Proposition.box ∧ ∀ B ∈ Bs, B ∉ H
+  | [], _ => ⟨[], rfl, fun _ h => nomatch h⟩
+  | x :: xs, hl => by
+      obtain ⟨B, hxeq, hBH⟩ := hl x (List.mem_cons.mpr (Or.inl rfl))
+      obtain ⟨Bs', hBs'eq, hBs'H⟩ :=
+        extract_box_list xs (fun y hy => hl y (List.mem_cons.mpr (Or.inr hy)))
+      refine ⟨B :: Bs', by rw [hxeq, hBs'eq]; rfl, ?_⟩
+      intro B' hB'
+      rcases List.mem_cons.mp hB' with rfl | h
+      · exact hBH
+      · exact hBs'H B' h
+
+/-- **Prime disjunction property, n-ary, nonempty case**: for quasi-prime `S`, if
+`bigOr (B :: Bs') ∈ S` then some member of `B :: Bs'` is in `S`. Proved by induction using
+`QuasiPrime.disj` (binary) repeatedly; the recursive base case (`Bs' = []`, i.e.
+`bigOr [] = ⊥ ∈ S`) is absorbed via `mem_of_bot_mem` (`efq`) into membership of the *outer*
+list's head `B`, so the returned witness is always drawn from the original nonempty list. -/
+private theorem quasiPrime_bigOr_mem {S : Set (Proposition Atom)}
+    (hS : QuasiPrime (@CS5ModalAxiom Atom) S) :
+    ∀ (B : Proposition Atom) (rest : List (Proposition Atom)),
+      Metalogic.bigOr (B :: rest) ∈ S → ∃ C ∈ B :: rest, C ∈ S
+  | B, [], hmem => by
+      -- hmem : B ∨ ⊥ ∈ S
+      rcases hS.disj hmem with h | h
+      · exact ⟨B, List.mem_cons.mpr (Or.inl rfl), h⟩
+      · exact ⟨B, List.mem_cons.mpr (Or.inl rfl), mem_of_bot_mem (fun φ => .efq φ) hS.closed h B⟩
+  | B, B' :: rest', hmem => by
+      -- hmem : B ∨ bigOr (B' :: rest') ∈ S
+      rcases hS.disj hmem with h | h
+      · exact ⟨B, List.mem_cons.mpr (Or.inl rfl), h⟩
+      · obtain ⟨C, hC, hCS⟩ := quasiPrime_bigOr_mem hS B' rest' h
+        exact ⟨C, List.mem_cons.mpr (Or.inr hC), hCS⟩
+
+/-- **Set (Lindenbaum-pair) exclusion at the trivially-true consistency predicate**: given a
+deductively closed `S` deriving no finite disjunction of `E`, there is a quasi-prime `T ⊇ S`
+still deriving no finite disjunction of `E`. Thin wrapper around `Metalogic.prime_set_exclusion`
+with `Cons := fun _ => True` — the set-exclusion analogue of `quasi_prime_exclusion`
+(`SegmentLindenbaum.lean`), which wraps the single-formula `Metalogic.prime_exclusion` the same
+way. Placed here (not `SegmentLindenbaum.lean`) since Phase 4 scoped that file to list-splitting/
+finite-conjunction helpers only. Factored out because Phase 7 reuses it twice. -/
+private theorem quasi_prime_set_exclusion
+    {S : Set (Proposition Atom)}
+    (h_closed : Metalogic.DeductivelyClosed (modalDerivationSystem (@CS5ModalAxiom Atom)) S)
+    {E : Set (Proposition Atom)}
+    (h_excl : Metalogic.DerivExcludes (modalDerivationSystem (@CS5ModalAxiom Atom)) E S) :
+    ∃ T, S ⊆ T ∧ QuasiPrime (@CS5ModalAxiom Atom) T ∧
+      Metalogic.DerivExcludes (modalDerivationSystem (@CS5ModalAxiom Atom)) E T :=
+  Metalogic.prime_set_exclusion
+    (modalDerivationSystem (@CS5ModalAxiom Atom)) (fun _ => True)
+    ⟨trivial, h_closed⟩ h_excl
+    (fun A B => ⟨.ax [] _ (.orI1 A B)⟩)
+    (fun A B => ⟨.ax [] _ (.orI2 A B)⟩)
+    (fun A B χ => ⟨.ax [] _ (.orE A B χ)⟩)
+    (fun A => ⟨.ax [] _ (.efq A)⟩)
+    (modalDeductiveClosure CS5ModalAxiom)
+    (modal_subset_deductive_closure CS5ModalAxiom)
+    (fun {_X _ψ} h => h)
+    (fun {_X} _ => ⟨trivial,
+      fun L φ' hL hd => modalDeductiveClosure_closed
+        (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) L φ' hL hd⟩)
+    (fun {_X} h_not_cons => absurd trivial h_not_cons)
+    (fun {U _L a _b} hL hd =>
+      modal_deriv_imp_of_union (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+        (fun x hx => by
+          rcases Set.mem_insert_iff.mp (hL x hx) with rfl | hu
+          · exact Set.mem_union_right U (Set.mem_singleton_iff.mpr rfl)
+          · exact Set.mem_union_left _ hu)
+        hd)
+    (fun _ _ _ _ => trivial)
+
+/-- **The diamond witness for the symmetric tail.** `◇A ∈ H ⟹ ∃ t ∈ cs5Tail H, A ∈ t`. Instantiates
+`prime_set_exclusion` (via `quasi_prime_set_exclusion`) at `S := boxInv H ∪ {A}`,
+`E := {□B | B ∉ H}`. See the section docstring above for the four-step discharge argument and
+the exploding-head case split. Zorn is used via `prime_set_exclusion`, so
+`Classical.choice`/`propext`/`Quot.sound` are expected in the non-exploding branch. -/
+theorem cs5_diam_witness {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    {A : Proposition Atom} (hA : (◇A) ∈ H) : ∃ t ∈ cs5Tail H, A ∈ t := by
+  by_cases hex : (Proposition.bot : Proposition Atom) ∈ H
+  · refine ⟨Set.univ, ⟨quasiPrime_univ, Set.subset_univ _, ?_⟩, Set.mem_univ _⟩
+    intro B _
+    exact mem_of_bot_mem (fun φ => .efq φ) hH.closed hex B
+  · have hExcl : Metalogic.DerivExcludes (modalDerivationSystem (@CS5ModalAxiom Atom))
+        {x | ∃ B, x = Proposition.box B ∧ B ∉ H}
+        (modalDeductiveClosure CS5ModalAxiom (boxInv H ∪ {A})) := by
+      intro l hl hmem
+      obtain ⟨Lctx, hLctx, hd⟩ := hmem
+      obtain ⟨L', hL'sub, hL'd⟩ :=
+        modal_deriv_imp_of_union (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          hLctx hd
+      obtain ⟨d'⟩ := hL'd
+      have hbox : Proposition.box (A.imp (Metalogic.bigOr l)) ∈ H :=
+        box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun φ ψ => .k φ ψ) hH.closed L' d' hL'sub
+      have hdiaBigOr : (◇(Metalogic.bigOr l)) ∈ H :=
+        mem_head_mp hH.closed
+          (mem_head_mp hH.closed (mem_of_axiom hH.closed
+            (CS5ModalAxiom.kdia A (Metalogic.bigOr l))) hbox) hA
+      rcases l with _ | ⟨x, xs⟩
+      · have hdbot : ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) ∈ H :=
+          hH.closed [] _ (fun _ h => nomatch h) cs5_dia_bot_imp_bot
+        exact hex (mem_head_mp hH.closed hdbot hdiaBigOr)
+      · obtain ⟨Bs, hBseq, hBsH⟩ := extract_box_list (H := H) (x :: xs) hl
+        have hdiaBigOr' : (◇(Metalogic.bigOr (Bs.map Proposition.box))) ∈ H := hBseq ▸ hdiaBigOr
+        have hchain : ((◇(Metalogic.bigOr (Bs.map Proposition.box))).imp
+            (Metalogic.bigOr Bs)) ∈ H :=
+          hH.closed [] _ (fun _ h => nomatch h) ⟨dia_or_box_imp_bigOr Bs⟩
+        have hBigOrBs : Metalogic.bigOr Bs ∈ H := mem_head_mp hH.closed hchain hdiaBigOr'
+        rcases Bs with _ | ⟨B, rest⟩
+        · exact absurd hBseq (List.cons_ne_nil x xs)
+        · obtain ⟨C, hCmem, hCH⟩ := quasiPrime_bigOr_mem hH B rest hBigOrBs
+          exact absurd hCH (hBsH C hCmem)
+    obtain ⟨T, hST, hTprime, hTexcl⟩ :=
+      quasi_prime_set_exclusion
+        (modalDeductiveClosure_closed (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ))
+        hExcl
+    refine ⟨T, ⟨hTprime, ?_, ?_⟩, ?_⟩
+    · exact fun B hB => hST (modal_subset_deductive_closure _ _ (Or.inl hB))
+    · intro B hBT
+      by_contra hBH
+      have hBoxBmemE : Proposition.box B ∈ {x | ∃ B, x = Proposition.box B ∧ B ∉ H} :=
+        ⟨B, rfl, hBH⟩
+      have hdisjT : Proposition.box B ∈ T :=
+        hTprime.closed [Proposition.box B] _
+          (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBT, nomatch h])
+          ⟨.assumption _ _ (List.mem_cons.mpr (Or.inl rfl))⟩
+      refine hTexcl [Proposition.box B]
+        (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hBoxBmemE, nomatch h])
+        (hTprime.closed [Proposition.box B] _
+          (fun x hx => by rcases List.mem_cons.mp hx with rfl | h; exacts [hdisjT, nomatch h])
+          ⟨.modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.orI1 (Proposition.box B)
+            (Proposition.bot))) (fun _ h => nomatch h))
+            (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩)
+    · exact hST (modal_subset_deductive_closure _ _ (Or.inr rfl))
+
 end Cslib.Logic.Modal

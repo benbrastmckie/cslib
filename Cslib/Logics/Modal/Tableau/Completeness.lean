@@ -20,6 +20,14 @@ branch, we can extract a finite Kripke countermodel refuting the formula.
 - `modalOpenBranch_countermodel`: An open branch with Hintikka property yields a countermodel.
 - `modalTableau_complete`: `modalTableau φ = .openBranch b acc → ¬ kValid φ`.
 - `modalTableau_decides`: `modalTableau φ = .closed ↔ kValid φ`.
+- `modalHintikkaClauseGen`/`_eq`, `modalStepBranchGen_none_saturated`,
+  `modalStepBranchGen_hintikka_inv` (task 510): the `Completeness.lean` half of the generic
+  Hintikka/saturation chain, generalized over an abstract `apply : RuleApply Atom`. Since this
+  file is strictly upstream of `GenericDriver.lean` (via `FmpMeasure.lean`), these `_gen` lemmas
+  take **raw** per-field hypotheses (only F8 `localShapeInvariance`) rather than a bundled
+  `spec : RuleApplicationSpec apply` argument; `GenericDriver.lean`/`CompletenessLoop.lean`
+  callers supply `spec.localShapeInvariance` directly. `hintikka_box_neg_gen`/
+  `hintikka_diamond_pos_gen`: free (no-field) projection bridges for 505/506.
 
 ## Strategy
 
@@ -631,6 +639,35 @@ def modalHintikkaClause (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     | .persistent out => ∀ sf' ∈ out, sf' ∈ X
     | .notApplicable => True
 
+/-- **Generic box-excluded rule-application clause** (task 510): `modalHintikkaClause`,
+generalized over an abstract `apply : RuleApply Atom`. One-token substitution
+(`modalApplyOne ↦ apply`). Note this carve-out is deliberately **coarser** than
+`modalHintikkaSetGen`'s conjunct 2: vacuous for *any* box/diamond-shaped `φ` (both signs),
+whereas the set's conjunct 2 carves out only `.neg, .box` / `.pos, .diamond`. That gap is
+exactly what `RuleApplicationSpec`'s F9/F10 fields exist to close (`GenericDriver.lean`); the
+coarseness here is forced because the clause must lift along branch growth
+(`modalHintikkaClauseGen_lift`), and both Propagating shapes are `b`/`acc`-dependent, so they
+cannot be lifted. `modalHintikkaClause` is retained unchanged (its `unfold`/`simp only` call
+sites rely on its exact normal form); see `modalHintikkaClause_eq` for the bridge. -/
+def modalHintikkaClauseGen (apply : RuleApply Atom) (s : Sign) (φ : Proposition Atom)
+    (w : WorldIndex) (X : List (SignedFormula (Proposition Atom) WorldIndex))
+    (Y : Accessibility) : Prop :=
+  match φ with
+  | .box _ => True
+  | .diamond _ => True
+  | _ =>
+    match (apply ⟨s, φ, w⟩ X Y).1 with
+    | .linear out => ∀ sf' ∈ out, sf' ∈ X
+    | .branching brs => ∃ br ∈ brs, ∀ sf' ∈ br, sf' ∈ X
+    | .persistent out => ∀ sf' ∈ out, sf' ∈ X
+    | .notApplicable => True
+
+/-- Bridge (task 510): `modalHintikkaClause` is exactly `modalHintikkaClauseGen modalApplyOne`.
+Closes by `rfl`. -/
+theorem modalHintikkaClause_eq (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) :
+    modalHintikkaClause s φ w X Y = modalHintikkaClauseGen modalApplyOne s φ w X Y := rfl
+
 /-- For a non-`box`/`diamond`-shaped signed formula, `modalApplyOne`'s rule result does not
 depend on the branch or accessibility relation. Propositional rules are formula-structural
 (`modalApplyOne_imp_pos`/`_neg`, `modalApplyOne_and_pos`/`_neg`, `modalApplyOne_or_pos`/`_neg`,
@@ -670,64 +707,72 @@ theorem modalApplyOne_fst_eq_of_not_box
   | box ψ => exact absurd rfl (hnb ψ)
   | diamond ψ => exact absurd rfl (hnd ψ)
 
-/-- Lifting lemma for the box-excluded rule-application clause: if it holds for `⟨s, φ, w⟩`
-against branch `b`/`acc`, it holds against any superset branch `b'` with any `acc'` (for
-non-`box` `φ`; `box`-shaped `φ` is vacuous on both sides). Used by
-`modalStepBranch_hintikka_inv` to lift the invariant for `sf ∈ e` from the old branch to the
-new one, since `modalApplyOne`'s output for non-`box` formulas does not depend on `b`/`acc`
-(`modalApplyOne_fst_eq_of_not_box`), so growing the branch only grows the witness set. -/
-private lemma modalHintikkaClause_lift
+/-- **Generic lifting lemma** (task 510): `modalHintikkaClauseGen_lift`, taking a raw
+`hLocalShapeInvariance` hypothesis (`RuleApplicationSpec`'s F8 field, `GenericDriver.lean`) in
+place of the K-specific `modalApplyOne_fst_eq_of_not_box`. Kept as a raw hypothesis rather than a
+bundled `spec` argument: `RuleApplicationSpec` is defined in `GenericDriver.lean`, which imports
+`FmpMeasure.lean`, which (transitively) imports this file -- so `Completeness.lean` must stay
+upstream and take F8 raw. `GenericDriver.lean` supplies the bundled wrapper. Body is
+`modalHintikkaClause_lift`'s exact proof with `modalApplyOne ↦ apply` and
+`modalApplyOne_fst_eq_of_not_box ↦ hLocalShapeInvariance`. -/
+private lemma modalHintikkaClauseGen_lift
+    (apply : RuleApply Atom)
+    (hLocalShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
+      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
+      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+        (acc acc' : Accessibility),
+      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1)
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc acc' : Accessibility) (hsub : b ⊆ b')
-    (hInv : modalHintikkaClause s φ w b acc) :
-    modalHintikkaClause s φ w b' acc' := by
-  unfold modalHintikkaClause at hInv ⊢
+    (hInv : modalHintikkaClauseGen apply s φ w b acc) :
+    modalHintikkaClauseGen apply s φ w b' acc' := by
+  unfold modalHintikkaClauseGen at hInv ⊢
   rcases φ with p | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
-  · have heq := modalApplyOne_fst_eq_of_not_box s (.atom p) w (by intro _ h; simp at h)
+  · have heq := hLocalShapeInvariance s (.atom p) w (by intro _ h; simp at h)
         (by intro _ h; simp at h) b b' acc acc'
     simp only [heq] at hInv
-    rcases hres : (modalApplyOne (⟨s, .atom p, w⟩ :
+    rcases hres : (apply (⟨s, .atom p, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
       simp only [hres] at hInv ⊢
     · exact fun sf' h => hsub (hInv sf' h)
     · obtain ⟨br, hbr, hbr'⟩ := hInv
       exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
     · exact fun sf' h => hsub (hInv sf' h)
-  · have heq := modalApplyOne_fst_eq_of_not_box s .bot w (by intro _ h; simp at h)
+  · have heq := hLocalShapeInvariance s .bot w (by intro _ h; simp at h)
         (by intro _ h; simp at h) b b' acc acc'
     simp only [heq] at hInv
-    rcases hres : (modalApplyOne (⟨s, .bot, w⟩ :
+    rcases hres : (apply (⟨s, .bot, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
       simp only [hres] at hInv ⊢
     · exact fun sf' h => hsub (hInv sf' h)
     · obtain ⟨br, hbr, hbr'⟩ := hInv
       exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
     · exact fun sf' h => hsub (hInv sf' h)
-  · have heq := modalApplyOne_fst_eq_of_not_box s (.imp a c) w (by intro _ h; simp at h)
+  · have heq := hLocalShapeInvariance s (.imp a c) w (by intro _ h; simp at h)
         (by intro _ h; simp at h) b b' acc acc'
     simp only [heq] at hInv
-    rcases hres : (modalApplyOne (⟨s, .imp a c, w⟩ :
+    rcases hres : (apply (⟨s, .imp a c, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
       simp only [hres] at hInv ⊢
     · exact fun sf' h => hsub (hInv sf' h)
     · obtain ⟨br, hbr, hbr'⟩ := hInv
       exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
     · exact fun sf' h => hsub (hInv sf' h)
-  · have heq := modalApplyOne_fst_eq_of_not_box s (.and x y) w (by intro _ h; simp at h)
+  · have heq := hLocalShapeInvariance s (.and x y) w (by intro _ h; simp at h)
         (by intro _ h; simp at h) b b' acc acc'
     simp only [heq] at hInv
-    rcases hres : (modalApplyOne (⟨s, .and x y, w⟩ :
+    rcases hres : (apply (⟨s, .and x y, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
       simp only [hres] at hInv ⊢
     · exact fun sf' h => hsub (hInv sf' h)
     · obtain ⟨br, hbr, hbr'⟩ := hInv
       exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
     · exact fun sf' h => hsub (hInv sf' h)
-  · have heq := modalApplyOne_fst_eq_of_not_box s (.or x y) w (by intro _ h; simp at h)
+  · have heq := hLocalShapeInvariance s (.or x y) w (by intro _ h; simp at h)
         (by intro _ h; simp at h) b b' acc acc'
     simp only [heq] at hInv
-    rcases hres : (modalApplyOne (⟨s, .or x y, w⟩ :
+    rcases hres : (apply (⟨s, .or x y, w⟩ :
         SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
       simp only [hres] at hInv ⊢
     · exact fun sf' h => hsub (hInv sf' h)
@@ -737,18 +782,38 @@ private lemma modalHintikkaClause_lift
   · trivial
   · trivial
 
-omit [Hashable Atom] in
-/-- When `modalStepBranch b e acc = none`, every formula on `b` is either already in the
-expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApplicable`
-(the branch is saturated). Port of `classicalStepBranch_none_saturated`
-(`Classical/Completeness.lean:694`), threaded with `acc`. -/
-lemma modalStepBranch_none_saturated
+/-- Lifting lemma for the box-excluded rule-application clause: if it holds for `⟨s, φ, w⟩`
+against branch `b`/`acc`, it holds against any superset branch `b'` with any `acc'` (for
+non-`box` `φ`; `box`-shaped `φ` is vacuous on both sides). Used by
+`modalStepBranch_hintikka_inv` to lift the invariant for `sf ∈ e` from the old branch to the
+new one, since `modalApplyOne`'s output for non-`box` formulas does not depend on `b`/`acc`
+(`modalApplyOne_fst_eq_of_not_box`), so growing the branch only grows the witness set.
+
+Byte-identical-statement corollary of `modalHintikkaClauseGen_lift` (task 510) via
+`modalHintikkaClause_eq`. -/
+private lemma modalHintikkaClause_lift
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) (hsub : b ⊆ b')
+    (hInv : modalHintikkaClause s φ w b acc) :
+    modalHintikkaClause s φ w b' acc' := by
+  simp only [modalHintikkaClause_eq] at hInv ⊢
+  exact modalHintikkaClauseGen_lift modalApplyOne modalApplyOne_fst_eq_of_not_box s φ w b b'
+    acc acc' hsub hInv
+
+/-- **Generic saturated-leaf characterisation** (task 510): `modalStepBranchGen_none_saturated`,
+generalized over an abstract `apply`. Takes **no** field -- verified rule-agnostic: the proof
+only ever `rcases` on the four `RuleResult` constructor shapes, touching `apply` opaquely.
+Body is `modalStepBranch_none_saturated`'s exact proof with `modalApplyOne ↦ apply` and
+`modalStepBranch ↦ modalStepBranchGen apply`. -/
+lemma modalStepBranchGen_none_saturated
+    (apply : RuleApply Atom)
     {b e : List (SignedFormula (Proposition Atom) WorldIndex)}
     {acc : Accessibility}
-    (hstep : modalStepBranch b e acc = none)
+    (hstep : modalStepBranchGen apply b e acc = none)
     (sf : SignedFormula (Proposition Atom) WorldIndex) (hsfb : sf ∈ b) :
-    sf ∈ e ∨ (modalApplyOne sf b acc).1 = .notApplicable := by
-  simp only [modalStepBranch] at hstep
+    sf ∈ e ∨ (apply sf b acc).1 = .notApplicable := by
+  simp only [modalStepBranchGen] at hstep
   rw [List.findSome?_eq_none_iff] at hstep
   have hbody := hstep sf hsfb
   by_cases hany : e.any (· == sf) = true
@@ -760,7 +825,7 @@ lemma modalStepBranch_none_saturated
   · right
     simp only [Bool.not_eq_true] at hany
     simp only [hany] at hbody
-    rcases hca : modalApplyOne sf b acc with ⟨res, newAcc⟩
+    rcases hca : apply sf b acc with ⟨res, newAcc⟩
     simp only [hca] at hbody
     rcases res with out | brs | out | _
     · exact absurd hbody (by simp)
@@ -768,31 +833,48 @@ lemma modalStepBranch_none_saturated
     · exact absurd hbody (by simp)
     · rfl
 
-/-- If the rule-application invariant holds for branch `b` against expanded set `e` (every
-non-`box`-shaped formula in `e` has its `modalApplyOne` output already present on `b`), then
-after one step `modalStepBranch b e acc = some (newBs, newExps, newAcc)`, the invariant
-holds for every new branch `b'` paired with its own new expanded set from `newExps`.
+/-- When `modalStepBranch b e acc = none`, every formula on `b` is either already in the
+expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApplicable`
+(the branch is saturated). Port of `classicalStepBranch_none_saturated`
+(`Classical/Completeness.lean:694`), threaded with `acc`.
 
-Port of `classicalStepBranch_hintikka_inv` (`Classical/Completeness.lean:722`). Two
-modal-specific adjustments: (1) the invariant is evaluated via `(modalApplyOne sf b acc).1`
-and carves out `.box _`-shaped formulas (see the section note above); (2) the `.persistent`
-case leaves the expanded set unchanged (`newExp = e`, not `e ++ [sf_exp]`), since `boxPos`
-re-fires when new successors are added and is never marked expanded
-(`Saturation.lean:116-117`) — so unlike the classical port's `.persistent` case (identical
-to `.linear`), here there is no `sf = sf_exp` sub-case to discharge at all. -/
-lemma modalStepBranch_hintikka_inv
+Byte-identical-statement corollary of `modalStepBranchGen_none_saturated` (task 510) via
+`modalStepBranch_eq`. -/
+lemma modalStepBranch_none_saturated
+    {b e : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility}
+    (hstep : modalStepBranch b e acc = none)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsfb : sf ∈ b) :
+    sf ∈ e ∨ (modalApplyOne sf b acc).1 = .notApplicable :=
+  modalStepBranchGen_none_saturated modalApplyOne (modalStepBranch_eq b e acc ▸ hstep) sf hsfb
+
+/-- **Generic Hintikka-invariant single-step preservation** (task 510): raw F8
+(`hLocalShapeInvariance`) is its only field input; the rest is driver case-split. Body is
+`modalStepBranch_hintikka_inv`'s exact proof with `modalApplyOne ↦ apply`,
+`modalStepBranch ↦ modalStepBranchGen apply`, and `modalHintikkaClause ↦
+modalHintikkaClauseGen apply` (via `modalHintikkaClauseGen_lift`, fed `hLocalShapeInvariance`
+directly in place of `modalApplyOne_fst_eq_of_not_box`). Public (not `private`, unlike its
+`_lift` helper): the Phase 7 crux (`CompletenessLoop.lean`, task 510) calls this directly with
+`spec.localShapeInvariance`. -/
+lemma modalStepBranchGen_hintikka_inv
+    (apply : RuleApply Atom)
+    (hLocalShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
+      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
+      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+        (acc acc' : Accessibility),
+      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
-    (hInv_b : ∀ sf ∈ e, modalHintikkaClause sf.sign sf.formula sf.label b acc) :
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hInv_b : ∀ sf ∈ e, modalHintikkaClauseGen apply sf.sign sf.formula sf.label b acc) :
     ∀ p ∈ newBs.zip newExps, ∀ sf ∈ p.2,
-      modalHintikkaClause sf.sign sf.formula sf.label p.1 newAcc := by
-  simp only [modalStepBranch] at hstep
+      modalHintikkaClauseGen apply sf.sign sf.formula sf.label p.1 newAcc := by
+  simp only [modalStepBranchGen] at hstep
   obtain ⟨sf_exp, _, hfound⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hfound with hexp
-  rcases hca : modalApplyOne sf_exp b acc with ⟨res, acc'⟩
+  rcases hca : apply sf_exp b acc with ⟨res, acc'⟩
   obtain ⟨s_exp, φ_exp, w_exp⟩ := sf_exp
   simp only [hca] at hfound
   rcases res with newForms | brs | newForms | _
@@ -805,32 +887,32 @@ lemma modalStepBranch_hintikka_inv
     rw [hp2, List.mem_append, List.mem_singleton] at hsfin
     rw [hp1]
     rcases hsfin with hsfin | heq
-    · exact modalHintikkaClause_lift s φ w b (newForms ++ b) acc newAcc
-        (fun _ hx => List.mem_append.mpr (Or.inr hx)) (hInv_b ⟨s, φ, w⟩ hsfin)
+    · exact modalHintikkaClauseGen_lift apply hLocalShapeInvariance s φ w b (newForms ++ b)
+        acc newAcc (fun _ hx => List.mem_append.mpr (Or.inr hx)) (hInv_b ⟨s, φ, w⟩ hsfin)
     · obtain ⟨rfl, rfl, rfl⟩ := heq
-      unfold modalHintikkaClause
+      unfold modalHintikkaClauseGen
       rcases φ_exp with p' | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.atom p') w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.atom p') w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (newForms ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp .bot w_exp
+      · have heq2 := hLocalShapeInvariance s_exp .bot w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (newForms ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.imp a c) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.imp a c) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (newForms ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.and x y) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.and x y) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (newForms ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.or x y) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.or x y) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (newForms ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
@@ -848,32 +930,32 @@ lemma modalStepBranch_hintikka_inv
     rw [← hx2, List.mem_append, List.mem_singleton] at hsfin
     rw [← hx1]
     rcases hsfin with hsfin | heq
-    · exact modalHintikkaClause_lift s φ w b (x ++ b) acc newAcc
+    · exact modalHintikkaClauseGen_lift apply hLocalShapeInvariance s φ w b (x ++ b) acc newAcc
         (fun _ hx'' => List.mem_append.mpr (Or.inr hx'')) (hInv_b ⟨s, φ, w⟩ hsfin)
     · obtain ⟨rfl, rfl, rfl⟩ := heq
-      unfold modalHintikkaClause
+      unfold modalHintikkaClauseGen
       rcases φ_exp with p' | _ | ⟨a, c⟩ | ⟨x2, y2⟩ | ⟨x2, y2⟩ | ψ | ψ
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.atom p') w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.atom p') w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (x ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact ⟨x, hx, fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')⟩
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp .bot w_exp
+      · have heq2 := hLocalShapeInvariance s_exp .bot w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (x ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact ⟨x, hx, fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')⟩
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.imp a c) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.imp a c) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (x ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact ⟨x, hx, fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')⟩
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.and x2 y2) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.and x2 y2) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (x ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
         exact ⟨x, hx, fun sf' hsf' => List.mem_append.mpr (Or.inl hsf')⟩
-      · have heq2 := modalApplyOne_fst_eq_of_not_box s_exp (.or x2 y2) w_exp
+      · have heq2 := hLocalShapeInvariance s_exp (.or x2 y2) w_exp
           (by intro _ h; simp at h) (by intro _ h; simp at h) b (x ++ b) acc newAcc
         have hres := heq2.symm.trans (congrArg Prod.fst hca)
         simp only [hres]
@@ -887,9 +969,62 @@ lemma modalStepBranch_hintikka_inv
     simp only [List.mem_singleton] at hp1 hp2
     obtain ⟨s, φ, w⟩ := sf
     rw [hp1]
-    exact modalHintikkaClause_lift s φ w b (newForms ++ b) acc newAcc
-      (fun _ hx => List.mem_append.mpr (Or.inr hx)) (hInv_b ⟨s, φ, w⟩ (hp2 ▸ hsfin))
+    exact modalHintikkaClauseGen_lift apply hLocalShapeInvariance s φ w b (newForms ++ b) acc
+      newAcc (fun _ hx => List.mem_append.mpr (Or.inr hx)) (hInv_b ⟨s, φ, w⟩ (hp2 ▸ hsfin))
   · simp at hfound
+
+/-- If the rule-application invariant holds for branch `b` against expanded set `e` (every
+non-`box`-shaped formula in `e` has its `modalApplyOne` output already present on `b`), then
+after one step `modalStepBranch b e acc = some (newBs, newExps, newAcc)`, the invariant
+holds for every new branch `b'` paired with its own new expanded set from `newExps`.
+
+Port of `classicalStepBranch_hintikka_inv` (`Classical/Completeness.lean:722`). Two
+modal-specific adjustments: (1) the invariant is evaluated via `(modalApplyOne sf b acc).1`
+and carves out `.box _`-shaped formulas (see the section note above); (2) the `.persistent`
+case leaves the expanded set unchanged (`newExp = e`, not `e ++ [sf_exp]`), since `boxPos`
+re-fires when new successors are added and is never marked expanded
+(`Saturation.lean:116-117`) — so unlike the classical port's `.persistent` case (identical
+to `.linear`), here there is no `sf = sf_exp` sub-case to discharge at all.
+
+Byte-identical-statement corollary of `modalStepBranchGen_hintikka_inv` (task 510) via
+`modalStepBranch_eq`/`modalHintikkaClause_eq`. -/
+lemma modalStepBranch_hintikka_inv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranch b e acc = some (newBs, newExps, newAcc))
+    (hInv_b : ∀ sf ∈ e, modalHintikkaClause sf.sign sf.formula sf.label b acc) :
+    ∀ p ∈ newBs.zip newExps, ∀ sf ∈ p.2,
+      modalHintikkaClause sf.sign sf.formula sf.label p.1 newAcc := by
+  simp only [modalHintikkaClause_eq] at hInv_b ⊢
+  exact modalStepBranchGen_hintikka_inv modalApplyOne modalApplyOne_fst_eq_of_not_box b e acc
+    newBs newExps newAcc (modalStepBranch_eq b e acc ▸ hstep) hInv_b
+
+/-- **Free projection bridge, generic** (task 510): box-negative bridge for `modalHintikkaSetGen`
+-- pure projection of conjunct 3, mentions no `apply`, costs nothing (~6 lines). Delivered for
+505/506 alongside `hintikka_diamond_pos_gen`. -/
+lemma hintikka_box_neg_gen
+    (apply : RuleApply Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen apply b acc)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hmem : (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+  hH.2.2.1 ψ w hmem
+
+/-- **Free projection bridge, generic** (task 510): diamond-positive bridge for
+`modalHintikkaSetGen` -- pure projection of conjunct 4, mentions no `apply`. -/
+lemma hintikka_diamond_pos_gen
+    (apply : RuleApply Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen apply b acc)
+    (ψ : Proposition Atom) (w : WorldIndex)
+    (hmem : (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+  hH.2.2.2 ψ w hmem
 
 end Cslib.Logic.Modal.Tableau
 

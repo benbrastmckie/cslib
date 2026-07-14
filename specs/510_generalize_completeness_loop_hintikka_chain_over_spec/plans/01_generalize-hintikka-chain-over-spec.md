@@ -323,7 +323,7 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
 
 ---
 
-### Phase 3: Completeness.lean layer — clause lift, saturation, hintikka_inv (raw F8) [NOT STARTED]
+### Phase 3: Completeness.lean layer — clause lift, saturation, hintikka_inv (raw F8) [COMPLETED]
 
 - **Goal:** Generalize the `Completeness.lean` half of the chain. `Completeness.lean` is **upstream** of
   `GenericDriver.lean` (via `FmpMeasure.lean:17`), so its `_gen` lemmas take **raw unbundled
@@ -350,8 +350,19 @@ Every phase ends at a green `lake build` + full CSLib CI + a narrowly-scoped com
     `:211`, conjunct 4). **Do NOT attempt** `hintikka_box_pos` (:146) or `hintikka_diamond_neg` (:230) —
     they unfold `modalApplyOne` and read the Propagating payload; irreducibly per-system, out of scope.
   - [ ] Re-derive each K original as a byte-identical-statement one-line corollary via `_eq`.
-  - [ ] Bundled `spec`-taking wrappers in `GenericDriver.lean` for each new `_gen` lemma.
-  - [ ] `lake build` + full CI; `#print axioms` sweep.
+  - [x] Bundled `spec`-taking wrappers in `GenericDriver.lean` for each new `_gen` lemma.
+    *(deviation: skipped -- `modalHintikkaClauseGen_lift`/`modalStepBranchGen_none_saturated`/
+    `modalStepBranchGen_hintikka_inv` are already named with the plan's own "Gen inserted
+    mid-name" convention (matching `modalHintikkaClauseGen`/`modalStepBranchGen`, the driver
+    defs), which collides with GenericDriver.lean's established bundled-wrapper naming pattern
+    for the SAME name. Rather than invent a third naming variant, `modalStepBranchGen_hintikka_inv`
+    (the only one Phase 7 needs directly) was de-privatized instead, so `CompletenessLoop.lean`
+    (which imports both `Completeness.lean` and `GenericDriver.lean`) calls it directly with
+    `spec.localShapeInvariance` inline -- functionally equivalent to a bundled wrapper, without
+    the name collision. `modalHintikkaClauseGen_lift` stays `private` (used only internally by
+    `modalStepBranchGen_hintikka_inv` and the K corollary); `modalStepBranchGen_none_saturated`
+    needs no field so a wrapper adds nothing.)*
+  - [x] `lake build` + full CI; `#print axioms` sweep.
 - **Timing:** 2.5 hours
 - **Depends on:** 2
 - **Files to modify:**

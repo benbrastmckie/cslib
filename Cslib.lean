@@ -353,6 +353,8 @@ public import Cslib.Logics.Modal.Metalogic.ConservativeExtension
 public import Cslib.Logics.Modal.Metalogic.Constructive.CK
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKTruthLemma
+public import Cslib.Logics.Modal.Metalogic.Constructive.CS4
+public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 public import Cslib.Logics.Modal.Metalogic.Constructive.CT
 public import Cslib.Logics.Modal.Metalogic.Constructive.Forcing
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment
@@ -444,6 +446,7 @@ public import Cslib.Logics.Modal.Tableau.CompletenessLoop
 public import Cslib.Logics.Modal.Tableau.Defs
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.FrameCompleteness
+public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.LoopInduction
 public import Cslib.Logics.Modal.Tableau.Rules

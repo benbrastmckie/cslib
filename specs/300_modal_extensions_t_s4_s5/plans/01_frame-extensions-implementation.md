@@ -1,7 +1,7 @@
 # Implementation Plan: Task #300 — Frame-Specific Modal Tableau Extensions (T/S4/S5/B/5)
 
 - **Task**: 300 - Extend modal K tableau with frame-specific rules for T, S4, S5, B, 5 (full modal cube)
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Effort**: 18 hours (risk-weighted; phases 5–6 may exceed and are candidates for task-splitting)
 - **Dependencies**: 299 (Modal K tableau, COMPLETED, sorry-free)
 - **Research Inputs**: specs/300_modal_extensions_t_s4_s5/reports/01_frame-specific-tableau-extensions.md
@@ -146,26 +146,78 @@ milestone with a task-scoped commit.
 
 ---
 
-### Phase 2: T system (reflexive) — LOW risk [IN PROGRESS]
+### Phase 2: T system (reflexive) — LOW risk [BLOCKED]
 
 - **Goal:** Deliver self-contained `Decidable (tValid φ)` with reflexive-frame countermodel.
 - **Tasks:**
-  - [ ] In `FrameRules.lean`, add the T rules `T(□φ)@w ⊢ T(φ)@w` and `F(◇φ)@w ⊢ F(φ)@w` as
-    `.persistent` arms (outputs at existing worlds; no new worlds), and the per-system
-    `modalHintikkaSet` reflexive conjunct.
-  - [ ] In `FrameCompleteness.lean`, define `extractModelT` via `Relation.ReflGen`; obtain
-    `Std.Refl` free from `Relation.reflexive_reflGen`.
-  - [ ] Re-prove the box-pos truth-lemma bridge for the reflexive self-edge (`ReflGen.refl`),
-    reusing the K induction on `modalComplexity`.
-  - [ ] In `FrameSoundness.lean`, add the T soundness arm discharged by `Satisfies.t`
-    (`Basic.lean:286`); enlarge `modalUniverse` to include reflexive outputs (already
-    subformulas) and reuse `modalWork_drop_persistent` for the measure.
-  - [ ] State `tValid` (against `Cube.T` / `{m | Std.Refl m.r}`), `..._complete`, `Decidable`.
-- **Timing:** 2 hours
+  - [x] In `FrameRules.lean`, add the T rules `T(□φ)@w ⊢ T(φ)@w` and `F(◇φ)@w ⊢ F(φ)@w` as
+    `.persistent` arms (outputs at existing worlds; no new worlds) — `modalTBoxSelf`,
+    `modalTDiaNegSelf`, `modalApplyOneT` (and its agreement lemma with `modalApplyOne`
+    outside the two T-relevant shapes).
+  - [x] In `FrameCompleteness.lean`, define `extractModelT` via `Relation.ReflGen`; obtain
+    `Std.Refl` free (`extractModelT_refl`, via `Relation.ReflGen`'s built-in `Std.Refl`
+    instance — `Relation.reflexive_reflGen` is deprecated in favour of `inferInstance`, used
+    instead) plus `extractModelT_hasEdge_imp_r` (raw `acc.hasEdge` edges survive into the
+    closure via `Relation.ReflGen.single`).
+  - [x] In `FrameSoundness.lean`, add rule-level T soundness (`reflFC`, `tValid`,
+    `branchSatisfiableIn_reflFC_boxPos_mem`/`_diaNeg_mem`, `modalTBoxSelf_sound`/
+    `modalTDiaNegSelf_sound`), discharged directly by reflexivity (no `Satisfies.t` needed at
+    this rule-soundness layer since branch-level `branchSatisfiableIn reflFC` already carries
+    the `Std.Refl` witness).
+  - [ ] *(deviation: blocked)* Re-prove the box-pos truth-lemma bridge for the reflexive
+    self-edge and state `tValid`'s completeness + `Decidable (tValid φ)`.
+  - [ ] *(deviation: blocked, same root cause)* `modalHintikkaSet` reflexive conjunct,
+    enlarged `modalUniverse`, `modalWork_drop_persistent` measure reuse — all deferred, they
+    are only needed to build the T-specific fuel-driven tableau driver below.
+- **Timing:** 2 hours (planned) — actual scope discovered to be an order of magnitude larger
+  (see blocker below); ~1 hour spent, stopped at last clean milestone rather than force it.
 - **Depends on:** 1
-- **Files to modify:** `FrameRules.lean` (new/T arms), `FrameCompleteness.lean` (extractModelT,
-  T truth bridge, tValid + Decidable), `FrameSoundness.lean` (T soundness arm).
-- **Verification:** `lake build` green, zero sorry; `Decidable (tValid φ)` type-checks; full CI clean.
+- **Files to modify:** `FrameRules.lean` (new/T arms) — done; `FrameCompleteness.lean`
+  (extractModelT, T truth bridge, tValid + Decidable) — extractModelT done, truth
+  bridge/decidability blocked; `FrameSoundness.lean` (T soundness arm) — rule-level soundness
+  done, branch-level fuel-induction soundness (the `modalTableau_sound`-style top theorem)
+  not attempted (blocked on the same driver dependency).
+- **Verification:** `lake build` green, zero sorry for everything delivered; `Decidable
+  (tValid φ)` NOT delivered (see blocker).
+
+**BLOCKER (Phase 2):**
+- **What failed**: `Decidable (tValid φ)` requires an actual terminating decision procedure
+  that *produces* a branch satisfying the T-Hintikka property, not just a conditional truth
+  lemma. Investigation of the existing K infrastructure (`Saturation.lean` 258 lines,
+  `Completeness.lean` 935 lines, `FmpMeasure.lean` 2,959 lines, `CompletenessLoop.lean` 1,353
+  lines — 8,066 lines total for K alone) shows `modalStepBranch`/`modalExpandBranches`/
+  `modalTableau` hard-code `modalApplyOne` (91 call sites across the three termination/driver
+  files, not parametrized). A T-specific driver needs an analogous
+  `modalStepBranchT`/`modalExpandBranchesT`/`modalTableauT` built on `modalApplyOneT`
+  (already in `FrameRules.lean`), **plus** a from-scratch re-derivation of the
+  `FmpMeasure.lean`-style termination/fuel-sufficiency argument for it.
+- **Why it's stuck**: The T self-propagation rule (`modalTBoxSelf`/`modalTDiaNegSelf`) can
+  introduce a formula `T(ψ)@w` that was never previously processed at world `w`. If `ψ` is
+  itself diamond-shaped, the *ordinary* K diamond-positive rule (reached via
+  `modalApplyOneT`'s fall-through to `modalApplyOne` outside the two T-relevant shapes) can
+  mint a **new** witness world in response — so the claim "the T rule never mints new worlds"
+  is true only of the one atomic self-propagation step, not of its transitive closure under
+  full saturation. Soundly bounding this (proving termination and the `Decidable` instance)
+  requires re-deriving K-scale termination machinery for `modalApplyOneT`, not a lightweight
+  wrapper around the existing K algorithm's output.
+- **What was tried**: (1) A "post-process the K algorithm's finished branch with a bounded
+  T-closure" shortcut was considered and rejected — it cannot soundly ignore the potential
+  cascading diamond-rule world-minting above. (2) Reuse of
+  `modalApplyOneT_eq_of_not_boxPos_diaNeg` (already proved) to reduce most truth-lemma cases
+  to the existing K bridge lemmas was confirmed promising for the *conditional* truth lemma
+  (assuming a Hintikka-T branch exists), but this does not by itself supply the *existence*
+  (termination) argument needed for `Decidable`.
+- **What is needed**: A dedicated task-scale effort (comparable to the original K tableau
+  build) to construct `modalStepBranchT`/`modalExpandBranchesT`/`modalTableauT` and their
+  termination proof, mirroring `Saturation.lean`/`FmpMeasure.lean`/`CompletenessLoop.lean`.
+  Recommend splitting this into its own dedicated task (e.g.
+  `t-frame-tableau-decidability`) rather than attempting it inline as "Phase 2" of a
+  five-system task — the same driver-rebuild cost recurs, likely worse, for every later phase
+  (S5, B, S4, 5).
+- **Prohibited workarounds**: No `sorry`, no `def tValid_decidable := True`/`trivial`, no
+  vacuous placeholder was introduced. Everything committed for Phase 2 is a genuine,
+  independently useful, sorry-free result (T rules + their rule-level semantic soundness +
+  the free-`Std.Refl` model extractor); only the driver/decidability piece is deferred.
 
 ---
 

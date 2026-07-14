@@ -88,6 +88,46 @@ lemma extractModelWith_id (b : List (SignedFormula (Proposition Atom) WorldIndex
     (acc : Accessibility) :
     extractModelWith (Atom := Atom) id b acc = extractModel b acc := rfl
 
+/-! ## T (Reflexive Frame) Extraction -/
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*reflexive closure* `Relation.ReflGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.ReflGen`). The frame instance
+`Std.Refl` comes free off `Relation.reflexive_reflGen` (see `extractModelT_refl` below); no
+new frame predicate is defined. -/
+def extractModelT
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (Relation.ReflGen) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelT`'s relation is exactly the reflexive closure of `acc.hasEdge`. -/
+lemma extractModelT_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelT b acc).r = Relation.ReflGen (fun w w' => acc.hasEdge w w' = true) := rfl
+
+omit [Hashable Atom] in
+/-- The reflexive frame condition holds of `extractModelT b acc` "for free": `Relation.ReflGen`
+is always reflexive (`Relation.reflexive_reflGen`), regardless of the underlying raw edge
+relation `acc.hasEdge`. Discharges the `reflFC` witness (`FrameSoundness.lean`) for the T
+countermodel. -/
+lemma extractModelT_refl (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Std.Refl (extractModelT b acc).r := by
+  rw [extractModelT_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelT`'s
+(reflexive-closure) relation via `Relation.ReflGen.single`. Needed to reuse the K bridge
+lemmas (`hintikka_box_pos`, `hintikka_diamond_pos`, etc.), which are stated in terms of
+`acc.hasEdge`, when relating them to `extractModelT`'s closed relation. -/
+lemma extractModelT_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelT b acc).r w w' := by
+  rw [extractModelT_r]
+  exact Relation.ReflGen.single h
+
 end Cslib.Logic.Modal.Tableau
 
 end

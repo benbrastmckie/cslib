@@ -308,7 +308,10 @@ deleted from the public API; ~90 lines of duplication are avoided.
 
 ---
 
-### Phase 5: Transcribe probe Parts F-G (truth lemma and completeness) [NOT STARTED]
+### Phase 5: Transcribe probe Parts F-G (truth lemma and completeness) [COMPLETED]
+
+`#print axioms`/`lean_verify` confirmed: `cs4_completeness` and `cs4_soundness_completeness`
+both report exactly `[propext, Classical.choice, Quot.sound]`, matching the probe baseline.
 
 **Goal**: Land `cs4_completeness` and `cs4_soundness_completeness`.
 

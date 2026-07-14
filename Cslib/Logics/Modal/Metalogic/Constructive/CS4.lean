@@ -404,4 +404,129 @@ theorem cs4_fcdia {w u : CS4Segment Atom} (hwu : cs4Mreach w u) :
 theorem cs4FC'_cs4Mreach : cs4FC' (@cs4Mreach Atom) :=
   ⟨cs4_refl, fun h1 h2 h3 => cs4_fc4 h1 h2 h3, fun h => cs4_fcdia h⟩
 
+/-! ### Part F: the truth lemma on the CS4 world type -/
+
+/-- Canonical valuation. -/
+def cs4Val (s : CS4Segment Atom) (p : Atom) : Prop := cval s.seg p
+
+/-- Canonical fallibility. -/
+def cs4Bot (s : CS4Segment Atom) : Prop := cbotForces s.seg
+
+/-- The truth lemma for the `CS4` canonical model: `CKForces` at a world `s` agrees with head
+membership. The diamond-backward case (`φ ∈ s.seg.head → CKForces (◇φ) s`) is the one the whole
+`cs4Tail`/`CS4Segment` technique exists for: it uses `CS4Segment.diaRefuting` to build the
+hereditary `◇φ`-refuting witness world, and closes via `cs4_dia_of_mem` (`tDia`) against the
+hereditary `◇A`-exclusion invariant carried by that world. -/
+theorem cs4_truth_lemma (s : CS4Segment Atom) (φ : Proposition Atom) :
+    CKForces cs4Mreach cs4Val cs4Bot s φ ↔ φ ∈ s.seg.head := by
+  induction φ generalizing s with
+  | atom p => exact Iff.rfl
+  | bot => exact Iff.rfl
+  | imp φ ψ ihφ ihψ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨T, hHT, hT, hφT, hψT⟩ :=
+        imp_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) s.seg.head_qprime h_not
+      exact hψT ((ihψ (CS4Segment.ofHead hT)).mp
+        (hf (CS4Segment.ofHead hT) hHT ((ihφ (CS4Segment.ofHead hT)).mpr hφT)))
+    · intro hmem s' hle hfφ
+      exact (ihψ s').mpr
+        (mem_head_mp s'.seg.head_qprime.closed (hle hmem) ((ihφ s').mp hfφ))
+  | and φ ψ ihφ ihψ =>
+    constructor
+    · rintro ⟨hfφ, hfψ⟩
+      exact mem_head_mp s.seg.head_qprime.closed
+        (mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andI φ ψ))
+          ((ihφ s).mp hfφ))
+        ((ihψ s).mp hfψ)
+    · intro hmem
+      exact ⟨(ihφ s).mpr (mem_head_mp s.seg.head_qprime.closed
+                (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andE1 φ ψ)) hmem),
+             (ihψ s).mpr (mem_head_mp s.seg.head_qprime.closed
+                (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.andE2 φ ψ)) hmem)⟩
+  | or φ ψ ihφ ihψ =>
+    constructor
+    · rintro (hfφ | hfψ)
+      · exact mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.orI1 φ ψ)) ((ihφ s).mp hfφ)
+      · exact mem_head_mp s.seg.head_qprime.closed
+          (mem_of_axiom s.seg.head_qprime.closed (CS4ModalAxiom.orI2 φ ψ)) ((ihψ s).mp hfψ)
+    · intro hmem
+      rcases s.seg.head_qprime.disj hmem with h | h
+      · exact Or.inl ((ihφ s).mpr h)
+      · exact Or.inr ((ihψ s).mpr h)
+  | box φ ihφ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨T, hsub, hT, hAT⟩ :=
+        box_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) (fun φ ψ => .k φ ψ) s.seg.head_qprime h_not
+      have hr : cs4Mreach (CS4Segment.ofHead s.seg.head_qprime) (CS4Segment.ofHead hT) :=
+        ⟨hT, hsub, by rintro A ⟨⟩⟩
+      exact hAT ((ihφ (CS4Segment.ofHead hT)).mp
+        (hf (CS4Segment.ofHead s.seg.head_qprime) (Set.Subset.refl _)
+          (CS4Segment.ofHead hT) hr))
+    · intro hmem s' hle Q hr
+      exact (ihφ Q).mpr (s'.seg.box_reflect φ (hle hmem) Q.seg.head hr)
+  | diamond φ ihφ =>
+    constructor
+    · intro hf
+      by_contra h_not
+      obtain ⟨Q, hr, hfQ⟩ :=
+        hf (CS4Segment.diaRefuting s.seg.head_qprime h_not) (Set.Subset.refl _)
+      exact hr.2.2 φ rfl (cs4_dia_of_mem Q.seg.head_qprime ((ihφ Q).mp hfQ))
+    · intro hmem s' hle
+      obtain ⟨t, ht_mem, hφt⟩ := s'.seg.diam_witness φ (hle hmem)
+      exact ⟨CS4Segment.ofHead (s'.seg.tail_qprime t ht_mem), ht_mem, (ihφ _).mpr hφt⟩
+
+/-! ### Part G: full CS4 completeness -/
+
+/-- `cs4Val` is upward-closed (segment analogue of `cval_upward_closed`). -/
+theorem cs4Val_upward_closed {w w' : CS4Segment Atom} (p : Atom) (h : w ≤ w')
+    (hv : cs4Val w p) : cs4Val w' p := cval_upward_closed p h hv
+
+/-- `cs4Bot` is upward-closed (segment analogue of `cbotForces_upward_closed`). -/
+theorem cs4Bot_upward_closed {w w' : CS4Segment Atom} (h : w ≤ w') (hb : cs4Bot w) :
+    cs4Bot w' := cbotForces_upward_closed h hb
+
+/-- Every atom is forced at an exploding world. -/
+theorem cs4Bot_val {w : CS4Segment Atom} (p : Atom) (hb : cs4Bot w) : cs4Val w p :=
+  cbotForces_val (fun φ => .efq φ) p hb
+
+/-- `cs4Bot` propagates along `cs4Mreach`. -/
+theorem cs4Bot_mreach {w u : CS4Segment Atom} (hb : cs4Bot w) (hr : cs4Mreach w u) :
+    cs4Bot u := cbotForces_mreach (fun φ => .efq φ) hb hr
+
+/-- Every exploding world has an exploding `cs4Mreach`-successor. -/
+theorem cs4Bot_mreach_wit {w : CS4Segment Atom} (hb : cs4Bot w) :
+    ∃ u : CS4Segment Atom, cs4Mreach w u ∧ cs4Bot u := by
+  obtain ⟨t, ht_mem, ht_bot⟩ :=
+    w.seg.diam_witness _ (mem_of_bot_mem (fun φ => .efq φ) w.seg.head_qprime.closed hb
+      (◇Proposition.bot))
+  exact ⟨CS4Segment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
+
+/-- **COMPLETENESS FOR CS4** over the weakened frame condition `cs4FC'`: every `cs4FC'`-valid
+formula is derivable. -/
+theorem cs4_completeness {φ : Proposition Atom} (h_valid : CKValidFC.{u, u} cs4FC' φ) :
+    Derivable CS4ModalAxiom φ :=
+  ckvalidFC_completeness cs4FC' cs4Mreach cs4Val cs4Bot
+    cs4Val_upward_closed cs4Bot_upward_closed cs4Bot_val cs4Bot_mreach cs4Bot_mreach_wit
+    cs4FC'_cs4Mreach
+    (fun {φ} h_nd => by
+      obtain ⟨T, hT, hφT⟩ := quasi_head_realization (fun φ ψ => .implyK φ ψ)
+        (fun φ ψ χ => .implyS φ ψ χ) (fun A B χ => .orE A B χ) h_nd
+      exact ⟨CS4Segment.ofHead hT,
+        fun hf => hφT ((cs4_truth_lemma (CS4Segment.ofHead hT) φ).mp hf)⟩)
+    h_valid
+
+/-- **SOUNDNESS-COMPLETENESS BICONDITIONAL FOR CS4** over the weakened frame condition `cs4FC'`:
+`φ` is derivable iff `φ` is `CKValidFC cs4FC'`. -/
+theorem cs4_soundness_completeness {φ : Proposition Atom} :
+    Derivable CS4ModalAxiom φ ↔ CKValidFC.{u, u} cs4FC' φ :=
+  ⟨cs4_soundness_derivable', cs4_completeness⟩
+
 end Cslib.Logic.Modal

@@ -520,4 +520,219 @@ theorem box_witness_pair_underivable
 
 end BoxWitnessSublemma
 
+/-! ## Box Witness (Phase 2b)
+
+This section proves `canonical_box_witness`, the corrected PAIR-shaped box witness (report 02
+Deliverable 3; report 03 §4 row 2): from `(□φ) ∉ w.val`, it produces `w' ≥ w` and a prime world
+`u` with `canonicalR w' u` and `φ ∉ u.val`. It also introduces `modal_set_exclusion`, a thin
+wrapper around `Metalogic.prime_set_exclusion` (placed here, NOT in `PrimeTheory.lean`, per the
+plan's postmortem constraint against re-opening Phase 1).
+
+**Construction** (ianshil/CK `general_th_completeness.v`, box case):
+- **Step 1**: `u` is the prime extension (`modal_prime_exclusion`) of `{ψ | □ψ ∈ w.val}`
+  excluding `φ`. `{ψ | □ψ ∈ w.val}` is admissible: deductively closed via the K-closure
+  argument (`box_context_deriv`), and consistent because an inconsistency would force
+  `□⊥ ∈ w.val`, hence (via EFQ necessitated + K) `□φ ∈ w.val`, contradicting the hypothesis.
+- **Step 2**: `w'` is the prime extension (`modal_set_exclusion`) of the deductive closure of
+  `Γ := w.val ∪ {◇A | A ∈ u.val}`, excluding `Σ := {□B | B ∉ u.val}`. The `DerivExcludes Σ Γ`
+  precondition is exactly `box_witness_pair_underivable` (Phase 2b-sublemma).
+- The three witness obligations (`w ≤ w'`, `canonicalR w' u`, `φ ∉ u.val`) then hold **by
+  construction**: `w ≤ w'` and the diamond clause follow from the seeding
+  (`Γ ⊆ closure Γ ⊆ w'.val`); the box clause follows from `Σ`-exclusion (contrapositive,
+  via `DerivExcludes` on the singleton `[□ψ]`); `φ ∉ u.val` is Step 1. -/
+
+section CanonicalBoxWitness
+
+variable {Axioms : Proposition Atom → Prop}
+
+/-- **K-closure**: if `Γ ⊢ ψ`, then `(Γ.map □) ⊢ □ψ` -- pushing necessitation through a whole
+derivation context via the deduction theorem and `h_K`, one hypothesis at a time. Used to show
+`{ψ | □ψ ∈ w.val}` is deductively closed (Step 1 of `canonical_box_witness`). -/
+private noncomputable def box_context_deriv
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ)))) :
+    ∀ (L : List (Proposition Atom)) (ψ : Proposition Atom),
+      DerivationTree Axioms L ψ →
+      DerivationTree Axioms (L.map Proposition.box) (Proposition.box ψ)
+  | [], ψ, d => .necessitation ψ d
+  | A :: L', ψ, d => by
+      have dt : DerivationTree Axioms L' (A.imp ψ) := deductionTheorem h_implyK h_implyS L' A ψ d
+      have ihres : DerivationTree Axioms (L'.map Proposition.box) (Proposition.box (A.imp ψ)) :=
+        box_context_deriv h_implyK h_implyS h_K L' (A.imp ψ) dt
+      have hKax : DerivationTree Axioms (L'.map Proposition.box)
+          ((Proposition.box (A.imp ψ)).imp ((Proposition.box A).imp (Proposition.box ψ))) :=
+        .weakening [] _ _ (.ax [] _ (h_K A ψ)) (fun _ h => nomatch h)
+      have hstep : DerivationTree Axioms (L'.map Proposition.box)
+          ((Proposition.box A).imp (Proposition.box ψ)) :=
+        .modus_ponens _ _ _ hKax ihres
+      have hstep_w : DerivationTree Axioms (Proposition.box A :: L'.map Proposition.box)
+          ((Proposition.box A).imp (Proposition.box ψ)) :=
+        .weakening _ _ _ hstep (fun x hx => List.mem_cons.mpr (Or.inr hx))
+      have hboxA : DerivationTree Axioms (Proposition.box A :: L'.map Proposition.box)
+          (Proposition.box A) :=
+        .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+      exact .modus_ponens _ _ _ hstep_w hboxA
+
+/-- **Set (Lindenbaum-Pair) Exclusion Lemma for Modal Theories**: given an admissible set `S`
+deriving no finite disjunction of `E`, there exists a prime modal theory `T ⊇ S` still deriving
+no finite disjunction of `E`. Thin wrapper around `Metalogic.prime_set_exclusion`, mirroring
+`modal_prime_exclusion` (`PrimeTheory.lean`) but for the generalized set-exclusion condition
+needed by the seeded box witness below. Placed here (NOT `PrimeTheory.lean`) so Phase 1 stays
+untouched. -/
+theorem modal_set_exclusion
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    {S : Set (Proposition Atom)}
+    (h_adm : Metalogic.Admissible (modalDerivationSystem Axioms) (ModalSetConsistent Axioms) S)
+    {E : Set (Proposition Atom)}
+    (h_excl : Metalogic.DerivExcludes (modalDerivationSystem Axioms) E S) :
+    ∃ T, S ⊆ T ∧ ModalPrimeTheory Axioms T ∧
+      Metalogic.DerivExcludes (modalDerivationSystem Axioms) E T :=
+  Metalogic.prime_set_exclusion
+    (modalDerivationSystem Axioms) (ModalSetConsistent Axioms)
+    h_adm h_excl
+    (fun A B => ⟨.ax [] _ (h_orI1 A B)⟩)
+    (fun A B => ⟨.ax [] _ (h_orI2 A B)⟩)
+    (fun A B χ => ⟨.ax [] _ (h_orE A B χ)⟩)
+    (fun A => ⟨.ax [] _ (h_efq A)⟩)
+    (modalDeductiveClosure Axioms)
+    (modal_subset_deductive_closure Axioms)
+    (fun {_X _ψ} h => h)
+    (fun {_X} hX => modalDeductiveClosure_is_admissible h_implyK h_implyS hX)
+    -- bot bridge: ⊥ ∈ cl X directly witnesses the inconsistency (no EFQ bridge needed, unlike
+    -- `modal_prime_exclusion`'s `phi_mem_cl_of_not_cons`)
+    (fun {X} h_not_cons => by
+      classical
+      simp only [ModalSetConsistent, Metalogic.SetConsistent, Metalogic.Consistent,
+        not_forall, not_not] at h_not_cons
+      obtain ⟨Linc, hLinc_sub, hLinc_bot⟩ := h_not_cons
+      exact ⟨Linc, hLinc_sub, hLinc_bot⟩)
+    (fun {U _L a _b} hL hd =>
+      modal_deriv_imp_of_union h_implyK h_implyS
+        (fun x hx => by
+          rcases Set.mem_insert_iff.mp (hL x hx) with rfl | hu
+          · exact Set.mem_union_right U (Set.mem_singleton_iff.mpr rfl)
+          · exact Set.mem_union_left _ hu)
+        hd)
+    (fun C hchain hCne hCsub L hL hd =>
+      let ⟨T', hT'C, hLT'⟩ := Metalogic.finite_list_in_chain_member hchain hCne L hL
+      (hCsub hT'C).2.1.1 L hLT' hd)
+
+/-- **Box Witness** (Phase 2b, task 480): the corrected PAIR-shaped box witness. From
+`(□φ) ∉ w.val`, produces `w' ≥ w` (a seeded prime extension) and a prime `u` with
+`canonicalR w' u` and `φ ∉ u.val`. The outer `w ≤ w'` is load-bearing, consumed by
+`BForces_box` in Phase 3b (report 02 Deliverable 3; report 03 §4 row 2).
+
+See [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
+Ch. 3; ianshil/CK `general_th_completeness.v`, box case. -/
+theorem canonical_box_witness
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_orI1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI1 φ ψ))
+    (h_orI2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrI2 φ ψ))
+    (h_orE : ∀ (φ ψ χ : Proposition Atom), Axioms (Cslib.Logic.Axioms.OrE φ ψ χ))
+    (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
+    (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_Kdia : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ))))
+    (h_Idb : ∀ (φ ψ : Proposition Atom),
+      Axioms (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ))))
+    {w : CanonicalPrimeWorld Axioms} {φ : Proposition Atom} (h_notbox : (□φ) ∉ w.val) :
+    ∃ w' u : CanonicalPrimeWorld Axioms, w ≤ w' ∧ canonicalR w' u ∧ φ ∉ u.val := by
+  -- Step 1: u := prime extension of {ψ | □ψ ∈ w.val} excluding φ.
+  have hS1_closed : Metalogic.DeductivelyClosed (modalDerivationSystem Axioms)
+      {ψ | (□ψ) ∈ w.val} := by
+    intro L ψ hL hd
+    obtain ⟨d⟩ := hd
+    exact w.2.1.2 (L.map Proposition.box) (Proposition.box ψ)
+      (fun x hx => by
+        obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+        exact hL y hy)
+      ⟨box_context_deriv h_implyK h_implyS h_K L ψ d⟩
+  have hS1_cons : ModalSetConsistent Axioms {ψ | (□ψ) ∈ w.val} := by
+    intro L hL hd
+    obtain ⟨d⟩ := hd
+    have hboxbot_mem : (□(Proposition.bot : Proposition Atom)) ∈ w.val :=
+      w.2.1.2 (L.map Proposition.box) (Proposition.box Proposition.bot)
+        (fun x hx => by
+          obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+          exact hL y hy)
+        ⟨box_context_deriv h_implyK h_implyS h_K L Proposition.bot d⟩
+    have hbox_efq : DerivationTree Axioms [] ((Proposition.box Proposition.bot).imp (□φ)) :=
+      box_mono h_K (h_efq φ)
+    have hbox_phi : (□φ) ∈ w.val :=
+      w.2.1.2 [Proposition.box Proposition.bot] (□φ)
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hboxbot_mem
+          · nomatch hx')
+        ⟨.modus_ponens _ _ _ (.weakening [] _ _ hbox_efq (fun _ h => nomatch h))
+          (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩
+    exact h_notbox hbox_phi
+  have h_phi_not_S1 : φ ∉ {ψ | (□ψ) ∈ w.val} := h_notbox
+  obtain ⟨Uval, hS1_sub_U, hprimeU, hphi_not_U⟩ :=
+    modal_prime_exclusion h_implyK h_implyS h_efq h_orE ⟨hS1_cons, hS1_closed⟩ h_phi_not_S1
+  let u : CanonicalPrimeWorld Axioms := ⟨Uval, hprimeU⟩
+  have hSu : ∀ ψ, (□ψ) ∈ w.val → ψ ∈ u.val := fun ψ hψ => hS1_sub_U hψ
+  -- Step 2: w' := seeded prime extension of w.val ∪ {◇A | A ∈ u.val} excluding {□B | B ∉ u.val}.
+  have hbwu := box_witness_pair_underivable h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE
+    h_andI h_andE1 h_andE2 h_K h_Kdia h_Idb (w := w) (u := u) hSu
+  have h_cons_raw : ModalSetConsistent Axioms
+      (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ u.val}) := by
+    intro L hL hd
+    have hbot_not_mem := hbwu [] (fun _ h => nomatch h)
+    rw [bigOr_nil_eq_bot] at hbot_not_mem
+    exact hbot_not_mem ⟨L, hL, hd⟩
+  have h_adm_raw : Metalogic.Admissible (modalDerivationSystem Axioms) (ModalSetConsistent Axioms)
+      (modalDeductiveClosure Axioms (w.val ∪ {χ | ∃ A, χ = (◇A) ∧ A ∈ u.val})) :=
+    modalDeductiveClosure_is_admissible h_implyK h_implyS h_cons_raw
+  obtain ⟨Tval, hclosure_sub_T, hprimeT, hexclT⟩ :=
+    modal_set_exclusion h_implyK h_implyS h_efq h_orI1 h_orI2 h_orE h_adm_raw hbwu
+  let w' : CanonicalPrimeWorld Axioms := ⟨Tval, hprimeT⟩
+  have hw_le_w' : w ≤ w' := by
+    intro x hx
+    exact hclosure_sub_T (modal_subset_deductive_closure Axioms _ (Set.mem_union_left _ hx))
+  have hdia_clause : ∀ ψ, ψ ∈ u.val → (◇ψ) ∈ w'.val := by
+    intro ψ hψ
+    exact hclosure_sub_T (modal_subset_deductive_closure Axioms _
+      (Set.mem_union_right _ ⟨ψ, rfl, hψ⟩))
+  have hbox_clause : ∀ ψ, (□ψ) ∈ w'.val → ψ ∈ u.val := by
+    intro ψ hψ_mem
+    by_contra hψ_notU
+    have hsig : ∀ x ∈ [(□ψ)], x ∈ {χ | ∃ B, χ = (□B) ∧ B ∉ u.val} := by
+      intro x hx
+      rcases List.mem_cons.mp hx with rfl | hx'
+      · exact ⟨ψ, rfl, hψ_notU⟩
+      · nomatch hx'
+    have hOrI1_deriv : DerivationTree Axioms [(□ψ)] (Metalogic.bigOr [(□ψ)]) :=
+      .modus_ponens _ _ _
+        (.weakening [] _ _
+          (.ax [] _ (h_orI1 (□ψ) (Metalogic.bigOr ([] : List (Proposition Atom)))))
+          (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+    have hbigOr_mem : Metalogic.bigOr [(□ψ)] ∈ w'.val :=
+      w'.2.1.2 [(□ψ)] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hψ_mem
+          · nomatch hx')
+        ⟨hOrI1_deriv⟩
+    exact hexclT [(□ψ)] hsig hbigOr_mem
+  exact ⟨w', u, hw_le_w', ⟨hbox_clause, hdia_clause⟩, hphi_not_U⟩
+
+end CanonicalBoxWitness
+
 end Cslib.Logic.Modal

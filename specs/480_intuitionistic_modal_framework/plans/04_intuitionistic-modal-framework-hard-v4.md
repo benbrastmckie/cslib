@@ -352,7 +352,7 @@ nothing; no new `axiom`; the four modal axioms are parametric hypotheses), **unt
   (the axiom set is now known-complete, so any remaining obstruction is a transliteration detail,
   not a missing axiom).
 
-### Phase 2b: canonical_box_witness (corrected pair ⟨w', u⟩, Kb+Kd+Idb) [NOT STARTED]
+### Phase 2b: canonical_box_witness (corrected pair ⟨w', u⟩, Kb+Kd+Idb) [COMPLETED]
 
 - **Goal:** Prove the corrected box witness (a PAIR), plus the thin `modal_set_exclusion` wrapper it
   needs.
@@ -365,21 +365,29 @@ nothing; no new `axiom`; the four modal axioms are parametric hypotheses), **unt
   `∃ w' u : CanonicalPrimeWorld Axioms, w ≤ w' ∧ canonicalR w' u ∧ φ ∉ u.val` — NOT the old
   `∃ v, canonicalR w v ∧ φ∉v.val`.
 - **Tasks:**
-  - [ ] Add `modal_set_exclusion` to `CanonicalModel.lean` (NOT `PrimeTheory.lean`), mirroring
+  - [x] Add `modal_set_exclusion` to `CanonicalModel.lean` (NOT `PrimeTheory.lean`), mirroring
         `modal_prime_exclusion`: `Cons := ModalSetConsistent Axioms`,
         `cl := modalDeductiveClosure Axioms`, `hOrI1/hOrI2` from `Axioms.OrI1/OrI2`, `hEFQ` from
         `h_efq`, same `hConsChain` closure (report 02 Deliverable 4). ~40 lines.
-  - [ ] **Step 1** (reuse v2's `[x]` result): `u :=` prime extension via `modal_prime_exclusion` of
+  - [x] **Step 1** (reuse v2's `[x]` result): `u :=` prime extension via `modal_prime_exclusion` of
         `{ψ | □ψ ∈ w.val}` excluding `φ`. Gives `{ψ|□ψ∈w.val} ⊆ u.val`, `φ ∉ u.val`.
-  - [ ] **Step 2**: `w' :=` prime extension via `modal_set_exclusion` of
+  - [x] **Step 2**: `w' :=` prime extension via `modal_set_exclusion` of
         `Γ := w.val ∪ {◇A | A ∈ u.val}` **excluding** `Σ := {□B | B ∉ u.val}`. Discharge its
         `DerivExcludes Σ Γ` precondition with `box_witness_pair_underivable` (Phase 2b-sublemma),
         passing `h_K`, `h_Kdia`, `h_Idb` through.
-  - [ ] Discharge the three witness obligations **by construction** (report 02 Deliverable 3):
+  - [x] Discharge the three witness obligations **by construction** (report 02 Deliverable 3):
         `w ≤ w'`; diamond clause `∀ψ∈u.val, ◇ψ∈w'.val`; box clause `∀ψ, □ψ∈w'.val → ψ∈u.val`
         (contrapositive via `DerivExcludes` on `l := [□ψ]`); `φ ∉ u.val`. Verify each with
         `lean_goal` before committing.
-  - [ ] Docstring; `lake build` the module.
+  - [x] Docstring; `lake build` the module.
+
+  **Implementation note (deviation, non-design-altering):** `{ψ | □ψ ∈ w.val}`'s admissibility
+  (Step 1's `modal_prime_exclusion` precondition) required two small new lemmas not spelled out
+  in report 02: a K-closure helper `box_context_deriv` (if `Γ ⊢ ψ` then `(Γ.map □) ⊢ □ψ`, by
+  induction on `Γ` via the deduction theorem + `h_K`) establishes deductive closure, and its
+  consistency follows from `h_notbox` itself (an inconsistency would force `□⊥ ∈ w.val`, hence
+  via EFQ-necessitated-plus-K `□φ ∈ w.val`, contradicting `h_notbox`) — no additional axiom
+  hypothesis was needed beyond the ones report 03 already lists for this phase.
 - **Reference grounding:** report 03 §4 row 2; report 02 Deliverable 3; ianshil/CK box case;
   `Simpson1994` Ch.3.
 - **Estimated output:** ~120-180 lines (incl. the ~40-line wrapper).

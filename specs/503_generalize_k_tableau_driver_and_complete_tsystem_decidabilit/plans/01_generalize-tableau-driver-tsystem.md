@@ -229,9 +229,35 @@ phase must be a single agent run ending at a green, zero-sorry milestone with a 
 
 ---
 
-### Phase 3: Generalize the FMP / termination measure over the interface [BLOCKED]
+### Phase 3: Generalize the FMP / termination measure over the interface [COMPLETED]
 
-**BLOCKER**:
+**RESOLVED by task 507** (`specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/`,
+commit `009cc348`). The blocker recorded below was escalated via `/spawn 503` into a dedicated
+`generic-tableau-termination` task exactly as this phase's fallback recommended; that task
+delivered the generalization across 8 phases, CI-green, zero `sorry`, zero `axiom`.
+
+**What task 507 delivered**:
+- All three rule-dependent step lemmas (`modalStepBranch_potential_step`,
+  `modalStepBranch_worldBound`, `modalExpMeasure_step_lt`) now hold for an abstract
+  `apply : RuleApply Atom` given a `RuleApplicationSpec apply` witness, as `_gen` lemmas in
+  `FmpMeasure.lean` with `(apply, spec)`-bundled wrapper theorems in `GenericDriver.lean`.
+- `RuleApplicationSpec` grew 3 -> 7 fields: the Phase-2 trio (`freshLocal`,
+  `outputsSubsetUniverse`, `persistentFresh`) plus `rankStep`, `outDegStep`, `knownWorldsStep`,
+  and `branchingLength` — precisely the "additional fields capturing the exact `outDeg`/rank-map
+  interaction at the mint point" that the *What is needed* note below predicted. Each is
+  discharged for `modalApplyOne` via `modalApplyOne_spec`.
+- The ~900-line dependency chain (`modalStepBranch_exists_rank'`, `modalStepBranch_knownWorlds`,
+  `modalStepBranch_preserves_outDegEq`, `outDeg_le_of_expandedNodup`, et al.) was re-derived
+  generically first, as recommended; the `geomCap` EXACT potential-drop identity replays
+  generically rather than degrading to a bound.
+- K re-instantiated: the three public K statements are byte-identical to their pre-507 forms
+  (diffed against `d5b24e67`), now proved as one-line corollaries.
+
+**Known constraint discovered**: an import cycle (`GenericDriver.lean` -> `FmpMeasure.lean`)
+forces the `_gen` lemmas to take raw hypotheses rather than a bundled `spec`; bundled wrappers
+therefore live in `GenericDriver.lean`. Downstream phases must import accordingly.
+
+**Original blocker record (historical — retained for postmortem value)**:
 - **What failed**: Generalizing `modalStepBranch_potential_step` (`FmpMeasure.lean:2146`) and
   `modalStepBranch_worldBound` (`FmpMeasure.lean:2376`) to take an abstract `(apply, spec :
   RuleApplicationSpec apply)` in place of the concrete `modalApplyOne`.
@@ -277,23 +303,25 @@ phase must be a single agent run ending at a green, zero-sorry milestone with a 
 **Phases 4, 5, and 6 all depend sequentially on Phase 3's generic termination measure**
 (Phase 4 instantiates the generic driver with `modalApplyOneT` and needs the generalized fuel
 loop; Phase 5's truth lemma needs the terminating `modalTableauT`; Phase 6's decidability needs
-Phase 5). They are therefore also blocked and left `[NOT STARTED]` below rather than attempted
-out of dependency order.
+Phase 5). With Phase 3 delivered by task 507, that dependency is discharged and Phases 4-6 are
+unblocked and eligible.
 
 - **Goal:** Parametrize `FmpMeasure.lean`'s termination measure and its step lemmas over
   `(apply, spec : RuleApplicationSpec apply)` and re-derive K's termination as the trivial
   instantiation. This is the crux; everything delivered is zero-sorry or the phase is [BLOCKED].
 - **Tasks:**
-  - [ ] Generalize `modalStepBranch_potential_step` (line 2146), `modalStepBranch_worldBound`
+  - [x] Generalize `modalStepBranch_potential_step` (line 2146), `modalStepBranch_worldBound`
     (line 2376), and `modalExpMeasure_step_lt` (line 2873) to take `apply` + `spec` and discharge
     each former `modalApplyOne`-specific step from the corresponding `spec` field.
-  - [ ] Keep `modalUniverse`/`modalWork`/`modalExpMeasure`/`modalFuel` (world-agnostic size bounds)
+    *(delivered by task 507 as `_gen` lemmas + `GenericDriver.lean` wrappers)*
+  - [x] Keep `modalUniverse`/`modalWork`/`modalExpMeasure`/`modalFuel` (world-agnostic size bounds)
     unchanged; only the *rule-dependent* step lemmas move behind the interface. Confirm the fuel
     bound `modalExpMeasure_entry_le_fuel` (line 208) still applies (catalog is rule-independent).
-  - [ ] Re-instantiate K: obtain the original K termination lemmas as
+  - [x] Re-instantiate K: obtain the original K termination lemmas as
     `<generic> modalApplyOne modalApplyOne_spec`; confirm `FmpMeasure.lean`'s existing K corollaries
     and `CompletenessLoop.lean`'s uses still typecheck (defeq via Phase-1 unfolding lemmas).
-  - [ ] `lake build` the Tableau tree; `lean_verify` no sorry/axiom on the generalized measure.
+  - [x] `lake build` the Tableau tree; `lean_verify` no sorry/axiom on the generalized measure.
+    *(29 declarations verified via `#print axioms`: standard axiom trio only)*
 - **Timing:** 3 hours (exceeds the 1–2h guideline by design — the 2,959-line measure is the crux;
   single-agent-run bounded; write an 80%-context handoff if approaching the limit).
 - **Depends on:** 2

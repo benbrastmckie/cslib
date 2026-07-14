@@ -6,6 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 
 /-! # Axiom Subsumption Lemmas for the Intuitionistic-Base Modal Cube

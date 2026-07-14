@@ -14,6 +14,9 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CK
 public import Cslib.Logics.Modal.Metalogic.Constructive.CT
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS4
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 
 /-! # Cross-Base Propositional-Strength Subsumption into the Intuitionistic Base

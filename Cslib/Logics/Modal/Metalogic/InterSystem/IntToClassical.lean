@@ -10,6 +10,9 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.K
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.S4
 public import Cslib.Logics.Modal.ProofSystem.Instances.S5
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IT
+public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
@@ -647,6 +650,124 @@ theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) 
 theorem is4Derivable_implies_s4Derivable {φ : Proposition Atom} (h : Derivable IS4ModalAxiom φ) :
     Derivable (@S4Axiom Atom) φ :=
   Derivable_of_axiom_derivable (fun _ hax => is4Axiom_derivable_in_S4 hax) h
+
+/-! ## Rung Bridge: `IS5 → S5` -/
+
+/-- `□¬X → ¬◇X` in classical `S5` (same construction as `k_diaNegToNotBox`'s converse /
+`s4_boxNegToNotDia`, instantiated at `S := Modal.HilbertS5`, `Axioms := ModalAxiom`). -/
+theorem s5_boxNegToNotDia {X : Proposition Atom} :
+    Derivable (@ModalAxiom Atom)
+      ((Proposition.box (X.imp Proposition.bot)).imp ((◇X).imp Proposition.bot)) := by
+  have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertS5) (φ := X)
+  have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
+    (S := Modal.HilbertS5) fwd
+  have dni := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS5) (F := Proposition Atom)
+    (Proposition.box (X.imp Proposition.bot))
+  have goal := Cslib.Logic.Theorems.Combinators.imp_trans dni contra
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- `IS5`'s `bDia` (`◇□φ → φ`) is **derivable** in classical `S5`, proved via its
+contrapositive plus `rcp`:
+
+1. `boxMonoDni : □φ → □¬¬φ` (necessitated `dni`, K-distributed); `innerFix := contraposition
+   boxMonoDni : ¬□¬¬φ → ¬□φ`.
+2. `boxMonoInnerFix : □¬□¬¬φ → □¬□φ` (necessitated `innerFix`, K-distributed).
+3. `bNegPhi := HasAxiomB.B (φ := ¬φ) : ¬φ → □¬□¬¬φ` (symmetry axiom `B` at `¬φ`).
+4. `chain := imp_trans bNegPhi boxMonoInnerFix : ¬φ → □¬□φ`.
+5. `notDiaBoxPhi := s5_boxNegToNotDia (X := □φ) : □¬□φ → ¬◇□φ`.
+6. `contrapositive := imp_trans chain notDiaBoxPhi : ¬φ → ¬◇□φ`; `rcp contrapositive :
+   ◇□φ → φ`, i.e. the goal. -/
+theorem s5_derivable_of_is5_bDia {φ : Proposition Atom} :
+    Derivable (@ModalAxiom Atom) ((◇(Proposition.box φ)).imp φ) := by
+  have dniPhi := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS5)
+    (F := Proposition Atom) φ
+  have necDni := Necessitation.nec dniPhi
+  have kDni := HasAxiomK.K (S := Modal.HilbertS5) (φ := φ)
+    (ψ := (φ.imp Proposition.bot).imp Proposition.bot)
+  have boxMonoDni := ModusPonens.mp kDni necDni
+  have innerFix := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
+    (S := Modal.HilbertS5) boxMonoDni
+  have necInnerFix := Necessitation.nec innerFix
+  have kInnerFix := HasAxiomK.K (S := Modal.HilbertS5)
+    (φ := (Proposition.box ((φ.imp Proposition.bot).imp Proposition.bot)).imp Proposition.bot)
+    (ψ := (Proposition.box φ).imp Proposition.bot)
+  have boxMonoInnerFix := ModusPonens.mp kInnerFix necInnerFix
+  have bNegPhi := HasAxiomB.B (S := Modal.HilbertS5) (φ := φ.imp Proposition.bot)
+  have chain := Cslib.Logic.Theorems.Combinators.imp_trans bNegPhi boxMonoInnerFix
+  have notDiaBoxPhi := s5_boxNegToNotDia (X := Proposition.box φ)
+  obtain ⟨dNDBP⟩ := notDiaBoxPhi
+  have notDiaBoxPhiIS : InferenceSystem.DerivableIn Modal.HilbertS5
+      ((Proposition.box ((Proposition.box φ).imp Proposition.bot)).imp
+        ((◇(Proposition.box φ)).imp Proposition.bot)) := ⟨dNDBP⟩
+  have contrapositive := Cslib.Logic.Theorems.Combinators.imp_trans chain notDiaBoxPhiIS
+  have goal := @Cslib.Logic.Theorems.Propositional.Core.rcp
+    (Proposition Atom) _ _ Modal.HilbertS5 _ _
+    (φ := φ) (ψ := ◇(Proposition.box φ)) contrapositive
+  obtain ⟨d⟩ := goal
+  exact ⟨d⟩
+
+/-- Every `IS5ModalAxiom` instance is `Derivable` in classical `S5` (`ModalAxiom`): the 18
+`IS4`-inherited constructors lift via `Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)`
+composed with `is4Axiom_derivable_in_S4`; `bBox` is `box_mono (diaDualityBack φ)` composed
+with the literal `modalB` axiom; `bDia` is `s5_derivable_of_is5_bDia`. -/
+theorem is5Axiom_derivable_in_S5 {φ : Proposition Atom} (h : IS5ModalAxiom φ) :
+    Derivable (@ModalAxiom Atom) φ :=
+  match h with
+  | .implyK _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.implyK _ _))
+  | .implyS _ _ _ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.implyS _ _ _))
+  | .efq _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.efq _))
+  | .andI _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.andI _ _))
+  | .andE1 _ _ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.andE1 _ _))
+  | .andE2 _ _ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.andE2 _ _))
+  | .orI1 _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.orI1 _ _))
+  | .orI2 _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.orI2 _ _))
+  | .orE _ _ _ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.orE _ _ _))
+  | .k _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.k _ _))
+  | .kdia _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.kdia _ _))
+  | .cd _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.cd _ _))
+  | .idb _ _ =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.idb _ _))
+  | .dbot =>
+      Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 .dbot)
+  | .tBox φ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.tBox φ))
+  | .tDia φ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.tDia φ))
+  | .fourBox φ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.fourBox φ))
+  | .fourDia φ => Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)
+      (is4Axiom_derivable_in_S4 (.fourDia φ))
+  | .bBox φ => by
+      have back := HasAxiomDiaDualityBack.diaDualityBack (S := Modal.HilbertS5) (φ := φ)
+      have necBack := Necessitation.nec back
+      have kBack := HasAxiomK.K (S := Modal.HilbertS5)
+        (φ := (Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot) (ψ := ◇φ)
+      have boxMonoBack := ModusPonens.mp kBack necBack
+      have bInst := HasAxiomB.B (S := Modal.HilbertS5) (φ := φ)
+      have goal := Cslib.Logic.Theorems.Combinators.imp_trans bInst boxMonoBack
+      obtain ⟨d⟩ := goal
+      exact ⟨d⟩
+  | .bDia _ => s5_derivable_of_is5_bDia
+
+/-- **The `IS5 → S5` bridge**: every `IS5`-derivable formula is `S5` (`ModalAxiom`)
+-derivable. This concludes the full suite of rung bridges (`IK → K`, `IT → T`, `IS4 → S4`,
+`IS5 → S5`) established in this module. -/
+theorem is5Derivable_implies_s5Derivable {φ : Proposition Atom} (h : Derivable IS5ModalAxiom φ) :
+    Derivable (@ModalAxiom Atom) φ :=
+  Derivable_of_axiom_derivable (fun _ hax => is5Axiom_derivable_in_S5 hax) h
 
 end Cslib.Logic.Modal
 

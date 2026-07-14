@@ -1,7 +1,7 @@
 # Implementation Plan: Task #484 — Conservative-Extension & Modularity Across the Propositional-Strength × Modal-Axiom Lattice
 
 - **Task**: 484 - Conservative-extension and modularity across the full propositional-strength × modal-axiom lattice (capstone)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 11 hours
 - **Dependencies**: None (Phase 3 constructive-cube work is independent of the CS4/CS5 completeness blocker, task 501)
 - **Research Inputs**: reports/01_conservative-extension-modularity.md
@@ -79,11 +79,11 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: Establish `MKModalAxiom → MTModalAxiom → MS4ModalAxiom → MS5ModalAxiom` subsumption and the `Derivable`-level monotonicity chain, plus frame-condition inclusion lemmas, mirroring the classical `AxiomSubsumption.lean` / `Conservativity.lean` template. (Report Phase 1, minimal base.)
 
 **Tasks**:
-- [ ] Read `InterSystem/AxiomSubsumption.lean` and `InterSystem/Conservativity.lean` as the copy template; read the minimal predicates `MK.lean:68`, `MT.lean:69`, `MS4.lean:66`, `MS5.lean:76`.
-- [ ] Create `Cslib/Logics/Modal/Metalogic/InterSystem/MinimalLatticeSubsumption.lean`: `cases`-subsumption lemmas `MKModalAxiom_implies_MTModalAxiom`, `MTModalAxiom_implies_MS4ModalAxiom`, `MS4ModalAxiom_implies_MS5ModalAxiom` (each ~14-20 constructor lines).
-- [ ] Create `Cslib/Logics/Modal/Metalogic/InterSystem/MinimalLatticeMonotonicity.lean`: `Derivable`-level corollaries `mkDerivable_implies_mtDerivable := Derivable_mono …`, etc.; plus frame-condition inclusion lemmas `ms4FC m → mtFC m`, `ms5FC m → ms4FC m` (`fun h => h.1`-style projections). Naming uses `_mono` / `_implies_`, NOT "conservative".
-- [ ] Re-read `Cslib.lean`, then append `public import` lines for both new modules (place near the existing InterSystem imports at lines 365-368).
-- [ ] Run CI (see Testing & Validation); commit green: `task 484 phase 1: minimal-base modal-cube monotonicity`.
+- [x] Read `InterSystem/AxiomSubsumption.lean` and `InterSystem/Conservativity.lean` as the copy template; read the minimal predicates `MK.lean:68`, `MT.lean:69`, `MS4.lean:66`, `MS5.lean:76`.
+- [x] Create `Cslib/Logics/Modal/Metalogic/InterSystem/MinimalLatticeSubsumption.lean`: `cases`-subsumption lemmas `MKModalAxiom_implies_MTModalAxiom`, `MTModalAxiom_implies_MS4ModalAxiom`, `MS4ModalAxiom_implies_MS5ModalAxiom` (each ~14-20 constructor lines).
+- [x] Create `Cslib/Logics/Modal/Metalogic/InterSystem/MinimalLatticeMonotonicity.lean`: `Derivable`-level corollaries `mkDerivable_implies_mtDerivable := Derivable_mono …`, etc.; plus frame-condition inclusion lemmas `ms4FC m → mtFC m`, `ms5FC m → ms4FC m` (`fun h => h.1`-style projections). Naming uses `_mono` / `_implies_`, NOT "conservative".
+- [x] Re-read `Cslib.lean`, then append `public import` lines for both new modules (place near the existing InterSystem imports at lines 365-368).
+- [x] Run CI (see Testing & Validation); commit green: `task 484 phase 1: minimal-base modal-cube monotonicity`.
 
 **Timing**: ~1.5 hours
 
@@ -105,11 +105,11 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: `IKModalAxiom → ITModalAxiom → IS4ModalAxiom → IS5ModalAxiom` subsumption + `Derivable`-level chain + FC inclusions. (Report Phase 1, intuitionistic base.)
 
 **Tasks**:
-- [ ] Read intuitionistic predicates `IK.lean:75`, `IT.lean:71`, `IS4.lean:72`, `IS5.lean:84`.
-- [ ] Create `InterSystem/IntuitionisticLatticeSubsumption.lean`: `IKModalAxiom_implies_ITModalAxiom`, `ITModalAxiom_implies_IS4ModalAxiom`, `IS4ModalAxiom_implies_IS5ModalAxiom`.
-- [ ] Create `InterSystem/IntuitionisticLatticeMonotonicity.lean`: `ikDerivable_implies_itDerivable`, etc., via `Derivable_mono`; FC inclusions `is4FC → itFC`, `is5FC → is4FC`.
-- [ ] Re-read `Cslib.lean`; append two `public import` lines.
-- [ ] Run CI; commit green: `task 484 phase 2: intuitionistic-base modal-cube monotonicity`.
+- [x] Read intuitionistic predicates `IK.lean:75`, `IT.lean:71`, `IS4.lean:72`, `IS5.lean:84`.
+- [x] Create `InterSystem/IntuitionisticLatticeSubsumption.lean`: `IKModalAxiom_implies_ITModalAxiom`, `ITModalAxiom_implies_IS4ModalAxiom`, `IS4ModalAxiom_implies_IS5ModalAxiom`.
+- [x] Create `InterSystem/IntuitionisticLatticeMonotonicity.lean`: `ikDerivable_implies_itDerivable`, etc., via `Derivable_mono`; FC inclusions `is4FC → itFC`, `is5FC → is4FC`.
+- [x] Re-read `Cslib.lean`; append two `public import` lines.
+- [x] Run CI; commit green: `task 484 phase 2: intuitionistic-base modal-cube monotonicity`.
 
 **Timing**: ~1.5 hours
 
@@ -130,11 +130,11 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: `CKModalAxiom → CTModalAxiom → CS4ModalAxiom → CS5ModalAxiom` subsumption + `Derivable`-level chain + FC inclusions. Explicitly independent of the CS4/CS5 completeness blocker (task 501) — monotonicity is purely syntactic. (Report Phase 1, constructive base.)
 
 **Tasks**:
-- [ ] Read constructive predicates `CK.lean:104`, `CT.lean:61`, `CS4.lean:68`, `CS5.lean:69`.
-- [ ] Create `InterSystem/ConstructiveLatticeSubsumption.lean`: `CKModalAxiom_implies_CTModalAxiom`, `CTModalAxiom_implies_CS4ModalAxiom`, `CS4ModalAxiom_implies_CS5ModalAxiom`.
-- [ ] Create `InterSystem/ConstructiveLatticeMonotonicity.lean`: `ckDerivable_implies_ctDerivable`, etc., via `Derivable_mono`; FC inclusions `cs4FC → ctFC`, `cs5FC → cs4FC`. Module docstring: note the CS4/CS5 completeness blocker does NOT obstruct these syntactic lemmas.
-- [ ] Re-read `Cslib.lean`; append two `public import` lines.
-- [ ] Run CI; commit green: `task 484 phase 3: constructive-base modal-cube monotonicity`.
+- [x] Read constructive predicates `CK.lean:104`, `CT.lean:61`, `CS4.lean:68`, `CS5.lean:69`.
+- [x] Create `InterSystem/ConstructiveLatticeSubsumption.lean`: `CKModalAxiom_implies_CTModalAxiom`, `CTModalAxiom_implies_CS4ModalAxiom`, `CS4ModalAxiom_implies_CS5ModalAxiom`.
+- [x] Create `InterSystem/ConstructiveLatticeMonotonicity.lean`: `ckDerivable_implies_ctDerivable`, etc., via `Derivable_mono`; FC inclusions `cs4FC → ctFC`, `cs5FC → cs4FC`. Module docstring: note the CS4/CS5 completeness blocker does NOT obstruct these syntactic lemmas.
+- [x] Re-read `Cslib.lean`; append two `public import` lines.
+- [x] Run CI; commit green: `task 484 phase 3: constructive-base modal-cube monotonicity`.
 
 **Timing**: ~1.5 hours
 
@@ -155,11 +155,11 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: Monotonicity into the intuitionistic base from the minimal and constructive bases: `MKModalAxiom → IKModalAxiom`, `CKModalAxiom → IKModalAxiom`, and per-rung `{MT,CT}→IT`, `{MS4,CS4}→IS4`, `{MS5,CS5}→IS5`. Document the MK/CK incomparability. (Report Phase 2.)
 
 **Tasks**:
-- [ ] Confirm constructor-set inclusions (IK = MK + `efq` + `dbot`; IK ⊇ CK; per-rung analogues) by reading the four base predicates.
-- [ ] Create `InterSystem/PropositionalStrengthSubsumption.lean`: `MKModalAxiom_implies_IKModalAxiom`, `CKModalAxiom_implies_IKModalAxiom`, and per-rung subsumptions. Module docstring: MK and CK are **incomparable** (MK has `cd/idb` not `efq`; CK has `efq` not `cd/idb`); both embed into IK.
-- [ ] Create `InterSystem/PropositionalStrengthMonotonicity.lean`: `Derivable`-level corollaries via `Derivable_mono`. Naming uses `_mono` / `_implies_`.
-- [ ] Re-read `Cslib.lean`; append two `public import` lines.
-- [ ] Run CI; commit green: `task 484 phase 4: cross-base propositional-strength monotonicity into IK`.
+- [x] Confirm constructor-set inclusions (IK = MK + `efq` + `dbot`; IK ⊇ CK; per-rung analogues) by reading the four base predicates.
+- [x] Create `InterSystem/PropositionalStrengthSubsumption.lean`: `MKModalAxiom_implies_IKModalAxiom`, `CKModalAxiom_implies_IKModalAxiom`, and per-rung subsumptions. Module docstring: MK and CK are **incomparable** (MK has `cd/idb` not `efq`; CK has `efq` not `cd/idb`); both embed into IK.
+- [x] Create `InterSystem/PropositionalStrengthMonotonicity.lean`: `Derivable`-level corollaries via `Derivable_mono`. Naming uses `_mono` / `_implies_`.
+- [x] Re-read `Cslib.lean`; append two `public import` lines.
+- [x] Run CI; commit green: `task 484 phase 4: cross-base propositional-strength monotonicity into IK`.
 
 **Timing**: ~1.5 hours
 
@@ -180,12 +180,12 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: The green, valuable capstone. A single `InterSystem/Modularity.lean` module that re-exports the Phase 1-4 monotonicity results, reuses the existing Axis-C `modal_conservative_extension`, and documents the three-axis framing precisely. This lands and commits green BEFORE the risky bridge, so a bridge block still leaves a complete monotone lattice + modularity synthesis. (Report Phase 4.)
 
 **Tasks**:
-- [ ] Read `Metalogic/ConservativeExtension.lean:54` (`modal_conservative_extension`) to confirm the reuse surface for Axis C.
-- [ ] Create `Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean`. Docstring = the lattice map: three axes with their distinct Lean shapes — (A) modal-axiom lattice: **monotonicity** only (converse false, T proves `□φ→φ`); (B) propositional strength: **monotonicity** only into IK (converse false, classical proves Peirce; genuine converses exist only at PL level via Glivenko/bot-free, out of scope here); (C) modal-over-propositional: genuine **conservativity**, reused verbatim from `modal_conservative_extension`.
-- [ ] Re-export / restate the Phase 1-4 monotonicity theorems as the consolidated lattice statement; reference the reused Axis-C conservativity. Do NOT re-prove anything.
+- [x] Read `Metalogic/ConservativeExtension.lean:54` (`modal_conservative_extension`) to confirm the reuse surface for Axis C.
+- [x] Create `Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean`. Docstring = the lattice map: three axes with their distinct Lean shapes — (A) modal-axiom lattice: **monotonicity** only (converse false, T proves `□φ→φ`); (B) propositional strength: **monotonicity** only into IK (converse false, classical proves Peirce; genuine converses exist only at PL level via Glivenko/bot-free, out of scope here); (C) modal-over-propositional: genuine **conservativity**, reused verbatim from `modal_conservative_extension`.
+- [x] Re-export / restate the Phase 1-4 monotonicity theorems as the consolidated lattice statement; reference the reused Axis-C conservativity. Do NOT re-prove anything.
 - [ ] (Optional, gate as time permits) instantiate the existing `conservative_over_cpl` bridge (`ConservativityLift.lean:108`) at IPL/MPL completeness for modal-over-IPL / modal-over-MPL conservativity; if it does not close cleanly, omit — do NOT `sorry`. *(deviation: skipped -- optional per plan; the mandatory capstone (docstring + monotonicity re-export + Axis-C K reuse) is complete and green; the IPL/MPL bridge is left as clean future work, not required for this task's definition of done)*
-- [ ] Re-read `Cslib.lean`; append `public import` line.
-- [ ] Run CI; commit green: `task 484 phase 5: capstone modularity synthesis (monotonicity + Axis-C conservativity)`.
+- [x] Re-read `Cslib.lean`; append `public import` line.
+- [x] Run CI; commit green: `task 484 phase 5: capstone modularity synthesis (monotonicity + Axis-C conservativity)`.
 
 **Timing**: ~1 hour
 
@@ -205,12 +205,12 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 **Goal**: Begin the IK→K bridge (report Phase 3, part 1). Add the new generalized lift `Derivable_of_axiom_derivable` (axiom → *derivation*, which does not exist anywhere), then classically derive the box-form and the tractable diamond-form Fischer-Servi schemata. HARD / Zero-Debt-gated. Placed after the green capstone. (Report Phase 3, Step 3a + easy part of 3b.)
 
 **Tasks**:
-- [ ] Read `InterSystem/Lifting.lean` (the `liftDerivation` structural-recursion template) and `ProofSystem/Instances/K.lean` (existing `HasAxiomK`, `Necessitation`, `HasAxiomDiaDualityFwd/Back` instances + modal combinators).
-- [ ] Re-read `InterSystem/Lifting.lean`; add `Derivable_of_axiom_derivable : (∀ φ, A₁ φ → Derivable A₂ φ) → Derivable A₁ φ → Derivable A₂ φ` by structural recursion on `DerivationTree`: discharge `ax` via the supplied derivation; recurse through `modus_ponens`/`necessitation`/`weakening`/`assumption` using closure of `Derivable A₂` under those rules. (~15 lines, low risk.)
+- [x] Read `InterSystem/Lifting.lean` (the `liftDerivation` structural-recursion template) and `ProofSystem/Instances/K.lean` (existing `HasAxiomK`, `Necessitation`, `HasAxiomDiaDualityFwd/Back` instances + modal combinators).
+- [x] Re-read `InterSystem/Lifting.lean`; add `Derivable_of_axiom_derivable : (∀ φ, A₁ φ → Derivable A₂ φ) → Derivable A₁ φ → Derivable A₂ φ` by structural recursion on `DerivationTree`: discharge `ax` via the supplied derivation; recurse through `modus_ponens`/`necessitation`/`weakening`/`assumption` using closure of `Derivable A₂` under those rules. (~15 lines, low risk.)
 - [x] Create `Cslib/Logics/Modal/Metalogic/InterSystem/IntToClassical.lean`. Prove `Derivable KAxiom` of the direct/tractable IK schemata: box-forms (`tBox/fourBox/bBox` are `modalT/modalFour/modalB` — direct); `kdia` (`□(φ→ψ)→(◇φ→◇ψ)`) under dual `◇=¬□¬`; `dbot` (`◇⊥→⊥`); and the propositional schemata (`efq`, and `peirce`=DNE which is a `KAxiom` constructor). Leave `cd` and `idb` for Phase 7 (stub the assembly, do not close it yet). *(deviation: altered -- `tBox`/`fourBox`/`bBox` are T/S4/S5 constructors, not `IKModalAxiom` constructors (IK has no `tBox` etc.); they belong to Phase 7's rung bridges (`IT→T`/`IS4→S4`/`IS5→S5`), not this module. `peirce` is not an `IKModalAxiom` constructor either (IK has `efq`, not `peirce`) so no derivation of it was needed here. All 12 of `IK`'s non-`cd`/`idb` constructors (`implyK`, `implyS`, `efq`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`, `k`, `kdia`, `dbot`) are proved `Derivable KAxiom` sorry-free; `kdia` and `dbot` required genuine multi-step derivations (via `k_dist_diamond`/`flip`/`b_combinator`/`imp_trans` and `identity`/`app1`/necessitation respectively), the rest are literal `KAxiom` instances)*
-- [ ] **ZERO-DEBT STOP CLAUSE (mandatory)**: if any per-axiom classical derivation cannot be closed sorry-free after genuine effort, record the exact goal state reached and the specific missing combinator in the module docstring, mark that schema `[BLOCKED]`, and escalate. NEVER `sorry`, NEVER add an axiom, NEVER use a vacuous `def X := True` placeholder. A blocked schema does not block Phase 5's green capstone (already committed).
-- [ ] Re-read `Cslib.lean`; append `public import` line for `IntToClassical` (and no new import needed for the in-place `Lifting.lean` addition).
-- [ ] Run CI; commit green (only the closed derivations + the lift): `task 484 phase 6: generalized axiom→derivation lift + IK→K box/kdia/dbot derivations`.
+- [x] **ZERO-DEBT STOP CLAUSE (mandatory)**: if any per-axiom classical derivation cannot be closed sorry-free after genuine effort, record the exact goal state reached and the specific missing combinator in the module docstring, mark that schema `[BLOCKED]`, and escalate. NEVER `sorry`, NEVER add an axiom, NEVER use a vacuous `def X := True` placeholder. A blocked schema does not block Phase 5's green capstone (already committed).
+- [x] Re-read `Cslib.lean`; append `public import` line for `IntToClassical` (and no new import needed for the in-place `Lifting.lean` addition).
+- [x] Run CI; commit green (only the closed derivations + the lift): `task 484 phase 6: generalized axiom→derivation lift + IK→K box/kdia/dbot derivations`.
 
 **Timing**: ~2 hours
 
@@ -226,17 +226,17 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 
 ---
 
-### Phase 7: IK→K completion (cd, idb) + classical rung bridges [IN PROGRESS]
+### Phase 7: IK→K completion (cd, idb) + classical rung bridges [COMPLETED]
 
 **Goal**: Complete the IK→K bridge (report Phase 3, part 2): the two fiddly Fischer-Servi schemata `cd` (`◇(φ∨ψ)→(◇φ∨◇ψ)`) and `idb` (`(◇φ→□ψ)→□(φ→ψ)`) as classical K derivations; assemble `∀ φ, IKModalAxiom φ → Derivable KAxiom φ`; conclude `Derivable IKModalAxiom φ → Derivable KAxiom φ` via the Phase 6 lift. Then the rung diamond schemata (`tDia`, `fourDia`, `bDia`) for classical T/S4/S5, yielding IT→T, IS4→S4, IS5→S5. HARD / Zero-Debt-gated; the heaviest phase — if it cannot complete in one dispatch, mark `[PARTIAL]` and resume. (Report Phase 3, remainder of 3b.)
 
 **Tasks**:
-- [ ] Re-read `InterSystem/IntToClassical.lean` (Phase 6 output) before editing.
-- [ ] Derive `cd` classically in K (dual `◇`): the fiddliest; budget a full dispatch. Then `idb` classically in K.
-- [ ] Assemble the total map `∀ φ, IKModalAxiom φ → Derivable KAxiom φ` from all per-axiom derivations (Phase 6 + Phase 7); conclude `ikDerivable_implies_kDerivable := Derivable_of_axiom_derivable …`. Naming reflects that this is the honest Int⟶Classical bridge (adding DNE/`peirce` collapses primitive-`◇` Fischer-Servi to dual-`◇` classical).
-- [ ] Derive rung diamond schemata `tDia (A→◇A)`, `fourDia (◇◇A→◇A)`, `bDia (◇□A→A)` in classical T/S4/S5; assemble `itDerivable_implies_tDerivable`, `is4Derivable_implies_s4Derivable`, `is5Derivable_implies_s5Derivable`.
-- [ ] **ZERO-DEBT STOP CLAUSE (mandatory)**: same as Phase 6 — any schema that resists sorry-free closure after genuine effort is recorded (exact goal state + missing combinator) and marked `[BLOCKED]`; NEVER `sorry`/axiom/vacuous placeholder. A blocked `cd`/`idb`/rung schema leaves the Phase 1-5 green capstone intact; commit whatever closed sorry-free.
-- [ ] Run CI; commit green: `task 484 phase 7: IK→K bridge (cd, idb) + classical rung bridges IT→T/IS4→S4/IS5→S5`.
+- [x] Re-read `InterSystem/IntToClassical.lean` (Phase 6 output) before editing.
+- [x] Derive `cd` classically in K (dual `◇`): the fiddliest; budget a full dispatch. Then `idb` classically in K.
+- [x] Assemble the total map `∀ φ, IKModalAxiom φ → Derivable KAxiom φ` from all per-axiom derivations (Phase 6 + Phase 7); conclude `ikDerivable_implies_kDerivable := Derivable_of_axiom_derivable …`. Naming reflects that this is the honest Int⟶Classical bridge (adding DNE/`peirce` collapses primitive-`◇` Fischer-Servi to dual-`◇` classical).
+- [x] Derive rung diamond schemata `tDia (A→◇A)`, `fourDia (◇◇A→◇A)`, `bDia (◇□A→A)` in classical T/S4/S5; assemble `itDerivable_implies_tDerivable`, `is4Derivable_implies_s4Derivable`, `is5Derivable_implies_s5Derivable`.
+- [x] **ZERO-DEBT STOP CLAUSE (mandatory)**: same as Phase 6 — any schema that resists sorry-free closure after genuine effort is recorded (exact goal state + missing combinator) and marked `[BLOCKED]`; NEVER `sorry`/axiom/vacuous placeholder. A blocked `cd`/`idb`/rung schema leaves the Phase 1-5 green capstone intact; commit whatever closed sorry-free.
+- [x] Run CI; commit green: `task 484 phase 7: IK→K bridge (cd, idb) + classical rung bridges IT→T/IS4→S4/IS5→S5`.
 
 **Timing**: ~2 hours (may exceed one dispatch; use `[PARTIAL]` + resume)
 
@@ -255,13 +255,13 @@ Phases within the same wave can execute in parallel (disjoint deliverable `.lean
 ## Testing & Validation
 
 Run the CSLib CI pipeline after each phase (per-phase green gate):
-- [ ] `lake build` (targeted module build, then full build before commit)
-- [ ] `lake test` — CslibTests suite
-- [ ] `lake exe checkInitImports` — verify Cslib.Init imports
-- [ ] `lake exe lint-style` — style linting
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` — dependency analysis (subsumption/monotonicity split keeps this clean)
-- [ ] Zero-debt audit: `grep` the new files for `sorry`, `admit`, `axiom`, and vacuous `:= True` placeholders — must be empty (except documented `[BLOCKED]` records that contain NO proof stub).
-- [ ] Naming audit: Axes A/B lemmas end in `_mono` / `_implies_`; "conservative" appears only where reusing Axis-C results.
+- [x] `lake build` (targeted module build, then full build before commit)
+- [x] `lake test` — CslibTests suite
+- [x] `lake exe checkInitImports` — verify Cslib.Init imports
+- [x] `lake exe lint-style` — style linting
+- [x] `lake shake --add-public --keep-implied --keep-prefix` — dependency analysis (subsumption/monotonicity split keeps this clean)
+- [x] Zero-debt audit: `grep` the new files for `sorry`, `admit`, `axiom`, and vacuous `:= True` placeholders — must be empty (except documented `[BLOCKED]` records that contain NO proof stub).
+- [x] Naming audit: Axes A/B lemmas end in `_mono` / `_implies_`; "conservative" appears only where reusing Axis-C results.
 
 ## Artifacts & Outputs
 

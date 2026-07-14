@@ -6,11 +6,8 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeMonotonicity
-public import Cslib.Logics.Modal.Metalogic.InterSystem.ConstructiveLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthMonotonicity
-public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
 
 /-! # Capstone: Modularity Across the Propositional-Strength × Modal-Axiom Lattice

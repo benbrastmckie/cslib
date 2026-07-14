@@ -256,7 +256,7 @@ analogue compiles.)
 
 ---
 
-### Phase 4: MS5.lean (equivalence via B — the crux) [NOT STARTED]
+### Phase 4: MS5.lean (equivalence via B — the crux) [COMPLETED]
 
 **Goal**: Deliver MS5 — MS4 + symmetry (B axiom, **not** euclidean-5), yielding an equivalence
 relation (Simpson's S5 birelational frame class).

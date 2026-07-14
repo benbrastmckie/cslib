@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
+import Mathlib.Tactic.Ring
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.FrameRules
 
@@ -848,6 +849,103 @@ Confirmed interactively:
 - `□p → □□p` (the 4 schema) evaluates to `.closed`: S4 is transitive -- this is the
   component that distinguishes S4 from T, and the entire reason this task's 4-rule exists.
 - A bare atom `p` evaluates to `.openBranch _ _`: S4 does not prove arbitrary atoms. -/
+
+/-! ## S4 World Bound (Decision D2)
+
+`modalWorldBound`/`modalUniverse` (`FmpMeasure.lean`) are `(2*complexity+1)^(complexity+1)`,
+a branching^depth *tree* bound: S4's world graph is not a bounded-depth tree (loop-back
+edges make it a general DAG-with-cycles-collapsed), so this bound does not transfer.
+`modalWorldBoundS4`/`modalUniverseS4` replace it with the pigeonhole bound
+`2 ^ |modalSubfmls φ₀|` -- the number of possible relevant-formula sets. `modalWork`/
+`modalExpMeasure` (`FmpMeasure.lean`) are reused **verbatim**: they take the universe `U` as
+an explicit parameter and are rule/world-agnostic. `geomCap`/`modalPotential`/
+`modalPotentialTerm` do **not** transfer -- they are the geometric tree-capacity argument
+specific to `modalWorldBound`. -/
+
+/-- The S4 world bound: `2 ^ |modalSubfmls φ₀|`, the number of possible relevant-formula
+sets (Decision D2). Replaces `modalWorldBound`'s branching^depth tree bound, which does not
+apply to S4's (possibly cyclic) world graph. -/
+def modalWorldBoundS4 (φ₀ : Proposition Atom) : Nat :=
+  2 ^ (modalSubfmls φ₀).length
+
+/-- The fixed finite signed-formula universe `U_{S4}(φ₀)`: both signs, every subformula of
+`φ₀`, at every world label `0 .. modalWorldBoundS4 φ₀`. Mirrors `modalUniverse`
+(`FmpMeasure.lean`) with `modalWorldBoundS4` swapped in for `modalWorldBound`. -/
+def modalUniverseS4 (φ₀ : Proposition Atom) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (List.range (modalWorldBoundS4 φ₀ + 1)).flatMap (fun w =>
+    (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
+
+/-- The S4 universe has length at most
+`2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)`. Mirrors
+`modalUniverse_length_le` (`FmpMeasure.lean`; that lemma carries the identical
+`unusedDecidableInType` lint warning, unaddressed there too -- `DecidableEq Atom` is needed
+by `SignedFormula`'s ambient instances even though the proof term itself never names it). -/
+lemma modalUniverseS4_length_le (φ₀ : Proposition Atom) :
+    (modalUniverseS4 φ₀).length ≤
+      2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by
+  have hinner : ∀ w : WorldIndex,
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length
+        ≤ 2 * (2 * modalComplexity φ₀ + 1) := by
+    intro w
+    rw [List.length_flatMap]
+    have hb : (List.map (fun ψ =>
+        ([(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), ⟨.neg, ψ, w⟩]).length)
+        (modalSubfmls φ₀)).sum ≤ (modalSubfmls φ₀).length * 2 :=
+      sum_map_le_length_mul (modalSubfmls φ₀) _ 2 (fun ψ _ => by simp)
+    have hlen := modalSubfmls_length_le φ₀
+    omega
+  unfold modalUniverseS4
+  rw [List.length_flatMap]
+  have houter : (List.map (fun w =>
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
+      ≤ (List.range (modalWorldBoundS4 φ₀ + 1)).length * (2 * (2 * modalComplexity φ₀ + 1)) :=
+    sum_map_le_length_mul (List.range (modalWorldBoundS4 φ₀ + 1)) _
+      (2 * (2 * modalComplexity φ₀ + 1)) (fun w _ => hinner w)
+  rw [List.length_range] at houter
+  calc (List.map (fun w =>
+        ((modalSubfmls φ₀).flatMap
+          (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                      ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
+      ≤ (modalWorldBoundS4 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
+    _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
+
+/-! ## The S4 Loop Invariant `S4LoopInv` -/
+
+/-- **Correction 1**: `S4LoopInv` is a **sibling** of `ModalPotentialInv` (`FmpMeasure.lean`),
+not an extension of it. `ModalPotentialInv` holds two rank fields (`rankBound`/`rankEdge`)
+encoding "modal depth strictly decreases along every edge", which the 4-rule (placing
+`T(□ψ)`, unchanged modal depth, at a successor) and loop-back edges (creating `w → w''`
+with `rank w'' + 2 = rank w`) both falsify. `S4LoopInv` reuses the six rule-independent
+fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`, over
+`modalUniverseS4` in place of `modalUniverse`), omits the two rank fields entirely, and adds
+`worldSetsDistinct` -- the equality-blocking invariant the minting guard is designed to
+maintain. `FmpMeasure.lean` is not modified by this plan. -/
+structure S4LoopInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop where
+  /-- Every branch formula is a member of the fixed finite S4 universe `U_{S4}(φ₀)`. -/
+  bClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀
+  /-- The expanded set has no duplicate entries. -/
+  eNodup : e.Nodup
+  /-- Every expanded-set formula is a member of `U_{S4}(φ₀)`. -/
+  eClosure : ∀ x ∈ e, x ∈ modalUniverseS4 φ₀
+  /-- All of `acc`'s recorded worlds are `< modalNextWorld b`. -/
+  accFresh : accFreshInv b acc
+  /-- Every `acc`-edge target is a label already appearing on the branch. -/
+  accKnown : accTargetsKnown b acc
+  /-- `outDeg` exactly counts the minting-shaped formulas in `e` at each world. -/
+  outDegEq : ∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length
+  /-- **The loop invariant the minting guard enforces**: every two *distinct* known worlds
+  have *distinct* relevant formula sets. This is exactly what makes the guard's blocking
+  search well-founded (a fresh world's relevant set cannot coincide with any existing
+  world's, by construction) and is the hypothesis the pigeonhole argument
+  (`modalKnownWorlds_length_le_worldBoundS4`, if closed) consumes. -/
+  worldSetsDistinct : ∀ w w', w ∈ modalKnownWorlds b → w' ∈ modalKnownWorlds b → w ≠ w' →
+    sameRelevantSet φ₀ b w w' = false
 
 end Cslib.Logic.Modal.Tableau
 

@@ -545,20 +545,21 @@ this repo. Message: `task 506 phase {P}: {name}`.
 
 ---
 
-### Phase 8: S4 termination bound `#worlds <= 2^|Sf|` — HIGH RISK [NOT STARTED]
+### Phase 8: S4 termination bound `#worlds <= 2^|Sf|` — HIGH RISK [BLOCKED]
 
 - **Goal**: Prove the equality-blocking loop invariant and the `2^|modalSubfmls phi0|`
   world bound. **This is the crux and the acknowledged blocker candidate.**
 - **Tasks**:
-  - [ ] `modalWorldBoundS4 phi := 2 ^ (modalSubfmls phi).length` (Decision D2). Do **not**
+  - [x] `modalWorldBoundS4 phi := 2 ^ (modalSubfmls phi).length` (Decision D2). Do **not**
         reuse `modalWorldBound` — it is `(2*complexity+1)^(complexity+1)`, a
         branching^depth *tree* bound, and S4's world graph is not a bounded-depth tree.
-  - [ ] `modalUniverseS4 phi` — mirror `modalUniverse` (FmpMeasure.lean:149) with
+  - [x] `modalUniverseS4 phi` — mirror `modalUniverse` (FmpMeasure.lean:149) with
         `modalWorldBoundS4` swapped in. Prove `modalUniverseS4_length_le`, mirroring
         `modalUniverse_length_le` (:155).
-  - [ ] Reuse `modalWork`/`modalExpMeasure` **verbatim** — they take `U` as a parameter and
-        are rule- and world-agnostic. Do not redefine them.
-  - [ ] `S4LoopInv phi0 b e acc : Prop` — a **sibling** of `ModalPotentialInv`, not an
+  - [x] Reuse `modalWork`/`modalExpMeasure` **verbatim** — they take `U` as a parameter and
+        are rule- and world-agnostic. Do not redefine them. *(no new references needed
+        yet -- consumed by the world-bound/pigeonhole steps below, which are blocked.)*
+  - [x] `S4LoopInv phi0 b e acc : Prop` — a **sibling** of `ModalPotentialInv`, not an
         extension of it (Correction 1). Fields: the six rule-independent ones
         (`bClosure` over `modalUniverseS4`, `eNodup`, `eClosure`, `accFresh`, `accKnown`,
         `outDegEq`), **omitting** `rankBound`/`rankEdge`, plus:
@@ -566,30 +567,90 @@ this repo. Message: `task 506 phase {P}: {name}`.
           sameRelevantSet phi0 b w w' = false` — **the** loop invariant the guard enforces.
         Follow the `ModalLoopInv`-wraps-`ModalPotentialInv` precedent (CompletenessLoop:57)
         for structure/docstring style, but hold no `ModalPotentialInv` field.
-  - [ ] Prove `worldSetsDistinct` is preserved by `modalStepBranchS4` — the guard mints only
-        when no equal-set world exists, so a fresh world's set differs from every existing
-        one; and a loop-back edge adds no world. Consume Phase 5's guard spec lemmas.
-        **Anticipated hard sub-goal**: a *persistent* rule firing can add a formula at an
-        existing world, changing its relevant set and potentially colliding with another
-        world's. Assess this early — it may force blocking to be re-checked after
-        persistent steps, or force the invariant to be stated over a saturation-stable
-        notion. If this cannot be resolved, it is the most likely blocker; document it
-        precisely as the goal state.
-  - [ ] Pigeonhole: `worldSetsDistinct` -> `(modalKnownWorlds b).length <= 2 ^
-        (modalSubfmls phi0).length`. Map each world to its relevant set as a
-        `Finset (Proposition Atom) x Sign`-valued key, injective by `worldSetsDistinct`,
+  - [ ] **BLOCKED**: Prove `worldSetsDistinct` is preserved by `modalStepBranchS4`. See the
+        "BLOCKER" note below -- the anticipated hard sub-goal is real and, on inspection,
+        is not the only gap; the guard's fresh-minting side also does not establish the
+        needed property. Not attempted as a sorry'd proof (prohibited); left unstated as a
+        lemma so no false claim of a closed goal exists in the file.
+  - [ ] **BLOCKED (depends on the above)**: Pigeonhole: `worldSetsDistinct` -> `(modalKnownWorlds
+        b).length <= 2 ^ (modalSubfmls phi0).length`. Map each world to its relevant set as
+        a `Finset (Proposition Atom) x Sign`-valued key, injective by `worldSetsDistinct`,
         into the powerset of `modalSubfmls phi0`. Mathlib candidates:
         `Finset.card_powerset`, `Finset.card_le_card_of_injOn`, `List.Nodup.length_le_card`.
-        Use `lean_leansearch`/`lean_loogle` to pin exact names before writing.
-  - [ ] `modalStepBranchS4_worldBound`: `modalMaxWorld b < modalWorldBoundS4 phi0` is a loop
-        invariant — the S4 replacement for `modalStepBranch_worldBound`.
-  - [ ] CI gate; commit `LoopChecking.lean` only. **FmpMeasure.lean must remain untouched.**
-- **Timing**: 4 hours (~500 lines)
+        Not started -- its hypothesis (`worldSetsDistinct` as an actual loop invariant, not
+        just a static definition) is unavailable.
+  - [ ] **BLOCKED (depends on the above)**: `modalStepBranchS4_worldBound`:
+        `modalMaxWorld b < modalWorldBoundS4 phi0` is a loop invariant. Not started.
+  - [x] CI gate; commit `LoopChecking.lean` only (the mechanical portion: `modalWorldBoundS4`,
+        `modalUniverseS4`, `modalUniverseS4_length_le`, `S4LoopInv`'s structure definition).
+        **FmpMeasure.lean remains untouched.**
+- **Timing**: 4 hours budgeted; ~1.5 hours spent (mechanical definitions + blocker analysis)
+  before invoking the standing `[BLOCKED]` permission rather than forcing a proof attempt
+  likely to require `sorry` or a silent scope reduction.
 - **Depends on**: 5, 7. (Logical dependency is only on 5; **7 is a deliberate sequencing
   gate** so all green work is committed before this high-risk phase is attempted.)
 - **Files to modify**: `Cslib/Logics/Modal/Tableau/LoopChecking.lean`.
-- **Verification**: `lake build` green; zero sorry/axiom; the `2^|Sf|` bound typechecks as
-  a loop invariant.
+- **Verification**: `lake build` green; zero sorry/axiom for everything actually landed
+  (`modalWorldBoundS4`/`modalUniverseS4`/`modalUniverseS4_length_le`/`S4LoopInv` all verified
+  via `lean_verify`, axioms = `{propext, Quot.sound}` only). The `2^|Sf|` bound itself does
+  **not** yet typecheck as a proven loop invariant -- only its target statement
+  (`S4LoopInv.worldSetsDistinct`) is defined; the preservation lemma is the open item.
+
+**BLOCKER** (Phase 8):
+- **What failed**: The task-list item "Prove `worldSetsDistinct` is preserved by
+  `modalStepBranchS4`" (the step immediately after `S4LoopInv`'s definition).
+- **What was tried**: `modalWorldBoundS4`, `modalUniverseS4` (+ `modalUniverseS4_length_le`),
+  and the `S4LoopInv` structure (with `worldSetsDistinct` as its final field) were all
+  written and verified (zero sorry/axiom, full CI green, committed). Before attempting the
+  preservation proof, the guard's actual behavior (`modalApplyOneS4`, Phase 5) and the
+  minting/blocking case split were re-examined in detail to scope the proof, following the
+  plan's explicit instruction to "assess this early."
+- **Why it's stuck**: Two independent gaps, not one:
+  1. **The plan's own anticipated gap is real**: a *persistent* rule firing (K's `boxPos`,
+     T's self-propagation, or the 4-rule's `modalFourBoxProp`/`modalFourDiaNegProp`) adds a
+     formula to an *already-known* world's relevant set. `worldSetsDistinct`, as stated, is
+     a property of the *current* branch `b`; after such a persistent step changes `b`, two
+     worlds that were distinct before the step can become identical after it (the new
+     formula lands at one world but not, coincidentally, at the other -- or vice versa).
+     Nothing in `modalApplyOneS4`'s persistent arms re-checks distinctness against the rest
+     of `modalKnownWorlds b` after appending; the guard only fires at the two *minting*
+     shapes (`F(□φ)@w`, `T(◇φ)@w`), never at persistent-rule steps.
+  2. **A second, independent gap in the minting side**: `blockingWorld` checks whether the
+     *source* world `w` (the one with the pending `F(□φ)@w`/`T(◇φ)@w` formula) already
+     matches some *other existing* known world's relevant set -- it does **not** check
+     whether the *freshly minted world's own prospective content* (the witness formula(s)
+     the underlying K rule is about to place there, e.g. `T(φ)@w''` from `diamondPos`) would
+     coincide with some existing world's relevant set. So even on the "unblocked" branch,
+     nothing rules out the fresh world `w'' = modalNextWorld b` being born with a relevant
+     set identical to some pre-existing world's, which would violate `worldSetsDistinct`
+     the instant it is created, before any further step.
+  Both gaps mean `worldSetsDistinct` is not, as currently designed, an actual per-step loop
+  invariant of `modalStepBranchS4` -- it is a *design target* the guard was built to serve,
+  but the guard's exact check (source-vs-others, at minting time only) does not establish
+  it. Closing this requires either (a) redesigning the guard to check the *prospective new
+  world's content* against all existing worlds before minting, and to re-run (or
+  re-establish) the distinctness check after every persistent step, or (b) restating the
+  invariant over a "saturation-stable" notion (e.g. only asserting distinctness once a
+  world's relevant set has stopped changing) as the plan's own text anticipated as the
+  fallback.
+- **What is needed to unblock**: A follow-on task should (i) decide between guard redesign
+  (re-check the *new* world's content, not just the source's, before minting; re-validate
+  distinctness after persistent steps) vs. a saturation-stable invariant restatement, (ii)
+  implement whichever is chosen -- this may require revisiting `modalApplyOneS4`'s
+  definition itself (Phase 5, currently green and committed; any change there needs a fresh
+  CI pass across Phases 5-7's consumers), and (iii) only then attempt the pigeonhole bound
+  and `modalStepBranchS4_worldBound`.
+- **Prohibited workarounds**: Did **not** use `sorry`, `def X := True`, or any vacuous
+  placeholder for `worldSetsDistinct`'s preservation, the pigeonhole bound, or
+  `modalStepBranchS4_worldBound`. These three items are simply absent from the file, not
+  stated-and-unproved.
+
+**Recommended follow-on task**: `s4-loop-checking-termination`, scoped to: redesigning the
+minting guard and/or `S4LoopInv` per the two gaps above, `worldSetsDistinct` preservation,
+the pigeonhole bound, and `modalStepBranchS4_worldBound`. Should re-read `modalApplyOneS4`
+(`LoopChecking.lean`, Phase 5) and this blocker note as its starting point. Phases 1-7 remain
+green and committed regardless of this phase's outcome.
+
 - **[BLOCKED] fallback (standing permission — exercise it rather than degrade)**: If the
   invariant does not close within the run, mark this phase `[BLOCKED]`. Record: which
   field of `S4LoopInv` is open, the exact goal state at the failure point, what was tried,

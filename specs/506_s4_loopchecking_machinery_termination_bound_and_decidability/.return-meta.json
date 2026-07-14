@@ -1,6 +1,8 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-14T21:37:15Z",
+  "requires_user_review": true,
+  "review_reason": "Phase 8 (S4 termination bound) is BLOCKED per the plan's standing permission. Mechanical definitions (modalWorldBoundS4, modalUniverseS4, modalUniverseS4_length_le, S4LoopInv structure) landed green with zero sorry/axiom. The worldSetsDistinct preservation lemma, the pigeonhole bound, and modalStepBranchS4_worldBound are NOT stated (not sorry'd) because closing them requires either a guard redesign or a saturation-stable invariant restatement -- see the plan file's 'BLOCKER' note under Phase 8 for full detail (two independent gaps identified: persistent-rule formula accretion at existing worlds, and the minting guard not checking the prospective new world's content against existing worlds). Phase 9 is also blocked/not-started, gated on this and (per task briefing) on task 510, which HAS now landed (9/9 phases, commit 817a5b45) during this run -- Phase 9's 510-dependency may therefore be re-assessable in a follow-on, but it still needs Phase 8's bound first.",
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/FrameRules.lean",
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
@@ -8,12 +10,23 @@
     "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "Cslib.lean"
   ],
+  "blockers": [
+    {
+      "phase": 8,
+      "name": "S4LoopInv.worldSetsDistinct preservation under modalStepBranchS4",
+      "description": "worldSetsDistinct is not, as currently designed, an actual per-step loop invariant: (1) persistent rule firings (K boxPos, T self-prop, 4-rule box-itself propagation) add formulas to existing worlds' relevant sets without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world's uniqueness against existing worlds, not the freshly-minted world's prospective content, so a new world can be born already coinciding with an existing one. Full detail in plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note.",
+      "recommended_followon_task": "s4-loop-checking-termination"
+    }
+  ],
+  "sorry_inventory": [],
   "partial_progress": {
-    "stage": "phases_1_7_complete",
-    "details": "Phases 1-7 (the mandatory, guaranteed-landable work per the plan's Definition of Done) are all complete, green, and committed. This is the landing milestone: 4-rule, LoopChecking machinery, extractModelS4 + free frame instances, S4 frame vocabulary + 4-rule semantic soundness, minting guard + modalApplyOneS4 + driver + modalHintikkaSetS4, S4 Hintikka bridges + ReflTransGen path bridge, modalTruthLemmaS4 + open-branch countermodel. Zero sorry/axiom throughout (propext/Classical.choice/Quot.sound only). Now attempting Phase 8 (HIGH RISK, standing [BLOCKED] permission): the 2^|Sf| termination bound (S4LoopInv, worldSetsDistinct preservation, pigeonhole).",
+    "stage": "phase_8_blocked_documenting",
+    "details": "Phases 1-7 complete, green, committed (the plan's mandatory Definition of Done). Phase 8 landed its mechanical portion (modalWorldBoundS4, modalUniverseS4, modalUniverseS4_length_le, S4LoopInv structure) then hit a genuine, well-documented blocker per standing permission -- not sorry'd, simply the three remaining lemmas (worldSetsDistinct preservation, pigeonhole bound, modalStepBranchS4_worldBound) are absent from the file. Phase 9 (gated on Phase 8 and task 510) is NOT STARTED -- task 510 completed during this run (commit 817a5b45) but Phase 8's bound is still required first.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 7,
+    "phases_partial": [8],
+    "phases_not_started": [9],
     "last_completed_phase": "Phase 7: modalTruthLemmaS4 and open-branch countermodel"
   },
   "metadata": {

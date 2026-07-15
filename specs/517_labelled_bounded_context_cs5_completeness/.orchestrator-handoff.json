@@ -1,34 +1,55 @@
 {
-  "status": "blocked",
-  "outcome": "gate_fail",
-  "next_action_hint": "escalate",
-  "summary": "Phase 3 adequacy gate FINAL verdict: GATE FAIL after 3 bounded dispatches (dispatch 3 explicitly user-authorized beyond the plan's 2-dispatch cap; no dispatch 4 will be opened). Lemma 6.2.2 (hard direction) remains complete/sorry-free/axiom-clean (reused unchanged). Lemma 6.1.2/6.2.3 (tree internalization) is NOT closed. Dispatch 3 wrote no new Lean code -- it re-derived the tree-telescope formula directly against the source PDF (Figure 6-1/6-2, the worked example) and found two further genuine corrections beyond dispatch 2's scaffold: (1) Simpson's T^i (i<m) must EXCLUDE the path-continuation child (a 'pruned' subtree), whereas the scaffold's LTree.pathTo returns the full unpruned subtree -- confirmed wrong by direct recomputation of the worked example; (2) the scaffold's Star_append lemma does not correspond to what boxI/diaI/diaE actually need from LTree.addChild/pathToList (an unproven commutation lemma). Dispatch 3 also resolved (clarified, not mechanized) dispatch 2's diaE z-scoping concern: threading an explicit companion LTree witness through the induction guarantees x and z are always nodes of one tree with a well-defined LCA, exactly what Simpson's Figure 6-2 argument assumes -- this raises confidence the theorem is TRUE, but the remaining mechanization is larger than previously estimated (revised: 2-3 further dispatches, not 1-2). Phase 9 (assembly of cs5_completeness) is confirmed unreachable without this bridge. Task returns to [BLOCKED]. Phases 1, 2, 4 remain landed, sorry-free, axiom-clean, CI-green; Phases 5-8 were not attempted (out of this gate's scope) and remain independently dispatchable in a future task regardless of Phase 3's fate.",
-  "phases_completed": 3,
-  "phases_total": 9,
-  "sorry_inventory": {
-    "count": 0,
-    "locations": [],
-    "note": "Zero sorry, zero new axiom under Cslib/. Nothing was landed or modified under Cslib/ this dispatch. probes/lemma612-scaffold.lean and probes/adequacy-gate-probe.lean remain sorry-free and axiom-clean (unchanged from dispatch 2/1 respectively)."
-  },
-  "axioms_clean": true,
-  "blockers": [
-    "Phase 3 gate: Lemma 6.1.2/6.2.3 (tree internalization) unmechanized after 3 dispatches. Root cause chain: (a) T^i telescope levels must be pruned subtrees (exclude path-continuation child) for i<m -- scaffold's LTree.pathTo does not do this; (b) Star_append does not model the addChild/pathToList relationship boxI/diaI/diaE need; (c) diaE's LCA-based dissection (Figure 6-2) is conceptually resolved but not mechanized. See specs/517_.../handoffs/lemma612-final-blocker-dispatch3.md for the full diagnosis and an updated 8-step recipe for any future attempt.",
-    "Phase 9 (cs5_completeness assembly) is unreachable without Phase 3."
-  ],
-  "continuation_context": {
-    "note": "Per the plan's Rollback/Contingency section: Phases 5-8 (Prime Lemma, canonical model, birelation construction, frame-class match) are NOT blocked by Phase 3's failure -- they depend only on Phase 4 (Context.lean), already landed -- and remain independently valuable/dispatchable in a future task if ever authorized, landing a genuine labelled-framework completeness result even without the Hilbert bridge. Phase 9 and the overall cs5_completeness target are unreachable. Waves 4-8 (Phases 5,6,7,8) are cleared for a future task if the user wants the semantic-spine value without the adequacy bridge; Phase 9 stays permanently blocked pending a future Phase-3 resolution.",
-    "clears_waves": [4, 5, 6, 7, 8],
-    "clears_phase_target": "cs5_completeness (Phase 9) remains BLOCKED -- not cleared"
-  },
+  "status": "researched",
+  "task_number": 517,
+  "session_id": "sess_1784127828_1f2b2f",
+  "summary": "Research dispatch after 3 failed adequacy-gate attempts. Consulted two literatures against PRIMARY SOURCES (Simpson 1994 PDF pp.51-59 + pp.100-109; Marin-Morales-Strassburger 2021 full paper; Pacheco 2024 corpus chunks). FOUR findings, in order of value. (1) CHEAPER-ROUTE VERDICT: the semantic detour AS FRAMED is CIRCULAR (labelled=>Hilbert IS the goal; Marin et al. confirm by construction -- their Thm 3.3 leg 4=>1 is IMPORTED from [Ser84,PS86], not proved). BUT the adequacy bridge is almost certainly NOT NEEDED AT ALL: Simpson proves IS5 completeness in CHAPTER 3 (Theorem 3.3.4, p.56, verbatim) by canonical model, citing Fischer Servi; Chapter 6 (Thm 6.2.1, p.107, verbatim) answers a DIFFERENT question -- is IK+Ax(T) a complete axiomatization of the LABELLED system's theorems. The plan routed cs5_completeness through Ch.6 unnecessarily. (2) NEW DEFECT (5th correction in 4 dispatches, source-verified): IKAx is NOT IK. Simpson Figure 3-6 (p.52, verbatim) gives IK = IPL + nec + axioms 1-5; IKAx (probes/lemma612-scaffold.lean:78-109) has ONLY axioms 1 (kBox) and 2 (kDia) -- missing axiom 3 (not-dia-bot), axiom 4 (dia(AvB) => diaA v diaB), axiom 5 ((diaA => boxB) => box(A=>B)). Simpson's Lemma 6.1.2 (boxE) case p.102 and formula (6.8) p.104 EXPLICITLY require axiom 5, so Lemma 6.1.2 was NEVER provable against this scaffold, independent of every tree defect found so far. Corroborated independently by Pacheco chunk_0003 (IK = CK + FS + DP + N). This defect sits inside the file dispatch 1 called COMPLETE and dispatch 3 called fully reusable. Repair is cheap and non-breaking. (3) The (diaE) case is NOT the crux and never was -- fully reconstructed from (6.4)-(6.8) pp.104-105 in ~3 Hilbert steps; Figure 6-2 is NOT new machinery (it is Figure 6-1 applied to subtree T^i at target y_j); the pruned/full relation is ONE near-trivial unfolding identity verified 3x in the source, which DISSOLVES D3's Star_append gap (delete it, do not fix it). True crux is the pathSpine/addChild commutation. (4) UNIFYING EXPLANATION for task 512: Simpson's canonical model proves frame condition (F2) 'by axiom 5 of IK' (p.53) = FS -- the exact axiom CS5 lacks. Both 512 and 517 have been attacking logics missing FS. Pacheco (Conclusion, chunk_0016, verbatim) proves CKB=IKB and states 'constructive and intuitionistic variations of DB, TB, KB5, and S5 coincide'. Also verified by web search: NO mechanization of Simpson's N_IK, of labIK-leq, or of any labelled<->Hilbert adequacy for intuitionistic modal logic exists anywhere; the one Lean labelled<->label-free adequacy (FormalizedFormalLogic/ProvabilityLogic, classical GL) could NOT do labelled=>label-free syntactically and fell back to semantics.",
   "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/lemma612-final-blocker-dispatch3.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/lemma612-final-blocker.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/adequacy-gate-blocker-handoff.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/adequacy-gate-probe.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Syntax.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Deduction.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean"
-  ]
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/02_adequacy-alternatives-and-technique.md"
+  ],
+  "outcome": "research_complete_route_change_recommended",
+  "next_action_hint": "revise",
+  "decomposition": {
+    "shape": "Track A (route selection + defect repair; 3 small parts; do FIRST) -> then Track B (semantic route, gated on A3 GO) OR Track C (Simpson tree surgery, 8 decomposed parts, fallback)",
+    "track_a": [
+      "A1: repair IKAx to be actually IK (add Simpson axioms 3/4/5). Non-breaking for NIK_to_NIKAx (:229) and TClosure.hilbertTransport (:185) -- they map INTO IKAx. Risk LOW. Required for EITHER track.",
+      "A2: THE ROUTE PROBE (highest leverage in task 517 AND task 512): attempt a sorry-free derivation of FS := (diaP -> boxQ) -> box(P -> Q) in CSLib's CS5 (CS5ModalAxiom, CS5.lean:182). Pacheco's CS5=IS5 collapse entails CS5 |- FS; FS is exactly what Simpson's canonical model uses for (F2) (p.53) and exactly what 512's box-backward step lacked. EITHER outcome is decisive. Hard cap: one dispatch. Risk MED-HIGH, payoff enormous.",
+      "A3: route verdict (paper, no Lean): does CSLib's CS5 semantics (Forcing.lean; CKExtension.lean:184-189 cs5FC'') coincide with IS5 birelation semantics (Simpson p.56: IS5 = R an equivalence relation, plus F1/F2)? Is the Pacheco corollary chain CKB=IKB => CS5=IS5 sound as stated? GO/NO-GO on Track B. Risk LOW. MUST NOT SKIP -- task 512's five dispatches are the cost of not having asked this."
+    ],
+    "track_c_parts": [
+      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1 (:450) / Star_imp2 (:507) to Tele-congruence. ZERO tree dependency. Risk LOW.",
+      "C2: prove (6.7) by induction on V using axiom 2 (kDia :91, already present). ZERO tree dependency. Risk LOW-MED.",
+      "C3: prove (6.8) by induction on W using axiom 5. REQUIRES A1. Risk MED.",
+      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList (:337-350) and Star_append (:577). Success criterion: #eval/decide reproduces Simpson's worked example verbatim (tree x->y, x->z->w, target z => ((diaA => boxboxB) and diaA) => box(dia-top => diaB)). Risk MED.",
+      "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. THE TRUE CRUX. Risk HIGH.",
+      "C6: LTree.toGraph + the tau-parameterized generalized induction; non-modal cases + (boxI)/(boxE)/(diaI). Risk MED.",
+      "C7: the (diaE) case via the reconstructed 3-step argument. Risk MED given C5.",
+      "C8: (botE)/(orE). Risk LOW -- label-local in this encoding."
+    ],
+    "true_crux": "C5 (pathSpine/addChild commutation against the pruned representation) -- NOT (diaE), which three dispatches mis-located. But the HEADLINE crux is the route question: Track C may be entirely unnecessary."
+  },
+  "confidence": {
+    "ikax_missing_axioms_and_lemma612_needs_axiom5": 0.97,
+    "diaE_short_given_67_68": 0.85,
+    "lemma612_NOT_required_for_cs5_completeness": 0.85,
+    "cs5_equiv_is5_as_mathematics": 0.90,
+    "pacheco_corollary_as_immediate_as_its_one_line_suggests": 0.60,
+    "track_b_semantic_route_mechanizable_at_reasonable_cost": 0.375,
+    "track_c_full_adequacy_bridge_completes_in_2_3_dispatches": 0.275,
+    "a2_probe_cs5_derives_FS_succeeds": 0.40,
+    "note": "Deliberately estimated BELOW instinct given documented over-rating history (reports 05, 06, 516/01, plan 01's ~50%, D2's '100-200 mechanical lines', D3's '2-3 dispatches'). Base-rate warning on record: every dispatch on this gate has found the previous dispatch's transcription subtly wrong, INCLUDING this one (the IKAx defect was found in the file two dispatches certified complete and reusable). That rate is not improving. No claim is made that this dispatch's (diaE) reconstruction is defect-free -- it is unmechanized; its value is precisely that C1-C3 can now falsify it CHEAPLY and IN ISOLATION rather than at a monolithic gate."
+  },
+  "recommendation": "Do NOT open a fourth dispatch on Simpson's tree surgery. Spend two cheap dispatches on A1 (a real defect fix, needed either way) and A2 (the FS probe) first. The honest reading is that the adequacy bridge is NOT worth the remaining cost -- because it is NOT NEEDED. Re-plan around Track A/B and retain the labelled framework (Phases 1/2/4; 789 lines landed, sorry-free, CI-green: Labelled/Syntax.lean 202, Deduction.lean 312, Context.lean 275) as an independently valuable contribution DECOUPLED from cs5_completeness.",
+  "gaps_flagged": [
+    "Fischer Servi 1984 (the explicit IK/IT/IKTB/IS4/IS5 completeness proofs that Simpson Thm 3.3.4 cites) is NOT in the literature corpus -- Track B step B3 would need /literature ingestion first. Flagged, not glossed.",
+    "Literature 2 (locally-nameless / cofinite-quantification scoping technique) returned a NEGATIVE result and is reported as such: the remaining obligation is structural-recursion bookkeeping (C5), not binder capture. Cofinite quantification in NIKAx.diaE is already correct and needs no change. No technique from that literature would have unblocked any of the three dispatches."
+  ],
+  "metadata": {
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "lit_flag": true,
+    "orchestrator_mode": true,
+    "supersedes": "prior .orchestrator-handoff.json (dispatch 3, status=blocked/gate_fail); backup at scratchpad/prev-handoff-backup.json; handoffs/ documents remain accurate historical records of their own findings",
+    "sorry_inventory": {"added": 0, "note": "research dispatch; no Lean written; nothing under Cslib/ touched"}
+  }
 }

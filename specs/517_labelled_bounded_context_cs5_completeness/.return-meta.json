@@ -1,39 +1,37 @@
 {
   "status": "partial",
-  "started_at": "2026-07-15T00:00:00Z",
-  "completed_at": "2026-07-15T00:30:00Z",
+  "started_at": "2026-07-15T10:30:00Z",
+  "completed_at": "2026-07-15T11:15:00Z",
   "requires_user_review": true,
-  "review_reason": "Phase 3 adequacy gate FINAL verdict: GATE FAIL after 3 bounded dispatches (user explicitly authorized dispatch 3 beyond the plan's original 2-dispatch cap; no dispatch 4 will be opened). Lemma 6.1.2/6.2.3 (tree internalization) remains unmechanized. Dispatch 3 made no new Lean edits -- it re-verified dispatch 2's scaffold directly against the source PDF and found two further genuine corrections (T^i pruning; Star_append/addChild mismatch) plus a clarification of the diaE z-scoping concern (resolved conceptually via LCA, not mechanized). Revised effort estimate: 2-3 further dispatches. Phase 9 (cs5_completeness) is unreachable. Task returns to [BLOCKED].",
+  "review_reason": "Research dispatch delivered a route-change recommendation plus a NEW source-verified defect (IKAx is not IK -- missing axioms 3/4/5, and Lemma 6.1.2 provably requires axiom 5). Recommends NOT opening a fourth tree-surgery dispatch; instead run Track A (A1 defect fix, A2 the CS5 |- FS probe, A3 route verdict) then Track B (semantic route) or Track C (decomposed tree surgery). next_action_hint=revise.",
   "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/lemma612-final-blocker-dispatch3.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/02_adequacy-alternatives-and-technique.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "gate_fail_final",
-    "details": "Dispatch 3 of 3 FINAL. No new Lean code. Re-derived Lemma 6.1.2's tree-telescope formula against the source PDF (Figure 6-1/6-2, worked example) with full rigor; found the scaffold's LTree.pathTo computes unpruned T^i where Simpson's convention requires pruning the path-continuation child for i<m (confirmed numerically against the worked example); found Star_append does not correspond to the addChild/pathToList operation boxI/diaI/diaE actually need; resolved (not mechanized) the diaE z-scoping concern via a companion-LTree/LCA argument. probes/lemma612-scaffold.lean and probes/adequacy-gate-probe.lean left unchanged (both still sorry-free, axiom-clean). Updated plan Phase 3 section and state.json blockers field with the dispatch-3 findings.",
-    "lint_count_start": null,
-    "lint_count_current": null,
+    "stage": "research_complete",
+    "details": "Read 3 handoffs + report/plan; read primary sources directly (Simpson 1994 PDF pp.51-59 + pp.100-118 for IK axiomatization/Thm 3.3.4/Fig 6-1/6-2/(6.1)-(6.11); Marin-Morales-Strassburger 2021 full paper; Pacheco 2024 corpus chunks 0002-0004,0016); web-searched existing mechanizations (none found). Wrote report 02 and orchestrator handoff.",
     "phases_completed": 0
   },
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": null,
     "ci_pipeline_passed": null,
-    "note": "No new Lean code was written this dispatch (analysis-only, per the plan's explicit preference for an honest wall over a forced proof). No Cslib/ files were touched. Confirmed via grep that Cslib/Logics/Modal/Metalogic/Constructive/Labelled/ has zero sorry and zero new axiom (unchanged from before this dispatch)."
+    "note": "Research dispatch. No Lean code written; nothing under Cslib/ touched."
   },
   "metadata": {
     "session_id": "sess_1784127828_1f2b2f",
-    "agent_type": "cslib-implementation-agent",
+    "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed",
-    "gate_verdict": "gate_fail_final",
-    "dispatch_number": 3,
-    "dispatch_total": 3,
-    "outcome": "gate_fail",
-    "next_action_hint": "escalate"
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "task_number": 517,
+    "lit_flag": true,
+    "orchestrator_mode": true,
+    "outcome": "research_complete_route_change_recommended",
+    "next_action_hint": "revise",
+    "prior_status": "blocked_gate_fail_final"
   }
 }

@@ -1,22 +1,53 @@
 {
   "task_number": 505,
   "task_slug": "b_symmetric_decidability_via_generic_tableau_driver",
-  "stage": "plan",
-  "status": "planned",
+  "stage": "implement",
+  "status": "implemented",
+  "summary": "Delivered all 9 phases of the B (symmetric-frame) modal tableau: backward-propagation rule, driver instantiation, 11-field RuleApplicationSpec discharge (with a new accSourcesKnown invariant for predecessor-world reasoning), generic Hintikka-chain instantiation, symmetric-closure model extraction, truth lemma, rule-level and driver-level soundness, bValid completeness, and Decidable (bValid phi). Task 513 landed immediately before this dispatch, unblocking Phase 9, which was delivered in full rather than left BLOCKED. Zero sorry, zero new axiom, full CSLib CI green.",
+  "phases_completed": 9,
+  "phases_total": 9,
+  "blockers": [],
+  "continuation_context": null,
   "artifact_path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
-  "phase_count": 9,
-  "estimated_hours": 8,
-  "dependency_waves": [[1], [2, 3, 5, 7], [4], [6], [8], [9]],
-  "blocked_deliverable": {
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/FrameRules.lean",
+    "Cslib/Logics/Modal/Tableau/BDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib.lean",
+    "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
+    "specs/505_b_symmetric_decidability_via_generic_tableau_driver/summaries/01_b-symmetric-tableau-summary.md"
+  ],
+  "commits": [
+    "a65b8ed0",
+    "3d4cc95f",
+    "a0a89045",
+    "8e4afe89",
+    "f627d310",
+    "75182916",
+    "f85bcb2b"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
+  "previously_blocked_deliverable": {
     "phase": 9,
     "deliverable": "Decidable (bValid phi)",
-    "blocked_on_task": 513,
+    "was_blocked_on_task": 513,
     "blocker_slug": "generalize_tableau_soundness_chain_over_spec",
-    "blocker_status": "not_started",
-    "reason": "Decidable(bValid) needs both completeness (generic, available via tasks 503/510) and the driver-level tableau soundness direction (modalTableauB = .closed -> bValid), which depends on the generalized soundness chain (modalStepBranch_preserves_sat still K-concrete in Soundness.lean/SoundnessStep.lean). Task 513 generalizes it. Until 513 lands, Phase 9 is a documented [BLOCKED] handoff (no sorry/axiom). Phases 1-8 deliver all other B results green.",
-    "fallback": "Mark Phase 9 [BLOCKED] with documented open goal state; B Decidable unblocks by pure instantiation once task 513 lands, no B-side rework needed."
+    "resolution": "Task 513 landed (commits 45c94d35..00b0ae34) immediately before this dispatch began, exposing modalStepBranchGen_preserves_satIn/modalExpandBranchesGen_closed_unsatIn as a spec-instantiable generic soundness chain. B's soundness side only needed to supply its own hAgree/hBoxPos/hDiaNeg triple, mirroring exactly how task 513 itself instantiated T. Phase 9 delivered in full."
   },
-  "next_command": "/implement 505",
-  "notes": "Orchestrator mode: plan artifact written; not implemented. B mirrors T (persistent-only). Verified Satisfies.b (Basic.lean:323) is the expected box-diamond form.",
-  "created": "2026-07-14T00:00:00Z"
+  "notes": [
+    "Cslib/Logics/Modal/Tableau/BDriver.lean also appears in task 512's commit f85e59f1 (concurrent orchestration on the same working tree) as a byte-identical snapshot of this task's in-progress file state; this task's commits supersede it with the completed version. No task-512-authored content was discarded.",
+    "Plan deviation: bValid is defined in FrameSoundness.lean (Phase 7), matching where T's tValid/reflFC precedent lives, not FrameCompleteness.lean as the plan's Phase 8 heading literally implies.",
+    "Plan deviation: Phase 9 delivered in full (task 513 landed before this dispatch began) rather than the documented BLOCKED-on-task-513 fallback."
+  ],
+  "next_command": null,
+  "created": "2026-07-14T00:00:00Z",
+  "completed": "2026-07-15T00:00:00Z"
 }

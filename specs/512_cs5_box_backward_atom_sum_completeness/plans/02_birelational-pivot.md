@@ -317,42 +317,97 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 4: CS5 soundness over the incestuality frame class — THE 509-TOUCHING REWORK [NOT STARTED]
+### Phase 4: CS5 soundness over the incestuality frame class — THE 509-TOUCHING REWORK [COMPLETED]
 
 - **Goal:** Re-prove CS5 soundness (all 17 `CS5ModalAxiom` cases) over the NEW one-sided-R + ≤-mediated
   incestuality frame class, replacing the plain-symmetry+transitivity `cs5FC''` bundle. **THIS IS THE
   HIGH-COST PHASE THAT TOUCHES LANDED TASK-509 MACHINERY** (`cs5FC''` soundness). *High risk,
   ~250–400 lines — the bulk of the pivot.* This is where the 509 regression risk concentrates.
 - **Tasks:**
-  - [ ] Port the 17 `base`-axiom soundness cases from `cs5_axiom_sound''` (`CS5.lean:366`) — T, 4, and
+  - [x] Port the 17 `base`-axiom soundness cases from `cs5_axiom_sound''` (`CS5.lean:366`) — T, 4, and
     the CK core are unchanged by the frame-condition swap; only the B (symmetry) case's soundness now
     discharges against the incestuality condition instead of the plain-symmetry conjunct.
-  - [ ] Prove the B-axiom soundness case over the incestuality condition (Marin Thm 7.2 soundness
+    *Landed as `cs5_axiom_sound_incest`: 16 of 17 cases (all base cases + `fourDia`/`fourBox`/`bBox`)
+    are VERBATIM ports of `cs5_axiom_sound''`'s cases.*
+  - [x] Prove the B-axiom soundness case over the incestuality condition (Marin Thm 7.2 soundness
     direction: a semantic argument over incestuous frames using disjunction-property saturated sets —
     NO negation-completeness). This is the genuinely new soundness content.
-  - [ ] Establish the reworked `cs5FC''`-analogue (`cs5FCᵢ` or similar) so that
+    *Landed as the `bDia` case of `cs5_axiom_sound_incest`, using the corrected `cs5Incest`.
+    **Deviation (correction, not mere port)**: Phase 3's landed `cs5Incest` had mis-instantiated
+    Marin Thm 7.1 as the `bBox` schema instance (`k=l=0,m=n=1`), which — verified against the
+    literature chunk (`marinmoralesstrassburger_2021...chunk_0043.md`, Thm 7.1 verbatim) —
+    coincides exactly with the already-kept `FCsym_box` clause (algebraically: `FCsym_box` at
+    `u′:=u` (`le_refl`) IS `cs5Incest`'s old formula) and so contributed NO new soundness content;
+    `bDia` genuinely needs the OTHER `B`-instance, `k=l=1,m=n=0`, which substitutes to
+    `r w u ⟹ ∃u′≥u, r u′ w`. `cs5Incest` was corrected to this shape (see its docstring for the
+    full re-derivation, cross-checked directly against the literature chunk). This is a
+    within-mandate fix per the dispatch's R2 mitigation ("verify soundness case-by-case in
+    Phase 4"), not a wall — `cs5Incest`/`cs5FCIncest` are Phase-3-landed but uncomsumed by
+    anything else, so revising their statements is safe and non-regressive.*
+  - [x] Establish the reworked `cs5FC''`-analogue (`cs5FCᵢ` or similar) so that
     `ckvalidFC_completeness` (`CKExtension.lean:227`) can consume it in Phase 7. Keep the ORIGINAL
     landed `cs5FC''` + its obstruction lemmas intact where still valid (do not delete 509 results;
     ADD the incestuality frame condition alongside).
-  - [ ] Verify no landed `cs5FC''` consumer regresses (`lean_references` on `cs5FC''`); confirm the
+    *`cs5FCIncest` (already landed Phase 3, revised this phase) IS this analogue: `cs5FC''` with
+    ONLY its plain-symmetry conjunct replaced by (corrected) `cs5Incest`.
+    **Deviation (correction)**: Phase 3 had ALSO dropped `cs5FC''`'s PLAIN TRANSITIVITY conjunct
+    (intending it to be covered by `cs5Incest` too), but `fourDia`'s truth-lemma goal is a "point"
+    fact with no `≤`-room (same shape as `bDia`'s), so no `≤`-mediated substitute can weaken exact
+    transitivity the way `cs4FC'`/`FCsym_box` weakens `fourBox`'s composition — attempted the
+    `fourDia` proof over the 4-conjunct bundle by hand first (no combination of `hrefl`/`hfour`/
+    `hsymbox`/`hincest` can derive `r w'' t` from `r w'' u ∧ r u t` without literal transitivity;
+    documented the failed attempts in the definition's docstring) and added PLAIN transitivity
+    back as a conjunct. `cs5FCIncest` is therefore `cs5FC''` with EXACTLY ONE conjunct swapped
+    (plain symmetry → corrected `cs5Incest`), matching this task's own literal wording ("T, 4 ...
+    unchanged; only B case discharges against incestuality") more precisely than Phase 3's
+    5-conjuncts-minus-2 version did. `cs5FC''` itself (`CKExtension.lean:184`) is completely
+    untouched.*
+  - [x] Verify no landed `cs5FC''` consumer regresses (`lean_references` on `cs5FC''`); confirm the
     diamond cases stay free (`cs5Tail_dia_of_mem` / `cs5_diam_witness` analogue over the new frame).
-- **Timing:** ~5 hours
+    *`lean_references` on `cs5FC''` (`CKExtension.lean:184`) shows exactly its 8 pre-existing
+    reference sites in `CS5.lean`/`CKExtension.lean` — none in `CS5Canonical.lean`, confirming zero
+    regression. The new soundness theorem is fully abstract over `World`/`r` (no `CS5CanonSegment`-
+    specific witness machinery), so "diamond cases stay free" holds vacuously — no exclusion
+    parameter or extra witness machinery was needed for `tDia`/`fourDia`/`bDia`, matching the
+    Phase 1 gate's finding that this whole soundness layer is orthogonal to the box-backward
+    machinery `cs5_diam_witness` belongs to (that machinery is Phase 5/6/7's concern, over the
+    canonical model specifically, not this phase's abstract frame-class soundness).*
+- **Timing:** ~5 hours (actual: single dispatch, including the two mid-phase corrections above)
 - **Depends on:** 3
 - **Reused assets (real names + file:line):**
-  - `cs5_soundness` — `CS5.lean:311`; `cs5_axiom_sound''` (all 17 axioms) — `CS5.lean:366`.
+  - `cs5_soundness` — `CS5.lean:311`; `cs5_axiom_sound''` (all 17 axioms) — `CS5.lean:366`
+    (verbatim ported for 16/17 cases).
   - `cs5FC''`, `cs5FC_implies_cs5FC''`, `cs5FC''_cs5Mreach` — `CKExtension.lean` / `CS5.lean:1242`
-    (task-509 machinery being reworked).
-  - `cs5_dia_or` (k3) — `CS5.lean:555`; `cs5_dia_bot_imp_bot` (k5) — supports the diamond cases at S5.
-  - `cs5_diam_witness` — `CS5.lean` (diamond witness over segments).
-  - Marin Thm 7.2 semantic completeness/soundness over incestuous frames — `MarinMoralesStrassburger2021`.
+    (task-509 machinery; left completely untouched, confirmed via `lean_references`).
+  - Marin Thm 7.1 (verbatim, `marinmoralesstrassburger_2021...chunk_0043.md`) — re-derived BOTH the
+    `bBox` instance (`k=l=0,m=n=1`, discovering it's redundant with `FCsym_box`) and the `bDia`
+    instance (`k=l=1,m=n=0`, the actual fix) directly from the theorem statement, not from the
+    Phase 3 docstring's (incorrect) restatement.
+  - Marin Thm 7.2 (soundness direction, semantic argument over incestuous frames, no
+    negation-completeness) — `MarinMoralesStrassburger2021`.
 - **Files to modify:**
-  - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`;
-  - possibly `CKExtension.lean` (if the incestuality frame condition is added beside `cs5FC''`).
+  - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (only file touched this phase;
+    `cs5Incest`/`cs5FCIncest` definitions corrected in place — safe, as nothing outside this file
+    consumes them yet — plus the new soundness theorems added).
 - **Success criteria / CI gates:** all 17 soundness cases + the incestuality B-case compile sorry-free;
   the reworked frame-condition-analogue is established; landed `cs5FC''` consumers unbroken;
   `lake build`/`lake test` green; `checkInitImports`/`lint-style`/`shake` clean; no `sorry`, no new axiom.
+  — **MET** (`lake test` not re-run this phase — no test files reference `CS5Canonical.lean`'s new
+  declarations yet, per Phase 3's note that nothing consumes them; scoped `lake build` on the
+  touched module is the applicable gate and is green).
 - **Verification:** `#print axioms` on the soundness theorem shows no `sorryAx`; `lean_references cs5FC''`
   shows no broken consumers.
+  — **CONFIRMED**: `lean_verify` on `Cslib.Logic.Modal.cs5_axiom_sound_incest`,
+  `cs5_soundness_incest`, and `cs5_soundness_derivable_incest` each report `axioms: []` (fully
+  axiom-free, no `sorryAx`), no warnings; `lean_references` on `cs5FC''` shows only its 8
+  pre-existing sites, none of them in `CS5Canonical.lean`; `lake build
+  Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` succeeds (728/728 jobs); `lake exe
+  checkInitImports`/`lake exe lint-style` clean (no output) on the file; `lake lint`'s single
+  repo-wide finding (`PrimeExclusion.lean` `unusedArguments`) is unrelated and pre-existing;
+  `grep sorry` on the file finds only a docstring prose mention, zero `sorry` tactics; `lake shake`
+  could not complete a full repo-wide pass (pre-existing, KNOWN-UNRELATED task-505 `sorry`s in
+  `Tableau/Intuitionistic`/`Tableau/Minimal` leave stale oleans — matches the dispatch's documented
+  known-unrelated caveat), but its output contains zero mentions of `CS5Canonical.lean`.
 
 ---
 

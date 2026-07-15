@@ -57,16 +57,38 @@ condition (`cs5Incest`, bundled into `cs5FCIncest`) that REPLACES `cs5FC''`'s pl
 plain-transitivity conjuncts (`CKExtension.lean:184`, task 509, left untouched — this phase adds
 a new definition alongside it, per the plan's rollback note, rather than editing it in place).
 
-**Deliberately NOT done this phase** (each is a separately-scoped later phase): soundness of the
-17 `CS5ModalAxiom` cases over `cs5FCIncest` (Phase 4); proving the canonical model
-(`cs5CanonMreach`) actually SATISFIES `cs5FCIncest`'s re-basing/incestuality clauses (Phase 5,
-beyond the free reflexivity fact `cs5CanonRefl` landed here); the real `cs5_box_backward` in
-`Cslib/` (Phase 6, already scaffolded sorry-free in the Phase 1 probe); the truth lemma and
-`cs5_completeness` (Phase 7).
+## Status (Phase 4 of the pivot: soundness over `cs5FCIncest`)
 
-The birelational frame class (one-sided `R` + incestuality condition) is added in Phase 3;
-soundness, canonical verification, box-backward, and the truth lemma follow in Phases 4-7. See
-the plan file for the full phase breakdown.
+This phase re-proves `CS5` soundness (all 17 `CS5ModalAxiom` cases,
+`cs5_axiom_sound_incest`/`cs5_soundness_incest`/`cs5_soundness_derivable_incest`) over
+`cs5FCIncest`. Along the way it CORRECTS two aspects of Phase 3's landed definitions (both
+`cs5Incest` and `cs5FCIncest` remain the same NAMES, uncomsumed by anything outside this file,
+so revising their statements is safe and non-regressive — see each definition's docstring for
+the full derivation):
+
+- `cs5Incest` was mis-instantiated: Phase 3 derived it as the `bBox` instance of Marin Thm 7.1
+  (`k=l=0,m=n=1`), which turns out to coincide with the already-kept `FCsym_box` clause and so
+  contributes nothing new. The genuinely new `B`-soundness content is the OTHER instance,
+  `bDia` (`k=l=1,m=n=0`); `cs5Incest` is corrected to that shape.
+- `cs5FCIncest` had dropped BOTH plain transitivity (`fourDia`) and plain symmetry (`bDia`).
+  `fourDia`'s truth-lemma goal is a "point" fact with no `≤`-room (exactly like `bDia`'s), so no
+  `≤`-mediated substitute can weaken transitivity for it the way `cs4FC'`/`FCsym_box` weakens
+  `fourBox`'s composition — plain transitivity is added BACK. Only plain symmetry (`bDia`) is
+  actually replaced by (corrected) `cs5Incest`.
+
+`cs5FCIncest` is therefore `cs5FC''` with ONLY its plain-symmetry conjunct replaced —
+`cs5FC''` itself (task 509, `CKExtension.lean`) is left completely untouched, per the plan's
+rollback note; this phase adds the reworked soundness theorems alongside it, in this file.
+
+**Deliberately NOT done this phase** (Phase 5's obligation): proving the canonical model
+(`cs5CanonMreach`) actually SATISFIES `cs5FCIncest`'s re-basing/incestuality clauses (beyond the
+free reflexivity fact `cs5CanonRefl` landed in Phase 3). The real `cs5_box_backward` in
+`Cslib/` (Phase 6, already scaffolded sorry-free in the Phase 1 probe); the truth lemma and
+`cs5_completeness` (Phase 7) are likewise untouched.
+
+The birelational frame class (one-sided `R` + incestuality condition) was added in Phase 3;
+soundness (this phase) is Phase 4; canonical verification, box-backward, and the truth lemma
+follow in Phases 5-7. See the plan file for the full phase breakdown.
 
 ## References
 
@@ -177,43 +199,183 @@ def cs5CanonBot (s : CS5CanonSegment Atom) : Prop := cbotForces s.seg
 
 /-! ## The ≤-Mediated S5 Incestuality Frame Condition
 
-Marin–Morales–Straßburger Thm 7.1 (Plotkin–Stirling 1986 frame correspondence): an
-intuitionistic modal frame `⟨W, R, ≤⟩` validates the Scott–Lemmon path axiom
-`◇ᵏ□ˡA ⊃ □ᵐ◇ⁿA` iff `wRᵏu ∧ wRᵐv ⟹ ∃u′. u ≤ u′ ∧ ∃x. u′Rˡx ∧ vRⁿx`. CS5's `B` axiom
-(`A → □◇A`, `bBox`) is the instance `k = l = 0`, `m = n = 1` (`◇⁰□⁰A ⊃ □¹◇¹A`, since `◇⁰□⁰A`
-is just `A`): `R⁰` is the identity relation, so `wR⁰u`/`u′R⁰x` collapse to `u = w`/`x = u′`, and
-`R¹` is plain `r`. Substituting: `r w v ⟹ ∃u′ ≥ w, r v u′`. -/
+Marin–Morales–Straßburger Thm 7.1 (`marinmoralesstrassburger_2021...`, chunk `0043`, verbatim):
+an intuitionistic modal frame `⟨W, R, ≤⟩` validates the Scott–Lemmon path axiom
+`◇ᵏ□ˡA ⊃ □ᵐ◇ⁿA` iff `wRᵏu ∧ wRᵐv ⟹ ∃u′. u ≤ u′ ∧ ∃x. u′Rˡx ∧ vRⁿx`.
 
-/-- **The ≤-mediated S5 incestuality condition** (Marin Thm 7.1, specialized to CS5's `B`
-instance `k = l = 0`, `m = n = 1` — see the section docstring for the derivation). **This is
-NOT the naive classical symmetry condition `r w v → r v w`**: Marin Remark 7.3 explicitly flags
-that the naive form is wrong intuitionistically (the exact error CSLib's discarded two-sided
-`cs5Tail` made). Here `v` need only reach some world `u′` *above* `w` (`w ≤ u′`), not `w`
-itself — the `≤`-mediation is the whole point. Cross-checked against Simpson's F1/F2
-forward/backward confluence (`≤∘R ⊆ R∘≤`, `R∘≤ ⊆ ≤∘R`, corpus `Simpson1994`): those are the
-general birelational monotonicity conditions any `CKForces`-style model already satisfies
-structurally (via `box_reflect`'s upward closure through `≤`); `cs5Incest` is the ADDITIONAL
-S5-specific ingredient on top. Proving the canonical model (`cs5CanonMreach`) satisfies this is
-Phase 5's obligation, NOT this phase's. -/
+`CS5`'s `B` axiom has TWO forms, and they are DIFFERENT instances of this schema (Phase 4
+correction to Phase 3's docstring — the definition below is unchanged in its final form, but
+its derivation was mis-attributed): `bBox` is `k = l = 0, m = n = 1` (`◇⁰□⁰A ⊃ □¹◇¹A`, since
+`◇⁰□⁰A` is just `A`): `R⁰` is the identity, so `wR⁰u`/`u′R⁰x` collapse to `u = w`/`x = u′`,
+giving `r w v ⟹ ∃u′ ≥ w, r v u′` — but this is *exactly* the `u′ := u` (`le_refl`)
+specialization of `cs5FC''`'s `FCsym_box` clause (kept verbatim below, third conjunct of
+`cs5FCIncest`), so it contributes no soundness content beyond what `FCsym_box` already
+supplies, and `bBox`'s soundness case is UNCHANGED from `cs5_axiom_sound''`. The genuinely new
+incestuality content is the OTHER `B` instance: `bDia` (`◇□A → A`) is `k = l = 1, m = n = 0`
+(antecedent `◇¹□¹A`, consequent `□⁰◇⁰A = A`); substituting (`wR⁰v` collapses to `v = w`,
+`vR⁰x` to `x = v = w`): `r w u ⟹ ∃u′ ≥ u, r u′ w`. **This** is `cs5Incest` below, replacing
+`cs5FC''`'s dropped PLAIN symmetry conjunct (`r w u → r u w`, the `u′ := u` degenerate case of
+this). -/
+
+/-- **The ≤-mediated `bDia`-instance of the S5 incestuality condition** (Marin Thm 7.1,
+`k = l = 1`, `m = n = 0` — see the section docstring for the derivation and why this, not the
+`bBox` instance, is the genuinely new soundness content). **This is NOT the naive classical
+symmetry condition `r w u → r u w`**: Marin Remark 7.3 explicitly flags that the naive form is
+wrong intuitionistically (the exact error CSLib's discarded two-sided `cs5Tail` made). Here the
+witness `u′` need only be *above* `u` (`u ≤ u′`) — the relation still lands back at `w` exactly
+(no `≤`-slack on that side, unlike `FCsym_box`'s landing side: `bDia`'s truth-lemma goal is a
+"point" fact with no `≤`-room to spare, whereas `bBox`'s nested-quantifier goal tolerates
+`≤`-slack on ITS landing side instead — the two `B`-instances trade off which side gets the
+slack). Cross-checked against Simpson's F1/F2 forward/backward confluence (`≤∘R ⊆ R∘≤`,
+`R∘≤ ⊆ ≤∘R`, corpus `Simpson1994`): those are the general birelational monotonicity conditions
+any `CKForces`-style model already satisfies structurally (via `box_reflect`'s upward closure
+through `≤`); `cs5Incest` is the ADDITIONAL S5-specific ingredient on top. Proving the canonical
+model (`cs5CanonMreach`) satisfies this is Phase 5's obligation, NOT this phase's. -/
 def cs5Incest {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
-  ∀ {w v : World}, r w v → ∃ u', w ≤ u' ∧ r v u'
+  ∀ {w u : World}, r w u → ∃ u', u ≤ u' ∧ r u' w
 
 /-- **The birelational `CS5` incestuality frame condition** (task 512 pivot). Mirrors
-`cs5FC''`'s bundling style (`CKExtension.lean:184`, task 509) exactly, but swaps the bundled
-conjuncts per the plan's Phase 3 task: reflexivity, the `cs4FC'`-style `fourBox` re-basing
-clause, and the `FCsym_box`-style `bBox` clause are KEPT verbatim from `cs5FC''`; `cs5FC''`'s
-plain transitivity (`fourDia`) and plain symmetry (`bDia`) conjuncts are DROPPED and replaced by
-`cs5Incest`. Per report 04 Q3, `cs5FC''_hub_forces_spoke_connectivity`'s hub-and-spoke
-obstruction (derived from exactly the two dropped conjuncts) does not apply to frames satisfying
-this bundle instead — dropping those two conjuncts is precisely what dissolves it as a
-constraint on canonical-model design. Soundness of the 17 `CS5ModalAxiom` cases over this
-bundle — in particular the genuinely new incestuality-mediated soundness argument for
-`bDia`/`fourDia` — is Phase 4's obligation, NOT proved here; this definition is pure syntax. -/
+`cs5FC''`'s bundling style (`CKExtension.lean:184`, task 509) exactly, but swaps ONE bundled
+conjunct (Phase 4 correction to Phase 3's plan: dropping BOTH plain transitivity and plain
+symmetry, as Phase 3 originally did, breaks `fourDia`'s soundness — its truth-lemma goal is
+also a "point" fact with no `≤`-room, so no `≤`-mediated substitute can replace EXACT
+transitivity the way `cs4FC'`/`FCsym_box` could weaken `fourBox`'s composition; see
+`cs5_axiom_sound_incest`'s `fourDia` case, verbatim from `cs5_axiom_sound''`). Reflexivity,
+PLAIN transitivity (`fourDia`, kept — NOT weakenable, see above), the `cs4FC'`-style `fourBox`
+re-basing clause, and the `FCsym_box`-style `bBox` clause are all KEPT verbatim from `cs5FC''`;
+ONLY `cs5FC''`'s plain symmetry (`bDia`) conjunct is DROPPED and replaced by `cs5Incest` (the
+`bDia`-specific Marin instance `k=l=1,m=n=0`, genuinely distinct from the `bBox`-specific
+instance `FCsym_box` already covers — see the section docstring). Per report 04 Q3,
+`cs5FC''_hub_forces_spoke_connectivity`'s hub-and-spoke obstruction (derived from PLAIN
+transitivity + PLAIN symmetry JOINTLY) no longer applies once EITHER conjunct is dropped;
+dropping plain symmetry alone already dissolves it as a canonical-model design constraint, so
+keeping plain transitivity is safe. Soundness of the 17 `CS5ModalAxiom` cases over this bundle —
+in particular the genuinely new incestuality-mediated soundness argument for `bDia` — is
+`cs5_axiom_sound_incest` below. -/
 def cs5FCIncest {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   (∀ w, r w w)
+    ∧ (∀ {w u t}, r w u → r u t → r w t)
     ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t)
     ∧ (∀ {w u u'}, r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t)
     ∧ cs5Incest r
+
+/-! ## Soundness over `cs5FCIncest` (Phase 4)
+
+Ports `cs5_axiom_sound''`'s 15 non-`B` cases and the `fourBox`/`bBox` cases VERBATIM
+(`CS5.lean:366`, task 509) — none of them touch the conjunct that changed. Only the `bDia` case
+is genuinely new: it discharges via `cs5Incest` (the corrected `bDia`-instance of Marin Thm 7.1,
+`k=l=1,m=n=0`) instead of `cs5FC''`'s plain symmetry conjunct. -/
+
+/-- **Every `CS5ModalAxiom` instance is `CKValidFC cs5FCIncest`.** Identical to
+`cs5_axiom_sound''` (`CS5.lean:366`) in 16 of its 17 cases (`fourDia` still uses PLAIN
+transitivity, `fourBox`/`bBox` still use the re-basing clauses — `cs5FCIncest` kept those three
+conjuncts verbatim from `cs5FC''`); only `bDia` (`◇□A → A`) changes: at `w'` (`le_refl`), get
+`u` with `r w' u ∧ □A@u`; `cs5Incest hru` (the `bDia`-instance of Marin Thm 7.1) gives `u' ≥ u`
+with `r u' w'`; instantiate `□A@u` at `u'` (via `hru' : u ≤ u'`) and `w'` (via `r u' w'`) to
+conclude `A@w'` directly — no `≤`-padding needed beyond what `cs5Incest` itself supplies, and no
+negation-completeness step anywhere (Marin Thm 7.2's soundness direction: purely a semantic
+unfolding of the incestuality condition against `CKForces`'s clauses). -/
+theorem cs5_axiom_sound_incest {φ : Proposition Atom} (h_ax : CS5ModalAxiom φ) :
+    CKValidFC.{u, v} cs5FCIncest φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨hrefl, htrans, hfour, hsymbox, hincest⟩ := hfc
+  cases h_ax with
+  | implyK φ ψ =>
+    intro w' _ hφ w'' hw' _
+    exact ckforces_persistence v_uc bf_uc hw' hφ
+  | implyS φ ψ χ =>
+    intro w₁ hw₁ h_pqr w₂ hw₂ h_pq w₃ hw₃ h_p
+    have h₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pqr w₃ h₁₃ h_p w₃ (le_refl w₃) (h_pq w₃ hw₃ h_p)
+  | efq φ =>
+    intro w' _ hbot
+    exact ckforces_of_exploding bf_uc bf_val bf_r bf_r_wit hbot φ
+  | andI φ ψ =>
+    intro w₁ _ hφ w₂ hw₂ hψ
+    exact ⟨ckforces_persistence v_uc bf_uc hw₂ hφ, hψ⟩
+  | andE1 φ ψ => intro _ _ h; exact h.1
+  | andE2 φ ψ => intro _ _ h; exact h.2
+  | orI1 φ ψ => intro _ _ h; exact Or.inl h
+  | orI2 φ ψ => intro _ _ h; exact Or.inr h
+  | orE φ ψ χ =>
+    intro w₁ _ h_pq w₂ hw₂ h_rq w₃ hw₃ h_pr
+    have hw₁₃ : w₁ ≤ w₃ := le_trans hw₂ hw₃
+    exact h_pr.elim (fun hp => h_pq w₃ hw₁₃ hp) (fun hr => h_rq w₃ hw₃ hr)
+  | k φ ψ =>
+    intro w' _ hbox_imp w'' hw' hbox_phi w1 hw1 u hru
+    exact hbox_imp w1 (le_trans hw' hw1) u hru u (le_refl u) (hbox_phi w1 hw1 u hru)
+  | kdia φ ψ =>
+    intro w' _ hbox_imp w'' hw' hdia_phi w₃ hw₃
+    obtain ⟨u, hru, hφu⟩ := hdia_phi w₃ hw₃
+    exact ⟨u, hru, hbox_imp w₃ (le_trans hw' hw₃) u hru u (le_refl u) hφu⟩
+  | tBox φ =>
+    intro w' _ hbox
+    exact hbox w' (le_refl w') w' (hrefl w')
+  | tDia φ =>
+    intro w' _ hφ w'' hw''
+    exact ⟨w'', hrefl w'', ckforces_persistence v_uc bf_uc hw'' hφ⟩
+  | fourDia φ =>
+    intro w' _ hdidia w'' hw''
+    obtain ⟨u, hru, hdia_u⟩ := hdidia w'' hw''
+    obtain ⟨t, hut, hφt⟩ := hdia_u u (le_refl u)
+    exact ⟨t, htrans hru hut, hφt⟩
+  | fourBox φ =>
+    intro w' _ hbox w'' hw'' u hru u' hu' t hrt
+    obtain ⟨v, hwv, hrvt⟩ := hfour hru hu' hrt
+    exact hbox v (le_trans hw'' hwv) t hrvt
+  | bDia φ =>
+    intro w' _ hdia
+    obtain ⟨u, hru, hboxA⟩ := hdia w' (le_refl w')
+    obtain ⟨u', hu', hru'w'⟩ := hincest hru
+    exact hboxA u' hu' w' hru'w'
+  | bBox φ =>
+    intro w' _ hφ w'' hw'' u hru u' hu'
+    obtain ⟨t, hru't, hw''t⟩ := hsymbox hru hu'
+    exact ⟨t, hru't, ckforces_persistence v_uc bf_uc (le_trans hw'' hw''t) hφ⟩
+
+/-- **Soundness over `cs5FCIncest`**: if `DerivationTree CS5ModalAxiom Γ φ`, then in any
+fallible-world model whose modal relation satisfies `cs5FCIncest`, at any world `w` where all
+formulas in `Γ` are forced, `φ` is also forced. Structural analogue of `cs5_soundness''`
+(`CS5.lean:427`), threading `hfc` through unused except at the `.ax` case. -/
+theorem cs5_soundness_incest
+    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (d : DerivationTree CS5ModalAxiom Γ φ)
+    {World : Type v} [Preorder World]
+    (r : World → World → Prop) (hfc : cs5FCIncest r)
+    (val : World → Atom → Prop) (botForces : World → Prop)
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → val w p → val w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_val : ∀ {w : World} (p : Atom), botForces w → val w p)
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    (bf_r_wit : ∀ {w : World}, botForces w → ∃ u, r w u ∧ botForces u)
+    (w : World)
+    (h_ctx : ∀ ψ, ψ ∈ Γ → CKForces r val botForces w ψ) :
+    CKForces r val botForces w φ := by
+  match d with
+  | .ax _ ψ h_ax =>
+    exact cs5_axiom_sound_incest h_ax World r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  | .assumption _ ψ h_mem =>
+    exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    exact cs5_soundness_incest d₁ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx
+      w (le_refl w)
+      (cs5_soundness_incest d₂ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w h_ctx)
+  | .necessitation ψ d' =>
+    intro w' _hle u _hru
+    exact cs5_soundness_incest d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit u
+      (fun _ h => nomatch h)
+  | .weakening Γ' Δ ψ d' h_sub =>
+    exact cs5_soundness_incest d' r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+      (fun x hx => h_ctx x (h_sub x hx))
+
+/-- **Soundness for derivable formulas over `cs5FCIncest`**: if `Derivable CS5ModalAxiom φ`,
+then `φ` is `CKValidFC cs5FCIncest`. -/
+theorem cs5_soundness_derivable_incest {φ : Proposition Atom}
+    (h : Derivable CS5ModalAxiom φ) : CKValidFC.{u, v} cs5FCIncest φ := by
+  intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+  obtain ⟨d⟩ := h
+  exact cs5_soundness_incest d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
+    (fun _ h => nomatch h)
 
 /-! ## `CKForces` Clauses Remain Served (Confirmation, Phase 3 Task 4)
 

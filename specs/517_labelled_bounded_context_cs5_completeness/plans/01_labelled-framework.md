@@ -290,28 +290,43 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
 
 ---
 
-### Phase 2: The labelled deduction system `N_IK(𝒯)` [NOT STARTED]
+### Phase 2: The labelled deduction system `N_IK(𝒯)` [COMPLETED]
 
 - **Goal:** Land `N_IK(𝒯)` with correct eigenvariable/freshness side conditions, plus the
   weakening/graph-morphism lemmas. **This is the gate's prerequisite — keep it minimal and land it
   fast.**
 - **Tasks:**
-  - [ ] Read report 01 §"Deliverable 1b". Statements from report 01 / source PDF **only**.
-  - [ ] Define the inductive `N_IK` (Figure 4-1, `:4630–4670`): intuitionistic propositional rules
+  - [x] Read report 01 §"Deliverable 1b". Statements from report 01 / source PDF **only**.
+  - [x] Define the inductive `N_IK` (Figure 4-1, `:4630–4670`): intuitionistic propositional rules
         (`⊥E`, `∧I/E`, `∨I/E`, `⊃I/E` — all **label-local**) plus `(□E)`, `(□I)`, `(◇I)`, `(◇E)`.
-  - [ ] Encode the **`(□I)` restriction** (`:4661`): "`y` must be **different from `x`** and must
+  - [x] Encode the **`(□I)` restriction** (`:4661`): "`y` must be **different from `x`** and must
         **not occur in any open assumptions** other than the distinguished occurrences of `xRy`".
-  - [ ] Encode the **`(◇E)` restriction** (`:4664`): "`y` must be different from both `x` and `z`
+        *(via cofinite quantification `∀ y ∉ L, ...` over a finite exclusion set `L`, not a bare
+        existential + side condition -- see "Encoding decision" deviation below.)*
+  - [x] Encode the **`(◇E)` restriction** (`:4664`): "`y` must be different from both `x` and `z`
         and must not occur in any open assumptions upon which `z:B` depends other than the
-        distinguished occurrences of `y:A` and `xRy`".
-  - [ ] Add the geometric rules: `N_IK(𝒯) = N_IK + {(R_χ) | χ ∈ 𝒯}` (`:4940`).
-  - [ ] Define the **consequence relation** `Γ ⊢_G x:A` (`:5090`, verbatim): a derivation of `x:A`
+        distinguished occurrences of `y:A` and `xRy`". *(same cofinite-quantification encoding.)*
+  - [x] Add the geometric rules: `N_IK(𝒯) = N_IK + {(R_χ) | χ ∈ 𝒯}` (`:4940`). *(deviation:
+        altered -- report 01 cites `:4940` by location only, without transcribing Figure 4-3's
+        exact rule shape (a genuine source gap). Resolved via a `TClosure` 𝒯-closure operator on
+        `G.R`, consumed by `(□E)`/`(◇I)`'s relational premises; `χ_D` (seriality) excluded as it
+        needs a fresh-witness rule, out of scope since `𝒯_S5` omits it. Flagged in the module
+        docstring ("The geometric extension") for the Phase 3 implementer to double-check against
+        the source PDF directly if Lemma 6.2.2's translation depends on the precise rule shape.)*
+  - [x] Define the **consequence relation** `Γ ⊢_G x:A` (`:5090`, verbatim): a derivation of `x:A`
         from open assumptions `y₁Rz₁,…,yₘRzₘ, x₁:A₁,…,xₙ:Aₙ` with each `yᵢRzᵢ` in `G` and
         `{xⱼ:Aⱼ} ⊆ Γ`. `A` is a **theorem** iff `⊢_𝒯 A` over the trivial graph (`:5114`).
-  - [ ] Prove weakening / graph-morphism lemmas (Prop. 4.4.1, `:5135`).
-  - [ ] **Encoding decision**: prefer **locally-nameless** for the eigenvariable conditions
+  - [x] Prove weakening / graph-morphism lemmas (Prop. 4.4.1, `:5135`).
+  - [x] **Encoding decision**: prefer **locally-nameless** for the eigenvariable conditions
         (precedent: CSLib `Languages/Lambda`). Record the decision in the module docstring.
-  - [ ] Add `public import` for `Labelled.Deduction` to `Cslib.lean`.
+        *(deviation: altered -- cofinite quantification over named labels was used instead of
+        strict locally-nameless de Bruijn indices, because labels here are names shared across
+        two independently-threaded structures (`Γ` and `G`), not binders scoped within one
+        inductive term. Cofinite quantification is the same underlying technique CSLib's own
+        locally-nameless `Typing.abs` uses and gives weakening "for free" by direct induction, so
+        the plan's underlying goal -- avoid a separate renaming lemma -- is achieved. Fully
+        flagged in the module docstring, "Encoding decision".)*
+  - [x] Add `public import` for `Labelled.Deduction` to `Cslib.lean`.
 - **Timing:** 3 hours (~250–300 lines; **budget 2× and re-plan if it exceeds ~600**)
 - **Depends on:** 1
 - **Files to modify:**

@@ -1,0 +1,39 @@
+{
+  "status": "implemented",
+  "verdict": "DERIVED",
+  "phases_completed": 11,
+  "phases_total": 26,
+  "phases_this_dispatch": [19],
+  "artifacts": [
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fs-derivation-gate.lean",
+      "type": "probe",
+      "summary": "cs5_fs: sorry-free Hilbert derivation of FS := (<>A -> []B) -> [](A -> B) against CS5ModalAxiom. Footprint [propext, Classical.choice]."
+    }
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": null,
+    "axiom_footprint": "[propext, Classical.choice]",
+    "scope_note": "Probe verified standalone via `lake env lean` (outside the lake build tree). Cslib/ untouched, so mainline CI status is exactly Phase 18's green state."
+  },
+  "memory_candidates": [
+    "CSLib CS5: bBox (phi -> []<>phi) and bDia (<>[]phi -> phi), with kBox/kDia-derived monotonicity, form an ADJUNCTION <> -| []. This is the most useful structural fact about CS5: <> is a left adjoint (preserves all joins, so k3/k5 come free), [] a right adjoint, Fix(<>) = Fix([]).",
+    "CS5 algebraically = Heyting algebra H + complete sublattice J, <> the reflector and [] the coreflector onto J. kBox is then automatic; kDia is EQUIVALENT to Frobenius: <>(u /\\ x) = u /\\ <>x for u in J. This characterization decides FS-style questions fast and shows no CS5 countermodel to FS can exist.",
+    "Hilbert-system anti-pattern: concluding a formula is underivable because necessitation needs an empty context and 'the hypothesis must live in the context'. With the B axiom (phi -> []<>phi), internalize the hypothesis C as <>C instead: prove the CLOSED theorem |- <>C -> psi, necessitate that, apply k to get []<>C -> []psi, then bBox gives C -> []psi. This refuted a landed 'structural mismatch' obstruction claim in task 517.",
+    "FS1 (<>(A->B) -> ([]A -> <>B)) is derivable in PLAIN CK -- it is not the hard Fischer-Servi axiom. The hard one is FS2 = (<>A -> []B) -> [](A -> B) (Simpson's k4); CSLib's `FS` denotes FS2. Relevant when reading IK = CK + k3 + k4 + k5 against CK + FS1 + FS2."
+  ],
+  "metadata": {
+    "session_id": "sess_1784156551_995e9d",
+    "agent_type": "cslib-implementation-hard-agent",
+    "phase_number": 19,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+    "dispatch_cap_respected": true,
+    "commits": ["04ce827f"]
+  }
+}

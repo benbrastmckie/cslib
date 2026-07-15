@@ -2,6 +2,41 @@
 
 **Single entry point after a context clear.** Everything below is committed to git.
 
+## ⛔ NEWEST RESULT FIRST — Plan 08 Phase 19 DECISION GATE: **`CS5 ⊢ FS` is DERIVED**
+
+**Read this before anything below; the older sections predate it.** Phase 19 (commit `04ce827f`)
+decided the gate: **`CS5 ⊢ FS` is TRUE**, mechanized sorry-free as **`cs5_fs`** in
+`probes/fs-derivation-gate.lean`, footprint `[propext, Classical.choice]`. This **eliminates**
+the `~25%` "target is FALSE" risk — the single largest term in this task's failure probability.
+Phase 16's `cs5_completeness ⟹ CS5 ⊢ FS` necessary condition is **discharged**.
+**Branch taken: proceed to Phase 20 → 21.** **Do NOT re-open this gate. Do NOT attempt a
+countermodel — none exists, and the proof that none exists IS the derivation.**
+Also unblocks **task 512**'s diagnosis.
+
+**Two landed claims are now STALE — do not trust them:**
+1. `probes/fischer-servi-probe.lean`'s module docstring records a **NEGATIVE** verdict on
+   `CS5 ⊢ FS`, self-described as *"not a search failure ... a structural mismatch"*. **It is
+   refuted.** Its argument holds only for routes that keep the hypothesis `H : ◇A → □B` in the
+   *context*. `cs5_fs` instead treats `C := ◇A → □B` as a **formula**, proves the **closed**
+   theorem `⊢ ◇C → (A → B)`, necessitates *that* (legal — empty context), and re-attaches the
+   hypothesis via `bBox`'s `C → □◇C`. Its `fs_sound''` and `cs5_completeness_implies_fs_derivable`
+   remain **valid and untouched** — only the obstruction narrative is wrong. Fix the docstring
+   when that file is next touched.
+2. The `fs_context_relative_half` obstruction is **circumvented, not contradicted** — it blocks
+   the context-relative route; `cs5_fs` is not that route.
+
+**The reusable insight (worth more than the theorem):** `bBox` (`φ → □◇φ`) and `bDia`
+(`◇□φ → φ`) are exactly the **unit and counit of an adjunction `◇ ⊣ □`**. A CS5 algebra is a
+Heyting algebra plus a complete sublattice `J`, with `◇` the reflector and `□` the coreflector.
+`kBox` is then automatic, and **`kDia` ⟺ Frobenius** (`◇(u ∧ x) = u ∧ ◇x` for `u ∈ J`). When a
+Hilbert-style derivation looks blocked because "necessitation needs an empty context", the B
+axiom lets you **internalize the hypothesis as `◇C`** instead of holding it in context.
+
+**Not done (deliberate):** `cs5_fs` is not yet transcribed into `Cslib/` — Phase 19's territory
+was `probes/` ONLY. That is transcription, not proof work.
+
+---
+
 ## One-line status
 Task **517 is [IMPLEMENTING]**. Track A (`plans/02_decomposed-track-a-b-c.md`) is
 **[COMPLETED]** (A1, A2, A3 all done). **A3's verdict: NO-GO for Track B** — Track B is CLOSED,

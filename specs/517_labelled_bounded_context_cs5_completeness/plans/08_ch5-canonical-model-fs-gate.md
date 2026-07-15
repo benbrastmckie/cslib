@@ -545,7 +545,48 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
     `unusedArguments` error at `Foundations/Logic/Metalogic/PrimeExclusion.lean:324`, and
     `Computability/URM/Basic.lean:92`'s `:= trivial` (a real goal, not a vacuous stub).
 
-### Phase 19: DECISION GATE — decide `CS5 ⊢ FS` [NOT STARTED]
+### Phase 19: DECISION GATE — decide `CS5 ⊢ FS` [COMPLETED]
+
+> **VERDICT: DERIVED.** `CS5 ⊢ FS` is **TRUE**, mechanized sorry-free as `cs5_fs` in
+> `probes/fs-derivation-gate.lean`, footprint `[propext, Classical.choice]`. Decided in ONE
+> dispatch, within the cap. **Branch taken: proceed to Phase 20 → 21.** The `~25%` "target is
+> FALSE" risk term — the single largest term in this task's failure probability — is
+> **eliminated, not deferred**. Phase 16's `cs5_completeness ⟹ CS5 ⊢ FS` necessary condition is
+> **discharged**. Do NOT re-open this gate. This also unblocks task 512's diagnosis.
+>
+> **How it was decided — the untried direction paid off, in the opposite direction.** The
+> dispatch prioritized refutation as instructed. Characterizing the algebra class any
+> countermodel must inhabit *proved no countermodel exists*, and the impossibility argument
+> transcribed directly into the Hilbert derivation:
+> - `k`/`kdia` + necessitation ⟹ `□`, `◇` monotone.
+> - **`bBox` + `bDia` are exactly the unit/counit of an adjunction `◇ ⊣ □`** — the structural
+>   fact the earlier negative probe missed. With `T`/`4`, `◇` is a closure and `□` an interior
+>   operator with `Fix(◇) = Fix(□) =: J`; `◇` reflects and `□` coreflects onto `J`.
+> - `k` is then automatic; the sole remaining constraint `kdia` **⟺ Frobenius**
+>   `◇(u ∧ x) = u ∧ ◇x` for `u ∈ J`.
+> - Hence in **every** CS5 algebra, with `C := ◇A → □B`:
+>   `◇C ∧ A ≤ ◇C ∧ ◇A = ◇(◇A ∧ C) ≤ ◇□B = □B ≤ B`, which by the adjunction *is* `C ≤ □(A → B)`.
+>   So `FS` is valid in every CS5 algebra; by Lindenbaum completeness, `CS5 ⊢ FS`.
+>
+> **A landed prior conclusion is refuted (recorded, not buried).** `probes/fischer-servi-probe.lean`
+> recorded a NEGATIVE syntactic verdict, self-described as *"not a search failure ... a structural
+> mismatch"*, on the ground that *"every route to `A → B` from the hypothesis `H : ◇A → □B`
+> genuinely needs `H` in context, so the resulting `A → B` is never closed and `necessitation` is
+> inapplicable."* **That diagnosis is wrong.** It holds only for routes keeping `H` as a *context
+> hypothesis*. The derivation treats `C := ◇A → □B` as a **formula**, proves the **closed**
+> theorem `⊢ ◇C → (A → B)`, necessitates *that* (legal — empty context), and re-attaches the
+> hypothesis via `bBox`'s `C → □◇C`. The landed `fs_context_relative_half` obstruction is
+> **circumvented, not contradicted** — it blocks the context-relative route; this is not that
+> route. `fischer-servi-probe.lean`'s stale NEGATIVE verdict should be corrected when that file
+> is next touched (its `fs_sound''` remains valid and is untouched).
+>
+> **Axiom usage:** `implyK`, `implyS`, `andI`, `andE1`, `andE2`, `k`, `kdia`, `tDia`, `fourDia`,
+> `bBox`, `bDia`. Notably **`tBox`, `fourBox`, `efq`, `orI`/`orE` are unused** — `FS` already
+> holds in `CK + tDia + fourDia + B`, a strictly weaker system than CS5.
+>
+> **Not done (deliberately, per the constraint "work in `probes/` ONLY"):** `cs5_fs` is not yet
+> transcribed into `Cslib/`. That is a mainline-landing step for a later phase.
+
 - **Goal:** **Resolve the named blocking obligation.** This is a **decision gate, not a phase to
   grind on**: it is bounded, and each outcome has a documented branch taken without further debate.
 - **Why**: Phase 16 makes `cs5_completeness ⟹ CS5 ⊢ FS` a landed theorem. **~25% the target is
@@ -553,14 +594,17 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   attacked derivation and failed; nobody has attempted refutation. The untried direction is where the
   information is.**
 - **Tasks:**
-  - [ ] **Prioritize the UNTRIED direction**: attempt a `CS5`-**countermodel** refuting `FS` — a
-        model validating all 17 `CS5ModalAxiom` clauses and refuting `FS`
-  - [ ] **Bounded**: cap at ONE dispatch. Do not open a second. If neither direction closes within
-        the cap, take the UNDECIDED branch below — do not extend.
-  - [ ] Secondary (only if budget remains within the cap): one further syntactic attempt, informed by
-        the landed `fs_context_relative_half` obstruction (the context-relative half succeeds; the
-        block is that `DerivationTree.necessitation` requires an **empty**-context sub-derivation)
-  - [ ] Record the verdict and take the corresponding branch, in writing
+  - [x] **Prioritize the UNTRIED direction**: attempted a `CS5`-**countermodel** refuting `FS`.
+        **Outcome: no countermodel exists, and proving that produced the derivation.** The
+        algebraic characterization (adjunction `◇ ⊣ □` from `bBox`/`bDia`; `kdia` ⟺ Frobenius)
+        shows every CS5 algebra validates `FS`.
+  - [x] **Bounded**: closed in ONE dispatch, within the cap. No second dispatch opened.
+  - [x] Secondary syntactic attempt: **succeeded** — `cs5_fs`, sorry-free, in
+        `probes/fs-derivation-gate.lean`. The `fs_context_relative_half` obstruction is
+        circumvented by internalizing the hypothesis as `◇C` via `bBox` instead of holding it in
+        context, so `necessitation`'s empty-context requirement is met by the closed theorem
+        `⊢ ◇C → (A → B)`.
+  - [x] Verdict recorded and branch taken, in writing: **DERIVED → proceed to Phase 20 → 21.**
 - **Timing:** ONE dispatch, hard cap
 - **Depends on:** 16, 17, 18
 - **Documented branches (decide now, not later)**:

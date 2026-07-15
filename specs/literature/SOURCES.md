@@ -15,8 +15,11 @@ directly grounding task 504's proven Phase-2 obstruction
 - **Massacci, F. (2000).** *Single Step Tableaux for Modal Logics: Computational
   Properties, Complexity and Methodology.* Journal of Automated Reasoning 24(3),
   319–364. DOI: 10.1023/A:1006155811656. BibKey: `Massacci2000`.
-  Status: **PDF not acquired** (paywalled, Springer/JAR). No open-access copy found
-  via Semantic Scholar / Unpaywall / arXiv.
+  Status: **✅ ACQUIRED + INGESTED** (2026-07-14, user-supplied PDF). Global corpus
+  `doc_id: massacci_2000_single_step_tableaux_for_modal_logics` (77 chunks); source
+  PDF at `~/Projects/Literature/massacci_2000_single_step_tableaux_for_modal_logics/source.pdf`;
+  registered in `specs/literature-index.json` sub-index. Searchable via
+  `literature-search.sh`.
   Why: uniform terminating single-step tableaux across the modal cube incl.
   S5/K5/KB5; the loop-checking / prefix-management termination machinery.
 

@@ -1486,8 +1486,9 @@
       "dependencies": [],
       "artifacts": [],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-15T06:19:22Z",
-      "session_id": null
+      "last_updated": "2026-07-15T06:24:17Z",
+      "session_id": null,
+      "notes": "Massacci2000 ACQUIRED + ingested into global corpus (doc_id massacci_2000_single_step_tableaux_for_modal_logics, 77 chunks) and added to specs/literature-index.json sub-index. Only Gore1999 PDF still outstanding (paywalled; see specs/literature/SOURCES.md). Run this task with --lit to navigate the Massacci corpus on demand."
     },
     {
       "project_number": 515,

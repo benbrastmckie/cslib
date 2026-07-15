@@ -1,6 +1,6 @@
 {
   "status": "partial",
-  "summary": "Phase 3 route-2 (report 02) advanced with real, sorry-free, axiom-clean progress: landed the atom-collapse ProofSigHom (tau0), which fully discharges 2 of 4 seed-exclusion sub-obligations (bot excluded, tau_L(box A) excluded); landed the four HR seed-pair facts (mechanical port of cs5_pair_seed_mem); landed box(tau_L B) <-> box(tau_R B) as a syntactic crossRL-conservativity lever. The genuinely hard remaining obligation (tau_R A excluded, plus the mixed bigOr disjunction) needs a bespoke non-homomorphic derivation-induction invariant (report 02's 'single hard node') that was not completed this dispatch; independently confirmed no compositional/homomorphic translation can witness it. Phase 3 marked [PARTIAL] (not [BLOCKED]/obstruction -- the claim is still believed true, ~85-90% per report 02). Phases 4-5 not started.",
+  "summary": "Resumed Phase 3 (cs5Combined_seed_excludes) per continuation handoff 02. Attempted the necessity-transfer conjecture as directed: landed cs5Combined_necTransfer (sorry-free, axiom-clean), showing CS5Combined-derivability of tau_L(Psi)->tau_R(A) implies CS5-derivability of box(Psi)->box(A). Proved this is INSUFFICIENT (vacuous at Psi:=A, the hardest case, since box(A)->box(A) is trivially true), exhausting the necessitation/K/cross-axiom algebraic route. Additionally performed a feasibility analysis (paper only, no Lean) of report 02's derivation-height-induction fallback and found it is NOT a cheaper alternative to the already-ruled-out semantic route 1: any sufficient invariant must be closed under ax/modus_ponens for arbitrary contexts (making it a semantic truth-predicate in disguise), and a concrete toy valuation fails because H is quasi-prime (disjunction property only), not negation-complete, so it cannot faithfully represent w |= tau_L''H for compound formulas -- only the full canonical model (comparable to CS5Segment/cs5Mreach) can. Both of report 02's proposed routes therefore bottom out at canonical-model-scale machinery. Phase 3 marked [PARTIAL] (not [BLOCKED] -- no proved obstruction). Phases 4-5 not started. Full CI pipeline green (lake build, lake test, checkInitImports, lint-style all clean).",
   "phases_completed": 2,
   "phases_total": 5,
   "sorry_inventory": [],
@@ -8,28 +8,28 @@
     {
       "phase": 3,
       "obligation": "cs5Combined_seed_excludes",
-      "what_is_done": "2 of 4 seed-exclusion sub-obligations discharged sorry-free (cs5Combined_bot_excluded, cs5Combined_boxA_excluded) via the landed atom-collapse projection tau0; the four HR seed-pair facts landed; box(tau_L B) <-> box(tau_R B) landed as a lever.",
-      "what_remains": "tau_R A excluded from modalDeductiveClosure CS5Combined (tau_L '' H), and the mixed bigOr {tau_L(box A), tau_R A} disjunction case. Reduces to: for all Psi in H, not-derivable(CS5Combined, tau_L(Psi) -> tau_R(A)).",
-      "why_stuck": "Confirmed (independently, via an L-uniform-valuation countermodel argument, matching report 02 section 5's general impossibility proof) that no compositional/homomorphic atom-substitution translation can witness this direction. A bespoke non-homomorphic derivation-induction invariant over the 5 CS5Combined DerivationTree rule cases is required (report 02's estimate: ~150-220 novel lines, the single hard node, not yet designed in enough detail to mechanize directly).",
+      "what_is_done": "4 of the prior dispatch's landed facts unchanged (tau0 collapse, 2 of 4 seed-exclusion sub-obligations, HR seed-pair facts, box-equivalence lemmas); this dispatch adds cs5Combined_necTransfer (sorry-free) plus a rigorous elimination of both of report 02's proposed discharge routes at their 'cheap' level.",
+      "what_remains": "tau_R A excluded from modalDeductiveClosure CS5Combined (tau_L '' H), and the mixed bigOr disjunction case. Reduces to: for all Psi in H, not-derivable(CS5Combined, tau_L(Psi) -> tau_R(A)).",
+      "why_stuck": "Three dispatches (1 opus-tier research + 2 implementation, including this one) have now confirmed: (a) no homomorphic/compositional translation can witness this direction (report 02); (b) no atom-indexed semantic model can either, including L-uniform, mirrored, naive 2-point, and naive identify-both-copies models (report 02 + this dispatch); (c) the necessitation/K/cross-axiom algebraic route caps out at boxed-antecedent consequences, provably insufficient (this dispatch); (d) the derivation-height induction report 02 recommended as the mechanizable fallback is NOT independent of the semantic route's difficulty -- both require canonical-model-scale (Lindenbaum, all-quasi-prime-theories) structure, since H is quasi-prime but not negation-complete, so no finite/toy characterization of H's compound-formula membership is possible without a genuine truth lemma.",
       "verbatim_goal": "theorem cs5Combined_seed_excludes {H} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (h_not : Proposition.box A ∉ H) : DerivExcludes (modalDerivationSystem (@CS5Combined Atom)) {x | x = (Proposition.box A).map Sum.inl ∨ x = A.map Sum.inr} (modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H))",
-      "next_lead": "Untested 'necessity transfer' conjecture: does (CS5Combined-derivable) tau_L(Psi) -> tau_R(A) imply CS5-derivable Psi -> box(A)? If so, Psi in H (closed) gives box(A) in H directly, contradicting h_not. Documented in handoffs/02_phase3-route2-continuation.md as the recommended first attempt for the next dispatch."
+      "next_lead": "Reframe Phase 3 as inseparable from Phases 4-5: build the CS5Combined canonical model (all CS5Combined-quasi-prime theories, mirroring CS5Segment/cs5Mreach) and a genuine truth lemma for it directly, reading off cs5Combined_seed_excludes as a corollary rather than as a standalone cheap gate. Alternatively, a genuinely new proof-theoretic idea (not a semantic-flavored invariant) is needed. Documented fully in handoffs/03_necessity-transfer-attempted.md."
     }
   ],
   "continuation_context": {
-    "handoff_path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/02_phase3-route2-continuation.md",
+    "handoff_path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/03_necessity-transfer-attempted.md",
     "next_phase": 3,
-    "resume_instructions": "Read the continuation handoff and reports/02_phase3-seed-consistency.md in full first. Attempt the necessity-transfer conjecture before anything else. If it fails, attempt the full derivation-height induction on CS5Combined DerivationTree/Deriv (5 rule cases) that report 02 section 5 describes. Do not re-attempt the confirmed dead ends (homomorphic translations, mirrored model, L-uniform model, naive 2-point frame, naive identify-both-copies model)."
+    "resume_instructions": "Read handoffs 02 and 03 plus reports 01-02 in full first. Do NOT re-attempt: the necessitation/K/cross-axiom algebraic route (exhausted); any homomorphic/compositional translation; any atom-indexed semantic model (mirrored, L-uniform, naive 2-point, naive identify-both-copies). Consider reframing Phase 3+4+5 as a single combined dispatch building the full CS5Combined canonical model and truth lemma directly, since both 'cheap' routes have now been shown to require this same machinery. If genuinely exhausted again, keep Phase 3 [PARTIAL] (a proved obstruction looks increasingly unlikely given accumulating evidence the claim is true; do not manufacture one)."
   },
   "artifacts": [
     {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md",
-      "type": "summary",
-      "summary": "Phase 3 route-2 partial progress: what landed (collapse projection, 2 discharged sub-obligations, HR seed-pair facts, box-equivalence lemmas), what remains open, verification results, next steps."
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/03_necessity-transfer-attempted.md",
+      "type": "handoff",
+      "summary": "Necessity-transfer conjecture attempted and found insufficient; derivation-height-induction feasibility analysis showing it reduces to the same canonical-scale obstacle as the semantic route; concrete next-dispatch recommendation to reframe Phase 3+4+5 as one combined effort."
     },
     {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/02_phase3-route2-continuation.md",
-      "type": "handoff",
-      "summary": "Full technical continuation handoff: landed facts, confirmed dead ends, the untested necessity-transfer conjecture lead, and explicit next-dispatch instructions."
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/03_necessity-transfer-summary.md",
+      "type": "summary",
+      "summary": "Concise summary of this dispatch's landed lemma, findings, plan deviations, and verification results."
     }
   ],
   "outcome": "in_progress",

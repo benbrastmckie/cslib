@@ -72,6 +72,56 @@ specific ones already tried. This strengthens the case that route 1 (semantic) i
 anything short of full canonical-model scale, which report 02 already flagged as circular
 ("adjacent to the very box-backward completeness that is open").
 
+## Derivation-height induction: analyzed (not mechanized) — found to reduce to the SAME
+circularity as route 1, not a cheaper alternative
+
+Report 02 §5 recommends the derivation-height induction as "the recommended, mechanizable path"
+for closing the obligation, estimating ~150-220 novel lines for the invariant `Φ`. This dispatch
+worked through, on paper, what `Φ` would actually need to satisfy for the induction to close, to
+scope the remaining effort before attempting to mechanize it (no Lean code written for this
+section — it is a feasibility analysis, recorded for the next dispatch's benefit).
+
+**Finding: designing `Φ` is NOT independent of route 1's semantic difficulty — it reduces to the
+same underlying obstacle.** Concretely:
+
+- The `ax` rule case requires `Φ Γ φ` to hold for `φ` = ANY `CS5Combined` axiom instance,
+  for ARBITRARY `Γ` — so `Φ` must already contain (be closed under) everything the axiom system
+  proves. The `modus_ponens` case requires `Φ` closed under implication-elimination. Together,
+  these force `Φ Γ ·` (restricted to `Γ ⊆ τL''H`) to essentially coincide with — or be sandwiched
+  around — the very closure `S := modalDeductiveClosure CS5Combined (τL''H)` being analyzed. A
+  `Φ` that is *provably* sound (contains only what's semantically forced) and *provably* closed
+  under `ax`/`modus_ponens`/`necessitation` is, in essence, a semantic truth-predicate for `S` —
+  i.e., route 1 (soundness w.r.t. some model) restated syntactically, not a distinct cheaper
+  route.
+- Attempting to build `Φ` via a concrete 2-world valuation (`w` for the `H`-side, `u` for the
+  `HR`-side, atom-level valuations `v(w, inl p) := p ∈ H`, `v(u, inr p) := p ∈ HR`, standard
+  compositional Kripke semantics with box/diamond quantifying over `{w, u}`) requires, for `w` to
+  actually satisfy `τL '' H` (i.e. `Satisfies w (τL ψ)` for EVERY `ψ ∈ H`, not just atoms), that
+  compound-formula membership in `H` be determined by atom-level membership via the standard
+  recursive truth definition. **This needs `H` to be negation-complete, not merely quasi-prime**
+  (disjunction property only) — and report 01 §3.4 / report 02 already established that
+  negation-completeness is exactly the property Pacheco's Lemma 16/18 wrongly assumes and that
+  FAILS for a quasi-prime, poset-maximal `H`. So a toy/finite valuation cannot faithfully
+  represent `w ⊨ τL''H` for an arbitrary quasi-prime `H`; only the FULL canonical model (all
+  quasi-prime theories as worlds, exactly `CS5Segment`/`cs5Mreach`) can, via a genuine truth
+  lemma — which is precisely the machinery Phase 5 needs to build for `cs5_truth_lemma` itself.
+  **This confirms report 02 §4's "adjacent to the very box-backward completeness that is open"
+  concern applies to the derivation-induction route too, not just to route 1's single-witness
+  models** — it is not a distinct, cheaper alternative; both routes bottom out at the same
+  canonical-scale requirement.
+
+**Implication for the next dispatch**: do not expect the derivation-induction to be a
+"mechanical, ~150-220 line" task as report 02 estimated — that estimate assumed `Φ` could be
+designed independently of full canonical-model machinery, which this analysis shows is false.
+Either a genuinely new proof-theoretic idea (not a semantic-flavored invariant in disguise) is
+needed, or the obligation should be attempted only ALONGSIDE Phase 4/5's canonical-model
+construction (build the full `CS5Combined` canonical model once, prove a real truth lemma for
+it, and read off both `cs5Combined_seed_excludes` AND the pair-recovery/truth-lemma facts from
+the same apparatus — likely the more promising reframing, since it stops treating Phase 3 as a
+separable "cheap gate" and instead accepts it is exactly as hard as full completeness, which
+report 02's own probability estimates (claim-true ~85-90%, mechanizable-via-route-2 ~70%) already
+hinted at without stating this explicitly).
+
 ## What remains open
 
 Exactly as before: `τR A` excluded from `modalDeductiveClosure CS5Combined (τL '' H)`, reducing to:
@@ -124,12 +174,23 @@ grep -n "\bsorry\b" Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean 
    provably capped at boxed-antecedent consequences — see above); any homomorphic/compositional
    translation; any atom-indexed semantic model (mirrored, L-uniform, naive 2-point, naive
    identify-both-copies) — all confirmed dead ends across three dispatches now.
-3. Attempt the derivation-height induction on `CS5Combined`'s `DerivationTree`/`Deriv` structure
-   directly (5 rule cases: `ax`, `assumption`, `modus_ponens`, `necessitation`, `weakening` — see
-   `Cslib/Logics/Modal/Metalogic/DerivationTree.lean:134-152` for the exact constructors). Budget
-   ~150-250 lines; report 02 §5 gives the invariant sketch (`Φ` closure-stable across mixed
-   `modus_ponens`, using `HR ⊆ H` as the `crossRL`-conservativity lever for the cross-axiom
-   cases). This is now the ONLY unexplored route.
+3. Per this dispatch's feasibility analysis above ("Derivation-height induction: analyzed"), the
+   naive derivation-induction is NOT independent of route 1's canonical-scale requirement — do
+   NOT expect a ~150-220-line self-contained invariant to work. Two options, in order of
+   promise:
+   (a) **Reframe Phase 3+4+5 as a single combined effort**: build the `CS5Combined` canonical
+       model (all `CS5Combined`-quasi-prime theories as worlds, mirroring `CS5Segment`/
+       `cs5Mreach`) and a genuine truth lemma for it FIRST; read off `cs5Combined_seed_excludes`
+       as a corollary (a designated canonical world satisfying `τL''H` refutes `τRA`/`τL□A` by
+       the truth lemma itself, no separate toy model needed). This accepts Phase 3 is exactly as
+       hard as full completeness rather than a cheap gate, consistent with report 02's own
+       ~70-85% (not near-100%) confidence figures.
+   (b) If (a) is judged too large for one dispatch, spend a BOUNDED effort (e.g. one focused
+       sub-session) searching for a genuinely different proof-theoretic argument not yet tried —
+       e.g. a Fitting-style "unravelling" or a cut-elimination-style argument on `CS5Combined`
+       derivations that avoids needing a full semantic characterization. Do not force a
+       derivation-induction invariant that secretly requires negation-completeness of `H` (this
+       dispatch's finding shows any such attempt will hit the same wall).
 4. Zero-debt holds throughout: no `sorry`, no new axiom. If this dispatch's budget is exhausted
    again without closing the obligation, land whatever builds green, update this handoff, and
    keep Phase 3 `[PARTIAL]` (not `[BLOCKED]` unless a genuine obstruction is PROVED — and per

@@ -215,8 +215,18 @@ box-equivalence), proved vacuous at exactly the hardest case `Ψ := A` (`□A→
 This exhausts the necessitation/K/cross-axiom algebraic route as a dead end (structurally: only
 boxed-antecedent consequences are reachable this way) and independently sharpens report 02 §4's
 semantic-route impossibility to rule out ANY atom-indexed model (not just homomorphic
-translations). **Only the derivation-height induction (report 02 §5) remains unexplored** after
-three dispatches. Phase 3 remains `[PARTIAL]`.
+translations). Additionally, a feasibility analysis of report 02 §5's derivation-height-induction
+route (not mechanized, paper analysis only) found it is **not a cheaper alternative to route 1**:
+the invariant `Φ` it requires must be closed under `ax`/`modus_ponens` for arbitrary `Γ`, which
+forces it to be a semantic truth-predicate for the closure in disguise; and a concrete toy
+2-world valuation attempt fails because faithfully representing `w ⊨ τL''H` needs `H` to be
+negation-complete (not merely quasi-prime), which quasi-prime theories are NOT (per report 01
+§3.4's Pacheco Lemma 16/18 warning). Both "cheap" routes therefore bottom out at needing
+canonical-model-scale machinery, comparable to the box-backward completeness this task is trying
+to establish. See `handoffs/03_necessity-transfer-attempted.md` for full detail and the two
+options recommended for the next dispatch (reframe Phase 3 into the canonical-model construction
+directly, or search for a genuinely different proof-theoretic argument). Phase 3 remains
+`[PARTIAL]` — no proved obstruction exists, so this is not the FAILURE/PIVOT branch.
 
 **BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14 — ORIGINAL, pre-route-2):
 

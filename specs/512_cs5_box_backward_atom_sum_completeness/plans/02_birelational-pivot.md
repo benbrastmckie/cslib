@@ -205,35 +205,51 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 2: Discard the abandoned `CS5Combined` atom-sum scaffold [IN PROGRESS]
+### Phase 2: Discard the abandoned `CS5Combined` atom-sum scaffold [COMPLETED]
 
 - **Goal:** (SUCCESS branch only) Explicitly remove the ~520-line doubled-atom `CS5Combined` apparatus
   from `CS5Canonical.lean` (currently ~1027 lines), auditing each landed lemma to classify KEEP vs.
   DISCARD. This is a committed, visible phase — NOT a silent deletion. *Low risk, net ~ -520 lines.*
 - **Tasks:**
-  - [ ] Audit and DISCARD the atom-sum-specific machinery (belongs only to the abandoned scaffold):
+  - [x] Audit and DISCARD the atom-sum-specific machinery (belongs only to the abandoned scaffold):
     `CS5Combined`, `cs5_axiom_relabel`, `τL`/`τR` transport, `cs5Combined_necTransfer`,
     `cs5Combined_symmetric_tail_box_gap`, `cs5Combined_box_four`, `cs5Combined_boxInv_subset`,
     `cs5CombinedTail`(+`_refl`/`_symm`/`_trans`), `cs5Combined_dia_bot_imp_bot`, the private `bigOr`/box
     combinatorics, `cs5Combined_quasi_prime_set_exclusion`, `cs5Combined_diam_witness`,
     `cs5CombinedSeg`/`CS5CombinedSegment`/`cs5CombinedMreach`, `cs5Combined_fcsymbox_theory`/
     `cs5Combined_fc4_theory`, `cs5CombinedFC''_cs5CombinedMreach`, and the box-equivalence lemmas.
-  - [ ] KEEP (still useful, NOT atom-sum-specific): `Proposition.map` + `@[simp]` commutation +
+    *Confirmed the ENTIRE ~977-line body of `CS5Canonical.lean` (everything after the module
+    header) was atom-sum-specific — the whole file was reduced to a header-only skeleton
+    (1027 → ~65 lines).*
+  - [x] KEEP (still useful, NOT atom-sum-specific): `Proposition.map` + `@[simp]` commutation +
     injectivity (relocate to `Basic.lean` in Phase 7 file split — a generic relabeling primitive);
     `cs5_symmetric_tail_box_gap` (`CS5.lean`, the load-bearing diagnosis);
     `cs5FC''_hub_forces_spoke_connectivity` (`CKExtension.lean`, general — documents why the naive
     plain-symmetry+transitivity condition over-connects; report 04 Q3 notes it "becomes irrelevant"
     as an obstruction for the NEW design but stays as a documented fact).
-  - [ ] Confirm no surviving `Cslib/` code depends on the discarded symbols (`lean_references` / grep);
-    `lake build` green after removal.
-- **Timing:** ~1.5 hours
+    *Confirmed `Proposition.map` already lives in `Basic.lean` (landed by an earlier dispatch,
+    predating this one) — no code was moved this phase; only two stale docstring references to
+    the now-deleted `CS5Canonical` atom-collapse projection were updated (generic rationale
+    substituted) in `Basic.lean`'s `Proposition.map_id`/`Proposition.map_map`.*
+  - [x] Confirm no surviving `Cslib/` code depends on the discarded symbols (`lean_references` / grep);
+    `lake build` green after removal. *Grep confirmed zero references to any `CS5Combined`/
+    `cs5Combined*` symbol anywhere in `Cslib/` outside the deleted file's own historical-record
+    docstring text; `lake build` on both touched modules green;
+    `checkInitImports`/`lint-style`/`lake lint` clean on both files.*
+- **Timing:** ~1.5 hours (actual: single dispatch)
 - **Depends on:** 1
 - **Files to modify:**
   - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (remove `CS5Combined` block).
 - **Success criteria / CI gates:** `lake build` green; `checkInitImports`/`lint-style`/`shake` clean;
   the discarded symbols are gone and no dangling references remain; no `sorry`, no new axiom.
+  — **MET.**
 - **Verification:** grep confirms `CS5Combined` symbols removed; `lake build` succeeds; kept lemmas
   (`cs5_symmetric_tail_box_gap`, `cs5FC''_hub_forces_spoke_connectivity`) still compile.
+  — **CONFIRMED**: `grep -rln "CS5Combined\|cs5Combined" Cslib/` finds only the new module's own
+  historical-record docstring text, no code references; `lake build
+  Cslib.Logics.Modal.Basic Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` succeeds
+  (728/728 jobs); `cs5_symmetric_tail_box_gap`/`cs5FC''_hub_forces_spoke_connectivity` untouched
+  in their original files (`CS5.lean`/`CKExtension.lean`).
 
 ---
 

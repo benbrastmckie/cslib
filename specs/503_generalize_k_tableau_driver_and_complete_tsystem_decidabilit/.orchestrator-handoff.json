@@ -1,43 +1,65 @@
 {
   "status": "partial",
-  "task_number": 503,
-  "phases_completed": 4,
+  "task": 503,
+  "phases_completed": 5,
   "phases_total": 7,
-  "phases": {
-    "1": "COMPLETED (prior session)",
-    "2": "COMPLETED (prior session)",
+  "phase_status": {
+    "1": "COMPLETED",
+    "2": "COMPLETED",
     "3": "COMPLETED (delivered by task 507)",
-    "4": "COMPLETED (this session, commit 305356e2)",
-    "5": "BLOCKED (this session, documented in plan file)",
-    "6": "NOT STARTED (depends on 5)",
-    "7": "NOT STARTED (depends on 6)"
+    "4": "COMPLETED",
+    "5": "COMPLETED",
+    "6": "BLOCKED",
+    "7": "PARTIAL"
   },
-  "requires_user_review": true,
+  "sorry_inventory": {
+    "total_sorry_count": 0,
+    "files_checked": [
+      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+      "Cslib/Logics/Modal/Tableau/GenericDriver.lean"
+    ],
+    "new_axioms_introduced": 0,
+    "axiom_trio_only": ["propext", "Classical.choice", "Quot.sound"]
+  },
   "blockers": [
     {
-      "phase": 5,
-      "summary": "Producing modalHintikkaSetT from an open modalExpandBranchesT result requires a T-analog of CompletenessLoop.lean's modalExpandBranches_hintikka top-loop lemma. Its full dependency chain (ModalLoopInv, modalStep_preserves_invariant, ~6 private witness-invariant helper lemmas in CompletenessLoop.lean, plus Completeness.lean's saturation-characterisation section: modalHintikkaClause/modalApplyOne_fst_eq_of_not_box/modalHintikkaClause_lift/modalStepBranch_none_saturated/modalStepBranch_hintikka_inv) is entirely private and stated directly against modalApplyOne, not against modalApplyOneT or an abstract apply. This is a several-hundred-line, multi-lemma development comparable in size to Phase 4's own 770-line TDriver.lean delivery, not a one-case fix.",
-      "recommended_action": "Spawn a dedicated follow-up task scoped to: (1) modalHintikkaClauseT/modalApplyOneT_fst_eq_of_not_boxPos_diaNeg/modalHintikkaClauseT_lift (T-analogs of Completeness.lean:665-778), (2) modalStepBranchT_none_saturated/modalStepBranchT_hintikka_inv (T-analogs of Completeness.lean:784-935), (3) ModalLoopInvT + witness-invariant lemmas + modalStepT_preserves_invariant (T-analogs of CompletenessLoop.lean:57-712, reusing the already-generic modalStepBranchGen_potential_step/_worldBound from GenericDriver.lean for the potential/world-bound conjuncts), (4) modalExpandBranchesT_hintikka. Once available, the plan's already-scoped remainder of Phase 5 (truth lemma's box-positive reflexive-self-edge case, tValid completeness) plus Phases 6-7 can proceed directly.",
-      "exact_open_lemma": "modalExpandBranchesT_hintikka (does not yet exist; T-analog of CompletenessLoop.lean:746 modalExpandBranches_hintikka)",
-      "goal_state": "No sorry was introduced. The blocker was identified via research (reading the full K dependency chain) before any T-specific proof code was attempted for this prerequisite, per the anti-corner-cutting escalation protocol."
+      "phase": 6,
+      "title": "Decidable (tValid phi) blocked on missing soundness-side generalization",
+      "what_failed": "Proving modalTableauT phi = .closed -> tValid phi (T soundness lifted to the driver/branch level), the prerequisite tValid_decides/instDecidableTValid need.",
+      "what_was_tried": "Read SoundnessStep.lean's modalStepBranch_preserves_sat in full (~500 lines, the K per-step soundness-preservation lemma Soundness.lean's modalExpandBranches_closed_unsat fuel-induction wraps). Confirmed the ambient Kripke model (W, m) never changes throughout that proof -- only the world-assignment function f is pointwise redefined at fresh worlds for the two minting rules (boxNeg/diamondPos) -- so a branchSatisfiableIn FC-generalized version would thread an FC witness through unchanged (structurally low-risk). Searched GenericDriver.lean and the codebase broadly: no _gen/(apply, spec) form of soundness exists anywhere (unlike completeness, fully generalized by task 510).",
+      "why_stuck": "Producing the generalization requires either (a) a ~500-line near-verbatim reproduction of modalStepBranch_preserves_sat with FC threaded through every refine tuple plus new box-positive/diamond-negative handling reusing the committed modalTBoxSelf_sound/modalTDiaNegSelf_sound, or (b) a fully generic RuleApplicationSpec-level soundness lift comparable in scope to task 507's termination generalization or task 510's completeness generalization. Neither fits the phase's 1.5-hour budget without unacceptable risk of sorry/shortcuts.",
+      "what_is_needed": "A dedicated follow-up task (mirroring the successful precedent of tasks 507 and 510, spawned for the analogous Phase 3/Phase 5 blockers) scoped to: (1) modalStepBranchT_preserves_satIn or generic modalStepBranchGen_preserves_satIn (FC); (2) a fuel-induction wrapper mirroring modalExpandBranches_closed_unsat instantiated at modalApplyOneT/reflFC; (3) modalTableauT_sound; (4) tValid_decides and instDecidableTValid (tractable one-liners once (3) exists). Budget 3-5+ hours. Also relevant groundwork for tasks 504 (S5) and 505 (B), which will hit the identical soundness-generalization gap.",
+      "prohibited_workarounds_confirmed": "No sorry, no axiom, no vacuous placeholder introduced. Phases 1-5 preserved green and committed.",
+      "full_documentation": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md (Phase 6 section)"
     }
   ],
-  "sorry_inventory": {
-    "new_sorries_introduced": 0,
-    "new_axioms_introduced": 0,
-    "files_touched": [
-      "Cslib/Logics/Modal/Tableau/TDriver.lean",
-      "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
-      "Cslib.lean"
-    ],
-    "verification": "grep -rn sorry / grep -rn '^axiom ' on all touched files: zero matches (code); full CSLib CI green (build 3232 jobs, checkInitImports, lint-style, lake lint, lake test exit 0, mk_all no-op, shake zero suggestions on touched files)"
+  "continuation_context": {
+    "last_green_commit": "f0830bd3",
+    "phase_5_commit": "14d9931c",
+    "next_action": "Spawn a dedicated generic-tableau-soundness (or t-tableau-soundness-lift) follow-up task scoped to Phase 6's blocker per the plan file's documented four-part scope. Once landed, Phase 6 (tValid_decides, instDecidableTValid) and the remainder of Phase 7's final-sweep checklist become tractable one-liners.",
+    "artifacts_delivered_this_session": [
+      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (T truth lemma section, ~340 lines)",
+      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean (two lemmas un-privatized, visibility-only)",
+      "Cslib/Logics/Modal/Tableau/GenericDriver.lean (module docstring: completeness-vs-soundness downstream contract)",
+      "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md (Phase 5 completed, Phase 6 blocked, Phase 7 partial)",
+      "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/summaries/01_generalize-tableau-driver-tsystem-summary.md (rewritten)"
+    ]
   },
-  "artifacts": [
-    "Cslib/Logics/Modal/Tableau/TDriver.lean",
-    "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md",
-    "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/summaries/01_generalize-tableau-driver-tsystem-summary.md"
-  ],
-  "commits": ["305356e2"],
-  "zero_regression_confirmed": true,
-  "continuation_context": "Phase 4 delivered and committed green. Phase 5 blocked at the Hintikka-set-production prerequisite (not the truth lemma's genuinely-new box-positive case, which remains fully scoped and tractable). See plan file Phase 5 section and summary's Recommendation section for the precise 4-part follow-up scope."
+  "ci_verification": {
+    "lake_build": "green (3233 jobs)",
+    "check_init_imports": "clean",
+    "lake_lint": "zero new warnings on touched files",
+    "lint_style": "clean",
+    "lake_test": "exit 0",
+    "mk_all_module": "no update necessary",
+    "lake_shake": "zero new suggestions on touched files",
+    "zero_regression_gate": "K public theorems (modalTableau_decides/instDecidableKValid) unchanged in statement, still green"
+  },
+  "metadata": {
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "requires_user_review": true
+  }
 }

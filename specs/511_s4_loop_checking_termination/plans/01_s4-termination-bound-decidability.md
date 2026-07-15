@@ -224,25 +224,27 @@ chain, so each wave contains a single phase.
   `... .FrameCompleteness`; all Phase 5-7 (of task 506) lemmas still build; `lean_verify` zero
   sorry/axiom on the new guard defs and the rewritten `modalApplyOneS4`.
 
-### Phase 4: Key-threaded S4 step/driver + restated `S4LoopInv` [NOT STARTED]
+### Phase 4: Key-threaded S4 step/driver + restated `S4LoopInv` [COMPLETED]
 
 - **Goal:** Thread stable per-world birth keys through an S4-specific step, and replace the broken
   `worldSetsDistinct` field with the four monotone-stable key fields. Structure + driver compiles
   green even before preservation is proved.
 - **Tasks:**
-  - [ ] Define the S4-specific step carrying `keys : List (WorldIndex × Finset (Sign × Proposition
-    Atom))` alongside `(b, e, acc)` (research Option A2). On a minting step, append
-    `(w', successorBirthContent …)`; on persistent steps, keys are unchanged. Reuse the K rule-slot
-    (`modalApplyOneS4`) for the formula work — only the stepping wrapper is S4-specific.
-  - [ ] Replace `S4LoopInv`'s `worldSetsDistinct` field (LoopChecking.lean:942-948) with:
-    `keysTotal` (∀ known world ∃ recorded key), `keyLowerBd` (each key ⊆ its live
-    `relevantSetFinset` — the monotone-stable lower bound), `keysDistinct` (distinct worlds ⇒
-    distinct keys), `keysInUniverse` (each key ⊆ `signedSubfmls φ₀`). Keep the six
-    rule-independent fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`) over
-    `modalUniverseS4`. Add the `keys` parameter to the structure.
-  - [ ] Update any current references to `S4LoopInv`/`worldSetsDistinct` to the new signature (the
-    structure is only referenced within the Phase 8/9 machinery, currently unproved, so ripple is
-    contained).
+  - [x] Define the S4-specific step (`modalStepBranchS4Keyed`) carrying `keys : List (WorldIndex ×
+    Finset (Sign × Proposition Atom))` alongside `(b, e, acc)` (research Option A2). On an
+    unblocked minting call, appends `(modalNextWorld b, successorBirthContent …)`; on every other
+    call (blocked minting-shaped, or non-minting), `keys` is unchanged. Reuses the K rule-slot
+    (`modalApplyOneS4 φ₀`) for the formula work — only the stepping wrapper is S4-specific
+    *(deviation: no separate bridge lemma to `modalStepBranchS4` was proved in this phase --
+    deferred to Phase 5/6 if their preservation proofs need it; not required for Phase 4's
+    "compiles green" deliverable)*.
+  - [x] Replace `S4LoopInv`'s `worldSetsDistinct` field with: `keysTotal` (∀ known world ∃ recorded
+    key), `keyLowerBd` (each key ⊆ its live `relevantSetFinset` — the monotone-stable lower bound),
+    `keysDistinct` (distinct worlds ⇒ distinct keys), `keysInUniverse` (each key ⊆ `signedSubfmls
+    φ₀`). Keeps the six rule-independent fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/
+    `accKnown`/`outDegEq`) over `modalUniverseS4`. Adds the `keys` parameter to the structure.
+  - [x] No other references to `S4LoopInv`/`worldSetsDistinct` existed anywhere in the codebase
+    (confirmed via `grep`) — zero ripple.
 - **Timing:** 2.5 hours
 - **Depends on:** 3
 - **Files to modify:**

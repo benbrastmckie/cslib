@@ -558,6 +558,56 @@ the signed tableau from `F(φ)` at world `0`. `φ` is in scope as the guard's `�
 def modalTableauS4 (φ : Proposition Atom) : ModalTableauResult Atom :=
   modalTableauGen (modalApplyOneS4 φ) φ
 
+/-! ## Key-Threaded S4 Step (task 511, Phase 4)
+
+`worldSetsDistinct`, stated over the *live* branch, is not a loop invariant (Gap 1, task 511
+research §2): a persistent step can fill in the one coordinate on which two worlds' relevant
+sets differed, collapsing them. The fix (Option A2) threads a **stable per-world birth key**
+list alongside `(b, e, acc)`: keys are fixed at minting time and never touched again, so a
+lower-bound-style invariant stated over them survives every subsequent step. This is *the*
+place S4 stops reusing `modalStepBranchGen` definitionally for **stepping** (it still reuses
+`modalApplyOneS4 φ₀` -- the K/T/4 rule slot -- for all formula-level work); Phase 9's own loop
+needs an S4-specific driver regardless (task 511 research §3), so this cost is not incurred
+twice. -/
+
+/-- The S4-specific keyed one-step branch expansion: mirrors `modalStepBranchS4`
+(`modalStepBranchGen (modalApplyOneS4 φ₀)`) exactly for the `(newBranches, newExpandedSets,
+newAcc)` triple -- same selected formula (`b.findSome?` over the same "already expanded"
+guard), same rule application (`modalApplyOneS4 φ₀`) -- but additionally threads a `keys` list
+recording every known world's stable birth content. On a call at one of the two minting shapes
+that is **not** blocked (`blockingWorldS4 φ₀ b s φ w = none`), the underlying rule mints
+`modalNextWorld b`, so `keys` gains the entry `(modalNextWorld b, successorBirthContent φ₀ b s
+φ w)`. On every other call (blocked minting-shaped, or a non-minting shape entirely), no world
+is minted and `keys` is unchanged. -/
+def modalStepBranchS4Keyed (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility ×
+            List (WorldIndex × Finset (Sign × Proposition Atom))) :=
+  b.findSome? fun sf =>
+    if e.any (· == sf) then none
+    else
+      let (result, newAcc) := modalApplyOneS4 φ₀ sf b acc
+      let keys' :=
+        match sf.sign, sf.formula with
+        | .neg, .box φ =>
+          match blockingWorldS4 φ₀ b .neg φ sf.label with
+          | some _ => keys
+          | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg φ sf.label)]
+        | .pos, .diamond φ =>
+          match blockingWorldS4 φ₀ b .pos φ sf.label with
+          | some _ => keys
+          | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos φ sf.label)]
+        | _, _ => keys
+      match result with
+      | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
+      | .branching branches =>
+        some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
+      | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
+      | .notApplicable => none
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),
@@ -1067,10 +1117,16 @@ encoding "modal depth strictly decreases along every edge", which the 4-rule (pl
 with `rank w'' + 2 = rank w`) both falsify. `S4LoopInv` reuses the six rule-independent
 fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`, over
 `modalUniverseS4` in place of `modalUniverse`), omits the two rank fields entirely, and adds
-`worldSetsDistinct` -- the equality-blocking invariant the minting guard is designed to
-maintain. `FmpMeasure.lean` is not modified by this plan. -/
+the four **stable birth-key** fields (task 511 Phase 4, replacing the structurally-unsound
+`worldSetsDistinct`): `keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse`, stated over
+the threaded `keys` list (`modalStepBranchS4Keyed`) rather than the live branch. `keys` never
+changes after a world is born and each key only ever lower-bounds a monotonically-growing live
+relevant set, so this invariant survives every step (Gap 1), and `keysDistinct` is exactly
+what the birth-content guard `blockingWorldS4` enforces at minting time (Gap 2).
+`FmpMeasure.lean` is not modified by this plan. -/
 structure S4LoopInv (φ₀ : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop where
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop where
   /-- Every branch formula is a member of the fixed finite S4 universe `U_{S4}(φ₀)`. -/
   bClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀
   /-- The expanded set has no duplicate entries. -/
@@ -1083,13 +1139,21 @@ structure S4LoopInv (φ₀ : Proposition Atom)
   accKnown : accTargetsKnown b acc
   /-- `outDeg` exactly counts the minting-shaped formulas in `e` at each world. -/
   outDegEq : ∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length
-  /-- **The loop invariant the minting guard enforces**: every two *distinct* known worlds
-  have *distinct* relevant formula sets. This is exactly what makes the guard's blocking
-  search well-founded (a fresh world's relevant set cannot coincide with any existing
-  world's, by construction) and is the hypothesis the pigeonhole argument
-  (`modalKnownWorlds_length_le_worldBoundS4`, if closed) consumes. -/
-  worldSetsDistinct : ∀ w w', w ∈ modalKnownWorlds b → w' ∈ modalKnownWorlds b → w ≠ w' →
-    sameRelevantSet φ₀ b w w' = false
+  /-- Every known world has a recorded birth key. -/
+  keysTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys
+  /-- **Survives Gap 1**: a world's recorded birth key is a LOWER BOUND on its live relevant
+  set. This is monotone-stable -- birth keys never change after a world is born, and live
+  relevant sets only grow (`relevantSetFinset_mono`) -- unlike the old `worldSetsDistinct`,
+  which compared live sets directly and so could be falsified by a later persistent step. -/
+  keyLowerBd : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w
+  /-- **Fixes Gap 2**: distinct worlds have DISTINCT birth keys. This is exactly what the
+  redesigned guard (`blockingWorldS4`) enforces at minting time (`blockingWorldS4_none_fresh`),
+  and no later step can violate it since keys themselves never change. This is the hypothesis
+  the pigeonhole argument (`modalKnownWorlds_length_le_worldBoundS4`, Phase 6) consumes. -/
+  keysDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k'
+  /-- Birth keys are drawn from the powerset of the finite signed-subformula codomain
+  `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 6). -/
+  keysInUniverse : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀
 
 end Cslib.Logic.Modal.Tableau
 

@@ -1,11 +1,11 @@
 ---
-next_project_number: 517
+next_project_number: 518
 ---
 
 # TODO
 
 WARNING: Task 512 not assigned to a wave (possible circular dependency)
-WARNING: Task 516 not assigned to a wave (possible circular dependency)
+WARNING: Task 517 not assigned to a wave (possible circular dependency)
 ## Task Order
 
 *Updated 2026-07-15. Generated from state.json dependency graph.*
@@ -17,7 +17,7 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
-| 99 | 512,516 | 512,516 | modal logic |
+| 99 | 512,517 | 512,517 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -47,7 +47,7 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 516 [BLOCKED] — FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Reb
+  └─ 517 [RESEARCHING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
     └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
@@ -97,9 +97,20 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 
 ## Tasks
 
+### 517. Labelled bounded context cs5 completeness
+- **Effort**: 40-70 hours
+- **Status**: [RESEARCHING]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 509, Task 512, Task 516
+
+**Description**: ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.
+
+---
+
 ### 516. Constructive modal independent le canonical model
 - **Effort**: 30-50 hours
-- **Status**: [BLOCKED]
+- **Status**: [ABANDONED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509, Task 512
@@ -151,7 +162,7 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 509, Task 516
+- **Dependencies**: Task 509, Task 517
 - **Research**:
   - [512_cs5_box_backward_atom_sum_completeness/reports/01_box-backward-atom-sum.md]
   - [512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md]

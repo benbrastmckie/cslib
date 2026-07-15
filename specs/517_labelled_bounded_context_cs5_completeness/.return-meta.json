@@ -1,69 +1,39 @@
 {
   "status": "partial",
-  "started_at": "2026-07-15T16:16:07Z",
-  "completed_at": "2026-07-15T16:55:27Z",
+  "started_at": "2026-07-15T00:00:00Z",
+  "completed_at": "2026-07-15T00:30:00Z",
   "requires_user_review": true,
-  "blocked_phase": "Phase 3: Adequacy bridge (GATE) -- FINAL, no further dispatch",
-  "review_reason": "Phase 3's gate did not close after the plan's bounded 2-dispatch limit. Dispatch 2 (this one) corrected a significant transcription error in the plan/report 01 (the internalizing formula's outer telescoping connective is box, not diamond, verified directly against the source PDF), and built a substantial verified (sorry-free, axiom-clean) reusable scaffold covering ~11 of 15 NIKAx induction cases on paper. The remaining obstruction -- a well-scopedness gap in NIKAx.diaE's z parameter, requiring an unproven invariant plus Simpson's Figure 6-2 dissection argument -- was not resolved. Per the plan's explicit bounded-attempt constraint ('do not open a third dispatch'), Phase 3 is now marked [BLOCKED] permanently. Phases 1-2 and 4 remain landed and independently valuable; Phase 9 is unreachable. Task should return to [BLOCKED].",
+  "review_reason": "Phase 3 adequacy gate FINAL verdict: GATE FAIL after 3 bounded dispatches (user explicitly authorized dispatch 3 beyond the plan's original 2-dispatch cap; no dispatch 4 will be opened). Lemma 6.1.2/6.2.3 (tree internalization) remains unmechanized. Dispatch 3 made no new Lean edits -- it re-verified dispatch 2's scaffold directly against the source PDF and found two further genuine corrections (T^i pruning; Star_append/addChild mismatch) plus a clarification of the diaE z-scoping concern (resolved conceptually via LCA, not mechanized). Revised effort estimate: 2-3 further dispatches. Phase 9 (cs5_completeness) is unreachable. Task returns to [BLOCKED].",
   "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean (dispatch 1's complete Lemma 6.2.2 mechanization, unchanged, plus dispatch 2's new verified scaffold: LTree, star/Star, box_mono1/box_mono2/wrapClosed/Star_imp1/Star_imp2/Star_append -- sorry-free, axiom-clean, standalone-compiles via `lake env lean`, exit code 0)",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/lemma612-final-blocker.md (this dispatch's final blocker handoff: corrected formula, verified toolkit description, precise remaining obstruction diagnosis, recommendation)",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md (Phase 3 marked [BLOCKED]; checklist items annotated with dispatch 2 findings and the FINAL gate verdict)"
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/lemma612-final-blocker-dispatch3.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md"
   ],
-  "phase_reports": {
-    "phase_3": {
-      "status": "blocked",
-      "requires_user_review": true,
-      "verdict": "GATE FAIL (FINAL, dispatch 2 of 2)",
-      "verification": {
-        "verification_passed": false,
-        "sorry_count": 0,
-        "vacuous_count": 0,
-        "axiom_count_new": 0,
-        "build_passed": true,
-        "ci_pipeline_passed": null,
-        "notes": "Nothing landed under Cslib/ -- CI pipeline (lake build/lint/etc.) does not apply since no Cslib/ file was touched. The probe/scaffold file (specs/.../probes/lemma612-scaffold.lean, outside Cslib/, never imported by it) was verified standalone via `lake env lean <file>` (exit code 0, no errors, no warnings) and per-theorem `#print axioms` checks (box_mono1: no axioms; box_mono2/wrapClosed/Star_imp1/Star_imp2/Star_append/NIK_to_NIKAx: only propext/Classical.choice/Quot.sound, all permitted, none new). grep for `sorry` in tactic position: zero hits."
-      },
-      "key_finding": "Corrected a transcription error inherited from the plan/report 01: Simpson's internalizing formula uses BOX (not diamond) as the outer ancestor-to-target telescoping connective, and DIAMOND (not box) for a subtree's own children -- exactly backwards from how the plan paraphrased it. Verified directly against the source PDF (Simpson_1994_IntuitionisticModalLogic.ocr.pdf, pages 109-112) via the Read tool (pdftotext garbles box/diamond glyphs in this typeface). This correction is what makes the 'combine' step for multi-premise rules (andI/impE/orE) tractable via ordinary K-necessitation reasoning (box is K-multiplicative; diamond is not) -- under the plan's incorrect reading, the analogous combine step would not be K-valid in general.",
-      "remaining_obstruction": "NIKAx.diaE's `z` parameter (the conclusion's label) is not scoped relative to `x` (the diamond-fact's label) by the bare Lean type. Simpson's own presentation enforces this via Fitch-style notational scoping, which does not automatically transfer to the inductive Prop encoding. Closing this requires (1) a separate, unproven well-scopedness invariant about NIKAx derivations, and (2) mechanizing Simpson's Figure 6-2 'dissection' tree-surgery argument for the case where z is a proper ancestor of x. Neither was completed this dispatch.",
-      "toolkit_delivered": "LTree (reified finite rose tree), star/Star (Simpson's Gamma@U and telescoped internalizing formula, corrected box/diamond assignment), box_mono1, box_mono2, wrapClosed, Star_imp1, Star_imp2, Star_append -- all sorry-free, axiom-clean, and individually verified. On paper (not yet mechanized as NIKAx induction cases): assumption/ax/efq/andI/andE1/andE2/orI1/orI2/impI/impE/boxE/boxI/diaI/orE all reduce cleanly to this toolkit; only diaE remains genuinely open."
-    },
-    "phase_4": {
-      "status": "implemented",
-      "note": "Landed by prior parallel dispatch; unmodified by this dispatch. See git log eaa4675a."
-    }
+  "partial_progress": {
+    "stage": "gate_fail_final",
+    "details": "Dispatch 3 of 3 FINAL. No new Lean code. Re-derived Lemma 6.1.2's tree-telescope formula against the source PDF (Figure 6-1/6-2, worked example) with full rigor; found the scaffold's LTree.pathTo computes unpruned T^i where Simpson's convention requires pruning the path-continuation child for i<m (confirmed numerically against the worked example); found Star_append does not correspond to the addChild/pathToList operation boxI/diaI/diaE actually need; resolved (not mechanized) the diaE z-scoping concern via a companion-LTree/LCA argument. probes/lemma612-scaffold.lean and probes/adequacy-gate-probe.lean left unchanged (both still sorry-free, axiom-clean). Updated plan Phase 3 section and state.json blockers field with the dispatch-3 findings.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 0
   },
-  "sorry_inventory": {
-    "count": 0,
-    "locations": [],
-    "note": "No sorry anywhere under Cslib/ (unchanged from baseline -- this dispatch touched only specs/ artifacts). The new probes/lemma612-scaffold.lean file is itself sorry-free, confirmed via grep and via `lake env lean` compilation with zero errors."
-  },
-  "axioms_clean": true,
-  "blockers": [
-    {
-      "phase": 3,
-      "what_failed": "Lemma 6.1.2/6.2.3 (the tree internalization bridging labelled derivability to Hilbert IK+Ax(T) derivability) did not close within the plan's 2-dispatch bound.",
-      "what_was_tried": "Dispatch 1: diagnosed the need for a reified finite-tree scaffold (vs. bare Graph). Dispatch 2 (this one): re-read the source PDF directly and corrected a box/diamond transcription error in the plan's own formula; built and fully verified (sorry-free, axiom-clean) the reified tree type, the corrected internalizing formulas, and a complete K-necessitation combinator toolkit (box_mono1/box_mono2/wrapClosed/Star_imp1/Star_imp2/Star_append) sufficient, on paper, for 11 of 15 NIKAx cases including the previously-feared-intractable orE/efq.",
-      "why_stuck": "The one remaining case, NIKAx.diaE (one of Simpson's own 'four modal rules', written out in full in the source), has an unscoped `z` parameter in its Lean type -- nothing forces z to be an ancestor-or-self of x, which Simpson's informal Fitch-style natural-deduction notation enforces implicitly but the bare inductive Prop does not. Closing this needs a new well-scopedness invariant (unproven) plus mechanizing Simpson's Figure 6-2 dissection tree-surgery (not attempted).",
-      "what_is_needed": "A follow-up task (if spawned) scoped narrowly to: (1) wire the verified LTree/Star scaffold into an actual NIKAx induction (build LTree.toGraph and thread the G=tau.toGraph/x-in-tau.labels invariant), (2) prove the diaE well-scopedness invariant, (3) mechanize the Figure 6-2 dissection argument. See handoffs/lemma612-final-blocker.md for the complete technical roadmap.",
-      "prohibited_workarounds_confirmed_not_used": "No sorry, no def X := True or any vacuous placeholder, no new axiom. All confirmed via grep and lake env lean."
-    }
-  ],
-  "outcome": "gate_fail",
-  "next_action_hint": "escalate",
-  "continuation_context": {
-    "gate_final": true,
-    "third_dispatch_permitted": false,
-    "waves_4_to_8_status": "Phase 4 (Context.lean, TPrime, TS5) already landed by a prior parallel dispatch and remains independently valuable. Phases 5-8 (Prime Lemma, canonical model, birelation, frame-class match) were NOT dispatched by this session and, per the plan's own Rollback/Contingency section, may still proceed independently of Phase 3's failure -- they do not depend on Phase 3's success, only on Phase 4 (already landed). Phase 9 (final assembly of cs5_completeness) is the ONLY phase that depends on Phase 3, and is now unreachable.",
-    "recommendation": "Per plans/01_labelled-framework.md 'Rollback/Contingency': do not open a third dispatch on Phase 3. Task 517 should transition to [BLOCKED]. Phases 5-8 may optionally be pursued as a separate continuation (they land a reusable labelled framework + countermodel construction independent of Phase 3's outcome), but Phase 9 (the task's own completion criterion, cs5_completeness) cannot be reached without resolving the diaE gap documented in handoffs/lemma612-final-blocker.md. If a follow-up task is spawned specifically to close Lemma 6.1.2, it should start from probes/lemma612-scaffold.lean (already verified, reusable) and the corrected box/diamond formula -- re-deriving the incorrect (diamond-outer) formula would be a regression.",
-    "corrected_formula_for_reuse": "Gamma@U = AND{B | y:B in Gamma} AND (DIAMOND Gamma@U_1) AND ... AND (DIAMOND Gamma@U_k) [diamond for children]; (Gamma |-_G x_m : A)* = Gamma@T^0 IMPLIES BOX(Gamma@T^1 IMPLIES BOX(... Gamma@T^{m-1} IMPLIES BOX(Gamma@T^m IMPLIES A)...)) [box for the outer telescope]. This is the OPPOSITE of what the plan document originally stated."
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": null,
+    "ci_pipeline_passed": null,
+    "note": "No new Lean code was written this dispatch (analysis-only, per the plan's explicit preference for an honest wall over a forced proof). No Cslib/ files were touched. Confirmed via grep that Cslib/Logics/Modal/Metalogic/Constructive/Labelled/ has zero sorry and zero new axiom (unchanged from before this dispatch)."
   },
   "metadata": {
     "session_id": "sess_1784127828_1f2b2f",
-    "task_number": 517,
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "gate_verdict": "gate_fail_final",
+    "dispatch_number": 3,
+    "dispatch_total": 3,
+    "outcome": "gate_fail",
+    "next_action_hint": "escalate"
   }
 }

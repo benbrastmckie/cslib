@@ -1,7 +1,8 @@
 # Implementation Plan: Task #517 — Labelled/Bounded-Context CS5 Completeness (Route B, full build)
 
 - **Task**: 517 - labelled_bounded_context_cs5_completeness
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED] (Phase 3 gate FAILED FINAL after 3 dispatches; Phase 9 unreachable; see
+  `handoffs/lemma612-final-blocker-dispatch3.md`)
 - **Effort**: 22 hours
 - **Dependencies**: None (task 513 landed; task 518 re-ingests the Simpson corpus but is NOT a blocker — see "Corpus warning")
 - **Research Inputs**: `specs/517_labelled_bounded_context_cs5_completeness/reports/01_labelled-bounded-context-method.md` (authoritative — built from the source PDF, not the corpus)
@@ -343,6 +344,25 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
 
 ### Phase 3: **[GATE — HARDEST NODE]** Adequacy bridge: Lemma 6.2.2 + Lemma 6.1.2/6.2.3 [BLOCKED]
 
+**Dispatch 3 of 3 verdict (FINAL, no dispatch 4): GATE FAIL.** User explicitly authorized one
+further bounded attempt beyond this plan's original "2 dispatches" cap. Dispatch 3 made no new
+Lean edits; it invested its full budget in re-verifying dispatch 2's scaffold directly against
+the source PDF (Figure 6-1, the worked example, and Figure 6-2, PDF pp.109-112/book pp.100-103)
+and found **two further genuine corrections** dispatch 2 missed: (1) Simpson's `T^i` (`i<m`) is a
+**pruned** subtree excluding the path-continuation child, not the full subtree the scaffold's
+`LTree.pathTo` computes — confirmed numerically against the worked example; (2) the scaffold's
+`Star_append` lemma does not model what `boxI`/`diaI`/`diaE` actually need from
+`LTree.addChild`/`pathToList` (an unproven commutation lemma, not "mechanical wiring" as
+dispatch 2 estimated). Dispatch 3 also **resolved** (clarified, not mechanized) dispatch 2's
+`diaE` "z-scoping" concern: threading an explicit companion `LTree` witness through the induction
+(obtained via the IH on `hdia`) guarantees `x` and `z` are always nodes of the *same* tree, hence
+always have a well-defined LCA — Simpson's own Figure 6-2 argument assumes exactly this. Net
+effect: **higher confidence the theorem is true, but a larger remaining mechanization than
+estimated** (revised to 2-3 further dispatches, not 1-2). Full diagnosis and recipe:
+`specs/517_.../handoffs/lemma612-final-blocker-dispatch3.md`. **No sorry, no axiom, nothing new
+under `Cslib/` this dispatch** — `probes/lemma612-scaffold.lean` is unchanged from dispatch 2.
+**This phase is now `[BLOCKED]` for good; no dispatch 4 will be opened on this task.**
+
 **Dispatch 1 of 2 verdict: GATE FAIL.** Lemma 6.2.2 (hard direction) is now **complete,
 sorry-free, axiom-clean** — see `specs/517_.../probes/adequacy-gate-probe.lean` and
 `specs/517_.../handoffs/adequacy-gate-blocker-handoff.md` for the full mechanization and the
@@ -468,6 +488,20 @@ close); the plan permits **one further dispatch (2 of 2)** before this phase is 
     diagnosis, the corrected formula, the verified toolkit, and the precise remaining gap. **No
     third dispatch will be opened; per Rollback/Contingency, Phases 4-8 stand as landed and the
     task returns to `[BLOCKED]`.**
+  - **Dispatch 3 of 3 verdict (FINAL, user-authorized beyond the 2-dispatch cap; no dispatch 4):
+    GATE FAIL.** Made no new Lean edits; re-verified the scaffold directly against the source PDF
+    (Figure 6-1, the worked example, Figure 6-2) and found two further genuine corrections dispatch
+    2 missed: (1) Simpson's `T^i` (`i<m`) is a **pruned** subtree excluding the path-continuation
+    child — the scaffold's `LTree.pathTo` returns the full, unpruned subtree instead, confirmed
+    wrong by direct numeric recomputation of the worked example; (2) the scaffold's `Star_append`
+    does not model what `boxI`/`diaI`/`diaE` need from `LTree.addChild`/`pathToList` (an unproven
+    commutation lemma). Also **resolved** (clarified, not mechanized) the `diaE` z-scoping concern:
+    threading an explicit companion `LTree` witness through the induction guarantees `x` and `z`
+    are always nodes of the same tree with a well-defined LCA, exactly what Simpson's Figure 6-2
+    assumes. Net: higher confidence the theorem is true; revised effort estimate is **2-3 further
+    dispatches**, not 1-2. See `specs/517_.../handoffs/lemma612-final-blocker-dispatch3.md` for the
+    complete diagnosis and recipe. **No sorry, no axiom, nothing new under `Cslib/`.** Phase 3 is
+    `[BLOCKED]` for good; no dispatch 4 will be opened on this task.
 
 ---
 

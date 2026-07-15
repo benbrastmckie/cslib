@@ -213,14 +213,14 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 6: Pigeonhole world bound [NOT STARTED]
+### Phase 6: Pigeonhole world bound [COMPLETED]
 
 **Goal**: Prove the finite world bound `modalKnownWorlds_length_le_worldBoundS5` via the Mathlib pigeonhole lemmas, consuming the corrected `S5LoopInv` key fields. **No template — the pigeonhole S4 also never landed (511 Section 5).**
 
 **Tasks**:
-- [ ] Prove `modalKnownWorlds_length_le_worldBoundS5` using `Finset.card_powerset` + `Finset.card_le_card_of_injOn` + `List.Nodup.length_le_card` (Mathlib lemmas confirmed imported by task 511, 511 report Section 5).
-- [ ] Map each known world to its key via `keysTotal`; `keysDistinct` (P5) ⇒ injectivity; `keysInUniverse` (P5) ⇒ keys `∈ (signedSubfmls φ₀).powerset`; cardinality `2^(2·|Sf|) = modalWorldBoundS5 φ₀` (note the corrected `2·|Sf|` exponent, 511 Phase 1).
-- [ ] If needed, a small `modalKnownWorlds_nodup` helper (the `foldl` guards against duplicates).
+- [x] Prove `modalKnownWorlds_length_le_worldBoundS5` -- landed sorry-free this dispatch (cycle 2), as a **static** private-adjacent lemma taking `keysTotal`/`keysDistinct`/`keysInUniverse` directly as hypotheses on a fixed `(b, keys)` pair (per the resume-task's directive: no step-preservation reasoning needed). Used `Finset.card_le_card_of_injOn` + `List.toFinset_card_of_nodup` + the pre-existing `signedSubfmls_powerset_card_le` (`LoopChecking.lean`, reused as-is since `modalWorldBoundS5 φ₀` is definitionally `modalWorldBoundS4 φ₀`). *(deviation: used `List.toFinset_card_of_nodup` in place of the plan's suggested `List.Nodup.length_le_card`, which does not exist under that name in this Mathlib snapshot; the injection function is built via a classical dependent-if choice over `∃ k, (w,k) ∈ keys` rather than `Finset.card_powerset` directly, since the powerset cardinality bound was already available pre-proven.)*
+- [x] Map each known world to its key via `keysTotal`; `keysDistinct` ⇒ injectivity (`hDistinct`/`hinj`); `keysInUniverse` ⇒ keys `∈ (signedSubfmls φ₀).powerset` (`hInUniv`/`hmapsto`); cardinality `2^(2·|Sf|) = modalWorldBoundS5 φ₀` via `signedSubfmls_powerset_card_le`.
+- [x] Added `modalKnownWorlds_nodup_S5` (+ its `modalKnownWorlds_fold_nodup_S5` foldl-induction helper) as a local re-derivation of `FmpMeasure.lean`'s private `modalKnownWorlds_nodup` (unavailable cross-file), mirroring the file's existing `_S5`-suffixed local-re-derivation pattern.
 
 **Timing**: 1.5 hours
 

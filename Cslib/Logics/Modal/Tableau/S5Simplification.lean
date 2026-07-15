@@ -1163,6 +1163,78 @@ lemma modalStepBranchS5g_preserves_outDegEq (φ₀ : Proposition Atom)
       rfl
     · rw [hm] at hshape; exact hshape.elim
 
+/-! ## Pigeonhole World Bound (task 515 Phase 6)
+
+A **static** cardinality fact about any fixed `(b, keys)` pair satisfying `S5LoopInv`'s three
+birth-key structural fields (`keysTotal`/`keysDistinct`/`keysInUniverse`) -- no step-preservation
+reasoning is needed, only that every known world has a birth key, distinct known worlds have
+distinct keys, and every key lies in the finite codomain `signedSubfmls φ₀`. Each known world
+injects into `(signedSubfmls φ₀).powerset` via its (possibly non-unique-choice-of-witness, but
+unique-by-value thanks to `keysDistinct`) birth key, so `Finset.card_le_card_of_injOn` composed
+with `signedSubfmls_powerset_card_le` (`LoopChecking.lean`) bounds `modalKnownWorlds b`'s length
+by `modalWorldBoundS5 φ₀`. Consumed both directly (Phase 5 exit criterion) and as the missing
+piece Phase 4's `bClosure`/`eClosure` mint-case obligations need (see
+`specs/515_.../handoffs/01_phase4-generic-field-preservation.md`). -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+private lemma modalKnownWorlds_fold_nodup_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
+    (hws0 : ws0.Nodup) :
+    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup := by
+  induction l generalizing ws0 with
+  | nil => simpa using hws0
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      exact ih ws0 hws0
+    · simp only [List.foldl_cons, if_neg hc]
+      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
+      exact ih (sf.label :: ws0) (List.nodup_cons.mpr ⟨hnotmem, hws0⟩)
+
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_nodup`
+(unavailable across files): `modalKnownWorlds`'s dedup-guarded `foldl` never produces
+duplicates. -/
+private lemma modalKnownWorlds_nodup_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
+  modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
+
+/-- **Phase 6**: the pigeonhole world bound. Any branch `b` whose known worlds all have birth
+keys in `keys` (`hTotal`), with distinct known worlds forced to distinct keys (`hDistinct`) and
+every key confined to `signedSubfmls φ₀` (`hInUniv`), has at most `modalWorldBoundS5 φ₀` known
+worlds. -/
+lemma modalKnownWorlds_length_le_worldBoundS5 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k')
+    (hInUniv : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
+    (modalKnownWorlds b).length ≤ modalWorldBoundS5 φ₀ := by
+  classical
+  -- Choose, for each known world, a witness birth key.
+  set f : WorldIndex → Finset (Sign × Proposition Atom) :=
+    fun w => if h : ∃ k, (w, k) ∈ keys then h.choose else ∅ with hf
+  have hfspec : ∀ w ∈ modalKnownWorlds b, (w, f w) ∈ keys := by
+    intro w hw
+    have hex : ∃ k, (w, k) ∈ keys := hTotal w hw
+    simp only [hf]
+    rw [dif_pos hex]
+    exact hex.choose_spec
+  have hmapsto : Set.MapsTo f (modalKnownWorlds b).toFinset ↑(signedSubfmls φ₀).powerset := by
+    intro w hw
+    rw [Finset.mem_coe, List.mem_toFinset] at hw
+    simp only [Finset.coe_powerset, Set.mem_preimage]
+    exact hInUniv w (f w) (hfspec w hw)
+  have hinj : Set.InjOn f (modalKnownWorlds b).toFinset := by
+    intro w hw w' hw' heq
+    rw [Finset.mem_coe, List.mem_toFinset] at hw hw'
+    by_contra hne
+    exact hDistinct w w' (f w) (f w') (hfspec w hw) (hfspec w' hw') hne heq
+  have hcard := Finset.card_le_card_of_injOn f hmapsto hinj
+  rw [List.toFinset_card_of_nodup (modalKnownWorlds_nodup_S5 b)] at hcard
+  calc (modalKnownWorlds b).length ≤ (signedSubfmls φ₀).powerset.card := hcard
+    _ ≤ modalWorldBoundS4 φ₀ := signedSubfmls_powerset_card_le φ₀
+    _ = modalWorldBoundS5 φ₀ := rfl
+
 /-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 
 **[BLOCKED]** (Phase 2). Attempting to discharge `RuleApplicationSpec modalApplyOneS5`

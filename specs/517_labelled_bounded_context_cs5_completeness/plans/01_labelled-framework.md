@@ -341,7 +341,15 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
 
 ---
 
-### Phase 3: **[GATE — HARDEST NODE]** Adequacy bridge: Lemma 6.2.2 + Lemma 6.1.2/6.2.3 [NOT STARTED]
+### Phase 3: **[GATE — HARDEST NODE]** Adequacy bridge: Lemma 6.2.2 + Lemma 6.1.2/6.2.3 [PARTIAL]
+
+**Dispatch 1 of 2 verdict: GATE FAIL.** Lemma 6.2.2 (hard direction) is now **complete,
+sorry-free, axiom-clean** — see `specs/517_.../probes/adequacy-gate-probe.lean` and
+`specs/517_.../handoffs/adequacy-gate-blocker-handoff.md` for the full mechanization and the
+precise diagnosis of what remains (Lemma 6.1.2/6.2.3, the tree internalization). Per the Phase 3
+failure branch below, nothing is landed under `Cslib/` this dispatch (the whole gate did not
+close); the plan permits **one further dispatch (2 of 2)** before this phase is finally marked
+`[BLOCKED]`.
 
 - **Goal:** Prove the Hilbert⟺labelled adequacy bridge's **hard direction**:
   `⊢_{N_IK(𝒯)} x:φ ⟹ Derivable_CS5 φ` (Theorem 6.2.1, `:6880`). **This is the gated hardest node,
@@ -357,18 +365,29 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
   transcribable proof**. **Everything else in Route B is transcription; this is reconstruction.**
   **Anyone who calls this a transcription has not read `:6544`.**
 - **Tasks:**
-  - [ ] Read report 01 §"Deliverable 3" **in full**. Work from report 01 or the source PDF —
-        **corpus chunks are unusable** (see Corpus warning).
-  - [ ] **Lemma 6.2.2** (`:6989`): `Γ ⊢^𝒯_G x:A ⟺ Ax(𝒯); Γ ⊢_G x:A`. The ⟸ direction translates
+  - [x] Read report 01 §"Deliverable 3" **in full**. Work from report 01 or the source PDF —
+        **corpus chunks are unusable** (see Corpus warning). *(dispatch 1: also re-read Figure
+        4-3/4-4 and Figure 3-7 directly from the source PDF via the `Read` tool, PDF pages 65 and
+        74, to settle the Phase-2 TClosure re-check mandated by this dispatch.)*
+  - [x] **Lemma 6.2.2** (`:6989`): `Γ ⊢^𝒯_G x:A ⟺ Ax(𝒯); Γ ⊢_G x:A`. The ⟸ direction translates
         each `(R_χ)` application away; the graph then stays a **tree**. Key structural observation
         (`:7014`): "each relational assumption in `Π*`, in particular the open assumptions `y_kRz_k`,
         **must be the premise of either a (□E) application or a (◇I) application**" — true by
         inspection of the rules (Phase 2 verification), but needs a careful derivation induction.
-  - [ ] **Adopt the modular mitigation** (report 01's explicit recommendation): define
+        *(dispatch 1: COMPLETE, sorry-free, axiom-clean — only the `⟹` direction, which is what
+        Phase 9's assembly actually needs (used in contrapositive form); see `NIK_to_NIKAx` /
+        `TClosure.hilbertTransport` in the probe file. The `⟸` direction was not attempted -- not
+        needed for `cs5_completeness`.)*
+  - [x] **Adopt the modular mitigation** (report 01's explicit recommendation): define
         `LCons G Γ x A := Derivable CS5ModalAxiom ((Γ ⊢_G x:A)*)`, making the bridge
         **definitional at the trivial graph** and converting Lemma 6.1.2 into a set of **per-rule
         admissibility obligations**. This does not reduce total work but makes it **modular and
         incremental** — so partial progress is legible and the gate verdict is evidence-based.
+        *(dispatch 1: adopted in spirit -- rather than one new Hilbert derivation-tree type, Phase 3
+        reuses `Metalogic.DerivationTree`/`Derivable` parameterized at a new axiom predicate `IKAx
+        𝒯`, and Lemma 6.2.2 was split into the standalone, reusable `TClosure.hilbertTransport`
+        lemma per non-`base` closure constructor -- exactly the "per-rule admissibility obligation"
+        structure recommended.)*
   - [ ] **Lemma 6.1.2**: define, for a **finite tree** `G`, the internalizing formula (`:6512`):
         ```
         Γ@U        = ⋀{B | y:B ∈ Γ} ∧ (□Γ@U₁) ∧ … ∧ (□Γ@U_k)   (y = root of subtree U)
@@ -376,13 +395,24 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
         ```
         and prove `Γ ⊢_G x:A ⟹ (Γ ⊢_G x:A)*` is a theorem of `IK + Ax(𝒯)`, **by induction on
         derivations**. At the trivial graph `(⊢_𝒯 x:A)* = ⊤ ⊃ A`, so `A` follows (`:6524`).
+        *(dispatch 1: NOT attempted to completion -- diagnosed as needing a dedicated reified
+        finite-tree type co-indexed with the derivation, not just `Graph`; see the blocker handoff
+        for the precise reasoning, including a concrete shortcut attempt that was tried and found
+        to fail. Deferred to dispatch 2.)*
   - [ ] **State the treeness invariant explicitly as a lemma** (Simpson never does) and carry it
-        through the induction.
+        through the induction. *(dispatch 1: deferred to dispatch 2, blocked on Lemma 6.1.2's
+        tree-type prerequisite above.)*
   - [ ] **Reconstruct the omitted `(⊥E)` and `(∨E)` cases from scratch**, following the written-out
-        `(◇E)` case as the model (`:6544`). **This is the crux.**
+        `(◇E)` case as the model (`:6544`). **This is the crux.** *(dispatch 1: not reached --
+        blocked on Lemma 6.1.2's tree-type prerequisite; the blocker handoff recommends attempting
+        these two cases LAST in dispatch 2, once the tree scaffold makes every other case's
+        pattern clear.)*
   - [ ] **Lemma 6.2.3** (`:7127`): "trivial modifications … apart from one extra trivial case
-        covering the use of an axiom" (`:7138`).
+        covering the use of an axiom" (`:7138`). *(dispatch 1: not reached, depends on Lemma
+        6.1.2.)*
   - [ ] Add `public import` for `Labelled.Adequacy` to `Cslib.lean` **only on success**.
+        *(dispatch 1: not done -- gate did not close; the working file was moved to
+        `specs/517_.../probes/adequacy-gate-probe.lean` instead, per the failure branch below.)*
 - **Timing:** 5 hours (~400–600 lines). **Bounded attempt: 2 agent dispatches. Do not open a third.**
 - **Depends on:** 2
 - **Files to modify:**
@@ -405,32 +435,56 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
     Phase 9 becomes unreachable; task → `[BLOCKED]`. **Never accrue a `sorry`.**
   - Either way: report the verdict explicitly to the orchestrator. **The gate verdict is the single
     most important output of this task's first half.**
+  - **Dispatch 1 of 2 verdict (recorded here): GATE FAIL.** Lemma 6.2.2 (hard direction) complete;
+    Lemma 6.1.2/6.2.3 not reached. See
+    `specs/517_.../handoffs/adequacy-gate-blocker-handoff.md` for the full diagnosis and
+    `specs/517_.../probes/adequacy-gate-probe.lean` for the reusable mechanization. **Dispatch 2
+    of 2 remains available** before this phase's failure becomes final per the FAILURE criterion
+    above.
 
 ---
 
-### Phase 4: Contexts and 𝒯-primeness [NOT STARTED]
+### Phase 4: Contexts and 𝒯-primeness [COMPLETED]
 
 - **Goal:** Land `Context` and `TPrime` with all five clauses, and fix `𝒯_S5 := {χ_T, χ_5}`.
 - **Tasks:**
-  - [ ] Read report 01 §"Deliverable 1c". Statements from report 01 / source PDF **only**.
-  - [ ] Define **`Context (G, Γ)`** (`:5941`): `G` contains every prefix in `Γ`, and (1) the
+  - [x] Read report 01 §"Deliverable 1c". Statements from report 01 / source PDF **only**
+        (verified against the `pdftotext -layout` extraction of the source PDF directly,
+        `:5941-6040`, since the corpus warning applies).
+  - [x] Define **`Context (G, Γ)`** (`:5941`): `G` contains every prefix in `Γ`, and (1) the
         underlying set of `G` is `⊆ W(V')` for some **coinfinite** `V'`; (2) `v_{x:◇A} ∈ G` only if
         `xRv_{x:◇A}` in `G` and `v_{x:◇A}:A ∈ Γ`; (3) the **geometric-witness closure condition**.
-  - [ ] Land clause (3) as a **separate `def` + closure lemma** — it is the fiddly one and Phase 5's
-        Zorn will need it cleanly factored.
-  - [ ] Define **`TPrime (G, Γ)`** (`:5953`): **clause 0 —`G` is a classical model of `𝒯`** — plus
+        *(deviation: altered -- `Context.Γ` is typed `Set (LabelledFormula Atom)`, not `List`,
+        because Phase 5's Zorn poset must take unions of chains that may be infinite; `NIK`'s
+        `List`-typed judgement is bridged via a new `Deriv` relation. Flagged in the module
+        docstring, "Design decision", as the one definitional choice not dictated verbatim by
+        this checklist.)*
+  - [x] Land clause (3) as a **separate `def` + closure lemma** — it is the fiddly one and Phase 5's
+        Zorn will need it cleanly factored. *(deviation: altered -- `GeomWitnessClosure` is
+        vacuously `True` under the present `Label` type, since Phase 1 elided the `k`-ary
+        geometric-sequent witness operators (only the unary `dwitness` exists) and `𝒯_S5`'s two
+        axioms are both universal Horn with no existential conclusion, hence need no Skolem
+        witness. Documented explicitly rather than silently omitted; `@[nolint unusedArguments]`
+        added since the linter correctly flags the unused parameters of a deliberately-vacuous
+        `Prop`.)*
+  - [x] Define **`TPrime (G, Γ)`** (`:5953`): **clause 0 —`G` is a classical model of `𝒯`** — plus
         1. `Γ ⊢_G x:A ⟹ x:A ∈ Γ` (**Deductive closure**)
         2. `∀x` in `G`, `Γ ⊬_G x:⊥` (**Consistency**) ← **this is what banishes `Ω`; it is
            load-bearing for the `cs5Incest_forces_symm` guardrail analysis (Phase 8)**
         3. `x:A∨B ∈ Γ ⟹ x:A ∈ Γ ∨ x:B ∈ Γ` (**Disjunction property**)
         4. `x:◇A ∈ Γ ⟹ ∃y. xRy in G ∧ y:A ∈ Γ` (**Diamond property**)
-  - [ ] Define the basic geometric theory `𝒯` over `R` and fix **`𝒯_S5 := {χ_T, χ_5}`**
-        (`IS5 = IKT5`; `:3827`). Note reflexive + euclidean ⟹ **equivalence relation** — prove this
-        as a lemma; Phase 8 consumes it.
-  - [ ] **Use Simpson's geometric-theory presentation, NOT Marin's `klmn` condition** (report 01
-        §Confidence): `cs5FCIncest` is only *derived* at the end, in Phase 8.
-  - [ ] Add `public import` for `Labelled.Context` to `Cslib.lean`.
-- **Timing:** 2 hours (~180–220 lines)
+        All four proved as *defining clauses* (structure fields), not derived; Consistency is
+        stated exactly as `∀ x ∈ G.X, ¬ Deriv 𝒯 G Γ (x ∶ ⊥)`.
+  - [x] Define the basic geometric theory `𝒯` over `R` (reused `GeomAxiom`/`ClassicalModel` from
+        Phase 2's `Deduction.lean`) and fix **`𝒯_S5 := {χ_T, χ_5}`** (`IS5 = IKT5`; `:3827`). Proved
+        reflexive + euclidean ⟹ **equivalence relation** (`equivalence_of_refl_eucl`,
+        `equivalence_of_classicalModel_TS5`); Phase 8 consumes it.
+  - [x] **Use Simpson's geometric-theory presentation, NOT Marin's `klmn` condition** (report 01
+        §Confidence): `cs5FCIncest` is only *derived* at the end, in Phase 8. Confirmed: this file
+        does not reference `cs5FCIncest`, `klmn`, or any Marin-style frame condition.
+  - [x] Add `public import` for `Labelled.Context` to `Cslib.lean`.
+- **Timing:** 2 hours (~180–220 lines; landed ~320 lines with the `Deriv` bridge and extensive
+  docstrings covering the flagged definitional choice and the guardrail analysis)
 - **Depends on:** 2
 - **Files to modify:**
   - `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean` — new (owned; **territory

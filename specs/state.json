@@ -1,5 +1,5 @@
 {
-  "next_project_number": 514,
+  "next_project_number": 516,
   "active_projects": [
     {
       "project_number": 513,
@@ -1473,6 +1473,38 @@
           "summary": "Phase 3 route-2 partial progress"
         }
       ]
+    },
+    {
+      "project_number": 514,
+      "project_name": "s5_tableau_termination_literature_grounding",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Ground task 504's PROVEN S5 tableau termination obstruction in the literature and produce a concrete, lemma-level implementation recommendation for task 515. Root cause to confirm and characterize precisely: S5's universal/global box rule (modalApplyOneS5) propagates box-formulas to ALL branch worlds irrespective of accessibility edges, so there is no edge-relation against which to decrement a modal-depth rank -- the edge-local rank-potential FMP argument (RuleApplicationSpec.rankStep, GenericDriver.lean) is provably inapplicable (task 504 landed modalApplyOneS5_rankStep_not_dischargeable, a sorry/axiom-free counterexample). (1) ACQUIRE + full-text ingest Massacci2000 (Single Step Tableaux for Modal Logics, J. Automated Reasoning 24(3):319-364, DOI 10.1023/A:1006155811656) and Gore1999 (Tableau Methods for Modal and Temporal Logics, Handbook of Tableau Methods, pp.297-396, DOI 10.1007/978-94-017-1754-0_6) via /literature Mode B; both are registered in references.bib (BibKeys Massacci2000, Gore1999) and specs/literature/SOURCES.md but PDFs are NOT yet acquired (paywalled, no OA copy found via Semantic Scholar/Unpaywall/arXiv). If PDFs remain unavailable, fall back to Gore's openly-available ANU/RSISE tech-report versions and the in-corpus surrogates ChagrovZakharyaschev1997 (filtration, FMP) and blackburn_2002_book. (2) Cross-check the literature's account of WHY S5 (and universal/global modalities) needs loop-checking / prefix-management / filtration rather than a depth-decrement measure, against task 504's mechanized obstruction. (3) Extract the concrete terminating strategy (single-step prefix loop-checking a la Massacci; semantic filtration FMP; or global caching) and MAP it onto CSLib's generic driver: specify what a rank-machinery-bypassing S5 termination/decidability interface looks like, which RuleApplicationSpec fields change or are replaced, and whether it can coexist with the existing K/T/B instantiations without regression. Deliverable: a research report with a BibKey-cited, lemma-level recommendation sufficient to plan task 515. Read-only survey: Cslib/Logics/Modal/Tableau/{GenericDriver,S5Simplification,FrameCompleteness,BDriver}.lean; specs/504_*/summaries/01_*.md and the Phase-2 obstruction proof. Comparable in scope to the S4/task-511 loop-checking analysis.",
+      "effort": "3-5 hours",
+      "parent_task": 504,
+      "dependencies": [],
+      "artifacts": [],
+      "created": "2026-07-15T06:19:22Z",
+      "last_updated": "2026-07-15T06:19:22Z",
+      "session_id": null
+    },
+    {
+      "project_number": 515,
+      "project_name": "s5_universal_rule_termination_unblock_504",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.",
+      "effort": "8-12 hours",
+      "parent_task": 504,
+      "dependencies": [
+        514
+      ],
+      "artifacts": [],
+      "created": "2026-07-15T06:19:22Z",
+      "last_updated": "2026-07-15T06:19:22Z",
+      "session_id": null
     }
   ],
   "repository_health": {

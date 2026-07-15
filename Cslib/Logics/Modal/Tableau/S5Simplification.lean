@@ -1709,6 +1709,7 @@ private lemma modalStepBranchS5gKeyed_acc_shape (φ₀ : Proposition Atom)
          · rw [show modalApplyOneS5 sf b acc = _ from by assumption]
            exact ⟨by simpa using hsf.1.symm, by simpa using hsf.2.1.symm⟩)
 
+omit [Hashable Atom] in
 /-- Characterization of the birth-key list shape a `modalStepBranchS5gKeyed` step can produce:
 `newKeys` is either `keys` unchanged (blocked step, or any non-minting shape), or `keys` grown
 by exactly one fresh entry `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)` at
@@ -1724,10 +1725,12 @@ private lemma modalStepBranchS5gKeyed_keys_shape (φ₀ : Proposition Atom)
       (newKeys = keys ∨
         (∃ φ, sf.sign = .neg ∧ sf.formula = .box φ ∧
           blockingWorldS5Keyed φ₀ keys b .neg φ sf.label = none ∧
-          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]) ∨
+          newKeys =
+            keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]) ∨
         (∃ φ, sf.sign = .pos ∧ sf.formula = .diamond φ ∧
           blockingWorldS5Keyed φ₀ keys b .pos φ sf.label = none ∧
-          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)])) := by
+          newKeys =
+            keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)])) := by
   unfold modalStepBranchS5gKeyed at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   clear hstep
@@ -2094,6 +2097,7 @@ lemma modalStepBranchS5g_preserves_eClosure (φ₀ : Proposition Atom)
 
 /-! ## Birth-Key Preservation Lemmas (task 515 Phase 5, the `keysDistinct` crux) -/
 
+omit [Hashable Atom] in
 /-- **Phase 5 field 1/4, the crux**: `modalStepBranchS5gKeyed` preserves `keysDistinct`. Keys
 never change value once recorded; the blocked/non-minting cases leave `keys` untouched entirely.
 The minting case appends exactly one fresh entry, and `blockingWorldS5Keyed_none_fresh`
@@ -2126,6 +2130,61 @@ lemma modalStepBranchS5g_preserves_keysDistinct (φ₀ : Proposition Atom)
   · rw [hnk]; exact hDistinct
   · exact hmint .neg φ hnone hnk
   · exact hmint .pos φ hnone hnk
+
+omit [Hashable Atom] in
+/-- **Phase 5 field 4/4**: `modalStepBranchS5gKeyed` preserves `keysInUniverse`
+(`∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀`). Old keys are unaffected. The fresh key
+`successorBirthContentS5 φ₀ b s φ sf.label` is, by construction, `insert (s, φ)` into a
+`Finset.filter` over `signedSubfmls φ₀` (hence trivially `⊆ signedSubfmls φ₀` once the witness
+pair `(s, φ)` itself is shown to lie in `signedSubfmls φ₀`); the witness's formula-closure
+`φ ∈ modalSubfmls φ₀` follows from `bClosure`/`sf ∈ b`/`modalSubfmls_trans_S5`, identical
+reasoning to `bClosure`'s own mint-case witness argument. -/
+lemma modalStepBranchS5g_preserves_keysInUniverse (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hInUniv : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
+    ∀ w k, (w, k) ∈ newKeys → k ⊆ signedSubfmls φ₀ := by
+  obtain ⟨sf, hsfmem, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_keys_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  have hkinuniv : ∀ (s : Sign) (φ : Proposition Atom), φ ∈ modalSubfmls φ₀ →
+      successorBirthContentS5 φ₀ b s φ sf.label ⊆ signedSubfmls φ₀ := by
+    intro s φ hφ
+    unfold successorBirthContentS5 successorBirthContent
+    apply Finset.insert_subset_iff.mpr
+    refine ⟨?_, Finset.filter_subset _ _⟩
+    simp only [signedSubfmls, Finset.mem_product, Finset.mem_insert, Finset.mem_singleton,
+      List.mem_toFinset]
+    exact ⟨by cases s <;> simp, hφ⟩
+  rcases hcase with hnk | ⟨φ, -, hf, -, hnk⟩ | ⟨φ, -, hf, -, hnk⟩
+  · rw [hnk]; exact hInUniv
+  · have hsrc : (Proposition.box φ) ∈ modalSubfmls φ₀ := by
+      have := modalUniverseS5_mem_formula (hbClosure sf hsfmem)
+      rwa [hf] at this
+    have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+    have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+    intro w k hwk
+    rw [hnk] at hwk
+    simp only [List.mem_append, List.mem_singleton, Prod.mk.injEq] at hwk
+    rcases hwk with hwk | ⟨-, rfl⟩
+    · exact hInUniv w k hwk
+    · exact hkinuniv .neg φ hφsub
+  · have hsrc : (Proposition.diamond φ) ∈ modalSubfmls φ₀ := by
+      have := modalUniverseS5_mem_formula (hbClosure sf hsfmem)
+      rwa [hf] at this
+    have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+    have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+    intro w k hwk
+    rw [hnk] at hwk
+    simp only [List.mem_append, List.mem_singleton, Prod.mk.injEq] at hwk
+    rcases hwk with hwk | ⟨-, rfl⟩
+    · exact hInUniv w k hwk
+    · exact hkinuniv .pos φ hφsub
 
 /-! ## Pigeonhole World Bound (task 515 Phase 6)
 

@@ -1,10 +1,20 @@
-# Handoff: Task 515 -- Phase 4 COMPLETE, Phase 5 `keysDistinct` Landed, Three Birth-Key Fields Remain
+# Handoff: Task 515 -- Phase 4 COMPLETE, Phase 5 2/4 Birth-Key Fields Landed, Two Remain
 
 **Date**: 2026-07-15
 **Session**: sess_1784130637_a36e2a (cycle 4)
 **Status**: Phase 4 (generic-field preservation) now **COMPLETE**. Phase 5 (birth-key
-preservation) 1/4 fields landed (`keysDistinct`). Phase 6 (pigeonhole) remains `[COMPLETED]`
-from cycle 2, unchanged.
+preservation) 2/4 fields landed (`keysDistinct`, `keysInUniverse` -- the latter added in a
+follow-up pass within the same cycle-4 dispatch, after this handoff's original draft; its
+"Recommended next dispatch order" below is superseded by the plan file's own updated task list,
+which should be treated as authoritative). Phase 6 (pigeonhole) remains `[COMPLETED]` from
+cycle 2, unchanged.
+
+**UPDATE (same dispatch, after initial write)**: `keysInUniverse` also landed sorry-free,
+confirming this handoff's own prediction that it was "likely the easiest of the three
+remaining fields" -- see the plan file's Phase 5 task list for the final per-field status.
+Only `keyLowerBd` and `keysTotal` remain `[NOT STARTED]`. The `keysInUniverse` section below is
+retained for its (still-accurate, now-historical) reasoning, but its status line is stale --
+consult the plan file, not this paragraph, for current status.
 
 ## What landed this dispatch (cycle 4)
 

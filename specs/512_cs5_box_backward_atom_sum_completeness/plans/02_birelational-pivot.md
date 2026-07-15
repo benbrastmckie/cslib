@@ -253,37 +253,67 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 3: Birelational frame class + ≤-mediated incestuality condition [NOT STARTED]
+### Phase 3: Birelational frame class + ≤-mediated incestuality condition [COMPLETED]
 
 - **Goal:** Define the CS5 canonical frame as birelational: worlds = quasi-prime theories, `≤` = `⊆`,
   `R` **one-sided** (`Γ R Δ ⟺ boxInv Γ ⊆ Δ`), plus the ≤-mediated S5 **incestuality** frame condition
   (Marin Thm 7.1 shape) REPLACING the two-sided `cs5Tail` back-inclusion. *Medium risk, ~100–150 lines.*
 - **Tasks:**
-  - [ ] Define the one-sided canonical relation `R Γ Δ := boxInv Γ ⊆ Δ` (reuse CSLib's `boxInv`;
+  - [x] Define the one-sided canonical relation `R Γ Δ := boxInv Γ ⊆ Δ` (reuse CSLib's `boxInv`;
     this is Simpson's `{B | □B ∈ X} ⊆ Y`, the modal clause with no "back" clause baked in).
-  - [ ] Define the ≤-mediated incestuality condition for the (b)/(5) axiom instance in Marin Thm 7.1's
+    *Landed as `cs5OnesidedR`, matching the Phase 1 probe's signature exactly.*
+  - [x] Define the ≤-mediated incestuality condition for the (b)/(5) axiom instance in Marin Thm 7.1's
     exact form: `wRᵏu ∧ wRᵐv ⟹ ∃u′. u ≤ u′ ∧ ∃x. u′Rˡx ∧ vRⁿx` specialized to CS5's B (symmetry) as a
     Scott–Lemmon path axiom `◇ᵏ□ˡA ⊃ □ᵐ◇ⁿA`. Cross-check against Simpson's F1/F2 forward/backward
-    confluence (`≤∘R ⊆ R∘≤`, `R∘≤ ⊆ ≤∘R`).
-  - [ ] Reuse the task-509 `cs5FC` frame-condition MACHINERY (structure/plumbing) but swap the bundled
+    confluence (`≤∘R ⊆ R∘≤`, `R∘≤ ⊆ ≤∘R`). *Landed as `cs5Incest`, instantiated at `k = l = 0`,
+    `m = n = 1` for `bBox` (`A → □◇A`): `R⁰` is the identity relation so `wR⁰u`/`u′R⁰x` collapse to
+    `u = w`/`x = u′`, giving `r w v ⟹ ∃u′ ≥ w, r v u′`. Explicitly documented as NOT the naive
+    classical symmetry condition (Marin Remark 7.3). F1/F2 cross-check recorded as a docstring-level
+    design note (the general birelational monotonicity any `CKForces` model already has structurally);
+    NOT mechanized as a separate Lean lemma this phase — that level of frame-theoretic verification is
+    Phase 5's canonical-model-satisfies-the-condition obligation, not a Phase-3 definition-level task.*
+  - [x] Reuse the task-509 `cs5FC` frame-condition MACHINERY (structure/plumbing) but swap the bundled
     conjuncts: drop the plain-symmetry+plain-transitivity bundle, add the incestuality condition.
-  - [ ] Confirm the propositional / box-forward / diamond truth-lemma clauses remain served by
+    *Landed as `cs5FCIncest` (in `CS5Canonical.lean`, NOT `CKExtension.lean` — `cs5FC''` itself is
+    untouched, per the plan's rollback note that Phase 4 adds alongside rather than edits in place):
+    reflexivity + the `fourBox` re-basing clause + the `bBox`-style `FCsym_box` clause are KEPT
+    verbatim from `cs5FC''`; plain transitivity (`fourDia`) and plain symmetry (`bDia`) are DROPPED and
+    replaced by `cs5Incest`.*
+  - [x] Confirm the propositional / box-forward / diamond truth-lemma clauses remain served by
     `CKForces` (monotone box truth quantifying through `≤ ∘ R`), matching `CS4.lean`'s one-sided-R
-    birelational template.
-- **Timing:** ~3 hours
+    birelational template. *Confirmed via the one-sided world-type port
+    (`cs5CanonTail`/`cs5CanonSeg`/`CS5CanonSegment`/`cs5CanonMreach`/`cs5CanonVal`/`cs5CanonBot`,
+    mirroring `CS4.lean`'s `cs4Tail`/`cs4Seg`/`CS4Segment`/`cs4Mreach` template rather than the
+    discarded two-sided `cs5Tail`/`CS5Segment`) plus a documentation note (`CKForces` is generic over
+    any `World`/`r`/`val`/`botForces`; only box-backward, Phase 6, needs anything beyond it, and that
+    case is frame-condition-independent per the Phase 1 gate). Also landed the free reflexivity fact
+    `cs5CanonRefl` (mirrors `cs4_refl`/`cs5_refl`, needs only axiom `T`) — the REMAINING frame-condition
+    clauses (re-basing/incestuality-holds-on-canonical-model) are Phase 5's obligation, not proved
+    here.*
+- **Timing:** ~3 hours (actual: single dispatch)
 - **Depends on:** 2
 - **Reused assets (real names + file:line):**
   - `boxInv`, `QuasiPrime`, `.closed`, `.disj` — `Segment.lean`.
   - `CKForces`, `CKSegment`, `cmreach`, `CKExtension` plumbing — `Segment.lean` / `CKExtension.lean`.
   - `CS4.lean`'s `cs4_truth_lemma` / restricted-tail template — `CS4.lean:457` (one-sided-R precedent).
   - task-509 `cs5FC`/`cs5FC''` frame-condition scaffold — `CKExtension.lean` (machinery reused).
+  - `CKSegment.ofHead`'s generic maximal tail — `Segment.lean:142-150` (the one-sided tail's exact
+    template, confirmed identical to what `cs5CanonSeg` needed).
+  - `cs5_boxInv_subset` (axiom `T`) — `CS5.lean:621`, used by `cs5CanonRefl`.
   - Simpson canonical model (`{B | □B ∈ X} ⊆ Y`) — corpus chunk `682e04d443e7bbd7` (`Simpson1994`);
     Marin Thm 7.1 incestuality — `MarinMoralesStrassburger2021`.
 - **Files to modify:**
   - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`.
 - **Success criteria / CI gates:** the new relation + incestuality frame condition compile;
   `lake build` green; `checkInitImports`/`lint-style`/`shake` clean; no `sorry`, no new axiom.
+  — **MET.**
 - **Verification:** the frame class typechecks; `CKForces`/box-forward clauses reuse compiles.
+  — **CONFIRMED**: `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` succeeds
+  (728/728 jobs) on first attempt; `lake exe checkInitImports`/`lake exe lint-style`/`lake lint`/
+  `lake shake` all clean on the file; `lean_verify` on `Cslib.Logic.Modal.cs5CanonRefl` reports
+  `axioms: [propext]`, no `sorryAx`, no warnings; grep confirms zero `sorry` tactics (one docstring
+  prose mention only) and zero unexpected external references to the new declarations (none
+  consumed yet, as expected — Phases 4-7 consume them).
 
 ---
 

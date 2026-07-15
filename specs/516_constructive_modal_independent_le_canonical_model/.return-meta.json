@@ -1,27 +1,21 @@
 {
   "status": "researched",
-  "started_at": "2026-07-15T08:38:35Z",
-  "completed_at": "2026-07-15T08:55:00Z",
+  "started_at": "2026-07-14T00:00:00Z",
+  "completed_at": "2026-07-15T00:00:00Z",
   "artifacts": [
-    {
-      "path": "specs/516_constructive_modal_independent_le_canonical_model/reports/01_independent-le-canonical-model.md",
-      "type": "report",
-      "summary": "De-risking design report: independent-≤ canonical model for CS5 completeness is refuted (escalate)."
-    },
-    {
-      "path": "specs/516_constructive_modal_independent_le_canonical_model/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Orchestrator handoff, next_action_hint=escalate."
-    }
+    "specs/516_constructive_modal_independent_le_canonical_model/reports/02_simpson-box-backward-route-a.md",
+    "specs/516_constructive_modal_independent_le_canonical_model/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "complete",
-    "details": "Report + orchestrator handoff written. Verdict: NO-GO on independent-≤ (escalate)."
+    "stage": "done",
+    "details": "Simpson chunks mined verbatim; guardrails verified against source; report + handoff written"
   },
+  "outcome": "Route A not plan-ready (research gamble on open pair-primeness); Route B is faithful port of Simpson's labelled IS5 method (zero reuse). next_action_hint=escalate.",
+  "next_action_hint": "escalate",
   "metadata": {
-    "session_id": "sess_1784104673_dcb72f",
+    "session_id": "sess_1784105723_fac1a0",
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "cslib-research", "cslib-research-agent"]
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

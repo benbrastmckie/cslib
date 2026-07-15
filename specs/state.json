@@ -1758,11 +1758,11 @@
       ],
       "parent_task": 512,
       "created": "2026-07-15T08:37:29Z",
-      "last_updated": "2026-07-15T08:54:43Z",
+      "last_updated": "2026-07-15T09:09:10Z",
       "priority": null,
       "effort": "30-50 hours",
       "artifacts": [],
-      "blockers": "Independent-<= premise REFUTED (~85%) by CSLib's own landed infra, not conjecture: cs5Incest_forces_symm's hmono (head monotone under <=) is STRUCTURAL, forced by ckforces_persistence (Forcing.lean:122: CKForces persistent under <= for every formula on arbitrary frames) + cval = head-membership (Segment.lean:177) + any truth lemma -- so head is monotone under WHATEVER <= is chosen; making <= independent only makes it a sub-relation of subset, hmono survives, cs5Incest collapses to plain symmetry regardless. Simpson 1994 Section 3.3 uses X<=X' iff X subset X' VERBATIM -- so <>=subset was never the culprit; the task premise was a misreading. The REAL obstruction is orthogonal to <=: the constructive simultaneous-pair box-backward / primeness-stability over consistent theories (cs5_symmetric_tail_box_gap, CS5.lean:712) -- the same core unclosed since task 509. Guardrail set now certifies FOUR dead routes: atom-sum (512), one-sided-R, two-sided-R, independent-<=. Two routes remain, both need human funding: Route A (Simpson-faithful consistent-prime worlds + simultaneous pair-Lindenbaum, <=stays subset, ~600-1000 lines, hard core UNCLOSED = the resistant problem); Route B (Marin fully-labelled saturated model, ~zero CSLib reuse, from scratch). See reports/01_independent-le-canonical-model.md."
+      "blockers": "Route A (Simpson-faithful prime-theory transcription) REFUTED ~95% (report 02, literature-grounded): Simpson never does symmetric box-backward in prime-theory form -- his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi; his rigorous IS5 completeness (Ch 7-8) ABANDONS prime theories for LABELLED T-prime bounded contexts (T-Comp graph completion Lemma 8.2.5; bounded box-backward Lemma 8.2.6). The classical decidability step is NOT a blocker (Lean has Classical.em); the real wall is structural -- prime non-maximal theories lack negation-completeness, tripping cs5_symmetric_tail_box_gap. EXHAUSTIVE: every prime-theory-canonical route (atom-sum, one-sided-R, two-sided-R, independent-<=, Simpson-faithful A) is dead for one root reason. CS5 IS complete; ONLY faithful path is Route B: labelled/bounded-context canonical model (Simpson Ch 7-8 / Marin 2021), ~1500-2500 lines, ~zero CSLib reuse -- a new labelled constructive-modal deduction framework. HUMAN FUNDING DECISION: fund Route B vs consolidate the substantial landed results (multi-condition soundness + complete guardrail set)."
     }
   ],
   "repository_health": {

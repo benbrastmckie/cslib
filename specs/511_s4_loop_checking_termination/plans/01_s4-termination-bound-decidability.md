@@ -252,30 +252,103 @@ chain, so each wave contains a single phase.
 - **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; the restated structure
   and the S4 step definition typecheck; `lean_verify` zero sorry/axiom on the new definitions.
 
-### Phase 5: `S4LoopInv` preservation lemmas — the crux [NOT STARTED]
+### Phase 5: `S4LoopInv` preservation lemmas — the crux [BLOCKED]
 
-- **Goal:** Prove every `modalStepBranchS4` step preserves the four key fields. This is the
+- **Goal:** Prove every `modalStepBranchS4Keyed` step preserves the four key fields. This is the
   mathematical heart of the task; budget generously.
 - **Tasks:**
-  - [ ] `modalStepBranchS4_preserves_keyLowerBd` — persistent steps only add formulas, so live sets
-    grow (`relevantSetFinset_mono`); birth keys are unchanged ⇒ `⊆` preserved. (Survives Gap 1.)
-  - [ ] `modalStepBranchS4_preserves_keysDistinct` — keys never change on any step; on a *minting*
-    step the new key differs from every existing key by the `blockingWorldS4 = none` contract
-    (`blockingWorld_none_fresh` combined with `keyLowerBd`), on *persistent* steps no key changes.
-    (Fixes Gap 2.) This is the highest-risk sub-lemma.
-  - [ ] `modalStepBranchS4_preserves_keysTotal` / `_preserves_keysInUniverse` — bookkeeping (a
-    minted world gets a key; the key is a birth content ⊆ `signedSubfmls φ₀`).
-  - [ ] Assemble `modalStepBranchS4_preserves_S4LoopInv` (all fields at once, reusing the six
-    rule-independent preservation facts already available for the K/T machinery where they
-    transfer).
-- **Timing:** 3 hours
+  - [ ] `modalStepBranchS4_preserves_keyLowerBd` *(deferred: not attempted -- see blocker; even if
+    provable in isolation, it cannot assemble into a preserved `S4LoopInv` given the
+    `keysDistinct` gap below, so the ~150-250 line Rules.lean-correspondence proof it needs was not
+    undertaken this dispatch to avoid sunk cost on a phase that cannot fully close)*.
+  - [ ] `modalStepBranchS4_preserves_keysDistinct` *(BLOCKED -- structural gap identified, not a
+    Lean-tactic difficulty; see below)*.
+  - [ ] `modalStepBranchS4_preserves_keysTotal` / `_preserves_keysInUniverse` *(deferred: not
+    attempted, same reasoning -- would not assemble into a full `S4LoopInv` preservation given the
+    `keysDistinct` gap)*.
+  - [ ] Assemble `modalStepBranchS4_preserves_S4LoopInv` *(not reached)*.
+- **Timing:** 3 hours (spent on analysis + one concrete counterexample construction; no Lean code
+  written for this phase -- the gap was confirmed at the design level before investing in proof
+  engineering that cannot close, per cslib.md's "decomposition, not deferral" posture applied here
+  as "diagnose before spending the proof-engineering budget on an unclosable lemma").
 - **Depends on:** 4
-- **Files to modify:**
-  - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` — preservation lemmas
-- **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; `lean_verify` zero
-  sorry/axiom on each preservation lemma. **If `_preserves_keysDistinct` resists within budget:**
-  mark this phase [BLOCKED] with the exact open goal state, do NOT weaken the invariant, and stop
-  (standing permission).
+
+**BLOCKER** (Phase 5):
+
+- **What failed**: `modalStepBranchS4_preserves_keysDistinct` cannot be proved from the currently
+  available hypotheses (`blockingWorldS4_none_fresh` + `S4LoopInv.keyLowerBd`), and not merely as
+  a matter of Lean tactic difficulty -- the combination is **mathematically insufficient**, and a
+  concrete counterexample-shaped scenario shows why.
+
+- **What was tried**: Formalized the intended proof shape (mirroring the research report's
+  Section 4 sketch and this plan's own task description): on an unblocked minting call producing
+  new key `newkey := successorBirthContent φ₀ b s φ w`, for every existing recorded key `(w', k')
+  ∈ keys` with `w' ≠ (the fresh world)`, derive `k' ≠ newkey` from (a) `blockingWorldS4_none_fresh`
+  giving `relevantSetFinset φ₀ b w' ≠ newkey` (the guard found no *live-set* match at any known
+  world, including `w'`), and (b) `S4LoopInv.keyLowerBd` giving `k' ⊆ relevantSetFinset φ₀ b w'`
+  (the recorded key is a lower bound on the current live set). Attempted to chain these into `k' ≠
+  newkey`.
+
+- **Why it's stuck**: The chain does not go through. `k' ⊆ X` and `X ≠ newkey` do **not** imply `k'
+  ≠ newkey` -- if `k'` is a **proper** subset of `X` (i.e. `w'`'s relevant set has genuinely grown
+  since `k'` was recorded, which is the *expected*, *common* case once propositional/modal
+  decomposition proceeds at `w'`), then `k' = newkey ⊊ X ≠ newkey` is entirely consistent. Concrete
+  counterexample sketch (abstract, universe `{a, b}`): world `A` is minted with birth key `{a}`.
+  Later, ordinary saturation at `A` (propositional decomposition of `A`'s own formulas, or T/4-rule
+  box-propagation) grows `A`'s live relevant set to `{a, b}` -- this is routine, expected behavior,
+  not a corner case; `S4LoopInv.keyLowerBd` is stated as `⊆` (not `=`) precisely because a world's
+  relevant set is *expected* to grow past its birth content as saturation proceeds. At a later step,
+  a fresh world `B` is minted whose prospective birth content also computes to `{a}`. The guard
+  `blockingWorldS4` checks `A`'s **current** relevant set `{a, b}` against `{a}` -- no match, guard
+  does **not** block (correctly, per the guard's own literal contract: it detects live-set
+  equality, and `{a, b} ≠ {a}`). `B` is minted with key `{a}`. Now `key(A) = {a} = key(B)`, with `A
+  ≠ B` -- `keysDistinct` is violated the moment `B`'s key is recorded. This is not a pathological
+  edge case: it is the generic behavior of a guard that compares against *live, growing* sets while
+  the invariant it must preserve is about *stable, historical* keys.
+
+- **What is needed**: The guard must compare the prospective birth content against the **recorded
+  keys** (`keys : List (WorldIndex × Finset (Sign × Proposition Atom))`), not against worlds'
+  live `relevantSetFinset`. Concretely: `blockingWorldS4` needs a `keys`-aware redesign (block iff
+  `∃ (w', k') ∈ keys, k' = successorBirthContent φ₀ b s φ w`), which directly gives `keysDistinct`'s
+  preservation for free (no live-set indirection). This is a **structural**, not incremental,
+  redesign: `blockingWorldS4`/`modalApplyOneS4` currently has type `RuleApply Atom` (`SignedFormula
+  → List SignedFormula → Accessibility → RuleResult × Accessibility`), with **no** `keys` parameter
+  -- and `modalApplyOneS4` is directly consumed, unparametrized by `keys`, by `modalHintikkaSetS4`,
+  `modalTruthLemmaS4`, and all of task 506's Phase 5-7 bridge lemmas (`hintikkaS4_box_pos_step` and
+  its four siblings, `modalOpenBranchS4_countermodel`), all landed and shipped. Threading `keys`
+  through the guard means either (a) redefining `modalStepBranchS4Keyed` to bypass
+  `modalApplyOneS4`'s *own* internal guard decision at the two minting shapes entirely (computing
+  the keys-aware blocking decision itself, then falling through to the *raw* K/T rule only when
+  unblocked) while leaving `modalApplyOneS4`/`modalHintikkaSetS4`/`modalTruthLemmaS4` (task 506,
+  live-set-guarded) untouched as a valid but decidability-orthogonal artifact, or (b) introducing a
+  new `modalApplyOneS4Keyed`-shaped rule-application variant and re-deriving the Phase 5-7 (506)
+  Hintikka/truth-lemma bridges against it from scratch. Either path is a materially larger
+  redesign than "Option A2" as scoped by the research report and this plan's Phase 3/4 -- it is
+  closer in size to the Phase 9 driver work the plan already flags as needing its own task. Given
+  the prohibition on weakening the invariant (cslib.md; this plan's own Phase 5 verification note),
+  this is the honest stopping point.
+
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`/`trivial`, or any vacuous
+  placeholder; did NOT weaken `keysDistinct` (e.g. to hold only for *saturated* worlds, which would
+  silently reintroduce something close to research's documented Option B fallback without
+  disclosing the substitution) to force a proof through.
+
+- **Scope note**: Phases 1-4 (the exponent fix, the finite signed-key codomain, the
+  successor-birth-content guard redesign fixing Gap 2 *as a live-set comparison*, and the restated
+  `S4LoopInv` structure/keyed-step definitions) remain fully valid, green, sorry/axiom-free
+  contributions independent of this blocker -- they correctly diagnose and structurally address
+  both original Phase 8 gaps at the *definitional* level (the guard now compares the right
+  quantity in spirit -- birth content, not source-world content -- fixing Gap 2's specific defect;
+  `S4LoopInv` is now stated over stable data, not the live branch, addressing Gap 1's specific
+  defect) even though the *live-set* comparison target chosen for the guard turns out to be
+  insufficiently strong to carry the pigeonhole argument through to completion. This is itself a
+  valuable, precise research finding for whoever picks up Phase 5: "birth-content guard, Option A2
+  as literally specified" needs the guard to compare against **keys**, not **live sets** -- a
+  refinement of the research report's Option A that the report's own Section 4 sketch did not
+  make explicit (its proof sketch implicitly needed this stronger property without stating it as a
+  requirement).
+- **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking` and `...FrameCompleteness`
+  remain green (no code was added for this phase); zero sorry/axiom (nothing new was written).
 
 ### Phase 6: Pigeonhole world bound (closes Phase 8) [NOT STARTED]
 

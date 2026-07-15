@@ -1,0 +1,35 @@
+{
+  "status": "partial",
+  "summary": "Phases 1-4 landed green and are self-contained (exponent fix, finite signed-key infrastructure, successor-birth-content guard redesign fixing Gap 2, key-threaded S4 step + restated S4LoopInv fixing Gap 1's statement). Phase 5 (S4LoopInv preservation, the plan's flagged crux) is BLOCKED on a structural gap discovered before writing any Phase 5 Lean code: the guard compares prospective birth content against worlds' LIVE relevant sets, but keysDistinct's preservation needs comparison against RECORDED KEYS -- a live-set comparison cannot guarantee birth-key distinctness once a world's live set grows past its own birth key (concrete counterexample constructed and documented). Phases 6-7 were not attempted (both depend on Phase 5 per the plan's wave analysis). Zero sorry, zero new axiom, zero vacuous placeholders throughout.",
+  "phases_completed": 4,
+  "phases_total": 7,
+  "blockers": [
+    {
+      "phase": 5,
+      "phase_name": "S4LoopInv preservation lemmas — the crux",
+      "type": "structural",
+      "what_failed": "modalStepBranchS4_preserves_keysDistinct cannot be proved from blockingWorldS4_none_fresh + S4LoopInv.keyLowerBd -- the combination is mathematically insufficient (k' subset of X and X != newkey does not imply k' != newkey when k' is a proper subset of X, which is the expected case once ordinary saturation grows a world's live relevant set past its birth key).",
+      "concrete_scenario": "World A minted with birth key {a}; ordinary saturation grows A's live relevant set to {a,b}; a later fresh world B's prospective birth content also computes to {a}; guard checks A's CURRENT set {a,b} != {a}, does not block; B is minted with key {a} = A's key; keysDistinct violated the instant B's key is recorded.",
+      "fix_needed": "Redesign blockingWorldS4 to compare the prospective birth content against the RECORDED keys list directly (not against live relevantSetFinset values). This requires either (a) redefining modalStepBranchS4Keyed to bypass modalApplyOneS4's own minting-shape guard decision and compute a keys-aware decision itself, leaving the live-set-guarded modalApplyOneS4/task-506 Hintikka/truth-lemma proofs as a separate valid artifact, or (b) a new keyed rule-application variant with re-derived Hintikka/truth-lemma bridges. Comparable in scope to the Phase 9 driver work already flagged for separate spawning.",
+      "documented_at": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md (Phase 5 section)",
+      "prohibited_workarounds_avoided": "No sorry, no vacuous placeholder, no weakening of keysDistinct to a saturated-worlds-only version."
+    }
+  ],
+  "continuation_context": {
+    "recommended_action": "Spawn a follow-on task to redesign the S4 minting guard to compare against recorded birth keys rather than live relevant sets, scoped separately from this task per the blocker documentation. Once landed, Phase 5's remaining preservation lemmas and Phases 6-7 of this plan become tractable; Phases 1-4's infrastructure (signedSubfmls, relevantSetFinset, successorBirthContent, the exponent-corrected modalWorldBoundS4) remains valid and reusable.",
+    "plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+    "files_modified": [
+      "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
+    ],
+    "phases_landed": [1, 2, 3, 4],
+    "phase_blocked": 5,
+    "phases_not_attempted": [6, 7]
+  },
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+    "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
+    "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json",
+    "specs/511_s4_loop_checking_termination/.return-meta.json"
+  ]
+}

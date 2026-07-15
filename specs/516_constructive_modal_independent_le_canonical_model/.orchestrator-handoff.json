@@ -1,0 +1,33 @@
+{
+  "status": "researched",
+  "task_number": 516,
+  "session_id": "sess_1784104673_dcb72f",
+  "outcome": "NO-GO on the independent-≤ rebuild as framed. The design premise is refuted by CSLib's own mechanized infrastructure: CKForces persistence under ≤ for all formulas (Forcing.lean:122) plus atom-forcing-as-head-membership (Segment.lean:177) force `head` monotone under ANY choice of ≤ compatible with a truth lemma. That is exactly cs5Incest_forces_symm's hypothesis (CS5Canonical.lean:643, hmono), so cs5Incest collapses to plain box-symmetry regardless of how ≤ is engineered. Independent ≤ makes ≤ a sub-relation of ⊆, not something that violates head-monotonicity — the collapse hypothesis survives intact. Corroborated by cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511, axiom-free): Simpson's two-sided R = the discarded symmetric box-tail over CS5. Simpson's own IS5 canonical model uses ≤=⊆ verbatim (corpus chunk 682e04d443e7bbd7), so ≤=⊆ is NOT the culprit. The genuine, orthogonal obstruction is the constructive simultaneous-pair box-backward over consistent theories (cs5_symmetric_tail_box_gap, CS5.lean:712) — task 512's Phase 8-10 unclosed primeness-stability problem. A rebuild CAN close CS5 completeness, but only via Route A (Simpson-faithful: consistent-prime worlds + simultaneous pair-Lindenbaum, ≤ stays ⊆, ~600-1000 lines, hard core UNCLOSED) or Route B (Marin fully-labelled saturated model, ~zero CSLib reuse, ~1500-2500 lines). Neither is 'make ≤ independent'.",
+  "summary": "Independent-≤ canonical model de-risking for CS5 completeness. VERDICT: escalate. The authorized lever (decouple ≤ from ⊆ to defeat cs5Incest_forces_symm) is refuted at the mechanized level — ckforces_persistence forces head-monotonicity under any ≤, so the collapse hypothesis is structural, not a consequence of ≤=⊆. CS5 completeness itself is not impossible (CS5≡IS5 is complete; Simpson proves it over ≤=⊆), but the real obstruction is the constructive simultaneous-pair box-backward (cs5_symmetric_tail_box_gap), orthogonal to ≤. Two viable-but-costly routes identified (consistent-prime+pair-Lindenbaum; or fully-labelled Marin), both with unresolved hard cores requiring a human funding decision.",
+  "confidence": "~85% that independent-≤ cannot defeat cs5Incest_forces_symm for the stated reason (grounded in mechanized ckforces_persistence + le/cval definitions, not literature inference). Residual ~15%: a from-scratch labelled/saturated model (Marin) could reach completeness, but with ~zero CSLib reuse and without vindicating the independent-≤ mechanism.",
+  "artifacts": [
+    {
+      "path": "specs/516_constructive_modal_independent_le_canonical_model/reports/01_independent-le-canonical-model.md",
+      "type": "report",
+      "summary": "Research/design report refuting the independent-≤ rebuild. Answers all 6 design questions: (Q1) Simpson's ≤ is literally ⊆; no literature construction has a ≤ decoupled from theory-growth. (Q2) cs5Incest_forces_symm's hmono is forced by ckforces_persistence + truth lemma, for ANY ≤ — the rigorous refutation. (Q3) Simpson's box-backward/F2 map onto quasi_prime_exclusion/box_refuting_theory/dia_refuting_theory but need consistency + simultaneous pair-Lindenbaum, not ≤-independence. (Q4) shared Preorder(CKSegment) ≤=head-inclusion untouched; recommend parallel/isolated Route A over generalizing shared infra. (Q5) reuse ledger; negative lemmas become permanent guardrails. (Q6) honest ~85% NO-GO with residual risks."
+    }
+  ],
+  "next_action_hint": "escalate",
+  "escalation_reason": "The user-authorized independent-≤ mechanism is refuted by CSLib's own mechanized ckforces_persistence + cval/le definitions (not a conjecture). CS5 completeness is not impossible, but the only viable routes (A: consistent-prime + simultaneous pair-Lindenbaum, ≤ stays ⊆; B: Marin fully-labelled saturated model, zero reuse) both have unresolved hard cores. Human must decide whether to fund Route A (re-attacking task 512 Phase 8-10 primeness-stability with a consistency restriction as the new untested ingredient), fund Route B (from-scratch reformalization), or bank the now-comprehensive negative result (one-sided-R, two-sided-R, AND independent-≤ all mechanized dead).",
+  "key_findings": [
+    "cs5Incest_forces_symm (CS5Canonical.lean:643) hypothesis hmono is structural: forced by ckforces_persistence (Forcing.lean:122, all-formulas persistence on arbitrary frames) + cval=head-membership (Segment.lean:177) + any truth lemma. Independent ≤ does NOT break it.",
+    "Simpson 1994 §3.3 canonical model uses X ≤ X' iff X ⊆ X' verbatim (corpus chunk 682e04d443e7bbd7). The task's premise that Simpson uses an independent ≤ is a misreading.",
+    "cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511, axiom-free) already refutes report 06's two-sided-R fix: Simpson's diamond clause = reverse box clause = cs5Tail over CS5 quasi-prime theories.",
+    "The real obstruction is cs5_symmetric_tail_box_gap (CS5.lean:712): constructive simultaneous-pair box-backward over consistent theories, task 512 Phase 8-10 unclosed primeness-stability — orthogonal to ≤.",
+    "Shared ≤=head-inclusion is in Preorder(CKSegment) (Segment.lean:161); consumed by CK/CT/CS4 — do NOT generalize QuasiPrime to require consistency (would regress landed CK/CT/CS4 fallible-world completeness)."
+  ],
+  "metadata": {
+    "agent_type": "cslib-research-agent",
+    "task_type": "cslib",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "cslib-research", "cslib-research-agent"],
+    "lit_flag": true,
+    "no_production_lean": true,
+    "bibkeys_grounded": ["Simpson1994", "AlechinaMendlerdePaivaRitter2001", "MarinMoralesStrassburger2021", "Pacheco2024"]
+  }
+}

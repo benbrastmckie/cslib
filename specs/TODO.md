@@ -47,7 +47,7 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 516 [NOT STARTED] — FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Reb
+  └─ 516 [BLOCKED] — FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Reb
     └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
@@ -99,7 +99,7 @@ WARNING: Task 516 not assigned to a wave (possible circular dependency)
 
 ### 516. Constructive modal independent le canonical model
 - **Effort**: 30-50 hours
-- **Status**: [NOT STARTED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509, Task 512

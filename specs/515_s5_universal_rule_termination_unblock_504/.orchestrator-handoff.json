@@ -1,49 +1,42 @@
 {
   "status": "partial",
-  "summary": "Cycle 5 (final cycle of this orchestration invocation): no new Lean declarations landed. Attempted modalStepBranchS5g_preserves_keysTotal, spending the dispatch on a combined shape helper (modalStepBranchS5gKeyed_keys_full_shape) needed to correlate the newBs-shape and newKeys-shape facts from a single case split (the existing modalStepBranchS5gKeyed_acc_shape and _keys_shape each independently obtain their own existential sf witness from hstep, so composing them as black boxes cannot be shown to share the same sf). Two small reusable lemmas (modalApplyOne_snd_eq_acc_of_not_mint_shape_S5, modalApplyOneS5_snd_eq_acc_of_not_mint_shape) DID compile standalone with zero errors. The combined helper itself hit three distinct, now fully diagnosed bugs (hygiene mismatch from pre-rewriting a separately-sourced shape witness into the match discriminant; wrong assumed Sign constructor order -- Sign.pos is declared before Sign.neg; a missing split step before injection in the wildcard sub-case) that were not fixed within budget. Per the orchestrator's explicit mid-cycle instruction to stop pushing on new proof obligations and reach a green checkpoint, the entire uncommitted draft was reverted via git checkout rather than committed or left with a sorry. S5Simplification.lean is byte-identical to the last CI-green commit (fcbe121c). Only the plan file (checklist annotations reflecting the cycle-5 attempt, a twelve-field wording correction in five places that still read 'ten-field', and this cycle's writeup) and this handoff/metadata were updated.",
-  "phases_completed": 5,
+  "summary": "Cycle 6 (hard-mode /implement resume): Phase 5 COMPLETED (4/4). Landed both remaining birth-key preservation lemmas sorry-free -- modalStepBranchS5g_preserves_keysTotal and modalStepBranchS5g_preserves_keyLowerBd -- closing the S5LoopInv twelve-field termination chain (Phases 3-6). keysTotal used a new combined shape helper modalStepBranchS5gKeyed_keys_full_shape that compiled on the first attempt by mirroring the landed _keys_shape skeleton (split at hsf <;> repeat' split at hsf; uniform inject) rather than destructuring sf up front -- this sidestepped all three cycle-5 bugs at once. keyLowerBd used named mint-output infrastructure (mintBoxPropsS5/mintDiaNegPropsS5), full mint-arm characterizations (modalApplyOne_boxNeg_eq_S5/_diamondPos_eq_S5), and successorBirthContentS5_subset_relevantSetFinset_mint. Both milestones committed CI-green with narrowly-scoped git add: d4e7ed73 (keysTotal, 3/4) and 49ed521b (keyLowerBd -- Phase 5 complete). Full CSLib CI green at 49ed521b (lake build 3239/3239, checkInitImports/lint-style/test clean, shake 0 for S5Simplification.lean; lean_verify propext/Classical.choice/Quot.sound only). Zero sorry, zero new axioms. The agent then exhausted Fable-5 usage credits during final wrap-up bookkeeping (API error), before writing the summary artifact -- but all Lean work and plan-marker updates were already committed. Phases 7, 8, 9 remain NOT STARTED.",
+  "phases_completed": 6,
   "phases_total": 9,
   "blockers": [],
   "continuation_context": {
-    "next_phase": 5,
+    "next_phase": 7,
     "next_fields": [
-      "keysTotal",
-      "keyLowerBd"
+      "modalTableauS5_sound"
     ],
-    "recommended_action": "Read handoffs/04_phase5-keystotal-attempt-reverted-cycle5.md FIRST -- it contains the exact Lean source for the two lemmas that DID compile (re-add verbatim) and a bug-by-bug fix recipe for the combined shape helper that did not. Step 1: re-add modalApplyOne_snd_eq_acc_of_not_mint_shape_S5 and modalApplyOneS5_snd_eq_acc_of_not_mint_shape right after modalApplyOneS5_snd_eq (~line 347); confirm green in isolation. Step 2: author modalStepBranchS5gKeyed_keys_full_shape using obtain <s,ff,l> := sf UP FRONT (not a separate rcases+rw of a pre-sourced witness -- that is bug 1), get the Sign.pos/Sign.neg bullet assignment right (Sign.pos is declared FIRST in Sign.lean, so the first rcases-s bullet is pos-diamond, not neg-box -- bug 2), and apply (split at hsf <;> repeat' split at hsf) uniformly to ALL 7 formula-shapes per sign-branch via all_goals BEFORE any injection (bug 3 was skipping this for the wildcard shapes). Step 3: once the helper compiles, keysTotal follows the outline in handoff 03 (case on the 4-way disjunction; blocked/wildcard cases reduce to the ambient hTotal hypothesis via mem_modalKnownWorlds_S5; the two mint cases use the disjunct's own freshly-appended key as witness). Step 4: keyLowerBd remains the harder field (needs new box/diamond membership introduction lemmas, converse to the existing elimination lemmas) -- see handoff 03 for that plan.",
+    "recommended_action": "Attempt Phase 7 (soundness bridge modalTableauS5_sound) in FrameSoundness.lean -- it is INDEPENDENT of the now-closed termination chain (forks after Phase 1) and touches a DIFFERENT file than Phases 3-6, so no interaction risk. Read FrameSoundness.lean:728 (modalExpandBranchesGen_closed_unsatIn) and FrameSoundness.lean:193 (modalStepBranchGen_preserves_satIn, reuse as black box) first; mirror modalTableauT_sound for the assembly. The landed P1 lemmas modalS5BoxAll_mem/modalS5DiaNegAll_mem give the non-mint universal arms' target labels in modalKnownWorlds b; modalApplyOne_fresh_local (FmpMeasure.lean:802) covers the mint case for reachability preservation. See handoffs/05_phase5-complete-termination-chain-closed.md for the full next-dispatch recipe. After P7, Phase 8 (spec-free Hintikka lift + decidability, now unblocked by P3+P6 but HIGH risk R6 -- Strategy 2 semantic-FMP fallback pre-authorized, Blackburn 2002 filtration/FMP chunks indexed in the literature corpus) is the only remaining hard frontier; Phase 9 gated on P8.",
     "reusable_infrastructure": [
-      "S5LoopInv (12 fields: bClosure, eNodup, eClosure, accFresh, accKnown, outDegEq, keysTotal, keyLowerBd, keysDistinct, keysInUniverse, keysKnown, worldsContiguous) -- unchanged this cycle",
-      "modalStepBranchS5g_preserves_{bClosure,eNodup,eClosure,accFresh,accKnown,outDegEq,worldsContiguous} (Phase 4, all COMPLETE, unchanged)",
-      "modalStepBranchS5g_preserves_{keysDistinct,keysInUniverse} (Phase 5, 2/4 landed, unchanged)",
-      "modalStepBranchS5gKeyed_keys_shape, modalStepBranchS5gKeyed_acc_shape, modalStepBranchS5gKeyed_expanded_shape (existing shape-characterization private helpers, each independently correct but NOT directly composable due to the separate-existential-witness issue documented in handoff 04)",
-      "modalApplyOneS5_knownWorlds_step, modalApplyOneS5_boxPos_diaNeg_eq, modalApplyOneS5_outputs_subset, modalApplyOneS5_snd_eq, modalApplyOneS5_eq_of_not_boxPos_diaNeg (S5/K per-call step and closure lemmas, all landed, all reusable)",
-      "modalApplyOne_snd_eq_acc_of_not_mint_shape_S5 / modalApplyOneS5_snd_eq_acc_of_not_mint_shape -- NOT currently in the file (reverted); exact source is in handoffs/04_phase5-keystotal-attempt-reverted-cycle5.md, verified to compile standalone, re-add verbatim first",
-      "relevantSetFinset_mono (LoopChecking.lean:344, public, not yet consumed -- needed for keyLowerBd)",
-      "modalKnownWorlds_length_le_worldBoundS5, modalKnownWorlds_nodup_S5 (Phase 6, COMPLETE, unchanged)"
+      "S5LoopInv (12 fields) -- ALL twelve now have preservation lemmas over modalStepBranchS5gKeyed; termination chain CLOSED",
+      "modalStepBranchS5g_preserves_{keysTotal,keyLowerBd} (Phase 5, NEW this cycle -- Phase 5 now 4/4 complete)",
+      "modalStepBranchS5gKeyed_keys_full_shape (NEW private combined shape helper -- newBs-shape AND newKeys-shape from one case split on the same trigger sf)",
+      "mintBoxPropsS5/mintDiaNegPropsS5, boxPositivesOf_intro_S5, modalApplyOne_boxNeg_eq_S5/_diamondPos_eq_S5, successorBirthContentS5_subset_relevantSetFinset_mint (NEW keyLowerBd mint-output infrastructure)",
+      "modalApplyOne_snd_eq_acc_of_not_mint_shape_S5 / modalApplyOneS5_snd_eq_acc_of_not_mint_shape (re-added verbatim from handoff 04, now landed in-file)",
+      "modalKnownWorlds_length_le_worldBoundS5 (Phase 6 pigeonhole bound -- now consumes the complete twelve-field invariant)",
+      "modalS5BoxAll_mem / modalS5DiaNegAll_mem (Phase 1) and modalApplyOne_fresh_local (FmpMeasure.lean:802) -- needed for Phase 7 reachability preservation"
     ],
-    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off the already-landed Phase 1 and does not depend on Phases 3-6; still fully untouched and available to attempt in parallel with, or instead of, further Phase 5 work.",
+    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off already-landed Phase 1 and is the next dispatch's natural target -- fully untouched, different file from the termination chain.",
     "stash_ref": null,
     "stash_label": null,
     "stash_verified": null
   },
-  "next_action_hint": "Next dispatch: read handoffs/04_phase5-keystotal-attempt-reverted-cycle5.md FIRST (contains exact reusable Lean source plus a 3-bug fix recipe), then handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md for the keysTotal/keyLowerBd proof outlines. Re-land the two standalone snd-eq-acc lemmas, then rebuild the combined shape helper with the three named bugs fixed, then close keysTotal. Phase 7 (soundness bridge) remains independent and untouched.",
+  "next_action_hint": "Next dispatch: read handoffs/05_phase5-complete-termination-chain-closed.md, then attempt Phase 7 soundness bridge modalTableauS5_sound in FrameSoundness.lean (independent of the closed termination chain). NOTE: this cycle terminated on Fable-5 credit exhaustion during wrap-up, not a proof failure -- all Lean work is committed and CI-green. Re-run with a model that has available credits (e.g. /implement 515 --hard, or --opus/--sonnet).",
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
       "type": "lean_source",
-      "summary": "UNCHANGED this cycle (byte-identical to commit fcbe121c after reverting the cycle-5 draft). Phases 1,2,3,4,6 COMPLETE; Phase 5 2/4 (keysDistinct, keysInUniverse). Full CI-green, zero sorry, zero new axioms."
+      "summary": "Phase 5 COMPLETE (4/4). keysTotal + keyLowerBd preservation lemmas landed sorry-free; twelve-field S5LoopInv termination chain (Phases 3-6) closed. Committed d4e7ed73, 49ed521b. Full CI green, zero sorry, zero new axioms."
     },
     {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
-      "type": "plan",
-      "summary": "Checklist dedup confirmed intact (42 items). Five 'ten-field' -> 'twelve-field' wording corrections for S5LoopInv's actual current field count. Phase 5's keysTotal/keyLowerBd checklist items annotated with the cycle-5 attempt outcome; a new 'Cycle 5 attempt' paragraph added under Phase 5's Blocked-branch note summarizing the reverted work and pointing to handoff 04."
-    },
-    {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/04_phase5-keystotal-attempt-reverted-cycle5.md",
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/05_phase5-complete-termination-chain-closed.md",
       "type": "handoff",
-      "summary": "New handoff: full technical writeup of the cycle-5 keysTotal attempt -- why it was needed, the two lemmas that compiled standalone (exact source included, ready to re-add verbatim), and a bug-by-bug diagnosis of the three issues in the combined shape helper that did not compile, with a concrete fix recipe for the next dispatch."
+      "summary": "Cycle-6 technical writeup: Phase 5 4/4 complete, termination chain closed, verification record, and next-dispatch recipe for the independent Phase 7 soundness bridge."
     }
   ],
   "sorry_inventory": [],
-  "pause_reason": "orchestrator_requested_checkpoint"
+  "pause_reason": "fable5_usage_credits_exhausted_during_wrapup"
 }

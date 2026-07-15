@@ -1278,7 +1278,8 @@
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
         }
       ],
-      "session_id": "sess_1784075478_630e1e_504"
+      "session_id": "sess_1784075478_630e1e_504",
+      "notes": "Implementation interrupted by API session limit mid-Phase 3; no phases committed. Plan complete, recovery WIP saved to specs/504_.../recovery/. Resume with /implement 504 after limit reset."
     },
     {
       "project_number": 505,

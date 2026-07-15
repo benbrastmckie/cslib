@@ -38,16 +38,19 @@
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 3,
-  "failed_tasks": [],
+  "cycle_count": 7,
+  "failed_tasks": [
+    511
+  ],
   "completed_tasks": [
-    513
+    513,
+    505
   ],
   "current_statuses": {
     "513": "completed",
-    "511": "planned",
-    "505": "planned",
-    "504": "researched",
+    "511": "blocked",
+    "505": "completed",
+    "504": "planned",
     "300": "blocked"
   },
   "task_dirs": {
@@ -70,5 +73,11 @@
     "505": "cslib-implementation-agent",
     "504": "cslib-implementation-agent",
     "300": "cslib-implementation-agent"
-  }
+  },
+  "interrupted_tasks": [
+    504
+  ],
+  "skipped_tasks": [
+    300
+  ]
 }

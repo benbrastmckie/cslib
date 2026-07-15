@@ -1,7 +1,7 @@
 # Implementation Plan: Task #505 — B (Symmetric-Frame) Tableau via Generic Driver
 
 - **Task**: 505 - B symmetric-frame decidability via the generic tableau driver (Phase 4 of task 300)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: 503 (generic driver + RuleApplicationSpec, DELIVERED green), 510 (generic Hintikka chain, DELIVERED green); soundness-side blocker: task 513 `generalize_tableau_soundness_chain_over_spec` (NOT started — gates the final Decidable phase only)
 - **Research Inputs**: reports/01_frame-specific-tableau-extensions.md; reports/03_parent-phase-plan-reference.md; parent plan specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md (Phase 4)

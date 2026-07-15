@@ -1,0 +1,5 @@
+{
+  "status": "planned",
+  "note": "Implementation dispatch interrupted by API session limit (resets 8:30pm America/Los_Angeles) mid-Phase 3. No phases committed. Partial WIP preserved in recovery/ (S5Simplification.lean.wip with a documented Phase-2 obstruction sorry; FrameCompleteness-504-phase3.patch delivering extractModelS5/instIsEquivEqvGen/extractModelS5_equiv; Cslib-504-import.patch). Working tree reverted to green HEAD. Resume with /orchestrate 504 or /implement 504 after limit reset; recovery/ is reference-only WIP.",
+  "resumable": true
+}

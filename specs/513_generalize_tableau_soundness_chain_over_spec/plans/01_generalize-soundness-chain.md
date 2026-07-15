@@ -195,7 +195,7 @@ each other, so they may run in parallel.
 - **Verification:**
   - `lake build` green; lemma sorry-free; axiom-trio only.
 
-### Phase 4: K zero-regression re-instantiation [NOT STARTED]
+### Phase 4: K zero-regression re-instantiation [COMPLETED]
 
 - **Goal:** Exhibit K as a trivial universe-0 instance of the generic chain WITHOUT touching K's
   canonical `Type*` API.

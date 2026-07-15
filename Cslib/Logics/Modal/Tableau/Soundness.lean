@@ -84,8 +84,13 @@ private lemma hasEdge_addEdge_cases {acc : Accessibility} {w w' a a' : WorldInde
 omit [Hashable Atom] in
 /-- The accessibility relation returned by `modalApplyOne` is either unchanged, or it adds a single
 fresh edge `sf.label → modalNextWorld b`; in the latter case the result is `.linear` with a head
-witness whose label is exactly the fresh world `modalNextWorld b`. -/
-private lemma modalApplyOne_fresh
+witness whose label is exactly the fresh world `modalNextWorld b`.
+
+De-privatized (task 513) so `FrameSoundness.lean`'s K zero-regression re-derivation
+(`modalTableau_sound_frame`, Phase 4) can discharge its `hFreshLocal` hypothesis directly,
+without importing `FmpMeasure.lean`'s public `modalApplyOne_fresh_local` (which would pull the
+completeness/`GenericDriver` import branch into the soundness-parallel branch). -/
+lemma modalApplyOne_fresh
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) :

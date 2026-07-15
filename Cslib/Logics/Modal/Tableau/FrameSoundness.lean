@@ -909,6 +909,43 @@ theorem modalTableau_sound_frame [DecidableEq Atom] [Hashable Atom] (φ : Propos
   rw [frameValid_trivialFC_iff_kValid]
   exact modalTableau_sound φ h
 
+/-- **Task 513 (Phase 4, K zero-regression)**: `modalTableau_sound_frame`, re-derived through
+the *generic* frame-relativized chain (`modalExpandBranchesGen_closed_unsatIn`, Phase 3)
+instantiated at `apply := modalApplyOne`, `FC := trivialFC`, discharging `hAgree` by `rfl`
+(`modalApplyOne` agrees with itself), `hBoxPos`/`hDiaNeg` by Phase 1's
+`modalApplyOne_boxPos_sound`/`modalApplyOne_diaNeg_sound` (`FC` unused), and `hFreshLocal` by
+`modalApplyOne_fresh` (`Soundness.lean`). This exhibits K as a trivial universe-0 instance of
+the generic soundness chain **without** touching K's canonical `Type*` API
+(`modalStepBranch_preserves_sat`, `modalExpandBranches_closed_unsat`, `modalTableau_sound`,
+`kValid`, `modalTableau_decides`, `instDecidableKValid` all remain byte-identical and
+untouched -- confirmed by `git diff`). -/
+theorem modalTableau_sound_frame_gen [DecidableEq Atom] [Hashable Atom] (φ : Proposition Atom)
+    (h : modalTableau φ = .closed) :
+    frameValid trivialFC φ := by
+  intro World m _ w
+  by_contra hnotsat
+  have hsat : branchSatisfiableIn trivialFC [⟨.neg, φ, 0⟩] Accessibility.empty :=
+    ⟨World, m, fun _ => w, trivial,
+      fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
+      fun sf hmem => by
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+        subst hmem
+        exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
+  have hunsat := modalExpandBranchesGen_closed_unsatIn trivialFC modalApplyOne
+    modalApplyOne_fresh
+    (fun _ _ _ _ => rfl)
+    (fun m f φ lbl b acc _ hacc hb hmem => modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem)
+    (fun m f φ lbl b acc _ hacc hb hmem => modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem)
+    (modalFuel φ)
+    [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
+    rfl rfl
+    (List.Forall₂.cons (accFreshInv_empty _) List.Forall₂.nil)
+    (by
+      rw [← modalExpandBranches_eq]
+      simpa only [modalTableau] using h)
+  cases hunsat with
+  | cons h_unsat _ => exact h_unsat hsat
+
 /-! ## T (Reflexive Frame) -/
 
 /-- The reflexive frame condition: `Std.Refl m.r`. Instantiates `frameValid`/

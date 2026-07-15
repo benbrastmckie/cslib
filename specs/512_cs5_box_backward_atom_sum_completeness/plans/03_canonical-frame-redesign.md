@@ -1,7 +1,10 @@
 # Implementation Plan: Task #512 — CS5 Completeness via Birelational Canonical Model (Frame Redesign)
 
 - **Task**: 512 - cs5_box_backward_atom_sum_completeness
-- **Status**: [IN PROGRESS] (Phases 1-4 LANDED; Phase 5 BLOCKED negative-result; Phases 6-10 = the frame redesign, NOT STARTED)
+- **Status**: [BLOCKED] (Phases 1-4 LANDED; Phase 5 BLOCKED negative-result; Phase 6 COMPLETED; Phase 7
+  GO/NO-GO GATE = GATE FAILURE, mechanized, sorry-free — CS5 completeness "BLOCKED across all
+  known-mechanizable routes", NOT incompleteness; Phases 8-9 SKIPPED per the pre-specified FAILURE
+  branch; Phase 10 FAILURE-branch writeup not yet drafted — escalated to human)
 - **Effort**: ~15 hours remaining (Phases 6-10 redesign); ~19 hours already invested in Phases 1-5
 - **Dependencies**: 509 (soundness + mechanized obstruction, both branches landed; Phase 8 RE-CHECKS soundness alongside — never editing — `cs5FC''`)
 - **Research Inputs**:
@@ -283,7 +286,21 @@ and can run in parallel. Each phase is sized to one agent run (~100–400 lines 
 
 ---
 
-### Phase 6: Restore Simpson's two-sided R + `Ω`-excluding canonical world type [NOT STARTED]
+### Phase 6: Restore Simpson's two-sided R + `Ω`-excluding canonical world type [COMPLETED]
+
+**RESULT: DONE, but see Phase 7 — the redesign's central premise is refuted in the process of
+building it.** Landed `cs5TwoSidedR` (`CS5Canonical.lean:487`), `cs5TwoSidedR_iff_cs5Tail` (`:511`,
+the decisive finding: for quasi-prime `CS5`-theories, Simpson's diamond clause `Δ ⊆ diaInv Γ` is
+PROVABLY EQUIVALENT, via the already-landed `cs5_boxInv_subset_iff` (`CS5.lean:589`), to the
+reverse box clause `boxInv Δ ⊆ Γ` — i.e. `cs5TwoSidedR Γ Δ ↔ Δ ∈ cs5Tail Γ`, the "new" two-sided R
+is EXTENSIONALLY THE SAME relation as the discarded `cs5Tail` wall), `cs5TwoSidedR_symm` (`:526`,
+corollary: genuinely just plain symmetry in disguise), `cs5_not_dia_dia` (`:542`, the `fourDia`
+closure step), `cs5PrimeTail`/`cs5PrimeSeg`/`CS5PrimeSegment`/`cs5PrimeMreach`/
+`CS5PrimeSegment.ofHead`/`CS5PrimeSegment.diaRefuting`/`cs5Prime_refl` (`:548-628`, the
+`CS4Segment`-cloned `Ω`-excluding one-sided world type, per the task list). All sorry-free,
+axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only — most components fully axiom-free).
+`lake build`/`checkInitImports`/`lint-style`/`shake` clean; zero new axioms; Phase 3/5 lemmas
+untouched and still compile.
 
 - **Goal:** Build, ALONGSIDE the one-sided frame, (a) the genuine **two-sided** canonical relation with
   the restored diamond clause, and (b) an `Ω`-**excluding** canonical world type carrying a hereditary
@@ -291,31 +308,32 @@ and can run in parallel. Each phase is sized to one agent run (~100–400 lines 
   bottom, and the hereditary-closure lemma) ported. This is the definitional + CS4-port setup that the
   Phase 7 gate stands on. *Medium risk, ~150–300 lines (mostly a CS4 port + one new clause).*
 - **Tasks:**
-  - [ ] Define the two-sided canonical relation (suggested `cs5TwoSidedR`, name at implementer's
-    discretion): `cs5TwoSidedR Γ Δ := boxInv Γ ⊆ Δ  ∧  (∀ A, (◇A) ∈ Δ → (◇A) ∈ Γ)` — Simpson's box
-    clause `{B | □B ∈ Γ} ⊆ Δ` (= `boxInv Γ ⊆ Δ`, the FORWARD clause, kept from `cs5OnesidedR`) AND the
-    restored diamond clause `{◇A | A ∈ Δ} ⊆ Γ` (the BACKWARD clause, dropped in Phase 3). Cross-check the
-    diamond clause direction against `cs5_boxInv_subset_iff` (`boxInv T ⊆ H ↔ T ⊆ diaInv H`, `CS5.lean:589`)
-    and `diaInv` (`Segment.lean:106`). **Document in the definition's docstring that the diamond clause is
-    discharged via the prime lemma / disjunction property (Phase 7), NOT via per-world back-inclusion /
-    negation-completeness — this is what distinguishes it from the discarded two-sided `cs5Tail` symmetry
-    wall.**
-  - [ ] Define the `Ω`-excluding canonical world type (suggested `CS5PrimeSegment`), cloning
-    `CS5CanonSegment` (`CS5Canonical.lean:166`) BUT adding an `excl`/`excl_head`-style hereditary invariant
-    excluding the exploding case, exactly mirroring `CS4Segment`'s `excl : Option (Proposition Atom)` +
-    `excl_head : ∀ A, excl = some A → (◇A) ∉ seg.head` (`CS4.lean:377/379`). Here the excluded object is
-    `⊥`/`univ`-membership, giving prime *consistent* (non-exploding) worlds. Licensed by settled
-    `CS5 ≡ IS5` (report 05) + Alechina redundancy (report 04 Q2): at CS5 strength the fallible/exploding
-    worlds are redundant, so excluding them loses NO completeness.
-  - [ ] Port the hereditary-closure lemma (analogue of `cs4_not_dia_dia`, `CS4.lean:317`) that makes the
-    `Ω`-exclusion propagate through the transitive closure of the two-sided reachability — the closure fact
-    the diamond-side witness (Phase 7) relies on to stay non-exploding.
-  - [ ] Port the free plumbing over the new type: reflexivity (clone `cs5CanonRefl`, `:189`, still just
-    axiom `T` on the box clause), valuation `cval`/`cbotForces` (clone `cs5CanonVal`/`cs5CanonBot`,
-    `:195/:198`), and the two-sided reachability `cmreach` port (clone `cs5CanonMreach`, `:176`).
-  - [ ] Confirm the propositional / box-forward / diamond truth-lemma clauses remain served by `CKForces`
-    over the new type (same as Phase 3's one-sided port; `CKForces` is generic over `World`/`r`/`val`).
-- **Timing:** ~3 hours
+  - [x] Define the two-sided canonical relation `cs5TwoSidedR Γ Δ := boxInv Γ ⊆ Δ ∧ Δ ⊆ diaInv Γ`
+    (`CS5Canonical.lean:487`) *(deviation: altered -- the plan's inline formula
+    `∀ A, (◇A) ∈ Δ → (◇A) ∈ Γ` is a typo relative to Simpson's own quote `{◇A | A ∈ Δ} ⊆ Γ`
+    (quantifying over `A ∈ Δ`, not `◇A ∈ Δ`); the landed definition uses the textually-correct
+    Simpson clause `Δ ⊆ diaInv Γ`, cross-checked against `cs5_boxInv_subset_iff` as instructed)*.
+    Cross-checking this direction against `cs5_boxInv_subset_iff` produced the decisive finding:
+    `cs5TwoSidedR_iff_cs5Tail` (`:511`) proves `cs5TwoSidedR Γ Δ ↔ Δ ∈ cs5Tail Γ` for quasi-prime
+    `Γ, Δ` — i.e. the diamond clause, once restored, is PROVABLY the reverse box clause in
+    disguise, so this "new" two-sided R is extensionally `cs5Tail`, not new information. See
+    `cs5TwoSidedR_symm` (`:526`) and Phase 7 below for the consequence.
+  - [x] Define the `Ω`-adjacent canonical world type `CS5PrimeSegment` (`CS5Canonical.lean:583`),
+    cloning `CS4Segment`'s `excl`/`excl_head` pattern (`CS4.lean:373/377/379`) onto the one-sided
+    `cs5OnesidedR` tail (`cs5PrimeTail`, `:548`) *(deviation: altered -- built as a genuinely NEW
+    world type rather than adding a field to `CS5CanonSegment`, per the plan's non-goal against
+    editing Phase 3 in place; and see the honesty note below: this exclusion turns out to be only
+    PER-TAIL, not blanket, exactly like its `CS4Segment` template -- documented at
+    `CS5PrimeSegment`'s docstring and exploited by the Phase 7 obstruction)*.
+  - [x] Port the hereditary-closure lemma `cs5_not_dia_dia` (`:542`, `fourDia` contrapositive,
+    analogue of `cs4_not_dia_dia`).
+  - [x] Port the free plumbing: `cs5Prime_refl` (`:620`, reflexivity via `cs5_boxInv_subset` +
+    `excl_head`), `CS5PrimeSegment.ofHead`/`CS5PrimeSegment.diaRefuting` (`:600/:609`).
+  - [x] Confirmed the propositional/box-forward/diamond truth-lemma clauses remain served by the
+    generic `CKForces`/`CKSegment` machinery over `CS5PrimeSegment` (same as Phase 3; no bespoke
+    per-connective work needed at this phase -- the truth lemma itself is Phase 10's obligation,
+    not reached since Phase 7 gate-failed).
+- **Timing:** ~3 hours (actual: within one dispatch, combined with Phase 7)
 - **Depends on:** 5
 - **Reused assets (real names + file:line):**
   - `CS4Segment` (structure) / `excl` / `excl_head` — `CS4.lean:373/377/379` (the `Ω`-exclusion template).
@@ -328,74 +346,94 @@ and can run in parallel. Each phase is sized to one agent run (~100–400 lines 
     `682e04d443e7bbd7` (`Simpson1994`).
 - **Files to modify:** `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (new defs ALONGSIDE
   the one-sided frame; `cs5FC''` in `CKExtension.lean` untouched).
-- **Success criteria / CI gates:** the two-sided R + `Ω`-excluding world type + closure lemma + plumbing
+- **Success criteria / CI gates:** the two-sided R + `Ω`-adjacent world type + closure lemma + plumbing
   compile; `lake build` green; `checkInitImports`/`lint-style`/`shake` clean; no `sorry`, no new axiom;
-  the Phase-5 negative-result lemmas still compile untouched.
-- **Verification:** the new frame class typechecks; `lean_verify` on the reflexivity/closure lemmas shows
-  no `sorryAx`; `lean_references cs5FC''` unchanged (8 pre-existing sites).
+  the Phase-5 negative-result lemmas still compile untouched. **MET.**
+- **Verification:** the new frame class typechecks; `lean_verify` on `cs5TwoSidedR_iff_cs5Tail`,
+  `cs5TwoSidedR_symm`, `cs5Incest_forces_symm`, `cs5Prime_refl` shows no `sorryAx` (axioms: `[]` or
+  `[propext]` only); `lean_references cs5FC''` unchanged (no new sites in `CS5Canonical.lean`, confirmed
+  by `grep -rl CS5Canonical Cslib/` returning no dependents).
 
 ---
 
-### Phase 7: GO/NO-GO GATE — verify UNCHANGED `cs5Incest` on the redesigned frame via the DIAMOND side [NOT STARTED]
+### Phase 7: GO/NO-GO GATE — verify UNCHANGED `cs5Incest` on the redesigned frame via the DIAMOND side [BLOCKED — GATE FAILURE, mechanized]
 
-- **Goal:** Prove the redesigned two-sided `Ω`-excluding canonical frame SATISFIES the UNCHANGED
-  `cs5Incest` (`CS5Canonical.lean:234`), constructing the `(1,1,0,0)` mediating witness `u′ ≥ u` with
-  `u′ R w` from the **DIAMOND clause** of the two-sided R via `dia_refuting_theory` — exactly as CS4
-  verifies `cs4FC'_cs4Mreach` (`CS4.lean:441`) via the ◇-refuting world (`dia_refuting_theory`,
-  `excl_head`), NOT via a box-refuting world. **This is the crux of the redesign and the go/no-go gate.**
-  *High risk — report 06's ~85% confidence / ~15% residual concentrates HERE. ~150–300 lines.*
-- **Why this can work now (and why Phase 5 could not):** under the one-sided R the witness had to come
-  from the `boxInv`-domain side, where monotonicity was fatal (Phase 5). With the diamond clause restored
-  and `Ω` excluded, the witness is sourced from `{◇A | A ∈ Δ} ⊆ Γ` via a prime/quasi-prime Lindenbaum
-  extension — the disjunction property only, NO negation-completeness, NO `boxInv`-monotonicity trap
-  (report 06 §2–§4; Simpson 3.3.2/3.3.3, Marin Thm 7.2 F2).
-- **Tasks (SUCCESS path):**
-  - [ ] For worlds `w, u` of the `Ω`-excluding type with `w R u` (two-sided), construct the mediating
-    `u′ ≥ u` and establish `u′ R w` by a diamond-sourced prime extension: apply `dia_refuting_theory`
-    (`SegmentLindenbaum.lean:203`) — which yields, from `◇B ∈ H` and `◇A ∉ H`, a quasi-prime `T` with
-    `boxInv H ⊆ T`, `B ∈ T`, `A ∉ T` — to build the witness on the DIAMOND side, discharging the
-    incestuality existential. Keep the witness non-exploding via the Phase-6 hereditary `excl_head`
-    closure (so `u′ ≠ Ω`).
-  - [ ] Discharge the two-sided R's diamond clause for the constructed witnesses from the same prime
-    lemma (mirroring how `cs4FC'_cs4Mreach` chains `dia_refuting_theory` through `cs4_not_dia_dia`).
-  - [ ] Land the canonical-frame incestuality lemma (suggested `cs5Incest_cs5PrimeMreach` / a
-    `cs5FCIncest`-over-two-sided reachability lemma) — the analogue of `cs4FC'_cs4Mreach` (`CS4.lean:441`)
-    — sorry-free, axiom-clean, grep-confirmed free of any `¬ϕ ∈`-style negation-completeness move.
-- **DECISION GATE — BOTH branches pre-specified:**
-  - **SUCCESS** (`cs5Incest` verified on the redesigned frame via the diamond side, sorry-free, no
-    negation-completeness) → proceed to Phase 8 (soundness re-check) + Phase 9 (box-backward) + Phase 10
-    (completeness). The redesign is validated; report 06's verdict (A) is confirmed in Lean.
-  - **FAILURE** (the diamond-side witness ALSO cannot be constructed even with the two-sided R + `Ω`
-    excluded — i.e. option (B) was real after all) → **do NOT force, no `sorry`.** Land the obstruction
-    as a mechanized negative theorem over the two-sided frame (sorry-free, no new axiom), extending
-    Phase 5's negative-result family; mark CS5 completeness "BLOCKED across all known-mechanizable routes"
-    (explicitly NOT incompleteness — `CS5 ≡ IS5` is complete, report 05); skip Phases 8–9 and route to the
-    Phase 10 FAILURE branch (obstruction writeup); **escalate to a human** with the mechanized account.
-- **Timing:** ~4 hours
+- **RESULT: GATE FAILURE.** `cs5Incest` FAILS on the redesigned frame too — mechanized, sorry-free,
+  axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only), via `cs5Incest_cs5PrimeMreach_false`
+  (`CS5Canonical.lean:688`), `¬ cs5Incest (@cs5PrimeMreach Atom)`. **Option (B) — a genuine structural
+  wall — is confirmed. Report 06's verdict (A) is refuted.**
+- **Two independent, sorry-free arguments converge on this conclusion:**
+  1. **General (theory-level): `cs5TwoSidedR_iff_cs5Tail` (Phase 6, `:511`).** Simpson's diamond
+     clause `Δ ⊆ diaInv Γ`, for `CS5`'s quasi-prime theories, is PROVABLY EQUIVALENT (via the
+     already-landed `cs5_boxInv_subset_iff`, `CS5.lean:589`) to the reverse box clause `boxInv Δ ⊆ Γ`
+     — i.e. `cs5TwoSidedR Γ Δ ↔ Δ ∈ cs5Tail Γ`. This is because `CS5`'s `B` axiom (`bBox` AND `bDia`,
+     both `CS5ModalAxiom` constructors) makes diamond-membership and reverse-box-non-membership dual
+     at the level of EVERY quasi-prime theory, independent of which relation or world type is under
+     discussion. So "restoring the diamond clause" does not restore independent information for
+     `CS5` — it restores exactly the `cs5Tail` relation Phase 3 replaced, in disguise. `cs5Incest_forces_symm`
+     (`:643`, a NEW general lemma) shows this is fatal REGARDLESS of `Ω`-exclusion: because `≤` on any
+     `CKSegment`-lifted world type is literally head-inclusion (`CKSegment.le_iff`) and `boxInv` is
+     monotone under `⊆`, `cs5Incest r` (for any `r` implying the forward box clause) can NEVER do
+     better than the witness `u′ := u` — enlarging `u` only ADDS to `boxInv (head u′)`, which can only
+     make `boxInv (head u′) ⊆ head w` HARDER. So `cs5Incest r` is equivalent to plain box-both-directions
+     symmetry of `r`, for ANY box-based canonical relation, `Ω`-excluded or not. Combined with
+     `cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized): forcing the tail into
+     `cs5Tail`-shape is exactly what makes box-backward (Phase 9) provably impossible via the
+     sequential Lindenbaum route this whole pivot exists to use.
+  2. **Concrete (world-type level): `cs5Incest_cs5PrimeMreach_false` (`:688`).** The `Ω`-exclusion
+     mechanism, ported faithfully from `CS4Segment`'s `excl : Option (Proposition Atom)` field, is
+     only a PER-TAIL exclusion, not a blanket one: `CS5PrimeSegment`s built via `.ofHead` (`excl :=
+     none`) do NOT exclude `Ω` from their tail at all (`cs5PrimeMreach_ofHead_to_univ`, `:658`) —
+     exactly mirroring `CS4Segment.ofHead`, which never needed to banish `Ω` (CS4's frame condition
+     has no incestuality-style clause). Since `cs5Incest` quantifies over ALL worlds including
+     `.ofHead`-built ones, Phase 5's EXACT collapse (`Ω` universally reachable from `.ofHead` worlds,
+     no non-exploding world can route back) reapplies verbatim to `cs5PrimeMreach`.
+- **Why report 06's premise was wrong:** report 06 §Sub-question 2 argued Simpson's diamond-side
+  verification "does not face the `boxInv`-monotonicity problem because it routes the witness through
+  the diamond clause, not through `boxInv`." `cs5TwoSidedR_iff_cs5Tail` shows this is false for `CS5`
+  specifically: the diamond clause IS the reverse-`boxInv` clause (an `↔`, not an implication), because
+  `CS5`'s `B` axiom already bakes `bBox`+`bDia` into every quasi-prime theory. Simpson's original
+  argument presumably applies to systems where box/diamond-inverse containment is NOT already forced
+  to coincide theory-by-theory; `CS5`'s specific axiomatization closes that gap.
+- **What was tried (SUCCESS-path tasks, all attempted and found to fail as documented above):**
+  - [x] *(deviation: altered -- attempted, result is FAILURE not SUCCESS)* Constructing the mediating
+    `u′ ≥ u` via `dia_refuting_theory`: shown structurally impossible by `cs5Incest_forces_symm` --
+    ANY witness `u′ ≥ u` (regardless of construction method) is subject to `boxInv`-monotonicity, so
+    no clever choice of `u′`, `dia_refuting_theory`-sourced or otherwise, can do better than `u′ := u`.
+  - [x] *(deviation: altered -- the two-sided R's diamond clause, once restored, is shown (Phase 6) to
+    be logically equivalent to the reverse box clause, not independently dischargeable)*.
+  - [x] *(deviation: altered -- landed `cs5Incest_cs5PrimeMreach_false`, the NEGATIVE mechanized
+    theorem, instead of the positive `cs5Incest_cs5PrimeMreach` the task list anticipated)*.
+- **DECISION GATE — FAILURE branch taken:** `cs5Incest` cannot be verified on the redesigned
+  `Ω`-adjacent one-sided frame, NOR (by the general `cs5TwoSidedR_iff_cs5Tail` argument) on any
+  frame design that genuinely carries Simpson's diamond clause, because that clause is provably
+  identical to the reverse box clause for `CS5`'s quasi-prime theories. Per the plan's pre-specified
+  FAILURE branch: **do NOT force, no `sorry`.** The obstruction is landed as two mechanized negative
+  theorems (sorry-free, no new axiom), extending Phase 5's negative-result family. CS5 completeness is
+  marked **"BLOCKED across all known-mechanizable routes"** (explicitly NOT incompleteness — `CS5 ≡ IS5`
+  is complete and sound, report 05). Phases 8–9 are SKIPPED. **Escalating to a human** with this
+  mechanized account (see task summary / orchestrator handoff for the escalation write-up).
 - **Depends on:** 6
-- **Reused assets (real names + file:line):**
-  - `dia_refuting_theory` — `SegmentLindenbaum.lean:203` (the ◇-side witness engine — from `◇B ∈ H`,
-    `◇A ∉ H`, yields quasi-prime `T ⊇ boxInv H` with `B ∈ T`, `A ∉ T`).
-  - `quasi_prime_exclusion` — `SegmentLindenbaum.lean:73`; `quasi_head_realization` — `:251`.
-  - `cs4FC'_cs4Mreach` — `CS4.lean:441` (THE diamond-side canonical-verification precedent to mirror);
-    `cs4_not_dia_dia` — `CS4.lean:317` (hereditary ◇-exclusion closure); `excl_head` — `CS4.lean:379`.
-  - `cs5Incest` (UNCHANGED condition) — `CS5Canonical.lean:234`; Phase-6 two-sided R + `Ω`-excluding type.
-  - `cs5_boxInv_subset_iff` (`boxInv T ⊆ H ↔ T ⊆ diaInv H`) — `CS5.lean:589`; `diaInv` — `Segment.lean:106`.
-  - Simpson Prime Lemma 3.3.2 / Canonical Model Lemma 3.3.3, F2 incestuality verification — corpus chunks
-    `8372f27240fe345d`, `caf3305a53065b87` (`Simpson1994`); Marin Thm 7.2 (`MarinMoralesStrassburger2021`).
-  - Phase 5's `cs5Incest_cs5CanonMreach_false` family — `CS5Canonical.lean:~419/430/465` (FAILURE-branch
-    obstruction template; and the contrast that isolates the one-sided frame as the artifact).
+- **Reused assets actually used:** `cs5_boxInv_subset_iff` (`CS5.lean:589`), `cs5Tail`/`cs5Tail_symm`
+  (`CS5.lean:632/645`), `cs5_symmetric_tail_box_gap` (`CS5.lean:712`), `CKSegment.le_iff`
+  (`Segment.lean:167`), `quasi_head_realization` (`SegmentLindenbaum.lean:251`), `cs5_consistent_incest`
+  (`CS5Canonical.lean:445`, Phase 5), Phase 6's `cs5TwoSidedR`/`cs5PrimeMreach`/`CS5PrimeSegment.ofHead`.
+  `dia_refuting_theory` was used only inside `cs5PrimeSeg`'s generic `diam_witness` construction
+  (Phase 6 plumbing), not for the (impossible) incestuality witness itself.
 - **Files to modify:** `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`.
-- **Success criteria / CI gates:** SUCCESS — the incestuality-on-redesigned-frame lemma compiles
-  sorry-free, `#print axioms` clean, grep confirms no `¬ϕ ∈` move. FAILURE — the obstruction theorem
-  compiles sorry-free, no new axiom, and is escalated. Either way `lake build`/`checkInitImports`/
-  `lint-style`/`shake` clean; no `sorry`, no new axiom in `Cslib/`.
-- **Verification:** `lean_verify` on the gate lemma (or the obstruction) shows no `sorryAx`;
-  `grep -n "¬.*∈"` over the file returns no negation-completeness move; Phase 5 lemmas still compile.
+- **Success criteria / CI gates:** FAILURE branch — the obstruction theorems compile sorry-free, no new
+  axiom, and are escalated. **MET.** `lake build`/`checkInitImports`/`lint-style`/`shake` clean; no
+  `sorry`, no new axiom in `Cslib/`.
+- **Verification:** `lean_verify Cslib.Logic.Modal.cs5Incest_cs5PrimeMreach_false` →
+  `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}` (no `sorryAx`).
+  `grep -n "¬.*∈"` over the Phase 6/7 section returns only the obstruction theorem's own STATEMENT
+  (`¬ cs5Incest (...)`), never a `ϕ ∉ Θ → ¬ϕ ∈ Θ`-style negation-completeness proof STEP — confirmed by
+  direct inspection of the section (only one `¬` occurrence, the theorem head). Phase 5 lemmas still
+  compile (untouched).
 
 ---
 
-### Phase 8: Re-check CS5 soundness over the two-sided frame class [NOT STARTED]
+### Phase 8: Re-check CS5 soundness over the two-sided frame class [BLOCKED — skipped, Phase 7 GATE FAILURE]
 
 - **Goal:** (SUCCESS branch only) Confirm CS5 soundness (all 17 `CS5ModalAxiom` cases) holds axiom-free
   over the NEW two-sided-R + `Ω`-excluding + `cs5Incest` frame class, adapting Phase 4's
@@ -431,7 +469,7 @@ and can run in parallel. Each phase is sized to one agent run (~100–400 lines 
 
 ---
 
-### Phase 9: `cs5_box_backward` as the one-sided prime lemma (over the two-sided R's box clause) [NOT STARTED]
+### Phase 9: `cs5_box_backward` as the one-sided prime lemma (over the two-sided R's box clause) [BLOCKED — skipped, Phase 7 GATE FAILURE]
 
 - **Goal:** (SUCCESS branch only) Discharge box-backward as the PLAIN one-sided prime lemma over the
   two-sided R's **box-inverse clause**: from `□A ∉ Γ`, get `boxInv Γ ⊬ A`, apply `box_refuting_theory`
@@ -460,7 +498,7 @@ and can run in parallel. Each phase is sized to one agent run (~100–400 lines 
 
 ---
 
-### Phase 10: Truth lemma + CS5 completeness + file split (or obstruction writeup) [NOT STARTED]
+### Phase 10: Truth lemma + CS5 completeness + file split (or obstruction writeup) [BLOCKED — FAILURE-branch writeup not yet drafted]
 
 - **Goal:** (SUCCESS branch) Land `cs5_truth_lemma` (clone `cs4_truth_lemma`, box-backward via
   `cs5_box_backward`), `realize` via Lindenbaum, and `cs5_completeness`/`cs5_soundness_completeness` via

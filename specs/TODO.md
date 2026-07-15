@@ -11,10 +11,11 @@ next_project_number: 513
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,511,512 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,504,505,506 | 36,37,181,317,407,425,449,503,511 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
-| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,511,512,512 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,503,506 | 36,37,181,317,407,425,449,511,512 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,12 +37,12 @@ next_project_number: 513
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-503 [IMPLEMENTING] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
-  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-  └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [NOT STARTED] — Attempt CS5 constructive completeness (Branch A) by building the 
+  └─ 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
+    └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+    └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -92,14 +93,39 @@ next_project_number: 513
 
 ## Tasks
 
-### 512. Cs5 box backward atom sum completeness
-- **Effort**: 10-16 hours
-- **Status**: [NOT STARTED]
+### 512. Generalize tableau soundness chain over spec
+cs5 box backward atom sum completeness
+- **Effort**: 
+10-16 hours
+- **Status**: [NOT_STARTED
+NOT_STARTED]
 - **Task Type**: cslib
-- **Topic**: Modal Logic
-- **Dependencies**: Task 509
+cslib
+- **Topic**: 
+Modal Logic
+- **Dependencies**: Task 510
+Task 509
 
-**Description**: Attempt CS5 constructive completeness (Branch A) by building the box-backward truth-lemma case that task 509 left open. 509 delivered CS5 soundness over cs5FC'', the full canonical machinery up to cs5FC''_cs5Mreach, and a MECHANIZED OBSTRUCTION (Branch B): the box-backward case needs, given prime H with box-A not in H, a SIMULTANEOUS prime pair (H', T) with H subset H', boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap, landed in CS5.lean) and the gap is non-vacuous (CS5BoxGapWorld countermodel, landed in CS5.lean). THE PHASE 8 FINDING (see specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean, sorry-free): the pair poset with designated-formula exclusion (box-A not in X, A not in Y) has a clean seed, a clean chain-upper-bound, and pair-maximality projects to per-component maximality — BUT the library's single-formula primeness engine (prime_set_exclusion / set_maximal_is_prime, PrimeExclusion.lean:558/:428) does NOT directly apply, because the cross-condition predicate Cons_Y(Z) := boxInv Z subset Y (Y fixed) is NOT stable under deductive closure: Zorn-closing an insertion can derive new box-formulas not pinned to Y. THE DESIGNED REPAIR (not yet built): work over a doubled atom space Atom+Atom (tag X's formulas via Sum.inl, Y's via Sum.inr) under a COMBINED axiom system that adds the two cross-condition implications as axioms rather than carrying them as an external invariant, so that closure preserves them by construction; then recover the pair from the combined prime theory. Deliverables: build the combined derivation system, prove its primeness engine, extract cs5_box_backward, complete the CS5 truth lemma and completeness theorem. NO sorry, no new axiom. If this repair also fails, document WHY as a further mechanized theorem and keep completeness BLOCKED citing both obstructions — a rigorous negative result remains acceptable. Reuse the three landed prime_set_exclusion instantiation templates in CS5.lean (cs5_diam_witness, cs5_fcsymbox_theory, cs5_fc4_theory) and quasi_prime_set_exclusion. Do NOT transcribe Pacheco Lemma 16/18 verbatim (negation-completeness, unsound); only the Zorn skeleton ports. Literature: pacheco_2024_collapsingconstructiveandintuitionisticmodallogics in the corpus. Consider the deferred CS5Canonical.lean file-size split. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean (~1400 lines). Depends on 509.
+**Description**: Generalize the tableau SOUNDNESS chain over the abstract rule-application interface, mirroring task 510 (which did this for the completeness/Hintikka chain). This is the shared blocker for Decidable(tValid) (task 503 Phase 6), Decidable(bValid) (task 505), and Decidable(s5Valid) (task 504): the completeness direction is fully generic (task 510), but the soundness direction is not. Root cause: modalStepBranch_preserves_sat (Cslib/Logics/Modal/Tableau/Soundness.lean, ~500 lines) is stated and proved concretely against modalApplyOne, so modalTableauT phi = .closed -> tValid phi (T soundness lifted to the driver/branch level) cannot be obtained by instantiation. Favourable structural fact found by task 503 Phase 6 (verified, documented at GenericDriver.lean:147-151): the ambient Kripke model is NEVER replaced throughout modalStepBranch_preserves_sat proof -- only the world-assignment function is redefined at fresh worlds -- so a branchSatisfiableIn-generalized version is structurally low-risk, though still multi-lemma. SCOPE: (1) generalize modalStepBranch_preserves_sat and its dependency chain in Soundness.lean/SoundnessStep.lean over (apply, spec : RuleApplicationSpec apply), following task 510 pattern (raw-hypothesis _gen lemmas where import topology forces it, bundled (apply, spec) wrappers where the file is a leaf; check import edges as 510 did); determine which existing RuleApplicationSpec fields (now 11 after task 510) suffice and whether any new soundness-side field is needed, deriving the field list from what the proof actually consumes, NOT assumed. (2) Re-instantiate K trivially with byte-identical public soundness statements (zero regression). (3) Instantiate at modalApplyOneT + modalApplyOneT_spec to expose modalTableauT_sound, then complete tValid_decides / instDecidableTValid (task 503 Phase 6) against Cube.T / Satisfies.t. Zero sorry, zero axiom, zero vacuous placeholders; mark [BLOCKED] with documented goal state rather than introduce debt. Run full CSLib CI at every milestone; scope git add narrowly (concurrent sessions). On completion unblocks task 503 Phase 6 and the Decidable side of tasks 505 (B) and 504 (S5). Files: Cslib/Logics/Modal/Tableau/Soundness.lean, Cslib/Logics/Modal/Tableau/SoundnessStep.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/TDriver.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (tValid_decides).
+Attempt CS5 constructive completeness (Branch A) by building the box-backward truth-lemma case that task 509 left open. 509 delivered CS5 soundness over cs5FC'', the full canonical machinery up to cs5FC''_cs5Mreach, and a MECHANIZED OBSTRUCTION (Branch B): the box-backward case needs, given prime H with box-A not in H, a SIMULTANEOUS prime pair (H', T) with H subset H', boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap, landed in CS5.lean) and the gap is non-vacuous (CS5BoxGapWorld countermodel, landed in CS5.lean). THE PHASE 8 FINDING (see specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean, sorry-free): the pair poset with designated-formula exclusion (box-A not in X, A not in Y) has a clean seed, a clean chain-upper-bound, and pair-maximality projects to per-component maximality — BUT the library's single-formula primeness engine (prime_set_exclusion / set_maximal_is_prime, PrimeExclusion.lean:558/:428) does NOT directly apply, because the cross-condition predicate Cons_Y(Z) := boxInv Z subset Y (Y fixed) is NOT stable under deductive closure: Zorn-closing an insertion can derive new box-formulas not pinned to Y. THE DESIGNED REPAIR (not yet built): work over a doubled atom space Atom+Atom (tag X's formulas via Sum.inl, Y's via Sum.inr) under a COMBINED axiom system that adds the two cross-condition implications as axioms rather than carrying them as an external invariant, so that closure preserves them by construction; then recover the pair from the combined prime theory. Deliverables: build the combined derivation system, prove its primeness engine, extract cs5_box_backward, complete the CS5 truth lemma and completeness theorem. NO sorry, no new axiom. If this repair also fails, document WHY as a further mechanized theorem and keep completeness BLOCKED citing both obstructions — a rigorous negative result remains acceptable. Reuse the three landed prime_set_exclusion instantiation templates in CS5.lean (cs5_diam_witness, cs5_fcsymbox_theory, cs5_fc4_theory) and quasi_prime_set_exclusion. Do NOT transcribe Pacheco Lemma 16/18 verbatim (negation-completeness, unsound); only the Zorn skeleton ports. Literature: pacheco_2024_collapsingconstructiveandintuitionisticmodallogics in the corpus. Consider the deferred CS5Canonical.lean file-size split. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean (~1400 lines). Depends on 509.
+
+---
+
+### 512. Generalize tableau soundness chain over spec
+cs5 box backward atom sum completeness
+- **Effort**: 
+10-16 hours
+- **Status**: [NOT_STARTED
+NOT_STARTED]
+- **Task Type**: cslib
+cslib
+- **Topic**: 
+Modal Logic
+- **Dependencies**: Task 510
+Task 509
+
+**Description**: Generalize the tableau SOUNDNESS chain over the abstract rule-application interface, mirroring task 510 (which did this for the completeness/Hintikka chain). This is the shared blocker for Decidable(tValid) (task 503 Phase 6), Decidable(bValid) (task 505), and Decidable(s5Valid) (task 504): the completeness direction is fully generic (task 510), but the soundness direction is not. Root cause: modalStepBranch_preserves_sat (Cslib/Logics/Modal/Tableau/Soundness.lean, ~500 lines) is stated and proved concretely against modalApplyOne, so modalTableauT phi = .closed -> tValid phi (T soundness lifted to the driver/branch level) cannot be obtained by instantiation. Favourable structural fact found by task 503 Phase 6 (verified, documented at GenericDriver.lean:147-151): the ambient Kripke model is NEVER replaced throughout modalStepBranch_preserves_sat proof -- only the world-assignment function is redefined at fresh worlds -- so a branchSatisfiableIn-generalized version is structurally low-risk, though still multi-lemma. SCOPE: (1) generalize modalStepBranch_preserves_sat and its dependency chain in Soundness.lean/SoundnessStep.lean over (apply, spec : RuleApplicationSpec apply), following task 510 pattern (raw-hypothesis _gen lemmas where import topology forces it, bundled (apply, spec) wrappers where the file is a leaf; check import edges as 510 did); determine which existing RuleApplicationSpec fields (now 11 after task 510) suffice and whether any new soundness-side field is needed, deriving the field list from what the proof actually consumes, NOT assumed. (2) Re-instantiate K trivially with byte-identical public soundness statements (zero regression). (3) Instantiate at modalApplyOneT + modalApplyOneT_spec to expose modalTableauT_sound, then complete tValid_decides / instDecidableTValid (task 503 Phase 6) against Cube.T / Satisfies.t. Zero sorry, zero axiom, zero vacuous placeholders; mark [BLOCKED] with documented goal state rather than introduce debt. Run full CSLib CI at every milestone; scope git add narrowly (concurrent sessions). On completion unblocks task 503 Phase 6 and the Decidable side of tasks 505 (B) and 504 (S5). Files: Cslib/Logics/Modal/Tableau/Soundness.lean, Cslib/Logics/Modal/Tableau/SoundnessStep.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/TDriver.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (tValid_decides).
+Attempt CS5 constructive completeness (Branch A) by building the box-backward truth-lemma case that task 509 left open. 509 delivered CS5 soundness over cs5FC'', the full canonical machinery up to cs5FC''_cs5Mreach, and a MECHANIZED OBSTRUCTION (Branch B): the box-backward case needs, given prime H with box-A not in H, a SIMULTANEOUS prime pair (H', T) with H subset H', boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap, landed in CS5.lean) and the gap is non-vacuous (CS5BoxGapWorld countermodel, landed in CS5.lean). THE PHASE 8 FINDING (see specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean, sorry-free): the pair poset with designated-formula exclusion (box-A not in X, A not in Y) has a clean seed, a clean chain-upper-bound, and pair-maximality projects to per-component maximality — BUT the library's single-formula primeness engine (prime_set_exclusion / set_maximal_is_prime, PrimeExclusion.lean:558/:428) does NOT directly apply, because the cross-condition predicate Cons_Y(Z) := boxInv Z subset Y (Y fixed) is NOT stable under deductive closure: Zorn-closing an insertion can derive new box-formulas not pinned to Y. THE DESIGNED REPAIR (not yet built): work over a doubled atom space Atom+Atom (tag X's formulas via Sum.inl, Y's via Sum.inr) under a COMBINED axiom system that adds the two cross-condition implications as axioms rather than carrying them as an external invariant, so that closure preserves them by construction; then recover the pair from the combined prime theory. Deliverables: build the combined derivation system, prove its primeness engine, extract cs5_box_backward, complete the CS5 truth lemma and completeness theorem. NO sorry, no new axiom. If this repair also fails, document WHY as a further mechanized theorem and keep completeness BLOCKED citing both obstructions — a rigorous negative result remains acceptable. Reuse the three landed prime_set_exclusion instantiation templates in CS5.lean (cs5_diam_witness, cs5_fcsymbox_theory, cs5_fc4_theory) and quasi_prime_set_exclusion. Do NOT transcribe Pacheco Lemma 16/18 verbatim (negation-completeness, unsound); only the Zorn skeleton ports. Literature: pacheco_2024_collapsingconstructiveandintuitionisticmodallogics in the corpus. Consider the deferred CS5Canonical.lean file-size split. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean (~1400 lines). Depends on 509.
 
 ---
 
@@ -206,10 +232,10 @@ next_project_number: 513
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 512
 - **Research**:
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]

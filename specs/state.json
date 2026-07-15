@@ -2,6 +2,17 @@
   "next_project_number": 513,
   "active_projects": [
     {
+      "project_number": 512,
+      "project_name": "generalize_tableau_soundness_chain_over_spec",
+      "status": "not_started",
+      "task_type": "cslib",
+      "description": "Generalize the tableau SOUNDNESS chain over the abstract rule-application interface, mirroring task 510 (which did this for the completeness/Hintikka chain). This is the shared blocker for Decidable(tValid) (task 503 Phase 6), Decidable(bValid) (task 505), and Decidable(s5Valid) (task 504): the completeness direction is fully generic (task 510), but the soundness direction is not. Root cause: modalStepBranch_preserves_sat (Cslib/Logics/Modal/Tableau/Soundness.lean, ~500 lines) is stated and proved concretely against modalApplyOne, so modalTableauT phi = .closed -> tValid phi (T soundness lifted to the driver/branch level) cannot be obtained by instantiation. Favourable structural fact found by task 503 Phase 6 (verified, documented at GenericDriver.lean:147-151): the ambient Kripke model is NEVER replaced throughout modalStepBranch_preserves_sat proof -- only the world-assignment function is redefined at fresh worlds -- so a branchSatisfiableIn-generalized version is structurally low-risk, though still multi-lemma. SCOPE: (1) generalize modalStepBranch_preserves_sat and its dependency chain in Soundness.lean/SoundnessStep.lean over (apply, spec : RuleApplicationSpec apply), following task 510 pattern (raw-hypothesis _gen lemmas where import topology forces it, bundled (apply, spec) wrappers where the file is a leaf; check import edges as 510 did); determine which existing RuleApplicationSpec fields (now 11 after task 510) suffice and whether any new soundness-side field is needed, deriving the field list from what the proof actually consumes, NOT assumed. (2) Re-instantiate K trivially with byte-identical public soundness statements (zero regression). (3) Instantiate at modalApplyOneT + modalApplyOneT_spec to expose modalTableauT_sound, then complete tValid_decides / instDecidableTValid (task 503 Phase 6) against Cube.T / Satisfies.t. Zero sorry, zero axiom, zero vacuous placeholders; mark [BLOCKED] with documented goal state rather than introduce debt. Run full CSLib CI at every milestone; scope git add narrowly (concurrent sessions). On completion unblocks task 503 Phase 6 and the Decidable side of tasks 505 (B) and 504 (S5). Files: Cslib/Logics/Modal/Tableau/Soundness.lean, Cslib/Logics/Modal/Tableau/SoundnessStep.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/TDriver.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (tValid_decides).",
+      "dependencies": [
+        510
+      ],
+      "parent_task": 503
+    },
+    {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
       "status": "not_started",
@@ -1152,15 +1163,17 @@
     {
       "project_number": 503,
       "project_name": "generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Saturation.lean's modalStepBranch/modalExpandBranches/modalTableau and Cslib/Logics/Modal/Tableau/FmpMeasure.lean's termination measure, currently hard-coding modalApplyOne at 91 call sites across Saturation.lean/FmpMeasure.lean/CompletenessLoop.lean) over an abstract rule-application function matching modalApplyOne's signature, together with a small set of explicit structural hypotheses (no world creation outside the unmodified K diamondPos/boxNeg arms; all added formulas drawn from the finite modalUniverse phi0 catalog). Re-derive K itself as the trivial instantiation (must stay green, zero regression, zero sorry/axiom). Then instantiate the generic driver with the already-proved modalApplyOneT (Cslib/Logics/Modal/Tableau/FrameRules.lean) to build modalStepBranchT/modalExpandBranchesT/modalTableauT, discharge the T-specific structural hypotheses, close the T truth-lemma box-positive case (reflexive self-edge; reuse modalApplyOneT_eq_of_not_boxPos_diaNeg to reduce other cases to existing K bridge lemmas per specs/300_modal_extensions_t_s4_s5/handoffs/phase2-blocked-handoff.md), and state tValid's completeness + Decidable (tValid phi). This completes Phase 2 of the original task 300 plan (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md). Build on the already-committed, green rule-level work in FrameRules.lean/FrameSoundness.lean/FrameCompleteness.lean (do not re-derive it). Every delivered result must be genuinely sorry-free/axiom-free; if the T truth-lemma or termination re-derivation cannot close, mark [BLOCKED] with a documented open goal state rather than introduce debt. Files: Cslib/Logics/Modal/Tableau/Saturation.lean, Cslib/Logics/Modal/Tableau/FmpMeasure.lean, Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, Cslib/Logics/Modal/Tableau/FrameSoundness.lean.",
       "effort": "10-14 hours",
       "parent_task": 300,
       "topic": "Modal Logic",
-      "dependencies": [],
+      "dependencies": [
+        512
+      ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-14T18:36:07Z",
+      "last_updated": "2026-07-15T00:09:20Z",
       "artifacts": [
         {
           "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md",
@@ -1188,9 +1201,9 @@
           "summary": "7-phase plan: parametrize K driver over abstract RuleApplicationSpec, re-derive K trivially, instantiate T, close T truth lemma + Decidable(tValid). Reuse interface validated for 504/505."
         }
       ],
-      "blockers": "UNBLOCKED: Phase 5 dependency delivered by task 510 (completed, commit 462560aa) -- modalExpandBranchesT_hintikka now exists in TDriver.lean concluding in modalHintikkaSetGen modalApplyOneT. Phases 1-4 green. Phases 5-7 (T truth lemma, Decidable (tValid phi), downstream contract docs) ready. Dispatch held by orchestrator until task 506 completes, to serialize on shared file FrameCompleteness.lean (both land public validity theorems there).",
+      "blockers": "Phase 6 [BLOCKED] on task 512 (generic soundness). Phases 1-5 COMPLETE and green: generic driver + interface (1-2), termination measure via task 507 (3), T driver instantiation (4), T truth lemma + tValid completeness (5, commit 14d9931c). Phase 6 Decidable(tValid) needs modalTableauT phi = .closed -> tValid phi, i.e. the SOUNDNESS direction lifted to driver level; modalStepBranch_preserves_sat (Soundness.lean) is still K-concrete -- the mirror of the completeness gap task 510 closed. Escalated to task 512. Phase 7 interface docs PARTIAL (completeness contract documented). Zero sorry/axiom.",
       "previous_status": "planned",
-      "session_id": "sess_1784054130_39201a"
+      "session_id": "sess_1784054776_0fc973_503"
     },
     {
       "project_number": 504,

@@ -1,7 +1,7 @@
 # Implementation Plan: Task #503 — Generalize K Tableau Driver + Complete T-System Decidability
 
 - **Task**: 503 - Generalize the K tableau driver and complete T-system decidability
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 13 hours
 - **Dependencies**: None (builds on the already-committed, green rule-level work in
   `FrameRules.lean`/`FrameSoundness.lean`/`FrameCompleteness.lean`; parent task 300 [PARTIAL])

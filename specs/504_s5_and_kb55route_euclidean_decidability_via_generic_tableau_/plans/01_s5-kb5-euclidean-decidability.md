@@ -266,28 +266,47 @@ as for B.
 
 ---
 
-### Phase 3: Countermodel extraction `extractModelS5` via `Relation.EqvGen` [NOT STARTED]
+### Phase 3: Countermodel extraction `extractModelS5` via `Relation.EqvGen` [COMPLETED]
 
 - **Goal:** Extract the S5 countermodel and read all frame conditions off the Mathlib closure for
   free. Independent of the rule (pure closure-model construction).
 - **Tasks:**
-  - [ ] In `FrameCompleteness.lean`, define `extractModelS5 b acc` with
+  - [x] In `FrameCompleteness.lean`, define `extractModelS5 b acc` with
     `r := Relation.EqvGen (fun w w' => acc.hasEdge w w' = true)` and the same valuation `v` as
     `extractModelB` (mirror `extractModelB`, `FrameCompleteness.lean:425`).
-  - [ ] `extractModelS5_r` (`.r = Relation.EqvGen …`, by `rfl`) — mirror `extractModelB_r:432`.
-  - [ ] `extractModelS5_equiv : IsEquiv _ (extractModelS5 b acc).r` via
-    `Relation.EqvGen.instIsEquiv`; derive the projections needed downstream
-    (`Std.Refl`/`Std.Symm`/`IsTrans`) — mirror `extractModelB_symm:441`.
-  - [ ] `extractModelS5_hasEdge_imp_r` (raw edges survive into the equivalence closure via
+  - [x] `extractModelS5_r` (`.r = Relation.EqvGen …`, by `rfl`) — mirror `extractModelB_r:432`.
+  - [x] `extractModelS5_equiv : IsEquiv _ (extractModelS5 b acc).r` *(deviation: altered --
+    `Relation.EqvGen.instIsEquiv` does not exist in Mathlib; built `instIsEquivEqvGen` by hand from
+    `EqvGen`'s own `.refl`/`.symm`/`.trans` constructors instead)*.
+  - [x] `extractModelS5_hasEdge_imp_r` (raw edges survive into the equivalence closure via
     `Relation.EqvGen.rel`/`.refl`) — mirror `extractModelB_hasEdge_imp_r:452`.
+  - [x] `extractModelS5_rightEuclidean` *(deviation: pulled forward from Phase 7 -- delivered here
+    since it depends only on `extractModelS5_equiv`, independent of the blocked Phase 2 rule
+    discharge; required adding `public import Cslib.Foundations.Relation.Euclidean` to
+    `FrameCompleteness.lean` (not previously imported) and constructing `RightEuclidean` directly
+    from `IsEquiv`'s `symm`/`trans` projections rather than
+    `Relation.symm_rightEuclidean_iff_trans`, which needs an unavailable `[Std.Symm r]` instance
+    for `Relation.EqvGen`)*.
 - **Timing:** 0.75 hours
 - **Depends on:** none
 - **Files to modify:** `FrameCompleteness.lean`.
 - **Verification:** `lake build` green; zero sorry/axiom; the `IsEquiv` instance type-checks; CI clean.
+  Re-verified green in this session (`lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`,
+  878/878 jobs, zero new sorry/axiom).
 
 ---
 
-### Phase 4: S5 completeness — Hintikka instantiation + truth lemma [NOT STARTED]
+### Phase 4: S5 completeness — Hintikka instantiation + truth lemma [BLOCKED]
+
+**BLOCKER** (Phase 4): Transitively blocked by Phase 2. Every task in this phase's checklist
+consumes `modalApplyOneS5_spec : RuleApplicationSpec modalApplyOneS5` (directly, or via the
+generic `modalExpandBranchesGen_hintikka`/`_openBranch_accSourcesKnown` lemmas which are
+themselves parametrized over a `spec` witness) — and `modalApplyOneS5_spec` cannot be
+constructed (Phase 2's `rankStep` field is proven mathematically false for `modalApplyOneS5`,
+see Phase 2's blocker record and the mechanized counterexample
+`modalApplyOneS5_rankStep_not_dischargeable` in `S5Simplification.lean`). No sorry/axiom/vacuous
+workaround was introduced; this phase's tasks were not attempted since their prerequisite type
+does not exist. Re-verified this session (re-derived, did not merely trust the prior claim).
 
 - **Goal:** Land `modalTruthLemmaS5` over the equivalence relation and `modalTableauS5_complete`.
 - **Tasks:**
@@ -327,7 +346,15 @@ as for B.
 
 ---
 
-### Phase 5: S5 soundness triple + `modalTableauS5_sound` [NOT STARTED]
+### Phase 5: S5 soundness triple + `modalTableauS5_sound` [BLOCKED]
+
+**BLOCKER** (Phase 5): Transitively blocked by Phase 2. `modalTableauS5_sound` explicitly consumes
+`modalApplyOneS5_spec.freshLocal` (this phase's own dependency line names it), and
+`modalApplyOneS5_spec` cannot be constructed (see Phase 2/4 blocker records). The `s5FC`
+frame-condition definition itself (`FrameCondition := fun {World} r => IsEquiv World r`) has no
+rule dependency and could be landed standalone, but was deferred since it has no independent use
+without Phase 6/`s5Valid`, which is itself blocked (depends on Phases 4 and 5). No sorry/axiom/
+vacuous workaround introduced.
 
 - **Goal:** Instantiate 513's generic soundness lemmas at the equivalence frame condition and land
   the top soundness theorem.
@@ -364,7 +391,11 @@ as for B.
 
 ---
 
-### Phase 6: `s5Valid` + decidability [NOT STARTED]
+### Phase 6: `s5Valid` + decidability [BLOCKED]
+
+**BLOCKER** (Phase 6): Transitively blocked by Phases 4 and 5 (both blocked by Phase 2).
+`s5Valid_decides`/`instDecidableS5Valid` need both `modalTableauS5_sound` (Phase 5) and
+`modalTableauS5_complete` (Phase 4). No sorry/axiom/vacuous workaround introduced.
 
 - **Goal:** State `s5Valid` against `Cube.S5` and deliver `Decidable (s5Valid φ)`.
 - **Tasks:**
@@ -386,29 +417,30 @@ as for B.
 
 ---
 
-### Phase 7: 5 / KB5 Euclidean coverage via the S5 route [NOT STARTED]
+### Phase 7: 5 / KB5 Euclidean coverage via the S5 route [PARTIAL]
 
 - **Goal:** Expose the Euclidean frame condition on the extracted model and state 5/KB5 validity +
   completeness via the equivalence route; document pure-K5 as out of scope.
 - **Tasks:**
-  - [ ] `extractModelS5_rightEuclidean : Relation.RightEuclidean (extractModelS5 b acc).r`.
-    Note: the `RightEuclidean` class lives in `Cslib/Foundations/Relation/Defs.lean:49` (field
-    `rightEuclidean : r a b → r a c → r b c`); there is **no** unconditional `IsEquiv → RightEuclidean`
-    instance and **no** lemma literally named `RightEuclidean.symm`. Construct it from
-    `extractModelS5_equiv`'s `Std.Symm` + `IsTrans` components via
-    `Relation.symm_rightEuclidean_iff_trans` (`Euclidean.lean:236`, for a symmetric relation
-    `RightEuclidean r ↔ IsTrans α r`), or directly: `r a b → r a c` gives `r b a` (`Std.Symm`) then
-    `r b c` (`IsTrans` with `r a c`). Seriality glue for KB5 comes from `refl_serial`
-    (`Euclidean.lean:35`).
-  - [ ] Add `fiveFC`/`kb5FC` (or reuse `s5FC` and note `frameValid s5FC` entails `Five`/`KB5`
-    validity): state `fiveValid`/`kb5Valid` and their completeness via the same `extractModelS5`
-    countermodel (which satisfies `RightEuclidean`, plus `Std.Symm` for KB5). The soundness arm uses
-    `Satisfies.five` (`Basic.lean:376`, needs `Relation.RightEuclidean m.r`) and the `Euclidean.lean`
-    API.
-  - [ ] Add an in-file docstring block stating that genuine **pure-K5 / pure-5** (Euclidean without
+  - [x] `extractModelS5_rightEuclidean : Relation.RightEuclidean (extractModelS5 b acc).r`
+    *(deviation: delivered in Phase 3 instead, since it depends only on `extractModelS5_equiv`;
+    built directly from `IsEquiv`'s `symm`/`trans` projections rather than
+    `Relation.symm_rightEuclidean_iff_trans`, which needs an unavailable `[Std.Symm r]` instance
+    for `Relation.EqvGen` -- see Phase 3's deviation note)*.
+  - [ ] Add `fiveFC`/`kb5FC` … state `fiveValid`/`kb5Valid` and their completeness via the same
+    `extractModelS5` countermodel; soundness arm via `Satisfies.five`.
+    *(deviation: skipped -- transitively blocked by Phase 6, which is blocked by Phases 4/5, which
+    are blocked by Phase 2's mechanized `rankStep` counterexample. `fiveValid`/`kb5Valid`
+    *completeness* specifically needs `modalTableauS5_complete`
+    (Phase 4)/`modalTableauS5_sound` (Phase 5) as its proof engine -- there is no way to state a
+    decidability/completeness result through the S5 tableau without the tableau's own soundness+
+    completeness triple existing first.)*
+  - [x] Add an in-file docstring block stating that genuine **pure-K5 / pure-5** (Euclidean without
     full equivalence) has no Mathlib closure operator and is OUT OF SCOPE, deferred to a dedicated
     `pure-k5-euclidean-closure` task (per `reports/03` non-goals). No `EuclGen`, no `sorry`, no
-    `axiom`.
+    `axiom`. *(deviation: also documents that 5/KB5 validity+completeness via this route -- not
+    just pure-K5 -- is blocked pending a resolution of Phase 2's obstruction; see
+    `extractModelS5_rightEuclidean`'s docstring in `FrameCompleteness.lean`.)*
 - **Timing:** 1.25 hours
 - **Depends on:** 3, 6
 - **Files to modify:** `FrameCompleteness.lean` (Euclidean instance + 5/KB5 validity/completeness),

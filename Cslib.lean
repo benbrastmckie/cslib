@@ -355,6 +355,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKTruthLemma
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS4
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
+public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 public import Cslib.Logics.Modal.Metalogic.Constructive.CT
 public import Cslib.Logics.Modal.Metalogic.Constructive.Forcing
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment

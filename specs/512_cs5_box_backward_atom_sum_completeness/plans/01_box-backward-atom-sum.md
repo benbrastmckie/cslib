@@ -134,7 +134,7 @@ selects the content of Phases 4-5. No two phases can execute in parallel.
 
 ---
 
-### Phase 2: Combined system + derivation transport [NOT STARTED]
+### Phase 2: Combined system + derivation transport [COMPLETED]
 
 - **Goal:** In a NEW file `CS5Canonical.lean` (importing `CS5.lean`), define `CS5Combined`, the
   17-case relabel helper `cs5_axiom_relabel`, the `τL`/`τR` `ProofSigHom`s, and the `DerivationTree`

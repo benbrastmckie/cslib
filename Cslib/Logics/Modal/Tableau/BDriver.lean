@@ -207,7 +207,7 @@ propagation emits at a *different* (predecessor) world, so this section re-deriv
 constructor/extractor lemmas needed for a cross-world catalog-membership argument, driven by
 `accFreshInv`'s numeric bound instead of a known-worlds membership fact. -/
 
-omit [Hashable Atom] in
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalSubfmls_trans_B {a c : Proposition Atom} {b : Proposition Atom}
     (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
   induction c with
@@ -244,7 +244,7 @@ private lemma modalSubfmls_trans_B {a c : Proposition Atom} {b : Proposition Ato
     · exact hab
     · exact List.mem_cons_of_mem _ (ihx hx)
 
-omit [Hashable Atom] in
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalUniverse_mem_formula_B {φ0 : Proposition Atom}
     {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverse φ0) :
     x.formula ∈ modalSubfmls φ0 := by
@@ -252,7 +252,7 @@ private lemma modalUniverse_mem_formula_B {φ0 : Proposition Atom}
     List.not_mem_nil, or_false] at hx
   obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
 
-omit [Hashable Atom] in
+omit [DecidableEq Atom] [Hashable Atom] in
 private lemma mem_modalUniverse_of_B {φ0 : Proposition Atom} {s : Sign} {φ : Proposition Atom}
     {w : WorldIndex} (hw : w ≤ modalWorldBound φ0) (hφ : φ ∈ modalSubfmls φ0) :
     (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 := by
@@ -260,7 +260,7 @@ private lemma mem_modalUniverse_of_B {φ0 : Proposition Atom} {s : Sign} {φ : P
   simp only [modalUniverse, List.mem_flatMap, List.mem_range]
   exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
 
-omit [Hashable Atom] in
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Cross-world catalog membership: a signed formula `⟨s, ψ, v⟩` is in `U(φ0)` provided `ψ` is a
 subformula of some `sf.formula` with `sf ∈ b ⊆ U(φ0)`, and `v` is bounded by `modalWorldBound
 φ0` -- independent of `v` being `sf.label` (unlike `modalUniverse_mem_of_sameWorld_subfml`). -/
@@ -273,7 +273,7 @@ private lemma modalUniverse_mem_of_predWorld_subfml {φ0 : Proposition Atom}
     (⟨s, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverse φ0 :=
   mem_modalUniverse_of_B hv (modalSubfmls_trans_B hψ (modalUniverse_mem_formula_B (hb sf hsf)))
 
-omit [Hashable Atom] in
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Every `modalBPredecessorsOf`/`modalBBoxBack`/`modalBDiaNegBack`-relevant predecessor `v` of
 `w` (i.e. `acc.hasEdge v w = true`) is bounded by `modalWorldBound φ0`, given `accFreshInv b acc`
 and `modalMaxWorld b < modalWorldBound φ0`: `v < modalNextWorld b = modalMaxWorld b + 1 ≤
@@ -907,21 +907,287 @@ private lemma hasEdge_addEdge_cases_B {acc : Accessibility} {w w' a a' : WorldIn
   tauto
 
 omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
+(unavailable across files, and there additionally bundled with a `Nodup` conjunct this
+development does not need): the membership characterization of the `List.foldl`
+underlying `modalKnownWorlds`, generalized over the accumulator. -/
+private lemma modalKnownWorlds_fold_spec_B
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => simp
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      intro x
+      rw [ih ws0]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      intro x
+      rw [ih (sf.label :: ws0)]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ List.mem_cons_self)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds`
+(unavailable across files). -/
+private lemma mem_modalKnownWorlds_B
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  simpa using modalKnownWorlds_fold_spec_B l [] x
+
+omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
 (unavailable across files): appending formulas to the front of a branch only grows its
-known-worlds set. Proved directly from `modalKnownWorlds`'s public `def` via
-`label_mem_modalKnownWorlds`-style reasoning, without needing the `private`
-`mem_modalKnownWorlds` iff-characterization. -/
+known-worlds set. -/
 private lemma modalKnownWorlds_mono_append_B
     (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
   intro x hx
-  induction b generalizing xs with
-  | nil => simp only [modalKnownWorlds] at hx; simp at hx
-  | cons sf rest ih =>
-    have hstep : modalKnownWorlds (xs ++ sf :: rest) = modalKnownWorlds ((xs ++ [sf]) ++ rest) :=
-      by simp
-    sorry
+  rw [mem_modalKnownWorlds_B] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+/-- **Single-step preservation of `accSourcesKnown`**: mirrors `FmpMeasure.lean`'s
+`modalStepBranch_preserves_accTargetsKnown_gen` but for edge *sources*. Simpler than the
+target-side proof for the new-edge case: the new edge's source is always `sf.label` for
+`sf ∈ b` (`RuleApplicationSpec.freshLocal`'s own shape), hence known via
+`label_mem_modalKnownWorlds` directly (no need to track the freshly-minted witness formula's
+membership in the child branch, unlike the target-side argument). -/
+theorem modalStepBranchGen_preserves_accSourcesKnown
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hknown : accSourcesKnown b acc) :
+    ∀ b' ∈ newBs, accSourcesKnown b' newAcc := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hbsub : ∀ b' ∈ newBs, ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds b' := by
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact modalKnownWorlds_mono_append_B nf b
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      obtain ⟨br, -, rfl⟩ := List.mem_map.mp hb'
+      exact modalKnownWorlds_mono_append_B br b
+    · rw [hfstc] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro b' hb'
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact modalKnownWorlds_mono_append_B nf b
+    · rw [hfstc] at hsf; simp at hsf
+  have hnewAcc : newAcc = (apply sf b acc).snd := by
+    rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp at hsf
+  intro b' hb' w w' hedge
+  rw [hnewAcc] at hedge
+  rcases spec.freshLocal sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  · rw [hsame] at hedge
+    exact hbsub b' hb' w (hknown w w' hedge)
+  · rw [hsnd] at hedge
+    rcases hasEdge_addEdge_cases_B hedge with ⟨rfl, rfl⟩ | hold
+    · exact hbsub b' hb' sf.label (label_mem_modalKnownWorlds hsfmem)
+    · exact hbsub b' hb' w (hknown w w' hold)
+
+/-- Local re-derivation of `CompletenessLoop.lean`'s `private lemma
+modalStepBranchGen_newExps_const` (unavailable across files): every `modalStepBranchGen` step
+produces children that all share the same freshly-expanded set. -/
+private lemma modalStepBranchGen_newExps_const_B
+    (apply : RuleApply Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc)) :
+    ∃ newExp, newExps = newBs.map (fun _ => newExp) := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -⟩ := hsf
+    exact ⟨e ++ [sf], rfl⟩
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -⟩ := hsf
+    exact ⟨e ++ [sf], by simp [List.map_map, Function.comp_def]⟩
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -⟩ := hsf
+    exact ⟨e, rfl⟩
+  · rw [hfstc] at hsf; simp at hsf
+
+/-- **Top-loop propagation of `accSourcesKnown`**: mirrors `CompletenessLoop.lean`'s
+`modalExpandBranchesGen_openBranch_initial_mem`'s double induction (outer on `fuel`, inner on
+the pending worklist), but threading a per-`(branch, acc)`-pair invariant (via
+`List.zip`) rather than a single fixed formula's membership, updated at each step by
+`modalStepBranchGen_preserves_accSourcesKnown`. -/
+theorem modalExpandBranchesGen_openBranch_accSourcesKnown
+    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accSourcesKnown p.1 p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
+        accSourcesKnown bR aR := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs _hlen _hlenA hAll bR aR h
+    simp only [modalExpandBranchesGen] at h
+    cases hfs : (branches.zip accs).findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | none => simp only [hfs] at h; exact absurd h (by simp)
+    | some p =>
+      obtain ⟨pb, pa⟩ := p
+      simp only [hfs] at h
+      injection h with hp1 hp2
+      obtain ⟨q, hqmem, hf⟩ := List.exists_of_findSome?_eq_some hfs
+      obtain ⟨qb, qa⟩ := q
+      simp only [] at hf
+      by_cases hcl : isModalClosed qb = true
+      · rw [if_pos hcl] at hf
+        exact absurd hf (by simp)
+      · rw [if_neg hcl] at hf
+        have hqp : (qb, qa) = (pb, pa) := Option.some.inj hf
+        have hqfst : qb = bR := by
+          have hh : qb = pb := congrArg Prod.fst hqp
+          rw [hh]; exact hp1
+        have hqsnd : qa = aR := by
+          have hh : qa = pa := congrArg Prod.snd hqp
+          rw [hh]; exact hp2
+        rw [hqfst, hqsnd] at hqmem
+        exact hAll (bR, aR) hqmem
+  | succ fuel' ih =>
+    intro branches expandedSets accs hlen hlenA hAll bR aR h
+    simp only [modalExpandBranchesGen] at h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        (∀ p ∈ pending.zip pendingAccs, accSourcesKnown p.1 p.2) →
+        (∀ p ∈ done.zip doneAccs, accSourcesKnown p.1 p.2) →
+        modalExpandBranchesGen.processNext apply fuel' pending pendingExp pendingAccs done doneExp
+            doneAccs = .openBranch bR aR →
+        accSourcesKnown bR aR from
+      key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hAll (by simp)
+        (by simpa [modalExpandBranchesGen] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs done doneExp doneAccs _ _ _ _ _ _ hinner
+      simp [modalExpandBranchesGen.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hlength_p hlenP_accs hdlength hdAccs hAll_p hAll_d hinner
+      cases pendingAccs with
+      | nil => simp at hlenP_accs
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hlength_p
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
+          simp only [modalExpandBranchesGen.processNext] at hinner
+          have hah : accSourcesKnown bh a := hAll_p (bh, a) (by simp)
+          by_cases hcl : isModalClosed bh = true
+          · rw [if_pos hcl] at hinner
+            have hAll_bt : ∀ p ∈ bt.zip restAs, accSourcesKnown p.1 p.2 := fun p hp =>
+              hAll_p p (List.mem_cons_of_mem _ hp)
+            have hAll_done_bh : ∀ p ∈ (done ++ [bh]).zip (doneAccs ++ [a]),
+                accSourcesKnown p.1 p.2 := by
+              rw [List.zip_append hdAccs.symm]
+              intro p hp
+              simp only [List.mem_append, List.zip_cons_cons, List.zip_nil_right,
+                List.mem_singleton] at hp
+              rcases hp with hp | hp
+              · exact hAll_d p hp
+              · subst hp; exact hah
+            exact ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+              hlength_p hlenP_accs (by simp [hdlength]) (by simp [hdAccs])
+              hAll_bt hAll_done_bh hinner
+          · simp only [Bool.not_eq_true] at hcl
+            rw [if_neg (by simp [hcl])] at hinner
+            cases hstep : modalStepBranchGen apply bh e a with
+            | none =>
+              rw [hstep] at hinner
+              have hbeq : bh = bR ∧ a = aR := by cases hinner; exact ⟨rfl, rfl⟩
+              rw [← hbeq.1, ← hbeq.2]; exact hah
+            | some step =>
+              obtain ⟨newBs, newExps, newAcc⟩ := step
+              rw [hstep] at hinner
+              have hNewBs_known : ∀ b' ∈ newBs, accSourcesKnown b' newAcc :=
+                modalStepBranchGen_preserves_accSourcesKnown apply spec bh e a newBs newExps
+                  newAcc hstep hah
+              have hLenNBE : newExps.length = newBs.length := by
+                obtain ⟨newExp, hEq⟩ :=
+                  modalStepBranchGen_newExps_const_B apply bh e a newBs newExps newAcc hstep
+                simp [hEq]
+              have hAll_new : ∀ p ∈ (done ++ newBs ++ bt).zip
+                  (doneAccs ++ List.replicate newBs.length newAcc ++ restAs),
+                  accSourcesKnown p.1 p.2 := by
+                rw [List.zip_append (by simp [hdAccs]), List.zip_append hdAccs.symm]
+                intro p hp
+                simp only [List.mem_append] at hp
+                rcases hp with (hp | hp) | hp
+                · exact hAll_d p hp
+                · have hp' : p ∈ newBs.zip (List.replicate newBs.length newAcc) := hp
+                  rw [List.zip_eq_zipWith] at hp'
+                  simp only [List.mem_iff_getElem] at hp'
+                  obtain ⟨n, hn, hpe⟩ := hp'
+                  have hn' : n < newBs.length := by
+                    simpa [List.length_zipWith, List.length_replicate] using hn
+                  have : p = (newBs[n], newAcc) := by
+                    simp only [List.getElem_zipWith, List.getElem_replicate] at hpe
+                    rw [← hpe]
+                  rw [this]
+                  exact hNewBs_known _ (List.getElem_mem hn')
+                · exact hAll_p p (List.mem_cons_of_mem _ hp)
+              exact ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                (by simp [hdlength, hlength_p, hLenNBE])
+                (by simp [hdAccs, hlenP_accs])
+                hAll_new bR aR hinner
 
 end Cslib.Logic.Modal.Tableau
 

@@ -459,6 +459,7 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.S5
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
 public import Cslib.Logics.Modal.Semantics.Birelational
+public import Cslib.Logics.Modal.Tableau.BDriver
 public import Cslib.Logics.Modal.Tableau.Branch
 public import Cslib.Logics.Modal.Tableau.Closure
 public import Cslib.Logics.Modal.Tableau.Completeness

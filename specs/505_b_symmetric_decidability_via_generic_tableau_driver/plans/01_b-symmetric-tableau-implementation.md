@@ -153,7 +153,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 2: B driver definitions (BDriver.lean) [NOT STARTED]
+### Phase 2: B driver definitions (BDriver.lean) [COMPLETED]
 
 - **Goal:** Define the B tableau driver by instantiating the generic driver on `modalApplyOneB`,
   mirroring `TDriver.lean`'s `modalStepBranchT`/`modalExpandBranchesT`/`modalTableauT`.
@@ -175,7 +175,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 3: RuleApplicationSpec discharge for modalApplyOneB (BDriver.lean) [NOT STARTED]
+### Phase 3: RuleApplicationSpec discharge for modalApplyOneB (BDriver.lean) [COMPLETED]
 
 - **Goal:** Discharge the 11-field `RuleApplicationSpec` structural-hypothesis interface for
   `modalApplyOneB`, the piece that unlocks every generic downstream lemma.
@@ -196,7 +196,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 4: B Hintikka chain via generic instantiation (BDriver.lean) [NOT STARTED]
+### Phase 4: B Hintikka chain via generic instantiation (BDriver.lean) [COMPLETED]
 
 - **Goal:** Obtain `modalExpandBranchesB_hintikka` by instantiating the generic Hintikka chain on
   `(modalApplyOneB, modalApplyOneB_spec)`.

@@ -353,29 +353,28 @@ noncomputable def addChild (t : LTree Atom) (x y : Label Atom) : LTree Atom :=
     if l = x then node l (cs ++ [leaf y])
     else node l (cs.map (fun c => c.addChild x y))
 
--- The path of subtrees from the root down to the (assumed-occurring) node labelled `x`:
--- `some [t₀,...,tₘ]` with `t₀` the whole tree and `tₘ` the subtree rooted at `x`, or `none` if
--- `x` does not occur. Written as an explicit tree/list mutual recursion (rather than via
--- `List.findSome?`) so Lean's structural recursion checker can see the nested-inductive
--- descent directly.
-mutual
+/-! #### `prune`/`fullSubtree` (Task 517 Track C C4)
 
-noncomputable def pathTo (t : LTree Atom) (x : Label Atom) : Option (List (LTree Atom)) :=
-  match t with
-  | node l cs => if l = x then some [t] else (pathToList cs x).map (t :: ·)
+**`pathTo`/`pathToList` DELETED this dispatch** (were here, mutually recursive): confirmed
+defective per the plan (`plans/02_decomposed-track-a-b-c.md`'s C4 entry, report 02 §2.2) --
+they returned the FULL (unpruned) subtree at the target label, whereas Figure 6-1's caption
+(p.100) is explicit that for `i < m` the node `x_i` has its path-continuation child `x_{i+1}`
+EXCLUDED from `T^i`. Replaced by the two functions below, which perform the pruning/restoring
+step directly at a single node (report 02 §2.3's "unfolding identity"), rather than trying to
+search-and-prune a whole path in one pass -- the whole-path recursion (`pathSpine`) with pruning
+*built into* the recursion, plus its commutation with `addChild`, is explicitly deferred to C5
+(the TRUE crux, HIGH risk, its own dispatch; H8 phase sizing). -/
 
--- Search a list of sibling subtrees for the first whose `pathTo x` succeeds. Mutually
--- recursive with `pathTo`.
-noncomputable def pathToList (cs : List (LTree Atom)) (x : Label Atom) :
-    Option (List (LTree Atom)) :=
-  match cs with
-  | [] => none
-  | c :: cs' =>
-    match c.pathTo x with
-    | some p => some p
-    | none => pathToList cs' x
+/-- The pruned node: label `l` with only its "ordinary" children `pre` (Figure 6-1's `T^i` for
+`i < m`, which excludes the path-continuation child `x_{i+1}`). -/
+def prune (l : Label Atom) (pre : List (LTree Atom)) : LTree Atom := node l pre
 
-end
+/-- The full, unpruned reconstruction: `l`'s ordinary children `pre` plus the path-continuation
+child `c` appended at the END of the children list -- matching `addChild`'s own append-at-end
+convention (`:350` above, `node l (cs ++ [leaf y])`), so this dispatch's convention is
+forward-compatible with C5's `addChild`/`pathSpine` commutation lemma. -/
+def fullSubtree (l : Label Atom) (pre : List (LTree Atom)) (c : LTree Atom) : LTree Atom :=
+  node l (pre ++ [c])
 
 end LTree
 
@@ -390,10 +389,21 @@ def bigAnd : List (Proposition Atom) → Proposition Atom
 
 /-- Simpson's `Γ@U` (`:6512`): the internalizing formula for the subtree `U`, using **◇** for
 each child (a subtree's own content is only *possible*, not *necessary*, from its parent's
-point of view -- confirmed against the worked example, see the module-level correction note). -/
+point of view -- confirmed against the worked example, see the module-level correction note).
+
+**FIXED this dispatch (Task 517 Track C C4)**: a single `bigAnd` over the CONCATENATED list
+(labels-at-the-node, then all children's `◇`-wrapped stars), rather than the previous two
+separately-`bigAnd`-ed halves joined by `.and`. The old double-`bigAnd` version produced a
+spurious `⊤∧(◇(⊤∧⊤))` at a label-less, single-childed node instead of the source's plain `◇⊤`
+(hand-verified against Simpson's own worked example, p.101: `(x:◇A⊃□□B, y:A ⊢_G z:◇B)* =
+((◇A⊃□□B)∧◇A) ⊃ □(◇⊤⊃◇B)` -- see `star_Star_worked_example` below, which reproduces this
+exactly with the fix and would NOT with the old convention). `bigAnd`'s own `[]`/singleton
+short-circuiting (`:386` above) is what collapses the label-less-and-childless case to bare `⊤`
+and the singleton case to a bare (undecorated) conjunct -- both needed for the verbatim match. -/
 noncomputable def star (Γ : List (LabelledFormula Atom)) : LTree Atom → Proposition Atom
-  | .node y cs => (bigAnd ((Γ.filter (·.lbl = y)).map (·.prop))).and
-      (bigAnd (cs.map (fun c => Proposition.diamond (star Γ c))))
+  | .node y cs =>
+      bigAnd ((Γ.filter (·.lbl = y)).map (·.prop) ++
+        cs.map (fun c => Proposition.diamond (star Γ c)))
 
 /-- Simpson's `(Γ⊢_G x_m:A)*` (`:6512`): the telescoped internalizing formula along a path
 `[T⁰,...,Tᵐ]` from the root to the target label, using **□** for the outer (ancestor-to-target)
@@ -448,6 +458,151 @@ theorem box_mono2 {𝒯 : Set GeomAxiom} {φ ψ χ : Proposition Atom}
   have hd1 := IK.impIntro (Γ := [Proposition.box φ]) (φ := Proposition.box ψ) hstep3
   have hd2 := IK.impIntro (Γ := []) (φ := Proposition.box φ) hd1
   exact hd2
+
+/-! ### The unfolding identity (Task 517 Track C C4, report 02 §2.3)
+
+`Γ@(fullSubtree v) ~ Γ@(prune v c) ∧ ◇Γ@(fullSubtree c)` -- proved here as a genuine IK-derivable
+two-way implication (`star_unfold_imp1`/`star_unfold_imp2`), NOT as a raw Lean `Eq`: `bigAnd`'s
+own definition is a right-fold that peels from the HEAD (`φ::rest => φ.and(bigAnd rest)`), so
+literal term equality between `bigAnd(xs++[y])` and `(bigAnd xs).and y` genuinely fails once
+`xs` has 2+ elements (associativity mismatch: `a.and(X.and y)` is a different TERM from
+`(a.and X).and y`, even though they are logically equivalent). The Derivable-level statement is
+both the mathematically honest mechanization (Simpson's own "=" is informal, up to
+provable-equivalence) and the more USEFUL one: Lemma 6.1.2's actual truth-lemma cases (C6-C8)
+reason about `NIKAx`-derivability, not meta-level term equality, so a `Derivable`-Iff is exactly
+what those cases will need to invoke. -/
+
+/-- `AndI` lifted to an arbitrary context. -/
+theorem andI_deriv {𝒯 : Set GeomAxiom} {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
+    (h1 : Deriv (IKAx 𝒯) Γ φ) (h2 : Deriv (IKAx 𝒯) Γ ψ) : Deriv (IKAx 𝒯) Γ (φ.and ψ) :=
+  mp_deriv (mp_deriv (weakening_deriv (IKAx.andI φ ψ).toIKDerivable (by simp)) h1) h2
+
+/-- `AndE1` lifted to an arbitrary context. -/
+theorem andE1_deriv {𝒯 : Set GeomAxiom} {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
+    (h : Deriv (IKAx 𝒯) Γ (φ.and ψ)) : Deriv (IKAx 𝒯) Γ φ :=
+  mp_deriv (weakening_deriv (IKAx.andE1 φ ψ).toIKDerivable (by simp)) h
+
+/-- `AndE2` lifted to an arbitrary context. -/
+theorem andE2_deriv {𝒯 : Set GeomAxiom} {Γ : List (Proposition Atom)} {φ ψ : Proposition Atom}
+    (h : Deriv (IKAx 𝒯) Γ (φ.and ψ)) : Deriv (IKAx 𝒯) Γ ψ :=
+  mp_deriv (weakening_deriv (IKAx.andE2 φ ψ).toIKDerivable (by simp)) h
+
+/-- `⊤` is derivable in any context (`⊥⊃⊥`, an instance of `φ.imp φ` via `implyK`+`implyS`). -/
+theorem top_deriv {𝒯 : Set GeomAxiom} (Γ : List (Proposition Atom)) :
+    Deriv (IKAx 𝒯) Γ (Proposition.top : Proposition Atom) := by
+  rw [Proposition.top_def]
+  have hassum : Deriv (IKAx 𝒯) (Proposition.bot :: ([] : List (Proposition Atom)))
+      Proposition.bot := assumption_deriv (by simp)
+  have h : Deriv (IKAx 𝒯) [] (Proposition.bot.imp Proposition.bot) :=
+    IK.impIntro (Γ := []) (φ := Proposition.bot) hassum
+  exact weakening_deriv h (by simp)
+
+/-- `bigAnd`'s cons-equation, stated for a `rest` known (propositionally) nonempty rather than
+syntactically `_::_` -- needed because the induction below produces `rest`s of the shape
+`xs ++ [y]`, which are always nonempty but not always syntactically headed by `cons`. -/
+theorem bigAnd_cons_of_ne_nil (φ : Proposition Atom) (rest : List (Proposition Atom))
+    (h : rest ≠ []) : bigAnd (φ :: rest) = φ.and (bigAnd rest) := by
+  cases rest with
+  | nil => exact absurd rfl h
+  | cons a as => rfl
+
+/-- **The algebraic core of the unfolding identity**: pulling the LAST conjunct `y` out of
+`bigAnd`'s scope, IK-derivable in both directions. Induction on `xs`, using `AndI`/`AndE1`/
+`AndE2` to re-associate at each cons step. -/
+theorem bigAnd_append_singleton_imp1 {𝒯 : Set GeomAxiom}
+    (xs : List (Proposition Atom)) (y : Proposition Atom) :
+    IKDerivable 𝒯 ((bigAnd (xs ++ [y])).imp ((bigAnd xs).and y)) := by
+  induction xs with
+  | nil =>
+    simp only [List.nil_append, bigAnd]
+    have hassum : Deriv (IKAx 𝒯) (y :: ([] : List (Proposition Atom))) y :=
+      assumption_deriv (by simp)
+    have htop' : Deriv (IKAx 𝒯) (y :: ([] : List (Proposition Atom)))
+        (Proposition.top : Proposition Atom) := top_deriv _
+    have hand : Deriv (IKAx 𝒯) (y :: ([] : List (Proposition Atom))) (Proposition.top.and y) :=
+      andI_deriv htop' hassum
+    exact IK.impIntro (Γ := []) (φ := y) hand
+  | cons a rest ih =>
+    rcases eq_or_ne rest [] with hrest | hrest
+    · subst hrest
+      simp only [List.cons_append, List.nil_append, bigAnd]
+      have hassum : Deriv (IKAx 𝒯) (a.and y :: ([] : List (Proposition Atom))) (a.and y) :=
+        assumption_deriv (by simp)
+      exact IK.impIntro (Γ := []) (φ := a.and y) hassum
+    · have hne : rest ++ [y] ≠ [] := by
+        intro hcontra
+        exact hrest (by simpa using (List.append_eq_nil_iff.mp hcontra).1)
+      rw [List.cons_append, bigAnd_cons_of_ne_nil a (rest ++ [y]) hne,
+        bigAnd_cons_of_ne_nil a rest hrest]
+      refine IK.impIntro (Γ := []) (φ := a.and (bigAnd (rest ++ [y]))) ?_
+      set Γ1 : List (Proposition Atom) := [a.and (bigAnd (rest ++ [y]))] with hΓ1
+      have hp : Deriv (IKAx 𝒯) Γ1 (a.and (bigAnd (rest ++ [y]))) :=
+        assumption_deriv (by simp [hΓ1])
+      have ha : Deriv (IKAx 𝒯) Γ1 a := andE1_deriv hp
+      have hrest' : Deriv (IKAx 𝒯) Γ1 (bigAnd (rest ++ [y])) := andE2_deriv hp
+      have hih : Deriv (IKAx 𝒯) Γ1 ((bigAnd (rest ++ [y])).imp ((bigAnd rest).and y)) :=
+        weakening_deriv ih (by simp [hΓ1])
+      have hxy : Deriv (IKAx 𝒯) Γ1 ((bigAnd rest).and y) := mp_deriv hih hrest'
+      have hx : Deriv (IKAx 𝒯) Γ1 (bigAnd rest) := andE1_deriv hxy
+      have hy : Deriv (IKAx 𝒯) Γ1 y := andE2_deriv hxy
+      exact andI_deriv (andI_deriv ha hx) hy
+
+/-- The converse direction of `bigAnd_append_singleton_imp1`. -/
+theorem bigAnd_append_singleton_imp2 {𝒯 : Set GeomAxiom}
+    (xs : List (Proposition Atom)) (y : Proposition Atom) :
+    IKDerivable 𝒯 (((bigAnd xs).and y).imp (bigAnd (xs ++ [y]))) := by
+  induction xs with
+  | nil =>
+    simp only [List.nil_append, bigAnd]
+    have hassum : Deriv (IKAx 𝒯) (Proposition.top.and y :: ([] : List (Proposition Atom)))
+        (Proposition.top.and y) := assumption_deriv (by simp)
+    have hy : Deriv (IKAx 𝒯) (Proposition.top.and y :: ([] : List (Proposition Atom))) y :=
+      andE2_deriv hassum
+    exact IK.impIntro (Γ := []) (φ := Proposition.top.and y) hy
+  | cons a rest ih =>
+    rcases eq_or_ne rest [] with hrest | hrest
+    · subst hrest
+      simp only [List.cons_append, List.nil_append, bigAnd]
+      have hassum : Deriv (IKAx 𝒯) (a.and y :: ([] : List (Proposition Atom))) (a.and y) :=
+        assumption_deriv (by simp)
+      exact IK.impIntro (Γ := []) (φ := a.and y) hassum
+    · have hne : rest ++ [y] ≠ [] := by
+        intro hcontra
+        exact hrest (by simpa using (List.append_eq_nil_iff.mp hcontra).1)
+      rw [List.cons_append, bigAnd_cons_of_ne_nil a (rest ++ [y]) hne,
+        bigAnd_cons_of_ne_nil a rest hrest]
+      refine IK.impIntro (Γ := []) (φ := (a.and (bigAnd rest)).and y) ?_
+      set Γ1 : List (Proposition Atom) := [(a.and (bigAnd rest)).and y] with hΓ1
+      have hp : Deriv (IKAx 𝒯) Γ1 ((a.and (bigAnd rest)).and y) :=
+        assumption_deriv (by simp [hΓ1])
+      have haX : Deriv (IKAx 𝒯) Γ1 (a.and (bigAnd rest)) := andE1_deriv hp
+      have hy : Deriv (IKAx 𝒯) Γ1 y := andE2_deriv hp
+      have ha : Deriv (IKAx 𝒯) Γ1 a := andE1_deriv haX
+      have hx : Deriv (IKAx 𝒯) Γ1 (bigAnd rest) := andE2_deriv haX
+      have hxy : Deriv (IKAx 𝒯) Γ1 ((bigAnd rest).and y) := andI_deriv hx hy
+      have hih : Deriv (IKAx 𝒯) Γ1 (((bigAnd rest).and y).imp (bigAnd (rest ++ [y]))) :=
+        weakening_deriv ih (by simp [hΓ1])
+      exact andI_deriv ha (mp_deriv hih hxy)
+
+/-- **The unfolding identity, forward direction**: `⊢ Γ@(fullSubtree l pre c) →
+(Γ@(prune l pre) ∧ ◇Γ@c)`. Direct corollary of `bigAnd_append_singleton_imp1` once `star`'s
+concatenated-list definition is unfolded through `fullSubtree`/`prune`'s `pre ++ [c]` split. -/
+theorem star_unfold_imp1 {𝒯 : Set GeomAxiom} (Γ : List (LabelledFormula Atom))
+    (l : Label Atom) (pre : List (LTree Atom)) (c : LTree Atom) :
+    IKDerivable 𝒯 ((star Γ (LTree.fullSubtree l pre c)).imp
+      ((star Γ (LTree.prune l pre)).and (Proposition.diamond (star Γ c)))) := by
+  simp only [LTree.fullSubtree, LTree.prune, star, List.map_append, List.map_singleton,
+    ← List.append_assoc]
+  exact bigAnd_append_singleton_imp1 _ _
+
+/-- **The unfolding identity, converse direction**. -/
+theorem star_unfold_imp2 {𝒯 : Set GeomAxiom} (Γ : List (LabelledFormula Atom))
+    (l : Label Atom) (pre : List (LTree Atom)) (c : LTree Atom) :
+    IKDerivable 𝒯 (((star Γ (LTree.prune l pre)).and (Proposition.diamond (star Γ c))).imp
+      (star Γ (LTree.fullSubtree l pre c))) := by
+  simp only [LTree.fullSubtree, LTree.prune, star, List.map_append, List.map_singleton,
+    ← List.append_assoc]
+  exact bigAnd_append_singleton_imp2 _ _
 
 /-- **Wrap a closed theorem in an arbitrary `Star` prefix.** If `⊢X` (closed) then, for *any*
 `Γ` and path, `⊢Star Γ path X`. Proved by induction on the path via `implyK` (base) and
@@ -594,28 +749,58 @@ theorem Star_imp2 {𝒯 : Set GeomAxiom} {Γ : List (LabelledFormula Atom)}
         (φ := (star Γ t).imp (Proposition.box (Star Γ (t2 :: rest') A))) hd2
       exact hd3
 
-/-- **Path-append unfolding**: appending one more (leaf-ward) tree `t` to a nonempty path
-telescopes `Star` by exactly one `□`-wrapped level. This is what boxI/diaI/boxE/diaE need to
-relate `Star` for the *extended* tree/target to `Star` for the ambient one: extending the tree
-by one child always adds exactly one more `□`-hop at the *end* of the path (never touching the
-ancestor prefix). Requires the path to be nonempty (always true in practice: `pathTo` never
-returns the empty list). -/
-theorem Star_append {Γ : List (LabelledFormula Atom)} (path : List (LTree Atom))
-    (hpath : path ≠ []) (t : LTree Atom) (A : Proposition Atom) :
-    Star Γ (path ++ [t]) A = Star Γ path (Proposition.box ((star Γ t).imp A)) := by
-  induction path with
-  | nil => exact absurd rfl hpath
-  | cons p prest ih =>
-    cases prest with
-    | nil => simp [Star]
-    | cons p2 prest' =>
-      have hne : (p2 :: prest' : List (LTree Atom)) ≠ [] := by simp
-      have hrec := ih hne
-      rw [List.cons_append] at hrec
-      show Star Γ (p :: (p2 :: prest' ++ [t])) A =
-          Star Γ (p :: p2 :: prest') (Proposition.box ((star Γ t).imp A))
-      rw [List.cons_append]
-      simp only [Star, hrec]
+/-! ### Worked-example sanity check (Task 517 Track C C4)
+
+**`Star_append` DELETED this dispatch**: confirmed wrong per the plan (report 02 §2.3) -- it
+wrapped the appended tree `t` via its FULL, unpruned `star Γ t`, which is precisely the shape
+the unfolding identity above shows is WRONG for a non-last path node (the continuation child
+must be excluded from the node it is attached to, not the other way around; `Star_append` was
+trying to solve a "peel one more path level" problem with the WRONG primitive -- `prune`/
+`fullSubtree`, not a `Star`-level append lemma, is the correct fix, per report 02 §2.3). The
+correct path-level recursion (with pruning built in) is `pathSpine`, explicitly deferred to C5. -/
+
+/-- **Worked-example verbatim reproduction** (report 02's C4 success criterion, source PDF
+p.101): `(x:◇A⊃□□B, y:A ⊢_G z:◇B)* = ((◇A⊃□□B)∧◇A) ⊃ □(◇⊤⊃◇B)`, for the tree `x→y, x→z→w` with
+target `z`. `T0 := prune x [y]` (`x` pruned: its ordinary child `y` remains, its
+path-continuation child `z` is excluded); `T1 := node z [leaf w]` (`z`'s full/unpruned subtree
+directly -- `z` is the path's last/target node, nothing to prune there, so no `fullSubtree`
+wrapper is needed at this node either). Genuine `Eq` via `star`/`Star`/`bigAnd` unfolding plus
+label-distinctness facts (`Label` has no computable `DecidableEq` here -- the file's
+`Classical.propDecidable` instance is classically opaque -- so this is a real proof via `simp`
+with supplied inequality hypotheses, not `rfl`/`decide`). Confirms the `star` fix above: the OLD
+double-`bigAnd` convention would have produced `⊤∧(◇(⊤∧⊤))` at `T1` instead of the source's plain
+`◇⊤`. -/
+theorem star_Star_worked_example (A B : Proposition Atom) :
+    Star
+      ([(Label.var 0 ∶ ((◇A).imp (Proposition.box (Proposition.box B)))),
+        (Label.var 1 ∶ A)] : List (LabelledFormula Atom))
+      [LTree.prune (Label.var 0) [LTree.leaf (Label.var 1)],
+        LTree.node (Label.var 2) [LTree.leaf (Label.var 3)]]
+      (Proposition.diamond B) =
+    (((Proposition.diamond A).imp (Proposition.box (Proposition.box B))).and
+        (Proposition.diamond A)).imp
+      (Proposition.box ((Proposition.diamond Proposition.top).imp (Proposition.diamond B))) := by
+  set Γ : List (LabelledFormula Atom) :=
+    [(Label.var 0 ∶ ((◇A).imp (Proposition.box (Proposition.box B)))),
+      (Label.var 1 ∶ A)] with hΓ
+  have hfilterW : Γ.filter (·.lbl = (Label.var 3 : Label Atom)) = [] := by simp [hΓ]
+  have hfilterZ : Γ.filter (·.lbl = (Label.var 2 : Label Atom)) = [] := by simp [hΓ]
+  have hfilterY : Γ.filter (·.lbl = (Label.var 1 : Label Atom)) =
+      [(Label.var 1 ∶ A : LabelledFormula Atom)] := by simp [hΓ]
+  have hfilterX : Γ.filter (·.lbl = (Label.var 0 : Label Atom)) =
+      [(Label.var 0 ∶ ((◇A).imp (Proposition.box (Proposition.box B))) :
+        LabelledFormula Atom)] := by simp [hΓ]
+  have hstarW : star Γ (LTree.leaf (Label.var 3)) = Proposition.top := by
+    simp [LTree.leaf, star, hfilterW, bigAnd]
+  have hstarZ : star Γ (LTree.node (Label.var 2) [LTree.leaf (Label.var 3)]) =
+      Proposition.diamond Proposition.top := by
+    simp [star, hfilterZ, hstarW, bigAnd]
+  have hstarY : star Γ (LTree.leaf (Label.var 1)) = A := by
+    simp [LTree.leaf, star, hfilterY, bigAnd]
+  have hstarX : star Γ (LTree.prune (Label.var 0) [LTree.leaf (Label.var 1)]) =
+      ((◇A).imp (Proposition.box (Proposition.box B))).and (Proposition.diamond A) := by
+    simp [LTree.prune, star, hfilterX, hstarY, bigAnd]
+  simp [Star, hstarX, hstarZ]
 
 end Lemma612Scaffold
 

@@ -6,9 +6,29 @@
 Task **517 is [IMPLEMENTING]**. Track A (`plans/02_decomposed-track-a-b-c.md`) is
 **[COMPLETED]** (A1, A2, A3 all done). **A3's verdict: NO-GO for Track B** — Track B is CLOSED,
 do not re-open without a representation change (see below). **Track C is now ACTIVE**; C1, C2,
-**C3 are all [COMPLETED]** (C3 landed this dispatch, session `sess_1784145761_061228`). Next
-action = **Track C C4** — see `summaries/05_c3-formula-6-8-summary.md` for this dispatch's full
-outcome. **Do NOT re-run A1/A2/A3/C1/C2/C3** — all landed, sorry-free, in `probes/`.
+C3, **C4 are all [COMPLETED]** (C4 landed this dispatch, session `sess_1784145761_061228`). Next
+action = **Track C C5 — the TRUE crux (HIGH risk)** — see
+`summaries/06_c4-tree-surgery-unfolding-identity-summary.md` for this dispatch's full outcome.
+**Do NOT re-run A1/A2/A3/C1/C2/C3/C4** — all landed, sorry-free, in `probes/`.
+
+## Track C C4 outcome (this dispatch)
+`probes/lemma612-scaffold.lean` (extended in place). **`star` FIXED** (was a double-`bigAnd`,
+now a single `bigAnd` over the concatenated labels++children list — the old version fails the
+worked-example check, confirmed by hand before editing). `prune`/`fullSubtree` added (children
+split `pre ++ [c]`, continuation child LAST, matching `addChild`'s existing append convention —
+forward-compatible with C5). **Unfolding identity proved as an IK-derivable two-way implication**
+(`star_unfold_imp1`/`star_unfold_imp2`), NOT raw `Eq` — `bigAnd`'s right-fold makes literal term
+equality fail once the pruned node has 2+ ordinary children (associativity, not `rfl`-provable);
+built via new reusable `andI_deriv`/`andE1_deriv`/`andE2_deriv`/`top_deriv`/
+`bigAnd_cons_of_ne_nil`/`bigAnd_append_singleton_imp1`/`imp2`. `pathTo`/`pathToList`/
+`Star_append` all DELETED (confirmed defective/wrong per the plan). Success criterion
+(worked-example verbatim match) delivered as a real `simp`-based theorem
+(`star_Star_worked_example`), not `#eval`/`decide` — `Label` has no computable `DecidableEq` in
+this file (only classically-opaque `Classical.propDecidable`), verified via a scratch probe
+before committing to the approach. Sorry-free, axiom footprint
+`[propext, Classical.choice, Quot.sound]` (no new axioms). `Star`/`Star_imp1`/`Star_imp2`/
+`box_mono1`/`box_mono2`/`NIKAx`/`TClosure.hilbertTransport` all unchanged, reverified compiling.
+C1/C2/C3's separate file untouched, reverified compiling.
 
 ## A3 verdict (this dispatch — read before doing anything else)
 
@@ -67,24 +87,39 @@ Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2
   proved by induction using `hFS` (axiom 5, `IKAx.fs`) once per level composed with the IH via a
   new `derivable_imp_trans` combinator (also directly reusable by C7's (◇E) 3-step composition —
   see plan's §2.5 argument, which composes exactly 3 such transitivity steps).
-- **Track C C4 (NEXT)** — `LTree`,`star`,`fullSubtree`,`prune` + the **unfolding identity**
-  (§2.3); DELETE `pathTo`/`pathToList`/`Star_append` (defective, per the plan's C4 entry).
-  Success criterion: `#eval`/`decide` reproduces Simpson's worked example verbatim. Risk MED.
-  This is where the tree-dependent work resumes (C1-C3 were pure formula-level, zero tree
-  dependency). Reuse `lemma612-scaffold.lean`'s existing `LTree`/`star` scaffolding where
-  possible; the defect list is `pathTo`/`pathToList` (return full-not-pruned subtree) and
-  `Star_append` (wrong) — both flagged as C4/C5 fix targets already, unrelated to A1's repair.
-- Then **C5** (`pathSpine` — THE TRUE CRUX, HIGH risk), **C6-C8** (truth-lemma cases). See plan
-  file's Track C table for the full C1-C8 breakdown and risk ratings. **HARD STOP still
-  applies**: do not open C5 until C4 lands (H8 phase sizing) — each is its own dispatch.
+- ~~**Track C C4** — `LTree`,`star`,`fullSubtree`,`prune` + the **unfolding identity**~~
+  **[COMPLETED]** this dispatch — see `summaries/06_c4-tree-surgery-unfolding-identity-summary.md`.
+  `star` FIXED (double-`bigAnd` → single concatenated `bigAnd`); `pathTo`/`pathToList`/
+  `Star_append` DELETED; unfolding identity proved as `Derivable`-Iff (`star_unfold_imp1`/
+  `imp2`), not raw `Eq` (associativity blocks literal term equality in general).
+- **Track C C5 (NEXT) — THE TRUE CRUX, HIGH risk**: `pathSpine` (the whole-path recursion with
+  pruning BUILT IN, replacing the deleted `pathTo`/`pathToList`) + the `addChild`/`pathSpine`
+  **commutation lemma**. Success criterion (from the plan): sorry-free commutation lemma. This is
+  its own dedicated dispatch — do NOT bundle with C6-C8 (H8 phase sizing). Reuse `prune`/
+  `fullSubtree`/`star_unfold_imp1`/`star_unfold_imp2` from C4 (this dispatch) — `pathSpine`
+  should be built to RETURN the `pre`-lists `prune`/`fullSubtree` need at each level (i.e.
+  `pathSpine` is the thing that walks the tree and, at each non-last node, splits its children
+  into "ordinary" vs "the one leading toward the target" — exactly the `pre`/`c` split C4's
+  `prune`/`fullSubtree` already consume). The commutation lemma needs to relate `pathSpine` on
+  `addChild t x y` to `pathSpine` on `t` — `addChild` appends the new child at the END of the
+  children list (`node l (cs ++ [leaf y])`), which is WHY C4 chose `pre ++ [c]` (continuation
+  child LAST) for `prune`/`fullSubtree` rather than head-first — check this convention still
+  looks right once `pathSpine`'s actual recursion is written; if the tree has multiple
+  interior branch points, `pathSpine` needs to identify, PER NODE ALONG THE PATH, which one
+  child continues the path — do not assume WLOG it is always literally the last-appended one
+  without checking against how the target label was reached.
+- Then **C6-C8** (truth-lemma cases, given C5). See plan file's Track C table for the full
+  C1-C8 breakdown and risk ratings.
 
 ## What is landed and MUST NOT be redone (all sorry-free, axiom-clean, CI-green)
 - `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Syntax.lean` (Phase 1), `Deduction.lean` (Phase 2),
   `Context.lean` (Phase 4) — ~789 lines. Independent contribution even if CS5 completeness never lands.
 - `probes/adequacy-gate-probe.lean` — Lemma 6.2.2 hard direction, correct & reusable.
-- `probes/lemma612-scaffold.lean` — LTree scaffold; `IKAx` now has axioms 3/4/5 (A1). **Still
-  DEFECTIVE elsewhere**: `pathTo`/`pathToList` return full-not-pruned subtree; `Star_append`
-  wrong (Track C C4/C5 fix target, unrelated to A1's repair).
+- `probes/lemma612-scaffold.lean` — `IKAx` has axioms 3/4/5 (A1). `star` FIXED (C4, single
+  concatenated `bigAnd`); `prune`/`fullSubtree` + `star_unfold_imp1`/`star_unfold_imp2` (the
+  unfolding identity, `Derivable`-Iff) added (C4); `pathTo`/`pathToList`/`Star_append` DELETED
+  (C4, were defective/wrong). **Still MISSING** (C5's job): `pathSpine`, the whole-path recursion
+  with pruning built in, and its commutation with `addChild`.
 - `probes/fischer-servi-probe.lean` (A2) — `fs_context_relative_half` (mechanized syntactic
   obstruction) and `fs_sound''` (semantic `FS`-validity over `cs5FC''`, sorry-free, axiom-free).
 - `probes/track-c-c1-tele-conj.lean` (C1) — `Conj`, `Tele`, `impIntro`,

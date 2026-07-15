@@ -1,9 +1,11 @@
 ---
-next_project_number: 516
+next_project_number: 517
 ---
 
 # TODO
 
+WARNING: Task 512 not assigned to a wave (possible circular dependency)
+WARNING: Task 516 not assigned to a wave (possible circular dependency)
 ## Task Order
 
 *Updated 2026-07-15. Generated from state.json dependency graph.*
@@ -11,10 +13,11 @@ next_project_number: 516
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,512,515 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
+| 99 | 512,516 | 512,516 | modal logic |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -40,10 +43,12 @@ next_project_number: 516
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
 515 [PLANNED] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
+  └─ 516 [NOT STARTED] — FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Reb
+    └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
 
@@ -92,6 +97,17 @@ next_project_number: 516
 
 ## Tasks
 
+### 516. Constructive modal independent le canonical model
+- **Effort**: 30-50 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 509, Task 512
+
+**Description**: FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Rebuild CSLib's constructive-modal canonical model with the intuitionistic preorder <= as an INDEPENDENT relation, DECOUPLED from theory-inclusion, following Simpson 1994 Ch.3 labelled/birelational IS4/IS5 models (also Dosen 1985, Alechina-Mendler-dePaiva-Ritter 2001, Marin-Morales-Strassburger 2021 Thm 7.1/7.2), in order to achieve CS5 constructive Kripke completeness -- the goal task 512 proved UNREACHABLE in CSLib's current representation. WHY (mechanized in task 512, all sorry-free/axiom-clean): over CSLib theory-inclusion canonical worlds (worlds = quasi-prime theories, <= = subset, boxInv monotone), (i) cs5Incest_forces_symm (axiom-free, CS5Canonical.lean:643) proves ANY <=-mediated incestuality/symmetry condition collapses to PLAIN symmetry -- the mediating witness u'>=u buys no room because larger worlds only add boxed formulas; (ii) cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511) proves Simpson's two-sided box+diamond relation is extensionally IDENTICAL to the old cs5Tail wall for CS5 quasi-prime theories (the B axiom's box/diamond-inverse duality, cs5_boxInv_subset_iff, CS5.lean:589); (iii) with task-509's cs5_symmetric_tail_box_gap (CS5.lean:712), plain symmetry on the canonical frame is exactly what box-backward CANNOT have -- so symmetry-verification and box-backward are JOINTLY UNSATISFIABLE for any single design over theory-inclusion worlds. CS5 == IS5 (CS5.lean:93-99) IS complete and sound (report 05); the block is REPRESENTATIONAL, not incompleteness. THE FIX (this task): make <= an independent preorder so Simpson's <=-mediated conditions regain genuine <=-room. SCOPE: (1) DESIGN/RESEARCH -- grounded in Simpson Ch.3, determine the exact independent-<= canonical construction (labelled worlds or an abstract birelational frame where <= is not subset), how box-backward and the symmetry/incestuality frame condition are verified with independent <= (via the disjunction property / prime lemma, NO negation-completeness), and confirm the collapse lemmas cs5Incest_forces_symm / cs5TwoSidedR_iff_cs5Tail provably DO NOT apply once <= is decoupled. (2) IMPACT ASSESSMENT on shared constructive-modal canonical infra: CKSegment/CKForces/Segment/SegmentLindenbaum (Segment.lean, SegmentLindenbaum.lean) currently bake <= = head-inclusion; decide whether to generalize this infra or build a parallel independent-<= model; preserve existing CK/CT/CS4 completeness (either re-derive over the new model or leave the old model intact for them). (3) BUILD the independent-<= canonical model; prove cs5_box_backward, cs5_truth_lemma, cs5_completeness / cs5_soundness_completeness over it. REUSE task-512's landed cs5_axiom_sound_incest (birelational soundness, axiom-free) where valid. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''. HIGH effort and HIGH uncertainty (foundational, touches shared infra) -- a design/research phase MUST precede implementation. Depends on 509 (base canonical machinery) and 512 (obstruction findings + soundness rework; see task-512 reports 03-06 and handoffs 03-05 + phase5-blocker-handoff).
+
+---
+
 ### 515. S5 universal rule termination unblock 504
 - **Effort**: 8-12 hours
 - **Status**: [PLANNED]
@@ -135,7 +151,7 @@ next_project_number: 516
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 509
+- **Dependencies**: Task 509, Task 516
 - **Research**:
   - [512_cs5_box_backward_atom_sum_completeness/reports/01_box-backward-atom-sum.md]
   - [512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md]

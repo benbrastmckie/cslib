@@ -207,6 +207,17 @@ handoff `handoffs/02_phase3-route2-continuation.md` for full detail):
   it is real, incremental progress toward the SUCCESS branch, incomplete due to genuine
   mathematical depth. Phases 4-5 remain `[NOT STARTED]` (both consume Phase 3's full closure).
 
+**RESUMED-DISPATCH PROGRESS 2** (necessity-transfer conjecture attempted, per
+`handoffs/03_necessity-transfer-attempted.md`): landed `cs5Combined_necTransfer` (sorry-free,
+axiom-clean: `⊢CS5Combined τLΨ→τRA` implies `⊢CS5 □Ψ→□A`) — a genuine but INSUFFICIENT byproduct
+of the necessity-transfer conjecture's natural proof-algebra route (necessitation + `K` +
+box-equivalence), proved vacuous at exactly the hardest case `Ψ := A` (`□A→□A` trivially true).
+This exhausts the necessitation/K/cross-axiom algebraic route as a dead end (structurally: only
+boxed-antecedent consequences are reachable this way) and independently sharpens report 02 §4's
+semantic-route impossibility to rule out ANY atom-indexed model (not just homomorphic
+translations). **Only the derivation-height induction (report 02 §5) remains unexplored** after
+three dispatches. Phase 3 remains `[PARTIAL]`.
+
 **BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14 — ORIGINAL, pre-route-2):
 
 - **What failed**: `cs5Combined_seed_excludes` was not closed sorry-free by either route within

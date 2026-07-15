@@ -416,6 +416,66 @@ noncomputable def cs5Combined_boxR_imp_boxL (B : Proposition Atom) :
     .ax [] _ (.base (.fourBox (B.map Sum.inr)))
   exact cs5Combined_impTrans hfour hstep
 
+/-! ## Necessitation-Transfer (Phase 3 continuation — necessity-transfer conjecture, attempted)
+
+The continuation handoff's most promising untested lead was the **necessity-transfer
+conjecture**: does `⊢CS5Combined τL(Ψ) → τR(A)` imply `⊢CS5 Ψ → □A`? If so, `Ψ ∈ H`
+(deductively closed) would give `□A ∈ H` directly, contradicting `h_not` — closing
+`cs5Combined_seed_excludes`'s remaining obligation immediately.
+
+**Finding this dispatch: the conjecture, AS STATED, is not reachable via the natural
+proof-algebra route (necessitation + `K` + the cross axioms + the box-equivalence lemmas
+above), and the byproduct that route DOES yield is provably INSUFFICIENT.** Concretely,
+`cs5Combined_necTransfer` below derives the WEAKER consequence `⊢CS5 □Ψ → □A` (not the hoped-for
+`⊢CS5 Ψ → □A`, unboxed antecedent). This weaker form is **vacuous exactly in the hardest case**:
+taking `Ψ := A` (the case `A ∈ H`, which is the whole difficulty — necessity does not follow
+from truth) makes the conclusion `⊢CS5 □A → □A`, which is *trivially* true (reflexivity of
+`→`) regardless of anything about `A` or `H`. So this consequence can never rule out
+`Ψ := A`, and hence cannot by itself refute `cs5Combined_seed_excludes`'s obligation.
+
+The root cause: `necessitation` in `CS5Combined`'s derivation system only applies to
+EMPTY-CONTEXT derivations, and boxes the WHOLE hypothesis `τLΨ → τRA` uniformly — there is no
+way to introduce a box selectively on `Ψ` alone while leaving `A` unboxed using only
+`necessitation`/`K`/`crossLR`/`crossRL`/box-equivalence algebra. Every combination explored
+(chaining through `crossRL A`, through the box-equivalence lemmas, through the `crossLR`/`crossRL`
+duality automorphism swapping `Sum.inl ↔ Sum.inr`) lands on a **boxed-antecedent** consequence
+of this shape, never on a bare-`Ψ` consequent. This is recorded as a genuine, sorry-free,
+navigational finding: **the necessity-transfer conjecture, if true, needs a fundamentally
+different argument** (the derivation-height induction of report 02 §5, or equivalent
+canonical-scale semantics) — re-attempting this exact algebraic route in a future dispatch
+would not make further progress. -/
+
+/-- **Necessitation-transfer** (insufficient, see module docstring above for why): if
+`τL(Ψ) → τR(A)` is `CS5Combined`-derivable (empty context), then `□Ψ → □A` is `CS5`-derivable.
+Obtained via necessitation of the hypothesis, `K`-distribution, and the box-equivalence lemmas
+`cs5Combined_boxR_imp_boxL`, landing on a purely `τL`-tagged empty-context theorem that collapses
+via `cs5_collapse_of_L_deriv`. Too weak to close `cs5Combined_seed_excludes` (vacuous at
+`Ψ := A` via `→`-reflexivity `□A → □A`), but a genuine, reusable fact. -/
+theorem cs5Combined_necTransfer {Ψ A : Proposition Atom}
+    (h : Deriv (@CS5Combined Atom) [] ((Ψ.map Sum.inl).imp (A.map Sum.inr))) :
+    Deriv (@CS5ModalAxiom Atom) [] ((Proposition.box Ψ).imp (Proposition.box A)) := by
+  obtain ⟨d⟩ := h
+  have hnec : DerivationTree (@CS5Combined Atom) []
+      (Proposition.box ((Ψ.map Sum.inl).imp (A.map Sum.inr))) :=
+    .necessitation _ d
+  have hk : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box ((Ψ.map Sum.inl).imp (A.map Sum.inr))).imp
+        ((Proposition.box (Ψ.map Sum.inl)).imp (Proposition.box (A.map Sum.inr)))) :=
+    .ax [] _ (.base (.k (Ψ.map Sum.inl) (A.map Sum.inr)))
+  have hstep : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (Ψ.map Sum.inl)).imp (Proposition.box (A.map Sum.inr))) :=
+    .modus_ponens _ _ _ hk hnec
+  have hboxRL : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (A.map Sum.inr)).imp (Proposition.box (A.map Sum.inl))) :=
+    cs5Combined_boxR_imp_boxL A
+  have hcomb : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (Ψ.map Sum.inl)).imp (Proposition.box (A.map Sum.inl))) :=
+    cs5Combined_impTrans hstep hboxRL
+  have hcomb' : DerivationTree (@CS5Combined Atom) []
+      (((Proposition.box Ψ).imp (Proposition.box A)).map Sum.inl) := by
+    simpa [Proposition.map_imp, Proposition.map_box] using hcomb
+  exact cs5_collapse_of_L_deriv (Γ := []) ⟨hcomb'⟩
+
 end Cslib.Logic.Modal
 
 end

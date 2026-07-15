@@ -132,6 +132,74 @@ abbrev Proposition.iff (φ₁ φ₂ : Proposition Atom) : Proposition Atom :=
 /-- Bottom element of `Proposition Atom`, registered as the canonical `⊥`. -/
 instance : Bot (Proposition Atom) := ⟨.bot⟩
 
+/-- Relabel the atoms of a proposition along `f : Atom → Atom'`, leaving the connective
+structure untouched. This is the formula-level functorial action used to transport
+propositions (and, via `Metalogic.Deriv.map`, derivations) across a change of atom type --
+e.g. tagging a proposition as belonging to the "left" or "right" copy of a doubled atom space
+`Atom ⊕ Atom`. -/
+def Proposition.map (f : Atom → Atom') : Proposition Atom → Proposition Atom'
+  | .atom p => .atom (f p)
+  | .bot => .bot
+  | .imp φ₁ φ₂ => .imp (φ₁.map f) (φ₂.map f)
+  | .and φ₁ φ₂ => .and (φ₁.map f) (φ₂.map f)
+  | .or φ₁ φ₂ => .or (φ₁.map f) (φ₂.map f)
+  | .box φ => .box (φ.map f)
+  | .diamond φ => .diamond (φ.map f)
+
+@[simp] theorem Proposition.map_atom (f : Atom → Atom') (p : Atom) :
+    (Proposition.atom p).map f = .atom (f p) := rfl
+
+@[simp] theorem Proposition.map_bot (f : Atom → Atom') :
+    (Proposition.bot : Proposition Atom).map f = .bot := rfl
+
+@[simp] theorem Proposition.map_imp (f : Atom → Atom') (φ₁ φ₂ : Proposition Atom) :
+    (φ₁.imp φ₂).map f = (φ₁.map f).imp (φ₂.map f) := rfl
+
+@[simp] theorem Proposition.map_and (f : Atom → Atom') (φ₁ φ₂ : Proposition Atom) :
+    (φ₁.and φ₂).map f = (φ₁.map f).and (φ₂.map f) := rfl
+
+@[simp] theorem Proposition.map_or (f : Atom → Atom') (φ₁ φ₂ : Proposition Atom) :
+    (φ₁.or φ₂).map f = (φ₁.map f).or (φ₂.map f) := rfl
+
+@[simp] theorem Proposition.map_box (f : Atom → Atom') (φ : Proposition Atom) :
+    (Proposition.box φ).map f = .box (φ.map f) := rfl
+
+@[simp] theorem Proposition.map_diamond (f : Atom → Atom') (φ : Proposition Atom) :
+    (Proposition.diamond φ).map f = .diamond (φ.map f) := rfl
+
+/-- Auxiliary injectivity statement for `Proposition.map`, proved by structural induction with
+an explicit second proposition (rather than via `Function.Injective`'s implicit binders, which
+do not generalize cleanly under `induction`). -/
+theorem Proposition.map_injective_aux {f : Atom → Atom'} (hf : Function.Injective f)
+    (φ ψ : Proposition Atom) (h : φ.map f = ψ.map f) : φ = ψ := by
+  induction φ generalizing ψ with
+  | atom p =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg Proposition.atom (hf h)
+  | bot =>
+    cases ψ <;> simp [Proposition.map] at h
+    rfl
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg₂ Proposition.imp (ih₁ _ h.1) (ih₂ _ h.2)
+  | and φ₁ φ₂ ih₁ ih₂ =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg₂ Proposition.and (ih₁ _ h.1) (ih₂ _ h.2)
+  | or φ₁ φ₂ ih₁ ih₂ =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg₂ Proposition.or (ih₁ _ h.1) (ih₂ _ h.2)
+  | box φ ih =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg Proposition.box (ih _ h)
+  | diamond φ ih =>
+    cases ψ <;> simp [Proposition.map] at h
+    exact congrArg Proposition.diamond (ih _ h)
+
+/-- `Proposition.map` is injective whenever the underlying atom relabeling is injective. -/
+theorem Proposition.map_injective {f : Atom → Atom'} (hf : Function.Injective f) :
+    Function.Injective (Proposition.map f) :=
+  fun _ _ h => Proposition.map_injective_aux hf _ _ h
+
 @[inherit_doc] scoped prefix:40 "¬" => Proposition.neg
 @[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
 @[inherit_doc] scoped infix:35 " ∨ " => Proposition.or

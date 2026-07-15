@@ -168,6 +168,553 @@ lemma negImp_alpha_preserved_gen (FC : FrameCondition)
   · exact ⟨fun h => by simp at h, fun _ => hnc⟩
   · exact hb sf' hmem_old
 
+/-! ## Task 513 Phase 2: The Generic Frame-Relativized Soundness Crux -/
+
+/-- **Task 513 (Phase 2, the crux)**: `modalStepBranchGen apply` preserves `branchSatisfiableIn
+FC` at a single step, given three raw frame-relativized soundness hypotheses on `apply`:
+
+- `hAgree` (S-agree): `apply` agrees with `modalApplyOne` off the two propagating shapes
+  (`T(□φ)@w`, `F(◇φ)@w`). Discharged by `fun _ _ _ _ => rfl` for K
+  (`apply := modalApplyOne`), and by `modalApplyOneT_eq_of_not_boxPos_diaNeg` verbatim for T.
+- `hBoxPos` (S-boxPos): frame-relativized semantic soundness of `apply`'s box-positive output,
+  given `T(□φ)@lbl ∈ b`. Discharged by `modalApplyOne_boxPos_sound` (`SoundnessStep.lean`) for
+  K (`FC` unused).
+- `hDiaNeg` (S-diaNeg): dual of `hBoxPos` for the diamond-negative shape. Discharged by
+  `modalApplyOne_diaNeg_sound` (`SoundnessStep.lean`) for K.
+
+This is the ~400-line FC-threaded port of `modalStepBranch_preserves_sat`
+(`SoundnessStep.lean`, the K monolith): every propositional/minting arm is ported via `hAgree`
+to reduce to `modalApplyOne`, threading the (unchanged) `FC m.r` witness through every
+`refine ⟨…, W, m, f, hFC, hacc, …⟩` tuple (the ambient Kripke model `(W, m)` is never
+rebuilt -- only `f` is pointwise extended by the two minting arms); the two propagating arms
+(box-positive, diamond-negative) are replaced wholesale by `hBoxPos`/`hDiaNeg`. -/
+theorem modalStepBranchGen_preserves_satIn [DecidableEq Atom] [Hashable Atom]
+    (FC : FrameCondition) (apply : RuleApply Atom)
+    (hAgree : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        (¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) →
+        apply sf b acc = modalApplyOne sf b acc)
+    (hBoxPos : ∀ {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+        (φ : Proposition Atom) (lbl : WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        FC m.r →
+        (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) →
+        (∀ sf ∈ b, sfSat m f sf) →
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (apply ⟨.pos, .box φ, lbl⟩ b acc).snd = acc ∧
+        RuleResultSat m f (apply ⟨.pos, .box φ, lbl⟩ b acc).fst)
+    (hDiaNeg : ∀ {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+        (φ : Proposition Atom) (lbl : WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        FC m.r →
+        (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) →
+        (∀ sf ∈ b, sfSat m f sf) →
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (apply ⟨.neg, .diamond φ, lbl⟩ b acc).snd = acc ∧
+        RuleResultSat m f (apply ⟨.neg, .diamond φ, lbl⟩ b acc).fst)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
+    (hsat : branchSatisfiableIn FC b acc)
+    (hInv : accFreshInv b acc) :
+    ∃ b' ∈ newBs, branchSatisfiableIn FC b' newAcc := by
+  obtain ⟨W, m, f, hFC, hacc, hb⟩ := hsat
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  obtain ⟨sign, formula, lbl⟩ := sf
+  have hsf_b := hb ⟨sign, formula, lbl⟩ hsfmem
+  by_cases hshape :
+      (sign = Sign.pos ∧ ∃ φ, formula = Proposition.box φ) ∨
+      (sign = Sign.neg ∧ ∃ φ, formula = Proposition.diamond φ)
+  · -- The two propagating shapes: discharge via hBoxPos/hDiaNeg directly.
+    rcases hshape with ⟨hs, φ, hform⟩ | ⟨hs, φ, hform⟩
+    · subst hs; subst hform
+      obtain ⟨hsndeq, hRRS⟩ := hBoxPos m f φ lbl b acc hFC hacc hb hsfmem
+      rcases hres :
+          (apply (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc)
+          with ⟨result, accOut⟩
+      rw [hres] at hsf hRRS hsndeq
+      simp only at hRRS hsndeq
+      subst hsndeq
+      cases result with
+      | linear nf =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        refine ⟨nf ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hRRS sf' hmem_new
+        · exact hb sf' hmem_old
+      | branching brs =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        obtain ⟨br, hbrmem, hbrsat⟩ := hRRS
+        refine ⟨br ++ b, List.mem_map_of_mem hbrmem, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hbrsat sf' hmem_new
+        · exact hb sf' hmem_old
+      | persistent nf =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        refine ⟨nf ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hRRS sf' hmem_new
+        · exact hb sf' hmem_old
+      | notApplicable => simp at hsf
+    · subst hs; subst hform
+      obtain ⟨hsndeq, hRRS⟩ := hDiaNeg m f φ lbl b acc hFC hacc hb hsfmem
+      rcases hres :
+          (apply (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc)
+          with ⟨result, accOut⟩
+      rw [hres] at hsf hRRS hsndeq
+      simp only at hRRS hsndeq
+      subst hsndeq
+      cases result with
+      | linear nf =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        refine ⟨nf ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hRRS sf' hmem_new
+        · exact hb sf' hmem_old
+      | branching brs =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        obtain ⟨br, hbrmem, hbrsat⟩ := hRRS
+        refine ⟨br ++ b, List.mem_map_of_mem hbrmem, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hbrsat sf' hmem_new
+        · exact hb sf' hmem_old
+      | persistent nf =>
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        refine ⟨nf ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append] at hmem'
+        rcases hmem' with hmem_new | hmem_old
+        · exact hRRS sf' hmem_new
+        · exact hb sf' hmem_old
+      | notApplicable => simp at hsf
+  · -- Every other shape: `apply` agrees with `modalApplyOne` (hAgree), port the K arm verbatim.
+    have heq : apply ⟨sign, formula, lbl⟩ b acc = modalApplyOne ⟨sign, formula, lbl⟩ b acc :=
+      hAgree ⟨sign, formula, lbl⟩ b acc (not_or.mp hshape)
+    rw [heq] at hsf
+    cases sign with
+    | pos =>
+      have hpos : Satisfies m (f lbl) formula := hsf_b.1 rfl
+      simp only [modalApplyOne] at hsf
+      cases formula with
+      | atom p =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+      | bot =>
+        simp only [Satisfies] at hpos
+      | and φ ψ =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        simp only [Satisfies] at hpos
+        obtain ⟨hφ, hψ⟩ := hpos
+        refine ⟨[⟨.pos, φ, lbl⟩, ⟨.pos, ψ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        rcases hmem' with (rfl | rfl) | hmem_old
+        · exact ⟨fun _ => hφ, fun h => by simp at h⟩
+        · exact ⟨fun _ => hψ, fun h => by simp at h⟩
+        · exact hb sf' hmem_old
+      | or φ ψ =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        simp only [Satisfies] at hpos
+        cases hpos with
+        | inl hφ =>
+          refine ⟨[⟨.pos, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · exact ⟨fun _ => hφ, fun h => by simp at h⟩
+          · exact hb sf' hmem_old
+        | inr hψ =>
+          refine ⟨[⟨.pos, ψ, lbl⟩] ++ b, List.mem_cons_of_mem _ List.mem_cons_self,
+            W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · exact ⟨fun _ => hψ, fun h => by simp at h⟩
+          · exact hb sf' hmem_old
+      | imp φ ψ =>
+        rcases eq_or_ne ψ Proposition.bot with rfl | hne
+        · simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+          subst hnewBs hnewAcc'
+          refine ⟨[⟨.neg, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · refine ⟨fun h => by simp at h, fun _ => ?_⟩
+            simp only [Satisfies] at hpos
+            exact fun ha => hpos ha
+          · exact hb sf' hmem_old
+        · simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?_imp hne, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+          subst hnewBs hnewAcc'
+          simp only [Satisfies] at hpos
+          rcases Classical.em (Satisfies m (f lbl) φ) with hφ | hφ
+          · refine ⟨[⟨.pos, ψ, lbl⟩] ++ b, List.mem_cons_of_mem _ List.mem_cons_self,
+              W, m, f, hFC, hacc, ?_⟩
+            intro sf' hmem'
+            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            rcases hmem' with rfl | hmem_old
+            · exact ⟨fun _ => hpos hφ, fun h => by simp at h⟩
+            · exact hb sf' hmem_old
+          · refine ⟨[⟨.neg, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+            intro sf' hmem'
+            simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+            rcases hmem' with rfl | hmem_old
+            · exact ⟨fun h => by simp at h, fun _ => hφ⟩
+            · exact hb sf' hmem_old
+      | box φ => exact absurd (Or.inl ⟨rfl, φ, rfl⟩) hshape
+      | diamond φ =>
+        simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.getD_some, Option.getD_none, Bool.false_eq_true, if_false,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        simp only [Satisfies] at hpos
+        obtain ⟨ww, hwwr, hwwφ⟩ := hpos
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        let w' := modalNextWorld b
+        let f' : WorldIndex → W := fun n => if n = w' then ww else f n
+        let witness : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, w'⟩
+        let boxProps : List (SignedFormula (Proposition Atom) WorldIndex) :=
+          (boxPositivesOf b).filterMap fun (ψ, src) =>
+            if src == lbl then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, w'⟩
+              if b.any (· == sf') then none else some sf'
+            else none
+        let diaNegProps : List (SignedFormula (Proposition Atom) WorldIndex) :=
+          b.filterMap fun sf' =>
+            if sf'.sign == .neg && sf'.label == lbl then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none
+        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, List.mem_cons_self,
+          W, m, f', hFC, ?_, ?_⟩
+        · intro u v hedge
+          simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
+            Bool.or_eq_true] at hedge
+          rcases hedge with hedge | hedge
+          · simp only [Bool.and_eq_true, beq_iff_eq] at hedge
+            obtain ⟨rfl, rfl⟩ := hedge
+            have hlbl_ne : lbl ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b ⟨.pos, .diamond φ, lbl⟩ hsfmem)
+            rw [show f' lbl = f lbl from if_neg hlbl_ne,
+              show f' w' = ww from if_pos rfl]
+            exact hwwr
+          · have huw' : u ≠ w' := by
+              intro heq'
+              have hfresh := (hInv u v hedge).1
+              rw [heq'] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
+            have hvw' : v ≠ w' := by
+              intro heq'
+              have hfresh := (hInv u v hedge).2
+              rw [heq'] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
+            simp only [f', if_neg huw', if_neg hvw']
+            exact hacc u v hedge
+        · intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons] at hmem'
+          rcases hmem' with ((rfl | hmem_bp) | hmem_dn) | hmem_old
+          · refine ⟨fun _ => ?_, fun h => by simp at h⟩
+            simp only [witness, f', if_pos rfl]
+            exact hwwφ
+          · simp only [boxProps, List.mem_filterMap] at hmem_bp
+            obtain ⟨⟨ψ, src⟩, hpairMem, hsf'_from⟩ := hmem_bp
+            split_ifs at hsf'_from with hsrceq hinb
+            simp only [Option.some.injEq] at hsf'_from
+            subst hsf'_from
+            simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+            obtain ⟨bsf, hbsfMem, hbsfeq⟩ := hpairMem
+            split_ifs at hbsfeq with hbsfpos
+            cases hbf : bsf.formula with
+            | box ψ' =>
+              rw [hbf] at hbsfeq
+              simp only [Option.some.injEq, Prod.mk.injEq] at hbsfeq
+              obtain ⟨hψ, hsrc⟩ := hbsfeq
+              have hsrc_lbl : bsf.label = lbl := by rw [hsrc]; simpa using hsrceq
+              have hbox_sat := (hb bsf hbsfMem).1 (by simpa using hbsfpos)
+              rw [hbf, hsrc_lbl] at hbox_sat
+              simp only [Satisfies] at hbox_sat
+              refine ⟨fun _ => ?_, fun h => by simp at h⟩
+              simp only [f', if_pos rfl]
+              rw [← hψ]
+              exact hbox_sat ww hwwr
+            | _ => simp [hbf] at hbsfeq
+          · simp only [diaNegProps, List.mem_filterMap] at hmem_dn
+            obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
+            by_cases hbsfsign : (bsf.sign == Sign.neg && bsf.label == lbl) = true
+            · rw [if_pos hbsfsign] at hbsfprop
+              cases hbf : bsf.formula with
+              | diamond ψ' =>
+                simp only [hbf] at hbsfprop
+                by_cases hinb :
+                    (b.any (· == (⟨.neg, ψ', w'⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+                      = true
+                · rw [if_pos hinb] at hbsfprop; simp at hbsfprop
+                · rw [if_neg hinb] at hbsfprop
+                  simp only [Option.some.injEq] at hbsfprop
+                  subst hbsfprop
+                  have hsign : bsf.sign = .neg ∧ bsf.label = lbl := by
+                    simp only [Bool.and_eq_true, beq_iff_eq] at hbsfsign
+                    exact hbsfsign
+                  have hdiaNeg := (hb bsf hbsfMem).2 hsign.1
+                  rw [hbf, hsign.2] at hdiaNeg
+                  simp only [Satisfies] at hdiaNeg
+                  push Not at hdiaNeg
+                  refine ⟨fun h => by simp at h, fun _ => ?_⟩
+                  simp only [f', if_pos rfl]
+                  exact hdiaNeg ww hwwr
+              | _ => simp [hbf] at hbsfprop
+            · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
+          · have hlabel_ne : sf'.label ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b sf' hmem_old)
+            have hf'_eq : f' sf'.label = f sf'.label := by
+              simp only [f', if_neg hlabel_ne]
+            constructor
+            · intro hsign
+              rw [hf'_eq]
+              exact (hb sf' hmem_old).1 hsign
+            · intro hsign
+              rw [hf'_eq]
+              exact (hb sf' hmem_old).2 hsign
+    | neg =>
+      have hneg : ¬Satisfies m (f lbl) formula := hsf_b.2 rfl
+      simp only [modalApplyOne] at hsf
+      cases formula with
+      | atom p =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+      | bot =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable] at hsf
+      | and φ ψ =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        simp only [Satisfies] at hneg
+        push Not at hneg
+        rcases Classical.em (Satisfies m (f lbl) φ) with hφ | hφ
+        · refine ⟨[⟨.neg, ψ, lbl⟩] ++ b, List.mem_cons_of_mem _ List.mem_cons_self,
+            W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · exact ⟨fun h => by simp at h, fun _ => hneg hφ⟩
+          · exact hb sf' hmem_old
+        · refine ⟨[⟨.neg, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · exact ⟨fun h => by simp at h, fun _ => hφ⟩
+          · exact hb sf' hmem_old
+      | or φ ψ =>
+        simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        simp only [Satisfies] at hneg
+        push Not at hneg
+        obtain ⟨hφ, hψ⟩ := hneg
+        refine ⟨[⟨.neg, φ, lbl⟩, ⟨.neg, ψ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+        intro sf' hmem'
+        simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+        rcases hmem' with (rfl | rfl) | hmem_old
+        · exact ⟨fun h => by simp at h, fun _ => hφ⟩
+        · exact ⟨fun h => by simp at h, fun _ => hψ⟩
+        · exact hb sf' hmem_old
+      | imp φ ψ =>
+        rcases eq_or_ne ψ Proposition.bot with rfl | hne
+        · simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+          subst hnewBs hnewAcc'
+          simp only [Satisfies] at hneg
+          push Not at hneg
+          refine ⟨[⟨.pos, φ, lbl⟩] ++ b, List.mem_cons_self, W, m, f, hFC, hacc, ?_⟩
+          intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+          rcases hmem' with rfl | hmem_old
+          · exact ⟨fun _ => hneg.1, fun h => by simp at h⟩
+          · exact hb sf' hmem_old
+        · simp [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+            modalImpOf?_imp hne, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+            Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+          subst hnewBs hnewAcc'
+          exact ⟨_, List.mem_cons_self,
+            negImp_alpha_preserved_gen FC hFC hacc hb hneg⟩
+      | box φ =>
+        simp only [tryAllPropRules, applyPropRule, modalAndOf?, modalOrOf?,
+          modalImpOf?, modalNegOf?, List.map, List.find?, RuleResult.isApplicable,
+          Option.getD_some, Option.getD_none, Bool.false_eq_true, if_false,
+          Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨hnewBs, -, hnewAcc'⟩ := hsf
+        subst hnewBs hnewAcc'
+        simp only [Satisfies] at hneg
+        push Not at hneg
+        obtain ⟨ww, hwwr, hwwφ⟩ := hneg
+        let w' := modalNextWorld b
+        let f' : WorldIndex → W := fun n => if n = w' then ww else f n
+        let newAcc' := acc.addEdge lbl w'
+        let witness : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
+        let boxProps : List (SignedFormula (Proposition Atom) WorldIndex) :=
+          (boxPositivesOf b).filterMap fun (ψ, src) =>
+            if src == lbl then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, w'⟩
+              if b.any (· == sf') then none else some sf'
+            else none
+        let diaNegProps : List (SignedFormula (Proposition Atom) WorldIndex) :=
+          b.filterMap fun sf' =>
+            if sf'.sign == .neg && sf'.label == lbl then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, w'⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none
+        refine ⟨(witness :: boxProps ++ diaNegProps) ++ b, List.mem_cons_self,
+          W, m, f', hFC, ?_, ?_⟩
+        · intro u v hedge
+          simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons,
+            Bool.or_eq_true] at hedge
+          rcases hedge with hedge | hedge
+          · simp only [Bool.and_eq_true, beq_iff_eq] at hedge
+            obtain ⟨rfl, rfl⟩ := hedge
+            have hlbl_ne : lbl ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b ⟨.neg, .box φ, lbl⟩ hsfmem)
+            rw [show f' lbl = f lbl from if_neg hlbl_ne,
+              show f' w' = ww from if_pos rfl]
+            exact hwwr
+          · have huw' : u ≠ w' := by
+              intro heq'
+              have hfresh := (hInv u v hedge).1
+              rw [heq'] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
+            have hvw' : v ≠ w' := by
+              intro heq'
+              have hfresh := (hInv u v hedge).2
+              rw [heq'] at hfresh
+              simp only [w'] at hfresh
+              exact Nat.lt_irrefl _ hfresh
+            simp only [f', if_neg huw', if_neg hvw']
+            exact hacc u v hedge
+        · intro sf' hmem'
+          simp only [List.mem_append, List.mem_cons] at hmem'
+          rcases hmem' with ((rfl | hmem_bp) | hmem_dn) | hmem_old
+          · constructor
+            · intro h; simp at h
+            · intro _
+              simp only [witness, f', if_pos rfl]
+              exact hwwφ
+          · simp only [boxProps, List.mem_filterMap] at hmem_bp
+            obtain ⟨⟨ψ, src⟩, hpairMem, hsf'_from⟩ := hmem_bp
+            split_ifs at hsf'_from with hsrceq hinb
+            simp only [Option.some.injEq] at hsf'_from
+            subst hsf'_from
+            simp only [boxPositivesOf, List.mem_filterMap] at hpairMem
+            obtain ⟨bsf, hbsfMem, hbsfeq⟩ := hpairMem
+            split_ifs at hbsfeq with hbsfpos
+            cases hbf : bsf.formula with
+            | box ψ' =>
+              rw [hbf] at hbsfeq
+              simp only [Option.some.injEq, Prod.mk.injEq] at hbsfeq
+              obtain ⟨hψ, hsrc⟩ := hbsfeq
+              have hsrc_lbl : bsf.label = lbl := by rw [hsrc]; simpa using hsrceq
+              have hbox_sat := (hb bsf hbsfMem).1 (by simpa using hbsfpos)
+              rw [hbf, hsrc_lbl] at hbox_sat
+              simp only [Satisfies] at hbox_sat
+              refine ⟨fun _ => ?_, fun h => by simp at h⟩
+              simp only [f', if_pos rfl]
+              rw [← hψ]
+              exact hbox_sat ww hwwr
+            | _ => simp [hbf] at hbsfeq
+          · simp only [diaNegProps, List.mem_filterMap] at hmem_dn
+            obtain ⟨bsf, hbsfMem, hbsfprop⟩ := hmem_dn
+            by_cases hbsfsign : (bsf.sign == Sign.neg && bsf.label == lbl) = true
+            · rw [if_pos hbsfsign] at hbsfprop
+              cases hbf : bsf.formula with
+              | diamond ψ' =>
+                simp only [hbf] at hbsfprop
+                by_cases hinb :
+                    (b.any (· == (⟨.neg, ψ', w'⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+                      = true
+                · rw [if_pos hinb] at hbsfprop; simp at hbsfprop
+                · rw [if_neg hinb] at hbsfprop
+                  simp only [Option.some.injEq] at hbsfprop
+                  subst hbsfprop
+                  have hsign : bsf.sign = .neg ∧ bsf.label = lbl := by
+                    simp only [Bool.and_eq_true, beq_iff_eq] at hbsfsign
+                    exact hbsfsign
+                  have hdiaNeg := (hb bsf hbsfMem).2 hsign.1
+                  rw [hbf, hsign.2] at hdiaNeg
+                  simp only [Satisfies] at hdiaNeg
+                  push Not at hdiaNeg
+                  refine ⟨fun h => by simp at h, fun _ => ?_⟩
+                  simp only [f', if_pos rfl]
+                  exact hdiaNeg ww hwwr
+              | _ => simp [hbf] at hbsfprop
+            · rw [if_neg hbsfsign] at hbsfprop; simp at hbsfprop
+          · have hlabel_ne : sf'.label ≠ w' :=
+              Nat.ne_of_lt (modalNextWorld_gt b sf' hmem_old)
+            have hf'_eq : f' sf'.label = f sf'.label := by
+              simp only [f', if_neg hlabel_ne]
+            constructor
+            · intro hsign
+              rw [hf'_eq]
+              exact (hb sf' hmem_old).1 hsign
+            · intro hsign
+              rw [hf'_eq]
+              exact (hb sf' hmem_old).2 hsign
+      | diamond φ => exact absurd (Or.inr ⟨rfl, φ, rfl⟩) hshape
+
 /-! ## K Soundness Re-Derived Through `frameValid` -/
 
 /-- The modal K tableau is sound through the frame-relativized vocabulary: if the tableau

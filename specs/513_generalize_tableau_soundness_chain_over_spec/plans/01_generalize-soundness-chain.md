@@ -147,7 +147,7 @@ each other, so they may run in parallel.
     the delegation risks that, extract as *new* standalone lemmas and leave the monolith untouched).
   - Zero `sorry`, zero added axiom.
 
-### Phase 2: CRUX — generic frame-relativized single-step sat preservation [NOT STARTED]
+### Phase 2: CRUX — generic frame-relativized single-step sat preservation [COMPLETED]
 
 - **Goal:** Land `modalStepBranchGen_preserves_satIn (FC) (apply)` with raw hypotheses `hAgree`
   (S-agree), `hBoxPos` (S-boxPos), `hDiaNeg` (S-diaNeg) — the ~420-line FC-threaded port of the

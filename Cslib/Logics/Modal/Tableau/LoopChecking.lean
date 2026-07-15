@@ -8,6 +8,12 @@ module
 
 import Cslib.Init
 import Mathlib.Tactic.Ring
+public import Mathlib.Data.Finset.Defs
+public import Mathlib.Data.Finset.Card
+public import Mathlib.Data.Finset.Prod
+public import Mathlib.Data.Finset.Powerset
+public import Mathlib.Data.Finset.Filter
+public import Mathlib.Data.Finset.Dedup
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.FrameRules
 
@@ -921,6 +927,83 @@ lemma modalUniverseS4_length_le (φ₀ : Proposition Atom) :
                       ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
       ≤ (modalWorldBoundS4 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
     _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
+
+/-! ## Signed-Key Finite Codomain (task 511, Phase 2)
+
+The stable-key infrastructure the redesigned guard/invariant (Phases 3-6) consumes: the fixed
+finite codomain `signedSubfmls φ₀` (both signs × every subformula of `φ₀`, as a `Finset`) and
+the live relevant set `relevantSetFinset φ₀ b w` restated as a `Finset` (reusing
+`sameRelevantSet`'s membership notion). No driver change here -- pure defs + lemmas,
+CI-green in isolation. -/
+
+/-- The finite signed-subformula codomain: both signs paired with every subformula of `φ₀`, as
+a `Finset (Sign × Proposition Atom)`. This is the fixed codomain the pigeonhole argument
+(`modalKnownWorlds_length_le_worldBoundS4`, Phase 6) injects known worlds into, via their birth
+keys (`S4LoopInv.keysInUniverse`). -/
+def signedSubfmls (φ₀ : Proposition Atom) : Finset (Sign × Proposition Atom) :=
+  ({Sign.pos, Sign.neg} : Finset Sign) ×ˢ (modalSubfmls φ₀).toFinset
+
+omit [Hashable Atom] in
+/-- `signedSubfmls φ₀`'s cardinality is at most `2 * |modalSubfmls φ₀|` (equality would need
+`modalSubfmls φ₀` duplicate-free; the pigeonhole argument only needs the inequality, since it
+feeds `Nat.pow_le_pow_right` toward `modalWorldBoundS4 φ₀ = 2 ^ (2 * |modalSubfmls φ₀|)`, an
+upper bound is all that is required). -/
+lemma signedSubfmls_card_le (φ₀ : Proposition Atom) :
+    (signedSubfmls φ₀).card ≤ 2 * (modalSubfmls φ₀).length := by
+  unfold signedSubfmls
+  rw [Finset.card_product]
+  have h2 : ({Sign.pos, Sign.neg} : Finset Sign).card = 2 := by decide
+  rw [h2]
+  have hle := List.toFinset_card_le (modalSubfmls φ₀)
+  omega
+
+omit [Hashable Atom] in
+/-- The powerset of `signedSubfmls φ₀` has cardinality at most `modalWorldBoundS4 φ₀`: the
+cardinality bridge Phase 6's pigeonhole argument consumes (`Finset.card_powerset` plus
+`signedSubfmls_card_le`, monotone in the exponent). This is why Phase 1 (the exponent fix)
+precedes: it ties the bound to `2 ^ (2·|Sf|)`, the correct codomain size for a sign-distinguishing
+key. -/
+lemma signedSubfmls_powerset_card_le (φ₀ : Proposition Atom) :
+    (signedSubfmls φ₀).powerset.card ≤ modalWorldBoundS4 φ₀ := by
+  unfold modalWorldBoundS4
+  rw [Finset.card_powerset]
+  exact Nat.pow_le_pow_right (by norm_num) (signedSubfmls_card_le φ₀)
+
+/-- The live relevant set `R(b,w)` (task 511 research §1.3) as a `Finset`: exactly the
+elements of `signedSubfmls φ₀` whose signed-formula instantiation at `w` is present on `b`.
+Reuses `sameRelevantSet`'s membership notion (`⟨s,ψ,w⟩ ∈ b`) restated as a finite set for the
+birth-key / pigeonhole machinery (Phases 3-6). -/
+def relevantSetFinset (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    Finset (Sign × Proposition Atom) :=
+  (signedSubfmls φ₀).filter
+    (fun p => b.any (· == (⟨p.1, p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+
+omit [Hashable Atom] in
+/-- `relevantSetFinset φ₀ b w` is (trivially, by construction as a filter of `signedSubfmls
+φ₀`) a subset of `signedSubfmls φ₀`. This is `S4LoopInv.keysInUniverse`'s per-world content
+once composed with `S4LoopInv.keyLowerBd`. -/
+lemma relevantSetFinset_subset_signedSubfmls (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    relevantSetFinset φ₀ b w ⊆ signedSubfmls φ₀ :=
+  Finset.filter_subset _ _
+
+omit [Hashable Atom] in
+/-- `relevantSetFinset` is monotone in the branch: if every formula of `b` is also a formula
+of `b'`, then `w`'s relevant set over `b` is a subset of `w`'s relevant set over `b'`. This is
+the fact Gap 1 (task 511 research §2) exploited for the old live-branch invariant, and the
+fact the new lower-bound invariant (`S4LoopInv.keyLowerBd`, Phase 4) is designed to *survive*:
+birth keys are fixed, but the live relevant set they lower-bound only grows. -/
+lemma relevantSetFinset_mono (φ₀ : Proposition Atom)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hsub : ∀ sf ∈ b, sf ∈ b') :
+    relevantSetFinset φ₀ b w ⊆ relevantSetFinset φ₀ b' w := by
+  unfold relevantSetFinset
+  apply Finset.monotone_filter_right
+  intro p _ hp
+  simp only [List.any_eq_true, beq_iff_eq] at hp ⊢
+  obtain ⟨sf, hsf_mem, heq⟩ := hp
+  exact ⟨sf, hsub sf hsf_mem, heq⟩
 
 /-! ## The S4 Loop Invariant `S4LoopInv` -/
 

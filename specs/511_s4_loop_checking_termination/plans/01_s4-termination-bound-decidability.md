@@ -151,22 +151,29 @@ chain, so each wave contains a single phase.
 - **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; `lean_verify` shows zero
   sorry/axiom for `modalWorldBoundS4`, `modalUniverseS4`, `modalUniverseS4_length_le`.
 
-### Phase 2: Finite signed-key infrastructure + powerset cardinality [NOT STARTED]
+### Phase 2: Finite signed-key infrastructure + powerset cardinality [COMPLETED]
 
 - **Goal:** Introduce the stable-key finite codomain and the cardinality bridge the pigeonhole
   consumes. Pure defs + lemmas, no driver change, CI-green in isolation.
 - **Tasks:**
-  - [ ] Define `signedSubfmls φ₀ : Finset (Sign × Proposition Atom)` (both signs × every
+  - [x] Define `signedSubfmls φ₀ : Finset (Sign × Proposition Atom)` (both signs × every
     subformula of `φ₀`) and `relevantSetFinset φ₀ b w : Finset (Sign × Proposition Atom)`
     (the live relevant set `R(b,w)` as a `Finset`, reusing `sameRelevantSet`'s membership notion).
-  - [ ] Prove `signedSubfmls_card : (signedSubfmls φ₀).card = 2 * (modalSubfmls φ₀).length`
-    (dedup via subformula nodup or `Finset` construction).
-  - [ ] Prove `signedSubfmls_powerset_card : (signedSubfmls φ₀).powerset.card = modalWorldBoundS4 φ₀`
-    via `Finset.card_powerset` and `signedSubfmls_card` (this is why Phase 1 precedes: ties the
-    bound to `2^(2·|Sf|)`).
-  - [ ] Prove `relevantSetFinset_subset_signedSubfmls : relevantSetFinset φ₀ b w ⊆ signedSubfmls φ₀`
-    (only when the branch is `modalUniverseS4`-closed) and
-    `relevantSetFinset_mono : b ⊆ b' → relevantSetFinset φ₀ b w ⊆ relevantSetFinset φ₀ b' w`
+  - [x] Prove `signedSubfmls_card_le : (signedSubfmls φ₀).card ≤ 2 * (modalSubfmls φ₀).length`
+    *(deviation: altered -- proved `≤` rather than the plan's stated `=`. `signedSubfmls` is
+    defined via `{pos,neg} ×ˢ (modalSubfmls φ₀).toFinset`, a `Finset` construction, so exact
+    equality would additionally need `modalSubfmls φ₀` duplicate-free (no such lemma exists in
+    `FmpMeasure.lean`). The pigeonhole argument (Phase 6) only ever consumes an upper bound on
+    `(signedSubfmls φ₀).card`, so `≤` is sufficient and strictly simpler -- no loss of guarantee.)*
+  - [x] Prove `signedSubfmls_powerset_card_le : (signedSubfmls φ₀).powerset.card ≤ modalWorldBoundS4 φ₀`
+    via `Finset.card_powerset` and `signedSubfmls_card_le` plus `Nat.pow_le_pow_right`
+    *(deviation: altered -- `≤` in place of the plan's stated `=`, same reasoning as above; this
+    is why Phase 1 precedes: ties the bound to `2^(2·|Sf|)`)*.
+  - [x] Prove `relevantSetFinset_subset_signedSubfmls : relevantSetFinset φ₀ b w ⊆ signedSubfmls φ₀`
+    *(deviation: altered -- no `modalUniverseS4`-closure side-condition needed: `relevantSetFinset`
+    is defined as a `Finset.filter` of `signedSubfmls φ₀`, so the subset fact is
+    `Finset.filter_subset` unconditionally, strictly stronger than the plan anticipated)* and
+    `relevantSetFinset_mono : (∀ sf ∈ b, sf ∈ b') → relevantSetFinset φ₀ b w ⊆ relevantSetFinset φ₀ b' w`
     (monotonicity — the fact Gap 1 exploited and the lower-bound invariant survives).
 - **Timing:** 2 hours
 - **Depends on:** 1

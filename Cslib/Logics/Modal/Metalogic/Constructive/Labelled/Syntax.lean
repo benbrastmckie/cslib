@@ -195,7 +195,8 @@ structure LabelledFormula (Atom : Type u) : Type u where
   /-- The formula. -/
   prop : Proposition Atom
 
-@[inherit_doc]
+/-- Notation `x ∶ A` for the labelled formula with label `x` and formula `A`
+(Simpson's `x:A` judgement). -/
 scoped notation:65 x " ∶ " A => LabelledFormula.mk x A
 
 end Cslib.Logic.Modal.Labelled

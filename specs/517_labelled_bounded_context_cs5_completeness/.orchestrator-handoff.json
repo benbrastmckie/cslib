@@ -3,53 +3,46 @@
   "task_number": 517,
   "session_id": "sess_1784156551_995e9d",
   "plan_path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
-  "summary": "Phases 16 and 17 landed sorry-free and axiom-clean, in probes/ only (zero Cslib/ files touched). Phase 16 mechanizes `cs5_completeness ⟹ CS5 ⊢ FS`: cs5_completeness is stated as a Lean HYPOTHESIS (never an axiom), instantiated at φ := FS, and discharged by the landed sorry-free fs_sound''. Result `cs5_completeness_implies_fs_derivable` depends on NO axioms. Contrapositive `CS5 ⊬ FS ⟹ the target is false` is now a machine fact, refuting plan 02:173's 'orthogonal … red herring' assessment. Phase 17 is DECISIVE and POSITIVE — the ~15% falsifier did NOT fire. Simpson §8.1.1's B_K, defined abstractly over an arbitrary IL-model, satisfies all five cs5FC'' conjuncts (BK_cs5FC'') plus cs5Incest (BK_cs5Incest) and cs5FCIncest (BK_cs5FCIncest) — all depending on NO axioms. cs5FC provably FAILS, MECHANIZED not asserted (BK_not_cs5FC), with a concrete two-point witness (BKWitness_not_cs5FC) making the cs5FC ⊊ cs5FC'' separation genuine rather than vacuous. The §8.1.1 leg does NOT collapse; the target frame class cs5FC'' is CONFIRMED; task 509's cs5FC'' pivot is independently re-validated as necessary rather than cosmetic.",
-  "phases_completed": 9,
+  "summary": "Phase 18 COMPLETE: the only corner cut in Cslib/ is removed. All four defects fixed under Cslib/**/Labelled/, the only phase in plan 08 that touches mainline. (1) defect 1 — TS5 changed {T,Five} -> {T,B,Four}, so Ax(TS5) matches CS5ModalAxiom schema-for-schema and the unproved constructive IKT5 <=> IKTB4 bridge is off the critical path; TS5 = {T,B,Four} verified rfl-true (definitional, not derived), and equivalence_of_classicalModel_TS5 now depends on NO axioms at all, its three fields being direct projections of clause 0 (B/Four are literally symm/trans under GeomAxiom.Holds). (2) defect 3 — GeomAxiom.D deleted: the sole existential axiom, silently ignored by TClosure/GeomWitnessClosure, which made Context {chi_D} a WRONG definition; blast radius was exactly the 3 predicted sites. (3) defect 2 — GeomWitnessClosure deleted (the `:= True` def + its `trivial` theorem + the Context field); a `def Foo := True` is rule-prohibited and no CI gate catches it since it is not a sorry. With .D gone, Simpson's clause 3 is absent BY CONSTRUCTION rather than vacuous by stipulation. (4) defect 4 — the false 'vacuous under the present Label type' rationale corrected; defect 10's superseded-phase refs cleared. Full lake build + lake test green; 0 sorry / 0 vacuous / 0 axioms under Labelled/; landed CK/CT/CS4/CS5 soundness and task-509's cs5FC'' unregressed.",
+  "phases_completed": 10,
   "phases_total": 26,
-  "phases_this_dispatch": [16, 17],
+  "phases_this_dispatch": [18],
   "skeleton": false,
   "blockers": [],
   "sorry_inventory": [],
   "continuation_context": {
     "is_successor": true,
-    "resume_at": "Plan 08 wave-1 remainder: Phases 18, 19, 20 (18 = the non-optional Cslib/ corner-cut removal). Phase 11/25 (pathSpine, a.k.a. plan 02's Track C C5) remains its own dedicated dispatch and was NOT touched here.",
+    "resume_at": "Plan 08 wave-1 remainder: Phases 19 and 20. Phase 18 is now DONE. Phase 19 is a DECISION GATE and is a separate dispatch. Phase 11/25 (pathSpine, a.k.a. plan 02's Track C C5) remains its own dedicated dispatch and was NOT touched here.",
     "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
     "do_not_redo": [
-      "Plan 08 Phase 16 (cs5_completeness ⟹ CS5 ⊢ FS) — COMPLETED this dispatch, probes/fischer-servi-probe.lean (cs5_completeness_implies_fs_derivable)",
-      "Plan 08 Phase 17 (B_K ⊨ cs5FC'' abstractly) — COMPLETED this dispatch, probes/bounded-context-bk-probe.lean (BK_cs5FC''/BK_cs5Incest/BK_cs5FCIncest/BK_not_cs5FC/BKWitness_*)",
+      "Plan 08 Phase 18 (remove the only corner cut in Cslib/) — COMPLETED this dispatch, commit 148ef71d. TS5/GeomAxiom.D/GeomWitnessClosure/docstrings all landed and verified.",
+      "Plan 08 Phase 16 (cs5_completeness => CS5 |- FS) — COMPLETED, probes/fischer-servi-probe.lean (cs5_completeness_implies_fs_derivable)",
+      "Plan 08 Phase 17 (B_K |= cs5FC'' abstractly) — COMPLETED, probes/bounded-context-bk-probe.lean (BK_cs5FC''/BK_cs5Incest/BK_cs5FCIncest/BK_not_cs5FC/BKWitness_*)",
       "A1 (IKAx repair) — COMPLETED, probes/lemma612-scaffold.lean",
-      "A2 (CS5 ⊢ FS route probe) — COMPLETED, probes/fischer-servi-probe.lean",
+      "A2 (CS5 |- FS route probe) — COMPLETED, probes/fischer-servi-probe.lean",
       "A3 (route verdict) — COMPLETED, NO-GO for Track B",
       "Track C C1/C2/C3 — COMPLETED, probes/track-c-c1-tele-conj.lean",
       "Track C C4 (LTree/star/fullSubtree/prune + unfolding identity) — COMPLETED, probes/lemma612-scaffold.lean"
     ]
   },
-  "next_action_hint": "Phase 17's falsifier did NOT fire, so the plan's 'document and STOP — do not proceed to Phase 21' branch is NOT triggered; Phase 21 remains open and the §8.1.1 leg is confirmed. Wave-1 Phases 18/19/20 are unblocked and were out of this dispatch's scope; Phase 18 (remove the only corner cut in Cslib/) is non-optional and is the one that edits Cslib/. Phase 11/25 (pathSpine) stays a dedicated dispatch — see gaps_flagged for the multi-branch-point warning carried forward from the C4 dispatch. STRATEGIC NOTE FOR THE ORCHESTRATOR: Phases 16+17 now INTERLOCK into a single hard constraint on the whole route. fs_sound'' gives cs5FC'' ⊨ FS; BK_cs5FC'' gives B_K ⊨ cs5FC''; therefore EVERY B_K validates FS, so the route's own countermodel construction can NEVER produce a countermodel for FS. Combined with cs5_completeness_implies_fs_derivable, the CS5 ⊢ FS obligation is upgraded from a necessary condition of the THEOREM to a necessary condition of the METHOD. And CS5 ⊢ FS is currently OPEN (probes/fischer-servi-probe.lean records the syntactic derivation as negative-but-not-refuted: necessitation needs a closed sub-derivation, every route to A → B genuinely needs the hypothesis in context). RECOMMENDATION: seriously consider forcing a CS5 ⊢ FS decision BEFORE further investment in Phases 21-24, since a negative resolution there falsifies the completeness target itself, not merely this route.",
+  "next_action_hint": "Phase 18 was Depends-on:none and is now landed, so mainline is honest and green. Next dispatch is Phase 19 (DECISION GATE: decide CS5 |- FS) as its own dispatch — it is bounded, with each outcome having a documented branch, and is explicitly NOT a phase to grind on. The plan's own note remains the key strategic fact: every dispatch to date attacked DERIVATION and failed; nobody has attempted REFUTATION, so the untried direction is where the information is. Phases 16+17 jointly make CS5 |- FS a necessary condition of the METHOD as well as of the theorem, so a negative resolution falsifies the completeness target itself — this is the route's single highest-leverage unknown and is worth deciding BEFORE further investment in Phases 21-24. BREAKING API CHANGES FROM THIS DISPATCH that any downstream phase must respect: (a) GeomAxiom.Five_mem_TS5 NO LONGER EXISTS — Five is not in TS5 anymore; use GeomAxiom.B_mem_TS5 / GeomAxiom.Four_mem_TS5. (b) GeomAxiom.D NO LONGER EXISTS — any probe defining an Ax(-) map must not gate a constructor on it (both existing probes were updated). (c) GeomWitnessClosure / geomWitnessClosure_holds / the Context.geomWitnessClosure field NO LONGER EXIST — a Context is now constructed from 5 fields, not 6. (d) equivalence_of_refl_eucl is RETAINED and still valid.",
   "artifacts": [
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/bounded-context-bk-probe.lean",
-      "type": "probe",
-      "summary": "Phase 17 (NEW FILE). ILModel/BKWorld/BKle/BKR/BKPreorder define Simpson §8.1.1's B_K abstractly over an arbitrary IL-model. BK_cs5FC'' (all five conjuncts), BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC — all depend on NO axioms. BKWitness/BKWitness_cs5FC''/BKWitness_not_cs5FC give the concrete non-vacuous separation ([propext] only). Verified: lake env lean exit 0, sorry-free."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fischer-servi-probe.lean",
-      "type": "probe",
-      "summary": "Phase 16 appended (cs5_completeness_implies_fs_derivable, depends on NO axioms). Appended IN-FILE rather than as a new probe because probes are standalone (verified via lake env lean) and are not a lean_lib, so fs_sound'' cannot be imported across probe files. Verified: lake env lean exit 0, sorry-free."
-    },
     {
       "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
       "type": "plan",
-      "summary": "Phases 16 and 17 marked [COMPLETED] with all task checkboxes ticked; Phase 17 annotated with its POSITIVE result (falsifier did not fire) and the Rdom-unnecessary finding."
+      "summary": "Phase 18 marked [COMPLETED] with all checkboxes ticked, plus a Result block recording: the rfl-true TS5 verification; the Five_mem_TS5 removal downstream phases must know about; the retained-but-now-formally-unused Context 𝒯 index decision and why removing it was left out of scope; the docstring-sweep scope note; and the pre-existing defects deliberately left untouched."
     }
   ],
   "modified_files": [
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/fischer-servi-probe.lean",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/bounded-context-bk-probe.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Deduction.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Syntax.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/adequacy-gate-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md"
   ],
   "commits": [
-    "task 517 phase 16: mechanize cs5_completeness => CS5 |- FS",
-    "task 517 phase 17: probe B_K |= cs5FC'' abstractly -- POSITIVE"
+    "148ef71d task 517 phase 18: make the landed framework honest -- remove the only corner cut in Cslib/"
   ],
   "verification": {
     "verification_passed": true,
@@ -57,57 +50,77 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
+    "test_passed": true,
     "ci_pipeline_passed": true,
-    "ci_pipeline_note": "Zero Cslib/ files modified (git status confirmed), so the Cslib-scoped CI steps (checkInitImports, lake lint, lint-style, shake, mk_all, lake test) have no changed surface to gate. Regression check run instead: `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` -> exit 0, 728 jobs -- landed CK/CT/CS4/CS5 soundness and task-509's cs5FC'' intact. Probes are standalone and verified via `lake env lean` (exit 0 on both files), the established verification method for this task's probes.",
-    "axiom_footprint": "Abstract results (cs5_completeness_implies_fs_derivable, BK_cs5FC'', BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC): depend on NO axioms at all. Concrete witness (BKWitness_cs5FC'', BKWitness_not_cs5FC): [propext]. All strictly within the permitted [propext, Classical.choice, Quot.sound]."
+    "scope_note": "sorry_count/vacuous_count/axiom_count above are scoped to this phase's territory (Cslib/**/Labelled/), which is the correct scope for a phase whose contract is 'zero sorry, zero new axioms under Cslib/' for the code it owns. See pre_existing_not_introduced for repo-wide counts that predate this dispatch.",
+    "ci_steps_run": [
+      "lake build (full project) — exit 0, zero errors",
+      "lake exe checkInitImports — exit 0",
+      "lake lint — 1 error, PRE-EXISTING at Foundations/Logic/Metalogic/PrimeExclusion.lean:324 (unusedArguments), outside territory and untouched by this diff; NOT introduced here",
+      "lake exe lint-style — clean for Labelled/",
+      "lake shake --add-public --keep-implied --keep-prefix — clean for Labelled/",
+      "lake exe mk_all --module — 'No update necessary'",
+      "lake test — exit 0"
+    ],
+    "axiom_footprint": "Within the permitted [propext, Classical.choice, Quot.sound]. Specifically: equivalence_of_classicalModel_TS5 and equivalence_of_refl_eucl depend on NO axioms; Context depends on no axioms; TPrime and Deriv.mono depend on [propext]. Landed assets unregressed: cs5Incest / cs5FCIncest / cs5Incest_forces_symm depend on no axioms; cs5Incest_cs5CanonMreach_false depends on exactly [propext, Classical.choice, Quot.sound].",
+    "acceptance_checks_run": [
+      "example : TS5 = {GeomAxiom.T, GeomAxiom.B, GeomAxiom.Four} := rfl — PASSES, so the Ax(TS5) = CS5ModalAxiom correspondence is definitional as the plan intended, not a derived bridge.",
+      "example : forall chi : GeomAxiom, chi = .T \\/ chi = .B \\/ chi = .Four \\/ chi = .Five — PASSES by exhaustive cases, confirming GeomAxiom has exactly four constructors and .D is gone.",
+      "GeomAxiom.T_mem_TS5 / B_mem_TS5 / Four_mem_TS5 all typecheck.",
+      "Regression: cs5Incest, cs5FCIncest, cs5Incest_forces_symm, cs5Incest_cs5CanonMreach_false, cs5FC''_cs5Mreach all still present and compiling."
+    ],
+    "no_regression_check": "Full lake build green across all 632+ jobs and lake test green — landed CK/CT/CS4/CS5 soundness and task-509's cs5FC'' intact. Verified by explicit #print axioms on the named landed assets, not by build-passes-therefore-fine inference."
   },
   "findings": [
     {
-      "type": "citation_verified",
-      "detail": "The plan's `chunk_0152:3` citation for the B_K definition is VALID under the current 206-chunk Simpson numbering -- verified BY CONTENT, not by number, per the renumbering hazard warning. chunk_0152.md contains the construction verbatim: W' = {(w,d) | w in W and d in D_w}; (w,d) <=' (w',d') iff w <= w' and d = d'; (w,d) R' (w',d') iff w = w' and R_w(d,d'). This matches the dispatch's transcription EXACTLY -- no OCR/plan conflict to flag. Lemma 8.1.2 is in the same chunk. The plan's other cited chunk (chunk_0068, Thm 3.3.4) was not needed by Phases 16-17 and was not checked."
+      "type": "plan_citations_verified",
+      "detail": "Every line number the plan cited for Phase 18 was re-verified before editing and ALL were correct: Context.lean:138 (GeomWitnessClosure := True), :144 (geomWitnessClosure_holds := trivial), :167 (the Context field), :247 (TS5 := {T, Five}), :260 (equivalence_of_refl_eucl); Deduction.lean:124 (.D => forall x, exists y, R x y), :126-127 (.B/.Four literally symm/trans). The .D blast radius was verified as EXACTLY the 3 predicted sites (Deduction.lean:124, lemma612-scaffold.lean:119, adequacy-gate-probe.lean:92) — no fourth site existed. The plan's Phase 18 spec required no correction."
     },
     {
-      "type": "citation_discrepancy",
-      "detail": "The dispatch and plan cite cs5FC''/cs5FC/cs5FCIncest as all at CKExtension.lean:159,184. Only cs5FC (line 159) and cs5FC'' (line 184) are there. cs5Incest (CS5Canonical.lean:234) and cs5FCIncest (CS5Canonical.lean:255) live in CS5Canonical.lean instead. Minor and non-blocking -- the probe imports CS5Canonical, which pulls in CKExtension transitively. Worth correcting in future plan revisions."
+      "type": "citation_discrepancy_confirmed",
+      "detail": "CONFIRMS the dispatch's warning and the prior dispatch's finding: cs5Incest and cs5FCIncest are at CS5Canonical.lean:234 and :255, NOT at CKExtension.lean:159,184 as the plan cites. Only cs5FC (:159) and cs5FC'' (:184) are in CKExtension.lean. Still worth correcting in a future plan revision; non-blocking."
     },
     {
-      "type": "plan_spec_refinement",
-      "detail": "The plan specifies proving the conjuncts 'given R_w refl/symm/trans and <=-monotonicity R_w subseteq R_w''. TWO refinements. (1) ADDITION: Dmono (D_w subseteq D_w', domain monotonicity) is required and is recorded as an ILModel field -- B_K's <=' moves the world component, so every freshly-constructed B_K-world needs a domain proof at the HIGHER context. This is not an addition to the source: Simpson's own box clause quantifies over d' in D_w' at w' >= w, presupposing exactly this. (2) OMISSION: a conjectured Rdom (R w d e -> D w e) turned out to be UNNECESSARY and was deliberately left out -- every conjunct that produces a fresh world reuses the SOURCE world's label, so Dmono alone transports domain membership. The hypothesis set is therefore minimal, which strengthens the result."
+      "type": "self_review_catch",
+      "detail": "An intermediate docstring I wrote asserted that Context 'would fail to compile' if GeomAxiom were later extended with an existential axiom. That is FALSE — Context would compile fine and simply not constrain it; the actual forcing function is GeomAxiom.Holds's EXHAUSTIVE MATCH (and TClosure), which is what forces a decision at the point of extension. Caught during self-review and corrected before commit. Recorded because shipping a plausible-but-false rationale is precisely the defect class (defect 4) this phase exists to remove — the fix would have been self-defeating otherwise."
     },
     {
-      "type": "guardrail_analysis",
-      "detail": "CONFIRMS the plan's guardrail claim, as required by the dispatch. BKR makes R' a label-level, WITHIN-context relation over an arbitrary K: R' relates labels d,d' inside one fixed context w (w = w' is definitional in BKR), never two theories. By contrast cs5Incest_forces_symm (CS5Canonical.lean:643) and cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511) are both statements about the CANONICAL model's theory-to-theory relation. This probe never mentions, constructs, or quantifies over theories, so neither guardrail is instantiable here and neither fires. The independence is load-bearing: B_K |= cs5FC'' is established over EVERY IL-model, so it cannot be an artifact of any canonical-model-specific collapse. This is mechanized in the file's module docstring, not merely asserted in prose."
+      "type": "design_note_context_theory_index",
+      "detail": "With clause 3 deleted, NO field of Context mentions 𝒯 — a context is now genuinely theory-independent. The 𝒯 parameter is RETAINED as an index and documented as such in the Context docstring, because TPrime extends Context 𝒯 Atom and IS 𝒯-relative (clause 0 plus every Deriv 𝒯 clause), and Context.le / the Zorn poset thread a fixed 𝒯. lake lint's unusedArguments does NOT flag it (structure parameters are not checked the way def arguments are). Removing the index would be a separate, larger refactor touching Context.le, the LE/Preorder instances, and TPrime — deliberately out of this phase's scope per the plan's task list and plan-compliance rules. Flagged so a future reviewer does not read the unused parameter as an oversight."
     },
     {
-      "type": "obstruction_mechanized",
-      "detail": "BK_not_cs5FC is stronger and simpler than the plan anticipated. cs5FC's <=-composed transitivity (r w u -> u <= u' -> r u' t -> r w t) is instantiated at w := (w,d), u := (w,d), u' := (w',d), t := (w',d): BOTH r-premises are mere REFLEXIVITY instances of R', so the obstruction needs no cleverly-placed edge -- it needs only R_w's reflexivity plus two distinct <=-comparable contexts. The conclusion would be (w,d) R' (w',d), whose first component is w = w', contradicting w != w'. Structural reason: <=' moves the world and pins the label; R' moves the label and pins the world; the two never compose into the cross-context edge cs5FC demands."
-    },
-    {
-      "type": "false_positive_warning",
-      "detail": "A naive grep for prohibited vacuous definitions flags BKWitness's fields (D _ _ := True, R _ _ _ := True, Rrefl _ := trivial, ...). These are NOT vacuous placeholders in the prohibited sense: BKWitness is a concrete two-point model whose INTENDED semantics is a total domain and total accessibility, so True/trivial are its genuine mathematical content, not a substitute for an unmet proof obligation. Every load-bearing result (BK_cs5FC'', BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC) is abstract over an arbitrary K and uses no such construct. Recorded so a future reviewer or lint pass does not misread the grep hit."
+      "type": "scope_note",
+      "detail": "Work beyond the four named defects was confined to defect 10's docstring sweep and was compliance-driven, not discretionary: (a) task-number citations ('Task 517 Phase 1/2', 'task 512's wall') were removed from Syntax.lean/Deduction.lean/Context.lean because .claude/rules/no-task-references-in-deliverables.md forbids them outside specs/** and Cslib/ is deliverable code — durable anchors (file names, cs5_symmetric_tail_box_gap) were substituted; (b) two claims the defect-1 fix made STALE were corrected — Syntax.lean's 'the task's target frame theory is 𝒯_S5 := {χ_T, χ_5}' and Deduction.lean's 'Discrepancy with the orchestrator dispatch' section, which still asserted {χ_T, χ_5} and would have directly contradicted the new Context.lean. Syntax.lean was touched for these docstring reasons ONLY — zero semantic change. The two probes were edited solely to keep compiling after .D deletion, per the territory contract; neither was extended."
     },
     {
       "type": "lit_briefing_confirmation",
-      "detail": "Confirms the dispatch's report that literature-briefing.sh is broken for this task: the briefing supplied no modal sources. Chunks were read directly from /home/benjamin/Projects/Literature/simpson_1994_intuitionisticmodallogic/ as instructed. Root cause (id vs doc_id namespace split in the global index) was NOT investigated or fixed -- correctly out of scope."
+      "detail": "Phase 18 was mechanical and required no literature lookup, so the known-broken literature-briefing.sh (id vs doc_id namespace split dropping all 20 modal sources) had no impact on this dispatch. Not investigated, not fixed — correctly out of scope. The Conflict-7 adjudication was accepted as settled per the dispatch and NOT re-litigated."
     }
   ],
-  "confidence": {
-    "bk_models_cs5FCpp": 1.0,
-    "cs5FC_fails_on_bk": 1.0,
-    "cs5FCpp_is_the_correct_frame_class_for_the_8_1_1_leg": 1.0,
-    "cs5_completeness_entails_CS5_derives_FS": 1.0,
-    "cs5_derives_FS_itself": null,
-    "note": "Phases 16-17 are now settled facts, not estimates -- both are machine-checked and axiom-clean. The A/KF3 hand-check the plan rated ~85% is now SETTLED at 1.0. What these phases do NOT settle is CS5 |- FS itself, which remains genuinely OPEN (deliberately null above rather than guessed): fs_sound'' shows FS is semantically cs5FC''-valid, and fs_syntactic_obstruction shows the naive Hilbert route fails structurally, but neither decides derivability. That open question is now the route's single highest-leverage unknown, because Phases 16+17 jointly make it a necessary condition of the METHOD as well as of the theorem."
-  },
-  "gaps_flagged": [
-    "CS5 |- FS remains OPEN and is now the route's critical path -- Phases 16+17 make it necessary for BOTH the theorem and the method, but neither phase decides it. A negative resolution would falsify the completeness target itself.",
-    "Phase 17 establishes B_K |= cs5FC'' as a FRAME fact only. B_K's valuation component (Simpson's V'((w,d)) = {a | alpha_w(d)}) and Lemma 8.1.2 (the forcing-preservation induction) are NOT mechanized here -- ILModel deliberately omits alpha_w since cs5FC''/cs5FC constrain only the relation. Phase 24 will need Lemma 8.1.2 separately; do not mistake Phase 17's positive result for it.",
-    "BKWitness is a two-point model with a TOTAL accessibility relation. It witnesses only that BK_not_cs5FC's hypotheses are satisfiable (making the separation non-vacuous); it is not a rich test of B_K's structure.",
-    "Carried forward from the C4 dispatch, still live: C4's prune/fullSubtree split children as pre ++ [c] (continuation child LAST) as an internal convention anticipated from addChild's append-at-end behaviour, NOT derived from pathSpine (which does not exist yet). Phase 11/25 (pathSpine) must independently verify this convention against a tree with at least 2 branch points -- report 02 section 1 documents that this exact multi-branch path reasoning is where three prior pre-reframe dispatches got stuck.",
-    "Carried forward: formula_6_7 (C2) is scoped to nonempty V; formula_6_8 (C3) is unrestricted. C7's (diaE) composition must respect the asymmetry.",
-    "Carried forward: Fischer Servi 1984 is still NOT in the literature corpus -- moot while Track B stays closed.",
-    "literature-briefing.sh silently drops all 20 modal sources for this task (id vs doc_id namespace split in ~/Projects/Literature/index.json). Diagnosed previously, not fixed, out of scope -- but every --lit dispatch on this task is affected and must read chunks directly."
+  "pre_existing_not_introduced": [
+    "129 sorry occurrences under Cslib/ in unrelated subtrees (Bimodal/Metalogic/BXCanonical, Bimodal/Metalogic/Bundle, Propositional/Tableau, Propositional/Metalogic, Temporal/Tableau, etc.). ZERO are under Labelled/, this phase's territory. All predate this dispatch and are untouched by it.",
+    "lake lint reports 1 error: unusedArguments at Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean:324 (@Cslib.Logic.Metalogic.DerivExcludes argument 5 _D). That file was last modified by an unrelated task, is untouched by this diff, and the error is independent of GeomAxiom/Context. Pre-existing.",
+    "Cslib/Computability/URM/Basic.lean:92 'theorem J_IsJump (m n q) : (J m n q).IsJump := trivial' matches a naive vacuous-definition grep but is NOT a prohibited stub: it discharges a real goal that reduces definitionally, rather than substituting `def Foo := True` for an unmet obligation. Outside territory, untouched."
   ],
+  "gaps_flagged": [
+    "CS5 |- FS remains OPEN and is now the route's critical path — Phases 16+17 make it necessary for BOTH the theorem and the method, but neither decides it. Phase 19 is the gate. A negative resolution would falsify the completeness target itself.",
+    "Phase 17 establishes B_K |= cs5FC'' as a FRAME fact only. B_K's valuation component (Simpson's V'((w,d)) = {a | alpha_w(d)}) and Lemma 8.1.2 (the forcing-preservation induction) are NOT mechanized — ILModel deliberately omits alpha_w. Phase 24 will need Lemma 8.1.2 separately; do not mistake Phase 17's positive result for it.",
+    "BKWitness is a two-point model with a TOTAL accessibility relation. It witnesses only that BK_not_cs5FC's hypotheses are satisfiable (making the separation non-vacuous); it is not a rich test of B_K's structure.",
+    "NEW: Context is now a 5-field structure (geomWitnessClosure field deleted). Any downstream phase constructing a Context literal must drop that field. No such construction exists in Cslib/ or probes/ today (grep-verified), so nothing is currently broken.",
+    "NEW: TS5 no longer contains GeomAxiom.Five, so Five_mem_TS5 is deleted. Any downstream phase needing Euclideanness of a TS5-classical model must now derive it from {T,B,Four} rather than project it out of clause 0. equivalence_of_refl_eucl remains available for the converse direction.",
+    "Carried forward from the C4 dispatch, still live: C4's prune/fullSubtree split children as pre ++ [c] (continuation child LAST) as an internal convention anticipated from addChild's append-at-end behaviour, NOT derived from pathSpine (which does not exist yet). Phase 11/25 (pathSpine) must independently verify this convention against a tree with at least 2 branch points — report 02 section 1 documents that this exact multi-branch path reasoning is where three prior pre-reframe dispatches got stuck.",
+    "Carried forward: formula_6_7 (C2) is scoped to nonempty V; formula_6_8 (C3) is unrestricted. C7's (diaE) composition must respect the asymmetry.",
+    "Carried forward: Fischer Servi 1984 is still NOT in the literature corpus — moot while Track B stays closed.",
+    "Carried forward: literature-briefing.sh silently drops all 20 modal sources for this task (id vs doc_id namespace split in ~/Projects/Literature/index.json). Diagnosed previously, not fixed, out of scope — but every --lit dispatch on this task is affected and must read chunks directly. Chunk-renumbering hazard (1091 -> 206) also stands: verify citations BY CONTENT, never by number."
+  ],
+  "confidence": {
+    "phase_18_defects_fixed": 1.0,
+    "ax_TS5_equals_CS5ModalAxiom_definitional": 1.0,
+    "geomWitnessClosure_deletion_sound": 1.0,
+    "no_regression_of_landed_assets": 1.0,
+    "cs5_derives_FS_itself": null,
+    "note": "Phase 18's outcomes are machine-checked facts, not estimates: TS5 = {T,B,Four} is rfl-true, GeomAxiom's four-constructor exhaustiveness is proved by cases, and the full build + test suite are green with the landed assets' axiom footprints explicitly re-verified. The GeomWitnessClosure deletion's SOUNDNESS is rated 1.0 on the plan's Conflict-7 adjudication (accepted as settled per dispatch, not independently re-derived here) plus the structural fact that a clause constraining witness variables cannot bind when the axiom type admits no axioms that have witness variables. cs5_derives_FS_itself stays deliberately null — Phase 18 is orthogonal to it and provides no evidence either way."
+  },
   "metadata": {
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
@@ -116,11 +129,10 @@
     "hard_mode": true,
     "orchestrator_mode": true,
     "effort_flag": "hard",
-    "supersedes": "prior .orchestrator-handoff.json (Track C C4 dispatch, session sess_1784145761_061228, status=partial, plan 02, next_action_hint=Track C C5). That handoff's phases_completed=7/7 counted plan 02's Track C parts; this handoff counts plan 08's phases (9 of 26). Its C5/pathSpine continuation guidance remains LIVE and is carried forward in gaps_flagged -- pathSpine was explicitly out of scope for this dispatch.",
-    "sorry_inventory": {
-      "added": 0,
-      "note": "Both Lean artifacts verified sorry-free via `lake env lean` (exit 0, zero errors, zero warnings) plus manual grep for the sorry tactic (zero real hits; all grep matches for 'sorry' are doc-comment prose). #print axioms run on all six new top-level theorems. No Cslib/ file touched (git status confirmed). Note: unrelated concurrent task-515 work and specs/ bookkeeping files may appear in git status; staging was scoped to this dispatch's three files only, never `git add -A`."
-    }
+    "phase_number": 18,
+    "supersedes": "prior .orchestrator-handoff.json (Phases 16+17 dispatch, session sess_1784156551_995e9d predecessor, status=implemented, 9 of 26). That handoff's Phase 16/17 results and its strategic note about CS5 |- FS remain LIVE and are carried forward above in do_not_redo, gaps_flagged, and next_action_hint. Its Phase 11/25 (pathSpine) continuation guidance also remains live — pathSpine was explicitly out of scope for this dispatch.",
+    "territory_contract": "Owned Cslib/**/Labelled/ (Context.lean, Deduction.lean, Syntax.lean). Also edited the two probes/ files named in defect 2's blast radius (lemma612-scaffold.lean, adequacy-gate-probe.lean) solely to keep them compiling after .D deletion, as the dispatch permitted — neither was extended. NO other Cslib/ subtree was touched (git status confirmed). Staging was scoped to this dispatch's files; `git add -A` was never used.",
+    "sorry_inventory_note": "Zero sorries added. Zero sorries exist under Labelled/. Zero vacuous definitions exist under Labelled/ — this phase DELETED the only one (GeomWitnessClosure). Zero axiom declarations under Labelled/. Verified by grep plus #print axioms on the touched and landed declarations."
   },
   "last_updated": "2026-07-15T00:00:00Z"
 }

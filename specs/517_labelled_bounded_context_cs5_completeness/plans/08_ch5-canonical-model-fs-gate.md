@@ -467,12 +467,12 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   (`BK_not_cs5FC`), with a concrete witness (`BKWitness_not_cs5FC`) making the separation
   non-vacuous. `Rdom` proved unnecessary. Artifact: `probes/bounded-context-bk-probe.lean`.
 
-### Phase 18: Make the landed framework honest — remove the only corner cut in `Cslib/` [NOT STARTED]
+### Phase 18: Make the landed framework honest — remove the only corner cut in `Cslib/` [COMPLETED]
 - **Goal:** **~2-4h, NON-OPTIONAL, required regardless of every other decision.** Per the user's
   directive, the only corner currently cut in this entire effort is **already in `Cslib/`** and is
   shipped via the root import. Fixing it is not a trade-off; it is an obligation.
 - **Tasks:**
-  - [ ] **Fix `TS5`** (defect 1, HIGH): `Context.lean:247` is
+  - [x] **Fix `TS5`** (defect 1, HIGH): `Context.lean:247` is
         `def TS5 : Set GeomAxiom := {GeomAxiom.T, GeomAxiom.Five}` (verified). Under Simpson's
         `Ax(-)` (Fig 3-7/6-3), `Ax({χ_T,χ_5}) = IKT5`, but `CS5ModalAxiom = IKTB4`. Bridging would
         need an **unproved constructive `IKT5 ⟺ IKTB4`** on the critical path — exactly the corner
@@ -482,23 +482,23 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
         `{T,B,Four}` they are **direct** (`.B`/`.Four` are literally symm/trans per
         `GeomAxiom.Holds`, `Deduction.lean:126-127`), and `TClosure` already carries
         `.symm`/`.trans` constructors.
-  - [ ] **Delete `GeomAxiom.D`** (defect 3, HIGH): `Deduction.lean:124` (`| .D => ∀ x, ∃ y, R x y`)
+  - [x] **Delete `GeomAxiom.D`** (defect 3, HIGH): `Deduction.lean:124` (`| .D => ∀ x, ∃ y, R x y`)
         is the **sole existential** axiom; `TClosure`/`GeomWitnessClosure` silently ignore it, making
         `Context {χ_D}` a **wrong definition**. Blast radius verified: 3 sites (`Deduction.lean:124`
         + `lemma612-scaffold.lean:119` + `adequacy-gate-probe.lean:92`).
-  - [ ] **Delete `GeomWitnessClosure`** (defect 2, HIGH): `Context.lean:138` is
+  - [x] **Delete `GeomWitnessClosure`** (defect 2, HIGH): `Context.lean:138` is
         `def GeomWitnessClosure (𝒯) (G) : Prop := True` with `geomWitnessClosure_holds := trivial`
         (`:144`) and a `Context` field at `:167` (all verified). A `def Foo := True` is
         rule-prohibited and **no CI gate catches it** (it is not a `sorry`). Delete the def, the
         theorem, and the field. With `.D` gone, clause 3 becomes **absent by construction**, not
         vacuous by stipulation — **structurally more rigorous** than the stub.
-  - [ ] **Correct the docstring rationale**: `Context.lean:130-138` says the clause is *"vacuous
+  - [x] **Correct the docstring rationale**: `Context.lean:130-138` says the clause is *"vacuous
         under the present `Label` type"* — **wrong on its own terms**; the real reason is *"no
         existential geometric axioms in the type"*. Moot once deleted, but do not repeat the error.
-  - [ ] Update docstrings referencing plan 01's superseded Phases 5/6 (defect 10)
-  - [ ] Reverify all untouched declarations compile; **no regression** of landed CK/CT/CS4/CS5
+  - [x] Update docstrings referencing plan 01's superseded Phases 5/6 (defect 10)
+  - [x] Reverify all untouched declarations compile; **no regression** of landed CK/CT/CS4/CS5
         soundness or task-509 `cs5FC''`
-  - [ ] Zero `sorry`, zero new axioms under `Cslib/`
+  - [x] Zero `sorry`, zero new axioms under `Cslib/`
 - **Timing:** one dispatch (~2-4h)
 - **Depends on:** none
 - **Territory:** the ONLY phase in this plan that edits `Cslib/`, and only under `Labelled/`. All
@@ -511,6 +511,39 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   argument. **If requirement 3 already asserted graph closure, that entire step would be a one-line
   citation of clause 3.** Simpson does not do that.
 - **Risk:** LOW-MED — mechanical, but it touches mainline.
+- **Result:** POSITIVE — all four defects fixed; landed as commit `148ef71d`. Every plan-cited
+  line number verified correct before editing, and the `.D` blast radius was **exactly** the 3
+  predicted sites. Notes for downstream phases:
+  - **`TS5 = {T, B, Four}` is `rfl`-true** (verified by `example : TS5 = {…} := rfl`), so
+    `Ax(TS5) = CS5ModalAxiom` is definitional as intended. `equivalence_of_classicalModel_TS5`
+    now depends on **no axioms at all** (was routed through `equivalence_of_refl_eucl`), its
+    three fields being direct projections of clause 0. `equivalence_of_refl_eucl` is **retained**
+    (still true, still useful) as the record that the `{χ_T, χ_5}` presentation agrees;
+    `Five_mem_TS5` is **gone** (`Five ∉ TS5` now) — any phase citing it must switch to
+    `B_mem_TS5`/`Four_mem_TS5`.
+  - **`GeomAxiom` now has exactly `{T, B, Four, Five}`** (verified by exhaustive `cases`).
+    Because `GeomAxiom.Holds` matches exhaustively, adding an existential axiom later *forces* a
+    decision at that match and at `TClosure` — the wrong-definition failure mode is now
+    unrepresentable rather than merely absent.
+  - **`Context`'s `𝒯` parameter is now formally unused** (no field mentions it once clause 3 is
+    gone). It is **retained as an index**, documented as such: `TPrime extends Context 𝒯 Atom` is
+    genuinely 𝒯-relative, and `Context.le`/the Zorn poset thread a fixed `𝒯`. `lake lint`'s
+    `unusedArguments` does **not** flag it. Removing the index would be a separate refactor,
+    deliberately out of this phase's scope.
+  - **Scope note (beyond the four defects, same rule-compliance intent):** defect 10's docstring
+    sweep also removed task-number citations from `Syntax.lean`/`Deduction.lean`/`Context.lean`,
+    which `.claude/rules/no-task-references-in-deliverables.md` forbids outside `specs/**`, and
+    corrected two now-stale claims the defect-1 fix invalidated (`Syntax.lean`'s "target frame
+    theory is `𝒯_S5 := {χ_T, χ_5}`" and `Deduction.lean`'s "Discrepancy with the orchestrator
+    dispatch" section). `Syntax.lean` was touched for this reason only — no semantic change.
+  - **Verification:** full `lake build` green; `lake test` green; `checkInitImports`, `lint-style`,
+    `shake`, `mk_all` all clean; **0 `sorry` / 0 vacuous defs / 0 axiom declarations under
+    `Labelled/`**; landed assets (`cs5Incest`, `cs5FCIncest`, `cs5Incest_forces_symm`,
+    `cs5FC''_cs5Mreach`) intact with footprint ⊆ `[propext, Classical.choice, Quot.sound]`.
+  - **Pre-existing, NOT introduced here** (left untouched, outside territory): 129 `sorry`s under
+    `Cslib/` in unrelated subtrees (Bimodal/Propositional/Temporal), one `lake lint`
+    `unusedArguments` error at `Foundations/Logic/Metalogic/PrimeExclusion.lean:324`, and
+    `Computability/URM/Basic.lean:92`'s `:= trivial` (a real goal, not a vacuous stub).
 
 ### Phase 19: DECISION GATE — decide `CS5 ⊢ FS` [NOT STARTED]
 - **Goal:** **Resolve the named blocking obligation.** This is a **decision gate, not a phase to

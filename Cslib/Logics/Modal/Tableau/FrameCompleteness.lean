@@ -466,6 +466,129 @@ lemma extractModelB_hasEdge_symm_imp_r (b : List (SignedFormula (Proposition Ato
   rw [extractModelB_r]
   exact Relation.SymmGen.of_rel_symm h
 
+/-! ## S5 (Equivalence Frame) Extraction (task 504 Phase 3)
+
+Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*equivalence closure* `Relation.EqvGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.EqvGen`). This extraction is
+**independent of the tableau rule** -- a pure closure-model construction over any branch/
+accessibility pair -- and is delivered here regardless of Phase 2's blocked status (see
+`S5Simplification.lean`'s "Phase 2 Obstruction" section).
+
+**Correction against the plan**: the plan cites `Relation.EqvGen.instIsEquiv`, but no such
+instance exists in Mathlib (confirmed: `infer_instance` fails for
+`IsEquiv _ (Relation.EqvGen r)`; only `Relation.EqvGen.is_equivalence : Equivalence (EqvGen r)`
+and the individual constructors `.refl`/`.symm`/`.trans` are provided). `instIsEquivEqvGen`
+below builds the instance directly from those constructors -- three one-line proofs, no new
+mathematical content, exactly the "for free off Mathlib" claim the plan makes, just assembled by
+hand rather than found pre-packaged. -/
+
+/-- `IsEquiv` for `Relation.EqvGen`: built directly from the closure's own constructors
+(`.refl`/`.symm`/`.trans`), since Mathlib ships no unconditional instance for this combination
+(unlike `Relation.SymmGen`'s `Std.Symm` instance, reused verbatim by `extractModelB_symm` above).
+Generic over any type/relation, not modal-tableau-specific; kept in this namespace since it is
+needed only here. -/
+instance instIsEquivEqvGen {α : Type*} (r : α → α → Prop) : IsEquiv α (Relation.EqvGen r) where
+  refl := Relation.EqvGen.refl
+  trans := fun _ _ _ h1 h2 => Relation.EqvGen.trans _ _ _ h1 h2
+  symm := fun _ _ h => Relation.EqvGen.symm _ _ h
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*equivalence closure* `Relation.EqvGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.EqvGen`). -/
+def extractModelS5
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (Relation.EqvGen) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelS5`'s relation is exactly the equivalence closure of `acc.hasEdge`. -/
+lemma extractModelS5_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelS5 b acc).r = Relation.EqvGen (fun w w' => acc.hasEdge w w' = true) := rfl
+
+omit [Hashable Atom] in
+/-- The equivalence frame condition holds of `extractModelS5 b acc` "for free": `Relation.EqvGen`
+is always an equivalence relation (`instIsEquivEqvGen` above), regardless of the underlying raw
+edge relation `acc.hasEdge`. Discharges the `s5FC` witness (`FrameSoundness.lean`) for the S5
+countermodel; its `Std.Refl`/`Std.Symm`/`IsTrans` projections are obtained downstream via
+`IsEquiv`'s own field projections. -/
+lemma extractModelS5_equiv (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    IsEquiv WorldIndex (extractModelS5 b acc).r := by
+  rw [extractModelS5_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelS5`'s
+(equivalence-closure) relation via `Relation.EqvGen.rel`. Needed to reuse the K bridge lemmas
+(`hintikka_box_neg`, `hintikka_diamond_pos`, etc.), which are stated in terms of `acc.hasEdge`,
+when relating them to `extractModelS5`'s closed relation. -/
+lemma extractModelS5_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelS5 b acc).r w w' := by
+  rw [extractModelS5_r]
+  exact Relation.EqvGen.rel _ _ h
+
+omit [Hashable Atom] in
+/-- Every known world of `b` is `extractModelS5`-related to every other known world of `b`,
+*provided* both are connected to a common recorded-edge chain -- in particular, `Relation.EqvGen`
+being symmetric+transitive means any two worlds reachable from a shared ancestor via raw edges
+are related, regardless of direction. Stated here as the reflexivity instance specialized to a
+single world (the trivial case of the cluster property: every world is related to itself),
+since the general "any two known worlds are related" fact requires connectivity of the
+underlying tree (established per-branch, not by the extractor alone). -/
+lemma extractModelS5_refl (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (w : WorldIndex) :
+    (extractModelS5 b acc).r w w :=
+  Relation.EqvGen.refl w
+
+omit [Hashable Atom] in
+/-- `extractModelS5`'s relation satisfies `Relation.RightEuclidean`, obtained directly from
+`IsEquiv`'s `symm` + `trans` projections: `r a b → r a c → r b c` follows by symmetry (`r a b`
+gives `r b a`) then transitivity (`r b a` with `r a c` gives `r b c`). This is the free 5/KB5
+(Euclidean) exposure the plan's Phase 7 targets -- delivered here since it depends only on
+`extractModelS5_equiv` (Phase 3), independent of the blocked Phase 2 rule discharge. There is
+**no** `RightEuclidean.symm` lemma (confirmed against `Defs.lean:49`); the plan's documented
+alternative route via `Relation.symm_rightEuclidean_iff_trans`
+(`Cslib/Foundations/Relation/Euclidean.lean:236`) requires a `[Std.Symm r]` instance that is not
+available generically for `Relation.EqvGen`, so this lemma instead builds the `RightEuclidean`
+witness directly from `IsEquiv`'s own `symm`/`trans` fields (both routes are mathematically
+equivalent; the direct route avoids an extra typeclass search). -/
+lemma extractModelS5_rightEuclidean (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Relation.RightEuclidean (extractModelS5 b acc).r := by
+  have hequiv := extractModelS5_equiv b acc
+  exact ⟨fun hab hac => hequiv.trans _ _ _ (hequiv.symm _ _ hab) hac⟩
+
+/-! ## 5 / KB5 (Euclidean) Coverage via the S5 Route: Status (task 504 Phase 7)
+
+`extractModelS5_rightEuclidean` above delivers the free Euclidean exposure the plan's Phase 7
+targets: `Relation.RightEuclidean (extractModelS5 b acc).r` holds unconditionally, since every
+equivalence relation is right-Euclidean. This is genuinely independent of Phase 2 (it only needs
+`extractModelS5_equiv`, a Phase 3 result).
+
+**What remains BLOCKED**: stating and proving `fiveValid`/`kb5Valid` *validity + completeness*
+theorems that route decidability through the S5 tableau (`modalTableauS5`) is **not** deliverable
+here. Such a completeness/decidability result needs `modalTableauS5_complete` (Phase 4) and
+`modalTableauS5_sound` (Phase 5) as its proof engine, and both are transitively blocked by Phase 2
+(`modalApplyOneS5_spec : RuleApplicationSpec modalApplyOneS5` cannot be constructed --
+`rankStep` is proven mathematically false for the universal rule, see
+`modalApplyOneS5_rankStep_not_dischargeable` in `S5Simplification.lean`). There is no way to
+assemble a `Decidable (fiveValid φ)`/`Decidable (kb5Valid φ)` instance through this route without
+that soundness+completeness triple existing first.
+
+**Separately, genuine pure-K5 / pure-5** (Euclidean *without* full equivalence -- i.e. a frame
+satisfying only `RightEuclidean`, not necessarily `Std.Refl`/`IsTrans`/`Std.Symm`) is OUT OF
+SCOPE regardless of Phase 2's status: no Mathlib closure operator exists for "Euclidean closure"
+analogous to `Relation.EqvGen`/`Relation.SymmGen`, so `extractModelS5`'s `EqvGen`-based
+construction cannot be narrowed to deliver a pure-K5 countermodel -- it would need a bespoke
+`EuclGen`-style closure operator, which this task explicitly does not introduce (per the parent
+plan's non-goals, `reports/03`). Both gaps -- the Phase-2-blocked 5/KB5-via-S5 route, and the
+separately-out-of-scope pure-K5 closure -- are deferred to follow-up tasks (a resolution of
+Phase 2's obstruction, and a dedicated `pure-k5-euclidean-closure` task, respectively). No
+`EuclGen`, no `sorry`, no `axiom` introduced. -/
+
 /-! ## T Modal Truth Lemma (task 503 Phase 5)
 
 `modalExpandBranchesT_hintikka` (`TDriver.lean`, delivered by task 510) produces a

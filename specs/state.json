@@ -1,8 +1,8 @@
 {
-  "next_project_number": 513,
+  "next_project_number": 514,
   "active_projects": [
     {
-      "project_number": 512,
+      "project_number": 513,
       "project_name": "generalize_tableau_soundness_chain_over_spec",
       "status": "not_started",
       "task_type": "cslib",
@@ -1170,7 +1170,7 @@
       "parent_task": 300,
       "topic": "Modal Logic",
       "dependencies": [
-        512
+        513
       ],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-07-15T00:09:20Z",
@@ -1201,7 +1201,7 @@
           "summary": "7-phase plan: parametrize K driver over abstract RuleApplicationSpec, re-derive K trivially, instantiate T, close T truth lemma + Decidable(tValid). Reuse interface validated for 504/505."
         }
       ],
-      "blockers": "Phase 6 [BLOCKED] on task 512 (generic soundness). Phases 1-5 COMPLETE and green: generic driver + interface (1-2), termination measure via task 507 (3), T driver instantiation (4), T truth lemma + tValid completeness (5, commit 14d9931c). Phase 6 Decidable(tValid) needs modalTableauT phi = .closed -> tValid phi, i.e. the SOUNDNESS direction lifted to driver level; modalStepBranch_preserves_sat (Soundness.lean) is still K-concrete -- the mirror of the completeness gap task 510 closed. Escalated to task 512. Phase 7 interface docs PARTIAL (completeness contract documented). Zero sorry/axiom.",
+      "blockers": "Phase 6 [BLOCKED] on task 513 (generic soundness). Phases 1-5 COMPLETE and green: generic driver + interface (1-2), termination measure via task 507 (3), T driver instantiation (4), T truth lemma + tValid completeness (5, commit 14d9931c). Phase 6 Decidable(tValid) needs modalTableauT phi = .closed -> tValid phi, i.e. the SOUNDNESS direction lifted to driver level; modalStepBranch_preserves_sat (Soundness.lean) is still K-concrete -- the mirror of the completeness gap task 510 closed. Escalated to task 513. Phase 7 interface docs PARTIAL (completeness contract documented). Zero sorry/axiom.",
       "previous_status": "planned",
       "session_id": "sess_1784054776_0fc973_503"
     },
@@ -1240,7 +1240,7 @@
     {
       "project_number": 505,
       "project_name": "b_symmetric_decidability_via_generic_tableau_driver",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the B (symmetric-frame) system. Add the symmetric box rule to Cslib/Logics/Modal/Tableau/FrameRules.lean: box-positives propagate backward along recorded edges (T(box phi)@w + edge v->w gives T(phi)@v), dually for F(diamond); add the backward-propagation saturation conjunct. Extract the countermodel via Relation.SymmGen (Std.Symm free from Relation.SymmGen.instSymm). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (backward propagation adds formulas only at existing worlds, so the K world bound and finite formula catalog survive unchanged). Prove the B truth-lemma bridge over the symmetric closure. State bValid / Decidable (bValid phi) against Cube.B / Satisfies.b (Basic.lean). Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (B arms), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelB, B bridge, bValid + Decidable), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (B arm).",
       "effort": "5-7 hours",
@@ -1250,7 +1250,7 @@
         503
       ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-14T17:57:00Z",
+      "last_updated": "2026-07-15T00:18:13Z",
       "artifacts": [
         {
           "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/01_frame-specific-tableau-extensions.md",
@@ -1267,7 +1267,8 @@
           "type": "report",
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
         }
-      ]
+      ],
+      "session_id": "sess_1784054776_0fc973_505"
     },
     {
       "project_number": 506,

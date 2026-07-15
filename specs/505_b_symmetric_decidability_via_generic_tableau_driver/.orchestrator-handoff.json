@@ -1,0 +1,22 @@
+{
+  "task_number": 505,
+  "task_slug": "b_symmetric_decidability_via_generic_tableau_driver",
+  "stage": "plan",
+  "status": "planned",
+  "artifact_path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
+  "phase_count": 9,
+  "estimated_hours": 8,
+  "dependency_waves": [[1], [2, 3, 5, 7], [4], [6], [8], [9]],
+  "blocked_deliverable": {
+    "phase": 9,
+    "deliverable": "Decidable (bValid phi)",
+    "blocked_on_task": 513,
+    "blocker_slug": "generalize_tableau_soundness_chain_over_spec",
+    "blocker_status": "not_started",
+    "reason": "Decidable(bValid) needs both completeness (generic, available via tasks 503/510) and the driver-level tableau soundness direction (modalTableauB = .closed -> bValid), which depends on the generalized soundness chain (modalStepBranch_preserves_sat still K-concrete in Soundness.lean/SoundnessStep.lean). Task 513 generalizes it. Until 513 lands, Phase 9 is a documented [BLOCKED] handoff (no sorry/axiom). Phases 1-8 deliver all other B results green.",
+    "fallback": "Mark Phase 9 [BLOCKED] with documented open goal state; B Decidable unblocks by pure instantiation once task 513 lands, no B-side rework needed."
+  },
+  "next_command": "/implement 505",
+  "notes": "Orchestrator mode: plan artifact written; not implemented. B mirrors T (persistent-only). Verified Satisfies.b (Basic.lean:323) is the expected box-diamond form.",
+  "created": "2026-07-14T00:00:00Z"
+}

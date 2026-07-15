@@ -701,6 +701,90 @@ structure S5LoopInv (φ₀ : Proposition Atom)
   membership direction; both grow only by appending a freshly-minted, immediately-known world. -/
   keysKnown : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b
 
+/-! ## Generic-Field Preservation Lemmas (task 515 Phase 4)
+
+Proves that a `modalStepBranchS5gKeyed` step preserves the six generic (rule-independent)
+`S5LoopInv` fields. **No template**: the existing generic `_gen` wrappers
+(`modalStepBranch_preserves_accTargetsKnown_gen`, `modalStepBranch_knownWorlds_gen`, etc.,
+`FmpMeasure.lean`) all presuppose the `hFreshLocal` dichotomy (`acc` unchanged, or exactly one
+edge to a genuinely FRESH world) -- but the keyed guard's *blocked* case adds a loop-back edge to
+an *existing* (known, non-fresh) world, which fits neither disjunct. So these lemmas are proved
+directly by case analysis on `modalStepBranchS5gKeyed`'s own three-way dispatch (blocked / mint /
+non-minting), reusing K's own per-call lemmas (`modalApplyOne_knownWorlds_step`,
+`modalApplyOne_boxNeg_witness`/`_diamondPos_witness`) on the shapes where the keyed stepper
+provably agrees with K, rather than routing through the generic wrappers. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases`
+(unavailable across files): decompose membership of an edge in `acc.addEdge w w'`. Mirrors
+`BDriver.lean`'s `hasEdge_addEdge_cases_B`. -/
+private lemma hasEdge_addEdge_cases_S5 {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  tauto
+
+omit [Hashable Atom] in
+/-- Characterization of the expanded-set shape a `modalStepBranchS5gKeyed` step can produce:
+every child expanded set is either `e ++ [sf]` (linear/blocked-loop-back-shaped) or `e` unchanged
+(persistent-shaped), where `sf` is the trigger formula the step fired on and `sf ∉ e`. This is
+the one fact all six generic-field preservation lemmas' `e`-component reasoning shares, so it is
+factored out once. -/
+private lemma modalStepBranchS5gKeyed_expanded_shape (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys)) :
+    ∃ sf ∈ b, sf ∉ e ∧ ∀ e' ∈ newExps, e' = e ++ [sf] ∨ e' = e := by
+  unfold modalStepBranchS5gKeyed at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  clear hstep
+  by_cases hexp : e.any (· == sf) = true
+  · simp only [hexp, if_true] at hsf
+    exact absurd hsf (by simp)
+  · rw [if_neg (by simpa using hexp)] at hsf
+    refine ⟨sf, hsfmem, by simpa using hexp, ?_⟩
+    clear hsfmem hexp
+    split at hsf <;> repeat' split at hsf
+    all_goals try injection hsf
+    all_goals
+      (rename_i hsf
+       simp only [Prod.mk.injEq] at hsf
+       intro e' he'
+       first
+       | (rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; exact Or.inl he')
+       | (rw [← hsf.2.1] at he'
+          obtain ⟨br, -, rfl⟩ := List.mem_map.mp he'; exact Or.inl rfl)
+       | (rw [← hsf.2.1] at he'; simp only [List.mem_singleton] at he'; exact Or.inr he'))
+
+omit [Hashable Atom] in
+/-- **Phase 4 field 1/6**: `modalStepBranchS5gKeyed` preserves `e.Nodup`. Rule-agnostic: the
+new expanded set is always either `e ++ [sf]` (with `sf ∉ e` from the stepper's own dedup guard)
+or `e` unchanged, across all three of the stepper's top-level cases. -/
+lemma modalStepBranchS5g_preserves_eNodup (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (henodup : e.Nodup) :
+    ∀ e' ∈ newExps, e'.Nodup := by
+  obtain ⟨sf, -, hsfnotin, hshape⟩ :=
+    modalStepBranchS5gKeyed_expanded_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  intro e' he'
+  rcases hshape e' he' with rfl | rfl
+  · rw [List.nodup_append]
+    refine ⟨henodup, List.nodup_singleton sf, ?_⟩
+    intro a ha y hy
+    simp only [List.mem_singleton] at hy
+    subst hy
+    intro heq
+    subst heq
+    exact hsfnotin ha
+  · exact henodup
+
 /-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 
 **[BLOCKED]** (Phase 2). Attempting to discharge `RuleApplicationSpec modalApplyOneS5`

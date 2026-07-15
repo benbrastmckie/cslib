@@ -167,15 +167,15 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 4: Generic-field preservation lemmas [NOT STARTED]
+### Phase 4: Generic-field preservation lemmas [IN PROGRESS]
 
 **Goal**: Prove that a `modalStepBranchS5gKeyed` step preserves the six generic (rule-independent) `S5LoopInv` fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`). These are the bookkeeping invariants S4 never landed (it stopped at the structure). **No template — author from scratch, reusing FmpMeasure invariant primitives.**
 
 **Tasks**:
-- [ ] Prove `modalStepBranchS5g_preserves_bClosure` — new branch formulas stay in `modalUniverseS5 φ₀` (the S5 arms broadcast unwrapped bodies already in the universe; the mint case adds bodies confined by `bClosure` of the source). Consumes `modalUniverseS5_length_le` (P1).
-- [ ] Prove `modalStepBranchS5g_preserves_eNodup` and `_preserves_eClosure`.
-- [ ] Prove `modalStepBranchS5g_preserves_accFresh` (reuse `accFreshInv` monotonicity) and `_preserves_accKnown` (reuse `accTargetsKnown` step lemmas; new/loop-back edges target known worlds).
-- [ ] Prove `modalStepBranchS5g_preserves_outDegEq`.
+- [ ] Prove `modalStepBranchS5g_preserves_bClosure` — new branch formulas stay in `modalUniverseS5 φ₀` (the S5 arms broadcast unwrapped bodies already in the universe; the mint case adds bodies confined by `bClosure` of the source). Consumes `modalUniverseS5_length_le` (P1). *(deviation: found to be entangled with the Phase 6 pigeonhole bound -- see handoff `02_phase4-generic-field-preservation.md` for the exact obstruction. NOT STARTED as of this dispatch.)*
+- [x] Prove `modalStepBranchS5g_preserves_eNodup` -- landed sorry-free, direct case analysis on `modalStepBranchS5gKeyed`'s three-way dispatch (see `modalStepBranchS5gKeyed_expanded_shape` private helper). `_preserves_eClosure` remains *(deviation: deferred, same pigeonhole entanglement as bClosure)*.
+- [ ] Prove `modalStepBranchS5g_preserves_accFresh` (reuse `accFreshInv` monotonicity) and `_preserves_accKnown` (reuse `accTargetsKnown` step lemmas; new/loop-back edges target known worlds). *(deviation: NOT STARTED this dispatch; identified as tractable via `S5LoopInv.keysKnown` + `hasEdge_addEdge_cases_S5`, see handoff.)*
+- [ ] Prove `modalStepBranchS5g_preserves_outDegEq`. *(deviation: NOT STARTED this dispatch.)*
 
 **Timing**: 2 hours
 

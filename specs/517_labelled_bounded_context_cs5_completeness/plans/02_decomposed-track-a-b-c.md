@@ -102,35 +102,107 @@ one-dispatch parts each with an independently-verifiable target.
 - **Risk**: MED-HIGH, realized as "syntactic route inconclusive, semantic route de-risked."
   **HARD CAP honored: one dispatch, no further syntactic search opened.**
 
-#### A3 — Route verdict (paper, no Lean)  [NOT STARTED] — NEXT ACTION
-- **Update given A2's outcome**: `fs_sound''` (sorry-free, axiom-clean) directly discharges the
-  "does `FS`/F2 hold in `CS5`'s semantics" precondition for Track B — this de-risks Track B below
-  the plan's original 35-40% estimate. A3 still needs to verify: (i) does `cs5FC''`'s equivalence
-  relation + `fs_sound''`'s F2 fact actually coincide with `IS5`'s birelational semantics as
-  Simpson states it (Ch.3, `Forcing.lean` vs. the birelational model), and (ii) whether the
-  syntactic-derivability gap found in A2 (`fs_context_relative_half`'s obstruction) blocks any
-  step of the Pacheco `CKB≡IKB ⟹ CS5≡IS5` corollary chain Track B would need. Not yet answered.
-- **Goal**: from A2's outcome, verify the two semantic-route preconditions: (i) does CS5's semantics
-  (`Forcing.lean`, `cs5FC''` `CKExtension.lean:184`) coincide with IS5 birelation semantics (equiv R
-  + F1/F2)? (ii) is the CKB≡IKB ⟹ CS5≡IS5 corollary chain sound as stated?
-- **Success**: a written GO/NO-GO on Track B with a named blocking obligation if NO-GO.
-- **Risk**: LOW (analysis) — but must NOT be skipped (task 512's 5 dispatches are the cost of skipping it).
+#### A3 — Route verdict (paper, no Lean)  [COMPLETED] — VERDICT: **NO-GO for Track B**
 
-### TRACK B — Semantic route  *(only on an A3 GO)*
+**(i) `cs5FC''` DOES coincide with `IS5`'s birelational semantics — CONFIRMED, GO on this point
+alone.** Simpson Theorem 3.3.4 (source PDF chunk `2595838e1aa3954c`/`chunk_0068.md`): "the
+birelation models for IT, IS4 and IS5 are those in which R is respectively reflexive, a preorder
+[and] an equivalence relation" — i.e. `IS5`'s birelation-model class is exactly "R an equivalence
+relation" *plus* the F1/F2 conditions every birelation model already carries (source PDF chunk
+`c795a118f01c279b`/`chunk_0064.md`: "(F1) ensures that the monotonicity lemma holds... (F2)
+means that formulae such as `¬◇A ⊃ □¬A` hold"). `cs5FC''` (`CKExtension.lean:184-189`) is
+*exactly* this: reflexivity + plain transitivity + plain symmetry (= `r` an equivalence relation)
+bundled with the `fourBox` clause (`r w u → u ≤ u' → r u' t → ∃v, w≤v ∧ r v t`, F1-shaped
+re-basing) and `FCsym_box` (`r w u → u ≤ u' → ∃t, r u' t ∧ w≤t`, F2-shaped witness). This is a
+faithful, literature-grounded match, independent of A2's `fs_sound''` (which is a *consequence*
+of this coincidence, not additional evidence for it).
+
+**(ii) Pacheco's `CKB≡IKB ⟹ CS5≡IS5` chain — DECISIVE BLOCKER FOUND, unrelated to A2's gap.**
+Read Pacheco2024 in full (`~/Projects/Literature/pacheco_2024_.../chunk_0001.md`–`chunk_0020.md`,
+all 20 chunks). Two findings:
+
+1. **A2's syntactic gap does NOT block Theorem 13.** Theorem 13's proof (`CKB⊢ϕ ⟺ IKB⊢ϕ ⟺
+   CKB⊨ϕ ⟺ IKB⊨ϕ`) is entirely semantic/canonical-model-based (Lemmas 14–20, Zorn's-lemma
+   theory existence, a Truth Lemma by structural induction) — it never uses `CKB⊢FS` as a
+   transported Hilbert lemma. Corollary 12 (`CKB⊨FS`, `CKB⊨DP`, `CKB⊨N`) is itself a *semantic*
+   confluence fact (via de Groot–Shillito–Clouston's Theorem 11: forward+backward confluence of
+   `∼` gives `DP`/`FS` validity), structurally the same *kind* of result as this dispatch's
+   `fs_sound''`. So the open syntactic `CS5 ⊢ FS` question from A2 is orthogonal to Track B and
+   was a red herring for gating purposes.
+
+2. **A NEW, decisive blocker: Pacheco's canonical relation, extended to `CS5`, is already caught
+   by task 512's mechanized wall.** Pacheco's CKB-canonical model (`chunk_0010.md`/`0011.md`,
+   "Canonical model for CKB") defines `Γ ∼c Δ := Γ ⊆ Δ ∧ Δ ⊆ Γ♦` over `Wc := {Γ | Γ a CKB-theory}`
+   (CKB-theories are `∨`-prime, MP-closed, `⊥`-free sets — i.e. quasi-prime theories, the *same*
+   kind of object task 512's guardrails are about), with the intuitionistic order `≼c` = plain
+   `⊆`. To reach `CS5` (`= CKB + T + 4`, needed to connect to `cs5_completeness`'s literal target
+   `CKValidFC.{u,u} cs5FC'' φ → Derivable CS5ModalAxiom φ`), Track B's B2 must extend this
+   construction with axiom `T`. But **once `T` (`□A→A`) is present, every canonical `CS5`-theory
+   satisfies `boxInv Γ ⊆ Γ`** (if `□A∈Γ` then `A∈Γ` by `T`+MP) — so Pacheco's `∼c`'s first
+   conjunct `Γ⊆Δ`, combined with `boxInv Γ ⊆ Γ`, already gives `boxInv Γ ⊆ Δ`. This is *exactly*
+   the `hbox` hypothesis of CSLib's already-landed, axiom-free, relation-and-world-type-agnostic
+   theorem `cs5Incest_forces_symm` (`CS5Canonical.lean:643-650`, task 512): for **any**
+   `Preorder`-headed world type with `r w u → boxInv(head w) ⊆ head u`, `cs5Incest r`
+   (`∃u', u≤u' ∧ r u' w`) forces `boxInv(head u) ⊆ head w`. Pacheco's CKB-models *require* `R`
+   symmetric (his Def 7, "M is a CKB-model iff R is symmetric, forward confluent, and backward
+   confluent") and he proves `∼c` symmetric (Lemma 15, `chunk_0011.md`) — plain symmetry trivially
+   witnesses `cs5Incest` (`u' := u`, `le_refl`). So `cs5Incest_forces_symm`'s hypotheses are *both*
+   satisfied by Pacheco's construction once extended to `CS5`, and its conclusion forces the
+   canonical relation into `cs5Tail`-shape (`cs5TwoSidedR_iff_cs5Tail`, `CS5Canonical.lean:511`),
+   which `cs5_symmetric_tail_box_gap` (task 509, `CS5.lean:712`, already mechanized) proves
+   *cannot* admit the box-refuting witness box-backward needs. **This is not a hypothetical
+   concern** — task 512's Phase-7 gate already tried *both* the one-sided-R route ("Marin Thm
+   7.1") and the two-sided-R route (Simpson's literal diamond clause, `cs5TwoSidedR`, which
+   `cs5TwoSidedR_iff_cs5Tail` shows is *extensionally identical* to Pacheco's second conjunct
+   `Δ⊆Γ♦` under `cs5_boxInv_subset_iff` duality) and BOTH failed this exact way (task 512
+   `blockers`, `last_updated 2026-07-15T15:03:35Z`: "Phase-7 gate FAILED with two axiom-free
+   mechanized lemmas: `cs5Incest_forces_symm`... and `cs5TwoSidedR_iff_cs5Tail`... Root cause:
+   CSLib identifies the intuitionistic `≤` with theory-inclusion; Simpson/Marin birelational `IS5`
+   completeness needs `≤` as an INDEPENDENT preorder"). Task 516 already explored and *refuted*
+   the "independent-`≤`" fix (report 01: "Simpson uses `≤` = subset VERBATIM, Section 3.3") — so
+   there is no known escape hatch within a theory-inclusion-`≤` canonical model, and Pacheco's
+   construction, once T-extended, is theory-inclusion-`≤` by definition (`≼c = ⊆`).
+
+**Named blocking obligation (if this task or a future one wants to re-open Track B):** any
+canonical model for `CS5` over theory-inclusion-ordered worlds whose accessibility relation is
+forced symmetric (as any `CKB`/`IS5`-family construction requires, since `CS5 ⊇ B`) and satisfies
+`r w u → boxInv(head w) ⊆ head u` (automatic once `T`-closure holds, which every `CS5`-theory
+has) is provably forced into `cs5Tail`-shape by `cs5Incest_forces_symm`, hence cannot admit a
+box-refuting witness, by `cs5_symmetric_tail_box_gap`. Escaping this requires either (a) an
+independent-`≤` canonical model (already refuted as unfaithful to Simpson, task 516 report 01),
+or (b) abandoning theory-inclusion worlds entirely for a genuinely different representation —
+which is exactly what the labelled bounded-context framework (Phases 1/2/4, already landed) and
+Track C's tree surgery are for. **No formal Lean reduction of this argument was attempted this
+dispatch** (that would itself cost as much as attempting B1) — the argument is a direct
+hypothesis-check against three already-mechanized, sorry-free/axiom-free theorems
+(`cs5Incest_forces_symm`, `cs5TwoSidedR_iff_cs5Tail`, `cs5_symmetric_tail_box_gap`) plus a literal
+reading of Pacheco2024's canonical-model definitions.
+
+- **Verdict**: **NO-GO for Track B.** Do not open B1/B2/B3. Proceed to Track C.
+- **Risk assessment retrospectively**: LOW (analysis, as planned) — correctly not skipped; skipping
+  it would have spent B1's ~300-600 line canonical-model construction cost rediscovering a wall
+  task 512 already mechanized.
+
+### TRACK B — Semantic route  *(only on an A3 GO)* — **CLOSED, A3 = NO-GO, see A3 above**
 - **B1**: mechanize CKB ≡ IKB (Pacheco §3, Lemmas 18-20; canonical model over CKB-theories, Zorn).
-- **B2**: derive CS5 ≡ IS5 (Pacheco corollary).
-- **B3**: mechanize the IS5 canonical model / Simpson Thm 3.3.4 (Fischer Servi 1984). **Fischer Servi
-  1984 is NOT in the corpus — requires `/literature` ingestion first (real gap, not glossed).**
-- **Confidence**: ~35-40%; A3 exists to sharpen this.
+  **NOT executed** — A3 found Pacheco's canonical relation, once T-extended for CS5, is already
+  caught by `cs5Incest_forces_symm`/`cs5TwoSidedR_iff_cs5Tail`/`cs5_symmetric_tail_box_gap`
+  (task 512, already mechanized). Opening B1 would spend ~300-600 lines rediscovering this wall.
+- **B2**: derive CS5 ≡ IS5 (Pacheco corollary). **NOT executed**, gated on B1.
+- **B3**: mechanize the IS5 canonical model / Simpson Thm 3.3.4 (Fischer Servi 1984). **NOT
+  executed**, gated on B1/B2. Fischer Servi 1984 remains NOT in the literature corpus (unchanged).
+- **Confidence** (retrospective, superseded by A3's NO-GO): the plan's original 35-40% estimate
+  did not anticipate the T-extension interaction with `cs5Incest_forces_symm`; actual: ~0%
+  without a representation change (independent-`≤`, already refuted, or labelled contexts).
 
-### TRACK C — Simpson tree surgery, decomposed  *(fallback; only if Track B is NO-GO)*
+### TRACK C — Simpson tree surgery, decomposed  *(fallback; A3 = NO-GO, this is now ACTIVE)*
 C1-C3 are pure formula-level work with ZERO tree dependency — dispatchable immediately, even in
 parallel with Track A.
 
 | # | Goal | Success criterion | Risk |
 |---|---|---|---|
-| C1 | `Tele`/`Conj` over `List (Proposition)`; port `Star_imp1/2` to `Tele`-congruence | compiles, sorry-free | LOW |
-| C2 | (6.7): `◇Conj(V) ⊃ □Tele(V,◇A) ⊃ ◇Conj(V++[A])`, induction on V, axiom 2 (`kDia`, present) | sorry-free | LOW-MED |
+| C1 | `Tele`/`Conj` over `List (Proposition)`; port `Star_imp1/2` to `Tele`-congruence | compiles, sorry-free | LOW — **[COMPLETED]** this dispatch, `probes/track-c-c1-tele-conj.lean` (new file, sorry-free, axiom footprint `[propext, Classical.choice, Quot.sound]` matching the rest of CSLib's Metalogic infra — no new axioms). Generalized beyond the plan's literal ask: `Tele_imp1`/`Tele_imp2`/`impIntro`/`box_mono1`/`box_mono2` are parametric over any `Axioms : Proposition Atom → Prop` (not hard-wired to `IKAx 𝒯`), directly reusable by C2/C3 or any other axiom system without redeclaration. |
+| C2 (NEXT) | (6.7): `◇Conj(V) ⊃ □Tele(V,◇A) ⊃ ◇Conj(V++[A])`, induction on V, axiom 2 (`kDia`, present) | sorry-free | LOW-MED |
 | C3 | (6.8): `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`, induction on W, **axiom 5 (requires A1)** | sorry-free | MED |
 | C4 | `LTree`,`star`,`fullSubtree`,`prune` + the **unfolding identity** (§2.3); DELETE `pathTo`/`pathToList`/`Star_append` | `#eval`/`decide` reproduces Simpson's worked example verbatim | MED |
 | C5 | `pathSpine` (pruning in the recursion) + `addChild`/`pathSpine` **commutation lemma** | sorry-free commutation lemma | **HIGH — TRUE CRUX** |

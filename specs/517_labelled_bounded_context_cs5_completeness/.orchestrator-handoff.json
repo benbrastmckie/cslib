@@ -2,14 +2,14 @@
   "status": "partial",
   "task_number": 517,
   "session_id": "sess_1784145761_061228",
-  "summary": "Track C C3 completed: proved Simpson's formula (6.8) (`(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`, source PDF p.104), appended to `probes/track-c-c1-tele-conj.lean` (same file as C1/C2 -- cross-probe `import` does not resolve for standalone `lake env lean` files). Mandatory base-case sanity check (per the resume-pointer warning carried from the C2 dispatch) done BEFORE writing any Lean: unlike C2's `V=[]` (refuted by countermodel), (6.8)'s `W=[]` instance `(◇⊤⊃□B)⊃□B` IS a genuine IK theorem (semantic argument: at any world, either it has no R-successor so ◇⊤ is vacuously false, or it has one so ◇⊤ is true and forces □B directly by MP) -- no restatement needed, `formula_6_8` holds for ALL W including the empty list. A naive single `hFS`-instantiation does NOT close the goal directly (consequent mismatch `□(Conj(W)⊃Tele(W,B))` vs target `□Tele(W,B)`, and the bridging fact is not a bare IPL tautology once Conj(W) has a diamond-guarded tail -- verified stuck by hand for W=[p,q]). The real proof composes `hFS` (axiom 5) once per induction level with the IH relativized one `Tele [p]`-layer deeper via `Tele_imp1`, via a new `derivable_imp_trans` transitivity combinator (directly reusable by C7's (◇E) 3-step composition, which composes exactly 3 such steps per report 02 §2.5). New declarations: `derivable_imp_trans`, `formula_6_8`, both generic over `Axioms`. Landed sorry-free, axiom footprint `[propext, Classical.choice, Quot.sound]` (identical to C1/C2, no new axioms). Per the explicit HARD STOP instruction, C4/C5 were NOT opened this dispatch (tree-dependent, each its own dispatch, C5 is the true crux). No Cslib/ file touched; landed CK/CT/CS4/CS5 soundness and task-509 cs5FC'' untouched.",
-  "phases_completed": 6,
-  "phases_total": 6,
+  "summary": "Track C C4 completed: tree surgery in `probes/lemma612-scaffold.lean` (extended in place, not a new file -- the choice left open by C3's dispatch). `star` FIXED from a double-`bigAnd` (`(bigAnd labels).and(bigAnd children)`) to a single `bigAnd` over the concatenated list (labels ++ children-diamonds) -- verified by hand BEFORE editing that the old version fails Simpson's own worked-example check (produces a spurious `top.and(dia(top.and top))` instead of the source's plain `dia top` at a label-less, single-childed node). `prune`/`fullSubtree` added (children split `pre ++ [c]`, continuation child LAST, matching `addChild`'s pre-existing append-at-end convention -- chosen to stay consistent with what C5's `addChild`/`pathSpine` commutation lemma will need). The unfolding identity (report 02 section 2.3, `Gamma@(fullSubtree v) = Gamma@(prune v c) AND dia(Gamma@(fullSubtree c))`) is proved as a genuine IK-derivable TWO-WAY IMPLICATION (`star_unfold_imp1`/`star_unfold_imp2`), NOT as a raw Lean `Eq`: `bigAnd`'s own right-fold definition (`phi::rest => phi.and(bigAnd rest)`) makes literal term equality fail once the pruned node has 2+ ordinary children (associativity mismatch between `a.and(X.and y)` and `(a.and X).and y` as TERMS, despite being logically equivalent) -- this was checked by hand before writing any Lean, avoiding a dead-end attempt at an unprovable `rfl` statement. Built via new reusable infrastructure, all generic over the axiom set: `andI_deriv`/`andE1_deriv`/`andE2_deriv` (AndI/AndE1/AndE2 lifted to an arbitrary Deriv-context), `top_deriv` (top is derivable in any context), `bigAnd_cons_of_ne_nil` (bigAnd's cons-equation for a propositionally-nonempty tail), and the algebraic core `bigAnd_append_singleton_imp1`/`imp2` (pulling the last conjunct out of bigAnd's scope, by induction on the list). The plan's explicitly-flagged-defective `pathTo`/`pathToList` (mutual recursion, returned the FULL not pruned subtree) and `Star_append` (wrapped the appended tree in its full star, the wrong primitive for the pruning problem) were DELETED. The success criterion (report 02's C4 entry: reproduce Simpson's worked example verbatim, tree x->y and x->z->w, target z) was investigated and found to NOT be achievable via literal `#eval`/`decide`: `Label Atom` has no `deriving DecidableEq` anywhere in the codebase, and the file's only decidability source is the classically-opaque `Classical.propDecidable` local instance, so `Gamma.filter (fun x => x.lbl = l)` does not computationally reduce. Verified this diagnosis with a standalone scratch probe (confirming `simp` with a supplied inequality proof still closes such filter goals regardless of instance opacity) before committing to the approach: `star_Star_worked_example` states and proves the exact target formula as a genuine `Eq` via `simp`-driven unfolding, not `rfl`/`decide`. Landed sorry-free, axiom footprint `[propext, Classical.choice, Quot.sound]` on all five new top-level theorems (`star_unfold_imp1`, `star_unfold_imp2`, `star_Star_worked_example`, `bigAnd_append_singleton_imp1`, `bigAnd_append_singleton_imp2`) -- no new axioms. `Star`/`Star_imp1`/`Star_imp2`/`box_mono1`/`box_mono2`/`IK.impIntro`/`NIKAx`/`TClosure.hilbertTransport` all unchanged (they reference `star Gamma t` only opaquely, never unfold its equation, so were not at regression risk from the `star` fix) and reverified compiling. `probes/track-c-c1-tele-conj.lean` (C1/C2/C3) untouched, reverified compiling. No `Cslib/` file touched. Per the explicit HARD STOP instruction, C5 was NOT opened this dispatch.",
+  "phases_completed": 7,
+  "phases_total": 7,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
     "is_successor": true,
-    "resume_at": "Track C C4 (plans/02_decomposed-track-a-b-c.md)",
+    "resume_at": "Track C C5 (plans/02_decomposed-track-a-b-c.md) -- THE TRUE CRUX, HIGH risk",
     "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
     "do_not_redo": [
       "A1 (IKAx repair) -- COMPLETED, probes/lemma612-scaffold.lean",
@@ -17,12 +17,13 @@
       "A3 (route verdict) -- COMPLETED, NO-GO for Track B, plans/02_decomposed-track-a-b-c.md A3 entry",
       "Track C C1 (Tele/Conj + congruence) -- COMPLETED, probes/track-c-c1-tele-conj.lean",
       "Track C C2 (formula 6.7) -- COMPLETED, appended to probes/track-c-c1-tele-conj.lean (dia_mono1, formula_6_7_base, formula_6_7)",
-      "Track C C3 (formula 6.8) -- COMPLETED this dispatch, appended to probes/track-c-c1-tele-conj.lean (derivable_imp_trans, formula_6_8)"
+      "Track C C3 (formula 6.8) -- COMPLETED, appended to probes/track-c-c1-tele-conj.lean (derivable_imp_trans, formula_6_8)",
+      "Track C C4 (LTree/star/fullSubtree/prune + unfolding identity) -- COMPLETED this dispatch, probes/lemma612-scaffold.lean (star fixed; prune/fullSubtree/star_unfold_imp1/star_unfold_imp2/star_Star_worked_example added; pathTo/pathToList/Star_append deleted)"
     ]
   },
-  "next_action_hint": "Dispatch Track C C4: `LTree`,`star`,`fullSubtree`,`prune` + the unfolding identity (report 02 §2.3); DELETE `pathTo`/`pathToList`/`Star_append` from `probes/lemma612-scaffold.lean` (defective -- pathTo/pathToList return the full-not-pruned subtree, Star_append is wrong). Success criterion: `#eval`/`decide` reproduces Simpson's worked example verbatim. This is the first tree-dependent Track C part (C1-C3 were pure formula-level over `List (Proposition Atom)`, zero tree dependency) -- decide at dispatch time whether to extend `lemma612-scaffold.lean` in place (it already has LTree/star scaffolding, just defective in the flagged spots) or bridge to `track-c-c1-tele-conj.lean`'s Conj/Tele. HARD STOP still applies: do NOT open C5 in the same dispatch as C4 -- C5 (pathSpine, the addChild/pathSpine commutation lemma) is THE TRUE CRUX (HIGH risk) and must be its own dispatch.",
+  "next_action_hint": "Dispatch Track C C5: `pathSpine` (the whole-path recursion from root to target, with pruning BUILT IN to the recursion -- this replaces the deleted `pathTo`/`pathToList`) + the `addChild`/`pathSpine` COMMUTATION LEMMA (sorry-free is the plan's stated success criterion). This is THE TRUE CRUX (HIGH risk) -- it is its own dedicated dispatch, do NOT bundle with C6-C8 (H8 phase sizing). Reuse C4's `prune`/`fullSubtree`/`star_unfold_imp1`/`star_unfold_imp2` from `probes/lemma612-scaffold.lean`: `pathSpine` should be designed to RETURN, at each non-last node along the path, the `pre`-list (ordinary children) and the continuation child `c` that `prune`/`fullSubtree` already consume -- i.e. `pathSpine` is the tree-walk that PRODUCES the `pre`/`c` split, not a separate mechanism. The commutation lemma needs to relate `pathSpine` computed on `addChild t x y` to `pathSpine` computed on `t` -- `addChild` appends the new leaf at the END of the target node's children list (`node l (cs ++ [leaf y])`), which is WHY C4 chose `pre ++ [c]` (continuation child LAST) for `prune`/`fullSubtree` rather than a head-first split; re-verify this convention still holds once `pathSpine`'s actual recursion is written, especially for trees where the target is reached through MULTIPLE branch points (do not assume WLOG the continuation child is always the literal last-appended one at every level without checking against how the target label was actually reached at that level).",
   "decomposition": {
-    "shape": "Track A (route selection + defect repair; A1+A2+A3 all done) -> Track B CLOSED (A3 NO-GO) -> Track C ACTIVE (Simpson tree surgery, 8 decomposed parts; C1+C2+C3 done, C4 next)",
+    "shape": "Track A (route selection + defect repair; A1+A2+A3 all done) -> Track B CLOSED (A3 NO-GO) -> Track C ACTIVE (Simpson tree surgery, 8 decomposed parts; C1+C2+C3+C4 done, C5 next)",
     "track_a_status": [
       "A1: COMPLETED. IKAx repaired with diaBot/diaOr/fs constructors.",
       "A2: COMPLETED (mixed outcome). fs_context_relative_half + fs_sound''.",
@@ -32,11 +33,11 @@
     "track_c_parts": [
       "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1/Star_imp2 to Tele-congruence. COMPLETED, generalized over Axioms.",
       "C2: prove (6.7) by induction on V using axiom 2 (kDia). COMPLETED. Scoping correction: theorem restricted to nonempty V (V=[] is false in bare IK, countermodel-checked).",
-      "C3: prove (6.8) by induction on W using axiom 5 (present after A1). COMPLETED this dispatch. Base-case check DIFFERS from C2's: W=[] IS a valid theorem, no restatement needed.",
-      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList and Star_append. NEXT. Risk MED.",
-      "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. THE TRUE CRUX. Risk HIGH.",
+      "C3: prove (6.8) by induction on W using axiom 5 (present after A1). COMPLETED. Base-case check DIFFERS from C2's: W=[] IS a valid theorem, no restatement needed.",
+      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList and Star_append. COMPLETED this dispatch. star fixed (double-bigAnd -> single concatenated bigAnd); unfolding identity proved as Derivable-Iff (star_unfold_imp1/imp2), not raw Eq; worked-example success criterion delivered via a real simp-based theorem (star_Star_worked_example), not #eval/decide (Label lacks computable DecidableEq).",
+      "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. NEXT. THE TRUE CRUX. Risk HIGH.",
       "C6: LTree.toGraph + the tau-parameterized generalized induction; non-modal cases + (boxI)/(boxE)/(diaI). Risk MED.",
-      "C7: the (diaE) case via the reconstructed 3-step argument. Risk MED given C5. NOTE: reuse derivable_imp_trans (new this dispatch) for the 3-step composition.",
+      "C7: the (diaE) case via the reconstructed 3-step argument. Risk MED given C5. NOTE: reuse derivable_imp_trans (C3) for the 3-step composition.",
       "C8: (botE)/(orE). Risk LOW -- label-local in this encoding."
     ]
   },
@@ -46,37 +47,39 @@
     "track_c_c1_correct_and_reusable": 1.0,
     "track_c_c2_correct_and_reusable": 1.0,
     "track_c_c3_correct_and_reusable": 1.0,
-    "track_c_c4_completes_next_dispatch": 0.55,
-    "note": "C3's own proof required discovering a nontrivial induction structure (IH relativized via Tele_imp1, not a single flat axiom-5 instantiation) that was NOT spelled out in Simpson's source text (verified against the raw literature chunk -- Simpson only asserts '(6.8) is derived by repeated applications of axiom 5' without giving the sub-derivation). This confirms the plan's MED risk rating was warranted. C4 begins tree-dependent work (LTree/star/prune), a different risk profile than C1-C3's pure formula-level work -- retaining the plan's MED rating rather than adjusting based on C1-C3's clean landing record."
+    "track_c_c4_correct_and_reusable": 1.0,
+    "track_c_c5_completes_next_dispatch": 0.35,
+    "note": "C4 required a genuine design correction (star's double-bigAnd was silently wrong, found by hand-checking the worked example BEFORE writing Lean, not discovered via a failed proof attempt) and a genuine scope clarification (the unfolding identity cannot be literal Eq, only Derivable-Iff, due to bigAnd's associativity). Both were caught early via analysis-before-coding rather than costing wasted proof attempts. C5 (pathSpine + addChild commutation) is explicitly flagged HIGH risk by the plan and is the true crux the whole Track C detour exists to resolve -- confidence kept LOWER than C4's clean landing record would suggest, per the plan's own risk rating and D3's prior finding (referenced in report 02) that this exact `x`-node/LCA-style reasoning was the point where three PRIOR dispatches (before the report-02 reframe) got stuck."
   },
-  "recommendation": "Proceed to Track C C4 next dispatch. C4 is the first tree-dependent part -- budget for reading lemma612-scaffold.lean's existing LTree/star/pathTo/pathToList/Star_append code carefully before editing, since the task is partly DELETION (of defective pathTo/pathToList/Star_append) and partly new construction (fullSubtree/prune/unfolding identity), not pure addition like C1-C3. Continue to honor the H8 hard stop on C5 until C4 lands.",
+  "recommendation": "Proceed to Track C C5 next dispatch, as its own dedicated dispatch (H8 phase sizing -- do not bundle with C6-C8). Before writing any pathSpine code, hand-check the addChild/pathSpine commutation claim against a tree with at least 2 branch points (not just the single-branch worked example used for C4), since the plan's own retrospective (report 02 section 1) documents that this exact kind of multi-branch path reasoning is where prior (pre-reframe) dispatches got stuck. Budget for this being a multi-dispatch effort if the first attempt does not close sorry-free -- do not force a rushed proof under H2's read-budget pressure; a documented BLOCKED status with precise goal-state diagnosis is preferable to a vacuous placeholder.",
   "gaps_flagged": [
     "Fischer Servi 1984 remains NOT in the literature corpus -- moot while Track B stays closed.",
     "A3's NO-GO argument is a hypothesis-matching analysis against existing mechanized theorems, not itself a new formal Lean proof of 'Track B is impossible' -- if Track B is ever reconsidered, that reduction argument should be checked, not merely cited.",
-    "C2's theorem (formula_6_7) is scoped to V = p :: rest (nonempty), NOT arbitrary List (Proposition Atom) -- any future caller (C7's (◇E) reconstruction) must supply a nonempty V, which matches Simpson's actual usage but should not be assumed automatically satisfied without checking the call site.",
-    "C3's theorem (formula_6_8) is UNRESTRICTED (holds for all W including []) -- this is a genuine asymmetry with C2 that C7's (◇E) composition should be aware of (W's nonemptiness, if relevant to the call site, does not need to be separately established for the (6.8) step, unlike V for the (6.7) step).",
-    "Whether `lemma612-scaffold.lean`'s existing LTree/star scaffolding is the right base for C4 or whether a cleaner rebuild is warranted is an open call for the C4 dispatch -- the plan flags pathTo/pathToList/Star_append as defective but the rest of the scaffold (LTree type itself, star's core recursion) has not been re-audited since A1's IKAx repair."
+    "C2's theorem (formula_6_7) is scoped to V = p :: rest (nonempty), NOT arbitrary List (Proposition Atom) -- any future caller (C7's (diaE) reconstruction) must supply a nonempty V.",
+    "C3's theorem (formula_6_8) is UNRESTRICTED (holds for all W including []) -- a genuine asymmetry with C2 that C7's (diaE) composition should be aware of.",
+    "C4's `prune`/`fullSubtree` split children as `pre ++ [c]` (continuation child LAST) purely as an internal convention for the unfolding identity's proof -- this was chosen to match `addChild`'s existing append-at-end convention, but C5 must independently verify this convention is actually what `pathSpine`'s real multi-level recursion needs; it was not derived FROM pathSpine (which does not exist yet), only anticipated.",
+    "The worked-example check (`star_Star_worked_example`) only exercises a SINGLE branch point (x has two children y and z, no deeper branching) -- it does not stress-test the multi-branch-point case that C5's commutation lemma will actually need to handle."
   ],
   "artifacts": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/track-c-c1-tele-conj.lean",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean",
       "type": "probe",
-      "summary": "C1 (Conj, Tele, impIntro, box_mono1, box_mono2, Tele_imp1, Tele_imp2) + C2 (dia_mono1, formula_6_7_base, formula_6_7) + C3 (derivable_imp_trans, formula_6_8, appended this dispatch), all generic over Axioms : Proposition Atom -> Prop. Sorry-free, axiom footprint [propext, Classical.choice, Quot.sound]."
+      "summary": "star fixed to a single concatenated bigAnd; prune/fullSubtree added; andI_deriv/andE1_deriv/andE2_deriv/top_deriv/bigAnd_cons_of_ne_nil/bigAnd_append_singleton_imp1/imp2 (new reusable AND-reasoning infrastructure); star_unfold_imp1/star_unfold_imp2 (the unfolding identity, Derivable-Iff); star_Star_worked_example (the C4 success criterion, real theorem not #eval/decide); pathTo/pathToList/Star_append deleted. Sorry-free, axiom footprint [propext, Classical.choice, Quot.sound]."
     },
     {
       "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/02_decomposed-track-a-b-c.md",
       "type": "plan",
-      "summary": "C3 marked [COMPLETED] with the base-case-check note (W=[] IS valid, unlike C2's V=[])."
+      "summary": "C4 marked [COMPLETED] with the star-fix / Derivable-Iff / worked-example-as-real-theorem notes."
     },
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/05_c3-formula-6-8-summary.md",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/06_c4-tree-surgery-unfolding-identity-summary.md",
       "type": "summary",
-      "summary": "Execution summary for Track C C3 (formula 6.8), including the base-case semantic check, the failed-naive-approach analysis, and verification results."
+      "summary": "Execution summary for Track C C4, including the star-fix diagnosis, the associativity argument for why the unfolding identity cannot be raw Eq, and the DecidableEq investigation behind the worked-example proof strategy."
     },
     {
       "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
       "type": "handoff",
-      "summary": "Resume pointer updated: C3 complete, C4 is next action."
+      "summary": "Resume pointer updated: C4 complete, C5 (the true crux) is next action, with detailed guidance on reusing C4's prune/fullSubtree/star_unfold_imp1/imp2 in pathSpine's design."
     }
   ],
   "metadata": {
@@ -86,10 +89,10 @@
     "lit_flag": true,
     "hard_mode": true,
     "orchestrator_mode": true,
-    "supersedes": "prior .orchestrator-handoff.json (C2 dispatch, status=partial, next_action_hint=Track C C3)",
+    "supersedes": "prior .orchestrator-handoff.json (C3 dispatch, status=partial, next_action_hint=Track C C4)",
     "sorry_inventory": {
       "added": 0,
-      "note": "This dispatch's only Lean artifact (probes/track-c-c1-tele-conj.lean, C3 section appended) verified sorry-free via lake env lean (exit 0) and manual grep check -- the single 'sorry' grep hit is the English word 'sorry-free' inside a doc comment (line 461), not a sorry tactic. #print axioms on derivable_imp_trans and formula_6_8 both give [propext, Classical.choice, Quot.sound], matching CSLib's standard Metalogic/DerivationTree infrastructure footprint (via deductionTheorem) -- not new axioms. No Cslib/ file touched (confirmed via git status -- only the probe file plus task-state bookkeeping files in the working tree diff for this dispatch)."
+      "note": "This dispatch's Lean artifact (probes/lemma612-scaffold.lean, extended in place) verified sorry-free via lake env lean (exit 0, zero errors, zero warnings) and manual grep for the sorry tactic (zero real hits; two grep hits for the literal substring 'axiom' are both inside doc-comment prose, not real axiom declarations). #print axioms on all five new top-level theorems (star_unfold_imp1, star_unfold_imp2, star_Star_worked_example, bigAnd_append_singleton_imp1, bigAnd_append_singleton_imp2) all give [propext, Classical.choice, Quot.sound], matching CSLib's standard Metalogic/DerivationTree infrastructure footprint (via deductionTheorem) -- not new axioms. No Cslib/ file touched (confirmed via git status -- only the probe file plus task-state/plan/handoff/summary bookkeeping files in the working tree diff for this dispatch; Cslib/Logics/Modal/Tableau/FrameSoundness.lean and the 515-task files that also appear in git status are task-515's unrelated, already-in-flight concurrent work, not touched by this dispatch)."
     }
   },
   "last_updated": "2026-07-15T00:00:00Z"

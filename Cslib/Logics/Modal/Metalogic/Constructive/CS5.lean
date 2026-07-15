@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
+public import Mathlib.Data.Fintype.Pi
 
 /-! # CS5: Constructive Modal Logic S5 (Soundness, and the Symmetric-Tail Completeness Route)
 
@@ -58,15 +59,36 @@ raised (`B ∉ w.head ⇒ ¬B ∈ w.head`, unavailable for quasi-prime heads) ne
 step 508 called "the known-hard core of constructive `S5` canonical completeness"; here it is
 free.
 
-**The actual remaining open sub-problem is narrower and different from 508's**: the truth
-lemma's *box-backward* case (`□A ∉ H` ⟹ some symmetric-tail member of a *possibly-larger* head
-omits `A`). `cs5_symmetric_tail_box_gap` mechanizes why the naive route — finding the witness
-tail member at `H` itself, or building the enlarged head sequentially before its tail — fails:
-if `□(p ∨ □q) ∈ H` and `q ∉ H`, every symmetric-tail member of `H` contains `p`, so the
-box-backward witness (when `□p ∉ H` too) must come from a *strictly larger* head `H' ⊇ H`, whose
-own tail must be built *simultaneously* with `H'`, not sequentially. This is genuinely a
-different, better-understood obstruction than 508's — soundness is not in question, and the
-canonical frame conditions are fully established (see `## Main Definitions`).
+**Completeness is open at exactly one, precisely-located sub-problem: the truth lemma's
+box-backward case** (`□A ∉ H` ⟹ some symmetric-tail member of a *possibly-larger* head omits
+`A`). This is narrower and better-understood than 508's blanket verdict — soundness is not in
+question (`cs5_axiom_sound''`, all 17 axioms, axiom-free), the canonical frame conditions are
+fully established (`cs5FC''_cs5Mreach`), and the diamond cases are free
+(`cs5Tail_dia_of_mem`/`cs5_diam_witness`, no exclusion parameter needed, unlike `CS4`).
+
+`cs5_symmetric_tail_box_gap` mechanizes why the naive route — finding the witness tail member at
+`H` itself, or building the enlarged head sequentially before its tail — fails: if
+`□(p ∨ □q) ∈ H` and `q ∉ H`, every symmetric-tail member of `H` contains `p`, so the box-backward
+witness (when `□p ∉ H` too) must come from a *strictly larger* head `H' ⊇ H`, whose own tail must
+be built *simultaneously* with `H'`, not sequentially. **This gap is non-vacuous**: `w3r_fc`-style
+material below (`cs5BoxGapR_fc`/`cs5BoxGap_box_p_or_box_q_at_w`/`cs5BoxGap_not_box_p_at_w`/
+`cs5BoxGap_not_q_at_w`) exhibits a three-world `cs5FC''` model realizing `□(p ∨ □q) ∈ Th(w)`,
+`□p ∉ Th(w)`, `q ∉ Th(w)` simultaneously, so the gap's hypotheses are jointly satisfiable, not an
+artifact of a weak proof attempt.
+
+**Task 509 Phases 8-10 attempted the simultaneous pair construction the gap calls for, and did
+not close it.** The attempt (design: build `H'`/`T` together via a Zorn pair poset carrying
+*designated-formula* exclusion invariants `□A ∉ H'`, `A ∉ T` — never a bot-exclusion poset, and
+never Pacheco's unsound Lemma 16 primeness step) established a clean seed construction, a clean
+chain-upper-bound step, and a clean general order fact transferring pair-maximality to
+per-component maximality (`probes/cs5-pair-primeness.lean`), but stopped short of usable
+primeness: the natural cross-condition invariant (`boxInv X ⊆ Y`, the other component held fixed)
+is not stable under the deductive-closure operator the library's single-formula primeness engine
+(`Metalogic.prime_maximal_is_prime`) requires — a genuine finding, not anticipated by the original
+research report, documented in full in that probe's module docstring together with a sketched (not
+built) repair via a combined derivation system over `Atom ⊕ Atom`. Completeness for `CS5` over
+`cs5FC''` therefore remains **open specifically at the box-backward pair construction** — not
+blocked at the library level, and not for the reason 508 originally claimed.
 
 **`CS5` is theorem-for-theorem Simpson's `IS5`** (Pacheco, `Pacheco2024`, Theorem 13; his
 Conclusion states the constructive and intuitionistic variants of `DB`/`TB`/`KB5`/`S5` coincide).
@@ -109,6 +131,12 @@ and the `probes/` directory in that task's spec folder.
 - `cs5_dia_or`: `CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B` (`k3`), corroborating the `CS5 ≡ IS5` collapse.
 - `cs5_boxInv_subset_iff`: `boxInv T ⊆ H ↔ T ⊆ diaInv H` — the box-inverse tail clause and
   Pacheco's diamond-inverse canonical relation `∼c` coincide over `CS5`.
+- `cs5_symmetric_tail_box_gap`: the mechanized reason the truth lemma's box-backward case needs a
+  simultaneous pair construction, not a sequential one.
+- `CS5BoxGapWorld`/`cs5BoxGapR_fc`/`cs5BoxGap_box_p_or_box_q_at_w`/`cs5BoxGap_not_box_p_at_w`/
+  `cs5BoxGap_not_q_at_w`: the three-world `cs5FC''` countermodel witnessing that
+  `cs5_symmetric_tail_box_gap`'s hypotheses are jointly satisfiable (task 509 Phase 11 Branch B) —
+  the box-backward gap is non-vacuous, not an artifact of a weak proof attempt.
 
 ## References
 
@@ -122,12 +150,16 @@ and the `probes/` directory in that task's spec folder.
   Logics*][ArisakaDasStrassburger2015] — source of the `B ⊢ k3, k5` fact corroborating
   `CS5 ≡ IS5`.
 
-**Note**: this docstring states the status as of task 509 Phase 3. If the box-backward case
-closes (Phase 11 Branch A), this docstring is revised to final status (completeness established)
-and the "actual remaining open sub-problem" paragraph above is removed. If it does not close
-(Phase 11 Branch B), the obstruction is restated as the precisely-located mechanized theorem
-Phase 10 produces, and this module does **not** claim `CS5` completeness is blocked at the
-library level — only that this specific sub-problem is open.
+**Status (task 509, final, Phase 11 Branch B)**: soundness over both `cs5FC` and the weakened
+`cs5FC''` is fully established (axiom-free for `cs5_axiom_sound''`); the canonical frame
+conditions are fully established (`cs5FC''_cs5Mreach`); the diamond cases of a prospective truth
+lemma are free. Completeness is open at exactly the truth lemma's box-backward case, precisely
+located by `cs5_symmetric_tail_box_gap` and shown non-vacuous by the `CS5BoxGapWorld`
+countermodel above. This is **not** a library-level "`CS5` completeness is blocked" verdict — it
+is a narrow, well-understood, and non-vacuous open sub-problem, materially different from and
+better-characterized than task 508's original (refuted) claim. A follow-up task attempting the
+combined-derivation-system repair sketched in `probes/cs5-pair-primeness.lean` is the identified
+path to closing it.
 -/
 
 @[expose] public section
@@ -1210,5 +1242,138 @@ theorem cs5_fc4 {w u u' t : CS5Segment Atom} (hwu : cs5Mreach w u) (hle : u ≤ 
 theorem cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom) :=
   ⟨cs5_refl, fun h1 h2 => cs5_trans h1 h2, fun h => cs5_symm h,
    fun h1 h2 h3 => cs5_fc4 h1 h2 h3, fun h1 h2 => cs5_fcsymbox h1 h2⟩
+
+/-! ## The Box-Backward Gap Is Non-Vacuous (Task 509, Phase 11 Branch B)
+
+**Completeness for `CS5` over `cs5FC''` is left open at exactly one, precisely-located
+sub-problem: the truth lemma's box-backward case.** Task 509 Phases 8-10 attempted to close it
+via a simultaneous Zorn pair construction (`H'`/`T` built together, mirroring the *technique* of
+Pacheco's Lemma 18, never its unsound primeness step) and got as far as: a clean seed
+construction (`probes/cs5-pair-primeness.lean`, `cs5_pair_seed_mem`), a clean chain-upper-bound
+step (`cs5_pair_chain_union_mem`), and a clean general order fact transferring pair-maximality to
+per-component maximality (`cs5_pair_maximal_component_left`/`_right`) — but this stopped short of
+usable primeness, because the natural cross-condition invariant is not stable under the
+deductive-closure operator the library's single-formula primeness engine
+(`Metalogic.prime_maximal_is_prime`) requires. Full account in that probe's module docstring and
+`specs/509_.../plans/01_cs5-symmetric-tail-completeness.md`'s Phase 9 blocker note. This is
+**not** a soundness issue (`cs5_axiom_sound''` is complete and axiom-free) and **not** the
+collapsed-model issue 508 raised (canonical symmetry is definitional, `cs5Tail_symm`, never
+derived) — it is a specific, narrow, and better-understood gap than either.
+
+This section lands the mechanized evidence that the gap is **real, not an artifact of a weak
+proof attempt**: `cs5_symmetric_tail_box_gap` (Phase 5, above) shows the *sequential* route (find
+a witness in `H`'s own symmetric tail) provably cannot work whenever `□(p ∨ □q) ∈ H` and
+`q ∉ H`; the three-world model below exhibits a concrete `cs5FC''` frame realizing exactly that
+configuration together with `□p ∉ H`, so the gap's hypotheses are jointly satisfiable — the
+obstruction is not vacuous. -/
+
+/-- **Three worlds for the box-backward gap witness.** A fresh inductive type (not `Fin 3`, which
+carries its own `LE` instance that would collide with the intuitionistic order defined below):
+`w` (where the gap's hypotheses hold), `wp` (`w`'s only proper `≤`-successor), `u` (`wp`'s `r`-
+image, sharing an `r`-class with `wp`). -/
+inductive CS5BoxGapWorld
+  /-- The world where `□(p ∨ □q)` holds, `□p` fails, and `q` fails. -/
+  | w
+  /-- `w`'s unique proper `≤`-successor, where `p` still holds. -/
+  | wp
+  /-- `wp`'s `r`-class partner, where `q` holds and `p` fails. -/
+  | u
+  deriving DecidableEq
+
+instance : Fintype CS5BoxGapWorld :=
+  ⟨{CS5BoxGapWorld.w, CS5BoxGapWorld.wp, CS5BoxGapWorld.u}, fun x => by cases x <;> decide⟩
+
+/-- Intuitionistic order on `CS5BoxGapWorld`: reflexive, plus the single proper step `w ≤ wp`. -/
+def cs5BoxGapLe (a b : CS5BoxGapWorld) : Prop := a = b ∨ (a = .w ∧ b = .wp)
+
+instance cs5BoxGapLeDec (a b : CS5BoxGapWorld) : Decidable (cs5BoxGapLe a b) := by
+  unfold cs5BoxGapLe; infer_instance
+
+instance : Preorder CS5BoxGapWorld where
+  le := cs5BoxGapLe
+  lt a b := cs5BoxGapLe a b ∧ ¬ cs5BoxGapLe b a
+  le_refl _ := Or.inl rfl
+  le_trans a b c hab hbc := by revert hab hbc; revert a b c; decide
+  lt_iff_le_not_ge _ _ := Iff.rfl
+
+instance cs5BoxGapLeDec' (a b : CS5BoxGapWorld) : Decidable (a ≤ b) := cs5BoxGapLeDec a b
+
+/-- Modal relation on `CS5BoxGapWorld`: `r`-classes `{w}` and `{wp, u}`. -/
+def cs5BoxGapR (a b : CS5BoxGapWorld) : Prop :=
+  a = b ∨ (a = .wp ∧ b = .u) ∨ (a = .u ∧ b = .wp)
+
+instance cs5BoxGapRDec (a b : CS5BoxGapWorld) : Decidable (cs5BoxGapR a b) := by
+  unfold cs5BoxGapR; infer_instance
+
+/-- Valuation: atom `false` (`p`) holds at `{w, wp}`; atom `true` (`q`) holds at `{wp, u}`. -/
+def cs5BoxGapVal (a : CS5BoxGapWorld) (x : Bool) : Prop :=
+  if x then (a = .wp ∨ a = .u) else (a = .w ∨ a = .wp)
+
+instance cs5BoxGapValDec (a : CS5BoxGapWorld) (x : Bool) : Decidable (cs5BoxGapVal a x) := by
+  unfold cs5BoxGapVal; infer_instance
+
+/-- No world is fallible: the countermodel needs no exploding world. The argument is structurally
+required (matching the `World → Prop` shape `CKForces`/`CKValidFC` expect for `botForces`), so it
+is deliberately unused, not an oversight. -/
+@[nolint unusedArguments]
+def cs5BoxGapBot (_a : CS5BoxGapWorld) : Prop := False
+
+/-- **The three-world frame satisfies every `cs5FC''` clause.** -/
+theorem cs5BoxGapR_fc : cs5FC'' cs5BoxGapR := by
+  refine ⟨fun _ => Or.inl rfl, ?_, ?_, ?_, ?_⟩
+  · intro a b c hab hbc; revert hab hbc; revert a b c; decide
+  · intro a b hab; revert hab; revert a b; decide
+  · intro a b b' c hab hbb' hb'c
+    revert hab hbb' hb'c; revert a b b' c; decide
+  · intro a b b' hab hbb'
+    revert hab hbb'; revert a b b'; decide
+
+/-- `□q` holds at `u`: `u`'s only `≤`-successor is itself, whose `r`-successors are `u` and `wp`
+— and `q` holds at both. Private helper for `cs5BoxGap_p_or_box_q`. -/
+private theorem cs5BoxGap_box_q_at_u :
+    CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot .u (Proposition.box (Proposition.atom true)) := by
+  intro z hz t hrt
+  change cs5BoxGapVal t true
+  revert hz hrt; revert z t; decide
+
+/-- **`p ∨ □q` holds at every world**: `p` at `w` and `wp`, `□q` at `u`. Private helper for
+`cs5BoxGap_box_p_or_box_q_at_w`. -/
+private theorem cs5BoxGap_p_or_box_q (t : CS5BoxGapWorld) :
+    CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot t
+      ((Proposition.atom false).or (Proposition.box (Proposition.atom true))) := by
+  change cs5BoxGapVal t false
+    ∨ CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot t (Proposition.box (Proposition.atom true))
+  by_cases hp : cs5BoxGapVal t false
+  · exact Or.inl hp
+  · have ht2 : t = .u := by revert hp; revert t; decide
+    exact ht2 ▸ Or.inr cs5BoxGap_box_q_at_u
+
+/-- **`□(p ∨ □q)` holds at `w`**: the first hypothesis of `cs5_symmetric_tail_box_gap`. -/
+theorem cs5BoxGap_box_p_or_box_q_at_w :
+    CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot .w
+      (Proposition.box ((Proposition.atom false).or
+        (Proposition.box (Proposition.atom true)))) :=
+  fun _z _hz t _hrt => cs5BoxGap_p_or_box_q t
+
+/-- **`□p` fails at `w`**: `w ≤ wp`, `r wp u`, and `p` fails at `u`. Together with
+`cs5BoxGap_box_p_or_box_q_at_w`/`cs5BoxGap_not_q_at_w`, this is the gap's non-vacuity witness: `H
+:= Th(w)` realizes `cs5_symmetric_tail_box_gap`'s full hypotheses (`□(p ∨ □q) ∈ H`, `q ∉ H`)
+together with `□p ∉ H`, so the box-backward case at `H` genuinely has no witness at `H` itself. -/
+theorem cs5BoxGap_not_box_p_at_w :
+    ¬ CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot .w (Proposition.box (Proposition.atom false)) :=
+  fun h => by
+    have hpu : cs5BoxGapVal .u false := h .wp (Or.inr ⟨rfl, rfl⟩) .u (Or.inr (Or.inl ⟨rfl, rfl⟩))
+    revert hpu; decide
+
+/-- **`q` fails at `w`**: the second hypothesis of `cs5_symmetric_tail_box_gap`. -/
+theorem cs5BoxGap_not_q_at_w :
+    ¬ CKForces cs5BoxGapR cs5BoxGapVal cs5BoxGapBot .w (Proposition.atom true) := by
+  change ¬ cs5BoxGapVal .w true
+  decide
+
+/-- `cs5BoxGapVal` is upward-closed, the model condition `CKValidFC` requires of any valuation. -/
+theorem cs5BoxGapVal_uc {a b : CS5BoxGapWorld} (x : Bool) (hle : a ≤ b) :
+    cs5BoxGapVal a x → cs5BoxGapVal b x := by
+  revert hle; revert a b x; decide
 
 end Cslib.Logic.Modal

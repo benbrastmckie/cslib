@@ -609,7 +609,20 @@ before proceeding — Phases 8-10 are the research risk, and this is the last gu
 
 ---
 
-### Phase 8: Designated-formula-exclusion primeness for the pair (via `prime_set_exclusion`) [NOT STARTED]
+### Phase 8: Designated-formula-exclusion primeness for the pair (via `prime_set_exclusion`) [COMPLETED]
+
+**Dispatch outcome (session `sess_1784065982_0f4e12`)**: literature defects confirmed exactly as
+stated (see probe docstring). The "largely a mapping exercise" prediction is **half right**: the
+seed-membership, chain-upper-bound, and general order (`Maximal` pair → `Maximal` component-with-
+other-fixed) facts are all free and landed sorry-free in
+`probes/cs5-pair-primeness.lean` (`cs5_pair_seed_mem`, `cs5_pair_chain_union_mem`,
+`cs5_pair_maximal_component_left`/`_right`). But projecting that component-maximality onto the
+library's `prime_maximal_is_prime` needs the cross-condition `boxInv X ⊆ Y` (Y fixed) to be
+closure-stable as a `Cons` predicate, which is **false in general** — a genuine finding not
+anticipated by the plan, documented in full in the probe's module docstring, along with the
+identified repair (a combined derivation system over `Atom ⊕ Atom` baking the cross-conditions in
+as axioms rather than an external invariant — sketched but not built, out of scope for the
+Phase 9/10 time bounds). See Phase 9's `[BLOCKED]` note below.
 
 **Goal**: Establish that the box-backward pair's component primeness comes from the **pre-existing**
 `prime_set_exclusion` / `set_maximal_is_prime` with a **designated-formula exclusion** invariant —
@@ -699,7 +712,41 @@ later phase, and do **not** use a bot-exclusion invariant.
 
 ---
 
-### Phase 9: The pair poset and its Zorn scaffold [NOT STARTED]
+### Phase 9: The pair poset and its Zorn scaffold [BLOCKED]
+
+**BLOCKER** (session `sess_1784065982_0f4e12`):
+- **What failed**: the primeness step for the pair's components (needed before the Zorn maximal
+  pair is useful for anything) cannot be discharged by projecting pair-maximality onto the
+  library's single-formula `prime_maximal_is_prime`/`set_maximal_is_prime`, because the natural
+  cross-condition predicate `Cons_Y(X) := boxInv X ⊆ Y` (Y held fixed) is not stable under the
+  deductive-closure operator those lemmas require (`cl_admissible_of_cons : Cons Z → Cons (cl Z)`)
+  — closing `insert ψ X` can derive new `□B` propositionally from already-admitted formulas
+  without `B` being pinned to `Y`. Full argument in `probes/cs5-pair-primeness.lean`'s module
+  docstring.
+- **What was tried**: (1) the plan's suggested one-sided projection (proved as far as it goes —
+  `cs5_pair_maximal_component_left`/`_right`, both landed) but this alone is insufficient, as
+  above; (2) an alternating single-component-at-a-time Lindenbaum, ruled out a priori by
+  `cs5_symmetric_tail_box_gap` (already landed, Phase 5); (3) designed (not built) a repair via a
+  combined derivation system over `Atom ⊕ Atom`, tagging `X`'s/`Y`'s formulas via `Sum.inl`/
+  `Sum.inr` and adding the cross-conditions as *axioms* (`□(τ_L B) → τ_R B`, `□(τ_R B) → τ_L B`)
+  rather than an external invariant — this makes `cl`-stability free (a theorem of the combined
+  system) and reduces the pair construction to a single ordinary `quasi_prime_set_exclusion`-style
+  application excluding the 2-element set `{τ_L(□A), τ_R A}`. This looks mathematically sound but
+  needs new `Proposition.map`/`DerivationTree` functoriality infrastructure (atom relabeling +
+  proof that `CS5ModalAxiom`-derivability lifts along it) — estimated several hundred lines of new
+  Lean, beyond Phase 9/10's combined time budget in this dispatch.
+- **Why it's stuck**: the plan's Phase 8 background assumed the designated-formula-exclusion swap
+  alone (bot-exclusion → single-formula exclusion) would let the pre-existing single-formula
+  primeness engine apply directly to one component with the other fixed; this is correct for the
+  *exclusion* half of the swap but does not address the *cross-condition* half, which needs its
+  own closure-stability argument the plan did not anticipate.
+- **What is needed**: build the `Atom ⊕ Atom` combined-system infrastructure sketched above (a
+  follow-up task), or find an alternative that avoids needing `Cons`-closure-stability entirely.
+- **Prohibited workarounds honored**: no `sorry`, no `def X := True`, no vacuous placeholder;
+  no bot-exclusion invariant was used; Pacheco's Lemma 16/18 primeness step was not transcribed at
+  any point.
+
+Per the dispatch's binding rule 5 (FALLBACK IS SUCCESS), this triggers Phase 11 Branch B.
 
 **Goal**: Build the simultaneous-pair Zorn scaffold for the box-backward case: the poset, its
 invariants, and the chain-upper-bound step. This phase does not yet use maximality.
@@ -780,7 +827,12 @@ fallback rather than weakening the invariants until the statement becomes vacuou
 
 ---
 
-### Phase 10: Maximality to `cs5_box_backward` [NOT STARTED]
+### Phase 10: Maximality to `cs5_box_backward` [BLOCKED]
+
+**BLOCKER**: depends on Phase 9, which is `[BLOCKED]` (see above). Not attempted this dispatch —
+Phase 9's blocker must resolve first (a follow-up task building the combined-derivation-system
+primeness engine). Per the plan's own research-risk framing and the dispatch's binding rule 5,
+this triggers Phase 11 Branch B rather than further time spent here.
 
 **Goal**: The crux. Extract from the maximal pair the two saturation properties the box-backward
 case needs, and prove `cs5_box_backward`.
@@ -826,7 +878,28 @@ anticipated outcome with a specified fallback (Phase 11), not a blocker.
 
 ---
 
-### Phase 11: Assembly, or mechanized obstruction [NOT STARTED]
+### Phase 11: Assembly, or mechanized obstruction [COMPLETED]
+
+**Branch decision**: Branch B (Phase 9/10 `[BLOCKED]`, see above).
+
+**Dispatch outcome (session `sess_1784065982_0f4e12`)**: landed the three-world `cs5FC''`
+countermodel from `probes/cs5-boxgap-countermodel.lean` into `CS5.lean` proper (`CS5BoxGapWorld`
+and five theorems: `cs5BoxGapR_fc`, `cs5BoxGap_box_p_or_box_q_at_w`, `cs5BoxGap_not_box_p_at_w`,
+`cs5BoxGap_not_q_at_w`, `cs5BoxGapVal_uc`, plus two `private` helpers), witnessing that
+`cs5_symmetric_tail_box_gap`'s hypotheses are jointly satisfiable — the box-backward gap is a
+real, non-vacuous obstruction. Revised the `CS5.lean` module docstring to final honest status:
+soundness/canonical-frame-conditions/diamond-cases all established; completeness open
+specifically at the box-backward pair construction (not a library-level "blocked" verdict); the
+Phase 8/9 finding and its sketched repair documented and cross-referenced. All landed theorems
+verified sorry-free with axioms `[propext, Quot.sound]` (the countermodel's `decide`-based
+theorems) or none (`cs5_axiom_sound''`/`cs5Tail_symm`, the two hard gates, unaffected). Full CI
+gate green: `lake build` (project-wide, 3233/3242 jobs, only pre-existing unrelated warnings),
+`lake exe checkInitImports`, `lake exe lint-style`, `lake lint` (one pre-existing unrelated error
+in `PrimeExclusion.lean`, zero in `CS5.lean` after adding `@[nolint unusedArguments]` to
+`cs5BoxGapBot`, a structurally-required-but-unused `botForces`-shaped argument), `lake shake`,
+`lake exe mk_all --module` (no update needed, no new `Cslib/` file), `lake test` (exit 0).
+`CS4.lean`/`CT.lean`/`CK.lean`/`Segment.lean`/`CKTruthLemma.lean` unmodified (confirmed via
+`git diff --stat`).
 
 **Goal**: Close CS5 completeness, or state the obstruction as a theorem. Exactly one of the two
 branches executes, decided by Phase 10's outcome.

@@ -1,5 +1,5 @@
 ---
-next_project_number: 518
+next_project_number: 519
 ---
 
 # TODO
@@ -13,7 +13,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515,518 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -47,7 +47,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 517 [RESEARCHING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+  └─ 517 [RESEARCHED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
     └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
@@ -90,6 +90,10 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Literature
+
+518 [NOT STARTED] — LITERATURE INFRASTRUCTURE FIX: re-ingest Simpson 1994 (The Proof 
+
 ### Uncategorized
 
 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
@@ -97,9 +101,20 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 ## Tasks
 
+### 518. Reingest simpson1994 literature corpus
+- **Effort**: 2-4 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Literature
+- **Dependencies**: None
+
+**Description**: LITERATURE INFRASTRUCTURE FIX: re-ingest Simpson 1994 (The Proof Theory and Semantics of Intuitionistic Modal Logic, BibKey Simpson1994) into the global Literature corpus. PROBLEM (found by task 517 research, report 01): the current Simpson chunks are UNUSABLE for lemma statements -- 1091 chunks with ~312 byte mean, and 122-140 byte fragments that TRUNCATE the very lemma statements they contain. IMPACT: task 516's report 02 rated Route B and cited Simpson lemmas from these truncated fragments and got the chapter structure WRONG (it cited Ch 7-8 Lemmas 8.2.4/8.2.5/8.2.6 as the IS5 completeness spine; in fact Ch 8 EXPLICITLY EXCLUDES IS5 -- p.161 verbatim "we fix L as any logic in Dec_T, other than IS5" -- and is the finite model property, not completeness; the real spine is Ch 5-6: Prime Lemma 5.3.1, Canonical Model Lemma 5.3.2, Adequacy Theorem 6.2.1). Task 517's research had to bypass the corpus and work from the source PDF. ALL prior Simpson citations in tasks 512/516 rest on the broken chunks and are suspect (NOTE: the mechanized Lean guardrail lemmas are unaffected -- they are proofs, not citations). SCOPE: locate the Simpson 1994 source PDF; re-convert/re-chunk with settings that preserve lemma statements intact (larger chunks / structure-aware segmentation rather than the current ~312-byte fragmentation); re-index in the global index.json + FTS5 db; update specs/literature-index.json; validate that a literature-search.sh query for "Lemma 5.3.1 prime" / "Lemma 5.3.2 canonical model" / "Theorem 6.2.1 adequacy" returns COMPLETE lemma statements. Also audit whether other large corpus documents suffer the same over-fragmentation. Deliverable: usable Simpson chunks + a short note on the chunking settings changed. Low risk, high leverage for tasks 517 and any future literature-grounded work.
+
+---
+
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509, Task 512, Task 516

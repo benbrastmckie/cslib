@@ -1215,7 +1215,8 @@
       "parent_task": 300,
       "topic": "Modal Logic",
       "dependencies": [
-        503
+        513,
+        505
       ],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-07-14T17:57:00Z",
@@ -1247,7 +1248,7 @@
       "parent_task": 300,
       "topic": "Modal Logic",
       "dependencies": [
-        503
+        513
       ],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-07-15T00:18:13Z",

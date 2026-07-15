@@ -12,9 +12,9 @@ next_project_number: 514
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
 | 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,511,512,513 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,503,506 | 36,37,181,317,407,425,449,511,513 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,504,505 | 39,40,375,503 | foundations, modal logic, code hygiene |
-| 4 | 300,412 | 41,504,505,506 | modal logic, code hygiene |
+| 2 | 39,40,215,301,375,409,430,450,451,456,503,505,506 | 36,37,181,317,407,425,449,511,513 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,504 | 39,40,375,505 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,503,504,506 | modal logic, code hygiene |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -40,10 +40,11 @@ next_project_number: 514
 512 [NOT STARTED] — Attempt CS5 constructive completeness (Branch A) by building the 
 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
-  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-  └─ 505 [PLANNED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+505 [PLANNED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
+  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -93,6 +94,7 @@ next_project_number: 514
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 513 [NOT STARTED] — Generalize the tableau SOUNDNESS chain over the abstract rule-app
   └─ 503 [BLOCKED] — (Modal Logic: Parametrize the K tableau driver (Cslib/) (see above)
+  └─ 505 [PLANNED] — (Modal Logic: Deliver plan Phase 4 of task 300 (specs/) (see above)
 
 ## Tasks
 
@@ -192,7 +194,7 @@ next_project_number: 514
 - **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 503
+- **Dependencies**: Task 513
 - **Research**:
   - [505_b_symmetric_decidability_via_generic_tableau_driver/reports/01_frame-specific-tableau-extensions.md]
   - [505_b_symmetric_decidability_via_generic_tableau_driver/reports/02_spawn-analysis.md]
@@ -207,7 +209,7 @@ next_project_number: 514
 - **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 503
+- **Dependencies**: Task 513, Task 505
 - **Research**:
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md]
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/02_spawn-analysis.md]

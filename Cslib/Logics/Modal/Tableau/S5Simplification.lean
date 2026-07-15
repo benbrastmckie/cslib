@@ -354,6 +354,57 @@ lemma modalApplyOneS5_snd_eq
     rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
 
 omit [Hashable Atom] in
+/-- K's own `modalApplyOne` leaves `acc` unchanged at every shape OTHER than its two minting
+shapes (`.neg,box` boxNeg, `.pos,diamond` diamondPos): direct from `Rules.lean`'s definition,
+where `.pos,.box`/`.neg,.diamond` (propagation, non-mint) and every prop/atomic shape return
+`(_, acc)` verbatim, and only `.neg,.box`/`.pos,.diamond` return `(_, acc.addEdge ..)`. This is
+the converse-shape fact `keysTotal`/`keyLowerBd`'s preservation proofs need to rule out minting
+at the keyed stepper's non-minting-shape (`| _, _ =>`) dispatch. -/
+private lemma modalApplyOne_snd_eq_acc_of_not_mint_shape_S5
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hns : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+           ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOne sf b acc).snd = acc := by
+  obtain ⟨h1, h2⟩ := hns
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp [hpa]
+  · rw [if_neg hpa]
+    obtain ⟨s, ff, l⟩ := sf
+    simp only at h1 h2
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · rfl
+      · rfl
+      · rfl
+      · rfl
+      · rfl
+      · dsimp only; split <;> rfl
+      · exact absurd ⟨rfl, φ, rfl⟩ h2
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · rfl
+      · rfl
+      · rfl
+      · rfl
+      · rfl
+      · exact absurd ⟨rfl, φ, rfl⟩ h1
+      · dsimp only; split <;> rfl
+
+omit [Hashable Atom] in
+/-- S5 lift of `modalApplyOne_snd_eq_acc_of_not_mint_shape_S5` via `modalApplyOneS5_snd_eq`:
+`modalApplyOneS5` also leaves `acc` unchanged outside the two K-minting shapes. -/
+private lemma modalApplyOneS5_snd_eq_acc_of_not_mint_shape
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hns : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+           ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneS5 sf b acc).snd = acc := by
+  rw [modalApplyOneS5_snd_eq]
+  exact modalApplyOne_snd_eq_acc_of_not_mint_shape_S5 sf b acc hns
+
+omit [Hashable Atom] in
 /-- If K's own rule application yields a `.linear` result, `modalApplyOneS5` reduces to
 `modalApplyOne` exactly (not just its accessibility component): every `modalApplyOneS5` match
 arm for the two S5-relevant shapes (`sf.sign = .pos ∧ sf.formula = .box _`,
@@ -1751,6 +1802,75 @@ private lemma modalStepBranchS5gKeyed_keys_shape (φ₀ : Proposition Atom)
          exact ⟨_, by assumption, by assumption, by assumption, hsf.2.2.2.symm⟩)
 
 omit [Hashable Atom] in
+/-- Combined characterization of a `modalStepBranchS5gKeyed` step, giving the `newBs`-shape (as
+`modalStepBranchS5gKeyed_acc_shape` does) AND the `newKeys`-shape (as
+`modalStepBranchS5gKeyed_keys_shape` does) from a SINGLE case split tied to the SAME triggering
+`sf`. Needed by `keysTotal`'s preservation proof: `_acc_shape` and `_keys_shape` each
+independently eliminate their own existential `sf` witness from `hstep`, so a caller composing
+them as black boxes gets two a priori unrelated witnesses with no proof they coincide -- but
+`keysTotal` must know that "the branch that grew" and "the key that got appended" belong to the
+same step event. The wildcard (non-minting-shape) disjunct additionally records
+`(modalApplyOneS5 sf b acc).snd = acc` (via `modalApplyOneS5_snd_eq_acc_of_not_mint_shape`),
+which lets callers rule out `modalApplyOneS5_knownWorlds_step`'s mint disjunct on those shapes. -/
+private lemma modalStepBranchS5gKeyed_keys_full_shape (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys)) :
+    ∃ sf ∈ b, sf ∉ e ∧
+      ((∃ wBlock, newAcc = acc.addEdge sf.label wBlock ∧ newBs = [b] ∧ newKeys = keys) ∨
+       (newKeys = keys ∧ (modalApplyOneS5 sf b acc).snd = acc ∧
+        (match (modalApplyOneS5 sf b acc).fst with
+          | .linear nf => newBs = [nf ++ b]
+          | .branching brs => newBs = brs.map (· ++ b)
+          | .persistent nf => newBs = [nf ++ b]
+          | .notApplicable => False)) ∨
+       (∃ φ', sf.sign = .neg ∧ sf.formula = .box φ' ∧
+          blockingWorldS5Keyed φ₀ keys b .neg φ' sf.label = none ∧
+          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ' sf.label)] ∧
+          (match (modalApplyOneS5 sf b acc).fst with
+            | .linear nf => newBs = [nf ++ b]
+            | .branching brs => newBs = brs.map (· ++ b)
+            | .persistent nf => newBs = [nf ++ b]
+            | .notApplicable => False)) ∨
+       (∃ φ', sf.sign = .pos ∧ sf.formula = .diamond φ' ∧
+          blockingWorldS5Keyed φ₀ keys b .pos φ' sf.label = none ∧
+          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ' sf.label)] ∧
+          (match (modalApplyOneS5 sf b acc).fst with
+            | .linear nf => newBs = [nf ++ b]
+            | .branching brs => newBs = brs.map (· ++ b)
+            | .persistent nf => newBs = [nf ++ b]
+            | .notApplicable => False))) := by
+  unfold modalStepBranchS5gKeyed at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  clear hstep
+  by_cases hexp : e.any (· == sf) = true
+  · simp only [hexp, if_true] at hsf
+    exact absurd hsf (by simp)
+  · rw [if_neg (by simpa using hexp)] at hsf
+    refine ⟨sf, hsfmem, by simpa using hexp, ?_⟩
+    clear hexp hsfmem
+    split at hsf <;> repeat' split at hsf
+    all_goals try injection hsf
+    all_goals (rename_i hsf; simp only [Prod.mk.injEq] at hsf)
+    all_goals first
+      | (refine Or.inl ⟨_, hsf.2.2.1.symm, hsf.1.symm, hsf.2.2.2.symm⟩)
+      | (refine Or.inr (Or.inr (Or.inl
+           ⟨_, by assumption, by assumption, by assumption, hsf.2.2.2.symm, ?_⟩))
+         rw [show modalApplyOneS5 sf b acc = _ from by assumption]
+         simpa using hsf.1.symm)
+      | (refine Or.inr (Or.inr (Or.inr
+           ⟨_, by assumption, by assumption, by assumption, hsf.2.2.2.symm, ?_⟩))
+         rw [show modalApplyOneS5 sf b acc = _ from by assumption]
+         simpa using hsf.1.symm)
+      | (refine Or.inr (Or.inl ⟨hsf.2.2.2.symm,
+           modalApplyOneS5_snd_eq_acc_of_not_mint_shape sf b acc
+             ⟨by rintro ⟨hs, ψ, hf⟩; simp_all, by rintro ⟨hs, ψ, hf⟩; simp_all⟩, ?_⟩)
+         rw [show modalApplyOneS5 sf b acc = _ from by assumption]
+         simpa using hsf.1.symm)
+
+omit [Hashable Atom] in
 /-- **Phase 4 field 1/6**: `modalStepBranchS5gKeyed` preserves `e.Nodup`. Rule-agnostic: the
 new expanded set is always either `e ++ [sf]` (with `sf ∉ e` from the stepper's own dedup guard)
 or `e` unchanged, across all three of the stepper's top-level cases. -/
@@ -2185,6 +2305,138 @@ lemma modalStepBranchS5g_preserves_keysInUniverse (φ₀ : Proposition Atom)
     rcases hwk with hwk | ⟨-, rfl⟩
     · exact hInUniv w k hwk
     · exact hkinuniv .pos φ hφsub
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `addEdge` never returns its input unchanged (it conses one edge onto the edge list). Used
+by `keysTotal`'s preservation to rule out `modalApplyOneS5_knownWorlds_step`'s mint disjunct at
+the keyed stepper's non-minting-shape dispatch, where
+`modalStepBranchS5gKeyed_keys_full_shape` guarantees `(modalApplyOneS5 sf b acc).snd = acc`. -/
+private lemma addEdge_ne_self_S5 (acc : Accessibility) (w w' : WorldIndex) :
+    acc.addEdge w w' ≠ acc := by
+  intro h
+  have hlen := congrArg (fun a => a.edges.length) h
+  simp only [Accessibility.addEdge, List.length_cons] at hlen
+  omega
+
+/-- **Phase 5 field 2/4**: `modalStepBranchS5gKeyed` preserves `keysTotal`
+(`∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys`). Blocked steps change neither the branch nor
+the keys. Non-minting-shape steps only emit formulas at already-known labels
+(`modalApplyOneS5_knownWorlds_step`'s non-mint disjunct, selected via
+`(modalApplyOneS5 sf b acc).snd = acc` from `modalStepBranchS5gKeyed_keys_full_shape` +
+`addEdge_ne_self_S5`), so the old `keysTotal` witness transfers. Minting steps append the fresh
+key for the ONE newly-known world `modalNextWorld b` in the SAME step event that grows the
+branch -- the correlation `modalStepBranchS5gKeyed_keys_full_shape` exists to provide. -/
+lemma modalStepBranchS5g_preserves_keysTotal (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hknown : accTargetsKnown b acc)
+    (hTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys) :
+    ∀ b' ∈ newBs, ∀ w ∈ modalKnownWorlds b', ∃ k, (w, k) ∈ newKeys := by
+  obtain ⟨sf, hsfmem, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_keys_full_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  have htrans : ∀ (xs : List (SignedFormula (Proposition Atom) WorldIndex)),
+      (∀ x ∈ xs, x.label ∈ modalKnownWorlds b) →
+      ∀ w ∈ modalKnownWorlds (xs ++ b), w ∈ modalKnownWorlds b := by
+    intro xs hxs w hw
+    rw [mem_modalKnownWorlds_S5] at hw
+    obtain ⟨sf', hsf', rfl⟩ := hw
+    rcases List.mem_append.mp hsf' with hx | hb0
+    · exact hxs sf' hx
+    · exact (mem_modalKnownWorlds_S5 b sf'.label).mpr ⟨sf', hb0, rfl⟩
+  have hmint : ∀ (s : Sign) (φ : Proposition Atom),
+      newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)] →
+      (match (modalApplyOneS5 sf b acc).fst with
+        | .linear nf => newBs = [nf ++ b]
+        | .branching brs => newBs = brs.map (· ++ b)
+        | .persistent nf => newBs = [nf ++ b]
+        | .notApplicable => False) →
+      ∀ b' ∈ newBs, ∀ w ∈ modalKnownWorlds b', ∃ k, (w, k) ∈ newKeys := by
+    intro s φ hnk hshape b' hb'
+    rcases modalApplyOneS5_knownWorlds_step sf b acc hsfmem hknown with
+      ⟨-, hmatch⟩ | ⟨-, hmatch⟩
+    · rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        obtain ⟨k, hk⟩ := hTotal w (htrans nf hmatch w hw)
+        exact ⟨k, hnk ▸ List.mem_append_left _ hk⟩
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+        intro w hw
+        obtain ⟨k, hk⟩ := hTotal w (htrans br
+          (fun x hx => hmatch x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)) w hw)
+        exact ⟨k, hnk ▸ List.mem_append_left _ hk⟩
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        obtain ⟨k, hk⟩ := hTotal w (htrans nf hmatch w hw)
+        exact ⟨k, hnk ▸ List.mem_append_left _ hk⟩
+      · rw [hm] at hshape; exact hshape.elim
+    · rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        rw [mem_modalKnownWorlds_S5] at hw
+        obtain ⟨sf', hsf', rfl⟩ := hw
+        rcases List.mem_append.mp hsf' with hx | hb0
+        · refine ⟨successorBirthContentS5 φ₀ b s φ sf.label, ?_⟩
+          rw [hnk, hmatch.2 sf' hx]
+          exact List.mem_append_right _ (List.mem_singleton.mpr rfl)
+        · obtain ⟨k, hk⟩ :=
+            hTotal sf'.label ((mem_modalKnownWorlds_S5 b sf'.label).mpr ⟨sf', hb0, rfl⟩)
+          exact ⟨k, hnk ▸ List.mem_append_left _ hk⟩
+      · rw [hm] at hmatch; exact hmatch.elim
+      · rw [hm] at hmatch; exact hmatch.elim
+      · rw [hm] at hmatch; exact hmatch.elim
+  rcases hcase with ⟨wBlock, -, hnewBs, hnk⟩ | ⟨hnk, hsnd, hshape⟩ |
+    ⟨φ, -, -, -, hnk, hshape⟩ | ⟨φ, -, -, -, hnk, hshape⟩
+  · intro b' hb'
+    rw [hnewBs] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    intro w hw
+    rw [hnk]
+    exact hTotal w hw
+  · rcases modalApplyOneS5_knownWorlds_step sf b acc hsfmem hknown with
+      ⟨-, hmatch⟩ | ⟨hsndeq, -⟩
+    · intro b' hb'
+      rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        rw [hnk]
+        exact hTotal w (htrans nf hmatch w hw)
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+        intro w hw
+        rw [hnk]
+        exact hTotal w (htrans br
+          (fun x hx => hmatch x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)) w hw)
+      · rw [hm] at hshape hmatch
+        rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        rw [hnk]
+        exact hTotal w (htrans nf hmatch w hw)
+      · rw [hm] at hshape; exact hshape.elim
+    · rw [hsnd] at hsndeq
+      exact absurd hsndeq.symm (addEdge_ne_self_S5 acc sf.label (modalNextWorld b))
+  · exact hmint .neg φ hnk hshape
+  · exact hmint .pos φ hnk hshape
 
 /-! ## Pigeonhole World Bound (task 515 Phase 6)
 

@@ -260,6 +260,58 @@ language. `cs5Combined_seed_excludes` itself remains **unresolved** this dispatc
 fabricated obstruction) — status stays `[PARTIAL]`. See `handoffs/04_canonical-model-scaffold.md`
 for the full account and the concrete next-step recommendation.
 
+**RESUMED-DISPATCH PROGRESS 4** (per user directive to reframe Phase 3+4+5 as one combined
+effort and attempt handoff 04's "cluster" lead; session `sess_1784091167_73afcc`): read Pacheco
+2024's actual "Canonical model for CKB" section (Lemmas 14-18, chunks `01990319adea2569` through
+`f90131e694c8b77a`) in full — confirms (does not overturn) report 01 §3.4's finding: Lemma 18's
+box-backward analogue for CKB relies on a `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` step valid only because Θ is built by
+plain-inclusion-maximality among sets already forced negation-complete by the ambient (classical/
+intuitionistic) logic — unavailable for a quasi-prime, disjunction-property-only `H`. No new
+technique found beyond what reports 01/02 already extracted; the Zorn-skeleton-only reuse
+decision stands. **This dispatch's substantive new finding: handoff 04's "cluster" lead (many
+R-side prime-extension worlds mutually accessible plus one designated L-world `w0`) is ALSO a
+confirmed dead end, for a newly-identified structural reason, not previously articulated:**
+`cs5FC''` (`CKExtension.lean`) requires *plain* symmetry and *plain* transitivity of the
+canonical relation `r` (not merely the ≤-composed clauses). A new, general, sorry-free,
+axiom-free lemma landed this dispatch, `cs5FC''_hub_forces_spoke_connectivity`
+(`CKExtension.lean`, right after `cs5FC_implies_cs5FC''`) mechanizes the consequence: for ANY
+`cs5FC''`-frame, `r w0 T1` and `r w0 T2` already force `r T1 T2` (symmetry turns `r w0 T1` into
+`r T1 w0`, then transitivity chains `r T1 w0 → r w0 T2 → r T1 T2`). Applied to the cluster
+proposal: connecting a designated world `w0` to two or more independent R-side worlds
+(necessary for `crossLR`/`crossRL` to be semantically meaningful at `w0` for more than one
+witness) **forces those R-worlds into full mutual accessibility with each other and with `w0`**
+— there is no way to keep the "spokes" independent while satisfying `cs5FC''`. Working through
+the consequence: any valuation assignment compatible with this forced full connectivity that
+also tries to keep `w0`'s L-content (`H`) semantically distinguishable from box-content
+(needed since `A ∈ H` while `□A ∉ H` is exactly the case in play) reduces, by the same argument
+already used to rule out the "L-uniform" model (`handoffs/02_phase3-route2-continuation.md`), to
+forcing `□ψ ↔ ψ` for L-pure `ψ` across the whole connected cluster — which is exactly the
+already-confirmed L-uniform failure mode, now shown to recur regardless of how many R-worlds the
+cluster contains. **The cluster idea is therefore not a distinct escape route from the L-uniform
+dead end; it reduces to the same one.** Separately, a second general finding (not mechanized,
+argued from the definitions of `Metalogic.prime_set_exclusion`/`quasi_prime_exclusion`): any
+attempt to build a designated witness world that OMITS a specific target formula via CSLib's
+generic Lindenbaum/prime-extension machinery is **inherently circular** for this purpose, because
+that machinery's precondition IS `DerivExcludes`/non-derivability of the target formula from the
+seed — i.e., exactly `cs5Combined_seed_excludes` (or the relevant fragment of it) as an input,
+never a byproduct. This rules out, in general, any semantic strategy of the form "construct a
+witness (via the generic prime-extension engine) that happens to omit `τR A`/`τL(□A)`, then read
+off non-derivability from its existence" — the witness cannot be built without already knowing
+what we are trying to prove. Combined with handoff 03's already-established finding that a
+closure-stable derivation-induction invariant `Φ` strong enough to conclude the exclusion is, in
+essence, a semantic truth-predicate in disguise, **all three routes conceived so far (semantic
+model, generic-Lindenbaum witness, syntactic derivation-induction) now trace back to the same
+underlying fixed-point circularity**: any argument strong enough to prove the exclusion is
+provably at least as strong as full `CS5Combined` canonical completeness at the relevant heads,
+which (per handoff 04 finding 5, mechanized via `cs5Combined_symmetric_tail_box_gap`) is exactly
+as hard as `CS5`'s own open box-backward problem. Status stays `[PARTIAL]`, not `[BLOCKED]` — no
+collapse has been proved, only that several proof STRATEGIES fail; per five dispatches' worth of
+failed leak-finding, report 02's ~85-90% confidence the underlying claim is TRUE stands. See
+`handoffs/05_cluster-dead-end-and-circularity-finding.md` for the full account and an explicit
+recommendation that continued investment in this specific doubled-atom repair architecture may
+need either a genuinely new proof-theoretic idea not yet conceived across five dispatches, or a
+human decision on whether to keep pursuing it.
+
 **BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14 — ORIGINAL, pre-route-2):
 
 - **What failed**: `cs5Combined_seed_excludes` was not closed sorry-free by either route within

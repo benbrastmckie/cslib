@@ -201,6 +201,27 @@ theorem cs5FC_implies_cs5FC'' {World : Type*} [Preorder World] {r : World → Wo
    fun hwu hle hu't => ⟨_, le_refl _, h.2.1 hwu hle hu't⟩,
    fun hwu hle => ⟨_, h.2.2 hwu hle, le_refl _⟩⟩
 
+/-- **A hub connected to two `cs5FC''`-related worlds forces those two worlds to be related to
+each other.** Plain symmetry (`r w u → r u w`) plus plain transitivity (`r w u → r u t → r w t`)
+— both required by `cs5FC''` — mean any relation `r` satisfying `cs5FC''` cannot support a
+"hub-and-spoke" shape (one designated world related to several otherwise-unrelated "spoke"
+worlds): `r w0 T1` and `r w0 T2` already force `r T1 T2` (via `r T1 w0` from symmetry, then
+`r T1 w0 → r w0 T2 → r T1 T2` from transitivity). Consequence for canonical-model design: any
+`cs5FC''`-frame with a designated world reachable from two or more "auxiliary" worlds collapses
+those auxiliary worlds into a single fully-connected cluster with the designated world itself —
+there is no way to keep a hub's spokes semantically independent of one another while satisfying
+`cs5FC''`. This rules out a class of hand-built multi-world separating models for combined/
+two-sorted systems (e.g. a designated `L`-world connected to many independent `R`-witness
+worlds intended to stay mutually unrelated): the frame condition itself forces them into one
+cluster, so any compound (in particular boxed) formula's truth at a spoke world is entangled
+with the hub's own valuation and with every other spoke, not just with that spoke's local
+theory. See `specs/512_cs5_box_backward_atom_sum_completeness/handoffs/` for the completeness
+obligation this was extracted from analyzing. -/
+theorem cs5FC''_hub_forces_spoke_connectivity {World : Type*} [Preorder World]
+    {r : World → World → Prop} (hFC : cs5FC'' r) {w0 T1 T2 : World}
+    (h1 : r w0 T1) (h2 : r w0 T2) : r T1 T2 :=
+  hFC.2.1 (hFC.2.2.1 h1) h2
+
 /-! ## Parametric Completeness over `FC`-Frames -/
 
 section ParametricFCCompleteness

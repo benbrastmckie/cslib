@@ -1,21 +1,10 @@
 {
-  "status": "researched",
-  "started_at": "2026-07-14T00:00:00Z",
-  "completed_at": "2026-07-14T00:00:00Z",
-  "artifacts": [
-    "specs/512_cs5_box_backward_atom_sum_completeness/reports/05_collapse-s5-probe.md",
-    "specs/512_cs5_box_backward_atom_sum_completeness/.orchestrator-handoff.json"
-  ],
-  "outcome": "collapse_extends_to_s5=YES-clean; option-(c)=REFUTED; Lemma-15-shortcut=DEAD-END-for-box-backward; recommend REVISE to birelational pivot (d)",
-  "next_action_hint": "revise",
-  "partial_progress": {
-    "stage": "done",
-    "details": "Report 05 + orchestrator handoff written; verdict grounded in Pacheco chunks + CS5.lean source"
-  },
+  "status": "in_progress",
+  "artifacts": [],
+  "next_steps": "Revision in progress",
   "metadata": {
     "session_id": "sess_1784091167_73afcc",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "cslib-research-agent"]
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"]
   }
 }

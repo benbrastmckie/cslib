@@ -38,7 +38,7 @@ next_project_number: 514
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-504 [PLANNED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [IMPLEMENTING] — Attempt CS5 constructive completeness (Branch A) by building the 
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -207,7 +207,7 @@ next_project_number: 514
 
 ### 504. S5 and kb55route euclidean decidability via generic tableau 
 - **Effort**: 5-7 hours
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 513, Task 505
@@ -216,6 +216,7 @@ next_project_number: 514
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md]
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/02_spawn-analysis.md]
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/03_parent-phase-plan-reference.md]
+- **Summary**: [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/summaries/01_s5-kb5-euclidean-decidability-summary.md]
 
 **Description**: Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): S5 universal-cluster simplification (no loop-checking needed) and 5/Euclidean coverage via the KB5/S5 equivalence route. Implement the 'propagate box to ALL branch worlds' universal rule in a new Cslib/Logics/Modal/Tableau/S5Simplification.lean; extract the countermodel via Relation.EqvGen (Std.Refl+IsTrans+IsSymm/IsEquiv free). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (world creation confined to the unmodified K diamondPos/boxNeg arms; each diamond mints at most once per formula). Prove the truth lemma over the universal relation; state s5Valid / Decidable (s5Valid phi) against Cube.S5. Additionally expose the Euclidean frame condition (Relation.RightEuclidean) for the equivalence-extracted model (every equivalence relation is Euclidean) and state 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean's API (RightEuclidean.symm, refl_serial). Document in-file that genuine pure-K5 (Euclidean without full equivalence; no Mathlib closure operator) remains out of scope, per the parent plan's non-goals. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean (new), Cslib/Logics/Modal/Tableau/FrameSoundness.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean.
 

@@ -1787,17 +1787,18 @@
     {
       "project_number": 518,
       "project_name": "reingest_simpson1994_literature_corpus",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "general",
       "topic": "Literature",
       "description": "LITERATURE INFRASTRUCTURE FIX: re-ingest Simpson 1994 (The Proof Theory and Semantics of Intuitionistic Modal Logic, BibKey Simpson1994) into the global Literature corpus. PROBLEM (found by task 517 research, report 01): the current Simpson chunks are UNUSABLE for lemma statements -- 1091 chunks with ~312 byte mean, and 122-140 byte fragments that TRUNCATE the very lemma statements they contain. IMPACT: task 516's report 02 rated Route B and cited Simpson lemmas from these truncated fragments and got the chapter structure WRONG (it cited Ch 7-8 Lemmas 8.2.4/8.2.5/8.2.6 as the IS5 completeness spine; in fact Ch 8 EXPLICITLY EXCLUDES IS5 -- p.161 verbatim \"we fix L as any logic in Dec_T, other than IS5\" -- and is the finite model property, not completeness; the real spine is Ch 5-6: Prime Lemma 5.3.1, Canonical Model Lemma 5.3.2, Adequacy Theorem 6.2.1). Task 517's research had to bypass the corpus and work from the source PDF. ALL prior Simpson citations in tasks 512/516 rest on the broken chunks and are suspect (NOTE: the mechanized Lean guardrail lemmas are unaffected -- they are proofs, not citations). SCOPE: locate the Simpson 1994 source PDF; re-convert/re-chunk with settings that preserve lemma statements intact (larger chunks / structure-aware segmentation rather than the current ~312-byte fragmentation); re-index in the global index.json + FTS5 db; update specs/literature-index.json; validate that a literature-search.sh query for \"Lemma 5.3.1 prime\" / \"Lemma 5.3.2 canonical model\" / \"Theorem 6.2.1 adequacy\" returns COMPLETE lemma statements. Also audit whether other large corpus documents suffer the same over-fragmentation. Deliverable: usable Simpson chunks + a short note on the chunking settings changed. Low risk, high leverage for tasks 517 and any future literature-grounded work.",
       "dependencies": [],
       "parent_task": 517,
       "created": "2026-07-15T15:21:58Z",
-      "last_updated": "2026-07-15T15:21:58Z",
+      "last_updated": "2026-07-15T15:40:00Z",
       "priority": "high",
       "effort": "2-4 hours",
-      "artifacts": []
+      "artifacts": [],
+      "completion_summary": "Re-chunked Simpson 1994 in the global Literature corpus: root cause was PyMuPDF font-heuristic heading misdetection on this OCR scan (no embedded TOC), producing 1091 chunks (~312B mean) that truncated lemma statements. Fixed via plain pdftotext -layout extraction + custom paragraph reflow + chapter-only headings, through the existing literature-chunk.sh Pass-2 merge -> 206 chunks, ~1.7KB mean. Verified Lemma 5.3.1, Lemma 5.3.2, Theorem 6.2.1, and the p.161 \"other than IS5\" passage all intact. Audited corpus: found wijesekera_1990_constructivemodallogicsi has the same fragmentation bug (154 chunks, 468B mean, 62% under 300B) -- not fixed, reported for follow-up."
     }
   ],
   "repository_health": {

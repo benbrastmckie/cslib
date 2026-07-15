@@ -13,7 +13,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515,518 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -90,10 +90,6 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
-### Literature
-
-518 [NOT STARTED] — LITERATURE INFRASTRUCTURE FIX: re-ingest Simpson 1994 (The Proof 
-
 ### Uncategorized
 
 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
@@ -103,7 +99,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 ### 518. Reingest simpson1994 literature corpus
 - **Effort**: 2-4 hours
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Literature
 - **Dependencies**: None

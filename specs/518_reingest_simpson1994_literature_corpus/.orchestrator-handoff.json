@@ -1,0 +1,32 @@
+{
+  "task_number": 518,
+  "session_id": "sess_1784127828_1f2b2f",
+  "status": "completed",
+  "outcome": "success",
+  "summary": "Re-ingested Simpson 1994 in the global Literature corpus. Root cause: PyMuPDF font-heuristic heading detection misfired on this OCR scan (no embedded TOC), inserting spurious mid-sentence headings that literature-chunk.sh's Pass-1 split at, producing 1091 chunks (~312B mean) that truncated lemma statements. Fix: bypassed the font-heuristic path with plain pdftotext -layout extraction + a custom indent/atomic-keyword paragraph reflow + chapter-only headings, fed through the existing (unmodified) literature-chunk.sh Pass-2 merge. Result: 206 chunks, ~1.7KB mean, max 2.3KB. All 4 acceptance targets (Lemma 5.3.1, Lemma 5.3.2, Theorem 6.2.1, p.161 'other than IS5' passage) verified intact via literature-search.sh --read. Global index.json and .literature.db (FTS5) rebuilt; specs/literature-index.json needed no change (doc_id unchanged). Old 1091-chunk set preserved uncommitted at simpson_1994_intuitionisticmodallogic.bak-pre518-1091chunks/ as rollback safety net. Audited all 20 corpus documents for the same fragmentation signature: found one additional affected document, wijesekera_1990_constructivemodallogicsi (154 chunks, 468B mean, 62% under 300B) -- NOT fixed in this task, reported only.",
+  "artifacts": [
+    "specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md",
+    "/home/benjamin/Projects/Literature/index.json",
+    "/home/benjamin/Projects/Literature/.literature.db",
+    "/home/benjamin/Projects/Literature/simpson_1994_intuitionisticmodallogic/",
+    "/home/benjamin/Projects/Literature/simpson_1994_intuitionisticmodallogic.bak-pre518-1091chunks/ (uncommitted rollback backup)"
+  ],
+  "validation": {
+    "chunk_count_before": 1091,
+    "chunk_count_after": 206,
+    "mean_bytes_before": 312,
+    "mean_bytes_after": 1768,
+    "acceptance_queries": [
+      {"target": "Lemma 5.3.1 (Prime lemma)", "chunk_id": "b7b7543b80021f0d", "intact": true},
+      {"target": "Lemma 5.3.2 (Canonical model lemma)", "chunk_id": "e2c9da9458f24650", "intact": true},
+      {"target": "Theorem 6.2.1", "chunk_id": "342383d3ad79a9af", "intact": true},
+      {"target": "p.161 'other than IS5' passage", "chunk_id": "89b8708e61d12778", "intact": true, "verbatim": "Henceforth, we fix L as any logic in Dec_T, other than IS5."}
+    ]
+  },
+  "audit_findings": {
+    "fragmented_docs_found": ["wijesekera_1990_constructivemodallogicsi"],
+    "fragmented_docs_fixed_in_this_task": [],
+    "note": "wijesekera_1990_constructivemodallogicsi shows the identical over-fragmentation signature (154 chunks, 468B mean, 62% under 300B, self-duplicating breadcrumbs, mid-sentence boundaries). Recommend a follow-up task using the same reflow approach before it is relied on for precise lemma citation."
+  },
+  "next_action_hint": "Task 517 can now proceed using the Simpson corpus directly via literature-search.sh / Read for Ch. 5-8 material instead of bypassing to the source PDF. Consider filing a follow-up task to apply the same reflow fix to wijesekera_1990_constructivemodallogicsi before task 517 or others cite it precisely."
+}

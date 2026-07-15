@@ -216,7 +216,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 5: extractModelB via SymmGen (FrameCompleteness.lean) [NOT STARTED]
+### Phase 5: extractModelB via SymmGen (FrameCompleteness.lean) [COMPLETED]
 
 - **Goal:** Extract the symmetric countermodel with the symmetric closure of the recorded edges and
   obtain `Std.Symm` for free.

@@ -10,6 +10,7 @@ public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.TDriver
+public import Cslib.Logics.Modal.Tableau.BDriver
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
 
@@ -404,6 +405,66 @@ theorem modalOpenBranchS4_countermodel
     (¬ Satisfies (extractModelS4 b acc) 0 φ₀) ∧ s4FC (extractModelS4 b acc).r :=
   ⟨(modalTruthLemmaS4 φ₀ b acc hH φ₀ 0).2 hF,
     ⟨extractModelS4_refl b acc, extractModelS4_trans b acc⟩⟩
+
+/-! ## B (Symmetric Frame) Extraction (task 505 Phase 5)
+
+Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*symmetric closure* `Relation.SymmGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.SymmGen`). The frame instance
+`Std.Symm` comes free off `Relation.SymmGen`'s own unnamed `instance : Std.Symm (SymmGen r)`
+(`Mathlib.Logic.Relation`); no new frame predicate is defined. Unlike `Relation.ReflGen`/
+`Relation.ReflTransGen` (inductive types with named constructors `.refl`/`.single`/`.tail`),
+`Relation.SymmGen r a b` is literally `r a b ∨ r b a` (a `def`, not an inductive), so case
+analysis on a `SymmGen` hypothesis is a plain `Or` split -- the forward direction reduces to
+K's own successor argument, the backward direction to B's own predecessor argument
+(`hintikkaB_box_pos`/`hintikkaB_diamond_neg`, Phase 6 below). -/
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*symmetric closure* `Relation.SymmGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.SymmGen`). -/
+def extractModelB
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (Relation.SymmGen) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelB`'s relation is exactly the symmetric closure of `acc.hasEdge`. -/
+lemma extractModelB_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelB b acc).r = Relation.SymmGen (fun w w' => acc.hasEdge w w' = true) := rfl
+
+omit [Hashable Atom] in
+/-- The symmetric frame condition holds of `extractModelB b acc` "for free": `Relation.SymmGen`
+is always symmetric (its own unnamed `instance : Std.Symm (SymmGen r)`, `Mathlib.Logic.
+Relation`), regardless of the underlying raw edge relation `acc.hasEdge`. Discharges the
+`symmFC` witness (`FrameSoundness.lean`) for the B countermodel. -/
+lemma extractModelB_symm (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Std.Symm (extractModelB b acc).r := by
+  rw [extractModelB_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelB`'s
+(symmetric-closure) relation via `Relation.SymmGen.of_rel` (`Or.inl`). Needed to reuse the K
+bridge lemmas (`hintikka_box_neg`, `hintikka_diamond_pos`, etc.), which are stated in terms of
+`acc.hasEdge`, when relating them to `extractModelB`'s closed relation. -/
+lemma extractModelB_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelB b acc).r w w' := by
+  rw [extractModelB_r]
+  exact Relation.SymmGen.of_rel h
+
+omit [Hashable Atom] in
+/-- The *backward* direction survives into `extractModelB`'s relation too, via
+`Relation.SymmGen.of_rel_symm` (`Or.inr`): a raw edge `v → w` (`acc.hasEdge v w`) gives
+`(extractModelB b acc).r w v` (the reversed pair) directly -- the symmetric-closure analogue of
+`extractModelB_hasEdge_imp_r` for the predecessor direction B's own rule reads. -/
+lemma extractModelB_hasEdge_symm_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {v w : WorldIndex} (h : acc.hasEdge v w = true) :
+    (extractModelB b acc).r w v := by
+  rw [extractModelB_r]
+  exact Relation.SymmGen.of_rel_symm h
 
 /-! ## T Modal Truth Lemma (task 503 Phase 5)
 

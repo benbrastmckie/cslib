@@ -433,7 +433,7 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
 - **Guardrails:** touches no canonical model; trips nothing.
 - **Risk:** NONE — this is why it goes first.
 
-### Phase 17: Probe `B_K ⊨ cs5FC''` abstractly [NOT STARTED]
+### Phase 17: Probe `B_K ⊨ cs5FC''` abstractly [COMPLETED]
 - **Goal:** **~50-100 lines, DECISIVE.** Confirm A's KF3 by machine: `B_K` satisfies all five
   `cs5FC''` conjuncts plus `cs5Incest`, and does **NOT** satisfy the stronger `cs5FC`.
 - **Why now**: statable **abstractly over an arbitrary IL-model `K`** — it does **not** need the
@@ -445,13 +445,13 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   therefore cannot prove completeness **unless `CS5 ⊢ FS`**. Together, Phases 16+17 convert the
   obligation from a necessary condition of the *theorem* into a necessary condition of the *method*.
 - **Tasks:**
-  - [ ] Define `B_K` abstractly (`chunk_0152:3`): `W′ = {(w,d) | w ∈ W, d ∈ D_w}`;
+  - [x] Define `B_K` abstractly (`chunk_0152:3`): `W′ = {(w,d) | w ∈ W, d ∈ D_w}`;
         `(w,d) ≤′ (w′,d′) iff w ≤ w′ ∧ d = d′`; `(w,d) R′ (w′,d′) iff w = w′ ∧ R_w(d,d′)`
-  - [ ] Prove all five `cs5FC''` conjuncts + `cs5Incest`, sorry-free, given `R_w` refl/symm/trans and
+  - [x] Prove all five `cs5FC''` conjuncts + `cs5Incest`, sorry-free, given `R_w` refl/symm/trans and
         `≤`-monotonicity `R_w ⊆ R_{w″}`
-  - [ ] **Confirm `cs5FC` FAILS** (its `≤`-composed transitivity needs cross-context edges `R′`
+  - [x] **Confirm `cs5FC` FAILS** (its `≤`-composed transitivity needs cross-context edges `R′`
         cannot supply) — mechanize the obstruction, do not merely assert it
-  - [ ] Verify sorry-free; `#print axioms`
+  - [x] Verify sorry-free; `#print axioms` (abstract results: **no axioms**; witness: `[propext]`)
 - **Timing:** one dispatch
 - **Depends on:** none
 - **Reuses:** `cs5FC''`/`cs5FC`/`cs5FCIncest` (`CKExtension.lean:159,184`), `CKForces`, `Preorder`
@@ -462,6 +462,10 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
 - **Falsifier:** `B_K ⊭ cs5FC''` (~15%) ⟹ the §8.1.1 leg collapses; the target's frame class is
   wrong; the route needs re-derivation. **Document and stop; do not proceed to Phase 21.**
 - **Risk:** LOW-MED
+- **Result:** POSITIVE — falsifier did **not** fire. `B_K ⊨ cs5FC''` holds over an arbitrary
+  IL-model (`BK_cs5FC''`), plus `cs5Incest`/`cs5FCIncest`; `cs5FC` provably FAILS
+  (`BK_not_cs5FC`), with a concrete witness (`BKWitness_not_cs5FC`) making the separation
+  non-vacuous. `Rdom` proved unnecessary. Artifact: `probes/bounded-context-bk-probe.lean`.
 
 ### Phase 18: Make the landed framework honest — remove the only corner cut in `Cslib/` [NOT STARTED]
 - **Goal:** **~2-4h, NON-OPTIONAL, required regardless of every other decision.** Per the user's

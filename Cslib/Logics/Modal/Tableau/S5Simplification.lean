@@ -2772,6 +2772,54 @@ lemma modalKnownWorlds_length_le_worldBoundS5 (φ₀ : Proposition Atom)
     _ ≤ modalWorldBoundS4 φ₀ := signedSubfmls_powerset_card_le φ₀
     _ = modalWorldBoundS5 φ₀ := rfl
 
+omit [Hashable Atom] in
+/-- **Phase 6 capstone**: the S5 termination chain's actual payload -- the a-priori world-index
+bound `modalMaxWorld b < modalWorldBoundS5 φ₀`, in *value* form rather than the pigeonhole's
+*count* form.
+
+This is the exact bridge `worldsContiguous` (the 12th `S5LoopInv` field) was introduced for:
+`modalKnownWorlds_length_le_worldBoundS5` bounds the known-world COUNT, while every downstream
+consumer (`modalApplyOneS5_outputs_subset`, and any future Hintikka lift generalized over
+`S5LoopInv` instead of `ModalLoopInvGen`) needs a bound on the fresh label's VALUE. Contiguity
+(`modalMaxWorld b + 1 = (modalKnownWorlds b).length` -- worlds are minted only at exactly
+`modalNextWorld b`, so the range `{0, ..., modalMaxWorld b}` has no gaps) converts one into the
+other definitionally.
+
+This is the S5 analogue of `modalMaxWorld_lt_worldBound_of_phiBound`
+(`CompletenessLoop.lean`), which derives the same conclusion for K from the rank-based Φ-bound.
+The whole point of the S5 chain is that it reaches this conclusion via the birth-key pigeonhole
+instead, since the rank route is *mathematically false* for `modalApplyOneS5`
+(`modalApplyOneS5_rankStep_not_dischargeable`, below). -/
+lemma modalMaxWorld_lt_worldBoundS5_of_keys (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hcontig : modalMaxWorld b + 1 = (modalKnownWorlds b).length)
+    (hTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k')
+    (hInUniv : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
+    modalMaxWorld b < modalWorldBoundS5 φ₀ := by
+  have hbound := modalKnownWorlds_length_le_worldBoundS5 φ₀ b keys hTotal hDistinct hInUniv
+  rw [← hcontig] at hbound
+  exact hbound
+
+omit [Hashable Atom] in
+/-- **Phase 6 capstone, bundled form**: an `S5LoopInv` witness delivers the a-priori world bound
+directly. This is the single fact the entire Phase 3-6 termination chain (keys-aware guard ->
+twelve-field invariant -> preservation lemmas -> pigeonhole) exists to establish, and the form in
+which any downstream consumer should consume it.
+
+Note the scope boundary this lemma makes precise: `S5LoopInv` is an invariant of the *keyed*
+stepper `modalStepBranchS5gKeyed`, whereas the shipped `modalTableauS5` surface runs the
+*unguarded* `modalStepBranchGen modalApplyOneS5`. Connecting this bound to `modalTableauS5`
+requires a driver over the keyed stepper (see this file's "Phase 8 Scope" note). -/
+lemma S5LoopInv.worldBound {φ₀ : Proposition Atom}
+    {b e : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {keys : List (WorldIndex × Finset (Sign × Proposition Atom))}
+    (inv : S5LoopInv φ₀ b e acc keys) :
+    modalMaxWorld b < modalWorldBoundS5 φ₀ :=
+  modalMaxWorld_lt_worldBoundS5_of_keys φ₀ b keys
+    inv.worldsContiguous inv.keysTotal inv.keysDistinct inv.keysInUniverse
+
 /-- **Phase 4 field 1/6 (unblocked, cycle-3)**: `modalStepBranchS5gKeyed` preserves `bClosure`
 (`∀ x ∈ b, x ∈ modalUniverseS5 φ₀`). The blocked case leaves `b` unchanged. The non-blocked case
 combines `modalApplyOneS5_outputs_subset` (every newly-appended formula is in `U_{S5}(φ₀)`,
@@ -2794,10 +2842,8 @@ lemma modalStepBranchS5g_preserves_bClosure (φ₀ : Proposition Atom)
     (hDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k')
     (hInUniv : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
     ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS5 φ₀ := by
-  have hW : modalMaxWorld b < modalWorldBoundS5 φ₀ := by
-    have hbound := modalKnownWorlds_length_le_worldBoundS5 φ₀ b keys hTotal hDistinct hInUniv
-    rw [← hcontig] at hbound
-    exact hbound
+  have hW : modalMaxWorld b < modalWorldBoundS5 φ₀ :=
+    modalMaxWorld_lt_worldBoundS5_of_keys φ₀ b keys hcontig hTotal hDistinct hInUniv
   obtain ⟨sf, hsfmem, -, hcase⟩ :=
     modalStepBranchS5gKeyed_acc_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep hkK
   rcases hcase with ⟨wBlock, -, -, hnewBs, -, -⟩ | ⟨-, hshape⟩

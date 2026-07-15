@@ -23,6 +23,11 @@
           "type": "report",
           "path": "specs/513_generalize_tableau_soundness_chain_over_spec/reports/01_generalize-soundness-chain-over-spec.md",
           "summary": "Soundness-chain generalization research: crux, RuleSoundnessSpec interface, 6-phase plan"
+        },
+        {
+          "path": "specs/513_generalize_tableau_soundness_chain_over_spec/summaries/01_generalize-soundness-chain-summary.md",
+          "type": "summary",
+          "summary": "generalize soundness chain summary (backfilled by --sync)"
         }
       ],
       "completion_summary": "Generalized the tableau soundness chain over the abstract rule-application interface (RuleSoundnessSpec-style raw hypotheses in FrameSoundness.lean), re-instantiated K byte-identical (zero regression), instantiated at T to expose modalTableauT_sound, and completed tValid_decides/instDecidableTValid (task 503 Phase 6). All 6 phases green, zero sorry, zero axiom, full CI. Unblocks Decidable side of tasks 505 (B) and 504 (S5)."
@@ -68,7 +73,24 @@
       ],
       "parent_task": 503,
       "last_updated": "2026-07-14T23:15:15Z",
-      "session_id": "sess_1784054776_0fc973_510"
+      "session_id": "sess_1784054776_0fc973_510",
+      "artifacts": [
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/reports/01_generalize-hintikka-chain-over-spec.md",
+          "type": "report",
+          "summary": "generalize hintikka chain over spec (backfilled by --sync)"
+        },
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
+          "type": "plan",
+          "summary": "generalize hintikka chain over spec (backfilled by --sync)"
+        },
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/summaries/01_generalize-hintikka-chain-over-spec-summary.md",
+          "type": "summary",
+          "summary": "generalize hintikka chain over spec summary (backfilled by --sync)"
+        }
+      ]
     },
     {
       "project_number": 502,
@@ -348,6 +370,96 @@
           "path": "specs/317_propositional_tableau_completeness/reports/10_wave-a-atomic-derisk.md",
           "type": "report",
           "summary": "Fable+hard de-risk: GO on atomic Wave A, no design change. WIP (~80% done, live worker t317-impl-1) uses improved IFimpAccess companion predicate. Exact drop-in code for 2 remaining build errors + Completeness mirrors + ~10 lint fixes. Wave A closes 0/4 sorries but reshapes 3-4 to edge-frame Phase-10 goals."
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/01_tableau-completeness-research.md",
+          "type": "report",
+          "summary": "tableau completeness research (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/03_tableau-completeness-approach.md",
+          "type": "report",
+          "summary": "tableau completeness approach (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/04_fuel-sufficiency-measure.md",
+          "type": "report",
+          "summary": "fuel sufficiency measure (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/05_fuel-sufficiency-literature.md",
+          "type": "report",
+          "summary": "fuel sufficiency literature (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/06_sfor-dedup-reuse-abstraction.md",
+          "type": "report",
+          "summary": "sfor dedup reuse abstraction (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/07_option-b-fuel-bound.md",
+          "type": "report",
+          "summary": "option b fuel bound (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/08_b1-truthlemma-timp.md",
+          "type": "report",
+          "summary": "b1 truthlemma timp (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/reports/09_phase2-escape-routes.md",
+          "type": "report",
+          "summary": "phase2 escape routes (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md",
+          "type": "summary",
+          "summary": "b2 fuel sufficiency phase1 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase2a-blocked-summary.md",
+          "type": "summary",
+          "summary": "b2 fuel sufficiency phase2a blocked summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase1-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase1 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase2-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase2 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/04_sfor-dedup-phase4-summary.md",
+          "type": "summary",
+          "summary": "sfor dedup phase4 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/05_frame-change-and-fuel-raise-summary.md",
+          "type": "summary",
+          "summary": "frame change and fuel raise summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/06_intuniverse-intwork-phase6-summary.md",
+          "type": "summary",
+          "summary": "intuniverse intwork phase6 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/07_expmeasure-phase7_2-and-phase8-blocked-summary.md",
+          "type": "summary",
+          "summary": "expmeasure phase7 2 and phase8 blocked summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/08_phase8-fuel-doubling-and-init-bound-summary.md",
+          "type": "summary",
+          "summary": "phase8 fuel doubling and init bound summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/317_propositional_tableau_completeness/summaries/09_phase6-2-containment-worldbound-summary.md",
+          "type": "summary",
+          "summary": "phase6 2 containment worldbound summary (backfilled by --sync)"
         }
       ],
       "dependencies": [],
@@ -374,6 +486,11 @@
           "path": "specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md",
           "type": "plan",
           "summary": "7-phase risk-ordered plan: (1) shared frameValid/branchSatisfiableIn scaffolding; (2) T reflexive via ReflGen; (3) S5 universal-cluster simplification; (4) B symmetric via SymmGen; (5) S4 rules + equality-blocking loop-checking structure + soundness/truth lemma; (6) S4 termination bound 2^|Sf| + Decidable (crux); (7) 5/Euclidean via KB5/S5 EqvGen route. Zero-debt: [BLOCKED] fallbacks for S4 termination and pure-K5."
+        },
+        {
+          "path": "specs/300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md",
+          "type": "report",
+          "summary": "spawn analysis (backfilled by --sync)"
         }
       ],
       "dependencies": [
@@ -1191,6 +1308,11 @@
           "type": "plan",
           "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/plans/01_ct-cs4-cs5-extensions.md",
           "summary": "8 phases, CK segment reuse, CS5 via B/symmetry, STOP contingency at Phase 7"
+        },
+        {
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/summaries/01_ct-cs4-cs5-extensions-summary.md",
+          "type": "summary",
+          "summary": "ct cs4 cs5 extensions summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1784044271_09e821_501",
@@ -1235,6 +1357,11 @@
           "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/plans/01_generalize-tableau-driver-tsystem.md",
           "type": "plan",
           "summary": "7-phase plan: parametrize K driver over abstract RuleApplicationSpec, re-derive K trivially, instantiate T, close T truth lemma + Decidable(tValid). Reuse interface validated for 504/505."
+        },
+        {
+          "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/summaries/01_generalize-tableau-driver-tsystem-summary.md",
+          "type": "summary",
+          "summary": "generalize tableau driver tsystem summary (backfilled by --sync)"
         }
       ],
       "blockers": "Phase 6 [BLOCKED] on task 513 (generic soundness). Phases 1-5 COMPLETE and green: generic driver + interface (1-2), termination measure via task 507 (3), T driver instantiation (4), T truth lemma + tValid completeness (5, commit 14d9931c). Phase 6 Decidable(tValid) needs modalTableauT phi = .closed -> tValid phi, i.e. the SOUNDNESS direction lifted to driver level; modalStepBranch_preserves_sat (Soundness.lean) is still K-concrete -- the mirror of the completeness gap task 510 closed. Escalated to task 513. Phase 7 interface docs PARTIAL (completeness contract documented). Zero sorry/axiom.",
@@ -1317,6 +1444,16 @@
           "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/03_parent-phase-plan-reference.md",
           "type": "report",
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
+          "type": "plan",
+          "summary": "b symmetric tableau implementation (backfilled by --sync)"
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/summaries/01_b-symmetric-tableau-summary.md",
+          "type": "summary",
+          "summary": "b symmetric tableau summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1784075478_630e1e_505",
@@ -1351,6 +1488,16 @@
           "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/reports/03_parent-phase-plan-reference.md",
           "type": "report",
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
+        },
+        {
+          "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md",
+          "type": "plan",
+          "summary": "s4 loopchecking termination decidability (backfilled by --sync)"
+        },
+        {
+          "path": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/summaries/01_s4-loopchecking-termination-decidability-summary.md",
+          "type": "summary",
+          "summary": "s4 loopchecking termination decidability summary (backfilled by --sync)"
         }
       ],
       "blockers": "Phase 8 [BLOCKED]: #worlds <= 2^|Sf| termination bound. worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 (persistent firings mutate known-world sets without re-checking distinctness; minting guard checks source not new-world content). Phases 1-7 delivered green (Definition of Done met), zero sorry/axiom. Phase 9 (Decidable (s4Valid phi)) unreachable without the bound. Escalated to follow-on task 511 with documented goal state; standing [BLOCKED] permission exercised per plan.",
@@ -1373,6 +1520,26 @@
           "type": "research",
           "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 503"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/reports/01_frame-specific-tableau-extensions.md",
+          "type": "report",
+          "summary": "frame specific tableau extensions (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/reports/03_parent-phase-plan-reference.md",
+          "type": "report",
+          "summary": "parent phase plan reference (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/plans/01_generalize-fmp-termination-measure.md",
+          "type": "plan",
+          "summary": "generalize fmp termination measure (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/summaries/01_generalize-fmp-termination-measure-summary.md",
+          "type": "summary",
+          "summary": "generalize fmp termination measure summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1784054776_0fc973_507"
@@ -1433,6 +1600,16 @@
           "path": "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
           "type": "plan",
           "summary": "11-phase CS5 symmetric-tail completeness; transcription first, pair-construction research-risk last"
+        },
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/summaries/01_cs5-symmetric-tail-completeness-phases1-7-summary.md",
+          "type": "summary",
+          "summary": "cs5 symmetric tail completeness phases1 7 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/summaries/02_cs5-phases8-11-summary.md",
+          "type": "summary",
+          "summary": "cs5 phases8 11 summary (backfilled by --sync)"
         }
       ],
       "completion_summary": "Branch B (scope-sanctioned): CS5 soundness + mechanized obstruction, sorry-free and axiom-clean. Delivered: (1) refuted task 508's published \"CS5 completeness blocked\" verdict in landed code (508's cs5FCweak omitted plain symmetry; wr'_not_symm); (2) CS5 soundness over the weakened frame condition cs5FC'' for all 17 axioms, cs5_axiom_sound'' axiom-free; (3) full canonical machinery up to cs5FC''_cs5Mreach via the symmetric tail cs5Tail with definitional symmetry (cs5Tail_symm axiom-free) reusing prime_set_exclusion; (4) a mechanized non-vacuity theorem for the box-backward gap (CS5BoxGapWorld three-world countermodel landed in CS5.lean). CS5 completeness itself remains OPEN at the truth-lemma box-backward case: Phase 8 discovered a new obstruction (the cross-condition predicate boxInv Z subset Y is not closure-stable) that defeats even the repaired designated-formula-exclusion approach. A repair (combined derivation system over a doubled atom space Atom+Atom) was designed but not built; pursued in follow-up task 512. Docstring reflects honest status: not a library-level 'CS5 completeness impossible' verdict, and not for 508's refuted reason. Commits ec4acb87..fef08fc5. Full CI green; CS5 module builds 727 jobs, verified independently by orchestrator.",
@@ -1452,8 +1629,8 @@
       ],
       "parent_task": 509,
       "created": "2026-07-14T23:59:00Z",
-      "last_updated": "2026-07-15T06:40:14Z",
-      "session_id": "sess_1784074924_e73d87",
+      "last_updated": "2026-07-15T07:16:02Z",
+      "session_id": "sess_1784097632_a8a105",
       "priority": null,
       "effort": "10-16 hours",
       "artifacts": [
@@ -1471,6 +1648,41 @@
           "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md",
           "type": "summary",
           "summary": "Phase 3 route-2 partial progress"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md",
+          "type": "report",
+          "summary": "phase3 seed consistency (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/03_alternative-techniques.md",
+          "type": "report",
+          "summary": "alternative techniques (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/04_birelational-feasibility.md",
+          "type": "report",
+          "summary": "birelational feasibility (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/05_collapse-s5-probe.md",
+          "type": "report",
+          "summary": "collapse s5 probe (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
+          "type": "plan",
+          "summary": "birelational pivot (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md",
+          "type": "summary",
+          "summary": "box backward atom sum summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/03_necessity-transfer-summary.md",
+          "type": "summary",
+          "summary": "necessity transfer summary (backfilled by --sync)"
         }
       ]
     },
@@ -1500,7 +1712,7 @@
     {
       "project_number": 515,
       "project_name": "s5_universal_rule_termination_unblock_504",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.",
@@ -1517,8 +1729,8 @@
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-15T07:10:07Z",
-      "session_id": "sess_1784098846_dbb56f"
+      "last_updated": "2026-07-15T07:14:16Z",
+      "session_id": "sess_1784099642_e6eb18"
     }
   ],
   "repository_health": {

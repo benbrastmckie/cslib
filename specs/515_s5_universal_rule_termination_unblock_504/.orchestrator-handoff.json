@@ -1,48 +1,36 @@
 {
   "status": "partial",
-  "summary": "Cycle 8 (hard-mode /implement resume at Phase 7): Phase 7 (S5 soundness bridge) COMPLETED. Landed the final fuel-induction assembly modalTableauS5_sound sorry-free, closing the gap left by cycle 7 (which landed the reachability invariant and rule-level semantic soundness lemmas but not the assembly). Authored three new bespoke S5-specialized declarations in FrameSoundness.lean: S5SoundInv (combined accFreshInv/accReachableInv/accTargetsKnown invariant, threaded via List.Forall2), modalStepBranchS5_preserves_satIn (bespoke copy of the generic modalStepBranchGen_preserves_satIn crux, specialized to modalApplyOneS5/s5FC with an added accReachableInv hypothesis; box-pos/dia-neg branch uses the landed modalS5BoxAll_soundIn/modalS5DiaNegAll_soundIn, every other shape is a byte-for-byte copy of the generic crux's 'not shape' branch), and modalExpandBranchesS5_closed_unsatIn (bespoke copy of the generic outer fuel induction, threading S5SoundInv and reusing two already-generic preservation lemmas plus the cycle-7-landed accReachableInv preservation lemma). modalTableauS5_sound itself mirrors modalTableauT_sound exactly. Chose Strategy 2 (bespoke copy) over Strategy 1 (extraction) per handoff 06's options, to keep zero blast-radius on the frozen K/T/B/S4 chain -- confirmed via full lake build/lake test re-run (3239/3239 green, no regressions). Phases 1-7 of 9 are now COMPLETED. Phases 8-9 remain NOT STARTED, deliberately deferred to a fresh dispatch: Phase 8 is the plan's flagged HIGH-risk hard frontier (spec-free Hintikka lift) and deserves dedicated budget rather than a rushed attempt at the tail of this cycle.",
+  "summary": "Phase 8 partial: the S5 truth lemma over the universal relation (modalTruthLemmaS5 / modalOpenBranchS5_countermodel) and the termination chain's world-bound capstone (S5LoopInv.worldBound) landed sorry-free and CI-green, plus a spec->freshLocal generalization unlocking accSourcesKnown for S5. The spec-free Hintikka lift is [BLOCKED] with an exact open goal; Phase 9 transitively [BLOCKED]. 7/9 phases complete. Zero sorry, zero new axioms.",
   "phases_completed": 7,
   "phases_total": 9,
   "sorry_inventory": [],
-  "blockers": [],
-  "continuation_context": {
-    "next_phase": 8,
-    "next_fields": [
-      "modalExpandBranchesS5_hintikka",
-      "fuel bridge (modalExpMeasureS5 <= modalFuel, or modalTableauS5g/modalFuelS5)",
-      "modalTableauS5_complete",
-      "s5Valid_decides",
-      "instDecidableS5Valid"
-    ],
-    "recommended_action": "Attempt Phase 8 (spec-free Hintikka lift + fuel + completeness + decidability) in FrameCompleteness.lean. Read CompletenessLoop.lean:876 (modalExpandBranchesGen_hintikka) first to understand the rank-bound generic lift this generalizes (swap the induction measure to S5LoopInv, landed Phase 3/6, instead of ModalLoopInvGen rank). Phase 8 does NOT depend on Phase 7 (plan's own 'Depends on: 6 and 3' line, both landed). If modalExpandBranchesS5_hintikka resists within budget, mark [BLOCKED] with the exact lean_goal open state and pivot to the plan's pre-authorized Strategy 2 fallback: semantic bounded-model FMP via the landed extractModelS5 (equivalence-relation model enumeration <= 2^(2*|Sf|) + filtration truth lemma, Massacci Fact 9.1 single-cluster models) for instDecidableS5Valid, bypassing the generic driver's termination entirely. See handoffs/07_phase7-complete-modalTableauS5-sound-landed.md 'Next dispatch recipe' for full detail.",
-    "reusable_infrastructure": [
-      "S5SoundInv, modalStepBranchS5_preserves_satIn, modalExpandBranchesS5_closed_unsatIn, modalTableauS5_sound (NEW this cycle, FrameSoundness.lean) -- Phase 7 fully closed",
-      "modalApplyOneS5_fresh_local, accReachableInv (+_initial), modalStepBranchS5_preserves_accReachableInv, reachable_imp_related_s5, accReachableInv_related_s5, modalS5BoxAll_soundIn, modalS5DiaNegAll_soundIn (cycle 7, reused as black boxes this cycle)",
-      "S5LoopInv (12 fields, Phase 3-6 termination chain, fully closed) -- available for Phase 8's induction measure swap",
-      "extractModelS5 (task 504, landed) -- the pre-authorized Strategy 2 semantic-FMP fallback for decidability"
-    ],
-    "independent_track": "Phase 8 (FrameCompleteness.lean) does not depend on Phase 7 and can start fresh; it is the last remaining hard frontier before Phase 9 (5/KB5 completeness, gated on Phase 8).",
-    "stash_ref": null,
-    "stash_label": null,
-    "stash_verified": null
-  },
-  "next_action_hint": "Next dispatch: read handoffs/07_phase7-complete-modalTableauS5-sound-landed.md 'Next dispatch recipe', then attempt Phase 8 (modalExpandBranchesS5_hintikka in FrameCompleteness.lean). Phase 7 is fully closed and CI-green; this is a clean handoff, not a proof failure.",
-  "artifacts": [
+  "blockers": [
     {
-      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "type": "lean_source",
-      "summary": "Phase 7 COMPLETE. modalTableauS5_sound landed sorry-free via bespoke S5SoundInv/modalStepBranchS5_preserves_satIn/modalExpandBranchesS5_closed_unsatIn. Full CI green, zero sorry, zero new axioms, zero regression to K/T/B/S4."
+      "phase": 8,
+      "open_goal": "⊢ modalHintikkaSetGen modalApplyOneS5 bR aR   (from: modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .openBranch bR aR)",
+      "why": "modalExpandBranchesGen_hintikka demands RuleApplicationSpec modalApplyOneS5 (proven false at rankStep) and threads rank-based ModalLoopInvGen. S5LoopInv is an invariant of the KEYED stepper, which no driver runs; it also has no Hintikka-forcing fields."
     },
-    {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-      "type": "summary",
-      "summary": "Updated in place with cycle 8 status ledger, Phase 7 completion details, plan deviations, and full CI verification record."
-    },
-    {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/07_phase7-complete-modalTableauS5-sound-landed.md",
-      "type": "handoff",
-      "summary": "Cycle 8 continuation handoff: what landed, CI verification, zero-regression confirmation, and the Phase 8 entry-point recipe for the next dispatch."
-    }
+    { "phase": 9, "open_goal": "N/A -- not attempted", "why": "Gated on modalTableauS5_complete (Phase 8 item 4)." }
   ],
-  "commit": "93f21b8541736a197d1538f60618eab369ebd461"
+  "recommended_next_dispatch": [
+    "1. Cheap/mechanical: generalize modalExpandBranchesGen_openBranch_accSourcesKnown's double induction over an arbitrary step-preserved per-(branch,acc) predicate P (body is already predicate-agnostic), instantiate at accSourcesKnown AND accTargetsKnown. Closes completeness items 1-3 entirely; step-level accTargetsKnown fact already exists and is S5-ready.",
+    "2. SETTLE PLAN RISK R7 BEFORE BUILDING ANYTHING LARGE: does K's modalFuel dominate the UNGUARDED S5 expansion? If YES, the lift targets the shipped modalTableauS5 surface and the keyed-vs-unguarded mismatch dissolves. If NO, a keyed driver + its own soundness bridge is needed and should be re-planned as its own phase, not absorbed into Phase 8.",
+    "3. Only then attempt the lift (needs 5 new Hintikka-forcing S5LoopInv fields + preservation), or pivot to Strategy 2 (needs a filtration truth lemma + an atom-locality argument, since no Fintype Atom is assumed).",
+    "RECOMMENDATION: /revise the plan before the next /implement -- plan v2's Phase 8 (3h estimate) did not account for the keyed-vs-unguarded mismatch or the missing Hintikka fields, and is realistically several phases."
+  ],
+  "continuation_context": {
+    "is_successor": true,
+    "resume_phase": 8,
+    "preserved_assets": "Phases 1-7 COMPLETED and CI-green; do not redo. Cycle-9 additions: S5Simplification.lean (modalMaxWorld_lt_worldBoundS5_of_keys, S5LoopInv.worldBound); FrameCompleteness.lean (eqvGen_mem_modalKnownWorlds_iff, hintikkaS5_box_pos, hintikkaS5_diamond_neg, modalTruthLemmaS5, modalOpenBranchS5_countermodel, modalExpandBranchesS5_openBranch_accSourcesKnown, + in-file 'Phase 8 scope note'); BDriver.lean (spec->freshLocal generalization).",
+    "read_first": [
+      "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md (Cycle 9 section)",
+      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean ('Phase 8 scope note', the 4-item breakdown)"
+    ]
+  },
+  "artifacts": [
+    { "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md", "type": "summary", "summary": "Cycle 9 section appended; phases 1-8 history preserved." },
+    { "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md", "type": "plan", "summary": "Phases 8/9 marked [BLOCKED] with exact open goal and structural findings." }
+  ],
+  "commits": ["6d04e74e", "07c79505"],
+  "session_id": "sess_1784152189_12f1bc"
 }

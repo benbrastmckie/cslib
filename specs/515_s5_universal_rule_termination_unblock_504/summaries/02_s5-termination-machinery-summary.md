@@ -1,4 +1,4 @@
-# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-8)
+# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-9)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
 - **Plan**: `plans/02_s5-termination-machinery.md`
@@ -9,8 +9,9 @@
   S5-specialized fuel induction (`modalStepBranchS5_preserves_satIn` +
   `modalExpandBranchesS5_closed_unsatIn`), reusing the cycle-7 semantic core
   (`accReachableInv`, `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn`) as black boxes. Phases
-  8, 9 remain `[NOT STARTED]` -- the spec-free Hintikka lift/decidability frontier, deferred to a
-  fresh dispatch per this cycle's continuation handoff.
+  **Phase 8 is `[BLOCKED]` and Phase 9 transitively `[BLOCKED]`** as of cycle 9 -- see the
+  "Cycle 9" section appended at the end of this summary for what landed, the exact open goal, and
+  two structural findings that re-scope Phase 8.
 - **Commits cycle 2**: `db5b837a` (Phase 4: accFresh/accKnown/outDegEq), `8e4a17ba` (Phase 6:
   pigeonhole world bound)
 - **Commits cycle 4**: `caaea293` (Phase 4 COMPLETE: 12th field `worldsContiguous` +
@@ -332,3 +333,167 @@ recipe.
 
 No `sorry`, no vacuous definitions, and no re-added rank axiom were introduced at any point
 across cycles 2 or 4.
+
+
+---
+
+## Cycle 9 (2026-07-15): Phase 8 partial -- S5 truth lemma landed, lift `[BLOCKED]`
+
+- **Status**: Phase 8 `[BLOCKED]`, Phase 9 transitively `[BLOCKED]`. **7 of 9 phases COMPLETED.**
+- **Commits**: `6d04e74e` (truth lemma + world-bound capstone), `07c79505` (spec generalization
+  + S5 `accSourcesKnown` instance).
+- **Sorry inventory**: EMPTY. Zero `sorry`, zero new axioms, zero vacuous definitions, zero
+  weakened statements.
+
+### Plan-marker reconciliation (dispatch instruction)
+
+The dispatch flagged that the plan records `keyLowerBd`/`keysTotal` as `[NOT STARTED]` inside an
+otherwise-`[COMPLETED]` Phase 5. **Verified against disk: this discrepancy no longer exists.**
+Both tasks are checked `[x]` with cycle-6 landing notes, and the on-disk state agrees --
+`grep` for `sorry` across `Cslib/Logics/Modal/Tableau/` returns only prose mentions, and
+`lake build` is green at 3239/3239. The stale text was already reconciled in cycle 6; only the
+prose paragraph *below* the task list still narrates them as deferred, which is historical
+narration of the cycle-4 state, not a live marker. No action needed.
+
+### What Changed
+
+- **`S5Simplification.lean`** -- `modalMaxWorld_lt_worldBoundS5_of_keys` and
+  `S5LoopInv.worldBound`: the termination chain's **actual payload**, exposed as a named lemma.
+  Phases 3-6 exist to establish the a-priori world bound via the birth-key pigeonhole (the rank
+  route being *false* for S5), but that conclusion existed only as a `have hW` buried inside
+  `_preserves_bClosure`. It is now the chain's public conclusion; `_preserves_bClosure` consumes
+  the named lemma. This is the S5 counterpart of K's
+  `modalMaxWorld_lt_worldBound_of_phiBound`.
+- **`FrameCompleteness.lean`** -- the **S5 truth lemma over the universal relation** (the task
+  description's explicit "Phase 4" deliverable): `eqvGen_mem_modalKnownWorlds_iff`,
+  `hintikkaS5_box_pos`, `hintikkaS5_diamond_neg`, `modalTruthLemmaS5`,
+  `modalOpenBranchS5_countermodel`. This is the **countermodel half of S5 completeness**, and it
+  is independent of both the termination chain and the blocked lift: like
+  `modalTruthLemmaT`/`modalTruthLemmaB` it consumes a `modalHintikkaSetGen modalApplyOneS5 b acc`
+  witness as a *hypothesis*.
+- **`BDriver.lean`** -- generalized `modalStepBranchGen_preserves_accSourcesKnown` and
+  `modalExpandBranchesGen_openBranch_accSourcesKnown` from the bundled
+  `spec : RuleApplicationSpec apply` to the raw `freshLocal` dichotomy they actually consumed
+  (verified: the sole use site was one `rcases spec.freshLocal`). Zero regression to B, which now
+  passes `modalApplyOneB_spec.freshLocal`.
+- **`FrameCompleteness.lean`** -- `modalExpandBranchesS5_openBranch_accSourcesKnown`, the S5
+  instantiation that generalization unlocks, plus an in-file **"Phase 8 scope note"** recording
+  precisely what `modalTableauS5_complete` still needs.
+
+### Decisions
+
+- **The S5 universal rule trivialises the truth lemma.** `extractModelS5`'s relation is the
+  *equivalence closure* `Relation.EqvGen acc.hasEdge` -- far more than the single raw edge K's/T's
+  bridges consume, and more even than B's `SymmGen`. Rather than chase paths, the S5 bridges
+  observe that `modalApplyOneS5`'s `T(□φ)@w` arm emits `T(φ)@w'` at **every** known world, so a
+  saturated branch already carries the payload everywhere; the bridges take a bare
+  `w' ∈ modalKnownWorlds b` where T's/B's take a path. The only residual obligation is that
+  `EqvGen` cannot escape the known-world set (`eqvGen_mem_modalKnownWorlds_iff`).
+- **`eqvGen_mem_modalKnownWorlds_iff` is stated as an `Iff`, not the `→` actually consumed.**
+  Forced, not stylistic: `Relation.EqvGen`'s `symm` constructor is otherwise not dischargeable by
+  induction (at `symm` the IH gives `x known → y known` while the goal needs the converse), so
+  both directions must be carried together. This is also why it needs `accSourcesKnown` *and*
+  `accTargetsKnown`, one per raw-edge endpoint.
+- **Generalize rather than copy.** For `accSourcesKnown` the fix was to weaken an over-strong
+  hypothesis in the shared generic lemma, not to author an S5 copy (contrast Phase 7's soundness
+  bridge, where a bespoke copy was chosen to protect the frozen K crux). Justified because the
+  change is a strict generalization with a single call site, and `#print axioms` on
+  `modalTableauB_complete` confirms B is unregressed.
+- **Strategy 2 (semantic FMP) deliberately NOT started.** It needs a filtration truth lemma
+  *plus* an atom-locality argument to make valuation enumeration decidable for arbitrary `Atom`
+  (no `Fintype Atom` is assumed by any decidability instance in the file). That is multi-dispatch
+  work; starting and not finishing it would have produced no landable artifact. It remains
+  pre-authorized and untouched.
+
+### Impacts -- two structural findings that re-scope Phase 8
+
+Both are new this cycle; **the plan did not account for either**, and they explain why Phase 8 is
+larger than its 3-hour estimate:
+
+1. **`S5LoopInv` is an invariant of a stepper no driver runs.** `S5LoopInv`/
+   `modalStepBranchS5gKeyed` is the *keyed* stepper; `modalTableauS5 = modalTableauGen
+   modalApplyOneS5` runs the *unguarded* `modalStepBranchGen modalApplyOneS5`, and no
+   `modalExpandBranchesS5gKeyed` exists. Generalizing the lift over `S5LoopInv` does not by
+   itself yield a lift for `modalTableauS5`: it needs either a keyed driver (with its OWN
+   soundness bridge, since the landed `modalTableauS5_sound` is stated for the unguarded surface)
+   or a fuel-domination proof for the unguarded expansion (plan risk R7).
+2. **`S5LoopInv` carries no Hintikka-forcing fields** -- none of `ModalLoopInvGen`'s
+   `hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`. Those
+   five fields plus preservation lemmas are prerequisite work for any `S5LoopInv`-parametrized
+   lift, on top of the twelve fields already landed.
+
+Also worth recording: **fuel insufficiency is a completeness-only hazard, never a soundness one.**
+`modalExpandBranchesGen` at `fuel = 0` returns `.openBranch` whenever any branch is open
+(`Saturation.lean:206-212`), never a premature `.closed`. This is why `modalTableauS5_sound` holds
+unconditionally at K's fuel while completeness does not -- and it means R7 must be settled before
+`modalTableauS5_complete` can even be *stated* at the shipped surface.
+
+### The exact blocker
+
+`modalTableauS5_complete` needs four facts at the open branch `(b, a)`:
+
+| # | Fact | Status |
+|---|------|--------|
+| 1 | `F(φ0)@0 ∈ b` | AVAILABLE (`modalExpandBranchesGen_openBranch_initial_mem`, generic) |
+| 2 | `accSourcesKnown b a` | AVAILABLE (landed this cycle) |
+| 3 | `accTargetsKnown b a` | NOT BUILT -- mechanical (see below) |
+| 4 | `modalHintikkaSetGen modalApplyOneS5 b a` | **THE WALL** |
+
+Item 4's open goal, verbatim:
+```
+⊢ modalHintikkaSetGen modalApplyOneS5 bR aR
+```
+from `modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .openBranch bR aR`.
+`modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean:876`) cannot serve: it demands
+`spec : RuleApplicationSpec apply` (PROVEN FALSE for S5 at `rankStep`) and threads
+`ModalLoopInvGen`, whose `potentialInv`/`phiBound` fields are rank-based by construction.
+
+### Follow-ups (next dispatch, in order)
+
+1. **Item 3 (cheap, mechanical)**: generalize `modalExpandBranchesGen_openBranch_accSourcesKnown`'s
+   double induction over an arbitrary step-preserved per-`(branch, acc)` predicate `P` -- its body
+   is already predicate-agnostic -- then instantiate at both `accSourcesKnown` and
+   `accTargetsKnown` (step-level fact already exists and is S5-ready:
+   `modalStepBranch_preserves_accTargetsKnown_gen`). This closes items 1-3 entirely.
+2. **Settle R7 before building anything large**: decide whether K's `modalFuel` dominates the
+   unguarded S5 expansion. If YES, the lift can target the shipped `modalTableauS5` surface
+   directly and finding 1 dissolves. If NO, a keyed driver + its own soundness bridge is required,
+   and that should be re-planned as its own phase rather than absorbed into Phase 8.
+3. **Only then** attempt the lift, or pivot to Strategy 2.
+
+### Verification (cycle 9)
+
+- `lake build`: 3239/3239 green.
+- `lake exe checkInitImports`: exit 0. `lake exe lint-style`: exit 0. `lake test`: exit 0.
+- `lake lint`: only the 1 pre-existing unrelated `PrimeExclusion.lean` `unusedArguments` error.
+- `lake shake --add-public --keep-implied --keep-prefix`: no new import suggestions for touched
+  files.
+- **`#print axioms` (run via `lake env lean`, independent of the LSP)** on
+  `modalTruthLemmaS5`, `modalOpenBranchS5_countermodel`, `hintikkaS5_box_pos`,
+  `hintikkaS5_diamond_neg`, `eqvGen_mem_modalKnownWorlds_iff`,
+  `modalExpandBranchesS5_openBranch_accSourcesKnown`,
+  `modalExpandBranchesGen_openBranch_accSourcesKnown`, `modalTableauB_complete`,
+  `modalTableauS5_sound`: `propext`/`Classical.choice`/`Quot.sound` only -- **no `sorryAx`**.
+  (`eqvGen_mem_modalKnownWorlds_iff` depends on no axioms at all.)
+  Recorded because an interim `lean_verify` call returned a spurious `sorryAx` for a
+  freshly-edited declaration; it was a stale-LSP artifact, disproved by both the independent
+  `#print axioms` run and by `lake build` emitting no `declaration uses sorry` warning for the
+  file. The only such warning in the project is the pre-existing task-317
+  `Cslib/Logics/Propositional/Tableau/Minimal/Completeness.lean:118`, outside this task's scope.
+- Pre-existing unrelated issues left untouched: the task-317 `sorry` above, and the
+  `PrimeExclusion.lean` lint error.
+
+### Plan Deviations (cycle 9)
+
+- **Landed the truth lemma, which plan v2 does not list under Phase 8.** Plan v2's Phase 8 task
+  list assumes the lift comes first; the truth lemma is listed only implicitly (task description
+  "the generic Hintikka lift + truth lemma over the universal relation (Phase 4)") and in the
+  Artifacts ledger. Since the lift is blocked and the truth lemma is genuinely *independent* of
+  it, the dispatch delivered the independent half rather than nothing. This is a scope
+  re-ordering, not a scope reduction.
+- **Edited `BDriver.lean`, not named in plan v2's Phase 8 "Files to modify".** The edit is a
+  strict hypothesis generalization (`spec` -> `freshLocal`) with one call site, verified
+  zero-regression by `#print axioms` on `modalTableauB_complete`. It does not touch
+  `GenericDriver.lean`'s `RuleApplicationSpec` core, which the plan's Non-Goals protect.
+- **`GenericDriver.lean` untouched**, as the plan's Non-Goals require. No
+  `RuleApplicationSpec modalApplyOneS5` witness was reintroduced; no rank axiom.

@@ -264,9 +264,32 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 8: Spec-free Hintikka lift + fuel + completeness + decidability [NOT STARTED]
+### Phase 8: Spec-free Hintikka lift + fuel + completeness + decidability [BLOCKED]
 
 **Goal**: Build the frontier capstone: the `S5LoopInv`-parametrized Hintikka lift replacing the rank-bound generic lift, the fuel bridge, completeness, and `Decidable (s5Valid φ)` against `Cube.S5`. **No template; the hard frontier (F4). HIGH risk — the primary `[BLOCKED]`/Strategy-2 candidate.**
+
+**Status (cycle 9)**: `[BLOCKED]` on the spec-free Hintikka lift, exactly as R6 predicted. **Substantial partial progress landed sorry-free and CI-green** — the countermodel half of S5 completeness is now DONE, and the remaining gap is sharply localised (see the in-file "Phase 8 scope note", `FrameCompleteness.lean`). Landed this cycle (commits `6d04e74e`, `07c79505`):
+- `modalMaxWorld_lt_worldBoundS5_of_keys` + `S5LoopInv.worldBound` (`S5Simplification.lean`) — the termination chain's **actual payload**, exposed as a named lemma. Phases 3-6 built toward the a-priori world bound, but it existed only as a `have hW` buried inside `_preserves_bClosure`; it is now the chain's public conclusion, and `_preserves_bClosure` consumes it.
+- `eqvGen_mem_modalKnownWorlds_iff`, `hintikkaS5_box_pos`, `hintikkaS5_diamond_neg`, `modalTruthLemmaS5`, `modalOpenBranchS5_countermodel` (`FrameCompleteness.lean`) — **the truth lemma over the universal relation** (the task description's Phase-4 deliverable, and plan Artifact "P8"'s prerequisite). Independent of both the termination chain and the lift: consumes a `modalHintikkaSetGen modalApplyOneS5 b acc` witness as a hypothesis, exactly as `modalTruthLemmaT`/`modalTruthLemmaB` do.
+- `modalExpandBranchesS5_openBranch_accSourcesKnown` (`FrameCompleteness.lean`), unlocked by generalizing `modalStepBranchGen_preserves_accSourcesKnown`/`modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean`) from the bundled `spec : RuleApplicationSpec apply` to the raw `freshLocal` dichotomy they actually consumed. Zero regression to B.
+
+**The exact remaining blocker** — `modalTableauS5_complete` needs four facts at the open branch `(b, a)`; 1 and 2 are now available, 3 is mechanical, 4 is the wall:
+1. `F(φ0)@0 ∈ b` — AVAILABLE (`modalExpandBranchesGen_openBranch_initial_mem`, generic).
+2. `accSourcesKnown b a` — AVAILABLE (landed this cycle, above).
+3. `accTargetsKnown b a` — NOT BUILT, but mechanical: the step-level fact is already generic and S5-ready (`modalStepBranch_preserves_accTargetsKnown_gen`, consumed at `modalApplyOneS5` by Phase 7); only the top-loop propagation is missing. Recommended route: generalize `modalExpandBranchesGen_openBranch_accSourcesKnown`'s double induction over an arbitrary step-preserved per-`(branch, acc)` predicate `P` (its body is already predicate-agnostic), then instantiate at both `accSourcesKnown` and `accTargetsKnown`.
+4. `modalHintikkaSetGen modalApplyOneS5 b a` — **THE WALL**. Open goal, verbatim:
+   ```
+   ⊢ modalHintikkaSetGen modalApplyOneS5 bR aR
+   ```
+   from `modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .openBranch bR aR`.
+   `modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean:876`) cannot serve: (a) it demands `spec : RuleApplicationSpec apply`, PROVEN FALSE for S5 at `rankStep`; (b) it threads `ModalLoopInvGen apply φ0 bi ei ai rank`, whose `potentialInv`/`phiBound` fields are rank-based by construction.
+
+**Two structural findings that re-scope this phase** (both new this cycle; the plan did not account for either):
+- **`S5LoopInv` is an invariant of a stepper no driver runs.** `S5LoopInv`/`modalStepBranchS5gKeyed` is the *keyed* stepper, but `modalTableauS5 = modalTableauGen modalApplyOneS5` runs the *unguarded* `modalStepBranchGen modalApplyOneS5`, and no `modalExpandBranchesS5gKeyed` exists. Generalizing the lift over `S5LoopInv` therefore does not by itself yield a lift for `modalTableauS5`; it needs either a keyed driver (with its OWN soundness bridge, since the landed `modalTableauS5_sound` is stated for the unguarded surface) or a fuel-domination proof for the unguarded expansion (R7).
+- **`S5LoopInv` carries no Hintikka-forcing fields.** It has none of `ModalLoopInvGen`'s `hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`. Those five fields plus their preservation lemmas are prerequisite work for any `S5LoopInv`-parametrized lift, on top of the twelve fields already landed.
+- **Fuel insufficiency is a completeness-only hazard, never a soundness one**: `modalExpandBranchesGen` at `fuel = 0` returns `.openBranch` whenever any branch is open (`Saturation.lean:206-212`), never a premature `.closed`. This is why `modalTableauS5_sound` holds unconditionally at K's fuel while completeness does not — and it means R7 must be settled before `modalTableauS5_complete` can be stated at the shipped surface.
+
+Strategy 2 (semantic bounded-model FMP) was NOT attempted this cycle: it needs a filtration truth lemma plus an atom-locality argument to make valuation enumeration decidable for arbitrary `Atom` (no `Fintype Atom` is assumed anywhere in the file's decidability instances), which is itself multi-dispatch. It remains pre-authorized and untouched.
 
 **Tasks**:
 - [ ] Author `modalExpandBranchesS5_hintikka`: the (extended) `S5LoopInv`-parametrized analogue of `modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean:876`), generalizing its induction over `S5LoopInv` (world bound from P3/P6) instead of `ModalLoopInvGen` (rank). The Hintikka-forcing fields survive as standalone lemmas re-targeted at `modalUniverseS5` (D2), NOT as a `RuleApplicationSpec` instance. Note the keyed-stepper's minting decision must align with the lift's loop-back semantics (the keys-aware guard's soundness for loop-back edges is re-derived here).
@@ -288,7 +311,9 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 9: 5/KB5 validity + completeness [NOT STARTED]
+### Phase 9: 5/KB5 validity + completeness [BLOCKED]
+
+**Status (cycle 9)**: transitively `[BLOCKED]` on Phase 8, exactly per this phase's own Blocked-branch clause. Both tasks route through `modalTableauS5_complete` (P8 item 4), which is not built. Not attempted; no `sorry`, no partial work landed. The `extractModelS5_rightEuclidean` half of the bridge remains landed and CI-green from task 504 (unchanged this cycle).
 
 **Goal**: Complete task 504 Phase 7: `fiveValid`/`kb5Valid` completeness via the landed semantic bridge. Low risk *given* P8.
 

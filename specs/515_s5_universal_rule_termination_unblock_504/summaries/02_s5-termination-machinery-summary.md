@@ -1,14 +1,16 @@
-# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-7)
+# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-8)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
 - **Plan**: `plans/02_s5-termination-machinery.md`
-- **Status**: PARTIAL -- **Phases 1-6 (the full termination chain) are now COMPLETED** (closed
-  across cycles 2, 4, 5, 6; see commits `d4e7ed73`/`49ed521b` for the final Phase 5 fields and
-  `bfbe032f` for the Phase 5-complete handoff). **Phase 7 (soundness bridge) is now `[PARTIAL]`**
-  (this cycle, cycle 7): the reachability invariant and both rule-level semantic soundness lemmas
-  landed sorry-free; only the final fuel-induction assembly (`modalTableauS5_sound`) remains,
-  blocked on budget with a precise, actionable continuation (see handoff 06). Phases 8, 9 remain
-  `[NOT STARTED]`.
+- **Status**: PARTIAL -- **Phases 1-7 are now COMPLETED** (termination chain P1-P6 closed across
+  cycles 2, 4, 5, 6; see commits `d4e7ed73`/`49ed521b` for the final Phase 5 fields and
+  `bfbe032f` for the Phase 5-complete handoff. **Phase 7 (soundness bridge) is now fully
+  `[COMPLETED]`** as of cycle 8: `modalTableauS5_sound` lands sorry-free via a bespoke
+  S5-specialized fuel induction (`modalStepBranchS5_preserves_satIn` +
+  `modalExpandBranchesS5_closed_unsatIn`), reusing the cycle-7 semantic core
+  (`accReachableInv`, `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn`) as black boxes. Phases
+  8, 9 remain `[NOT STARTED]` -- the spec-free Hintikka lift/decidability frontier, deferred to a
+  fresh dispatch per this cycle's continuation handoff.
 - **Commits cycle 2**: `db5b837a` (Phase 4: accFresh/accKnown/outDegEq), `8e4a17ba` (Phase 6:
   pigeonhole world bound)
 - **Commits cycle 4**: `caaea293` (Phase 4 COMPLETE: 12th field `worldsContiguous` +
@@ -16,10 +18,13 @@
   `keysInUniverse`)
 - **Commits cycles 5-6** (Phase 5 completion, termination chain closed): `d4e7ed73` (`keysTotal`),
   `49ed521b` (`keyLowerBd` -- Phase 5 COMPLETE, Phases 3-6 all closed)
-- **Commits cycle 7** (this dispatch, Phase 7 partial): `e2430463` (`modalApplyOneS5_fresh_local`
+- **Commits cycle 7** (Phase 7 partial): `e2430463` (`modalApplyOneS5_fresh_local`
   + `accReachableInv` scaffolding), `a1018c6b`
   (`modalStepBranchS5_preserves_accReachableInv`), `4dd7d0e7` (`modalS5BoxAll_soundIn` /
   `modalS5DiaNegAll_soundIn`)
+- **Commits cycle 8** (this dispatch, Phase 7 COMPLETE): `modalTableauS5_sound` assembly --
+  `S5SoundInv`, `modalStepBranchS5_preserves_satIn`, `modalExpandBranchesS5_closed_unsatIn`,
+  `modalTableauS5_sound` (see the final commit hash in this cycle's handoff `07_*.md`)
 - **Handoffs**:
   - `handoffs/01_phase4-generic-field-preservation.md` (cycle-2-prior dispatch: proof template,
     gotchas)
@@ -29,8 +34,10 @@
     `keysInUniverse` landed; concrete next-step plan for `keyLowerBd`/`keysTotal`)
   - `handoffs/05_phase5-complete-termination-chain-closed.md` (cycle 6: Phase 5 complete,
     termination chain P3-P6 closed)
-  - `handoffs/06_phase7-reachability-soundIn-landed-assembly-remains.md` (cycle 7, **this
-    dispatch**: Phase 7's semantic core landed; exact assembly gap and two viable strategies)
+  - `handoffs/06_phase7-reachability-soundIn-landed-assembly-remains.md` (cycle 7: Phase 7's
+    semantic core landed; exact assembly gap and two viable strategies)
+  - `handoffs/07_phase7-complete-modalTableauS5-sound-landed.md` (cycle 8, **this dispatch**:
+    Phase 7 fully complete; Phase 8 entry point for the next dispatch)
 
 ## Cycle 2 Context
 
@@ -45,7 +52,21 @@ to require additional infrastructure not achievable safely within this dispatch'
 budget (documented as a precise, actionable blocker rather than rushed with `sorry` or a
 vacuous placeholder).
 
-## Per-Phase Status Ledger (as of cycle 4)
+## Per-Phase Status Ledger (as of cycle 8, current)
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 1. Frame surface + S5 world bound + universe | COMPLETED | commit `66021669` |
+| 2. Live-set guard + guarded rule (preserved scaffold) | COMPLETED | commit `aa9015d6` |
+| 3. Keys-aware guard redesign + extended `S5LoopInv` | COMPLETED | commit `4f41f3a4`; extended to 12 fields cycle 4 (`caaea293`) |
+| 4. Generic-field preservation lemmas | COMPLETED | all six generic fields plus the 12th field land sorry-free |
+| 5. Birth-key preservation lemmas | COMPLETED | all four birth-key fields land sorry-free (cycles 4-6) |
+| 6. Pigeonhole world bound | COMPLETED | `modalKnownWorlds_length_le_worldBoundS5`, commit `8e4a17ba` |
+| 7. Soundness bridge `modalTableauS5_sound` | **COMPLETED (cycle 8)** | `modalTableauS5_sound` lands sorry-free via bespoke `S5SoundInv`/`modalStepBranchS5_preserves_satIn`/`modalExpandBranchesS5_closed_unsatIn`, reusing cycle-7's semantic core |
+| 8. Spec-free Hintikka lift + fuel + completeness + decidability | NOT STARTED | highest-risk frontier per plan; does NOT depend on Phase 7 (depends on 6 and 3, both landed) -- ready for the next dispatch |
+| 9. 5/KB5 validity + completeness | NOT STARTED | gated on Phase 8 |
+
+## Per-Phase Status Ledger (as of cycle 4, historical)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
@@ -184,6 +205,19 @@ built anywhere in the codebase (K or S5); `keysTotal` should compose fairly dire
    `keysTotal` deferred, not blocked -- see handoff 03.
 6. **Phase 7 not attempted** in either cycle 2 or cycle 4 (budget consumed by Phases 4-5); remains
    independent and available for a future dispatch per the plan's own framing.
+7. **Phase 7 completed cycle 8, via Strategy 2 (bespoke copy)**, not Strategy 1 (extraction), per
+   handoff 06's two offered options. Chosen to keep zero blast-radius on the frozen K/T/B/S4
+   soundness chain (`modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`
+   are entirely untouched -- confirmed by the full `lake build`/`lake test` re-run showing all
+   3239 jobs green with no regressions). The cost is ~700 lines of near-duplicate proof in the
+   "not box/dia shape" branch, matching the plan's own risk assessment for Strategy 2.
+8. **`accFreshInv` retained** (not dropped) in the Phase 7 assembly's threaded invariant
+   (`S5SoundInv`), contrary to handoff 06's speculative "drop `accFreshInv` entirely if unneeded"
+   suggestion: `accFreshInv` (`hInv` in `modalStepBranchS5_preserves_satIn`) IS needed by the two
+   K-minting shapes (`F(□φ)`/`T(◇φ)`) inside the ported "not shape" branch, for the
+   freshness-confinement argument establishing the new witness world `w'` is disjoint from every
+   existing edge endpoint. Kept as a third `S5SoundInv` conjunct alongside `accReachableInv`/
+   `accTargetsKnown`.
 
 ## Verification (at final commit `f04817cf`, cycle 4)
 
@@ -203,7 +237,7 @@ built anywhere in the codebase (K or S5); `keysTotal` should compose fairly dire
   `_keysInUniverse`: only `propext`/`Classical.choice`/`Quot.sound` (standard Mathlib axioms, no
   new axioms).
 
-## Continuation Guidance
+## Continuation Guidance (historical, cycle 4; superseded by cycle 8 below for Phase 7)
 
 See `handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md` for full technical detail on the
 remaining Phase 5 fields. In brief, the next dispatch should:
@@ -216,6 +250,81 @@ remaining Phase 5 fields. In brief, the next dispatch should:
    lemmas (`boxProps_mem_of_S5`/`diaNegProps_mem_of_S5`-style, converse direction of the
    existing elimination lemmas built this cycle) plus `relevantSetFinset_mono`
    (`LoopChecking.lean:344`, already public) for the old-key case.
+
+(Both items above were completed in cycles 5-6; Phase 5 and the whole termination chain P3-P6
+are now `[COMPLETED]` -- see the Per-Phase Status Ledger above.)
+
+## Cycle 8: Phase 7 Completion (`modalTableauS5_sound`)
+
+**What landed**: three new declarations in `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`,
+appended immediately after the cycle-7 semantic core (`## Task 515 Phase 7` section):
+
+1. `S5SoundInv b acc := accFreshInv b acc ∧ accReachableInv b acc ∧ accTargetsKnown b acc` --
+   the combined per-step invariant threaded via a single `List.Forall₂` through the outer fuel
+   induction (mirroring how the K/T generic chain threads `accFreshInv` alone).
+2. `modalStepBranchS5_preserves_satIn` -- a bespoke S5 specialization of the generic
+   `modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean:193`), fixed to
+   `apply := modalApplyOneS5`/`FC := s5FC` with an added `hreach : accReachableInv b acc`
+   hypothesis. The box-positive/diamond-negative branch swaps in the landed
+   `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` in place of the generic theorem's
+   `hBoxPos`/`hDiaNeg` parameters (which cannot receive `hreach` -- confirmed structurally per
+   handoff 06). Every other shape is a byte-for-byte copy of the generic crux's own "not shape"
+   branch (`FrameSoundness.lean:318-718` in the pre-cycle-8 file), the only substantive edits
+   being the `hAgree`-call replaced by `modalApplyOneS5_eq_of_not_boxPos_diaNeg` and the single
+   `negImp_alpha_preserved_gen FC ...` call's `FC` replaced by `s5FC` -- confirmed via `grep` that
+   these are the ONLY two places in that ~400-line branch referencing the generic `apply`/`FC`
+   parameters (besides the tactic keyword `apply`, which is unrelated and left untouched).
+3. `modalExpandBranchesS5_closed_unsatIn` -- a bespoke S5 specialization of the generic
+   `modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:729`), fixed similarly, threading
+   `S5SoundInv` instead of bare `accFreshInv`. At each step, the three components are produced by:
+   `modalStepBranch_preserves_accFreshInv_gen` and `modalStepBranch_preserves_accTargetsKnown_gen`
+   (both ALREADY GENERIC in `apply`, reused directly at `modalApplyOneS5` via the landed
+   `modalApplyOneS5_fresh_local` witness -- zero new proof content for these two), plus the landed
+   `modalStepBranchS5_preserves_accReachableInv` for the third.
+4. `modalTableauS5_sound` -- the capstone, mirroring `modalTableauT_sound`
+   (`FrameCompleteness.lean:1182`) exactly: `by_contra` on a falsifying model, build the initial
+   `branchSatisfiableIn s5FC` witness and the initial `S5SoundInv` witness (`accFreshInv_empty`,
+   the landed `accReachableInv_initial`, and an inline vacuous `accTargetsKnown` proof for the
+   edgeless empty accessibility relation), feed both into
+   `modalExpandBranchesS5_closed_unsatIn (modalFuel φ)` at the initial tableau configuration, and
+   close by contradiction.
+
+**Strategy decision**: chose Strategy 2 (bespoke copy) from handoff 06's two options, not
+Strategy 1 (extraction), specifically to keep the frozen K/T/B/S4 chain's own declarations
+(`modalStepBranchGen_preserves_satIn`, `modalExpandBranchesGen_closed_unsatIn`,
+`modalTableau_sound_frame_gen`, `modalTableauT_sound`, etc.) completely untouched -- verified via
+`git diff` showing the only changes to `FrameSoundness.lean` are pure additions (no lines removed
+or modified in the pre-existing K/T/generic machinery), and via a full `lake build`/`lake test`
+re-run confirming 3239/3239 jobs green with the same pre-existing (out-of-scope) sorries in
+`Cslib/Logics/Propositional/Tableau/{Intuitionistic,Minimal}/*.lean` as before.
+
+**Verification (cycle 8, this dispatch)**:
+- `lake build` (full project): 3239/3239 jobs green.
+- `lake exe checkInitImports`: clean.
+- `lake exe lint-style`: clean.
+- `lake lint`: 0 new errors (only the 1 pre-existing unrelated `PrimeExclusion.lean`
+  `unusedArguments` error, untouched).
+- `lake test`: `CslibTests` suite exit 0.
+- `lake shake --add-public --keep-implied --keep-prefix`: the only suggestion touching
+  `FrameSoundness.lean` is `remove import Mathlib.Data.List.Forall2` -- confirmed pre-existing
+  and unrelated to this dispatch's additions (`Soundness.lean`, already `public import`ed by this
+  file, also directly imports `Mathlib.Data.List.Forall2`, and `List.Forall₂` was already used
+  extensively by the pre-existing K/T generic fuel induction before this dispatch touched the
+  file; the redundant-transitive-import fact predates cycle 8).
+- `grep -c sorry Cslib/Logics/Modal/Tableau/FrameSoundness.lean`: 0 matches.
+- `grep -c '^axiom ' Cslib/Logics/Modal/Tableau/FrameSoundness.lean`: 0 matches.
+- `lean_verify` on `modalTableauS5_sound`, `modalStepBranchS5_preserves_satIn`,
+  `modalExpandBranchesS5_closed_unsatIn`: only `propext`/`Classical.choice`/`Quot.sound`.
+
+**Continuation guidance for Phase 8** (the next dispatch's entry point): Phase 8 (spec-free
+Hintikka lift + fuel bridge + `Decidable (s5Valid φ)`) does NOT depend on Phase 7 (plan's own
+"Depends on: 6 and 3" line) and can start fresh. Per the plan's pre-authorized fallback: attempt
+`modalExpandBranchesS5_hintikka` (the `S5LoopInv`-parametrized analogue of
+`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean:876`) first; if it resists within
+budget, mark `[BLOCKED]` with the exact open goal and pivot to Strategy 2 (semantic bounded-model
+FMP via the landed `extractModelS5`, Massacci Fact 9.1 single-cluster models) as the sorry-free
+fallback for `instDecidableS5Valid`. See handoff `07_*.md` (this cycle) for the fully detailed
+recipe.
 3. Once all four Phase 5 fields land, the full termination chain (Phases 3-6) closes, since
    Phase 6 is already `[COMPLETED]`.
 4. Phase 7 (soundness bridge) can be attempted independently/in parallel at any point, per the

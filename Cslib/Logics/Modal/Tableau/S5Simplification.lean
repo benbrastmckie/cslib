@@ -456,6 +456,145 @@ theorem modalExpandBranchesS5_eq
 theorem modalTableauS5_eq (φ : Proposition Atom) :
     modalTableauS5 φ = modalTableauGen modalApplyOneS5 φ := rfl
 
+/-! ## `modalKnownWorlds` Local Re-Derivations (task 515 Phase 3)
+
+`FmpMeasure.lean`'s `mem_modalKnownWorlds`/`modalKnownWorlds_mono_append` are `private` (hence
+unavailable across files). Local re-derivation, mirroring `BDriver.lean`'s established pattern
+(`mem_modalKnownWorlds_B`/`modalKnownWorlds_mono_append_B`), renamed for S5. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
+(unavailable across files), dropping the `Nodup` conjunct this development does not need.
+Mirrors `BDriver.lean`'s `modalKnownWorlds_fold_spec_B`. -/
+private lemma modalKnownWorlds_fold_spec_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => simp
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      intro x
+      rw [ih ws0]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      intro x
+      rw [ih (sf.label :: ws0)]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ List.mem_cons_self)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds`
+(unavailable across files). Mirrors `BDriver.lean`'s `mem_modalKnownWorlds_B`. -/
+private lemma mem_modalKnownWorlds_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  simpa using modalKnownWorlds_fold_spec_S5 l [] x
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
+(unavailable across files): appending formulas to the front of a branch only grows its
+known-worlds set. Mirrors `BDriver.lean`'s `modalKnownWorlds_mono_append_B`. -/
+private lemma modalKnownWorlds_mono_append_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
+  intro x hx
+  rw [mem_modalKnownWorlds_S5] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+/-! ## Key-Threaded S5 Guarded Step (task 515 Phase 3)
+
+Mirrors `LoopChecking.lean`'s `modalStepBranchS4Keyed` (task 511 Phase 4): threads a stable
+per-world birth-key list `keys` alongside `(b, e, acc)`, gaining an entry exactly when
+`modalApplyOneS5g` mints a genuinely fresh world (an unblocked call at one of the two K minting
+shapes). Unlike S4, S5 has only one rule layer (`modalApplyOneS5`, no `modalApplyOneS4Rules`
+intermediate), so the guard's `none` branch mints via `modalApplyOneS5` directly. -/
+
+/-- The S5-specific keyed one-step branch expansion: mirrors `modalStepBranchS5g`
+(`modalStepBranchGen (modalApplyOneS5g φ₀)`, the un-keyed analogue -- not separately named,
+since Phase 3 only ever needs the keyed form) for the `(newBranches, newExpandedSets, newAcc)`
+triple, additionally threading `keys`. On an unblocked call at one of the two minting shapes,
+`keys` gains `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ w)`; otherwise `keys` is
+unchanged. Mirrors `modalStepBranchS4Keyed` (`LoopChecking.lean:582`). -/
+def modalStepBranchS5gKeyed (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility ×
+            List (WorldIndex × Finset (Sign × Proposition Atom))) :=
+  b.findSome? fun sf =>
+    if e.any (· == sf) then none
+    else
+      let (result, newAcc) := modalApplyOneS5g φ₀ sf b acc
+      let keys' :=
+        match sf.sign, sf.formula with
+        | .neg, .box φ =>
+          match blockingWorldS5 φ₀ b .neg φ sf.label with
+          | some _ => keys
+          | none => keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]
+        | .pos, .diamond φ =>
+          match blockingWorldS5 φ₀ b .pos φ sf.label with
+          | some _ => keys
+          | none => keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)]
+        | _, _ => keys
+      match result with
+      | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
+      | .branching branches =>
+        some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
+      | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
+      | .notApplicable => none
+
+/-! ## The S5 Loop Invariant `S5LoopInv` (task 515 Phase 3)
+
+The four stable birth-key fields, mirroring `S4LoopInv`'s corresponding four fields
+(`LoopChecking.lean:1127`) exactly (omitting the six generic driver-bookkeeping fields
+`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`, per the plan's leaner Phase 3
+field list -- S5 has no `RuleApplicationSpec` witness to source those from generically, and the
+pigeonhole argument (Phase 4) only ever consumes the four birth-key fields). -/
+
+/-- **Correction 1 mirror**: `S5LoopInv` reuses `S4LoopInv`'s four stable birth-key fields
+(`keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse`), stated over the threaded `keys`
+list (`modalStepBranchS5gKeyed`) rather than the live branch, for exactly the reason `S4LoopInv`
+adopted them (task 511 Phase 4, Gap 1/Gap 2): keys are fixed at minting time and never touched
+again, so a lower-bound-style invariant over them survives every subsequent step. -/
+structure S5LoopInv (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop where
+  /-- Every known world has a recorded birth key. -/
+  keysTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys
+  /-- A world's recorded birth key is a LOWER BOUND on its live relevant set: monotone-stable,
+  since birth keys never change after a world is born and live relevant sets only grow
+  (`relevantSetFinset_mono`). -/
+  keyLowerBd : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w
+  /-- Distinct worlds have DISTINCT birth keys: the hypothesis the pigeonhole argument
+  (`modalKnownWorlds_length_le_worldBoundS5`, Phase 4) consumes. -/
+  keysDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k'
+  /-- Birth keys are drawn from the powerset of the finite signed-subformula codomain
+  `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 4). -/
+  keysInUniverse : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀
+
 /-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 
 **[BLOCKED]** (Phase 2). Attempting to discharge `RuleApplicationSpec modalApplyOneS5`

@@ -184,7 +184,77 @@ test` (9227/9227). Zero sorries, zero new axioms in touched files.
 
 ---
 
-### Phase 3: `S5LoopInv` + preservation lemmas [NOT STARTED]
+### Phase 3: `S5LoopInv` + preservation lemmas [BLOCKED]
+
+_Started: 2026-07-15T01:00:00Z_ -- _Blocked: 2026-07-15T02:15:00Z_
+
+**Landed sorry-free (genuine partial progress, in `S5Simplification.lean`)**: the `S5LoopInv`
+structure (exactly the plan's four fields `keysTotal`/`keyLowerBd`/`keysDistinct`/
+`keysInUniverse`); `modalStepBranchS5gKeyed` (the key-threaded guarded step, mirroring
+`modalStepBranchS4Keyed`); three local re-derivations of `FmpMeasure.lean`'s `private`
+`modalKnownWorlds` lemmas (`modalKnownWorlds_fold_spec_S5`/`mem_modalKnownWorlds_S5`/
+`modalKnownWorlds_mono_append_S5`), mirroring `BDriver.lean`'s established `_B`-suffixed
+re-derivation pattern. All compile, zero sorries, zero new axioms.
+
+**BLOCKER**: the four `modalStepBranchS5_preserves_key*` preservation lemmas could not be
+closed sorry-free within budget. Two distinct, concrete obstructions were identified by
+reading the actual dependency chain (not assumed abstractly):
+
+1. **Infrastructure gap (`keysTotal`/`keyLowerBd`/`keysInUniverse`)**: the only public
+   lemma that lets a non-`RuleApplicationSpec` step reason "which labels can newly appear on
+   the branch" is `modalApplyOne_knownWorlds_step` (`FmpMeasure.lean:2042`), whose dichotomy
+   (no mint, all new labels `∈ modalKnownWorlds b`; OR mint, all new labels `= modalNextWorld
+   b`) requires `accTargetsKnown b acc` as a standing hypothesis. Discharging `keysInUniverse`
+   for the S5-universal-arm shapes additionally needs a subformula-closure fact (`φ ∈
+   modalSubfmls φ₀`, i.e. a `bClosure`-style invariant) to place a newly-inserted birth-key
+   pair `(s, φ)` inside `signedSubfmls φ₀`. Neither is present in the plan's literal four-field
+   `S5LoopInv`. This is exactly why `S4LoopInv` (`LoopChecking.lean:1127`, which `S5LoopInv`
+   mirrors) carries **six additional** generic fields (`bClosure`/`eNodup`/`eClosure`/
+   `accFresh`/`accKnown`/`outDegEq`) beyond the four birth-key fields the plan asked for --
+   S4 needed them too, it just never got far enough to state the preservation lemmas that would
+   expose the need (blueprint F2: `LoopChecking.lean` ends at the `S4LoopInv` **structure**).
+   Closing this gap requires either extending `S5LoopInv` with these six fields (adding their
+   own preservation obligations, none scoped by the plan) or threading `accTargetsKnown b acc`
+   and a subformula-closure fact as extra explicit hypotheses through all four lemmas.
+2. **Design-level gap (`keysDistinct`), the deeper issue**: `blockingWorldS5_none_fresh`
+   (Phase 2) guarantees the prospective birth content differs from every known world's
+   **current** `relevantSetFinset`. But `S5LoopInv.keyLowerBd` only records that a *stored* key
+   is a **lower bound** (`⊆`, not `=`) of its world's current relevant set -- by design, so the
+   invariant survives monotonic branch growth (this was precisely task 511's Gap-1 fix). A
+   newly-minted key could therefore coincide with an *older* world's frozen, historical key even
+   though it differs from that older world's now-larger *current* relevant set -- nothing in
+   the four-field invariant (or the guard, which only ever compares against current relevant
+   sets) rules this out. This is a genuine open design question, not a proof-search failure: the
+   guard would need to compare the prospective birth content against every *stored key*, not
+   every world's *current relevant set*, for `blockingWorldS5_none_fresh` to directly discharge
+   `keysDistinct`'s new-vs-old case. S4 never encountered this either, for the same reason as
+   above (`S4LoopInv` is the last thing S4 landed, per blueprint F2).
+
+**What was tried**: read `RuleApplicationSpec`'s `freshLocal`/`outputsSubsetUniverse` fields and
+their K witnesses (`modalApplyOne_fresh_local`, `modalApplyOne_diamondPos_outputs_subset`,
+`modalApplyOne_boxNeg_outputs_subset`) to source a mint-confinement fact without threading a
+full spec (unavailable, D2); found and read `modalApplyOne_knownWorlds_step`
+(`FmpMeasure.lean:2042`), the closest-fitting public lemma, and traced its `accTargetsKnown`
+dependency; re-derived the three `modalKnownWorlds` private helpers locally (successfully); then
+attempted to state `modalStepBranchS5_preserves_keyTotal` and found the guard-unblocked-mint
+case requires exactly the gap-1 infrastructure above before the lemma can even be fully stated
+with the right side hypotheses, let alone proved.
+
+**What is needed to unblock**: (a) decide whether to extend `S5LoopInv` to the full ten-field
+shape (mirroring `S4LoopInv` verbatim, absorbing the six generic fields and their own
+preservation lemmas) or thread the missing hypotheses explicitly per-lemma; (b) resolve the
+`keysDistinct` design gap, most plausibly by redesigning `blockingWorldS5` to compare the
+prospective birth content against the threaded `keys` list directly (`∃ (w', k) ∈ keys, k =
+successorBirthContentS5 φ₀ b s φ w`) rather than against `relevantSetFinset`'s current value --
+a change to Phase 2's guard, which would need to be re-verified against Phase 2's
+already-landed, already-committed agreement lemmas (or superseded by a new guard variant).
+
+**Prohibited workarounds not used**: no `sorry`, no `def S5LoopInv := True`-style placeholder,
+no re-added rank axiom (D2/D5).
+
+P4/P6/P7 are transitively `[BLOCKED]` on this (P4's pigeonhole consumes exactly
+`S5LoopInv.keysDistinct`/`keysInUniverse`, both open). P5 (soundness) is independent (F5) and
+was pursued separately regardless of this block (see Phase 5 below).
 
 **Goal**: Define the loop invariant structure and prove the four preservation lemmas across a driver step. **This is the S4-unbuilt crux (F2): no template exists past the structure definition.** Budget generously.
 

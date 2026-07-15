@@ -1,0 +1,17 @@
+{
+  "status": "implemented",
+  "summary": "Generalized the tableau soundness chain over the abstract rule-application interface (apply, FC) across all 6 planned phases: extracted the K box-positive/diamond-negative arm lemmas and modalClosed_unsatIn (P1); landed the ~420-line frame-relativized crux modalStepBranchGen_preserves_satIn on the first build attempt (P2); ported the generic fuel induction modalExpandBranchesGen_closed_unsatIn (P3); re-derived K soundness through the generic chain as a zero-regression demonstration while keeping K's canonical Type* public API byte-identical (P4); discharged the three T soundness facts and landed modalTableauT_sound (P5); completed tValid_decides and instDecidableTValid, the task 503 Phase 6 target (P6). Zero sorry, zero new axiom, full CSLib CI green (lake build, checkInitImports, lint, lint-style, shake, test).",
+  "phases_completed": 6,
+  "phases_total": 6,
+  "blockers": [],
+  "continuation_context": null,
+  "artifacts": [
+    "specs/513_generalize_tableau_soundness_chain_over_spec/summaries/01_generalize-soundness-chain-summary.md",
+    "specs/513_generalize_tableau_soundness_chain_over_spec/plans/01_generalize-soundness-chain.md",
+    "Cslib/Logics/Modal/Tableau/SoundnessStep.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/Soundness.lean",
+    "Cslib/Logics/Modal/Tableau/TDriver.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+  ]
+}

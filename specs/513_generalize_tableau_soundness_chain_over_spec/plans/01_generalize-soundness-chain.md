@@ -1,7 +1,7 @@
 # Implementation Plan: Task #513 — Generalize the Tableau SOUNDNESS Chain over the Rule-Application Interface
 
 - **Task**: 513 - Generalize the tableau soundness chain over the abstract rule-application interface
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: 510 (completeness-chain generalization — landed)
 - **Research Inputs**: reports/01_generalize-soundness-chain-over-spec.md
@@ -241,7 +241,7 @@ each other, so they may run in parallel.
 - **Verification:**
   - `lake build` green; `modalTableauT_sound` sorry-free; axiom-trio only.
 
-### Phase 6: Decidability wiring + final CI/axiom sweep [NOT STARTED]
+### Phase 6: Decidability wiring + final CI/axiom sweep [COMPLETED]
 
 - **Goal:** Complete `tValid_decides` and `instDecidableTValid` (task 503 Phase 6 target) as
   one-liners mirroring K's `modalTableau_decides` / `instDecidableKValid`.

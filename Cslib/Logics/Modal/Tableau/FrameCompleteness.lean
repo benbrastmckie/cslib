@@ -868,6 +868,7 @@ theorem modalOpenBranchT_countermodel
 
 /-! ## Task 513 Phase 5: T Soundness Discharges + `modalTableauT_sound` -/
 
+omit [Hashable Atom] in
 /-- **Task 513 (Phase 5, S-agree for T)**: `modalApplyOneT` agrees with `modalApplyOne` off
 the two propagating shapes -- exactly `modalApplyOneT_eq_of_not_boxPos_diaNeg`
 (`FrameRules.lean`) verbatim; zero new proof content. Discharges
@@ -1072,6 +1073,31 @@ theorem modalTableauT_complete (φ0 : Proposition Atom)
   have hnot := modalOpenBranchT_countermodel b a φ0 hH hmemInit
   intro htv
   exact hnot (htv WorldIndex (extractModelT b a) (extractModelT_refl b a) 0)
+
+/-! ## Task 513 Phase 6: `tValid` Decidability -/
+
+/-- **The modal T tableau decides T-validity** (task 513 Phase 6 / task 503 Phase 6 target):
+`modalTableauT φ0` closes exactly when `φ0` is T-valid. Combines soundness
+(`modalTableauT_sound`, Phase 5) with completeness (`modalTableauT_complete`, above) via the
+two-constructor dichotomy of `ModalTableauResult`. Mirrors `modalTableau_decides`
+(`CompletenessLoop.lean`) line-for-line. -/
+theorem tValid_decides (φ0 : Proposition Atom) :
+    modalTableauT φ0 = .closed ↔ tValid φ0 := by
+  constructor
+  · exact modalTableauT_sound φ0
+  · intro htv
+    cases htab : modalTableauT φ0 with
+    | closed => rfl
+    | openBranch b a => exact absurd htv (modalTableauT_complete φ0 htab)
+
+/-- **T-validity is decidable** (task 513 Phase 6 / task 503 Phase 6 target): decide by running
+the modal T tableau and consulting `tValid_decides`. No `Fintype Atom` assumption is needed,
+since the tableau computation itself is the decision procedure. Mirrors `instDecidableKValid`
+(`CompletenessLoop.lean`) line-for-line. -/
+instance instDecidableTValid (φ0 : Proposition Atom) : Decidable (tValid φ0) :=
+  match h : modalTableauT φ0 with
+  | .closed => .isTrue ((tValid_decides φ0).mp h)
+  | .openBranch _ _ => .isFalse (modalTableauT_complete φ0 h)
 
 end Cslib.Logic.Modal.Tableau
 

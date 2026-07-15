@@ -1,17 +1,23 @@
-# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycle 2)
+# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-4)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
 - **Plan**: `plans/02_s5-termination-machinery.md`
-- **Status**: PARTIAL -- Phase 3 COMPLETED; Phase 4 (generic-field preservation) BLOCKED at 4 of
-  6 fields (`eNodup`/`accFresh`/`accKnown`/`outDegEq` landed; `bClosure`/`eClosure` blocked on a
-  missing contiguity invariant, see below); Phase 6 (pigeonhole world bound) COMPLETED; Phases
-  5, 7, 8, 9 NOT STARTED.
-- **Commits this dispatch (cycle 2)**: `db5b837a` (Phase 4: accFresh/accKnown/outDegEq),
-  `8e4a17ba` (Phase 6: pigeonhole world bound)
+- **Status**: PARTIAL -- Phase 4 (generic-field preservation) now **COMPLETED** (cycle 4 unblocked
+  the cycle-2 `bClosure`/`eClosure` gap via a new 12th `S5LoopInv` field); Phase 5 (birth-key
+  preservation) 2 of 4 fields landed (`keysDistinct`, `keysInUniverse`; `keyLowerBd`/`keysTotal`
+  remain `[NOT STARTED]`); Phase 6 (pigeonhole world bound) COMPLETED; Phases 7, 8, 9 NOT STARTED.
+- **Commits cycle 2**: `db5b837a` (Phase 4: accFresh/accKnown/outDegEq), `8e4a17ba` (Phase 6:
+  pigeonhole world bound)
+- **Commits cycle 4**: `caaea293` (Phase 4 COMPLETE: 12th field `worldsContiguous` +
+  `bClosure`/`eClosure`), `fa816254` (Phase 5: `keysDistinct`), `f04817cf` (Phase 5:
+  `keysInUniverse`)
 - **Handoffs**:
-  - `handoffs/01_phase4-generic-field-preservation.md` (prior dispatch: proof template, gotchas)
-  - `handoffs/02_phase4-bclosure-contiguity-gap.md` (this dispatch: exact `bClosure`/`eClosure`
-    blocker and recommended 12th-invariant-field fix)
+  - `handoffs/01_phase4-generic-field-preservation.md` (cycle-2-prior dispatch: proof template,
+    gotchas)
+  - `handoffs/02_phase4-bclosure-contiguity-gap.md` (cycle 2: exact `bClosure`/`eClosure` blocker
+    and recommended 12th-invariant-field fix -- **fully resolved this cycle 4 dispatch**)
+  - `handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md` (cycle 4: `keysDistinct`/
+    `keysInUniverse` landed; concrete next-step plan for `keyLowerBd`/`keysTotal`)
 
 ## Cycle 2 Context
 
@@ -26,17 +32,17 @@ to require additional infrastructure not achievable safely within this dispatch'
 budget (documented as a precise, actionable blocker rather than rushed with `sorry` or a
 vacuous placeholder).
 
-## Per-Phase Status Ledger
+## Per-Phase Status Ledger (as of cycle 4)
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | 1. Frame surface + S5 world bound + universe | COMPLETED (prior dispatch) | commit `66021669` |
 | 2. Live-set guard + guarded rule (preserved scaffold) | COMPLETED (prior dispatch) | commit `aa9015d6` |
-| 3. Keys-aware guard redesign + extended `S5LoopInv` | COMPLETED (prior dispatch) | commit `4f41f3a4` |
-| 4. Generic-field preservation lemmas | **BLOCKED (4/6)** | `eNodup` (prior dispatch, `12f32499`); `accFresh`/`accKnown`/`outDegEq` (this dispatch, `db5b837a`); `bClosure`/`eClosure` BLOCKED -- see handoff 02 |
-| 5. Birth-key preservation lemmas | NOT STARTED | gated on Phase 4; `keysDistinct` assessed easy (`blockingWorldS5Keyed_none_fresh` already landed), `keysTotal`/`keysInUniverse` share the same contiguity-gap blocker as `bClosure` |
-| 6. Pigeonhole world bound | **COMPLETED** | `modalKnownWorlds_length_le_worldBoundS5`, this dispatch, commit `8e4a17ba` |
-| 7. Soundness bridge `modalTableauS5_sound` | NOT STARTED | independent of termination chain; not attempted this dispatch (budget spent on Phase 4/6 investigation) |
+| 3. Keys-aware guard redesign + extended `S5LoopInv` | COMPLETED (prior dispatch) | commit `4f41f3a4`; extended to 12 fields cycle 4 (`caaea293`) |
+| 4. Generic-field preservation lemmas | **COMPLETED** | `eNodup` (cycle 2, `12f32499`); `accFresh`/`accKnown`/`outDegEq` (cycle 2, `db5b837a`); `bClosure`/`eClosure`/`worldsContiguous` (cycle 4, `caaea293`) -- all six generic fields plus the new 12th field now land sorry-free |
+| 5. Birth-key preservation lemmas | **IN PROGRESS (2/4)** | `keysDistinct` (cycle 4, `fa816254`); `keysInUniverse` (cycle 4, `f04817cf`); `keyLowerBd`/`keysTotal` `[NOT STARTED]` -- see handoff 03 |
+| 6. Pigeonhole world bound | **COMPLETED** | `modalKnownWorlds_length_le_worldBoundS5`, cycle 2, commit `8e4a17ba` |
+| 7. Soundness bridge `modalTableauS5_sound` | NOT STARTED | independent of termination chain; not attempted (budget spent on Phases 4-5) |
 | 8. Spec-free Hintikka lift + fuel + completeness + decidability | NOT STARTED | highest-risk frontier per plan |
 | 9. 5/KB5 validity + completeness | NOT STARTED | gated on Phase 8 |
 
@@ -80,75 +86,127 @@ is definitionally `modalWorldBoundS4 φ₀`, both `2 ^ (2 * (modalSubfmls φ₀)
 supporting local re-derivations (`modalKnownWorlds_nodup_S5`, `modalKnownWorlds_fold_nodup_S5`)
 mirroring the file's existing pattern of re-deriving `FmpMeasure.lean`'s private lemmas locally.
 
-### Phase 4: `bClosure`/`eClosure` -- BLOCKED (investigated, not landed)
+### Phase 4: `bClosure`/`eClosure` -- BLOCKED at cycle 2, RESOLVED at cycle 4
 
-Consuming Phase 6's pigeonhole bound to close `bClosure`/`eClosure`'s mint-case obligation (as
-the prior handoff recommended) revealed a **genuine gap**: Phase 6 bounds the *count* of known
-worlds, but placing a freshly-minted formula (at label `modalNextWorld b`) into `modalUniverseS5
-φ₀` needs a bound on the *numeric value* `modalNextWorld b`. Bridging count to value requires an
-ADDITIONAL invariant -- known-world labels form a contiguous range `{0, ..., modalMaxWorld b}`
-(true for this driver, since worlds are only ever minted at exactly `modalMaxWorld b + 1`, and
-blocked steps leave `b` unchanged) -- which is **not currently present anywhere in the codebase**
-(confirmed by targeted grep across `FmpMeasure.lean`/`LoopChecking.lean`/`S5Simplification.lean`/
-`GenericDriver.lean`; only a one-directional per-element bound,
-`modalKnownWorlds_le_modalMaxWorld`, exists). This is a real, provable fact but requires its own
-new `S5LoopInv` field and preservation lemma -- scoped in full detail, with a concrete
-recommended field statement and per-case proof sketch, in
-`handoffs/02_phase4-bclosure-contiguity-gap.md`. **No `sorry` or vacuous placeholder was used**;
-`bClosure`/`eClosure` remain unproven `[ ]` tasks in the plan, and Phase 4's header is marked
-`[BLOCKED]` accordingly.
+Cycle 2 found a **genuine gap** consuming Phase 6's pigeonhole bound to close `bClosure`/
+`eClosure`'s mint-case obligation: Phase 6 bounds the *count* of known worlds, but placing a
+freshly-minted formula (at label `modalNextWorld b`) into `modalUniverseS5 φ₀` needs a bound on
+the *numeric value* `modalNextWorld b`. This was scoped in full detail (with a concrete
+recommended field statement and per-case proof sketch) in
+`handoffs/02_phase4-bclosure-contiguity-gap.md`, and left `[ ]`/`[BLOCKED]` rather than rushed.
+
+**Cycle 4 resolved this in full**, following handoff 02's recommendation almost verbatim:
+
+1. Added the 12th `S5LoopInv` field `worldsContiguous : modalMaxWorld b + 1 =
+   (modalKnownWorlds b).length` and its preservation lemma
+   `modalStepBranchS5g_preserves_worldsContiguous` (case analysis via
+   `modalStepBranchS5gKeyed_acc_shape`: non-mint case appends at already-known labels, both
+   sides unchanged; mint case appends at exactly `modalNextWorld b`, both sides increment by
+   1). Needed six new local re-derivations for the append-invariance facts
+   (`modalMaxWorld_append_eq_of_forall_le_S5`, `modalMaxWorld_append_single_S5`,
+   `modalKnownWorlds_length_append_of_known_S5`, `modalKnownWorlds_length_append_single_S5`,
+   `modalNextWorld_not_mem_modalKnownWorlds_S5`, plus relocating the pre-existing
+   `modalKnownWorlds_nodup_S5` earlier in the file so Phase 4 could consume it before Phase 6's
+   own definition site).
+2. This alone was NOT sufficient for `bClosure` -- also needed a substantial new "`bClosure`
+   support" layer mirroring `FmpMeasure.lean`'s private `modalApplyOne_outputs_subset` /
+   `boxProps_outputs_subset` / `diaNegProps_outputs_subset` /
+   `modalApplyOne_diamondPos_outputs_subset` / `modalApplyOne_boxNeg_outputs_subset` machinery
+   (all `private`, hence unavailable cross-file), re-derived locally against
+   `modalUniverseS5`/`modalWorldBoundS5`: `modalSubfmls_trans_S5`, `mem_modalUniverseS5_of`/
+   `_of'`, `modalUniverseS5_mem_formula`/`_mem_label`, `mem_boxPositivesOf_S5`,
+   `boxProps_outputs_subset_S5`, `diaNegProps_outputs_subset_S5`,
+   `modalApplyOne_diamondPos_outputs_subset_S5`, `modalApplyOne_boxNeg_outputs_subset_S5`, the
+   K-level top dispatch `modalApplyOne_outputs_subset_S5`, and finally the S5-merge-aware top
+   dispatch `modalApplyOneS5_outputs_subset` that `bClosure`'s own preservation consumes
+   directly. Also produced `modalApplyOneS5_knownWorlds_step` (an S5 analogue of K's
+   `modalApplyOne_knownWorlds_step`) and `modalApplyOneS5_boxPos_diaNeg_eq` as byproducts, used
+   by `worldsContiguous`'s own preservation proof.
+3. `eClosure` turned out to be MUCH simpler once stated as consuming `bClosure` as an ambient
+   hypothesis: the only formula ever appended to `e` is the trigger `sf` itself, and `sf ∈ b`
+   with `bClosure` gives `sf ∈ modalUniverseS5 φ₀` directly -- no mint-case/contiguity reasoning
+   needed at all for `eClosure`.
+
+All landed sorry-free, zero new axioms, full CI green (commit `caaea293`).
+
+## Phase 5: `keysDistinct` and `keysInUniverse` (cycle 4, commits `fa816254`/`f04817cf`)
+
+With Phase 4 unblocked, cycle 4 continued into Phase 5. **`keysDistinct`** (the phase's namesake
+crux, and the fix for the v1 design gap this whole v2 plan exists to close) landed sorry-free on
+the first real attempt, after authoring one new private helper,
+`modalStepBranchS5gKeyed_keys_shape` (mirroring the file's established `_expanded_shape`/
+`_acc_shape` pattern), characterizing `newKeys`'s shape: either `keys` unchanged, or `keys` grown
+by exactly one fresh `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)` entry at one
+of the two K-minting shapes when the keyed guard is unblocked. Given this, a direct 4-way case
+split (old/old, old/fresh, fresh/old, fresh/fresh) using `blockingWorldS5Keyed_none_fresh`
+(Phase 3) for the two mixed cases closes it -- confirming the Phase 3 keys-aware guard design
+works exactly as intended, with zero live-set reasoning.
+
+**`keysInUniverse`** also landed sorry-free on the first attempt, reusing `bClosure` +
+`modalSubfmls_trans_S5` (both from Phase 4's new support layer) for the witness pair's
+formula-closure, plus `Finset.filter_subset` for the `successorBirthContentS5`-filtered
+remainder -- essentially a restatement of reasoning `bClosure`'s own mint case already used.
+
+`keyLowerBd` and `keysTotal` remain `[NOT STARTED]` (not attempted this dispatch; budget
+constraints). See `handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md` for a concrete
+per-field next-step plan -- `keyLowerBd` is flagged as the hardest of the two, needing a new
+"introduction-direction" correspondence lemma for `boxProps`/`diaNegProps` membership not yet
+built anywhere in the codebase (K or S5); `keysTotal` should compose fairly directly from
+`modalApplyOneS5_knownWorlds_step` (landed Phase 4) + `accKnown`.
 
 ## Plan Deviations
 
-1. **`S5LoopInv.keysKnown` (Phase 3, prior dispatch)**: unchanged from before, see round 2 plan
-   history.
-2. **Phase 4 status this dispatch**: 4 of 6 fields landed and CI-green (`eNodup`, `accFresh`,
-   `accKnown`, `outDegEq`); `bClosure`/`eClosure` remain blocked on a newly-identified,
-   precisely-scoped missing invariant (contiguous world numbering), documented in handoff 02
-   rather than rushed.
-3. **Phase 6 landed in full this dispatch**, ahead of Phase 5 (which the plan lists as its
-   dependency) -- justified because the resume task explicitly directed establishing the
-   pigeonhole bound as a static fact (no step-preservation reasoning needed), independent of
-   Phase 5's birth-key preservation proofs.
-4. **Phase 7 not attempted** this dispatch (budget consumed by the Phase 4/6 investigation);
-   remains independent and available for a future dispatch per the plan's own framing.
+1. **`S5LoopInv.keysKnown` (Phase 3, cycle-2-prior dispatch)**: unchanged from before, see round
+   2 plan history.
+2. **`S5LoopInv.worldsContiguous` (Phase 3/4, cycle 4)**: added as the 12th field, per handoff
+   02's recommendation, to bridge Phase 6's pigeonhole COUNT bound to the VALUE bound
+   `bClosure`'s mint-case obligation needs.
+3. **Phase 4 fully unblocked cycle 4**: all six generic fields plus `worldsContiguous` now land
+   sorry-free and CI-green.
+4. **Phase 6 landed ahead of Phase 5** (cycle 2), ahead of the plan's stated dependency order --
+   justified because the resume task explicitly directed establishing the pigeonhole bound as a
+   static fact (no step-preservation reasoning needed), independent of Phase 5's birth-key
+   preservation proofs.
+5. **Phase 5 partially landed cycle 4** (`keysDistinct`, `keysInUniverse`); `keyLowerBd`/
+   `keysTotal` deferred, not blocked -- see handoff 03.
+6. **Phase 7 not attempted** in either cycle 2 or cycle 4 (budget consumed by Phases 4-5); remains
+   independent and available for a future dispatch per the plan's own framing.
 
-## Verification (at final commit `8e4a17ba`)
+## Verification (at final commit `f04817cf`, cycle 4)
 
-- `lake build` (full project): 3236/3236 jobs green.
+- `lake build` (full project): 3239/3239 jobs green.
 - `lake exe checkInitImports`: clean.
 - `lake exe lint-style`: clean.
 - `lake lint`: 0 new warnings on touched files (1 pre-existing unrelated `unusedArguments` error
-  in `PrimeExclusion.lean`, predates this task).
-- `lake test`: `CslibTests` suite green.
+  in `PrimeExclusion.lean`, predates this task, confirmed untouched).
+- `lake test`: `CslibTests` suite exit 0.
 - `lake shake --add-public --keep-implied --keep-prefix`: 0 new import-minimization suggestions
-  for `S5Simplification.lean` (some informational `unusedSectionVars`/style messages appear in
-  `lake shake`'s own broader analysis, consistent with many pre-existing declarations throughout
-  the codebase already carrying the same messages -- confirmed these are NOT part of `lake
-  lint`'s 17-linter error-producing output, which is clean).
+  for `S5Simplification.lean` (verified via explicit grep against the file's own suggestion
+  block; all listed suggestions elsewhere in the codebase are pre-existing).
 - `grep -n sorry Cslib/Logics/Modal/Tableau/S5Simplification.lean`: 0 matches outside a prose
-  reference inside an existing doc comment.
+  reference inside an existing doc comment ("sorry-free").
 - `grep -n '^axiom ' Cslib/Logics/Modal/Tableau/S5Simplification.lean`: 0 matches.
+- `lean_verify` on `modalStepBranchS5g_preserves_bClosure`/`_worldsContiguous`/`_keysDistinct`/
+  `_keysInUniverse`: only `propext`/`Classical.choice`/`Quot.sound` (standard Mathlib axioms, no
+  new axioms).
 
 ## Continuation Guidance
 
-See `handoffs/02_phase4-bclosure-contiguity-gap.md` for full technical detail. In brief, the next
-dispatch should:
+See `handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md` for full technical detail on the
+remaining Phase 5 fields. In brief, the next dispatch should:
 
-1. Add a 12th `S5LoopInv` field capturing world-label contiguity (e.g.
-   `worldsContiguous : modalMaxWorld b < (modalKnownWorlds b).length` or the exact equality form),
-   and prove it preserved across a `modalStepBranchS5gKeyed` step (blocked case trivial since `b`
-   is unchanged; non-blocked non-minting case needs a "append at known labels doesn't grow the
-   known-world count" lemma; non-blocked minting case needs "append at `modalNextWorld b` grows
-   both `modalMaxWorld` and the known-world count by exactly 1", partly available via
-   `modalNextWorld_not_mem_modalKnownWorlds`, currently private in `FmpMeasure.lean` and needing
-   a local `_S5` re-derivation).
-2. Use the new field + Phase 6's `modalKnownWorlds_length_le_worldBoundS5` (via `omega`) to close
-   `bClosure`/`eClosure`'s mint-case obligations, completing Phase 4.
-3. Proceed to Phase 5 (birth-key preservation); `keysDistinct` should be the easy field
-   (`blockingWorldS5Keyed_none_fresh`, already landed); `keysTotal`/`keysInUniverse` likely reuse
-   the same new 12th-field machinery.
-4. Phase 7 (soundness bridge) can be attempted independently/in parallel at any point.
+1. Prove `modalStepBranchS5g_preserves_keysTotal` next (most tractable of the two remaining
+   fields) -- reuse `modalApplyOneS5_knownWorlds_step` (landed Phase 4) + `accKnown` for the
+   known-vs-fresh-world dichotomy; the fresh world's own key entry is immediate from
+   `modalStepBranchS5gKeyed_keys_shape`.
+2. Prove `modalStepBranchS5g_preserves_keyLowerBd` last -- needs two new small "introduction"
+   lemmas (`boxProps_mem_of_S5`/`diaNegProps_mem_of_S5`-style, converse direction of the
+   existing elimination lemmas built this cycle) plus `relevantSetFinset_mono`
+   (`LoopChecking.lean:344`, already public) for the old-key case.
+3. Once all four Phase 5 fields land, the full termination chain (Phases 3-6) closes, since
+   Phase 6 is already `[COMPLETED]`.
+4. Phase 7 (soundness bridge) can be attempted independently/in parallel at any point, per the
+   plan's own framing ("forks after P1, runs parallel to P3-P6").
 
-No `sorry`, no vacuous definitions, and no re-added rank axiom were introduced at any point this
-dispatch.
+No `sorry`, no vacuous definitions, and no re-added rank axiom were introduced at any point
+across cycles 2 or 4.

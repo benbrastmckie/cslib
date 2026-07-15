@@ -184,28 +184,35 @@ chain, so each wave contains a single phase.
 - **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; `lean_verify` zero
   sorry/axiom for each new lemma; `signedSubfmls_powerset_card` reduces to `modalWorldBoundS4 φ₀`.
 
-### Phase 3: Successor-birth-content guard redesign [NOT STARTED]
+### Phase 3: Successor-birth-content guard redesign [COMPLETED]
 
 - **Goal:** Fix Gap 2 — make the guard block on the prospective successor's birth content, not the
   source world's set. Rewrite `modalApplyOneS4` to consult the new guard; re-verify Phase 5-7
   consumers are unaffected.
 - **Tasks:**
-  - [ ] Define `successorBirthContent φ₀ b s φ w : Finset (Sign × Proposition Atom)` — the witness
+  - [x] Define `successorBirthContent φ₀ b s φ w : Finset (Sign × Proposition Atom)` — the witness
     `⟨s,φ⟩` plus the S4 box-context transmitted from `w` (`{⟨.pos,ψ⟩ : T(□ψ)@w ∈ b}` ∪
     `{⟨.neg,ψ⟩ : F(◇ψ)@w ∈ b}`), matching the actual K-minting birth content (research Section 1.1,
     Gap 2 in Section 2).
-  - [ ] Define `blockingWorldS4 φ₀ b s φ w : Option WorldIndex` — block iff some existing known
+  - [x] Define `blockingWorldS4 φ₀ b s φ w : Option WorldIndex` — block iff some existing known
     world's CURRENT `relevantSetFinset` equals the prospective `successorBirthContent`.
-  - [ ] Prove the guard contract lemmas: `blockingWorldS4_none_fresh` (when `= none`, the
+  - [x] Prove the guard contract lemmas: `blockingWorldS4_none_fresh` (when `= none`, the
     prospective birth content differs from every existing world's relevant set) and
-    `blockingWorldS4_some_mem` (the returned world is in `modalKnownWorlds b`).
-  - [ ] Rewrite `modalApplyOneS4` (LoopChecking.lean:253-264) to consult `blockingWorldS4` at the
-    two minting shapes (`⟨.neg,.box φ,w⟩` / `⟨.pos,.diamond φ,w⟩`) in place of `blockingWorld`.
-    Leave all *non-minting* arms byte-identical.
-  - [ ] Re-CI the consumers that depend on `modalApplyOneS4`: `hintikkaS4_box_pos_step` (line 421),
-    the dia-neg dual (line 510), the crux bridges (lines 603/687/773/785/809/825), and
-    `modalHintikkaSetS4`/`modalTruthLemmaS4`. Fix any signature drift; their dependence is on the
-    unchanged non-minting behavior, so breakage should be limited to references to `blockingWorld`.
+    `blockingWorldS4_mem_modalKnownWorlds` *(deviation: altered -- named `_mem_modalKnownWorlds`
+    rather than the plan's `_some_mem`, matching the existing `blockingWorld_mem_modalKnownWorlds`
+    naming convention it supersedes)* (the returned world is in `modalKnownWorlds b`); also added
+    `blockingWorldS4_eq_birthContent` (the `some wBlock` case's positive contract: `wBlock`'s
+    *current* relevant set equals the prospective birth content -- needed by Phase 5's
+    `_preserves_keysDistinct`, symmetric to the `_none_fresh` negative contract, not explicitly
+    named in the plan but implied by "the guard contract lemmas").
+  - [x] Rewrite `modalApplyOneS4` (now consulting `blockingWorldS4` at the two minting shapes,
+    `⟨.neg,.box φ,w⟩` / `⟨.pos,.diamond φ,w⟩`) in place of `blockingWorld`, which is removed
+    (superseded, no external consumers). Leave all *non-minting* arms byte-identical.
+  - [x] Re-CI the consumers that depend on `modalApplyOneS4`: `hintikkaS4_box_pos_step`, the
+    dia-neg dual, the crux bridges, and `modalHintikkaSetS4`/`modalTruthLemmaS4` (`FrameCompleteness.lean`)
+    all still build green unchanged -- their dependence is on `modalApplyOneS4_eq_of_not_boxNeg_diaPos`
+    (the non-minting-shape agreement lemma), whose proof did not reference `blockingWorld`'s
+    internals and needed no edits.
 - **Timing:** 2.5 hours
 - **Depends on:** 2
 - **Files to modify:**

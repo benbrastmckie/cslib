@@ -30,19 +30,29 @@ its transitively-propagating 4-rule places `T(□φ)` (unchanged modal depth) at
 worlds, which falsifies the exact-decrement edge invariant (`rankStep`) that
 `RuleApplicationSpec` demands. S4 reuses the generic driver (`modalStepBranchGen` etc.)
 **definitionally only**, via a `φ₀`-parameterized `RuleApply` value, and supplies its own
-sibling termination argument (`S4LoopInv`, a pigeonhole bound on `2 ^ |modalSubfmls φ₀|`
-possible relevant-formula sets) instead of the K/T rank-decrease argument.
+sibling termination argument (`S4LoopInv`, a pigeonhole bound on `2 ^ (2 * |modalSubfmls φ₀|)`
+possible signed-relevant-formula sets) instead of the K/T rank-decrease argument.
+
+**Task 511 redesign**: the original `blockingWorld` guard and `worldSetsDistinct` invariant
+(task 506) were both proved structurally unsound (task 511 research report) -- distinctness
+over the *live* branch is not a loop invariant (relevant sets grow monotonically), and the
+guard compared the *source* world's set rather than the *prospective successor's* birth
+content. This module now uses `blockingWorldS4`/`successorBirthContent` (stable birth-content
+guard) and `S4LoopInv`'s `keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse` fields
+(stable per-world birth keys) in their place.
 
 ## Main Definitions
 
 - `formulasAtWorld`: the sub-list of a branch's signed formulas at a given world.
 - `sameRelevantSet`: the decidable equality-of-relevant-formula-set test over
-  `modalSubfmls φ₀`, used by the S4 minting guard to detect a "loop" (an existing world
-  that already witnesses everything the current world would witness).
-- `blockingWorld`: search `modalKnownWorlds b` for an existing world with the same
-  relevant formula set as `w` -- the concrete minting guard.
+  `modalSubfmls φ₀`, used for comparison (retained as the comparison primitive, task 511).
+- `signedSubfmls`/`relevantSetFinset`: the finite `Finset (Sign × Proposition Atom)` codomain
+  and the live relevant set restated as a `Finset` (task 511 Phase 2).
+- `successorBirthContent`/`blockingWorldS4`: the redesigned minting guard (task 511 Phase 3):
+  blocks iff an existing known world's CURRENT relevant set equals the PROSPECTIVE successor's
+  birth content, fixing Gap 2 (the old guard compared the source world's set instead).
 - `modalApplyOneS4`: the `φ₀`-parameterized S4 rule-application function (Decision D1):
-  at the two minting shapes, consult `blockingWorld` before falling through to the
+  at the two minting shapes, consult `blockingWorldS4` before falling through to the
   underlying rule's fresh-world minting.
 - `modalStepBranchS4`/`modalExpandBranchesS4`/`modalTableauS4`: the S4 driver, reusing
   `Saturation.lean`'s generic driver **definitionally only** (no `RuleApplicationSpec`
@@ -56,9 +66,10 @@ Blocking is **equality-of-relevant-formula-set**, not subset-blocking: two world
 `w'` are considered "the same" for loop-checking purposes exactly when they agree, for
 every `ψ ∈ modalSubfmls φ₀` and every sign `s`, on whether `⟨s, ψ, w⟩` (`⟨s, ψ, w'⟩`
 respectively) is on the branch. This is simpler than subset blocking and still yields a
-`2 ^ |modalSubfmls φ₀|` bound on the number of distinct worlds a saturating S4 tableau can
-create (Phase 8), since each world's relevant set is a distinct element of the powerset of
-`modalSubfmls φ₀ × Sign`.
+`2 ^ (2 * |modalSubfmls φ₀|)` bound on the number of distinct worlds a saturating S4 tableau
+can create (Phase 8), since each world's *birth key* is a distinct element of the powerset of
+`modalSubfmls φ₀ × Sign` (task 511: the *birth key*, not the live relevant set, is what the
+pigeonhole argument now injects -- see `S4LoopInv`).
 
 Do **not** import `LoopInduction.lean`: despite the name, it is a `Forall2` list lemma
 about the *fuel* loop in the generic driver, unrelated to modal loop-checking.
@@ -192,51 +203,242 @@ lemma sameRelevantSet_trans (φ₀ : Proposition Atom)
   intro s ψ hψ
   exact (h1 s ψ hψ).trans (h2 s ψ hψ)
 
-/-! ## Minting Guard -/
+/-! ## S4 World Bound (Decision D2)
 
-/-- The concrete minting guard: the least world `w' ∈ modalKnownWorlds b` (other than `w`
-itself) whose relevant formula set matches `w`'s, if any exists. `none` means no blocking
-world exists (the underlying rule should mint a fresh world); `some wBlock` means `w` should
-be closed back to `wBlock` via a loop-back edge instead of minting a new world. -/
-def blockingWorld (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (w : WorldIndex) : Option WorldIndex :=
-  ((modalKnownWorlds b).filter (fun w' => w' != w && sameRelevantSet φ₀ b w w')).min?
+`modalWorldBound`/`modalUniverse` (`FmpMeasure.lean`) are `(2*complexity+1)^(complexity+1)`,
+a branching^depth *tree* bound: S4's world graph is not a bounded-depth tree (loop-back
+edges make it a general DAG-with-cycles-collapsed), so this bound does not transfer.
+`modalWorldBoundS4`/`modalUniverseS4` replace it with the pigeonhole bound
+`2 ^ (2 * |modalSubfmls φ₀|)` -- the number of possible relevant-formula sets, i.e. the
+cardinality of `powerset (Sign × modalSubfmls φ₀)` (task 511 research finding 3: the
+`sameRelevantSet`/birth-key notion distinguishes *both signs*, so the pigeonhole codomain is
+`powerset(Sign × Sf)`, not `powerset(Sf)`; `2^|Sf|` is unprovably small). `modalWork`/
+`modalExpMeasure` (`FmpMeasure.lean`) are reused **verbatim**: they take the universe `U` as
+an explicit parameter and are rule/world-agnostic. `geomCap`/`modalPotential`/
+`modalPotentialTerm` do **not** transfer -- they are the geometric tree-capacity argument
+specific to `modalWorldBound`. -/
+
+/-- The S4 world bound: `2 ^ (2 * |modalSubfmls φ₀|)`, the number of possible
+signed-relevant-formula sets, i.e. `(signedSubfmls φ₀).powerset.card` (Decision D2, corrected
+per task 511 research finding 3). Replaces `modalWorldBound`'s branching^depth tree bound,
+which does not apply to S4's (possibly cyclic) world graph. The `2·|Sf|` exponent (rather
+than `|Sf|`) is required because the relevant-set/birth-key notion (`sameRelevantSet`,
+`signedSubfmls`) distinguishes signs: the pigeonhole codomain is `powerset (Sign × Sf)`,
+cardinality `2 ^ (2·|Sf|)`. Decidability only needs *a* computable finite bound, so this
+looser value is harmless. -/
+def modalWorldBoundS4 (φ₀ : Proposition Atom) : Nat :=
+  2 ^ (2 * (modalSubfmls φ₀).length)
+
+/-- The fixed finite signed-formula universe `U_{S4}(φ₀)`: both signs, every subformula of
+`φ₀`, at every world label `0 .. modalWorldBoundS4 φ₀`. Mirrors `modalUniverse`
+(`FmpMeasure.lean`) with `modalWorldBoundS4` swapped in for `modalWorldBound`. -/
+def modalUniverseS4 (φ₀ : Proposition Atom) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (List.range (modalWorldBoundS4 φ₀ + 1)).flatMap (fun w =>
+    (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
+
+/-- The S4 universe has length at most
+`2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)`. Mirrors
+`modalUniverse_length_le` (`FmpMeasure.lean`; that lemma carries the identical
+`unusedDecidableInType` lint warning, unaddressed there too -- `DecidableEq Atom` is needed
+by `SignedFormula`'s ambient instances even though the proof term itself never names it). -/
+lemma modalUniverseS4_length_le (φ₀ : Proposition Atom) :
+    (modalUniverseS4 φ₀).length ≤
+      2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by
+  have hinner : ∀ w : WorldIndex,
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length
+        ≤ 2 * (2 * modalComplexity φ₀ + 1) := by
+    intro w
+    rw [List.length_flatMap]
+    have hb : (List.map (fun ψ =>
+        ([(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), ⟨.neg, ψ, w⟩]).length)
+        (modalSubfmls φ₀)).sum ≤ (modalSubfmls φ₀).length * 2 :=
+      sum_map_le_length_mul (modalSubfmls φ₀) _ 2 (fun ψ _ => by simp)
+    have hlen := modalSubfmls_length_le φ₀
+    omega
+  unfold modalUniverseS4
+  rw [List.length_flatMap]
+  have houter : (List.map (fun w =>
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
+      ≤ (List.range (modalWorldBoundS4 φ₀ + 1)).length * (2 * (2 * modalComplexity φ₀ + 1)) :=
+    sum_map_le_length_mul (List.range (modalWorldBoundS4 φ₀ + 1)) _
+      (2 * (2 * modalComplexity φ₀ + 1)) (fun w _ => hinner w)
+  rw [List.length_range] at houter
+  calc (List.map (fun w =>
+        ((modalSubfmls φ₀).flatMap
+          (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                      ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
+      ≤ (modalWorldBoundS4 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
+    _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
+
+/-! ## Signed-Key Finite Codomain (task 511, Phase 2)
+
+The stable-key infrastructure the redesigned guard/invariant (Phases 3-6) consumes: the fixed
+finite codomain `signedSubfmls φ₀` (both signs × every subformula of `φ₀`, as a `Finset`) and
+the live relevant set `relevantSetFinset φ₀ b w` restated as a `Finset` (reusing
+`sameRelevantSet`'s membership notion). No driver change here -- pure defs + lemmas,
+CI-green in isolation. -/
+
+/-- The finite signed-subformula codomain: both signs paired with every subformula of `φ₀`, as
+a `Finset (Sign × Proposition Atom)`. This is the fixed codomain the pigeonhole argument
+(`modalKnownWorlds_length_le_worldBoundS4`, Phase 6) injects known worlds into, via their birth
+keys (`S4LoopInv.keysInUniverse`). -/
+def signedSubfmls (φ₀ : Proposition Atom) : Finset (Sign × Proposition Atom) :=
+  ({Sign.pos, Sign.neg} : Finset Sign) ×ˢ (modalSubfmls φ₀).toFinset
 
 omit [Hashable Atom] in
-/-- If `blockingWorld` returns a world, it is a known world of the branch. -/
-lemma blockingWorld_mem_modalKnownWorlds (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
-    (h : blockingWorld φ₀ b w = some wBlock) : wBlock ∈ modalKnownWorlds b := by
+/-- `signedSubfmls φ₀`'s cardinality is at most `2 * |modalSubfmls φ₀|` (equality would need
+`modalSubfmls φ₀` duplicate-free; the pigeonhole argument only needs the inequality, since it
+feeds `Nat.pow_le_pow_right` toward `modalWorldBoundS4 φ₀ = 2 ^ (2 * |modalSubfmls φ₀|)`, an
+upper bound is all that is required). -/
+lemma signedSubfmls_card_le (φ₀ : Proposition Atom) :
+    (signedSubfmls φ₀).card ≤ 2 * (modalSubfmls φ₀).length := by
+  unfold signedSubfmls
+  rw [Finset.card_product]
+  have h2 : ({Sign.pos, Sign.neg} : Finset Sign).card = 2 := by decide
+  rw [h2]
+  have hle := List.toFinset_card_le (modalSubfmls φ₀)
+  omega
+
+omit [Hashable Atom] in
+/-- The powerset of `signedSubfmls φ₀` has cardinality at most `modalWorldBoundS4 φ₀`: the
+cardinality bridge Phase 6's pigeonhole argument consumes (`Finset.card_powerset` plus
+`signedSubfmls_card_le`, monotone in the exponent). This is why Phase 1 (the exponent fix)
+precedes: it ties the bound to `2 ^ (2·|Sf|)`, the correct codomain size for a sign-distinguishing
+key. -/
+lemma signedSubfmls_powerset_card_le (φ₀ : Proposition Atom) :
+    (signedSubfmls φ₀).powerset.card ≤ modalWorldBoundS4 φ₀ := by
+  unfold modalWorldBoundS4
+  rw [Finset.card_powerset]
+  exact Nat.pow_le_pow_right (by norm_num) (signedSubfmls_card_le φ₀)
+
+/-- The live relevant set `R(b,w)` (task 511 research §1.3) as a `Finset`: exactly the
+elements of `signedSubfmls φ₀` whose signed-formula instantiation at `w` is present on `b`.
+Reuses `sameRelevantSet`'s membership notion (`⟨s,ψ,w⟩ ∈ b`) restated as a finite set for the
+birth-key / pigeonhole machinery (Phases 3-6). -/
+def relevantSetFinset (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    Finset (Sign × Proposition Atom) :=
+  (signedSubfmls φ₀).filter
+    (fun p => b.any (· == (⟨p.1, p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex)))
+
+omit [Hashable Atom] in
+/-- `relevantSetFinset φ₀ b w` is (trivially, by construction as a filter of `signedSubfmls
+φ₀`) a subset of `signedSubfmls φ₀`. This is `S4LoopInv.keysInUniverse`'s per-world content
+once composed with `S4LoopInv.keyLowerBd`. -/
+lemma relevantSetFinset_subset_signedSubfmls (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
+    relevantSetFinset φ₀ b w ⊆ signedSubfmls φ₀ :=
+  Finset.filter_subset _ _
+
+omit [Hashable Atom] in
+/-- `relevantSetFinset` is monotone in the branch: if every formula of `b` is also a formula
+of `b'`, then `w`'s relevant set over `b` is a subset of `w`'s relevant set over `b'`. This is
+the fact Gap 1 (task 511 research §2) exploited for the old live-branch invariant, and the
+fact the new lower-bound invariant (`S4LoopInv.keyLowerBd`, Phase 4) is designed to *survive*:
+birth keys are fixed, but the live relevant set they lower-bound only grows. -/
+lemma relevantSetFinset_mono (φ₀ : Proposition Atom)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hsub : ∀ sf ∈ b, sf ∈ b') :
+    relevantSetFinset φ₀ b w ⊆ relevantSetFinset φ₀ b' w := by
+  unfold relevantSetFinset
+  apply Finset.monotone_filter_right
+  intro p _ hp
+  simp only [List.any_eq_true, beq_iff_eq] at hp ⊢
+  obtain ⟨sf, hsf_mem, heq⟩ := hp
+  exact ⟨sf, hsub sf hsf_mem, heq⟩
+
+/-! ## Minting Guard (task 511, Phase 3: redesigned to fix Gap 2)
+
+**Gap 2** (task 511 research §2): the *original* `blockingWorld` guard compared the *source*
+world `w`'s own relevant set against other known worlds' sets -- but the newly-minted world
+`w'`'s actual birth content (`successorBirthContent` below) is unrelated to `R(b,w)` (it is
+the witness formula plus the *unwrapped* box-context transmitted from `w`, not `w`'s own
+relevant-formula membership). So the old guard's check was neither necessary nor sufficient
+for the property it was meant to enforce. The redesigned guard `blockingWorldS4` compares
+against the **prospective successor's own birth content** instead, closing the gap. -/
+
+/-- The prospective birth content of the successor that would be minted for the modal-minting
+call at `⟨s, φ, w⟩` (the two K minting shapes `F(□φ)@w`/`T(◇φ)@w`, `s` the witness's sign) at
+branch `b`: the witness signed pair `(s, φ)` together with the S4 box-context transmitted from
+`w` -- `(Sign.pos, ψ)` for every `T(□ψ)@w ∈ b` and `(Sign.neg, ψ)` for every `F(◇ψ)@w ∈ b`.
+Matches the actual K-minting birth content (`modalApplyOne`'s `boxNeg`/`diamondPos` arms,
+`Rules.lean`), restricted to `signedSubfmls φ₀`-relevant pairs. Computed entirely from data
+already on `b` at mint time; stable (never recomputed once the world is born) -- this is
+exactly the property that makes `S4LoopInv.keyLowerBd` (Phase 4) a genuine loop invariant
+where the old `worldSetsDistinct` (over the live branch) was not (Gap 1). -/
+def successorBirthContent (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) : Finset (Sign × Proposition Atom) :=
+  insert (s, φ) ((signedSubfmls φ₀).filter (fun p =>
+    (p.1 = Sign.pos ∧
+      b.any (· == (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex))) ∨
+    (p.1 = Sign.neg ∧
+      b.any (· == (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex)))))
+
+/-- The redesigned minting guard (fixes Gap 2): the least world `w' ∈ modalKnownWorlds b` whose
+CURRENT relevant set (`relevantSetFinset`) already equals the PROSPECTIVE successor's birth
+content (`successorBirthContent`), if any exists. `none` means no blocking world exists (the
+underlying rule should mint a fresh world); `some wBlock` means the prospective successor
+should be loop-backed to `wBlock` via a loop-back edge instead of minting a new world. Unlike
+the old `blockingWorld`, no `w' ≠ w` side condition is needed: if `w` itself already carries
+the prospective birth content, a reflexive loop-back edge `w → w` is a harmless, valid S4
+degenerate case. -/
+def blockingWorldS4 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) : Option WorldIndex :=
+  ((modalKnownWorlds b).filter
+    (fun w' => decide (relevantSetFinset φ₀ b w' = successorBirthContent φ₀ b s φ w))).min?
+
+omit [Hashable Atom] in
+/-- If `blockingWorldS4` returns a world, it is a known world of the branch. -/
+lemma blockingWorldS4_mem_modalKnownWorlds (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (s : Sign) (φ : Proposition Atom)
+    (w wBlock : WorldIndex) (h : blockingWorldS4 φ₀ b s φ w = some wBlock) :
+    wBlock ∈ modalKnownWorlds b := by
   have hmem := List.min?_mem h
   exact (List.mem_filter.mp hmem).1
 
 omit [Hashable Atom] in
-/-- If `blockingWorld` returns a world, it is distinct from `w`. -/
-lemma blockingWorld_ne (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
-    (h : blockingWorld φ₀ b w = some wBlock) : wBlock ≠ w := by
+/-- **The guard contract** (replaces `blockingWorld_sameRelevantSet`): if `blockingWorldS4`
+returns a world, that world's CURRENT relevant set equals the prospective successor's birth
+content. This is exactly the fact Phase 5's `_preserves_keysDistinct` consumes: a freshly
+minted world's key (its birth content) cannot coincide with any *other* existing world's key,
+because if it did, the guard would have blocked and no new world would have been minted at
+all. -/
+lemma blockingWorldS4_eq_birthContent (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (s : Sign) (φ : Proposition Atom)
+    (w wBlock : WorldIndex) (h : blockingWorldS4 φ₀ b s φ w = some wBlock) :
+    relevantSetFinset φ₀ b wBlock = successorBirthContent φ₀ b s φ w := by
   have hmem := List.min?_mem h
   have hpred := (List.mem_filter.mp hmem).2
-  simp only [Bool.and_eq_true, bne_iff_ne] at hpred
-  exact hpred.1
+  exact of_decide_eq_true hpred
 
 omit [Hashable Atom] in
-/-- If `blockingWorld` returns a world, that world has an equal relevant formula set to
-`w`: this is the property Phase 8's pigeonhole argument needs. -/
-lemma blockingWorld_sameRelevantSet (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w wBlock : WorldIndex)
-    (h : blockingWorld φ₀ b w = some wBlock) : sameRelevantSet φ₀ b w wBlock = true := by
-  have hmem := List.min?_mem h
-  have hpred := (List.mem_filter.mp hmem).2
-  simp only [Bool.and_eq_true, bne_iff_ne] at hpred
-  exact hpred.2
+/-- **The guard's freshness contract**: if `blockingWorldS4` returns `none`, the prospective
+successor's birth content differs from every existing known world's CURRENT relevant set. This
+is what makes a freshly-minted world's key distinct from every prior key (the `keysDistinct`
+preservation obligation's minting case, Phase 5). -/
+lemma blockingWorldS4_none_fresh (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (s : Sign) (φ : Proposition Atom)
+    (w : WorldIndex) (h : blockingWorldS4 φ₀ b s φ w = none) :
+    ∀ w' ∈ modalKnownWorlds b, relevantSetFinset φ₀ b w' ≠ successorBirthContent φ₀ b s φ w := by
+  unfold blockingWorldS4 at h
+  rw [List.min?_eq_none_iff, List.filter_eq_nil_iff] at h
+  intro w' hw' heq
+  exact absurd (decide_eq_true heq) (by simpa using h w' hw')
 
 /-! ## S4 Rule Application -/
 
 /-- The `φ₀`-parameterized S4 rule-application function (Decision D1). Wraps
 `modalApplyOneS4Rules` (K + T + 4, `FrameRules.lean`). At the two **minting** shapes
 (`F(□φ)@w`, `T(◇φ)@w` -- the shapes where the underlying K rule would create a fresh
-world), consults `blockingWorld`:
+world), consults `blockingWorldS4` (task 511 Phase 3: fixes Gap 2, the guard now compares the
+*prospective successor's* birth content, not the source world `w`'s own set):
 - **blocked** (`some wBlock`): returns `.linear []` and `acc.addEdge w wBlock` -- a
   loop-back edge to the existing blocking world, minting **no** new world.
 - **unblocked** (`none`): falls through unchanged to `modalApplyOneS4Rules` (hence to the
@@ -259,12 +461,12 @@ threads `newAcc` through and marks the source formula expanded. -/
 def modalApplyOneS4 (φ₀ : Proposition Atom) : RuleApply Atom :=
   fun sf b acc =>
     match sf.sign, sf.formula with
-    | .neg, .box _ =>
-      match blockingWorld φ₀ b sf.label with
+    | .neg, .box φ =>
+      match blockingWorldS4 φ₀ b .neg φ sf.label with
       | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
       | none => modalApplyOneS4Rules sf b acc
-    | .pos, .diamond _ =>
-      match blockingWorld φ₀ b sf.label with
+    | .pos, .diamond φ =>
+      match blockingWorldS4 φ₀ b .pos φ sf.label with
       | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
       | none => modalApplyOneS4Rules sf b acc
     | _, _ => modalApplyOneS4Rules sf b acc
@@ -277,7 +479,7 @@ point for the box-negative minting shape. -/
 lemma modalApplyOneS4_boxNeg_blocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w wBlock : WorldIndex)
-    (hblock : blockingWorld φ₀ b w = some wBlock) :
+    (hblock : blockingWorldS4 φ₀ b .neg φ w = some wBlock) :
     modalApplyOneS4 φ₀ ⟨.neg, .box φ, w⟩ b acc = (.linear [], acc.addEdge w wBlock) := by
   unfold modalApplyOneS4
   simp [hblock]
@@ -285,7 +487,7 @@ lemma modalApplyOneS4_boxNeg_blocked_eq (φ₀ : Proposition Atom)
 /-- Guard spec (b), box-negative shape, unblocked case: reduces to the underlying K rule. -/
 lemma modalApplyOneS4_boxNeg_unblocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorld φ₀ b w = none) :
+    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorldS4 φ₀ b .neg φ w = none) :
     modalApplyOneS4 φ₀ ⟨.neg, .box φ, w⟩ b acc = modalApplyOne ⟨.neg, .box φ, w⟩ b acc := by
   unfold modalApplyOneS4
   simp only [hblock]
@@ -298,7 +500,7 @@ adds exactly one loop-back edge and mints no new world. -/
 lemma modalApplyOneS4_diaPos_blocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w wBlock : WorldIndex)
-    (hblock : blockingWorld φ₀ b w = some wBlock) :
+    (hblock : blockingWorldS4 φ₀ b .pos φ w = some wBlock) :
     modalApplyOneS4 φ₀ ⟨.pos, .diamond φ, w⟩ b acc = (.linear [], acc.addEdge w wBlock) := by
   unfold modalApplyOneS4
   simp [hblock]
@@ -307,7 +509,7 @@ lemma modalApplyOneS4_diaPos_blocked_eq (φ₀ : Proposition Atom)
 rule, which mints exactly `modalNextWorld b`. -/
 lemma modalApplyOneS4_diaPos_unblocked_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorld φ₀ b w = none) :
+    (φ : Proposition Atom) (w : WorldIndex) (hblock : blockingWorldS4 φ₀ b .pos φ w = none) :
     modalApplyOneS4 φ₀ ⟨.pos, .diamond φ, w⟩ b acc = modalApplyOne ⟨.pos, .diamond φ, w⟩ b acc := by
   unfold modalApplyOneS4
   simp only [hblock]
@@ -855,155 +1057,6 @@ Confirmed interactively:
 - `□p → □□p` (the 4 schema) evaluates to `.closed`: S4 is transitive -- this is the
   component that distinguishes S4 from T, and the entire reason this task's 4-rule exists.
 - A bare atom `p` evaluates to `.openBranch _ _`: S4 does not prove arbitrary atoms. -/
-
-/-! ## S4 World Bound (Decision D2)
-
-`modalWorldBound`/`modalUniverse` (`FmpMeasure.lean`) are `(2*complexity+1)^(complexity+1)`,
-a branching^depth *tree* bound: S4's world graph is not a bounded-depth tree (loop-back
-edges make it a general DAG-with-cycles-collapsed), so this bound does not transfer.
-`modalWorldBoundS4`/`modalUniverseS4` replace it with the pigeonhole bound
-`2 ^ (2 * |modalSubfmls φ₀|)` -- the number of possible relevant-formula sets, i.e. the
-cardinality of `powerset (Sign × modalSubfmls φ₀)` (task 511 research finding 3: the
-`sameRelevantSet`/birth-key notion distinguishes *both signs*, so the pigeonhole codomain is
-`powerset(Sign × Sf)`, not `powerset(Sf)`; `2^|Sf|` is unprovably small). `modalWork`/
-`modalExpMeasure` (`FmpMeasure.lean`) are reused **verbatim**: they take the universe `U` as
-an explicit parameter and are rule/world-agnostic. `geomCap`/`modalPotential`/
-`modalPotentialTerm` do **not** transfer -- they are the geometric tree-capacity argument
-specific to `modalWorldBound`. -/
-
-/-- The S4 world bound: `2 ^ (2 * |modalSubfmls φ₀|)`, the number of possible
-signed-relevant-formula sets, i.e. `(signedSubfmls φ₀).powerset.card` (Decision D2, corrected
-per task 511 research finding 3). Replaces `modalWorldBound`'s branching^depth tree bound,
-which does not apply to S4's (possibly cyclic) world graph. The `2·|Sf|` exponent (rather
-than `|Sf|`) is required because the relevant-set/birth-key notion (`sameRelevantSet`,
-`signedSubfmls`) distinguishes signs: the pigeonhole codomain is `powerset (Sign × Sf)`,
-cardinality `2 ^ (2·|Sf|)`. Decidability only needs *a* computable finite bound, so this
-looser value is harmless. -/
-def modalWorldBoundS4 (φ₀ : Proposition Atom) : Nat :=
-  2 ^ (2 * (modalSubfmls φ₀).length)
-
-/-- The fixed finite signed-formula universe `U_{S4}(φ₀)`: both signs, every subformula of
-`φ₀`, at every world label `0 .. modalWorldBoundS4 φ₀`. Mirrors `modalUniverse`
-(`FmpMeasure.lean`) with `modalWorldBoundS4` swapped in for `modalWorldBound`. -/
-def modalUniverseS4 (φ₀ : Proposition Atom) :
-    List (SignedFormula (Proposition Atom) WorldIndex) :=
-  (List.range (modalWorldBoundS4 φ₀ + 1)).flatMap (fun w =>
-    (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
-
-/-- The S4 universe has length at most
-`2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)`. Mirrors
-`modalUniverse_length_le` (`FmpMeasure.lean`; that lemma carries the identical
-`unusedDecidableInType` lint warning, unaddressed there too -- `DecidableEq Atom` is needed
-by `SignedFormula`'s ambient instances even though the proof term itself never names it). -/
-lemma modalUniverseS4_length_le (φ₀ : Proposition Atom) :
-    (modalUniverseS4 φ₀).length ≤
-      2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by
-  have hinner : ∀ w : WorldIndex,
-      ((modalSubfmls φ₀).flatMap
-        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
-                    ⟨.neg, ψ, w⟩])).length
-        ≤ 2 * (2 * modalComplexity φ₀ + 1) := by
-    intro w
-    rw [List.length_flatMap]
-    have hb : (List.map (fun ψ =>
-        ([(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), ⟨.neg, ψ, w⟩]).length)
-        (modalSubfmls φ₀)).sum ≤ (modalSubfmls φ₀).length * 2 :=
-      sum_map_le_length_mul (modalSubfmls φ₀) _ 2 (fun ψ _ => by simp)
-    have hlen := modalSubfmls_length_le φ₀
-    omega
-  unfold modalUniverseS4
-  rw [List.length_flatMap]
-  have houter : (List.map (fun w =>
-      ((modalSubfmls φ₀).flatMap
-        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
-                    ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
-      ≤ (List.range (modalWorldBoundS4 φ₀ + 1)).length * (2 * (2 * modalComplexity φ₀ + 1)) :=
-    sum_map_le_length_mul (List.range (modalWorldBoundS4 φ₀ + 1)) _
-      (2 * (2 * modalComplexity φ₀ + 1)) (fun w _ => hinner w)
-  rw [List.length_range] at houter
-  calc (List.map (fun w =>
-        ((modalSubfmls φ₀).flatMap
-          (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
-                      ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS4 φ₀ + 1))).sum
-      ≤ (modalWorldBoundS4 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
-    _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
-
-/-! ## Signed-Key Finite Codomain (task 511, Phase 2)
-
-The stable-key infrastructure the redesigned guard/invariant (Phases 3-6) consumes: the fixed
-finite codomain `signedSubfmls φ₀` (both signs × every subformula of `φ₀`, as a `Finset`) and
-the live relevant set `relevantSetFinset φ₀ b w` restated as a `Finset` (reusing
-`sameRelevantSet`'s membership notion). No driver change here -- pure defs + lemmas,
-CI-green in isolation. -/
-
-/-- The finite signed-subformula codomain: both signs paired with every subformula of `φ₀`, as
-a `Finset (Sign × Proposition Atom)`. This is the fixed codomain the pigeonhole argument
-(`modalKnownWorlds_length_le_worldBoundS4`, Phase 6) injects known worlds into, via their birth
-keys (`S4LoopInv.keysInUniverse`). -/
-def signedSubfmls (φ₀ : Proposition Atom) : Finset (Sign × Proposition Atom) :=
-  ({Sign.pos, Sign.neg} : Finset Sign) ×ˢ (modalSubfmls φ₀).toFinset
-
-omit [Hashable Atom] in
-/-- `signedSubfmls φ₀`'s cardinality is at most `2 * |modalSubfmls φ₀|` (equality would need
-`modalSubfmls φ₀` duplicate-free; the pigeonhole argument only needs the inequality, since it
-feeds `Nat.pow_le_pow_right` toward `modalWorldBoundS4 φ₀ = 2 ^ (2 * |modalSubfmls φ₀|)`, an
-upper bound is all that is required). -/
-lemma signedSubfmls_card_le (φ₀ : Proposition Atom) :
-    (signedSubfmls φ₀).card ≤ 2 * (modalSubfmls φ₀).length := by
-  unfold signedSubfmls
-  rw [Finset.card_product]
-  have h2 : ({Sign.pos, Sign.neg} : Finset Sign).card = 2 := by decide
-  rw [h2]
-  have hle := List.toFinset_card_le (modalSubfmls φ₀)
-  omega
-
-omit [Hashable Atom] in
-/-- The powerset of `signedSubfmls φ₀` has cardinality at most `modalWorldBoundS4 φ₀`: the
-cardinality bridge Phase 6's pigeonhole argument consumes (`Finset.card_powerset` plus
-`signedSubfmls_card_le`, monotone in the exponent). This is why Phase 1 (the exponent fix)
-precedes: it ties the bound to `2 ^ (2·|Sf|)`, the correct codomain size for a sign-distinguishing
-key. -/
-lemma signedSubfmls_powerset_card_le (φ₀ : Proposition Atom) :
-    (signedSubfmls φ₀).powerset.card ≤ modalWorldBoundS4 φ₀ := by
-  unfold modalWorldBoundS4
-  rw [Finset.card_powerset]
-  exact Nat.pow_le_pow_right (by norm_num) (signedSubfmls_card_le φ₀)
-
-/-- The live relevant set `R(b,w)` (task 511 research §1.3) as a `Finset`: exactly the
-elements of `signedSubfmls φ₀` whose signed-formula instantiation at `w` is present on `b`.
-Reuses `sameRelevantSet`'s membership notion (`⟨s,ψ,w⟩ ∈ b`) restated as a finite set for the
-birth-key / pigeonhole machinery (Phases 3-6). -/
-def relevantSetFinset (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
-    Finset (Sign × Proposition Atom) :=
-  (signedSubfmls φ₀).filter
-    (fun p => b.any (· == (⟨p.1, p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex)))
-
-omit [Hashable Atom] in
-/-- `relevantSetFinset φ₀ b w` is (trivially, by construction as a filter of `signedSubfmls
-φ₀`) a subset of `signedSubfmls φ₀`. This is `S4LoopInv.keysInUniverse`'s per-world content
-once composed with `S4LoopInv.keyLowerBd`. -/
-lemma relevantSetFinset_subset_signedSubfmls (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex) :
-    relevantSetFinset φ₀ b w ⊆ signedSubfmls φ₀ :=
-  Finset.filter_subset _ _
-
-omit [Hashable Atom] in
-/-- `relevantSetFinset` is monotone in the branch: if every formula of `b` is also a formula
-of `b'`, then `w`'s relevant set over `b` is a subset of `w`'s relevant set over `b'`. This is
-the fact Gap 1 (task 511 research §2) exploited for the old live-branch invariant, and the
-fact the new lower-bound invariant (`S4LoopInv.keyLowerBd`, Phase 4) is designed to *survive*:
-birth keys are fixed, but the live relevant set they lower-bound only grows. -/
-lemma relevantSetFinset_mono (φ₀ : Proposition Atom)
-    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
-    (hsub : ∀ sf ∈ b, sf ∈ b') :
-    relevantSetFinset φ₀ b w ⊆ relevantSetFinset φ₀ b' w := by
-  unfold relevantSetFinset
-  apply Finset.monotone_filter_right
-  intro p _ hp
-  simp only [List.any_eq_true, beq_iff_eq] at hp ⊢
-  obtain ⟨sf, hsf_mem, heq⟩ := hp
-  exact ⟨sf, hsub sf hsf_mem, heq⟩
 
 /-! ## The S4 Loop Invariant `S4LoopInv` -/
 

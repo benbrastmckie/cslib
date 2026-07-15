@@ -1,86 +1,112 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "task_number": 517,
-  "session_id": "sess_1784145761_061228",
-  "summary": "Track C C4 completed: tree surgery in `probes/lemma612-scaffold.lean` (extended in place, not a new file -- the choice left open by C3's dispatch). `star` FIXED from a double-`bigAnd` (`(bigAnd labels).and(bigAnd children)`) to a single `bigAnd` over the concatenated list (labels ++ children-diamonds) -- verified by hand BEFORE editing that the old version fails Simpson's own worked-example check (produces a spurious `top.and(dia(top.and top))` instead of the source's plain `dia top` at a label-less, single-childed node). `prune`/`fullSubtree` added (children split `pre ++ [c]`, continuation child LAST, matching `addChild`'s pre-existing append-at-end convention -- chosen to stay consistent with what C5's `addChild`/`pathSpine` commutation lemma will need). The unfolding identity (report 02 section 2.3, `Gamma@(fullSubtree v) = Gamma@(prune v c) AND dia(Gamma@(fullSubtree c))`) is proved as a genuine IK-derivable TWO-WAY IMPLICATION (`star_unfold_imp1`/`star_unfold_imp2`), NOT as a raw Lean `Eq`: `bigAnd`'s own right-fold definition (`phi::rest => phi.and(bigAnd rest)`) makes literal term equality fail once the pruned node has 2+ ordinary children (associativity mismatch between `a.and(X.and y)` and `(a.and X).and y` as TERMS, despite being logically equivalent) -- this was checked by hand before writing any Lean, avoiding a dead-end attempt at an unprovable `rfl` statement. Built via new reusable infrastructure, all generic over the axiom set: `andI_deriv`/`andE1_deriv`/`andE2_deriv` (AndI/AndE1/AndE2 lifted to an arbitrary Deriv-context), `top_deriv` (top is derivable in any context), `bigAnd_cons_of_ne_nil` (bigAnd's cons-equation for a propositionally-nonempty tail), and the algebraic core `bigAnd_append_singleton_imp1`/`imp2` (pulling the last conjunct out of bigAnd's scope, by induction on the list). The plan's explicitly-flagged-defective `pathTo`/`pathToList` (mutual recursion, returned the FULL not pruned subtree) and `Star_append` (wrapped the appended tree in its full star, the wrong primitive for the pruning problem) were DELETED. The success criterion (report 02's C4 entry: reproduce Simpson's worked example verbatim, tree x->y and x->z->w, target z) was investigated and found to NOT be achievable via literal `#eval`/`decide`: `Label Atom` has no `deriving DecidableEq` anywhere in the codebase, and the file's only decidability source is the classically-opaque `Classical.propDecidable` local instance, so `Gamma.filter (fun x => x.lbl = l)` does not computationally reduce. Verified this diagnosis with a standalone scratch probe (confirming `simp` with a supplied inequality proof still closes such filter goals regardless of instance opacity) before committing to the approach: `star_Star_worked_example` states and proves the exact target formula as a genuine `Eq` via `simp`-driven unfolding, not `rfl`/`decide`. Landed sorry-free, axiom footprint `[propext, Classical.choice, Quot.sound]` on all five new top-level theorems (`star_unfold_imp1`, `star_unfold_imp2`, `star_Star_worked_example`, `bigAnd_append_singleton_imp1`, `bigAnd_append_singleton_imp2`) -- no new axioms. `Star`/`Star_imp1`/`Star_imp2`/`box_mono1`/`box_mono2`/`IK.impIntro`/`NIKAx`/`TClosure.hilbertTransport` all unchanged (they reference `star Gamma t` only opaquely, never unfold its equation, so were not at regression risk from the `star` fix) and reverified compiling. `probes/track-c-c1-tele-conj.lean` (C1/C2/C3) untouched, reverified compiling. No `Cslib/` file touched. Per the explicit HARD STOP instruction, C5 was NOT opened this dispatch.",
-  "phases_completed": 7,
-  "phases_total": 7,
-  "sorry_inventory": [],
+  "session_id": "sess_1784156551_995e9d",
+  "plan_path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
+  "summary": "Phases 16 and 17 landed sorry-free and axiom-clean, in probes/ only (zero Cslib/ files touched). Phase 16 mechanizes `cs5_completeness ⟹ CS5 ⊢ FS`: cs5_completeness is stated as a Lean HYPOTHESIS (never an axiom), instantiated at φ := FS, and discharged by the landed sorry-free fs_sound''. Result `cs5_completeness_implies_fs_derivable` depends on NO axioms. Contrapositive `CS5 ⊬ FS ⟹ the target is false` is now a machine fact, refuting plan 02:173's 'orthogonal … red herring' assessment. Phase 17 is DECISIVE and POSITIVE — the ~15% falsifier did NOT fire. Simpson §8.1.1's B_K, defined abstractly over an arbitrary IL-model, satisfies all five cs5FC'' conjuncts (BK_cs5FC'') plus cs5Incest (BK_cs5Incest) and cs5FCIncest (BK_cs5FCIncest) — all depending on NO axioms. cs5FC provably FAILS, MECHANIZED not asserted (BK_not_cs5FC), with a concrete two-point witness (BKWitness_not_cs5FC) making the cs5FC ⊊ cs5FC'' separation genuine rather than vacuous. The §8.1.1 leg does NOT collapse; the target frame class cs5FC'' is CONFIRMED; task 509's cs5FC'' pivot is independently re-validated as necessary rather than cosmetic.",
+  "phases_completed": 9,
+  "phases_total": 26,
+  "phases_this_dispatch": [16, 17],
+  "skeleton": false,
   "blockers": [],
+  "sorry_inventory": [],
   "continuation_context": {
     "is_successor": true,
-    "resume_at": "Track C C5 (plans/02_decomposed-track-a-b-c.md) -- THE TRUE CRUX, HIGH risk",
+    "resume_at": "Plan 08 wave-1 remainder: Phases 18, 19, 20 (18 = the non-optional Cslib/ corner-cut removal). Phase 11/25 (pathSpine, a.k.a. plan 02's Track C C5) remains its own dedicated dispatch and was NOT touched here.",
     "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
     "do_not_redo": [
-      "A1 (IKAx repair) -- COMPLETED, probes/lemma612-scaffold.lean",
-      "A2 (CS5 |- FS route probe) -- COMPLETED, probes/fischer-servi-probe.lean",
-      "A3 (route verdict) -- COMPLETED, NO-GO for Track B, plans/02_decomposed-track-a-b-c.md A3 entry",
-      "Track C C1 (Tele/Conj + congruence) -- COMPLETED, probes/track-c-c1-tele-conj.lean",
-      "Track C C2 (formula 6.7) -- COMPLETED, appended to probes/track-c-c1-tele-conj.lean (dia_mono1, formula_6_7_base, formula_6_7)",
-      "Track C C3 (formula 6.8) -- COMPLETED, appended to probes/track-c-c1-tele-conj.lean (derivable_imp_trans, formula_6_8)",
-      "Track C C4 (LTree/star/fullSubtree/prune + unfolding identity) -- COMPLETED this dispatch, probes/lemma612-scaffold.lean (star fixed; prune/fullSubtree/star_unfold_imp1/star_unfold_imp2/star_Star_worked_example added; pathTo/pathToList/Star_append deleted)"
+      "Plan 08 Phase 16 (cs5_completeness ⟹ CS5 ⊢ FS) — COMPLETED this dispatch, probes/fischer-servi-probe.lean (cs5_completeness_implies_fs_derivable)",
+      "Plan 08 Phase 17 (B_K ⊨ cs5FC'' abstractly) — COMPLETED this dispatch, probes/bounded-context-bk-probe.lean (BK_cs5FC''/BK_cs5Incest/BK_cs5FCIncest/BK_not_cs5FC/BKWitness_*)",
+      "A1 (IKAx repair) — COMPLETED, probes/lemma612-scaffold.lean",
+      "A2 (CS5 ⊢ FS route probe) — COMPLETED, probes/fischer-servi-probe.lean",
+      "A3 (route verdict) — COMPLETED, NO-GO for Track B",
+      "Track C C1/C2/C3 — COMPLETED, probes/track-c-c1-tele-conj.lean",
+      "Track C C4 (LTree/star/fullSubtree/prune + unfolding identity) — COMPLETED, probes/lemma612-scaffold.lean"
     ]
   },
-  "next_action_hint": "Dispatch Track C C5: `pathSpine` (the whole-path recursion from root to target, with pruning BUILT IN to the recursion -- this replaces the deleted `pathTo`/`pathToList`) + the `addChild`/`pathSpine` COMMUTATION LEMMA (sorry-free is the plan's stated success criterion). This is THE TRUE CRUX (HIGH risk) -- it is its own dedicated dispatch, do NOT bundle with C6-C8 (H8 phase sizing). Reuse C4's `prune`/`fullSubtree`/`star_unfold_imp1`/`star_unfold_imp2` from `probes/lemma612-scaffold.lean`: `pathSpine` should be designed to RETURN, at each non-last node along the path, the `pre`-list (ordinary children) and the continuation child `c` that `prune`/`fullSubtree` already consume -- i.e. `pathSpine` is the tree-walk that PRODUCES the `pre`/`c` split, not a separate mechanism. The commutation lemma needs to relate `pathSpine` computed on `addChild t x y` to `pathSpine` computed on `t` -- `addChild` appends the new leaf at the END of the target node's children list (`node l (cs ++ [leaf y])`), which is WHY C4 chose `pre ++ [c]` (continuation child LAST) for `prune`/`fullSubtree` rather than a head-first split; re-verify this convention still holds once `pathSpine`'s actual recursion is written, especially for trees where the target is reached through MULTIPLE branch points (do not assume WLOG the continuation child is always the literal last-appended one at every level without checking against how the target label was actually reached at that level).",
-  "decomposition": {
-    "shape": "Track A (route selection + defect repair; A1+A2+A3 all done) -> Track B CLOSED (A3 NO-GO) -> Track C ACTIVE (Simpson tree surgery, 8 decomposed parts; C1+C2+C3+C4 done, C5 next)",
-    "track_a_status": [
-      "A1: COMPLETED. IKAx repaired with diaBot/diaOr/fs constructors.",
-      "A2: COMPLETED (mixed outcome). fs_context_relative_half + fs_sound''.",
-      "A3: COMPLETED. NO-GO for Track B, full hypothesis-matched argument against cs5Incest_forces_symm/cs5TwoSidedR_iff_cs5Tail/cs5_symmetric_tail_box_gap."
-    ],
-    "track_b_status": "CLOSED. B1/B2/B3 not opened.",
-    "track_c_parts": [
-      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1/Star_imp2 to Tele-congruence. COMPLETED, generalized over Axioms.",
-      "C2: prove (6.7) by induction on V using axiom 2 (kDia). COMPLETED. Scoping correction: theorem restricted to nonempty V (V=[] is false in bare IK, countermodel-checked).",
-      "C3: prove (6.8) by induction on W using axiom 5 (present after A1). COMPLETED. Base-case check DIFFERS from C2's: W=[] IS a valid theorem, no restatement needed.",
-      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList and Star_append. COMPLETED this dispatch. star fixed (double-bigAnd -> single concatenated bigAnd); unfolding identity proved as Derivable-Iff (star_unfold_imp1/imp2), not raw Eq; worked-example success criterion delivered via a real simp-based theorem (star_Star_worked_example), not #eval/decide (Label lacks computable DecidableEq).",
-      "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. NEXT. THE TRUE CRUX. Risk HIGH.",
-      "C6: LTree.toGraph + the tau-parameterized generalized induction; non-modal cases + (boxI)/(boxE)/(diaI). Risk MED.",
-      "C7: the (diaE) case via the reconstructed 3-step argument. Risk MED given C5. NOTE: reuse derivable_imp_trans (C3) for the 3-step composition.",
-      "C8: (botE)/(orE). Risk LOW -- label-local in this encoding."
-    ]
-  },
-  "confidence": {
-    "cs5FCpp_coincides_with_IS5_birelational_semantics": 1.0,
-    "track_b_mechanizable_at_reasonable_cost": 0.02,
-    "track_c_c1_correct_and_reusable": 1.0,
-    "track_c_c2_correct_and_reusable": 1.0,
-    "track_c_c3_correct_and_reusable": 1.0,
-    "track_c_c4_correct_and_reusable": 1.0,
-    "track_c_c5_completes_next_dispatch": 0.35,
-    "note": "C4 required a genuine design correction (star's double-bigAnd was silently wrong, found by hand-checking the worked example BEFORE writing Lean, not discovered via a failed proof attempt) and a genuine scope clarification (the unfolding identity cannot be literal Eq, only Derivable-Iff, due to bigAnd's associativity). Both were caught early via analysis-before-coding rather than costing wasted proof attempts. C5 (pathSpine + addChild commutation) is explicitly flagged HIGH risk by the plan and is the true crux the whole Track C detour exists to resolve -- confidence kept LOWER than C4's clean landing record would suggest, per the plan's own risk rating and D3's prior finding (referenced in report 02) that this exact `x`-node/LCA-style reasoning was the point where three PRIOR dispatches (before the report-02 reframe) got stuck."
-  },
-  "recommendation": "Proceed to Track C C5 next dispatch, as its own dedicated dispatch (H8 phase sizing -- do not bundle with C6-C8). Before writing any pathSpine code, hand-check the addChild/pathSpine commutation claim against a tree with at least 2 branch points (not just the single-branch worked example used for C4), since the plan's own retrospective (report 02 section 1) documents that this exact kind of multi-branch path reasoning is where prior (pre-reframe) dispatches got stuck. Budget for this being a multi-dispatch effort if the first attempt does not close sorry-free -- do not force a rushed proof under H2's read-budget pressure; a documented BLOCKED status with precise goal-state diagnosis is preferable to a vacuous placeholder.",
-  "gaps_flagged": [
-    "Fischer Servi 1984 remains NOT in the literature corpus -- moot while Track B stays closed.",
-    "A3's NO-GO argument is a hypothesis-matching analysis against existing mechanized theorems, not itself a new formal Lean proof of 'Track B is impossible' -- if Track B is ever reconsidered, that reduction argument should be checked, not merely cited.",
-    "C2's theorem (formula_6_7) is scoped to V = p :: rest (nonempty), NOT arbitrary List (Proposition Atom) -- any future caller (C7's (diaE) reconstruction) must supply a nonempty V.",
-    "C3's theorem (formula_6_8) is UNRESTRICTED (holds for all W including []) -- a genuine asymmetry with C2 that C7's (diaE) composition should be aware of.",
-    "C4's `prune`/`fullSubtree` split children as `pre ++ [c]` (continuation child LAST) purely as an internal convention for the unfolding identity's proof -- this was chosen to match `addChild`'s existing append-at-end convention, but C5 must independently verify this convention is actually what `pathSpine`'s real multi-level recursion needs; it was not derived FROM pathSpine (which does not exist yet), only anticipated.",
-    "The worked-example check (`star_Star_worked_example`) only exercises a SINGLE branch point (x has two children y and z, no deeper branching) -- it does not stress-test the multi-branch-point case that C5's commutation lemma will actually need to handle."
-  ],
+  "next_action_hint": "Phase 17's falsifier did NOT fire, so the plan's 'document and STOP — do not proceed to Phase 21' branch is NOT triggered; Phase 21 remains open and the §8.1.1 leg is confirmed. Wave-1 Phases 18/19/20 are unblocked and were out of this dispatch's scope; Phase 18 (remove the only corner cut in Cslib/) is non-optional and is the one that edits Cslib/. Phase 11/25 (pathSpine) stays a dedicated dispatch — see gaps_flagged for the multi-branch-point warning carried forward from the C4 dispatch. STRATEGIC NOTE FOR THE ORCHESTRATOR: Phases 16+17 now INTERLOCK into a single hard constraint on the whole route. fs_sound'' gives cs5FC'' ⊨ FS; BK_cs5FC'' gives B_K ⊨ cs5FC''; therefore EVERY B_K validates FS, so the route's own countermodel construction can NEVER produce a countermodel for FS. Combined with cs5_completeness_implies_fs_derivable, the CS5 ⊢ FS obligation is upgraded from a necessary condition of the THEOREM to a necessary condition of the METHOD. And CS5 ⊢ FS is currently OPEN (probes/fischer-servi-probe.lean records the syntactic derivation as negative-but-not-refuted: necessitation needs a closed sub-derivation, every route to A → B genuinely needs the hypothesis in context). RECOMMENDATION: seriously consider forcing a CS5 ⊢ FS decision BEFORE further investment in Phases 21-24, since a negative resolution there falsifies the completeness target itself, not merely this route.",
   "artifacts": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/bounded-context-bk-probe.lean",
       "type": "probe",
-      "summary": "star fixed to a single concatenated bigAnd; prune/fullSubtree added; andI_deriv/andE1_deriv/andE2_deriv/top_deriv/bigAnd_cons_of_ne_nil/bigAnd_append_singleton_imp1/imp2 (new reusable AND-reasoning infrastructure); star_unfold_imp1/star_unfold_imp2 (the unfolding identity, Derivable-Iff); star_Star_worked_example (the C4 success criterion, real theorem not #eval/decide); pathTo/pathToList/Star_append deleted. Sorry-free, axiom footprint [propext, Classical.choice, Quot.sound]."
+      "summary": "Phase 17 (NEW FILE). ILModel/BKWorld/BKle/BKR/BKPreorder define Simpson §8.1.1's B_K abstractly over an arbitrary IL-model. BK_cs5FC'' (all five conjuncts), BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC — all depend on NO axioms. BKWitness/BKWitness_cs5FC''/BKWitness_not_cs5FC give the concrete non-vacuous separation ([propext] only). Verified: lake env lean exit 0, sorry-free."
     },
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/02_decomposed-track-a-b-c.md",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fischer-servi-probe.lean",
+      "type": "probe",
+      "summary": "Phase 16 appended (cs5_completeness_implies_fs_derivable, depends on NO axioms). Appended IN-FILE rather than as a new probe because probes are standalone (verified via lake env lean) and are not a lean_lib, so fs_sound'' cannot be imported across probe files. Verified: lake env lean exit 0, sorry-free."
+    },
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
       "type": "plan",
-      "summary": "C4 marked [COMPLETED] with the star-fix / Derivable-Iff / worked-example-as-real-theorem notes."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/06_c4-tree-surgery-unfolding-identity-summary.md",
-      "type": "summary",
-      "summary": "Execution summary for Track C C4, including the star-fix diagnosis, the associativity argument for why the unfolding identity cannot be raw Eq, and the DecidableEq investigation behind the worked-example proof strategy."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
-      "type": "handoff",
-      "summary": "Resume pointer updated: C4 complete, C5 (the true crux) is next action, with detailed guidance on reusing C4's prune/fullSubtree/star_unfold_imp1/imp2 in pathSpine's design."
+      "summary": "Phases 16 and 17 marked [COMPLETED] with all task checkboxes ticked; Phase 17 annotated with its POSITIVE result (falsifier did not fire) and the Rdom-unnecessary finding."
     }
+  ],
+  "modified_files": [
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/fischer-servi-probe.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/bounded-context-bk-probe.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md"
+  ],
+  "commits": [
+    "task 517 phase 16: mechanize cs5_completeness => CS5 |- FS",
+    "task 517 phase 17: probe B_K |= cs5FC'' abstractly -- POSITIVE"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "ci_pipeline_note": "Zero Cslib/ files modified (git status confirmed), so the Cslib-scoped CI steps (checkInitImports, lake lint, lint-style, shake, mk_all, lake test) have no changed surface to gate. Regression check run instead: `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` -> exit 0, 728 jobs -- landed CK/CT/CS4/CS5 soundness and task-509's cs5FC'' intact. Probes are standalone and verified via `lake env lean` (exit 0 on both files), the established verification method for this task's probes.",
+    "axiom_footprint": "Abstract results (cs5_completeness_implies_fs_derivable, BK_cs5FC'', BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC): depend on NO axioms at all. Concrete witness (BKWitness_cs5FC'', BKWitness_not_cs5FC): [propext]. All strictly within the permitted [propext, Classical.choice, Quot.sound]."
+  },
+  "findings": [
+    {
+      "type": "citation_verified",
+      "detail": "The plan's `chunk_0152:3` citation for the B_K definition is VALID under the current 206-chunk Simpson numbering -- verified BY CONTENT, not by number, per the renumbering hazard warning. chunk_0152.md contains the construction verbatim: W' = {(w,d) | w in W and d in D_w}; (w,d) <=' (w',d') iff w <= w' and d = d'; (w,d) R' (w',d') iff w = w' and R_w(d,d'). This matches the dispatch's transcription EXACTLY -- no OCR/plan conflict to flag. Lemma 8.1.2 is in the same chunk. The plan's other cited chunk (chunk_0068, Thm 3.3.4) was not needed by Phases 16-17 and was not checked."
+    },
+    {
+      "type": "citation_discrepancy",
+      "detail": "The dispatch and plan cite cs5FC''/cs5FC/cs5FCIncest as all at CKExtension.lean:159,184. Only cs5FC (line 159) and cs5FC'' (line 184) are there. cs5Incest (CS5Canonical.lean:234) and cs5FCIncest (CS5Canonical.lean:255) live in CS5Canonical.lean instead. Minor and non-blocking -- the probe imports CS5Canonical, which pulls in CKExtension transitively. Worth correcting in future plan revisions."
+    },
+    {
+      "type": "plan_spec_refinement",
+      "detail": "The plan specifies proving the conjuncts 'given R_w refl/symm/trans and <=-monotonicity R_w subseteq R_w''. TWO refinements. (1) ADDITION: Dmono (D_w subseteq D_w', domain monotonicity) is required and is recorded as an ILModel field -- B_K's <=' moves the world component, so every freshly-constructed B_K-world needs a domain proof at the HIGHER context. This is not an addition to the source: Simpson's own box clause quantifies over d' in D_w' at w' >= w, presupposing exactly this. (2) OMISSION: a conjectured Rdom (R w d e -> D w e) turned out to be UNNECESSARY and was deliberately left out -- every conjunct that produces a fresh world reuses the SOURCE world's label, so Dmono alone transports domain membership. The hypothesis set is therefore minimal, which strengthens the result."
+    },
+    {
+      "type": "guardrail_analysis",
+      "detail": "CONFIRMS the plan's guardrail claim, as required by the dispatch. BKR makes R' a label-level, WITHIN-context relation over an arbitrary K: R' relates labels d,d' inside one fixed context w (w = w' is definitional in BKR), never two theories. By contrast cs5Incest_forces_symm (CS5Canonical.lean:643) and cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511) are both statements about the CANONICAL model's theory-to-theory relation. This probe never mentions, constructs, or quantifies over theories, so neither guardrail is instantiable here and neither fires. The independence is load-bearing: B_K |= cs5FC'' is established over EVERY IL-model, so it cannot be an artifact of any canonical-model-specific collapse. This is mechanized in the file's module docstring, not merely asserted in prose."
+    },
+    {
+      "type": "obstruction_mechanized",
+      "detail": "BK_not_cs5FC is stronger and simpler than the plan anticipated. cs5FC's <=-composed transitivity (r w u -> u <= u' -> r u' t -> r w t) is instantiated at w := (w,d), u := (w,d), u' := (w',d), t := (w',d): BOTH r-premises are mere REFLEXIVITY instances of R', so the obstruction needs no cleverly-placed edge -- it needs only R_w's reflexivity plus two distinct <=-comparable contexts. The conclusion would be (w,d) R' (w',d), whose first component is w = w', contradicting w != w'. Structural reason: <=' moves the world and pins the label; R' moves the label and pins the world; the two never compose into the cross-context edge cs5FC demands."
+    },
+    {
+      "type": "false_positive_warning",
+      "detail": "A naive grep for prohibited vacuous definitions flags BKWitness's fields (D _ _ := True, R _ _ _ := True, Rrefl _ := trivial, ...). These are NOT vacuous placeholders in the prohibited sense: BKWitness is a concrete two-point model whose INTENDED semantics is a total domain and total accessibility, so True/trivial are its genuine mathematical content, not a substitute for an unmet proof obligation. Every load-bearing result (BK_cs5FC'', BK_cs5Incest, BK_cs5FCIncest, BK_not_cs5FC) is abstract over an arbitrary K and uses no such construct. Recorded so a future reviewer or lint pass does not misread the grep hit."
+    },
+    {
+      "type": "lit_briefing_confirmation",
+      "detail": "Confirms the dispatch's report that literature-briefing.sh is broken for this task: the briefing supplied no modal sources. Chunks were read directly from /home/benjamin/Projects/Literature/simpson_1994_intuitionisticmodallogic/ as instructed. Root cause (id vs doc_id namespace split in the global index) was NOT investigated or fixed -- correctly out of scope."
+    }
+  ],
+  "confidence": {
+    "bk_models_cs5FCpp": 1.0,
+    "cs5FC_fails_on_bk": 1.0,
+    "cs5FCpp_is_the_correct_frame_class_for_the_8_1_1_leg": 1.0,
+    "cs5_completeness_entails_CS5_derives_FS": 1.0,
+    "cs5_derives_FS_itself": null,
+    "note": "Phases 16-17 are now settled facts, not estimates -- both are machine-checked and axiom-clean. The A/KF3 hand-check the plan rated ~85% is now SETTLED at 1.0. What these phases do NOT settle is CS5 |- FS itself, which remains genuinely OPEN (deliberately null above rather than guessed): fs_sound'' shows FS is semantically cs5FC''-valid, and fs_syntactic_obstruction shows the naive Hilbert route fails structurally, but neither decides derivability. That open question is now the route's single highest-leverage unknown, because Phases 16+17 jointly make it a necessary condition of the METHOD as well as of the theorem."
+  },
+  "gaps_flagged": [
+    "CS5 |- FS remains OPEN and is now the route's critical path -- Phases 16+17 make it necessary for BOTH the theorem and the method, but neither phase decides it. A negative resolution would falsify the completeness target itself.",
+    "Phase 17 establishes B_K |= cs5FC'' as a FRAME fact only. B_K's valuation component (Simpson's V'((w,d)) = {a | alpha_w(d)}) and Lemma 8.1.2 (the forcing-preservation induction) are NOT mechanized here -- ILModel deliberately omits alpha_w since cs5FC''/cs5FC constrain only the relation. Phase 24 will need Lemma 8.1.2 separately; do not mistake Phase 17's positive result for it.",
+    "BKWitness is a two-point model with a TOTAL accessibility relation. It witnesses only that BK_not_cs5FC's hypotheses are satisfiable (making the separation non-vacuous); it is not a rich test of B_K's structure.",
+    "Carried forward from the C4 dispatch, still live: C4's prune/fullSubtree split children as pre ++ [c] (continuation child LAST) as an internal convention anticipated from addChild's append-at-end behaviour, NOT derived from pathSpine (which does not exist yet). Phase 11/25 (pathSpine) must independently verify this convention against a tree with at least 2 branch points -- report 02 section 1 documents that this exact multi-branch path reasoning is where three prior pre-reframe dispatches got stuck.",
+    "Carried forward: formula_6_7 (C2) is scoped to nonempty V; formula_6_8 (C3) is unrestricted. C7's (diaE) composition must respect the asymmetry.",
+    "Carried forward: Fischer Servi 1984 is still NOT in the literature corpus -- moot while Track B stays closed.",
+    "literature-briefing.sh silently drops all 20 modal sources for this task (id vs doc_id namespace split in ~/Projects/Literature/index.json). Diagnosed previously, not fixed, out of scope -- but every --lit dispatch on this task is affected and must read chunks directly."
   ],
   "metadata": {
     "agent_type": "cslib-implementation-hard-agent",
@@ -89,10 +115,11 @@
     "lit_flag": true,
     "hard_mode": true,
     "orchestrator_mode": true,
-    "supersedes": "prior .orchestrator-handoff.json (C3 dispatch, status=partial, next_action_hint=Track C C4)",
+    "effort_flag": "hard",
+    "supersedes": "prior .orchestrator-handoff.json (Track C C4 dispatch, session sess_1784145761_061228, status=partial, plan 02, next_action_hint=Track C C5). That handoff's phases_completed=7/7 counted plan 02's Track C parts; this handoff counts plan 08's phases (9 of 26). Its C5/pathSpine continuation guidance remains LIVE and is carried forward in gaps_flagged -- pathSpine was explicitly out of scope for this dispatch.",
     "sorry_inventory": {
       "added": 0,
-      "note": "This dispatch's Lean artifact (probes/lemma612-scaffold.lean, extended in place) verified sorry-free via lake env lean (exit 0, zero errors, zero warnings) and manual grep for the sorry tactic (zero real hits; two grep hits for the literal substring 'axiom' are both inside doc-comment prose, not real axiom declarations). #print axioms on all five new top-level theorems (star_unfold_imp1, star_unfold_imp2, star_Star_worked_example, bigAnd_append_singleton_imp1, bigAnd_append_singleton_imp2) all give [propext, Classical.choice, Quot.sound], matching CSLib's standard Metalogic/DerivationTree infrastructure footprint (via deductionTheorem) -- not new axioms. No Cslib/ file touched (confirmed via git status -- only the probe file plus task-state/plan/handoff/summary bookkeeping files in the working tree diff for this dispatch; Cslib/Logics/Modal/Tableau/FrameSoundness.lean and the 515-task files that also appear in git status are task-515's unrelated, already-in-flight concurrent work, not touched by this dispatch)."
+      "note": "Both Lean artifacts verified sorry-free via `lake env lean` (exit 0, zero errors, zero warnings) plus manual grep for the sorry tactic (zero real hits; all grep matches for 'sorry' are doc-comment prose). #print axioms run on all six new top-level theorems. No Cslib/ file touched (git status confirmed). Note: unrelated concurrent task-515 work and specs/ bookkeeping files may appear in git status; staging was scoped to this dispatch's three files only, never `git add -A`."
     }
   },
   "last_updated": "2026-07-15T00:00:00Z"

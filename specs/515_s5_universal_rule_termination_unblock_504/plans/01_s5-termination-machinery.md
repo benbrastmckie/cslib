@@ -1,7 +1,7 @@
 # Implementation Plan: S5 Universal-Rule Termination Machinery
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 8-12 hours
 - **Dependencies**: Task 514 (literature grounding, anchor), Task 504 (parent; Phases 1/3 + partial 7 landed CI-green), Task 511 (`LoopChecking.lean` S4 scaffolding)
 - **Research Inputs**: reports/01_s5-termination-implementation-blueprint.md
@@ -96,7 +96,29 @@ Per-milestone commit discipline: narrow `git add` (only the specific `.lean` fil
 
 Phases within the same wave can run in parallel. **Phase 5 (soundness) forks after Phase 1 and runs parallel to the P2 -> P3 -> P4 termination chain** (F5: it consumes only `freshLocal`, never `rankStep`, so a blockage in the termination chain does not strand it). The decidability capstone (P6) depends on the pigeonhole (P4) and the `S5LoopInv` structure (P3); P7 depends on P6.
 
-### Phase 1: Frame surface + S5 world bound + universe [NOT STARTED]
+### Phase 1: Frame surface + S5 world bound + universe [COMPLETED]
+
+_Started: 2026-07-15T00:05:00Z_ -- _Completed: 2026-07-15T00:40:00Z_
+
+Landed sorry-free: `s5FC`, `s5Valid`, `fiveFC`, `fiveValid`, `kb5FC`, `kb5Valid`
+(`FrameSoundness.lean`, mirroring `s4FC`/`symmFC`); `modalWorldBoundS5`, `modalUniverseS5`,
+`modalUniverseS5_length_le` (`S5Simplification.lean`, mirroring `modalWorldBoundS4`/
+`modalUniverseS4`/`modalUniverseS4_length_le`, `LoopChecking.lean:229/235/245`, verbatim).
+Note: plan text said `fiveValid := frameValid (Cube.Five)` / `kb5Valid` "per the Cube classes"
+-- `Cube.Five`/`Cube.KB5` are `Set (Proposition Atom)` logic objects, not `FrameCondition`
+values, so (matching the `s4FC`/`symmFC` precedent already in the file) new `fiveFC`/`kb5FC`
+`FrameCondition` predicates were authored (`Relation.RightEuclidean` alone; `Std.Symm ∧
+Relation.RightEuclidean`) and `fiveValid`/`kb5Valid` defined via `frameValid fiveFC`/
+`frameValid kb5FC`, matching every other `*Valid` definition's shape in this file.
+Scoped builds (`lake build Cslib.Logics.Modal.Tableau.FrameSoundness` /
+`...S5Simplification`), `lake exe checkInitImports`, `lake exe lint-style`, and a full-project
+`lake lint` (12098 declarations, only the pre-existing unrelated `PrimeExclusion.lean`
+`unusedArguments` error, nothing in the touched files) all green. Full-project `lake build`/
+`lake test`/`lake shake` were intermittently blocked during this phase by an unrelated,
+concurrent, uncommitted in-progress edit to `Cslib/Logics/Modal/Metalogic/Constructive/
+CS5Canonical.lean` (task 512, a different active session, outside task 515's file scope) --
+re-verified at the end-of-run full pipeline pass (see final metadata) once that file
+stabilized.
 
 **Goal**: Author the missing frame-class definitions and the world-bound/universe scaffolding, reusing the φ₀-parametric engine verbatim. Lowest-risk phase; establishes the surface all later phases consume.
 

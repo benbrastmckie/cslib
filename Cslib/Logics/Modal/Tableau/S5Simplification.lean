@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+import Mathlib.Tactic.Ring
 public import Cslib.Logics.Modal.Tableau.FmpMeasure
 
 /-! # S5 Universal-Cluster Tableau Simplification
@@ -54,6 +55,66 @@ namespace Cslib.Logic.Modal.Tableau
 open Cslib.Logic.Tableau Cslib.Logic.Modal
 
 variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
+
+/-! ## S5 World Bound and Universe (task 515 Phase 1)
+
+`modalWorldBound`/`modalUniverse` (`FmpMeasure.lean`) are a branching^depth *tree* bound: S5's
+universal-cluster world graph is not a bounded-depth tree (the universal rule re-broadcasts
+across the whole known-world set, `S5Simplification.lean`'s module docstring), so this bound
+does not transfer, exactly as it does not transfer to S4 (`LoopChecking.lean`'s `modalWorldBoundS4`
+correction). `modalWorldBoundS5`/`modalUniverseS5` mirror `modalWorldBoundS4`/`modalUniverseS4`
+(`LoopChecking.lean:229/235/245`) verbatim: the pigeonhole bound `2 ^ (2 * |modalSubfmls φ₀|)`,
+the number of possible signed-relevant-formula sets a birth-key loop-checking argument
+(`S5LoopInv`, Phase 3) can inject into. -/
+
+/-- The S5 world bound: `2 ^ (2 * |modalSubfmls φ₀|)`, the number of possible
+signed-relevant-formula sets, mirroring `modalWorldBoundS4` (`LoopChecking.lean:229`). -/
+def modalWorldBoundS5 (φ₀ : Proposition Atom) : Nat :=
+  2 ^ (2 * (modalSubfmls φ₀).length)
+
+/-- The fixed finite signed-formula universe `U_{S5}(φ₀)`: both signs, every subformula of
+`φ₀`, at every world label `0 .. modalWorldBoundS5 φ₀`. Mirrors `modalUniverseS4`
+(`LoopChecking.lean:235`) with `modalWorldBoundS5` swapped in for `modalWorldBoundS4`. -/
+def modalUniverseS5 (φ₀ : Proposition Atom) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (List.range (modalWorldBoundS5 φ₀ + 1)).flatMap (fun w =>
+    (modalSubfmls φ₀).flatMap (fun ψ => [⟨.pos, ψ, w⟩, ⟨.neg, ψ, w⟩]))
+
+/-- The S5 universe has length at most
+`2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS5 φ₀ + 1)`. Mirrors
+`modalUniverseS4_length_le` (`LoopChecking.lean:245`) verbatim, `S4` swapped for `S5`. -/
+lemma modalUniverseS5_length_le (φ₀ : Proposition Atom) :
+    (modalUniverseS5 φ₀).length ≤
+      2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS5 φ₀ + 1) := by
+  have hinner : ∀ w : WorldIndex,
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length
+        ≤ 2 * (2 * modalComplexity φ₀ + 1) := by
+    intro w
+    rw [List.length_flatMap]
+    have hb : (List.map (fun ψ =>
+        ([(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex), ⟨.neg, ψ, w⟩]).length)
+        (modalSubfmls φ₀)).sum ≤ (modalSubfmls φ₀).length * 2 :=
+      sum_map_le_length_mul (modalSubfmls φ₀) _ 2 (fun ψ _ => by simp)
+    have hlen := modalSubfmls_length_le φ₀
+    omega
+  unfold modalUniverseS5
+  rw [List.length_flatMap]
+  have houter : (List.map (fun w =>
+      ((modalSubfmls φ₀).flatMap
+        (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                    ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS5 φ₀ + 1))).sum
+      ≤ (List.range (modalWorldBoundS5 φ₀ + 1)).length * (2 * (2 * modalComplexity φ₀ + 1)) :=
+    sum_map_le_length_mul (List.range (modalWorldBoundS5 φ₀ + 1)) _
+      (2 * (2 * modalComplexity φ₀ + 1)) (fun w _ => hinner w)
+  rw [List.length_range] at houter
+  calc (List.map (fun w =>
+        ((modalSubfmls φ₀).flatMap
+          (fun ψ => [(⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex),
+                      ⟨.neg, ψ, w⟩])).length) (List.range (modalWorldBoundS5 φ₀ + 1))).sum
+      ≤ (modalWorldBoundS5 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
+    _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS5 φ₀ + 1) := by ring
 
 /-! ## S5-Specific (Universal-Cluster) Propagation Helpers -/
 

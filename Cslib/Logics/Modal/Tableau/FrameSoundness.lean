@@ -1252,6 +1252,47 @@ lemma modalBDiaNegBack_sound [DecidableEq Atom] [Hashable Atom]
   rw [hxeq]
   exact branchSatisfiableIn_symmFC_diaNeg_pred_mem h hmem hedge
 
+/-! ## S5 (Equivalence Frame), Five, KB5 (task 515 Phase 1)
+
+The frame-condition surface for S5's universal-cluster tableau (`S5Simplification.lean`) and
+the 5/KB5 semantic bridge (task 504 Phases 4/7). `s5FC` mirrors `s4FC` (reflexive +
+transitive) with `IsTrans` replaced by `Relation.RightEuclidean`: reflexive + (right)
+Euclidean is equivalent to an equivalence relation (`Relation.symm_rightEuclidean_iff_trans`,
+`Cslib/Foundations/Relation/Euclidean.lean`, together with reflexivity giving symmetry and
+transitivity). `fiveFC`/`kb5FC` mirror `symmFC`/`s4FC` for the pure-Euclidean (`Cube.Five`)
+and symmetric-plus-Euclidean (`Cube.KB5`) frame classes respectively. -/
+
+/-- The S5 (equivalence) frame condition: `Std.Refl m.r ∧ Relation.RightEuclidean m.r`.
+Instantiates `frameValid`/`branchSatisfiableIn` for the modal logic S5 (`Cube.S5`,
+`K ∪ T ∪ Four ∪ Five`, `Cube.lean:85`): a reflexive right-Euclidean relation is an equivalence
+relation (`Relation.symm_rightEuclidean_iff_trans` gives transitivity from Euclideanness once
+symmetry is available, and reflexivity + Euclideanness together give symmetry via
+`Relation.RightEuclidean.refl_cod`-style projections), matching S5's single-cluster model
+property. -/
+def s5FC : FrameCondition := fun {_} r => Std.Refl r ∧ Relation.RightEuclidean r
+
+/-- S5-validity: `φ` is satisfied in every Kripke model whose relation is an equivalence
+relation (reflexive + right-Euclidean), at every world. Matches `Cube.S5`. -/
+def s5Valid (φ : Proposition Atom) : Prop := frameValid s5FC φ
+
+/-- The pure-Euclidean frame condition: `Relation.RightEuclidean m.r`. Instantiates
+`frameValid`/`branchSatisfiableIn` for the modal logic 5 (`Cube.Five`,
+`{m | Relation.RightEuclidean m.r}`, `Cube.lean:45`). -/
+def fiveFC : FrameCondition := fun {_} r => Relation.RightEuclidean r
+
+/-- 5-validity: `φ` is satisfied in every Kripke model whose relation is right-Euclidean, at
+every world. Matches `Cube.Five`. -/
+def fiveValid (φ : Proposition Atom) : Prop := frameValid fiveFC φ
+
+/-- The KB5 frame condition: `Std.Symm m.r ∧ Relation.RightEuclidean m.r`. Instantiates
+`frameValid`/`branchSatisfiableIn` for the modal logic KB5 (`Cube.KB5`,
+`K ∪ B ∪ Five`, `Cube.lean:73`). -/
+def kb5FC : FrameCondition := fun {_} r => Std.Symm r ∧ Relation.RightEuclidean r
+
+/-- KB5-validity: `φ` is satisfied in every Kripke model whose relation is symmetric and
+right-Euclidean, at every world. Matches `Cube.KB5`. -/
+def kb5Valid (φ : Proposition Atom) : Prop := frameValid kb5FC φ
+
 end Cslib.Logic.Modal.Tableau
 
 end

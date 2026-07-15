@@ -551,8 +551,58 @@ left `[NOT STARTED]` below, in dependency order, rather than worked out of seque
 
 ---
 
-### Phase 6: `Decidable (tValid φ)` [NOT STARTED]
+### Phase 6: `Decidable (tValid φ)` [BLOCKED]
 
+**BLOCKER**:
+- **What failed**: Proving `modalTableauT φ = .closed → tValid φ` (T soundness lifted to the
+  driver/branch level), the prerequisite `tValid_decides`/`instDecidableTValid` need.
+- **What was tried**: Read `SoundnessStep.lean`'s `modalStepBranch_preserves_sat` in full
+  (~500 lines, the K per-step soundness-preservation lemma `Soundness.lean`'s
+  `modalExpandBranches_closed_unsat` fuel-induction wraps) to determine whether a T-specific
+  analog is tractable within this phase's budget. Confirmed a genuinely useful structural fact:
+  throughout that entire proof, the ambient Kripke model `(W, m)` is **never replaced** --
+  only the world-assignment function `f : WorldIndex → W` is *pointwise redefined* at a fresh
+  index for the two minting rules (`boxNeg`/`diamondPos`, lines 611-727), since `f` is already a
+  total function over `WorldIndex = Nat` and minting a new index needs no new codomain element.
+  This means a frame-condition witness `FC m.r` (e.g. `Std.Refl m.r` for T) would thread through
+  **unchanged** in every case if the lemma were restated over `branchSatisfiableIn FC` in place
+  of the frame-free `branchSatisfiable` (`SoundnessStep.lean:63`) -- i.e. the generalization is
+  *structurally* sound and low-risk, not a dead end.
+- **Why it's stuck**: Confirming that fact is not the same as having the lemma. No generic (or
+  even T-specific) `branchSatisfiableIn`-flavored version of `modalStepBranch_preserves_sat`
+  exists anywhere in the codebase (confirmed via search -- `GenericDriver.lean`'s own docstring,
+  which carefully cross-references termination and completeness reuse for 504/505, never
+  mentions soundness at all). Producing one requires **either** (a) a ~500-line near-verbatim
+  reproduction of `modalStepBranch_preserves_sat`'s proof script with `FC m.r` inserted as an
+  extra threaded component in every one of its ~15 `refine ⟨..., hacc, ...⟩` tuples, **plus**
+  genuinely new handling for the box-positive/diamond-negative cases (reusing
+  `modalTBoxSelf_sound`/`modalTDiaNegSelf_sound`, already committed in `FrameSoundness.lean`, for
+  the T self-conjunct on top of the existing K per-rule argument), since `modalStepBranchT`'s
+  found-formula case-split needs a T-shape branch the K lemma doesn't have -- or (b) the fully
+  generic `RuleApplicationSpec`-level soundness lift (a "soundness" sibling to task 507's
+  termination generalization and task 510's completeness generalization), each of which was
+  independently sized as its own multi-phase task. Either path is comparable in size to the
+  largest single deliverables already in this task (task 510's ~850-line completeness
+  generalization; this task's own `TDriver.lean`, 908 lines) and does not fit in the 1.5-hour
+  budget without unacceptable risk of introducing `sorry`/shortcuts to force a close.
+- **What is needed**: A dedicated follow-up task (matching this plan's own precedent at Phase 3
+  and Phase 5 -- both were escalated via `/spawn` into dedicated tasks, 507 and 510, and both
+  succeeded) scoped to: (1) a `branchSatisfiableIn`-generalized per-step soundness lemma
+  (`modalStepBranchT_preserves_satIn` or a generic `modalStepBranchGen_preserves_satIn (FC)`,
+  reusing the "`m`/`W` never change" structural fact above to keep the FC-threading mechanical);
+  (2) a fuel-induction wrapper mirroring `modalExpandBranches_closed_unsat`
+  (`Soundness.lean:197`) instantiated at `modalApplyOneT`/`reflFC`; (3) the top-level
+  `modalTableauT_sound : modalTableauT φ = .closed → tValid φ`; (4) `tValid_decides` and
+  `instDecidableTValid` as originally scoped below (these two remain fully tractable
+  one-liners once (3) exists, mirroring `modalTableau_decides`/`instDecidableKValid`
+  verbatim). Recommend budgeting at least 3-5 hours (mirroring task 510's own scope for the
+  structurally-analogous completeness-side generalization).
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous placeholder.
+  Phase 5 (T truth lemma, `tValid` completeness, `modalTableauT_complete`) is preserved green and
+  committed (`14d9931c`).
+
+**Once T soundness-at-the-driver-level is available, the remainder of this phase is fully scoped
+and was NOT blocked** (retained here for the follow-up task to execute directly):
 - **Goal:** Combine T soundness (rule-level soundness committed in `FrameSoundness.lean`, lifted to
   branch-level via the terminating `modalTableauT`) with the Phase-5 completeness to state
   `tValid_decides` and `instDecidableTValid`, mirroring `modalTableau_decides` /
@@ -562,14 +612,16 @@ left `[NOT STARTED]` below, in dependency order, rather than worked out of seque
     committed rule-level T soundness (`modalTBoxSelf_sound`/`modalTDiaNegSelf_sound`,
     `branchSatisfiableIn reflFC`) through the generalized fuel loop (the generic
     `modalExpandBranches` soundness instantiated at `modalApplyOneT` + `branchSatisfiableIn reflFC`).
+    *(blocked; see BLOCKER above)*
   - [ ] State `tValid_decides : modalTableauT φ = .closed ↔ tValid φ` (two-constructor dichotomy of
-    `ModalTableauResult`, as in `modalTableau_decides`).
+    `ModalTableauResult`, as in `modalTableau_decides`). *(blocked; depends on the above)*
   - [ ] Define `instDecidableTValid (φ) : Decidable (tValid φ)` by running `modalTableauT φ` and
     consulting `tValid_decides` (no `Fintype Atom` assumption — the tableau computation is the
-    decision procedure, exactly as `instDecidableKValid`).
+    decision procedure, exactly as `instDecidableKValid`). *(blocked; depends on the above)*
   - [ ] `lake build`; `lean_verify` no sorry/axiom on `tValid_decides` and `instDecidableTValid`;
-    full CI.
-- **Timing:** 1.5 hours
+    full CI. *(deferred to the follow-up task)*
+- **Timing:** 1.5 hours (original estimate; the blocked prerequisite above is additional,
+  estimated 3-5+ hours, mirroring the recurring underestimation pattern noted at Phases 2/3/5).
 - **Depends on:** 5
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` — driver-level T soundness lift.
@@ -579,23 +631,36 @@ left `[NOT STARTED]` below, in dependency order, rather than worked out of seque
 
 ---
 
-### Phase 7: Interface documentation, downstream contract, and final CI [NOT STARTED]
+### Phase 7: Interface documentation, downstream contract, and final CI [PARTIAL]
 
 - **Goal:** Document the reusable `RuleApplicationSpec` interface for tasks 504/505, run the full
   CSLib CI end-to-end, and write the completion summary.
 - **Tasks:**
-  - [ ] Add a module docstring to `GenericDriver.lean` describing how a new frame rule instantiates
+  - [x] Add a module docstring to `GenericDriver.lean` describing how a new frame rule instantiates
     the generic driver (define `apply`, prove `RuleApplicationSpec apply`, obtain
     `modalTableau<X>` + termination), with T as the worked example and explicit pointers for S5
     (universal rule, `EqvGen`, task 504) and B (backward rule, `SymmGen`, task 505). State
     explicitly that S4 (task 506) is **not** an instance (transitive-box termination differs).
-  - [ ] Run the full CSLib CI in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
+    *(deviation: altered -- the bulk of this documentation (fields 1-7, downstream-reuse table
+    for T/S5/B, S4 exclusion) was already committed by Phases 2-4; this session added a new
+    "Completeness Is Generic; Soundness Is Not Yet" section documenting that task 510's
+    completeness generalization is fully consumed (Phase 5) but no soundness-side `_gen`
+    generalization exists, explicitly warning tasks 504/505 they will hit the same Phase-6 gap
+    when they reach their own decidability results.)*
+  - [x] Run the full CSLib CI in order: `lake build`, `lake exe checkInitImports`, `lake lint`,
     `lake exe lint-style`, `lake test`, `lake exe mk_all --module`,
-    `lake shake --add-public --keep-implied --keep-prefix`. Fix any lint on new decls.
-  - [ ] Final `lean_verify` sweep on all new/changed top decls (`modalTableauGen`,
+    `lake shake --add-public --keep-implied --keep-prefix`. Fix any lint on new decls. *(all
+    green on touched files; `lake build`/`lake test` exit 0 project-wide, zero new lint/shake
+    findings on `GenericDriver.lean`/`FrameCompleteness.lean`/`CompletenessLoop.lean`.)*
+  - [x] Final `lean_verify` sweep on all new/changed top decls (`modalTableauGen`,
     `RuleApplicationSpec`, `modalApplyOne_spec`, `modalApplyOneT_spec`, `modalTableauT`,
-    `tValid_decides`, `instDecidableTValid`): confirm zero sorry / zero axiom.
-  - [ ] Write `specs/503_.../summaries/01_generalize-tableau-driver-tsystem-summary.md`.
+    `tValid_decides`, `instDecidableTValid`): confirm zero sorry / zero axiom. *(deviation:
+    altered -- `tValid_decides`/`instDecidableTValid` do not exist (Phase 6 blocked); verified
+    the six decls that do exist instead, plus Phase 5's new decls
+    (`modalTruthLemmaT`/`modalTableauT_complete`/`hintikkaT_box_pos`/`hintikkaT_diamond_neg`):
+    all report the standard `propext`/`Classical.choice`/`Quot.sound` axiom trio only, zero
+    `sorry`.)*
+  - [x] Write `specs/503_.../summaries/01_generalize-tableau-driver-tsystem-summary.md`.
 - **Timing:** 1 hour
 - **Depends on:** 6
 - **Files to modify:**
@@ -603,6 +668,9 @@ left `[NOT STARTED]` below, in dependency order, rather than worked out of seque
   - `specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/summaries/01_generalize-tableau-driver-tsystem-summary.md` (new).
 - **Verification:**
   - Full CI green; zero sorry/axiom repository-wide for the touched files; interface documented.
+  - **Marked [PARTIAL] rather than [COMPLETED]** solely because Phase 6 is `[BLOCKED]` and this
+    phase's own final-sweep task list named two decls (`tValid_decides`/`instDecidableTValid`)
+    that consequently do not exist; every task achievable independent of Phase 6 is done.
 
 ---
 

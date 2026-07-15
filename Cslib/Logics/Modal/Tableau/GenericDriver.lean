@@ -127,6 +127,35 @@ convention the plan originally specified.
   loop-checking (`#worlds ≤ 2^|Sf|`) rather than the depth-based `modalWorldBound` this bundle
   presupposes via `outputsSubsetUniverse`'s reliance on `modalApplyOne_outputs_subset`-style
   world-bound hypotheses; S4 needs a structurally different termination argument.
+
+## Completeness Is Generic (task 510); Soundness Is Not Yet (task 503 Phase 6, blocked)
+
+Task 510 generalized the *completeness*-side Hintikka/saturation chain fully over
+`(apply, spec)` (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), so **any**
+`RuleApplicationSpec apply` witness -- T's `modalApplyOneT_spec` (`TDriver.lean`), and by the
+same pattern S5's/B's own future witnesses -- gets a Hintikka-set-producing top-loop lemma for
+free. Task 503 Phase 5 consumed this directly for T: `modalExpandBranchesT_hintikka` is a
+one-line application, and the remaining T-specific work (`hintikkaT_box_pos`/
+`hintikkaT_diamond_neg`, `modalTruthLemmaT`, `modalTableauT_complete`, all in
+`FrameCompleteness.lean`) needed no generic abstraction beyond that -- only the two shapes where
+T's rule genuinely differs from K's (`box`-positive, `diamond`-negative) needed new proof content;
+the other two modal shapes reuse the equally-generic *free* projection bridges
+`hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (`Completeness.lean`) directly.
+
+**Soundness has no such generic lift yet.** `Soundness.lean`'s `modalExpandBranches_closed_unsat`
+(the K fuel-induction soundness argument, wrapping `SoundnessStep.lean`'s
+`modalStepBranch_preserves_sat`) is stated and proved concretely against `modalApplyOne` and the
+frame-free `branchSatisfiable` predicate; no `_gen`/`(apply, spec)` form exists. Task 503 Phase 6
+(`Decidable (tValid φ)`) is **[BLOCKED]** on this exact gap -- see that phase's blocker record for
+the full analysis, including the key finding that the ambient Kripke model `(W, m)` is *never
+replaced* throughout `modalStepBranch_preserves_sat`'s proof (only the world-assignment function
+`f` is pointwise redefined for the two minting rules), which makes a `branchSatisfiableIn
+FC`-generalized version structurally low-risk (an `FC m.r` witness would thread through
+unchanged) but still a substantial (~500-line) undertaking, comparable in scope to task 510's own
+completeness generalization. **Tasks 504 (S5) and 505 (B) will hit this same gap** when they
+reach their own decidability results -- budget a soundness-lift phase (or a shared
+`generic-tableau-soundness` follow-up task, analogous to how 507/510 were spawned for
+termination/completeness) rather than assuming soundness comes for free alongside completeness.
 -/
 
 @[expose] public section

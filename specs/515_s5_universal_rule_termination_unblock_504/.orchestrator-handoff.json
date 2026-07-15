@@ -1,61 +1,59 @@
 {
   "status": "partial",
-  "summary": "Phase 3 (keys-aware guard redesign + extended 11-field S5LoopInv) landed sorry-free and CI-green, resolving the crux guard-vs-live-set obstruction shared with task 511's S4 development. Phase 4 (generic-field preservation) is in progress: 1 of 6 fields (eNodup) landed sorry-free; the remaining five require substantial direct case-analysis proof work (no template exists in the codebase for this rule shape, since the existing generic _gen preservation wrappers all presuppose a freshLocal dichotomy the keyed guard's blocked/loop-back case violates). bClosure/eClosure are further entangled with the Phase 6 pigeonhole cardinality argument. Phases 5-9 not started.",
+  "summary": "Cycle 2 resumed from a quota-halted dispatch: recovered ~364 lines of stashed WIP (git stash pop, clean), fixed one outstanding build error in outDegEq's proof (a match-auxiliary-constant identity issue between two lemmas' rw targets, resolved via term-mode Eq.trans/congrArg composition instead of rw), and landed accFresh/accKnown/outDegEq (Phase 4, now 4/6 fields) plus the full Phase 6 pigeonhole world bound (modalKnownWorlds_length_le_worldBoundS5, static, no step-preservation reasoning). Investigated closing Phase 4's remaining bClosure/eClosure fields using the new pigeonhole bound and found a genuine additional gap: the pigeonhole bound only bounds the COUNT of known worlds, but bClosure/eClosure's mint case needs a bound on the VALUE of the freshly-minted world label, which requires an as-yet-unproven contiguous-world-numbering invariant not present anywhere in the codebase. This is documented precisely (with a concrete recommended fix: a 12th S5LoopInv field) rather than rushed with sorry or a vacuous placeholder. Phase 7 (soundness bridge) not attempted this dispatch.",
   "phases_completed": 3,
   "phases_total": 9,
   "blockers": [
     {
       "phase": 4,
-      "description": "accFresh/accKnown/outDegEq assessed tractable but not yet proven (time-boxed out this dispatch). bClosure/eClosure require the Phase 6 pigeonhole cardinality bound (modalNextWorld b <= modalWorldBoundS5 phi0 at mint time) to be established as a static helper BEFORE their step-preservation proofs can close -- this is a genuine logical entanglement between Phase 4 and Phase 6, not an error, but means Phase 6's core cardinality argument should be attempted early in the next dispatch.",
-      "exact_goal_state": "See handoffs/01_phase4-generic-field-preservation.md, section 'Remaining Phase 4 fields', for the precise per-field obligations and reasoning sketch. No sorry was introduced; these fields are simply NOT YET ATTEMPTED (not blocked-with-open-goal in the strict sense), except bClosure/eClosure whose entanglement is documented as the specific technical obstruction."
+      "description": "bClosure/eClosure BLOCKED on a missing contiguity invariant connecting modalMaxWorld b's numeric value to (modalKnownWorlds b).length. Phase 6's pigeonhole bound (landed this dispatch) only bounds the COUNT of known worlds; placing a freshly-minted formula (label modalNextWorld b) into modalUniverseS5 phi0 needs a bound on modalNextWorld b's VALUE, which requires world labels to form a contiguous range {0,...,modalMaxWorld b} with no gaps -- true for this driver (worlds are only minted at exactly modalMaxWorld b + 1) but not yet a proven, threaded invariant. Confirmed via grep across FmpMeasure.lean/LoopChecking.lean/S5Simplification.lean/GenericDriver.lean that only a one-directional per-element bound (modalKnownWorlds_le_modalMaxWorld) exists, not the needed count<->value connection.",
+      "exact_goal_state": "See handoffs/02_phase4-bclosure-contiguity-gap.md for the full technical writeup, including a concrete recommended 12th S5LoopInv field (worldsContiguous : modalMaxWorld b < (modalKnownWorlds b).length or the exact equality form) and a per-case proof sketch (blocked/non-blocked-non-minting/non-blocked-minting) for its preservation lemma."
     }
   ],
   "continuation_context": {
     "next_phase": 4,
     "next_fields": [
-      "accFresh",
-      "accKnown",
-      "outDegEq",
       "bClosure",
       "eClosure"
     ],
-    "proof_template_location": "Cslib/Logics/Modal/Tableau/S5Simplification.lean, modalStepBranchS5gKeyed_expanded_shape (private helper) and modalStepBranchS5g_preserves_eNodup, both landed sorry-free at commit 12f32499",
+    "recommended_action": "Add a 12th S5LoopInv field for world-label contiguity (see handoff 02 for exact statement and proof sketch), prove it preserved across a modalStepBranchS5gKeyed step, then combine with the already-landed modalKnownWorlds_length_le_worldBoundS5 (Phase 6) via omega to close bClosure/eClosure's mint-case obligations.",
     "reusable_infrastructure": [
+      "modalKnownWorlds_length_le_worldBoundS5 (Phase 6, landed this dispatch)",
+      "modalKnownWorlds_nodup_S5 / modalKnownWorlds_fold_nodup_S5 (Phase 6 support, landed this dispatch)",
       "hasEdge_addEdge_cases_S5",
-      "modalStepBranchS5gKeyed_expanded_shape",
-      "blockingWorldS5Keyed_eq_birthContent",
-      "blockingWorldS5Keyed_none_fresh",
-      "S5LoopInv.keysKnown"
+      "modalStepBranchS5gKeyed_expanded_shape / modalStepBranchS5gKeyed_acc_shape",
+      "blockingWorldS5Keyed_eq_birthContent / blockingWorldS5Keyed_none_fresh",
+      "S5LoopInv.keysKnown",
+      "the term-mode Eq.trans/congrArg bridging pattern for cross-lemma match-expression identity mismatches (see handoff 02, 'Central finding')"
     ],
-    "recommended_order": "Prove the pigeonhole cardinality bound (modalKnownWorlds_length_le_worldBoundS5's core argument) as a static private helper FIRST (needs only keysDistinct+keysInUniverse+keysTotal on a fixed (b,keys) pair, no step-preservation reasoning), then use it to close bClosure/eClosure's mint-case obligations, then Phase 6's public lemma is a direct corollary.",
     "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off the already-landed Phase 1 and does not depend on Phases 3-6; can be attempted in parallel by a separate dispatch.",
-    "stash_ref": "stash@{0}",
-    "stash_label": "task515-cycle2-WIP",
-    "stash_verified": false
+    "stash_ref": null,
+    "stash_label": null,
+    "stash_verified": true
   },
-  "next_action_hint": "QUOTA-HALTED Jul15 (weekly limit, resets Jul 20 3am PT). Cycle-2 WIP (Phase 4 accFresh/accKnown/outDegEq preservation lemmas, ~364 lines, UNVERIFIED/mid-rw-fix) is preserved in git stash@{0} labelled 'task515-cycle2-WIP'. NEXT SESSION: run 'git stash list' to confirm, 'git stash pop' to restore, finish the outstanding rw build errors, then run full CI before committing. After that, continue per handoffs/01_phase4-generic-field-preservation.md: establish Phase 6 pigeonhole cardinality bound as static helper, then close entangled bClosure/eClosure fields; Phase 7 soundness independent.",
+  "next_action_hint": "Next dispatch: read handoffs/02_phase4-bclosure-contiguity-gap.md first. Add the 12th S5LoopInv field (world-label contiguity) and its preservation lemma to unblock bClosure/eClosure and complete Phase 4, then proceed to Phase 5 (keysDistinct should be easy; keysTotal/keysInUniverse mint cases likely reuse the same new field). Phase 7 (soundness bridge) is independent and can be attempted separately/in parallel at any point.",
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
       "type": "lean_source",
-      "summary": "Phase 3 complete (blockingWorldS5Keyed + _none_fresh, 11-field S5LoopInv, redesigned modalStepBranchS5gKeyed); Phase 4 partial (hasEdge_addEdge_cases_S5, modalStepBranchS5gKeyed_expanded_shape, modalStepBranchS5g_preserves_eNodup)"
+      "summary": "Phase 4: accFresh/accKnown/outDegEq landed sorry-free (4/6 fields total with eNodup); Phase 6: modalKnownWorlds_length_le_worldBoundS5 + modalKnownWorlds_nodup_S5/modalKnownWorlds_fold_nodup_S5 landed sorry-free, full CI-green"
     },
     {
       "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
       "type": "plan",
-      "summary": "Phase 3 marked [COMPLETED] with deviation annotations; Phase 4 marked [IN PROGRESS] with per-task checkbox status"
+      "summary": "Phase 4 marked [BLOCKED] with precise per-task deviation annotations; Phase 6 marked [COMPLETED]"
     },
     {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/01_phase4-generic-field-preservation.md",
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/02_phase4-bclosure-contiguity-gap.md",
       "type": "handoff",
-      "summary": "Detailed technical handoff: proof template, tactic gotchas, exact remaining obligations per field, pigeonhole entanglement analysis"
+      "summary": "Detailed technical handoff: the outDegEq matcher-identity fix (reusable pattern), the full pigeonhole bound proof writeup, and the precise bClosure/eClosure contiguity-gap blocker with a concrete recommended 12th-invariant-field fix"
     },
     {
       "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
       "type": "summary",
-      "summary": "Per-phase status ledger, deliverables, plan deviations, verification results, continuation guidance"
+      "summary": "Updated per-phase status ledger, cycle-2 deliverables, plan deviations, verification results, continuation guidance"
     }
   ],
   "sorry_inventory": [],
-  "pause_reason": "orchestration paused: external weekly usage quota exhausted mid cycle-2 dispatch, not a task-level blocker"
+  "pause_reason": null
 }

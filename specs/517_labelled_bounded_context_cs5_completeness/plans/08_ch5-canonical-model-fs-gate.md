@@ -1,7 +1,7 @@
 # Implementation Plan: Task #517 — CS5 Completeness via Simpson Ch.5 + Ch.6 + §8.1.1, Gated on `CS5 ⊢ FS`
 
 - **Task**: 517 - labelled_bounded_context_cs5_completeness
-- **Status**: [IN PROGRESS]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 7 phases landed (~8 dispatches spent); ~10-16 dispatches remaining (~60-100 hours), HIGH
   uncertainty. Honest headline: **~10%** the full target lands via the recommended route; **leg A
   alone (`NIK(𝒯)`-completeness) is ~50% and survives target-falsity**.
@@ -251,7 +251,7 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   recommended route before it starts.
 - **Completed:** 2026-07-15T13:34:05-07:00 (commit `cc7edf4c`); **Verdict retracted:** 2026-07-15
 
-### Phase 4: Probe B′ — Pacheco Lemma 18 joint Zorn / the ∆-primality crux [NOT STARTED]
+### Phase 4: Probe B′ — Pacheco Lemma 18 joint Zorn / the ∆-primality crux [IN PROGRESS]
 - **Goal:** OPTIONAL, off the critical path. Mechanize Pacheco's Lemma 18 joint Zorn over **pairs**,
   isolating the true crux: **∆-primality under the antitone `∆□ ⊆ Σ` cap**. Decisive either way — if
   it lands, CS5 completeness follows over plain theories; if it provably fails, the task's diffuse
@@ -416,17 +416,17 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
 - **Depends on:** 12, 13, 14, 24
 - **Risk:** HIGH — inherits every leg's risk. **~10% overall.**
 
-### Phase 16: Mechanize `cs5_completeness ⟹ CS5 ⊢ FS` [NOT STARTED]
+### Phase 16: Mechanize `cs5_completeness ⟹ CS5 ⊢ FS` [COMPLETED]
 - **Goal:** **~2 lines, CANNOT FAIL.** Convert the entailment from an argument into a **landed
   theorem**, making the necessary condition undeniable whichever way `CS5 ⊢ FS` later resolves.
 - **Why**: `fs_sound''` (landed, sorry-free) proves `cs5FC'' ⊨ FS`. Instantiate the target at
   `φ := FS`; the hypothesis discharges; therefore **`cs5_completeness ⟹ CS5 ⊢ FS`**. Contrapositive:
   `CS5 ⊬ FS ⟹ the target is false`. Plan 02:173's "orthogonal … red herring" is **refuted**.
 - **Tasks:**
-  - [ ] State `cs5_completeness` as a **hypothesis** (do not assume it as an axiom)
-  - [ ] Instantiate at `φ := FS`; discharge via the landed `fs_sound''`
-  - [ ] Verify sorry-free; `#print axioms` — footprint must not exceed
-        `[propext, Classical.choice, Quot.sound]`
+  - [x] State `cs5_completeness` as a **hypothesis** (do not assume it as an axiom)
+  - [x] Instantiate at `φ := FS`; discharge via the landed `fs_sound''`
+  - [x] Verify sorry-free; `#print axioms` — footprint must not exceed
+        `[propext, Classical.choice, Quot.sound]` (result: depends on **no** axioms at all)
 - **Timing:** minutes; bundle with Phase 17 or 18 if convenient
 - **Depends on:** none
 - **Reuses:** `fs_sound''` (`probes/fischer-servi-probe.lean:132-144`)

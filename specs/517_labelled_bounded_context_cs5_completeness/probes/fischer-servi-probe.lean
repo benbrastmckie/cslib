@@ -143,4 +143,29 @@ theorem fs_sound'' (A B : Proposition Atom) :
     hH t (le_trans hw1w2 hw2t) hdiaA_t
   exact hboxB_t t (le_refl t) w3 (hsymm hrw3t)
 
+/-! ## The necessary condition, mechanized: `cs5_completeness ⟹ CS5 ⊢ FS` -/
+
+/-- **`cs5_completeness` entails `CS5 ⊢ FS`.** The target completeness statement is taken here as
+a *hypothesis* (`cs5_completeness`), never as an axiom: this theorem asserts only the
+**implication**, so it commits to nothing about whether `CS5 ⊢ FS` actually holds.
+
+Instantiating the hypothesis at `φ := FS` reduces the goal to `CKValidFC cs5FC'' FS`, which is
+exactly the landed, sorry-free `fs_sound''` above. Hence the entailment is unconditional.
+
+**Contrapositive (the load-bearing direction):** `CS5 ⊬ FS ⟹ cs5_completeness is false`. So
+`CS5 ⊢ FS` is a genuine *necessary condition* for the completeness target over `cs5FC''` — it is
+not an orthogonal side-question that can be set aside, and any route to `cs5_completeness` must
+also establish `CS5 ⊢ FS`. This refutes the earlier "orthogonal … red herring" assessment
+(plan 02:173) by machine rather than by argument.
+
+Note the hypothesis is stated for *every* `φ` (the shape `cs5_completeness` actually has); the
+proof uses only its instance at `FS`, so the entailment holds a fortiori for any strengthening. -/
+theorem cs5_completeness_implies_fs_derivable
+    (cs5_completeness : ∀ φ : Proposition Atom,
+      CKValidFC.{u, v} cs5FC'' φ → Derivable (@CS5ModalAxiom Atom) φ)
+    (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((◇A).imp (Proposition.box B)).imp (Proposition.box (A.imp B))) :=
+  cs5_completeness _ (fs_sound''.{u, v} A B)
+
 end Cslib.Logic.Modal

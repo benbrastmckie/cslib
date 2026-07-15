@@ -236,7 +236,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 6: B truth-lemma bridges + modalTruthLemmaB (FrameCompleteness.lean) [NOT STARTED]
+### Phase 6: B truth-lemma bridges + modalTruthLemmaB (FrameCompleteness.lean) [COMPLETED]
 
 - **Goal:** Prove the B-specific truth-lemma bridges over the symmetric closure and assemble the
   full B truth lemma.

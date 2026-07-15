@@ -311,6 +311,46 @@ lemma modalBDiaNegBack_mem {b : List (SignedFormula (Proposition Atom) WorldInde
       injection heq
     exact ⟨rfl, hpred, by simpa using hknown, by simpa using hmem⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Converse of `modalBPredecessorsOf_hasEdge`: every raw recorded edge `v → w` witnesses `v`
+as a `modalBPredecessorsOf acc w` member. -/
+lemma modalBPredecessorsOf_mem_of_hasEdge {acc : Accessibility} {v w : WorldIndex}
+    (h : acc.hasEdge v w = true) : v ∈ modalBPredecessorsOf acc w := by
+  simp only [Accessibility.hasEdge, List.any_eq_true] at h
+  obtain ⟨⟨src, tgt⟩, hmem, hbeq⟩ := h
+  simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
+  obtain ⟨h1, h2⟩ := hbeq
+  subst h1; subst h2
+  simp only [modalBPredecessorsOf, List.mem_filterMap]
+  exact ⟨_, hmem, by simp⟩
+
+omit [Hashable Atom] in
+/-- Introduction direction for `modalBBoxBack`, converse of `modalBBoxBack_mem`: a known-world
+predecessor `v` of `w` not already carrying `T(φ)@v` on `b` witnesses `T(φ)@v ∈
+modalBBoxBack b acc φ w`. -/
+lemma modalBBoxBack_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w v : WorldIndex}
+    (hpred : v ∈ modalBPredecessorsOf acc w) (hknown : v ∈ modalKnownWorlds b)
+    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalBBoxBack b acc φ w := by
+  simp only [modalBBoxBack, List.mem_filterMap, List.mem_filter]
+  refine ⟨v, ⟨hpred, ?_⟩, ?_⟩
+  · exact List.any_eq_true.mpr ⟨v, hknown, by simp⟩
+  · rw [if_neg (by simpa using hnotin)]
+
+omit [Hashable Atom] in
+/-- Introduction direction for `modalBDiaNegBack`, dual of `modalBBoxBack_mem_of`. -/
+lemma modalBDiaNegBack_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w v : WorldIndex}
+    (hpred : v ∈ modalBPredecessorsOf acc w) (hknown : v ∈ modalKnownWorlds b)
+    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalBDiaNegBack b acc φ w := by
+  simp only [modalBDiaNegBack, List.mem_filterMap, List.mem_filter]
+  refine ⟨v, ⟨hpred, ?_⟩, ?_⟩
+  · exact List.any_eq_true.mpr ⟨v, hknown, by simp⟩
+  · rw [if_neg (by simpa using hnotin)]
+
 /-! ## B-Augmented Rule Application -/
 
 /-- Apply the K modal rules together with the B backward-propagation arms. For the two

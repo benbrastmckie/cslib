@@ -1,42 +1,48 @@
 {
   "status": "partial",
-  "summary": "Cycle 6 (hard-mode /implement resume): Phase 5 COMPLETED (4/4). Landed both remaining birth-key preservation lemmas sorry-free -- modalStepBranchS5g_preserves_keysTotal and modalStepBranchS5g_preserves_keyLowerBd -- closing the S5LoopInv twelve-field termination chain (Phases 3-6). keysTotal used a new combined shape helper modalStepBranchS5gKeyed_keys_full_shape that compiled on the first attempt by mirroring the landed _keys_shape skeleton (split at hsf <;> repeat' split at hsf; uniform inject) rather than destructuring sf up front -- this sidestepped all three cycle-5 bugs at once. keyLowerBd used named mint-output infrastructure (mintBoxPropsS5/mintDiaNegPropsS5), full mint-arm characterizations (modalApplyOne_boxNeg_eq_S5/_diamondPos_eq_S5), and successorBirthContentS5_subset_relevantSetFinset_mint. Both milestones committed CI-green with narrowly-scoped git add: d4e7ed73 (keysTotal, 3/4) and 49ed521b (keyLowerBd -- Phase 5 complete). Full CSLib CI green at 49ed521b (lake build 3239/3239, checkInitImports/lint-style/test clean, shake 0 for S5Simplification.lean; lean_verify propext/Classical.choice/Quot.sound only). Zero sorry, zero new axioms. The agent then exhausted Fable-5 usage credits during final wrap-up bookkeeping (API error), before writing the summary artifact -- but all Lean work and plan-marker updates were already committed. Phases 7, 8, 9 remain NOT STARTED.",
-  "phases_completed": 6,
+  "summary": "Cycle 8 (hard-mode /implement resume at Phase 7): Phase 7 (S5 soundness bridge) COMPLETED. Landed the final fuel-induction assembly modalTableauS5_sound sorry-free, closing the gap left by cycle 7 (which landed the reachability invariant and rule-level semantic soundness lemmas but not the assembly). Authored three new bespoke S5-specialized declarations in FrameSoundness.lean: S5SoundInv (combined accFreshInv/accReachableInv/accTargetsKnown invariant, threaded via List.Forall2), modalStepBranchS5_preserves_satIn (bespoke copy of the generic modalStepBranchGen_preserves_satIn crux, specialized to modalApplyOneS5/s5FC with an added accReachableInv hypothesis; box-pos/dia-neg branch uses the landed modalS5BoxAll_soundIn/modalS5DiaNegAll_soundIn, every other shape is a byte-for-byte copy of the generic crux's 'not shape' branch), and modalExpandBranchesS5_closed_unsatIn (bespoke copy of the generic outer fuel induction, threading S5SoundInv and reusing two already-generic preservation lemmas plus the cycle-7-landed accReachableInv preservation lemma). modalTableauS5_sound itself mirrors modalTableauT_sound exactly. Chose Strategy 2 (bespoke copy) over Strategy 1 (extraction) per handoff 06's options, to keep zero blast-radius on the frozen K/T/B/S4 chain -- confirmed via full lake build/lake test re-run (3239/3239 green, no regressions). Phases 1-7 of 9 are now COMPLETED. Phases 8-9 remain NOT STARTED, deliberately deferred to a fresh dispatch: Phase 8 is the plan's flagged HIGH-risk hard frontier (spec-free Hintikka lift) and deserves dedicated budget rather than a rushed attempt at the tail of this cycle.",
+  "phases_completed": 7,
   "phases_total": 9,
+  "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
-    "next_phase": 7,
+    "next_phase": 8,
     "next_fields": [
-      "modalTableauS5_sound"
+      "modalExpandBranchesS5_hintikka",
+      "fuel bridge (modalExpMeasureS5 <= modalFuel, or modalTableauS5g/modalFuelS5)",
+      "modalTableauS5_complete",
+      "s5Valid_decides",
+      "instDecidableS5Valid"
     ],
-    "recommended_action": "Attempt Phase 7 (soundness bridge modalTableauS5_sound) in FrameSoundness.lean -- it is INDEPENDENT of the now-closed termination chain (forks after Phase 1) and touches a DIFFERENT file than Phases 3-6, so no interaction risk. Read FrameSoundness.lean:728 (modalExpandBranchesGen_closed_unsatIn) and FrameSoundness.lean:193 (modalStepBranchGen_preserves_satIn, reuse as black box) first; mirror modalTableauT_sound for the assembly. The landed P1 lemmas modalS5BoxAll_mem/modalS5DiaNegAll_mem give the non-mint universal arms' target labels in modalKnownWorlds b; modalApplyOne_fresh_local (FmpMeasure.lean:802) covers the mint case for reachability preservation. See handoffs/05_phase5-complete-termination-chain-closed.md for the full next-dispatch recipe. After P7, Phase 8 (spec-free Hintikka lift + decidability, now unblocked by P3+P6 but HIGH risk R6 -- Strategy 2 semantic-FMP fallback pre-authorized, Blackburn 2002 filtration/FMP chunks indexed in the literature corpus) is the only remaining hard frontier; Phase 9 gated on P8.",
+    "recommended_action": "Attempt Phase 8 (spec-free Hintikka lift + fuel + completeness + decidability) in FrameCompleteness.lean. Read CompletenessLoop.lean:876 (modalExpandBranchesGen_hintikka) first to understand the rank-bound generic lift this generalizes (swap the induction measure to S5LoopInv, landed Phase 3/6, instead of ModalLoopInvGen rank). Phase 8 does NOT depend on Phase 7 (plan's own 'Depends on: 6 and 3' line, both landed). If modalExpandBranchesS5_hintikka resists within budget, mark [BLOCKED] with the exact lean_goal open state and pivot to the plan's pre-authorized Strategy 2 fallback: semantic bounded-model FMP via the landed extractModelS5 (equivalence-relation model enumeration <= 2^(2*|Sf|) + filtration truth lemma, Massacci Fact 9.1 single-cluster models) for instDecidableS5Valid, bypassing the generic driver's termination entirely. See handoffs/07_phase7-complete-modalTableauS5-sound-landed.md 'Next dispatch recipe' for full detail.",
     "reusable_infrastructure": [
-      "S5LoopInv (12 fields) -- ALL twelve now have preservation lemmas over modalStepBranchS5gKeyed; termination chain CLOSED",
-      "modalStepBranchS5g_preserves_{keysTotal,keyLowerBd} (Phase 5, NEW this cycle -- Phase 5 now 4/4 complete)",
-      "modalStepBranchS5gKeyed_keys_full_shape (NEW private combined shape helper -- newBs-shape AND newKeys-shape from one case split on the same trigger sf)",
-      "mintBoxPropsS5/mintDiaNegPropsS5, boxPositivesOf_intro_S5, modalApplyOne_boxNeg_eq_S5/_diamondPos_eq_S5, successorBirthContentS5_subset_relevantSetFinset_mint (NEW keyLowerBd mint-output infrastructure)",
-      "modalApplyOne_snd_eq_acc_of_not_mint_shape_S5 / modalApplyOneS5_snd_eq_acc_of_not_mint_shape (re-added verbatim from handoff 04, now landed in-file)",
-      "modalKnownWorlds_length_le_worldBoundS5 (Phase 6 pigeonhole bound -- now consumes the complete twelve-field invariant)",
-      "modalS5BoxAll_mem / modalS5DiaNegAll_mem (Phase 1) and modalApplyOne_fresh_local (FmpMeasure.lean:802) -- needed for Phase 7 reachability preservation"
+      "S5SoundInv, modalStepBranchS5_preserves_satIn, modalExpandBranchesS5_closed_unsatIn, modalTableauS5_sound (NEW this cycle, FrameSoundness.lean) -- Phase 7 fully closed",
+      "modalApplyOneS5_fresh_local, accReachableInv (+_initial), modalStepBranchS5_preserves_accReachableInv, reachable_imp_related_s5, accReachableInv_related_s5, modalS5BoxAll_soundIn, modalS5DiaNegAll_soundIn (cycle 7, reused as black boxes this cycle)",
+      "S5LoopInv (12 fields, Phase 3-6 termination chain, fully closed) -- available for Phase 8's induction measure swap",
+      "extractModelS5 (task 504, landed) -- the pre-authorized Strategy 2 semantic-FMP fallback for decidability"
     ],
-    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off already-landed Phase 1 and is the next dispatch's natural target -- fully untouched, different file from the termination chain.",
+    "independent_track": "Phase 8 (FrameCompleteness.lean) does not depend on Phase 7 and can start fresh; it is the last remaining hard frontier before Phase 9 (5/KB5 completeness, gated on Phase 8).",
     "stash_ref": null,
     "stash_label": null,
     "stash_verified": null
   },
-  "next_action_hint": "Next dispatch: read handoffs/05_phase5-complete-termination-chain-closed.md, then attempt Phase 7 soundness bridge modalTableauS5_sound in FrameSoundness.lean (independent of the closed termination chain). NOTE: this cycle terminated on Fable-5 credit exhaustion during wrap-up, not a proof failure -- all Lean work is committed and CI-green. Re-run with a model that has available credits (e.g. /implement 515 --hard, or --opus/--sonnet).",
+  "next_action_hint": "Next dispatch: read handoffs/07_phase7-complete-modalTableauS5-sound-landed.md 'Next dispatch recipe', then attempt Phase 8 (modalExpandBranchesS5_hintikka in FrameCompleteness.lean). Phase 7 is fully closed and CI-green; this is a clean handoff, not a proof failure.",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
       "type": "lean_source",
-      "summary": "Phase 5 COMPLETE (4/4). keysTotal + keyLowerBd preservation lemmas landed sorry-free; twelve-field S5LoopInv termination chain (Phases 3-6) closed. Committed d4e7ed73, 49ed521b. Full CI green, zero sorry, zero new axioms."
+      "summary": "Phase 7 COMPLETE. modalTableauS5_sound landed sorry-free via bespoke S5SoundInv/modalStepBranchS5_preserves_satIn/modalExpandBranchesS5_closed_unsatIn. Full CI green, zero sorry, zero new axioms, zero regression to K/T/B/S4."
     },
     {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/05_phase5-complete-termination-chain-closed.md",
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+      "type": "summary",
+      "summary": "Updated in place with cycle 8 status ledger, Phase 7 completion details, plan deviations, and full CI verification record."
+    },
+    {
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/07_phase7-complete-modalTableauS5-sound-landed.md",
       "type": "handoff",
-      "summary": "Cycle-6 technical writeup: Phase 5 4/4 complete, termination chain closed, verification record, and next-dispatch recipe for the independent Phase 7 soundness bridge."
+      "summary": "Cycle 8 continuation handoff: what landed, CI verification, zero-regression confirmation, and the Phase 8 entry-point recipe for the next dispatch."
     }
   ],
-  "sorry_inventory": [],
-  "pause_reason": "fable5_usage_credits_exhausted_during_wrapup"
+  "commit": "93f21b8541736a197d1538f60618eab369ebd461"
 }

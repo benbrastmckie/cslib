@@ -1737,13 +1737,37 @@
         {
           "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
           "type": "summary",
-          "summary": "Updated per-phase status ledger (cycles 2-4), Phase 4 resolution narrative, Phase 5 progress narrative, plan deviations, verification results, continuation guidance"
+          "summary": "Updated in place: Phase 7 (S5 soundness bridge) is now fully COMPLETED. modalTableauS5_sound landed sorry-free via a bespoke fuel induction. Phases 1-7 of 9 complete; Phases 8-9 remain NOT STARTED, deferred to a fresh dispatch."
         }
       ],
       "created": "2026-07-15T06:19:22Z",
       "last_updated": "2026-07-15T09:00:00Z",
       "session_id": "sess_1784103256_616c12",
-      "next_artifact_number": 2
+      "next_artifact_number": 2,
+      "memory_candidates": [
+        {
+          "content": "When a generic frame-relativized soundness crux (e.g. modalStepBranchGen_preserves_satIn) takes hBoxPos/hDiaNeg hypotheses universally quantified over ALL (b, acc) pairs, it cannot be instantiated for a frame system whose rule-level soundness genuinely depends on an extra invariant specific to that (b, acc)'s computational history (e.g. S5's accReachableInv). The generic theorem's type has no parameter slot to receive such a per-instance witness. In this situation, a bespoke copy of the generic theorem (specialized to the fixed apply/FC, with the extra invariant added as a parameter) is safer than extracting the shared 'other shapes' branch into a new generic lemma, when the priority is zero regression risk to already-frozen, CI-green declarations that consume the original generic theorem.",
+          "tags": [
+            "cslib",
+            "lean4",
+            "modal-logic",
+            "tableau",
+            "soundness",
+            "S5",
+            "generic-lemma-limits"
+          ]
+        },
+        {
+          "content": "lake shake's before/after A/B comparison via `git stash` is unreliable: shake reads existing .olean build caches rather than rebuilding, so stashing a file mid-session produces a spurious 'target is out-of-date and needs to be rebuilt' error for that file instead of an accurate pre-change baseline. To verify whether a shake import-removal suggestion predates a change, inspect the import graph manually (check whether the flagged import is already re-imported, even non-publicly, by one of the file's own public-imported dependencies) rather than relying on a stash-based diff.",
+          "tags": [
+            "cslib",
+            "lean4",
+            "lake-shake",
+            "ci-verification",
+            "tooling-gotcha"
+          ]
+        }
+      ]
     },
     {
       "project_number": 516,

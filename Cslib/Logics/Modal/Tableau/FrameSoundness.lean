@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
+public import Cslib.Logics.Modal.Tableau.S5Simplification
 import Mathlib.Data.List.Forall2
 
 /-! # Frame-Relativized Modal Tableau Soundness
@@ -1292,6 +1293,155 @@ def kb5FC : FrameCondition := fun {_} r => Std.Symm r ∧ Relation.RightEuclidea
 /-- KB5-validity: `φ` is satisfied in every Kripke model whose relation is symmetric and
 right-Euclidean, at every world. Matches `Cube.KB5`. -/
 def kb5Valid (φ : Proposition Atom) : Prop := frameValid kb5FC φ
+
+/-! ## Task 515 Phase 7: S5 Soundness Bridge
+
+`modalApplyOneS5`'s accessibility output is unconditionally identical to K's
+(`modalApplyOneS5_snd_eq`, `S5Simplification.lean`), so the `freshLocal`/`knownWorlds`-step
+dichotomies K's own machinery
+established (`modalApplyOne_fresh_local`, `modalApplyOne_knownWorlds_step`, `FmpMeasure.lean`)
+lift directly to `modalApplyOneS5`. These structural facts (independent of any Kripke semantics)
+underwrite the new reachability invariant `accReachableInv`: every known world of a branch is
+reachable from world `0` via the recorded accessibility edges. Combined with `s5FC`'s
+equivalence-relation closure (`Std.Refl` + `Relation.RightEuclidean`), reachability from a common
+origin gives full pairwise relatedness -- exactly what the universal box/diamond rules
+(`modalS5BoxAll`/`modalS5DiaNegAll`) need to be semantically sound. -/
+
+variable [DecidableEq Atom] [Hashable Atom]
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS5` satisfies the same `freshLocal` dichotomy as `modalApplyOne`
+(`modalApplyOne_fresh_local`, `FmpMeasure.lean:802`): either the accessibility relation is left
+unchanged, or the result is `.linear (wsf :: rest)` with a fresh edge `sf.label → wsf.label`
+added. Case 1 lifts via `modalApplyOneS5_snd_eq` (unconditional accessibility agreement); case 2
+lifts via `modalApplyOneS5_eq_of_linear` (full agreement whenever K's own result is `.linear`). -/
+lemma modalApplyOneS5_fresh_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (modalApplyOneS5 sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneS5 sf b acc).fst = RuleResult.linear (wsf :: rest)
+      ∧ (modalApplyOneS5 sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  · exact Or.inl (by rw [modalApplyOneS5_snd_eq]; exact hsame)
+  · have heq := modalApplyOneS5_eq_of_linear sf b acc (wsf :: rest) hfst
+    exact Or.inr ⟨wsf, rest, by rw [heq]; exact hfst, by rw [heq]; exact hsnd⟩
+
+/-! ### The Reachability Invariant
+
+Task 515 Phase 4/5 already landed `modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean:860`),
+the S5 analogue of K's `modalApplyOne_knownWorlds_step` used directly below. -/
+
+/-- Every known world of a branch is reachable from world `0` via the recorded accessibility
+edges (the reflexive-transitive closure of `acc.hasEdge`). This is the extra invariant S5
+soundness needs beyond `accFreshInv`: since the universal rules (`modalS5BoxAll`/
+`modalS5DiaNegAll`) propagate to *every* known world (not just directly-`acc`-connected ones),
+their semantic soundness needs *every* known world related to a common origin in the model, not
+just directly-`acc`-connected pairs. Composed with `s5FC`'s equivalence-relation closure, common
+reachability from `0` gives full pairwise relatedness. -/
+def accReachableInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  ∀ w ∈ modalKnownWorlds b, Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `accReachableInv` holds for the initial singleton branch `[⟨.neg, φ, 0⟩]` against the empty
+accessibility relation: its only known world is `0` itself, reachable from `0` by reflexivity. -/
+lemma accReachableInv_initial (φ : Proposition Atom) :
+    accReachableInv [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]
+      Accessibility.empty := by
+  intro w hw
+  have : w = 0 := by
+    simpa [modalKnownWorlds] using hw
+  subst this
+  exact Relation.ReflTransGen.refl
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
+(unavailable across files), dropping the `Nodup` conjunct this development does not need.
+Mirrors `S5Simplification.lean`'s `modalKnownWorlds_fold_spec_S5`. -/
+private lemma modalKnownWorlds_fold_spec_FS
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => simp
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      intro x
+      rw [ih ws0]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      intro x
+      rw [ih (sf.label :: ws0)]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ List.mem_cons_self)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds` (unavailable
+across files): membership in `modalKnownWorlds` is exactly "some formula on the branch has this
+label". Mirrors `S5Simplification.lean`'s `mem_modalKnownWorlds_S5`. -/
+private lemma mem_modalKnownWorlds_FS
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  simpa using modalKnownWorlds_fold_spec_FS l [] x
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
+(unavailable across files): appending formulas to the front of a branch only grows its
+known-worlds set. Mirrors `S5Simplification.lean`'s `modalKnownWorlds_mono_append_S5`. -/
+private lemma modalKnownWorlds_mono_append_FS
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
+  intro x hx
+  rw [mem_modalKnownWorlds_FS] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every emitted label of `xs` known in `b` puts every known world of `xs ++ b` back inside
+`modalKnownWorlds b`: the converse direction to `modalKnownWorlds_mono_append_FS`, needed when
+the appended formulas' labels are already known (the S5 universal-propagation and K
+propositional/propagation arms). -/
+private lemma modalKnownWorlds_append_subset_of_labels_known
+    {xs b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hxs : ∀ x ∈ xs, x.label ∈ modalKnownWorlds b) :
+    ∀ w ∈ modalKnownWorlds (xs ++ b), w ∈ modalKnownWorlds b := by
+  intro w hw
+  rw [mem_modalKnownWorlds_FS] at hw
+  obtain ⟨sf, hsf, rfl⟩ := hw
+  rcases List.mem_append.mp hsf with hxsf | hbsf
+  · exact hxs sf hxsf
+  · rw [mem_modalKnownWorlds_FS]; exact ⟨sf, hbsf, rfl⟩
+
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
+across files): decompose membership of an edge in `acc.addEdge w w'`. Mirrors
+`S5Simplification.lean`'s `hasEdge_addEdge_cases_S5`. -/
+private lemma hasEdge_addEdge_cases_FS {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  tauto
 
 end Cslib.Logic.Modal.Tableau
 

@@ -1,29 +1,17 @@
 {
-  "status": "researched",
+  "status": "planned",
   "task": 512,
   "session_id": "sess_1784091167_73afcc",
-  "summary": "Settled report 04's pivotal gate: the constructive=intuitionistic collapse DOES extend from KB to S5 (YES-clean). Pacheco 2024 Conclusion states verbatim that CKB/DB/TB/KB5/S5 constructive and intuitionistic variants coincide; the operative content (k3 dia-distribution, k5 dia-bot) is already landed axiom-free in CSLib as cs5_dia_or and cs5_dia_bot_imp_bot, and CS5's real axioms (CS5.lean:182-234) are confirmed CK+T+4+B (B, not euclidean-5). Report 04's 'Pacheco proves only KB' was an underread. Consequences: (c) banking a negative result is REFUTED (CS5 is complete, CS5 equiv IS5, birelational completeness demonstrably exists); the Lemma-15 diamond-inverse 'shortcut' is a DEAD END for box-backward (already mechanized as cs5_boxInv_subset_iff/cs5Tail_symm; delivers only symmetry, which was never the blocker; Pacheco's own box-backward Lemma 18/19 needs a pair construction plus the classical negation-completeness move phi-not-in-Theta => not-phi-in-Theta, chunk_0012:48 - exactly CSLib's wall). Plan 01 (the Atom-sum doubled-atom pair construction) exists precisely to replace that unsound move and re-enters the hardest, most-resisted step. Recommend REVISE to adopt report 04's birelational pivot (d) as primary route; residual is report 04 Q1 (~92%): confirm Simpson's intuitionistic-diamond box-backward avoids negation-completeness at proof level before the ~250-400 line soundness rework.",
-  "artifacts": [
-    "specs/512_cs5_box_backward_atom_sum_completeness/reports/05_collapse-s5-probe.md"
-  ],
-  "outcome": "collapse_extends_to_s5=YES-clean; option-(c)-negative-result=REFUTED; Lemma-15-shortcut=DEAD-END-for-box-backward; recommended-route=birelational-pivot-(d); atom-sum-plan-01=hard-fallback-not-de-risked",
-  "next_action_hint": "revise",
-  "confidence": {
-    "collapse_extends_to_s5_yes": 0.9,
-    "lemma15_deadend_for_box_backward": 0.9,
-    "option_c_refuted": 0.9,
-    "pivot_d_lands_sorry_free_as_scoped": 0.6,
-    "pivot_d_conditional_on_Q1_intuitionistic_diamond_box_backward": 0.8
-  },
-  "grounding": {
-    "pacheco_conclusion_s5": "~/Projects/Literature/pacheco_2024_collapsingconstructiveandintuitionisticmodallogics/chunk_0016.md:79-83",
-    "pacheco_theorem13": "chunk_0009.md:26-35",
-    "pacheco_box_backward_negation_completeness": "chunk_0012.md:46-53 (Lemma 16) and 74-91 (Lemma 18)",
-    "pacheco_diamond_inverse_relation_lemma15": "chunk_0010.md:60,78-84",
-    "cslib_cs5_axioms": "Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:182-234",
-    "cslib_mechanized_k3": "CS5.lean:555 (cs5_dia_or, axiom-free)",
-    "cslib_lemma15_mechanized": "CS5.lean:589 (cs5_boxInv_subset_iff), CS5.lean:645 (cs5Tail_symm)",
-    "cslib_collapse_statement": "CS5.lean:93-99",
-    "current_plan_atom_sum_route": "specs/512_cs5_box_backward_atom_sum_completeness/plans/01_box-backward-atom-sum.md:16-48,223-224"
-  }
+  "summary": "Revised plan v2 supersedes plan 01: ABANDON the doubled-atom/atom-sum architecture, PIVOT to a birelational canonical model (Bozic-Dosen 1984 / Dosen 1985 IS5 / Simpson 1994 / Alechina 2001). Canonical relation is ONE-SIDED (Gamma R Delta iff boxInv Gamma subseteq Delta), so box-backward dissolves to the landed one-sided prime lemma box_refuting_theory; the simultaneous-pair problem disappears. Symmetry becomes a GLOBAL <=-mediated incestuality frame condition (Marin Thm 7.1), NOT the naive two-sided cs5Tail back-inclusion that IS the negation-completeness wall (the precise diagnosis of the 5-dispatch failure). Justified by report 05: the CKB=IKB collapse extends to S5 (CS5 equiv IS5), so the constructive diamond does not force pair/fallible worlds at S5 strength. 7 phases. Phase 1 is a CHEAP Q1 GO/NO-GO GATE (both branches specified) verifying the intuitionistic-diamond box-backward avoids phi-not-in-Theta => not-phi-in-Theta for CSLib's actual CS5 axioms BEFORE sinking the ~250-400 line soundness rework; FAILURE lands a mechanized obstruction and marks completeness BLOCKED-across-known-mechanizable-routes (NOT incompleteness). Phase 2 explicitly discards the ~520-line CS5Combined scaffold. Zero-debt invariant: no sorry / no new axiom under Cslib at any phase boundary. BibKeys Dosen1985/BozicDosen1984/Ewald1986/AlechinaMendlerdePaivaRitter2001/MarinMoralesStrassburger2021 verified in references.bib.",
+  "artifacts": [{
+    "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
+    "type": "plan",
+    "summary": "7-phase birelational-pivot plan; Phase 1 cheap GO/NO-GO gate; Phase 4 = the high-cost, task-509-cs5FC''-touching soundness rework where regression risk concentrates."
+  }],
+  "outcome": "plan-v2-written; architecture=birelational-canonical-model; box-backward=one-sided-prime-lemma; symmetry=global-incestuality-frame-condition; phase-1=cheap-Q1-go-no-go-gate; phase-4=509-touching-soundness-rework; atom-sum-scaffold=discarded-explicitly-phase-2; zero-debt-preserved",
+  "next_action_hint": "implement",
+  "phase_count": 7,
+  "estimated_hours": 19,
+  "risk_concentration": "Phase 4 (CS5 soundness rework over the incestuality frame class) reworks landed task-509 cs5FC'' machinery -- highest regression risk; Phase 1 gate (R1 linchpin) decides whether the pivot proceeds at all",
+  "reports_integrated": ["03_alternative-techniques.md", "04_birelational-feasibility.md", "05_collapse-s5-probe.md", "01_box-backward-atom-sum.md"]
 }

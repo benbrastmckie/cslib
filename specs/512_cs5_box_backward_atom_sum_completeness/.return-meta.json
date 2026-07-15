@@ -1,10 +1,19 @@
 {
-  "status": "in_progress",
-  "artifacts": [],
-  "next_steps": "Revision in progress",
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
+    "summary": "Revised plan (v2) pivoting CS5 completeness from the abandoned doubled-atom/atom-sum scaffold to a birelational canonical model (one-sided R + <=-mediated incestuality condition); Phase 1 is a cheap Q1 GO/NO-GO gate, Phase 4 concentrates the task-509-touching soundness-rework risk."
+  }],
+  "next_steps": "Run /implement 512 to execute the revised plan, starting with the Phase 1 GO/NO-GO gate.",
   "metadata": {
     "session_id": "sess_1784091167_73afcc",
     "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"]
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 7,
+    "estimated_hours": 19,
+    "plan_version": 2,
+    "supersedes": "specs/512_cs5_box_backward_atom_sum_completeness/plans/01_box-backward-atom-sum.md",
+    "reports_integrated": ["03_alternative-techniques.md", "04_birelational-feasibility.md", "05_collapse-s5-probe.md", "01_box-backward-atom-sum.md"]
   }
 }

@@ -137,7 +137,7 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 1: Q1 GO/NO-GO GATE — intuitionistic-diamond box-backward avoids negation-completeness [NOT STARTED]
+### Phase 1: Q1 GO/NO-GO GATE — intuitionistic-diamond box-backward avoids negation-completeness [COMPLETED]
 
 - **Goal:** CHEAPLY decide whether the Simpson/Došen intuitionistic-diamond box-backward genuinely
   avoids the negation-completeness move `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` for CSLib's ACTUAL `CS5ModalAxiom` set
@@ -146,24 +146,31 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
   This gate is a paper proof plus minimal Lean scaffolding — it MUST NOT sink the ~250–400-line
   soundness rework before passing. *Low–medium risk, ~40–80 lines of Lean scaffolding + paper proof.*
 - **Tasks:**
-  - [ ] Write the paper proof (in the plan-summary / a `probes/` note, NOT `Cslib/`) that Simpson's
+  - [x] Write the paper proof (in the plan-summary / a `probes/` note, NOT `Cslib/`) that Simpson's
     Prime Lemma 3.3.2 + Canonical Model Lemma 3.3.3 box-backward case, instantiated to
     `CS5ModalAxiom`, closes using ONLY the disjunction property (prime/quasi-prime) + the one-sided
     `R = boxInv Γ ⊆ Δ` + the ≤-mediated incestuality condition — with NO `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` step.
-  - [ ] Cross-check against Marin Thm 7.1/7.2 (soundness of the incestuality condition is a semantic
+    Landed as the module docstring of
+    `specs/512_.../probes/phase1-onesided-box-backward-gate.lean`.
+  - [x] Cross-check against Marin Thm 7.1/7.2 (soundness of the incestuality condition is a semantic
     argument over incestuous frames using disjunction-property saturated sets — no neg.-completeness).
-  - [ ] Lean scaffolding: state (do NOT yet fully prove) the target `cs5_box_backward` signature over
-    the one-sided relation, and confirm via `lean_goal` that its proof obligation reduces to
-    `box_refuting_theory` (`SegmentLindenbaum.lean`) + a quasi-prime witness — i.e. the SAME object
-    Simpson's Prime Lemma uses — with no back-inclusion obligation. Minimal `sorry` in the scaffolding
-    is permitted ONLY inside `specs/512_.../probes/`, never in `Cslib/`.
-  - [ ] Adversarially test the failure mode: attempt to construct the exact spot where a two-sided
-    condition WOULD re-introduce `¬ϕ ∈ Θ`; confirm the one-sided `R` never requires it.
-- **Timing:** ~2 hours
+  - [x] Lean scaffolding *(deviation: fully proved, not merely stated — see below)*: stated the target
+    `cs5_box_backward_onesided` signature over the one-sided relation `cs5OnesidedR`, and confirmed via
+    `lean_goal` that its proof obligation reduces EXACTLY to `box_refuting_theory`
+    (`SegmentLindenbaum.lean`) + a quasi-prime witness, `goals_after: []` — i.e. the SAME object
+    Simpson's Prime Lemma uses — with no back-inclusion obligation. The reduction is so direct that
+    `box_refuting_theory` discharges the goal completely with no `sorry` needed anywhere, in
+    `Cslib/` or in the probe.
+  - [x] Adversarially test the failure mode: reconstructed the exact spot where a two-sided condition
+    WOULD reintroduce difficulty, as `cs5_two_sided_witness_can_fail_to_omit` (a direct application of
+    the already-landed `cs5_symmetric_tail_box_gap`) — confirmed the one-sided `R` never requires it
+    (its proof never inspects `A`'s shape or splits on any disjunction, unlike the two-sided case).
+- **Timing:** ~2 hours (actual: single dispatch, no `sorry` needed)
 - **Depends on:** none
 - **Reused assets (real names + file:line):**
   - `box_refuting_theory`, `quasi_prime_exclusion` — `SegmentLindenbaum.lean` (the box-backward engine).
-  - `cs5_symmetric_tail_box_gap` — `CS5.lean` (the mechanized diagnosis of WHY the two-sided form fails).
+  - `cs5_symmetric_tail_box_gap` — `CS5.lean:712` (the mechanized diagnosis of WHY the two-sided form
+    fails; reused directly, not just cited, in `cs5_two_sided_witness_can_fail_to_omit`).
   - Simpson Prime Lemma 3.3.2 / Canonical Model Lemma 3.3.3 — corpus chunks `8372f27240fe345d`,
     `caf3305a53065b87` (`Simpson1994`).
   - Marin Thm 7.1/7.2 incestuality condition — `MarinMoralesStrassburger2021` (ingested).
@@ -176,12 +183,25 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
     completeness "BLOCKED across all known-mechanizable routes" — explicitly NOT an incompleteness
     result (`CS5 ≡ IS5` is complete; what is blocked is mechanization in CSLib's prime-theory setting).
     Skip Phases 3–6; go directly to the Phase 7 obstruction writeup. This is an ACCEPTABLE outcome.
+  - **RESULT: SUCCESS / GATE PASS.** `cs5_box_backward_onesided`
+    (`specs/512_.../probes/phase1-onesided-box-backward-gate.lean`) is proved sorry-free, axiom-clean
+    (`propext`/`Classical.choice`/`Quot.sound` only, `lean_verify`-confirmed), by direct application of
+    the already-landed, negation-completeness-free `box_refuting_theory`. Phase 2 and the full pivot
+    (Phases 3-7) are cleared to proceed **pending human greenlight** — Phase 4 reworks landed
+    task-509 `cs5FC''` soundness and per this dispatch's hard constraint must not be started without
+    explicit approval.
 - **Success criteria / CI gates:** the scaffolding compiles (any probe `sorry` confined to
   `specs/512_.../probes/`); the paper proof is written; the gate decision (SUCCESS/FAILURE) is recorded
-  with its grounding. No `sorry`, no new axiom in `Cslib/`.
+  with its grounding. No `sorry`, no new axiom in `Cslib/`. — **MET**: `lake env lean` on the probe
+  exits 0 with no output; zero `sorry` anywhere (probe or `Cslib/`); zero new axioms; `Cslib/` untouched
+  this phase (`git status` shows only `specs/` changes).
 - **Verification:** `lean_goal` on the stated `cs5_box_backward` shows the obligation is exactly
   `box_refuting_theory`'s output (SUCCESS), or the negation-completeness step is provably unavoidable
-  (FAILURE, mechanized).
+  (FAILURE, mechanized). — **CONFIRMED**: `lean_goal` at the `exact` line reports `goals_after: []`;
+  `lean_verify` on `Cslib.Logic.Modal.cs5_box_backward_onesided` reports
+  `axioms: [propext, Classical.choice, Quot.sound]`, no `sorryAx`, no warnings; `lean_verify` on the
+  adversarial theorem `cs5_two_sided_witness_can_fail_to_omit` reports `axioms: []` (fully
+  axiom-free), no warnings.
 
 ---
 

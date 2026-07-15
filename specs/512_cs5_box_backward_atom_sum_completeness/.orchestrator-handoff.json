@@ -1,17 +1,27 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task": 512,
   "session_id": "sess_1784091167_73afcc",
-  "summary": "Revised plan v2 supersedes plan 01: ABANDON the doubled-atom/atom-sum architecture, PIVOT to a birelational canonical model (Bozic-Dosen 1984 / Dosen 1985 IS5 / Simpson 1994 / Alechina 2001). Canonical relation is ONE-SIDED (Gamma R Delta iff boxInv Gamma subseteq Delta), so box-backward dissolves to the landed one-sided prime lemma box_refuting_theory; the simultaneous-pair problem disappears. Symmetry becomes a GLOBAL <=-mediated incestuality frame condition (Marin Thm 7.1), NOT the naive two-sided cs5Tail back-inclusion that IS the negation-completeness wall (the precise diagnosis of the 5-dispatch failure). Justified by report 05: the CKB=IKB collapse extends to S5 (CS5 equiv IS5), so the constructive diamond does not force pair/fallible worlds at S5 strength. 7 phases. Phase 1 is a CHEAP Q1 GO/NO-GO GATE (both branches specified) verifying the intuitionistic-diamond box-backward avoids phi-not-in-Theta => not-phi-in-Theta for CSLib's actual CS5 axioms BEFORE sinking the ~250-400 line soundness rework; FAILURE lands a mechanized obstruction and marks completeness BLOCKED-across-known-mechanizable-routes (NOT incompleteness). Phase 2 explicitly discards the ~520-line CS5Combined scaffold. Zero-debt invariant: no sorry / no new axiom under Cslib at any phase boundary. BibKeys Dosen1985/BozicDosen1984/Ewald1986/AlechinaMendlerdePaivaRitter2001/MarinMoralesStrassburger2021 verified in references.bib.",
-  "artifacts": [{
-    "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
-    "type": "plan",
-    "summary": "7-phase birelational-pivot plan; Phase 1 cheap GO/NO-GO gate; Phase 4 = the high-cost, task-509-cs5FC''-touching soundness rework where regression risk concentrates."
-  }],
-  "outcome": "plan-v2-written; architecture=birelational-canonical-model; box-backward=one-sided-prime-lemma; symmetry=global-incestuality-frame-condition; phase-1=cheap-Q1-go-no-go-gate; phase-4=509-touching-soundness-rework; atom-sum-scaffold=discarded-explicitly-phase-2; zero-debt-preserved",
+  "summary": "Executed ONLY Phase 1 (the Q1 GO/NO-GO GATE) of plan 02_birelational-pivot.md, per explicit hard-boundary dispatch instructions -- did NOT proceed to Phase 2+. GATE PASS: the Simpson/Dosen one-sided canonical relation (Gamma R Delta iff boxInv Gamma subseteq Delta) genuinely avoids the classical negation-completeness move phi-not-in-Theta => not-phi-in-Theta for CSLib's actual CS5ModalAxiom set (CK+T+4+B). Substantiated by a new, sorry-free, axiom-clean Lean probe (specs/512_.../probes/phase1-onesided-box-backward-gate.lean, NOT under Cslib/): cs5_box_backward_onesided reduces EXACTLY to the already-landed box_refuting_theory (SegmentLindenbaum.lean) -- lean_goal confirms goals_after=[] at the exact/apply site, no back-inclusion obligation, no case-split on the excluded formula's shape. An adversarial companion theorem, cs5_two_sided_witness_can_fail_to_omit, reconstructs (via the already-landed cs5_symmetric_tail_box_gap) the EXACT spot the CURRENT two-sided cs5Tail design fails (the boxInv Delta subseteq Gamma back-clause converts a boxed disjunct into a head membership fact, forcing a non-existence problem that historically required negation-completeness to repair, task 509 Phases 8-11). This confirms the one-sided design genuinely dissolves the five-dispatch box-backward wall rather than relocating it. No Cslib/ file was touched this dispatch.",
+  "phases_completed": 1,
+  "phases_total": 7,
+  "sorry_inventory": [],
+  "axioms_clean": true,
+  "blockers": [],
+  "artifacts": [
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
+      "type": "plan",
+      "summary": "Phase 1 marked [COMPLETED] with the GATE PASS verdict, its grounding, and full verification transcript recorded inline in the phase's task checklist and decision-gate block."
+    },
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/probes/phase1-onesided-box-backward-gate.lean",
+      "type": "probe",
+      "summary": "New, standalone (imports Cslib.Logics.Modal.Metalogic.Constructive.CS5, not part of the Cslib lean_lib target), sorry-free, axiom-clean Lean file substantiating the Phase 1 gate: cs5OnesidedR (the one-sided relation), cs5_box_backward_onesided (the gate's positive result, axioms=[propext, Classical.choice, Quot.sound]), and cs5_two_sided_witness_can_fail_to_omit (the adversarial confirmation, axioms=[], fully axiom-free). Verified compiling via `lake env lean` (exit 0, no output) and via lean_verify (no sorryAx, no warnings)."
+    }
+  ],
+  "outcome": "gate_pass; phase-1-of-7-complete; box-backward-over-the-one-sided-relation=proved-sorry-free-axiom-clean-via-box_refuting_theory; two-sided-cs5Tail-wall=adversarially-reconfirmed-via-cs5_symmetric_tail_box_gap; Cslib-untouched-this-dispatch; phases-2-7-ready-but-AWAIT-HUMAN-GREENLIGHT-before-any-further-dispatch-especially-phase-4-which-reworks-landed-task-509-cs5FC''-soundness",
   "next_action_hint": "implement",
-  "phase_count": 7,
-  "estimated_hours": 19,
-  "risk_concentration": "Phase 4 (CS5 soundness rework over the incestuality frame class) reworks landed task-509 cs5FC'' machinery -- highest regression risk; Phase 1 gate (R1 linchpin) decides whether the pivot proceeds at all",
-  "reports_integrated": ["03_alternative-techniques.md", "04_birelational-feasibility.md", "05_collapse-s5-probe.md", "01_box-backward-atom-sum.md"]
+  "continuation_context": "Phase 1 GATE PASSED cheaply (~single dispatch, no soundness rework attempted) and is a hard stop by explicit instruction. Phases 2-7 of plans/02_birelational-pivot.md are architecturally cleared to proceed: Phase 2 discards the ~520-line CS5Combined atom-sum scaffold from CS5Canonical.lean; Phase 3 defines the one-sided relation + ≤-mediated incestuality frame condition (Marin Thm 7.1 shape) for real in Cslib/; Phase 4 is the HIGH-COST, TASK-509-TOUCHING soundness rework (re-proving all 17 CS5ModalAxiom soundness cases over the new incestuality frame class, replacing cs5FC'''s plain-symmetry+transitivity bundle) -- this is the phase requiring explicit human approval before any agent touches it, per this dispatch's hard constraint; Phase 5 proves the canonical frame satisfies incestuality (Dosen-style, reusing box_refuting_theory/quasi_prime_exclusion); Phase 6 lands the REAL cs5_box_backward in Cslib/CS5Canonical.lean (trivial given Phase 1's probe, ~60 lines); Phase 7 lands cs5_truth_lemma + cs5_completeness + the file split (Proposition.map to Basic.lean). DO NOT auto-dispatch Phase 2+ without an explicit human greenlight -- this was the single most load-bearing instruction of this dispatch. When greenlit, resume with /implement 512 (or a fresh cslib-implementation-agent dispatch scoped to Phase 2, then Phase 3, etc. -- each phase is sized to one agent run per the plan's dependency table).",
+  "reports_integrated": ["04_birelational-feasibility.md", "05_collapse-s5-probe.md", "plans/02_birelational-pivot.md (Phase 1 section)"]
 }

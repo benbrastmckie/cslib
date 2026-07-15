@@ -1,57 +1,54 @@
 {
   "status": "partial",
-  "summary": "Cycle 2 resumed from a quota-halted dispatch: recovered ~364 lines of stashed WIP (git stash pop, clean), fixed one outstanding build error in outDegEq's proof (a match-auxiliary-constant identity issue between two lemmas' rw targets, resolved via term-mode Eq.trans/congrArg composition instead of rw), and landed accFresh/accKnown/outDegEq (Phase 4, now 4/6 fields) plus the full Phase 6 pigeonhole world bound (modalKnownWorlds_length_le_worldBoundS5, static, no step-preservation reasoning). Investigated closing Phase 4's remaining bClosure/eClosure fields using the new pigeonhole bound and found a genuine additional gap: the pigeonhole bound only bounds the COUNT of known worlds, but bClosure/eClosure's mint case needs a bound on the VALUE of the freshly-minted world label, which requires an as-yet-unproven contiguous-world-numbering invariant not present anywhere in the codebase. This is documented precisely (with a concrete recommended fix: a 12th S5LoopInv field) rather than rushed with sorry or a vacuous placeholder. Phase 7 (soundness bridge) not attempted this dispatch.",
-  "phases_completed": 3,
+  "summary": "Cycle 4: unblocked Phase 4 in full, closing the gap documented in handoff 02 (bClosure/eClosure BLOCKED since cycle 2). Added a 12th S5LoopInv field, worldsContiguous (modalMaxWorld b + 1 = (modalKnownWorlds b).length), plus its preservation lemma, and a substantial new bClosure-support universe-membership infrastructure layer mirroring FmpMeasure.lean's private modalApplyOne_outputs_subset/boxProps_outputs_subset/diaNegProps_outputs_subset/modalApplyOne_diamondPos_outputs_subset/modalApplyOne_boxNeg_outputs_subset machinery, re-derived locally against modalUniverseS5/modalWorldBoundS5. This let modalStepBranchS5g_preserves_bClosure and _preserves_eClosure land sorry-free, completing Phase 4 (all six generic fields plus the new 12th field). Continued into Phase 5 (birth-key preservation): landed keysDistinct (the phase's namesake crux, closing the v1 design gap this whole v2 plan exists to fix) and keysInUniverse, both on the first real attempt after authoring one new helper (modalStepBranchS5gKeyed_keys_shape). keyLowerBd and keysTotal remain NOT STARTED (not blocked) with a concrete per-field next-step plan documented. Phase 7 (soundness bridge, independent of the termination chain) was not attempted this dispatch.",
+  "phases_completed": 5,
   "phases_total": 9,
-  "blockers": [
-    {
-      "phase": 4,
-      "description": "bClosure/eClosure BLOCKED on a missing contiguity invariant connecting modalMaxWorld b's numeric value to (modalKnownWorlds b).length. Phase 6's pigeonhole bound (landed this dispatch) only bounds the COUNT of known worlds; placing a freshly-minted formula (label modalNextWorld b) into modalUniverseS5 phi0 needs a bound on modalNextWorld b's VALUE, which requires world labels to form a contiguous range {0,...,modalMaxWorld b} with no gaps -- true for this driver (worlds are only minted at exactly modalMaxWorld b + 1) but not yet a proven, threaded invariant. Confirmed via grep across FmpMeasure.lean/LoopChecking.lean/S5Simplification.lean/GenericDriver.lean that only a one-directional per-element bound (modalKnownWorlds_le_modalMaxWorld) exists, not the needed count<->value connection.",
-      "exact_goal_state": "See handoffs/02_phase4-bclosure-contiguity-gap.md for the full technical writeup, including a concrete recommended 12th S5LoopInv field (worldsContiguous : modalMaxWorld b < (modalKnownWorlds b).length or the exact equality form) and a per-case proof sketch (blocked/non-blocked-non-minting/non-blocked-minting) for its preservation lemma."
-    }
-  ],
+  "blockers": [],
   "continuation_context": {
-    "next_phase": 4,
+    "next_phase": 5,
     "next_fields": [
-      "bClosure",
-      "eClosure"
+      "keysTotal",
+      "keyLowerBd"
     ],
-    "recommended_action": "Add a 12th S5LoopInv field for world-label contiguity (see handoff 02 for exact statement and proof sketch), prove it preserved across a modalStepBranchS5gKeyed step, then combine with the already-landed modalKnownWorlds_length_le_worldBoundS5 (Phase 6) via omega to close bClosure/eClosure's mint-case obligations.",
+    "recommended_action": "Prove modalStepBranchS5g_preserves_keysTotal next (most tractable remaining field): reuse modalApplyOneS5_knownWorlds_step (landed Phase 4, cycle 4) + accKnown for the known-vs-fresh-world dichotomy; the fresh world's own key entry is immediate from modalStepBranchS5gKeyed_keys_shape. Then prove modalStepBranchS5g_preserves_keyLowerBd (hardest remaining field): needs two new small 'introduction' lemmas (boxProps_mem_of_S5/diaNegProps_mem_of_S5-style, converse direction of the elimination lemmas built this cycle) plus relevantSetFinset_mono (LoopChecking.lean:344, already public) for the old-key case. Once all four Phase 5 fields land, the full termination chain (Phases 3-6) closes since Phase 6 is already COMPLETED. Phase 7 (soundness bridge, FrameSoundness.lean) is independent and can be attempted in parallel at any point.",
     "reusable_infrastructure": [
-      "modalKnownWorlds_length_le_worldBoundS5 (Phase 6, landed this dispatch)",
-      "modalKnownWorlds_nodup_S5 / modalKnownWorlds_fold_nodup_S5 (Phase 6 support, landed this dispatch)",
-      "hasEdge_addEdge_cases_S5",
-      "modalStepBranchS5gKeyed_expanded_shape / modalStepBranchS5gKeyed_acc_shape",
-      "blockingWorldS5Keyed_eq_birthContent / blockingWorldS5Keyed_none_fresh",
-      "S5LoopInv.keysKnown",
-      "the term-mode Eq.trans/congrArg bridging pattern for cross-lemma match-expression identity mismatches (see handoff 02, 'Central finding')"
+      "S5LoopInv (now 12 fields: bClosure, eNodup, eClosure, accFresh, accKnown, outDegEq, keysTotal, keyLowerBd, keysDistinct, keysInUniverse, keysKnown, worldsContiguous)",
+      "modalStepBranchS5g_preserves_{bClosure,eNodup,eClosure,accFresh,accKnown,outDegEq,worldsContiguous} (Phase 4, all COMPLETE)",
+      "modalStepBranchS5g_preserves_{keysDistinct,keysInUniverse} (Phase 5, 2/4 landed)",
+      "modalStepBranchS5gKeyed_keys_shape (new this dispatch: characterizes newKeys' shape uniformly)",
+      "modalApplyOneS5_knownWorlds_step, modalApplyOneS5_boxPos_diaNeg_eq, modalApplyOneS5_outputs_subset (S5 analogues of K's per-call step/closure lemmas)",
+      "modalSubfmls_trans_S5, mem_modalUniverseS5_of/_of', modalUniverseS5_mem_formula/_mem_label, mem_boxPositivesOf_S5, boxProps_outputs_subset_S5, diaNegProps_outputs_subset_S5, modalApplyOne_diamondPos_outputs_subset_S5, modalApplyOne_boxNeg_outputs_subset_S5, modalApplyOne_outputs_subset_S5 (bClosure-support universe-membership layer, new this dispatch, reusable for keysInUniverse-style witness reasoning)",
+      "modalMaxWorld_append_eq_of_forall_le_S5, modalMaxWorld_append_single_S5, modalKnownWorlds_length_append_of_known_S5, modalKnownWorlds_length_append_single_S5, modalNextWorld_not_mem_modalKnownWorlds_S5, mem_successorsOf_hasEdge_S5 (contiguity bookkeeping, new this dispatch)",
+      "modalKnownWorlds_length_le_worldBoundS5, modalKnownWorlds_nodup_S5, modalKnownWorlds_fold_nodup_S5 (Phase 6, COMPLETE, relocated earlier in the file this dispatch)",
+      "blockingWorldS5Keyed_eq_birthContent / blockingWorldS5Keyed_none_fresh (Phase 3)",
+      "relevantSetFinset_mono (LoopChecking.lean:344, public, not yet consumed -- needed for keyLowerBd)"
     ],
-    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off the already-landed Phase 1 and does not depend on Phases 3-6; can be attempted in parallel by a separate dispatch.",
+    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off the already-landed Phase 1 and does not depend on Phases 3-6; can be attempted in parallel by a separate dispatch, or instead of the remaining Phase 5 work if that stalls.",
     "stash_ref": null,
     "stash_label": null,
-    "stash_verified": true
+    "stash_verified": null
   },
-  "next_action_hint": "Next dispatch: read handoffs/02_phase4-bclosure-contiguity-gap.md first. Add the 12th S5LoopInv field (world-label contiguity) and its preservation lemma to unblock bClosure/eClosure and complete Phase 4, then proceed to Phase 5 (keysDistinct should be easy; keysTotal/keysInUniverse mint cases likely reuse the same new field). Phase 7 (soundness bridge) is independent and can be attempted separately/in parallel at any point.",
+  "next_action_hint": "Next dispatch: read handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md first. Prove modalStepBranchS5g_preserves_keysTotal (reuses modalApplyOneS5_knownWorlds_step + accKnown, both already landed) then _preserves_keyLowerBd (needs two new introduction-direction lemmas for boxProps/diaNegProps membership) to complete Phase 5 and close the full termination chain (Phases 3-6). Phase 7 (soundness bridge) is independent and can be attempted separately/in parallel at any point.",
   "artifacts": [
     {
       "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
       "type": "lean_source",
-      "summary": "Phase 4: accFresh/accKnown/outDegEq landed sorry-free (4/6 fields total with eNodup); Phase 6: modalKnownWorlds_length_le_worldBoundS5 + modalKnownWorlds_nodup_S5/modalKnownWorlds_fold_nodup_S5 landed sorry-free, full CI-green"
+      "summary": "Phase 4 COMPLETE (all six generic fields plus new 12th field worldsContiguous, including bClosure/eClosure which were BLOCKED since cycle 2); Phase 5 2/4 fields landed (keysDistinct, keysInUniverse); Phase 6 unchanged (COMPLETE). Full CI-green, zero sorry, zero new axioms."
     },
     {
       "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
       "type": "plan",
-      "summary": "Phase 4 marked [BLOCKED] with precise per-task deviation annotations; Phase 6 marked [COMPLETED]"
+      "summary": "Phase 4 marked [COMPLETED] with full per-task deviation annotations; Phase 5 marked [IN PROGRESS] (2/4 fields done, keysDistinct and keysInUniverse); Phase 6 unchanged [COMPLETED]"
     },
     {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/02_phase4-bclosure-contiguity-gap.md",
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md",
       "type": "handoff",
-      "summary": "Detailed technical handoff: the outDegEq matcher-identity fix (reusable pattern), the full pigeonhole bound proof writeup, and the precise bClosure/eClosure contiguity-gap blocker with a concrete recommended 12th-invariant-field fix"
+      "summary": "Detailed technical handoff: Phase 4's full resolution narrative, keysDistinct/keysInUniverse's landing narrative, and a concrete per-field next-step plan for keyLowerBd/keysTotal with a recommended dispatch order"
     },
     {
       "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
       "type": "summary",
-      "summary": "Updated per-phase status ledger, cycle-2 deliverables, plan deviations, verification results, continuation guidance"
+      "summary": "Updated per-phase status ledger (cycles 2-4), Phase 4 resolution narrative, Phase 5 progress narrative, plan deviations, verification results, continuation guidance"
     }
   ],
   "sorry_inventory": [],

@@ -283,7 +283,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 8: bValid + B completeness (FrameCompleteness.lean) [NOT STARTED]
+### Phase 8: bValid + B completeness (FrameCompleteness.lean) [COMPLETED] *(deviation: bValid itself defined in Phase 7/FrameSoundness.lean, mirroring where T's tValid lives; this phase adds only modalTableauB_complete)*
 
 - **Goal:** State `bValid` against `Cube.B` / `Satisfies.b` and prove the completeness direction,
   which is fully generic and available now.

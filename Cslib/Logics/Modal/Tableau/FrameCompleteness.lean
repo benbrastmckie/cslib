@@ -1530,6 +1530,76 @@ lemma modalTruthLemmaB
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
           (hintikkaB_diamond_neg b acc hSrc hH ψ w w' hmem hpath) hsψ
 
+/-- An open B Hintikka branch with `F(φ)@0 ∈ b` (and `accSourcesKnown b acc`) yields a
+symmetric Kripke countermodel to `φ`. Mirrors `modalOpenBranchT_countermodel`. -/
+theorem modalOpenBranchB_countermodel
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (hSrc : accSourcesKnown b acc)
+    (hH : modalHintikkaSetGen modalApplyOneB b acc)
+    (hF : (⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ¬ Satisfies (extractModelB b acc) 0 φ :=
+  (modalTruthLemmaB b acc hSrc hH φ 0).2 hF
+
+/-! ## `bValid` Completeness (task 505 Phase 8) -/
+
+/-- **B-completeness of the modal tableau**: if the B tableau on `φ0` returns an open branch,
+`φ0` is not B-valid. Mirrors `modalTableauT_complete`: combines `modalExpandBranchesB_hintikka`
+instantiated at the initial configuration, the generic initial-branch membership persistence
+lemma (`modalExpandBranchesGen_openBranch_initial_mem`), the `accSourcesKnown` top-loop
+propagation lemma (`modalExpandBranchesGen_openBranch_accSourcesKnown`, `BDriver.lean`,
+task 505 -- the piece with no T analogue, since T never needs known-worlds reasoning), and the
+B countermodel extraction above. This direction is fully generic and does **not** depend on
+task 513's soundness-chain generalization. -/
+theorem modalTableauB_complete (φ0 : Proposition Atom)
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {a : Accessibility}
+    (h : modalTableauB φ0 = .openBranch b a) :
+    ¬ bValid φ0 := by
+  have h' : modalExpandBranchesB
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      [Accessibility.empty] (modalFuel φ0) = .openBranch b a := h
+  have hmeas := modalExpMeasure_entry_le_fuel φ0
+  have hInv : ∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+      (ai : Accessibility),
+      ([[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]])[i]? = some bi →
+      (([[]] : List (List (SignedFormula (Proposition Atom) WorldIndex))))[i]? = some ei →
+      ([Accessibility.empty])[i]? = some ai →
+      ∃ rank, ModalLoopInvGen modalApplyOneB φ0 bi ei ai rank := by
+    intro i bi ei ai hib hie hia
+    match i with
+    | 0 =>
+      simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+      subst hib; subst hie; subst hia
+      exact ⟨fun _ => modalDepth φ0, modalLoopInvGen_initial modalApplyOneB φ0⟩
+    | n + 1 => simp at hib
+  have hH : modalHintikkaSetGen modalApplyOneB b a :=
+    modalExpandBranchesB_hintikka φ0 (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl hmeas hInv b a h'
+  have hSrc : accSourcesKnown b a :=
+    modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneB modalApplyOneB_spec
+      (modalFuel φ0)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (by
+        intro p hp
+        simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+        subst hp
+        exact accSourcesKnown_empty _)
+      b a h'
+  have hmemInit : (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+    modalExpandBranchesGen_openBranch_initial_mem modalApplyOneB (modalFuel φ0)
+      (⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
+      rfl rfl
+      (fun b₀ hb₀ => by
+        simp only [List.mem_singleton] at hb₀
+        subst hb₀
+        simp)
+      b a h'
+  have hnot := modalOpenBranchB_countermodel b a φ0 hSrc hH hmemInit
+  intro htv
+  exact hnot (htv WorldIndex (extractModelB b a) (extractModelB_symm b a) 0)
+
 end Cslib.Logic.Modal.Tableau
 
 end

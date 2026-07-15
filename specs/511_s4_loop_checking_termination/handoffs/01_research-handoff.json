@@ -1,0 +1,46 @@
+{
+  "task_number": 511,
+  "session_id": "sess_1784075478_630e1e_511",
+  "agent_type": "cslib-research-agent",
+  "phase": "research",
+  "status": "research_complete",
+  "orchestrator_mode": false,
+  "report": "specs/511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md",
+  "headline_findings": [
+    "Phase 9 blocker is independent of Phase 8: task 510's modalExpandBranchesGen_hintikka (CompletenessLoop.lean:876) requires RuleApplicationSpec + ModalLoopInvGen (rank fields + geomCap phiBound) + modalExpMeasure over modalUniverse (K). S4 provably cannot supply any of these. 510 generalized the rule slot, NOT the termination measure. The 506 plan's Task-510 Gate checked the conclusion type (which does align, rfl) but not the hypotheses (the real obstruction).",
+    "Both Phase 8 gaps confirmed and shown structural: worldSetsDistinct over the live branch is provably not a loop invariant. Relevant sets grow monotonically, so distinctness has no forward-stable witness (Gap 1, persistent-step collapse); and blockingWorld checks the source world's set, not the prospective successor's birth content (Gap 2). Fix requires stating the invariant over stable birth-key data, not the live branch.",
+    "Exponent mismatch: modalWorldBoundS4 = 2^|Sf| is too small. sameRelevantSet distinguishes signs, so the pigeonhole codomain is powerset(Sign x Sf), card 2^(2|Sf|). Bump modalWorldBoundS4 to 2^(2*|Sf|); decidability needs only a finite computable bound."
+  ],
+  "recommended_design": {
+    "guard": "blockingWorldS4: block iff an existing known world's CURRENT relevant set equals the PROSPECTIVE successor birth content (successorBirthContent), not the source's set.",
+    "invariant": "Option A (recommended): thread per-world stable birth keys; S4LoopInv fields keysTotal/keyLowerBd(subset of live relevant set)/keysDistinct/keysInUniverse. Monotone-stable because keys never change and live sets only grow.",
+    "fallback": "Option B: restate distinctness only for saturated worlds (no driver change, looser bound, harder fuel-sufficiency).",
+    "pigeonhole": "Inject known worlds into powerset(Sign x Sf) via injective key map; Finset.card_powerset (=2^card), Finset.card_le_card_of_injOn / List.Nodup.length_le_card. All confirmed present in Mathlib."
+  },
+  "verified_facts": [
+    "Branch b grows monotonically (modalStepBranchGen appends _ ++ b on every arm).",
+    "Worlds minted consecutively; #worlds = modalMaxWorld b + 1.",
+    "K minting births successor with unwrapped bodies (pos,psi)/(neg,psi), not the boxed formula; source's R(b,w) is unrelated to successor content -> Gap 2.",
+    "modalHintikkaSetS4 phi0 b acc = modalHintikkaSetGen (modalApplyOneS4 phi0) b acc is rfl (Saturation.lean:460 vs LoopChecking.lean:373).",
+    "modalExpandBranchesGen_hintikka signature confirmed to require spec:RuleApplicationSpec and ModalLoopInvGen with ModalPotentialInv rank fields + geomCap phiBound + modalUniverse fuel."
+  ],
+  "reuse_check": {
+    "reuse_verbatim": ["modalWork", "modalExpMeasure", "formulasAtWorld", "sameRelevantSet + iff/refl/symm/trans", "accFreshInv", "accTargetsKnown", "outDeg", "isMintingShaped", "modalHintikkaSetGen"],
+    "do_not_extend": ["ModalPotentialInv (Correction 1, sibling S4LoopInv only)", "FmpMeasure.lean unchanged"],
+    "cannot_reuse_for_s4": ["modalExpandBranchesGen_hintikka", "ModalLoopInvGen", "RuleApplicationSpec"]
+  },
+  "recommended_phases": [
+    "P1 exponent fix (2^(2|Sf|)), re-verify modalUniverseS4_length_le (low risk, land first)",
+    "P2 guard+key redesign (blockingWorldS4, successorBirthContent), re-CI Phases 5-7 consumers",
+    "P3 S4LoopInv restatement + preservation lemmas (the crux)",
+    "P4 pigeonhole modalKnownWorlds_length_le_worldBoundS4 + modalStepBranchS4_worldBound",
+    "P5/separate-task Phase 9 loop: choose 9-A (abstract termination interface in CompletenessLoop.lean, shared with 505/513) or 9-B (S4-local re-derivation)"
+  ],
+  "planner_decisions_required": [
+    "Accept S4-specific driver change threading keys (Option A) vs saturated-world invariant (Option B)?",
+    "Phase 9: pursue shared-file termination-measure generalization (9-A) or S4-local re-derivation (9-B)?"
+  ],
+  "zero_debt": "No sorry/axiom/vacuous path recommended. Option B is a documented alternative design, not a debt shortcut. If a preservation lemma resists in a run, mark BLOCKED with the exact goal and split.",
+  "files_touched_this_dispatch": [],
+  "next_command": "/plan 511"
+}

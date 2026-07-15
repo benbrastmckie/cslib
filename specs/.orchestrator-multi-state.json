@@ -1,77 +1,74 @@
 {
-  "session_id": "sess_1784054776_0fc973",
+  "session_id": "sess_1784075478_630e1e",
   "task_numbers": [
-    507,
-    503,
+    513,
+    511,
     505,
-    506,
+    504,
     300
   ],
   "waves": [
     [
-      507
+      513,
+      511
     ],
     [
-      503
+      505
     ],
     [
-      505,
-      506
+      504
     ],
     [
       300
     ]
   ],
   "dependency_graph": {
-    "507": [],
-    "503": [
-      507
-    ],
+    "513": [],
+    "511": [],
     "505": [
-      503
+      "513"
     ],
-    "506": [
-      503
+    "504": [
+      "513",
+      "505"
     ],
     "300": [
-      503,
-      505,
-      506
+      "504",
+      "505"
     ]
   },
   "max_cycles": 25,
-  "cycle_count": 7,
+  "cycle_count": 3,
   "failed_tasks": [],
   "completed_tasks": [
-    507,
-    510
+    513
   ],
   "current_statuses": {
-    "507": "completed",
-    "496": "completed",
-    "484": "completed",
-    "503": "implementing",
-    "510": "completed"
+    "513": "completed",
+    "511": "planned",
+    "505": "planned",
+    "504": "researched",
+    "300": "blocked"
   },
   "task_dirs": {
-    "507": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec",
-    "503": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit",
+    "513": "specs/513_generalize_tableau_soundness_chain_over_spec",
+    "511": "specs/511_s4_loop_checking_termination",
     "505": "specs/505_b_symmetric_decidability_via_generic_tableau_driver",
-    "506": "specs/506_s4_loopchecking_machinery_termination_bound_and_decidability",
+    "504": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_",
     "300": "specs/300_modal_extensions_t_s4_s5"
   },
   "research_agents": {
-    "507": "cslib-research-agent",
-    "503": "cslib-research-agent",
+    "513": "cslib-research-agent",
+    "511": "cslib-research-agent",
     "505": "cslib-research-agent",
-    "506": "cslib-research-agent",
+    "504": "cslib-research-agent",
     "300": "cslib-research-agent"
   },
   "implement_agents": {
-    "507": "cslib-implementation-agent",
-    "503": "cslib-implementation-agent",
+    "513": "cslib-implementation-agent",
+    "511": "cslib-implementation-agent",
     "505": "cslib-implementation-agent",
-    "506": "cslib-implementation-agent",
+    "504": "cslib-implementation-agent",
     "300": "cslib-implementation-agent"
   }
 }

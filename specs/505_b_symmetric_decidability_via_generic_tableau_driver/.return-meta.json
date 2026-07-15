@@ -1,18 +1,18 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 505,
-  "task_slug": "b_symmetric_decidability_via_generic_tableau_driver",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "artifact_number": 1,
-  "artifact_path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
-  "phase_count": 9,
-  "estimated_hours": 8,
-  "dependency_waves": [[1], [2, 3, 5, 7], [4], [6], [8], [9]],
-  "complexity": "complex",
-  "research_integrated": true,
-  "next_steps": "Run /implement 505 to execute the plan",
-  "notes": "B is a persistent-only extension mirroring T (TDriver.lean / FrameCompleteness.lean modalTruthLemmaT). All green work (Phases 1-8: B rule, driver+11-field spec discharge, generic Hintikka chain, extractModelB via SymmGen, truth-lemma bridges, bValid completeness, rule-level soundness via Satisfies.b) lands before the LAST phase. Phase 9 Decidable(bValid) is BLOCKED on task 513 (generalize_tableau_soundness_chain_over_spec, currently not_started) with a documented [BLOCKED] fallback, exactly like task 503 Phase 6. VERIFIED: Satisfies.b (Basic.lean:323) is the expected box-diamond form phi -> box-diamond-phi under [Std.Symm m.r] -- no surprise form.",
-  "memory_candidates": [],
-  "completed": "2026-07-14T00:00:00Z"
+  "status": "in_progress",
+  "started_at": "2026-07-15T01:24:46Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, reading plan and post-513 FrameSoundness/FrameCompleteness state",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 0
+  },
+  "metadata": {
+    "session_id": "sess_1784075478_630e1e_505",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

@@ -428,4 +428,168 @@ theorem formula_6_7
     have hd2 := impIntro hK hS (Γ := []) (φ := ◇ (p.and (◇C))) hd1
     simpa [Conj, Tele, hC, hT, hC', Derivable] using hd2
 
+/-! ## Track C — C3: Simpson formula (6.8)
+
+**Goal (source PDF p.104, report 02 §2.5, table row C3)**: for *every* `W : List (Proposition
+Atom)` (empty list included — see the base-case sanity check below, this is the one place C3
+diverges from C2's scoping restriction), `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`, *"derived by
+repeated applications of axiom 5 of IK"* (`hFS`, `IKAx.fs`, `lemma612-scaffold.lean:117`,
+`((◇φ).imp(□ψ)).imp(□(φ.imp ψ))`, added by A1).
+
+**Base-case sanity check, done BEFORE writing any Lean (per the C2 resume-pointer warning)**:
+unlike (6.7)'s `V = []` instance (refuted by a countermodel, see C2 above), *(6.8)'s `W = []`
+instance is a genuine IK theorem — no restatement needed*. At `W = []`: `Conj [] = ⊤`,
+`Tele [] B = B`, so the instance reads `(◇⊤ ⊃ □B) ⊃ □B`. Semantic check: fix any birelational IK
+model and world `w`. If `w` has no `R`-successor, `◇⊤` is false at `w` (vacuously), so the whole
+implication holds vacuously. If `w` has an `R`-successor, `⊤` holds everywhere so `◇⊤` is *true*
+at `w`, and then `◇⊤ ⊃ □B` forces `□B` directly by modus ponens. Either way `(◇⊤⊃□B)⊃□B` holds at
+every world — a genuine unconditional validity, not one requiring `W` nonempty. The Lean proof
+below confirms this syntactically via `hFS ⊤ B` plus the pure-IPL fact `⊢(⊤⊃B)⊃B` (the only role
+`Proposition.top` plays is being *provable*, `⊢⊤`, which needs no `GeomAxiom.D`/seriality
+assumption — contrast `IKAx.dDia`, gated on `D ∈ 𝒯`, which asserts the *stronger* unconditional
+`⊢◇⊤`, not needed here).
+
+**Why the self-referential shape does not collapse to a single `hFS` instantiation** (per the
+dispatch's warning that (6.8)'s shape differs structurally from (6.7)'s): naively substituting
+`φ := Conj(W)`, `ψ := Tele(W,B)` directly into `hFS` gives
+`(◇Conj(W)⊃□Tele(W,B)) ⊃ □(Conj(W).imp Tele(W,B))`, whose consequent is
+`□(Conj(W)⊃Tele(W,B))`, *not* the target `□Tele(W,B)` — these coincide only via a further
+`(Conj(W)⊃Tele(W,B)) ⊃ Tele(W,B)`-shaped fact, which is *not* a bare IPL tautology once `Conj(W)`
+contains a `◇`-guarded tail (checked directly by hand: for `W=[p,q]`,
+`((p∧◇q)⊃(p⊃□(q⊃B)))⊃(p⊃□(q⊃B))` gets stuck deriving `◇q` from `p` alone — assuming the
+antecedent and `p`, there is no way to invoke it without `◇q` in hand). The actual induction
+(below, sorry-free) instead uses the **IH itself, relativized one `Tele [p]`-layer deeper via
+`Tele_imp1`**, composed with `hFS` and one *pure-IPL* currying step per list element — genuinely
+"repeated application of axiom 5" (once per recursion level, bottoming out at the base case),
+not a single flat instantiation. -/
+
+/-- **Transitivity of `Derivable`-implication** (Hilbert-style compose): from `⊢A→B` and `⊢B→C`
+derive `⊢A→C`. New combinator needed by C3 — Simpson's own (◇E) argument (§2.5) composes exactly
+three such steps ((6.4)+(6.7), then +(6.5), then +(6.8)); this is that composition primitive,
+and C3's own inductive step needs it twice internally. -/
+theorem derivable_imp_trans
+    (hK : ∀ φ ψ : Proposition Atom, Axioms (φ.imp (ψ.imp φ)))
+    (hS : ∀ φ ψ χ : Proposition Atom,
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    {A B C : Proposition Atom}
+    (h1 : Derivable Axioms (A.imp B)) (h2 : Derivable Axioms (B.imp C)) :
+    Derivable Axioms (A.imp C) := by
+  set Γ : List (Proposition Atom) := [A] with hΓ
+  have hA : Deriv Axioms Γ A := assumption_deriv (by simp [hΓ])
+  have h1' : Deriv Axioms Γ (A.imp B) := weakening_deriv h1 (by simp [hΓ])
+  have hB : Deriv Axioms Γ B := mp_deriv h1' hA
+  have h2' : Deriv Axioms Γ (B.imp C) := weakening_deriv h2 (by simp [hΓ])
+  have hC : Deriv Axioms Γ C := mp_deriv h2' hB
+  exact impIntro hK hS (Γ := []) (φ := A) hC
+
+/-- **(6.8), full statement, for every `W` (empty list included, see the base-case sanity check
+above)**: `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`. Induction on `W`, matching `Tele`/`Conj`'s own
+`nil`/`[p]`/`p::p2::rest` 3-way pattern-match (same shape C1's `Tele_imp1`/`Tele_imp2` and C2's
+`formula_6_7` used). Every case is closed using `hFS` (axiom 5) once, composed (via
+`derivable_imp_trans`) with a box-lifted pure-IPL identity: `nil` uses `⊢(⊤⊃B)⊃B`; `[p]` uses
+contraction `⊢(p⊃(p⊃B))⊃(p⊃B)`; `p::p2::rest'` uses currying
+`⊢((p∧◇C')⊃(p⊃□T'))⊃(p⊃((◇C')⊃□T'))` (where `C' := Conj(p2::rest')`, `T' := Tele(p2::rest',B)`)
+composed with the *induction hypothesis* relativized one `Tele [p]`-layer deeper via
+`Tele_imp1`. -/
+theorem formula_6_8
+    (hK : ∀ φ ψ : Proposition Atom, Axioms (φ.imp (ψ.imp φ)))
+    (hS : ∀ φ ψ χ : Proposition Atom,
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (hBoxK : ∀ φ ψ : Proposition Atom,
+      Axioms ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))))
+    (hAndI : ∀ φ ψ : Proposition Atom, Axioms (Cslib.Logic.Axioms.AndI φ ψ))
+    (hFS : ∀ φ ψ : Proposition Atom,
+      Axioms (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ))))
+    (W : List (Proposition Atom)) (B : Proposition Atom) :
+    Derivable Axioms
+      (((◇ (Conj W)).imp (Proposition.box (Tele W B))).imp (Proposition.box (Tele W B))) := by
+  induction W with
+  | nil =>
+    simp only [Conj, Tele]
+    have htop : Derivable Axioms (Proposition.top : Proposition Atom) := by
+      have h : Deriv Axioms [] (Proposition.bot.imp Proposition.bot) :=
+        impIntro hK hS (Γ := []) (φ := Proposition.bot) (assumption_deriv (by simp))
+      rw [Proposition.top_def]
+      exact h
+    have htopImpB : Derivable Axioms ((Proposition.top.imp B).imp B) := by
+      set Γ1 : List (Proposition Atom) := [Proposition.top.imp B] with hΓ1
+      have htopw : Deriv Axioms Γ1 Proposition.top := weakening_deriv htop (by simp [hΓ1])
+      have himp : Deriv Axioms Γ1 (Proposition.top.imp B) := assumption_deriv (by simp [hΓ1])
+      have hB : Deriv Axioms Γ1 B := mp_deriv himp htopw
+      exact impIntro hK hS (Γ := []) (φ := Proposition.top.imp B) hB
+    have hboxCongr : Derivable Axioms
+        ((Proposition.box (Proposition.top.imp B)).imp (Proposition.box B)) :=
+      box_mono1 hBoxK htopImpB
+    have h5 : Derivable Axioms
+        (((◇ Proposition.top).imp (Proposition.box B)).imp
+          (Proposition.box (Proposition.top.imp B))) :=
+      ⟨.ax [] _ (hFS Proposition.top B)⟩
+    exact derivable_imp_trans hK hS h5 hboxCongr
+  | cons p rest ih =>
+    cases rest with
+    | nil =>
+      simp only [Conj, Tele]
+      have hContraction : Derivable Axioms ((p.imp (p.imp B)).imp (p.imp B)) := by
+        set Γc : List (Proposition Atom) := [p, p.imp (p.imp B)] with hΓc
+        have hp' : Deriv Axioms Γc p := assumption_deriv (by simp [hΓc])
+        have hpp : Deriv Axioms Γc (p.imp (p.imp B)) := assumption_deriv (by simp [hΓc])
+        have hpb : Deriv Axioms Γc (p.imp B) := mp_deriv hpp hp'
+        have hb : Deriv Axioms Γc B := mp_deriv hpb hp'
+        have hd1 := impIntro hK hS (Γ := [p.imp (p.imp B)]) (φ := p) hb
+        exact impIntro hK hS (Γ := []) (φ := p.imp (p.imp B)) hd1
+      have hboxContraction : Derivable Axioms
+          ((Proposition.box (p.imp (p.imp B))).imp (Proposition.box (p.imp B))) :=
+        box_mono1 hBoxK hContraction
+      have h5 : Derivable Axioms
+          (((◇p).imp (Proposition.box (p.imp B))).imp
+            (Proposition.box (p.imp (p.imp B)))) :=
+        ⟨.ax [] _ (hFS p (p.imp B))⟩
+      exact derivable_imp_trans hK hS h5 hboxContraction
+    | cons p2 rest' =>
+      simp only [Conj, Tele]
+      set C' : Proposition Atom := Conj (p2 :: rest') with hC'
+      set T' : Proposition Atom := Tele (p2 :: rest') B with hT'
+      -- `ih : Derivable Axioms (((◇C').imp (Proposition.box T')).imp (Proposition.box T'))`
+      have hCurry : Derivable Axioms
+          (((p.and (◇C')).imp (p.imp (Proposition.box T'))).imp
+            (p.imp ((◇C').imp (Proposition.box T')))) := by
+        set Γcu : List (Proposition Atom) :=
+          [◇C', p, (p.and (◇C')).imp (p.imp (Proposition.box T'))] with hΓcu
+        have hdc' : Deriv Axioms Γcu (◇C') := assumption_deriv (by simp [hΓcu])
+        have hp' : Deriv Axioms Γcu p := assumption_deriv (by simp [hΓcu])
+        have hphi : Deriv Axioms Γcu ((p.and (◇C')).imp (p.imp (Proposition.box T'))) :=
+          assumption_deriv (by simp [hΓcu])
+        have handI : Deriv Axioms Γcu (Cslib.Logic.Axioms.AndI p (◇C')) :=
+          weakening_deriv ⟨.ax [] _ (hAndI p (◇C'))⟩ (by simp)
+        have hand : Deriv Axioms Γcu (p.and (◇C')) := mp_deriv (mp_deriv handI hp') hdc'
+        have hpsi : Deriv Axioms Γcu (p.imp (Proposition.box T')) := mp_deriv hphi hand
+        have hboxT' : Deriv Axioms Γcu (Proposition.box T') := mp_deriv hpsi hp'
+        have hd1 := impIntro hK hS
+          (Γ := [p, (p.and (◇C')).imp (p.imp (Proposition.box T'))]) (φ := ◇C') hboxT'
+        have hd2 := impIntro hK hS
+          (Γ := [(p.and (◇C')).imp (p.imp (Proposition.box T'))]) (φ := p) hd1
+        exact impIntro hK hS (Γ := [])
+          (φ := (p.and (◇C')).imp (p.imp (Proposition.box T'))) hd2
+      have hBoxCurry : Derivable Axioms
+          ((Proposition.box ((p.and (◇C')).imp (p.imp (Proposition.box T')))).imp
+            (Proposition.box (p.imp ((◇C').imp (Proposition.box T'))))) :=
+        box_mono1 hBoxK hCurry
+      have hIhRel : Derivable Axioms
+          ((p.imp ((◇C').imp (Proposition.box T'))).imp (p.imp (Proposition.box T'))) := by
+        have h := Tele_imp1 hK hS hBoxK [p] ih
+        simpa [Tele] using h
+      have hBoxIhRel : Derivable Axioms
+          ((Proposition.box (p.imp ((◇C').imp (Proposition.box T')))).imp
+            (Proposition.box (p.imp (Proposition.box T')))) :=
+        box_mono1 hBoxK hIhRel
+      have hBoxPsi : Derivable Axioms
+          ((Proposition.box ((p.and (◇C')).imp (p.imp (Proposition.box T')))).imp
+            (Proposition.box (p.imp (Proposition.box T')))) :=
+        derivable_imp_trans hK hS hBoxCurry hBoxIhRel
+      have h5 : Derivable Axioms
+          (((◇ (p.and (◇C'))).imp (Proposition.box (p.imp (Proposition.box T')))).imp
+            (Proposition.box ((p.and (◇C')).imp (p.imp (Proposition.box T'))))) :=
+        ⟨.ax [] _ (hFS (p.and (◇C')) (p.imp (Proposition.box T')))⟩
+      exact derivable_imp_trans hK hS h5 hBoxPsi
+
 end Cslib.Logic.Modal.TeleConj

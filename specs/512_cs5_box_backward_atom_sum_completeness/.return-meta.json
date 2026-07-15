@@ -3,20 +3,20 @@
   "started_at": "2026-07-14T00:00:00Z",
   "artifacts": [
     {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/03_necessity-transfer-attempted.md",
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/04_canonical-model-scaffold.md",
       "type": "handoff"
     },
     {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/03_necessity-transfer-summary.md",
-      "type": "summary"
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
+      "type": "lean_source"
     }
   ],
   "partial_progress": {
-    "stage": "phase3_necessity_transfer_attempted",
-    "details": "Landed cs5Combined_necTransfer (sorry-free); ruled out the necessitation/K/cross-axiom algebraic route as insufficient; feasibility-analyzed the derivation-height induction and found it reduces to the same canonical-scale obstacle as route 1 (H is quasi-prime, not negation-complete, so toy valuations cannot represent it).",
+    "stage": "phase3_canonical_model_scaffold_landed",
+    "details": "Ported CS5.lean's entire canonical-model construction (cs5_box_four through cs5FC''_cs5Mreach, ~630 lines) to CS5Combined over Atom ⊕ Atom: cs5CombinedTail + refl/symm/trans, cs5Combined_dia_bot_imp_bot, bigOr/box combinatorics, cs5Combined_quasi_prime_set_exclusion, cs5Combined_diam_witness, CS5CombinedSegment/cs5CombinedMreach, cs5Combined_fcsymbox_theory/cs5Combined_fc4_theory, cs5CombinedFC''_cs5CombinedMreach. All sorry-free, axiom-clean. Also landed cs5Combined_symmetric_tail_box_gap, mechanically confirming CS5Combined's canonical model has the identical box-backward gap as CS5's own, so a fully general CS5Combined truth lemma is not easier than the original problem. cs5Combined_seed_excludes itself remains unresolved (no sorry, no fabricated obstruction). Fixed 6 pre-existing defsWithUnderscore lint violations via safe rename.",
     "phases_completed": 2,
     "lint_count_start": null,
-    "lint_count_current": null
+    "lint_count_current": 0
   },
   "verification": {
     "verification_passed": true,
@@ -27,7 +27,7 @@
     "ci_pipeline_passed": true
   },
   "requires_user_review": true,
-  "review_reason": "Phase 3 (cs5Combined_seed_excludes) remains open after three dispatches; this dispatch's analysis suggests the originally-planned separation of Phase 3 as a cheap go/no-go gate before Phases 4-5 may not hold -- both proposed discharge routes appear to require canonical-model-scale machinery comparable to the full completeness construction. Recommend either approving a combined Phase 3+4+5 dispatch, or accepting the task stays PARTIAL pending a genuinely new proof idea.",
+  "review_reason": "Phase 3 (cs5Combined_seed_excludes) remains open after four dispatches. This dispatch's strategic reframe (build the full CS5Combined canonical model directly) landed substantial, real, sorry-free scaffolding, but also mechanically confirmed that a fully general CS5Combined truth lemma faces the identical box-backward gap CS5 itself has -- so the reframe does not purchase a shortcut at the 'cover all worlds' level. A concrete, not-yet-tried 'cluster' semantic lead (multi-world R-side cluster using existing single-formula Lindenbaum) is identified as the most promising next step. Recommend either approving a further dispatch to attempt the cluster construction, or accepting the task stays PARTIAL pending that attempt.",
   "metadata": {
     "session_id": "sess_1784082183_03d15b",
     "agent_type": "cslib-implementation-agent",

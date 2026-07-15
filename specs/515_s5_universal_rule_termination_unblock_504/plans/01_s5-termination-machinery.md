@@ -278,7 +278,9 @@ was pursued separately regardless of this block (see Phase 5 below).
 
 ---
 
-### Phase 4: Pigeonhole world bound [NOT STARTED]
+### Phase 4: Pigeonhole world bound [BLOCKED]
+
+_Transitively blocked_: not independently attempted. Depends on Phase 3's `S5LoopInv.keysDistinct`/`keysInUniverse`, both open (Phase 3 [BLOCKED]).
 
 **Goal**: Prove the finite world bound `modalKnownWorlds_length_le_worldBoundS5` via the Mathlib pigeonhole lemmas, consuming the `S5LoopInv` key fields. **No template — this is the pigeonhole S4 also never landed (F2).** High risk.
 
@@ -299,7 +301,66 @@ was pursued separately regardless of this block (see Phase 5 below).
 
 ---
 
-### Phase 5: Soundness `modalTableauS5_sound` [NOT STARTED]
+### Phase 5: Soundness `modalTableauS5_sound` [BLOCKED]
+
+_Attempted: 2026-07-15T02:20:00Z -- 2026-07-15T02:45:00Z_
+
+**Clarification of the plan text vs. dependency table**: the phase's task list says
+"fed `modalApplyOneS5g`'s `freshLocal`" but the Dependency Analysis table lists Phase 5 as
+depending on Phase 1 only (forking after it, parallel to 2/3/4). Since `(modalApplyOneS5 sf b
+acc).snd = (modalApplyOne sf b acc).snd` unconditionally (verified by inspection of
+`modalApplyOneS5`'s definition: every match arm returns the K-computed `kAcc` as its second
+component, regardless of shape), soundness is fully expressible against the **already-landed,
+unguarded** `modalApplyOneS5`/`modalTableauS5` (task 504), matching the dependency table and
+F5's blueprint framing (soundness is independent of the guard/termination chain). This plan
+targets the unguarded declarations; no `modalApplyOneS5g`-specific freshLocal fact was needed.
+
+**BLOCKER**: `modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:728`), the only
+existing generic soundness bridge, threads a *single* invariant (`accFreshInv`) across its
+fuel-induction and hands `hBoxPos`/`hDiaNeg` only `hacc : ∀ w w', acc.hasEdge w w' → m.r (f w)
+(f w')` (direct-edge relatedness) at each single step -- **no reachability-closure fact is
+available inside those per-step hypotheses**. S5's universal box-positive/diamond-negative arms
+(`modalS5BoxAll`/`modalS5DiaNegAll`) propagate to **every** known world `w'`, not just
+`acc.hasEdge`-successors of the trigger `lbl`, so proving `RuleResultSat` there needs `m.r (f
+lbl) (f w')` for a `w'` that may be many mint-tree edges away from `lbl` -- direct-edge `hacc`
+alone is insufficient (confirmed by inspection: `modalApplyOne_boxPos_sound`/
+`modalApplyOne_diaNeg_sound`, `SoundnessStep.lean:446/490`, the K per-shape soundness lemmas
+`hBoxPos`/`hDiaNeg` normally discharge from, only ever use `hacc` at the *trigger's own* direct
+edges -- exactly what T's `reflFC` self-propagation and B's predecessor-propagation need, and
+exactly what S5's *whole-known-world* propagation does not have available). This is the R5/F5
+"genuinely new content" the plan flagged, but the actual shape of the gap is sharper than "new
+per-shape lemmas": it requires a **new top-level fuel-induction bridge** (a
+`modalExpandBranchesGen_closed_unsatIn`-style wrapper additionally threading a "every known
+world is `acc`-reachable from world 0" invariant alongside `accFreshInv`), not merely two new
+per-shape `soundIn` lemmas plugged into the *existing* bridge.
+
+**What was tried / established (not committed -- no file changes from this phase, to keep the
+zero-debt/no-partial-file-edit discipline clean; findings only)**: (1) confirmed
+`(modalApplyOneS5 sf b acc).snd = (modalApplyOne sf b acc).snd` holds unconditionally by
+inspection of the definition (all three match arms return `kAcc`), so `modalApplyOneS5`'s
+`freshLocal`-style dichotomy reduces directly to `modalApplyOne_fresh_local`
+(`FmpMeasure.lean:802`) -- this piece is genuinely easy and was NOT the blocker; (2) traced
+`modalExpandBranchesGen_closed_unsatIn`'s signature and its single-step callee
+`modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean:193`, the "K monolith", 300+ lines)
+and confirmed neither threads reachability; (3) sketched (not written) a *scoped* single-step
+reachability-preservation argument specific to `modalApplyOneS5` (not the full generic K
+monolith): using the already-landed `modalS5BoxAll_mem`/`modalS5DiaNegAll_mem` (Phase 1, giving
+target labels `∈ modalKnownWorlds b` directly for the universal arms) plus
+`modalApplyOne_fresh_local`'s dichotomy for the mint case, a "known worlds reachable from 0"
+invariant should be provable as its own standalone lemma without re-deriving the K monolith --
+but assembling a full replacement top-level fuel-induction bridge (combining this with
+`modalStepBranchGen_preserves_satIn` as a black box) was not completed within budget.
+
+**What is needed to unblock**: author a new generic lemma
+`modalExpandBranchesGen_closed_unsatIn_reachable` (or an S5-specialized variant) that threads
+`∀ w ∈ modalKnownWorlds b, Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w` alongside
+`accFreshInv` through the fuel induction, reusing `modalStepBranchGen_preserves_satIn` as a
+black box for the satisfiability half and a new (sketched-but-unwritten) single-step
+reachability-preservation lemma for the second half; then re-derive `hBoxPos`/`hDiaNeg` for
+S5's universal arms using the equivalence-closure projections (`Std.Refl`/
+`Relation.RightEuclidean` from `s5FC`) applied to the reachability witness, not direct `hacc`.
+
+**Prohibited workarounds not used**: no `sorry`, no vacuous placeholder, no re-added rank axiom.
 
 **Goal**: Land S5 soundness. **Independent of the termination chain (F5): uses only `freshLocal` + per-shape `soundIn` lemmas + the agreement lemma, never `rankStep`.** Forks after P1 and runs parallel to P2/P3/P4.
 
@@ -320,7 +381,9 @@ was pursued separately regardless of this block (see Phase 5 below).
 
 ---
 
-### Phase 6: Spec-free Hintikka lift + fuel + completeness + decidability [NOT STARTED]
+### Phase 6: Spec-free Hintikka lift + fuel + completeness + decidability [BLOCKED]
+
+_Transitively blocked_: not independently attempted. Depends on Phase 4 (pigeonhole) and Phase 3 (`S5LoopInv`), both open. Strategy 2 (semantic bounded-model FMP over `extractModelS5`) was not attempted either -- it was not reached given the upstream blocks and remaining budget; it remains the pre-authorized fallback for a follow-up task.
 
 **Goal**: Build the frontier capstone: the `S5LoopInv`-parametrized Hintikka lift replacing the rank-bound generic lift, the fuel bridge, completeness, and the `Decidable (s5Valid φ)` instance against `Cube.S5`. **No template; the hard frontier (F4). HIGH risk — the primary `[BLOCKED]`/Strategy-2 candidate.**
 
@@ -344,7 +407,9 @@ was pursued separately regardless of this block (see Phase 5 below).
 
 ---
 
-### Phase 7: 5/KB5 validity + completeness [NOT STARTED]
+### Phase 7: 5/KB5 validity + completeness [BLOCKED]
+
+_Transitively blocked_: not independently attempted. Depends on Phase 6's `modalTableauS5_complete`, which is blocked. The `Satisfies.five`-direct `fiveValid`-completeness fragment (not routed through the tableau engine) was not separately attempted within budget.
 
 **Goal**: Complete task 504 Phase 7: `fiveValid`/`kb5Valid` completeness via the landed semantic bridge. Low risk *given* P6.
 

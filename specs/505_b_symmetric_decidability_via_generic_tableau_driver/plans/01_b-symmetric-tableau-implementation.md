@@ -302,7 +302,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 9: Decidable (bValid φ) — BLOCKED on task 513 [NOT STARTED]
+### Phase 9: Decidable (bValid φ) [COMPLETED] *(task 513 landed during this dispatch -- unblocked, delivered rather than BLOCKED-fallback)*
 
 - **Goal:** Discharge `Decidable (bValid φ)` by combining B completeness (Phase 8) with the
   driver-level B soundness (`modalTableauB φ = .closed → bValid φ`) — the latter requiring task

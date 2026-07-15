@@ -1600,6 +1600,181 @@ theorem modalTableauB_complete (φ0 : Proposition Atom)
   intro htv
   exact hnot (htv WorldIndex (extractModelB b a) (extractModelB_symm b a) 0)
 
+/-! ## Task 505 Phase 9: B Soundness Discharges + `modalTableauB_sound`
+
+Task 513 landed (during this dispatch) the generalized frame-relativized soundness chain
+(`modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`,
+`FrameSoundness.lean`), taking three raw hypotheses (`hAgree`/`hBoxPos`/`hDiaNeg`) rather than
+a hard-coded `modalApplyOne`. B's soundness side therefore only needs to supply its own
+`hAgree`/`hBoxPos`/`hDiaNeg` triple and instantiate -- mirroring exactly how task 513 itself
+instantiated T (`hAgreeT`, `modalApplyOneT_boxPos_soundIn`, `modalApplyOneT_diaNeg_soundIn`,
+`modalTableauT_sound`). This closes the loop the plan originally isolated as a `[BLOCKED]`
+Phase 9 fallback: no fallback is needed since task 513 landed before this phase ran. -/
+
+omit [Hashable Atom] in
+/-- **S-agree for B**: `modalApplyOneB` agrees with `modalApplyOne` off the two propagating
+shapes -- exactly `modalApplyOneB_eq_of_not_boxPos_diaNeg` (`FrameRules.lean`) verbatim; zero
+new proof content. Discharges `modalStepBranchGen_preserves_satIn`/
+`modalExpandBranchesGen_closed_unsatIn`'s `hAgree` hypothesis at `apply := modalApplyOneB`. -/
+theorem hAgreeB
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneB sf b acc = modalApplyOne sf b acc :=
+  modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc h
+
+/-- **S-boxPos for B**: frame-relativized semantic soundness of `modalApplyOneB`'s box-positive
+output at `FC := symmFC`. Splits `RuleResultSat` over the `kForms ++ backNew.filter …` append
+(`modalApplyOneB_boxPos_fst`, `BDriver.lean`): the `kForms` half is K's own
+`modalApplyOne_boxPos_sound` (`FC` unused); the `backNew` half (backward-propagated formulas at
+recorded predecessors) is justified by symmetry -- each `x ∈ modalBBoxBack b acc φ lbl` has
+`x.label` a predecessor `v` (edge `v → lbl`), so `hacc` gives `m.r (f v) (f lbl)`, symmetry
+(`hFC.symm`) gives `m.r (f lbl) (f v)`, and `T(□φ)@lbl`'s box unfolding then places `φ` at
+`f v`. -/
+theorem modalApplyOneB_boxPos_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : symmFC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneB
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneB
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨hsndeqK, hRRSK⟩ := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
+  have hbox : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+  have hback : ∀ sf' ∈ modalBBoxBack b acc φ lbl, sfSat m f sf' := by
+    intro sf' hmem'
+    obtain ⟨hxeq, hpred, -, -⟩ := modalBBoxBack_mem hmem'
+    have hedge : acc.hasEdge sf'.label lbl = true := modalBPredecessorsOf_hasEdge hpred
+    have hmvw : m.r (f sf'.label) (f lbl) := hacc _ _ hedge
+    have hmwv : m.r (f lbl) (f sf'.label) := hFC.symm (f sf'.label) (f lbl) hmvw
+    rw [hxeq]
+    exact sfSat_pos m f φ sf'.label (hbox (f sf'.label) hmwv)
+  refine ⟨?_, ?_⟩
+  · rw [modalApplyOneB_boxPos_snd]; exact hsndeqK
+  · rw [modalApplyOneB_boxPos_fst]
+    rcases modalApplyOne_boxPos_eq
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc with
+        hk | ⟨kForms, hk⟩
+    · rw [hk] at hRRSK ⊢
+      split_ifs with hemp
+      · trivial
+      · exact hback
+    · rw [hk] at hRRSK ⊢
+      intro sf' hmem'
+      simp only [List.mem_append, List.mem_filter] at hmem'
+      rcases hmem' with hmem' | ⟨hmem', -⟩
+      · exact hRRSK sf' hmem'
+      · exact hback sf' hmem'
+
+/-- **S-diaNeg for B**: dual of `modalApplyOneB_boxPos_soundIn` for the diamond-negative
+shape. -/
+theorem modalApplyOneB_diaNeg_soundIn
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hFC : symmFC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf)
+    (hmem :
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneB
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOneB
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  obtain ⟨hsndeqK, hRRSK⟩ := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
+  have hdia : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+  have hback : ∀ sf' ∈ modalBDiaNegBack b acc φ lbl, sfSat m f sf' := by
+    intro sf' hmem'
+    obtain ⟨hxeq, hpred, -, -⟩ := modalBDiaNegBack_mem hmem'
+    have hedge : acc.hasEdge sf'.label lbl = true := modalBPredecessorsOf_hasEdge hpred
+    have hmvw : m.r (f sf'.label) (f lbl) := hacc _ _ hedge
+    have hmwv : m.r (f lbl) (f sf'.label) := hFC.symm (f sf'.label) (f lbl) hmvw
+    have hnotsat : ¬ Satisfies m (f sf'.label) φ := fun hφ =>
+      hdia (Satisfies.diamond_iff.mpr ⟨f sf'.label, hmwv, hφ⟩)
+    rw [hxeq]
+    exact sfSat_neg m f φ sf'.label hnotsat
+  refine ⟨?_, ?_⟩
+  · rw [modalApplyOneB_diamondNeg_snd]; exact hsndeqK
+  · rw [modalApplyOneB_diamondNeg_fst]
+    rcases modalApplyOne_diamondNeg_eq
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        with hk | ⟨kForms, hk⟩
+    · rw [hk] at hRRSK ⊢
+      split_ifs with hemp
+      · trivial
+      · exact hback
+    · rw [hk] at hRRSK ⊢
+      intro sf' hmem'
+      simp only [List.mem_append, List.mem_filter] at hmem'
+      rcases hmem' with hmem' | ⟨hmem', -⟩
+      · exact hRRSK sf' hmem'
+      · exact hback sf' hmem'
+
+/-- **`modalTableauB` is sound**: if the B tableau closes on `F(φ)`, then `φ` is `bValid`.
+Contrapositive over `symmFC`, mirroring `modalTableauT_sound`: feeds
+`modalExpandBranchesGen_closed_unsatIn symmFC modalApplyOneB` at the initial configuration
+`[[F(φ)@0]] [[]] [Accessibility.empty]`. The initial `branchSatisfiableIn symmFC` witness uses
+the symmetric falsifying model directly (available since `bValid = frameValid symmFC`
+quantifies only symmetric models, so the `by_contra` model is symmetric by hypothesis). -/
+theorem modalTableauB_sound (φ : Proposition Atom) (h : modalTableauB φ = .closed) :
+    bValid φ := by
+  intro World m hsymm w
+  by_contra hnotsat
+  have hsat : branchSatisfiableIn symmFC [⟨.neg, φ, 0⟩] Accessibility.empty :=
+    ⟨World, m, fun _ => w, hsymm,
+      fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
+      fun sf hmem => by
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+        subst hmem
+        exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
+  have hunsat := modalExpandBranchesGen_closed_unsatIn symmFC modalApplyOneB
+    modalApplyOneB_spec.freshLocal
+    hAgreeB
+    (fun m f φ lbl b acc hFC hacc hb hmem =>
+      modalApplyOneB_boxPos_soundIn m f φ lbl b acc hFC hacc hb hmem)
+    (fun m f φ lbl b acc hFC hacc hb hmem =>
+      modalApplyOneB_diaNeg_soundIn m f φ lbl b acc hFC hacc hb hmem)
+    (modalFuel φ)
+    [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
+    rfl rfl
+    (List.Forall₂.cons (accFreshInv_empty _) List.Forall₂.nil)
+    (by
+      have h' : modalExpandBranchesB
+          [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+          [Accessibility.empty] (modalFuel φ) = .closed := h
+      exact h')
+  cases hunsat with
+  | cons h_unsat _ => exact h_unsat hsat
+
+/-! ## `bValid` Decidability -/
+
+/-- **The modal B tableau decides B-validity**: `modalTableauB φ0` closes exactly when `φ0` is
+B-valid. Combines soundness (`modalTableauB_sound`) with completeness
+(`modalTableauB_complete`, Phase 8) via the two-constructor dichotomy of
+`ModalTableauResult`. Mirrors `tValid_decides` line-for-line. -/
+theorem bValid_decides (φ0 : Proposition Atom) :
+    modalTableauB φ0 = .closed ↔ bValid φ0 := by
+  constructor
+  · exact modalTableauB_sound φ0
+  · intro htv
+    cases htab : modalTableauB φ0 with
+    | closed => rfl
+    | openBranch b a => exact absurd htv (modalTableauB_complete φ0 htab)
+
+/-- **B-validity is decidable**: decide by running the modal B tableau and consulting
+`bValid_decides`. No `Fintype Atom` assumption is needed, since the tableau computation itself
+is the decision procedure. Mirrors `instDecidableTValid` line-for-line. -/
+instance instDecidableBValid (φ0 : Proposition Atom) : Decidable (bValid φ0) :=
+  match h : modalTableauB φ0 with
+  | .closed => .isTrue ((bValid_decides φ0).mp h)
+  | .openBranch _ _ => .isFalse (modalTableauB_complete φ0 h)
+
 end Cslib.Logic.Modal.Tableau
 
 end

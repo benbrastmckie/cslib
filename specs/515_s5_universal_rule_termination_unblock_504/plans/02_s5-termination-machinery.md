@@ -241,26 +241,26 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 7: Soundness bridge `modalTableauS5_sound` [NOT STARTED]
+### Phase 7: Soundness bridge `modalTableauS5_sound` [PARTIAL]
 
 **Goal**: Land S5 soundness via a **new reachability-threading fuel-induction bridge**. The v1 blocker showed the existing `modalExpandBranchesGen_closed_unsatIn` (`FrameSoundness.lean:728`) threads only `accFreshInv` and hands per-shape lemmas only direct-edge relatedness, insufficient for S5's whole-known-world propagation. **Independent of the termination chain (F5): forks after P1, runs parallel to P3-P6.**
 
 **Tasks**:
-- [ ] Author `modalExpandBranchesGen_closed_unsatIn_reachable` (or an S5-specialized variant) threading `∀ w ∈ modalKnownWorlds b, Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w` alongside `accFreshInv` through the fuel induction, reusing `modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean:193`) as a black box for the satisfiability half.
-- [ ] Prove a new single-step reachability-preservation lemma: a `modalApplyOneS5` step keeps "every known world `acc`-reachable from 0" (use the landed `modalS5BoxAll_mem`/`modalS5DiaNegAll_mem` from P1 for the non-mint universal arms — target labels are `∈ modalKnownWorlds b` — and `modalApplyOne_fresh_local` (`FmpMeasure.lean:802`) for the mint case).
-- [ ] Prove per-shape `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` under `s5FC`, re-deriving `m.r (f lbl) (f w')` from the reachability witness via `s5FC`'s `Std.Refl`/`Relation.RightEuclidean` cluster-collapse projections (not direct `hacc`).
-- [ ] Assemble `modalTableauS5_sound` against the already-landed unguarded `modalApplyOneS5`/`modalTableauS5` (task 504), using `(modalApplyOneS5 sf b acc).snd = (modalApplyOne sf b acc).snd` (unconditional; every match arm returns K's `kAcc`) so the `freshLocal`-style dichotomy reduces to `modalApplyOne_fresh_local`. Mirror `modalTableauT_sound` (`FrameCompleteness.lean:1182`).
+- [x] Author the `accReachableInv` invariant (`∀ w ∈ modalKnownWorlds b, Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w`), its base case for the initial branch (`accReachableInv_initial`), and the single-step preservation lemma `modalStepBranchS5_preserves_accReachableInv` against a `modalStepBranchGen modalApplyOneS5` step (landed sorry-free, `FrameSoundness.lean`). Reused the ALREADY-LANDED (Phase 4/5) `modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean:860`) rather than re-deriving it, plus a new `modalApplyOneS5_fresh_local` lift of `modalApplyOne_fresh_local`.
+- [x] Prove `reachable_imp_related_s5` (reachability from 0 + `hacc` + `s5FC`'s `Std.Refl`/`Relation.RightEuclidean` gives `m.r (f 0) (f w)`, via two `rightEuclidean` applications per edge-step) and `accReachableInv_related_s5` (hence any two known worlds are related in either direction).
+- [x] Prove `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` under `s5FC`: K's own bounded propagation reduces to the existing `modalApplyOne_boxPos_sound`/`_diaNeg_sound`; the S5-added universal-propagation half is discharged via `accReachableInv_related_s5` (not direct `hacc`). Landed sorry-free.
+- [ ] **BLOCKED (budget)**: Assemble `modalTableauS5_sound`. This requires a bespoke fuel induction (NOT a re-use of the existing `modalExpandBranchesGen_closed_unsatIn`/`modalStepBranchGen_preserves_satIn`, whose `hBoxPos`/`hDiaNeg` parameters are universally quantified over *all* `(b,acc)` and have no slot to receive the `accReachableInv` witness — confirmed structurally, not merely assumed) that threads `branchSatisfiableIn s5FC`, `accReachableInv`, and `accTargetsKnown` together. At the two S5-relevant shapes this reduces cleanly to the now-landed `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` plus `modalApplyOneS5_boxPos_diaNeg_eq` (rules out `.linear`/`.branching`). At every OTHER shape (atomic no-ops, all six propositional α/β rules, and the two K-minting shapes `F(□φ)`/`T(◇φ)`), `modalApplyOneS5` agrees with `modalApplyOne` exactly (`modalApplyOneS5_eq_of_not_boxPos_diaNeg`), so the needed case analysis is *semantically* identical to the "not shape" branch already proved inline inside `modalStepBranchGen_preserves_satIn` (`FrameSoundness.lean:230-717`, ~490 lines, the K/T-shared monolith) — but that branch is not currently factored into a standalone reusable lemma (only `negImp_alpha_preserved_gen` was extracted; the rest is inlined). Landing this needs either (a) extracting that ~490-line branch into its own generic lemma (parametrized by `apply`/`FC`, taking `apply sf b acc = modalApplyOne sf b acc` as a hypothesis) so both the original crux and the new S5 induction can share it, or (b) a bespoke copy specialized to `modalApplyOneS5`. Did not attempt within this dispatch's budget — no `lean_goal` failure to report since the theorem statement was not yet written; see the Phase 7 continuation handoff (`handoffs/06_*.md`) for the precise entry point and the five already-landed building-block lemmas to reuse.
 
-**Timing**: 2 hours
+**Timing**: 2 hours (spent: ~2 hours on the four landed sub-tasks; assembly not attempted)
 
 **Depends on**: 1 (landed)
 
 **Files to modify**:
-- `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` — `modalExpandBranchesGen_closed_unsatIn_reachable`, the reachability-preservation lemma, `modalS5BoxAll_soundIn`, `modalS5DiaNegAll_soundIn`, `modalTableauS5_sound`
+- `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` — landed: `modalApplyOneS5_fresh_local`, `accReachableInv` (+`_initial`), `modalStepBranchS5_preserves_accReachableInv`, `reachable_imp_related_s5`, `accReachableInv_related_s5`, `modalS5BoxAll_soundIn`, `modalS5DiaNegAll_soundIn`. Remaining: `modalTableauS5_sound` (and its supporting fuel-induction bridge, name TBD per the extraction-vs-bespoke decision above).
 
-**Verification**: full CI pipeline green; `modalTableauS5_sound` closes sorry-free with the reachability bridge and the two `soundIn` lemmas.
+**Verification**: full CI pipeline green (build/checkInitImports/lint/lint-style/shake/test all clean) for the five landed lemma groups; `modalTableauS5_sound` not yet attempted.
 
-**Blocked-branch**: if the reachability-threading bridge cannot close within budget, mark `[BLOCKED]` with the exact `lean_goal` open state at the failing induction step; this does not block the termination chain (P3-P6) or the frontier. No `sorry`.
+**Blocked-branch**: the reachability-threading bridge's SEMANTIC core (reachability invariant + rule-level soundIn lemmas) is landed sorry-free; only the final fuel-induction ASSEMBLY (re-deriving or extracting the K monolith's "not box/dia shape" case analysis) remains. No `sorry` introduced. Does not block P3-P6 or the frontier.
 
 ---
 

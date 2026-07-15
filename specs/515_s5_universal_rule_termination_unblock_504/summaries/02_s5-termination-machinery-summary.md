@@ -1,16 +1,25 @@
-# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-4)
+# Implementation Summary: S5 Universal-Rule Termination Machinery (v2 plan, round 2, cycles 2-7)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
 - **Plan**: `plans/02_s5-termination-machinery.md`
-- **Status**: PARTIAL -- Phase 4 (generic-field preservation) now **COMPLETED** (cycle 4 unblocked
-  the cycle-2 `bClosure`/`eClosure` gap via a new 12th `S5LoopInv` field); Phase 5 (birth-key
-  preservation) 2 of 4 fields landed (`keysDistinct`, `keysInUniverse`; `keyLowerBd`/`keysTotal`
-  remain `[NOT STARTED]`); Phase 6 (pigeonhole world bound) COMPLETED; Phases 7, 8, 9 NOT STARTED.
+- **Status**: PARTIAL -- **Phases 1-6 (the full termination chain) are now COMPLETED** (closed
+  across cycles 2, 4, 5, 6; see commits `d4e7ed73`/`49ed521b` for the final Phase 5 fields and
+  `bfbe032f` for the Phase 5-complete handoff). **Phase 7 (soundness bridge) is now `[PARTIAL]`**
+  (this cycle, cycle 7): the reachability invariant and both rule-level semantic soundness lemmas
+  landed sorry-free; only the final fuel-induction assembly (`modalTableauS5_sound`) remains,
+  blocked on budget with a precise, actionable continuation (see handoff 06). Phases 8, 9 remain
+  `[NOT STARTED]`.
 - **Commits cycle 2**: `db5b837a` (Phase 4: accFresh/accKnown/outDegEq), `8e4a17ba` (Phase 6:
   pigeonhole world bound)
 - **Commits cycle 4**: `caaea293` (Phase 4 COMPLETE: 12th field `worldsContiguous` +
   `bClosure`/`eClosure`), `fa816254` (Phase 5: `keysDistinct`), `f04817cf` (Phase 5:
   `keysInUniverse`)
+- **Commits cycles 5-6** (Phase 5 completion, termination chain closed): `d4e7ed73` (`keysTotal`),
+  `49ed521b` (`keyLowerBd` -- Phase 5 COMPLETE, Phases 3-6 all closed)
+- **Commits cycle 7** (this dispatch, Phase 7 partial): `e2430463` (`modalApplyOneS5_fresh_local`
+  + `accReachableInv` scaffolding), `a1018c6b`
+  (`modalStepBranchS5_preserves_accReachableInv`), `4dd7d0e7` (`modalS5BoxAll_soundIn` /
+  `modalS5DiaNegAll_soundIn`)
 - **Handoffs**:
   - `handoffs/01_phase4-generic-field-preservation.md` (cycle-2-prior dispatch: proof template,
     gotchas)
@@ -18,6 +27,10 @@
     and recommended 12th-invariant-field fix -- **fully resolved this cycle 4 dispatch**)
   - `handoffs/03_phase5-keysdistinct-landed-keylowerbd-scope.md` (cycle 4: `keysDistinct`/
     `keysInUniverse` landed; concrete next-step plan for `keyLowerBd`/`keysTotal`)
+  - `handoffs/05_phase5-complete-termination-chain-closed.md` (cycle 6: Phase 5 complete,
+    termination chain P3-P6 closed)
+  - `handoffs/06_phase7-reachability-soundIn-landed-assembly-remains.md` (cycle 7, **this
+    dispatch**: Phase 7's semantic core landed; exact assembly gap and two viable strategies)
 
 ## Cycle 2 Context
 
@@ -40,10 +53,10 @@ vacuous placeholder).
 | 2. Live-set guard + guarded rule (preserved scaffold) | COMPLETED (prior dispatch) | commit `aa9015d6` |
 | 3. Keys-aware guard redesign + extended `S5LoopInv` | COMPLETED (prior dispatch) | commit `4f41f3a4`; extended to 12 fields cycle 4 (`caaea293`) |
 | 4. Generic-field preservation lemmas | **COMPLETED** | `eNodup` (cycle 2, `12f32499`); `accFresh`/`accKnown`/`outDegEq` (cycle 2, `db5b837a`); `bClosure`/`eClosure`/`worldsContiguous` (cycle 4, `caaea293`) -- all six generic fields plus the new 12th field now land sorry-free |
-| 5. Birth-key preservation lemmas | **IN PROGRESS (2/4)** | `keysDistinct` (cycle 4, `fa816254`); `keysInUniverse` (cycle 4, `f04817cf`); `keyLowerBd`/`keysTotal` `[NOT STARTED]` -- see handoff 03 |
+| 5. Birth-key preservation lemmas | **COMPLETED** (cycles 5-6) | `keysDistinct`/`keysInUniverse` (cycle 4); `keysTotal` (cycle 5, `d4e7ed73`); `keyLowerBd` (cycle 6, `49ed521b`) -- all four birth-key fields land sorry-free |
 | 6. Pigeonhole world bound | **COMPLETED** | `modalKnownWorlds_length_le_worldBoundS5`, cycle 2, commit `8e4a17ba` |
-| 7. Soundness bridge `modalTableauS5_sound` | NOT STARTED | independent of termination chain; not attempted (budget spent on Phases 4-5) |
-| 8. Spec-free Hintikka lift + fuel + completeness + decidability | NOT STARTED | highest-risk frontier per plan |
+| 7. Soundness bridge `modalTableauS5_sound` | **PARTIAL** (cycle 7, this dispatch) | `modalApplyOneS5_fresh_local`, `accReachableInv` (+base case, single-step preservation), `reachable_imp_related_s5`, `accReachableInv_related_s5`, `modalS5BoxAll_soundIn`, `modalS5DiaNegAll_soundIn` all landed sorry-free; final fuel-induction assembly (`modalTableauS5_sound`) not attempted -- see handoff 06 for the precise structural gap and two viable completion strategies |
+| 8. Spec-free Hintikka lift + fuel + completeness + decidability | NOT STARTED | highest-risk frontier per plan; does NOT depend on Phase 7 (depends on 6 and 3, both landed) -- available for parallel/independent attempt |
 | 9. 5/KB5 validity + completeness | NOT STARTED | gated on Phase 8 |
 
 ## What Was Delivered This Dispatch (Cycle 2)

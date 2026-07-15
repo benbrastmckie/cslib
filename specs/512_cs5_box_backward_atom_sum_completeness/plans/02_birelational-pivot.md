@@ -1,7 +1,7 @@
 # Implementation Plan: Task #512 — CS5 Completeness via Birelational Canonical Model (Pivot)
 
 - **Task**: 512 - cs5_box_backward_atom_sum_completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IN PROGRESS] (Phase 1 gate COMPLETE/PASS; Phases 2–7 authorized)
 - **Effort**: 19 hours
 - **Dependencies**: 509 (soundness + mechanized obstruction, both branches landed; Phase 4 REWORKS its `cs5FC''` soundness)
 - **Research Inputs**:

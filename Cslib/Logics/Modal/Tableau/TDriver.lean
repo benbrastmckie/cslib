@@ -172,8 +172,11 @@ private lemma modalTDiaNegSelf_not_mem
 
 omit [Hashable Atom] in
 /-- Direct unfolding of `modalApplyOneT`'s `.fst` component at a box-positive shaped signed
-formula, in terms of the underlying `modalApplyOne` (K) result. -/
-private lemma modalApplyOneT_boxPos_fst
+formula, in terms of the underlying `modalApplyOne` (K) result.
+
+De-privatized (task 513) so `FrameCompleteness.lean`'s T soundness discharge
+(`modalApplyOneT_boxPos_soundIn`, Phase 5) can consume it directly. -/
+lemma modalApplyOneT_boxPos_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneT (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
@@ -194,8 +197,10 @@ private lemma modalApplyOneT_boxPos_fst
 omit [Hashable Atom] in
 /-- Direct unfolding of `modalApplyOneT`'s `.snd` component at a box-positive shaped signed
 formula: exactly K's own accessibility output (`modalApplyOneT` never touches `acc` for this
-shape). -/
-private lemma modalApplyOneT_boxPos_snd
+shape).
+
+De-privatized (task 513) for the same reason as `modalApplyOneT_boxPos_fst`. -/
+lemma modalApplyOneT_boxPos_snd
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneT (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
@@ -207,8 +212,9 @@ private lemma modalApplyOneT_boxPos_snd
     first | rfl | (split_ifs <;> rfl)
 
 omit [Hashable Atom] in
-/-- Symmetric to `modalApplyOneT_boxPos_fst` for the diamond-negative shape. -/
-private lemma modalApplyOneT_diamondNeg_fst
+/-- Symmetric to `modalApplyOneT_boxPos_fst` for the diamond-negative shape. De-privatized
+(task 513) for `modalApplyOneT_diaNeg_soundIn` (Phase 5). -/
+lemma modalApplyOneT_diamondNeg_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
@@ -228,8 +234,9 @@ private lemma modalApplyOneT_diamondNeg_fst
     first | rfl | (split_ifs <;> rfl)
 
 omit [Hashable Atom] in
-/-- Symmetric to `modalApplyOneT_boxPos_snd` for the diamond-negative shape. -/
-private lemma modalApplyOneT_diamondNeg_snd
+/-- Symmetric to `modalApplyOneT_boxPos_snd` for the diamond-negative shape. De-privatized
+(task 513) for the same reason as `modalApplyOneT_diamondNeg_fst`. -/
+lemma modalApplyOneT_diamondNeg_snd
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
     (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :

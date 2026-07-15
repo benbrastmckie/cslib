@@ -215,7 +215,7 @@ each other, so they may run in parallel.
 - **Verification:**
   - `lake build` green; K public API diff is empty (byte-identical); axiom-trio only.
 
-### Phase 5: T soundness discharges + `modalTableauT_sound` [NOT STARTED]
+### Phase 5: T soundness discharges + `modalTableauT_sound` [COMPLETED]
 
 - **Goal:** Discharge the three soundness facts for T and land `modalTableauT_sound`.
 - **Tasks:**

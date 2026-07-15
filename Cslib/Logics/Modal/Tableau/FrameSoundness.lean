@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
+import Mathlib.Data.List.Forall2
 
 /-! # Frame-Relativized Modal Tableau Soundness
 
@@ -714,6 +715,186 @@ theorem modalStepBranchGen_preserves_satIn [DecidableEq Atom] [Hashable Atom]
               rw [hf'_eq]
               exact (hb sf' hmem_old).2 hsign
       | diamond φ => exact absurd (Or.inr ⟨rfl, φ, rfl⟩) hshape
+
+/-! ## Task 513 Phase 3: Generic Frame-Relativized Fuel Induction -/
+
+/-- **Task 513 (Phase 3)**: `modalExpandBranchesGen apply` closing implies every branch is
+unsatisfiable-in-`FC`. Port of `modalExpandBranches_closed_unsat` (`Soundness.lean`), swapping
+in the generic step (`modalStepBranchGen_preserves_satIn`, Phase 2), the generic freshness
+lemma (`modalStepBranch_preserves_accFreshInv_gen`, already generic from task 510), and
+`modalClosed_unsatIn` (Phase 1). Takes the same three raw soundness hypotheses as Phase 2 plus
+`hFreshLocal` (the `RuleApplicationSpec` F1 shape) for the fuel wrapper's freshness
+maintenance. -/
+theorem modalExpandBranchesGen_closed_unsatIn [DecidableEq Atom] [Hashable Atom]
+    (FC : FrameCondition) (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        (apply sf b acc).snd = acc ∨
+        (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+          (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (hAgree : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        (¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) →
+        apply sf b acc = modalApplyOne sf b acc)
+    (hBoxPos : ∀ {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+        (φ : Proposition Atom) (lbl : WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        FC m.r →
+        (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) →
+        (∀ sf ∈ b, sfSat m f sf) →
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (apply ⟨.pos, .box φ, lbl⟩ b acc).snd = acc ∧
+        RuleResultSat m f (apply ⟨.pos, .box φ, lbl⟩ b acc).fst)
+    (hDiaNeg : ∀ {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+        (φ : Proposition Atom) (lbl : WorldIndex)
+        (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+        FC m.r →
+        (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) →
+        (∀ sf ∈ b, sfSat m f sf) →
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (apply ⟨.neg, .diamond φ, lbl⟩ b acc).snd = acc ∧
+        RuleResultSat m f (apply ⟨.neg, .diamond φ, lbl⟩ b acc).fst)
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      List.Forall₂ (fun b acc => accFreshInv b acc) branches accs →
+      modalExpandBranchesGen apply branches expandedSets accs fuel = .closed →
+      List.Forall₂ (fun b acc => ¬branchSatisfiableIn FC b acc) branches accs := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs hlength hlength_accs hFresh h
+    simp only [modalExpandBranchesGen] at h
+    split at h
+    · simp at h
+    · rename_i hfind
+      refine List.forall₂_iff_zip.mpr ⟨hlength_accs.symm, ?_⟩
+      intro b a hmem
+      have hfn := (List.findSome?_eq_none_iff.mp hfind) _ hmem
+      have hcl : isModalClosed b = true := by
+        cases h : isModalClosed b with
+        | true => rfl
+        | false => simp [h] at hfn
+      exact modalClosed_unsatIn FC b hcl a
+  | succ fuel' ih =>
+    intro branches expandedSets accs hlength hlength_accs hFresh h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        List.Forall₂ (fun b a => accFreshInv b a) pending pendingAccs →
+        List.Forall₂ (fun b a => accFreshInv b a) done doneAccs →
+        modalExpandBranchesGen.processNext apply
+          fuel' pending pendingExp pendingAccs done doneExp doneAccs = .closed →
+        List.Forall₂ (fun b a => ¬branchSatisfiableIn FC b a) pending pendingAccs from
+      key branches expandedSets accs [] [] []
+        hlength hlength_accs rfl rfl hFresh List.Forall₂.nil
+        (by simpa [modalExpandBranchesGen] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro _ _ _ _ _ _ _ _ _ hFresh_pending _ _
+      cases hFresh_pending
+      exact List.Forall₂.nil
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hpendingExpLen hpendingAccsLen hdoneExpLen hdoneAccsLen
+        hFresh_pending hFresh_done hinner
+      cases pendingAccs with
+      | nil => simp at hpendingAccsLen
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hpendingExpLen
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hpendingExpLen hpendingAccsLen
+          cases hFresh_pending with
+          | cons hInv_bh hFresh_rest =>
+            simp only [modalExpandBranchesGen.processNext] at hinner
+            by_cases hcl : isModalClosed bh = true
+            · rw [if_pos hcl] at hinner
+              apply List.Forall₂.cons
+              · exact modalClosed_unsatIn FC bh hcl a
+              · exact ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+                    (by simp [hpendingExpLen])
+                    (by simp [hpendingAccsLen])
+                    (by simp [hdoneExpLen])
+                    (by simp [hdoneAccsLen])
+                    hFresh_rest
+                    (List.rel_append hFresh_done
+                      (List.Forall₂.cons hInv_bh List.Forall₂.nil))
+                    hinner
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [hcl])] at hinner
+              cases hstep_eq : modalStepBranchGen apply bh e a with
+              | none => rw [hstep_eq] at hinner; simp at hinner
+              | some step =>
+                obtain ⟨newBs, newExps, newAcc⟩ := step
+                rw [hstep_eq] at hinner
+                have hnewExpLen : newExps.length = newBs.length := by
+                  unfold modalStepBranchGen at hstep_eq
+                  obtain ⟨sf, -, hf⟩ := List.exists_of_findSome?_eq_some hstep_eq
+                  rcases h_apply : (apply sf bh a) with ⟨result, _⟩
+                  simp only [h_apply] at hf
+                  cases result with
+                  | notApplicable => simp at hf
+                  | _ =>
+                    split_ifs at hf
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                    obtain ⟨rfl, rfl, -⟩ := hf; simp [List.length_map]
+                have hFreshNew : List.Forall₂ (fun b a => accFreshInv b a)
+                    newBs (List.replicate newBs.length newAcc) :=
+                  forall₂_replicate_right.mpr
+                    (modalStepBranch_preserves_accFreshInv_gen apply hFreshLocal
+                      bh e a newBs newExps newAcc hstep_eq hInv_bh)
+                have hFreshAll : List.Forall₂ (fun b a => accFreshInv b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  List.rel_append (List.rel_append hFresh_done hFreshNew) hFresh_rest
+                have hunsat_all :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn FC b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                    (by simp only [List.length_append]; omega)
+                    (by simp only [List.length_append, List.length_replicate]; omega)
+                    hFreshAll hinner
+                have hunsat_newBs_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn FC b a)
+                    (newBs ++ bt) (List.replicate newBs.length newAcc ++ restAs) := by
+                  have h := List.forall₂_drop done.length hunsat_all
+                  rw [List.append_assoc done newBs bt, List.drop_left,
+                      List.append_assoc doneAccs (List.replicate newBs.length newAcc) restAs,
+                      List.drop_left' hdoneAccsLen] at h
+                  exact h
+                have hunsat_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn FC b a)
+                    bt restAs := by
+                  have h := List.forall₂_drop newBs.length hunsat_newBs_bt
+                  rw [List.drop_left,
+                      List.drop_left' List.length_replicate] at h
+                  exact h
+                have hunsat_newBs :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn FC b a)
+                    newBs (List.replicate newBs.length newAcc) := by
+                  have h := List.forall₂_take newBs.length hunsat_newBs_bt
+                  rw [List.take_left,
+                      List.take_left' List.length_replicate] at h
+                  exact h
+                have hbh_unsat : ¬branchSatisfiableIn FC bh a := by
+                  intro hbh_sat
+                  obtain ⟨b', hb'_mem, hb'_sat⟩ :=
+                    modalStepBranchGen_preserves_satIn FC apply hAgree hBoxPos hDiaNeg
+                      bh e a newBs newExps newAcc hstep_eq hbh_sat hInv_bh
+                  exact (forall₂_replicate_right.mp hunsat_newBs b' hb'_mem) hb'_sat
+                exact List.Forall₂.cons hbh_unsat hunsat_bt
 
 /-! ## K Soundness Re-Derived Through `frameValid` -/
 

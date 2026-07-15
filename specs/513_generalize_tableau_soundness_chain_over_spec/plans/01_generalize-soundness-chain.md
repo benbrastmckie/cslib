@@ -176,7 +176,7 @@ each other, so they may run in parallel.
   specific arm and, if useful, land the clean split P2a (propositional + atom/bot arms) as a partial
   green milestone before recording the block on P2b. **Never a `sorry`, never a vacuous placeholder.**
 
-### Phase 3: Generic frame-relativized fuel induction [NOT STARTED]
+### Phase 3: Generic frame-relativized fuel induction [COMPLETED]
 
 - **Goal:** Land `modalExpandBranchesGen_closed_unsatIn (FC) (apply)` — the ~160-line port of
   `modalExpandBranches_closed_unsat`, swapping in the generic step (P2), the generic freshness lemma

@@ -1,0 +1,45 @@
+{
+  "status": "partial",
+  "summary": "Phase 3 (keys-aware guard redesign + extended 11-field S5LoopInv) landed sorry-free and CI-green, resolving the crux guard-vs-live-set obstruction shared with task 511's S4 development. Phase 4 (generic-field preservation) is in progress: 1 of 6 fields (eNodup) landed sorry-free; the remaining five require substantial direct case-analysis proof work (no template exists in the codebase for this rule shape, since the existing generic _gen preservation wrappers all presuppose a freshLocal dichotomy the keyed guard's blocked/loop-back case violates). bClosure/eClosure are further entangled with the Phase 6 pigeonhole cardinality argument. Phases 5-9 not started.",
+  "phases_completed": 3,
+  "phases_total": 9,
+  "blockers": [
+    {
+      "phase": 4,
+      "description": "accFresh/accKnown/outDegEq assessed tractable but not yet proven (time-boxed out this dispatch). bClosure/eClosure require the Phase 6 pigeonhole cardinality bound (modalNextWorld b <= modalWorldBoundS5 phi0 at mint time) to be established as a static helper BEFORE their step-preservation proofs can close -- this is a genuine logical entanglement between Phase 4 and Phase 6, not an error, but means Phase 6's core cardinality argument should be attempted early in the next dispatch.",
+      "exact_goal_state": "See handoffs/01_phase4-generic-field-preservation.md, section 'Remaining Phase 4 fields', for the precise per-field obligations and reasoning sketch. No sorry was introduced; these fields are simply NOT YET ATTEMPTED (not blocked-with-open-goal in the strict sense), except bClosure/eClosure whose entanglement is documented as the specific technical obstruction."
+    }
+  ],
+  "continuation_context": {
+    "next_phase": 4,
+    "next_fields": ["accFresh", "accKnown", "outDegEq", "bClosure", "eClosure"],
+    "proof_template_location": "Cslib/Logics/Modal/Tableau/S5Simplification.lean, modalStepBranchS5gKeyed_expanded_shape (private helper) and modalStepBranchS5g_preserves_eNodup, both landed sorry-free at commit 12f32499",
+    "reusable_infrastructure": ["hasEdge_addEdge_cases_S5", "modalStepBranchS5gKeyed_expanded_shape", "blockingWorldS5Keyed_eq_birthContent", "blockingWorldS5Keyed_none_fresh", "S5LoopInv.keysKnown"],
+    "recommended_order": "Prove the pigeonhole cardinality bound (modalKnownWorlds_length_le_worldBoundS5's core argument) as a static private helper FIRST (needs only keysDistinct+keysInUniverse+keysTotal on a fixed (b,keys) pair, no step-preservation reasoning), then use it to close bClosure/eClosure's mint-case obligations, then Phase 6's public lemma is a direct corollary.",
+    "independent_track": "Phase 7 (soundness bridge, FrameSoundness.lean) forks off the already-landed Phase 1 and does not depend on Phases 3-6; can be attempted in parallel by a separate dispatch."
+  },
+  "next_action_hint": "Dispatch /implement 515 to continue Phase 4 (accFresh/accKnown/outDegEq first, then the pigeonhole-entangled bClosure/eClosure), following the proof template in handoffs/01_phase4-generic-field-preservation.md. Phase 7 (soundness) may be dispatched independently/in parallel.",
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+      "type": "lean_source",
+      "summary": "Phase 3 complete (blockingWorldS5Keyed + _none_fresh, 11-field S5LoopInv, redesigned modalStepBranchS5gKeyed); Phase 4 partial (hasEdge_addEdge_cases_S5, modalStepBranchS5gKeyed_expanded_shape, modalStepBranchS5g_preserves_eNodup)"
+    },
+    {
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
+      "type": "plan",
+      "summary": "Phase 3 marked [COMPLETED] with deviation annotations; Phase 4 marked [IN PROGRESS] with per-task checkbox status"
+    },
+    {
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/01_phase4-generic-field-preservation.md",
+      "type": "handoff",
+      "summary": "Detailed technical handoff: proof template, tactic gotchas, exact remaining obligations per field, pigeonhole entanglement analysis"
+    },
+    {
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+      "type": "summary",
+      "summary": "Per-phase status ledger, deliverables, plan deviations, verification results, continuation guidance"
+    }
+  ],
+  "sorry_inventory": []
+}

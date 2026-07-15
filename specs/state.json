@@ -1730,14 +1730,14 @@
           "summary": "S5 termination implementation blueprint: path (b) bespoke loop-checking; corrects 514 report (S4 LoopChecking.lean is scaffolding-only, termination capstone unbuilt); 7-phase breakdown with lemma signatures, reuse table, and [BLOCKED]-candidate risk register (Strategy 2 semantic FMP fallback)."
         },
         {
-          "type": "summary",
-          "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/01_s5-termination-machinery-summary.md",
-          "summary": "Phases 1-2 green (s5/five/kb5 validity, world bound, guard + guarded rule); Phase 3 S5LoopInv preservation BLOCKED (keysDistinct guard vs live-set obstruction, S5 mirror of task 511 P5); P4-P7 gated; zero sorry/axiom, full CI green."
-        },
-        {
           "type": "plan",
           "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
           "summary": "v2 revised plan (9 phases) overcoming the v1 Phase-3 keysDistinct blocker: extends S5LoopInv 4->10 fields (mirrors real S4LoopInv) and replaces the live-set minting guard with a keys-aware blockingWorldS5Keyed comparing against STORED keys. Preserves CI-green Phases 1-2 (66021669/aa9015d6); re-architects termination chain (P3 guard+invariant, P4/P5 preservation split, P6 pigeonhole), adds independent soundness bridge (P7 reachability-from-0 invariant), keeps frontier [BLOCKED] branches + Strategy 2 FMP fallback. Shared keys-aware guard couples with task 511 (S4)."
+        },
+        {
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "type": "summary",
+          "summary": "Updated per-phase status ledger (cycles 2-4), Phase 4 resolution narrative, Phase 5 progress narrative, plan deviations, verification results, continuation guidance"
         }
       ],
       "created": "2026-07-15T06:19:22Z",
@@ -1768,7 +1768,7 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
@@ -1779,10 +1779,11 @@
       ],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-15T15:31:05Z",
+      "last_updated": "2026-07-15T16:59:24Z",
       "priority": null,
       "effort": "40-70 hours",
-      "artifacts": []
+      "artifacts": [],
+      "blockers": "Phase 3 adequacy GATE FAILED (final, 2 of 2 bounded attempts). CS5 completeness via Route B NOT delivered: Phase 9 unreachable without the Hilbert<=>labelled adequacy bridge. NOT a mathematical wall (unlike the prime-theory obstruction, which is mechanized): the remaining gap is a NARROW, NAMED reconstruction -- NIKAx.diaE's z parameter is not scoped relative to x by the bare Lean type (Simpson's Fitch-style notation enforces this implicitly; an inductive Prop does not), needing (i) an unproven well-scopedness invariant and (ii) mechanization of Simpson's Figure 6-2 dissection tree-surgery. LANDED AND REUSABLE: Lemma 6.2.2 hard direction (NIK_to_NIKAx / TClosure.hilbertTransport, axioms=[propext]); a verified LTree scaffold + corrected star/Star + combinator toolkit closing 11 of 15 NIKAx cases on paper incl. orE/efq (probes/lemma612-scaffold.lean); the labelled framework Syntax/Deduction/Context (~750 lines, sorry-free, axiom-clean, full CI green). LOAD-BEARING CORRECTION: the internalizing formula's OUTER connective is BOX, not diamond -- plan 01 and report 01 both had it backwards (box-outer makes the multi-premise combine step an ordinary K-necessitation fact; the diamond-outer reading is K-invalid). Phases 5-8 are not blocked by this and could still land a labelled canonical model (completeness of the LABELLED system, a real but different result from CS5 completeness). KNOWN DEBT if resumed: GeomWitnessClosure := True (violates the project rule banning vacuous defs) couples with Phase 1's elided k-ary witness operators and TClosure's exclusion of chi_D to make GeomAxiom.D a silent trap -- harmless for T_S5={T,Five} (both universal-Horn) but must be fixed (drop D from GeomAxiom, or require a no-existential-axioms proof) before any PR."
     },
     {
       "project_number": 518,

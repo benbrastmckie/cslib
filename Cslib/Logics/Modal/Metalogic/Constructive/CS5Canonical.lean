@@ -161,6 +161,261 @@ theorem cs5_lift_deriv_R {Γ : List (Proposition Atom)} {φ : Proposition Atom}
   let ⟨d⟩ := h
   ⟨cs5_lift_toDerivationTree_R d⟩
 
+/-! ## The Atom-Collapse Projection (Phase 3, route 2)
+
+The `τL`/`τR` morphisms *tag* a `CS5ModalAxiom`-derivation into `CS5Combined`. The **collapse**
+morphism `τ0` goes the other way: it identifies both copies of `Atom` in `Atom ⊕ Atom` via
+`Sum.elim id id`, projecting any `CS5Combined`-derivation back down to a `CS5ModalAxiom`-
+derivation. Crucially, `crossLR`/`crossRL` project onto the *same* target `CS5ModalAxiom.tBox`
+instance (`□B → B`): once the `τL`/`τR` tagging is erased, both cross axioms collapse to the
+reflexivity axiom `T`. This gives, for free, the two easiest of the four seed-exclusion
+obligations of `cs5Combined_seed_excludes` (report 02 §5's "naive collapse" finding, sharpened
+here into a landed morphism reusing the `τL`/`τR` `Deriv.map` machinery, not new
+infrastructure): `⊥` and `τL(□A)` cannot leak into the combined closure of `τL '' H`, since
+collapsing any such derivation yields `⊥ ∈ H` / `□A ∈ H` directly, contradicting `H`'s
+consistency / `h_not`. The harder obligation (`τR A` excluded, and the mixed `bigOr`
+disjunction) needs the bespoke non-homomorphic invariant report 02 §5 describes; report 02 §5
+also proves NO homomorphic atom-substitution translation (which this collapse morphism is an
+instance of) can witness that harder direction, so the collapse tool below is deliberately
+scoped to the two obligations it can honestly discharge. -/
+
+/-- Identifies both copies of `Atom` in the doubled atom space `Atom ⊕ Atom`. (Parameter-style
+signature, not `Atom ⊕ Atom → Atom`: this file lives inside `namespace Cslib.Logic.Modal`, where
+`Basic.lean`'s `scoped infix:30 " → " => Proposition.imp` notation shadows the core function
+arrow, so a bare `→` in a type ascription here would parse as `Proposition.imp`.) -/
+def cs5Collapse (x : Atom ⊕ Atom) : Atom := Sum.elim id id x
+
+@[simp] theorem cs5Collapse_inl (p : Atom) : cs5Collapse (Sum.inl p) = p := rfl
+
+@[simp] theorem cs5Collapse_inr (p : Atom) : cs5Collapse (Sum.inr p) = p := rfl
+
+/-- Collapsing a `τL`-tagged formula erases the tag. -/
+@[simp] theorem cs5Collapse_map_inl (φ : Proposition Atom) :
+    (φ.map Sum.inl).map cs5Collapse = φ := by
+  rw [Proposition.map_map]
+  exact Proposition.map_id φ
+
+/-- Collapsing a `τR`-tagged formula erases the tag. -/
+@[simp] theorem cs5Collapse_map_inr (φ : Proposition Atom) :
+    (φ.map Sum.inr).map cs5Collapse = φ := by
+  rw [Proposition.map_map]
+  exact Proposition.map_id φ
+
+/-- The atom-collapse proof-system morphism: erases the `τL`/`τR` tagging, projecting any
+`CS5Combined`-derivation to a `CS5ModalAxiom`-derivation. Both `crossLR`/`crossRL` axiom
+instances collapse onto the *same* `tBox` instance (`□B → B`). -/
+def τ0 : ProofSigHom (modalSig (@CS5Combined Atom)) (modalSig (@CS5ModalAxiom Atom)) where
+  g := Proposition.map cs5Collapse
+  g_imp := fun _ _ => rfl
+  axMap := fun φ h => ⟨by
+    -- `CS5Combined` has three constructors, so `cases h.down` cannot eliminate directly into
+    -- the `Type`-sorted `PLift` goal (large-elimination restriction); prove the `Prop`-sorted
+    -- `CS5ModalAxiom` statement first (Prop-to-Prop elimination is unrestricted), then wrap.
+    have hax : CS5ModalAxiom (Proposition.map cs5Collapse φ) := by
+      cases h.down with
+      | base h => exact cs5_axiom_relabel cs5Collapse h
+      | crossLR B =>
+          show CS5ModalAxiom
+            (((Proposition.box (B.map Sum.inl)).imp (B.map Sum.inr)).map cs5Collapse)
+          simp only [Proposition.map_imp, Proposition.map_box, cs5Collapse_map_inl,
+            cs5Collapse_map_inr]
+          exact CS5ModalAxiom.tBox B
+      | crossRL B =>
+          show CS5ModalAxiom
+            (((Proposition.box (B.map Sum.inr)).imp (B.map Sum.inl)).map cs5Collapse)
+          simp only [Proposition.map_imp, Proposition.map_box, cs5Collapse_map_inl,
+            cs5Collapse_map_inr]
+          exact CS5ModalAxiom.tBox B
+    exact hax⟩
+  clMap := fun m hm => by
+    obtain rfl := List.mem_singleton.mp hm
+    exact ⟨Proposition.box, List.mem_singleton.mpr rfl, fun _ => rfl⟩
+
+/-- `DerivationTree` transport of the collapse projection. -/
+noncomputable def cs5_lift_toDerivationTree_collapse {Γ : List (Proposition (Atom ⊕ Atom))}
+    {φ : Proposition (Atom ⊕ Atom)} (d : DerivationTree CS5Combined Γ φ) :
+    DerivationTree CS5ModalAxiom (Γ.map (Proposition.map cs5Collapse)) (φ.map cs5Collapse) :=
+  ofDeriv (Metalogic.Deriv.map τ0 (toDeriv d))
+
+/-- `Deriv`-level transport of the collapse projection. -/
+theorem cs5_lift_deriv_collapse {Γ : List (Proposition (Atom ⊕ Atom))}
+    {φ : Proposition (Atom ⊕ Atom)} (h : Deriv CS5Combined Γ φ) :
+    Deriv CS5ModalAxiom (Γ.map (Proposition.map cs5Collapse)) (φ.map cs5Collapse) :=
+  let ⟨d⟩ := h
+  ⟨cs5_lift_toDerivationTree_collapse d⟩
+
+/-- Specialization of the collapse projection to a purely `τL`-tagged derivation: any
+`CS5Combined`-derivation from an `L`-tagged context concluding an `L`-tagged formula collapses
+to a `CS5ModalAxiom`-derivation of the untagged formula from the untagged context. -/
+theorem cs5_collapse_of_L_deriv {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (h : Deriv CS5Combined (Γ.map (Proposition.map Sum.inl)) (φ.map Sum.inl)) :
+    Deriv CS5ModalAxiom Γ φ := by
+  have h' := cs5_lift_deriv_collapse h
+  simp only [cs5Collapse_map_inl, List.map_map, Function.comp_def, List.map_id'] at h'
+  exact h'
+
+/-- If every element of a list `Γ` lies in the image `τL '' H`, there is a list `Γ₀ ⊆ H` with
+`Γ = Γ₀.map τL.g`. Choice-style list-unzip helper feeding `cs5_collapse_of_L_deriv` from the
+`Set`-level membership `modalDeductiveClosure` uses. -/
+theorem exists_preimage_list_of_forall_mem_image {H : Set (Proposition Atom)}
+    {Γ : List (Proposition (Atom ⊕ Atom))}
+    (hΓ : ∀ x ∈ Γ, x ∈ (Proposition.map Sum.inl) '' H) :
+    ∃ Γ₀ : List (Proposition Atom), (∀ y ∈ Γ₀, y ∈ H) ∧ Γ = Γ₀.map (Proposition.map Sum.inl) := by
+  induction Γ with
+  | nil =>
+      refine ⟨[], ?_, rfl⟩
+      exact fun _ h => nomatch h
+  | cons x xs ih =>
+      obtain ⟨y, hyH, hyx⟩ := hΓ x (List.mem_cons.mpr (Or.inl rfl))
+      obtain ⟨Γ₀, hΓ₀H, hΓ₀eq⟩ := ih (fun z hz => hΓ z (List.mem_cons.mpr (Or.inr hz)))
+      refine ⟨y :: Γ₀, fun z hz => ?_, ?_⟩
+      · rcases List.mem_cons.mp hz with rfl | hz'
+        · exact hyH
+        · exact hΓ₀H z hz'
+      · rw [List.map_cons, ← hΓ₀eq, hyx]
+
+/-- **Collapse-projection at the `Set`/`modalDeductiveClosure` level.** If a `τL`-tagged
+formula lies in the `CS5Combined`-deductive closure of `τL '' H`, the untagged formula lies in
+the `CS5ModalAxiom`-deductive closure of `H`. -/
+theorem cs5Combined_collapse_mem_L {H : Set (Proposition Atom)} {ψ : Proposition Atom}
+    (h : (ψ.map Sum.inl) ∈ modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H)) :
+    ψ ∈ modalDeductiveClosure CS5ModalAxiom H := by
+  obtain ⟨Γ, hΓ, hd⟩ := h
+  obtain ⟨Γ₀, hΓ₀H, rfl⟩ := exists_preimage_list_of_forall_mem_image hΓ
+  exact ⟨Γ₀, hΓ₀H, cs5_collapse_of_L_deriv hd⟩
+
+/-- **`⊥` cannot leak into the combined seed closure.** If `H` is quasi-prime with `□A ∉ H`
+(so `H` is consistent -- `mem_of_bot_mem` would otherwise force `□A ∈ H` via `efq`), then `⊥` is
+not `CS5Combined`-derivable from `τL '' H`. Via the collapse projection: `⊥ = (⊥ : Proposition
+Atom).map Sum.inl`, so a derivation of `⊥` collapses to `⊥ ∈ modalDeductiveClosure CS5ModalAxiom
+H = H`, contradicting `h_not` (`efq`) once `□A ∉ H` rules out `⊥ ∈ H`. -/
+theorem cs5Combined_bot_excluded {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) {A : Proposition Atom}
+    (h_not : Proposition.box A ∉ H) :
+    (Proposition.bot : Proposition (Atom ⊕ Atom)) ∉
+      modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H) := by
+  intro hmem
+  have hmem' : ((Proposition.bot : Proposition Atom).map Sum.inl) ∈
+      modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H) := by
+    simpa using hmem
+  obtain ⟨L, hL, hd⟩ := cs5Combined_collapse_mem_L hmem'
+  have hbotH : (Proposition.bot : Proposition Atom) ∈ H := hH.closed L _ hL hd
+  exact h_not (mem_of_bot_mem (fun φ => .efq φ) hH.closed hbotH (Proposition.box A))
+
+/-- **`τL(□A)` cannot leak into the combined seed closure.** Via the collapse projection:
+`τL(□A) = (□A).map Sum.inl`, so a derivation of `τL(□A)` from `τL '' H` collapses to `□A ∈
+modalDeductiveClosure CS5ModalAxiom H = H` (`H` closed), directly contradicting `h_not`. -/
+theorem cs5Combined_boxA_excluded {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) {A : Proposition Atom}
+    (h_not : Proposition.box A ∉ H) :
+    ((Proposition.box A).map Sum.inl : Proposition (Atom ⊕ Atom)) ∉
+      modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H) := by
+  intro hmem
+  obtain ⟨L, hL, hd⟩ := cs5Combined_collapse_mem_L hmem
+  exact h_not (hH.closed L _ hL hd)
+
+/-! ## Seed-Pair Facts for `HR` (Phase 3, Step 1 — mechanical port)
+
+Direct port of the sorry-free `cs5_pair_seed_mem` (`probes/cs5-pair-primeness.lean:98`, task 509
+Phase 8): with `HR := modalDeductiveClosure CS5ModalAxiom (boxInv H)`, the four seed-pair facts
+that the pair `(H, HR)` needs already hold. Landed here for reuse by the remainder of Phase 3's
+route-2 argument and by Phase 4's pair recovery (report 02 §5 step 1). -/
+
+/-- `boxInv H ⊆ HR` (the `crossLR` cross-condition): trivial, `HR` is the closure of `boxInv H`. -/
+theorem cs5Combined_boxInv_subset_HR {H : Set (Proposition Atom)} :
+    boxInv H ⊆ modalDeductiveClosure CS5ModalAxiom (boxInv H) :=
+  modal_subset_deductive_closure _ _
+
+/-- `HR ⊆ H`: since `boxInv H ⊆ H` (axiom `T`, `cs5_boxInv_subset`) and `H` is deductively
+closed, the closure of `boxInv H` stays inside `H`. Port of `cs5_pair_seed_mem`'s `h_cl_sub_H`. -/
+theorem cs5Combined_HR_subset_H {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    modalDeductiveClosure CS5ModalAxiom (boxInv H) ⊆ H := by
+  rintro φ ⟨L, hL, ⟨d⟩⟩
+  exact hH.closed L φ (fun x hx => cs5_boxInv_subset hH (hL x hx)) ⟨d⟩
+
+/-- `boxInv HR ⊆ H` (the `crossRL` cross-condition): since `HR ⊆ H`, `boxInv HR ⊆ boxInv H ⊆ H`.
+Port of `cs5_pair_seed_mem`'s second cross-condition clause. -/
+theorem cs5Combined_boxInv_HR_subset_H {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    boxInv (modalDeductiveClosure CS5ModalAxiom (boxInv H)) ⊆ H :=
+  fun _B hB => cs5_boxInv_subset hH (cs5Combined_HR_subset_H hH hB)
+
+/-- `A ∉ HR` whenever `□A ∉ H`: a derivation of `A` from `boxInv H` would place `□A ∈ H` via
+`box_mem_of_boxed_context`. Port of `cs5_pair_seed_mem`'s final clause. -/
+theorem cs5Combined_A_notMem_HR {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) {A : Proposition Atom}
+    (h_not : Proposition.box A ∉ H) :
+    A ∉ modalDeductiveClosure CS5ModalAxiom (boxInv H) := by
+  rintro ⟨L, hL, ⟨d⟩⟩
+  exact h_not (box_mem_of_boxed_context (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .k φ ψ) hH.closed L d hL)
+
+/-! ## Box-Equivalence Across the Cross Axioms
+
+`□(τL B) ↔ □(τR B)` is `CS5Combined`-derivable for every `B` (empty context). Necessitating
+`crossLR`/`crossRL` and combining with `K` (`.k`) and axiom `4` (`.fourBox`) transfers the box
+past the cross axiom: this is the syntactic form of report 02's "crossRL-conservativity" lever
+(the two sorts agree on all *boxed* content, though not necessarily on bare content) -- a
+standalone, verified fact left here for the continuation of Phase 3's still-open `τR A`
+obligation (see the plan/handoff for the remaining gap). -/
+
+/-- Empty-context implication transitivity for `CS5Combined`, via the deduction theorem (the
+`CS5Combined` analogue of `CS5.lean`'s private `cs5_impTrans`). -/
+noncomputable def cs5Combined_impTrans {a b c : Proposition (Atom ⊕ Atom)}
+    (h1 : DerivationTree (@CS5Combined Atom) [] (a.imp b))
+    (h2 : DerivationTree (@CS5Combined Atom) [] (b.imp c)) :
+    DerivationTree (@CS5Combined Atom) [] (a.imp c) :=
+  deductionTheorem (fun φ ψ => .base (.implyK φ ψ)) (fun φ ψ χ => .base (.implyS φ ψ χ)) [] a c
+    (.modus_ponens _ _ _ (.weakening [] [a] _ h2 (fun _ h => nomatch h))
+      (.modus_ponens _ _ _ (.weakening [] [a] _ h1 (fun _ h => nomatch h))
+        (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))))
+
+/-- `⊢ □(τL B) → □(τR B)`: necessitate `crossLR B`, `K`-distribute, and compose with axiom `4`
+on `τL B`. -/
+noncomputable def cs5Combined_boxL_imp_boxR (B : Proposition Atom) :
+    DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (B.map Sum.inl)).imp (Proposition.box (B.map Sum.inr))) := by
+  have hnec : DerivationTree (@CS5Combined Atom) []
+      (Proposition.box ((Proposition.box (B.map Sum.inl)).imp (B.map Sum.inr))) :=
+    .necessitation _ (.ax [] _ (.crossLR B))
+  have hk : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box ((Proposition.box (B.map Sum.inl)).imp (B.map Sum.inr))).imp
+        ((Proposition.box (Proposition.box (B.map Sum.inl))).imp
+          (Proposition.box (B.map Sum.inr)))) :=
+    .ax [] _ (.base (.k (Proposition.box (B.map Sum.inl)) (B.map Sum.inr)))
+  have hstep : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (Proposition.box (B.map Sum.inl))).imp
+        (Proposition.box (B.map Sum.inr))) :=
+    .modus_ponens _ _ _ hk hnec
+  have hfour : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (B.map Sum.inl)).imp
+        (Proposition.box (Proposition.box (B.map Sum.inl)))) :=
+    .ax [] _ (.base (.fourBox (B.map Sum.inl)))
+  exact cs5Combined_impTrans hfour hstep
+
+/-- `⊢ □(τR B) → □(τL B)`: symmetric to `cs5Combined_boxL_imp_boxR`, via `crossRL`. -/
+noncomputable def cs5Combined_boxR_imp_boxL (B : Proposition Atom) :
+    DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (B.map Sum.inr)).imp (Proposition.box (B.map Sum.inl))) := by
+  have hnec : DerivationTree (@CS5Combined Atom) []
+      (Proposition.box ((Proposition.box (B.map Sum.inr)).imp (B.map Sum.inl))) :=
+    .necessitation _ (.ax [] _ (.crossRL B))
+  have hk : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box ((Proposition.box (B.map Sum.inr)).imp (B.map Sum.inl))).imp
+        ((Proposition.box (Proposition.box (B.map Sum.inr))).imp
+          (Proposition.box (B.map Sum.inl)))) :=
+    .ax [] _ (.base (.k (Proposition.box (B.map Sum.inr)) (B.map Sum.inl)))
+  have hstep : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (Proposition.box (B.map Sum.inr))).imp
+        (Proposition.box (B.map Sum.inl))) :=
+    .modus_ponens _ _ _ hk hnec
+  have hfour : DerivationTree (@CS5Combined Atom) []
+      ((Proposition.box (B.map Sum.inr)).imp
+        (Proposition.box (Proposition.box (B.map Sum.inr)))) :=
+    .ax [] _ (.base (.fourBox (B.map Sum.inr)))
+  exact cs5Combined_impTrans hfour hstep
+
 end Cslib.Logic.Modal
 
 end

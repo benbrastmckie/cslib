@@ -177,7 +177,11 @@ selects the content of Phases 4-5. No two phases can execute in parallel.
 
 ---
 
-### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [BLOCKED]
+### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [IN PROGRESS]
+
+**Resumed** (2026-07-15, route-2 dispatch per report 02): pursuing the proof-theoretic
+derivation-induction route recommended by `reports/02_phase3-seed-consistency.md`. See the
+resumed-dispatch note below the original blocker annotation for current status.
 
 **BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14):
 

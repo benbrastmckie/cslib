@@ -200,6 +200,34 @@ theorem Proposition.map_injective {f : Atom → Atom'} (hf : Function.Injective 
     Function.Injective (Proposition.map f) :=
   fun _ _ h => Proposition.map_injective_aux hf _ _ h
 
+/-- `Proposition.map` along the identity atom relabeling is the identity. Needed by the
+`CS5Canonical` atom-collapse projection (task 512), which composes `map` along `Sum.inl`/
+`Sum.inr` with `Sum.elim id id` and simplifies the round-trip back to `id`. -/
+@[simp] theorem Proposition.map_id (φ : Proposition Atom) :
+    φ.map (id : Atom → Atom) = φ := by
+  induction φ with
+  | atom p => rfl
+  | bot => rfl
+  | imp _ _ ih₁ ih₂ => simp [Proposition.map, ih₁, ih₂]
+  | and _ _ ih₁ ih₂ => simp [Proposition.map, ih₁, ih₂]
+  | or _ _ ih₁ ih₂ => simp [Proposition.map, ih₁, ih₂]
+  | box _ ih => simp [Proposition.map, ih]
+  | diamond _ ih => simp [Proposition.map, ih]
+
+/-- `Proposition.map` is functorial: relabeling along `f` then `g` equals relabeling along the
+composite `g ∘ f`. Needed by the `CS5Canonical` atom-collapse projection (task 512) to simplify
+`(φ.map Sum.inl).map (Sum.elim id id)` down to `φ.map id = φ`. -/
+theorem Proposition.map_map (f : Atom → Atom') (g : Atom' → Atom'') (φ : Proposition Atom) :
+    (φ.map f).map g = φ.map (g ∘ f) := by
+  induction φ with
+  | atom p => rfl
+  | bot => rfl
+  | imp _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | and _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | or _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | box _ ih => simp [ih]
+  | diamond _ ih => simp [ih]
+
 @[inherit_doc] scoped prefix:40 "¬" => Proposition.neg
 @[inherit_doc] scoped infix:36 " ∧ " => Proposition.and
 @[inherit_doc] scoped infix:35 " ∨ " => Proposition.or

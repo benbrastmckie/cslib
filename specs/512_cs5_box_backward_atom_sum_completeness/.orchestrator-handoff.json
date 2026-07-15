@@ -1,0 +1,32 @@
+{
+  "status": "partial",
+  "summary": "Phases 1-2 landed sorry-free and CI-green: Proposition.map (Basic.lean) and CS5Combined + tauL/tauR transport (new CS5Canonical.lean), both verified with #print axioms clean. Phase 3 (cs5Combined_seed_excludes, the go/no-go gate) is genuinely blocked: substantial semantic and proof-theoretic analysis (documented in the plan file) showed the report's sketched routes (toy 2-point frame; naive collapse projection) are both insufficient, and the claim more likely holds true (no sort collapse) than not, so no obstruction was forced. No sorry, no new axiom, no vacuous placeholder was introduced anywhere. Phases 4-5 were not attempted since both consume Phase 3's output directly.",
+  "phases_completed": 2,
+  "phases_total": 5,
+  "artifacts": [
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md",
+      "type": "summary",
+      "summary": "Full account of Phases 1-2 (landed, sorry-free, CI-green) and Phase 3's blocker analysis (four specific findings on why the report's two sketched discharge routes are insufficient), plus next-step guidance for the continuation dispatch."
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 3,
+      "theorem": "cs5Combined_seed_excludes",
+      "what_failed": "Neither route-1 (semantic) nor route-2 (proof-theoretic projection) as sketched in the plan/report closes sorry-free within this dispatch's budget.",
+      "what_was_tried": "Confirmed H is consistent given h_not; checked and refuted a naive 'identify both copies' semantic model; checked and refuted a naive 2-point discrete-frame model; checked and refuted the literal collapse-to-single-copy proof-theoretic projection sketch. All four are documented with specific counterexample-style reasoning in the plan file's Phase 3 BLOCKER annotation.",
+      "why_stuck": "The obligation is a genuine (non-mechanical) mathematical claim requiring either canonical-model-scale semantic machinery or a bespoke derivation-induction logical-relation invariant -- both comparable in depth to CS5.lean's own ~150-line soundness apparatus, not a clone-and-adapt step.",
+      "what_is_needed": "A fresh, well-resourced attempt at either route (a) or (b) as detailed in the handoff document (specs/512_.../handoffs/01_phase3-blocker-handoff.md) and the plan file's Phase 3 section.",
+      "prohibited_workarounds_respected": true
+    }
+  ],
+  "continuation_context": {
+    "handoff_path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/01_phase3-blocker-handoff.md",
+    "next_phase": 3,
+    "next_phase_name": "SEED CONSISTENCY -- the GO/NO-GO DECISION GATE",
+    "note": "Phases 4-5 remain fully specified in the plan and unattempted; they clone quasi_prime_set_exclusion and ck_truth_lemma respectively and should be mechanical once Phase 3 lands."
+  },
+  "outcome": "in_progress",
+  "axioms_clean": true
+}

@@ -177,7 +177,68 @@ selects the content of Phases 4-5. No two phases can execute in parallel.
 
 ---
 
-### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [NOT STARTED]
+### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [BLOCKED]
+
+**BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14):
+
+- **What failed**: `cs5Combined_seed_excludes` was not closed sorry-free by either route within
+  this dispatch's budget. No `sorry`/placeholder was written to `Cslib/` for it (zero-debt
+  maintained); the obligation is simply not yet attempted in committed Lean code.
+- **What was tried (analysis only, no Lean written for this phase)**:
+  1. **Simplification confirmed**: `h_not : Proposition.box A ∉ H` implies `⊥ ∉ H` (else
+     `mem_of_bot_mem` would force `□A ∈ H` via `efq`), so `H` is a genuine *consistent* prime
+     theory for the whole of Phase 3 — the exploding-head case in `quasi_prime_set_exclusion`'s
+     style split is vacuous here and does not need separate handling.
+  2. **Naive "identify both copies" semantic model** (set `v(w)(inl p) = v(w)(inr p)` for all `w`,
+     any frame) was checked and **fails**: it forces `Satisfies M w (τL C) ↔ Satisfies M w (τR C)`
+     for every `C`, which cannot refute `τR A` whenever `A ∈ H` — a live possibility since
+     `A ∈ H ∧ □A ∉ H` is perfectly consistent for a normal modal prime theory (necessity does not
+     follow from truth). The two copies must be allowed to disagree on non-boxed content while
+     agreeing on boxed content — exactly the box-backward gap's semantic content.
+  3. **Naive 2-point discrete-frame model** (`World := Bool`, trivial preorder, total relation)
+     was checked and **fails** for a different reason: with only two *point* worlds, `Satisfies`
+     of a *compound* (boxed) `τL`-tagged formula does not track `H`-membership correctly unless
+     the companion world's valuation is *also* pinned to agree with `H` on boxed content — but
+     pinning it that tightly requires the companion world's theory to already be the desired
+     prime `T` (or something with equivalent closure properties), which is circular relative to
+     what Phase 3/4 are trying to construct. A genuine truth-lemma-grade semantic argument appears
+     to need canonical-model-scale (effectively infinite) structure, not a hand-built toy frame.
+  4. **Naive "collapse to a single copy" proof-theoretic projection** (`π := Sum.elim id id`,
+     i.e. `π ∘ τL = π ∘ τR = id`; `crossLR`/`crossRL` project to the already-present `tBox` axiom
+     `□B → B`) was checked and **fails**: it only yields `τL '' H ⊢_{Combined} τR A ⟹ H ⊢_{CS5} A`,
+     which is not a contradiction (`A ∈ H` is consistent with `h_not`). This confirms route 2 as
+     literally sketched in the report is too weak; a *sharper* proof-theoretic invariant
+     (tracking, by induction on derivation height/structure, exactly which combined-formulas are
+     derivable from the pure-`τL`-tagged seed) would be needed instead, and is comparable in
+     depth to a genuine soundness argument, not a mechanical clone.
+- **Why it's stuck**: the seed-consistency obligation is a genuine (not merely mechanical)
+  mathematical claim about a bespoke combined derivation system; both discharge routes sketched in
+  the plan need either (a) canonical-model-scale semantic machinery (not the toy 2-world frame the
+  plan sketch suggested — that sketch under-specifies how the companion world's valuation is
+  pinned down) or (b) a bespoke proof-theoretic logical-relation/invariant argument by induction
+  on `CS5Combined` derivations (not simply the collapse-projection sketch, which is provably too
+  weak, per finding 4 above). Both are substantial, genuinely novel proof developments — on the
+  order of the semantic soundness apparatus already in `CS5.lean` (`cs5_axiom_sound`/
+  `cs5_soundness`, ~150 lines) or more, not a "clone an existing template" step like Phases 2/4/5.
+- **What is needed to unblock**: either (a) a correctly-specified separating model — likely
+  reusing the *existing* CS5 canonical `CS5Segment`/`cs5Mreach` machinery for the L-side world
+  (`CS5Segment.ofHead H`) together with a *second*, honestly-built quasi-prime witness for the
+  R-side that already carries the needed cross-conditions (which risks being exactly as hard as
+  Phase 4's pair-recovery problem, i.e. potentially circular) — or (b) a derivation-height
+  induction proving the sharp invariant "every combined-formula derivable from `τL '' H` is either
+  pure-`τL`-tagged with underlying formula in `H`, pure-`τR`-tagged with underlying formula in
+  `Y := modalDeductiveClosure CS5ModalAxiom (boxInv H)`, or a positive propositional combination of
+  such formulas that is *not* provably equal to `τL(□A)`, `τR A`, or a `bigOr`-disjunction
+  containing one of them" — a genuinely new logical-relation lemma, not sketched in this plan in
+  enough detail to mechanize directly. `box_mem_of_boxed_context` (used by the sorry-free
+  `cs5_pair_seed_mem`, `probes/cs5-pair-primeness.lean:98`) is the key existing ingredient for the
+  *pure-`τL`* half of such an invariant (it is exactly how `A ∉ cl_{CS5}(boxInv H)` is established
+  at the set level) but does not by itself cover the cross-tagged/mixed-disjunction cases that
+  `CS5Combined`'s axioms (applied uniformly over the whole `Atom ⊕ Atom` language, not just
+  per-tag) make derivable.
+- **Prohibited workarounds**: no `sorry`, no `def _ := True`/vacuous placeholder was introduced for
+  this obligation — confirmed absent from `Cslib/` (see Phase 2 commit; nothing was added for
+  Phase 3 in this dispatch).
 
 - **Goal:** Prove `cs5Combined_seed_excludes` — that `CS5Combined`'s two cross axioms do NOT collapse
   the L/R sorts, i.e. neither `τR A` nor `τL(□A)` (nor any disjunction of them) is derivable from the

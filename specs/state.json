@@ -1732,22 +1732,25 @@
         {
           "type": "plan",
           "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
-          "summary": "v2 revised plan (9 phases) overcoming the v1 Phase-3 keysDistinct blocker: extends S5LoopInv 4->10 fields (mirrors real S4LoopInv) and replaces the live-set minting guard with a keys-aware blockingWorldS5Keyed comparing against STORED keys. Preserves CI-green Phases 1-2 (66021669/aa9015d6); re-architects termination chain (P3 guard+invariant, P4/P5 preservation split, P6 pigeonhole), adds independent soundness bridge (P7 reachability-from-0 invariant), keeps frontier [BLOCKED] branches + Strategy 2 FMP fallback. Shared keys-aware guard couples with task 511 (S4)."
+          "summary": "Phase 8 marked [BLOCKED] with exact open goal + two structural findings; Phase 9 marked [BLOCKED] (transitive)."
         },
         {
           "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
           "type": "summary",
-          "summary": "Updated in place: Phase 7 (S5 soundness bridge) is now fully COMPLETED. modalTableauS5_sound landed sorry-free via a bespoke fuel induction. Phases 1-7 of 9 complete; Phases 8-9 remain NOT STARTED, deferred to a fresh dispatch."
+          "summary": "Cycle 9 appended: Phase 8 partial -- S5 truth lemma over the universal relation + world-bound capstone landed sorry-free; lift [BLOCKED] with exact open goal; Phase 9 transitively [BLOCKED]."
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-15T09:00:00Z",
-      "session_id": "sess_1784103256_616c12",
-      "next_artifact_number": 2,
+      "last_updated": "2026-07-15T22:16:00Z",
+      "session_id": "sess_1784152189_12f1bc",
+      "next_artifact_number": 3,
       "memory_candidates": [
         {
           "content": "When a generic frame-relativized soundness crux (e.g. modalStepBranchGen_preserves_satIn) takes hBoxPos/hDiaNeg hypotheses universally quantified over ALL (b, acc) pairs, it cannot be instantiated for a frame system whose rule-level soundness genuinely depends on an extra invariant specific to that (b, acc)'s computational history (e.g. S5's accReachableInv). The generic theorem's type has no parameter slot to receive such a per-instance witness. In this situation, a bespoke copy of the generic theorem (specialized to the fixed apply/FC, with the extra invariant added as a parameter) is safer than extracting the shared 'other shapes' branch into a new generic lemma, when the priority is zero regression risk to already-frozen, CI-green declarations that consume the original generic theorem.",
-          "tags": [
+          "category": "INSIGHT",
+          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "confidence": 0.85,
+          "suggested_keywords": [
             "cslib",
             "lean4",
             "modal-logic",
@@ -1759,12 +1762,54 @@
         },
         {
           "content": "lake shake's before/after A/B comparison via `git stash` is unreliable: shake reads existing .olean build caches rather than rebuilding, so stashing a file mid-session produces a spurious 'target is out-of-date and needs to be rebuilt' error for that file instead of an accurate pre-change baseline. To verify whether a shake import-removal suggestion predates a change, inspect the import graph manually (check whether the flagged import is already re-imported, even non-publicly, by one of the file's own public-imported dependencies) rather than relying on a stash-based diff.",
-          "tags": [
+          "category": "INSIGHT",
+          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "confidence": 0.85,
+          "suggested_keywords": [
             "cslib",
             "lean4",
             "lake-shake",
             "ci-verification",
             "tooling-gotcha"
+          ]
+        },
+        {
+          "content": "Generic CSLib lemmas may over-require RuleApplicationSpec when only freshLocal is used -- modalStepBranchGen_preserves_accSourcesKnown and modalExpandBranchesGen_openBranch_accSourcesKnown (BDriver.lean) each took a bundled spec : RuleApplicationSpec apply but used it ONLY via a single `rcases spec.freshLocal`. Since RuleApplicationSpec modalApplyOneS5 is mathematically false at rankStep, the bundled form permanently locked S5 out of facts it could actually have. Before concluding a generic lemma is unusable for a spec-less rule, grep its body for `spec.` -- the true dependency is often far weaker than the signature claims. FmpMeasure.lean already takes hFreshLocal raw for exactly this reason.",
+          "category": "TECHNIQUE",
+          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "cslib",
+            "lean4",
+            "modal-logic",
+            "tableau",
+            "S5"
+          ]
+        },
+        {
+          "content": "S5's universal rule trivialises the truth lemma but not termination -- extractModelS5's relation is Relation.EqvGen acc.hasEdge (arbitrary alternating chains), which looks harder than K's single raw edge or B's SymmGen. But modalApplyOneS5's T(box phi)@w arm emits T(phi)@w' at EVERY known world, so a saturated branch already carries the payload everywhere and the S5 Hintikka bridges take a bare `w' in modalKnownWorlds b` where T's/B's take a path. The only residual obligation is that EqvGen cannot escape the known-world set -- which needs accSourcesKnown AND accTargetsKnown (one per raw-edge endpoint) and must be stated as an Iff, since EqvGen's symm constructor is not dischargeable by induction from a one-directional IH.",
+          "category": "TECHNIQUE",
+          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "cslib",
+            "lean4",
+            "modal-logic",
+            "tableau",
+            "S5"
+          ]
+        },
+        {
+          "content": "lean_verify can report spurious sorryAx on freshly-edited declarations -- An lean_verify call on a just-added declaration returned sorryAx while every dependency verified clean. It was a stale-LSP artifact (queried mid-elaboration). Confirm with `#print axioms` run through `lake env lean` on a scratch file, and cross-check that `lake build` emits no `declaration uses sorry` warning for the file -- the build warning is authoritative and LSP-independent.",
+          "category": "TECHNIQUE",
+          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
+          "confidence": 0.9,
+          "suggested_keywords": [
+            "cslib",
+            "lean4",
+            "modal-logic",
+            "tableau",
+            "S5"
           ]
         }
       ]
@@ -1792,7 +1837,7 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "implementing",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
@@ -1803,7 +1848,7 @@
       ],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-15T21:48:29Z",
+      "last_updated": "2026-07-15T21:58:43Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1814,7 +1859,7 @@
         }
       ],
       "blockers": "TRACK B CLOSED (A3 verdict, this session): Pacheco's canonical CKB-relation, once extended with axiom T to reach CS5, automatically satisfies the hypotheses of the axiom-free cs5Incest_forces_symm (CS5Canonical.lean:643) -- forcing cs5Tail shape and hitting cs5_symmetric_tail_box_gap (CS5.lean:712, task 509). Same wall task 512's phase-7 gate already proved dead. A2's syntactic gap was orthogonal (Pacheco Thm 13 is proved semantically, never transports CS5|-FS). ROUTE = TRACK C (Simpson tree surgery, C1-C8). LANDED sorry-free + axiom-clean this session, all in probes/ (zero Cslib/ files touched): A1 (IKAx repaired with Simpson base-IK axioms 3/4/5), A2 (fs_context_relative_half mechanizes the syntactic obstruction; fs_sound'' proves semantic FS-validity over cs5FC'', axiom-free), C1 (Conj/Tele over List + Tele_imp1/Tele_imp2, generic over Axioms), C2 (Simpson formula 6.7 -- NOTE: the literal formula is FALSE for V=[], refuted by a 3-world countermodel; restated for nonempty V, matching Simpson's actual usage), C3 (formula 6.8, valid for ALL W -- base case checked and genuinely holds), C4 (LTree/star/fullSubtree/prune + the unfolding identity as a two-way IK-derivable implication, NOT raw Eq; fixed a defective double-bigAnd star; deleted pathTo/pathToList/Star_append). NEXT = C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma -- THE TRUE CRUX, HIGH risk, must be its own dedicated dispatch. Then C6 (LTree.toGraph + tau-parameterized generalized induction), C7 (diaE case), C8 (botE/orE). Gap still flagged: FischerServi1984 NOT in literature corpus (was only needed for Track B step B3; now moot). Resume: handoffs/00_RESUME-HERE.md.",
-      "session_id": "sess_1784145761_061228",
+      "session_id": "sess_1784152666_97c7df",
       "plan_metadata": {
         "phases": 15,
         "complexity": "complex",

@@ -259,7 +259,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 7: B rule-level soundness (FrameSoundness.lean) [NOT STARTED]
+### Phase 7: B rule-level soundness (FrameSoundness.lean) [COMPLETED]
 
 - **Goal:** Land the B soundness arm at the rule level via `Satisfies.b`, independent of the
   task-513 driver-level soundness chain.

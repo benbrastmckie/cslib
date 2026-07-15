@@ -1159,6 +1159,99 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
 
+/-! ## B (Symmetric Frame, task 505 Phase 7) -/
+
+/-- The symmetric frame condition: `Std.Symm m.r`. Instantiates `frameValid`/
+`branchSatisfiableIn` for the modal logic B (`Cube.B`, `{m | Std.Symm m.r}`). -/
+def symmFC : FrameCondition := fun {_} r => Std.Symm r
+
+/-- B-validity: `φ` is satisfied in every Kripke model whose relation is symmetric, at every
+world. Matches `Cube.B`. -/
+def bValid (φ : Proposition Atom) : Prop := frameValid symmFC φ
+
+/-! ### B-Rule Semantic Soundness
+
+The two B-specific tableau arms (`modalBBoxBack`, `modalBDiaNegBack` in `FrameRules.lean`)
+propagate `T(□φ)@w` (with a recorded edge `v → w`) `⊢ T(φ)@v`, and dually `F(◇φ)@w ⊢ F(φ)@v`,
+backward along the *predecessor* `v`. Their soundness reduces directly to symmetry: given
+`m.r (f v) (f w)` (from the recorded edge, via `hedges`), symmetry gives `m.r (f w) (f v)`, and
+`Satisfies m (f w) (□φ)` then gives `Satisfies m (f v) φ` (dually for `◇`) -- no fuel-induction
+argument is needed at the rule level, matching T's `reflFC` precedent (`Std.Refl`'s `.refl`
+lever replaced by `Std.Symm`'s `.symm` lever). -/
+
+/-- Adding `T(φ)@v` to a branch witnessing `branchSatisfiableIn symmFC` preserves
+`branchSatisfiableIn symmFC`, given `T(□φ)@w` is already on the branch and `v → w` is a
+recorded edge (`acc.hasEdge v w`): the semantic core of the B box-positive backward
+propagation arm (`modalBBoxBack`). -/
+lemma branchSatisfiableIn_symmFC_boxPos_pred_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn symmFC b acc)
+    {φ : Proposition Atom} {v w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge v w = true) :
+    branchSatisfiableIn symmFC (⟨.pos, φ, v⟩ :: b) acc := by
+  obtain ⟨W, m, f, hsymm, hedges, hb⟩ := h
+  refine ⟨W, m, f, hsymm, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun _ => ?_, fun hcontra => by simp at hcontra⟩
+    have hbox : Satisfies m (f w) (.box φ) := (hb _ hmem).1 rfl
+    have hmvw : m.r (f v) (f w) := hedges v w hedge
+    have hmwv : m.r (f w) (f v) := hsymm.symm (f v) (f w) hmvw
+    exact hbox (f v) hmwv
+  · exact hb sf hold
+
+/-- Adding `F(φ)@v` to a branch witnessing `branchSatisfiableIn symmFC` preserves
+`branchSatisfiableIn symmFC`, given `F(◇φ)@w` is already on the branch and `v → w` is a
+recorded edge: the semantic core of the B diamond-negative backward propagation arm
+(`modalBDiaNegBack`). Dual of `branchSatisfiableIn_symmFC_boxPos_pred_mem`. -/
+lemma branchSatisfiableIn_symmFC_diaNeg_pred_mem
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn symmFC b acc)
+    {φ : Proposition Atom} {v w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hedge : acc.hasEdge v w = true) :
+    branchSatisfiableIn symmFC (⟨.neg, φ, v⟩ :: b) acc := by
+  obtain ⟨W, m, f, hsymm, hedges, hb⟩ := h
+  refine ⟨W, m, f, hsymm, hedges, ?_⟩
+  intro sf hmem'
+  rcases List.mem_cons.mp hmem' with rfl | hold
+  · refine ⟨fun hcontra => by simp at hcontra, fun _ hφ => ?_⟩
+    have hdianeg : ¬ Satisfies m (f w) (.diamond φ) := (hb _ hmem).2 rfl
+    have hmvw : m.r (f v) (f w) := hedges v w hedge
+    have hmwv : m.r (f w) (f v) := hsymm.symm (f v) (f w) hmvw
+    exact hdianeg (Satisfies.diamond_iff.mpr ⟨f v, hmwv, hφ⟩)
+  · exact hb sf hold
+
+/-- Rule-level B soundness for the box-positive backward arm: every formula produced by
+`modalBBoxBack` (given `T(□φ)@w` already on the branch) preserves `branchSatisfiableIn symmFC`
+when added to the branch. Connects `FrameRules.lean`'s concrete rule output to the semantic
+soundness lemma `branchSatisfiableIn_symmFC_boxPos_pred_mem`. -/
+lemma modalBBoxBack_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn symmFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalBBoxBack b acc φ w, branchSatisfiableIn symmFC (sf :: b) acc := by
+  intro sf hsf
+  obtain ⟨hxeq, hpred, -, -⟩ := modalBBoxBack_mem hsf
+  have hedge : acc.hasEdge sf.label w = true := modalBPredecessorsOf_hasEdge hpred
+  rw [hxeq]
+  exact branchSatisfiableIn_symmFC_boxPos_pred_mem h hmem hedge
+
+/-- Rule-level B soundness for the diamond-negative backward arm: every formula produced by
+`modalBDiaNegBack` (given `F(◇φ)@w` already on the branch) preserves `branchSatisfiableIn
+symmFC` when added to the branch. Dual of `modalBBoxBack_sound`. -/
+lemma modalBDiaNegBack_sound [DecidableEq Atom] [Hashable Atom]
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn symmFC b acc) {φ : Proposition Atom} {w : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ∀ sf ∈ modalBDiaNegBack b acc φ w, branchSatisfiableIn symmFC (sf :: b) acc := by
+  intro sf hsf
+  obtain ⟨hxeq, hpred, -, -⟩ := modalBDiaNegBack_mem hsf
+  have hedge : acc.hasEdge sf.label w = true := modalBPredecessorsOf_hasEdge hpred
+  rw [hxeq]
+  exact branchSatisfiableIn_symmFC_diaNeg_pred_mem h hmem hedge
+
 end Cslib.Logic.Modal.Tableau
 
 end

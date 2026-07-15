@@ -40,7 +40,7 @@ next_project_number: 516
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-512 [IMPLEMENTING] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
+512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
 515 [PLANNED] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
@@ -132,7 +132,7 @@ next_project_number: 516
 
 ### 512. Cs5 box backward atom sum completeness
 - **Effort**: 10-16 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509

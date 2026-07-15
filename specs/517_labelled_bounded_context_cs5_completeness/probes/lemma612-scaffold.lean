@@ -92,7 +92,7 @@ inductive IKAx (𝒯 : Set GeomAxiom) : Proposition Atom → Prop where
       IKAx 𝒯 ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ)))
   /-- **Task 517 A1 repair.** Simpson's Figure 3-7 base-IK axiom 3, `¬◇⊥`
   (source PDF p.56): possibility never witnesses absurdity. Unconditional (part of bare `IK`,
-  not gated by `𝒯` membership) -- unlike `dDia`/`tBox`/... below, which are the *geometric
+  not gated by `𝒯` membership) -- unlike `tBox`/`tDia`/... below, which are the *geometric
   extension* schemata. CS5's analogue is `cs5_dia_bot_imp_bot` (`CS5.lean:740`), there *derived*
   from `efq`+`bDia`, not primitive; here it is primitive since plain `IKAx` (no `B` gate) has no
   `bDia` to derive it from. -/
@@ -116,7 +116,8 @@ inductive IKAx (𝒯 : Set GeomAxiom) : Proposition Atom → Prop where
   companion) showing `FS` nonetheless holds in every `cs5FC''` *model*. -/
   | fs (φ ψ : Proposition Atom) :
       IKAx 𝒯 (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ)))
-  | dDia (h : GeomAxiom.D ∈ 𝒯) : IKAx 𝒯 (◇(Proposition.top))
+  -- `dDia` (`Ax(χ_D) = ◇⊤`) is absent: `GeomAxiom` admits only universal Horn axioms, so `χ_D`
+  -- (seriality) is not representable. See `Deduction.lean`'s `GeomAxiom` docstring.
   | tBox (h : GeomAxiom.T ∈ 𝒯) (φ : Proposition Atom) :
       IKAx 𝒯 ((Proposition.box φ).imp φ)
   | tDia (h : GeomAxiom.T ∈ 𝒯) (φ : Proposition Atom) :

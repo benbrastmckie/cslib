@@ -8,18 +8,18 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Syntax
 
-/-! # The Labelled Deduction System `N_IK(𝒯)` (Task 517 Phase 2)
+/-! # The Labelled Deduction System `N_IK(𝒯)`
 
 This module lands A. K. Simpson's labelled natural-deduction system `N_IK` [Simpson1994],
 Figure 4-1 (`:4630-4670`), extended with the geometric rules `{(R_χ) | χ ∈ 𝒯}` (`:4940`) that
 give `N_IK(𝒯)`, plus the consequence relation `Γ ⊢_G x:A` (`:5090`) and the weakening /
 graph-morphism lemmas (Prop. 4.4.1, `:5135`).
 
-**Task 517 scope note**: this file covers Phase 2 only. It is the gate's prerequisite --
-Phase 3 (`Adequacy.lean`, the adequacy bridge, dispatched separately) quantifies over the
+**Scope note**: this file lands the deduction system only. It is the adequacy gate's
+prerequisite -- `Adequacy.lean` (the adequacy bridge, developed separately) quantifies over the
 `NIK` relation defined here and needs nothing more from this file than what is landed below.
-Phases 4-9 (contexts, the Prime Lemma, the canonical model, the birelation construction, the
-frame-class match, and final assembly) are **not** attempted here.
+Contexts (`Context.lean`), the Prime Lemma, the canonical model, the birelation construction, the
+frame-class match, and final assembly are **not** attempted here.
 
 ## Design
 
@@ -30,9 +30,9 @@ The plan's contingency note suggested a locally-nameless encoding (precedent: CS
 departure is flagged here as required by the escalation protocol.** Locally-nameless indices are
 designed for binders scoped *within a single inductive term*; here, by contrast, a label is a
 *name* shared across two independently-threaded pieces of judgement state -- the formula context
-`Γ` (a `List (LabelledFormula Atom)`) and the graph `G` (a `Graph Atom`, Phase 1) -- and a fresh
-label introduced by `(□I)`/`(◇E)` must simultaneously avoid capture in *both*. There is no single
-inductive term whose binding structure de Bruijn indices could describe. Instead this module
+`Γ` (a `List (LabelledFormula Atom)`) and the graph `G` (a `Graph Atom`, `Syntax.lean`) -- and a
+fresh label introduced by `(□I)`/`(◇E)` must simultaneously avoid capture in *both*. There is no
+single inductive term whose binding structure de Bruijn indices could describe. Instead this module
 uses the **cofinite-quantification** technique that CSLib's own locally-nameless developments use
 for their `abs`-style binders (e.g. `Typing.abs` in
 `Cslib/Languages/LambdaCalculus/LocallyNameless/Stlc/Basic.lean`): the eigenvariable rules
@@ -53,35 +53,42 @@ the available source material, flagged rather than guessed silently.** This modu
 via the standard treatment of geometric theories in labelled deduction (as in labelled sequent
 calculi for modal logics, e.g. Negri's `G3`-systems): `(□E)` and `(◇I)` -- the two rules with a
 relational premise, confirmed by inspection to be the only two (see `NIK.smoke_boxE` below and
-the structural check in the Phase 2 verification criteria) -- consume not just a literal edge of
-`G.R` but any edge in the **𝒯-closure** `TClosure 𝒯 G.R` of `G.R` under the non-existential
-axioms of `𝒯` (reflexivity `χ_T`, symmetry `χ_B`, transitivity `χ_4`, Euclideanness `χ_5`).
-Seriality (`χ_D`) is *excluded* from `TClosure` because it has an existential conclusion (`∀x,
-∃y, xRy`) and so needs a fresh-witness-introducing rule structurally like `(□I)`/`(◇E)`, not a
-pure relational closure -- this is out of scope because the task's target frame theory
-`𝒯_S5 := {χ_T, χ_5}` (fixed in Phase 4) does not include `χ_D`. Extending `TClosure` with a
-seriality case later is additive and does not disturb anything here.
+the structural check accompanying it) -- consume not just a literal edge of
+`G.R` but any edge in the **𝒯-closure** `TClosure 𝒯 G.R` of `G.R` under the axioms of `𝒯`
+(reflexivity `χ_T`, symmetry `χ_B`, transitivity `χ_4`, Euclideanness `χ_5`).
 
-### Discrepancy with the orchestrator dispatch, flagged
+Seriality (`χ_D`) is **not a constructor of `GeomAxiom` at all**, rather than being a constructor
+that `TClosure` skips. It has an existential conclusion (`∀x, ∃y, xRy`) and so would need a
+fresh-witness-introducing rule structurally like `(□I)`/`(◇E)`, plus a Skolem witness operator on
+`Label`, not a pure relational closure. Representing it in the type while leaving `TClosure` and
+`Label` unable to honour it would make `Context {χ_D}` a wrong definition -- the type would
+advertise a constraint that no closure operator enforces. Excluding it from the type instead makes
+that unrepresentable *by construction*. This costs nothing here: the target frame theory `𝒯_S5`
+(fixed in `Context.lean`) does not include `χ_D`. Adding seriality later remains additive, but
+must extend `GeomAxiom`, `TClosure`, and `Label`'s witness operators together.
 
-The dispatch text asks for "the 𝒯 relational rules covering `χ_B` and `χ_5` for CS5". The
-plan and report 01 are more precise and are followed here: Simpson's own `IS5 = IKT5` fixes
-`𝒯_S5 := {χ_T, χ_5}` (`:3827`), not `{χ_B, χ_5}` -- `χ_B` (CSLib's own `CS5ModalAxiom` naming
-for its `bBox`/`bDia` symmetry axioms) and Simpson's `{χ_T, χ_5}` are Hilbert-equivalent
-presentations of the same logic (via Pacheco's `CS5 ≡ IS5`, `CS5.lean:93-99`) but are
-*structurally different* axiom/frame-condition sets, and the plan explicitly commits to
-Simpson's `{χ_T, χ_5}` presentation for the labelled construction (see the plan's Non-Goals:
-"use Simpson's geometric theory `{χ_T, χ_5}`"). To keep both presentations available downstream
-without committing early, `GeomAxiom` below includes all five of Simpson's basic geometric
-axioms (`D`, `T`, `B`, `Four`, `Five`) and `TClosure` implements the rule for each non-existential
-one (`T`, `B`, `Four`, `Five`); Phase 4 (not attempted here) is where `𝒯_S5` is actually fixed.
+### Why all four axioms are kept here, and none of them fixed
+
+Simpson presents `IS5` as `IKT5` (`:3827`), i.e. as `Ax({χ_T, χ_5})`. CSLib's `CS5ModalAxiom`
+(`CS5.lean:182`) is instead `IKTB4`, naming `bBox`/`bDia` (symmetry) and `4`. These are
+Hilbert-equivalent presentations of the same logic (via Pacheco's `CS5 ≡ IS5`,
+`CS5.lean:93-99`), but they are *structurally different* axiom/frame-condition sets, and the
+equivalence is **not** constructively available off the shelf.
+
+This module therefore fixes **nothing**: `GeomAxiom` below carries each of Simpson's universal
+Horn basic geometric axioms (`T`, `B`, `Four`, `Five`) and `TClosure` implements the rule for
+every one of them, so either presentation is expressible downstream. `Context.lean` is where the
+target theory is actually fixed, as `𝒯_S5 := {χ_T, χ_B, χ_4}` -- matching `CS5ModalAxiom`
+schema-for-schema and so avoiding an unproved constructive `IKT5 ⟺ IKTB4` bridge on the critical
+path. See that file's `TS5` docstring for the full rationale.
 
 ## Contents
 
-- `GeomAxiom`: the five basic geometric axioms `χ_D, χ_T, χ_B, χ_4, χ_5` (Simpson §3.2).
+- `GeomAxiom`: the universal Horn basic geometric axioms `χ_T, χ_B, χ_4, χ_5` (Simpson §3.2;
+  `χ_D` is excluded -- see the type's docstring).
 - `GeomAxiom.Holds` / `ClassicalModel`: the classical-model semantics of a geometric axiom /
   theory on a relation (`G ⊨_cl 𝒯`).
-- `TClosure`: the 𝒯-closure of a relation, realizing `(R_χ)` for the four non-existential axioms.
+- `TClosure`: the 𝒯-closure of a relation, realizing `(R_χ)` for every axiom of `GeomAxiom`.
 - `NIK`: the labelled natural-deduction relation `Γ ⊢_G x:A`, i.e. `N_IK(𝒯)` (Figure 4-1 plus the
   geometric extension).
 - `NIK.weaken`: the combined weakening / graph-morphism lemma (Prop. 4.4.1).
@@ -103,12 +110,21 @@ variable {Atom : Type u}
 
 /-! ## Geometric axioms and their closure -/
 
-/-- The five basic geometric axioms of Simpson's frame theories, `𝒯 ⊆ {χ_D, χ_T, χ_B, χ_4, χ_5}`
-(§3.2). `D` = seriality, `T` = reflexivity, `B` = symmetry, `Four` = transitivity,
-`Five` = Euclideanness. -/
+/-- The **universal Horn** basic geometric axioms of Simpson's frame theories,
+`𝒯 ⊆ {χ_T, χ_B, χ_4, χ_5}` (§3.2). `T` = reflexivity, `B` = symmetry, `Four` = transitivity,
+`Five` = Euclideanness.
+
+**Why `χ_D` (seriality) is absent.** Simpson's §3.2 also lists `χ_D := ∀x, ∃y, xRy`. It is the
+sole axiom of the five with an **existential conclusion**, and it is deliberately **not** a
+constructor of this type. Every axiom represented here is quantifier-free in its conclusion, which
+is exactly the property that lets `TClosure` (below) realize `(R_χ)` for **every** `χ` in this
+type by a pure relational closure, with no fresh-witness-introducing rule and no Skolem witness
+operator on `Label`. Admitting `χ_D` as a constructor without also extending `TClosure` and
+`Label` would make `Context {χ_D}` (`Context.lean`) a *wrong definition*: the closure operators
+would silently ignore the axiom while the type advertised that they honoured it. Adding seriality
+later is purely additive but must extend `TClosure` and `Label`'s witness operators **in the same
+change** as the constructor. -/
 inductive GeomAxiom : Type where
-  /-- Seriality: `∀x, ∃y, xRy`. -/
-  | D
   /-- Reflexivity: `∀x, xRx`. -/
   | T
   /-- Symmetry: `∀x y, xRy → yRx`. -/
@@ -121,7 +137,6 @@ inductive GeomAxiom : Type where
 /-- The classical-model clause for a single geometric axiom on a relation `R`. -/
 def GeomAxiom.Holds (χ : GeomAxiom) (R : Label Atom → Label Atom → Prop) : Prop :=
   match χ with
-  | .D => ∀ x, ∃ y, R x y
   | .T => ∀ x, R x x
   | .B => ∀ x y, R x y → R y x
   | .Four => ∀ x y z, R x y → R y z → R x z
@@ -133,9 +148,10 @@ def ClassicalModel (𝒯 : Set GeomAxiom) (R : Label Atom → Label Atom → Pro
   ∀ χ ∈ 𝒯, χ.Holds R
 
 /-- The **𝒯-closure** of a relation `R`: the smallest relation extending `R` that satisfies the
-non-existential geometric axioms in `𝒯` (`T`, `B`, `Four`, `Five`). This realizes the geometric
-rules `(R_χ)` (`:4940`); see the module docstring ("The geometric extension") for why `D`
-(seriality) is excluded and why this is flagged as a definitional choice. -/
+geometric axioms in `𝒯`. This realizes the geometric rules `(R_χ)` (`:4940`); see the module
+docstring ("The geometric extension") for why this is flagged as a definitional choice. Because
+every constructor of `GeomAxiom` is universal Horn (seriality is not representable -- see
+`GeomAxiom`), this closure covers **every** axiom of the type, with no silently-ignored case. -/
 inductive TClosure (𝒯 : Set GeomAxiom) (R : Label Atom → Label Atom → Prop) :
     Label Atom → Label Atom → Prop where
   /-- Every edge of `R` is in its 𝒯-closure. -/
@@ -301,7 +317,7 @@ theorem NIK.weaken {𝒯 : Set GeomAxiom} {G G' : Graph Atom} {Γ Δ : List (Lab
 
 /-! ## Smoke test -/
 
-/-- **Smoke test** (Phase 2 verification): `x:□A, xRy ⊢_G y:A` via `(□E)` alone, for any `𝒯`.
+/-- **Smoke test**: `x:□A, xRy ⊢_G y:A` via `(□E)` alone, for any `𝒯`.
 Confirms `(□E)` needs only a graph edge (here, already literal, not even requiring 𝒯-closure)
 and the boxed formula. -/
 theorem NIK.smoke_boxE {𝒯 : Set GeomAxiom} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}

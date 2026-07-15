@@ -89,7 +89,8 @@ inductive IKAx (𝒯 : Set GeomAxiom) : Proposition Atom → Prop where
       IKAx 𝒯 ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ)))
   | kDia (φ ψ : Proposition Atom) :
       IKAx 𝒯 ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ)))
-  | dDia (h : GeomAxiom.D ∈ 𝒯) : IKAx 𝒯 (◇(Proposition.top))
+  -- `dDia` (`Ax(χ_D) = ◇⊤`) is absent: `GeomAxiom` admits only universal Horn axioms, so `χ_D`
+  -- (seriality) is not representable. See `Deduction.lean`'s `GeomAxiom` docstring.
   | tBox (h : GeomAxiom.T ∈ 𝒯) (φ : Proposition Atom) :
       IKAx 𝒯 ((Proposition.box φ).imp φ)
   | tDia (h : GeomAxiom.T ∈ 𝒯) (φ : Proposition Atom) :

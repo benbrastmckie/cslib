@@ -43,7 +43,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-515 [PLANNED] — Implement the terminating S5 tableau machinery recommended by tas
+515 [IMPLEMENTING] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
@@ -121,7 +121,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 ### 515. S5 universal rule termination unblock 504
 - **Effort**: 8-12 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 514

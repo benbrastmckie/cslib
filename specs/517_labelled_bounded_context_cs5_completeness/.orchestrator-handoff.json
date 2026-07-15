@@ -2,38 +2,42 @@
   "status": "partial",
   "task_number": 517,
   "session_id": "sess_1784145761_061228",
-  "summary": "Track A implementation dispatch: A1 (IKAx repair) and A2 (CS5 |- FS route probe) both completed and landed sorry-free in probes/. A1 added Simpson's base-IK axioms 3/4/5 to the lemma612-scaffold's IKAx (mechanical, additive, verified sorry-free). A2's outcome is mixed but decisive: syntactic Derivable CS5ModalAxiom FS is left open with the precise obstruction mechanized (fs_context_relative_half -- DerivationTree.necessitation requires an empty-context sub-derivation, but every route to A->B from the hypothesis (diaA -> boxB) genuinely needs that hypothesis in context, so it can never be lifted into box(A->B)); semantic CKValidFC cs5FC'' FS is proved sorry-free and axiom-free (fs_sound'', using only the bBox/bDia-supporting frame clauses hsymbox/hsymm -- no reflexivity or transitivity needed). This de-risks Track B (the semantic canonical-model route) below the plan's original 35-40% estimate: the F2 confluence precondition Track B needs is now a mechanized, reusable fact rather than an open question. A3 (paper GO/NO-GO on Track B, no Lean) is the next action, not yet executed. cs5_completeness itself remains open, as does task 512 (blocked-on-517). No Cslib/ file was modified; landed CK/CT/CS4/CS5 soundness and task-509 cs5FC'' are untouched.",
-  "phases_completed": 2,
-  "phases_total": 3,
+  "summary": "Track C C2 completed: proved Simpson's formula (6.7) (`◇Conj(V) ⊃ □Tele(V,◇A) ⊃ ◇Conj(V++[A])`, source PDF p.104), appended to `probes/track-c-c1-tele-conj.lean` (same file as C1 -- cross-probe `import` does not resolve for these standalone `lake env lean` files, so genuine reuse of C1's Conj/Tele/impIntro/box_mono1 without redeclaration required physically sharing the file). Load-bearing correction found before writing any Lean: the literal `∀ V` statement is FALSE for `V = []` (a 3-world countermodel refutes `◇⊤ ⊃ □◇A ⊃ ◇A` in bare IK) -- consistent with Simpson's own usage, where V is always nonempty at every call site. The theorem is therefore correctly stated for `V = p :: rest` (nonempty), proved by induction on `rest` matching Tele/Conj's own pattern-match structure, same induction shape as C1's Tele_imp1/Tele_imp2. New generic combinators added: `dia_mono1` (kDia-direct diamond monotonicity, no necessitation) plus `hAndI`/`hAndE1`/`hAndE2`/`hDiaK` hypothesis parameters (Conj's `∧` needed andI/andE, unlike C1's Tele-only congruence). Landed sorry-free, axiom footprint `[propext, Classical.choice, Quot.sound]` (identical to C1, no new axioms). Per explicit dispatch instruction ('if C2 consumes the dispatch, STOP at C2 and defer C3 -- do not rush it'), C3 (formula 6.8) was NOT attempted: C2's scoping correction was itself non-trivial extra work, and (6.8)'s self-referential shape (`□Tele(W,B)` appears both inside and outside the outer implication) needs its own dedicated semantic sanity check before any Lean is written, exactly the kind of shortcut this dispatch was warned against. No Cslib/ file touched; landed CK/CT/CS4/CS5 soundness and task-509 cs5FC'' untouched.",
+  "phases_completed": 5,
+  "phases_total": 5,
   "sorry_inventory": [],
   "blockers": [
     {
-      "phase": "A3",
-      "description": "Paper GO/NO-GO on Track B not yet executed. Needs to verify (i) whether cs5FC'' + fs_sound'' genuinely coincide with IS5's birelational semantics as Simpson states it (Ch.3, Forcing.lean vs. the birelational model), and (ii) whether A2's open syntactic gap (CS5 |- FS unresolved) blocks any step of Pacheco's CKB=IKB => CS5=IS5 corollary chain that Track B (B1/B2) would need. This is analysis work, no Lean required.",
-      "goal_text_verbatim": "A3 -- Route verdict (paper, no Lean): from A2's outcome, verify the two semantic-route preconditions: (i) does CS5's semantics (Forcing.lean, cs5FC'' CKExtension.lean:184) coincide with IS5 birelation semantics (equiv R + F1/F2)? (ii) is the CKB=IKB => CS5=IS5 corollary chain sound as stated? Success: a written GO/NO-GO on Track B with a named blocking obligation if NO-GO."
+      "phase": "Track C C3",
+      "description": "Not a blocker in the sense of an obstruction found -- deliberately deferred per H8 phase sizing and the dispatch's explicit 'do not rush' instruction. Before writing any Lean for C3, the next dispatch MUST first run the same countermodel-style sanity check C2 required: verify whether (6.8)'s `W = []` base case (`(◇⊤ ⊃ □B) ⊃ □B`, i.e. Conj([])=⊤, Tele([],B)=B) is a genuine bare-IK theorem or needs restriction to nonempty W, BEFORE assuming the plan's literal `∀ W` phrasing is correct (C2 found the analogous assumption false for (6.7)).",
+      "goal_text_verbatim": "C3 -- Prove (6.8): `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`, induction on W, using axiom 5 (`IKAx.fs`, present since A1: `((◇φ).imp (box ψ)).imp (box (φ.imp ψ))`)."
     }
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_at": "A3 (plans/02_decomposed-track-a-b-c.md)",
+    "resume_at": "Track C C3 (plans/02_decomposed-track-a-b-c.md)",
     "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
     "do_not_redo": [
       "A1 (IKAx repair) -- COMPLETED, probes/lemma612-scaffold.lean",
-      "A2 (CS5 |- FS route probe) -- COMPLETED, probes/fischer-servi-probe.lean"
+      "A2 (CS5 |- FS route probe) -- COMPLETED, probes/fischer-servi-probe.lean",
+      "A3 (route verdict) -- COMPLETED, NO-GO for Track B, plans/02_decomposed-track-a-b-c.md A3 entry",
+      "Track C C1 (Tele/Conj + congruence) -- COMPLETED, probes/track-c-c1-tele-conj.lean",
+      "Track C C2 (formula 6.7) -- COMPLETED this dispatch, appended to probes/track-c-c1-tele-conj.lean (dia_mono1, formula_6_7_base, formula_6_7)"
     ]
   },
-  "next_action_hint": "Run A3 (paper analysis, no Lean) using fs_sound'' as the mechanized F2-confluence fact. On GO, proceed to Track B (B1: mechanize CKB=IKB per Pacheco Lemmas 18-20; B3 needs Fischer Servi 1984 literature-ingested, currently NOT in corpus -- run /literature first). On NO-GO, proceed to Track C (tree surgery C1-C8; C5 is the true crux; only if Track B is NO-GO).",
+  "next_action_hint": "Dispatch Track C C3: prove (6.8) `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)` by induction on W, using IKAx.fs (axiom 5, present in probes/lemma612-scaffold.lean's IKAx since A1). FIRST: countermodel-check (or otherwise verify) whether the `W = []` case is a genuine bare-IK theorem before assuming the plan's `∀ W` phrasing -- C2 found the analogous (6.7) assumption false for V=[]. Reuse Conj/Tele/impIntro/box_mono1/dia_mono1 from probes/track-c-c1-tele-conj.lean by APPENDING to that same file (cross-probe import does not resolve for these standalone lake env lean files -- C2 already established this pattern, do not create a new file that re-declares Conj/Tele). Land sorry-free. HARD STOP still applies: do NOT open C4/C5 in the same dispatch as C3 (C4/C5 are tree-dependent; C5 is the true crux and must be its own dispatch).",
   "decomposition": {
-    "shape": "Track A (route selection + defect repair; A1+A2 done this dispatch, A3 next) -> then Track B (semantic route, gated on A3 GO) OR Track C (Simpson tree surgery, 8 decomposed parts, fallback)",
+    "shape": "Track A (route selection + defect repair; A1+A2+A3 all done) -> Track B CLOSED (A3 NO-GO) -> Track C ACTIVE (Simpson tree surgery, 8 decomposed parts; C1+C2 done, C3 next)",
     "track_a_status": [
-      "A1: COMPLETED this dispatch. IKAx repaired with diaBot/diaOr/fs constructors (Simpson base-IK axioms 3/4/5). Sorry-free, non-breaking, verified via lake env lean exit 0.",
-      "A2: COMPLETED this dispatch (mixed, decisive outcome). fs_context_relative_half mechanizes the syntactic obstruction; fs_sound'' proves semantic FS-validity over cs5FC'', sorry-free and axiom-free.",
-      "A3: NOT STARTED. Next action. Paper GO/NO-GO on Track B, factoring in fs_sound'' as a positive de-risking result."
+      "A1: COMPLETED. IKAx repaired with diaBot/diaOr/fs constructors.",
+      "A2: COMPLETED (mixed outcome). fs_context_relative_half + fs_sound''.",
+      "A3: COMPLETED. NO-GO for Track B, full hypothesis-matched argument against cs5Incest_forces_symm/cs5TwoSidedR_iff_cs5Tail/cs5_symmetric_tail_box_gap."
     ],
+    "track_b_status": "CLOSED. B1/B2/B3 not opened.",
     "track_c_parts": [
-      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1/Star_imp2 to Tele-congruence. ZERO tree dependency. Risk LOW.",
-      "C2: prove (6.7) by induction on V using axiom 2 (kDia). ZERO tree dependency. Risk LOW-MED.",
-      "C3: prove (6.8) by induction on W using axiom 5 (now present after A1). Risk MED.",
+      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1/Star_imp2 to Tele-congruence. COMPLETED, generalized over Axioms.",
+      "C2: prove (6.7) by induction on V using axiom 2 (kDia). COMPLETED this dispatch. Scoping correction: theorem restricted to nonempty V (V=[] is false in bare IK, countermodel-checked).",
+      "C3: prove (6.8) by induction on W using axiom 5 (present after A1). NEXT. Risk MED -- check the W=[] base case semantically before implementing (see blockers/next_action_hint).",
       "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList and Star_append. Risk MED.",
       "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. THE TRUE CRUX. Risk HIGH.",
       "C6: LTree.toGraph + the tau-parameterized generalized induction; non-modal cases + (boxI)/(boxE)/(diaI). Risk MED.",
@@ -42,33 +46,53 @@
     ]
   },
   "confidence": {
-    "ikax_missing_axioms_and_lemma612_needs_axiom5": 1.0,
-    "a2_probe_cs5_derives_FS_succeeds_syntactically": "not resolved -- open, precisely diagnosed obstruction, not refuted",
-    "fs_semantically_valid_over_cs5FCpp": 1.0,
-    "track_b_semantic_route_mechanizable_at_reasonable_cost": "revised upward from 0.375 given fs_sound'' de-risks the F2 precondition; A3 will sharpen this further",
-    "note": "This dispatch's A2 result is a genuine third outcome beyond the plan's binary framing (sorry-free proof / precisely documented failure): a mechanized obstruction to the naive syntactic route PLUS a decisive, reusable positive semantic corollary. Recorded honestly rather than rounded to either extreme."
+    "cs5FCpp_coincides_with_IS5_birelational_semantics": 1.0,
+    "track_b_mechanizable_at_reasonable_cost": 0.02,
+    "track_c_c1_correct_and_reusable": 1.0,
+    "track_c_c2_correct_and_reusable": 1.0,
+    "track_c_c3_completes_next_dispatch": 0.55,
+    "note": "C2's own base-case scoping error (initially assumed to hold for V=[]) was caught by direct semantic check before implementation, not by a failed proof attempt -- this raises (not lowers) confidence that the same discipline applied to C3 will avoid an analogous mistake, but C3's self-referential formula shape is structurally different from (6.7)'s clean telescoping shape, so the MED risk rating from the plan is retained rather than downgraded."
   },
-  "recommendation": "Proceed to A3 (paper GO/NO-GO on Track B) next dispatch, using fs_sound'' as the mechanized F2-confluence fact that discharges part of Track B's semantic precondition. Do NOT re-attempt A2's syntactic search further (hard cap honored, one dispatch). Do NOT open a Track C tree-surgery dispatch before A3 completes.",
+  "recommendation": "Proceed to Track C C3 next dispatch, but require the countermodel-style sanity check on W=[] as a mandatory first step (not optional), given C2's discovery that the plan's literal unrestricted quantifier was wrong for the structurally analogous (6.7). Continue to honor the H8 hard stop on C4/C5 until C3 lands.",
   "gaps_flagged": [
-    "Fischer Servi 1984 (the explicit IK/IT/IKTB/IS4/IS5 completeness proofs that Simpson Thm 3.3.4 cites) is NOT in the literature corpus -- Track B step B3 would need /literature ingestion first. Still flagged, unchanged from prior dispatch.",
-    "Syntactic Derivable CS5ModalAxiom FS remains genuinely open (neither proved nor refuted) -- this dispatch's negative finding is about the naive necessitation-based route only, not a completeness-level impossibility result. A future dispatch could still find a cleverer combinator chain if it becomes load-bearing."
+    "Fischer Servi 1984 remains NOT in the literature corpus -- moot while Track B stays closed.",
+    "A3's NO-GO argument is a hypothesis-matching analysis against existing mechanized theorems, not itself a new formal Lean proof of 'Track B is impossible' -- if Track B is ever reconsidered, that reduction argument should be checked, not merely cited.",
+    "C2's theorem (formula_6_7) is scoped to V = p :: rest (nonempty), NOT arbitrary List (Proposition Atom) -- any future caller (C7's (◇E) reconstruction) must supply a nonempty V, which matches Simpson's actual usage but should not be assumed automatically satisfied without checking the call site."
+  ],
+  "artifacts": [
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/track-c-c1-tele-conj.lean",
+      "type": "probe",
+      "summary": "C1 (Conj, Tele, impIntro, box_mono1, box_mono2, Tele_imp1, Tele_imp2) plus C2 (dia_mono1, formula_6_7_base, formula_6_7) appended this dispatch, all generic over Axioms : Proposition Atom -> Prop. Sorry-free, axiom footprint [propext, Classical.choice, Quot.sound]."
+    },
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/02_decomposed-track-a-b-c.md",
+      "type": "plan",
+      "summary": "C2 marked [COMPLETED] with the nonempty-V scoping correction; C3 marked NEXT with a warning to countermodel-check the W=[] base case first."
+    },
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/04_c2-formula-6-7-summary.md",
+      "type": "summary",
+      "summary": "Execution summary for Track C C2 (formula 6.7), including the V=[] countermodel finding and verification results."
+    },
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
+      "type": "handoff",
+      "summary": "Resume pointer updated: C2 complete, C3 is next action, with the base-case-check warning carried forward."
+    }
   ],
   "metadata": {
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "cslib-implementation-hard-agent"
-    ],
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "lit_flag": true,
     "hard_mode": true,
     "orchestrator_mode": true,
-    "supersedes": "prior .orchestrator-handoff.json (research dispatch, status=planned, next_action_hint=implement)",
+    "supersedes": "prior .orchestrator-handoff.json (A3+C1 dispatch, status=partial, next_action_hint=Track C C2)",
     "sorry_inventory": {
       "added": 0,
-      "note": "implementation dispatch; probes/lemma612-scaffold.lean and probes/fischer-servi-probe.lean both verified sorry-free via lake env lean (exit 0) and grep. No Cslib/ file touched. fs_sound'' confirmed axiom-free via #print axioms; fs_context_relative_half's [propext, Classical.choice] footprint cross-checked identical to existing landed CS5 Derivable-level facts (cs5_dia_bot_imp_bot, cs5_dia_or) -- not a new axiom."
+      "note": "This dispatch's only Lean artifact (probes/track-c-c1-tele-conj.lean, C2 section appended) verified sorry-free via lake env lean (exit 0) and grep -c sorry = 0. Axiom footprint of dia_mono1 is empty (no axioms); formula_6_7_base and formula_6_7 both have footprint [propext, Classical.choice, Quot.sound], matching CSLib's standard Metalogic/DerivationTree infrastructure footprint (via deductionTheorem) -- not new axioms. No Cslib/ file touched (confirmed via git status -- zero Cslib/ paths in the working tree diff for this dispatch)."
     }
   },
-  "last_updated": "2026-07-15T20:04:10Z"
+  "last_updated": "2026-07-15T21:15:00Z"
 }

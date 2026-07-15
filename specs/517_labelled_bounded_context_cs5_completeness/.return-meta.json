@@ -1,42 +1,37 @@
 {
   "status": "partial",
-  "started_at": "2026-07-15T20:04:10Z",
+  "started_at": "2026-07-15T20:41:03Z",
   "artifacts": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/lemma612-scaffold.lean",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/track-c-c1-tele-conj.lean",
       "type": "probe",
-      "summary": "A1: IKAx now has Simpson's base-IK axioms 3/4/5 (diaBot/diaOr/fs) as unconditional constructors. Sorry-free, additive."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fischer-servi-probe.lean",
-      "type": "probe",
-      "summary": "A2: fs_context_relative_half (mechanized syntactic obstruction to CS5 |- FS) and fs_sound'' (semantic FS-validity over cs5FC'', sorry-free, axiom-free)."
+      "summary": "C2 section appended: dia_mono1, formula_6_7_base, formula_6_7 (Simpson formula 6.7, scoped to nonempty V). Sorry-free, no new axioms."
     },
     {
       "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/02_decomposed-track-a-b-c.md",
       "type": "plan",
-      "summary": "A1/A2 marked [COMPLETED] with outcomes recorded; A3 marked NEXT with updated GO/NO-GO framing."
+      "summary": "C2 marked [COMPLETED] with the nonempty-V scoping correction; C3 marked NEXT with a warning to countermodel-check the W=[] base case first."
     },
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/02_track-a-a1-a2-summary.md",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/04_c2-formula-6-7-summary.md",
       "type": "summary",
-      "summary": "Execution summary for A1+A2, including plan deviations and verification results."
+      "summary": "Execution summary for Track C C2 (formula 6.7), including the V=[] countermodel finding and verification results."
     },
     {
       "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
       "type": "handoff",
-      "summary": "Resume pointer updated: A1/A2 complete, A3 is next action."
+      "summary": "Resume pointer updated: C2 complete, C3 is next action."
     }
   ],
   "partial_progress": {
-    "stage": "track_a_a1_a2_complete",
-    "details": "A1 (IKAx repair) and A2 (CS5 |- FS route probe) both landed sorry-free in probes/. A3 (paper GO/NO-GO on Track B) is the next action, not yet executed. cs5_completeness itself remains open."
+    "stage": "track_c_c2_complete",
+    "details": "Track A/A3 and Track C C1 preserved from prior dispatch. Track C C2 (Simpson formula 6.7) landed sorry-free this dispatch, appended to probes/track-c-c1-tele-conj.lean. C3 deferred per explicit dispatch instruction and H8 phase sizing. cs5_completeness itself remains open."
   },
-  "phases_completed": 2,
-  "phases_total": 3,
+  "phases_completed": 5,
+  "phases_total": 5,
   "memory_candidates": [
-    "FS (Fischer-Servi confluence axiom, (◇A→□B)→□(A→B)) is semantically valid over CS5's cs5FC'' frame condition using only the bBox/bDia-supporting clauses (hsymbox, hsymm) -- no reflexivity or transitivity needed. Proved sorry-free, axiom-free in probes/fischer-servi-probe.lean (fs_sound''). Reusable for any Track B semantic canonical-model work.",
-    "Syntactic Hilbert derivation of FS from CS5ModalAxiom (T+4+B+K+Kdia) hits a structural obstruction: DerivationTree.necessitation requires an empty-context sub-derivation, but every route to (A→B) from hypothesis (◇A→□B) genuinely needs that hypothesis in context, so it can never be lifted into □(A→B) via necessitation. Mechanized in fs_context_relative_half. Genuine underivability was not proved -- only the naive route's failure."
+    "Simpson's telescoping formulas (6.7)/(6.8) over List (Proposition Atom), when transcribed literally with an unrestricted `∀ V : List` quantifier, can be FALSE for V=[] even when the paper's own usage never instantiates the empty case -- always run a quick semantic/countermodel check on the degenerate list-length-0 case before writing Lean for a 'prove by induction on the list' formula-level lemma ported from a paper; the paper's implicit nonempty-list convention is easy to silently violate in a literal Lean transcription.",
+    "Standalone task-scratch probes/*.lean files (lake env lean <file>, not registered in any lean_lib source root) cannot cross-import each other by module/namespace name even if they declare the same namespace -- genuine code reuse across a multi-dispatch probe sequence (e.g. C1 -> C2 -> C3) requires appending to the SAME physical file, not creating new files that re-declare shared definitions."
   ],
   "verification": {
     "verification_passed": true,
@@ -52,9 +47,9 @@
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "task_number": 517,
-    "outcome": "track_a_a1_a2_completed_a3_next",
-    "next_action_hint": "implement (A3: paper GO/NO-GO on Track B, no Lean)",
+    "outcome": "track_c_c2_complete_c3_deferred",
+    "next_action_hint": "implement (Track C C3: prove (6.8), induction on W using IKAx.fs, but FIRST countermodel-check the W=[] base case per C2's precedent)",
     "resume_pointer": "handoffs/00_RESUME-HERE.md",
-    "updated": "2026-07-15T20:04:10Z"
+    "updated": "2026-07-15T21:15:00Z"
   }
 }

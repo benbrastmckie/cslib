@@ -4,11 +4,11 @@
 
 ## One-line status
 Task **517 is [IMPLEMENTING]**. Track A (`plans/02_decomposed-track-a-b-c.md`) is
-**[COMPLETED]** (A1, A2, A3 all done). **A3's verdict: NO-GO for Track B** (this dispatch,
-session `sess_1784145761_061228`) — Track B is CLOSED, do not re-open without a representation
-change (see below). **Track C is now ACTIVE**; C1 is **[COMPLETED]** this dispatch. Next action =
-**Track C C2** — see `summaries/03_a3-verdict-and-c1-summary.md` for this dispatch's full outcome.
-**Do NOT re-run A1/A2/A3/C1** — all landed, sorry-free, in `probes/`.
+**[COMPLETED]** (A1, A2, A3 all done). **A3's verdict: NO-GO for Track B** — Track B is CLOSED,
+do not re-open without a representation change (see below). **Track C is now ACTIVE**; C1 and
+**C2 are [COMPLETED]** (C2 landed this dispatch, session `sess_1784145761_061228`). Next action =
+**Track C C3** — see `summaries/04_c2-formula-6-7-summary.md` for this dispatch's full outcome.
+**Do NOT re-run A1/A2/A3/C1/C2** — all landed, sorry-free, in `probes/`.
 
 ## A3 verdict (this dispatch — read before doing anything else)
 
@@ -55,16 +55,26 @@ Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2
 ## Exact next steps (from `plans/02_decomposed-track-a-b-c.md`)
 - ~~**A1** — add axioms 3/4/5 to `IKAx`~~ **[COMPLETED]**.
 - ~~**A2** — attempt sorry-free `CS5 ⊢ FS`~~ **[COMPLETED]**, mixed outcome (see prior dispatch).
-- ~~**A3** — paper GO/NO-GO on Track B~~ **[COMPLETED]** this dispatch — **NO-GO**.
-- ~~**Track C C1** — `Tele`/`Conj` + congruence~~ **[COMPLETED]** this dispatch.
-- **Track C C2 (NEXT)** — prove (6.7): `◇Conj(V) ⊃ □Tele(V,◇A) ⊃ ◇Conj(V++[A])`, induction on V,
-  using axiom 2 (`kDia`, already present in `IKAx`). Reuse `Tele_imp1`/`Tele_imp2` from
-  `probes/track-c-c1-tele-conj.lean` (generalized, apply with `IKAx 𝒯`'s `implyK`/`implyS`/`kBox`
-  constructors as the three hypothesis arguments). Risk LOW-MED per plan.
-- Then **C3** (formula 6.8, needs axiom 5 — present since A1), **C4** (LTree/star/prune + the
-  unfolding identity; DELETE `pathTo`/`pathToList`/`Star_append`), **C5** (`pathSpine` — THE TRUE
-  CRUX, HIGH risk), **C6-C8** (truth-lemma cases). See plan file's Track C table for the full
-  C1-C8 breakdown and risk ratings.
+- ~~**A3** — paper GO/NO-GO on Track B~~ **[COMPLETED]** — **NO-GO**.
+- ~~**Track C C1** — `Tele`/`Conj` + congruence~~ **[COMPLETED]**.
+- ~~**Track C C2** — prove (6.7)~~ **[COMPLETED]** this dispatch — see
+  `summaries/04_c2-formula-6-7-summary.md`. **Scoping correction, load-bearing for C3**: (6.7)'s
+  schema had to be restated for *nonempty* `V = p :: rest` — the literal `V = []` instance is
+  FALSE in bare IK (countermodel-checked). **Apply the same countermodel-style sanity check to
+  (6.8)'s `W = []` case before writing any Lean for C3** — do not assume the empty-list case
+  holds just because the plan's table entry doesn't flag it.
+- **Track C C3 (NEXT)** — prove (6.8): `(◇Conj(W) ⊃ □Tele(W,B)) ⊃ □Tele(W,B)`, induction on W,
+  using axiom 5 (`IKAx.fs`, present since A1: `((◇φ).imp (box ψ)).imp (box (φ.imp ψ))`). Reuse
+  `Conj`/`Tele`/`impIntro`/`box_mono1`/`dia_mono1` from `probes/track-c-c1-tele-conj.lean`
+  (append to the SAME file — cross-probe `import` does not resolve for these standalone
+  `lake env lean` files; C2 already established this pattern). Risk MED per plan — the base case
+  needs its own semantic check first (see above), and (6.8)'s self-referential shape (consequent
+  `□Tele(W,B)` also appears bare, not just under the outer implication) is structurally different
+  from (6.7)'s, so do not assume the same proof skeleton transfers mechanically.
+- Then **C4** (LTree/star/prune + the unfolding identity; DELETE `pathTo`/`pathToList`/
+  `Star_append`), **C5** (`pathSpine` — THE TRUE CRUX, HIGH risk), **C6-C8** (truth-lemma cases).
+  See plan file's Track C table for the full C1-C8 breakdown and risk ratings. **HARD STOP still
+  applies**: do not open C4/C5 until C3 lands (H8 phase sizing).
 
 ## What is landed and MUST NOT be redone (all sorry-free, axiom-clean, CI-green)
 - `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Syntax.lean` (Phase 1), `Deduction.lean` (Phase 2),
@@ -75,9 +85,14 @@ Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2
   wrong (Track C C4/C5 fix target, unrelated to A1's repair).
 - `probes/fischer-servi-probe.lean` (A2) — `fs_context_relative_half` (mechanized syntactic
   obstruction) and `fs_sound''` (semantic `FS`-validity over `cs5FC''`, sorry-free, axiom-free).
-- `probes/track-c-c1-tele-conj.lean` (C1, this dispatch, new) — `Conj`, `Tele`, `impIntro`,
+- `probes/track-c-c1-tele-conj.lean` (C1) — `Conj`, `Tele`, `impIntro`,
   `box_mono1`, `box_mono2`, `Tele_imp1`, `Tele_imp2`, all generic over `Axioms`. Reusable
   verbatim by C2/C3 without redeclaration.
+- **Same file, C2 section appended this dispatch** — `dia_mono1`, `formula_6_7_base`,
+  `formula_6_7` (Simpson (6.7), stated for nonempty `V = p :: rest`; the `V = []` instance is
+  FALSE in bare IK, countermodel-checked, see plan's C2 entry). Sorry-free, axiom footprint
+  `[propext, Classical.choice, Quot.sound]` (same as C1, no new axioms). C3 should append to this
+  SAME file too (cross-probe `import` does not resolve for these standalone files).
 
 ## Debt to clear before ANY PR (do not forget)
 - `GeomWitnessClosure := True` in `Context.lean` violates the project's no-vacuous-def rule; it couples

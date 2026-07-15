@@ -141,7 +141,29 @@ stabilized.
 
 ---
 
-### Phase 2: Guard + guarded rule [NOT STARTED]
+### Phase 2: Guard + guarded rule [COMPLETED]
+
+_Started/Completed: 2026-07-15T00:45:00Z_
+
+Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockingWorldS5` (+3
+guard lemmas `blockingWorldS5_mem_modalKnownWorlds`/`blockingWorldS5_eq_birthContent`/
+`blockingWorldS5_none_fresh`) reusing `successorBirthContent` from `LoopChecking.lean`
+verbatim (rule-independent: purely a function of `b`'s box-context at `w`); `modalApplyOneS5g`
+(guarded rule, mirrors `modalApplyOneS4`); 4 agreement lemmas
+(`modalApplyOneS5g_boxNeg_blocked_eq`/`_boxNeg_unblocked_eq`/`_diaPos_blocked_eq`/
+`_diaPos_unblocked_eq`) plus `modalApplyOneS5g_eq_of_not_boxNeg_diaPos` and a new composed
+lemma `modalApplyOneS5g_eq_of_not_minting_not_universal` (agreement with K's `modalApplyOne`
+outside all four guard/universal shapes, composing the new guard-agreement lemma with the
+already-landed `modalApplyOneS5_eq_of_not_boxPos_diaNeg`, per the plan's explicit reuse
+instruction). Added `public import Cslib.Logics.Modal.Tableau.LoopChecking` to
+`S5Simplification.lean` (read-only reuse of `signedSubfmls`/`relevantSetFinset`/
+`successorBirthContent`; no edit to `LoopChecking.lean` itself, zero regression to S4/K/T/B).
+Unblocked-case agreement lemmas are direct (`unfold; simp`), simpler than S4's chained
+`modalApplyOneS4Rules`-through-T proof, since S5 has no intermediate K+T+4-style rule layer.
+Full CSLib CI green: `lake build` (3236/3236), `lake exe checkInitImports`, `lake exe
+lint-style`, `lake lint` (only the pre-existing unrelated `PrimeExclusion.lean` error), `lake
+shake --add-public --keep-implied --keep-prefix` (no import-diff for the touched files), `lake
+test` (9227/9227). Zero sorries, zero new axioms in touched files.
 
 **Goal**: Transpose the S4 blocking guard to S5: define the birth-content function, the blocking-world guard (with its 3 guard lemmas), and the guarded rule `modalApplyOneS5g` that routes the K-minting shapes through the guard while leaving the universal arms unchanged. Establish agreement lemmas against the landed `modalApplyOneS5` and K.
 

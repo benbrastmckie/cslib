@@ -523,20 +523,88 @@ private lemma modalKnownWorlds_mono_append_S5
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
-/-! ## Key-Threaded S5 Guarded Step (task 515 Phase 3)
+/-! ## Keys-Aware Guard Redesign (task 515 Phase 3, v2)
+
+`blockingWorldS5` (Phase 2) compares the prospective successor's birth content against every
+known world's CURRENT (live) relevant set. Task 511's S4 development hit the identical guard-vs-
+live-set obstruction: a world born with key `k` can later grow its live relevant set past `k`,
+so a *different* freshly-minted world computing the *same* birth content `k` is not blocked by
+the live-set guard (its own live set has already grown away from `k`), yet `keysDistinct`
+demands the two worlds' *birth keys* differ. The v2 fix (task 511's documented resolution,
+adopted verbatim in shape): compare the prospective birth content against the threaded
+**stored keys** list directly. Keys are fixed at minting time and never change, so this
+comparison is exact and the resulting `_none_fresh` contract is precisely the birth-key
+invariant `keysDistinct` (Phase 5) needs. -/
+
+/-- The keys-aware S5 minting guard (v2, supersedes `blockingWorldS5` for the minting decision):
+the least *stored* world `w'` among `keys` whose STORED birth key already equals the PROSPECTIVE
+successor's birth content (`successorBirthContentS5`), if any exists. Mirrors the *intent* of
+`blockingWorldS4`/`blockingWorldS5` but keys the comparison on the threaded `keys` list, per task
+511's documented fix (511 summary "Next Steps"; report Section 4 Option A2). `none` means no
+blocking world exists (mint fresh); `some wBlock` means loop-back to `wBlock`. -/
+def blockingWorldS5Keyed (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) : Option WorldIndex :=
+  ((keys.filter
+    (fun p => decide (p.2 = successorBirthContentS5 φ₀ b s φ w))).map Prod.fst).min?
+
+omit [Hashable Atom] in
+/-- **The keyed guard contract**: if `blockingWorldS5Keyed` returns a world, that world's
+STORED birth key equals the prospective successor's birth content. Mirrors
+`blockingWorldS5_eq_birthContent`, keyed on `keys` rather than the live relevant set. -/
+lemma blockingWorldS5Keyed_eq_birthContent (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (s : Sign) (φ : Proposition Atom)
+    (w wBlock : WorldIndex) (h : blockingWorldS5Keyed φ₀ keys b s φ w = some wBlock) :
+    (wBlock, successorBirthContentS5 φ₀ b s φ w) ∈ keys := by
+  unfold blockingWorldS5Keyed at h
+  have hmem := List.min?_mem h
+  obtain ⟨p, hp, hpfst⟩ := List.mem_map.mp hmem
+  obtain ⟨hpmem, hpdec⟩ := List.mem_filter.mp hp
+  have hpeq : p.2 = successorBirthContentS5 φ₀ b s φ w := of_decide_eq_true hpdec
+  obtain ⟨pw, pk⟩ := p
+  simp only at hpfst hpeq
+  subst hpfst
+  subst hpeq
+  exact hpmem
+
+omit [Hashable Atom] in
+/-- **The keyed guard's freshness contract**: if `blockingWorldS5Keyed` returns `none`, the
+prospective successor's birth content differs from EVERY stored key in `keys`. **This is the
+birth-key invariant that makes `keysDistinct` a genuine per-step invariant** (directly discharges
+the new-vs-old case in Phase 5). Mirrors `blockingWorldS5_none_fresh`/`blockingWorldS4_none_fresh`,
+keyed on `keys`. -/
+lemma blockingWorldS5Keyed_none_fresh (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (s : Sign) (φ : Proposition Atom)
+    (w : WorldIndex) (h : blockingWorldS5Keyed φ₀ keys b s φ w = none) :
+    ∀ w' k, (w', k) ∈ keys → k ≠ successorBirthContentS5 φ₀ b s φ w := by
+  unfold blockingWorldS5Keyed at h
+  rw [List.min?_eq_none_iff, List.map_eq_nil_iff, List.filter_eq_nil_iff] at h
+  intro w' k hmem heq
+  exact absurd (decide_eq_true heq) (by simpa using h (w', k) hmem)
+
+/-! ## Key-Threaded S5 Guarded Step (task 515 Phase 3, v2)
 
 Mirrors `LoopChecking.lean`'s `modalStepBranchS4Keyed` (task 511 Phase 4): threads a stable
-per-world birth-key list `keys` alongside `(b, e, acc)`, gaining an entry exactly when
-`modalApplyOneS5g` mints a genuinely fresh world (an unblocked call at one of the two K minting
-shapes). Unlike S4, S5 has only one rule layer (`modalApplyOneS5`, no `modalApplyOneS4Rules`
-intermediate), so the guard's `none` branch mints via `modalApplyOneS5` directly. -/
+per-world birth-key list `keys` alongside `(b, e, acc)`, gaining an entry exactly when the guard
+is unblocked at one of the two K minting shapes. **v2 crux change**: the block/mint decision is
+now computed here directly via `blockingWorldS5Keyed` (the keys-aware guard), bypassing
+`modalApplyOneS5g`'s live-set dispatch on the two minting shapes entirely (R2: "keys-aware bypass
+inside a redesigned stepper"). Every other shape (including both S5 universal-propagation arms)
+still delegates to `modalApplyOneS5` unchanged, so the non-minting agreement lemmas
+(`modalApplyOneS5g_eq_of_not_boxNeg_diaPos`, Phase 2) remain valid, undisturbed reference
+material even though this stepper no longer calls `modalApplyOneS5g` on the minting shapes. -/
 
-/-- The S5-specific keyed one-step branch expansion: mirrors `modalStepBranchS5g`
-(`modalStepBranchGen (modalApplyOneS5g φ₀)`, the un-keyed analogue -- not separately named,
-since Phase 3 only ever needs the keyed form) for the `(newBranches, newExpandedSets, newAcc)`
-triple, additionally threading `keys`. On an unblocked call at one of the two minting shapes,
-`keys` gains `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ w)`; otherwise `keys` is
-unchanged. Mirrors `modalStepBranchS4Keyed` (`LoopChecking.lean:582`). -/
+/-- The S5-specific keyed one-step branch expansion (v2): mirrors `modalStepBranchS4Keyed`
+(`LoopChecking.lean:582`) for the `(newBranches, newExpandedSets, newAcc)` triple, additionally
+threading `keys`. At the two K minting shapes, the keyed guard `blockingWorldS5Keyed` decides
+block (loop-back edge to the stored world, no new formulas) vs. mint (delegate to
+`modalApplyOneS5` -- equal to K's `modalApplyOne` here since minting shapes are disjoint from
+the S5 universal shapes, `modalApplyOneS5_eq_of_not_boxPos_diaNeg`), appending the fresh key to
+`keys` on an unblocked mint. Every other shape delegates to `modalApplyOneS5` with `keys`
+unchanged. -/
 def modalStepBranchS5gKeyed (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
@@ -547,41 +615,71 @@ def modalStepBranchS5gKeyed (φ₀ : Proposition Atom)
   b.findSome? fun sf =>
     if e.any (· == sf) then none
     else
-      let (result, newAcc) := modalApplyOneS5g φ₀ sf b acc
-      let keys' :=
-        match sf.sign, sf.formula with
-        | .neg, .box φ =>
-          match blockingWorldS5 φ₀ b .neg φ sf.label with
-          | some _ => keys
-          | none => keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]
-        | .pos, .diamond φ =>
-          match blockingWorldS5 φ₀ b .pos φ sf.label with
-          | some _ => keys
-          | none => keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)]
-        | _, _ => keys
-      match result with
-      | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
-      | .branching branches =>
-        some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
-      | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
-      | .notApplicable => none
+      match sf.sign, sf.formula with
+      | .neg, .box φ =>
+        match blockingWorldS5Keyed φ₀ keys b .neg φ sf.label with
+        | some wBlock => some ([b], [e ++ [sf]], acc.addEdge sf.label wBlock, keys)
+        | none =>
+          let (result, newAcc) := modalApplyOneS5 sf b acc
+          let keys' := keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]
+          match result with
+          | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
+          | .branching branches =>
+            some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
+          | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
+          | .notApplicable => none
+      | .pos, .diamond φ =>
+        match blockingWorldS5Keyed φ₀ keys b .pos φ sf.label with
+        | some wBlock => some ([b], [e ++ [sf]], acc.addEdge sf.label wBlock, keys)
+        | none =>
+          let (result, newAcc) := modalApplyOneS5 sf b acc
+          let keys' := keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)]
+          match result with
+          | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
+          | .branching branches =>
+            some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
+          | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
+          | .notApplicable => none
+      | _, _ =>
+        let (result, newAcc) := modalApplyOneS5 sf b acc
+        match result with
+        | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys)
+        | .branching branches =>
+          some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys)
+        | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys)
+        | .notApplicable => none
 
-/-! ## The S5 Loop Invariant `S5LoopInv` (task 515 Phase 3)
+/-! ## The S5 Loop Invariant `S5LoopInv` (task 515 Phase 3, v2: extended to ten fields)
 
-The four stable birth-key fields, mirroring `S4LoopInv`'s corresponding four fields
-(`LoopChecking.lean:1127`) exactly (omitting the six generic driver-bookkeeping fields
-`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`, per the plan's leaner Phase 3
-field list -- S5 has no `RuleApplicationSpec` witness to source those from generically, and the
-pigeonhole argument (Phase 4) only ever consumes the four birth-key fields). -/
+**v2 crux change**: extends the v1 four-field `S5LoopInv` to the full ten-field shape mirroring
+the landed `S4LoopInv` (`LoopChecking.lean:1127`), adding the six generic driver-bookkeeping
+fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`) the v1 four-field
+structure lacked. `accKnown` (= `accTargetsKnown`) is the exact standing hypothesis
+`modalApplyOne_knownWorlds_step` (`FmpMeasure.lean:2042`) demands; `bClosure` (⊆
+`modalUniverseS5 φ₀`) supplies the subformula-closure fact needed to place a newly-inserted
+birth-key pair inside `signedSubfmls φ₀`. The four birth-key fields are carried unchanged from
+v1 (same statements), but `keysDistinct` is now discharged by the keys-aware guard
+(`blockingWorldS5Keyed_none_fresh`) rather than resisting as in the v1 live-set design. -/
 
-/-- **Correction 1 mirror**: `S5LoopInv` reuses `S4LoopInv`'s four stable birth-key fields
-(`keysTotal`/`keyLowerBd`/`keysDistinct`/`keysInUniverse`), stated over the threaded `keys`
-list (`modalStepBranchS5gKeyed`) rather than the live branch, for exactly the reason `S4LoopInv`
-adopted them (task 511 Phase 4, Gap 1/Gap 2): keys are fixed at minting time and never touched
-again, so a lower-bound-style invariant over them survives every subsequent step. -/
+/-- **v2 extended structure**: `S5LoopInv` mirrors `S4LoopInv`'s ten fields
+(`LoopChecking.lean:1127`) exactly, `S4` swapped for `S5` throughout (`modalUniverseS4` ->
+`modalUniverseS5`), stated over the threaded `keys` list (`modalStepBranchS5gKeyed`) rather than
+the live branch for the four birth-key fields. -/
 structure S5LoopInv (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop where
+  /-- Every branch formula is a member of the fixed finite S5 universe `U_{S5}(φ₀)`. -/
+  bClosure : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀
+  /-- The expanded set has no duplicate entries. -/
+  eNodup : e.Nodup
+  /-- Every expanded-set formula is a member of `U_{S5}(φ₀)`. -/
+  eClosure : ∀ x ∈ e, x ∈ modalUniverseS5 φ₀
+  /-- All of `acc`'s recorded worlds are `< modalNextWorld b`. -/
+  accFresh : accFreshInv b acc
+  /-- Every `acc`-edge target is a label already appearing on the branch. -/
+  accKnown : accTargetsKnown b acc
+  /-- `outDeg` exactly counts the minting-shaped formulas in `e` at each world. -/
+  outDegEq : ∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length
   /-- Every known world has a recorded birth key. -/
   keysTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys
   /-- A world's recorded birth key is a LOWER BOUND on its live relevant set: monotone-stable,
@@ -589,11 +687,19 @@ structure S5LoopInv (φ₀ : Proposition Atom)
   (`relevantSetFinset_mono`). -/
   keyLowerBd : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w
   /-- Distinct worlds have DISTINCT birth keys: the hypothesis the pigeonhole argument
-  (`modalKnownWorlds_length_le_worldBoundS5`, Phase 4) consumes. -/
+  (`modalKnownWorlds_length_le_worldBoundS5`, Phase 6) consumes. Now discharged via the
+  keys-aware guard (`blockingWorldS5Keyed_none_fresh`), not live-set reasoning. -/
   keysDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k'
   /-- Birth keys are drawn from the powerset of the finite signed-subformula codomain
-  `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 4). -/
+  `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 6). -/
   keysInUniverse : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀
+  /-- Every recorded key's world is a known world of the branch: the fact
+  `blockingWorldS5Keyed`'s stored-key guard needs (in place of `blockingWorldS5`'s free
+  `blockingWorldS5_mem_modalKnownWorlds` corollary of filtering over `modalKnownWorlds b`
+  directly) to justify that a loop-back edge to a stored key's world targets a known world
+  (feeds `accKnown` preservation, Phase 4). Maintained alongside `keysTotal` as the converse
+  membership direction; both grow only by appending a freshly-minted, immediately-known world. -/
+  keysKnown : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b
 
 /-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 

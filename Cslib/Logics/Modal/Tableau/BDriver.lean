@@ -975,7 +975,12 @@ target-side proof for the new-edge case: the new edge's source is always `sf.lab
 `label_mem_modalKnownWorlds` directly (no need to track the freshly-minted witness formula's
 membership in the child branch, unlike the target-side argument). -/
 theorem modalStepBranchGen_preserves_accSourcesKnown
-    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
@@ -1016,7 +1021,7 @@ theorem modalStepBranchGen_preserves_accSourcesKnown
     · rw [hfstc] at hsf; simp at hsf
   intro b' hb' w w' hedge
   rw [hnewAcc] at hedge
-  rcases spec.freshLocal sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  rcases hFreshLocal sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
   · rw [hsame] at hedge
     exact hbsub b' hb' w (hknown w w' hedge)
   · rw [hsnd] at hedge
@@ -1058,7 +1063,13 @@ the pending worklist), but threading a per-`(branch, acc)`-pair invariant (via
 `List.zip`) rather than a single fixed formula's membership, updated at each step by
 `modalStepBranchGen_preserves_accSourcesKnown`. -/
 theorem modalExpandBranchesGen_openBranch_accSourcesKnown
-    (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) (fuel : Nat) :
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
       expandedSets.length = branches.length →
@@ -1157,7 +1168,7 @@ theorem modalExpandBranchesGen_openBranch_accSourcesKnown
               obtain ⟨newBs, newExps, newAcc⟩ := step
               rw [hstep] at hinner
               have hNewBs_known : ∀ b' ∈ newBs, accSourcesKnown b' newAcc :=
-                modalStepBranchGen_preserves_accSourcesKnown apply spec bh e a newBs newExps
+                modalStepBranchGen_preserves_accSourcesKnown apply hFreshLocal bh e a newBs newExps
                   newAcc hstep hah
               have hLenNBE : newExps.length = newBs.length := by
                 obtain ⟨newExp, hEq⟩ :=

@@ -1699,7 +1699,7 @@ theorem modalTableauB_complete (φ0 : Proposition Atom)
       [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
       rfl rfl hmeas hInv b a h'
   have hSrc : accSourcesKnown b a :=
-    modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneB modalApplyOneB_spec
+    modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneB modalApplyOneB_spec.freshLocal
       (modalFuel φ0)
       [[(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]] [Accessibility.empty]
       rfl rfl
@@ -2215,6 +2215,67 @@ lemma modalTruthLemmaS5
           (eqvGen_mem_modalKnownWorlds_iff b acc hSrc hTgt hpath).mp hw
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
           (hintikkaS5_diamond_neg b acc hH ψ w w' hmem hw') hsψ
+
+/-- **Top-loop propagation of `accSourcesKnown`, at `modalApplyOneS5`**: an open
+`modalExpandBranchesS5` run started from `accSourcesKnown`-respecting branches returns an
+`accSourcesKnown`-respecting branch.
+
+This is a direct instantiation of the generic
+`modalExpandBranchesGen_openBranch_accSourcesKnown` at `apply := modalApplyOneS5`, made possible
+by that lemma's hypothesis having been *generalized* from the bundled
+`spec : RuleApplicationSpec apply` to the raw `freshLocal` dichotomy it actually consumed. The
+bundled form was unusable for S5 on principle -- `RuleApplicationSpec modalApplyOneS5` is
+mathematically false at `rankStep` (`modalApplyOneS5_rankStep_not_dischargeable`) -- but the
+`freshLocal` fact itself holds of `modalApplyOneS5` unconditionally
+(`modalApplyOneS5_fresh_local`, task 515 Phase 7), since the S5 arms never touch accessibility.
+Generalizing cost B nothing: its call site now passes `modalApplyOneB_spec.freshLocal`. -/
+theorem modalExpandBranchesS5_openBranch_accSourcesKnown (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accSourcesKnown p.1 p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel =
+          .openBranch bR aR →
+        accSourcesKnown bR aR :=
+  modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneS5 modalApplyOneS5_fresh_local
+    fuel
+
+/-! ### Phase 8 scope note: what `modalTableauS5_complete` still needs
+
+With `modalTruthLemmaS5` above, the countermodel half of S5 completeness is done, and the
+remaining gap is now sharply localised. `modalTableauS5_complete` would need, at the open branch
+`(b, a)` returned by `modalTableauS5 φ0`:
+
+1. `F(φ0)@0 ∈ b` -- available: `modalExpandBranchesGen_openBranch_initial_mem` (fully generic).
+2. `accSourcesKnown b a` -- available: `modalExpandBranchesS5_openBranch_accSourcesKnown` above.
+3. `accTargetsKnown b a` -- **not yet built**. The step-level fact is already generic and
+   S5-ready (`modalStepBranch_preserves_accTargetsKnown_gen`, `FmpMeasure.lean`, consumed at
+   `modalApplyOneS5` by task 515 Phase 7's soundness bridge); only the *top-loop* propagation
+   lemma is missing. The clean way to get it is to generalize
+   `modalExpandBranchesGen_openBranch_accSourcesKnown`'s double induction over an arbitrary
+   step-preserved per-`(branch, acc)` predicate `P`, then instantiate it at both
+   `accSourcesKnown` and `accTargetsKnown`; the induction body is already predicate-agnostic.
+4. `modalHintikkaSetGen modalApplyOneS5 b a` -- **the wall**. This is the spec-free Hintikka
+   lift (plan Phase 8 task 1, risk R6). `modalExpandBranchesGen_hintikka`
+   (`CompletenessLoop.lean`) cannot serve: it demands `spec : RuleApplicationSpec apply`, false
+   for S5 at `rankStep`, and threads `ModalLoopInvGen` whose `potentialInv`/`phiBound` fields
+   are rank-based by construction. The S5 replacement route is to redo that induction over
+   `S5LoopInv`, whose `worldBound` (`S5Simplification.lean`) reaches the same a-priori world
+   bound via the birth-key pigeonhole instead of the rank -- but `S5LoopInv` carries no
+   Hintikka-forcing fields yet (no `hintikkaInv`/`eBoxNegWitness`/`eDiamondPosWitness`
+   analogues), and, more fundamentally, it is an invariant of the *keyed* stepper
+   `modalStepBranchS5gKeyed`, whereas `modalTableauS5` runs the *unguarded*
+   `modalStepBranchGen modalApplyOneS5`. Closing item 4 therefore also requires either a driver
+   over the keyed stepper (with its own soundness bridge, since `modalTableauS5_sound` is stated
+   for the unguarded surface) or a proof that K's `modalFuel` already dominates the unguarded S5
+   expansion (plan risk R7, fuel domination).
+
+Note that fuel insufficiency is a *completeness*-only hazard, never a soundness one:
+`modalExpandBranchesGen` at `fuel = 0` returns `.openBranch` whenever any branch is open
+(`Saturation.lean`), never a premature `.closed`. This is why `modalTableauS5_sound` (task 515
+Phase 7) holds unconditionally at K's fuel while completeness does not. -/
 
 /-- An open S5 Hintikka branch with `F(φ)@0 ∈ b` (and the known-world edge closure
 `accSourcesKnown`/`accTargetsKnown`) yields an **equivalence-frame** Kripke countermodel to `φ`.

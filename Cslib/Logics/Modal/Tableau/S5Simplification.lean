@@ -117,6 +117,91 @@ lemma modalUniverseS5_length_le (φ₀ : Proposition Atom) :
       ≤ (modalWorldBoundS5 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
     _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS5 φ₀ + 1) := by ring
 
+/-! ## `modalUniverseS5` Membership Lemmas (task 515 Phase 4, `bClosure` support)
+
+Local re-derivations of `FmpMeasure.lean`'s private `modalUniverse`-membership lemmas
+(unavailable across files), swapped to `modalUniverseS5`/`modalWorldBoundS5`. Needed for
+`bClosure`'s preservation, which places newly-appended branch formulas inside `U_{S5}(φ₀)`. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalSubfmls_trans`
+(unavailable across files, system-agnostic): a subformula of a subformula is a subformula. -/
+private lemma modalSubfmls_trans_S5 {a b c : Proposition Atom}
+    (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
+  induction c with
+  | atom p =>
+    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | bot =>
+    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | imp x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | and x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | or x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | box x ihx =>
+    simp only [modalSubfmls, List.mem_cons] at hbc
+    rcases hbc with rfl | hx
+    · exact hab
+    · exact List.mem_cons_of_mem _ (ihx hx)
+  | diamond x ihx =>
+    simp only [modalSubfmls, List.mem_cons] at hbc
+    rcases hbc with rfl | hx
+    · exact hab
+    · exact List.mem_cons_of_mem _ (ihx hx)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalUniverse_of` (unavailable
+across files): a signed formula with any sign, a subformula of `φ₀`, at a world label within the
+`modalWorldBoundS5` bound, is in `U_{S5}(φ₀)`. -/
+private lemma mem_modalUniverseS5_of {φ₀ : Proposition Atom} {s : Sign} {φ : Proposition Atom}
+    {w : WorldIndex} (hw : w ≤ modalWorldBoundS5 φ₀) (hφ : φ ∈ modalSubfmls φ₀) :
+    (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalUniverseS5 φ₀ := by
+  have hlt : w < modalWorldBoundS5 φ₀ + 1 := Nat.lt_succ_of_le hw
+  simp only [modalUniverseS5, List.mem_flatMap, List.mem_range]
+  exact ⟨w, hlt, φ, hφ, by cases s <;> simp⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Generic form of `mem_modalUniverseS5_of`, stated for an arbitrary signed formula `z`. -/
+private lemma mem_modalUniverseS5_of' {φ₀ : Proposition Atom}
+    {z : SignedFormula (Proposition Atom) WorldIndex}
+    (hw : z.label ≤ modalWorldBoundS5 φ₀) (hφ : z.formula ∈ modalSubfmls φ₀) :
+    z ∈ modalUniverseS5 φ₀ := by
+  obtain ⟨s, φ, w⟩ := z
+  exact mem_modalUniverseS5_of hw hφ
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalUniverse_mem_formula`
+(unavailable across files): extraction of the formula-component bound. -/
+private lemma modalUniverseS5_mem_formula {φ₀ : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverseS5 φ₀) :
+    x.formula ∈ modalSubfmls φ₀ := by
+  simp only [modalUniverseS5, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalUniverse_mem_label`
+(unavailable across files): extraction of the label-component bound. -/
+private lemma modalUniverseS5_mem_label {φ₀ : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverseS5 φ₀) :
+    x.label ≤ modalWorldBoundS5 φ₀ := by
+  simp only [modalUniverseS5, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, hw, ψ, -, heq | heq⟩ := hx <;> (subst heq; exact Nat.lt_succ_iff.mp hw)
+
 /-! ## S5-Specific (Universal-Cluster) Propagation Helpers -/
 
 /-- The S5 universal propagation for box-positives: from `T(□φ)@w`, generate `T(φ)@w'` for
@@ -320,6 +405,434 @@ lemma modalApplyOneS5_eshape_eq
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all <;>
     rcases kResult with _ | _ | _ | _ <;> simp <;> split_ifs <;> simp
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_successorsOf_hasEdge`
+(unavailable across files): if `w'` is returned by `acc.successorsOf w`, the edge `w → w'` is
+recorded in `acc`. Needed to lift the `boxPos`/`diamondNeg` closure facts (labels drawn from
+`acc.successorsOf w`) to `accTargetsKnown`'s edge-indexed form. -/
+private lemma mem_successorsOf_hasEdge_S5 {acc : Accessibility} {w w' : WorldIndex}
+    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
+  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
+  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
+  split at heq
+  · rename_i hsrc
+    simp only [Option.some.injEq] at heq
+    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
+    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
+  · simp at heq
+
+/-- At the two S5-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), `modalApplyOneS5` never mints: its
+accessibility output is unchanged (`= acc`), the `RuleResult` is always `.notApplicable` or
+`.persistent`, and every emitted formula's label is a KNOWN world of `b` -- whether it came from
+K's own bounded self-propagation (`boxPropagation`/`diamondNeg`'s `successorsOf`, known via
+`accTargetsKnown`) or from the S5 universal-propagation arms (`modalS5BoxAll`/`modalS5DiaNegAll`,
+known by construction, `modalS5BoxAll_mem`/`modalS5DiaNegAll_mem`). This is the fact
+`worldsContiguous`'s (and later `bClosure`/`eClosure`'s) preservation needs to handle the
+"non-mint" case at these two shapes uniformly, since K's own generic step lemma
+(`modalApplyOne_knownWorlds_step`) only characterizes K's OWN emitted formulas, not the
+S5-merged ones. -/
+lemma modalApplyOneS5_boxPos_diaNeg_eq
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneS5 sf b acc).snd = acc ∧
+    ((modalApplyOneS5 sf b acc).fst = .notApplicable ∨
+      ∃ out, (modalApplyOneS5 sf b acc).fst = .persistent out ∧
+        ∀ x ∈ out, x.label ∈ modalKnownWorlds b) := by
+  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_boxPos_eq
+      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    unfold modalApplyOneS5
+    rcases hp : modalApplyOne
+        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rw [hp] at hKW
+    simp only at hKW
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      split_ifs with hemp
+      · exact ⟨rfl, Or.inl rfl⟩
+      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+        intro x hx
+        exact (modalS5BoxAll_mem hx).2.1
+    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hmatch x hx
+      · exact (modalS5BoxAll_mem hx).2.1
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_diamondNeg_eq
+      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    unfold modalApplyOneS5
+    rcases hp : modalApplyOne
+        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rw [hp] at hKW
+    simp only at hKW
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      split_ifs with hemp
+      · exact ⟨rfl, Or.inl rfl⟩
+      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+        intro x hx
+        exact (modalS5DiaNegAll_mem hx).2.1
+    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hmatch x hx
+      · exact (modalS5DiaNegAll_mem hx).2.1
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
+(available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which
+these `omit [Hashable Atom]` lemmas cannot supply): every formula is a member of its own
+structural subformula list. -/
+private lemma modalSubfmls_self_mem_S5 (φ : Proposition Atom) : φ ∈ modalSubfmls φ := by
+  cases φ <;> simp [modalSubfmls]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_boxPositivesOf` (unavailable
+across files): inversion for `boxPositivesOf`. -/
+private lemma mem_boxPositivesOf_S5 {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {ψ : Proposition Atom} {src : WorldIndex} (h : (ψ, src) ∈ boxPositivesOf b) :
+    (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  simp only [boxPositivesOf, List.mem_filterMap] at h
+  obtain ⟨sf, hsfmem, hsfeq⟩ := h
+  split at hsfeq
+  · rename_i hsign
+    split at hsfeq
+    · rename_i φ' hform
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
+      obtain ⟨rfl, rfl⟩ := hsfeq
+      rw [beq_iff_eq] at hsign
+      obtain ⟨s, φ, l⟩ := sf
+      simp only at hsign hform
+      subst hsign; subst hform
+      exact hsfmem
+    · simp at hsfeq
+  · simp at hsfeq
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma boxProps_outputs_subset`
+(unavailable across files), swapped to `modalUniverseS5`/`modalWorldBoundS5`: the box-positives
+group propagated by both fresh-world rules (`diamondPos`, `boxNeg`) stays inside
+`U_{S5}(φ₀)`. -/
+private lemma boxProps_outputs_subset_S5 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hwbound : modalNextWorld b ≤ modalWorldBoundS5 φ₀) :
+    ∀ x ∈ (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none),
+    x ∈ modalUniverseS5 φ₀ := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨⟨ψ, src⟩, hψsrc, heq⟩ := hx
+  split at heq
+  · split at heq
+    · simp at heq
+    · simp only [Option.some.injEq] at heq
+      subst heq
+      have hψbox : (⟨.pos, .box ψ, src⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ∈ b := mem_boxPositivesOf_S5 hψsrc
+      have hψsub : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
+        modalUniverseS5_mem_formula (hb _ hψbox)
+      have hψmem : ψ ∈ modalSubfmls (Proposition.box ψ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+      exact mem_modalUniverseS5_of hwbound (modalSubfmls_trans_S5 hψmem hψsub)
+  · simp at heq
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma diaNegProps_outputs_subset`
+(unavailable across files), swapped to `modalUniverseS5`/`modalWorldBoundS5`: the
+diamond-negatives group propagated by both fresh-world rules stays inside `U_{S5}(φ₀)`. -/
+private lemma diaNegProps_outputs_subset_S5 (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hwbound : modalNextWorld b ≤ modalWorldBoundS5 φ₀) :
+    ∀ x ∈ b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let prop : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == prop) then none else some prop
+          | _ => none
+        else none),
+    x ∈ modalUniverseS5 φ₀ := by
+  intro x hx
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨sf', hsf'mem, heq⟩ := hx
+  split at heq
+  · split at heq
+    · rename_i ψ hform
+      split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq
+        subst heq
+        have hψsub : (Proposition.diamond ψ) ∈ modalSubfmls φ₀ := by
+          have hmem := modalUniverseS5_mem_formula (hb sf' hsf'mem)
+          rwa [hform] at hmem
+        have hψmem : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
+          List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 ψ)
+        exact mem_modalUniverseS5_of hwbound (modalSubfmls_trans_S5 hψmem hψsub)
+    · simp at heq
+  · simp at heq
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s
+`private lemma modalApplyOne_diamondPos_outputs_subset` (unavailable across files, swapped to
+`modalUniverseS5`/`modalWorldBoundS5`): `diamondPos`'s
+three emitted groups (witness, propagated box-positives, propagated diamond-negatives) all stay
+inside `U_{S5}(φ₀)`, given the branch invariant, source membership, and the S5 world-bound
+hypothesis (consumed for the fresh label `modalNextWorld b ≤ modalWorldBoundS5 φ₀`). -/
+lemma modalApplyOne_diamondPos_outputs_subset_S5
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hsf : (⟨.pos, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hW : modalMaxWorld b < modalWorldBoundS5 φ₀) :
+    ∀ x ∈ ((⟨.pos, φ, modalNextWorld b⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) ::
+      (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none) ++
+      b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let prop : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == prop) then none else some prop
+          | _ => none
+        else none)),
+    x ∈ modalUniverseS5 φ₀ := by
+  have hwbound : modalNextWorld b ≤ modalWorldBoundS5 φ₀ := by
+    unfold modalNextWorld; exact hW
+  have hsrc : (Proposition.diamond φ) ∈ modalSubfmls φ₀ :=
+    modalUniverseS5_mem_formula (hb _ hsf)
+  have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+    List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+  intro x hx
+  simp only [List.mem_cons, List.mem_append] at hx
+  rcases hx with (rfl | hbox) | hdia
+  · exact mem_modalUniverseS5_of hwbound (modalSubfmls_trans_S5 hφmem hsrc)
+  · exact boxProps_outputs_subset_S5 φ₀ b w hb hwbound x hbox
+  · exact diaNegProps_outputs_subset_S5 φ₀ b w hb hwbound x hdia
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalApplyOne_boxNeg_outputs_subset`
+(unavailable across files, swapped to `modalUniverseS5`/`modalWorldBoundS5`): symmetric to
+`modalApplyOne_diamondPos_outputs_subset_S5`. -/
+lemma modalApplyOne_boxNeg_outputs_subset_S5
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hsf : (⟨.neg, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hW : modalMaxWorld b < modalWorldBoundS5 φ₀) :
+    ∀ x ∈ ((⟨.neg, φ, modalNextWorld b⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) ::
+      (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none) ++
+      b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let prop : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == prop) then none else some prop
+          | _ => none
+        else none)),
+    x ∈ modalUniverseS5 φ₀ := by
+  have hwbound : modalNextWorld b ≤ modalWorldBoundS5 φ₀ := by
+    unfold modalNextWorld; exact hW
+  have hsrc : (Proposition.box φ) ∈ modalSubfmls φ₀ := modalUniverseS5_mem_formula (hb _ hsf)
+  have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+    List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+  intro x hx
+  simp only [List.mem_cons, List.mem_append] at hx
+  rcases hx with (rfl | hbox) | hdia
+  · exact mem_modalUniverseS5_of hwbound (modalSubfmls_trans_S5 hφmem hsrc)
+  · exact boxProps_outputs_subset_S5 φ₀ b w hb hwbound x hbox
+  · exact diaNegProps_outputs_subset_S5 φ₀ b w hb hwbound x hdia
+
+/-- Local re-derivation of `FmpMeasure.lean`'s `lemma modalApplyOne_outputs_subset`, swapped to
+`modalUniverseS5`/`modalWorldBoundS5`: every signed formula emitted by K's OWN `modalApplyOne
+sf b acc` stays inside `U_{S5}(φ₀)`, given the branch invariant, source membership, the
+freshness invariant, and the S5 world-bound hypothesis. Dispatches over the five `modalApplyOne`
+outcomes exactly as the K-file's top-level dispatch does. This is purely about `modalApplyOne`
+(K), independent of any S5 merge; `modalApplyOneS5_outputs_subset` (below) builds on this for the
+two S5-relevant shapes. -/
+lemma modalApplyOne_outputs_subset_S5
+    (φ₀ : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀) (hsf : sf ∈ b)
+    (hInv : accFreshInv b acc)
+    (hW : modalMaxWorld b < modalWorldBoundS5 φ₀) :
+    (match (modalApplyOne sf b acc).fst with
+      | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverseS5 φ₀
+      | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverseS5 φ₀
+      | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverseS5 φ₀
+      | .notApplicable => True) := by
+  have hsfU : sf ∈ modalUniverseS5 φ₀ := hb sf hsf
+  have hprop := modalApplyOne_prop_outputs_subset sf
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true]
+    rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      formulas | branches | formulas | -
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      refine mem_modalUniverseS5_of' ?_
+        (modalSubfmls_trans_S5 hzform (modalUniverseS5_mem_formula hsfU))
+      rw [hzlabel]; exact modalUniverseS5_mem_label hsfU
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      refine mem_modalUniverseS5_of' ?_
+        (modalSubfmls_trans_S5 hzform (modalUniverseS5_mem_formula hsfU))
+      rw [hzlabel]; exact modalUniverseS5_mem_label hsfU
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨hzform, hzlabel⟩ := hprop z hz
+      refine mem_modalUniverseS5_of' ?_
+        (modalSubfmls_trans_S5 hzform (modalUniverseS5_mem_formula hsfU))
+      rw [hzlabel]; exact modalUniverseS5_mem_label hsfU
+    · rw [hpr] at hpa
+      simp [RuleResult.isApplicable] at hpa
+  · rw [if_neg hpa]
+    obtain ⟨s, ff, l⟩ := sf
+    rcases s with _ | _
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · simp
+      · simp
+      · simp
+      · simp
+      · simp
+      · dsimp only
+        by_cases hemp : (boxPropagation b acc φ l).isEmpty = true
+        · simp only [if_pos hemp]
+        · simp only [if_neg hemp]
+          intro x hx
+          obtain ⟨hxform, hxsucc⟩ := modalApplyOne_boxPos_outputs_subset b acc φ l x hx
+          have hedge : acc.hasEdge l x.label = true := mem_successorsOf_hasEdge_S5 hxsucc
+          have hxlt := (hInv l x.label hedge).2
+          have hxle : x.label ≤ modalMaxWorld b := Nat.lt_succ_iff.mp hxlt
+          exact mem_modalUniverseS5_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
+            (modalSubfmls_trans_S5 hxform (modalUniverseS5_mem_formula hsfU))
+      · dsimp only
+        exact modalApplyOne_diamondPos_outputs_subset_S5 φ₀ b φ l hb hsf hW
+    · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+      · simp
+      · simp
+      · simp
+      · simp
+      · simp
+      · dsimp only
+        exact modalApplyOne_boxNeg_outputs_subset_S5 φ₀ b φ l hb hsf hW
+      · dsimp only
+        by_cases hemp : ((acc.successorsOf l).filterMap (fun w' =>
+            if b.any (· == (⟨.neg, φ, w'⟩ :
+                SignedFormula (Proposition Atom) WorldIndex))
+            then none
+            else some (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+          ).isEmpty = true
+        · simp only [if_pos hemp]
+        · simp only [if_neg hemp]
+          intro x hx
+          obtain ⟨hxform, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
+          have hedge : acc.hasEdge l x.label = true := mem_successorsOf_hasEdge_S5 hxsucc
+          have hxlt := (hInv l x.label hedge).2
+          have hxle : x.label ≤ modalMaxWorld b := Nat.lt_succ_iff.mp hxlt
+          exact mem_modalUniverseS5_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
+            (modalSubfmls_trans_S5 hxform (modalUniverseS5_mem_formula hsfU))
+
+/-- The S5 analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
+`modalApplyOneS5` rather than `modalApplyOne`: either `modalApplyOneS5` leaves `acc` unchanged
+with every emitted formula's label a known world of `b` (covering both the ordinary
+agreement shapes, via `modalApplyOneS5_eq_of_not_boxPos_diaNeg` + K's own step lemma, and the two
+S5-relevant shapes, via `modalApplyOneS5_boxPos_diaNeg_eq`), or it mints exactly one edge with a
+nonempty `.linear` result entirely labeled at `modalNextWorld b` (only possible at the two
+K-minting shapes, disjoint from the two S5-relevant shapes, so `modalApplyOneS5` agrees with K
+there too). This is the uniform per-call fact `worldsContiguous`'s (and `bClosure`/`eClosure`'s)
+preservation needs. -/
+lemma modalApplyOneS5_knownWorlds_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    ((modalApplyOneS5 sf b acc).snd = acc ∧
+      (match (modalApplyOneS5 sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOneS5 sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOneS5 sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · obtain ⟨hsndeq, hor⟩ := modalApplyOneS5_boxPos_diaNeg_eq sf b acc hsfmem hknown hbd
+    refine Or.inl ⟨hsndeq, ?_⟩
+    rcases hor with hnot | ⟨out, hpers, hlabel⟩
+    · rw [hnot]; trivial
+    · rw [hpers]; exact hlabel
+  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
+    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
+    rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
+    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
 
 /-! ## S5 Minting Guard (task 515 Phase 2)
 
@@ -593,6 +1106,270 @@ private lemma modalKnownWorlds_mono_append_S5
   obtain ⟨sf, hsf, rfl⟩ := hx
   exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`'s
+`Nodup` conjunct (unavailable across files): the dedup-guarded `foldl` accumulator stays
+`Nodup`. Relocated ahead of Phase 6 (its original site) since Phase 4's `worldsContiguous`
+preservation (below) also needs it. -/
+private lemma modalKnownWorlds_fold_nodup_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
+    (hws0 : ws0.Nodup) :
+    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup := by
+  induction l generalizing ws0 with
+  | nil => simpa using hws0
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      exact ih ws0 hws0
+    · simp only [List.foldl_cons, if_neg hc]
+      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
+      exact ih (sf.label :: ws0) (List.nodup_cons.mpr ⟨hnotmem, hws0⟩)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_nodup`
+(unavailable across files): `modalKnownWorlds`'s dedup-guarded `foldl` never produces
+duplicates. -/
+private lemma modalKnownWorlds_nodup_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
+  modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
+
+/-! ## World-Contiguity Bookkeeping (task 515 Phase 4, 12th `S5LoopInv` field)
+
+Local re-derivations of `FmpMeasure.lean`'s private `modalMaxWorld_append_*`/known-worlds-length
+facts (unavailable across files), needed to prove the 12th `S5LoopInv` field `worldsContiguous`
+(`modalMaxWorld b + 1 = (modalKnownWorlds b).length`) is preserved across a
+`modalStepBranchS5gKeyed` step. See `specs/515_.../handoffs/02_phase4-bclosure-contiguity-gap.md`
+for why this field is needed: Phase 6's pigeonhole bound
+(`modalKnownWorlds_length_le_worldBoundS5`) bounds the known-world *count*, but `bClosure`'s
+mint-case obligation needs a bound on the fresh label's *value*
+(`modalNextWorld b ≤ modalWorldBoundS5 φ₀`); contiguity is exactly the bridge between the two. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalMaxWorld_foldl_le`. -/
+private lemma modalMaxWorld_foldl_le_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (c M : Nat) (hc : c ≤ M)
+    (h : ∀ sf ∈ l, sf.label ≤ M) :
+    l.foldl (fun mx sf => max mx sf.label) c ≤ M := by
+  induction l generalizing c with
+  | nil => simpa using hc
+  | cons sf rest ih =>
+    simp only [List.foldl_cons]
+    exact ih (max c sf.label) (max_le hc (h sf List.mem_cons_self))
+      (fun x hx => h x (List.mem_cons_of_mem _ hx))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalMaxWorld_le_of_forall_le`. -/
+private lemma modalMaxWorld_le_of_forall_le_S5
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (M : Nat)
+    (h : ∀ sf ∈ l, sf.label ≤ M) : modalMaxWorld l ≤ M :=
+  modalMaxWorld_foldl_le_S5 l 0 M (Nat.zero_le _) h
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalMaxWorld_append_eq_of_forall_le`
+(unavailable across files): if every label of `xs` is already `≤ modalMaxWorld b`, appending `xs`
+doesn't change `modalMaxWorld`. -/
+private lemma modalMaxWorld_append_eq_of_forall_le_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : ∀ sf ∈ xs, sf.label ≤ modalMaxWorld b) :
+    modalMaxWorld (xs ++ b) = modalMaxWorld b := by
+  apply le_antisymm
+  · apply modalMaxWorld_le_of_forall_le_S5
+    intro sf hsf
+    rcases List.mem_append.mp hsf with hxs | hb
+    · exact h sf hxs
+    · exact label_le_modalMaxWorld hb
+  · exact modalMaxWorld_le_append xs b
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalMaxWorld_append_single`
+(unavailable across files): if `xs` is nonempty and all its labels equal a fresh world `w'`
+strictly greater than `modalMaxWorld b`, appending `xs` sets `modalMaxWorld` to exactly `w'`. -/
+private lemma modalMaxWorld_append_single_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) (w' : WorldIndex)
+    (hxsne : xs ≠ []) (hxs : ∀ sf ∈ xs, sf.label = w') (hgt : modalMaxWorld b < w') :
+    modalMaxWorld (xs ++ b) = w' := by
+  apply le_antisymm
+  · apply modalMaxWorld_le_of_forall_le_S5
+    intro sf hsf
+    rcases List.mem_append.mp hsf with hxs' | hb
+    · exact le_of_eq (hxs sf hxs')
+    · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld hb) hgt)
+  · obtain ⟨sf0, hsf0⟩ := List.exists_mem_of_ne_nil xs hxsne
+    have := label_le_modalMaxWorld (List.mem_append_left b hsf0)
+    rwa [hxs sf0 hsf0] at this
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s
+`private lemma modalNextWorld_not_mem_modalKnownWorlds` (unavailable across files): the fresh
+world is never already known. -/
+private lemma modalNextWorld_not_mem_modalKnownWorlds_S5
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalNextWorld b ∉ modalKnownWorlds b := by
+  intro hmem
+  rw [mem_modalKnownWorlds_S5] at hmem
+  obtain ⟨sf, hsf, hsflab⟩ := hmem
+  exact absurd hsflab (Nat.ne_of_lt (modalNextWorld_gt b sf hsf))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_toFinset_append`
+(unavailable across files): the known-worlds `Finset` under append splits as a union. -/
+private lemma modalKnownWorlds_toFinset_append_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    (modalKnownWorlds (xs ++ b)).toFinset =
+      (xs.map SignedFormula.label).toFinset ∪ (modalKnownWorlds b).toFinset := by
+  ext x
+  simp only [Finset.mem_union, List.mem_toFinset, mem_modalKnownWorlds_S5, List.mem_append,
+    List.mem_map]
+  constructor
+  · rintro ⟨sf, hsf | hsf, rfl⟩
+    · exact Or.inl ⟨sf, hsf, rfl⟩
+    · exact Or.inr ⟨sf, hsf, rfl⟩
+  · rintro (⟨sf, hsf, rfl⟩ | ⟨sf, hsf, rfl⟩)
+    · exact ⟨sf, Or.inl hsf, rfl⟩
+    · exact ⟨sf, Or.inr hsf, rfl⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- If every label of `xs` is already a known world of `b`, appending `xs` doesn't change the
+known-worlds COUNT (mirrors `FmpMeasure.lean`'s private `modalKnownWorlds_perm_append_of_subset`,
+stated at the length level rather than up to `Perm`). -/
+private lemma modalKnownWorlds_length_append_of_known_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : ∀ sf ∈ xs, sf.label ∈ modalKnownWorlds b) :
+    (modalKnownWorlds (xs ++ b)).length = (modalKnownWorlds b).length := by
+  rw [← List.toFinset_card_of_nodup (modalKnownWorlds_nodup_S5 (xs ++ b)),
+    ← List.toFinset_card_of_nodup (modalKnownWorlds_nodup_S5 b),
+    modalKnownWorlds_toFinset_append_S5]
+  have hsub : (xs.map SignedFormula.label).toFinset ⊆ (modalKnownWorlds b).toFinset := by
+    intro x hx
+    simp only [List.mem_toFinset, List.mem_map] at hx
+    obtain ⟨sf, hsf, rfl⟩ := hx
+    simpa using h sf hsf
+  rw [Finset.union_eq_right.mpr hsub]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- If `xs` is nonempty and all its labels equal a fresh world `w'` not already known, appending
+`xs` grows the known-worlds COUNT by exactly 1 (mirrors `FmpMeasure.lean`'s private
+`modalKnownWorlds_perm_append_single`, stated at the length level). -/
+private lemma modalKnownWorlds_length_append_single_S5
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) (w' : WorldIndex)
+    (hxsne : xs ≠ []) (hxs : ∀ sf ∈ xs, sf.label = w') (hw' : w' ∉ modalKnownWorlds b) :
+    (modalKnownWorlds (xs ++ b)).length = (modalKnownWorlds b).length + 1 := by
+  rw [← List.toFinset_card_of_nodup (modalKnownWorlds_nodup_S5 (xs ++ b)),
+    ← List.toFinset_card_of_nodup (modalKnownWorlds_nodup_S5 b),
+    modalKnownWorlds_toFinset_append_S5]
+  have hxseq : (xs.map SignedFormula.label).toFinset = {w'} := by
+    ext x
+    simp only [List.mem_toFinset, List.mem_map, Finset.mem_singleton]
+    constructor
+    · rintro ⟨sf, hsf, rfl⟩; exact hxs sf hsf
+    · intro hxeq
+      obtain ⟨sf, hsf⟩ := List.exists_mem_of_ne_nil xs hxsne
+      exact ⟨sf, hsf, hxeq ▸ (hxs sf hsf)⟩
+  rw [hxseq, Finset.singleton_union, Finset.card_insert_of_notMem (by simpa using hw')]
+
+/-- **`bClosure` support**: every signed formula emitted by `modalApplyOneS5 sf b acc` (NOT just
+K's own `modalApplyOne`) stays inside `U_{S5}(φ₀)`. At the two S5-relevant shapes, combines K's
+own closure (`modalApplyOne_outputs_subset_S5`) for the `boxPropagation`/`diamondNeg`-sourced
+formulas with a direct bound for the S5-merged `modalS5BoxAll`/`modalS5DiaNegAll` formulas
+(same formula `φ` as the box/diamond body, subformula-closed via `modalSubfmls_trans_S5`; label a
+known world of `b`, hence `≤ modalMaxWorld b < modalWorldBoundS5 φ₀`). At every other shape,
+`modalApplyOneS5` agrees with `modalApplyOne` exactly
+(`modalApplyOneS5_eq_of_not_boxPos_diaNeg`), so `modalApplyOne_outputs_subset_S5` transfers
+directly. -/
+lemma modalApplyOneS5_outputs_subset
+    (φ₀ : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀) (hsf : sf ∈ b)
+    (hInv : accFreshInv b acc)
+    (hW : modalMaxWorld b < modalWorldBoundS5 φ₀) :
+    (match (modalApplyOneS5 sf b acc).fst with
+      | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverseS5 φ₀
+      | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverseS5 φ₀
+      | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverseS5 φ₀
+      | .notApplicable => True) := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hbd with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, l⟩ := sf
+      simp only at hs hf
+      subst hs; subst hf
+      have hKsub := modalApplyOne_outputs_subset_S5 φ₀
+        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+      have hKeq := modalApplyOne_boxPos_eq
+        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+      have hsrc : (Proposition.box φ) ∈ modalSubfmls φ₀ := modalUniverseS5_mem_formula (hb _ hsf)
+      have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+      have hallNewSub : ∀ x ∈ modalS5BoxAll b φ l, x ∈ modalUniverseS5 φ₀ := by
+        intro x hx
+        obtain ⟨hxeq, hxknown, -⟩ := modalS5BoxAll_mem hx
+        rw [hxeq]
+        refine mem_modalUniverseS5_of ?_ hφsub
+        obtain ⟨sf0, hsf0, hlab⟩ := (mem_modalKnownWorlds_S5 b x.label).mp hxknown
+        calc x.label ≤ modalMaxWorld b := hlab ▸ label_le_modalMaxWorld hsf0
+          _ ≤ modalWorldBoundS5 φ₀ := le_of_lt hW
+      unfold modalApplyOneS5
+      rcases hp : modalApplyOne
+          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+          with ⟨kResult, kAcc⟩
+      rw [hp] at hKsub hKeq
+      dsimp only at hKsub
+      simp only at hKeq
+      rcases hKeq with hKeq | ⟨out0, hKeq⟩ <;> subst hKeq
+      · dsimp only
+        split_ifs with hemp
+        · trivial
+        · exact fun x hx => hallNewSub x hx
+      · dsimp only
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hKsub x hx
+        · exact hallNewSub x hx
+    · obtain ⟨s, ff, l⟩ := sf
+      simp only at hs hf
+      subst hs; subst hf
+      have hKsub := modalApplyOne_outputs_subset_S5 φ₀
+        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+      have hKeq := modalApplyOne_diamondNeg_eq
+        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+      have hsrc : (Proposition.diamond φ) ∈ modalSubfmls φ₀ :=
+        modalUniverseS5_mem_formula (hb _ hsf)
+      have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+      have hallNewSub : ∀ x ∈ modalS5DiaNegAll b φ l, x ∈ modalUniverseS5 φ₀ := by
+        intro x hx
+        obtain ⟨hxeq, hxknown, -⟩ := modalS5DiaNegAll_mem hx
+        rw [hxeq]
+        refine mem_modalUniverseS5_of ?_ hφsub
+        obtain ⟨sf0, hsf0, hlab⟩ := (mem_modalKnownWorlds_S5 b x.label).mp hxknown
+        calc x.label ≤ modalMaxWorld b := hlab ▸ label_le_modalMaxWorld hsf0
+          _ ≤ modalWorldBoundS5 φ₀ := le_of_lt hW
+      unfold modalApplyOneS5
+      rcases hp : modalApplyOne
+          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+          with ⟨kResult, kAcc⟩
+      rw [hp] at hKsub hKeq
+      dsimp only at hKsub
+      simp only at hKeq
+      rcases hKeq with hKeq | ⟨out0, hKeq⟩ <;> subst hKeq
+      · dsimp only
+        split_ifs with hemp
+        · trivial
+        · exact fun x hx => hallNewSub x hx
+      · dsimp only
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hKsub x hx
+        · exact hallNewSub x hx
+  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
+    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
+    rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
+    exact modalApplyOne_outputs_subset_S5 φ₀ sf b acc hb hsf hInv hW
+
 /-! ## Keys-Aware Guard Redesign (task 515 Phase 3, v2)
 
 `blockingWorldS5` (Phase 2) compares the prospective successor's birth content against every
@@ -770,6 +1547,15 @@ structure S5LoopInv (φ₀ : Proposition Atom)
   (feeds `accKnown` preservation, Phase 4). Maintained alongside `keysTotal` as the converse
   membership direction; both grow only by appending a freshly-minted, immediately-known world. -/
   keysKnown : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b
+  /-- **12th field (deviation, cycle-3 addition)**: known-world labels form a CONTIGUOUS range
+  `{0, ..., modalMaxWorld b}` -- worlds are only ever minted at exactly
+  `modalNextWorld b = modalMaxWorld b + 1`, so the known-world COUNT equals `modalMaxWorld b + 1`
+  exactly, with no gaps. Needed because Phase 6's pigeonhole bound
+  (`modalKnownWorlds_length_le_worldBoundS5`) only bounds the known-world *count*, but
+  `bClosure`/`eClosure`'s mint-case obligation needs a bound on the fresh label's *value*
+  (`modalNextWorld b ≤ modalWorldBoundS5 φ₀`); contiguity is exactly the bridge (see
+  `specs/515_.../handoffs/02_phase4-bclosure-contiguity-gap.md`). -/
+  worldsContiguous : modalMaxWorld b + 1 = (modalKnownWorlds b).length
 
 /-! ## Generic-Field Preservation Lemmas (task 515 Phase 4)
 
@@ -1163,6 +1949,111 @@ lemma modalStepBranchS5g_preserves_outDegEq (φ₀ : Proposition Atom)
       rfl
     · rw [hm] at hshape; exact hshape.elim
 
+/-- **Phase 4 field 5/6 (12th `S5LoopInv` field, cycle-3 addition)**: `modalStepBranchS5gKeyed`
+preserves `worldsContiguous` (`modalMaxWorld b + 1 = (modalKnownWorlds b).length`). Blocked
+(loop-back) steps leave `b` unchanged, so both sides are trivially stable. Non-blocked steps
+consume `modalApplyOneS5_knownWorlds_step`'s dichotomy: the non-mint case appends formulas at
+already-known labels, so `modalMaxWorld`/the known-worlds COUNT are both unchanged
+(`modalMaxWorld_append_eq_of_forall_le_S5`/`modalKnownWorlds_length_append_of_known_S5`); the
+mint case appends a nonempty list of formulas all at exactly `modalNextWorld b`, incrementing
+both `modalMaxWorld` and the known-worlds count by exactly 1
+(`modalMaxWorld_append_single_S5`/`modalKnownWorlds_length_append_single_S5`). See handoff
+`02_phase4-bclosure-contiguity-gap.md` for why this field is the key to unblocking
+`bClosure`/`eClosure`. -/
+lemma modalStepBranchS5g_preserves_worldsContiguous (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hkK : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hknown : accTargetsKnown b acc)
+    (hcontig : modalMaxWorld b + 1 = (modalKnownWorlds b).length) :
+    ∀ b' ∈ newBs, modalMaxWorld b' + 1 = (modalKnownWorlds b').length := by
+  obtain ⟨sf, hsfmem, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_acc_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep hkK
+  rcases hcase with ⟨wBlock, -, -, hnewBs, -, -⟩ | ⟨-, hshape⟩
+  · intro b' hb'
+    rw [hnewBs] at hb'
+    simp only [List.mem_singleton] at hb'
+    rw [hb']; exact hcontig
+  · have hallxs : ∀ b' ∈ newBs, ∃ xs, b' = xs ++ b ∧
+        ((∀ x ∈ xs, x.label ∈ modalKnownWorlds b) ∨
+          (xs ≠ [] ∧ ∀ x ∈ xs, x.label = modalNextWorld b)) := by
+      intro b' hb'
+      rcases modalApplyOneS5_knownWorlds_step sf b acc hsfmem hknown with
+        ⟨-, hmatch⟩ | ⟨-, hmatch⟩
+      · rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+        · rw [hm] at hshape hmatch
+          rw [hshape.1] at hb'
+          simp only [List.mem_singleton] at hb'
+          exact ⟨nf, hb', Or.inl hmatch⟩
+        · rw [hm] at hshape hmatch
+          rw [hshape.1] at hb'
+          obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+          refine ⟨br, rfl, Or.inl ?_⟩
+          intro x hx
+          exact hmatch x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+        · rw [hm] at hshape hmatch
+          rw [hshape.1] at hb'
+          simp only [List.mem_singleton] at hb'
+          exact ⟨nf, hb', Or.inl hmatch⟩
+        · rw [hm] at hshape; exact absurd hshape (by simp)
+      · rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+        · rw [hm] at hshape hmatch
+          rw [hshape.1] at hb'
+          simp only [List.mem_singleton] at hb'
+          exact ⟨nf, hb', Or.inr hmatch⟩
+        · rw [hm] at hmatch; exact hmatch.elim
+        · rw [hm] at hmatch; exact hmatch.elim
+        · rw [hm] at hmatch; exact hmatch.elim
+    intro b' hb'
+    obtain ⟨xs, rfl, hxsfact⟩ := hallxs b' hb'
+    rcases hxsfact with hknownxs | ⟨hne, hfreshxs⟩
+    · have hmaxeq : modalMaxWorld (xs ++ b) = modalMaxWorld b :=
+        modalMaxWorld_append_eq_of_forall_le_S5 xs b (fun sf' hsf' => by
+          have hk := hknownxs sf' hsf'
+          rw [mem_modalKnownWorlds_S5] at hk
+          obtain ⟨sf0, hsf0, hlab⟩ := hk
+          rw [← hlab]; exact label_le_modalMaxWorld hsf0)
+      have hleneq : (modalKnownWorlds (xs ++ b)).length = (modalKnownWorlds b).length :=
+        modalKnownWorlds_length_append_of_known_S5 xs b hknownxs
+      rw [hmaxeq, hleneq]; exact hcontig
+    · have hmaxeq : modalMaxWorld (xs ++ b) = modalNextWorld b :=
+        modalMaxWorld_append_single_S5 xs b (modalNextWorld b) hne hfreshxs
+          (Nat.lt_succ_self (modalMaxWorld b))
+      have hleneq : (modalKnownWorlds (xs ++ b)).length = (modalKnownWorlds b).length + 1 :=
+        modalKnownWorlds_length_append_single_S5 xs b (modalNextWorld b) hne hfreshxs
+          (modalNextWorld_not_mem_modalKnownWorlds_S5 b)
+      have hnext : modalNextWorld b = modalMaxWorld b + 1 := rfl
+      rw [hmaxeq, hleneq, hnext, hcontig]
+
+omit [Hashable Atom] in
+/-- **Phase 4 field 6/6**: `modalStepBranchS5gKeyed` preserves `eClosure`
+(`∀ x ∈ e, x ∈ modalUniverseS5 φ₀`). Easy given `bClosure`: the only formula ever appended to
+`e` is the trigger `sf` itself (`modalStepBranchS5gKeyed_expanded_shape`), and `sf ∈ b`, so
+`sf ∈ modalUniverseS5 φ₀` follows directly from the ambient `bClosure` hypothesis on `b` -- no
+mint-case label-bound reasoning is needed at all (unlike `bClosure`'s own preservation). -/
+lemma modalStepBranchS5g_preserves_eClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (heClosure : ∀ x ∈ e, x ∈ modalUniverseS5 φ₀) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverseS5 φ₀ := by
+  obtain ⟨sf, hsfmem, -, hshape⟩ :=
+    modalStepBranchS5gKeyed_expanded_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  intro e' he'
+  rcases hshape e' he' with rfl | rfl
+  · intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | hxeq
+    · exact heClosure x hx
+    · rw [hxeq]; exact hbClosure sf hsfmem
+  · exact heClosure
+
 /-! ## Pigeonhole World Bound (task 515 Phase 6)
 
 A **static** cardinality fact about any fixed `(b, keys)` pair satisfying `S5LoopInv`'s three
@@ -1176,28 +2067,7 @@ by `modalWorldBoundS5 φ₀`. Consumed both directly (Phase 5 exit criterion) an
 piece Phase 4's `bClosure`/`eClosure` mint-case obligations need (see
 `specs/515_.../handoffs/01_phase4-generic-field-preservation.md`). -/
 
-omit [DecidableEq Atom] [Hashable Atom] in
-private lemma modalKnownWorlds_fold_nodup_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
-    (hws0 : ws0.Nodup) :
-    (l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0).Nodup := by
-  induction l generalizing ws0 with
-  | nil => simpa using hws0
-  | cons sf rest ih =>
-    by_cases hc : ws0.any (· == sf.label)
-    · simp only [List.foldl_cons, if_pos hc]
-      exact ih ws0 hws0
-    · simp only [List.foldl_cons, if_neg hc]
-      have hnotmem : sf.label ∉ ws0 := by simpa [List.any_eq_true] using hc
-      exact ih (sf.label :: ws0) (List.nodup_cons.mpr ⟨hnotmem, hws0⟩)
-
-/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_nodup`
-(unavailable across files): `modalKnownWorlds`'s dedup-guarded `foldl` never produces
-duplicates. -/
-private lemma modalKnownWorlds_nodup_S5
-    (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
-  modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
-
+omit [Hashable Atom] in
 /-- **Phase 6**: the pigeonhole world bound. Any branch `b` whose known worlds all have birth
 keys in `keys` (`hTotal`), with distinct known worlds forced to distinct keys (`hDistinct`) and
 every key confined to `signedSubfmls φ₀` (`hInUniv`), has at most `modalWorldBoundS5 φ₀` known
@@ -1234,6 +2104,71 @@ lemma modalKnownWorlds_length_le_worldBoundS5 (φ₀ : Proposition Atom)
   calc (modalKnownWorlds b).length ≤ (signedSubfmls φ₀).powerset.card := hcard
     _ ≤ modalWorldBoundS4 φ₀ := signedSubfmls_powerset_card_le φ₀
     _ = modalWorldBoundS5 φ₀ := rfl
+
+/-- **Phase 4 field 1/6 (unblocked, cycle-3)**: `modalStepBranchS5gKeyed` preserves `bClosure`
+(`∀ x ∈ b, x ∈ modalUniverseS5 φ₀`). The blocked case leaves `b` unchanged. The non-blocked case
+combines `modalApplyOneS5_outputs_subset` (every newly-appended formula is in `U_{S5}(φ₀)`,
+consuming the world-bound `modalMaxWorld b < modalWorldBoundS5 φ₀` derived from `worldsContiguous`
++ the pigeonhole bound `modalKnownWorlds_length_le_worldBoundS5`) with `bClosure` itself for the
+unchanged suffix `b`. This is the fact that was missing per handoff
+`02_phase4-bclosure-contiguity-gap.md` -- contiguity is exactly the bridge from Phase 6's known-
+world COUNT bound to the fresh label's VALUE bound `modalApplyOneS5_outputs_subset` needs. -/
+lemma modalStepBranchS5g_preserves_bClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hkK : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hfresh : accFreshInv b acc)
+    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hcontig : modalMaxWorld b + 1 = (modalKnownWorlds b).length)
+    (hTotal : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k')
+    (hInUniv : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
+    ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS5 φ₀ := by
+  have hW : modalMaxWorld b < modalWorldBoundS5 φ₀ := by
+    have hbound := modalKnownWorlds_length_le_worldBoundS5 φ₀ b keys hTotal hDistinct hInUniv
+    rw [← hcontig] at hbound
+    exact hbound
+  obtain ⟨sf, hsfmem, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_acc_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep hkK
+  rcases hcase with ⟨wBlock, -, -, hnewBs, -, -⟩ | ⟨-, hshape⟩
+  · intro b' hb'
+    rw [hnewBs] at hb'
+    simp only [List.mem_singleton] at hb'
+    rw [hb']
+    exact hbClosure
+  · have hsub := modalApplyOneS5_outputs_subset φ₀ sf b acc hbClosure hsfmem hfresh hW
+    intro b' hb'
+    rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+    · rw [hm] at hshape hsub
+      rw [hshape.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      rw [hb']
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hsub x hx
+      · exact hbClosure x hx
+    · rw [hm] at hshape hsub
+      rw [hshape.1] at hb'
+      obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hsub x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+      · exact hbClosure x hx
+    · rw [hm] at hshape hsub
+      rw [hshape.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      rw [hb']
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hsub x hx
+      · exact hbClosure x hx
+    · rw [hm] at hshape; exact absurd hshape (by simp)
 
 /-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 

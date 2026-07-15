@@ -47,7 +47,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 517 [RESEARCHED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+  └─ 517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
     └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
@@ -114,7 +114,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509, Task 512, Task 516

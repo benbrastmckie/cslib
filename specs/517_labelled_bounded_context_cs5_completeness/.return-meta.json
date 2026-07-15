@@ -1,27 +1,21 @@
 {
-  "status": "researched",
-  "started_at": "2026-07-14T00:00:00Z",
-  "completed_at": "2026-07-15T00:00:00Z",
+  "status": "planned",
+  "agent_type": "planner-agent",
+  "task_number": 517,
+  "session_id": "sess_1784127828_1f2b2f",
+  "delegation_path": ["orchestrator", "plan", "planner-agent"],
   "artifacts": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/reports/01_labelled-bounded-context-method.md",
-      "type": "report",
-      "summary": "Simpson's labelled method for CS5 completeness: spine relocated from Ch.7-8 (f.m.p., excludes IS5) to Ch.5+6+8.1; three real spine lemmas stated; guardrail non-triggering verified with mechanism; B_K |= cs5FCIncest so landed soundness transfers; 9-phase plan (~2050-2450 lines); hardest node P8 named; ~50% confidence."
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md",
+      "type": "plan"
     }
   ],
-  "partial_progress": {
-    "stage": "finished",
-    "details": "Research complete. Report + orchestrator handoff written."
-  },
-  "metadata": {
-    "session_id": "sess_1784127828_1f2b2f",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "next_action_hint": "plan",
-    "confidence": "~50% (45-55%)",
-    "guardrail_verdict": "none trip",
-    "no_production_lean_written": true,
-    "zero_debt": "no sorry or axiom proposed"
-  }
+  "phase_count": 9,
+  "estimated_hours": 22,
+  "dependency_waves": [[1], [2], [3, 4], [5], [6], [7], [8], [9]],
+  "gated_phase": 3,
+  "gated_phase_name": "Adequacy bridge -- Lemma 6.2.2 + Lemma 6.1.2/6.2.3 tree internalization (dispatched first among risk-bearing nodes)",
+  "confidence": "~50% (45-55%)",
+  "next_steps": "Run /implement 517 to execute the plan",
+  "memory_candidates": []
 }

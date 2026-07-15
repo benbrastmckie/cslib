@@ -125,6 +125,49 @@ lemma branchSatisfiableIn_trivial_imp [DecidableEq Atom] [Hashable Atom]
   obtain ⟨W, m, f, -, hedges, hb⟩ := h
   exact ⟨W, m, f, hedges, hb⟩
 
+/-! ## Task 513 Phase 1: Frame-Relativized Closed-Branch Unsatisfiability -/
+
+/-- **Task 513 (Phase 1)**: a classically closed modal branch is unsatisfiable-in-`FC`, for any
+frame condition `FC`. Trivial generalization of `modalClosed_unsat` (`SoundnessStep.lean:92`):
+dropping the `FC m.r` witness from a `branchSatisfiableIn FC` hypothesis recovers exactly the
+frame-free `branchSatisfiable` hypothesis `modalClosed_unsat` consumes. Feeds the closed-leaf
+case of the generic fuel induction `modalExpandBranchesGen_closed_unsatIn` (Phase 3). -/
+lemma modalClosed_unsatIn [DecidableEq Atom] (FC : FrameCondition)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hclosed : isModalClosed b = true) (acc : Accessibility) :
+    ¬ branchSatisfiableIn FC b acc := by
+  intro ⟨W, m, f, _, hedges, hb⟩
+  exact modalClosed_unsat b hclosed acc ⟨W, m, f, hedges, hb⟩
+
+/-- **Task 513 (Phase 1)**: `FC`-lifted variant of `negImp_alpha_preserved`
+(`SoundnessStep.lean`) for the generic `impNeg` arm of the frame-relativized crux
+(`modalStepBranchGen_preserves_satIn`, Phase 2): if `F(A → C)@lbl` fails to be satisfied by
+`(m, f)` (with `FC m.r`), and `b` (with accessibility `acc`) is otherwise `branchSatisfiableIn
+FC`, then `[T(A)@lbl, F(C)@lbl] ++ b` is `branchSatisfiableIn FC`. Identical proof to the K
+original, with the `FC m.r` witness threaded through unchanged (the model `(W, m)` is never
+rebuilt). -/
+lemma negImp_alpha_preserved_gen (FC : FrameCondition)
+    {A C : Proposition Atom} {lbl : WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : FC m.r)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+                    (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
+    (hneg : ¬Satisfies m (f lbl) (Proposition.imp A C)) :
+    branchSatisfiableIn FC ([⟨.pos, A, lbl⟩, ⟨.neg, C, lbl⟩] ++ b) acc := by
+  simp only [Satisfies] at hneg
+  have hsa : Satisfies m (f lbl) A := by by_contra h; exact hneg (fun ha => absurd ha h)
+  have hnc : ¬Satisfies m (f lbl) C := fun hC => hneg (fun _ => hC)
+  refine ⟨W, m, f, hFC, hacc, ?_⟩
+  intro sf' hmem'
+  simp only [List.mem_append, List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+  rcases hmem' with (rfl | rfl) | hmem_old
+  · exact ⟨fun _ => hsa, fun h => by simp at h⟩
+  · exact ⟨fun h => by simp at h, fun _ => hnc⟩
+  · exact hb sf' hmem_old
+
 /-! ## K Soundness Re-Derived Through `frameValid` -/
 
 /-- The modal K tableau is sound through the frame-relativized vocabulary: if the tableau

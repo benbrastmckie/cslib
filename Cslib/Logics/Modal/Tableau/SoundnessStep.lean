@@ -410,8 +410,12 @@ satisfiable via `(m, f)`, then `[T(A)@lbl, F(C)@lbl] ++ b` is satisfiable via `(
 
 This is the shared tail of the ~18 leaf case-arms of `modalStepBranch_preserves_sat` for the
 negative-implication α-rule where the antecedent `A` is not itself a negated implication
-(`A ≠ A₁ → ⊥`); see `negImp_alpha_preserved_neg` for that shape. -/
-private lemma negImp_alpha_preserved
+(`A ≠ A₁ → ⊥`); see `negImp_alpha_preserved_neg` for that shape.
+
+De-privatized (task 513) so the generic frame-relativized crux (`FrameSoundness.lean`) can
+consume the K-specific instance directly; an `FC`-lifted variant for the generic `impNeg` arm
+lives alongside `modalStepBranchGen_preserves_satIn` in `FrameSoundness.lean`. -/
+lemma negImp_alpha_preserved
     {A C : Proposition Atom} {lbl : WorldIndex}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)}
     {acc : Accessibility}
@@ -431,6 +435,100 @@ private lemma negImp_alpha_preserved
   · exact ⟨fun _ => hsa, fun h => by simp at h⟩
   · exact ⟨fun h => by simp at h, fun _ => hnc⟩
   · exact hb sf' hmem_old
+
+/-- **Task 513 (Phase 1)**: box-positive arm semantic soundness, extracted from
+`modalStepBranch_preserves_sat`'s K monolith (below, the `| box φ =>` arm) as a standalone
+`RuleResultSat`-valued lemma about `modalApplyOne` directly (not `modalStepBranch`). Given
+`T(□φ)@lbl ∈ b` and `b` satisfied by `(m, f)` w.r.t. `acc`, `modalApplyOne`'s output on
+`⟨.pos, .box φ, lbl⟩` leaves `acc` unchanged and is `RuleResultSat`. Consumed by the generic
+frame-relativized crux (`FrameSoundness.lean`) to discharge its `hBoxPos` hypothesis at
+`apply := modalApplyOne`, `FC := trivialFC` (K zero-regression, Phase 4). -/
+lemma modalApplyOne_boxPos_sound
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+                    (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOne (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOne
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hpos : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  split_ifs with hemp
+  · exact ⟨rfl, trivial⟩
+  · refine ⟨rfl, ?_⟩
+    intro sf' hmem'
+    simp only [boxPropagation, Accessibility.successorsOf, List.mem_filterMap] at hmem'
+    obtain ⟨w', ⟨⟨src, tgt⟩, hedge_mem, hsrc⟩, hsf'⟩ := hmem'
+    simp only [beq_iff_eq] at hsrc
+    split_ifs at hsrc with hsrceq
+    · simp only [Option.some.injEq] at hsrc
+      subst hsrc
+      have hedge : acc.hasEdge lbl tgt = true := by
+        rw [show lbl = src from hsrceq.symm]
+        simp only [Accessibility.hasEdge, List.any_eq_true]
+        exact ⟨(src, tgt), hedge_mem, by simp⟩
+      split_ifs at hsf' with hinb
+      · simp only [Option.some.injEq] at hsf'
+        subst hsf'
+        exact sfSat_pos m f φ tgt (by
+          simp only [Satisfies] at hpos
+          exact hpos (f tgt) (hacc lbl tgt hedge))
+
+/-- **Task 513 (Phase 1)**: diamond-negative arm semantic soundness, extracted from
+`modalStepBranch_preserves_sat`'s K monolith (below, the `| diamond φ =>` arm in the `neg`
+case) as a standalone `RuleResultSat`-valued lemma. Dual of `modalApplyOne_boxPos_sound`. -/
+lemma modalApplyOne_diaNeg_sound
+    {W : Type} (m : Model W Atom) (f : WorldIndex → W)
+    (φ : Proposition Atom) (lbl : WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧
+                    (sf.sign = .neg → ¬Satisfies m (f sf.label) sf.formula))
+    (hmem :
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOne
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOne
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hneg : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+  simp only [Satisfies] at hneg
+  push Not at hneg
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  split_ifs with hemp
+  · exact ⟨rfl, trivial⟩
+  · refine ⟨rfl, ?_⟩
+    intro sf' hmem'
+    simp only [List.mem_filterMap, Accessibility.successorsOf] at hmem'
+    obtain ⟨tgt, ⟨⟨src, tgt'⟩, hedge_mem, hsrc⟩, hsf'⟩ := hmem'
+    simp only [beq_iff_eq] at hsrc
+    split_ifs at hsrc with hsrceq
+    · simp only [Option.some.injEq] at hsrc
+      subst hsrc
+      have hedge : acc.hasEdge lbl tgt' = true := by
+        rw [show lbl = src from hsrceq.symm]
+        simp only [Accessibility.hasEdge, List.any_eq_true]
+        exact ⟨(src, tgt'), hedge_mem, by simp⟩
+      split_ifs at hsf' with hinb
+      · simp only [Option.some.injEq] at hsf'
+        subst hsf'
+        exact sfSat_neg m f φ tgt' (hneg (f tgt') (hacc lbl tgt' hedge))
 
 /-- If `modalStepBranch b e acc = some (newBs, newExps, newAcc)` and `b` is satisfiable
 (with the freshness invariant `hInv`), then some branch in `newBs` is satisfiable.

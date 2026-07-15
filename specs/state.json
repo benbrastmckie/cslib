@@ -30,7 +30,7 @@
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [],
@@ -47,8 +47,15 @@
           "type": "report",
           "path": "specs/511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md",
           "summary": "S4 termination guard redesign: birth-key invariant, pigeonhole bound, Phase 9 blocker"
+        },
+        {
+          "type": "summary",
+          "path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
+          "summary": "Phases 1-4 green; Phase 5 structurally blocked (keysDistinct)"
         }
-      ]
+      ],
+      "blockers": "Phase 5 (_preserves_keysDistinct) is a genuine structural obstruction: blockingWorldS4_none_fresh checks against LIVE relevant sets while keyLowerBd only gives key ⊆ live set, so a fresh birth key cannot be shown distinct from existing recorded keys (a world live set routinely grows past its own birth key; counterexample constructed). Fix requires comparing against RECORDED keys, a materially larger guard redesign (~Phase 9 scope). Phases 1-4 landed green (exponent fix 2^(2|Sf|), signedSubfmls key infra, successorBirthContent/blockingWorldS4 minting guard, modalStepBranchS4Keyed + restated S4LoopInv); zero sorry/axiom, full CI green. Phases 6-7 depend on Phase 5. Also: independent Phase 9 blocker remains (task 510 modalExpandBranchesGen_hintikka cannot be instantiated for S4).",
+      "completion_summary": "PARTIAL/[BLOCKED]: Phases 1-4 of S4 termination bound landed green (zero sorry/axiom, full CI). Phase 5 keysDistinct preservation blocked by documented structural obstruction requiring recorded-key guard redesign; Phases 6-7 gated on it. Recommend follow-on task for keys-aware guard redesign."
     },
     {
       "project_number": 510,
@@ -1237,7 +1244,7 @@
     {
       "project_number": 504,
       "project_name": "s5_and_kb55route_euclidean_decidability_via_generic_tableau_",
-      "status": "researched",
+      "status": "planned",
       "task_type": "cslib",
       "description": "Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): S5 universal-cluster simplification (no loop-checking needed) and 5/Euclidean coverage via the KB5/S5 equivalence route. Implement the 'propagate box to ALL branch worlds' universal rule in a new Cslib/Logics/Modal/Tableau/S5Simplification.lean; extract the countermodel via Relation.EqvGen (Std.Refl+IsTrans+IsSymm/IsEquiv free). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (world creation confined to the unmodified K diamondPos/boxNeg arms; each diamond mints at most once per formula). Prove the truth lemma over the universal relation; state s5Valid / Decidable (s5Valid phi) against Cube.S5. Additionally expose the Euclidean frame condition (Relation.RightEuclidean) for the equivalence-extracted model (every equivalence relation is Euclidean) and state 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean's API (RightEuclidean.symm, refl_serial). Document in-file that genuine pure-K5 (Euclidean without full equivalence; no Mathlib closure operator) remains out of scope, per the parent plan's non-goals. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean (new), Cslib/Logics/Modal/Tableau/FrameSoundness.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean.",
       "effort": "5-7 hours",
@@ -1248,8 +1255,13 @@
         505
       ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-14T17:57:00Z",
+      "last_updated": "2026-07-15T02:29:10Z",
       "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/plans/01_s5-kb5-euclidean-decidability.md",
+          "summary": "7-phase S5/KB5 Euclidean decidability; mirrors B precedent; Phase 5 cluster-connectivity is BLOCKED risk"
+        },
         {
           "path": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md",
           "type": "report",
@@ -1265,12 +1277,13 @@
           "type": "report",
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
         }
-      ]
+      ],
+      "session_id": "sess_1784075478_630e1e_504"
     },
     {
       "project_number": 505,
       "project_name": "b_symmetric_decidability_via_generic_tableau_driver",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the B (symmetric-frame) system. Add the symmetric box rule to Cslib/Logics/Modal/Tableau/FrameRules.lean: box-positives propagate backward along recorded edges (T(box phi)@w + edge v->w gives T(phi)@v), dually for F(diamond); add the backward-propagation saturation conjunct. Extract the countermodel via Relation.SymmGen (Std.Symm free from Relation.SymmGen.instSymm). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (backward propagation adds formulas only at existing worlds, so the K world bound and finite formula catalog survive unchanged). Prove the B truth-lemma bridge over the symmetric closure. State bValid / Decidable (bValid phi) against Cube.B / Satisfies.b (Basic.lean). Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (B arms), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelB, B bridge, bValid + Decidable), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (B arm).",
       "effort": "5-7 hours",
@@ -1280,7 +1293,7 @@
         513
       ],
       "created": "2026-07-14T17:57:00Z",
-      "last_updated": "2026-07-15T00:18:13Z",
+      "last_updated": "2026-07-15T02:18:32Z",
       "artifacts": [
         {
           "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/01_frame-specific-tableau-extensions.md",
@@ -1298,7 +1311,8 @@
           "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
         }
       ],
-      "session_id": "sess_1784054776_0fc973_505"
+      "session_id": "sess_1784075478_630e1e_505",
+      "completion_summary": "Delivered the full B (symmetric-frame) tableau system: backward-propagation rule (modalApplyOneB), new BDriver.lean, accSourcesKnown invariant, symmetric-closure model extraction (extractModelB via Relation.SymmGen), B truth lemma, rule+driver soundness, bValid completeness, and Decidable (bValid φ). Phase 9 delivered in full by consuming task 513 generic soundness chain. All 9 phases green, zero sorry, zero axiom, full CI."
     },
     {
       "project_number": 506,

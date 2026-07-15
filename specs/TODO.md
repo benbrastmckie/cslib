@@ -11,8 +11,8 @@ next_project_number: 514
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,505,511,512 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,504,506 | 36,37,181,317,407,425,449,505,511 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,512 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
@@ -38,9 +38,8 @@ next_project_number: 514
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-505 [PLANNED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
-  └─ 504 [RESEARCHED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+504 [PLANNED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [IMPLEMENTING] — Attempt CS5 constructive completeness (Branch A) by building the 
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
@@ -87,7 +86,7 @@ next_project_number: 514
 
 ### Uncategorized
 
-511 [PLANNED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
@@ -118,11 +117,12 @@ next_project_number: 514
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [PLANNED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
 - **Research**: [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
+- **Summary**: [511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md]
 
 **Description**: Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.
 
@@ -192,7 +192,7 @@ next_project_number: 514
 
 ### 505. B symmetric decidability via generic tableau driver
 - **Effort**: 5-7 hours
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 513
@@ -207,10 +207,11 @@ next_project_number: 514
 
 ### 504. S5 and kb55route euclidean decidability via generic tableau 
 - **Effort**: 5-7 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 513, Task 505
+- **Plan**: [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/plans/01_s5-kb5-euclidean-decidability.md]
 - **Research**:
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md]
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/02_spawn-analysis.md]

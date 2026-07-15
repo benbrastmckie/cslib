@@ -1,13 +1,13 @@
 {
-  "status": "researched",
+  "status": "planned",
   "task_number": 517,
   "session_id": "sess_1784127828_1f2b2f",
-  "summary": "Research dispatch after 3 failed adequacy-gate attempts. Consulted two literatures against PRIMARY SOURCES (Simpson 1994 PDF pp.51-59 + pp.100-109; Marin-Morales-Strassburger 2021 full paper; Pacheco 2024 corpus chunks). FOUR findings, in order of value. (1) CHEAPER-ROUTE VERDICT: the semantic detour AS FRAMED is CIRCULAR (labelled=>Hilbert IS the goal; Marin et al. confirm by construction -- their Thm 3.3 leg 4=>1 is IMPORTED from [Ser84,PS86], not proved). BUT the adequacy bridge is almost certainly NOT NEEDED AT ALL: Simpson proves IS5 completeness in CHAPTER 3 (Theorem 3.3.4, p.56, verbatim) by canonical model, citing Fischer Servi; Chapter 6 (Thm 6.2.1, p.107, verbatim) answers a DIFFERENT question -- is IK+Ax(T) a complete axiomatization of the LABELLED system's theorems. The plan routed cs5_completeness through Ch.6 unnecessarily. (2) NEW DEFECT (5th correction in 4 dispatches, source-verified): IKAx is NOT IK. Simpson Figure 3-6 (p.52, verbatim) gives IK = IPL + nec + axioms 1-5; IKAx (probes/lemma612-scaffold.lean:78-109) has ONLY axioms 1 (kBox) and 2 (kDia) -- missing axiom 3 (not-dia-bot), axiom 4 (dia(AvB) => diaA v diaB), axiom 5 ((diaA => boxB) => box(A=>B)). Simpson's Lemma 6.1.2 (boxE) case p.102 and formula (6.8) p.104 EXPLICITLY require axiom 5, so Lemma 6.1.2 was NEVER provable against this scaffold, independent of every tree defect found so far. Corroborated independently by Pacheco chunk_0003 (IK = CK + FS + DP + N). This defect sits inside the file dispatch 1 called COMPLETE and dispatch 3 called fully reusable. Repair is cheap and non-breaking. (3) The (diaE) case is NOT the crux and never was -- fully reconstructed from (6.4)-(6.8) pp.104-105 in ~3 Hilbert steps; Figure 6-2 is NOT new machinery (it is Figure 6-1 applied to subtree T^i at target y_j); the pruned/full relation is ONE near-trivial unfolding identity verified 3x in the source, which DISSOLVES D3's Star_append gap (delete it, do not fix it). True crux is the pathSpine/addChild commutation. (4) UNIFYING EXPLANATION for task 512: Simpson's canonical model proves frame condition (F2) 'by axiom 5 of IK' (p.53) = FS -- the exact axiom CS5 lacks. Both 512 and 517 have been attacking logics missing FS. Pacheco (Conclusion, chunk_0016, verbatim) proves CKB=IKB and states 'constructive and intuitionistic variations of DB, TB, KB5, and S5 coincide'. Also verified by web search: NO mechanization of Simpson's N_IK, of labIK-leq, or of any labelled<->Hilbert adequacy for intuitionistic modal logic exists anywhere; the one Lean labelled<->label-free adequacy (FormalizedFormalLogic/ProvabilityLogic, classical GL) could NOT do labelled=>label-free syntactically and fell back to semantics.",
+  "summary": "Revision COMPLETE (plans/02_decomposed-track-a-b-c.md). Start at handoffs/00_RESUME-HERE.md. Next concrete step: A1 then A2 per Track A.",
   "artifacts": [
     "specs/517_labelled_bounded_context_cs5_completeness/reports/02_adequacy-alternatives-and-technique.md"
   ],
-  "outcome": "research_complete_route_change_recommended",
-  "next_action_hint": "revise",
+  "outcome": "plan_02_written; adequacy-bridge reframed as NOT on critical path; next = Track A (A1 fix IKAx, A2 probe CS5-derives-FS, decisive for 512 too)",
+  "next_action_hint": "implement",
   "decomposition": {
     "shape": "Track A (route selection + defect repair; 3 small parts; do FIRST) -> then Track B (semantic route, gated on A3 GO) OR Track C (Simpson tree surgery, 8 decomposed parts, fallback)",
     "track_a": [
@@ -46,10 +46,18 @@
   "metadata": {
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
+    "delegation_path": [
+      "orchestrator",
+      "research",
+      "cslib-research-agent"
+    ],
     "lit_flag": true,
     "orchestrator_mode": true,
     "supersedes": "prior .orchestrator-handoff.json (dispatch 3, status=blocked/gate_fail); backup at scratchpad/prev-handoff-backup.json; handoffs/ documents remain accurate historical records of their own findings",
-    "sorry_inventory": {"added": 0, "note": "research dispatch; no Lean written; nothing under Cslib/ touched"}
-  }
+    "sorry_inventory": {
+      "added": 0,
+      "note": "research dispatch; no Lean written; nothing under Cslib/ touched"
+    }
+  },
+  "last_updated": "2026-07-15T19:49:20Z"
 }

@@ -1,37 +1,10 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-15T10:30:00Z",
-  "completed_at": "2026-07-15T11:15:00Z",
-  "requires_user_review": true,
-  "review_reason": "Research dispatch delivered a route-change recommendation plus a NEW source-verified defect (IKAx is not IK -- missing axioms 3/4/5, and Lemma 6.1.2 provably requires axiom 5). Recommends NOT opening a fourth tree-surgery dispatch; instead run Track A (A1 defect fix, A2 the CS5 |- FS probe, A3 route verdict) then Track B (semantic route) or Track C (decomposed tree surgery). next_action_hint=revise.",
-  "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/reports/02_adequacy-alternatives-and-technique.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
-  ],
-  "partial_progress": {
-    "stage": "research_complete",
-    "details": "Read 3 handoffs + report/plan; read primary sources directly (Simpson 1994 PDF pp.51-59 + pp.100-118 for IK axiomatization/Thm 3.3.4/Fig 6-1/6-2/(6.1)-(6.11); Marin-Morales-Strassburger 2021 full paper; Pacheco 2024 corpus chunks 0002-0004,0016); web-searched existing mechanizations (none found). Wrote report 02 and orchestrator handoff.",
-    "phases_completed": 0
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": null,
-    "ci_pipeline_passed": null,
-    "note": "Research dispatch. No Lean code written; nothing under Cslib/ touched."
-  },
+  "status": "planned",
   "metadata": {
-    "session_id": "sess_1784127828_1f2b2f",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
     "task_number": 517,
-    "lit_flag": true,
-    "orchestrator_mode": true,
-    "outcome": "research_complete_route_change_recommended",
-    "next_action_hint": "revise",
-    "prior_status": "blocked_gate_fail_final"
+    "outcome": "plan_02_written_next_track_A",
+    "next_action_hint": "implement",
+    "resume_pointer": "handoffs/00_RESUME-HERE.md",
+    "updated": "2026-07-15T19:49:20Z"
   }
 }

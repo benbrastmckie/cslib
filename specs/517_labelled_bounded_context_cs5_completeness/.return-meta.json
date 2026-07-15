@@ -1,48 +1,14 @@
 {
   "status": "partial",
-  "started_at": "2026-07-15T00:00:00Z",
-  "phases_completed": 6,
-  "phases_total": 6,
-  "artifacts": [
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/track-c-c1-tele-conj.lean",
-      "type": "probe",
-      "summary": "C3 section appended: derivable_imp_trans, formula_6_8 (Simpson 6.8, holds for all W). Sorry-free, axiom footprint [propext, Classical.choice, Quot.sound]."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/02_decomposed-track-a-b-c.md",
-      "type": "plan",
-      "summary": "C3 marked [COMPLETED]."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/05_c3-formula-6-8-summary.md",
-      "type": "summary",
-      "summary": "Track C C3 execution summary."
-    },
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
-      "type": "handoff",
-      "summary": "Resume pointer updated to Track C C4."
-    }
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "not_run_probe_only",
-    "notes": "Probe file only (specs/.../probes/, not Cslib/), verified via `lake env lean` (exit 0) rather than full lake build/CI pipeline, per established C1/C2 convention for this task -- no Cslib/ source files were touched this dispatch, so the CSLib CI pipeline (lake lint, lint-style, shake, mk_all, test) is not applicable."
-  },
-  "memory_candidates": [
-    "CSLib DerivationTree idiom: to lift a closed axiom instance (Deriv Axioms [] phi via .ax [] _ h) into a nonempty context Gamma, must explicitly weaken (weakening_deriv or .weakening [] _ _ ... (by simp)) -- .ax's context argument does NOT auto-generalize.",
-    "Hilbert-style proof pattern: derivable_imp_trans (transitivity of Derivable-implication, composing two closed A-imp-B / B-imp-C facts via a single-hypothesis context + assumption/weakening/mp/impIntro) is a broadly reusable combinator for chained Hilbert derivations -- worth considering for promotion into shared CSLib Metalogic infra if more tasks need it.",
-    "When a source text (Simpson 1994) asserts a formula is 'derived by repeated application of axiom X' without giving the sub-derivation, do not assume a single flat instantiation of axiom X suffices -- check by hand whether the naive substitution's consequent actually matches the target (it did not for formula 6.8: naive hFS instantiation produces box(phi imp psi), not the target box psi, and bridging requires a genuine induction, not a bare IPL fact, once the antecedent contains a diamond-guarded tail)."
-  ],
   "metadata": {
-    "session_id": "sess_1784145761_061228",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+    "task_number": 517,
+    "cycles_used": 5,
+    "final_state": "implementing",
+    "outcome": "track_a_complete_trackB_closed_trackC_C1-C4_landed",
+    "next_action_hint": "implement",
+    "resume_pointer": "handoffs/00_RESUME-HERE.md",
+    "resume_at": "Track C C5 (the crux)",
+    "sorry_inventory": [],
+    "updated": "2026-07-15T21:48:54Z"
   }
 }

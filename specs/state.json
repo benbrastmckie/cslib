@@ -1792,7 +1792,7 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
@@ -1803,7 +1803,7 @@
       ],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-15T19:34:35Z",
+      "last_updated": "2026-07-15T21:48:29Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1813,7 +1813,55 @@
           "summary": "Decomposed Track A/B/C plan: adequacy bridge NOT needed for completeness; A2 (CS5 derives FS probe) is the decisive next step, shared with task 512."
         }
       ],
-      "blockers": "REFRAME (report 02, source-PDF grounded): the 3 failed adequacy-gate dispatches chased Simpson Ch.6 (Theorem 6.2.1), which is NOT on the critical path to cs5_completeness (~85%). Simpson proves IS5 completeness in Ch.3 (Theorem 3.3.4, p.56) via CANONICAL MODEL citing Fischer Servi (FS axiom) -- plan 01 routed cs5_completeness through Ch.6 unnecessarily. 5th mechanization defect found (~97%): the scaffold IKAx (probes/lemma612-scaffold.lean:78-109) is NOT Simpson IK -- has only axioms 1-2 (kBox,kDia), MISSING 3/4/5; Simpson (boxE) p.102 + formula (6.8) p.104 require axiom 5, so Lemma 6.1.2 was never provable against it. UNIFIED DIAGNOSIS: the same FS/axiom-5 is what task 512s wall lacks (Simpson canonical model proves F2 by axiom 5, p.53). PATH FORWARD (decomposed per user directive): Track A -- A1 repair IKAx; A2 (highest-leverage) attempt sorry-free CS5 |- FS (decisive for BOTH 517 and 512; Pachecos CS5==IS5 collapse may entail it); A3 route GO/NO-GO. Then Track B (semantic via Ch.3 canonical model + Fischer Servi -- needs FischerServi1984 ingested, NOT in corpus) on GO, else Track C (Simpson tree surgery, C1-C8, ~25-30pct in 2-3 dispatches). DO NOT open a 4th tree-surgery dispatch. Landed labelled framework (789 lines, CI-green, sorry-free) stands as an independent contribution decoupled from cs5_completeness. Confidence: bridge-not-needed ~85pct; A2 ~40pct. SESSION LIMIT hit (resets 1pm PT) -- dispatches throttled."
+      "blockers": "TRACK B CLOSED (A3 verdict, this session): Pacheco's canonical CKB-relation, once extended with axiom T to reach CS5, automatically satisfies the hypotheses of the axiom-free cs5Incest_forces_symm (CS5Canonical.lean:643) -- forcing cs5Tail shape and hitting cs5_symmetric_tail_box_gap (CS5.lean:712, task 509). Same wall task 512's phase-7 gate already proved dead. A2's syntactic gap was orthogonal (Pacheco Thm 13 is proved semantically, never transports CS5|-FS). ROUTE = TRACK C (Simpson tree surgery, C1-C8). LANDED sorry-free + axiom-clean this session, all in probes/ (zero Cslib/ files touched): A1 (IKAx repaired with Simpson base-IK axioms 3/4/5), A2 (fs_context_relative_half mechanizes the syntactic obstruction; fs_sound'' proves semantic FS-validity over cs5FC'', axiom-free), C1 (Conj/Tele over List + Tele_imp1/Tele_imp2, generic over Axioms), C2 (Simpson formula 6.7 -- NOTE: the literal formula is FALSE for V=[], refuted by a 3-world countermodel; restated for nonempty V, matching Simpson's actual usage), C3 (formula 6.8, valid for ALL W -- base case checked and genuinely holds), C4 (LTree/star/fullSubtree/prune + the unfolding identity as a two-way IK-derivable implication, NOT raw Eq; fixed a defective double-bigAnd star; deleted pathTo/pathToList/Star_append). NEXT = C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma -- THE TRUE CRUX, HIGH risk, must be its own dedicated dispatch. Then C6 (LTree.toGraph + tau-parameterized generalized induction), C7 (diaE case), C8 (botE/orE). Gap still flagged: FischerServi1984 NOT in literature corpus (was only needed for Track B step B3; now moot). Resume: handoffs/00_RESUME-HERE.md.",
+      "session_id": "sess_1784145761_061228",
+      "plan_metadata": {
+        "phases": 15,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 2,
+        "dependency_waves": [
+          [
+            1,
+            2,
+            7
+          ],
+          [
+            3,
+            8,
+            9,
+            10
+          ],
+          [
+            4,
+            11
+          ],
+          [
+            5,
+            12
+          ],
+          [
+            6,
+            13,
+            14
+          ],
+          [
+            15
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_labelled-bounded-context-method.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-07-15"
+          },
+          {
+            "path": "reports/02_adequacy-alternatives-and-technique.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-07-15"
+          }
+        ]
+      }
     },
     {
       "project_number": 518,

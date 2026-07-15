@@ -1,5 +1,5 @@
 ---
-next_project_number: 519
+next_project_number: 520
 ---
 
 # TODO
@@ -13,7 +13,7 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515,519 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -90,12 +90,33 @@ WARNING: Task 517 not assigned to a wave (possible circular dependency)
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Literature
+
+519 [NOT STARTED] — Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
+
 ### Uncategorized
 
 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
+
+### 519. Fix literature ocr chunking and wijesekera
+- **Effort**: 3-5 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Topic**: Literature
+- **Dependencies**: Task 518
+
+**Description**: Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
+
+(1) RE-INGEST wijesekera_1990_constructivemodallogicsi (BibKey Wijesekera1990). Task 518's corpus audit found it has the IDENTICAL over-fragmentation signature that made Simpson unusable: 154 chunks, 468B mean, 62% under 300B. This document matters -- Wijesekera 1990 is THE source for CSLib's constructive (fallible-world) DIAMOND semantics, cited in Cslib/Logics/Modal/Metalogic/Constructive/ (CS4.lean and CS5.lean docstrings reference it for Definition 1.1.4 and Section 2), and is directly relevant to in-flight task 517. Apply task 518's proven fix (documented in specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md): bypass the font-size heading heuristic, extract via pdftotext -layout, apply paragraph-reflow to repair OCR line-break noise, insert chapter/section-level headings only, then feed the existing unmodified literature-chunk.sh Pass-2 merge. VALIDATE that Definition 1.1.4 and the Section 2 diamond / fallible-world definitions return COMPLETE statements via literature-search.sh. Preserve the old chunk set as rollback, as 518 did.
+
+(2) HARDEN THE ROOT CAUSE (the general fix that 518 deliberately left undone). literature-convert.sh's PyMuPDF path falls back to a FONT-SIZE heading-detection heuristic when a PDF has no embedded TOC. On OCRmyPDF/Tesseract scans the per-line font metrics are noisy, so it emits spurious markdown headings mid-sentence and mid-word, and literature-chunk.sh then splits at every one -- shredding lemma statements. Fix so it does not fire on OCR'd scans: detect the OCR producer (Tesseract / OCRmyPDF metadata), require corroborating cues (line length, position, numbering, blank-line context) before accepting a font-size heading, and/or add a post-check rejecting headings that split mid-sentence. ALSO add a guard so any future ingest yielding a pathological mean chunk size (under roughly 600B) warns loudly rather than silently landing a shredded corpus. Task 518 scoped its fix to Simpson only and left the shared scripts untouched; this task does the general repair so all future --lit work benefits.
+
+NOTE the honest ceiling from 518: prose is recoverable but math symbols are frequently garbled by Tesseract. Do NOT attempt to fix OCR quality itself -- only the chunking/heading pathology. Do not touch Cslib/ Lean source. Low risk, high leverage.
+
+---
 
 ### 518. Reingest simpson1994 literature corpus
 - **Effort**: 2-4 hours

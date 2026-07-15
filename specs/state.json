@@ -1,5 +1,5 @@
 {
-  "next_project_number": 519,
+  "next_project_number": 520,
   "active_projects": [
     {
       "project_number": 513,
@@ -1799,6 +1799,23 @@
       "effort": "2-4 hours",
       "artifacts": [],
       "completion_summary": "Re-chunked Simpson 1994 in the global Literature corpus: root cause was PyMuPDF font-heuristic heading misdetection on this OCR scan (no embedded TOC), producing 1091 chunks (~312B mean) that truncated lemma statements. Fixed via plain pdftotext -layout extraction + custom paragraph reflow + chapter-only headings, through the existing literature-chunk.sh Pass-2 merge -> 206 chunks, ~1.7KB mean. Verified Lemma 5.3.1, Lemma 5.3.2, Theorem 6.2.1, and the p.161 \"other than IS5\" passage all intact. Audited corpus: found wijesekera_1990_constructivemodallogicsi has the same fragmentation bug (154 chunks, 468B mean, 62% under 300B) -- not fixed, reported for follow-up."
+    },
+    {
+      "project_number": 519,
+      "project_name": "fix_literature_ocr_chunking_and_wijesekera",
+      "status": "not_started",
+      "task_type": "general",
+      "topic": "Literature",
+      "description": "Follow-up to task 518 (Simpson re-ingest). TWO PARTS.\n\n(1) RE-INGEST wijesekera_1990_constructivemodallogicsi (BibKey Wijesekera1990). Task 518's corpus audit found it has the IDENTICAL over-fragmentation signature that made Simpson unusable: 154 chunks, 468B mean, 62% under 300B. This document matters -- Wijesekera 1990 is THE source for CSLib's constructive (fallible-world) DIAMOND semantics, cited in Cslib/Logics/Modal/Metalogic/Constructive/ (CS4.lean and CS5.lean docstrings reference it for Definition 1.1.4 and Section 2), and is directly relevant to in-flight task 517. Apply task 518's proven fix (documented in specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md): bypass the font-size heading heuristic, extract via pdftotext -layout, apply paragraph-reflow to repair OCR line-break noise, insert chapter/section-level headings only, then feed the existing unmodified literature-chunk.sh Pass-2 merge. VALIDATE that Definition 1.1.4 and the Section 2 diamond / fallible-world definitions return COMPLETE statements via literature-search.sh. Preserve the old chunk set as rollback, as 518 did.\n\n(2) HARDEN THE ROOT CAUSE (the general fix that 518 deliberately left undone). literature-convert.sh's PyMuPDF path falls back to a FONT-SIZE heading-detection heuristic when a PDF has no embedded TOC. On OCRmyPDF/Tesseract scans the per-line font metrics are noisy, so it emits spurious markdown headings mid-sentence and mid-word, and literature-chunk.sh then splits at every one -- shredding lemma statements. Fix so it does not fire on OCR'd scans: detect the OCR producer (Tesseract / OCRmyPDF metadata), require corroborating cues (line length, position, numbering, blank-line context) before accepting a font-size heading, and/or add a post-check rejecting headings that split mid-sentence. ALSO add a guard so any future ingest yielding a pathological mean chunk size (under roughly 600B) warns loudly rather than silently landing a shredded corpus. Task 518 scoped its fix to Simpson only and left the shared scripts untouched; this task does the general repair so all future --lit work benefits.\n\nNOTE the honest ceiling from 518: prose is recoverable but math symbols are frequently garbled by Tesseract. Do NOT attempt to fix OCR quality itself -- only the chunking/heading pathology. Do not touch Cslib/ Lean source. Low risk, high leverage.",
+      "dependencies": [
+        518
+      ],
+      "parent_task": 518,
+      "created": "2026-07-15T15:41:21Z",
+      "last_updated": "2026-07-15T15:41:21Z",
+      "priority": "medium",
+      "effort": "3-5 hours",
+      "artifacts": []
     }
   ],
   "repository_health": {

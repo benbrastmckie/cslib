@@ -1,17 +1,17 @@
 ---
-next_project_number: 512
+next_project_number: 513
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-14. Generated from state.json dependency graph.*
+*Updated 2026-07-15. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,509,511 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,511,512 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,504,505,506 | 36,37,181,317,407,425,449,503,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,504,505,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -41,7 +41,7 @@ next_project_number: 512
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
   └─ 505 [RESEARCHED] — Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-509 [IMPLEMENTING] — OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from ta
+512 [NOT STARTED] — Attempt CS5 constructive completeness (Branch A) by building the 
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -92,6 +92,17 @@ next_project_number: 512
 
 ## Tasks
 
+### 512. Cs5 box backward atom sum completeness
+- **Effort**: 10-16 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 509
+
+**Description**: Attempt CS5 constructive completeness (Branch A) by building the box-backward truth-lemma case that task 509 left open. 509 delivered CS5 soundness over cs5FC'', the full canonical machinery up to cs5FC''_cs5Mreach, and a MECHANIZED OBSTRUCTION (Branch B): the box-backward case needs, given prime H with box-A not in H, a SIMULTANEOUS prime pair (H', T) with H subset H', boxInv H' subset T, boxInv T subset H', A not in T, box-A not in H'. Sequential Lindenbaum provably fails (cs5_symmetric_tail_box_gap, landed in CS5.lean) and the gap is non-vacuous (CS5BoxGapWorld countermodel, landed in CS5.lean). THE PHASE 8 FINDING (see specs/509_rescope_CK_CS5_constructive_completeness/probes/cs5-pair-primeness.lean, sorry-free): the pair poset with designated-formula exclusion (box-A not in X, A not in Y) has a clean seed, a clean chain-upper-bound, and pair-maximality projects to per-component maximality — BUT the library's single-formula primeness engine (prime_set_exclusion / set_maximal_is_prime, PrimeExclusion.lean:558/:428) does NOT directly apply, because the cross-condition predicate Cons_Y(Z) := boxInv Z subset Y (Y fixed) is NOT stable under deductive closure: Zorn-closing an insertion can derive new box-formulas not pinned to Y. THE DESIGNED REPAIR (not yet built): work over a doubled atom space Atom+Atom (tag X's formulas via Sum.inl, Y's via Sum.inr) under a COMBINED axiom system that adds the two cross-condition implications as axioms rather than carrying them as an external invariant, so that closure preserves them by construction; then recover the pair from the combined prime theory. Deliverables: build the combined derivation system, prove its primeness engine, extract cs5_box_backward, complete the CS5 truth lemma and completeness theorem. NO sorry, no new axiom. If this repair also fails, document WHY as a further mechanized theorem and keep completeness BLOCKED citing both obstructions — a rigorous negative result remains acceptable. Reuse the three landed prime_set_exclusion instantiation templates in CS5.lean (cs5_diam_witness, cs5_fcsymbox_theory, cs5_fc4_theory) and quasi_prime_set_exclusion. Do NOT transcribe Pacheco Lemma 16/18 verbatim (negation-completeness, unsound); only the Zorn skeleton ports. Literature: pacheco_2024_collapsingconstructiveandintuitionisticmodallogics in the corpus. Consider the deferred CS5Canonical.lean file-size split. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean (~1400 lines). Depends on 509.
+
+---
+
 ### 511. S4 loop checking termination
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
@@ -112,7 +123,7 @@ next_project_number: 512
 
 ### 509. Rescope CK CS5 constructive completeness
 - **Effort**: 12-20 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 508

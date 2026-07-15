@@ -411,33 +411,140 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 5: Canonical-frame incestuality verification (Došen-style, negation-completeness-free) [NOT STARTED]
+### Phase 5: Canonical-frame incestuality verification (Došen-style, negation-completeness-free) [BLOCKED]
 
 - **Goal:** Prove the canonical frame (worlds = quasi-prime theories, `R` one-sided) SATISFIES the
   ≤-mediated incestuality condition — the Došen-style verification, using ONLY the disjunction property
   + F1/F2 confluence, with NO `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ` step anywhere. *Medium–high risk, ~150–250 lines.*
 - **Tasks:**
-  - [ ] For canonical worlds `Γ, Δ` with `Γ Rᵏ ...`, construct the mediating `u′ ≥ u` via a prime
+  - [x] For canonical worlds `Γ, Δ` with `Γ Rᵏ ...`, construct the mediating `u′ ≥ u` via a prime
     (quasi-prime) Lindenbaum extension (`quasi_prime_exclusion` / `box_refuting_theory`) and the witness
     `x` via the same engine — establishing the incestuality condition's existential.
+    *(deviation: BLOCKED, not completed — see blocker below. Direct analysis shows NO extension `u′ ⊇ u`
+    can ever help: `boxInv` is monotone in its argument, so if `u.head` already contains some `□C` with
+    `C ∉ w.head`, then `u′.head ⊇ u.head` inherits `□C` too, and `w.head` is untouched by the choice of
+    `u′` — the goal `boxInv u′.head ⊆ w.head` is UNAFFECTED by extending `u`. So satisfying `cs5Incest`
+    for `cs5CanonMreach` is logically EQUIVALENT to plain (unmediated) symmetry of `cs5CanonMreach`,
+    which is mechanized below to be FALSE via a concrete counterexample — no Lindenbaum construction can
+    produce a `u′` that doesn't already reduce to this.*
   - [ ] Discharge the F1/F2 confluence obligations from the prime lemma (Simpson's chunk `8372…`
     continues into the F2 verification) — reuse `box_refuting_theory`/`quasi_prime_exclusion` verbatim.
-  - [ ] Confirm the whole verification is negation-completeness-free (this is the Phase 1 gate's promise
+    *(deviation: skipped — moot once the base `cs5Incest` goal was shown unprovable; no point discharging
+    auxiliary confluence obligations for a target that is false.)*
+  - [x] Confirm the whole verification is negation-completeness-free (this is the Phase 1 gate's promise
     now discharged in Lean); the B-axiom's canonical-frame content is a GLOBAL frame property, not a
     per-world back-inclusion.
-- **Timing:** ~4 hours
+    *(deviation: confirmed negative, not positive — the counterexample proof (below) is itself
+    negation-completeness-free (grep-confirmed, no `¬ϕ ∈`/complementation move anywhere), so the BLOCKER
+    is NOT a rediscovery of the Phase 1 negation-completeness wall. It is a distinct, new, purely
+    set-theoretic obstruction: see blocker writeup below.)*
+
+**BLOCKER (Phase 5):**
+- **What failed**: `cs5Incest (@cs5CanonMreach Atom)` — the literal Phase-5 goal — is **false**, not
+  merely hard to prove. Mechanized as `cs5Incest_cs5CanonMreach_false` (sorry-free, axiom-clean:
+  `[propext, Classical.choice, Quot.sound]` only) in `CS5Canonical.lean`.
+- **What was tried**: (1) The plan's own prescribed technique — construct `u′ ≥ u` via
+  `box_refuting_theory`/`quasi_prime_exclusion` Lindenbaum extension. Direct analysis (not just proof
+  search) shows this CANNOT work: `boxInv` is monotone under `⊆`, so extending `u.head` to `u′.head` can
+  only add MORE boxed formulas, never remove the one causing the problem, while the target `w.head` is
+  fixed. Concretely: `∃ u′ ⊇ u.head, boxInv u′.head ⊆ w.head` is logically EQUIVALENT to
+  `boxInv u.head ⊆ w.head` directly (`u′ := u` is WLOG-optimal; any proper extension only adds
+  obstructions). This collapses the ≤-mediated incestuality goal to PLAIN (unmediated) symmetry of
+  `cs5CanonMreach` — exactly the naive two-sided condition the whole task-512 pivot was designed to
+  AVOID (Marin Remark 7.3: "wrong intuitionistically"). (2) Attempted the Simpson-style "combine multiple
+  box-formulas via conjunction/disjunction" technique (chunk `8372f27240fe345d`/`chunk_0224-0227`,
+  `~/Projects/Literature/simpson_1994_intuitionisticmodallogic/`) to see if it could establish full plain
+  symmetry directly from axiom `bDia` + the disjunction property (bypassing the extension-freedom
+  argument, which is technique-independent). No derivation path found: going from `□C ∈ u.head` to
+  `C ∈ w.head` requires SOME relationship FROM `u` TO `w`, but the only given hypothesis
+  (`boxInv w.head ⊆ u.head`) runs the OPPOSITE direction (`w → u`), and nothing in `CS5`'s axiom set
+  bridges the gap without assuming negation-completeness (matching the classical `KB` canonical-model
+  symmetry proof's known reliance on maximal-consistent-set completeness, which quasi-prime theories
+  lack by design). (3) Constructed and mechanized the concrete counterexample instead (below), to
+  confirm this is a genuine mathematical fact, not a proof-search gap.
+- **Why it's stuck**: The `CS5CanonSegment` world type landed in Phase 3 pins each world's tail to the
+  UNRESTRICTED maximal tail `cs5CanonTail(head) = {t | QuasiPrime t ∧ boxInv head ⊆ t}`, with NO
+  additional invariant restricting which quasi-prime theories may serve as heads. Consequence: the
+  EXPLODING world `Ω` (head `= Set.univ`, quasi-prime via `quasiPrime_univ`) is `cs5CanonMreach`-reachable
+  from **every** canonical world `P` (`boxInv P.head ⊆ Set.univ` holds trivially for any `P`). But `Ω`'s
+  head is already the top of the subset order, so the only possible mediating witness is `Ω′ = Ω` itself,
+  and `cs5CanonMreach Ω P` would require `boxInv Set.univ ⊆ P.head`, i.e. `P.head = Set.univ` (since
+  `boxInv Set.univ = Set.univ`) — false for any NON-exploding `P`. Mechanized fully: assuming
+  `cs5Incest cs5CanonMreach`, EVERY canonical world's head must equal `Set.univ`
+  (`cs5Incest_cs5CanonMreach_forces_univ`); combined with `CS5`'s consistency (`cs5_consistent_incest`,
+  proved via a trivial one-point model plus `cs5_soundness_derivable_incest`, giving — via
+  `quasi_head_realization` — a genuine quasi-prime world omitting `⊥`, hence `≠ Set.univ`) this is an
+  outright contradiction (`cs5Incest_cs5CanonMreach_false`). This is a **structurally different**
+  obstruction from Phase 1's negation-completeness wall: it is not about proof technique at all, but
+  about the UNRESTRICTED world type admitting a degenerate "universal successor" that no ≤-mediated
+  witness can route around, since routing-around requires an EXTENSION and extensions cannot help
+  (monotonicity argument above) regardless of which Lindenbaum technique is used.
+- **What is needed to unblock** (two options, either requiring a new planning round — NOT executable
+  within Phase 5's ~150–250-line budget or its "only touch `CS5Canonical.lean`" scope without a
+  significant design decision):
+  1. **Restrict the world type** (the precedent already in this codebase, task 508):
+     introduce a hereditary invariant on `CS5CanonSegment` analogous to `CS4Segment`'s `excl`/`excl_head`
+     fields — e.g. threading a "not-forced-to-explode" or "omits a specific formula" invariant through
+     the ENTIRE transitive closure — so the degenerate universal-successor world is excluded from the
+     restricted subtype that `ckvalidFC_completeness` is actually instantiated at (Phase 6/7 would need
+     rework to use the new subtype). This mirrors exactly how task 508 discovered `cs4FC` fails on raw
+     `CKSegment` and fixed it by restricting to `CS4Segment` + weakening to `cs4FC'`.
+  2. **Weaken `cs5Incest` itself** to an existential/disjunctive form that handles the exploding case
+     specially (analogous to `cs4FC'`'s replacement of blanket transitivity with two existential
+     clauses) — e.g. `r w u → (u.head = Set.univ) ∨ (∃ u' ≥ u, r u' w)` — then re-verify `bDia`'s
+     soundness (Phase 4) still goes through over the weakened condition (it should: the exploding case
+     already forces `A@w'` trivially via `ckforces_of_exploding`-style explosion, independent of
+     `cs5Incest`).
+  Either option is itself a new, non-trivial design/proof effort (~100–250 lines) requiring explicit
+  human greenlight, per this dispatch's hard constraints (no rework of Phase 4's landed `cs5FCIncest`/
+  `cs5_axiom_sound_incest` without authorization) and per the general policy that Phase-boundary pivots
+  of this scale require a plan revision, not an in-flight expansion of Phase 5.
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous placeholder. Did NOT
+  force a false theorem through. Did NOT touch Phase 4's `cs5FCIncest`/`cs5_axiom_sound_incest` (verified
+  untouched, unbroken by `lean_verify`/`lake build`).
+- **Landed as compensating artifacts (sorry-free, axiom-clean, `CS5Canonical.lean`)**: `cs5CanonMreach_to_univ`,
+  `cs5Incest_cs5CanonMreach_forces_univ`, `cs5_consistent_incest`, `cs5Incest_cs5CanonMreach_false` — a
+  complete, mechanized, adversarially-verified negative result (in the spirit of Phase 1's own
+  `cs5_two_sided_witness_can_fail_to_omit` and CS5.lean's `cs5_symmetric_tail_box_gap`), so a future
+  planning round has a precise, load-bearing account of the obstruction rather than a bare "it didn't
+  work."
+- **Timing:** ~4 hours (actual: single dispatch; budget matched, but outcome was a mechanized blocker
+  rather than the intended positive lemma)
 - **Depends on:** 4
 - **Reused assets (real names + file:line):**
-  - `box_refuting_theory`, `quasi_prime_exclusion`, `quasi_prime_box_exclusion` — `SegmentLindenbaum.lean`.
-  - `CKSegment`, `cmreach`, `boxInv`, `QuasiPrime` — `Segment.lean`.
-  - Simpson Prime Lemma 3.3.2 + F1/F2 — corpus chunk `8372f27240fe345d` (`Simpson1994`).
+  - `box_refuting_theory`, `quasi_prime_exclusion`, `quasi_head_realization` — `SegmentLindenbaum.lean`.
+  - `CKSegment`, `cmreach`, `boxInv`, `QuasiPrime`, `quasiPrime_univ` — `Segment.lean`.
+  - Simpson Prime Lemma 3.3.2 + F1/F2 — corpus chunk `8372f27240fe345d` (`Simpson1994`) — consulted, not
+    reused (see "what was tried" (2) above — its technique doesn't transfer to plain symmetry).
   - Marin Thm 7.1 incestuality shape — `MarinMoralesStrassburger2021`.
+  - `cs5_soundness_derivable_incest`, `cs5FCIncest` — Phase 4 (`CS5Canonical.lean`), reused unchanged to
+    prove `CS5`'s consistency via a one-point model.
+  - `CS4Segment`'s `excl`/`excl_head` hereditary-invariant technique — `CS4.lean:373-403` (task 508) — the
+    precedent for unblock option 1.
+  - `cs4FC'`'s existential-weakening technique — `CKExtension.lean` (task 508) — the precedent for
+    unblock option 2.
 - **Files to modify:**
   - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`.
 - **Success criteria / CI gates:** the canonical-frame incestuality lemma compiles sorry-free;
   `lake build` green; `checkInitImports`/`lint-style`/`shake` clean; no `sorry`, no new axiom.
+  — **PARTIALLY MET**: the POSITIVE lemma was not landed (it is false); the CI gates on what WAS landed
+  (the mechanized counterexample) are met: `lake build
+  Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical` succeeds (728/728 jobs);
+  `lake exe checkInitImports`/`lake exe lint-style` clean (no output); `lake lint`'s single repo-wide
+  finding is the same pre-existing unrelated `PrimeExclusion.lean` `unusedArguments` warning documented
+  at Phase 4; `lake shake`'s only note for this file is the pre-existing "`Cslib.Init` import is
+  redundant" suggestion shared by every file in this same import chain (`Segment.lean`,
+  `SegmentLindenbaum.lean`, `Forcing.lean`, `CKTruthLemma.lean`, `CKExtension.lean`, `CS5.lean` all get
+  the identical suggestion — pre-existing, not introduced this phase); zero `sorry` tactics, zero new
+  axioms.
 - **Verification:** `#print axioms` on the incestuality-verification lemma shows no `sorryAx`; grep
   confirms no negation-completeness (`¬ϕ ∈`) move in the proof.
+  — **CONFIRMED (for the counterexample landed instead)**: `lean_verify` on
+  `Cslib.Logic.Modal.cs5Incest_cs5CanonMreach_false`, `cs5Incest_cs5CanonMreach_forces_univ`, and
+  `cs5_consistent_incest` each report `axioms: [propext, Classical.choice, Quot.sound]` (or a subset),
+  no `sorryAx`, no warnings; `grep -n "¬.*∈"` over the file returns zero matches (no negation-
+  completeness move anywhere); `lean_references cs5FCIncest`/`cs5_axiom_sound_incest` (Phase 4) show no
+  regression — those theorems are reused, not modified, by the consistency proof.
 
 ---
 

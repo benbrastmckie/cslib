@@ -389,6 +389,88 @@ generic machinery — the plain one-sided prime lemma (`cs5_box_backward`, Phase
 about `cs5FCIncest` is needed for that case either (the Phase 1 gate's whole point: box-backward
 is frame-condition-independent). Landing the actual truth lemma is Phase 7's obligation. -/
 
+/-! ## Adversarial Verification: `cs5Incest` Fails on `CS5CanonSegment` (Phase 5)
+
+Phase 5's task was to prove `cs5Incest (@cs5CanonMreach Atom)` — the canonical model literally
+satisfies the ≤-mediated incestuality condition. Direct attempt shows this is **mathematically
+false**, for a reason independent of negation-completeness: `boxInv` is monotone in its
+argument, so for `cs5Incest`'s witness `u' ≥ u` (i.e. `u.head ⊆ u'.head`) to satisfy `r u' w`
+(`boxInv u'.head ⊆ w.head`), it is *necessary* that `boxInv u.head ⊆ w.head` already holds (any
+`□C ∈ u.head` persists into `u'.head`, and `w.head` is untouched by the choice of `u'`) —
+extending `u` can never help satisfy the goal, so only `u' := u` (up to the ≤-order) is ever a
+candidate. So `cs5Incest cs5CanonMreach` is equivalent, on this world type, to *plain* symmetry
+of `cs5CanonMreach` — exactly the naive two-sided condition Marin Remark 7.3 (and this pivot's
+whole design) says is wrong intuitionistically.
+
+The counterexample: the exploding world `Ω` (head `Set.univ`) is `cs5CanonMreach`-reachable
+from **every** canonical world `P` (`boxInv P.head ⊆ Set.univ` trivially), yet `Ω` cannot reach
+back to any non-exploding `P` (`Ω`'s head is already maximal, so `Ω' = Ω` is forced, and
+`boxInv Set.univ = Set.univ ⊆ P.head` forces `P.head = Set.univ`). Combined with the fact that
+`CS5` is consistent (witnessed below via a one-point model), this produces an outright `False`
+from `cs5Incest (@cs5CanonMreach Atom)` — **not a proof-search failure, a genuine
+counterexample**. See the Phase 5 blocker writeup
+(`specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md`) for the full
+analysis and the design options this opens up (restrict to a hereditary world subtype, à la
+`CS4Segment`'s `excl` invariant, task 508; or weaken `cs5Incest` to an existential clause
+excluding the exploding case, à la `cs4FC'`). -/
+
+/-- The exploding canonical world is reachable from every canonical world: `boxInv P.head ⊆
+Set.univ` trivially. -/
+theorem cs5CanonMreach_to_univ (P : CS5CanonSegment Atom) :
+    cs5CanonMreach P (CS5CanonSegment.ofHead (@quasiPrime_univ Atom (@CS5ModalAxiom Atom))) := by
+  change (Set.univ : Set (Proposition Atom)) ∈ P.seg.tail
+  rw [P.tail_eq]
+  exact ⟨quasiPrime_univ, Set.subset_univ _⟩
+
+/-- **If `cs5Incest cs5CanonMreach` held, every canonical world would be the exploding one.**
+Applying `cs5Incest` at `(P, Ω)` (`Ω` the exploding world, always `cs5CanonMreach`-reachable from
+`P` by `cs5CanonMreach_to_univ`) forces the mediating witness `Ω' ≥ Ω` to equal `Ω` (its head is
+already `Set.univ`, the top of the subset order), and then `cs5CanonMreach Ω' P` forces
+`P.head = Set.univ` too. -/
+theorem cs5Incest_cs5CanonMreach_forces_univ
+    (hincest : cs5Incest (@cs5CanonMreach Atom)) (P : CS5CanonSegment Atom) :
+    P.seg.head = Set.univ := by
+  obtain ⟨Ω', hΩΩ', hΩ'P⟩ := hincest (cs5CanonMreach_to_univ P)
+  have hΩ'univ : Ω'.seg.head = Set.univ :=
+    Set.Subset.antisymm (Set.subset_univ _) hΩΩ'
+  have hmem : P.seg.head ∈ cs5CanonTail Ω'.seg.head := Ω'.tail_eq ▸ hΩ'P
+  rw [hΩ'univ] at hmem
+  exact Set.Subset.antisymm (Set.subset_univ _) (fun x _ => hmem.2 (Set.mem_univ _))
+
+/-- **`CS5` is consistent**: `⊥` is not derivable. Witnessed by the trivial one-point model
+(`World := Unit`, `r`/`val` always `True`, `botForces` always `False`) — `cs5FCIncest` holds
+vacuously on this model (every clause's conclusion is trivially available since `r` is always
+`True`), so `cs5_soundness_derivable_incest` would force `botForces Unit.unit` (i.e. `False`)
+from a hypothetical derivation of `⊥`. -/
+theorem cs5_consistent_incest : ¬ Derivable (@CS5ModalAxiom Atom) Proposition.bot := by
+  intro h
+  have hfc : cs5FCIncest (World := Unit) (fun _ _ => True) := by
+    refine ⟨fun _ => trivial, fun _ _ => trivial, ?_, ?_, ?_⟩
+    · intro w u u' t hwu hle hu't; exact ⟨Unit.unit, trivial, trivial⟩
+    · intro w u u' hwu hle; exact ⟨Unit.unit, trivial, trivial⟩
+    · intro w u hwu; exact ⟨Unit.unit, trivial, trivial⟩
+  exact cs5_soundness_derivable_incest h Unit (fun _ _ => True) hfc
+    (fun _ _ => True) (fun _ => False)
+    (fun _ _ _ => trivial) (fun _ h => h.elim) (fun _ h => h.elim)
+    (fun h _ => h.elim) (fun h => h.elim) Unit.unit
+
+/-- **`cs5Incest` FAILS for `cs5CanonMreach` (Phase 5 blocker, mechanized).** Combines
+`cs5Incest_cs5CanonMreach_forces_univ` (if incestuality held, every canonical world would be
+exploding) with `cs5_consistent_incest` (there is a non-exploding canonical world, realized via
+`quasi_head_realization` at the underivable `⊥`) for an outright contradiction. This is **not**
+the negation-completeness wall (Phase 1's gate) — it is a distinct, purely set-theoretic
+obstruction (monotonicity of `boxInv` against a fixed target, defeated by the universally
+reachable exploding world) specific to verifying frame conditions on the *unrestricted*
+`CS5CanonSegment` world type landed in Phase 3. -/
+theorem cs5Incest_cs5CanonMreach_false : ¬ cs5Incest (@cs5CanonMreach Atom) := by
+  intro hincest
+  obtain ⟨T, hT, hbotT⟩ := quasi_head_realization
+    (fun φ ψ => CS5ModalAxiom.implyK φ ψ) (fun φ ψ χ => CS5ModalAxiom.implyS φ ψ χ)
+    (fun A B χ => CS5ModalAxiom.orE A B χ) cs5_consistent_incest
+  have huniv := cs5Incest_cs5CanonMreach_forces_univ hincest (CS5CanonSegment.ofHead hT)
+  have huniv' : T = Set.univ := huniv
+  exact hbotT (huniv' ▸ Set.mem_univ _)
+
 end Cslib.Logic.Modal
 
 end

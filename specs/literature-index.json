@@ -69,6 +69,14 @@
     {
       "doc_id": "arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics",
       "relevance": "Arisaka, Das, Strassburger, On Nested Sequents for Constructive Modal Logics (LMCS 11(3:7), 2015) — deepest proof-theoretic treatment of the fallible-world constructive modal cube including CS5. Section 4.3 proves B entails k3 (diamond distribution) and k5 (not dia bot) constructively, corroborating the collapse result. Explicitly disclaims Kripke-semantic completeness for CS5, supporting the scope caveat in task 509."
+    },
+    {
+      "doc_id": "alechinamendlerdepaivaritter_2001_categorical_and_kripke_semantics_for_constructive_s4",
+      "relevance": "Alechina, Mendler, de Paiva, Ritter, Categorical and Kripke Semantics for Constructive S4 (CSL 2001, LNCS 2142:292-307) — INGESTED task 512. The constructive (Wijesekera) diamond birelational completeness. Saturation Lemma 1 builds worlds as consistent-theory PAIRS (Gamma, Delta) with Delta a prime filter (NO negation-completeness). Section 5 proves the constructive diamond REQUIRES fallible worlds + refutation-sets Delta (pair worlds), redundant only if dia-bot and dia-distribution are adopted. Establishes that CSLib's constructive-diamond CS5 needs pair/fallible canonical worlds (= its own CKSegment head+tail), NOT Dosen's single-prime-theory model. S4 only (no symmetry)."
+    },
+    {
+      "doc_id": "marinmoralesstrassburger_2021_fully_labelled_proof_system_intuitionistic_modal",
+      "relevance": "Marin, Morales, Strassburger, A Fully Labelled Proof System for Intuitionistic Modal Logics (J. Logic Comput. 31(3):998-1022, 2021) — INGESTED task 512. Whole intuitionistic modal cube IK-IS5 with birelational semantics. Def 2.1: F1/F2 confluence conditions. Theorem 7.1 [Plotkin-Stirling 1986]: symmetry (b) and Euclidean (5) are Scott-Lemmon path axioms whose frame condition is a ONE-SIDED, <=-mediated intuitionistic klmn-incestuality condition (NOT naive classical symmetry). Theorem 7.2: soundness + completeness for the whole family incl IS5, no negation-completeness (saturated/prime sets). Remark 7.3: naive frame conditions are 'problematic' -- diagnoses CSLib's two-sided-tail as the wrong (negation-completeness-requiring) symmetry condition."
     }
   ]
 }

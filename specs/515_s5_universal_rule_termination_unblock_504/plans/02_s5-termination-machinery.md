@@ -1,7 +1,7 @@
 # Implementation Plan: S5 Universal-Rule Termination Machinery (v2)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 12-18 hours
 - **Dependencies**: Task 514 (literature grounding, anchor), Task 504 (parent; S5 rule/driver + `extractModelS5*` landed CI-green), Task 511 (shared S4 guard-vs-live-set obstruction; keys-aware guard redesign findings)
 - **Research Inputs**: reports/01_s5-termination-implementation-blueprint.md; summaries/01_s5-termination-machinery-summary.md (v1 implementation, P1/P2 landed, P3/P5 blocked); task 511 reports/01_s4-termination-guard-redesign.md; task 511 summaries/01_s4-termination-bound-decidability-summary.md
@@ -172,10 +172,10 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 **Goal**: Prove that a `modalStepBranchS5gKeyed` step preserves the six generic (rule-independent) `S5LoopInv` fields (`bClosure`/`eNodup`/`eClosure`/`accFresh`/`accKnown`/`outDegEq`). These are the bookkeeping invariants S4 never landed (it stopped at the structure). **No template — author from scratch, reusing FmpMeasure invariant primitives.**
 
 **Tasks**:
-- [ ] Prove `modalStepBranchS5g_preserves_bClosure` — new branch formulas stay in `modalUniverseS5 φ₀` (the S5 arms broadcast unwrapped bodies already in the universe; the mint case adds bodies confined by `bClosure` of the source). Consumes `modalUniverseS5_length_le` (P1). *(deviation: found to be entangled with the Phase 6 pigeonhole bound -- see handoff `02_phase4-generic-field-preservation.md` for the exact obstruction. NOT STARTED as of this dispatch.)*
+- [ ] Prove `modalStepBranchS5g_preserves_bClosure` — new branch formulas stay in `modalUniverseS5 φ₀` (the S5 arms broadcast unwrapped bodies already in the universe; the mint case adds bodies confined by `bClosure` of the source). Consumes `modalUniverseS5_length_le` (P1). *(deviation: found to be entangled with the Phase 6 pigeonhole bound -- see handoff `01_phase4-generic-field-preservation.md` for the exact obstruction. NOT STARTED as of this dispatch.)*
 - [x] Prove `modalStepBranchS5g_preserves_eNodup` -- landed sorry-free, direct case analysis on `modalStepBranchS5gKeyed`'s three-way dispatch (see `modalStepBranchS5gKeyed_expanded_shape` private helper). `_preserves_eClosure` remains *(deviation: deferred, same pigeonhole entanglement as bClosure)*.
-- [ ] Prove `modalStepBranchS5g_preserves_accFresh` (reuse `accFreshInv` monotonicity) and `_preserves_accKnown` (reuse `accTargetsKnown` step lemmas; new/loop-back edges target known worlds). *(deviation: NOT STARTED this dispatch; identified as tractable via `S5LoopInv.keysKnown` + `hasEdge_addEdge_cases_S5`, see handoff.)*
-- [ ] Prove `modalStepBranchS5g_preserves_outDegEq`. *(deviation: NOT STARTED this dispatch.)*
+- [x] Prove `modalStepBranchS5g_preserves_accFresh` (reuse `accFreshInv` monotonicity) and `_preserves_accKnown` (reuse `accTargetsKnown` step lemmas; new/loop-back edges target known worlds) -- both landed sorry-free this dispatch (cycle 2), recovered from stashed WIP and fixed to build.
+- [x] Prove `modalStepBranchS5g_preserves_outDegEq` -- landed sorry-free this dispatch (cycle 2). *(deviation: the stashed draft's final `rw [modalApplyOne_outDeg_step ..., ← modalApplyOneS5_eshape_eq ...]` failed with a "did not find pattern" error caused by Lean's per-declaration match-auxiliary-function identity -- two syntactically identical `match ... with` expressions in different lemma statements compile to distinct matcher constants, which `rw`'s kabstract cannot unify even though `exact`/term-mode elaboration can via defeq. Fixed by bridging the two lemmas' matches through a `have hfull := (modalApplyOne_outDeg_step ...).trans (congrArg (fun l => ...) (modalApplyOneS5_eshape_eq ...).symm)` term composition (which type-checks via `isDefEq`, not syntactic rw), then `rw [hfull]` and case-splitting cleanly. Also required an `omit [Hashable Atom] in` before the lemma to clear a new `unusedSectionVars` warning caught by `lake shake`.)*
 
 **Timing**: 2 hours
 

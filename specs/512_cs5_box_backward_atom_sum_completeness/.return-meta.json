@@ -1,53 +1,53 @@
 {
   "status": "partial",
-  "started_at": "2026-07-14T17:38:29-07:00",
-  "requires_user_review": true,
-  "review_reason": "Phase 3 (cs5Combined_seed_excludes, the task's designated go/no-go adversarial gate) could not be closed sorry-free within this dispatch. Substantial semantic and proof-theoretic analysis was performed and is documented in the plan file's Phase 3 BLOCKER annotation and in the handoff document; both routes sketched in the research report were checked and found insufficient. No sorry, no new axiom, and no vacuous placeholder were introduced. Phases 1-2 landed solidly and are CI-verified clean.",
+  "started_at": "2026-07-15T01:17:28Z",
+  "completed_at": "2026-07-15T01:45:14Z",
+  "phases_completed": 2,
+  "phases_total": 5,
   "artifacts": [
     {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md",
-      "type": "summary",
-      "summary": "Full account of what landed (Phases 1-2) and the Phase 3 blocker analysis."
-    },
-    {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/01_phase3-blocker-handoff.md",
-      "type": "handoff",
-      "summary": "Continuation guidance for resuming at Phase 3."
-    },
-    {
       "path": "Cslib/Logics/Modal/Basic.lean",
-      "type": "lean_source",
-      "summary": "Phase 1: Proposition.map + commutation lemmas + injectivity."
+      "type": "lean-source",
+      "summary": "Added Proposition.map_id, Proposition.map_map (functoriality facts needed by the collapse projection)."
     },
     {
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
-      "type": "lean_source",
-      "summary": "Phase 2: CS5Combined, cs5_axiom_relabel, tauL/tauR, transport corollaries."
+      "type": "lean-source",
+      "summary": "Added the atom-collapse ProofSigHom (cs5Collapse/tau0) and transport corollaries; cs5Combined_bot_excluded and cs5Combined_boxA_excluded (2 of 4 seed-exclusion sub-obligations, fully discharged sorry-free); the four HR seed-pair facts (mechanical port of cs5_pair_seed_mem); box(tau_L B) <-> box(tau_R B) box-equivalence lemmas."
+    },
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/01_box-backward-atom-sum.md",
+      "type": "plan",
+      "summary": "Phase 3 heading updated to [PARTIAL] with a resumed-dispatch progress note documenting what landed and what remains."
+    },
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for this dispatch: landed facts, remaining gap, verification, next steps."
+    },
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/02_phase3-route2-continuation.md",
+      "type": "handoff",
+      "summary": "Full continuation handoff: landed facts, confirmed dead ends, the untested necessity-transfer conjecture lead, explicit next-dispatch instructions."
     }
   ],
-  "partial_progress": {
-    "stage": "phase3_blocked",
-    "details": "Phases 1-2 complete and committed (2 commits). Phase 3 analyzed extensively but not closed; marked [BLOCKED] in plan with full blocker documentation. Phases 4-5 not attempted.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Phase 2: Combined system + derivation transport",
-    "blocked_phase": 3
-  },
+  "memory_candidates": [
+    "CS5Canonical.lean lives inside `namespace Cslib.Logic.Modal`, where Basic.lean's `scoped infix:30 \" \\u2192 \" => Proposition.imp` shadows the core function-arrow notation. Any new `def`/`theorem` in this file needing a genuine function-type arrow (e.g. `Atom \\u2295 Atom \\u2192 Atom`) must avoid writing a bare `\\u2192` in the type ascription (it parses as `Proposition.imp`); use parameter-style signatures instead, e.g. `def f (x : A) : B := ...`.",
+    "Eliminating a multi-constructor inductive Prop (e.g. `CS5Combined`, 3 constructors) into a Type-sorted goal (e.g. building a `PLift`/`ProofSigHom.axMap` result) via `cases`/`match` is disallowed (large-elimination restriction) even though the analogous single-constructor-source case (`CS5ModalAxiom`, via `h.down`) works fine. Fix: prove the Prop-sorted statement first inside a `have`, then wrap the Prop-valued result in the Type-valued constructor (`PLift.up`/`\\u27e8...\\u27e9`) outside the `cases`.",
+    "Task 512 Phase 3 (`cs5Combined_seed_excludes`): confirmed no compositional/homomorphic atom-substitution translation Proposition(Atom\\u2295Atom)\\u2192Proposition Atom can witness the tau_R A exclusion (matches report 02 \\u00a75's general impossibility, independently re-derived via an L-uniform-valuation semantic argument). The untested 'necessity transfer' conjecture (CS5Combined-derivable tau_L(Psi)\\u2192tau_R(A) implies CS5-derivable Psi\\u2192box(A)) is the most promising unexplored lead for closing it."
+  ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
-    "axiom_count_new": 0,
+    "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": true,
-    "note": "verification_passed refers to Phases 1-2's landed content only (both sorry-free, CI-green, axiom-clean via #print axioms). Phase 3 is not landed -- status is partial, not implemented, precisely because 3 of 5 phases remain."
+    "ci_pipeline_passed": true
   },
   "metadata": {
-    "session_id": "orchestrator-512",
-    "agent_type": "cslib-implementation-agent",
+    "session_id": "task-512-phase3-resume",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

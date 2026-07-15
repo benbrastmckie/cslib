@@ -1,32 +1,37 @@
 {
   "status": "partial",
-  "summary": "Phases 1-2 landed sorry-free and CI-green: Proposition.map (Basic.lean) and CS5Combined + tauL/tauR transport (new CS5Canonical.lean), both verified with #print axioms clean. Phase 3 (cs5Combined_seed_excludes, the go/no-go gate) is genuinely blocked: substantial semantic and proof-theoretic analysis (documented in the plan file) showed the report's sketched routes (toy 2-point frame; naive collapse projection) are both insufficient, and the claim more likely holds true (no sort collapse) than not, so no obstruction was forced. No sorry, no new axiom, no vacuous placeholder was introduced anywhere. Phases 4-5 were not attempted since both consume Phase 3's output directly.",
+  "summary": "Phase 3 route-2 (report 02) advanced with real, sorry-free, axiom-clean progress: landed the atom-collapse ProofSigHom (tau0), which fully discharges 2 of 4 seed-exclusion sub-obligations (bot excluded, tau_L(box A) excluded); landed the four HR seed-pair facts (mechanical port of cs5_pair_seed_mem); landed box(tau_L B) <-> box(tau_R B) as a syntactic crossRL-conservativity lever. The genuinely hard remaining obligation (tau_R A excluded, plus the mixed bigOr disjunction) needs a bespoke non-homomorphic derivation-induction invariant (report 02's 'single hard node') that was not completed this dispatch; independently confirmed no compositional/homomorphic translation can witness it. Phase 3 marked [PARTIAL] (not [BLOCKED]/obstruction -- the claim is still believed true, ~85-90% per report 02). Phases 4-5 not started.",
   "phases_completed": 2,
   "phases_total": 5,
-  "artifacts": [
-    {
-      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md",
-      "type": "summary",
-      "summary": "Full account of Phases 1-2 (landed, sorry-free, CI-green) and Phase 3's blocker analysis (four specific findings on why the report's two sketched discharge routes are insufficient), plus next-step guidance for the continuation dispatch."
-    }
-  ],
+  "sorry_inventory": [],
   "blockers": [
     {
       "phase": 3,
-      "theorem": "cs5Combined_seed_excludes",
-      "what_failed": "Neither route-1 (semantic) nor route-2 (proof-theoretic projection) as sketched in the plan/report closes sorry-free within this dispatch's budget.",
-      "what_was_tried": "Confirmed H is consistent given h_not; checked and refuted a naive 'identify both copies' semantic model; checked and refuted a naive 2-point discrete-frame model; checked and refuted the literal collapse-to-single-copy proof-theoretic projection sketch. All four are documented with specific counterexample-style reasoning in the plan file's Phase 3 BLOCKER annotation.",
-      "why_stuck": "The obligation is a genuine (non-mechanical) mathematical claim requiring either canonical-model-scale semantic machinery or a bespoke derivation-induction logical-relation invariant -- both comparable in depth to CS5.lean's own ~150-line soundness apparatus, not a clone-and-adapt step.",
-      "what_is_needed": "A fresh, well-resourced attempt at either route (a) or (b) as detailed in the handoff document (specs/512_.../handoffs/01_phase3-blocker-handoff.md) and the plan file's Phase 3 section.",
-      "prohibited_workarounds_respected": true
+      "obligation": "cs5Combined_seed_excludes",
+      "what_is_done": "2 of 4 seed-exclusion sub-obligations discharged sorry-free (cs5Combined_bot_excluded, cs5Combined_boxA_excluded) via the landed atom-collapse projection tau0; the four HR seed-pair facts landed; box(tau_L B) <-> box(tau_R B) landed as a lever.",
+      "what_remains": "tau_R A excluded from modalDeductiveClosure CS5Combined (tau_L '' H), and the mixed bigOr {tau_L(box A), tau_R A} disjunction case. Reduces to: for all Psi in H, not-derivable(CS5Combined, tau_L(Psi) -> tau_R(A)).",
+      "why_stuck": "Confirmed (independently, via an L-uniform-valuation countermodel argument, matching report 02 section 5's general impossibility proof) that no compositional/homomorphic atom-substitution translation can witness this direction. A bespoke non-homomorphic derivation-induction invariant over the 5 CS5Combined DerivationTree rule cases is required (report 02's estimate: ~150-220 novel lines, the single hard node, not yet designed in enough detail to mechanize directly).",
+      "verbatim_goal": "theorem cs5Combined_seed_excludes {H} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (h_not : Proposition.box A ∉ H) : DerivExcludes (modalDerivationSystem (@CS5Combined Atom)) {x | x = (Proposition.box A).map Sum.inl ∨ x = A.map Sum.inr} (modalDeductiveClosure CS5Combined ((Proposition.map Sum.inl) '' H))",
+      "next_lead": "Untested 'necessity transfer' conjecture: does (CS5Combined-derivable) tau_L(Psi) -> tau_R(A) imply CS5-derivable Psi -> box(A)? If so, Psi in H (closed) gives box(A) in H directly, contradicting h_not. Documented in handoffs/02_phase3-route2-continuation.md as the recommended first attempt for the next dispatch."
     }
   ],
   "continuation_context": {
-    "handoff_path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/01_phase3-blocker-handoff.md",
+    "handoff_path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/02_phase3-route2-continuation.md",
     "next_phase": 3,
-    "next_phase_name": "SEED CONSISTENCY -- the GO/NO-GO DECISION GATE",
-    "note": "Phases 4-5 remain fully specified in the plan and unattempted; they clone quasi_prime_set_exclusion and ck_truth_lemma respectively and should be mechanical once Phase 3 lands."
+    "resume_instructions": "Read the continuation handoff and reports/02_phase3-seed-consistency.md in full first. Attempt the necessity-transfer conjecture before anything else. If it fails, attempt the full derivation-height induction on CS5Combined DerivationTree/Deriv (5 rule cases) that report 02 section 5 describes. Do not re-attempt the confirmed dead ends (homomorphic translations, mirrored model, L-uniform model, naive 2-point frame, naive identify-both-copies model)."
   },
+  "artifacts": [
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md",
+      "type": "summary",
+      "summary": "Phase 3 route-2 partial progress: what landed (collapse projection, 2 discharged sub-obligations, HR seed-pair facts, box-equivalence lemmas), what remains open, verification results, next steps."
+    },
+    {
+      "path": "specs/512_cs5_box_backward_atom_sum_completeness/handoffs/02_phase3-route2-continuation.md",
+      "type": "handoff",
+      "summary": "Full technical continuation handoff: landed facts, confirmed dead ends, the untested necessity-transfer conjecture lead, and explicit next-dispatch instructions."
+    }
+  ],
   "outcome": "in_progress",
   "axioms_clean": true
 }

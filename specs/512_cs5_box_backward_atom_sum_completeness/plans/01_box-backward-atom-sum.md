@@ -177,13 +177,37 @@ selects the content of Phases 4-5. No two phases can execute in parallel.
 
 ---
 
-### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [IN PROGRESS]
+### Phase 3: SEED CONSISTENCY — the GO/NO-GO DECISION GATE [PARTIAL]
 
-**Resumed** (2026-07-15, route-2 dispatch per report 02): pursuing the proof-theoretic
-derivation-induction route recommended by `reports/02_phase3-seed-consistency.md`. See the
-resumed-dispatch note below the original blocker annotation for current status.
+**RESUMED-DISPATCH PROGRESS** (2026-07-15, route-2 dispatch per report 02): pursuing the
+proof-theoretic derivation-induction route recommended by
+`reports/02_phase3-seed-consistency.md`. Real, sorry-free, axiom-clean progress landed in
+`CS5Canonical.lean` (see `summaries/02_phase3-route2-partial-summary.md` and the continuation
+handoff `handoffs/02_phase3-route2-continuation.md` for full detail):
 
-**BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14):
+- **Landed** (commit "task 512 phase 3: land collapse-projection + HR seed-pair facts"): the
+  atom-collapse `ProofSigHom` `τ0` (erases `τL`/`τR` tagging via `Sum.elim id id`, projecting
+  `CS5Combined`-derivations back to `CS5ModalAxiom`-derivations); this **fully discharges two of
+  the four seed-exclusion obligations**: `cs5Combined_bot_excluded` (`⊥` cannot leak) and
+  `cs5Combined_boxA_excluded` (`τL(□A)` cannot leak) — both via direct contradiction
+  (`H` consistent / `h_not`). Also landed: the four `HR`-seed-pair facts (mechanical port of
+  `cs5_pair_seed_mem`) and the box-equivalence lemmas `□(τL B) ↔ □(τR B)` (syntactic form of
+  "crossRL-conservativity", via necessitation + `K` + axiom `4` on the cross axioms).
+- **Still open**: `τR A` excluded, and the mixed `bigOr {τL(□A), τR A}` disjunction case. Per
+  report 02 §5 (confirmed independently in this dispatch via an explicit L-uniform-valuation
+  countermodel argument), **no compositional/homomorphic translation** (which the landed
+  collapse projection is an instance of) can witness this direction — it requires the bespoke,
+  non-homomorphic derivation-induction invariant report 02 describes, which needs
+  canonical-model-scale machinery comparable in depth to `CS5.lean`'s own soundness apparatus (or
+  more). This was NOT closed within this dispatch's budget; see the continuation handoff for the
+  detailed gap analysis and one promising unexplored lead (a "necessity transfer" conjecture:
+  whether `⊢CS5Combined τLΨ → τRA` forces `⊢CS5 Ψ → □A`, which was not confirmed or refuted).
+- **Status**: `[PARTIAL]`, not `[BLOCKED]` — no proved obstruction exists (the claim is still
+  believed TRUE per report 02's ~85-90% confidence), so this is not the FAILURE/PIVOT branch;
+  it is real, incremental progress toward the SUCCESS branch, incomplete due to genuine
+  mathematical depth. Phases 4-5 remain `[NOT STARTED]` (both consume Phase 3's full closure).
+
+**BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14 — ORIGINAL, pre-route-2):
 
 - **What failed**: `cs5Combined_seed_excludes` was not closed sorry-free by either route within
   this dispatch's budget. No `sorry`/placeholder was written to `Cslib/` for it (zero-debt

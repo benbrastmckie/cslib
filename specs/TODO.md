@@ -11,8 +11,8 @@ next_project_number: 516
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,512,514 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506,515 | 36,37,181,317,407,425,449,511,514 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,512,515 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
@@ -41,8 +41,7 @@ next_project_number: 516
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [IMPLEMENTING] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-514 [NOT STARTED] — Ground task 504's PROVEN S5 tableau termination obstruction in th
-  └─ 515 [NOT STARTED] — Implement the terminating S5 tableau machinery recommended by tas
+515 [NOT STARTED] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -106,10 +105,11 @@ next_project_number: 516
 
 ### 514. S5 tableau termination literature grounding
 - **Effort**: 3-5 hours
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [514_s5_tableau_termination_literature_grounding/reports/01_s5-termination-literature-grounding.md]
 
 **Description**: Ground task 504's PROVEN S5 tableau termination obstruction in the literature and produce a concrete, lemma-level implementation recommendation for task 515. Root cause to confirm and characterize precisely: S5's universal/global box rule (modalApplyOneS5) propagates box-formulas to ALL branch worlds irrespective of accessibility edges, so there is no edge-relation against which to decrement a modal-depth rank -- the edge-local rank-potential FMP argument (RuleApplicationSpec.rankStep, GenericDriver.lean) is provably inapplicable (task 504 landed modalApplyOneS5_rankStep_not_dischargeable, a sorry/axiom-free counterexample). (1) ACQUIRE + full-text ingest Massacci2000 (Single Step Tableaux for Modal Logics, J. Automated Reasoning 24(3):319-364, DOI 10.1023/A:1006155811656) and Gore1999 (Tableau Methods for Modal and Temporal Logics, Handbook of Tableau Methods, pp.297-396, DOI 10.1007/978-94-017-1754-0_6) via /literature Mode B; both are registered in references.bib (BibKeys Massacci2000, Gore1999) and specs/literature/SOURCES.md but PDFs are NOT yet acquired (paywalled, no OA copy found via Semantic Scholar/Unpaywall/arXiv). If PDFs remain unavailable, fall back to Gore's openly-available ANU/RSISE tech-report versions and the in-corpus surrogates ChagrovZakharyaschev1997 (filtration, FMP) and blackburn_2002_book. (2) Cross-check the literature's account of WHY S5 (and universal/global modalities) needs loop-checking / prefix-management / filtration rather than a depth-decrement measure, against task 504's mechanized obstruction. (3) Extract the concrete terminating strategy (single-step prefix loop-checking a la Massacci; semantic filtration FMP; or global caching) and MAP it onto CSLib's generic driver: specify what a rank-machinery-bypassing S5 termination/decidability interface looks like, which RuleApplicationSpec fields change or are replaced, and whether it can coexist with the existing K/T/B instantiations without regression. Deliverable: a research report with a BibKey-cited, lemma-level recommendation sufficient to plan task 515. Read-only survey: Cslib/Logics/Modal/Tableau/{GenericDriver,S5Simplification,FrameCompleteness,BDriver}.lean; specs/504_*/summaries/01_*.md and the Phase-2 obstruction proof. Comparable in scope to the S4/task-511 loop-checking analysis.
 

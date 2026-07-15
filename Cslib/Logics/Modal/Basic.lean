@@ -200,9 +200,8 @@ theorem Proposition.map_injective {f : Atom → Atom'} (hf : Function.Injective 
     Function.Injective (Proposition.map f) :=
   fun _ _ h => Proposition.map_injective_aux hf _ _ h
 
-/-- `Proposition.map` along the identity atom relabeling is the identity. Needed by the
-`CS5Canonical` atom-collapse projection (task 512), which composes `map` along `Sum.inl`/
-`Sum.inr` with `Sum.elim id id` and simplifies the round-trip back to `id`. -/
+/-- `Proposition.map` along the identity atom relabeling is the identity. A generic relabeling
+fact, useful whenever a formula is transported through an atom-type isomorphism or projection. -/
 @[simp] theorem Proposition.map_id (φ : Proposition Atom) :
     φ.map (id : Atom → Atom) = φ := by
   induction φ with
@@ -215,8 +214,8 @@ theorem Proposition.map_injective {f : Atom → Atom'} (hf : Function.Injective 
   | diamond _ ih => simp [Proposition.map, ih]
 
 /-- `Proposition.map` is functorial: relabeling along `f` then `g` equals relabeling along the
-composite `g ∘ f`. Needed by the `CS5Canonical` atom-collapse projection (task 512) to simplify
-`(φ.map Sum.inl).map (Sum.elim id id)` down to `φ.map id = φ`. -/
+composite `g ∘ f`. A generic relabeling-composition fact, useful whenever a formula is
+transported through a chain of atom-type maps. -/
 theorem Proposition.map_map (f : Atom → Atom') (g : Atom' → Atom'') (φ : Proposition Atom) :
     (φ.map f).map g = φ.map (g ∘ f) := by
   induction φ with

@@ -1477,18 +1477,25 @@
     {
       "project_number": 514,
       "project_name": "s5_tableau_termination_literature_grounding",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Ground task 504's PROVEN S5 tableau termination obstruction in the literature and produce a concrete, lemma-level implementation recommendation for task 515. Root cause to confirm and characterize precisely: S5's universal/global box rule (modalApplyOneS5) propagates box-formulas to ALL branch worlds irrespective of accessibility edges, so there is no edge-relation against which to decrement a modal-depth rank -- the edge-local rank-potential FMP argument (RuleApplicationSpec.rankStep, GenericDriver.lean) is provably inapplicable (task 504 landed modalApplyOneS5_rankStep_not_dischargeable, a sorry/axiom-free counterexample). (1) ACQUIRE + full-text ingest Massacci2000 (Single Step Tableaux for Modal Logics, J. Automated Reasoning 24(3):319-364, DOI 10.1023/A:1006155811656) and Gore1999 (Tableau Methods for Modal and Temporal Logics, Handbook of Tableau Methods, pp.297-396, DOI 10.1007/978-94-017-1754-0_6) via /literature Mode B; both are registered in references.bib (BibKeys Massacci2000, Gore1999) and specs/literature/SOURCES.md but PDFs are NOT yet acquired (paywalled, no OA copy found via Semantic Scholar/Unpaywall/arXiv). If PDFs remain unavailable, fall back to Gore's openly-available ANU/RSISE tech-report versions and the in-corpus surrogates ChagrovZakharyaschev1997 (filtration, FMP) and blackburn_2002_book. (2) Cross-check the literature's account of WHY S5 (and universal/global modalities) needs loop-checking / prefix-management / filtration rather than a depth-decrement measure, against task 504's mechanized obstruction. (3) Extract the concrete terminating strategy (single-step prefix loop-checking a la Massacci; semantic filtration FMP; or global caching) and MAP it onto CSLib's generic driver: specify what a rank-machinery-bypassing S5 termination/decidability interface looks like, which RuleApplicationSpec fields change or are replaced, and whether it can coexist with the existing K/T/B instantiations without regression. Deliverable: a research report with a BibKey-cited, lemma-level recommendation sufficient to plan task 515. Read-only survey: Cslib/Logics/Modal/Tableau/{GenericDriver,S5Simplification,FrameCompleteness,BDriver}.lean; specs/504_*/summaries/01_*.md and the Phase-2 obstruction proof. Comparable in scope to the S4/task-511 loop-checking analysis.",
       "effort": "3-5 hours",
       "parent_task": 504,
       "dependencies": [],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/514_s5_tableau_termination_literature_grounding/reports/01_s5-termination-literature-grounding.md",
+          "type": "report",
+          "summary": "398-line BibKey-cited S5 termination literature grounding report"
+        }
+      ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-15T06:24:17Z",
-      "session_id": null,
-      "notes": "Massacci2000 ACQUIRED + ingested into global corpus (doc_id massacci_2000_single_step_tableaux_for_modal_logics, 77 chunks) and added to specs/literature-index.json sub-index. Only Gore1999 PDF still outstanding (paywalled; see specs/literature/SOURCES.md). Run this task with --lit to navigate the Massacci corpus on demand."
+      "last_updated": "2026-07-15T06:50:44Z",
+      "session_id": "sess_1784097631_b36059",
+      "notes": "Massacci2000 ACQUIRED + ingested into global corpus (doc_id massacci_2000_single_step_tableaux_for_modal_logics, 77 chunks) and added to specs/literature-index.json sub-index. Only Gore1999 PDF still outstanding (paywalled; see specs/literature/SOURCES.md). Run this task with --lit to navigate the Massacci corpus on demand.",
+      "completion_summary": "Produced BibKey-cited research report grounding task 504's PROVEN S5 termination obstruction (modalApplyOneS5_rankStep_not_dischargeable) in the literature. Confirmed via Massacci2000 §8-9 (Table IV) that the per-edge modal-depth decrement is reserved for the non-transitive family K/D/T/KB/KDB/B (CSLib's K/T/B dischargers) and provably excludes transitive/euclidean logics incl. S5 -- so RuleApplicationSpec.rankStep is mathematically false for S5's universal box rule, not a CSLib artifact. Terminating strategy: loop-checking/prefix-bound (S5 reuses the S4 device per Massacci), already realized in CSLib as LoopChecking.lean (task 511, 0 sorries). Lemma-level recommendation for task 515: transpose LoopChecking.lean declaration-for-declaration to a guarded S5 rule (modalApplyOneS5g, S5LoopInv, pigeonhole modalWorldBoundS5, instDecidableFiveValid); drop rankStep, replace depth-based modalWorldBound universe; zero K/T/B regression; decidability P5 gated on task 511 Phase-9 LoopTermination interface. Deliverable: reports/01_s5-termination-literature-grounding.md (398 lines). Research-only task -- implementation is task 515."
     },
     {
       "project_number": 515,

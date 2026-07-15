@@ -205,7 +205,7 @@ to one agent run (~100–500 lines output). The high-cost, 509-touching risk con
 
 ---
 
-### Phase 2: Discard the abandoned `CS5Combined` atom-sum scaffold [NOT STARTED]
+### Phase 2: Discard the abandoned `CS5Combined` atom-sum scaffold [IN PROGRESS]
 
 - **Goal:** (SUCCESS branch only) Explicitly remove the ~520-line doubled-atom `CS5Combined` apparatus
   from `CS5Canonical.lean` (currently ~1027 lines), auditing each landed lemma to classify KEEP vs.

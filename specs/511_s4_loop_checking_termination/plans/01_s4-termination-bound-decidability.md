@@ -130,7 +130,7 @@ with tasks 505 (B-system) and 513, which the Phase 7 9-A option would benefit.
 Phases within the same wave can execute in parallel. This plan is a tightly-coupled formal-proof
 chain, so each wave contains a single phase.
 
-### Phase 1: Exponent fix — bound `2^(2·|Sf|)` [NOT STARTED]
+### Phase 1: Exponent fix — bound `2^(2·|Sf|)` [COMPLETED]
 
 - **Goal:** Correct `modalWorldBoundS4` to the provable pigeonhole codomain size and re-verify the
   universe length bound. Independent, low risk, land first.

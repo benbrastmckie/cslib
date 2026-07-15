@@ -856,17 +856,25 @@ Confirmed interactively:
 a branching^depth *tree* bound: S4's world graph is not a bounded-depth tree (loop-back
 edges make it a general DAG-with-cycles-collapsed), so this bound does not transfer.
 `modalWorldBoundS4`/`modalUniverseS4` replace it with the pigeonhole bound
-`2 ^ |modalSubfmls φ₀|` -- the number of possible relevant-formula sets. `modalWork`/
+`2 ^ (2 * |modalSubfmls φ₀|)` -- the number of possible relevant-formula sets, i.e. the
+cardinality of `powerset (Sign × modalSubfmls φ₀)` (task 511 research finding 3: the
+`sameRelevantSet`/birth-key notion distinguishes *both signs*, so the pigeonhole codomain is
+`powerset(Sign × Sf)`, not `powerset(Sf)`; `2^|Sf|` is unprovably small). `modalWork`/
 `modalExpMeasure` (`FmpMeasure.lean`) are reused **verbatim**: they take the universe `U` as
 an explicit parameter and are rule/world-agnostic. `geomCap`/`modalPotential`/
 `modalPotentialTerm` do **not** transfer -- they are the geometric tree-capacity argument
 specific to `modalWorldBound`. -/
 
-/-- The S4 world bound: `2 ^ |modalSubfmls φ₀|`, the number of possible relevant-formula
-sets (Decision D2). Replaces `modalWorldBound`'s branching^depth tree bound, which does not
-apply to S4's (possibly cyclic) world graph. -/
+/-- The S4 world bound: `2 ^ (2 * |modalSubfmls φ₀|)`, the number of possible
+signed-relevant-formula sets, i.e. `(signedSubfmls φ₀).powerset.card` (Decision D2, corrected
+per task 511 research finding 3). Replaces `modalWorldBound`'s branching^depth tree bound,
+which does not apply to S4's (possibly cyclic) world graph. The `2·|Sf|` exponent (rather
+than `|Sf|`) is required because the relevant-set/birth-key notion (`sameRelevantSet`,
+`signedSubfmls`) distinguishes signs: the pigeonhole codomain is `powerset (Sign × Sf)`,
+cardinality `2 ^ (2·|Sf|)`. Decidability only needs *a* computable finite bound, so this
+looser value is harmless. -/
 def modalWorldBoundS4 (φ₀ : Proposition Atom) : Nat :=
-  2 ^ (modalSubfmls φ₀).length
+  2 ^ (2 * (modalSubfmls φ₀).length)
 
 /-- The fixed finite signed-formula universe `U_{S4}(φ₀)`: both signs, every subformula of
 `φ₀`, at every world label `0 .. modalWorldBoundS4 φ₀`. Mirrors `modalUniverse`

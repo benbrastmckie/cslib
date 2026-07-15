@@ -255,25 +255,28 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
 
 ---
 
-### Phase 1: Labelled syntax — labels, graphs, witness algebra [NOT STARTED]
+### Phase 1: Labelled syntax — labels, graphs, witness algebra [COMPLETED]
 
 - **Goal:** Land the labelled syntax layer: prefix variables, the witness algebra `W(V')`, graphs
   with their operations, and labelled formulae.
 - **Tasks:**
-  - [ ] Read `reports/01_labelled-bounded-context-method.md` §"Deliverable 1a/1c". **Do not use
+  - [x] Read `reports/01_labelled-bounded-context-method.md` §"Deliverable 1a/1c". **Do not use
         corpus chunks for statements** (see Corpus warning).
-  - [ ] Define prefix variables `V` (countably infinite) and the **witness algebra** `W(V')`: the
+  - [x] Define prefix variables `V` (countably infinite) and the **witness algebra** `W(V')`: the
         free algebra over `V'` with a unary operator `v_{x:◇A}` per modal formula and a `k`-ary
-        operator per geometric sequent (Simpson `:5883–5905`).
-  - [ ] Define **coinfinite** `V' ⊆ V` and the fresh-label supply lemma: from coinfiniteness,
+        operator per geometric sequent (Simpson `:5883–5905`). *(deviation: altered -- only the
+        unary diamond-witness operator `dwitness` is implemented; the `k`-ary geometric-sequent
+        witness operators are elided because `𝒯_S5 := {χ_T, χ_5}` are both universal Horn clauses
+        needing no Skolem witness. Flagged in the module docstring as additive/extensible.)*
+  - [x] Define **coinfinite** `V' ⊆ V` and the fresh-label supply lemma: from coinfiniteness,
         extract `z ∈ V \ V'`. **This is load-bearing for the □-backward case (Phase 6)** — Simpson
         `:5920`: "In order to always guarantee a supply of such new elements for `D_{w'}` we shall
         work below with `V'` that are coinfinite subsets of `V`".
-  - [ ] Define `Graph` as `(X, R)` with `X` non-empty (`:5047–5065`); operations `G ∪ G'`,
+  - [x] Define `Graph` as `(X, R)` with `X` non-empty (`:5047–5065`); operations `G ∪ G'`,
         `G ∪ X'`, `G ∪ {xRy}`; the **trivial graph** `𝒯 = ({x}, ∅)` (`:5077`).
-  - [ ] Define labelled formulae as `x : A` for `x ∈ W(V)`, `A : Proposition Atom` (reuse
+  - [x] Define labelled formulae as `x : A` for `x ∈ W(V)`, `A : Proposition Atom` (reuse
         `Proposition`, `Basic.lean:72`).
-  - [ ] Add `public import` for `Labelled.Syntax` to `Cslib.lean`.
+  - [x] Add `public import` for `Labelled.Syntax` to `Cslib.lean`.
 - **Timing:** 2 hours (~200–250 lines)
 - **Depends on:** none
 - **Files to modify:**

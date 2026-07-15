@@ -1,21 +1,16 @@
 {
-  "status": "planned",
-  "agent_type": "planner-agent",
-  "task_number": 517,
-  "session_id": "sess_1784127828_1f2b2f",
-  "delegation_path": ["orchestrator", "plan", "planner-agent"],
-  "artifacts": [
-    {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/01_labelled-framework.md",
-      "type": "plan"
-    }
-  ],
-  "phase_count": 9,
-  "estimated_hours": 22,
-  "dependency_waves": [[1], [2], [3, 4], [5], [6], [7], [8], [9]],
-  "gated_phase": 3,
-  "gated_phase_name": "Adequacy bridge -- Lemma 6.2.2 + Lemma 6.1.2/6.2.3 tree internalization (dispatched first among risk-bearing nodes)",
-  "confidence": "~50% (45-55%)",
-  "next_steps": "Run /implement 517 to execute the plan",
-  "memory_candidates": []
+  "status": "in_progress",
+  "started_at": "2026-07-14T00:00:00Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, reading plan and report",
+    "phases_completed": 0
+  },
+  "metadata": {
+    "session_id": "sess_1784127828_1f2b2f",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

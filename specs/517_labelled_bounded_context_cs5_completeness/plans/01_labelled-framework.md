@@ -341,7 +341,7 @@ either lands sorry-free under `Cslib/` or lands nothing under `Cslib/`.
 
 ---
 
-### Phase 3: **[GATE — HARDEST NODE]** Adequacy bridge: Lemma 6.2.2 + Lemma 6.1.2/6.2.3 [PARTIAL]
+### Phase 3: **[GATE — HARDEST NODE]** Adequacy bridge: Lemma 6.2.2 + Lemma 6.1.2/6.2.3 [BLOCKED]
 
 **Dispatch 1 of 2 verdict: GATE FAIL.** Lemma 6.2.2 (hard direction) is now **complete,
 sorry-free, axiom-clean** — see `specs/517_.../probes/adequacy-gate-probe.lean` and
@@ -388,31 +388,44 @@ close); the plan permits **one further dispatch (2 of 2)** before this phase is 
         𝒯`, and Lemma 6.2.2 was split into the standalone, reusable `TClosure.hilbertTransport`
         lemma per non-`base` closure constructor -- exactly the "per-rule admissibility obligation"
         structure recommended.)*
-  - [ ] **Lemma 6.1.2**: define, for a **finite tree** `G`, the internalizing formula (`:6512`):
-        ```
-        Γ@U        = ⋀{B | y:B ∈ Γ} ∧ (□Γ@U₁) ∧ … ∧ (□Γ@U_k)   (y = root of subtree U)
-        (Γ ⊢_G x:A)* = Γ@T⁰ ⊃ ◇(Γ@T¹ ⊃ ◇(… Γ@T^{m-1} ⊃ ◇(Γ@T^m ⊃ A)…))
-        ```
+  - [ ] **Lemma 6.1.2**: define, for a **finite tree** `G`, the internalizing formula (`:6512`).
+        *(dispatch 2 CORRECTION: the formula as written above (□ for children, ◇ for the outer
+        telescope) is BACKWARDS relative to the source. Verified directly against the source PDF
+        (pages 109-112, read via the `Read` tool, not `pdftotext` which garbles □/◇ in this
+        typeface): `Γ@U = ⋀{B|y:B∈Γ} ∧ (◇Γ@U₁) ∧ … ∧ (◇Γ@U_k)` (◇ for children) and
+        `(Γ⊢_G x:A)* = Γ@T⁰ ⊃ □(Γ@T¹ ⊃ □(…Γ@T^{m-1} ⊃ □(Γ@T^m ⊃ A)…))` (□ for the outer,
+        ancestor-to-target telescope). This correction is load-bearing: any future attempt MUST
+        use the corrected formula -- see `handoffs/lemma612-final-blocker.md` §1.)*
         and prove `Γ ⊢_G x:A ⟹ (Γ ⊢_G x:A)*` is a theorem of `IK + Ax(𝒯)`, **by induction on
         derivations**. At the trivial graph `(⊢_𝒯 x:A)* = ⊤ ⊃ A`, so `A` follows (`:6524`).
         *(dispatch 1: NOT attempted to completion -- diagnosed as needing a dedicated reified
-        finite-tree type co-indexed with the derivation, not just `Graph`; see the blocker handoff
-        for the precise reasoning, including a concrete shortcut attempt that was tried and found
-        to fail. Deferred to dispatch 2.)*
+        finite-tree type co-indexed with the derivation, not just `Graph`. dispatch 2: built and
+        verified this reified tree type (`LTree`) plus the corrected `star`/`Star` formulas and a
+        full combinator toolkit (`box_mono1`/`box_mono2`/`wrapClosed`/`Star_imp1`/`Star_imp2`/
+        `Star_append`), sorry-free and axiom-clean, in `probes/lemma612-scaffold.lean` -- but did
+        NOT complete the induction over `NIKAx` itself (the `LTree`-`Graph` correspondence was not
+        wired up, and the `(◇E)` case has a new, deeper obstruction -- see below and the final
+        blocker handoff.)*
   - [ ] **State the treeness invariant explicitly as a lemma** (Simpson never does) and carry it
-        through the induction. *(dispatch 1: deferred to dispatch 2, blocked on Lemma 6.1.2's
-        tree-type prerequisite above.)*
+        through the induction. *(dispatch 1: deferred to dispatch 2. dispatch 2: NOT reached --
+        subsumed by the `(◇E)` well-scopedness gap below, which is the actual remaining blocker.)*
   - [ ] **Reconstruct the omitted `(⊥E)` and `(∨E)` cases from scratch**, following the written-out
-        `(◇E)` case as the model (`:6544`). **This is the crux.** *(dispatch 1: not reached --
-        blocked on Lemma 6.1.2's tree-type prerequisite; the blocker handoff recommends attempting
-        these two cases LAST in dispatch 2, once the tree scaffold makes every other case's
-        pattern clear.)*
+        `(◇E)` case as the model (`:6544`). **This is the crux.** *(dispatch 1: not reached.
+        dispatch 2: worked out on paper via the verified `Star_imp1`/`Star_imp2` toolkit --
+        CONTRARY to Simpson's own hedge, both `(⊥E)`/`(∨E)` are tractable, not intricate, because
+        `NIKAx`'s encoding already commits them to being strictly label-local; NOT mechanized as
+        actual `NIKAx` induction cases. The genuinely hard remaining case turned out to be
+        `(◇E)` itself, one of "the four modal rules" Simpson writes out in full: `NIKAx.diaE`'s
+        `z` parameter is not provably scoped relative to `x` by the bare Lean type, requiring an
+        unproven well-scopedness invariant plus Simpson's own Figure 6-2 "dissection" tree-surgery
+        -- see `handoffs/lemma612-final-blocker.md` §3 for the complete diagnosis.)*
   - [ ] **Lemma 6.2.3** (`:7127`): "trivial modifications … apart from one extra trivial case
-        covering the use of an axiom" (`:7138`). *(dispatch 1: not reached, depends on Lemma
-        6.1.2.)*
+        covering the use of an axiom" (`:7138`). *(dispatch 1: not reached. dispatch 2: not
+        reached -- blocked on Lemma 6.1.2's `(◇E)` gap above.)*
   - [ ] Add `public import` for `Labelled.Adequacy` to `Cslib.lean` **only on success**.
-        *(dispatch 1: not done -- gate did not close; the working file was moved to
-        `specs/517_.../probes/adequacy-gate-probe.lean` instead, per the failure branch below.)*
+        *(dispatch 1/2: not done -- gate did not close (FINAL, per the plan's 2-dispatch bound);
+        the working file was moved to `specs/517_.../probes/lemma612-scaffold.lean` instead, per
+        the failure branch below.)*
 - **Timing:** 5 hours (~400–600 lines). **Bounded attempt: 2 agent dispatches. Do not open a third.**
 - **Depends on:** 2
 - **Files to modify:**
@@ -438,9 +451,23 @@ close); the plan permits **one further dispatch (2 of 2)** before this phase is 
   - **Dispatch 1 of 2 verdict (recorded here): GATE FAIL.** Lemma 6.2.2 (hard direction) complete;
     Lemma 6.1.2/6.2.3 not reached. See
     `specs/517_.../handoffs/adequacy-gate-blocker-handoff.md` for the full diagnosis and
-    `specs/517_.../probes/adequacy-gate-probe.lean` for the reusable mechanization. **Dispatch 2
-    of 2 remains available** before this phase's failure becomes final per the FAILURE criterion
-    above.
+    `specs/517_.../probes/adequacy-gate-probe.lean` for the reusable mechanization.
+  - **Dispatch 2 of 2 verdict (FINAL): GATE FAIL.** Per the "bounded attempt: 2 dispatches, do not
+    open a third" constraint above, this phase is now marked `[BLOCKED]` for good and no further
+    dispatch will be attempted on this task. Dispatch 2 (a) **corrected a significant
+    transcription error** in this plan's own paraphrase of the internalizing formula (the outer
+    telescoping connective is `□`, not `◇` as written above in the "Lemma 6.1.2" task item — see
+    the handoff for the source-verified correct formula and why the error mattered), (b) built and
+    fully verified (sorry-free, axiom-clean) a substantial reusable scaffold covering ~11 of 15
+    `NIKAx` cases on paper (`LTree`, `star`/`Star`, `box_mono1`/`box_mono2`/`wrapClosed`/
+    `Star_imp1`/`Star_imp2`/`Star_append`, in `specs/517_.../probes/lemma612-scaffold.lean`), and
+    (c) found a **new, deeper obstruction** in the `(◇E)` rule: `NIKAx.diaE`'s Lean type does not
+    scope its `z` parameter relative to `x`, requiring an unproven well-scopedness invariant on
+    top of Simpson's own "dissection" tree-surgery (Figure 6-2) before the rule can be
+    internalized. See `specs/517_.../handoffs/lemma612-final-blocker.md` for the complete
+    diagnosis, the corrected formula, the verified toolkit, and the precise remaining gap. **No
+    third dispatch will be opened; per Rollback/Contingency, Phases 4-8 stand as landed and the
+    task returns to `[BLOCKED]`.**
 
 ---
 

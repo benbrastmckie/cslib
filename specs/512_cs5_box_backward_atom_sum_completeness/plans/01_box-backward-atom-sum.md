@@ -228,6 +228,38 @@ options recommended for the next dispatch (reframe Phase 3 into the canonical-mo
 directly, or search for a genuinely different proof-theoretic argument). Phase 3 remains
 `[PARTIAL]` — no proved obstruction exists, so this is not the FAILURE/PIVOT branch.
 
+**RESUMED-DISPATCH PROGRESS 3** (canonical-model reframe, per continuation handoff 03,
+session `sess_1784082183_03d15b`): per handoff 03's strategic reframe ("build the full
+`CS5Combined` canonical model directly, mirroring `CS5Segment`/`cs5Mreach`"), this dispatch
+ported `CS5.lean`'s entire canonical-model construction (`cs5_box_four` through
+`cs5FC''_cs5Mreach`, ~630 lines of `CS5.lean`) to `CS5Combined` over `Atom ⊕ Atom`, landed in
+`CS5Canonical.lean` (sorry-free, axiom-clean: `#print axioms`/`lean_verify` show only
+`propext`/`Classical.choice`/`Quot.sound`, and several purely-structural facts show **no**
+axioms at all). Landed: `cs5Combined_box_four`, `cs5Combined_boxInv_subset`, `cs5CombinedTail` +
+`_refl`/`_symm`/`_trans`, `cs5Combined_symmetric_tail_box_gap`, `cs5Combined_dia_bot_imp_bot`,
+the `bigOr`/box combinatorics (`cs5Combined_box_mono`, `cs5Combined_or_box_imp_box_bigOr`,
+`cs5Combined_dia_or_box_imp_bigOr`, `cs5Combined_extract_box_list`,
+`cs5Combined_quasiPrime_bigOr_mem`), `cs5Combined_quasi_prime_set_exclusion`,
+`cs5Combined_diam_witness`, `cs5CombinedSeg`/`CS5CombinedSegment`/`cs5CombinedMreach`/
+`CS5CombinedSegment.ofHead`, `cs5Combined_refl`/`_trans`/`_symm`,
+`cs5Combined_fcsymbox_theory`/`cs5Combined_fc4_theory` + their segment lifts, and
+`cs5CombinedFC''_cs5CombinedMreach`. Reuse finding: almost all of `CS5.lean`'s plumbing
+(`mem_head_mp`, `mem_of_axiom`, `box_mem_of_boxed_context`, `quasi_prime_exclusion`,
+`list_split_union`, `bigAnd`/`bigAnd_mem_of_forall_mem`, `derivImpBigAndOfAppend`,
+`modal_deriv_imp_of_union`, `Metalogic.prime_set_exclusion`, `CKSegment`, `cmreach`,
+`QuasiPrime`) is already generic over an arbitrary axiom predicate, so the port was a direct
+mechanical substitution, not new mathematics. **Key structural finding** (mechanized via
+`cs5Combined_symmetric_tail_box_gap`, a direct port of `cs5_symmetric_tail_box_gap`): the
+box-backward gap is structural (uses only primality + the two tail clauses, no axiom-system-
+specific fact) and therefore applies **identically** to `cs5CombinedTail` — a fully general
+`cs5Combined` truth lemma (covering arbitrary `CS5Combined`-quasi-prime heads) is **not** easier
+than `CS5`'s own open box-backward case. The scaffolding's value is therefore in supporting an
+attack on `cs5Combined_seed_excludes` as a *specific*, designated-pair existence claim (using
+the seed `τL '' H` and the already-landed `HR` facts), not in avoiding box-backward via a bigger
+language. `cs5Combined_seed_excludes` itself remains **unresolved** this dispatch (no `sorry`, no
+fabricated obstruction) — status stays `[PARTIAL]`. See `handoffs/04_canonical-model-scaffold.md`
+for the full account and the concrete next-step recommendation.
+
 **BLOCKER** (Phase 3, task 512 implementation dispatch, 2026-07-14 — ORIGINAL, pre-route-2):
 
 - **What failed**: `cs5Combined_seed_excludes` was not closed sorry-free by either route within

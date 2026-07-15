@@ -129,7 +129,7 @@ a green, zero-sorry milestone with a task-scoped commit.
 
 ---
 
-### Phase 1: B backward-propagation rule (FrameRules.lean) [NOT STARTED]
+### Phase 1: B backward-propagation rule (FrameRules.lean) [COMPLETED]
 
 - **Goal:** Add the symmetric box rule and its K-merged application function, so downstream phases
   have `modalApplyOneB` to build on.

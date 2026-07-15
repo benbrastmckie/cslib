@@ -194,6 +194,170 @@ lemma modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
+/-! ## B-Specific (Symmetric-Frame) Backward-Propagation Helpers
+
+The B rule propagates **backward** along already-recorded edges: given `T(□φ)@w` and a raw
+tableau edge `v → w` (`acc.hasEdge v w = true`), it emits `T(φ)@v`; dually for `F(◇φ)@w`. This
+is the source-directed mirror of K's own `boxPos`/`diamondNeg` arms (which propagate *forward*
+along `w`'s own successors); `Accessibility` (`Branch.lean`) exposes only `successorsOf`
+(forward), so `modalBPredecessorsOf` below reads `acc.edges` directly for the reverse
+direction.
+
+**Known-worlds filter (the delicate part)**: unlike T's self-propagation (same world `w`,
+trivially known since `sf ∈ b`) and S4's forward propagation (successors, known via
+`accTargetsKnown`), a raw predecessor `v` of `w` is a **source**, not a target, of an
+`acc`-edge, so `RuleApplicationSpec.knownWorldsStep`'s hypothesis bundle
+(`accTargetsKnown b acc`, target-only) does not by itself place `v ∈ modalKnownWorlds b`. The
+backward arms therefore filter `modalBPredecessorsOf` down to predecessors that are
+*already* known worlds of `b`. This filter is a no-op on every branch/accessibility pair
+actually reachable by the tableau algorithm (every edge source is `sf.label` for some `sf`
+already on the branch at the moment the edge is minted, by `RuleApplicationSpec.freshLocal`'s
+own shape, and branches only grow thereafter) -- `BDriver.lean`'s `accSourcesKnown` invariant
+makes this precise and is what the B completeness bridge (`FrameCompleteness.lean`) consumes to
+show the filter never excludes a genuine predecessor on a real derivation. Restricting to known
+predecessors is what makes `RuleApplicationSpec.knownWorldsStep` dischargeable *unconditionally*
+(for arbitrary `b`/`acc`, not just reachable ones), exactly as the interface requires.
+
+## Main Definitions
+
+- `modalBPredecessorsOf`: the raw predecessors of a world `w` in `acc` (reverse of
+  `Accessibility.successorsOf`).
+- `modalBBoxBack`/`modalBDiaNegBack`: the two B-specific backward-propagation helpers.
+- `modalApplyOneB`: apply the K rules (`modalApplyOne`) together with the B backward-propagation
+  arms, merging persistent-rule outputs. Reduces to `modalApplyOne` exactly outside the two
+  B-relevant signed-formula shapes (`T(□φ)@w`, `F(◇φ)@w`). -/
+
+/-- All predecessors of world `w` in the accessibility relation: worlds `v` such that the raw
+edge `v → w` is recorded in `acc`. Reverse direction of `Accessibility.successorsOf`
+(`Branch.lean`), which `Accessibility` does not itself expose. -/
+def modalBPredecessorsOf (acc : Accessibility) (w : WorldIndex) : List WorldIndex :=
+  acc.edges.filterMap fun (src, tgt) => if tgt == w then some src else none
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every `modalBPredecessorsOf acc w` member `v` witnesses a raw recorded edge `v → w`. -/
+lemma modalBPredecessorsOf_hasEdge {acc : Accessibility} {v w : WorldIndex}
+    (h : v ∈ modalBPredecessorsOf acc w) : acc.hasEdge v w = true := by
+  unfold modalBPredecessorsOf at h
+  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := List.mem_filterMap.mp h
+  dsimp only at heq
+  simp only [Accessibility.hasEdge, List.any_eq_true]
+  by_cases hc : (tgt == w) = true
+  · rw [if_pos hc] at heq
+    obtain rfl : src = v := by injection heq
+    obtain rfl : tgt = w := eq_of_beq hc
+    exact ⟨_, hmem, by simp⟩
+  · rw [if_neg hc] at heq
+    exact absurd heq (by simp)
+
+/-- The B backward-propagation for box-positives: from `T(□φ)@w`, generate `T(φ)@v` for every
+recorded predecessor `v` of `w` that is already a known world of `b`, filtered to exclude
+formulas already present on the branch. Backward-along-edges dual of K's forward `boxPos` arm
+(`Rules.lean`); see the module docstring above for why the known-worlds filter is needed. -/
+def modalBBoxBack (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  ((modalBPredecessorsOf acc w).filter (fun v => (modalKnownWorlds b).any (· == v))).filterMap
+    fun v =>
+      let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, v⟩
+      if b.any (· == sf) then none else some sf
+
+/-- The B backward-propagation for diamond-negatives: from `F(◇φ)@w`, generate `F(φ)@v` for
+every recorded predecessor `v` of `w` that is already a known world of `b`, filtered to
+exclude formulas already present on the branch. Dual of `modalBBoxBack`. -/
+def modalBDiaNegBack (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  ((modalBPredecessorsOf acc w).filter (fun v => (modalKnownWorlds b).any (· == v))).filterMap
+    fun v =>
+      let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, v⟩
+      if b.any (· == sf) then none else some sf
+
+omit [Hashable Atom] in
+/-- Membership dichotomy for `modalBBoxBack`: every emitted formula `⟨.pos, φ, v⟩` has `v` a
+known-world predecessor of `w` and was not already on `b`. -/
+lemma modalBBoxBack_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalBBoxBack b acc φ w) :
+    x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
+      x.label ∈ modalBPredecessorsOf acc w ∧ x.label ∈ modalKnownWorlds b ∧ x ∉ b := by
+  unfold modalBBoxBack at h
+  obtain ⟨v, hv, heq⟩ := List.mem_filterMap.mp h
+  simp only [List.mem_filter] at hv
+  obtain ⟨hpred, hknown⟩ := hv
+  dsimp only at heq
+  by_cases hmem : (b.any (· == (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+  · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+  · rw [if_neg hmem] at heq
+    obtain rfl : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+      injection heq
+    exact ⟨rfl, hpred, by simpa using hknown, by simpa using hmem⟩
+
+omit [Hashable Atom] in
+/-- Membership dichotomy for `modalBDiaNegBack`, dual of `modalBBoxBack_mem`. -/
+lemma modalBDiaNegBack_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalBDiaNegBack b acc φ w) :
+    x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
+      x.label ∈ modalBPredecessorsOf acc w ∧ x.label ∈ modalKnownWorlds b ∧ x ∉ b := by
+  unfold modalBDiaNegBack at h
+  obtain ⟨v, hv, heq⟩ := List.mem_filterMap.mp h
+  simp only [List.mem_filter] at hv
+  obtain ⟨hpred, hknown⟩ := hv
+  dsimp only at heq
+  by_cases hmem : (b.any (· == (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+  · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+  · rw [if_neg hmem] at heq
+    obtain rfl : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+      injection heq
+    exact ⟨rfl, hpred, by simpa using hknown, by simpa using hmem⟩
+
+/-! ## B-Augmented Rule Application -/
+
+/-- Apply the K modal rules together with the B backward-propagation arms. For the two
+B-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the backward-propagation formulas are merged into
+the K rule's `persistent` output (deduplicated); for every other signed-formula shape,
+`modalApplyOneB` reduces to exactly `modalApplyOne` (the K rule dispatch): the B arms are pure
+`persistent` outputs at existing (known) worlds, never `linear`/`branching`, matching the
+report's "no new worlds" classification for B. -/
+def modalApplyOneB
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
+  let (kResult, kAcc) := modalApplyOne sf b acc
+  match sf.sign, sf.formula with
+  | .pos, .box φ =>
+    let backNew := modalBBoxBack b acc φ sf.label
+    match kResult with
+    | .persistent kForms =>
+      (.persistent (kForms ++ backNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
+    | .notApplicable =>
+      if backNew.isEmpty then (.notApplicable, kAcc) else (.persistent backNew, kAcc)
+    | other => (other, kAcc)
+  | .neg, .diamond φ =>
+    let backNew := modalBDiaNegBack b acc φ sf.label
+    match kResult with
+    | .persistent kForms =>
+      (.persistent (kForms ++ backNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
+    | .notApplicable =>
+      if backNew.isEmpty then (.notApplicable, kAcc) else (.persistent backNew, kAcc)
+    | other => (other, kAcc)
+  | _, _ => (kResult, kAcc)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneB` agrees with `modalApplyOne` outside the two B-relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): the B arms never affect any other rule dispatch. -/
+lemma modalApplyOneB_eq_of_not_boxPos_diaNeg
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalApplyOneB sf b acc = modalApplyOne sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneB
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
 end Cslib.Logic.Modal.Tableau
 
 end

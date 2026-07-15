@@ -471,6 +471,235 @@ theorem cs5Incest_cs5CanonMreach_false : ¬ cs5Incest (@cs5CanonMreach Atom) := 
   have huniv' : T = Set.univ := huniv
   exact hbotT (huniv' ▸ Set.mem_univ _)
 
+/-! ## Phase 6: Simpson's Two-Sided Canonical Relation (task 512 plan 03)
+
+Restores the diamond clause `{◇A | A ∈ Δ} ⊆ Γ` (Simpson 1994, corpus chunk `682e04d443e7bbd7`)
+alongside the box clause `boxInv Γ ⊆ Δ` kept from `cs5OnesidedR` above. -/
+
+/-- **Simpson's two-sided `CS5` canonical relation**: `Γ R Δ` iff `boxInv Γ ⊆ Δ` (the box clause,
+Simpson's `{B | □B ∈ Γ} ⊆ Δ`, kept from `cs5OnesidedR`) AND `Δ ⊆ diaInv Γ` (the diamond clause,
+Simpson's `{◇A | A ∈ Δ} ⊆ Γ`, i.e. `∀ A, A ∈ Δ → (◇A) ∈ Γ`, restored here). **Note on the plan's
+inline formula**: `plans/03_canonical-frame-redesign.md`'s Phase 6 task list states the second
+clause as `∀ A, (◇A) ∈ Δ → (◇A) ∈ Γ`; that is a typo relative to Simpson's own quote (which
+quantifies over `A ∈ Δ`, not `◇A ∈ Δ`) reproduced verbatim in report 06. This definition uses the
+textually-correct Simpson clause, cross-checked directly against `cs5_boxInv_subset_iff`
+(`CS5.lean:589`) below. -/
+def cs5TwoSidedR (Γ Δ : Set (Proposition Atom)) : Prop :=
+  boxInv Γ ⊆ Δ ∧ Δ ⊆ diaInv Γ
+
+/-- **DECISIVE STRUCTURAL FACT (the Phase 6/7 crux, and the finding that settles the gate).**
+For quasi-prime `Γ`, `Δ`, `cs5TwoSidedR Γ Δ` is EXTENSIONALLY THE SAME RELATION as `Δ ∈ cs5Tail Γ`
+(`CS5.lean:632`, the discarded "old wall" two-sided box-BOTH-directions relation
+`boxInv Γ ⊆ Δ ∧ boxInv Δ ⊆ Γ`). Proof: `cs5_boxInv_subset_iff` (`CS5.lean:589`,
+`boxInv T ⊆ H ↔ T ⊆ diaInv H`, already landed, axiom-free) instantiated at `H := Γ, T := Δ` reads
+`boxInv Δ ⊆ Γ ↔ Δ ⊆ diaInv Γ` — i.e. Simpson's diamond clause `Δ ⊆ diaInv Γ` is LITERALLY
+EQUIVALENT (an `↔`, not a one-way implication) to the reverse box clause `boxInv Δ ⊆ Γ`, for ANY
+pair of quasi-prime `CS5`-theories. This holds because `CS5`'s `B` axiom (`bBox` + `bDia`, both
+`CS5ModalAxiom` constructors) makes diamond-membership and reverse-box-non-membership dual at the
+level of every individual quasi-prime theory — independent of which accessibility relation is
+under discussion, independent of `Ω`-exclusion, independent of any world-type engineering.
+
+**This refutes report 06's central technical claim** that "Simpson's verification does not face
+the `boxInv`-monotonicity problem because it routes the witness through the diamond clause, not
+through `boxInv`" (report 06 §Sub-question 2, §Sub-question 4 point 1): for `CS5` specifically,
+restoring the diamond clause is NOT restoring independent information — it is restoring EXACTLY
+the `cs5Tail` relation Phase 3 replaced, in disguise. See `cs5Incest_forces_symm` and
+`cs5Incest_cs5PrimeMreach_false` below for the mechanized consequence: verifying `cs5Incest` on any
+one-sided-tail world type forces every tail member into `cs5Tail`-shape, which
+`cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized) shows cannot admit the
+box-refuting witness box-backward (Phase 9) needs. -/
+theorem cs5TwoSidedR_iff_cs5Tail {Γ Δ : Set (Proposition Atom)}
+    (hΓ : QuasiPrime (@CS5ModalAxiom Atom) Γ) (hΔ : QuasiPrime (@CS5ModalAxiom Atom) Δ) :
+    cs5TwoSidedR Γ Δ ↔ Δ ∈ cs5Tail Γ := by
+  unfold cs5TwoSidedR cs5Tail
+  constructor
+  · rintro ⟨h1, h2⟩
+    exact ⟨hΔ, h1, (cs5_boxInv_subset_iff hΓ hΔ).mpr h2⟩
+  · rintro ⟨_, h1, h2⟩
+    exact ⟨h1, (cs5_boxInv_subset_iff hΓ hΔ).mp h2⟩
+
+/-- **Corollary: `cs5TwoSidedR` is symmetric** on quasi-prime theories (immediate from
+`cs5TwoSidedR_iff_cs5Tail` plus the already-landed `cs5Tail_symm`, `CS5.lean:645`). So at the
+THEORY level (before any world-type/segment machinery), `cs5Incest`'s witness for `cs5TwoSidedR`
+is always just `u' := u` (`le_refl`) — no `dia_refuting_theory` construction can do better, since
+`cs5TwoSidedR` carries no more incestuality content than plain symmetry already does. -/
+theorem cs5TwoSidedR_symm {Γ Δ : Set (Proposition Atom)}
+    (hΓ : QuasiPrime (@CS5ModalAxiom Atom) Γ) (hΔ : QuasiPrime (@CS5ModalAxiom Atom) Δ)
+    (h : cs5TwoSidedR Γ Δ) : cs5TwoSidedR Δ Γ :=
+  (cs5TwoSidedR_iff_cs5Tail hΔ hΓ).mpr
+    (cs5Tail_symm hΓ ((cs5TwoSidedR_iff_cs5Tail hΓ hΔ).mp h))
+
+/-! ## Phase 6 continued: The `Ω`-Excluding One-Sided World Type (`CS5PrimeSegment`)
+
+Clones `CS4Segment`'s `excl`/`excl_head` hereditary-invariant pattern (`CS4.lean:373-403`) onto
+`cs5OnesidedR`'s one-sided box tail, giving a world type carrying a hereditary excluded-diamond
+invariant. Built ALONGSIDE `CS5CanonSegment` (Phase 3) and `cs5TwoSidedR` above; nothing here
+edits Phase 3/5's declarations. -/
+
+/-- `4`-diamond contrapositive for `CS5`: `◇A ∉ H → ◇◇A ∉ H`. The hereditary closure step (CS4
+precedent `cs4_not_dia_dia`, `CS4.lean:317`, using `fourDia` here instead) that lets an
+excluded-diamond invariant propagate through the transitive closure of the one-sided tail. -/
+theorem cs5_not_dia_dia {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : (◇(◇A)) ∉ H :=
+  fun h => h_not (mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.fourDia A)) h)
+
+/-- Tail determined by head `H` and an optional excluded diamond `E`, over `cs5OnesidedR` (NOT
+`cs5Tail`) — mirrors `cs4Tail` (`CS4.lean:341`). -/
+def cs5PrimeTail (H : Set (Proposition Atom)) (E : Option (Proposition Atom)) :
+    Set (Set (Proposition Atom)) :=
+  {t | QuasiPrime (@CS5ModalAxiom Atom) t ∧ cs5OnesidedR H t ∧ ∀ A, E = some A → (◇A) ∉ t}
+
+/-- The `◇`-exclusion `CS5` canonical segment at head `H` excluding diamond `E`. Mirrors `cs4Seg`
+(`CS4.lean:348`) exactly: `diam_witness` for `E = some A` needs `◇◇A ∉ H`, supplied by `fourDia`
+via `cs5_not_dia_dia`, so the hereditary exclusion propagates to the witness theory. -/
+def cs5PrimeSeg {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    (E : Option (Proposition Atom)) (hE : ∀ A, E = some A → (◇A) ∉ H) :
+    CKSegment (@CS5ModalAxiom Atom) where
+  head := H
+  tail := cs5PrimeTail H E
+  head_qprime := hH
+  tail_qprime := fun _ ht => ht.1
+  box_reflect := fun _ hB _ ht => ht.2.1 hB
+  diam_witness := fun B hB => by
+    cases hE_eq : E with
+    | none =>
+      refine ⟨Set.univ, ⟨quasiPrime_univ, Set.subset_univ _, ?_⟩, Set.mem_univ _⟩
+      rintro A ⟨⟩
+    | some A =>
+      obtain ⟨T, hsub, hT, hBT, hAT⟩ :=
+        dia_refuting_theory (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+          (fun A B χ => .orE A B χ) (fun φ ψ => .k φ ψ) (fun φ ψ => .kdia φ ψ)
+          hH hB (cs5_not_dia_dia hH (hE A hE_eq))
+      refine ⟨T, ⟨hT, hsub, ?_⟩, hBT⟩
+      rintro A' ⟨rfl⟩
+      exact hAT
+
+/-- `CS5` canonical worlds carrying a hereditary excluded-diamond invariant (mirrors
+`CS4Segment`, `CS4.lean:373`). **Note (see `cs5Incest_cs5PrimeMreach_false` below): worlds with
+`excl := none` (e.g. `.ofHead`) do NOT exclude the exploding world `Ω` from their tail** — the
+`E = some A` exclusion clause is vacuous when `E = none`, exactly mirroring `CS4Segment` (which
+never needed to banish `Ω`, since `CS4`'s frame condition has no incestuality-style clause). This
+is the CS4-template's blind spot for `CS5`'s Phase 7 obligation, diagnosed precisely below. -/
+structure CS5PrimeSegment (Atom : Type u) where
+  /-- The underlying segment. -/
+  seg : CKSegment (@CS5ModalAxiom Atom)
+  /-- The optional excluded diamond. -/
+  excl : Option (Proposition Atom)
+  /-- The excluded diamond is absent from the head (hereditary invariant). -/
+  excl_head : ∀ A, excl = some A → (◇A) ∉ seg.head
+  /-- The tail is exactly the `◇`-exclusion one-sided tail. -/
+  tail_eq : seg.tail = cs5PrimeTail seg.head excl
+
+instance : Preorder (CS5PrimeSegment Atom) :=
+  Preorder.lift (fun s : CS5PrimeSegment Atom => s.seg)
+
+/-- Canonical accessibility for the `◇`-exclusion one-sided model. -/
+def cs5PrimeMreach (P Q : CS5PrimeSegment Atom) : Prop := cmreach P.seg Q.seg
+
+/-- Maximal-tail world (no excluded diamond). -/
+def CS5PrimeSegment.ofHead {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) : CS5PrimeSegment Atom where
+  seg := cs5PrimeSeg hH none (by rintro A ⟨⟩)
+  excl := none
+  excl_head := by rintro A ⟨⟩
+  tail_eq := rfl
+
+/-- The hereditary diamond-refuting world: excludes `A` from every world in its transitive
+closure (via `cs5_not_dia_dia`), unlike a one-step `A`-exclusion. -/
+def CS5PrimeSegment.diaRefuting
+    {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
+    {A : Proposition Atom} (h_not : (◇A) ∉ H) : CS5PrimeSegment Atom where
+  seg := cs5PrimeSeg hH (some A) (by rintro A' ⟨rfl⟩; exact h_not)
+  excl := some A
+  excl_head := by rintro A' ⟨rfl⟩; exact h_not
+  tail_eq := rfl
+
+/-- `cs5PrimeMreach` is reflexive: `boxInv H ⊆ H` is axiom `T` (`cs5_boxInv_subset`) plus
+`excl_head`. This comes for free from the axioms — no separate `refl` invariant is threaded
+through the world type. -/
+theorem cs5Prime_refl (P : CS5PrimeSegment Atom) : cs5PrimeMreach P P := by
+  change P.seg.head ∈ P.seg.tail
+  rw [P.tail_eq]
+  exact ⟨P.seg.head_qprime, cs5_boxInv_subset P.seg.head_qprime, P.excl_head⟩
+
+/-! ## Phase 7: GO/NO-GO GATE — `cs5Incest` on the redesigned frame
+
+Attempts to verify the UNCHANGED `cs5Incest` (`:234`) on the `◇`-exclusion one-sided relation
+`cs5PrimeMreach`, mirroring `cs4FC'_cs4Mreach`'s diamond-side technique
+(`CS4.lean:441`). **RESULT: GATE FAILURE**, mechanized below (`cs5Incest_cs5PrimeMreach_false`)
+via TWO independent, sorry-free arguments — a general one (`cs5Incest_forces_symm`, tied to
+`cs5TwoSidedR_iff_cs5Tail` above) and a concrete one (Ω remains reachable from `.ofHead`-built
+worlds, exactly as in Phase 5). -/
+
+/-- **General monotonicity collapse** (generalizes Phase 5's `cs5CanonMreach`-specific argument
+to ANY box-based canonical relation on ANY `CKSegment`-style world type, independent of
+`Ω`-exclusion or world-type engineering). `≤` is head-inclusion on every `CKSegment`-lifted
+`Preorder` in this file (`CKSegment.le_iff`, `Segment.lean:167`); if `r` implies the forward box
+clause whenever `r w u`, `cs5Incest r` forces the witness to be `u' := u` itself: enlarging `u`
+(`u ≤ u'` unfolds to `head u ⊆ head u'`) only ADDS to `boxInv (head u')` (`boxInv` is monotone
+under `⊆`), so `boxInv (head u') ⊆ head w` can hold only if `boxInv (head u) ⊆ head w` ALREADY
+does — no clever choice of `u'` escapes this, since it is unconditional set theory, not a fact
+about any specific construction. -/
+theorem cs5Incest_forces_symm
+    {World : Type*} [Preorder World] (head : World → Set (Proposition Atom))
+    (hmono : ∀ {w w' : World}, w ≤ w' → head w ⊆ head w')
+    (r : World → World → Prop) (hbox : ∀ {w u : World}, r w u → boxInv (head w) ⊆ head u)
+    (hincest : cs5Incest r) {w u : World} (hru : r w u) :
+    boxInv (head u) ⊆ head w := by
+  obtain ⟨u', hle, hru'w⟩ := hincest hru
+  exact fun B hB => hbox hru'w (hmono hle hB)
+
+/-- `Ω` (the exploding world, wrapped via `.ofHead` with no excluded diamond) is
+`cs5PrimeMreach`-reachable from EVERY `.ofHead`-built canonical world — the `E := none` exclusion
+clause is vacuous, exactly mirroring `cs4Seg`'s `none` case (which also admits `Set.univ`
+unconditionally). This is the concrete instance of the note on `CS5PrimeSegment` above: the
+CS4-style per-tail exclusion does not banish `Ω` from the type, only from tails explicitly built
+with `excl := some _`. -/
+theorem cs5PrimeMreach_ofHead_to_univ {H : Set (Proposition Atom)}
+    (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
+    cs5PrimeMreach (CS5PrimeSegment.ofHead hH)
+      (CS5PrimeSegment.ofHead (@quasiPrime_univ Atom (@CS5ModalAxiom Atom))) := by
+  change (Set.univ : Set (Proposition Atom)) ∈ cs5PrimeTail H none
+  exact ⟨quasiPrime_univ, Set.subset_univ _, by rintro A ⟨⟩⟩
+
+/-- **`cs5Incest` FAILS for `cs5PrimeMreach` (Phase 7 GATE FAILURE, mechanized).** Two independent
+routes combine here:
+1. `cs5Incest_forces_symm` shows that IF `cs5Incest cs5PrimeMreach` held, THEN
+   `boxInv (head u) ⊆ head w` whenever `cs5PrimeMreach w u` — in particular at
+   `w := .ofHead hT` (`T` realizing an underivable formula, hence non-exploding) and
+   `u := .ofHead quasiPrime_univ` (`Ω`, reachable from `w` by `cs5PrimeMreach_ofHead_to_univ`),
+   giving `boxInv Set.univ ⊆ T`.
+2. `boxInv Set.univ = Set.univ` (every formula is trivially boxed inside `Set.univ`), so this
+   forces `Set.univ ⊆ T`, i.e. `T = Set.univ` — contradicting `T`'s non-explosion (`⊥ ∉ T`,
+   witnessed via `quasi_head_realization` at the underivable `⊥`, `cs5_consistent_incest`).
+
+This is the SAME shape of contradiction as Phase 5's `cs5Incest_cs5CanonMreach_false` (`Ω`
+universally reachable, no witness can route back to a non-exploding world) — showing the Phase 6
+redesign's `Ω`-exclusion mechanism (CS4's per-tail `excl` field) does not actually solve the
+problem it was built for: it excludes `Ω` only from tails explicitly constructed with
+`excl := some _`, never from the base `.ofHead` worlds `cs5Incest` must quantify over. Combined
+with `cs5TwoSidedR_iff_cs5Tail` above (Simpson's diamond clause is, for `CS5`, PROVABLY THE SAME
+relation as the old two-sided `cs5Tail` wall), this is not a fixable implementation gap: any
+world type whose reachability relation genuinely carries Simpson's diamond clause is forced into
+`cs5Tail`-shape, which `cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized) shows
+cannot admit the box-refuting witness (omitting a specific formula) that box-backward (Phase 9)
+needs. **Report 06's verdict (A) is refuted: option (B), a genuine structural wall, is confirmed
+for the two-sided-R redesign as well.** -/
+theorem cs5Incest_cs5PrimeMreach_false : ¬ cs5Incest (@cs5PrimeMreach Atom) := by
+  intro hincest
+  obtain ⟨T, hT, hbotT⟩ := quasi_head_realization
+    (fun φ ψ => CS5ModalAxiom.implyK φ ψ) (fun φ ψ χ => CS5ModalAxiom.implyS φ ψ χ)
+    (fun A B χ => CS5ModalAxiom.orE A B χ) (@cs5_consistent_incest Atom)
+  have hru := cs5PrimeMreach_ofHead_to_univ hT
+  have hsub : boxInv (Set.univ : Set (Proposition Atom)) ⊆ T :=
+    cs5Incest_forces_symm (fun s : CS5PrimeSegment Atom => s.seg.head) (fun h => h)
+      cs5PrimeMreach
+      (fun {w u} hwu => (w.tail_eq ▸ hwu : u.seg.head ∈ cs5PrimeTail w.seg.head w.excl).2.1)
+      hincest hru
+  have huniv_sub : (Set.univ : Set (Proposition Atom)) ⊆ boxInv Set.univ :=
+    fun x _ => Set.mem_univ (Proposition.box x)
+  exact hbotT (hsub (huniv_sub (Set.mem_univ _)))
+
 end Cslib.Logic.Modal
 
 end

@@ -71,7 +71,7 @@ one-dispatch parts each with an independently-verifiable target.
 
 ### TRACK A — Route selection + defect repair (do FIRST; both parts small)
 
-#### A1 — Repair `IKAx` to be actually IK  [NOT STARTED]
+#### A1 — Repair `IKAx` to be actually IK  [COMPLETED]
 - **Goal**: add Simpson's axioms 3 (`¬◇⊥`), 4 (`◇(A∨B) ⊃ (◇A ∨ ◇B)`), 5 (`(◇A ⊃ □B) ⊃ □(A ⊃ B)`) as
   constructors of `IKAx`.
 - **Reused**: `IKAx` (`probes/lemma612-scaffold.lean:78`), `NIK_to_NIKAx` (`:229`),
@@ -80,18 +80,36 @@ one-dispatch parts each with an independently-verifiable target.
   `NIK_to_NIKAx` and `TClosure.hilbertTransport` unchanged (adding constructors is non-breaking).
 - **Risk**: LOW (mechanical). Needed for either track; in `probes/` so no `Cslib/` impact.
 
-#### A2 — ROUTE PROBE: is `FS` derivable in CSLib's CS5?  [NOT STARTED] — HIGHEST LEVERAGE
+#### A2 — ROUTE PROBE: is `FS` derivable in CSLib's CS5?  [COMPLETED] — HIGHEST LEVERAGE
 - **Goal**: attempt a sorry-free derivation of `FS := (◇ϕ → □ψ) → □(ϕ → ψ)` in CSLib `CS5`
   (`CS5ModalAxiom`, `CS5.lean:182`).
 - **Why**: `FS` is the exact axiom Simpson's canonical model turns on (F2, p.53) and the exact thing
   task 512's box-backward was missing. CS5 ≡ IS5 (Pacheco) ⟹ CS5 ⊢ FS *should* hold. **Decisive for
   BOTH task 517 and task 512.**
-- **Success**: EITHER sorry-free `CS5 ⊢ FS`, OR a precisely documented failure naming the failing step.
-  Both outcomes decisive. Land the attempt (or the negative writeup) in `probes/`.
-- **Risk**: MED-HIGH (Pacheco's collapse is semantic; a direct syntactic derivation may not exist and
-  may itself need the canonical model). **HARD CAP: one dispatch. Do not let this become a 4th gate.**
+- **Outcome (this dispatch, `probes/fischer-servi-probe.lean`)**: **mixed, decisive.**
+  - Syntactic `Derivable CS5ModalAxiom FS`: **left open, precisely diagnosed** (not proved, not
+    refuted). `fs_context_relative_half` mechanizes the exact obstruction: the context-relative
+    half (`[◇A→□B] ⊢ A→B`, via `T`'s two halves) succeeds unconditionally, but
+    `DerivationTree.necessitation` requires an **empty**-context sub-derivation, so this cannot be
+    lifted to `□(A→B)`. A short combinator-chain search (bBox-smuggling attempts) did not find a
+    route within the dispatch's bound; genuine underivability was not proved either.
+  - Semantic `CKValidFC cs5FC'' FS`: **proved, sorry-free, axiom-clean** (`fs_sound''` — `#print
+    axioms` reports none). Uses *only* the `bBox`/`bDia`-supporting frame clauses (`hsymbox`,
+    `hsymm`); no reflexivity/transitivity needed. This is the fact Track B's canonical-model route
+    actually needs (Simpson's F2 confluence condition), independent of syntactic derivability.
+- **Success criterion met**: a precisely documented outcome landed in `probes/`, decisive for
+  routing (see A3 below).
+- **Risk**: MED-HIGH, realized as "syntactic route inconclusive, semantic route de-risked."
+  **HARD CAP honored: one dispatch, no further syntactic search opened.**
 
-#### A3 — Route verdict (paper, no Lean)  [NOT STARTED]
+#### A3 — Route verdict (paper, no Lean)  [NOT STARTED] — NEXT ACTION
+- **Update given A2's outcome**: `fs_sound''` (sorry-free, axiom-clean) directly discharges the
+  "does `FS`/F2 hold in `CS5`'s semantics" precondition for Track B — this de-risks Track B below
+  the plan's original 35-40% estimate. A3 still needs to verify: (i) does `cs5FC''`'s equivalence
+  relation + `fs_sound''`'s F2 fact actually coincide with `IS5`'s birelational semantics as
+  Simpson states it (Ch.3, `Forcing.lean` vs. the birelational model), and (ii) whether the
+  syntactic-derivability gap found in A2 (`fs_context_relative_half`'s obstruction) blocks any
+  step of the Pacheco `CKB≡IKB ⟹ CS5≡IS5` corollary chain Track B would need. Not yet answered.
 - **Goal**: from A2's outcome, verify the two semantic-route preconditions: (i) does CS5's semantics
   (`Forcing.lean`, `cs5FC''` `CKExtension.lean:184`) coincide with IS5 birelation semantics (equiv R
   + F1/F2)? (ii) is the CKB≡IKB ⟹ CS5≡IS5 corollary chain sound as stated?

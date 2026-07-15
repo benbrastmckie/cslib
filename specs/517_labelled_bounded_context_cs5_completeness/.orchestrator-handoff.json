@@ -1,63 +1,74 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 517,
-  "session_id": "sess_1784127828_1f2b2f",
-  "summary": "Revision COMPLETE (plans/02_decomposed-track-a-b-c.md). Start at handoffs/00_RESUME-HERE.md. Next concrete step: A1 then A2 per Track A.",
-  "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/reports/02_adequacy-alternatives-and-technique.md"
+  "session_id": "sess_1784145761_061228",
+  "summary": "Track A implementation dispatch: A1 (IKAx repair) and A2 (CS5 |- FS route probe) both completed and landed sorry-free in probes/. A1 added Simpson's base-IK axioms 3/4/5 to the lemma612-scaffold's IKAx (mechanical, additive, verified sorry-free). A2's outcome is mixed but decisive: syntactic Derivable CS5ModalAxiom FS is left open with the precise obstruction mechanized (fs_context_relative_half -- DerivationTree.necessitation requires an empty-context sub-derivation, but every route to A->B from the hypothesis (diaA -> boxB) genuinely needs that hypothesis in context, so it can never be lifted into box(A->B)); semantic CKValidFC cs5FC'' FS is proved sorry-free and axiom-free (fs_sound'', using only the bBox/bDia-supporting frame clauses hsymbox/hsymm -- no reflexivity or transitivity needed). This de-risks Track B (the semantic canonical-model route) below the plan's original 35-40% estimate: the F2 confluence precondition Track B needs is now a mechanized, reusable fact rather than an open question. A3 (paper GO/NO-GO on Track B, no Lean) is the next action, not yet executed. cs5_completeness itself remains open, as does task 512 (blocked-on-517). No Cslib/ file was modified; landed CK/CT/CS4/CS5 soundness and task-509 cs5FC'' are untouched.",
+  "phases_completed": 2,
+  "phases_total": 3,
+  "sorry_inventory": [],
+  "blockers": [
+    {
+      "phase": "A3",
+      "description": "Paper GO/NO-GO on Track B not yet executed. Needs to verify (i) whether cs5FC'' + fs_sound'' genuinely coincide with IS5's birelational semantics as Simpson states it (Ch.3, Forcing.lean vs. the birelational model), and (ii) whether A2's open syntactic gap (CS5 |- FS unresolved) blocks any step of Pacheco's CKB=IKB => CS5=IS5 corollary chain that Track B (B1/B2) would need. This is analysis work, no Lean required.",
+      "goal_text_verbatim": "A3 -- Route verdict (paper, no Lean): from A2's outcome, verify the two semantic-route preconditions: (i) does CS5's semantics (Forcing.lean, cs5FC'' CKExtension.lean:184) coincide with IS5 birelation semantics (equiv R + F1/F2)? (ii) is the CKB=IKB => CS5=IS5 corollary chain sound as stated? Success: a written GO/NO-GO on Track B with a named blocking obligation if NO-GO."
+    }
   ],
-  "outcome": "plan_02_written; adequacy-bridge reframed as NOT on critical path; next = Track A (A1 fix IKAx, A2 probe CS5-derives-FS, decisive for 512 too)",
-  "next_action_hint": "implement",
+  "continuation_context": {
+    "is_successor": true,
+    "resume_at": "A3 (plans/02_decomposed-track-a-b-c.md)",
+    "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
+    "do_not_redo": [
+      "A1 (IKAx repair) -- COMPLETED, probes/lemma612-scaffold.lean",
+      "A2 (CS5 |- FS route probe) -- COMPLETED, probes/fischer-servi-probe.lean"
+    ]
+  },
+  "next_action_hint": "Run A3 (paper analysis, no Lean) using fs_sound'' as the mechanized F2-confluence fact. On GO, proceed to Track B (B1: mechanize CKB=IKB per Pacheco Lemmas 18-20; B3 needs Fischer Servi 1984 literature-ingested, currently NOT in corpus -- run /literature first). On NO-GO, proceed to Track C (tree surgery C1-C8; C5 is the true crux; only if Track B is NO-GO).",
   "decomposition": {
-    "shape": "Track A (route selection + defect repair; 3 small parts; do FIRST) -> then Track B (semantic route, gated on A3 GO) OR Track C (Simpson tree surgery, 8 decomposed parts, fallback)",
-    "track_a": [
-      "A1: repair IKAx to be actually IK (add Simpson axioms 3/4/5). Non-breaking for NIK_to_NIKAx (:229) and TClosure.hilbertTransport (:185) -- they map INTO IKAx. Risk LOW. Required for EITHER track.",
-      "A2: THE ROUTE PROBE (highest leverage in task 517 AND task 512): attempt a sorry-free derivation of FS := (diaP -> boxQ) -> box(P -> Q) in CSLib's CS5 (CS5ModalAxiom, CS5.lean:182). Pacheco's CS5=IS5 collapse entails CS5 |- FS; FS is exactly what Simpson's canonical model uses for (F2) (p.53) and exactly what 512's box-backward step lacked. EITHER outcome is decisive. Hard cap: one dispatch. Risk MED-HIGH, payoff enormous.",
-      "A3: route verdict (paper, no Lean): does CSLib's CS5 semantics (Forcing.lean; CKExtension.lean:184-189 cs5FC'') coincide with IS5 birelation semantics (Simpson p.56: IS5 = R an equivalence relation, plus F1/F2)? Is the Pacheco corollary chain CKB=IKB => CS5=IS5 sound as stated? GO/NO-GO on Track B. Risk LOW. MUST NOT SKIP -- task 512's five dispatches are the cost of not having asked this."
+    "shape": "Track A (route selection + defect repair; A1+A2 done this dispatch, A3 next) -> then Track B (semantic route, gated on A3 GO) OR Track C (Simpson tree surgery, 8 decomposed parts, fallback)",
+    "track_a_status": [
+      "A1: COMPLETED this dispatch. IKAx repaired with diaBot/diaOr/fs constructors (Simpson base-IK axioms 3/4/5). Sorry-free, non-breaking, verified via lake env lean exit 0.",
+      "A2: COMPLETED this dispatch (mixed, decisive outcome). fs_context_relative_half mechanizes the syntactic obstruction; fs_sound'' proves semantic FS-validity over cs5FC'', sorry-free and axiom-free.",
+      "A3: NOT STARTED. Next action. Paper GO/NO-GO on Track B, factoring in fs_sound'' as a positive de-risking result."
     ],
     "track_c_parts": [
-      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1 (:450) / Star_imp2 (:507) to Tele-congruence. ZERO tree dependency. Risk LOW.",
-      "C2: prove (6.7) by induction on V using axiom 2 (kDia :91, already present). ZERO tree dependency. Risk LOW-MED.",
-      "C3: prove (6.8) by induction on W using axiom 5. REQUIRES A1. Risk MED.",
-      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList (:337-350) and Star_append (:577). Success criterion: #eval/decide reproduces Simpson's worked example verbatim (tree x->y, x->z->w, target z => ((diaA => boxboxB) and diaA) => box(dia-top => diaB)). Risk MED.",
+      "C1: define Tele/Conj over List (Proposition Atom); port Star_imp1/Star_imp2 to Tele-congruence. ZERO tree dependency. Risk LOW.",
+      "C2: prove (6.7) by induction on V using axiom 2 (kDia). ZERO tree dependency. Risk LOW-MED.",
+      "C3: prove (6.8) by induction on W using axiom 5 (now present after A1). Risk MED.",
+      "C4: LTree/star/fullSubtree/prune + the unfolding identity; DELETE pathTo/pathToList and Star_append. Risk MED.",
       "C5: pathSpine (pruning built into the recursion) + the addChild/pathSpine commutation lemma. THE TRUE CRUX. Risk HIGH.",
       "C6: LTree.toGraph + the tau-parameterized generalized induction; non-modal cases + (boxI)/(boxE)/(diaI). Risk MED.",
       "C7: the (diaE) case via the reconstructed 3-step argument. Risk MED given C5.",
       "C8: (botE)/(orE). Risk LOW -- label-local in this encoding."
-    ],
-    "true_crux": "C5 (pathSpine/addChild commutation against the pruned representation) -- NOT (diaE), which three dispatches mis-located. But the HEADLINE crux is the route question: Track C may be entirely unnecessary."
+    ]
   },
   "confidence": {
-    "ikax_missing_axioms_and_lemma612_needs_axiom5": 0.97,
-    "diaE_short_given_67_68": 0.85,
-    "lemma612_NOT_required_for_cs5_completeness": 0.85,
-    "cs5_equiv_is5_as_mathematics": 0.90,
-    "pacheco_corollary_as_immediate_as_its_one_line_suggests": 0.60,
-    "track_b_semantic_route_mechanizable_at_reasonable_cost": 0.375,
-    "track_c_full_adequacy_bridge_completes_in_2_3_dispatches": 0.275,
-    "a2_probe_cs5_derives_FS_succeeds": 0.40,
-    "note": "Deliberately estimated BELOW instinct given documented over-rating history (reports 05, 06, 516/01, plan 01's ~50%, D2's '100-200 mechanical lines', D3's '2-3 dispatches'). Base-rate warning on record: every dispatch on this gate has found the previous dispatch's transcription subtly wrong, INCLUDING this one (the IKAx defect was found in the file two dispatches certified complete and reusable). That rate is not improving. No claim is made that this dispatch's (diaE) reconstruction is defect-free -- it is unmechanized; its value is precisely that C1-C3 can now falsify it CHEAPLY and IN ISOLATION rather than at a monolithic gate."
+    "ikax_missing_axioms_and_lemma612_needs_axiom5": 1.0,
+    "a2_probe_cs5_derives_FS_succeeds_syntactically": "not resolved -- open, precisely diagnosed obstruction, not refuted",
+    "fs_semantically_valid_over_cs5FCpp": 1.0,
+    "track_b_semantic_route_mechanizable_at_reasonable_cost": "revised upward from 0.375 given fs_sound'' de-risks the F2 precondition; A3 will sharpen this further",
+    "note": "This dispatch's A2 result is a genuine third outcome beyond the plan's binary framing (sorry-free proof / precisely documented failure): a mechanized obstruction to the naive syntactic route PLUS a decisive, reusable positive semantic corollary. Recorded honestly rather than rounded to either extreme."
   },
-  "recommendation": "Do NOT open a fourth dispatch on Simpson's tree surgery. Spend two cheap dispatches on A1 (a real defect fix, needed either way) and A2 (the FS probe) first. The honest reading is that the adequacy bridge is NOT worth the remaining cost -- because it is NOT NEEDED. Re-plan around Track A/B and retain the labelled framework (Phases 1/2/4; 789 lines landed, sorry-free, CI-green: Labelled/Syntax.lean 202, Deduction.lean 312, Context.lean 275) as an independently valuable contribution DECOUPLED from cs5_completeness.",
+  "recommendation": "Proceed to A3 (paper GO/NO-GO on Track B) next dispatch, using fs_sound'' as the mechanized F2-confluence fact that discharges part of Track B's semantic precondition. Do NOT re-attempt A2's syntactic search further (hard cap honored, one dispatch). Do NOT open a Track C tree-surgery dispatch before A3 completes.",
   "gaps_flagged": [
-    "Fischer Servi 1984 (the explicit IK/IT/IKTB/IS4/IS5 completeness proofs that Simpson Thm 3.3.4 cites) is NOT in the literature corpus -- Track B step B3 would need /literature ingestion first. Flagged, not glossed.",
-    "Literature 2 (locally-nameless / cofinite-quantification scoping technique) returned a NEGATIVE result and is reported as such: the remaining obligation is structural-recursion bookkeeping (C5), not binder capture. Cofinite quantification in NIKAx.diaE is already correct and needs no change. No technique from that literature would have unblocked any of the three dispatches."
+    "Fischer Servi 1984 (the explicit IK/IT/IKTB/IS4/IS5 completeness proofs that Simpson Thm 3.3.4 cites) is NOT in the literature corpus -- Track B step B3 would need /literature ingestion first. Still flagged, unchanged from prior dispatch.",
+    "Syntactic Derivable CS5ModalAxiom FS remains genuinely open (neither proved nor refuted) -- this dispatch's negative finding is about the naive necessitation-based route only, not a completeness-level impossibility result. A future dispatch could still find a cleverer combinator chain if it becomes load-bearing."
   ],
   "metadata": {
-    "agent_type": "cslib-research-agent",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": [
       "orchestrator",
-      "research",
-      "cslib-research-agent"
+      "implement",
+      "cslib-implementation-hard-agent"
     ],
     "lit_flag": true,
+    "hard_mode": true,
     "orchestrator_mode": true,
-    "supersedes": "prior .orchestrator-handoff.json (dispatch 3, status=blocked/gate_fail); backup at scratchpad/prev-handoff-backup.json; handoffs/ documents remain accurate historical records of their own findings",
+    "supersedes": "prior .orchestrator-handoff.json (research dispatch, status=planned, next_action_hint=implement)",
     "sorry_inventory": {
       "added": 0,
-      "note": "research dispatch; no Lean written; nothing under Cslib/ touched"
+      "note": "implementation dispatch; probes/lemma612-scaffold.lean and probes/fischer-servi-probe.lean both verified sorry-free via lake env lean (exit 0) and grep. No Cslib/ file touched. fs_sound'' confirmed axiom-free via #print axioms; fs_context_relative_half's [propext, Classical.choice] footprint cross-checked identical to existing landed CS5 Derivable-level facts (cs5_dia_bot_imp_bot, cs5_dia_or) -- not a new axiom."
     }
   },
-  "last_updated": "2026-07-15T19:49:20Z"
+  "last_updated": "2026-07-15T20:04:10Z"
 }

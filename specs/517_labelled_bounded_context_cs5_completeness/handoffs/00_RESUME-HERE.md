@@ -3,8 +3,23 @@
 **Single entry point after a context clear.** Everything below is committed to git.
 
 ## One-line status
-Task **517 is [PLANNED]**. Next action = **Track A of `plans/02_decomposed-track-a-b-c.md`**:
-run **A1** (fix `IKAx`) then **A2** (probe `CS5 ⊢ FS`). A2 is the decisive step and is shared with task 512.
+Task **517 is [IMPLEMENTING]**. Track A (`plans/02_decomposed-track-a-b-c.md`) A1+A2 are
+**[COMPLETED]** (this dispatch, session `sess_1784145761_061228`). Next action = **A3** (paper
+GO/NO-GO on Track B, no Lean) — see `summaries/02_track-a-a1-a2-summary.md` for the full A1/A2
+outcome. **Do NOT re-run A1/A2** — both landed, sorry-free, in `probes/`.
+
+## A1/A2 outcome (this dispatch — read before doing anything else)
+- **A1**: `probes/lemma612-scaffold.lean`'s `IKAx` now has Simpson's base-`IK` axioms 3/4/5
+  (`diaBot`/`diaOr`/`fs`) as unconditional constructors. Sorry-free, additive, verified.
+- **A2**: `probes/fischer-servi-probe.lean` (new). Syntactic `CS5 ⊢ FS` is **left open**, with the
+  exact obstruction mechanized (`fs_context_relative_half`: necessitation needs empty context,
+  but every route to `A→B` from `◇A→□B` genuinely uses the hypothesis). Semantic
+  `CKValidFC cs5FC'' FS` is **proved, sorry-free, axiom-free** (`fs_sound''`, uses only
+  `bBox`/`bDia`-supporting frame clauses). **This de-risks Track B** — the F2 confluence
+  precondition Track B's canonical-model route needs is now a mechanized fact, not an open
+  question. A3 should factor this in: Track B's GO/NO-GO looks more favorable than the plan's
+  original 35-40% estimate, but A3 must still check semantic-model coincidence with `IS5` and
+  whether A2's syntactic gap blocks Pacheco's `CKB≡IKB` chain.
 
 ## The reframe (why the plan changed) — read `reports/02_adequacy-alternatives-and-technique.md`
 Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2). The research then found:
@@ -18,12 +33,11 @@ Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2
    Lemma 6.1.2 was never provable against it anyway.
 
 ## Exact next steps (from `plans/02_decomposed-track-a-b-c.md`)
-- **A1** — add axioms 3 (`¬◇⊥`), 4 (`◇(A∨B) ⊃ ◇A∨◇B`), 5 (`(◇A ⊃ □B) ⊃ □(A ⊃ B)`) as constructors of
-  `IKAx` (`probes/lemma612-scaffold.lean:78`). Mechanical, LOW risk, `probes/` only. Success: file still
-  compiles sorry-free; `#print axioms` on `NIK_to_NIKAx`/`TClosure.hilbertTransport` unchanged.
-- **A2** — attempt sorry-free `CS5 ⊢ FS` in `Cslib/.../CS5.lean` (`CS5ModalAxiom`, CS5.lean:182). HARD CAP
-  one dispatch. Either a proof OR a precisely documented failure — both decisive, for 517 AND 512.
-- **A3** — paper GO/NO-GO on the semantic route (Track B) given A2's result.
+- ~~**A1** — add axioms 3/4/5 to `IKAx`~~ **[COMPLETED]** this dispatch (`probes/lemma612-scaffold.lean`).
+- ~~**A2** — attempt sorry-free `CS5 ⊢ FS`~~ **[COMPLETED]** this dispatch, mixed outcome — see
+  "A1/A2 outcome" above and `probes/fischer-servi-probe.lean`.
+- **A3 (NEXT)** — paper GO/NO-GO on the semantic route (Track B), factoring in `fs_sound''`
+  (F2 confluence mechanized, sorry-free) and the open syntactic gap. No Lean required for A3 itself.
 - Then **Track B** (semantic; needs Fischer Servi 1984 `/literature`-ingested — NOT in corpus) on a GO,
   else **Track C** (tree surgery C1–C8; C5 is the true crux; only if Track B is NO-GO).
 
@@ -31,8 +45,12 @@ Three dispatches failed to mechanize Simpson's Ch.6 adequacy bridge (Lemma 6.1.2
 - `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Syntax.lean` (Phase 1), `Deduction.lean` (Phase 2),
   `Context.lean` (Phase 4) — ~789 lines. Independent contribution even if CS5 completeness never lands.
 - `probes/adequacy-gate-probe.lean` — Lemma 6.2.2 hard direction, correct & reusable.
-- `probes/lemma612-scaffold.lean` — LTree scaffold; **DEFECTIVE**: `IKAx` missing axioms 3/4/5 (A1 fixes);
-  `pathTo`/`pathToList` return full-not-pruned subtree; `Star_append` wrong (Track C C4/C5 fix).
+- `probes/lemma612-scaffold.lean` — LTree scaffold; `IKAx` now has axioms 3/4/5 (A1, this
+  dispatch, fixed). **Still DEFECTIVE elsewhere**: `pathTo`/`pathToList` return full-not-pruned
+  subtree; `Star_append` wrong (Track C C4/C5 fix, unrelated to A1's repair).
+- `probes/fischer-servi-probe.lean` (A2, this dispatch, new) — `fs_context_relative_half`
+  (mechanized syntactic obstruction) and `fs_sound''` (semantic `FS`-validity over `cs5FC''`,
+  sorry-free, axiom-free). Reusable by Track B without modification.
 
 ## Debt to clear before ANY PR (do not forget)
 - `GeomWitnessClosure := True` in `Context.lean` violates the project's no-vacuous-def rule; it couples with

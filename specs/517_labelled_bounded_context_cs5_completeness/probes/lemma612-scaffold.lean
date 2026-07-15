@@ -90,6 +90,32 @@ inductive IKAx (𝒯 : Set GeomAxiom) : Proposition Atom → Prop where
       IKAx 𝒯 ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ)))
   | kDia (φ ψ : Proposition Atom) :
       IKAx 𝒯 ((Proposition.box (φ.imp ψ)).imp ((◇φ).imp (◇ψ)))
+  /-- **Task 517 A1 repair.** Simpson's Figure 3-7 base-IK axiom 3, `¬◇⊥`
+  (source PDF p.56): possibility never witnesses absurdity. Unconditional (part of bare `IK`,
+  not gated by `𝒯` membership) -- unlike `dDia`/`tBox`/... below, which are the *geometric
+  extension* schemata. CS5's analogue is `cs5_dia_bot_imp_bot` (`CS5.lean:740`), there *derived*
+  from `efq`+`bDia`, not primitive; here it is primitive since plain `IKAx` (no `B` gate) has no
+  `bDia` to derive it from. -/
+  | diaBot : IKAx 𝒯 (¬(◇(Proposition.bot : Proposition Atom)))
+  /-- **Task 517 A1 repair.** Simpson's Figure 3-7 base-IK axiom 4,
+  `◇(A∨B) ⊃ (◇A∨◇B)` (source PDF p.56): possibility distributes over disjunction. Unconditional.
+  CS5's analogue is `cs5_dia_or` (`CS5.lean:555`, Arisaka-Das-Straßburger's `k3`), there *derived*
+  from `bBox`/`bDia`; here primitive for the same reason as `diaBot`. -/
+  | diaOr (φ ψ : Proposition Atom) :
+      IKAx 𝒯 ((◇(φ.or ψ)).imp ((◇φ).or (◇ψ)))
+  /-- **Task 517 A1 repair.** Simpson's Figure 3-7 base-IK axiom 5, the Fischer-Servi
+  confluence schema `FS := (◇A ⊃ □B) ⊃ □(A ⊃ B)` (source PDF p.56) -- the exact axiom task 517's
+  report 02 identifies as the shared missing link for both this task and task 512 (Simpson's
+  canonical-model confluence condition F2, p.53). Unconditional: `FS` is a base-`IK` requirement,
+  present even with `𝒯 = ∅`, *not* implied by any of `D`/`T`/`B`/`4`/`5`(-Euclidean) individually
+  since those are stated as independent box/diamond schema pairs rather than derived from a
+  single shared accessibility relation. `CS5ModalAxiom` (`CS5.lean:182`) has **no** analogue of
+  this axiom -- see `probes/fischer-servi-probe.lean` (this dispatch) for the syntactic-derivation
+  attempt against `CS5ModalAxiom`'s `T`/`4`/`B`/`K`/`Kdia` alone (negative outcome, precisely
+  documented) and the semantic validity result (`CS5.lean`, this dispatch, `cs5_axiom_sound''`
+  companion) showing `FS` nonetheless holds in every `cs5FC''` *model*. -/
+  | fs (φ ψ : Proposition Atom) :
+      IKAx 𝒯 (((◇φ).imp (Proposition.box ψ)).imp (Proposition.box (φ.imp ψ)))
   | dDia (h : GeomAxiom.D ∈ 𝒯) : IKAx 𝒯 (◇(Proposition.top))
   | tBox (h : GeomAxiom.T ∈ 𝒯) (φ : Proposition Atom) :
       IKAx 𝒯 ((Proposition.box φ).imp φ)

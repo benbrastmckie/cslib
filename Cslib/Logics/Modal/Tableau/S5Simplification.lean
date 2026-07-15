@@ -1709,6 +1709,44 @@ private lemma modalStepBranchS5gKeyed_acc_shape (φ₀ : Proposition Atom)
          · rw [show modalApplyOneS5 sf b acc = _ from by assumption]
            exact ⟨by simpa using hsf.1.symm, by simpa using hsf.2.1.symm⟩)
 
+/-- Characterization of the birth-key list shape a `modalStepBranchS5gKeyed` step can produce:
+`newKeys` is either `keys` unchanged (blocked step, or any non-minting shape), or `keys` grown
+by exactly one fresh entry `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)` at
+one of the two K-minting shapes (`F(□φ)@w`/`T(◇φ)@w`) when the keyed guard is unblocked. Shared
+case dispatch for Phase 5's four birth-key preservation lemmas. -/
+private lemma modalStepBranchS5gKeyed_keys_shape (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys)) :
+    ∃ sf ∈ b, sf ∉ e ∧
+      (newKeys = keys ∨
+        (∃ φ, sf.sign = .neg ∧ sf.formula = .box φ ∧
+          blockingWorldS5Keyed φ₀ keys b .neg φ sf.label = none ∧
+          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .neg φ sf.label)]) ∨
+        (∃ φ, sf.sign = .pos ∧ sf.formula = .diamond φ ∧
+          blockingWorldS5Keyed φ₀ keys b .pos φ sf.label = none ∧
+          newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b .pos φ sf.label)])) := by
+  unfold modalStepBranchS5gKeyed at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  clear hstep
+  by_cases hexp : e.any (· == sf) = true
+  · simp only [hexp, if_true] at hsf
+    exact absurd hsf (by simp)
+  · rw [if_neg (by simpa using hexp)] at hsf
+    refine ⟨sf, hsfmem, by simpa using hexp, ?_⟩
+    clear hexp hsfmem
+    split at hsf <;> repeat' split at hsf
+    all_goals try injection hsf
+    all_goals (rename_i hsf; simp only [Prod.mk.injEq] at hsf)
+    all_goals first
+      | (left; exact hsf.2.2.2.symm)
+      | (right; left
+         exact ⟨_, by assumption, by assumption, by assumption, hsf.2.2.2.symm⟩)
+      | (right; right
+         exact ⟨_, by assumption, by assumption, by assumption, hsf.2.2.2.symm⟩)
+
 omit [Hashable Atom] in
 /-- **Phase 4 field 1/6**: `modalStepBranchS5gKeyed` preserves `e.Nodup`. Rule-agnostic: the
 new expanded set is always either `e ++ [sf]` (with `sf ∉ e` from the stepper's own dedup guard)
@@ -2053,6 +2091,41 @@ lemma modalStepBranchS5g_preserves_eClosure (φ₀ : Proposition Atom)
     · exact heClosure x hx
     · rw [hxeq]; exact hbClosure sf hsfmem
   · exact heClosure
+
+/-! ## Birth-Key Preservation Lemmas (task 515 Phase 5, the `keysDistinct` crux) -/
+
+/-- **Phase 5 field 1/4, the crux**: `modalStepBranchS5gKeyed` preserves `keysDistinct`. Keys
+never change value once recorded; the blocked/non-minting cases leave `keys` untouched entirely.
+The minting case appends exactly one fresh entry, and `blockingWorldS5Keyed_none_fresh`
+(Phase 3) directly gives that the fresh key differs from EVERY stored key -- this is the fix for
+the v1 design gap (the guard compares against stored keys, not a live relevant set that could
+have grown past a stale key). -/
+lemma modalStepBranchS5g_preserves_keysDistinct (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hDistinct : ∀ w w' k k', (w, k) ∈ keys → (w', k') ∈ keys → w ≠ w' → k ≠ k') :
+    ∀ w w' k k', (w, k) ∈ newKeys → (w', k') ∈ newKeys → w ≠ w' → k ≠ k' := by
+  obtain ⟨sf, -, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_keys_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  have hmint : ∀ (s : Sign) (φ : Proposition Atom),
+      blockingWorldS5Keyed φ₀ keys b s φ sf.label = none →
+      newKeys = keys ++ [(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)] →
+      ∀ w w' k k', (w, k) ∈ newKeys → (w', k') ∈ newKeys → w ≠ w' → k ≠ k' := by
+    intro s φ hnone hnk w w' k k' hw hw' hne
+    rw [hnk] at hw hw'
+    simp only [List.mem_append, List.mem_singleton, Prod.mk.injEq] at hw hw'
+    rcases hw with hw | ⟨rfl, rfl⟩ <;> rcases hw' with hw' | ⟨rfl, rfl⟩
+    · exact hDistinct w w' k k' hw hw' hne
+    · exact blockingWorldS5Keyed_none_fresh φ₀ keys b s φ sf.label hnone w k hw
+    · exact (blockingWorldS5Keyed_none_fresh φ₀ keys b s φ sf.label hnone w' k' hw').symm
+    · exact absurd rfl hne
+  rcases hcase with hnk | ⟨φ, -, -, hnone, hnk⟩ | ⟨φ, -, -, hnone, hnk⟩
+  · rw [hnk]; exact hDistinct
+  · exact hmint .neg φ hnone hnk
+  · exact hmint .pos φ hnone hnk
 
 /-! ## Pigeonhole World Bound (task 515 Phase 6)
 

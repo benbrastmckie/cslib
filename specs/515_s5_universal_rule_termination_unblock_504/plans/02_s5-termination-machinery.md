@@ -190,26 +190,26 @@ Landed sorry-free in `S5Simplification.lean`: `successorBirthContentS5`/`blockin
 
 ---
 
-### Phase 5: Birth-key preservation lemmas (the `keysDistinct` crux) [NOT STARTED]
+### Phase 5: Birth-key preservation lemmas (the `keysDistinct` crux) [IN PROGRESS]
 
 **Goal**: Prove that a `modalStepBranchS5gKeyed` step preserves the four birth-key fields, using the corrected keys-aware guard. **`keysDistinct` is the deep v1 blocker; it is now discharged directly by `blockingWorldS5Keyed_none_fresh`.**
 
 **Tasks**:
-- [ ] Prove `modalStepBranchS5g_preserves_keysDistinct` — keys never change on any step; on a *minting* step the fresh key is `≠` every stored key by `blockingWorldS5Keyed_none_fresh` (P3), so distinctness is preserved. **This is the fix for the v1 design gap** (cf. S4 analogue `modalStepBranchS4_preserves_keysDistinct`, unbuilt in `LoopChecking.lean`; 511 report Section 4).
-- [ ] Prove `modalStepBranchS5g_preserves_keyLowerBd` — birth keys never change, live relevant sets only grow (`relevantSetFinset_mono`), so `⊆` is preserved (monotone; survives the v1 Gap-1 collapse by construction).
-- [ ] Prove `modalStepBranchS5g_preserves_keysTotal` — every newly-known world gets a recorded key; consumes `accKnown` (P3) feeding `modalApplyOne_knownWorlds_step` (`FmpMeasure.lean:2042`) for the label-provenance dichotomy.
-- [ ] Prove `modalStepBranchS5g_preserves_keysInUniverse` — new keys `⊆ signedSubfmls φ₀`; consumes `bClosure` (P3) for the subformula-closure of inserted `(s,φ)` pairs.
+- [x] Prove `modalStepBranchS5g_preserves_keysDistinct` -- landed sorry-free this dispatch (cycle 4). Keys never change on any step; on a *minting* step the fresh key is `≠` every stored key by `blockingWorldS5Keyed_none_fresh` (P3), so distinctness is preserved. **This is the fix for the v1 design gap** (cf. S4 analogue `modalStepBranchS4_preserves_keysDistinct`, unbuilt in `LoopChecking.lean`; 511 report Section 4). *(deviation: required first authoring a new private helper `modalStepBranchS5gKeyed_keys_shape` (mirroring `_expanded_shape`/`_acc_shape`'s established pattern) to characterize `newKeys`'s shape -- `keys` unchanged, or `keys` grown by exactly one fresh `(modalNextWorld b, successorBirthContentS5 φ₀ b s φ sf.label)` entry at one of the two K-minting shapes -- since no existing helper exposed this.)*
+- [ ] Prove `modalStepBranchS5g_preserves_keyLowerBd` — birth keys never change, live relevant sets only grow (`relevantSetFinset_mono`), so `⊆` is preserved (monotone; survives the v1 Gap-1 collapse by construction). *(deviation: NOT STARTED this dispatch (cycle 4) -- budget was spent landing Phase 4 in full (bClosure/eClosure, the 12th `worldsContiguous` field) plus `keysDistinct`. The mint case needs a genuine per-pair correspondence lemma: every `(s',ψ) ∈ successorBirthContentS5 φ₀ b s φ w` (the witness `(s,φ)` itself, or a box-positive/diamond-negative pair drawn from `b`'s box-context at `w`) corresponds to an ACTUAL signed formula `⟨s',ψ,modalNextWorld b⟩` on the newly-minted branch `b' = newForms ++ b` -- i.e. an "introduction" direction converse to the existing `modalApplyOne_boxPos_outputs_subset`/`diamondNeg`-style "elimination" lemmas, not yet built for S5 or K. See handoff `03_phase5-keysdistinct-landed-keylowerbd-scope.md`.)*
+- [ ] Prove `modalStepBranchS5g_preserves_keysTotal` — every newly-known world gets a recorded key; consumes `accKnown` (P3) feeding `modalApplyOne_knownWorlds_step` (`FmpMeasure.lean:2042`) for the label-provenance dichotomy. *(deviation: NOT STARTED this dispatch, same budget reason as `keyLowerBd`.)*
+- [ ] Prove `modalStepBranchS5g_preserves_keysInUniverse` — new keys `⊆ signedSubfmls φ₀`; consumes `bClosure` (P3) for the subformula-closure of inserted `(s,φ)` pairs. *(deviation: NOT STARTED this dispatch, same budget reason. This one is likely the most tractable of the three remaining -- `successorBirthContentS5`'s output is already, by construction, a `Finset.filter` over `signedSubfmls φ₀` with the witness `(s,φ)` inserted, so it should follow from `bClosure`/`hsf ∈ b` + `modalSubfmls_trans_S5`-style reasoning without needing a new introduction-direction lemma.)*
 
-**Timing**: 2.5 hours
+**Timing**: 2.5 hours (actual: ~1 dispatch cycle for `keysDistinct`; remaining three fields deferred)
 
 **Depends on**: 4
 
 **Files to modify**:
-- `Cslib/Logics/Modal/Tableau/S5Simplification.lean` — four `modalStepBranchS5g_preserves_key*` lemmas
+- `Cslib/Logics/Modal/Tableau/S5Simplification.lean` — four `modalStepBranchS5g_preserves_key*` lemmas (one landed: `keysDistinct`)
 
-**Verification**: full CI pipeline green; all four birth-key preservation lemmas close sorry-free; in particular `_preserves_keysDistinct` closes via the keys-aware guard contract with no live-set reasoning.
+**Verification**: full CI pipeline green (cycle 4: `lake build` 3239/3239, `lake exe checkInitImports`, `lake exe lint-style`, `lake lint` 0 new warnings, `lake test` exit 0, `lake shake` 0 new suggestions for `S5Simplification.lean`); `modalStepBranchS5g_preserves_keysDistinct` closes sorry-free via the keys-aware guard contract with no live-set reasoning (`lean_verify`: only `propext`/`Classical.choice`/`Quot.sound`).
 
-**Blocked-branch**: if `_preserves_keysDistinct` still resists (it should not, given the keys-aware guard), the most likely residual cause is a stepper/guard mismatch — mark `[BLOCKED]` with the exact `lean_goal` open state and the specific unmet hypothesis, preserve P1-P4, and defer P6. No `sorry`, no weakening of `keysDistinct` to saturated-worlds-only (the 511-documented false shortcut).
+**Blocked-branch**: `keysDistinct` did NOT resist -- it closed on the first attempt once `modalStepBranchS5gKeyed_keys_shape` was authored, confirming the keys-aware guard design from Phase 3 works exactly as intended. `keyLowerBd`/`keysTotal`/`keysInUniverse` are `[NOT STARTED]` (not `[BLOCKED]`) pending the next dispatch's budget; see handoff `03_phase5-keysdistinct-landed-keylowerbd-scope.md` for the concrete next-step plan. No `sorry`, no weakening of `keysDistinct` to saturated-worlds-only (the 511-documented false shortcut).
 
 ---
 

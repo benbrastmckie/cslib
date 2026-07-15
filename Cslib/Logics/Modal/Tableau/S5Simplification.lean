@@ -2438,6 +2438,289 @@ lemma modalStepBranchS5g_preserves_keysTotal (φ₀ : Proposition Atom)
   · exact hmint .neg φ hnk hshape
   · exact hmint .pos φ hnk hshape
 
+/-- The box-positives group K's two minting arms (`diamondPos`/`boxNeg`, `Rules.lean`) emit at
+a mint from trigger world `w`: for every recorded `(ψ', src) ∈ boxPositivesOf b` with
+`src = w`, the propagated copy `T(ψ')@(modalNextWorld b)`, deduplicated against `b`. Named
+(rather than left as `modalApplyOne`'s inline term) so `keyLowerBd`'s mint-case obligation can
+state introduction lemmas against ONE shared expression -- both
+`modalApplyOne_boxNeg_eq_S5`/`modalApplyOne_diamondPos_eq_S5` (the arm characterizations) and
+`successorBirthContentS5_subset_relevantSetFinset_mint` (the consumer) refer to this def, so no
+cross-lemma matcher-unification is ever needed. -/
+private def mintBoxPropsS5 (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (w : WorldIndex) : List (SignedFormula (Proposition Atom) WorldIndex) :=
+  (boxPositivesOf b).filterMap fun (ψ', src) =>
+    if src == w then
+      if b.any (· == (⟨.pos, ψ', modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) then none
+      else some ⟨.pos, ψ', modalNextWorld b⟩
+    else none
+
+/-- The diamond-negatives group K's two minting arms emit at a mint from trigger world `w`:
+for every `F(◇ψ')@w ∈ b`, the propagated copy `F(ψ')@(modalNextWorld b)`, deduplicated against
+`b`. Companion of `mintBoxPropsS5`, same rationale. -/
+private def mintDiaNegPropsS5 (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (w : WorldIndex) : List (SignedFormula (Proposition Atom) WorldIndex) :=
+  b.filterMap fun sf' =>
+    if sf'.sign == .neg && sf'.label == w then
+      match sf'.formula with
+      | .diamond ψ' =>
+        if b.any (· == (⟨.neg, ψ', modalNextWorld b⟩ :
+            SignedFormula (Proposition Atom) WorldIndex)) then none
+        else some ⟨.neg, ψ', modalNextWorld b⟩
+      | _ => none
+    else none
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Introduction direction for `boxPositivesOf` (converse of `mem_boxPositivesOf_S5`): every
+box-positive formula on the branch is recorded in the collector's output. -/
+private lemma boxPositivesOf_intro_S5 {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {ψ : Proposition Atom} {src : WorldIndex}
+    (h : (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (ψ, src) ∈ boxPositivesOf b := by
+  simp only [boxPositivesOf, List.mem_filterMap]
+  exact ⟨⟨.pos, .box ψ, src⟩, h, rfl⟩
+
+omit [Hashable Atom] in
+/-- Introduction lemma for `mintBoxPropsS5` (the converse direction of
+`boxProps_outputs_subset_S5`'s elimination reasoning): if `T(□χ)@w ∈ b`, then the propagated
+copy `T(χ)@(modalNextWorld b)` is on the minted branch -- either freshly emitted into
+`mintBoxPropsS5 b w` (when not already present on `b`), or already a member of `b` (the
+dedup-guard case). This is exactly the dichotomy the `if b.any (· == sf')` guard inside
+`boxProps`'s construction encodes. -/
+private lemma mintBoxPropsS5_mem_intro (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (w : WorldIndex) (χ : Proposition Atom)
+    (hmem : (⟨.pos, .box χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.pos, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+        mintBoxPropsS5 b w ∨
+      (⟨.pos, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_cases hany : b.any (· == (⟨.pos, χ, modalNextWorld b⟩ :
+      SignedFormula (Proposition Atom) WorldIndex)) = true
+  · right
+    simp only [List.any_eq_true, beq_iff_eq] at hany
+    obtain ⟨x, hxmem, rfl⟩ := hany
+    exact hxmem
+  · left
+    unfold mintBoxPropsS5
+    simp only [List.mem_filterMap]
+    refine ⟨(χ, w), boxPositivesOf_intro_S5 hmem, ?_⟩
+    simp [hany]
+
+omit [Hashable Atom] in
+/-- Introduction lemma for `mintDiaNegPropsS5`, symmetric to `mintBoxPropsS5_mem_intro`: if
+`F(◇χ)@w ∈ b`, the propagated copy `F(χ)@(modalNextWorld b)` is either freshly emitted into
+`mintDiaNegPropsS5 b w` or already on `b`. -/
+private lemma mintDiaNegPropsS5_mem_intro
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (χ : Proposition Atom)
+    (hmem : (⟨.neg, .diamond χ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.neg, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+        mintDiaNegPropsS5 b w ∨
+      (⟨.neg, χ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_cases hany : b.any (· == (⟨.neg, χ, modalNextWorld b⟩ :
+      SignedFormula (Proposition Atom) WorldIndex)) = true
+  · right
+    simp only [List.any_eq_true, beq_iff_eq] at hany
+    obtain ⟨x, hxmem, rfl⟩ := hany
+    exact hxmem
+  · left
+    unfold mintDiaNegPropsS5
+    simp only [List.mem_filterMap]
+    refine ⟨⟨.neg, .diamond χ, w⟩, hmem, ?_⟩
+    simp [hany]
+
+omit [Hashable Atom] in
+/-- Full characterization of K's `boxNeg` mint output (strengthens
+`modalApplyOne_boxNeg_witness`, whose `rest` is existentially quantified): the emitted
+`.linear` list is EXACTLY the witness `F(ψ)@(modalNextWorld b)` followed by
+`mintBoxPropsS5 b sf.label ++ mintDiaNegPropsS5 b sf.label`. `keyLowerBd`'s mint case needs the
+concrete tail to place every birth-content pair on the minted branch. -/
+private lemma modalApplyOne_boxNeg_eq_S5
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (hsign : sf.sign = .neg) (hform : sf.formula = .box ψ) :
+    (modalApplyOne sf b acc).fst
+      = RuleResult.linear
+          ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+            mintBoxPropsS5 b sf.label ++ mintDiaNegPropsS5 b sf.label) := by
+  obtain ⟨s, f0, l⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .box ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
+omit [Hashable Atom] in
+/-- Full characterization of K's `diamondPos` mint output, symmetric to
+`modalApplyOne_boxNeg_eq_S5`: the emitted `.linear` list is EXACTLY the witness
+`T(ψ)@(modalNextWorld b)` followed by
+`mintBoxPropsS5 b sf.label ++ mintDiaNegPropsS5 b sf.label`. -/
+private lemma modalApplyOne_diamondPos_eq_S5
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (hsign : sf.sign = .pos) (hform : sf.formula = .diamond ψ) :
+    (modalApplyOne sf b acc).fst
+      = RuleResult.linear
+          ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+            mintBoxPropsS5 b sf.label ++ mintDiaNegPropsS5 b sf.label) := by
+  obtain ⟨s, f0, l⟩ := sf
+  simp only at hsign hform
+  subst hsign; subst hform
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .diamond ψ, l⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+      = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
+omit [Hashable Atom] in
+/-- **The `keyLowerBd` mint-case correspondence**: every pair of the prospective birth content
+`successorBirthContentS5 φ₀ b s φ w` is realized as an ACTUAL signed formula at label
+`modalNextWorld b` on the freshly-minted branch
+`(⟨s, φ, modalNextWorld b⟩ :: mintBoxPropsS5 b w ++ mintDiaNegPropsS5 b w) ++ b`: the witness
+pair `(s, φ)` by the head witness formula itself, and each box-positive/diamond-negative
+context pair by `mintBoxPropsS5_mem_intro`/`mintDiaNegPropsS5_mem_intro`'s
+freshly-emitted-or-already-present dichotomy. Hence the fresh birth key is a LOWER BOUND on the
+minted world's live relevant set at birth -- the fresh-key case of `keyLowerBd`'s
+preservation. -/
+private lemma successorBirthContentS5_subset_relevantSetFinset_mint (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hwitU : ((s, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀) :
+    successorBirthContentS5 φ₀ b s φ w ⊆
+      relevantSetFinset φ₀
+        (((⟨s, φ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+            mintBoxPropsS5 b w ++ mintDiaNegPropsS5 b w) ++ b)
+        (modalNextWorld b) := by
+  intro p hp
+  unfold successorBirthContentS5 successorBirthContent at hp
+  rw [Finset.mem_insert] at hp
+  unfold relevantSetFinset
+  rw [Finset.mem_filter]
+  rcases hp with rfl | hp
+  · refine ⟨hwitU, ?_⟩
+    simp only [List.any_eq_true, beq_iff_eq]
+    exact ⟨⟨s, φ, modalNextWorld b⟩,
+      List.mem_append_left _ List.mem_cons_self, rfl⟩
+  · rw [Finset.mem_filter] at hp
+    obtain ⟨hpU, hpc⟩ := hp
+    refine ⟨hpU, ?_⟩
+    obtain ⟨ps, pf⟩ := p
+    simp only [List.any_eq_true, beq_iff_eq] at hpc ⊢
+    rcases hpc with ⟨hps, x, hxmem, hxeq⟩ | ⟨hps, x, hxmem, hxeq⟩
+    · subst hps; subst hxeq
+      rcases mintBoxPropsS5_mem_intro b w pf hxmem with hin | hin
+      · exact ⟨⟨Sign.pos, pf, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_cons_of_mem _ (List.mem_append_left _ hin)), rfl⟩
+      · exact ⟨⟨Sign.pos, pf, modalNextWorld b⟩, List.mem_append_right _ hin, rfl⟩
+    · subst hps; subst hxeq
+      rcases mintDiaNegPropsS5_mem_intro b w pf hxmem with hin | hin
+      · exact ⟨⟨Sign.neg, pf, modalNextWorld b⟩,
+          List.mem_append_left _ (List.mem_cons_of_mem _ (List.mem_append_right _ hin)), rfl⟩
+      · exact ⟨⟨Sign.neg, pf, modalNextWorld b⟩, List.mem_append_right _ hin, rfl⟩
+
+omit [Hashable Atom] in
+/-- **Phase 5 field 3/4**: `modalStepBranchS5gKeyed` preserves `keyLowerBd`
+(`∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w`). Old keys survive because birth keys
+never change and live relevant sets only grow under branch prepend (`relevantSetFinset_mono` --
+the monotone-stability that defeats the v1 Gap-1 collapse by construction). The fresh key
+equals the minted world's birth content, realized on the SAME minted branch by
+`successorBirthContentS5_subset_relevantSetFinset_mint` via the concrete mint-arm
+characterizations (`modalApplyOne_boxNeg_eq_S5`/`modalApplyOne_diamondPos_eq_S5`). -/
+lemma modalStepBranchS5g_preserves_keyLowerBd (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (newKeys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS5gKeyed φ₀ b e acc keys = some (newBs, newExps, newAcc, newKeys))
+    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS5 φ₀)
+    (hLowerBd : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w) :
+    ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ newKeys → k ⊆ relevantSetFinset φ₀ b' w := by
+  obtain ⟨sf, hsfmem, -, hcase⟩ :=
+    modalStepBranchS5gKeyed_keys_full_shape φ₀ b e acc keys newBs newExps newAcc newKeys hstep
+  have hmono : ∀ (xs : List (SignedFormula (Proposition Atom) WorldIndex))
+      (w : WorldIndex) (k : Finset (Sign × Proposition Atom)),
+      k ⊆ relevantSetFinset φ₀ b w → k ⊆ relevantSetFinset φ₀ (xs ++ b) w := fun xs w k hk =>
+    hk.trans (relevantSetFinset_mono φ₀ b (xs ++ b) w
+      (fun sf' h => List.mem_append_right _ h))
+  rcases hcase with ⟨wBlock, -, hnewBs, hnk⟩ | ⟨hnk, -, hshape⟩ |
+    ⟨φ, hsign, hform, -, hnk, hshape⟩ | ⟨φ, hsign, hform, -, hnk, hshape⟩
+  · intro b' hb'
+    rw [hnewBs] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    intro w k hk
+    rw [hnk] at hk
+    exact hLowerBd w k hk
+  · intro b' hb'
+    have hxs : ∃ xs, b' = xs ++ b := by
+      rcases hm : (modalApplyOneS5 sf b acc).fst with nf | brs | nf | -
+      · rw [hm] at hshape; rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'; exact ⟨nf, hb'⟩
+      · rw [hm] at hshape; rw [hshape] at hb'
+        obtain ⟨br, -, rfl⟩ := List.mem_map.mp hb'; exact ⟨br, rfl⟩
+      · rw [hm] at hshape; rw [hshape] at hb'
+        simp only [List.mem_singleton] at hb'; exact ⟨nf, hb'⟩
+      · rw [hm] at hshape; exact hshape.elim
+    obtain ⟨xs, rfl⟩ := hxs
+    intro w k hk
+    rw [hnk] at hk
+    exact hmono xs w k (hLowerBd w k hk)
+  · have hS5eq : modalApplyOneS5 sf b acc = modalApplyOne sf b acc :=
+      modalApplyOneS5_eq_of_not_boxPos_diaNeg sf b acc ⟨by simp [hsign], by simp [hform]⟩
+    have heq := modalApplyOne_boxNeg_eq_S5 sf b acc φ hsign hform
+    rw [hS5eq, heq] at hshape
+    have hsrc : (Proposition.box φ) ∈ modalSubfmls φ₀ := by
+      have := modalUniverseS5_mem_formula (hbClosure sf hsfmem)
+      rwa [hform] at this
+    have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+    have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+    have hwitU : ((Sign.neg, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ := by
+      simp only [signedSubfmls, Finset.mem_product, Finset.mem_insert, Finset.mem_singleton,
+        List.mem_toFinset]
+      exact ⟨by simp, hφsub⟩
+    intro b' hb'
+    rw [hshape] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    intro w k hk
+    rw [hnk] at hk
+    simp only [List.mem_append, List.mem_singleton, Prod.mk.injEq] at hk
+    rcases hk with hk | ⟨rfl, rfl⟩
+    · exact hmono _ w k (hLowerBd w k hk)
+    · exact successorBirthContentS5_subset_relevantSetFinset_mint φ₀ b .neg φ sf.label hwitU
+  · have hS5eq : modalApplyOneS5 sf b acc = modalApplyOne sf b acc :=
+      modalApplyOneS5_eq_of_not_boxPos_diaNeg sf b acc ⟨by simp [hform], by simp [hsign]⟩
+    have heq := modalApplyOne_diamondPos_eq_S5 sf b acc φ hsign hform
+    rw [hS5eq, heq] at hshape
+    have hsrc : (Proposition.diamond φ) ∈ modalSubfmls φ₀ := by
+      have := modalUniverseS5_mem_formula (hbClosure sf hsfmem)
+      rwa [hform] at this
+    have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem_S5 φ)
+    have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_S5 hφmem hsrc
+    have hwitU : ((Sign.pos, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ := by
+      simp only [signedSubfmls, Finset.mem_product, Finset.mem_insert, Finset.mem_singleton,
+        List.mem_toFinset]
+      exact ⟨by simp, hφsub⟩
+    intro b' hb'
+    rw [hshape] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    intro w k hk
+    rw [hnk] at hk
+    simp only [List.mem_append, List.mem_singleton, Prod.mk.injEq] at hk
+    rcases hk with hk | ⟨rfl, rfl⟩
+    · exact hmono _ w k (hLowerBd w k hk)
+    · exact successorBirthContentS5_subset_relevantSetFinset_mint φ₀ b .pos φ sf.label hwitU
+
 /-! ## Pigeonhole World Bound (task 515 Phase 6)
 
 A **static** cardinality fact about any fixed `(b, keys)` pair satisfying `S5LoopInv`'s three

@@ -1,57 +1,34 @@
 {
-  "status": "partial",
-  "requires_user_review": true,
-  "started_at": "2026-07-15T00:00:00Z",
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 517,
+  "session_id": "sess_1784156551_995e9d",
+  "dispatch": "divergence audit - Fig 4-1 cross-label verification",
+  "verdict": "CONFIRMED",
+  "findings_count": 6,
+  "adversarial_verification_triggered": true,
+  "adversarial_verification_result": "verdict survived three refutation attempts; dispatch's stated blast radius REFUTED",
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "verified: Simpson1994 present at references.bib:86",
+  "report_path": "specs/517_labelled_bounded_context_cs5_completeness/reports/10_fig41-crosslabel-verification.md",
+  "probe_path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fig41-crosslabel-gate.lean",
   "phases_completed": 12,
-  "phases_total": 26,
-  "phase_number": 21,
-  "phase_status": "BLOCKED",
-  "summary": "Phase 21 BLOCKED: TPrime 𝒯 Atom is uninhabited for every 𝒯 including ∅ (mechanized, sorry-free), so Lemma 5.3.1's deliverable cannot exist. Supersedes Phase 20's TS5-only scoping. Two further NIK transcription defects found from the p.69 page raster: (⊥E) and (∨E) are printed cross-label but transcribed label-local — exactly the two rules 5.3.1 uses for consistency and the disjunction property. Repairs stated, not applied (Cslib/ out of territory). Chain-union/cofinite-encoding obstacle flagged (not mechanized).",
-  "artifacts": [
+  "memory_candidates": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/prime-lemma-blockers.lean",
-      "type": "probe",
-      "summary": "11 declarations, sorry-free, axioms ⊆ [propext, Classical.choice, Quot.sound]."
+      "content": "Simpson1994 (Intuitionistic Modal Logic, LFCS ECS-LFCS-94-308) OCR PDF has page offset +9 (printed p.N = PDF p.N+9) and a text layer that is systematically defective at figures and displayed math while intact for prose. Figure 4-1 (printed p.69 = PDF p.78) renders as noise in pdftotext/chunk text but is fully legible in the page raster via the Read tool's `pages` parameter. For any claim about a figure or displayed formula in this document, read the raster; the text layer silently drops symbols rather than erroring.",
+      "keywords": ["Simpson1994", "OCR", "raster", "page-offset", "text-layer-defect", "pdftotext"],
+      "tags": ["literature", "provenance"]
     },
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/09_prime-lemma-blockers-summary.md",
-      "type": "summary",
-      "summary": "Phase 21 execution summary: PDF transcription, three mechanized blockers, stated repairs, flagged chain-union obstacle, plan deviations."
+      "content": "Before scoping a Lean inference-rule change as a 'mainline rewrite requiring re-proved soundness', measure the blast radius from the import graph rather than assuming it: `grep -rln <RelName> Cslib/` plus a check of which files import the defining module. A relation can be widely assumed to be load-bearing while actually being confined to its own subdirectory with a single induction over it. Same-named constructors in unrelated developments (e.g. Axiom.efq vs NIK.efq) inflate naive grep counts and can manufacture a false blast radius.",
+      "keywords": ["blast-radius", "import-graph", "scoping", "grep", "inference-rules"],
+      "tags": ["lean", "verification-practice"]
+    },
+    {
+      "content": "In labelled natural deduction (Simpson-style N_IK), a label-local (⊥E)/(∨E) recovers every cross-label instance whose labels are joined by a closure edge, with no frame axiom: label-local (⊥E) yields x:□A from x:⊥, and (□E) walks it across the edge; (∨E) runs the same trick one level up via y:□C. So k3 (◇⊥⊃⊥) and k4 (◇(A∨B)⊃◇A∨◇B) survive a label-local transcription at any theory with symmetry. The genuine gap is only the DISCONNECTED instances — which is exactly what Simpson's Prime Lemma 5.3.1 needs, since its Zorn target x:A is unrelated to the label being case-split.",
+      "keywords": ["labelled-deduction", "Simpson", "cross-label", "prime-lemma", "IK-axioms", "NIK"],
+      "tags": ["modal-logic", "formalization"]
     }
   ],
-  "partial_progress": {
-    "stage": "blocked-and-escalated",
-    "details": "Transcribed Lemma 5.3.1 (pp. 92-93) and Figure 4-1 (p. 69) from PDF rasters. Ran the mandated small-model/consistency check on the statement BEFORE writing the Zorn argument; the check killed the target type. Mechanized the blocker rather than proving anything against IsEmpty. Zorn argument not attempted, by design."
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "axioms": "[propext, Classical.choice, Quot.sound]",
-    "build_passed": true,
-    "ci_pipeline_passed": null,
-    "ci_note": "Not run: zero changes under Cslib/, so no mainline surface changed. checkInitImports N/A to probes/ (not a lake target). Probe verified via `lake env lean` + #print axioms on every declaration.",
-    "cslib_untouched": true
-  },
-  "memory_candidates": [
-    "Before dispatching proof work that CONSTRUCTS an inhabitant of a formalized structure, gate on the type being inhabited. Task 517 Phases 20 and 21 both spent dispatches against TPrime, which was provably empty at every 𝒯; a one-lemma inhabitedness check would have caught it at a fraction of the cost.",
-    "In a Lean transcription of a labelled/annotated deduction system, a clause quantified type-wide over labels where the source quantifies over the structure's domain will typically make the structure type UNINHABITED (via a containment field like Graph.edge_mem or Context.ctxSubset plus a coinfiniteness/freshness reserve), not merely too strong. The emptiness is silent until something tries to construct an inhabitant.",
-    "When a PDF's text layer is OCR-damaged, the damage is not uniform: Simpson1994's inference-rule FIGURES render as noise (`%(M) %(/\\El)`) while surrounding prose extracts cleanly. Rule shapes — where cross-label vs label-local structure lives — are exactly what is lost. Read rule figures from the page raster, never the text layer.",
-    "A premise-free derivation at an arbitrary label (e.g. `impI`+`assumption` giving `x : A ⊃ A`) is a powerful probe for over-strong closure clauses in a proof-theoretic formalization: it instantiates the clause at every label at once."
-  ],
-  "blockers_summary": [
-    "tprime-uninhabited-every-T (blocking 21, 22, 23) — repair: relativize TPrime.deductiveClosure to ∀ x ∈ G.X",
-    "efq-label-local-vs-fig41-cross-label (blocking 21, 23) — repair: retype NIK.efq to x:⊥ / y:A; soundness re-check required",
-    "orE-label-local-vs-fig41-cross-label (blocking 21, 23) — repair: retype NIK.orE to cross-label; soundness re-check required",
-    "chain-union-vs-cofinite-encoding (flagged, medium confidence, not mechanized) — needs a NIK label-renaming/equivariance lemma"
-  ],
-  "metadata": {
-    "session_id": "sess_1784156551_995e9d",
-    "agent_type": "cslib-implementation-hard-agent",
-    "task_number": 517,
-    "effort_flag": "hard",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+  "next_steps": "Re-ask user to authorize the efq/orE generalization with the corrected blast radius; Phase 21 stays [BLOCKED]"
 }

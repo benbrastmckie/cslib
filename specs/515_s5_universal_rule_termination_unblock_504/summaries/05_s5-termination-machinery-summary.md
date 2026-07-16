@@ -1,10 +1,10 @@
-# Summary: S5 Termination Machinery Plan v5, Phases 0-6
+# Summary: S5 Termination Machinery Plan v5, Phases 0-7
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [IN PROGRESS] (phases 0-6 of 24 complete; phase 7 onward remain)
+- **Status**: [IN PROGRESS] (phases 0-7 of 24 complete; phase 8 onward remain)
 - **Started**: 2026-07-15T00:00:00Z
-- **Completed**: 2026-07-15 (this dispatch)
-- **Effort**: ~6 hours (7 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant)
+- **Completed**: 2026-07-16 (this dispatch: phase 7)
+- **Effort**: ~8 hours (8 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux)
 - **Dependencies**: Task 514 (literature grounding); Task 504 (parent, `modalApplyOneS5`/`extractModelS5*`/`modalTruthLemmaS5` landed)
 - **Artifacts**:
   - `Cslib/Logics/Modal/Tableau/S5Simplification.lean` (modified)
@@ -53,6 +53,13 @@ phase closed sorry-free, CI-green, with an incremental commit.
 - **Phase 6** (`S5Simplification.lean`): Landed `S5wTagInv`, `usedTags`, `usedTags_mono`, two
   new subformula-closure lemmas (`mem_mintTags_of_diamond_mem`/`_of_box_mem`), and
   `modalApplyOneS5w_outputs_tags`.
+- **Phase 7** (`S5Simplification.lean`): Landed the counting crux -- `S5wWorldInv`,
+  `modalStepBranchS5w_preserves_worldInv`, `modalMaxWorld_lt_worldBound_of_S5w` -- plus the
+  supporting `witnessWorldS5_none_not_mem_usedTags` helper, `modalApplyOneS5w_fresh_local`,
+  `modalStepBranchS5w_preserves_accTargetsKnown`, and the central per-call dichotomy
+  `modalApplyOneS5w_step`. This is the drop-in replacement for
+  `modalMaxWorld_lt_worldBound_of_phiBound`: no rank, no potential, no pigeonhole, no powerset,
+  no birth keys.
 
 ## Decisions
 
@@ -63,20 +70,30 @@ phase closed sorry-free, CI-green, with an incremental commit.
   cross-checked against the research report's `#eval` table (fuel 10/20/40 -> maxWorld 5/10/20).
 - Phase 6's `modalApplyOneS5w_outputs_tags` statement was left as `...` in the plan; landed as
   the conjunction of two directional per-mint-shape lemmas rather than a single combined form.
+- Phase 7's `modalStepBranchS5w_preserves_worldInv` takes `accTargetsKnown b acc` as a THIRD
+  hypothesis beyond the plan's literal two-hypothesis signature -- a documented, necessary
+  deviation (not an optional embellishment): K's own `boxPos`/`diamondNeg` propagation shapes
+  emit at `acc.successorsOf w`, which is unbounded by `modalMaxWorld` without it. The
+  `accTargetsKnown` preservation instantiation itself was free (a corollary of the already-landed
+  generic `modalStepBranch_preserves_accTargetsKnown_gen`).
+- `modalMaxWorld_lt_worldBound_of_S5w` needed only `hW : S5wWorldInv`, not `hT : S5wTagInv`,
+  narrower than the plan's stated `(hT) (hW)` signature -- the chain
+  `modalMaxWorld b ≤ (usedTags φ₀ b).card ≤ (mintTags φ₀).card ≤ modalOps φ₀ < modalWorldBound φ₀`
+  never touches `S5wTagInv` directly.
 
 ## Impacts
 
-- Phases 8-14 (the rest of the S5 chain) and Phases 15-23 (the Euclidean 5/KB5 route) remain
-  unattempted. Phase 7 (the counting crux) is the necessary next step and requires threading
-  `accTargetsKnown b acc` as an additional hypothesis beyond the plan's literal two-hypothesis
-  signature -- see `.orchestrator-handoff.json` for the full analysis.
+- Phases 9-14 (the rest of the S5 chain: spec split, rank-free loop invariant, step
+  preservation, the parametric Hintikka lift + K/T/B regression gate) and Phases 15-23 (the
+  Euclidean 5/KB5 route) remain unattempted. Phase 8 (the R1 scratch gate -- soundness re-proof
+  feasibility) is the necessary next step, and writes no production Lean.
 - No existing declaration was renamed, removed, or had its statement weakened. All new
   declarations are purely additive.
 
 ## Follow-ups
 
-- Next dispatch: attempt Phase 7 with the `accTargetsKnown` threading noted above, or mark
-  `[BLOCKED]` with the exact open goal if it resists.
+- Next dispatch: Phase 8, the R1 scratch probe (soundness re-proof feasibility) -- a GATE phase
+  with a documented kill condition (>~400 line re-proof estimate triggers a pivot to fallback 2).
 
 ## References
 

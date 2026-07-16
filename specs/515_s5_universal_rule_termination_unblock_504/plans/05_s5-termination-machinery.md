@@ -911,33 +911,51 @@ Atom] in`, placed BEFORE the docstring per Lean's doc-comment/command-modifier o
 
 ---
 
-### Phase 7: The counting crux [NOT STARTED]
+### Phase 7: The counting crux [COMPLETED]
 
 **Goal**: The load-bearing new proof. Land the linear a-priori world budget, replacing the birth-key
 pigeonhole entirely.
 
+**Completion note**: landed exactly as specified, with one documented, necessary deviation from
+the literal 2-hypothesis signature: `modalStepBranchS5w_preserves_worldInv` takes
+`accTargetsKnown b acc` as a THIRD hypothesis. This is required because K's own `boxPos`/
+`diamondNeg` propagation shapes emit at `acc.successorsOf w`, which is unbounded by
+`modalMaxWorld` without it. The `accTargetsKnown` preservation instantiation itself is a free
+corollary of `modalStepBranch_preserves_accTargetsKnown_gen`, discharged via a new
+`modalApplyOneS5w_fresh_local` dichotomy lemma. The per-call counting argument is centralized in
+one new combined lemma, `modalApplyOneS5w_step`, which gives both the `signedSubfmls`-closure
+half of `S5wTagInv`'s preservation and the known-label-or-fresh-tag-mint dichotomy `S5wWorldInv`
+needs, in one pass over `modalApplyOneS5w`'s three-way dispatch (the two tag-consuming mint/reuse
+shapes, the two S5-relevant propagation shapes, and the fallthrough to `modalApplyOne`). Full CI
+green (`lake build`: 3239/3239); zero sorry, zero new axioms (`propext`, `Classical.choice`,
+`Quot.sound` only) in the new declarations.
+
 **Tasks**:
-- [ ] Land:
+- [x] Land:
       ```lean
       def S5wWorldInv (φ₀) (b) : Prop := modalMaxWorld b ≤ (usedTags φ₀ b).card
 
       theorem modalStepBranchS5w_preserves_worldInv
-          (hT : S5wTagInv φ₀ b) (hW : S5wWorldInv φ₀ b)
+          (hT : S5wTagInv φ₀ b) (hW : S5wWorldInv φ₀ b) (hK : accTargetsKnown b acc)
           (h : modalStepBranchGen modalApplyOneS5w b e acc = some (bs, es, acc')) :
           ∀ b' ∈ bs, S5wTagInv φ₀ b' ∧ S5wWorldInv φ₀ b'
 
-      theorem modalMaxWorld_lt_worldBound_of_S5w (hT) (hW) : modalMaxWorld b < modalWorldBound φ₀
+      theorem modalMaxWorld_lt_worldBound_of_S5w (hW) : modalMaxWorld b < modalWorldBound φ₀
       ```
-- [ ] **The argument** (record in the docstring): a mint fires only when
-      `witnessWorldS5 b s ψ = none`, which is **equivalent** to `(s,ψ) ∉ usedTags φ₀ b` (any
-      `⟨s,ψ,w''⟩ ∈ b` puts `w''` in `modalKnownWorlds b`, `Branch.lean:89`, so `find?` cannot miss
-      it). The mint **emits its own witness** at `w' = modalNextWorld b = modalMaxWorld b + 1`
-      (`Rules.lean:125`, `Branch.lean:99`). So `modalMaxWorld` grows by 1 while `usedTags` gains
-      `(s,ψ)` -- and since `b` only ever **grows**, that tag is **used forever after**, so it can
-      never mint again. Mints inject into `mintTags`. Every non-mint arm leaves `modalMaxWorld`
-      unchanged and `usedTags` monotone. Chain:
+      (`modalMaxWorld_lt_worldBound_of_S5w` needed only `hW`, not `hT`, since the chain
+      `modalMaxWorld b ≤ (usedTags φ₀ b).card ≤ (mintTags φ₀).card ≤ modalOps φ₀ <
+      modalWorldBound φ₀` never touches `S5wTagInv` directly.)
+- [x] **The argument** (recorded in the docstring): a mint fires only when
+      `witnessWorldS5 b s ψ = none`, which implies `(s,ψ) ∉ usedTags φ₀ b`
+      (`witnessWorldS5_none_not_mem_usedTags`; any `⟨s,ψ,w''⟩ ∈ b` puts `w''` in
+      `modalKnownWorlds b`, `Branch.lean:89`, so `find?` cannot miss it). The mint **emits its own
+      witness** at `w' = modalNextWorld b = modalMaxWorld b + 1` (`Rules.lean:125`,
+      `Branch.lean:99`). So `modalMaxWorld` grows by 1 while `usedTags` gains `(s,ψ)` -- and since
+      `b` only ever **grows**, that tag is **used forever after**, so it can never mint again.
+      Mints inject into `mintTags`. Every non-mint arm leaves `modalMaxWorld` unchanged and
+      `usedTags` monotone. Chain:
       `modalMaxWorld b ≤ (usedTags φ₀ b).card ≤ (mintTags φ₀).card ≤ modalOps φ₀ < modalWorldBound φ₀`.
-- [ ] Confirm `modalMaxWorld_lt_worldBound_of_S5w` is the **drop-in replacement** for
+- [x] Confirmed `modalMaxWorld_lt_worldBound_of_S5w` is the **drop-in replacement** for
       `modalMaxWorld_lt_worldBound_of_phiBound` (`CompletenessLoop.lean:775-776`) -- same conclusion,
       at K's own bound, with **no rank, no potential, no pigeonhole, no powerset, no birth keys**.
       That scalar is **all the rank ever buys** (report §2.3).

@@ -1621,6 +1621,40 @@ theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
     _ ≤ modalOps φ₀ := mintTags_card_le_modalOps φ₀
     _ < modalWorldBound φ₀ := modalOps_lt_worldBound φ₀
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Generalizes `modalMaxWorld_le_of_forall_label_le` over an arbitrary `foldl` accumulator, to
+support induction. Mirrors `modalNextWorld_gt`'s own internal generalized-accumulator style
+(`Branch.lean`). -/
+private lemma modalMaxWorld_foldl_le_of_forall_S5w
+    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M init : WorldIndex}
+    (hinit : init ≤ M) (h : ∀ z ∈ l, z.label ≤ M) :
+    l.foldl (fun mx sf => max mx sf.label) init ≤ M := by
+  induction l generalizing init with
+  | nil => simpa using hinit
+  | cons hd tl ih =>
+    simp only [List.foldl_cons]
+    exact ih (max_le hinit (h hd List.mem_cons_self))
+      (fun z hz => h z (List.mem_cons_of_mem _ hz))
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `modalMaxWorld l` is bounded by `M` whenever every label in `l` is bounded by `M` -- the
+converse direction to `label_le_modalMaxWorld`. Needed to bound `modalMaxWorld (nf ++ b)` in the
+non-mint branches of `modalStepBranchS5w_preserves_worldInv`, where every emitted label is
+already known to `b` (hence `≤ modalMaxWorld b`). -/
+private lemma modalMaxWorld_le_of_forall_label_le_S5w
+    {l : List (SignedFormula (Proposition Atom) WorldIndex)} {M : WorldIndex}
+    (h : ∀ z ∈ l, z.label ≤ M) : modalMaxWorld l ≤ M :=
+  modalMaxWorld_foldl_le_of_forall_S5w (Nat.zero_le M) h
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Any known-world label is bounded by `modalMaxWorld b`: unwinds `modalKnownWorlds` membership
+to a genuine branch member (`mem_modalKnownWorlds_S5`), then applies `label_le_modalMaxWorld`. -/
+private lemma known_label_le_modalMaxWorld_S5w
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
+    (h : w ∈ modalKnownWorlds b) : w ≤ modalMaxWorld b := by
+  obtain ⟨y, hy, hyeq⟩ := (mem_modalKnownWorlds_S5 b w).mp h
+  rw [← hyeq]; exact label_le_modalMaxWorld hy
+
 /-- Local re-derivation of `FrameSoundness.lean`'s `lemma modalApplyOneS5_fresh_local`
 (unavailable across files, since `FrameSoundness.lean` imports `S5Simplification.lean`, not the
 reverse): `modalApplyOneS5` satisfies the same `freshLocal` dichotomy as `modalApplyOne`. Needed
@@ -2135,6 +2169,131 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
         obtain ⟨s, ff, l⟩ := sf
         rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ <;>
           simp_all
+
+/-- The counting-crux preservation theorem: `modalStepBranchGen modalApplyOneS5w` preserves both
+`S5wTagInv` and `S5wWorldInv` across a single step, given `accTargetsKnown` as an ambient
+invariant. `accTargetsKnown` is a necessary THIRD hypothesis beyond the plan's literal two-field
+signature -- documented deviation, not an embellishment: K's own `boxPos`/`diamondNeg`
+propagation shapes emit at `acc.successorsOf w`, which is unbounded by `modalMaxWorld` without
+it (see the module docstring above `S5wTagInv`). Combines `modalApplyOneS5w_step`'s per-call
+dichotomy with the tag-cardinality counting argument: a mint consumes a fresh tag (`usedTags`
+strictly grows), so `modalMaxWorld`'s +1 growth is always matched by `usedTags.card`'s growth;
+every other shape leaves `modalMaxWorld` unchanged (`modalMaxWorld_le_of_forall_label_le_S5w`)
+while `usedTags` only grows (`usedTags_mono`). -/
+theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
+    {b e : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {bs es : List (List (SignedFormula (Proposition Atom) WorldIndex))} {acc' : Accessibility}
+    (hT : S5wTagInv φ₀ b) (hW : S5wWorldInv φ₀ b) (hK : accTargetsKnown b acc)
+    (h : modalStepBranchGen modalApplyOneS5w b e acc = some (bs, es, acc')) :
+    ∀ b' ∈ bs, S5wTagInv φ₀ b' ∧ S5wWorldInv φ₀ b' := by
+  simp only [modalStepBranchGen] at h
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some h
+  split_ifs at hsf with hexp
+  unfold S5wWorldInv at hW
+  have hstep := modalApplyOneS5w_step sf b acc hsfmem hK hT
+  rcases hfstc : (modalApplyOneS5w sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hfstc] at hstep
+    obtain ⟨hformclosed, hlab⟩ := hstep
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    have htagpres : S5wTagInv φ₀ (nf ++ b) := by
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hformclosed x hx
+      · exact hT x hx
+    refine ⟨htagpres, ?_⟩
+    unfold S5wWorldInv
+    rcases hlab with hknownall | ⟨s, ψ, hnotused, htagmem, hmemnf, hlabelall⟩
+    · have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
+        apply modalMaxWorld_le_of_forall_label_le_S5w
+        intro z hz
+        simp only [List.mem_append] at hz
+        rcases hz with hz | hz
+        · exact known_label_le_modalMaxWorld_S5w (hknownall z hz)
+        · exact label_le_modalMaxWorld hz
+      have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (nf ++ b)).card :=
+        Finset.card_le_card (usedTags_mono (fun x hx => List.mem_append_right _ hx))
+      exact le_trans hmaxle (le_trans hW husedge)
+    · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
+        apply le_antisymm
+        · apply modalMaxWorld_le_of_forall_label_le_S5w
+          intro z hz
+          simp only [List.mem_append] at hz
+          rcases hz with hz | hz
+          · rw [hlabelall z hz]
+          · exact le_of_lt (modalNextWorld_gt b z hz)
+        · exact label_le_modalMaxWorld (List.mem_append_left _ hmemnf)
+      have husedsub : usedTags φ₀ b ⊆ usedTags φ₀ (nf ++ b) :=
+        usedTags_mono (fun x hx => List.mem_append_right _ hx)
+      have hnewmem : (s, ψ) ∈ usedTags φ₀ (nf ++ b) := by
+        simp only [usedTags, Finset.mem_filter]
+        refine ⟨htagmem, ?_⟩
+        exact List.any_eq_true.mpr
+          ⟨⟨s, ψ, modalNextWorld b⟩, List.mem_append_left _ hmemnf, by simp⟩
+      have hcard : (usedTags φ₀ b).card < (usedTags φ₀ (nf ++ b)).card :=
+        Finset.card_lt_card ((Finset.ssubset_iff_of_subset husedsub).mpr ⟨(s, ψ), hnewmem, hnotused⟩)
+      rw [hmaxeq]
+      unfold modalNextWorld
+      calc modalMaxWorld b + 1 ≤ (usedTags φ₀ b).card + 1 := Nat.add_le_add_right hW 1
+        _ ≤ (usedTags φ₀ (nf ++ b)).card := hcard
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hfstc] at hstep
+    obtain ⟨hformclosed, hknownall⟩ := hstep
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+    have htagpres : S5wTagInv φ₀ (br ++ b) := by
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hformclosed x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+      · exact hT x hx
+    refine ⟨htagpres, ?_⟩
+    unfold S5wWorldInv
+    have hmaxle : modalMaxWorld (br ++ b) ≤ modalMaxWorld b := by
+      apply modalMaxWorld_le_of_forall_label_le_S5w
+      intro z hz
+      simp only [List.mem_append] at hz
+      rcases hz with hz | hz
+      · exact known_label_le_modalMaxWorld_S5w
+          (hknownall z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
+      · exact label_le_modalMaxWorld hz
+    have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (br ++ b)).card :=
+      Finset.card_le_card (usedTags_mono (fun x hx => List.mem_append_right _ hx))
+    exact le_trans hmaxle (le_trans hW husedge)
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    rw [hfstc] at hstep
+    obtain ⟨hformclosed, hknownall⟩ := hstep
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    have htagpres : S5wTagInv φ₀ (nf ++ b) := by
+      intro x hx
+      simp only [List.mem_append] at hx
+      rcases hx with hx | hx
+      · exact hformclosed x hx
+      · exact hT x hx
+    refine ⟨htagpres, ?_⟩
+    unfold S5wWorldInv
+    have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
+      apply modalMaxWorld_le_of_forall_label_le_S5w
+      intro z hz
+      simp only [List.mem_append] at hz
+      rcases hz with hz | hz
+      · exact known_label_le_modalMaxWorld_S5w (hknownall z hz)
+      · exact label_le_modalMaxWorld hz
+    have husedge : (usedTags φ₀ b).card ≤ (usedTags φ₀ (nf ++ b)).card :=
+      Finset.card_le_card (usedTags_mono (fun x hx => List.mem_append_right _ hx))
+    exact le_trans hmaxle (le_trans hW husedge)
+  · rw [hfstc] at hsf; simp at hsf
 
 /-! ## World-Contiguity Bookkeeping (task 515 Phase 4, 12th `S5LoopInv` field)
 

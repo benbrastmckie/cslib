@@ -1773,7 +1773,7 @@ is the "bespoke construction" `FrameCompleteness.lean:583-585` and `S5Simplifica
 both name as the cost.** It is missing library infrastructure; this phase supplies it.
 
 **Tasks**:
-- [ ] Land in `Cslib/Foundations/Relation/Euclidean.lean`, beside the existing `RightEuclidean` API:
+- [x] Land in `Cslib/Foundations/Relation/Euclidean.lean`, beside the existing `RightEuclidean` API:
       ```lean
       inductive EuclGen (r : α → α → Prop) : α → α → Prop
         | base {a b} : r a b → EuclGen r a b
@@ -1784,16 +1784,16 @@ both name as the cost.** It is missing library infrastructure; this phase suppli
       theorem EuclGen.least (hs : RightEuclidean s)
           (hle : ∀ a b, r a b → s a b) : EuclGen r a b → s a b   -- induction on EuclGen
       ```
-- [ ] Record the **structural precedent** in the docstring: `Relation.SymmGen` / `Relation.EqvGen` /
+- [x] Record the **structural precedent** in the docstring: `Relation.SymmGen` / `Relation.EqvGen` /
       `Relation.ReflGen` in the sibling `Cslib/Foundations/Relation/Confluence.lean` are exactly this
       pattern (see `SymmGen.to_eqvGen` :52, `reflTransGen_compRel : ReflTransGen (SymmGen r) = EqvGen r`
       :374 for a worked closure-characterization precedent). `EuclGen` is the Euclidean member of that
       family. **This placement is what the B/S5 routes already rely on for their closures**, so it is
       precedent-consistent rather than novel.
-- [ ] Record the **intersection warrant** from Phase 15 in the docstring: `EuclGen r` is the least
+- [x] Record the **intersection warrant** from Phase 15 in the docstring: `EuclGen r` is the least
       Euclidean relation containing `r`, which exists because Euclideanness is closed under arbitrary
       intersection and the full relation is Euclidean. `EuclGen.least` **is** that characterization.
-- [ ] **R11 discipline**: this addition is **purely additive**. Touch **no existing declaration** in
+- [x] **R11 discipline**: this addition is **purely additive**. Touch **no existing declaration** in
       `Euclidean.lean`.
 
 **Timing**: 2.5 hours
@@ -1812,25 +1812,31 @@ directory and re-scope upstreaming to a follow-up -- **that is a relocation, not
 
 ---
 
-### Phase 17: The rooted normal form -- root + universal cluster [NOT STARTED]
+### Phase 17: The rooted normal form -- root + universal cluster [COMPLETED]
 
 **Goal**: Land the structure theorem that makes K5 **adjacent to S5 rather than beyond it**: a rooted
 Euclidean frame is a root plus a universal cluster. **This is the phase that converts the S5 cluster
 machinery into 5/KB5 leverage.**
 
 **Tasks**:
-- [ ] Land the cluster-is-universal fact for a rooted Euclidean frame: for right-Euclidean `r` and
+- [x] Land the cluster-is-universal fact for a rooted Euclidean frame: for right-Euclidean `r` and
       root `w`, `∀ a b, r w a → r w b → r a b` (immediate: this **is** `rightEuclidean`), i.e.
       `R(w) × R(w) ⊆ R`.
-- [ ] **Consume the landed `Relation.RightEuclidean.equiv_cod : IsEquiv (cod r) r`
+- [x] **Consume the landed `Relation.RightEuclidean.equiv_cod : IsEquiv (cod r) r`
       (`Euclidean.lean:124`) -- do NOT re-derive it.** It supplies the cluster's `IsEquiv` directly.
       Supporting: `rightTotal_cod` (:121), `cod_subset_dom` (:113), `refl_cod` (:45).
-- [ ] Land the decomposition for `EuclGen`-closed rooted frames: the carrier splits as
+- [x] Land the decomposition for `EuclGen`-closed rooted frames: the carrier splits as
       `{root} ∪ cod (EuclGen r)`, with `EuclGen r` an equivalence **on the cluster** and the root
       related **into** the cluster but not necessarily to itself. **The root's non-reflexivity is the
       entire difference from S5** -- and is exactly what `□p → p` detects
-      (`probes/five-s5-separation.lean`).
-- [ ] Land the KB5 specialization from Phase 15(c): symmetric + Euclidean is a **PER**, so a rooted
+      (`probes/five-s5-separation.lean`). *(deviation: altered -- rendered via the relation-generic
+      `rooted_mem_cod` (root successors ⊆ cluster) + `rooted_cluster_isEquiv` (cluster is an
+      equivalence), which apply to `EuclGen r` directly since it carries the `RightEuclidean`
+      instance. A bespoke `EuclGen`-specific `IsEquiv (cod (EuclGen r)) (EuclGen r)` restatement was
+      dropped: it added nothing over the generic theorems and hit a subtype-coercion elaboration
+      snag. The non-reflexivity of the root is the ABSENCE of `r w w`, so it is not a theorem to
+      land; the missing-reflexivity is documented in the module docstring.)*
+- [x] Land the KB5 specialization from Phase 15(c): symmetric + Euclidean is a **PER**, so a rooted
       KB5 frame is either edge-isolated at the root or a full cluster containing it. Route via
       `Relation.symm_rightEuclidean_iff_trans` (`Euclidean.lean:236`).
 

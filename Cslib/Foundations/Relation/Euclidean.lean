@@ -300,4 +300,49 @@ theorem leftEuclidean_rightEuclidean_iff_dom_cod :
   mp := fun ⟨_, _⟩ ↦ ⟨leftEuclidean_rightEuclidean_dom_cod_eq, LeftEuclidean.equiv_dom⟩
   mpr := fun ⟨eq, _⟩ ↦ ⟨dom_cod_leftEuclidean eq, dom_cod_rightEuclidean eq⟩
 
+/-! ## Rooted normal form
+
+A right-Euclidean frame reachable from a distinguished root `w` is a *root above a universal
+cluster*: the successors of `w` are mutually related (`rooted_cluster_universal`) and carry an
+equivalence relation (`rooted_cluster_isEquiv`, consuming `RightEuclidean.equiv_cod`), while the
+root itself is related *into* the cluster but -- unlike an S5 frame -- need not be related to
+itself. That missing root-reflexivity is the entire difference from S5 and is exactly what the
+modal axiom `□p → p` detects. The symmetric case is a partial equivalence relation, yielding the
+KB5 dichotomy: a rooted symmetric right-Euclidean frame is either edge-isolated at the root or a
+full cluster containing it. -/
+
+/-- **Universality of the cluster.** In a right-Euclidean frame, all successors of a common root
+`w` are mutually related: `R(w) × R(w) ⊆ R`. This is `rightEuclidean` read at the root, and is
+what makes a rooted Euclidean frame a root together with a *universal* cluster of successors. -/
+theorem rooted_cluster_universal [RightEuclidean r] {w a b : α}
+    (hwa : r w a) (hwb : r w b) : r a b :=
+  RightEuclidean.rightEuclidean hwa hwb
+
+/-- **The cluster is an equivalence.** The successor cluster `cod r` of a right-Euclidean frame
+carries an equivalence relation. This consumes `RightEuclidean.equiv_cod` directly rather than
+re-deriving it: the successor cluster of a rooted Euclidean frame is an S5 cluster. -/
+theorem rooted_cluster_isEquiv [RightEuclidean r] : IsEquiv (cod r) r :=
+  RightEuclidean.equiv_cod
+
+/-- **The root sits above the cluster.** Every successor of the root lies in the successor cluster
+`cod r`. Combined with `rooted_cluster_isEquiv`, this exhibits a rooted right-Euclidean frame as a
+root `w` sitting above the universal cluster `cod r`. The root is related *into* the cluster but
+-- unlike in an S5 frame -- need not be related to itself: `r w w` can fail. -/
+theorem rooted_mem_cod [RightEuclidean r] {w a : α} (hwa : r w a) : a ∈ cod r :=
+  ⟨w, hwa⟩
+
+/-- **KB5, the partial-equivalence case.** A symmetric right-Euclidean relation is transitive --
+a partial equivalence relation on its field. This is the `IsTrans` direction of
+`symm_rightEuclidean_iff_trans`, packaged for direct use. -/
+theorem symm_rightEuclidean_isTrans [Std.Symm r] [RightEuclidean r] : IsTrans α r :=
+  symm_rightEuclidean_iff_trans.mp inferInstance
+
+/-- **KB5 dichotomy witness.** For a symmetric right-Euclidean relation, if the root `w` has any
+successor then it is reflexive at `w` -- the full-cluster branch of the dichotomy. The only way
+`r w w` fails is the edge-isolated root with no successor at all, in which case `□p → p` can fail
+vacuously at the root. -/
+theorem symm_rightEuclidean_root_refl [Std.Symm r] [RightEuclidean r] {w a : α}
+    (hwa : r w a) : r w w :=
+  RightEuclidean.rightEuclidean (Std.Symm.symm w a hwa) (Std.Symm.symm w a hwa)
+
 end Relation

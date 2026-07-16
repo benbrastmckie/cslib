@@ -1743,11 +1743,16 @@
           "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md",
           "type": "summary",
           "summary": "Implementation summary for phases 0-6 of plan v5."
+        },
+        {
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/06_k-aux-unprovability-audit.md",
+          "type": "report",
+          "summary": "Adversarial audit of the K-Aux unprovability claim: claim SURVIVES refutation (auxK_not_stepPreserved is a machine-checked theorem, no sorryAx) but Phase 11's stated mechanism (frozen-vs-step e divergence) is REFUTED -- the real defect is that Aux has no e slot, so the post-state obligation is re-asserted at the pre-state e. Phase 11 should be [PARTIAL]; Phase 10 reopened (its 'both instantiations elaborate' bar was too weak -- elaboration is not satisfiability). Verified fix: Aux gains an e slot; costs S5w one token and yields a GENERIC K/T/B AuxStepPreserved theorem. Phase 12 as written would hit its own KILL after a ~310-line induction."
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-16T01:34:10Z",
-      "session_id": "sess_1784165611_81d962",
+      "last_updated": "2026-07-16T07:00:12Z",
+      "session_id": "sess_1784185091_129d98",
       "next_artifact_number": 6,
       "memory_candidates": [
         "In this repo, Lean files with `module` + `public import` (not `public meta import`) headers cannot embed permanent `#eval`/`#guard`/`native_decide` declarations (structural module-system limitation, documented at Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Sanity Checks' section). Kernel-level `rfl`/`decide` also fails on functions compiled via nested well-founded recursion (e.g. modalExpandBranchesGen's fuel-driven processNext) even at small argument magnitudes, independent of the module-system limitation. Workaround: chain single, non-recursive step functions (e.g. modalStepBranchGen) via explicit `let`/`bind`, which DO reduce fine under `rfl`/`decide`, to build a mechanized multi-step counterexample without touching the recursive driver.",

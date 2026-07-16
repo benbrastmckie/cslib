@@ -160,6 +160,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Research**:
   - [515_s5_universal_rule_termination_unblock_504/reports/01_s5-termination-implementation-blueprint.md]
   - [515_s5_universal_rule_termination_unblock_504/reports/03_s5-infrastructure-deep-research.md]
+  - [515_s5_universal_rule_termination_unblock_504/reports/06_k-aux-unprovability-audit.md]
 - **Plan**: [515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md]
 - **Summary**: [515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md]
 

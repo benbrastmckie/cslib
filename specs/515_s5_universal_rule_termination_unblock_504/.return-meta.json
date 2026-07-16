@@ -1,28 +1,10 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-16T00:00:00Z",
-  "partial_progress": {
-    "phases_completed": 18,
-    "last_completed_phase": "Phase 17: rooted normal form",
-    "note": "18 = numbered phases 0-17 inclusive (plus audit-inserted 11.5). Phases 18-23 remain."
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "note": "Only Cslib/Foundations/Relation/Euclidean.lean modified (purely additive). Full tree builds (3239 jobs); checkInitImports exit 0; lint-style/lint/shake clean for Euclidean; lake test exit 0. #print axioms: EuclGen API axiom-free; rooted_cluster_isEquiv=[Classical.choice]; symm_rightEuclidean_isTrans=[propext,Quot.sound] -- all standard subset, no sorryAx. Pre-existing baselines unchanged (PrimeExclusion lint; BDriver/Intuitionistic/Minimal warnings; shake repo-wide exit 1)."
-  },
-  "artifacts": [
-    "Cslib/Foundations/Relation/Euclidean.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md"
-  ],
+  "status": "partial",
   "metadata": {
-    "session_id": "sess_1784185091_129d98",
-    "agent_type": "cslib-implementation-agent",
-    "task_number": 515,
-    "compliance_check": "passed"
+    "cycles_used": 5,
+    "final_state": "implementing",
+    "phases_completed": 18,
+    "phases_total": 24,
+    "resume_phase": 18
   }
 }

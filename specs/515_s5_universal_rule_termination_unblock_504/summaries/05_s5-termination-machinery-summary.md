@@ -1,10 +1,10 @@
-# Summary: S5 Termination Machinery Plan v5, Phases 0-9
+# Summary: S5 Termination Machinery Plan v5, Phases 0-10
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [IN PROGRESS] (phases 0-9 of 24 complete; phase 10 onward remain)
+- **Status**: [IN PROGRESS] (phases 0-10 of 24 complete; phase 11 onward remain)
 - **Started**: 2026-07-15T00:00:00Z
-- **Completed**: 2026-07-15 (this dispatch: phase 9)
-- **Effort**: ~9 hours (9 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux, gate, spec split)
+- **Completed**: 2026-07-15 (this dispatch: phase 10)
+- **Effort**: ~11 hours (10 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux, gate, spec split, rank-free Aux invariant)
 - **Dependencies**: Task 514 (literature grounding); Task 504 (parent, `modalApplyOneS5`/`extractModelS5*`/`modalTruthLemmaS5` landed)
 - **Artifacts**:
   - `Cslib/Logics/Modal/Tableau/S5Simplification.lean` (modified)
@@ -95,6 +95,24 @@ phase closed sorry-free, CI-green, with an incremental commit.
   here matching this file's existing `_S5`/`_S5w` re-derivation convention).
   `modalApplyOneT_spec`/`modalApplyOneB_spec` needed only a 3-line existential-wrapping adapter
   each for the two renamed fields -- verified by building, not assumed.
+- **Phase 10** (`CompletenessLoop.lean`): Landed the rank-free loop invariant with the `Aux`
+  parametrization, exactly per the plan's fix (not the bare-scalar hazard it warns against).
+  `AuxStepPreserved (apply) (Aux)` and `AuxBounds (φ0) (Aux)` state the two obligations any
+  `Aux : List (SignedFormula ...) → Accessibility → Prop` must satisfy. `ModalLoopInvHintikka
+  (apply) (φ0) (Aux) (b e) (acc)` bundles the five rank-free `ModalPotentialInv` conjuncts
+  (`bClosure`, `eClosure`, `eNodup`, `accFresh`, `accKnown`), an opaque `aux : Aux b acc` field,
+  and the five Hintikka-witness conjuncts unchanged from `ModalLoopInvGen` -- 11 fields,
+  confirming the plan's arity-change warning (`ModalLoopInvGen`'s 7 rank-scoped fields vs. this
+  structure's 11). K's instantiation `ModalLoopAuxK` existentially quantifies a rank map
+  witnessing `ModalPotentialInv` plus the `phiBound` conservation identity; S5w's instantiation
+  `ModalLoopAuxS5w` is `S5wTagInv ∧ S5wWorldInv`, needing no rank map. Both `AuxBounds` instances
+  are proved outright, S5w's `AuxStepPreserved` is proved outright (a direct corollary of the
+  already-landed `modalStepBranchS5w_preserves_worldInv`), and the full bridge
+  `ModalLoopInvGen_iff_hintikka_auxK : (∃ rank, ModalLoopInvGen apply φ0 b e acc rank) ↔
+  ModalLoopInvHintikka apply φ0 (ModalLoopAuxK φ0 e) b e acc` confirms K's instantiation is
+  logically equivalent to the existing rank-based invariant, not merely elaborating. K's own
+  `AuxStepPreserved` is intentionally left to Phase 11 (the step-preservation port). Added one
+  new import: `public import Cslib.Logics.Modal.Tableau.S5Simplification`.
 
 ## Decisions
 
@@ -132,26 +150,40 @@ phase closed sorry-free, CI-green, with an incremental commit.
   `diaPosWitness'`/`boxNegWitness'`) -- roughly 440 new lines total, not a handful of free
   bridges. Each field required a genuine case split on whether `sf` is one of the two S5w
   witness-reuse shapes, one of S5's own two universal-propagation shapes, or neither.
+- Phase 10's `AuxStepPreserved` takes `accFreshInv b acc` and `accTargetsKnown b acc` as
+  additional ambient hypotheses beyond `Aux b acc` itself (not part of the plan's literal
+  two-hypothesis `Aux`/`auxStep`/`auxBound` sketch), matching Phase 7's documented
+  `accTargetsKnown`-as-third-hypothesis deviation for `modalStepBranchS5w_preserves_worldInv`.
+  Without this, S5w's `AuxStepPreserved` instance could not be discharged from the already-landed
+  Phase 7 lemma.
+- `ModalLoopAuxS5w` ignores its `Accessibility` argument entirely (S5w's invariant depends only
+  on the branch, not `acc`), which `lake lint`'s `unusedArguments` linter flagged as an error
+  (not merely a compiler warning); fixed with `@[nolint unusedArguments]`, matching existing
+  precedent elsewhere in the library (`CountermodelExtraction.lean`, `SignedFormula.lean`).
+- Went beyond the plan's literal verification bar ("both `Aux` instantiations elaborate") by
+  proving full theorems (`ModalLoopAuxK_bounds`, `ModalLoopAuxS5w_bounds`,
+  `ModalLoopAuxS5w_stepPreserved`, `ModalLoopInvGen_iff_hintikka_auxK`) rather than stopping at
+  type-checking, since every one of these was a direct, low-risk corollary of already-landed
+  Phase 6-9 machinery.
 
 ## Impacts
 
-- Phases 10-14 (the rest of the S5 chain: rank-free loop invariant, step preservation, the
-  parametric Hintikka lift + K/T/B regression gate) and Phases 15-23 (the Euclidean 5/KB5
-  route) remain unattempted. Phase 9's completion clears the way to Phase 10; no fallback
-  pivot is needed.
-- No existing declaration was renamed, removed, or had its statement weakened, with one
-  exception: `RuleApplicationSpec.boxNegWitness`/`.diaPosWitness` were renamed to
-  `.boxNegWitness'`/`.diaPosWitness'` and their type weakened to existentially quantify the
-  witness world (rather than fixing it at `modalNextWorld b`). Every existing consumer
-  (`modalApplyOne_spec`, `modalApplyOneT_spec`, `modalApplyOneB_spec`, and
-  `CompletenessLoop.lean`'s six destructuring sites) was updated in this dispatch; no consumer
-  was left referencing the old field names.
+- Phases 11-14 (the rest of the S5 chain: step preservation, the parametric Hintikka lift +
+  K/T/B regression gate, soundness) and Phases 15-23 (the Euclidean 5/KB5 route) remain
+  unattempted. Phase 10's completion clears the way to Phase 11; no fallback pivot is needed.
+- No existing declaration was renamed, removed, or had its statement weakened by Phase 10;
+  `ModalLoopInvGen`, `ModalLoopInv`, and every prior declaration in `CompletenessLoop.lean` are
+  byte-identical. Phase 9's `RuleApplicationSpec.boxNegWitness`/`.diaPosWitness` →
+  `.boxNegWitness'`/`.diaPosWitness'` rename (the one exception across Phases 0-10) remains as
+  documented in that phase's own note.
 
 ## Follow-ups
 
-- Next dispatch: Phase 10 (rank-free loop invariant with the `Aux` parametrization) -- Phase 7's
-  landed `S5wTagInv`/`S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w` bundle is exactly the
-  `Aux` instantiation this phase needs for S5w.
+- Next dispatch: Phase 11 (step preservation) -- port `modalStepGen_preserves_invariant`
+  (`CompletenessLoop.lean`) to `ModalLoopInvHintikka`, minus its two `potential_step` lines,
+  threading `AuxStepPreserved`/`AuxBounds` as explicit hypotheses. K's own `AuxStepPreserved`
+  instance (not proved in Phase 10) is needed here, reusing `modalStepBranchGen_potential_step`
+  directly rather than re-deriving it.
 - Phase 12 should verify (by reading, not assuming) which of `CompletenessLoop.lean`'s seven
   `RuleApplicationSpec`-typed signatures can weaken to `RuleApplicationSpecCore`; Phase 9 confirms
   this for the five whose bodies it touched (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,

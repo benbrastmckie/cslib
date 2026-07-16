@@ -1,15 +1,18 @@
-# Summary: S5 Termination Machinery Plan v5, Phases 0-7
+# Summary: S5 Termination Machinery Plan v5, Phases 0-9
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [IN PROGRESS] (phases 0-7 of 24 complete; phase 8 onward remain)
+- **Status**: [IN PROGRESS] (phases 0-9 of 24 complete; phase 10 onward remain)
 - **Started**: 2026-07-15T00:00:00Z
-- **Completed**: 2026-07-16 (this dispatch: phase 7)
-- **Effort**: ~8 hours (8 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux)
+- **Completed**: 2026-07-15 (this dispatch: phase 9)
+- **Effort**: ~9 hours (9 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux, gate, spec split)
 - **Dependencies**: Task 514 (literature grounding); Task 504 (parent, `modalApplyOneS5`/`extractModelS5*`/`modalTruthLemmaS5` landed)
 - **Artifacts**:
   - `Cslib/Logics/Modal/Tableau/S5Simplification.lean` (modified)
   - `Cslib/Logics/Modal/Tableau/BDriver.lean` (modified)
   - `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (modified)
+  - `Cslib/Logics/Modal/Tableau/GenericDriver.lean` (modified)
+  - `Cslib/Logics/Modal/Tableau/TDriver.lean` (modified)
+  - `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean` (modified)
   - `specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md` (phase status updates)
 - **Standards**: `.claude/rules/artifact-formats.md`, `.claude/rules/state-management.md`, `.claude/rules/git-workflow.md`, `.claude/rules/plan-format-enforcement.md`
 - **Type**: cslib
@@ -74,6 +77,24 @@ phase closed sorry-free, CI-green, with an incremental commit.
   case sizes, `modalS5BoxAll_soundIn`'s packaging pattern, Phase 7's own preservation-lemma
   sizes) -- well under the 400-line kill threshold. See the plan's Phase 8 completion note for
   the full writeup.
+- **Phase 9** (`GenericDriver.lean`, `TDriver.lean`, `BDriver.lean`, `CompletenessLoop.lean`,
+  `S5Simplification.lean`): Split `RuleApplicationSpec` into `RuleApplicationSpecCore` (the nine
+  fields the Hintikka/saturation machinery consumes: `freshLocal`, `outputsSubsetUniverse`,
+  `persistentFresh`, `branchingLength`, `localShapeInvariance`, `boxPosNotExpanding`,
+  `diaNegNotExpanding`, and the two witness fields renamed+weakened to `boxNegWitness'`/
+  `diaPosWitness'` -- existentially quantified on the witness world rather than fixed at
+  `modalNextWorld b`) plus `RuleApplicationSpec extends RuleApplicationSpecCore` (adding
+  `rankStep`/`outDegStep`/`knownWorldsStep`, the three fields Phase 2's counterexample proved
+  unreachable for any S5 rule). Landed `RuleApplicationSpec.toCore` and
+  `modalApplyOneS5w_specCore : RuleApplicationSpecCore modalApplyOneS5w` -- all nine fields
+  discharged via the two-layer agreement chain `modalApplyOneS5w → modalApplyOneS5 →
+  modalApplyOne`, a new hypothesis-free combined F9/F10 shape fact
+  (`modalApplyOneS5_boxPos_diaNeg_shape`), and local re-derivations of `modalUniverse`'s
+  membership constructors/extractors (`mem_modalUniverse_of_S5w`,
+  `modalUniverse_mem_formula_S5w`; the FmpMeasure.lean originals are `private`, so re-derived
+  here matching this file's existing `_S5`/`_S5w` re-derivation convention).
+  `modalApplyOneT_spec`/`modalApplyOneB_spec` needed only a 3-line existential-wrapping adapter
+  each for the two renamed fields -- verified by building, not assumed.
 
 ## Decisions
 
@@ -94,22 +115,48 @@ phase closed sorry-free, CI-green, with an incremental commit.
   narrower than the plan's stated `(hT) (hW)` signature -- the chain
   `modalMaxWorld b ≤ (usedTags φ₀ b).card ≤ (mintTags φ₀).card ≤ modalOps φ₀ < modalWorldBound φ₀`
   never touches `S5wTagInv` directly.
+- Phase 9's "Files to modify" list (`GenericDriver.lean`, `S5Simplification.lean`, plus 3-line
+  T/B adapters) omitted `CompletenessLoop.lean`, but the field rename there forced six
+  destructuring-site updates (`spec.boxNegWitness`/`spec.diaPosWitness` → `spec.boxNegWitness'`/
+  `spec.diaPosWitness'`, each gaining an extra existential witness-world binder). This is
+  mechanical fallout of the rename, not a design change: `CompletenessLoop.lean`'s seven
+  `RuleApplicationSpec`-typed signatures are all left unchanged (still the full spec, not Core),
+  since `modalStepGen_preserves_invariant` (and transitively `modalExpandBranchesGen_hintikka`)
+  calls `modalStepBranchGen_potential_step`, which needs `rankStep`/`outDegStep`/
+  `knownWorldsStep`. Weakening those five (of seven) `CompletenessLoop.lean` signatures whose
+  bodies don't touch the three dropped fields to `RuleApplicationSpecCore` is deferred to
+  Phase 12 (the parametric Hintikka lift), per the plan's own phase split.
+- Phase 9's `outputsSubsetUniverse`/`persistentFresh`/`branchingLength`/`localShapeInvariance`/
+  `boxPosNotExpanding`/`diaNegNotExpanding` fields for `modalApplyOneS5w` needed substantially
+  more new proof content than the plan's task list detailed (which fully specified only
+  `diaPosWitness'`/`boxNegWitness'`) -- roughly 440 new lines total, not a handful of free
+  bridges. Each field required a genuine case split on whether `sf` is one of the two S5w
+  witness-reuse shapes, one of S5's own two universal-propagation shapes, or neither.
 
 ## Impacts
 
-- Phases 9-14 (the rest of the S5 chain: spec split, rank-free loop invariant, step
-  preservation, the parametric Hintikka lift + K/T/B regression gate) and Phases 15-23 (the
-  Euclidean 5/KB5 route) remain unattempted. Phase 8's GO verdict clears the way to Phase 9;
-  no fallback pivot is needed.
-- No existing declaration was renamed, removed, or had its statement weakened. All new
-  declarations are purely additive. Phase 8 added no production Lean (scratch probe only, per
-  its own gate design).
+- Phases 10-14 (the rest of the S5 chain: rank-free loop invariant, step preservation, the
+  parametric Hintikka lift + K/T/B regression gate) and Phases 15-23 (the Euclidean 5/KB5
+  route) remain unattempted. Phase 9's completion clears the way to Phase 10; no fallback
+  pivot is needed.
+- No existing declaration was renamed, removed, or had its statement weakened, with one
+  exception: `RuleApplicationSpec.boxNegWitness`/`.diaPosWitness` were renamed to
+  `.boxNegWitness'`/`.diaPosWitness'` and their type weakened to existentially quantify the
+  witness world (rather than fixing it at `modalNextWorld b`). Every existing consumer
+  (`modalApplyOne_spec`, `modalApplyOneT_spec`, `modalApplyOneB_spec`, and
+  `CompletenessLoop.lean`'s six destructuring sites) was updated in this dispatch; no consumer
+  was left referencing the old field names.
 
 ## Follow-ups
 
-- Next dispatch: Phase 9 (spec split + the one-token weakening) -- split
-  `RuleApplicationSpec` into `RuleApplicationSpecCore` (the fields the Hintikka machinery
-  needs) plus the 3 fields S5 cannot discharge, and land `diaPosWitness'`/`boxNegWitness'`.
+- Next dispatch: Phase 10 (rank-free loop invariant with the `Aux` parametrization) -- Phase 7's
+  landed `S5wTagInv`/`S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w` bundle is exactly the
+  `Aux` instantiation this phase needs for S5w.
+- Phase 12 should verify (by reading, not assuming) which of `CompletenessLoop.lean`'s seven
+  `RuleApplicationSpec`-typed signatures can weaken to `RuleApplicationSpecCore`; Phase 9 confirms
+  this for the five whose bodies it touched (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
+  `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) but did not change their
+  signatures, since doing so wasn't required for Phase 9's own goal.
 - Future artifacts citing `modalApplyOneS5_snd_eq`'s consumer sites should use the corrected
   line numbers from the Phase 8 completion note, not the stale ones in earlier reports.
 

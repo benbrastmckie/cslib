@@ -1373,6 +1373,340 @@ theorem ModalLoopAuxK_stepPreserved (apply : RuleApply Atom) (spec : RuleApplica
   · exact hre'
   · rw [hpotid p.1 hp1]; exact hphi
 
+/-! ## The Parametric Top-Loop Hintikka Lemma -/
+
+/-- **Parametric top-loop Hintikka lemma**: the `Aux`-parametrized analogue of
+`modalExpandBranchesGen_hintikka` (below), built on `modalStepHintikka_preserves_inv`
+the same way that lemma is itself built on `modalStepGen_preserves_invariant`. Takes only
+`RuleApplicationSpecCore` (no `rankStep`/`outDegStep`/`knownWorldsStep`) plus the caller-supplied
+`Aux`/`AuxStepPreserved`/`AuxBounds` triple in place of a rank witness; the per-index hypothesis
+is `ModalLoopInvHintikka apply φ0 Aux bi ei ai` (no existential `rank`), not
+`∃ rank, ModalLoopInvGen apply φ0 bi ei ai rank`.
+
+A pure substitution port of `modalExpandBranchesGen_hintikka`'s proof: `spec ↦ hs`, the rank
+witness `↦` `Aux`'s opaque `aux` field, `modalStepGen_preserves_invariant ↦
+modalStepHintikka_preserves_inv`, `modalMaxWorld_lt_worldBound_of_phiBound ↦ hAuxBounds` (direct
+application to `hinv.aux`), and `modalStepBranchGen_expMeasure_step_lt ↦
+modalExpMeasure_step_lt_gen` (direct against `hs`'s three raw Core fields, exactly as
+`modalStepHintikka_preserves_inv`'s own measure-drop already does). The only other change is that
+`spec.boxNegWitness'`/`spec.diaPosWitness'` become `hs.boxNegWitness'`/`hs.diaPosWitness'` --
+both are `RuleApplicationSpecCore` fields (F11'/F12'), so this needs no extra hypothesis.
+
+`modalExpandBranchesGen_hintikka` itself is re-derived from this lemma at
+`Aux := ModalLoopAuxK φ0` (see its proof below), which is what pins this factoring as faithful to
+the K-facing statement its `TDriver`/`BDriver` consumers depend on. -/
+theorem modalExpandBranchesHintikka
+    (apply : RuleApply Atom) (hs : RuleApplicationSpecCore apply)
+    (φ0 : Proposition Atom)
+    (Aux : List (SignedFormula (Proposition Atom) WorldIndex) →
+           List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
+    (hAuxStep : AuxStepPreserved apply Aux) (hAuxBounds : AuxBounds φ0 Aux)
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      modalExpMeasure (modalUniverse φ0) branches expandedSets ≤ fuel →
+      (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+          (ai : Accessibility),
+        branches[i]? = some bi → expandedSets[i]? = some ei → accs[i]? = some ai →
+        ModalLoopInvHintikka apply φ0 Aux bi ei ai) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
+        modalHintikkaSetGen apply bR aR := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs hlen hlenA hfuel _hInv bR aR h
+    have hm : modalExpMeasure (modalUniverse φ0) branches expandedSets = 0 :=
+      Nat.le_zero.mp hfuel
+    have hbranches : branches = [] := by
+      rcases branches with _ | ⟨bh, bt⟩
+      · rfl
+      · exfalso
+        rcases expandedSets with _ | ⟨e, es⟩
+        · simp only [List.length_nil, List.length_cons] at hlen; omega
+        · simp only [modalExpMeasure, List.zip_cons_cons, List.map_cons, List.sum_cons] at hm
+          have h3 := Nat.one_le_pow (modalWork (modalUniverse φ0) bh e) 3 (by omega)
+          omega
+    subst hbranches
+    simp [modalExpandBranchesGen] at h
+  | succ fuel' ih =>
+    intro branches expandedSets accs hlen hlenA hfuel hInv bR aR h
+    simp only [modalExpandBranchesGen] at h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        (∀ (i : Nat) (bi ei : List (SignedFormula (Proposition Atom) WorldIndex))
+            (ai : Accessibility),
+          (done ++ pending)[i]? = some bi → (doneExp ++ pendingExp)[i]? = some ei →
+          (doneAccs ++ pendingAccs)[i]? = some ai →
+          ModalLoopInvHintikka apply φ0 Aux bi ei ai) →
+        modalExpMeasure (modalUniverse φ0) (done ++ pending) (doneExp ++ pendingExp) ≤
+          fuel' + 1 →
+        modalExpandBranchesGen.processNext apply fuel' pending pendingExp pendingAccs done doneExp
+            doneAccs = .openBranch bR aR →
+        modalHintikkaSetGen apply bR aR from
+      key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hInv hfuel
+        (by simpa [modalExpandBranchesGen] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro pendingExp pendingAccs done doneExp doneAccs _ _ _ _ _ _ hinner
+      simp [modalExpandBranchesGen.processNext] at hinner
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hlength_p hlenP_accs hdlength hdAccs hInv_all hmeas hinner
+      cases pendingAccs with
+      | nil => simp at hlenP_accs
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hlength_p
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
+          simp only [modalExpandBranchesGen.processNext] at hinner
+          by_cases hcl : isModalClosed bh = true
+          · -- Closed branch: skip and recurse on the inner induction
+            rw [if_pos hcl] at hinner
+            apply ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+            · simpa using hlength_p
+            · simpa using hlenP_accs
+            · simp [hdlength]
+            · simp [hdAccs]
+            · intro i bi ei ai hib hie hia
+              apply hInv_all i bi ei ai
+              · convert hib using 2; simp
+              · convert hie using 2; simp
+              · convert hia using 2; simp
+            · convert hmeas using 2 <;> simp
+            · exact hinner
+          · simp only [Bool.not_eq_true] at hcl
+            rw [if_neg (by simp [hcl])] at hinner
+            cases hstep : modalStepBranchGen apply bh e a with
+            | none =>
+              -- Saturated open branch: bh/a are the returned bR/aR
+              rw [hstep] at hinner
+              obtain ⟨hbeq, haeq⟩ : bh = bR ∧ a = aR := by
+                cases hinner; exact ⟨rfl, rfl⟩
+              have hbeq' : bR = bh := hbeq.symm
+              have haeq' : aR = a := haeq.symm
+              subst hbeq'; subst haeq'
+              have hbh_idx : (done ++ bR :: bt)[done.length]? = some bR := by
+                rw [List.getElem?_append_right (Nat.le_refl done.length)]; simp [Nat.sub_self]
+              have he_idx : (doneExp ++ e :: es)[done.length]? = some e := by
+                rw [List.getElem?_append_right (by omega)]; simp [hdlength, Nat.sub_self]
+              have ha_idx : (doneAccs ++ aR :: restAs)[done.length]? = some aR := by
+                rw [List.getElem?_append_right (by omega)]; simp [hdAccs, Nat.sub_self]
+              have hinv := hInv_all done.length bR e aR hbh_idx he_idx ha_idx
+              refine ⟨hcl, ?_, ?_, ?_⟩
+              · -- Conjunct 2: rule-application clause for every sf ∈ bR
+                intro sf hsfmem
+                obtain ⟨s, φ, l⟩ := sf
+                cases φ with
+                | atom p =>
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .atom p, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .atom p, l⟩ hine
+                    simp only [modalHintikkaClauseGen] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | bot =>
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .bot, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .bot, l⟩ hine
+                    simp only [modalHintikkaClauseGen] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | imp a c =>
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .imp a c, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .imp a c, l⟩ hine
+                    simp only [modalHintikkaClauseGen] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | and a c =>
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .and a c, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .and a c, l⟩ hine
+                    simp only [modalHintikkaClauseGen] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | or a c =>
+                  rcases modalStepBranchGen_none_saturated apply hstep ⟨s, .or a c, l⟩ hsfmem
+                    with hine | hna
+                  · have hc := hinv.hintikkaInv ⟨s, .or a c, l⟩ hine
+                    simp only [modalHintikkaClauseGen] at hc
+                    cases s <;> exact hc
+                  · cases s <;> simp [hna]
+                | box ψ' =>
+                  cases s with
+                  | pos =>
+                    -- boxPos still falls into `_, _`; `eBoxOnlyNeg` rules out `sf ∈ e`
+                    rcases modalStepBranchGen_none_saturated apply hstep ⟨.pos, .box ψ', l⟩ hsfmem
+                      with hine | hna
+                    · exact absurd (hinv.eBoxOnlyNeg ⟨.pos, .box ψ', l⟩ hine ψ' rfl) (by simp)
+                    · simp [hna]
+                  | neg =>
+                    -- boxNeg = F(□ψ')@w: matches `modalHintikkaSetGen`'s first branch directly
+                    trivial
+                | diamond ψ' =>
+                  cases s with
+                  | pos =>
+                    -- diamondPos = T(◇ψ')@w: matches `modalHintikkaSetGen`'s second branch
+                    -- directly (native diamond, symmetric to boxNeg above).
+                    trivial
+                  | neg =>
+                    -- diamondNeg still falls into `_, _`; `eDiamondOnlyPos` rules out `sf ∈ e`
+                    rcases modalStepBranchGen_none_saturated apply hstep ⟨.neg, .diamond ψ', l⟩
+                        hsfmem with hine | hna
+                    · exact absurd (hinv.eDiamondOnlyPos ⟨.neg, .diamond ψ', l⟩ hine ψ' rfl)
+                        (by simp)
+                    · simp [hna]
+              · -- Conjunct 3: box-negative witness existence
+                intro ψ' w hmem
+                rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
+                · exact hinv.eBoxNegWitness _ hine ψ' w rfl
+                · exfalso
+                  obtain ⟨_, -, rest, hlin⟩ := hs.boxNegWitness' bR aR ψ' w
+                  rw [hlin] at hna
+                  simp at hna
+              · -- Conjunct 4: diamond-positive witness existence (symmetric to
+                -- Conjunct 3 above).
+                intro ψ' w hmem
+                rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
+                · exact hinv.eDiamondPosWitness _ hine ψ' w rfl
+                · exfalso
+                  obtain ⟨_, -, rest, hlin⟩ := hs.diaPosWitness' bR aR ψ' w
+                  rw [hlin] at hna
+                  simp at hna
+            | some step =>
+              obtain ⟨newBs, newExps, newAcc⟩ := step
+              rw [hstep] at hinner
+              have hstepEq : modalStepBranchGen apply bh e a = some (newBs, newExps, newAcc) :=
+                hstep
+              have hinv :=
+                hInv_all done.length bh e a
+                  (by rw [List.getElem?_append_right (Nat.le_refl done.length)]
+                      simp [Nat.sub_self])
+                  (by rw [List.getElem?_append_right (by omega)]; simp [hdlength, Nat.sub_self])
+                  (by rw [List.getElem?_append_right (by omega)]; simp [hdAccs, Nat.sub_self])
+              obtain ⟨newExp, hNewExpEq⟩ :=
+                modalStepBranchGen_newExps_const apply bh e a newBs newExps newAcc hstepEq
+              subst hNewExpEq
+              have hstepEq' :
+                  modalStepBranchGen apply bh e a =
+                    some (newBs, newBs.map (fun _ => newExp), newAcc) :=
+                hstepEq
+              obtain ⟨hinvAll, -⟩ :=
+                modalStepHintikka_preserves_inv apply hs φ0 Aux hAuxStep hAuxBounds bh e a newBs
+                  (newBs.map (fun _ => newExp)) newAcc hstepEq' hinv
+              have hWb : modalMaxWorld bh < modalWorldBound φ0 := hAuxBounds bh e a hinv.aux
+              have hstep_lt := modalExpMeasure_step_lt_gen apply hs.branchingLength
+                hs.persistentFresh hs.outputsSubsetUniverse φ0 done bt newBs doneExp es newExp bh e
+                a newAcc hdlength.symm hinv.bClosure hinv.accFresh hWb hstepEq'
+              apply ih (done ++ newBs ++ bt) (doneExp ++ newBs.map (fun _ => newExp) ++ es)
+                (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+              · simp only [List.length_append, List.length_map, hdlength]
+                omega
+              · simp only [List.length_append, List.length_replicate, hdAccs]
+                omega
+              · omega
+              · intro i bi ei ai hib hie hia
+                rcases Nat.lt_or_ge i done.length with hlt1 | hge1
+                · apply hInv_all i bi ei ai
+                  · rw [List.append_assoc, List.getElem?_append_left hlt1] at hib
+                    rwa [List.getElem?_append_left hlt1]
+                  · rw [List.append_assoc, List.getElem?_append_left (by omega)] at hie
+                    rwa [List.getElem?_append_left (by omega)]
+                  · rw [List.append_assoc, List.getElem?_append_left (by omega)] at hia
+                    rwa [List.getElem?_append_left (by omega)]
+                · rcases Nat.lt_or_ge i (done.length + newBs.length) with hlt2 | hge2
+                  · -- Region: newBs (all sharing newExp/newAcc)
+                    have hj : i - done.length < newBs.length := by omega
+                    have hbi_newBs : newBs[i - done.length]? = some bi := by
+                      rw [List.append_assoc, List.getElem?_append_right hge1] at hib
+                      rwa [List.getElem?_append_left hj] at hib
+                    have hbi_mem : bi ∈ newBs := List.mem_of_getElem? hbi_newBs
+                    have hei_eq : ei = newExp := by
+                      rw [List.append_assoc,
+                          List.getElem?_append_right (by omega : doneExp.length ≤ i)] at hie
+                      rw [List.getElem?_append_left
+                            (by simp only [List.length_map]; omega)] at hie
+                      rw [List.getElem?_map,
+                          show newBs[i - doneExp.length]? = some bi from by
+                            rw [show i - doneExp.length = i - done.length from by omega]
+                            exact hbi_newBs] at hie
+                      simp only [Option.map_some, Option.some.injEq] at hie
+                      exact hie.symm
+                    have hei_eq' : newExp = ei := hei_eq.symm
+                    subst hei_eq'
+                    have hai_eq : ai = newAcc := by
+                      rw [List.append_assoc,
+                          List.getElem?_append_right (by omega : doneAccs.length ≤ i)] at hia
+                      rw [List.getElem?_append_left
+                            (by simp only [List.length_replicate]; omega)] at hia
+                      exact List.eq_of_mem_replicate (List.mem_of_getElem? hia)
+                    subst hai_eq
+                    have hexp_idx : (newBs.map (fun _ => newExp))[i - done.length]? =
+                        some newExp := by
+                      rw [List.getElem?_map, hbi_newBs]; rfl
+                    have hzip_idx :
+                        (newBs.zip (newBs.map (fun _ => newExp)))[i - done.length]? =
+                          some (bi, newExp) :=
+                      List.getElem?_zip_eq_some.mpr ⟨hbi_newBs, hexp_idx⟩
+                    exact hinvAll (bi, newExp) (List.mem_of_getElem? hzip_idx)
+                  · -- Region: bt (shifted index)
+                    have hbi_bt : bt[i - done.length - newBs.length]? = some bi := by
+                      rw [List.append_assoc, List.getElem?_append_right hge1] at hib
+                      rw [List.getElem?_append_right
+                            (by omega : newBs.length ≤ i - done.length)] at hib
+                      exact hib
+                    have hei_es : es[i - done.length - newBs.length]? = some ei := by
+                      rw [List.append_assoc,
+                          List.getElem?_append_right (by omega : doneExp.length ≤ i)] at hie
+                      rw [List.getElem?_append_right
+                            (by simp only [List.length_map]; omega :
+                              (newBs.map (fun _ => newExp)).length ≤ i - doneExp.length)] at hie
+                      rwa [show i - doneExp.length - (newBs.map (fun _ => newExp)).length =
+                            i - done.length - newBs.length from by
+                          simp only [List.length_map]; omega] at hie
+                    have hai_restAs : restAs[i - done.length - newBs.length]? = some ai := by
+                      rw [List.append_assoc, List.getElem?_append_right (by omega :
+                            doneAccs.length ≤ i)] at hia
+                      rw [List.getElem?_append_right
+                            (by simp only [List.length_replicate]; omega :
+                              (List.replicate newBs.length newAcc).length ≤
+                                i - doneAccs.length)] at hia
+                      rwa [show i - doneAccs.length -
+                            (List.replicate newBs.length newAcc).length =
+                            i - done.length - newBs.length from by
+                          simp only [List.length_replicate]; omega] at hia
+                    apply hInv_all (done.length + 1 + (i - done.length - newBs.length)) bi ei ai
+                    · rw [List.getElem?_append_right
+                            (by omega : done.length ≤
+                              done.length + 1 + (i - done.length - newBs.length))]
+                      rw [show done.length + 1 + (i - done.length - newBs.length) - done.length
+                            = (i - done.length - newBs.length) + 1 from by omega]
+                      rw [List.getElem?_cons_succ]; exact hbi_bt
+                    · rw [List.getElem?_append_right
+                            (by omega : doneExp.length ≤
+                              done.length + 1 + (i - done.length - newBs.length))]
+                      rw [show done.length + 1 + (i - done.length - newBs.length) -
+                            doneExp.length = (i - done.length - newBs.length) + 1 from by omega]
+                      rw [List.getElem?_cons_succ]; exact hei_es
+                    · rw [List.getElem?_append_right
+                            (by omega : doneAccs.length ≤
+                              done.length + 1 + (i - done.length - newBs.length))]
+                      rw [show done.length + 1 + (i - done.length - newBs.length) -
+                            doneAccs.length = (i - done.length - newBs.length) + 1 from by omega]
+                      rw [List.getElem?_cons_succ]; exact hai_restAs
+              · exact hinner
+
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 
 /-- **Generic combined-invariant single-step preservation** (task 510, the composition crux):

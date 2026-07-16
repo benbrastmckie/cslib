@@ -400,6 +400,40 @@ theorem ModalLoopAuxS5w_stepPreserved (φ₀ : Proposition Atom) :
   rintro b e acc newBs newExps newAcc hstep _hFresh hKnown ⟨hT, hW⟩ p hp
   exact modalStepBranchS5w_preserves_worldInv hT hW hKnown hstep p.1 (List.of_mem_zip hp).1
 
+/-- **S5w's initial-configuration rank-free loop invariant**: `ModalLoopInvHintikka` holds of the
+starting worklist entry `([F(φ₀)@0], [], ∅)`. The S5w analogue of `modalLoopInvGen_initial`, and
+the last input `modalExpandBranchesHintikka` needs to deliver S5 completeness.
+
+Cheaper than K's initial lemma, because S5w's `Aux` carries no rank map and no potential: the
+five expanded-set conjuncts are all vacuous over `e = []`, `accFresh`/`accKnown` hold of the
+empty relation, and the `aux` field reduces to two one-line facts -- `S5wTagInv` because the sole
+branch formula is `(.neg, φ₀)` and `φ₀ ∈ modalSubfmls φ₀`, and `S5wWorldInv` because
+`modalMaxWorld [F(φ₀)@0] = 0`, which bounds any cardinality. -/
+lemma modalLoopInvHintikkaS5w_initial (φ₀ : Proposition Atom) :
+    ModalLoopInvHintikka modalApplyOneS5w φ₀ (ModalLoopAuxS5w φ₀)
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty := by
+  have hmemU : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalUniverse φ₀ := by
+    simp only [modalUniverse, List.mem_flatMap, List.mem_range]
+    exact ⟨0, Nat.succ_pos _, φ₀, modalSubfmls_self_mem φ₀, by simp⟩
+  refine ⟨?_, by simp, List.nodup_nil, accFreshInv_empty _, ?_, ⟨?_, ?_⟩,
+    by simp, by simp, by simp, by simp, by simp⟩
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset]
+    exact ⟨by simp, modalSubfmls_self_mem φ₀⟩
+  · show modalMaxWorld _ ≤ _
+    simp [modalMaxWorld]
+
 /-- **Generic branch-side universe-closure preservation** (task 510):
 `modalLoopGen_bClosure`, over an abstract `(apply, spec)`, discharged by
 `spec.outputsSubsetUniverse`. Body is `modalLoop_bClosure`'s exact proof with

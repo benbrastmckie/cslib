@@ -2613,14 +2613,6 @@ theorem modalTableauS5Gen_sound
   cases hunsat with
   | cons h_unsat _ => exact h_unsat hsat
 
-/-- `modalTableauS5` is sound: if the S5 tableau closes on `F(φ)`, then `φ` is `s5Valid`. Free
-corollary of `modalTableauS5Gen_sound` at the degenerate spec `modalApplyOneS5_s5SoundSpec`;
-statement unchanged. -/
-theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .closed) :
-    s5Valid φ :=
-  modalTableauS5Gen_sound modalApplyOneS5 modalApplyOneS5_s5SoundSpec
-    modalApplyOneS5_fresh_local φ h
-
 /-- **The witness-reuse S5 soundness capstone**: if the tableau driven by the witness-reuse rule
 `modalApplyOneS5w` closes on `F(φ)`, then `φ` is `s5Valid`. Free corollary of
 `modalTableauS5Gen_sound` at `modalApplyOneS5w_s5SoundSpec` and the landed
@@ -2637,6 +2629,15 @@ theorem modalTableauS5w_sound (φ : Proposition Atom)
     s5Valid φ :=
   modalTableauS5Gen_sound modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
     modalApplyOneS5w_fresh_local φ h
+
+/-- `modalTableauS5` is sound: if the S5 tableau closes on `F(φ)`, then `φ` is `s5Valid`.
+Statement unchanged across `modalTableauS5`'s re-basing onto the witness-reuse rule
+(`S5Simplification.lean`): `modalTableauS5 φ` is now *definitionally* `modalTableauGen
+modalApplyOneS5w φ`, which is exactly `modalTableauS5w_sound`'s hypothesis, so this carries over
+by unfolding with no change to what it asserts. -/
+theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .closed) :
+    s5Valid φ :=
+  modalTableauS5w_sound φ h
 
 end Cslib.Logic.Modal.Tableau
 

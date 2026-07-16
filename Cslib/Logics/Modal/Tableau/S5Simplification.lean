@@ -1439,22 +1439,24 @@ def modalExpandBranchesS5
     (accs : List Accessibility) (fuel : Nat) : ModalTableauResult Atom :=
   modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel
 
-/-- The S5-system (equivalence-frame) modal tableau decision procedure -- **built on the
-superseded, unguarded `modalApplyOneS5`**: the generic entry point (`modalTableauGen`,
-`Saturation.lean`) instantiated at `apply := modalApplyOneS5`, starting the signed tableau from
-`F(φ)` at world `0`.
+/-- The S5-system (equivalence-frame) modal tableau **decision procedure**: the generic entry
+point (`modalTableauGen`, `Saturation.lean`) instantiated at the witness-reuse rule
+`apply := modalApplyOneS5w`, starting the signed tableau from `F(φ)` at world `0`.
 
-**CORRECTED (this docstring previously claimed "S5 never mints a world outside the K
-`diamondPos`/`boxNeg` arms, so `modalFuel` is sufficient here too" -- the first half is true, the
-second half is FALSE, refuted by execution, `modalApplyOneS5_hintikka_not_reachable_growth`
-below).** `modalApplyOneS5` re-fires its persistent box-propagation at every known world, which
-manufactures a fresh K-style mint trigger every cycle; K's own `diamondPos`/`boxNeg` mint
-unconditionally (no witness reuse), so world creation under this rule is **unbounded** -- no
-fuel value, however large, yields a genuine Hintikka set. This surface is retained ONLY as
-landed documentation of the dead route; the terminating decision procedure is built on the
-witness-reuse rule `modalApplyOneS5w` (Phase 1) instead. -/
+**Why the witness rule, and not `modalApplyOneS5`.** This surface was previously based on the
+unguarded `modalApplyOneS5`, for which it does *not* terminate at K's fuel: that rule re-fires
+its persistent box-propagation at every known world, manufacturing a fresh K-style mint trigger
+every cycle, and K's own `diamondPos`/`boxNeg` arms mint unconditionally (no witness reuse), so
+world creation is **unbounded** -- no fuel value, however large, yields a genuine Hintikka set
+(refuted by execution: `modalApplyOneS5_hintikka_not_reachable_growth`, below).
+`modalApplyOneS5w` mints only on a genuinely fresh `(sign, formula)` tag and otherwise reuses an
+existing witness world, which caps world creation at `modalOps φ` and so at K's own
+`modalWorldBound φ` (`modalMaxWorld_lt_worldBound_of_S5w`). Both halves of the correspondence
+survive the change: `modalTableauS5_sound` (`FrameSoundness.lean`) carries over unchanged via
+`modalTableauS5w_sound`, and `hintikka_congr` (above) ports the landed countermodel half
+verbatim, since the two rules agree on Hintikka-set-hood. -/
 def modalTableauS5 (φ : Proposition Atom) : ModalTableauResult Atom :=
-  modalTableauGen modalApplyOneS5 φ
+  modalTableauGen modalApplyOneS5w φ
 
 /-- `modalStepBranchS5` is exactly `modalStepBranchGen modalApplyOneS5` -- true `rfl`. -/
 theorem modalStepBranchS5_eq
@@ -1468,9 +1470,11 @@ theorem modalExpandBranchesS5_eq
     modalExpandBranchesS5 branches expandedSets accs fuel =
       modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel := rfl
 
-/-- `modalTableauS5` is exactly `modalTableauGen modalApplyOneS5` -- true `rfl`. -/
+/-- `modalTableauS5` is exactly `modalTableauGen modalApplyOneS5w` -- true `rfl`. Tracks
+`modalTableauS5`'s re-basing onto the witness-reuse rule; the bookkeeping bridge for
+`modalTableauS5w_sound` (`FrameSoundness.lean`), which is stated over the unfolded form. -/
 theorem modalTableauS5_eq (φ : Proposition Atom) :
-    modalTableauS5 φ = modalTableauGen modalApplyOneS5 φ := rfl
+    modalTableauS5 φ = modalTableauGen modalApplyOneS5w φ := rfl
 
 /-! ## `modalKnownWorlds` Local Re-Derivations (task 515 Phase 3)
 

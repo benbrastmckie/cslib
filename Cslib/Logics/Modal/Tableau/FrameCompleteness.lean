@@ -2313,6 +2313,110 @@ theorem modalOpenBranchS5_countermodel
     ¬ Satisfies (extractModelS5 b acc) 0 φ :=
   (modalTruthLemmaS5 b acc hSrc hTgt hH φ 0).2 hF
 
+/-! ## S5 Completeness and `s5Valid` Decidability
+
+`modalTableauS5` now runs the witness-reuse rule `modalApplyOneS5w` (`S5Simplification.lean`),
+which terminates at K's own `modalFuel`. That closes the four-item gap the scope note above
+recorded: items 1-3 are supplied by the generic top-loop lemmas at `modalApplyOneS5w`
+(`modalApplyOneS5w_fresh_local` is the only hypothesis they take), and item 4 -- "the wall" -- is
+supplied by `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) at
+`Aux := ModalLoopAuxS5w φ₀`, whose world bound comes from tag-cardinality counting rather than a
+rank map. `hintikka_congr` then converts the resulting `modalHintikkaSetGen modalApplyOneS5w`
+witness into the `modalHintikkaSetGen modalApplyOneS5` witness `modalOpenBranchS5_countermodel`
+consumes, so the entire landed countermodel half above is reused verbatim. -/
+
+/-- **S5-completeness of the modal tableau**: if `φ₀` is `s5Valid`, the S5 tableau closes on it.
+Contrapositively: an open branch is a genuine equivalence-frame countermodel.
+
+Assembled from four landed pieces at `apply := modalApplyOneS5w` --
+`modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxS5w`),
+`modalExpandBranchesGen_openBranch_accSourcesKnown`/`_accTargetsKnown` (`BDriver.lean`),
+`modalExpandBranchesGen_openBranch_initial_mem`, and `modalOpenBranchS5_countermodel` above --
+with `hintikka_congr` (`S5Simplification.lean`) bridging the two rules' Hintikka sets and
+`extractModelS5_equiv` discharging `s5FC` for free. Mirrors `modalTableauB_complete`. -/
+theorem modalTableauS5_complete (φ₀ : Proposition Atom) (h : s5Valid φ₀) :
+    modalTableauS5 φ₀ = .closed := by
+  cases htab : modalTableauS5 φ₀ with
+  | closed => rfl
+  | openBranch b a =>
+    exfalso
+    have h' : modalExpandBranchesGen modalApplyOneS5w
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
+    have hH5w : modalHintikkaSetGen modalApplyOneS5w b a :=
+      modalExpandBranchesHintikka modalApplyOneS5w modalApplyOneS5w_specCore φ₀
+        (ModalLoopAuxS5w φ₀) (ModalLoopAuxS5w_stepPreserved φ₀) (ModalLoopAuxS5w_bounds φ₀)
+        (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl (modalExpMeasure_entry_le_fuel φ₀)
+        (by
+          intro i bi ei ai hib hie hia
+          match i with
+          | 0 =>
+            simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+            subst hib; subst hie; subst hia
+            exact modalLoopInvHintikkaS5w_initial φ₀
+          | n + 1 => simp at hib)
+        b a h'
+    have hH : modalHintikkaSetGen modalApplyOneS5 b a := (hintikka_congr b a).mp hH5w
+    have hSrc : accSourcesKnown b a :=
+      modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneS5w
+        modalApplyOneS5w_fresh_local (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          exact accSourcesKnown_empty _)
+        b a h'
+    have hTgt : accTargetsKnown b a :=
+      modalExpandBranchesGen_openBranch_accTargetsKnown modalApplyOneS5w
+        modalApplyOneS5w_fresh_local (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          intro w w' hedge
+          simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+          exact absurd hedge (by decide))
+        b a h'
+    have hmemInit : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+      modalExpandBranchesGen_openBranch_initial_mem modalApplyOneS5w (modalFuel φ₀)
+        (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (fun b₀ hb₀ => by
+          simp only [List.mem_singleton] at hb₀
+          subst hb₀
+          simp)
+        b a h'
+    have hFC : s5FC (extractModelS5 b a).r :=
+      ⟨⟨extractModelS5_refl b a⟩, extractModelS5_rightEuclidean b a⟩
+    exact modalOpenBranchS5_countermodel b a φ₀ hSrc hTgt hH hmemInit
+      (h WorldIndex (extractModelS5 b a) hFC 0)
+
+/-- **The modal S5 tableau decides S5-validity**: `modalTableauS5 φ₀` closes exactly when `φ₀` is
+`s5Valid`. Combines soundness (`modalTableauS5_sound`, `FrameSoundness.lean`) with completeness
+(above). Mirrors `tValid_decides`. -/
+theorem s5Valid_decides (φ₀ : Proposition Atom) :
+    modalTableauS5 φ₀ = .closed ↔ s5Valid φ₀ :=
+  ⟨modalTableauS5_sound φ₀, modalTableauS5_complete φ₀⟩
+
+/-- **S5-validity is decidable**: decide by running the modal S5 tableau and consulting
+`s5Valid_decides`. No `Fintype Atom` assumption is needed, since the tableau computation itself
+is the decision procedure. Mirrors `instDecidableTValid`. -/
+instance instDecidableS5Valid (φ₀ : Proposition Atom) : Decidable (s5Valid φ₀) :=
+  match h : modalTableauS5 φ₀ with
+  | .closed => .isTrue ((s5Valid_decides φ₀).mp h)
+  | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauS5_complete φ₀ hv] at h; cases h)
+
 end Cslib.Logic.Modal.Tableau
 
 end

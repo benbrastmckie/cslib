@@ -1,92 +1,57 @@
 {
   "status": "implemented",
-  "summary": "Phase 14 CLOSED -- the S5 capstone is delivered and the ~2,386 superseded lines are archived (MOVED, not deleted) out of the CI-built tree. Three green milestones, each committed narrowly. (14a) Re-based the shipped surface one line: modalTableauS5 now runs the witness-reuse rule (modalTableauGen modalApplyOneS5w) instead of the non-terminating modalApplyOneS5. modalTableauS5_sound's statement is UNCHANGED -- its proof is now the term-mode corollary modalTableauS5w_sound (Phase 13) via definitional unfolding. Landed modalTableauS5_complete by assembling four landed pieces at modalApplyOneS5w -- modalExpandBranchesHintikka (Phase 12 lift) at Aux := ModalLoopAuxS5w, the generic openBranch accSourcesKnown/accTargetsKnown top-loop lemmas, openBranch_initial_mem, and modalOpenBranchS5_countermodel -- with hintikka_congr (Phase 2) bridging the two rules' Hintikka sets and a fresh modalLoopInvHintikkaS5w_initial supplying the base case; the s5FC witness is (extractModelS5_refl, extractModelS5_rightEuclidean). Landed s5Valid_decides + instDecidableS5Valid mirroring instDecidableTValid. All six delivered declarations report exactly [propext, Classical.choice, Quot.sound] -- no sorryAx. (14b) Archived five clusters to archive/*.lean with per-block provenance headers, ahead of ANY removal; each block verified present and VERBATIM-complete at its archive path before deletion. (14c) Removed the archived blocks from S5Simplification.lean (4736 -> ~2490 lines). CRITICAL CATCH: modalApplyOneS5_knownWorlds_step was inside a removal region but re-verification BY NAME found a live cross-file consumer (FrameSoundness's S5 soundness bridge, which failed to build) -- it was RESTORED to the live tree and the archive amended with a correction note. Landed the S5 regression corpus and Gore1999/Blackburn2001 BibKey docstrings.",
-  "phases_completed": 15,
+  "summary": "Phase 15 GATE PASSED (go). Scratch-only feasibility probe (no production Lean) confirms all three load-bearing claims of the Euclidean route (Phases 16-23) before any file is written to Cslib/. Probe probes/phase15-euclidean-route-gate.lean runs under `lake env lean` at exit 0, zero sorry, and all six vetted theorems report only the standard [propext, Classical.choice, Quot.sound] axiom subset (four of them depend on NO axioms). (a) CONFIRMED: EuclGen -- the inductive least right-Euclidean closure (base/eucl) -- is right-Euclidean directly via the `eucl` constructor (instRightEuclideanEuclGen), embeds r (euclGen_mono), and satisfies the least property `[RightEuclidean s] -> (forall a b, r a b -> s a b) -> EuclGen r a b -> s a b` by induction (euclGen_least, no axioms). Warrant recorded: Euclideanness is closed under arbitrary intersection and the full relation is Euclidean, so the least Euclidean relation containing r exists; EuclGen is its inductive realization. (b) CONFIRMED: rooted normal form R(w) x R(w) subset R is literally `rightEuclidean` at the root (rooted_cluster_universal, no axioms); the landed RightEuclidean.equiv_cod : IsEquiv (cod r) r is consumed directly (rooted_cluster_isEquiv) -- the single biggest cost reducer applies as claimed. (c) CONFIRMED: symmetric + right-Euclidean is a PER (kb5_per derives IsTrans via the landed symm_rightEuclidean_iff_trans); the dichotomy's non-trivial branch (rooted KB5 frame with any root successor is a full cluster containing the root) is witnessed by kb5_root_reflexive_if_has_succ, the alternative being the edge-isolated root that makes box-p -> p fail at KB5. Rule shape: mint-arm shape claim is structural (backed by EuclGen.eucl giving right-Euclideanness directly, so the S5w termination machinery ports). File-placement decision for Phase 17: the normal-form structure theorems are relation-generic (need only RightEuclidean/cod/Std.Symm) -- land them beside EuclGen in Cslib/Foundations/Relation/Euclidean.lean, NOT a new tableau-local file. NOTE: this gate is NOT task completion -- Phases 16-23 (the actual Euclidean/5/KB5 construction) remain unwritten.",
+  "phases_completed": 16,
   "phases_total": 24,
-  "phases_note": "15 = numbered phases 0-14 inclusive. The plan carries an extra [COMPLETED] marker for the audit-inserted Phase 11.5, which is not part of the 24-phase (0-23) numbering. Phases 15-23 (the Euclidean / 5 / KB5 chain) remain. The S5 deliverable (soundness + completeness + decidability) is now COMPLETE and green; per the plan's DAG the 5/KB5 chain sits strictly after Phase 14, so a stall there does not endanger the S5 result already landed.",
+  "phases_note": "16 = numbered phases 0-15 inclusive. The plan also carries an [COMPLETED] marker for the audit-inserted Phase 11.5, not part of the 24-phase (0-23) numbering. Phases 16-23 (the Euclidean/5/KB5 chain) remain unwritten. Phase 15 was a scratch GATE only -- it wrote NO production Lean, only the scratch probe and the plan verdict; the S5 deliverable (Phases 0-14) remains complete, green, and committed.",
   "blockers": [],
-  "plan_deviations": [
-    {
-      "task": "Phase 14: Land a #eval-backed regression test in CslibTests (the 3,963-formula corpus).",
-      "disposition": "altered -- raised, not silent",
-      "finding": "Hosted the runtime corpus in specs/515_.../probes/s5-decision-regression.lean (run via `lake env lean`), NOT CslibTests, and as a curated 14-check corpus (S5 axioms K/T/4/5/B/dualT/box-and/weakening all close; non-theorems incl. S5's named falsifier ◇p→p all stay open) rather than the 3,963-formula generator. Root cause is environmental and hard: every file reachable from the CslibTests `module` barrel must itself be a `module`, and the Cslib lean_lib is NOT built with precompileModules := true, so a module-mode #guard/#eval of the tableau fails to link native symbols ('Could not find native implementation of external declaration modalFuel._redArg'). Kernel `decide` also does not reduce the tableau (well-founded recursion / Finset). The non-module probe executes cleanly (exit 0, all 14 checks pass). The 3,963-formula generator was an ephemeral research scratch, never landed as a reusable artifact, so it could not be re-run verbatim. Correctness is established by proof anyway (modalTableauS5_sound / modalTableauS5_complete); per plan risk R5 the corpus is only the safety net.",
-      "raised_not_silent": true
+  "gate_verdict": {
+    "phase": 15,
+    "verdict": "PASSED",
+    "decision": "go -- proceed to Phase 16 (Relation.EuclGen)",
+    "probe": "specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
+    "run_command": "lake env lean specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
+    "run_result": "exit 0; zero sorry; #print axioms: instRightEuclideanEuclGen/euclGen_least/rooted_cluster_universal/kb5_root_reflexive_if_has_succ = NO axioms; rooted_cluster_isEquiv = [Classical.choice]; kb5_per = [propext, Quot.sound]",
+    "claims": {
+      "a_closure_exists_inductive": "CONFIRMED -- EuclGen inductive + RightEuclidean instance + euclGen_least least property, no axioms",
+      "b_rooted_normal_form": "CONFIRMED -- R(w)xR(w) subset R is rightEuclidean at root; equiv_cod consumed directly",
+      "c_kb5_shape": "CONFIRMED -- symmetric+Euclidean is a PER; root-successor => reflexive-at-root dichotomy witnessed",
+      "rule_shape": "CONFIRMED (structural) -- EuclGen.eucl gives right-Euclideanness directly; S5w termination machinery ports"
     },
-    {
-      "task": "Phase 14 archival: line-range-defined removal set.",
-      "disposition": "altered -- resolved by NAME as the plan instructed",
-      "finding": "Plan line citations were stale (file was 4736 lines, not ~3000). Every block was resolved by declaration NAME. This surfaced one genuine miss: modalApplyOneS5_knownWorlds_step sat inside a removal line-range but is LIVE (consumed by FrameSoundness). It was NOT archived (restored to the live tree); the archive file records the correction. Also, three structural lemmas inside the retired region's span (modalSubfmls_trans_S5, modalSubfmls_self_mem_S5, mem_boxPositivesOf_S5) were resolved to be LIVE and kept, exactly as the plan's KEEP-IN-LIVE-TREE guidance anticipated for the two refutation siblings.",
-      "raised_not_silent": true
-    }
-  ],
+    "phase17_file_placement": "Relation-generic structure theorems -> land beside EuclGen in Cslib/Foundations/Relation/Euclidean.lean (NOT a new tableau-local file).",
+    "line_estimate_16_23": "EuclGen + 3 structure theorems ~40 additive lines (Phases 16-17); Phases 18-23 (root-aware modalApplyOneFive/modalApplyOneKb5, extractModelFive, soundness/completeness/decidability) are the genuinely new surface, termination half ports from Phases 1-7."
+  },
   "verification": {
     "verification_passed": true,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
+    "mode": "scratch_gate_no_production_lean",
     "sorry_count": 0,
-    "vacuous_count": 0,
     "axiom_count": 0,
-    "lean_verify": "modalTableauS5_sound, modalTableauS5w_sound, modalTableauS5_complete, s5Valid_decides, instDecidableS5Valid, modalLoopInvHintikkaS5w_initial all report exactly [propext, Classical.choice, Quot.sound] via #print axioms (lake env lean, authoritative); no sorryAx. (Note: the lean-lsp lean_verify tool reported a spurious stale sorryAx for modalTableauS5_sound that #print axioms contradicts.)",
-    "debt_gate": "PASSED -- repo-wide sorry 131 -> 131 and axiom 28 -> 28, identical to the pre-phase baseline. Zero sorry / zero axiom in all four modified Cslib files (the only 'sorry' string matches are prose: 'sorry-free').",
-    "statement_unchanged_gate": "PASSED -- modalTableauS5_sound's statement is byte-identical; only its proof body changed (now `:= modalTableauS5w_sound φ h`). No delivered statement was weakened.",
-    "archival_gate": "PASSED -- ~2,386 lines MOVED to archive/*.lean with provenance headers; each block verified VERBATIM-complete at its archive path BEFORE removal; modalApplyOneS5_rankStep_not_dischargeable + the Phase 3 R7 refutation siblings kept in the live tree per instruction; modalApplyOneS5_knownWorlds_step caught as live and restored.",
-    "regression_corpus": "specs/515_.../probes/s5-decision-regression.lean: 14/14 #guard checks pass under `lake env lean` (exit 0).",
-    "ci_steps": {
-      "lake build": "PASS (3239 jobs)",
-      "lake exe checkInitImports": "PASS (exit 0)",
-      "lake exe lint-style": "PASS (exit 0)",
-      "lake lint": "1 error (PrimeExclusion.lean:324) -- known pre-existing out-of-scope baseline; ZERO findings and ZERO of the 7 prevention categories in the four modified files",
-      "lake test": "PASS (exit 0; the Minimal/Completeness sorry warning is the pre-existing baseline, not a modified file)",
-      "lake exe mk_all --module": "PASS (No update necessary)",
-      "lake shake --add-public --keep-implied --keep-prefix": "exit 1 repo-wide pre-existing baseline; ZERO new import-removal findings on the four modified files (diffed against the Phase-13 baseline)"
-    },
-    "known_baseline_failures": [
-      "lake lint: 1 error in PrimeExclusion.lean:324 -- pre-existing, out of scope",
-      "lake shake: exit 1 repo-wide, pre-existing (88 files; 62 told to remove import Cslib.Init which checkInitImports mandates)"
-    ]
+    "note": "Phase 15 writes NO production Lean -- no Cslib/ file touched, so no CI signal moves. The probe under specs/** reaches a definite CONFIRM verdict (exit 0, zero sorry) rather than leaving sorries as the answer. Pre-existing CI baselines (PrimeExclusion.lean lint error; lake shake repo-wide exit 1) are unchanged and out of scope for this phase."
   },
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/archive/01_universe-s5-worldbound.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/archive/02_unkeyed-guard-s5g.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/archive/03_keyed-guard-stepper.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/archive/04_s5loopinv-preservation.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/archive/05_birthkey-pigeonhole-worldbound.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/probes/s5-decision-regression.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
     "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md"
   ],
-  "declarations_landed": [
-    "modalTableauS5 -- re-based onto modalApplyOneS5w (one-line def change)",
-    "modalTableauS5_complete -- S5-completeness of the tableau (FrameCompleteness.lean)",
-    "s5Valid_decides -- closed iff s5Valid (FrameCompleteness.lean)",
-    "instDecidableS5Valid -- Decidable (s5Valid φ) (FrameCompleteness.lean)",
-    "modalLoopInvHintikkaS5w_initial -- S5w initial-configuration loop invariant (CompletenessLoop.lean)",
-    "modalTableauS5_sound -- statement unchanged; proof now = modalTableauS5w_sound (FrameSoundness.lean)"
-  ],
   "commits": [
-    "af593180 task 515 phase 14a: re-base modalTableauS5 on the witness rule, land S5 completeness + decidability",
-    "e8cb6a8a task 515 phase 14b: archive ~2,386 superseded S5 lines (MOVE, not delete)",
-    "27b921c0 task 515 phase 14c: remove archived S5 lines from live tree, land regression corpus + BibKeys"
+    "a6cfb2e3 task 515 phase 15: GATE PASSED -- Euclidean route feasibility probe"
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_phase": 15,
-    "resume_rationale": "Phase 14 is closed and the entire S5 chain (soundness + completeness + decidability, plus archival) is green and committed. The task is 15/24. Phase 15 opens the Euclidean / 5 / KB5 chain (Phases 15-23), which sits strictly after Phase 14 in the DAG and depends on the S5 cluster machinery this file's neighbours build. Note the frame-class inclusion obstruction already proven in probes/five-s5-separation.lean: 5/KB5 is NOT reachable via the S5 tableau route; it needs a dedicated Euclidean route (modalTableauFive/modalTableauKb5) over a new Relation.EuclGen least-closure operator in Cslib/Foundations/Relation/Euclidean.lean plus a root-aware rule.",
+    "resume_phase": 16,
+    "resume_rationale": "Phase 15 GATE passed cleanly: the Euclidean route is feasible and all three load-bearing claims are confirmed sorry-free in scratch. The task is 16/24. Phase 16 lands Relation.EuclGen (the least-Euclidean closure operator) in Cslib/Foundations/Relation/Euclidean.lean as purely additive content -- the exact inductive from the probe (EuclGen base/eucl), plus the RightEuclidean instance, EuclGen.mono, and EuclGen.least. The probe's four (a)-claim theorems are drop-in: instRightEuclideanEuclGen, euclGen_mono, euclGen_least are already proved sorry-free and axiom-clean at the exact signatures Phase 16 needs.",
     "next_phase_notes": [
-      "The S5 deliverable is complete; per the plan's R9, a stall on Phases 15-23 lands the S5 chain green and the 5/KB5 chain [BLOCKED] -- a real partial delivery, not a total loss.",
-      "Plan line citations remain STALE across the board (every phase 8-14 independently confirmed this). Resolve declarations by NAME via lean_local_search / grep, never by trusting plan line numbers. S5Simplification.lean is now ~2490 lines (was 4736).",
-      "The archival established the archive/ convention for this task dir: five archive/*.lean files with provenance headers. If Phases 15-23 retire further code, follow the same convention (verify verbatim-complete at archive path BEFORE removing; check every removal-region declaration for cross-file consumers BY NAME -- phase 14 caught modalApplyOneS5_knownWorlds_step this way).",
-      "CslibTests cannot host a runtime #eval/#guard test of the tableau (module system + no precompileModules on the Cslib lib). Use probes/*.lean run via `lake env lean` for any further computational regression corpus, per phase 14's precedent.",
-      "instDecidableS5Valid is now available -- Euclidean-route decidability instances can mirror it (and instDecidableTValid) at the new fiveValid/kb5Valid predicates."
+      "REUSE THE PROBE VERBATIM: probes/phase15-euclidean-route-gate.lean already contains sorry-free, axiom-clean proofs of the Phase-16 EuclGen API (instRightEuclideanEuclGen, euclGen_mono, euclGen_least) AND the Phase-17 structure theorems (rooted_cluster_universal, rooted_cluster_isEquiv, kb5_per, kb5_root_reflexive_if_has_succ). Phases 16-17 are largely a lift of this probe into Cslib/Foundations/Relation/Euclidean.lean with docstrings + BibKey provenance, NOT a re-derivation.",
+      "Phase 16 is R11-purely-additive: touch NO existing declaration in Euclidean.lean. If the addition perturbs an existing consumer, relocate EuclGen local to the Tableau dir (a relocation, not a [BLOCKED]).",
+      "Phase 15 decided Phase 17's open file-placement question: the structure theorems are relation-generic -> land in Euclidean.lean, not a new tableau file.",
+      "Std.Symm's accessor is `Std.Symm.symm a b : r a b -> r b a` (explicit a b), NOT `Std.symm`. RightEuclidean.rightEuclidean has implicit a b c. cod is Relation.cod (mem_cod : b in cod r <-> exists a, r a b).",
+      "Plan line citations remain STALE across the board. Resolve declarations by NAME (lean_local_search / grep), never by plan line number. Euclidean.lean's landed API used here: RightEuclidean.rightEuclidean, RightEuclidean.equiv_cod (:~124), RightEuclidean.refl_cod (:~45), symm_rightEuclidean_iff_trans (:~236).",
+      "The S5 deliverable (Phases 0-14) is complete/green/committed and does NOT depend on the Euclidean chain -- per plan R9, a stall on 16-23 lands S5 green and the 5/KB5 chain [BLOCKED], a real partial delivery."
     ],
     "environment_notes": [
       "Mathlib cache is warm; lake exe cache get is a no-op on this branch.",
       "Concurrent sessions are active: scope git add narrowly to specific files, never git add -A.",
-      "Full lake build takes several minutes; scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` is the fast check for the S5 chain.",
-      "CI baselines to diff against (NOT regressions): lake lint has 1 pre-existing error (PrimeExclusion.lean:324); lake shake exits 1 repo-wide (88 files)."
+      "CI baselines to diff against (NOT regressions): lake lint has 1 pre-existing error (PrimeExclusion.lean:324); lake shake exits 1 repo-wide.",
+      "For scoped checks on the Foundations tree once Phase 16 lands: `lake build Cslib.Foundations.Relation.Euclidean`."
     ]
   },
   "metadata": {

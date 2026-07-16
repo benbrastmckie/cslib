@@ -125,6 +125,43 @@ theorem equiv_cod : IsEquiv (cod r) r := rightTotal_equiv rightTotal_cod
 
 end RightEuclidean
 
+/-- The least right-Euclidean relation containing `r`, defined inductively.
+
+This is the right-Euclidean member of the closure-operator family typified by `Relation.ReflGen`,
+`Relation.SymmGen`, and `Relation.EqvGen` in the sibling module
+`Cslib/Foundations/Relation/Confluence.lean` (cf. `SymmGen.to_eqvGen` and the closure
+characterization `reflTransGen_compRel : ReflTransGen (SymmGen r) = EqvGen r`): an inductive whose
+constructors are exactly the generating edges (`base`) together with the closure property being
+imposed (`eucl`, the right-Euclidean law).
+
+Semantically `EuclGen r` is the least right-Euclidean relation containing `r`. Such a least
+relation exists because right-Euclideanness is closed under arbitrary intersection and the full
+relation is right-Euclidean; hence the intersection of all right-Euclidean relations containing
+`r` is itself right-Euclidean and contains `r`. `EuclGen.least` is exactly that characterization
+in usable form. -/
+inductive EuclGen (r : α → α → Prop) : α → α → Prop
+  | base {a b} : r a b → EuclGen r a b
+  | eucl {a b c} : EuclGen r a b → EuclGen r a c → EuclGen r b c
+
+/-- `EuclGen r` is right-Euclidean -- directly by its `eucl` constructor. -/
+instance : RightEuclidean (EuclGen r) where
+  rightEuclidean := EuclGen.eucl
+
+/-- `r` embeds into its right-Euclidean closure `EuclGen r`. -/
+theorem EuclGen.mono {a b : α} (h : r a b) : EuclGen r a b := EuclGen.base h
+
+/-- `EuclGen r` is the *least* right-Euclidean relation containing `r`: it lies below every
+right-Euclidean relation `s` that contains `r`. This is the intersection characterization of the
+closure made usable -- given any right-Euclidean `s` with `r ≤ s`, induction on the closure shows
+`EuclGen r ≤ s`. -/
+theorem EuclGen.least {s : α → α → Prop} {a b : α} (hs : RightEuclidean s)
+    (hle : ∀ a b, r a b → s a b) : EuclGen r a b → s a b := by
+  haveI := hs
+  intro h
+  induction h with
+  | base hr => exact hle _ _ hr
+  | eucl _ _ ihab ihac => exact RightEuclidean.rightEuclidean ihab ihac
+
 namespace LeftEuclidean
 
 variable [LeftEuclidean r]

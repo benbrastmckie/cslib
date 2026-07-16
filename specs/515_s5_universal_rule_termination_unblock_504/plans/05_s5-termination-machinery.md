@@ -1766,7 +1766,7 @@ A no-go means *this* decomposition is wrong, not that 5/KB5 is unreachable.
 
 ---
 
-### Phase 16: `Relation.EuclGen` -- the least-Euclidean closure operator [NOT STARTED]
+### Phase 16: `Relation.EuclGen` -- the least-Euclidean closure operator [COMPLETED]
 
 **Goal**: Land the closure operator whose absence v3 mistook for a mathematical obstruction. **This
 is the "bespoke construction" `FrameCompleteness.lean:583-585` and `S5Simplification.lean:3029-3034`

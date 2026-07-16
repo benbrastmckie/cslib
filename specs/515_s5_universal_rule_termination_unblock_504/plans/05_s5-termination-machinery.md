@@ -785,7 +785,7 @@ correct and expected).
 
 ---
 
-### Phase 4: The linear budget arithmetic [NOT STARTED]
+### Phase 4: The linear budget arithmetic [COMPLETED]
 
 **Goal**: Land the arithmetic that lets `modalUniverse` / `modalWorldBound` / `modalExpMeasure` /
 `modalExpMeasure_entry_le_fuel` / `modalFuel` be reused **verbatim at K's own universe**, and lets
@@ -793,16 +793,24 @@ correct and expected).
 retires the `(universe, worldBound)`-parametrization blocker. **Independent of the rule.**
 
 **Tasks**:
-- [ ] Land `def modalOps : Proposition Atom → Nat` -- **modal-operator OCCURRENCES**.
-- [ ] Land `lemma modalOps_le_complexity (φ) : modalOps φ ≤ modalComplexity φ`.
-- [ ] Land `lemma modalOps_lt_worldBound (φ) : modalOps φ < modalWorldBound φ`.
+- [x] Land `def modalOps : Proposition Atom → Nat` -- **modal-operator OCCURRENCES**.
+- [x] Land `lemma modalOps_le_complexity (φ) : modalOps φ ≤ modalComplexity φ`.
+- [x] Land `lemma modalOps_lt_worldBound (φ) : modalOps φ < modalWorldBound φ`.
       **PROVED sorry-free in research** (`#print axioms` = `[propext, Classical.choice, Quot.sound]`),
       via `modalWorldBound φ = (2c+1)^(c+1) ≥ (2c+1)^1 = 2c+1 > c ≥ modalOps φ`.
       **The `c = 0` case is the tight one** (`0 < 1 = 1^1`) -- and the *naive* `2 * |modalSubfmls φ|`
       budget **fails** there (2 > 1). **Counting modal-operator occurrences rather than subformulas
       is load-bearing, not cosmetic.**
-- [ ] Land `def mintTags (φ₀) : Finset (Sign × Proposition Atom)` -- `◇ψ ↦ (pos,ψ)`; `□ψ ↦ (neg,ψ)`.
-- [ ] Land `lemma mintTags_card_le_modalOps (φ₀) : (mintTags φ₀).card ≤ modalOps φ₀`.
+- [x] Land `def mintTags (φ₀) : Finset (Sign × Proposition Atom)` -- `◇ψ ↦ (pos,ψ)`; `□ψ ↦ (neg,ψ)`.
+- [x] Land `lemma mintTags_card_le_modalOps (φ₀) : (mintTags φ₀).card ≤ modalOps φ₀`.
+
+**Completion note**: All four declarations landed verbatim in `S5Simplification.lean`
+immediately after `hintikka_congr`. `lean_verify` on `modalOps_lt_worldBound` ->
+`[propext, Quot.sound]` (leaner than the research-session figure -- no `Classical.choice`
+needed; the proof only uses `Nat.pow_le_pow_right`/`omega`, no classical case split).
+`mintTags_card_le_modalOps` -> `[propext, Classical.choice, Quot.sound]` (Finset lemmas pull in
+`Classical.choice`), matching expectations for `Finset`-valued reasoning. `lake build` scoped
+green (848/848); `checkInitImports` and `lint-style` clean; zero new sorry.
 
 **Timing**: 1.5 hours
 

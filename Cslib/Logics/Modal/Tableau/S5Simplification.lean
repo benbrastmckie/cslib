@@ -694,6 +694,94 @@ theorem hintikka_congr (b : List (SignedFormula (Proposition Atom) WorldIndex))
                     rcases hs : sf.sign with _ | _ <;>
                       rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;> simp_all [modalApplyOneS5w]
 
+/-! ## The Linear Budget Arithmetic (Termination Machinery Plan v5, Phase 4)
+
+Lets `modalUniverse` / `modalWorldBound` / `modalExpMeasure` / `modalExpMeasure_entry_le_fuel` /
+`modalFuel` (`FmpMeasure.lean`/`Saturation.lean`) be reused **verbatim at K's own universe**, and
+lets `modalWorldBoundS5`/`modalUniverseS5` be **archived** (Phase 14) rather than parametrized.
+This single-handedly retires the `(universe, worldBound)`-parametrization blocker: the S5
+termination chain retargets at K's own `modalUniverse φ` / `modalWorldBound φ`, over which
+`modalExpMeasure_entry_le_fuel` already applies verbatim. -/
+
+/-- Modal-operator OCCURRENCE count: unlike `modalSubfmls`'s length or `modalComplexity`, this
+counts only `box`/`diamond` nodes (not `imp`/`and`/`or`), since those are exactly the shapes that
+mint tags (`mintTags`, below). -/
+def modalOps : Proposition Atom → Nat
+  | .atom _ => 0
+  | .bot => 0
+  | .imp φ ψ => modalOps φ + modalOps ψ
+  | .and φ ψ => modalOps φ + modalOps ψ
+  | .or φ ψ => modalOps φ + modalOps ψ
+  | .box φ => 1 + modalOps φ
+  | .diamond φ => 1 + modalOps φ
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `modalOps` is bounded by `modalComplexity` (which additionally charges 1 for each
+`imp`/`and`/`or` node that `modalOps` charges nothing for). -/
+lemma modalOps_le_complexity (φ : Proposition Atom) : modalOps φ ≤ modalComplexity φ := by
+  induction φ with
+  | atom p => simp [modalOps]
+  | bot => simp [modalOps]
+  | imp a b iha ihb => simp only [modalOps, modalComplexity_imp]; omega
+  | and a b iha ihb => simp only [modalOps, modalComplexity_and]; omega
+  | or a b iha ihb => simp only [modalOps, modalComplexity_or]; omega
+  | box a iha => simp only [modalOps, modalComplexity_box]; omega
+  | diamond a iha => simp only [modalOps, modalComplexity_diamond]; omega
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The load-bearing arithmetic fact: `modalOps φ < modalWorldBound φ`, where
+`modalWorldBound φ = (2c+1)^(c+1)` with `c := modalComplexity φ`. Since `modalOps φ ≤ c`
+(`modalOps_le_complexity`) and `(2c+1)^(c+1) ≥ (2c+1)^1 = 2c+1 > c` for every `c` (monotone in
+the exponent, base `≥ 1`), the naive `2 * |modalSubfmls φ|` budget is NOT what makes this work --
+that budget fails at `c = 0` (`2 > 1`). Counting modal-operator OCCURRENCES rather than
+subformula-list length is load-bearing, not cosmetic: this is the tight case (`0 < 1 = 1^1`). -/
+lemma modalOps_lt_worldBound (φ : Proposition Atom) : modalOps φ < modalWorldBound φ := by
+  have h1 : modalOps φ ≤ modalComplexity φ := modalOps_le_complexity φ
+  have h2 : (2 * modalComplexity φ + 1) ≤ modalWorldBound φ := by
+    unfold modalWorldBound
+    calc (2 * modalComplexity φ + 1) = (2 * modalComplexity φ + 1) ^ 1 := by ring
+      _ ≤ (2 * modalComplexity φ + 1) ^ (modalComplexity φ + 1) :=
+          Nat.pow_le_pow_right (by omega) (by omega)
+  omega
+
+/-- The mint-tag codomain: for each `box φ`/`diamond φ` node of `φ₀`'s syntax tree, the tag a
+mint at that node would consume -- `◇ψ ↦ (pos, ψ)` (the `diamondPos` mint witness), `□ψ ↦
+(neg, ψ)` (the `boxNeg` mint witness). Used by Phase 6/7's `usedTags`-cardinality counting
+argument: each mint permanently consumes a distinct tag from this finite set, so world creation
+is bounded by `(mintTags φ₀).card`, not by any exponential pigeonhole. -/
+def mintTags : Proposition Atom → Finset (Sign × Proposition Atom)
+  | .atom _ => ∅
+  | .bot => ∅
+  | .imp φ ψ => mintTags φ ∪ mintTags ψ
+  | .and φ ψ => mintTags φ ∪ mintTags ψ
+  | .or φ ψ => mintTags φ ∪ mintTags ψ
+  | .box φ => insert (Sign.neg, φ) (mintTags φ)
+  | .diamond φ => insert (Sign.pos, φ) (mintTags φ)
+
+omit [Hashable Atom] in
+/-- `mintTags φ₀`'s cardinality is bounded by `modalOps φ₀`: each `box`/`diamond` node
+contributes at most one new tag (`Finset.card_insert_le`), and `imp`/`and`/`or` nodes contribute
+none directly (`Finset.card_union_le`), mirroring `modalOps`'s own recursive shape exactly. -/
+lemma mintTags_card_le_modalOps (φ : Proposition Atom) : (mintTags φ).card ≤ modalOps φ := by
+  induction φ with
+  | atom p => simp [mintTags, modalOps]
+  | bot => simp [mintTags, modalOps]
+  | imp a b iha ihb =>
+    simp only [mintTags, modalOps]
+    exact le_trans (Finset.card_union_le _ _) (by omega)
+  | and a b iha ihb =>
+    simp only [mintTags, modalOps]
+    exact le_trans (Finset.card_union_le _ _) (by omega)
+  | or a b iha ihb =>
+    simp only [mintTags, modalOps]
+    exact le_trans (Finset.card_union_le _ _) (by omega)
+  | box a iha =>
+    simp only [mintTags, modalOps]
+    exact le_trans (Finset.card_insert_le _ _) (by omega)
+  | diamond a iha =>
+    simp only [mintTags, modalOps]
+    exact le_trans (Finset.card_insert_le _ _) (by omega)
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
 (available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which

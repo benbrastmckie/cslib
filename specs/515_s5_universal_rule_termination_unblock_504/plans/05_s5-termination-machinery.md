@@ -1480,41 +1480,60 @@ No `sorry`. Do not weaken the K-facing statement to make the gate pass -- that d
 
 ---
 
-### Phase 13: Soundness re-proof -- `modalTableauS5_sound` [IN PROGRESS]
+### Phase 13: Soundness re-proof -- `modalTableauS5_sound` [COMPLETED]
 
 **Goal**: Re-prove S5 soundness against the witness rule. **Statement unchanged.** This is R1, the
 top risk, and the largest un-costed item of the prior effort. **Forks after Phase 8's probe and runs
 parallel to the 9→12 lift chain.**
 
 **Tasks**:
-- [ ] Land `theorem modalTableauS5_sound (φ) (h : modalTableauS5 φ = .closed) : s5Valid φ` --
-      **STATEMENT UNCHANGED** from `FrameSoundness.lean:2379`.
-- [ ] The new case is the reuse edge `w→w'` to an **existing** `w'` carrying `⟨s,φ,w'⟩`.
+- [x] Land `theorem modalTableauS5_sound (φ) (h : modalTableauS5 φ = .closed) : s5Valid φ` --
+      **STATEMENT UNCHANGED**. Verified byte-identical against `git show 4e6b9a98`; the only diff
+      is the proof delimiter (`:= by` -> `:=`), since it is now a term-mode corollary of the new
+      lift `modalTableauS5Gen_sound`. The witness-rule terminus `modalTableauS5w_sound`
+      (over `modalTableauGen modalApplyOneS5w φ`) is delivered alongside it, so Phase 14's
+      one-line re-base carries the capstone over by definitional unfolding.
+- [x] The new case is the reuse edge `w→w'` to an **existing** `w'` carrying `⟨s,φ,w'⟩`.
       Structurally **easier** than the landed mint case: the world-assignment `f` is **not extended**
       (no mint), so the only obligation is `m.r (f w) (f w')` for an existing `w'`.
-- [ ] **The decisive reuse**: `accReachableInv_related_s5` (`FrameSoundness.lean:1381`) -- **landed** --
+- [x] **The decisive reuse**: `accReachableInv_related_s5` -- **landed** --
       states that two known worlds, both reachable from 0, are related in **any** model whose relation
       is an equivalence relation. That is exactly the obligation. Consume the Phase 8 probe's findings
       verbatim.
-- [ ] **Known breakage**: restate `modalApplyOneS5_snd_eq` (`S5Simplification.lean:340-351`,
+- [x] **Known breakage**: *(deviation: skipped -- premise factually incorrect; no work exists)*
+      `modalApplyOneS5_snd_eq` does **not** become false: it is a statement about
+      `modalApplyOneS5`, which the witness rule does not modify. It remains true and all 14 of
+      its consumers still compile untouched. What the plan anticipated is that its *`w`-analogue*
+      would be false -- and indeed no `modalApplyOneS5w_snd_eq` was ever stated, because the
+      landed `modalApplyOneS5w_fresh_local` proves the needed dichotomy directly: the reuse arm
+      satisfies the dichotomy's **right** disjunct (`.linear (wsf :: rest)` with `rest := []`,
+      edge `sf.label → wsf.label`), never the `snd = acc` left disjunct. So there was no
+      restatement to make and no consumer to fix. `S5Simplification.lean` was **not modified**.
+      Original task text: restate `modalApplyOneS5_snd_eq` (`S5Simplification.lean:340-351`,
       *"accessibility output is unconditionally identical to K's"*) -- it becomes **false** under the
       witness rule. Use Phase 8's `lean_references` enumeration (R4) to fix each real consumer.
       `modalApplyOneS5_fresh_local` (`FrameSoundness.lean:~1326`) stays reusable -- the witness rule
       is **defeq** to `modalApplyOneS5` on all 12 non-mint arms.
-- [ ] Reuse the landed `S5SoundInv`, `modalStepBranchS5_preserves_satIn`,
+- [x] Reuse the landed `S5SoundInv`, `modalStepBranchS5_preserves_satIn`,
       `modalExpandBranchesS5_closed_unsatIn`, `modalS5BoxAll_soundIn`, `modalS5DiaNegAll_soundIn`,
       `accReachableInv` (+`_initial`), `modalStepBranchS5_preserves_accReachableInv`,
       `reachable_imp_related_s5` (all `FrameSoundness.lean`, landed CI-green by v2's Phase 7)
       wherever the witness rule is defeq to `modalApplyOneS5`.
-- [ ] **KILL CONDITION**: if the re-proof exceeds **~400 lines**, stop and re-litigate the fork
-      (fallback 2).
+- [x] **KILL CONDITION NOT TRIGGERED**: re-proof measured at **+282/-47 = 235 net lines** in a
+      single file, against the ~400 budget. The saving came from lifting the three landed S5
+      soundness theorems over an abstract rule constrained by a new per-call contract
+      `S5SoundSpec` (agree-with-`modalApplyOneS5` **or** fire a witness reuse), rather than
+      duplicating them: the reuse arm itself is ~20 lines, and every original S5 statement
+      returns as a free corollary at `Or.inl rfl`. Same architecture as Phase 12's parametric
+      lift + regression corollary.
 
 **Timing**: 3 hours
 
 **Depends on**: 8 (and 1)
 
-**Files to modify**: `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`,
-`Cslib/Logics/Modal/Tableau/S5Simplification.lean` (restating `modalApplyOneS5_snd_eq`)
+**Files modified**: `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` **only**.
+`S5Simplification.lean` was NOT modified -- the `modalApplyOneS5_snd_eq` restatement it was
+predicted to need turned out to be moot (see the Known-breakage task above).
 
 **Verification**: full CI green; `lean_verify` on `modalTableauS5_sound` (expect
 `propext`/`Classical.choice`/`Quot.sound` only); **zero edits to any K/T/B/S4 declaration**.

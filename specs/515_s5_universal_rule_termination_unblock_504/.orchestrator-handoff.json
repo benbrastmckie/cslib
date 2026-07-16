@@ -1,36 +1,40 @@
 {
   "status": "partial",
-  "summary": "Phase 8 partial: the S5 truth lemma over the universal relation (modalTruthLemmaS5 / modalOpenBranchS5_countermodel) and the termination chain's world-bound capstone (S5LoopInv.worldBound) landed sorry-free and CI-green, plus a spec->freshLocal generalization unlocking accSourcesKnown for S5. The spec-free Hintikka lift is [BLOCKED] with an exact open goal; Phase 9 transitively [BLOCKED]. 7/9 phases complete. Zero sorry, zero new axioms.",
+  "summary": "Plan v5 (24 phases, superseding the v2 handoff below whose phase numbers do NOT map onto v5). Phases 0-6 landed sorry-free and CI-green, each committed incrementally: the Phase 0 kill test (tag closure under the neg encoding), the witness-reuse rule modalApplyOneS5w + free bridges (Phase 1), the Hintikka congruence bridge hintikka_congr (Phase 2), the R7 fuel-domination refutation as decide-backed theorems plus three corrected docstrings (Phase 3), the linear budget arithmetic modalOps/mintTags (Phase 4), the generalized accTargetsKnown top-loop propagation (Phase 5), and the tag invariant S5wTagInv/usedTags plus mint-tag lemmas (Phase 6). Phase 7 (the counting crux -- the load-bearing new proof binding modalMaxWorld to usedTags.card) was analyzed but not attempted: see blockers for a documented signature-completeness finding that should inform the next dispatch. Zero sorry, zero new axioms across all landed work; full project lake build green (3239/3239) as of the Phase 6 commit.",
   "phases_completed": 7,
-  "phases_total": 9,
+  "phases_total": 24,
   "sorry_inventory": [],
   "blockers": [
     {
-      "phase": 8,
-      "open_goal": "⊢ modalHintikkaSetGen modalApplyOneS5 bR aR   (from: modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .openBranch bR aR)",
-      "why": "modalExpandBranchesGen_hintikka demands RuleApplicationSpec modalApplyOneS5 (proven false at rankStep) and threads rank-based ModalLoopInvGen. S5LoopInv is an invariant of the KEYED stepper, which no driver runs; it also has no Hintikka-forcing fields."
-    },
-    { "phase": 9, "open_goal": "N/A -- not attempted", "why": "Gated on modalTableauS5_complete (Phase 8 item 4)." }
+      "phase": 7,
+      "open_goal": "N/A -- not attempted this dispatch; analysis only, no Lean written for this phase",
+      "why": "Phase 7's stated theorem signature `modalStepBranchS5w_preserves_worldInv (hT : S5wTagInv φ₀ b) (hW : S5wWorldInv φ₀ b) (h : modalStepBranchGen modalApplyOneS5w b e acc = some (bs, es, acc')) : ∀ b' ∈ bs, S5wTagInv φ₀ b' ∧ S5wWorldInv φ₀ b'` appears UNDER-HYPOTHESIZED. The mint/non-mint case split works cleanly for the two mint shapes (T(diamond phi)@w / F(box phi)@w): the reuse sub-case adds no new world (edge targets an EXISTING known world) and the genuine-mint sub-case grows modalMaxWorld by exactly 1 while usedTags strictly grows (via modalApplyOneS5w_outputs_tags, landed Phase 6), which is the clean part. The problem is the NON-mint shapes: K's own boxPos (T(box phi)@w -> propagate to acc.successorsOf w) and diamondNeg (F(diamond phi)@w -> propagate to acc.successorsOf w) emit formulas at labels drawn from acc.successorsOf w, and WITHOUT accTargetsKnown b acc as an ambient invariant, nothing bounds those labels by modalMaxWorld b -- so modalMaxWorld could in principle grow at a non-mint step too, breaking the S5wWorldInv <= usedTags.card chain (which only accounts for mint-shape growth). accTargetsKnown is NOT threaded through the plan's stated two-hypothesis signature."
+    }
   ],
   "recommended_next_dispatch": [
-    "1. Cheap/mechanical: generalize modalExpandBranchesGen_openBranch_accSourcesKnown's double induction over an arbitrary step-preserved per-(branch,acc) predicate P (body is already predicate-agnostic), instantiate at accSourcesKnown AND accTargetsKnown. Closes completeness items 1-3 entirely; step-level accTargetsKnown fact already exists and is S5-ready.",
-    "2. SETTLE PLAN RISK R7 BEFORE BUILDING ANYTHING LARGE: does K's modalFuel dominate the UNGUARDED S5 expansion? If YES, the lift targets the shipped modalTableauS5 surface and the keyed-vs-unguarded mismatch dissolves. If NO, a keyed driver + its own soundness bridge is needed and should be re-planned as its own phase, not absorbed into Phase 8.",
-    "3. Only then attempt the lift (needs 5 new Hintikka-forcing S5LoopInv fields + preservation), or pivot to Strategy 2 (needs a filtration truth lemma + an atom-locality argument, since no Fintype Atom is assumed).",
-    "RECOMMENDATION: /revise the plan before the next /implement -- plan v2's Phase 8 (3h estimate) did not account for the keyed-vs-unguarded mismatch or the missing Hintikka fields, and is realistically several phases."
+    "1. Add accTargetsKnown b acc as a THIRD hypothesis (and conclusion component) to modalStepBranchS5w_preserves_worldInv -- a documented, necessary deviation from the plan's literal 2-hypothesis signature, not an optional embellishment. This is cheap to discharge: modalApplyOneS5w already satisfies the RuleApplicationSpec-style hFreshLocal dichotomy (acc unchanged, OR .linear (wsf :: rest) with acc.addEdge sf.label wsf.label) -- verify this directly (it should follow immediately from modalApplyOneS5w's definition: the reuse case emits exactly .linear [witness] with acc.addEdge sf.label witness.label, and the mint case falls through verbatim to K's own modalApplyOne, which already has this shape via modalApplyOne_fresh_local). Given that dichotomy, accTargetsKnown preservation for modalApplyOneS5w is a FREE instantiation of FmpMeasure.lean's already-generic modalStepBranch_preserves_accTargetsKnown_gen -- no new proof needed, just supply the concrete hFreshLocal witness.",
+    "2. With accTargetsKnown threaded, prove modalStepBranchS5w_preserves_worldInv by case-splitting modalStepBranchGen's single-step unfold on sf's shape: (a) the two mint shapes via modalApplyOneS5w's own match (reuse sub-case: modalMaxWorld unchanged since witnessWorldS5_mem gives w' known, hence w' <= modalMaxWorld b via a landed label_le_modalMaxWorld-style fact; usedTags monotone via usedTags_mono since b subset b'; mint sub-case: modalMaxWorld b' = modalMaxWorld b + 1 via modalNextWorld_gt-style reasoning, usedTags strictly grows via modalApplyOneS5w_outputs_tags + witnessWorldS5 = none meaning the tag was NOT already in usedTags -- needs a new lemma connecting witnessWorldS5 = none to (s,psi) not-in usedTags, likely near-trivial from the two definitions' shared use of modalKnownWorlds/b.any); (b) all other shapes via modalApplyOneS5w_eq_of_not_mint_shape (landed Phase 1) falling to modalApplyOneS5, itself either the S5 propagation arms (modalS5BoxAll_mem/modalS5DiaNegAll_mem, landed, already give x.label in modalKnownWorlds b) or K's prop rules (same-world, trivial) or K's boxPos/diamondNeg (successorsOf-bounded, NOW dischargeable via the threaded accTargetsKnown).",
+    "3. Then land modalMaxWorld_lt_worldBound_of_S5w by chaining: modalMaxWorld b <= (usedTags phi0 b).card <= (mintTags phi0).card <= modalOps phi0 < modalWorldBound phi0 (the last two steps already landed in Phase 4/6: mintTags_card_le_modalOps, modalOps_lt_worldBound; usedTags subset mintTags is immediate from usedTags' definition as a Finset.filter of mintTags).",
+    "4. If the accTargetsKnown threading resists or the case-split proves substantially larger than the phase's 2h budget, mark Phase 7 [BLOCKED] with the exact open goal per the R9 risk mitigation -- do NOT introduce a sorry or weaken S5wWorldInv's statement.",
+    "5. Phases 8 (R1 scratch gate, no .lean file edited) and 9-14 (spec split, Hintikka lift, soundness, archival) remain fully unattempted and gate the rest of the S5 chain; Phases 15-23 (the Euclidean 5/KB5 route) are independent of 0-14's internals and can proceed in parallel once Phase 14 lands, per the plan's own wave DAG."
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_phase": 8,
-    "preserved_assets": "Phases 1-7 COMPLETED and CI-green; do not redo. Cycle-9 additions: S5Simplification.lean (modalMaxWorld_lt_worldBoundS5_of_keys, S5LoopInv.worldBound); FrameCompleteness.lean (eqvGen_mem_modalKnownWorlds_iff, hintikkaS5_box_pos, hintikkaS5_diamond_neg, modalTruthLemmaS5, modalOpenBranchS5_countermodel, modalExpandBranchesS5_openBranch_accSourcesKnown, + in-file 'Phase 8 scope note'); BDriver.lean (spec->freshLocal generalization).",
+    "resume_phase": 7,
+    "preserved_assets": "Phases 0-6 COMPLETED, CI-green, committed (commits 71e5f997..7aa080b0). Do not redo. All work lives in Cslib/Logics/Modal/Tableau/S5Simplification.lean (witnessWorldS5, modalApplyOneS5w, hintikka_congr, R7 refutation theorems + corrected docstrings, modalOps/mintTags, S5wTagInv/usedTags/mint-tag lemmas) and Cslib/Logics/Modal/Tableau/BDriver.lean (modalExpandBranchesGen_openBranch_gen + accTargetsKnown instantiation) and Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (corrected 5/KB5 route docstring only, no new declarations).",
     "read_first": [
-      "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md (Cycle 9 section)",
-      "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean ('Phase 8 scope note', the 4-item breakdown)"
+      "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md (Phase 0-6 completion notes, Phase 7 task list)",
+      "Cslib/Logics/Modal/Tableau/S5Simplification.lean (search for 'Phase 6', 'Phase 4', 'R7Refutation' section headers to find the landed declarations)",
+      "Cslib/Logics/Modal/Tableau/BDriver.lean (search for 'Phase 5' / 'modalExpandBranchesGen_openBranch_gen')"
     ]
   },
   "artifacts": [
-    { "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md", "type": "summary", "summary": "Cycle 9 section appended; phases 1-8 history preserved." },
-    { "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md", "type": "plan", "summary": "Phases 8/9 marked [BLOCKED] with exact open goal and structural findings." }
+    {
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for phases 0-6 of plan v5."
+    }
   ],
-  "commits": ["6d04e74e", "07c79505"],
-  "session_id": "sess_1784152189_12f1bc"
+  "commits": ["71e5f997", "e6db020c", "b0a259d7", "9ea48d31", "405f7590", "5040dfc3", "7aa080b0"],
+  "session_id": "sess_1784165611_81d962"
 }

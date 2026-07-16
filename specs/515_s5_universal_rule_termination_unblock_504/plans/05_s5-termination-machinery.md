@@ -1,7 +1,7 @@
 # Implementation Plan: S5 Witness-Reuse Rule + Linear World Budget + Euclidean 5/KB5 Route (v4)
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 52 hours (24 phases: 27h S5 chain [Phases 0-14] + 25h Euclidean 5/KB5 chain [Phases 15-23]; the figure is the exact sum of the per-phase timings and is deliberately pessimistic -- see "Budget realism" below)
 - **Dependencies**: Task 514 (literature grounding); Task 504 (parent; `modalApplyOneS5`, `extractModelS5*`, `modalTruthLemmaS5` landed CI-green). Task 511 (S4 keyed-guard sibling) is **decoupled by this revision** -- see Goals & Non-Goals.
 - **Research Inputs**:
@@ -527,7 +527,7 @@ Ambient context for every Lean phase: `S5Simplification.lean:54-56`
 `variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]`. **No `Fintype Atom` is needed
 anywhere.**
 
-### Phase 0: Kill test -- `modalSubfmls` tag closure under the `neg` encoding [NOT STARTED]
+### Phase 0: Kill test -- `modalSubfmls` tag closure under the `neg` encoding [COMPLETED]
 
 **Goal**: Cheaply falsify the entire design before any investment. Verify `modalSubfmls` closure
 survives the `neg φ = φ.imp .bot` encoding, so that `(s,ψ) ∈ mintTags φ₀` is derivable from the tag
@@ -539,8 +539,19 @@ invariant in the mint case. **This is the single load-bearing step of the counti
       reachable in `signedSubfmls φ₀` / `modalSubfmls φ₀` under the encoding
       `neg φ = φ.imp .bot`. `Proposition` has 7 constructors -- `atom, bot, imp, and, or, box,
       diamond` -- with **no primitive negation** (`Basic.lean:72-88`) [VERIFIED].
-- [ ] Record the result in the phase's completion note (pass -> proceed; fail -> invoke fallback 1
+- [x] Record the result in the phase's completion note (pass -> proceed; fail -> invoke fallback 1
       and re-plan the world bound, keeping the rule).
+
+**Completion note (PASS)**: Verified in `lean_run_code` scratch (no `.lean` file touched) against
+`Cslib/Logics/Modal/Tableau/LoopChecking.lean`: for `φ₀ := ◇ψ` with `ψ := p.imp .bot` (the
+negation encoding of `¬p`), `ψ ∈ modalSubfmls φ₀` closes by `simp [modalSubfmls]`; symmetrically
+for `φ₀ := □ψ`; and the actual tag codomain `(Sign.pos, ψ) ∈ signedSubfmls φ₀` /
+`(Sign.neg, ψ) ∈ signedSubfmls φ₀` both close by `simp [signedSubfmls, modalSubfmls]`. The
+generic, **public** `modalSubfmls_self_mem` (`FmpMeasure.lean:266`) already gives `ψ ∈
+modalSubfmls ψ` unconditionally regardless of whether `ψ` is negation-encoded (`Proposition` has
+no primitive negation constructor to special-case), and this fact already underlies `BDriver.lean`
+(K/B route) and the superseded `S5Simplification.lean`'s own local re-derivation
+(`modalSubfmls_self_mem_S5`, `modalSubfmls_trans_S5`). **Kill test PASSES.** Proceed to Phase 1.
 
 **Timing**: 0.5 hours
 

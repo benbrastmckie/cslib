@@ -1,113 +1,54 @@
 {
-  "status": "implemented",
-  "task_number": 517,
+  "status": "completed",
   "session_id": "sess_1784156551_995e9d",
-  "plan_path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
-  "summary": "VERDICT: DERIVED. CS5 |- FS is TRUE, mechanized sorry-free as `cs5_fs` in probes/fs-derivation-gate.lean, footprint [propext, Classical.choice]. Phase 19 decided in ONE dispatch, within the hard cap. The ~25% target-is-FALSE risk term -- the single largest term in this task s failure probability -- is ELIMINATED, not deferred. Phase 16 s `cs5_completeness => CS5 |- FS` necessary condition is DISCHARGED. BRANCH TAKEN per the plan s documented-branches table: proceed to Phase 20 -> 21. Do NOT re-open this gate. Also unblocks task 512 s diagnosis. HOW IT WAS DECIDED: the dispatch prioritized the untried REFUTATION direction as instructed, and that is what settled the gate -- in the opposite direction. Characterizing the algebra class any countermodel must inhabit PROVED no countermodel exists, and the impossibility argument transcribed directly into the Hilbert derivation. Key structural fact the earlier negative probe missed: bBox (phi -> []<>phi) and bDia (<>[]phi -> phi) are exactly the unit and counit of an ADJUNCTION <> -| []. With T/4, <> is a closure and [] an interior operator with Fix(<>) = Fix([]) =: J; <> reflects and [] coreflects onto J. Then kBox is automatic, and the sole remaining constraint kDia is EQUIVALENT to Frobenius: <>(u /\\ x) = u /\\ <>x for u in J. Hence in EVERY CS5 algebra, with C := <>A -> []B: <>C /\\ A <= <>C /\\ <>A = <>(<>A /\\ C) <= <>[]B = []B <= B, which by the adjunction IS C <= [](A -> B). So FS holds in every CS5 algebra; by Lindenbaum completeness, CS5 |- FS.",
-  "phases_completed": 11,
+  "task_number": 517,
+  "phase_number": 20,
+  "phases_completed": 12,
   "phases_total": 26,
-  "phases_this_dispatch": [
-    19
-  ],
-  "skeleton": false,
-  "blockers": [],
-  "sorry_inventory": [],
-  "continuation_context": {
-    "is_successor": true,
-    "resume_at": "Plan 08 wave-1 remainder: Phase 20 (pre-gate on TClosure / (R_Upsilon) internalization), then Phase 21. Phase 19 is DECIDED (DERIVED) and must not be re-opened. Phase 11/25 (pathSpine, a.k.a. plan 02 Track C C5) remains its own dedicated dispatch and was NOT touched here.",
-    "resume_pointer": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/00_RESUME-HERE.md",
-    "do_not_redo": [
-      "Plan 08 Phase 18 (remove the only corner cut in Cslib/) — COMPLETED this dispatch, commit 148ef71d. TS5/GeomAxiom.D/GeomWitnessClosure/docstrings all landed and verified.",
-      "Plan 08 Phase 16 (cs5_completeness => CS5 |- FS) — COMPLETED, probes/fischer-servi-probe.lean (cs5_completeness_implies_fs_derivable)",
-      "Plan 08 Phase 17 (B_K |= cs5FC'' abstractly) — COMPLETED, probes/bounded-context-bk-probe.lean (BK_cs5FC''/BK_cs5Incest/BK_cs5FCIncest/BK_not_cs5FC/BKWitness_*)",
-      "A1 (IKAx repair) — COMPLETED, probes/lemma612-scaffold.lean",
-      "A2 (CS5 |- FS route probe) — COMPLETED, probes/fischer-servi-probe.lean",
-      "A3 (route verdict) — COMPLETED, NO-GO for Track B",
-      "Track C C1/C2/C3 — COMPLETED, probes/track-c-c1-tele-conj.lean",
-      "Track C C4 (LTree/star/fullSubtree/prune + unfolding identity) — COMPLETED, probes/lemma612-scaffold.lean",
-      "Plan 08 Phase 19 (DECISION GATE: decide CS5 |- FS) — COMPLETED this dispatch, commit 04ce827f. VERDICT DERIVED: cs5_fs is sorry-free in probes/fs-derivation-gate.lean, footprint [propext, Classical.choice]. Do NOT re-attempt a countermodel: none exists, and the proof that none exists IS the derivation. Do NOT re-litigate the gate."
-    ]
-  },
-  "next_action_hint": "Dispatch Phase 20 (pre-gate: confirm TClosure supports the (R_Upsilon) internalization). The DERIVED verdict means Phase 20 -> 21 proceeds with the FS risk term REMOVED rather than merely priced: subsequent handoffs no longer need to re-state the ~25% target-is-FALSE risk, because it is closed. Leg A (Phases 21-23) remains ~50% on its own merits, unaffected by this result. Do NOT re-open Phase 19. TWO follow-ups worth scheduling but NOT blocking: (1) transcribe cs5_fs into Cslib/ mainline -- deliberately not done here because this dispatch s territory was probes/ ONLY; the derivation is already sorry-free and axiom-clean, so this is transcription, not proof work. (2) probes/fischer-servi-probe.lean now carries a STALE, REFUTED NEGATIVE verdict in its module docstring (self-described as not a search failure ... a structural mismatch); correct it when that file is next touched. Its fs_sound_dprime is unaffected and remains valid -- only the syntactic-obstruction narrative is wrong.",
-  "artifacts": [
+  "summary": "VERDICT: YES -- TClosure DOES support the (R_Υ) internalization; the falsifier did NOT fire and leg A's first real obstacle is CLEARED, mechanized sorry-free. (□E)/(◇I) are the only NIK rules with a relational premise and both range over TClosure 𝒯 G.R; NIK never reads G.X. So (R_χ) reduces to closure absorption: TClosure.absorb_addEdge + NIK.weakenCl (a strict generalization of NIK.weaken to the closure order) give NIK.geomInternalize, instantiated for all three TS5 axioms (refl/symm/trans) and lifted to Deriv. Deriv/Context.le chain closure confirmed adequate. REQUIREMENT-3 VERDICT: NO -- not load-bearing for the quantifier-free {T,B,Four}. PDF p.91 verbatim makes requirement 3 an 'only if' whose subject is 'each of the witness variables in v_χz̄', and p.72's normal form makes v_χz̄ the EMPTY vector when ȳ is empty. It is vacuously true at TS5, so Conflict 7's adjudication is CONFIRMED and Phase 18's deletion removed nothing leg A needs -- do not reverse it. HOWEVER the pre-gate found a SEPARATE, unanticipated blocker: TPrime TS5 Atom is UNINHABITED (tPrime_TS5_false, IsEmpty instance, mechanized). clModel : ClassicalModel 𝒯 G.R quantifies type-wide (.T => ∀ x, R x x), but PDF p.94 makes H ⊨_CL 𝒯 satisfaction IN THE STRUCTURE H with domain = H's underlying set; clModel .T + Graph.edge_mem force G.X = univ, contradicting Context.coinfinite. Root cause is χ_T alone (only TS5 axiom with n=0 premises); {χ_B,χ_4} is harmless. This is a repairable STATEMENT-LEVEL transcription defect, not a mathematical obstruction, and it does NOT block Phase 21: at 𝒯 = ∅ clause 0 is vacuous, so plan v3's D2 '𝒯 = ∅ first' sequencing is independently vindicated. Route remains alive; proceed to Phase 21.",
+  "skeleton": "probes/rchi-internalization-gate.lean: TClosure.absorb_addEdge, ClLe, ClLe.of_le, ClLe.addEdge, NIK.weakenCl, NIK.geomInternalize, NIK.geomInternalize_T/_B/_Four (+3 TS5 examples), Deriv.geomInternalize, GeomAxiom.HoldsOn, ClassicalModelOn, ClassicalModelOn.of_classicalModel, classicalModelOn_TS5_iff, tPrime_TS5_false, IsEmpty (TPrime TS5 Atom), classicalModel_tClosure_free, classicalModel_empty, classicalModel_B_Four_trivial. All sorry-free; axioms ⊆ [propext, Classical.choice, Quot.sound].",
+  "blockers": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fs-derivation-gate.lean",
-      "type": "probe",
-      "summary": "Sorry-free Hilbert derivation cs5_fs : Derivable (@CS5ModalAxiom Atom) (((<>A).imp (Proposition.box B)).imp (Proposition.box (A.imp B))) -- statement string-identical to the FS that fs_sound_dprime proves semantically valid. Footprint [propext, Classical.choice], strictly inside the allowed [propext, Classical.choice, Quot.sound]. Compiles clean via `lake env lean` with zero errors/warnings. Contents: 4 private plumbing defs (fsImpTrans, fsBoxMono, fsDiaMono, fsAndImpElim); 2 structural lemmas -- fsDiaFrobenius (|- []U -> (<>X -> <>(U /\\ X)), the syntactic content of kDia, pure CK) and fsDiaBoxedDia (|- <>A -> []<>A, i.e. <>A lies in the fixed-point sublattice J); the closed core fsDiaHypImp (|- <>(<>A -> []B) -> (A -> B)); the adjunction step fsBoxInternalise (|- <>C -> psi yields |- C -> []psi); and the public theorem cs5_fs. fsDiaFrobenius and fsBoxInternalise are reusable beyond FS. Module docstring records the full algebraic argument, axiom-usage accounting, and why the earlier NEGATIVE verdict was wrong."
+      "id": "clmodel-type-wide-quantifier",
+      "severity": "blocking-for-phase-23-only",
+      "blocks": [23],
+      "does_not_block": [21, 22],
+      "statement": "TPrime TS5 Atom is UNINHABITED as currently typed. TPrime.clModel : ClassicalModel 𝒯 G.R (Context.lean:217) with GeomAxiom.Holds .T R = ∀ x, R x x (Deduction.lean:140) quantifies over the whole Label Atom type. Graph.edge_mem (Syntax.lean:119) then forces G.X = univ, which contradicts Context.coinfinite (Context.lean:154) since Label.InW V' (.var n) = n ∈ V' and Coinfinite V' supplies some n ∉ V'. Mechanized: tPrime_TS5_false, plus instance IsEmpty (TPrime TS5 Atom). Universe-polymorphic; holds for every Atom.",
+      "required_behavior": "Simpson1994 p.94 (PDF p.103) verbatim: 'D^𝒯_(H,Δ) = the underlying set of H, R^𝒯_(H,Δ)(x,y) iff xRy in H ... (D^𝒯_(H,Δ), R^𝒯_(H,Δ)) ⊨_CL 𝒯 because (D^𝒯_(H,Δ), R^𝒯_(H,Δ)) = H'. So ⊨_CL is satisfaction in the structure H, with quantifiers ranging over H.X, not over all labels.",
+      "counterexample": "A single-node reflexive-at-that-node graph satisfies ClassicalModelOn {χ_T} G.X G.R (Simpson's clause 0) but refutes ClassicalModel {χ_T} G.R (CSLib's). Mechanized in the probe.",
+      "isolation": "Deduction.lean:138-143 (GeomAxiom.Holds), Deduction.lean:145-148 (ClassicalModel); consumers: Context.lean:217 (TPrime.clModel), Context.lean:~285 (equivalence_of_classicalModel_TS5).",
+      "repair": "Retype clause 0 to ClassicalModelOn 𝒯 G.X G.R. Probe has GeomAxiom.HoldsOn, ClassicalModelOn, classicalModelOn_TS5_iff ready to lift; ~40 lines in mainline Cslib/, free at TS5. NOT applied in Phase 20 (Cslib/ out of territory).",
+      "downstream_unsolved": "equivalence_of_classicalModel_TS5 returns a type-wide Equivalence R consumed by the frame-class match (cs5FCIncest). Under the repair it becomes an equivalence on G.X. Phase 23 must either carry a domain-relative equivalence or make the canonical model's world domain a subtype ↥H.X. Flagged, not solved.",
+      "do_not": "Do NOT discharge clModel via ClassicalModel 𝒯 (TClosure 𝒯 R). It is free (classicalModel_tClosure_free, zero axioms) but proves clause 0 for the CLOSURE, whereas p.94 fixes the RAW relation. It would silently change the canonical model and put the truth lemma's ◇-case (which reads G.R x y off TPrime.diamond, Context.lean:225-226) onto a different relation than the one it is proved about."
     }
   ],
+  "plan_corrections_required": [
+    {
+      "phase": 22,
+      "current": "Plan v3 Phase 22 task list: 'R_(H,Δ)(x,y) iff xRy in 𝒯-Comp(H)'.",
+      "correct": "PDF p.94: R^𝒯_(H,Δ)(x,y) iff xRy in H -- the RAW relation. Simpson's justification sentence ('because (D,R) = H') is unintelligible under the closure reading.",
+      "confidence": "high on the PDF text; pp.95-98 not read this dispatch -- Phase 22 should re-verify before committing."
+    },
+    {
+      "phase": 23,
+      "current": "Phase 23 generalizes leg A to 𝒯 = TS5.",
+      "correct": "Insert a clause-0 relativization repair phase BEFORE Phase 23. Phase 23 is impossible until it lands: IsEmpty (TPrime TS5 Atom)."
+    }
+  ],
+  "continuation_context": "Phase 20 answered its mission question YES and mechanized it; the (R_Υ)/TClosure risk term is retired. Leg A's remaining risk is unchanged and sits where plan v3 already priced it: Phase 21 (Prime Lemma 5.3.1 transcription, ~65%) and Phase 22 (truth lemma, the second crux). Phase 21 runs at 𝒯 = ∅ where clause 0 is vacuous (classicalModel_empty) and the (R_Υ) obligation is empty, so BOTH this dispatch's new blocker and the whole TClosure question are inert there. Carry into Phase 21: (a) at a quantifier-free axiom, p.92-93's reductio framing AND its requirement-3 exit are BOTH vacuous -- the goal is delivered by the maximality step used DIRECTLY (H_i = H ⟹ R_i1[z̄/x̄] ∈ H); do NOT transcribe the reductio literally or the agent will get stuck on two content-free steps and may wrongly conclude the argument is broken. (b) Discharging (H_i,Δ) ∈ C requires re-checking Context's requirement-2 (dwitness clause) survives H_i = H ∪ {c}; expected fine (adding an edge adds no witness variables) but NOT verified this dispatch. (c) Simpson notes (p.93) the prime lemma is choice-free in principle but 'laborious'; use Zorn. (d) Chain-union closure judged adequate from signatures + Deriv.mono but NOT mechanized; Simpson calls it 'easily seen'.",
+  "next_action_hint": "Dispatch Phase 21 (leg A1 -- Simpson Prime Lemma 5.3.1 at 𝒯 = ∅) per plan v3. Do NOT dispatch Phase 23 before the clause-0 relativization repair lands. Correct plan v3's Phase 22 relation definition (𝒯-Comp(H) -> raw H) first -- it is a one-line plan edit.",
+  "artifacts": [
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean"
+  ],
   "modified_files": [
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/fs-derivation-gate.lean",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
+    "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json"
   ],
-  "commits": [
-    "04ce827f"
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "axiom_footprint": "[propext, Classical.choice]",
-    "acceptance_checks_run": [
-      "lake env lean on probes/fs-derivation-gate.lean: zero errors, zero warnings",
-      "#print axioms cs5_fs => [propext, Classical.choice], subset of allowed [propext, Classical.choice, Quot.sound]",
-      "grep sorry: zero real occurrences (2 hits are prose: sorry-free and a line-wrapped axiom 5)",
-      "git status --short Cslib/: EMPTY -- Cslib/ untouched, Phase 18 mainline not regressed",
-      "FS statement string-compared against fischer-servi-probe.lean fs_sound_dprime: identical"
-    ],
-    "no_regression_check": "Cslib/ untouched (git status --short Cslib/ empty), so no landed CK/CT/CS4/CS5 soundness or task-509 cs5FC_dprime asset can have regressed. Phase 18 breaking API changes (Five/GeomAxiom.D/GeomWitnessClosure removals) are not implicated: the derivation is purely Hilbert-syntactic against CS5ModalAxiom and touches no Context/GeomAxiom surface.",
-    "ci_pipeline_passed": null,
-    "ci_steps_run": [],
-    "test_passed": null,
-    "scope_note": "Full lake build / checkInitImports / lint / lint-style / shake / mk_all / test were NOT run this dispatch, deliberately. The probe lives outside the lake build tree (verified standalone with `lake env lean`) and NOTHING under Cslib/ changed, so mainline CI status is exactly Phase 18 s green state. Territory constraint (work in probes/ ONLY) was honored."
-  },
-  "findings": [
-    "VERDICT DERIVED: CS5 |- FS, mechanized sorry-free as cs5_fs (probes/fs-derivation-gate.lean), footprint [propext, Classical.choice].",
-    "The UNTRIED refutation direction is what decided the gate -- by proving refutation IMPOSSIBLE. A CS5 algebra is a Heyting algebra H plus a complete sublattice J with <> the reflector and [] the coreflector; bBox/bDia are precisely the unit/counit of the adjunction <> -| []. Every CS5 algebra validates FS, so no countermodel exists in the class, and the impossibility argument IS the derivation.",
-    "kBox is AUTOMATIC in the algebraic characterization ([](x->y) /\\ []x lies in J and is <= y, hence <= []y). The only non-trivial CS5 constraint is kDia, which is EQUIVALENT to the Frobenius condition <>(u /\\ x) = u /\\ <>x for u in J.",
-    "REFUTES A LANDED CONCLUSION: probes/fischer-servi-probe.lean s NEGATIVE syntactic verdict -- self-described as not a search failure ... a structural mismatch -- is WRONG. Its argument (every route to A -> B needs the hypothesis H : <>A -> []B in context, so the resulting A -> B is never closed and necessitation is inapplicable) holds only for routes that keep H as a CONTEXT HYPOTHESIS. The derivation treats C := <>A -> []B as a FORMULA, proves the CLOSED theorem |- <>C -> (A -> B), necessitates THAT (legal, empty context), and re-attaches the hypothesis via bBox s C -> []<>C. bBox is exactly the internalise-a-hypothesis-under-a-box move the obstruction argument did not price in. The landed fs_context_relative_half is CIRCUMVENTED, not contradicted: it blocks the context-relative route; this is not that route.",
-    "AXIOM ECONOMY: the derivation uses implyK, implyS, andI, andE1, andE2, k, kdia, tDia, fourDia, bBox, bDia. tBox, fourBox, efq, orI1/orI2/orE are UNUSED -- FS already holds in CK + tDia + fourDia + B, strictly weaker than CS5. (fourDia is needed only to promote bBox s <>A -> []<><>A to <>A -> []<>A.)",
-    "COLLATERAL CORRECTION: FS1 (<>(A->B) -> ([]A -> <>B)) is derivable in PLAIN CK and is not the hard Fischer-Servi axiom; the hard one is FS2 = (<>A -> []B) -> [](A -> B) (Simpson s k4), which is what CSLib s FS denotes. Relevant to reading IK = CK + k3 + k4 + k5 against CK + FS1 + FS2."
-  ],
-  "pre_existing_not_introduced": [
-    "129 sorry-s under Cslib/ in unrelated subtrees (Bimodal/Propositional/Temporal) -- untouched, outside territory.",
-    "One lake lint unusedArguments error at Foundations/Logic/Metalogic/PrimeExclusion.lean:324 -- pre-existing, untouched.",
-    "Computability/URM/Basic.lean:92 := trivial (a real goal, not a vacuous stub) -- pre-existing, untouched."
-  ],
-  "gaps_flagged": [
-    "cs5_fs is NOT yet transcribed into Cslib/ mainline -- deliberate: this dispatch s territory was probes/ ONLY. Transcription (not proof work) is a later-phase step; the derivation is already sorry-free and axiom-clean.",
-    "probes/fischer-servi-probe.lean s module docstring now carries a STALE, REFUTED NEGATIVE verdict on CS5 |- FS. Correct it when that file is next touched. Its fs_sound_dprime and cs5_completeness_implies_fs_derivable are unaffected and remain valid; only the syntactic-obstruction narrative is wrong.",
-    "The plan s Phase 19 evidence block asserted Pacheco s chain is holed at Lemma 16 and contributes ~nothing. That assessment is UNCHANGED and UNUSED: this derivation leans on Pacheco nowhere.",
-    "CS5 |- FS is NECESSARY but NOT SUFFICIENT for the completeness target. Retiring it does not raise leg A s ~50% -- it only removes the ~25% independent failure term."
-  ],
-  "confidence": {
-    "phase_18_defects_fixed": 1.0,
-    "ax_TS5_equals_CS5ModalAxiom_definitional": 1.0,
-    "geomWitnessClosure_deletion_sound": 1.0,
-    "no_regression_of_landed_assets": 1.0,
-    "cs5_derives_FS_itself": 1.0,
-    "note": "Phase 19 s verdict is a MACHINE-CHECKED FACT, not an estimate: cs5_fs compiles sorry-free with footprint [propext, Classical.choice]. cs5_derives_FS_itself moves from null (Phase 18 deliberately left it null as orthogonal) to 1.0. This retires the largest single risk term in the task. The one genuinely uncertain item is the reverse-direction reading: CS5 |- FS being TRUE is NECESSARY for the completeness target but not sufficient, so leg A (Phases 21-23, ~50% on its own) remains the live risk and is unaffected by this result."
-  },
-  "metadata": {
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "cslib-implementation-hard-agent"
-    ],
-    "lit_flag": true,
-    "hard_mode": true,
-    "orchestrator_mode": true,
-    "effort_flag": "hard",
-    "phase_number": 19,
-    "supersedes": "Phase 18 handoff (commit 19706814)",
-    "territory_contract": "Owned Cslib/**/Labelled/ (Context.lean, Deduction.lean, Syntax.lean). Also edited the two probes/ files named in defect 2's blast radius (lemma612-scaffold.lean, adequacy-gate-probe.lean) solely to keep them compiling after .D deletion, as the dispatch permitted — neither was extended. NO other Cslib/ subtree was touched (git status confirmed). Staging was scoped to this dispatch's files; `git add -A` was never used.",
-    "sorry_inventory_note": "Empty and verified: cs5_fs and all its private dependencies compile sorry-free; #print axioms confirms no sorryAx in the footprint.",
-    "verdict_is_machine_checked": true
-  },
-  "last_updated": "2026-07-15T00:00:00Z",
-  "verdict": "DERIVED"
+  "cslib_mainline_touched": false,
+  "sorry_inventory": [],
+  "literature_access_note": "--lit briefing is broken (index.json .id vs .doc_id key mismatch; 20 modal sources silently skip). Accessed the PDF directly at /home/benjamin/Downloads/Simpson_1994_IntuitionisticModalLogic.ocr.pdf. CONFIRMED the OCR defect is worse than recorded: chunk_0102.md:11-12 drops H_i's definition AND so does the pdftotext -layout text layer -- only the page raster carries it. Read tool with pages parameter (PDF pages 81, 99-103) was the only working route."
 }

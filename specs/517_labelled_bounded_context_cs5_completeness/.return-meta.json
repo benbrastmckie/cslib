@@ -1,39 +1,42 @@
 {
-  "status": "implemented",
-  "verdict": "DERIVED",
-  "phases_completed": 11,
-  "phases_total": 26,
-  "phases_this_dispatch": [19],
-  "artifacts": [
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 517,
+  "session_id": "sess_1784156551_995e9d",
+  "phase_number": 20,
+  "findings_count": 6,
+  "adversarial_verification_triggered": true,
+  "adversarial_verification_result": "6 claims challenged; 2 REFUTED (the requirement-3 suspicion that motivated the dispatch, and the assumption that the new blocker would block Phase 21); 4 held under attack. One self-correction mid-dispatch: I initially believed Graph did not confine edges to nodes; the compiler surfaced the edge_mem field, which INVERTED a finding from 'clModel is over-strong but derivable for B/Four' to 'TPrime TS5 is outright uninhabited'.",
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "VERIFIED -- Simpson1994 present at references.bib:86 (@phdthesis, Simpson, Alex K.); matches the citation form already used in Deduction.lean:13,99",
+  "pdf_pages_read": [81, 99, 100, 101, 102, 103],
+  "verdict": "YES -- TClosure supports the (R_Υ) internalization; falsifier did not fire",
+  "requirement_3_verdict": "NOT load-bearing for quantifier-free {T,B,Four}; vacuous at ȳ = ∅; Conflict 7 CONFIRMED; Phase 18 deletion compatible; do not reverse",
+  "new_blocker_found": "TPrime TS5 Atom is uninhabited (clModel type-wide quantifier vs Graph.edge_mem vs Context.coinfinite). Blocks Phase 23 only; Phase 21 unaffected (clause 0 vacuous at 𝒯 = ∅). Repairable.",
+  "cslib_mainline_touched": false,
+  "memory_candidates": [
     {
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fs-derivation-gate.lean",
-      "type": "probe",
-      "summary": "cs5_fs: sorry-free Hilbert derivation of FS := (<>A -> []B) -> [](A -> B) against CS5ModalAxiom. Footprint [propext, Classical.choice]."
+      "content": "When mechanizing from an OCR'd PDF, a dropped displayed equation is often missing from the pdftotext text layer as well as from the chunked corpus -- both derive from the same text layer. Only the page raster carries it. Read the PDF with the pages parameter (image extraction) rather than assuming a re-extraction will recover it.",
+      "keywords": ["ocr", "pdf", "literature-fidelity", "pdftotext", "text-layer"],
+      "tags": ["research-method"],
+      "topic": "literature transcription"
+    },
+    {
+      "content": "A formalized 'classical model of a frame theory' clause must relativize its quantifiers to the structure's domain. Transcribing Simpson-style 'H ⊨_CL χ' as a type-wide '∀ x, R x x' silently strengthens it; combined with a Graph invariant confining edges to nodes, it forces X = univ and can render the whole prime-context type UNINHABITED. Check inhabitation of a target structure type BEFORE attempting a Zorn construction that produces it -- an IsEmpty proof is far cheaper than a failed 300-line maximization.",
+      "keywords": ["classical-model", "quantifier-range", "domain-relative", "uninhabited", "IsEmpty", "transcription-defect"],
+      "tags": ["formalization-pitfall", "lean4"],
+      "topic": "labelled modal logic formalization"
+    },
+    {
+      "content": "A uniform published proof can degenerate into vacuity on a special case while still being sound: Simpson's Lemma 5.3.1 discharges 'H is a classical model of 𝒯' via a reductio plus a requirement-3 citation, but for quantifier-free axioms (empty witness vector) BOTH steps are vacuous and the goal is delivered instead by the maximality step used directly. Before concluding a source's argument is broken on your special case, check whether the general machinery simply does not specialize -- the load-bearing step may be present but used for a different purpose.",
+      "keywords": ["proof-transcription", "vacuous", "specialization", "maximality", "simpson"],
+      "tags": ["literature-fidelity", "research-method"],
+      "topic": "proof mechanization"
     }
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": null,
-    "axiom_footprint": "[propext, Classical.choice]",
-    "scope_note": "Probe verified standalone via `lake env lean` (outside the lake build tree). Cslib/ untouched, so mainline CI status is exactly Phase 18's green state."
-  },
-  "memory_candidates": [
-    "CSLib CS5: bBox (phi -> []<>phi) and bDia (<>[]phi -> phi), with kBox/kDia-derived monotonicity, form an ADJUNCTION <> -| []. This is the most useful structural fact about CS5: <> is a left adjoint (preserves all joins, so k3/k5 come free), [] a right adjoint, Fix(<>) = Fix([]).",
-    "CS5 algebraically = Heyting algebra H + complete sublattice J, <> the reflector and [] the coreflector onto J. kBox is then automatic; kDia is EQUIVALENT to Frobenius: <>(u /\\ x) = u /\\ <>x for u in J. This characterization decides FS-style questions fast and shows no CS5 countermodel to FS can exist.",
-    "Hilbert-system anti-pattern: concluding a formula is underivable because necessitation needs an empty context and 'the hypothesis must live in the context'. With the B axiom (phi -> []<>phi), internalize the hypothesis C as <>C instead: prove the CLOSED theorem |- <>C -> psi, necessitate that, apply k to get []<>C -> []psi, then bBox gives C -> []psi. This refuted a landed 'structural mismatch' obstruction claim in task 517.",
-    "FS1 (<>(A->B) -> ([]A -> <>B)) is derivable in PLAIN CK -- it is not the hard Fischer-Servi axiom. The hard one is FS2 = (<>A -> []B) -> [](A -> B) (Simpson's k4); CSLib's `FS` denotes FS2. Relevant when reading IK = CK + k3 + k4 + k5 against CK + FS1 + FS2."
+  "artifacts": [
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean"
   ],
-  "metadata": {
-    "session_id": "sess_1784156551_995e9d",
-    "agent_type": "cslib-implementation-hard-agent",
-    "phase_number": 19,
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-    "dispatch_cap_respected": true,
-    "commits": ["04ce827f"]
-  }
+  "next_steps": "Dispatch Phase 21 (leg A1, Prime Lemma 5.3.1 at 𝒯 = ∅). Correct plan v3 Phase 22's relation definition; insert a clause-0 relativization repair before Phase 23."
 }

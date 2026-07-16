@@ -623,7 +623,7 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   it trips no guardrail.
 - **Risk:** the gate itself cannot fail — it always returns one of three branches.
 
-### Phase 20: Pre-gate — confirm `TClosure` supports the `(R_Υ)` internalization [NOT STARTED]
+### Phase 20: Pre-gate — confirm `TClosure` supports the `(R_Υ)` internalization [COMPLETED]
 - **Goal:** **Cheap paper/probe pre-gate before Phase 21 is dispatched.** Confirm that `TClosure`
   supports the `(R_Υ)` internalization the maximality argument needs to discharge `clModel`.
 - **Why**: `clModel` (*"G is a classical model of 𝒯"*) is a **field** of `TPrime` that Lemma 5.3.1
@@ -641,12 +641,45 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   teammates flatly contradicted each other. **Read `H_i`'s definition from PDF layout, not chunk
   text.** The standing rule binds here more than anywhere else in the plan.
 - **Tasks:**
-  - [ ] Read Simpson Lemma 5.3.1's `H_i` definition **from PDF layout** (`chunk_0102`'s text is
+  - [x] Read Simpson Lemma 5.3.1's `H_i` definition **from PDF layout** (`chunk_0102`'s text is
         known-defective)
-  - [ ] Confirm `TClosure` (`Deduction.lean:146-148`, carrying `.symm`/`.trans`) admits the `(R_Υ)`
+  - [x] Confirm `TClosure` (`Deduction.lean:146-148`, carrying `.symm`/`.trans`) admits the `(R_Υ)`
         internalization for each `𝒯 = TS5 = {T, B, Four}` axiom (post-Phase-18)
-  - [ ] Confirm `Deriv`/`Context.le` support the maximality argument's chain closure
-  - [ ] Write the finding; if it does not support it, name the precise obstruction
+  - [x] Confirm `Deriv`/`Context.le` support the maximality argument's chain closure
+  - [x] Write the finding; if it does not support it, name the precise obstruction
+- **FINDING (Phase 20, report 09; probe `probes/rchi-internalization-gate.lean`, sorry-free):**
+  - **VERDICT: `TClosure` DOES support the `(R_Υ)` internalization. Falsifier did NOT fire.**
+    Mechanized for all three `TS5` axioms via `TClosure.absorb_addEdge` + `NIK.weakenCl` +
+    `NIK.geomInternalize_T/_B/_Four`. `(□E)`/`(◇I)` are the only relational-premise rules and both
+    range over `TClosure 𝒯 G.R`; `NIK` never reads `G.X`. `Deriv`/`Context.le` confirmed adequate.
+  - **Requirement 3: NOT load-bearing for `{T,B,Four}`.** PDF p. 91 verbatim: its "only if" subject
+    is *"each of the witness variables in `v_χz̄`"*, and `v_χz̄` is the **empty vector** when `ȳ` is
+    empty (p. 72 normal form). **Vacuously true ⟹ Conflict 7 CONFIRMED; Phase 18's deletion removed
+    nothing leg A needs.** Do not reverse Phase 18.
+  - **Transcription rule for Phases 21/23**: at a quantifier-free axiom, p. 92-93's reductio framing
+    AND its requirement-3 exit are BOTH vacuous. The goal is delivered by the maximality step used
+    **directly** (`H_i = H` ⟹ `R_i1[z̄/x̄] ∈ H`). Do NOT transcribe the reductio literally.
+  - **NEW BLOCKER (Phase 23, NOT Phase 21): `TPrime TS5 Atom` is UNINHABITED.**
+    `tPrime_TS5_false` / `IsEmpty (TPrime TS5 Atom)`, mechanized. `clModel : ClassicalModel 𝒯 G.R`
+    (`Context.lean:217`) quantifies **type-wide** (`.T => ∀ x, R x x`), but PDF p. 94 makes
+    `H ⊨_CL 𝒯` satisfaction **in the structure `H`**, domain = `H`'s underlying set. Chain:
+    `clModel .T` + `Graph.edge_mem` ⟹ `G.X = univ`, contradicting `Context.coinfinite`.
+    Root cause is **`χ_T` alone** (the only `TS5` axiom with `n = 0` premises);
+    `{χ_B, χ_4}` is harmless (`classicalModel_B_Four_trivial`).
+  - **Phase 21 is UNAFFECTED**: at `𝒯 = ∅` clause 0 is vacuous (`classicalModel_empty`), so the
+    chain has no premise. **Plan v3's D2 `𝒯 = ∅`-first sequencing is independently vindicated.**
+  - **REQUIRED before Phase 23** (~40 lines, mainline `Cslib/`): retype clause 0 to
+    `ClassicalModelOn 𝒯 G.X G.R` (Simpson's domain-relative `⊨_CL`). Probe declarations
+    (`GeomAxiom.HoldsOn`, `ClassicalModelOn`, `classicalModelOn_TS5_iff`) are ready to lift; the
+    repair is **free at `TS5`**. Downstream: `equivalence_of_classicalModel_TS5` returns a
+    type-wide `Equivalence` and must become domain-relative (or the canonical model's domain a
+    subtype `↥H.X`) — flagged, not solved.
+  - **DO NOT** discharge `clModel` via `ClassicalModel 𝒯 (TClosure 𝒯 R)` — it is free
+    (`classicalModel_tClosure_free`) but proves clause 0 for the **closure**, whereas p. 94 fixes
+    `R^𝒯_(H,Δ)(x,y)` iff `xRy` in **`H`** (raw). It would silently change the canonical model.
+  - **PLAN CORRECTION — Phase 22**: its task list says `R_(H,Δ)(x,y)` iff `xRy` in `𝒯-Comp(H)`.
+    **PDF p. 94 says raw `xRy in H`** ("because `(D^𝒯_(H,Δ), R^𝒯_(H,Δ)) = H`"). Correct before
+    Phase 22; re-verify against pp. 95-98.
 - **Timing:** one dispatch (paper + small probe)
 - **Depends on:** 18 (the `TS5` fix changes which axioms `(R_Υ)` must cover)
 - **Falsifier:** `TClosure` cannot support the internalization (~20%) ⟹ `clModel` undischargeable ⟹

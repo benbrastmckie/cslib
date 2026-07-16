@@ -1495,21 +1495,77 @@ private lemma hasEdge_addEdge_self_FS (acc : Accessibility) (w w' : WorldIndex) 
     (acc.addEdge w w').hasEdge w w' = true := by
   simp [Accessibility.addEdge, Accessibility.hasEdge]
 
-/-- **Task 515 (Phase 7, single-step reachability preservation)**: a `modalStepBranchGen
-modalApplyOneS5` step preserves `accReachableInv`, given `accTargetsKnown` also holds. This is
-the structural core of the reachability-threading fuel induction: at the "acc unchanged" branch
-of `modalApplyOneS5_knownWorlds_step` (covering the universal-propagation arms, which only ever
-target *known* worlds, and every ordinary K arm outside the two minting shapes), every newly
-known world of the child branch was already known on `b`, so the (unchanged) reachability
-witness transfers directly; at the "mint" branch (the two K-minting shapes, disjoint from the
-S5-relevant shapes, so untouched by the universal arms), the one fresh world is reached by
-extending the popped formula's own (already-known, hence already-reachable) witness by the new
-edge. -/
-lemma modalStepBranchS5_preserves_accReachableInv
+/-! ### The Agree-or-Reuse Per-Call Contract
+
+The S5 soundness chain below is stated over an abstract `apply : RuleApply Atom` constrained by
+`S5SoundSpec` rather than over `modalApplyOneS5` directly. `S5SoundSpec` is the exact per-call
+contract the whole chain consumes, and it is deliberately the weakest one that both the
+unguarded universal rule and the witness-reuse rule satisfy:
+
+* `modalApplyOneS5` satisfies it by always taking the left disjunct (`Or.inl rfl`), so every
+  theorem below specializes back to its original statement as a free corollary.
+* `modalApplyOneS5w` satisfies it because its two reuse arms emit `.linear [sf']` for a signed
+  formula `sf'` **already on the branch**, together with the single edge `sf.label → sf'.label`.
+
+The right disjunct's `sf' ∈ b` is what makes the reuse edge cheap to discharge semantically: it
+simultaneously supplies the *formula* obligation (`sf'` is already satisfied by any model of `b`,
+so re-asserting it is free) and the *edge* obligation (`sf'.label` is a known world of `b`, so
+`accReachableInv_related_s5` relates it to `sf.label` in any `s5FC` model). This is why witness
+reuse is structurally easier than minting: no world is created, so the world-assignment `f` is
+never extended. -/
+
+/-- The per-call contract the S5 soundness chain consumes: at every call site, `apply` either
+agrees with `modalApplyOneS5` outright, or fires a **witness reuse** -- emitting `.linear [sf']`
+for a signed formula `sf'` already present on the branch, plus the single edge
+`sf.label → sf'.label`. Paired with the per-branch invariant `S5SoundInv`. -/
+def S5SoundSpec (apply : RuleApply Atom) : Prop :=
+  ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+    apply sf b acc = modalApplyOneS5 sf b acc ∨
+    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
+      sf' ∈ b ∧ apply sf b acc = (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label)
+
+/-- `modalApplyOneS5` satisfies `S5SoundSpec` degenerately: it never reuses, so the left
+disjunct always fires. This is what re-derives every original S5 soundness statement below as a
+free corollary of its lifted form. -/
+lemma modalApplyOneS5_s5SoundSpec : S5SoundSpec (Atom := Atom) modalApplyOneS5 :=
+  fun _ _ _ => Or.inl rfl
+
+/-- `modalApplyOneS5w` satisfies `S5SoundSpec`. Outside the two mint shapes it is definitionally
+`modalApplyOneS5` (`modalApplyOneS5w_eq_of_not_mint_shape`), as it is at a mint shape with no
+available witness. At a mint shape *with* a witness `w'`, the emitted formula `⟨s, φ, w'⟩` is on
+the branch by `witnessWorldS5_mem` and its label is `w'`, so the right disjunct fires. -/
+lemma modalApplyOneS5w_s5SoundSpec : S5SoundSpec (Atom := Atom) modalApplyOneS5w := by
+  intro sf b acc
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+  case pos.diamond =>
+    unfold modalApplyOneS5w
+    cases hw : witnessWorldS5 b Sign.pos φ with
+    | none => exact Or.inl (by simp only [hw])
+    | some w' => exact Or.inr ⟨⟨.pos, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+  case neg.box =>
+    unfold modalApplyOneS5w
+    cases hw : witnessWorldS5 b Sign.neg φ with
+    | none => exact Or.inl (by simp only [hw])
+    | some w' => exact Or.inr ⟨⟨.neg, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+  all_goals exact Or.inl (modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp))
+
+/-- Single-step reachability preservation, lifted over any `apply` satisfying `S5SoundSpec`. At
+the "acc unchanged" branch of `modalApplyOneS5_knownWorlds_step` (the universal-propagation arms,
+which only ever target *known* worlds, and every ordinary K arm outside the two minting shapes),
+every newly known world of the child branch was already known on `b`, so the (unchanged)
+reachability witness transfers directly; at the "mint" branch (the two K-minting shapes, disjoint
+from the S5-relevant shapes, so untouched by the universal arms), the one fresh world is reached
+by extending the popped formula's own (already-known, hence already-reachable) witness by the new
+edge. At a **reuse** call the target `sf'.label` is a world already known on `b`, so no new world
+appears at all and every witness transfers under `hasEdge_addEdge_mono_FS`. -/
+lemma modalStepBranchS5Gen_preserves_accReachableInv
+    (apply : RuleApply Atom) (hspec : S5SoundSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranchGen modalApplyOneS5 b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hknown : accTargetsKnown b acc)
     (hInv : accReachableInv b acc) :
     ∀ b' ∈ newBs, accReachableInv b' newAcc := by
@@ -1518,6 +1574,27 @@ lemma modalStepBranchS5_preserves_accReachableInv
   split_ifs at hsf with hexp
   have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds_FS b sf.label).mpr
     ⟨sf, hsfmem, rfl⟩
+  rcases hspec sf b acc with heq | ⟨sf', hsf'mem, heq⟩
+  swap
+  · -- Reuse: the emitted formula is already on `b`, so the child branch knows no new world;
+    -- every reachability witness survives the one added edge by monotonicity.
+    rw [heq] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, rfl⟩ := hsf
+    intro b' hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    intro w hw
+    have hsf'known : sf'.label ∈ modalKnownWorlds b :=
+      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+    have hknown' : ∀ x ∈ [sf'], x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      simp only [List.mem_singleton] at hx
+      subst hx
+      exact hsf'known
+    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+      (hInv w (modalKnownWorlds_append_subset_of_labels_known hknown' w hw))
+  rw [heq] at hsf
   rcases modalApplyOneS5_knownWorlds_step sf b acc hsfmem hknown with
     ⟨hsndeq, hdich⟩ | ⟨hsndeq, hdich⟩
   · -- acc unchanged: every new label of the child branch was already known on `b`.
@@ -1568,6 +1645,33 @@ lemma modalStepBranchS5_preserves_accReachableInv
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
+
+/-- A `modalStepBranchGen modalApplyOneS5` step preserves `accReachableInv`, given
+`accTargetsKnown`. Free corollary of `modalStepBranchS5Gen_preserves_accReachableInv` at the
+degenerate spec `modalApplyOneS5_s5SoundSpec`; statement unchanged. -/
+lemma modalStepBranchS5_preserves_accReachableInv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneS5 b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc)
+    (hInv : accReachableInv b acc) :
+    ∀ b' ∈ newBs, accReachableInv b' newAcc :=
+  modalStepBranchS5Gen_preserves_accReachableInv modalApplyOneS5 modalApplyOneS5_s5SoundSpec
+    b e acc newBs newExps newAcc hstep hknown hInv
+
+/-- A `modalStepBranchGen modalApplyOneS5w` step preserves `accReachableInv`. Free corollary of
+`modalStepBranchS5Gen_preserves_accReachableInv` at `modalApplyOneS5w_s5SoundSpec`. -/
+lemma modalStepBranchS5w_preserves_accReachableInv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneS5w b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc)
+    (hInv : accReachableInv b acc) :
+    ∀ b' ∈ newBs, accReachableInv b' newAcc :=
+  modalStepBranchS5Gen_preserves_accReachableInv modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
+    b e acc newBs newExps newAcc hstep hknown hInv
 
 /-! ### Rule-Level S5 Semantic Soundness -/
 
@@ -1698,18 +1802,26 @@ def S5SoundInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : Prop :=
   accFreshInv b acc ∧ accReachableInv b acc ∧ accTargetsKnown b acc
 
-/-- **Task 515 (Phase 7): bespoke S5 per-step satisfiability preservation.** Specialization of
-`modalStepBranchGen_preserves_satIn` (Task 513 Phase 2) to `apply := modalApplyOneS5`,
-`FC := s5FC`, threading the extra `accReachableInv` witness the two S5-relevant shapes need.
-The box-positive/diamond-negative branches discharge via the landed
+/-- Per-step satisfiability preservation for the S5 frame condition, lifted over any `apply`
+satisfying `S5SoundSpec`. Specialization of `modalStepBranchGen_preserves_satIn` to `FC := s5FC`,
+threading the extra `accReachableInv` witness the two S5-relevant shapes need. The
+box-positive/diamond-negative branches discharge via the landed
 `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` (consuming `hreach`); every other shape is
 byte-identical to the generic crux's own "not shape" branch, ported via
-`modalApplyOneS5_eq_of_not_boxPos_diaNeg` in place of the generic `hAgree` parameter. -/
-theorem modalStepBranchS5_preserves_satIn
+`modalApplyOneS5_eq_of_not_boxPos_diaNeg` in place of the generic `hAgree` parameter.
+
+The **reuse** call handled up front is the only case the unguarded universal rule cannot produce,
+and it is the cheapest of all: no world is minted, so the world-assignment `f` is not extended
+and the model is carried over verbatim. Both obligations fall out of `sf' ∈ b` -- the re-asserted
+formula is already satisfied (`hb sf'`), and the single new edge `sf.label → sf'.label` connects
+two *known* worlds, which `accReachableInv_related_s5` relates in any model whose relation is an
+equivalence. -/
+theorem modalStepBranchS5Gen_preserves_satIn
+    (apply : RuleApply Atom) (hspec : S5SoundSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility)
-    (hstep : modalStepBranchGen modalApplyOneS5 b e acc = some (newBs, newExps, newAcc))
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc))
     (hsat : branchSatisfiableIn s5FC b acc)
     (hInv : accFreshInv b acc)
     (hreach : accReachableInv b acc) :
@@ -1718,6 +1830,30 @@ theorem modalStepBranchS5_preserves_satIn
   simp only [modalStepBranchGen] at hstep
   obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
   split_ifs at hsf with hexp
+  have hsflabel_known : sf.label ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_FS b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+  rcases hspec sf b acc with heq | ⟨sf', hsf'mem, heq⟩
+  swap
+  · -- Witness reuse: re-assert a formula already on `b` and record one edge between two
+    -- already-known worlds. The model is unchanged; `f` is not extended.
+    have hsf'known : sf'.label ∈ modalKnownWorlds b :=
+      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+    rw [heq] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, rfl⟩ := hsf
+    refine ⟨[sf'] ++ b, List.mem_cons_self, W, m, f, hFC, ?_, ?_⟩
+    · -- The one new edge relates two known worlds; every old edge survives via `hacc`.
+      intro w1 w2 hedge
+      rcases hasEdge_addEdge_cases_FS hedge with ⟨rfl, rfl⟩ | hold
+      · exact accReachableInv_related_s5 hFC hacc hreach hsflabel_known hsf'known
+      · exact hacc w1 w2 hold
+    · -- The re-asserted formula is already satisfied, being already on `b`.
+      intro sfx hmem
+      simp only [List.singleton_append, List.mem_cons] at hmem
+      rcases hmem with rfl | hmem
+      · exact hb sfx hsf'mem
+      · exact hb sfx hmem
+  rw [heq] at hsf
   obtain ⟨sign, formula, lbl⟩ := sf
   have hsf_b := hb ⟨sign, formula, lbl⟩ hsfmem
   by_cases hshape :
@@ -2211,6 +2347,36 @@ theorem modalStepBranchS5_preserves_satIn
               rw [hf'_eq]
               exact (hb sf' hmem_old).2 hsign
       | diamond φ => exact absurd (Or.inr ⟨rfl, φ, rfl⟩) hshape
+
+/-- Per-step `s5FC`-satisfiability preservation for `modalApplyOneS5`. Free corollary of
+`modalStepBranchS5Gen_preserves_satIn` at the degenerate spec `modalApplyOneS5_s5SoundSpec`
+(the unguarded universal rule never reuses, so the reuse branch of the lift is vacuous for it);
+statement unchanged. -/
+theorem modalStepBranchS5_preserves_satIn
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneS5 b e acc = some (newBs, newExps, newAcc))
+    (hsat : branchSatisfiableIn s5FC b acc)
+    (hInv : accFreshInv b acc)
+    (hreach : accReachableInv b acc) :
+    ∃ b' ∈ newBs, branchSatisfiableIn s5FC b' newAcc :=
+  modalStepBranchS5Gen_preserves_satIn modalApplyOneS5 modalApplyOneS5_s5SoundSpec
+    b e acc newBs newExps newAcc hstep hsat hInv hreach
+
+/-- Per-step `s5FC`-satisfiability preservation for the witness-reuse rule `modalApplyOneS5w`.
+Free corollary of `modalStepBranchS5Gen_preserves_satIn` at `modalApplyOneS5w_s5SoundSpec`. -/
+theorem modalStepBranchS5w_preserves_satIn
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneS5w b e acc = some (newBs, newExps, newAcc))
+    (hsat : branchSatisfiableIn s5FC b acc)
+    (hInv : accFreshInv b acc)
+    (hreach : accReachableInv b acc) :
+    ∃ b' ∈ newBs, branchSatisfiableIn s5FC b' newAcc :=
+  modalStepBranchS5Gen_preserves_satIn modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
+    b e acc newBs newExps newAcc hstep hsat hInv hreach
 
 /-- **Task 515 (Phase 7): the S5 bespoke fuel induction.** Bespoke S5 specialization of
 `modalExpandBranchesGen_closed_unsatIn` (Task 513 Phase 3): `modalExpandBranchesGen

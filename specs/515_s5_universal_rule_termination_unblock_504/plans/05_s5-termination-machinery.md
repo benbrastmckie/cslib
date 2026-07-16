@@ -981,7 +981,7 @@ invoke fallback 1 (keep the rule, obtain the bound another way). No `sorry`.
 
 ---
 
-### Phase 8: R1 scratch probe -- soundness re-proof feasibility [NOT STARTED]
+### Phase 8: R1 scratch probe -- soundness re-proof feasibility [COMPLETED]
 
 **Goal**: **GATE.** Falsify or confirm the top risk (R1) in scratch **before** committing to the
 spec split and the lift refactor (Phases 9-12). The report is explicit: *"Probe it in scratch BEFORE
@@ -989,17 +989,17 @@ committing to Phase 6+, exactly as `hintikka_congr` and `diaPosWitness'` were pr
 This phase writes **no** production Lean.
 
 **Tasks**:
-- [ ] In scratch (`lean_run_code` / `lean_multi_attempt`; **no `.lean` file edited**), probe the new
+- [x] In scratch (`lean_run_code` / `lean_multi_attempt`; **no `.lean` file edited**), probe the new
       soundness case: the reuse edge `w→w'` to an **existing** `w'` carrying `⟨s,φ,w'⟩`. Confirm the
       world-assignment `f` is **not extended** (no mint), so the only obligation is `m.r (f w) (f w')`.
-- [ ] Confirm `accReachableInv_related_s5` (`FrameSoundness.lean:1381`, **landed**) discharges it:
+- [x] Confirm `accReachableInv_related_s5` (`FrameSoundness.lean:1381`, **landed**) discharges it:
       it states that two known worlds, both reachable from 0, are related in **any** model whose
       relation is an equivalence relation. That is exactly the obligation.
-- [ ] Run `lean_references` on `modalApplyOneS5_snd_eq` (`S5Simplification.lean:340-351`) to
+- [x] Run `lean_references` on `modalApplyOneS5_snd_eq` (`S5Simplification.lean:340-351`) to
       **enumerate its real consumers** (R4). Expected: `FrameSoundness.lean:1326` (inside
       `modalApplyOneS5_fresh_local`, which stays reusable) plus S5g/keyed sites
       (`S5Simplification.lean:1720/1868/1943/1953/2017/2025/2083`, :398) that Phase 14 retires anyway.
-- [ ] Estimate the re-proof size. **KILL CONDITION: if the probe indicates > ~400 lines, STOP and
+- [x] Estimate the re-proof size. **KILL CONDITION: if the probe indicates > ~400 lines, STOP and
       re-litigate the fork** -- invoke fallback 2 (atom-quotient semantic FMP, `[PARTIAL]`,
       deliverable 4 only).
 
@@ -1014,6 +1014,85 @@ in the phase completion note and the handoff JSON.
 
 **Blocked-branch**: a no-go here is **cheap and valuable** -- it saves Phases 9-13. Record the
 finding, land Phases 0-7 green, and pivot to fallback 2 as a documented `[PARTIAL]`.
+
+#### Phase 8 completion note: **GO** verdict, measured
+
+**1. `f` not extended -- CONFIRMED BY PROBE, structurally.** The probe's target `example`
+(`specs/515_s5_universal_rule_termination_unblock_504/probes/phase8-r1-reuse-soundness.lean`) states
+both reuse-case obligations purely in terms of the *original* `f` -- no `f'`, no model extension was
+constructed anywhere in the proof. This is the strongest form of confirmation available: had `f`
+needed extending, the statement itself would have required an existential model/assignment, and it
+does not.
+
+**2. `accReachableInv_related_s5` discharges the obligation -- CONFIRMED BY PROBE, sorry-free.**
+`lean_run_code` against the real project imports (`S5Simplification.lean`, `FrameSoundness.lean`)
+returned `"success":true` with **zero diagnostics on the target example** (the only two warnings
+attach to an orthogonal scratch-only auxiliary lemma, see below). The obligation splits into two
+parts, both closed using only already-landed lemmas:
+  - `sfSat m f ⟨.pos, φ, w'⟩` -- one line, `hb _ (witnessWorldS5_mem hw)` (the witness formula is
+    already on the branch, hence already satisfied by the existing IH; no new argument).
+  - `m.r (f lbl) (f w')` -- one line, `accReachableInv_related_s5 hFC hacc hreach hlblknown hw'known`.
+  The only auxiliary fact needed (`w' ∈ modalKnownWorlds b`, from `witnessWorldS5_mem` +
+  membership-in-fold) is orthogonal plumbing already proven identically at 3+ sites in this codebase
+  (`mem_modalKnownWorlds_S5`, `BDriver.lean`'s `mem_modalKnownWorlds_B`, `FmpMeasure.lean`'s
+  original); the probe `sorry`'d only that re-derivation (needed solely because the probe lives
+  outside `S5Simplification.lean` and can't see its `private` lemma) -- Phase 13's real
+  implementation sits inside that file and calls the existing private lemma directly, no
+  re-derivation required.
+
+**3. `lean_references` on `modalApplyOneS5_snd_eq` -- run, with a documented mismatch against the
+plan's expected line numbers.** `modalApplyOneS5_snd_eq` is at `S5Simplification.lean:358` (the plan
+cited `:340-351`, which is actually the *preceding* lemma, `modalApplyOneS5_eq_of_not_boxPos_diaNeg`).
+Actual `lean_references` output (8 real consumers, excluding the declaration site):
+  - `FrameSoundness.lean:1326` -- inside `modalApplyOneS5_fresh_local`, **matches expectation**
+    (stays reusable, per the plan).
+  - `S5Simplification.lean:415` -- inside `modalApplyOneS5_snd_eq_acc_of_not_mint_shape` (private).
+  - `S5Simplification.lean:1670` -- inside `modalApplyOneS5_fresh_local_local` (private; the
+    in-file twin of the `FrameSoundness.lean` lemma above).
+  - `S5Simplification.lean:3054, 3064` -- inside `modalStepBranchS5g_preserves_accFresh`.
+  - `S5Simplification.lean:3128, 3136` -- inside `modalStepBranchS5g_preserves_accKnown`.
+  - `S5Simplification.lean:3194` -- inside `modalStepBranchS5g_preserves_outDegEq`.
+  **Mismatch**: none of the plan's expected literal line numbers
+  (`1720/1868/1943/1953/2017/2025/2083`, `:398`) matched a real reference site. Root cause, confirmed
+  by inspection: those numbers are stale, predating Phases 4-7's ~1,500 lines of new S5w code
+  inserted into `S5Simplification.lean` since the deep-research report was written. **The taxonomy
+  and count still match**: 8 total references, split exactly as predicted between (a) the reusable
+  `fresh_local`-family lemmas and (b) `S5g`-prefixed (keyed/generalized-stepper) sites -- and every
+  one of the `S5g` sites Phase 14 is already scheduled to retire, confirmed by name
+  (`modalStepBranchS5g_preserves_{accFresh,accKnown,outDegEq}`). **No blocker**: the reference
+  surface is exactly as small and exactly as retirable as the plan claimed; only the citation's line
+  numbers need correcting in future artifacts.
+
+**4. Re-proof size estimate: ~150-250 new lines, well under the 400-line kill threshold.**
+Grounded in measured comparables, not guesswork:
+  - `modalStepBranchS5_preserves_satIn` (`FrameSoundness.lean:1708-2221`, ~514 lines) is the direct
+    analogue of what Phase 13 must build for `modalApplyOneS5w`. Of its ~514 lines, ~394 are the
+    "port every other shape verbatim from K" branch (all shapes except the two S5-universal-rule
+    cases) -- **unaffected by the witness-reuse change**, since `modalApplyOneS5w` only diverges
+    from `modalApplyOneS5` at the two mint shapes.
+  - The two mint-shape case bodies that DO change: `.pos,.diamond` (diaPos mint, lines 1901-2019,
+    ~118 lines) and `.neg,.box` (boxNeg mint, lines 2090-2212, ~122 lines). Each needs a
+    `cases witnessWorldS5 b s φ with` split: the `none` arm reuses the existing ~118/122-line mint
+    proof **verbatim** (behind `modalApplyOneS5w_eq_of_not_mint_shape`-style reduction, ~5-10 wiring
+    lines), and the `some w'` arm is **new**: probe-confirmed core content is ~4-5 lines
+    (`sfSat`/`m.r` obligations), but the surrounding `RuleResultSat`/`branchSatisfiableIn` packaging
+    (matching the `refine ⟨..., W, m, f, hFC, ?_, ?_⟩` shape used throughout
+    `modalStepBranchS5_preserves_satIn` and `modalS5BoxAll_soundIn`, `FrameSoundness.lean:1581-1627`,
+    ~47 lines) brings each reuse arm to a realistic **~30-40 lines**. Net new per case: **~40-50
+    lines** (2 cases: **~80-100 lines**).
+  - A new `accReachableInv`-preservation lemma is needed for `modalStepBranchGen modalApplyOneS5w`
+    (the S5w analogue of the already-landed `modalStepBranchS5_preserves_accReachableInv`,
+    `FrameSoundness.lean:1508`, accounting for the reuse arm's new edge between two already-known
+    worlds rather than a newly-minted one). Comparable in complexity to Phase 7's already-landed
+    `modalStepBranchS5w_preserves_worldInv`/`_preserves_accTargetsKnown` (each ~50-100 lines per the
+    Phase 7 completion note): estimate **~50-100 lines**.
+  - `modalTableauS5w_sound` itself is structurally identical to `modalTableauS5_sound`
+    (`FrameSoundness.lean:2379-2404`, ~26 lines) -- near-zero new content, a rename/adapt.
+  - **Total: ~80-100 (two reuse cases) + ~50-100 (new preservation lemma) + wiring ≈ 150-250 new
+    lines.** This is comfortably under the ~400-line kill threshold, with the highest-risk step
+    (the semantic core of the reuse-case obligation) already probe-confirmed sorry-free.
+
+**VERDICT: GO.** Proceed to Phase 9 (spec split). `next_action_hint`: Phase 9.
 
 ---
 

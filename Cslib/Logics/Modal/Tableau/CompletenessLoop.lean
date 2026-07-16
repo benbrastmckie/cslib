@@ -10,6 +10,7 @@ public import Cslib.Logics.Modal.Tableau.FmpMeasure
 public import Cslib.Logics.Modal.Tableau.Completeness
 public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.GenericDriver
+public import Cslib.Logics.Modal.Tableau.S5Simplification
 
 /-! # Modal K Tableau Completeness Loop: Combined-Invariant Single-Step Preservation
 
@@ -224,6 +225,160 @@ private lemma modalMaxWorld_lt_worldBound_of_phiBound
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalDepth φ0 + 1) := hpow1
     _ ≤ (2 * modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1) := hpow2
     _ = modalWorldBound φ0 := hWB.symm
+
+/-! ## Rank-Free Loop Invariant via the `Aux` Parametrization
+
+`ModalLoopInvGen` (above) threads a rank map `rank : WorldIndex → Nat` purely to re-establish
+the a-priori world bound (`phiBound`) across a step, via K's exact potential-conservation
+identity (`modalStepBranch_potential_step_gen`, `FmpMeasure.lean`). S5w's own termination
+argument (`S5wTagInv`/`S5wWorldInv`, `S5Simplification.lean`) re-establishes the same world
+bound with *no* rank map at all -- purely by tag-cardinality counting. `ModalLoopInvHintikka`
+below factors the world-bound conjunct out into an abstract, caller-supplied `Aux` predicate so
+both arguments can share one structure.
+
+**The hazard this design avoids**: a bare scalar field `worldBound : modalMaxWorld b <
+modalWorldBound φ0` is *not* itself step-preserved -- `n < WB` says nothing about `n + 1 < WB`.
+K only re-establishes it via the exact `phiBound` conservation identity; S5w via the exact
+tag-cardinality identity. `Aux` is therefore threaded as an opaque, step-preserved predicate
+(`AuxStepPreserved`) from which the bound is derived pointwise (`AuxBounds`), never as a bound
+scalar on its own. -/
+
+/-- **`Aux` is preserved by one `modalStepBranchGen apply` step** (the fix for the bare-scalar
+hazard above), given the two promoted branch-side bookkeeping facts (`accFreshInv`,
+`accTargetsKnown`) every instantiation needs as ambient hypotheses: K's own step lemmas consume
+`accFreshInv` (`spec.freshLocal`), and S5w's `modalStepBranchS5w_preserves_worldInv` needs
+`accTargetsKnown b acc` as a documented *third* hypothesis beyond `Aux` itself (the counting-crux
+deviation: K's `boxPos`/`diamondNeg` propagation shapes emit at `acc.successorsOf w`, unbounded
+by `modalMaxWorld` without it). A later step-preservation port for K's `Aux` discharges this
+against `modalStepGen_preserves_invariant`'s existing machinery (minus its two `potential_step`
+lines); the S5w instantiation discharges it directly below, with no further machinery needed. -/
+def AuxStepPreserved (apply : RuleApply Atom)
+    (Aux : List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop) : Prop :=
+  ∀ (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility),
+    modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc) →
+    accFreshInv b acc → accTargetsKnown b acc → Aux b acc →
+    ∀ b' ∈ newBs, Aux b' newAcc
+
+/-- **`Aux` entails the a-priori world bound**: the pointwise obligation that lets
+`ModalLoopInvHintikka.aux` stand in for `ModalLoopInvGen`'s `phiBound` conjunct wherever the
+world bound (`modalMaxWorld b < modalWorldBound φ0`) is needed, e.g. by
+`modalExpMeasure_step_lt_gen` (`FmpMeasure.lean`) in a step-preservation port. -/
+def AuxBounds (φ0 : Proposition Atom)
+    (Aux : List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop) : Prop :=
+  ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+    Aux b acc → modalMaxWorld b < modalWorldBound φ0
+
+/-- **Rank-free bundled loop invariant, `Aux`-parametrized** (task 510's `ModalLoopInvGen`,
+generalized further). Carries the five rank-free conjuncts of `ModalPotentialInv` directly
+(`bClosure`, `eClosure`, `eNodup`, `accFresh`, `accKnown`) plus the five Hintikka-witness
+conjuncts unchanged from `ModalLoopInvGen`, and replaces `potentialInv`/`phiBound` with a single
+opaque `aux : Aux b acc` field. `rankBound`/`rankEdge`/`outDegEq` (`ModalPotentialInv`'s
+remaining, genuinely rank-dependent fields) are *not* promoted here -- they live entirely inside
+K's own `Aux` instantiation (`ModalLoopAuxK` below), since S5w's instantiation needs no rank map
+at all. This is an arity change from `ModalLoopInvGen`'s seven `(rank : WorldIndex → Nat)`-scoped
+fields, not a field rename: the flat five-field list above lives inside `ModalPotentialInv`, not
+`ModalLoopInvGen`, in the pre-existing structure. -/
+structure ModalLoopInvHintikka (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (Aux : List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop where
+  /-- Every branch formula is a member of the fixed finite universe `U(φ0)`. -/
+  bClosure : ∀ x ∈ b, x ∈ modalUniverse φ0
+  /-- Every expanded-set formula is a member of `U(φ0)`. -/
+  eClosure : ∀ x ∈ e, x ∈ modalUniverse φ0
+  /-- The expanded set has no duplicate entries. -/
+  eNodup : e.Nodup
+  /-- All of `acc`'s recorded worlds are `< modalNextWorld b`. -/
+  accFresh : accFreshInv b acc
+  /-- Every `acc`-edge target is a label already appearing on the branch. -/
+  accKnown : accTargetsKnown b acc
+  /-- The opaque, caller-supplied auxiliary predicate standing in for the world-bound conjunct
+  (`phiBound` for K, `S5wTagInv ∧ S5wWorldInv` for S5w). -/
+  aux : Aux b acc
+  /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
+  hintikkaInv : ∀ sf ∈ e, modalHintikkaClauseGen apply sf.sign sf.formula sf.label b acc
+  /-- Every box-shaped formula in the expanded set `e` has sign `.neg`. -/
+  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
+  /-- Every `boxNeg`-shaped formula already has a witness successor on the branch. -/
+  eBoxNegWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos`. -/
+  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
+  /-- Every `diamondPos`-shaped formula already has a witness successor on the branch. -/
+  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+
+/-! ### K's `Aux` Instantiation -/
+
+/-- **K's instantiation of `Aux`**: existentially quantify over a rank map witnessing both the
+remaining `ModalPotentialInv` fields (`outDegEq`, `rankBound`, `rankEdge`) and the exact
+`phiBound` conservation identity. Closes over the fixed expanded set `e`, matching every other
+per-branch use of `ModalLoopInvHintikka`'s own `e` parameter at the invocation site. -/
+def ModalLoopAuxK (φ0 : Proposition Atom)
+    (e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop :=
+  ∃ rank : WorldIndex → Nat, ModalPotentialInv φ0 b e acc rank ∧
+    modalMaxWorld b + modalPotential (modalSubfmls φ0).length b acc rank + 1 ≤
+      geomCap (modalSubfmls φ0).length (modalDepth φ0)
+
+/-- **`ModalLoopAuxK` entails the world bound**: the pointwise `AuxBounds` obligation for K's
+instantiation, discharged directly by the already-landed
+`modalMaxWorld_lt_worldBound_of_phiBound`. -/
+theorem ModalLoopAuxK_bounds (φ0 : Proposition Atom)
+    (e : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    AuxBounds φ0 (ModalLoopAuxK φ0 e) := by
+  rintro b acc ⟨rank, -, hphi⟩
+  exact modalMaxWorld_lt_worldBound_of_phiBound φ0 b _ hphi
+
+/-- **`ModalLoopInvGen` is logically equivalent to `ModalLoopInvHintikka` at K's `Aux`**
+(confirms `ModalLoopAuxK` elaborates in the strongest sense -- a full bridge, not merely a
+type-check). Constructor/destructor on the shared eleven conjuncts plus `ModalPotentialInv`'s
+three remaining rank-dependent fields, packaged into/out of the existential `aux` field. -/
+theorem ModalLoopInvGen_iff_hintikka_auxK (apply : RuleApply Atom) (φ0 : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (∃ rank, ModalLoopInvGen apply φ0 b e acc rank) ↔
+      ModalLoopInvHintikka apply φ0 (ModalLoopAuxK φ0 e) b e acc := by
+  constructor
+  · rintro ⟨rank, hpot, hphi, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩
+    exact ⟨hpot.bClosure, hpot.eClosure, hpot.eNodup, hpot.accFresh, hpot.accKnown,
+      ⟨rank, hpot, hphi⟩, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩
+  · rintro ⟨-, -, -, -, -, ⟨rank, hpot, hphi⟩, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩
+    exact ⟨rank, hpot, hphi, hhint, hboxneg, hboxwit, hdiapos, hdiawit⟩
+
+/-! ### S5w's `Aux` Instantiation -/
+
+/-- **S5w's instantiation of `Aux`**: the landed tag/world invariants (`S5Simplification.lean`),
+needing no rank map at all. The trailing `Accessibility` argument is required by `Aux`'s shared
+signature (`AuxStepPreserved`/`AuxBounds`/`ModalLoopInvHintikka` all expect
+`List (SignedFormula …) → Accessibility → Prop`) but genuinely unused here. -/
+@[nolint unusedArguments]
+def ModalLoopAuxS5w (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (_acc : Accessibility) : Prop :=
+  S5wTagInv φ₀ b ∧ S5wWorldInv φ₀ b
+
+omit [Hashable Atom] in
+/-- **`ModalLoopAuxS5w` entails the world bound**: the pointwise `AuxBounds` obligation for S5w's
+instantiation, discharged directly by the already-landed `modalMaxWorld_lt_worldBound_of_S5w`. -/
+theorem ModalLoopAuxS5w_bounds (φ₀ : Proposition Atom) :
+    AuxBounds φ₀ (ModalLoopAuxS5w φ₀) := by
+  rintro b acc ⟨-, hW⟩
+  exact modalMaxWorld_lt_worldBound_of_S5w hW
+
+/-- **`ModalLoopAuxS5w` is step-preserved**: the `AuxStepPreserved` obligation for S5w's
+instantiation, discharged directly by the already-landed
+`modalStepBranchS5w_preserves_worldInv`, which is exactly this statement's conclusion under the
+same three hypotheses (`hT`/`hW` packaged as `Aux`, `hK` the `accTargetsKnown` ambient). Unlike
+K's instantiation, this discharges completely here: no rank map, no potential, no further
+step-preservation machinery needed. -/
+theorem ModalLoopAuxS5w_stepPreserved (φ₀ : Proposition Atom) :
+    AuxStepPreserved modalApplyOneS5w (ModalLoopAuxS5w φ₀) := by
+  rintro b e acc newBs newExps newAcc hstep _hFresh hKnown ⟨hT, hW⟩ b' hb'
+  exact modalStepBranchS5w_preserves_worldInv hT hW hKnown hstep b' hb'
 
 /-- **Generic branch-side universe-closure preservation** (task 510):
 `modalLoopGen_bClosure`, over an abstract `(apply, spec)`, discharged by

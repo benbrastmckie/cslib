@@ -1206,38 +1206,40 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 
-### Phase 10: Rank-free loop invariant with the `Aux` parametrization [NOT STARTED]
+### Phase 10: Rank-free loop invariant with the `Aux` parametrization [COMPLETED]
 
 **Goal**: Land the rank-free Hintikka loop invariant. **This is real work, not a rename.**
 
 **Tasks**:
-- [ ] Land:
-      ```lean
-      structure ModalLoopInvHintikka (apply) (φ0) (b e) (acc) : Prop where
-        bClosure, eClosure, eNodup, accFresh, accKnown        -- from ModalPotentialInv, rank-free
-        worldBound : modalMaxWorld b < modalWorldBound φ0     -- replaces potentialInv + phiBound
-        hintikkaInv, eBoxOnlyNeg, eBoxNegWitness, eDiamondOnlyPos, eDiamondPosWitness
-      ```
-- [ ] **The honest hazard, and the fix.** A **bare** `worldBound` scalar is **NOT step-preserved**
-      (`n < WB` says nothing about `n+1 < WB`), and K re-establishes `phiBound` only via an exact
-      conservation identity (`CompletenessLoop.lean:812`). The fix is **not** a bare field -- it is
-      to parametrize over an auxiliary step-preserved predicate:
-      ```lean
-      (Aux : List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
-      (auxStep : Aux is preserved by modalStepBranchGen apply)
-      (auxBound : Aux b acc → modalMaxWorld b < modalWorldBound φ0)
-      ```
-      K instantiates `Aux := fun b _ => ∃ rank, ModalPotentialInv φ0 b e acc rank ∧ phiBound`;
-      S5w instantiates `Aux := fun b _ => S5wTagInv φ₀ b ∧ S5wWorldInv φ₀ b` (Phases 6-7).
-      **This is the correction that makes the factoring actually inductive.**
-- [ ] Note for sizing (R3): `ModalLoopInvGen` really has **7** fields and is parametrized by
-      `(rank : WorldIndex → Nat)` -- `potentialInv, phiBound, hintikkaInv, eBoxOnlyNeg,
-      eBoxNegWitness, eDiamondOnlyPos, eDiamondPosWitness` [VERIFIED]. The flat field list
-      (`bClosure`, `eClosure`, `accFresh`, `accKnown`, `outDegEq`) that several designs asserted lives
-      **inside `ModalPotentialInv`**, not in `ModalLoopInvGen`. **Dropping `rank` is an ARITY CHANGE
-      to the structure K/T/B share, not a field swap.** Budget accordingly.
-- [ ] `hintikkaInv` is **cheap** for the witness rule: `modalHintikkaClauseGen` returns literal `True`
-      at `| .box _` and `| .diamond _` (`Completeness.lean`, VERIFIED), so all mint shapes are trivial.
+- [x] Landed `ModalLoopInvHintikka (apply) (φ0) (Aux) (b e) (acc) : Prop` with `bClosure`,
+      `eClosure`, `eNodup`, `accFresh`, `accKnown` (from `ModalPotentialInv`, rank-free), an
+      opaque `aux : Aux b acc` field (replacing `potentialInv`/`phiBound`), and `hintikkaInv`,
+      `eBoxOnlyNeg`, `eBoxNegWitness`, `eDiamondOnlyPos`, `eDiamondPosWitness`
+      (`CompletenessLoop.lean`, after `modalMaxWorld_lt_worldBound_of_phiBound`).
+- [x] **The honest hazard, and the fix -- landed as specified.** Did **not** land a bare
+      `worldBound` scalar. Landed `Aux : List (SignedFormula (Proposition Atom) WorldIndex) →
+      Accessibility → Prop` as an explicit structure parameter, plus the two standalone
+      obligations `AuxStepPreserved apply Aux` (takes `accFreshInv`/`accTargetsKnown` as
+      additional ambient hypotheses alongside `Aux b acc`, matching S5w's documented
+      third-hypothesis deviation) and `AuxBounds φ0 Aux` (`Aux b acc → modalMaxWorld b <
+      modalWorldBound φ0`). K instantiates `ModalLoopAuxK φ0 e b acc := ∃ rank,
+      ModalPotentialInv φ0 b e acc rank ∧ phiBound`-statement; S5w instantiates
+      `ModalLoopAuxS5w φ₀ b _acc := S5wTagInv φ₀ b ∧ S5wWorldInv φ₀ b`. Both `AuxBounds`
+      instances are proved outright (`ModalLoopAuxK_bounds`, `ModalLoopAuxS5w_bounds`), and
+      S5w's `AuxStepPreserved` is proved outright too (`ModalLoopAuxS5w_stepPreserved`, a direct
+      corollary of the landed `modalStepBranchS5w_preserves_worldInv`) -- K's `AuxStepPreserved`
+      is left to the step-preservation port (next phase), as scoped.
+- [x] Note for sizing (R3) -- confirmed exactly as documented: `ModalLoopInvGen` has **7** fields
+      parametrized by `(rank : WorldIndex → Nat)`; the flat five-field list (`bClosure`,
+      `eClosure`, `eNodup`, `accFresh`, `accKnown`) lives inside `ModalPotentialInv`, and is what
+      `ModalLoopInvHintikka` promotes directly. `outDegEq`/`rankBound`/`rankEdge` (the genuinely
+      rank-dependent remainder) live only inside K's `ModalLoopAuxK` instantiation. Proved the
+      full bridge `ModalLoopInvGen_iff_hintikka_auxK : (∃ rank, ModalLoopInvGen apply φ0 b e acc
+      rank) ↔ ModalLoopInvHintikka apply φ0 (ModalLoopAuxK φ0 e) b e acc` confirming the arity
+      change is sound, not merely a field swap.
+- [x] `hintikkaInv`'s cheapness for the witness rule was not separately re-verified in this
+      phase (no new proof needed it yet); the field is carried unchanged from `ModalLoopInvGen`
+      into `ModalLoopInvHintikka`.
 
 **Timing**: 2 hours
 

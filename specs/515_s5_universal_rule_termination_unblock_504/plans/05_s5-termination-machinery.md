@@ -566,19 +566,19 @@ refutation (Phase 3) remain independently valuable and should still land. Invoke
 
 ---
 
-### Phase 1: The witness-reuse rule + the free bridges [NOT STARTED]
+### Phase 1: The witness-reuse rule + the free bridges [COMPLETED]
 
 **Goal**: Land the rule. All four declarations below **already compiled sorry-free in the research
 session**; this phase transcribes and CI-greens them.
 
 **Tasks**:
-- [ ] Land `witnessWorldS5`:
+- [x] Land `witnessWorldS5`:
       ```lean
       def witnessWorldS5 (b : List (SignedFormula (Proposition Atom) WorldIndex))
           (s : Sign) (φ : Proposition Atom) : Option WorldIndex :=
         (modalKnownWorlds b).find? (fun w' => b.any (· == (⟨s, φ, w'⟩ : SignedFormula _ _)))
       ```
-- [ ] Land `modalApplyOneS5w : RuleApply Atom` (**plain, NOT φ₀-parametrized** -- see report §8 item
+- [x] Land `modalApplyOneS5w : RuleApply Atom` (**plain, NOT φ₀-parametrized** -- see report §8 item
       3; `hOutputsSubsetUniverse` at `FmpMeasure.lean:3241` binds `φ0` universally **inside** the
       hypothesis, so a φ₀-parametrized rule can never discharge it):
       ```lean
@@ -595,12 +595,25 @@ session**; this phase transcribes and CI-greens them.
            | none => modalApplyOneS5 sf b acc)
         | _, _ => modalApplyOneS5 sf b acc
       ```
-- [ ] Land `witnessWorldS5_mem (h : witnessWorldS5 b s φ = some w') : ⟨s, φ, w'⟩ ∈ b`.
+- [x] Land `witnessWorldS5_mem (h : witnessWorldS5 b s φ = some w') : ⟨s, φ, w'⟩ ∈ b`.
       **Compiled in research** (2 lines: `have := List.find?_some h; simpa using (List.any_eq_true.mp this)`;
       axioms `[propext, Quot.sound]`).
-- [ ] Land the two `rfl` bridges -- **compiled in research**, axioms `[propext]`:
+- [x] Land the two `rfl` bridges -- **compiled in research**, axioms `[propext]`:
       `modalApplyOneS5w_boxPos_eq`, `modalApplyOneS5w_diaNeg_eq`.
-- [ ] Land `modalApplyOneS5w_eq_of_not_mint_shape (h : ¬mint-shaped sf) : modalApplyOneS5w sf b acc = modalApplyOneS5 sf b acc`.
+- [x] Land `modalApplyOneS5w_eq_of_not_mint_shape (h : ¬mint-shaped sf) : modalApplyOneS5w sf b acc = modalApplyOneS5 sf b acc`.
+
+**Completion note**: All four declarations landed verbatim in
+`Cslib/Logics/Modal/Tableau/S5Simplification.lean`, inserted immediately after
+`modalApplyOneS5_boxPos_diaNeg_eq` (before the `modalWorldBoundS5`-dependent section slated for
+Phase 14 archival). `lake build Cslib.Logics.Modal.Tableau.S5Simplification` green (848/848
+jobs); `lake exe checkInitImports` clean; `lake exe lint-style` clean; zero new `sorry`.
+`lean_verify` confirms `witnessWorldS5_mem` -> `[propext, Quot.sound]` and
+`modalApplyOneS5w_eq_of_not_mint_shape` -> `[propext, Quot.sound]`, matching the research-session
+figures exactly (the two `rfl` bridges are axiom-free `rfl` terms, subsumed by the general
+`_eq_of_not_mint_shape` lemma). Note `modalApplyOneS5w_eq_of_not_mint_shape`'s hypothesis is
+phrased over the mint shapes directly (`.pos,.diamond` / `.neg,.box`) rather than the
+propagation shapes, which is the logically dual (and equivalent, since these are the only two
+S5-relevant shapes) framing to the task list's "¬mint-shaped sf" description.
 
 **Three design constraints, EACH LOAD-BEARING -- do not "optimize" any of them**:
 - **`.linear [witness]`, not `.linear []`** -- the cons is required for `freshLocal`'s right disjunct

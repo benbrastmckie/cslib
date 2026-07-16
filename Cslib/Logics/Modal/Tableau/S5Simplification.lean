@@ -569,6 +569,91 @@ lemma modalApplyOneS5_boxPos_diaNeg_eq
       · exact hmatch x hx
       · exact (modalS5DiaNegAll_mem hx).2.1
 
+/-! ## The Witness-Reuse Rule (Termination Machinery Plan v5, Phase 1)
+
+The two S5 world-*minting* arms of `modalApplyOneS5` -- `T(◇φ)@w` (inherited from K's
+`diamondPos`) and `F(□φ)@w` (inherited from K's `boxNeg`) -- mint a fresh world unconditionally,
+even when a world already carrying `⟨s, φ, w'⟩` exists on the branch. Since S5's universal box
+re-fires at every world (unlike K/T/B, which propagate only along recorded edges), this
+unconditional minting is unbounded: `modalApplyOneS5_hintikka_not_reachable` below exhibits
+`T(□◇p)@0` diverging under fuel `f` with `maxWorld = f/2`, no fixpoint.
+
+`modalApplyOneS5w` replaces minting with witness reuse: if any known world already carries
+`⟨s, φ, w'⟩`, add the edge `w → w'` and emit `.linear [⟨s, φ, w'⟩]` (re-asserting the already-known
+formula, which triggers no further work); mint fresh (falling through to `modalApplyOneS5`, hence
+to K's own mint arm) only when no witness exists on the branch. This bounds world creation by a
+monotone tag-injection argument (Phase 6/7): each mint permanently consumes a distinct
+`(sign, subformula)` tag, of which there are only `2 * |modalSubfmls φ₀|` -- **linear**, not
+exponential. -/
+
+/-- `witnessWorldS5 b s φ` finds a known world of `b` that already carries the signed formula
+`⟨s, φ, w'⟩`, if one exists. Used by `modalApplyOneS5w` to redirect a would-be mint into a reuse
+edge. -/
+def witnessWorldS5 (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) : Option WorldIndex :=
+  (modalKnownWorlds b).find? (fun w' => b.any (· == (⟨s, φ, w'⟩ : SignedFormula _ _)))
+
+omit [Hashable Atom] in
+/-- If `witnessWorldS5 b s φ = some w'`, then `⟨s, φ, w'⟩` is genuinely present on `b`. -/
+lemma witnessWorldS5_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {s : Sign} {φ : Proposition Atom} {w' : WorldIndex}
+    (h : witnessWorldS5 b s φ = some w') :
+    (⟨s, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have := List.find?_some h
+  simpa using (List.any_eq_true.mp this)
+
+/-- The witness-reuse S5 rule. GUARD-LESS: at the two mint shapes (`T(◇φ)@w`, `F(□φ)@w`), if a
+known world already carries the witness formula, always reuse it (`.linear [witness]`, never
+`.notApplicable`, never `.linear []` -- both load-bearing: `.notApplicable` on a mint shape would
+invert the `exfalso` discharge at `CompletenessLoop.lean`'s conjunct-3/4 obligation (R6), and
+`.linear []` would break `freshLocal`'s right disjunct, which needs a `cons`). Mint fresh (falling
+through to `modalApplyOneS5`, hence K's own mint arm) only when no witness exists. Every other
+shape (including the two S5-relevant *propagation* shapes `T(□φ)@w`/`F(◇φ)@w`, which are NOT mint
+shapes) falls through to `modalApplyOneS5` unchanged. -/
+def modalApplyOneS5w : RuleApply Atom := fun sf b acc =>
+  match sf.sign, sf.formula with
+  | .pos, .diamond φ =>
+    (match witnessWorldS5 b .pos φ with
+     | some w' => (.linear [⟨.pos, φ, w'⟩], acc.addEdge sf.label w')
+     | none => modalApplyOneS5 sf b acc)
+  | .neg, .box φ =>
+    (match witnessWorldS5 b .neg φ with
+     | some w' => (.linear [⟨.neg, φ, w'⟩], acc.addEdge sf.label w')
+     | none => modalApplyOneS5 sf b acc)
+  | _, _ => modalApplyOneS5 sf b acc
+
+/-- Free bridge: on the box-positive (propagation, non-mint) shape, `modalApplyOneS5w` falls
+through to `modalApplyOneS5` by the definitional `| _, _ =>` catch-all -- `rfl`. -/
+lemma modalApplyOneS5w_boxPos_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS5w (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS5 (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
+  rfl
+
+/-- Free bridge, dual of `modalApplyOneS5w_boxPos_eq`: on the diamond-negative (propagation,
+non-mint) shape, `modalApplyOneS5w` falls through to `modalApplyOneS5` by `rfl`. -/
+lemma modalApplyOneS5w_diaNeg_eq
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS5w (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS5 (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
+  rfl
+
+/-- `modalApplyOneS5w` agrees with `modalApplyOneS5` outside the two mint shapes (`T(◇φ)@w`,
+`F(□φ)@w`): generalizes both free bridges above, plus every propositional/atomic shape, into a
+single reduction lemma. -/
+lemma modalApplyOneS5w_eq_of_not_mint_shape
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∧
+         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)) :
+    modalApplyOneS5w sf b acc = modalApplyOneS5 sf b acc := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalApplyOneS5w
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
 (available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which

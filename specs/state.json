@@ -1740,15 +1740,15 @@
           "summary": "Deep multi-agent research (29 agents): R7 fuel domination REFUTED by execution (maxWorld = fuel/2 on box-dia-p, unbounded); modalWorldBoundS5 <= modalWorldBound is FALSE; hOutputsSubsetUniverse binds phi0 universally (kills phi0-parametrized rules); 5/KB5 NOT deliverable by any S5 tableau (fiveValid subsetneq s5Valid). Verdict: witness-reuse S5 rule + linear world budget at K own universe; delete modalUniverseS5/modalWorldBoundS5; ~2000 lines of S5Simplification.lean discarded; 12 phases."
         },
         {
-          "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/04_s5-termination-machinery.md",
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
           "type": "plan",
-          "summary": "Plan v3: witness-reuse S5 rule + linear tag-injection world budget at K's own universe; retires the keyed/pigeonhole architecture, lands the R7 refutation as a theorem, drops 5/KB5 as mathematically impossible"
+          "summary": "Plan v4: preserves v3's S5 witness-reuse architecture verbatim (Phases 0-14) and applies two targeted corrections driven by probes/five-s5-separation.lean and explicit user decisions. (1) 5/KB5 is RE-SCOPED, NOT STRUCK: the probe confirms v3's narrow claim (fiveValid/kb5Valid are strict subsets of s5Valid, so the S5 route provably cannot reach them) but REFUTES v3's broader 'mathematically impossible' claim -- the missing Euclidean-closure operator is library infrastructure, not an obstruction. Nine new phases (15-23) at the END of the DAG deliver Relation.EuclGen, the root+cluster normal form, extractModelFive, 5/KB5 soundness+completeness, and Decidable (fiveValid/kb5Valid). The task-description-amendment demand is deleted; the description stands. (2) Phase 14 is ARCHIVAL, not demolition: ~2,000 superseded lines move to specs/515_*/archive/ with provenance headers, never deleted. Effort 25h -> 52h (24 phases), budgeted honestly per 'no matter the cost'."
         }
       ],
       "created": "2026-07-15T06:19:22Z",
       "last_updated": "2026-07-16T00:19:56Z",
       "session_id": "sess_1784160570_55026e",
-      "next_artifact_number": 5,
+      "next_artifact_number": 6,
       "memory_candidates": [
         {
           "content": "When a generic frame-relativized soundness crux (e.g. modalStepBranchGen_preserves_satIn) takes hBoxPos/hDiaNeg hypotheses universally quantified over ALL (b, acc) pairs, it cannot be instantiated for a frame system whose rule-level soundness genuinely depends on an extra invariant specific to that (b, acc)'s computational history (e.g. S5's accReachableInv). The generic theorem's type has no parameter slot to receive such a per-instance witness. In this situation, a bespoke copy of the generic theorem (specialized to the fixed apply/FC, with the extra invariant added as a parameter) is safer than extracting the shared 'other shapes' branch into a new generic lemma, when the priority is zero regression risk to already-frozen, CI-green declarations that consume the original generic theorem.",
@@ -1819,11 +1819,11 @@
         }
       ],
       "plan_metadata": {
-        "phases": 15,
-        "total_effort_hours": 25,
+        "phases": 24,
+        "total_effort_hours": 52,
         "complexity": "complex",
         "research_integrated": true,
-        "plan_version": 3,
+        "plan_version": 4,
         "dependency_waves": [
           [
             0,
@@ -1855,6 +1855,31 @@
           ],
           [
             14
+          ],
+          [
+            15
+          ],
+          [
+            16
+          ],
+          [
+            17
+          ],
+          [
+            18
+          ],
+          [
+            19,
+            20
+          ],
+          [
+            21
+          ],
+          [
+            22
+          ],
+          [
+            23
           ]
         ],
         "reports_integrated": [
@@ -1862,6 +1887,11 @@
             "path": "reports/03_s5-infrastructure-deep-research.md",
             "integrated_in_plan_version": 3,
             "integrated_date": "2026-07-16"
+          },
+          {
+            "path": "probes/five-s5-separation.lean",
+            "integrated_in_plan_version": 4,
+            "integrated_date": "2026-07-15"
           }
         ],
         "skeleton": false,

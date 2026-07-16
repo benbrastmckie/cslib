@@ -45,7 +45,7 @@ next_project_number: 520
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+  └─ 517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
     └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
@@ -129,7 +129,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 509, Task 512, Task 516

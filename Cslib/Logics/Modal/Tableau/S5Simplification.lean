@@ -1565,6 +1565,62 @@ private lemma modalKnownWorlds_nodup_S5
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
   modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
 
+/-! ## The Counting Crux (Termination Machinery Plan v5, Phase 7)
+
+The load-bearing new proof: replaces the birth-key pigeonhole with a linear a-priori world
+budget over `modalApplyOneS5w`. A mint fires only when `witnessWorldS5 b s φ = none`, which is
+equivalent to `(s, φ) ∉ usedTags φ₀ b` (any `⟨s, φ, w''⟩ ∈ b` puts `w''` in `modalKnownWorlds b`,
+so `find?` cannot miss it). The mint emits its own witness at `modalNextWorld b = modalMaxWorld
+b + 1`, so `modalMaxWorld` grows by 1 exactly when `usedTags` gains a fresh tag from the finite
+set `mintTags φ₀` -- and since `b` only ever grows, that tag is used forever after, so it can
+never mint again. This bounds `modalMaxWorld b` by `(usedTags φ₀ b).card ≤ (mintTags φ₀).card ≤
+modalOps φ₀ < modalWorldBound φ₀` (K's own bound: no rank, no potential, no pigeonhole, no
+powerset, no birth keys). -/
+
+/-- The world-independent invariant: `modalMaxWorld b` never exceeds the number of mint tags
+already consumed. Combined with `mintTags φ₀`'s finite cardinality (`mintTags_card_le_modalOps`,
+`modalOps_lt_worldBound`), this is the drop-in replacement for K's own
+`modalMaxWorld_lt_worldBound_of_phiBound` -- at K's own bound, with no rank, no potential, no
+pigeonhole, no powerset, no birth keys. -/
+def S5wWorldInv (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Prop :=
+  modalMaxWorld b ≤ (usedTags φ₀ b).card
+
+omit [Hashable Atom] in
+/-- `witnessWorldS5 b s φ = none` implies `(s, φ)` is not (yet) a used tag on `b`: if some
+`x ∈ b` had `x.sign = s ∧ x.formula = φ`, then `x.label ∈ modalKnownWorlds b` (`x ∈ b`) and
+`b.any (· == ⟨s, φ, x.label⟩)` holds (witnessed by `x` itself, since `x = ⟨s, φ, x.label⟩` given
+`x.sign = s`, `x.formula = φ`), so `witnessWorldS5 b s φ`'s `find?` would have returned `some _`,
+contradicting `= none`. -/
+lemma witnessWorldS5_none_not_mem_usedTags {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {s : Sign} {φ : Proposition Atom}
+    (h : witnessWorldS5 b s φ = none) : (s, φ) ∉ usedTags φ₀ b := by
+  simp only [usedTags, Finset.mem_filter, not_and]
+  intro _ hany
+  obtain ⟨x, hxmem, hxeq⟩ := List.any_eq_true.mp hany
+  simp only [Bool.and_eq_true, beq_iff_eq] at hxeq
+  obtain ⟨hxs, hxf⟩ := hxeq
+  have hxsf : x = (⟨s, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+    cases x; simp_all
+  have hknown : x.label ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_S5 b x.label).mpr ⟨x, hxmem, rfl⟩
+  unfold witnessWorldS5 at h
+  have hcontra := List.find?_eq_none.mp h x.label hknown
+  exact hcontra (List.any_eq_true.mpr ⟨x, hxmem, beq_iff_eq.mpr hxsf⟩)
+
+omit [Hashable Atom] in
+/-- Chains `S5wWorldInv`, `usedTags ⊆ mintTags`, `mintTags_card_le_modalOps`, and
+`modalOps_lt_worldBound` into the world bound the S5w termination argument needs: the drop-in
+replacement for `modalMaxWorld_lt_worldBound_of_phiBound` (K's own bound), with no rank, no
+potential, no pigeonhole, no powerset, no birth keys. -/
+theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : S5wWorldInv φ₀ b) :
+    modalMaxWorld b < modalWorldBound φ₀ :=
+  calc modalMaxWorld b ≤ (usedTags φ₀ b).card := hW
+    _ ≤ (mintTags φ₀).card := Finset.card_le_card (Finset.filter_subset _ _)
+    _ ≤ modalOps φ₀ := mintTags_card_le_modalOps φ₀
+    _ < modalWorldBound φ₀ := modalOps_lt_worldBound φ₀
+
 /-! ## World-Contiguity Bookkeeping (task 515 Phase 4, 12th `S5LoopInv` field)
 
 Local re-derivations of `FmpMeasure.lean`'s private `modalMaxWorld_append_*`/known-worlds-length

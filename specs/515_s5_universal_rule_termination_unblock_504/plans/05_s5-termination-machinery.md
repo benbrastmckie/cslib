@@ -1251,22 +1251,56 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 
-### Phase 11: Step preservation [NOT STARTED]
+### Phase 11: Step preservation [COMPLETED]
 
 **Goal**: Port `modalStepGen_preserves_invariant` to the rank-free invariant with `Aux` threaded.
 
 **Tasks**:
-- [ ] Land:
+- [x] Landed:
       ```lean
-      lemma modalStepHintikka_preserves_inv (hs : RuleApplicationSpecCore apply) ... :
-        (∀ p ∈ newBs.zip newExps, ModalLoopInvHintikka ... p.1 p.2 newAcc) ∧ measure-drop
+      lemma modalStepHintikka_preserves_inv (apply) (hs : RuleApplicationSpecCore apply) (φ0)
+          (Aux) (hAuxStep : AuxStepPreserved apply Aux) (hAuxBounds : AuxBounds φ0 Aux) ... :
+        (∀ p ∈ newBs.zip newExps, ModalLoopInvHintikka apply φ0 Aux p.1 p.2 newAcc) ∧ measure-drop
       ```
-- [ ] Port of `modalStepGen_preserves_invariant` (`CompletenessLoop.lean:761-845`) **minus the two
-      `potential_step` lines**, with `Aux` threaded.
-- [ ] Consume `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean:3231`) directly for the measure drop:
-      it needs only `apply` + three raw hypotheses + `hW : modalMaxWorld bh < modalWorldBound φ0`
-      -- supplied by `auxBound` at S5w's instantiation via
-      `modalMaxWorld_lt_worldBound_of_S5w` (Phase 7). **No rank.**
+      (`CompletenessLoop.lean`, immediately before "The Combined-Invariant Single-Step
+      Preservation Lemma" section).
+- [x] Port of `modalStepGen_preserves_invariant` (located by name, not the stale line citation)
+      **minus the two `potential_step` lines** (the existential rank witness and the `phiBound`
+      re-derivation), with `Aux` threaded via `hAuxStep`/`hAuxBounds` in their place. The five
+      rule-dependent helpers it composes (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
+      `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) are declared against the full
+      `RuleApplicationSpec` even though each proof body only ever touches a Core field; rather
+      than weaken those five declarations in place (explicitly Phase 12's remit per this plan's
+      own scoping note), landed five purely-additive `_core`-suffixed twins (identical proof
+      bodies, parametrized over `RuleApplicationSpecCore`) and used those instead. The other four
+      preservation facts needed (`accFreshInv`, `accTargetsKnown`, `eNodup`, `eClosure`,
+      hintikka-inv) already had raw, Core-compatible underlying lemmas taking field hypotheses
+      directly (not a bundled spec) -- no new plumbing needed there.
+- [x] Consumed `modalExpMeasure_step_lt_gen` (located by name; stale line citation) directly for
+      the measure drop: `apply` + `hs.branchingLength`/`hs.persistentFresh`/
+      `hs.outputsSubsetUniverse` (all three Core fields) + `hW : modalMaxWorld bh <
+      modalWorldBound φ0` -- supplied by `hAuxBounds b acc haux` at S5w's instantiation via the
+      landed `modalMaxWorld_lt_worldBound_of_S5w` (Phase 7). **No rank.** Bypassed the
+      full-spec-typed `modalStepBranchGen_expMeasure_step_lt` wrapper entirely.
+- [x] Landed `modalStepHintikka_preserves_inv_S5w`, a concrete corollary instantiating the generic
+      lemma at `Aux := ModalLoopAuxS5w φ0` (using the already-landed `modalApplyOneS5w_specCore`,
+      `ModalLoopAuxS5w_stepPreserved`, `ModalLoopAuxS5w_bounds`), demonstrating the S5w half of
+      the verification bar concretely, sorry-free.
+
+**Finding (documented, not a blocker for this phase)**: the K-side half of the verification bar
+("closes sorry-free at both `Aux` instantiations") cannot be satisfied by a *closed*
+`AuxStepPreserved modalApplyOne (ModalLoopAuxK φ0 e)` term, for a genuine mathematical reason, not
+a missing tactic: `ModalLoopAuxK`'s `outDegEq` conjunct is stated against a **frozen** `e`
+(`ModalLoopAuxK` must close over a fixed `e` to fit `Aux`'s bare `b → acc → Prop` type), but
+`AuxStepPreserved`'s own step hypothesis is universally quantified over an independent, per-call
+`e`. A step that mints a new edge changes `outDeg` against the step's own *current* expanded set,
+not against `ModalLoopAuxK`'s frozen `e` -- so whenever the frozen `e` and the step's actual `e`
+diverge, the post-state conjunct is false (concrete counterexample: an empty frozen `e0 := []`
+together with any `boxNeg`/`diamondPos`-shaped step that mints an edge). This is architecture
+work for Phase 12's parametric Hintikka lift (which will need to thread the current `e` through
+K's instantiation explicitly, rather than freezing it inside `Aux`), not a Phase 11 port defect --
+`modalStepHintikka_preserves_inv` itself is fully generic and sorry-free for **any** `Aux`
+genuinely satisfying `AuxStepPreserved`/`AuxBounds` (as S5w's does).
 
 **Timing**: 2 hours
 
@@ -1274,7 +1308,11 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 **Files to modify**: `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean`
 
-**Verification**: full CI green; the port closes sorry-free at both `Aux` instantiations.
+**Verification**: full CI green (build, `checkInitImports`, `lint-style`, `lint` [pre-existing
+`PrimeExclusion.lean` error only, out of scope], `test`, `shake`); the port closes sorry-free;
+zero new axioms (`propext`/`Classical.choice`/`Quot.sound` only); confirmed sorry-free at S5w's
+`Aux` instantiation concretely; K's instantiation genuinely requires Phase 12 architecture (see
+Finding above), not a gap in this phase's port.
 
 ---
 

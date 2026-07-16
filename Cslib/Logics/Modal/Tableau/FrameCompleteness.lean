@@ -568,26 +568,45 @@ targets: `Relation.RightEuclidean (extractModelS5 b acc).r` holds unconditionall
 equivalence relation is right-Euclidean. This is genuinely independent of Phase 2 (it only needs
 `extractModelS5_equiv`, a Phase 3 result).
 
-**What remains BLOCKED**: stating and proving `fiveValid`/`kb5Valid` *validity + completeness*
-theorems that route decidability through the S5 tableau (`modalTableauS5`) is **not** deliverable
-here. Such a completeness/decidability result needs `modalTableauS5_complete` (Phase 4) and
-`modalTableauS5_sound` (Phase 5) as its proof engine, and both are transitively blocked by Phase 2
-(`modalApplyOneS5_spec : RuleApplicationSpec modalApplyOneS5` cannot be constructed --
-`rankStep` is proven mathematically false for the universal rule, see
-`modalApplyOneS5_rankStep_not_dischargeable` in `S5Simplification.lean`). There is no way to
-assemble a `Decidable (fiveValid φ)`/`Decidable (kb5Valid φ)` instance through this route without
-that soundness+completeness triple existing first.
+**CORRECTED (this docstring previously framed the gap below as a SCHEDULING dependency --
+*"needs `modalTableauS5_complete`/`modalTableauS5_sound` as its proof engine, both transitively
+blocked by Phase 2"* -- which is wrong on the mathematics and misled a prior planning cycle into
+attempting a route that provably cannot arrive).**
+
+**What is actually true: 5/KB5 is not deliverable *via the S5 tableau route*, at all, regardless
+of whether `modalTableauS5_complete`/`modalTableauS5_sound` exist.** This is a **frame-class
+inclusion obstruction**, proven (not argued) by
+`specs/515_s5_universal_rule_termination_unblock_504/probes/five-s5-separation.lean`
+(sorry-free, **zero axioms**): `s5FC = Std.Refl r ∧ Relation.RightEuclidean r`
+(`FrameSoundness.lean:1273`), but `fiveFC = Relation.RightEuclidean r` **alone** (:1282,
+reflexivity absent) and `kb5FC = Std.Symm r ∧ Relation.RightEuclidean r` (:1291, reflexivity
+absent) are **strictly larger** frame classes. `□p → p` on the one-world **empty** frame
+separates them: `RightEuclidean` and `Std.Symm` are both vacuous with no edges, so `□p` holds
+vacuously while `p` is false, and reflexivity -- exactly what `fiveFC`/`kb5FC` drop -- is exactly
+what this validity depends on. Hence `fiveValid ⊊ s5Valid` and `kb5Valid ⊊ s5Valid`
+(`fiveValid_ssubset_s5Valid`, `kb5Valid_ssubset_s5Valid`, with supporting `boxImp_s5Valid`,
+`boxImp_not_fiveValid`, `boxImp_not_kb5Valid`, `fiveValid_imp_s5Valid`, `kb5Valid_imp_s5Valid`,
+`s5FC_imp_fiveFC`, `s5FC_imp_kb5FC` in the probe): **no sound+complete decision procedure for
+`s5Valid` composes into one for `fiveValid`/`kb5Valid`**, no matter how the S5 tableau itself is
+built or proven.
+
+**This is a route obstruction, NOT an impossibility of the deliverable.** 5/KB5 validity and
+completeness ARE delivered -- by a dedicated Euclidean route built on top of the S5 cluster
+machinery (`modalTableauFive`/`modalTableauKb5`, consuming a new `Relation.EuclGen` least-closure
+operator in `Cslib/Foundations/Relation/Euclidean.lean`): rooted Euclidean frames are exactly
+"root + universal cluster" (`Relation.RightEuclidean.equiv_cod`, `Euclidean.lean:124`), so the
+cluster half is the S5 machinery this file's neighbours already build, and only the closure
+operator and a root-aware rule are genuinely new. See the S5 termination/decidability plan's
+Phases 15-23 for the route that reaches it.
 
 **Separately, genuine pure-K5 / pure-5** (Euclidean *without* full equivalence -- i.e. a frame
-satisfying only `RightEuclidean`, not necessarily `Std.Refl`/`IsTrans`/`Std.Symm`) is OUT OF
-SCOPE regardless of Phase 2's status: no Mathlib closure operator exists for "Euclidean closure"
-analogous to `Relation.EqvGen`/`Relation.SymmGen`, so `extractModelS5`'s `EqvGen`-based
-construction cannot be narrowed to deliver a pure-K5 countermodel -- it would need a bespoke
-`EuclGen`-style closure operator, which this task explicitly does not introduce (per the parent
-plan's non-goals, `reports/03`). Both gaps -- the Phase-2-blocked 5/KB5-via-S5 route, and the
-separately-out-of-scope pure-K5 closure -- are deferred to follow-up tasks (a resolution of
-Phase 2's obstruction, and a dedicated `pure-k5-euclidean-closure` task, respectively). No
-`EuclGen`, no `sorry`, no `axiom` introduced. -/
+satisfying only `RightEuclidean`, not necessarily `Std.Refl`/`IsTrans`/`Std.Symm`) is **OUT OF
+SCOPE** for THIS file's `extractModelS5`-based route: no Mathlib closure operator exists for
+"Euclidean closure" analogous to `Relation.EqvGen`/`Relation.SymmGen`, so `extractModelS5`'s
+`EqvGen`-based construction cannot be narrowed to deliver a pure-K5 countermodel directly -- it
+needs the bespoke `Relation.EuclGen` closure operator named above. This is a **cost** (missing
+library infrastructure), not a mathematical obstruction, and it is exactly what the Euclidean
+route's Phase 16 builds. No `EuclGen`, no `sorry`, no `axiom` introduced in THIS file. -/
 
 /-! ## T Modal Truth Lemma (task 503 Phase 5)
 

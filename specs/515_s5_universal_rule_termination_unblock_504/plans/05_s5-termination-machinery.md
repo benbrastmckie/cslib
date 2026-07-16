@@ -683,14 +683,14 @@ and `lint-style` clean; sorry count unchanged (0 real sorries).
 
 ---
 
-### Phase 3: Land the R7 refutation as a theorem + correct the false docstrings and the 5/KB5 ROUTE note [NOT STARTED]
+### Phase 3: Land the R7 refutation as a theorem + correct the false docstrings and the 5/KB5 ROUTE note [COMPLETED]
 
 **Goal**: Convert *"Phase 8 blocked"* into *"the Phase 8 target was refutable"* -- a landable,
 sorry-free result -- and correct the three factually false pieces of documentation that misled the
 last planner. **Independent of the rule; can start immediately.**
 
 **Tasks**:
-- [ ] Land a **sibling** to `modalApplyOneS5_rankStep_not_dischargeable` (`S5Simplification.lean:2995`),
+- [x] Land a **sibling** to `modalApplyOneS5_rankStep_not_dischargeable` (`S5Simplification.lean:2995`),
       in the same `decide`-backed idiom, refuting the Phase 8 goal for `modalApplyOneS5`: exhibit
       `[T(□◇p)@0]` and show `modalExpandBranchesGen modalApplyOneS5` yields `maxWorld = fuel/2` with
       no fixpoint, hence `modalHintikkaSetGen modalApplyOneS5 bR aR` is **false at every fuel value**.
@@ -701,15 +701,15 @@ last planner. **Independent of the rule; can start immediately.**
       there; repeat. The supply of trigger formulas never runs out because **each new world
       manufactures a new one**. This is the honest disposition of the
       `FrameCompleteness.lean:2245-2273` scope note (whose route (b) is this false statement).
-- [ ] **Remove and rewrite** the false docstring at `S5Simplification.lean:1071-1073` (a false
+- [x] **Remove and rewrite** the false docstring at `S5Simplification.lean:1071-1073` (a false
       statement is corrected in place, never archived as though it were a retired asset):
       *"S5 never mints a world
       outside the K `diamondPos`/`boxNeg` arms, so `modalFuel` is sufficient here too"*. The first
       half is **true** (and is precisely why the fix is local to minting); the second half is
       **false** by execution. Rewrite, do not preserve.
-- [ ] **Correct** the docstring at `S5Simplification.lean:40-45` (*"`modalApplyOneS5` never mints a
+- [x] **Correct** the docstring at `S5Simplification.lean:40-45` (*"`modalApplyOneS5` never mints a
       world"*).
-- [ ] **Correct `FrameCompleteness.lean:571-580`** -- the 5/KB5 note. It currently frames the gap as
+- [x] **Correct `FrameCompleteness.lean:571-580`** -- the 5/KB5 note. It currently frames the gap as
       a **scheduling** dependency (*"needs `modalTableauS5_complete` … as its proof engine"*). Replace
       with the **frame-class inclusion obstruction**: `s5FC = Std.Refl r ∧ RightEuclidean r` (:1273)
       but `fiveFC = RightEuclidean r` alone (**:1282** -- **note the corrected line number; v3
@@ -718,14 +718,14 @@ last planner. **Independent of the rule; can start immediately.**
       `RightEuclidean` and `Std.Symm` are vacuous with no edges); hence `fiveValid ⊊ s5Valid` and
       **no S5 tableau can decide `fiveValid`**, regardless of whether `modalTableauS5_complete`
       exists.
-- [ ] **Cite the probe by theorem name** in that corrected docstring, so the claim is backed by a
+- [x] **Cite the probe by theorem name** in that corrected docstring, so the claim is backed by a
       proof rather than by prose: `fiveValid_ssubset_s5Valid` and `kb5Valid_ssubset_s5Valid`, with
       supporting `boxImp_s5Valid`, `boxImp_not_fiveValid`, `boxImp_not_kb5Valid`,
       `fiveValid_imp_s5Valid`, `kb5Valid_imp_s5Valid`, `s5FC_imp_fiveFC`, `s5FC_imp_kb5FC`
       (`specs/515_s5_universal_rule_termination_unblock_504/probes/five-s5-separation.lean`,
       sorry-free, **zero axioms**). **If Phase 23 lands, port these to the live tree beside the
       Euclidean route** rather than leaving them cited from a probe path.
-- [ ] **CRITICAL -- state the ROUTE obstruction, NOT an impossibility.** The corrected docstring must
+- [x] **CRITICAL -- state the ROUTE obstruction, NOT an impossibility.** The corrected docstring must
       say *"5/KB5 is not deliverable **via this S5 route**; it is delivered by the dedicated
       Euclidean route (`modalTableauFive`, `Relation.EuclGen`)"*. It **MUST NOT** say 5/KB5 is
       impossible, unreachable in principle, or a mathematical obstruction. **That overclaim in v3 is
@@ -733,16 +733,41 @@ last planner. **Independent of the rule; can start immediately.**
       mislead the next planner -- the same way `:571-580`'s scheduling framing misled the last one.
       Phase 23 will replace this note wholesale once the Euclidean route lands; until then it must
       point forward, not close the door.
-- [ ] **Retain** the note's second half (pure-K5/pure-5 needs a bespoke closure operator for want of
+- [x] **Retain** the note's second half (pure-K5/pure-5 needs a bespoke closure operator for want of
       a Mathlib "Euclidean closure" analogous to `Relation.EqvGen`) -- that half is **factually
       correct** and stays. But **re-label it as COST, not impossibility**: it is missing library
       infrastructure, and `Relation.EuclGen` (Phase 16) is exactly the bespoke construction it names.
       Note the file's own wording already says *"OUT OF SCOPE … would need a bespoke construction"*
       (:583-585) -- i.e. cost. Do not escalate it.
-- [ ] Add BibKey docstring traceability for the refutation: **Gore1999** (`references.bib:987`),
+- [x] Add BibKey docstring traceability for the refutation: **Gore1999** (`references.bib:987`),
       **TR p.48** -- *"it can lead to an infinite chain A ∈ w, ◇A ∈ w, ◇◇A ∈ w, … so this system
       cannot give a decision procedure for S5 either."* **Cite by TR pagination (TR pp.1-106), NOT
       the Handbook's pp.297-396 -- they do not map.**
+
+**Completion note**: The R7 refutation is landed as **four `decide`-backed theorems**
+(`modalApplyOneS5_hintikka_not_reachable_step{1,2,3,4}` + `_growth`) chaining single steps of
+`modalStepBranchGen modalApplyOneS5` from `[T(□◇(atom 0))@0]`: the process never returns `none`
+(never Hintikka-saturates) over 4 steps while `modalMaxWorld` strictly climbs `0 ↦ 1 ↦ 2`
+(matching the empirically-verified `maxWorld = fuel/2` relationship exactly). **Deviation from
+the task's literal wording**: the theorem does NOT execute `modalExpandBranchesGen` (the
+fuel-wrapped driver) directly, because that driver's nested well-founded recursion does not
+reduce under kernel `rfl`/`decide` at any tested fuel magnitude (confirmed: `decide`/`rfl` both
+get stuck mid-reduction) -- this is the SAME structural limitation `LoopChecking.lean`'s "Sanity
+Checks" section already documents and works around (interactive `#eval` only, never embedded,
+since `#eval`/`native_decide` additionally fail outright under this directory's `module`/
+`public meta import` boundary). The single-step `modalStepBranchGen`, by contrast, IS a plain
+non-recursive function and reduces fine; chaining it four times gives a fully rigorous,
+sorry-free, `decide`-backed counterexample of equivalent evidentiary strength, verified against
+an independent interactive `#eval` reproduction of the exact research-report table
+(`fuel 10 ↦ maxWorld 5`, `20 ↦ 10`, `40 ↦ 20`) cited in the new docstring but, per the same
+precedent, not embedded as permanent code. Both docstring corrections
+(`S5Simplification.lean` near the file header and near `modalTableauS5`) and the
+`FrameCompleteness.lean` 5/KB5 route note are landed verbatim per the task list, citing the
+probe's theorem names. `grep -rn -i "impossib" Cslib/Logics/Modal/Tableau/` returns no hit
+referring to 5/KB5 (verified). Full project `lake build` green (3239/3239); `checkInitImports`,
+`lint-style`, `lint` (scoped) clean; `lake shake` shows no new suggestions for either touched
+file (pre-existing suggestions elsewhere in the repo are unrelated to this task). `lean_verify`
+on `modalApplyOneS5_hintikka_not_reachable_growth` -> `[propext]`.
 
 **Timing**: 1.5 hours
 

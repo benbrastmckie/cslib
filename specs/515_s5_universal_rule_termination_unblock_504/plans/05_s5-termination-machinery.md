@@ -1096,7 +1096,7 @@ Grounded in measured comparables, not guesswork:
 
 ---
 
-### Phase 9: Spec split + the one-token weakening [NOT STARTED]
+### Phase 9: Spec split + the one-token weakening [COMPLETED]
 
 **Goal**: Split `RuleApplicationSpec` so the Hintikka machinery no longer sees the three fields S5
 cannot discharge. **Drop THREE fields, not one.**
@@ -1168,6 +1168,41 @@ authorized edit to this file), `Cslib/Logics/Modal/Tableau/S5Simplification.lean
 
 **Verification**: full CI green; **K/T/B compile with their existing `where` blocks**; `lean_verify`
 on `modalApplyOneS5w_specCore`.
+
+#### Phase 9 completion note
+
+Landed as planned, with one scope deviation: `CompletenessLoop.lean` also required edits (6
+destructuring sites for `spec.boxNegWitness`/`spec.diaPosWitness` gained an extra existential
+witness-world binder after the field rename to `boxNegWitness'`/`diaPosWitness'`), even though it
+wasn't in the "Files to modify" list. This is mechanical fallout of the field rename in
+`RuleApplicationSpecCore`, not a design change -- `CompletenessLoop.lean`'s lemma signatures still
+take the *full* `RuleApplicationSpec` (unchanged), since `modalStepGen_preserves_invariant`
+(and, through it, `modalExpandBranchesGen_hintikka`) calls `modalStepBranchGen_potential_step`,
+which needs `rankStep`/`outDegStep`/`knownWorldsStep` transitively. The "Hintikka machinery no
+longer sees the three fields" weakening (swapping `RuleApplicationSpec` to
+`RuleApplicationSpecCore` in `CompletenessLoop.lean`'s own signatures) is Phase 12's job, not
+this one -- Phase 9 only lands the structural split plus the `modalApplyOneS5w_specCore` Core
+witness.
+
+Verified: **K/T/B pay nothing** -- `modalApplyOneT_spec`/`modalApplyOneB_spec`'s `where` blocks
+needed only the 3-line existential-wrapping adapter for `boxNegWitness'`/`diaPosWitness'`, no
+other change. `lean_verify` on `modalApplyOneS5w_specCore` reports axioms
+`[propext, Classical.choice, Quot.sound]` -- identical to the existing `modalApplyOneT_spec`/
+`modalApplyOneB_spec` baseline, no new axioms. Full CI green: `lake build` (3239/3239),
+`checkInitImports`, `lake lint` (only the pre-existing, out-of-scope `PrimeExclusion.lean` error),
+`lake exe lint-style` (clean), `lake test` (9230 jobs, only pre-existing unrelated sorries),
+`lake shake` (no new suggestions for any of the five touched files). Zero sorry, zero new axioms,
+zero vacuous definitions in the touched files.
+
+The nine `RuleApplicationSpecCore` fields for `modalApplyOneS5w` required substantially more new
+proof content than the plan's task list detailed (which only fully specified `diaPosWitness'`/
+`boxNegWitness'`): `outputsSubsetUniverse`, `persistentFresh`, `branchingLength`,
+`localShapeInvariance`, `boxPosNotExpanding`, `diaNegNotExpanding` all needed fresh lemmas built
+on the two-layer agreement chain (`modalApplyOneS5w_eq_of_not_mint_shape` /
+`modalApplyOneS5_eq_of_not_boxPos_diaNeg`) plus new local re-derivations of `mem_modalUniverse_of`/
+`modalUniverse_mem_formula` (private in `FmpMeasure.lean`, hence re-derived locally, matching this
+file's existing `_S5`/`_S5w`-suffixed re-derivation pattern) and a new hypothesis-free combined
+F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 

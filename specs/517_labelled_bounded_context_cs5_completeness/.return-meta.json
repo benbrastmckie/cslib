@@ -1,42 +1,57 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
-  "task_number": 517,
-  "session_id": "sess_1784156551_995e9d",
-  "phase_number": 20,
-  "findings_count": 6,
-  "adversarial_verification_triggered": true,
-  "adversarial_verification_result": "6 claims challenged; 2 REFUTED (the requirement-3 suspicion that motivated the dispatch, and the assumption that the new blocker would block Phase 21); 4 held under attack. One self-correction mid-dispatch: I initially believed Graph did not confine edges to nodes; the compiler surfaced the edge_mem field, which INVERTED a finding from 'clModel is over-strong but derivable for B/Four' to 'TPrime TS5 is outright uninhabited'.",
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "VERIFIED -- Simpson1994 present at references.bib:86 (@phdthesis, Simpson, Alex K.); matches the citation form already used in Deduction.lean:13,99",
-  "pdf_pages_read": [81, 99, 100, 101, 102, 103],
-  "verdict": "YES -- TClosure supports the (R_Υ) internalization; falsifier did not fire",
-  "requirement_3_verdict": "NOT load-bearing for quantifier-free {T,B,Four}; vacuous at ȳ = ∅; Conflict 7 CONFIRMED; Phase 18 deletion compatible; do not reverse",
-  "new_blocker_found": "TPrime TS5 Atom is uninhabited (clModel type-wide quantifier vs Graph.edge_mem vs Context.coinfinite). Blocks Phase 23 only; Phase 21 unaffected (clause 0 vacuous at 𝒯 = ∅). Repairable.",
-  "cslib_mainline_touched": false,
-  "memory_candidates": [
+  "status": "partial",
+  "requires_user_review": true,
+  "started_at": "2026-07-15T00:00:00Z",
+  "phases_completed": 12,
+  "phases_total": 26,
+  "phase_number": 21,
+  "phase_status": "BLOCKED",
+  "summary": "Phase 21 BLOCKED: TPrime 𝒯 Atom is uninhabited for every 𝒯 including ∅ (mechanized, sorry-free), so Lemma 5.3.1's deliverable cannot exist. Supersedes Phase 20's TS5-only scoping. Two further NIK transcription defects found from the p.69 page raster: (⊥E) and (∨E) are printed cross-label but transcribed label-local — exactly the two rules 5.3.1 uses for consistency and the disjunction property. Repairs stated, not applied (Cslib/ out of territory). Chain-union/cofinite-encoding obstacle flagged (not mechanized).",
+  "artifacts": [
     {
-      "content": "When mechanizing from an OCR'd PDF, a dropped displayed equation is often missing from the pdftotext text layer as well as from the chunked corpus -- both derive from the same text layer. Only the page raster carries it. Read the PDF with the pages parameter (image extraction) rather than assuming a re-extraction will recover it.",
-      "keywords": ["ocr", "pdf", "literature-fidelity", "pdftotext", "text-layer"],
-      "tags": ["research-method"],
-      "topic": "literature transcription"
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/prime-lemma-blockers.lean",
+      "type": "probe",
+      "summary": "11 declarations, sorry-free, axioms ⊆ [propext, Classical.choice, Quot.sound]."
     },
     {
-      "content": "A formalized 'classical model of a frame theory' clause must relativize its quantifiers to the structure's domain. Transcribing Simpson-style 'H ⊨_CL χ' as a type-wide '∀ x, R x x' silently strengthens it; combined with a Graph invariant confining edges to nodes, it forces X = univ and can render the whole prime-context type UNINHABITED. Check inhabitation of a target structure type BEFORE attempting a Zorn construction that produces it -- an IsEmpty proof is far cheaper than a failed 300-line maximization.",
-      "keywords": ["classical-model", "quantifier-range", "domain-relative", "uninhabited", "IsEmpty", "transcription-defect"],
-      "tags": ["formalization-pitfall", "lean4"],
-      "topic": "labelled modal logic formalization"
-    },
-    {
-      "content": "A uniform published proof can degenerate into vacuity on a special case while still being sound: Simpson's Lemma 5.3.1 discharges 'H is a classical model of 𝒯' via a reductio plus a requirement-3 citation, but for quantifier-free axioms (empty witness vector) BOTH steps are vacuous and the goal is delivered instead by the maximality step used directly. Before concluding a source's argument is broken on your special case, check whether the general machinery simply does not specialize -- the load-bearing step may be present but used for a different purpose.",
-      "keywords": ["proof-transcription", "vacuous", "specialization", "maximality", "simpson"],
-      "tags": ["literature-fidelity", "research-method"],
-      "topic": "proof mechanization"
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/09_prime-lemma-blockers-summary.md",
+      "type": "summary",
+      "summary": "Phase 21 execution summary: PDF transcription, three mechanized blockers, stated repairs, flagged chain-union obstacle, plan deviations."
     }
   ],
-  "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean"
+  "partial_progress": {
+    "stage": "blocked-and-escalated",
+    "details": "Transcribed Lemma 5.3.1 (pp. 92-93) and Figure 4-1 (p. 69) from PDF rasters. Ran the mandated small-model/consistency check on the statement BEFORE writing the Zorn argument; the check killed the target type. Mechanized the blocker rather than proving anything against IsEmpty. Zorn argument not attempted, by design."
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "axioms": "[propext, Classical.choice, Quot.sound]",
+    "build_passed": true,
+    "ci_pipeline_passed": null,
+    "ci_note": "Not run: zero changes under Cslib/, so no mainline surface changed. checkInitImports N/A to probes/ (not a lake target). Probe verified via `lake env lean` + #print axioms on every declaration.",
+    "cslib_untouched": true
+  },
+  "memory_candidates": [
+    "Before dispatching proof work that CONSTRUCTS an inhabitant of a formalized structure, gate on the type being inhabited. Task 517 Phases 20 and 21 both spent dispatches against TPrime, which was provably empty at every 𝒯; a one-lemma inhabitedness check would have caught it at a fraction of the cost.",
+    "In a Lean transcription of a labelled/annotated deduction system, a clause quantified type-wide over labels where the source quantifies over the structure's domain will typically make the structure type UNINHABITED (via a containment field like Graph.edge_mem or Context.ctxSubset plus a coinfiniteness/freshness reserve), not merely too strong. The emptiness is silent until something tries to construct an inhabitant.",
+    "When a PDF's text layer is OCR-damaged, the damage is not uniform: Simpson1994's inference-rule FIGURES render as noise (`%(M) %(/\\El)`) while surrounding prose extracts cleanly. Rule shapes — where cross-label vs label-local structure lives — are exactly what is lost. Read rule figures from the page raster, never the text layer.",
+    "A premise-free derivation at an arbitrary label (e.g. `impI`+`assumption` giving `x : A ⊃ A`) is a powerful probe for over-strong closure clauses in a proof-theoretic formalization: it instantiates the clause at every label at once."
   ],
-  "next_steps": "Dispatch Phase 21 (leg A1, Prime Lemma 5.3.1 at 𝒯 = ∅). Correct plan v3 Phase 22's relation definition; insert a clause-0 relativization repair before Phase 23."
+  "blockers_summary": [
+    "tprime-uninhabited-every-T (blocking 21, 22, 23) — repair: relativize TPrime.deductiveClosure to ∀ x ∈ G.X",
+    "efq-label-local-vs-fig41-cross-label (blocking 21, 23) — repair: retype NIK.efq to x:⊥ / y:A; soundness re-check required",
+    "orE-label-local-vs-fig41-cross-label (blocking 21, 23) — repair: retype NIK.orE to cross-label; soundness re-check required",
+    "chain-union-vs-cofinite-encoding (flagged, medium confidence, not mechanized) — needs a NIK label-renaming/equivariance lemma"
+  ],
+  "metadata": {
+    "session_id": "sess_1784156551_995e9d",
+    "agent_type": "cslib-implementation-hard-agent",
+    "task_number": 517,
+    "effort_flag": "hard",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
 }

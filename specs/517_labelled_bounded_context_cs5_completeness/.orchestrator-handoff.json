@@ -1,54 +1,120 @@
 {
-  "status": "completed",
+  "status": "blocked",
   "session_id": "sess_1784156551_995e9d",
   "task_number": 517,
-  "phase_number": 20,
+  "phase_number": 21,
   "phases_completed": 12,
   "phases_total": 26,
-  "summary": "VERDICT: YES -- TClosure DOES support the (R_Υ) internalization; the falsifier did NOT fire and leg A's first real obstacle is CLEARED, mechanized sorry-free. (□E)/(◇I) are the only NIK rules with a relational premise and both range over TClosure 𝒯 G.R; NIK never reads G.X. So (R_χ) reduces to closure absorption: TClosure.absorb_addEdge + NIK.weakenCl (a strict generalization of NIK.weaken to the closure order) give NIK.geomInternalize, instantiated for all three TS5 axioms (refl/symm/trans) and lifted to Deriv. Deriv/Context.le chain closure confirmed adequate. REQUIREMENT-3 VERDICT: NO -- not load-bearing for the quantifier-free {T,B,Four}. PDF p.91 verbatim makes requirement 3 an 'only if' whose subject is 'each of the witness variables in v_χz̄', and p.72's normal form makes v_χz̄ the EMPTY vector when ȳ is empty. It is vacuously true at TS5, so Conflict 7's adjudication is CONFIRMED and Phase 18's deletion removed nothing leg A needs -- do not reverse it. HOWEVER the pre-gate found a SEPARATE, unanticipated blocker: TPrime TS5 Atom is UNINHABITED (tPrime_TS5_false, IsEmpty instance, mechanized). clModel : ClassicalModel 𝒯 G.R quantifies type-wide (.T => ∀ x, R x x), but PDF p.94 makes H ⊨_CL 𝒯 satisfaction IN THE STRUCTURE H with domain = H's underlying set; clModel .T + Graph.edge_mem force G.X = univ, contradicting Context.coinfinite. Root cause is χ_T alone (only TS5 axiom with n=0 premises); {χ_B,χ_4} is harmless. This is a repairable STATEMENT-LEVEL transcription defect, not a mathematical obstruction, and it does NOT block Phase 21: at 𝒯 = ∅ clause 0 is vacuous, so plan v3's D2 '𝒯 = ∅ first' sequencing is independently vindicated. Route remains alive; proceed to Phase 21.",
-  "skeleton": "probes/rchi-internalization-gate.lean: TClosure.absorb_addEdge, ClLe, ClLe.of_le, ClLe.addEdge, NIK.weakenCl, NIK.geomInternalize, NIK.geomInternalize_T/_B/_Four (+3 TS5 examples), Deriv.geomInternalize, GeomAxiom.HoldsOn, ClassicalModelOn, ClassicalModelOn.of_classicalModel, classicalModelOn_TS5_iff, tPrime_TS5_false, IsEmpty (TPrime TS5 Atom), classicalModel_tClosure_free, classicalModel_empty, classicalModel_B_Four_trivial. All sorry-free; axioms ⊆ [propext, Classical.choice, Quot.sound].",
+  "skeleton": false,
+  "summary": "Phase 21 (Prime Lemma 5.3.1 at 𝒯 = ∅) is BLOCKED: its deliverable is not constructible as specified. TPrime 𝒯 Atom is UNINHABITED for EVERY 𝒯, including 𝒯 = ∅ -- mechanized sorry-free as tPrime_false / instance IsEmpty (TPrime 𝒯 Atom). Lemma 5.3.1's whole job is to PRODUCE an inhabitant of that type, so no proof effort at any 𝒯 can succeed until it is repaired. This SUPERSEDES Phase 20's scoping, which found the emptiness only at TS5, attributed it to χ_T's quantifier range, and concluded it 'lands on Phase 23, not Phase 21' and that plan v3's D2 '𝒯 = ∅ first' sequencing 'independently saves Phase 21'. Clause 0 IS vacuous at ∅ -- but clause 1 (deductiveClosure) empties the type on its own, independently of 𝒯: NIK.impI + NIK.assumption derive x : A ⊃ A at an ARBITRARY label, over an arbitrary graph, from the EMPTY assumption list, with no premises and no side conditions (and, as Phase 20 itself established, NIK never reads G.X at all). Type-wide deductiveClosure then forces (x : A⊃A) ∈ Γ for every label, Context.ctxSubset forces G.X = univ, and Context.coinfinite contradicts it. The 𝒯 = ∅ route does not dodge the emptiness. Reading Simpson's Figure 4-1 from the p. 69 page RASTER (its pdftotext layer is destroyed -- the same text-layer failure mode Phase 20 documented for H_i on p. 92) surfaced two FURTHER transcription defects: (⊥E) is printed CROSS-LABEL (x:⊥ / y:A) but transcribed label-local as NIK.efq, and (∨E) is printed CROSS-LABEL (major premise x:A∨B, conclusion y:C) but transcribed label-local as NIK.orE. Those are precisely the two rules Lemma 5.3.1 uses to discharge consistency and the disjunction property, and both transcriptions are STRICT WEAKENINGS (mechanized: the printed rules imply CSLib's). All three defects, plus Phase 20's clModel finding, share ONE root cause: the transcription drops the domain-relativity / cross-label structure Simpson's Chapter 5 relies on. Declarations landed (probes/prime-lemma-blockers.lean, 11 decls, sorry-free, axioms ⊆ [propext, Classical.choice, Quot.sound]): NIK.imp_self, Deriv.imp_self, tPrime_false, instIsEmptyTPrime, deductiveClosure_relativized_kills_the_chain, EfqCrossLabel, consistency_of_efqCrossLabel, consistency_at_excluded_label_only, efq_of_efqCrossLabel, OrECrossLabel, orE_labelLocal_of_orECrossLabel. Cslib/ untouched (git status --short Cslib/ empty). No sorries planted -- nothing was attempted against a provably empty type. The ROUTE is not what failed: p. 92 confirms the Zorn-over-whole-contexts construction verbatim.",
   "blockers": [
     {
-      "id": "clmodel-type-wide-quantifier",
-      "severity": "blocking-for-phase-23-only",
-      "blocks": [23],
-      "does_not_block": [21, 22],
-      "statement": "TPrime TS5 Atom is UNINHABITED as currently typed. TPrime.clModel : ClassicalModel 𝒯 G.R (Context.lean:217) with GeomAxiom.Holds .T R = ∀ x, R x x (Deduction.lean:140) quantifies over the whole Label Atom type. Graph.edge_mem (Syntax.lean:119) then forces G.X = univ, which contradicts Context.coinfinite (Context.lean:154) since Label.InW V' (.var n) = n ∈ V' and Coinfinite V' supplies some n ∉ V'. Mechanized: tPrime_TS5_false, plus instance IsEmpty (TPrime TS5 Atom). Universe-polymorphic; holds for every Atom.",
-      "required_behavior": "Simpson1994 p.94 (PDF p.103) verbatim: 'D^𝒯_(H,Δ) = the underlying set of H, R^𝒯_(H,Δ)(x,y) iff xRy in H ... (D^𝒯_(H,Δ), R^𝒯_(H,Δ)) ⊨_CL 𝒯 because (D^𝒯_(H,Δ), R^𝒯_(H,Δ)) = H'. So ⊨_CL is satisfaction in the structure H, with quantifiers ranging over H.X, not over all labels.",
-      "counterexample": "A single-node reflexive-at-that-node graph satisfies ClassicalModelOn {χ_T} G.X G.R (Simpson's clause 0) but refutes ClassicalModel {χ_T} G.R (CSLib's). Mechanized in the probe.",
-      "isolation": "Deduction.lean:138-143 (GeomAxiom.Holds), Deduction.lean:145-148 (ClassicalModel); consumers: Context.lean:217 (TPrime.clModel), Context.lean:~285 (equivalence_of_classicalModel_TS5).",
-      "repair": "Retype clause 0 to ClassicalModelOn 𝒯 G.X G.R. Probe has GeomAxiom.HoldsOn, ClassicalModelOn, classicalModelOn_TS5_iff ready to lift; ~40 lines in mainline Cslib/, free at TS5. NOT applied in Phase 20 (Cslib/ out of territory).",
-      "downstream_unsolved": "equivalence_of_classicalModel_TS5 returns a type-wide Equivalence R consumed by the frame-class match (cs5FCIncest). Under the repair it becomes an equivalence on G.X. Phase 23 must either carry a domain-relative equivalence or make the canonical model's world domain a subtype ↥H.X. Flagged, not solved.",
-      "do_not": "Do NOT discharge clModel via ClassicalModel 𝒯 (TClosure 𝒯 R). It is free (classicalModel_tClosure_free, zero axioms) but proves clause 0 for the CLOSURE, whereas p.94 fixes the RAW relation. It would silently change the canonical model and put the truth lemma's ◇-case (which reads G.R x y off TPrime.diamond, Context.lean:225-226) onto a different relation than the one it is proved about."
-    }
-  ],
-  "plan_corrections_required": [
-    {
-      "phase": 22,
-      "current": "Plan v3 Phase 22 task list: 'R_(H,Δ)(x,y) iff xRy in 𝒯-Comp(H)'.",
-      "correct": "PDF p.94: R^𝒯_(H,Δ)(x,y) iff xRy in H -- the RAW relation. Simpson's justification sentence ('because (D,R) = H') is unintelligible under the closure reading.",
-      "confidence": "high on the PDF text; pp.95-98 not read this dispatch -- Phase 22 should re-verify before committing."
+      "id": "tprime-uninhabited-every-T",
+      "severity": "blocking",
+      "blocks": [21, 22, 23],
+      "phase": 21,
+      "title": "TPrime 𝒯 Atom is uninhabited for every 𝒯, including 𝒯 = ∅",
+      "what_failed": "Phase 21's deliverable -- a 𝒯-prime context -- cannot exist. The target type is empty at every 𝒯.",
+      "what_was_tried": "Transcribed Lemma 5.3.1 from the PDF rasters (pp. 92-93), then ran the dispatch's mandated small-model/consistency check on the STATEMENT before writing the Zorn argument. The check failed the type itself, so the Zorn argument was never started.",
+      "root_cause": "TPrime.deductiveClosure (Context.lean:219) is typed `∀ (x : Label Atom) (A : Proposition Atom), Deriv 𝒯 G Γ (x ∶ A) → (x ∶ A) ∈ Γ` -- a TYPE-WIDE quantifier over labels. But NIK.impI + NIK.assumption derive (x ∶ A ⊃ A) at an arbitrary label from the empty list with no side conditions, and NIK never reads G.X. So deductiveClosure forces (x ∶ A⊃A) ∈ Γ for every label x; ctxSubset forces x ∈ G.X for every x (G.X = univ); coinfinite supplies Label.var n with n ∉ V'. Contradiction. Simpson's clause 1 (p. 92) reads 'If Γ ⊢^𝒯_G x:A then x:A ∈ Γ' where ⊢_G is a judgement about labels OF G; Lemma 5.3.2 (p. 94) makes the same domain-relativity explicit in its own statement ('for all y IN H'). The type-wide reading is a transcription defect.",
+      "what_is_needed": "Relativize clause 1 in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean:219 to `deductiveClosure : ∀ x ∈ G.X, ∀ A, Deriv 𝒯 G Γ (x ∶ A) → (x ∶ A) ∈ Γ`. Adequacy checked in the probe. This is not merely a strength question: the relativized clause is exactly what Lemma 5.3.1's OWN deductive-closure step needs -- Simpson forms the context (H, Δ ∪ {y:B}), whose Context.ctxSubset obligation demands y ∈ H.X, which only the relativized clause supplies as a hypothesis. The type-wide clause is unusable at the very step that consumes it.",
+      "mechanized_as": ["tPrime_false", "instIsEmptyTPrime", "deductiveClosure_relativized_kills_the_chain"],
+      "supersedes": "Phase 20's tPrime_TS5_false scoping. Phase 20's IsEmpty (TPrime TS5 Atom) is a special case of tPrime_false. Phase 20's conclusion that the emptiness 'lands on Phase 23, not Phase 21' and that D2's sequencing 'independently saves Phase 21 from a blocker nobody had spotted' is FALSE.",
+      "territory_note": "Repair is in Cslib/, out of Phase 21's territory. Not applied."
     },
     {
-      "phase": 23,
-      "current": "Phase 23 generalizes leg A to 𝒯 = TS5.",
-      "correct": "Insert a clause-0 relativization repair phase BEFORE Phase 23. Phase 23 is impossible until it lands: IsEmpty (TPrime TS5 Atom)."
+      "id": "efq-label-local-vs-fig41-cross-label",
+      "severity": "blocking",
+      "blocks": [21, 23],
+      "phase": 21,
+      "title": "(⊥E) transcribed label-local; Simpson's Figure 4-1 prints it cross-label",
+      "what_failed": "Lemma 5.3.1's consistency clause cannot be discharged the way Simpson discharges it.",
+      "root_cause": "Simpson Figure 4-1 (p. 69, PDF p. 78, read from the page RASTER) prints `x:⊥ / y:A` -- premise and conclusion at DIFFERENT labels. CSLib's NIK.efq (Deduction.lean) is `x:⊥ / x:A`, label-local, and its docstring says so explicitly. Lemma 5.3.1's 'Consistency is immediate, because Δ ⊬^𝒯_H x:A' (p. 93) bridges y:⊥ to x:A ACROSS the label boundary; only the cross-label rule does that, and nothing else in the system does. Note the argument needs no maximality -- it is a property of any context avoiding x:A, exactly as Simpson says.",
+      "what_is_needed": "Retype NIK.efq to Figure 4-1's form: `| efq (G) (Γ) (x y) (A) (h : NIK 𝒯 G Γ (x ∶ .bot)) : NIK 𝒯 G Γ (y ∶ A)`. SOUNDNESS RE-CHECK REQUIRED and NOT done in this dispatch: semantically the cross-label rule looks fine (no interpretation makes ρ(x) ⊩ ⊥, so ρ(y) ⊩ A vacuously), but the landed CK/CT/CS4/CS5 soundness results and task-509's cs5FC'' must be re-verified against the strengthened rule. That verification is the repair's main risk and its precondition.",
+      "mechanized_as": ["EfqCrossLabel", "consistency_of_efqCrossLabel", "consistency_at_excluded_label_only", "efq_of_efqCrossLabel"],
+      "territory_note": "Repair is in Cslib/, out of Phase 21's territory. Not applied."
+    },
+    {
+      "id": "orE-label-local-vs-fig41-cross-label",
+      "severity": "blocking",
+      "blocks": [21, 23],
+      "phase": 21,
+      "title": "(∨E) transcribed label-local; Simpson's Figure 4-1 prints it cross-label",
+      "what_failed": "Lemma 5.3.1's disjunction-property clause cannot be discharged the way Simpson discharges it.",
+      "root_cause": "Simpson Figure 4-1 (p. 69, PDF p. 78, raster) prints major premise `x:A∨B`, minor premises `y:C` under discharged `[x:A]`/`[x:B]`, conclusion `y:C` -- the disjunction's label is INDEPENDENT of the conclusion's. CSLib's NIK.orE fixes all of them at x ('label-local case split'). Lemma 5.3.1 (p. 93) argues: 'suppose that y:B ∨ C ∈ Δ. Now either Δ,y:B ⊬^𝒯_H x:A or Δ,y:C ⊬^𝒯_H x:A, for otherwise we would have that Δ ⊢^𝒯_H x:A by an application of (∨E)' -- disjunction at y, derived formula at x. Under the label-local rule that application is ill-formed, so the clause is dischargeable only for disjunctions sitting at the excluded label x.",
+      "what_is_needed": "Retype NIK.orE to Figure 4-1's form: `| orE (G) (Γ) (x y) (A B C) (hor : NIK 𝒯 G Γ (x ∶ .or A B)) (hA : NIK 𝒯 G ((x ∶ A) :: Γ) (y ∶ C)) (hB : NIK 𝒯 G ((x ∶ B) :: Γ) (y ∶ C)) : NIK 𝒯 G Γ (y ∶ C)`. Same soundness re-check requirement as the efq repair; not done here.",
+      "mechanized_as": ["OrECrossLabel", "orE_labelLocal_of_orECrossLabel"],
+      "territory_note": "Repair is in Cslib/, out of Phase 21's territory. Not applied."
+    },
+    {
+      "id": "chain-union-vs-cofinite-encoding",
+      "severity": "flagged-not-mechanized",
+      "confidence": "medium",
+      "blocks": [21, 23],
+      "phase": 21,
+      "title": "Simpson's chain-union step may not transfer to CSLib's cofinite-quantification encoding -- the real crux",
+      "root_cause": "Simpson's Zorn step says 'It is easily seen that (⋃_{i∈I} G_i, ⋃_{i∈I} Γ_i) is also in C' (p. 92). That needs: Deriv 𝒯 G_∞ Γ_∞ (x∶A) → ∃ i, Deriv 𝒯 G_i Γ_i (x∶A) -- a finite-support argument. But NIK.boxI and NIK.diaE encode their eigenvariable side-condition by COFINITE QUANTIFICATION (∀ y ∉ L, L finite), so a NIK derivation has INFINITE BRANCHING and no finite graph support: rebuilding a boxI at a single chain index i requires ONE i valid for cofinitely many y, and directedness does not supply it (each y yields its own i_y, unboundedly). Simpson's own derivations are finite trees with ONE eigenvariable premise -- which is why he calls the step 'easily seen'. The gap is created by the encoding, not by the mathematics.",
+      "what_is_needed": "Almost certainly a label-renaming / equivariance lemma for NIK (if NIK 𝒯 (G.addEdge x y) Γ₀ (y∶A) for one fresh y, then for every fresh y'), letting one index i transport across all eigenvariables. No such lemma exists in Cslib/. A successor MUST settle this BEFORE attempting the Zorn argument -- it is upstream of the whole construction.",
+      "supersedes": "Phase 20 rated this LOW uncertainty ('the union of a chain of contexts is genuinely routine'), judging it from signatures + Deriv.mono without mechanizing it. That rating looks optimistic: Deriv.mono is monotonicity (the easy direction); the chain step needs the REFLECTION direction, which is where the cofinite encoding bites."
     }
   ],
-  "continuation_context": "Phase 20 answered its mission question YES and mechanized it; the (R_Υ)/TClosure risk term is retired. Leg A's remaining risk is unchanged and sits where plan v3 already priced it: Phase 21 (Prime Lemma 5.3.1 transcription, ~65%) and Phase 22 (truth lemma, the second crux). Phase 21 runs at 𝒯 = ∅ where clause 0 is vacuous (classicalModel_empty) and the (R_Υ) obligation is empty, so BOTH this dispatch's new blocker and the whole TClosure question are inert there. Carry into Phase 21: (a) at a quantifier-free axiom, p.92-93's reductio framing AND its requirement-3 exit are BOTH vacuous -- the goal is delivered by the maximality step used DIRECTLY (H_i = H ⟹ R_i1[z̄/x̄] ∈ H); do NOT transcribe the reductio literally or the agent will get stuck on two content-free steps and may wrongly conclude the argument is broken. (b) Discharging (H_i,Δ) ∈ C requires re-checking Context's requirement-2 (dwitness clause) survives H_i = H ∪ {c}; expected fine (adding an edge adds no witness variables) but NOT verified this dispatch. (c) Simpson notes (p.93) the prime lemma is choice-free in principle but 'laborious'; use Zorn. (d) Chain-union closure judged adequate from signatures + Deriv.mono but NOT mechanized; Simpson calls it 'easily seen'.",
-  "next_action_hint": "Dispatch Phase 21 (leg A1 -- Simpson Prime Lemma 5.3.1 at 𝒯 = ∅) per plan v3. Do NOT dispatch Phase 23 before the clause-0 relativization repair lands. Correct plan v3's Phase 22 relation definition (𝒯-Comp(H) -> raw H) first -- it is a one-line plan edit.",
+  "continuation_context": {
+    "is_successor_needed": true,
+    "resume_at": "a NEW repair phase in Cslib/, before any further attempt at Phase 21",
+    "recommended_sequencing": [
+      "1. REPAIR PHASE (mainline Cslib/, must precede Phase 21 AND Phase 23): relativize TPrime.deductiveClosure to ∀ x ∈ G.X (blocker 1); retype TPrime.clModel to ClassicalModelOn 𝒯 G.X G.R (Phase 20's blocker; probe declarations ready to lift from probes/rchi-internalization-gate.lean); retype NIK.efq and NIK.orE to Figure 4-1's cross-label forms (blockers 2-3); RE-VERIFY landed CK/CT/CS4/CS5 soundness and task-509's cs5FC'' against the strengthened rules -- this is the repair's main risk and was NOT done here. Also settle Phase 20's flagged consequence: equivalence_of_classicalModel_TS5 returns a type-wide Equivalence that the frame-class match (cs5FCIncest) consumes; under relativization it becomes an equivalence ON G.X, forcing a deliberate design choice (carry a domain-relative equivalence, or make the canonical model's world domain a subtype ↥H.X). Still unmade.",
+      "2. GATE ON INHABITEDNESS before re-dispatching Phase 21: construct any inhabitant of the repaired prime-context type at 𝒯 = ∅, or prove every emptiness chain fails. Phase 20 and Phase 21 both dispatched proof work against a type that was already empty; a cheap inhabitedness gate would have caught both, at a fraction of the cost.",
+      "3. SETTLE the chain-union / cofinite-quantification obstacle (blocker 4) -- the crux, upstream of the Zorn argument.",
+      "4. THEN re-dispatch Phase 21. Its mathematics is untouched by all of this: the PDF transcription is complete and recorded, and Phase 20's (R_Υ) mechanism still stands."
+    ],
+    "preserved_assets": [
+      "probes/rchi-internalization-gate.lean (Phase 20, sorry-free) -- untouched",
+      "probes/prime-lemma-blockers.lean (Phase 21, sorry-free) -- three blockers + stated repairs",
+      "Cslib/ mainline -- untouched and green (Phases 18/19/20 honesty preserved)"
+    ]
+  },
+  "next_action_hint": "Do NOT re-dispatch Phase 21 as written -- its target type is provably empty and a successor would burn the dispatch rediscovering that. Create a repair phase in Cslib/ covering all FOUR transcription defects (deductiveClosure, clModel, efq, orE) with a soundness re-check, then gate on inhabitedness, then settle the chain-union obstacle, then re-dispatch Phase 21.",
   "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean"
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/prime-lemma-blockers.lean",
+      "type": "probe",
+      "summary": "Sorry-free Lean probe, 11 declarations, axioms ⊆ [propext, Classical.choice, Quot.sound]. Blocker 1: NIK.imp_self, Deriv.imp_self, tPrime_false, instIsEmptyTPrime, deductiveClosure_relativized_kills_the_chain. Blocker 2: EfqCrossLabel, consistency_of_efqCrossLabel, consistency_at_excluded_label_only, efq_of_efqCrossLabel. Blocker 3: OrECrossLabel, orE_labelLocal_of_orECrossLabel."
+    },
+    {
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/09_prime-lemma-blockers-summary.md",
+      "type": "summary",
+      "summary": "Phase 21 execution summary: PDF transcription of Lemma 5.3.1 (pp. 92-93) and Figure 4-1 (p. 69) from page rasters, the three mechanized blockers, stated repairs, the flagged chain-union obstacle, and plan deviations."
+    }
   ],
   "modified_files": [
-    "specs/517_labelled_bounded_context_cs5_completeness/reports/09_rchi-internalization-pregate.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/rchi-internalization-gate.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/prime-lemma-blockers.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/summaries/09_prime-lemma-blockers-summary.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
     "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json"
   ],
-  "cslib_mainline_touched": false,
   "sorry_inventory": [],
-  "literature_access_note": "--lit briefing is broken (index.json .id vs .doc_id key mismatch; 20 modal sources silently skip). Accessed the PDF directly at /home/benjamin/Downloads/Simpson_1994_IntuitionisticModalLogic.ocr.pdf. CONFIRMED the OCR defect is worse than recorded: chunk_0102.md:11-12 drops H_i's definition AND so does the pdftotext -layout text layer -- only the page raster carries it. Read tool with pages parameter (PDF pages 81, 99-103) was the only working route."
+  "carry_forward": {
+    "phase_22_observation": "Dispatch §6 asked for any Phase 22-relevant observation from the pp. 93-94 reading. CONFIRMED independently of Phase 20: p. 94 defines R^𝒯_(H,Δ)(x,y) iff 'xRy in H' -- the RAW relation -- and justifies clModel with 'because (D^𝒯_(H,Δ), R^𝒯_(H,Δ)) = H'. Plan v3's Phase 22 spec (𝒯-Comp(H)) contradicts the printed text; the identity sentence is unintelligible under the closure reading. Phase 20's LOW-MEDIUM uncertainty here (it had not read pp. 95-98) is now largely discharged: Lemma 5.3.2's □-case (p. 95) reads 'yRz in H'' and its ◇-case 'yRz in H' -- RAW throughout, no closure reading anywhere in 5.3.2. Correct plan v3's Phase 22 to the raw relation.",
+    "corroboration_of_blocker_1": "Lemma 5.3.2's statement (p. 94) reads 'For all 𝒯-prime contexts (H,Δ), for all y IN H, ...' -- its domain-relativity is explicit in the statement itself, corroborating blocker 1's root-cause diagnosis from a second, independent site.",
+    "route_not_falsified": "p. 92 CONFIRMS plan v3's convergence anchor verbatim: 'Consider the set C of all contexts (G',Γ') ⊇ (G,Γ) such that the underlying set of G' is contained in W(V') and Γ' ⊬^𝒯_{G'} x:A' -- ONE Zorn poset over WHOLE contexts, graph and formula-set growing together, capped by the excluded x:A, inside a fixed coinfinite reserve W(V'). This is the 'simultaneous maximal pair, not sequentially' that CS5.lean:705-706 names as the real open problem. The route is NOT what failed in this dispatch; the target type's transcription is."
+  },
+  "verification": {
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "new_axiom_count": 0,
+    "axioms": "[propext, Classical.choice, Quot.sound]",
+    "cslib_untouched": true,
+    "probe_builds": true,
+    "note": "Full CI pipeline (lake lint / lint-style / shake / mk_all / test) NOT run: this dispatch made ZERO changes under Cslib/, so no mainline surface changed and no CI-visible regression is possible. checkInitImports is not applicable to probes/, which is not a lake target; the probe was verified with `lake env lean` plus #print axioms on every declaration."
+  },
+  "metadata": {
+    "session_id": "sess_1784156551_995e9d",
+    "task_number": 517,
+    "phase_number": 21,
+    "agent_type": "cslib-implementation-hard-agent",
+    "effort_flag": "hard",
+    "reference_grounding_tier": "literature",
+    "bibkey": "Simpson1994 (references.bib:86)"
+  }
 }

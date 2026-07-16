@@ -686,7 +686,49 @@ birelation countermodel B_K, and B_K ⊨ cs5FC''                       ← Phase
   **leg A blocked ⟹ the whole route blocked**. Document and move to blocked status; do not grind.
 - **Risk:** LOW (analysis) — but it gates a HIGH-cost phase.
 
-### Phase 21: Leg A1 — Simpson Prime Lemma 5.3.1, at `𝒯 = ∅` (IK) first [NOT STARTED]
+### Phase 21: Leg A1 — Simpson Prime Lemma 5.3.1, at `𝒯 = ∅` (IK) first [BLOCKED]
+
+> **[BLOCKED — Phase 21 dispatch, session `sess_1784156551_995e9d`]**
+> **The deliverable is not constructible as specified: `TPrime 𝒯 Atom` is UNINHABITED for every
+> `𝒯`, including `𝒯 = ∅`.** Mechanized sorry-free as `tPrime_false` /
+> `instance : IsEmpty (TPrime 𝒯 Atom)` in `probes/prime-lemma-blockers.lean`. Lemma 5.3.1's whole
+> job is to *produce* an inhabitant of this type, so no proof effort at any `𝒯` can succeed until
+> the type is repaired. **This supersedes Phase 20's scoping**, which found the emptiness only at
+> `TS5`, attributed it to `χ_T`'s quantifier range, and concluded it "lands on Phase 23, not
+> Phase 21". Clause 0 *is* vacuous at `∅`; but clause 1 (`deductiveClosure`) empties the type on
+> its own, independently of `𝒯`: `impI`+`assumption` derive `x : A ⊃ A` at an **arbitrary** label
+> with no premises and no side conditions, and the type-wide `deductiveClosure` + `ctxSubset` then
+> force `G.X = univ`, contradicting `Context.coinfinite`. The `𝒯 = ∅`-first sequencing does not
+> dodge this.
+>
+> **Two further transcription defects found, both in `NIK`, both read from the p. 69 page raster
+> (Figure 4-1; the `pdftotext` layer for this figure is destroyed — same failure mode Phase 20
+> documented for `H_i`):**
+> - `(⊥E)` is printed **cross-label** (`x:⊥ / y:A`); CSLib's `NIK.efq` is label-local
+>   (`x:⊥ / x:A`). Lemma 5.3.1's *"Consistency is immediate, because `Δ ⊬_H x:A`"* is exactly an
+>   appeal to the cross-label form. Mechanized: `consistency_of_efqCrossLabel` (Simpson's argument
+>   works given the printed rule) vs `consistency_at_excluded_label_only` (the label-local rule
+>   discharges the clause **only at `y = x`**, leaving every other `y ∈ H.X` open).
+> - `(∨E)` is printed **cross-label** (major premise `x:A∨B`, conclusion `y:C`); CSLib's `NIK.orE`
+>   fixes both at `x`. Lemma 5.3.1's disjunction step needs the disjunction at `y` and the excluded
+>   formula at `x`; under the label-local rule that application is ill-formed.
+>
+> All three defects — plus Phase 20's `clModel` finding — are **one root cause**: the transcription
+> drops the domain-relativity / cross-label structure Simpson's Ch. 5 relies on. Repairs are stated
+> and their adequacy checked in the probe; none applied (`Cslib/` out of territory).
+>
+> **Also flagged, NOT mechanized (MEDIUM confidence):** Simpson's chain-union step (*"It is easily
+> seen that `(⋃G_i, ⋃Γ_i)` is also in `C`"*, p. 92) may not transfer to CSLib's encoding. `boxI`
+> and `diaE` use **cofinite quantification** (`∀ y ∉ L`) for their eigenvariable, so a `NIK`
+> derivation has *infinite branching* and no finite graph support: reconstructing a `boxI` at a
+> single chain index `i` needs one `i` working for cofinitely many `y`, which directedness does not
+> supply. Simpson's own derivations are finite trees, which is why he calls it "easily seen". A
+> label-renaming/equivariance lemma for `NIK` (not present in `Cslib/`) would likely rescue it.
+> **A successor must settle this before attempting the Zorn argument** — it is the crux, and
+> Phase 20's LOW-uncertainty rating of it looks optimistic.
+>
+> **Nothing was attempted against the empty type**; no strategic sorries were planted. See
+> `probes/prime-lemma-blockers.lean` (9 declarations, sorry-free).
 - **Goal:** **THE MISSING PIECE — absent from plan 02 entirely.** Mechanize Simpson's **unbounded**
   Prime Lemma 5.3.1: if `Δ ⊬_H y:B` then there is a `𝒯`-prime context `(H′,Δ′) ⊇ (H,Δ)` with
   `Δ′ ⊬ y:B`. **At `𝒯 = ∅` (IK) first**, per D2 and **Simpson's own order** (base system, then

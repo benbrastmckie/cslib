@@ -1,57 +1,46 @@
 {
   "status": "implemented",
-  "summary": "Phase 15 GATE PASSED (go). Scratch-only feasibility probe (no production Lean) confirms all three load-bearing claims of the Euclidean route (Phases 16-23) before any file is written to Cslib/. Probe probes/phase15-euclidean-route-gate.lean runs under `lake env lean` at exit 0, zero sorry, and all six vetted theorems report only the standard [propext, Classical.choice, Quot.sound] axiom subset (four of them depend on NO axioms). (a) CONFIRMED: EuclGen -- the inductive least right-Euclidean closure (base/eucl) -- is right-Euclidean directly via the `eucl` constructor (instRightEuclideanEuclGen), embeds r (euclGen_mono), and satisfies the least property `[RightEuclidean s] -> (forall a b, r a b -> s a b) -> EuclGen r a b -> s a b` by induction (euclGen_least, no axioms). Warrant recorded: Euclideanness is closed under arbitrary intersection and the full relation is Euclidean, so the least Euclidean relation containing r exists; EuclGen is its inductive realization. (b) CONFIRMED: rooted normal form R(w) x R(w) subset R is literally `rightEuclidean` at the root (rooted_cluster_universal, no axioms); the landed RightEuclidean.equiv_cod : IsEquiv (cod r) r is consumed directly (rooted_cluster_isEquiv) -- the single biggest cost reducer applies as claimed. (c) CONFIRMED: symmetric + right-Euclidean is a PER (kb5_per derives IsTrans via the landed symm_rightEuclidean_iff_trans); the dichotomy's non-trivial branch (rooted KB5 frame with any root successor is a full cluster containing the root) is witnessed by kb5_root_reflexive_if_has_succ, the alternative being the edge-isolated root that makes box-p -> p fail at KB5. Rule shape: mint-arm shape claim is structural (backed by EuclGen.eucl giving right-Euclideanness directly, so the S5w termination machinery ports). File-placement decision for Phase 17: the normal-form structure theorems are relation-generic (need only RightEuclidean/cod/Std.Symm) -- land them beside EuclGen in Cslib/Foundations/Relation/Euclidean.lean, NOT a new tableau-local file. NOTE: this gate is NOT task completion -- Phases 16-23 (the actual Euclidean/5/KB5 construction) remain unwritten.",
-  "phases_completed": 16,
+  "summary": "Phases 16 and 17 both LANDED, green, committed. This dispatch lifted the Phase-15 gate probe into production as purely-additive content in Cslib/Foundations/Relation/Euclidean.lean (the only file touched), beside the existing RightEuclidean API. Phase 16: the least-Euclidean closure operator EuclGen (inductive base/eucl), its RightEuclidean instance (via the eucl constructor), EuclGen.mono (embedding r), and EuclGen.least (the intersection characterization: EuclGen r lies below every right-Euclidean s containing r, by induction). All three EuclGen API declarations are AXIOM-FREE (#print axioms). Phase 17: the rooted normal form as five relation-generic theorems -- rooted_cluster_universal (R(w)xR(w) subset R, i.e. rightEuclidean at the root), rooted_cluster_isEquiv (IsEquiv (cod r) r, CONSUMING RightEuclidean.equiv_cod, not re-deriving), rooted_mem_cod (root successors lie in the cluster cod r; root need not be reflexive -- the entire S5/K5 difference), symm_rightEuclidean_isTrans (symmetric+Euclidean is a PER, via symm_rightEuclidean_iff_trans), and symm_rightEuclidean_root_refl (KB5 dichotomy witness: a symmetric-Euclidean root with any successor is reflexive). Phase-17 axioms all in the standard subset [propext, Classical.choice, Quot.sound] -- no sorryAx, no new axioms. Zero sorry in the modified file. R11 fully satisfied: no existing declaration in Euclidean.lean was touched, the whole Foundations tree (and full repo, 3239 jobs) compiles unmodified, no relocation needed. One deviation (annotated in the plan): Phase-17 task 3's bespoke EuclGen-specific IsEquiv (cod (EuclGen r)) (EuclGen r) restatement was dropped -- it added nothing over the relation-generic theorems (which apply to EuclGen r directly since it carries the RightEuclidean instance) and hit a subtype-coercion elaboration snag; the root's non-reflexivity is the ABSENCE of r w w, documented in the module docstring rather than landed as a theorem. TASK IS NOT FINISHED: this is 18/24. Phases 18-23 (modalApplyOneFive rule + termination port, 5-soundness, extractModelFive, 5-completeness, KB5, final decidability) remain the genuinely new modal-tableau surface.",
+  "phases_completed": 18,
   "phases_total": 24,
-  "phases_note": "16 = numbered phases 0-15 inclusive. The plan also carries an [COMPLETED] marker for the audit-inserted Phase 11.5, not part of the 24-phase (0-23) numbering. Phases 16-23 (the Euclidean/5/KB5 chain) remain unwritten. Phase 15 was a scratch GATE only -- it wrote NO production Lean, only the scratch probe and the plan verdict; the S5 deliverable (Phases 0-14) remains complete, green, and committed.",
+  "phases_note": "18 = numbered phases 0-17 inclusive. The plan also carries an [COMPLETED] marker for the audit-inserted Phase 11.5, outside the 24-phase (0-23) numbering. Phases 18-23 (the modal-tableau 5/KB5/decidability chain) remain unwritten. The S5 deliverable (Phases 0-14) remains complete, green, and committed; per plan R9 it does NOT depend on the Euclidean chain, so a future stall on 18-23 lands S5 green with the 5/KB5 chain [BLOCKED] as a real partial delivery.",
   "blockers": [],
-  "gate_verdict": {
-    "phase": 15,
-    "verdict": "PASSED",
-    "decision": "go -- proceed to Phase 16 (Relation.EuclGen)",
-    "probe": "specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
-    "run_command": "lake env lean specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
-    "run_result": "exit 0; zero sorry; #print axioms: instRightEuclideanEuclGen/euclGen_least/rooted_cluster_universal/kb5_root_reflexive_if_has_succ = NO axioms; rooted_cluster_isEquiv = [Classical.choice]; kb5_per = [propext, Quot.sound]",
-    "claims": {
-      "a_closure_exists_inductive": "CONFIRMED -- EuclGen inductive + RightEuclidean instance + euclGen_least least property, no axioms",
-      "b_rooted_normal_form": "CONFIRMED -- R(w)xR(w) subset R is rightEuclidean at root; equiv_cod consumed directly",
-      "c_kb5_shape": "CONFIRMED -- symmetric+Euclidean is a PER; root-successor => reflexive-at-root dichotomy witnessed",
-      "rule_shape": "CONFIRMED (structural) -- EuclGen.eucl gives right-Euclideanness directly; S5w termination machinery ports"
-    },
-    "phase17_file_placement": "Relation-generic structure theorems -> land beside EuclGen in Cslib/Foundations/Relation/Euclidean.lean (NOT a new tableau-local file).",
-    "line_estimate_16_23": "EuclGen + 3 structure theorems ~40 additive lines (Phases 16-17); Phases 18-23 (root-aware modalApplyOneFive/modalApplyOneKb5, extractModelFive, soundness/completeness/decidability) are the genuinely new surface, termination half ports from Phases 1-7."
-  },
-  "verification": {
-    "verification_passed": true,
-    "mode": "scratch_gate_no_production_lean",
+  "ci_status": {
+    "build": "green (3239 jobs, full tree compiles unmodified)",
+    "checkInitImports": "exit 0",
+    "lint-style": "no Euclidean issues",
+    "lint": "no Euclidean/EuclGen warnings",
+    "shake": "no Euclidean suggestions (repo-wide exit 1 is a pre-existing baseline, unchanged)",
+    "test": "exit 0",
     "sorry_count": 0,
-    "axiom_count": 0,
-    "note": "Phase 15 writes NO production Lean -- no Cslib/ file touched, so no CI signal moves. The probe under specs/** reaches a definite CONFIRM verdict (exit 0, zero sorry) rather than leaving sorries as the answer. Pre-existing CI baselines (PrimeExclusion.lean lint error; lake shake repo-wide exit 1) are unchanged and out of scope for this phase."
+    "axiom_note": "EuclGen API axiom-free; rooted_cluster_isEquiv=[Classical.choice]; symm_rightEuclidean_isTrans=[propext,Quot.sound]; all standard subset, no sorryAx",
+    "preexisting_baselines_unchanged": ["PrimeExclusion.lean lint error", "BDriver.lean:1219 longLine", "Intuitionistic/Minimal Completeness sorries", "lake shake repo-wide exit 1"]
   },
   "artifacts": [
-    "specs/515_s5_universal_rule_termination_unblock_504/probes/phase15-euclidean-route-gate.lean",
+    "Cslib/Foundations/Relation/Euclidean.lean",
     "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md"
   ],
   "commits": [
-    "a6cfb2e3 task 515 phase 15: GATE PASSED -- Euclidean route feasibility probe"
+    "75bd620b task 515 phase 16: land Relation.EuclGen least-Euclidean closure",
+    "14cd78da task 515 phase 17: land rooted normal form in Euclidean.lean"
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_phase": 16,
-    "resume_rationale": "Phase 15 GATE passed cleanly: the Euclidean route is feasible and all three load-bearing claims are confirmed sorry-free in scratch. The task is 16/24. Phase 16 lands Relation.EuclGen (the least-Euclidean closure operator) in Cslib/Foundations/Relation/Euclidean.lean as purely additive content -- the exact inductive from the probe (EuclGen base/eucl), plus the RightEuclidean instance, EuclGen.mono, and EuclGen.least. The probe's four (a)-claim theorems are drop-in: instRightEuclideanEuclGen, euclGen_mono, euclGen_least are already proved sorry-free and axiom-clean at the exact signatures Phase 16 needs.",
+    "resume_phase": 18,
+    "resume_rationale": "Phases 16-17 landed the entire relation-generic substrate the 5/KB5 chain consumes: EuclGen (the least right-Euclidean closure, the 'bespoke construction' FrameCompleteness.lean and S5Simplification.lean both named as the cost) and the rooted normal form (root above a universal cluster). Phase 18 begins the genuinely new modal-tableau surface: modalApplyOneFive, the root-aware 5 rule, whose TERMINATION HALF is a PORT of the S5w termination machinery (Phases 1-7), not new work -- that is the payoff for sequencing the Euclidean chain after the S5 chain.",
     "next_phase_notes": [
-      "REUSE THE PROBE VERBATIM: probes/phase15-euclidean-route-gate.lean already contains sorry-free, axiom-clean proofs of the Phase-16 EuclGen API (instRightEuclideanEuclGen, euclGen_mono, euclGen_least) AND the Phase-17 structure theorems (rooted_cluster_universal, rooted_cluster_isEquiv, kb5_per, kb5_root_reflexive_if_has_succ). Phases 16-17 are largely a lift of this probe into Cslib/Foundations/Relation/Euclidean.lean with docstrings + BibKey provenance, NOT a re-derivation.",
-      "Phase 16 is R11-purely-additive: touch NO existing declaration in Euclidean.lean. If the addition perturbs an existing consumer, relocate EuclGen local to the Tableau dir (a relocation, not a [BLOCKED]).",
-      "Phase 15 decided Phase 17's open file-placement question: the structure theorems are relation-generic -> land in Euclidean.lean, not a new tableau file.",
-      "Std.Symm's accessor is `Std.Symm.symm a b : r a b -> r b a` (explicit a b), NOT `Std.symm`. RightEuclidean.rightEuclidean has implicit a b c. cod is Relation.cod (mem_cod : b in cod r <-> exists a, r a b).",
-      "Plan line citations remain STALE across the board. Resolve declarations by NAME (lean_local_search / grep), never by plan line number. Euclidean.lean's landed API used here: RightEuclidean.rightEuclidean, RightEuclidean.equiv_cod (:~124), RightEuclidean.refl_cod (:~45), symm_rightEuclidean_iff_trans (:~236).",
-      "The S5 deliverable (Phases 0-14) is complete/green/committed and does NOT depend on the Euclidean chain -- per plan R9, a stall on 16-23 lands S5 green and the 5/KB5 chain [BLOCKED], a real partial delivery."
+      "Phase 18 (modalApplyOneFive): plan section '### Phase 18' (heading resolves by name, not line number -- citations are STALE). The termination half PORTS from the landed S5 termination machinery; EuclGen.eucl gives right-Euclideanness directly so the S5w cluster shape carries over.",
+      "The Phase 16-17 API is now in the CI-built tree and importable from Cslib.Foundations.Relation.Euclidean: EuclGen / EuclGen.mono / EuclGen.least / the RightEuclidean (EuclGen r) instance / rooted_cluster_universal / rooted_cluster_isEquiv / rooted_mem_cod / symm_rightEuclidean_isTrans / symm_rightEuclidean_root_refl. All under namespace Relation.",
+      "EuclGen.least signature landed with an EXPLICIT hypothesis (hs : RightEuclidean s), matching the plan/delegation, not the probe's instance-argument form: `EuclGen.least (hs : RightEuclidean s) (hle : forall a b, r a b -> s a b) : EuclGen r a b -> s a b`.",
+      "Std.Symm.symm is (explicit a b): `Std.Symm.symm a b : r a b -> r b a`. RightEuclidean.rightEuclidean has implicit a b c. cod is Relation.cod (b in cod r <-> exists a, r a b; witness constructor is anonymous <w, hwa>).",
+      "Plan line citations remain STALE across the board -- resolve every declaration by NAME (lean_local_search / lean_declaration_file / grep), never by plan line number. This caught a live-consumer near-miss in prior phases.",
+      "Per plan R9, the S5 deliverable (Phases 0-14) is complete/green/committed and independent of the 5/KB5 chain: a stall on 18-23 is a real partial delivery (S5 green, 5/KB5 [BLOCKED]), not a task failure."
     ],
     "environment_notes": [
-      "Mathlib cache is warm; lake exe cache get is a no-op on this branch.",
-      "Concurrent sessions are active: scope git add narrowly to specific files, never git add -A.",
-      "CI baselines to diff against (NOT regressions): lake lint has 1 pre-existing error (PrimeExclusion.lean:324); lake shake exits 1 repo-wide.",
-      "For scoped checks on the Foundations tree once Phase 16 lands: `lake build Cslib.Foundations.Relation.Euclidean`."
+      "Mathlib cache warm; lake exe cache get is a no-op on this branch.",
+      "Concurrent sessions active: scope git add narrowly to specific files, never git add -A / git add .",
+      "CI baselines to diff against (NOT regressions): lake lint has a pre-existing PrimeExclusion.lean error; lake shake exits 1 repo-wide; BDriver.lean:1219 longLine and Intuitionistic/Minimal Completeness sorries are all pre-existing in files outside this task's scope.",
+      "Scoped Foundations check: `lake build Cslib.Foundations.Relation.Euclidean`. Verify axioms with authoritative `#print axioms` (via `lake env lean <scratch>.lean`), not lean_verify alone (it gave a spurious stale sorryAx in a prior phase)."
     ]
   },
   "metadata": {

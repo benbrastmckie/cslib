@@ -1714,7 +1714,7 @@
     {
       "project_number": 515,
       "project_name": "s5_universal_rule_termination_unblock_504",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.",
@@ -1730,11 +1730,6 @@
           "summary": "S5 termination implementation blueprint: path (b) bespoke loop-checking; corrects 514 report (S4 LoopChecking.lean is scaffolding-only, termination capstone unbuilt); 7-phase breakdown with lemma signatures, reuse table, and [BLOCKED]-candidate risk register (Strategy 2 semantic FMP fallback)."
         },
         {
-          "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "type": "summary",
-          "summary": "Cycle 9 appended: Phase 8 partial -- S5 truth lemma over the universal relation + world-bound capstone landed sorry-free; lift [BLOCKED] with exact open goal; Phase 9 transitively [BLOCKED]."
-        },
-        {
           "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/03_s5-infrastructure-deep-research.md",
           "type": "report",
           "summary": "Deep multi-agent research (29 agents): R7 fuel domination REFUTED by execution (maxWorld = fuel/2 on box-dia-p, unbounded); modalWorldBoundS5 <= modalWorldBound is FALSE; hOutputsSubsetUniverse binds phi0 universally (kills phi0-parametrized rules); 5/KB5 NOT deliverable by any S5 tableau (fiveValid subsetneq s5Valid). Verdict: witness-reuse S5 rule + linear world budget at K own universe; delete modalUniverseS5/modalWorldBoundS5; ~2000 lines of S5Simplification.lean discarded; 12 phases."
@@ -1743,80 +1738,20 @@
           "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
           "type": "plan",
           "summary": "Plan v4: preserves v3's S5 witness-reuse architecture verbatim (Phases 0-14) and applies two targeted corrections driven by probes/five-s5-separation.lean and explicit user decisions. (1) 5/KB5 is RE-SCOPED, NOT STRUCK: the probe confirms v3's narrow claim (fiveValid/kb5Valid are strict subsets of s5Valid, so the S5 route provably cannot reach them) but REFUTES v3's broader 'mathematically impossible' claim -- the missing Euclidean-closure operator is library infrastructure, not an obstruction. Nine new phases (15-23) at the END of the DAG deliver Relation.EuclGen, the root+cluster normal form, extractModelFive, 5/KB5 soundness+completeness, and Decidable (fiveValid/kb5Valid). The task-description-amendment demand is deleted; the description stands. (2) Phase 14 is ARCHIVAL, not demolition: ~2,000 superseded lines move to specs/515_*/archive/ with provenance headers, never deleted. Effort 25h -> 52h (24 phases), budgeted honestly per 'no matter the cost'."
+        },
+        {
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary for phases 0-6 of plan v5."
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-16T00:19:56Z",
-      "session_id": "sess_1784160570_55026e",
+      "last_updated": "2026-07-16T01:34:10Z",
+      "session_id": "sess_1784165611_81d962",
       "next_artifact_number": 6,
       "memory_candidates": [
-        {
-          "content": "When a generic frame-relativized soundness crux (e.g. modalStepBranchGen_preserves_satIn) takes hBoxPos/hDiaNeg hypotheses universally quantified over ALL (b, acc) pairs, it cannot be instantiated for a frame system whose rule-level soundness genuinely depends on an extra invariant specific to that (b, acc)'s computational history (e.g. S5's accReachableInv). The generic theorem's type has no parameter slot to receive such a per-instance witness. In this situation, a bespoke copy of the generic theorem (specialized to the fixed apply/FC, with the extra invariant added as a parameter) is safer than extracting the shared 'other shapes' branch into a new generic lemma, when the priority is zero regression risk to already-frozen, CI-green declarations that consume the original generic theorem.",
-          "category": "INSIGHT",
-          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "confidence": 0.85,
-          "suggested_keywords": [
-            "cslib",
-            "lean4",
-            "modal-logic",
-            "tableau",
-            "soundness",
-            "S5",
-            "generic-lemma-limits"
-          ]
-        },
-        {
-          "content": "lake shake's before/after A/B comparison via `git stash` is unreliable: shake reads existing .olean build caches rather than rebuilding, so stashing a file mid-session produces a spurious 'target is out-of-date and needs to be rebuilt' error for that file instead of an accurate pre-change baseline. To verify whether a shake import-removal suggestion predates a change, inspect the import graph manually (check whether the flagged import is already re-imported, even non-publicly, by one of the file's own public-imported dependencies) rather than relying on a stash-based diff.",
-          "category": "INSIGHT",
-          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "confidence": 0.85,
-          "suggested_keywords": [
-            "cslib",
-            "lean4",
-            "lake-shake",
-            "ci-verification",
-            "tooling-gotcha"
-          ]
-        },
-        {
-          "content": "Generic CSLib lemmas may over-require RuleApplicationSpec when only freshLocal is used -- modalStepBranchGen_preserves_accSourcesKnown and modalExpandBranchesGen_openBranch_accSourcesKnown (BDriver.lean) each took a bundled spec : RuleApplicationSpec apply but used it ONLY via a single `rcases spec.freshLocal`. Since RuleApplicationSpec modalApplyOneS5 is mathematically false at rankStep, the bundled form permanently locked S5 out of facts it could actually have. Before concluding a generic lemma is unusable for a spec-less rule, grep its body for `spec.` -- the true dependency is often far weaker than the signature claims. FmpMeasure.lean already takes hFreshLocal raw for exactly this reason.",
-          "category": "TECHNIQUE",
-          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "confidence": 0.9,
-          "suggested_keywords": [
-            "cslib",
-            "lean4",
-            "modal-logic",
-            "tableau",
-            "S5"
-          ]
-        },
-        {
-          "content": "S5's universal rule trivialises the truth lemma but not termination -- extractModelS5's relation is Relation.EqvGen acc.hasEdge (arbitrary alternating chains), which looks harder than K's single raw edge or B's SymmGen. But modalApplyOneS5's T(box phi)@w arm emits T(phi)@w' at EVERY known world, so a saturated branch already carries the payload everywhere and the S5 Hintikka bridges take a bare `w' in modalKnownWorlds b` where T's/B's take a path. The only residual obligation is that EqvGen cannot escape the known-world set -- which needs accSourcesKnown AND accTargetsKnown (one per raw-edge endpoint) and must be stated as an Iff, since EqvGen's symm constructor is not dischargeable by induction from a one-directional IH.",
-          "category": "TECHNIQUE",
-          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "confidence": 0.9,
-          "suggested_keywords": [
-            "cslib",
-            "lean4",
-            "modal-logic",
-            "tableau",
-            "S5"
-          ]
-        },
-        {
-          "content": "lean_verify can report spurious sorryAx on freshly-edited declarations -- An lean_verify call on a just-added declaration returned sorryAx while every dependency verified clean. It was a stale-LSP artifact (queried mid-elaboration). Confirm with `#print axioms` run through `lake env lean` on a scratch file, and cross-check that `lake build` emits no `declaration uses sorry` warning for the file -- the build warning is authoritative and LSP-independent.",
-          "category": "TECHNIQUE",
-          "source_artifact": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
-          "confidence": 0.9,
-          "suggested_keywords": [
-            "cslib",
-            "lean4",
-            "modal-logic",
-            "tableau",
-            "S5"
-          ]
-        }
+        "In this repo, Lean files with `module` + `public import` (not `public meta import`) headers cannot embed permanent `#eval`/`#guard`/`native_decide` declarations (structural module-system limitation, documented at Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Sanity Checks' section). Kernel-level `rfl`/`decide` also fails on functions compiled via nested well-founded recursion (e.g. modalExpandBranchesGen's fuel-driven processNext) even at small argument magnitudes, independent of the module-system limitation. Workaround: chain single, non-recursive step functions (e.g. modalStepBranchGen) via explicit `let`/`bind`, which DO reduce fine under `rfl`/`decide`, to build a mechanized multi-step counterexample without touching the recursive driver.",
+        "When generalizing a driver-level top-loop induction (e.g. modalExpandBranchesGen_openBranch_accSourcesKnown in BDriver.lean) over an abstract per-(branch,acc) predicate P, the double-induction body is often already predicate-agnostic -- the generalization is a pure mechanical parametrization requiring no new proof insight, only careful signature threading of the step-preservation hypothesis."
       ],
       "plan_metadata": {
         "phases": 24,

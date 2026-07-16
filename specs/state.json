@@ -1714,7 +1714,7 @@
     {
       "project_number": 515,
       "project_name": "s5_universal_rule_termination_unblock_504",
-      "status": "implementing",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.",
@@ -1730,11 +1730,6 @@
           "summary": "S5 termination implementation blueprint: path (b) bespoke loop-checking; corrects 514 report (S4 LoopChecking.lean is scaffolding-only, termination capstone unbuilt); 7-phase breakdown with lemma signatures, reuse table, and [BLOCKED]-candidate risk register (Strategy 2 semantic FMP fallback)."
         },
         {
-          "type": "plan",
-          "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/02_s5-termination-machinery.md",
-          "summary": "Phase 8 marked [BLOCKED] with exact open goal + two structural findings; Phase 9 marked [BLOCKED] (transitive)."
-        },
-        {
           "path": "specs/515_s5_universal_rule_termination_unblock_504/summaries/02_s5-termination-machinery-summary.md",
           "type": "summary",
           "summary": "Cycle 9 appended: Phase 8 partial -- S5 truth lemma over the universal relation + world-bound capstone landed sorry-free; lift [BLOCKED] with exact open goal; Phase 9 transitively [BLOCKED]."
@@ -1743,12 +1738,17 @@
           "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/03_s5-infrastructure-deep-research.md",
           "type": "report",
           "summary": "Deep multi-agent research (29 agents): R7 fuel domination REFUTED by execution (maxWorld = fuel/2 on box-dia-p, unbounded); modalWorldBoundS5 <= modalWorldBound is FALSE; hOutputsSubsetUniverse binds phi0 universally (kills phi0-parametrized rules); 5/KB5 NOT deliverable by any S5 tableau (fiveValid subsetneq s5Valid). Verdict: witness-reuse S5 rule + linear world budget at K own universe; delete modalUniverseS5/modalWorldBoundS5; ~2000 lines of S5Simplification.lean discarded; 12 phases."
+        },
+        {
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/04_s5-termination-machinery.md",
+          "type": "plan",
+          "summary": "Plan v3: witness-reuse S5 rule + linear tag-injection world budget at K's own universe; retires the keyed/pigeonhole architecture, lands the R7 refutation as a theorem, drops 5/KB5 as mathematically impossible"
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-15T22:16:00Z",
-      "session_id": "sess_1784152189_12f1bc",
-      "next_artifact_number": 3,
+      "last_updated": "2026-07-16T00:19:56Z",
+      "session_id": "sess_1784160570_55026e",
+      "next_artifact_number": 5,
       "memory_candidates": [
         {
           "content": "When a generic frame-relativized soundness crux (e.g. modalStepBranchGen_preserves_satIn) takes hBoxPos/hDiaNeg hypotheses universally quantified over ALL (b, acc) pairs, it cannot be instantiated for a frame system whose rule-level soundness genuinely depends on an extra invariant specific to that (b, acc)'s computational history (e.g. S5's accReachableInv). The generic theorem's type has no parameter slot to receive such a per-instance witness. In this situation, a bespoke copy of the generic theorem (specialized to the fixed apply/FC, with the extra invariant added as a parameter) is safer than extracting the shared 'other shapes' branch into a new generic lemma, when the priority is zero regression risk to already-frozen, CI-green declarations that consume the original generic theorem.",
@@ -1817,7 +1817,56 @@
             "S5"
           ]
         }
-      ]
+      ],
+      "plan_metadata": {
+        "phases": 15,
+        "total_effort_hours": 25,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 3,
+        "dependency_waves": [
+          [
+            0,
+            3,
+            4,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            7,
+            8
+          ],
+          [
+            9,
+            13
+          ],
+          [
+            10
+          ],
+          [
+            11
+          ],
+          [
+            12
+          ],
+          [
+            14
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/03_s5-infrastructure-deep-research.md",
+            "integrated_in_plan_version": 3,
+            "integrated_date": "2026-07-16"
+          }
+        ],
+        "skeleton": false,
+        "follow_up_tasks": []
+      }
     },
     {
       "project_number": 516,

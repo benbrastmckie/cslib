@@ -1206,7 +1206,17 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 
-### Phase 10: Rank-free loop invariant with the `Aux` parametrization [COMPLETED]
+### Phase 10: Rank-free loop invariant with the `Aux` parametrization [PARTIAL]
+
+**Correction (post-audit, see `reports/06_k-aux-unprovability-audit.md`)**: this phase's original
+verification bar -- "both `Aux` instantiations elaborate" -- was too weak. Elaboration is not
+satisfiability: `ModalLoopAuxK` elaborated but was not step-preservable, and
+`ModalLoopInvGen_iff_hintikka_auxK` gave false assurance precisely because it is stated at a
+single fixed `(b, e, acc)` and never exercises a step, which is exactly where the frozen-`e`
+defect bites. **Strengthened bar going forward**: both `Aux` instantiations must have closed
+`AuxStepPreserved` **and** `AuxBounds` witnesses, not merely elaborate. Phase 11.5 (below) closes
+this gap by re-aritying `Aux` to thread `e`; Phase 10's declarations as landed are otherwise
+sound and are re-aritied in place, not replaced.
 
 **Goal**: Land the rank-free Hintikka loop invariant. **This is real work, not a rename.**
 
@@ -1251,7 +1261,18 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 
-### Phase 11: Step preservation [COMPLETED]
+### Phase 11: Step preservation [PARTIAL]
+
+**Correction (post-audit, see `reports/06_k-aux-unprovability-audit.md`)**: this phase's own
+verification bar reads *"the port closes sorry-free at **both** `Aux` instantiations."* It met
+one of two (S5w). A phase that meets half its stated bar is `[PARTIAL]`, not `[COMPLETED]`. The
+self-assessment below ("documented, not a blocker for this phase") under-stated the defect: the
+audit machine-checked that `AuxStepPreserved modalApplyOne (ModalLoopAuxK φ0 [])` is not merely
+unproven but **refutable** (`auxK_not_stepPreserved`, sorry-free, `#print axioms` ->
+`[propext, Quot.sound]`), and that the finding's own stated mechanism ("frozen `e` and step's `e`
+diverge") is wrong -- the audit's counterexample sets them equal and the statement is still
+false. The real defect, and its fix, are Phase 11.5's (below), not this phase's remit; this
+phase's generic `modalStepHintikka_preserves_inv` port itself was correct and is unchanged.
 
 **Goal**: Port `modalStepGen_preserves_invariant` to the rank-free invariant with `Aux` threaded.
 
@@ -1316,7 +1337,76 @@ Finding above), not a gap in this phase's port.
 
 ---
 
+### Phase 11.5: `Aux` re-arity -- thread `e` (audit-inserted) [COMPLETED]
+
+**Goal**: Close the K-side half of Phase 11's original verification bar by re-aritying `Aux` to
+thread the expanded set `e` explicitly, per the verified fix in
+`reports/06_k-aux-unprovability-audit.md` §5. Re-arity only -- the design is settled and
+machine-checked by the audit, not re-derived here.
+
+**Tasks**:
+- [x] Re-arity `AuxStepPreserved (apply) (Aux)` (`CompletenessLoop.lean`): `Aux` now has type
+      `List (SignedFormula …) → List (SignedFormula …) → Accessibility → Prop` (was
+      `List (SignedFormula …) → Accessibility → Prop`); the step hypothesis becomes `Aux b e acc`
+      (was `Aux b acc`); the conclusion becomes `∀ p ∈ newBs.zip newExps, Aux p.1 p.2 newAcc`
+      (was `∀ b' ∈ newBs, Aux b' newAcc`), pairing each new branch with its own new expanded set.
+- [x] Re-arity `AuxBounds (φ0) (Aux)` to the same `Aux` type; `Aux b e acc → modalMaxWorld b <
+      modalWorldBound φ0` (was `Aux b acc → …`).
+- [x] Re-arity `ModalLoopInvHintikka.aux : Aux b e acc` (was `Aux b acc`) -- the structure's own
+      `e` parameter was already in scope, so this is a one-line field-type change.
+- [x] Re-arity `ModalLoopAuxK (φ0) (b e) (acc)` (was the curried `ModalLoopAuxK (φ0) (e) (b) (acc)`)
+      -- body unchanged, only the parameter order/currying changes to match `Aux`'s shared shape.
+- [x] Re-arity `ModalLoopAuxS5w (φ₀) (b _e) (_acc)` (was `(φ₀) (b) (_acc)`, no `e` at all) --
+      body unchanged; `_e` genuinely unused, covered by the existing `@[nolint unusedArguments]`.
+- [x] Re-land `ModalLoopAuxK_bounds`, `ModalLoopInvGen_iff_hintikka_auxK`, `ModalLoopAuxS5w_bounds`
+      against the new arities -- all mechanical, proof bodies unchanged apart from binder shape.
+- [x] Re-land `ModalLoopAuxS5w_stepPreserved`: one token, `(List.of_mem_zip hp).1` replaces the
+      prior direct `hb'` membership; nothing else changes.
+- [x] Adjust `modalStepHintikka_preserves_inv`'s body: `hAuxBounds b e acc haux` (added `e`),
+      `hAuxAll : ∀ p ∈ newBs.zip newExps, Aux p.1 p.2 newAcc` (was `∀ b' ∈ newBs, …`), and the
+      final `refine`'s aux-field call site becomes `hAuxAll p hp` (was `hAuxAll p.1 hp1`) -- the
+      `refine`'s own `p`/`hp` destructuring via `List.of_mem_zip` was already in place from Phase 11
+      and needed no other change.
+- [x] Land **NEW** `ModalLoopAuxK_stepPreserved (apply) (spec : RuleApplicationSpec apply) (φ0) :
+      AuxStepPreserved apply (ModalLoopAuxK φ0)`, generic over any `apply` with a full
+      `RuleApplicationSpec` (K, T, B all get it from one theorem -- the "K/T/B pay nothing"
+      guarantee, actually delivered). Discharged per audit §5: `modalStepBranch_potential_step_gen`
+      for the rank witness and `rankBound`/`rankEdge`/`phiBound`-conservation; the five
+      `_core`-suffixed helpers from Phase 11 (via `spec.toCore`) for `bClosure`/`eNodup`/
+      `eClosure`/`accFresh`/`accKnown`; the crux, `modalStepBranch_preserves_outDegEq_gen`, applied
+      at `p.2` (the branch's own new `e`), not a frozen `e`.
+- [x] Verified the one residual line the audit flagged (`modalLoopGen_bClosure_core`, `private` in
+      this file, so the audit's out-of-file probe supplied it as a hypothesis): in-file it is
+      discharged directly via `spec.toCore`, exactly as Phase 11's port already does at the same
+      position. Closes with no additional machinery.
+
+**Timing**: 1 hour (audit estimated ~60 lines / mechanical; actual diff: 100 insertions, 46
+deletions, entirely within `CompletenessLoop.lean`)
+
+**Depends on**: 11 (and the audit report, `reports/06_k-aux-unprovability-audit.md`)
+
+**Files to modify**: `Cslib/Logics/Modal/Tableau/CompletenessLoop.lean`
+
+**Verification**: full CI green (`lake build`, `checkInitImports`, `lint-style`, `lint`
+[pre-existing `PrimeExclusion.lean` error only, out of scope], `test`, `shake` -- all six
+confirmed); **closed `AuxStepPreserved` witness at BOTH instantiations** (`ModalLoopAuxK_bounds`
++ `ModalLoopAuxK_stepPreserved` for K, `ModalLoopAuxS5w_bounds` +
+`ModalLoopAuxS5w_stepPreserved` for S5w) -- Phase 11's original bar, now met; zero `sorry`; zero
+new axioms (`lean_verify` on `ModalLoopAuxK_stepPreserved`, `ModalLoopAuxS5w_stepPreserved`, and
+`modalStepHintikka_preserves_inv` all report `propext`/`Classical.choice`/`Quot.sound` only, no
+`sorryAx`); `TDriver.lean`/`BDriver.lean` compile unmodified (confirmed via `lake test`, since
+neither file consumes `Aux`/`ModalLoopAuxK`/`AuxStepPreserved` directly -- they consume
+`ModalLoopInvGen`, which this phase does not touch).
+
+---
+
 ### Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [NOT STARTED]
+
+**Note (post-audit)**: Phase 11.5 (above) closed the K-side `AuxStepPreserved`/`AuxBounds` gap
+this phase's own KILL (R3) gate would otherwise have hit **after** the ~310-line double
+induction below, per `reports/06_k-aux-unprovability-audit.md` §1/§4. Both `Aux` instantiations
+now have closed step-preservation and bounds witnesses; this phase can proceed on that
+foundation rather than rediscovering the arity defect mid-induction.
 
 **Goal**: The big one. Re-derive the lift parametrically and **prove the factoring correct by
 re-deriving K's own theorem from it, unchanged**. ~310 lines, a **double induction**.

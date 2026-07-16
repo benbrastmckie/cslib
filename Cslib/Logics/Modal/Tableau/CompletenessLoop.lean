@@ -548,7 +548,7 @@ private lemma modalApplyOne_hasEdge_mono
 abstract `(apply, spec)`. For old `e`-elements the witness/edge from `he` transfers to every
 child branch/accessibility via `b ⊆ b'` (branches only grow) and `modalApplyGen_hasEdge_mono`
 (`spec.freshLocal`, `acc`-edges only grow); for a freshly-appended `sf_exp` that is itself
-`boxNeg`-shaped, `spec.boxNegWitness` (F11) constructs the witness and edge directly. -/
+`boxNeg`-shaped, `spec.boxNegWitness'` (F11') constructs the witness and edge directly. -/
 private lemma modalLoopGen_eBoxNegWitness
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -582,10 +582,10 @@ private lemma modalLoopGen_eBoxNegWitness
     · have hsfexp_eq : sf_exp =
           (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.boxNegWitness b acc ψ w
+      obtain ⟨w', hsndeq, rest, hfsteq⟩ := spec.boxNegWitness' b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
       simp only [RuleResult.linear.injEq] at hfstc
-      refine ⟨modalNextWorld b, ?_, ?_⟩
+      refine ⟨w', ?_, ?_⟩
       · rw [hnewAcc, hsfexp_eq, hsndeq]
         simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, beq_self_eq_true,
           Bool.true_and, Bool.true_or]
@@ -607,7 +607,7 @@ private lemma modalLoopGen_eBoxNegWitness
     · have hsfexp_eq : sf_exp =
           (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.boxNegWitness b acc ψ w
+      obtain ⟨w', hsndeq, rest, hfsteq⟩ := spec.boxNegWitness' b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
       -- boxNeg's own result is `.linear`, never `.branching`: contradiction
       simp at hfstc
@@ -648,7 +648,7 @@ private lemma modalLoop_eBoxNegWitness
     (modalStepBranch_eq b e acc ▸ hstep) he
 
 /-- **Generic F12+freshLocal discharge** (task 510): `modalLoopGen_eDiamondPosWitness`, dual of
-`modalLoopGen_eBoxNegWitness` via `spec.diaPosWitness` (F12). -/
+`modalLoopGen_eBoxNegWitness` via `spec.diaPosWitness'` (F12'). -/
 private lemma modalLoopGen_eDiamondPosWitness
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -682,10 +682,10 @@ private lemma modalLoopGen_eDiamondPosWitness
     · have hsfexp_eq : sf_exp =
           (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.diaPosWitness b acc ψ w
+      obtain ⟨w', hsndeq, rest, hfsteq⟩ := spec.diaPosWitness' b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
       simp only [RuleResult.linear.injEq] at hfstc
-      refine ⟨modalNextWorld b, ?_, ?_⟩
+      refine ⟨w', ?_, ?_⟩
       · rw [hnewAcc, hsfexp_eq, hsndeq]
         simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, beq_self_eq_true,
           Bool.true_and, Bool.true_or]
@@ -707,7 +707,7 @@ private lemma modalLoopGen_eDiamondPosWitness
     · have hsfexp_eq : sf_exp =
           (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
         rw [← hsfeq2]; exact hsfeq
-      obtain ⟨hsndeq, rest, hfsteq⟩ := spec.diaPosWitness b acc ψ w
+      obtain ⟨w', hsndeq, rest, hfsteq⟩ := spec.diaPosWitness' b acc ψ w
       rw [hsfexp_eq, hfsteq] at hfstc
       -- diamondPos's own result is `.linear`, never `.branching`: contradiction
       simp at hfstc
@@ -871,8 +871,8 @@ F9-F12 (`RuleApplicationSpec`, `GenericDriver.lean`): Structural shapes close vi
 (`boxNeg`/`diamondPos`) are `trivial` (carved out of conjunct 2); Propagating shapes
 (`boxPos`/`diamondNeg`) are ruled out by `eBoxOnlyNeg`/`eDiamondOnlyPos` (F9/F10, via
 `modalLoopGen_eBoxOnlyNeg`/`_eDiamondOnlyPos`, Phase 6) contradicting `sf ∈ e`; conjuncts 3/4 use
-`eBoxNegWitness`/`eDiamondPosWitness` plus `spec.boxNegWitness`/`spec.diaPosWitness` (F11/F12) to
-rule out `.notApplicable`. -/
+`eBoxNegWitness`/`eDiamondPosWitness` plus `spec.boxNegWitness'`/`spec.diaPosWitness'` (F11'/F12')
+to rule out `.notApplicable`. -/
 lemma modalExpandBranchesGen_hintikka
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom) (fuel : Nat) :
@@ -1046,7 +1046,7 @@ lemma modalExpandBranchesGen_hintikka
                 rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
                 · exact hinv.eBoxNegWitness _ hine ψ' w rfl
                 · exfalso
-                  obtain ⟨-, rest, hlin⟩ := spec.boxNegWitness bR aR ψ' w
+                  obtain ⟨_, -, rest, hlin⟩ := spec.boxNegWitness' bR aR ψ' w
                   rw [hlin] at hna
                   simp at hna
               · -- Conjunct 4: diamond-positive witness existence (task 441, symmetric to
@@ -1055,7 +1055,7 @@ lemma modalExpandBranchesGen_hintikka
                 rcases modalStepBranchGen_none_saturated apply hstep _ hmem with hine | hna
                 · exact hinv.eDiamondPosWitness _ hine ψ' w rfl
                 · exfalso
-                  obtain ⟨-, rest, hlin⟩ := spec.diaPosWitness bR aR ψ' w
+                  obtain ⟨_, -, rest, hlin⟩ := spec.diaPosWitness' bR aR ψ' w
                   rw [hlin] at hna
                   simp at hna
             | some step =>

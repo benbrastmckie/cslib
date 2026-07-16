@@ -855,8 +855,12 @@ theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT 
   localShapeInvariance := modalApplyOneT_localShapeInvariance
   boxPosNotExpanding := modalApplyOneT_boxPosNotExpanding
   diaNegNotExpanding := modalApplyOneT_diaNegNotExpanding
-  boxNegWitness := modalApplyOneT_boxNegWitness
-  diaPosWitness := modalApplyOneT_diaPosWitness
+  boxNegWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOneT_boxNegWitness b acc ψ w).1,
+      (modalApplyOneT_boxNegWitness b acc ψ w).2⟩
+  diaPosWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOneT_diaPosWitness b acc ψ w).1,
+      (modalApplyOneT_diaPosWitness b acc ψ w).2⟩
 
 /-! ## T Instantiation of the Generic Hintikka/Saturation Chain (task 510) -/
 

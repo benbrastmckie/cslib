@@ -391,39 +391,9 @@ lemma modalApplyOne_outputs_subset_S5
           exact mem_modalUniverseS5_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
             (modalSubfmls_trans_S5 hxform (modalUniverseS5_mem_formula hsfU))
 
-/-- The S5 analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
-`modalApplyOneS5` rather than `modalApplyOne`: either `modalApplyOneS5` leaves `acc` unchanged
-with every emitted formula's label a known world of `b` (covering both the ordinary
-agreement shapes, via `modalApplyOneS5_eq_of_not_boxPos_diaNeg` + K's own step lemma, and the two
-S5-relevant shapes, via `modalApplyOneS5_boxPos_diaNeg_eq`), or it mints exactly one edge with a
-nonempty `.linear` result entirely labeled at `modalNextWorld b` (only possible at the two
-K-minting shapes, disjoint from the two S5-relevant shapes, so `modalApplyOneS5` agrees with K
-there too). This is the uniform per-call fact `worldsContiguous`'s (and `bClosure`/`eClosure`'s)
-preservation needs. -/
-lemma modalApplyOneS5_knownWorlds_step
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
-    ((modalApplyOneS5 sf b acc).snd = acc ∧
-      (match (modalApplyOneS5 sf b acc).fst with
-        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
-        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-        | .notApplicable => True)) ∨
-    ((modalApplyOneS5 sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
-      (match (modalApplyOneS5 sf b acc).fst with
-        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
-        | .branching _ => False
-        | .persistent _ => False
-        | .notApplicable => False)) := by
-  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-  · obtain ⟨hsndeq, hor⟩ := modalApplyOneS5_boxPos_diaNeg_eq sf b acc hsfmem hknown hbd
-    refine Or.inl ⟨hsndeq, ?_⟩
-    rcases hor with hnot | ⟨out, hpers, hlabel⟩
-    · rw [hnot]; trivial
-    · rw [hpers]; exact hlabel
-  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
-    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
-    rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
-    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+-- CORRECTION (2026-07-16, task 515 phase 14): `modalApplyOneS5_knownWorlds_step` originally sat
+-- here as the tail of this cluster's third block. On re-verification by NAME it was found to have
+-- a LIVE cross-file consumer (`FrameSoundness.lean`'s S5 soundness bridge), so it was RESTORED to
+-- the live tree (`S5Simplification.lean`, "S5 Driver Instantiation" section) and is NOT archived.
+-- It is a per-call known-worlds dichotomy about `modalApplyOneS5`, independent of the retired
+-- `modalUniverseS5`/`worldsContiguous` machinery this cluster otherwise collects.

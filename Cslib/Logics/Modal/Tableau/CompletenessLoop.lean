@@ -431,8 +431,8 @@ lemma modalLoopInvHintikkaS5w_initial (φ₀ : Proposition Atom) :
     subst hx
     simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset]
     exact ⟨by simp, modalSubfmls_self_mem φ₀⟩
-  · show modalMaxWorld _ ≤ _
-    simp [modalMaxWorld]
+  · simp only [S5wWorldInv, modalMaxWorld, List.foldl_cons, List.foldl_nil]
+    exact Nat.zero_le _
 
 /-- **Generic branch-side universe-closure preservation** (task 510):
 `modalLoopGen_bClosure`, over an abstract `(apply, spec)`, discharged by

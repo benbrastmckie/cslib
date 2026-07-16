@@ -168,12 +168,16 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## The Structural-Hypothesis Bundle -/
 
-/-- The structural-hypothesis bundle a rule-application function `apply` (matching
-`modalApplyOne`'s signature, see `RuleApply`) must satisfy to reuse the K-style FMP termination
-measure with the generic tableau driver. See the module docstring for the provenance of each
-field and the downstream-reuse contract for tasks 504 (S5/KB5), 505 (B), and 506 (S4, explicitly
-excluded). -/
-structure RuleApplicationSpec (apply : RuleApply Atom) : Prop where
+/-- **Core bundle** (the Hintikka/saturation-forcing fields, F1-F3 + F7-F12): the subset of
+`RuleApplicationSpec`'s fields that `CompletenessLoop.lean`'s generic Hintikka-set machinery
+actually consumes -- no `rankStep`, no `outDegStep`, no `knownWorldsStep`. Split out so a rule
+that cannot discharge the termination-measure fields (S5's witness-reuse rule
+`modalApplyOneS5w`, `S5Simplification.lean`) can still supply everything the *completeness* side
+needs. The two witness fields (`boxNegWitness'`/`diaPosWitness'`) are existentially quantified on
+the witness world -- weaker than `RuleApplicationSpec`'s eventual concrete-`modalNextWorld b`
+form -- exactly what lets a witness-reuse rule (which may redirect the edge to an arbitrary
+already-known world, not the fresh mint point) discharge them. -/
+structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
   /-- World-creation confinement: `apply sf b acc` either leaves `acc` unchanged, or adds
   exactly one edge from `sf`'s own world to a fresh witness world, with a `.linear` result
   headed by that witness. No other accessibility change or result shape may accompany a new
@@ -206,6 +210,82 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop where
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
       (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
       (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b
+  /-- Branching arity (task 507 Phase 7): every `.branching` result `apply sf b acc` can
+  produce has exactly two sub-branches. Needed by the counting-measure engine
+  `modalExpMeasure_step_lt`'s `.branching` case. Mirrors `modalApplyOne_branching_length`. -/
+  branchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+      (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
+      (apply sf b acc).fst = .branching brs → brs.length = 2
+  /-- **F8** (task 510) Branch-independence on structural shapes: for a signed formula whose
+  formula-component is neither `box`- nor `diamond`-shaped, `apply`'s rule result does not
+  depend on the branch or the accessibility relation. Forces `modalHintikkaClauseGen_lift`
+  (and, through it, `modalStepBranchGen_hintikka_inv`), which lifts the expanded-set Hintikka
+  invariant from the old branch to each strictly larger child branch. Mirrors
+  `modalApplyOne_fst_eq_of_not_box` (`Completeness.lean`). -/
+  localShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
+      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
+      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+        (acc acc' : Accessibility),
+      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1
+  /-- **F9** (task 510) Box-positive is never expanding: `apply`'s result on a `T(□ψ)@w`-shaped
+  input is always `.notApplicable` or `.persistent` -- never `.linear`/`.branching`. Since
+  `.persistent` leaves the expanded set unchanged (`modalStepBranchGen`, `Saturation.lean`),
+  this is what makes `modalLoopGen_eBoxOnlyNeg` go through: a `boxPos`-shaped formula can never
+  be the `sf_exp` appended to `e`. **The payload is existentially quantified on purpose**: every
+  use site discards it (it serves only to contradict the `.linear`/`.branching` case split), and
+  quantifying it is exactly what lets T's self-conjunct, B's symmetric propagation, and S5's
+  universal propagation discharge this field. Mirrors `modalApplyOne_boxPos_eq` (`Rules.lean`),
+  weakened from its concrete `boxPropagation` payload. -/
+  boxPosNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
+      sf.sign = .pos → ∀ (ψ : Proposition Atom), sf.formula = .box ψ →
+      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).1 = .notApplicable ∨
+        ∃ out, (apply sf b acc).1 = .persistent out
+  /-- **F10** (task 510) Diamond-negative is never expanding: dual of `boxPosNotExpanding`,
+  forcing `modalLoopGen_eDiamondOnlyPos`. Mirrors `modalApplyOne_diamondNeg_eq` (`Rules.lean`),
+  likewise payload-weakened. -/
+  diaNegNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
+      sf.sign = .neg → ∀ (ψ : Proposition Atom), sf.formula = .diamond ψ →
+      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).1 = .notApplicable ∨
+        ∃ out, (apply sf b acc).1 = .persistent out
+  /-- **F11'** (task 515 Phase 9) Box-negative witness minting/reuse, existentially quantified
+  on the witness world: `apply` on `F(□ψ)@w` is *always* applicable, adds the edge
+  `w → w'` for **some** world `w'`, and heads its `.linear` output with the witness
+  `F(ψ)@w'`. Weaker than the eventual `RuleApplicationSpec.boxNegWitness` (which fixes
+  `w' := modalNextWorld b`, the fresh mint point) -- this existential form is exactly what a
+  witness-*reuse* rule (which may redirect the edge to an already-known world) can discharge.
+  Mirrors `modalApplyOne_boxNeg_witness` (`Rules.lean`), further weakened from `boxNegWitness`. -/
+  boxNegWitness' : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
+      ∃ w', (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+          = acc.addEdge w w' ∧
+      ∃ rest,
+        (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest)
+  /-- **F12'** (task 515 Phase 9) Diamond-positive witness minting/reuse: dual of
+  `boxNegWitness'`. Mirrors `modalApplyOne_diamondPos_witness` (`Rules.lean`), further weakened
+  from `diaPosWitness`. -/
+  diaPosWitness' : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
+      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
+      ∃ w', (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+          = acc.addEdge w w' ∧
+      ∃ rest,
+        (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest)
+
+/-- The structural-hypothesis bundle a rule-application function `apply` (matching
+`modalApplyOne`'s signature, see `RuleApply`) must satisfy to reuse the K-style FMP termination
+measure with the generic tableau driver. See the module docstring for the provenance of each
+field and the downstream-reuse contract for tasks 504 (S5/KB5), 505 (B), and 506 (S4, explicitly
+excluded). Extends `RuleApplicationSpecCore` with the three fields (`rankStep`/`outDegStep`/
+`knownWorldsStep`) the K-style FMP *termination-measure* argument needs but the *completeness*
+side (`CompletenessLoop.lean`) does not -- see `RuleApplicationSpecCore`'s docstring. -/
+structure RuleApplicationSpec (apply : RuleApply Atom) : Prop extends
+    RuleApplicationSpecCore apply where
   /-- Per-call rank-step (task 507): given `rank` satisfying the depth-bound/edge invariants
   pre-call, `apply sf b acc` yields a `rank'` (agreeing with `rank` off `modalNextWorld b`)
   satisfying the edge invariant on `(apply sf b acc).snd` and the depth bound on
@@ -257,74 +337,14 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop where
           | .branching _ => False
           | .persistent _ => False
           | .notApplicable => False))
-  /-- Branching arity (task 507 Phase 7): every `.branching` result `apply sf b acc` can
-  produce has exactly two sub-branches. Needed by the counting-measure engine
-  `modalExpMeasure_step_lt`'s `.branching` case. Mirrors `modalApplyOne_branching_length`. -/
-  branchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
-      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-      (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
-      (apply sf b acc).fst = .branching brs → brs.length = 2
-  /-- **F8** (task 510) Branch-independence on structural shapes: for a signed formula whose
-  formula-component is neither `box`- nor `diamond`-shaped, `apply`'s rule result does not
-  depend on the branch or the accessibility relation. Forces `modalHintikkaClauseGen_lift`
-  (and, through it, `modalStepBranchGen_hintikka_inv`), which lifts the expanded-set Hintikka
-  invariant from the old branch to each strictly larger child branch. Mirrors
-  `modalApplyOne_fst_eq_of_not_box` (`Completeness.lean`). -/
-  localShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
-      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
-      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
-        (acc acc' : Accessibility),
-      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1
-  /-- **F9** (task 510) Box-positive is never expanding: `apply`'s result on a `T(□ψ)@w`-shaped
-  input is always `.notApplicable` or `.persistent` -- never `.linear`/`.branching`. Since
-  `.persistent` leaves the expanded set unchanged (`modalStepBranchGen`, `Saturation.lean`),
-  this is what makes `modalLoopGen_eBoxOnlyNeg` go through: a `boxPos`-shaped formula can never
-  be the `sf_exp` appended to `e`. **The payload is existentially quantified on purpose**: every
-  use site discards it (it serves only to contradict the `.linear`/`.branching` case split), and
-  quantifying it is exactly what lets T's self-conjunct, B's symmetric propagation, and S5's
-  universal propagation discharge this field. Mirrors `modalApplyOne_boxPos_eq` (`Rules.lean`),
-  weakened from its concrete `boxPropagation` payload. -/
-  boxPosNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
-      sf.sign = .pos → ∀ (ψ : Proposition Atom), sf.formula = .box ψ →
-      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
-      (apply sf b acc).1 = .notApplicable ∨
-        ∃ out, (apply sf b acc).1 = .persistent out
-  /-- **F10** (task 510) Diamond-negative is never expanding: dual of `boxPosNotExpanding`,
-  forcing `modalLoopGen_eDiamondOnlyPos`. Mirrors `modalApplyOne_diamondNeg_eq` (`Rules.lean`),
-  likewise payload-weakened. -/
-  diaNegNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
-      sf.sign = .neg → ∀ (ψ : Proposition Atom), sf.formula = .diamond ψ →
-      ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
-      (apply sf b acc).1 = .notApplicable ∨
-        ∃ out, (apply sf b acc).1 = .persistent out
-  /-- **F11** (task 510) Box-negative witness minting: `apply` on `F(□ψ)@w` is *always*
-  applicable, mints the fresh world `modalNextWorld b`, records the edge `w → modalNextWorld b`,
-  and heads its `.linear` output with the witness `F(ψ)@(modalNextWorld b)`. Forces
-  `modalLoopGen_eBoxNegWitness` (the `eBoxNegWitness` conjunct's fresh-`sf_exp` case) and
-  `modalExpandBranchesGen_hintikka`'s conjunct-3 discharge at a saturated leaf (where
-  always-applicability rules out the `.notApplicable` alternative). Mirrors
-  `modalApplyOne_boxNeg_witness` (`Rules.lean`). -/
-  boxNegWitness : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
-      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
-      (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
-          = acc.addEdge w (modalNextWorld b) ∧
-      ∃ rest,
-        (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-          = RuleResult.linear
-              ((⟨.neg, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex)
-                :: rest)
-  /-- **F12** (task 510) Diamond-positive witness minting: dual of `boxNegWitness`, forcing
-  `modalLoopGen_eDiamondPosWitness` and `modalExpandBranchesGen_hintikka`'s conjunct-4
-  discharge. Mirrors `modalApplyOne_diamondPos_witness` (`Rules.lean`). -/
-  diaPosWitness : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
-      (acc : Accessibility) (ψ : Proposition Atom) (w : WorldIndex),
-      (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
-          = acc.addEdge w (modalNextWorld b) ∧
-      ∃ rest,
-        (apply (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
-          = RuleResult.linear
-              ((⟨.pos, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex)
-                :: rest)
+
+/-- The Core-projection theorem: every `RuleApplicationSpec` witness is, in particular, a
+`RuleApplicationSpecCore` witness (immediate from `extends`; named for readability at call
+sites and to give downstream consumers a stable API independent of the `extends`-generated
+projection name). -/
+theorem RuleApplicationSpec.toCore {apply : RuleApply Atom} (spec : RuleApplicationSpec apply) :
+    RuleApplicationSpecCore apply :=
+  spec.toRuleApplicationSpecCore
 
 /-! ## The Trivial K Witness -/
 
@@ -348,8 +368,12 @@ theorem modalApplyOne_spec : RuleApplicationSpec (Atom := Atom) modalApplyOne wh
     modalApplyOne_boxPos_eq sf hsign ψ hform b acc
   diaNegNotExpanding := fun sf hsign ψ hform b acc =>
     modalApplyOne_diamondNeg_eq sf hsign ψ hform b acc
-  boxNegWitness := fun b acc ψ w => modalApplyOne_boxNeg_witness b acc ψ w
-  diaPosWitness := fun b acc ψ w => modalApplyOne_diamondPos_witness b acc ψ w
+  boxNegWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOne_boxNeg_witness b acc ψ w).1,
+      (modalApplyOne_boxNeg_witness b acc ψ w).2⟩
+  diaPosWitness' := fun b acc ψ w =>
+    ⟨modalNextWorld b, (modalApplyOne_diamondPos_witness b acc ψ w).1,
+      (modalApplyOne_diamondPos_witness b acc ψ w).2⟩
 
 /-! ## Task 507 Phase 2: Generic outDeg-Preservation (spec-bundled) -/
 

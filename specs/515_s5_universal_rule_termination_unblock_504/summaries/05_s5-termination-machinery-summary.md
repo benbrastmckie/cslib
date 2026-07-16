@@ -206,17 +206,70 @@ phase closed sorry-free, CI-green, with an incremental commit.
   all of Phases 0-10's additions) is byte-identical. Phase 11 is purely additive: five `_core`
   helper twins, `modalStepHintikka_preserves_inv`, and `modalStepHintikka_preserves_inv_S5w`.
 
+## Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [COMPLETED]
+
+Both halves landed in a single dispatch; the phase's authorized two-dispatch split was not needed.
+
+**12a -- `modalExpandBranchesHintikka`** (commit `ecfa123e`, 333 lines).
+The prior session crashed mid-phase, leaving 333 uncommitted, never-built lines. The first action
+of this dispatch was to establish whether that draft compiled rather than assume either way: it
+did, as authored (852/852, zero errors). It was kept, not rewritten. The only substantive change
+was stripping three ephemeral task-number citations (`task 515 Phase 12a` in the section header,
+two `task 441` inline comments copied verbatim from the port source) and the `Phase 11`/`Phase
+12b` plan references from the docstring, replacing them with durable anchors per
+`.claude/rules/no-task-references-in-deliverables.md`.
+
+**12b -- the REGRESSION GATE** (commit `4e6b9a98`, net -287 lines). **PASSED.**
+`modalExpandBranchesGen_hintikka` is now a 7-line corollary of the parametric lift at
+`Aux := ModalLoopAuxK φ0`. Its ~290-line double induction turned out to *be* the
+`Aux := ModalLoopAuxK φ0` special case of the lift, so it was deleted rather than kept in
+parallel. Three pieces bridge the gap:
+- `spec.toCore` -- weakens `RuleApplicationSpec` to the `RuleApplicationSpecCore` the lift takes
+- `ModalLoopAuxK_stepPreserved` / `ModalLoopAuxK_bounds` -- the `Aux` obligations (landed 11.5)
+- `ModalLoopInvGen_iff_hintikka_auxK` -- converts the K-facing per-index
+  `∃ rank, ModalLoopInvGen …` hypothesis into the lift's rank-free `ModalLoopInvHintikka …`
+
+**Why the gate is honest, not merely green.** A regression gate that passes because the statement
+was quietly weakened proves nothing, so both invariants were checked mechanically rather than by
+eye:
+- The K statement is **byte-identical** to the prior revision -- verified by extracting the
+  signature (decl line through `:= by`) from `git show HEAD` and from the working tree and
+  `diff`ing them; the diff is empty. The two statement-shaped lines that *do* appear in the raw
+  diff are from the deleted proof's inner `suffices key` block (they end in `from`), not the
+  signature.
+- `TDriver.lean` and `BDriver.lean` are **unmodified** (`git status --short` on both: empty) and
+  both compile (`lake test` exit 0; TDriver and BDriver both built).
+
+**KILL (R3): not triggered.** The factoring is validated against the K contract. Phase 11.5's
+`Aux` re-arity is what made this pass -- the adversarial audit predicted the curried-`e` shape
+would fail exactly here, and the crux was `modalStepBranch_preserves_outDegEq_gen` stating its
+conclusion at the branch's own new `e` (`p.2`).
+
+**Verification**: `lake build` (852/852), `checkInitImports`, `lint-style`, `lint` (1 error, the
+known out-of-scope `PrimeExclusion.lean` baseline), `test` (exit 0), `shake` (clean for
+`CompletenessLoop`; all suggestions are pre-existing, other files), `mk_all` (no update). Zero
+`sorry`, zero new axioms: `lean_verify` on both `modalExpandBranchesHintikka` and
+`modalExpandBranchesGen_hintikka` reports `propext`/`Classical.choice`/`Quot.sound` only, no
+`sorryAx`. Repo-wide `sorry`(127)/`axiom`(28) counts are byte-identical to `HEAD` (confirmed by
+stash-compare) and none are in `CompletenessLoop.lean`.
+
+## Plan Deviations
+
+None. Phase 12a and 12b were executed as written. The phase's authorization to split across two
+dispatches was not exercised (both closed in one), which is under-consumption of budget, not a
+deviation from the task sequence.
+
 ## Follow-ups
 
-- Next dispatch: Phase 12a (the parametric Hintikka lift, `modalExpandBranchesHintikka`), then
-  12b (the K re-derivation + regression gate). Read the Phase 11 finding first: K's
-  `ModalLoopAuxK` cannot supply a closed `AuxStepPreserved` witness in its current frozen-`e`
-  form (concrete counterexample in the plan's Phase 11 section and the H9 handoff); Phase 12 will
-  likely need to thread the current `e` explicitly through K's `Aux` instantiation, or otherwise
-  redesign how K's rank-dependent invariant interacts with the per-step-changing `e`, before it
-  can reuse `modalStepHintikka_preserves_inv` at K's own instantiation. Per the plan's KILL
-  CONDITION (R3): if the K re-derivation does not go through, STOP -- do not proceed to Phase 14,
-  do not attempt S5-specific patches; Phases 0-11, 13 remain green and landed regardless.
+- **Phase 12 is closed and its KILL gate did not fire** (this supersedes the prior dispatch's
+  standing warning about it). The Phase 11 finding it warned of -- that K's `ModalLoopAuxK` could
+  not supply a closed `AuxStepPreserved` witness in its frozen-`e` form -- was resolved by Phase
+  11.5's `e`-threading re-arity, exactly as that finding predicted would be necessary. Phase 14 is
+  unblocked on the lift axis.
+- Next dispatch: **Phase 13** (S5 soundness re-proof, `modalTableauS5_sound`) is still
+  `[IN PROGRESS]` -- it is the parallel fork off Phase 8's probe and was never owned by the
+  Phase 9-12 lift chain; it carries its own KILL condition (stop if the re-proof exceeds ~400
+  lines). Phase 14 (S5 assembly/archival/CI) depends on both 12 and 13.
 - Phase 12 should still verify (by reading, not assuming) which of `CompletenessLoop.lean`'s
   seven `RuleApplicationSpec`-typed signatures can weaken to `RuleApplicationSpecCore`; Phase 9
   confirms this for the five whose bodies it touched (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,

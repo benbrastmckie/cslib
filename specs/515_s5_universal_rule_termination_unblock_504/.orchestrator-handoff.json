@@ -1,43 +1,51 @@
 {
   "status": "implemented",
-  "summary": "Phase 11 (Step preservation) landed. modalStepHintikka_preserves_inv ports modalStepGen_preserves_invariant to the rank-free ModalLoopInvHintikka/Aux invariant, minus the two potential_step lines, taking RuleApplicationSpecCore plus AuxStepPreserved/AuxBounds in their place. Five purely-additive _core-suffixed twins of the rule-dependent helper lemmas (bClosure/eBoxOnlyNeg/eDiamondOnlyPos/eBoxNegWitness/eDiamondPosWitness) were landed to supply Core-only proofs without touching Phase 12's remit (weakening the existing full-spec-typed declarations in place). The measure-drop consumes modalExpMeasure_step_lt_gen directly, bypassing the full-spec wrapper. A concrete corollary modalStepHintikka_preserves_inv_S5w demonstrates the S5w half of the verification bar sorry-free. K's half of the verification bar (a closed AuxStepPreserved witness for ModalLoopAuxK) was found to be genuinely unprovable in its current frozen-e form (a concrete counterexample: a minting step against a stale frozen e breaks outDegEq) -- this is documented as architecture work for Phase 12's parametric Hintikka lift, not a defect in this phase's port. modalStepHintikka_preserves_inv itself is fully generic and sorry-free for any Aux genuinely satisfying AuxStepPreserved/AuxBounds.",
-  "phases_completed": 12,
+  "summary": "Phase 12 CLOSED, both halves in one dispatch. 12a: recovered the crashed session's 333 uncommitted, never-built lines of modalExpandBranchesHintikka -- established by building it (not by assuming) that it compiled as authored, kept it, and stripped ephemeral task-number citations per the deliverables rule (commit ecfa123e). 12b: the REGRESSION GATE PASSED -- modalExpandBranchesGen_hintikka re-derived as a 7-line corollary of the parametric lift at Aux := ModalLoopAuxK phi0, deleting the ~290-line double induction that turned out to be exactly that special case (net -287 lines, commit 4e6b9a98). Gate verified honest rather than merely green: K statement byte-identical to prior revision (signature extracted from git show HEAD and working tree, diffed, empty), TDriver.lean/BDriver.lean unmodified and both compiling (lake test exit 0). KILL (R3) NOT TRIGGERED -- the factoring is validated against the K contract; Phase 11.5's Aux e-threading re-arity is what made it pass. Zero sorry, zero new axioms.",
+  "phases_completed": 13,
   "phases_total": 24,
-  "sorry_inventory": [],
+  "phases_note": "13 = numbered phases 0-12 inclusive. The plan carries 14 [COMPLETED] markers because Phase 11.5 was audit-inserted and is not part of the 24-phase (0-23) numbering. Phase 13 remains [IN PROGRESS]: it is the parallel S5-soundness fork off Phase 8's probe, never owned by the 9-12 lift chain, and was NOT advanced by this dispatch.",
   "blockers": [],
-  "findings": [
-    {
-      "title": "K's ModalLoopAuxK cannot supply a closed AuxStepPreserved witness in its current form",
-      "detail": "ModalLoopAuxK (phi0) (e) (b) (acc) freezes e to fit Aux's bare (b -> acc -> Prop) type. AuxStepPreserved's own step hypothesis universally quantifies over an independent, per-call e. A minting step changes outDeg against the step's own current expanded set, not against ModalLoopAuxK's frozen e -- concrete counterexample: frozen e0 := [] with any boxNeg/diamondPos-shaped step that mints an edge makes the post-state outDegEq conjunct false. modalStepHintikka_preserves_inv itself remains fully generic and sorry-free for any Aux genuinely satisfying AuxStepPreserved/AuxBounds (confirmed concretely for S5w via the landed modalStepHintikka_preserves_inv_S5w).",
-      "recommendation": "Phase 12 (the parametric Hintikka lift) will need to thread the current e explicitly through K's Aux instantiation rather than freezing it, or otherwise redesign how K's rank-dependent invariant interacts with the per-step-changing e. Flag this to the Phase 12 dispatch before it begins the K re-derivation regression gate.",
-      "location": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, ModalLoopAuxK (Phase 10, ~line 322) and modalStepHintikka_preserves_inv (Phase 11, this dispatch)"
-    }
-  ],
-  "recommended_next_dispatch": [
-    "Phase 12a: the parametric Hintikka lift (modalExpandBranchesHintikka), informed by the K-Aux finding above -- consider whether Phase 12's design needs an amended AuxStepPreserved/ModalLoopAuxK shape (e.g. threading e explicitly rather than freezing it) before attempting the K re-derivation regression gate (12b). Locate cited declarations by name, not line number -- stale line citations confirmed again this phase."
-  ],
-  "continuation_context": {
-    "is_successor": true,
-    "resume_phase": 12,
-    "preserved_assets": "Phases 0-11 COMPLETED, CI-green, committed. Phases 0-10 unchanged from the prior handoff. Phase 11 (this dispatch) added to Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, immediately before the 'Combined-Invariant Single-Step Preservation Lemma' section: modalLoopGen_bClosure_core, modalLoopGen_eBoxOnlyNeg_core, modalLoopGen_eDiamondOnlyPos_core, modalLoopGen_eBoxNegWitness_core, modalLoopGen_eDiamondPosWitness_core (Core-typed twins of the existing full-spec-typed helpers, purely additive), modalStepHintikka_preserves_inv (the generic rank-free step-preservation port), modalStepHintikka_preserves_inv_S5w (concrete S5w instantiation corollary). Zero existing declarations modified.",
-    "read_first": [
-      "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md (Phase 11 completion note with the K-Aux finding; Phase 12's task list)",
-      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean (search 'Step Preservation for ModalLoopInvHintikka' section header for everything Phase 11 landed)",
-      "Cslib/Logics/Modal/Tableau/GenericDriver.lean (RuleApplicationSpecCore/RuleApplicationSpec split, F9-F12', all Core fields Phase 11's _core helpers consume)"
+  "verification": {
+    "verification_passed": true,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "lean_verify": "modalExpandBranchesHintikka and modalExpandBranchesGen_hintikka both report propext/Classical.choice/Quot.sound only; no sorryAx",
+    "regression_gate": "PASSED -- K name/statement byte-identical (diff empty); TDriver.lean/BDriver.lean unmodified (git status empty) and compiling (lake test exit 0)",
+    "known_baseline_failures": [
+      "lake lint: 1 error in Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean:324 -- pre-existing, out of scope, present at HEAD",
+      "repo-wide sorry(127)/axiom(28) counts identical to HEAD via stash-compare; none in CompletenessLoop.lean"
     ]
   },
   "artifacts": [
-    {
-      "path": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
-      "type": "lean",
-      "summary": "Added modalLoopGen_bClosure_core, modalLoopGen_eBoxOnlyNeg_core, modalLoopGen_eDiamondOnlyPos_core, modalLoopGen_eBoxNegWitness_core, modalLoopGen_eDiamondPosWitness_core, modalStepHintikka_preserves_inv, modalStepHintikka_preserves_inv_S5w. Purely additive, zero existing declarations modified."
-    },
-    {
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
-      "type": "plan",
-      "summary": "Phase 11 heading marked [COMPLETED], tasks checked off, Finding documented for Phase 12."
-    }
+    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
+    "specs/515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md"
   ],
-  "commits": ["<to be filled by the commit step immediately following this write>"],
-  "session_id": "sess_1784171237_6d3e73"
+  "commits": [
+    "ecfa123e task 515 phase 12a: land parametric modalExpandBranchesHintikka",
+    "4e6b9a98 task 515 phase 12b: re-derive K's hintikka lemma from the parametric lift"
+  ],
+  "continuation_context": {
+    "is_successor": true,
+    "resume_phase": 13,
+    "resume_rationale": "Phase 12 is closed and its KILL gate did not fire, so the 9-12 lift chain is complete and Phase 14 is unblocked on the lift axis. Phase 13 (S5 soundness re-proof, modalTableauS5_sound) is still [IN PROGRESS] from an earlier dispatch and is the remaining dependency for Phase 14 (which depends on both 12 and 13).",
+    "next_phase_notes": [
+      "Phase 13 carries its own KILL condition: if the re-proof exceeds ~400 lines, STOP and re-litigate the fork (fallback 2).",
+      "Phase 13's statement is UNCHANGED from FrameSoundness.lean:2379. The decisive reuse is accReachableInv_related_s5 (FrameSoundness.lean:1381, landed).",
+      "Known breakage to expect in 13: modalApplyOneS5_snd_eq (S5Simplification.lean:340-351) becomes false under the witness rule; use Phase 8's lean_references enumeration (R4) to fix each real consumer.",
+      "Plan line citations are stale across the board (Phases 8-11 each independently confirmed this; files have grown). Resolve declarations by name via lean_local_search / grep, never by trusting plan line numbers."
+    ],
+    "environment_notes": [
+      "Mathlib cache is warm; lake exe cache get is a no-op on this branch.",
+      "Concurrent sessions are active in this repo: scope git add narrowly to specific files, never git add -A."
+    ]
+  },
+  "metadata": {
+    "session_id": "sess_1784185091_129d98",
+    "agent_type": "cslib-implementation-agent",
+    "task_number": 515
+  }
 }

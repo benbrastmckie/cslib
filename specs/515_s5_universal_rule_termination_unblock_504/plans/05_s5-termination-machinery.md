@@ -1416,7 +1416,7 @@ neither file consumes `Aux`/`ModalLoopAuxK`/`AuxStepPreserved` directly -- they 
 
 ---
 
-### Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [IN PROGRESS]
+### Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [COMPLETED]
 
 **Note (post-audit)**: Phase 11.5 (above) closed the K-side `AuxStepPreserved`/`AuxBounds` gap
 this phase's own KILL (R3) gate would otherwise have hit **after** the ~310-line double
@@ -1432,24 +1432,38 @@ regression gate). Do **not** compress this into one run if the first does not cl
 Phase 8 failed exactly by being budgeted as one unit.
 
 **Tasks**:
-- [ ] (12a) Land:
+- [x] (12a) Land:
       ```lean
       theorem modalExpandBranchesHintikka (hs : RuleApplicationSpecCore apply) (hAux …) … :
         modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
         modalHintikkaSetGen apply bR aR
       ```
       Port of `modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean:876-1185`, ~310 lines, a
-      double induction).
-- [ ] (12b) **REGRESSION GATE -- non-negotiable**: re-derive
+      double induction). **LANDED** (333 lines, commit `ecfa123e`). Recovered from the crashed
+      session's uncommitted draft, which was found to compile as-authored; this dispatch verified
+      it (852/852, `lean_verify`: `propext`/`Classical.choice`/`Quot.sound`, no `sorryAx`) and
+      stripped ephemeral task-number citations from its docstring/comments per the deliverables
+      rule.
+- [x] (12b) **REGRESSION GATE -- non-negotiable**: re-derive
       ```lean
       theorem modalExpandBranchesGen_hintikka (…)   -- K-facing name/statement UNCHANGED
       ```
       from the parametric lift at `Aux := (∃ rank, …)`. `TDriver.lean:911` and `BDriver.lean:871`
       consume it **by name** with `∃ rank, ModalLoopInvGen …` in the hypothesis. Both files must
-      compile **unmodified**.
-- [ ] **KILL (R3)**: if the re-derivation does not go through, **STOP HERE**. The factoring is wrong.
-      Do **not** proceed to Phase 14; do **not** attempt S5-specific patches. Phases 0-8, 13 remain
-      green and landed. Record the exact failing goal.
+      compile **unmodified**. **GATE PASSED** (commit `4e6b9a98`). Re-derived at
+      `Aux := ModalLoopAuxK φ0` as a 7-line corollary, deleting the ~290-line double induction it
+      duplicated (net -287 lines). Gate verified honest, not merely green: the K statement is
+      **byte-identical** to the prior revision (extracted + `diff`ed signature, empty), and
+      `TDriver.lean`/`BDriver.lean` are **unmodified** (`git status` empty) and both compile
+      (`lake test` exit 0). Bridges: `spec.toCore` (weakens `RuleApplicationSpec` to
+      `...SpecCore`), `ModalLoopAuxK_stepPreserved`/`_bounds` (the `Aux` obligations, landed in
+      11.5), and `ModalLoopInvGen_iff_hintikka_auxK` (per-index hypothesis conversion).
+- [x] **KILL (R3)**: **NOT TRIGGERED** -- the re-derivation went through with the K-facing
+      statement unchanged, so the factoring is validated and the KILL gate does not fire. The lift
+      is confirmed faithful to the K contract; Phase 14 is unblocked on this axis. (Phase 11.5's
+      `Aux` re-arity is what made this pass: the audit predicted the curried-`e` shape would fail
+      here, and the crux was `modalStepBranch_preserves_outDegEq_gen` landing at the branch's own
+      new `e`.)
 
 **Timing**: 3 hours (may require two dispatches)
 
@@ -1466,7 +1480,7 @@ No `sorry`. Do not weaken the K-facing statement to make the gate pass -- that d
 
 ---
 
-### Phase 13: Soundness re-proof -- `modalTableauS5_sound` [NOT STARTED]
+### Phase 13: Soundness re-proof -- `modalTableauS5_sound` [IN PROGRESS]
 
 **Goal**: Re-prove S5 soundness against the witness rule. **Statement unchanged.** This is R1, the
 top risk, and the largest un-costed item of the prior effort. **Forks after Phase 8's probe and runs

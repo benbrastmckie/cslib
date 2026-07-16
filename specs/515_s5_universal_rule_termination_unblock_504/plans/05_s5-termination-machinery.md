@@ -822,7 +822,7 @@ green (848/848); `checkInitImports` and `lint-style` clean; zero new sorry.
 
 ---
 
-### Phase 5: `accTargetsKnown` top-loop generalization [NOT STARTED]
+### Phase 5: `accTargetsKnown` top-loop generalization [COMPLETED]
 
 **Goal**: Close a genuinely missing generic lemma that **every route needs**. This survives verbatim
 from plan v2's "recommended next dispatch, item 1" and from the repo's own scope note. Promoted here
@@ -830,20 +830,30 @@ from plan v2's "recommended next dispatch, item 1" and from the repo's own scope
 `modalOpenBranchS5_countermodel`'s `hTgt` argument. **Independent of the rule.**
 
 **Tasks**:
-- [ ] Land `theorem modalExpandBranchesGen_openBranch_accTargetsKnown`. `grep` for
+- [x] Land `theorem modalExpandBranchesGen_openBranch_accTargetsKnown`. `grep` for
       `openBranch_accTargetsKnown` returns **zero hits** across `Cslib/` [VERIFIED]; the repo's own
       scope note (`FrameCompleteness.lean:2250-2253`) says it is *"not yet built"* and prescribes the
       fix.
-- [ ] Route: **generalize `modalExpandBranchesGen_openBranch_accSourcesKnown`'s double induction**
+- [x] Route: **generalize `modalExpandBranchesGen_openBranch_accSourcesKnown`'s double induction**
       (`BDriver.lean:1065-1205`) over an arbitrary step-preserved per-`(branch, acc)` predicate `P`
       -- **its body is already predicate-agnostic** -- then instantiate at **both**
       `accSourcesKnown` and `accTargetsKnown`. ~60-line clone.
-- [ ] Confirm zero regression to B: `modalExpandBranchesGen_openBranch_accSourcesKnown` keeps its
+- [x] Confirm zero regression to B: `modalExpandBranchesGen_openBranch_accSourcesKnown` keeps its
       exact name and statement (re-derived from the generalized form).
-- [ ] Note: the step-level fact is already generic and S5-ready
+- [x] Note: the step-level fact is already generic and S5-ready
       (`modalStepBranch_preserves_accTargetsKnown_gen`); **only the top-loop propagation is missing**.
       `modalOpenBranchS5_countermodel` **REQUIRES** this as its `hTgt` argument -- several candidate
       designs listed that theorem under "reuses" while never supplying its hypothesis.
+
+**Completion note**: Landed `modalExpandBranchesGen_openBranch_gen` (the generic double
+induction, parametrized over `P` and its step-preservation hypothesis `hPresP`), then
+re-derived `modalExpandBranchesGen_openBranch_accSourcesKnown` from it (exact name/statement
+preserved, one-line proof term now) and landed the new
+`modalExpandBranchesGen_openBranch_accTargetsKnown` by instantiating at `accTargetsKnown` +
+`modalStepBranch_preserves_accTargetsKnown_gen` (already generic, `FmpMeasure.lean`). Full
+project `lake build` green (3239/3239) -- confirms zero regression to every existing B consumer.
+`lean_verify` on the new theorem -> `[propext, Classical.choice, Quot.sound]`. `checkInitImports`,
+`lint-style`, `lint` (scoped) clean; zero new sorry.
 
 **Timing**: 1.5 hours
 

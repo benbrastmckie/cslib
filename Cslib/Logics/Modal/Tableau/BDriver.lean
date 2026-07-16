@@ -1057,27 +1057,39 @@ private lemma modalStepBranchGen_newExps_const_B
     exact ⟨e, rfl⟩
   · rw [hfstc] at hsf; simp at hsf
 
-/-- **Top-loop propagation of `accSourcesKnown`**: mirrors `CompletenessLoop.lean`'s
+/-! ## Generic Top-Loop Propagation (Termination Machinery Plan v5, Phase 5)
+
+Generalizes the double induction below over an arbitrary step-preserved per-`(branch, acc)`
+predicate `P` -- its body is predicate-agnostic (it never inspects `accSourcesKnown` beyond
+threading it through as a hypothesis), so instantiating at `accSourcesKnown` re-derives the
+original B theorem byte-for-byte, and instantiating at `FmpMeasure.lean`'s `accTargetsKnown`
+closes a genuinely missing generic lemma: `grep` for `openBranch_accTargetsKnown` returned zero
+hits across `Cslib/` before this phase, and the repo's own scope note
+(`FrameCompleteness.lean`) says it is *"not yet built"*. `modalOpenBranchS5_countermodel`
+requires this as its `hTgt` argument. -/
+
+/-- **Generic top-loop propagation**: mirrors `CompletenessLoop.lean`'s
 `modalExpandBranchesGen_openBranch_initial_mem`'s double induction (outer on `fuel`, inner on
-the pending worklist), but threading a per-`(branch, acc)`-pair invariant (via
-`List.zip`) rather than a single fixed formula's membership, updated at each step by
-`modalStepBranchGen_preserves_accSourcesKnown`. -/
-theorem modalExpandBranchesGen_openBranch_accSourcesKnown
+the pending worklist), threading an ABSTRACT per-`(branch, acc)`-pair invariant `P` (via
+`List.zip`) rather than a single fixed formula's membership or a hardcoded concrete predicate,
+updated at each step by the supplied single-step preservation hypothesis `hPresP`. -/
+theorem modalExpandBranchesGen_openBranch_gen
     (apply : RuleApply Atom)
-    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
-      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
-      (apply sf b acc).snd = acc ∨
-      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
-        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (P : List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop)
+    (hPresP : ∀ (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+        (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (newAcc : Accessibility),
+      modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc) →
+      P b acc → ∀ b' ∈ newBs, P b' newAcc)
     (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
       expandedSets.length = branches.length →
       accs.length = branches.length →
-      (∀ p ∈ branches.zip accs, accSourcesKnown p.1 p.2) →
+      (∀ p ∈ branches.zip accs, P p.1 p.2) →
       ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
         modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
-        accSourcesKnown bR aR := by
+        P bR aR := by
   induction fuel with
   | zero =>
     intro branches expandedSets accs _hlen _hlenA hAll bR aR h
@@ -1117,11 +1129,11 @@ theorem modalExpandBranchesGen_openBranch_accSourcesKnown
         pendingAccs.length = pending.length →
         doneExp.length = done.length →
         doneAccs.length = done.length →
-        (∀ p ∈ pending.zip pendingAccs, accSourcesKnown p.1 p.2) →
-        (∀ p ∈ done.zip doneAccs, accSourcesKnown p.1 p.2) →
+        (∀ p ∈ pending.zip pendingAccs, P p.1 p.2) →
+        (∀ p ∈ done.zip doneAccs, P p.1 p.2) →
         modalExpandBranchesGen.processNext apply fuel' pending pendingExp pendingAccs done doneExp
             doneAccs = .openBranch bR aR →
-        accSourcesKnown bR aR from
+        P bR aR from
       key branches expandedSets accs [] [] [] hlen hlenA rfl rfl hAll (by simp)
         (by simpa [modalExpandBranchesGen] using h)
     intro pending
@@ -1140,13 +1152,13 @@ theorem modalExpandBranchesGen_openBranch_accSourcesKnown
         | cons e es =>
           simp only [List.length_cons, Nat.add_right_cancel_iff] at hlength_p hlenP_accs
           simp only [modalExpandBranchesGen.processNext] at hinner
-          have hah : accSourcesKnown bh a := hAll_p (bh, a) (by simp)
+          have hah : P bh a := hAll_p (bh, a) (by simp)
           by_cases hcl : isModalClosed bh = true
           · rw [if_pos hcl] at hinner
-            have hAll_bt : ∀ p ∈ bt.zip restAs, accSourcesKnown p.1 p.2 := fun p hp =>
+            have hAll_bt : ∀ p ∈ bt.zip restAs, P p.1 p.2 := fun p hp =>
               hAll_p p (List.mem_cons_of_mem _ hp)
             have hAll_done_bh : ∀ p ∈ (done ++ [bh]).zip (doneAccs ++ [a]),
-                accSourcesKnown p.1 p.2 := by
+                P p.1 p.2 := by
               rw [List.zip_append hdAccs.symm]
               intro p hp
               simp only [List.mem_append, List.zip_cons_cons, List.zip_nil_right,
@@ -1167,16 +1179,15 @@ theorem modalExpandBranchesGen_openBranch_accSourcesKnown
             | some step =>
               obtain ⟨newBs, newExps, newAcc⟩ := step
               rw [hstep] at hinner
-              have hNewBs_known : ∀ b' ∈ newBs, accSourcesKnown b' newAcc :=
-                modalStepBranchGen_preserves_accSourcesKnown apply hFreshLocal bh e a newBs newExps
-                  newAcc hstep hah
+              have hNewBs_known : ∀ b' ∈ newBs, P b' newAcc :=
+                hPresP bh e a newBs newExps newAcc hstep hah
               have hLenNBE : newExps.length = newBs.length := by
                 obtain ⟨newExp, hEq⟩ :=
                   modalStepBranchGen_newExps_const_B apply bh e a newBs newExps newAcc hstep
                 simp [hEq]
               have hAll_new : ∀ p ∈ (done ++ newBs ++ bt).zip
                   (doneAccs ++ List.replicate newBs.length newAcc ++ restAs),
-                  accSourcesKnown p.1 p.2 := by
+                  P p.1 p.2 := by
                 rw [List.zip_append (by simp [hdAccs]), List.zip_append hdAccs.symm]
                 intro p hp
                 simp only [List.mem_append] at hp
@@ -1199,6 +1210,60 @@ theorem modalExpandBranchesGen_openBranch_accSourcesKnown
                 (by simp [hdlength, hlength_p, hLenNBE])
                 (by simp [hdAccs, hlenP_accs])
                 hAll_new bR aR hinner
+
+/-- **Top-loop propagation of `accSourcesKnown`** -- zero-regression re-derivation from the
+generic form above at `P := accSourcesKnown`, `hPresP := modalStepBranchGen_preserves_accSourcesKnown
+apply hFreshLocal`. Exact name and statement unchanged from the pre-generalization version. -/
+theorem modalExpandBranchesGen_openBranch_accSourcesKnown
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accSourcesKnown p.1 p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
+        accSourcesKnown bR aR :=
+  modalExpandBranchesGen_openBranch_gen apply accSourcesKnown
+    (fun b e acc newBs newExps newAcc hstep hknown =>
+      modalStepBranchGen_preserves_accSourcesKnown apply hFreshLocal b e acc newBs newExps newAcc
+        hstep hknown)
+    fuel
+
+/-- **Top-loop propagation of `accTargetsKnown`** (`FmpMeasure.lean`) -- the genuinely missing
+generic lemma this phase closes: re-derivation from the generic form above at
+`P := accTargetsKnown`, `hPresP := modalStepBranch_preserves_accTargetsKnown_gen apply
+hFreshLocal`. Needed as `modalOpenBranchS5_countermodel`'s `hTgt` argument
+(`FrameCompleteness.lean`): the step-level fact was already generic and S5-ready
+(`modalStepBranch_preserves_accTargetsKnown_gen`), but no top-loop propagation existed until
+now. -/
+theorem modalExpandBranchesGen_openBranch_accTargetsKnown
+    (apply : RuleApply Atom)
+    (hFreshLocal : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accTargetsKnown p.1 p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen apply branches expandedSets accs fuel = .openBranch bR aR →
+        accTargetsKnown bR aR :=
+  modalExpandBranchesGen_openBranch_gen apply accTargetsKnown
+    (fun b e acc newBs newExps newAcc hstep hknown =>
+      modalStepBranch_preserves_accTargetsKnown_gen apply hFreshLocal b e acc newBs newExps newAcc
+        hstep hknown)
+    fuel
 
 end Cslib.Logic.Modal.Tableau
 

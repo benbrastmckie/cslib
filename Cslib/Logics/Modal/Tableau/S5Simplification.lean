@@ -654,6 +654,35 @@ lemma modalApplyOneS5w_eq_of_not_mint_shape
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
+/-! ## The Hintikka Congruence Bridge (Termination Machinery Plan v5, Phase 2)
+
+This is the single highest-value declaration in the plan: it ports the entire landed
+countermodel half of S5 completeness **verbatim, with zero edits to `FrameCompleteness.lean`**.
+It works because `modalHintikkaSetGen`'s conjunct 2 (`Saturation.lean`) binds
+`let (result, _) := apply sf b acc` but then returns **literal `True`** at exactly the two mint
+shapes `| .neg, .box _ =>` / `| .pos, .diamond _ =>` -- `result` is unused at exactly the two
+shapes the witness rule intercepts. Conjuncts 1/3/4 name no rule function at all. So the ONLY
+way `modalHintikkaSetGen` can see a difference between `modalApplyOneS5w` and `modalApplyOneS5`
+is through conjunct 2's `result` binding at some OTHER shape -- and there
+`modalApplyOneS5w_eq_of_not_mint_shape` gives definitional equality. -/
+
+/-- `modalHintikkaSetGen modalApplyOneS5w b acc ↔ modalHintikkaSetGen modalApplyOneS5 b acc`:
+the witness rule and the (superseded, unguarded) universal rule agree on Hintikka-set-hood.
+This supersedes the two `rfl` bridges as the porting mechanism -- the bridges alone are defeated
+by the 8 rewrites through `modalApplyOneS5_eq_of_not_boxPos_diaNeg`-style lemmas that
+`FrameCompleteness.lean`'s countermodel extraction performs, but `hintikka_congr` ports across
+all of them in one step since it operates at the level of the `Prop` itself. -/
+theorem hintikka_congr (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    modalHintikkaSetGen modalApplyOneS5w b acc ↔ modalHintikkaSetGen modalApplyOneS5 b acc := by
+  unfold modalHintikkaSetGen
+  constructor <;> · rintro ⟨h1, h2, h3, h4⟩
+                    refine ⟨h1, ?_, h3, h4⟩
+                    intro sf hsf
+                    have h := h2 sf hsf
+                    rcases hs : sf.sign with _ | _ <;>
+                      rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;> simp_all [modalApplyOneS5w]
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
 (available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which

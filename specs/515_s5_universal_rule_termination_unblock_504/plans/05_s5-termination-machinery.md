@@ -636,14 +636,14 @@ S5-relevant shapes) framing to the task list's "¬mint-shaped sf" description.
 
 ---
 
-### Phase 2: The Hintikka congruence bridge [NOT STARTED]
+### Phase 2: The Hintikka congruence bridge [COMPLETED]
 
 **Goal**: Land `hintikka_congr`. **This is the single highest-value declaration in the plan** -- it
 ports the entire landed countermodel half of S5 completeness **verbatim, with zero edits to
 `FrameCompleteness.lean`**. Land it early and the whole plan de-risks.
 
 **Tasks**:
-- [ ] Land:
+- [x] Land:
       ```lean
       theorem hintikka_congr (b) (acc) :
           modalHintikkaSetGen modalApplyOneS5w b acc ↔ modalHintikkaSetGen modalApplyOneS5 b acc
@@ -658,13 +658,19 @@ ports the entire landed countermodel half of S5 completeness **verbatim, with ze
                         rcases hs : sf.sign with _ | _ <;>
                           rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;> simp_all [modalApplyOneS5w]
       ```
-- [ ] Record **why it works** in the docstring [VERIFIED by reading `Saturation.lean:460-480`]:
+- [x] Record **why it works** in the docstring [VERIFIED by reading `Saturation.lean:460-480`]:
       conjunct 2 binds `let (result, _) := apply sf b acc` but then returns **literal `True`** at
       `| .neg, .box _` and `| .pos, .diamond _` -- `result` is **unused at exactly the two shapes the
       witness rule intercepts**. Conjuncts 1/3/4 name no rule function at all.
-- [ ] Confirm this supersedes the two `rfl` bridges as the porting mechanism: the bridges alone are
+- [x] Confirm this supersedes the two `rfl` bridges as the porting mechanism: the bridges alone are
       defeated by the 8 rewrites through `modalApplyOneS5_eq_of_not_boxPos_diaNeg` at
       `FrameCompleteness.lean:2096-2181`.
+
+**Completion note**: Landed verbatim in `S5Simplification.lean` immediately after
+`modalApplyOneS5w_eq_of_not_mint_shape`. `lake build` scoped green (848/848); `lean_verify`
+confirms `hintikka_congr` -> `[propext]`, exactly the research-session figure.
+`FrameCompleteness.lean` diff-verified **unmodified** (`git diff --stat` empty). `checkInitImports`
+and `lint-style` clean; sorry count unchanged (0 real sorries).
 
 **Timing**: 1 hour
 

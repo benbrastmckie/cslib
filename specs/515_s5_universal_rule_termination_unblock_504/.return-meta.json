@@ -1,31 +1,39 @@
 {
   "status": "implemented",
-  "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/.orchestrator-handoff.json"
-  ],
+  "started_at": "2026-07-15T00:00:00Z",
+  "completed_at": "2026-07-16T00:00:00Z",
   "partial_progress": {
-    "stage": "phase 13 complete",
-    "phases_completed": 14,
+    "stage": "phase_14_complete",
+    "phases_completed": 15,
     "phases_total": 24,
-    "last_completed_phase": "Phase 13: Soundness re-proof -- modalTableauS5_sound"
+    "last_completed_phase": "Phase 14: S5 assembly, ARCHIVAL, CI, regression test"
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "kill_condition_triggered": false,
-    "net_lines": 235
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0
   },
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/01_universe-s5-worldbound.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/02_unkeyed-guard-s5g.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/03_keyed-guard-stepper.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/04_s5loopinv-preservation.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/05_birthkey-pigeonhole-worldbound.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/probes/s5-decision-regression.lean"
+  ],
   "metadata": {
     "session_id": "sess_1784185091_129d98",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "task_number": 515,
-    "compliance_check": "passed"
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed",
+    "requires_user_review": false
   }
 }

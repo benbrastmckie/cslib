@@ -1,15 +1,21 @@
 {
   "status": "implemented",
-  "summary": "Phase 13 CLOSED -- R1, the plan's top risk and the largest un-costed item of the prior effort, landed sorry-free at 235 net lines against a ~400-line KILL budget. The saving came from refusing to duplicate: instead of re-deriving the S5 soundness chain for the witness rule, the three landed theorems were LIFTED over an abstract rule constrained by one new per-call contract, S5SoundSpec -- 'at every call site, apply either agrees with modalApplyOneS5 outright, or fires a witness reuse emitting .linear [sf'] for an sf' ALREADY on the branch, plus the single edge sf.label -> sf'.label'. modalApplyOneS5 satisfies it degenerately (Or.inl rfl), so modalStepBranchS5_preserves_accReachableInv, modalStepBranchS5_preserves_satIn, modalExpandBranchesS5_closed_unsatIn and modalTableauS5_sound ALL return as free corollaries with statements unchanged; the witness-rule versions fall out at modalApplyOneS5w_s5SoundSpec. Same architecture Phase 12 blessed (parametric lift + regression corollary). The plan's structural prediction held exactly: the reuse arm is the cheapest case in the chain (~20 lines), because no world is minted so the world-assignment f is never extended, and sf' in b supplies BOTH obligations at once -- the re-asserted formula is already satisfied (hb sf'), and the new edge joins two KNOWN worlds, related by the landed accReachableInv_related_s5 in any model whose relation is an equivalence. Delivered: modalTableauS5w_sound. modalTableauS5_sound's statement verified byte-identical to the pre-phase revision (only the proof delimiter changed, := by -> :=, as it is now a term-mode corollary).",
-  "phases_completed": 14,
+  "summary": "Phase 14 CLOSED -- the S5 capstone is delivered and the ~2,386 superseded lines are archived (MOVED, not deleted) out of the CI-built tree. Three green milestones, each committed narrowly. (14a) Re-based the shipped surface one line: modalTableauS5 now runs the witness-reuse rule (modalTableauGen modalApplyOneS5w) instead of the non-terminating modalApplyOneS5. modalTableauS5_sound's statement is UNCHANGED -- its proof is now the term-mode corollary modalTableauS5w_sound (Phase 13) via definitional unfolding. Landed modalTableauS5_complete by assembling four landed pieces at modalApplyOneS5w -- modalExpandBranchesHintikka (Phase 12 lift) at Aux := ModalLoopAuxS5w, the generic openBranch accSourcesKnown/accTargetsKnown top-loop lemmas, openBranch_initial_mem, and modalOpenBranchS5_countermodel -- with hintikka_congr (Phase 2) bridging the two rules' Hintikka sets and a fresh modalLoopInvHintikkaS5w_initial supplying the base case; the s5FC witness is (extractModelS5_refl, extractModelS5_rightEuclidean). Landed s5Valid_decides + instDecidableS5Valid mirroring instDecidableTValid. All six delivered declarations report exactly [propext, Classical.choice, Quot.sound] -- no sorryAx. (14b) Archived five clusters to archive/*.lean with per-block provenance headers, ahead of ANY removal; each block verified present and VERBATIM-complete at its archive path before deletion. (14c) Removed the archived blocks from S5Simplification.lean (4736 -> ~2490 lines). CRITICAL CATCH: modalApplyOneS5_knownWorlds_step was inside a removal region but re-verification BY NAME found a live cross-file consumer (FrameSoundness's S5 soundness bridge, which failed to build) -- it was RESTORED to the live tree and the archive amended with a correction note. Landed the S5 regression corpus and Gore1999/Blackburn2001 BibKey docstrings.",
+  "phases_completed": 15,
   "phases_total": 24,
-  "phases_note": "14 = numbered phases 0-13 inclusive. The plan carries 15 [COMPLETED] markers because Phase 11.5 was audit-inserted and is not part of the 24-phase (0-23) numbering. With Phase 13 closed, BOTH of Phase 14's dependencies (12 and 13) are now satisfied and Phase 14 is fully unblocked. Phases 14-23 remain.",
+  "phases_note": "15 = numbered phases 0-14 inclusive. The plan carries an extra [COMPLETED] marker for the audit-inserted Phase 11.5, which is not part of the 24-phase (0-23) numbering. Phases 15-23 (the Euclidean / 5 / KB5 chain) remain. The S5 deliverable (soundness + completeness + decidability) is now COMPLETE and green; per the plan's DAG the 5/KB5 chain sits strictly after Phase 14, so a stall there does not endanger the S5 result already landed.",
   "blockers": [],
   "plan_deviations": [
     {
-      "task": "Phase 13, 'Known breakage': restate modalApplyOneS5_snd_eq and fix each real consumer via lean_references (R4).",
-      "disposition": "skipped -- no work exists; premise factually incorrect",
-      "finding": "modalApplyOneS5_snd_eq does NOT become false. It is a statement about modalApplyOneS5, which the witness rule does not modify; it remains true and all 14 of its consumers compile untouched. What the plan correctly anticipated is that its w-ANALOGUE would be false -- and no modalApplyOneS5w_snd_eq was ever stated, because the landed modalApplyOneS5w_fresh_local proves the needed dichotomy directly: the reuse arm satisfies the RIGHT disjunct (.linear (wsf :: rest) with rest := [], edge sf.label -> wsf.label), never the 'snd = acc' left disjunct. The S5SoundSpec route never needed snd_eq at all. Consequence: S5Simplification.lean was NOT modified, contrary to the plan's 'Files to modify'. Nothing is left unproven by this skip.",
+      "task": "Phase 14: Land a #eval-backed regression test in CslibTests (the 3,963-formula corpus).",
+      "disposition": "altered -- raised, not silent",
+      "finding": "Hosted the runtime corpus in specs/515_.../probes/s5-decision-regression.lean (run via `lake env lean`), NOT CslibTests, and as a curated 14-check corpus (S5 axioms K/T/4/5/B/dualT/box-and/weakening all close; non-theorems incl. S5's named falsifier ◇p→p all stay open) rather than the 3,963-formula generator. Root cause is environmental and hard: every file reachable from the CslibTests `module` barrel must itself be a `module`, and the Cslib lean_lib is NOT built with precompileModules := true, so a module-mode #guard/#eval of the tableau fails to link native symbols ('Could not find native implementation of external declaration modalFuel._redArg'). Kernel `decide` also does not reduce the tableau (well-founded recursion / Finset). The non-module probe executes cleanly (exit 0, all 14 checks pass). The 3,963-formula generator was an ephemeral research scratch, never landed as a reusable artifact, so it could not be re-run verbatim. Correctness is established by proof anyway (modalTableauS5_sound / modalTableauS5_complete); per plan risk R5 the corpus is only the safety net.",
+      "raised_not_silent": true
+    },
+    {
+      "task": "Phase 14 archival: line-range-defined removal set.",
+      "disposition": "altered -- resolved by NAME as the plan instructed",
+      "finding": "Plan line citations were stale (file was 4736 lines, not ~3000). Every block was resolved by declaration NAME. This surfaced one genuine miss: modalApplyOneS5_knownWorlds_step sat inside a removal line-range but is LIVE (consumed by FrameSoundness). It was NOT archived (restored to the live tree); the archive file records the correction. Also, three structural lemmas inside the retired region's span (modalSubfmls_trans_S5, modalSubfmls_self_mem_S5, mem_boxPositivesOf_S5) were resolved to be LIVE and kept, exactly as the plan's KEEP-IN-LIVE-TREE guidance anticipated for the two refutation siblings.",
       "raised_not_silent": true
     }
   ],
@@ -20,58 +26,67 @@
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
-    "lean_verify": "modalTableauS5_sound and modalTableauS5w_sound both report exactly [propext, Classical.choice, Quot.sound]; no sorryAx",
-    "kill_condition": "NOT TRIGGERED -- 235 net lines (+282/-47) vs the ~400 budget. Fallback 2 (atom-quotient semantic FMP / [PARTIAL]) NOT invoked; full soundness delivered, statement unweakened.",
-    "statement_unchanged_gate": "PASSED -- modalTableauS5_sound signature diffed against git show 4e6b9a98; identical except the proof delimiter (:= by -> :=), since it is now a term-mode corollary of modalTableauS5Gen_sound.",
-    "scope_gate": "PASSED -- phase 13 touched exactly ONE file (FrameSoundness.lean). Zero edits to any K/T/B/S4 declaration; TDriver.lean, BDriver.lean, S5Simplification.lean, Completeness.lean all untouched (git diff --name-only empty). lake test exit 0.",
-    "debt_gate": "PASSED -- repo-wide sorry 131 -> 131 and axiom 28 -> 28, identical to the pre-phase commit 4e6b9a98. Zero sorry and zero axioms in FrameSoundness.lean.",
-    "deliverable_rule_gate": "PASSED -- no new task-number citations added outside specs/**; new docstrings use durable anchors (lemma names) only.",
+    "lean_verify": "modalTableauS5_sound, modalTableauS5w_sound, modalTableauS5_complete, s5Valid_decides, instDecidableS5Valid, modalLoopInvHintikkaS5w_initial all report exactly [propext, Classical.choice, Quot.sound] via #print axioms (lake env lean, authoritative); no sorryAx. (Note: the lean-lsp lean_verify tool reported a spurious stale sorryAx for modalTableauS5_sound that #print axioms contradicts.)",
+    "debt_gate": "PASSED -- repo-wide sorry 131 -> 131 and axiom 28 -> 28, identical to the pre-phase baseline. Zero sorry / zero axiom in all four modified Cslib files (the only 'sorry' string matches are prose: 'sorry-free').",
+    "statement_unchanged_gate": "PASSED -- modalTableauS5_sound's statement is byte-identical; only its proof body changed (now `:= modalTableauS5w_sound φ h`). No delivered statement was weakened.",
+    "archival_gate": "PASSED -- ~2,386 lines MOVED to archive/*.lean with provenance headers; each block verified VERBATIM-complete at its archive path BEFORE removal; modalApplyOneS5_rankStep_not_dischargeable + the Phase 3 R7 refutation siblings kept in the live tree per instruction; modalApplyOneS5_knownWorlds_step caught as live and restored.",
+    "regression_corpus": "specs/515_.../probes/s5-decision-regression.lean: 14/14 #guard checks pass under `lake env lean` (exit 0).",
     "ci_steps": {
       "lake build": "PASS (3239 jobs)",
-      "lake exe checkInitImports": "PASS",
-      "lake exe lint-style": "PASS",
-      "lake lint": "1 error, PrimeExclusion.lean:324 -- known pre-existing out-of-scope baseline; zero findings in FrameSoundness.lean",
-      "lake test": "PASS (exit 0)",
-      "lake exe mk_all --module": "PASS (no update necessary)",
-      "lake shake": "exit 1, repo-wide pre-existing baseline (88 files flagged; 62 told to 'remove import Cslib.Init', which checkInitImports mandates -- a systemic tension, not a phase-13 regression). FrameSoundness.lean's single finding (remove Mathlib.Data.List.Forall2) PRE-DATES phase 13: verified the diff touches no import line and the import is present at 4e6b9a98."
+      "lake exe checkInitImports": "PASS (exit 0)",
+      "lake exe lint-style": "PASS (exit 0)",
+      "lake lint": "1 error (PrimeExclusion.lean:324) -- known pre-existing out-of-scope baseline; ZERO findings and ZERO of the 7 prevention categories in the four modified files",
+      "lake test": "PASS (exit 0; the Minimal/Completeness sorry warning is the pre-existing baseline, not a modified file)",
+      "lake exe mk_all --module": "PASS (No update necessary)",
+      "lake shake --add-public --keep-implied --keep-prefix": "exit 1 repo-wide pre-existing baseline; ZERO new import-removal findings on the four modified files (diffed against the Phase-13 baseline)"
     },
     "known_baseline_failures": [
-      "lake lint: 1 error in Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean:324 -- pre-existing, out of scope",
-      "lake shake: exit 1 repo-wide, pre-existing; FrameSoundness's finding pre-dates this phase (imports untouched)"
+      "lake lint: 1 error in PrimeExclusion.lean:324 -- pre-existing, out of scope",
+      "lake shake: exit 1 repo-wide, pre-existing (88 files; 62 told to remove import Cslib.Init which checkInitImports mandates)"
     ]
   },
   "artifacts": [
+    "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+    "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/01_universe-s5-worldbound.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/02_unkeyed-guard-s5g.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/03_keyed-guard-stepper.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/04_s5loopinv-preservation.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/archive/05_birthkey-pigeonhole-worldbound.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/probes/s5-decision-regression.lean",
     "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md"
   ],
   "declarations_landed": [
-    "S5SoundSpec -- the per-call agree-or-reuse contract, pairing with the landed per-branch S5SoundInv",
-    "modalApplyOneS5_s5SoundSpec -- degenerate instance (Or.inl rfl); the regression mechanism",
-    "modalApplyOneS5w_s5SoundSpec -- witness-rule instance via witnessWorldS5_mem",
-    "modalStepBranchS5Gen_preserves_accReachableInv (+ S5 and S5w corollaries)",
-    "modalStepBranchS5Gen_preserves_satIn (+ S5 and S5w corollaries)",
-    "modalExpandBranchesS5Gen_closed_unsatIn (+ S5 and S5w corollaries)",
-    "modalTableauS5Gen_sound (+ modalTableauS5_sound unchanged, + modalTableauS5w_sound NEW)"
+    "modalTableauS5 -- re-based onto modalApplyOneS5w (one-line def change)",
+    "modalTableauS5_complete -- S5-completeness of the tableau (FrameCompleteness.lean)",
+    "s5Valid_decides -- closed iff s5Valid (FrameCompleteness.lean)",
+    "instDecidableS5Valid -- Decidable (s5Valid φ) (FrameCompleteness.lean)",
+    "modalLoopInvHintikkaS5w_initial -- S5w initial-configuration loop invariant (CompletenessLoop.lean)",
+    "modalTableauS5_sound -- statement unchanged; proof now = modalTableauS5w_sound (FrameSoundness.lean)"
   ],
   "commits": [
-    "75bc6185 task 515 phase 13a: lift S5 step soundness over the agree-or-reuse contract",
-    "efcee325 task 515 phase 13b: land modalTableauS5w_sound via the lifted S5 chain"
+    "af593180 task 515 phase 14a: re-base modalTableauS5 on the witness rule, land S5 completeness + decidability",
+    "e8cb6a8a task 515 phase 14b: archive ~2,386 superseded S5 lines (MOVE, not delete)",
+    "27b921c0 task 515 phase 14c: remove archived S5 lines from live tree, land regression corpus + BibKeys"
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_phase": 14,
-    "resume_rationale": "Phase 13 is closed and its KILL did not fire, so the S5-soundness fork off Phase 8's probe is complete. Phase 14 depends on both 12 and 13; both are now [COMPLETED], so Phase 14 (S5 assembly, ARCHIVAL, CI, regression test) is fully unblocked and is the next phase.",
+    "resume_phase": 15,
+    "resume_rationale": "Phase 14 is closed and the entire S5 chain (soundness + completeness + decidability, plus archival) is green and committed. The task is 15/24. Phase 15 opens the Euclidean / 5 / KB5 chain (Phases 15-23), which sits strictly after Phase 14 in the DAG and depends on the S5 cluster machinery this file's neighbours build. Note the frame-class inclusion obstruction already proven in probes/five-s5-separation.lean: 5/KB5 is NOT reachable via the S5 tableau route; it needs a dedicated Euclidean route (modalTableauFive/modalTableauKb5) over a new Relation.EuclGen least-closure operator in Cslib/Foundations/Relation/Euclidean.lean plus a root-aware rule.",
     "next_phase_notes": [
-      "Phase 14's one-line re-base is `def modalTableauS5 (φ) := modalTableauGen modalApplyOneS5w φ` (currently modalApplyOneS5, at S5Simplification.lean:1456-1457). After the flip, modalTableauS5_sound should carry over by definitional unfolding: modalTableauS5w_sound is ALREADY stated over `modalTableauGen modalApplyOneS5w φ`, which is exactly what modalTableauS5 becomes. Expect modalTableauS5_sound's proof to reduce to `modalTableauS5w_sound φ h` (or remain the existing corollary call with modalApplyOneS5 swapped for modalApplyOneS5w). Do NOT change its statement.",
-      "ARCHIVAL is user-binding and explicit: code is MOVED to specs/515_s5_universal_rule_termination_unblock_504/archive/, never deleted. Never `rm` a block without first confirming it exists at its archive path. Five archive files are specified by name in the plan, each needing the 5-line provenance header. KEEP IN THE LIVE TREE modalApplyOneS5_rankStep_not_dischargeable and the Phase 3 refutation sibling.",
-      "The plan tells Phase 14 to check `git log` for any archival precedent landed between plan and execution and follow it instead if one exists. As of this dispatch there is still no archive/ directory for Lean code in this task dir.",
-      "Phase 14 expects shake to report newly-unused imports in S5Simplification.lean once ~2,000 lines leave. NOTE the shake baseline established this dispatch: shake already exits 1 repo-wide (88 files, 62 of them told to remove `import Cslib.Init` which checkInitImports mandates). Do not read shake exit 1 as a phase-14 regression -- diff shake's per-file findings against this baseline instead.",
-      "Plan line citations remain stale across the board (Phases 8-13 each independently confirmed this). Resolve declarations by NAME via lean_local_search / grep, never by trusting plan line numbers. Phase 13 confirmed FrameSoundness.lean:2379 and :1381 were both stale."
+      "The S5 deliverable is complete; per the plan's R9, a stall on Phases 15-23 lands the S5 chain green and the 5/KB5 chain [BLOCKED] -- a real partial delivery, not a total loss.",
+      "Plan line citations remain STALE across the board (every phase 8-14 independently confirmed this). Resolve declarations by NAME via lean_local_search / grep, never by trusting plan line numbers. S5Simplification.lean is now ~2490 lines (was 4736).",
+      "The archival established the archive/ convention for this task dir: five archive/*.lean files with provenance headers. If Phases 15-23 retire further code, follow the same convention (verify verbatim-complete at archive path BEFORE removing; check every removal-region declaration for cross-file consumers BY NAME -- phase 14 caught modalApplyOneS5_knownWorlds_step this way).",
+      "CslibTests cannot host a runtime #eval/#guard test of the tableau (module system + no precompileModules on the Cslib lib). Use probes/*.lean run via `lake env lean` for any further computational regression corpus, per phase 14's precedent.",
+      "instDecidableS5Valid is now available -- Euclidean-route decidability instances can mirror it (and instDecidableTValid) at the new fiveValid/kb5Valid predicates."
     ],
     "environment_notes": [
       "Mathlib cache is warm; lake exe cache get is a no-op on this branch.",
-      "Concurrent sessions are active in this repo: scope git add narrowly to specific files, never git add -A.",
-      "Full `lake build` takes several minutes; `lake build Cslib.Logics.Modal.Tableau.FrameSoundness` is the fast scoped check for the soundness chain."
+      "Concurrent sessions are active: scope git add narrowly to specific files, never git add -A.",
+      "Full lake build takes several minutes; scoped `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` is the fast check for the S5 chain.",
+      "CI baselines to diff against (NOT regressions): lake lint has 1 pre-existing error (PrimeExclusion.lean:324); lake shake exits 1 repo-wide (88 files)."
     ]
   },
   "metadata": {

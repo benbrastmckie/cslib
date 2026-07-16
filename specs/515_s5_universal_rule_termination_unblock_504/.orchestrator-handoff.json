@@ -1,54 +1,43 @@
 {
-  "status": "partial",
-  "summary": "Plan v5 (24 phases). Phases 0-9 landed, each committed incrementally. Phase 9 (spec split + the one-token weakening) is now COMPLETE: RuleApplicationSpec (GenericDriver.lean) split into RuleApplicationSpecCore (freshLocal, outputsSubsetUniverse, persistentFresh, branchingLength, localShapeInvariance, boxPosNotExpanding, diaNegNotExpanding, boxNegWitness', diaPosWitness' -- the last two existentially quantified on the witness world) plus RuleApplicationSpec extends Core (adds rankStep/outDegStep/knownWorldsStep, the three fields the Phase 2 counterexample proved unreachable for any S5 rule). Landed RuleApplicationSpec.toCore and modalApplyOneS5w_specCore : RuleApplicationSpecCore modalApplyOneS5w -- every one of the nine Core fields discharged, reducing along the two-layer agreement chain modalApplyOneS5w -> modalApplyOneS5 -> modalApplyOne, plus a new hypothesis-free combined F9/F10 shape fact and local re-derivations of modalUniverse's membership constructors (private in FmpMeasure.lean, so re-derived matching S5Simplification.lean's existing _S5/_S5w pattern). K/T/B pay nothing beyond a 3-line existential-wrapping adapter each (verified by building, not assumed). One scope deviation from the plan's file list: CompletenessLoop.lean needed six mechanical destructuring-site updates (spec.boxNegWitness/diaPosWitness -> spec.boxNegWitness'/diaPosWitness' with an extra existential binder) as direct fallout of the field rename -- its lemma signatures still take the FULL RuleApplicationSpec unchanged (modalStepGen_preserves_invariant needs rankStep/outDegStep/knownWorldsStep transitively via modalStepBranchGen_potential_step); the Core-only weakening of CompletenessLoop.lean's own signatures is Phase 12's job, not this one. Zero sorry, zero new axioms (lean_verify on modalApplyOneS5w_specCore: propext/Classical.choice/Quot.sound, identical to modalApplyOneT_spec/modalApplyOneB_spec's existing baseline) across all landed work. Full CI green: lake build 3239/3239, checkInitImports clean, lake lint (only the pre-existing out-of-scope PrimeExclusion.lean error), lake exe lint-style clean, lake test 9230 jobs (only pre-existing unrelated sorries in Propositional/Bimodal files), lake shake (no new suggestions for any of the five touched files).",
-  "phases_completed": 10,
+  "status": "implemented",
+  "summary": "Phase 11 (Step preservation) landed. modalStepHintikka_preserves_inv ports modalStepGen_preserves_invariant to the rank-free ModalLoopInvHintikka/Aux invariant, minus the two potential_step lines, taking RuleApplicationSpecCore plus AuxStepPreserved/AuxBounds in their place. Five purely-additive _core-suffixed twins of the rule-dependent helper lemmas (bClosure/eBoxOnlyNeg/eDiamondOnlyPos/eBoxNegWitness/eDiamondPosWitness) were landed to supply Core-only proofs without touching Phase 12's remit (weakening the existing full-spec-typed declarations in place). The measure-drop consumes modalExpMeasure_step_lt_gen directly, bypassing the full-spec wrapper. A concrete corollary modalStepHintikka_preserves_inv_S5w demonstrates the S5w half of the verification bar sorry-free. K's half of the verification bar (a closed AuxStepPreserved witness for ModalLoopAuxK) was found to be genuinely unprovable in its current frozen-e form (a concrete counterexample: a minting step against a stale frozen e breaks outDegEq) -- this is documented as architecture work for Phase 12's parametric Hintikka lift, not a defect in this phase's port. modalStepHintikka_preserves_inv itself is fully generic and sorry-free for any Aux genuinely satisfying AuxStepPreserved/AuxBounds.",
+  "phases_completed": 12,
   "phases_total": 24,
   "sorry_inventory": [],
   "blockers": [],
+  "findings": [
+    {
+      "title": "K's ModalLoopAuxK cannot supply a closed AuxStepPreserved witness in its current form",
+      "detail": "ModalLoopAuxK (phi0) (e) (b) (acc) freezes e to fit Aux's bare (b -> acc -> Prop) type. AuxStepPreserved's own step hypothesis universally quantifies over an independent, per-call e. A minting step changes outDeg against the step's own current expanded set, not against ModalLoopAuxK's frozen e -- concrete counterexample: frozen e0 := [] with any boxNeg/diamondPos-shaped step that mints an edge makes the post-state outDegEq conjunct false. modalStepHintikka_preserves_inv itself remains fully generic and sorry-free for any Aux genuinely satisfying AuxStepPreserved/AuxBounds (confirmed concretely for S5w via the landed modalStepHintikka_preserves_inv_S5w).",
+      "recommendation": "Phase 12 (the parametric Hintikka lift) will need to thread the current e explicitly through K's Aux instantiation rather than freezing it, or otherwise redesign how K's rank-dependent invariant interacts with the per-step-changing e. Flag this to the Phase 12 dispatch before it begins the K re-derivation regression gate.",
+      "location": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, ModalLoopAuxK (Phase 10, ~line 322) and modalStepHintikka_preserves_inv (Phase 11, this dispatch)"
+    }
+  ],
   "recommended_next_dispatch": [
-    "1. Phase 10 (rank-free loop invariant with the Aux parametrization): Phase 7's landed S5wTagInv/S5wWorldInv/modalMaxWorld_lt_worldBound_of_S5w bundle is exactly the Aux instantiation this phase needs for S5w (Aux := fun b _ => S5wTagInv phi0 b /\\ S5wWorldInv phi0 b). Read the Phase 7 section of S5Simplification.lean first (search 'The Counting Crux' header).",
-    "2. Phases 11-12 (step preservation; the parametric Hintikka lift + K/T/B REGRESSION GATE) are the big remaining lift -- Phase 12 is AUTHORIZED TO SPLIT ACROSS TWO DISPATCHES (12a: parametric lift; 12b: K re-derivation + regression gate). Phase 12 is where CompletenessLoop.lean's seven RuleApplicationSpec-typed signatures (modalLoopGen_bClosure, _eBoxOnlyNeg, _eDiamondOnlyPos, _eBoxNegWitness, _eDiamondPosWitness -- five of the seven -- can weaken to RuleApplicationSpecCore since their bodies only ever use freshLocal/boxPosNotExpanding/diaNegNotExpanding/boxNegWitness'/diaPosWitness'/localShapeInvariance/outputsSubsetUniverse, never rankStep/outDegStep/knownWorldsStep; modalStepGen_preserves_invariant and modalExpandBranchesGen_hintikka must stay on the full RuleApplicationSpec since they call modalStepBranchGen_potential_step). Verify this field-usage claim by reading, not assuming -- Phase 9 confirmed it only for the five lemmas actually touched this dispatch (see phase-9 completion note for the exact six destructuring sites).",
-    "3. Phase 13 (soundness, forks after Phase 8/9 per the plan's DAG) should follow the Phase 8 completion note's size breakdown directly: two mint-shape cases (diaPos/boxNeg), each split into a 'none' arm (existing mint proof reused verbatim) and a 'some w'' arm (new, ~30-40 lines, following the probe's discharge pattern: witnessWorldS5_mem + accReachableInv_related_s5), plus one new accReachableInv-preservation lemma for modalStepBranchGen modalApplyOneS5w (~50-100 lines).",
-    "4. Phases 15-23 (the Euclidean 5/KB5 route) are independent of 9-14's internals and can proceed in parallel once Phase 14 lands, per the plan's own wave DAG; they reuse Phase 7's entire termination argument verbatim (per the plan's own R10 note)."
+    "Phase 12a: the parametric Hintikka lift (modalExpandBranchesHintikka), informed by the K-Aux finding above -- consider whether Phase 12's design needs an amended AuxStepPreserved/ModalLoopAuxK shape (e.g. threading e explicitly rather than freezing it) before attempting the K re-derivation regression gate (12b). Locate cited declarations by name, not line number -- stale line citations confirmed again this phase."
   ],
   "continuation_context": {
     "is_successor": true,
-    "resume_phase": 10,
-    "preserved_assets": "Phases 0-9 COMPLETED, CI-green, committed. Phases 0-8 unchanged from the prior handoff (see that entry's full listing: S5wWorldInv, modalApplyOneS5w_step, modalStepBranchS5w_preserves_worldInv/accTargetsKnown, witnessWorldS5_none_not_mem_usedTags, modalApplyOneS5w_fresh_local, all in Cslib/Logics/Modal/Tableau/S5Simplification.lean; witnessWorldS5, modalApplyOneS5w, hintikka_congr, R7 refutation theorems, modalOps/mintTags, S5wTagInv/usedTags/mint-tag lemmas; modalExpandBranchesGen_openBranch_gen + accTargetsKnown instantiation in BDriver.lean; corrected 5/KB5 route docstring in FrameCompleteness.lean; Phase 8's GO verdict and probe). Phase 9 (this dispatch) added: GenericDriver.lean's RuleApplicationSpecCore/RuleApplicationSpec split + RuleApplicationSpec.toCore + modalApplyOne_spec's existential-wrapped boxNegWitness'/diaPosWitness'; TDriver.lean/BDriver.lean's 3-line adapters for the same two fields; CompletenessLoop.lean's six updated destructuring sites (field renamed, unchanged full-spec signatures); S5Simplification.lean's new 'RuleApplicationSpecCore for modalApplyOneS5w' section (~440 lines: mem_modalUniverse_of_S5w, modalUniverse_mem_formula_S5w, modalApplyOneS5_boxPos_diaNeg_shape, modalApplyOneS5w_boxPosNotExpanding/diaNegNotExpanding/localShapeInvariance/branchingLength/persistentFresh/outputsSubsetUniverse/diaPosWitness'/boxNegWitness', modalApplyOneS5w_specCore) plus a new GenericDriver.lean import.",
+    "resume_phase": 12,
+    "preserved_assets": "Phases 0-11 COMPLETED, CI-green, committed. Phases 0-10 unchanged from the prior handoff. Phase 11 (this dispatch) added to Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, immediately before the 'Combined-Invariant Single-Step Preservation Lemma' section: modalLoopGen_bClosure_core, modalLoopGen_eBoxOnlyNeg_core, modalLoopGen_eDiamondOnlyPos_core, modalLoopGen_eBoxNegWitness_core, modalLoopGen_eDiamondPosWitness_core (Core-typed twins of the existing full-spec-typed helpers, purely additive), modalStepHintikka_preserves_inv (the generic rank-free step-preservation port), modalStepHintikka_preserves_inv_S5w (concrete S5w instantiation corollary). Zero existing declarations modified.",
     "read_first": [
-      "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md (Phase 9 completion note -- the CompletenessLoop.lean deviation and its rationale; Phase 10+ task lists)",
-      "Cslib/Logics/Modal/Tableau/GenericDriver.lean (RuleApplicationSpecCore/RuleApplicationSpec split -- read this before touching either structure again)",
-      "Cslib/Logics/Modal/Tableau/S5Simplification.lean (search 'RuleApplicationSpecCore for modalApplyOneS5w' section header for the full Phase 9 S5w witness; search 'The Counting Crux' for Phase 7's Aux-parametrization source material)",
-      "specs/515_s5_universal_rule_termination_unblock_504/probes/phase8-r1-reuse-soundness.lean (the sorry-free probe example Phase 13's soundness proof should mirror)"
+      "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md (Phase 11 completion note with the K-Aux finding; Phase 12's task list)",
+      "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean (search 'Step Preservation for ModalLoopInvHintikka' section header for everything Phase 11 landed)",
+      "Cslib/Logics/Modal/Tableau/GenericDriver.lean (RuleApplicationSpecCore/RuleApplicationSpec split, F9-F12', all Core fields Phase 11's _core helpers consume)"
     ]
   },
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
-      "type": "lean",
-      "summary": "RuleApplicationSpecCore (9 fields) + RuleApplicationSpec extends Core (+3 fields) split; RuleApplicationSpec.toCore; modalApplyOne_spec's existential-wrapped boxNegWitness'/diaPosWitness'."
-    },
-    {
-      "path": "Cslib/Logics/Modal/Tableau/TDriver.lean",
-      "type": "lean",
-      "summary": "modalApplyOneT_spec's 3-line existential-wrapping adapter for boxNegWitness'/diaPosWitness'."
-    },
-    {
-      "path": "Cslib/Logics/Modal/Tableau/BDriver.lean",
-      "type": "lean",
-      "summary": "modalApplyOneB_spec's 3-line existential-wrapping adapter for boxNegWitness'/diaPosWitness'."
-    },
-    {
       "path": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
       "type": "lean",
-      "summary": "Six destructuring sites updated to the renamed existential boxNegWitness'/diaPosWitness' fields (mechanical fallout of the GenericDriver.lean rename; signatures still take full RuleApplicationSpec)."
+      "summary": "Added modalLoopGen_bClosure_core, modalLoopGen_eBoxOnlyNeg_core, modalLoopGen_eDiamondOnlyPos_core, modalLoopGen_eBoxNegWitness_core, modalLoopGen_eDiamondPosWitness_core, modalStepHintikka_preserves_inv, modalStepHintikka_preserves_inv_S5w. Purely additive, zero existing declarations modified."
     },
     {
-      "path": "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
-      "type": "lean",
-      "summary": "New 'RuleApplicationSpecCore for modalApplyOneS5w' section landing modalApplyOneS5w_specCore : RuleApplicationSpecCore modalApplyOneS5w, sorry-free."
+      "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md",
+      "type": "plan",
+      "summary": "Phase 11 heading marked [COMPLETED], tasks checked off, Finding documented for Phase 12."
     }
   ],
-  "commits": ["0bcb4701", "917bf94c", "a19ab89e"],
+  "commits": ["<to be filled by the commit step immediately following this write>"],
   "session_id": "sess_1784171237_6d3e73"
 }

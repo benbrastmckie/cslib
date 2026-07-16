@@ -866,13 +866,13 @@ theorem closes sorry-free.
 
 ---
 
-### Phase 6: The tag invariant (no world hypothesis -- breaks the circularity) [NOT STARTED]
+### Phase 6: The tag invariant (no world hypothesis -- breaks the circularity) [COMPLETED]
 
 **Goal**: Land the tag-only branch invariant. **It deliberately carries NO world-bound hypothesis**
 -- this is necessary, not an oversight.
 
 **Tasks**:
-- [ ] Land:
+- [x] Land:
       ```lean
       def S5wTagInv (φ₀) (b) : Prop := ∀ x ∈ b, (x.sign, x.formula) ∈ signedSubfmls φ₀
       def usedTags (φ₀) (b) : Finset (Sign × Proposition Atom) :=
@@ -880,12 +880,26 @@ theorem closes sorry-free.
       lemma usedTags_mono (h : ∀ x ∈ b, x ∈ b') : usedTags φ₀ b ⊆ usedTags φ₀ b'
       theorem modalApplyOneS5w_outputs_tags (hb : S5wTagInv φ₀ b) (hsf : sf ∈ b) : ...
       ```
-- [ ] Record **why `S5wTagInv` carries no world hypothesis**: the landed
+- [x] Record **why `S5wTagInv` carries no world hypothesis**: the landed
       `modalApplyOneS5_outputs_subset` (`S5Simplification.lean:1330`) takes
       `modalMaxWorld b < modalWorldBoundS5 φ₀` as an **input**, so it **cannot be used to prove the
       world bound**. The tag-only invariant breaks that circularity. (That landed lemma is part of
       the Phase 14 archival set anyway.)
-- [ ] Consume Phase 0's tag-closure result for the mint case.
+- [x] Consume Phase 0's tag-closure result for the mint case.
+
+**Completion note**: Landed `S5wTagInv`, `usedTags`, `usedTags_mono` verbatim per the task list.
+For `modalApplyOneS5w_outputs_tags`, the plan left its exact statement as `...`; landed it as the
+conjunction bundling two directional lemmas (`modalApplyOneS5w_diamondPos_tag_mem`,
+`modalApplyOneS5w_boxNeg_tag_mem`) that consume Phase 0's kill-test result via two new
+subformula-closure lemmas (`mem_mintTags_of_diamond_mem`/`_of_box_mem`, proved by structural
+induction on `φ₀` mirroring `mintTags`'s own recursion): `sf ∈ b` mint-shaped plus `S5wTagInv φ₀
+b` gives `(sf.sign, sf.formula) ∈ signedSubfmls φ₀`, hence the argument formula is itself a
+member of `modalSubfmls φ₀`, hence (by the two new closure lemmas) its mint tag is a member of
+`mintTags φ₀`. All 7 new declarations close sorry-free; `lean_verify` on
+`modalApplyOneS5w_outputs_tags` -> `[propext, Classical.choice, Quot.sound]`. `lake build`
+scoped green (848/848); `checkInitImports`/`lint-style` clean; zero new sorry; zero new
+unused-section-variable warnings (all three world-independent lemmas carry `omit [Hashable
+Atom] in`, placed BEFORE the docstring per Lean's doc-comment/command-modifier ordering rule).
 
 **Timing**: 1.5 hours
 

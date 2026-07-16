@@ -782,6 +782,164 @@ lemma mintTags_card_le_modalOps (φ : Proposition Atom) : (mintTags φ).card ≤
     simp only [mintTags, modalOps]
     exact le_trans (Finset.card_insert_le _ _) (by omega)
 
+/-! ## The Tag Invariant (Termination Machinery Plan v5, Phase 6)
+
+`S5wTagInv` deliberately carries NO world-bound hypothesis -- this is necessary, not an
+oversight. The landed `modalApplyOneS5_outputs_subset` (part of the Phase 14 archival set) takes
+`modalMaxWorld b < modalWorldBoundS5 φ₀` as an INPUT, so it cannot be used to prove the world
+bound: that would be circular. The tag-only invariant breaks the circularity by tracking
+membership in the finite, world-independent set `signedSubfmls φ₀` instead. -/
+
+omit [Hashable Atom] in
+/-- Two subformula-closure lemmas consuming Phase 0's kill-test result: if `◇ψ` (resp. `□ψ`) is a
+subformula of `φ₀`, the tag `(pos, ψ)` (resp. `(neg, ψ)`) it would mint is a member of
+`mintTags φ₀`. Proved by structural induction on `φ₀`, mirroring `mintTags`'s own recursive
+shape. -/
+lemma mem_mintTags_of_diamond_mem {φ₀ ψ : Proposition Atom}
+    (h : (Proposition.diamond ψ) ∈ modalSubfmls φ₀) : (Sign.pos, ψ) ∈ mintTags φ₀ := by
+  induction φ₀ with
+  | atom p => simp [modalSubfmls] at h
+  | bot => simp [modalSubfmls] at h
+  | imp a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | and a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | or a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | box a iha =>
+    simp only [modalSubfmls, List.mem_cons] at h
+    rcases h with h | h
+    · exact absurd h (by simp)
+    · simp only [mintTags]; exact Finset.mem_insert_of_mem (iha h)
+  | diamond a iha =>
+    simp only [modalSubfmls, List.mem_cons] at h
+    rcases h with h | h
+    · injection h with heq
+      subst heq
+      simp only [mintTags]
+      exact Finset.mem_insert_self _ _
+    · simp only [mintTags]; exact Finset.mem_insert_of_mem (iha h)
+
+omit [Hashable Atom] in
+/-- Dual of `mem_mintTags_of_diamond_mem` for `box`. -/
+lemma mem_mintTags_of_box_mem {φ₀ ψ : Proposition Atom}
+    (h : (Proposition.box ψ) ∈ modalSubfmls φ₀) : (Sign.neg, ψ) ∈ mintTags φ₀ := by
+  induction φ₀ with
+  | atom p => simp [modalSubfmls] at h
+  | bot => simp [modalSubfmls] at h
+  | imp a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | and a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | or a b iha ihb =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at h
+    rcases h with (h | h) | h
+    · exact absurd h (by simp)
+    · exact Finset.mem_union_left _ (iha h)
+    · exact Finset.mem_union_right _ (ihb h)
+  | box a iha =>
+    simp only [modalSubfmls, List.mem_cons] at h
+    rcases h with h | h
+    · injection h with heq
+      subst heq
+      simp only [mintTags]
+      exact Finset.mem_insert_self _ _
+    · simp only [mintTags]; exact Finset.mem_insert_of_mem (iha h)
+  | diamond a iha =>
+    simp only [modalSubfmls, List.mem_cons] at h
+    rcases h with h | h
+    · exact absurd h (by simp)
+    · simp only [mintTags]; exact Finset.mem_insert_of_mem (iha h)
+
+/-- The tag-only branch invariant: every branch formula's `(sign, formula)` pair is a member of
+`signedSubfmls φ₀`. No world hypothesis, by design (see the module note above). -/
+def S5wTagInv (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Prop :=
+  ∀ x ∈ b, (x.sign, x.formula) ∈ signedSubfmls φ₀
+
+/-- The set of mint tags already "used" (present) on branch `b`: the subset of `mintTags φ₀`
+whose witness formula already appears somewhere on `b`. Phase 7's counting crux tracks this
+set's cardinality across mints. -/
+def usedTags (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Finset (Sign × Proposition Atom) :=
+  (mintTags φ₀).filter (fun p => b.any (fun x => x.sign == p.1 && x.formula == p.2))
+
+omit [Hashable Atom] in
+/-- `usedTags` is monotone under branch growth (as a set, i.e. under `∀ x ∈ b, x ∈ b'`, not
+necessarily list-append order). -/
+lemma usedTags_mono {φ₀ : Proposition Atom}
+    {b b' : List (SignedFormula (Proposition Atom) WorldIndex)} (h : ∀ x ∈ b, x ∈ b') :
+    usedTags φ₀ b ⊆ usedTags φ₀ b' := by
+  intro p hp
+  simp only [usedTags, Finset.mem_filter] at hp ⊢
+  obtain ⟨hp1, hp2⟩ := hp
+  refine ⟨hp1, ?_⟩
+  obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hp2
+  exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
+
+/-- If `T(◇φ)@w ∈ b` and `b` satisfies the tag invariant, the tag `(pos, φ)` a mint at `sf` would
+consume is a member of `mintTags φ₀`. Consumes Phase 0's kill-test result via
+`mem_mintTags_of_diamond_mem`. -/
+lemma modalApplyOneS5w_diamondPos_tag_mem {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
+    {φ : Proposition Atom} (hb : S5wTagInv φ₀ b)
+    (hsf : (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (Sign.pos, φ) ∈ mintTags φ₀ := by
+  have h := hb _ hsf
+  simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset] at h
+  exact mem_mintTags_of_diamond_mem h.2
+
+/-- Dual of `modalApplyOneS5w_diamondPos_tag_mem` for `F(□φ)@w`. -/
+lemma modalApplyOneS5w_boxNeg_tag_mem {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
+    {φ : Proposition Atom} (hb : S5wTagInv φ₀ b)
+    (hsf : (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (Sign.neg, φ) ∈ mintTags φ₀ := by
+  have h := hb _ hsf
+  simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset] at h
+  exact mem_mintTags_of_box_mem h.2
+
+/-- Bundles both mint-shape tag facts: whenever `sf ∈ b` is mint-shaped and `b` satisfies the tag
+invariant, the tag `modalApplyOneS5w` would consume on a genuine mint at `sf` is a legitimate
+member of `mintTags φ₀`. This is the fact Phase 7's counting crux needs to bound `usedTags`'s
+growth by `mintTags φ₀`'s finite cardinality. -/
+theorem modalApplyOneS5w_outputs_tags {φ₀ : Proposition Atom}
+    {sf : SignedFormula (Proposition Atom) WorldIndex}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hb : S5wTagInv φ₀ b) (hsf : sf ∈ b) :
+    (∀ φ, sf.sign = .pos → sf.formula = .diamond φ → (Sign.pos, φ) ∈ mintTags φ₀) ∧
+    (∀ φ, sf.sign = .neg → sf.formula = .box φ → (Sign.neg, φ) ∈ mintTags φ₀) := by
+  obtain ⟨s, f, l⟩ := sf
+  constructor
+  · intro φ hs hf
+    simp only at hs hf
+    subst hs; subst hf
+    exact modalApplyOneS5w_diamondPos_tag_mem hb hsf
+  · intro φ hs hf
+    simp only at hs hf
+    subst hs; subst hf
+    exact modalApplyOneS5w_boxNeg_tag_mem hb hsf
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `@[simp] lemma modalSubfmls_self_mem`
 (available cross-file, but its own signature implicitly carries unused `[Hashable Atom]`, which

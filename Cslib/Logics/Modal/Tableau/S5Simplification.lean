@@ -1621,6 +1621,112 @@ theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
     _ ≤ modalOps φ₀ := mintTags_card_le_modalOps φ₀
     _ < modalWorldBound φ₀ := modalOps_lt_worldBound φ₀
 
+/-- Local re-derivation of `FrameSoundness.lean`'s `lemma modalApplyOneS5_fresh_local`
+(unavailable across files, since `FrameSoundness.lean` imports `S5Simplification.lean`, not the
+reverse): `modalApplyOneS5` satisfies the same `freshLocal` dichotomy as `modalApplyOne`. Needed
+locally to thread `modalApplyOneS5w`'s own `freshLocal` dichotomy through the "falls through to
+`modalApplyOneS5`" shapes below. -/
+private lemma modalApplyOneS5_fresh_local_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneS5 sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneS5 sf b acc).fst = RuleResult.linear (wsf :: rest)
+      ∧ (modalApplyOneS5 sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  · exact Or.inl (by rw [modalApplyOneS5_snd_eq]; exact hsame)
+  · have heq := modalApplyOneS5_eq_of_linear sf b acc (wsf :: rest) hfst
+    exact Or.inr ⟨wsf, rest, by rw [heq]; exact hfst, by rw [heq]; exact hsnd⟩
+
+/-- `modalApplyOneS5w` satisfies the same `freshLocal` dichotomy as `modalApplyOne` /
+`modalApplyOneS5`: either `acc` is left unchanged, or exactly one edge is added with a `.linear`
+result headed by the new witness. At the reuse arm (`witnessWorldS5 = some w'`), the witness `w'`
+is drawn from `modalKnownWorlds b`, but the edge added (`acc.addEdge sf.label w'`) still fits the
+dichotomy's second disjunct with `rest := []`. At a genuine mint (`witnessWorldS5 = none`),
+`modalApplyOneS5w` falls through verbatim to `modalApplyOneS5` (`modalApplyOneS5w_eq_of_not_mint_shape`,
+since diamond-positive/box-negative are not `modalApplyOneS5`'s own two S5-relevant propagation
+shapes), so `modalApplyOneS5_fresh_local_local` applies. Every other shape falls through the same
+way. This is the `hFreshLocal` witness `modalStepBranch_preserves_accTargetsKnown_gen` needs to
+thread `accTargetsKnown` through `modalStepBranchGen modalApplyOneS5w`. -/
+lemma modalApplyOneS5w_fresh_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneS5w sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneS5w sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+      (modalApplyOneS5w sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    case atom =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case bot =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case imp =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case and =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case or =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case box =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case diamond =>
+      unfold modalApplyOneS5w
+      cases hw : witnessWorldS5 b Sign.pos φ with
+      | none =>
+        simp only [hw]
+        rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact modalApplyOne_fresh_local _ b acc
+      | some w' =>
+        simp only [hw]
+        exact Or.inr ⟨⟨.pos, φ, w'⟩, [], rfl, rfl⟩
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    case atom =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case bot =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case imp =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case and =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case or =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case diamond =>
+      rw [modalApplyOneS5w_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneS5_fresh_local_local _ b acc
+    case box =>
+      unfold modalApplyOneS5w
+      cases hw : witnessWorldS5 b Sign.neg φ with
+      | none =>
+        simp only [hw]
+        rw [modalApplyOneS5_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact modalApplyOne_fresh_local _ b acc
+      | some w' =>
+        simp only [hw]
+        exact Or.inr ⟨⟨.neg, φ, w'⟩, [], rfl, rfl⟩
+
+/-- Free instantiation of `modalStepBranch_preserves_accTargetsKnown_gen` at
+`apply := modalApplyOneS5w`, `hFreshLocal := modalApplyOneS5w_fresh_local`: `accTargetsKnown` is
+preserved across a `modalApplyOneS5w` step. -/
+theorem modalStepBranchS5w_preserves_accTargetsKnown
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneS5w b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) :
+    ∀ b' ∈ newBs, accTargetsKnown b' newAcc :=
+  modalStepBranch_preserves_accTargetsKnown_gen modalApplyOneS5w modalApplyOneS5w_fresh_local
+    b e acc newBs newExps newAcc hstep hknown
+
 /-! ## World-Contiguity Bookkeeping (task 515 Phase 4, 12th `S5LoopInv` field)
 
 Local re-derivations of `FmpMeasure.lean`'s private `modalMaxWorld_append_*`/known-worlds-length

@@ -1206,7 +1206,7 @@ F9/F10 shape fact `modalApplyOneS5_boxPos_diaNeg_shape`.
 
 ---
 
-### Phase 10: Rank-free loop invariant with the `Aux` parametrization [PARTIAL]
+### Phase 10: Rank-free loop invariant with the `Aux` parametrization [COMPLETED]
 
 **Correction (post-audit, see `reports/06_k-aux-unprovability-audit.md`)**: this phase's original
 verification bar -- "both `Aux` instantiations elaborate" -- was too weak. Elaboration is not
@@ -1217,6 +1217,14 @@ defect bites. **Strengthened bar going forward**: both `Aux` instantiations must
 `AuxStepPreserved` **and** `AuxBounds` witnesses, not merely elaborate. Phase 11.5 (below) closes
 this gap by re-aritying `Aux` to thread `e`; Phase 10's declarations as landed are otherwise
 sound and are re-aritied in place, not replaced.
+
+**Re-marked `[COMPLETED]` (post-Phase-11.5, this dispatch)**: the strengthened bar above is now
+met. Confirmed directly against the landed Lean: `ModalLoopAuxK_bounds`,
+`ModalLoopAuxS5w_bounds`, `ModalLoopAuxK_stepPreserved`, and `ModalLoopAuxS5w_stepPreserved` are
+all closed, sorry-free (`grep sorry` clean), and axiom-checked via `lean_verify` to use only
+`propext`/`Classical.choice`/`Quot.sound` (K's `_bounds` uses only `propext`/`Quot.sound`) -- no
+new axioms. The bar was met via Phase 11.5's re-arity correction, not as originally landed here;
+this note documents that provenance rather than erasing the `[PARTIAL]` history above.
 
 **Goal**: Land the rank-free Hintikka loop invariant. **This is real work, not a rename.**
 
@@ -1261,7 +1269,7 @@ sound and are re-aritied in place, not replaced.
 
 ---
 
-### Phase 11: Step preservation [PARTIAL]
+### Phase 11: Step preservation [COMPLETED]
 
 **Correction (post-audit, see `reports/06_k-aux-unprovability-audit.md`)**: this phase's own
 verification bar reads *"the port closes sorry-free at **both** `Aux` instantiations."* It met
@@ -1273,6 +1281,14 @@ unproven but **refutable** (`auxK_not_stepPreserved`, sorry-free, `#print axioms
 diverge") is wrong -- the audit's counterexample sets them equal and the statement is still
 false. The real defect, and its fix, are Phase 11.5's (below), not this phase's remit; this
 phase's generic `modalStepHintikka_preserves_inv` port itself was correct and is unchanged.
+
+**Re-marked `[COMPLETED]` (post-Phase-11.5, this dispatch)**: the phase's own bar -- "the port
+closes sorry-free at both `Aux` instantiations" -- is now met at both K and S5w. Confirmed
+directly against the landed Lean: `ModalLoopAuxK_stepPreserved` (generic over any `apply` with a
+full `RuleApplicationSpec`) and `ModalLoopAuxS5w_stepPreserved` are both closed, sorry-free, and
+axiom-checked to use only `propext`/`Classical.choice`/`Quot.sound`. This was closed by Phase
+11.5's `Aux` re-arity (threading `e`), not by a change to this phase's own
+`modalStepHintikka_preserves_inv` port, which was correct all along per the Finding below.
 
 **Goal**: Port `modalStepGen_preserves_invariant` to the rank-free invariant with `Aux` threaded.
 
@@ -1400,7 +1416,7 @@ neither file consumes `Aux`/`ModalLoopAuxK`/`AuxStepPreserved` directly -- they 
 
 ---
 
-### Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [NOT STARTED]
+### Phase 12: The parametric Hintikka lift + the K/T/B REGRESSION GATE [IN PROGRESS]
 
 **Note (post-audit)**: Phase 11.5 (above) closed the K-side `AuxStepPreserved`/`AuxBounds` gap
 this phase's own KILL (R3) gate would otherwise have hit **after** the ~310-line double

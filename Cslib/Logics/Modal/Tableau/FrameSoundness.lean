@@ -2378,21 +2378,27 @@ theorem modalStepBranchS5w_preserves_satIn
   modalStepBranchS5Gen_preserves_satIn modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
     b e acc newBs newExps newAcc hstep hsat hInv hreach
 
-/-- **Task 515 (Phase 7): the S5 bespoke fuel induction.** Bespoke S5 specialization of
-`modalExpandBranchesGen_closed_unsatIn` (Task 513 Phase 3): `modalExpandBranchesGen
-modalApplyOneS5` closing implies every branch is unsatisfiable-in-`s5FC`. Threads the combined
-invariant `S5SoundInv` via `List.Forall₂`, reusing all three step-preservation lemmas
-(`modalStepBranch_preserves_accFreshInv_gen`, `modalStepBranchS5_preserves_accReachableInv`,
-`modalStepBranch_preserves_accTargetsKnown_gen`, all already generic or already landed) plus the
-per-step satisfiability bridge `modalStepBranchS5_preserves_satIn` above. -/
-theorem modalExpandBranchesS5_closed_unsatIn
+/-- The S5 fuel induction, lifted over any `apply` satisfying `S5SoundSpec` (and the per-call
+freshness dichotomy `hfresh` that the two already-generic structural preservation lemmas need):
+`modalExpandBranchesGen apply` closing implies every branch is unsatisfiable-in-`s5FC`. Threads
+the combined invariant `S5SoundInv` via `List.Forall₂`, reusing all three step-preservation
+lemmas (`modalStepBranch_preserves_accFreshInv_gen`,
+`modalStepBranchS5Gen_preserves_accReachableInv`, `modalStepBranch_preserves_accTargetsKnown_gen`)
+plus the per-step satisfiability bridge `modalStepBranchS5Gen_preserves_satIn` above. -/
+theorem modalExpandBranchesS5Gen_closed_unsatIn
+    (apply : RuleApply Atom) (hspec : S5SoundSpec apply)
+    (hfresh : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
     (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
       expandedSets.length = branches.length →
       accs.length = branches.length →
       List.Forall₂ (fun b acc => S5SoundInv b acc) branches accs →
-      modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .closed →
+      modalExpandBranchesGen apply branches expandedSets accs fuel = .closed →
       List.Forall₂ (fun b acc => ¬branchSatisfiableIn s5FC b acc) branches accs := by
   induction fuel with
   | zero =>
@@ -2422,7 +2428,7 @@ theorem modalExpandBranchesS5_closed_unsatIn
         doneAccs.length = done.length →
         List.Forall₂ (fun b a => S5SoundInv b a) pending pendingAccs →
         List.Forall₂ (fun b a => S5SoundInv b a) done doneAccs →
-        modalExpandBranchesGen.processNext modalApplyOneS5
+        modalExpandBranchesGen.processNext apply
           fuel' pending pendingExp pendingAccs done doneExp doneAccs = .closed →
         List.Forall₂ (fun b a => ¬branchSatisfiableIn s5FC b a) pending pendingAccs from
       key branches expandedSets accs [] [] []
@@ -2466,7 +2472,7 @@ theorem modalExpandBranchesS5_closed_unsatIn
                     hinner
             · simp only [Bool.not_eq_true] at hcl
               rw [if_neg (by simp [hcl])] at hinner
-              cases hstep_eq : modalStepBranchGen modalApplyOneS5 bh e a with
+              cases hstep_eq : modalStepBranchGen apply bh e a with
               | none => rw [hstep_eq] at hinner; simp at hinner
               | some step =>
                 obtain ⟨newBs, newExps, newAcc⟩ := step
@@ -2474,7 +2480,7 @@ theorem modalExpandBranchesS5_closed_unsatIn
                 have hnewExpLen : newExps.length = newBs.length := by
                   unfold modalStepBranchGen at hstep_eq
                   obtain ⟨sf, -, hf⟩ := List.exists_of_findSome?_eq_some hstep_eq
-                  rcases h_apply : (modalApplyOneS5 sf bh a) with ⟨result, _⟩
+                  rcases h_apply : (apply sf bh a) with ⟨result, _⟩
                   simp only [h_apply] at hf
                   cases result with
                   | notApplicable => simp at hf
@@ -2485,13 +2491,13 @@ theorem modalExpandBranchesS5_closed_unsatIn
                 have hInvNew : List.Forall₂ (fun b a => S5SoundInv b a)
                     newBs (List.replicate newBs.length newAcc) :=
                   forall₂_replicate_right.mpr (fun b' hb' =>
-                    ⟨modalStepBranch_preserves_accFreshInv_gen modalApplyOneS5
-                        modalApplyOneS5_fresh_local bh e a newBs newExps newAcc hstep_eq
+                    ⟨modalStepBranch_preserves_accFreshInv_gen apply
+                        hfresh bh e a newBs newExps newAcc hstep_eq
                         hFresh_bh b' hb',
-                     modalStepBranchS5_preserves_accReachableInv bh e a newBs newExps newAcc
-                        hstep_eq hKnown_bh hReach_bh b' hb',
-                     modalStepBranch_preserves_accTargetsKnown_gen modalApplyOneS5
-                        modalApplyOneS5_fresh_local bh e a newBs newExps newAcc hstep_eq
+                     modalStepBranchS5Gen_preserves_accReachableInv apply hspec bh e a newBs
+                        newExps newAcc hstep_eq hKnown_bh hReach_bh b' hb',
+                     modalStepBranch_preserves_accTargetsKnown_gen apply
+                        hfresh bh e a newBs newExps newAcc hstep_eq
                         hKnown_bh b' hb'⟩)
                 have hInvAll : List.Forall₂ (fun b a => S5SoundInv b a)
                     (done ++ newBs ++ bt)
@@ -2531,18 +2537,56 @@ theorem modalExpandBranchesS5_closed_unsatIn
                 have hbh_unsat : ¬branchSatisfiableIn s5FC bh a := by
                   intro hbh_sat
                   obtain ⟨b', hb'_mem, hb'_sat⟩ :=
-                    modalStepBranchS5_preserves_satIn
+                    modalStepBranchS5Gen_preserves_satIn apply hspec
                       bh e a newBs newExps newAcc hstep_eq hbh_sat hFresh_bh hReach_bh
                   exact (forall₂_replicate_right.mp hunsat_newBs b' hb'_mem) hb'_sat
                 exact List.Forall₂.cons hbh_unsat hunsat_bt
 
-/-- **Task 515 (Phase 7, capstone)**: `modalTableauS5` is sound: if the S5 tableau closes on
-`F(φ)`, then `φ` is `s5Valid`. Contrapositive over `s5FC`, mirroring `modalTableauT_sound`
-(`FrameCompleteness.lean`): feeds `modalExpandBranchesS5_closed_unsatIn` at the initial
-configuration `[[F(φ)@0]] [[]] [Accessibility.empty]`, with the initial `S5SoundInv` witness
-built from `accFreshInv_empty` (any branch, empty `acc`), the landed `accReachableInv_initial`,
-and the trivial vacuous `accTargetsKnown` for the edgeless empty accessibility relation. -/
-theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .closed) :
+/-- `modalExpandBranchesGen modalApplyOneS5` closing implies every branch is
+unsatisfiable-in-`s5FC`. Free corollary of `modalExpandBranchesS5Gen_closed_unsatIn` at the
+degenerate spec `modalApplyOneS5_s5SoundSpec`; statement unchanged. -/
+theorem modalExpandBranchesS5_closed_unsatIn
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      List.Forall₂ (fun b acc => S5SoundInv b acc) branches accs →
+      modalExpandBranchesGen modalApplyOneS5 branches expandedSets accs fuel = .closed →
+      List.Forall₂ (fun b acc => ¬branchSatisfiableIn s5FC b acc) branches accs :=
+  modalExpandBranchesS5Gen_closed_unsatIn modalApplyOneS5 modalApplyOneS5_s5SoundSpec
+    modalApplyOneS5_fresh_local fuel
+
+/-- `modalExpandBranchesGen modalApplyOneS5w` closing implies every branch is
+unsatisfiable-in-`s5FC`. Free corollary of `modalExpandBranchesS5Gen_closed_unsatIn` at
+`modalApplyOneS5w_s5SoundSpec` and the landed `modalApplyOneS5w_fresh_local`. -/
+theorem modalExpandBranchesS5w_closed_unsatIn
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      List.Forall₂ (fun b acc => S5SoundInv b acc) branches accs →
+      modalExpandBranchesGen modalApplyOneS5w branches expandedSets accs fuel = .closed →
+      List.Forall₂ (fun b acc => ¬branchSatisfiableIn s5FC b acc) branches accs :=
+  modalExpandBranchesS5Gen_closed_unsatIn modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
+    modalApplyOneS5w_fresh_local fuel
+
+/-- **The S5 soundness capstone, lifted over any `apply` satisfying `S5SoundSpec`**: if the
+tableau driven by `apply` closes on `F(φ)`, then `φ` is `s5Valid`. Contrapositive over `s5FC`,
+mirroring `modalTableauT_sound` (`FrameCompleteness.lean`): feeds
+`modalExpandBranchesS5Gen_closed_unsatIn` at the initial configuration
+`[[F(φ)@0]] [[]] [Accessibility.empty]`, with the initial `S5SoundInv` witness built from
+`accFreshInv_empty` (any branch, empty `acc`), the landed `accReachableInv_initial`, and the
+trivial vacuous `accTargetsKnown` for the edgeless empty accessibility relation. -/
+theorem modalTableauS5Gen_sound
+    (apply : RuleApply Atom) (hspec : S5SoundSpec apply)
+    (hfresh : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
+      (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
+      (apply sf b acc).snd = acc ∨
+      (∃ wsf rest, (apply sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+        (apply sf b acc).snd = acc.addEdge sf.label wsf.label))
+    (φ : Proposition Atom) (h : modalTableauGen apply φ = .closed) :
     s5Valid φ := by
   intro World m hFC w
   by_contra hnotsat
@@ -2557,17 +2601,42 @@ theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .c
       [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] Accessibility.empty :=
     ⟨accFreshInv_empty _, accReachableInv_initial φ,
       fun w w' hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge])⟩
-  have hunsat := modalExpandBranchesS5_closed_unsatIn (modalFuel φ)
+  have hunsat := modalExpandBranchesS5Gen_closed_unsatIn apply hspec hfresh (modalFuel φ)
     [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
     rfl rfl
     (List.Forall₂.cons hInv0 List.Forall₂.nil)
     (by
-      have h' : modalExpandBranchesGen modalApplyOneS5
+      have h' : modalExpandBranchesGen apply
           [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
           [Accessibility.empty] (modalFuel φ) = .closed := h
       exact h')
   cases hunsat with
   | cons h_unsat _ => exact h_unsat hsat
+
+/-- `modalTableauS5` is sound: if the S5 tableau closes on `F(φ)`, then `φ` is `s5Valid`. Free
+corollary of `modalTableauS5Gen_sound` at the degenerate spec `modalApplyOneS5_s5SoundSpec`;
+statement unchanged. -/
+theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .closed) :
+    s5Valid φ :=
+  modalTableauS5Gen_sound modalApplyOneS5 modalApplyOneS5_s5SoundSpec
+    modalApplyOneS5_fresh_local φ h
+
+/-- **The witness-reuse S5 soundness capstone**: if the tableau driven by the witness-reuse rule
+`modalApplyOneS5w` closes on `F(φ)`, then `φ` is `s5Valid`. Free corollary of
+`modalTableauS5Gen_sound` at `modalApplyOneS5w_s5SoundSpec` and the landed
+`modalApplyOneS5w_fresh_local`.
+
+Soundness survives the move from unguarded minting to witness reuse because a reuse edge only
+ever connects two worlds *already known* to the branch, and under `s5FC` -- whose relation is an
+equivalence -- any two worlds reachable from the common origin `0` are related
+(`accReachableInv_related_s5`). Re-basing `modalTableauS5` onto `modalApplyOneS5w` therefore
+carries `modalTableauS5_sound` over by definitional unfolding, with no change to its
+statement. -/
+theorem modalTableauS5w_sound (φ : Proposition Atom)
+    (h : modalTableauGen modalApplyOneS5w φ = .closed) :
+    s5Valid φ :=
+  modalTableauS5Gen_sound modalApplyOneS5w modalApplyOneS5w_s5SoundSpec
+    modalApplyOneS5w_fresh_local φ h
 
 end Cslib.Logic.Modal.Tableau
 

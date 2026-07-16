@@ -1,10 +1,10 @@
-# Summary: S5 Termination Machinery Plan v5, Phases 0-10
+# Summary: S5 Termination Machinery Plan v5, Phases 0-11
 
 - **Task**: 515 - s5_universal_rule_termination_unblock_504
-- **Status**: [IN PROGRESS] (phases 0-10 of 24 complete; phase 11 onward remain)
+- **Status**: [IN PROGRESS] (phases 0-11 of 24 complete; phase 12 onward remain)
 - **Started**: 2026-07-15T00:00:00Z
-- **Completed**: 2026-07-15 (this dispatch: phase 10)
-- **Effort**: ~11 hours (10 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux, gate, spec split, rank-free Aux invariant)
+- **Completed**: 2026-07-16 (this dispatch: phase 11)
+- **Effort**: ~13 hours (11 phases: kill test, rule, congruence, refutation, arithmetic, generalization, invariant, counting crux, gate, spec split, rank-free Aux invariant, step preservation)
 - **Dependencies**: Task 514 (literature grounding); Task 504 (parent, `modalApplyOneS5`/`extractModelS5*`/`modalTruthLemmaS5` landed)
 - **Artifacts**:
   - `Cslib/Logics/Modal/Tableau/S5Simplification.lean` (modified)
@@ -113,6 +113,20 @@ phase closed sorry-free, CI-green, with an incremental commit.
   logically equivalent to the existing rank-based invariant, not merely elaborating. K's own
   `AuxStepPreserved` is intentionally left to Phase 11 (the step-preservation port). Added one
   new import: `public import Cslib.Logics.Modal.Tableau.S5Simplification`.
+- **Phase 11** (`CompletenessLoop.lean`): Landed `modalStepHintikka_preserves_inv`, the
+  step-preservation port of `modalStepGen_preserves_invariant` to `ModalLoopInvHintikka`/`Aux`,
+  minus the two `potential_step` lines, taking `RuleApplicationSpecCore` plus
+  `AuxStepPreserved`/`AuxBounds` in their place. The measure drop consumes
+  `modalExpMeasure_step_lt_gen` directly against `RuleApplicationSpecCore`'s three raw fields
+  (`branchingLength`/`persistentFresh`/`outputsSubsetUniverse`), bypassing the full-spec-typed
+  wrapper. Five of the composed rule-dependent helpers (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
+  `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) are declared against the full
+  `RuleApplicationSpec` even though each proof body only ever touches a Core field; rather than
+  weaken those five declarations in place (Phase 12's remit per the plan), landed purely-additive
+  `_core`-suffixed twins with identical proof bodies parametrized over `RuleApplicationSpecCore`.
+  Landed `modalStepHintikka_preserves_inv_S5w`, a concrete corollary instantiating the generic
+  lemma at `Aux := ModalLoopAuxS5w φ0` (using the already-landed Phase 9/10 machinery),
+  demonstrating the S5w half of the plan's verification bar sorry-free.
 
 ## Decisions
 
@@ -165,32 +179,54 @@ phase closed sorry-free, CI-green, with an incremental commit.
   `ModalLoopAuxS5w_stepPreserved`, `ModalLoopInvGen_iff_hintikka_auxK`) rather than stopping at
   type-checking, since every one of these was a direct, low-risk corollary of already-landed
   Phase 6-9 machinery.
+- **Phase 11 finding, not a defect**: the plan's verification bar asks the port to close
+  sorry-free "at both `Aux` instantiations", but a *closed* `AuxStepPreserved` witness for K's
+  `ModalLoopAuxK` genuinely cannot be constructed in its current form. `ModalLoopAuxK (φ0) (e) (b)
+  (acc)` freezes `e` to fit `Aux`'s bare `(b → acc → Prop)` type, while `AuxStepPreserved`'s own
+  step hypothesis is universally quantified over an independent, per-call `e`. A minting step
+  changes `outDeg` against the step's own *current* expanded set, not against `ModalLoopAuxK`'s
+  frozen `e`; a concrete counterexample (frozen `e0 := []` with any `boxNeg`/`diamondPos`-shaped
+  minting step) makes the post-state `outDegEq` conjunct false. `modalStepHintikka_preserves_inv`
+  itself remains fully generic and sorry-free for any `Aux` genuinely satisfying
+  `AuxStepPreserved`/`AuxBounds` -- confirmed concretely for S5w via the landed
+  `modalStepHintikka_preserves_inv_S5w`. Resolving K's half is architecture work for Phase 12
+  (most likely threading the current `e` explicitly rather than freezing it inside `Aux`), not a
+  gap in this phase's port; documented in the plan's Phase 11 section and the H9 handoff for
+  Phase 12 to consume before attempting the K re-derivation regression gate.
 
 ## Impacts
 
-- Phases 11-14 (the rest of the S5 chain: step preservation, the parametric Hintikka lift +
-  K/T/B regression gate, soundness) and Phases 15-23 (the Euclidean 5/KB5 route) remain
-  unattempted. Phase 10's completion clears the way to Phase 11; no fallback pivot is needed.
-- No existing declaration was renamed, removed, or had its statement weakened by Phase 10;
-  `ModalLoopInvGen`, `ModalLoopInv`, and every prior declaration in `CompletenessLoop.lean` are
-  byte-identical. Phase 9's `RuleApplicationSpec.boxNegWitness`/`.diaPosWitness` →
-  `.boxNegWitness'`/`.diaPosWitness'` rename (the one exception across Phases 0-10) remains as
-  documented in that phase's own note.
+- Phases 12-14 (the parametric Hintikka lift + K/T/B regression gate, soundness) and Phases
+  15-23 (the Euclidean 5/KB5 route) remain unattempted. Phase 11's completion clears the way to
+  Phase 12, but Phase 12 should read the Phase 11 finding above before attempting the K
+  re-derivation: K's `ModalLoopAuxK` needs its `e`-freezing redesigned before it can supply a
+  closed `AuxStepPreserved` witness.
+- No existing declaration was renamed, removed, or had its statement weakened by Phase 11; every
+  prior declaration in `CompletenessLoop.lean` (including `ModalLoopInvGen`, `ModalLoopInv`, and
+  all of Phases 0-10's additions) is byte-identical. Phase 11 is purely additive: five `_core`
+  helper twins, `modalStepHintikka_preserves_inv`, and `modalStepHintikka_preserves_inv_S5w`.
 
 ## Follow-ups
 
-- Next dispatch: Phase 11 (step preservation) -- port `modalStepGen_preserves_invariant`
-  (`CompletenessLoop.lean`) to `ModalLoopInvHintikka`, minus its two `potential_step` lines,
-  threading `AuxStepPreserved`/`AuxBounds` as explicit hypotheses. K's own `AuxStepPreserved`
-  instance (not proved in Phase 10) is needed here, reusing `modalStepBranchGen_potential_step`
-  directly rather than re-deriving it.
-- Phase 12 should verify (by reading, not assuming) which of `CompletenessLoop.lean`'s seven
-  `RuleApplicationSpec`-typed signatures can weaken to `RuleApplicationSpecCore`; Phase 9 confirms
-  this for the five whose bodies it touched (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
-  `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) but did not change their
-  signatures, since doing so wasn't required for Phase 9's own goal.
-- Future artifacts citing `modalApplyOneS5_snd_eq`'s consumer sites should use the corrected
-  line numbers from the Phase 8 completion note, not the stale ones in earlier reports.
+- Next dispatch: Phase 12a (the parametric Hintikka lift, `modalExpandBranchesHintikka`), then
+  12b (the K re-derivation + regression gate). Read the Phase 11 finding first: K's
+  `ModalLoopAuxK` cannot supply a closed `AuxStepPreserved` witness in its current frozen-`e`
+  form (concrete counterexample in the plan's Phase 11 section and the H9 handoff); Phase 12 will
+  likely need to thread the current `e` explicitly through K's `Aux` instantiation, or otherwise
+  redesign how K's rank-dependent invariant interacts with the per-step-changing `e`, before it
+  can reuse `modalStepHintikka_preserves_inv` at K's own instantiation. Per the plan's KILL
+  CONDITION (R3): if the K re-derivation does not go through, STOP -- do not proceed to Phase 14,
+  do not attempt S5-specific patches; Phases 0-11, 13 remain green and landed regardless.
+- Phase 12 should still verify (by reading, not assuming) which of `CompletenessLoop.lean`'s
+  seven `RuleApplicationSpec`-typed signatures can weaken to `RuleApplicationSpecCore`; Phase 9
+  confirms this for the five whose bodies it touched (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
+  `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) but Phase 11 deliberately left
+  their signatures unchanged, landing `_core`-suffixed twins instead (Phase 12's remit, per the
+  plan's own scoping note, is the actual in-place weakening).
+- Future artifacts citing declarations by line number should expect drift: Phases 8, 9, 10, and
+  11 have each independently confirmed the plan's line citations are stale (files have grown
+  substantially across Phases 4-11); resolve citations by name via `lean_local_search` /
+  `lean_declaration_file` / grep, not by trusting the plan's line numbers.
 
 ## References
 

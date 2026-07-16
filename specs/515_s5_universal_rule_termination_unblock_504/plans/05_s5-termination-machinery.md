@@ -1665,14 +1665,54 @@ just deletions)** -- a diff that only removes lines is a demolition, and is a ph
 
 ---
 
-### Phase 15: GATE -- Euclidean route feasibility probe (rooted normal form + `EuclGen` shape) [NOT STARTED]
+### Phase 15: GATE -- Euclidean route feasibility probe (rooted normal form + `EuclGen` shape) [COMPLETED]
+
+**GATE VERDICT: PASSED (go).** All three load-bearing claims confirm in scratch. Probe:
+`probes/phase15-euclidean-route-gate.lean` (run via `lake env lean`, exit 0, zero `sorry`; all six
+theorems report only the standard `[propext, Classical.choice, Quot.sound]` axiom subset --
+`instRightEuclideanEuclGen`, `euclGen_least`, `rooted_cluster_universal`, and
+`kb5_root_reflexive_if_has_succ` depend on **no** axioms at all; `rooted_cluster_isEquiv` uses only
+`Classical.choice`; `kb5_per` uses only `propext`/`Quot.sound`).
+
+- **(a) CONFIRMED**: `EuclGen` (inductive `base`/`eucl`) is right-Euclidean directly via the `eucl`
+  constructor (`instRightEuclideanEuclGen`), embeds `r` (`euclGen_mono`), and satisfies the **least
+  property** `[RightEuclidean s] → (∀ a b, r a b → s a b) → EuclGen r a b → s a b` by induction on
+  `EuclGen` (`euclGen_least`, no axioms). Warrant recorded: Euclideanness is closed under arbitrary
+  intersection and the full relation is Euclidean, so the least Euclidean relation containing `r`
+  exists; `EuclGen` is its inductive realization and `euclGen_least` is that characterization.
+- **(b) CONFIRMED**: rooted normal form `R(w) × R(w) ⊆ R` is literally `rightEuclidean` at the root
+  (`rooted_cluster_universal`, no axioms). The landed `RightEuclidean.equiv_cod : IsEquiv (cod r) r`
+  is consumed directly (`rooted_cluster_isEquiv`) -- the single biggest cost reducer applies as
+  claimed; no re-derivation needed.
+- **(c) CONFIRMED**: symmetric + right-Euclidean is a PER -- `kb5_per` derives `IsTrans` via the
+  landed `symm_rightEuclidean_iff_trans`. The dichotomy's non-trivial branch (a rooted KB5 frame
+  with any root successor is a full cluster containing the root) is witnessed by
+  `kb5_root_reflexive_if_has_succ` (root has a successor ⟹ `r w w`, no axioms); the alternative is
+  the edge-isolated root, which is exactly why `□p → p` fails at KB5.
+- **rule shape**: the mint-arm shape claim is structural (prose), backed at the Lean level by
+  `EuclGen.eucl` giving right-Euclideanness directly -- the closure's successor structure is the S5w
+  cluster shape, so Phases 4/6/7's termination argument (`usedTags`, `S5wWorldInv`,
+  `modalOps_lt_worldBound`) ports directly rather than being re-derived.
+- **File placement decision for Phase 17** (the task heading asks Phase 15 to decide): the
+  normal-form content proved here (`rooted_cluster_universal`, `rooted_cluster_isEquiv`, `kb5_per`)
+  is **relation-generic** -- it needs only the `RightEuclidean`/`cod`/`Std.Symm` API, no tableau
+  types. Land it **beside `EuclGen` in `Cslib/Foundations/Relation/Euclidean.lean`**, not a new
+  tableau-local file. (Tableau-specific rooted-frame extraction, if any, still belongs in the Tableau
+  dir; but the structure theorems are Foundations-tier.)
+
+**Line estimate for Phases 16-23**: `EuclGen` + the three structure theorems above are ~40 lines of
+additive `Euclidean.lean` content (Phases 16-17). The remaining Euclidean-route cost (Phases 18-23:
+root-aware `modalApplyOneFive`/`modalApplyOneKb5`, `extractModelFive`,
+soundness/completeness/decidability) is the genuinely new surface; the termination half ports from
+Phases 1-7 (mint arms shape-identical to `modalApplyOneS5w`). Go: proceed to Phase 16
+(`Relation.EuclGen`).
 
 **Goal**: **GATE**, on the same cheap-and-early pattern as Phases 0 and 8. Confirm or falsify the
 three load-bearing claims of the Euclidean route **in scratch, before any file is written**. This
 phase writes **no** production Lean. It guards ~23.5 hours.
 
 **Tasks**:
-- [ ] Confirm **(a) the closure exists and is inductively definable**. In scratch, define
+- [x] Confirm **(a) the closure exists and is inductively definable**. In scratch, define
       ```lean
       inductive EuclGen (r : α → α → Prop) : α → α → Prop
         | base {a b} : r a b → EuclGen r a b
@@ -1686,7 +1726,7 @@ phase writes **no** production Lean. It guards ~23.5 hours.
       intersected over is non-empty. The least Euclidean relation containing `r` therefore **exists**;
       `EuclGen` is its inductive realization, and the least property above is the intersection
       characterization in usable form.
-- [ ] Confirm **(b) the rooted normal form**. Verify in scratch that for a right-Euclidean `r` and a
+- [x] Confirm **(b) the rooted normal form**. Verify in scratch that for a right-Euclidean `r` and a
       root `w`, `R(w) × R(w) ⊆ R` follows immediately from `rightEuclidean : r w a → r w b → r a b`
       -- i.e. **the successors of the root form a universal cluster**, and a rooted Euclidean frame
       is exactly **root + cluster**. **Consume, do not re-derive**:
@@ -1694,20 +1734,20 @@ phase writes **no** production Lean. It guards ~23.5 hours.
       landed** and gives the cluster's `IsEquiv` for free, supported by `rightTotal_cod` (:121),
       `cod_subset_dom` (:113), `refl_cod : r a b → r b b` (:45). **This is the single biggest cost
       reducer in the chain -- confirm it applies before building anything.**
-- [ ] Confirm **(c) the KB5 shape**. `kb5FC = Std.Symm r ∧ RightEuclidean r`, and symmetric +
+- [x] Confirm **(c) the KB5 shape**. `kb5FC = Std.Symm r ∧ RightEuclidean r`, and symmetric +
       Euclidean gives **transitive** (`Relation.symm_rightEuclidean_iff_trans`, `Euclidean.lean:236`).
       So a KB5 frame is a **partial equivalence relation** (symmetric + transitive): an equivalence
       on `dom r`, plus possibly edge-isolated points. A **rooted** KB5 frame is therefore either the
       edge-isolated one-world frame **or** a full cluster containing the root -- which is exactly why
       `□p → p` fails at KB5 (the isolated root; see the probe's `boxImp_not_kb5Valid`). Confirm this
       dichotomy, since Phase 22's rule shape depends on it.
-- [ ] Pin down the **rule shape** for `modalApplyOneFive`: identical to `modalApplyOneS5w` except
+- [x] Pin down the **rule shape** for `modalApplyOneFive`: identical to `modalApplyOneS5w` except
       **root-aware** -- `T(□φ)@0` propagates to the cluster but **not** to `0` itself (no reflexivity
       at the root), while `T(□φ)@w` for `w ≠ 0` propagates universally within the cluster. Confirm
       the **mint arms are shape-identical to `modalApplyOneS5w`'s**, since that is what lets Phases
       4/6/7's termination argument (`usedTags`, `S5wWorldInv`, `modalOps_lt_worldBound`) port
       directly rather than be re-derived.
-- [ ] Record a written go/no-go with a line estimate for Phases 16-23.
+- [x] Record a written go/no-go with a line estimate for Phases 16-23.
 
 **Timing**: 1.5 hours
 

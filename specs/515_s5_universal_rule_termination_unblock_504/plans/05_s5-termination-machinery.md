@@ -1853,36 +1853,59 @@ not duplicated.
 
 ---
 
-### Phase 18: `modalApplyOneFive` -- the root-aware rule + termination reuse [NOT STARTED]
+### Phase 18: `modalApplyOneFive` -- the root-aware rule + termination reuse [COMPLETED]
 
 **Goal**: Land the 5 rule and its termination. **The termination half is a PORT, not new work** --
 this is the payoff for putting these phases after the S5 chain.
 
 **Tasks**:
-- [ ] Land `modalApplyOneFive : RuleApply Atom` -- **plain, NOT φ₀-parametrized** (report §8 item 3
+- [x] Land `modalApplyOneFive : RuleApply Atom` -- **plain, NOT φ₀-parametrized** (report §8 item 3
       applies here verbatim: `hOutputsSubsetUniverse` at `FmpMeasure.lean:3241` binds `φ0`
       universally **inside** the hypothesis, so a φ₀-parametrized rule can never discharge it, for
       the 5 route exactly as for the S5 route).
-- [ ] The rule is `modalApplyOneS5w` **with root-awareness on the propagation arms**: `T(□φ)@0`
+- [x] The rule is `modalApplyOneS5w` **with root-awareness on the propagation arms**: `T(□φ)@0`
       propagates to the cluster but **not** to `0`; `T(□φ)@w` for `w ≠ 0` propagates universally
       within the cluster. Mirror for `F(◇φ)`. **The mint arms (`T(◇φ)@w`, `F(□φ)@w`) are
       shape-identical to `modalApplyOneS5w`'s** -- same witness-reuse test, same `.linear [witness]`
-      output, same `acc.addEdge`.
-- [ ] **The three design constraints from Phase 1 carry over UNCHANGED and are still each
+      output, same `acc.addEdge`. *(Landed as `modalFiveBoxAll`/`modalFiveDiaNegAll` -- the
+      root-exclusion reduces to a single extra `if w' == 0 then none else …` filter clause added
+      uniformly to both propagation helpers, regardless of the trigger world; this covers both the
+      `T(□φ)@0` and `T(□φ)@w, w≠0` cases identically, since neither ever legitimately propagates
+      back onto the root. `modalApplyOneFiveProp` mirrors `modalApplyOneS5` verbatim, substituting
+      the two root-aware helpers for `modalS5BoxAll`/`modalS5DiaNegAll`; `modalApplyOneFive` mirrors
+      `modalApplyOneS5w` verbatim, reusing `witnessWorldS5` directly (already rule-independent, no
+      clone needed) and falling through to `modalApplyOneFiveProp`.)*
+- [x] **The three design constraints from Phase 1 carry over UNCHANGED and are still each
       load-bearing**: `.linear [witness]` **not** `.linear []` (`freshLocal`'s right disjunct needs a
       cons); `.linear [witness]` **not** `.persistent []` (instant infinite loop, `Saturation.lean:141`);
       **no `hasEdge` guard** (R6 -- inverts the `exfalso` conjunct-3/4 discharge at
       `CompletenessLoop.lean:1049-1060` from a refutation into a proof obligation). Do not
-      "optimize" any of them here either.
-- [ ] **PORT the termination argument from Phases 4/6/7 -- do not re-derive it**: `modalOps`,
+      "optimize" any of them here either. *(Verified: `modalApplyOneFive`'s two mint arms are
+      textually identical to `modalApplyOneS5w`'s -- same `.linear [witness]`/`acc.addEdge` shape,
+      same guard-less dispatch.)*
+- [x] **PORT the termination argument from Phases 4/6/7 -- do not re-derive it**: `modalOps`,
       `modalOps_lt_worldBound`, `mintTags`, `S5wTagInv`, `usedTags`, `usedTags_mono`, `S5wWorldInv`,
       `modalMaxWorld_lt_worldBound_of_S5w`. The counting crux is **identical**, because it depends
       only on the mint arms, which are shape-identical. Generalize the Phase 6/7 lemmas over the rule
-      if that is cheaper than cloning them -- **Phase 15's estimate decides**.
-- [ ] **R8 carries over**: do **not** define a `birth` function as "the least world carrying the
+      if that is cheaper than cloning them -- **Phase 15's estimate decides**. *(Landed by direct
+      IMPORT/reuse, zero new proof: `FiveSimplification.lean` imports `S5Simplification.lean` and
+      consumes `modalOps`/`mintTags`/`S5wTagInv`/`usedTags`/`usedTags_mono`/`S5wWorldInv`/
+      `modalMaxWorld_lt_worldBound_of_S5w` unchanged -- none of these mention the rule in their
+      statement, confirming the plan's prediction. `witnessWorldS5` is likewise reused directly, not
+      cloned. Deviation: the rule-specific step-preservation theorem
+      `modalStepBranchS5w_preserves_worldInv` (the one genuinely rule-specific piece of the chain,
+      consumed only by `ModalLoopAuxS5w_stepPreserved` in `CompletenessLoop.lean`, Phase 21
+      territory) is DEFERRED to Phase 21, where its Five-analogue (`ModalLoopAuxFive_stepPreserved`)
+      is actually needed -- landing it here would be premature scaffolding with no phase-18 consumer
+      per the plan's own Verification bullet.)*
+- [x] **R8 carries over**: do **not** define a `birth` function as "the least world carrying the
       pair". The `usedTags`-cardinality formulation sidesteps it by never naming a witness world.
-- [ ] Land `modalApplyOneFive_specCore : RuleApplicationSpecCore modalApplyOneFive`, reusing Phase 9's
-      split structure. **K/T/B/S5 pay nothing.**
+      *(Satisfied vacuously: no `birth` function is defined anywhere in `FiveSimplification.lean`.)*
+- [x] Land `modalApplyOneFive_specCore : RuleApplicationSpecCore modalApplyOneFive`, reusing Phase 9's
+      split structure. **K/T/B/S5 pay nothing.** *(Landed; all nine Core fields discharged along the
+      two-layer agreement chain `modalApplyOneFive → modalApplyOneFiveProp → modalApplyOne`, mirroring
+      `modalApplyOneS5w_specCore` field-for-field. Zero edits to any S5Simplification.lean/
+      GenericDriver.lean declaration.)*
 
 **Timing**: 3 hours
 
@@ -1890,11 +1913,16 @@ this is the payoff for putting these phases after the S5 chain.
 
 **Files to modify**: `Cslib/Logics/Modal/Tableau/FiveSimplification.lean` (new; mirrors
 `S5Simplification.lean`'s structure), `Cslib/Logics/Modal/Tableau/S5Simplification.lean` (only if
-Phase 6/7 lemmas are generalized over the rule)
+Phase 6/7 lemmas are generalized over the rule) *(not touched -- reused via import instead)*
 
-**Verification**: full CI green; `lean_verify` on `modalApplyOneFive_specCore` and the ported world
-bound; **`lake exe mk_all --module`** run (a new file is added); **zero edits to any K/T/B/S5
-declaration's statement**.
+**Verification**: full CI green (lake build 3240 jobs, checkInitImports exit 0, lint-style clean,
+lint clean for this file (repo-wide PrimeExclusion.lean baseline unchanged), shake clean for this
+file (repo-wide exit 1 baseline unchanged), test green); axioms confirmed via `lake env lean` on
+`modalApplyOneFive`/`modalApplyOneFive_specCore`/`modalApplyOneFive_fresh_local`/`modalTableauFive`
+-- all in `[propext, Classical.choice, Quot.sound]`, no `sorryAx`, no new axioms; **`lake exe
+mk_all --module`** run (single-line addition to `Cslib.lean`); **zero edits to any K/T/B/S5
+declaration's statement** (confirmed: `S5Simplification.lean`/`GenericDriver.lean` untouched, only
+imported).
 
 ---
 

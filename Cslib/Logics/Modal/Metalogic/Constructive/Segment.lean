@@ -7,7 +7,8 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
+public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
+public import Cslib.Logics.Modal.Metalogic.DerivationTree
 
 /-! # Segments: Canonical Worlds for Constructive Modal Logic
 

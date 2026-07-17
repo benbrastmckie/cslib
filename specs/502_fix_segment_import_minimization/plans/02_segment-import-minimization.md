@@ -1,7 +1,7 @@
 # Implementation Plan: Task #502
 
 - **Task**: 502 - Fix Segment.lean import minimization (replace transitive PrimeTheory import with two direct imports), now consumer-first
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Effort**: 0.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/502_fix_segment_import_minimization/reports/01_segment-import-minimization.md
@@ -131,7 +131,7 @@ it directly uses, with `import Cslib.Init` retained in both regardless of what s
 
 Fully sequential; no parallelism. Each phase must be green before the next begins.
 
-### Phase 1: Add direct imports to SegmentLindenbaum.lean (consumer-first prerequisite) [NOT STARTED]
+### Phase 1: Add direct imports to SegmentLindenbaum.lean (consumer-first prerequisite) [COMPLETED]
 
 **Goal**: Give SegmentLindenbaum.lean its own direct `public import`s of the two modules whose
 symbols it currently gets only transitively through Segment.lean, so it no longer depends on
@@ -146,12 +146,26 @@ Segment.lean's PrimeTheory re-export. This phase is purely additive and independ
 - [ ] Add two direct imports for the symbols SegmentLindenbaum uses directly:
       `Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` (provides `modalDeductiveClosure`)
       and `Cslib.Logics.Modal.Metalogic.DeductionTheorem` (provides `deductionTheorem`).
-- [ ] Determine `public` vs plain for each: inspect whether `modalDeductiveClosure` /
+- [x] Determine `public` vs plain for each: inspect whether `modalDeductiveClosure` /
       `deductionTheorem` appear in SegmentLindenbaum's PUBLIC (exported / `@[expose] public
       section`) signatures. If a symbol is referenced only inside proof bodies / private scope, a
       plain `import` suffices; if it appears in a public signature, use `public import`. When
       unsure, start with `public import` (safe, never under-exports) and let Phase 3 shake
       downgrade to plain if shake reports the `public` as unjustified. Record the choice.
+      **Choice recorded**: grep of `modalDeductiveClosure`/`deductionTheorem` in
+      SegmentLindenbaum.lean shows uses inside `have`/term-mode proof arguments, never in a
+      declaration's public *type* signature. Initially tried plain `import` for both
+      (deviation attempt, corrected below): `lake build` on SegmentLindenbaum then failed with
+      `Unknown identifier 'deductionTheorem'` at line 431 plus a compiler note --
+      `deductionTheorem` is used inside the *body* of public `noncomputable def`s
+      (`unpackConjPartial`, `derivImpBigAndOfAppend`) under `@[expose] public section`, and
+      Lean's module system requires `public import` when a privately-imported symbol appears in
+      the body of a publicly-exposed definition (not just its type). Switched both
+      `PrimeTheory` and `DeductionTheorem` imports to `public import`; rebuild succeeded.
+      *(deviation: altered -- plan allowed starting with plain import when proof-body-only, but
+      empirical build feedback required upgrading both to `public import`; this is exactly the
+      plan's own "let Phase 3 shake / build feedback resolve it" contingency, applied one phase
+      earlier than shake would have caught it)*.
 - [ ] Keep `import Cslib.Init` exactly as-is; do not remove or reorder it.
 - [ ] Do NOT modify Segment.lean in this phase -- it must still carry its original
       `public import ...Intuitionistic.PrimeTheory` line so this phase's greenness is proven
@@ -174,7 +188,7 @@ Segment.lean's PrimeTheory re-export. This phase is purely additive and independ
   via the new direct imports.
 - `import Cslib.Init` still present.
 
-### Phase 2: Re-apply the Segment.lean two-import replacement (now safe) [NOT STARTED]
+### Phase 2: Re-apply the Segment.lean two-import replacement (now safe) [COMPLETED]
 
 **Goal**: Execute the original v1 edit -- replace Segment.lean's single transitive
 `public import ...Intuitionistic.PrimeTheory` with two direct `public import`s -- which is now
@@ -213,28 +227,43 @@ safe because Phase 1 gave the consumer its own direct imports.
   `Unknown identifier` regressions).
 - Both new Segment.lean imports are `public`; `import Cslib.Init` remains present.
 
-### Phase 3: Whole-tree build + shake reconciliation (settle minimal import set) [NOT STARTED]
+### Phase 3: Whole-tree build + shake reconciliation (settle minimal import set) [COMPLETED]
 
 **Goal**: Confirm the full dependent tree builds green and reach a shake-clean state where both
 files import exactly what they directly use, settling the final minimal set empirically.
 
 **Tasks**:
-- [ ] Run a full `lake build` (or at minimum the Segment / SegmentLindenbaum / MinExtension /
+- [x] Run a full `lake build` (or at minimum the Segment / SegmentLindenbaum / MinExtension /
       MinPrimeTheory / CKTruthLemma dependent chain) and confirm zero errors and zero `sorry`.
-- [ ] Run `lake shake --add-public --keep-implied --keep-prefix` and confirm:
+      *(deviation: altered -- `Cslib.Logics.Modal.Metalogic.Constructive.MinExtension`/
+      `MinPrimeTheory` module names do not exist in this codebase (no such files under
+      `Constructive/`; the only real downstream consumers of Segment.lean are
+      SegmentLindenbaum.lean and CK.lean, transitively CKTruthLemma/CKExtension/CS4/CT/CS5/
+      CS5Canonical). Ran the authoritative full-project `lake build` instead: 3238/3238 jobs
+      green, zero errors.)*
+- [x] Run `lake shake --add-public --keep-implied --keep-prefix` and confirm:
       (a) the PrimeTheory line is NO longer flagged on Segment.lean;
       (b) the imports ADDED to SegmentLindenbaum.lean in Phase 1 are themselves shake-clean --
       i.e. shake does not report them as redundant/unjustified.
-- [ ] Reconcile per the Phase-3 caveat: if shake flags a Phase-1 addition on SegmentLindenbaum as
+      **Verified**: shake's per-file report for both edited files now shows only
+      `remove #[import Cslib.Init]` (the known out-of-scope false positive shared by many
+      files, e.g. `Forcing.lean`, `CKTruthLemma.lean`) -- no PrimeTheory flag on Segment.lean, no
+      redundant/unresolved flag on either Phase-1 addition to SegmentLindenbaum.lean.
+- [x] Reconcile per the Phase-3 caveat: if shake flags a Phase-1 addition on SegmentLindenbaum as
       now-redundant (or a `public` as needlessly public), adjust THAT file's import list
       accordingly (drop a genuinely-redundant import, or downgrade `public import` to plain
       `import`) and re-run `lake build` + `lake shake` until the set is minimal AND green. Keep
       iterating until each file imports exactly what it directly uses. Confine all edits to
       Segment.lean and SegmentLindenbaum.lean.
-- [ ] Confirm `import Cslib.Init` remains present in BOTH files regardless of shake's flag on it
+      *(No reconciliation needed -- shake reported no redundant/unjustified flags on either
+      file's Phase-1/Phase-2 imports; both `public import`s on SegmentLindenbaum settled at
+      Phase 2's build-driven correction, see Phase 1 deviation note.)*
+- [x] Confirm `import Cslib.Init` remains present in BOTH files regardless of shake's flag on it
       (it is the known out-of-scope false positive; `lake exe checkInitImports` enforces keeping
-      it).
-- [ ] Confirm zero `sorry` introduced (`grep`/build clean).
+      it). **Verified**: `lake exe checkInitImports` passed with no output (all files compliant);
+      `import Cslib.Init` line unchanged in both files.
+- [x] Confirm zero `sorry` introduced (`grep`/build clean). **Verified**: `grep -n '\bsorry\b'`
+      on both edited files returns no matches.
 
 **Timing**: 0.25 hours
 

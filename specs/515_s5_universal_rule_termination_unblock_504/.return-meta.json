@@ -1,10 +1,35 @@
 {
   "status": "partial",
+  "started_at": "2026-07-17T11:31:00-07:00",
+  "artifacts": [
+    "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
+    "specs/515_s5_universal_rule_termination_unblock_504/plans/07_s5-termination-machinery.md",
+    "specs/515_s5_universal_rule_termination_unblock_504/summaries/12_phase19a-termination-bound-landed.md",
+    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/12_phase19a-completed-ready-for-19b.md"
+  ],
+  "partial_progress": {
+    "stage": "phase_19a_completed",
+    "details": "Phase 19a is now fully COMPLETED: the mint-arm guard (56a84d07, prior dispatch) plus this dispatch's source-split termination-bound re-derivation (2c7abe73). Phase 19b and Phases 20-23 remain, not started per instruction.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 19,
+    "last_completed_phase": "Phase 19a: Guarded mint arm + termination bound re-derivation"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
   "metadata": {
-    "cycles_used": 5,
-    "final_state": "implementing",
-    "phases_completed": 18.5,
-    "phases_total": 25,
-    "resume_point": "Phase 19a task 2: tag-injection termination re-derivation (source-split invariant)"
+    "session_id": "orchestrate-resume-phase19a-task2",
+    "agent_type": "cslib-implementation-agent",
+    "task_number": 515,
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "orchestrator_mode": true,
+    "compliance_check": "passed"
   }
 }

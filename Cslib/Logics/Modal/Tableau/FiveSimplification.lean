@@ -1686,6 +1686,308 @@ lemma FiveWorldInvE_imp_FiveWorldInv {φ₀ : Proposition Atom}
   refine le_trans h (Nat.add_le_add_left ?_ _)
   exact Finset.card_le_card (expandedRootTagsFive_subset_usedTagsFiveRoot φ₀ b e)
 
+/-! ### K-Level Mint-Shape Unfold Helpers
+
+Pure K mechanics (no S5/Five content): the two mint shapes' (`T(◇φ)@w`, `F(□φ)@w`) `.fst`
+computation and the uniform-fresh-label fact about it, extracted once so both the root-triggered
+and non-root-reuse-missed branches below (which both fall through to this exact K computation)
+can share the same two small proofs. Mirrors the inline unfold `modalApplyOneS5w_step`
+(`S5Simplification.lean`) performs at its own "none" branches. -/
+
+omit [Hashable Atom] in
+private lemma modalApplyOne_diamondPos_mint_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = RuleResult.linear ((⟨.pos, φ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
+omit [Hashable Atom] in
+private lemma modalApplyOne_diamondPos_mint_label
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    ∀ z ∈ ((⟨.pos, φ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)),
+      z.label = modalNextWorld b := by
+  intro z hz
+  simp only [List.mem_cons, List.mem_append] at hz
+  rcases hz with (rfl | hbox) | hdia
+  · rfl
+  · simp only [List.mem_filterMap] at hbox
+    obtain ⟨⟨ψ, src⟩, -, heq⟩ := hbox
+    split at heq
+    · split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq; rw [← heq]
+    · simp at heq
+  · simp only [List.mem_filterMap] at hdia
+    obtain ⟨sf', -, heq⟩ := hdia
+    split at heq
+    · split at heq
+      · rename_i ψ hform
+        split at heq
+        · simp at heq
+        · simp only [Option.some.injEq] at heq; rw [← heq]
+      · simp at heq
+    · simp at heq
+
+omit [Hashable Atom] in
+private lemma modalApplyOne_boxNeg_mint_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = RuleResult.linear ((⟨.neg, φ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
+omit [Hashable Atom] in
+private lemma modalApplyOne_boxNeg_mint_label
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (φ : Proposition Atom)
+    (w : WorldIndex) :
+    ∀ z ∈ ((⟨.neg, φ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)),
+      z.label = modalNextWorld b := by
+  intro z hz
+  simp only [List.mem_cons, List.mem_append] at hz
+  rcases hz with (rfl | hbox) | hdia
+  · rfl
+  · simp only [List.mem_filterMap] at hbox
+    obtain ⟨⟨ψ, src⟩, -, heq⟩ := hbox
+    split at heq
+    · split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq; rw [← heq]
+    · simp at heq
+  · simp only [List.mem_filterMap] at hdia
+    obtain ⟨sf', -, heq⟩ := hdia
+    split at heq
+    · split at heq
+      · rename_i ψ hform
+        split at heq
+        · simp at heq
+        · simp only [Option.some.injEq] at heq; rw [← heq]
+      · simp at heq
+    · simp at heq
+
+/-- **World-growth dichotomy for `modalApplyOneFive`** (Phase 21b's per-call step lemma, mirroring
+`modalApplyOneS5w_step` but split for `FiveWorldInvE`'s root/non-root division): given `sf`'s
+formula is a subformula of `φ₀` (so any tag it mints belongs to `mintTags φ₀`), EITHER (a) every
+emitted formula lands at an already-known world (propagation, witness reuse, or propositional
+decomposition -- no growth), OR (b) a genuine NON-ROOT-triggered fresh mint occurred (the tag was
+not yet in `usedTagsFiveNonRoot`), OR (c) a genuine ROOT-triggered fresh mint occurred
+(`sf.label = 0`, unconditional per `modalApplyOneFive`'s guard -- no "not yet used" side
+condition needed, since the root arm never consults a witness search). -/
+lemma modalApplyOneFive_worldGrowth {φ₀ : Proposition Atom}
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (hsfform : sf.formula ∈ modalSubfmls φ₀) :
+    (match (modalApplyOneFive sf b acc).fst with
+      | .linear formulas =>
+          (∀ x ∈ formulas, x.label ∈ modalKnownWorlds b) ∨
+          (∃ s ψ, (s, ψ) ∉ usedTagsFiveNonRoot φ₀ b ∧ (s, ψ) ∈ mintTags φ₀ ∧
+            (⟨s, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+              formulas ∧
+            ∀ x ∈ formulas, x.label = modalNextWorld b) ∨
+          (sf.label = (0 : WorldIndex) ∧ ∃ s ψ, (s, ψ) ∈ mintTags φ₀ ∧
+            (⟨s, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+              formulas ∧
+            ∀ x ∈ formulas, x.label = modalNextWorld b)
+      | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+      | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True) := by
+  by_cases hmint : (sf.sign = Sign.pos ∧ ∃ φ, sf.formula = Proposition.diamond φ) ∨
+      (sf.sign = Sign.neg ∧ ∃ φ, sf.formula = Proposition.box φ)
+  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf hsfform
+      subst hs; subst hf
+      have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_Five hφmem hsfform
+      have htagmem : (Sign.pos, φ) ∈ mintTags φ₀ := mem_mintTags_of_diamond_mem hsfform
+      by_cases hz : w = (0 : WorldIndex)
+      · subst hz
+        have heq : modalApplyOneFive
+            (⟨.pos, .diamond φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc =
+            modalApplyOneFiveProp
+              (⟨.pos, .diamond φ, (0 : WorldIndex)⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) b acc := by
+          unfold modalApplyOneFive; simp
+        rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+          modalApplyOne_diamondPos_mint_fst]
+        exact Or.inr (Or.inr ⟨rfl, Sign.pos, φ, htagmem, List.mem_cons_self,
+          modalApplyOne_diamondPos_mint_label b φ (0 : WorldIndex)⟩)
+      · cases hw : witnessWorldFive b Sign.pos φ with
+        | none =>
+          have heq : modalApplyOneFive
+              (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              modalApplyOneFiveProp
+                (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+            unfold modalApplyOneFive
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+            modalApplyOne_diamondPos_mint_fst]
+          exact Or.inr (Or.inl ⟨Sign.pos, φ,
+            witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
+            modalApplyOne_diamondPos_mint_label b φ w⟩)
+        | some w' =>
+          have heq : modalApplyOneFive
+              (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w') := by
+            unfold modalApplyOneFive
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq]
+          refine Or.inl (fun z hz' => ?_)
+          simp only [List.mem_singleton] at hz'; subst hz'
+          exact label_mem_modalKnownWorlds (witnessWorldFive_mem hw).1
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf hsfform
+      subst hs; subst hf
+      have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_Five hφmem hsfform
+      have htagmem : (Sign.neg, φ) ∈ mintTags φ₀ := mem_mintTags_of_box_mem hsfform
+      by_cases hz : w = (0 : WorldIndex)
+      · subst hz
+        have heq : modalApplyOneFive
+            (⟨.neg, .box φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc =
+            modalApplyOneFiveProp
+              (⟨.neg, .box φ, (0 : WorldIndex)⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) b acc := by
+          unfold modalApplyOneFive; simp
+        rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+          modalApplyOne_boxNeg_mint_fst]
+        exact Or.inr (Or.inr ⟨rfl, Sign.neg, φ, htagmem, List.mem_cons_self,
+          modalApplyOne_boxNeg_mint_label b φ (0 : WorldIndex)⟩)
+      · cases hw : witnessWorldFive b Sign.neg φ with
+        | none =>
+          have heq : modalApplyOneFive
+              (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              modalApplyOneFiveProp
+                (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+            unfold modalApplyOneFive
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+            modalApplyOne_boxNeg_mint_fst]
+          exact Or.inr (Or.inl ⟨Sign.neg, φ,
+            witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
+            modalApplyOne_boxNeg_mint_label b φ w⟩)
+        | some w' =>
+          have heq : modalApplyOneFive
+              (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w') := by
+            unfold modalApplyOneFive
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq]
+          refine Or.inl (fun z hz' => ?_)
+          simp only [List.mem_singleton] at hz'; subst hz'
+          exact label_mem_modalKnownWorlds (witnessWorldFive_mem hw).1
+  · rw [modalApplyOneFive_eq_of_not_mint_shape sf b acc
+        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩]
+    by_cases hprop : (sf.sign = Sign.pos ∧ ∃ φ, sf.formula = Proposition.box φ) ∨
+        (sf.sign = Sign.neg ∧ ∃ φ, sf.formula = Proposition.diamond φ)
+    · obtain ⟨hsndeq, hor⟩ := modalApplyOneFiveProp_boxPos_diaNeg_eq sf b acc hsfmem hknown hprop
+      rcases hor with hnot | ⟨out, hpers, hlabel⟩
+      · rw [hnot]; trivial
+      · rw [hpers]; exact hlabel
+    · rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg sf b acc
+          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩]
+      have hsflabel : sf.label ∈ modalKnownWorlds b :=
+        (mem_modalKnownWorlds_Five b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+      have hprop2 := modalApplyOne_prop_outputs_subset sf
+      unfold modalApplyOne
+      by_cases hpa :
+          (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+      · simp only [hpa, if_true]
+        rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+          formulas | branches | formulas | -
+        · rw [hpr] at hprop2
+          refine Or.inl (fun z hz => ?_)
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hprop2
+          intro z hz
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hprop2
+          intro z hz
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hpa
+          simp [RuleResult.isApplicable] at hpa
+      · rw [if_neg hpa]
+        rcases hs : sf.sign with _ | _ <;>
+          rcases hf : sf.formula with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ <;> simp_all
+
 end Cslib.Logic.Modal.Tableau
 
 end

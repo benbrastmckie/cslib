@@ -1,15 +1,15 @@
 {
-  "next_project_number": 524,
+  "next_project_number": 526,
   "active_projects": [
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "partial",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [],
       "parent_task": 506,
-      "last_updated": "2026-07-17T22:31:01Z",
+      "last_updated": "2026-07-17T22:34:17Z",
       "session_id": "sess_1784322687_fcf57a_511",
       "artifacts": [
         {
@@ -39,19 +39,24 @@
     {
       "project_number": 502,
       "project_name": "fix_segment_import_minimization",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Minimize Segment.lean imports per lake shake recommendation",
       "description": "lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.",
       "parent_task": 493,
       "created": "2026-07-14T15:19:36Z",
-      "last_updated": "2026-07-17T21:54:49Z",
+      "last_updated": "2026-07-17T22:34:12Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
           "path": "specs/502_fix_segment_import_minimization/reports/01_segment-import-minimization.md",
           "type": "report",
           "summary": "Research report"
+        },
+        {
+          "path": "specs/502_fix_segment_import_minimization/plans/01_segment-import-minimization.md",
+          "type": "plan",
+          "summary": "Implementation plan"
         }
       ],
       "topic": "Code Hygiene",
@@ -1385,7 +1390,9 @@
       "effort": "8-12 hours",
       "parent_task": 504,
       "dependencies": [
-        514
+        514,
+        524,
+        525
       ],
       "artifacts": [
         {
@@ -1651,76 +1658,149 @@
     {
       "project_number": 520,
       "project_name": "composite_conservativity_bridges_to_classical_column",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "high",
       "description": "Add the missing composite conservativity bridges collapsing each non-classical base into the classical column, in Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean. Currently IntToClassical.lean provides IK->K/IT->T/IS4->S4/IS5->S5 and Axis-B provides MK->IK/CK->IK etc., but the one-line composites mkDerivable_implies_kDerivable, mtDerivable_implies_tDerivable, ms4Derivable_implies_s4Derivable, ms5Derivable_implies_s5Derivable, and the constructive analogues ckDerivable_implies_kDerivable etc. do NOT exist (confirmed by grep). Modularity.lean currently chains only into the intuitionistic IS5 corner. Compose the existing Axis-B (base->intuitionistic) and IntToClassical (intuitionistic->classical) edges to complete the 'every base collapses into classical' modularity story. Low effort, high elegance value. Parallel-safe with task 515 (separate file). Verify zero sorry, axioms [propext, Classical.choice, Quot.sound] only, full CI.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T21:54:29Z",
+      "last_updated": "2026-07-17T22:34:02Z",
       "session_id": "sess_1784322687_fcf57a_520",
       "artifacts": [
         {
           "path": "specs/520_composite_conservativity_bridges_to_classical_column/reports/01_composite-conservativity-bridges.md",
           "type": "report",
           "summary": "Research report"
+        },
+        {
+          "path": "specs/520_composite_conservativity_bridges_to_classical_column/plans/01_composite-conservativity-bridges.md",
+          "type": "plan",
+          "summary": "Implementation plan"
         }
       ]
     },
     {
       "project_number": 521,
       "project_name": "dedup_minimal_canonical_model_onto_generic_extension",
-      "status": "planning",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Consolidate the duplicated minimal-base canonical model. Cslib/Logics/Modal/Metalogic/Minimal/{MinCanonicalModel,MinTruthLemma,MinCompleteness}.lean are the older MK-only bespoke copies; MinExtension.lean is the Axioms-generic frame-condition-parametric version that MT/MS4/MS5 already instantiate (mkvalidFC_completeness). MK's own completeness (mk_completeness, MinCompleteness.lean:55) still runs through the old trio. Refactor mk_completeness/mk_soundness_completeness to instantiate mkvalidFC_completeness at MKModalAxiom + the trivial frame condition, then delete the bespoke MinCanonicalModel/MinTruthLemma/MinCompleteness trio (~1500 duplicated lines). The duplication is self-documented at MinExtension.lean:23-37. Preserve all public theorem names MK consumers rely on. Verify zero sorry, full CI, zero regression across the minimal base. Parallel-safe with task 515.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T21:54:34Z",
+      "last_updated": "2026-07-17T22:34:07Z",
       "session_id": "sess_1784322687_fcf57a_521",
       "artifacts": [
         {
           "path": "specs/521_dedup_minimal_canonical_model_onto_generic_extension/reports/01_dedup-minimal-canonical-model.md",
           "type": "report",
           "summary": "Research report"
+        },
+        {
+          "path": "specs/521_dedup_minimal_canonical_model_onto_generic_extension/plans/01_dedup-minimal-canonical-model.md",
+          "type": "plan",
+          "summary": "Implementation plan"
         }
       ]
     },
     {
       "project_number": 522,
       "project_name": "uniform_frame_condition_axiom_correspondence_library",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Design and build a uniform frame-condition-to-axiom correspondence library for modal logic. Currently each soundness direction reproves the axiom-frame-property correspondence case-by-case: classical conditions inline in each Systems/<Sys>/Soundness.lean (e.g. s4_axiom_sound over 'reflexive, transitive'), and birelational conditions as ad-hoc local FC predicates (ms4FC, is4FC, cs4FC', ...) re-declared per file. There is no shared 'axiom X <-> frame property P' library. Provide reusable correspondence lemmas (reflexivity<->T, transitivity<->4, symmetry<->B, seriality<->D, euclidean<->5) that the per-system soundness proofs consume, so new systems can be assembled by choosing frame properties rather than reproving soundness. RESEARCH task first (survey how Systems/*/Soundness.lean and the birelational FC predicates express conditions, and whether a single Frame-property typeclass layer can unify classical + birelational). Coordinate scope on Zulip per CONTRIBUTING if it touches many files. Parallel-safe with task 515.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T21:54:39Z",
+      "last_updated": "2026-07-17T22:32:55Z",
       "session_id": "sess_1784322687_fcf57a_522",
       "artifacts": [
         {
           "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md",
           "type": "report",
           "summary": "Research report"
+        },
+        {
+          "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md",
+          "type": "plan",
+          "summary": "Implementation plan"
         }
       ]
     },
     {
       "project_number": 523,
       "project_name": "schema_union_axiom_combinator_for_proofsystem_instances",
-      "status": "planning",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "low",
       "description": "Replace the 15 hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean (KAxiom, TAxiom, ... each re-listing overlapping constructors implyK/implyS/efq/modalK/andI..orE/diaDuality) with a compositional schema-union combinator that builds <Sys>Axiom from a chosen set of shared axiom-schema predicates. The consumption interface (HasAxiomK/HasAxiomImplyK/HasAxiomEFQ typeclasses in Cslib/Foundations/Logic/ProofSystem.lean) is ALREADY uniform, demonstrating a generic layer is feasible. This is the deepest 'elegant compositional' refactor and the highest-risk (touches every system's axiom declaration and all downstream soundness/completeness that pattern-match on constructors). MUST coordinate on Zulip per CONTRIBUTING before implementing. Start as a RESEARCH task to design the combinator and assess the blast radius on existing proofs. Parallel-safe with task 515 in principle but broad enough to warrant sequencing after 520/521.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T21:54:44Z",
+      "last_updated": "2026-07-17T22:33:05Z",
       "session_id": "sess_1784322687_fcf57a_523",
       "artifacts": [
         {
           "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/reports/01_schema-union-combinator-blast-radius.md",
           "type": "report",
           "summary": "Research report"
+        },
+        {
+          "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md",
+          "type": "plan",
+          "summary": "Implementation plan"
+        }
+      ]
+    },
+    {
+      "project_number": 524,
+      "project_name": "kb5_full_cluster_rule_and_soundness",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive` as a literal alias (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:1436), sound for KB5 only because 'factor, not clone' lets a Five-sound rule transfer to the strictly-stronger kb5FC frame class. That alias only propagates content at DIRECT `acc.hasEdge` successors of the root -- by design, since Five's own soundness needs exactly that restriction (Five's root is not reflexive). But `extractModelKb5`'s relation (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:3230) is forced to be `Relation.EuclGen (Relation.SymmGen acc.hasEdge)`, the least kb5FC-satisfying relation preserving every raw edge -- and this relation relates the root to INDIRECT chain targets too (a raw chain `0 -> a -> c` where non-root `a` mints a fresh witness `c` gives `(extractModelKb5 b acc).r 0 c`). This is proved by the already-landed, sorry-free, zero-axiom witness lemma `extractModelKb5_root_reach_scout` (FrameCompleteness.lean:3294), and confirmed algebraically to hold for ANY kb5FC-satisfying relation preserving raw edges -- not an artifact of this specific closure operator. Deliver a genuinely NEW KB5-specific tableau rule (a plausible name is `modalApplyOneKb5'`, landed either in FiveSimplification.lean's KB5 section or a new Kb5Simplification.lean -- implementer's choice) whose root box/diamond trigger propagates to the FULL known non-root cluster (matching the non-root propagation arm's own unconditional behavior), and which ALSO propagates the root's own box content back onto world 0 itself, justified by the already-landed `Relation.symm_rightEuclidean_root_refl` (Cslib/Foundations/Relation/Euclidean.lean:362: a rooted symmetric+right-Euclidean frame makes the root reflexive whenever it has a successor). Re-derive the termination bound for the new rule (Phase 19a's bound does not transfer for free since the new rule is no longer definitionally modalApplyOneFive). Land the RuleApplicationSpecCore instance for the new rule (mirroring modalApplyOneFive_specCore's nine-field discharge, FiveSimplification.lean:1389-1441). Land a NEW soundness theorem in Cslib/Logics/Modal/Tableau/FrameSoundness.lean, proved DIRECTLY against kb5FC (the frame-class-monotonicity shortcut Phase 22 used is NOT available here -- the new rule's unrestricted root propagation would be unsound for the strictly larger fiveFC class, per the Phase 23 blocker note at FrameCompleteness.lean:3300-3339). Reuse without re-deriving: extractModelKb5 and its extraction lemmas (extractModelKb5_r/_rightEuclidean/_symm/_hasEdge_imp_r, FrameCompleteness.lean:3230-3270), extractModelKb5_root_reach_scout (FrameCompleteness.lean:3294, the counterexample characterizing exactly what the new rule must handle), EuclGen.symm_of_symm + its Std.Symm (EuclGen r) instance and Relation.EuclGen/Relation.SymmGen (Cslib/Foundations/Relation/Euclidean.lean), Relation.symm_rightEuclidean_root_refl (Euclidean.lean:362), and the entire green S5/Five rule-design pattern in FiveSimplification.lean (mint-arm guards, witness reuse, source-split termination tagging) as structural template. Constraint: zero sorry, zero new axiom declarations anywhere; every new public declaration must be lean_verify-clean (only the standard [propext, Classical.choice, Quot.sound] subset). Do not introduce a vacuous placeholder (def X := True / theorem X := trivial) if a step cannot be completed -- mark [BLOCKED] instead per plan-compliance.md and lean4.md. Do not touch Cslib/Logics/Modal/Tableau/LoopChecking.lean unless it is already resolved by task 511's concurrent session by the time this task runs (check first).",
+      "effort": "6-10 hours",
+      "parent_task": 515,
+      "topic": "Modal Logic",
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
+        "Cslib/Logics/Modal/Tableau/Kb5Simplification.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+      ],
+      "created": "2026-07-17T22:34:22Z",
+      "last_updated": "2026-07-17T22:34:22Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 515"
+        }
+      ]
+    },
+    {
+      "project_number": 525,
+      "project_name": "kb5_completeness_and_decidability",
+      "status": "researched",
+      "task_type": "cslib",
+      "description": "Completes task 515's re-scoped Phase 23 deliverable, resuming after the KB5-specific propagation rule and its soundness proof (New Task 1 / the task this depends on) are landed. Land `theorem modalTableauKb5_complete (phi) (h : kb5Valid phi) : modalTableauKb5 phi = .closed` (or the tableau-entry-point-equivalent name matching whatever New Task 1's new rule is wired through) in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, via extractModelKb5 (already landed sorry-free, FrameCompleteness.lean:3230-3270) plus the Phase 12 lift pattern used by modalTableauFive_complete. Build (or extend) the Euclidean-symmetric truth lemma's root box-positive case using New Task 1's rule: T(box psi)@0 in b must imply T(psi)@w' for every w' with (extractModelKb5 b acc).r 0 w', discharged via the full-cluster-dump plus root-reflexive-propagation guarantees New Task 1 proved sound against kb5FC. Land `instance instDecidableKb5Valid (phi) : Decidable (kb5Valid phi)`, mirroring instDecidableFiveValid's two-direction (soundness/completeness) decidability construction. Remove or update the 'Phase 23 Blocker' /-! -/ note (FrameCompleteness.lean:3300-3339) and reconcile the SCOUT section framing (FrameCompleteness.lean:3272-3299) to reflect the delivered state (the scout lemma extractModelKb5_root_reach_scout should stay as documentation of the design constraint the new rule satisfies, not read as an open blocker). Reconcile the '5/KB5 Coverage via the S5 Route' docstring in FrameCompleteness.lean and the 'Scope Note: Pure-K5 / Pure-5' block in Cslib/Logics/Modal/Tableau/S5Simplification.lean (both located by content, not stale line numbers) to state KB5 completeness as delivered. Extend CslibTests/ModalFrameSeparation.lean's kb5Valid regression coverage to use instDecidableKb5Valid / by decide now that the instance exists, replacing the current term-proof-only (boxImp_not_kb5Valid) check where appropriate. Run the full CSLib CI pipeline (lake build, checkInitImports, lake lint, lint-style, lake test, shake) to completion -- this was the one item Phase 23 left pending purely due to the concurrent LoopChecking.lean interruption from an unrelated task (511); by the time this task runs that file should be resolved, so this should require no further code changes, just verification. Constraint: zero sorry, zero new axiom declarations; every new public declaration lean_verify-clean.",
+      "effort": "5-8 hours",
+      "parent_task": 515,
+      "topic": "Modal Logic",
+      "dependencies": [
+        524
+      ],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+        "CslibTests/ModalFrameSeparation.lean"
+      ],
+      "created": "2026-07-17T22:34:22Z",
+      "last_updated": "2026-07-17T22:34:22Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 515"
         }
       ]
     }

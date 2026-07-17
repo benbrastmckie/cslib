@@ -7716,6 +7716,416 @@
       "detected_artifacts": [
         "reports/"
       ]
+    },
+    {
+      "project_number": 513,
+      "project_name": "generalize_tableau_soundness_chain_over_spec",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Generalize the tableau SOUNDNESS chain over the abstract rule-application interface, mirroring task 510 (which did this for the completeness/Hintikka chain). This is the shared blocker for Decidable(tValid) (task 503 Phase 6), Decidable(bValid) (task 505), and Decidable(s5Valid) (task 504): the completeness direction is fully generic (task 510), but the soundness direction is not. Root cause: modalStepBranch_preserves_sat (Cslib/Logics/Modal/Tableau/Soundness.lean, ~500 lines) is stated and proved concretely against modalApplyOne, so modalTableauT phi = .closed -> tValid phi (T soundness lifted to the driver/branch level) cannot be obtained by instantiation. Favourable structural fact found by task 503 Phase 6 (verified, documented at GenericDriver.lean:147-151): the ambient Kripke model is NEVER replaced throughout modalStepBranch_preserves_sat proof -- only the world-assignment function is redefined at fresh worlds -- so a branchSatisfiableIn-generalized version is structurally low-risk, though still multi-lemma. SCOPE: (1) generalize modalStepBranch_preserves_sat and its dependency chain in Soundness.lean/SoundnessStep.lean over (apply, spec : RuleApplicationSpec apply), following task 510 pattern (raw-hypothesis _gen lemmas where import topology forces it, bundled (apply, spec) wrappers where the file is a leaf; check import edges as 510 did); determine which existing RuleApplicationSpec fields (now 11 after task 510) suffice and whether any new soundness-side field is needed, deriving the field list from what the proof actually consumes, NOT assumed. (2) Re-instantiate K trivially with byte-identical public soundness statements (zero regression). (3) Instantiate at modalApplyOneT + modalApplyOneT_spec to expose modalTableauT_sound, then complete tValid_decides / instDecidableTValid (task 503 Phase 6) against Cube.T / Satisfies.t. Zero sorry, zero axiom, zero vacuous placeholders; mark [BLOCKED] with documented goal state rather than introduce debt. Run full CSLib CI at every milestone; scope git add narrowly (concurrent sessions). On completion unblocks task 503 Phase 6 and the Decidable side of tasks 505 (B) and 504 (S5). Files: Cslib/Logics/Modal/Tableau/Soundness.lean, Cslib/Logics/Modal/Tableau/SoundnessStep.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/TDriver.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (tValid_decides).",
+      "dependencies": [
+        510
+      ],
+      "parent_task": 503,
+      "last_updated": "2026-07-15T01:23:36Z",
+      "session_id": "sess_1784075478_630e1e_513",
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "specs/513_generalize_tableau_soundness_chain_over_spec/plans/01_generalize-soundness-chain.md",
+          "summary": "6-phase soundness generalization; P2 crux (~420-line FC port) is the [BLOCKED] risk site"
+        },
+        {
+          "type": "report",
+          "path": "specs/513_generalize_tableau_soundness_chain_over_spec/reports/01_generalize-soundness-chain-over-spec.md",
+          "summary": "Soundness-chain generalization research: crux, RuleSoundnessSpec interface, 6-phase plan"
+        },
+        {
+          "path": "specs/513_generalize_tableau_soundness_chain_over_spec/summaries/01_generalize-soundness-chain-summary.md",
+          "type": "summary",
+          "summary": "generalize soundness chain summary (backfilled by --sync)"
+        }
+      ],
+      "completion_summary": "Generalized the tableau soundness chain over the abstract rule-application interface (RuleSoundnessSpec-style raw hypotheses in FrameSoundness.lean), re-instantiated K byte-identical (zero regression), instantiated at T to expose modalTableauT_sound, and completed tValid_decides/instDecidableTValid (task 503 Phase 6). All 6 phases green, zero sorry, zero axiom, full CI. Unblocks Decidable side of tasks 505 (B) and 504 (S5).",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 510,
+      "project_name": "generalize_completeness_loop_hintikka_chain_over_spec",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Generalize the Hintikka-set / saturation-characterisation chain over the abstract rule-application interface, so that T (503), B (505), and S5 (504) all instantiate ONE generic development rather than each re-deriving an ~850-line system-specific analog. This is the direct successor to task 507 (which generalized FmpMeasure.lean's termination measure over RuleApplicationSpec, CI-green, zero sorry/axiom, commit 009cc348) and applies the same play one layer up. Blocker origin: task 503 Phase 5 (see specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/.orchestrator-handoff.json and plan Phase 5) -- producing a modalHintikkaSetT witness from an open modalExpandBranchesT result requires modalExpandBranches_hintikka and its entire private dependency chain, all stated directly against the concrete modalApplyOne rather than an abstract apply. Scope: (1) Extend RuleApplicationSpec (Cslib/Logics/Modal/Tableau/GenericDriver.lean, currently 7 fields after task 507) with a saturation component -- an abstract saturation predicate plus a noneIffSaturated characterisation (apply returns none iff the branch is saturated w.r.t. that predicate) and a Hintikka-lift hook (the saturation predicate implies the Hintikka clause conditions). \"Saturated\" is genuinely rule-dependent -- T's saturation includes the T-rule self-conjunct -- so this MUST be abstracted, not assumed. Expect the interface may need a further field round; that is anticipated, not a failure. (2) Generalize Completeness.lean:665-778 (modalHintikkaClause / modalApplyOne_fst_eq_of_not_box / modalHintikkaClause_lift) over (apply, spec). (3) Generalize Completeness.lean:784-935 (modalStepBranch_none_saturated / modalStepBranch_hintikka_inv). (4) Generalize CompletenessLoop.lean:57-712 (ModalLoopInv, modalStep_preserves_invariant, the ~6 private witness-invariant helpers) over (apply, spec), reusing the already-generic modalStepBranchGen_potential_step / modalStepBranchGen_worldBound from task 507 for the potential/world-bound conjuncts. (5) Generalize modalExpandBranches_hintikka (CompletenessLoop.lean:746) as modalExpandBranchesGen_hintikka. (6) Re-instantiate K as the trivial instance at modalApplyOne + modalApplyOne_spec: K's public theorem statements (kValid, modalTableau_decides, instDecidableKValid) must stay byte-identical, zero regression. (7) Instantiate at modalApplyOneT + modalApplyOneT_spec (already delivered in Cslib/Logics/Modal/Tableau/TDriver.lean by task 503 Phase 4) to expose modalExpandBranchesT_hintikka, the exact lemma task 503 Phase 5 is blocked on. Note the known import-cycle constraint discovered by task 507: GenericDriver.lean -> FmpMeasure.lean forces _gen lemmas to take raw hypotheses with bundled (apply, spec) wrappers living in GenericDriver.lean; follow the same pattern. Zero sorry, zero axiom, zero regression to K. Run the full CSLib CI (lake build, lake exe checkInitImports, lake exe lint-style, lake lint, lake test, lake exe mk_all --module, lake shake) at every phase milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions run in this repo). If a sub-piece cannot close sorry-free, mark it [BLOCKED] with the exact open lemma name and goal state documented -- never introduce a sorry or axiom. On completion this unblocks task 503 Phases 5-7 (T truth lemma, Decidable (tValid phi), downstream contract docs) and is the shared prerequisite for tasks 505 (B) and 504 (S5/KB5). Task 506 (S4) is out of scope -- its loop-checking termination is structurally different. Files: Cslib/Logics/Modal/Tableau/GenericDriver.lean, Cslib/Logics/Modal/Tableau/Completeness.lean, Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/TDriver.lean.",
+      "dependencies": [
+        507
+      ],
+      "parent_task": 503,
+      "last_updated": "2026-07-14T23:15:15Z",
+      "session_id": "sess_1784054776_0fc973_510",
+      "artifacts": [
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/reports/01_generalize-hintikka-chain-over-spec.md",
+          "type": "report",
+          "summary": "generalize hintikka chain over spec (backfilled by --sync)"
+        },
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/plans/01_generalize-hintikka-chain-over-spec.md",
+          "type": "plan",
+          "summary": "generalize hintikka chain over spec (backfilled by --sync)"
+        },
+        {
+          "path": "specs/510_generalize_completeness_loop_hintikka_chain_over_spec/summaries/01_generalize-hintikka-chain-over-spec-summary.md",
+          "type": "summary",
+          "summary": "generalize hintikka chain over spec summary (backfilled by --sync)"
+        }
+      ],
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 484,
+      "project_name": "metalogic_conservative_extension_modularity",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Conservative-extension and modularity results across the FULL propositional-strength × modal-axiom lattice: relate minimal ⊆ intuitionistic ⊆ classical propositional bases crossed with the modal-axiom lattice (K ⊆ T ⊆ S4 ⊆ S5, plus D/serial and B/symmetric correspondences), ensuring each axiom↔frame-condition module composes cleanly, stronger logics conservatively extend weaker ones, and the classical systems arise from the intuitionistic/minimal ones by adding DNE/efq. Establishes the compositional guarantees that make the axiomatizations modular. Depends on 478-483 (classical), 480/492 (intuitionistic), 495 (minimal).",
+      "created": "2026-07-12T18:05:54Z",
+      "last_updated": "2026-07-14T15:27:45Z",
+      "dependencies": [
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        492,
+        494,
+        495,
+        496
+      ],
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/484_metalogic_conservative_extension_modularity/reports/01_conservative-extension-modularity.md",
+          "summary": "Lattice already unified over Derivable Axioms; monotonicity lemmas cheap; only IK->K hard; 4-phase plan, Phase 3 gated"
+        },
+        {
+          "type": "plan",
+          "path": "specs/484_metalogic_conservative_extension_modularity/plans/01_conservative-extension-modularity.md",
+          "summary": "7 phases/4 waves; monotonicity cubes + Modularity.lean, then gated IK->K bridge (full scope)"
+        },
+        {
+          "type": "summary",
+          "path": "specs/484_metalogic_conservative_extension_modularity/summaries/01_conservative-extension-modularity-summary.md",
+          "summary": "7/7 phases, IK->K bridge complete, CI green"
+        }
+      ],
+      "completion_summary": "All 7 phases complete, full scope including the hard IK->K bridge. New InterSystem/ files: per-base modal-cube monotonicity (Minimal/Intuitionistic/Constructive Lattice{Monotonicity,Subsumption}.lean), cross-base MK/CK->IK, Modularity.lean capstone (three-axis framing: Axis A/B monotonicity, Axis C reused conservativity), generalized Derivable_of_axiom_derivable lift in Lifting.lean, and IntToClassical.lean (~650 lines, 36 theorems) proving all 14 IKModalAxiom constructors (incl. Fischer-Servi cd/idb) are Derivable KAxiom -> ikDerivable_implies_kDerivable, plus rung bridges IT->T, IS4->S4, IS5->S5. Zero sorry, zero new axioms, full CI green. STOP/[BLOCKED] clause never needed.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 496,
+      "project_name": "minimal_modal_extensions",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "parent_task": 495,
+      "dependencies": [
+        495
+      ],
+      "description": "Minimal modal extensions — minimal-base analogues of T / S4 / S5 as modular extensions of minimal K (task 495), via the axiom↔frame-condition correspondences over the minimal/birelational semantics. Lower priority / exploratory; establishes that the modular extension pattern also holds over the minimal propositional base. Depends on 495.",
+      "created": "2026-07-13T05:15:48Z",
+      "last_updated": "2026-07-14T15:29:45Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/496_minimal_modal_extensions/reports/01_minimal-modal-extensions.md",
+          "summary": "MT/MS4/MS5 completeness tractable (no CS4/CS5 blocker); 5-phase MinExtension+MT/MS4/MS5; S5 via B"
+        },
+        {
+          "type": "plan",
+          "path": "specs/496_minimal_modal_extensions/plans/01_minimal-modal-extensions.md",
+          "summary": "5 phases sequential; MinExtension+MT/MS4/MS5; plain FCs; MS5 via B; STOP clauses P3-P4"
+        },
+        {
+          "type": "summary",
+          "path": "specs/496_minimal_modal_extensions/summaries/01_minimal-modal-extensions-summary.md",
+          "summary": "MT/MS4/MS5 fully implemented, CI green"
+        }
+      ],
+      "completion_summary": "MT/MS4/MS5 minimal modal extensions fully implemented (all 5 phases, zero sorry/axioms, full CI green 3221 jobs). New Minimal/ files: MinExtension.lean (Axioms-generic port of MK canonical model + MValidFC + mkvalidFC_completeness), MT/MS4/MS5.lean. All three *_soundness_completeness biconditionals proved. MS5 via B/symmetry (min_canonical_symmetric_ms5 verbatim port of is5_canonical_symmetric). Completeness tractable (no CS4/CS5-style blocker). Phase 1 required genericizing MK canonical model over abstract Axioms (~1580 lines).",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 501,
+      "project_name": "CK_constructive_modal_extensions_CT_CS4_CS5",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "parent_task": 493,
+      "dependencies": [
+        493,
+        508
+      ],
+      "description": "CK constructive modal extensions CT / CS4 (+ CS5 soundness) — RE-SCOPED: CS5 completeness moved to task 509, which owns it entirely. 501 scope is now: sound and complete axiomatizations of the constructive (CK-based) analogues of T and S4 as modular extensions of CK (task 493), over birelational semantics (task 490) instantiating the intuitionistic modal framework (task 480), PLUS CS5 axioms + soundness. CK is the weaker constructive base (drops IK's diamond-bot->bot and diamond(A or B)->diamond A or diamond B), so box and diamond stay fully independent; establish the axiom<->birelational-frame-condition correspondences over that base and prove soundness + completeness by the birelational (prime-theory) canonical model. DELIVERED: CKExtension.lean; CT soundness+completeness; CS4 soundness+completeness (completeness closed by task 508 via the weakened frame condition cs4FC' + hereditary diamond-refuting tail); CS5 axioms + soundness (cs5_soundness, no axioms). NOT IN SCOPE: CS5 completeness — see task 509 and the mechanized obstruction bDia_not_valid_over_cs5FCweak. Contributes the CK column of the constructive modal cube (CK analogue of task 494 for IK and task 496 for minimal); the column is CT+CS4-complete with CS5 completeness outstanding under 509. Depends on 493.",
+      "created": "2026-07-14T06:35:23Z",
+      "last_updated": "2026-07-14T21:49:32Z",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/reports/01_ct-cs4-cs5-segment-extensions.md",
+          "summary": "CT/CS4/CS5 segment-extension research with 8-phase decomposition"
+        },
+        {
+          "type": "plan",
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/plans/01_ct-cs4-cs5-extensions.md",
+          "summary": "8 phases, CK segment reuse, CS5 via B/symmetry, STOP contingency at Phase 7"
+        },
+        {
+          "path": "specs/501_CK_constructive_modal_extensions_CT_CS4_CS5/summaries/01_ct-cs4-cs5-extensions-summary.md",
+          "type": "summary",
+          "summary": "ct cs4 cs5 extensions summary (backfilled by --sync)"
+        }
+      ],
+      "session_id": "sess_1784044271_09e821_501",
+      "completion_summary": "RE-SCOPED and COMPLETE under the new scope (CKExtension + CT + CS4 + CS5 soundness). CKExtension.lean and CT.lean fully done (CT soundness AND completeness). CS4 soundness AND completeness done — completeness was closed by task 508, which refuted this task's original claim that CS4 completeness was permanently blocked: the obstruction rested on holding the frame condition fixed, and weakening cs4FC to cs4FC' plus a hereditary diamond-refuting tail closes it sorry-free (axioms exactly [propext, Classical.choice, Quot.sound], orchestrator-verified). CS5 axioms + soundness done (cs5_soundness, no axioms). CS5 COMPLETENESS is out of scope and owned entirely by task 509; task 508 mechanized bDia_not_valid_over_cs5FCweak showing the CS4 technique provably does not transfer. Full CI green, zero sorry.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 505,
+      "project_name": "b_symmetric_decidability_via_generic_tableau_driver",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Deliver plan Phase 4 of task 300 (specs/300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md): the B (symmetric-frame) system. Add the symmetric box rule to Cslib/Logics/Modal/Tableau/FrameRules.lean: box-positives propagate backward along recorded edges (T(box phi)@w + edge v->w gives T(phi)@v), dually for F(diamond); add the backward-propagation saturation conjunct. Extract the countermodel via Relation.SymmGen (Std.Symm free from Relation.SymmGen.instSymm). Discharge the structural hypotheses interface fixed by the generic driver delivered in the prerequisite task (backward propagation adds formulas only at existing worlds, so the K world bound and finite formula catalog survive unchanged). Prove the B truth-lemma bridge over the symmetric closure. State bValid / Decidable (bValid phi) against Cube.B / Satisfies.b (Basic.lean). Files: Cslib/Logics/Modal/Tableau/FrameRules.lean (B arms), Cslib/Logics/Modal/Tableau/FrameCompleteness.lean (extractModelB, B bridge, bValid + Decidable), Cslib/Logics/Modal/Tableau/FrameSoundness.lean (B arm).",
+      "effort": "5-7 hours",
+      "parent_task": 300,
+      "topic": "Modal Logic",
+      "dependencies": [
+        513
+      ],
+      "created": "2026-07-14T17:57:00Z",
+      "last_updated": "2026-07-15T02:18:32Z",
+      "artifacts": [
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/01_frame-specific-tableau-extensions.md",
+          "type": "report",
+          "summary": "Research report: existing K tableau architecture, reusable Mathlib/CSLib frame API, per-system formalization direction (T/B/S4/S5/5), S4 loop-checking scaffolding (copied from parent task 300)."
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/02_spawn-analysis.md",
+          "type": "report",
+          "summary": "Spawn analysis decomposing parent task 300 into subtasks 503-506 (copied from parent task 300)."
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/reports/03_parent-phase-plan-reference.md",
+          "type": "report",
+          "summary": "Reference: original 7-phase task-300 plan (frameValid scaffolding, T/S5/B/S4/5 phases) copied as background context."
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/plans/01_b-symmetric-tableau-implementation.md",
+          "type": "plan",
+          "summary": "b symmetric tableau implementation (backfilled by --sync)"
+        },
+        {
+          "path": "specs/505_b_symmetric_decidability_via_generic_tableau_driver/summaries/01_b-symmetric-tableau-summary.md",
+          "type": "summary",
+          "summary": "b symmetric tableau summary (backfilled by --sync)"
+        }
+      ],
+      "session_id": "sess_1784075478_630e1e_505",
+      "completion_summary": "Delivered the full B (symmetric-frame) tableau system: backward-propagation rule (modalApplyOneB), new BDriver.lean, accSourcesKnown invariant, symmetric-closure model extraction (extractModelB via Relation.SymmGen), B truth lemma, rule+driver soundness, bValid completeness, and Decidable (bValid φ). Phase 9 delivered in full by consuming task 513 generic soundness chain. All 9 phases green, zero sorry, zero axiom, full CI.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 507,
+      "project_name": "generalize_k_fmp_termination_measure_over_ruleapplicationspec",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Complete task 503's Phase 3 (plans/01_generalize-tableau-driver-tsystem.md): generalize Cslib/Logics/Modal/Tableau/FmpMeasure.lean's rule-dependent termination/FMP step lemmas -- modalStepBranch_potential_step (~line 2146), modalStepBranch_worldBound (~line 2376), and modalExpMeasure_step_lt (~line 2873) -- to take an abstract (apply : RuleApply Atom) (spec : RuleApplicationSpec apply) in place of the concrete modalApplyOne, defined in Cslib/Logics/Modal/Tableau/GenericDriver.lean (commit d5b24e67). Before attempting the top-level lemmas, first re-derive the ~900-line dependency chain generically: modalStepBranch_exists_rank' (~line 1058), modalStepBranch_knownWorlds (~line 1901), modalStepBranch_preserves_outDegEq (~line 1365), outDeg_le_of_expandedNodup (~line 1509), and ~10 further private helpers (FmpMeasure.lean lines ~1058-2415), each of which today independently rcases on modalApplyOne's four concrete RuleResult shapes (propositional/boxPos/diamondNeg/diamondPos/boxNeg) rather than going through RuleApplicationSpec. This will likely require extending RuleApplicationSpec (GenericDriver.lean) with additional fields capturing the exact outDeg/rank-map interaction at the fresh-world mint point (not just 'a fresh edge is added', but 'the fresh edge's source outDeg was < Sf beforehand, by exactly the amount the catalog bounds') so the existing geomCap-based EXACT potential-drop identity (lines ~2251-2270) can be replayed generically, not merely bounded. Keep modalUniverse/modalWork/modalExpMeasure/modalFuel (world-agnostic size bounds) unchanged -- only the rule-dependent step lemmas move behind the interface. Re-instantiate K's termination lemmas as the generic lemmas applied to modalApplyOne + the already-proved modalApplyOne_spec witness (Phase 2), and confirm FmpMeasure.lean's existing K corollaries and CompletenessLoop.lean's uses still typecheck via the Phase-1 modalStepBranch_eq/modalExpandBranches_eq/modalTableau_eq bridge lemmas (Saturation.lean, commit e9f350c7). Zero regression to K's public theorem statements; zero sorry; zero axiom. If any sub-piece cannot close sorry-free, mark the affected sub-goal [BLOCKED] with the exact open lemma name and goal state documented, and sequence the remainder into further phases within this task's own plan rather than deferring silently. Run the full CSLib CI (lake build, lake exe checkInitImports, lake lint, lake exe lint-style, lake test, lake exe mk_all --module, lake shake) at every milestone. On completion this unblocks task 503's Phases 4-7 (T driver instantiation, T truth lemma, Decidable (tValid phi)) and is a prerequisite for tasks 504 (S5/KB5) and 505 (B), which are documented to reuse the same generic termination measure. Task 506 (S4) is explicitly out of scope -- its transitive-box termination argument is structurally different and not an instance of this interface.",
+      "effort": "12-16 hours",
+      "parent_task": 503,
+      "topic": "Modal Logic",
+      "dependencies": [],
+      "created": "2026-07-14T18:39:26Z",
+      "last_updated": "2026-07-14T20:24:24Z",
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 503"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/reports/01_frame-specific-tableau-extensions.md",
+          "type": "report",
+          "summary": "frame specific tableau extensions (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/reports/03_parent-phase-plan-reference.md",
+          "type": "report",
+          "summary": "parent phase plan reference (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/plans/01_generalize-fmp-termination-measure.md",
+          "type": "plan",
+          "summary": "generalize fmp termination measure (backfilled by --sync)"
+        },
+        {
+          "path": "specs/507_generalize_k_fmp_termination_measure_over_ruleapplicationspec/summaries/01_generalize-fmp-termination-measure-summary.md",
+          "type": "summary",
+          "summary": "generalize fmp termination measure summary (backfilled by --sync)"
+        }
+      ],
+      "session_id": "sess_1784054776_0fc973_507",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 508,
+      "project_name": "unblock_CK_CS4_CS5_completeness",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Unblock CK constructive CS4/CS5 completeness (task 501 follow-up) — task 501 delivered CT/CS4/CS5 soundness and CT completeness, but CS4/CS5 completeness is [BLOCKED] on a mechanically-verified obstruction: over CK's segment/fallible-world model, the diamRefutingSegment tail-exclusion witness needed for the truth lemma's diamond-backward 'far' clause cannot be shown to propagate through further relational steps (no maximal-tail invariant makes cs4FC transitivity / cs5FC symmetry hold globally on the restricted canonical world type). Research and implement an alternative canonical-model technique to close CS4/CS5 completeness sorry-free: candidate approaches (a) a hereditary/maximal diamond-refuting construction that keeps the exclusion invariant stable under cmreach steps, or (b) filtration over the CK segment model. Files: Cslib/Logics/Modal/Metalogic/Constructive/{CS4,CS5}.lean (currently soundness-only + BLOCKED completeness sections). Depends on 501.",
+      "dependencies": [],
+      "parent_task": 501,
+      "topic": "Modal Logic",
+      "last_updated": "2026-07-14T21:29:34Z",
+      "session_id": "sess_1784061933_322282",
+      "artifacts": [
+        {
+          "path": "specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md",
+          "type": "report",
+          "summary": "CS4 completeness technique (verified sorry-free): weaken cs4FC to cs4FC' plus hereditary diamond-exclusion; CS5 blocked on a newly mechanized bDia obstruction."
+        },
+        {
+          "path": "specs/508_unblock_CK_CS4_CS5_completeness/plans/01_cs4-completeness-integration.md",
+          "type": "plan",
+          "summary": "8-phase CS4 transcription+integration plan; cs4FC kept with compile-verified cs4FC_implies_cs4FC' bridge; CS5 left blocked."
+        },
+        {
+          "path": "specs/508_unblock_CK_CS4_CS5_completeness/summaries/01_cs4-completeness-integration-summary.md",
+          "type": "summary",
+          "summary": "CS4 completeness landed sorry-free across 8 phases; CS5 re-scoped to task 509."
+        }
+      ],
+      "completion_summary": "CS4 constructive completeness CLOSED sorry-free: cs4_completeness and cs4_soundness_completeness land in CS4.lean with axioms exactly [propext, Classical.choice, Quot.sound] (orchestrator-verified). Technique: weakened frame condition cs4FC' plus a hereditary diamond-refuting tail, with cs4FC retained and bridged via cs4FC_implies_cs4FC' so the cs5FC->cs4FC->ctFC inclusion chain in ConstructiveLatticeMonotonicity.lean is preserved unchanged. CS5 completeness is NOT closed and was re-scoped to task 509: it is provably unreachable by this technique per the mechanized countermodel bDia_not_valid_over_cs5FCweak. Full CI pipeline green.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 509,
+      "project_name": "rescope_CK_CS5_constructive_completeness",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "OWNS CK CONSTRUCTIVE CS5 COMPLETENESS ENTIRELY (re-scoped from task 501; task 508 follow-up). This task is the sole owner of CS5 completeness for the CK column of the constructive modal cube — task 501 delivered CS5 axioms + soundness (cs5_soundness, landed and axiom-free) and is now CLOSED with CS5 completeness explicitly out of its scope. Task 508 closed CS4 completeness sorry-free by weakening the frame condition to cs4FC' plus a hereditary diamond-exclusion tail, but proved that technique provably does NOT extend to CS5. Mechanized negative results from 508 (specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean, compiling): (1) bDia_not_valid_over_cs5FCweak — a two-world Bool countermodel satisfying reflexivity, both cs4FC' clauses, and weakened symmetry, yet refuting the-diamond-of-box-p implies p; so bDia is UNSOUND over the weakened condition that makes CS4 work. (2) cs5_dia_bot_imp_bot — CS5 proves the-diamond-of-bot implies bot (unlike CK/CT/CS4), a NEW lead enabling a Set.univ-free tail redesign. Remaining gap: the frame condition that would validate bDia (FCbdia: r w u implies exists u' >= u and t <= w with r u' t) fails canonically because u := cexpl forces Set.univ into every realized tail; discharging it needs genuine canonical symmetry (boxInv(u.head) subset w.head), whose classical proof requires maximality (B not in head implies not-B in head) — unavailable for quasi-prime (intuitionistic) heads. IMPORTANT — do not repeat prior mistakes: 501 held the frame condition FIXED and searched for a better tail construction, and 508 proved the frame condition is the FREE PARAMETER. Also note 501 Phase 7 wrongly asserted CS5 shares CS4's root cause; 508 refuted this — CS5's obstruction is different and deeper. SCOPE CAVEAT: the countermodel rules out the CS4 technique, NOT CS5 completeness as such; the broader infeasibility verdict is a limitation-of-known-technique argument, not an impossibility theorem. Investigate whether cs5_dia_bot_imp_bot supports a Set.univ-free canonical world type admitting symmetry without maximality, or whether CS5 constructive completeness requires different semantics (e.g. birelational models with a separate intuitionistic preorder). A rigorous NEGATIVE result is an ACCEPTABLE and VALUABLE outcome: if CS5 completeness is not achievable over the CK segment/fallible-world model, document the obstruction as a mechanized theorem and leave CS5.lean completeness BLOCKED citing it. Files: Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean. Depends on 508.",
+      "dependencies": [
+        508
+      ],
+      "parent_task": 508,
+      "created": "2026-07-14T21:12:35Z",
+      "last_updated": "2026-07-14T23:59:00Z",
+      "session_id": "sess_1784065982_0f4e12",
+      "priority": null,
+      "effort": "12-20 hours",
+      "artifacts": [
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md",
+          "type": "report",
+          "summary": "CS5 symmetric-tail construction; refutes 508 negative verdict"
+        },
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/plans/01_cs5-symmetric-tail-completeness.md",
+          "type": "plan",
+          "summary": "11-phase CS5 symmetric-tail completeness; transcription first, pair-construction research-risk last"
+        },
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/summaries/01_cs5-symmetric-tail-completeness-phases1-7-summary.md",
+          "type": "summary",
+          "summary": "cs5 symmetric tail completeness phases1 7 summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/509_rescope_CK_CS5_constructive_completeness/summaries/02_cs5-phases8-11-summary.md",
+          "type": "summary",
+          "summary": "cs5 phases8 11 summary (backfilled by --sync)"
+        }
+      ],
+      "completion_summary": "Branch B (scope-sanctioned): CS5 soundness + mechanized obstruction, sorry-free and axiom-clean. Delivered: (1) refuted task 508's published \"CS5 completeness blocked\" verdict in landed code (508's cs5FCweak omitted plain symmetry; wr'_not_symm); (2) CS5 soundness over the weakened frame condition cs5FC'' for all 17 axioms, cs5_axiom_sound'' axiom-free; (3) full canonical machinery up to cs5FC''_cs5Mreach via the symmetric tail cs5Tail with definitional symmetry (cs5Tail_symm axiom-free) reusing prime_set_exclusion; (4) a mechanized non-vacuity theorem for the box-backward gap (CS5BoxGapWorld three-world countermodel landed in CS5.lean). CS5 completeness itself remains OPEN at the truth-lemma box-backward case: Phase 8 discovered a new obstruction (the cross-condition predicate boxInv Z subset Y is not closure-stable) that defeats even the repaired designated-formula-exclusion approach. A repair (combined derivation system over a doubled atom space Atom+Atom) was designed but not built; pursued in follow-up task 512. Docstring reflects honest status: not a library-level 'CS5 completeness impossible' verdict, and not for 508's refuted reason. Commits ec4acb87..fef08fc5. Full CI green; CS5 module builds 727 jobs, verified independently by orchestrator.",
+      "roadmap_items": [
+        "CS5 constructive completeness (box-backward case) — designed Atom+Atom repair, tracked as task 512"
+      ],
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 514,
+      "project_name": "s5_tableau_termination_literature_grounding",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Ground task 504's PROVEN S5 tableau termination obstruction in the literature and produce a concrete, lemma-level implementation recommendation for task 515. Root cause to confirm and characterize precisely: S5's universal/global box rule (modalApplyOneS5) propagates box-formulas to ALL branch worlds irrespective of accessibility edges, so there is no edge-relation against which to decrement a modal-depth rank -- the edge-local rank-potential FMP argument (RuleApplicationSpec.rankStep, GenericDriver.lean) is provably inapplicable (task 504 landed modalApplyOneS5_rankStep_not_dischargeable, a sorry/axiom-free counterexample). (1) ACQUIRE + full-text ingest Massacci2000 (Single Step Tableaux for Modal Logics, J. Automated Reasoning 24(3):319-364, DOI 10.1023/A:1006155811656) and Gore1999 (Tableau Methods for Modal and Temporal Logics, Handbook of Tableau Methods, pp.297-396, DOI 10.1007/978-94-017-1754-0_6) via /literature Mode B; both are registered in references.bib (BibKeys Massacci2000, Gore1999) and specs/literature/SOURCES.md but PDFs are NOT yet acquired (paywalled, no OA copy found via Semantic Scholar/Unpaywall/arXiv). If PDFs remain unavailable, fall back to Gore's openly-available ANU/RSISE tech-report versions and the in-corpus surrogates ChagrovZakharyaschev1997 (filtration, FMP) and blackburn_2002_book. (2) Cross-check the literature's account of WHY S5 (and universal/global modalities) needs loop-checking / prefix-management / filtration rather than a depth-decrement measure, against task 504's mechanized obstruction. (3) Extract the concrete terminating strategy (single-step prefix loop-checking a la Massacci; semantic filtration FMP; or global caching) and MAP it onto CSLib's generic driver: specify what a rank-machinery-bypassing S5 termination/decidability interface looks like, which RuleApplicationSpec fields change or are replaced, and whether it can coexist with the existing K/T/B instantiations without regression. Deliverable: a research report with a BibKey-cited, lemma-level recommendation sufficient to plan task 515. Read-only survey: Cslib/Logics/Modal/Tableau/{GenericDriver,S5Simplification,FrameCompleteness,BDriver}.lean; specs/504_*/summaries/01_*.md and the Phase-2 obstruction proof. Comparable in scope to the S4/task-511 loop-checking analysis.",
+      "effort": "3-5 hours",
+      "parent_task": 504,
+      "dependencies": [],
+      "artifacts": [
+        {
+          "path": "specs/514_s5_tableau_termination_literature_grounding/reports/01_s5-termination-literature-grounding.md",
+          "type": "report",
+          "summary": "398-line BibKey-cited S5 termination literature grounding report"
+        }
+      ],
+      "created": "2026-07-15T06:19:22Z",
+      "last_updated": "2026-07-15T06:50:44Z",
+      "session_id": "sess_1784097631_b36059",
+      "notes": "Massacci2000 ACQUIRED + ingested into global corpus (doc_id massacci_2000_single_step_tableaux_for_modal_logics, 77 chunks) and added to specs/literature-index.json sub-index. Only Gore1999 PDF still outstanding (paywalled; see specs/literature/SOURCES.md). Run this task with --lit to navigate the Massacci corpus on demand.",
+      "completion_summary": "Produced BibKey-cited research report grounding task 504's PROVEN S5 termination obstruction (modalApplyOneS5_rankStep_not_dischargeable) in the literature. Confirmed via Massacci2000 §8-9 (Table IV) that the per-edge modal-depth decrement is reserved for the non-transitive family K/D/T/KB/KDB/B (CSLib's K/T/B dischargers) and provably excludes transitive/euclidean logics incl. S5 -- so RuleApplicationSpec.rankStep is mathematically false for S5's universal box rule, not a CSLib artifact. Terminating strategy: loop-checking/prefix-bound (S5 reuses the S4 device per Massacci), already realized in CSLib as LoopChecking.lean (task 511, 0 sorries). Lemma-level recommendation for task 515: transpose LoopChecking.lean declaration-for-declaration to a guarded S5 rule (modalApplyOneS5g, S5LoopInv, pigeonhole modalWorldBoundS5, instDecidableFiveValid); drop rankStep, replace depth-based modalWorldBound universe; zero K/T/B regression; decidability P5 gated on task 511 Phase-9 LoopTermination interface. Deliverable: reports/01_s5-termination-literature-grounding.md (398 lines). Research-only task -- implementation is task 515.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 518,
+      "project_name": "reingest_simpson1994_literature_corpus",
+      "status": "completed",
+      "task_type": "general",
+      "topic": "Literature",
+      "description": "LITERATURE INFRASTRUCTURE FIX: re-ingest Simpson 1994 (The Proof Theory and Semantics of Intuitionistic Modal Logic, BibKey Simpson1994) into the global Literature corpus. PROBLEM (found by task 517 research, report 01): the current Simpson chunks are UNUSABLE for lemma statements -- 1091 chunks with ~312 byte mean, and 122-140 byte fragments that TRUNCATE the very lemma statements they contain. IMPACT: task 516's report 02 rated Route B and cited Simpson lemmas from these truncated fragments and got the chapter structure WRONG (it cited Ch 7-8 Lemmas 8.2.4/8.2.5/8.2.6 as the IS5 completeness spine; in fact Ch 8 EXPLICITLY EXCLUDES IS5 -- p.161 verbatim \"we fix L as any logic in Dec_T, other than IS5\" -- and is the finite model property, not completeness; the real spine is Ch 5-6: Prime Lemma 5.3.1, Canonical Model Lemma 5.3.2, Adequacy Theorem 6.2.1). Task 517's research had to bypass the corpus and work from the source PDF. ALL prior Simpson citations in tasks 512/516 rest on the broken chunks and are suspect (NOTE: the mechanized Lean guardrail lemmas are unaffected -- they are proofs, not citations). SCOPE: locate the Simpson 1994 source PDF; re-convert/re-chunk with settings that preserve lemma statements intact (larger chunks / structure-aware segmentation rather than the current ~312-byte fragmentation); re-index in the global index.json + FTS5 db; update specs/literature-index.json; validate that a literature-search.sh query for \"Lemma 5.3.1 prime\" / \"Lemma 5.3.2 canonical model\" / \"Theorem 6.2.1 adequacy\" returns COMPLETE lemma statements. Also audit whether other large corpus documents suffer the same over-fragmentation. Deliverable: usable Simpson chunks + a short note on the chunking settings changed. Low risk, high leverage for tasks 517 and any future literature-grounded work.",
+      "dependencies": [],
+      "parent_task": 517,
+      "created": "2026-07-15T15:21:58Z",
+      "last_updated": "2026-07-15T15:40:00Z",
+      "priority": "high",
+      "effort": "2-4 hours",
+      "artifacts": [],
+      "completion_summary": "Re-chunked Simpson 1994 in the global Literature corpus: root cause was PyMuPDF font-heuristic heading misdetection on this OCR scan (no embedded TOC), producing 1091 chunks (~312B mean) that truncated lemma statements. Fixed via plain pdftotext -layout extraction + custom paragraph reflow + chapter-only headings, through the existing literature-chunk.sh Pass-2 merge -> 206 chunks, ~1.7KB mean. Verified Lemma 5.3.1, Lemma 5.3.2, Theorem 6.2.1, and the p.161 \"other than IS5\" passage all intact. Audited corpus: found wijesekera_1990_constructivemodallogicsi has the same fragmentation bug (154 chunks, 468B mean, 62% under 300B) -- not fixed, reported for follow-up.",
+      "archived": "2026-07-17T20:19:23Z"
+    },
+    {
+      "project_number": 468,
+      "project_name": "resync_pr_662_with_648_head",
+      "status": "orphan_archived",
+      "archived": "2026-07-17T20:19:34Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 469,
+      "project_name": "drop_connectives_typeclass_layer_pr_662",
+      "status": "orphan_archived",
+      "archived": "2026-07-17T20:19:34Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/",
+        "summaries/"
+      ]
+    },
+    {
+      "project_number": 475,
+      "project_name": "fix_and_stack_pr_662_on_648",
+      "status": "orphan_archived",
+      "archived": "2026-07-17T20:19:34Z",
+      "source": "orphan_recovery",
+      "detected_artifacts": [
+        "reports/",
+        "plans/"
+      ]
     }
   ],
   "archived_at": "2026-06-28T18:47:30Z",
@@ -7825,6 +8235,27 @@
       "session_id": "sess_1783038723_6ac05b",
       "completion_summary": "Abandoned: superseded by tasks 477 + 486. Its premise (retarget #662 base to feat/propositional-v2, stack on #648, inherit #648's propositional files) contradicts the settled+Zulip-coordinated #607 pivot — #662 now bases on fmontesi/connectives (#607), #648 stays independent. Forward modal-package work continues in #486.",
       "archived": "2026-07-14T18:42:50Z"
+    },
+    {
+      "project_number": 516,
+      "project_name": "constructive_modal_independent_le_canonical_model",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "FOUNDATIONAL REBUILD (funds task 512's independent-<= route). Rebuild CSLib's constructive-modal canonical model with the intuitionistic preorder <= as an INDEPENDENT relation, DECOUPLED from theory-inclusion, following Simpson 1994 Ch.3 labelled/birelational IS4/IS5 models (also Dosen 1985, Alechina-Mendler-dePaiva-Ritter 2001, Marin-Morales-Strassburger 2021 Thm 7.1/7.2), in order to achieve CS5 constructive Kripke completeness -- the goal task 512 proved UNREACHABLE in CSLib's current representation. WHY (mechanized in task 512, all sorry-free/axiom-clean): over CSLib theory-inclusion canonical worlds (worlds = quasi-prime theories, <= = subset, boxInv monotone), (i) cs5Incest_forces_symm (axiom-free, CS5Canonical.lean:643) proves ANY <=-mediated incestuality/symmetry condition collapses to PLAIN symmetry -- the mediating witness u'>=u buys no room because larger worlds only add boxed formulas; (ii) cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511) proves Simpson's two-sided box+diamond relation is extensionally IDENTICAL to the old cs5Tail wall for CS5 quasi-prime theories (the B axiom's box/diamond-inverse duality, cs5_boxInv_subset_iff, CS5.lean:589); (iii) with task-509's cs5_symmetric_tail_box_gap (CS5.lean:712), plain symmetry on the canonical frame is exactly what box-backward CANNOT have -- so symmetry-verification and box-backward are JOINTLY UNSATISFIABLE for any single design over theory-inclusion worlds. CS5 == IS5 (CS5.lean:93-99) IS complete and sound (report 05); the block is REPRESENTATIONAL, not incompleteness. THE FIX (this task): make <= an independent preorder so Simpson's <=-mediated conditions regain genuine <=-room. SCOPE: (1) DESIGN/RESEARCH -- grounded in Simpson Ch.3, determine the exact independent-<= canonical construction (labelled worlds or an abstract birelational frame where <= is not subset), how box-backward and the symmetry/incestuality frame condition are verified with independent <= (via the disjunction property / prime lemma, NO negation-completeness), and confirm the collapse lemmas cs5Incest_forces_symm / cs5TwoSidedR_iff_cs5Tail provably DO NOT apply once <= is decoupled. (2) IMPACT ASSESSMENT on shared constructive-modal canonical infra: CKSegment/CKForces/Segment/SegmentLindenbaum (Segment.lean, SegmentLindenbaum.lean) currently bake <= = head-inclusion; decide whether to generalize this infra or build a parallel independent-<= model; preserve existing CK/CT/CS4 completeness (either re-derive over the new model or leave the old model intact for them). (3) BUILD the independent-<= canonical model; prove cs5_box_backward, cs5_truth_lemma, cs5_completeness / cs5_soundness_completeness over it. REUSE task-512's landed cs5_axiom_sound_incest (birelational soundness, axiom-free) where valid. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''. HIGH effort and HIGH uncertainty (foundational, touches shared infra) -- a design/research phase MUST precede implementation. Depends on 509 (base canonical machinery) and 512 (obstruction findings + soundness rework; see task-512 reports 03-06 and handoffs 03-05 + phase5-blocker-handoff).",
+      "dependencies": [
+        509,
+        512
+      ],
+      "parent_task": 512,
+      "created": "2026-07-15T08:37:29Z",
+      "last_updated": "2026-07-15T15:03:35Z",
+      "priority": null,
+      "effort": "30-50 hours",
+      "artifacts": [],
+      "blockers": "Route A (Simpson-faithful prime-theory transcription) REFUTED ~95% (report 02, literature-grounded): Simpson never does symmetric box-backward in prime-theory form -- his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi; his rigorous IS5 completeness (Ch 7-8) ABANDONS prime theories for LABELLED T-prime bounded contexts (T-Comp graph completion Lemma 8.2.5; bounded box-backward Lemma 8.2.6). The classical decidability step is NOT a blocker (Lean has Classical.em); the real wall is structural -- prime non-maximal theories lack negation-completeness, tripping cs5_symmetric_tail_box_gap. EXHAUSTIVE: every prime-theory-canonical route (atom-sum, one-sided-R, two-sided-R, independent-<=, Simpson-faithful A) is dead for one root reason. CS5 IS complete; ONLY faithful path is Route B: labelled/bounded-context canonical model (Simpson Ch 7-8 / Marin 2021), ~1500-2500 lines, ~zero CSLib reuse -- a new labelled constructive-modal deduction framework. HUMAN FUNDING DECISION: fund Route B vs consolidate the substantial landed results (multi-condition soundness + complete guardrail set).",
+      "completion_summary": "ABANDONED: premise refuted. Independent-<= cannot help (ckforces_persistence + cval force head-monotonicity under ANY <=; Simpson uses <= = subset verbatim). Route A (Simpson-faithful prime-theory) also refuted ~95% (Simpson never does symmetric box-backward in prime-theory form; Ch 7-8 uses labelled bounded contexts). VALUE DELIVERED: reports 01 + 02 are the definitive route analysis closing the entire prime-theory paradigm and identifying Route B (labelled) as the only faithful path -> superseded by task 517.",
+      "archived": "2026-07-17T20:19:23Z"
     }
   ]
 }

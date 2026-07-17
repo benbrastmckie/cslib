@@ -1402,6 +1402,89 @@ theorem modalApplyOneFive_specCore :
   boxNegWitness' := modalApplyOneFive_boxNegWitness'
   diaPosWitness' := modalApplyOneFive_diaPosWitness'
 
+/-! ## KB5 Instantiation (task 515 Phase 22)
+
+**Factor, not clone.** `modalApplyOneFive`'s tableau rule is **purely syntactic**: it is a
+function of the branch and the accessibility relation alone, and its definition (and every field
+of `RuleApplicationSpecCore modalApplyOneFive` above) never inspects a frame condition. Its
+soundness proof (`modalTableauFive_sound`, `FrameSoundness.lean`) shows that a branch the rule
+closes is unsatisfiable on **every** Euclidean frame (`fiveFC`). Since
+`kb5FC := Std.Symm r ∧ Relation.RightEuclidean r` is *strictly stronger* than
+`fiveFC := Relation.RightEuclidean r` (every KB5 frame is, in particular, a Five frame -- the
+`Std.Symm` conjunct only narrows the frame class further), a branch unsatisfiable on every
+Euclidean frame is unsatisfiable on every KB5 frame too. **The unmodified `modalApplyOneFive`
+rule is therefore already a sound KB5 tableau rule**: no cloned rule, root-aware mint-arm guard,
+or Phase 18/19a/19b-style termination-bound re-derivation is needed for soundness.
+`modalApplyOneKb5` below is a plain alias for `modalApplyOneFive`, and
+`modalApplyOneKb5_specCore`/`modalTableauKb5` transfer by definitional equality -- the entire KB5
+driver chain reduces to `rfl` against its Five counterpart. This is *cheaper* than the literal
+three-way clone the plan flags as a fallback, because the syntactic rule genuinely does not
+depend on which frame condition its soundness proof targets; only the **semantic** wrapper
+differs, and that lives in `FrameSoundness.lean`
+(`fiveValid_imp_kb5Valid`/`modalTableauKb5_sound`) as a frame-class-monotonicity corollary, not a
+re-derived fuel-induction chain.
+
+This factoring is sound *only* for the soundness direction (`.closed → kb5Valid`): completeness
+(`kb5Valid → .closed`, task 515 Phase 23) is a genuinely different question, since `kb5Valid` is
+strictly weaker than `fiveValid` (`kb5FC` is a proper subclass of `fiveFC`-frames) and may hold on
+formulas the Five tableau leaves open. Phase 23's own extraction (`extractModelKb5`) is expected
+to need a bespoke symmetric-model construction from an open KB5 branch; that is out of this
+phase's scope. -/
+
+/-- The KB5 tableau rule: **literally** `modalApplyOneFive`, not a clone -- see this section's
+module note for the "factor, not clone" argument. -/
+def modalApplyOneKb5 : RuleApply Atom := modalApplyOneFive
+
+/-- `modalApplyOneKb5` satisfies `RuleApplicationSpecCore`: definitionally `modalApplyOneFive`'s
+own witness, since `modalApplyOneKb5 = modalApplyOneFive` by `rfl`. -/
+theorem modalApplyOneKb5_specCore :
+    RuleApplicationSpecCore (Atom := Atom) modalApplyOneKb5 :=
+  modalApplyOneFive_specCore
+
+/-- One-step branch expansion for the KB5 (symmetric-Euclidean-frame) tableau: the generic driver
+instantiated at `apply := modalApplyOneKb5` (= `modalApplyOneFive`). -/
+def modalStepBranchKb5
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility) :=
+  modalStepBranchGen modalApplyOneKb5 b e acc
+
+/-- Fuel-based expansion of a list of KB5-system branches. -/
+def modalExpandBranchesKb5
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) : ModalTableauResult Atom :=
+  modalExpandBranchesGen modalApplyOneKb5 branches expandedSets accs fuel
+
+/-- The KB5-system (symmetric-Euclidean-frame) modal tableau **decision procedure**: the generic
+entry point instantiated at `apply := modalApplyOneKb5`, starting the signed tableau from `F(φ)`
+at world `0`. -/
+def modalTableauKb5 (φ : Proposition Atom) : ModalTableauResult Atom :=
+  modalTableauGen modalApplyOneKb5 φ
+
+/-- `modalStepBranchKb5` is exactly `modalStepBranchGen modalApplyOneKb5` -- true `rfl`. -/
+theorem modalStepBranchKb5_eq
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalStepBranchKb5 b e acc = modalStepBranchGen modalApplyOneKb5 b e acc := rfl
+
+/-- `modalExpandBranchesKb5` is exactly `modalExpandBranchesGen modalApplyOneKb5` -- true `rfl`.
+-/
+theorem modalExpandBranchesKb5_eq
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility) (fuel : Nat) :
+    modalExpandBranchesKb5 branches expandedSets accs fuel =
+      modalExpandBranchesGen modalApplyOneKb5 branches expandedSets accs fuel := rfl
+
+/-- `modalTableauKb5` is exactly `modalTableauGen modalApplyOneKb5` -- true `rfl`. -/
+theorem modalTableauKb5_eq (φ : Proposition Atom) :
+    modalTableauKb5 φ = modalTableauGen modalApplyOneKb5 φ := rfl
+
+/-- **`modalTableauKb5` coincides with `modalTableauFive`**: both instantiate the generic driver
+at the same underlying rule (`modalApplyOneKb5 = modalApplyOneFive` by `rfl`). This is the bridge
+`FrameSoundness.lean`'s `modalTableauKb5_sound` composes with `modalTableauFive_sound`. -/
+theorem modalTableauKb5_eq_modalTableauFive (φ : Proposition Atom) :
+    modalTableauKb5 φ = modalTableauFive φ := rfl
+
 /-! ## Source-Split Termination Invariant (Phase 19a Task 2: Route (a) termination re-derivation)
 
 `reports/08_mint-arm-reuse-route-decision.md`'s termination-bound re-derivation, required by the

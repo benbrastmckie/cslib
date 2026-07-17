@@ -3697,6 +3697,37 @@ theorem modalTableauFive_sound (φ : Proposition Atom) (h : modalTableauFive φ 
   cases hunsat with
   | cons h_unsat _ => exact h_unsat hsat
 
+/-! ## KB5 Soundness via Frame-Class Monotonicity (task 515 Phase 22)
+
+`modalTableauKb5` (`FiveSimplification.lean`) is definitionally `modalTableauFive` -- the "factor,
+not clone" decision recorded in that file's KB5-instantiation module note. Soundness for `kb5Valid`
+is therefore not a re-derived fuel-induction chain but a two-line corollary of
+`modalTableauFive_sound` composed with the frame-class monotonicity below, mirroring the
+`specs/515_.../probes/five-s5-separation.lean` bridging pattern
+(`s5FC_imp_fiveFC`/`fiveValid_imp_s5Valid`) one level down the frame-class hierarchy
+(`kb5FC ⇒ fiveFC ⇒ trivialFC`, matching `s5FC ⇒ fiveFC`/`s5FC ⇒ kb5FC`'s already-probed shape). -/
+
+/-- `kb5FC` entails `fiveFC` by projection: KB5 frames are Euclidean frames with symmetry added.
+Mirrors the separation probe's `s5FC_imp_fiveFC`. -/
+theorem kb5FC_imp_fiveFC {World : Type} {r : World → World → Prop} (h : kb5FC r) : fiveFC r := h.2
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Frame-class monotonicity**: `fiveValid φ → kb5Valid φ`. Validity over the larger
+(Euclidean) frame class is the stronger requirement, so it descends to the smaller (KB5,
+symmetric-and-Euclidean) subclass. Mirrors the separation probe's `fiveValid_imp_s5Valid`. -/
+theorem fiveValid_imp_kb5Valid (φ : Proposition Atom) (h : fiveValid φ) : kb5Valid φ :=
+  fun World m hFC w => h World m hFC.2 w
+
+/-- **The KB5 soundness capstone** (task 515 Phase 22): if the KB5 tableau closes on `F(φ)`, then
+`φ` is `kb5Valid`. Since `modalTableauKb5 = modalTableauFive` definitionally
+(`FiveSimplification.lean`'s `modalTableauKb5_eq_modalTableauFive`), this is a direct corollary of
+`modalTableauFive_sound` composed with `fiveValid_imp_kb5Valid` -- no bespoke fuel-induction
+re-derivation needed. See `FiveSimplification.lean`'s KB5-instantiation module note for the full
+"factor, don't clone" argument. -/
+theorem modalTableauKb5_sound (φ : Proposition Atom) (h : modalTableauKb5 φ = .closed) :
+    kb5Valid φ :=
+  fiveValid_imp_kb5Valid φ (modalTableauFive_sound φ h)
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -1,7 +1,7 @@
 # Implementation Plan: Dedup Minimal Canonical Model onto Generic Extension
 
 - **Task**: 521 - Dedup Minimal Canonical Model onto Generic Extension
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2.5 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_dedup-minimal-canonical-model.md
@@ -200,25 +200,45 @@ Phases 1-2 if CI surfaces any unexpected dependency. DEFAULT: delete it (reaches
 
 ---
 
-### Phase 4: Full CI and axiom-set verification [NOT STARTED]
+### Phase 4: Full CI and axiom-set verification [COMPLETED]
 
 **Goal**: Confirm the whole refactor is zero-regression across the full CSLib CI pipeline and that
 `mk_completeness`'s axiom set is unchanged.
 
 **Tasks**:
-- [ ] Full build: `lake build`.
-- [ ] `lake exe checkInitImports`.
-- [ ] `lake lint` and `lake exe lint-style`.
-- [ ] `lake test`.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` (import minimization now that
+- [x] Full build: `lake build`. *(Green. One transient failure was observed mid-phase from a
+      concurrent task's in-flight edit to `Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean`
+      — unrelated to this task's scope; resolved once that task's edit landed, and rebuilt clean.)*
+- [x] `lake exe checkInitImports`. *(Passes, exit 0.)*
+- [x] `lake lint` and `lake exe lint-style`. *(`lake lint`: exactly one finding, an
+      `unusedArguments` warning in `Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean`
+      (outside this task's scope, not a file this task touched). `lake exe lint-style`: clean,
+      exit 0.)*
+- [x] `lake test`. *(Fails only on `CslibTests/ModalFrameSeparation.lean` -- `decide` reduction
+      stuck on `instDecidableS5Valid`/`instDecidableFiveValid`. Confirmed pre-existing/
+      out-of-scope: added by task 515 phase 23.2 (commit `d5e528b0`), imports only
+      `Cslib.Logics.Modal.Tableau.FrameCompleteness`, zero connection to the Minimal/ directory
+      or any file this task modified -- exactly the KB5/Five-simplification blocker the
+      delegation brief flagged as out of scope. All other test targets (including
+      `CslibTests.ImportWithMathlib`, `CslibTests.GrindLint`) build green.)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix` (import minimization now that
       `MinCompleteness`'s import set changed); apply any suggested trims to `MinCompleteness.lean`
-      and rebuild if it edits imports.
-- [ ] `lean_verify` on `mk_completeness`, `mk_soundness_completeness`, `mt_completeness`,
+      and rebuild if it edits imports. *(Only suggestion for `MinCompleteness.lean`: "remove
+      `import Cslib.Init`" -- the known systemic false positive (also called out in task 502's
+      plan) that must be kept per CONTRIBUTING.md/`checkInitImports`. No actionable trim; no
+      edit applied.)*
+- [x] `lean_verify` on `mk_completeness`, `mk_soundness_completeness`, `mt_completeness`,
       `ms4_completeness`, `ms5_completeness`: confirm zero `sorry` and that `mk_completeness`'s
       axiom set matches the Phase 1 baseline (expected to reduce to the standard
       `propext`/`Classical.choice`/`Quot.sound` set already used by `mt_completeness`; no NEW
-      axiom relative to baseline).
-- [ ] Confirm no `sorry`/`admit`/`axiom` declarations introduced anywhere in the Minimal directory.
+      axiom relative to baseline). *(deviation: altered -- `lean_verify` returned an empty axiom
+      list for every theorem tried, including unmodified `mt_completeness`, so `lake env lean` +
+      `#print axioms` was used instead, as in Phase 1. Result: all five theorems report
+      `[propext, Classical.choice, Quot.sound]`, identical to the Phase 1 baseline and to each
+      other -- zero new axiom, zero regression.)*
+- [x] Confirm no `sorry`/`admit`/`axiom` declarations introduced anywhere in the Minimal
+      directory. *(`grep -rn` for `sorry`/`admit`/`^axiom ` across
+      `Cslib/Logics/Modal/Metalogic/Minimal/` returns zero matches.)*
 
 **Timing**: 45 minutes (dominated by Lean build/test time)
 

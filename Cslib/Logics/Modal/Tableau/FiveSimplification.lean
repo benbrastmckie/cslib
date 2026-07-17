@@ -7,18 +7,29 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Tableau.GenericDriver
+public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Mathlib.Data.Prod.Basic
 public import Mathlib.Data.Nat.Basic
+import Mathlib.Tactic.Ring
 
 /-! # 5/KB5 Rooted-Cluster Tableau Simplification
 
 This module defines the root-aware universal-propagation rule `modalApplyOneFive`, the 5/KB5
 analogue of `S5Simplification.lean`'s `modalApplyOneS5w`. It realises the Euclidean (not
-necessarily reflexive) frame property directly, reusing the *entire* S5 witness-reuse termination
-machinery (task 515 Phases 1-7) verbatim, per the parent plan's Phase 18: the mint arms
-(`T(◇φ)@w`, `F(□φ)@w`) are shape-identical to `modalApplyOneS5w`'s, so `modalOps`/`mintTags`/
-`S5wTagInv`/`usedTags`/`S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w` (all rule-independent)
-apply unchanged; only the two *propagation* arms (`T(□φ)@w`, `F(◇φ)@w`) differ.
+necessarily reflexive) frame property directly. The mint arms (`T(◇φ)@w`, `F(□φ)@w`) are
+shape-identical to `modalApplyOneS5w`'s *except* for the Route (a) root-aware guard (landed
+`56a84d07`): a root-triggered mint (`sf.label = 0`) never consults a witness search, so it may
+fire even when a non-root witness for the same tag already exists elsewhere on the branch. This
+means only `modalOps`/`mintTags`/`S5wTagInv` (and their tag-membership corollaries
+`modalApplyOneS5w_diamondPos_tag_mem`/`_boxNeg_tag_mem`) -- all genuinely rule-independent, since
+they say nothing about `witnessWorldS5`/`witnessWorldFive` -- apply unchanged, reused verbatim
+from `S5Simplification.lean`. The witness-reuse-*specific* pieces (`usedTags`/`S5wWorldInv`/
+`modalMaxWorld_lt_worldBound_of_S5w`) do **not** carry over unchanged under the guard; their
+Five-local, source-split analogues (`usedTagsFiveNonRoot`/`usedTagsFiveRoot`/`FiveWorldInv`/
+`modalMaxWorld_lt_worldBound_of_FiveWorldInv`) are defined near the end of this file
+(Phase 19a's termination-bound re-derivation, `reports/08_mint-arm-reuse-route-decision.md`).
+Only the two *propagation* arms (`T(□φ)@w`, `F(◇φ)@w`) differ from `modalApplyOneS5w`'s shape
+directly (Route 1, landed earlier).
 
 ## Main Definitions
 
@@ -32,9 +43,10 @@ apply unchanged; only the two *propagation* arms (`T(□φ)@w`, `F(◇φ)@w`) di
 - `modalApplyOneFiveProp`: apply the K modal rules together with the root-aware propagation arms.
   Mirrors `modalApplyOneS5` declaration-for-declaration, substituting `modalFiveBoxAll`/
   `modalFiveDiaNegAll` for `modalS5BoxAll`/`modalS5DiaNegAll`.
-- `modalApplyOneFive`: the shipped rule -- witness-reuse (Phase 1's `witnessWorldS5`, reused
-  verbatim: it is already rule-independent, parametrized only over `b`/`s`/`φ`) at the two mint
-  shapes, falling through to `modalApplyOneFiveProp` everywhere else. Mirrors `modalApplyOneS5w`.
+- `modalApplyOneFive`: the shipped rule -- Route (a) guarded witness-reuse (`witnessWorldFive`,
+  the root-`0`-excluding refinement of Phase 1's `witnessWorldS5`) at the two mint shapes, with a
+  root-triggered mint (`sf.label = 0`) never consulting the search at all, falling through to
+  `modalApplyOneFiveProp` everywhere else. Mirrors `modalApplyOneS5w`'s shape modulo this guard.
 - `modalStepBranchFive`/`modalExpandBranchesFive`/`modalTableauFive`: the 5-system driver,
   instantiated at `apply := modalApplyOneFive` throughout (unlike the S5 chain, which staged
   `modalApplyOneS5`/`modalApplyOneS5w` separately for historical reasons -- Five needs only the
@@ -48,7 +60,7 @@ agreement chain as S5w's own discharge (`modalApplyOneFive_eq_of_not_mint_shape`
 is definitionally `modalApplyOne` (K), so K's own field witnesses apply unchanged. At the two
 propagation shapes, the merged root-excluded content is bounded by `modalKnownWorlds b` (hence by
 `modalWorldBound φ0`) and a subformula of `φ0`. At the two witness-reuse shapes, the reuse arm's
-witness world is drawn from `modalKnownWorlds b` by `witnessWorldS5`'s own construction, and the
+witness world is drawn from `modalKnownWorlds b` by `witnessWorldFive`'s own construction, and the
 mint arm falls through to K's own mint witness -- identical to S5w's own discharge.
 
 ## References
@@ -1249,6 +1261,196 @@ theorem modalApplyOneFive_specCore :
   diaNegNotExpanding := modalApplyOneFive_diaNegNotExpanding
   boxNegWitness' := modalApplyOneFive_boxNegWitness'
   diaPosWitness' := modalApplyOneFive_diaPosWitness'
+
+/-! ## Source-Split Termination Invariant (Phase 19a Task 2: Route (a) termination re-derivation)
+
+`reports/08_mint-arm-reuse-route-decision.md`'s termination-bound re-derivation, required by the
+root-aware mint-arm guard (`witnessWorldFive`/`modalApplyOneFive`, landed `56a84d07`). The LANDED
+`S5w*` tag-injection chain (`S5Simplification.lean`) bounds `modalMaxWorld b` by "≤1 mint per
+`(sign, formula)` tag, GLOBALLY" -- sound for `modalApplyOneS5w`, whose mint arms always consult
+`witnessWorldS5` before minting. Under Five's guard, a root-triggered mint (`sf.label = 0`) never
+consults `witnessWorldFive`, so it may fire even when a non-root witness for the *same* tag
+already exists elsewhere on the branch -- refining the invariant to "≤1 mint per tag PER
+SOURCE-CLASS {root, non-root}" (`reports/08_*`).
+
+`mintTags`/`S5wTagInv` (and their tag-membership corollaries `modalApplyOneS5w_diamondPos_tag_mem`
+/`_boxNeg_tag_mem`) are **rule-independent** and reused **verbatim** from `S5Simplification.lean`:
+they say nothing about `witnessWorldS5`/`witnessWorldFive` at all, only about branch content and
+`φ₀`'s finite subformula structure. Only `usedTags`/`S5wWorldInv`/
+`modalMaxWorld_lt_worldBound_of_S5w` are **witness-reuse-specific**, hence need the Five-local,
+source-split analogues below: `usedTagsFiveNonRoot`/`usedTagsFiveRoot`/`FiveWorldInv`/
+`modalMaxWorld_lt_worldBound_of_FiveWorldInv`.
+
+**Scope note**: this section lands the *static* source-split structures and the final arithmetic
+bound (mirroring `S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w`'s own shape, which likewise
+take the world-bound invariant as a hypothesis rather than proving it holds at every reachable
+branch). The *inductive* step-preservation proof establishing `FiveWorldInv` holds across the
+whole fuel-driven expansion (the source-split analogue of `S5wTagInv_S5wWorldInv_step`) is
+Phase 19b-scale work, for whatever call site eventually maintains it across the fuel induction --
+consistent with `reports/08_*`'s own scoping (`FiveSimplification.lean`'s `outputsSubsetUniverse`
+field already takes its world-bound fact as a raw hypothesis parameter, discharged nowhere in this
+file yet). -/
+
+omit [Hashable Atom] in
+/-- **Non-root usedTags** (Route (a) source-split invariant): the subset of `mintTags φ₀` whose
+witness formula already appears at some NON-ROOT world of branch `b`. Matches `witnessWorldFive`'s
+own search domain exactly (root `0` excluded), so a `witnessWorldFive`-miss is equivalent to "tag
+unused in the non-root source-class" (`witnessWorldFive_none_not_mem_usedTagsFiveNonRoot`, below)
+-- the direct analogue of `witnessWorldS5_none_not_mem_usedTags` for the non-root reuse-miss
+case. -/
+def usedTagsFiveNonRoot (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Finset (Sign × Proposition Atom) :=
+  (mintTags φ₀).filter (fun p =>
+    b.any (fun x => (x.sign == p.1 && x.formula == p.2) && !(x.label == (0 : WorldIndex))))
+
+omit [Hashable Atom] in
+/-- **Root usedTags** (Route (a) source-split invariant): the subset of `mintTags φ₀` whose
+root-mint TRIGGER (`⟨.pos, .diamond ψ, 0⟩` for tag `(pos, ψ)`, `⟨.neg, .box ψ, 0⟩` for tag
+`(neg, ψ)`) already appears at world `0` of branch `b`. Since `modalApplyOneFive`'s root-triggered
+mint arms never consult a witness search, this source class's contribution to `modalMaxWorld` is
+bounded purely by how many DISTINCT triggers can ever appear at the root -- not by a reuse
+argument -- exactly `reports/08_*`'s "the root contributes at most one mint per tag, bounded by
+the root's own diamond/negated-box subformulas": a formula sitting at the root was never itself
+minted (root formulas arrive by decomposition, never via `witnessWorldFive`), so a root-triggered
+mint for a given tag is always that tag's first mint in the root source-class, and the driver's
+`.linear`-result memoization (`modalStepBranchGen`'s `expanded` bookkeeping, `Saturation.lean`)
+ensures the exact trigger occurrence `⟨s, .diamond/.box ψ, 0⟩` fires at most once, so it is that
+tag's *only* root-side mint. -/
+def usedTagsFiveRoot (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Finset (Sign × Proposition Atom) :=
+  (mintTags φ₀).filter (fun p =>
+    b.any (fun x => x.label == (0 : WorldIndex) &&
+      ((p.1 == Sign.pos && x.sign == Sign.pos && x.formula == Proposition.diamond p.2) ||
+       (p.1 == Sign.neg && x.sign == Sign.neg && x.formula == Proposition.box p.2))))
+
+omit [Hashable Atom] in
+/-- `usedTagsFiveNonRoot` is monotone under branch growth. Mirrors `usedTags_mono`. -/
+lemma usedTagsFiveNonRoot_mono {φ₀ : Proposition Atom}
+    {b b' : List (SignedFormula (Proposition Atom) WorldIndex)} (h : ∀ x ∈ b, x ∈ b') :
+    usedTagsFiveNonRoot φ₀ b ⊆ usedTagsFiveNonRoot φ₀ b' := by
+  intro p hp
+  simp only [usedTagsFiveNonRoot, Finset.mem_filter] at hp ⊢
+  obtain ⟨hp1, hp2⟩ := hp
+  refine ⟨hp1, ?_⟩
+  obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hp2
+  exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
+
+omit [Hashable Atom] in
+/-- `usedTagsFiveRoot` is monotone under branch growth. Mirrors `usedTags_mono`. -/
+lemma usedTagsFiveRoot_mono {φ₀ : Proposition Atom}
+    {b b' : List (SignedFormula (Proposition Atom) WorldIndex)} (h : ∀ x ∈ b, x ∈ b') :
+    usedTagsFiveRoot φ₀ b ⊆ usedTagsFiveRoot φ₀ b' := by
+  intro p hp
+  simp only [usedTagsFiveRoot, Finset.mem_filter] at hp ⊢
+  obtain ⟨hp1, hp2⟩ := hp
+  refine ⟨hp1, ?_⟩
+  obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hp2
+  exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
+
+omit [Hashable Atom] in
+/-- **Non-root mint-tag miss** (Route (a) termination re-derivation task 2, non-root case): the
+direct analogue of `witnessWorldS5_none_not_mem_usedTags` for `witnessWorldFive`.
+`witnessWorldFive b s φ = none` implies `(s, φ)` is not (yet) a used tag in the NON-ROOT
+source-class on `b`: if some non-root `x ∈ b` had `x.sign = s ∧ x.formula = φ`, `witnessWorldFive`'s
+`find?` (which searches exactly the non-root known worlds of `b`) would have returned `some _`,
+contradicting `= none`. -/
+lemma witnessWorldFive_none_not_mem_usedTagsFiveNonRoot {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {s : Sign} {φ : Proposition Atom}
+    (h : witnessWorldFive b s φ = none) : (s, φ) ∉ usedTagsFiveNonRoot φ₀ b := by
+  simp only [usedTagsFiveNonRoot, Finset.mem_filter, not_and]
+  intro _ hany
+  obtain ⟨x, hxmem, hxeq⟩ := List.any_eq_true.mp hany
+  simp only [Bool.and_eq_true, Bool.not_eq_true', beq_iff_eq] at hxeq
+  obtain ⟨⟨hxs, hxf⟩, hxlabel⟩ := hxeq
+  have hxsf : x = (⟨s, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+    cases x; simp_all
+  have hknown : x.label ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_Five b x.label).mpr ⟨x, hxmem, rfl⟩
+  unfold witnessWorldFive at h
+  have hcontra := List.find?_eq_none.mp h x.label hknown
+  refine hcontra ?_
+  simp only [Bool.and_eq_true, Bool.not_eq_true']
+  exact ⟨hxlabel, List.any_eq_true.mpr ⟨x, hxmem, beq_iff_eq.mpr hxsf⟩⟩
+
+omit [Hashable Atom] in
+/-- **Root-side mint-tag membership** (Route (a) termination re-derivation task 2, the
+root-trigger-always-fresh case): if the root-mint trigger `⟨.pos, .diamond φ, 0⟩` is present on
+`b` and `(pos, φ) ∈ mintTags φ₀` (e.g. via `S5wTagInv` + `modalApplyOneS5w_diamondPos_tag_mem`,
+both reused verbatim), then `(pos, φ)` is already a member of `usedTagsFiveRoot φ₀ b` -- witnessed
+by the trigger itself. Unlike the non-root case, **no "unused" precondition is needed**: the
+root-triggered mint arm fires unconditionally, so this fact holds regardless of whether a
+witness search would have found anything. -/
+lemma diamondPos_root_mem_usedTagsFiveRoot {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {φ : Proposition Atom}
+    (hsf : (⟨.pos, .diamond φ, (0 : WorldIndex)⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (htag : (Sign.pos, φ) ∈ mintTags φ₀) :
+    (Sign.pos, φ) ∈ usedTagsFiveRoot φ₀ b := by
+  simp only [usedTagsFiveRoot, Finset.mem_filter]
+  refine ⟨htag, ?_⟩
+  exact List.any_eq_true.mpr ⟨_, hsf, by simp⟩
+
+omit [Hashable Atom] in
+/-- Dual of `diamondPos_root_mem_usedTagsFiveRoot` for the box-negative mint shape
+(`⟨.neg, .box φ, 0⟩`, tag `(neg, φ)`). -/
+lemma boxNeg_root_mem_usedTagsFiveRoot {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {φ : Proposition Atom}
+    (hsf : (⟨.neg, .box φ, (0 : WorldIndex)⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (htag : (Sign.neg, φ) ∈ mintTags φ₀) :
+    (Sign.neg, φ) ∈ usedTagsFiveRoot φ₀ b := by
+  simp only [usedTagsFiveRoot, Finset.mem_filter]
+  refine ⟨htag, ?_⟩
+  exact List.any_eq_true.mpr ⟨_, hsf, by simp⟩
+
+/-- The source-split world-bound invariant (Route (a) termination re-derivation,
+`reports/08_*`): `modalMaxWorld b` never exceeds the SUM of the non-root usedTags count and the
+root usedTags count. Refines `S5wWorldInv`'s single global count to the "≤1 mint per tag per
+source-class {root, non-root}" invariant the guarded mint arms require. -/
+def FiveWorldInv (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Prop :=
+  modalMaxWorld b ≤ (usedTagsFiveNonRoot φ₀ b).card + (usedTagsFiveRoot φ₀ b).card
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Arithmetic companion to `modalOps_lt_worldBound` (`S5Simplification.lean`): TWICE `modalOps φ`
+still stays strictly under `modalWorldBound φ`, since `modalWorldBound φ = (2c+1)^(c+1)` with
+`c := modalComplexity φ` dominates `2c + 1` (`Nat.pow_le_pow_right` at exponent `1`), and
+`modalOps φ ≤ c` (`modalOps_le_complexity`) gives `2 * modalOps φ ≤ 2c < 2c + 1 ≤ modalWorldBound
+φ`. The larger constant (`2·modalOps φ₀` vs. the S5 chain's `modalOps φ₀`) that Route (a)'s
+source-split invariant needs -- still LINEAR, not a worse asymptotic (`reports/08_*`). -/
+lemma two_mul_modalOps_lt_worldBound (φ : Proposition Atom) :
+    2 * modalOps φ < modalWorldBound φ := by
+  have h1 : modalOps φ ≤ modalComplexity φ := modalOps_le_complexity φ
+  have h2 : (2 * modalComplexity φ + 1) ≤ modalWorldBound φ := by
+    unfold modalWorldBound
+    calc (2 * modalComplexity φ + 1) = (2 * modalComplexity φ + 1) ^ 1 := by ring
+      _ ≤ (2 * modalComplexity φ + 1) ^ (modalComplexity φ + 1) :=
+          Nat.pow_le_pow_right (by omega) (by omega)
+  omega
+
+omit [Hashable Atom] in
+/-- **Task 3**: chains `FiveWorldInv`, both `usedTagsFiveNonRoot φ₀ b ⊆ mintTags φ₀` and
+`usedTagsFiveRoot φ₀ b ⊆ mintTags φ₀` (`Finset.filter_subset`), `mintTags_card_le_modalOps`, and
+`two_mul_modalOps_lt_worldBound` into the Five-local world bound: the drop-in, source-split
+replacement for `modalMaxWorld_lt_worldBound_of_S5w`, at a larger (but still LINEAR, `≈
+2·modalOps φ₀`) constant, matching `outputsSubsetUniverse`'s `hW : modalMaxWorld b <
+modalWorldBound φ0` hypothesis shape exactly, so this theorem can discharge that hypothesis at
+whatever call site eventually maintains `FiveWorldInv` across Phase 19b's fuel induction. -/
+theorem modalMaxWorld_lt_worldBound_of_FiveWorldInv {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : FiveWorldInv φ₀ b) :
+    modalMaxWorld b < modalWorldBound φ₀ := by
+  have h1 : (usedTagsFiveNonRoot φ₀ b).card ≤ modalOps φ₀ :=
+    le_trans (Finset.card_le_card (Finset.filter_subset _ _)) (mintTags_card_le_modalOps φ₀)
+  have h2 : (usedTagsFiveRoot φ₀ b).card ≤ modalOps φ₀ :=
+    le_trans (Finset.card_le_card (Finset.filter_subset _ _)) (mintTags_card_le_modalOps φ₀)
+  have h3 : 2 * modalOps φ₀ < modalWorldBound φ₀ := two_mul_modalOps_lt_worldBound φ₀
+  unfold FiveWorldInv at hW
+  calc modalMaxWorld b ≤ (usedTagsFiveNonRoot φ₀ b).card + (usedTagsFiveRoot φ₀ b).card := hW
+    _ ≤ modalOps φ₀ + modalOps φ₀ := Nat.add_le_add h1 h2
+    _ = 2 * modalOps φ₀ := by ring
+    _ < modalWorldBound φ₀ := h3
 
 end Cslib.Logic.Modal.Tableau
 

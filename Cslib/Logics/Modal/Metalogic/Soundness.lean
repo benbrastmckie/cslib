@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
+public import Cslib.Logics.Modal.Metalogic.FrameCorrespondence -- shake: keep
 
 /-! # Soundness Theorem for Normal Modal Logics
 

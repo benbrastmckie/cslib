@@ -365,6 +365,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Segment
 public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum
 public import Cslib.Logics.Modal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
+public import Cslib.Logics.Modal.Metalogic.FrameCorrespondence
 public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity

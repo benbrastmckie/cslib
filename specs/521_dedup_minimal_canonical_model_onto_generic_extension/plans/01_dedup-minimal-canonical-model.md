@@ -165,7 +165,7 @@ barrel so nothing imports them.
 
 ---
 
-### Phase 3: Delete orphaned MinPrimeTheory (gated, reversible) [NOT STARTED]
+### Phase 3: Delete orphaned MinPrimeTheory (gated, reversible) [COMPLETED]
 
 **Goal**: Remove `MinPrimeTheory.lean`, which becomes fully orphaned after Phase 2 (imported only
 by the deleted `MinCanonicalModel`; zero external consumers per research §4). This phase is the one
@@ -174,14 +174,14 @@ Phases 1-2 if CI surfaces any unexpected dependency. DEFAULT: delete it (reaches
 1089+257+125 = ~1471 lines, matching the task's "~1500"; the named trio alone is only 1346).
 
 **Tasks**:
-- [ ] Confirm no remaining importer: grep the whole `Cslib/` tree for
+- [x] Confirm no remaining importer: grep the whole `Cslib/` tree for
       `Minimal.MinPrimeTheory` and confirm zero hits after Phase 2 (only the barrel line should
       remain). Note that propositional `MinPrimeTheory` hits in `Logics/Propositional/…` are
       namespace-coincidental (different namespace, no modal import) and are NOT consumers.
-- [ ] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinPrimeTheory.lean` (125 lines).
-- [ ] Regenerate the barrel: `lake exe mk_all --module`. Confirm the `…Minimal.MinPrimeTheory`
+- [x] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinPrimeTheory.lean` (125 lines).
+- [x] Regenerate the barrel: `lake exe mk_all --module`. Confirm the `…Minimal.MinPrimeTheory`
       line (was line 400) is removed and nothing else changed.
-- [ ] Build the barrel/Minimal subtree to confirm no dangling import.
+- [x] Build the barrel/Minimal subtree to confirm no dangling import.
 
 **Timing**: 20 minutes
 

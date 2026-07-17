@@ -41,11 +41,11 @@ next_project_number: 524
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-515 [IMPLEMENTING] — Implement the terminating S5 tableau machinery recommended by tas
-520 [NOT STARTED] — Add the missing composite conservativity bridges collapsing each 
-521 [NOT STARTED] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
-522 [NOT STARTED] — Design and build a uniform frame-condition-to-axiom correspondenc
-523 [NOT STARTED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
+515 [PARTIAL] — Implement the terminating S5 tableau machinery recommended by tas
+520 [RESEARCHING] — Add the missing composite conservativity bridges collapsing each 
+521 [RESEARCHING] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
+522 [RESEARCHING] — Design and build a uniform frame-condition-to-axiom correspondenc
+523 [RESEARCHING] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
@@ -75,7 +75,7 @@ next_project_number: 524
 
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-502 [NOT STARTED] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
+502 [RESEARCHING] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -98,13 +98,13 @@ next_project_number: 524
 
 ### Uncategorized
 
-511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [IMPLEMENTING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
 
 ### 523. Schema union axiom combinator for proofsystem instances
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -114,7 +114,7 @@ next_project_number: 524
 ---
 
 ### 522. Uniform frame condition axiom correspondence library
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -124,7 +124,7 @@ next_project_number: 524
 ---
 
 ### 521. Dedup minimal canonical model onto generic extension
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -134,7 +134,7 @@ next_project_number: 524
 ---
 
 ### 520. Composite conservativity bridges to classical column
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -175,7 +175,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 515. S5 universal rule termination unblock 504
 - **Effort**: 8-12 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 514
@@ -215,7 +215,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [BLOCKED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
@@ -279,7 +279,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 502. Minimize Segment.lean imports per lake shake recommendation
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None

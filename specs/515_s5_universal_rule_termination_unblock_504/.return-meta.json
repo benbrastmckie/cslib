@@ -1,47 +1,10 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-17T20:13:51Z",
-  "completed_at": "2026-07-17T23:59:00Z",
-  "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-    "specs/515_s5_universal_rule_termination_unblock_504/plans/07_s5-termination-machinery.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/summaries/16_phase21-hintikka-wall-landed-completed.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/16_phase21-completed-ready-for-22.md"
-  ],
-  "partial_progress": {
-    "stage": "phase_21_completed",
-    "details": "Landed the full four-step Hintikka-wall recipe: expandedRootTagsFive/FiveWorldInvE (e-aware refinement of FiveWorldInv, necessary since a root-triggered mint consumes a tag counted at trigger-appearance time, before the mint fires, so a bare presence-based counter is not step-preservable), modalApplyOneFive_worldGrowth + modalStepBranchFive_preserves_worldInv (mirrors modalApplyOneS5w_step/modalStepBranchS5w_preserves_worldInv, doubled root/non-root), ModalLoopAuxFive + _bounds + _stepPreserved + modalLoopInvHintikkaFive_initial, and finally modalTableauFive_complete + fiveValid_decides + instDecidableFiveValid. Phase 21 marked [COMPLETED] in the plan. Task 504's re-scoped deliverable's first half (fiveValid decidability) is fully shipped.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 23,
-    "last_completed_phase": "Phase 21: modalTableauFive_complete + Decidable (fiveValid phi) [COMPLETED]"
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count_new": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "details": "Full CI green: lake build (3240/3240), lake exe checkInitImports (exit 0), lake lint (clean except the pre-existing PrimeExclusion.lean baseline; added @[nolint unusedArguments] to ModalLoopAuxFive to keep this dispatch's own code clean), lake exe lint-style (exit 0), lake shake --add-public --keep-implied --keep-prefix (no import changes suggested for either touched file), lake test (green, 9230/9231; pre-existing Intuitionistic/Minimal sorry warnings are an unrelated baseline). Axioms on every new public declaration confirmed via lake env lean + #print axioms: [propext, Classical.choice, Quot.sound] only. Live regression probe: decide (fiveValid (box p -> p)) = false while decide (s5Valid (box p -> p)) = true, confirming instDecidableFiveValid genuinely routes through fiveFC and is not silently equal to instDecidableS5Valid."
-  },
-  "commits": [
-    "720088c9 task 515 phase 21.1: land accTargetsNeRoot top-loop preservation pair",
-    "69d5f657 task 515 phase 21.2: land e-aware FiveWorldInvE infrastructure",
-    "6eefff80 task 515 phase 21.3: land modalApplyOneFive_worldGrowth (mirrors modalApplyOneS5w_step)",
-    "ee112b41 task 515 phase 21.4: land modalStepBranchFive_preserves_worldInv (recipe steps 1-2)",
-    "f1fa2965 task 515 phase 21.5: land ModalLoopAuxFive + bounds + stepPreserved + initial (recipe step 3)",
-    "245e2157 task 515 phase 21.6: land modalTableauFive_complete + instDecidableFiveValid (recipe step 4)",
-    "31398911 task 515: mark Phase 21 COMPLETED (Hintikka wall resolved, four-step recipe landed)"
-  ],
+  "status": "partial",
   "metadata": {
-    "session_id": "orchestrate-resume-phase21b",
-    "agent_type": "cslib-implementation-agent",
-    "task_number": 515,
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "orchestrator_mode": true,
-    "compliance_check": "passed"
+    "cycles_used": 5,
+    "final_state": "partial",
+    "phases_completed": 23,
+    "phases_total": 25,
+    "resume_point": "Phase 22 (KB5 chain); fiveValid decidability fully shipped through Phase 21"
   }
 }

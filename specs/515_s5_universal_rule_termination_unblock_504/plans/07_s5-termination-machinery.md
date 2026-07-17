@@ -2625,7 +2625,7 @@ prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
 
 ---
 
-### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [PARTIAL]
+### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [IN PROGRESS]
 
 **Unblocked (design unchanged)** -- consumes Phase 19b's `modalTableauFive_sound` (built on 19a's
 Route-1 propagation + Route (a) mint-arm soundness) and Phase 20's countermodel.

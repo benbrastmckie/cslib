@@ -1592,6 +1592,100 @@ theorem modalMaxWorld_lt_worldBound_of_FiveWorldInv {φ₀ : Proposition Atom}
     _ = 2 * modalOps φ₀ := by ring
     _ < modalWorldBound φ₀ := h3
 
+/-! ## Step-Preservation of `FiveWorldInv` (task 515 Phase 21b: the Hintikka "wall")
+
+The inductive step-preservation proof `FiveSimplification.lean`'s own docstring above flagged as
+deferred. Mirrors `S5Simplification.lean`'s `modalApplyOneS5w_step` /
+`modalStepBranchS5w_preserves_worldInv`, doubled for the root/non-root source-class split
+`FiveWorldInv` introduces, **plus one genuine refinement `S5wWorldInv`'s single-class shape did
+not need**: a root-triggered mint (`sf.label = 0`) consumes a tag that was already counted in
+`usedTagsFiveRoot` the moment its TRIGGER first appeared on the branch (mere presence, not
+processing) — chronologically *before* the mint itself fires. A bare, `e`-independent per-step
+argument therefore cannot show `usedTagsFiveRoot`'s cardinality grows exactly when the root mint
+fires (it does not; it already counted the tag). The fix threads the expanded-set `e` (already
+present in `AuxStepPreserved`'s signature for exactly this kind of need) into a refined,
+`e`-aware root-tag counter `expandedRootTagsFive`, counting a root tag only once its unique
+trigger occurrence has been *dequeued* (`e`-membership), not merely present on `b`. This
+strictly grows at the exact step a root-triggered mint fires (the trigger moves from
+not-expanded to expanded), restoring the same "count grows in lockstep with `modalMaxWorld`"
+argument `usedTagsFiveNonRoot` already gives non-root mints for free. Since
+`expandedRootTagsFive φ₀ b e ⊆ usedTagsFiveRoot φ₀ b` unconditionally (a strictly stronger
+filter predicate), the final bound consumed by `ModalLoopAuxFive_bounds` still routes through the
+already-landed, `e`-independent `FiveWorldInv`/`modalMaxWorld_lt_worldBound_of_FiveWorldInv`
+unchanged. -/
+
+omit [Hashable Atom] in
+/-- **`e`-aware root-tag counter**: the subset of `mintTags φ₀` whose root-mint TRIGGER is not
+merely present on `b` (as `usedTagsFiveRoot` counts) but has already been *dequeued/processed*
+(is a member of the expanded set `e`). Strictly stronger filter predicate than
+`usedTagsFiveRoot`'s (adds the `e.any` conjunct), so `expandedRootTagsFive φ₀ b e ⊆
+usedTagsFiveRoot φ₀ b` holds with no side hypothesis relating `e` to `b`
+(`expandedRootTagsFive_subset_usedTagsFiveRoot` below). -/
+def expandedRootTagsFive (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Finset (Sign × Proposition Atom) :=
+  (mintTags φ₀).filter (fun p =>
+    b.any (fun x => x.label == (0 : WorldIndex) &&
+      ((p.1 == Sign.pos && x.sign == Sign.pos && x.formula == Proposition.diamond p.2) ||
+       (p.1 == Sign.neg && x.sign == Sign.neg && x.formula == Proposition.box p.2)) &&
+      e.any (· == x)))
+
+omit [Hashable Atom] in
+/-- `expandedRootTagsFive φ₀ b e ⊆ usedTagsFiveRoot φ₀ b`: dropping the extra `e.any` conjunct
+from `expandedRootTagsFive`'s filter predicate gives exactly `usedTagsFiveRoot`'s predicate, so
+this is immediate from `Finset.filter_subset`-style monotonicity of `Finset.filter` under a
+weaker predicate. -/
+lemma expandedRootTagsFive_subset_usedTagsFiveRoot (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    expandedRootTagsFive φ₀ b e ⊆ usedTagsFiveRoot φ₀ b := by
+  intro p hp
+  simp only [expandedRootTagsFive, Finset.mem_filter] at hp
+  obtain ⟨hp1, hp2⟩ := hp
+  simp only [usedTagsFiveRoot, Finset.mem_filter]
+  refine ⟨hp1, ?_⟩
+  obtain ⟨x, hx, hxeq⟩ := List.any_eq_true.mp hp2
+  simp only [Bool.and_eq_true] at hxeq
+  exact List.any_eq_true.mpr ⟨x, hx, by simp [hxeq.1]⟩
+
+omit [Hashable Atom] in
+/-- `expandedRootTagsFive` is monotone under branch AND expanded-set growth together (the shape
+`AuxStepPreserved`'s step lemma needs: both `b` and `e` grow across a step). -/
+lemma expandedRootTagsFive_mono {φ₀ : Proposition Atom}
+    {b b' e e' : List (SignedFormula (Proposition Atom) WorldIndex)}
+    (hb : ∀ x ∈ b, x ∈ b') (he : ∀ x ∈ e, x ∈ e') :
+    expandedRootTagsFive φ₀ b e ⊆ expandedRootTagsFive φ₀ b' e' := by
+  intro p hp
+  simp only [expandedRootTagsFive, Finset.mem_filter] at hp ⊢
+  obtain ⟨hp1, hp2⟩ := hp
+  refine ⟨hp1, ?_⟩
+  obtain ⟨x, hxmem, hxeq⟩ := List.any_eq_true.mp hp2
+  simp only [Bool.and_eq_true] at hxeq
+  obtain ⟨⟨hxlab, hxshape⟩, hxexp⟩ := hxeq
+  obtain ⟨y, hymem, hyeq⟩ := List.any_eq_true.mp hxexp
+  have hyx : y = x := beq_iff_eq.mp hyeq
+  refine List.any_eq_true.mpr ⟨x, hb x hxmem, ?_⟩
+  simp only [Bool.and_eq_true]
+  exact ⟨⟨hxlab, hxshape⟩, List.any_eq_true.mpr ⟨x, he x (hyx ▸ hymem), by simp⟩⟩
+
+/-- **`e`-aware source-split world-bound invariant**: the version of `FiveWorldInv` that
+`ModalLoopAuxFive` actually threads, replacing the presence-based `usedTagsFiveRoot` with the
+dequeued-based `expandedRootTagsFive` so the per-step argument at a root-triggered mint (which
+consumes a tag counted at TRIGGER-APPEARANCE time, strictly before the mint) goes through. Implies
+plain `FiveWorldInv` via `expandedRootTagsFive_subset_usedTagsFiveRoot`
+(`FiveWorldInvE_imp_FiveWorldInv` below). -/
+def FiveWorldInvE (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) : Prop :=
+  modalMaxWorld b ≤ (usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card
+
+omit [Hashable Atom] in
+lemma FiveWorldInvE_imp_FiveWorldInv {φ₀ : Proposition Atom}
+    {b e : List (SignedFormula (Proposition Atom) WorldIndex)} (h : FiveWorldInvE φ₀ b e) :
+    FiveWorldInv φ₀ b := by
+  unfold FiveWorldInvE at h
+  unfold FiveWorldInv
+  refine le_trans h (Nat.add_le_add_left ?_ _)
+  exact Finset.card_le_card (expandedRootTagsFive_subset_usedTagsFiveRoot φ₀ b e)
+
 end Cslib.Logic.Modal.Tableau
 
 end

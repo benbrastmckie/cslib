@@ -1,0 +1,45 @@
+{
+  "status": "implemented",
+  "task_number": 520,
+  "session_id": "sess_1784322687_fcf57a_520",
+  "phase": "implement",
+  "artifacts": [
+    "Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean",
+    "specs/520_composite_conservativity_bridges_to_classical_column/reports/01_composite-conservativity-bridges.md",
+    "specs/520_composite_conservativity_bridges_to_classical_column/plans/01_composite-conservativity-bridges.md",
+    "specs/520_composite_conservativity_bridges_to_classical_column/summaries/01_composite-conservativity-bridges-summary.md"
+  ],
+  "plan_path": "specs/520_composite_conservativity_bridges_to_classical_column/plans/01_composite-conservativity-bridges.md",
+  "summary": "Implemented both plan phases: added 1 public import of IntToClassical plus 8 one-line composite theorems (mkDerivable_implies_kDerivable, mtDerivable_implies_tDerivable, ms4Derivable_implies_s4Derivable, ms5Derivable_implies_s5Derivable, ckDerivable_implies_kDerivable, ctDerivable_implies_tDerivable, cs4Derivable_implies_s4Derivable, cs5Derivable_implies_s5Derivable) to Modularity.lean. Both S5 composites conclude Derivable (@ModalAxiom Atom) φ. Zero sorry, zero vacuous placeholders, zero new axioms. Scoped and full builds green; checkInitImports, lint-style, and shake (scoped) green; lake lint shows exactly 1 pre-existing unrelated error; lake test fails only in the pre-existing, explicitly out-of-scope CslibTests.ModalFrameSeparation (KB5/Five-simplification issue tracked under a separate concurrent task). Axiom closure for all 8: [propext, Quot.sound], a subset of the expected [propext, Classical.choice, Quot.sound].",
+  "plan_metadata": {
+    "phases": 2,
+    "phases_completed": 2,
+    "total_effort_hours": 1,
+    "complexity": "simple",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_composite-conservativity-bridges.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-07-17"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
+  },
+  "key_constraints_verified": {
+    "required_import": "landed: public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical",
+    "s5_classical_target_predicate": "confirmed ModalAxiom (not S5Axiom) on both S5 composites",
+    "naming_discipline": "confirmed: _implies_ only, zero 'conservative' tokens in added block, all 8 are theorem",
+    "expected_axioms": "actual [propext, Quot.sound], subset of expected [propext, Classical.choice, Quot.sound]",
+    "build_scope": "lake build Cslib.Logics.Modal.Metalogic.InterSystem.Modularity -- green",
+    "target_file": "Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean -- only file modified"
+  },
+  "deviations": [
+    "Transient concurrent-task interference: an uncommitted, in-flight edit to Constructive/Segment.lean by a separate task briefly broke the scoped build's transitive chain; verified correctness via an isolated git worktree, then re-confirmed directly in the main tree once the concurrent edit cleared.",
+    "Self-corrected build-cache side effect: the isolated-worktree verification (hardlinked .lake cache) left 3 stale trace files referencing the deleted temp worktree path; detected via grep and fixed by rebuilding exactly those 3 files' outputs; zero remaining references confirmed."
+  ],
+  "next_phase": "none -- task complete, awaiting user review/merge decision"
+}

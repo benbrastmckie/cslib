@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthMonotonicity
 public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
@@ -109,6 +110,56 @@ theorem mtDerivable_implies_is5Derivable (h : Derivable (@MTModalAxiom Atom) φ)
 theorem ctDerivable_implies_is5Derivable (h : Derivable (@CTModalAxiom Atom) φ) :
     Derivable (@IS5ModalAxiom Atom) φ :=
   itDerivable_implies_is5Derivable (ctDerivable_implies_itDerivable h)
+
+/-! ## Cross-Axis Composites Into the Classical Column (Axis B then Int->Classical) -/
+
+/-- `MK`-derivable formulas are `K`-derivable: chain Axis B (`MK → IK`) then the
+`IK → K` Int→Classical bridge. -/
+theorem mkDerivable_implies_kDerivable (h : Derivable (@MKModalAxiom Atom) φ) :
+    Derivable (@KAxiom Atom) φ :=
+  ikDerivable_implies_kDerivable (mkDerivable_implies_ikDerivable h)
+
+/-- `MT`-derivable formulas are `T`-derivable: chain Axis B (`MT → IT`) then the
+`IT → T` Int→Classical bridge. -/
+theorem mtDerivable_implies_tDerivable (h : Derivable (@MTModalAxiom Atom) φ) :
+    Derivable (@TAxiom Atom) φ :=
+  itDerivable_implies_tDerivable (mtDerivable_implies_itDerivable h)
+
+/-- `MS4`-derivable formulas are `S4`-derivable: chain Axis B (`MS4 → IS4`) then the
+`IS4 → S4` Int→Classical bridge. -/
+theorem ms4Derivable_implies_s4Derivable (h : Derivable (@MS4ModalAxiom Atom) φ) :
+    Derivable (@S4Axiom Atom) φ :=
+  is4Derivable_implies_s4Derivable (ms4Derivable_implies_is4Derivable h)
+
+/-- `MS5`-derivable formulas are `S5`-derivable (classical target is `ModalAxiom`): chain
+Axis B (`MS5 → IS5`) then the `IS5 → S5` Int→Classical bridge. -/
+theorem ms5Derivable_implies_s5Derivable (h : Derivable (@MS5ModalAxiom Atom) φ) :
+    Derivable (@ModalAxiom Atom) φ :=
+  is5Derivable_implies_s5Derivable (ms5Derivable_implies_is5Derivable h)
+
+/-- `CK`-derivable formulas are `K`-derivable: chain Axis B (`CK → IK`) then the
+`IK → K` Int→Classical bridge. -/
+theorem ckDerivable_implies_kDerivable (h : Derivable (@CKModalAxiom Atom) φ) :
+    Derivable (@KAxiom Atom) φ :=
+  ikDerivable_implies_kDerivable (ckDerivable_implies_ikDerivable h)
+
+/-- `CT`-derivable formulas are `T`-derivable: chain Axis B (`CT → IT`) then the
+`IT → T` Int→Classical bridge. -/
+theorem ctDerivable_implies_tDerivable (h : Derivable (@CTModalAxiom Atom) φ) :
+    Derivable (@TAxiom Atom) φ :=
+  itDerivable_implies_tDerivable (ctDerivable_implies_itDerivable h)
+
+/-- `CS4`-derivable formulas are `S4`-derivable: chain Axis B (`CS4 → IS4`) then the
+`IS4 → S4` Int→Classical bridge. -/
+theorem cs4Derivable_implies_s4Derivable (h : Derivable (@CS4ModalAxiom Atom) φ) :
+    Derivable (@S4Axiom Atom) φ :=
+  is4Derivable_implies_s4Derivable (cs4Derivable_implies_is4Derivable h)
+
+/-- `CS5`-derivable formulas are `S5`-derivable (classical target is `ModalAxiom`): chain
+Axis B (`CS5 → IS5`) then the `IS5 → S5` Int→Classical bridge. -/
+theorem cs5Derivable_implies_s5Derivable (h : Derivable (@CS5ModalAxiom Atom) φ) :
+    Derivable (@ModalAxiom Atom) φ :=
+  is5Derivable_implies_s5Derivable (cs5Derivable_implies_is5Derivable h)
 
 /-! ## Axis C: Reused Conservativity (Not Reproved) -/
 

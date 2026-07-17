@@ -711,6 +711,51 @@ def modalApplyOneS4Keyed (φ₀ : Proposition Atom)
       | none => modalApplyOne sf b acc
     | _, _ => modalApplyOneS4 φ₀ sf b acc
 
+/-- Guard spec, box-negative shape, blocked case (mirrors `modalApplyOneS4_boxNeg_blocked_eq`
+for the keys-aware guard). -/
+lemma modalApplyOneS4Keyed_boxNeg_blocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .neg φ w = some wBlock) :
+    modalApplyOneS4Keyed φ₀ keys ⟨.neg, .box φ, w⟩ b acc = (.linear [], acc.addEdge w wBlock) := by
+  unfold modalApplyOneS4Keyed
+  simp [hblock]
+
+/-- Guard spec, box-negative shape, unblocked case: reduces to the raw K rule
+(`modalApplyOne`). -/
+lemma modalApplyOneS4Keyed_boxNeg_unblocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .neg φ w = none) :
+    modalApplyOneS4Keyed φ₀ keys ⟨.neg, .box φ, w⟩ b acc
+      = modalApplyOne ⟨.neg, .box φ, w⟩ b acc := by
+  unfold modalApplyOneS4Keyed
+  simp [hblock]
+
+/-- Guard spec, diamond-positive shape, blocked case (dual of the box-negative pair). -/
+lemma modalApplyOneS4Keyed_diaPos_blocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .pos φ w = some wBlock) :
+    modalApplyOneS4Keyed φ₀ keys ⟨.pos, .diamond φ, w⟩ b acc
+      = (.linear [], acc.addEdge w wBlock) := by
+  unfold modalApplyOneS4Keyed
+  simp [hblock]
+
+/-- Guard spec, diamond-positive shape, unblocked case: reduces to the raw K rule. -/
+lemma modalApplyOneS4Keyed_diaPos_unblocked_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hblock : blockingWorldS4Keyed φ₀ b keys .pos φ w = none) :
+    modalApplyOneS4Keyed φ₀ keys ⟨.pos, .diamond φ, w⟩ b acc
+      = modalApplyOne ⟨.pos, .diamond φ, w⟩ b acc := by
+  unfold modalApplyOneS4Keyed
+  simp [hblock]
+
 /-- The S4-specific keyed one-step branch expansion: same selected formula (`b.findSome?` over
 the same "already expanded" guard) and same rule application (`modalApplyOneS4Keyed φ₀ keys`,
 task 511 Phase 5) as the `(newBranches, newExpandedSets, newAcc)` triple -- additionally threads
@@ -881,6 +926,251 @@ lemma modalApplyOne_diamondPos_mint_fst_S4
   simp only [modalApplyOne]
   rw [if_neg (by simp [htry])]
   rfl
+
+/-! ## Minting-Content Equality Closure (task 511, Phase 5 continuation)
+
+This section closes the gap the prior dispatch narrowed but did not finish: `keyLowerBd`'s
+minting case, `successorBirthContent φ₀ b s φ w ⊆ relevantSetFinset φ₀ (newForms ++ b)
+(modalNextWorld b)`. `keyLowerBd` itself only demands `⊆` (not `=`), so only the forward
+direction is proved -- narrower than the prior dispatch's `Finset.ext` attempt, which chased
+the (unneeded for this obligation) reverse direction too and got stuck bridging `Bool`-valued
+`List.any` against the target `Prop`. The technique here avoids that bridge entirely: convert
+every `List.any (· == t) = true`/`= false` fact to/from a plain `t ∈ l`/`t ∉ l` membership fact
+immediately (`any_beq_of_mem_S4`/`mem_of_any_beq_S4`), then work purely with `List.mem_*`
+combinators and `List.mem_filterMap`. -/
+
+omit [Hashable Atom] in
+/-- If `t ∈ l`, then `l.any (· == t) = true`. Converts a `List.mem` fact into the `Bool`-valued
+form `relevantSetFinset`/`successorBirthContent` filter on. -/
+private lemma any_beq_of_mem_S4 {l : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {t : SignedFormula (Proposition Atom) WorldIndex} (h : t ∈ l) : l.any (· == t) = true := by
+  rw [List.any_eq_true]
+  exact ⟨t, h, by simp⟩
+
+omit [Hashable Atom] in
+/-- Converse of `any_beq_of_mem_S4`: `l.any (· == t) = true` gives `t ∈ l`. -/
+private lemma mem_of_any_beq_S4 {l : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {t : SignedFormula (Proposition Atom) WorldIndex} (h : l.any (· == t) = true) : t ∈ l := by
+  rw [List.any_eq_true] at h
+  obtain ⟨x, hx, hxeq⟩ := h
+  rw [beq_iff_eq] at hxeq
+  rwa [hxeq] at hx
+
+omit [Hashable Atom] in
+/-- Freshness, in `any`-form: if `t`'s label is the fresh world `modalNextWorld b`, `t` cannot
+be found on `b` (`modalNextWorld_gt`'s contrapositive). This is what makes every dedup guard
+inside `modalApplyOne`'s minting arms take the "not yet present" branch when consumed against
+the freshly-minted label. -/
+private lemma modalNextWorld_fresh_beq_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (t : SignedFormula (Proposition Atom) WorldIndex) (ht : t.label = modalNextWorld b) :
+    b.any (· == t) = false := by
+  by_contra hcontra
+  rw [Bool.not_eq_false] at hcontra
+  have hmem := mem_of_any_beq_S4 hcontra
+  have hlt := modalNextWorld_gt b t hmem
+  exact absurd (ht ▸ hlt) (lt_irrefl _)
+
+omit [Hashable Atom] in
+/-- Any `Sign` value is a member of `signedSubfmls φ₀`'s sign component (`{pos, neg}` is the
+whole type), so `signedSubfmls` membership reduces to the formula component alone
+(S4-local restatement of `S5Simplification.lean`'s file-private `mem_signedSubfmls_of_formula_S5w`,
+needed here since `signedSubfmls` is defined in this file but that lemma is file-private there). -/
+private lemma mem_signedSubfmls_of_formula_S4 {φ₀ : Proposition Atom} (s : Sign)
+    {ψ : Proposition Atom} (h : ψ ∈ modalSubfmls φ₀) : (s, ψ) ∈ signedSubfmls φ₀ := by
+  simp only [signedSubfmls, Finset.mem_product, List.mem_toFinset]
+  refine ⟨?_, h⟩
+  cases s <;> simp
+
+/-- **`keyLowerBd`'s minting case, box-negative shape**: the prospective birth content computed
+PRE-step (`successorBirthContent`) is a subset of the freshly-minted world's relevant set
+computed POST-step (`relevantSetFinset` over `newForms ++ b`). Consumes `modalApplyOne`'s
+literal box-neg minting payload (`modalApplyOne_boxNeg_mint_fst_S4`) via the `hnewForms`
+hypothesis (stated in terms of `modalApplyOne` rather than the raw payload literal, so the
+caller only needs `modalApplyOne`'s actual output, not to hand-reconstruct its list shape) plus
+the branch-closure witness fact (`hb`/`hsf`, via `modalUniverseS4_mem_formula`/
+`modalSubfmls_trans_S4`) that the witness formula `φ` itself lies in `signedSubfmls φ₀`. -/
+private lemma successorBirthContent_boxNeg_subset_relevantSetFinset
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (w : WorldIndex) (φ : Proposition Atom)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hsf : (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (newForms : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hnewForms : (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).fst = RuleResult.linear newForms) :
+    successorBirthContent φ₀ b .neg φ w ⊆
+      relevantSetFinset φ₀ (newForms ++ b) (modalNextWorld b) := by
+  rw [modalApplyOne_boxNeg_mint_fst_S4] at hnewForms
+  injection hnewForms with hnewForms
+  subst hnewForms
+  have hφsub : φ ∈ modalSubfmls φ₀ := by
+    have h1 : (Proposition.box φ) ∈ modalSubfmls φ₀ := modalUniverseS4_mem_formula (hb _ hsf)
+    have h2 : φ ∈ modalSubfmls (Proposition.box φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+    exact modalSubfmls_trans_S4 h2 h1
+  have hwit : ((Sign.neg, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ :=
+    mem_signedSubfmls_of_formula_S4 .neg hφsub
+  intro p hp
+  simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hp
+  rcases hp with rfl | ⟨hpmem, hdisj⟩
+  · simp only [relevantSetFinset, Finset.mem_filter]
+    refine ⟨hwit, any_beq_of_mem_S4 ?_⟩
+    exact List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self)
+  · simp only [relevantSetFinset, Finset.mem_filter]
+    refine ⟨hpmem, any_beq_of_mem_S4 ?_⟩
+    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
+    · -- box-positive transmission: p.1 = pos, T(□p.2)@w ∈ b
+      have hbmem : (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+        mem_of_any_beq_S4 hpb
+      have hbp : (p.2, w) ∈ boxPositivesOf b := by
+        simp only [boxPositivesOf, List.mem_filterMap]
+        exact ⟨⟨.pos, .box p.2, w⟩, hbmem, by simp⟩
+      have hdedup : b.any (· == (⟨.pos, p.2, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (boxPositivesOf b).filterMap (fun (ψ, src) =>
+            if src == w then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+              if b.any (· == sf') then none else some sf'
+            else none) := by
+        rw [hp1, List.mem_filterMap]
+        exact ⟨(p.2, w), hbp, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_cons_of_mem _ htarget))
+    · -- diamond-negative transmission: p.1 = neg, F(◇p.2)@w ∈ b
+      have hbmem : (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+        mem_of_any_beq_S4 hpb
+      have hdedup : b.any (· == (⟨.neg, p.2, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          b.filterMap (fun sf' =>
+            if sf'.sign == .neg && sf'.label == w then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                  ⟨.neg, ψ, modalNextWorld b⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none) := by
+        rw [hp1, List.mem_filterMap]
+        exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_right _ htarget)
+
+/-- **`keyLowerBd`'s minting case, diamond-positive shape** (dual of the box-negative case):
+the prospective birth content computed PRE-step is a subset of the freshly-minted world's
+relevant set computed POST-step. -/
+private lemma successorBirthContent_diamondPos_subset_relevantSetFinset
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (w : WorldIndex) (φ : Proposition Atom)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hsf : (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (newForms : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hnewForms : (modalApplyOne
+        (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+        = RuleResult.linear newForms) :
+    successorBirthContent φ₀ b .pos φ w ⊆
+      relevantSetFinset φ₀ (newForms ++ b) (modalNextWorld b) := by
+  rw [modalApplyOne_diamondPos_mint_fst_S4] at hnewForms
+  injection hnewForms with hnewForms
+  subst hnewForms
+  have hφsub : φ ∈ modalSubfmls φ₀ := by
+    have h1 : (Proposition.diamond φ) ∈ modalSubfmls φ₀ := modalUniverseS4_mem_formula (hb _ hsf)
+    have h2 : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+      List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+    exact modalSubfmls_trans_S4 h2 h1
+  have hwit : ((Sign.pos, φ) : Sign × Proposition Atom) ∈ signedSubfmls φ₀ :=
+    mem_signedSubfmls_of_formula_S4 .pos hφsub
+  intro p hp
+  simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hp
+  rcases hp with rfl | ⟨hpmem, hdisj⟩
+  · simp only [relevantSetFinset, Finset.mem_filter]
+    refine ⟨hwit, any_beq_of_mem_S4 ?_⟩
+    exact List.mem_append_left _ (List.mem_append_left _ List.mem_cons_self)
+  · simp only [relevantSetFinset, Finset.mem_filter]
+    refine ⟨hpmem, any_beq_of_mem_S4 ?_⟩
+    rcases hdisj with ⟨hp1, hpb⟩ | ⟨hp1, hpb⟩
+    · -- box-positive transmission: p.1 = pos, T(□p.2)@w ∈ b
+      have hbmem : (⟨.pos, .box p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+        mem_of_any_beq_S4 hpb
+      have hbp : (p.2, w) ∈ boxPositivesOf b := by
+        simp only [boxPositivesOf, List.mem_filterMap]
+        exact ⟨⟨.pos, .box p.2, w⟩, hbmem, by simp⟩
+      have hdedup : b.any (· == (⟨.pos, p.2, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (boxPositivesOf b).filterMap (fun (ψ, src) =>
+            if src == w then
+              let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+              if b.any (· == sf') then none else some sf'
+            else none) := by
+        rw [hp1, List.mem_filterMap]
+        exact ⟨(p.2, w), hbp, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_left _ (List.mem_cons_of_mem _ htarget))
+    · -- diamond-negative transmission: p.1 = neg, F(◇p.2)@w ∈ b
+      have hbmem : (⟨.neg, .diamond p.2, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+        mem_of_any_beq_S4 hpb
+      have hdedup : b.any (· == (⟨.neg, p.2, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex)) = false :=
+        modalNextWorld_fresh_beq_S4 b _ rfl
+      have htarget : (⟨p.1, p.2, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          b.filterMap (fun sf' =>
+            if sf'.sign == .neg && sf'.label == w then
+              match sf'.formula with
+              | .diamond ψ =>
+                let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                  ⟨.neg, ψ, modalNextWorld b⟩
+                if b.any (· == prop) then none else some prop
+              | _ => none
+            else none) := by
+        rw [hp1, List.mem_filterMap]
+        exact ⟨⟨.neg, .diamond p.2, w⟩, hbmem, by simp [hdedup]⟩
+      exact List.mem_append_left _ (List.mem_append_right _ htarget)
+
+/-! ## Assembling `keyLowerBd`'s Preservation (task 511, Phase 5 continuation) -/
+
+/-- Every branch `modalStepBranchS4Keyed` produces is a superset of the pre-step branch: each
+output branch has the literal shape `X ++ b` (new formulas prepended, `b` untouched at the
+tail), regardless of which rule fired or whether the result was `.linear`/`.branching`/
+`.persistent`. This is what lets OLD keys' `keyLowerBd` obligation survive any step via
+`relevantSetFinset_mono`, with no need to know which rule actually fired. -/
+lemma modalStepBranchS4Keyed_branch_superset (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ x ∈ b, x ∈ b' := by
+  unfold modalStepBranchS4Keyed at hstep
+  obtain ⟨sf, -, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_map] at hb'
+    obtain ⟨br, -, rfl⟩ := hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp at hsf
 
 /-! ## S4 Hintikka Set -/
 

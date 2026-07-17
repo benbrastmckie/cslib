@@ -1,43 +1,32 @@
 {
   "status": "partial",
-  "summary": "Phases 1-4 remain landed green and self-contained (unchanged from the prior dispatch). This dispatch attempted the Phase 5 guard redesign the prior dispatch's blocker called for, and it landed: blockingWorldS4Keyed compares the prospective successor's birth content against the RECORDED keys list (not worlds' live relevant sets), with modalApplyOneS4Keyed/modalStepBranchS4Keyed redefined so both branch bookkeeping and keys bookkeeping are driven by this same keys-aware decision (modalApplyOneS4/blockingWorldS4/modalHintikkaSetS4 untouched, remaining task 506's valid live-set-guarded artifact). The SPECIFIC fact the prior dispatch proved impossible -- modalStepBranchS4_preserves_keysDistinct -- is now proved, as keysUpdate_preserves_keysDistinct, directly from blockingWorldS4Keyed_none_fresh with no live-set indirection. Phase 5 remains BLOCKED, but the blocker narrowed from a structural design gap to a bounded Lean proof-engineering gap: S4LoopInv.keyLowerBd's minting-case equality (relevantSetFinset of a freshly-minted world equals successorBirthContent) is mathematically verified by hand and its reusable groundwork (mint-shape unfolding lemmas, subformula-membership helpers) is landed, but the Finset/Bool/Prop bridging proof itself did not converge within this dispatch's budget and was removed (not committed with a sorry) rather than left broken. Phases 6-7 were not attempted (both depend on Phase 5). Zero sorry, zero new axiom, zero vacuous placeholders throughout; lake build/checkInitImports/lint/lint-style/shake/test all green for this dispatch's changes.",
+  "summary": "Phases 1-4 remain landed green and unchanged. This dispatch closed the specific gap the prior dispatch's blocker named: S4LoopInv.keyLowerBd's minting-case fact (successorBirthContent subset relevantSetFinset of the freshly-minted world) is now proved as two standalone lemmas (successorBirthContent_boxNeg_subset_relevantSetFinset / successorBirthContent_diamondPos_subset_relevantSetFinset), zero sorry, zero new axiom. The key technique that broke through where the prior dispatch got stuck: keyLowerBd only needs subset (not equality), and every Bool-valued List.any fact is converted to a plain List.mem fact immediately via two tiny helper lemmas (any_beq_of_mem_S4/mem_of_any_beq_S4), avoiding the Bool/Prop bridging trap that stalled the prior Finset.ext attempt. This dispatch also landed the driver-level assembly groundwork: four modalApplyOneS4Keyed_*_blocked/unblocked_eq guard-spec lemmas and modalStepBranchS4Keyed_branch_superset (a generic branch-superset fact usable for keyLowerBd/keysTotal/keysInUniverse preservation alike). The full driver-level lemma modalStepBranchS4_preserves_keyLowerBd (composing all of the above against an actual modalStepBranchS4Keyed step) was NOT completed this dispatch -- what remains is pure mechanical casework (a 9-leaf split on sf.sign/sf.formula), not proof-engineering research. keysTotal/keysInUniverse preservation and the full S4LoopInv assembly were not attempted. Phases 6-7 not attempted (both depend on Phase 5's full completion). Zero sorry, zero new axiom, zero vacuous placeholders throughout. Scoped lake build green; full unscoped lake build also green (the prior FiveSimplification.lean cross-task conflict has since been resolved by the concurrent task). lake test fails on one file (CslibTests/ModalFrameSeparation.lean, decide stuck on instDecidableFiveValid) confirmed to be entirely task 515's unrelated S5/Five work, not a regression from this dispatch.",
   "phases_completed": 4,
   "phases_total": 7,
-  "blockers": [
-    {
-      "phase": 5,
-      "phase_name": "S4LoopInv preservation lemmas — the crux",
-      "type": "proof-engineering",
-      "what_closed_this_dispatch": "The guard-vs-keys structural gap (prior blocker) is fixed: blockingWorldS4Keyed compares against recorded keys directly. keysUpdate_preserves_keysDistinct (the prior dispatch's named-impossible fact) is now proved, standalone and assumption-carrying (takes pre-step keysDistinct as a hypothesis, matching how it will be consumed once assembled).",
-      "what_remains_open": "S4LoopInv.keyLowerBd's minting case: successorBirthContent φ₀ b s φ w ⊆ relevantSetFinset φ₀ (newForms ++ b) (modalNextWorld b) (in fact an equality, the stronger fact attempted). This is successorBirthContent's own design claim (its docstring: 'matches the actual K-minting birth content'), hand-verified true: modalApplyOne's box-neg/diamond-pos minting arms transmit exactly the box-positive/diamond-negative context successorBirthContent filters for.",
-      "what_was_tried": "(1) Landed modalApplyOne_boxNeg_mint_fst_S4/modalApplyOne_diamondPos_mint_fst_S4 (literal .fst unfolding of modalApplyOne at both minting shapes; renamed with an _S4 suffix mid-dispatch after discovering a cross-file private-declaration name clash with FiveSimplification.lean's file-private originals of the same name). (2) Landed modalSubfmls_trans_S4/modalUniverseS4_mem_formula (subformula-membership groundwork the witness case needs, given branch-closure hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀ plus source membership hsf -- a precondition the original lemma sketch omitted). (3) Attempted the full Finset.ext equality proof via simp-set iteration (Bool.or_eq_true, List.any_cons, List.mem_cons, SignedFormula.mk.injEq, ...); the residual goal shape shifted non-monotonically across attempts (over-application of SignedFormula.mk.injEq to an unrelated Sign × Proposition Atom pair produced spurious conjuncts) and did not converge within budget.",
-      "fix_needed": "A continuation should reuse the four landed groundwork lemmas, then prove two small membership-iff helper lemmas (one per filterMap group: box-positive transmission, diamond-negative transmission -- mirroring FmpMeasure.lean's private mem_boxPositivesOf but as a full Iff), compose them into relevantSetFinset_boxNeg_mint/_diamondPos_mint (with the hb/hsf hypotheses this dispatch discovered are required), then keyLowerBd's preservation follows by cases on blockingWorldS4Keyed (blocked = no-op; unblocked = this equality composed with relevantSetFinset_mono for untouched old keys). Comparable in size to the original research report's own '~150-250 line' estimate for this piece.",
-      "documented_at": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md (Phase 5 section, updated this dispatch)",
-      "prohibited_workarounds_avoided": "No sorry, no vacuous placeholder, no weakening of keysDistinct or keyLowerBd. The unfinished equality lemma was removed from the file rather than committed broken or with a sorry."
-    }
-  ],
+  "blockers": [],
   "continuation_context": {
-    "recommended_action": "Continue Phase 5 directly (no further redesign needed -- the structural fix is done): prove the two membership-iff helper lemmas for the box-positive/diamond-negative transmission groups, compose into the relevantSetFinset-equals-successorBirthContent equality (reusing the four landed groundwork lemmas), close keyLowerBd's preservation, then keysTotal/keysInUniverse (expected straightforward), assemble modalStepBranchS4_preserves_S4LoopInv, and proceed to Phase 6 (pigeonhole world bound, closes original task 506 Phase 8) and Phase 7 (decidability decision).",
+    "recommended_action": "Continue Phase 5's assembly directly (no further proof-engineering research needed -- every mathematical fact is proved and green): write modalStepBranchS4_preserves_keyLowerBd by (1) extracting sf via List.exists_of_findSome?_eq_some (mirroring modalStepBranchS4Keyed_branch_superset's own proof), (2) case-splitting on sf.sign, sf.formula (9 leaves: atom/bot/imp/and/or share one generic non-minting argument via `hold := fun b' hb' w k hwk => relevantSetFinset_mono φ₀ b b' w (hsuper b' hb') (hLB w k hwk)` regardless of sign; box/diamond each need an inner sign split to isolate the minting shape from its non-minting sibling), (3) within each of the 7 non-minting leaves extracting keys' = keys via the same rcases hres : result with nf | brs | nf | - pattern already proven in modalStepBranchS4Keyed_branch_superset, (4) within the 2 minting leaves' unblocked sub-case, applying the now-closed successorBirthContent_*_subset_relevantSetFinset lemmas directly (newForms is pinned exactly by modalApplyOneS4Keyed_*_unblocked_eq + the mint_fst lemmas). Then attempt _preserves_keysTotal/_preserves_keysInUniverse (keysInUniverse's minting case reuses the SAME hwit witness-membership argument already proved inside the two subset lemmas), assemble modalStepBranchS4_preserves_S4LoopInv, and proceed to Phase 6 (pigeonhole world bound) and Phase 7 (decidability decision).",
     "plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
     "files_modified": [
       "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
     ],
     "reusable_lemmas_landed_this_dispatch": [
-      "blockingWorldS4Keyed",
-      "blockingWorldS4Keyed_eq_birthContent",
-      "blockingWorldS4Keyed_none_fresh",
-      "modalApplyOneS4Keyed",
-      "modalStepBranchS4Keyed (redefined)",
-      "keysUpdate_preserves_keysDistinct",
-      "modalSubfmls_trans_S4",
-      "modalUniverseS4_mem_formula",
-      "modalApplyOne_boxNeg_mint_fst_S4",
-      "modalApplyOne_diamondPos_mint_fst_S4"
+      "any_beq_of_mem_S4",
+      "mem_of_any_beq_S4",
+      "modalNextWorld_fresh_beq_S4",
+      "mem_signedSubfmls_of_formula_S4",
+      "successorBirthContent_boxNeg_subset_relevantSetFinset",
+      "successorBirthContent_diamondPos_subset_relevantSetFinset",
+      "modalApplyOneS4Keyed_boxNeg_blocked_eq",
+      "modalApplyOneS4Keyed_boxNeg_unblocked_eq",
+      "modalApplyOneS4Keyed_diaPos_blocked_eq",
+      "modalApplyOneS4Keyed_diaPos_unblocked_eq",
+      "modalStepBranchS4Keyed_branch_superset"
     ],
     "phases_landed": [1, 2, 3, 4],
-    "phase_blocked": 5,
+    "phase_partial": 5,
     "phases_not_attempted": [6, 7],
-    "unrelated_note": "A full unscoped `lake build` of the entire Cslib target currently fails on Cslib/Logics/Modal/Tableau/FiveSimplification.lean due to a pre-existing, uncommitted modification from a different concurrent task (515), confirmed present before this dispatch began. Not in this task's scope; `lake build` scoped to LoopChecking.lean/FrameCompleteness.lean and `lake test` (full suite) are both green."
+    "unrelated_note": "The prior dispatch's FiveSimplification.lean cross-task conflict is resolved -- full unscoped `lake build` is green (3240/3240). A NEW unrelated issue was observed this dispatch: `lake test` fails on CslibTests/ModalFrameSeparation.lean (`decide` stuck reducing `instDecidableFiveValid`) -- confirmed via `git log -- CslibTests/ModalFrameSeparation.lean` and `git status` (clean, last touched by task 515's own commit 'phase 23.2') to be entirely task 515's S5/Five decidability work, not caused by or related to any file this task modifies. Not in this task's scope."
   },
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",

@@ -1,8 +1,8 @@
 {
   "status": "partial",
-  "started_at": "2026-07-17T00:00:00Z",
+  "started_at": "2026-07-17T22:00:05Z",
   "requires_user_review": true,
-  "review_reason": "Phase 5 (S4LoopInv preservation, the plan's flagged crux) remains BLOCKED, but this dispatch closed the prior dispatch's structural guard-vs-keys gap: blockingWorldS4Keyed (recorded-keys guard) plus keysUpdate_preserves_keysDistinct (the specific fact previously proved impossible) are now landed, green, zero-sorry, zero-axiom. The residual blocker narrowed from a structural design gap to a bounded Lean proof-engineering gap in S4LoopInv.keyLowerBd's minting-case equality (relevantSetFinset of a freshly-minted world equals successorBirthContent) -- mathematically verified by hand, reusable groundwork landed (mint_fst unfolding lemmas + subformula-membership helpers), but the Finset/Bool/Prop bridging proof itself did not converge within budget and was removed rather than committed with a sorry. Phases 6-7 not attempted (dependency on Phase 5).",
+  "review_reason": "Phase 5's specifically-flagged blocker (S4LoopInv.keyLowerBd's minting-case fact) is now CLOSED and verified, zero sorry/axiom. This dispatch also landed the driver-level assembly groundwork (four modalApplyOneS4Keyed_*_eq guard-spec lemmas, modalStepBranchS4Keyed_branch_superset). The full driver-level lemma modalStepBranchS4_preserves_keyLowerBd (and keysTotal/keysInUniverse preservation, and the full S4LoopInv assembly) remain unwritten -- pure mechanical casework now, no further proof-engineering research needed. Phases 6-7 not attempted (depend on Phase 5's full completion).",
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
@@ -10,20 +10,21 @@
     "specs/511_s4_loop_checking_termination/.return-meta.json"
   ],
   "partial_progress": {
-    "stage": "phase_5_reblocked_narrowed",
-    "details": "Phases 1-4 remain landed green (unchanged). Phase 5: guard redesign (blockingWorldS4Keyed) closed; keysDistinct preservation (the named crux) closed as keysUpdate_preserves_keysDistinct; keyLowerBd's minting-case equality attempted with reusable groundwork landed (modalApplyOne_boxNeg_mint_fst_S4/_diamondPos_mint_fst_S4, modalSubfmls_trans_S4, modalUniverseS4_mem_formula) but not closed; keysTotal/keysInUniverse preservation and full S4LoopInv assembly not attempted (blocked on keyLowerBd). Phases 6-7 not attempted.",
+    "stage": "phase_5_keyLowerBd_fact_closed_assembly_open",
+    "details": "Phases 1-4 unchanged, green. Phase 5: keysDistinct preservation remains closed (keysUpdate_preserves_keysDistinct, prior dispatch). This dispatch closed the previously-open keyLowerBd minting-case fact as two standalone lemmas (successorBirthContent_boxNeg_subset_relevantSetFinset / successorBirthContent_diamondPos_subset_relevantSetFinset), using a Bool-to-Prop membership-conversion technique (any_beq_of_mem_S4/mem_of_any_beq_S4) that avoided the prior dispatch's Bool/Prop bridging trap. Also landed: modalApplyOneS4Keyed_boxNeg_blocked_eq/_unblocked_eq/_diaPos_blocked_eq/_unblocked_eq (guard-spec lemmas) and modalStepBranchS4Keyed_branch_superset (generic branch-superset fact). The driver-level modalStepBranchS4_preserves_keyLowerBd lemma composing all of this is NOT yet written (mechanical casework remaining: 9-leaf sf.sign/sf.formula split). keysTotal/keysInUniverse preservation and full S4LoopInv assembly not attempted. Phases 6-7 not attempted.",
     "phases_completed": 4,
     "last_completed_phase": "Phase 4: Key-threaded S4 step + restated S4LoopInv",
-    "blocked_phase": 5
+    "blocked_phase": null,
+    "partial_phase": 5
   },
   "verification": {
     "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
-    "axiom_count": 28,
+    "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "lake build (scoped: LoopChecking.lean, FrameCompleteness.lean), lake exe checkInitImports, lake lint, lake exe lint-style, lake shake, lake test all green/clean for this dispatch's changes. axiom_count is the repo-wide baseline (unchanged by this task). A full unscoped `lake build` of the entire Cslib target currently fails on Cslib/Logics/Modal/Tableau/FiveSimplification.lean due to a PRE-EXISTING, uncommitted, unrelated modification from a different concurrent task (515) -- confirmed via git status/log before this dispatch began; not touched or caused by this task. lean_verify on blockingWorldS4Keyed_none_fresh and keysUpdate_preserves_keysDistinct reports only propext/Classical.choice/Quot.sound."
+    "note": "Scoped lake build (LoopChecking.lean, FrameCompleteness.lean) green. Full unscoped lake build also green (3240/3240 jobs) -- the prior FiveSimplification.lean cross-task conflict has been resolved/committed by the concurrent task (515) since the last dispatch. lake exe checkInitImports, lake lint, lake exe lint-style, lake shake (scoped) all clean for this file (only the pre-existing modalUniverseS4_length_le unused-hypothesis warning remains, predating this dispatch). lean_verify on successorBirthContent_boxNeg_subset_relevantSetFinset, successorBirthContent_diamondPos_subset_relevantSetFinset, and modalStepBranchS4Keyed_branch_superset: propext/Classical.choice/Quot.sound only (no new axioms). lake test fails on CslibTests/ModalFrameSeparation.lean (decide stuck on instDecidableFiveValid) -- confirmed via git log/git status to be entirely task 515's S5/Five decidability work, unrelated to any file this task modifies; not a regression from this dispatch."
   },
   "metadata": {
     "session_id": "sess_1784322687_fcf57a_511",

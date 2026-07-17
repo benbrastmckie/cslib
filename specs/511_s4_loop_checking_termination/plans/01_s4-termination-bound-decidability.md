@@ -1,7 +1,7 @@
 # Implementation Plan: Task #511 — S4 Loop-Checking Termination Bound & Decidability
 
 - **Task**: 511 — s4_loop_checking_termination (follow-on to task 506, Phases 8-9)
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 16 hours
 - **Dependencies**: Task 506 (Phases 1-7 landed green); task 510 (generalized loop lemma — see Phase 7 finding: does NOT unblock S4)
 - **Research Inputs**: specs/511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md; specs/511_s4_loop_checking_termination/handoffs/01_research-handoff.json
@@ -252,7 +252,7 @@ chain, so each wave contains a single phase.
 - **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; the restated structure
   and the S4 step definition typecheck; `lean_verify` zero sorry/axiom on the new definitions.
 
-### Phase 5: `S4LoopInv` preservation lemmas — the crux [BLOCKED]
+### Phase 5: `S4LoopInv` preservation lemmas — the crux [IN PROGRESS]
 
 - **Goal:** Prove every `modalStepBranchS4Keyed` step preserves the four key fields. This is the
   mathematical heart of the task; budget generously.

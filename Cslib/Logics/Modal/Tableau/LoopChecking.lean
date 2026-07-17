@@ -432,6 +432,81 @@ lemma blockingWorldS4_none_fresh (φ₀ : Proposition Atom)
   intro w' hw' heq
   exact absurd (decide_eq_true heq) (by simpa using h w' hw')
 
+/-! ## Keys-Aware Minting Guard (task 511, Phase 5: closes the guard-vs-keys gap)
+
+**The Phase 5 blocker** (this plan, Phase 5 section): `blockingWorldS4` compares the prospective
+successor's birth content against worlds' LIVE `relevantSetFinset`, but `S4LoopInv.keysDistinct`'s
+preservation needs comparison against the RECORDED `keys` list directly. The chain
+`k' ⊆ relevantSetFinset φ₀ b w'` (`keyLowerBd`) and `relevantSetFinset φ₀ b w' ≠ newkey`
+(`blockingWorldS4_none_fresh`) does **not** imply `k' ≠ newkey`: if `k'` is a *proper* subset of
+`w'`'s current relevant set (the expected case once ordinary saturation grows `w'`'s live set
+past its birth key), `k' = newkey ⊊ relevantSetFinset φ₀ b w' ≠ newkey` is consistent, and
+`keysDistinct` breaks the instant the new key is recorded.
+
+`blockingWorldS4Keyed` below fixes this by comparing the prospective birth content directly
+against `keys`, giving `keysDistinct`'s preservation for free from the guard's own freshness
+contract -- no live-set indirection, no dependence on `keyLowerBd` being an equality.
+`blockingWorldS4`/`modalApplyOneS4`/`modalHintikkaSetS4` (task 511 Phase 3, task 506) remain
+completely untouched as a separate, valid, live-set-guarded artifact that task 506's
+Hintikka/truth-lemma bridges continue to consume; `modalApplyOneS4Keyed`/`modalStepBranchS4Keyed`
+below are the loop-invariant/termination track (this plan's Phases 5-7) and consult ONLY the
+keys-aware guard, bypassing `modalApplyOneS4`'s own internal (live-set) guard decision entirely
+at the two minting shapes (blocker's Option (a)). -/
+
+/-- The keys-aware minting guard: the least world `w'` **recorded** in `keys` whose recorded
+birth key already equals the PROSPECTIVE successor's birth content, if any exists. Unlike
+`blockingWorldS4` (live `relevantSetFinset`), this compares against the stable `keys` list. -/
+def blockingWorldS4Keyed (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) : Option WorldIndex :=
+  ((keys.filter
+    (fun wk => decide (wk.2 = successorBirthContent φ₀ b s φ w))).map Prod.fst).min?
+
+omit [Hashable Atom] in
+/-- If `blockingWorldS4Keyed` returns a world, that world's RECORDED key equals the prospective
+successor's birth content -- i.e. the pair is literally recorded in `keys`. -/
+lemma blockingWorldS4Keyed_eq_birthContent (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (h : blockingWorldS4Keyed φ₀ b keys s φ w = some wBlock) :
+    (wBlock, successorBirthContent φ₀ b s φ w) ∈ keys := by
+  unfold blockingWorldS4Keyed at h
+  have hmem := List.min?_mem h
+  simp only [List.mem_map] at hmem
+  obtain ⟨wk, hwk_mem, hwk_fst⟩ := hmem
+  have hwk_pred := (List.mem_filter.mp hwk_mem).2
+  have heq : wk.2 = successorBirthContent φ₀ b s φ w := of_decide_eq_true hwk_pred
+  have hwk_in : wk ∈ keys := (List.mem_filter.mp hwk_mem).1
+  have hwk_eq : wk = (wBlock, successorBirthContent φ₀ b s φ w) := by
+    rw [← hwk_fst, ← heq]
+  rwa [hwk_eq] at hwk_in
+
+omit [Hashable Atom] in
+/-- **The keys-aware guard's freshness contract**: if `blockingWorldS4Keyed` returns `none`, the
+prospective successor's birth content differs from every RECORDED key. This is exactly what
+gives `keysDistinct`'s preservation directly (Phase 5's crux, closing the gap
+`blockingWorldS4_none_fresh` could not close on its own). -/
+lemma blockingWorldS4Keyed_none_fresh (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (h : blockingWorldS4Keyed φ₀ b keys s φ w = none) :
+    ∀ w' k', (w', k') ∈ keys → k' ≠ successorBirthContent φ₀ b s φ w := by
+  unfold blockingWorldS4Keyed at h
+  rw [List.min?_eq_none_iff] at h
+  intro w' k' hmem heq
+  have hfilt : (w', k') ∈ keys.filter
+      (fun wk => decide (wk.2 = successorBirthContent φ₀ b s φ w)) := by
+    rw [List.mem_filter]
+    exact ⟨hmem, decide_eq_true heq⟩
+  have hmap : w' ∈ (keys.filter
+      (fun wk => decide (wk.2 = successorBirthContent φ₀ b s φ w))).map Prod.fst :=
+    List.mem_map_of_mem hfilt
+  rw [h] at hmap
+  simp at hmap
+
 /-! ## S4 Rule Application -/
 
 /-- The `φ₀`-parameterized S4 rule-application function (Decision D1). Wraps
@@ -570,15 +645,45 @@ place S4 stops reusing `modalStepBranchGen` definitionally for **stepping** (it 
 needs an S4-specific driver regardless (task 511 research §3), so this cost is not incurred
 twice. -/
 
-/-- The S4-specific keyed one-step branch expansion: mirrors `modalStepBranchS4`
-(`modalStepBranchGen (modalApplyOneS4 φ₀)`) exactly for the `(newBranches, newExpandedSets,
-newAcc)` triple -- same selected formula (`b.findSome?` over the same "already expanded"
-guard), same rule application (`modalApplyOneS4 φ₀`) -- but additionally threads a `keys` list
-recording every known world's stable birth content. On a call at one of the two minting shapes
-that is **not** blocked (`blockingWorldS4 φ₀ b s φ w = none`), the underlying rule mints
-`modalNextWorld b`, so `keys` gains the entry `(modalNextWorld b, successorBirthContent φ₀ b s
-φ w)`. On every other call (blocked minting-shaped, or a non-minting shape entirely), no world
-is minted and `keys` is unchanged. -/
+/-- **Task 511 Phase 5 revision**: the keys-aware S4 rule-application function, closing the
+guard-vs-keys gap. Identical in shape to `modalApplyOneS4 φ₀` (same non-minting fallthrough to
+`modalApplyOneS4Rules`/`modalApplyOneS4`), but at the two minting shapes consults
+`blockingWorldS4Keyed φ₀ b keys` (the RECORDED-keys guard) instead of `blockingWorldS4` (the
+live-set guard). This is what makes `modalStepBranchS4Keyed`'s `(b, e, acc)` bookkeeping and its
+`keys` bookkeeping driven by the SAME decision -- required for `S4LoopInv.keyLowerBd` to remain
+consistent with `S4LoopInv.keysDistinct` (blocker Option (a)): if the two bookkeeping streams
+used different guards, a world could be recorded in `keys` without ever actually being minted
+onto the branch, breaking `keyLowerBd` (`k ⊆ relevantSetFinset φ₀ b w` fails when `w` was never
+minted, since then `relevantSetFinset φ₀ b w = ∅ ⊉ k` for nonempty `k`). Reduces to
+`modalApplyOne` (raw K) at an unblocked minting shape -- same underlying rule as
+`modalApplyOneS4`'s own unblocked reduction (`modalApplyOneS4_boxNeg_unblocked_eq`/dual), just
+gated by a different guard. `modalApplyOneS4`/`blockingWorldS4` are NOT modified or removed:
+they remain the live-set-guarded artifact task 506's Hintikka/truth-lemma bridges consume. -/
+def modalApplyOneS4Keyed (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : RuleApply Atom :=
+  fun sf b acc =>
+    match sf.sign, sf.formula with
+    | .neg, .box φ =>
+      match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
+      | none => modalApplyOne sf b acc
+    | .pos, .diamond φ =>
+      match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
+      | some wBlock => (.linear [], acc.addEdge sf.label wBlock)
+      | none => modalApplyOne sf b acc
+    | _, _ => modalApplyOneS4 φ₀ sf b acc
+
+/-- The S4-specific keyed one-step branch expansion: same selected formula (`b.findSome?` over
+the same "already expanded" guard) and same rule application (`modalApplyOneS4Keyed φ₀ keys`,
+task 511 Phase 5) as the `(newBranches, newExpandedSets, newAcc)` triple -- additionally threads
+a `keys` list recording every known world's stable birth content. On a call at one of the two
+minting shapes that is **not** blocked (`blockingWorldS4Keyed φ₀ b keys s φ w = none`), the
+underlying rule mints `modalNextWorld b`, so `keys` gains the entry `(modalNextWorld b,
+successorBirthContent φ₀ b s φ w)`. On every other call (blocked minting-shaped, or a
+non-minting shape entirely), no world is minted and `keys` is unchanged. The keys' computation
+below re-derives the SAME `blockingWorldS4Keyed` decision `modalApplyOneS4Keyed` already made
+internally (rather than threading it out), keeping this definition's shape close to Phase 4's
+original for auditability. -/
 def modalStepBranchS4Keyed (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
@@ -589,15 +694,15 @@ def modalStepBranchS4Keyed (φ₀ : Proposition Atom)
   b.findSome? fun sf =>
     if e.any (· == sf) then none
     else
-      let (result, newAcc) := modalApplyOneS4 φ₀ sf b acc
+      let (result, newAcc) := modalApplyOneS4Keyed φ₀ keys sf b acc
       let keys' :=
         match sf.sign, sf.formula with
         | .neg, .box φ =>
-          match blockingWorldS4 φ₀ b .neg φ sf.label with
+          match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
           | some _ => keys
           | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg φ sf.label)]
         | .pos, .diamond φ =>
-          match blockingWorldS4 φ₀ b .pos φ sf.label with
+          match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
           | some _ => keys
           | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos φ sf.label)]
         | _, _ => keys

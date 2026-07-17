@@ -2124,7 +2124,7 @@ imported).
 
 ---
 
-### Phase 19a: Guarded mint arm + termination bound re-derivation [PARTIAL -- mint-arm guard LANDED (`56a84d07`); termination re-derivation BLOCKED, not yet attempted]
+### Phase 19a: Guarded mint arm + termination bound re-derivation [COMPLETED -- mint-arm guard LANDED (`56a84d07`); termination bound re-derivation LANDED (`2c7abe73`)]
 
 **Goal**: Close BOTH Phase-19 soundness gaps at the rule/termination level, so that Phase 19b's
 `modalTableauFive_sound` assembly discharges cleanly. Two gaps, two fixes: (i) the **propagation-arm**
@@ -2293,7 +2293,7 @@ below is resolved by these steps; execute as sorry-free CI-green sub-milestones 
       PrimeExclusion.lean baseline error and one pre-existing, untouched `flexible`-tactic info at
       line 510), `lake shake` (no import-removal suggestion for this file), and `lake test` all
       green.)*
-- [ ] **RE-DERIVE the tag-injection termination chain under the source-split invariant**
+- [x] **RE-DERIVE the tag-injection termination chain under the source-split invariant**
       (`FiveSimplification.lean`, and any `S5wWorldInv`/`S5wTagInv` consumers). The landed bound rests
       on "≤1 mint per `(sign, subformula)` tag"; under the guard it refines to "**≤1 mint per tag PER
       SOURCE-CLASS {root, non-root}**". Re-state and re-prove `mintTags`/`usedTags`/`usedTags_mono`/
@@ -2301,30 +2301,51 @@ below is resolved by these steps; execute as sorry-free CI-green sub-milestones 
       the source-split invariant. The root contributes ≤1 mint per tag (bounded by the root's own
       diamond/negated-box subformulas, ≤ `|modalSubfmls φ₀|`); the non-root cluster contributes ≤1 per
       tag as before; new world bound ≈ `2·|modalSubfmls φ₀|` -- **a larger constant, still LINEAR**,
-      decidability unaffected. **This is Phase-6/7-scale work on landed green assets** (Phase 6 = 1.5h,
-      Phase 7 = 2h): re-verify CI-green and commit each sub-milestone; **do not attempt in one pass**.
-      Excluding root-as-witness never forces a second mint of an already-minted tag: a formula at the
-      *root* was never minted (root formulas arrive by decomposition, not via `witnessWorldS5`), so
-      minting fresh for it is that tag's *first* mint in the root source-class (`reports/08_*`).
+      decidability unaffected. Excluding root-as-witness never forces a second mint of an
+      already-minted tag: a formula at the *root* was never minted (root formulas arrive by
+      decomposition, not via `witnessWorldS5`), so minting fresh for it is that tag's *first* mint in
+      the root source-class (`reports/08_*`).
 
-      **BLOCKER (this task, this dispatch)**: NOT ATTEMPTED. The mint-arm guard (previous task) landed
-      and consumed this dispatch's KILL budget for careful re-verification of its downstream consumers;
-      the termination re-derivation itself (a from-scratch, Phase-6/7-scale proof effort per the plan's
-      own sizing) was not started. This is the legitimate, plan-sanctioned partial outcome the Phase
-      19a description anticipates ("if the guarded mint-arm rule ALONE lands green ... that is a
-      legitimate, valuable partial"). **What is needed**: a dedicated dispatch (or sequence of
-      sub-milestone dispatches) to (i) state a source-split `usedTags`/`S5wTagInv`/`S5wWorldInv`-shaped
-      family of Five-local lemmas in `FiveSimplification.lean` (NOT editing the shared
-      `S5Simplification.lean` declarations `mintTags`/`usedTags`/`usedTags_mono`/`S5wTagInv`/
-      `S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w`, which the S5 chain still consumes verbatim);
-      (ii) prove the source-split analogue of `witnessWorldS5_none_not_mem_usedTags` against
-      `witnessWorldFive` (landed this dispatch, `56a84d07`) plus the new root-trigger-always-fresh
-      case; (iii) chain to a Five-local `modalMaxWorld_lt_worldBound_of_S5w`-analogue bounding
-      `modalMaxWorld b` by `2 * modalOps φ₀` (or tighter) as the plan specifies. **Open goal state**:
-      none yet exists -- no proof attempt was made this dispatch, so there is no partial `lean_goal` to
-      record; the starting point is a blank Lean declaration, not a stuck tactic state. **Prohibited
-      workarounds**: do NOT touch the shared S5w declarations; do NOT `sorry`; do NOT weaken
-      `modalApplyOneFive_specCore`'s statement to dodge the bound.
+      **LANDED, `2c7abe73` (task 515 phase 19a.2)**: `mintTags`/`S5wTagInv` (and their
+      tag-membership corollaries `modalApplyOneS5w_diamondPos_tag_mem`/`_boxNeg_tag_mem`) are
+      genuinely rule-independent -- they reference neither `witnessWorldS5` nor `witnessWorldFive` --
+      so they are reused **verbatim** from `S5Simplification.lean` (now `public import`ed), per the
+      shared-declaration constraint (S5Simplification.lean's `mintTags`/`usedTags`/`usedTags_mono`/
+      `S5wTagInv`/`S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w` themselves are untouched -- the S5
+      chain still consumes them verbatim). Only the witness-reuse-*specific* pieces needed Five-local,
+      source-split analogues, all additive in `FiveSimplification.lean`:
+      `usedTagsFiveNonRoot`/`usedTagsFiveRoot` (source-split `usedTags`, each a `Finset` filter of the
+      reused `mintTags φ₀`) + their monotonicity lemmas (`usedTagsFiveNonRoot_mono`/
+      `usedTagsFiveRoot_mono`, mirroring `usedTags_mono`); `witnessWorldFive_none_not_mem_usedTagsFiveNonRoot`
+      (the non-root reuse-miss case, direct analogue of `witnessWorldS5_none_not_mem_usedTags`);
+      `diamondPos_root_mem_usedTagsFiveRoot`/`boxNeg_root_mem_usedTagsFiveRoot` (the
+      root-trigger-always-fresh case -- no "unused" precondition needed, since the root arm fires
+      unconditionally and is witnessed directly by the trigger's own presence on the branch);
+      `FiveWorldInv` (source-split `S5wWorldInv`, summing both source-class counts); and
+      `modalMaxWorld_lt_worldBound_of_FiveWorldInv` (the final chain, giving `modalMaxWorld b <
+      modalWorldBound φ₀` at the larger-but-linear `2·modalOps φ₀` constant, matching
+      `outputsSubsetUniverse`'s `hW` hypothesis shape exactly, via the new arithmetic companion
+      `two_mul_modalOps_lt_worldBound`). Verified: scoped + full `lake build` (3240/3240) green,
+      `checkInitImports` exit 0, `lint-style` clean, `lake lint`/`lake shake` (full-repo scans) report
+      zero new warnings/import-suggestions attributable to this file (only pre-existing baselines
+      elsewhere), `lake test` exit 0, zero `sorry`/`admit` in the file, axioms confirmed via
+      `lake env lean` + `#print axioms` on every new declaration as `[propext, Classical.choice,
+      Quot.sound]` (or a subset) only -- no `sorryAx`, no new custom axiom.
+
+      **Scope note (not a deviation -- this is the literal scope of this checklist item and of the
+      corresponding continuation-handoff task list)**: this lands the *static* source-split
+      structures and the final arithmetic bound, mirroring `S5wWorldInv`/
+      `modalMaxWorld_lt_worldBound_of_S5w`'s own shape (which likewise take the world-bound invariant
+      as a hypothesis rather than proving it holds at every reachable branch). The *inductive*
+      step-preservation proof establishing `FiveWorldInv` holds across the whole fuel-driven
+      expansion (the source-split analogue of `S5wTagInv_S5wWorldInv_step`) is Phase 19b-scale work,
+      for whatever call site eventually maintains it across the fuel induction -- consistent with
+      `reports/08_*`'s own scoping and with the fact that `FiveSimplification.lean`'s
+      `outputsSubsetUniverse` field already takes its world-bound fact as a raw hypothesis parameter,
+      discharged nowhere in this file yet (recorded in handoff 11, unaffected by this dispatch).
+      `modalApplyOneFive_specCore` re-verified unconditionally (untouched by this dispatch's edits);
+      zero edits to any K/T/B/S4/S5 declaration's statement; the S5 surface and the five green
+      Route-1/soundness building-block lemmas remain valid and unmodified.
 - [x] **Re-verify `modalApplyOneFive_specCore`** under the guarded mint arms. The mint-arm world-bound
       fields **loosen on the reuse side** (reuse fires less often) but **gain the root-class allowance**
       on the mint side -- net linear. `GenericDriver.lean`'s `freshLocal` one-edge contract is
@@ -2525,7 +2546,7 @@ statement**; the S5 surface (`modalTableauS5*`, `extractModelS5*`, `modalTruthLe
 
 ---
 
-### Phase 20: `extractModelFive` + the Euclidean truth lemma [NOT STARTED]
+### Phase 20: `extractModelFive` + the Euclidean truth lemma [IN PROGRESS]
 
 **Design UNCHANGED by the v6 re-scope** -- this phase is the completeness/countermodel side and is
 **independent of the soundness re-derivation**; it depends only on Phases 17/18 and runs in parallel

@@ -284,7 +284,20 @@ discharging all nine fields.
 
 ---
 
-### Phase 5: Direct KB5 soundness theorem against kb5FC [NOT STARTED]
+### Phase 5: Direct KB5 soundness theorem against kb5FC [COMPLETED]
+
+Landed `modalTableauKb5'_sound` proved directly against `kb5FC`. Key semantic facts:
+`reachable_imp_related_kb5`/`accReachableInv_related_kb5`/`accReachableInv_kb5_root_refl`
+(simpler than Five's cod-equivalence route since `kb5FC`'s `Std.Symm` conjunct lets the
+`ReflTransGen` path anchor directly at `f 0`), `modalKb5BoxAllFull_soundIn`/
+`modalKb5DiaNegAllFull_soundIn` (rule-level soundness for the two changed shapes), and the full
+~700-line fuel-induction chain (`modalStepBranchKb5'_preserves_satIn`/
+`modalExpandBranchesKb5'_closed_unsatIn`) mirrored from the Five chain (renaming
+`fiveFC↦kb5FC`/`modalApplyOneFive↦modalApplyOneKb5'` throughout; the "every other shape" K-rule
+branch never inspected `fiveFC`-specific facts, only threaded `hFC` opaquely, so it transferred
+verbatim). Confirmed the dependency graph excludes `fiveValid_imp_kb5Valid`/`kb5FC_imp_fiveFC`
+(grepped the full new block). Sorry-free, lean_verify-clean (standard axiom subset, confirmed
+both via the MCP tool and `lake env lean #print axioms`).
 
 **Goal**: Land a new soundness theorem in `FrameSoundness.lean` proving `modalTableauKb5' φ =
 .closed → kb5Valid φ`, argued **directly** against `kb5FC` — NOT via `fiveValid_imp_kb5Valid`.

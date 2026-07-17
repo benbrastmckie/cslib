@@ -2072,7 +2072,7 @@ deleted. The remediation (Route 1) follows in **Tasks**.
 
 **Tasks** (Route 1 -- the diagnosis above is resolved by these steps):
 
-- [ ] **Install the root/non-root split in the Phase 18 helpers** (`FiveSimplification.lean`). Give
+- [x] **Install the root/non-root split in the Phase 18 helpers** (`FiveSimplification.lean`). Give
       `modalFiveBoxAll`/`modalFiveDiaNegAll` an `acc` parameter and add a single `hasEdge 0 w'` guard
       on the **root arm** (`w == 0`): the root trigger keeps only `w'` with `acc.hasEdge 0 w'` (direct
       successors); the non-root trigger (`w ≠ 0`) keeps the current universal `modalKnownWorlds b \ {0}`
@@ -2081,23 +2081,23 @@ deleted. The remediation (Route 1) follows in **Tasks**.
       stays a **subset** of the current one. Membership lemmas `modalFiveBoxAll_mem`/`_mem` keep their
       conclusion verbatim (`x.label ∈ modalKnownWorlds b ∧ x.label ≠ 0 ∧ x ∉ b`); one extra `by_cases`
       on the new guard.
-- [ ] **Thread `acc` through `modalApplyOneFiveProp`** so the propagation arms receive it. The mint
+- [x] **Thread `acc` through `modalApplyOneFiveProp`** so the propagation arms receive it. The mint
       arms (`T(◇φ)@w`, `F(□φ)@w`) are **UNTOUCHED** -- same witness-reuse test, same `.linear [witness]`,
       same `acc.addEdge sf.label w'`. The three Phase 1 design constraints (`.linear [witness]` not
       `.linear []`; not `.persistent []`; **no `hasEdge` guard on the mint/reuse arm**, R6) are
       preserved: the new guard sits on the **propagation** arm's target-list filter, not on the
       minting-vs-notApplicable dispatch.
-- [ ] **Re-verify `modalApplyOneFive_specCore`** under the revised helpers. The world-bound /
+- [x] **Re-verify `modalApplyOneFive_specCore`** under the revised helpers. The world-bound /
       catalog-membership fields (`hOutputsSubsetUniverse`, the `modalKnownWorlds` fields) get **strictly
       easier** -- the root arm's output is now a **subset** of what was already proven in bounds. The
       **mint-arm fields are untouched**. This is a re-verification, not a fresh proof.
-- [ ] **`GenericDriver.lean` is NOT touched.** `RuleApplicationSpecCore.freshLocal`'s one-edge mint
+- [x] **`GenericDriver.lean` is NOT touched.** `RuleApplicationSpecCore.freshLocal`'s one-edge mint
       contract is unchanged (the propagation arms emit `.persistent` formulas and add no edges), so the
       earlier-rejected "redirect mint edges to the root" idea is **not** Route 1 and stays discarded.
       **Termination is unaffected**: `modalOps`/`mintTags`/`S5wTagInv`/`usedTags`/`S5wWorldInv`/
       `modalMaxWorld_lt_worldBound_of_S5w` depend only on the **mint arms**, which Route 1 leaves alone;
       restricting propagation output to a subset cannot raise the world count.
-- [ ] **Land `accReachableInv_related_five`** (`FrameSoundness.lean`) -- the root/non-root discharge,
+- [x] **Land `accReachableInv_related_five`** (`FrameSoundness.lean`) -- the root/non-root discharge,
       the analogue of `accReachableInv_related_s5` (`:1385`) but **consuming
       `rooted_cluster_isEquiv.refl` on `cod r`** (the landed Phase 17 lemma
       `Relation.rooted_cluster_isEquiv : IsEquiv (cod r) r`) **instead of frame reflexivity** (`hFC.1`).
@@ -2106,15 +2106,34 @@ deleted. The remediation (Route 1) follows in **Tasks**.
       **inside `cod`**, where reflexivity is recovered from the cod-equivalence. The root case is the
       standard K realized-edge argument on `acc.successorsOf 0`. Reuse the landed `accReachableInv`
       definition, `accReachableInv_initial`, and its step-preservation **unchanged** (edge-tracking is
-      frame-condition-independent).
+      frame-condition-independent). *(deviation: altered -- landed as two lemmas,
+      `reachable_imp_cod_related_five` (anchors a known non-root world to a direct root successor's
+      image via `ReflTransGen` induction, symmetrizing inside `cod m.r` via `rooted_cluster_isEquiv`)
+      + `accReachableInv_related_five` (combines two such anchors sharing `f 0` as common
+      `RightEuclidean` source); required adding a previously-missing
+      `import Cslib.Foundations.Relation.Euclidean` to `FrameSoundness.lean`. Verified sorry-free,
+      CI-green, committed at `4ae8eac5`.)*
 - [ ] **Land `theorem modalTableauFive_sound (φ) (h : modalTableauFive φ = .closed) : fiveValid φ`**,
       reusing the landed soundness scaffolding (`S5SoundInv`, `modalStepBranchS5_preserves_satIn`,
       `modalExpandBranchesS5_closed_unsatIn`, `accReachableInv` + `_initial`) wherever `modalApplyOneFive`
       is **defeq** to `modalApplyOneS5w`, and dispatching the propagation case through
-      `accReachableInv_related_five`.
+      `accReachableInv_related_five`. *(deviation: deferred -- not attempted this dispatch. Scoping
+      revealed the fully-generic and S5-specific per-step theorems are both structurally
+      inapplicable to `modalApplyOneFive` (same "no accReachableInv slot" obstruction the landed S5
+      docstring records, plus `modalApplyOneFive` does not satisfy `S5SoundSpec`); a bespoke
+      Five-specific per-step + fuel-induction assembly is needed, estimated at ~800-1100 new lines
+      (mirroring `FrameSoundness.lean`'s S5 bespoke chain, `S5SoundInv` through
+      `modalTableauS5_sound`, ~860 lines). See
+      `handoffs/09_phase19-route1-and-cod-equivalence-landed.md` for the full scoping breakdown and
+      continuation plan.)*
 - [ ] **KILL CONDITION** (mirrors Phase 13's): if the soundness re-proof exceeds **~400 lines**, stop
       and record the measured count -- the root/cluster split is then wrong in a way `reports/07_*` did
       not foresee. The report's blast-radius analysis places the new proof **well inside** this budget.
+      *(deviation: the report's estimate appears to under-scope the mechanical fuel-induction
+      assembly; see handoff 09 for the revised ~800-1100 line estimate and the reasoning. The
+      root/cluster split itself is NOT wrong -- `accReachableInv_related_five` is landed,
+      sorry-free, and CI-green -- the underestimate is specifically about per-shape fuel-induction
+      boilerplate, not about the mathematical design.)*
   **Prohibited workarounds**: do NOT weaken `fiveFC`/`kb5FC`'s definitions, do NOT restrict
   `modalTableauFive_sound`'s statement to a special case of `φ₀`, do NOT introduce `sorry` or an
   axiom to paper over the gap.

@@ -4,12 +4,12 @@
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [],
       "parent_task": 506,
-      "last_updated": "2026-07-17T21:13:23Z",
+      "last_updated": "2026-07-17T22:31:01Z",
       "session_id": "sess_1784322687_fcf57a_511",
       "artifacts": [
         {
@@ -26,10 +26,15 @@
           "type": "summary",
           "path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
           "summary": "Phases 1-4 green; Phase 5 structurally blocked (keysDistinct)"
+        },
+        {
+          "type": "handoff",
+          "path": "specs/511_s4_loop_checking_termination/handoffs/02_phase5-keylowerbd-fact-closed.md",
+          "summary": "keyLowerBd minting-case fact closed; driver-level assembly recipe for continuation"
         }
       ],
-      "blockers": "Phase 5 (_preserves_keysDistinct) is a genuine structural obstruction: blockingWorldS4_none_fresh checks against LIVE relevant sets while keyLowerBd only gives key ⊆ live set, so a fresh birth key cannot be shown distinct from existing recorded keys (a world live set routinely grows past its own birth key; counterexample constructed). Fix requires comparing against RECORDED keys, a materially larger guard redesign (~Phase 9 scope). Phases 1-4 landed green (exponent fix 2^(2|Sf|), signedSubfmls key infra, successorBirthContent/blockingWorldS4 minting guard, modalStepBranchS4Keyed + restated S4LoopInv); zero sorry/axiom, full CI green. Phases 6-7 depend on Phase 5. Also: independent Phase 9 blocker remains (task 510 modalExpandBranchesGen_hintikka cannot be instantiated for S4).",
-      "completion_summary": "PARTIAL/[BLOCKED]: Phases 1-4 of S4 termination bound landed green (zero sorry/axiom, full CI). Phase 5 keysDistinct preservation blocked by documented structural obstruction requiring recorded-key guard redesign; Phases 6-7 gated on it. Recommend follow-on task for keys-aware guard redesign."
+      "blockers": "No genuine blocker remains. Phase 5's specifically-named gap (S4LoopInv.keyLowerBd's minting-case fact) is CLOSED and verified (successorBirthContent_boxNeg_subset_relevantSetFinset / successorBirthContent_diamondPos_subset_relevantSetFinset, zero sorry/axiom). Driver-level assembly groundwork also landed (modalApplyOneS4Keyed_*_blocked/unblocked_eq guard-spec lemmas, modalStepBranchS4Keyed_branch_superset). What remains is pure mechanical casework to assemble modalStepBranchS4_preserves_keyLowerBd (a 9-leaf split on sf.sign/sf.formula, every sub-argument already proven in isolation), then keysTotal/keysInUniverse preservation and the full S4LoopInv assembly, before Phases 6-7 (pigeonhole world bound, decidability) become attemptable. See specs/511_s4_loop_checking_termination/handoffs/02_phase5-keylowerbd-fact-closed.md for the exact continuation recipe.",
+      "completion_summary": "PARTIAL: Phases 1-4 remain green (zero sorry/axiom). Phase 5's named crux (keyLowerBd minting-case fact) is now closed and verified, plus reusable driver-level assembly groundwork landed. The full driver-level preservation lemma (modalStepBranchS4_preserves_keyLowerBd) and keysTotal/keysInUniverse/full S4LoopInv assembly remain open but are now pure mechanical casework, not proof-engineering research. Phases 6-7 not attempted (depend on Phase 5). Recommend continuation dispatch to finish the assembly."
     },
     {
       "project_number": 502,
@@ -1410,8 +1415,8 @@
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-17T21:32:00Z",
-      "session_id": "sess_1784323861_ecc751",
+      "last_updated": "2026-07-17T22:30:15Z",
+      "session_id": "sess_1784327380_e6aeac",
       "next_artifact_number": 6,
       "memory_candidates": [
         "In this repo, Lean files with `module` + `public import` (not `public meta import`) headers cannot embed permanent `#eval`/`#guard`/`native_decide` declarations (structural module-system limitation, documented at Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Sanity Checks' section). Kernel-level `rfl`/`decide` also fails on functions compiled via nested well-founded recursion (e.g. modalExpandBranchesGen's fuel-driven processNext) even at small argument magnitudes, independent of the module-system limitation. Workaround: chain single, non-recursive step functions (e.g. modalStepBranchGen) via explicit `let`/`bind`, which DO reduce fine under `rfl`/`decide`, to build a mechanized multi-step counterexample without touching the recursive driver.",

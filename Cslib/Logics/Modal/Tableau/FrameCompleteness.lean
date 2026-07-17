@@ -3037,7 +3037,11 @@ the root-triggered mint case needs this refinement over the plain, `e`-independe
 /-- **Five's instantiation of `Aux`**: the `modalUniverse`-closure conjunct (needed since
 `AuxStepPreserved`'s signature does not thread `ModalLoopInvHintikka.bClosure` as an ambient
 hypothesis the way it threads `accFreshInv`/`accTargetsKnown`) paired with the `e`-aware
-world-bound invariant `FiveWorldInvE`. -/
+world-bound invariant `FiveWorldInvE`. The trailing `Accessibility` argument is required by
+`Aux`'s shared signature (`AuxStepPreserved`/`AuxBounds`/`ModalLoopInvHintikka` all expect
+`List (SignedFormula …) → List (SignedFormula …) → Accessibility → Prop`) but genuinely unused
+here, mirroring `ModalLoopAuxS5w`. -/
+@[nolint unusedArguments]
 def ModalLoopAuxFive (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (_acc : Accessibility) : Prop :=
   (∀ x ∈ b, x ∈ modalUniverse φ₀) ∧ FiveWorldInvE φ₀ b e
@@ -3090,6 +3094,116 @@ lemma modalLoopInvHintikkaFive_initial (φ₀ : Proposition Atom) :
     exact hmemU
   · simp only [FiveWorldInvE, modalMaxWorld, List.foldl_cons, List.foldl_nil]
     exact Nat.zero_le _
+
+/-! ## Five Completeness and `fiveValid` Decidability (Phase 21b, recipe step 4)
+
+`modalTableauFive` runs the witness-reuse, root-aware rule `modalApplyOneFive`
+(`FiveSimplification.lean`), which terminates at K's own `modalFuel`. Items 1-3 of the
+completeness ingredients are supplied by the generic top-loop lemmas at `modalApplyOneFive`
+(`modalApplyOneFive_fresh_local` is the only hypothesis they take) plus the bespoke
+`accTargetsNeRoot` top-loop pair (Phase 21.1), and item 4 -- "the wall" -- is supplied by
+`modalExpandBranchesHintikka` (`CompletenessLoop.lean`) at `Aux := ModalLoopAuxFive φ₀` (recipe
+steps 1-3 above). Unlike the S5 chain, no `hintikka_congr`-style bridge is needed:
+`modalTableauFive` already runs `modalApplyOneFive` directly (Phase 21's investigation finding,
+`modalOpenBranchFive_countermodel` above already takes `modalHintikkaSetGen modalApplyOneFive`
+as its witness). -/
+
+/-- **Five-completeness of the modal tableau**: if `φ₀` is `fiveValid`, the Five tableau closes
+on it. Contrapositively: an open branch is a genuine right-Euclidean-frame countermodel.
+
+Assembled from the four landed pieces at `apply := modalApplyOneFive` --
+`modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxFive`),
+`modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean`),
+`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot` (Phase 21.1),
+`modalExpandBranchesGen_openBranch_initial_mem`, and `modalOpenBranchFive_countermodel` above --
+with `extractModelFive_rightEuclidean` discharging `fiveFC` for free. Mirrors
+`modalTableauS5_complete`. -/
+theorem modalTableauFive_complete (φ₀ : Proposition Atom) (h : fiveValid φ₀) :
+    modalTableauFive φ₀ = .closed := by
+  cases htab : modalTableauFive φ₀ with
+  | closed => rfl
+  | openBranch b a =>
+    exfalso
+    have h' : modalExpandBranchesGen modalApplyOneFive
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
+    have hH : modalHintikkaSetGen modalApplyOneFive b a :=
+      modalExpandBranchesHintikka modalApplyOneFive modalApplyOneFive_specCore φ₀
+        (ModalLoopAuxFive φ₀) (ModalLoopAuxFive_stepPreserved φ₀) (ModalLoopAuxFive_bounds φ₀)
+        (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl (modalExpMeasure_entry_le_fuel φ₀)
+        (by
+          intro i bi ei ai hib hie hia
+          match i with
+          | 0 =>
+            simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+            subst hib; subst hie; subst hia
+            exact modalLoopInvHintikkaFive_initial φ₀
+          | n + 1 => simp at hib)
+        b a h'
+    have hSrc : accSourcesKnown b a :=
+      modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneFive
+        modalApplyOneFive_fresh_local (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          exact accSourcesKnown_empty _)
+        b a h'
+    have hTgtRoot : accTargetsKnown b a ∧ accTargetsNeRoot a :=
+      modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          refine ⟨?_, ?_⟩
+          · intro w w' hedge
+            simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+            exact absurd hedge (by decide)
+          · intro w w' hedge
+            simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+            exact absurd hedge (by decide))
+        b a h'
+    have hmemInit : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+      modalExpandBranchesGen_openBranch_initial_mem modalApplyOneFive (modalFuel φ₀)
+        (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (fun b₀ hb₀ => by
+          simp only [List.mem_singleton] at hb₀
+          subst hb₀
+          simp)
+        b a h'
+    have hFC : fiveFC (extractModelFive b a).r := extractModelFive_rightEuclidean b a
+    exact modalOpenBranchFive_countermodel b a φ₀ hSrc hTgtRoot.1 hTgtRoot.2 hH hmemInit
+      (h WorldIndex (extractModelFive b a) hFC 0)
+
+/-- **The modal Five tableau decides Five-validity**: `modalTableauFive φ₀` closes exactly when
+`φ₀` is `fiveValid`. Combines soundness (`modalTableauFive_sound`, `FrameSoundness.lean`) with
+completeness (above). Mirrors `s5Valid_decides`. -/
+theorem fiveValid_decides (φ₀ : Proposition Atom) :
+    modalTableauFive φ₀ = .closed ↔ fiveValid φ₀ :=
+  ⟨modalTableauFive_sound φ₀, modalTableauFive_complete φ₀⟩
+
+/-- **Five-validity is decidable**: decide by running the modal Five tableau and consulting
+`fiveValid_decides`. No `Fintype Atom` assumption is needed, since the tableau computation itself
+is the decision procedure. Mirrors `instDecidableS5Valid`.
+
+This is the constructive witness to the Euclidean logic K5's decidability -- the terminating
+witness-reuse, root-aware rule `modalApplyOneFive` supplies the finite-search half. -/
+instance instDecidableFiveValid (φ₀ : Proposition Atom) : Decidable (fiveValid φ₀) :=
+  match h : modalTableauFive φ₀ with
+  | .closed => .isTrue ((fiveValid_decides φ₀).mp h)
+  | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauFive_complete φ₀ hv] at h; cases h)
 
 end Cslib.Logic.Modal.Tableau
 

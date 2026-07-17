@@ -252,7 +252,7 @@ chain, so each wave contains a single phase.
 - **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking`; the restated structure
   and the S4 step definition typecheck; `lean_verify` zero sorry/axiom on the new definitions.
 
-### Phase 5: `S4LoopInv` preservation lemmas — the crux [PARTIAL]
+### Phase 5: `S4LoopInv` preservation lemmas — the crux [IN PROGRESS]
 
 - **Goal:** Prove every `modalStepBranchS4Keyed` step preserves the four key fields. This is the
   mathematical heart of the task; budget generously.
@@ -414,7 +414,7 @@ only mechanical assembly remains):
   decidability work (last touched by that task's own commit, clean working tree), unrelated to any
   file this task modifies; NOT a regression from this dispatch.
 
-### Phase 6: Pigeonhole world bound (closes Phase 8) [NOT STARTED]
+### Phase 6: Pigeonhole world bound (closes Phase 8) [IN PROGRESS]
 
 - **Goal:** Derive the finite world bound from the preserved invariant — the deliverable that
   closes the original task 506 Phase 8.

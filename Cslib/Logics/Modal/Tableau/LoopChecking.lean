@@ -1172,6 +1172,143 @@ lemma modalStepBranchS4Keyed_branch_superset (φ₀ : Proposition Atom)
   · rw [hres] at hsf
     simp at hsf
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Reusable result-shape-agnostic `keys'` extraction**: whatever `result` turns out to be
+(linear/branching/persistent/notApplicable), the 4th tuple component of
+`modalStepBranchS4Keyed`'s inner `match result with ...` is always the SAME local `keysLocal`
+term (only the first three components vary by branch). This factors out the "case on `result`,
+discard everything but the `keys'` component" boilerplate common to all 9
+`sf.sign`/`sf.formula` leaves of `modalStepBranchS4_preserves_keyLowerBd`'s assembly, so that
+proof only needs to case on `sf.sign`/`sf.formula` (to pin `keysLocal` itself), never on
+`result`. -/
+private lemma modalStepBranchS4Keyed_result_keys_eq
+    (result : RuleResult (Proposition Atom) WorldIndex)
+    (newAcc0 : Accessibility)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (keysLocal : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hsf : (match result with
+      | .linear nf => some ([nf ++ b], [e ++ [sf]], newAcc0, keysLocal)
+      | .branching brs => some (brs.map (· ++ b), brs.map (fun _ => e ++ [sf]), newAcc0, keysLocal)
+      | .persistent nf => some ([nf ++ b], [e], newAcc0, keysLocal)
+      | .notApplicable => none) = some (newBs, newExps, newAcc, keys')) :
+    keys' = keysLocal := by
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.2.symm
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.2.symm
+  · rw [hres] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.2.symm
+  · rw [hres] at hsf; simp at hsf
+
+/-- **`keyLowerBd`'s driver-level preservation** (task 511, Phase 5 assembly): every key
+recorded after an S4Keyed step remains a lower bound on its live relevant set, over EVERY
+branch the step produces. Assembles `modalStepBranchS4Keyed_branch_superset` (handles every
+OLD key uniformly, via `relevantSetFinset_mono`, regardless of which rule fired) with the two
+closed minting-content subset lemmas (`successorBirthContent_boxNeg_subset_relevantSetFinset`
+/ `_diamondPos_subset_relevantSetFinset`, for the NEW key at the two minting leaves). -/
+lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hLB : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → k ⊆ relevantSetFinset φ₀ b' w := by
+  have hsuper := modalStepBranchS4Keyed_branch_superset φ₀ b e acc keys newBs newExps newAcc
+    keys' hstep
+  have hold : ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b' w :=
+    fun b' hb' w k hwk => (hLB w k hwk).trans (relevantSetFinset_mono φ₀ b b' w (hsuper b' hb'))
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro b' hb' w k hwk
+  rw [hkeq] at hwk
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at hwk
+  all_goals first
+    | exact hold b' hb' w k hwk
+    | skip
+  case neg.neg.box =>
+    have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · -- unblocked: minting shape, `keys'` gains the new key
+      simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
+        rw [hresulteq.trans hmint] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
+          hb hsfmem' _ hmint
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, hkeq2⟩ := hwk
+        subst hweq
+        subst hkeq2
+        rw [hb']
+        exact hsub
+    · -- blocked: no new key, old-key argument suffices
+      simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+  case neg.pos.diamond =>
+    have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · -- unblocked: minting shape, `keys'` gains the new key
+      simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
+        rw [hresulteq.trans hmint] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
+          hb hsfmem' _ hmint
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, hkeq2⟩ := hwk
+        subst hweq
+        subst hkeq2
+        rw [hb']
+        exact hsub
+    · -- blocked: no new key, old-key argument suffices
+      simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

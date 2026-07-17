@@ -2625,7 +2625,7 @@ prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
 
 ---
 
-### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [IN PROGRESS]
+### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [PARTIAL]
 
 **Unblocked (design unchanged)** -- consumes Phase 19b's `modalTableauFive_sound` (built on 19a's
 Route-1 propagation + Route (a) mint-arm soundness) and Phase 20's countermodel.
@@ -2634,22 +2634,97 @@ Route-1 propagation + Route (a) mint-arm soundness) and Phase 20's countermodel.
 proposed to strike.
 
 **Tasks**:
-- [ ] Land `theorem modalTableauFive_complete (φ) (h : fiveValid φ) : modalTableauFive φ = .closed`,
+- [x] **(deviation: added -- new scope item, not in the original four bullets)** Land the
+      `accTargetsNeRoot` top-loop preservation pair `modalApplyOneFive_edge_target_ne_root` +
+      `modalStepBranchFive_preserves_accTargetsNeRoot` (single-step) and
+      `modalStepBranchFive_preserves_accTargetsKnown_and_NeRoot` +
+      `modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot` (joint top-loop, bundled
+      with `accTargetsKnown` since `accTargetsNeRoot`'s single-step preservation needs
+      `accTargetsKnown` as an ambient invariant across the same induction -- the same "necessary
+      THIRD hypothesis" pattern `S5Simplification.lean`'s `modalStepBranchS5w_preserves_worldInv`
+      documents for `S5wWorldInv`). Landed in `FrameCompleteness.lean`, green, sorry-free, axioms
+      `[propext, Classical.choice, Quot.sound]` only. This discharges Phase 20's `accTargetsNeRoot`
+      abstract hypothesis for a real `modalTableauFive`/`modalExpandBranchesFive` run.
+- [ ] **(deviation: blocked -- see note below)** Land
+      `theorem modalTableauFive_complete (φ) (h : fiveValid φ) : modalTableauFive φ = .closed`,
       from the Phase 12 parametric lift (instantiated at `modalApplyOneFive`'s `Aux`) + Phase 20's
       countermodel + Phase 5's `hTgt`.
-- [ ] Land a `hintikka_congr` analogue for the Five rule if the propagation arms require it -- Phase
-      2's proof works because `modalHintikkaSetGen`'s conjunct 2 returns **literal `True`** at
-      `.neg, .box _` and `.pos, .diamond _` (`Saturation.lean:460-480`), which is a fact about the
-      **driver**, not about S5. **Check whether it transfers before assuming it does**: the Five
-      rule differs on the *propagation* arms, which is exactly where Phase 2's argument had no work
-      to do for S5.
-- [ ] Land `instance instDecidableFiveValid (φ) : Decidable (fiveValid φ)`, mirroring
-      `instDecidableS5Valid` (Phase 14) and `instDecidableTValid` (`FrameCompleteness.lean:1281`).
-- [ ] Confirm against the probe: `instDecidableFiveValid` must **not** be derivable from
-      `instDecidableS5Valid` -- `fiveValid_ssubset_s5Valid` proves it cannot be. If a proof appears
-      to route through `s5Valid`, **it is wrong**; find the error.
+- [ ] **(deviation: blocked -- see note below)** Land a `hintikka_congr` analogue for the Five rule
+      if the propagation arms require it -- Phase 2's proof works because `modalHintikkaSetGen`'s
+      conjunct 2 returns **literal `True`** at `.neg, .box _` and `.pos, .diamond _`
+      (`Saturation.lean:460-480`), which is a fact about the **driver**, not about S5. **Check
+      whether it transfers before assuming it does**: the Five rule differs on the *propagation*
+      arms, which is exactly where Phase 2's argument had no work to do for S5.
+      **Investigation finding (this dispatch)**: no bridging lemma is needed at all --
+      `modalTableauFive` already runs `modalApplyOneFive` directly (unlike S5's
+      `modalTableauS5`/`modalApplyOneS5w` split), and `modalOpenBranchFive_countermodel` already
+      takes `modalHintikkaSetGen modalApplyOneFive b acc` directly as `hH`. This task item is
+      **moot**; the real blocker is the missing `Aux` instantiation (next bullet's note).
+- [ ] **(deviation: blocked -- see note below)** Land `instance instDecidableFiveValid (φ) :
+      Decidable (fiveValid φ)`, mirroring `instDecidableS5Valid` (Phase 14) and
+      `instDecidableTValid` (`FrameCompleteness.lean:1281`).
+- [ ] **(deviation: blocked -- see note below)** Confirm against the probe:
+      `instDecidableFiveValid` must **not** be derivable from `instDecidableS5Valid` --
+      `fiveValid_ssubset_s5Valid` proves it cannot be. If a proof appears to route through
+      `s5Valid`, **it is wrong**; find the error.
 
-**Timing**: 3 hours
+**BLOCKER (Phase 21, remaining three items)**:
+- **What failed**: `modalTableauFive_complete` needs a fourth ingredient beyond
+  `accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot` (all now landed): the Hintikka "wall"
+  `modalHintikkaSetGen modalApplyOneFive b a` at the real open branch, supplied by
+  `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) instantiated at a bespoke
+  `Aux := ModalLoopAuxFive φ0` (mirroring S5's `ModalLoopAuxS5w`). This requires
+  `ModalLoopAuxFive_stepPreserved`, which in turn requires the **inductive step-preservation
+  proof for `FiveWorldInv` across the fuel-driven expansion** -- explicitly flagged as NOT YET
+  BUILT by `FiveSimplification.lean`'s own docstring (lines 1424-1431, written when `FiveWorldInv`
+  and `modalMaxWorld_lt_worldBound_of_FiveWorldInv` were landed): *"The inductive step-preservation
+  proof establishing `FiveWorldInv` holds across the whole fuel-driven expansion ... is Phase
+  19b-scale work, for whatever call site eventually maintains it."* `FiveWorldInv` and its
+  arithmetic bound are landed and otherwise unused (`grep` confirms zero consumers before this
+  dispatch) -- this is a real, previously-deferred gap, not a regression.
+- **What was tried**: Read `S5Simplification.lean`'s full analogous machinery
+  (`modalApplyOneS5w_step`, ~230 lines of per-shape case analysis, plus
+  `modalStepBranchS5w_preserves_worldInv`, ~100 lines assembling it into the step-preservation
+  theorem, plus several supporting private lemmas). Confirmed the K-rank route (`ModalLoopAuxK`,
+  fully generic over any `RuleApplicationSpec`-satisfying rule) is **not** available as a
+  shortcut: Five's box-positive/diamond-negative propagation shapes have the same
+  `rankStep`-defeating shape as S5's universal rule (the documented, mechanized
+  `RuleApplicationSpec.rankStep` counterexample, `S5Simplification.lean` "Phase 2 Obstruction"
+  section) -- this is precisely why the witness-counting `FiveWorldInv` route was built in the
+  first place, so no rank-based shortcut exists.
+- **Why it's stuck**: A faithful Five analogue of `modalApplyOneS5w_step` +
+  `modalStepBranchS5w_preserves_worldInv` needs the **same** case-work, doubled by the root/
+  non-root source-class split `FiveWorldInv` itself introduces (`usedTagsFiveNonRoot` vs.
+  `usedTagsFiveRoot`, each needing its own mint-tag-consumption argument, plus the guard's extra
+  root/non-root dichotomy at each mint shape). This is genuinely comparable in scale to Phase 19b
+  itself (which needed its own multi-dispatch effort per the task's commit history), far beyond
+  what this dispatch's explicitly-budgeted new-scope item (the `accTargetsNeRoot` pair, now
+  landed) covered, and beyond what could be responsibly attempted -- without risking a rushed,
+  under-verified multi-hundred-line proof -- in the remaining budget of this dispatch.
+- **What is needed**: A dedicated follow-up phase (recommend inserting "Phase 21b:
+  `FiveWorldInv` step-preservation and the Hintikka wall" before the current Phase 22, or
+  expanding Phase 21's own timing estimate substantially) to build, in
+  `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (or `FiveSimplification.lean`, matching
+  where `FiveWorldInv` itself already lives):
+  1. `modalApplyOneFive_step` (mirrors `modalApplyOneS5w_step`, doubled for root/non-root at the
+     two mint shapes), establishing the per-call subformula-closure + "known-worlds-or-fresh-mint"
+     dichotomy against `usedTagsFiveNonRoot`/`usedTagsFiveRoot` instead of a single `usedTags`.
+  2. `modalStepBranchFive_preserves_worldInv` (mirrors `modalStepBranchS5w_preserves_worldInv`),
+     assembling (1) into single-step preservation of `S5wTagInv φ₀ b ∧ FiveWorldInv φ₀ b`.
+  3. `ModalLoopAuxFive φ₀ b _e _acc := S5wTagInv φ₀ b ∧ FiveWorldInv φ₀ b`,
+     `ModalLoopAuxFive_bounds` (trivial, via the already-landed
+     `modalMaxWorld_lt_worldBound_of_FiveWorldInv`), `ModalLoopAuxFive_stepPreserved` (from (2)),
+     and `modalLoopInvHintikkaFive_initial` (mirrors `modalLoopInvHintikkaS5w_initial`).
+  4. Then `modalTableauFive_complete` and `instDecidableFiveValid` assemble exactly as
+     `modalTableauS5_complete`/`instDecidableS5Valid` do, now with all four ingredients
+     (`accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot`/the Hintikka wall) available.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous placeholder for
+  `ModalLoopAuxFive`/`modalTableauFive_complete`/`instDecidableFiveValid`. Do NOT weaken
+  `fiveValid`/`modalTableauFive_sound`/the truth lemma to dodge this gap. Do NOT attempt a
+  rank-based (`ModalLoopAuxK`) shortcut -- confirmed unavailable above.
+
+**Timing**: 3 hours (substantially underestimates the remaining `FiveWorldInv` step-preservation
+work; recommend re-costing at Phase 19b's own scale for the follow-up phase)
 
 **Depends on**: 19b, 20
 

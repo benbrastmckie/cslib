@@ -2883,6 +2883,144 @@ theorem modalOpenBranchFive_countermodel
     ¬ Satisfies (extractModelFive b acc) 0 φ :=
   (modalTruthLemmaFive b acc hSrc hTgt hRoot hH φ 0).2 hF
 
+/-! ## Top-Loop Propagation of `accTargetsNeRoot` (task 515 Phase 21)
+
+`modalOpenBranchFive_countermodel` takes `accTargetsNeRoot acc` as an abstract hypothesis
+(Phase 20's design finding: the universal-propagation direction of the truth lemma is false in
+general without it). This section discharges it for a **real** `modalTableauFive`/
+`modalExpandBranchesFive` run, exactly as `modalExpandBranchesGen_openBranch_accSourcesKnown`/
+`_accTargetsKnown` (`BDriver.lean`) already discharge `hSrc`/`hTgt`, so `modalTableauFive_complete`
+below can supply all three ingredients at once.
+
+Unlike `accSourcesKnown`/`accTargetsKnown` (which are preserved by *any* rule satisfying the
+generic `hFreshLocal` dichotomy), root-isolation is a fact specific to `modalApplyOneFive`'s own
+guard shape (`FiveSimplification.lean`): a genuine mint targets `modalNextWorld b`, always
+positive since `WorldIndex := Nat`; a Route (a) reuse targets a witness that
+`modalApplyOneFive_agree_or_reuse_ne_root` (Phase 19b) already certifies non-root. Also unlike
+`accSourcesKnown`/`accTargetsKnown` individually, `accTargetsNeRoot`'s single-step preservation
+needs `accTargetsKnown` as an ambient invariant (to invoke
+`modalApplyOneFiveProp_knownWorlds_step`'s own `hknown` hypothesis) -- the same "necessary THIRD
+hypothesis beyond the plan's literal signature" pattern `S5Simplification.lean`'s
+`modalStepBranchS5w_preserves_worldInv` documents for `S5wWorldInv`. The top-loop lemma below
+therefore re-derives `accTargetsKnown` and `accTargetsNeRoot` together, in one induction, rather
+than assuming the former has already been established by a separate run. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
+across files): decompose membership of an edge in `acc.addEdge w w'`. -/
+private lemma hasEdge_addEdge_cases_Five {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  rcases h with ⟨hw, hw'⟩ | h
+  · exact Or.inl ⟨hw.symm, hw'.symm⟩
+  · exact Or.inr h
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- A fresh world is never the root: `modalNextWorld b = modalMaxWorld b + 1 ≥ 1`
+unconditionally, since `WorldIndex := Nat`. -/
+private lemma modalNextWorld_ne_zero_Five
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalNextWorld b ≠ (0 : WorldIndex) :=
+  Nat.succ_ne_zero (modalMaxWorld b)
+
+/-- **`modalApplyOneFive`'s edge-target root-isolation, per call**: whenever a step of
+`modalApplyOneFive` records a new accessibility edge, that edge's target is non-root. Combines
+`modalApplyOneFive_agree_or_reuse_ne_root` (Phase 19b: a reuse edge's target is the witness
+`sf'.label`, already known non-root there) with `modalApplyOneFiveProp_knownWorlds_step` (a
+genuine mint edge's target is `modalNextWorld b`, non-root since `WorldIndex := Nat` gives
+`modalNextWorld b = modalMaxWorld b + 1 ≥ 1` unconditionally). The per-call companion
+`modalStepBranchFive_preserves_accTargetsNeRoot` below needs. -/
+lemma modalApplyOneFive_edge_target_ne_root
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    (modalApplyOneFive sf b acc).snd = acc ∨
+      ∃ w', (modalApplyOneFive sf b acc).snd = acc.addEdge sf.label w' ∧
+        w' ≠ (0 : WorldIndex) := by
+  rcases modalApplyOneFive_agree_or_reuse_ne_root sf b acc with heq | ⟨sf', -, -, hsf'ne, heq⟩
+  · rw [heq]
+    rcases modalApplyOneFiveProp_knownWorlds_step sf b acc hsfmem hknown with
+      ⟨hsnd, -⟩ | ⟨hsnd, -⟩
+    · exact Or.inl hsnd
+    · exact Or.inr ⟨modalNextWorld b, hsnd, modalNextWorld_ne_zero_Five b⟩
+  · rw [heq]
+    exact Or.inr ⟨sf'.label, rfl, hsf'ne⟩
+
+/-- **Single-step preservation of `accTargetsNeRoot` at `modalApplyOneFive`**, given
+`accTargetsKnown` as an ambient invariant. Mirrors `FmpMeasure.lean`'s
+`modalStepBranch_preserves_accTargetsKnown_gen`'s edge-decomposition shape, substituting
+`modalApplyOneFive_edge_target_ne_root` for the generic `hFreshLocal` dichotomy. -/
+theorem modalStepBranchFive_preserves_accTargetsNeRoot
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneFive b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) (hroot : accTargetsNeRoot acc) :
+    accTargetsNeRoot newAcc := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hnewAcc : newAcc = (modalApplyOneFive sf b acc).snd := by
+    rcases hfstc : (modalApplyOneFive sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp at hsf
+  rw [hnewAcc]
+  rcases modalApplyOneFive_edge_target_ne_root sf b acc hsfmem hknown with
+    hsame | ⟨w', hsnd, hw'ne⟩
+  · rw [hsame]; exact hroot
+  · rw [hsnd]
+    intro w1 w1' hedge
+    rcases hasEdge_addEdge_cases_Five hedge with ⟨-, rfl⟩ | hold
+    · exact hw'ne
+    · exact hroot _ _ hold
+
+/-- **Joint single-step preservation of `accTargetsKnown` and `accTargetsNeRoot`** at
+`modalApplyOneFive`: bundles `modalStepBranch_preserves_accTargetsKnown_gen` (generic, at
+`modalApplyOneFive_fresh_local`) with `modalStepBranchFive_preserves_accTargetsNeRoot` above, so
+the top-loop induction below can maintain both invariants together without assuming either has
+already been separately established. -/
+theorem modalStepBranchFive_preserves_accTargetsKnown_and_NeRoot
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneFive b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) (hroot : accTargetsNeRoot acc) :
+    (∀ b' ∈ newBs, accTargetsKnown b' newAcc) ∧ accTargetsNeRoot newAcc :=
+  ⟨modalStepBranch_preserves_accTargetsKnown_gen modalApplyOneFive modalApplyOneFive_fresh_local
+      b e acc newBs newExps newAcc hstep hknown,
+    modalStepBranchFive_preserves_accTargetsNeRoot b e acc newBs newExps newAcc hstep hknown hroot⟩
+
+/-- **Top-loop propagation of `accTargetsKnown` and `accTargetsNeRoot`, together, at
+`modalApplyOneFive`**: instantiates the generic `modalExpandBranchesGen_openBranch_gen`
+(`BDriver.lean`) at the conjoined predicate `P := fun b acc => accTargetsKnown b acc ∧
+accTargetsNeRoot acc`. This is the new top-loop ingredient `modalTableauFive_complete` (below)
+needs alongside `accSourcesKnown`'s own top-loop lemma
+(`modalExpandBranchesS5_openBranch_accSourcesKnown`'s Five analogue, applied directly at
+`modalApplyOneFive_fresh_local`) to supply all of `hSrc`/`hTgt`/`hRoot` from a single real open
+branch. -/
+theorem modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accTargetsKnown p.1 p.2 ∧ accTargetsNeRoot p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen modalApplyOneFive branches expandedSets accs fuel =
+          .openBranch bR aR →
+        accTargetsKnown bR aR ∧ accTargetsNeRoot aR :=
+  modalExpandBranchesGen_openBranch_gen modalApplyOneFive
+    (fun b acc => accTargetsKnown b acc ∧ accTargetsNeRoot acc)
+    (by
+      intro b e acc newBs newExps newAcc hstep hp b' hb'
+      have hboth := modalStepBranchFive_preserves_accTargetsKnown_and_NeRoot b e acc newBs newExps
+        newAcc hstep hp.1 hp.2
+      exact ⟨hboth.1 b' hb', hboth.2⟩)
+    fuel
+
 end Cslib.Logic.Modal.Tableau
 
 end

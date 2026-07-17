@@ -2485,7 +2485,7 @@ five green building-block lemmas (DECIDED RECORD #2) remain valid and unmodified
 
 ---
 
-### Phase 19b: `modalTableauFive_sound` bespoke assembly [NOT STARTED]
+### Phase 19b: `modalTableauFive_sound` bespoke assembly [COMPLETED]
 
 **Goal**: Land `theorem modalTableauFive_sound (φ) (h : modalTableauFive φ = .closed) : fiveValid φ`
 at `fiveFC`, the bespoke per-step-satisfiability + fuel-induction assembly consuming the (now sound)
@@ -2507,23 +2507,37 @@ discharge, `4ae8eac5`); `modalApplyOneFiveProp_knownWorlds_step`, `modalApplyOne
 19a does **not** invalidate any of them.
 
 **Tasks**:
-- [ ] **Land the bespoke per-step satisfiability theorem** `modalStepBranchFive_preserves_satIn` (the
+- [x] **Land the bespoke per-step satisfiability theorem** `modalStepBranchFive_preserves_satIn` (the
       Five analogue of `modalStepBranchS5Gen_preserves_satIn`), dispatching: the **propagation** case
       through `modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn` + `accReachableInv_related_five`;
       the **witness-reuse** (mint) case through the 19a guard -- every reuse edge is now either a
       genuine `m.r` edge (non-root/non-root) or a fresh mint (root-class), so the previously-open
       `m.r (f sf.label) (f w')` obligation discharges. *(This is the item handoff 10 could not land;
-      19a's guard is its precondition.)*
-- [ ] **Assemble the fuel induction into `modalTableauFive_sound`**, mirroring the S5 bespoke chain
+      19a's guard is its precondition.)* **Landed** in `FrameSoundness.lean`, stated directly and
+      non-generically over `modalApplyOneFive` (no `RuleApply`/spec-class abstraction needed, since
+      Five has only the one shipped rule). Two small additive strengthenings were also landed in
+      `FiveSimplification.lean` (`modalApplyOneFive_diaPos_eq_or_reuse_ne_root`/
+      `_boxNeg_eq_or_reuse_ne_root`/`_agree_or_reuse_ne_root`) exposing `sf.label ≠ 0 ∧ sf'.label ≠ 0`
+      at a reuse call -- needed because `accReachableInv_related_five` (unlike S5's
+      `accReachableInv_related_s5`) requires both endpoints of a reuse edge to be non-root, a fact the
+      already-landed `modalApplyOneFive_agree_or_reuse` did not expose.
+- [x] **Assemble the fuel induction into `modalTableauFive_sound`**, mirroring the S5 bespoke chain
       `FrameSoundness.lean`'s `S5SoundInv` → `modalTableauS5_sound` (~860 lines). The fully-generic and
       S5-specific per-step theorems are structurally inapplicable to `modalApplyOneFive` (no
       `accReachableInv` slot; `modalApplyOneFive` does not satisfy `S5SoundSpec`), so a bespoke
       Five-specific chain is required -- estimated ~800-1100 new lines (handoff 09 scoping). Consume the
-      reusable green blocks above; do not re-derive them.
-- [ ] **KILL CONDITION**: if the bespoke assembly resists sorry-free beyond a bounded set of committed
+      reusable green blocks above; do not re-derive them. **Landed**: `modalExpandBranchesFive_closed_unsatIn`
+      (direct, non-generic fuel induction threading `FiveSoundInv`) + `modalTableauFive_sound` capstone,
+      both in `FrameSoundness.lean`. Note: unlike Phase 19a's termination-bound machinery
+      (`FiveWorldInv`), the soundness assembly needs **no** world-bound hypothesis at all -- mirrors
+      `S5SoundInv`'s own omission of a world-bound term exactly, since `outputsSubsetUniverse`/`hW` is
+      Hintikka/completeness-side machinery (Phase 21), not soundness-side.
+- [x] **KILL CONDITION**: if the bespoke assembly resists sorry-free beyond a bounded set of committed
       sub-milestones, `[BLOCKED]` with the exact `lean_goal` -- but note this is mechanical
       fuel-induction boilerplate on a now-sound rule, not a design gap (both soundness gaps are closed
-      by 19a). Escalate only if the mechanical assembly itself is intractable.
+      by 19a). Escalate only if the mechanical assembly itself is intractable. **Not triggered** --
+      the bespoke assembly built sorry-free on the first attempt, well within budget (~640 new lines
+      across the two files, vs. the ~800-1100 estimate).
 
 **Prohibited workarounds**: do NOT weaken `fiveFC`/`kb5FC`'s definitions, do NOT restrict
 `modalTableauFive_sound`'s statement to a special case of `φ₀`, do NOT introduce `sorry` or an axiom.
@@ -2595,7 +2609,7 @@ prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
 
 ---
 
-### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [NOT STARTED]
+### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [IN PROGRESS]
 
 **Unblocked (design unchanged)** -- consumes Phase 19b's `modalTableauFive_sound` (built on 19a's
 Route-1 propagation + Route (a) mint-arm soundness) and Phase 20's countermodel.

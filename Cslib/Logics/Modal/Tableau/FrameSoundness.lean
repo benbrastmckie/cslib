@@ -1560,6 +1560,89 @@ lemma accReachableInv_related_five
     hEquiv.symm (⟨f w, hw_cod⟩ : Relation.cod m.r) ⟨f s', hs'_cod⟩ hD
   exact Relation.RightEuclidean.rightEuclidean hD' hs'w'
 
+/-! ### Task 524: the KB5 full-cluster reachability discharge
+
+`kb5FC := Std.Symm m.r ∧ Relation.RightEuclidean m.r` adds symmetry on top of `fiveFC`, which
+gives a **direct** induction on `accReachableInv`'s `ReflTransGen` path -- no cod-equivalence
+detour needed, unlike `reachable_imp_cod_related_five`/`accReachableInv_related_five` above. At
+each step `a → b` of the path: if `a = 0` the edge is itself a direct root witness (`hacc`
+applied directly); otherwise the accumulated witness `m.r (f 0) (f a)` symmetrizes to
+`m.r (f a) (f 0)` (`Std.Symm`) and composes with the new edge's `m.r (f a) (f b)` via
+`RightEuclidean.rightEuclidean` (`x := f a, y := f 0, z := f b`) to give `m.r (f 0) (f b)`
+directly. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every world reachable from `0` via the recorded accessibility edges (`ReflTransGen`), other
+than `0` itself, is related **to `0`** in the model under `kb5FC` -- no root-successor anchor
+needed (contrast `reachable_imp_cod_related_five`, which lands on a direct-successor witness
+`s` rather than `0` itself, since `fiveFC` alone cannot symmetrize). This is the semantic payoff
+of `kb5FC`'s extra `Std.Symm` conjunct: the whole known non-root cluster relates directly back to
+the root, matching `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s unconditional (non-edge-gated)
+propagation target set. -/
+lemma reachable_imp_related_kb5
+    {acc : Accessibility} {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : kb5FC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    {w : WorldIndex} (hw0 : w ≠ 0)
+    (hreach : Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w) :
+    m.r (f 0) (f w) := by
+  haveI : Std.Symm m.r := hFC.1
+  haveI : Relation.RightEuclidean m.r := hFC.2
+  revert hw0
+  induction hreach with
+  | refl => intro h; exact absurd rfl h
+  | tail hprev hedge ih =>
+    rename_i w0 w
+    intro _
+    by_cases hw00 : w0 = (0 : WorldIndex)
+    · subst hw00
+      exact hacc 0 w hedge
+    · have h0w0 : m.r (f 0) (f w0) := ih hw00
+      have hw00' : m.r (f w0) (f 0) := Std.Symm.symm _ _ h0w0
+      have hstep : m.r (f w0) (f w) := hacc w0 w hedge
+      exact Relation.RightEuclidean.rightEuclidean hw00' hstep
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Two known non-root worlds, both reachable from `0` on a branch satisfying `accReachableInv`,
+are related in the model under `kb5FC`: each anchors directly to `f 0`
+(`reachable_imp_related_kb5`), then one more `RightEuclidean` composition (via symmetrizing the
+first leg) relates them to each other. Mirrors `accReachableInv_related_five`'s role but via the
+simpler direct-anchor route `kb5FC`'s symmetry affords. -/
+lemma accReachableInv_related_kb5
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : kb5FC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hreach : accReachableInv b acc)
+    {w w' : WorldIndex} (hw : w ∈ modalKnownWorlds b) (hw' : w' ∈ modalKnownWorlds b)
+    (hwne : w ≠ 0) (hw'ne : w' ≠ 0) :
+    m.r (f w) (f w') := by
+  haveI : Std.Symm m.r := hFC.1
+  haveI : Relation.RightEuclidean m.r := hFC.2
+  have h0w : m.r (f 0) (f w) := reachable_imp_related_kb5 hFC hacc hwne (hreach w hw)
+  have h0w' : m.r (f 0) (f w') := reachable_imp_related_kb5 hFC hacc hw'ne (hreach w' hw')
+  exact Relation.RightEuclidean.rightEuclidean h0w h0w'
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Root self-reflexivity discharge** (task 524, `Relation.symm_rightEuclidean_root_refl`): if
+the known cluster of `b` has *some* non-root member `v`, the root is related to itself in the
+model under `kb5FC`. This is exactly the semantic justification for
+`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s self-target arm (fires only when the cluster is
+nonempty): `v`'s anchor `m.r (f 0) (f v)` (`reachable_imp_related_kb5`) symmetrizes to `m.r (f v)
+(f 0)`, and `RightEuclidean` applied to that pair with itself (`x := f v, y := f 0, z := f 0`)
+gives `m.r (f 0) (f 0)` directly -- the model-level mirror of
+`Relation.symm_rightEuclidean_root_refl`. -/
+lemma accReachableInv_kb5_root_refl
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : kb5FC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hreach : accReachableInv b acc)
+    {v : WorldIndex} (hv : v ∈ modalKnownWorlds b) (hvne : v ≠ 0) :
+    m.r (f 0) (f 0) := by
+  haveI : Std.Symm m.r := hFC.1
+  haveI : Relation.RightEuclidean m.r := hFC.2
+  have h0v : m.r (f 0) (f v) := reachable_imp_related_kb5 hFC hacc hvne (hreach v hv)
+  have hv0 : m.r (f v) (f 0) := Std.Symm.symm _ _ h0v
+  exact Relation.RightEuclidean.rightEuclidean hv0 hv0
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
 (unavailable across files), dropping the `Nodup` conjunct this development does not need.
@@ -3013,6 +3096,145 @@ lemma modalFiveDiaNegAll_soundIn
       rw [hxeq]
       exact sfSat_neg m f φ x.label (hdiasat (f x.label) hrel)
   unfold modalApplyOneFiveProp
+  rcases hp : modalApplyOne
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hKeq hKsound
+  simp only at hKeq hKsound
+  rcases hKeq with hKeq | ⟨kForms, hKeq⟩ <;> subst hKeq
+  · obtain ⟨hsndeq, -⟩ := hKsound
+    dsimp only
+    split_ifs with hemp
+    · exact ⟨hsndeq, trivial⟩
+    · exact ⟨hsndeq, hallSat⟩
+  · obtain ⟨hsndeq, hKformSat⟩ := hKsound
+    dsimp only
+    refine ⟨hsndeq, ?_⟩
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hKformSat x hx
+    · exact hallSat x hx
+
+/-! ### Task 524: Rule-Level KB5 Full-Cluster Semantic Soundness
+
+`modalKb5BoxAllFull_soundIn`/`modalKb5DiaNegAllFull_soundIn` discharge the new rule's two
+propagation shapes directly against `kb5FC`, using `accReachableInv_related_kb5` for non-root
+targets and `accReachableInv_kb5_root_refl` for the self-target arm. Mirrors
+`modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn`'s shape but with a genuinely different
+per-target case split (`modalKb5BoxAllFull_mem`'s two-way dichotomy, not Five's uniform
+`x.label ≠ 0` fact). -/
+
+/-- **Task 524**: frame-relativized semantic soundness of `modalApplyOneKb5'Prop`'s box-positive
+output under `kb5FC`, given `accReachableInv`. K's own bounded propagation is sound via
+`modalApplyOne_boxPos_sound`; the full-cluster propagation (`modalKb5BoxAllFull b φ lbl`) splits
+on `modalKb5BoxAllFull_mem`'s dichotomy: a non-root target is discharged via
+`accReachableInv_related_kb5` when `lbl ≠ 0`, or directly via `hacc`/`reachable_imp_related_kb5`
+when `lbl = 0`; the self-target (`x.label = 0`) is discharged via
+`accReachableInv_kb5_root_refl` using the cluster-nonempty witness `modalKb5BoxAllFull_mem`
+supplies. -/
+lemma modalKb5BoxAllFull_soundIn
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : kb5FC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf) (hreach : accReachableInv b acc)
+    {φ : Proposition Atom} {lbl : WorldIndex}
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneKb5'Prop
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneKb5'Prop
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hKeq := modalApplyOne_boxPos_eq
+    (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+  have hKsound := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
+  have hlblknown : lbl ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_FS b lbl).mpr
+      ⟨(⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
+  have hboxsat : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+  simp only [Satisfies] at hboxsat
+  have hallSat : ∀ x ∈ modalKb5BoxAllFull b φ lbl, sfSat m f x := by
+    intro x hx
+    have hxeq : x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
+      modalKb5BoxAllFull_mem_eq hx
+    rcases (modalKb5BoxAllFull_mem hx).2 with ⟨-, hxknown, hxne0⟩ | ⟨hxeq0, hlbl0, v, hv, hvne⟩
+    · by_cases hlbleq : lbl = (0 : WorldIndex)
+      · subst hlbleq
+        have hrel : m.r (f 0) (f x.label) :=
+          reachable_imp_related_kb5 hFC hacc hxne0 (hreach x.label hxknown)
+        rw [hxeq]
+        exact sfSat_pos m f φ x.label (hboxsat (f x.label) hrel)
+      · have hrel : m.r (f lbl) (f x.label) :=
+          accReachableInv_related_kb5 hFC hacc hreach hlblknown hxknown hlbleq hxne0
+        rw [hxeq]
+        exact sfSat_pos m f φ x.label (hboxsat (f x.label) hrel)
+    · subst hlbl0
+      have hrefl : m.r (f 0) (f 0) := accReachableInv_kb5_root_refl hFC hacc hreach hv hvne
+      have hsat0 : Satisfies m (f 0) φ := hboxsat (f 0) hrefl
+      rw [hxeq0]
+      exact sfSat_pos m f φ 0 hsat0
+  unfold modalApplyOneKb5'Prop
+  rcases hp : modalApplyOne (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      b acc with ⟨kResult, kAcc⟩
+  rw [hp] at hKeq hKsound
+  simp only at hKeq hKsound
+  rcases hKeq with hKeq | ⟨kForms, hKeq⟩ <;> subst hKeq
+  · obtain ⟨hsndeq, -⟩ := hKsound
+    dsimp only
+    split_ifs with hemp
+    · exact ⟨hsndeq, trivial⟩
+    · exact ⟨hsndeq, hallSat⟩
+  · obtain ⟨hsndeq, hKformSat⟩ := hKsound
+    dsimp only
+    refine ⟨hsndeq, ?_⟩
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hKformSat x hx
+    · exact hallSat x hx
+
+/-- Dual of `modalKb5BoxAllFull_soundIn` for the diamond-negative shape. -/
+lemma modalKb5DiaNegAllFull_soundIn
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : kb5FC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf) (hreach : accReachableInv b acc)
+    {φ : Proposition Atom} {lbl : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneKb5'Prop
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOneKb5'Prop
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hKeq := modalApplyOne_diamondNeg_eq
+    (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+  have hKsound := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
+  have hlblknown : lbl ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_FS b lbl).mpr
+      ⟨(⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
+  have hdiasat : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+  simp only [Satisfies] at hdiasat
+  push Not at hdiasat
+  have hallSat : ∀ x ∈ modalKb5DiaNegAllFull b φ lbl, sfSat m f x := by
+    intro x hx
+    have hxeq : x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
+      modalKb5DiaNegAllFull_mem_eq hx
+    rcases (modalKb5DiaNegAllFull_mem hx).2 with ⟨-, hxknown, hxne0⟩ | ⟨hxeq0, hlbl0, v, hv, hvne⟩
+    · by_cases hlbleq : lbl = (0 : WorldIndex)
+      · subst hlbleq
+        have hrel : m.r (f 0) (f x.label) :=
+          reachable_imp_related_kb5 hFC hacc hxne0 (hreach x.label hxknown)
+        rw [hxeq]
+        exact sfSat_neg m f φ x.label (hdiasat (f x.label) hrel)
+      · have hrel : m.r (f lbl) (f x.label) :=
+          accReachableInv_related_kb5 hFC hacc hreach hlblknown hxknown hlbleq hxne0
+        rw [hxeq]
+        exact sfSat_neg m f φ x.label (hdiasat (f x.label) hrel)
+    · subst hlbl0
+      have hrefl : m.r (f 0) (f 0) := accReachableInv_kb5_root_refl hFC hacc hreach hv hvne
+      have hsat0 : ¬ Satisfies m (f 0) φ := hdiasat (f 0) hrefl
+      rw [hxeq0]
+      exact sfSat_neg m f φ 0 hsat0
+  unfold modalApplyOneKb5'Prop
   rcases hp : modalApplyOne
       (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
       with ⟨kResult, kAcc⟩

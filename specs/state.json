@@ -1,5 +1,5 @@
 {
-  "next_project_number": 520,
+  "next_project_number": 524,
   "active_projects": [
     {
       "project_number": 511,
@@ -1634,6 +1634,46 @@
       "priority": "medium",
       "effort": "3-5 hours",
       "artifacts": []
+    },
+    {
+      "project_number": 520,
+      "project_name": "composite_conservativity_bridges_to_classical_column",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "high",
+      "description": "Add the missing composite conservativity bridges collapsing each non-classical base into the classical column, in Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean. Currently IntToClassical.lean provides IK->K/IT->T/IS4->S4/IS5->S5 and Axis-B provides MK->IK/CK->IK etc., but the one-line composites mkDerivable_implies_kDerivable, mtDerivable_implies_tDerivable, ms4Derivable_implies_s4Derivable, ms5Derivable_implies_s5Derivable, and the constructive analogues ckDerivable_implies_kDerivable etc. do NOT exist (confirmed by grep). Modularity.lean currently chains only into the intuitionistic IS5 corner. Compose the existing Axis-B (base->intuitionistic) and IntToClassical (intuitionistic->classical) edges to complete the 'every base collapses into classical' modularity story. Low effort, high elegance value. Parallel-safe with task 515 (separate file). Verify zero sorry, axioms [propext, Classical.choice, Quot.sound] only, full CI.",
+      "created": "2026-07-17T20:46:47Z"
+    },
+    {
+      "project_number": 521,
+      "project_name": "dedup_minimal_canonical_model_onto_generic_extension",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "description": "Consolidate the duplicated minimal-base canonical model. Cslib/Logics/Modal/Metalogic/Minimal/{MinCanonicalModel,MinTruthLemma,MinCompleteness}.lean are the older MK-only bespoke copies; MinExtension.lean is the Axioms-generic frame-condition-parametric version that MT/MS4/MS5 already instantiate (mkvalidFC_completeness). MK's own completeness (mk_completeness, MinCompleteness.lean:55) still runs through the old trio. Refactor mk_completeness/mk_soundness_completeness to instantiate mkvalidFC_completeness at MKModalAxiom + the trivial frame condition, then delete the bespoke MinCanonicalModel/MinTruthLemma/MinCompleteness trio (~1500 duplicated lines). The duplication is self-documented at MinExtension.lean:23-37. Preserve all public theorem names MK consumers rely on. Verify zero sorry, full CI, zero regression across the minimal base. Parallel-safe with task 515.",
+      "created": "2026-07-17T20:46:47Z"
+    },
+    {
+      "project_number": 522,
+      "project_name": "uniform_frame_condition_axiom_correspondence_library",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "description": "Design and build a uniform frame-condition-to-axiom correspondence library for modal logic. Currently each soundness direction reproves the axiom-frame-property correspondence case-by-case: classical conditions inline in each Systems/<Sys>/Soundness.lean (e.g. s4_axiom_sound over 'reflexive, transitive'), and birelational conditions as ad-hoc local FC predicates (ms4FC, is4FC, cs4FC', ...) re-declared per file. There is no shared 'axiom X <-> frame property P' library. Provide reusable correspondence lemmas (reflexivity<->T, transitivity<->4, symmetry<->B, seriality<->D, euclidean<->5) that the per-system soundness proofs consume, so new systems can be assembled by choosing frame properties rather than reproving soundness. RESEARCH task first (survey how Systems/*/Soundness.lean and the birelational FC predicates express conditions, and whether a single Frame-property typeclass layer can unify classical + birelational). Coordinate scope on Zulip per CONTRIBUTING if it touches many files. Parallel-safe with task 515.",
+      "created": "2026-07-17T20:46:47Z"
+    },
+    {
+      "project_number": 523,
+      "project_name": "schema_union_axiom_combinator_for_proofsystem_instances",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "low",
+      "description": "Replace the 15 hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean (KAxiom, TAxiom, ... each re-listing overlapping constructors implyK/implyS/efq/modalK/andI..orE/diaDuality) with a compositional schema-union combinator that builds <Sys>Axiom from a chosen set of shared axiom-schema predicates. The consumption interface (HasAxiomK/HasAxiomImplyK/HasAxiomEFQ typeclasses in Cslib/Foundations/Logic/ProofSystem.lean) is ALREADY uniform, demonstrating a generic layer is feasible. This is the deepest 'elegant compositional' refactor and the highest-risk (touches every system's axiom declaration and all downstream soundness/completeness that pattern-match on constructors). MUST coordinate on Zulip per CONTRIBUTING before implementing. Start as a RESEARCH task to design the combinator and assess the blast radius on existing proofs. Parallel-safe with task 515 in principle but broad enough to warrant sequencing after 520/521.",
+      "created": "2026-07-17T20:46:47Z"
     }
   ],
   "repository_health": {

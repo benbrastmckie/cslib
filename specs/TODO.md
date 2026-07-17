@@ -1,5 +1,5 @@
 ---
-next_project_number: 520
+next_project_number: 524
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 520
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515,519 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,515,519,520,521,522,523 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -42,6 +42,10 @@ next_project_number: 520
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 515 [IMPLEMENTING] — Implement the terminating S5 tableau machinery recommended by tas
+520 [NOT STARTED] — Add the missing composite conservativity bridges collapsing each 
+521 [NOT STARTED] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
+522 [NOT STARTED] — Design and build a uniform frame-condition-to-axiom correspondenc
+523 [NOT STARTED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
@@ -98,6 +102,46 @@ next_project_number: 520
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
+
+### 523. Schema union axiom combinator for proofsystem instances
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Replace the 15 hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean (KAxiom, TAxiom, ... each re-listing overlapping constructors implyK/implyS/efq/modalK/andI..orE/diaDuality) with a compositional schema-union combinator that builds <Sys>Axiom from a chosen set of shared axiom-schema predicates. The consumption interface (HasAxiomK/HasAxiomImplyK/HasAxiomEFQ typeclasses in Cslib/Foundations/Logic/ProofSystem.lean) is ALREADY uniform, demonstrating a generic layer is feasible. This is the deepest 'elegant compositional' refactor and the highest-risk (touches every system's axiom declaration and all downstream soundness/completeness that pattern-match on constructors). MUST coordinate on Zulip per CONTRIBUTING before implementing. Start as a RESEARCH task to design the combinator and assess the blast radius on existing proofs. Parallel-safe with task 515 in principle but broad enough to warrant sequencing after 520/521.
+
+---
+
+### 522. Uniform frame condition axiom correspondence library
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Design and build a uniform frame-condition-to-axiom correspondence library for modal logic. Currently each soundness direction reproves the axiom-frame-property correspondence case-by-case: classical conditions inline in each Systems/<Sys>/Soundness.lean (e.g. s4_axiom_sound over 'reflexive, transitive'), and birelational conditions as ad-hoc local FC predicates (ms4FC, is4FC, cs4FC', ...) re-declared per file. There is no shared 'axiom X <-> frame property P' library. Provide reusable correspondence lemmas (reflexivity<->T, transitivity<->4, symmetry<->B, seriality<->D, euclidean<->5) that the per-system soundness proofs consume, so new systems can be assembled by choosing frame properties rather than reproving soundness. RESEARCH task first (survey how Systems/*/Soundness.lean and the birelational FC predicates express conditions, and whether a single Frame-property typeclass layer can unify classical + birelational). Coordinate scope on Zulip per CONTRIBUTING if it touches many files. Parallel-safe with task 515.
+
+---
+
+### 521. Dedup minimal canonical model onto generic extension
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Consolidate the duplicated minimal-base canonical model. Cslib/Logics/Modal/Metalogic/Minimal/{MinCanonicalModel,MinTruthLemma,MinCompleteness}.lean are the older MK-only bespoke copies; MinExtension.lean is the Axioms-generic frame-condition-parametric version that MT/MS4/MS5 already instantiate (mkvalidFC_completeness). MK's own completeness (mk_completeness, MinCompleteness.lean:55) still runs through the old trio. Refactor mk_completeness/mk_soundness_completeness to instantiate mkvalidFC_completeness at MKModalAxiom + the trivial frame condition, then delete the bespoke MinCanonicalModel/MinTruthLemma/MinCompleteness trio (~1500 duplicated lines). The duplication is self-documented at MinExtension.lean:23-37. Preserve all public theorem names MK consumers rely on. Verify zero sorry, full CI, zero regression across the minimal base. Parallel-safe with task 515.
+
+---
+
+### 520. Composite conservativity bridges to classical column
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Add the missing composite conservativity bridges collapsing each non-classical base into the classical column, in Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean. Currently IntToClassical.lean provides IK->K/IT->T/IS4->S4/IS5->S5 and Axis-B provides MK->IK/CK->IK etc., but the one-line composites mkDerivable_implies_kDerivable, mtDerivable_implies_tDerivable, ms4Derivable_implies_s4Derivable, ms5Derivable_implies_s5Derivable, and the constructive analogues ckDerivable_implies_kDerivable etc. do NOT exist (confirmed by grep). Modularity.lean currently chains only into the intuitionistic IS5 corner. Compose the existing Axis-B (base->intuitionistic) and IntToClassical (intuitionistic->classical) edges to complete the 'every base collapses into classical' modularity story. Low effort, high elegance value. Parallel-safe with task 515 (separate file). Verify zero sorry, axioms [propext, Classical.choice, Quot.sound] only, full CI.
+
+---
 
 ### 519. Fix literature ocr chunking and wijesekera
 - **Effort**: 3-5 hours

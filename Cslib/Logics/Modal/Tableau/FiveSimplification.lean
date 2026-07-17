@@ -1881,6 +1881,37 @@ lemma modalApplyOneKb5'Prop_boxPos_diaNeg_eq
             rw [hxeq]; dsimp only; rw [← hw0]
             exact label_mem_modalKnownWorlds hsfmem)
 
+/-- The Kb5' analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
+`modalApplyOneKb5'Prop`. Mirrors `modalApplyOneFiveProp_knownWorlds_step`. Needed by
+`modalStepBranchKb5'_preserves_accReachableInv` (`FrameSoundness.lean`). -/
+lemma modalApplyOneKb5'Prop_knownWorlds_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    ((modalApplyOneKb5'Prop sf b acc).snd = acc ∧
+      (match (modalApplyOneKb5'Prop sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOneKb5'Prop sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOneKb5'Prop sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · obtain ⟨hsndeq, hor⟩ := modalApplyOneKb5'Prop_boxPos_diaNeg_eq sf b acc hsfmem hknown hbd
+    refine Or.inl ⟨hsndeq, ?_⟩
+    rcases hor with hnot | ⟨out, hpers, hlabel⟩
+    · rw [hnot]; trivial
+    · rw [hpers]; exact hlabel
+  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
+    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
+    rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
+    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+
 /-! ## The KB5 Full-Cluster Rule -/
 
 /-- **The new KB5-specific rule** (task 524): the mint (existential) shapes are
@@ -2044,6 +2075,28 @@ lemma modalApplyOneKb5'_agree_or_reuse_ne_root
     · exact Or.inl heq
     · exact Or.inr
         ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
+  all_goals exact Or.inl (modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp))
+
+/-- Plain (non-root-excluded) agree-or-reuse dichotomy for `modalApplyOneKb5'`, mirrors
+`modalApplyOneFive_agree_or_reuse`. Needed by `modalStepBranchKb5'_preserves_accReachableInv`
+(`FrameSoundness.lean`), which does not need the root exclusion. -/
+lemma modalApplyOneKb5'_agree_or_reuse
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneKb5' sf b acc = modalApplyOneKb5'Prop sf b acc ∨
+    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
+      sf' ∈ b ∧ modalApplyOneKb5' sf b acc =
+        (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label) := by
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+  case pos.diamond =>
+    rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr ⟨⟨.pos, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
+  case neg.box =>
+    rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   all_goals exact Or.inl (modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp))
 
 /-! ## Driver Instantiation (task 524) -/

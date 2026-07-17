@@ -1991,7 +1991,7 @@ imported).
 
 ---
 
-### Phase 19: `modalTableauFive_sound` (Route 1 helper revision + cod-equivalence soundness) [IN PROGRESS]
+### Phase 19: `modalTableauFive_sound` (Route 1 helper revision + cod-equivalence soundness) [BLOCKED]
 
 **Goal**: Install the **Route (1)** root/non-root asymmetric propagation fix in the Phase 18 helpers,
 re-verify `modalApplyOneFive_specCore`, then land `modalTableauFive_sound` at `fiveFC` via the
@@ -2126,6 +2126,83 @@ deleted. The remediation (Route 1) follows in **Tasks**.
       `modalTableauS5_sound`, ~860 lines). See
       `handoffs/09_phase19-route1-and-cod-equivalence-landed.md` for the full scoping breakdown and
       continuation plan.)*
+
+  **NEW BLOCKER (this dispatch, distinct from the resolved Route-1 propagation gap above)**: while
+  building the bespoke fuel-induction assembly (the item directly above), landed sorry-free:
+  `modalApplyOneFiveProp_knownWorlds_step`, `modalApplyOneFive_agree_or_reuse`
+  (`FiveSimplification.lean`), `modalStepBranchFive_preserves_accReachableInv`, `FiveSoundInv`,
+  `modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn` (`FrameSoundness.lean`) -- all CI-green,
+  committed. Attempting the next item, `modalStepBranchFive_preserves_satIn`'s **witness-reuse**
+  branch (the direct analogue of `modalStepBranchS5Gen_preserves_satIn`'s "Witness reuse" case,
+  `FrameSoundness.lean` around `modalS5BoxAll_soundIn`), exposed a **second, independent** semantic
+  gap, this time in the **mint arms** (`T(◇φ)@w`/`F(□φ)@w`, i.e. `witnessWorldS5`-driven reuse),
+  which Route (1) explicitly left untouched (`reports/07_*`: "Mint-arm fields are untouched (route
+  (1) changes only the two propagation arms...)").
+
+  - **What failed**: `modalApplyOneFive`'s two mint arms call `witnessWorldS5 b s φ`
+    (`S5Simplification.lean:521`) **verbatim, unguarded** -- it searches **all** of
+    `modalKnownWorlds b` (root included) for an existing `⟨s, φ, w'⟩`, with **no restriction** tying
+    the found `w'` to the trigger `sf.label`'s identity (root or not) or to any recorded edge. When
+    reuse fires, the rule adds edge `sf.label → w'` and the soundness proof (mirroring S5's, which
+    keeps the **same** model `(W, m, f)` unchanged) needs `m.r (f sf.label) (f w')` to discharge the
+    new edge's `hacc` obligation. S5 gets this for free from `accReachableInv_related_s5` (**any**
+    two known worlds are related under an equivalence relation). The Route-1 replacement,
+    `accReachableInv_related_five`, requires **both** endpoints non-root (`hwne`/`hw'ne`); it proves
+    nothing when either `sf.label = 0` or `w' = 0`.
+  - **What was tried**: A full derivation of both root-involving sub-cases, with an explicit
+    adversarial-model check (not merely asserted):
+    - **Root trigger** (`sf.label = 0`, arbitrary `w'` found by `witnessWorldS5`, no `hasEdge`
+      guarantee): needs `m.r (f 0) (f w')`. `RightEuclidean` only forces relatedness between
+      targets **sharing a common source**; there is none linking `f 0` and an arbitrary known
+      `f w'` absent a recorded edge. A concrete adversarial `RightEuclidean` relation realizing the
+      failure: two disjoint "islands" `r = {(a,b), (b,b)} ∪ {(c,d), (d,d)}` on `Fin 4` (`a=f 0`\-side,
+      `c,d` an unrelated component) -- each island trivially satisfies `RightEuclidean` in isolation
+      (no cross-pairs share a source), yet `¬ r a d`. A model built on this frame can satisfy
+      `Satisfies m (f 0) (.diamond φ)` via `b` while **independently** satisfying `φ` at an unrelated
+      `f w' = d`, with `r (f 0) (f w')` false throughout -- the exact shape `witnessWorldS5` cannot
+      rule out (it only checks the branch's **syntactic** formula list, never the semantic model).
+    - **Root witness** (`w' = 0`, arbitrary non-root trigger, i.e. some earlier propositional
+      decomposition put a positive formula at world `0` that a later, unrelated diamond trigger's
+      `witnessWorldS5` search then reuses): needs `m.r (f w) (f 0)`. Worse than the root-trigger
+      case: `reachable_imp_cod_related_five`'s conclusion never targets `f 0` as an endpoint (only a
+      **direct successor** of it), and world `0` has in-degree zero in `acc` in a well-formed rooted
+      tableau (nothing ever emits an edge *into* the root), so there is no `hacc`-realized edge to
+      fall back on either.
+    - Considered whether a genuinely reachable tableau derivation exercises this: yes -- e.g.
+      `φ₀ := χ → ψ` with `χ` chosen to literally **be** the body of a `.diamond` subformula
+      processed later at an unrelated, non-root world (the imp-rule's alpha-decomposition of
+      `F(χ → ψ)@0` unconditionally adds `T(χ)@0`, positive, at the root -- ordinary, not exotic).
+    - Considered model-repair (redefining `f` or Euclidean-closing `m.r ∪ {(f w, f w')}` to patch the
+      missing pair) as an alternative to needing the raw relatedness fact. Rejected as out of scope
+      for this dispatch: naive union does not preserve `RightEuclidean` (needs a genuine closure,
+      `Relation.EuclGen`-shaped, already used for **completeness** in Phase 20/`EuclGen`, not
+      soundness), and would additionally need a fresh "closure preserves already-satisfied
+      box/diamond formulas" lemma that does not exist anywhere in the codebase yet.
+    - Considered a rule-level fix mirroring Route (1) (guard `witnessWorldS5`'s search: require
+      `acc.hasEdge 0 w'` when the trigger is root; exclude `0` from candidacy as a witness
+      altogether). Rejected as **not a bounded patch**: the termination argument
+      (`modalMaxWorld_lt_worldBound_of_S5w`, Phase 6/7) relies on **at most one mint per
+      `(sign, subformula)` tag** -- a guard that sometimes *rejects* an otherwise-valid reuse for a
+      tag **already** minted once (specifically when the trigger/witness combination happens to
+      cross the root boundary) would let that **same tag mint a second time** from a different
+      trigger, which is exactly the invariant the tag-injection world-bound proof needs to stay
+      intact. Any such guard requires re-deriving the termination bound alongside the soundness fix,
+      not a local patch to `FiveSimplification.lean`/`FrameSoundness.lean` alone.
+  - **Why it's stuck**: This is a genuine model-theoretic gap (parallel in kind, but independent in
+    location, to the one Route (1) fixed for propagation), not a proof-search or tactic problem --
+    the counterexample sketch above is realizable. Closing it soundly needs either (a) a rule-level
+    Route-1b fix to the mint arms whose interaction with the already-landed, CI-green termination
+    proof (Phase 6/7/18) is re-derived from scratch, or (b) a genuinely new "Euclidean-closure
+    preserves satisfaction" completeness-style argument -- both are design decisions requiring fresh
+    `/research`, not something to improvise mid-implementation per `plan-compliance.md`'s escalation
+    requirement.
+  - **What is needed**: A follow-up research/plan cycle ("Route 1b") specifically for the mint-arm
+    witness-reuse soundness gap, addressing termination-invariant compatibility before any Lean is
+    written. This blocker's diagnosis should be preserved verbatim for that cycle, the same way the
+    (now-resolved) Route-1 propagation diagnosis above was preserved for this one.
+  - **Prohibited workarounds**: do NOT use `sorry`, do NOT weaken `fiveFC`/`kb5FC`, do NOT restrict
+    `modalTableauFive_sound`'s statement, do NOT silently guard `witnessWorldS5` without re-deriving
+    the termination bound.
 - [ ] **KILL CONDITION** (mirrors Phase 13's): if the soundness re-proof exceeds **~400 lines**, stop
       and record the measured count -- the root/cluster split is then wrong in a way `reports/07_*` did
       not foresee. The report's blast-radius analysis places the new proof **well inside** this budget.
@@ -2133,7 +2210,9 @@ deleted. The remediation (Route 1) follows in **Tasks**.
       assembly; see handoff 09 for the revised ~800-1100 line estimate and the reasoning. The
       root/cluster split itself is NOT wrong -- `accReachableInv_related_five` is landed,
       sorry-free, and CI-green -- the underestimate is specifically about per-shape fuel-induction
-      boilerplate, not about the mathematical design.)*
+      boilerplate, not about the mathematical design. Superseded by the NEW BLOCKER above: the
+      remaining assembly cannot be measured against the 400-line budget until the mint-arm
+      witness-reuse gap has its own remediation route.)*
   **Prohibited workarounds**: do NOT weaken `fiveFC`/`kb5FC`'s definitions, do NOT restrict
   `modalTableauFive_sound`'s statement to a special case of `φ₀`, do NOT introduce `sorry` or an
   axiom to paper over the gap.

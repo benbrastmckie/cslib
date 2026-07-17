@@ -1,33 +1,10 @@
 {
   "status": "partial",
-  "started_at": "2026-07-17T00:00:00Z",
-  "artifacts": [
-    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/11_phase19a-mint-arm-guard-landed-termination-open.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/plans/07_s5-termination-machinery.md"
-  ],
-  "requires_user_review": true,
-  "review_reason": "Phase 19a's second task (tag-injection termination bound re-derivation under the source-split invariant) was not attempted this dispatch -- it is Phase-6/7-scale work requiring its own dedicated dispatch(es), per the plan's own KILL-budget sizing. The mint-arm guard (first task) landed green and sorry-free.",
-  "partial_progress": {
-    "stage": "phase-19a-partial",
-    "details": "Landed the Route (a) root-aware mint-arm guard in modalApplyOneFive (witnessWorldFive, root-trigger-always-fresh branch) plus full re-verification of every downstream consumer of the old witnessWorldS5 case-split pattern, committed as 56a84d07. The tag-injection termination bound re-derivation under the source-split ('<=1 mint per tag per {root, non-root}') invariant was not attempted this dispatch.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 18.5
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count_new": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "note": "CI pipeline (build, checkInitImports, lint-style, lake lint --builtin-lint, lake shake, lake test, axiom check via lake env lean + #print axioms) re-run directly after the dispatching agent stalled on an infra timeout mid-verification; all green for the committed change (56a84d07)."
-  },
   "metadata": {
-    "session_id": "orchestrate-final-dispatch",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "cycles_used": 5,
+    "final_state": "implementing",
+    "phases_completed": 18.5,
+    "phases_total": 25,
+    "resume_point": "Phase 19a task 2: tag-injection termination re-derivation (source-split invariant)"
   }
 }

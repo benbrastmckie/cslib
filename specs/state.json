@@ -1751,8 +1751,8 @@
         }
       ],
       "created": "2026-07-15T06:19:22Z",
-      "last_updated": "2026-07-16T07:00:12Z",
-      "session_id": "sess_1784185091_129d98",
+      "last_updated": "2026-07-17T15:13:11Z",
+      "session_id": "sess_1784301132_3fbef6",
       "next_artifact_number": 6,
       "memory_candidates": [
         "In this repo, Lean files with `module` + `public import` (not `public meta import`) headers cannot embed permanent `#eval`/`#guard`/`native_decide` declarations (structural module-system limitation, documented at Cslib/Logics/Modal/Tableau/LoopChecking.lean's 'Sanity Checks' section). Kernel-level `rfl`/`decide` also fails on functions compiled via nested well-founded recursion (e.g. modalExpandBranchesGen's fuel-driven processNext) even at small argument magnitudes, independent of the module-system limitation. Workaround: chain single, non-recursive step functions (e.g. modalStepBranchGen) via explicit `let`/`bind`, which DO reduce fine under `rfl`/`decide`, to build a mechanized multi-step counterexample without touching the recursive driver.",

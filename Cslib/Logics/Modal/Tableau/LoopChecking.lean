@@ -713,6 +713,137 @@ def modalStepBranchS4Keyed (φ₀ : Proposition Atom)
       | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
       | .notApplicable => none
 
+/-! ## Minting-Content Groundwork (task 511, Phase 5): towards `successorBirthContent`
+matching the actual K-minting payload
+
+`successorBirthContent` was *designed* to match `modalApplyOne`'s box-neg/diamond-pos minting
+payload (its own docstring): `keyLowerBd`'s minting case needs the fresh world's
+`relevantSetFinset` (over the POST-step branch) to equal the prospective birth content computed
+PRE-step. This section lands the REUSABLE groundwork for that equality (subformula-membership
+extraction so the witness lands in `signedSubfmls φ₀`, plus the literal `.fst` unfolding of
+`modalApplyOne` at both minting shapes) but the equality lemma itself did **not** close within
+this dispatch's budget -- see this plan's Phase 5 section for the current, narrowed blocker
+(the guard-vs-keys gap itself IS closed; this remaining piece is pure Lean/`Bool`-vs-`Prop`
+proof engineering, not a further structural gap). -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Transitivity of `modalSubfmls`: a subformula of a subformula is a subformula.
+`FmpMeasure.lean`'s `modalSubfmls_trans` is file-private (as are its siblings `_B`/`_S5`/`_Five`
+in their own files); this is the S4-local copy, needed to derive `φ ∈ modalSubfmls φ₀` (hence
+`signedSubfmls` membership) for the box/diamond witness in the minting-content equality this
+groundwork supports. -/
+private lemma modalSubfmls_trans_S4 {a b c : Proposition Atom}
+    (hab : a ∈ modalSubfmls b) (hbc : b ∈ modalSubfmls c) : a ∈ modalSubfmls c := by
+  induction c with
+  | atom p =>
+    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | bot =>
+    simp only [modalSubfmls, List.mem_singleton] at hbc; subst hbc; exact hab
+  | imp x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | and x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | or x y ihx ihy =>
+    simp only [modalSubfmls, List.mem_cons, List.mem_append] at hbc
+    rcases hbc with (rfl | hx) | hy
+    · exact hab
+    · exact List.mem_cons_of_mem _ (List.mem_append_left _ (ihx hx))
+    · exact List.mem_cons_of_mem _ (List.mem_append_right _ (ihy hy))
+  | box x ihx =>
+    simp only [modalSubfmls, List.mem_cons] at hbc
+    rcases hbc with rfl | hx
+    · exact hab
+    · exact List.mem_cons_of_mem _ (ihx hx)
+  | diamond x ihx =>
+    simp only [modalSubfmls, List.mem_cons] at hbc
+    rcases hbc with rfl | hx
+    · exact hab
+    · exact List.mem_cons_of_mem _ (ihx hx)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Extraction: the formula-component of any `modalUniverseS4 φ₀` member is a subformula of
+`φ₀`. S4-local restatement of `FmpMeasure.lean`'s file-private `modalUniverse_mem_formula`. -/
+private lemma modalUniverseS4_mem_formula {φ₀ : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (hx : x ∈ modalUniverseS4 φ₀) :
+    x.formula ∈ modalSubfmls φ₀ := by
+  simp only [modalUniverseS4, List.mem_flatMap, List.mem_range, List.mem_cons,
+    List.not_mem_nil, or_false] at hx
+  obtain ⟨w, -, ψ, hψ, heq | heq⟩ := hx <;> (subst heq; exact hψ)
+
+omit [Hashable Atom] in
+/-- `modalApplyOne`'s box-negative minting shape, unfolded directly to its literal `.linear`
+payload (mirrors `FiveSimplification.lean`'s file-private `modalApplyOne_boxNeg_mint_fst`). -/
+lemma modalApplyOne_boxNeg_mint_fst_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = RuleResult.linear ((⟨.neg, φ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
+omit [Hashable Atom] in
+/-- `modalApplyOne`'s diamond-positive minting shape, unfolded directly (dual of
+`modalApplyOne_boxNeg_mint_fst`; mirrors `FiveSimplification.lean`'s file-private
+`modalApplyOne_diamondPos_mint_fst`). -/
+lemma modalApplyOne_diamondPos_mint_fst_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).fst
+      = RuleResult.linear ((⟨.pos, φ, modalNextWorld b⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ::
+        (boxPositivesOf b).filterMap (fun (ψ, src) =>
+          if src == w then
+            let sf' : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, ψ, modalNextWorld b⟩
+            if b.any (· == sf') then none else some sf'
+          else none) ++
+        b.filterMap (fun sf' =>
+          if sf'.sign == .neg && sf'.label == w then
+            match sf'.formula with
+            | .diamond ψ =>
+              let prop : SignedFormula (Proposition Atom) WorldIndex :=
+                ⟨.neg, ψ, modalNextWorld b⟩
+              if b.any (· == prop) then none else some prop
+            | _ => none
+          else none)) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+  rfl
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

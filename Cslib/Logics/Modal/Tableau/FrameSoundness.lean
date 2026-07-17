@@ -2819,6 +2819,136 @@ theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .c
     s5Valid φ :=
   modalTableauS5w_sound φ h
 
+/-! ### Task 515 (Phase 19): Rule-Level Five/KB5 Semantic Soundness
+
+The Route (1) root/non-root split lands here: `modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn`
+discharge the root-triggered arm directly via `hacc` on the `modalFiveBoxAll_root_hasEdge`/
+`modalFiveDiaNegAll_root_hasEdge` witness (`FiveSimplification.lean`), and the non-root-triggered
+arm via the codomain-equivalence discharge `accReachableInv_related_five`. Mirrors
+`modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn`. -/
+
+/-- **Task 515 (Phase 19)**: frame-relativized semantic soundness of `modalApplyOneFiveProp`'s
+box-positive output under `fiveFC`, given `accReachableInv`. K's own bounded propagation
+(`kForms`, at `acc.successorsOf lbl`) is sound via the existing `modalApplyOne_boxPos_sound`
+(direct-edge relatedness, `FC` unused); the root-aware universal propagation
+(`modalFiveBoxAll b acc φ lbl`) splits on whether the trigger `lbl` is the root: at the root, every
+emitted target has a genuine recorded edge (`modalFiveBoxAll_root_hasEdge`), discharged directly
+via `hacc`; away from the root, both `lbl` and any target world `x.label` are non-root known
+worlds, hence related via `accReachableInv_related_five`. -/
+lemma modalFiveBoxAll_soundIn
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : fiveFC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf) (hreach : accReachableInv b acc)
+    {φ : Proposition Atom} {lbl : WorldIndex}
+    (hmem : (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneFiveProp
+        (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd = acc ∧
+    RuleResultSat m f (modalApplyOneFiveProp
+      (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hKeq := modalApplyOne_boxPos_eq
+    (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+  have hKsound := modalApplyOne_boxPos_sound m f φ lbl b acc hacc hb hmem
+  have hlblknown : lbl ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_FS b lbl).mpr
+      ⟨(⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
+  have hboxsat : Satisfies m (f lbl) (.box φ) := (hb _ hmem).1 rfl
+  simp only [Satisfies] at hboxsat
+  have hallSat : ∀ x ∈ modalFiveBoxAll b acc φ lbl, sfSat m f x := by
+    intro x hx
+    obtain ⟨hxeq, hxknown, hxne0, -⟩ := modalFiveBoxAll_mem hx
+    by_cases hlbl0 : lbl = (0 : WorldIndex)
+    · subst hlbl0
+      have hedge : acc.hasEdge 0 x.label = true := modalFiveBoxAll_root_hasEdge hx
+      have hrel : m.r (f 0) (f x.label) := hacc 0 x.label hedge
+      rw [hxeq]
+      exact sfSat_pos m f φ x.label (hboxsat (f x.label) hrel)
+    · have hrel : m.r (f lbl) (f x.label) :=
+        accReachableInv_related_five hFC hacc hreach hlblknown hxknown hlbl0 hxne0
+      rw [hxeq]
+      exact sfSat_pos m f φ x.label (hboxsat (f x.label) hrel)
+  unfold modalApplyOneFiveProp
+  rcases hp : modalApplyOne (⟨.pos, .box φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex)
+      b acc with ⟨kResult, kAcc⟩
+  rw [hp] at hKeq hKsound
+  simp only at hKeq hKsound
+  rcases hKeq with hKeq | ⟨kForms, hKeq⟩ <;> subst hKeq
+  · obtain ⟨hsndeq, -⟩ := hKsound
+    dsimp only
+    split_ifs with hemp
+    · exact ⟨hsndeq, trivial⟩
+    · exact ⟨hsndeq, hallSat⟩
+  · obtain ⟨hsndeq, hKformSat⟩ := hKsound
+    dsimp only
+    refine ⟨hsndeq, ?_⟩
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hKformSat x hx
+    · exact hallSat x hx
+
+/-- Dual of `modalFiveBoxAll_soundIn` for the diamond-negative shape. -/
+lemma modalFiveDiaNegAll_soundIn
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : fiveFC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hb : ∀ sf ∈ b, sfSat m f sf) (hreach : accReachableInv b acc)
+    {φ : Proposition Atom} {lbl : WorldIndex}
+    (hmem : (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (modalApplyOneFiveProp
+        (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+        = acc ∧
+    RuleResultSat m f (modalApplyOneFiveProp
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst := by
+  have hKeq := modalApplyOne_diamondNeg_eq
+    (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+  have hKsound := modalApplyOne_diaNeg_sound m f φ lbl b acc hacc hb hmem
+  have hlblknown : lbl ∈ modalKnownWorlds b :=
+    (mem_modalKnownWorlds_FS b lbl).mpr
+      ⟨(⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex), hmem, rfl⟩
+  have hdiasat : ¬ Satisfies m (f lbl) (.diamond φ) := (hb _ hmem).2 rfl
+  simp only [Satisfies] at hdiasat
+  push Not at hdiasat
+  have hallSat : ∀ x ∈ modalFiveDiaNegAll b acc φ lbl, sfSat m f x := by
+    intro x hx
+    obtain ⟨hxeq, hxknown, hxne0, -⟩ := modalFiveDiaNegAll_mem hx
+    by_cases hlbl0 : lbl = (0 : WorldIndex)
+    · subst hlbl0
+      have hedge : acc.hasEdge 0 x.label = true := modalFiveDiaNegAll_root_hasEdge hx
+      have hrel : m.r (f 0) (f x.label) := hacc 0 x.label hedge
+      rw [hxeq]
+      exact sfSat_neg m f φ x.label (hdiasat (f x.label) hrel)
+    · have hrel : m.r (f lbl) (f x.label) :=
+        accReachableInv_related_five hFC hacc hreach hlblknown hxknown hlbl0 hxne0
+      rw [hxeq]
+      exact sfSat_neg m f φ x.label (hdiasat (f x.label) hrel)
+  unfold modalApplyOneFiveProp
+  rcases hp : modalApplyOne
+      (⟨.neg, .diamond φ, lbl⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hKeq hKsound
+  simp only at hKeq hKsound
+  rcases hKeq with hKeq | ⟨kForms, hKeq⟩ <;> subst hKeq
+  · obtain ⟨hsndeq, -⟩ := hKsound
+    dsimp only
+    split_ifs with hemp
+    · exact ⟨hsndeq, trivial⟩
+    · exact ⟨hsndeq, hallSat⟩
+  · obtain ⟨hsndeq, hKformSat⟩ := hKsound
+    dsimp only
+    refine ⟨hsndeq, ?_⟩
+    intro x hx
+    simp only [List.mem_append, List.mem_filter] at hx
+    rcases hx with hx | ⟨hx, -⟩
+    · exact hKformSat x hx
+    · exact hallSat x hx
+
+/-- **Task 515 (Phase 19)**: the combined per-step invariant the Five fuel induction threads:
+`accFreshInv`, `accReachableInv`, and `accTargetsKnown`. Mirrors `S5SoundInv`. -/
+def FiveSoundInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  accFreshInv b acc ∧ accReachableInv b acc ∧ accTargetsKnown b acc
+
 end Cslib.Logic.Modal.Tableau
 
 end

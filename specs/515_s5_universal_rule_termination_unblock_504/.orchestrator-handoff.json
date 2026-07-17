@@ -1,56 +1,30 @@
 {
   "status": "implemented",
-  "summary": "Resumed from handoffs/15 (Phase 21 PARTIAL -- accTargetsNeRoot top-loop pair landed, primary deliverable blocked on the missing FiveWorldInv step-preservation proof, the Hintikka wall). This dispatch built and landed the full four-step recipe the blocker's note recorded, with one necessary technical refinement discovered and documented as a deviation. Step 1: expandedRootTagsFive/FiveWorldInvE (FiveSimplification.lean) -- the e-aware refinement of FiveWorldInv actually needed for a step-local induction proof (a careful per-step trace showed the recipe's literal e-independent S5wTagInv-and-FiveWorldInv shape is not step-preservable: a root-triggered mint consumes a root tag that was already counted the moment its trigger appeared on the branch, chronologically before the mint fires, so a bare presence-based counter cannot show the required per-step growth at that step; the fix counts a root tag only once its trigger has been dequeued into e, restoring the lockstep-growth argument). Step 2: modalApplyOneFive_worldGrowth (mirrors modalApplyOneS5w_step, doubled for root/non-root) + modalStepBranchFive_preserves_worldInv (mirrors modalStepBranchS5w_preserves_worldInv, three-way case split) -- FiveSimplification.lean. Step 3: ModalLoopAuxFive + _bounds + _stepPreserved + modalLoopInvHintikkaFive_initial -- FrameCompleteness.lean. Step 4 (the payoff): modalTableauFive_complete + fiveValid_decides + instDecidableFiveValid, assembled exactly as modalTableauS5_complete/instDecidableS5Valid do -- FrameCompleteness.lean. All landed sorry-free, axioms [propext, Classical.choice, Quot.sound] only (confirmed via lake env lean + #print axioms on every new public declaration). Full CI green: lake build (3240/3240), checkInitImports exit 0, lake lint (only the pre-existing PrimeExclusion.lean baseline remains, after adding @[nolint unusedArguments] to ModalLoopAuxFive caught during this dispatch's own lint run), lake exe lint-style exit 0, lake shake (no import changes suggested for either touched file), lake test green (9230/9231, pre-existing Intuitionistic/Minimal sorry warnings unrelated). Live regression probe (the plan's own Verification requirement) confirms decide (fiveValid (box p -> p)) = false while decide (s5Valid (box p -> p)) = true, confirming the route is genuinely at fiveFC and not silently at s5FC. Plan file's Phase 21 marked [COMPLETED], checklist fully checked off with deviation notes, BLOCKER note replaced with a RESOLVED note (staged via git hash-object/update-index against HEAD's blob to precisely exclude stray, pre-existing, uncommitted Phase 22/23 [IN PROGRESS] markers from a concurrent session, which remain untouched in the working tree). Task 504's re-scoped deliverable's first half (fiveValid decidability) is now fully shipped. Phases 22-23 (KB5) NOT started this dispatch, per the hard constraint.",
-  "phases_completed": 23,
+  "summary": "Phase 22 (KB5 rule + soundness) landed and marked COMPLETED. modalApplyOneKb5, modalApplyOneKb5_specCore, and modalTableauKb5_sound are all sorry-free and axiom-clean. Key finding: the Five tableau rule is purely syntactic (no frame-condition dependence), so KB5 soundness factors entirely -- modalApplyOneKb5 is a literal alias for modalApplyOneFive, and modalTableauKb5_sound is a two-line frame-class-monotonicity corollary of the already-landed modalTableauFive_sound. No cloned rule, mint-arm guard, or termination-bound re-derivation was needed, making this phase far cheaper than the plan anticipated.",
+  "phases_completed": 22,
   "phases_total": 25,
-  "phases_note": "Phases 0-19 (19a+19b), 20, and now 21 fully [COMPLETED]. Phase 21's Hintikka wall (the FiveWorldInv step-preservation proof, previously flagged as Phase-19b-scale deferred work) is fully landed across this and the prior dispatch (accTargetsNeRoot pair + the four-step recipe). Phases 22-23 (KB5 rule/soundness, KB5 completeness) remain queued/not-yet-implemented; they are now unblocked per the plan's own dependency graph (Depends on: 21) but were not started this dispatch.",
   "blockers": [],
   "ci_status": {
-    "build": "green (full project, 3240/3240 jobs)",
-    "checkInitImports": "exit 0",
-    "lint": "clean except the pre-existing PrimeExclusion.lean baseline (unrelated to task 515); a new @[nolint unusedArguments] annotation was added to ModalLoopAuxFive during this dispatch's own lint run to keep it clean",
-    "lint-style": "exit 0",
-    "shake": "green; no import changes suggested for FiveSimplification.lean or FrameCompleteness.lean",
-    "test": "green (9230/9231 targets built; pre-existing Intuitionistic/Minimal Completeness sorry warnings are an unrelated baseline)",
+    "lake_build": "green (3240/3240)",
+    "checkInitImports": "pass",
+    "lake_lint": "pass (only pre-existing PrimeExclusion.lean baseline, unrelated)",
+    "lint_style": "pass",
+    "shake": "pass (no import changes suggested for touched files)",
+    "lake_test": "pass",
     "sorry_count": 0,
-    "axiom_note": "modalApplyOneFive_worldGrowth, modalStepBranchFive_preserves_worldInv, ModalLoopAuxFive_bounds, ModalLoopAuxFive_stepPreserved, modalLoopInvHintikkaFive_initial, modalTableauFive_complete, fiveValid_decides, instDecidableFiveValid (and the smaller expandedRootTagsFive/FiveWorldInvE helper lemmas): [propext, Classical.choice, Quot.sound] only. Confirmed via lake env lean + #print axioms, not lean_verify alone. No sorryAx, no new custom axiom.",
-    "live_probe": "decide (fiveValid (Proposition.imp (Proposition.box (Proposition.atom 0)) (Proposition.atom 0))) = false; decide (s5Valid (same formula)) = true -- confirms instDecidableFiveValid is genuinely at fiveFC, not silently routed through s5Valid",
-    "preexisting_baselines_unchanged": ["PrimeExclusion.lean lint baseline", "BDriver.lean:1219 longLine", "Intuitionistic/Minimal Completeness sorries (repo-wide, unrelated to task 515)"]
+    "new_axioms": 0
   },
   "commits": [
-    "720088c9 task 515 phase 21.1: land accTargetsNeRoot top-loop preservation pair",
-    "69d5f657 task 515 phase 21.2: land e-aware FiveWorldInvE infrastructure",
-    "6eefff80 task 515 phase 21.3: land modalApplyOneFive_worldGrowth (mirrors modalApplyOneS5w_step)",
-    "ee112b41 task 515 phase 21.4: land modalStepBranchFive_preserves_worldInv (recipe steps 1-2)",
-    "f1fa2965 task 515 phase 21.5: land ModalLoopAuxFive + bounds + stepPreserved + initial (recipe step 3)",
-    "245e2157 task 515 phase 21.6: land modalTableauFive_complete + instDecidableFiveValid (recipe step 4)",
-    "31398911 task 515: mark Phase 21 COMPLETED (Hintikka wall resolved, four-step recipe landed)"
+    "6edb30cc task 515 phase 22.1: land modalApplyOneKb5 + modalTableauKb5_sound (factor, not clone)",
+    "75ca9d06 task 515 phase 22: mark KB5 rule + soundness COMPLETED (factor, not clone)"
   ],
   "continuation_context": {
-    "is_successor": true,
-    "resume_phase": "22",
-    "resume_rationale": "Phase 21 is fully [COMPLETED]: modalTableauFive_complete and instDecidableFiveValid are landed, green, sorry-free, and axiom-clean. Do not re-derive any Phase 21 declaration. The next phase per the plan's dependency graph (Depends on: 21) is Phase 22 (KB5 rule + soundness).",
-    "next_phase_notes": [
-      "Read plans/07_s5-termination-machinery.md's Phase 22 section in full before writing any code.",
-      "Do NOT re-derive expandedRootTagsFive/FiveWorldInvE/modalApplyOneFive_worldGrowth/modalStepBranchFive_preserves_worldInv (FiveSimplification.lean), or ModalLoopAuxFive/_bounds/_stepPreserved/modalLoopInvHintikkaFive_initial/modalTableauFive_complete/fiveValid_decides/instDecidableFiveValid (FrameCompleteness.lean) -- all landed, green, sorry-free.",
-      "Phase 22's own plan note says KB5 reuses the Route-1-corrected + Route-(a)-guarded Five pattern (same root/non-root propagation split AND same root-aware mint-arm guard). If KB5's mint-arm guard shares Five's root/non-root double-mint structure, KB5's own eventual completeness proof will likely need an analogue of this dispatch's e-aware expandedRootTagsFive refinement -- budget for that possibility (see summaries/16_phase21-hintikka-wall-landed-completed.md's 'e-aware refinement' section for the exact mathematical trace that revealed this necessity for Five; do not assume a naive e-independent port will step-preserve cleanly for KB5 either without re-verifying).",
-      "Resolve every declaration by NAME (lean_local_search/lean_declaration_file/grep), not by plan line-number citations.",
-      "Do NOT touch S5Simplification.lean's shared S5w* declarations.",
-      "Stray uncommitted Phase 22/23 [IN PROGRESS] markers are present in the working tree (not the last commit) from a concurrent/prior source -- reconcile this as part of Phase 22's own preflight (see handoffs/16 for detail). If staging plan-file edits and stray concurrent edits are interleaved in the same diff hunk, git add -p's hunk splitting may be insufficient (confirmed this dispatch) -- use git hash-object -w + git update-index --cacheinfo against a clean git show HEAD:<path> base with your own edits applied, instead.",
-      "Do not start Phase 23 before Phase 22 completes."
-    ],
-    "environment_notes": [
-      "Mathlib cache warm; lake exe cache get is a no-op on this branch.",
-      "Concurrent sessions may be active: scope git add narrowly to specific files touched, never git add -A / git add .",
-      "Scoped checks: lake build Cslib.Logics.Modal.Tableau.FrameCompleteness (rebuilds FiveSimplification.lean transitively) or lake build Cslib.Logics.Modal.Tableau.FiveSimplification. Verify axioms with authoritative #print axioms via lake env lean <scratch>.lean, not lean_verify alone.",
-      "lake lint/lake shake/lake test all rebuild/scan the whole default Cslib target regardless of a module argument passed to them in this Lake version -- budget several minutes for each.",
-      "Phase 22's likely target file(s): FiveSimplification.lean (for a KB5 rule mirroring modalApplyOneFive) or a new sibling Kb5Simplification.lean, plus FrameSoundness.lean for soundness -- per the plan's own note, decide factored-vs-cloned based on how much Five/KB5 actually share once Phase 22 investigates."
+    "next_phase": "Phase 23: KB5 completeness, Decidable (kb5Valid phi), and final docstring reconciliation",
+    "notes": [
+      "Phase 23 needs modalTableauKb5_complete (kb5Valid phi -> modalTableauKb5 phi = .closed), which is NOT free from the Phase 22 factoring: kb5Valid is strictly weaker than fiveValid (kb5FC is a proper subclass of fiveFC-frames), so some kb5Valid formulas may leave modalTableauFive/modalTableauKb5 open. A genuine extractModelKb5 (symmetric-model extraction from an open branch, at the PER normal form) is expected to be needed, per the plan's own Phase 23 task list.",
+      "modalTableauKb5 := modalTableauFive definitionally (rfl); modalTableauKb5_eq_modalTableauFive is the bridge lemma if Phase 23 needs to reuse Five's open-branch structure directly.",
+      "Phase 23 also needs to: reconcile FrameCompleteness.lean:571-590 and S5Simplification.lean:3018-3037 scope notes (both now stale/false per the plan's own instructions), port the probes/five-s5-separation.lean theorems into the live tree, and land a #eval regression test for the boxImp separating formula.",
+      "External note: Cslib/Logics/Modal/Tableau/LoopChecking.lean is owned by a concurrent session (task 511) and was mid-edit (build-breaking) at the start of this dispatch; it resolved itself (task 511 committed) partway through and was never touched by this dispatch. If Phase 23 dispatch hits a similar concurrent breakage in LoopChecking.lean, it is not this task's responsibility to fix."
     ]
-  },
-  "metadata": {
-    "session_id": "orchestrate-resume-phase21b",
-    "agent_type": "cslib-implementation-agent",
-    "task_number": 515,
-    "orchestrator_mode": true
   }
 }

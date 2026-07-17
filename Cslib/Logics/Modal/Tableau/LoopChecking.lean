@@ -1309,6 +1309,101 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
 
+omit [Hashable Atom] in
+/-- Every `successorBirthContent` value lies in `signedSubfmls φ₀`, provided its witness
+formula `φ` is a subformula of `φ₀`: the `insert (s, φ)` component needs
+`mem_signedSubfmls_of_formula_S4`, and the filtered remainder is trivially a subset of
+`signedSubfmls φ₀` (`Finset.filter_subset`). Reusable by both minting leaves of
+`keysInUniverse`'s preservation (unlike the `relevantSetFinset`-targeted subset lemmas above,
+this fact needs no information about the POST-step branch at all). -/
+private lemma successorBirthContent_subset_signedSubfmls
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex) (hφ : φ ∈ modalSubfmls φ₀) :
+    successorBirthContent φ₀ b s φ w ⊆ signedSubfmls φ₀ := by
+  intro p hp
+  simp only [successorBirthContent, Finset.mem_insert, Finset.mem_filter] at hp
+  rcases hp with rfl | ⟨hpmem, -⟩
+  · exact mem_signedSubfmls_of_formula_S4 s hφ
+  · exact hpmem
+
+/-- **`keysInUniverse`'s driver-level preservation** (task 511, Phase 5 assembly): every key
+recorded after an S4Keyed step is drawn from `signedSubfmls φ₀`. Unlike `keyLowerBd`, this
+obligation is independent of the (possibly several) output branches `newBs` -- it is a fact
+about `keys'` alone. Assembled the same way: old keys survive via the `keysInUniverse`
+hypothesis directly (`keys ⊆ keys'` always), new keys (the two minting leaves) via
+`successorBirthContent_subset_signedSubfmls`, whose witness-formula-membership side
+condition is derived exactly as in `successorBirthContent_boxNeg_subset_relevantSetFinset`/
+`_diamondPos_subset_relevantSetFinset` above. -/
+lemma modalStepBranchS4_preserves_keysInUniverse (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hIU : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ w k, (w, k) ∈ keys' → k ⊆ signedSubfmls φ₀ := by
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro w k hwk
+  rw [hkeq] at hwk
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at hwk
+  all_goals first
+    | exact hIU w k hwk
+    | skip
+  case neg.neg.box =>
+    have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hIU w k hwk
+      · have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hφsub : ψ ∈ modalSubfmls φ₀ := by
+          have h1 : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
+            modalUniverseS4_mem_formula (hb _ hsfmem')
+          have h2 : ψ ∈ modalSubfmls (Proposition.box ψ) :=
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
+          exact modalSubfmls_trans_S4 h2 h1
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨-, hkeq2⟩ := hwk
+        subst hkeq2
+        exact successorBirthContent_subset_signedSubfmls φ₀ b .neg ψ sf.label hφsub
+    · simp only [hblock] at hwk
+      exact hIU w k hwk
+  case neg.pos.diamond =>
+    have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hIU w k hwk
+      · have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hφsub : ψ ∈ modalSubfmls φ₀ := by
+          have h1 : (Proposition.diamond ψ) ∈ modalSubfmls φ₀ :=
+            modalUniverseS4_mem_formula (hb _ hsfmem')
+          have h2 : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
+          exact modalSubfmls_trans_S4 h2 h1
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨-, hkeq2⟩ := hwk
+        subst hkeq2
+        exact successorBirthContent_subset_signedSubfmls φ₀ b .pos ψ sf.label hφsub
+    · simp only [hblock] at hwk
+      exact hIU w k hwk
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

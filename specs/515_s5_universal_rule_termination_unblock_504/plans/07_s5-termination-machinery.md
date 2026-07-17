@@ -2727,7 +2727,7 @@ genuinely at `fiveFC` and not silently at `s5FC`).
 
 ---
 
-### Phase 22: KB5 -- `modalApplyOneKb5` + `modalTableauKb5_sound` [NOT STARTED]
+### Phase 22: KB5 -- `modalApplyOneKb5` + `modalTableauKb5_sound` [COMPLETED]
 
 **Unblocked (design unchanged)** -- KB5 reuses the **Route-1-corrected + Route-(a)-guarded** Five
 pattern (the same root/non-root propagation split AND the same root-aware mint-arm guard). The KB5 PER
@@ -2740,33 +2740,61 @@ normal form and Phases 18/19a/19b established the pattern (rule + guard + source
 bespoke soundness assembly).
 
 **Tasks**:
-- [ ] Land `modalApplyOneKb5 : RuleApply Atom`, on Phase 15(c)/17's dichotomy: a rooted KB5 frame is
-      either **edge-isolated at the root** or a **full cluster containing the root**. Symmetric +
-      Euclidean gives transitive (`Relation.symm_rightEuclidean_iff_trans`, `Euclidean.lean:236`), so
-      KB5 frames are PERs -- an equivalence on `dom r` plus isolated points.
-- [ ] Port the termination argument from Phase 18 (which ported it from Phases 4/6/7). Mint arms are
-      shape-identical again; the same three design constraints (R6, `.linear [witness]`, no guard)
-      apply unchanged.
-- [ ] Land `modalApplyOneKb5_specCore : RuleApplicationSpecCore modalApplyOneKb5`.
-- [ ] Land `theorem modalTableauKb5_sound (φ) (h : modalTableauKb5 φ = .closed) : kb5Valid φ`.
-- [ ] **Consider generalizing over the frame condition instead of cloning.** If Phases 18/19a/19b
-      reveal that the Five and KB5 rules differ only in a `Std.Symm` obligation, factor the two rules
-      over the frame condition rather than writing a third near-copy. **Phase 19a/19b's outcome decides
-      this; do not pre-commit.** A three-way clone is acceptable if factoring costs more than it saves --
-      **but say which was chosen and why in the phase note.**
+- [x] Land `modalApplyOneKb5 : RuleApply Atom` *(deviation: altered -- landed as a literal alias
+      `modalApplyOneKb5 := modalApplyOneFive`, not the Phase 15(c)/17 root/cluster-dichotomy
+      rule the task text anticipated; see phase note "Factor, not clone" below for why the
+      syntactic rule needs no KB5-specific shape)*.
+- [x] Port the termination argument from Phase 18 *(deviation: skipped -- moot. The termination
+      bound is a property of `modalApplyOneFive` alone (world-count vs. `modalWorldBound φ0`,
+      independent of any frame condition); since `modalApplyOneKb5 = modalApplyOneFive`
+      definitionally, Phase 19a's bound already applies to KB5 verbatim with zero new proof.
+      No mint-arm guard, source-split tag invariant, or termination re-derivation was needed)*.
+- [x] Land `modalApplyOneKb5_specCore : RuleApplicationSpecCore modalApplyOneKb5` *(landed as
+      `modalApplyOneFive_specCore` by `rfl`-transfer, per the same alias)*.
+- [x] Land `theorem modalTableauKb5_sound (φ) (h : modalTableauKb5 φ = .closed) : kb5Valid φ`
+      *(deviation: altered -- landed as a two-line frame-class-monotonicity corollary of
+      `modalTableauFive_sound`, not a bespoke fuel-induction re-derivation; see phase note)*.
+- [x] **Consider generalizing over the frame condition instead of cloning.** Decision: **factor,
+      fully** -- see phase note below for the argument and its scope.
 
-**Timing**: 3 hours
+**Phase note -- "Factor, not clone" (the frame-condition-generalization decision this phase's
+task list asked for)**: `modalApplyOneFive`'s tableau rule (`FiveSimplification.lean`) is
+**purely syntactic** -- a function of the branch and accessibility relation alone, with no
+dependence on any frame condition anywhere in its definition or in
+`RuleApplicationSpecCore modalApplyOneFive`'s fields. Its soundness proof
+(`modalTableauFive_sound`) shows a branch it closes is unsatisfiable on **every** Euclidean frame
+(`fiveFC`). Since `kb5FC := Std.Symm r ∧ Relation.RightEuclidean r` is *strictly stronger* than
+`fiveFC := Relation.RightEuclidean r` (every KB5 frame is, in particular, a Five frame), a branch
+unsatisfiable on every Euclidean frame is unsatisfiable on every KB5 frame too. **The unmodified
+`modalApplyOneFive` rule is therefore already a sound KB5 tableau rule** -- no cloned rule,
+root-aware mint-arm guard, or Phase 18/19a/19b-style termination-bound re-derivation is needed
+for soundness. This is a stronger form of factoring than the task text's "differ only in a
+`Std.Symm` obligation" framing anticipated: the two rules do not merely share structure, they are
+**definitionally identical** (`modalApplyOneKb5 := modalApplyOneFive`, `rfl` throughout), and only
+the **semantic** wrapper (the frame-condition-monotonicity lemma `fiveValid_imp_kb5Valid` and the
+capstone `modalTableauKb5_sound`, both in `FrameSoundness.lean`) is KB5-specific. No sibling
+`Kb5Simplification.lean` was created; both landed files stay the ones the plan named. This
+factoring is sound **only** for the soundness direction landed this phase -- completeness (Phase
+23, `kb5Valid → .closed`) is a genuinely different question (`kb5Valid` is strictly weaker than
+`fiveValid`, so some `kb5Valid` formulas may leave the Five tableau open) and is expected to need
+a bespoke symmetric-model extraction, out of this phase's scope.
+
+**Timing**: 3 hours (landed in well under this: the factoring made the Phase 18/19a/19b-style
+termination-bound port and mint-arm guard entirely unnecessary)
 
 **Depends on**: 21
 
-**Files to modify**: `Cslib/Logics/Modal/Tableau/FiveSimplification.lean` (or a sibling
-`Kb5Simplification.lean` if not factored), `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`
+**Files to modify**: `Cslib/Logics/Modal/Tableau/FiveSimplification.lean`,
+`Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (no sibling file needed -- fully factored)
 
-**Verification**: full CI green; `lean_verify` on `modalTableauKb5_sound`; `mk_all` re-run if a new
-file is added.
+**Verification**: full CI green (`lake build` 3240/3240, `checkInitImports` exit 0, `lake lint`
+only the pre-existing `PrimeExclusion.lean` baseline, `lint-style` clean, `shake` suggests no
+import changes for either touched file, `lake test` green); `lean_verify`/`#print axioms` via
+`lake env lean` on every new public declaration confirm `[propext, Classical.choice, Quot.sound]`
+only (several declarations need none of these); zero `sorry` in both touched files; no new file
+added, so `mk_all` is not required.
 
-**Blocked-branch**: `[BLOCKED]` with the exact open goal. **Phase 21 (the 5 deliverable) is already
-green and shipped at this point** -- a KB5 stall is a partial, not a loss.
+**Blocked-branch**: not taken -- Phase 22 landed in full.
 
 ---
 

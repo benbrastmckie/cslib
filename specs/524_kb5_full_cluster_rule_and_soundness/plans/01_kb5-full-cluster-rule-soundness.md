@@ -240,7 +240,16 @@ root arm, since it is no longer definitionally `modalApplyOneFive`.
 
 ---
 
-### Phase 4: RuleApplicationSpecCore instance (nine-field discharge) [NOT STARTED]
+### Phase 4: RuleApplicationSpecCore instance (nine-field discharge) [COMPLETED]
+
+All nine fields discharged mirroring `modalApplyOneFive_specCore` declaration-for-declaration.
+Mint shapes (`boxNegWitness'`/`diaPosWitness'`) reuse Five's mint behavior verbatim; the two
+propagation-shape fields (`boxPosNotExpanding`/`diaNegNotExpanding`) needed a fresh
+`modalApplyOneKb5'Prop_boxPos_diaNeg_shape` fact; `outputsSubsetUniverse`/`persistentFresh` use
+the `modalKb5BoxAllFull_mem`/`_mem_known`/`_mem_eq` helper lemmas landed alongside Phase 1's
+membership dichotomy, with the self-target case (`x.label = 0`) requiring no special argument
+(`0 ≤ modalWorldBound φ0` is unconditional). `localShapeInvariance`/`branchingLength` are
+unaffected-shape mirrors of Five's own proofs.
 
 **Goal**: Land `modalApplyOneKb5'_specCore : RuleApplicationSpecCore modalApplyOneKb5'`,
 discharging all nine fields.

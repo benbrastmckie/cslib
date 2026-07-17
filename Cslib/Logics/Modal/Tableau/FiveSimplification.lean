@@ -1693,6 +1693,49 @@ lemma modalKb5DiaNegAllFull_mem {b : List (SignedFormula (Proposition Atom) Worl
         refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
         simpa using huz
 
+omit [Hashable Atom] in
+/-- Every emitted formula's label is a known world of `b`, regardless of which case of
+`modalKb5BoxAllFull_mem`'s dichotomy produced it -- the general fact `outputsSubsetUniverse`/
+`persistentFresh` (Phase 4) need. -/
+lemma modalKb5BoxAllFull_mem_known {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5BoxAllFull b φ w)
+    (hw : w ∈ modalKnownWorlds b) : x.label ∈ modalKnownWorlds b := by
+  rcases (modalKb5BoxAllFull_mem h).2 with ⟨_, hkn, _⟩ | ⟨hxeq, hw0, _⟩
+  · exact hkn
+  · rw [hxeq]; dsimp only; rw [← hw0]; exact hw
+
+omit [Hashable Atom] in
+/-- Dual of `modalKb5BoxAllFull_mem_known` for `modalKb5DiaNegAllFull`. -/
+lemma modalKb5DiaNegAllFull_mem_known {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5DiaNegAllFull b φ w)
+    (hw : w ∈ modalKnownWorlds b) : x.label ∈ modalKnownWorlds b := by
+  rcases (modalKb5DiaNegAllFull_mem h).2 with ⟨_, hkn, _⟩ | ⟨hxeq, hw0, _⟩
+  · exact hkn
+  · rw [hxeq]; dsimp only; rw [← hw0]; exact hw
+
+omit [Hashable Atom] in
+/-- Every emitted formula's shape is `⟨.pos, φ, x.label⟩` regardless of which case of
+`modalKb5BoxAllFull_mem`'s dichotomy produced it. -/
+lemma modalKb5BoxAllFull_mem_eq {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w : WorldIndex} {x : SignedFormula (Proposition Atom) WorldIndex}
+    (h : x ∈ modalKb5BoxAllFull b φ w) :
+    x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+  rcases (modalKb5BoxAllFull_mem h).2 with ⟨heq, -, -⟩ | ⟨heq, -, -⟩
+  · exact heq
+  · subst heq; rfl
+
+omit [Hashable Atom] in
+/-- Dual of `modalKb5BoxAllFull_mem_eq` for `modalKb5DiaNegAllFull`. -/
+lemma modalKb5DiaNegAllFull_mem_eq {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w : WorldIndex} {x : SignedFormula (Proposition Atom) WorldIndex}
+    (h : x ∈ modalKb5DiaNegAllFull b φ w) :
+    x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
+  rcases (modalKb5DiaNegAllFull_mem h).2 with ⟨heq, -, -⟩ | ⟨heq, -, -⟩
+  · exact heq
+  · subst heq; rfl
+
 /-! ## Rule Application (task 524) -/
 
 /-- Apply the K modal rules together with the KB5 full-cluster propagation arms. Mirrors
@@ -2042,6 +2085,527 @@ theorem modalExpandBranchesKb5'_eq
 /-- `modalTableauKb5'` is exactly `modalTableauGen modalApplyOneKb5'` -- true `rfl`. -/
 theorem modalTableauKb5'_eq (φ : Proposition Atom) :
     modalTableauKb5' φ = modalTableauGen modalApplyOneKb5' φ := rfl
+
+/-! ## `RuleApplicationSpecCore` for `modalApplyOneKb5'` (task 524 Phase 4)
+
+Discharges `RuleApplicationSpecCore modalApplyOneKb5'` (`GenericDriver.lean`), mirroring
+`modalApplyOneFive_specCore`'s discharge declaration-for-declaration. The two mint shapes
+(`.pos .diamond`/`.neg .box`) are byte-identical to `modalApplyOneFive`'s own discharge (verbatim
+witness-reuse behavior, Phase 1); only the two propagation shapes (`.pos .box`/`.neg .diamond`)
+need fresh proofs against `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s membership facts. -/
+
+omit [Hashable Atom] in
+/-- `modalApplyOneKb5'Prop`'s accessibility output agrees with K's `modalApplyOne` at every
+shape. Mirrors `modalApplyOneFiveProp_snd_eq`. -/
+lemma modalApplyOneKb5'Prop_snd_eq
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneKb5'Prop sf b acc).snd = (modalApplyOne sf b acc).snd := by
+  unfold modalApplyOneKb5'Prop
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all <;>
+    rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
+
+omit [Hashable Atom] in
+/-- Whenever K's own result is `.linear`, `modalApplyOneKb5'Prop` agrees with `modalApplyOne`
+entirely. Mirrors `modalApplyOneFiveProp_eq_of_linear`. -/
+lemma modalApplyOneKb5'Prop_eq_of_linear
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : (modalApplyOne sf b acc).fst = RuleResult.linear nf) :
+    modalApplyOneKb5'Prop sf b acc = modalApplyOne sf b acc := by
+  unfold modalApplyOneKb5'Prop
+  rcases hp : modalApplyOne sf b acc with ⟨kResult, kAcc⟩
+  rw [hp] at h
+  simp only [] at h
+  subst h
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `modalApplyOneFiveProp_fresh_local_local` for `modalApplyOneKb5'Prop`.
+-/
+private lemma modalApplyOneKb5'Prop_fresh_local_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneKb5'Prop sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneKb5'Prop sf b acc).fst = RuleResult.linear (wsf :: rest)
+      ∧ (modalApplyOneKb5'Prop sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
+  · exact Or.inl (by rw [modalApplyOneKb5'Prop_snd_eq]; exact hsame)
+  · have heq := modalApplyOneKb5'Prop_eq_of_linear sf b acc (wsf :: rest) hfst
+    exact Or.inr ⟨wsf, rest, by rw [heq]; exact hfst, by rw [heq]; exact hsnd⟩
+
+/-- **F1 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_fresh_local`. -/
+lemma modalApplyOneKb5'_fresh_local
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneKb5' sf b acc).snd = acc ∨
+    (∃ wsf rest, (modalApplyOneKb5' sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
+      (modalApplyOneKb5' sf b acc).snd = acc.addEdge sf.label wsf.label) := by
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    case atom =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case bot =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case imp =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case and =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case or =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case box =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case diamond =>
+      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact modalApplyOne_fresh_local _ b acc
+      · rw [heq]
+        exact Or.inr ⟨⟨.pos, φ, w'⟩, [], rfl, rfl⟩
+  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+    case atom =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case bot =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case imp =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case and =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case or =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case diamond =>
+      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
+      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
+    case box =>
+      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact modalApplyOne_fresh_local _ b acc
+      · rw [heq]
+        exact Or.inr ⟨⟨.neg, φ, w'⟩, [], rfl, rfl⟩
+
+omit [Hashable Atom] in
+/-- **Combined F9/F10 shape fact for `modalApplyOneKb5'Prop`** (hypothesis-free). Mirrors
+`modalApplyOneFiveProp_boxPos_diaNeg_shape`. -/
+private lemma modalApplyOneKb5'Prop_boxPos_diaNeg_shape
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneKb5'Prop sf b acc).fst = .notApplicable ∨
+      ∃ out, (modalApplyOneKb5'Prop sf b acc).fst = .persistent out := by
+  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf; subst hs; subst hf
+    have hK := modalApplyOne_boxPos_eq
+      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    unfold modalApplyOneKb5'Prop
+    rcases hp : modalApplyOne
+        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · dsimp only; split_ifs with hemp
+      · exact Or.inl rfl
+      · exact Or.inr ⟨_, rfl⟩
+    · exact Or.inr ⟨_, rfl⟩
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf; subst hs; subst hf
+    have hK := modalApplyOne_diamondNeg_eq
+      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    unfold modalApplyOneKb5'Prop
+    rcases hp : modalApplyOne
+        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · dsimp only; split_ifs with hemp
+      · exact Or.inl rfl
+      · exact Or.inr ⟨_, rfl⟩
+    · exact Or.inr ⟨_, rfl⟩
+
+/-- **F9 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_boxPosNotExpanding`. -/
+private lemma modalApplyOneKb5'_boxPosNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hsign : sf.sign = .pos) (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneKb5' sf b acc).fst = .notApplicable ∨
+      ∃ out, (modalApplyOneKb5' sf b acc).fst = .persistent out := by
+  rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc (by simp [hsign, hform])]
+  exact modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc (Or.inl ⟨hsign, ψ, hform⟩)
+
+/-- **F10 discharge for `modalApplyOneKb5'`**, dual of `modalApplyOneKb5'_boxPosNotExpanding`. -/
+private lemma modalApplyOneKb5'_diaNegNotExpanding
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hsign : sf.sign = .neg) (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneKb5' sf b acc).fst = .notApplicable ∨
+      ∃ out, (modalApplyOneKb5' sf b acc).fst = .persistent out := by
+  rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc (by simp [hsign, hform])]
+  exact modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc (Or.inr ⟨hsign, ψ, hform⟩)
+
+/-- **F8 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_localShapeInvariance`. -/
+private lemma modalApplyOneKb5'_localShapeInvariance
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (acc acc' : Accessibility) :
+    (modalApplyOneKb5' ⟨s, φ, w⟩ b acc).1 = (modalApplyOneKb5' ⟨s, φ, w⟩ b' acc').1 := by
+  rw [modalApplyOneKb5'_eq_of_not_mint_shape ⟨s, φ, w⟩ b acc ⟨by simp [hnd], by simp [hnb]⟩,
+    modalApplyOneKb5'_eq_of_not_mint_shape ⟨s, φ, w⟩ b' acc' ⟨by simp [hnd], by simp [hnb]⟩,
+    modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg ⟨s, φ, w⟩ b acc ⟨by simp [hnb], by simp [hnd]⟩,
+    modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg ⟨s, φ, w⟩ b' acc' ⟨by simp [hnb], by simp [hnd]⟩]
+  exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
+
+/-- **F7 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_branchingLength`. -/
+private lemma modalApplyOneKb5'_branchingLength
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (h : (modalApplyOneKb5' sf b acc).fst = RuleResult.branching brs) :
+    brs.length = 2 := by
+  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
+  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+        exact modalApplyOne_branching_length _ b acc brs h
+      · rw [heq] at h; simp at h
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+        exact modalApplyOne_branching_length _ b acc brs h
+      · rw [heq] at h; simp at h
+  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
+        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
+    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · exfalso
+      rcases modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc hprop with hna | ⟨out, hpe⟩
+      · rw [hna] at h; simp at h
+      · rw [hpe] at h; simp at h
+    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
+          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
+      exact modalApplyOne_branching_length sf b acc brs h
+
+/-- **F3 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_persistentFresh`. -/
+private lemma modalApplyOneKb5'_persistentFresh
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (h : (modalApplyOneKb5' sf b acc).fst = RuleResult.persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
+  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+        exact modalApplyOne_persistent_props _ b acc nf h
+      · rw [heq] at h; simp at h
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+        exact modalApplyOne_persistent_props _ b acc nf h
+      · rw [heq] at h; simp at h
+  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
+        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
+    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · rcases hprop with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+      · obtain ⟨s, ff, l⟩ := sf
+        simp only at hs hf; subst hs; subst hf
+        have hK := modalApplyOne_boxPos_eq
+          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        have hKfresh := modalApplyOne_persistent_props
+          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        simp only [modalApplyOneKb5'Prop] at h
+        rcases hp : modalApplyOne
+            (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+            with ⟨kResult, kAcc⟩
+        rw [hp] at h hK
+        simp only at hK
+        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+        · -- kResult = .notApplicable
+          dsimp only at h
+          split_ifs at h with hemp
+          rw [RuleResult.persistent.injEq] at h
+          refine ⟨?_, ?_⟩
+          · rw [← h]; simpa using hemp
+          · intro x hx
+            rw [← h] at hx
+            exact (modalKb5BoxAllFull_mem hx).1
+        · -- kResult = .persistent out0
+          simp only at h
+          obtain ⟨hne, hfresh⟩ := hKfresh out0 (by rw [hp])
+          rw [RuleResult.persistent.injEq] at h
+          refine ⟨by rw [← h]; simp [hne], ?_⟩
+          intro x hx
+          rw [← h] at hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hfresh x hx
+          · exact (modalKb5BoxAllFull_mem hx).1
+      · obtain ⟨s, ff, l⟩ := sf
+        simp only at hs hf; subst hs; subst hf
+        have hK := modalApplyOne_diamondNeg_eq
+          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        have hKfresh := modalApplyOne_persistent_props
+          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        simp only [modalApplyOneKb5'Prop] at h
+        rcases hp : modalApplyOne
+            (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+            with ⟨kResult, kAcc⟩
+        rw [hp] at h hK
+        simp only at hK
+        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+        · -- kResult = .notApplicable
+          dsimp only at h
+          split_ifs at h with hemp
+          rw [RuleResult.persistent.injEq] at h
+          refine ⟨?_, ?_⟩
+          · rw [← h]; simpa using hemp
+          · intro x hx
+            rw [← h] at hx
+            exact (modalKb5DiaNegAllFull_mem hx).1
+        · -- kResult = .persistent out0
+          simp only at h
+          obtain ⟨hne, hfresh⟩ := hKfresh out0 (by rw [hp])
+          rw [RuleResult.persistent.injEq] at h
+          refine ⟨by rw [← h]; simp [hne], ?_⟩
+          intro x hx
+          rw [← h] at hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hfresh x hx
+          · exact (modalKb5DiaNegAllFull_mem hx).1
+    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
+          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
+      exact modalApplyOne_persistent_props sf b acc nf h
+
+/-- **F2 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_outputsSubsetUniverse`.
+The self-target case (`x.label = 0`) needs no separate world-bound argument: `0 ≤ modalWorldBound
+φ0` holds unconditionally (`Nat.zero_le`), so `mem_modalUniverse_of_Five` discharges it exactly
+like any other target once `x = ⟨.pos, φ, x.label⟩` is known
+(`modalKb5BoxAllFull_mem_eq`)/(`modalKb5DiaNegAllFull_mem_eq`). -/
+private lemma modalApplyOneKb5'_outputsSubsetUniverse
+    (φ0 : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0) (hsf : sf ∈ b) (hInv : accFreshInv b acc)
+    (hW : modalMaxWorld b < modalWorldBound φ0) :
+    (match (modalApplyOneKb5' sf b acc).fst with
+      | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+      | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse φ0
+      | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
+      | .notApplicable => True) := by
+  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
+  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, l⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      have hKsub := modalApplyOne_outputs_subset φ0
+        (⟨.pos, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact hKsub
+      · rw [heq]
+        have hwknown : w' ∈ modalKnownWorlds b :=
+          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
+        have hwle : w' ≤ modalWorldBound φ0 :=
+          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+        have hφsub : φ ∈ modalSubfmls φ0 := by
+          have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
+            modalUniverse_mem_formula_Five (hb _ hsf)
+          exact modalSubfmls_trans_Five (b := Proposition.diamond φ)
+            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
+        intro x hx
+        simp only [List.mem_singleton] at hx
+        rw [hx]
+        exact mem_modalUniverse_of_Five hwle hφsub
+    · obtain ⟨s, ff, l⟩ := sf
+      simp only at hs hf; subst hs; subst hf
+      have hKsub := modalApplyOne_outputs_subset φ0
+        (⟨.neg, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact hKsub
+      · rw [heq]
+        have hwknown : w' ∈ modalKnownWorlds b :=
+          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
+        have hwle : w' ≤ modalWorldBound φ0 :=
+          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
+        have hφsub : φ ∈ modalSubfmls φ0 := by
+          have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
+            modalUniverse_mem_formula_Five (hb _ hsf)
+          exact modalSubfmls_trans_Five (b := Proposition.box φ)
+            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
+        intro x hx
+        simp only [List.mem_singleton] at hx
+        rw [hx]
+        exact mem_modalUniverse_of_Five hwle hφsub
+  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
+        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at *
+    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · rcases hprop with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+      · obtain ⟨s, ff, l⟩ := sf
+        simp only at hs hf; subst hs; subst hf
+        have hK := modalApplyOne_boxPos_eq
+          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        have hKsub := modalApplyOne_outputs_subset φ0
+          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
+        simp only [modalApplyOneKb5'Prop]
+        rcases hp : modalApplyOne
+            (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+            with ⟨kResult, kAcc⟩
+        rw [hp] at hKsub hK
+        simp only at hK
+        have hφsub : φ ∈ modalSubfmls φ0 := by
+          have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
+            modalUniverse_mem_formula_Five (hb _ hsf)
+          exact modalSubfmls_trans_Five (b := Proposition.box φ)
+            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
+        have hallNew : ∀ x ∈ modalKb5BoxAllFull b φ l, x ∈ modalUniverse φ0 := by
+          intro x hx
+          have hxeq : x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
+            modalKb5BoxAllFull_mem_eq hx
+          have hlknown : l ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hsf
+          have hxknown : x.label ∈ modalKnownWorlds b :=
+            modalKb5BoxAllFull_mem_known hx hlknown
+          have hxle : x.label ≤ modalWorldBound φ0 :=
+            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
+          rw [hxeq]; exact mem_modalUniverse_of_Five hxle hφsub
+        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+        · -- kResult = .notApplicable
+          simp only
+          split_ifs with hemp
+          · trivial
+          · exact hallNew
+        · -- kResult = .persistent out0
+          simp only at hKsub ⊢
+          intro x hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hKsub x hx
+          · exact hallNew x hx
+      · obtain ⟨s, ff, l⟩ := sf
+        simp only at hs hf; subst hs; subst hf
+        have hK := modalApplyOne_diamondNeg_eq
+          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+        have hKsub := modalApplyOne_outputs_subset φ0
+          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf
+            hInv hW
+        simp only [modalApplyOneKb5'Prop]
+        rcases hp : modalApplyOne
+            (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+            with ⟨kResult, kAcc⟩
+        rw [hp] at hKsub hK
+        simp only at hK
+        have hφsub : φ ∈ modalSubfmls φ0 := by
+          have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
+            modalUniverse_mem_formula_Five (hb _ hsf)
+          exact modalSubfmls_trans_Five (b := Proposition.diamond φ)
+            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
+        have hallNew : ∀ x ∈ modalKb5DiaNegAllFull b φ l, x ∈ modalUniverse φ0 := by
+          intro x hx
+          have hxeq : x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
+            modalKb5DiaNegAllFull_mem_eq hx
+          have hlknown : l ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hsf
+          have hxknown : x.label ∈ modalKnownWorlds b :=
+            modalKb5DiaNegAllFull_mem_known hx hlknown
+          have hxle : x.label ≤ modalWorldBound φ0 :=
+            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
+          rw [hxeq]; exact mem_modalUniverse_of_Five hxle hφsub
+        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+        · -- kResult = .notApplicable
+          simp only
+          split_ifs with hemp
+          · trivial
+          · exact hallNew
+        · -- kResult = .persistent out0
+          simp only at hKsub ⊢
+          intro x hx
+          simp only [List.mem_append, List.mem_filter] at hx
+          rcases hx with hx | ⟨hx, -⟩
+          · exact hKsub x hx
+          · exact hallNew x hx
+    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
+          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at *
+      exact modalApplyOne_outputs_subset φ0 sf b acc hb hsf hInv hW
+
+/-- **F12' discharge for `modalApplyOneKb5'`**: mint (existential) shapes are verbatim
+`modalApplyOneFive`'s behavior. Mirrors `modalApplyOneFive_diaPosWitness'`. -/
+private lemma modalApplyOneKb5'_diaPosWitness'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∃ w', (modalApplyOneKb5' (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w w' ∧
+      ∃ rest,
+        (modalApplyOneKb5' (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
+  rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
+  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+    have heq := modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg
+      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
+    rw [heqp, heq]
+    exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
+  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
+
+/-- **F11' discharge for `modalApplyOneKb5'`**, symmetric to `modalApplyOneKb5'_diaPosWitness'`.
+-/
+private lemma modalApplyOneKb5'_boxNegWitness'
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    ∃ w', (modalApplyOneKb5' (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd = acc.addEdge w w' ∧
+      ∃ rest,
+        (modalApplyOneKb5' (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc).fst
+          = RuleResult.linear
+              ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
+  rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
+  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+    have heq := modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg
+      (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
+    rw [heqp, heq]
+    exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
+  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
+
+/-- **`modalApplyOneKb5'` satisfies `RuleApplicationSpecCore`** (task 524 Phase 4): the
+full-cluster-propagation rule discharges every field the Hintikka/saturation machinery needs,
+mirroring `modalApplyOneFive_specCore` declaration-for-declaration. -/
+theorem modalApplyOneKb5'_specCore :
+    RuleApplicationSpecCore (Atom := Atom) modalApplyOneKb5' where
+  freshLocal := modalApplyOneKb5'_fresh_local
+  outputsSubsetUniverse := modalApplyOneKb5'_outputsSubsetUniverse
+  persistentFresh := modalApplyOneKb5'_persistentFresh
+  branchingLength := modalApplyOneKb5'_branchingLength
+  localShapeInvariance := modalApplyOneKb5'_localShapeInvariance
+  boxPosNotExpanding := modalApplyOneKb5'_boxPosNotExpanding
+  diaNegNotExpanding := modalApplyOneKb5'_diaNegNotExpanding
+  boxNegWitness' := modalApplyOneKb5'_boxNegWitness'
+  diaPosWitness' := modalApplyOneKb5'_diaPosWitness'
 
 /-! ## Source-Split Termination Invariant (Phase 19a Task 2: Route (a) termination re-derivation)
 

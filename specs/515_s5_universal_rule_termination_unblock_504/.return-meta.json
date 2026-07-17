@@ -1,20 +1,22 @@
 {
   "status": "partial",
-  "started_at": "2026-07-17T19:26:57Z",
+  "started_at": "2026-07-17T19:53:22Z",
+  "completed_at": "2026-07-17T20:10:29Z",
+  "requires_user_review": true,
+  "review_reason": "Phase 21's primary deliverable (modalTableauFive_complete + instDecidableFiveValid) is blocked on a previously-undocumented-as-Phase-21-scope gap: the missing FiveWorldInv inductive step-preservation proof (the Hintikka 'wall'), flagged as not-yet-built by FiveSimplification.lean's own docstring and comparable in scale to Phase 19b itself. The dispatch's own new-scope item (accTargetsNeRoot top-loop pair) was completed in full. Recommend a dedicated follow-up phase with a realistic time budget; see plans/07 Phase 21 BLOCKER note and handoffs/15 for the concrete four-step recipe.",
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
     "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/515_s5_universal_rule_termination_unblock_504/plans/07_s5-termination-machinery.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/summaries/14_phase20-euclidean-truth-lemma-landed.md",
-    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/14_phase20-completed-ready-for-21.md"
+    "specs/515_s5_universal_rule_termination_unblock_504/summaries/15_phase21-accTargetsNeRoot-landed-wall-blocked.md",
+    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/15_phase21-partial-fiveworldinv-wall-blocked.md"
   ],
   "partial_progress": {
-    "stage": "phase_20_completed",
-    "details": "Phase 20 (extractModelFive + Euclidean truth lemma) is now fully COMPLETED. Landed extractModelFive/_r/_rightEuclidean/_hasEdge_imp_r, the new accTargetsNeRoot hypothesis + euclGen_ne_root_of_hasEdge_ne_root/euclGen_root_imp_hasEdge/euclGen_mem_modalKnownWorlds_iff, modalApplyOneFive_eq_of_prop_shape, hintikkaFive_box_pos/hintikkaFive_diamond_neg, the capstone modalTruthLemmaFive, and modalOpenBranchFive_countermodel in FrameCompleteness.lean, plus four additive _mem_of helper lemmas in FiveSimplification.lean. Task 515 overall remains partial pending Phases 21-23.",
+    "stage": "phase_21_partial",
+    "details": "Landed the accTargetsNeRoot top-loop preservation pair (modalApplyOneFive_edge_target_ne_root, modalStepBranchFive_preserves_accTargetsNeRoot, modalStepBranchFive_preserves_accTargetsKnown_and_NeRoot, modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot) in FrameCompleteness.lean, discharging Phase 20's accTargetsNeRoot abstract hypothesis for a real tableau run. modalTableauFive_complete/instDecidableFiveValid remain unimplemented, blocked on the missing FiveWorldInv step-preservation proof (the Hintikka wall), a separate large gap documented in the plan's new BLOCKER note. hintikka_congr task item investigated and found moot.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 22,
-    "last_completed_phase": "Phase 20: extractModelFive + the Euclidean truth lemma"
+    "last_completed_phase": "Phase 20: extractModelFive + the Euclidean truth lemma (Phase 21 partial, not counted as completed)"
   },
   "verification": {
     "verification_passed": true,
@@ -22,10 +24,13 @@
     "vacuous_count": 0,
     "axiom_count_new": 0,
     "build_passed": true,
-    "ci_pipeline_passed": true
+    "ci_pipeline_passed": "partial (build/checkInitImports/lint/lint-style/sorry/axiom checks green; lake shake and lake test not re-run this dispatch given partial status and their multi-minute repo-wide cost -- no imports were added, only existing lemmas consumed)"
   },
+  "commits": [
+    "720088c9 task 515 phase 21.1: land accTargetsNeRoot top-loop preservation pair"
+  ],
   "metadata": {
-    "session_id": "orchestrate-resume-phase20",
+    "session_id": "orchestrate-resume-phase21",
     "agent_type": "cslib-implementation-agent",
     "task_number": 515,
     "delegation_depth": 1,

@@ -202,7 +202,15 @@ helper it needs, with the file-location decision recorded.
 
 ---
 
-### Phase 3: Termination bound re-derivation [NOT STARTED]
+### Phase 3: Termination bound re-derivation [COMPLETED]
+
+**Note**: `FiveWorldInv`/`usedTagsFiveNonRoot`/`usedTagsFiveRoot`/
+`modalMaxWorld_lt_worldBound_of_FiveWorldInv` are rule-independent (branch-content-only, never
+naming `modalApplyOneFive`), and `modalApplyOneKb5'`'s mint arms are verbatim `modalApplyOneFive`
+witness-reuse (Phase 1). The root arm no longer mints at all (dump, not mint), so the same bound
+transfers with no re-derivation; landed as `Kb5'WorldInv`/`modalMaxWorld_lt_worldBound_of_Kb5'WorldInv`
+(own Kb5'-named artifacts per this phase's task list) rather than duplicating the ~150-line
+arithmetic proof.
 
 **Goal**: Re-derive (or re-confirm) the source-split termination invariant for the new rule's
 root arm, since it is no longer definitionally `modalApplyOneFive`.

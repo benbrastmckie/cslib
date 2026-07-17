@@ -2886,6 +2886,50 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
             (expandedRootTagsFive φ₀ (nf ++ b) e).card := Nat.add_le_add hN hE
     · rw [hfstc] at hsf; simp at hsf
 
+/-! ## Termination Bound for `modalApplyOneKb5'` (task 524 Phase 3)
+
+`FiveWorldInv`/`usedTagsFiveNonRoot`/`usedTagsFiveRoot`/
+`modalMaxWorld_lt_worldBound_of_FiveWorldInv` above are **entirely rule-independent**: their
+definitions inspect only branch content (which
+signed formulas appear on `b`, at which labels) and `φ₀`'s finite subformula/tag structure --
+never `modalApplyOneFive`/`modalApplyOneKb5'` by name. This is exactly what task 524's Phase 1
+design relies on: `modalApplyOneKb5'`'s mint (existential) shapes (`.pos .diamond`/`.neg .box`)
+are **verbatim** `modalApplyOneFive`'s witness-reuse behavior
+(`modalApplyOneKb5'_diaPos_eq_or_reuse`/`_boxNeg_eq_or_reuse`, mirroring `modalApplyOneFive`'s own
+case-split exactly) -- the only shapes
+that ever mint a fresh world (`modalMaxWorld`-growing) are unchanged between the two rules. Only
+the two *propagation* shapes (`.pos .box`/`.neg .diamond`) differ, and neither of those shapes
+ever mints (`modalApplyOneKb5'Prop_boxPos_diaNeg_eq`: accessibility output is always `acc`
+unchanged, result always `.notApplicable`/`.persistent`, never `.linear`/`.branching`). So the
+world-count-vs-`modalWorldBound` bound `FiveWorldInv` establishes for Five transfers to
+`modalApplyOneKb5'` with **no re-derivation needed** -- landed here as its own Kb5'-named
+artifact per this phase's task list, rather than silently reusing the Five name at call sites
+that are conceptually about the new rule. -/
+
+/-- The KB5' full-cluster rule's source-split world-bound invariant: definitionally
+`FiveWorldInv`, per this section's rule-independence note. -/
+def Kb5'WorldInv (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) : Prop :=
+  FiveWorldInv φ₀ b
+
+omit [Hashable Atom] in
+/-- `Kb5'WorldInv` is exactly `FiveWorldInv` -- true `rfl`, since Phase 3's termination bound for
+`modalApplyOneKb5'` reuses Five's rule-independent tag/world-count machinery verbatim (see this
+section's module note). -/
+theorem Kb5'WorldInv_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    Kb5'WorldInv φ₀ b = FiveWorldInv φ₀ b := rfl
+
+omit [Hashable Atom] in
+/-- **Task 524 Phase 3**: the termination bound `modalApplyOneKb5'`'s catalog-membership field
+(`outputsSubsetUniverse`, Phase 4) consumes: `Kb5'WorldInv` bounds `modalMaxWorld b` strictly
+under `modalWorldBound φ₀`. Free corollary of `modalMaxWorld_lt_worldBound_of_FiveWorldInv` via
+`Kb5'WorldInv_eq`. -/
+theorem modalMaxWorld_lt_worldBound_of_Kb5'WorldInv {φ₀ : Proposition Atom}
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : Kb5'WorldInv φ₀ b) :
+    modalMaxWorld b < modalWorldBound φ₀ :=
+  modalMaxWorld_lt_worldBound_of_FiveWorldInv (Kb5'WorldInv_eq φ₀ b ▸ hW)
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -2560,7 +2560,7 @@ statement**; the S5 surface (`modalTableauS5*`, `extractModelS5*`, `modalTruthLe
 
 ---
 
-### Phase 20: `extractModelFive` + the Euclidean truth lemma [IN PROGRESS]
+### Phase 20: `extractModelFive` + the Euclidean truth lemma [COMPLETED]
 
 **Design UNCHANGED by the v6 re-scope** -- this phase is the completeness/countermodel side and is
 **independent of the soundness re-derivation**; it depends only on Phases 17/18 and runs in parallel
@@ -2578,22 +2578,38 @@ completeness half (the strong consistency signal recorded in `reports/07_*` and 
 prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
 
 **Tasks**:
-- [ ] Land `extractModelFive` -- mirroring `extractModelS5` (`FrameCompleteness.lean:499-531`), but
+- [x] Land `extractModelFive` -- mirroring `extractModelS5` (`FrameCompleteness.lean:499-531`), but
       taking the model's relation as the **`Relation.EuclGen` closure** of `acc.hasEdge` rather than
       the `Relation.EqvGen` closure. **This is the one-word substitution the whole chain was built
       for**: `EqvGen` forces reflexivity (hence S5); `EuclGen` does not (hence 5).
-- [ ] Land `extractModelFive_rightEuclidean : RightEuclidean (extractModelFive b acc).r` -- immediate
+- [x] Land `extractModelFive_rightEuclidean : RightEuclidean (extractModelFive b acc).r` -- immediate
       from Phase 16's `instance : RightEuclidean (EuclGen r)`.
-- [ ] Land the Euclidean truth lemma `modalTruthLemmaFive`, mirroring `modalTruthLemmaS5`
+- [x] Land the Euclidean truth lemma `modalTruthLemmaFive`, mirroring `modalTruthLemmaS5`
       (`FrameCompleteness.lean:2048`). Consume Phase 17's normal form for the box/diamond cases: the
       cluster case is **structurally the S5 case** (`equiv_cod` gives the cluster its `IsEquiv`), and
-      the **root case is the only genuinely new one**.
-- [ ] Land the `modalOpenBranchFive_countermodel` analogue, consuming **Phase 5's
+      the **root case is the only genuinely new one**. *(deviation: altered -- the root case turned
+      out to need one further genuinely-new ingredient beyond what the phase note anticipated: a new
+      abstract hypothesis `accTargetsNeRoot acc` (raw tableau edges never target the root),
+      threaded through `modalTruthLemmaFive`/`modalOpenBranchFive_countermodel` alongside
+      `hSrc`/`hTgt`. Without it the universal-propagation direction is false in general -- a
+      counterexample edge `acc.hasEdge w 0` witnesses a model relation `r w 0` that
+      `modalFiveBoxAll`'s root exclusion can never certify a matching branch formula for. Like
+      `hSrc`/`hTgt`, discharging this hypothesis for a genuine tableau run (mint targets are fresh
+      hence positive; Phase 19b's `modalApplyOneFive_agree_or_reuse_ne_root` shows reuse targets are
+      non-root too) is deferred to Phase 21's `modalTableauFive_complete`, not re-derived here.)*
+- [x] Land the `modalOpenBranchFive_countermodel` analogue, consuming **Phase 5's
       `modalExpandBranchesGen_openBranch_accTargetsKnown`** as its `hTgt` argument -- Phase 5 was
       promoted early precisely because **every route needs it**, and this is the second route that
-      needs it.
-- [ ] Note: `extractModelS5_rightEuclidean` (landed, task 504) stays **untouched**. It is a genuinely
-      independent fragment and is **not** superseded by `extractModelFive`.
+      needs it. *(deviation: altered -- mirrors `modalOpenBranchS5_countermodel`'s own shape exactly:
+      `hTgt` (and the new `hRoot`) are taken as abstract hypotheses of the theorem, not invoked
+      internally; Phase 5's lemma is the witness Phase 21 will supply at the real open-branch call
+      site, exactly as it already does for `modalTableauS5_complete`.)*
+- [x] Note: `extractModelS5_rightEuclidean` (landed, task 504) stays **untouched**. It is a genuinely
+      independent fragment and is **not** superseded by `extractModelFive`. Confirmed: this dispatch
+      touched only `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (additive new section) and
+      `Cslib/Logics/Modal/Tableau/FiveSimplification.lean` (four additive `_mem_of` introduction
+      lemmas for `modalFiveBoxAll`/`modalFiveDiaNegAll`, needed by the truth lemma's box/diamond
+      cases); no existing S5 declaration was edited.
 
 **Timing**: 3.5 hours
 

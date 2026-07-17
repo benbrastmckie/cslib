@@ -11,6 +11,7 @@ public import Cslib.Logics.Modal.Tableau.LoopChecking
 public import Cslib.Logics.Modal.Tableau.FrameSoundness
 public import Cslib.Logics.Modal.Tableau.TDriver
 public import Cslib.Logics.Modal.Tableau.BDriver
+public import Cslib.Foundations.Relation.Euclidean
 
 /-! # Frame-Relativized Modal Tableau Completeness (Shared Extractor Skeleton)
 
@@ -2412,6 +2413,475 @@ instance instDecidableS5Valid (φ₀ : Proposition Atom) : Decidable (s5Valid φ
   match h : modalTableauS5 φ₀ with
   | .closed => .isTrue ((s5Valid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauS5_complete φ₀ hv] at h; cases h)
+
+/-! ## 5 (Euclidean Frame) Extraction (task 515 Phase 20)
+
+`extractModelS5_rightEuclidean` above already delivers *some* Euclidean coverage, but only for the
+S5 route's `EqvGen`-closed model, which is unconditionally reflexive -- strictly narrower than a
+genuine (non-reflexive) rooted Euclidean frame. This section instantiates Strategy B's
+closure-at-extraction skeleton (`extractModelWith`) with `Relation.EuclGen`, the bespoke
+right-Euclidean least-closure operator (`Cslib/Foundations/Relation/Euclidean.lean`), giving the
+model relation genuine Euclidean-but-not-necessarily-reflexive structure. `extractModelS5*` and
+`modalTruthLemmaS5` above are **untouched** -- this is a new, independent extraction, not a
+modification of the S5 route. -/
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*right-Euclidean closure* `Relation.EuclGen` of `acc.hasEdge` as the model's relation (Strategy B,
+closure-at-extraction, instantiated with `Cl := Relation.EuclGen`). Mirrors `extractModelS5`,
+substituting `Relation.EuclGen` for `Relation.EqvGen` -- the one-word change the Euclidean route
+was built for. -/
+def extractModelFive
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (Relation.EuclGen) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelFive`'s relation is exactly the right-Euclidean closure of `acc.hasEdge`. -/
+lemma extractModelFive_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelFive b acc).r = Relation.EuclGen (fun w w' => acc.hasEdge w w' = true) := rfl
+
+omit [Hashable Atom] in
+/-- `extractModelFive`'s relation satisfies `Relation.RightEuclidean` unconditionally: immediate
+from the generic instance `RightEuclidean (EuclGen r)` (`Euclidean.lean:147`). Discharges the
+`fiveFC` witness (`FrameSoundness.lean`) for the Five countermodel. -/
+lemma extractModelFive_rightEuclidean (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Relation.RightEuclidean (extractModelFive b acc).r := by
+  rw [extractModelFive_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelFive`'s
+(right-Euclidean-closure) relation via `Relation.EuclGen.base`. Needed to reuse the K bridge
+lemmas (`hintikka_box_neg_gen`, `hintikka_diamond_pos_gen`), stated in terms of `acc.hasEdge`,
+against `extractModelFive`'s closed relation. Mirrors `extractModelS5_hasEdge_imp_r`. -/
+lemma extractModelFive_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelFive b acc).r w w' := by
+  rw [extractModelFive_r]
+  exact Relation.EuclGen.base h
+
+/-! ### Raw Edge Root-Isolation and the Euclidean Closure's Root Behaviour
+
+`modalFiveBoxAll`/`modalFiveDiaNegAll` (`FiveSimplification.lean`) structurally never place
+propagated content at world `0`: a rooted (non-necessarily-reflexive) Euclidean frame need not
+relate the root to itself, so universal propagation is unsound as a target there. This means the
+Euclidean truth lemma's universal-propagation direction genuinely needs the tableau's accessibility
+edges to never *target* the root -- true of every edge a real `modalTableauFive` run ever records
+(mint arms always target a strictly fresh, hence positive, world; Route (a)'s reuse arm only ever
+reuses a non-root witness, `modalApplyOneFive_agree_or_reuse_ne_root`, Phase 19b) -- but, exactly
+like `accSourcesKnown`/`accTargetsKnown`, this phase takes it as an **abstract hypothesis** of the
+truth lemma rather than re-deriving the top-loop preservation argument that would discharge it for
+an actual tableau run. That discharge (alongside the existing `accSourcesKnown`/`accTargetsKnown`
+witnesses) is Phase 21's obligation when it instantiates `modalTableauFive_complete` from a genuine
+open branch.
+
+This hypothesis is **not** a mere convenience: without it, the universal-propagation direction is
+false in general. A raw edge `acc.hasEdge w 0` would witness a model relation `r w 0` that
+`modalFiveBoxAll`'s root exclusion can never certify a matching branch formula `T(ψ)@0` for, so
+`T(□ψ)@w ∈ b` would not entail `Satisfies M w (□ψ)`. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Raw edge root-isolation**: every recorded accessibility edge's *target* is a non-root world.
+See the section note above for why this is a genuinely new, necessary hypothesis (not derivable
+from `accSourcesKnown`/`accTargetsKnown` alone) and why discharging it for a real tableau run is
+deferred to Phase 21. -/
+def accTargetsNeRoot (acc : Accessibility) : Prop :=
+  ∀ w w', acc.hasEdge w w' → w' ≠ (0 : WorldIndex)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every target reachable via the right-Euclidean closure of a root-isolated raw relation is
+itself non-root: the `eucl` constructor's conclusion `EuclGen r b c` inherits its target `c`
+directly from the second premise's own target, so induction reduces immediately to the raw
+`accTargetsNeRoot` hypothesis at the `base` case and to the inner induction hypothesis (no use of
+the first premise at all) at the `eucl` case. -/
+lemma euclGen_ne_root_of_hasEdge_ne_root {acc : Accessibility} (hRoot : accTargetsNeRoot acc)
+    {w w' : WorldIndex}
+    (h : Relation.EuclGen (fun a c => acc.hasEdge a c = true) w w') :
+    w' ≠ (0 : WorldIndex) := by
+  induction h with
+  | base hab => exact hRoot _ _ hab
+  | eucl _ _ _ ihac => exact ihac
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **The root, as a *source* of the Euclidean closure, can only reach a target via a genuine
+direct edge.** This is the fact `modalFiveBoxAll`'s root-trigger arm (Route (1)) is built to
+match: `EuclGen r 0 w'` cannot arise from the `eucl` constructor, since that would require a
+sub-derivation `EuclGen r a 0` reaching *target* `0` -- impossible by
+`euclGen_ne_root_of_hasEdge_ne_root`. Hence the only remaining constructor, `base`, applies. -/
+lemma euclGen_root_imp_hasEdge {acc : Accessibility} (hRoot : accTargetsNeRoot acc)
+    {w' : WorldIndex}
+    (h : Relation.EuclGen (fun a c => acc.hasEdge a c = true) (0 : WorldIndex) w') :
+    acc.hasEdge 0 w' = true := by
+  cases h with
+  | base hab => exact hab
+  | eucl hab _ => exact absurd rfl (euclGen_ne_root_of_hasEdge_ne_root hRoot hab)
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The right-Euclidean closure of `acc.hasEdge` never leaves `b`'s known-world set, in **both**
+directions. Five analogue of `eqvGen_mem_modalKnownWorlds_iff`: `EuclGen`'s two constructors
+(`base`/`eucl`) replace `EqvGen`'s four (`rel`/`refl`/`symm`/`trans`), but the argument is the
+same shape -- the `base` case spends `accSourcesKnown`/`accTargetsKnown` on the one raw edge, and
+the `eucl` case chains two `Iff`s sharing a common anchor (the shared first argument `a` of
+`EuclGen r a b`/`EuclGen r a c`) via `Iff.symm`/`Iff.trans` instead of an explicit `trans` case. -/
+lemma euclGen_mem_modalKnownWorlds_iff
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    {w w' : WorldIndex}
+    (h : Relation.EuclGen (fun a c => acc.hasEdge a c = true) w w') :
+    w ∈ modalKnownWorlds b ↔ w' ∈ modalKnownWorlds b := by
+  induction h with
+  | base hab => exact iff_of_true (hSrc _ _ hab) (hTgt _ _ hab)
+  | eucl _ _ ihab ihac => exact ihab.symm.trans ihac
+
+/-! ## Five Modal Truth Lemma (task 515 Phase 20)
+
+`modalFiveBoxAll`/`modalFiveDiaNegAll` (`FiveSimplification.lean`) are **root/non-root
+asymmetric**: a non-root trigger propagates to the full non-root cluster (sound via the codomain
+equivalence `Relation.rooted_cluster_isEquiv`, exactly the S5 argument transplanted onto
+`cod (extractModelFive b acc).r`), while a root trigger propagates only to genuine direct
+successors (sound via `hasEdge` alone, no closure reasoning needed). The bridge lemmas below
+(`hintikkaFive_box_pos`/`hintikkaFive_diamond_neg`) package this root/non-root dichotomy; the
+truth lemma's box/diamond cases then select the matching arm via `euclGen_root_imp_hasEdge`
+(root trigger) or plain known-world membership (non-root trigger, via
+`euclGen_mem_modalKnownWorlds_iff`). Every other case (propositional, and the box-negative/
+diamond-positive mint directions) is unchanged in shape from `modalTruthLemmaS5`. -/
+
+/-- `modalApplyOneFive` agrees with K's `modalApplyOne` at every purely propositional shape
+(`atom`/`bot`/`imp`/`and`/`or`): chains `modalApplyOneFive_eq_of_not_mint_shape` (Five's own mint
+shapes, diamond-positive/box-negative, are excluded) with
+`modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg` (Five's own propagation shapes, box-positive/
+diamond-negative, are excluded). Two-step where `modalApplyOneS5_eq_of_not_boxPos_diaNeg` is one
+step, since Five (unlike plain S5) stages its rule through the guarded witness-reuse layer. -/
+lemma modalApplyOneFive_eq_of_prop_shape
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (h1 : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ))
+    (h2 : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ))
+    (h3 : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ))
+    (h4 : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)) :
+    modalApplyOneFive sf b acc = modalApplyOne sf b acc := by
+  rw [modalApplyOneFive_eq_of_not_mint_shape sf b acc ⟨h3, h4⟩,
+    modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg sf b acc ⟨h1, h2⟩]
+
+/-- **Five-analogue of `hintikkaS5_box_pos`**, root/non-root split: on an
+`modalApplyOneFive`-saturated branch, `T(□ψ)@w ∈ b` forces `T(ψ)@v ∈ b` at any known, non-root
+world `v`, PROVIDED that whenever the trigger `w` is itself the root, `v` is additionally a
+genuine direct root successor (`acc.hasEdge 0 v`) -- exactly the root/non-root dichotomy
+`modalFiveBoxAll` itself enforces. The proof is a `by_contra` mirroring `hintikkaS5_box_pos`
+exactly once `hall`'s membership is established (via `modalFiveBoxAll_mem_of_root`/
+`_mem_of_ne_root`), substituting the two-step `modalApplyOneFive_boxPos_eq` +
+`modalApplyOneFiveProp` unfolding for S5's direct `modalApplyOneS5` unfolding. -/
+lemma hintikkaFive_box_pos
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneFive b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hv : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hedge : w = (0 : WorldIndex) → acc.hasEdge 0 v = true) :
+    (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFiveBoxAll b acc ψ w := by
+    by_cases hw0 : w = (0 : WorldIndex)
+    · subst hw0
+      exact modalFiveBoxAll_mem_of_root hv hvne (hedge rfl) hnotin
+    · exact modalFiveBoxAll_mem_of_ne_root hw0 hv hvne hnotin
+  have hcond := hH.2.1 (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond
+  have hK := modalApplyOne_boxPos_eq
+    (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneFive_boxPos_eq] at hcond
+  unfold modalApplyOneFiveProp at hcond
+  rcases hp : modalApplyOne
+      (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond hK
+  simp only at hcond hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond
+    split_ifs at hcond with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond _ hall)
+  · dsimp only at hcond
+    by_cases hkf : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
+/-- **Five-analogue of `hintikkaS5_diamond_neg`**, dual of `hintikkaFive_box_pos`: `F(◇ψ)@w ∈ b`
+forces `F(ψ)@v ∈ b` at any known, non-root world `v`, subject to the same root/non-root
+dichotomy, via `modalFiveDiaNegAll`. -/
+lemma hintikkaFive_diamond_neg
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneFive b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hv : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hedge : w = (0 : WorldIndex) → acc.hasEdge 0 v = true) :
+    (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFiveDiaNegAll b acc ψ w := by
+    by_cases hw0 : w = (0 : WorldIndex)
+    · subst hw0
+      exact modalFiveDiaNegAll_mem_of_root hv hvne (hedge rfl) hnotin
+    · exact modalFiveDiaNegAll_mem_of_ne_root hw0 hv hvne hnotin
+  have hcond := hH.2.1 (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond
+  have hK := modalApplyOne_diamondNeg_eq
+    (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneFive_diaNeg_eq] at hcond
+  unfold modalApplyOneFiveProp at hcond
+  rcases hp : modalApplyOne
+      (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond hK
+  simp only at hcond hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond
+    split_ifs at hcond with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond _ hall)
+  · dsimp only at hcond
+    by_cases hkf : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
+/-- **The Five modal truth lemma** (task 515 Phase 20): on an `modalApplyOneFive`-saturated open
+branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`) and never target the
+root (`hRoot`), branch membership and `extractModelFive`-satisfaction agree, at every world and
+both signs.
+
+Mirrors `modalTruthLemmaS5` structurally: the propositional cases reuse the apply-agnostic
+consistency kit and K's `modalApplyOne_*` bridge lemmas verbatim, routed through
+`modalApplyOneFive_eq_of_prop_shape`; the box-negative/diamond-positive (minting) cases reuse the
+free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` directly, since a
+raw recorded edge survives into the right-Euclidean closure via `extractModelFive_hasEdge_imp_r`.
+
+The box-positive/diamond-negative cases are where Five differs from S5: rather than a single
+uniform closure argument, they split on whether the trigger `w` is the root -- a root trigger
+reads its edge witness off `euclGen_root_imp_hasEdge` directly (no closure detour), while a
+non-root trigger reads known-world membership off `euclGen_mem_modalKnownWorlds_iff` (the
+non-root cluster case, structurally the S5 argument transplanted via
+`Relation.rooted_cluster_isEquiv`) -- and then read off the payload from
+`hintikkaFive_box_pos`/`hintikkaFive_diamond_neg`. -/
+lemma modalTruthLemmaFive
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    (hRoot : accTargetsNeRoot acc)
+    (hH : modalHintikkaSetGen modalApplyOneFive b acc) :
+    ∀ (φ : Proposition Atom) (w : WorldIndex),
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelFive b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelFive b acc) w φ) := by
+  suffices H : ∀ (n : Nat) (φ : Proposition Atom), modalComplexity φ = n → ∀ w,
+      (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelFive b acc) w φ) ∧
+      (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelFive b acc) w φ) by
+    intro φ w; exact H (modalComplexity φ) φ rfl w
+  intro n
+  induction n using Nat.strongRecOn with
+  | ind n IHn =>
+    intro φ hφ w
+    have IH : ∀ (ψ : Proposition Atom), modalComplexity ψ < n → ∀ w',
+        (⟨.pos, ψ, w'⟩ ∈ b → Satisfies (extractModelFive b acc) w' ψ) ∧
+        (⟨.neg, ψ, w'⟩ ∈ b → ¬ Satisfies (extractModelFive b acc) w' ψ) :=
+      fun ψ hlt w' => IHn (modalComplexity ψ) hlt ψ rfl w'
+    have hHopen : isModalClosed b = false := hH.1
+    have hHrule := hH.2.1
+    cases φ with
+    | atom p =>
+      refine ⟨?_, ?_⟩
+      · intro hmem
+        simp only [Satisfies, extractModelFive, extractModelWith]
+        exact List.any_eq_true.mpr ⟨⟨.pos, .atom p, w⟩, hmem, by simp⟩
+      · intro hmem hsat
+        simp only [Satisfies, extractModelFive, extractModelWith, List.any_eq_true] at hsat
+        obtain ⟨sf, hsf_mem, hcond⟩ := hsat
+        simp only [Bool.and_eq_true] at hcond
+        obtain ⟨⟨hsign, hform⟩, hlab⟩ := hcond
+        have hsign_eq : sf.sign = .pos := eq_of_beq hsign
+        have hform_eq : sf.formula = .atom p := eq_of_beq hform
+        have hlab_eq : sf.label = w := eq_of_beq hlab
+        have hpos : (⟨.pos, .atom p, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+          convert hsf_mem using 1; rcases sf with ⟨s, f, l⟩; simp_all
+        exact openBranch_noContradiction b hHopen (.atom p) w hpos hmem
+    | bot =>
+      refine ⟨fun hmem => absurd hmem (openBranch_noTBot b hHopen w), ?_⟩
+      intro _ hsat
+      exact hsat
+    | imp a c =>
+      rcases eq_or_ne c Proposition.bot with rfl | hne
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+            (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.neg, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, a, w⟩ (by simp)
+          intro hsa
+          exact (IH a (by rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega)
+            w).2 hxmem hsa
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a .bot, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+            (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_neg, modalNegOf?_neg] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          intro hna
+          have hlt : modalComplexity a < n := by
+            rw [← hφ]; simp only [modalComplexity_imp, modalComplexity_bot]; omega
+          exact hna ((IH a hlt w).1 hxmem)
+      · constructor
+        · intro hmem
+          have hcond := hHrule ⟨.pos, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+            (by simp)] at hcond
+          simp only [modalApplyOne_imp_pos, modalImpOf?_imp hne] at hcond
+          intro hsa
+          obtain ⟨br, hbr_mem, hbr⟩ := hcond
+          simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+          rcases hbr_mem with rfl | rfl
+          · exact absurd hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2
+              (hbr ⟨.neg, a, w⟩ (by simp)))
+          · exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1
+              (hbr ⟨.pos, c, w⟩ (by simp))
+        · intro hmem
+          have hcond := hHrule ⟨.neg, .imp a c, w⟩ hmem
+          simp only at hcond
+          rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+            (by simp)] at hcond
+          simp only [modalApplyOne_imp_neg, modalImpOf?_imp hne] at hcond
+          have hxmem : (⟨.pos, a, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.pos, a, w⟩ (by simp)
+          have hymem : (⟨.neg, c, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+            hcond ⟨.neg, c, w⟩ (by simp)
+          intro hsa
+          exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2 hymem
+            (hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1 hxmem))
+    | and φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+          (by simp)] at hcond
+        simp only [modalApplyOne_and_pos] at hcond
+        exact ⟨(IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, φ', w⟩ (by simp)),
+          (IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).1
+            (hcond ⟨.pos, ψ', w⟩ (by simp))⟩
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .and φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+          (by simp)] at hcond
+        simp only [modalApplyOne_and_neg] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rintro ⟨hsφ, hsψ⟩
+        rcases hbr_mem with rfl | rfl
+        · exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, φ', w⟩ (by simp)))
+        · exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
+            (hbr ⟨.neg, ψ', w⟩ (by simp)))
+    | or φ' ψ' =>
+      constructor
+      · intro hmem
+        have hcond := hHrule ⟨.pos, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+          (by simp)] at hcond
+        simp only [modalApplyOne_or_pos] at hcond
+        obtain ⟨br, hbr_mem, hbr⟩ := hcond
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hbr_mem
+        rcases hbr_mem with rfl | rfl
+        · exact Or.inl ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, φ', w⟩ (by simp)))
+        · exact Or.inr ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega) w).1
+            (hbr ⟨.pos, ψ', w⟩ (by simp)))
+      · intro hmem
+        have hcond := hHrule ⟨.neg, .or φ' ψ', w⟩ hmem
+        simp only at hcond
+        rw [modalApplyOneFive_eq_of_prop_shape _ b acc (by simp) (by simp) (by simp)
+          (by simp)] at hcond
+        simp only [modalApplyOne_or_neg] at hcond
+        intro hs
+        cases hs with
+        | inl hsφ => exact absurd hsφ ((IH φ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, φ', w⟩ (by simp)))
+        | inr hsψ => exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_or]; omega)
+            w).2 (hcond ⟨.neg, ψ', w⟩ (by simp)))
+    | box ψ =>
+      constructor
+      · intro hmem w' hr
+        have hpath : Relation.EuclGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelFive_r b acc ▸ hr
+        have hw : w ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hmem
+        have hw'ne : w' ≠ (0 : WorldIndex) := euclGen_ne_root_of_hasEdge_ne_root hRoot hpath
+        have hw' : w' ∈ modalKnownWorlds b :=
+          (euclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt hpath).mp hw
+        have hT : (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hintikkaFive_box_pos b acc hH ψ w w' hmem hw' hw'ne
+            (fun hz => euclGen_root_imp_hasEdge hRoot (hz ▸ hpath))
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').1 hT
+      · intro hmem hall
+        obtain ⟨w', hw', hF⟩ := hintikka_box_neg_gen modalApplyOneFive b acc hH ψ w hmem
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').2 hF
+          (hall w' (extractModelFive_hasEdge_imp_r b acc hw'))
+    | diamond ψ =>
+      constructor
+      · intro hmem
+        obtain ⟨w', hw', hT⟩ := hintikka_diamond_pos_gen modalApplyOneFive b acc hH ψ w hmem
+        exact ⟨w', extractModelFive_hasEdge_imp_r b acc hw',
+          (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').1 hT⟩
+      · intro hmem
+        rintro ⟨w', hw', hsψ⟩
+        have hpath : Relation.EuclGen (fun a c => acc.hasEdge a c = true) w w' :=
+          extractModelFive_r b acc ▸ hw'
+        have hw : w ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hmem
+        have hw'ne : w' ≠ (0 : WorldIndex) := euclGen_ne_root_of_hasEdge_ne_root hRoot hpath
+        have hw'known : w' ∈ modalKnownWorlds b :=
+          (euclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt hpath).mp hw
+        have hF : (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+          hintikkaFive_diamond_neg b acc hH ψ w w' hmem hw'known hw'ne
+            (fun hz => euclGen_root_imp_hasEdge hRoot (hz ▸ hpath))
+        exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2 hF hsψ
+
+/-- An open Five Hintikka branch with `F(φ)@0 ∈ b` (and the known-world edge closure
+`accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot`) yields a **right-Euclidean-frame** Kripke
+countermodel to `φ`. Mirrors `modalOpenBranchS5_countermodel`.
+
+Together with `extractModelFive_rightEuclidean` (which discharges `fiveFC` for free), this is the
+countermodel half of Five completeness: it is exactly the input `modalTableauFive_complete`
+(Phase 21) would consume. -/
+theorem modalOpenBranchFive_countermodel
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    (hRoot : accTargetsNeRoot acc)
+    (hH : modalHintikkaSetGen modalApplyOneFive b acc)
+    (hF : (⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ¬ Satisfies (extractModelFive b acc) 0 φ :=
+  (modalTruthLemmaFive b acc hSrc hTgt hRoot hH φ 0).2 hF
 
 end Cslib.Logic.Modal.Tableau
 

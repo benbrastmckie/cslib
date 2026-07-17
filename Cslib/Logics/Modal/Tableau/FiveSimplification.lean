@@ -246,6 +246,71 @@ lemma modalFiveDiaNegAll_root_hasEdge {b : List (SignedFormula (Proposition Atom
         simpa using hedge
     · rw [if_neg hedge] at heq; exact absurd heq (by simp)
 
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalFiveBoxAll` at a non-root trigger** (task 515 Phase 20),
+converse of `modalFiveBoxAll_mem` restricted to `w ≠ 0`: a known, non-root world `v` of `b` not
+already carrying `T(φ)@v` on `b` witnesses `T(φ)@v ∈ modalFiveBoxAll b acc φ w`, provided the
+trigger `w` itself is non-root (so the propagation target set is the full non-root cluster,
+unguarded by any edge condition). Mirrors `modalS5BoxAll_mem_of`, split into the root/non-root
+cases `modalFiveBoxAll`'s own definition requires. -/
+lemma modalFiveBoxAll_mem_of_ne_root {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w v : WorldIndex}
+    (hw : w ≠ (0 : WorldIndex))
+    (hknown : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalFiveBoxAll b acc φ w := by
+  simp only [modalFiveBoxAll, List.mem_filterMap]
+  refine ⟨v, hknown, ?_⟩
+  rw [if_neg (by simpa using hvne), if_neg (by simpa using hw), if_neg (by simpa using hnotin)]
+
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalFiveBoxAll` at the root trigger** (task 515 Phase 20),
+converse of `modalFiveBoxAll_mem` restricted to `w = 0`: a known, non-root world `v` reached from
+the root by a genuine recorded edge and not already carrying `T(φ)@v` on `b` witnesses
+`T(φ)@v ∈ modalFiveBoxAll b acc φ 0`. Dual case-split of `modalFiveBoxAll_mem_of_ne_root`. -/
+lemma modalFiveBoxAll_mem_of_root {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {v : WorldIndex}
+    (hknown : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hedge : acc.hasEdge 0 v = true)
+    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFiveBoxAll b acc φ (0 : WorldIndex) := by
+  simp only [modalFiveBoxAll, List.mem_filterMap]
+  refine ⟨v, hknown, ?_⟩
+  rw [if_neg (by simpa using hvne),
+    if_pos (by simp : ((0 : WorldIndex) == (0 : WorldIndex)) = true), if_pos hedge,
+    if_neg (by simpa using hnotin)]
+
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalFiveDiaNegAll` at a non-root trigger**, dual of
+`modalFiveBoxAll_mem_of_ne_root`. -/
+lemma modalFiveDiaNegAll_mem_of_ne_root {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {w v : WorldIndex}
+    (hw : w ≠ (0 : WorldIndex))
+    (hknown : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFiveDiaNegAll b acc φ w := by
+  simp only [modalFiveDiaNegAll, List.mem_filterMap]
+  refine ⟨v, hknown, ?_⟩
+  rw [if_neg (by simpa using hvne), if_neg (by simpa using hw), if_neg (by simpa using hnotin)]
+
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalFiveDiaNegAll` at the root trigger**, dual of
+`modalFiveBoxAll_mem_of_root`. -/
+lemma modalFiveDiaNegAll_mem_of_root {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom} {v : WorldIndex}
+    (hknown : v ∈ modalKnownWorlds b) (hvne : v ≠ (0 : WorldIndex))
+    (hedge : acc.hasEdge 0 v = true)
+    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b) :
+    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFiveDiaNegAll b acc φ (0 : WorldIndex) := by
+  simp only [modalFiveDiaNegAll, List.mem_filterMap]
+  refine ⟨v, hknown, ?_⟩
+  rw [if_neg (by simpa using hvne),
+    if_pos (by simp : ((0 : WorldIndex) == (0 : WorldIndex)) = true), if_pos hedge,
+    if_neg (by simpa using hnotin)]
+
 /-! ## Root-Aware Rule Application -/
 
 /-- Apply the K modal rules together with the root-aware propagation arms. Mirrors

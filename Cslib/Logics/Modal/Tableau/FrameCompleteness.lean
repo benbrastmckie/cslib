@@ -591,23 +591,33 @@ what this validity depends on. Hence `fiveValid ⊊ s5Valid` and `kb5Valid ⊊ s
 `s5Valid` composes into one for `fiveValid`/`kb5Valid`**, no matter how the S5 tableau itself is
 built or proven.
 
-**This is a route obstruction, NOT an impossibility of the deliverable.** 5/KB5 validity and
-completeness ARE delivered -- by a dedicated Euclidean route built on top of the S5 cluster
-machinery (`modalTableauFive`/`modalTableauKb5`, consuming a new `Relation.EuclGen` least-closure
-operator in `Cslib/Foundations/Relation/Euclidean.lean`): rooted Euclidean frames are exactly
-"root + universal cluster" (`Relation.RightEuclidean.equiv_cod`, `Euclidean.lean:124`), so the
-cluster half is the S5 machinery this file's neighbours already build, and only the closure
-operator and a root-aware rule are genuinely new. See the S5 termination/decidability plan's
-Phases 15-23 for the route that reaches it.
+**This is a route obstruction, NOT an impossibility of the deliverable.** 5 (Euclidean) validity
+and completeness ARE delivered -- by a dedicated Euclidean route built on top of the S5 cluster
+machinery (`modalTableauFive`, consuming a new `Relation.EuclGen` least-closure operator in
+`Cslib/Foundations/Relation/Euclidean.lean`): rooted Euclidean frames are exactly "root + universal
+cluster" (`Relation.RightEuclidean.equiv_cod`, `Euclidean.lean:124`), so the cluster half is the S5
+machinery this file's neighbours already build, and only the closure operator and a root-aware
+rule are genuinely new. KB5's **rule and soundness** are delivered too (`modalApplyOneKb5`,
+`modalTableauKb5_sound`, by a "factor, not clone" frame-class-monotonicity argument: the
+unmodified Five rule is already sound for the strictly stronger `kb5FC` class). **KB5
+completeness is the one piece that remains open** -- `modalApplyOneFive`'s root-restricted
+propagation, essential to Five's own soundness, is provably insufficient once the frame is required
+to be symmetric too; see the dedicated blocker note beside `extractModelKb5` below for the precise
+argument and a machine-checked scout lemma. This is a **rule-design gap for the completeness
+direction**, not an impossibility: K5/KB5 completeness via a rooted Euclidean tableau is standard
+in the literature (Blackburn–de Rijke–Venema §4.8-4.9).
 
-**Separately, genuine pure-K5 / pure-5** (Euclidean *without* full equivalence -- i.e. a frame
-satisfying only `RightEuclidean`, not necessarily `Std.Refl`/`IsTrans`/`Std.Symm`) is **OUT OF
-SCOPE** for THIS file's `extractModelS5`-based route: no Mathlib closure operator exists for
-"Euclidean closure" analogous to `Relation.EqvGen`/`Relation.SymmGen`, so `extractModelS5`'s
-`EqvGen`-based construction cannot be narrowed to deliver a pure-K5 countermodel directly -- it
-needs the bespoke `Relation.EuclGen` closure operator named above. This is a **cost** (missing
-library infrastructure), not a mathematical obstruction, and it is exactly what the Euclidean
-route's Phase 16 builds. No `EuclGen`, no `sorry`, no `axiom` introduced in THIS file. -/
+**Genuine pure-K5 / pure-5** (Euclidean *without* full equivalence -- i.e. a frame satisfying only
+`RightEuclidean`, and for KB5 additionally `Std.Symm`, but not necessarily `Std.Refl`/`IsTrans` as
+freestanding properties) is no longer missing library infrastructure. The bespoke `Relation.EuclGen`
+closure operator (`Cslib/Foundations/Relation/Euclidean.lean`) -- the least right-Euclidean relation
+containing a given relation, built exactly because Mathlib ships no such "Euclidean closure"
+analogous to `Relation.EqvGen`/`Relation.SymmGen` -- lands the countermodel extractor
+`extractModelFive` (5, via `EuclGen acc.hasEdge`, complete) and `extractModelKb5` (KB5, via a
+symmetric variant of the same closure, extraction infrastructure landed but its truth lemma and
+completeness theorem blocked, see below) together with `modalTruthLemmaFive` and the completeness
+theorem `modalTableauFive_complete`. `extractModelS5` itself remains untouched and is not the route
+pure-K5/5 uses. -/
 
 /-! ## T Modal Truth Lemma (task 503 Phase 5)
 
@@ -3204,6 +3214,129 @@ instance instDecidableFiveValid (φ₀ : Proposition Atom) : Decidable (fiveVali
   match h : modalTableauFive φ₀ with
   | .closed => .isTrue ((fiveValid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauFive_complete φ₀ hv] at h; cases h)
+
+/-! ## KB5 (Symmetric-Euclidean/PER Frame) Extraction -- SCOUTING (task 515 Phase 23)
+
+Extract a Kripke model using the *symmetric right-Euclidean closure*
+`Relation.EuclGen (Relation.SymmGen acc.hasEdge)` as the model's relation: right-Euclidean
+unconditionally (the generic `RightEuclidean (EuclGen r)` instance, regardless of base) and
+symmetric because its base `Relation.SymmGen acc.hasEdge` is symmetric
+(`EuclGen.symm_of_symm`/its packaged `Std.Symm` instance, `Euclidean.lean`). This is the *least*
+`kb5FC`-satisfying relation containing every raw edge, hence forced, not merely convenient: see
+the phase note below the extraction lemmas for why no other choice is available. -/
+
+/-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
+*symmetric right-Euclidean closure* of `acc.hasEdge` as the model's relation. -/
+def extractModelKb5
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Model WorldIndex Atom :=
+  extractModelWith (fun r => Relation.EuclGen (Relation.SymmGen r)) b acc
+
+omit [Hashable Atom] in
+/-- `extractModelKb5`'s relation is exactly the symmetric right-Euclidean closure of
+`acc.hasEdge`. -/
+lemma extractModelKb5_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    (extractModelKb5 b acc).r =
+      Relation.EuclGen (Relation.SymmGen (fun w w' => acc.hasEdge w w' = true)) := rfl
+
+omit [Hashable Atom] in
+/-- `extractModelKb5`'s relation satisfies `Relation.RightEuclidean` unconditionally: immediate
+from the generic instance `RightEuclidean (EuclGen r)` (`Euclidean.lean:147`), regardless of the
+base relation. -/
+lemma extractModelKb5_rightEuclidean (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Relation.RightEuclidean (extractModelKb5 b acc).r := by
+  rw [extractModelKb5_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- `extractModelKb5`'s relation satisfies `Std.Symm`: its base `Relation.SymmGen acc.hasEdge` is
+symmetric (Mathlib's own unnamed instance), so `EuclGen`'s symmetry-preservation instance
+(`Euclidean.lean`) applies. Discharges the `Std.Symm` half of `kb5FC` for the KB5 countermodel. -/
+lemma extractModelKb5_symm (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) :
+    Std.Symm (extractModelKb5 b acc).r := by
+  rw [extractModelKb5_r]
+  infer_instance
+
+omit [Hashable Atom] in
+/-- Every raw tableau edge `acc.hasEdge w w' = true` survives into `extractModelKb5`'s relation
+via `Relation.SymmGen.of_rel` then `Relation.EuclGen.base`. -/
+lemma extractModelKb5_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (extractModelKb5 b acc).r w w' := by
+  rw [extractModelKb5_r]
+  exact Relation.EuclGen.base (Relation.SymmGen.of_rel h)
+
+/-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
+
+`modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,
+Phase 22) only ever forces propagated content at **direct** `acc.hasEdge 0 w'` successors of the
+root. The Five truth lemma's root case is airtight *because* `Relation.EuclGen`'s closure of the
+**raw, non-symmetrized** relation providably never lets the root reach anything beyond a direct
+successor (`euclGen_root_imp_hasEdge`, consuming `accTargetsNeRoot`). The scout lemma below checks
+whether the same containment survives once the base relation is **symmetrized** first -- i.e.
+whether `euclGen_root_imp_hasEdge`'s KB5 analogue is even a true statement, before spending effort
+on the truth lemma that would need it. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- **Scout counterexample**: with only two raw edges `0 → a` (root's direct successor) and
+`a → c` (a's own child, `c` not a direct root successor), `extractModelKb5`'s relation relates the
+root to `c` anyway -- `EuclGen (SymmGen r) 0 c` -- via `eucl (SymmGen.of_rel_symm h1) (base h2)`
+(chaining through the *symmetrized* reverse edge `a → 0`, which shares source `a` with the raw
+`a → c` edge). This is not an artifact of this specific closure choice: `r a 0` (forced by
+`Std.Symm` applied to the required raw-edge survival `r 0 a`) and `r a c` (forced by raw-edge
+survival alone) together force `r 0 c` via `RightEuclidean` alone, in **any** relation that is
+simultaneously `kb5FC`-satisfying and preserves every raw edge -- so this is not repairable by
+choosing a different closure operator. See the phase note below for the completeness-side
+consequence. -/
+private lemma extractModelKb5_root_reach_scout {α : Type*} {r : α → α → Prop} {w0 x y : α}
+    (h1 : r w0 x) (h2 : r x y) :
+    Relation.EuclGen (Relation.SymmGen r) w0 y :=
+  Relation.EuclGen.eucl (Relation.EuclGen.base (Relation.SymmGen.of_rel_symm h1))
+    (Relation.EuclGen.base (Relation.SymmGen.of_rel h2))
+
+/-! ## Phase 23 Blocker: `modalTableauKb5_complete` -- genuine root-reach obstruction
+
+**Finding (before any further code was written, per the mandatory pre-code analysis)**: the scout
+lemma above confirms that `extractModelKb5`'s relation relates the root `0` to *every* world
+reachable via a raw-edge path from a direct root successor, not merely to the direct successors
+themselves. This is **forced**, not a choice: `extractModelKb5`'s relation is the *least*
+`kb5FC`-satisfying relation containing every raw edge (`Relation.EuclGen.least` applied to
+`Relation.SymmGen`), and raw-edge survival (`extractModelKb5_hasEdge_imp_r`, required by every
+extraction in this file to support the box-negative/diamond-positive "K-style" witness cases,
+mirroring `extractModelFive_hasEdge_imp_r`) plus `Std.Symm` plus `Relation.RightEuclidean`
+*jointly* force `(extractModelKb5 b acc).r 0 c` whenever a raw chain `0 → a → ⋯ → c` exists, for
+**any** relation satisfying those three properties -- not only this specific closure.
+
+This breaks the truth lemma's root box-positive case: `T(□ψ)@0 ∈ b` needs `T(ψ)@w' ∈ b` for every
+`w'` with `(extractModelKb5 b acc).r 0 w'`, but `modalFiveBoxAll`'s root arm (the same rule Phase
+22 reuses unmodified for `modalApplyOneKb5`, deliberately restricted to direct successors --
+*that* restriction is exactly what Five's soundness needs, since Five's root is not itself
+reflexive) only forces content at **direct** `acc.hasEdge 0 w'` successors. A raw chain
+`0 → a → c` (`a` non-root, minting a fresh witness `c` because no reuse candidate exists yet --
+a routine, reachable shape under Route (a)'s witness-reuse mint arms) is exactly the case where
+`T(ψ)@c ∈ b` is not forced by the existing rule, yet `(extractModelKb5 b acc).r 0 c` holds.
+
+**This is not "5/KB5 completeness is impossible."** K5/KB5 completeness via a rooted Euclidean
+tableau is well known to be achievable (Blackburn–de Rijke–Venema §4.8-4.9); the obstruction is
+narrower and structural: `modalApplyOneKb5 := modalApplyOneFive` (Phase 22's literal alias,
+"factor, not clone") is a **root-restricted** rule, deliberately so for Five's soundness, and that
+restriction is precisely what a genuine KB5 completeness proof cannot route around while reusing
+the *same* rule. Reaching `modalTableauKb5_complete` requires a **KB5-specific** propagation rule
+(root box/diamond triggers dumping to the *full* known non-root cluster, matching the non-root
+arm's own unconditional propagation, since the model forces the root into the same equivalence
+class as everyone it can reach) -- and, once root becomes reflexive whenever it has a successor
+(`Relation.symm_rightEuclidean_root_refl`, `Euclidean.lean`), the rule would additionally need to
+propagate root's own box content back onto world `0` itself. Such a rule is no longer definable as
+an alias of `modalApplyOneFive`: it needs its own soundness proof (the *same* unrestricted
+propagation would be **unsound** for the strictly larger `fiveFC` class, so "factor, not clone"
+does not apply to this direction), and its own completeness argument built to match. This is
+substantial, genuinely new tableau-rule design and proof work -- comparable in scope to
+Phases 15-21's Five construction -- not a proof-engineering gap closable by a different closure
+choice or a cleverer induction. Marked `[BLOCKED]` per the escalation protocol; **not** re-narrated
+as an impossibility, and not attempted with a `sorry` or placeholder. -/
 
 end Cslib.Logic.Modal.Tableau
 

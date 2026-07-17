@@ -2798,7 +2798,7 @@ added, so `mk_all` is not required.
 
 ---
 
-### Phase 23: KB5 completeness, `Decidable (kb5Valid φ)`, and final docstring reconciliation [NOT STARTED]
+### Phase 23: KB5 completeness, `Decidable (kb5Valid φ)`, and final docstring reconciliation [PARTIAL]
 
 **Unblocked (design unchanged)** -- the capstone; consumes Phases 19a/19b-22.
 
@@ -2806,36 +2806,70 @@ added, so `mk_all` is not required.
 the repo with what was actually delivered.
 
 **Tasks**:
-- [ ] Land `theorem modalTableauKb5_complete (φ) (h : kb5Valid φ) : modalTableauKb5 φ = .closed`,
-      via `extractModelKb5` (the Phase 20 extraction at the PER normal form) + the Phase 12 lift.
-- [ ] Land `instance instDecidableKb5Valid (φ) : Decidable (kb5Valid φ)`.
-- [ ] **Reconcile `FrameCompleteness.lean:571-590`** -- replace Phase 3's forward-pointing note
-      wholesale. It must now record: 5/KB5 **delivered** via the Euclidean route; the S5 route
-      **proven** unreachable (cite `fiveValid_ssubset_s5Valid`, `kb5Valid_ssubset_s5Valid`); the
-      `EuclGen` gap **closed** by `Relation.EuclGen` (`Euclidean.lean`). **The "OUT OF SCOPE …
-      bespoke construction" paragraph (:581-590) is now FALSE and must go** -- the bespoke
-      construction exists.
-- [ ] **Reconcile `S5Simplification.lean:3018-3037`** -- the "Scope Note: Pure-K5 / Pure-5 Is Out of
-      Scope" block. Its claim that *"Mathlib ships no closure operator that produces a
-      Euclidean-but-not-necessarily-equivalence relation"* was true when written and is now
-      **obsolete**: `Relation.EuclGen` is that operator. Note that its instruction *"Do **not**
-      introduce a custom `EuclGen` closure operator **in this file**"* remains **satisfied and
-      correct** -- `EuclGen` lands in `Cslib/Foundations/Relation/Euclidean.lean`, its proper home
-      beside the `RightEuclidean` API and mirroring `SymmGen`/`EqvGen`'s placement in
-      `Confluence.lean`. **Rewrite the note to point at the delivered route; do not simply delete the
-      file-local prohibition, which is still good advice.**
-- [ ] **Port the probe into the live tree.** Move `probes/five-s5-separation.lean`'s theorems
+- [ ] **[BLOCKED]** Land `theorem modalTableauKb5_complete (φ) (h : kb5Valid φ) : modalTableauKb5 φ
+      = .closed`, via `extractModelKb5` (the Phase 20 extraction at the PER normal form) + the
+      Phase 12 lift. *(deviation: blocked -- see the "Phase 23 Blocker" note landed in
+      `FrameCompleteness.lean` immediately after `extractModelKb5`'s extraction lemmas, and the
+      summary of this dispatch. Root cause, confirmed by a machine-checked scout lemma
+      (`extractModelKb5_root_reach_scout`), not just hand-derivation: `extractModelKb5`'s relation
+      -- forced to be `Relation.EuclGen (Relation.SymmGen acc.hasEdge)`, the *least*
+      `kb5FC`-satisfying relation preserving every raw edge -- relates the root to every world
+      reachable via a raw-edge chain through a direct successor, not merely to direct successors.
+      `modalApplyOneKb5 := modalApplyOneFive`'s root arm (Phase 22's literal alias) only forces
+      propagated content at direct successors, by design, since that restriction is exactly what
+      Five's own soundness needs. A raw chain `0 → a → c` (`a` non-root minting a fresh witness
+      `c`, a routine reachable shape under Route (a)'s witness-reuse mint arms) is exactly the case
+      where `T(ψ)@c ∈ b` is not forced by the existing rule, yet
+      `(extractModelKb5 b acc).r 0 c` holds -- breaking the truth lemma's root box-positive case.
+      **Not an impossibility**: K5/KB5 completeness via a rooted Euclidean tableau is standard
+      (Blackburn–de Rijke–Venema §4.8-4.9); what is blocked is specifically *reusing*
+      `modalApplyOneFive`'s root-restricted rule. Reaching this deliverable needs a genuinely new
+      KB5-specific propagation rule (root triggers dumping to the full non-root cluster, plus --
+      once root becomes reflexive whenever it has a successor,
+      `Relation.symm_rightEuclidean_root_refl` -- propagating root's own box content back onto
+      world `0`), together with its own soundness proof (the same unrestricted propagation would be
+      unsound for the strictly larger `fiveFC` class, so "factor, not clone" does not transfer to
+      this direction) and its own completeness argument. Comparable in scope to Phases 15-21's Five
+      construction; a follow-up task, not a same-dispatch fix. No `sorry`, no placeholder axiom
+      introduced.)*
+- [ ] **[BLOCKED]** Land `instance instDecidableKb5Valid (φ) : Decidable (kb5Valid φ)`.
+      *(deviation: blocked -- transitively blocked by `modalTableauKb5_complete` above; decidability
+      needs both tableau-closure directions, and only the sound direction (Phase 22) exists.)*
+- [x] **Reconcile `FrameCompleteness.lean`** -- replaced Phase 3's forward-pointing note (located
+      by content, not stale line numbers -- see the "5/KB5 Coverage via the S5 Route" `/-! -/`
+      block). *(deviation: altered -- records the ACCURATE state, not the plan's anticipated fully
+      "delivered" state: 5 (Euclidean) validity/completeness delivered; KB5 rule + soundness
+      delivered (Phase 22, factor-not-clone); KB5 **completeness** specifically blocked, with a
+      pointer to the dedicated blocker note beside `extractModelKb5`. The "OUT OF SCOPE … bespoke
+      construction" paragraph is removed/rewritten as instructed -- it no longer claims missing
+      library infrastructure, since `Relation.EuclGen` exists and is used.)*
+- [x] **Reconcile `S5Simplification.lean`** -- the "Scope Note: Pure-K5 / Pure-5 Is Out of Scope"
+      block (located by content). *(deviation: altered -- same accurate-not-optimistic framing as
+      above: pure-5 delivered, KB5 rule+soundness delivered, KB5 completeness blocked with a
+      pointer. The file-local prohibition on introducing a custom `EuclGen` closure operator IN
+      THIS FILE is kept verbatim, per instruction -- `EuclGen` lives in `Euclidean.lean`.)*
+- [x] **Port the probe into the live tree.** Moved `probes/five-s5-separation.lean`'s theorems
       (`fiveValid_ssubset_s5Valid`, `kb5Valid_ssubset_s5Valid`, `s5FC_imp_fiveFC`, `s5FC_imp_kb5FC`,
-      `fiveValid_imp_s5Valid`, `kb5Valid_imp_s5Valid`, and the `boxImp_*` supports) into
-      `FrameSoundness.lean` or `FrameCompleteness.lean` beside the frame-class defs. They are
-      **sorry-free and axiom-free**, they are the standing proof that the two routes are genuinely
-      distinct, and they belong in the library rather than cited from a `specs/` probe path. **This
-      is the durable record that stops a future dispatch from "simplifying" the Euclidean route into
-      the S5 one.**
-- [ ] Land a `#eval`-backed regression test in `CslibTests`: `□p → p` is `s5Valid` but **not**
-      `fiveValid` and **not** `kb5Valid` -- the probe's separating formula, as a live check.
+      `fiveValid_imp_s5Valid`, `kb5Valid_imp_s5Valid`, and the `boxImp_*`/`emptyFrame` supports)
+      into `FrameSoundness.lean`, beside the frame-class defs (`kb5Valid`'s own definition), right
+      before the existing Phase 22 KB5-soundness section. Sorry-free; axioms confirmed
+      `[propext, Classical.choice, Quot.sound]` or fewer via `lean_goal` (LSP-only pending the
+      concurrent `LoopChecking.lean` breakage, see summary).
+- [x] Land a `#eval`-backed regression test in `CslibTests` (`CslibTests/ModalFrameSeparation.lean`,
+      registered in `CslibTests.lean`): `□p → p` is `s5Valid` but **not** `fiveValid` and **not**
+      `kb5Valid`. *(deviation: altered -- `s5Valid`/`fiveValid` checked via `by decide` against
+      `instDecidableS5Valid`/`instDecidableFiveValid` (confirmed non-hanging via `lean_run_code`);
+      `kb5Valid`'s negation checked via the ported theorem `boxImp_not_kb5Valid` directly, not
+      `decide`, since `instDecidableKb5Valid` is blocked (no `Decidable (kb5Valid φ)` instance
+      exists to decide against). A raw `#eval` was avoided per Phase 14's own documented, sanctioned
+      finding that `#eval`/`#guard` of the tableau fails to link native symbols in `CslibTests`'
+      `module`-mode barrel; `by decide` (kernel reduction, not compiled `#eval`) sidesteps that
+      specific issue and was confirmed to complete quickly, not hang.)*
 - [ ] Full CI: `lake build` / `checkInitImports` / `lint-style` / `lint` / `test` / `shake`; `mk_all`
-      if files were added.
+      if files were added. *(blocked on an external, non-blocking interruption: `LoopChecking.lean`
+      is mid-edit by the concurrent task 511 session with a real build error at the time of this
+      dispatch; per the hard constraint it was never touched. See the summary for the LSP-only
+      verification performed instead, and re-run full CI once that session resolves.)*
 
 **Timing**: 3 hours
 

@@ -1296,6 +1296,96 @@ def kb5FC : FrameCondition := fun {_} r => Std.Symm r ∧ Relation.RightEuclidea
 right-Euclidean, at every world. Matches `Cube.KB5`. -/
 def kb5Valid (φ : Proposition Atom) : Prop := frameValid kb5FC φ
 
+/-! ## S5 vs 5/KB5 Frame-Class Separation (task 515 Phase 23, ported from the probe)
+
+Ported verbatim from `specs/515_s5_universal_rule_termination_unblock_504/probes/
+five-s5-separation.lean` (sorry-free, **zero axioms** there and here) into the live tree, per
+Phase 23's task list: this is the standing, machine-checked proof that `s5FC` is a *strictly*
+larger frame class than `fiveFC`/`kb5FC`, so no `s5Valid` decision procedure can ever decide
+`fiveValid`/`kb5Valid` by composition -- the durable record that stops a future dispatch from
+"simplifying" the Euclidean route into the S5 one. See `FrameCompleteness.lean`'s "5/KB5 Coverage
+via the S5 Route" note for the full narrative and `kb5FC_imp_fiveFC`/`fiveValid_imp_kb5Valid`
+above for the (independent) one-level-down `kb5FC ⇒ fiveFC` bridge Phase 22 needed for soundness.
+-/
+
+/-- `s5FC` entails `fiveFC` by projection: S5 frames are Euclidean frames with reflexivity added.
+-/
+theorem s5FC_imp_fiveFC {World : Type} {r : World → World → Prop} (h : s5FC r) : fiveFC r := h.2
+
+/-- **Inclusion**: `fiveValid φ → s5Valid φ`. Validity over the larger (Euclidean) frame class is
+the stronger requirement, so it descends to the smaller (S5) class. -/
+theorem fiveValid_imp_s5Valid (φ : Proposition Atom) (h : fiveValid φ) : s5Valid φ :=
+  fun World m hFC w => h World m hFC.2 w
+
+/-- The one-world empty frame: the separating countermodel for `□p → p`. `r` is the empty
+relation, and `p` is false at the sole world. -/
+private def emptyFrame : Model Unit Unit where
+  r := fun _ _ => False
+  v := fun _ _ => False
+
+/-- The empty relation is `RightEuclidean` -- vacuously, since it has no edges to chain. -/
+private instance : Relation.RightEuclidean emptyFrame.r where
+  rightEuclidean hab _ := absurd hab id
+
+/-- The empty relation is `Std.Symm` -- vacuously, for the same reason. This is what makes the
+countermodel serve `kb5FC` as well as `fiveFC`. -/
+private instance : Std.Symm emptyFrame.r where
+  symm _ _ hab := absurd hab id
+
+/-- `□p` holds vacuously at the sole world of the empty frame: there is no accessible world. -/
+private theorem box_atom_holds : Satisfies emptyFrame () (.box (.atom ())) :=
+  fun _ hr => absurd hr id
+
+/-- `p` fails at the sole world of the empty frame. -/
+private theorem atom_fails : ¬ Satisfies emptyFrame () (.atom ()) := id
+
+/-- **`□p → p` is `s5Valid`**, discharged by reflexivity alone -- this is the `T` axiom. -/
+theorem boxImp_s5Valid (p : Unit) : s5Valid (.imp (.box (.atom p)) (.atom p)) := by
+  intro World m hFC w hbox
+  exact hbox w (hFC.1.refl w)
+
+/-- **`□p → p` is NOT `fiveValid`**: the one-world empty frame is Euclidean and refutes it.
+Reflexivity is exactly what `fiveFC` drops, and exactly what the proof above needed. -/
+theorem boxImp_not_fiveValid : ¬ fiveValid (Atom := Unit) (.imp (.box (.atom ())) (.atom ())) := by
+  intro h
+  exact atom_fails
+    (h Unit emptyFrame (inferInstanceAs (Relation.RightEuclidean emptyFrame.r)) () box_atom_holds)
+
+/-- **`□p → p` is NOT `kb5Valid`** either: the same countermodel is symmetric. So the gap is not
+repaired by moving from 5 to KB5 -- `kb5FC` drops reflexivity too. -/
+theorem boxImp_not_kb5Valid : ¬ kb5Valid (Atom := Unit) (.imp (.box (.atom ())) (.atom ())) := by
+  intro h
+  exact atom_fails (h Unit emptyFrame ⟨inferInstance, inferInstance⟩ () box_atom_holds)
+
+/-- **`fiveValid ⊊ s5Valid`**: the inclusion is strict, witnessed by `□p → p`.
+
+A sound+complete decision procedure for `s5Valid` cannot decide `fiveValid`: the S5 tableau's
+closure sits on the wrong side of a strict inclusion. -/
+theorem fiveValid_ssubset_s5Valid :
+    (∀ φ : Proposition Unit, fiveValid φ → s5Valid φ) ∧
+    (∃ φ : Proposition Unit, s5Valid φ ∧ ¬ fiveValid φ) :=
+  ⟨fun φ => fiveValid_imp_s5Valid φ,
+   ⟨.imp (.box (.atom ())) (.atom ()), boxImp_s5Valid (), boxImp_not_fiveValid⟩⟩
+
+/-- `s5FC` entails `kb5FC`: reflexivity and right-Euclideanness together give symmetry. Proved
+directly (`rightEuclidean ab (refl a) : r b a`) rather than via the `[Std.Refl r] : Std.Symm r`
+instance at `Euclidean.lean:53`, so the argument is legible without instance-resolution context.
+-/
+theorem s5FC_imp_kb5FC {World : Type} {r : World → World → Prop} (h : s5FC r) : kb5FC r := by
+  obtain ⟨hrefl, heucl⟩ := h
+  exact ⟨⟨fun a _ ab => heucl.rightEuclidean ab (hrefl.refl a)⟩, heucl⟩
+
+/-- **Inclusion**: `kb5Valid φ → s5Valid φ`. -/
+theorem kb5Valid_imp_s5Valid (φ : Proposition Atom) (h : kb5Valid φ) : s5Valid φ :=
+  fun World m hFC w => h World m (s5FC_imp_kb5FC hFC) w
+
+/-- The same, for KB5: `kb5Valid ⊊ s5Valid`. -/
+theorem kb5Valid_ssubset_s5Valid :
+    (∀ φ : Proposition Unit, kb5Valid φ → s5Valid φ) ∧
+    (∃ φ : Proposition Unit, s5Valid φ ∧ ¬ kb5Valid φ) :=
+  ⟨fun φ => kb5Valid_imp_s5Valid φ,
+   ⟨.imp (.box (.atom ())) (.atom ()), boxImp_s5Valid (), boxImp_not_kb5Valid⟩⟩
+
 /-! ## Task 515 Phase 7: S5 Soundness Bridge
 
 `modalApplyOneS5`'s accessibility output is unconditionally identical to K's

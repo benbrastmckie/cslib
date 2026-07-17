@@ -2034,26 +2034,33 @@ theorem modalApplyOneS5_hintikka_not_reachable_growth :
 
 end R7Refutation
 
-/-! ## Scope Note: Pure-K5 / Pure-5 Is Out of Scope
+/-! ## Scope Note: Pure-K5 / Pure-5 -- Delivered Elsewhere, via a Dedicated Euclidean Closure
 
 This file delivers S5 (equivalence-frame) coverage, and — for the parts independent of the
 blocked `Phase 2 Obstruction` above (`extractModelS5` and its `RightEuclidean` exposure,
 `FrameCompleteness.lean`) — 5/KB5 coverage **via the S5/equivalence route**: every equivalence
 relation is `Relation.RightEuclidean` (`Relation.symm_rightEuclidean_iff_trans`,
 `Cslib/Foundations/Relation/Euclidean.lean`), so a countermodel extracted as an equivalence
-closure (`Relation.EqvGen`) automatically satisfies the Euclidean frame condition "for free".
+closure (`Relation.EqvGen`) automatically satisfies the Euclidean frame condition "for free". As
+recorded above, this route cannot reach genuine (non-reflexive-root) 5/KB5 validity, only the
+`s5FC`-restricted fragment.
 
-Genuine **pure-K5 / pure-5** completeness — Euclidean accessibility *without* assuming full
-equivalence (i.e. Euclidean plus, for KB5, seriality, but *not* reflexivity/transitivity/symmetry
-as freestanding properties) — is explicitly **OUT OF SCOPE** for this file. Mathlib ships no
-closure operator that produces a Euclidean-but-not-necessarily-equivalence relation from a set of
-tableau edges (unlike `Relation.SymmGen`/`Relation.EqvGen`, which the B/S5 routes reuse
-directly), so building a genuine pure-K5 countermodel extractor would require inventing a new,
-bespoke closure (e.g. a hypothetical `EuclGen`) and re-deriving its properties from scratch — a
-separate, self-contained piece of work, not an instantiation of the existing generic driver.
-This is deferred to a dedicated `pure-k5-euclidean-closure` follow-up task, per the parent plan's
-non-goals (`reports/03_parent-phase-plan-reference.md`). Do **not** introduce a custom `EuclGen`
-closure operator in this file. -/
+**Genuine pure-K5 / pure-5** completeness — Euclidean accessibility *without* assuming full
+equivalence (i.e. Euclidean, and for KB5 additionally symmetric, but *not*
+reflexive/transitive as freestanding properties) — is **delivered outside this file**, by the
+dedicated `Relation.EuclGen` least-closure operator (`Cslib/Foundations/Relation/Euclidean.lean`)
+and the tableau built on it (`modalApplyOneFive`/`modalTableauFive`, `FiveSimplification.lean`;
+`extractModelFive`/`modalTableauFive_complete`, `FrameCompleteness.lean`). Pure-5 validity and
+completeness are fully delivered this way; KB5's rule and soundness are delivered too
+(`modalApplyOneKb5`/`modalTableauKb5_sound`, `FrameSoundness.lean`, by frame-class monotonicity
+over the same rule), while KB5's **completeness** specifically remains open -- see
+`FrameCompleteness.lean`'s dedicated blocker note beside `extractModelKb5` for why reusing
+`modalApplyOneFive`'s root-restricted propagation rule does not suffice once the frame is also
+required to be symmetric, and what a fix would require. This is a **rule-design gap**, not an
+impossibility. The instruction below remains correct and unaffected by any of this: `EuclGen`
+lives in `Cslib/Foundations/Relation/Euclidean.lean`, beside the `RightEuclidean` API and
+mirroring `SymmGen`/`EqvGen`'s placement in `Confluence.lean` -- **do not** introduce a custom
+`EuclGen` closure operator in this file. -/
 
 /-! ## `RuleApplicationSpecCore` for `modalApplyOneS5w` (task 515 Phase 9)
 

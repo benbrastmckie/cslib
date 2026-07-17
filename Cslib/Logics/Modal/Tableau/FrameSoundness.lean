@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.S5Simplification
+import Cslib.Foundations.Relation.Euclidean
 import Mathlib.Data.List.Forall2
 
 /-! # Frame-Relativized Modal Tableau Soundness
@@ -1390,6 +1391,83 @@ lemma accReachableInv_related_s5
     m.r (f w) (f w') :=
   hFC.2.rightEuclidean (reachable_imp_related_s5 hFC hacc (hreach w hw))
     (reachable_imp_related_s5 hFC hacc (hreach w' hw'))
+
+/-! ### Task 515 Phase 19 (Route 1): the Euclidean (non-reflexive) reachability discharge
+
+`fiveFC := Relation.RightEuclidean r` drops `s5FC`'s reflexivity conjunct, so
+`reachable_imp_related_s5`'s base case (`hFC.1.refl (f 0)`) is unavailable -- and genuinely
+false at the frame level (the `Fin 3` counterexample recorded in Phase 19's blocker record:
+`RightEuclidean` with `¬ r 0 2`). Route (1) (`reports/07_phase19-soundness-blocker-remediation.md`)
+resolves this by restricting root-triggered propagation to direct successors
+(`modalFiveBoxAll`/`modalFiveDiaNegAll`'s `hasEdge 0 w'` guard) and discharging non-root-triggered
+propagation through the **codomain equivalence** (`Relation.rooted_cluster_isEquiv`, Phase 17)
+rather than frame reflexivity. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Every known, non-root world reachable from `0` is related **in the model** to some direct
+root successor's image: `reachable_imp_related_s5`'s analogue without reflexivity, landing on
+`m.r (f s) (f w)` for a genuine direct successor `s` of `0` (`acc.hasEdge 0 s`) instead of directly
+on `m.r (f 0) (f w)` (which is false in general for pure `RightEuclidean`). The induction's tail
+step composes the accumulated witness `s` with the new edge via `RightEuclidean.rightEuclidean`,
+recovering the needed symmetry from the **codomain equivalence** (`rooted_cluster_isEquiv`,
+consuming that both `f s` and the previous node's image lie in `cod m.r`) rather than from frame
+reflexivity. -/
+lemma reachable_imp_cod_related_five
+    {acc : Accessibility} {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : fiveFC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    {w : WorldIndex} (hw0 : w ≠ 0)
+    (hreach : Relation.ReflTransGen (fun a c => acc.hasEdge a c) 0 w) :
+    ∃ s, acc.hasEdge 0 s = true ∧ m.r (f s) (f w) := by
+  haveI : Relation.RightEuclidean m.r := hFC
+  revert hw0
+  induction hreach with
+  | refl => intro h; exact absurd rfl h
+  | tail hprev hedge ih =>
+    rename_i w0 w
+    intro _
+    by_cases hw00 : w0 = (0 : WorldIndex)
+    · subst hw00
+      refine ⟨w, hedge, ?_⟩
+      exact Relation.RightEuclidean.refl_cod (hacc 0 w hedge)
+    · obtain ⟨s, hs0, hsw0⟩ := ih hw00
+      have hs_cod : f s ∈ Relation.cod m.r := ⟨f 0, hacc 0 s hs0⟩
+      have hw0_cod : f w0 ∈ Relation.cod m.r := ⟨f s, hsw0⟩
+      have hEquiv := Relation.rooted_cluster_isEquiv (r := m.r)
+      have hsymm : m.r (f w0) (f s) :=
+        hEquiv.symm (⟨f s, hs_cod⟩ : Relation.cod m.r) ⟨f w0, hw0_cod⟩ hsw0
+      have hstep : m.r (f w0) (f w) := hacc w0 w hedge
+      exact ⟨s, hs0, Relation.RightEuclidean.rightEuclidean hsymm hstep⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Two **non-root** known worlds, both known on a branch satisfying `accReachableInv`, are
+related in the model under `fiveFC`: the Route (1) analogue of `accReachableInv_related_s5`,
+needed only for the non-root-triggered propagation arm (the root-triggered arm is discharged
+directly by `hacc` on the `modalFiveBoxAll_root_hasEdge`/`modalFiveDiaNegAll_root_hasEdge`
+witness, with no need for this lemma). Each side is anchored at its own direct-root-successor
+witness (`reachable_imp_cod_related_five`), the two anchors are related via one `rightEuclidean`
+composition sharing `f 0` as common source, and the two composition legs are re-oriented via the
+codomain equivalence exactly as in `reachable_imp_cod_related_five`'s own tail step. -/
+lemma accReachableInv_related_five
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {W : Type} {m : Model W Atom} {f : WorldIndex → W}
+    (hFC : fiveFC m.r) (hacc : ∀ w w', acc.hasEdge w w' → m.r (f w) (f w'))
+    (hreach : accReachableInv b acc)
+    {w w' : WorldIndex} (hw : w ∈ modalKnownWorlds b) (hw' : w' ∈ modalKnownWorlds b)
+    (hwne : w ≠ 0) (hw'ne : w' ≠ 0) :
+    m.r (f w) (f w') := by
+  haveI : Relation.RightEuclidean m.r := hFC
+  obtain ⟨s, hs0, hsw⟩ := reachable_imp_cod_related_five hFC hacc hwne (hreach w hw)
+  obtain ⟨s', hs'0, hs'w'⟩ := reachable_imp_cod_related_five hFC hacc hw'ne (hreach w' hw')
+  have h0s : m.r (f 0) (f s) := hacc 0 s hs0
+  have h0s' : m.r (f 0) (f s') := hacc 0 s' hs'0
+  have hC : m.r (f s) (f s') := Relation.RightEuclidean.rightEuclidean h0s h0s'
+  have hD : m.r (f w) (f s') := Relation.RightEuclidean.rightEuclidean hsw hC
+  have hw_cod : f w ∈ Relation.cod m.r := ⟨f s, hsw⟩
+  have hs'_cod : f s' ∈ Relation.cod m.r := ⟨f 0, h0s'⟩
+  have hEquiv := Relation.rooted_cluster_isEquiv (r := m.r)
+  have hD' : m.r (f s') (f w) :=
+    hEquiv.symm (⟨f w, hw_cod⟩ : Relation.cod m.r) ⟨f s', hs'_cod⟩ hD
+  exact Relation.RightEuclidean.rightEuclidean hD' hs'w'
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`

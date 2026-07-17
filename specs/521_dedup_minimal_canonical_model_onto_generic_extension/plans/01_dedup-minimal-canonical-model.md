@@ -134,18 +134,18 @@ old trio files are still present, so the rewire is proven in isolation.
 
 ---
 
-### Phase 2: Delete the bespoke trio core and regenerate the barrel [NOT STARTED]
+### Phase 2: Delete the bespoke trio core and regenerate the barrel [COMPLETED]
 
 **Goal**: Remove the now-dead `MinCanonicalModel.lean` and `MinTruthLemma.lean` and regenerate the
 barrel so nothing imports them.
 
 **Tasks**:
-- [ ] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean` (1089 lines).
-- [ ] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinTruthLemma.lean` (257 lines).
-- [ ] Regenerate the barrel: `lake exe mk_all --module`. Diff `Cslib.lean` and confirm exactly the
+- [x] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean` (1089 lines).
+- [x] Delete `Cslib/Logics/Modal/Metalogic/Minimal/MinTruthLemma.lean` (257 lines).
+- [x] Regenerate the barrel: `lake exe mk_all --module`. Diff `Cslib.lean` and confirm exactly the
       lines for `…Minimal.MinCanonicalModel` (was line 397) and `…Minimal.MinTruthLemma` (was line
       401) are removed, and that `…Minimal.MinCompleteness` and `…Minimal.MinExtension` remain.
-- [ ] Build the Minimal subtree: `lake build Cslib.Logics.Modal.Metalogic.Minimal.MinCompleteness`
+- [x] Build the Minimal subtree: `lake build Cslib.Logics.Modal.Metalogic.Minimal.MinCompleteness`
       (and the barrel target) to confirm no dangling import.
 
 **Timing**: 30 minutes

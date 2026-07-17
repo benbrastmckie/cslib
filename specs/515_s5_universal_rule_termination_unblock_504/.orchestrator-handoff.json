@@ -1,30 +1,52 @@
 {
-  "status": "implemented",
-  "summary": "Phase 22 (KB5 rule + soundness) landed and marked COMPLETED. modalApplyOneKb5, modalApplyOneKb5_specCore, and modalTableauKb5_sound are all sorry-free and axiom-clean. Key finding: the Five tableau rule is purely syntactic (no frame-condition dependence), so KB5 soundness factors entirely -- modalApplyOneKb5 is a literal alias for modalApplyOneFive, and modalTableauKb5_sound is a two-line frame-class-monotonicity corollary of the already-landed modalTableauFive_sound. No cloned rule, mint-arm guard, or termination-bound re-derivation was needed, making this phase far cheaper than the plan anticipated.",
+  "status": "partial",
+  "summary": "Phase 23 (KB5 completeness capstone) landed as PARTIAL. Before writing any code, per instructions, the completeness construction was worked through on paper and found genuinely blocked: extractModelKb5's relation is forced to be Relation.EuclGen (Relation.SymmGen acc.hasEdge), the least kb5FC-satisfying relation preserving every raw edge, and this relation does NOT keep the root's reach capped at direct successors the way Five's non-symmetrized closure does -- confirmed by a machine-checked scout lemma (extractModelKb5_root_reach_scout, FrameCompleteness.lean, zero axioms). modalApplyOneFive's root-restricted propagation rule (Phase 22's literal KB5 alias) is provably insufficient for the completeness direction, though it remains fully sound. This is NOT an impossibility -- K5/KB5 completeness via a rooted Euclidean tableau is standard in the literature; the gap is specifically reusing modalApplyOneFive's rule, which was deliberately restricted for Five's own soundness. modalTableauKb5_complete/instDecidableKb5Valid are marked [BLOCKED] in the plan, not attempted with a sorry. All other Phase 23 sub-deliverables landed sorry-free and axiom-clean: extractModelKb5 extraction infrastructure, a new general EuclGen.symm_of_symm lemma (Euclidean.lean), accurate docstring reconciliation in FrameCompleteness.lean and S5Simplification.lean (replacing the stale/optimistic forward-pointing notes), the five-s5-separation probe theorems ported into FrameSoundness.lean, and a decide-backed regression test in CslibTests/ModalFrameSeparation.lean confirming box p -> p is s5Valid but not fiveValid/kb5Valid.",
   "phases_completed": 22,
   "phases_total": 25,
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": "Phase 23: KB5 completeness, Decidable (kb5Valid phi), and final docstring reconciliation",
+      "declarations": ["modalTableauKb5_complete", "instDecidableKb5Valid"],
+      "finding": "modalApplyOneFive's root-restricted box/diamond propagation (kept unmodified as modalApplyOneKb5 by Phase 22's 'factor, not clone' soundness argument) only forces propagated content at DIRECT acc.hasEdge successors of the root. extractModelKb5's relation -- forced to be Relation.EuclGen (Relation.SymmGen acc.hasEdge), the least kb5FC-satisfying relation preserving every raw edge -- relates the root to every world reachable via a raw-edge chain through a direct successor (e.g. 0 -> a -> c gives (extractModelKb5 b acc).r 0 c), not merely to direct successors. A raw chain 0 -> a -> c (a non-root minting a fresh witness c, a routine reachable shape under Route (a)'s witness-reuse mint arms) is exactly the case where T(psi)@c in b is not forced by the existing rule, yet the closure relates root to c -- breaking the truth lemma's root box-positive case.",
+      "machine_checked_witness": "extractModelKb5_root_reach_scout (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean), lean_verify-confirmed zero axioms",
+      "not_an_impossibility": "K5/KB5 completeness via a rooted Euclidean tableau is standard (Blackburn-de Rijke-Venema section 4.8-4.9). What is blocked is specifically reusing modalApplyOneFive's root-restricted rule for the completeness direction.",
+      "fix_requires": "A genuinely new KB5-specific propagation rule (root triggers dumping to the full non-root cluster, plus -- since root becomes reflexive whenever it has a successor, Relation.symm_rightEuclidean_root_refl -- propagating root's own box content back onto world 0), with its own soundness proof (the same unrestricted propagation would be unsound for the strictly larger fiveFC class, so 'factor, not clone' does not transfer to this direction) and its own completeness argument. Comparable in scope to Phases 15-21's Five construction -- a follow-up task, not a same-dispatch fix.",
+      "sorry_or_placeholder_introduced": false
+    }
+  ],
   "ci_status": {
-    "lake_build": "green (3240/3240)",
-    "checkInitImports": "pass",
-    "lake_lint": "pass (only pre-existing PrimeExclusion.lean baseline, unrelated)",
-    "lint_style": "pass",
-    "shake": "pass (no import changes suggested for touched files)",
-    "lake_test": "pass",
+    "lake_build": "partial -- Cslib.Foundations.Relation.Euclidean built clean standalone; Cslib.Logics.Modal.Tableau.FrameCompleteness confirmed to elaborate cleanly in one lake build attempt (reported 'Built ... FrameCompleteness') before a later attempt failed specifically on an unrelated external file's missing .olean; full project lake build not completed this dispatch",
+    "checkInitImports": "not run (blocked by external file)",
+    "lake_lint": "not run (blocked by external file)",
+    "lint_style": "pass per-file on all touched files (lake exe lint-style <file>, one at a time)",
+    "shake": "not run (blocked by external file)",
+    "lake_test": "not run (blocked by external file)",
     "sorry_count": 0,
-    "new_axioms": 0
+    "new_axioms": 0,
+    "substitute_verification": [
+      "lean_verify (mcp__lean-lsp) on every new public declaration: zero axioms, confirmed",
+      "lean_run_code: both decide-based regression checks (s5Valid/fiveValid) confirmed success:true, timed_out:false",
+      "exhaustive grep -rn sorry across all touched files: zero non-prose hits"
+    ],
+    "external_blocker": {
+      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "owner": "concurrent session, task 511",
+      "status_at_dispatch_end": "still mid-edit, uncommitted, real build errors (omega failure at :927, Hashable Atom synthesis failures at :965/:1037)",
+      "never_touched": true,
+      "note": "FrameCompleteness.lean imports LoopChecking.lean directly. This exact situation occurred and self-resolved mid-dispatch during Phase 22 (see prior handoff); re-run full CI once this session's file resolves. No further code changes are expected to be needed."
+    }
   },
   "commits": [
-    "6edb30cc task 515 phase 22.1: land modalApplyOneKb5 + modalTableauKb5_sound (factor, not clone)",
-    "75ca9d06 task 515 phase 22: mark KB5 rule + soundness COMPLETED (factor, not clone)"
+    "4ac3022c task 515 phase 23.1: add EuclGen.symm_of_symm (symmetric-base preservation)",
+    "d5e528b0 task 515 phase 23.2: land extractModelKb5 infra, blocker note, docstring reconciliation, probe port, regression test"
   ],
   "continuation_context": {
-    "next_phase": "Phase 23: KB5 completeness, Decidable (kb5Valid phi), and final docstring reconciliation",
+    "next_phase": "Full CI re-run once LoopChecking.lean resolves (no code changes expected); separately, a follow-up task to design a genuinely new KB5-specific propagation rule for modalTableauKb5_complete/instDecidableKb5Valid",
     "notes": [
-      "Phase 23 needs modalTableauKb5_complete (kb5Valid phi -> modalTableauKb5 phi = .closed), which is NOT free from the Phase 22 factoring: kb5Valid is strictly weaker than fiveValid (kb5FC is a proper subclass of fiveFC-frames), so some kb5Valid formulas may leave modalTableauFive/modalTableauKb5 open. A genuine extractModelKb5 (symmetric-model extraction from an open branch, at the PER normal form) is expected to be needed, per the plan's own Phase 23 task list.",
-      "modalTableauKb5 := modalTableauFive definitionally (rfl); modalTableauKb5_eq_modalTableauFive is the bridge lemma if Phase 23 needs to reuse Five's open-branch structure directly.",
-      "Phase 23 also needs to: reconcile FrameCompleteness.lean:571-590 and S5Simplification.lean:3018-3037 scope notes (both now stale/false per the plan's own instructions), port the probes/five-s5-separation.lean theorems into the live tree, and land a #eval regression test for the boxImp separating formula.",
-      "External note: Cslib/Logics/Modal/Tableau/LoopChecking.lean is owned by a concurrent session (task 511) and was mid-edit (build-breaking) at the start of this dispatch; it resolved itself (task 511 committed) partway through and was never touched by this dispatch. If Phase 23 dispatch hits a similar concurrent breakage in LoopChecking.lean, it is not this task's responsibility to fix."
+      "Phase 23's plan checklist has [x] on docstring reconciliation, probe port, and regression test, [BLOCKED] annotations on modalTableauKb5_complete/instDecidableKb5Valid, and an unchecked 'Full CI' item pending the external file.",
+      "extractModelKb5 extraction infrastructure (extractModelKb5, extractModelKb5_r/_rightEuclidean/_symm/_hasEdge_imp_r) is landed and reusable by whatever future rule design attempts the completeness direction -- it is NOT itself the blocker, only its truth lemma against the current rule is.",
+      "Full implementation summary: specs/515_s5_universal_rule_termination_unblock_504/summaries/18_phase23-kb5-completeness-blocked-partial.md.",
+      "The plan's top-level Status field remains [IMPLEMENTING] (not reconciled to [COMPLETED]), correctly, since Phase 23 is [PARTIAL]."
     ]
   }
 }

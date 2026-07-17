@@ -2946,9 +2946,14 @@ Expected sorry-free, axiom-free Lean outputs (per phase):
   `modalOpenBranchFive_countermodel` (`FrameCompleteness.lean`).
 - **P21**: `modalTableauFive_complete`, `instDecidableFiveValid` (`FrameCompleteness.lean`).
 - **P22**: `modalApplyOneKb5`, `modalApplyOneKb5_specCore`, `modalTableauKb5_sound`.
-- **P23**: `modalTableauKb5_complete`, `instDecidableKb5Valid`; reconciled scope notes
-  (`FrameCompleteness.lean:571-590`, `S5Simplification.lean:3018-3037`); the separation theorems
-  ported from `probes/five-s5-separation.lean` into the live tree; `#eval` separation regression test.
+- **P23** (`[PARTIAL]`): `modalTableauKb5_complete`/`instDecidableKb5Valid` **BLOCKED** (genuine
+  root-restricted-propagation obstruction, see `FrameCompleteness.lean`'s blocker note beside
+  `extractModelKb5`) -- landed instead: `extractModelKb5` extraction infrastructure
+  (`extractModelKb5_r`/`_rightEuclidean`/`_symm`/`_hasEdge_imp_r`) and the machine-checked scout
+  counterexample confirming the obstruction; `EuclGen.symm_of_symm` (`Euclidean.lean`); reconciled
+  scope notes (`FrameCompleteness.lean`, `S5Simplification.lean`, located by content); the
+  separation theorems ported from `probes/five-s5-separation.lean` into `FrameSoundness.lean`;
+  `#eval`/`decide` separation regression test (`CslibTests/ModalFrameSeparation.lean`).
 - Implementation summary at `specs/515_*/summaries/05_*-summary.md` on completion, with an honest
   per-phase status ledger (including any `[BLOCKED]`-with-open-goal entries), **the archive manifest
   (every moved block and its new path)**, and **an explicit statement of which of the two capstones

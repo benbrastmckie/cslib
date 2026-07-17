@@ -66,37 +66,54 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Root-Aware Propagation Helpers -/
 
-/-- The root-aware propagation for box-positives: from `T(□φ)@w` (any trigger `w`), generate
-`T(φ)@w'` for every known world `w' ≠ 0` of the branch -- **excluding the root** from every
-propagation target, filtered to exclude formulas already present. The trigger world `_w` is
-unused, exactly as in `modalS5BoxAll`. -/
-@[nolint unusedArguments]
+/-- The root/non-root-asymmetric propagation for box-positives (Route (1), see
+`reports/07_phase19-soundness-blocker-remediation.md`): from `T(□φ)@w`, generate `T(φ)@w'` for
+known worlds `w' ≠ 0` of the branch, **excluding the root** from every propagation target
+(unconditionally, exactly as before). When the trigger `w` is the **root** (`w = 0`), an
+**additional** guard restricts the target set to `w'` with a genuine recorded edge
+`acc.hasEdge 0 w'` -- direct root successors -- since `RightEuclidean` alone does not relate the
+root to worlds beyond its direct successors (the `Fin 3` counterexample in Phase 19's blocker
+record). When the trigger `w ≠ 0`, the target set is the full non-root cluster, unchanged: this
+direction is sound via the codomain equivalence (`Relation.rooted_cluster_isEquiv`), not frame
+reflexivity. The root case's output is a **subset** of the non-root case's (same list, filtered
+further), so every world-bound / catalog-membership fact proved for the old uniform shape
+continues to hold for the root arm. -/
 def modalFiveBoxAll (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (φ : Proposition Atom) (_w : WorldIndex) :
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
     List (SignedFormula (Proposition Atom) WorldIndex) :=
   (modalKnownWorlds b).filterMap fun w' =>
     if w' == (0 : WorldIndex) then none
+    else if w == (0 : WorldIndex) then
+      (if acc.hasEdge 0 w' then
+        let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, w'⟩
+        if b.any (· == sf) then none else some sf
+      else none)
     else
       let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, w'⟩
       if b.any (· == sf) then none else some sf
 
-/-- The root-aware propagation for diamond-negatives, dual of `modalFiveBoxAll`. -/
-@[nolint unusedArguments]
+/-- The root/non-root-asymmetric propagation for diamond-negatives, dual of `modalFiveBoxAll`. -/
 def modalFiveDiaNegAll (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (φ : Proposition Atom) (_w : WorldIndex) :
+    (acc : Accessibility) (φ : Proposition Atom) (w : WorldIndex) :
     List (SignedFormula (Proposition Atom) WorldIndex) :=
   (modalKnownWorlds b).filterMap fun w' =>
     if w' == (0 : WorldIndex) then none
+    else if w == (0 : WorldIndex) then
+      (if acc.hasEdge 0 w' then
+        let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
+        if b.any (· == sf) then none else some sf
+      else none)
     else
       let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
       if b.any (· == sf) then none else some sf
 
 omit [Hashable Atom] in
 /-- Membership dichotomy for `modalFiveBoxAll`: every emitted formula `⟨.pos, φ, w'⟩` has `w'` a
-known, non-root world of `b`, and was not already on `b`. -/
+known, non-root world of `b`, and was not already on `b`. Conclusion unchanged from the
+pre-Route-1 shape (verbatim); the extra root-arm guard only adds a `by_cases` to the proof. -/
 lemma modalFiveBoxAll_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalFiveBoxAll b φ w) :
+    {acc : Accessibility} {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalFiveBoxAll b acc φ w) :
     x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
       x.label ∈ modalKnownWorlds b ∧ x.label ≠ 0 ∧ x ∉ b := by
   unfold modalFiveBoxAll at h
@@ -105,20 +122,61 @@ lemma modalFiveBoxAll_mem {b : List (SignedFormula (Proposition Atom) WorldIndex
   by_cases hz : (v == (0 : WorldIndex)) = true
   · rw [if_pos hz] at heq; exact absurd heq (by simp)
   · rw [if_neg hz] at heq
-    by_cases hmem : (b.any (· == (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) =
-        true
-    · rw [if_pos hmem] at heq; exact absurd heq (by simp)
-    · rw [if_neg hmem] at heq
-      obtain rfl : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-        injection heq
-      refine ⟨rfl, hv, ?_, by simpa using hmem⟩
-      simpa using hz
+    by_cases hw0 : (w == (0 : WorldIndex)) = true
+    · rw [if_pos hw0] at heq
+      by_cases hedge : acc.hasEdge 0 v = true
+      · rw [if_pos hedge] at heq
+        by_cases hmem :
+            (b.any (· == (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+        · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+        · rw [if_neg hmem] at heq
+          obtain rfl : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+            injection heq
+          refine ⟨rfl, hv, ?_, by simpa using hmem⟩
+          simpa using hz
+      · rw [if_neg hedge] at heq; exact absurd heq (by simp)
+    · rw [if_neg hw0] at heq
+      by_cases hmem : (b.any (· == (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) =
+          true
+      · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+      · rw [if_neg hmem] at heq
+        obtain rfl : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+          injection heq
+        refine ⟨rfl, hv, ?_, by simpa using hmem⟩
+        simpa using hz
+
+omit [Hashable Atom] in
+/-- **Root-arm edge witness** for `modalFiveBoxAll`: when the trigger is the root (`w = 0`), every
+emitted target `x.label` has a genuine recorded edge `acc.hasEdge 0 x.label`. This is the fact
+Phase 19's `accReachableInv_related_five` root case needs (the standard K-style realized-edge
+argument on `acc.successorsOf 0`). -/
+lemma modalFiveBoxAll_root_hasEdge {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex}
+    (h : x ∈ modalFiveBoxAll b acc φ (0 : WorldIndex)) : acc.hasEdge 0 x.label = true := by
+  unfold modalFiveBoxAll at h
+  obtain ⟨v, hv, heq⟩ := List.mem_filterMap.mp h
+  dsimp only at heq
+  by_cases hz : (v == (0 : WorldIndex)) = true
+  · rw [if_pos hz] at heq; exact absurd heq (by simp)
+  · rw [if_neg hz] at heq
+    rw [if_pos (by simp : ((0 : WorldIndex) == (0 : WorldIndex)) = true)] at heq
+    by_cases hedge : acc.hasEdge 0 v = true
+    · rw [if_pos hedge] at heq
+      by_cases hmem :
+          (b.any (· == (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+      · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+      · rw [if_neg hmem] at heq
+        obtain rfl : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+          injection heq
+        simpa using hedge
+    · rw [if_neg hedge] at heq; exact absurd heq (by simp)
 
 omit [Hashable Atom] in
 /-- Membership dichotomy for `modalFiveDiaNegAll`, dual of `modalFiveBoxAll_mem`. -/
 lemma modalFiveDiaNegAll_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalFiveDiaNegAll b φ w) :
+    {acc : Accessibility} {φ : Proposition Atom} {w : WorldIndex}
+    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalFiveDiaNegAll b acc φ w) :
     x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
       x.label ∈ modalKnownWorlds b ∧ x.label ≠ 0 ∧ x ∉ b := by
   unfold modalFiveDiaNegAll at h
@@ -127,14 +185,52 @@ lemma modalFiveDiaNegAll_mem {b : List (SignedFormula (Proposition Atom) WorldIn
   by_cases hz : (v == (0 : WorldIndex)) = true
   · rw [if_pos hz] at heq; exact absurd heq (by simp)
   · rw [if_neg hz] at heq
-    by_cases hmem : (b.any (· == (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) =
-        true
-    · rw [if_pos hmem] at heq; exact absurd heq (by simp)
-    · rw [if_neg hmem] at heq
-      obtain rfl : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-        injection heq
-      refine ⟨rfl, hv, ?_, by simpa using hmem⟩
-      simpa using hz
+    by_cases hw0 : (w == (0 : WorldIndex)) = true
+    · rw [if_pos hw0] at heq
+      by_cases hedge : acc.hasEdge 0 v = true
+      · rw [if_pos hedge] at heq
+        by_cases hmem :
+            (b.any (· == (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+        · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+        · rw [if_neg hmem] at heq
+          obtain rfl : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+            injection heq
+          refine ⟨rfl, hv, ?_, by simpa using hmem⟩
+          simpa using hz
+      · rw [if_neg hedge] at heq; exact absurd heq (by simp)
+    · rw [if_neg hw0] at heq
+      by_cases hmem : (b.any (· == (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) =
+          true
+      · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+      · rw [if_neg hmem] at heq
+        obtain rfl : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+          injection heq
+        refine ⟨rfl, hv, ?_, by simpa using hmem⟩
+        simpa using hz
+
+omit [Hashable Atom] in
+/-- **Root-arm edge witness** for `modalFiveDiaNegAll`, dual of `modalFiveBoxAll_root_hasEdge`. -/
+lemma modalFiveDiaNegAll_root_hasEdge {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {acc : Accessibility} {φ : Proposition Atom}
+    {x : SignedFormula (Proposition Atom) WorldIndex}
+    (h : x ∈ modalFiveDiaNegAll b acc φ (0 : WorldIndex)) : acc.hasEdge 0 x.label = true := by
+  unfold modalFiveDiaNegAll at h
+  obtain ⟨v, hv, heq⟩ := List.mem_filterMap.mp h
+  dsimp only at heq
+  by_cases hz : (v == (0 : WorldIndex)) = true
+  · rw [if_pos hz] at heq; exact absurd heq (by simp)
+  · rw [if_neg hz] at heq
+    rw [if_pos (by simp : ((0 : WorldIndex) == (0 : WorldIndex)) = true)] at heq
+    by_cases hedge : acc.hasEdge 0 v = true
+    · rw [if_pos hedge] at heq
+      by_cases hmem :
+          (b.any (· == (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
+      · rw [if_pos hmem] at heq; exact absurd heq (by simp)
+      · rw [if_neg hmem] at heq
+        obtain rfl : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
+          injection heq
+        simpa using hedge
+    · rw [if_neg hedge] at heq; exact absurd heq (by simp)
 
 /-! ## Root-Aware Rule Application -/
 
@@ -149,7 +245,7 @@ def modalApplyOneFiveProp
   let (kResult, kAcc) := modalApplyOne sf b acc
   match sf.sign, sf.formula with
   | .pos, .box φ =>
-    let allNew := modalFiveBoxAll b φ sf.label
+    let allNew := modalFiveBoxAll b acc φ sf.label
     match kResult with
     | .persistent kForms =>
       (.persistent (kForms ++ allNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
@@ -157,7 +253,7 @@ def modalApplyOneFiveProp
       if allNew.isEmpty then (.notApplicable, kAcc) else (.persistent allNew, kAcc)
     | other => (other, kAcc)
   | .neg, .diamond φ =>
-    let allNew := modalFiveDiaNegAll b φ sf.label
+    let allNew := modalFiveDiaNegAll b acc φ sf.label
     match kResult with
     | .persistent kForms =>
       (.persistent (kForms ++ allNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
@@ -914,7 +1010,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
             modalUniverse_mem_formula_Five (hb _ hsf)
           exact modalSubfmls_trans_Five (b := Proposition.box φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        have hallNew : ∀ x ∈ modalFiveBoxAll b φ l, x ∈ modalUniverse φ0 := by
+        have hallNew : ∀ x ∈ modalFiveBoxAll b acc φ l, x ∈ modalUniverse φ0 := by
           intro x hx
           obtain ⟨hxeq, hxknown, -, -⟩ := modalFiveBoxAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=
@@ -951,7 +1047,7 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
             modalUniverse_mem_formula_Five (hb _ hsf)
           exact modalSubfmls_trans_Five (b := Proposition.diamond φ)
             (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        have hallNew : ∀ x ∈ modalFiveDiaNegAll b φ l, x ∈ modalUniverse φ0 := by
+        have hallNew : ∀ x ∈ modalFiveDiaNegAll b acc φ l, x ∈ modalUniverse φ0 := by
           intro x hx
           obtain ⟨hxeq, hxknown, -, -⟩ := modalFiveDiaNegAll_mem hx
           have hxle : x.label ≤ modalWorldBound φ0 :=

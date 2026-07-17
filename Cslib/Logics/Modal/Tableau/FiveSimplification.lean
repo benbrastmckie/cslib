@@ -1113,6 +1113,79 @@ private lemma modalApplyOneFive_boxNegWitness'
     simp only [heq]
     exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
 
+/-! ## Reachability Bridge (Task 515 Phase 19)
+
+The remaining Phase 19 soundness assembly (`modalTableauFive_sound`, `FrameSoundness.lean`) needs
+two structural facts about `modalApplyOneFive`/`modalApplyOneFiveProp`, mirroring the S5 chain's
+`modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean`) and `modalApplyOneS5w_s5SoundSpec`
+(`FrameSoundness.lean`). Since Five has only the one shipped rule (no separate unguarded/witness
+staging), both are stated directly, without the `RuleApply`/`S5SoundSpec` abstraction layer S5
+needed to cover two distinct rules. -/
+
+/-- The Five analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
+`modalApplyOneFiveProp` (the non-reuse propagation rule, exact structural analogue of
+`modalApplyOneS5`): either `modalApplyOneFiveProp` leaves `acc` unchanged with every emitted
+formula's label a known world of `b` (covering both the ordinary agreement shapes, via
+`modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg` + K's own step lemma, and the two Five-relevant
+propagation shapes, via `modalApplyOneFiveProp_boxPos_diaNeg_eq`), or it mints exactly one edge
+with a nonempty `.linear` result entirely labeled at `modalNextWorld b` (only possible at the two
+K-minting shapes, disjoint from the two propagation-relevant shapes, so `modalApplyOneFiveProp`
+agrees with K there too). Mirrors `modalApplyOneS5_knownWorlds_step`. -/
+lemma modalApplyOneFiveProp_knownWorlds_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
+    ((modalApplyOneFiveProp sf b acc).snd = acc ∧
+      (match (modalApplyOneFiveProp sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOneFiveProp sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOneFiveProp sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · obtain ⟨hsndeq, hor⟩ := modalApplyOneFiveProp_boxPos_diaNeg_eq sf b acc hsfmem hknown hbd
+    refine Or.inl ⟨hsndeq, ?_⟩
+    rcases hor with hnot | ⟨out, hpers, hlabel⟩
+    · rw [hnot]; trivial
+    · rw [hpers]; exact hlabel
+  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
+    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
+    rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
+    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+
+/-- `modalApplyOneFive` either agrees with `modalApplyOneFiveProp` outright, or fires a witness
+reuse -- emitting `.linear [sf']` for a signed formula `sf'` already present on the branch, plus
+the single edge `sf.label → sf'.label`. The Five analogue of `modalApplyOneS5w_s5SoundSpec`,
+stated directly (no `RuleApply`/`S5SoundSpec` abstraction needed, since Five has only the one
+shipped rule). This is the per-call dichotomy the remaining Phase 19 assembly
+(`FrameSoundness.lean`) consumes in place of threading an `S5SoundSpec`-style hypothesis. -/
+lemma modalApplyOneFive_agree_or_reuse
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneFive sf b acc = modalApplyOneFiveProp sf b acc ∨
+    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
+      sf' ∈ b ∧ modalApplyOneFive sf b acc =
+        (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label) := by
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+  case pos.diamond =>
+    unfold modalApplyOneFive
+    cases hw : witnessWorldS5 b Sign.pos φ with
+    | none => exact Or.inl (by simp only [hw])
+    | some w' => exact Or.inr ⟨⟨.pos, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+  case neg.box =>
+    unfold modalApplyOneFive
+    cases hw : witnessWorldS5 b Sign.neg φ with
+    | none => exact Or.inl (by simp only [hw])
+    | some w' => exact Or.inr ⟨⟨.neg, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+  all_goals exact Or.inl (modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp))
+
 /-- **`modalApplyOneFive` satisfies `RuleApplicationSpecCore`**: the witness-reuse root-aware rule
 discharges every field the Hintikka/saturation machinery needs, mirroring
 `modalApplyOneS5w_specCore` declaration-for-declaration. This is the interface witness Phase 21's

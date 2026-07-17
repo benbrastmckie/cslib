@@ -1855,6 +1855,18 @@ not duplicated.
 
 ### Phase 18: `modalApplyOneFive` -- the root-aware rule + termination reuse [COMPLETED]
 
+**POST-HOC CAVEAT (discovered during Phase 19's design analysis, same dispatch)**: the
+`RuleApplicationSpecCore modalApplyOneFive` result landed here is genuinely correct and stays
+landed -- it is a purely structural/syntactic fact (world-bound catalog membership, Hintikka
+scaffolding) independent of frame semantics. However, the propagation design
+(`modalFiveBoxAll`/`modalFiveDiaNegAll` ignoring the trigger world `_w`, uniformly propagating to
+`modalKnownWorlds \ {0}` regardless of whether the trigger is the root or a non-root world) is
+very likely **semantically unsound** at `fiveFC` for root-triggered propagation reaching a
+second-or-later-generation world. See Phase 19's blocker record (below) for the full diagnosis, a
+computer-verified counterexample, and remediation routes. **Do not build further phases on the
+assumption that this rule's propagation shape is semantically final** -- Phase 19 must resolve
+(or explicitly re-affirm) the propagation design before soundness is attempted again.
+
 **Goal**: Land the 5 rule and its termination. **The termination half is a PORT, not new work** --
 this is the payoff for putting these phases after the S5 chain.
 
@@ -1926,11 +1938,91 @@ imported).
 
 ---
 
-### Phase 19: `modalTableauFive_sound` [NOT STARTED]
+### Phase 19: `modalTableauFive_sound` [BLOCKED]
 
 **Goal**: Soundness at `fiveFC`. Mirrors Phase 13, at the Euclidean frame class.
 
-**Tasks**:
+**BLOCKER** (Phase 19, hit at the design-analysis stage, before any Lean proof was attempted --
+the kill condition fired at ~0 lines of re-proof, not 400, which is a CHEAPER catch, not a more
+expensive one):
+
+- **What failed**: Phase 18's `modalFiveBoxAll`/`modalFiveDiaNegAll` propagate a box-positive/
+  diamond-negative formula from **any** trigger world `w` (root or non-root) to **every** known
+  non-root world, uniformly, ignoring `w`. Attempting to state the semantic soundness obligation
+  this needs (mirroring `accReachableInv_related_s5`'s shape, per the task list) exposed that this
+  uniform design is very likely **semantically unsound** for a pure Euclidean (not reflexive, not
+  necessarily symmetric) relation, specifically for **root-triggered propagation reaching a
+  second-or-later-generation world** (a world minted from a non-root trigger, not directly from
+  the root).
+- **What was tried**: A full derivation (not merely asserted) of the semantic argument needed, with
+  a **computer-verified counterexample** confirming the concern is real, not a reasoning error:
+  - Relation `r` on `Fin 3`: `r 0 1`, `r 1 1`, `r 1 2`, `r 2 1`, `r 2 2` (all else false).
+  - Verified in Lean (`decide`, `Cslib/Foundations/Relation/Euclidean.lean`'s `RightEuclidean`):
+    `r` **is** `RightEuclidean`, and **`¬ r 0 2`** -- confirmed by `lake env lean` on a scratch
+    file, `decide`-checked, no axioms beyond kernel computation.
+  - Concretely: `0` is the root, `{1, 2}` form a genuine Euclidean cluster (`1`/`2` mutually
+    related, both reflexive) reached via `0 → 1 → 2` (world `2` minted from world `1`, **not**
+    from the root), yet **`0` does not relate to `2`**. A model built on this frame satisfying
+    `M, f(0) ⊨ □φ` imposes **no constraint whatsoever on `f(2)`** -- `2` is simply not a successor
+    of `0` in this (genuinely Euclidean) model.
+  - The realizing tableau scenario is not exotic: `φ₀ = ◇◇p` (the same shape as the standing
+    `s5RankCounterFormula` test formula used earlier in this file) forces exactly this
+    root→world1→world2 generation structure via ordinary diamond-positive mints.
+  - Traced why the natural fix ("track that every known non-root world is directly root-related")
+    fails to close inductively: when a **non-root** trigger `w1` mints `w2` (edge `w1 → w2`), the
+    only Euclidean instance available combines facts sharing `w1` as source (giving `w2` related
+    to *other things `w1` already relates to*, which **does** correctly re-derive full mutual
+    relatedness among non-root cluster members -- this part of the design is fine); but it never
+    produces `r(0, w2)` (no instance shares `0` as a common source with the new edge). This is not
+    a proof gap that more tactic effort closes -- it is a genuine model-theoretic gap: `r(0,w2)` is
+    **independent** of `r(0,w1) ∧ r(w1,w2)` under `RightEuclidean` alone (the counterexample above
+    is the witness).
+  - Considered redirecting every mint's edge to originate from the root (`acc.addEdge 0 w'` instead
+    of `acc.addEdge sf.label w'`) so every minted world is a genuine direct root successor by
+    construction. Rejected for now: this conflicts with `RuleApplicationSpecCore.freshLocal`'s
+    contract (`GenericDriver.lean`), which requires *exactly one* edge added, `sf.label → wsf.label`
+    -- already discharged, verified, and committed for `modalApplyOneFive` in Phase 18. Redefining
+    the mint edge would invalidate Phase 18's landed `modalApplyOneFive_specCore` and would need to
+    be re-verified from scratch, and it is not obviously compatible with the reused S5w termination
+    machinery (`witnessWorldS5`, `modalApplyOneS5w_step`-style counting), which is keyed on
+    `sf.label` throughout.
+- **Why it's stuck**: The propagation design needs to distinguish root-triggered propagation
+  (semantically must be restricted to `acc.successorsOf 0`, i.e. genuine direct root successors --
+  standard K-style propagation, **not** `modalKnownWorlds \ {0}`) from non-root-triggered
+  propagation (can safely remain universal across the full non-root cluster, since that direction
+  **is** justified inductively via `RightEuclidean.rightEuclidean` with the trigger itself as the
+  common source). This is a different rule than the one Phase 18 landed and verified
+  (`modalFiveBoxAll`/`modalFiveDiaNegAll` currently ignore the trigger world `_w` entirely, by
+  design, mirroring `modalS5BoxAll`'s S5-specific unconditional-propagation shape -- which **is**
+  sound for `s5FC` because `s5FC` is an equivalence relation with transitivity, and pure `fiveFC`
+  is not).
+- **What is needed**: A decision, not a proof attempt, on one of:
+  1. **Revise Phase 18's rule**: give `modalFiveBoxAll`/`modalFiveDiaNegAll` an `acc` parameter and
+     branch on `w == 0`: root case propagates to `acc.successorsOf 0` only; non-root case keeps the
+     current `modalKnownWorlds \ {0}` universal propagation. Re-verify
+     `RuleApplicationSpecCore modalApplyOneFive` under the revised definition (the F2/F3/F7/F9/F10
+     fields' proofs need re-deriving against the new helper; the mint-arm fields are untouched).
+     Then re-attempt Phase 19 with the corrected invariant: track `∀ x y ∈ modalKnownWorlds b,
+     x ≠ 0 → y ≠ 0 → m.r (f x) (f y)` (full pairwise clique, no root membership), closed
+     inductively via the **non-root trigger as Euclidean source** (this direction verified sound
+     above), plus a **separate**, simpler root-only fact (`∀ w ∈ acc.successorsOf 0, m.r (f 0)
+     (f w)`) for the restricted root-propagation case.
+  2. **Falsify (1) at the completeness side first** (cheaper than a fresh soundness proof): check
+     whether restricting root propagation to `acc.successorsOf 0` still lets Phase 20's
+     `extractModelFive`/`modalTruthLemmaFive` close, since `EuclGen(acc.hasEdge)` (Phase 16) also
+     only relates `0` to its own `base`-case direct successors (confirmed: `EuclGen`'s `eucl`
+     constructor only combines two derivations **sharing** the same first argument, so it never
+     manufactures `EuclGen r 0 2` from `EuclGen r 0 1` and `EuclGen r 1 2` alone) -- if so, (1) is
+     *also* the right shape for completeness, not just a soundness patch, which is a strong
+     consistency signal that (1) is correct rather than a workaround.
+  3. If neither closes within a bounded re-proof, invoke **Fallback 4** (parent plan, "Rollback/
+     Contingency"): land Phases 0-14 (done) as the S5 deliverable and mark the 5/KB5 chain
+     `[BLOCKED]` with this record as the open item for a dedicated follow-up task.
+  **Prohibited workarounds**: do NOT weaken `fiveFC`/`kb5FC`'s definitions, do NOT restrict
+  `modalTableauFive_sound`'s statement to a special case of `φ₀`, do NOT introduce `sorry` or an
+  axiom to paper over the gap.
+
+**Tasks** (superseded by the blocker above; left for provenance):
 - [ ] Land `theorem modalTableauFive_sound (φ) (h : modalTableauFive φ = .closed) : fiveValid φ`.
 - [ ] **The obligation is WEAKER than S5's**: `fiveFC = RightEuclidean r` **alone** -- no reflexivity
       to establish. Where Phase 13 discharges `m.r (f w) (f w')` via `accReachableInv_related_s5`
@@ -1938,28 +2030,38 @@ imported).
       cluster case via Phase 17's normal form and the root case via the root's edges into the
       cluster. **Mirror `accReachableInv_related_s5`'s shape at the Euclidean class**; do not attempt
       to reuse it directly (its hypothesis is an equivalence relation, which `fiveFC` does not give).
+      *(This is exactly the step that surfaced the blocker: attempting to state this exposed the
+      root/non-root asymmetry the landed Phase 18 rule does not yet have.)*
 - [ ] Reuse the landed soundness scaffolding (`S5SoundInv`, `modalStepBranchS5_preserves_satIn`,
       `modalExpandBranchesS5_closed_unsatIn`, `accReachableInv` + `_initial`, all
       `FrameSoundness.lean`) wherever `modalApplyOneFive` is **defeq** to `modalApplyOneS5w` -- i.e.
-      on every non-propagation arm.
-- [ ] **KILL CONDITION** (mirrors Phase 13's): if the re-proof exceeds **~400 lines**, stop and
+      on every non-propagation arm. *(Still expected to hold; unaffected by the blocker, which is
+      specific to the two propagation shapes.)*
+- [x] **KILL CONDITION** (mirrors Phase 13's): if the re-proof exceeds **~400 lines**, stop and
       record the measured count. The root/cluster split is the suspect; re-litigate the
-      decomposition rather than grinding.
+      decomposition rather than grinding. *(Fired at design-analysis time, ~0 lines of Lean
+      attempted -- cheaper than the 400-line budget, exactly the point of stating the obligation
+      before writing the proof.)*
 
-**Timing**: 3 hours
+**Timing**: 3 hours (not spent -- blocked before proof attempt)
 
 **Depends on**: 18
 
-**Files to modify**: `Cslib/Logics/Modal/Tableau/FrameSoundness.lean`
+**Files to modify**: `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (none touched; also
+`Cslib/Logics/Modal/Tableau/FiveSimplification.lean` if remediation route 1 above is taken)
 
 **Verification**: full CI green; `lean_verify` on `modalTableauFive_sound` (expect
 `propext`/`Classical.choice`/`Quot.sound` only); **zero edits to any K/T/B/S4/S5 declaration**.
 
 **Blocked-branch**: `[BLOCKED]` with the exact open goal + the measured line count. No `sorry`.
+**Status**: `[BLOCKED]` as of this dispatch, per the blocker record above. Phases 20-23 are
+transitively blocked (all depend on 19's soundness result or reuse its scaffolding).
 
 ---
 
-### Phase 20: `extractModelFive` + the Euclidean truth lemma [NOT STARTED]
+### Phase 20: `extractModelFive` + the Euclidean truth lemma [BLOCKED]
+
+**Transitively blocked** by Phase 19's blocker (root/non-root propagation-design gap). Not started; see Phase 19's blocker record for the diagnosis and remediation routes.
 
 **Goal**: The countermodel half. Extract a **root + universal cluster** model from an open branch and
 prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
@@ -1996,7 +2098,9 @@ prove its truth lemma. **This is the phase `Relation.EuclGen` exists to serve.**
 
 ---
 
-### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [NOT STARTED]
+### Phase 21: `modalTableauFive_complete` + `Decidable (fiveValid φ)` [BLOCKED]
+
+**Transitively blocked** by Phase 19/20. Not started.
 
 **Goal**: The **first half of the re-scoped deliverable** the task description asks for and v3
 proposed to strike.
@@ -2032,7 +2136,9 @@ route is genuinely at `fiveFC` and not silently at `s5FC`).
 
 ---
 
-### Phase 22: KB5 -- `modalApplyOneKb5` + `modalTableauKb5_sound` [NOT STARTED]
+### Phase 22: KB5 -- `modalApplyOneKb5` + `modalTableauKb5_sound` [BLOCKED]
+
+**Transitively blocked** by Phase 19/20/21 (KB5 reuses the Five pattern). Not started.
 
 **Goal**: The KB5 rule and its soundness. **Cheaper than 5**, because Phase 17 established the PER
 normal form and Phases 18-19 established the pattern.
@@ -2068,7 +2174,9 @@ green and shipped at this point** -- a KB5 stall is a partial, not a loss.
 
 ---
 
-### Phase 23: KB5 completeness, `Decidable (kb5Valid φ)`, and final docstring reconciliation [NOT STARTED]
+### Phase 23: KB5 completeness, `Decidable (kb5Valid φ)`, and final docstring reconciliation [BLOCKED]
+
+**Transitively blocked** by Phases 19-22. Not started.
 
 **Goal**: Close the **second half of the re-scoped deliverable** and reconcile every scope note in
 the repo with what was actually delivered.

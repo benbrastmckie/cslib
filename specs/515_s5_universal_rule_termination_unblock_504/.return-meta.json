@@ -1,49 +1,30 @@
 {
   "status": "partial",
-  "started_at": "2026-07-17T16:03:31Z",
+  "started_at": "2026-07-17T00:00:00Z",
   "artifacts": [
-    {
-      "type": "code",
-      "path": "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
-      "summary": "Added modalApplyOneFiveProp_knownWorlds_step and modalApplyOneFive_agree_or_reuse -- the Five analogues of modalApplyOneS5_knownWorlds_step and modalApplyOneS5w_s5SoundSpec, stated directly (no RuleApply/S5SoundSpec abstraction needed)."
-    },
-    {
-      "type": "code",
-      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "summary": "Added the FiveSimplification.lean import plus modalStepBranchFive_preserves_accReachableInv, FiveSoundInv, modalFiveBoxAll_soundIn, modalFiveDiaNegAll_soundIn."
-    },
-    {
-      "type": "plan",
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/06_s5-termination-machinery.md",
-      "summary": "Phase 19 re-marked [BLOCKED]; new blocker section documents a mint-arm witness-reuse soundness gap discovered this dispatch, independent of the resolved Route-1 propagation gap."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/515_s5_universal_rule_termination_unblock_504/handoffs/10_phase19-mint-arm-reuse-soundness-gap.md",
-      "summary": "Full diagnosis of the new soundness gap, the adversarial countermodel, why a naive rule-level guard is not a bounded patch, and the recommended Route-1b next steps."
-    }
+    "specs/515_s5_universal_rule_termination_unblock_504/handoffs/11_phase19a-mint-arm-guard-landed-termination-open.md",
+    "specs/515_s5_universal_rule_termination_unblock_504/plans/07_s5-termination-machinery.md"
   ],
+  "requires_user_review": true,
+  "review_reason": "Phase 19a's second task (tag-injection termination bound re-derivation under the source-split invariant) was not attempted this dispatch -- it is Phase-6/7-scale work requiring its own dedicated dispatch(es), per the plan's own KILL-budget sizing. The mint-arm guard (first task) landed green and sorry-free.",
   "partial_progress": {
-    "stage": "phase-19-reblocked-mint-arm-reuse-gap",
-    "details": "Three more green, sorry-free, CI-clean milestones landed (commits 1a9ec45a, da05c424, 6f7872b8), continuing the bespoke Five fuel-induction assembly per handoff 09. Attempting the next item exposed a new, independent soundness gap in modalApplyOneFive's mint-arm witness reuse (witnessWorldS5), distinct from the already-resolved Route-1 propagation gap. Phase 19 re-marked [BLOCKED] per plan-compliance.md's escalation requirement; commit 5b4d0d28 records the diagnosis. No sorry, no vacuous placeholder, no new axiom introduced.",
+    "stage": "phase-19a-partial",
+    "details": "Landed the Route (a) root-aware mint-arm guard in modalApplyOneFive (witnessWorldFive, root-trigger-always-fresh branch) plus full re-verification of every downstream consumer of the old witnessWorldS5 case-split pattern, committed as 56a84d07. The tag-injection termination bound re-derivation under the source-split ('<=1 mint per tag per {root, non-root}') invariant was not attempted this dispatch.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 18
+    "phases_completed": 18.5
   },
   "verification": {
     "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
-    "axiom_count": 0,
+    "axiom_count_new": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Full CI pipeline (build/checkInitImports/lint/lint-style) green for both touched files this dispatch, no regressions beyond documented baselines. Phase 19 is blocked on a newly discovered soundness gap (not a build/lint failure), hence overall task status is partial with requires_user_review true."
+    "note": "CI pipeline (build, checkInitImports, lint-style, lake lint --builtin-lint, lake shake, lake test, axiom check via lake env lean + #print axioms) re-run directly after the dispatching agent stalled on an infra timeout mid-verification; all green for the committed change (56a84d07)."
   },
-  "requires_user_review": true,
-  "review_reason": "A newly discovered, independent soundness gap in modalApplyOneFive's mint-arm witness-reuse mechanism blocks completing modalTableauFive_sound. This is a genuine model-theoretic gap (concrete adversarial countermodel constructed), not a proof-search difficulty, and a naive rule-level guard mirroring the already-landed Route (1) fix would threaten the landed termination bound. A dedicated research/plan cycle (Route 1b) is recommended before further Lean implementation on this phase. See handoffs/10_phase19-mint-arm-reuse-soundness-gap.md and plans/06_s5-termination-machinery.md Phase 19's NEW BLOCKER section for the full diagnosis.",
-  "next_steps": "Dispatch /research (or /plan revision) scoped specifically to the mint-arm witness-reuse soundness gap: decide between (a) a rule-level witnessWorldS5 guard with the tag-injection termination bound re-derived from scratch, or (b) a semantic/model-repair (Euclidean-closure) argument. Once decided, resume Phase 19 consuming the five still-valid pieces landed across the last two dispatches (Route 1 propagation split, cod-equivalence lemmas, modalApplyOneFiveProp_knownWorlds_step, modalApplyOneFive_agree_or_reuse, modalStepBranchFive_preserves_accReachableInv, FiveSoundInv, modalFiveBoxAll_soundIn/modalFiveDiaNegAll_soundIn).",
   "metadata": {
-    "session_id": "resume-task-515-phase19-cycle2",
+    "session_id": "orchestrate-final-dispatch",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],

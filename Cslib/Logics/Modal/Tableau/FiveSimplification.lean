@@ -6,7 +6,9 @@ Authors: Benjamin Brast-McKie
 
 module
 
-public import Cslib.Logics.Modal.Tableau.S5Simplification
+public import Cslib.Logics.Modal.Tableau.GenericDriver
+public import Mathlib.Data.Prod.Basic
+public import Mathlib.Data.Nat.Basic
 
 /-! # 5/KB5 Rooted-Cluster Tableau Simplification
 
@@ -367,22 +369,102 @@ lemma modalApplyOneFiveProp_boxPos_diaNeg_eq
 
 /-! ## The 5/KB5 Witness-Reuse Rule -/
 
-/-- The shipped 5/KB5 rule: `witnessWorldS5` (Phase 1, `S5Simplification.lean`, already
-rule-independent -- parametrized only over `b`/`s`/`φ`) at the two mint shapes, falling through to
-`modalApplyOneFiveProp` everywhere else, including the two root-aware propagation shapes. Mirrors
-`modalApplyOneS5w`; every load-bearing design constraint (`.linear [witness]`, no `hasEdge` guard)
-carries over unchanged, since the mint arms are shape-identical. -/
+/-- **Route (a) root-aware mint-arm witness search**
+(`reports/08_mint-arm-reuse-route-decision.md`): the Five-local refinement of `witnessWorldS5`
+(`S5Simplification.lean`) that **excludes root `0` from witness candidacy**. Root `0` has
+in-degree zero in a rooted tableau (nothing ever emits an edge *into* the root) and
+`RightEuclidean` (`fiveFC`) does not relate the root to an arbitrary known world absent a recorded
+edge (the two-island adversarial-model kill in `reports/08_*`), so a reuse witness `w' = 0` can
+never be soundly justified. Combined with the root-trigger guard on `modalApplyOneFive` below
+(which never even consults this search when the trigger is root), this closes both the
+root-as-witness and root-as-trigger unsound sub-cases (`reports/08_*`). -/
+def witnessWorldFive (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (s : Sign) (φ : Proposition Atom) : Option WorldIndex :=
+  (modalKnownWorlds b).find? (fun w' =>
+    !(w' == (0 : WorldIndex)) && b.any (· == (⟨s, φ, w'⟩ : SignedFormula _ _)))
+
+omit [Hashable Atom] in
+/-- If `witnessWorldFive b s φ = some w'`, then `⟨s, φ, w'⟩` is genuinely present on `b` and
+`w' ≠ 0`. -/
+lemma witnessWorldFive_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {s : Sign} {φ : Proposition Atom} {w' : WorldIndex}
+    (h : witnessWorldFive b s φ = some w') :
+    (⟨s, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b ∧ w' ≠ 0 := by
+  have hp := List.find?_some h
+  simp only [Bool.and_eq_true, Bool.not_eq_true'] at hp
+  obtain ⟨hne, hany⟩ := hp
+  refine ⟨by simpa using (List.any_eq_true.mp hany), ?_⟩
+  simpa using hne
+
+/-- The shipped 5/KB5 rule: **Route (a) guarded** witness reuse at the two mint shapes
+(`reports/08_*`) -- (i) a **root-triggered** mint (`sf.label = 0`) never consults the witness
+search and always falls through to a fresh mint (`modalApplyOneFiveProp`, hence K's own mint arm);
+(ii) a **non-root-triggered** mint consults `witnessWorldFive` (which itself excludes root `0` as
+a candidate witness) and reuses only a genuine non-root witness, falling through to a fresh mint
+otherwise. Both guard branches fall through to `modalApplyOneFiveProp`, **never** to
+`.notApplicable` -- the mint arm is a strict narrowing of when reuse fires, not a new
+`.notApplicable` outcome (verified by `modalApplyOneFive_boxPosNotExpanding`/
+`_diaNegNotExpanding`'s shape and the F9/F10-style discharges below, which never depend on the
+guard). Mirrors `modalApplyOneS5w`'s shape everywhere except this root split. -/
 def modalApplyOneFive : RuleApply Atom := fun sf b acc =>
   match sf.sign, sf.formula with
   | .pos, .diamond φ =>
-    (match witnessWorldS5 b .pos φ with
-     | some w' => (.linear [⟨.pos, φ, w'⟩], acc.addEdge sf.label w')
-     | none => modalApplyOneFiveProp sf b acc)
+    (if sf.label == (0 : WorldIndex) then modalApplyOneFiveProp sf b acc
+     else
+       match witnessWorldFive b .pos φ with
+       | some w' => (.linear [⟨.pos, φ, w'⟩], acc.addEdge sf.label w')
+       | none => modalApplyOneFiveProp sf b acc)
   | .neg, .box φ =>
-    (match witnessWorldS5 b .neg φ with
-     | some w' => (.linear [⟨.neg, φ, w'⟩], acc.addEdge sf.label w')
-     | none => modalApplyOneFiveProp sf b acc)
+    (if sf.label == (0 : WorldIndex) then modalApplyOneFiveProp sf b acc
+     else
+       match witnessWorldFive b .neg φ with
+       | some w' => (.linear [⟨.neg, φ, w'⟩], acc.addEdge sf.label w')
+       | none => modalApplyOneFiveProp sf b acc)
   | _, _ => modalApplyOneFiveProp sf b acc
+
+/-- **Case-split helper for the diamond-positive mint shape**, packaging the root-trigger guard
+and the `witnessWorldFive` match into the same two-way dichotomy the pre-guard code enjoyed
+(`modalApplyOneFive = modalApplyOneFiveProp` either because the trigger is root or because no
+non-root witness exists, vs. a genuine non-root reuse). Every downstream consumer of the old
+`cases hw : witnessWorldS5 b Sign.pos φ with | none => .. | some w' => ..` pattern rewrites via
+this lemma instead. -/
+lemma modalApplyOneFive_diaPos_eq_or_reuse
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneFive (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+       = modalApplyOneFiveProp
+           (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
+    (∃ w', witnessWorldFive b .pos φ = some w' ∧
+      modalApplyOneFive (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w')) := by
+  unfold modalApplyOneFive
+  dsimp only
+  by_cases hz : (w == (0 : WorldIndex)) = true
+  · rw [if_pos hz]; exact Or.inl rfl
+  · rw [if_neg hz]
+    cases hw : witnessWorldFive b .pos φ with
+    | none => exact Or.inl rfl
+    | some w' => exact Or.inr ⟨w', rfl, rfl⟩
+
+/-- **Case-split helper for the box-negative mint shape**, dual of
+`modalApplyOneFive_diaPos_eq_or_reuse`. -/
+lemma modalApplyOneFive_boxNeg_eq_or_reuse
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneFive (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+       = modalApplyOneFiveProp
+           (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
+    (∃ w', witnessWorldFive b .neg φ = some w' ∧
+      modalApplyOneFive (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w')) := by
+  unfold modalApplyOneFive
+  dsimp only
+  by_cases hz : (w == (0 : WorldIndex)) = true
+  · rw [if_pos hz]; exact Or.inl rfl
+  · rw [if_neg hz]
+    cases hw : witnessWorldFive b .neg φ with
+    | none => exact Or.inl rfl
+    | some w' => exact Or.inr ⟨w', rfl, rfl⟩
 
 /-- Free bridge: on the box-positive (propagation, non-mint) shape, `modalApplyOneFive` falls
 through to `modalApplyOneFiveProp` by the definitional `| _, _ =>` catch-all -- `rfl`. -/
@@ -494,14 +576,10 @@ lemma modalApplyOneFive_fresh_local
       rw [modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp)]
       exact modalApplyOneFiveProp_fresh_local_local _ b acc
     case diamond =>
-      unfold modalApplyOneFive
-      cases hw : witnessWorldS5 b Sign.pos φ with
-      | none =>
-        simp only [hw]
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+      rcases modalApplyOneFive_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
         exact modalApplyOne_fresh_local _ b acc
-      | some w' =>
-        simp only [hw]
+      · rw [heq]
         exact Or.inr ⟨⟨.pos, φ, w'⟩, [], rfl, rfl⟩
   · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
     case atom =>
@@ -523,14 +601,10 @@ lemma modalApplyOneFive_fresh_local
       rw [modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp)]
       exact modalApplyOneFiveProp_fresh_local_local _ b acc
     case box =>
-      unfold modalApplyOneFive
-      cases hw : witnessWorldS5 b Sign.neg φ with
-      | none =>
-        simp only [hw]
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+      rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
         exact modalApplyOne_fresh_local _ b acc
-      | some w' =>
-        simp only [hw]
+      · rw [heq]
         exact Or.inr ⟨⟨.neg, φ, w'⟩, [], rfl, rfl⟩
 
 /-! ## Driver Instantiation -/
@@ -793,22 +867,16 @@ private lemma modalApplyOneFive_branchingLength
   · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
     · obtain ⟨s, ff, w⟩ := sf
       simp only at hs hf; subst hs; subst hf
-      simp only [modalApplyOneFive] at h
-      cases hw : witnessWorldS5 b Sign.pos φ with
-      | some w' => rw [hw] at h; simp at h
-      | none =>
-        rw [hw] at h
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+      rcases modalApplyOneFive_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
         exact modalApplyOne_branching_length _ b acc brs h
+      · rw [heq] at h; simp at h
     · obtain ⟨s, ff, w⟩ := sf
       simp only at hs hf; subst hs; subst hf
-      simp only [modalApplyOneFive] at h
-      cases hw : witnessWorldS5 b Sign.neg φ with
-      | some w' => rw [hw] at h; simp at h
-      | none =>
-        rw [hw] at h
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+      rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
         exact modalApplyOne_branching_length _ b acc brs h
+      · rw [heq] at h; simp at h
   · rw [modalApplyOneFive_eq_of_not_mint_shape sf b acc
         ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
     by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
@@ -833,22 +901,16 @@ private lemma modalApplyOneFive_persistentFresh
   · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
     · obtain ⟨s, ff, w⟩ := sf
       simp only at hs hf; subst hs; subst hf
-      simp only [modalApplyOneFive] at h
-      cases hw : witnessWorldS5 b Sign.pos φ with
-      | some w' => rw [hw] at h; simp at h
-      | none =>
-        rw [hw] at h
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+      rcases modalApplyOneFive_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
         exact modalApplyOne_persistent_props _ b acc nf h
+      · rw [heq] at h; simp at h
     · obtain ⟨s, ff, w⟩ := sf
       simp only at hs hf; subst hs; subst hf
-      simp only [modalApplyOneFive] at h
-      cases hw : witnessWorldS5 b Sign.neg φ with
-      | some w' => rw [hw] at h; simp at h
-      | none =>
-        rw [hw] at h
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
+      rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
         exact modalApplyOne_persistent_props _ b acc nf h
+      · rw [heq] at h; simp at h
   · rw [modalApplyOneFive_eq_of_not_mint_shape sf b acc
         ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
     by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
@@ -942,12 +1004,12 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
       simp only at hs hf; subst hs; subst hf
       have hKsub := modalApplyOne_outputs_subset φ0
         (⟨.pos, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
-      unfold modalApplyOneFive
-      cases hw : witnessWorldS5 b Sign.pos φ with
-      | some w' =>
-        simp only [hw]
+      rcases modalApplyOneFive_diaPos_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact hKsub
+      · rw [heq]
         have hwknown : w' ∈ modalKnownWorlds b :=
-          label_mem_modalKnownWorlds (witnessWorldS5_mem hw)
+          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
           le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
@@ -959,20 +1021,16 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
         simp only [List.mem_singleton] at hx
         rw [hx]
         exact mem_modalUniverse_of_Five hwle hφsub
-      | none =>
-        simp only [hw]
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact hKsub
     · obtain ⟨s, ff, l⟩ := sf
       simp only at hs hf; subst hs; subst hf
       have hKsub := modalApplyOne_outputs_subset φ0
         (⟨.neg, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
-      unfold modalApplyOneFive
-      cases hw : witnessWorldS5 b Sign.neg φ with
-      | some w' =>
-        simp only [hw]
+      rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
+      · rw [heq, modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
+        exact hKsub
+      · rw [heq]
         have hwknown : w' ∈ modalKnownWorlds b :=
-          label_mem_modalKnownWorlds (witnessWorldS5_mem hw)
+          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
         have hwle : w' ≤ modalWorldBound φ0 :=
           le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
         have hφsub : φ ∈ modalSubfmls φ0 := by
@@ -984,10 +1042,6 @@ private lemma modalApplyOneFive_outputsSubsetUniverse
         simp only [List.mem_singleton] at hx
         rw [hx]
         exact mem_modalUniverse_of_Five hwle hφsub
-      | none =>
-        simp only [hw]
-        rw [modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact hKsub
   · rw [modalApplyOneFive_eq_of_not_mint_shape sf b acc
         ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at *
     by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
@@ -1082,15 +1136,13 @@ private lemma modalApplyOneFive_diaPosWitness'
             b acc).fst
           = RuleResult.linear
               ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
-  simp only [modalApplyOneFive]
-  cases h : witnessWorldS5 b .pos ψ with
-  | some w' => exact ⟨w', by simp, [], by simp⟩
-  | none =>
-    obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+  rcases modalApplyOneFive_diaPos_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
+  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
     have heq := modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg
       (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
-    simp only [heq]
+    rw [heqp, heq]
     exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
+  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
 
 /-- **F11' discharge for `modalApplyOneFive`**, symmetric to `modalApplyOneFive_diaPosWitness'`. -/
 private lemma modalApplyOneFive_boxNegWitness'
@@ -1103,15 +1155,13 @@ private lemma modalApplyOneFive_boxNegWitness'
             b acc).fst
           = RuleResult.linear
               ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
-  simp only [modalApplyOneFive]
-  cases h : witnessWorldS5 b .neg ψ with
-  | some w' => exact ⟨w', by simp, [], by simp⟩
-  | none =>
-    obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+  rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
+  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
     have heq := modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg
       (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
-    simp only [heq]
+    rw [heqp, heq]
     exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
+  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
 
 /-! ## Reachability Bridge (Task 515 Phase 19)
 
@@ -1175,15 +1225,13 @@ lemma modalApplyOneFive_agree_or_reuse
   obtain ⟨s, ff, w⟩ := sf
   rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
   case pos.diamond =>
-    unfold modalApplyOneFive
-    cases hw : witnessWorldS5 b Sign.pos φ with
-    | none => exact Or.inl (by simp only [hw])
-    | some w' => exact Or.inr ⟨⟨.pos, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+    rcases modalApplyOneFive_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr ⟨⟨.pos, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   case neg.box =>
-    unfold modalApplyOneFive
-    cases hw : witnessWorldS5 b Sign.neg φ with
-    | none => exact Or.inl (by simp only [hw])
-    | some w' => exact Or.inr ⟨⟨.neg, φ, w'⟩, witnessWorldS5_mem hw, by simp only [hw]⟩
+    rcases modalApplyOneFive_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   all_goals exact Or.inl (modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp))
 
 /-- **`modalApplyOneFive` satisfies `RuleApplicationSpecCore`**: the witness-reuse root-aware rule

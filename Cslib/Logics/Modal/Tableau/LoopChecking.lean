@@ -507,6 +507,44 @@ lemma blockingWorldS4Keyed_none_fresh (φ₀ : Proposition Atom)
   rw [h] at hmap
   simp at hmap
 
+omit [Hashable Atom] in
+/-- **Phase 5's named crux, closed**: the `keys`-update rule shared by both minting shapes
+preserves `S4LoopInv.keysDistinct`. Unlike the old `blockingWorldS4`-driven update (Phase 5's
+blocker: `k' ⊆ relevantSetFinset φ₀ b w'` and `relevantSetFinset φ₀ b w' ≠ newkey` do NOT imply
+`k' ≠ newkey` when `k'` is a proper subset), this needs no live-set indirection and no freshness
+argument about the new world index at all: `blockingWorldS4Keyed_none_fresh` gives `k' ≠ newkey`
+directly for every `(w', k') ∈ keys`, so the only remaining case (`w' = modalNextWorld b`, if it
+were to occur) is excluded by `keysDistinct`'s own `w1 ≠ w2` hypothesis before `k1 ≠ k2` is ever
+asked for. -/
+lemma keysUpdate_preserves_keysDistinct (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hdistinct : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2) :
+    ∀ w1 w2 k1 k2,
+      (w1, k1) ∈ (match blockingWorldS4Keyed φ₀ b keys s φ w with
+        | some _ => keys
+        | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b s φ w)]) →
+      (w2, k2) ∈ (match blockingWorldS4Keyed φ₀ b keys s φ w with
+        | some _ => keys
+        | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b s φ w)]) →
+      w1 ≠ w2 → k1 ≠ k2 := by
+  cases hblock : blockingWorldS4Keyed φ₀ b keys s φ w with
+  | some wBlock => exact hdistinct
+  | none =>
+    intro w1 w2 k1 k2 hmem1 hmem2 hne
+    simp only [List.mem_append, List.mem_singleton] at hmem1 hmem2
+    rcases hmem1 with hmem1 | hmem1 <;> rcases hmem2 with hmem2 | hmem2
+    · exact hdistinct w1 w2 k1 k2 hmem1 hmem2 hne
+    · obtain ⟨rfl, rfl⟩ := Prod.mk.injEq .. ▸ hmem2
+      exact (blockingWorldS4Keyed_none_fresh φ₀ b keys s φ w hblock w1 k1 hmem1)
+    · obtain ⟨rfl, rfl⟩ := Prod.mk.injEq .. ▸ hmem1
+      exact fun heq =>
+        (blockingWorldS4Keyed_none_fresh φ₀ b keys s φ w hblock w2 k2 hmem2) heq.symm
+    · obtain ⟨rfl, rfl⟩ := Prod.mk.injEq .. ▸ hmem1
+      obtain ⟨rfl, rfl⟩ := Prod.mk.injEq .. ▸ hmem2
+      exact absurd rfl hne
+
 /-! ## S4 Rule Application -/
 
 /-- The `φ₀`-parameterized S4 rule-application function (Decision D1). Wraps

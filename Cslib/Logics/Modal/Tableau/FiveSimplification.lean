@@ -1246,6 +1246,81 @@ lemma modalApplyOneFive_agree_or_reuse
     · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   all_goals exact Or.inl (modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp))
 
+/-- **Task 515 (Phase 19b)**: strengthens `modalApplyOneFive_diaPos_eq_or_reuse` with the fact
+that a reuse call's trigger is never the root -- reuse only fires in the `else` branch of
+`modalApplyOneFive`'s `if sf.label == 0 then .. else ..` guard, i.e. exactly when `w ≠ 0`. Needed
+by `modalStepBranchFive_preserves_satIn` (`FrameSoundness.lean`) to invoke
+`accReachableInv_related_five`, which requires **both** endpoints of a reuse edge to be
+non-root. -/
+lemma modalApplyOneFive_diaPos_eq_or_reuse_ne_root
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneFive (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+       = modalApplyOneFiveProp
+           (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
+    (∃ w', w ≠ 0 ∧ witnessWorldFive b .pos φ = some w' ∧
+      modalApplyOneFive (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w')) := by
+  unfold modalApplyOneFive
+  dsimp only
+  by_cases hz : (w == (0 : WorldIndex)) = true
+  · rw [if_pos hz]; exact Or.inl rfl
+  · rw [if_neg hz]
+    have hwne : w ≠ 0 := by simpa using hz
+    cases hw : witnessWorldFive b .pos φ with
+    | none => exact Or.inl rfl
+    | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
+
+/-- **Task 515 (Phase 19b)**: dual of `modalApplyOneFive_diaPos_eq_or_reuse_ne_root` for the
+box-negative mint shape. -/
+lemma modalApplyOneFive_boxNeg_eq_or_reuse_ne_root
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneFive (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+       = modalApplyOneFiveProp
+           (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
+    (∃ w', w ≠ 0 ∧ witnessWorldFive b .neg φ = some w' ∧
+      modalApplyOneFive (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        = (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w')) := by
+  unfold modalApplyOneFive
+  dsimp only
+  by_cases hz : (w == (0 : WorldIndex)) = true
+  · rw [if_pos hz]; exact Or.inl rfl
+  · rw [if_neg hz]
+    have hwne : w ≠ 0 := by simpa using hz
+    cases hw : witnessWorldFive b .neg φ with
+    | none => exact Or.inl rfl
+    | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
+
+/-- **Task 515 (Phase 19b)**: `modalApplyOneFive` either agrees with `modalApplyOneFiveProp`
+outright, or fires a witness reuse **away from the root, targeting a non-root witness** --
+strengthens `modalApplyOneFive_agree_or_reuse` with the `sf.label ≠ 0 ∧ sf'.label ≠ 0` facts
+`modalStepBranchFive_preserves_satIn` needs to invoke `accReachableInv_related_five` (which
+requires **both** endpoints of a reuse edge to be non-root, unlike S5's
+`accReachableInv_related_s5`, which needs no such exclusion since `s5FC` is an equivalence). -/
+lemma modalApplyOneFive_agree_or_reuse_ne_root
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneFive sf b acc = modalApplyOneFiveProp sf b acc ∨
+    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
+      sf' ∈ b ∧ sf.label ≠ 0 ∧ sf'.label ≠ 0 ∧ modalApplyOneFive sf b acc =
+        (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label) := by
+  obtain ⟨s, ff, w⟩ := sf
+  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
+  case pos.diamond =>
+    rcases modalApplyOneFive_diaPos_eq_or_reuse_ne_root b acc φ w with
+      heq | ⟨w', hwne, hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr
+        ⟨⟨.pos, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
+  case neg.box =>
+    rcases modalApplyOneFive_boxNeg_eq_or_reuse_ne_root b acc φ w with
+      heq | ⟨w', hwne, hw', heq⟩
+    · exact Or.inl heq
+    · exact Or.inr
+        ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
+  all_goals exact Or.inl (modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp))
+
 /-- **`modalApplyOneFive` satisfies `RuleApplicationSpecCore`**: the witness-reuse root-aware rule
 discharges every field the Hintikka/saturation machinery needs, mirroring
 `modalApplyOneS5w_specCore` declaration-for-declaration. This is the interface witness Phase 21's

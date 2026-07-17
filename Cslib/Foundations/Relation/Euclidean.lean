@@ -150,6 +150,24 @@ instance : RightEuclidean (EuclGen r) where
 /-- `r` embeds into its right-Euclidean closure `EuclGen r`. -/
 theorem EuclGen.mono {a b : α} (h : r a b) : EuclGen r a b := EuclGen.base h
 
+/-- **`EuclGen` preserves symmetry of its base relation.** If `r` is symmetric, so is `EuclGen r`:
+the `base` case reduces to `r`'s own symmetry, and the `eucl` case needs no induction hypothesis
+at all -- given `EuclGen r a b` and `EuclGen r a c` (sharing source `a`), swapping their order
+(`eucl hac hab`) directly yields `EuclGen r c b`, the symmetric partner of the constructor's own
+conclusion `EuclGen r b c`. Used to build a symmetric-*and*-right-Euclidean (KB5/PER) closure as
+`EuclGen (Relation.SymmGen r)`, right-Euclidean unconditionally (the instance above) and symmetric
+by this lemma applied to `Relation.SymmGen r` (always symmetric, `Mathlib.Logic.Relation`). -/
+theorem EuclGen.symm_of_symm (hsymm : Std.Symm r) {a b : α} (h : EuclGen r a b) :
+    EuclGen r b a := by
+  cases h with
+  | base hab => exact EuclGen.base (hsymm.symm _ _ hab)
+  | eucl hab hac => exact EuclGen.eucl hac hab
+
+/-- `EuclGen r` is symmetric whenever `r` is -- the `Std.Symm` instance packaging
+`EuclGen.symm_of_symm`. -/
+instance [Std.Symm r] : Std.Symm (EuclGen r) where
+  symm _ _ h := EuclGen.symm_of_symm ‹Std.Symm r› h
+
 /-- `EuclGen r` is the *least* right-Euclidean relation containing `r`: it lies below every
 right-Euclidean relation `s` that contains `r`. This is the intersection characterization of the
 closure made usable -- given any right-Euclidean `s` with `r ≤ s`, induction on the closure shows

@@ -1,17 +1,17 @@
 {
   "status": "partial",
-  "started_at": "2026-07-15T02:19:40Z",
+  "started_at": "2026-07-17T00:00:00Z",
   "requires_user_review": true,
-  "review_reason": "Phase 5 (S4LoopInv preservation, the plan's flagged crux) is BLOCKED on a structural gap in the birth-key guard design (guard compares against live relevant sets, but keysDistinct's preservation needs comparison against recorded keys). Phases 6-7 depend on Phase 5 and were not attempted. Phases 1-4 landed green and are self-contained. Recommend spawning a follow-on task for the guard redesign per the documented blocker.",
+  "review_reason": "Phase 5 (S4LoopInv preservation, the plan's flagged crux) remains BLOCKED, but this dispatch closed the prior dispatch's structural guard-vs-keys gap: blockingWorldS4Keyed (recorded-keys guard) plus keysUpdate_preserves_keysDistinct (the specific fact previously proved impossible) are now landed, green, zero-sorry, zero-axiom. The residual blocker narrowed from a structural design gap to a bounded Lean proof-engineering gap in S4LoopInv.keyLowerBd's minting-case equality (relevantSetFinset of a freshly-minted world equals successorBirthContent) -- mathematically verified by hand, reusable groundwork landed (mint_fst unfolding lemmas + subformula-membership helpers), but the Finset/Bool/Prop bridging proof itself did not converge within budget and was removed rather than committed with a sorry. Phases 6-7 not attempted (dependency on Phase 5).",
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-    "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
-    "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json"
+    "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json",
+    "specs/511_s4_loop_checking_termination/.return-meta.json"
   ],
   "partial_progress": {
-    "stage": "phase_5_blocked",
-    "details": "Phases 1-4 landed green (exponent fix, signed-key infra, birth-content guard redesign, key-threaded S4 step + restated S4LoopInv). Phase 5 blocked on structural gap in keysDistinct preservation. Phases 6-7 not attempted.",
+    "stage": "phase_5_reblocked_narrowed",
+    "details": "Phases 1-4 remain landed green (unchanged). Phase 5: guard redesign (blockingWorldS4Keyed) closed; keysDistinct preservation (the named crux) closed as keysUpdate_preserves_keysDistinct; keyLowerBd's minting-case equality attempted with reusable groundwork landed (modalApplyOne_boxNeg_mint_fst_S4/_diamondPos_mint_fst_S4, modalSubfmls_trans_S4, modalUniverseS4_mem_formula) but not closed; keysTotal/keysInUniverse preservation and full S4LoopInv assembly not attempted (blocked on keyLowerBd). Phases 6-7 not attempted.",
     "phases_completed": 4,
     "last_completed_phase": "Phase 4: Key-threaded S4 step + restated S4LoopInv",
     "blocked_phase": 5
@@ -23,10 +23,10 @@
     "axiom_count": 28,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "CI pipeline (build/checkInitImports/lint/lint-style/shake/test) fully green for all phases actually landed (1-4). axiom_count is the repo-wide baseline count, unchanged by this task -- zero new axioms introduced."
+    "note": "lake build (scoped: LoopChecking.lean, FrameCompleteness.lean), lake exe checkInitImports, lake lint, lake exe lint-style, lake shake, lake test all green/clean for this dispatch's changes. axiom_count is the repo-wide baseline (unchanged by this task). A full unscoped `lake build` of the entire Cslib target currently fails on Cslib/Logics/Modal/Tableau/FiveSimplification.lean due to a PRE-EXISTING, uncommitted, unrelated modification from a different concurrent task (515) -- confirmed via git status/log before this dispatch began; not touched or caused by this task. lean_verify on blockingWorldS4Keyed_none_fresh and keysUpdate_preserves_keysDistinct reports only propext/Classical.choice/Quot.sound."
   },
   "metadata": {
-    "session_id": "sess_1784075478_630e1e_511",
+    "session_id": "sess_1784322687_fcf57a_511",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],

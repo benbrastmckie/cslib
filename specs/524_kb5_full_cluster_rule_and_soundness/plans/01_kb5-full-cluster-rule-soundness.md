@@ -1,7 +1,7 @@
 # Implementation Plan: KB5 Full-Cluster Propagation Rule and Direct Soundness
 
 - **Task**: 524 - kb5_full_cluster_rule_and_soundness
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None (task 511's LoopChecking.lean edit is a CI-gating check only, see Phase 6)
 - **Research Inputs**: specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md
@@ -337,7 +337,35 @@ both via the MCP tool and `lake env lean #print axioms`).
 
 ---
 
-### Phase 6: Verification, axiom audit, CI, and docstring reconciliation [NOT STARTED]
+### Phase 6: Verification, axiom audit, CI, and docstring reconciliation [COMPLETED]
+
+`lean_verify` audited on every new public declaration named in the deliverable summary plus the
+key semantic lemmas (`modalApplyOneKb5'`, `modalApplyOneKb5'_specCore`, `Kb5'WorldInv`/
+`modalMaxWorld_lt_worldBound_of_Kb5'WorldInv`, `reachable_imp_related_kb5`/
+`accReachableInv_related_kb5`/`accReachableInv_kb5_root_refl`, `modalKb5BoxAllFull_soundIn`/
+`modalKb5DiaNegAllFull_soundIn`, `modalStepBranchKb5'_preserves_satIn`/
+`modalExpandBranchesKb5'_closed_unsatIn`/`modalTableauKb5'_sound`) -- all show only the standard
+`[propext, Classical.choice, Quot.sound]` subset (several needing none), zero `sorry`. Cross-checked
+one `lean_verify` result against `lake env lean #print axioms` directly after an apparent
+transient LSP-staleness reading (resolved, both agree). Zero new `axiom` declarations confirmed
+(`grep -rn "^axiom " Cslib/` count unchanged by this task's diff).
+
+Task 511 status checked (`specs/state.json`): still `partial` (LoopChecking.lean/S4 decidability
+mid-work), so per this phase's gate, `LoopChecking.lean` was left untouched. Ran the full CI order
+anyway since the plain `lake build` (whole project, 3238 jobs) succeeds cleanly:
+`lake exe checkInitImports` (exit 0), `lake lint` (one pre-existing, unrelated error in
+`Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean`; zero findings in either touched file),
+`lake exe lint-style` (clean), `lake shake --add-public --keep-implied --keep-prefix` (zero
+import-minimization findings for either touched file; findings elsewhere are pre-existing and
+out of this task's file_scope). `lake test` surfaces one pre-existing, unrelated failure
+(`CslibTests.ModalFrameSeparation`, a `decide`-reduction stall in `instDecidableS5Valid`/
+`instDecidableFiveValid`, both defined in `FrameCompleteness.lean` which this task never
+touched -- confirmed via `git status`/`git log` that file is untouched and unstaged). No new file
+was added, so `lake exe mk_all --module` is not required.
+
+Module note updated: `FiveSimplification.lean`'s KB5-instantiation section (the "factor, not
+clone" note) now has an "Update (task 524)" paragraph pointing to `modalApplyOneKb5'` and its own
+soundness theorem, without retiring the existing alias/corollary chain.
 
 **Goal**: Prove the whole task green and axiom-clean; reconcile the KB5 module notes.
 

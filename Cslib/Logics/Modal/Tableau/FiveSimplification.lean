@@ -1429,7 +1429,18 @@ This factoring is sound *only* for the soundness direction (`.closed → kb5Vali
 strictly weaker than `fiveValid` (`kb5FC` is a proper subclass of `fiveFC`-frames) and may hold on
 formulas the Five tableau leaves open. Phase 23's own extraction (`extractModelKb5`) is expected
 to need a bespoke symmetric-model construction from an open KB5 branch; that is out of this
-phase's scope. -/
+phase's scope.
+
+**Update (task 524)**: the alias above stays in place (it is still the cheapest sound-only route
+and nothing below retires it), but Phase 23's blocker note (`FrameCompleteness.lean`) identified
+that *completeness* needs a genuinely different, KB5-specific rule -- reaching into the full known
+non-root cluster on a root trigger, rather than `modalApplyOneFive`'s edge-gated root arm. That
+rule now exists alongside this alias: see `modalApplyOneKb5'` (`## KB5-Specific Full-Cluster
+Propagation Rule` section below), its own `RuleApplicationSpecCore` instance
+(`modalApplyOneKb5'_specCore`), and its own direct-against-`kb5FC` soundness theorem
+(`modalTableauKb5'_sound`, `FrameSoundness.lean` -- proved without this section's
+frame-class-monotonicity shortcut, which is unsound for `modalApplyOneKb5'`'s unrestricted root
+propagation). `modalApplyOneKb5'`-based completeness is deferred to a follow-on task. -/
 
 /-- The KB5 tableau rule: **literally** `modalApplyOneFive`, not a clone -- see this section's
 module note for the "factor, not clone" argument. -/

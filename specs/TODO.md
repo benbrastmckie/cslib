@@ -43,7 +43,7 @@ next_project_number: 526
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
-524 [PLANNING] — Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive
+524 [IMPLEMENTING] — Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive
   └─ 525 [RESEARCHED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
     └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -75,7 +75,7 @@ next_project_number: 526
 
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-502 [PARTIAL] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
+502 [PLANNED] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -117,11 +117,12 @@ next_project_number: 526
 
 ### 524. Kb5 full cluster rule and soundness
 - **Effort**: 6-10 hours
-- **Status**: [PLANNING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md]
+- **Plan**: [524_kb5_full_cluster_rule_and_soundness/plans/01_kb5-full-cluster-rule-soundness.md]
 
 **Description**: Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive` as a literal alias (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:1436), sound for KB5 only because 'factor, not clone' lets a Five-sound rule transfer to the strictly-stronger kb5FC frame class. That alias only propagates content at DIRECT `acc.hasEdge` successors of the root -- by design, since Five's own soundness needs exactly that restriction (Five's root is not reflexive). But `extractModelKb5`'s relation (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:3230) is forced to be `Relation.EuclGen (Relation.SymmGen acc.hasEdge)`, the least kb5FC-satisfying relation preserving every raw edge -- and this relation relates the root to INDIRECT chain targets too (a raw chain `0 -> a -> c` where non-root `a` mints a fresh witness `c` gives `(extractModelKb5 b acc).r 0 c`). This is proved by the already-landed, sorry-free, zero-axiom witness lemma `extractModelKb5_root_reach_scout` (FrameCompleteness.lean:3294), and confirmed algebraically to hold for ANY kb5FC-satisfying relation preserving raw edges -- not an artifact of this specific closure operator. Deliver a genuinely NEW KB5-specific tableau rule (a plausible name is `modalApplyOneKb5'`, landed either in FiveSimplification.lean's KB5 section or a new Kb5Simplification.lean -- implementer's choice) whose root box/diamond trigger propagates to the FULL known non-root cluster (matching the non-root propagation arm's own unconditional behavior), and which ALSO propagates the root's own box content back onto world 0 itself, justified by the already-landed `Relation.symm_rightEuclidean_root_refl` (Cslib/Foundations/Relation/Euclidean.lean:362: a rooted symmetric+right-Euclidean frame makes the root reflexive whenever it has a successor). Re-derive the termination bound for the new rule (Phase 19a's bound does not transfer for free since the new rule is no longer definitionally modalApplyOneFive). Land the RuleApplicationSpecCore instance for the new rule (mirroring modalApplyOneFive_specCore's nine-field discharge, FiveSimplification.lean:1389-1441). Land a NEW soundness theorem in Cslib/Logics/Modal/Tableau/FrameSoundness.lean, proved DIRECTLY against kb5FC (the frame-class-monotonicity shortcut Phase 22 used is NOT available here -- the new rule's unrestricted root propagation would be unsound for the strictly larger fiveFC class, per the Phase 23 blocker note at FrameCompleteness.lean:3300-3339). Reuse without re-deriving: extractModelKb5 and its extraction lemmas (extractModelKb5_r/_rightEuclidean/_symm/_hasEdge_imp_r, FrameCompleteness.lean:3230-3270), extractModelKb5_root_reach_scout (FrameCompleteness.lean:3294, the counterexample characterizing exactly what the new rule must handle), EuclGen.symm_of_symm + its Std.Symm (EuclGen r) instance and Relation.EuclGen/Relation.SymmGen (Cslib/Foundations/Relation/Euclidean.lean), Relation.symm_rightEuclidean_root_refl (Euclidean.lean:362), and the entire green S5/Five rule-design pattern in FiveSimplification.lean (mint-arm guards, witness reuse, source-split termination tagging) as structural template. Constraint: zero sorry, zero new axiom declarations anywhere; every new public declaration must be lean_verify-clean (only the standard [propext, Classical.choice, Quot.sound] subset). Do not introduce a vacuous placeholder (def X := True / theorem X := trivial) if a step cannot be completed -- mark [BLOCKED] instead per plan-compliance.md and lean4.md. Do not touch Cslib/Logics/Modal/Tableau/LoopChecking.lean unless it is already resolved by task 511's concurrent session by the time this task runs (check first).
 
@@ -312,12 +313,12 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 502. Minimize Segment.lean imports per lake shake recommendation
-- **Status**: [PARTIAL]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
 - **Research**: [502_fix_segment_import_minimization/reports/01_segment-import-minimization.md]
-- **Plan**: [502_fix_segment_import_minimization/plans/01_segment-import-minimization.md]
+- **Plan**: [502_fix_segment_import_minimization/plans/02_segment-import-minimization.md]
 
 **Description**: lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.
 

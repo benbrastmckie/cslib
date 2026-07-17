@@ -1,37 +1,21 @@
 {
-  "status": "partial",
+  "status": "planned",
   "started_at": "2026-07-17T22:35:06Z",
-  "completed_at": "2026-07-17T22:55:00Z",
+  "completed_at": "2026-07-17T23:10:00Z",
   "artifacts": [
-    "specs/502_fix_segment_import_minimization/reports/01_segment-import-minimization.md",
-    "specs/502_fix_segment_import_minimization/plans/01_segment-import-minimization.md"
+    {
+      "type": "plan",
+      "path": "specs/502_fix_segment_import_minimization/plans/02_segment-import-minimization.md",
+      "summary": "Revised consumer-first 3-phase plan: fix SegmentLindenbaum.lean imports first (add direct PrimeTheory + DeductionTheorem), then re-apply the Segment.lean transitive->direct import replacement, then reconcile the minimal import set empirically with lake shake."
+    }
   ],
-  "partial_progress": {
-    "stage": "blocked",
-    "details": "Applied the plan's two-import replacement to Segment.lean; scoped Segment.lean build was green, but lake shake / a direct build of the sole downstream importer SegmentLindenbaum.lean failed with 6 'Unknown identifier' errors (modalDeductiveClosure x4, deductionTheorem x2). Root cause: SegmentLindenbaum.lean never directly imports PrimeTheory.lean or Modal/Metalogic/DeductionTheorem.lean -- it relied entirely on Segment.lean's old transitive public-import re-export. Fixing this requires editing SegmentLindenbaum.lean, which is outside this task's declared single-file scope. Reverted Segment.lean to its original content (git diff confirms zero delta) and re-verified SegmentLindenbaum.lean builds green again post-revert.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0
-  },
-  "requires_user_review": true,
-  "blocked_phase": "Phase 1: Replace transitive import and verify",
-  "review_reason": "Segment.lean's two-import replacement is correct in isolation and builds green, but SegmentLindenbaum.lean (the only file that imports Segment.lean) transitively depends on modalDeductiveClosure (PrimeTheory.lean:78) and deductionTheorem (Modal/Metalogic/DeductionTheorem.lean:64) via Segment.lean's old re-export, without importing either module directly. This is a genuine import-hygiene gap in SegmentLindenbaum.lean, not a flaw in the prescribed Segment.lean edit, but fixing it requires touching a second file outside this task's declared scope. Recommend a follow-up task (or a revised plan for this task) to add direct public imports of PrimeTheory.lean and Modal/Metalogic/DeductionTheorem.lean to SegmentLindenbaum.lean before re-applying and re-verifying this task's edit.",
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count_delta": 0,
-    "build_passed": false,
-    "build_note": "Segment.lean itself builds green with the prescribed two-import replacement; the failure is in downstream SegmentLindenbaum.lean. Edit was reverted; repo is currently in its original, fully-green state for this file.",
-    "ci_pipeline_passed": false,
-    "ci_pipeline_note": "Did not proceed past scoped build + shake since shake surfaced the real downstream build break; full 7-step pipeline not run for this partial/blocked outcome."
-  },
-  "artifacts_note": "No .lean files modified in the final state (edit applied then reverted per plan Rollback/Contingency). Plan file annotated with [BLOCKED] phase heading and full blocker documentation.",
+  "next_steps": "Run /implement 502 to execute the revised plan (Phase 1 -> 2 -> 3, strictly sequential).",
   "metadata": {
-    "session_id": "sess_1784322687_fcf57a_502",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "session_id": "sess_1784330211_e1fa40",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 3,
+    "estimated_hours": 0.75,
+    "reports_integrated": ["01_segment-import-minimization.md"]
   }
 }

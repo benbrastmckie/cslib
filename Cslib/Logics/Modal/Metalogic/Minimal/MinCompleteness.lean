@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Modal.Metalogic.Minimal.MinTruthLemma
+public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
 public import Cslib.Logics.Modal.Metalogic.Minimal.MK
 
 /-! # Completeness of `MK`
@@ -47,24 +47,21 @@ variable {Atom : Type u}
 /-! ## Completeness -/
 
 /-- **Completeness for `MK`**: any `MValid` formula is derivable from `MKModalAxiom`.
-Single-branch (no consistency case split, `Role C` of the research report's `efq` analysis):
-by contrapositive, `min_head_realization` extends `cl ∅` to a quasi-prime theory `T` omitting
-`φ`; instantiate `MValid` at the canonical model (`minCanonicalR`, `min_canonical_f1`/
-`min_canonical_f2`, `minCanonicalVal`, `minBotForces`) rooted at `⟨T, hT⟩`, apply
-`min_canonical_truth_lemma`, and contradict `φ ∉ T`. -/
+Instantiation of the `Axioms`-generic `mkvalidFC_completeness` at `Axioms := MKModalAxiom` and the
+trivial frame condition `FC := (fun {_} _ => True)`: `h_canonFC` is discharged by `trivial` (the
+trivial `FC` holds of any relation), and the `MValid` hypothesis is converted to `MValidFC`-form
+via `mvalid_iff_mvalidFC_true`. The 12 anonymous-constructor lambdas supply `MKModalAxiom`'s 12
+core schemata (`.implyK` … `.idb`), mirroring `mt_completeness`'s instantiation
+(`MT.lean`). -/
 theorem mk_completeness {φ : Proposition Atom} (h_valid : MValid.{u, u} φ) :
-    Derivable MKModalAxiom φ := by
-  by_contra h_not_deriv
-  obtain ⟨T, hT_qp, hT_excl⟩ := min_head_realization h_not_deriv
-  let w0 : MinCanonicalPrimeWorld Atom := ⟨T, hT_qp⟩
-  have h_forces : BForces minCanonicalR minCanonicalVal minBotForces w0 φ :=
-    h_valid (MinCanonicalPrimeWorld Atom) minCanonicalR
-      (fun {w w' v} hww' hwv => min_canonical_f1 hww' hwv)
-      (fun {w v v'} hwv hvv' => min_canonical_f2 hwv hvv')
-      minCanonicalVal minBotForces
-      (fun {_ _} p hw hv => minCanonicalVal_upward_closed p hw hv)
-      (fun {_ _} hw hbf => minBotForces_upward_closed hw hbf) w0
-  exact hT_excl ((min_canonical_truth_lemma φ w0).mp h_forces)
+    Derivable MKModalAxiom φ :=
+  mkvalidFC_completeness (fun {_} _ => True)
+    (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    (fun φ ψ => .andI φ ψ) (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ)
+    (fun φ ψ => .orI1 φ ψ) (fun φ ψ => .orI2 φ ψ) (fun φ ψ χ => .orE φ ψ χ)
+    (fun φ ψ => .k φ ψ) (fun φ ψ => .kdia φ ψ) (fun φ ψ => .cd φ ψ) (fun φ ψ => .idb φ ψ)
+    trivial
+    (mvalid_iff_mvalidFC_true.mp h_valid)
 
 /-- **Soundness-completeness biconditional for `MK`**: `φ` is `MValid` iff `φ` is derivable
 from `MKModalAxiom`. -/

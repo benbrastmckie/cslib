@@ -3021,6 +3021,76 @@ theorem modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot (fuel : Na
       exact ⟨hboth.1 b' hb', hboth.2⟩)
     fuel
 
+/-! ## `ModalLoopAuxFive`: the Hintikka Wall's `Aux` Instantiation (Phase 21b, recipe step 3)
+
+Assembles `modalStepBranchFive_preserves_worldInv` (`FiveSimplification.lean`) into the
+`AuxStepPreserved`/`AuxBounds` pair `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) needs
+to supply the fourth completeness ingredient -- the Hintikka "wall" -- for a real
+`modalTableauFive` run. Mirrors `ModalLoopAuxS5w`/`ModalLoopAuxS5w_bounds`/
+`ModalLoopAuxS5w_stepPreserved`/`modalLoopInvHintikkaS5w_initial` (`CompletenessLoop.lean`).
+Unlike `ModalLoopAuxS5w` (which ignores its `e` argument entirely), `ModalLoopAuxFive` genuinely
+depends on `e` through `FiveWorldInvE`'s `expandedRootTagsFive` bookkeeping -- see
+`FiveSimplification.lean`'s module note above `modalStepBranchFive_preserves_worldInv` for why
+the root-triggered mint case needs this refinement over the plain, `e`-independent
+`FiveWorldInv`. -/
+
+/-- **Five's instantiation of `Aux`**: the `modalUniverse`-closure conjunct (needed since
+`AuxStepPreserved`'s signature does not thread `ModalLoopInvHintikka.bClosure` as an ambient
+hypothesis the way it threads `accFreshInv`/`accTargetsKnown`) paired with the `e`-aware
+world-bound invariant `FiveWorldInvE`. -/
+def ModalLoopAuxFive (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (_acc : Accessibility) : Prop :=
+  (∀ x ∈ b, x ∈ modalUniverse φ₀) ∧ FiveWorldInvE φ₀ b e
+
+omit [Hashable Atom] in
+/-- **`ModalLoopAuxFive` entails the world bound**: the pointwise `AuxBounds` obligation,
+discharged by routing `FiveWorldInvE` back to the already-landed, `e`-independent `FiveWorldInv`
+(`FiveWorldInvE_imp_FiveWorldInv`) and then `modalMaxWorld_lt_worldBound_of_FiveWorldInv`
+(Phase 19a). -/
+theorem ModalLoopAuxFive_bounds (φ₀ : Proposition Atom) :
+    AuxBounds φ₀ (ModalLoopAuxFive φ₀) := by
+  rintro b e acc ⟨-, hWE⟩
+  exact modalMaxWorld_lt_worldBound_of_FiveWorldInv (FiveWorldInvE_imp_FiveWorldInv hWE)
+
+/-- **`ModalLoopAuxFive` is step-preserved**: the `AuxStepPreserved` obligation, discharged
+directly by the already-landed `modalStepBranchFive_preserves_worldInv`
+(`FiveSimplification.lean`), which is exactly this statement's conclusion under the same
+hypotheses (`hb`/`hWE` packaged as `Aux`, `hFresh`/`hKnown` the ambient bookkeeping facts). -/
+theorem ModalLoopAuxFive_stepPreserved (φ₀ : Proposition Atom) :
+    AuxStepPreserved modalApplyOneFive (ModalLoopAuxFive φ₀) := by
+  rintro b e acc newBs newExps newAcc hstep hFresh hKnown ⟨hb, hWE⟩ p hp
+  exact modalStepBranchFive_preserves_worldInv hb hWE hFresh hKnown hstep p hp
+
+/-- **Five's initial-configuration rank-free loop invariant**: `ModalLoopInvHintikka` holds of
+the starting worklist entry `([F(φ₀)@0], [], ∅)`. Mirrors `modalLoopInvHintikkaS5w_initial`: the
+five expanded-set conjuncts are all vacuous over `e = []`, `accFresh`/`accKnown` hold of the
+empty relation, and the `aux` field reduces to two one-line facts -- `modalUniverse` membership
+(the sole branch formula is `(.neg, φ₀)@0`) and `FiveWorldInvE`, because
+`modalMaxWorld [F(φ₀)@0] = 0`, which bounds any sum of cardinalities. -/
+lemma modalLoopInvHintikkaFive_initial (φ₀ : Proposition Atom) :
+    ModalLoopInvHintikka modalApplyOneFive φ₀ (ModalLoopAuxFive φ₀)
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty := by
+  have hmemU : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalUniverse φ₀ := by
+    simp only [modalUniverse, List.mem_flatMap, List.mem_range]
+    exact ⟨0, Nat.succ_pos _, φ₀, modalSubfmls_self_mem φ₀, by simp⟩
+  refine ⟨?_, by simp, List.nodup_nil, accFreshInv_empty _, ?_, ⟨?_, ?_⟩,
+    by simp, by simp, by simp, by simp, by simp⟩
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · simp only [FiveWorldInvE, modalMaxWorld, List.foldl_cons, List.foldl_nil]
+    exact Nat.zero_le _
+
 end Cslib.Logic.Modal.Tableau
 
 end

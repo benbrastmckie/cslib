@@ -41,11 +41,11 @@ next_project_number: 524
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-515 [PARTIAL] — Implement the terminating S5 tableau machinery recommended by tas
-520 [RESEARCHING] — Add the missing composite conservativity bridges collapsing each 
-521 [RESEARCHING] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
-522 [RESEARCHING] — Design and build a uniform frame-condition-to-axiom correspondenc
-523 [RESEARCHING] — Replace the 15 hand-written per-system axiom inductives in Cslib/
+515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
+520 [PLANNING] — Add the missing composite conservativity bridges collapsing each 
+521 [PLANNING] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
+522 [PLANNING] — Design and build a uniform frame-condition-to-axiom correspondenc
+523 [PLANNING] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
@@ -75,7 +75,7 @@ next_project_number: 524
 
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-502 [RESEARCHING] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
+502 [PLANNING] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -104,40 +104,44 @@ next_project_number: 524
 ## Tasks
 
 ### 523. Schema union axiom combinator for proofsystem instances
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [523_schema_union_axiom_combinator_for_proofsystem_instances/reports/01_schema-union-combinator-blast-radius.md]
 
 **Description**: Replace the 15 hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean (KAxiom, TAxiom, ... each re-listing overlapping constructors implyK/implyS/efq/modalK/andI..orE/diaDuality) with a compositional schema-union combinator that builds <Sys>Axiom from a chosen set of shared axiom-schema predicates. The consumption interface (HasAxiomK/HasAxiomImplyK/HasAxiomEFQ typeclasses in Cslib/Foundations/Logic/ProofSystem.lean) is ALREADY uniform, demonstrating a generic layer is feasible. This is the deepest 'elegant compositional' refactor and the highest-risk (touches every system's axiom declaration and all downstream soundness/completeness that pattern-match on constructors). MUST coordinate on Zulip per CONTRIBUTING before implementing. Start as a RESEARCH task to design the combinator and assess the blast radius on existing proofs. Parallel-safe with task 515 in principle but broad enough to warrant sequencing after 520/521.
 
 ---
 
 ### 522. Uniform frame condition axiom correspondence library
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md]
 
 **Description**: Design and build a uniform frame-condition-to-axiom correspondence library for modal logic. Currently each soundness direction reproves the axiom-frame-property correspondence case-by-case: classical conditions inline in each Systems/<Sys>/Soundness.lean (e.g. s4_axiom_sound over 'reflexive, transitive'), and birelational conditions as ad-hoc local FC predicates (ms4FC, is4FC, cs4FC', ...) re-declared per file. There is no shared 'axiom X <-> frame property P' library. Provide reusable correspondence lemmas (reflexivity<->T, transitivity<->4, symmetry<->B, seriality<->D, euclidean<->5) that the per-system soundness proofs consume, so new systems can be assembled by choosing frame properties rather than reproving soundness. RESEARCH task first (survey how Systems/*/Soundness.lean and the birelational FC predicates express conditions, and whether a single Frame-property typeclass layer can unify classical + birelational). Coordinate scope on Zulip per CONTRIBUTING if it touches many files. Parallel-safe with task 515.
 
 ---
 
 ### 521. Dedup minimal canonical model onto generic extension
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [521_dedup_minimal_canonical_model_onto_generic_extension/reports/01_dedup-minimal-canonical-model.md]
 
 **Description**: Consolidate the duplicated minimal-base canonical model. Cslib/Logics/Modal/Metalogic/Minimal/{MinCanonicalModel,MinTruthLemma,MinCompleteness}.lean are the older MK-only bespoke copies; MinExtension.lean is the Axioms-generic frame-condition-parametric version that MT/MS4/MS5 already instantiate (mkvalidFC_completeness). MK's own completeness (mk_completeness, MinCompleteness.lean:55) still runs through the old trio. Refactor mk_completeness/mk_soundness_completeness to instantiate mkvalidFC_completeness at MKModalAxiom + the trivial frame condition, then delete the bespoke MinCanonicalModel/MinTruthLemma/MinCompleteness trio (~1500 duplicated lines). The duplication is self-documented at MinExtension.lean:23-37. Preserve all public theorem names MK consumers rely on. Verify zero sorry, full CI, zero regression across the minimal base. Parallel-safe with task 515.
 
 ---
 
 ### 520. Composite conservativity bridges to classical column
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [520_composite_conservativity_bridges_to_classical_column/reports/01_composite-conservativity-bridges.md]
 
 **Description**: Add the missing composite conservativity bridges collapsing each non-classical base into the classical column, in Cslib/Logics/Modal/Metalogic/InterSystem/Modularity.lean. Currently IntToClassical.lean provides IK->K/IT->T/IS4->S4/IS5->S5 and Axis-B provides MK->IK/CK->IK etc., but the one-line composites mkDerivable_implies_kDerivable, mtDerivable_implies_tDerivable, ms4Derivable_implies_s4Derivable, ms5Derivable_implies_s5Derivable, and the constructive analogues ckDerivable_implies_kDerivable etc. do NOT exist (confirmed by grep). Modularity.lean currently chains only into the intuitionistic IS5 corner. Compose the existing Axis-B (base->intuitionistic) and IntToClassical (intuitionistic->classical) edges to complete the 'every base collapses into classical' modularity story. Low effort, high elegance value. Parallel-safe with task 515 (separate file). Verify zero sorry, axioms [propext, Classical.choice, Quot.sound] only, full CI.
 
@@ -175,7 +179,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 515. S5 universal rule termination unblock 504
 - **Effort**: 8-12 hours
-- **Status**: [PARTIAL]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 514
@@ -184,7 +188,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
   - [515_s5_universal_rule_termination_unblock_504/reports/03_s5-infrastructure-deep-research.md]
   - [515_s5_universal_rule_termination_unblock_504/reports/06_k-aux-unprovability-audit.md]
 - **Plan**: [515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md]
-- **Summary**: [515_s5_universal_rule_termination_unblock_504/summaries/05_s5-termination-machinery-summary.md]
+- **Summary**: [515_s5_universal_rule_termination_unblock_504/summaries/16_phase21-hintikka-wall-landed-completed.md]
 
 **Description**: Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.
 
@@ -279,10 +283,11 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 502. Minimize Segment.lean imports per lake shake recommendation
-- **Status**: [RESEARCHING]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [502_fix_segment_import_minimization/reports/01_segment-import-minimization.md]
 
 **Description**: lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.
 

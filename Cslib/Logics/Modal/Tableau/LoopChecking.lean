@@ -1446,6 +1446,15 @@ def modalHintikkaSetS4 (φ₀ : Proposition Atom)
   (∀ (φ : Proposition Atom) (w : WorldIndex),
     ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
 
+/-- **Bridge (task 511, Phase 7)**: `modalHintikkaSetS4 φ₀` is exactly `modalHintikkaSetGen
+(modalApplyOneS4 φ₀)`. Closes by `rfl` (mirrors `Saturation.lean`'s `modalHintikkaSet_eq`),
+confirming the substitution in `modalHintikkaSetGen` is faithful for the S4 rule set. Lets a
+generic-driver conclusion about `modalApplyOneS4 φ₀` be recovered in the concrete
+`modalHintikkaSetS4` form (or vice versa) without unfolding either definition. -/
+theorem modalHintikkaSetS4_eq (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalHintikkaSetS4 φ₀ b acc = modalHintikkaSetGen (modalApplyOneS4 φ₀) b acc := rfl
+
 /-! ## S4 Hintikka Bridges -/
 
 /-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership: the converse of

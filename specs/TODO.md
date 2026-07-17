@@ -11,7 +11,7 @@ next_project_number: 526
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,519,520,521,522,523,524 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,502,503,504,511,519,522,523,524 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506,525 | 36,37,181,317,407,425,449,511,524 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413,515 | 39,40,375,503,504,506,525 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -41,11 +41,9 @@ next_project_number: 526
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-520 [IMPLEMENTING] — Add the missing composite conservativity bridges collapsing each 
-521 [IMPLEMENTING] — Consolidate the duplicated minimal-base canonical model. Cslib/Lo
-522 [PLANNED] — Design and build a uniform frame-condition-to-axiom correspondenc
+522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
-524 [RESEARCHED] — Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive
+524 [PLANNING] — Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive
   └─ 525 [RESEARCHED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
     └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -77,7 +75,7 @@ next_project_number: 526
 
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-502 [IMPLEMENTING] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
+502 [PARTIAL] — lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segmen
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -100,7 +98,7 @@ next_project_number: 526
 
 ### Uncategorized
 
-511 [IMPLEMENTING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [PARTIAL] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
@@ -119,7 +117,7 @@ next_project_number: 526
 
 ### 524. Kb5 full cluster rule and soundness
 - **Effort**: 6-10 hours
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -142,7 +140,7 @@ next_project_number: 526
 ---
 
 ### 522. Uniform frame condition axiom correspondence library
-- **Status**: [PLANNED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -154,7 +152,7 @@ next_project_number: 526
 ---
 
 ### 521. Dedup minimal canonical model onto generic extension
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -166,7 +164,7 @@ next_project_number: 526
 ---
 
 ### 520. Composite conservativity bridges to classical column
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -249,7 +247,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
@@ -314,7 +312,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 502. Minimize Segment.lean imports per lake shake recommendation
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None

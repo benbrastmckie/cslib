@@ -2,20 +2,19 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      513,
-      505
+      520,
+      521
     ],
-    "tasks_blocked": [
-      511
+    "tasks_failed": [],
+    "tasks_partial": [
+      511,
+      522,
+      502
     ],
-    "tasks_interrupted": [
-      504
+    "tasks_planned_terminal": [
+      523
     ],
-    "tasks_skipped": [
-      300
-    ],
-    "cycles_used": 7,
-    "multi_task_mode": true,
-    "interruption_cause": "API session limit (resets 8:30pm America/Los_Angeles) during task 504 implementation"
+    "cycles_used": 4,
+    "multi_task_mode": true
   }
 }

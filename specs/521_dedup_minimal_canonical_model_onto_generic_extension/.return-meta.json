@@ -1,0 +1,49 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-17T15:34:56-07:00",
+  "completed_at": "2026-07-17T15:51:18-07:00",
+  "artifacts": [
+    "specs/521_dedup_minimal_canonical_model_onto_generic_extension/plans/01_dedup-minimal-canonical-model.md",
+    "specs/521_dedup_minimal_canonical_model_onto_generic_extension/summaries/01_dedup-minimal-canonical-model-summary.md"
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "All 4 phases landed green with independent commits (c1d6c958, 072a14f3, 42a0f14a, 2ec389bd). mk_completeness rewired onto mkvalidFC_completeness at trivial FC; MinCanonicalModel.lean, MinTruthLemma.lean, MinPrimeTheory.lean deleted (1471 lines); barrel regenerated twice; full CI pipeline run with two out-of-scope/pre-existing findings documented (unrelated lint finding in PrimeExclusion.lean; concurrent-task KB5/Five test failure in ModalFrameSeparation.lean, commit d5e528b0, unconnected to Minimal/).",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 4
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "axiom_set_baseline": ["propext", "Classical.choice", "Quot.sound"],
+    "axiom_set_final": {
+      "mk_completeness": ["propext", "Classical.choice", "Quot.sound"],
+      "mk_soundness_completeness": ["propext", "Classical.choice", "Quot.sound"],
+      "mt_completeness": ["propext", "Classical.choice", "Quot.sound"],
+      "ms4_completeness": ["propext", "Classical.choice", "Quot.sound"],
+      "ms5_completeness": ["propext", "Classical.choice", "Quot.sound"]
+    },
+    "notes": "lake lint: one unrelated pre-existing finding (PrimeExclusion.lean, out of scope). lake test: fails only on CslibTests/ModalFrameSeparation.lean, confirmed pre-existing/out-of-scope KB5/Five blocker from a concurrent task (commit d5e528b0), zero connection to files this task touched. lake shake: only suggestion for MinCompleteness.lean is the known Cslib.Init false positive, not applied per CONTRIBUTING.md."
+  },
+  "artifacts_deleted": [
+    "Cslib/Logics/Modal/Metalogic/Minimal/MinCanonicalModel.lean",
+    "Cslib/Logics/Modal/Metalogic/Minimal/MinTruthLemma.lean",
+    "Cslib/Logics/Modal/Metalogic/Minimal/MinPrimeTheory.lean"
+  ],
+  "artifacts_modified": [
+    "Cslib/Logics/Modal/Metalogic/Minimal/MinCompleteness.lean",
+    "Cslib.lean"
+  ],
+  "metadata": {
+    "session_id": "sess_1784322687_fcf57a_521",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

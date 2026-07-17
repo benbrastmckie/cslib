@@ -1,83 +1,48 @@
 {
-  "session_id": "sess_1784075478_630e1e",
+  "session_id": "sess_1784329467_424a02",
   "task_numbers": [
-    513,
-    511,
-    505,
-    504,
-    300
+    524,
+    525
   ],
   "waves": [
     [
-      513,
-      511
+      524
     ],
     [
-      505
-    ],
-    [
-      504
-    ],
-    [
-      300
+      525
     ]
   ],
   "dependency_graph": {
-    "513": [],
-    "511": [],
-    "505": [
-      "513"
-    ],
-    "504": [
-      "513",
-      "505"
-    ],
-    "300": [
-      "504",
-      "505"
+    "524": [],
+    "525": [
+      "524"
     ]
   },
-  "max_cycles": 25,
-  "cycle_count": 7,
-  "failed_tasks": [
-    511
-  ],
+  "max_cycles": 10,
+  "cycle_count": 4,
+  "failed_tasks": [],
   "completed_tasks": [
-    513,
-    505
+    520,
+    521
   ],
   "current_statuses": {
-    "513": "completed",
-    "511": "blocked",
-    "505": "completed",
-    "504": "planned",
-    "300": "blocked"
+    "511": "partial",
+    "520": "completed",
+    "521": "completed",
+    "522": "partial",
+    "523": "planned",
+    "502": "partial"
   },
   "task_dirs": {
-    "513": "specs/513_generalize_tableau_soundness_chain_over_spec",
-    "511": "specs/511_s4_loop_checking_termination",
-    "505": "specs/505_b_symmetric_decidability_via_generic_tableau_driver",
-    "504": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_",
-    "300": "specs/300_modal_extensions_t_s4_s5"
+    "524": "specs/524_kb5_full_cluster_rule_and_soundness",
+    "525": "specs/525_kb5_completeness_and_decidability"
   },
   "research_agents": {
-    "513": "cslib-research-agent",
-    "511": "cslib-research-agent",
-    "505": "cslib-research-agent",
-    "504": "cslib-research-agent",
-    "300": "cslib-research-agent"
+    "524": "cslib-research-agent",
+    "525": "cslib-research-agent"
   },
   "implement_agents": {
-    "513": "cslib-implementation-agent",
-    "511": "cslib-implementation-agent",
-    "505": "cslib-implementation-agent",
-    "504": "cslib-implementation-agent",
-    "300": "cslib-implementation-agent"
-  },
-  "interrupted_tasks": [
-    504
-  ],
-  "skipped_tasks": [
-    300
-  ]
+    "524": "cslib-implementation-agent",
+    "525": "cslib-implementation-agent"
+  }
 }

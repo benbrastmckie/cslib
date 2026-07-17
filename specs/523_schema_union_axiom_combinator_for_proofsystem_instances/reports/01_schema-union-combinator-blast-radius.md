@@ -1,0 +1,285 @@
+# Research Report: Schema-Union Axiom Combinator for Modal ProofSystem Instances
+
+**Task**: 523 — Replace the 15 hand-written per-system axiom inductives with a compositional
+schema-union combinator.
+**Type**: cslib / Lean 4 (RESEARCH-FIRST — design + blast-radius assessment; no implementation).
+**Scope root**: `Cslib/Logics/Modal/ProofSystem/Instances/*.lean` (15 files) plus all downstream
+consumers under `Cslib/Logics/Modal/Metalogic/`.
+
+---
+
+## 1. Inventory of the 15 Per-System Axiom Inductives
+
+All 15 predicates have type `Proposition Atom → Prop` and are consumed by the
+predicate-parametric `DerivationTree` (`DerivationTree (@KAxiom Atom) [] φ`). 14 are named
+`<Sys>Axiom`; S5 reuses the older `ModalAxiom` (defined in
+`Metalogic/DerivationTree.lean:64`, structurally identical — **not** an outlier; it carries no
+extra `ax`/`assumption` constructors, those belong to `DerivationTree`).
+
+### 1.1 Shared "core" schemata — present in ALL 15 systems (13 constructors)
+
+`implyK`, `implyS`, `efq`, `peirce` (propositional Hilbert core), `modalK` (K distribution),
+`andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE` (native and/or characterization, sanctioned by
+task 441), `diaDualityFwd`, `diaDualityBack` (native diamond duality).
+
+This 13-constructor block is **byte-for-byte identical** across all 15 files (verified by grep;
+only the `<Sys>Axiom` head name differs). This is the exact duplication the task targets.
+
+### 1.2 Differentiator schemata — the modal-strength axioms (5 constructors)
+
+| Schema tag | Axiom | Systems containing it |
+|-----------|-------|-----------------------|
+| `modalT`    | `□φ → φ` (reflexivity)   | T, S4, TB |
+| `modalD`    | `□φ → ◇φ` (seriality)    | D, D4, D5, D45, DB |
+| `modalB`    | `φ → □◇φ` (symmetry)     | B(KB), TB, KB5, DB |
+| `modalFour` | `□φ → □□φ` (transitivity)| K4, K45, S4, D4, D45 |
+| `modalFive` | `◇φ → □◇φ` (Euclid.)     | K5, K45, KB5, D5, D45 |
+
+Note: **S5** (`ModalAxiom`) carries `modalT + modalFour + modalB` (S5 = T+4+B), **not**
+`modalFive` — this is why `AxiomSubsumption.lean` explicitly omits the `KB5 → S5` edge.
+
+### 1.3 Per-system constructor sets (differentiators beyond the shared core)
+
+```
+K   : {modalK}                          S4  : {modalK, modalT, modalFour}
+T   : {modalK, modalT}                  S5  : {modalK, modalT, modalFour, modalB}  (=ModalAxiom)
+D   : {modalK, modalD}                  TB  : {modalK, modalT, modalB}
+B   : {modalK, modalB}                  KB5 : {modalK, modalB, modalFive}
+K4  : {modalK, modalFour}               D4  : {modalK, modalD, modalFour}
+K5  : {modalK, modalFive}               D5  : {modalK, modalD, modalFive}
+K45 : {modalK, modalFour, modalFive}    D45 : {modalK, modalD, modalFour, modalFive}
+                                        DB  : {modalK, modalD, modalB}
+```
+
+Every system = `core(13) ∪ {modalK} ∪ (chosen subset of {modalT, modalD, modalB, modalFour,
+modalFive})`. The full schema alphabet is **18 tags**. This is a clean lattice — strong evidence
+the schema-union abstraction is natural.
+
+---
+
+## 2. The Consumption Interface (already uniform)
+
+`Cslib/Foundations/Logic/ProofSystem.lean` defines one `HasAxiom*` typeclass per schema
+(`HasAxiomImplyK`, `HasAxiomImplyS`, `HasAxiomEFQ`, `HasAxiomPeirce`, `HasAxiomK`, `HasAxiomT`,
+`HasAxiom4`, `HasAxiomB`, `HasAxiom5`, `HasAxiomD`, `HasAxiomAndI…OrE`,
+`HasAxiomDiaDuality{Fwd,Back}`), bundled by `extends` into `ModalHilbert ⊂ ModalTHilbert ⊂
+ModalS4Hilbert ⊂ ModalS5Hilbert`, etc. **This layer is representation-agnostic**: it only asserts
+`DerivableIn S (Axioms.X …)` and never inspects how `<Sys>Axiom` is built. Any combinator that
+still lets the instance files discharge each `HasAxiom*` field leaves this entire hierarchy —
+and every consumer that goes through it — untouched. This is the load-bearing feasibility fact.
+
+---
+
+## 3. Combinator Design
+
+`DerivationTree` is **already parametric** over `Axioms : Proposition Atom → Prop` (confirmed in
+`Lifting.lean`: `liftDerivation`/`Derivable_mono` take `h_sub : ∀ φ, Axioms1 φ → Axioms2 φ`).
+So changing each `<Sys>Axiom` from an `inductive` to a `def : Proposition Atom → Prop` is
+type-compatible with all derivation machinery. Two representations are viable.
+
+### Representation A — Schema-tag family + membership union (the task's stated design)
+
+```lean
+/-- The 18 shared modal axiom schemata. -/
+inductive ModalSchemaTag
+  | implyK | implyS | efq | peirce | modalK
+  | modalT | modalD | modalB | modalFour | modalFive
+  | andI | andE1 | andE2 | orI1 | orI2 | orE
+  | diaDualityFwd | diaDualityBack
+  deriving DecidableEq
+
+/-- Formula-level meaning of each schema (existential over its metavariables). -/
+def ModalSchemaTag.Holds : ModalSchemaTag → Proposition Atom → Prop
+  | implyK, χ => ∃ φ ψ, χ = φ.imp (ψ.imp φ)
+  | modalK, χ => ∃ φ ψ, χ = (Proposition.box (φ.imp ψ)).imp ((φ.box).imp (ψ.box))
+  | …
+
+/-- Schema-union combinator: the axiom predicate generated by a chosen tag set. -/
+def SchemaUnion (S : Finset ModalSchemaTag) : Proposition Atom → Prop :=
+  fun χ => ∃ t ∈ S, t.Holds χ
+
+def KAxiom  : Proposition Atom → Prop := SchemaUnion {.implyK, .implyS, .efq, .peirce, .modalK, propCore…}
+def S4Axiom : Proposition Atom → Prop := SchemaUnion (kCore ∪ {.modalT, .modalFour})
+-- …one one-line declaration per system, differing only in the tag set.
+```
+
+**Wins.** (a) Subsumption `Sᴬ ⊆ Sᴮ → SchemaUnion Sᴬ φ → SchemaUnion Sᴮ φ` is **one** generic
+lemma; the 24 hand-written `XAxiom_implies_YAxiom` lemmas collapse to `Finset.subset` facts.
+(b) Soundness becomes a per-tag validity table fed to one generic `unionSound` combinator (see
+§5). (c) The 13-line core duplication vanishes.
+
+**Cost.** The *elimination form* changes. Downstream `cases h_ax with | implyK … | modalK …`
+must become `obtain ⟨t, ht, hφ⟩ := h_ax; fin_cases t <;> …`. This is the blast radius (§4).
+
+### Representation B — Macro-generated flat inductives (lower-risk alternative)
+
+Keep the flat `inductive <Sys>Axiom` shape but generate it from a `macro`/elaborator over a tag
+list, so constructor names **and elimination form are preserved**:
+
+```lean
+derive_modal_axiom KAxiom  [implyK, implyS, efq, peirce, modalK, andCore, orCore, diaDuality]
+derive_modal_axiom S4Axiom [implyK, …, modalK, modalT, modalFour, …]
+```
+
+**Wins.** Eliminates the re-listing at the source (the task's literal ask) with **near-zero
+downstream blast radius** — every `cases | implyK`, every `.implyK → .implyK` still typechecks.
+**Cost.** Does not deliver the "elegant" set-theoretic subsumption (cross-inductive subsumption
+lemmas remain O(edges), though the macro can also generate them); metaprogramming maintenance
+burden; less transparent to reviewers than a plain `def`.
+
+---
+
+## 4. CRITICAL Blast-Radius Assessment
+
+Downstream references were enumerated by grep over `Cslib/Logics/`. Aggregate signal:
+**~354 constructor *construction* sites** (`Sys Axiom.ctor`) and **~329 destructuring
+sites** (`cases … with | ctor` / `match`) across `Metalogic/`. Broken down by consumer class:
+
+| Consumer class | Files | Coupling | Effect under Representation A | Under Rep B |
+|----------------|:----:|----------|-------------------------------|-------------|
+| Instance registrations (target) | 15 | Constructs witnesses `KAxiom.implyK _ _` in each `HasAxiom*` instance | **Rewritten** (expected — this is the refactor) | Rewritten (macro emits them) |
+| `Systems/*/Soundness.lean` | 15 | `cases h_ax with \| implyK … \| modalK …` in `<sys>_axiom_sound` | **Replaced** by generic `unionSound` + per-system tag→validity table (net deletion) | **Untouched** |
+| `InterSystem/AxiomSubsumption.lean` (524 lines) | 1 | 24 lemmas, each a full `.ctor → .ctor` `match` | **Collapses** to 1 generic lemma + `Finset.subset` facts (net deletion) | Untouched (or macro-gen) |
+| `InterSystem/IntToClassical.lean` (774 lines) | 1 | 36 constructor-destructuring sites; maps *intuitionistic* families to classical `Derivable` | **Residual hand-rewrite** — real per-schema derivation work, not renaming; also constructs `KAxiom`/`ModalAxiom` witnesses via `⟨.ax _ _ h⟩` (cross-family coupling) | Untouched |
+| `InterSystem/Lifting.lean`, `Modularity.lean`, `Conservativity.lean`, `LiftViaMorphism.lean`, lattice files | ~8 | Parametric over `Axioms : … → Prop`; consume subsumption **callbacks**, do not inspect constructors | **Insulated** — only call-site *names* of subsumption lemmas may change | Insulated |
+| `Systems/*/Completeness.lean` | 15 | Access axioms via `HasAxiom*` typeclass fields (`h_implyK`, `h_K`, …), **not** via the inductive | **Insulated** (goes through §2 uniform layer) | Insulated |
+| `Systems/*/ConservativeExtension.lean` | 15 | Route through `<sys>_soundness` + `nomatch h`; do not case on constructors | **Insulated** (depend only on soundness theorem names) | Insulated |
+| `Bimodal/…/ModalConservativity.lean`, `Metalogic/MCS.lean`, `Metalogic/Soundness.lean` | 3 | Reference `ModalAxiom` (S5) | S5 handled with the rest; MCS/Soundness are the generic layer | Insulated |
+
+### 4.1 Honest reading
+
+- **The refactor is net line-*negative*** under Representation A: the ~1000+ lines of
+  AxiomSubsumption + per-system soundness enumeration are *replaced by generic combinators*,
+  not merely re-typed. The scary "329 destructuring sites" number is misleading — the large
+  majority live in soundness + subsumption and are **deleted**, not rewritten.
+- **The irreducible hand cost is `IntToClassical.lean`** (36 sites doing genuine
+  intuitionistic→classical derivation work) plus the 15 instance files. Everything else is
+  either deleted or insulated.
+- **Cross-family coupling is the sharpest hidden risk.** `IntToClassical`/`Modularity` reference
+  *intuitionistic/minimal* modal axiom families (`IKModalAxiom`, `MKModalAxiom`, `CKModalAxiom`,
+  `IS5ModalAxiom`, `MTModalAxiom`, …) that are **out of scope** but construct/consume the
+  in-scope classical `KAxiom`/`ModalAxiom` witnesses. Any representation change to the classical
+  15 must keep those witness-construction call sites (`⟨.ax _ _ h⟩` producing a `KAxiom`) valid.
+- **Rep B has essentially no blast radius** but does not achieve the set-theoretic elegance.
+
+---
+
+## 5. Compositional Soundness (why Rep A is tractable, not just DRY)
+
+The frame-*unconditional* schema validity lemmas **already exist** as reusable atoms in
+`Metalogic/Soundness.lean`: `Satisfies.implyK_axiom`, `…implyS_axiom`, `efq`, `peirce`,
+`modalK`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`, `diaDualityFwd`, `diaDualityBack`
+(13 lemmas). The 5 differentiator schemata (`modalT/D/B/Four/Five`) have **frame-conditioned**
+validity (reflexive/serial/symmetric/transitive/Euclidean frames), currently proved inline in
+each `Systems/*/Soundness.lean`. A generic combinator
+
+```lean
+theorem unionSound (S : Finset ModalSchemaTag) (m : Model World Atom)
+    (hfc : ∀ t ∈ S, FrameValidatesTag m t)   -- per-tag validity obligations
+    {φ} (h : SchemaUnion S φ) (w) : Satisfies m w φ
+```
+
+reduces every `<sys>_axiom_sound` to *supplying the tag→validity table for its own tag set*.
+Because 13 of 18 tags are frame-unconditional (reuse the existing atoms) and only 5 carry a
+frame condition, each per-system obligation is 3–5 lines. This is the mechanism that makes the
+soundness column a *deletion* rather than a rewrite.
+
+---
+
+## 6. Tractability Verdict and Recommended Sequencing
+
+**Verdict: tractable but high-cost and high-coordination; NOT a single-shot refactor.** Do it
+**staged and additive**, sequenced **after tasks 520 and 521**, gated on a Zulip design decision.
+
+Rationale for sequencing after 520/521: both are actively `[RESEARCHING]` on the exact same
+surface. **521** deletes the ~1500-line bespoke minimal-canonical trio and routes MK through the
+generic `mkvalidFC_completeness` — shrinking the minimal/InterSystem surface this refactor must
+cross. **520** adds composite conservativity bridges in `Modularity.lean` — landing those first
+avoids merge churn against the file most entangled with cross-family axiom references. Doing 523
+first would force re-doing its `IntToClassical`/`Modularity` edits after 520/521 land.
+
+### Recommended staged plan (each stage independently CI-green, zero-debt)
+
+1. **Stage A (additive, zero blast).** Introduce `ModalSchemaTag`, `.Holds`, `SchemaUnion`,
+   the generic `subsumption` lemma, and `unionSound` **alongside** the existing inductives.
+   Prove bridge equivalences `SchemaUnion sysTags φ ↔ <Sys>Axiom φ` for each system. Nothing
+   downstream changes yet; CI stays green.
+2. **Stage B.** Migrate `Systems/*/Soundness.lean` to `unionSound` one file at a time (each
+   file self-contained; the bridge lemma from Stage A lets old and new coexist).
+3. **Stage C.** Replace `AxiomSubsumption.lean`'s 24 lemmas with `Finset.subset`-backed facts;
+   update the (few) call sites in `Lifting`/`Modularity`.
+4. **Stage D.** Hand-migrate `IntToClassical.lean` witness constructions; then swap the 15
+   instance registrations to build `HasAxiom*` fields from `SchemaUnion`, and finally delete the
+   15 inductives (+ `ModalAxiom` if fully superseded).
+
+**Fallback if Zulip prefers minimal risk:** Representation B (macro-generated inductives)
+achieves the task's literal DRY goal with near-zero blast radius and can be landed in one PR;
+it forgoes the set-theoretic subsumption elegance. Recommend presenting both to maintainers and
+letting the design decision be made on-thread.
+
+**Zero-debt note:** No stage requires `sorry` or a new axiom. Every intermediate state keeps all
+public theorem names (`k_soundness`, `KAxiom_implies_TAxiom`, the `HasAxiom*` instances) stable
+or provides deprecated aliases. If any stage cannot close sorry-free, mark that phase `[BLOCKED]`
+with the open goal state rather than deferring.
+
+---
+
+## 7. CONTRIBUTING / Zulip Coordination
+
+`CONTRIBUTING.md` §"Before you start: coordination to avoid rework" (line 147) requires
+discussion first for **"New cross-cutting abstractions / typeclasses"** AND **"Major
+refactorings"** — this task hits *both*. Coordination is mandatory before implementation.
+
+### Draft Zulip message
+
+> **Topic (suggest #CSLib channel):** Proposal — schema-union combinator for the 15 modal axiom
+> predicates
+>
+> Hi all. The 15 per-system modal axiom predicates in
+> `Cslib/Logics/Modal/ProofSystem/Instances/*.lean` (`KAxiom`, `TAxiom`, …, plus S5's
+> `ModalAxiom`) each re-list an identical 13-constructor propositional+K+diamond-duality core and
+> differ only in a subset of 5 modal-strength schemata (`modalT/D/B/Four/Five`). I'd like to
+> replace the hand-written inductives with a compositional **schema-union combinator**
+> `SchemaUnion (S : Finset ModalSchemaTag) : Proposition Atom → Prop`, so each system is a
+> one-line tag-set declaration.
+>
+> **Motivation.** `DerivationTree` is already predicate-parametric and the `HasAxiom*`
+> consumption layer in `Foundations/Logic/ProofSystem.lean` is already uniform, so the abstract
+> layer is feasible today. Two immediate payoffs: the 24 boilerplate `XAxiom_implies_YAxiom`
+> subsumption lemmas in `AxiomSubsumption.lean` (~524 lines) collapse to `Finset.subset` facts,
+> and the 15 per-system soundness case-splits collapse to a generic `unionSound` fed by a
+> per-tag validity table (13 of 18 tags are already frame-unconditional atoms in
+> `Metalogic/Soundness.lean`).
+>
+> **Cost/risk I want input on.** It changes the *elimination form* of the axiom predicates. The
+> soundness + subsumption sites are net-deleted, and completeness/conservativity go through the
+> typeclass layer (insulated), but `InterSystem/IntToClassical.lean` (~36 sites, genuine
+> intuitionistic→classical derivation work) needs hand migration, and there's cross-family
+> coupling with the intuitionistic/minimal axiom families. I'm proposing a **staged, additive**
+> rollout (introduce combinator alongside the inductives with bridge lemmas, migrate soundness,
+> then subsumption, then instances, deleting the inductives last) so every intermediate commit is
+> CI-green and zero-debt, sequenced **after** the in-flight minimal-base dedup and composite
+> conservativity work touching the same files.
+>
+> **Alternative** if you'd prefer minimal churn: a `macro`-generated flat-inductive form that
+> keeps constructor names and elimination form (near-zero downstream blast radius) at the price
+> of the set-theoretic subsumption elegance.
+>
+> Would appreciate a steer on (1) `def SchemaUnion` vs macro-generated inductives, (2) whether
+> the S5 `ModalAxiom` should be unified into the same scheme or kept, and (3) preferred landing
+> order relative to the ongoing InterSystem/minimal-base work. Happy to write up a short design
+> note / issue if useful.
+
+---
+
+## 8. Key File References
+
+- Target: `Cslib/Logics/Modal/ProofSystem/Instances/{K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB}.lean`
+- Consumption layer: `Cslib/Foundations/Logic/ProofSystem.lean` (HasAxiom* + bundled classes)
+- S5 predicate: `Cslib/Logics/Modal/Metalogic/DerivationTree.lean:64` (`ModalAxiom`)
+- Reusable schema-validity atoms: `Cslib/Logics/Modal/Metalogic/Soundness.lean:48–…`
+- Soundness case-splits (15): `Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean`
+- Subsumption boilerplate: `Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean`
+- Generic (insulated) lifting: `Cslib/Logics/Modal/Metalogic/InterSystem/Lifting.lean`
+- Residual hand cost / cross-family: `Cslib/Logics/Modal/Metalogic/InterSystem/IntToClassical.lean`
+- Coordination requirement: `CONTRIBUTING.md:147`

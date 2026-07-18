@@ -4113,7 +4113,43 @@ lemma modalStepBranchS4_preserves_eClosure (φ₀ : Proposition Atom)
     (hknown : accTargetsKnown b acc)
     (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
     ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverseS4 φ₀ := by
-  sorry
+  unfold modalStepBranchS4Keyed at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hsfbound : sf ∈ modalUniverseS4 φ₀ := hb sf hsfmem
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfbound
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    obtain ⟨x0, -, rfl⟩ := List.mem_map.mp he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfbound
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact heclosure
+  · rw [hres] at hsf; simp at hsf
 
 /-- **`bClosure`'s driver-level preservation -- STRATEGIC SORRY** (task 511, Phase 5, documented
 gap; see the section docstring above for the exact remaining proof obligation -- the pigeonhole

@@ -349,20 +349,29 @@ successor-preservation and limit-preservation are independent statements).
   `addRedundantEdge` task note above and `.orchestrator-handoff.json`'s `sorry_inventory` for the
   follow-up this leaves for Phase 4/6).
 
-### Phase 3: FLO maintained at limit stages (chain unions) [NOT STARTED]
+### Phase 3: FLO maintained at limit stages (chain unions) [COMPLETED]
 
 - **Goal:** prove `flo_limit` — the union of an FLO-coherent chain of stage contexts is a `Context`
   satisfying FLO, with `rank` extended coherently across the chain (each label keeps its birth
   stage; FLO-2 edge-locality is preserved in the union).
 - **Tasks:**
-  - [ ] Reuse `ChainCtx.unionContext`/`ChainCtx.chain_closure` where they transfer; establish that a
-    chain of FLO contexts sharing coherent `rank` yields an FLO union.
-  - [ ] Prove the union's `rank` is well-defined (each label's birth stage is the least chain stage
+  - [x] Reuse `ChainCtx.unionContext`/`ChainCtx.chain_closure` where they transfer; establish that a
+    chain of FLO contexts sharing coherent `rank` yields an FLO union. **Deviation**: neither was
+    invoked — see "Plan Deviations" in `summaries/13_flo-limit-phase3-summary.md`. `FLO`'s own
+    clauses (FLO-1/FLO-2) are stated purely in terms of `𝒮`/`rankOf`, independent of the stage `σ`
+    being proved at, so membership/relatedness at the limit stage descends directly (via
+    `FloSeq.limit_eq`'s raw `Set.iUnion`/existential) to a witnessing predecessor stage `τ < σ`,
+    and `hflo τ hτσ` closes the goal with no need for `ChainCtx.unionContext`'s `Monotone` setup.
+  - [x] Prove the union's `rank` is well-defined (each label's birth stage is the least chain stage
     containing it) and that FLO-2 holds in the union (every union edge is introduced at one chain
-    stage, inheriting edge-locality).
+    stage, inheriting edge-locality). Achieved by the same direct-descent argument (no separate
+    "rank well-definedness" lemma was needed — `rankOf` is already globally well-defined,
+    independent of `σ`).
 - **Timing:** 1 dispatch. Estimated output: ~150-300 lines (probe).
 - **Depends on:** 1. (Parallel with Phase 2.)
-- **Done when:** `flo_limit` sorry-free; probe build green.
+- **Done when:** `flo_limit` sorry-free; probe build green. **MET**: `flo_limit` sorry-free (`lake
+  env lean` on the probe: exit 0, zero errors, sorry count 6 -> 5); `lean_verify` on `flo_limit`:
+  axioms `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
 
 ### Phase 4: Assemble the maximal FLO context — `primeC'_exists_maximal` (replaces `zorn_le₀`) [NOT STARTED]
 

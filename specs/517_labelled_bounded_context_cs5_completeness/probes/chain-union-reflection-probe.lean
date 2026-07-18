@@ -1591,7 +1591,23 @@ theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ
 attempted here; sorried scaffolding for Phase 3. -/
 theorem flo_limit (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hlim : Order.IsSuccLimit σ)
     (hflo : ∀ τ < σ, FLO 𝒮 τ) : FLO 𝒮 σ := by
-  sorry
+  obtain ⟨hX, hR, hΓ⟩ := 𝒮.limit_eq σ hlim
+  refine ⟨fun x hx => rankOf_base 𝒮 hx, ?_, ?_⟩
+  · -- (FLO-1): membership at the limit stage descends, via `limit_eq`, to some witnessing
+    -- predecessor stage `τ < σ`; FLO-1's conclusion (an existential about `rankOf 𝒮 x` and
+    -- membership in `(𝒮.H τ').G.X` for some `τ'`) does not mention `σ` at all, so `(hflo τ
+    -- hτσ).flo1` at that predecessor stage closes the goal for `σ` directly.
+    intro x hx hx0
+    rw [hX] at hx
+    obtain ⟨⟨τ, hτσ⟩, hxτ⟩ := Set.mem_iUnion.mp hx
+    exact (hflo τ hτσ).flo1 x hxτ hx0
+  · -- (FLO-2): symmetric descent argument. `(𝒮.H σ).G.R x y` unions existentially over `τ < σ`
+    -- (`limit_eq`); FLO-2's conclusion `max (rankOf x) (rankOf y) = sInf {τ' | (𝒮.H τ').G.R x y}`
+    -- is likewise independent of `σ`, so `(hflo τ hτσ).flo2` at the witnessing `τ` closes it.
+    intro x y hxy
+    rw [hR] at hxy
+    obtain ⟨⟨τ, hτσ⟩, hxyτ⟩ := hxy
+    exact (hflo τ hτσ).flo2 x y hxyτ
 
 /-- **Phase 4's target**: running the staged construction to a sufficiently large stage yields a
 maximal, `FLO`-carrying context, **replacing** `primeC_exists_maximal`'s non-constructive

@@ -2737,6 +2737,149 @@ lemma modalApplyOneKb5''_fresh_local
       · rw [heq]
         exact Or.inr ⟨⟨.neg, φ, w'⟩, [], rfl, rfl⟩
 
+/-! ### `knownWorlds_step` for `modalApplyOneKb5''Prop`
+
+Unlike the frozen `modalApplyOneKb5'Prop_knownWorlds_step` (whose self-target arm ties
+`x.label = 0` to the trigger `lbl = 0`, already known via `hsfmem`), the corrected rule's
+self-target arm fires for ANY trigger, so `x.label = 0`'s known-ness is no longer derivable from
+the trigger's own known-ness. These two lemmas take an explicit
+`(h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)` hypothesis instead -- the "root always known"
+invariant every branch in this tableau satisfies (it starts from the singleton `[F(φ)@0]` and
+formulas are never removed), threaded the same way completeness proofs elsewhere in this
+development already thread `F(φ)@0 ∈ b` explicitly. -/
+
+/-- At the two propagation shapes, `modalApplyOneKb5''Prop` never mints (its accessibility output
+is exactly K's, unchanged) and only appends formulas at existing known worlds -- given the root is
+already known. Mirrors `modalApplyOneKb5'Prop_boxPos_diaNeg_eq`, with the extra `h0` hypothesis
+the self-target arm's `x.label = 0` case needs. -/
+lemma modalApplyOneKb5''Prop_boxPos_diaNeg_eq
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneKb5''Prop sf b acc).snd = acc ∧
+    ((modalApplyOneKb5''Prop sf b acc).fst = .notApplicable ∨
+      ∃ out, (modalApplyOneKb5''Prop sf b acc).fst = .persistent out ∧
+        ∀ x ∈ out, x.label ∈ modalKnownWorlds b) := by
+  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_boxPos_eq
+      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    unfold modalApplyOneKb5''Prop
+    rcases hp : modalApplyOne
+        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rw [hp] at hKW
+    simp only at hKW
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      split_ifs with hemp
+      · exact ⟨rfl, Or.inl rfl⟩
+      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+        intro x hx
+        rcases (modalKb5BoxAllUniv_mem hx).2 with ⟨-, hkn, -⟩ | ⟨hxeq, -⟩
+        · exact hkn
+        · rw [hxeq]; dsimp only; exact h0
+    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hmatch x hx
+      · rcases (modalKb5BoxAllUniv_mem hx).2 with ⟨-, hkn, -⟩ | ⟨hxeq, -⟩
+        · exact hkn
+        · rw [hxeq]; dsimp only; exact h0
+  · obtain ⟨s, ff, l⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_diamondNeg_eq
+      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    unfold modalApplyOneKb5''Prop
+    rcases hp : modalApplyOne
+        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+        with ⟨kResult, kAcc⟩
+    rw [hp] at hK
+    simp only at hK
+    rw [hp] at hKW
+    simp only at hKW
+    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      split_ifs with hemp
+      · exact ⟨rfl, Or.inl rfl⟩
+      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+        intro x hx
+        rcases (modalKb5DiaNegAllUniv_mem hx).2 with ⟨-, hkn, -⟩ | ⟨hxeq, -⟩
+        · exact hkn
+        · rw [hxeq]; dsimp only; exact h0
+    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
+      swap
+      · exact hmatch.elim
+      subst hsndeq
+      dsimp only
+      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hmatch x hx
+      · rcases (modalKb5DiaNegAllUniv_mem hx).2 with ⟨-, hkn, -⟩ | ⟨hxeq, -⟩
+        · exact hkn
+        · rw [hxeq]; dsimp only; exact h0
+
+/-- The Kb5'' analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
+`modalApplyOneKb5''Prop`, given the root is already known. Mirrors
+`modalApplyOneKb5'Prop_knownWorlds_step`, with the extra `h0` hypothesis. -/
+lemma modalApplyOneKb5''Prop_knownWorlds_step
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b) :
+    ((modalApplyOneKb5''Prop sf b acc).snd = acc ∧
+      (match (modalApplyOneKb5''Prop sf b acc).fst with
+        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+        | .notApplicable => True)) ∨
+    ((modalApplyOneKb5''Prop sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
+      (match (modalApplyOneKb5''Prop sf b acc).fst with
+        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
+        | .branching _ => False
+        | .persistent _ => False
+        | .notApplicable => False)) := by
+  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · obtain ⟨hsndeq, hor⟩ :=
+      modalApplyOneKb5''Prop_boxPos_diaNeg_eq sf b acc hsfmem hknown h0 hbd
+    refine Or.inl ⟨hsndeq, ?_⟩
+    rcases hor with hnot | ⟨out, hpers, hlabel⟩
+    · rw [hnot]; trivial
+    · rw [hpers]; exact hlabel
+  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
+    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
+    rw [modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
+    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
+
 omit [Hashable Atom] in
 /-- **Combined F9/F10 shape fact for `modalApplyOneKb5''Prop`** (hypothesis-free). Mirrors
 `modalApplyOneKb5'Prop_boxPos_diaNeg_shape`. -/

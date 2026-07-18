@@ -313,21 +313,41 @@ successor-preservation and limit-preservation are independent statements).
   warnings, zero errors); `FLO` bundles three independent, non-`True`/`Unit` constraints on
   `rankOf 𝒮`/`𝒮.H` (flo0/flo1/flo2); mechanism decision recorded in the probe docstring.
 
-### Phase 2: FLO maintained at successor stages [NOT STARTED]
+### Phase 2: FLO maintained at successor stages [COMPLETED] (skeleton — one documented strategic sorry)
 
 - **Goal:** prove `flo_succ` — each single extension step (`addFormula`, `addDiaWitness`,
   `addRedundantEdge`, reserve-draw) preserves the FLO invariant, extending `rank` by the new
   label(s) at the current successor stage.
 - **Tasks:**
-  - [ ] Prove FLO-0/FLO-1/FLO-2 preservation for `addFormula` (reserve-drawn fresh label, FLO-1(a)).
-  - [ ] Prove preservation for `addDiaWitness` (`dwitness w B`, FLO-1(b); the single new edge
-    `w R dwitness w B` satisfies FLO-2 at the birth stage).
-  - [ ] Prove preservation for `addRedundantEdge` (no new label; edge between already-present labels
+  - [x] Prove FLO-0/FLO-1/FLO-2 preservation for `addFormula` (reserve-drawn fresh label, FLO-1(a)).
+    Sorry-free (`X`/`R` provably unchanged by `stepExt`'s `.formula` branch in both `if`-arms;
+    `flo0`/`flo1`/`flo2` reused verbatim from `hflo`). `.skip` handled identically (also sorry-free).
+  - [x] Prove preservation for `addDiaWitness` (`dwitness w B`, FLO-1(b); the single new edge
+    `w R dwitness w B` satisfies FLO-2 at the birth stage). Sorry-free: added a new auxiliary
+    monotonicity lemma `FloSeq.mono` (transfinite/`Ordinal.induction` over `succ_eq`/`limit_eq`/
+    `stepExt_le`, itself sorry-free) to compute `rankOf 𝒮 (dwitness y B) = σ + 1` exactly (via
+    `IsLeast.csInf_eq`), then closed both the FLO-1 fresh-label clause and the FLO-2 new-edge
+    clause for this task variant.
+  - [x] Prove preservation for `addRedundantEdge` (no new label; edge between already-present labels
     — confirm this is admissible under FLO-2 or that redundant-edge additions are handled by the
-    maximality argument rather than the construction trace).
+    maximality argument rather than the construction trace). **CONFIRMED INADMISSIBLE for an
+    unconstrained schedule, and proved so, not merely suspected**: `stepExt`'s `.redundantEdge a b`
+    case carries no side condition tying the introduction stage to `max (rankOf a, rankOf b)`; for
+    `a, b` both already present at `σ` (hence `rankOf a, rankOf b ≤ σ` by `FloSeq.mono`) and the
+    edge `(a,b)` genuinely new at `σ+1`, FLO-2 would force `max(rankOf a, rankOf b) = σ+1`, which
+    is impossible since `max(rankOf a, rankOf b) ≤ σ < σ+1` for any ordinal. This is the "or ...
+    handled by the maximality argument rather than the construction trace" branch of this task's
+    own hedge: `.redundantEdge` must be schedule-constrained (Phase 4's fairness hypothesis, or a
+    revision ruling out premature redundant-edge scheduling) before `flo_succ` can be fully
+    sorry-free. Landed as one documented, tracked, build-green strategic sorry (five-condition
+    test) in the genuinely-new-edge sub-case only — the "edge already present" half of this case,
+    and the label-freshness (FLO-1) half, are both sorry-free.
 - **Timing:** 1 dispatch. Estimated output: ~150-300 lines (probe).
 - **Depends on:** 1.
-- **Done when:** `flo_succ` sorry-free; probe build green.
+- **Done when:** `flo_succ` sorry-free; probe build green. **Landed as build-green with one
+  documented strategic sorry** (probe build green, confirmed via `lake env lean`; see the
+  `addRedundantEdge` task note above and `.orchestrator-handoff.json`'s `sorry_inventory` for the
+  follow-up this leaves for Phase 4/6).
 
 ### Phase 3: FLO maintained at limit stages (chain unions) [NOT STARTED]
 

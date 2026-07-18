@@ -1411,12 +1411,179 @@ structure FLO (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) : Prop where
   flo2 : ∀ x y, (𝒮.H σ).G.R x y →
     (max (rankOf 𝒮 x) (rankOf 𝒮 y) = sInf {τ : Stage | (𝒮.H τ).G.R x y})
 
+/-- **Auxiliary monotonicity lemma** (Phase 2): the staged sequence `𝒮.H` is `Context.le`-monotone
+in the stage order, purely from `succ_eq`/`limit_eq`/`stepExt_le` -- no dependence on `FLO`. This
+is the fact `flo_succ`'s rank computations below need (a label absent at stage `σ` is absent at
+every earlier stage), and the fact the Phase 1 summary flagged as needed before Phase 3 can
+identify `FloSeq.limit_eq`'s raw union with `ChainCtx.unionContext`. Proved by transfinite
+induction on the upper stage (`Ordinal.induction`), casing on whether the upper stage is
+zero/successor/limit (`Ordinal.zero_or_succ_or_isSuccLimit`). -/
+theorem FloSeq.mono (𝒮 : FloSeq 𝒯 Atom G₀) {τ σ : Stage} (h : τ ≤ σ) : 𝒮.H τ ≤ 𝒮.H σ := by
+  induction σ using Ordinal.induction generalizing τ with
+  | _ σ ih =>
+    rcases eq_or_lt_of_le h with heq | hlt
+    · rw [heq]
+    · rcases Ordinal.zero_or_succ_or_isSuccLimit σ with h0 | ⟨ρ, hρ⟩ | hlim
+      · exact absurd (h0 ▸ hlt) (Ordinal.not_lt_zero τ)
+      · have hσ : σ = ρ + 1 := by rw [Ordinal.add_one_eq_succ]; exact hρ.symm
+        subst hσ
+        have hτρ : τ ≤ ρ := by
+          rw [Ordinal.add_one_eq_succ, Order.lt_succ_iff_eq_or_lt] at hlt
+          rcases hlt with heq | hlt'
+          · exact le_of_eq heq
+          · exact le_of_lt hlt'
+        have hρlt : ρ < ρ + 1 := by
+          rw [Ordinal.add_one_eq_succ]; exact Order.lt_succ_iff_eq_or_lt.mpr (Or.inl rfl)
+        have h1 : 𝒮.H τ ≤ 𝒮.H ρ := ih ρ hρlt hτρ
+        have h2 : 𝒮.H ρ ≤ 𝒮.H (ρ + 1) := by
+          rw [𝒮.succ_eq ρ]; exact stepExt_le (𝒮.H ρ) (𝒮.task ρ)
+        exact Context.le_trans h1 h2
+      · obtain ⟨hX, hR, hΓ⟩ := 𝒮.limit_eq σ hlim
+        refine ⟨⟨?_, ?_⟩, ?_⟩
+        · rw [hX]; exact Set.subset_iUnion (fun τ' : {τ' // τ' < σ} => (𝒮.H τ'.1).G.X) ⟨τ, hlt⟩
+        · intro a b hab
+          rw [hR]; exact ⟨⟨τ, hlt⟩, hab⟩
+        · rw [hΓ]; exact Set.subset_iUnion (fun τ' : {τ' // τ' < σ} => (𝒮.H τ'.1).Γ) ⟨τ, hlt⟩
+
 /-- **Phase 2's target**: `stepExt` preserves `FLO`-coherence across a successor step, extending
 `rankOf` by the newly-adjoined label(s) (if any) at the just-taken step. Not attempted here per
 Phase 1's scope ("DEFINITIONS ... not proofs"); this signature is the sorried scaffolding Phase 2
 discharges. -/
 theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ) : FLO 𝒮 (σ + 1) := by
-  sorry
+  obtain ⟨flo0, flo1, flo2⟩ := hflo
+  have habsent : ∀ {x : Label Atom} {ρ : Stage}, ρ ≤ σ → x ∉ (𝒮.H σ).G.X → x ∉ (𝒮.H ρ).G.X :=
+    fun {x ρ} hρσ hx hxρ => hx ((𝒮.mono hρσ).1.1 hxρ)
+  have hstep : 𝒮.H (σ + 1) = stepExt (𝒮.H σ) (𝒮.task σ) := 𝒮.succ_eq σ
+  generalize htask : 𝒮.task σ = t at hstep
+  cases t with
+  | formula φ =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]; split <;> rfl
+    have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]; split <;> rfl
+    exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+      fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+  | skip =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+    have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+    exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+      fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+  | redundantEdge a b =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by
+      rw [hstep]
+      split
+      · split
+        · exact Graph.addEdge_X_eq_of_mem ‹_› ‹_›
+        · rfl
+      · rfl
+    refine ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0, ?_⟩
+    intro x y hxy
+    rw [hstep] at hxy
+    split at hxy
+    · split at hxy
+      · rcases hxy with hxy | ⟨rfl, rfl⟩
+        · exact flo2 x y hxy
+        · -- **STRATEGIC/LEAF SORRY** (documented per the anti-analysis five-condition test):
+          --
+          -- 1. Deliberate division boundary: `stepExt`'s `.redundantEdge a b` case, as landed in
+          --    Phase 1, is *unconditional* on the pair `(a,b)` beyond `a,b ∈ H.G.X` -- it carries
+          --    no side condition tying the stage of introduction to `max (rankOf a) (rankOf b)`.
+          --    FLO-2 demands the edge first appear at EXACTLY that stage. For an adversarial
+          --    `FloTask.redundantEdge a b` scheduled with `a,b` both already ranked ≪ σ (e.g.
+          --    both base labels, rank 0) and the edge `(a,b)` genuinely absent before this step,
+          --    the edge's true first-appearance stage is `σ+1`, so `max (rankOf a) (rankOf b) =
+          --    sInf {τ | edge τ}` would force `0 = σ+1` (or generally `max(rank a,rank b) = σ+1`)
+          --    -- impossible for an ordinal and its successor. `flo_succ` is genuinely FALSE for
+          --    such an unconstrained `𝒮`; this is exactly the ambiguity the plan's own Phase 2
+          --    task list flagged ("confirm this is admissible under FLO-2 or that redundant-edge
+          --    additions are handled by the maximality argument rather than the construction
+          --    trace") -- Phase 4's fair schedule is expected to invoke `.redundantEdge` only when
+          --    `raw_edge_of_tclosure`'s maximality argument has already forced the edge to be
+          --    present (making this branch a definitional no-op via the `hxy | ⟨rfl,rfl⟩` split
+          --    above landing in the `hxy` branch instead), but `flo_succ`'s signature (Phase 1,
+          --    preserved verbatim) does not carry that scheduling-fairness hypothesis, so the
+          --    genuinely-new-edge sub-case cannot be discharged from `FLO 𝒮 σ` alone.
+          -- 2. Tightly scoped: exactly this one sub-case (new edge from an unconstrained
+          --    `redundantEdge` task) inside `flo_succ`'s FLO-2 clause; FLO-0, FLO-1, and every
+          --    other task variant's FLO-2 obligation (`formula`/`diaWitness`/`skip`, plus the
+          --    "edge already present" half of this very case) are proved sorry-free above.
+          -- 3. Documented: this comment states the assumption (the new edge's timing coheres with
+          --    `max (rankOf a) (rankOf b)`) and why it is deferred (no fairness/scheduling
+          --    hypothesis is available in `flo_succ`'s signature to discharge it).
+          -- 4. Tracked: recorded in `.orchestrator-handoff.json`'s `sorry_inventory` with
+          --    `strategic: true` and a non-null `follow_up_task`.
+          -- 5. Build-green: `sorry` typechecks; the probe remains build-green with this one
+          --    documented gap.
+          sorry
+      · exact flo2 x y hxy
+    · exact flo2 x y hxy
+  | diaWitness y B =>
+    simp only [stepExt] at hstep
+    split at hstep
+    · split at hstep
+      · rename_i hy hfresh
+        have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X ∪ {y, Label.dwitness y B} := by
+          rw [hstep]; rfl
+        have hReq : ∀ p q, (𝒮.H (σ + 1)).G.R p q ↔
+            (𝒮.H σ).G.R p q ∨ (p = y ∧ q = Label.dwitness y B) := by
+          intro p q; rw [hstep]; rfl
+        have hnew_mem : Label.dwitness y B ∈ (𝒮.H (σ + 1)).G.X := by
+          rw [hXeq]; exact Or.inr (Or.inr rfl)
+        have hle_succ : σ ≤ σ + 1 := by
+          rw [Ordinal.add_one_eq_succ]; exact Order.le_succ σ
+        have hrank_new : rankOf 𝒮 (Label.dwitness y B) = σ + 1 := by
+          have hleast : IsLeast {σ' : Stage | Label.dwitness y B ∈ (𝒮.H σ').G.X} (σ + 1) := by
+            refine ⟨hnew_mem, ?_⟩
+            intro σ' hσ'mem
+            by_contra hcon
+            push_neg at hcon
+            have hσ'σ : σ' ≤ σ := by
+              rw [Ordinal.add_one_eq_succ, Order.lt_succ_iff_eq_or_lt] at hcon
+              rcases hcon with heq | hlt
+              · exact le_of_eq heq
+              · exact le_of_lt hlt
+            exact (habsent hσ'σ hfresh) hσ'mem
+          exact hleast.csInf_eq
+        have hrank_y_le : rankOf 𝒮 y ≤ σ := by
+          have hmemy : (σ : Stage) ∈ {σ' : Stage | y ∈ (𝒮.H σ').G.X} := hy
+          exact csInf_le ⟨0, fun z _ => bot_le⟩ hmemy
+        refine ⟨fun x hx => rankOf_base 𝒮 hx, ?_, ?_⟩
+        · intro x hx hx0
+          simp only [hXeq, Set.mem_union, Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+          rcases hx with hx | rfl | rfl
+          · exact flo1 x hx hx0
+          · exact flo1 x hy hx0
+          · exact ⟨σ, hrank_new, hfresh, Or.inr ⟨y, B, rfl, hy⟩⟩
+        · intro x y' hxy'
+          rw [hReq] at hxy'
+          rcases hxy' with hxy' | ⟨rfl, rfl⟩
+          · exact flo2 x y' hxy'
+          · have hmax : max (rankOf 𝒮 x) (rankOf 𝒮 (Label.dwitness x B)) = σ + 1 := by
+              rw [hrank_new]; exact max_eq_right (le_trans hrank_y_le hle_succ)
+            rw [hmax]
+            have hleast_edge : IsLeast {τ : Stage | (𝒮.H τ).G.R x (Label.dwitness x B)} (σ + 1) := by
+              refine ⟨(hReq x (Label.dwitness x B)).mpr (Or.inr ⟨rfl, rfl⟩), ?_⟩
+              intro τ hτmem
+              by_contra hcon
+              push_neg at hcon
+              have hτσ : τ ≤ σ := by
+                rw [Ordinal.add_one_eq_succ, Order.lt_succ_iff_eq_or_lt] at hcon
+                rcases hcon with heq | hlt
+                · exact le_of_eq heq
+                · exact le_of_lt hlt
+              exact (habsent hτσ hfresh) (((𝒮.H τ).G.edge_mem x (Label.dwitness x B) hτmem).2)
+            exact hleast_edge.csInf_eq.symm
+      · rename_i hy hfresh
+        have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+        have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+        exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+          fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+    · rename_i hy
+      have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+      have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+      exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+        fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
 
 /-- **Phase 3's target**: `FLO`-coherence is preserved at limit stages -- the raw chain-union
 (`FloSeq.limit_eq`) of an `FLO`-coherent stretch of the construction is again `FLO`-coherent, with

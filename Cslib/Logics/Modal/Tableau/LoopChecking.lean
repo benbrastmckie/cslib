@@ -2104,6 +2104,54 @@ private lemma modalApplyOneS4Keyed_nonMint_snd_eq_acc
       · exact h2' (Or.inr ⟨hs, φ, hfe⟩)
     exact (modalApplyOne_nonModal_known_S4 sf b acc hsfmem hnb hnd).1
 
+/-- **`eNodup`'s driver-level preservation**: `modalStepBranchS4Keyed` preserves `Nodup`-ness of
+the expanded set `e`, exactly like the generic `modalStepBranch_preserves_expandedNodup_gen`
+(`FmpMeasure.lean`) -- fully rule-agnostic, only the top-level `RuleResult` constructor shape
+matters, `keys`/`keys'` never enter the argument. Direct case split on `result` (not routed
+through the generic lemma, since `modalStepBranchS4Keyed` returns a 4-tuple with `keys'` bolted
+on rather than literally being `modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys)`). -/
+lemma modalStepBranchS4_preserves_eNodup (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys'))
+    (hnodup : e.Nodup) :
+    ∀ e' ∈ newExps, e'.Nodup := by
+  unfold modalStepBranchS4Keyed at hstep
+  obtain ⟨sf, -, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hsfnotmem : sf ∉ e := by
+    intro hmem
+    exact hexp (by simp only [List.any_eq_true]; exact ⟨sf, hmem, by simp⟩)
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact hnodup
+  · rw [hres] at hsf; simp at hsf
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

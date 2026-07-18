@@ -128,34 +128,32 @@ convention the plan originally specified.
   presupposes via `outputsSubsetUniverse`'s reliance on `modalApplyOne_outputs_subset`-style
   world-bound hypotheses; S4 needs a structurally different termination argument.
 
-## Completeness Is Generic (task 510); Soundness Is Not Yet (task 503 Phase 6, blocked)
+## Completeness and Soundness Are Both Generic Over `(apply, spec)`
 
-Task 510 generalized the *completeness*-side Hintikka/saturation chain fully over
-`(apply, spec)` (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), so **any**
-`RuleApplicationSpec apply` witness -- T's `modalApplyOneT_spec` (`TDriver.lean`), and by the
-same pattern S5's/B's own future witnesses -- gets a Hintikka-set-producing top-loop lemma for
-free. Task 503 Phase 5 consumed this directly for T: `modalExpandBranchesT_hintikka` is a
-one-line application, and the remaining T-specific work (`hintikkaT_box_pos`/
-`hintikkaT_diamond_neg`, `modalTruthLemmaT`, `modalTableauT_complete`, all in
-`FrameCompleteness.lean`) needed no generic abstraction beyond that -- only the two shapes where
-T's rule genuinely differs from K's (`box`-positive, `diamond`-negative) needed new proof content;
-the other two modal shapes reuse the equally-generic *free* projection bridges
-`hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (`Completeness.lean`) directly.
+The completeness-side Hintikka/saturation chain is fully generic over `(apply, spec)`:
+`modalExpandBranchesGen_hintikka` (`CompletenessLoop.lean`) turns any
+`RuleApplicationSpec apply` witness -- e.g. T's `modalApplyOneT_spec` (`TDriver.lean`) -- into a
+Hintikka-set-producing top-loop lemma for free. The T-specific completeness work
+(`hintikkaT_box_pos`/`hintikkaT_diamond_neg`, `modalTruthLemmaT`, `modalTableauT_complete`, all
+in `FrameCompleteness.lean`) needed new content only at the two shapes where T's rule differs
+from K's; the other two modal shapes reuse the free projection bridges
+`hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (`Completeness.lean`).
 
-**Soundness has no such generic lift yet.** `Soundness.lean`'s `modalExpandBranches_closed_unsat`
-(the K fuel-induction soundness argument, wrapping `SoundnessStep.lean`'s
-`modalStepBranch_preserves_sat`) is stated and proved concretely against `modalApplyOne` and the
-frame-free `branchSatisfiable` predicate; no `_gen`/`(apply, spec)` form exists. Task 503 Phase 6
-(`Decidable (tValid φ)`) is **[BLOCKED]** on this exact gap -- see that phase's blocker record for
-the full analysis, including the key finding that the ambient Kripke model `(W, m)` is *never
-replaced* throughout `modalStepBranch_preserves_sat`'s proof (only the world-assignment function
-`f` is pointwise redefined for the two minting rules), which makes a `branchSatisfiableIn
-FC`-generalized version structurally low-risk (an `FC m.r` witness would thread through
-unchanged) but still a substantial (~500-line) undertaking, comparable in scope to task 510's own
-completeness generalization. **Tasks 504 (S5) and 505 (B) will hit this same gap** when they
-reach their own decidability results -- budget a soundness-lift phase (or a shared
-`generic-tableau-soundness` follow-up task, analogous to how 507/510 were spawned for
-termination/completeness) rather than assuming soundness comes for free alongside completeness.
+The soundness side is likewise generic, via the frame-relativized chain in `FrameSoundness.lean`:
+`branchSatisfiableIn FC` and `frameValid FC` generalize `branchSatisfiable`/`kValid` with an
+explicit frame-condition predicate `FC`, and `modalStepBranchGen_preserves_satIn` /
+`modalExpandBranchesGen_closed_unsatIn` are the `(apply, spec)`-parametric fuel-induction
+soundness arguments (the ambient Kripke model is never replaced; only the world-assignment `f`
+is pointwise redefined at the minting rules, so an `FC m.r` witness threads through unchanged).
+`modalTableau_sound_frame` re-derives K soundness through this vocabulary to confirm the K arms
+port unchanged. Each per-system tableau supplies its own `hAgree`/`hBoxPos`/`hDiaNeg` triple and
+instantiates the generic chain -- see `modalTableauT_sound`, `modalTableauB_sound`,
+`modalTableauS5_sound`, `modalTableauFive_sound` in `FrameCompleteness.lean`/`FrameSoundness.lean`.
+
+Consequently the decision procedures are all delivered: `instDecidableTValid`,
+`instDecidableBValid`, `instDecidableS5Valid`, `instDecidableFiveValid`, and
+`instDecidableKb5Valid` (all in `FrameCompleteness.lean`), alongside K's `instDecidableKValid`
+(`CompletenessLoop.lean`).
 -/
 
 @[expose] public section

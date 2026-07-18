@@ -3519,6 +3519,108 @@ lemma modalStepBranchKb5'_preserves_accReachableInv
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
 
+/-! ### `accReachableInv` Preservation for `modalApplyOneKb5''`
+
+Mirrors `modalStepBranchKb5'_preserves_accReachableInv`, with one addition: since the corrected
+rule's self-target arm needs `(0 : WorldIndex) ∈ modalKnownWorlds b` threaded in
+(`modalApplyOneKb5''Prop_knownWorlds_step`'s `h0`), the conclusion is strengthened to also
+propagate `0 ∈ modalKnownWorlds b'` to every child branch `b'` -- trivial by
+`modalKnownWorlds_mono_append_FS` at each case, since every child branch is `b` with formulas
+prepended (never removed). -/
+
+/-- A `modalStepBranchGen modalApplyOneKb5''` step preserves `accReachableInv` and the "root
+always known" invariant, given `accTargetsKnown`. Mirrors
+`modalStepBranchKb5'_preserves_accReachableInv`. -/
+lemma modalStepBranchKb5''_preserves_accReachableInv
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneKb5'' b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc)
+    (hInv : accReachableInv b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b) :
+    ∀ b' ∈ newBs, accReachableInv b' newAcc ∧ (0 : WorldIndex) ∈ modalKnownWorlds b' := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hsflabel_known : sf.label ∈ modalKnownWorlds b := (mem_modalKnownWorlds_FS b sf.label).mpr
+    ⟨sf, hsfmem, rfl⟩
+  rcases modalApplyOneKb5''_agree_or_reuse sf b acc with heq | ⟨sf', hsf'mem, heq⟩
+  swap
+  · -- Reuse: the emitted formula is already on `b`, so the child branch knows no new world;
+    -- every reachability witness survives the one added edge by monotonicity.
+    rw [heq] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, rfl⟩ := hsf
+    intro b' hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+    intro w hw
+    have hsf'known : sf'.label ∈ modalKnownWorlds b :=
+      (mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hsf'mem, rfl⟩
+    have hknown' : ∀ x ∈ [sf'], x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      simp only [List.mem_singleton] at hx
+      subst hx
+      exact hsf'known
+    exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+      (hInv w (modalKnownWorlds_append_subset_of_labels_known hknown' w hw))
+  rw [heq] at hsf
+  rcases modalApplyOneKb5''Prop_knownWorlds_step sf b acc hsfmem hknown h0 with
+    ⟨hsndeq, hdich⟩ | ⟨hsndeq, hdich⟩
+  · -- acc unchanged: every new label of the child branch was already known on `b`.
+    rcases hfstc : (modalApplyOneKb5''Prop sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc, hsndeq] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl⟩ := hsf
+      rw [hfstc] at hdich
+      intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      intro w hw
+      exact hInv w (modalKnownWorlds_append_subset_of_labels_known hdich w hw)
+    · rw [hfstc, hsndeq] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl⟩ := hsf
+      rw [hfstc] at hdich
+      intro b' hb'
+      obtain ⟨br, hbrmem, rfl⟩ := List.mem_map.mp hb'
+      have hbr_known : ∀ x ∈ br, x.label ∈ modalKnownWorlds b :=
+        fun x hx => hdich x (List.mem_flatten.mpr ⟨br, hbrmem, hx⟩)
+      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      intro w hw
+      exact hInv w (modalKnownWorlds_append_subset_of_labels_known hbr_known w hw)
+    · rw [hfstc, hsndeq] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl⟩ := hsf
+      rw [hfstc] at hdich
+      intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      intro w hw
+      exact hInv w (modalKnownWorlds_append_subset_of_labels_known hdich w hw)
+    · rw [hfstc] at hsf; simp at hsf
+  · -- mint case: one fresh edge `sf.label → modalNextWorld b` added.
+    rcases hfstc : (modalApplyOneKb5''Prop sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc, hsndeq] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl⟩ := hsf
+      rw [hfstc] at hdich
+      obtain ⟨-, hlabels⟩ := hdich
+      intro b' hb'; simp only [List.mem_singleton] at hb'; subst hb'
+      refine ⟨?_, modalKnownWorlds_mono_append_FS _ b 0 h0⟩
+      intro w hw
+      rw [mem_modalKnownWorlds_FS] at hw
+      obtain ⟨sf', hsf', rfl⟩ := hw
+      rcases List.mem_append.mp hsf' with hnew | hold
+      · -- the fresh world: extend sf.label's (already-known) reachability witness by one hop.
+        rw [hlabels sf' hnew]
+        exact (Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS) (hInv sf.label
+          hsflabel_known)).tail (hasEdge_addEdge_self_FS acc sf.label (modalNextWorld b))
+      · exact Relation.ReflTransGen.mono (fun a c => hasEdge_addEdge_mono_FS)
+          (hInv sf'.label ((mem_modalKnownWorlds_FS b sf'.label).mpr ⟨sf', hold, rfl⟩))
+    · rw [hfstc] at hdich; exact hdich.elim
+    · rw [hfstc] at hdich; exact hdich.elim
+    · rw [hfstc] at hsf; simp at hsf
 
 /-! ### The Bespoke Five/KB5 Fuel-Induction Assembly (Task 515, Phase 19b)
 

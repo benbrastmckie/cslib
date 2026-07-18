@@ -147,7 +147,20 @@ cases consume — the KB5 analogues of Five's `euclGen_mem_modalKnownWorlds_iff`
 
 ---
 
-### Phase 2: KB5 full-cluster Hintikka insertion lemmas [NOT STARTED]
+### Phase 2: KB5 full-cluster Hintikka insertion lemmas [COMPLETED]
+
+**Status update**: landed `modalKb5BoxAllFull_mem_of`/`modalKb5DiaNegAllFull_mem_of` and
+`hintikkaKb5'_box_pos`/`hintikkaKb5'_diamond_neg`, all in `FrameCompleteness.lean` (the
+`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` definitions from `FiveSimplification.lean` are
+already transitively imported, so no file-scope escalation was needed). All four
+`lean_verify`-clean (`propext`/`Quot.sound` only). **However**: Phase 3's concrete counterexample
+(see the new `## Phase 3 Blocker (task 525)` note below, replacing the old Phase 23 blocker)
+shows these lemmas, while individually true, are **not sufficient** to prove the general KB5 truth
+lemma -- the gap is a case these insertion lemmas do not (and cannot, given `modalApplyOneKb5'`'s
+frozen definition) cover: a non-root trigger `w` whose box-positive formula is read by the closure
+relation as reaching the root (`(extractModelKb5 b acc).r w 0` via a raw two-hop chain through an
+intermediate non-root world), which forces `T(ψ)@0 ∈ b` that no arm of `modalKb5BoxAllFull b ψ w`
+(`w ≠ 0`) ever emits.
 
 **Goal**: Land `hintikkaKb5'_box_pos` and `hintikkaKb5'_diamond_neg` — from a
 `modalHintikkaSetGen modalApplyOneKb5'` set and `T(□ψ)@w ∈ b`, certify `T(ψ)@w' ∈ b` for every

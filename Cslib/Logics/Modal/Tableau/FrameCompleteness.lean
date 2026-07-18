@@ -3315,6 +3315,179 @@ lemma extractModelKb5_root_reach_mem_modalKnownWorlds
     w' ∈ modalKnownWorlds b :=
   (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ h)).mp h0
 
+/-! ### KB5 Full-Cluster Hintikka Insertion Lemmas (task 525 Phase 2)
+
+`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` (`FiveSimplification.lean`) are unconditional in the
+trigger `w` for their non-root cluster-dump arm (unlike Five's root/non-root split), so the
+introduction ("insertion") lemmas below collapse Five's two lemmas
+(`modalFiveBoxAll_mem_of_root`/`_mem_of_ne_root`) into one: either `v` is a known non-root world
+(unconditional in `w`), or `v = 0` with the trigger `w` itself the root and the known cluster
+already nonempty (the root-reflexive self-target arm, task 524). -/
+
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalKb5BoxAllFull`** (task 525 Phase 2), converse of
+`modalKb5BoxAllFull_mem`. -/
+lemma modalKb5BoxAllFull_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w v : WorldIndex}
+    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
+        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalKb5BoxAllFull b φ w := by
+  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, rfl, u, hu, hune⟩
+  · unfold modalKb5BoxAllFull
+    dsimp only
+    have hmemNR :
+        (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (modalKnownWorlds b).filterMap fun w' =>
+            if w' == (0 : WorldIndex) then none
+            else
+              if b.any (· == (⟨.pos, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+              then none else some ⟨.pos, φ, w'⟩ := by
+      simp only [List.mem_filterMap]
+      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
+    by_cases hgate :
+        (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
+          = true
+    · rw [if_pos hgate]
+      exact List.mem_append_left _ hmemNR
+    · rw [if_neg hgate]
+      exact hmemNR
+  · unfold modalKb5BoxAllFull
+    dsimp only
+    rw [if_pos (by
+      simp only [Bool.and_eq_true, beq_iff_eq, List.any_eq_true, Bool.not_eq_true',
+        beq_eq_false_iff_ne, ne_eq]
+      exact ⟨trivial, u, hu, hune⟩)]
+    rw [if_neg (by simpa using hnotin)]
+    exact List.mem_append_right _ (List.mem_singleton_self _)
+
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalKb5DiaNegAllFull`**, dual of `modalKb5BoxAllFull_mem_of`. -/
+lemma modalKb5DiaNegAllFull_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w v : WorldIndex}
+    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
+        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalKb5DiaNegAllFull b φ w := by
+  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, rfl, u, hu, hune⟩
+  · unfold modalKb5DiaNegAllFull
+    dsimp only
+    have hmemNR :
+        (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (modalKnownWorlds b).filterMap fun w' =>
+            if w' == (0 : WorldIndex) then none
+            else
+              if b.any (· == (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+              then none else some ⟨.neg, φ, w'⟩ := by
+      simp only [List.mem_filterMap]
+      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
+    by_cases hgate :
+        (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
+          = true
+    · rw [if_pos hgate]
+      exact List.mem_append_left _ hmemNR
+    · rw [if_neg hgate]
+      exact hmemNR
+  · unfold modalKb5DiaNegAllFull
+    dsimp only
+    rw [if_pos (by
+      simp only [Bool.and_eq_true, beq_iff_eq, List.any_eq_true, Bool.not_eq_true',
+        beq_eq_false_iff_ne, ne_eq]
+      exact ⟨trivial, u, hu, hune⟩)]
+    rw [if_neg (by simpa using hnotin)]
+    exact List.mem_append_right _ (List.mem_singleton_self _)
+
+/-- **KB5-analogue of `hintikkaFive_box_pos`** (task 525 Phase 2): on an
+`modalApplyOneKb5'`-saturated branch, `T(□ψ)@w ∈ b` forces `T(ψ)@v ∈ b` at any target `v` matching
+`modalKb5BoxAllFull`'s dichotomy -- either `v` is known and non-root (unconditional in the trigger
+`w`), or `v = 0` with the trigger `w` itself the root and the known cluster nonempty. Proof is
+`by_contra` mirroring `hintikkaFive_box_pos`, substituting `modalKb5BoxAllFull_mem_of` for the
+root/non-root split lemma pair and `modalApplyOneKb5'_boxPos_eq`/`modalApplyOneKb5'Prop` for their
+Five counterparts. -/
+lemma hintikkaKb5'_box_pos
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5' b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
+        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalKb5BoxAllFull b ψ w := modalKb5BoxAllFull_mem_of hnotin hcond
+  have hcond2 := hH.2.1 (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond2
+  have hK := modalApplyOne_boxPos_eq
+    (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneKb5'_boxPos_eq] at hcond2
+  unfold modalApplyOneKb5'Prop at hcond2
+  rcases hp : modalApplyOne
+      (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond2 hK
+  simp only at hcond2 hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond2
+    split_ifs at hcond2 with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond2 _ hall)
+  · dsimp only at hcond2
+    by_cases hkf : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
+/-- **KB5-analogue of `hintikkaFive_diamond_neg`**, dual of `hintikkaKb5'_box_pos`: `F(◇ψ)@w ∈ b`
+forces `F(ψ)@v ∈ b` at any target `v` matching `modalKb5DiaNegAllFull`'s dichotomy. -/
+lemma hintikkaKb5'_diamond_neg
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5' b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
+        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalKb5DiaNegAllFull b ψ w := modalKb5DiaNegAllFull_mem_of hnotin hcond
+  have hcond2 := hH.2.1 (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond2
+  have hK := modalApplyOne_diamondNeg_eq
+    (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneKb5'_diaNeg_eq] at hcond2
+  unfold modalApplyOneKb5'Prop at hcond2
+  rcases hp : modalApplyOne
+      (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond2 hK
+  simp only at hcond2 hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond2
+    split_ifs at hcond2 with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond2 _ hall)
+  · dsimp only at hcond2
+    by_cases hkf : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

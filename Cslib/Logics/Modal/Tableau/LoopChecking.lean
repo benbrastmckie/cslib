@@ -927,6 +927,41 @@ lemma modalApplyOne_diamondPos_mint_fst_S4
   rw [if_neg (by simp [htry])]
   rfl
 
+omit [Hashable Atom] in
+/-- `modalApplyOne`'s box-negative minting shape adds exactly one fresh edge, from the source
+world to the freshly-minted witness `modalNextWorld b`. Mirrors `modalApplyOne_boxNeg_mint_fst_S4`
+(same proof technique), extracting `.snd` instead of `.fst`. -/
+lemma modalApplyOne_boxNeg_mint_snd_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).snd
+      = acc.addEdge w (modalNextWorld b) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_neg]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+
+omit [Hashable Atom] in
+/-- `modalApplyOne`'s diamond-positive minting shape adds exactly one fresh edge, from the
+source world to the freshly-minted witness `modalNextWorld b`. Dual of
+`modalApplyOne_boxNeg_mint_snd_S4`. -/
+lemma modalApplyOne_diamondPos_mint_snd_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOne (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        b acc).snd
+      = acc.addEdge w (modalNextWorld b) := by
+  have htry : (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf?
+      (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)).isApplicable
+        = false := by
+    rw [tryAllPropRules_pos]
+    simp [modalAndOf?, modalOrOf?, modalImpOf?, modalNegOf?, RuleResult.isApplicable]
+  simp only [modalApplyOne]
+  rw [if_neg (by simp [htry])]
+
 /-! ## Minting-Content Equality Closure (task 511, Phase 5 continuation)
 
 This section closes the gap the prior dispatch narrowed but did not finish: `keyLowerBd`'s
@@ -2472,6 +2507,31 @@ lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
       subst he'
       exact houtdeg w
     · rw [hres] at hsf; simp at hsf
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `Soundness.lean`'s `private lemma accFreshInv_append` (unavailable
+across files): prepending formulas to a branch preserves `accFreshInv`. -/
+private lemma accFreshInv_append_S4
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (hInv : accFreshInv b acc)
+    (xs : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    accFreshInv (xs ++ b) acc := by
+  intro w w' hedge
+  obtain ⟨hw, hw'⟩ := hInv w w' hedge
+  exact ⟨Nat.lt_of_lt_of_le hw (modalNextWorld_le_append xs b),
+         Nat.lt_of_lt_of_le hw' (modalNextWorld_le_append xs b)⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
+across files): decompose membership of an edge in `acc.addEdge w w'`. -/
+private lemma hasEdge_addEdge_cases_S4 {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  rcases h with ⟨hw, hw'⟩ | h
+  · exact Or.inl ⟨hw.symm, hw'.symm⟩
+  · exact Or.inr h
 
 /-! ## S4 Hintikka Set -/
 

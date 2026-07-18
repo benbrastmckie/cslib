@@ -2358,6 +2358,76 @@ lemma modalKb5DiaNegAllUniv_mem_eq {b : List (SignedFormula (Proposition Atom) W
   · exact heq
   · subst heq; rfl
 
+omit [Hashable Atom] in
+/-- **Introduction direction for `modalKb5BoxAllUniv`**, converse of `modalKb5BoxAllUniv_mem`.
+Trigger-free: unlike `modalKb5BoxAllFull_mem_of` (`FrameCompleteness.lean`), the self-target
+condition drops the `w = 0` conjunct entirely -- the corrected gate's self-target arm fires for
+any trigger. -/
+lemma modalKb5BoxAllUniv_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w v : WorldIndex}
+    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalKb5BoxAllUniv b φ w := by
+  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, u, hu, hune⟩
+  · unfold modalKb5BoxAllUniv
+    dsimp only
+    have hmemNR :
+        (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (modalKnownWorlds b).filterMap fun w' =>
+            if w' == (0 : WorldIndex) then none
+            else
+              if b.any (· == (⟨.pos, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+              then none else some ⟨.pos, φ, w'⟩ := by
+      simp only [List.mem_filterMap]
+      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
+    by_cases hgate : ((modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex)))) = true
+    · rw [if_pos hgate]
+      exact List.mem_append_left _ hmemNR
+    · rw [if_neg hgate]
+      exact hmemNR
+  · unfold modalKb5BoxAllUniv
+    dsimp only
+    rw [if_pos (by
+      simp only [List.any_eq_true, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq]
+      exact ⟨u, hu, hune⟩)]
+    rw [if_neg (by simpa using hnotin)]
+    exact List.mem_append_right _ (List.mem_singleton_self _)
+
+omit [Hashable Atom] in
+/-- Dual of `modalKb5BoxAllUniv_mem_of` for `modalKb5DiaNegAllUniv`. -/
+lemma modalKb5DiaNegAllUniv_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
+    {φ : Proposition Atom} {w v : WorldIndex}
+    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalKb5DiaNegAllUniv b φ w := by
+  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, u, hu, hune⟩
+  · unfold modalKb5DiaNegAllUniv
+    dsimp only
+    have hmemNR :
+        (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+          (modalKnownWorlds b).filterMap fun w' =>
+            if w' == (0 : WorldIndex) then none
+            else
+              if b.any (· == (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
+              then none else some ⟨.neg, φ, w'⟩ := by
+      simp only [List.mem_filterMap]
+      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
+    by_cases hgate : ((modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex)))) = true
+    · rw [if_pos hgate]
+      exact List.mem_append_left _ hmemNR
+    · rw [if_neg hgate]
+      exact hmemNR
+  · unfold modalKb5DiaNegAllUniv
+    dsimp only
+    rw [if_pos (by
+      simp only [List.any_eq_true, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq]
+      exact ⟨u, hu, hune⟩)]
+    rw [if_neg (by simpa using hnotin)]
+    exact List.mem_append_right _ (List.mem_singleton_self _)
+
 /-- Apply the K modal rules together with the KB5 corrected-gate full-cluster propagation arms.
 Mirrors `modalApplyOneKb5'Prop` declaration-for-declaration, substituting `modalKb5BoxAllUniv`/
 `modalKb5DiaNegAllUniv` for `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`. -/

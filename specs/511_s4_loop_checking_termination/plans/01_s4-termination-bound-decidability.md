@@ -1,7 +1,8 @@
 # Implementation Plan: Task #511 — S4 Loop-Checking Termination Bound & Decidability
 
 - **Task**: 511 — s4_loop_checking_termination (follow-on to task 506, Phases 8-9)
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED] — Phases 1-6 complete (sorry-free world bound); Phase 7 blocked on the
+  driver-mismatch bridge, tracked by follow-on task 535 (dependency)
 - **Effort**: 16 hours
 - **Dependencies**: Task 506 (Phases 1-7 landed green); task 510 (generalized loop lemma — see Phase 7 finding: does NOT unblock S4)
 - **Research Inputs**: specs/511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md; specs/511_s4_loop_checking_termination/handoffs/01_research-handoff.json

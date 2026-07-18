@@ -287,7 +287,7 @@ it does not re-trip `cs5_symmetric_tail_box_gap`, `cs5Incest_forces_symm`, or `c
 `[BLOCKED]` and STOP — do not proceed. (This is very unlikely: all four scaffolds are landed
 sorry-free.)
 
-### Phase 2: INHABITEDNESS GATE — construct an inhabitant of the repaired `TPrime` [NOT STARTED]
+### Phase 2: INHABITEDNESS GATE — construct an inhabitant of the repaired `TPrime` [COMPLETED]
 
 **Objective** (the explicit process lesson of v3): before any Zorn/proof dispatch, prove the repaired
 type is inhabitable. Depends on Phase 1.

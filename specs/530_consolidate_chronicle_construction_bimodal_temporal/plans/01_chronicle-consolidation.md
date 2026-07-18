@@ -157,7 +157,7 @@ extend.
 
 ---
 
-### Phase 1: Lift ChronicleTypes to generic Types.lean [NOT STARTED]
+### Phase 1: Lift ChronicleTypes to generic Types.lean [COMPLETED]
 
 **Goal**: Lift the ~95%-shared `ChronicleTypes` layer (DCS infrastructure, r-relations,
 r-maximality, Burgess content relations, the `Chronicle` structure, conditions c0-c5',
@@ -165,15 +165,30 @@ r-maximality, Burgess content relations, the `Chronicle` structure, conditions c
 generic Foundations module; instantiate in both trees.
 
 **Tasks**:
-- [ ] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean` with the shared defs/theorems
+- [x] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/Types.lean` with the shared defs/theorems
   as generic `def`s/`theorem`s over a `ChronicleInterface` value.
-- [ ] Lift bimodal's extra dcs-intersection lemmas (`dcs_inter_*`, `three_way_inter_consistent`)
+- [x] Lift bimodal's extra dcs-intersection lemmas (`dcs_inter_*`, `three_way_inter_consistent`)
   into the shared core generically (they simply go unused by temporal).
-- [ ] Replace `Bimodal/.../Chronicle/ChronicleTypes.lean` body with the bimodal instance (family
+- [x] Replace `Bimodal/.../Chronicle/ChronicleTypes.lean` body with the bimodal instance (family
   `fun fc => …`) + `export`/abbrev re-exports under the existing namespace/names.
-- [ ] Replace `Temporal/.../Chronicle/ChronicleTypes.lean` body with the single `.Base` instance +
-  re-exports.
-- [ ] Update Foundations/Bimodal/Temporal barrels as needed.
+  *(deviation: altered -- the DCS/r-relation/r-maximality/Burgess layer is generic
+  instance + re-export as planned, but the `Chronicle` structure and its conditions
+  c0-c5', `ValidChronicle`, `ChronicleInvariant`, and the C3 consequences stay logic-local
+  verbatim rather than routing through a generic-structure bridge: a `toGeneric` bridge
+  approach compiled standalone but broke `rcases`/`simp` proofs in downstream
+  `CounterexampleElimination/*.lean` files that pattern-match on Finset-membership
+  subterms nested inside condition statements. See the file's "Chronicle Structure"
+  section for the full rationale. Also, `untlLeftMonoDeriv` and `combineImpConj` were
+  dropped from `ChronicleInterface` after landing (their only proofs live downstream of
+  `ChronicleTypes.lean`, in each tree's `PointInsertion/Burgess.lean`, creating an import
+  cycle); deferred to Phase 2.)*
+- [x] Replace `Temporal/.../Chronicle/ChronicleTypes.lean` body with the single `.Base` instance +
+  re-exports. *(deviation: altered -- same Chronicle-structure-stays-local carve-out as
+  Bimodal, for symmetry and to avoid the same downstream regression risk.)*
+- [x] Update Foundations/Bimodal/Temporal barrels as needed. *(deviation: altered -- no
+  `Bimodal/Metalogic.lean`/`Temporal/Metalogic.lean` barrel changes were needed since
+  `ChronicleTypes.lean` re-exports under identical names/namespaces; only the root
+  `Cslib.lean` barrel gained the two new Foundations modules.)*
 
 **Timing**: 2 hours
 

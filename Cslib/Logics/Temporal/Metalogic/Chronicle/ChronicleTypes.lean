@@ -8,12 +8,31 @@ module
 
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
 public import Cslib.Logics.Temporal.Metalogic.MCS
+public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.Types
 
 /-!
 # Chronicle Types for Temporal Logic
 
 DCS infrastructure, r-relation definitions, r-maximality, and Burgess relation
 definitions for the temporal chronicle construction.
+
+## Status (task 530, Phase 1)
+
+The DCS infrastructure (`ClosedUnderDerivation`, `SetDeductivelyClosed`, `mcs_is_dcs`,
+`cud_*`/`dcs_*`), r-relations, r-maximality, and Burgess content relations are now thin
+instance + re-export wrappers over the generic
+`Cslib.Foundations.Logic.Metalogic.Chronicle.Types` module, instantiated by
+`temporalChronicleInterface : ChronicleInterface (Formula Atom)` (a single value, since
+Temporal is fixed to `FrameClass.Base` -- no `fc`-indexed family needed, mirroring
+`temporalSinceInterface` in `PointInsertion/Since.lean`).
+
+The `Chronicle` structure and its conditions (c0-c5', `ValidChronicle`,
+`ChronicleInvariant`, C3 consequences) stay logic-local (unchanged), matching the Bimodal
+tree's same deviation: routing them through a generic-structure bridge (`toGeneric`) broke
+downstream `rcases`/`simp` proofs that pattern-match on Finset-membership subterms nested
+inside condition statements. See `Bimodal/.../ChronicleTypes.lean`'s "Chronicle Structure"
+section for the full rationale.
 
 ## References
 
@@ -30,33 +49,79 @@ namespace Cslib.Logic.Temporal.Metalogic.Chronicle
 
 open Cslib.Logic.Temporal
 open Cslib.Logic.Temporal.Metalogic
+open Cslib.Logic.Metalogic.Chronicle (ChronicleInterface)
 
 attribute [local instance] Classical.propDecidable
 
 variable {Atom : Type*}
 
+/-! ## `ChronicleInterface` Instance (task 530, Phase 1)
+
+Populates every field of the shared Foundations interface with Temporal's own apparatus
+at `FrameClass.Base`. Not marked `private`: the public re-export `abbrev`s below unfold to
+expressions mentioning it directly, and Lean's module-privacy system disallows a `public
+section` declaration from referencing a `private` one. -/
+
+/-- The `ChronicleInterface` instance for Temporal (task 530). -/
+noncomputable def temporalChronicleInterface : ChronicleInterface (Formula Atom) where
+  bot := Formula.bot
+  imp := Formula.imp
+  and := Formula.and
+  or := Formula.or
+  untl := Formula.untl
+  snce := Formula.snce
+  somePast := Formula.somePast
+  allPast := Formula.allPast
+  allFuture := Formula.allFuture
+  someFuture := Formula.someFuture
+  Deriv := DerivationTree FrameClass.Base
+  assumption := fun h => DerivationTree.assumption _ _ h
+  modusPonens := fun h1 h2 => DerivationTree.modus_ponens _ _ _ h1 h2
+  weakening := fun Γ Δ φ d hsub => DerivationTree.weakening Γ Δ φ d hsub
+  deductionTheorem := fun Γ φ ψ d => deductionTheorem Γ φ ψ d
+  identity' := fun φ => identity φ
+  impTrans := fun h1 h2 => impTrans h1 h2
+  lceImp := fun φ ψ => lceImp φ ψ
+  rceImp := fun φ ψ => rceImp φ ψ
+  pairing := fun φ ψ => pairing φ ψ
+  efq := fun φ => efqAxiom φ
+  pastNecessitation := fun φ d => pastNecessitation φ d
+  mcsClosedUnderDerivation := by
+    intro Ω hmcs L φ hL hd
+    exact temporal_closed_under_derivation hmcs hL ⟨hd⟩
+  theoremInMcs := by
+    intro Ω hmcs φ hd
+    exact temporal_closed_under_derivation hmcs (fun _ h => absurd h List.not_mem_nil) ⟨hd⟩
+  negationComplete := fun hmcs φ => temporal_negation_complete hmcs φ
+  negExcludes := by
+    intro Ω hmcs φ hneg hmem
+    exact mcs_not_mem_of_neg hmcs hneg hmem
+  cudContainsTheorems := by
+    intro Ω h φ hd
+    exact h [] φ (fun _ hc => absurd hc List.not_mem_nil) hd
+
 /-! ## Deductively Closed Sets (DCS) -/
 
 /-- A set is closed under derivation. -/
-def ClosedUnderDerivation (Omega : Set (Formula Atom)) : Prop :=
-  ∀ (L : List (Formula Atom)) (phi : Formula Atom),
-    (∀ psi ∈ L, psi ∈ Omega) → (DerivationTree FrameClass.Base L phi) → phi ∈ Omega
+abbrev ClosedUnderDerivation (Omega : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.CIClosedUnderDerivation temporalChronicleInterface Omega
 
 /-- A set is deductively closed (consistent + closed under derivation). -/
-def SetDeductivelyClosed (Omega : Set (Formula Atom)) : Prop :=
-  Temporal.SetConsistent Omega ∧ ClosedUnderDerivation Omega
+abbrev SetDeductivelyClosed (Omega : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.SetDeductivelyClosed temporalChronicleInterface Omega
 
 /-- Every MCS is deductively closed. -/
 theorem mcs_is_dcs {Omega : Set (Formula Atom)}
     (h : Temporal.SetMaximalConsistent Omega) :
     SetDeductivelyClosed Omega :=
-  ⟨h.1, fun _L _ hL hd => temporal_closed_under_derivation h hL ⟨hd⟩⟩
+  Cslib.Logic.Metalogic.Chronicle.mcs_is_dcs temporalChronicleInterface (Omega := Omega) h
 
 /-- A CUD set contains all theorems. -/
 theorem cud_contains_theorems {Omega : Set (Formula Atom)}
     (h : ClosedUnderDerivation Omega)
     {phi : Formula Atom} (hd : DerivationTree FrameClass.Base [] phi) : phi ∈ Omega :=
-  h [] phi (fun _ h => absurd h List.not_mem_nil) hd
+  Cslib.Logic.Metalogic.Chronicle.cud_contains_theorems
+    temporalChronicleInterface (Omega := Omega) h (phi := phi) hd
 
 /-- A DCS contains all theorems. -/
 theorem dcs_contains_theorems {Omega : Set (Formula Atom)}
@@ -67,16 +132,9 @@ theorem dcs_contains_theorems {Omega : Set (Formula Atom)}
 /-- Modus ponens in a CUD set. -/
 theorem cud_modus_ponens {Omega : Set (Formula Atom)}
     (h : ClosedUnderDerivation Omega)
-    {phi psi : Formula Atom} (h_imp : (phi → psi) ∈ Omega) (h_phi : phi ∈ Omega) : psi ∈ Omega := by
-  apply h [phi, phi.imp psi] psi
-  · intro chi h_mem
-    simp only [List.mem_cons, List.mem_nil_iff, or_false] at h_mem
-    rcases h_mem with rfl | rfl
-    · exact h_phi
-    · exact h_imp
-  · exact DerivationTree.modus_ponens [phi, phi.imp psi] phi psi
-      (DerivationTree.assumption _ (phi.imp psi) (by simp))
-      (DerivationTree.assumption _ phi (by simp))
+    {phi psi : Formula Atom} (h_imp : (phi → psi) ∈ Omega) (h_phi : phi ∈ Omega) : psi ∈ Omega :=
+  Cslib.Logic.Metalogic.Chronicle.cud_modus_ponens
+    temporalChronicleInterface (Omega := Omega) h (phi := phi) (psi := psi) h_imp h_phi
 
 /-- Modus ponens in a DCS. -/
 theorem dcs_modus_ponens {Omega : Set (Formula Atom)}
@@ -88,9 +146,9 @@ theorem dcs_modus_ponens {Omega : Set (Formula Atom)}
 theorem cud_conj_closed {Omega : Set (Formula Atom)}
     (h : ClosedUnderDerivation Omega)
     {phi psi : Formula Atom} (h_phi : phi ∈ Omega) (h_psi : psi ∈ Omega) :
-    (phi ∧ psi) ∈ Omega := by
-  have h_pair := cud_contains_theorems h (pairing phi psi)
-  exact cud_modus_ponens h (cud_modus_ponens h h_pair h_phi) h_psi
+    (phi ∧ psi) ∈ Omega :=
+  Cslib.Logic.Metalogic.Chronicle.cud_conj_closed
+    temporalChronicleInterface (Omega := Omega) h (phi := phi) (psi := psi) h_phi h_psi
 
 /-- A DCS is closed under conjunction. -/
 theorem dcs_conj_closed {Omega : Set (Formula Atom)}
@@ -102,117 +160,95 @@ theorem dcs_conj_closed {Omega : Set (Formula Atom)}
 /-- A CUD set with a non-member is SDC. -/
 theorem cud_not_mem_is_sdc {B : Set (Formula Atom)}
     (h_cud : ClosedUnderDerivation B)
-    {phi : Formula Atom} (h_not_mem : phi ∉ B) : SetDeductivelyClosed B := by
-  refine ⟨?_, h_cud⟩
-  intro L hL ⟨d⟩
-  have h_bot : (⊥ : Formula Atom) ∈ B := h_cud L (⊥ : Formula Atom) hL d
-  have h_efq : DerivationTree FrameClass.Base [] ((⊥ : Formula Atom).imp phi) :=
-    efqAxiom phi
-  exact h_not_mem (cud_modus_ponens h_cud (cud_contains_theorems h_cud h_efq) h_bot)
+    {phi : Formula Atom} (h_not_mem : phi ∉ B) : SetDeductivelyClosed B :=
+  Cslib.Logic.Metalogic.Chronicle.cud_not_mem_is_sdc
+    temporalChronicleInterface (B := B) h_cud (phi := phi) h_not_mem
 
-/-! ## The r-Relation (Burgess Lemma 2.3) -/
+/-! ## The r-Relation (Burgess Lemma 2.3)
+
+`rRelation`/`rRelationSince`/`r3Relation`/`r3RelationSince`/`burgessR`/`burgessRSet`/
+`burgessRSince`/`burgessRSetSince`/`burgessR3` depend only on `untl`/`snce`, which never
+vary across Temporal's single interface value, so `temporalChronicleInterface` is used
+directly (no `fc`-family to pick from, unlike Bimodal). -/
 
 /-- The r-relation: B is a right-successor of A for the Until operator (Burgess Lemma 2.3). -/
-def rRelation (A B : Set (Formula Atom)) : Prop :=
-  ∀ (gamma delta : Formula Atom),
-    (gamma U delta) ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ (gamma U delta) ∈ B)
+abbrev rRelation (A B : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.rRelation temporalChronicleInterface A B
 
 /-- The r-relation for the Since operator: B is a left-successor of A. -/
-def rRelationSince (A B : Set (Formula Atom)) : Prop :=
-  ∀ (gamma delta : Formula Atom),
-    (gamma S delta) ∈ A →
-    delta ∈ B ∨ (gamma ∈ B ∧ (gamma S delta) ∈ B)
+abbrev rRelationSince (A B : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.rRelationSince temporalChronicleInterface A B
 
 /-- The combined r3-relation: B is a successor of A (Until) and C (Since). -/
-def r3Relation (A B C : Set (Formula Atom)) : Prop :=
-  rRelation A B ∧ rRelationSince C B
+abbrev r3Relation (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.r3Relation temporalChronicleInterface A B C
 
 /-- The combined r3-relation for Since: B is a Since-successor of A and an Until-successor of C. -/
-def r3RelationSince (A B C : Set (Formula Atom)) : Prop :=
-  rRelationSince A B ∧ rRelation C B
+abbrev r3RelationSince (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.r3RelationSince temporalChronicleInterface A B C
 
 /-! ## R-Maximality -/
 
 /-- A set B is r-maximal over A if it is deductively closed,
 satisfies rRelation, and no proper superset does. -/
-def rMaximal (A B : Set (Formula Atom)) : Prop :=
-  SetDeductivelyClosed B ∧
-  rRelation A B ∧
-  ∀ (C : Set (Formula Atom)),
-    SetDeductivelyClosed C →
-    B ⊂ C →
-    ¬rRelation A C
+abbrev rMaximal (A B : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.rMaximal temporalChronicleInterface A B
 
 /-- A set B is r-maximal over A for Since if it is deductively closed,
 satisfies rRelationSince, and no proper superset does. -/
-def rMaximalSince (A B : Set (Formula Atom)) : Prop :=
-  SetDeductivelyClosed B ∧
-  rRelationSince A B ∧
-  ∀ (C : Set (Formula Atom)),
-    SetDeductivelyClosed C →
-    B ⊂ C →
-    ¬rRelationSince A C
+abbrev rMaximalSince (A B : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.rMaximalSince temporalChronicleInterface A B
 
 /-- A set B is R3-maximal over A and C if it satisfies r3Relation and no proper superset does. -/
-def R3Maximal (A B C : Set (Formula Atom)) : Prop :=
-  SetDeductivelyClosed B ∧
-  r3Relation A B C ∧
-  ∀ (D : Set (Formula Atom)),
-    SetDeductivelyClosed D →
-    B ⊂ D →
-    ¬r3Relation A D C
+abbrev R3Maximal (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.R3Maximal temporalChronicleInterface A B C
 
 /-- A set B is R3-maximal (Since variant) over A and C if it satisfies
 r3RelationSince and no proper superset does. -/
-def R3MaximalSince (A B C : Set (Formula Atom)) : Prop :=
-  SetDeductivelyClosed B ∧
-  r3RelationSince A B C ∧
-  ∀ (D : Set (Formula Atom)),
-    SetDeductivelyClosed D →
-    B ⊂ D →
-    ¬r3RelationSince A D C
+abbrev R3MaximalSince (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.R3MaximalSince temporalChronicleInterface A B C
 
 /-! ## Burgess r-Relation (Content-Based) -/
 
 /-- The Burgess r-relation: every formula in C appears as the left
 argument of `gamma U beta` in A. -/
-def burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, (beta U gamma) ∈ A
+abbrev burgessR (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessR temporalChronicleInterface A beta C
 
 /-- Lifts `burgessR` to all beta in B: every pair `(beta, gamma)` with
 beta ∈ B, gamma ∈ C satisfies burgessR. -/
-def burgessRSet (A B C : Set (Formula Atom)) : Prop :=
-  ∀ beta ∈ B, burgessR A beta C
+abbrev burgessRSet (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSet temporalChronicleInterface A B C
 
 /-- The Burgess r-relation for Since: every formula in C appears as
 the left argument of `gamma S beta` in A. -/
-def burgessRSince (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
-  ∀ gamma ∈ C, (beta S gamma) ∈ A
+abbrev burgessRSince
+    (A : Set (Formula Atom)) (beta : Formula Atom) (C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSince temporalChronicleInterface A beta C
 
 /-- Lifts `burgessRSince` to all beta in B. -/
-def burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
-  ∀ beta ∈ B, burgessRSince A beta C
+abbrev burgessRSetSince (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessRSetSince temporalChronicleInterface A B C
 
 /-- The combined Burgess r3-relation: combines burgessRSet for Until
 and burgessRSetSince for Since. -/
-def burgessR3 (A B C : Set (Formula Atom)) : Prop :=
-  burgessRSet A B C ∧ burgessRSetSince C B A
+abbrev burgessR3 (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.ciBurgessR3 temporalChronicleInterface A B C
 
 /-- B is a Burgess R3-maximal set over A and C: deductively closed,
 satisfies burgessR3, and no proper superset does. -/
-def BurgessR3Maximal (A B C : Set (Formula Atom)) : Prop :=
-  ClosedUnderDerivation B ∧
-  burgessR3 A B C ∧
-  ∀ D, ClosedUnderDerivation D → B ⊂ D → ¬burgessR3 A D C
+abbrev BurgessR3Maximal (A B C : Set (Formula Atom)) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.CIBurgessR3Maximal temporalChronicleInterface A B C
 
 /-! ## Adjacency Predicate -/
 
 /-- Two rational points x < y in dom are adjacent if no dom-element lies strictly between them. -/
-def Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
-  x ∈ dom ∧ y ∈ dom ∧ x < y ∧ ∀ z ∈ dom, ¬(x < z ∧ z < y)
+abbrev Adjacent (dom : Finset Rat) (x y : Rat) : Prop :=
+  Cslib.Logic.Metalogic.Chronicle.Adjacent dom x y
 
-/-! ## Chronicle Structure -/
+/-! ## Chronicle Structure
+
+Kept logic-local (unchanged); see the module docstring "Status" section. -/
 
 /-- A chronicle: a finite sequence of MCS-labelled rational points with interval sets. -/
 @[nolint dupNamespace]
@@ -343,18 +379,14 @@ structure ChronicleInvariant (chi : Chronicle Atom) : Prop where
 /-! ## Basic Properties -/
 
 theorem rRelation_subset {A B C : Set (Formula Atom)}
-    (h_r : rRelation A B) (h_sub : B ⊆ C) : rRelation A C := by
-  intro gamma delta h_until
-  rcases h_r gamma delta h_until with h_delta | ⟨h_gamma, h_u⟩
-  · exact Or.inl (h_sub h_delta)
-  · exact Or.inr ⟨h_sub h_gamma, h_sub h_u⟩
+    (h_r : rRelation A B) (h_sub : B ⊆ C) : rRelation A C :=
+  Cslib.Logic.Metalogic.Chronicle.rRelation_subset temporalChronicleInterface
+    (A := A) (B := B) (C := C) h_r h_sub
 
 theorem rRelationSince_subset {A B C : Set (Formula Atom)}
-    (h_r : rRelationSince A B) (h_sub : B ⊆ C) : rRelationSince A C := by
-  intro gamma delta h_since
-  rcases h_r gamma delta h_since with h_delta | ⟨h_gamma, h_s⟩
-  · exact Or.inl (h_sub h_delta)
-  · exact Or.inr ⟨h_sub h_gamma, h_sub h_s⟩
+    (h_r : rRelationSince A B) (h_sub : B ⊆ C) : rRelationSince A C :=
+  Cslib.Logic.Metalogic.Chronicle.rRelationSince_subset temporalChronicleInterface
+    (A := A) (B := B) (C := C) h_r h_sub
 
 theorem r3Relation_subset {A B B' C : Set (Formula Atom)}
     (h : r3Relation A B C) (h_sub : B ⊆ B') : r3Relation A B' C :=
@@ -369,8 +401,8 @@ theorem R3Maximal_r3 {A B C : Set (Formula Atom)}
 /-! ## DCS Intersection Properties -/
 
 theorem SetConsistent_of_subset {Omega T : Set (Formula Atom)}
-    (h_sub : Omega ⊆ T) (h_cons : Temporal.SetConsistent T) : Temporal.SetConsistent Omega := by
-  intro L hL hd
-  exact h_cons L (fun psi hpsi => h_sub (hL psi hpsi)) hd
+    (h_sub : Omega ⊆ T) (h_cons : Temporal.SetConsistent T) : Temporal.SetConsistent Omega :=
+  Cslib.Logic.Metalogic.Chronicle.SetConsistent_of_subset temporalChronicleInterface
+    (Omega := Omega) (T := T) h_sub h_cons
 
 end Cslib.Logic.Temporal.Metalogic.Chronicle

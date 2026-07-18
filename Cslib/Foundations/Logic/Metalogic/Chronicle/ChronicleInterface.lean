@@ -29,8 +29,14 @@ broader `ChronicleInterface F`.
   `GenericMCS.HilbertTree` and `SinceSeedInterface.Deriv`);
 - the low-level derivation combinators each logic already proves for its own
   `DerivationTree` (`assumption`, `modusPonens`, `weakening`, `deductionTheorem`,
-  `identity'`, `impTrans`, `lceImp`, `rceImp`, `combineImpConj`, `pairing`, `efq`,
-  `untlLeftMonoDeriv`, `pastNecessitation`);
+  `identity'`, `impTrans`, `lceImp`, `rceImp`, `pairing`, `efq`, `pastNecessitation`);
+  `untlLeftMonoDeriv` and `combineImpConj` are deliberately **not** included here — their
+  only proofs live downstream of `ChronicleTypes.lean` (in each tree's
+  `PointInsertion/Burgess.lean`), confirmed for `untlLeftMonoDeriv` in both trees and for
+  `combineImpConj` in Temporal specifically (Bimodal's own `combineImpConj` is available
+  via `Theorems/Combinators.lean` with no cycle, but the field must serve both trees
+  uniformly). Both are deferred to Phase 2 (`RRelation.lean`), which sits at the correct
+  layer to supply them;
 - the MCS/Burgess apparatus lemmas the `ChronicleTypes` layer invokes
   (`mcsClosedUnderDerivation`, `theoremInMcs`, `negationComplete`, `negExcludes`,
   `cudContainsTheorems`) as *statement-only* fields — each logic supplies its own proof
@@ -144,16 +150,10 @@ structure ChronicleInterface (F : Type*) where
   lceImp : ∀ (φ ψ : F), Deriv [] (imp (and φ ψ) φ)
   /-- Right conjunction elimination: `⊢ (φ ∧ ψ) → ψ`. -/
   rceImp : ∀ (φ ψ : F), Deriv [] (imp (and φ ψ) ψ)
-  /-- Combine two empty-context implications into a conjunction. -/
-  combineImpConj : ∀ {φ ψ χ : F},
-    Deriv [] (imp φ ψ) → Deriv [] (imp φ χ) → Deriv [] (imp φ (and ψ χ))
   /-- Pairing combinator: `⊢ φ → ψ → (φ ∧ ψ)` (used by `cud_conj_closed`). -/
   pairing : ∀ (φ ψ : F), Deriv [] (imp φ (imp ψ (and φ ψ)))
   /-- Ex falso quodlibet: `⊢ ⊥ → φ` (used by `cud_not_mem_is_sdc`). -/
   efq : ∀ (φ : F), Deriv [] (imp bot φ)
-  /-- Left monotonicity of `untl` at the derivation level. -/
-  untlLeftMonoDeriv : ∀ (guard1 event guard2 : F),
-    Deriv [] (imp guard1 guard2) → Deriv [] (imp (untl guard1 event) (untl guard2 event))
   /-- Past necessitation: `⊢ φ` implies `⊢ allPast φ`. -/
   pastNecessitation : ∀ (φ : F), Deriv [] φ → Deriv [] (allPast φ)
   /-- Derivable formulas from an MCS-subset context are already in the MCS (the general,

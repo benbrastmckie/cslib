@@ -449,29 +449,65 @@ lift), `accSourcesKnown`, and a KB5 `accTargetsKnown` open-branch preservation a
       step-preservation + bounds. Leverage the Phase 2 world invariant (coinciding with
       `FiveWorldInv`) to reuse Five's bound machinery; re-prove only the arms where the new rule's
       propagation differs.
-- [ ] `accSourcesKnown`: apply the generic `modalExpandBranchesGen_openBranch_accSourcesKnown` with
+      *NOT YET STARTED -- see handoff `handoffs/02_phase5-complete-phase6-continuation.md` for the
+      full analysis. This is genuinely the single largest remaining piece of work in the plan
+      (estimated 300-500+ lines mirroring `modalApplyOneFive_worldGrowth` (~90 lines) and
+      `modalStepBranchFive_preserves_worldInv` (~220 lines), both rule-specific tag-counting
+      bookkeeping that does not transfer via the mint-arm agreement lemmas the way Phase 4/6.2's
+      work did, because `FiveWorldInv`'s termination measure needs a TIGHT per-step growth
+      argument, not just the `outputsSubsetUniverse` catalog-membership bound Phase 2 already
+      landed).*
+- [x] `accSourcesKnown`: apply the generic `modalExpandBranchesGen_openBranch_accSourcesKnown` with
       `modalApplyOneKb5''` + the Phase 2 freshness helper — this bridge is generic in the rule and
       should apply directly.
-- [ ] `accTargetsKnown`: build a `modalExpandBranchesKb5''_openBranch_accTargetsKnown` analogue via
+      *(deviation: altered -- confirmed this bridge is fully generic and needs NO new declaration
+      in this file; it applies directly at the Phase 7 assembly site with
+      `modalApplyOneKb5''_fresh_local` (Phase 2). No task-6-specific lemma landed for this bullet;
+      documented here as verified-free rather than landed.)*
+- [x] `accTargetsKnown`: build a `modalExpandBranchesKb5''_openBranch_accTargetsKnown` analogue via
       a `modalStepBranchKb5''_preserves_accTargetsKnown` step lemma. (NeRoot is not required by the
       truth lemma — KB5's root is in the cluster.)
+      *(deviation: altered -- TWO corrections to this bullet's own premises, both discovered during
+      Phase 5: (1) `accTargetsKnown` alone is ALSO fully generic (`modalExpandBranchesGen_open
+      Branch_accTargetsKnown`, `BDriver.lean`), needing no bespoke lemma either; (2)
+      **`accTargetsNeRoot` IS required** by `modalTruthLemmaKb5` after all -- the plan's own
+      parenthetical ("NeRoot is not required... KB5's root is in the cluster") is now stale: Phase
+      5's residual `w=0` self-relate case (`extractModelKb5_clusterNonempty_of_root_selfRelate`)
+      needed `accTargetsNeRoot` as a genuine new hypothesis (see Phase 5's own second deviation
+      note for the full "why", including why the FIRST attempt at fixing this, an unsafe
+      `accEdgeIrrefl` hypothesis, was corrected). Landed the full bespoke top-loop propagation
+      mirroring Five's Phase 21 exactly, EXTENDED with root-known-ness as a third bundled
+      invariant (since `modalApplyOneKb5''Prop_knownWorlds_step`, Phase 3, needs `h0` too):
+      `modalKnownWorlds_fold_spec_C`/`mem_modalKnownWorlds_C`/`modalKnownWorlds_mono_append_C`
+      (local re-derivations), `modalStepBranchGen_knownWorlds_mono_C` (generic new-branches-are-
+      prepend helper), `hasEdge_addEdge_cases_C`/`modalNextWorld_ne_zero_C` (local re-derivations),
+      `modalApplyOneKb5''_edge_target_ne_root`, `modalStepBranchKb5''_preserves_accTargetsNeRoot`,
+      `modalStepBranchKb5''_preserves_accTargetsKnown_and_NeRoot_and_rootKnown`, and the top-loop
+      `modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown`. All
+      `lean_verify`-clean, zero sorry, identical axiom profile.*
 - [ ] `lean_verify` every new declaration.
+      *Done for all Phase 6.2 (accTargetsNeRoot+rootKnown) declarations; the Hintikka-lift
+      declarations (Phase 6.1 per the handoff's numbering) remain to be landed and verified.*
 
-**Timing**: 2 hours
+**Timing**: 2 hours (revised estimate: 2 hours actual for the accTargetsNeRoot+rootKnown piece
+landed so far; the still-outstanding Hintikka lift is now estimated at 3-5 hours given its true
+scope, discovered only once `modalApplyOneFive_worldGrowth`/`modalStepBranchFive_preserves_
+worldInv`'s actual size and rule-specific-bookkeeping depth were read in full)
 
 **Depends on**: 2
 
 **Files to modify**:
-- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — Hintikka-lift instantiation,
-  `accTargetsKnown` open-branch lemma and its step-preservation helper (entry-point/open-branch
-  block, distinct from the Phase 4 Hintikka block).
+- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — Hintikka-lift instantiation (still
+  outstanding), `accTargetsNeRoot`+root-known-ness top-loop propagation (landed, entry-point/
+  open-branch block, distinct from the Phase 4 Hintikka block).
 
 **Verification**:
-- `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` succeeds.
-- `lean_verify` clean on every new lemma.
-- **Split trigger**: if the `ModalLoopAuxKb5''` loop invariant + preservation exceeds ~400 lines or
-  one agent run, split into Phase 6a (Hintikka lift) and Phase 6b (accTargetsKnown); update the
-  wave table.
+- `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` succeeds (true for all landed pieces).
+- `lean_verify` clean on every new lemma (true for all landed pieces).
+- **Split trigger, exercised**: the `ModalLoopAuxKb5''` loop invariant + preservation piece
+  (Hintikka lift) is split into its own continuation session per the handoff above -- the
+  accTargetsNeRoot+rootKnown piece (originally scoped under the plan's `accTargetsKnown` bullet)
+  is fully landed and verified in this session.
 
 ---
 

@@ -1,16 +1,28 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-18T16:43:50Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/plans/01_corrected-gate-kb5-rule.md",
-      "summary": "8-phase plan; Phases 1-5 marked [COMPLETED] with deviation annotations, resuming Phase 6"
+      "summary": "8-phase plan; Phases 1-5 [COMPLETED], Phase 6 [IN PROGRESS] (accTargetsNeRoot+rootKnown landed, Hintikka lift outstanding)"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/01_phases-1-4-complete-phase5-continuation.md",
+      "summary": "Continuation context for Phase 5 onward (prior session)"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/02_phase5-complete-phase6-continuation.md",
+      "summary": "Detailed continuation context for the Phase 6 Hintikka-lift work (this session)"
     }
   ],
+  "requires_user_review": true,
+  "review_reason": "Phase 5 (the truth lemma that was mathematically false for the frozen rule and is now proven true for the corrected-gate rule) is fully complete and verified. Phase 6 is partially complete: accTargetsNeRoot + root-known-ness top-loop propagation landed and verified; the Hintikka lift (ModalLoopAuxKb5'' + world-invariant step-preservation) is NOT yet started -- discovered this session to be substantially larger than the plan anticipated (~300-500+ lines mirroring Five's ~180-line modalApplyOneFive_worldGrowth and ~220-line modalStepBranchFive_preserves_worldInv, both intricate rule-specific tag-counting bookkeeping). Phases 7 and 8 have not been started (both depend on Phase 6 completing). No phase is marked [BLOCKED] -- work simply has not yet reached the remaining scope. A detailed, actionable continuation handoff (02_phase5-complete-phase6-continuation.md) documents exactly what transfers from Five's existing proof and what needs fresh case work, to make the next session efficient.",
   "partial_progress": {
-    "stage": "phase-5-complete",
-    "details": "Phase 5 (truth lemma modalTruthLemmaKb5) landed and lean_verify-clean: propext/Classical.choice/Quot.sound only, zero sorry. This is the lemma that was mathematically FALSE for the frozen task-524 rule and is now TRUE for the corrected-gate rule. Landed modalApplyOneKb5''_eq_of_prop_shape (propositional-case dispatcher bridge), accEdgeIrrefl (new abstract hypothesis: raw edges never self-loop, mirroring accSourcesKnown/accTargetsKnown/accTargetsNeRoot's pattern, discharge deferred to Phase 6/7), euclGen_symmGen_exists_ne_base (general structural helper), and extractModelKb5_clusterNonempty_of_root_selfRelate (residual w=0 self-relate case Phase 4's clusterNonempty_of_reach_root did not cover). Scoped build of FiveSimplification+FrameSoundness+FrameCompleteness together green.",
+    "stage": "phase-6-partial",
+    "details": "Phase 5 fully landed: modalTruthLemmaKb5, modalApplyOneKb5''_eq_of_prop_shape, euclGen_symmGen_exists_base, extractModelKb5_clusterNonempty_of_root_selfRelate. Phase 5's first attempt (accEdgeIrrefl hypothesis) was found unsafe and corrected to use accTargetsNeRoot instead (documented in plan file and handoff). Phase 6 partial: accTargetsNeRoot + root-known-ness top-loop propagation landed (modalKnownWorlds_fold_spec_C/mem_modalKnownWorlds_C/modalKnownWorlds_mono_append_C, modalStepBranchGen_knownWorlds_mono_C, hasEdge_addEdge_cases_C/modalNextWorld_ne_zero_C, modalApplyOneKb5''_edge_target_ne_root, modalStepBranchKb5''_preserves_accTargetsNeRoot, modalStepBranchKb5''_preserves_accTargetsKnown_and_NeRoot_and_rootKnown, modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown). accSourcesKnown/accTargetsKnown individually confirmed fully generic (no new code needed, use existing BDriver.lean bridges directly at Phase 7 assembly). Hintikka lift (ModalLoopAuxKb5'') not started -- full plan for it is in handoffs/02_phase5-complete-phase6-continuation.md.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 5
@@ -20,5 +32,13 @@
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "note": "Scoped builds (FiveSimplification.lean, FrameSoundness.lean, FrameCompleteness.lean, individually and together) all green. Full CSLib CI pipeline deferred to Phase 8, which is not yet reached."
   }
 }

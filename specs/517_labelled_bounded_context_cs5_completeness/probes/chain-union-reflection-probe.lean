@@ -1029,4 +1029,25 @@ theorem deductiveClosure_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Ato
   obtain ⟨_, _, hnd⟩ := hmax.prop
   exact hnd (hDeriv'.subst hderiv)
 
+/-! ### Assembly: Simpson's Prime Lemma 5.3.1 -/
+
+/-- **Simpson's Prime Lemma 5.3.1** (`chunk_0102.md`/`chunk_0103.md`, pp. 92-93): if `(G,Γ)` is a
+context and `Γ ⊬_G x:A`, there is a `𝒯`-prime context `(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A`. Assembles
+`primeC_exists_maximal` (the Zorn maximalisation) with the five `TPrime` clause theorems above.
+The maximal element's `TPrime` structure carries `clModel`/`consistency`/`disjunction`/`diamond`
+sorry-free; `deductiveClosure` routes through the one documented strategic sorry `NIK.subst`
+(cut admissibility) — see that theorem's docstring. -/
+theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Proposition Atom)
+    (h0 : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) :
+    ∃ P : TPrime 𝒯 Atom, G₀ ≤ P.toContext ∧ ¬ Deriv 𝒯 P.G P.Γ (x₀ ∶ A₀) := by
+  obtain ⟨H, hmax⟩ := primeC_exists_maximal G₀ x₀ A₀ (primeC_mem_base G₀ x₀ A₀ h0)
+  obtain ⟨hG₀H, _, hnd⟩ := hmax.prop
+  exact ⟨{ H with
+      clModel := clModel_of_maximal hmax
+      deductiveClosure := deductiveClosure_of_maximal hmax
+      consistency := consistency_of_maximal hmax
+      disjunction := disjunction_of_maximal hmax
+      diamond := diamond_of_maximal hmax },
+    hG₀H, hnd⟩
+
 end Cslib.Logic.Modal.Labelled

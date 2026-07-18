@@ -406,27 +406,51 @@ successor-preservation and limit-preservation are independent statements).
   hypothesis plus a cardinality/ordinal-stabilization argument — see the theorem's docstring and
   `.orchestrator-handoff.json`'s `sorry_inventory` for the exact follow-up).
 
-### Phase 5: The shared old-label reflection lemma from FLO — `flo_oldlabel_transport` [NOT STARTED]
+### Phase 5: The shared old-label reflection lemma from FLO — `flo_oldlabel_transport` [COMPLETED]
 
 - **Goal:** the mathematical crux. Using FLO-2's `rank` bound, prove the shared lemma that
   transports a single witnessing `NIK`-derivation across "old" labels — the exact fact both
   `deriv_reflect` and `dwitness_mem_of_maximal` need for their cofinite `boxI`/`diaE` eigenvariable
   premise (`∀ y' ∉ L, …`) where `y'` may already be in the domain.
 - **Tasks:**
-  - [ ] `--lit`: re-read the "(◇E)"/"(□I)" eigenvariable justification in `chunk_0102.md`/
-    `chunk_0103.md` (raster) for the intended reflection.
-  - [ ] (5.1) Prove the rank-induction transport lemma: for a label `y'` with `rank y' = σ`, the
-    witnessing derivation transports to `y'` by well-founded induction on `σ`, using FLO-2 to bound
-    the edges incident to `y'` to its birth stage (so the swap/transport does not collide — the
-    naive-swap invalidity is avoided by construction, not asserted away).
-  - [ ] (5.2) Apply the transport lemma to build the full cofinite premise (`∀ y' ∉ L`) from the
-    single reserve-fresh witness (`NIK.freshWitness_transport`, FLO-1(a)) plus the old-label
-    transport (5.1) plus the dwitness case (FLO-1(b)).
+  - [x] `--lit`: re-read the "(◇E)"/"(□I)" eigenvariable justification in `chunk_0102.md`/
+    `chunk_0103.md` (raster) for the intended reflection. **Confirmed**: both chunks (Prime Lemma
+    5.3.1's proof and the diamond/deductive-closure maximality argument) contain no further detail
+    on the fresh-vs-old label distinction than what prior phases already extracted — Simpson's
+    informal proof never surfaces this obstacle at all; it is an artifact purely of this
+    development's cofinite-quantifier Lean encoding of `(□I)`/`(◇E)` (`Deduction.lean:288-312`),
+    confirming the module docstring's existing diagnosis rather than adding new textual guidance.
+  - [x] (5.1) Prove the transport lemma. *(deviation: altered — a well-founded/rank induction
+    using FLO-2 turned out to be unnecessary; see the "Finding (documented deviation...)" module
+    section directly above `flo_oldlabel_transport` in the probe, ~line 1846. A **one-directional**
+    relabeling `substFn a b` (`a↦b`, identity elsewhere, in particular fixing `b`) — as opposed to
+    `swapFn a b`, an involution that also sends `b↦a` — never touches `y'`'s own incident edges at
+    all, because it is not invertible and does not relocate `y'`'s structure onto `y₀`. This avoids
+    the naive-swap collision **by construction** (matching the task's own requirement), just via a
+    different construction (a non-swap substitution) than the anticipated rank-indexed induction.
+    The only freshness fact used is `hy₀ : y₀ ∉ (𝒮.H σ).G.X` (already part of the theorem's fixed
+    signature); FLO/`rankOf`/FLO-2 are not needed by the proof. Landed as the reusable general
+    lemma `NIK.relabelFresh` (mirrors `NIK.swap_relabel`'s case shape) plus the helper `substFn`/
+    `substFn_self`/`substFn_other`/`List.map_substFn_eq_self`, all sorry-free.*
+  - [x] (5.2) Build the full premise for every `y'`. *(deviation: skipped as a separate assembly
+    step — subsumed by 5.1's generalized shape. Because `NIK.relabelFresh`/`substFn`-transport does
+    not case on whether `y'` is fresh or old, dwitness-shaped or not, `flo_oldlabel_transport`'s
+    single conclusion (`∀ y' ∈ (𝒮.H σ).G.X, x≠y' → (∀ψ∈Γ,ψ.lbl≠y') → NIK …`) already covers every
+    `y'` uniformly in one shot, so no separate combination of the fresh-witness case
+    (`NIK.freshWitness_transport`) and a distinct old-label/dwitness case was required —
+    `freshWitness_transport` is in fact the special case of `flo_oldlabel_transport` where the
+    extra hypothesis `y ∉ G.X` also happens to hold.)*
 - **Timing:** 1-2 dispatches (may split 5.1/5.2). Estimated output: ~200-400 lines (probe).
+  **Actual: ~150 lines** (simpler than anticipated per the 5.1 deviation).
 - **Depends on:** 4.
 - **Done when:** `flo_oldlabel_transport` sorry-free; probe build green. If the transport lemma
   cannot be proved from FLO as stated, escalate `[BLOCKED]` with the exact failing goal — do NOT
-  weaken FLO to a free bounded-old-label hypothesis (Shortcut 3, Postmortem Constraints).
+  weaken FLO to a free bounded-old-label hypothesis (Shortcut 3, Postmortem Constraints). **MET**:
+  `flo_oldlabel_transport` sorry-free (`lake env lean` on the probe: exit 0, zero errors, sorry
+  count unchanged at 4 — the pre-existing `deriv_reflect`/`dwitness_mem_of_maximal`/`flo_succ`/
+  `primeC'_exists_maximal` strategic sorries, all preserved verbatim, none newly introduced);
+  `lean_verify` on `flo_oldlabel_transport` and `NIK.relabelFresh`: axioms `[propext,
+  Classical.choice, Quot.sound]`, no `sorryAx`, for both.
 
 ### Phase 6: Discharge both sorries; re-verify `primeLemma` fully sorry-free [NOT STARTED]
 

@@ -1820,23 +1820,183 @@ theorem primeC'_exists_maximal (x₀ : Label Atom) (A₀ : Proposition Atom)
   --    gap, and `FLO 𝒮 σ₀` plus `𝒮.H σ₀ ∈ primeC` are independently sorry-free.
   sorry
 
+/-! ## Phase 5 — the shared old-label reflection lemma: `substFn` and `NIK.relabelFresh`
+
+**Finding (documented deviation from the plan's anticipated proof shape, see the plan's Task 5.1
+annotation)**: the plan's Overview and Task 5.1 anticipated needing a well-founded (rank-)
+induction using FLO-2's edge-locality bound to avoid the "naive swap" collision the Postmortem
+Constraints flag (`swapFn v y'` corrupts `y'`'s *own* pre-existing structure by relocating it onto
+`v`, since `swapFn` is an involution and therefore also maps `y' ↦ v`). Closer analysis shows the
+collision is avoided **by construction, not by bounding `y'`'s edges to a stage** (the "so the
+swap/transport does not collide" clause Task 5.1 asks for, satisfied a different way than
+anticipated): a **one-directional** relabeling `substFn a b` (`a ↦ b`, identity everywhere else,
+in particular fixing `b`) never touches `b`'s own incident edges at all, because `substFn a b` is
+NOT an involution -- unlike `swapFn a b`, it does not also send `b ↦ a`. The only freshness fact
+this needs is that `a` (`y₀` at the call site) has NO incident edges in the ambient graph, which
+`(𝒮.H σ).G.edge_mem` + `hy₀ : y₀ ∉ (𝒮.H σ).G.X` already supplies directly -- `FLO`/`rankOf`/FLO-2
+are consequently not needed by this lemma's proof (`hflo` is threaded through the signature only
+because Phase 1 fixed it there; the argument below never uses it). This subsumes Task 5.2 as
+originally scoped ("apply the transport lemma to build the full cofinite premise... from the
+fresh witness... plus old-label transport... plus the dwitness case"): because `substFn`-transport
+does not case on whether `y'` is fresh or old, dwitness-shaped or not, `flo_oldlabel_transport`'s
+single conclusion already covers every `y'` (fresh or old) uniformly, so no separate assembly step
+combining the fresh-witness and old-label cases is required -- `NIK.freshWitness_transport`
+(above) is in fact the special case of the lemma below where the extra hypothesis `y ∉ G.X` also
+happens to hold. -/
+
+/-- The one-directional label substitution sending `a ↦ b` and fixing every other label
+(including `b` itself). Unlike `swapFn`, this is **not an involution**: `substFn a b` never sends
+`b ↦ a`, so it never disturbs any structure already incident to `b` -- exactly what avoids the
+"naive swap" collision the Postmortem Constraints flag for old-label transport. -/
+noncomputable def substFn (a b l : Label Atom) : Label Atom :=
+  if l = a then b else l
+
+@[simp] theorem substFn_self (a b : Label Atom) : substFn a b a = b := by
+  unfold substFn; simp
+
+theorem substFn_other {a b l : Label Atom} (hl : l ≠ a) : substFn a b l = l := by
+  unfold substFn; simp [hl]
+
+/-- If `f = substFn a b` fixes every label occurring in `Γ` (i.e. `a` is fresh w.r.t. `Γ`),
+relabeling does nothing to `Γ`. Analogue of `List.map_swapFn_eq_self` for `substFn`. -/
+theorem List.map_substFn_eq_self {a b : Label Atom} {Γ : List (LabelledFormula Atom)}
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ a) :
+    Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop) = Γ := by
+  conv_rhs => rw [← List.map_id (l := Γ)]
+  refine List.map_congr_left (fun ψ hψ => ?_)
+  simp [substFn_other (hΓ ψ hψ)]
+
+/-- **One-directional relabeling.** Prop. 4.4.1 (`f(Γ) ⊢_{G'} f(x):A`) specialized to
+`f = substFn a b`: any `NIK`-derivation transports along a one-directional substitution `a ↦ b`
+(not necessarily a swap), provided the target graph `G'` is related to the source `G` by the
+substitution as a graph morphism (`hf`). The proof mirrors `NIK.swap_relabel`'s case shape
+exactly, with one departure in `boxI`/`diaE`: since `substFn a b` is not invertible, the preimage
+of a target label `t ∉ substFn a b '' L ∪ {a}` is `t` **itself** (not `substFn a b t` computed via
+an involution formula), because `substFn a b` fixes every point besides `a`, and `t ≠ a` is
+guaranteed by `t ∉ {a}`. This is what lets `b` remain fully untouched: the lemma places no
+freshness requirement on `b` at all. -/
+theorem NIK.relabelFresh {a b : Label Atom} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {φ : LabelledFormula Atom} (h : NIK 𝒯 G Γ φ) :
+    ∀ {G' : Graph Atom}, (∀ p q, G.R p q → G'.R (substFn a b p) (substFn a b q)) →
+      NIK 𝒯 G' (Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop)) (substFn a b φ.lbl ∶ φ.prop) := by
+  induction h with
+  | assumption G Γ φ hmem =>
+      intro G' _
+      exact .assumption G' _ _ (List.mem_map_of_mem hmem)
+  | efq G Γ x y A _ ih =>
+      intro G' hf
+      exact .efq G' _ (substFn a b x) (substFn a b y) A (ih hf)
+  | andI G Γ x A B _ _ ihA ihB =>
+      intro G' hf
+      exact .andI G' _ (substFn a b x) A B (ihA hf) (ihB hf)
+  | andE1 G Γ x A B _ ih =>
+      intro G' hf
+      exact .andE1 G' _ (substFn a b x) A B (ih hf)
+  | andE2 G Γ x A B _ ih =>
+      intro G' hf
+      exact .andE2 G' _ (substFn a b x) A B (ih hf)
+  | orI1 G Γ x A B _ ih =>
+      intro G' hf
+      exact .orI1 G' _ (substFn a b x) A B (ih hf)
+  | orI2 G Γ x A B _ ih =>
+      intro G' hf
+      exact .orI2 G' _ (substFn a b x) A B (ih hf)
+  | orE G Γ x y A B C _ _ _ ihor ihA ihB =>
+      intro G' hf
+      refine .orE G' _ (substFn a b x) (substFn a b y) A B C (ihor hf) ?_ ?_
+      · simpa using ihA hf
+      · simpa using ihB hf
+  | impI G Γ x A B _ ih =>
+      intro G' hf
+      have := ih hf
+      simpa using NIK.impI G' _ (substFn a b x) A B (by simpa using this)
+  | impE G Γ x A B _ _ ihimp ihA =>
+      intro G' hf
+      exact .impE G' _ (substFn a b x) A B (ihimp hf) (ihA hf)
+  | boxE G Γ x y A hR _ ih =>
+      intro G' hf
+      exact .boxE G' _ (substFn a b x) (substFn a b y) A
+        (TClosure.map (substFn a b) hf hR) (ih hf)
+  | boxI L hL G Γ x A h ih =>
+      intro G' hf
+      refine .boxI (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
+        (substFn a b x) A ?_
+      intro t ht
+      have hta : t ≠ a := by
+        intro heq
+        exact ht (Or.inr (by simp [heq]))
+      have hst : substFn a b t = t := substFn_other hta
+      have htL : t ∉ L := by
+        intro hmem
+        exact ht (Or.inl ⟨t, hmem, hst⟩)
+      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
+      have hf' : ∀ p q, (G.addEdge x t).R p q →
+          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
+        intro p q hpq
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact Or.inl (hf p q hpq)
+        · exact Or.inr ⟨rfl, hst⟩
+      have := hstep hf'
+      simpa [hst] using this
+  | diaI G Γ x y A hR _ ih =>
+      intro G' hf
+      exact .diaI G' _ (substFn a b x) (substFn a b y) A
+        (TClosure.map (substFn a b) hf hR) (ih hf)
+  | diaE L hL G Γ x z A B hdia h ihdia ih =>
+      intro G' hf
+      refine .diaE (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
+        (substFn a b x) (substFn a b z) A B (ihdia hf) ?_
+      intro t ht
+      have hta : t ≠ a := by
+        intro heq
+        exact ht (Or.inr (by simp [heq]))
+      have hst : substFn a b t = t := substFn_other hta
+      have htL : t ∉ L := by
+        intro hmem
+        exact ht (Or.inl ⟨t, hmem, hst⟩)
+      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
+      have hf' : ∀ p q, (G.addEdge x t).R p q →
+          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
+        intro p q hpq
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact Or.inl (hf p q hpq)
+        · exact Or.inr ⟨rfl, hst⟩
+      have := hstep hf'
+      simpa [hst] using this
+
 /-- **Phase 5's target (the mathematical crux)**: given `FLO`-coherence at stage `σ`, a
 `NIK`-derivation witnessed at one label `y₀` fresh w.r.t. the ambient graph transports to ANY
 other label `y'` in `(𝒮.H σ).G.X` -- including "old" labels already present, not just fresh ones
 -- generalising `NIK.freshWitness_transport` (above) beyond the shared coinfinite reserve. This is
 exactly the fact `ChainCtx.deriv_reflect` (~line 395) and `dwitness_mem_of_maximal`'s diamond
 sub-case (~line 1030) could not close without it (see the module analysis preceding
-`ChainCtx.deriv_reflect`, ~line 295): FLO-2's `rankOf`-indexed edge locality is what makes a
-rank-indexed (well-founded) induction transport the witnessing derivation across old labels
-legitimate, where a bare `swapFn` transposition is not (Postmortem Constraints: "do not
-naive-swap `swapFn v y'` for an 'old' label"). Not attempted here; sorried scaffolding for
-Phase 5. -/
-theorem flo_oldlabel_transport {𝒮 : FloSeq 𝒯 Atom G₀} {σ : Stage} (hflo : FLO 𝒮 σ)
+`ChainCtx.deriv_reflect`, ~line 295).
+
+**Proof shape (see the module section immediately above for the full deviation writeup)**: built
+from `NIK.relabelFresh` with `a := y₀`, `b := y'`, exactly mirroring `NIK.freshWitness_transport`'s
+own proof shape but with `substFn` in place of `swapFn` -- `substFn y₀ y'` fixes `y'` outright
+(never sends `y' ↦ y₀`), so it never disturbs whatever structure `(𝒮.H σ).G` already has at `y'`,
+avoiding the naive-swap collision by construction. `hflo`/`FLO`/`rankOf` are not needed by this
+proof (see the deviation note); `hflo` remains in the signature because it was fixed here by
+Phase 1's landed scaffolding. -/
+theorem flo_oldlabel_transport {𝒮 : FloSeq 𝒯 Atom G₀} {σ : Stage} (_hflo : FLO 𝒮 σ)
     {x y₀ : Label Atom} {A : Proposition Atom} {Γ : List (LabelledFormula Atom)}
     (h : NIK 𝒯 ((𝒮.H σ).G.addEdge x y₀) Γ (y₀ ∶ A)) (hy₀ : y₀ ∉ (𝒮.H σ).G.X) (hxy₀ : x ≠ y₀)
     (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀) :
     ∀ y' ∈ (𝒮.H σ).G.X, x ≠ y' → (∀ ψ ∈ Γ, ψ.lbl ≠ y') →
       NIK 𝒯 ((𝒮.H σ).G.addEdge x y') Γ (y' ∶ A) := by
-  sorry
+  intro y' _hy' hxy' _hΓy'
+  have hf : ∀ p q, ((𝒮.H σ).G.addEdge x y₀).R p q →
+      ((𝒮.H σ).G.addEdge x y').R (substFn y₀ y' p) (substFn y₀ y' q) := by
+    intro p q hpq
+    rcases hpq with hpq | ⟨rfl, rfl⟩
+    · have hp : p ≠ y₀ := fun hp => hy₀ (hp ▸ ((𝒮.H σ).G.edge_mem p q hpq).1)
+      have hq : q ≠ y₀ := fun hq => hy₀ (hq ▸ ((𝒮.H σ).G.edge_mem p q hpq).2)
+      rw [substFn_other hp, substFn_other hq]
+      exact Or.inl hpq
+    · rw [substFn_other hxy₀, substFn_self]
+      exact Or.inr ⟨rfl, rfl⟩
+  have hstep := h.relabelFresh (a := y₀) (b := y') (G' := (𝒮.H σ).G.addEdge x y') hf
+  rwa [List.map_substFn_eq_self hΓ, show substFn y₀ y' y₀ = y' from substFn_self y₀ y'] at hstep
 
 end Cslib.Logic.Modal.Labelled

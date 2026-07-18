@@ -146,19 +146,19 @@ a `Univ` module docstring.
 
 ---
 
-### Phase 3: Retire FiveSimplification Full definitions (base) [NOT STARTED]
+### Phase 3: Retire FiveSimplification Full definitions (base) [COMPLETED]
 
 **Goal**: With both consumer chains removed, delete the `Full`/prime base definitions and their
 split-lemma families in `FiveSimplification.lean`.
 
 **Tasks**:
-- [ ] Delete target fns `modalKb5BoxAllFull` (1539) / `modalKb5DiaNegAllFull` (1556) and their
-      `_mem` / `_mem_known` / `_mem_eq` lemmas (1577, 1645, 1715, 1725, 1736, 1746).
-- [ ] Delete Prop sibling `modalApplyOneKb5'Prop` (1759) and its lemma family (1787, 1801, 1902, 3376, 3388, 3405, 3479).
-- [ ] Delete rule `modalApplyOneKb5'` (1937) and all its `'` split-lemma pairs (1955, 1975, 1995, 2004, 2014, 2029, 2050, 2072, 2098, 3417, 3519, 3529, 3539, 3551, 3585, 3686, 3833, 3853, 3874).
-- [ ] Delete driver decls `modalStepBranchKb5'` (2121), `modalExpandBranchesKb5'` (2129), `modalTableauKb5'` (2137) and their `_eq` theorems (2141, 2147, 2154).
-- [ ] Delete the dead termination aliases `Kb5'WorldInv` (4751), `Kb5'WorldInv_eq` (4759), `modalMaxWorld_lt_worldBound_of_Kb5'WorldInv` (4768).
-- [ ] Update `FiveSimplification.lean` docstrings that name retired prime symbols.
+- [x] Delete target fns `modalKb5BoxAllFull` (1539) / `modalKb5DiaNegAllFull` (1556) and their
+      `_mem` / `_mem_known` / `_mem_eq` lemmas (1577, 1645, 1715, 1725, 1736, 1746). *(altered: the entire contiguous section 1503-2156 -- comprising these lemmas plus the modalApplyOneKb5'Prop family, the modalApplyOneKb5' rule/split lemmas, and the driver decls below -- was found to be one uninterrupted prime-family block and deleted in a single range, since no Univ/keeper declaration was interleaved within it)*
+- [x] Delete Prop sibling `modalApplyOneKb5'Prop` (1759) and its lemma family (1787, 1801, 1902, 3376, 3388, 3405, 3479).
+- [x] Delete rule `modalApplyOneKb5'` (1937) and all its `'` split-lemma pairs (1955, 1975, 1995, 2004, 2014, 2029, 2050, 2072, 2098, 3417, 3519, 3529, 3539, 3551, 3585, 3686, 3833, 3853, 3874).
+- [x] Delete driver decls `modalStepBranchKb5'` (2121), `modalExpandBranchesKb5'` (2129), `modalTableauKb5'` (2137) and their `_eq` theorems (2141, 2147, 2154).
+- [x] Delete the dead termination aliases `Kb5'WorldInv` (4751), `Kb5'WorldInv_eq` (4759), `modalMaxWorld_lt_worldBound_of_Kb5'WorldInv` (4768).
+- [x] Update `FiveSimplification.lean` docstrings that name retired prime symbols. *(also fixed several stray retired-symbol docstring references discovered in the already-committed FrameSoundness.lean/FrameCompleteness.lean during this phase's repo-wide grep sweep, ahead of Phase 4's final sweep)*
 
 **Timing**: 1 hour
 

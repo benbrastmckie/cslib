@@ -605,9 +605,9 @@ unmodified Five rule is already sound for the strictly stronger `kb5FC` class). 
 completeness is now fully delivered too**, via a corrected-gate full-cluster rule
 (`modalApplyOneKb5''`, `modalTableauKb5''_complete`, `kb5Valid_decides`, `instDecidableKb5Valid`
 below): `modalApplyOneFive`'s root-restricted propagation, essential to Five's own soundness, is
-provably insufficient once the frame is required to be symmetric too (see the dedicated blocker
-note beside `extractModelKb5` below, retained as documentation of exactly why the naive
-root-restricted gate is unrepairable for the frozen `modalApplyOneKb5'` rule) -- the fix drops the
+provably insufficient once the frame is required to be symmetric too (see `modalTruthLemmaKb5`'s
+docstring below, which retains the counterexample documenting exactly why the naive
+root-restricted gate was unrepairable for the retired frozen rule) -- the fix drops the
 trigger-identity conjunct from the self-target gate (`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`),
 firing the cluster-dump arm whenever the known cluster has any non-root member, regardless of which
 world triggered it. This confirms K5/KB5 completeness via a rooted Euclidean tableau is exactly as
@@ -3312,7 +3312,7 @@ in `b`, and a `base`/`eucl` derivation witnesses at least one raw edge touching 
 *positive* direction the KB5 truth lemma's root case consumes: unlike Five's
 `euclGen_root_imp_hasEdge` (which restricts the root to its **direct** successors only), this
 lemma places every closure-reachable `w'` in the full known non-root cluster **without** asserting
-a direct recorded edge -- exactly matching `modalKb5BoxAllFull`'s unconditional non-root cluster
+a direct recorded edge -- exactly matching `modalKb5BoxAllUniv`'s unconditional non-root cluster
 dump. -/
 lemma extractModelKb5_root_reach_mem_modalKnownWorlds
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)

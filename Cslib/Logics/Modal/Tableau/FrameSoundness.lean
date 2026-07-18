@@ -1577,7 +1577,7 @@ than `0` itself, is related **to `0`** in the model under `kb5FC` -- no root-suc
 needed (contrast `reachable_imp_cod_related_five`, which lands on a direct-successor witness
 `s` rather than `0` itself, since `fiveFC` alone cannot symmetrize). This is the semantic payoff
 of `kb5FC`'s extra `Std.Symm` conjunct: the whole known non-root cluster relates directly back to
-the root, matching `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s unconditional (non-edge-gated)
+the root, matching `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s unconditional (non-edge-gated)
 propagation target set. -/
 lemma reachable_imp_related_kb5
     {acc : Accessibility} {W : Type} {m : Model W Atom} {f : WorldIndex → W}
@@ -1625,9 +1625,10 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Root self-reflexivity discharge** (task 524, `Relation.symm_rightEuclidean_root_refl`): if
 the known cluster of `b` has *some* non-root member `v`, the root is related to itself in the
 model under `kb5FC`. This is exactly the semantic justification for
-`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s self-target arm (fires only when the cluster is
-nonempty): `v`'s anchor `m.r (f 0) (f v)` (`reachable_imp_related_kb5`) symmetrizes to `m.r (f v)
-(f 0)`, and `RightEuclidean` applied to that pair with itself (`x := f v, y := f 0, z := f 0`)
+`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s self-target arm (fires unconditionally whenever the
+cluster is nonempty): `v`'s anchor `m.r (f 0) (f v)` (`reachable_imp_related_kb5`) symmetrizes to
+`m.r (f v) (f 0)`, and `RightEuclidean` applied to that pair with itself (`x := f v, y := f 0,
+z := f 0`)
 gives `m.r (f 0) (f 0)` directly -- the model-level mirror of
 `Relation.symm_rightEuclidean_root_refl`. -/
 lemma accReachableInv_kb5_root_refl
@@ -3123,7 +3124,7 @@ two propagation shapes directly against `kb5FC`, reusing task 524's landed three
 family (`reachable_imp_related_kb5`/`accReachableInv_related_kb5`/`accReachableInv_kb5_root_refl`)
 for the non-root-target and trigger-is-root cases verbatim, plus one new one-liner
 (`reachable_imp_related_kb5_symm`) for the genuinely new fourth case: a non-root trigger firing
-the self-target arm, which `modalKb5BoxAllFull`'s trigger-identity gate could never reach. -/
+the self-target arm, which the retired frozen rule's trigger-identity gate could never reach. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- **The one new semantic case the corrected gate needs**: symmetrized form of

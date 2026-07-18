@@ -1435,15 +1435,12 @@ phase's scope.
 below retires it), but a `FrameCompleteness.lean` blocker note (retained there as documentation)
 identified that *completeness* needs a genuinely different, KB5-specific rule -- reaching into the
 full known non-root cluster on a root trigger, rather than `modalApplyOneFive`'s edge-gated root
-arm. That rule now exists alongside this alias: see `modalApplyOneKb5'` (`## KB5-Specific
-Full-Cluster Propagation Rule` section below), its own `RuleApplicationSpecCore` instance
-(`modalApplyOneKb5'_specCore`), and its own direct-against-`kb5FC` soundness theorem
-(`modalTableauKb5'_sound`, `FrameSoundness.lean` -- proved without this section's
-frame-class-monotonicity shortcut, which is unsound for `modalApplyOneKb5'`'s unrestricted root
-propagation). `modalApplyOneKb5'` itself is complete only up to a shallow root-only repair, still
-insufficient in general (`FrameCompleteness.lean`'s blocker note above has the full witness); full
-KB5 completeness is delivered by the corrected-gate rule beside it instead (`## The Corrected-Gate
-KB5 Rule` section below: `modalApplyOneKb5''`, and `FrameCompleteness.lean`'s
+arm. A first attempt at that rule (root-trigger-gated: the self-target arm fired only when the
+*trigger itself* was the root) was tried and retired: it was sound but only complete up to a
+shallow root-only repair, since `extractModelKb5`'s forced relation reaches non-root-triggered
+worlds too (`modalTruthLemmaKb5`'s docstring, `FrameCompleteness.lean`, retains the counterexample
+witness). Full KB5 completeness is delivered by the corrected-gate rule instead (`## The
+Corrected-Gate KB5 Rule` section below: `modalApplyOneKb5''`, and `FrameCompleteness.lean`'s
 `modalTableauKb5''_complete`/`kb5Valid_decides`/`instDecidableKb5Valid`). -/
 
 /-- The KB5 tableau rule: **literally** `modalApplyOneFive`, not a clone -- see this section's
@@ -1500,682 +1497,28 @@ at the same underlying rule (`modalApplyOneKb5 = modalApplyOneFive` by `rfl`). T
 theorem modalTableauKb5_eq_modalTableauFive (φ : Proposition Atom) :
     modalTableauKb5 φ = modalTableauFive φ := rfl
 
-/-! ## KB5-Specific Full-Cluster Propagation Rule (task 524)
-
-`modalApplyOneKb5 := modalApplyOneFive` (the "factor, not clone" alias above) is sound for KB5 but
-not *complete*: `FrameCompleteness.lean`'s Phase 23 blocker note (`extractModelKb5_root_reach_scout`
-et al.) shows `extractModelKb5`'s forced relation (`Relation.EuclGen (Relation.SymmGen
-acc.hasEdge)`) relates the root `0` to **every** world reachable via a raw-edge chain, not merely
-to `modalFiveBoxAll`/`modalFiveDiaNegAll`'s edge-gated direct successors. Reaching completeness
-needs a genuinely new rule whose root-triggered box-positive/diamond-negative propagation (i) dumps
-to the **full** known non-root cluster unconditionally -- matching the non-root arm's own
-unconditional propagation, since the model forces the root into the same equivalence class as
-everyone it can reach (`Relation.rooted_cluster_isEquiv`/`Relation.rooted_mem_cod`) -- and (ii)
-propagates the root's own content back onto world `0` itself whenever the known cluster is
-nonempty, since a symmetric right-Euclidean root with *any* successor is reflexive
-(`Relation.symm_rightEuclidean_root_refl`, `Euclidean.lean:362`). This is unsound for the *larger*
-`fiveFC` class (Five's root need not be reflexive, and an edge-isolated Five root need not relate
-to a disconnected branch world), so it cannot be an alias of `modalApplyOneFive`; it gets its own
-name, its own `RuleApplicationSpecCore` instance, and its own soundness theorem, proved directly
-against `kb5FC` (`FrameSoundness.lean`) -- the `fiveValid_imp_kb5Valid` frame-class-monotonicity
-shortcut is unavailable for this direction. The mint (existential) shapes `.pos .diamond`/
-`.neg .box` are **untouched**: they retain `modalApplyOneFive`'s witness-reuse behavior verbatim
-(root-triggered mints still fall through to a fresh K-style mint, never consulting
-`witnessWorldFive`), since universally asserting a diamond/box-negative witness at every known
-world would turn an existential claim into an unsound universal one -- only the two *universal*
-propagation shapes change. -/
-
-/-- **Full-cluster root-aware propagation for box-positives** (task 524): the KB5-specific
-analogue of `modalFiveBoxAll`. The non-root targets (`nonRootTargets`, computed once) are
-*unconditional* -- every known non-root world of `b`, regardless of whether the trigger `w` is
-the root or not, exactly matching `modalFiveBoxAll`'s own non-root arm and dropping its root-arm
-`acc.hasEdge 0 w'` restriction entirely (justified by `Relation.rooted_cluster_isEquiv`/
-`Relation.rooted_mem_cod`: the model forces every reachable non-root world into the root's own
-equivalence class regardless of a *direct* recorded edge). An **additional** self-target `w' = 0`
-fires only when the trigger `w` is itself the root **and** the known cluster already has some
-non-root member (`Relation.symm_rightEuclidean_root_refl`: a symmetric right-Euclidean root with
-any successor is reflexive) -- the guard that keeps this rule sound on an edge-isolated-root KB5
-model, where `□p → p` may still fail vacuously. -/
-def modalKb5BoxAllFull (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (φ : Proposition Atom) (w : WorldIndex) :
-    List (SignedFormula (Proposition Atom) WorldIndex) :=
-  let nonRootTargets : List (SignedFormula (Proposition Atom) WorldIndex) :=
-    (modalKnownWorlds b).filterMap fun w' =>
-      if w' == (0 : WorldIndex) then none
-      else
-        let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, w'⟩
-        if b.any (· == sf) then none else some sf
-  if w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))) then
-    let sf0 : SignedFormula (Proposition Atom) WorldIndex := ⟨.pos, φ, (0 : WorldIndex)⟩
-    nonRootTargets ++ (if b.any (· == sf0) then [] else [sf0])
-  else
-    nonRootTargets
-
-/-- **Full-cluster root-aware propagation for diamond-negatives**, dual of `modalKb5BoxAllFull`.
--/
-def modalKb5DiaNegAllFull (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (φ : Proposition Atom) (w : WorldIndex) :
-    List (SignedFormula (Proposition Atom) WorldIndex) :=
-  let nonRootTargets : List (SignedFormula (Proposition Atom) WorldIndex) :=
-    (modalKnownWorlds b).filterMap fun w' =>
-      if w' == (0 : WorldIndex) then none
-      else
-        let sf : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, w'⟩
-        if b.any (· == sf) then none else some sf
-  if w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))) then
-    let sf0 : SignedFormula (Proposition Atom) WorldIndex := ⟨.neg, φ, (0 : WorldIndex)⟩
-    nonRootTargets ++ (if b.any (· == sf0) then [] else [sf0])
-  else
-    nonRootTargets
-
-omit [Hashable Atom] in
-/-- Membership dichotomy for `modalKb5BoxAllFull`: every emitted formula is fresh (`x ∉ b`) and
-either (a) targets a known non-root world (the unconditional cluster-dump arm), or (b) is the
-self-target `⟨.pos, φ, 0⟩`, which only fires when the trigger `w` is itself the root and the
-known cluster has some other, non-root member `v` (the cluster-nonempty witness the soundness
-proof's `symm_rightEuclidean_root_refl` application needs). -/
-lemma modalKb5BoxAllFull_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5BoxAllFull b φ w) :
-    x ∉ b ∧
-    ((x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
-        x.label ∈ modalKnownWorlds b ∧ x.label ≠ 0) ∨
-     (x = (⟨.pos, φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
-        w = (0 : WorldIndex) ∧ ∃ v ∈ modalKnownWorlds b, v ≠ (0 : WorldIndex))) := by
-  unfold modalKb5BoxAllFull at h
-  dsimp only at h
-  by_cases hgate :
-      (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
-        = true
-  · rw [if_pos hgate] at h
-    simp only [Bool.and_eq_true, beq_iff_eq] at hgate
-    obtain ⟨hw0, hcluster⟩ := hgate
-    simp only [List.any_eq_true, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq] at hcluster
-    obtain ⟨v, hv, hvne⟩ := hcluster
-    by_cases hmem0 :
-        (b.any (· == (⟨.pos, φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)))
-          = true
-    · rw [if_pos hmem0] at h
-      simp only [List.append_nil, List.mem_filterMap] at h
-      obtain ⟨u, hu, heq⟩ := h
-      by_cases huz : (u == (0 : WorldIndex)) = true
-      · rw [if_pos huz] at heq; exact absurd heq (by simp)
-      · rw [if_neg huz] at heq
-        by_cases humem :
-            (b.any (· == (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-        · rw [if_pos humem] at heq; exact absurd heq (by simp)
-        · rw [if_neg humem] at heq
-          obtain rfl : (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-            injection heq
-          refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-          simpa using huz
-    · rw [if_neg hmem0] at h
-      simp only [List.mem_append, List.mem_filterMap, List.mem_singleton] at h
-      rcases h with ⟨u, hu, heq⟩ | heq
-      · by_cases huz : (u == (0 : WorldIndex)) = true
-        · rw [if_pos huz] at heq; exact absurd heq (by simp)
-        · rw [if_neg huz] at heq
-          by_cases humem :
-              (b.any (· == (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-          · rw [if_pos humem] at heq; exact absurd heq (by simp)
-          · rw [if_neg humem] at heq
-            obtain rfl : (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-              injection heq
-            refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-            simpa using huz
-      · subst heq
-        exact ⟨by simpa using hmem0, Or.inr ⟨rfl, hw0, v, hv, hvne⟩⟩
-  · rw [if_neg hgate] at h
-    simp only [List.mem_filterMap] at h
-    obtain ⟨u, hu, heq⟩ := h
-    by_cases huz : (u == (0 : WorldIndex)) = true
-    · rw [if_pos huz] at heq; exact absurd heq (by simp)
-    · rw [if_neg huz] at heq
-      by_cases humem :
-          (b.any (· == (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-      · rw [if_pos humem] at heq; exact absurd heq (by simp)
-      · rw [if_neg humem] at heq
-        obtain rfl : (⟨.pos, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-          injection heq
-        refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-        simpa using huz
-
-omit [Hashable Atom] in
-/-- Membership dichotomy for `modalKb5DiaNegAllFull`, dual of `modalKb5BoxAllFull_mem`. -/
-lemma modalKb5DiaNegAllFull_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5DiaNegAllFull b φ w) :
-    x ∉ b ∧
-    ((x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
-        x.label ∈ modalKnownWorlds b ∧ x.label ≠ 0) ∨
-     (x = (⟨.neg, φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex) ∧
-        w = (0 : WorldIndex) ∧ ∃ v ∈ modalKnownWorlds b, v ≠ (0 : WorldIndex))) := by
-  unfold modalKb5DiaNegAllFull at h
-  dsimp only at h
-  by_cases hgate :
-      (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
-        = true
-  · rw [if_pos hgate] at h
-    simp only [Bool.and_eq_true, beq_iff_eq] at hgate
-    obtain ⟨hw0, hcluster⟩ := hgate
-    simp only [List.any_eq_true, Bool.not_eq_true', beq_eq_false_iff_ne, ne_eq] at hcluster
-    obtain ⟨v, hv, hvne⟩ := hcluster
-    by_cases hmem0 :
-        (b.any (· == (⟨.neg, φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)))
-          = true
-    · rw [if_pos hmem0] at h
-      simp only [List.append_nil, List.mem_filterMap] at h
-      obtain ⟨u, hu, heq⟩ := h
-      by_cases huz : (u == (0 : WorldIndex)) = true
-      · rw [if_pos huz] at heq; exact absurd heq (by simp)
-      · rw [if_neg huz] at heq
-        by_cases humem :
-            (b.any (· == (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-        · rw [if_pos humem] at heq; exact absurd heq (by simp)
-        · rw [if_neg humem] at heq
-          obtain rfl : (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-            injection heq
-          refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-          simpa using huz
-    · rw [if_neg hmem0] at h
-      simp only [List.mem_append, List.mem_filterMap, List.mem_singleton] at h
-      rcases h with ⟨u, hu, heq⟩ | heq
-      · by_cases huz : (u == (0 : WorldIndex)) = true
-        · rw [if_pos huz] at heq; exact absurd heq (by simp)
-        · rw [if_neg huz] at heq
-          by_cases humem :
-              (b.any (· == (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-          · rw [if_pos humem] at heq; exact absurd heq (by simp)
-          · rw [if_neg humem] at heq
-            obtain rfl : (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-              injection heq
-            refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-            simpa using huz
-      · subst heq
-        exact ⟨by simpa using hmem0, Or.inr ⟨rfl, hw0, v, hv, hvne⟩⟩
-  · rw [if_neg hgate] at h
-    simp only [List.mem_filterMap] at h
-    obtain ⟨u, hu, heq⟩ := h
-    by_cases huz : (u == (0 : WorldIndex)) = true
-    · rw [if_pos huz] at heq; exact absurd heq (by simp)
-    · rw [if_neg huz] at heq
-      by_cases humem :
-          (b.any (· == (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex))) = true
-      · rw [if_pos humem] at heq; exact absurd heq (by simp)
-      · rw [if_neg humem] at heq
-        obtain rfl : (⟨.neg, φ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) = x := by
-          injection heq
-        refine ⟨by simpa using humem, Or.inl ⟨rfl, hu, ?_⟩⟩
-        simpa using huz
-
-omit [Hashable Atom] in
-/-- Every emitted formula's label is a known world of `b`, regardless of which case of
-`modalKb5BoxAllFull_mem`'s dichotomy produced it -- the general fact `outputsSubsetUniverse`/
-`persistentFresh` (Phase 4) need. -/
-lemma modalKb5BoxAllFull_mem_known {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5BoxAllFull b φ w)
-    (hw : w ∈ modalKnownWorlds b) : x.label ∈ modalKnownWorlds b := by
-  rcases (modalKb5BoxAllFull_mem h).2 with ⟨_, hkn, _⟩ | ⟨hxeq, hw0, _⟩
-  · exact hkn
-  · rw [hxeq]; dsimp only; rw [← hw0]; exact hw
-
-omit [Hashable Atom] in
-/-- Dual of `modalKb5BoxAllFull_mem_known` for `modalKb5DiaNegAllFull`. -/
-lemma modalKb5DiaNegAllFull_mem_known {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex}
-    {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5DiaNegAllFull b φ w)
-    (hw : w ∈ modalKnownWorlds b) : x.label ∈ modalKnownWorlds b := by
-  rcases (modalKb5DiaNegAllFull_mem h).2 with ⟨_, hkn, _⟩ | ⟨hxeq, hw0, _⟩
-  · exact hkn
-  · rw [hxeq]; dsimp only; rw [← hw0]; exact hw
-
-omit [Hashable Atom] in
-/-- Every emitted formula's shape is `⟨.pos, φ, x.label⟩` regardless of which case of
-`modalKb5BoxAllFull_mem`'s dichotomy produced it. -/
-lemma modalKb5BoxAllFull_mem_eq {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex} {x : SignedFormula (Proposition Atom) WorldIndex}
-    (h : x ∈ modalKb5BoxAllFull b φ w) :
-    x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
-  rcases (modalKb5BoxAllFull_mem h).2 with ⟨heq, -, -⟩ | ⟨heq, -, -⟩
-  · exact heq
-  · subst heq; rfl
-
-omit [Hashable Atom] in
-/-- Dual of `modalKb5BoxAllFull_mem_eq` for `modalKb5DiaNegAllFull`. -/
-lemma modalKb5DiaNegAllFull_mem_eq {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w : WorldIndex} {x : SignedFormula (Proposition Atom) WorldIndex}
-    (h : x ∈ modalKb5DiaNegAllFull b φ w) :
-    x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) := by
-  rcases (modalKb5DiaNegAllFull_mem h).2 with ⟨heq, -, -⟩ | ⟨heq, -, -⟩
-  · exact heq
-  · subst heq; rfl
-
-/-! ## Rule Application (task 524) -/
-
-/-- Apply the K modal rules together with the KB5 full-cluster propagation arms. Mirrors
-`modalApplyOneFiveProp` declaration-for-declaration, substituting `modalKb5BoxAllFull`/
-`modalKb5DiaNegAllFull` for `modalFiveBoxAll`/`modalFiveDiaNegAll`. -/
-def modalApplyOneKb5'Prop
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) :
-    RuleResult (Proposition Atom) WorldIndex × Accessibility :=
-  let (kResult, kAcc) := modalApplyOne sf b acc
-  match sf.sign, sf.formula with
-  | .pos, .box φ =>
-    let allNew := modalKb5BoxAllFull b φ sf.label
-    match kResult with
-    | .persistent kForms =>
-      (.persistent (kForms ++ allNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
-    | .notApplicable =>
-      if allNew.isEmpty then (.notApplicable, kAcc) else (.persistent allNew, kAcc)
-    | other => (other, kAcc)
-  | .neg, .diamond φ =>
-    let allNew := modalKb5DiaNegAllFull b φ sf.label
-    match kResult with
-    | .persistent kForms =>
-      (.persistent (kForms ++ allNew.filter (fun x => !(kForms.any (· == x)))), kAcc)
-    | .notApplicable =>
-      if allNew.isEmpty then (.notApplicable, kAcc) else (.persistent allNew, kAcc)
-    | other => (other, kAcc)
-  | _, _ => (kResult, kAcc)
-
-omit [Hashable Atom] in
-/-- `modalApplyOneKb5'Prop` agrees with `modalApplyOne` outside the two propagation shapes.
-Mirrors `modalApplyOneFiveProp_eq_of_not_boxPos_diaNeg`. -/
-lemma modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
-         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
-    modalApplyOneKb5'Prop sf b acc = modalApplyOne sf b acc := by
-  obtain ⟨h1, h2⟩ := h
-  unfold modalApplyOneKb5'Prop
-  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all
-
-/-- At the two propagation shapes, `modalApplyOneKb5'Prop` never mints (its accessibility output
-is exactly K's, unchanged) and only appends formulas at existing known worlds. Mirrors
-`modalApplyOneFiveProp_boxPos_diaNeg_eq`. -/
-lemma modalApplyOneKb5'Prop_boxPos_diaNeg_eq
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
-    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
-    (modalApplyOneKb5'Prop sf b acc).snd = acc ∧
-    ((modalApplyOneKb5'Prop sf b acc).fst = .notApplicable ∨
-      ∃ out, (modalApplyOneKb5'Prop sf b acc).fst = .persistent out ∧
-        ∀ x ∈ out, x.label ∈ modalKnownWorlds b) := by
-  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-  · obtain ⟨s, ff, l⟩ := sf
-    simp only at hs hf
-    subst hs; subst hf
-    have hK := modalApplyOne_boxPos_eq
-      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-    have hKW := modalApplyOne_knownWorlds_step
-      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
-    unfold modalApplyOneKb5'Prop
-    rcases hp : modalApplyOne
-        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        with ⟨kResult, kAcc⟩
-    rw [hp] at hK
-    simp only at hK
-    rw [hp] at hKW
-    simp only at hKW
-    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
-      swap
-      · exact hmatch.elim
-      subst hsndeq
-      dsimp only
-      split_ifs with hemp
-      · exact ⟨rfl, Or.inl rfl⟩
-      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
-        intro x hx
-        exact (modalKb5BoxAllFull_mem hx).2.elim (fun ⟨_, hkn, _⟩ => hkn)
-          (fun ⟨hxeq, hw0, _⟩ => by
-            rw [hxeq]; dsimp only; rw [← hw0]
-            exact label_mem_modalKnownWorlds hsfmem)
-    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
-      swap
-      · exact hmatch.elim
-      subst hsndeq
-      dsimp only
-      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
-      intro x hx
-      simp only [List.mem_append, List.mem_filter] at hx
-      rcases hx with hx | ⟨hx, -⟩
-      · exact hmatch x hx
-      · exact (modalKb5BoxAllFull_mem hx).2.elim (fun ⟨_, hkn, _⟩ => hkn)
-          (fun ⟨hxeq, hw0, _⟩ => by
-            rw [hxeq]; dsimp only; rw [← hw0]
-            exact label_mem_modalKnownWorlds hsfmem)
-  · obtain ⟨s, ff, l⟩ := sf
-    simp only at hs hf
-    subst hs; subst hf
-    have hK := modalApplyOne_diamondNeg_eq
-      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-    have hKW := modalApplyOne_knownWorlds_step
-      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
-    unfold modalApplyOneKb5'Prop
-    rcases hp : modalApplyOne
-        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        with ⟨kResult, kAcc⟩
-    rw [hp] at hK
-    simp only at hK
-    rw [hp] at hKW
-    simp only at hKW
-    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-    · rcases hKW with ⟨hsndeq, -⟩ | ⟨-, hmatch⟩
-      swap
-      · exact hmatch.elim
-      subst hsndeq
-      dsimp only
-      split_ifs with hemp
-      · exact ⟨rfl, Or.inl rfl⟩
-      · refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
-        intro x hx
-        exact (modalKb5DiaNegAllFull_mem hx).2.elim (fun ⟨_, hkn, _⟩ => hkn)
-          (fun ⟨hxeq, hw0, _⟩ => by
-            rw [hxeq]; dsimp only; rw [← hw0]
-            exact label_mem_modalKnownWorlds hsfmem)
-    · rcases hKW with ⟨hsndeq, hmatch⟩ | ⟨-, hmatch⟩
-      swap
-      · exact hmatch.elim
-      subst hsndeq
-      dsimp only
-      refine ⟨rfl, Or.inr ⟨_, rfl, ?_⟩⟩
-      intro x hx
-      simp only [List.mem_append, List.mem_filter] at hx
-      rcases hx with hx | ⟨hx, -⟩
-      · exact hmatch x hx
-      · exact (modalKb5DiaNegAllFull_mem hx).2.elim (fun ⟨_, hkn, _⟩ => hkn)
-          (fun ⟨hxeq, hw0, _⟩ => by
-            rw [hxeq]; dsimp only; rw [← hw0]
-            exact label_mem_modalKnownWorlds hsfmem)
-
-/-- The Kb5' analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
-`modalApplyOneKb5'Prop`. Mirrors `modalApplyOneFiveProp_knownWorlds_step`. Needed by
-`modalStepBranchKb5'_preserves_accReachableInv` (`FrameSoundness.lean`). -/
-lemma modalApplyOneKb5'Prop_knownWorlds_step
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc) :
-    ((modalApplyOneKb5'Prop sf b acc).snd = acc ∧
-      (match (modalApplyOneKb5'Prop sf b acc).fst with
-        | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-        | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
-        | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
-        | .notApplicable => True)) ∨
-    ((modalApplyOneKb5'Prop sf b acc).snd = acc.addEdge sf.label (modalNextWorld b) ∧
-      (match (modalApplyOneKb5'Prop sf b acc).fst with
-        | .linear formulas => formulas ≠ [] ∧ ∀ x ∈ formulas, x.label = modalNextWorld b
-        | .branching _ => False
-        | .persistent _ => False
-        | .notApplicable => False)) := by
-  by_cases hbd : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-  · obtain ⟨hsndeq, hor⟩ := modalApplyOneKb5'Prop_boxPos_diaNeg_eq sf b acc hsfmem hknown hbd
-    refine Or.inl ⟨hsndeq, ?_⟩
-    rcases hor with hnot | ⟨out, hpers, hlabel⟩
-    · rw [hnot]; trivial
-    · rw [hpers]; exact hlabel
-  · have hnbox : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) := fun hc => hbd (Or.inl hc)
-    have hndia : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) := fun hc => hbd (Or.inr hc)
-    rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc ⟨hnbox, hndia⟩]
-    exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
-
-/-! ## The KB5 Full-Cluster Rule -/
-
-/-- **The new KB5-specific rule** (task 524): the mint (existential) shapes are
-`modalApplyOneFive`'s witness-reuse behavior, verbatim and unchanged; only the two propagation
-(universal) shapes differ, routing through `modalApplyOneKb5'Prop` instead of
-`modalApplyOneFiveProp`. NOT an alias of `modalApplyOneFive`: its root-triggered propagation is
-strictly more permissive (full cluster, plus self), sound only for `kb5FC`. -/
-def modalApplyOneKb5' : RuleApply Atom := fun sf b acc =>
-  match sf.sign, sf.formula with
-  | .pos, .diamond φ =>
-    (if sf.label == (0 : WorldIndex) then modalApplyOneKb5'Prop sf b acc
-     else
-       match witnessWorldFive b .pos φ with
-       | some w' => (.linear [⟨.pos, φ, w'⟩], acc.addEdge sf.label w')
-       | none => modalApplyOneKb5'Prop sf b acc)
-  | .neg, .box φ =>
-    (if sf.label == (0 : WorldIndex) then modalApplyOneKb5'Prop sf b acc
-     else
-       match witnessWorldFive b .neg φ with
-       | some w' => (.linear [⟨.neg, φ, w'⟩], acc.addEdge sf.label w')
-       | none => modalApplyOneKb5'Prop sf b acc)
-  | _, _ => modalApplyOneKb5'Prop sf b acc
-
-/-- Case-split helper for the diamond-positive mint shape, mirrors
-`modalApplyOneFive_diaPos_eq_or_reuse`. -/
-lemma modalApplyOneKb5'_diaPos_eq_or_reuse
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOneKb5' (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-       = modalApplyOneKb5'Prop
-           (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
-    (∃ w', witnessWorldFive b .pos φ = some w' ∧
-      modalApplyOneKb5' (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        = (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w')) := by
-  unfold modalApplyOneKb5'
-  dsimp only
-  by_cases hz : (w == (0 : WorldIndex)) = true
-  · rw [if_pos hz]; exact Or.inl rfl
-  · rw [if_neg hz]
-    cases hw : witnessWorldFive b .pos φ with
-    | none => exact Or.inl rfl
-    | some w' => exact Or.inr ⟨w', rfl, rfl⟩
-
-/-- Case-split helper for the box-negative mint shape, dual of
-`modalApplyOneKb5'_diaPos_eq_or_reuse`. -/
-lemma modalApplyOneKb5'_boxNeg_eq_or_reuse
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOneKb5' (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-       = modalApplyOneKb5'Prop
-           (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
-    (∃ w', witnessWorldFive b .neg φ = some w' ∧
-      modalApplyOneKb5' (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        = (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w')) := by
-  unfold modalApplyOneKb5'
-  dsimp only
-  by_cases hz : (w == (0 : WorldIndex)) = true
-  · rw [if_pos hz]; exact Or.inl rfl
-  · rw [if_neg hz]
-    cases hw : witnessWorldFive b .neg φ with
-    | none => exact Or.inl rfl
-    | some w' => exact Or.inr ⟨w', rfl, rfl⟩
-
-/-- Free bridge: on the box-positive (propagation, non-mint) shape, `modalApplyOneKb5'` falls
-through to `modalApplyOneKb5'Prop` by the definitional `| _, _ =>` catch-all -- `rfl`. -/
-lemma modalApplyOneKb5'_boxPos_eq
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    modalApplyOneKb5' (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-      = modalApplyOneKb5'Prop
-          (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
-  rfl
-
-/-- Free bridge, dual of `modalApplyOneKb5'_boxPos_eq`. -/
-lemma modalApplyOneKb5'_diaNeg_eq
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    modalApplyOneKb5' (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-      = modalApplyOneKb5'Prop
-          (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc :=
-  rfl
-
-/-- `modalApplyOneKb5'` agrees with `modalApplyOneKb5'Prop` outside the two mint shapes. Mirrors
-`modalApplyOneFive_eq_of_not_mint_shape`. -/
-lemma modalApplyOneKb5'_eq_of_not_mint_shape
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (h : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∧
-         ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)) :
-    modalApplyOneKb5' sf b acc = modalApplyOneKb5'Prop sf b acc := by
-  obtain ⟨h1, h2⟩ := h
-  unfold modalApplyOneKb5'
-  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all
-
-/-- **Task 524**: strengthens `modalApplyOneKb5'_diaPos_eq_or_reuse` with the fact that a reuse
-call's trigger is never the root -- reuse only fires in the `else` branch of
-`modalApplyOneKb5'`'s `if sf.label == 0 then .. else ..` guard, i.e. exactly when `w ≠ 0`. Mirrors
-`modalApplyOneFive_diaPos_eq_or_reuse_ne_root`. -/
-lemma modalApplyOneKb5'_diaPos_eq_or_reuse_ne_root
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOneKb5' (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-       = modalApplyOneKb5'Prop
-           (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
-    (∃ w', w ≠ 0 ∧ witnessWorldFive b .pos φ = some w' ∧
-      modalApplyOneKb5' (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        = (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w')) := by
-  unfold modalApplyOneKb5'
-  dsimp only
-  by_cases hz : (w == (0 : WorldIndex)) = true
-  · rw [if_pos hz]; exact Or.inl rfl
-  · rw [if_neg hz]
-    have hwne : w ≠ 0 := by simpa using hz
-    cases hw : witnessWorldFive b .pos φ with
-    | none => exact Or.inl rfl
-    | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
-
-/-- **Task 524**: dual of `modalApplyOneKb5'_diaPos_eq_or_reuse_ne_root` for the box-negative
-mint shape. Mirrors `modalApplyOneFive_boxNeg_eq_or_reuse_ne_root`. -/
-lemma modalApplyOneKb5'_boxNeg_eq_or_reuse_ne_root
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (φ : Proposition Atom) (w : WorldIndex) :
-    (modalApplyOneKb5' (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-       = modalApplyOneKb5'Prop
-           (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc) ∨
-    (∃ w', w ≠ 0 ∧ witnessWorldFive b .neg φ = some w' ∧
-      modalApplyOneKb5' (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        = (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w')) := by
-  unfold modalApplyOneKb5'
-  dsimp only
-  by_cases hz : (w == (0 : WorldIndex)) = true
-  · rw [if_pos hz]; exact Or.inl rfl
-  · rw [if_neg hz]
-    have hwne : w ≠ 0 := by simpa using hz
-    cases hw : witnessWorldFive b .neg φ with
-    | none => exact Or.inl rfl
-    | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
-
-/-- `modalApplyOneKb5'` either agrees with `modalApplyOneKb5'Prop` outright, or fires a witness
-reuse away from the root, targeting a non-root witness (verbatim `modalApplyOneFive` mint
-behavior). Mirrors `modalApplyOneFive_agree_or_reuse_ne_root`. -/
-lemma modalApplyOneKb5'_agree_or_reuse_ne_root
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    modalApplyOneKb5' sf b acc = modalApplyOneKb5'Prop sf b acc ∨
-    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
-      sf' ∈ b ∧ sf.label ≠ 0 ∧ sf'.label ≠ 0 ∧ modalApplyOneKb5' sf b acc =
-        (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label) := by
-  obtain ⟨s, ff, w⟩ := sf
-  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-  case pos.diamond =>
-    rcases modalApplyOneKb5'_diaPos_eq_or_reuse_ne_root b acc φ w with
-      heq | ⟨w', hwne, hw', heq⟩
-    · exact Or.inl heq
-    · exact Or.inr
-        ⟨⟨.pos, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
-  case neg.box =>
-    rcases modalApplyOneKb5'_boxNeg_eq_or_reuse_ne_root b acc φ w with
-      heq | ⟨w', hwne, hw', heq⟩
-    · exact Or.inl heq
-    · exact Or.inr
-        ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
-  all_goals exact Or.inl (modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp))
-
-/-- Plain (non-root-excluded) agree-or-reuse dichotomy for `modalApplyOneKb5'`, mirrors
-`modalApplyOneFive_agree_or_reuse`. Needed by `modalStepBranchKb5'_preserves_accReachableInv`
-(`FrameSoundness.lean`), which does not need the root exclusion. -/
-lemma modalApplyOneKb5'_agree_or_reuse
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    modalApplyOneKb5' sf b acc = modalApplyOneKb5'Prop sf b acc ∨
-    ∃ sf' : SignedFormula (Proposition Atom) WorldIndex,
-      sf' ∈ b ∧ modalApplyOneKb5' sf b acc =
-        (RuleResult.linear [sf'], acc.addEdge sf.label sf'.label) := by
-  obtain ⟨s, ff, w⟩ := sf
-  rcases s with _ | _ <;> rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-  case pos.diamond =>
-    rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
-    · exact Or.inl heq
-    · exact Or.inr ⟨⟨.pos, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
-  case neg.box =>
-    rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
-    · exact Or.inl heq
-    · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
-  all_goals exact Or.inl (modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp))
-
-/-! ## Driver Instantiation (task 524) -/
-
-/-- One-step branch expansion for the new KB5 full-cluster tableau: the generic driver
-instantiated at `apply := modalApplyOneKb5'`. -/
-def modalStepBranchKb5'
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
-            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
-            Accessibility) :=
-  modalStepBranchGen modalApplyOneKb5' b e acc
-
-/-- Fuel-based expansion of a list of KB5 full-cluster-system branches. -/
-def modalExpandBranchesKb5'
-    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (accs : List Accessibility) (fuel : Nat) : ModalTableauResult Atom :=
-  modalExpandBranchesGen modalApplyOneKb5' branches expandedSets accs fuel
-
-/-- The KB5 full-cluster modal tableau **decision procedure**: the generic entry point
-instantiated at `apply := modalApplyOneKb5'`, starting the signed tableau from `F(φ)` at world
-`0`. -/
-def modalTableauKb5' (φ : Proposition Atom) : ModalTableauResult Atom :=
-  modalTableauGen modalApplyOneKb5' φ
-
-/-- `modalStepBranchKb5'` is exactly `modalStepBranchGen modalApplyOneKb5'` -- true `rfl`. -/
-theorem modalStepBranchKb5'_eq
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    modalStepBranchKb5' b e acc = modalStepBranchGen modalApplyOneKb5' b e acc := rfl
-
-/-- `modalExpandBranchesKb5'` is exactly `modalExpandBranchesGen modalApplyOneKb5'` -- true `rfl`.
--/
-theorem modalExpandBranchesKb5'_eq
-    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (accs : List Accessibility) (fuel : Nat) :
-    modalExpandBranchesKb5' branches expandedSets accs fuel =
-      modalExpandBranchesGen modalApplyOneKb5' branches expandedSets accs fuel := rfl
-
-/-- `modalTableauKb5'` is exactly `modalTableauGen modalApplyOneKb5'` -- true `rfl`. -/
-theorem modalTableauKb5'_eq (φ : Proposition Atom) :
-    modalTableauKb5' φ = modalTableauGen modalApplyOneKb5' φ := rfl
-
 /-! ## The Corrected-Gate KB5 Rule
 
-`modalTruthLemmaKb5` is mathematically FALSE for `modalApplyOneKb5'`'s 0-target propagation arm,
-witnessed by `extractModelKb5_nonRoot_boxPos_gap` (`FrameCompleteness.lean`) at `φ₀ = ¬◇◇□p`. The
-root cause is a single misplaced boolean gate: the 0-target arm of `modalKb5BoxAllFull`/
-`modalKb5DiaNegAllFull` fires on `w == 0 && clusterNonempty` (trigger-identity) when it must fire
-on `clusterNonempty` alone -- `extractModelKb5`'s forced relation is already the *total/universal*
-cluster on the connected edge-touched world set (`Relation.EuclGen (Relation.SymmGen
-acc.hasEdge)` over a connected symmetric graph is total on its field), so the self-target `w' = 0`
-formula must propagate regardless of *which* world triggered the rule, not only when the trigger
-happens to be the root itself. This section clones the frozen `*Full` helpers into `*Univ`
-siblings with exactly that one gate change, and clones the dispatcher/entry point around them.
-The frozen `modalApplyOneKb5'`/`modalTableauKb5'`/`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`
-above are left byte-for-byte untouched; the new rule sits beside them. -/
+`modalTruthLemmaKb5` was mathematically FALSE for the retired root-trigger-gated rule's 0-target
+propagation arm, witnessed by a counterexample at `φ₀ = ¬◇◇□p` (retained in `modalTruthLemmaKb5`'s
+docstring, `FrameCompleteness.lean`). The root cause was a single misplaced boolean gate: the
+0-target arm of the retired rule's full-cluster helpers fired on `w == 0 && clusterNonempty`
+(trigger-identity) when it needed to fire on `clusterNonempty` alone -- `extractModelKb5`'s forced
+relation is already the *total/universal* cluster on the connected edge-touched world set
+(`Relation.EuclGen (Relation.SymmGen acc.hasEdge)` over a connected symmetric graph is total on
+its field), so the self-target `w' = 0` formula must propagate regardless of *which* world
+triggered the rule, not only when the trigger happens to be the root itself. This section defines
+the `*Univ` rule with exactly that one gate change relative to the retired rule, along with its own
+dispatcher/entry point. -/
 
-/-- **Corrected-gate full-cluster propagation for box-positives**: identical to
-`modalKb5BoxAllFull` except the self-target `w' = 0` arm fires whenever the known cluster has any
-non-root member, regardless of whether the trigger `w` is itself the root. This is the gate fix:
-dropping the `w == 0` conjunct from `modalKb5BoxAllFull`'s guard. Sound because a symmetric
-right-Euclidean root with any successor is reflexive (`Relation.symm_rightEuclidean_root_refl`)
-independently of which world raised `T(□φ)` first -- the forced relation is already total on the
+/-- **Corrected-gate full-cluster propagation for box-positives**: the self-target `w' = 0` arm
+fires whenever the known cluster has any non-root member, regardless of whether the trigger `w` is
+itself the root -- the gate fix relative to the retired root-trigger-gated rule, which additionally
+required `w == 0`. Sound because a symmetric right-Euclidean root with any successor is reflexive
+(`Relation.symm_rightEuclidean_root_refl`) independently of which world raised `T(□φ)` first -- the
+forced relation is already total on the
 cluster, so any non-root trigger's box-positive content belongs at the root too. -/
+@[nolint unusedArguments]
 def modalKb5BoxAllUniv (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (φ : Proposition Atom) (_w : WorldIndex) :
     List (SignedFormula (Proposition Atom) WorldIndex) :=
@@ -2193,6 +1536,7 @@ def modalKb5BoxAllUniv (b : List (SignedFormula (Proposition Atom) WorldIndex))
 
 /-- **Corrected-gate full-cluster propagation for diamond-negatives**, dual of
 `modalKb5BoxAllUniv`. -/
+@[nolint unusedArguments]
 def modalKb5DiaNegAllUniv (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (φ : Proposition Atom) (_w : WorldIndex) :
     List (SignedFormula (Proposition Atom) WorldIndex) :=
@@ -2213,7 +1557,7 @@ omit [Hashable Atom] in
 fresh (`x ∉ b`) and either (a) targets a known non-root world (the unconditional cluster-dump
 arm), or (b) is the self-target `⟨.pos, φ, 0⟩`, which fires whenever the known cluster has some
 non-root member `v` -- the trigger `w` no longer appears in the dichotomy at all, in contrast to
-`modalKb5BoxAllFull_mem`. -/
+the retired frozen rule's trigger-gated dichotomy. -/
 lemma modalKb5BoxAllUniv_mem {b : List (SignedFormula (Proposition Atom) WorldIndex)}
     {φ : Proposition Atom} {w : WorldIndex}
     {x : SignedFormula (Proposition Atom) WorldIndex} (h : x ∈ modalKb5BoxAllUniv b φ w) :
@@ -2364,9 +1708,9 @@ lemma modalKb5DiaNegAllUniv_mem_eq {b : List (SignedFormula (Proposition Atom) W
 
 omit [Hashable Atom] in
 /-- **Introduction direction for `modalKb5BoxAllUniv`**, converse of `modalKb5BoxAllUniv_mem`.
-Trigger-free: unlike `modalKb5BoxAllFull_mem_of` (`FrameCompleteness.lean`), the self-target
-condition drops the `w = 0` conjunct entirely -- the corrected gate's self-target arm fires for
-any trigger. -/
+Trigger-free: unlike the retired frozen rule's introduction lemma, the self-target condition
+drops the `w = 0` conjunct entirely -- the corrected gate's self-target arm fires for any
+trigger. -/
 lemma modalKb5BoxAllUniv_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
     {φ : Proposition Atom} {w v : WorldIndex}
     (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
@@ -2433,8 +1777,9 @@ lemma modalKb5DiaNegAllUniv_mem_of {b : List (SignedFormula (Proposition Atom) W
     exact List.mem_append_right _ (List.mem_singleton_self _)
 
 /-- Apply the K modal rules together with the KB5 corrected-gate full-cluster propagation arms.
-Mirrors `modalApplyOneKb5'Prop` declaration-for-declaration, substituting `modalKb5BoxAllUniv`/
-`modalKb5DiaNegAllUniv` for `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`. -/
+Mirrors the retired frozen rule's propagation-only step function declaration-for-declaration,
+substituting `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv` for the retired rule's full-cluster
+helpers. -/
 def modalApplyOneKb5''Prop
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -2462,7 +1807,7 @@ def modalApplyOneKb5''Prop
 
 omit [Hashable Atom] in
 /-- `modalApplyOneKb5''Prop` agrees with `modalApplyOne` outside the two propagation shapes.
-Mirrors `modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg`. -/
+Mirrors the retired frozen rule's analogous free bridge lemma. -/
 lemma modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2475,9 +1820,9 @@ lemma modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg
     simp_all
 
 /-- **The corrected-gate KB5 rule**: the mint (existential) shapes are `modalApplyOneFive`'s
-witness-reuse behavior, verbatim and unchanged (identical to `modalApplyOneKb5'`'s mint arms);
-only the two propagation (universal) shapes differ, routing through `modalApplyOneKb5''Prop`
-instead of `modalApplyOneKb5'Prop`. Mirrors `modalApplyOneKb5'` declaration-for-declaration. -/
+witness-reuse behavior, verbatim and unchanged (identical to the retired frozen rule's mint arms);
+only the two propagation (universal) shapes differ, routing through `modalApplyOneKb5''Prop`.
+Mirrors the retired frozen rule declaration-for-declaration. -/
 def modalApplyOneKb5'' : RuleApply Atom := fun sf b acc =>
   match sf.sign, sf.formula with
   | .pos, .diamond φ =>
@@ -2494,8 +1839,8 @@ def modalApplyOneKb5'' : RuleApply Atom := fun sf b acc =>
        | none => modalApplyOneKb5''Prop sf b acc)
   | _, _ => modalApplyOneKb5''Prop sf b acc
 
-/-- Case-split helper for the diamond-positive mint shape, mirrors
-`modalApplyOneKb5'_diaPos_eq_or_reuse`. -/
+/-- Case-split helper for the diamond-positive mint shape, mirrors the retired frozen rule's
+analogous case-split helper. -/
 lemma modalApplyOneKb5''_diaPos_eq_or_reuse
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -2554,7 +1899,7 @@ lemma modalApplyOneKb5''_diaNeg_eq
   rfl
 
 /-- `modalApplyOneKb5''` agrees with `modalApplyOneKb5''Prop` outside the two mint shapes. Mirrors
-`modalApplyOneKb5'_eq_of_not_mint_shape`. -/
+the retired frozen rule's analogous agreement lemma. -/
 lemma modalApplyOneKb5''_eq_of_not_mint_shape
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2569,7 +1914,7 @@ lemma modalApplyOneKb5''_eq_of_not_mint_shape
 /-- **Task 528**: strengthens `modalApplyOneKb5''_diaPos_eq_or_reuse` with the fact that a reuse
 call's trigger is never the root -- reuse only fires in the `else` branch of
 `modalApplyOneKb5''`'s `if sf.label == 0 then .. else ..` guard, i.e. exactly when `w ≠ 0`.
-Mirrors `modalApplyOneKb5'_diaPos_eq_or_reuse_ne_root`. -/
+Mirrors the retired frozen rule's analogous strengthened case-split helper. -/
 lemma modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -2590,7 +1935,7 @@ lemma modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root
     | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
 
 /-- **Task 528**: dual of `modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root` for the box-negative
-mint shape. Mirrors `modalApplyOneKb5'_boxNeg_eq_or_reuse_ne_root`. -/
+mint shape. Mirrors the retired frozen rule's analogous dual lemma. -/
 lemma modalApplyOneKb5''_boxNeg_eq_or_reuse_ne_root
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -2612,7 +1957,7 @@ lemma modalApplyOneKb5''_boxNeg_eq_or_reuse_ne_root
 
 /-- `modalApplyOneKb5''` either agrees with `modalApplyOneKb5''Prop` outright, or fires a witness
 reuse away from the root, targeting a non-root witness (verbatim `modalApplyOneFive` mint
-behavior). Mirrors `modalApplyOneKb5'_agree_or_reuse_ne_root`. -/
+behavior). Mirrors the retired frozen rule's analogous root-excluded dichotomy. -/
 lemma modalApplyOneKb5''_agree_or_reuse_ne_root
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -2636,8 +1981,8 @@ lemma modalApplyOneKb5''_agree_or_reuse_ne_root
         ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, hwne, (witnessWorldFive_mem hw').2, heq⟩
   all_goals exact Or.inl (modalApplyOneKb5''_eq_of_not_mint_shape _ b acc (by simp))
 
-/-- Plain (non-root-excluded) agree-or-reuse dichotomy for `modalApplyOneKb5''`, mirrors
-`modalApplyOneKb5'_agree_or_reuse`. -/
+/-- Plain (non-root-excluded) agree-or-reuse dichotomy for `modalApplyOneKb5''`, mirrors the
+retired frozen rule's analogous plain dichotomy. -/
 lemma modalApplyOneKb5''_agree_or_reuse
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -2699,9 +2044,9 @@ theorem modalTableauKb5''_eq (φ : Proposition Atom) :
 
 /-! ## `RuleApplicationSpecCore` for `modalApplyOneKb5''`
 
-Discharges `RuleApplicationSpecCore modalApplyOneKb5''` (`GenericDriver.lean`), mirroring
-`modalApplyOneKb5'_specCore`'s discharge declaration-for-declaration. The two mint shapes
-(`.pos .diamond`/`.neg .box`) are byte-identical to `modalApplyOneKb5'`'s own discharge (verbatim
+Discharges `RuleApplicationSpecCore modalApplyOneKb5''` (`GenericDriver.lean`), mirroring the
+retired frozen rule's analogous discharge declaration-for-declaration. The two mint shapes
+(`.pos .diamond`/`.neg .box`) are byte-identical to the retired rule's own discharge (verbatim
 witness-reuse behavior); only the two propagation shapes (`.pos .box`/`.neg .diamond`) need fresh
 proofs against `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s membership facts. Only
 `RuleApplicationSpecCore` (not the extended `RuleApplicationSpec` with its `rankStep`/`outDegStep`/
@@ -2710,7 +2055,7 @@ completeness machinery (`CompletenessLoop.lean`) consumes, and all this plan's t
 
 omit [Hashable Atom] in
 /-- `modalApplyOneKb5''Prop`'s accessibility output agrees with K's `modalApplyOne` at every
-shape. Mirrors `modalApplyOneKb5'Prop_snd_eq`. -/
+shape. Mirrors the retired frozen rule's analogous lemma. -/
 lemma modalApplyOneKb5''Prop_snd_eq
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -2722,7 +2067,7 @@ lemma modalApplyOneKb5''Prop_snd_eq
 
 omit [Hashable Atom] in
 /-- Whenever K's own result is `.linear`, `modalApplyOneKb5''Prop` agrees with `modalApplyOne`
-entirely. Mirrors `modalApplyOneKb5'Prop_eq_of_linear`. -/
+entirely. Mirrors the retired frozen rule's analogous lemma. -/
 lemma modalApplyOneKb5''Prop_eq_of_linear
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2738,8 +2083,8 @@ lemma modalApplyOneKb5''Prop_eq_of_linear
     simp_all
 
 omit [Hashable Atom] in
-/-- Local re-derivation of `modalApplyOneKb5'Prop_fresh_local_local` for `modalApplyOneKb5''Prop`.
--/
+/-- Local re-derivation of the retired frozen rule's analogous lemma for
+`modalApplyOneKb5''Prop`. -/
 private lemma modalApplyOneKb5''Prop_fresh_local_local
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -2751,7 +2096,8 @@ private lemma modalApplyOneKb5''Prop_fresh_local_local
   · have heq := modalApplyOneKb5''Prop_eq_of_linear sf b acc (wsf :: rest) hfst
     exact Or.inr ⟨wsf, rest, by rw [heq]; exact hfst, by rw [heq]; exact hsnd⟩
 
-/-- **F1 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_fresh_local`. -/
+/-- **F1 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. -/
 lemma modalApplyOneKb5''_fresh_local
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -2813,7 +2159,7 @@ lemma modalApplyOneKb5''_fresh_local
 
 /-! ### `knownWorlds_step` for `modalApplyOneKb5''Prop`
 
-Unlike the frozen `modalApplyOneKb5'Prop_knownWorlds_step` (whose self-target arm ties
+Unlike the retired frozen rule's analogous lemma (whose self-target arm ties
 `x.label = 0` to the trigger `lbl = 0`, already known via `hsfmem`), the corrected rule's
 self-target arm fires for ANY trigger, so `x.label = 0`'s known-ness is no longer derivable from
 the trigger's own known-ness. These two lemmas take an explicit
@@ -2824,7 +2170,7 @@ development already thread `F(φ)@0 ∈ b` explicitly. -/
 
 /-- At the two propagation shapes, `modalApplyOneKb5''Prop` never mints (its accessibility output
 is exactly K's, unchanged) and only appends formulas at existing known worlds -- given the root is
-already known. Mirrors `modalApplyOneKb5'Prop_boxPos_diaNeg_eq`, with the extra `h0` hypothesis
+already known. Mirrors the retired frozen rule's analogous lemma, with the extra `h0` hypothesis
 the self-target arm's `x.label = 0` case needs. -/
 lemma modalApplyOneKb5''Prop_boxPos_diaNeg_eq
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -2922,8 +2268,8 @@ lemma modalApplyOneKb5''Prop_boxPos_diaNeg_eq
         · rw [hxeq]; dsimp only; exact h0
 
 /-- The Kb5'' analogue of K's `modalApplyOne_knownWorlds_step`, stated directly over
-`modalApplyOneKb5''Prop`, given the root is already known. Mirrors
-`modalApplyOneKb5'Prop_knownWorlds_step`, with the extra `h0` hypothesis. -/
+`modalApplyOneKb5''Prop`, given the root is already known. Mirrors the retired frozen rule's
+analogous lemma, with the extra `h0` hypothesis. -/
 lemma modalApplyOneKb5''Prop_knownWorlds_step
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2955,8 +2301,8 @@ lemma modalApplyOneKb5''Prop_knownWorlds_step
     exact modalApplyOne_knownWorlds_step sf b acc hsfmem hknown
 
 omit [Hashable Atom] in
-/-- **Combined F9/F10 shape fact for `modalApplyOneKb5''Prop`** (hypothesis-free). Mirrors
-`modalApplyOneKb5'Prop_boxPos_diaNeg_shape`. -/
+/-- **Combined F9/F10 shape fact for `modalApplyOneKb5''Prop`** (hypothesis-free). Mirrors the
+retired frozen rule's analogous shape fact. -/
 private lemma modalApplyOneKb5''Prop_boxPos_diaNeg_shape
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2996,7 +2342,8 @@ private lemma modalApplyOneKb5''Prop_boxPos_diaNeg_shape
       · exact Or.inr ⟨_, rfl⟩
     · exact Or.inr ⟨_, rfl⟩
 
-/-- **F9 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_boxPosNotExpanding`. -/
+/-- **F9 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. -/
 private lemma modalApplyOneKb5''_boxPosNotExpanding
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (hsign : sf.sign = .pos) (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
@@ -3016,8 +2363,8 @@ private lemma modalApplyOneKb5''_diaNegNotExpanding
   rw [modalApplyOneKb5''_eq_of_not_mint_shape sf b acc (by simp [hsign, hform])]
   exact modalApplyOneKb5''Prop_boxPos_diaNeg_shape sf b acc (Or.inr ⟨hsign, ψ, hform⟩)
 
-/-- **F8 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_localShapeInvariance`.
--/
+/-- **F8 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. -/
 private lemma modalApplyOneKb5''_localShapeInvariance
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
@@ -3029,7 +2376,8 @@ private lemma modalApplyOneKb5''_localShapeInvariance
     modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg ⟨s, φ, w⟩ b' acc' ⟨by simp [hnb], by simp [hnd]⟩]
   exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
 
-/-- **F7 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_branchingLength`. -/
+/-- **F7 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. -/
 private lemma modalApplyOneKb5''_branchingLength
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -3063,7 +2411,8 @@ private lemma modalApplyOneKb5''_branchingLength
           ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
       exact modalApplyOne_branching_length sf b acc brs h
 
-/-- **F3 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_persistentFresh`. -/
+/-- **F3 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. -/
 private lemma modalApplyOneKb5''_persistentFresh
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -3160,9 +2509,9 @@ private lemma modalApplyOneKb5''_persistentFresh
           ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
       exact modalApplyOne_persistent_props sf b acc nf h
 
-/-- **F2 discharge for `modalApplyOneKb5''`**. Mirrors `modalApplyOneKb5'_outputsSubsetUniverse`.
-Unlike the frozen `Full` version (which routes the self-target case through
-`modalKb5BoxAllFull_mem_known`, needing the trigger to be known-and-equal-to-root), the corrected
+/-- **F2 discharge for `modalApplyOneKb5''`**. Mirrors the retired frozen rule's analogous
+discharge. Unlike the retired `Full` version (which routes the self-target case through its own
+membership-known lemma, needing the trigger to be known-and-equal-to-root), the corrected
 `Univ` version's self-target case needs no `modalKnownWorlds`-level argument at all: `x.label = 0`
 there, and `0 ≤ modalWorldBound φ0` holds unconditionally (`Nat.zero_le`, `WorldIndex := Nat`), so
 `mem_modalUniverse_of_Five` discharges it directly off `modalKb5BoxAllUniv_mem`'s dichotomy. -/
@@ -3306,7 +2655,7 @@ private lemma modalApplyOneKb5''_outputsSubsetUniverse
       exact modalApplyOne_outputs_subset φ0 sf b acc hb hsf hInv hW
 
 /-- **F12' discharge for `modalApplyOneKb5''`**: mint (existential) shapes are verbatim
-`modalApplyOneFive`'s behavior. Mirrors `modalApplyOneKb5'_diaPosWitness'`. -/
+`modalApplyOneFive`'s behavior. Mirrors the retired frozen rule's analogous discharge. -/
 private lemma modalApplyOneKb5''_diaPosWitness'
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (ψ : Proposition Atom) (w : WorldIndex) :
@@ -3346,8 +2695,8 @@ private lemma modalApplyOneKb5''_boxNegWitness'
   · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
 
 /-- **`modalApplyOneKb5''` satisfies `RuleApplicationSpecCore`**: the corrected-gate full-cluster
-rule discharges every field the Hintikka/saturation machinery needs, mirroring
-`modalApplyOneKb5'_specCore` declaration-for-declaration. -/
+rule discharges every field the Hintikka/saturation machinery needs, mirroring the retired frozen
+rule's analogous discharge declaration-for-declaration. -/
 theorem modalApplyOneKb5''_specCore :
     RuleApplicationSpecCore (Atom := Atom) modalApplyOneKb5'' where
   freshLocal := modalApplyOneKb5''_fresh_local
@@ -3359,527 +2708,6 @@ theorem modalApplyOneKb5''_specCore :
   diaNegNotExpanding := modalApplyOneKb5''_diaNegNotExpanding
   boxNegWitness' := modalApplyOneKb5''_boxNegWitness'
   diaPosWitness' := modalApplyOneKb5''_diaPosWitness'
-
-/-! ## `RuleApplicationSpecCore` for `modalApplyOneKb5'` (task 524 Phase 4)
-
-Discharges `RuleApplicationSpecCore modalApplyOneKb5'` (`GenericDriver.lean`), mirroring
-`modalApplyOneFive_specCore`'s discharge declaration-for-declaration. The two mint shapes
-(`.pos .diamond`/`.neg .box`) are byte-identical to `modalApplyOneFive`'s own discharge (verbatim
-witness-reuse behavior, Phase 1); only the two propagation shapes (`.pos .box`/`.neg .diamond`)
-need fresh proofs against `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`'s membership facts. -/
-
-omit [Hashable Atom] in
-/-- `modalApplyOneKb5'Prop`'s accessibility output agrees with K's `modalApplyOne` at every
-shape. Mirrors `modalApplyOneFiveProp_snd_eq`. -/
-lemma modalApplyOneKb5'Prop_snd_eq
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOneKb5'Prop sf b acc).snd = (modalApplyOne sf b acc).snd := by
-  unfold modalApplyOneKb5'Prop
-  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all <;>
-    rcases h1 : (modalApplyOne sf b acc).1 with _ | _ | _ | _ <;> simp <;> split <;> simp
-
-omit [Hashable Atom] in
-/-- Whenever K's own result is `.linear`, `modalApplyOneKb5'Prop` agrees with `modalApplyOne`
-entirely. Mirrors `modalApplyOneFiveProp_eq_of_linear`. -/
-lemma modalApplyOneKb5'Prop_eq_of_linear
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
-    (h : (modalApplyOne sf b acc).fst = RuleResult.linear nf) :
-    modalApplyOneKb5'Prop sf b acc = modalApplyOne sf b acc := by
-  unfold modalApplyOneKb5'Prop
-  rcases hp : modalApplyOne sf b acc with ⟨kResult, kAcc⟩
-  rw [hp] at h
-  simp only [] at h
-  subst h
-  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
-    simp_all
-
-omit [Hashable Atom] in
-/-- Local re-derivation of `modalApplyOneFiveProp_fresh_local_local` for `modalApplyOneKb5'Prop`.
--/
-private lemma modalApplyOneKb5'Prop_fresh_local_local
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOneKb5'Prop sf b acc).snd = acc ∨
-    (∃ wsf rest, (modalApplyOneKb5'Prop sf b acc).fst = RuleResult.linear (wsf :: rest)
-      ∧ (modalApplyOneKb5'Prop sf b acc).snd = acc.addEdge sf.label wsf.label) := by
-  rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, hfst, hsnd⟩
-  · exact Or.inl (by rw [modalApplyOneKb5'Prop_snd_eq]; exact hsame)
-  · have heq := modalApplyOneKb5'Prop_eq_of_linear sf b acc (wsf :: rest) hfst
-    exact Or.inr ⟨wsf, rest, by rw [heq]; exact hfst, by rw [heq]; exact hsnd⟩
-
-/-- **F1 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_fresh_local`. -/
-lemma modalApplyOneKb5'_fresh_local
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOneKb5' sf b acc).snd = acc ∨
-    (∃ wsf rest, (modalApplyOneKb5' sf b acc).fst = RuleResult.linear (wsf :: rest) ∧
-      (modalApplyOneKb5' sf b acc).snd = acc.addEdge sf.label wsf.label) := by
-  obtain ⟨s, ff, w⟩ := sf
-  rcases s with _ | _
-  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-    case atom =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case bot =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case imp =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case and =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case or =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case box =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case diamond =>
-      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact modalApplyOne_fresh_local _ b acc
-      · rw [heq]
-        exact Or.inr ⟨⟨.pos, φ, w'⟩, [], rfl, rfl⟩
-  · rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
-    case atom =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case bot =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case imp =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case and =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case or =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case diamond =>
-      rw [modalApplyOneKb5'_eq_of_not_mint_shape _ b acc (by simp)]
-      exact modalApplyOneKb5'Prop_fresh_local_local _ b acc
-    case box =>
-      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', hw', heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact modalApplyOne_fresh_local _ b acc
-      · rw [heq]
-        exact Or.inr ⟨⟨.neg, φ, w'⟩, [], rfl, rfl⟩
-
-omit [Hashable Atom] in
-/-- **Combined F9/F10 shape fact for `modalApplyOneKb5'Prop`** (hypothesis-free). Mirrors
-`modalApplyOneFiveProp_boxPos_diaNeg_shape`. -/
-private lemma modalApplyOneKb5'Prop_boxPos_diaNeg_shape
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
-    (modalApplyOneKb5'Prop sf b acc).fst = .notApplicable ∨
-      ∃ out, (modalApplyOneKb5'Prop sf b acc).fst = .persistent out := by
-  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-  · obtain ⟨s, ff, l⟩ := sf
-    simp only at hs hf; subst hs; subst hf
-    have hK := modalApplyOne_boxPos_eq
-      (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-    unfold modalApplyOneKb5'Prop
-    rcases hp : modalApplyOne
-        (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        with ⟨kResult, kAcc⟩
-    rw [hp] at hK
-    simp only at hK
-    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-    · dsimp only; split_ifs with hemp
-      · exact Or.inl rfl
-      · exact Or.inr ⟨_, rfl⟩
-    · exact Or.inr ⟨_, rfl⟩
-  · obtain ⟨s, ff, l⟩ := sf
-    simp only at hs hf; subst hs; subst hf
-    have hK := modalApplyOne_diamondNeg_eq
-      (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-    unfold modalApplyOneKb5'Prop
-    rcases hp : modalApplyOne
-        (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        with ⟨kResult, kAcc⟩
-    rw [hp] at hK
-    simp only at hK
-    rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-    · dsimp only; split_ifs with hemp
-      · exact Or.inl rfl
-      · exact Or.inr ⟨_, rfl⟩
-    · exact Or.inr ⟨_, rfl⟩
-
-/-- **F9 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_boxPosNotExpanding`. -/
-private lemma modalApplyOneKb5'_boxPosNotExpanding
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (hsign : sf.sign = .pos) (ψ : Proposition Atom) (hform : sf.formula = .box ψ)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOneKb5' sf b acc).fst = .notApplicable ∨
-      ∃ out, (modalApplyOneKb5' sf b acc).fst = .persistent out := by
-  rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc (by simp [hsign, hform])]
-  exact modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc (Or.inl ⟨hsign, ψ, hform⟩)
-
-/-- **F10 discharge for `modalApplyOneKb5'`**, dual of `modalApplyOneKb5'_boxPosNotExpanding`. -/
-private lemma modalApplyOneKb5'_diaNegNotExpanding
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (hsign : sf.sign = .neg) (ψ : Proposition Atom) (hform : sf.formula = .diamond ψ)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
-    (modalApplyOneKb5' sf b acc).fst = .notApplicable ∨
-      ∃ out, (modalApplyOneKb5' sf b acc).fst = .persistent out := by
-  rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc (by simp [hsign, hform])]
-  exact modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc (Or.inr ⟨hsign, ψ, hform⟩)
-
-/-- **F8 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_localShapeInvariance`. -/
-private lemma modalApplyOneKb5'_localShapeInvariance
-    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
-    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
-    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (acc acc' : Accessibility) :
-    (modalApplyOneKb5' ⟨s, φ, w⟩ b acc).1 = (modalApplyOneKb5' ⟨s, φ, w⟩ b' acc').1 := by
-  rw [modalApplyOneKb5'_eq_of_not_mint_shape ⟨s, φ, w⟩ b acc ⟨by simp [hnd], by simp [hnb]⟩,
-    modalApplyOneKb5'_eq_of_not_mint_shape ⟨s, φ, w⟩ b' acc' ⟨by simp [hnd], by simp [hnb]⟩,
-    modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg ⟨s, φ, w⟩ b acc ⟨by simp [hnb], by simp [hnd]⟩,
-    modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg ⟨s, φ, w⟩ b' acc' ⟨by simp [hnb], by simp [hnd]⟩]
-  exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
-
-/-- **F7 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_branchingLength`. -/
-private lemma modalApplyOneKb5'_branchingLength
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
-    (h : (modalApplyOneKb5' sf b acc).fst = RuleResult.branching brs) :
-    brs.length = 2 := by
-  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
-  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-    · obtain ⟨s, ff, w⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
-        exact modalApplyOne_branching_length _ b acc brs h
-      · rw [heq] at h; simp at h
-    · obtain ⟨s, ff, w⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
-        exact modalApplyOne_branching_length _ b acc brs h
-      · rw [heq] at h; simp at h
-  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
-        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
-    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-    · exfalso
-      rcases modalApplyOneKb5'Prop_boxPos_diaNeg_shape sf b acc hprop with hna | ⟨out, hpe⟩
-      · rw [hna] at h; simp at h
-      · rw [hpe] at h; simp at h
-    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
-          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
-      exact modalApplyOne_branching_length sf b acc brs h
-
-/-- **F3 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_persistentFresh`. -/
-private lemma modalApplyOneKb5'_persistentFresh
-    (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
-    (h : (modalApplyOneKb5' sf b acc).fst = RuleResult.persistent nf) :
-    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
-  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
-  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-    · obtain ⟨s, ff, w⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
-        exact modalApplyOne_persistent_props _ b acc nf h
-      · rw [heq] at h; simp at h
-    · obtain ⟨s, ff, w⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ w with heq | ⟨w', -, heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)] at h
-        exact modalApplyOne_persistent_props _ b acc nf h
-      · rw [heq] at h; simp at h
-  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
-        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at h
-    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-    · rcases hprop with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-      · obtain ⟨s, ff, l⟩ := sf
-        simp only at hs hf; subst hs; subst hf
-        have hK := modalApplyOne_boxPos_eq
-          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-        have hKfresh := modalApplyOne_persistent_props
-          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        simp only [modalApplyOneKb5'Prop] at h
-        rcases hp : modalApplyOne
-            (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-            with ⟨kResult, kAcc⟩
-        rw [hp] at h hK
-        simp only at hK
-        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-        · -- kResult = .notApplicable
-          dsimp only at h
-          split_ifs at h with hemp
-          rw [RuleResult.persistent.injEq] at h
-          refine ⟨?_, ?_⟩
-          · rw [← h]; simpa using hemp
-          · intro x hx
-            rw [← h] at hx
-            exact (modalKb5BoxAllFull_mem hx).1
-        · -- kResult = .persistent out0
-          simp only at h
-          obtain ⟨hne, hfresh⟩ := hKfresh out0 (by rw [hp])
-          rw [RuleResult.persistent.injEq] at h
-          refine ⟨by rw [← h]; simp [hne], ?_⟩
-          intro x hx
-          rw [← h] at hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hfresh x hx
-          · exact (modalKb5BoxAllFull_mem hx).1
-      · obtain ⟨s, ff, l⟩ := sf
-        simp only at hs hf; subst hs; subst hf
-        have hK := modalApplyOne_diamondNeg_eq
-          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-        have hKfresh := modalApplyOne_persistent_props
-          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-        simp only [modalApplyOneKb5'Prop] at h
-        rcases hp : modalApplyOne
-            (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-            with ⟨kResult, kAcc⟩
-        rw [hp] at h hK
-        simp only at hK
-        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-        · -- kResult = .notApplicable
-          dsimp only at h
-          split_ifs at h with hemp
-          rw [RuleResult.persistent.injEq] at h
-          refine ⟨?_, ?_⟩
-          · rw [← h]; simpa using hemp
-          · intro x hx
-            rw [← h] at hx
-            exact (modalKb5DiaNegAllFull_mem hx).1
-        · -- kResult = .persistent out0
-          simp only at h
-          obtain ⟨hne, hfresh⟩ := hKfresh out0 (by rw [hp])
-          rw [RuleResult.persistent.injEq] at h
-          refine ⟨by rw [← h]; simp [hne], ?_⟩
-          intro x hx
-          rw [← h] at hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hfresh x hx
-          · exact (modalKb5DiaNegAllFull_mem hx).1
-    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
-          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at h
-      exact modalApplyOne_persistent_props sf b acc nf h
-
-/-- **F2 discharge for `modalApplyOneKb5'`**. Mirrors `modalApplyOneFive_outputsSubsetUniverse`.
-The self-target case (`x.label = 0`) needs no separate world-bound argument: `0 ≤ modalWorldBound
-φ0` holds unconditionally (`Nat.zero_le`), so `mem_modalUniverse_of_Five` discharges it exactly
-like any other target once `x = ⟨.pos, φ, x.label⟩` is known
-(`modalKb5BoxAllFull_mem_eq`)/(`modalKb5DiaNegAllFull_mem_eq`). -/
-private lemma modalApplyOneKb5'_outputsSubsetUniverse
-    (φ0 : Proposition Atom) (sf : SignedFormula (Proposition Atom) WorldIndex)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (hb : ∀ x ∈ b, x ∈ modalUniverse φ0) (hsf : sf ∈ b) (hInv : accFreshInv b acc)
-    (hW : modalMaxWorld b < modalWorldBound φ0) :
-    (match (modalApplyOneKb5' sf b acc).fst with
-      | .linear formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
-      | .branching branches => ∀ x ∈ branches.flatten, x ∈ modalUniverse φ0
-      | .persistent formulas => ∀ x ∈ formulas, x ∈ modalUniverse φ0
-      | .notApplicable => True) := by
-  by_cases hmint : (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) ∨
-      (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ)
-  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-    · obtain ⟨s, ff, l⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      have hKsub := modalApplyOne_outputs_subset φ0
-        (⟨.pos, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
-      rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact hKsub
-      · rw [heq]
-        have hwknown : w' ∈ modalKnownWorlds b :=
-          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
-        have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
-        have hφsub : φ ∈ modalSubfmls φ0 := by
-          have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_Five (hb _ hsf)
-          exact modalSubfmls_trans_Five (b := Proposition.diamond φ)
-            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        intro x hx
-        simp only [List.mem_singleton] at hx
-        rw [hx]
-        exact mem_modalUniverse_of_Five hwle hφsub
-    · obtain ⟨s, ff, l⟩ := sf
-      simp only at hs hf; subst hs; subst hf
-      have hKsub := modalApplyOne_outputs_subset φ0
-        (⟨.neg, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
-      rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc φ l with heq | ⟨w', hw', heq⟩
-      · rw [heq, modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp)]
-        exact hKsub
-      · rw [heq]
-        have hwknown : w' ∈ modalKnownWorlds b :=
-          label_mem_modalKnownWorlds (witnessWorldFive_mem hw').1
-        have hwle : w' ≤ modalWorldBound φ0 :=
-          le_trans (known_label_le_modalMaxWorld_Five hwknown) (le_of_lt hW)
-        have hφsub : φ ∈ modalSubfmls φ0 := by
-          have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_Five (hb _ hsf)
-          exact modalSubfmls_trans_Five (b := Proposition.box φ)
-            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        intro x hx
-        simp only [List.mem_singleton] at hx
-        rw [hx]
-        exact mem_modalUniverse_of_Five hwle hφsub
-  · rw [modalApplyOneKb5'_eq_of_not_mint_shape sf b acc
-        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩] at *
-    by_cases hprop : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
-        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
-    · rcases hprop with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
-      · obtain ⟨s, ff, l⟩ := sf
-        simp only at hs hf; subst hs; subst hf
-        have hK := modalApplyOne_boxPos_eq
-          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-        have hKsub := modalApplyOne_outputs_subset φ0
-          (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf hInv hW
-        simp only [modalApplyOneKb5'Prop]
-        rcases hp : modalApplyOne
-            (⟨.pos, .box φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-            with ⟨kResult, kAcc⟩
-        rw [hp] at hKsub hK
-        simp only at hK
-        have hφsub : φ ∈ modalSubfmls φ0 := by
-          have hform : Proposition.box φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_Five (hb _ hsf)
-          exact modalSubfmls_trans_Five (b := Proposition.box φ)
-            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        have hallNew : ∀ x ∈ modalKb5BoxAllFull b φ l, x ∈ modalUniverse φ0 := by
-          intro x hx
-          have hxeq : x = (⟨.pos, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
-            modalKb5BoxAllFull_mem_eq hx
-          have hlknown : l ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hsf
-          have hxknown : x.label ∈ modalKnownWorlds b :=
-            modalKb5BoxAllFull_mem_known hx hlknown
-          have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
-          rw [hxeq]; exact mem_modalUniverse_of_Five hxle hφsub
-        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-        · -- kResult = .notApplicable
-          simp only
-          split_ifs with hemp
-          · trivial
-          · exact hallNew
-        · -- kResult = .persistent out0
-          simp only at hKsub ⊢
-          intro x hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hKsub x hx
-          · exact hallNew x hx
-      · obtain ⟨s, ff, l⟩ := sf
-        simp only at hs hf; subst hs; subst hf
-        have hK := modalApplyOne_diamondNeg_eq
-          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
-        have hKsub := modalApplyOne_outputs_subset φ0
-          (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hb hsf
-            hInv hW
-        simp only [modalApplyOneKb5'Prop]
-        rcases hp : modalApplyOne
-            (⟨.neg, .diamond φ, l⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-            with ⟨kResult, kAcc⟩
-        rw [hp] at hKsub hK
-        simp only at hK
-        have hφsub : φ ∈ modalSubfmls φ0 := by
-          have hform : Proposition.diamond φ ∈ modalSubfmls φ0 :=
-            modalUniverse_mem_formula_Five (hb _ hsf)
-          exact modalSubfmls_trans_Five (b := Proposition.diamond φ)
-            (List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)) hform
-        have hallNew : ∀ x ∈ modalKb5DiaNegAllFull b φ l, x ∈ modalUniverse φ0 := by
-          intro x hx
-          have hxeq : x = (⟨.neg, φ, x.label⟩ : SignedFormula (Proposition Atom) WorldIndex) :=
-            modalKb5DiaNegAllFull_mem_eq hx
-          have hlknown : l ∈ modalKnownWorlds b := label_mem_modalKnownWorlds hsf
-          have hxknown : x.label ∈ modalKnownWorlds b :=
-            modalKb5DiaNegAllFull_mem_known hx hlknown
-          have hxle : x.label ≤ modalWorldBound φ0 :=
-            le_trans (known_label_le_modalMaxWorld_Five hxknown) (le_of_lt hW)
-          rw [hxeq]; exact mem_modalUniverse_of_Five hxle hφsub
-        rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-        · -- kResult = .notApplicable
-          simp only
-          split_ifs with hemp
-          · trivial
-          · exact hallNew
-        · -- kResult = .persistent out0
-          simp only at hKsub ⊢
-          intro x hx
-          simp only [List.mem_append, List.mem_filter] at hx
-          rcases hx with hx | ⟨hx, -⟩
-          · exact hKsub x hx
-          · exact hallNew x hx
-    · rw [modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg sf b acc
-          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩] at *
-      exact modalApplyOne_outputs_subset φ0 sf b acc hb hsf hInv hW
-
-/-- **F12' discharge for `modalApplyOneKb5'`**: mint (existential) shapes are verbatim
-`modalApplyOneFive`'s behavior. Mirrors `modalApplyOneFive_diaPosWitness'`. -/
-private lemma modalApplyOneKb5'_diaPosWitness'
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (ψ : Proposition Atom) (w : WorldIndex) :
-    ∃ w', (modalApplyOneKb5' (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-        b acc).snd = acc.addEdge w w' ∧
-      ∃ rest,
-        (modalApplyOneKb5' (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-            b acc).fst
-          = RuleResult.linear
-              ((⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
-  rcases modalApplyOneKb5'_diaPos_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
-  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
-    have heq := modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg
-      (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
-    rw [heqp, heq]
-    exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
-  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
-
-/-- **F11' discharge for `modalApplyOneKb5'`**, symmetric to `modalApplyOneKb5'_diaPosWitness'`.
--/
-private lemma modalApplyOneKb5'_boxNegWitness'
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (ψ : Proposition Atom) (w : WorldIndex) :
-    ∃ w', (modalApplyOneKb5' (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-        b acc).snd = acc.addEdge w w' ∧
-      ∃ rest,
-        (modalApplyOneKb5' (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
-            b acc).fst
-          = RuleResult.linear
-              ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest) := by
-  rcases modalApplyOneKb5'_boxNeg_eq_or_reuse b acc ψ w with heqp | ⟨w', -, heqp⟩
-  · obtain ⟨hsnd, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
-    have heq := modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg
-      (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc (by simp)
-    rw [heqp, heq]
-    exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
-  · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
-
-/-- **`modalApplyOneKb5'` satisfies `RuleApplicationSpecCore`** (task 524 Phase 4): the
-full-cluster-propagation rule discharges every field the Hintikka/saturation machinery needs,
-mirroring `modalApplyOneFive_specCore` declaration-for-declaration. -/
-theorem modalApplyOneKb5'_specCore :
-    RuleApplicationSpecCore (Atom := Atom) modalApplyOneKb5' where
-  freshLocal := modalApplyOneKb5'_fresh_local
-  outputsSubsetUniverse := modalApplyOneKb5'_outputsSubsetUniverse
-  persistentFresh := modalApplyOneKb5'_persistentFresh
-  branchingLength := modalApplyOneKb5'_branchingLength
-  localShapeInvariance := modalApplyOneKb5'_localShapeInvariance
-  boxPosNotExpanding := modalApplyOneKb5'_boxPosNotExpanding
-  diaNegNotExpanding := modalApplyOneKb5'_diaNegNotExpanding
-  boxNegWitness' := modalApplyOneKb5'_boxNegWitness'
-  diaPosWitness' := modalApplyOneKb5'_diaPosWitness'
 
 /-! ## Source-Split Termination Invariant (Phase 19a Task 2: Route (a) termination re-derivation)
 
@@ -4724,64 +3552,22 @@ theorem modalStepBranchFive_preserves_worldInv {φ₀ : Proposition Atom}
             (expandedRootTagsFive φ₀ (nf ++ b) e).card := Nat.add_le_add hN hE
     · rw [hfstc] at hsf; simp at hsf
 
-/-! ## Termination Bound for `modalApplyOneKb5'` (task 524 Phase 3)
-
-`FiveWorldInv`/`usedTagsFiveNonRoot`/`usedTagsFiveRoot`/
-`modalMaxWorld_lt_worldBound_of_FiveWorldInv` above are **entirely rule-independent**: their
-definitions inspect only branch content (which
-signed formulas appear on `b`, at which labels) and `φ₀`'s finite subformula/tag structure --
-never `modalApplyOneFive`/`modalApplyOneKb5'` by name. This is exactly what task 524's Phase 1
-design relies on: `modalApplyOneKb5'`'s mint (existential) shapes (`.pos .diamond`/`.neg .box`)
-are **verbatim** `modalApplyOneFive`'s witness-reuse behavior
-(`modalApplyOneKb5'_diaPos_eq_or_reuse`/`_boxNeg_eq_or_reuse`, mirroring `modalApplyOneFive`'s own
-case-split exactly) -- the only shapes
-that ever mint a fresh world (`modalMaxWorld`-growing) are unchanged between the two rules. Only
-the two *propagation* shapes (`.pos .box`/`.neg .diamond`) differ, and neither of those shapes
-ever mints (`modalApplyOneKb5'Prop_boxPos_diaNeg_eq`: accessibility output is always `acc`
-unchanged, result always `.notApplicable`/`.persistent`, never `.linear`/`.branching`). So the
-world-count-vs-`modalWorldBound` bound `FiveWorldInv` establishes for Five transfers to
-`modalApplyOneKb5'` with **no re-derivation needed** -- landed here as its own Kb5'-named
-artifact per this phase's task list, rather than silently reusing the Five name at call sites
-that are conceptually about the new rule. -/
-
-/-- The KB5' full-cluster rule's source-split world-bound invariant: definitionally
-`FiveWorldInv`, per this section's rule-independence note. -/
-def Kb5'WorldInv (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) : Prop :=
-  FiveWorldInv φ₀ b
-
-omit [Hashable Atom] in
-/-- `Kb5'WorldInv` is exactly `FiveWorldInv` -- true `rfl`, since Phase 3's termination bound for
-`modalApplyOneKb5'` reuses Five's rule-independent tag/world-count machinery verbatim (see this
-section's module note). -/
-theorem Kb5'WorldInv_eq (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
-    Kb5'WorldInv φ₀ b = FiveWorldInv φ₀ b := rfl
-
-omit [Hashable Atom] in
-/-- **Task 524 Phase 3**: the termination bound `modalApplyOneKb5'`'s catalog-membership field
-(`outputsSubsetUniverse`, Phase 4) consumes: `Kb5'WorldInv` bounds `modalMaxWorld b` strictly
-under `modalWorldBound φ₀`. Free corollary of `modalMaxWorld_lt_worldBound_of_FiveWorldInv` via
-`Kb5'WorldInv_eq`. -/
-theorem modalMaxWorld_lt_worldBound_of_Kb5'WorldInv {φ₀ : Proposition Atom}
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : Kb5'WorldInv φ₀ b) :
-    modalMaxWorld b < modalWorldBound φ₀ :=
-  modalMaxWorld_lt_worldBound_of_FiveWorldInv (Kb5'WorldInv_eq φ₀ b ▸ hW)
-
 /-! ## Termination Bound for `modalApplyOneKb5''`
 
-Same rule-independence argument as `Kb5'WorldInv` above, applied to the corrected-gate rule:
-`modalApplyOneKb5''`'s mint (existential) shapes are **verbatim** `modalApplyOneFive`'s
-witness-reuse behavior (`modalApplyOneKb5''_diaPos_eq_or_reuse`/`_boxNeg_eq_or_reuse`, identical
-to `modalApplyOneKb5'`'s own case-split), and its two propagation shapes never mint either
+Same rule-independence argument as the retired frozen rule's analogous termination bound above,
+applied to the corrected-gate rule: `modalApplyOneKb5''`'s mint (existential) shapes are
+**verbatim** `modalApplyOneFive`'s witness-reuse behavior
+(`modalApplyOneKb5''_diaPos_eq_or_reuse`/`_boxNeg_eq_or_reuse`, identical to the retired rule's
+own case-split), and its two propagation shapes never mint either
 (`modalApplyOneKb5''Prop_boxPos_diaNeg_shape`: result is always `.notApplicable`/`.persistent`,
 never `.linear`/`.branching`, so accessibility is never touched at those shapes -- the corrected
 gate only changes *which formulas* a `.persistent` result carries, never the result *shape*).
 So `FiveWorldInv`'s world-count-vs-`modalWorldBound` bound transfers to `modalApplyOneKb5''`
-exactly as it did to `modalApplyOneKb5'`, with no re-derivation needed. -/
+exactly as it did to the retired rule, with no re-derivation needed. -/
 
 /-- The corrected-gate KB5 rule's source-split world-bound invariant: definitionally
-`FiveWorldInv`, per this section's rule-independence note. Mirrors `Kb5'WorldInv`. -/
+`FiveWorldInv`, per this section's rule-independence note. Mirrors the retired frozen rule's
+analogous invariant. -/
 def Kb5''WorldInv (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) : Prop :=
   FiveWorldInv φ₀ b
@@ -4789,7 +3575,7 @@ def Kb5''WorldInv (φ₀ : Proposition Atom)
 omit [Hashable Atom] in
 /-- `Kb5''WorldInv` is exactly `FiveWorldInv` -- true `rfl`, since the termination bound for
 `modalApplyOneKb5''` reuses Five's rule-independent tag/world-count machinery verbatim (see this
-section's module note). Mirrors `Kb5'WorldInv_eq`. -/
+section's module note). Mirrors the retired frozen rule's analogous lemma. -/
 theorem Kb5''WorldInv_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     Kb5''WorldInv φ₀ b = FiveWorldInv φ₀ b := rfl
@@ -4798,7 +3584,7 @@ omit [Hashable Atom] in
 /-- The termination bound `modalApplyOneKb5''`'s catalog-membership field
 (`outputsSubsetUniverse`) consumes: `Kb5''WorldInv` bounds `modalMaxWorld b` strictly under
 `modalWorldBound φ₀`. Free corollary of `modalMaxWorld_lt_worldBound_of_FiveWorldInv` via
-`Kb5''WorldInv_eq`. Mirrors `modalMaxWorld_lt_worldBound_of_Kb5'WorldInv`. -/
+`Kb5''WorldInv_eq`. Mirrors the retired frozen rule's analogous corollary. -/
 theorem modalMaxWorld_lt_worldBound_of_Kb5''WorldInv {φ₀ : Proposition Atom}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : Kb5''WorldInv φ₀ b) :
     modalMaxWorld b < modalWorldBound φ₀ :=

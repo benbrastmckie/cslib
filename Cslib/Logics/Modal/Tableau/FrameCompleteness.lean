@@ -4114,6 +4114,83 @@ theorem modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootK
       exact ⟨(hboth.1 b' hb').1, (hboth.1 b' hb').2, hboth.2⟩)
     fuel
 
+/-! ## `ModalLoopAuxKb5''`: the Hintikka Wall's `Aux` Instantiation (task 528 Phase 6)
+
+Assembles `modalStepBranchKb5''_preserves_worldInv` (`FiveSimplification.lean`) into the
+`AuxStepPreserved`/`AuxBounds` pair `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) needs
+to supply the fourth completeness ingredient -- the Hintikka "wall" -- for a real
+`modalTableauKb5''` run. Mirrors `ModalLoopAuxFive`/`_bounds`/`_stepPreserved`/
+`modalLoopInvHintikkaFive_initial` above, extended with a THIRD bundled conjunct (root-known-ness)
+`AuxStepPreserved`'s ambient hypotheses (`accFreshInv`/`accTargetsKnown`) do not supply but
+`modalApplyOneKb5''_worldGrowth`'s propagation-shape case needs -- the same pattern this file's
+Phase 6 top-loop section above already established for `accTargetsKnown ∧ accTargetsNeRoot ∧
+rootKnown`. `FiveWorldInvE`/`expandedRootTagsFive` are reused directly (no `Kb5''`-named fork --
+per `FiveSimplification.lean`'s own Kb5''-termination-bound precedent, these are already
+rule-independent, so aliasing would only add surface area with no new content). -/
+
+/-- **Kb5'''s instantiation of `Aux`**: the `modalUniverse`-closure conjunct, the `e`-aware
+world-bound invariant `FiveWorldInvE` (reused directly), and root-known-ness (the extra conjunct
+`modalApplyOneKb5''`'s corrected propagation gate needs that Five's own instantiation does not).
+Mirrors `ModalLoopAuxFive`. -/
+@[nolint unusedArguments]
+def ModalLoopAuxKb5'' (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (_acc : Accessibility) : Prop :=
+  (∀ x ∈ b, x ∈ modalUniverse φ₀) ∧ FiveWorldInvE φ₀ b e ∧ (0 : WorldIndex) ∈ modalKnownWorlds b
+
+omit [Hashable Atom] in
+/-- **`ModalLoopAuxKb5''` entails the world bound**: the pointwise `AuxBounds` obligation,
+discharged exactly as `ModalLoopAuxFive_bounds` (routes through the shared, rule-independent
+`FiveWorldInvE`/`FiveWorldInv` machinery; the extra root-known-ness conjunct is simply unused
+here). -/
+theorem ModalLoopAuxKb5''_bounds (φ₀ : Proposition Atom) :
+    AuxBounds φ₀ (ModalLoopAuxKb5'' φ₀) := by
+  rintro b e acc ⟨-, hWE, -⟩
+  exact modalMaxWorld_lt_worldBound_of_FiveWorldInv (FiveWorldInvE_imp_FiveWorldInv hWE)
+
+/-- **`ModalLoopAuxKb5''` is step-preserved**: the `AuxStepPreserved` obligation. The
+`modalUniverse`-closure and `FiveWorldInvE` conjuncts are discharged together by
+`modalStepBranchKb5''_preserves_worldInv` (`FiveSimplification.lean`), fed the root-known-ness
+conjunct as its extra `h0` hypothesis; root-known-ness itself is preserved for every child branch
+by `modalStepBranchGen_knownWorlds_mono_C` (this file's Phase 6 top-loop section above). -/
+theorem ModalLoopAuxKb5''_stepPreserved (φ₀ : Proposition Atom) :
+    AuxStepPreserved modalApplyOneKb5'' (ModalLoopAuxKb5'' φ₀) := by
+  rintro b e acc newBs newExps newAcc hstep hFresh hKnown ⟨hb, hWE, h0⟩ p hp
+  obtain ⟨hbClosure, hWE'⟩ :=
+    modalStepBranchKb5''_preserves_worldInv hb hWE hFresh hKnown h0 hstep p hp
+  refine ⟨hbClosure, hWE', ?_⟩
+  have hp1 : p.1 ∈ newBs := (List.of_mem_zip hp).1
+  exact modalStepBranchGen_knownWorlds_mono_C modalApplyOneKb5'' b e acc newBs newExps newAcc
+    hstep p.1 hp1 h0
+
+/-- **Kb5'''s initial-configuration rank-free loop invariant**: `ModalLoopInvHintikka` holds of
+the starting worklist entry `([F(φ₀)@0], [], ∅)`. Mirrors `modalLoopInvHintikkaFive_initial`,
+extended with the trivial root-known-ness fact (`0 ∈ modalKnownWorlds [F(φ₀)@0]`, immediate since
+the sole branch formula's own label is `0`). -/
+lemma modalLoopInvHintikkaKb5''_initial (φ₀ : Proposition Atom) :
+    ModalLoopInvHintikka modalApplyOneKb5'' φ₀ (ModalLoopAuxKb5'' φ₀)
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      Accessibility.empty := by
+  have hmemU : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalUniverse φ₀ := by
+    simp only [modalUniverse, List.mem_flatMap, List.mem_range]
+    exact ⟨0, Nat.succ_pos _, φ₀, modalSubfmls_self_mem φ₀, by simp⟩
+  refine ⟨?_, by simp, List.nodup_nil, accFreshInv_empty _, ?_, ⟨?_, ?_, ?_⟩,
+    by simp, by simp, by simp, by simp, by simp⟩
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · simp only [FiveWorldInvE, modalMaxWorld, List.foldl_cons, List.foldl_nil]
+    exact Nat.zero_le _
+  · exact label_mem_modalKnownWorlds (List.mem_singleton_self _)
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

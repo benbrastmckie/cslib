@@ -1,29 +1,48 @@
 {
-  "status": "implemented",
+  "status": "partial",
   "skeleton": false,
   "phases_completed": 2,
   "phases_total": 9,
-  "sorry_inventory": [],
-  "blockers": [],
-  "continuation_path": null,
+  "sorry_inventory": [
+    {
+      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "line": 326,
+      "statement": "theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} : Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ",
+      "strategic": true,
+      "assumption": "Assumes every label y a boxI/diaE cofinite premise ranges over reflects to a single chain index; the swap-transport argument (NIK.freshWitness_transport, proven) only establishes this for labels drawn from the chain's shared coinfinite reserve V'^c, not for 'old' labels already present in some chain member's domain.",
+      "why_deferred": "Closing the 'old label' case needs either an invariant that Phase 4's concrete Zorn construction only ever extends a context by fresh (reserve-drawn) labels at each step (knowable only once Phase 4's construction exists), or a separate monotonicity-based argument not yet found. Forcing either without the concrete Phase 4 construction risks a subtly wrong general-position proof, matching this task's ~100%/dispatch transcription-defect base rate the plan itself flags.",
+      "follow_up_task": "Phase 4 (Bounded Prime Lemma / Zorn over whole contexts) -- the natural point to discharge this, since it supplies the concrete extension-step invariant"
+    }
+  ],
+  "blockers": [
+    {
+      "phase": 3,
+      "target": "ChainCtx.deriv_reflect / ChainCtx.chain_closure (Task 3: 'Prove chain closure')",
+      "verbatim_goal": "Prove chain closure: `(⋃G_i, ⋃Γ_i) ∈ C`.",
+      "what_was_tried": "Proved the crux label-renaming/equivariance lemma (NIK.swap_relabel, Simpson Prop. 4.4.1 specialized to a two-label swap) and its freshness-transport corollary, fully sorry-free; built the ChainCtx scaffold (union graph/context, sorry-free) mirroring Simpson's single-shared-coinfinite-V' setup; attempted to close the reflection theorem's boxI/diaE cases using freshWitness_transport for witnesses drawn from the shared reserve V'^c.",
+      "why_it_failed": "boxI/diaE's cofinite quantifier ranges over ALL of Label Atom, not just the reserve V'^c; for labels y already present in some chain member's domain ('old' labels), the swap-transport argument does not apply (risk of collision with existing structure), and no invariant is yet available (Phase 4 doesn't exist yet) to rule this case out."
+    }
+  ],
+  "continuation_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-3-handoff-20260718.md",
   "continuation_context": {
     "is_successor": false,
     "next_phase": 3,
-    "next_action_hint": "Dispatch Phase 3 (chain-union / cofinite-encoding obstacle, Simpson 5.1 + Ch 7-8's bounded-context finite-support handling). Phase 2's gate is clear: probes/inhabitedness-gate-probe.lean proves TPrime.gx_ne_univ (for every TPrime P and every 𝒯, P.G.X ≠ Set.univ) -- the shared conclusion both pre-repair emptiness drivers (tPrime_false / tPrime_TS5_false) relied on is now unreachable, via freshWitness_notMem_GX pinpointing the exact label that blocks each driver's first step. No explicit TPrime inhabitant was constructed (the plan's sanctioned weaker-gate alternative was taken instead: a full inhabitant needs either Phase 4's Zorn maximalisation or an unestablished NIK substitution/cut-admissibility lemma, out of scope for a gate check -- documented in the probe's module docstring under 'Why a full explicit inhabitant is NOT attempted here'). Phase 3 is gated by this go result and depends on Phase 1."
+    "next_action_hint": "Re-dispatch Phase 3 (or fold into Phase 4's dispatch) to discharge ChainCtx.deriv_reflect's one sorry using Phase 4's concrete Zorn extension-step invariant (each step adjoins only a fresh/reserve-drawn label) -- see the theorem's docstring and the handoff markdown for the two candidate closing routes. The crux equivariance machinery (NIK.swap_relabel, NIK.freshWitness_transport) is done and directly reusable; do not re-derive it."
   },
-  "summary": "Phase 2 (INHABITEDNESS GATE) complete: re-ran both pre-repair emptiness drivers (tPrime_false/clause-1 and tPrime_TS5_false/clause-0-at-TS5) against the Phase-1-repaired TPrime in a new probe. Proved freshWitness_notMem_GX (the coinfinite-witness label both drivers instantiated their clause at is never in G.X under the repaired, relativized clauses), driver1_blocked/driver2_blocked (each driver's first proof step is now unconstructible), and the capstone TPrime.gx_ne_univ (the shared conclusion G.X = Set.univ both drivers needed is unreachable, for every 𝒯 -- not just the two instances). Took the plan's sanctioned weaker-gate route rather than a full explicit inhabitant, per task 2's own escape hatch; the ruled-out full-construction alternatives and why are documented in the probe's module docstring.",
+  "summary": "Phase 3 (chain-union / cofinite-encoding obstacle): landed the crux label-renaming/equivariance lemma NIK.swap_relabel (Simpson Prop. 4.4.1, chunk_0087/0088, specialized to a two-label-swap bijection) and its freshWitness_transport corollary, both fully proven sorry-free with the development's existing axiom footprint [propext, Classical.choice, Quot.sound] -- this is exactly the 'label-renaming / equivariance lemma for NIKX (absent from Cslib/)' the plan's Risk section predicted would be needed. Built the ChainCtx scaffold (union graph/context, sorry-free) mirroring Simpson's own single-shared-coinfinite-V' Zorn-poset setup (chunk_0102). The reflection theorem itself (ChainCtx.deriv_reflect, and its corollary chain_closure = Task 3's literal deliverable) is landed with ONE precisely-scoped, documented strategic sorry: the swap-transport argument handles witnesses drawn from the chain's shared coinfinite reserve, but not 'old' labels already present in some chain member -- closing this needs Phase 4's concrete construction to supply an extension-step invariant. All work is in probes/ (Cslib/ untouched, zero-debt invariant trivially holds), per the plan's own artifact scoping for this phase.",
   "modified_files": [
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/inhabitedness-gate-probe.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/progress/phase-2-progress.json"
+    "specs/517_labelled_bounded_context_cs5_completeness/progress/phase-3-progress.json",
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-3-handoff-20260718.md"
   ],
   "verification": {
     "build_passed": true,
     "probe_module_build_passed": true,
-    "sorry_count_in_probe": 0,
+    "sorry_count_in_probe": 1,
     "sorry_count_in_scope_mainline_files": 0,
     "new_axiom_count": 0,
-    "axioms_in_probe": ["propext", "Classical.choice", "Quot.sound"],
+    "axioms_in_probe": ["propext", "Classical.choice", "Quot.sound", "sorryAx (deriv_reflect only)"],
     "vacuous_count": 0,
     "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true

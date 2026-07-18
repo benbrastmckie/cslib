@@ -307,7 +307,7 @@ type is inhabitable. Depends on Phase 1.
 refuted). This phase may live in `probes/` (it is a gate, not a mainline deliverable) but its
 conclusion is binding on Phases 3+.
 
-### Phase 3: Settle the chain-union / cofinite-encoding obstacle [NOT STARTED]
+### Phase 3: Settle the chain-union / cofinite-encoding obstacle [PARTIAL]
 
 **Objective**: mechanize the reflection (finite-support) fact that Simpson calls "easily seen" —
 `Deriv 𝒯 G_∞ Γ_∞ (x:A) → ∃ i, Deriv 𝒯 G_i Γ_i (x:A)` over a chain — so the Zorn chain-closure step

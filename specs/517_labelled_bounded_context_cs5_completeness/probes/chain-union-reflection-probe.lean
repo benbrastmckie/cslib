@@ -1,5 +1,6 @@
 import Cslib.Init
 import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
+import Mathlib.Order.SetNotation
 
 /-! # Task 517 Phase 3 — the chain-union / cofinite-encoding obstacle
 
@@ -246,5 +247,94 @@ theorem NIK.freshWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula 
       exact Or.inr ⟨rfl, rfl⟩
   have hstep := h.swap_relabel (a := y₀) (b := y) (G' := G.addEdge x y) hf
   rwa [List.map_swapFn_eq_self hΓ, show swapFn y₀ y y₀ = y from swapFn_left y₀ y] at hstep
+
+/-! ## Task 3: chain closure — scaffold, and the precise remaining gap
+
+Simpson's own proof of the Prime Lemma fixes a **single, shared** coinfinite `V'` for the whole
+Zorn poset `C` (chunk_0102.md, verbatim: *"Let `V'` be some coinfinite subset of `V` ... Consider
+the set `C` of all contexts `(G',Γ') ⊇ (G,Γ)` such that the underlying set of `G'` is contained in
+`W(V')`..."*) -- every chain member lives in the same `W(V')`, not merely *some* coinfinite set
+each. `ChainCtx` below mirrors this precisely. -/
+
+/-- An `ι`-indexed **chain** of contexts (Simpson's `{(Gᵢ,Γᵢ)}ᵢ∈I`, `:5990`): monotone under
+`Context.le`, directed, and confined to a single fixed coinfinite `V'` throughout. -/
+structure ChainCtx (𝒯 : Set GeomAxiom) (Atom : Type u) (ι : Type u) [Preorder ι] where
+  /-- The chain's contexts. -/
+  C : ι → Context 𝒯 Atom
+  /-- Monotonicity under `Context.le`: `i ≤ j → C i ≤ C j`. -/
+  mono : Monotone C
+  /-- The chain is directed (in particular, any totally-ordered `ι` qualifies). -/
+  dir : Directed (· ≤ ·) (id : ι → ι)
+  /-- The single coinfinite reserve shared by every chain member (Simpson's fixed `V'`). -/
+  V' : Set PrefixVar
+  hV' : Coinfinite V'
+  /-- Every chain member's underlying set lies in `W(V')`. -/
+  hCV' : ∀ i, ∀ x ∈ (C i).G.X, Label.InW V' x
+
+namespace ChainCtx
+
+variable {ι : Type u} [Preorder ι] (𝒞 : ChainCtx 𝒯 Atom ι)
+
+/-- The union graph `⋃ᵢ Gᵢ`. -/
+def unionG [Nonempty ι] : Graph Atom where
+  X := ⋃ i, (𝒞.C i).G.X
+  R := fun x y => ∃ i, (𝒞.C i).G.R x y
+  nonempty := by
+    obtain ⟨i₀⟩ := (inferInstance : Nonempty ι)
+    obtain ⟨p, hp⟩ := (𝒞.C i₀).G.nonempty
+    exact ⟨p, Set.mem_iUnion.mpr ⟨i₀, hp⟩⟩
+  edge_mem := by
+    rintro x y ⟨i, hi⟩
+    obtain ⟨hx, hy⟩ := (𝒞.C i).G.edge_mem x y hi
+    exact ⟨Set.mem_iUnion.mpr ⟨i, hx⟩, Set.mem_iUnion.mpr ⟨i, hy⟩⟩
+
+/-- The union formula set `⋃ᵢ Γᵢ`. -/
+def unionΓ : Set (LabelledFormula Atom) := ⋃ i, (𝒞.C i).Γ
+
+/-- **The reflection theorem** — Simpson's elided "easily seen" step (p. 92, `chunk_0102.md`),
+mechanized as far as this dispatch could take it, landed here as a **documented strategic
+sorry** per the anti-analysis five-condition test (`.claude/context/contracts/anti-analysis.md`):
+
+1. **Deliberate division boundary**: the plan's own Phase 3 contingency names exactly this
+   escalation route ("if it cannot be settled, escalate before spending Phase 4's Zorn
+   dispatch"); this is not an abandoned attempt.
+2. **Tightly scoped**: exactly this one theorem.
+3. **Documented** (this docstring):
+   - **What is proven** (`NIK.swap_relabel`/`NIK.freshWitness_transport` above): a `boxI`/`diaE`
+     premise reflects to a single chain index for witnesses drawn from the chain's shared
+     coinfinite reserve `V'ᶜ` -- pick any `y₀ ∈ V'ᶜ` outside the exclusion set, reflect the IH at
+     `y₀` alone to get one index `i₀`, then `freshWitness_transport` carries that single witness
+     to every *other* `y ∈ V'ᶜ` (since every chain member's domain lies in `W(V')`, disjoint from
+     `V'ᶜ`, so `y ∉ (C i₀).G.X` for every such `y` and every `i₀` -- the freshness hypothesis
+     `freshWitness_transport` needs).
+   - **What remains open**: `boxI`/`diaE`'s cofinite quantifier ranges over *every* `y ∉ L` in
+     `Label Atom`, not just `V'ᶜ`. For `y` that already lies in some `(C i).G.X` (an "old" label,
+     not drawn from the reserve), the swap-transport argument does not apply directly: swapping
+     `y₀ ↔ y` could collide with structure the chain already built at `y`. Closing this needs
+     either (a) an invariant that Phase 4's *concrete* Zorn construction only ever extends a
+     context by reserve-drawn (fresh) labels at each step -- true by construction of Lemma
+     5.3.1's argument (deductive-closure/disjunction/diamond steps each adjoin at most one fresh
+     witness), but only statable once Phase 4's construction exists -- or (b) a separate argument
+     for "old" `y` reusing `Deriv.mono`/monotonicity directly (since an "old" `y ∈ (C i).G.X` is,
+     by directedness, already dominated by some concrete chain member, so the *fact* needed there
+     may already be available without any relabeling at all). Route (a) is the natural one given
+     Phase 4 supplies the construction.
+4. **Tracked**: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
+   `follow_up_task` pointing at Phase 4 (the Zorn application, which supplies the concrete
+   extension-step invariant needed to close route (a) above).
+5. **Build-green**: `lake env lean` on this file (verified) succeeds with this `sorry` present. -/
+theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} :
+    Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ := by
+  sorry
+
+/-- **Chain closure** (Phase 3 Task 3): if no chain member derives the excluded formula, neither
+does the union -- the fact the Zorn chain-closure step (Phase 4) needs to show `(⋃Gᵢ,⋃Γᵢ) ∈ C`.
+Immediate contrapositive of `deriv_reflect`; carries no additional proof burden once that theorem
+lands. -/
+theorem chain_closure [Nonempty ι] {x : Label Atom} {A : Proposition Atom}
+    (hC : ∀ i, ¬ Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ (x ∶ A)) : ¬ Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ (x ∶ A) :=
+  fun h => let ⟨i, hi⟩ := 𝒞.deriv_reflect h; hC i hi
+
+end ChainCtx
 
 end Cslib.Logic.Modal.Labelled

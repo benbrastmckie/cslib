@@ -1,0 +1,43 @@
+{
+  "phase": 3,
+  "phase_name": "Settle the chain-union / cofinite-encoding obstacle",
+  "started_at": "2026-07-18T00:00:00Z",
+  "last_updated": "2026-07-18T00:40:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "--lit: mine Simpson S5.1 and Ch 7-8's bounded-context finite-support handling for how the cofinite eigenvariable premise is reflected to a single chain index",
+      "status": "done",
+      "note": "Found Prop. 4.4.1 (chunk_0087.md/chunk_0088.md, S4.4): general graph-morphism transport, already partially transcribed as NIK.weaken's inclusion special case. Found Lemma 5.3.1's proof (chunk_0102.md/chunk_0103.md): the chain-union step is stated but NOT detailed ('it is easily seen'), confirming this is a genuine mechanization gap, not a missed citation. Also found the load-bearing structural fact: Simpson fixes a SINGLE shared coinfinite V' for the whole Zorn poset C (not merely some coinfinite set per member), which is what ChainCtx.V'/hCV' below transcribes.",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "Prove (or construct) the label-renaming / equivariance lemma for NIKX that lets a boxI/diaE at the union graph be rebuilt at one chain index valid for cofinitely many y",
+      "status": "done",
+      "note": "NIK.swap_relabel (Prop. 4.4.1 specialized to a two-label-swap bijection) and its corollary NIK.freshWitness_transport, both fully proven, sorry-free, axiom footprint [propext, Classical.choice, Quot.sound] (the development's existing baseline). This is the diagnosed crux: a general (non-bijective) graph morphism cannot supply a preimage for every label outside a finite exclusion set; the swap's involution can.",
+      "files_touched": ["specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Prove chain closure: (union G_i, union Gamma_i) in C",
+      "status": "partial",
+      "note": "ChainCtx scaffold (union graph/context construction) fully proven, sorry-free. ChainCtx.deriv_reflect (the reflection theorem chain_closure reduces to) landed as ONE documented strategic sorry: NIK.freshWitness_transport handles boxI/diaE witnesses drawn from the chain's shared coinfinite reserve V'^c, but boxI/diaE's cofinite quantifier ranges over ALL of Label Atom, not just V'^c -- 'old' labels y already in some (C i).G.X need either an invariant that Phase 4's concrete Zorn construction only ever extends by fresh (reserve-drawn) witnesses, or a separate monotonicity-based argument. See the theorem's docstring for the full diagnosis. follow_up_task: Phase 4 (the Zorn application, which supplies the concrete extension-step invariant).",
+      "files_touched": ["specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean"]
+    }
+  ],
+  "current_objective": 3,
+  "approaches_tried": [
+    {
+      "approach": "General (non-bijective) graph morphism f for the boxI/diaE reflection",
+      "result": "failed",
+      "reason": "Reconstructing the cofinite premise at a new index needs a preimage for every y' outside a finite set; a general f need not be surjective off any finite set. Diagnosed via direct analysis of the boxI case, confirmed by Simpson's own Prop. 4.4.1 definition (arbitrary function, not stated as sufficient for this specific reflection use)."
+    },
+    {
+      "approach": "Uniform transport of ALL y (not just reserve-drawn ones) via freshWitness_transport from a single index",
+      "result": "blocked",
+      "reason": "freshWitness_transport requires y not-in the target graph's node set to avoid the swap colliding with existing structure; this holds for the shared coinfinite reserve V'^c (guaranteed fresh w.r.t. every chain member) but not for arbitrary y already present in some chain member's domain. Landed as the strategic sorry in ChainCtx.deriv_reflect; the docstring records two candidate closing routes for Phase 4."
+    }
+  ],
+  "handoff_count": 0
+}

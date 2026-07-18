@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleTypes
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Data.Finset.Max
 public import Mathlib.Tactic.Linarith
@@ -15,6 +16,18 @@ public import Mathlib.Tactic.Linarith
 
 C5/C5' counterexample structures and the fresh-rational helper lemmas
 used by the Burgess chronicle construction.
+
+## Status (task 530, Phase 3a)
+
+The fresh-rational Finset helpers (`exists_rat_gt_finset`/`exists_rat_lt_finset`/
+`exists_rat_between_not_in_finset`) are now thin re-exports of
+`Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures` (zero
+`Formula`/`Chronicle` dependency, identical in both trees).
+
+`C5Counterexample`/`C5'Counterexample` stay logic-local, verbatim: they are `structure`s
+indexed by `Chronicle Atom`, referencing the `.f`/`.dom` fields Phase 1 deliberately kept
+logic-local (a `toGeneric` bridge broke downstream `rcases`/`simp` proofs). See the generic
+module's docstring for the full rationale.
 -/
 
 @[expose] public section
@@ -75,82 +88,23 @@ There exists a rational strictly greater than all elements of a finite set
 of rationals. (The rationals are unbounded above.)
 -/
 theorem exists_rat_gt_finset (fs : Finset Rat) :
-    ∃ q : Rat, (∀ s ∈ fs, s < q) ∧ q ∉ fs := by
-  by_cases h : fs.Nonempty
-  · refine ⟨fs.max' h + 1, ?_, ?_⟩
-    · intro s hs
-      calc s ≤ fs.max' h := Finset.le_max' fs s hs
-        _ < fs.max' h + 1 := lt_add_one _
-    · intro hmem
-      have h1 := Finset.le_max' fs _ hmem
-      linarith
-  · rw [Finset.not_nonempty_iff_eq_empty] at h
-    subst h
-    exact ⟨0, fun s hs => absurd hs (by simp), (by simp)⟩
+    ∃ q : Rat, (∀ s ∈ fs, s < q) ∧ q ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_gt_finset fs
 
 /--
 There exists a rational strictly less than all elements of a finite set
 of rationals. (The rationals are unbounded below.)
 -/
 theorem exists_rat_lt_finset (fs : Finset Rat) :
-    ∃ q : Rat, (∀ s ∈ fs, q < s) ∧ q ∉ fs := by
-  by_cases h : fs.Nonempty
-  · refine ⟨fs.min' h - 1, ?_, ?_⟩
-    · intro s hs
-      calc fs.min' h - 1 < fs.min' h := sub_one_lt _
-        _ ≤ s := Finset.min'_le fs s hs
-    · intro hmem
-      have h1 := Finset.min'_le fs _ hmem
-      linarith
-  · rw [Finset.not_nonempty_iff_eq_empty] at h
-    subst h
-    exact ⟨0, fun s hs => absurd hs (by simp), (by simp)⟩
+    ∃ q : Rat, (∀ s ∈ fs, q < s) ∧ q ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_lt_finset fs
 
 /--
 There exists a rational strictly between x and y that is NOT in a finite set fs.
-Since fs is finite and Q is dense, the open interval (x,y) is infinite while
-fs ∩ (x,y) is finite, so there must be a point outside fs.
-
-We construct it explicitly: take z = (x + y) / 2. If z ∉ fs, done. Otherwise,
-the interval (x, z) still has no elements of fs strictly between x and z that
-block finding a midpoint — but we use a simpler argument: among the finitely
-many points of fs in [x,y], there must be a gap, and the midpoint of that gap
-works. We use the simpler approach: (x + y) / 2 works when Adjacent, and for
-the general case we find any gap in the finite set fs within (x,y).
 -/
 private theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
-    ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs := by
-  -- The set of fs-elements strictly between x and y
-  set T := fs.filter (fun s => x < s ∧ s < y) with hT_def
-  by_cases hT : T.Nonempty
-  · -- There are fs-elements between x and y. Find the minimum, take midpoint with x.
-    set t := T.min' hT with ht_def
-    have ht_mem : t ∈ T := Finset.min'_mem T hT
-    have ht_prop : x < t ∧ t < y := by
-      rw [hT_def] at ht_mem; exact (Finset.mem_filter.mp ht_mem).2
-    -- z = (x + t) / 2 is strictly between x and t, hence between x and y
-    set z := (x + t) / 2 with hz_def
-    have hxz : x < z := by linarith
-    have hzt : z < t := by linarith
-    have hzy : z < y := lt_trans hzt ht_prop.2
-    refine ⟨z, hxz, hzy, ?_⟩
-    -- z ∉ fs because z < t = min of fs-elements in (x,y), and z > x
-    intro hz_mem
-    have hz_in_T : z ∈ T := by
-      rw [hT_def]; exact Finset.mem_filter.mpr ⟨hz_mem, hxz, hzy⟩
-    have : t ≤ z := Finset.min'_le T z hz_in_T
-    linarith
-  · -- No fs-elements between x and y. Midpoint works.
-    rw [Finset.not_nonempty_iff_eq_empty] at hT
-    set z := (x + y) / 2 with hz_def
-    have hxz : x < z := by linarith
-    have hzy : z < y := by linarith
-    refine ⟨z, hxz, hzy, ?_⟩
-    intro hz_mem
-    have : z ∈ T := by
-      rw [hT_def]; exact Finset.mem_filter.mpr ⟨hz_mem, hxz, hzy⟩
-    rw [hT] at this
-    exact absurd this (by simp)
+    ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_between_not_in_finset fs x y hxy
 
 end Cslib.Logic.Bimodal.Metalogic.BXCanonical.Chronicle
 

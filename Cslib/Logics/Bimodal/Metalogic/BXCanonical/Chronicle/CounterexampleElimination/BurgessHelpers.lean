@@ -8,8 +8,7 @@ module
 
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.ChronicleTypes
 public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.RRelation
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.Chronicle.PointInsertion
-public import Cslib.Logics.Bimodal.Metalogic.BXCanonical.CanonicalModel
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Tactic.NormNum
@@ -18,6 +17,14 @@ public import Mathlib.Tactic.NormNum
 
 Helper lemmas for `BurgessR3Maximal fc`: g-content subset, SetDeductivelyClosed,
 bot exclusion, adjacency preservation, and backward h-content construction.
+
+## Status (task 530, Phase 3a)
+
+`BurgessR3Maximal_g_content_sub`/`_sdc`/`_bot_not_mem` are now thin re-exports of
+`Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures`.
+`c2'_preserved_on_old_adjacent` and `burgessR3Maximal_from_h_content_sub` stay logic-local,
+verbatim (`Chronicle`-locality and forward Phase-4b-decision dependency respectively — see
+the generic module's docstring).
 -/
 
 @[expose] public section
@@ -39,7 +46,6 @@ open Cslib.Logic.Bimodal
 
 open Cslib.Logic.Bimodal.Metalogic.Core
 open Cslib.Logic.Bimodal.Metalogic.Bundle
-open Cslib.Logic.Bimodal.Metalogic.BXCanonical.CanonicalModel
 open Cslib.Logic.Bimodal.Theorems.Combinators
 
 /-! ## BurgessR3Maximal fc Helper Lemmas -/
@@ -56,55 +62,9 @@ in MCS), contradicting consistency of A.
 theorem BurgessR3Maximal_g_content_sub {fc : FrameClass} {A B C : Set (Formula Atom)}
     (h_r3m : BurgessR3Maximal fc A B C)
     (h_mcs_A : SetMaximalConsistent fc A) (h_mcs_C : SetMaximalConsistent fc C) :
-    gContent A ⊆ C := by
-  intro φ hφ
-  -- hφ : G(φ) ∈ A, i.e., allFuture(φ) ∈ A
-  change Formula.allFuture φ ∈ A at hφ
-  -- Suppose φ ∉ C, derive contradiction
-  by_contra h_not_C
-  have h_neg_C : φ.neg ∈ C := by
-    rcases SetMaximalConsistent.negation_complete h_mcs_C φ with h | h
-    · exact absurd h h_not_C
-    · exact h
-  -- ⊤ ∈ B (CUD contains all theorems)
-  set top := Formula.bot.imp Formula.bot with top_def
-  have h_top_B : top ∈ B :=
-    cud_contains_theorems h_r3m.1 (Cslib.Logic.Bimodal.Theorems.Combinators.identity Formula.bot)
-  -- burgessRSet(A, B, C): ∀ β ∈ B, ∀ γ ∈ C, untl(β, γ) ∈ A
-  have hUntl : Formula.untl top φ.neg ∈ A :=
-    h_r3m.2.1.1 top h_top_B φ.neg h_neg_C
-  -- BX10: untl(γ, δ) ∈ A → F(δ) ∈ A, here F(φ.neg) ∈ A
-  have h_F_neg : Formula.someFuture φ.neg ∈ A :=
-    until_F_mcs fc h_mcs_A top φ.neg hUntl
-  -- G(φ) ∈ A implies F(φ.neg) ∉ A
-  -- F(φ.neg) = someFuture(φ.neg) = (allFuture(φ.neg.neg)).neg
-  -- G(φ) ∈ A → G(φ.neg.neg) ∈ A (by φ → ¬¬φ inside G) → F(φ.neg) ∉ A
-  -- Derive ⊢ φ → ¬¬φ, i.e., ⊢ φ → (φ.neg → ⊥)
-  -- This is ⊢ φ → ((φ → ⊥) → ⊥), which follows from prop_s, prop_k, identity
-  have h_dni : DerivationTree fc [] (φ.imp φ.neg.neg) := by
-    -- φ.neg.neg = (φ.imp bot).imp bot
-    -- Need: ⊢ φ → ((φ → ⊥) → ⊥)
-    -- Proof: by deduction, assume φ.neg and φ, apply to get ⊥
-    have h1 : DerivationTree fc [φ.neg, φ] Formula.bot :=
-      DerivationTree.modus_ponens [φ.neg, φ] φ Formula.bot
-        (DerivationTree.assumption _ φ.neg (by simp))
-        (DerivationTree.assumption _ φ (by simp))
-    have h2 : DerivationTree fc [φ] φ.neg.neg :=
-      deductionTheorem [φ] φ.neg Formula.bot h1
-    exact deductionTheorem [] φ φ.neg.neg h2
-  -- G(φ → ¬¬φ) and temp_k_dist give G(φ) → G(¬¬φ)
-  have h_G_dni : DerivationTree fc [] (Formula.allFuture (φ.imp φ.neg.neg)) :=
-    DerivationTree.temporal_necessitation _ h_dni
-  have h_kd : DerivationTree fc [] ((φ.imp φ.neg.neg).allFuture.imp
-      (φ.allFuture.imp φ.neg.neg.allFuture)) :=
-    liftBase fc (Cslib.Logic.Bimodal.Theorems.TemporalDerived.tempKDistDerived φ φ.neg.neg)
-  have h1 := theoremInMcsFc h_mcs_A h_G_dni
-  have h2 := theoremInMcsFc h_mcs_A h_kd
-  have h3 := SetMaximalConsistent.implication_property h_mcs_A h2 h1
-  have h_G_nn : Formula.allFuture φ.neg.neg ∈ A :=
-    SetMaximalConsistent.implication_property h_mcs_A h3 hφ
-  -- F(¬φ) and G(¬¬φ) = G(neg(φ.neg)) are contradictory in MCS A
-  exact someFuture_allFuture_neg_absurd h_mcs_A φ.neg h_F_neg h_G_nn
+    gContent A ⊆ C :=
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_g_content_sub
+    (bimodalChronicleInterface fc) h_r3m h_mcs_A h_mcs_C
 
 /--
 **BurgessR3Maximal fc implies SetDeductivelyClosed** when some formula is not in B.
@@ -114,7 +74,8 @@ theorem BurgessR3Maximal_sdc {fc : FrameClass} {A B C : Set (Formula Atom)}
     (h_r3m : BurgessR3Maximal fc A B C)
     {phi : Formula Atom} (h_not_mem : phi ∉ B) :
     SetDeductivelyClosed fc B :=
-  cud_not_mem_is_sdc h_r3m.1 h_not_mem
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_sdc
+    (bimodalChronicleInterface fc) h_r3m h_not_mem
 
 /--
 **BurgessR3Maximal fc excludes ⊥ when B is consistent**: In Burgess's framework,
@@ -132,10 +93,9 @@ x < y} to the set of all DCSs" where DCS = deductively closed set
 private theorem BurgessR3Maximal_bot_not_mem {fc : FrameClass} {A B C : Set (Formula Atom)}
     (_h_r3m : BurgessR3Maximal fc A B C)
     (h_cons : SetConsistent fc B) :
-    Formula.bot ∉ B := by
-  intro h_bot
-  exact h_cons [Formula.bot] (fun φ hφ => by simp at hφ; rw [hφ]; exact h_bot)
-    ⟨DerivationTree.assumption [Formula.bot] Formula.bot (by simp)⟩
+    Formula.bot ∉ B :=
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_bot_not_mem
+    (bimodalChronicleInterface fc) _h_r3m h_cons
 
 /--
 Helper: for adjacent pairs in a chronicle satisfying c2', when inserting a new point

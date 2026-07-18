@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.ChronicleTypes
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.RRelation
 public import Cslib.Logics.Temporal.Metalogic.Chronicle.PointInsertion
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures
 public import Mathlib.Data.Rat.Defs
 public import Mathlib.Algebra.Order.Ring.Rat
 public import Mathlib.Data.Finset.Max
@@ -18,6 +19,17 @@ public import Mathlib.Tactic.Linarith
 
 C5/C5' counterexample structures, the fresh-rational helper lemmas,
 and BurgessR3Maximal helper lemmas used by the Temporal chronicle construction.
+
+## Status (task 530, Phase 3a)
+
+The fresh-rational Finset helpers and the `BurgessR3Maximal_g_content_sub`/`_sdc`/
+`_bot_not_mem` MCS-level lemmas are now thin re-exports of
+`Cslib.Foundations.Logic.Metalogic.Chronicle.CounterexampleElimination.Structures`.
+
+`C5Counterexample`/`C5'Counterexample` stay logic-local, verbatim (see the generic
+module's docstring for the `Chronicle`-locality rationale), as does
+`burgessR3Maximal_from_h_content_sub` (forward dependency on the Phase 4b duality-theorem
+decision) and `c2'_preserved_on_old_adjacent`.
 -/
 
 @[expose] public section
@@ -79,68 +91,23 @@ There exists a rational strictly greater than all elements of a finite set
 of rationals. (The rationals are unbounded above.)
 -/
 theorem exists_rat_gt_finset (fs : Finset Rat) :
-    ∃ q : Rat, (∀ s ∈ fs, s < q) ∧ q ∉ fs := by
-  by_cases h : fs.Nonempty
-  · refine ⟨fs.max' h + 1, ?_, ?_⟩
-    · intro s hs
-      calc s ≤ fs.max' h := Finset.le_max' fs s hs
-        _ < fs.max' h + 1 := lt_add_one _
-    · intro hmem
-      have h1 := Finset.le_max' fs _ hmem
-      linarith
-  · rw [Finset.not_nonempty_iff_eq_empty] at h
-    subst h
-    exact ⟨0, fun s hs => absurd hs (by simp), (by simp)⟩
+    ∃ q : Rat, (∀ s ∈ fs, s < q) ∧ q ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_gt_finset fs
 
 /--
 There exists a rational strictly less than all elements of a finite set
 of rationals. (The rationals are unbounded below.)
 -/
 theorem exists_rat_lt_finset (fs : Finset Rat) :
-    ∃ q : Rat, (∀ s ∈ fs, q < s) ∧ q ∉ fs := by
-  by_cases h : fs.Nonempty
-  · refine ⟨fs.min' h - 1, ?_, ?_⟩
-    · intro s hs
-      calc fs.min' h - 1 < fs.min' h := sub_one_lt _
-        _ ≤ s := Finset.min'_le fs s hs
-    · intro hmem
-      have h1 := Finset.min'_le fs _ hmem
-      linarith
-  · rw [Finset.not_nonempty_iff_eq_empty] at h
-    subst h
-    exact ⟨0, fun s hs => absurd hs (by simp), (by simp)⟩
+    ∃ q : Rat, (∀ s ∈ fs, q < s) ∧ q ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_lt_finset fs
 
 /--
 There exists a rational strictly between x and y that is NOT in a finite set fs.
 -/
 private theorem exists_rat_between_not_in_finset (fs : Finset Rat) (x y : Rat) (hxy : x < y) :
-    ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs := by
-  set T := fs.filter (fun s => x < s ∧ s < y) with hT_def
-  by_cases hT : T.Nonempty
-  · set t := T.min' hT with ht_def
-    have ht_mem : t ∈ T := Finset.min'_mem T hT
-    have ht_prop : x < t ∧ t < y := by
-      rw [hT_def] at ht_mem; exact (Finset.mem_filter.mp ht_mem).2
-    set z := (x + t) / 2 with hz_def
-    have hxz : x < z := by linarith
-    have hzt : z < t := by linarith
-    have hzy : z < y := lt_trans hzt ht_prop.2
-    refine ⟨z, hxz, hzy, ?_⟩
-    intro hz_mem
-    have hz_in_T : z ∈ T := by
-      rw [hT_def]; exact Finset.mem_filter.mpr ⟨hz_mem, hxz, hzy⟩
-    have : t ≤ z := Finset.min'_le T z hz_in_T
-    linarith
-  · rw [Finset.not_nonempty_iff_eq_empty] at hT
-    set z := (x + y) / 2 with hz_def
-    have hxz : x < z := by linarith
-    have hzy : z < y := by linarith
-    refine ⟨z, hxz, hzy, ?_⟩
-    intro hz_mem
-    have : z ∈ T := by
-      rw [hT_def]; exact Finset.mem_filter.mpr ⟨hz_mem, hxz, hzy⟩
-    rw [hT] at this
-    exact absurd this (by simp)
+    ∃ z : Rat, x < z ∧ z < y ∧ z ∉ fs :=
+  Cslib.Logic.Metalogic.Chronicle.exists_rat_between_not_in_finset fs x y hxy
 
 /-! ## BurgessR3Maximal Helper Lemmas -/
 
@@ -151,38 +118,9 @@ A and C both MCS, then gContent(A) ⊆ C.
 theorem BurgessR3Maximal_g_content_sub {A B C : Set (Formula Atom)}
     (h_r3m : BurgessR3Maximal A B C)
     (h_mcs_A : Temporal.SetMaximalConsistent A) (h_mcs_C : Temporal.SetMaximalConsistent C) :
-    gContent A ⊆ C := by
-  intro φ hφ
-  change Formula.allFuture φ ∈ A at hφ
-  by_contra h_not_C
-  have h_neg_C : (¬φ) ∈ C := by
-    rcases temporal_negation_complete h_mcs_C φ with h | h
-    · exact absurd h h_not_C
-    · exact h
-  set top := Formula.bot.imp Formula.bot with top_def
-  have h_top_B : top ∈ B :=
-    cud_contains_theorems h_r3m.1 (identity Formula.bot)
-  have hUntl : Formula.untl top φ.neg ∈ A :=
-    h_r3m.2.1.1 top h_top_B φ.neg h_neg_C
-  have h_F_neg : (𝐅(¬φ)) ∈ A :=
-    until_implies_F_in_mcs h_mcs_A hUntl
-  have h_dni : DerivationTree FrameClass.Base [] (φ.imp φ.neg.neg) := by
-    have h1 : DerivationTree FrameClass.Base [φ.neg, φ] Formula.bot :=
-      DerivationTree.modus_ponens [φ.neg, φ] φ Formula.bot
-        (DerivationTree.assumption _ φ.neg (by simp))
-        (DerivationTree.assumption _ φ (by simp))
-    have h2 : DerivationTree FrameClass.Base [φ] φ.neg.neg :=
-      deductionTheorem [φ] φ.neg Formula.bot h1
-    exact deductionTheorem [] φ φ.neg.neg h2
-  have h_G_dni : DerivationTree FrameClass.Base [] (Formula.allFuture (φ.imp φ.neg.neg)) :=
-    DerivationTree.temporal_necessitation _ h_dni
-  have h_kd := tempKDistDerived φ φ.neg.neg
-  have h1 := theoremInMcs h_mcs_A h_G_dni
-  have h2 := theoremInMcs h_mcs_A h_kd
-  have h3 := temporal_implication_property h_mcs_A h2 h1
-  have h_G_nn : Formula.allFuture φ.neg.neg ∈ A :=
-    temporal_implication_property h_mcs_A h3 hφ
-  exact someFuture_allFuture_neg_absurd h_mcs_A φ.neg h_F_neg h_G_nn
+    gContent A ⊆ C :=
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_g_content_sub
+    temporalChronicleInterface h_r3m h_mcs_A h_mcs_C
 
 /--
 **BurgessR3Maximal implies SetDeductivelyClosed** when some formula is not in B.
@@ -191,7 +129,8 @@ theorem BurgessR3Maximal_sdc {A B C : Set (Formula Atom)}
     (h_r3m : BurgessR3Maximal A B C)
     {phi : Formula Atom} (h_not_mem : phi ∉ B) :
     SetDeductivelyClosed B :=
-  cud_not_mem_is_sdc h_r3m.1 h_not_mem
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_sdc
+    temporalChronicleInterface h_r3m h_not_mem
 
 /--
 **BurgessR3Maximal excludes ⊥ when B is consistent**.
@@ -199,10 +138,9 @@ theorem BurgessR3Maximal_sdc {A B C : Set (Formula Atom)}
 private theorem BurgessR3Maximal_bot_not_mem {A B C : Set (Formula Atom)}
     (_h_r3m : BurgessR3Maximal A B C)
     (h_cons : Temporal.SetConsistent B) :
-    Formula.bot ∉ B := by
-  intro h_bot
-  exact h_cons [Formula.bot] (fun φ hφ => by simp at hφ; rw [hφ]; exact h_bot)
-    ⟨DerivationTree.assumption [Formula.bot] Formula.bot (by simp)⟩
+    Formula.bot ∉ B :=
+  Cslib.Logic.Metalogic.Chronicle.burgessR3Maximal_bot_not_mem
+    temporalChronicleInterface _h_r3m h_cons
 
 /--
 Helper: for adjacent pairs in a chronicle satisfying c2', when inserting a new point

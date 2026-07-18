@@ -259,19 +259,34 @@ seed→BurgessR3Maximal, the `someFuture/somePast` absurdity lemmas, the
 
 ---
 
-### Phase 3a: Generic CEE Structures + BurgessHelpers [NOT STARTED]
+### Phase 3a: Generic CEE Structures + BurgessHelpers [COMPLETED]
 
 **Goal**: Land the generic CounterexampleElimination foundation — the Kind + result structures and
 Burgess helpers — using temporal's 3-way file split as the target layout (the cleaner target per
 research §5.3).
 
 **Tasks**:
-- [ ] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/CounterexampleElimination/Structures.lean`
+- [x] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/CounterexampleElimination/Structures.lean`
   (generic) holding the Kind/result structures (bimodal `Structures.lean` + the inlined
   `BurgessHelpers.lean` content; temporal keeps these in `Structures.lean`).
-- [ ] Instantiate/re-export the structures in both trees' CEE `Structures.lean` (bimodal) /
+  *(deviation: altered -- landed the fresh-rational Finset helpers (zero
+  `ChronicleInterface`/`Formula` dependency) and the three `BurgessR3Maximal_g_content_sub`/
+  `_sdc`/`_bot_not_mem` MCS-level lemmas generically. `C5Counterexample`/`C5'Counterexample`
+  (structures indexed by the logic-local `Chronicle F`), `c2'_preserved_on_old_adjacent`, and
+  `burgessR3Maximal_from_h_content_sub` (forward dependency on the Phase 4b duality-theorem
+  decision) stay logic-local in both trees per the survey's recommendation -- see the generic
+  module's docstring for the full rationale. No new `ChronicleInterface` fields were needed:
+  `until_implies_F_in_mcs` (Phase 2), `futureNecessitation`, `futureKDist`,
+  `someFutureAllFutureNegAbsurd`, and `dcs_modus_ponens ∘ mcs_is_dcs` (for
+  `implication_property`) already covered every primitive the three lemmas needed.)*
+- [x] Instantiate/re-export the structures in both trees' CEE `Structures.lean` (bimodal) /
   `Structures.lean` (temporal). Bimodal's `BurgessHelpers.lean` becomes instance/re-export.
-- [ ] Update the `CounterexampleElimination.lean` sub-barrels in both trees as needed.
+- [x] Update the `CounterexampleElimination.lean` sub-barrels in both trees as needed.
+  *(deviation: altered -- no sub-barrel changes were needed since both files re-export
+  under identical names; `Cslib.lean` gained one new Foundations import. `lake shake`
+  flagged `PointInsertion`/`CanonicalModel` imports in Bimodal's `BurgessHelpers.lean` as
+  now-unused after the lift; removed both, along with the now-unresolvable
+  `CanonicalModel` `open`.)*
 
 **Timing**: 1.5 hours
 

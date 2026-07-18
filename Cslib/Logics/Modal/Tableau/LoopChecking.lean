@@ -4472,32 +4472,155 @@ lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
     (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hWC : worldsContiguousS4 b)
     (hKT : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
     (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
     (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
     (hknown : accTargetsKnown b acc)
     (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
     ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS4 φ₀ := by
-  sorry
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
+        have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hcontent := modalApplyOne_boxNeg_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb' x hx
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rcases List.mem_append.mp hx with hxnew | hxold
+        · exact hcontent x hxnew
+        · exact hb x hxold
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb' x hx
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact hb x hx
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
+        have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hcontent := modalApplyOne_diamondPos_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem'
+          hW
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb' x hx
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rcases List.mem_append.mp hx with hxnew | hxold
+        · exact hcontent x hxnew
+        · exact hb x hxold
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb' x hx
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact hb x hx
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnm := modalApplyOneS4Keyed_nonMint_universe_S4 φ₀ keys sf b acc hb hsfmem hknown hnbd
+    rw [hpair] at hnm
+    dsimp only at hnm
+    intro b' hb' x hx
+    rcases hres : result with lf | brs | lf | -
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x hxnew
+      · exact hb x hxold
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x (List.mem_flatten.mpr ⟨br, hbr, hxnew⟩)
+      · exact hb x hxold
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x hxnew
+      · exact hb x hxold
+    · rw [hres] at hsf; simp at hsf
 
-/-- **`modalStepBranchS4_preserves_S4LoopInv`** (task 511, Phase 5 assembly): every
-`modalStepBranchS4Keyed` step preserves `S4LoopInv`, over every branch/expanded-set pair it
-produces (any `b' ∈ newBs` paired with any `e' ∈ newExps` -- valid because `modalStepBranchS4Keyed`
-never produces distinct `newExps` entries for distinct `newBs` entries: the `.branching` arm
-maps EVERY branch to the identical `e ++ [sf]`, and the `.linear`/`.persistent` arms produce
-singleton lists of each, so any member of one is definitionally paired with any member of the
-other). Also threads and re-establishes the proof-internal `keysWorldsKnown` auxiliary invariant
-(not an `S4LoopInv` field itself, `modalStepBranchS4_preserves_keysWorldsKnown`'s own
-docstring) needed by `accFresh`/`accKnown`'s own preservation, so a continuation dispatch driving
-this assembly through repeated steps (Phase 6/7) can re-supply it at each call.
+/-- **`modalStepBranchS4_preserves_S4LoopInv`** (task 511, Phase 5 assembly, now fully closed
+Phase 6): every `modalStepBranchS4Keyed` step preserves `S4LoopInv`, over every
+branch/expanded-set pair it produces (any `b' ∈ newBs` paired with any `e' ∈ newExps` -- valid
+because `modalStepBranchS4Keyed` never produces distinct `newExps` entries for distinct `newBs`
+entries: the `.branching` arm maps EVERY branch to the identical `e ++ [sf]`, and the
+`.linear`/`.persistent` arms produce singleton lists of each, so any member of one is
+definitionally paired with any member of the other). Also threads and re-establishes TWO
+proof-internal auxiliary invariants (neither an `S4LoopInv` field itself, to avoid reopening the
+completed Phase 4 struct design): `keysWorldsKnown` (needed by `accFresh`/`accKnown`) and
+`worldsContiguousS4` (needed by `bClosure`'s own minting-case pigeonhole prerequisite,
+`modalStepBranchS4_worldBound`), so a continuation dispatch driving this assembly through
+repeated steps (Phase 7) can re-supply both at each call.
 
-**Eight of the ten fields are fully closed, zero sorry** (`keysDistinct`/`keyLowerBd`/
+**All ten fields are now fully closed, zero sorry** (`keysDistinct`/`keyLowerBd`/
 `keysInUniverse`/`keysTotal`: the four "key" fields, closed across dispatches 2-5; `eNodup`/
-`outDegEq`/`accFresh`/`accKnown`: closed this dispatch). **Two fields
-(`bClosure`/`eClosure`) are documented strategic-sorry skeletons** -- see the section docstring
-immediately above `modalStepBranchS4_preserves_eClosure` for the precise remaining obligation
-each needs; both are genuinely non-mechanical (the `bClosure` gap in particular requires Phase
-6's own pigeonhole deliverable as a prerequisite, not merely a corollary). -/
+`outDegEq`/`accFresh`/`accKnown`: closed dispatch 6; `eClosure`/`bClosure`: closed this
+dispatch, `eClosure` directly and `bClosure` via Phase 6's pigeonhole world-bound
+(`modalStepBranchS4_worldBound`) as a genuine prerequisite for its minting-case obligation). -/
 theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
@@ -4505,16 +4628,19 @@ theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
     (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
     (hinv : S4LoopInv φ₀ b e acc keys)
     (hKW : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hWC : worldsContiguousS4 b)
     (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
     (∀ b' ∈ newBs, ∀ e' ∈ newExps, S4LoopInv φ₀ b' e' newAcc keys') ∧
-    (∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → w ∈ modalKnownWorlds b') := by
+    (∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → w ∈ modalKnownWorlds b') ∧
+    (∀ b' ∈ newBs, worldsContiguousS4 b') := by
   obtain ⟨hbC, heN, heC, haF, haK, hoD, hkT, hkL, hkD, hkI⟩ := hinv
   refine ⟨?_, modalStepBranchS4_preserves_keysWorldsKnown φ₀ b e acc keys newBs newExps newAcc
-    keys' hKW hstep⟩
+    keys' hKW hstep, modalStepBranchS4_preserves_worldsContiguousS4 φ₀ b e acc keys newBs newExps
+    newAcc keys' hWC haK hstep⟩
   intro b' hb' e' he'
   exact
     { bClosure := modalStepBranchS4_preserves_bClosure φ₀ b e acc keys newBs newExps newAcc keys'
-        hbC hkT hkD hkI haK hstep b' hb'
+        hbC hWC hkT hkD hkI haK hstep b' hb'
       eNodup := modalStepBranchS4_preserves_eNodup φ₀ b e acc keys newBs newExps newAcc keys'
         hstep heN e' he'
       eClosure := modalStepBranchS4_preserves_eClosure φ₀ b e acc keys newBs newExps newAcc keys'

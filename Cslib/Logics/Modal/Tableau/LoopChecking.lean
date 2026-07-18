@@ -1404,6 +1404,372 @@ lemma modalStepBranchS4_preserves_keysInUniverse (φ₀ : Proposition Atom)
     · simp only [hblock] at hwk
       exact hIU w k hwk
 
+/-! ## Assembling `keysTotal`'s Preservation (task 511, Phase 5 continuation) -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_successorsOf_hasEdge`
+(unavailable across files): if `w'` is returned by `acc.successorsOf w`, the edge `w → w'` is
+recorded in `acc`. Mirrors `FrameSoundness.lean`'s `mem_successorsOf_hasEdge'`/
+`S5Simplification.lean`'s `mem_successorsOf_hasEdge_S5`. Needed to lift the 4-rule's
+propagation-target labels (drawn from `acc.successorsOf w`) to `accTargetsKnown`'s edge-indexed
+known-worlds form. -/
+private lemma mem_successorsOf_hasEdge_S4 {acc : Accessibility} {w w' : WorldIndex}
+    (h : w' ∈ acc.successorsOf w) : acc.hasEdge w w' = true := by
+  simp only [Accessibility.successorsOf, List.mem_filterMap] at h
+  obtain ⟨⟨src, tgt⟩, hmem, heq⟩ := h
+  split at heq
+  · rename_i hsrc
+    simp only [Option.some.injEq] at heq
+    simp only [Accessibility.hasEdge, List.any_eq_true, Bool.and_eq_true]
+    exact ⟨(src, tgt), hmem, hsrc, by rw [beq_iff_eq]; exact heq⟩
+  · simp at heq
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`
+(unavailable across files), dropping the `Nodup` conjunct this development does not need.
+Mirrors `S5Simplification.lean`'s `modalKnownWorlds_fold_spec_S5`. -/
+private lemma modalKnownWorlds_fold_spec_S4
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => simp
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      intro x
+      rw [ih ws0]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      intro x
+      rw [ih (sf.label :: ws0)]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ List.mem_cons_self)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds`
+(unavailable across files). Mirrors `S5Simplification.lean`'s `mem_modalKnownWorlds_S5`. -/
+private lemma mem_modalKnownWorlds_S4
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  simpa using modalKnownWorlds_fold_spec_S4 l [] x
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`
+(unavailable across files): appending formulas to the front of a branch only grows its
+known-worlds set. Mirrors `S5Simplification.lean`'s `modalKnownWorlds_mono_append_S5`. -/
+private lemma modalKnownWorlds_mono_append_S4
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
+  intro x hx
+  rw [mem_modalKnownWorlds_S4] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+omit [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mintGroup_label_eq_freshWorld`
+(unavailable across files): the K minting groups (`boxNeg`'s and `diamondPos`'s live shape)
+always emit formulas entirely labeled at the fresh witness `modalNextWorld b`, since the
+witness, `boxProps`, and `diaNegProps` are all constructed at that one fresh label. -/
+private lemma mintGroup_label_eq_freshWorld_S4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w : WorldIndex)
+    (s0 : Sign) (ψ0 : Proposition Atom) :
+    ∀ x ∈ ((⟨s0, ψ0, modalNextWorld b⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) ::
+      (boxPositivesOf b).filterMap (fun (ψ, src) =>
+        if src == w then
+          let sf' : SignedFormula (Proposition Atom) WorldIndex :=
+            ⟨.pos, ψ, modalNextWorld b⟩
+          if b.any (· == sf') then none else some sf'
+        else none) ++
+      b.filterMap (fun sf' =>
+        if sf'.sign == .neg && sf'.label == w then
+          match sf'.formula with
+          | .diamond ψ =>
+            let prop : SignedFormula (Proposition Atom) WorldIndex :=
+              ⟨.neg, ψ, modalNextWorld b⟩
+            if b.any (· == prop) then none else some prop
+          | _ => none
+        else none)),
+    x.label = modalNextWorld b := by
+  intro x hx
+  simp only [List.mem_cons, List.mem_append] at hx
+  rcases hx with (rfl | hbox) | hdia
+  · rfl
+  · simp only [List.mem_filterMap] at hbox
+    obtain ⟨⟨ψ, src⟩, -, heq⟩ := hbox
+    split at heq
+    · split at heq
+      · simp at heq
+      · simp only [Option.some.injEq] at heq; subst heq; rfl
+    · simp at heq
+  · simp only [List.mem_filterMap] at hdia
+    obtain ⟨sf', -, heq⟩ := hdia
+    split at heq
+    · split at heq
+      · rename_i ψ hform
+        split at heq
+        · simp at heq
+        · simp only [Option.some.injEq] at heq; subst heq; rfl
+      · simp at heq
+    · simp at heq
+
+/-- The T-augmented rule `modalApplyOneT` never mints at its own two relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): `acc` is unchanged and every emitted formula's label is a known world
+of `b` -- either the source's own world `w` (self-propagation, known since `sf ∈ b`) or one of
+K's own `boxPos`/`diamondNeg` propagation targets (known via `accTargetsKnown`, exactly as in
+K's own `modalApplyOne_knownWorlds_step`). Needed as the base layer for the S4-specific composed
+dichotomy (`modalApplyOneS4Rules_boxPos_diaNeg_known_S4`), since T's own
+`modalApplyOneT_knownWorldsStep` (`TDriver.lean`) is `private` and unavailable across files. -/
+private lemma modalApplyOneT_boxPos_diaNeg_known_S4
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneT sf b acc).snd = acc ∧
+    (match (modalApplyOneT sf b acc).fst with
+      | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True
+      | _ => False) := by
+  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+  · obtain ⟨s, ff, w⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_boxPos_eq
+      (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    have hself : ∀ x ∈ modalTBoxSelf b φ w, x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      simp only [modalTBoxSelf] at hx
+      split_ifs at hx with hmem
+      · simp at hx
+      · simp only [List.mem_singleton] at hx
+        subst hx
+        exact label_mem_modalKnownWorlds
+          (sf := (⟨.pos, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
+    rcases hkeq : modalApplyOne (⟨.pos, .box φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨kResult, kAcc⟩
+    simp only [hkeq] at hK hKW
+    rcases hK with hk | ⟨kForms, hk⟩
+    · subst hk
+      unfold modalApplyOneT
+      simp only [hkeq, apply_ite Prod.snd, apply_ite Prod.fst, ite_self]
+      rcases hKW with ⟨hacc, -⟩ | ⟨-, hfalse⟩
+      · subst hacc
+        refine ⟨rfl, ?_⟩
+        split_ifs with hemp
+        · trivial
+        · exact hself
+      · simp at hfalse
+    · subst hk
+      unfold modalApplyOneT
+      simp only [hkeq]
+      rcases hKW with ⟨hacc, hmatch⟩ | ⟨-, hfalse⟩
+      · subst hacc
+        refine ⟨rfl, ?_⟩
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hmatch x hx
+        · exact hself x hx
+      · simp at hfalse
+  · obtain ⟨s, ff, w⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hK := modalApplyOne_diamondNeg_eq
+      (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl φ rfl b acc
+    have hKW := modalApplyOne_knownWorlds_step
+      (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc hsfmem hknown
+    have hself : ∀ x ∈ modalTDiaNegSelf b φ w, x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      simp only [modalTDiaNegSelf] at hx
+      split_ifs at hx with hmem
+      · simp at hx
+      · simp only [List.mem_singleton] at hx
+        subst hx
+        exact label_mem_modalKnownWorlds
+          (sf := (⟨.neg, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)) hsfmem
+    rcases hkeq : modalApplyOne (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨kResult, kAcc⟩
+    simp only [hkeq] at hK hKW
+    rcases hK with hk | ⟨kForms, hk⟩
+    · subst hk
+      unfold modalApplyOneT
+      simp only [hkeq, apply_ite Prod.snd, apply_ite Prod.fst, ite_self]
+      rcases hKW with ⟨hacc, -⟩ | ⟨-, hfalse⟩
+      · subst hacc
+        refine ⟨rfl, ?_⟩
+        split_ifs with hemp
+        · trivial
+        · exact hself
+      · simp at hfalse
+    · subst hk
+      unfold modalApplyOneT
+      simp only [hkeq]
+      rcases hKW with ⟨hacc, hmatch⟩ | ⟨-, hfalse⟩
+      · subst hacc
+        refine ⟨rfl, ?_⟩
+        intro x hx
+        simp only [List.mem_append, List.mem_filter] at hx
+        rcases hx with hx | ⟨hx, -⟩
+        · exact hmatch x hx
+        · exact hself x hx
+      · simp at hfalse
+
+/-- The S4-augmented rule `modalApplyOneS4Rules` never mints at its two T/4-relevant shapes
+(`T(□φ)@w`, `F(◇φ)@w`): composes `modalApplyOneT_boxPos_diaNeg_known_S4` (K+T layer) with the
+4-rule propagation (`modalFourBoxProp`/`modalFourDiaNegProp`), whose targets are recorded
+successors of `w` -- known via `accTargetsKnown` composed with `mem_successorsOf_hasEdge_S4`. -/
+private lemma modalApplyOneS4Rules_boxPos_diaNeg_known_S4
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneS4Rules sf b acc).snd = acc ∧
+    (match (modalApplyOneS4Rules sf b acc).fst with
+      | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True
+      | _ => False) := by
+  obtain ⟨hTacc, hT⟩ := modalApplyOneT_boxPos_diaNeg_known_S4 sf b acc hsfmem hknown h
+  rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+  · obtain ⟨s, ff, w⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hfour : ∀ x ∈ modalFourBoxProp b acc φ w, x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      unfold modalFourBoxProp at hx
+      simp only [List.mem_filterMap] at hx
+      obtain ⟨w', hw', hxeq⟩ := hx
+      split at hxeq
+      · simp at hxeq
+      · simp only [Option.some.injEq] at hxeq
+        subst hxeq
+        exact hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+    rcases htr : modalApplyOneT (⟨.pos, .box φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨tResult, tAcc⟩
+    rw [htr] at hTacc hT
+    dsimp only at hTacc hT
+    unfold modalApplyOneS4Rules
+    rw [htr]
+    dsimp only
+    rcases htres : tResult with tf | tbrs | tf | -
+    · rw [htres] at hT; simp at hT
+    · rw [htres] at hT; simp at hT
+    · rw [htres] at hT
+      dsimp only
+      refine ⟨hTacc, ?_⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hT x hx
+      · exact hfour x hx
+    · rw [htres] at hT
+      simp only [apply_ite Prod.snd, apply_ite Prod.fst, ite_self]
+      refine ⟨hTacc, ?_⟩
+      split_ifs with hemp
+      · trivial
+      · exact hfour
+  · obtain ⟨s, ff, w⟩ := sf
+    simp only at hs hf
+    subst hs; subst hf
+    have hfour : ∀ x ∈ modalFourDiaNegProp b acc φ w, x.label ∈ modalKnownWorlds b := by
+      intro x hx
+      unfold modalFourDiaNegProp at hx
+      simp only [List.mem_filterMap] at hx
+      obtain ⟨w', hw', hxeq⟩ := hx
+      split at hxeq
+      · simp at hxeq
+      · simp only [Option.some.injEq] at hxeq
+        subst hxeq
+        exact hknown w w' (mem_successorsOf_hasEdge_S4 hw')
+    rcases htr : modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc with ⟨tResult, tAcc⟩
+    rw [htr] at hTacc hT
+    dsimp only at hTacc hT
+    unfold modalApplyOneS4Rules
+    rw [htr]
+    dsimp only
+    rcases htres : tResult with tf | tbrs | tf | -
+    · rw [htres] at hT; simp at hT
+    · rw [htres] at hT; simp at hT
+    · rw [htres] at hT
+      dsimp only
+      refine ⟨hTacc, ?_⟩
+      intro x hx
+      simp only [List.mem_append, List.mem_filter] at hx
+      rcases hx with hx | ⟨hx, -⟩
+      · exact hT x hx
+      · exact hfour x hx
+    · rw [htres] at hT
+      simp only [apply_ite Prod.snd, apply_ite Prod.fst, ite_self]
+      refine ⟨hTacc, ?_⟩
+      split_ifs with hemp
+      · trivial
+      · exact hfour
+
+/-- Outside the two K-minting shapes, and with `sf.formula` non-modal (neither `box` nor
+`diamond`), `modalApplyOne` never touches `acc` and every emitted formula's label is `sf.label`
+(the propositional decomposition rules never leave the source world): the goal reduces to K's
+own `tryAllPropRules` dispatch, whose output labels are exactly `sf.label`
+(`modalApplyOne_prop_outputs_subset`), or a vacuous `.notApplicable`. -/
+private lemma modalApplyOne_nonModal_known_S4
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b)
+    (hnb : ∀ φ, sf.formula ≠ .box φ) (hnd : ∀ φ, sf.formula ≠ .diamond φ) :
+    (modalApplyOne sf b acc).snd = acc ∧
+    (match (modalApplyOne sf b acc).fst with
+      | .linear formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+      | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True) := by
+  have hprop := modalApplyOne_prop_outputs_subset sf
+  unfold modalApplyOne
+  by_cases hpa :
+      (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+  · simp only [hpa, if_true]
+    refine ⟨trivial, ?_⟩
+    rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+      formulas | branches | formulas | -
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds_S4]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds_S4]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hprop
+      intro z hz
+      obtain ⟨-, hzlabel⟩ := hprop z hz
+      rw [hzlabel, mem_modalKnownWorlds_S4]; exact ⟨sf, hsfmem, rfl⟩
+    · rw [hpr] at hpa; simp [RuleResult.isApplicable] at hpa
+  · rw [if_neg hpa]
+    rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+      simp_all
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

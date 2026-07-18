@@ -1,5 +1,5 @@
 {
-  "next_project_number": 526,
+  "next_project_number": 528,
   "active_projects": [
     {
       "project_number": 511,
@@ -1817,6 +1817,41 @@
         }
       ],
       "session_id": "sess_1784329467_424a02_525"
+    },
+    {
+      "project_number": 526,
+      "project_name": "fix_prime_exclusion_unused_argument",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix unusedArguments lint error in PrimeExclusion.lean",
+      "description": "lake lint (batteries/runLinter) reports one `unusedArguments` linter error in Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean. Locate the flagged declaration (a hypothesis/argument bound in a def or theorem signature that is never used in the body and is not underscore-prefixed), and resolve it per CONTRIBUTING.md conventions: either prefix the unused binder with `_` (preferred when the argument is structurally required for the signature, e.g. an abstract `DerivationSystem`/typeclass parameter kept for uniformity with sibling lemmas) or remove it if genuinely dead. Do NOT alter the public API surface of `prime_exclusion`/`prime_set_exclusion` or their downstream instantiations in MinLindenbaum.lean/IntLindenbaum.lean without confirming callers still compile. Single-file change. Re-verify with `lake build` + `lake lint` (expect the PrimeExclusion unusedArguments error gone, no new warnings). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue.",
+      "parent_task": 502,
+      "created": "2026-07-18T00:04:48Z",
+      "last_updated": "2026-07-18T00:04:48Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "topic": "Code Hygiene",
+      "file_scope": [
+        "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean"
+      ]
+    },
+    {
+      "project_number": 527,
+      "project_name": "fix_modal_frame_separation_decide",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix stuck decide in ModalFrameSeparation.lean regression test",
+      "description": "lake test fails on CslibTests/ModalFrameSeparation.lean: the `decide`-based regression checks for the S5-vs-5 frame-class separation (`example : decide (s5Valid ...) = true := by decide` and `example : decide (fiveValid ...) = false := by decide`) get stuck / fail to reduce against `instDecidableS5Valid` / `instDecidableFiveValid`. This is a live regression (the file builds these countermodel checks via the tableau's Decidable instances rather than the semantic proofs). Diagnose why the `decide` kernel reduction no longer terminates/succeeds on the S5 and Five decidability instances: check whether a recent change to the modal tableau / validity Decidable instances (this area is under active work in the KB5 metalogic tasks) altered the reduction behaviour or made the instance non-computable. Fix so `lake test` passes on this file again — either by repairing the Decidable instance's computability or, if `decide` is genuinely no longer viable, by replacing the stuck `decide` checks with the proven separation theorems (mirroring the existing `kb5Valid` case at line 42, which already uses `boxImp_not_kb5Valid` from FrameSoundness.lean instead of `decide`). Verify with `lake build` + `lake test` (ModalFrameSeparation green). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue; verified unrelated to the Segment.lean import change via git-stash reproduction.",
+      "parent_task": 502,
+      "created": "2026-07-18T00:04:48Z",
+      "last_updated": "2026-07-18T00:04:48Z",
+      "next_artifact_number": 1,
+      "artifacts": [],
+      "topic": "Testing",
+      "file_scope": [
+        "CslibTests/ModalFrameSeparation.lean",
+        "Cslib/Logics/Modal/**"
+      ]
     }
   ],
   "repository_health": {

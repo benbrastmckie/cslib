@@ -1,5 +1,5 @@
 ---
-next_project_number: 526
+next_project_number: 528
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 526
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,504,511,519,522,523,525 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,504,511,519,522,523,525,526,527 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506,515 | 36,37,181,317,407,425,449,511,525 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -74,6 +74,7 @@ next_project_number: 526
 
 393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
+526 [NOT STARTED] — lake lint (batteries/runLinter) reports one `unusedArguments` lin
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
 414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
@@ -94,12 +95,36 @@ next_project_number: 526
 
 519 [NOT STARTED] — Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
 
+### Testing
+
+527 [NOT STARTED] — lake test fails on CslibTests/ModalFrameSeparation.lean: the `dec
+
 ### Uncategorized
 
 511 [PARTIAL] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 
 ## Tasks
+
+### 527. Fix stuck decide in ModalFrameSeparation.lean regression test
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Testing
+- **Dependencies**: None
+
+**Description**: lake test fails on CslibTests/ModalFrameSeparation.lean: the `decide`-based regression checks for the S5-vs-5 frame-class separation (`example : decide (s5Valid ...) = true := by decide` and `example : decide (fiveValid ...) = false := by decide`) get stuck / fail to reduce against `instDecidableS5Valid` / `instDecidableFiveValid`. This is a live regression (the file builds these countermodel checks via the tableau's Decidable instances rather than the semantic proofs). Diagnose why the `decide` kernel reduction no longer terminates/succeeds on the S5 and Five decidability instances: check whether a recent change to the modal tableau / validity Decidable instances (this area is under active work in the KB5 metalogic tasks) altered the reduction behaviour or made the instance non-computable. Fix so `lake test` passes on this file again — either by repairing the Decidable instance's computability or, if `decide` is genuinely no longer viable, by replacing the stuck `decide` checks with the proven separation theorems (mirroring the existing `kb5Valid` case at line 42, which already uses `boxImp_not_kb5Valid` from FrameSoundness.lean instead of `decide`). Verify with `lake build` + `lake test` (ModalFrameSeparation green). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue; verified unrelated to the Segment.lean import change via git-stash reproduction.
+
+---
+
+### 526. Fix unusedArguments lint error in PrimeExclusion.lean
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Code Hygiene
+- **Dependencies**: None
+
+**Description**: lake lint (batteries/runLinter) reports one `unusedArguments` linter error in Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean. Locate the flagged declaration (a hypothesis/argument bound in a def or theorem signature that is never used in the body and is not underscore-prefixed), and resolve it per CONTRIBUTING.md conventions: either prefix the unused binder with `_` (preferred when the argument is structurally required for the signature, e.g. an abstract `DerivationSystem`/typeclass parameter kept for uniformity with sibling lemmas) or remove it if genuinely dead. Do NOT alter the public API surface of `prime_exclusion`/`prime_set_exclusion` or their downstream instantiations in MinLindenbaum.lean/IntLindenbaum.lean without confirming callers still compile. Single-file change. Re-verify with `lake build` + `lake lint` (expect the PrimeExclusion unusedArguments error gone, no new warnings). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue.
+
+---
 
 ### 525. Kb5 completeness and decidability
 - **Effort**: 5-8 hours

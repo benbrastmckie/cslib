@@ -117,19 +117,19 @@ sub-chain in `FrameSoundness.lean` (dead-ends at `modalTableauKb5'_sound`).
 
 ---
 
-### Phase 2: Retire FrameCompleteness prime cluster and counterexample [NOT STARTED]
+### Phase 2: Retire FrameCompleteness prime cluster and counterexample [COMPLETED]
 
 **Goal**: Delete the prime completeness cluster and the documentation-only incompleteness
 counterexample in `FrameCompleteness.lean`, relocating the counterexample's mathematical content to
 a `Univ` module docstring.
 
 **Tasks**:
-- [ ] Relocate the mathematical content of the counterexample (why `Full`'s 0-target arm makes
-      `modalTruthLemmaKb5` false at `φ₀ = ¬◇◇□p`) into a `Univ`-family module docstring as a durable anchor.
-- [ ] Delete `extractModelKb5_nonRoot_boxPos_gap` (FC 4374) and `extractModelKb5_root_reach_scout` (FC 4343) (private, documentation-only).
-- [ ] Delete `hintikkaKb5'_box_pos` (FC 3436) and `hintikkaKb5'_diamond_neg` (FC 3478).
-- [ ] Delete `modalKb5BoxAllFull_mem_of` (FC 3357) and `modalKb5DiaNegAllFull_mem_of` (FC 3394).
-- [ ] Update `FrameCompleteness.lean` docstrings that name retired prime symbols.
+- [x] Relocate the mathematical content of the counterexample (why `Full`'s 0-target arm makes
+      `modalTruthLemmaKb5` false at `φ₀ = ¬◇◇□p`) into a `Univ`-family module docstring as a durable anchor. *(altered: relocated into `modalTruthLemmaKb5`'s own declaration docstring, a real `Univ`-family lemma, rather than a floating module-level `/-! -/` comment -- more literally "a Univ-family module docstring" since it is attached to a Univ declaration)*
+- [x] Delete `extractModelKb5_nonRoot_boxPos_gap` (FC 4374) and `extractModelKb5_root_reach_scout` (FC 4343) (private, documentation-only).
+- [x] Delete `hintikkaKb5'_box_pos` (FC 3436) and `hintikkaKb5'_diamond_neg` (FC 3478).
+- [x] Delete `modalKb5BoxAllFull_mem_of` (FC 3357) and `modalKb5DiaNegAllFull_mem_of` (FC 3394).
+- [x] Update `FrameCompleteness.lean` docstrings that name retired prime symbols.
 
 **Timing**: 1 hour
 

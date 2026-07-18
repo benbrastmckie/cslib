@@ -473,8 +473,9 @@ Extract a Kripke model from an open branch `b` and accessibility relation `acc`,
 *equivalence closure* `Relation.EqvGen` of `acc.hasEdge` as the model's relation (Strategy B,
 closure-at-extraction, instantiated with `Cl := Relation.EqvGen`). This extraction is
 **independent of the tableau rule** -- a pure closure-model construction over any branch/
-accessibility pair -- and is delivered here regardless of Phase 2's blocked status (see
-`S5Simplification.lean`'s "Phase 2 Obstruction" section).
+accessibility pair -- and is delivered here regardless of the *bypassed* Phase 2 rule discharge
+(superseded by the witness-reuse rule `modalApplyOneS5w`, `S5Simplification.lean`; see that
+file's "Phase 2 Obstruction" section).
 
 **Correction against the plan**: the plan cites `Relation.EqvGen.instIsEquiv`, but no such
 instance exists in Mathlib (confirmed: `infer_instance` fails for
@@ -549,7 +550,8 @@ omit [Hashable Atom] in
 `IsEquiv`'s `symm` + `trans` projections: `r a b → r a c → r b c` follows by symmetry (`r a b`
 gives `r b a`) then transitivity (`r b a` with `r a c` gives `r b c`). This is the free 5/KB5
 (Euclidean) exposure the plan's Phase 7 targets -- delivered here since it depends only on
-`extractModelS5_equiv` (Phase 3), independent of the blocked Phase 2 rule discharge. There is
+`extractModelS5_equiv` (Phase 3), independent of the *bypassed* Phase 2 rule discharge
+(superseded by the witness-reuse rule `modalApplyOneS5w`, `S5Simplification.lean`). There is
 **no** `RightEuclidean.symm` lemma (confirmed against `Defs.lean:49`); the plan's documented
 alternative route via `Relation.symm_rightEuclidean_iff_trans`
 (`Cslib/Foundations/Relation/Euclidean.lean:236`) requires a `[Std.Symm r]` instance that is not
@@ -3340,196 +3342,23 @@ lemma extractModelKb5_clusterNonempty_of_reach_root
   ⟨w, (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ hr)).mpr h0,
     hwne⟩
 
-/-! ### KB5 Full-Cluster Hintikka Insertion Lemmas (task 525 Phase 2)
-
-`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` (`FiveSimplification.lean`) are unconditional in the
-trigger `w` for their non-root cluster-dump arm (unlike Five's root/non-root split), so the
-introduction ("insertion") lemmas below collapse Five's two lemmas
-(`modalFiveBoxAll_mem_of_root`/`_mem_of_ne_root`) into one: either `v` is a known non-root world
-(unconditional in `w`), or `v = 0` with the trigger `w` itself the root and the known cluster
-already nonempty (the root-reflexive self-target arm, task 524). -/
-
-omit [Hashable Atom] in
-/-- **Introduction direction for `modalKb5BoxAllFull`** (task 525 Phase 2), converse of
-`modalKb5BoxAllFull_mem`. -/
-lemma modalKb5BoxAllFull_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w v : WorldIndex}
-    (hnotin : (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
-    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
-      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
-        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
-    (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalKb5BoxAllFull b φ w := by
-  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, rfl, u, hu, hune⟩
-  · unfold modalKb5BoxAllFull
-    dsimp only
-    have hmemNR :
-        (⟨.pos, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
-          (modalKnownWorlds b).filterMap fun w' =>
-            if w' == (0 : WorldIndex) then none
-            else
-              if b.any (· == (⟨.pos, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-              then none else some ⟨.pos, φ, w'⟩ := by
-      simp only [List.mem_filterMap]
-      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
-    by_cases hgate :
-        (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
-          = true
-    · rw [if_pos hgate]
-      exact List.mem_append_left _ hmemNR
-    · rw [if_neg hgate]
-      exact hmemNR
-  · unfold modalKb5BoxAllFull
-    dsimp only
-    rw [if_pos (by
-      simp only [Bool.and_eq_true, beq_iff_eq, List.any_eq_true, Bool.not_eq_true',
-        beq_eq_false_iff_ne, ne_eq]
-      exact ⟨trivial, u, hu, hune⟩)]
-    rw [if_neg (by simpa using hnotin)]
-    exact List.mem_append_right _ (List.mem_singleton_self _)
-
-omit [Hashable Atom] in
-/-- **Introduction direction for `modalKb5DiaNegAllFull`**, dual of `modalKb5BoxAllFull_mem_of`. -/
-lemma modalKb5DiaNegAllFull_mem_of {b : List (SignedFormula (Proposition Atom) WorldIndex)}
-    {φ : Proposition Atom} {w v : WorldIndex}
-    (hnotin : (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉ b)
-    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
-      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
-        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
-    (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ modalKb5DiaNegAllFull b φ w := by
-  rcases hcond with ⟨hv, hvne⟩ | ⟨rfl, rfl, u, hu, hune⟩
-  · unfold modalKb5DiaNegAllFull
-    dsimp only
-    have hmemNR :
-        (⟨.neg, φ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
-          (modalKnownWorlds b).filterMap fun w' =>
-            if w' == (0 : WorldIndex) then none
-            else
-              if b.any (· == (⟨.neg, φ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex))
-              then none else some ⟨.neg, φ, w'⟩ := by
-      simp only [List.mem_filterMap]
-      exact ⟨v, hv, by rw [if_neg (by simpa using hvne), if_neg (by simpa using hnotin)]⟩
-    by_cases hgate :
-        (w == (0 : WorldIndex) && (modalKnownWorlds b).any (fun v => !(v == (0 : WorldIndex))))
-          = true
-    · rw [if_pos hgate]
-      exact List.mem_append_left _ hmemNR
-    · rw [if_neg hgate]
-      exact hmemNR
-  · unfold modalKb5DiaNegAllFull
-    dsimp only
-    rw [if_pos (by
-      simp only [Bool.and_eq_true, beq_iff_eq, List.any_eq_true, Bool.not_eq_true',
-        beq_eq_false_iff_ne, ne_eq]
-      exact ⟨trivial, u, hu, hune⟩)]
-    rw [if_neg (by simpa using hnotin)]
-    exact List.mem_append_right _ (List.mem_singleton_self _)
-
-/-- **KB5-analogue of `hintikkaFive_box_pos`** (task 525 Phase 2): on an
-`modalApplyOneKb5'`-saturated branch, `T(□ψ)@w ∈ b` forces `T(ψ)@v ∈ b` at any target `v` matching
-`modalKb5BoxAllFull`'s dichotomy -- either `v` is known and non-root (unconditional in the trigger
-`w`), or `v = 0` with the trigger `w` itself the root and the known cluster nonempty. Proof is
-`by_contra` mirroring `hintikkaFive_box_pos`, substituting `modalKb5BoxAllFull_mem_of` for the
-root/non-root split lemma pair and `modalApplyOneKb5'_boxPos_eq`/`modalApplyOneKb5'Prop` for their
-Five counterparts. -/
-lemma hintikkaKb5'_box_pos
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5' b acc)
-    (ψ : Proposition Atom) (w v : WorldIndex)
-    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
-    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
-      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
-        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
-    (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  by_contra hnotin
-  have hall : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
-      modalKb5BoxAllFull b ψ w := modalKb5BoxAllFull_mem_of hnotin hcond
-  have hcond2 := hH.2.1 (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
-  simp only at hcond2
-  have hK := modalApplyOne_boxPos_eq
-    (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
-  rw [modalApplyOneKb5'_boxPos_eq] at hcond2
-  unfold modalApplyOneKb5'Prop at hcond2
-  rcases hp : modalApplyOne
-      (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-      with ⟨kResult, kAcc⟩
-  rw [hp] at hcond2 hK
-  simp only at hcond2 hK
-  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-  · dsimp only at hcond2
-    split_ifs at hcond2 with hemp
-    · rw [List.isEmpty_iff] at hemp
-      rw [hemp] at hall
-      simp at hall
-    · exact hnotin (hcond2 _ hall)
-  · dsimp only at hcond2
-    by_cases hkf : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
-    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
-    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
-      simp only [List.mem_filter]
-      refine ⟨hall, ?_⟩
-      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
-      intro x hx heq
-      exact hkf (heq ▸ hx)
-
-/-- **KB5-analogue of `hintikkaFive_diamond_neg`**, dual of `hintikkaKb5'_box_pos`: `F(◇ψ)@w ∈ b`
-forces `F(ψ)@v ∈ b` at any target `v` matching `modalKb5DiaNegAllFull`'s dichotomy. -/
-lemma hintikkaKb5'_diamond_neg
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5' b acc)
-    (ψ : Proposition Atom) (w v : WorldIndex)
-    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
-    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
-      (v = (0 : WorldIndex) ∧ w = (0 : WorldIndex) ∧
-        ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
-    (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  by_contra hnotin
-  have hall : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
-      modalKb5DiaNegAllFull b ψ w := modalKb5DiaNegAllFull_mem_of hnotin hcond
-  have hcond2 := hH.2.1 (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
-  simp only at hcond2
-  have hK := modalApplyOne_diamondNeg_eq
-    (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
-  rw [modalApplyOneKb5'_diaNeg_eq] at hcond2
-  unfold modalApplyOneKb5'Prop at hcond2
-  rcases hp : modalApplyOne
-      (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
-      with ⟨kResult, kAcc⟩
-  rw [hp] at hcond2 hK
-  simp only at hcond2 hK
-  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
-  · dsimp only at hcond2
-    split_ifs at hcond2 with hemp
-    · rw [List.isEmpty_iff] at hemp
-      rw [hemp] at hall
-      simp at hall
-    · exact hnotin (hcond2 _ hall)
-  · dsimp only at hcond2
-    by_cases hkf : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
-    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
-    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
-      simp only [List.mem_filter]
-      refine ⟨hall, ?_⟩
-      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
-      intro x hx heq
-      exact hkf (heq ▸ hx)
-
 /-! ### Re-Derived Hintikka Insertion Lemmas for the Corrected-Gate Rule
 
-`hintikkaKb5''_box_pos`/`hintikkaKb5''_diamond_neg` are the trigger-free analogues of
-`hintikkaKb5'_box_pos`/`hintikkaKb5'_diamond_neg`: the dichotomy `hcond` they consume drops the
-`w = 0` conjunct entirely, since `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s self-target arm
-fires for any trigger `w`. This is precisely the extra case the frozen rule's dichotomy could
-never cover -- and precisely what `extractModelKb5_nonRoot_boxPos_gap` below shows is REQUIRED
-for the truth lemma: a non-root world `w`'s box-positive content must reach the root regardless
-of whether `w` happens to be the FIRST world to raise `T(□ψ)`. -/
+`hintikkaKb5''_box_pos`/`hintikkaKb5''_diamond_neg` are the trigger-free analogues of the
+retired frozen rule's insertion lemmas: the dichotomy `hcond` they consume drops the `w = 0`
+conjunct entirely, since `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s self-target arm fires for
+any trigger `w`. This is precisely the extra case the frozen rule's dichotomy could never cover --
+and precisely what the retired frozen-rule counterexample (preserved in `modalTruthLemmaKb5`'s
+docstring) shows is REQUIRED for the truth lemma: a non-root world `w`'s box-positive content must
+reach the root regardless of whether `w` happens to be the FIRST world to raise `T(□ψ)`. -/
 
 /-- **Trigger-free KB5-analogue of `hintikkaFive_box_pos`**: on a `modalApplyOneKb5''`-saturated
 branch, `T(□ψ)@w ∈ b` forces `T(ψ)@v ∈ b` at any target `v` matching `modalKb5BoxAllUniv`'s
 dichotomy -- either `v` is known and non-root (unconditional in the trigger `w`), or `v = 0` with
 the known cluster nonempty (unconditional in `w` too, unlike the frozen rule). Proof is
-`by_contra` mirroring `hintikkaKb5'_box_pos`, substituting `modalKb5BoxAllUniv_mem_of` for the
-root/non-root split lemma pair and `modalApplyOneKb5''_boxPos_eq`/`modalApplyOneKb5''Prop` for
-their frozen counterparts. -/
+`by_contra` mirroring the retired frozen rule's own insertion-lemma proof, substituting
+`modalKb5BoxAllUniv_mem_of` for the root/non-root split lemma pair and
+`modalApplyOneKb5''_boxPos_eq`/`modalApplyOneKb5''Prop` for their frozen counterparts. -/
 lemma hintikkaKb5''_box_pos
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5'' b acc)
@@ -3613,8 +3442,8 @@ lemma hintikkaKb5''_diamond_neg
 
 /-! ### Phase 5: The KB5 Truth Lemma (task 528)
 
-`modalTruthLemmaKb5` is the lemma that was mathematically FALSE for the frozen
-`modalApplyOneKb5'` rule (`extractModelKb5_nonRoot_boxPos_gap` below) and is now TRUE for the
+`modalTruthLemmaKb5` is the lemma that was mathematically FALSE for the retired frozen root-gated
+rule (see `modalTruthLemmaKb5`'s docstring for the retained counterexample) and is now TRUE for the
 corrected-gate `modalApplyOneKb5''` rule: the trigger-free dichotomy
 (`modalKb5BoxAllUniv_mem`/`modalKb5DiaNegAllUniv_mem`) lets `hintikkaKb5''_box_pos`/
 `hintikkaKb5''_diamond_neg` certify the self-target `v = 0` case regardless of which world
@@ -3678,11 +3507,33 @@ lemma extractModelKb5_clusterNonempty_of_root_selfRelate
 branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`), never target the root
 (`hRoot`), and whose root is always known (`h0`), branch membership and
 `extractModelKb5`-satisfaction agree, at every world and both signs. This is the lemma that is
-mathematically FALSE for the frozen `modalApplyOneKb5'` rule
-(`extractModelKb5_nonRoot_boxPos_gap` below) and TRUE for the corrected-gate rule: the trigger-free
-dichotomy lets the box-positive/diamond-negative cases discharge their `v = 0` sub-case
-unconditionally in the trigger `w`, via `extractModelKb5_clusterNonempty_of_reach_root` (Phase 4,
-`w ≠ 0`) and `extractModelKb5_clusterNonempty_of_root_selfRelate` (above, `w = 0`). -/
+mathematically FALSE for the retired frozen root-gated rule and TRUE for the corrected-gate rule:
+the trigger-free dichotomy lets the box-positive/diamond-negative cases discharge their `v = 0`
+sub-case unconditionally in the trigger `w`, via `extractModelKb5_clusterNonempty_of_reach_root`
+(Phase 4, `w ≠ 0`) and `extractModelKb5_clusterNonempty_of_root_selfRelate` (above, `w = 0`).
+
+**Why the retired rule could never prove this (counterexample, preserved here as documentation)**:
+the retired rule's box-positive/diamond-negative propagation dumped a self-target `0` only when
+the *trigger itself* was the root (`w = 0`); it excluded target `0` unconditionally for any
+non-root trigger. But `extractModelKb5`'s relation is the symmetrized-then-Euclidean closure of
+the raw edges, so a non-root world `w` reachable from the root by a two-hop raw chain `0 → a → w`
+(`a` non-root, e.g. an ordinary witness-reuse mint chain) is placed *adjacent to the root* in the
+extracted model (`.r w 0`) regardless of which world triggered the rule: raw-edge survival gives
+`r 0 a` and `r a w`, `Std.Symm` (`kb5FC`) turns `r 0 a` into `r a 0`, and `RightEuclidean`
+(`kb5FC`) chains `r a 0`/`r a w` into `r w 0`. So a box-positive formula `T(□ψ)@w` at such a `w`
+could never force `T(ψ)@0 ∈ b` through the retired rule, no matter how saturated the branch
+became -- the rule's own definition ruled this out, not merely a proof strategy failing to find
+the argument. A concrete Lean-checked witness existed for `φ₀ := ¬(◇◇□p)`: the retired tableau
+produced an open branch with raw edges `0 → 1 → 2`, `T(□p)@2 ∈ b`, and `T(p)@0 ∉ b`, while
+`(extractModelKb5 b acc).r 2 0` held by exactly the two-hop construction above -- a genuine,
+checked failure of this lemma's would-be statement for that rule, not a proof search that had
+not yet succeeded. This is not "KB5 completeness is impossible" (Blackburn–de Rijke–Venema
+§4.8-4.9 confirms it is achievable via a rooted Euclidean tableau in general); it is specifically
+the retired `extractModelKb5`/frozen-rule pairing that could not reach it without a rule change.
+The corrected-gate rule `modalApplyOneKb5''` (`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`) fixes
+this by dropping the trigger-identity conjunct from the self-target gate, so it fires whenever the
+known cluster has any non-root member, regardless of which world triggered it -- which is exactly
+what this lemma proves TRUE. -/
 lemma modalTruthLemmaKb5
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
@@ -4315,129 +4166,6 @@ instance instDecidableKb5Valid (φ₀ : Proposition Atom) : Decidable (kb5Valid 
   match h : modalTableauKb5'' φ₀ with
   | .closed => .isTrue ((kb5Valid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauKb5''_complete φ₀ hv] at h; cases h)
-
-/-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
-
-`modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,
-Phase 22) only ever forces propagated content at **direct** `acc.hasEdge 0 w'` successors of the
-root. The Five truth lemma's root case is airtight *because* `Relation.EuclGen`'s closure of the
-**raw, non-symmetrized** relation providably never lets the root reach anything beyond a direct
-successor (`euclGen_root_imp_hasEdge`, consuming `accTargetsNeRoot`). The scout lemma below checks
-whether the same containment survives once the base relation is **symmetrized** first -- i.e.
-whether `euclGen_root_imp_hasEdge`'s KB5 analogue is even a true statement, before spending effort
-on the truth lemma that would need it. -/
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- **Scout counterexample**: with only two raw edges `0 → a` (root's direct successor) and
-`a → c` (a's own child, `c` not a direct root successor), `extractModelKb5`'s relation relates the
-root to `c` anyway -- `EuclGen (SymmGen r) 0 c` -- via `eucl (SymmGen.of_rel_symm h1) (base h2)`
-(chaining through the *symmetrized* reverse edge `a → 0`, which shares source `a` with the raw
-`a → c` edge). This is not an artifact of this specific closure choice: `r a 0` (forced by
-`Std.Symm` applied to the required raw-edge survival `r 0 a`) and `r a c` (forced by raw-edge
-survival alone) together force `r 0 c` via `RightEuclidean` alone, in **any** relation that is
-simultaneously `kb5FC`-satisfying and preserves every raw edge -- so this is not repairable by
-choosing a different closure operator. See the phase note below for the completeness-side
-consequence. -/
-private lemma extractModelKb5_root_reach_scout {α : Type*} {r : α → α → Prop} {w0 x y : α}
-    (h1 : r w0 x) (h2 : r x y) :
-    Relation.EuclGen (Relation.SymmGen r) w0 y :=
-  Relation.EuclGen.eucl (Relation.EuclGen.base (Relation.SymmGen.of_rel_symm h1))
-    (Relation.EuclGen.base (Relation.SymmGen.of_rel h2))
-
-omit [Hashable Atom] in
-/-- **Task 525 Phase 3 scout: the deep-chain gap `modalApplyOneKb5'` still cannot close.**
-`modalApplyOneKb5'` (task 524) already repairs the *shallow* gap the scout lemma above records
-(the root's own box formulas now dump to the full known cluster, including a self-target, once
-the cluster is nonempty). But the closure relation's symmetry, combined with the SAME scout
-derivation, forces a **deeper**, structurally unrepairable gap: whenever a *non-root* world `w`
-is connected to the root via a raw two-hop chain `0 → a → w` (`a` non-root, e.g. a routine
-witness-reuse mint that first mints `a` from the root, then mints `w` from `a`'s own diamond),
-`extractModelKb5`'s relation places `w` adjacent to the root (`.r w 0`, via `EuclGen.symm_of_symm`
-applied to the scout derivation) -- yet `modalKb5BoxAllFull b ψ w`'s non-root cluster-dump arm
-**unconditionally excludes target `0`** regardless of the trigger `w` (`modalKb5BoxAllFull_mem`'s
-dichotomy: a `0`-labeled output requires the trigger itself to be `0`). So a box-positive formula
-`T(□ψ)@w` at exactly such a `w` can never force `T(ψ)@0 ∈ b` through this rule, no matter how
-saturated the branch becomes -- the rule's own definition rules it out, not merely a proof
-strategy failing to find the argument.
-
-This is not hypothetical: a concrete Lean-checked witness exists (verified via `#eval`/
-`native_decide` outside this file, since kernel `decide` reduction on a real `modalTableauKb5'`
-run stalls -- the same pre-existing `Decidable`-reduction issue task 515 left in
-`ModalFrameSeparation.lean`). For `φ₀ := ¬(◇◇□p)`, `modalTableauKb5' φ₀` produces an open branch
-with raw edges `0 → 1 → 2`, `T(□p)@2 ∈ b`, and `T(p)@0 ∉ b`; `(extractModelKb5 b acc).r 2 0` holds
-by exactly the construction this lemma packages, so the branch is Hintikka-saturated yet
-`extractModelKb5` does *not* actually satisfy `T(□p)@2`'s claim at world `0` -- the truth lemma's
-general statement (quantifying over **every** trigger `w`, not only the root) is false for this
-rule, not merely difficult to prove. -/
-private lemma extractModelKb5_nonRoot_boxPos_gap
-    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
-    {ψ : Proposition Atom} {a w : WorldIndex} (hw : w ≠ (0 : WorldIndex))
-    (h1 : acc.hasEdge 0 a = true) (h2 : acc.hasEdge a w = true) :
-    (extractModelKb5 b acc).r w (0 : WorldIndex) ∧
-    (⟨.pos, ψ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉
-      modalKb5BoxAllFull b ψ w := by
-  refine ⟨?_, ?_⟩
-  · rw [extractModelKb5_r]
-    exact Relation.EuclGen.symm_of_symm inferInstance (extractModelKb5_root_reach_scout h1 h2)
-  · intro hmem
-    rcases (modalKb5BoxAllFull_mem hmem).2 with ⟨_, _, hne⟩ | ⟨_, hw0, _⟩
-    · exact hne rfl
-    · exact hw hw0
-
-/-! ## Frozen-Rule Blocker: `modalTruthLemmaKb5`'s original statement is false for
-`modalApplyOneKb5'`
-
-**Finding**: `modalApplyOneKb5'` repairs the shallow root-only gap an earlier scout-lemma finding
-(superseded by this note) recorded, but `extractModelKb5_nonRoot_boxPos_gap`
-above proves a deeper, structurally unrepairable gap survives: the general KB5 truth lemma this
-section's original design goal
-specifies -- branch membership agreeing with `extractModelKb5`-satisfaction at **every** world,
-including non-root trigger worlds connected to the root by a raw two-hop (or longer) chain -- is
-**false** for `modalApplyOneKb5'`, not merely unproved. `modalKb5BoxAllFull`'s non-root cluster-
-dump arm unconditionally excludes target `0` regardless of which world triggers it (only a
-literal `w = 0` trigger gets the self-target arm), while the closure relation's global symmetry
-(`extractModelKb5_symm`) plus the already-landed scout derivation together force `.r w 0` whenever
-`w` is connected to the root by *any* two-hop raw chain, root-triggered or not.
-
-**Reproducible witness**: `φ₀ := ¬(◇◇□p)` (`Proposition.imp (.diamond (.diamond (.box (.atom
-false)))) .bot`, `Atom := Bool`). Running `modalTableauKb5' φ₀` (verified via `lean_run_code`
-`#eval`/`native_decide` outside this file -- kernel `decide` stalls on the real tableau
-computation, the same pre-existing kernel-reduction issue documented in `CslibTests/
-ModalFrameSeparation.lean`) yields an
-open branch `b`/`acc` with raw edges `acc.edges = [(1, 2), (0, 1)]`, `T(□p)@2 ∈ b`, and
-`T(p)@0 ∉ b`. `(extractModelKb5 b acc).r 2 (0 : WorldIndex)` is independently proved (no
-`native_decide` needed) from `acc.hasEdge 0 1 = true`/`acc.hasEdge 1 2 = true` alone, exactly by
-`extractModelKb5_nonRoot_boxPos_gap`'s construction. So `T(□p)@2 ∈ b` while
-`¬ Satisfies (extractModelKb5 b acc) 2 (Proposition.box (.atom false))` (world `0` fails `atom
-false` and `.r 2 0` holds) -- a genuine, checked failure of the truth lemma's would-be statement,
-not a proof search that has not yet succeeded.
-
-**This is not "KB5 completeness is impossible"** (Blackburn–de Rijke–Venema §4.8-4.9 confirms it is
-achievable via a rooted Euclidean tableau in general), but reaching it from this specific
-`extractModelKb5`/`modalApplyOneKb5'` pairing is not possible without a rule change, and
-`modalApplyOneKb5'` itself stays frozen (its own landed, sorry-free deliverable is preserved
-byte-for-byte; it is deliberately not modified to try to route around this gap). A genuine fix
-needs either: (i) a rule whose box-positive/diamond-negative propagation dumps to the full known
-cluster *unconditionally* including target `0` whenever the cluster is connected to the root by
-**any** length chain (not just literal `w = 0` triggers), which likely requires a different
-bookkeeping device (e.g. tracking cluster membership directly rather than via `w == 0` trigger
-identity), or (ii) a different model extraction that does not let non-root-triggered chains reach
-the root semantically while the rule stays root-trigger-gated. Both are substantial new
-rule/extraction design, comparable in scope to the original Five construction (`modalApplyOneFive`
-and its supporting `EuclGen`/witness-reuse machinery above) -- not a proof-engineering gap closable
-by a cleverer induction on the existing rule.
-
-**Resolved**: option (i) above is exactly what the corrected-gate rule `modalApplyOneKb5''`
-implements (`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`, dropping the trigger-identity conjunct
-from the self-target gate so it fires whenever the known cluster has any non-root member,
-regardless of which world triggered it). `modalTruthLemmaKb5` is proved TRUE for
-`modalApplyOneKb5''` above, and `modalTableauKb5''_complete`/`kb5Valid_decides`/
-`instDecidableKb5Valid` (above) deliver full KB5 completeness and decidability on top of it. This
-blocker note, the scout lemma (`extractModelKb5_root_reach_scout`), and the witness above are
-retained in full as documentation of exactly why the naive root-restricted gate is unrepairable --
-they are not stale, since `modalApplyOneKb5'` genuinely remains incomplete and frozen; only the
-*overall* KB5-completeness goal is now delivered, via the corrected-gate rule beside it, not by
-fixing this one. -/
 
 end Cslib.Logic.Modal.Tableau
 

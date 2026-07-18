@@ -325,28 +325,83 @@ Phase 1; gated by Phase 2's go/no-go.
 **Verification**: `lake build` green; sorry-free in mainline (or a clearly-marked probe if still
 exploratory). If the equivariance route fails, escalate — do NOT paper over with an axiom.
 
-### Phase 4: Bounded Prime Lemma (Simpson 5.3.1 / bounded 8.2.6 form) — Zorn over whole contexts [NOT STARTED]
+### Phase 4: Bounded Prime Lemma (Simpson 5.3.1 / bounded 8.2.6 form) — Zorn over whole contexts [PARTIAL]
 
 **Objective**: prove `Γ ⊬_G x:A ⟹ ∃ 𝒯-prime `(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A`` — producing an
 inhabitant of the repaired `TPrime`. Depends on Phases 2, 3.
 
 **Tasks**:
-1. `--lit`: mine Simpson Lemma 5.3.1 (pp.92-93 raster) and the bounded prime lemma (Ch 7-8); confirm
-   the bounded form's coinfinite reserve `W(V')` matches `Context.coinfinite`.
-2. ONE Zorn application over whole contexts (graph + formula-set growing together, capped by excluded
-   `x:A`, inside fixed coinfinite reserve `W(V')`); upper bound from Phase 3.
-3. Discharge the four clauses with the repaired rules:
-   - **Consistency**: `NIKX.consistency_step` (cross-label `(⊥E)`) — "immediate", no maximality.
-   - **Deductive closure**: relativized clause + maximality on `(H, Δ∪{y:B})` (needs `y ∈ H.X`,
-     which the relativized clause supplies).
-   - **Disjunction**: `NIKX.disjunction_step` (cross-label `(∨E)`) + maximality.
-   - **Diamond**: `(◇E)` freshness + maximality on `(H∪{yRv}, Δ∪{v:B})` — reductio here is REAL
-     (unlike `clModel`'s vacuous one); do not generalize any Phase-20 vacuity warning to it.
+1. [x] `--lit`: mined Simpson Lemma 5.3.1 (`chunk_0102.md`/`chunk_0103.md`, pp.92-93 raster) and the
+   bounded prime lemma (Ch 7-8, `chunk_0165.md`/`chunk_0166.md`, Lemmas 8.2.5/8.2.6). **Resolved the
+   plan's own flagged bounded-vs-unbounded risk**: Lemma 8.2.5 shows a bounded-context's primeness
+   does NOT entail raw classical-modelhood (that's the separately-constructed `T-Comp(H)`
+   completion); the already-landed `TPrime` (`Context.lean`) requires **raw** `clModel`, matching
+   the **unbounded** Ch 5 form instead. Phase 4 transcribes the unbounded 5.3.1 route. **This makes
+   Phase 5 ("T-Comp graph completion — symmetry") unneeded for a `TPrime`-typed target** — flagged
+   here for reconsideration, not silently dropped (see Phase 5's note below). The shared coinfinite
+   reserve `W(V')` matches `Context.coinfinite` in both forms (confirmed).
+2. [x] ONE Zorn application over whole contexts, via Mathlib's `zorn_le₀` over `primeC`
+   (contexts `⊇ (G₀,Γ₀)`, confined to `W(G₀.coinfinite.choose)`, `⊬ x₀:A₀`), with the chain
+   upper-bound obligation discharged by packaging Phase 3's `ChainCtx` into a genuine `Context`
+   (`ChainCtx.unionContext`) and reusing `ChainCtx.chain_closure` (inherits Phase 3's one sorry,
+   not re-derived). Sorry-free.
+3. Discharged all **five** clauses (0 plus the four numbered) with the repaired rules — landed in
+   `probes/chain-union-reflection-probe.lean`:
+   - **Clause 0 (`clModel`)**: sorry-free, via a NEW "redundant edge" maximality argument
+     (`TClosure.mono'` → `NIK.weaken_tclosure` → `TClosure.addEdge_redundant` →
+     `NIK.drop_redundant_edge` → `raw_edge_of_tclosure`) reconstructed from Simpson's *stated
+     property* since `GeomAxiom`'s Horn-only axioms don't match the general existential-witness
+     argument on the page (transcription discipline, "reconstructed from a stated property").
+   - **Consistency**: sorry-free, immediate via cross-label `NIK.efq` (`consistency_of_maximal`).
+   - **Disjunction**: sorry-free, via `Deriv.orE` (set-lifted `(∨E)`, no cut needed) +
+     `mem_of_maximal_addFormula` (`disjunction_of_maximal`).
+   - **Deductive closure**: outer maximality wiring sorry-free (`deductiveClosure_of_maximal`);
+     routes through ONE new documented strategic sorry, `NIK.subst` (cut/substitution
+     admissibility) — a genuinely new lemma Simpson's own proof silently relies on but this
+     dispatch's remaining budget did not close (see that theorem's docstring for the full
+     five-condition justification).
+   - **Diamond**: outer maximality wiring and the fresh-label half sorry-free
+     (`dwitness_mem_of_maximal`, `diamond_of_maximal`, via new `NIK.diaWitness_transport`);
+     routes through ONE new documented strategic sorry for the "old label" cofinite-range
+     sub-case — **the same cofinite-quantification-vs-finite-graph-domain obstacle Phase 3's
+     `deriv_reflect` hit**, now confirmed as a recurring structural gap, not a one-off.
+4. [x] `primeLemma` — Simpson's Prime Lemma 5.3.1, fully assembled from the five clause theorems
+   plus `primeC_exists_maximal`.
 
-**Verification**: `lake build` green; sorry-free; axiom footprint ⊆ `[propext, Classical.choice,
-Quot.sound]` (Zorn is classical metatheory, ambient in Mathlib, not a new axiom under `Cslib/`).
+**Verification**: `lake env lean` on `probes/chain-union-reflection-probe.lean` green (verified,
+repeatedly, through incremental additions). Zero-debt invariant holds: **zero** `sorry`/new
+`axiom`/vacuous def under `Cslib/` (mainline untouched this phase — all work in `probes/`, per
+Phase 3's own precedent). **Three** total `sorry`s remain in the probe (all documented strategic
+sorries meeting the anti-analysis five-condition test): the inherited Phase 3 `deriv_reflect`
+sorry (NOT discharged — see below), the new `NIK.subst` sorry, and the new diamond "old label"
+sorry. Guardrail modules (`CS5Canonical.lean`, `CKExtension.lean`) unaffected (untouched, confirmed
+via scoped build).
+
+**On discharging Phase 3's `deriv_reflect` sorry (secondary dispatch objective)**: NOT discharged.
+Phase 3's docstring named two candidate closing routes: (a) an invariant that the concrete Zorn
+construction only ever extends by fresh (reserve-drawn) labels at each step, or (b) a
+monotonicity-based argument for "old" labels. Route (a) is **not naturally available** from
+Mathlib's `zorn_le₀`: that lemma is a non-constructive existence result (`∃ m, Maximal ... m`) — it
+does not expose a step-indexed extension sequence for a "single-step-adjoins-only-a-fresh-label"
+invariant to be stated against. Route (b) was not found either. This dispatch instead hit the
+**identical** obstacle independently, in the diamond clause's "old label" cofinite-range case —
+confirming the gap is structural (inherent to the cofinite-quantification encoding versus
+`Context.G.X`'s potentially-infinite domain), not specific to either theorem. Left as-is per the
+dispatch's explicit permission; both occurrences are tracked together in `sorry_inventory` with a
+shared `follow_up_task`.
 
 ### Phase 5: T-Comp graph completion (Simpson Lemma 8.2.5) — symmetry [NOT STARTED]
+
+**FLAGGED for reconsideration (Phase 4 finding, not acted on unilaterally)**: Phase 4's `--lit`
+research (Simpson `chunk_0165.md`/`chunk_0166.md`) found that Lemma 8.2.5's `T-Comp(H)` completion
+belongs to the *bounded* (Ch 7-8) canonical-model route, in which primeness does NOT entail raw
+classical-modelhood. Phase 4 discharged `TPrime`'s `clModel` clause directly for the **raw**
+relation of the Zorn-maximal `H` (sorry-free — see Phase 4's notes and
+`clModel_of_maximal`/`raw_edge_of_tclosure` in `probes/chain-union-reflection-probe.lean`), which
+is what the already-landed (unbounded, Ch 5-style) `TPrime` type requires. If Phase 6 continues to
+consume the raw relation from Phase 4's `primeLemma` output directly, this phase may be **unneeded**
+for the `cs5_completeness` target. Left `[NOT STARTED]` (not skipped) pending explicit
+orchestrator/user confirmation, since redefining scope is outside a single phase's authority.
 
 **Objective**: the graph-completion step that supplies symmetry of the canonical relation in the
 labelled bounded-context model. Depends on Phase 4.

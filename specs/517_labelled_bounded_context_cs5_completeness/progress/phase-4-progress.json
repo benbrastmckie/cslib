@@ -1,0 +1,50 @@
+{
+  "phase": 4,
+  "phase_name": "Bounded Prime Lemma (Simpson 5.3.1 / bounded 8.2.6 form) -- Zorn over whole contexts",
+  "started_at": "2026-07-18T19:43:56Z",
+  "last_updated": "2026-07-18T21:30:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "--lit: mine Simpson Lemma 5.3.1 (pp.92-93 raster) and the bounded prime lemma (Ch 7-8); confirm the bounded form's coinfinite reserve W(V') matches Context.coinfinite",
+      "status": "done",
+      "note": "Read chunk_0102.md/chunk_0103.md (5.3.1 proof) and chunk_0165.md/chunk_0166.md (Lemma 8.2.5/8.2.6, the bounded route). Resolved the plan's own flagged bounded-vs-unbounded risk: 8.2.5 shows bounded-context primeness does NOT entail raw classical-modelhood (T-Comp(H) is a separate post-hoc completion); the already-landed TPrime requires raw clModel, matching the unbounded Ch5 form. Coinfinite reserve mechanism confirmed shared between both forms.",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "ONE Zorn application over whole contexts (graph + formula-set growing together, capped by excluded x:A, inside fixed coinfinite reserve W(V')); upper bound from Phase 3",
+      "status": "done",
+      "note": "primeC (Simpson's poset C) via Context.le; primeC_exists_maximal via Mathlib's zorn_le0; chain upper-bound obligation discharged via ChainCtx.unionContext (packages Phase 3's unionG/unionGamma into a genuine Context) + ChainCtx.chain_closure (reused, inherits Phase 3's sorry, not re-derived). Sorry-free.",
+      "files_touched": ["specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Discharge the four clauses with the repaired rules (consistency, deductive closure, disjunction, diamond) plus clause 0 (clModel)",
+      "status": "partial",
+      "note": "Clause 0 (clModel), consistency, and disjunction are sorry-free. Deductive closure's outer maximality wiring is sorry-free but routes through one new documented strategic sorry (NIK.subst, cut/substitution admissibility -- a genuinely new lemma Simpson's proof silently needs). Diamond's outer wiring and fresh-label half are sorry-free (via new NIK.diaWitness_transport) but route through one documented strategic sorry for the 'old label' cofinite-range sub-case -- the SAME obstacle Phase 3's deriv_reflect hit, now confirmed structural. Clause 0 discharged via a NEW 'redundant edge' maximality argument (TClosure.mono' -> NIK.weaken_tclosure -> TClosure.addEdge_redundant -> NIK.drop_redundant_edge -> raw_edge_of_tclosure) reconstructed from Simpson's stated property since GeomAxiom's Horn-only axioms don't match the general existential-witness argument on the page.",
+      "files_touched": ["specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean"]
+    },
+    {
+      "id": 4,
+      "description": "Assemble primeLemma (Simpson's Prime Lemma 5.3.1)",
+      "status": "done",
+      "note": "primeLemma assembled from primeC_exists_maximal + the five clause theorems, producing a genuine TPrime instance. Build-green (lake env lean verified). 3 total sorries remain, all documented strategic sorries.",
+      "files_touched": ["specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean"]
+    }
+  ],
+  "current_objective": 4,
+  "approaches_tried": [
+    {
+      "approach": "Discharge Phase 3's deriv_reflect sorry via Phase 4's concrete construction (secondary dispatch objective)",
+      "result": "not achieved",
+      "reason": "Mathlib's zorn_le0 is a non-constructive existence result (exists m, Maximal ... m) -- it does not expose a step-indexed extension sequence for a 'single-step-adjoins-only-a-fresh-label' invariant (Phase 3's route (a)) to be stated against. Route (b) (monotonicity for old labels) was not found either. Confirmed the SAME obstacle independently in the diamond clause's own 'old label' cofinite-range case, establishing this is a structural gap (cofinite quantification vs. Context.G.X's potentially-infinite domain), not a one-off. Left as-is per the dispatch's explicit permission."
+    },
+    {
+      "approach": "Clause 0 (clModel) via Simpson's literal general-geometric-axiom witness-search argument",
+      "result": "superseded",
+      "reason": "Simpson's chunk_0102.md argument is written for the general case (existential geometric sequents with a k-ary witness vector); GeomAxiom (T/B/Four/Five) is entirely Horn with no existential conclusion, so the witness-search machinery does not directly transcribe. Reconstructed a specialized 'redundant edge' argument from the stated property instead (see objective 3's note) -- fully sorry-free."
+    }
+  ],
+  "handoff_count": 0
+}

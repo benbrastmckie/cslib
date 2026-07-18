@@ -174,19 +174,22 @@ split-lemma families in `FiveSimplification.lean`.
 
 ---
 
-### Phase 4: S5Simplification docstring cleanup and final verification [NOT STARTED]
+### Phase 4: S5Simplification docstring cleanup and final verification [COMPLETED]
 
 **Goal**: Clean the remaining docstring-only prime references in `S5Simplification.lean` and run the
 full post-merge acceptance checklist.
 
 **Tasks**:
-- [ ] Update the docstring-only prime references in `S5Simplification.lean` (~lines 2057-2062).
-- [ ] Grep across all of `Cslib/` for every Section 3a retired symbol name; assert zero remaining
-      references (including docstrings).
-- [ ] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` green (880 jobs), sorry-free.
-- [ ] `lake build Cslib.Logics.Modal.Tableau.S5Simplification` green (catches stale references).
-- [ ] `lean_verify` `kb5Valid_decides` axioms exactly `[propext, Classical.choice, Quot.sound]`.
-- [ ] Scan the four in-scope files: no new `sorry`, `admit`, `axiom`, `native_decide`, or `@[nolint]` introduced.
+- [x] Update the docstring-only prime references in `S5Simplification.lean` (~lines 2057-2062).
+- [x] Grep across all of `Cslib/` for every Section 3a retired symbol name; assert zero remaining
+      references (including docstrings). *(altered: also caught and fixed several additional stray
+      references beyond Section 3a's exact inventory -- a few docstrings in FrameSoundness.lean/
+      FrameCompleteness.lean that named retired symbols but were not in the plan's line-numbered
+      list -- during Phase 3's and this phase's repo-wide sweeps)*
+- [x] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` green (880 jobs), sorry-free.
+- [x] `lake build Cslib.Logics.Modal.Tableau.S5Simplification` green (catches stale references). *(849 jobs)*
+- [x] `lean_verify` `kb5Valid_decides` axioms exactly `[propext, Classical.choice, Quot.sound]`.
+- [x] Scan the four in-scope files: no new `sorry`, `admit`, `axiom`, `native_decide`, or `@[nolint]` introduced.
 
 **Timing**: 0.75 hours
 
@@ -202,12 +205,18 @@ full post-merge acceptance checklist.
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` green (880 jobs), sorry-free.
-- [ ] `lake build Cslib.Logics.Modal.Tableau.S5Simplification` green.
-- [ ] `lean_verify` `kb5Valid_decides` axioms exactly `[propext, Classical.choice, Quot.sound]` (unchanged from baseline).
-- [ ] `instDecidableKb5Valid` and `modalTableauKb5''_complete` still present and used.
-- [ ] Grep confirms zero remaining references to any retired prime symbol (Section 3a) across `Cslib/`, including docstrings.
-- [ ] No new `@[nolint ...]`, `sorry`, `admit`, `axiom`, or `native_decide` introduced in any of the four in-scope files.
+- [x] `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` green (880 jobs), sorry-free.
+- [x] `lake build Cslib.Logics.Modal.Tableau.S5Simplification` green. *(849 jobs)*
+- [x] `lean_verify` `kb5Valid_decides` axioms exactly `[propext, Classical.choice, Quot.sound]` (unchanged from baseline).
+- [x] `instDecidableKb5Valid` and `modalTableauKb5''_complete` still present and used.
+- [x] Grep confirms zero remaining references to any retired prime symbol (Section 3a) across `Cslib/`, including docstrings.
+- [x] No new `@[nolint ...]`, `sorry`, `admit`, `axiom`, or `native_decide` introduced in any of the four in-scope files.
+- [x] `lake exe checkInitImports` passes.
+- [x] `lake lint` passes cleanly for `Cslib` (zero environment-linter warnings anywhere in the repo).
+- [x] `lake exe lint-style` passes with zero output.
+- [x] `lake exe mk_all --module` reports "No update necessary" (no new/deleted files, so `Cslib.lean` needs no changes).
+- [x] `lake test` succeeds in full: 9232/9232 jobs, including `CslibTests` (`ModalFrameSeparation`, `ImportWithMathlib`, `GrindLint`).
+- [~] `lake shake --add-public --keep-implied --keep-prefix` (whole-repo import minimization): could not be run to a clean, fully-converged completion during this session -- the working tree is shared with a concurrent sibling task (511, S4 loop-checking termination) that is actively mid-edit on `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (confirmed via repeated `git status`/rebuild checks showing that file's content changing between retries, with transient `sorry`-bearing intermediate states). `lake shake` walks the *entire* project graph and requires every module's oleans to be simultaneously fresh, so it raced against the sibling's live edits and reported "out of date oleans" / "target is out-of-date" for `LoopChecking.lean` on every attempt, never for any of this task's four files. A full `lake test` run (which itself requires a complete, successful whole-project build) *did* succeed in full at one point during this session with zero errors, confirming the repo was fully green -- including this task's changes -- at that snapshot; the subsequent `shake` staleness is attributable to the sibling's ongoing edits after that point, not to this task's diff. Per this task's dispatch guidance ("confirm your OWN diff is clean and retry rather than 'fixing' the unrelated file"), this is documented rather than worked around by touching `LoopChecking.lean`.
 
 ## Artifacts & Outputs
 

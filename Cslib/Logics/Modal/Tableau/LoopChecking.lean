@@ -2273,6 +2273,206 @@ lemma modalStepBranchS4_preserves_keysWorldsKnown (φ₀ : Proposition Atom)
     · simp only [hblock] at hwk
       exact hold b' hb' w k hwk
 
+/-- **`outDegEq`'s driver-level preservation**: the out-degree/expanded-set correspondence
+survives an S4Keyed step, for every branch it produces. At the 12 non-minting shapes, `acc` is
+literally unchanged (`modalApplyOneS4Keyed_nonMint_snd_eq_acc`) and `sf` is not minting-shaped,
+so appending it to `e` (when the result is `.linear`/`.branching`) does not perturb the filtered
+count. At the 2 minting shapes' UNBLOCKED sub-case, `modalApplyOneS4Keyed` reduces to plain K's
+`modalApplyOne`, so K's own per-call obligation `modalApplyOne_outDeg_step` (`FmpMeasure.lean`,
+public) applies directly. At the BLOCKED sub-case, `newAcc = acc.addEdge sf.label wBlock` --
+`outDeg`'s bookkeeping is insensitive to whether the edge's target `wBlock` is a genuinely fresh
+witness or a recorded-key world, so the identical `outDeg_addEdge_self_S4`/`_ne_S4` argument K's
+own minting case uses applies verbatim (no `keysWorldsKnown` dependency here, unlike
+`accFresh`/`accKnown`). -/
+lemma modalStepBranchS4_preserves_outDegEq (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hknown : accTargetsKnown b acc)
+    (houtdeg : ∀ w, outDeg acc w = (e.filter (fun x => x.label == w && isMintingShaped x)).length)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ e' ∈ newExps, ∀ w, outDeg newAcc w =
+      (e'.filter (fun x => x.label == w && isMintingShaped x)).length := by
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
+        rw [← hpaireq] at hstep2
+        dsimp only at hstep2
+        rcases hres : result with nf | brs | nf | -
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          simp only [List.mem_singleton] at he'
+          subst he'
+          rw [hsfeq]
+          exact hstep2 w
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+          rw [hsfeq]
+          exact hstep2 w
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          simp only [List.mem_singleton] at he'
+          subst he'
+          exact hstep2 w
+        · rw [hres] at hsf; simp at hsf
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+          hpair.symm.trans heq2
+        have hreseq : result = RuleResult.linear [] := congrArg Prod.fst hpaireq
+        have hacceq : newAcc0 = acc.addEdge sf.label wBlock := congrArg Prod.snd hpaireq
+        rw [hreseq, hacceq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨-, rfl, rfl, -⟩ := hsf
+        intro e' he' w
+        simp only [List.mem_singleton] at he'
+        subst he'
+        rcases eq_or_ne w sf.label with hw | hw
+        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+            List.length_append]
+          simp [List.filter_cons, hmshape]
+        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+            List.filter_append, List.length_append]
+          have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
+          simp [List.filter_cons, hne]
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      have hmshape : isMintingShaped sf = true := by rw [hsfeq]; rfl
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hstep2 := modalApplyOne_outDeg_step (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b e acc houtdeg
+        rw [← hpaireq] at hstep2
+        dsimp only at hstep2
+        rcases hres : result with nf | brs | nf | -
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          simp only [List.mem_singleton] at he'
+          subst he'
+          rw [hsfeq]
+          exact hstep2 w
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+          rw [hsfeq]
+          exact hstep2 w
+        · rw [hres] at hsf hstep2
+          dsimp only at hstep2
+          simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+          obtain ⟨-, rfl, rfl, -⟩ := hsf
+          intro e' he' w
+          simp only [List.mem_singleton] at he'
+          subst he'
+          exact hstep2 w
+        · rw [hres] at hsf; simp at hsf
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+          hpair.symm.trans heq2
+        have hreseq : result = RuleResult.linear [] := congrArg Prod.fst hpaireq
+        have hacceq : newAcc0 = acc.addEdge sf.label wBlock := congrArg Prod.snd hpaireq
+        rw [hreseq, hacceq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨-, rfl, rfl, -⟩ := hsf
+        intro e' he' w
+        simp only [List.mem_singleton] at he'
+        subst he'
+        rcases eq_or_ne w sf.label with hw | hw
+        · rw [hw, outDeg_addEdge_self_S4, houtdeg sf.label, List.filter_append,
+            List.length_append]
+          simp [List.filter_cons, hmshape]
+        · rw [outDeg_addEdge_ne_S4 acc sf.label wBlock w hw, houtdeg w,
+            List.filter_append, List.length_append]
+          have hne : (sf.label == w) = false := by simpa using (Ne.symm hw)
+          simp [List.filter_cons, hne]
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnm : isMintingShaped sf = false := by
+      unfold isMintingShaped
+      rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+        simp_all
+    have haccunchanged : newAcc0 = acc := by
+      have hthis := modalApplyOneS4Keyed_nonMint_snd_eq_acc φ₀ keys sf b acc hsfmem hknown hnbd
+      rw [hpair] at hthis
+      exact hthis
+    subst haccunchanged
+    rcases hres : result with nf | brs | nf | -
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨-, rfl, rfl, -⟩ := hsf
+      intro e' he' w
+      simp only [List.mem_singleton] at he'
+      subst he'
+      rw [houtdeg w, List.filter_append, List.length_append]
+      simp [List.filter_cons, hnm]
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨-, rfl, rfl, -⟩ := hsf
+      intro e' he' w
+      obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+      rw [houtdeg w, List.filter_append, List.length_append]
+      simp [List.filter_cons, hnm]
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨-, rfl, rfl, -⟩ := hsf
+      intro e' he' w
+      simp only [List.mem_singleton] at he'
+      subst he'
+      exact houtdeg w
+    · rw [hres] at hsf; simp at hsf
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

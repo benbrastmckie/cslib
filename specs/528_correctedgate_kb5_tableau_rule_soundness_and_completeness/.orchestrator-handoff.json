@@ -1,40 +1,51 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "partial",
-  "summary": "Implemented Phase 5 (the truth lemma modalTruthLemmaKb5 -- proven mathematically FALSE for the frozen task-524 rule and now TRUE for the corrected-gate rule) and part of Phase 6 (accTargetsNeRoot + root-known-ness top-loop propagation) of 8. All landed work is lean_verify-clean (zero sorry, zero new axioms, axiom profile identical to the frozen task-524 chain) and committed incrementally. No phase is [BLOCKED]; the remaining Phase 6 work (the Hintikka lift, ModalLoopAuxKb5'') was discovered this session to be substantially larger than the plan anticipated (~300-500+ lines mirroring Five's own ~180+220-line world-invariant machinery) and was not completed -- a detailed, actionable continuation handoff documents exactly what transfers from Five's existing proof and what needs fresh case work. Phases 7-8 depend on Phase 6 and were not started.",
-  "phases_completed": 5,
+  "status": "implemented",
+  "summary": "All 8 phases complete. This session finished Phase 6 (the Hintikka lift: modalApplyOneKb5''_worldGrowth/modalStepBranchKb5''_preserves_worldInv in FiveSimplification.lean, ModalLoopAuxKb5''/_bounds/_stepPreserved/modalLoopInvHintikkaKb5''_initial in FrameCompleteness.lean -- bundling root-known-ness as a genuine third Aux conjunct beyond Five's two), Phase 7 (modalOpenBranchKb5''_countermodel/modalTableauKb5''_complete/kb5Valid_decides/instDecidableKb5Valid, mirroring modalTableauFive_complete's assembly), and Phase 8 (reconciled three stale KB5-completeness-blocked docstrings with durable-anchor 'Resolved' notes, extended CslibTests/ModalFrameSeparation.lean with three regression examples, diagnosed the kernel decide-reduction stall as persisting -- identical WellFounded.fix limitation instDecidableS5Valid/instDecidableFiveValid already have, documented not fixed -- and ran the full 7-step CSLib CI pipeline). KB5 (symmetric right-Euclidean) modal logic now has a complete, decidable, sorry-free, axiom-free tableau decision procedure via the corrected-gate rule modalApplyOneKb5''. The frozen modalApplyOneKb5' rule stays untouched, verified via git diff at every commit.",
+  "phases_completed": 8,
   "phases_total": 8,
   "artifacts": [
     {"type": "plan", "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/plans/01_corrected-gate-kb5-rule.md"},
     {"type": "handoff", "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/01_phases-1-4-complete-phase5-continuation.md"},
-    {"type": "handoff", "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/02_phase5-complete-phase6-continuation.md"}
+    {"type": "handoff", "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/02_phase5-complete-phase6-continuation.md"},
+    {"type": "summary", "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/summaries/01_corrected-gate-kb5-rule-summary.md"}
   ],
   "blockers": [],
-  "next_action_hint": "implement",
+  "next_action_hint": "complete",
   "files_modified": [
+    "Cslib/Logics/Modal/Tableau/FiveSimplification.lean",
     "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+    "CslibTests/ModalFrameSeparation.lean",
     "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/plans/01_corrected-gate-kb5-rule.md",
-    "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/02_phase5-complete-phase6-continuation.md"
+    "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/summaries/01_corrected-gate-kb5-rule-summary.md",
+    "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/.return-meta.json"
   ],
   "decisions_made": [
-    "Phase 5's truth lemma modalTruthLemmaKb5 closed cleanly, confirming the corrected-gate rule's mathematical soundness for completeness -- the trigger-free dichotomy lets the box-positive/diamond-negative cases discharge their v=0 self-target sub-case unconditionally in the trigger w, exactly as designed.",
-    "Phase 5's FIRST attempt to close the residual w=0 self-relate sub-case introduced a new hypothesis accEdgeIrrefl ('raw edges never self-loop, anywhere'). This was discovered mid-session to be UNSAFE: witness-reuse (modalApplyOneKb5''_agree_or_reuse_ne_root) searches modalKnownWorlds b for an existing matching formula without excluding the trigger's own label, so a self-loop via reuse is not structurally ruled out. Corrected to reuse the already-established, provably-true accTargetsNeRoot instead (raw edges never TARGET the root specifically -- true because witnessWorldFive's search explicitly excludes 0 and mint targets are always fresh/non-root). This is fully resolved and verified, not a loose thread.",
-    "This correction means the plan's Phase 6 premise ('NeRoot is not required by the truth lemma') is now stale -- accTargetsNeRoot IS required, and its top-loop discharge (mirroring Five's own Phase 21) was landed as part of Phase 6 this session, extended with a third bundled invariant (root-known-ness) since modalApplyOneKb5''Prop_knownWorlds_step (Phase 3) needs h0 ambiently too.",
-    "accSourcesKnown and plain accTargetsKnown (individually, without NeRoot) are BOTH confirmed fully rule-generic via existing BDriver.lean bridges (modalExpandBranchesGen_openBranch_accSourcesKnown/_accTargetsKnown), consuming only modalApplyOneKb5''_fresh_local (Phase 2). No bespoke lemma needed for either in this file -- use the generic bridges directly at Phase 7 assembly.",
-    "The remaining Hintikka-lift piece of Phase 6 (ModalLoopAuxKb5'' + world-invariant step-preservation) is genuinely large: it mirrors Five's own modalApplyOneFive_worldGrowth (~180 lines) and modalStepBranchFive_preserves_worldInv (~220 lines), both intricate rule-specific tag-counting bookkeeping needed because the root-triggered-mint subtlety Five's own machinery was built to handle applies identically to Kb5'' (mint arms are verbatim Five's per Phase 1). The mint-shape cases should port near-verbatim; the propagation-shape cases (Kb5'''s own difference from Five) are assessed LOW risk/easier than Five's own non-mint case, since modalApplyOneKb5''Prop_boxPos_diaNeg_eq already shows accessibility is unconditionally unchanged at those shapes."
+    "FiveWorldInvE/expandedRootTagsFive/usedTagsFiveNonRoot/mintTags are reused directly for Kb5'' (no Kb5''-named fork) since they are already rule-independent -- minimizes new surface area, per the prior session's handoff naming recommendation.",
+    "modalApplyOneKb5''_worldGrowth/modalStepBranchKb5''_preserves_worldInv were placed in FiveSimplification.lean (not FrameCompleteness.lean), matching where the private helper modalApplyOneKb5''_outputsSubsetUniverse they consume is file-scoped -- mirrors exactly where Five's own analogues live.",
+    "ModalLoopAuxKb5'' bundles root-known-ness (0 in modalKnownWorlds b) as a genuine THIRD conjunct beyond Five's two (universe-closure, FiveWorldInvE), because AuxStepPreserved's ambient hypotheses (accFreshInv/accTargetsKnown) do not supply it but modalApplyOneKb5''Prop_boxPos_diaNeg_eq (Phase 3) needs it. Preservation across steps uses the already-landed modalStepBranchGen_knownWorlds_mono_C (Phase 6.2).",
+    "The propagation-shape case of modalApplyOneKb5''_worldGrowth was genuinely easier than Five's own analogue, confirming the prior session's LOW-risk prediction: modalApplyOneKb5''Prop_boxPos_diaNeg_eq already shows .snd = acc unconditionally there, so no tag-counting argument was needed.",
+    "No explicit rewrite via modalTableauKb5''_eq was needed in modalTableauKb5''_complete -- exactly as Five's own proof relies on modalTableauFive_eq being defeq (rfl), the cases htab : modalTableauKb5'' phi0 with pattern already typechecks htab directly against the modalExpandBranchesGen equality.",
+    "The kernel decide-reduction stall on instDecidableKb5Valid was diagnosed (not fixed, per plan instruction): confirmed via a bounded maxHeartbeats decide attempt to fail cleanly (not hang) with the identical WellFounded.fix-via-nested-let-rec failure mode instDecidableS5Valid/instDecidableFiveValid already have. Documented in the test file's module docstring; regression coverage for instDecidableKb5Valid instead uses inferInstance plus two decide-free concrete examples.",
+    "Docstring reconciliation kept all scout/gap lemmas (extractModelKb5_root_reach_scout, extractModelKb5_nonRoot_boxPos_gap) and the frozen-rule blocker note fully intact as documentation of why modalApplyOneKb5' itself remains unrepairable -- only added 'Resolved' paragraphs pointing at the corrected-gate rule for the overall KB5-completeness goal, per the plan's explicit instruction not to delete or reframe them as open blockers.",
+    "Replaced task-number citations (task 524/525/515/504/503) with durable declaration/section-name anchors in every docstring touched this session, per no-task-references-in-deliverables.md; left untouched pre-existing task-number mentions in text not rewritten this session."
   ],
-  "dead_ends": [
-    "The euclGen_symmGen_exists_ne_base + accEdgeIrrefl approach to Phase 5's residual case (full irreflexivity hypothesis) was abandoned -- both because the hypothesis is unsafe (see decisions_made) and because the induction got tangled in a self-referential recursion pattern (calling the lemma being proven on a symmetrized/transformed sub-term inside its own eucl case) that Lean's induction-tactic-generated ih1/ih2 do not support. The corrected euclGen_symmGen_exists_base (no side conditions, fully general) plus accTargetsNeRoot is the approach that shipped -- do not re-attempt the abandoned approach.",
-    "Modifying modalApplyOneKb5'/its specCore/termination/modalTableauKb5'_sound remains out of scope (frozen task-524 deliverables) -- confirmed untouched throughout this session (git diff shows only additions across all three touched files)."
-  ],
-  "continuation_context": {
-    "next_phase": 6,
-    "next_phase_name": "Open-branch supply lemmas for the new rule (Hintikka lift remaining)",
-    "next_phase_depends_on": [2],
-    "next_phase_file": "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
-    "next_phase_notes": "See specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/02_phase5-complete-phase6-continuation.md for the full step-by-step continuation plan, including exact lemma names/line numbers to port (modalApplyOneFive_worldGrowth at FiveSimplification.lean:4320-4497, modalStepBranchFive_preserves_worldInv at :4499-4721, ModalLoopAuxFive/_bounds/_stepPreserved/modalLoopInvHintikkaFive_initial at FrameCompleteness.lean:3047-3106) and a precise assessment of what transfers verbatim (mint-shape cases) vs. needs fresh case work (propagation-shape cases, assessed easier than Five's own analogue).",
-    "remaining_waves": "Finish Wave 3/Phase 6 (Hintikka lift only -- accTargetsNeRoot+rootKnown and the generic accSourcesKnown/accTargetsKnown bridges are already done) -> Wave 5 (Phase 7: completeness+decidability assembly, mirrors modalTableauFive_complete's assembly at FrameCompleteness.lean:3131-3198 directly) -> Wave 6 (Phase 8: docs reconciliation + CslibTests extension + full 7-step CI pipeline)."
-  },
-  "plan_markers_verified": true
+  "dead_ends": [],
+  "continuation_context": null,
+  "plan_markers_verified": true,
+  "ci_verification": {
+    "lake_build_full": "green (3238 jobs)",
+    "checkInitImports": "exit 0",
+    "lake_lint": "2 pre-existing unusedArguments errors on modalKb5BoxAllUniv/modalKb5DiaNegAllUniv, landed at an earlier Phase 1 commit, not touched this session, not one of the 7 lint-prevention categories -- out of this phase's scope",
+    "lint_style": "exit 0, clean",
+    "lake_test": "exit 0, full suite green (pre-existing sorry warnings only in unrelated Propositional/Tableau/{Intuitionistic,Minimal} files)",
+    "lake_shake": "widespread pre-existing import-minimization suggestions across the codebase (Propositional/, Temporal/, etc.); zero suggestions for any of the four files touched this session, confirmed by direct grep",
+    "mk_all": "no update necessary",
+    "sorry_count_touched_files": 0,
+    "vacuous_count_touched_files": 0,
+    "new_axiom_count": 0,
+    "axiom_profile": "propext, Classical.choice, Quot.sound (identical to the frozen chain) -- some new declarations propext/Quot.sound only"
+  }
 }

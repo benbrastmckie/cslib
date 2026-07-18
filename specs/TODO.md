@@ -11,8 +11,8 @@ next_project_number: 529
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,512,519,522,523,528 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506,517,525 | 36,37,181,317,407,425,449,511,512,528 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,517,519,522,523,528 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506,525 | 36,37,181,317,407,425,449,511,528 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,515 | 39,40,375,525 | foundations, modal logic, code hygiene |
 | 4 | 412,504 | 41,515 | modal logic, code hygiene |
 | 5 | 300 | 503,504,506 | modal logic |
@@ -40,11 +40,10 @@ next_project_number: 529
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
-528 [RESEARCHED] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
+528 [IMPLEMENTING] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
   └─ 525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
     └─ 515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
       └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
@@ -104,11 +103,12 @@ next_project_number: 529
 
 ### 528. Correctedgate kb5 tableau rule soundness and completeness
 - **Effort**: 10-14 hours
-- **Status**: [RESEARCHED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [525_kb5_completeness_and_decidability/reports/02_spawn-analysis.md]
+- **Plan**: [528_correctedgate_kb5_tableau_rule_soundness_and_completeness/plans/01_corrected-gate-kb5-rule.md]
 
 **Description**: Task 525 (KB5 tableau completeness + kb5Valid decidability) is blocked because its Phase 3 truth lemma `modalTruthLemmaKb5` is mathematically FALSE for task 524's frozen `modalApplyOneKb5'` rule. This was proven in-repo as `extractModelKb5_nonRoot_boxPos_gap` (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean) with a concrete witness (phi0 = NOT(DIAMOND(DIAMOND(BOX p))): open branch with acc.edges = [(1,2),(0,1)], T(BOX p)@2 in branch, T(p)@0 NOT in branch, yet the extracted relation .r 2 0 holds -- a genuine countermodel-side failure). This has been architecturally pinned to ONE misplaced boolean gate (see specs/525_kb5_completeness_and_decidability/reports/02_s5-architecture-investigation.md, the authoritative root-cause report for this task -- read it in full before starting).
 
@@ -251,7 +251,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 509, Task 512
+- **Dependencies**: None
 - **Research**: [517_labelled_bounded_context_cs5_completeness/reports/07_team-research.md]
 - **Plan**: [517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md]
 
@@ -273,30 +273,6 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Summary**: [515_s5_universal_rule_termination_unblock_504/summaries/16_phase21-hintikka-wall-landed-completed.md]
 
 **Description**: PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau machinery, S5 soundness/completeness, S5 decidability, and the full Euclidean-5 route are all landed sorry-free and CI-green (headline commit af593180): modalTableauS5_sound (FrameSoundness.lean:2991), modalTableauS5_complete (FrameCompleteness.lean:2340), s5Valid_decides/instDecidableS5Valid (FrameCompleteness.lean:2411/2422), fiveValid_decides/instDecidableFiveValid (FrameCompleteness.lean:3203/3213). The rank obstruction was engineered around via a witness-reuse mint rule. The SOLE remaining deliverable is KB5 completeness + Decidable kb5Valid, delegated to child task 525: task 524's KB5 rule was mechanically proven insufficient (extractModelKb5_nonRoot_boxPos_gap, FrameCompleteness.lean:3544, sorry-free), so KB5 needs a NEW rule + extraction design (achievable per Blackburn-de Rijke-Venema 4.8-4.9), not a re-run. Deps corrected: dropped stale 514 (archived, research-only) and insufficient 524; real gate is 525. Do NOT re-attempt against task 524's frozen modalApplyOneKb5' rule -- its truth lemma is a machine-checked falsehood. Off-roadmap; no roadmap claims.
-
----
-
-### 512. Cs5 box backward atom sum completeness
-- **Effort**: 10-16 hours
-- **Status**: [BLOCKED]
-- **Task Type**: cslib
-- **Topic**: Modal Logic
-- **Dependencies**: Task 509
-- **Research**:
-  - [512_cs5_box_backward_atom_sum_completeness/reports/01_box-backward-atom-sum.md]
-  - [512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md]
-  - [512_cs5_box_backward_atom_sum_completeness/reports/03_alternative-techniques.md]
-  - [512_cs5_box_backward_atom_sum_completeness/reports/04_birelational-feasibility.md]
-  - [512_cs5_box_backward_atom_sum_completeness/reports/05_collapse-s5-probe.md]
-- **Plan**:
-  - [512_cs5_box_backward_atom_sum_completeness/plans/01_box-backward-atom-sum.md]
-  - [512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md]
-- **Summary**:
-  - [512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md]
-  - [512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md]
-  - [512_cs5_box_backward_atom_sum_completeness/summaries/03_necessity-transfer-summary.md]
-
-**Description**: Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a BIRELATIONAL canonical model (Dosen 1985 / Bozic-Dosen 1984 / Simpson 1994 / Marin-Morales-Strassburger 2021), SUPERSEDING the abandoned doubled-atom "atom-sum" architecture. Established across reports 03-05 (six dispatches): (a) the doubled-atom repair AND any direct attack within CSLib's two-sided cs5Tail architecture are eliminated -- the two-sided back-inclusion boxInv T subset H IS the negation-completeness step quasi-prime theories cannot take (mechanized: cs5_two_sided_witness_can_fail_to_omit, cs5FC''_hub_forces_spoke_connectivity, cs5_symmetric_tail_box_gap); (b) CS5 IS complete -- CS5 == IS5 (CS5.lean:93-99), Pacheco's CKB=IKB collapse extends to S5 (mechanized via cs5_dia_or, cs5_dia_bot_imp_bot), so "bank a negative result" is REFUTED (no genuine obstruction exists); (c) the birelational route uses a ONE-SIDED relation R = boxInv Gamma subset Delta with symmetry as the <=-mediated incestuality frame condition (Marin Thm 7.1), under which box-backward dissolves to the landed box_refuting_theory. Phase-1 GO/NO-GO gate PASSED (cs5_box_backward_onesided, sorry-free/axiom-clean). Active plan: plans/02_birelational-pivot.md (7 phases; Phase 1 COMPLETE). Remaining: discard the ~520-line CS5Combined scaffold (Phase 2); define one-sided R + incestuality frame class (Phase 3); REWORK CS5 soundness over the new frame class -- TOUCHES landed task-509 cs5FC'' (Phase 4, high-cost, ~250-400 lines, preserve 509 proofs alongside); verify canonical-frame incestuality Dosen-style, negation-completeness-free (Phase 5); land cs5_box_backward + cs5_truth_lemma (Phase 6); cs5_completeness + file split (Phase 7). Zero-debt invariant: no sorry, no new axiom at any phase boundary. BibKeys added: Dosen1985, BozicDosen1984, Ewald1986, AlechinaMendlerdePaivaRitter2001, MarinMoralesStrassburger2021. Depends on 509.
 
 ---
 

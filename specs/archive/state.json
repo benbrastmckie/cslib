@@ -2,6 +2,83 @@
   "_comment": "Archive state for completed and abandoned tasks",
   "completed_projects": [
     {
+      "project_number": 512,
+      "project_name": "cs5_box_backward_atom_sum_completeness",
+      "status": "abandoned",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a BIRELATIONAL canonical model (Dosen 1985 / Bozic-Dosen 1984 / Simpson 1994 / Marin-Morales-Strassburger 2021), SUPERSEDING the abandoned doubled-atom \"atom-sum\" architecture. Established across reports 03-05 (six dispatches): (a) the doubled-atom repair AND any direct attack within CSLib's two-sided cs5Tail architecture are eliminated -- the two-sided back-inclusion boxInv T subset H IS the negation-completeness step quasi-prime theories cannot take (mechanized: cs5_two_sided_witness_can_fail_to_omit, cs5FC''_hub_forces_spoke_connectivity, cs5_symmetric_tail_box_gap); (b) CS5 IS complete -- CS5 == IS5 (CS5.lean:93-99), Pacheco's CKB=IKB collapse extends to S5 (mechanized via cs5_dia_or, cs5_dia_bot_imp_bot), so \"bank a negative result\" is REFUTED (no genuine obstruction exists); (c) the birelational route uses a ONE-SIDED relation R = boxInv Gamma subset Delta with symmetry as the <=-mediated incestuality frame condition (Marin Thm 7.1), under which box-backward dissolves to the landed box_refuting_theory. Phase-1 GO/NO-GO gate PASSED (cs5_box_backward_onesided, sorry-free/axiom-clean). Active plan: plans/02_birelational-pivot.md (7 phases; Phase 1 COMPLETE). Remaining: discard the ~520-line CS5Combined scaffold (Phase 2); define one-sided R + incestuality frame class (Phase 3); REWORK CS5 soundness over the new frame class -- TOUCHES landed task-509 cs5FC'' (Phase 4, high-cost, ~250-400 lines, preserve 509 proofs alongside); verify canonical-frame incestuality Dosen-style, negation-completeness-free (Phase 5); land cs5_box_backward + cs5_truth_lemma (Phase 6); cs5_completeness + file split (Phase 7). Zero-debt invariant: no sorry, no new axiom at any phase boundary. BibKeys added: Dosen1985, BozicDosen1984, Ewald1986, AlechinaMendlerdePaivaRitter2001, MarinMoralesStrassburger2021. Depends on 509.",
+      "dependencies": [
+        509
+      ],
+      "parent_task": 509,
+      "created": "2026-07-14T23:59:00Z",
+      "last_updated": "2026-07-15T15:03:35Z",
+      "session_id": "sess_1784097632_a8a105",
+      "priority": null,
+      "effort": "10-16 hours",
+      "artifacts": [
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/01_box-backward-atom-sum.md",
+          "type": "report",
+          "summary": "Doubled-atom combined-axiom repair assessment for cs5_box_backward"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/01_box-backward-atom-sum.md",
+          "type": "plan",
+          "summary": "5-phase sequential plan (waves 1-5, no parallelism). Phase 3 flagged as the adversarial go/no-go gate with both success (continue) and failure (mechanized obstruction, completeness BLOCKED) branches fully specified. Every reused lemma carries its real name + file:line from report 01. File split: Proposition.map -> Basic.lean; combined machinery + truth lemma -> new CS5Canonical.lean. Zero-debt: no sorry, no new axiom in Cslib/ under either outcome."
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/02_phase3-route2-partial-summary.md",
+          "type": "summary",
+          "summary": "Phase 3 route-2 partial progress"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md",
+          "type": "report",
+          "summary": "phase3 seed consistency (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/03_alternative-techniques.md",
+          "type": "report",
+          "summary": "alternative techniques (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/04_birelational-feasibility.md",
+          "type": "report",
+          "summary": "birelational feasibility (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/reports/05_collapse-s5-probe.md",
+          "type": "report",
+          "summary": "collapse s5 probe (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md",
+          "type": "plan",
+          "summary": "birelational pivot (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/01_box-backward-atom-sum-summary.md",
+          "type": "summary",
+          "summary": "box backward atom sum summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/512_cs5_box_backward_atom_sum_completeness/summaries/03_necessity-transfer-summary.md",
+          "type": "summary",
+          "summary": "necessity transfer summary (backfilled by --sync)"
+        }
+      ],
+      "blockers": "CS5 completeness BLOCKED across all known-mechanizable routes in CSLib's current canonical representation (NOT incompleteness -- CS5 == IS5 is complete/sound). Phase-7 gate FAILED with two axiom-free mechanized lemmas: cs5Incest_forces_symm (cs5Incest collapses to PLAIN symmetry over any CKSegment world type, because <= is head-inclusion and boxInv is monotone -- independent of world engineering) and cs5TwoSidedR_iff_cs5Tail (Simpson's two-sided R = the old cs5Tail wall for CS5 quasi-prime theories, via cs5_boxInv_subset_iff / the B axiom's box-diamond duality). Combined with cs5_symmetric_tail_box_gap (task 509): plain symmetry on the canonical frame is exactly what box-backward cannot have -- the symmetry-verification and box-backward obligations are JOINTLY UNSATISFIABLE for any single design over CSLib theory-inclusion worlds. Root cause: CSLib identifies the intuitionistic <= with theory-inclusion; Simpson/Marin birelational IS5 completeness needs <= as an INDEPENDENT preorder (the source of the missing <=-room). Closing CS5 requires a FOUNDATIONAL change (independent-<= / labelled canonical model, or a non-canonical technique) touching shared CK/CT/CS4 infra -- a human decision. Landed real contributions: mechanized obstruction lemmas + the birelational soundness rework (cs5_axiom_sound_incest, axiom-free).",
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean"
+      ],
+      "abandoned": "2026-07-18T16:43:36Z",
+      "abandon_reason": "Abandoned per alignment audit (specs/ROADMAP-alignment-audit.md): the prime-theory / atom-sum route to CS5 completeness is a mechanically-proven dead-end (cs5_symmetric_tail_box_gap CS5.lean:712, cs5Incest_forces_symm CS5Canonical.lean:643 — all prime-theory canonical routes refuted sorry-free). Superseded by task 517 (labelled / bounded-context Route B), which already consumes 512's landed soundness lemmas (cs5_axiom_sound_incest, cs5_soundness_incest). Mirrors task 516's superseded-by-517 abandonment."
+    },
+    {
       "project_number": 485,
       "project_name": "fix_pr607_hml_logicalequivalence_migration",
       "status": "abandoned",

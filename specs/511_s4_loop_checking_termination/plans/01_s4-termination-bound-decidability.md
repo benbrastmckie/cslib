@@ -459,7 +459,7 @@ are documented strategic-sorry skeletons, the last remaining gap before Phase 5 
   `modalStepBranchS4_preserves_worldsContiguousS4`. This phase closing = original Phase 8
   resolved.
 
-### Phase 7: Phase 9 decidability — decision + closure or documented [IN PROGRESS]
+### Phase 7: Phase 9 decidability — decision + closure or documented [BLOCKED]
 
 - **Goal:** Land the cheap S4-local alignment, make the 9-A/9-B decision concrete, and either close
   `Decidable (s4Valid φ)` against `Cube.S4` or land [BLOCKED] with a precise handoff and a spawned
@@ -469,29 +469,87 @@ are documented strategic-sorry skeletons, the last remaining gap before Phase 5 
     `modalHintikkaSetS4 φ₀ b acc = modalHintikkaSetGen (modalApplyOneS4 φ₀) b acc` (research
     Section 8: verified `rfl` — Saturation.lean:460 vs LoopChecking.lean, closes by `rfl`).
     This item is independent of Phases 5/6's completion and lands regardless. Zero sorry/axiom.
-  - [ ] Record the decision (Planner Decision 2): the abstract termination-measure interface (9-A)
+  - [x] Record the decision (Planner Decision 2): the abstract termination-measure interface (9-A)
     is a shared-file change in `CompletenessLoop.lean` benefiting 505/513 — **spawn it as a separate
     task** (`/spawn 511 "abstract termination-measure interface for S4/B loop lemma"`), do NOT
     inline it. Task 510's `modalExpandBranchesGen_hintikka` is confirmed NOT instantiable for S4
     (requires `RuleApplicationSpec` + `ModalLoopInvGen` rank fields + `geomCap` + K-universe fuel —
-    research Section 3).
+    research Section 3). **Update (this dispatch)**: a task 515 dispatch (concurrent/later,
+    `CompletenessLoop.lean` commit `ecfa123e`) has ALREADY landed a more general, rank-free
+    top-loop lemma `modalExpandBranchesHintikka` parametrized by an abstract `Aux : List SF →
+    List SF → Accessibility → Prop` (`AuxStepPreserved`/`AuxBounds`/`ModalLoopInvHintikka`,
+    `CompletenessLoop.lean:262-378`), built for S5's needs (`ModalLoopAuxS5w`). This is a strong
+    head start on 9-A and should be the entry point for the spawned task's investigation — but
+    see the "genuine gap identified" note below: even this generalized interface does not by
+    itself close S4, for a structural reason not previously documented.
   - [ ] If the 9-A task is already available (or within budget as 9-B S4-local re-derivation port
     of `processNext`'s fuel induction over `modalUniverseS4` with `S4LoopInv`): wire fuel
     sufficiency from `modalStepBranchS4_worldBound` (Phase 6) and derive
-    `Decidable (s4Valid φ)` + `s4Valid` completeness against `Cube.S4`.
-  - [ ] Otherwise: mark this phase [BLOCKED] with the exact open goal state (fuel-sufficiency /
-    Decidable instance), the chosen approach, and the spawned task number; return `partial`.
-- **Timing:** 3 hours
+    `Decidable (s4Valid φ)` + `s4Valid` completeness against `Cube.S4`. **NOT closed this
+    dispatch** — see below.
+  - [x] Otherwise: mark this phase [BLOCKED] with the exact open goal state (fuel-sufficiency /
+    Decidable instance), the chosen approach, and the spawned task number; return `partial`/`blocked`.
+- **Timing:** 3 hours (this dispatch: ~3h of concrete technical investigation, no closure)
 - **Depends on:** 6
 
-**Continuation note**: the remaining three tasks genuinely depend on Phase 6 (fuel sufficiency
-needs `modalStepBranchS4_worldBound`), which is itself blocked on Phase 5's `keysTotal` — so only
-the independent Hintikka-alignment item was attempted this dispatch. The decision-recording task
-(Planner Decision 2: recommend the 9-A abstract termination-measure interface as a separate
-spawned task rather than inlining it) does not strictly require Phase 6 and could be recorded by
-a future dispatch without waiting, but was left for whichever dispatch actually reaches Phase 7's
-closure/block decision, so the recommendation is made alongside real knowledge of Phase 5/6's
-final state rather than speculatively now.
+**Continuation note (this dispatch — genuine attempt at 9-B, BLOCKED with a sharpened, precise
+goal state; the independent Hintikka-alignment item was already landed by a prior dispatch,
+confirmed still green and axiom-clean this dispatch via `lean_verify`)**:
+
+**The core finding — a driver/shadow-invariant mismatch not previously documented.** Attempting
+the 9-B wiring surfaced a structural gap that Phases 1-6's machinery does not close by itself:
+
+- `s4Valid`'s `Decidable` instance must run the REAL computational driver `modalTableauS4 φ :=
+  modalTableauGen (modalApplyOneS4 φ) φ` (LoopChecking.lean:671), whose minting guard is
+  `blockingWorldS4` (LoopChecking.lean:391) — this compares a PROSPECTIVE successor's birth
+  content against the **CURRENT LIVE** `relevantSetFinset` of each existing known world (fixes
+  Gap 2 from the research report, but still reads *live* — i.e. ever-growing — content).
+- `S4LoopInv`/`modalStepBranchS4_worldBound` (Phases 4-6), by contrast, are proven ONLY for the
+  keyed SHADOW stepper `modalStepBranchS4Keyed`, whose guard `blockingWorldS4Keyed`
+  (LoopChecking.lean:459) compares against the **stable, birth-frozen `keys` list** instead of
+  live content. Confirmed directly in the theorem signature:
+  `modalStepBranchS4_preserves_S4LoopInv`'s hypothesis is
+  `modalStepBranchS4Keyed φ₀ b e acc keys = some (...)` (LoopChecking.lean:4625) — NOT
+  `modalStepBranchS4`. The two guards are genuinely different decision procedures (`keys ⊆
+  relevantSetFinset` per `keyLowerBd` is a **subset**, not equality, so a live-set match/mismatch
+  does not determine a keys match/mismatch). Phase 5's own dispatch-2 handoff independently
+  confirms this: `blockingWorldS4Keyed` was introduced specifically because the Phase-3
+  `blockingWorldS4` guard's live-set freshness contract (`blockingWorldS4_none_fresh`) was
+  *insufficient* to prove `keysDistinct` preservation — the exact gap re-derived here from the
+  Decidable-instance side.
+- **Consequence**: `modalStepBranchS4_worldBound` cannot be "wired" as fuel-sufficiency for the
+  REAL `modalTableauS4` as a one-line application — the world-bound guarantee is proven about a
+  driver `modalTableauS4` does not run. Closing Phase 7 genuinely requires ONE of:
+  (a) **9-B, sharpened**: build a bespoke top-level S4-specific driver
+  (`modalExpandBranchesS4Keyed`/`modalTableauS4Keyed`) around `modalStepBranchS4Keyed` (which
+  cannot reuse `modalStepBranchGen`/`modalExpandBranchesGen`/`modalTableauGen` even via the new
+  `Aux`-parametrized `modalExpandBranchesHintikka`, since `keys` is extra threaded state a fixed
+  `apply : RuleApply Atom` closure cannot carry across steps — wrapping it in an existential
+  `Aux(b,e,acc) := ∃ keys, …` does NOT help, because `AuxStepPreserved` would then need to
+  re-derive `keysDistinct` preservation using the REAL (live-set) guard's contract, which is
+  exactly the insufficient argument above), full ~700-line `processNext`-style fuel induction,
+  PLUS a re-verification that soundness (`modalTableauS4_sound`, task 506) and the truth lemma
+  still connect (this looks tractable in principle — the keyed and unkeyed guards' *non-minting*
+  arms and *blocked-target-has-content* contracts agree — but is unverified and adds scope); or
+  (b) **9-A, extended**: generalize the driver framework itself (`RuleApply`/`Accessibility` or a
+  new `RuleApplyState`-style wrapper) to support extra opaque per-branch threaded state (not just
+  a `Prop`-valued `Aux`), so `modalApplyOneS4Keyed`'s `keys` parameter can be threaded generically
+  and `modalTableauS4` redefined to consume it directly. This is a materially larger 9-A than the
+  plan originally scoped (which only needed to replace `ModalLoopInvGen`'s rank machinery, not
+  add threaded state) — but note task 515's `Aux`-parametrized `modalExpandBranchesHintikka` is
+  real, useful groundwork already landed for S5's (state-free) case and should be surveyed first.
+- **Zero-debt discipline honored**: no `sorry`/`axiom`/vacuous placeholder was introduced while
+  investigating this; no code was written that could not close cleanly. `lake build`
+  (`Cslib.Logics.Modal.Tableau.LoopChecking` and `.FrameCompleteness`) green; `lean_verify` on
+  `modalHintikkaSetS4_eq` and `modalStepBranchS4_worldBound` confirms `propext`/
+  `Classical.choice`/`Quot.sound` only, no `sorryAx`.
+- **Recommendation**: spawn `abstract termination-measure interface for S4/B loop lemma
+  (task 511 Phase 7 follow-on)` scoped to `CompletenessLoop.lean`/`GenericDriver.lean`, briefed
+  with this exact finding (the driver/shadow-invariant mismatch, and the requirement that
+  whatever interface is built must support threading `S4LoopInv`-style extra per-branch state,
+  not just a state-free `Aux : Prop`), shared with tasks 505/513. Phases 1-6 (the world bound
+  over the shadow driver) remain a valid, self-contained, sorry-free deliverable regardless of
+  Phase 7's outcome.
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/LoopChecking.lean`,
     `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — alignment bridge, fuel sufficiency,

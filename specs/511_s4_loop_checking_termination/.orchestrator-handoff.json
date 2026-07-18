@@ -1,53 +1,55 @@
 {
-  "status": "implemented",
+  "status": "blocked",
   "skeleton": false,
-  "summary": "Landed Phase 6's pigeonhole world-bound lemmas and used them to discharge both of Phase 5's remaining strategic sorries (bClosure, eClosure), fully closing modalStepBranchS4_preserves_S4LoopInv -- all 10 S4LoopInv fields now proven, zero sorry, zero new axiom. Corrected the prior dispatch's analysis: modalStepBranchS4Keyed's newExps component is e ++ [sf] (or e unchanged for .persistent) -- it only ever gains the selected formula sf (already in b, hence covered by hb directly), never the rule's output content (that goes to newBs, bClosure's concern, not eClosure's). eClosure closed immediately via the same case-split shape as the already-landed modalStepBranchS4_preserves_eNodup. bClosure needed the T-self/4-propagation formula-subset composite the prior dispatch had mis-attributed to eClosure (built as modalApplyOneS4Keyed_nonMint_universe_S4 and its supporting pieces, mirroring the existing known-worlds composite's case-split shape but concluding full modalUniverseS4 membership) for its 12 non-minting shapes, plus Phase 6's own pigeonhole world-bound (modalStepBranchS4_worldBound) as a genuine prerequisite for its 2 minting shapes (the freshly-minted witness's label needs the STRICT modalMaxWorld b < modalWorldBoundS4 phi0 bound to hold on the pre-step branch). Phase 6's pigeonhole deliverable required a new proof-internal auxiliary invariant worldsContiguousS4 (known worlds form the contiguous range {0,...,maxWorld}; NOT an S4LoopInv field, mirrors the keysWorldsKnown precedent, threaded as an extra hypothesis/conclusion) plus its own preservation lemma, since density of world labels does not otherwise follow from S4LoopInv's existing fields -- this was not anticipated in the plan's original Phase 6 task wording but is a necessary, mechanical extension of the same threading pattern already established. Also built S4-local mirrors of FmpMeasure.lean's modalUniverse constructor/extraction facts (mem_modalUniverseS4_of, modalUniverseS4_mem_label) and minting-content subset facts (modalApplyOne_boxNeg/diamondPos_outputs_subset_S4, boxProps/diaNegProps_outputs_subset_S4) needed by bClosure's 2 minting shapes. The assembly theorem modalStepBranchS4_preserves_S4LoopInv now threads worldsContiguousS4 alongside keysWorldsKnown (extra hypothesis in, extra conclusion out, third conjunct) so a Phase 7 continuation dispatch can re-supply both across repeated steps. Scoped build green throughout (5 incremental green commits this dispatch, one per logical unit: universe-membership groundwork, eClosure closure, pigeonhole lemmas, bClosure closure, stale-docstring reconciliation). checkInitImports and lint-style clean. Plan file's Phase 5 and Phase 6 headings marked [COMPLETED]; stale multi-page continuation narrative trimmed to closure summaries. Did NOT start Phase 7 per dispatch scope. Full-project lake build/lake test were not run (dispatch instructions explicitly scoped verification to Cslib.Logics.Modal.Tableau.LoopChecking; concurrent task 517/530/531 sessions have uncommitted edits to unrelated files that would show as unrelated full-project failures).",
+  "summary": "Phase 7 (final phase) attempted: the independent Hintikka-alignment rfl bridge was already landed by a prior dispatch (re-verified clean). A genuine, concrete attempt to close 9-B (wire modalStepBranchS4_worldBound into Decidable (s4Valid phi) fuel sufficiency) surfaced a structural gap not previously documented: the REAL decision procedure modalTableauS4 runs modalApplyOneS4/blockingWorldS4 (a LIVE-relevant-set guard), while S4LoopInv and modalStepBranchS4_worldBound (Phases 4-6) are proven only for the KEYED SHADOW stepper modalStepBranchS4Keyed/blockingWorldS4Keyed (a stable-birth-key guard) -- confirmed directly in modalStepBranchS4_preserves_S4LoopInv's hypothesis, which takes modalStepBranchS4Keyed as its step function, not modalStepBranchS4. Since S4LoopInv.keyLowerBd only gives keys subset-of live relevant sets (not equality), the live-set freshness guarantee blockingWorldS4_none_fresh does not imply keys-freshness -- the world-bound guarantee is proven about a driver modalTableauS4 does not run. Also discovered that task 515 (concurrent/later) already landed a more general Aux-parametrized rank-free top-loop lemma (modalExpandBranchesHintikka, CompletenessLoop.lean) built for S5, which is useful groundwork for the 9-A follow-on but does not by itself close S4 (wrapping keys in an existential Aux does not avoid the same guard-mismatch argument). Marked Phase 7 [BLOCKED] in the plan with this precise finding; recommend spawning the 9-A follow-on task with this sharpened scope. No sorry/axiom/vacuous placeholder introduced. Phases 1-6 (the original task 506 Phase 8 world-bound deliverable) remain a valid, self-contained, fully sorry-free artifact regardless of Phase 7's outcome. Both lake build Cslib.Logics.Modal.Tableau.LoopChecking and .FrameCompleteness green; lean_verify clean on all re-checked lemmas.",
   "phases_completed": 6,
   "phases_total": 7,
   "sorry_inventory": [],
-  "blockers": [],
-  "continuation_path": null,
+  "blockers": [
+    {
+      "phase": 7,
+      "what_failed": "Cannot wire modalStepBranchS4_worldBound (Phase 6) into fuel sufficiency for Decidable (s4Valid phi) as a direct application",
+      "what_was_tried": "Traced modalTableauS4's actual definition (modalTableauGen (modalApplyOneS4 phi) phi, guarded by blockingWorldS4) against S4LoopInv/modalStepBranchS4_worldBound's actual proof target (modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed). Confirmed via the theorem signature of modalStepBranchS4_preserves_S4LoopInv (hypothesis is modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4) that the world-bound machinery is proven for a keyed shadow stepper distinct from the real decision procedure. Verified the two guards are not interchangeable: keyLowerBd gives keys subset-of relevantSetFinset (not equality), so blockingWorldS4_none_fresh's live-set freshness contract does not imply keys-freshness -- this is the same class of gap Phase 5's own guard redesign (introducing blockingWorldS4Keyed as a second guard) was built to route around, now re-encountered from the Decidable-instance side. Surveyed task 515's newly-landed Aux-parametrized modalExpandBranchesHintikka (CompletenessLoop.lean, more general than the modalExpandBranchesGen_hintikka this task's research evaluated) and confirmed wrapping keys in an existential Aux does not avoid the mismatch, since AuxStepPreserved would still need the same insufficient live-guard argument.",
+      "root_cause": "modalTableauS4 (the real driver Decidable (s4Valid phi) must run) and modalStepBranchS4Keyed (the driver S4LoopInv/the pigeonhole world bound are proven for) are two distinct stepping functions with two distinct minting guards (blockingWorldS4 live-set-based vs blockingWorldS4Keyed birth-key-based). Phases 4-6 built the termination bound entirely around the keyed shadow driver as a proof-internal construction; no bridge or driver-swap connecting it to the real modalTableauS4 was built (nor was one anticipated with this precision in the plan's original Phase 7 wording, which described 'wire fuel sufficiency from modalStepBranchS4_worldBound' as if it were a direct application).",
+      "what_is_needed": "Either (a) a bespoke S4-specific top-level driver (modalExpandBranchesS4Keyed/modalTableauS4Keyed) built around modalStepBranchS4Keyed with its own full processNext-style fuel induction (RuleApply's fixed-per-call signature cannot thread keys across steps, so the generic modalExpandBranchesGen/modalTableauGen/even the new Aux-parametrized modalExpandBranchesHintikka cannot be reused directly), plus re-verification that soundness (modalTableauS4_sound, task 506) and the truth lemma reconnect against the keyed guard (plausible in principle -- non-minting behavior and blocked-target-has-content contracts agree between the two guards -- but unverified); or (b) generalizing the driver framework itself (RuleApply/Accessibility or a new wrapper) to carry extra opaque per-branch threaded state generically, a materially larger 9-A than originally scoped."
+    }
+  ],
   "continuation_context": {
     "plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+    "summary_path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
     "files_modified": [
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md"
+      "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+      "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
+      "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json"
     ],
-    "reusable_lemmas_landed_this_dispatch": [
-      "mem_modalUniverseS4_of",
-      "mem_modalUniverseS4_of'",
-      "modalUniverseS4_mem_label",
-      "mem_boxPositivesOf_S4",
-      "boxProps_outputs_subset_S4",
-      "diaNegProps_outputs_subset_S4",
-      "modalApplyOne_diamondPos_outputs_subset_S4",
-      "modalApplyOne_boxNeg_outputs_subset_S4",
-      "modalApplyOne_boxPos_fst_S4",
-      "modalApplyOne_diamondNeg_fst_S4",
-      "modalApplyOne_boxPos_snd_S4",
-      "modalApplyOne_diamondNeg_snd_S4",
-      "modalApplyOneT_boxPos_diaNeg_universe_S4",
-      "modalApplyOneS4Rules_boxPos_diaNeg_universe_S4",
-      "modalApplyOne_nonModal_universe_S4",
-      "modalApplyOneS4Keyed_nonMint_universe_S4",
-      "modalStepBranchS4_preserves_eClosure (CLOSED, zero sorry)",
-      "foldl_max_le_of_forall_le",
-      "modalMaxWorld_le_of_forall_label_le",
-      "worldsContiguousS4",
-      "modalStepBranchS4_preserves_worldsContiguousS4",
-      "modalKnownWorlds_nodup_S4",
-      "modalKnownWorlds_length_le_worldBoundS4",
-      "modalStepBranchS4_worldBound",
-      "modalStepBranchS4_preserves_bClosure (CLOSED, zero sorry)",
-      "modalStepBranchS4_preserves_S4LoopInv (fully closed, all 10 fields, zero sorry)"
-    ],
+    "lean_files_modified_this_dispatch": [],
     "phases_landed": [1, 2, 3, 4, 5, 6],
-    "phases_not_attempted": [7],
-    "next_action_hint": "Phase 7 (Phase 9 decidability): the Hintikka-alignment bridge modalHintikkaSetS4_eq is already landed (independent, prior dispatch). Remaining Phase 7 tasks: (a) record Planner Decision 2 (recommend spawning the abstract termination-measure interface, 9-A, as a separate task rather than inlining it in CompletenessLoop.lean, shared with tasks 505/513); (b) wire fuel sufficiency from modalStepBranchS4_worldBound (now available) plus the 9-A/9-B decision to derive Decidable (s4Valid phi) against Cube.S4; (c) otherwise mark [BLOCKED] with the exact open goal state and the spawned task number. modalStepBranchS4_preserves_S4LoopInv is now the fully-closed loop invariant a Phase 7 induction over repeated modalStepBranchS4Keyed calls can consume directly, re-supplying worldsContiguousS4/keysWorldsKnown at each step from the assembly theorem's own third/second conjuncts."
+    "phases_not_attempted": [],
+    "phases_blocked": [7],
+    "is_successor": false,
+    "spawn_recommendation": {
+      "title": "abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
+      "scope": "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean, Cslib/Logics/Modal/Tableau/GenericDriver.lean, and (as the S4-consuming side) Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "shared_with": ["task 505 (B-system)", "task 513"],
+      "brief": "Survey task 515's Aux-parametrized modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka (CompletenessLoop.lean, landed for S5's ModalLoopAuxS5w) first -- it is real, useful groundwork for a state-free termination interface. It will need extending to support threaded per-branch state beyond a Prop-valued Aux (to carry S4's keys : List (WorldIndex x Finset (Sign x Proposition Atom))) before it can close S4's Decidable (s4Valid phi); alternatively, build a bespoke S4-local processNext-style driver directly around the already-landed modalStepBranchS4Keyed/S4LoopInv/modalStepBranchS4_worldBound (Cslib/Logics/Modal/Tableau/LoopChecking.lean, task 511 Phases 4-6, all sorry-free) if the generic extension is judged too invasive. Either resolution must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) and re-verify soundness/the truth lemma reconnect, since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4/blockingWorldS4, not the keyed guard the termination proof is about."
+    },
+    "next_action_hint": "Spawn the task described in spawn_recommendation above (do not inline it into 511 -- Planner Decision 2). Once spawned/landed, task 511 Phase 7 can be resumed by wiring the new interface (or the bespoke driver) against the already-landed, sorry-free Phases 1-6 machinery in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4."
   },
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-    "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json"
+    {
+      "path": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "type": "lean_source",
+      "summary": "No changes this dispatch (already sorry-free from prior dispatches through Phase 6, including the independent Phase 7 rfl bridge modalHintikkaSetS4_eq); re-verified green and axiom-clean."
+    },
+    {
+      "path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+      "type": "plan",
+      "summary": "Phase 7 heading marked [BLOCKED]; task checklist updated; continuation note documents the driver/shadow-invariant mismatch finding and the sharpened 9-A/9-B options."
+    },
+    {
+      "path": "specs/511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md",
+      "type": "summary",
+      "summary": "Rewritten to reflect the final state: Phases 1-6 fully landed sorry-free (closes the original task 506 Phase 8 blocker), Phase 7 blocked with the precise finding and spawn recommendation."
+    }
   ]
 }

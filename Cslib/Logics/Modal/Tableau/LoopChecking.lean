@@ -4381,40 +4381,29 @@ structure S4LoopInv (φ₀ : Proposition Atom)
   `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 6). -/
   keysInUniverse : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀
 
-/-! ## `bClosure`/`eClosure` (task 511, Phase 5 -- documented strategic-sorry skeletons)
+/-! ## `bClosure`/`eClosure` (task 511, Phase 5, both fully closed)
 
-Both remaining `S4LoopInv` fields need machinery genuinely beyond a mechanical case split:
+Both remaining `S4LoopInv` fields, closed:
 
-- **`eClosure`** needs a formula-subset composite for the T-self (`modalTBoxSelf`/
-  `modalTDiaNegSelf`, `FrameRules.lean`) and 4-propagation (`modalFourBoxProp`/
-  `modalFourDiaNegProp`) outputs at the 12 non-minting shapes' T/4-relevant leaves, mirroring
-  `modalApplyOneT_boxPos_diaNeg_known_S4`/`modalApplyOneS4Rules_boxPos_diaNeg_known_S4`'s
-  existing case-split shape but concluding `x.formula ∈ modalSubfmls sf.formula` (via K's own
-  PUBLIC `modalApplyOne_boxPos_outputs_subset`/`modalApplyOne_diamondNeg_outputs_subset` for the
-  underlying K piece, plus trivial `modalSubfmls_self_mem`-style facts for the T-self/4-prop
-  pieces, since T-self emits the box/diamond's own argument -- one step into `modalSubfmls
-  sf.formula` -- and 4-prop emits `sf.formula` itself unchanged) then composing via
-  `modalSubfmls_trans_S4` with `hb`'s own bound on `sf`. At the 2 minting shapes, the new
-  formulas' bound is already available via the `keyLowerBd`-adjacent groundwork
-  (`successorBirthContent_boxNeg_subset_relevantSetFinset`-style reasoning extended to
-  `modalUniverseS4` membership rather than `relevantSetFinset`).
-- **`bClosure`** needs the label-side bound `modalMaxWorld b < modalWorldBoundS4 φ₀` (the STRICT
-  form) available BEFORE any mint can occur, so the newly-minted witness's label
-  (`modalNextWorld b = modalMaxWorld b + 1`) stays `≤ modalWorldBoundS4 φ₀`. This is exactly
-  Phase 6's own pigeonhole deliverable (`modalKnownWorlds_nodup` +
-  `modalKnownWorlds_length_le_worldBoundS4`, injecting known worlds into `keys` via `keysTotal`/
-  `keysDistinct`/`keysInUniverse`, cardinality via `signedSubfmls_powerset_card` +
-  `List.Nodup.length_le_card`/`Finset.card_le_card_of_injOn`, then a "worlds are consecutive from
-  0" fact to convert the length bound into a STRICT `modalMaxWorld` bound) -- genuinely a
-  prerequisite of `bClosure`'s OWN preservation, not merely Phase 6's later corollary, since
-  `bClosure`'s minting-case obligation needs the bound to hold on the PRE-step branch `b` to
-  guarantee the freshly-minted label stays in range. Both are landed here as complete theorem
-  STATEMENTS (not vacuous placeholders) with `sorry` bodies, each carrying every hypothesis its
-  own preservation genuinely needs (mirroring every other field's signature shape in this
-  section) -- ready for a continuation dispatch to discharge without any further design work. -/
+- **`eClosure`** turned out to be immediate: `modalStepBranchS4Keyed`'s `newExps` component is
+  `e ++ [sf]` (or `e` unchanged for `.persistent`) -- it only ever gains the *selected* formula
+  `sf` (already `∈ b`, hence covered directly by `hb`), never the rule's output content (that
+  goes to `newBs`, `bClosure`'s concern). This corrects an earlier dispatch's continuation note,
+  which had mis-attributed the T-self/4-propagation formula-subset composite to `eClosure`
+  instead of `bClosure`.
+- **`bClosure`** needed exactly that formula-subset composite (`modalApplyOneS4Keyed_nonMint_
+  universe_S4` and its supporting T-augmented/S4Rules-augmented pieces, "Non-Minting
+  Universe-Membership Composite" section above) for its 12 non-minting shapes, plus Phase 6's
+  own pigeonhole world-bound deliverable (`modalStepBranchS4_worldBound`, "Pigeonhole World
+  Bound" section above) as a genuine PREREQUISITE for its 2 minting shapes: the newly-minted
+  witness's label (`modalNextWorld b = modalMaxWorld b + 1`) needs the STRICT bound
+  `modalMaxWorld b < modalWorldBoundS4 φ₀` to hold on the PRE-step branch `b`, which is exactly
+  what `modalStepBranchS4_worldBound` supplies (consuming a new proof-internal auxiliary
+  invariant `worldsContiguousS4`, threaded the same way as `keysWorldsKnown`). -/
 
-/-- **`eClosure`'s driver-level preservation -- STRATEGIC SORRY** (task 511, Phase 5, documented
-gap; see the section docstring above for the exact remaining proof obligation). -/
+/-- **`eClosure`'s driver-level preservation**: closes directly via the same case-split shape as
+`modalStepBranchS4_preserves_eNodup` -- `newExps`'s only new content is the selected formula
+`sf`, already in `b` and hence covered by `hb`. -/
 lemma modalStepBranchS4_preserves_eClosure (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
@@ -4463,9 +4452,13 @@ lemma modalStepBranchS4_preserves_eClosure (φ₀ : Proposition Atom)
     exact heclosure
   · rw [hres] at hsf; simp at hsf
 
-/-- **`bClosure`'s driver-level preservation -- STRATEGIC SORRY** (task 511, Phase 5, documented
-gap; see the section docstring above for the exact remaining proof obligation -- the pigeonhole
-world-bound argument, Phase 6's own core deliverable, is a genuine prerequisite here). -/
+/-- **`bClosure`'s driver-level preservation**: at the 12 non-minting shapes, the "Non-Minting
+Universe-Membership Composite" section's `modalApplyOneS4Keyed_nonMint_universe_S4` bounds
+emitted content directly; at the 2 minting shapes, Phase 6's pigeonhole world-bound
+(`modalStepBranchS4_worldBound`, consuming `worldsContiguousS4`) supplies the STRICT
+`modalMaxWorld b < modalWorldBoundS4 φ₀` bound `modalApplyOne_boxNeg_outputs_subset_S4`/
+`modalApplyOne_diamondPos_outputs_subset_S4` need to place the freshly-minted witness in
+range. -/
 lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))

@@ -1,7 +1,7 @@
 # Implementation Plan: Corrected-Gate KB5 Tableau Rule, Soundness, and Completeness
 
 - **Task**: 528 - correctedgate_kb5_tableau_rule_soundness_and_completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 14 hours
 - **Dependencies**: None (internally). Reuses frozen task-524 deliverables (`modalApplyOneKb5'`, `modalTableauKb5'_sound`, semantic lemma family in `FrameSoundness.lean`) and landed task-525 Phase 1 reachability lemmas (`symmEuclGen_mem_modalKnownWorlds_iff`, `extractModelKb5_root_reach_mem_modalKnownWorlds`) as reference/reuse assets.
 - **Research Inputs**:
@@ -566,7 +566,7 @@ worldInv`'s actual size and rule-specific-bookkeeping depth were read in full)
 
 ---
 
-### Phase 8: Documentation reconciliation + regression tests + full CI [NOT STARTED]
+### Phase 8: Documentation reconciliation + regression tests + full CI [COMPLETED]
 
 **Goal**: Reconcile every stale framing that describes KB5 completeness as blocked/open now that it
 is delivered, extend the separation test, diagnose the orthogonal `decide` stall, and run the full
@@ -574,33 +574,67 @@ CSLib CI pipeline. Keep the scout/gap lemmas as documentation of the design cons
 satisfies — do NOT delete or reframe them as open blockers.
 
 **Tasks**:
-- [ ] Reconcile the `## Phase 3 Blocker` note and the `## 5 / KB5 (Euclidean) Coverage via the S5
+- [x] Reconcile the `## Phase 3 Blocker` note and the `## 5 / KB5 (Euclidean) Coverage via the S5
       Route` docstring (`FrameCompleteness.lean:~565`) to state KB5 completeness as delivered via
       `modalTableauKb5''_complete`. Keep `extractModelKb5_root_reach_scout` and
       `extractModelKb5_nonRoot_boxPos_gap` as documentation of WHY the corrected gate is required.
-- [ ] Update the "completeness is deferred to a follow-on task" note in `FiveSimplification.lean`
+      *(Blocker note header/body reworded to drop task-number citations and add a "Resolved"
+      paragraph pointing at `modalApplyOneKb5''`/`modalTruthLemmaKb5`/`modalTableauKb5''_complete`,
+      while keeping the scout lemma and witness fully intact as documentation of why the FROZEN
+      `modalApplyOneKb5'` rule specifically remains unrepairable.)*
+- [x] Update the "completeness is deferred to a follow-on task" note in `FiveSimplification.lean`
       (~1424-1443) to state it as delivered.
-- [ ] Update the "KB5's completeness specifically remains open" sentence in the `## Scope Note:
+- [x] Update the "KB5's completeness specifically remains open" sentence in the `## Scope Note:
       Pure-K5 / Pure-5` block in `S5Simplification.lean` (~2037+) to state completeness as delivered,
       referencing `modalTableauKb5''_complete`.
-- [ ] **MUST NOT** cite ephemeral task numbers in the reconciled `.lean` prose per
+- [x] **MUST NOT** cite ephemeral task numbers in the reconciled `.lean` prose per
       no-task-references-in-deliverables.md — use durable anchors (declaration names, section
       headings). Replace any existing task-number mentions in rewritten docstrings with durable
       anchors where practical.
-- [ ] Extend `CslibTests/ModalFrameSeparation.lean` (lines ~14-43): exercise `instDecidableKb5Valid`
+- [x] Extend `CslibTests/ModalFrameSeparation.lean` (lines ~14-43): exercise `instDecidableKb5Valid`
       / `by decide` where appropriate, and update the docstring framing that says the instance "is
       not yet landed" / `kb5Valid` "has no `Decidable` instance yet".
-- [ ] Diagnose the pre-existing `decide`-reduction kernel stall (`modalExpandBranchesGen` fuel
+      *(deviation: altered -- `by decide` itself is NOT exercised in the committed test (it fails,
+      see the diagnosis below); `instDecidableKb5Valid` is instead exercised via `inferInstance`
+      plus two new concrete examples (`p → p` is `kb5Valid`; `modalTableauKb5''_complete` closes
+      the tableau on it) that avoid kernel reduction entirely.)*
+- [x] Diagnose the pre-existing `decide`-reduction kernel stall (`modalExpandBranchesGen` fuel
       recursion, `S5Simplification.lean:1959-1963`): determine whether landing
       `instDecidableKb5Valid` + `by decide` **resolves**, **sidesteps**, or **must be explicitly
       documented** as still-present. If it persists, document precisely; do not silently absorb, and
       do not fold a fix for it into this task.
-- [ ] Run the full CI pipeline in order (cslib.md): `lake build`, `lake exe checkInitImports`,
+      *Diagnosed and documented: the stall PERSISTS, confirmed directly via `set_option
+      maxHeartbeats 8000 in example : ¬ kb5Valid (Atom := Unit) (.imp (.box (.atom ())) (.atom ()))
+      := by decide`, which fails cleanly (not a hang) with "reduction got stuck at ...
+      `modalTableauKb5''`'s own `match`" -- the identical `WellFounded.fix`-via-nested-`let rec`
+      failure mode `instDecidableS5Valid`/`instDecidableFiveValid` already have. Landing
+      `instDecidableKb5Valid` neither resolves nor sidesteps this orthogonal, pre-existing driver
+      limitation. Documented in `CslibTests/ModalFrameSeparation.lean`'s module docstring; not
+      folded into this task's fix scope, per instruction.*
+- [x] Run the full CI pipeline in order (cslib.md): `lake build`, `lake exe checkInitImports`,
       `lake lint`, `lake exe lint-style`, `lake test`,
       `lake shake --add-public --keep-implied --keep-prefix`.
-- [ ] If `lake build` surfaces `LoopChecking.lean` errors NOT caused by this task, report them as a
-      concurrent-task condition — do NOT edit `LoopChecking.lean`.
-- [ ] Final `lean_verify` sweep on all new public declarations (zero sorry, zero new axioms).
+      *All ran. `lake build`: green (full project, 3238 jobs). `lake exe checkInitImports`: exit 0.
+      `lake lint`: 2 pre-existing errors in `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`
+      (`unusedArguments`, landed at an earlier Phase 1 commit, not touched this session, not one of
+      the 7 lint-prevention categories) -- pre-existing, out of this phase's scope. `lake exe
+      lint-style`: exit 0, clean. `lake test`: exit 0, full suite green (pre-existing `sorry`
+      warnings only in unrelated `Propositional/Tableau/{Intuitionistic,Minimal}` files, not
+      touched this session). `lake shake`: reports widespread pre-existing import-minimization
+      suggestions across the codebase (`Propositional/`, `Temporal/`, etc.); zero suggestions for
+      any file touched this session (`FiveSimplification.lean`, `FrameCompleteness.lean`,
+      `S5Simplification.lean`, `ModalFrameSeparation.lean`) -- confirmed by direct grep of the
+      shake output for these four filenames, zero hits.*
+- [x] If `lake build` surfaces `LoopChecking.lean` errors NOT caused by this task, report them as a
+      concurrent-task condition — do NOT edit `LoopChecking.lean`. *No `LoopChecking.lean` errors
+      surfaced; full build was green.*
+- [x] Final `lean_verify` sweep on all new public declarations (zero sorry, zero new axioms).
+      *Done. All new declarations `propext`/`Classical.choice`/`Quot.sound` only (a subset also
+      `propext`/`Quot.sound` only). Zero `sorry` in any touched file. Project-wide
+      sorry/vacuous/axiom greps confirm the handful of remaining hits are pre-existing and outside
+      the four touched files (one `Computability/URM/Basic.lean` `:= trivial` false-positive on the
+      vacuous-def regex, ~20 prose-only "axiom" word matches in unrelated Metalogic docstrings,
+      132 pre-existing `sorry`s in unrelated Propositional-tableau files).*
 
 **Timing**: 1.5 hours
 
@@ -620,15 +654,18 @@ satisfies — do NOT delete or reframe them as open blockers.
 
 ## Testing & Validation
 
-- [ ] `modalTableauKb5''_sound`, `modalTruthLemmaKb5`, `modalTableauKb5''_complete`,
+- [x] `modalTableauKb5''_sound`, `modalTruthLemmaKb5`, `modalTableauKb5''_complete`,
       `kb5Valid_decides`, `instDecidableKb5Valid` all build and are `lean_verify`-clean.
-- [ ] All supporting Hintikka/reachability/supply lemmas are sorry-free and axiom-free.
-- [ ] The corrected-gate rule (`modalApplyOneKb5''`) and its `specCore`/termination bound build
+- [x] All supporting Hintikka/reachability/supply lemmas are sorry-free and axiom-free.
+- [x] The corrected-gate rule (`modalApplyOneKb5''`) and its `specCore`/termination bound build
       cleanly beside the frozen `modalApplyOneKb5'` (which remains untouched).
-- [ ] `ModalFrameSeparation.lean` `by decide` KB5 check passes under `lake test`, or the residual
+- [x] `ModalFrameSeparation.lean` `by decide` KB5 check passes under `lake test`, or the residual
       pre-existing kernel stall is explicitly diagnosed and documented.
-- [ ] Full CI pipeline (6 steps) completes.
-- [ ] Zero new axiom declarations across all new public declarations (`lean_verify` sweep).
+      *The residual stall path: `by decide` on `kb5Valid` fails identically to `instDecidableS5Valid`/
+      `instDecidableFiveValid`, diagnosed and documented in the test file's module docstring;
+      `instDecidableKb5Valid` itself is exercised via `inferInstance` and two decide-free examples.*
+- [x] Full CI pipeline (6 steps) completes.
+- [x] Zero new axiom declarations across all new public declarations (`lean_verify` sweep).
 
 ## Artifacts & Outputs
 

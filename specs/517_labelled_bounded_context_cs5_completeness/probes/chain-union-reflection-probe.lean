@@ -251,6 +251,481 @@ theorem NIK.freshWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula 
   have hstep := h.swap_relabel (a := y₀) (b := y) (G' := G.addEdge x y) hf
   rwa [List.map_swapFn_eq_self hΓ, show swapFn y₀ y y₀ = y from swapFn_left y₀ y] at hstep
 
+/-! ## `substFn`/`NIK.relabelFresh`: one-directional relabeling (relocated from Phase 5, Task 517
+Phase 6)
+
+**Relocation note**: this block (originally landed by Phase 5 as `flo_oldlabel_transport`'s
+supporting machinery, much later in the file) is moved here, content unchanged, so that
+`ChainCtx.deriv_reflect` and `dwitness_mem_of_maximal` -- both defined below, ahead of Phase 5's
+original position -- can consume it too (Task 517 Phase 6). See `flo_oldlabel_transport`'s
+docstring (further below) for the full mathematical writeup of why a *one-directional*
+substitution, unlike `swapFn`'s involution, never disturbs the target label's own pre-existing
+structure and so needs no freshness hypothesis on the target at all. -/
+
+/-- The one-directional label substitution sending `a ↦ b` and fixing every other label
+(including `b` itself). Unlike `swapFn`, this is **not an involution**: `substFn a b` never sends
+`b ↦ a`, so it never disturbs any structure already incident to `b` -- exactly what avoids the
+"naive swap" collision the Postmortem Constraints flag for old-label transport. -/
+noncomputable def substFn (a b l : Label Atom) : Label Atom :=
+  if l = a then b else l
+
+@[simp] theorem substFn_self (a b : Label Atom) : substFn a b a = b := by
+  unfold substFn; simp
+
+theorem substFn_other {a b l : Label Atom} (hl : l ≠ a) : substFn a b l = l := by
+  unfold substFn; simp [hl]
+
+/-- If `f = substFn a b` fixes every label occurring in `Γ` (i.e. `a` is fresh w.r.t. `Γ`),
+relabeling does nothing to `Γ`. Analogue of `List.map_swapFn_eq_self` for `substFn`. -/
+theorem List.map_substFn_eq_self {a b : Label Atom} {Γ : List (LabelledFormula Atom)}
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ a) :
+    Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop) = Γ := by
+  conv_rhs => rw [← List.map_id (l := Γ)]
+  refine List.map_congr_left (fun ψ hψ => ?_)
+  simp [substFn_other (hΓ ψ hψ)]
+
+/-- **One-directional relabeling.** Prop. 4.4.1 (`f(Γ) ⊢_{G'} f(x):A`) specialized to
+`f = substFn a b`: any `NIK`-derivation transports along a one-directional substitution `a ↦ b`
+(not necessarily a swap), provided the target graph `G'` is related to the source `G` by the
+substitution as a graph morphism (`hf`). The proof mirrors `NIK.swap_relabel`'s case shape
+exactly, with one departure in `boxI`/`diaE`: since `substFn a b` is not invertible, the preimage
+of a target label `t ∉ substFn a b '' L ∪ {a}` is `t` **itself** (not `substFn a b t` computed via
+an involution formula), because `substFn a b` fixes every point besides `a`, and `t ≠ a` is
+guaranteed by `t ∉ {a}`. This is what lets `b` remain fully untouched: the lemma places no
+freshness requirement on `b` at all. -/
+theorem NIK.relabelFresh {a b : Label Atom} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {φ : LabelledFormula Atom} (h : NIK 𝒯 G Γ φ) :
+    ∀ {G' : Graph Atom}, (∀ p q, G.R p q → G'.R (substFn a b p) (substFn a b q)) →
+      NIK 𝒯 G' (Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop)) (substFn a b φ.lbl ∶ φ.prop) := by
+  induction h with
+  | assumption G Γ φ hmem =>
+      intro G' _
+      exact .assumption G' _ _ (List.mem_map_of_mem hmem)
+  | efq G Γ x y A _ ih =>
+      intro G' hf
+      exact .efq G' _ (substFn a b x) (substFn a b y) A (ih hf)
+  | andI G Γ x A B _ _ ihA ihB =>
+      intro G' hf
+      exact .andI G' _ (substFn a b x) A B (ihA hf) (ihB hf)
+  | andE1 G Γ x A B _ ih =>
+      intro G' hf
+      exact .andE1 G' _ (substFn a b x) A B (ih hf)
+  | andE2 G Γ x A B _ ih =>
+      intro G' hf
+      exact .andE2 G' _ (substFn a b x) A B (ih hf)
+  | orI1 G Γ x A B _ ih =>
+      intro G' hf
+      exact .orI1 G' _ (substFn a b x) A B (ih hf)
+  | orI2 G Γ x A B _ ih =>
+      intro G' hf
+      exact .orI2 G' _ (substFn a b x) A B (ih hf)
+  | orE G Γ x y A B C _ _ _ ihor ihA ihB =>
+      intro G' hf
+      refine .orE G' _ (substFn a b x) (substFn a b y) A B C (ihor hf) ?_ ?_
+      · simpa using ihA hf
+      · simpa using ihB hf
+  | impI G Γ x A B _ ih =>
+      intro G' hf
+      have := ih hf
+      simpa using NIK.impI G' _ (substFn a b x) A B (by simpa using this)
+  | impE G Γ x A B _ _ ihimp ihA =>
+      intro G' hf
+      exact .impE G' _ (substFn a b x) A B (ihimp hf) (ihA hf)
+  | boxE G Γ x y A hR _ ih =>
+      intro G' hf
+      exact .boxE G' _ (substFn a b x) (substFn a b y) A
+        (TClosure.map (substFn a b) hf hR) (ih hf)
+  | boxI L hL G Γ x A h ih =>
+      intro G' hf
+      refine .boxI (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
+        (substFn a b x) A ?_
+      intro t ht
+      have hta : t ≠ a := by
+        intro heq
+        exact ht (Or.inr (by simp [heq]))
+      have hst : substFn a b t = t := substFn_other hta
+      have htL : t ∉ L := by
+        intro hmem
+        exact ht (Or.inl ⟨t, hmem, hst⟩)
+      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
+      have hf' : ∀ p q, (G.addEdge x t).R p q →
+          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
+        intro p q hpq
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact Or.inl (hf p q hpq)
+        · exact Or.inr ⟨rfl, hst⟩
+      have := hstep hf'
+      simpa [hst] using this
+  | diaI G Γ x y A hR _ ih =>
+      intro G' hf
+      exact .diaI G' _ (substFn a b x) (substFn a b y) A
+        (TClosure.map (substFn a b) hf hR) (ih hf)
+  | diaE L hL G Γ x z A B hdia h ihdia ih =>
+      intro G' hf
+      refine .diaE (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
+        (substFn a b x) (substFn a b z) A B (ihdia hf) ?_
+      intro t ht
+      have hta : t ≠ a := by
+        intro heq
+        exact ht (Or.inr (by simp [heq]))
+      have hst : substFn a b t = t := substFn_other hta
+      have htL : t ∉ L := by
+        intro hmem
+        exact ht (Or.inl ⟨t, hmem, hst⟩)
+      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
+      have hf' : ∀ p q, (G.addEdge x t).R p q →
+          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
+        intro p q hpq
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact Or.inl (hf p q hpq)
+        · exact Or.inr ⟨rfl, hst⟩
+      have := hstep hf'
+      simpa [hst] using this
+
+/-- **Old-label transport, graph-generic form** (Task 517 Phase 6): the graph-level fact
+`flo_oldlabel_transport` (further below) specializes to a `FloSeq` stage -- extracted here,
+BEFORE `FloSeq`/`FLO` exist in the file, because `ChainCtx.deriv_reflect` and
+`dwitness_mem_of_maximal` need exactly this graph-generic form and neither one is stated in terms
+of a `FloSeq`. Built directly from `NIK.relabelFresh` with `a := y₀`, `b := y'`: a `NIK`-derivation
+witnessed at one label `y₀` **fresh w.r.t. the ambient graph `G`** transports to ANY OTHER label
+`y'` -- fresh or already a member of `G.X` ("old") -- with NO side condition on `y'` at all, since
+`substFn y₀ y'` (unlike `swapFn`) never touches whatever structure `G` already has at `y'`. This
+is the fact both `ChainCtx.deriv_reflect` and `dwitness_mem_of_maximal`'s diamond old-label
+sub-case could not close without it. -/
+theorem NIK.oldLabelTransport {G : Graph Atom} {x y₀ : Label Atom} {A : Proposition Atom}
+    {Γ : List (LabelledFormula Atom)} (h : NIK 𝒯 (G.addEdge x y₀) Γ (y₀ ∶ A)) (hy₀ : y₀ ∉ G.X)
+    (hxy₀ : x ≠ y₀) (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀) (y' : Label Atom) :
+    NIK 𝒯 (G.addEdge x y') Γ (y' ∶ A) := by
+  have hf : ∀ p q, (G.addEdge x y₀).R p q → (G.addEdge x y').R (substFn y₀ y' p) (substFn y₀ y' q) := by
+    intro p q hpq
+    rcases hpq with hpq | ⟨rfl, rfl⟩
+    · have hp : p ≠ y₀ := fun hp => hy₀ (hp ▸ (G.edge_mem p q hpq).1)
+      have hq : q ≠ y₀ := fun hq => hy₀ (hq ▸ (G.edge_mem p q hpq).2)
+      rw [substFn_other hp, substFn_other hq]
+      exact Or.inl hpq
+    · rw [substFn_other hxy₀, substFn_self]
+      exact Or.inr ⟨rfl, rfl⟩
+  have hstep := h.relabelFresh (a := y₀) (b := y') (G' := G.addEdge x y') hf
+  rwa [List.map_substFn_eq_self hΓ, show substFn y₀ y' y₀ = y' from substFn_self y₀ y'] at hstep
+
+/-- **Old-label diamond-witness transport, graph-generic form** (Task 517 Phase 6): the
+`substFn`-based analogue of `NIK.diaWitness_transport` above, dropping the freshness requirement
+on the TARGET label `y` -- the one-directional relabeling `substFn y₀ y` never disturbs whatever
+structure the ambient graph `G` already has at `y`, so the transported derivation is valid for
+ANY target `y`, old or fresh. Only the SOURCE witness `y₀` needs to be fresh. This is
+`dwitness_mem_of_maximal`'s diamond old-label sub-case's exact missing fact. -/
+theorem NIK.diaWitnessTransportOld {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {x z y₀ : Label Atom} {A C : Proposition Atom}
+    (h : NIK 𝒯 (G.addEdge x y₀) ((y₀ ∶ A) :: Γ) (z ∶ C)) (hy₀X : y₀ ∉ G.X)
+    (hxy₀ : x ≠ y₀) (hzy₀ : z ≠ y₀) (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀) (y : Label Atom) :
+    NIK 𝒯 (G.addEdge x y) ((y ∶ A) :: Γ) (z ∶ C) := by
+  have hf : ∀ p q, (G.addEdge x y₀).R p q → (G.addEdge x y).R (substFn y₀ y p) (substFn y₀ y q) := by
+    intro p q hpq
+    rcases hpq with hpq | ⟨rfl, rfl⟩
+    · have hp : p ≠ y₀ := fun hp => hy₀X (hp ▸ (G.edge_mem p q hpq).1)
+      have hq : q ≠ y₀ := fun hq => hy₀X (hq ▸ (G.edge_mem p q hpq).2)
+      rw [substFn_other hp, substFn_other hq]
+      exact Or.inl hpq
+    · rw [substFn_other hxy₀, substFn_self]
+      exact Or.inr ⟨rfl, rfl⟩
+  have hstep := h.relabelFresh (a := y₀) (b := y) (G' := G.addEdge x y) hf
+  simp only [List.map_cons, substFn_self, List.map_substFn_eq_self hΓ, substFn_other hzy₀] at hstep
+  exact hstep
+
+/-! ## `GChain`: a graph-only chain, and the `NIK`-level reflection theorem (Task 517 Phase 6)
+
+**Finding (corrects the "Joint follow-up dispatch" analysis below, which predates this
+insight)**: that analysis concluded reflection needs "route (a)" (a step-indexed FLO
+reconstruction) because every route it tried transported a *single* witnessed fact to *every*
+other label via a **swap** (`swapFn`, an involution) or via reusing the induction hypothesis with
+a *different* chain index per label (Shortcut 2). Neither obstacle applies to the **one-directional**
+`substFn`-based transport (`NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld` above, Phase 5's
+`flo_oldlabel_transport` insight, generalized to an arbitrary graph): it needs freshness of only
+the *source* witness `y₀`, never the target, so a *single* reflected chain index for `y₀` alone
+already supplies the *entire* cofinite family (fresh or old target labels alike) via
+`oldLabelTransport`/`diaWitnessTransportOld`. This reduces the reflection argument to an ordinary
+structural induction on the `NIK`-derivation, always working with the CURRENT graph's fresh
+witnesses (drawn from the chain's shared reserve `V'ᶜ`, so a supply is always available), with no
+FLO/well-founded-rank machinery needed at all. The three "ruled out" shortcuts remain correctly
+ruled out **for the techniques they tested** (an unstructured swap, or no relabeling at all); they
+did not anticipate a one-directional, non-involutive relabeling. -/
+
+/-- A minimal **graph-only** analogue of `ChainCtx`: an `ι`-indexed family of raw `Graph`s,
+monotone and directed, with NO `Context`-validity obligations. Used only by `NIK.reflectChain`
+below: the auxiliary chains the reflection induction builds along the way (extending every member
+by one shared fresh edge at each `(□I)`/`(◇E)` step) do **not** stay confined to the *original*
+reserve `V'` (the fresh witness is drawn from `V'ᶜ` precisely so it lies outside `W(V')`), so they
+cannot be re-packaged as genuine `ChainCtx`/`Context` values. Since `NIK` only ever reads the raw
+`Graph` structure (never `Context`'s `dwitnessMem` etc.), dropping the `Context` wrapper for this
+one auxiliary argument is sound and considerably simpler. -/
+structure GChain (Atom : Type u) (ι : Type u) [Preorder ι] where
+  /-- The chain's raw graphs. -/
+  G : ι → Graph Atom
+  /-- Monotonicity under `Graph.le`. -/
+  mono : Monotone G
+  /-- The chain is directed. -/
+  dir : Directed (· ≤ ·) (id : ι → ι)
+
+namespace GChain
+
+variable {ι : Type u} [Preorder ι]
+
+/-- The union graph `⋃ᵢ Gᵢ`. -/
+def union (𝒢 : GChain Atom ι) [Nonempty ι] : Graph Atom where
+  X := ⋃ i, (𝒢.G i).X
+  R := fun x y => ∃ i, (𝒢.G i).R x y
+  nonempty := by
+    obtain ⟨i₀⟩ := (inferInstance : Nonempty ι)
+    obtain ⟨p, hp⟩ := (𝒢.G i₀).nonempty
+    exact ⟨p, Set.mem_iUnion.mpr ⟨i₀, hp⟩⟩
+  edge_mem := by
+    rintro x y ⟨i, hi⟩
+    obtain ⟨hx, hy⟩ := (𝒢.G i).edge_mem x y hi
+    exact ⟨Set.mem_iUnion.mpr ⟨i, hx⟩, Set.mem_iUnion.mpr ⟨i, hy⟩⟩
+
+/-- Every chain member is `≤` the union. -/
+theorem le_union (𝒢 : GChain Atom ι) [Nonempty ι] (i : ι) : 𝒢.G i ≤ 𝒢.union :=
+  ⟨fun _ hx => Set.mem_iUnion.mpr ⟨i, hx⟩, fun _ _ hxy => ⟨i, hxy⟩⟩
+
+/-- Extend every chain member by the SAME edge `x R y` -- the operation `NIK.reflectChain`
+performs at each `(□I)`/`(◇E)` step, mirroring the source union graph's own `.addEdge` on every
+member simultaneously. -/
+def addEdgeAll (𝒢 : GChain Atom ι) (x y : Label Atom) : GChain Atom ι where
+  G := fun i => (𝒢.G i).addEdge x y
+  mono := fun _ _ hij => Graph.addEdge_mono (𝒢.mono hij) x y
+  dir := 𝒢.dir
+
+/-- The extended chain's union domain is exactly the original union's domain plus the two new
+points. -/
+theorem addEdgeAll_union_X (𝒢 : GChain Atom ι) [Nonempty ι] (x y : Label Atom) :
+    (𝒢.addEdgeAll x y).union.X = 𝒢.union.X ∪ {x, y} := by
+  obtain ⟨i₀⟩ := (inferInstance : Nonempty ι)
+  ext z
+  simp only [union, addEdgeAll, Graph.addEdge, Set.mem_iUnion, Set.mem_union,
+    Set.mem_insert_iff, Set.mem_singleton_iff]
+  constructor
+  · rintro ⟨i, hz | hz | hz⟩
+    · exact Or.inl ⟨i, hz⟩
+    · exact Or.inr (Or.inl hz)
+    · exact Or.inr (Or.inr hz)
+  · rintro (⟨i, hz⟩ | hz | hz)
+    · exact ⟨i, Or.inl hz⟩
+    · exact ⟨i₀, Or.inr (Or.inl hz)⟩
+    · exact ⟨i₀, Or.inr (Or.inr hz)⟩
+
+/-- `𝒢.union` extended by one edge is `≤` the extended chain's union (the direction
+`NIK.reflectChain`'s `(□I)`/`(◇E)` cases need to weaken the ambient graph hypothesis into the new
+chain's union). -/
+theorem addEdge_union_le (𝒢 : GChain Atom ι) [Nonempty ι] (x y : Label Atom) :
+    𝒢.union.addEdge x y ≤ (𝒢.addEdgeAll x y).union := by
+  obtain ⟨i₀⟩ := (inferInstance : Nonempty ι)
+  refine ⟨fun z hz => ?_, fun a b hab => ?_⟩
+  · rcases hz with hz | hz
+    · obtain ⟨i, hzi⟩ := Set.mem_iUnion.mp hz
+      exact Set.mem_iUnion.mpr ⟨i, Or.inl hzi⟩
+    · exact Set.mem_iUnion.mpr ⟨i₀, Or.inr hz⟩
+  · rcases hab with hab | hab
+    · obtain ⟨i, habi⟩ := hab
+      exact ⟨i, Or.inl habi⟩
+    · exact ⟨i₀, Or.inr hab⟩
+
+end GChain
+
+/-- **Fresh-label supply, `Label`-level.** Given a coinfinite `V'` and a finite set `F` of labels,
+there is a prefix variable `n ∉ V'` whose label `Label.var n` avoids `F` -- the source of every
+fresh witness `NIK.reflectChain` picks. -/
+theorem exists_fresh_var {V' : Set PrefixVar} (hV' : Coinfinite V') (F : Set (Label Atom))
+    (hF : F.Finite) : ∃ n : PrefixVar, n ∉ V' ∧ Label.var n ∉ F := by
+  have hFvars : {n : PrefixVar | Label.var n ∈ F}.Finite :=
+    hF.preimage (fun a _ b _ hab => by injection hab)
+  have hinf : (V'ᶜ \ {n : PrefixVar | Label.var n ∈ F}).Infinite := hV'.diff hFvars
+  obtain ⟨n, hn1, hn2⟩ := hinf.nonempty
+  exact ⟨n, hn1, hn2⟩
+
+/-- **`TClosure`-level reflection**: a `𝒯`-closure fact over a `GChain`'s union graph reflects to
+a single chain member -- the `(□E)`/`(◇I)` premise `NIK.reflectChain` needs. Induction on the
+closure derivation, merging indices via directedness at `trans`/`eucl`. -/
+theorem TClosure.reflectChain {ι : Type u} [Preorder ι] [Nonempty ι] (𝒢 : GChain Atom ι)
+    {x y : Label Atom} (h : TClosure 𝒯 𝒢.union.R x y) : ∃ i, TClosure 𝒯 (𝒢.G i).R x y := by
+  induction h with
+  | base h =>
+      obtain ⟨i, hi⟩ := h
+      exact ⟨i, .base hi⟩
+  | refl h a =>
+      obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+      exact ⟨i, .refl h a⟩
+  | symm h _ ih =>
+      obtain ⟨i, hi⟩ := ih
+      exact ⟨i, .symm h hi⟩
+  | trans h _ _ ih1 ih2 =>
+      obtain ⟨i1, hi1⟩ := ih1
+      obtain ⟨i2, hi2⟩ := ih2
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .trans h (hi1.mono (fun a b hab => (𝒢.mono h1).2 a b hab))
+        (hi2.mono (fun a b hab => (𝒢.mono h2).2 a b hab))⟩
+  | eucl h _ _ ih1 ih2 =>
+      obtain ⟨i1, hi1⟩ := ih1
+      obtain ⟨i2, hi2⟩ := ih2
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .eucl h (hi1.mono (fun a b hab => (𝒢.mono h1).2 a b hab))
+        (hi2.mono (fun a b hab => (𝒢.mono h2).2 a b hab))⟩
+
+/-- **The master reflection theorem** (Task 517 Phase 6): a `NIK`-derivation over (an upper bound
+of) a `GChain`'s union graph reflects to a single chain member. Structural induction on the
+derivation, generalizing over the `GChain` itself: the finitely-branching rules merge reflected
+indices via directedness (`𝒢.dir`) and weaken via `𝒢.mono`/`NIK.weaken`; the cofinite rules
+(`(□I)`/`(◇E)`) pick ONE witness `y₀` fresh w.r.t. the current union (drawn from the shared
+reserve `V'ᶜ`, always available since only finitely many labels are excluded at any stage),
+recurse via `ih` at `y₀` into an EXTENDED chain (`GChain.addEdgeAll`, every member gains the same
+edge), then rebuild the FULL cofinite family from the single reflected instance via
+`NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld` -- which need no freshness at all on the
+*target* label, so a single witness suffices for the entire family, fresh or old alike. -/
+theorem NIK.reflectChain {ι : Type u} [Preorder ι] [Nonempty ι] {V' : Set PrefixVar}
+    (hV' : Coinfinite V') :
+    ∀ {G : Graph Atom} {Γ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom},
+      NIK 𝒯 G Γ φ → ∀ (𝒢 : GChain Atom ι), G ≤ 𝒢.union →
+        (𝒢.union.X \ {a : Label Atom | Label.InW V' a}).Finite → ∃ i, NIK 𝒯 (𝒢.G i) Γ φ := by
+  intro G Γ φ h
+  induction h with
+  | assumption G Γ φ hmem =>
+      intro 𝒢 _ _
+      obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+      exact ⟨i, .assumption _ _ _ hmem⟩
+  | efq G Γ x y A _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .efq _ _ x y A hi⟩
+  | andI G Γ x A B _ _ ihA ihB =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ihA 𝒢 hG hextra
+      obtain ⟨i2, hi2⟩ := ihB 𝒢 hG hextra
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .andI _ _ x A B (hi1.weaken (𝒢.mono h1) (fun _ hh => hh))
+        (hi2.weaken (𝒢.mono h2) (fun _ hh => hh))⟩
+  | andE1 G Γ x A B _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .andE1 _ _ x A B hi⟩
+  | andE2 G Γ x A B _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .andE2 _ _ x A B hi⟩
+  | orI1 G Γ x A B _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .orI1 _ _ x A B hi⟩
+  | orI2 G Γ x A B _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .orI2 _ _ x A B hi⟩
+  | orE G Γ x y A B C _ _ _ ihor ihA ihB =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ihor 𝒢 hG hextra
+      obtain ⟨i2, hi2⟩ := ihA 𝒢 hG hextra
+      obtain ⟨i3, hi3⟩ := ihB 𝒢 hG hextra
+      obtain ⟨j, h1j, h2j⟩ := 𝒢.dir i1 i2
+      obtain ⟨k, hjk, h3k⟩ := 𝒢.dir j i3
+      have h1k : i1 ≤ k := le_trans h1j hjk
+      have h2k : i2 ≤ k := le_trans h2j hjk
+      exact ⟨k, .orE _ _ x y A B C (hi1.weaken (𝒢.mono h1k) (fun _ hh => hh))
+        (hi2.weaken (𝒢.mono h2k) (fun _ hh => hh)) (hi3.weaken (𝒢.mono h3k) (fun _ hh => hh))⟩
+  | impI G Γ x A B _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i, hi⟩ := ih 𝒢 hG hextra
+      exact ⟨i, .impI _ _ x A B hi⟩
+  | impE G Γ x A B _ _ ihimp ihA =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ihimp 𝒢 hG hextra
+      obtain ⟨i2, hi2⟩ := ihA 𝒢 hG hextra
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .impE _ _ x A B (hi1.weaken (𝒢.mono h1) (fun _ hh => hh))
+        (hi2.weaken (𝒢.mono h2) (fun _ hh => hh))⟩
+  | boxE G Γ x y A hRxy _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ih 𝒢 hG hextra
+      have hRxy' : TClosure 𝒯 𝒢.union.R x y := hRxy.mono (fun a b hab => hG.2 a b hab)
+      obtain ⟨i2, hi2⟩ := TClosure.reflectChain 𝒢 hRxy'
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .boxE _ _ x y A (hi2.mono (fun a b hab => (𝒢.mono h2).2 a b hab))
+        (hi1.weaken (𝒢.mono h1) (fun _ hh => hh))⟩
+  | boxI L hL G Γ x A hp ih =>
+      intro 𝒢 hG hextra
+      have hFfin : ((𝒢.union.X \ {a : Label Atom | Label.InW V' a}) ∪ L ∪ ({x} : Set (Label Atom))
+          ∪ (Γ.map LabelledFormula.lbl : List (Label Atom)).toFinset).Finite :=
+        (((hextra.union hL).union (Set.finite_singleton x)).union
+          (Γ.map LabelledFormula.lbl).toFinset.finite_toSet)
+      obtain ⟨n, hnV', hnF⟩ := exists_fresh_var hV' _ hFfin
+      set y₀ : Label Atom := Label.var n with hy₀def
+      have hnInW : ¬ Label.InW V' y₀ := hnV'
+      have hy₀L : y₀ ∉ L := fun hmem => hnF (Or.inl (Or.inl (Or.inr hmem)))
+      have hy₀union : y₀ ∉ 𝒢.union.X := fun hmem =>
+        hnF (Or.inl (Or.inl (Or.inl ⟨hmem, hnInW⟩)))
+      have hxy₀ : x ≠ y₀ := fun heq => hnF (Or.inl (Or.inr (Set.mem_singleton_iff.mpr heq.symm)))
+      have hΓy₀ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀ := fun ψ hψ heq =>
+        hnF (Or.inr (List.mem_toFinset.mpr (heq ▸ List.mem_map_of_mem hψ)))
+      have hp' : NIK 𝒯 (G.addEdge x y₀) Γ (y₀ ∶ A) := hp y₀ hy₀L
+      have hG' : G.addEdge x y₀ ≤ (𝒢.addEdgeAll x y₀).union :=
+        le_trans (Graph.addEdge_mono hG x y₀) (𝒢.addEdge_union_le x y₀)
+      have hextra' : ((𝒢.addEdgeAll x y₀).union.X \ {a : Label Atom | Label.InW V' a}).Finite := by
+        rw [𝒢.addEdgeAll_union_X x y₀]
+        have : (𝒢.union.X ∪ {x, y₀}) \ {a : Label Atom | Label.InW V' a} ⊆
+            (𝒢.union.X \ {a : Label Atom | Label.InW V' a}) ∪ {x, y₀} := by
+          intro z hz
+          rcases hz.1 with hz1 | hz1
+          · exact Or.inl ⟨hz1, hz.2⟩
+          · exact Or.inr hz1
+        exact Set.Finite.subset (hextra.union (Set.Finite.insert x (Set.finite_singleton y₀))) this
+      obtain ⟨i, hi⟩ := ih y₀ hy₀L (𝒢.addEdgeAll x y₀) hG' hextra'
+      have hy₀i : y₀ ∉ (𝒢.G i).X := fun hmem => hy₀union ((𝒢.le_union i).1 hmem)
+      refine ⟨i, .boxI L hL _ Γ x A (fun y _ => ?_)⟩
+      exact NIK.oldLabelTransport hi hy₀i hxy₀ hΓy₀ y
+  | diaI G Γ x y A hRxy _ ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ih 𝒢 hG hextra
+      have hRxy' : TClosure 𝒯 𝒢.union.R x y := hRxy.mono (fun a b hab => hG.2 a b hab)
+      obtain ⟨i2, hi2⟩ := TClosure.reflectChain 𝒢 hRxy'
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      exact ⟨i3, .diaI _ _ x y A (hi2.mono (fun a b hab => (𝒢.mono h2).2 a b hab))
+        (hi1.weaken (𝒢.mono h1) (fun _ hh => hh))⟩
+  | diaE L hL G Γ x z A B hdia h ihdia ih =>
+      intro 𝒢 hG hextra
+      obtain ⟨i1, hi1⟩ := ihdia 𝒢 hG hextra
+      have hFfin : ((𝒢.union.X \ {a : Label Atom | Label.InW V' a}) ∪ L ∪ ({x} : Set (Label Atom))
+          ∪ ({z} : Set (Label Atom)) ∪
+          (Γ.map LabelledFormula.lbl : List (Label Atom)).toFinset).Finite :=
+        ((((hextra.union hL).union (Set.finite_singleton x)).union (Set.finite_singleton z)).union
+          (Γ.map LabelledFormula.lbl).toFinset.finite_toSet)
+      obtain ⟨n, hnV', hnF⟩ := exists_fresh_var hV' _ hFfin
+      set y₀ : Label Atom := Label.var n with hy₀def
+      have hnInW : ¬ Label.InW V' y₀ := hnV'
+      have hy₀L : y₀ ∉ L := fun hmem => hnF (Or.inl (Or.inl (Or.inl (Or.inr hmem))))
+      have hy₀union : y₀ ∉ 𝒢.union.X := fun hmem =>
+        hnF (Or.inl (Or.inl (Or.inl (Or.inl ⟨hmem, hnInW⟩))))
+      have hxy₀ : x ≠ y₀ := fun heq => hnF (Or.inl (Or.inl (Or.inr (Set.mem_singleton_iff.mpr heq.symm))))
+      have hzy₀ : z ≠ y₀ := fun heq => hnF (Or.inl (Or.inr (Set.mem_singleton_iff.mpr heq.symm)))
+      have hΓy₀ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀ := fun ψ hψ heq =>
+        hnF (Or.inr (List.mem_toFinset.mpr (heq ▸ List.mem_map_of_mem hψ)))
+      have hstep : NIK 𝒯 (G.addEdge x y₀) ((y₀ ∶ A) :: Γ) (z ∶ B) := h y₀ hy₀L
+      have hG' : G.addEdge x y₀ ≤ (𝒢.addEdgeAll x y₀).union :=
+        le_trans (Graph.addEdge_mono hG x y₀) (𝒢.addEdge_union_le x y₀)
+      have hextra' : ((𝒢.addEdgeAll x y₀).union.X \ {a : Label Atom | Label.InW V' a}).Finite := by
+        rw [𝒢.addEdgeAll_union_X x y₀]
+        have : (𝒢.union.X ∪ {x, y₀}) \ {a : Label Atom | Label.InW V' a} ⊆
+            (𝒢.union.X \ {a : Label Atom | Label.InW V' a}) ∪ {x, y₀} := by
+          intro w hw
+          rcases hw.1 with hw1 | hw1
+          · exact Or.inl ⟨hw1, hw.2⟩
+          · exact Or.inr hw1
+        exact Set.Finite.subset (hextra.union (Set.Finite.insert x (Set.finite_singleton y₀))) this
+      obtain ⟨i2, hi2⟩ := ih y₀ hy₀L (𝒢.addEdgeAll x y₀) hG' hextra'
+      obtain ⟨i3, h1, h2⟩ := 𝒢.dir i1 i2
+      have hi1' : NIK 𝒯 (𝒢.G i3) Γ (x ∶ .diamond A) := hi1.weaken (𝒢.mono h1) (fun _ hh => hh)
+      have hi2' : NIK 𝒯 ((𝒢.G i3).addEdge x y₀) ((y₀ ∶ A) :: Γ) (z ∶ B) :=
+        hi2.weaken (Graph.addEdge_mono (𝒢.mono h2) x y₀) (fun _ hh => hh)
+      have hy₀i3 : y₀ ∉ (𝒢.G i3).X := fun hmem => hy₀union ((𝒢.le_union i3).1 hmem)
+      refine ⟨i3, .diaE L hL _ Γ x z A B hi1' (fun y _ => ?_)⟩
+      exact NIK.diaWitnessTransportOld hi2' hy₀i3 hxy₀ hzy₀ hΓy₀ y
+
 /-! ## Task 3: chain closure — scaffold, and the precise remaining gap
 
 Simpson's own proof of the Prime Lemma fixes a **single, shared** coinfinite `V'` for the whole
@@ -359,43 +834,50 @@ instead of `zorn_le₀` — not a fix expressible as a single additional lemma i
 be planned as its own dedicated multi-phase effort (a "Phase 4.5") rather than re-attempted as a
 quick follow-up dispatch. -/
 
-/-- **The reflection theorem** — Simpson's elided "easily seen" step (p. 92, `chunk_0102.md`),
-mechanized as far as this dispatch could take it, landed here as a **documented strategic
-sorry** per the anti-analysis five-condition test (`.claude/context/contracts/anti-analysis.md`):
+/-- **CLOSED (Task 517 Phase 6)**, superseding the "documented strategic sorry" writeup this
+docstring used to carry (kept as history in the module section above). The fix is
+`NIK.reflectChain`: the "old label" obstacle the module analysis above diagnoses only blocks a
+**swap**-based transport or a **no-relabeling** reuse of the induction hypothesis (Shortcuts
+above); the **one-directional** `substFn`-based transport (`NIK.oldLabelTransport`, built from
+`NIK.relabelFresh`) needs freshness of only the *source* witness, so a single reflected chain
+index already supplies the *entire* cofinite family. `deriv_reflect` packages `𝒞` as a `GChain`
+(dropping the `Context` fields `NIK.reflectChain` never reads), reflects the `Deriv`-level
+witnessing `NIK`-derivation via `NIK.reflectChain`, then finds a single chain index covering the
+witnessing (finite) formula list via `exists_index_of_subset_unionΓ` and merges the two indices
+via `𝒞.dir`. -/
+theorem exists_index_of_subset_unionΓ [Nonempty ι] (𝒞 : ChainCtx 𝒯 Atom ι)
+    (Γ₀ : List (LabelledFormula Atom)) (hΓ₀ : ∀ ψ ∈ Γ₀, ψ ∈ 𝒞.unionΓ) :
+    ∃ i, ∀ ψ ∈ Γ₀, ψ ∈ (𝒞.C i).Γ := by
+  induction Γ₀ with
+  | nil =>
+      obtain ⟨i⟩ := (inferInstance : Nonempty ι)
+      exact ⟨i, fun ψ hψ => absurd hψ (List.not_mem_nil)⟩
+  | cons ψ Γ₀ ihΓ₀ =>
+      obtain ⟨i1, hi1⟩ := ihΓ₀ (fun χ hχ => hΓ₀ χ (List.mem_cons_of_mem _ hχ))
+      obtain ⟨i2, hi2⟩ := Set.mem_iUnion.mp (hΓ₀ ψ List.mem_cons_self)
+      obtain ⟨i3, h1, h2⟩ := 𝒞.dir i1 i2
+      refine ⟨i3, fun χ hχ => ?_⟩
+      rcases List.mem_cons.mp hχ with rfl | hχ
+      · exact (𝒞.mono h2).2 hi2
+      · exact (𝒞.mono h1).2 (hi1 χ hχ)
 
-1. **Deliberate division boundary**: the plan's own Phase 3 contingency names exactly this
-   escalation route ("if it cannot be settled, escalate before spending Phase 4's Zorn
-   dispatch"); this is not an abandoned attempt. A dedicated joint follow-up dispatch
-   (task 517) re-investigated three further shortcuts and ruled all three out formally — see the
-   "Joint follow-up dispatch" section immediately above this docstring.
-2. **Tightly scoped**: exactly this one theorem.
-3. **Documented** (this docstring; full analysis in the module section above):
-   - **What is proven** (`NIK.swap_relabel`/`NIK.freshWitness_transport` above): a `boxI`/`diaE`
-     premise reflects to a single chain index for witnesses drawn from the chain's shared
-     coinfinite reserve `V'ᶜ` -- pick any `y₀ ∈ V'ᶜ` outside the exclusion set, reflect the IH at
-     `y₀` alone to get one index `i₀`, then `freshWitness_transport` carries that single witness
-     to every *other* `y ∈ V'ᶜ` (since every chain member's domain lies in `W(V')`, disjoint from
-     `V'ᶜ`, so `y ∉ (C i₀).G.X` for every such `y` and every `i₀` -- the freshness hypothesis
-     `freshWitness_transport` needs).
-   - **What remains open**: `boxI`/`diaE`'s cofinite quantifier ranges over *every* `y ∉ L` in
-     `Label Atom`, not just `V'ᶜ`. For `y` that already lies in some `(C i).G.X` (an "old" label,
-     not drawn from the reserve), the swap-transport argument does not apply directly: swapping
-     `y₀ ↔ y` could collide with structure the chain already built at `y`. **Closing this needs
-     route (a)**: an invariant that the construction only ever extends a context by reserve-drawn
-     (fresh) labels at each step, carried via a step-indexed/well-founded reconstruction of the
-     whole Zorn argument (Mathlib's `zorn_le₀` is non-constructive and cannot supply this).
-     Route (b) (a monotonicity argument reusing the IH directly for old labels, no relabelling)
-     was tested this dispatch and does not close the gap either: see "Shortcut 2" above — the
-     obstruction is the *unbounded family of distinct chain indices*, which no single application
-     of `Deriv.mono`/directedness resolves.
-4. **Tracked**: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
-   `follow_up_task` pointing at a **new, dedicated "Phase 4.5" planning effort** (transfinite
-   Lindenbaum construction with a fresh-labels-only invariant) — not a further quick dispatch;
-   see the module section above for why the fix is scoped larger than one lemma.
-5. **Build-green**: `lake env lean` on this file (verified) succeeds with this `sorry` present. -/
 theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} :
     Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ := by
-  sorry
+  rintro ⟨Γ₀, hΓ₀, hNIK⟩
+  set 𝒢₀ : GChain Atom ι := ⟨fun i => (𝒞.C i).G, fun i j hij => (𝒞.mono hij).1, 𝒞.dir⟩ with h𝒢₀def
+  have hG₀ : 𝒞.unionG ≤ 𝒢₀.union := ⟨fun _ h => h, fun _ _ h => h⟩
+  have hextra₀ : (𝒢₀.union.X \ {a : Label Atom | Label.InW 𝒞.V' a}).Finite := by
+    have heq : 𝒢₀.union.X \ {a : Label Atom | Label.InW 𝒞.V' a} = ∅ := by
+      rw [Set.diff_eq_empty]
+      intro z hz
+      obtain ⟨i, hzi⟩ := Set.mem_iUnion.mp hz
+      exact 𝒞.hCV' i z hzi
+    rw [heq]
+    exact Set.finite_empty
+  obtain ⟨i, hi⟩ := NIK.reflectChain 𝒞.hV' hNIK 𝒢₀ hG₀ hextra₀
+  obtain ⟨i', hi'⟩ := 𝒞.exists_index_of_subset_unionΓ Γ₀ hΓ₀
+  obtain ⟨i'', h1, h2⟩ := 𝒞.dir i i'
+  exact ⟨i'', Γ₀, fun ψ hψ => (𝒞.mono h2).2 (hi' ψ hψ), hi.weaken (𝒞.mono h1).1 (fun _ h => h)⟩
 
 /-- **Chain closure** (Phase 3 Task 3): if no chain member derives the excluded formula, neither
 does the union -- the fact the Zorn chain-closure step (Phase 4) needs to show `(⋃Gᵢ,⋃Γᵢ) ∈ C`.
@@ -1844,125 +2326,13 @@ combining the fresh-witness and old-label cases is required -- `NIK.freshWitness
 (above) is in fact the special case of the lemma below where the extra hypothesis `y ∉ G.X` also
 happens to hold. -/
 
-/-- The one-directional label substitution sending `a ↦ b` and fixing every other label
-(including `b` itself). Unlike `swapFn`, this is **not an involution**: `substFn a b` never sends
-`b ↦ a`, so it never disturbs any structure already incident to `b` -- exactly what avoids the
-"naive swap" collision the Postmortem Constraints flag for old-label transport. -/
-noncomputable def substFn (a b l : Label Atom) : Label Atom :=
-  if l = a then b else l
-
-@[simp] theorem substFn_self (a b : Label Atom) : substFn a b a = b := by
-  unfold substFn; simp
-
-theorem substFn_other {a b l : Label Atom} (hl : l ≠ a) : substFn a b l = l := by
-  unfold substFn; simp [hl]
-
-/-- If `f = substFn a b` fixes every label occurring in `Γ` (i.e. `a` is fresh w.r.t. `Γ`),
-relabeling does nothing to `Γ`. Analogue of `List.map_swapFn_eq_self` for `substFn`. -/
-theorem List.map_substFn_eq_self {a b : Label Atom} {Γ : List (LabelledFormula Atom)}
-    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ a) :
-    Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop) = Γ := by
-  conv_rhs => rw [← List.map_id (l := Γ)]
-  refine List.map_congr_left (fun ψ hψ => ?_)
-  simp [substFn_other (hΓ ψ hψ)]
-
-/-- **One-directional relabeling.** Prop. 4.4.1 (`f(Γ) ⊢_{G'} f(x):A`) specialized to
-`f = substFn a b`: any `NIK`-derivation transports along a one-directional substitution `a ↦ b`
-(not necessarily a swap), provided the target graph `G'` is related to the source `G` by the
-substitution as a graph morphism (`hf`). The proof mirrors `NIK.swap_relabel`'s case shape
-exactly, with one departure in `boxI`/`diaE`: since `substFn a b` is not invertible, the preimage
-of a target label `t ∉ substFn a b '' L ∪ {a}` is `t` **itself** (not `substFn a b t` computed via
-an involution formula), because `substFn a b` fixes every point besides `a`, and `t ≠ a` is
-guaranteed by `t ∉ {a}`. This is what lets `b` remain fully untouched: the lemma places no
-freshness requirement on `b` at all. -/
-theorem NIK.relabelFresh {a b : Label Atom} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
-    {φ : LabelledFormula Atom} (h : NIK 𝒯 G Γ φ) :
-    ∀ {G' : Graph Atom}, (∀ p q, G.R p q → G'.R (substFn a b p) (substFn a b q)) →
-      NIK 𝒯 G' (Γ.map (fun ψ => substFn a b ψ.lbl ∶ ψ.prop)) (substFn a b φ.lbl ∶ φ.prop) := by
-  induction h with
-  | assumption G Γ φ hmem =>
-      intro G' _
-      exact .assumption G' _ _ (List.mem_map_of_mem hmem)
-  | efq G Γ x y A _ ih =>
-      intro G' hf
-      exact .efq G' _ (substFn a b x) (substFn a b y) A (ih hf)
-  | andI G Γ x A B _ _ ihA ihB =>
-      intro G' hf
-      exact .andI G' _ (substFn a b x) A B (ihA hf) (ihB hf)
-  | andE1 G Γ x A B _ ih =>
-      intro G' hf
-      exact .andE1 G' _ (substFn a b x) A B (ih hf)
-  | andE2 G Γ x A B _ ih =>
-      intro G' hf
-      exact .andE2 G' _ (substFn a b x) A B (ih hf)
-  | orI1 G Γ x A B _ ih =>
-      intro G' hf
-      exact .orI1 G' _ (substFn a b x) A B (ih hf)
-  | orI2 G Γ x A B _ ih =>
-      intro G' hf
-      exact .orI2 G' _ (substFn a b x) A B (ih hf)
-  | orE G Γ x y A B C _ _ _ ihor ihA ihB =>
-      intro G' hf
-      refine .orE G' _ (substFn a b x) (substFn a b y) A B C (ihor hf) ?_ ?_
-      · simpa using ihA hf
-      · simpa using ihB hf
-  | impI G Γ x A B _ ih =>
-      intro G' hf
-      have := ih hf
-      simpa using NIK.impI G' _ (substFn a b x) A B (by simpa using this)
-  | impE G Γ x A B _ _ ihimp ihA =>
-      intro G' hf
-      exact .impE G' _ (substFn a b x) A B (ihimp hf) (ihA hf)
-  | boxE G Γ x y A hR _ ih =>
-      intro G' hf
-      exact .boxE G' _ (substFn a b x) (substFn a b y) A
-        (TClosure.map (substFn a b) hf hR) (ih hf)
-  | boxI L hL G Γ x A h ih =>
-      intro G' hf
-      refine .boxI (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
-        (substFn a b x) A ?_
-      intro t ht
-      have hta : t ≠ a := by
-        intro heq
-        exact ht (Or.inr (by simp [heq]))
-      have hst : substFn a b t = t := substFn_other hta
-      have htL : t ∉ L := by
-        intro hmem
-        exact ht (Or.inl ⟨t, hmem, hst⟩)
-      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
-      have hf' : ∀ p q, (G.addEdge x t).R p q →
-          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
-        intro p q hpq
-        rcases hpq with hpq | ⟨rfl, rfl⟩
-        · exact Or.inl (hf p q hpq)
-        · exact Or.inr ⟨rfl, hst⟩
-      have := hstep hf'
-      simpa [hst] using this
-  | diaI G Γ x y A hR _ ih =>
-      intro G' hf
-      exact .diaI G' _ (substFn a b x) (substFn a b y) A
-        (TClosure.map (substFn a b) hf hR) (ih hf)
-  | diaE L hL G Γ x z A B hdia h ihdia ih =>
-      intro G' hf
-      refine .diaE (substFn a b '' L ∪ {a}) (hL.image _ |>.union (Set.finite_singleton a)) G' _
-        (substFn a b x) (substFn a b z) A B (ihdia hf) ?_
-      intro t ht
-      have hta : t ≠ a := by
-        intro heq
-        exact ht (Or.inr (by simp [heq]))
-      have hst : substFn a b t = t := substFn_other hta
-      have htL : t ∉ L := by
-        intro hmem
-        exact ht (Or.inl ⟨t, hmem, hst⟩)
-      have hstep := ih t htL (G' := G'.addEdge (substFn a b x) t)
-      have hf' : ∀ p q, (G.addEdge x t).R p q →
-          (G'.addEdge (substFn a b x) t).R (substFn a b p) (substFn a b q) := by
-        intro p q hpq
-        rcases hpq with hpq | ⟨rfl, rfl⟩
-        · exact Or.inl (hf p q hpq)
-        · exact Or.inr ⟨rfl, hst⟩
-      have := hstep hf'
-      simpa [hst] using this
+/- `substFn`/`substFn_self`/`substFn_other`/`List.map_substFn_eq_self`/`NIK.relabelFresh`
+(the one-directional relabeling family `flo_oldlabel_transport` below is built from) were
+**relocated** (Task 517 Phase 6) to immediately after `NIK.freshWitness_transport`, ~line 253
+above -- content unchanged, position only -- so that `ChainCtx.deriv_reflect` (~line 396) and
+`dwitness_mem_of_maximal` (~line 944), both defined earlier in this file, can also consume them
+via the new `NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld` corollaries (Phase 6, module
+section preceding `ChainCtx.deriv_reflect`). -/
 
 /-- **Phase 5's target (the mathematical crux)**: given `FLO`-coherence at stage `σ`, a
 `NIK`-derivation witnessed at one label `y₀` fresh w.r.t. the ambient graph transports to ANY

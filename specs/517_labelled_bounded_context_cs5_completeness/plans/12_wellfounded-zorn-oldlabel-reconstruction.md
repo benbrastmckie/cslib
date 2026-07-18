@@ -452,15 +452,24 @@ successor-preservation and limit-preservation are independent statements).
   `lean_verify` on `flo_oldlabel_transport` and `NIK.relabelFresh`: axioms `[propext,
   Classical.choice, Quot.sound]`, no `sorryAx`, for both.
 
-### Phase 6: Discharge both sorries; re-verify `primeLemma` fully sorry-free [NOT STARTED]
+### Phase 6: Discharge both sorries; re-verify `primeLemma` fully sorry-free [IN PROGRESS]
 
 - **Goal:** wire `flo_oldlabel_transport` (Phase 5) into `deriv_reflect` and
   `dwitness_mem_of_maximal`, closing both sorries, and re-verify `primeLemma` is fully sorry-free
   and axiom-clean.
 - **Tasks:**
-  - [ ] Close `ChainCtx.deriv_reflect` (probe ~line 394) using the transport lemma for old labels.
-  - [ ] Close `dwitness_mem_of_maximal`'s diamond "old label" sub-case (probe ~line 980) using the
-    same lemma.
+  - [x] Close `ChainCtx.deriv_reflect` (probe ~line 394). *(deviation: altered -- the anticipated
+    fix was "use `flo_oldlabel_transport` directly," but `deriv_reflect` is stated over the
+    generic `ChainCtx`/`Preorder ι` abstraction, not a `FloSeq`. Reconciled by extracting the
+    graph-generic core of `flo_oldlabel_transport` -- `NIK.oldLabelTransport`/
+    `NIK.diaWitnessTransportOld`, built directly from `NIK.relabelFresh`, needing no `FloSeq`/`FLO`
+    at all -- and a new `GChain` (graph-only chain) + `NIK.reflectChain` master reflection
+    induction that discovers the single chain index by structural recursion, picking one fresh
+    witness per `(□I)`/`(◇E)` node from the chain's shared reserve `V'ᶜ` and rebuilding the full
+    cofinite family from it via the one-directional transport. Fully sorry-free,
+    `lean_verify`-clean.)*
+  - [ ] Close `dwitness_mem_of_maximal`'s diamond "old label" sub-case (probe ~line 980) using
+    the same lemma.
   - [ ] Re-run the whole probe: confirm ZERO `sorry` warnings.
   - [ ] `#print axioms primeLemma` / `lean_verify`: footprint ⊆ `[propext, Classical.choice,
     Quot.sound]`, no `sorryAx`.

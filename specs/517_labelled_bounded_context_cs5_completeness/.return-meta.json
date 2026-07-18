@@ -1,34 +1,37 @@
 {
-  "status": "researched",
-  "agent_type": "cslib-research-hard-agent",
-  "task_number": 517,
-  "session_id": "sess_1784156551_995e9d",
-  "dispatch": "divergence audit - Fig 4-1 cross-label verification",
-  "verdict": "CONFIRMED",
-  "findings_count": 6,
-  "adversarial_verification_triggered": true,
-  "adversarial_verification_result": "verdict survived three refutation attempts; dispatch's stated blast radius REFUTED",
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "verified: Simpson1994 present at references.bib:86",
-  "report_path": "specs/517_labelled_bounded_context_cs5_completeness/reports/10_fig41-crosslabel-verification.md",
-  "probe_path": "specs/517_labelled_bounded_context_cs5_completeness/probes/fig41-crosslabel-gate.lean",
-  "phases_completed": 12,
-  "memory_candidates": [
+  "status": "planned",
+  "artifacts": [
     {
-      "content": "Simpson1994 (Intuitionistic Modal Logic, LFCS ECS-LFCS-94-308) OCR PDF has page offset +9 (printed p.N = PDF p.N+9) and a text layer that is systematically defective at figures and displayed math while intact for prose. Figure 4-1 (printed p.69 = PDF p.78) renders as noise in pdftotext/chunk text but is fully legible in the page raster via the Read tool's `pages` parameter. For any claim about a figure or displayed formula in this document, read the raster; the text layer silently drops symbols rather than erroring.",
-      "keywords": ["Simpson1994", "OCR", "raster", "page-offset", "text-layer-defect", "pdftotext"],
-      "tags": ["literature", "provenance"]
-    },
-    {
-      "content": "Before scoping a Lean inference-rule change as a 'mainline rewrite requiring re-proved soundness', measure the blast radius from the import graph rather than assuming it: `grep -rln <RelName> Cslib/` plus a check of which files import the defining module. A relation can be widely assumed to be load-bearing while actually being confined to its own subdirectory with a single induction over it. Same-named constructors in unrelated developments (e.g. Axiom.efq vs NIK.efq) inflate naive grep counts and can manufacture a false blast radius.",
-      "keywords": ["blast-radius", "import-graph", "scoping", "grep", "inference-rules"],
-      "tags": ["lean", "verification-practice"]
-    },
-    {
-      "content": "In labelled natural deduction (Simpson-style N_IK), a label-local (⊥E)/(∨E) recovers every cross-label instance whose labels are joined by a closure edge, with no frame axiom: label-local (⊥E) yields x:□A from x:⊥, and (□E) walks it across the edge; (∨E) runs the same trick one level up via y:□C. So k3 (◇⊥⊃⊥) and k4 (◇(A∨B)⊃◇A∨◇B) survive a label-local transcription at any theory with symmetry. The genuine gap is only the DISCONNECTED instances — which is exactly what Simpson's Prime Lemma 5.3.1 needs, since its Zorn target x:A is unrelated to the label being case-split.",
-      "keywords": ["labelled-deduction", "Simpson", "cross-label", "prime-lemma", "IK-axioms", "NIK"],
-      "tags": ["modal-logic", "formalization"]
+      "type": "plan",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
+      "summary": "Plan v4 (Route B funded): fix the TPrime inhabitance transcription defect FIRST (transcribe the four landed sorry-free probe repairs into Cslib/), gate on inhabitedness, then sequence the labelled bounded-context CS5 completeness proof per Simpson Ch 5 + Ch 7-8 (chain-union -> bounded prime lemma 5.3.1/8.2.6 -> T-Comp symmetry 8.2.5 -> bounded canonical model/truth lemma -> frame-class match -> cs5_completeness)."
     }
   ],
-  "next_steps": "Re-ask user to authorize the efq/orE generalization with the corrected blast radius; Phase 21 stays [BLOCKED]"
+  "next_steps": "Run /implement 517 --lit --hard to execute plan v4 (--lit is required: every proof-leg phase mines Simpson Ch 7-8 chunks 8.2.5/8.2.6/bounded prime lemma; --hard recommended given 3 prior non-converging plan versions).",
+  "metadata": {
+    "session_id": "sess_1784333163_06a765",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "revision_mode": "plan_revision",
+    "plan_version": 4,
+    "phase_count": 9,
+    "estimated_hours": "60-100",
+    "recommended_status": "planned",
+    "recommended_next_command": "/implement 517 --lit --hard",
+    "reports_integrated": [
+      "reports/10_fig41-crosslabel-verification.md",
+      "reports/09_rchi-internalization-pregate.md",
+      "reports/07_team-research.md",
+      "summaries/09_prime-lemma-blockers-summary.md",
+      "probes/prime-lemma-blockers.lean",
+      "probes/fig41-crosslabel-gate.lean",
+      "probes/rchi-internalization-gate.lean"
+    ],
+    "preserved_prior_plans": [
+      "plans/01_labelled-framework.md",
+      "plans/02_decomposed-track-a-b-c.md",
+      "plans/08_ch5-canonical-model-fs-gate.md"
+    ],
+    "no_lean_code_edited": true
+  }
 }

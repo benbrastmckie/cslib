@@ -40,7 +40,7 @@ next_project_number: 529
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+517 [PLANNED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 528 [IMPLEMENTING] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
@@ -248,7 +248,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

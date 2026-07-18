@@ -362,6 +362,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 public import Cslib.Logics.Modal.Metalogic.Constructive.CT
 public import Cslib.Logics.Modal.Metalogic.Constructive.Forcing
+public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Deduction
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.PrimeLemma

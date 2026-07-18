@@ -574,24 +574,53 @@ successor-preservation and limit-preservation are independent statements).
 > proving the completion preserves `𝒯`-primeness + yields symmetry on `H.X`. The retained
 > `probes/lemma612-scaffold.lean` material is the fallback.
 
-### Phase 8: Canonical model + truth lemma (Simpson 5.3.2 / 8.2.6) — box-backward [NOT STARTED]
+### Phase 8: Canonical model + truth lemma (Simpson 5.3.2 / 8.2.6) — box-backward [COMPLETED]
 
 - **Goal:** build the canonical model over `TPrime` worlds with the **raw** relation and prove the
   truth lemma by formula induction, including the box-backward case. (Carried from v4 Phase 6.)
 - **Tasks:**
-  - [ ] `--lit`: mine Simpson Lemma 5.3.2 (pp.94-98 raster) and 8.2.6; **canonical relation = RAW
+  - [x] `--lit`: mine Simpson Lemma 5.3.2 (pp.94-98 raster) and 8.2.6; **canonical relation = RAW
     `xRy` in `H`** (NOT `𝒯-Comp(H)`, confirmed twice); domain-relative "for all `y` in `H`".
-  - [ ] **Confirm the flagged T-Comp question above** (raw relation consumed directly ⟹ original
-    Phase 5 unneeded); record the confirmation.
-  - [ ] (8.1) Define the canonical model over `TPrime` worlds, raw relation, valuation from labelled
-    membership `y:B`.
-  - [ ] (8.2) Prove the truth lemma by induction on the formula; box-backward via the bounded
-    canonical model lemma over `y:B`. (If box-backward genuinely needs the Ch.6 tree-surgery bridge,
-    pull in the retained `probes/lemma612-scaffold.lean`; otherwise leave it off-path.)
-- **Timing:** 2-3 dispatches (split 8.1/8.2). Estimated output: ~300-600 lines (mainline).
+    **Confirmed a third time** against `chunk_0103.md`-`chunk_0105.md` (verbatim quotation of the
+    `𝒦^𝒯` construction and the per-case Lemma 5.3.2 proof in `CanonicalModel.lean`'s module
+    docstring).
+  - [x] **Confirm the flagged T-Comp question above** (raw relation consumed directly ⟹ original
+    Phase 5 unneeded); record the confirmation. **CONFIRMED UNNEEDED**: `CanonWorld.r` is built
+    directly from `ctx.G.R` with no `TClosure`/graph-completion step anywhere in the truth lemma;
+    Lemma 8.2.6 (`chunk_0166.md`) is the *bounded* (Ch 7-8) canonical model lemma, out of scope for
+    this *unbounded* (Ch 5) route. Documented in `CanonicalModel.lean`'s module docstring.
+    `probes/lemma612-scaffold.lean` remains an untouched fallback, not needed.
+  - [x] (8.1) Define the canonical model over `TPrime` worlds, raw relation, valuation from labelled
+    membership `y:B`. Landed as `CanonWorld` (a pointed `𝒯`-prime context `⟨ctx,lbl,mem⟩`,
+    Simpson's `(H,Δ),y` pair), `CanonWorld.le`/`CanonWorld.r`, `canonVal`/`canonBotForces` (the
+    latter trivially `False`, since `TPrime`'s Consistency clause bans exploding worlds), plus the
+    `CKValidFC`-required monotonicity lemmas (`canonVal_mono`, `canonBotForces_mono`,
+    `canonBotForces_val`, `canonBotForces_r`, `canonBotForces_r_wit`).
+  - [x] (8.2) Prove the truth lemma by induction on the formula; box-backward via the bounded
+    canonical model lemma over `y:B`. *(deviation: the Ch.6 tree-surgery bridge
+    (`probes/lemma612-scaffold.lean`) was NOT needed — box-backward closes via a fresh
+    `Context.addFreshVar` extension (one new raw-variable node + edge, `Γ` unchanged) followed by a
+    *fresh reapplication of `primeLemma` itself* (not the Ch.6 apparatus), then
+    `NIK.oldLabelTransport` (already landed, Phase 6) to upgrade the single fresh witness to the
+    cofinite family `NIK.boxI` needs.)* Landed as `canon_truth_lemma`, fully sorry-free,
+    `lean_verify`-clean (axioms `[propext, Classical.choice, Quot.sound]`, no `sorryAx`), covering
+    all seven `Proposition` cases (`atom`/`bot`/`and`/`or`/`imp`/`box`/`diamond`), both the
+    `⊃`-backward and `□`-backward reductio directions via a fresh `primeLemma` application
+    contradicting the semantic `CKForces` hypothesis at the witnessing extension.
+- **Timing:** 2-3 dispatches (split 8.1/8.2). **Actual: 1 dispatch, ~420 lines** (mainline;
+  narrower than estimated since the Ch.6 bridge and the FLO/T-Comp apparatus were both confirmed
+  unneeded).
 - **Depends on:** 7.
 - **Done when:** `lake build` green; sorry-free; ◇-case and □-case both proved about the RAW
-  relation the model is built on (no silent closure swap).
+  relation the model is built on (no silent closure swap). **MET.** New mainline file
+  `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean`. Full CSLib CI pipeline
+  green: scoped + full `lake build` (3244/3244), `lake exe checkInitImports` (pass), `lake lint`
+  (0 warnings after `@[nolint unusedArguments]` on the two genuinely-unused-by-design parameters —
+  `Context.addFreshVar`'s freshness witness and `canonBotForces`'s constant-`False` world
+  argument), `lake exe lint-style` (0 warnings), `lake shake` (no suggestions), `lake exe mk_all
+  --module` (`Cslib.lean` updated), `lake test` (green, 9235/9236 -- pre-existing sorries in
+  unrelated Propositional Tableau files unregressed). `lean_verify canon_truth_lemma`: axioms
+  `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
 
 ### Phase 9: Frame-class match — domain-relative equivalence ⟹ `cs5FCIncest` [NOT STARTED]
 

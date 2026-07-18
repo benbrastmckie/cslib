@@ -1,38 +1,99 @@
 {
-  "status": "partial",
-  "requires_user_review": true,
-  "started_at": "2026-07-17T22:55:27Z",
-  "completed_at": "2026-07-17T23:10:00Z",
+  "status": "implemented",
+  "started_at": "2026-07-18T23:39:03Z",
+  "completed_at": "2026-07-18T23:47:00Z",
   "artifacts": [
     {
       "type": "lean_file",
-      "path": "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean",
-      "summary": "New file: 5 explicit-hypothesis modal-axiom correspondence lemmas (modalT/Four/B/D/Five), zero sorries, zero custom axioms"
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+      "summary": "modalT case rewired to exact Satisfies.modalT_axiom m h_refl w φ"
     },
     {
       "type": "lean_file",
-      "path": "Cslib/Logics/Modal/Metalogic/Soundness.lean",
-      "summary": "Added one public import line (FrameCorrespondence, annotated `-- shake: keep` for the intentional re-export) so all 14 downstream Systems/*/Soundness.lean consumers get the lemmas transitively"
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+      "summary": "modalB case rewired to exact Satisfies.modalB_axiom m h_symm w φ"
     },
     {
       "type": "lean_file",
-      "path": "Cslib.lean",
-      "summary": "Registered FrameCorrespondence in the root barrel at its alphabetical position (confirmed via `lake exe mk_all --module` reporting \"No update necessary\" after manual insertion)"
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+      "summary": "modalD case rewired to exact Satisfies.modalD_axiom m h_serial w φ"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+      "summary": "modalFour case rewired to exact Satisfies.modalFour_axiom m h_trans w φ"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+      "summary": "modalFive case rewired to exact Satisfies.modalFive_axiom m h_eucl w φ"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+      "summary": "modalT + modalFour rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+      "summary": "modalT + modalFour rewired; inline symmetry derivation (modalB) preserved untouched"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+      "summary": "modalFour + modalFive rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+      "summary": "modalB + modalFive rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+      "summary": "modalD + modalFour rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+      "summary": "modalD + modalFive rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+      "summary": "modalD + modalFour + modalFive rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
+      "summary": "modalD + modalB rewired"
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean",
+      "summary": "modalT + modalB rewired"
     },
     {
       "type": "plan",
       "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md",
-      "summary": "Phase 1 header marked [COMPLETED]; checklist items checked off; optional instance-backed forms explicitly deferred (deviation annotation); Phases 2-5 left untouched as [BLOCKED-PENDING-ZULIP]"
+      "summary": "Phases 3, 4, 5 marked [COMPLETED]; plan-level Status set to [PR READY]"
+    },
+    {
+      "type": "pr_description",
+      "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/pr-description.md",
+      "summary": "PR description with axiom-property map, placement rationale, blast radius, verification, AI disclosure"
+    },
+    {
+      "type": "summary",
+      "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/summaries/01_frame-correspondence-library-summary.md",
+      "summary": "Implementation summary for Phases 3-5"
     }
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 (additive correspondence core, 5 lemmas) is fully implemented, sorry-free, axiom-free, and green across the full CSLib CI pipeline (scoped build, checkInitImports, lake lint, lint-style, shake, mk_all, and full lake test). Phases 2-5 (14-file consumer refactor) remain BLOCKED-PENDING-ZULIP per CONTRIBUTING.md:149 and were not touched.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 1,
-    "phases_blocked_pending_human": [2, 3, 4, 5],
-    "blocked_reason": "Phase 2 requires human Zulip coordination with the modal-logic working group before the 14-file Systems/*/Soundness.lean consumer refactor (Phases 3-5) can proceed, per plan and CONTRIBUTING.md:149."
+    "stage": "all_phases_complete",
+    "details": "Phases 3, 4, 5 complete. Phase 1 was already complete/green from a prior dispatch. Phase 2 (Zulip heads-up) remains a user step per plan design, non-blocking.",
+    "phases_completed": 4,
+    "phases_total": 5
   },
   "verification": {
     "verification_passed": true,
@@ -41,40 +102,50 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "scoped_build": "lake build Cslib.Logics.Modal.Metalogic.FrameCorrespondence -- success (zero errors)",
-    "soundness_downstream_build": "lake build Cslib.Logics.Modal.Metalogic.Soundness Cslib.Logics.Modal.Metalogic.Systems.T.Soundness Cslib.Logics.Modal.Metalogic.Systems.K4.Soundness Cslib.Logics.Modal.Metalogic.Systems.B.Soundness Cslib.Logics.Modal.Metalogic.Systems.D.Soundness Cslib.Logics.Modal.Metalogic.Systems.K5.Soundness -- success, byte-identical consumer files (git diff --stat on Systems/ empty)",
-    "check_init_imports": "lake exe checkInitImports -- clean (no output)",
-    "lake_lint": "clean for FrameCorrespondence.lean and Soundness.lean (only pre-existing unrelated error in Foundations/Logic/Metalogic/PrimeExclusion.lean)",
-    "lint_style": "clean, zero issues repo-wide",
-    "lake_shake": "clean after adjusting FrameCorrespondence.lean's import to the shake-minimal set (public import Cslib.Foundations.Logic.Axioms + public import Cslib.Logics.Modal.Basic, replacing the originally-specified DerivationTree import) and adding `-- shake: keep` to the Soundness.lean re-export import, matching the codebase's established annotation convention for intentional transitive re-exports (see e.g. Cslib/Logics/Bimodal/Metalogic/BXCanonical/CanonicalChain.lean:10)",
-    "mk_all": "lake exe mk_all --module reports \"No update necessary\" -- manual barrel insertion was already alphabetically correct",
-    "full_lake_build": "lake build (3238/3238 jobs) -- Build completed successfully, exit 0",
-    "full_lake_test": "lake test -- only pre-existing failure CslibTests.ModalFrameSeparation (tactic `decide` failed, lines 32/37), matching the task's documented known-issue; no new failures introduced",
-    "lean_verify_axioms": {
-      "Cslib.Logic.Modal.Satisfies.modalT_axiom": [],
-      "Cslib.Logic.Modal.Satisfies.modalFour_axiom": [],
-      "Cslib.Logic.Modal.Satisfies.modalB_axiom": [],
-      "Cslib.Logic.Modal.Satisfies.modalD_axiom": [],
-      "Cslib.Logic.Modal.Satisfies.modalFive_axiom": []
-    }
+    "scoped_build_phase3": "lake build Systems.{T,B,D,K4,K5}.Soundness -- success",
+    "scoped_build_phase4": "lake build Systems.{S4,S5,K45,KB5,D4,D5,D45,DB,TB}.Soundness -- success",
+    "full_lake_build": "lake build -- 3243/3243 jobs, success",
+    "check_init_imports": "lake exe checkInitImports -- clean",
+    "lake_lint": "lake lint -- Linting passed for Cslib.",
+    "lint_style": "lake exe lint-style -- clean, no output",
+    "lake_shake": "lake shake --add-public --keep-implied --keep-prefix -- none of the 15 touched/new files flagged",
+    "mk_all": "lake exe mk_all --module -- No update necessary",
+    "full_lake_test": "lake test -- 9236/9236 jobs, success, no new failures",
+    "git_diff_signature_check": "confirmed byte-identical signatures/hypothesis names across all 14 consumer files; only modal case bodies changed",
+    "completeness_adapters_unaffected": "no Systems/*/Completeness.lean file touched; full build confirms downstream compatibility"
   },
-  "deviations": [
-    "FrameCorrespondence.lean's import line deviates from the task's literal spec (`public import Cslib.Logics.Modal.Metalogic.DerivationTree`) to the shake-minimal direct imports (`Cslib.Foundations.Logic.Axioms` + `Cslib.Logics.Modal.Basic`), because `lake shake` flagged DerivationTree as an unused/prunable import for this file (none of our 5 lemmas reference anything declared in DerivationTree.lean itself, only re-exported symbols) -- this was required to satisfy the Verification list's own `lake shake` clean-run requirement.",
-    "Optional instance-backed sibling forms (Std.Refl/IsTrans/Std.Symm/Relation.Serial/Relation.RightEuclidean) were skipped per the plan's own optionality language, to keep Phase 1 minimal and avoid lint/naming risk."
+  "residuals": [
+    "Zulip pre-PR heads-up (Phase 2) is a user step, non-blocking, performed before /pr per plan design and CONTRIBUTING.md:149",
+    "Optional instance-backed sibling forms for FrameCorrespondence.lean deferred in Phase 1 (unchanged in this dispatch)"
   ],
   "metadata": {
-    "session_id": "sess_1784322687_fcf57a_522",
+    "session_id": "sess_1784322687_fcf57a_522_phase345",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
     "compliance_check": "passed"
   },
-  "next_steps": "Phase 1 is complete and green, ready for commit. Phases 2-5 remain BLOCKED-PENDING-ZULIP: a human must post the Zulip scope note to the modal-logic working group (plan Phase 2) and record maintainer alignment before /implement 522 can proceed to the 14-file consumer refactor.",
+  "next_steps": "Task is [PR READY]. User posts Zulip heads-up, then invokes /pr 522 to create the branch, run cache fetch + full CI, and submit the PR (gh pr create). No agent action creates the PR or pushes.",
   "memory_candidates": [],
   "modified_files": [
-    "Cslib.lean",
-    "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean",
-    "Cslib/Logics/Modal/Metalogic/Soundness.lean",
-    "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md"
+    "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean",
+    "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md",
+    "specs/522_uniform_frame_condition_axiom_correspondence_library/pr-description.md",
+    "specs/522_uniform_frame_condition_axiom_correspondence_library/summaries/01_frame-correspondence-library-summary.md",
+    "specs/state.json",
+    "specs/TODO.md"
   ]
 }

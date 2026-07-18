@@ -2,29 +2,36 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "implemented",
-  "summary": "Phase 7: transcribed primeLemma + its actual sorry-free dependency closure (NIK relabeling/reflection apparatus, GChain/ChainCtx, primeC Zorn poset, five clause theorems) into new mainline file Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean. FLO machinery deliberately NOT transcribed (non-load-bearing, 2 open sorries, stays in probes/). Full CSLib CI pipeline green; lean_verify axioms = [propext, Classical.choice, Quot.sound], no sorryAx.",
+  "summary": "Phase 8: built the canonical model (CanonWorld -- a pointed TPrime context, Simpson's (H,Delta),y pair) with the RAW relation and canonVal/canonBotForces, and proved the full canonical model lemma (Simpson 5.3.2) canon_truth_lemma by induction on all seven Proposition cases, including both the imp-backward and box-backward reductio directions via a fresh primeLemma reapplication (the Ch.6 tree-surgery bridge was confirmed unneeded). T-Comp (Simpson 8.2.5/Lemma 8.2.6) confirmed unneeded -- the bounded-route apparatus stays out of scope. New mainline file Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean. Full CSLib CI pipeline green; lean_verify canon_truth_lemma axioms = [propext, Classical.choice, Quot.sound], no sorryAx. Landed in a single dispatch (plan estimated 2-3, explicitly allowed partial).",
   "artifacts": [
-    {"type": "summary", "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/17_phase7-primelemma-mainline-transcription-summary.md"},
-    {"type": "plan", "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md"}
+    {"type": "summary", "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/18_phase8-canonical-model-truth-lemma-summary.md"},
+    {"type": "plan", "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md"},
+    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-8-handoff-20260718.md"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean",
     "Cslib.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/17_phase7-primelemma-mainline-transcription-summary.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/summaries/18_phase8-canonical-model-truth-lemma-summary.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-8-handoff-20260718.md"
   ],
   "decisions_made": [
-    "primeLemma routes through primeC_exists_maximal (plain zorn_le₀), not the FLO apparatus; FLO stays in probes/ only",
-    "New mainline file placed at Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean, mirroring the Intuitionistic/PrimeTheory.lean naming precedent",
-    "Kept file-level open Classical (matches 7 other mainline files) rather than scoping per-declaration -- warning-only lint, pervasive decidability need"
+    "CanonWorld is a pointed TPrime context (ctx, lbl, mem), instantiating CKForces's single-sorted World with Simpson's two-sorted (H,Delta),y pair",
+    "canonBotForces := fun _ => False (TPrime's Consistency clause bans exploding worlds); this collapses CKForces's Wijesekera ∀∃-diamond/∀-box to Simpson's plain ∃-diamond/∀-box on this model",
+    "Box-backward and imp-backward both close via a FRESH reapplication of primeLemma itself (not the Ch.6 tree-surgery apparatus) -- primeLemma already supplies exactly Simpson's own witnessing-extension reductio",
+    "T-Comp (original Phase 5, Simpson Lemma 8.2.5) confirmed unneeded a third time -- Lemma 8.2.6 is the bounded (Ch 7-8) route, out of scope for this unbounded (Ch 5) route",
+    "New Context.addFreshVar operation (fresh raw-variable node + edge, Gamma unchanged) added to support box-backward's fresh-witness construction, patching the coinfinite reserve to insert z V'",
+    "@[nolint unusedArguments] on Context.addFreshVar's freshness witness and canonBotForces's constant-False world argument -- both are genuinely, by-design unused in their bodies"
   ],
   "dead_ends": [],
   "sorry_inventory": [],
   "continuation_context": {
-    "phases_completed": 7,
+    "phases_completed": 8,
     "phases_total": 11,
+    "next_phase": 9,
+    "next_phase_note": "Frame-class match -- derive domain-relative EquivalenceOn on H.G.X from TPrime.clModel (via already-landed equivalence_of_classicalModelOn_TS5), then match cs5FCIncest's conjuncts against CanonWorld's le/r. See handoffs/phase-8-handoff-20260718.md for the open design question on whether CanonWorld needs restricting to a single fixed maximal H for Phase 10's assembly.",
     "orchestrator_mode": true
   },
   "plan_markers_verified": true

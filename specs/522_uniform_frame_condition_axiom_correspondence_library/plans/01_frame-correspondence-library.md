@@ -1,7 +1,7 @@
 # Implementation Plan: Uniform Frame-Condition-to-Axiom Correspondence Library
 
 - **Task**: 522 - Uniform frame-condition-to-axiom correspondence library
-- **Status**: [IMPLEMENTING]
+- **Status**: [PR READY]
 - **Effort**: 6 hours (Phase 1 complete ~1.5h; Phases 3-5 ~4.5h — unblocked, design decision resolved 2026-07-18)
 - **Dependencies**: None (research complete)
 - **Research Inputs**: reports/01_frame-condition-correspondence-survey.md
@@ -257,17 +257,24 @@ keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file set
 
 ---
 
-### Phase 5: Full verification and PR preparation [NOT STARTED]
+### Phase 5: Full verification and PR preparation [COMPLETED]
 
 **Goal**: Confirm the whole change set builds and lints cleanly end-to-end, then hand off for PR.
 
 **Tasks**:
-- [ ] Full `lake build` (all modal metalogic + downstream) succeeds with no regressions.
-- [ ] `lake lint` clean across the new file and all 14 refactored files.
-- [ ] Confirm no `Completeness.lean` adapter (`<sys>_sound_cb`) required a change (downstream stable).
-- [ ] Confirm total `sorry` count unchanged (zero introduced).
-- [ ] Prepare PR description (axiom⇔property map, placement, blast radius, Zulip thread link);
+- [x] Full `lake build` (all modal metalogic + downstream) succeeds with no regressions.
+      *(3243/3243 jobs, build completed successfully)*
+- [x] `lake lint` clean across the new file and all 14 refactored files.
+      *(`-- Linting passed for Cslib.` repo-wide; `lake exe lint-style` also clean)*
+- [x] Confirm no `Completeness.lean` adapter (`<sys>_sound_cb`) required a change (downstream stable).
+      *(grep + git status confirm zero Completeness.lean files touched; full build validates
+      compatibility)*
+- [x] Confirm total `sorry` count unchanged (zero introduced).
+      *(zero sorry in all 15 touched/new files; repo-wide 136 pre-existing sorries unaffected)*
+- [x] Prepare PR description (axiom⇔property map, placement, blast radius, Zulip thread link);
       transition task to [PR READY]. Do NOT create the PR or push (user runs `/pr`).
+      *(pr-description.md written; task_type is "cslib" not "pr", so Zulip heads-up + `/pr`
+      remain user steps as documented in Phase 2/pr-prohibition.md)*
 
 **Timing**: ~1 hour
 

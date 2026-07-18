@@ -38,8 +38,8 @@ next_project_number: 536
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
-522 [BLOCKED] — Uniform frame-condition to axiom correspondence library for modal
-523 [BLOCKED] — Schema-union axiom combinator to replace the hand-written per-sys
+522 [PR READY] — Uniform frame-condition to axiom correspondence library for modal
+523 [PLANNED] — Schema-union axiom combinator to replace the hand-written per-sys
 535 [NOT STARTED] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -252,7 +252,7 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 ---
 
 ### 523. Schema union axiom combinator for proofsystem instances
-- **Status**: [BLOCKED]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -264,7 +264,7 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 ---
 
 ### 522. Uniform frame condition axiom correspondence library
-- **Status**: [BLOCKED]
+- **Status**: [PR READY]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

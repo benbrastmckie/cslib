@@ -1838,14 +1838,14 @@
     {
       "project_number": 522,
       "project_name": "uniform_frame_condition_axiom_correspondence_library",
-      "status": "blocked",
+      "status": "pr_ready",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Uniform frame-condition to axiom correspondence library for modal soundness. RECONCILED: Phase 1 delivered sorry-free - Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean provides the five explicit-hypothesis correspondence lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom), registered in the barrel and re-exported via Soundness.lean. REMAINING (the actual dedup payoff): wire the 14 downstream Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean consumers to delegate to this library instead of reproving axiom-frame correspondence case-by-case; they are currently still byte-identical case-by-case proofs. Was gated pending a Zulip design decision on the library shape. DESIGN DECISION (resolved, user 2026-07-18): Public signature form = EXPLICIT-HYPOTHESIS primary — lemmas like Satisfies.modalT_axiom' m (h_refl : ∀ w, m.r w w) w φ; the 14 downstream Systems/*/Soundness.lean consumers delegate via one-line exact-delegation passing their existing h_refl/h_trans/… (zero other downstream edits). Additionally expose instance-arg [Std.Refl m.r] forms for new systems. Scope: one coherent PR = additive lemmas (already landed in FrameCorrespondence.lean) + wire the 14 consumers; defer completeness-FC re-expression and birelational dedup to follow-ups. Post a Zulip heads-up before the multi-file PR lands.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-18T22:07:22Z",
-      "session_id": "sess_1784412310_87a91c_522",
+      "last_updated": "2026-07-18T23:49:14Z",
+      "session_id": "sess_1784322687_fcf57a_522_phase345",
       "artifacts": [
         {
           "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md",
@@ -1858,7 +1858,7 @@
           "summary": "Implementation plan"
         }
       ],
-      "blockers": "Phases 2-5 [BLOCKED-PENDING-ZULIP] per CONTRIBUTING.md:149; the shared Systems/*/Soundness.lean multi-file refactor requires human maintainer Zulip alignment before proceeding. Phase 1 (additive core) is complete, sorry-free, axiom-free, CI-green, and shippable standalone as a low-risk PR.",
+      "blockers": null,
       "file_scope": [
         "Cslib/Logics/Modal/Metalogic/Systems/",
         "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean"

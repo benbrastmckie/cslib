@@ -604,4 +604,89 @@ theorem primeC_exists_maximal (h0 : G₀ ∈ primeC G₀ x₀ A₀) :
 
 end PrimeC
 
+/-! ### Discharging the four numbered clauses plus clause 0 (𝒯-primeness of the maximal element) -/
+
+/-- If both endpoints of an adjoined edge already lie in `G.X`, `addEdge` leaves the node set
+unchanged. -/
+theorem Graph.addEdge_X_eq_of_mem {G : Graph Atom} {a b : Label Atom} (ha : a ∈ G.X)
+    (hb : b ∈ G.X) : (G.addEdge a b).X = G.X := by
+  apply subset_antisymm
+  · rintro z (hz | rfl | rfl)
+    · exact hz
+    · exact ha
+    · exact hb
+  · exact Set.subset_union_left
+
+/-- Extending a context by one edge between two of its **own** labels stays a genuine `Context`
+(same `Γ`, same `V'`-confinement — `X` is literally unchanged, `Graph.addEdge_X_eq_of_mem`). -/
+def Context.addRedundantEdge (H : Context 𝒯 Atom) (a b : Label Atom) (ha : a ∈ H.G.X)
+    (hb : b ∈ H.G.X) : Context 𝒯 Atom where
+  G := H.G.addEdge a b
+  Γ := H.Γ
+  ctxSubset := fun φ hφ => (Graph.addEdge_X_eq_of_mem ha hb) ▸ H.ctxSubset φ hφ
+  coinfinite :=
+    let ⟨V', hV', hX⟩ := H.coinfinite
+    ⟨V', hV', fun x hx => hX x ((Graph.addEdge_X_eq_of_mem ha hb) ▸ hx)⟩
+  dwitnessMem := fun x A hx =>
+    let ⟨hR, hmem⟩ := H.dwitnessMem x A ((Graph.addEdge_X_eq_of_mem ha hb) ▸ hx)
+    ⟨Or.inl hR, hmem⟩
+
+theorem Context.addRedundantEdge_le (H : Context 𝒯 Atom) (a b : Label Atom) (ha : a ∈ H.G.X)
+    (hb : b ∈ H.G.X) : H ≤ H.addRedundantEdge a b ha hb :=
+  ⟨⟨fun _ hx => Or.inl hx, fun _ _ hxy => Or.inl hxy⟩, Set.Subset.refl _⟩
+
+/-- **The maximality argument, specialised to graph edges.** If `H` is maximal in `C` and an edge
+`(a,b)` between two of `H`'s own labels is already `𝒯`-closure-derivable, the raw edge must
+already be present in `H.G.R` — else adjoining it (`Context.addRedundantEdge`) would keep the
+extension in `C` (`NIK.drop_redundant_edge` shows no new derivations arise), forcing the
+extension to equal `H` by maximality, i.e. the edge was already there. This is Simpson's
+Lindenbaum-style maximality pattern (`chunk_0102.md`), specialised via the "redundant edge"
+reconstruction (module docstring) to discharge clause 0 without an existential witness search. -/
+theorem raw_edge_of_tclosure {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) {a b : Label Atom}
+    (ha : a ∈ H.G.X) (hb : b ∈ H.G.X) (hclosed : TClosure 𝒯 H.G.R a b) : H.G.R a b := by
+  by_contra hcontra
+  have hle : H ≤ H.addRedundantEdge a b ha hb := H.addRedundantEdge_le a b ha hb
+  have hmem : H.addRedundantEdge a b ha hb ∈ primeC G₀ x₀ A₀ := by
+    obtain ⟨hG₀H, hV', hnd⟩ := hmax.prop
+    refine ⟨Context.le_trans hG₀H hle, ?_, ?_⟩
+    · intro x hx
+      exact hV' x ((Graph.addEdge_X_eq_of_mem ha hb) ▸ hx)
+    · intro hDeriv
+      apply hnd
+      obtain ⟨Γ₀, hΓ₀, hNIK⟩ := hDeriv
+      exact ⟨Γ₀, hΓ₀, NIK.drop_redundant_edge hclosed hNIK⟩
+  have hge := hmax.le_of_ge hmem hle
+  exact hcontra (hge.1.2 a b (Or.inr ⟨rfl, rfl⟩))
+
+/-- **Clause 0** (`TPrime.clModel`): the maximal element's raw graph relation is a domain-relative
+classical model of `𝒯` (Simpson `chunk_0102.md`, *"First, we show that H is a classical model of
+𝒯"*), mechanized via `raw_edge_of_tclosure` for each Horn axiom `T`/`B`/`Four`/`Five` (module
+docstring, "Clause 0 without an existential witness search"). -/
+theorem clModel_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    ClassicalModelOn 𝒯 H.G.X H.G.R := by
+  intro χ hχ
+  cases χ with
+  | T => exact fun x hx => raw_edge_of_tclosure hmax hx hx (.refl hχ x)
+  | B => exact fun x hx y hy hxy => raw_edge_of_tclosure hmax hy hx (.symm hχ (.base hxy))
+  | Four =>
+      exact fun x hx y hy z hz hxy hyz =>
+        raw_edge_of_tclosure hmax hx hz (.trans hχ (.base hxy) (.base hyz))
+  | Five =>
+      exact fun x hx y hy z hz hxy hxz =>
+        raw_edge_of_tclosure hmax hy hz (.eucl hχ (.base hxy) (.base hxz))
+
+/-- **Clause 2** (`TPrime.consistency`): consistency is immediate (Simpson `chunk_0103.md`,
+*"Consistency is immediate, because `Δ ⊬_H x:A`"*) — cross-label `(⊥E)` (`NIK.efq`) turns any
+`x:⊥` derivation directly into an `x₀:A₀` derivation, contradicting maximality's own `¬Deriv`
+membership fact, with no Lindenbaum extension needed at all. -/
+theorem consistency_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    ∀ x ∈ H.G.X, ¬ Deriv 𝒯 H.G H.Γ (x ∶ Proposition.bot) := by
+  intro x _ hDeriv
+  obtain ⟨_, _, hnd⟩ := hmax.prop
+  obtain ⟨Γ₀, hΓ₀, hNIK⟩ := hDeriv
+  exact hnd ⟨Γ₀, hΓ₀, NIK.efq H.G Γ₀ x x₀ A₀ hNIK⟩
+
 end Cslib.Logic.Modal.Labelled

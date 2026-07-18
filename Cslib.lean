@@ -86,6 +86,7 @@ public import Cslib.Foundations.Logic.Connectives
 public import Cslib.Foundations.Logic.InferenceSystem
 public import Cslib.Foundations.Logic.LogicalEquivalence
 public import Cslib.Foundations.Logic.Metalogic.Chronicle.ChronicleInterface
+public import Cslib.Foundations.Logic.Metalogic.Chronicle.RRelation
 public import Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency
 public import Cslib.Foundations.Logic.Metalogic.Chronicle.Types
 public import Cslib.Foundations.Logic.Metalogic.Consistency

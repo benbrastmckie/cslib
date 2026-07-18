@@ -172,6 +172,64 @@ structure ChronicleInterface (F : Type*) where
   /-- CUD sets contain all theorems. -/
   cudContainsTheorems : ∀ {Ω : Set F}, isClosedUnderDerivation Deriv Ω →
     ∀ {φ : F}, Deriv [] φ → φ ∈ Ω
+  /-- BX10: `⊢ (γ U δ) → F(δ)`. -/
+  untilF : ∀ (γ δ : F), Deriv [] (imp (untl γ δ) (someFuture δ))
+  /-- BX5: `⊢ (γ U δ) → ((γ ∧ (γ U δ)) U δ)`. -/
+  selfAccumUntil : ∀ (γ δ : F), Deriv [] (imp (untl γ δ) (untl (and γ (untl γ δ)) δ))
+  /-- BX10': `⊢ (γ S δ) → P(δ)`. -/
+  sinceP : ∀ (γ δ : F), Deriv [] (imp (snce γ δ) (somePast δ))
+  /-- BX6: `⊢ (β U (β ∧ (β U γ))) → (β U γ)`. -/
+  absorbUntil : ∀ (β γ : F), Deriv [] (imp (untl β (and β (untl β γ))) (untl β γ))
+  /-- BX6': `⊢ (β S (β ∧ (β S γ))) → (β S γ)`. -/
+  absorbSince : ∀ (β γ : F), Deriv [] (imp (snce β (and β (snce β γ))) (snce β γ))
+  /-- BX2G: `⊢ G(β₁ → β₂) → ((β₁ U γ) → (β₂ U γ))`. -/
+  leftMonoUntilG : ∀ (β₁ β₂ γ : F),
+    Deriv [] (imp (allFuture (imp β₁ β₂)) (imp (untl β₁ γ) (untl β₂ γ)))
+  /-- BX2H: `⊢ H(β₁ → β₂) → ((β₁ S γ) → (β₂ S γ))`. -/
+  leftMonoSinceH : ∀ (β₁ β₂ γ : F),
+    Deriv [] (imp (allPast (imp β₁ β₂)) (imp (snce β₁ γ) (snce β₂ γ)))
+  /-- BX3: `⊢ G(a → b) → ((pivot U a) → (pivot U b))`. -/
+  rightMonoUntil : ∀ (a b pivot : F),
+    Deriv [] (imp (allFuture (imp a b)) (imp (untl pivot a) (untl pivot b)))
+  /-- BX3': `⊢ H(a → b) → ((pivot S a) → (pivot S b))`. -/
+  rightMonoSince : ∀ (a b pivot : F),
+    Deriv [] (imp (allPast (imp a b)) (imp (snce pivot a) (snce pivot b)))
+  /-- A3a (enrichment_until): `⊢ (α ∧ (β U ψ)) → (β U (ψ ∧ (β S α)))`. -/
+  enrichmentUntil : ∀ (β ψ α : F),
+    Deriv [] (imp (and α (untl β ψ)) (untl β (and ψ (snce β α))))
+  /-- A3b (enrichment_since): `⊢ (γ ∧ (β S ψ)) → (β S (ψ ∧ (β U γ)))`. -/
+  enrichmentSince : ∀ (β ψ γ : F),
+    Deriv [] (imp (and γ (snce β ψ)) (snce β (and ψ (untl β γ))))
+  /-- BX4: `⊢ α → G(P(α))`. -/
+  connectFuture : ∀ (α : F), Deriv [] (imp α (allFuture (somePast α)))
+  /-- BX4': `⊢ γ → H(F(γ))`. -/
+  connectPast : ∀ (γ : F), Deriv [] (imp γ (allPast (someFuture γ)))
+  /-- Future necessitation: `⊢ φ` implies `⊢ G(φ)`. -/
+  futureNecessitation : ∀ (φ : F), Deriv [] φ → Deriv [] (allFuture φ)
+  /-- Double negation elimination: `⊢ ¬¬φ → φ`. -/
+  doubleNegation : ∀ (φ : F), Deriv [] (imp (imp (imp φ bot) bot) φ)
+  /-- K-distribution for `allFuture`: `⊢ G(φ → ψ) → (G φ → G ψ)`. -/
+  futureKDist : ∀ (φ ψ : F), Deriv [] (imp (allFuture (imp φ ψ)) (imp (allFuture φ) (allFuture ψ)))
+  /-- K-distribution for `allPast`: `⊢ H(φ → ψ) → (H φ → H ψ)`. -/
+  pastKDist : ∀ (φ ψ : F), Deriv [] (imp (allPast (imp φ ψ)) (imp (allPast φ) (allPast ψ)))
+  /-- `F(φ) ∈ Ω` and `G(¬φ) ∈ Ω` are contradictory in an MCS (duality bridge). -/
+  someFutureAllFutureNegAbsurd : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (φ : F), someFuture φ ∈ Ω → allFuture (imp φ bot) ∈ Ω → False
+  /-- `P(φ) ∈ Ω` and `H(¬φ) ∈ Ω` are contradictory in an MCS (duality bridge). -/
+  somePastAllPastNegAbsurd : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (φ : F), somePast φ ∈ Ω → allPast (imp φ bot) ∈ Ω → False
+  /-- In an MCS, `¬H(¬α) ∈ Ω` implies `P(α) ∈ Ω` (duality bridge for Burgess Lemma 2.3). -/
+  negAllPastNegToSomePast : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (α : F), imp (allPast (imp α bot)) bot ∈ Ω → somePast α ∈ Ω
+  /-- In an MCS, `¬G(¬γ) ∈ Ω` implies `F(γ) ∈ Ω` (duality bridge for Burgess Lemma 2.3). -/
+  negAllFutureNegToSomeFuture : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (γ : F), imp (allFuture (imp γ bot)) bot ∈ Ω → someFuture γ ∈ Ω
+  /-- `F(H(¬α)) ∈ Ω` and `G(P(α)) ∈ Ω` are contradictory in an MCS. -/
+  someFutureHNegGPAbsurd : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (α : F), someFuture (allPast (imp α bot)) ∈ Ω → allFuture (somePast α) ∈ Ω → False
+  /-- `P(G(¬γ)) ∈ Ω` and `H(F(γ)) ∈ Ω` are contradictory in an MCS. -/
+  somePastGNegHFAbsurd : ∀ {Ω : Set F}, isSetMaximalConsistent Deriv bot Ω →
+    ∀ (γ : F), somePast (allFuture (imp γ bot)) ∈ Ω → allPast (someFuture γ) ∈ Ω → False
 
 /-! ## Convenience wrappers over an interface value
 
@@ -181,6 +239,13 @@ the generic `SinceSeedConsistency.lean` defs directly (`isSetConsistent`,
 `rSetBurgessOf`, `rSinceBurgessOf`, `rSetSinceBurgessOf`, `r3BurgessOf`,
 `r3MaximalBurgessOf`, `gContentOf`, `hContentOf`), so only the `I.*`-qualified thin
 wrappers are declared here. -/
+
+/-- Negation w.r.t. `I`: `neg φ := imp φ bot` (the Lukasiewicz default both `Formula.neg`
+instances delegate to; see `Cslib.Foundations.Logic.Connectives`). -/
+def ciNeg (I : ChronicleInterface F) (φ : F) : F := I.imp φ I.bot
+
+/-- Verum w.r.t. `I`: `top := imp bot bot`. -/
+def ciTop (I : ChronicleInterface F) : F := I.imp I.bot I.bot
 
 /-- `SetConsistent` w.r.t. `I`'s derivation family. -/
 def CISetConsistent (I : ChronicleInterface F) (S : Set F) : Prop :=

@@ -209,7 +209,7 @@ generic Foundations module; instantiate in both trees.
 
 ---
 
-### Phase 2: Lift RRelation shared core [NOT STARTED]
+### Phase 2: Lift RRelation shared core [COMPLETED]
 
 **Goal**: Lift the ~38 shared RRelation core lemmas (deductive-closure infra,
 r-relation/r3 maximal-extension existence via Zorn, `burgess*_absorption`, `untl/snce_left_mono*`,
@@ -218,17 +218,29 @@ seed→BurgessR3Maximal, the `someFuture/somePast` absurdity lemmas, the
 `chain_finite_subset_in_element`.
 
 **Tasks**:
-- [ ] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/RRelation.lean` (generic) with the ~38
+- [x] Create `Cslib/Foundations/Logic/Metalogic/Chronicle/RRelation.lean` (generic) with the ~38
   shared-core lemmas over the interface, plus the hoisted `chain_finite_subset_in_element`.
-- [ ] Replace `Temporal/.../Chronicle/RRelation.lean` shared-core body with instance + re-exports;
-  keep temporal's `deductiveClosure_singleton_imp'` primed variant local.
-- [ ] Replace `Bimodal/.../Chronicle/RRelation.lean` shared-core body with instance + re-exports;
-  keep bimodal's ~24 extras local (Since-mirrored maximal-extension variants
+  *(deviation: altered -- extended `ChronicleInterface` with 21 new statement-only fields
+  (BX2-BX6/BX10, connect_future/past, enrichment, futureNecessitation, doubleNegation,
+  futureKDist/pastKDist, and 6 MCS-level duality-bridge facts) discovered necessary during
+  the lift; not anticipated at Phase 0/1 scope. `burgessR3Maximal_from_g_content_sub` was
+  found to be a false-positive name match -- Temporal's version is a trivial restatement of
+  `burgessR3Maximal_extension_exists` while Bimodal's takes an additional `gContent A ⊆ C`
+  hypothesis -- kept logic-local in BOTH trees rather than merged.)*
+- [x] Replace `Temporal/.../Chronicle/RRelation.lean` shared-core body with instance + re-exports.
+  *(deviation: altered -- no genuine "primed variant" divergence was found: Temporal's
+  `deductiveClosure_singleton_imp'` and Bimodal's non-primed `deductiveClosure_singleton_imp`
+  are the SAME lemma (Bimodal fc-generic, Temporal fixed at Base); lifted as one generic
+  `deductiveClosure_singleton_imp'`, re-exported under each tree's own existing name.)*
+- [x] Replace `Bimodal/.../Chronicle/RRelation.lean` shared-core body with instance + re-exports;
+  keep bimodal's ~23 extras local (Since-mirrored maximal-extension variants
   `rMaximalSince_extension_exists`/`r3MaximalSince_extension_exists`; the `BurgessR3Maximal`
   projection/accessor suite; conjunction-guard machinery `untl/snce_conj_guard`, `burgessR_conj`,
-  and the c4/c4' hard-case lemmas).
-- [ ] Do NOT yet fix the stale doc-comment (Phase 5) — but do not propagate it into the generic
-  module.
+  `burgessRSince_conj`; the c4/c4' hard-case lemmas; `burgessR3_untl_conj_in_A` (Xu 3.2.1);
+  `F_mem_of_g_content_sub`/`P_mem_of_g_content_sub`/`burgessR3Maximal_from_g_content_sub`/
+  `burgessR3Maximal_with_guard`).
+- [x] Do NOT yet fix the stale doc-comment (Phase 5) — but do not propagate it into the generic
+  module. *(confirmed: not propagated.)*
 
 **Timing**: 2.5 hours
 

@@ -337,4 +337,180 @@ theorem chain_closure [Nonempty ι] {x : Label Atom} {A : Proposition Atom}
 
 end ChainCtx
 
+/-! ## Task 517 Phase 4 — Bounded Prime Lemma (Simpson 5.3.1) — Zorn over whole contexts
+
+**Objective** (plan `11_tprime-repair-cs5-completeness.md`, Phase 4): `Γ ⊬_G x:A ⟹ ∃ 𝒯-prime
+(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A` — Simpson's Prime Lemma 5.3.1 (`chunk_0102.md`/`chunk_0103.md`,
+p. 92-93 raster), a Zorn maximalisation over **whole contexts** (`Context 𝒯 Atom`), producing an
+inhabitant of the repaired `TPrime`.
+
+## `--lit` research resolution: unbounded (Ch 5) vs bounded (Ch 7-8) form
+
+The plan flagged a genuine open risk: whether the *bounded* prime lemma (Ch 7-8, Lemma 8.2.6) is
+needed, or the *unbounded* Chapter 5 form (5.3.1) suffices. **Resolved here, against the raster**:
+Simpson's Chapter 8 bounded canonical model (`chunk_0165.md`/`chunk_0166.md`) states Lemma 8.2.5
+— *"If `(H,Δ)` is a 𝒯-prime **bounded** context then `T-Comp(H) ⊨_cl 𝒯`"* — i.e. in the *bounded*
+framework, primeness of `(H,Δ)` does **NOT** entail that the raw relation `H.R` classically models
+`𝒯`; that only holds of the **separately-constructed completion** `T-Comp(H)`, built *after*
+primeness is established, and the bounded canonical model's relation is `R_{(H,Δ)}(x,y)` iff
+`xRy` in `T-Comp(H)` (`chunk_0166.md`), not raw `H.R`. This means the bounded route's notion of
+"𝒯-prime" is **NOT** the type already landed as `TPrime` (`Context.lean`), whose clause 0
+(`clModel : ClassicalModelOn 𝒯 G.X G.R`) is stated for the **raw** relation. `TPrime` — as landed —
+is unmistakably a Chapter-5-style (**unbounded**) definition: Simpson's own proof of the
+*unbounded* Prime Lemma 5.3.1 (`chunk_0102.md`, *"First, we show that H is a classical model of
+𝒯"*) derives clause 0 for the **raw** `H` directly, with no separate completion step, as part of
+the very same maximality argument used for the other four clauses. Since the landed `TPrime`
+already requires raw clause 0, **the unbounded Chapter 5 form is the one that matches it**, and is
+what this file transcribes; the plan's Phase 5 ("T-Comp graph completion … symmetry") is
+consequently unneeded for a `TPrime`-typed target, flagged here (and in this dispatch's handoff)
+for the orchestrator/user to reconsider rather than silently skipped or forced through.
+
+## Clause 0 without an existential witness search: the "redundant edge" argument
+
+Simpson's own clause-0 argument (`chunk_0102.md`) is written for the *general* geometric-sequent
+shape, which admits a disjunctive, existentially-witnessed conclusion (`GeomAxiom`'s absent
+`k`-ary witness case, see `Deduction.lean`'s docstring); its maximality step searches for a vector
+of *fresh* witness variables. `GeomAxiom` (`T`, `B`, `Four`, `Five`) is **entirely** Horn, with
+**no** existential conclusion (`m = 1`, witness vector length `0`) — so that general argument's
+witness-search machinery does not directly transcribe, and this file reconstructs the specialised
+Horn-only argument from Simpson's *stated property* ("H is a classical model of 𝒯"), per the
+plan's transcription discipline. The reconstruction: `NIK`'s only graph-reading rules (`boxE`,
+`diaI`) consume `TClosure 𝒯 G.R`, **not** the raw relation; since `T`, `B`, `Four` are exactly the
+constructors `TClosure` itself already closes under (`.refl`, `.symm`, `.trans`), **any edge `x R
+y` that is already `𝒯`-closure-derivable from the raw relation adds no new `NIK`-derivations when
+adjoined as a raw edge** (`NIK.drop_redundant_edge` below). This is precisely the fact needed to
+run the *same* Lindenbaum-style maximality argument Simpson uses for the other four clauses,
+specialised to graph edges: if `H` lacked a `T`/`B`/`Four`-required raw edge, adjoining it would
+keep the extended context in the poset `C` (no new derivations), forcing the extension to equal
+`H` by maximality — i.e. the edge was already present.
+
+## Contents
+
+- `TClosure.mono'`: **closure-under-closure monotonicity** — `TClosure` is closed under any
+  relation whose edges are individually `𝒯`-closure-derivable from a target relation (subsumes
+  `TClosure.mono`, whose `hmono` conclusion is the weaker raw-relation case).
+- `NIK.weaken_tclosure`: **`TClosure`-aware weakening** — a strict generalisation of
+  `Deduction.lean`'s `NIK.weaken`: the graph condition is relaxed from raw inclusion (`G ≤ G'`) to
+  `𝒯`-closure inclusion (`∀ a b, TClosure 𝒯 G.R a b → TClosure 𝒯 G'.R a b`), which is exactly what
+  the "redundant edge" argument needs.
+- `TClosure.addEdge_redundant`: adjoining an edge already `𝒯`-closure-derivable does not change the
+  `𝒯`-closure at all.
+- `NIK.drop_redundant_edge`: the corollary consumed by clause 0's maximality argument — a
+  `NIK`-derivation over a graph with one closure-redundant edge adjoined transfers back down.
+- `ChainCtx.unionContext`: packages `ChainCtx.unionG`/`unionΓ` (Phase 3) into a genuine
+  `Context 𝒯 Atom` (`ctxSubset`/`coinfinite`/`dwitnessMem`) — the missing piece Phase 3 did not
+  need for the reflection theorem alone but Phase 4's Zorn upper-bound step does.
+- `primeC`: Simpson's poset `C` (`:5990`) — contexts extending `(G₀,Γ₀)`, confined to `W(V')`,
+  that still fail to derive the excluded `x₀:A₀`.
+- `primeC_exists_maximal`: Zorn's lemma applied to `primeC` (via `zorn_le₀`), using
+  `ChainCtx.chain_closure` (Phase 3) for the chain upper bound.
+- `primeLemma`: **Simpson's Prime Lemma 5.3.1**, assembled.
+
+## Provenance
+
+Literature: `chunk_0102.md`, `chunk_0103.md` (Lemma 5.3.1, the Prime Lemma proof, §5.3);
+`chunk_0165.md`, `chunk_0166.md` (Lemma 8.2.5/8.2.6, the *bounded* route, consulted to resolve the
+plan's flagged unbounded-vs-bounded risk, see above). PDF offset +9.
+-/
+
+/-- **Closure-under-closure monotonicity.** `TClosure` is closed under any relation each of whose
+edges is individually `𝒯`-closure-derivable from a target relation `R'` — a strengthening of
+`TClosure.mono` (`Deduction.lean`), whose `hmono` hypothesis only supplies *raw* `R'`-edges. -/
+theorem TClosure.mono' {R R' : Label Atom → Label Atom → Prop}
+    (hmono : ∀ a b, R a b → TClosure 𝒯 R' a b) {a b : Label Atom} (h : TClosure 𝒯 R a b) :
+    TClosure 𝒯 R' a b := by
+  induction h with
+  | base h => exact hmono _ _ h
+  | refl h a => exact .refl h a
+  | symm h _ ih => exact .symm h ih
+  | trans h _ _ ihab ihbc => exact .trans h ihab ihbc
+  | eucl h _ _ ihab ihac => exact .eucl h ihab ihac
+
+/-- **`𝒯`-closure-aware weakening.** A strict generalisation of `Deduction.lean`'s `NIK.weaken`:
+the graph hypothesis is relaxed from raw inclusion (`G ≤ G'`) to `𝒯`-closure inclusion. Proof
+mirrors `NIK.weaken`'s case shape exactly; only the graph-dependent cases (`boxE`, `boxI`, `diaI`,
+`diaE`) differ, consuming `hR`/`TClosure.mono'` in place of `hG`/`TClosure.mono`. -/
+theorem NIK.weaken_tclosure {G G' : Graph Atom} {Γ Δ : List (LabelledFormula Atom)}
+    {φ : LabelledFormula Atom} (h : NIK 𝒯 G Γ φ)
+    (hR : ∀ a b, TClosure 𝒯 G.R a b → TClosure 𝒯 G'.R a b) (hΓ : ∀ ψ ∈ Γ, ψ ∈ Δ) :
+    NIK 𝒯 G' Δ φ := by
+  induction h generalizing G' Δ with
+  | assumption G Γ φ hmem => exact .assumption G' Δ φ (hΓ _ hmem)
+  | efq G Γ x y A _ ih => exact .efq G' Δ x y A (ih hR hΓ)
+  | andI G Γ x A B _ _ ihA ihB => exact .andI G' Δ x A B (ihA hR hΓ) (ihB hR hΓ)
+  | andE1 G Γ x A B _ ih => exact .andE1 G' Δ x A B (ih hR hΓ)
+  | andE2 G Γ x A B _ ih => exact .andE2 G' Δ x A B (ih hR hΓ)
+  | orI1 G Γ x A B _ ih => exact .orI1 G' Δ x A B (ih hR hΓ)
+  | orI2 G Γ x A B _ ih => exact .orI2 G' Δ x A B (ih hR hΓ)
+  | orE G Γ x y A B C _ _ _ ihor ihA ihB =>
+      refine .orE G' Δ x y A B C (ihor hR hΓ) (ihA hR ?_) (ihB hR ?_)
+      · intro ψ hψ
+        rcases List.mem_cons.mp hψ with rfl | hψ
+        · exact List.mem_cons_self
+        · exact List.mem_cons_of_mem _ (hΓ _ hψ)
+      · intro ψ hψ
+        rcases List.mem_cons.mp hψ with rfl | hψ
+        · exact List.mem_cons_self
+        · exact List.mem_cons_of_mem _ (hΓ _ hψ)
+  | impI G Γ x A B _ ih =>
+      refine .impI G' Δ x A B (ih hR ?_)
+      intro ψ hψ
+      rcases List.mem_cons.mp hψ with rfl | hψ
+      · exact List.mem_cons_self
+      · exact List.mem_cons_of_mem _ (hΓ _ hψ)
+  | impE G Γ x A B _ _ ihimp ihA => exact .impE G' Δ x A B (ihimp hR hΓ) (ihA hR hΓ)
+  | boxE G Γ x y A hRxy _ ih => exact .boxE G' Δ x y A (hR x y hRxy) (ih hR hΓ)
+  | boxI L hL G Γ x A h ih =>
+      refine .boxI L hL G' Δ x A ?_
+      intro y hy
+      have hR' : ∀ a b, TClosure 𝒯 (G.addEdge x y).R a b → TClosure 𝒯 (G'.addEdge x y).R a b := by
+        intro a b
+        refine TClosure.mono' (fun p q hpq => ?_)
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact (hR p q (.base hpq)).mono (fun _ _ h => Or.inl h)
+        · exact .base (Or.inr ⟨rfl, rfl⟩)
+      exact ih y hy hR' hΓ
+  | diaI G Γ x y A hRxy _ ih => exact .diaI G' Δ x y A (hR x y hRxy) (ih hR hΓ)
+  | diaE L hL G Γ x z A B _ _ ihdia ih =>
+      refine .diaE L hL G' Δ x z A B (ihdia hR hΓ) ?_
+      intro y hy
+      have hR' : ∀ a b, TClosure 𝒯 (G.addEdge x y).R a b → TClosure 𝒯 (G'.addEdge x y).R a b := by
+        intro a b
+        refine TClosure.mono' (fun p q hpq => ?_)
+        rcases hpq with hpq | ⟨rfl, rfl⟩
+        · exact (hR p q (.base hpq)).mono (fun _ _ h => Or.inl h)
+        · exact .base (Or.inr ⟨rfl, rfl⟩)
+      refine ih y hy hR' ?_
+      intro ψ hψ
+      rcases List.mem_cons.mp hψ with rfl | hψ
+      · exact List.mem_cons_self
+      · exact List.mem_cons_of_mem _ (hΓ _ hψ)
+
+/-- **Closure invariance under a redundant edge.** Adjoining an edge `(x,y)` that is already
+`𝒯`-closure-derivable from `R` does not change the `𝒯`-closure at all. -/
+theorem TClosure.addEdge_redundant {R : Label Atom → Label Atom → Prop} {x y : Label Atom}
+    (hxy : TClosure 𝒯 R x y) :
+    ∀ a b, TClosure 𝒯 (fun p q => R p q ∨ (p = x ∧ q = y)) a b ↔ TClosure 𝒯 R a b := by
+  intro a b
+  constructor
+  · intro h
+    induction h with
+    | base h =>
+        rcases h with h | ⟨rfl, rfl⟩
+        · exact .base h
+        · exact hxy
+    | refl h a => exact .refl h a
+    | symm h _ ih => exact .symm h ih
+    | trans h _ _ ihab ihbc => exact .trans h ihab ihbc
+    | eucl h _ _ ihab ihac => exact .eucl h ihab ihac
+  · exact TClosure.mono (fun _ _ h => Or.inl h)
+
+/-- **The corollary clause 0's maximality argument consumes.** A `NIK`-derivation over a graph
+extended by one `𝒯`-closure-redundant edge transfers back down to the un-extended graph — adjoining
+a redundant edge adds no derivation power. -/
+theorem NIK.drop_redundant_edge {G : Graph Atom} {x y : Label Atom} (hxy : TClosure 𝒯 G.R x y)
+    {Γ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom} (h : NIK 𝒯 (G.addEdge x y) Γ φ) :
+    NIK 𝒯 G Γ φ :=
+  h.weaken_tclosure (fun a b hab => (TClosure.addEdge_redundant hxy a b).mp hab) (fun _ hψ => hψ)
+
 end Cslib.Logic.Modal.Labelled

@@ -1645,7 +1645,7 @@
       "dependencies": [],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-18T20:58:42Z",
+      "last_updated": "2026-07-18T22:07:32Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1658,10 +1658,15 @@
           "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
           "type": "plan",
           "summary": "Plan v5: well-founded Zorn / FLO-invariant reconstruction for the old-label obstacle"
+        },
+        {
+          "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/14_flo-maximal-phase4-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: 14_flo-maximal-phase4-summary.md"
         }
       ],
       "blockers": "Route B funded (user decision, alignment audit). Plan v4 (plans/11_tprime-repair-cs5-completeness.md): Phase 1-2 = GATE repairing the TPrime inhabitance transcription defect (Context.lean:215/217/219; transcribe already-landed sorry-free probes), then Simpson 1994 Ch 7-8 labelled bounded-context CS5 completeness (8.2.5 T-Comp symmetry, 8.2.6 bounded canonical model, bounded prime lemma, truth lemma). Prime-theory route (512) and independent-<= route (516) abandoned/superseded. Next: /implement 517 --lit --hard (--lit required: Ch 7-8 not yet mined).",
-      "session_id": "sess_1784400586_5cfab1",
+      "session_id": "sess_1784412320_0eed91",
       "plan_metadata": {
         "phases": 26,
         "complexity": "complex",
@@ -1833,14 +1838,14 @@
     {
       "project_number": 522,
       "project_name": "uniform_frame_condition_axiom_correspondence_library",
-      "status": "partial",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Uniform frame-condition to axiom correspondence library for modal soundness. RECONCILED: Phase 1 delivered sorry-free - Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean provides the five explicit-hypothesis correspondence lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom), registered in the barrel and re-exported via Soundness.lean. REMAINING (the actual dedup payoff): wire the 14 downstream Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean consumers to delegate to this library instead of reproving axiom-frame correspondence case-by-case; they are currently still byte-identical case-by-case proofs. Was gated pending a Zulip design decision on the library shape. DESIGN DECISION (resolved, user 2026-07-18): Public signature form = EXPLICIT-HYPOTHESIS primary — lemmas like Satisfies.modalT_axiom' m (h_refl : ∀ w, m.r w w) w φ; the 14 downstream Systems/*/Soundness.lean consumers delegate via one-line exact-delegation passing their existing h_refl/h_trans/… (zero other downstream edits). Additionally expose instance-arg [Std.Refl m.r] forms for new systems. Scope: one coherent PR = additive lemmas (already landed in FrameCorrespondence.lean) + wire the 14 consumers; defer completeness-FC re-expression and birelational dedup to follow-ups. Post a Zulip heads-up before the multi-file PR lands.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T22:53:10Z",
-      "session_id": "sess_1784322687_fcf57a_522",
+      "last_updated": "2026-07-18T22:07:22Z",
+      "session_id": "sess_1784412310_87a91c_522",
       "artifacts": [
         {
           "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md",
@@ -1853,7 +1858,7 @@
           "summary": "Implementation plan"
         }
       ],
-      "blockers": "Phase 1 (additive 5-lemma FrameCorrespondence.lean core) landed green, committed e1b98339, axioms []. Phases 2-5 (14-file Systems/*/Soundness.lean consumer refactor) are BLOCKED-PENDING-ZULIP per CONTRIBUTING.md:149 — require human Zulip coordination before any further autonomous implementation.",
+      "blockers": "Phases 2-5 [BLOCKED-PENDING-ZULIP] per CONTRIBUTING.md:149; the shared Systems/*/Soundness.lean multi-file refactor requires human maintainer Zulip alignment before proceeding. Phase 1 (additive core) is complete, sorry-free, axiom-free, CI-green, and shippable standalone as a low-risk PR.",
       "file_scope": [
         "Cslib/Logics/Modal/Metalogic/Systems/",
         "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean"
@@ -1862,14 +1867,14 @@
     {
       "project_number": 523,
       "project_name": "schema_union_axiom_combinator_for_proofsystem_instances",
-      "status": "planned",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "low",
       "description": "Schema-union axiom combinator to replace the hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean. RECONCILED COUNT: there are 14 such inductives ({K,T,B,D,S4,K4,K5,K45,D4,D5,D45,DB,TB,KB5}Axiom), not 15 - S5.lean already reuses Modal.ModalAxiom directly and is the exact pattern the combinator should generalize to. Build a SchemaUnion/axiom-combinator so each system is expressed as a union of shared axiom schemas rather than a bespoke re-listing inductive. Gated on a Zulip design decision (representation A: closed inductive of schema tags, vs B: Set/predicate union). DESIGN DECISION (resolved, user 2026-07-18): Representation = A (schema-tag union). Build ModalSchemaTag inductive + ModalSchemaTag.Holds + SchemaUnion (S : Finset ModalSchemaTag) := fun χ => ∃ t ∈ S, t.Holds χ; each system = one-line SchemaUnion over its tag set. Collapse the 24 XAxiom_implies_YAxiom subsumption lemmas to one generic lemma + Finset.subset facts; soundness = per-tag validity table + one unionSound combinator. Accept the elimination-form change downstream (cases|ctor → obtain ⟨t,ht,hφ⟩; fin_cases t) and the ~36 genuine hand-rewrites in InterSystem/IntToClassical.lean. Keep intuitionistic/minimal families (IK/MK/CK/IS5/MT ModalAxiom) OUT of scope. Stage additively, each stage CI-green/zero-debt; Zulip heads-up before the PR lands (large shared-subtree blast radius).",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-17T22:33:05Z",
-      "session_id": "sess_1784322687_fcf57a_523",
+      "last_updated": "2026-07-18T22:07:27Z",
+      "session_id": "sess_1784412310_87a91c_523",
       "artifacts": [
         {
           "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/reports/01_schema-union-combinator-blast-radius.md",
@@ -1885,7 +1890,8 @@
       "file_scope": [
         "Cslib/Logics/Modal/ProofSystem/Instances/",
         "Cslib/Logics/Modal/Metalogic/Systems/"
-      ]
+      ],
+      "blockers": "Plan is a design/staging document, not autonomously implementable. Per CONTRIBUTING.md:147 the task hits both 'new cross-cutting abstraction' and 'major refactoring', each independently mandating a Zulip design decision (Representation A vs B) before ANY implementation phase. Sequence AFTER tasks 520 and 521."
     },
     {
       "project_number": 524,

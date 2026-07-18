@@ -4,7 +4,7 @@
     {
       "project_number": 530,
       "project_name": "consolidate_chronicle_construction_bimodal_temporal",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Consolidate the duplicated Chronicle construction across Bimodal and Temporal",
       "description": "REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them.",
@@ -15,14 +15,26 @@
         "Cslib/Foundations/Logic/Metalogic/Chronicle/"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-18T19:24:35Z",
+      "last_updated": "2026-07-18T19:45:47Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/reports/01_chronicle-dedup-research.md",
+          "type": "report",
+          "summary": "Chronicle dedup research"
+        },
+        {
+          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md",
+          "type": "plan",
+          "summary": "Chronicle consolidation 9-phase plan"
+        }
+      ],
+      "session_id": "sess_1784402996_48ad02_530"
     },
     {
       "project_number": 531,
       "project_name": "merge_kb5_prime_and_doubleprime_rule_variants",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Merge the KB5 prime/double-prime tableau rule variants into one rule",
       "description": "REDUNDANCY CLEANUP. Cslib/Logics/Modal/Tableau/ carries two complementary but overlapping KB5 rule families: modalApplyOneKb5 prime (FiveSimplification.lean, ~200 refs, repairs the shallow root-only gap) and modalApplyOneKb5 double-prime (~377 refs, corrected-gate full-cluster rule handling the deeper edge-target case), each with a Prop sibling and duplicated root/non-root split lemma pairs. Both are currently load-bearing (referenced by live soundness/completeness theorems). Merge them into a single rule with one set of split lemmas - a genuine proof-merge (NOT a delete of the prime variant), retiring the redundant lemma pairs once the merged rule discharges every downstream obligation. Must stay sorry-free and axiom-clean; verify instDecidableKb5Valid/modalTableauKb5-complete still hold after the merge.",
@@ -36,14 +48,31 @@
         "Cslib/Logics/Modal/Tableau/S5Simplification.lean"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-18T19:24:35Z",
+      "last_updated": "2026-07-18T20:36:46Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/531_merge_kb5_prime_and_doubleprime_rule_variants/reports/01_kb5-prime-doubleprime-merge-research.md",
+          "type": "report",
+          "summary": "KB5 prime/double-prime merge research"
+        },
+        {
+          "path": "specs/531_merge_kb5_prime_and_doubleprime_rule_variants/plans/01_retire-kb5-prime-family.md",
+          "type": "plan",
+          "summary": "Retire KB5 prime family plan"
+        },
+        {
+          "path": "specs/531_merge_kb5_prime_and_doubleprime_rule_variants/summaries/01_retire-kb5-prime-family-summary.md",
+          "type": "summary",
+          "summary": "Retire KB5 prime family"
+        }
+      ],
+      "session_id": "sess_1784402996_48ad02_531"
     },
     {
       "project_number": 532,
       "project_name": "reconcile_stale_blocked_docstrings_generic_driver",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Reconcile stale [BLOCKED] docstrings left by completed decidability tasks",
       "description": "CLEANUP. Now that the generic tableau driver and T/S5/5/Euclidean decidability are delivered, several docstrings still narrate them as blocked. Sweep and correct: Cslib/Logics/Modal/Tableau/GenericDriver.lean (~lines 131/149 still say Phase-6 Decidable tValid is blocked, though instDecidableTValid is live), plus any residual [BLOCKED]/pending narratives in Saturation.lean / FrameCompleteness.lean / CompletenessLoop.lean referencing the now-landed T/S5/Euclidean instances. Use durable anchors (declaration names, file/section references), never task-number citations, per the no-task-references rule. Docstring-only; no proof changes.",
@@ -58,14 +87,31 @@
         "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-18T19:24:35Z",
+      "last_updated": "2026-07-18T19:47:47Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/532_reconcile_stale_blocked_docstrings_generic_driver/reports/01_stale-blocked-docstring-sweep.md",
+          "type": "report",
+          "summary": "Stale [BLOCKED] docstring sweep research"
+        },
+        {
+          "path": "specs/532_reconcile_stale_blocked_docstrings_generic_driver/reports/01_stale-blocked-docstring-sweep.md",
+          "type": "plan",
+          "summary": "Reconcile stale [BLOCKED] docstrings plan"
+        },
+        {
+          "path": "specs/532_reconcile_stale_blocked_docstrings_generic_driver/summaries/01_reconcile-stale-blocked-docstrings-summary.md",
+          "type": "summary",
+          "summary": "Reconcile stale blocked docstrings"
+        }
+      ],
+      "session_id": "sess_1784402996_48ad02_532"
     },
     {
       "project_number": 533,
       "project_name": "intuitionistic_modal_truth_lemma_sorries",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Discharge the 3 sorries in the intuitionistic modal truth lemma",
       "description": "COMPLETENESS GAP. Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean carries 3 active sorries that leave IK/IT/IS4/IS5 completeness (ivalid_completeness/mvalid_completeness in Intuitionistic/Completeness.lean) resting on unproven obligations. Discharge them so the intuitionistic modal grid is fully sorry-free, matching the classical cube. Verify against the birelational semantics (Modal/Semantics/Birelational.lean) and the shared CanonicalModel/PrimeTheory infrastructure. Zero sorry, zero new axioms.",
@@ -75,9 +121,11 @@
         "Cslib/Logics/Modal/Metalogic/Intuitionistic/Completeness.lean"
       ],
       "created": "2026-07-18T19:24:35Z",
-      "last_updated": "2026-07-18T19:24:35Z",
+      "last_updated": "2026-07-18T19:31:04Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "session_id": "sess_1784402996_48ad02_533",
+      "completion_summary": "Deliverable already satisfied by prior work. TruthLemma.lean has zero sorries; the intuitionistic modal grid (TruthLemma, Completeness, IK/IT/IS4/IS5) builds and is axiom-clean (lean_verify shows only [propext, Classical.choice, Quot.sound], no sorryAx). Re-verified via grep, lake build, and lean_verify. No implementation needed."
     },
     {
       "project_number": 534,
@@ -102,7 +150,7 @@
     {
       "project_number": 529,
       "project_name": "fix_lint_unused_args_kb5_univ_rules",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix lake lint unusedArguments failures in FiveSimplification.lean (KB5 corrected-gate rule)",
       "description": "Add @[nolint unusedArguments] to modalKb5BoxAllUniv (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:2172) and modalKb5DiaNegAllUniv (:2194), whose 5th argument _w : WorldIndex is genuinely and intentionally unused (the corrected-gate KB5 rule fires unconditionally on cluster-nonemptiness regardless of trigger world, by design, dropping the w == 0 conjunct the frozen modalKb5BoxAllFull/modalKb5DiaNegAllFull used it for). The underscore prefix does not suppress CSLib's unusedArguments environment linter, so lake lint currently fails with exactly these 2 errors. Precedent for the nolint pattern: Cslib/Logics/Bimodal/Metalogic/Decidability/CountermodelExtraction.lean:204, Cslib/Logics/Temporal/Metalogic/DenseMCS.lean:202. Verify with: lake lint (must pass clean on these files). This is the sole CI failure attributable to the corrected-gate KB5 tableau rule work.",
@@ -112,20 +160,32 @@
         "Cslib/Logics/Modal/Tableau/FiveSimplification.lean"
       ],
       "created": "2026-07-18T18:58:16Z",
-      "last_updated": "2026-07-18T18:58:16Z",
+      "last_updated": "2026-07-18T19:46:44Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/529_fix_lint_unused_args_kb5_univ_rules/reports/01_nolint-kb5-univ-rules.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/529_fix_lint_unused_args_kb5_univ_rules/reports/01_nolint-kb5-univ-rules.md",
+          "type": "summary",
+          "summary": "nolint KB5 univ rules"
+        }
+      ],
+      "session_id": "sess_1784402996_48ad02_529"
     },
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [],
       "parent_task": 506,
-      "last_updated": "2026-07-18T18:53:03Z",
-      "session_id": "sess_1784400586_5cfab1",
+      "last_updated": "2026-07-18T21:15:57Z",
+      "session_id": "sess_1784204000_p7block",
       "artifacts": [
         {
           "type": "plan",
@@ -1582,7 +1642,7 @@
       "dependencies": [],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-18T18:53:08Z",
+      "last_updated": "2026-07-18T20:58:42Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1592,9 +1652,9 @@
           "summary": "Team research (4 teammates + synthesis): all four independently converged on Simpson Prime Lemma 5.3.1 + canonical model 5.3.2 as the missing piece -- absent from plan 02. A3 verdict OVERTURNED (Track B reopened); report 02's 85% superseded (Ch.6 required, reordered). Named blocking obligation: CS5 |- FS (entailed by the target, ~25% target false). Do NOT dispatch C5."
         },
         {
-          "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md",
+          "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
           "type": "plan",
-          "summary": "Plan v3 integrates reports/07_team-research.md: reroutes to Simpson Ch.5 (Prime Lemma 5.3.1 + Canonical Model 5.3.2 -- the missing piece absent from plan 02) ahead of Ch.6, retracts the A3 Track B NO-GO, adds a bounded CS5 |- FS decision gate with documented branches for each outcome, and splits C5 into statement-first/proof phases so it is not dispatched as previously specified."
+          "summary": "Plan v5: well-founded Zorn / FLO-invariant reconstruction for the old-label obstacle"
         }
       ],
       "blockers": "Route B funded (user decision, alignment audit). Plan v4 (plans/11_tprime-repair-cs5-completeness.md): Phase 1-2 = GATE repairing the TPrime inhabitance transcription defect (Context.lean:215/217/219; transcribe already-landed sorry-free probes), then Simpson 1994 Ch 7-8 labelled bounded-context CS5 completeness (8.2.5 T-Comp symmetry, 8.2.6 bounded canonical model, bounded prime lemma, truth lemma). Prime-theory route (512) and independent-<= route (516) abandoned/superseded. Next: /implement 517 --lit --hard (--lit required: Ch 7-8 not yet mined).",

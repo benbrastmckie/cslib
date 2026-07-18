@@ -1,5 +1,5 @@
 ---
-next_project_number: 529
+next_project_number: 530
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 529
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,515,517,519,522,523 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,515,517,519,522,523,529 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,504,506 | 36,37,181,317,407,425,449,511,515 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -41,7 +41,7 @@ next_project_number: 529
 515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
   └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
     └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-517 [PLANNED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -92,10 +92,20 @@ next_project_number: 529
 
 ### Uncategorized
 
-511 [PARTIAL] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+511 [IMPLEMENTING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
+529 [NOT STARTED] — Add @[nolint unusedArguments] to modalKb5BoxAllUniv (Cslib/Logics
 
 ## Tasks
+
+### 529. Fix lake lint unusedArguments failures in FiveSimplification.lean (KB5 corrected-gate rule)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Add @[nolint unusedArguments] to modalKb5BoxAllUniv (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:2172) and modalKb5DiaNegAllUniv (:2194), whose 5th argument _w : WorldIndex is genuinely and intentionally unused (the corrected-gate KB5 rule fires unconditionally on cluster-nonemptiness regardless of trigger world, by design, dropping the w == 0 conjunct the frozen modalKb5BoxAllFull/modalKb5DiaNegAllFull used it for). The underscore prefix does not suppress CSLib's unusedArguments environment linter, so lake lint currently fails with exactly these 2 errors. Precedent for the nolint pattern: Cslib/Logics/Bimodal/Metalogic/Decidability/CountermodelExtraction.lean:204, Cslib/Logics/Temporal/Metalogic/DenseMCS.lean:202. Verify with: lake lint (must pass clean on these files). This is the sole CI failure attributable to the corrected-gate KB5 tableau rule work.
+
+---
 
 ### 528. Correctedgate kb5 tableau rule soundness and completeness
 - **Effort**: 10-14 hours
@@ -244,7 +254,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -273,7 +283,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 511. S4 loop checking termination
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]

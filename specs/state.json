@@ -1,16 +1,33 @@
 {
-  "next_project_number": 529,
+  "next_project_number": 530,
   "active_projects": [
+    {
+      "project_number": 529,
+      "project_name": "fix_lint_unused_args_kb5_univ_rules",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Fix lake lint unusedArguments failures in FiveSimplification.lean (KB5 corrected-gate rule)",
+      "description": "Add @[nolint unusedArguments] to modalKb5BoxAllUniv (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:2172) and modalKb5DiaNegAllUniv (:2194), whose 5th argument _w : WorldIndex is genuinely and intentionally unused (the corrected-gate KB5 rule fires unconditionally on cluster-nonemptiness regardless of trigger world, by design, dropping the w == 0 conjunct the frozen modalKb5BoxAllFull/modalKb5DiaNegAllFull used it for). The underscore prefix does not suppress CSLib's unusedArguments environment linter, so lake lint currently fails with exactly these 2 errors. Precedent for the nolint pattern: Cslib/Logics/Bimodal/Metalogic/Decidability/CountermodelExtraction.lean:204, Cslib/Logics/Temporal/Metalogic/DenseMCS.lean:202. Verify with: lake lint (must pass clean on these files). This is the sole CI failure attributable to the corrected-gate KB5 tableau rule work.",
+      "parent_task": 528,
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/FiveSimplification.lean"
+      ],
+      "created": "2026-07-18T18:58:16Z",
+      "last_updated": "2026-07-18T18:58:16Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
     {
       "project_number": 511,
       "project_name": "s4_loop_checking_termination",
-      "status": "partial",
+      "status": "implementing",
       "task_type": "cslib",
       "description": "Follow-on to task 506 (S4 loop-checking): close the S4 termination bound and complete decidability. Task 506 landed Phases 1-7 green (4-rule, LoopChecking.lean equality-blocking machinery, modalApplyOneS4/modalTableauS4, modalHintikkaSetS4, extractModelS4, modalTruthLemmaS4, s4Valid + 4-rule soundness; zero sorry/axiom) but Phase 8 (the #worlds <= 2^|modalSubfmls phi0| termination bound) is [BLOCKED]: worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 as currently designed. Two documented gaps (see specs/506_s4_loopchecking_machinery_termination_bound_and_decidability/plans/01_s4-loopchecking-termination-decidability.md Phase 8 BLOCKER note): (1) persistent rule firings (K boxPos, T self-propagation, the 4-rule box-itself propagation) add formulas to an already-known world relevant set without re-checking distinctness against other known worlds; (2) the minting guard (blockingWorld) checks the SOURCE world uniqueness against existing worlds, not the freshly-minted world own prospective content, so a new world is not guaranteed distinct at creation. SCOPE: (a) redesign the minting guard or restate the invariant over a saturation-stable notion of a world relevant set so distinctness is actually preserved per step; (b) prove the pigeonhole bound #worlds <= 2^|modalSubfmls phi0| as a loop invariant under the corrected guard (build the sibling S4LoopInv, do NOT extend ModalPotentialInv whose rankEdge exact per-edge decrease transitive propagation falsifies); (c) modalStepBranchS4_worldBound; (d) then Phase 9: fuel sufficiency, s4Valid completeness, Decidable (s4Valid phi) against Cube.S4, consuming task 510 generalized modalHintikkaSetGen chain (verify modalHintikkaSetS4 aligns with modalHintikkaSetGen modalApplyOneS4, or build the S4 hintikka-production via the generic loop lemma). Zero sorry, zero axiom. Files: Cslib/Logics/Modal/Tableau/LoopChecking.lean, Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, possibly a new FmpMeasure-sibling for S4LoopInv. Standing permission to land [BLOCKED] again with documented goal state if the pigeonhole invariant still does not close.",
       "dependencies": [],
       "parent_task": 506,
-      "last_updated": "2026-07-17T22:34:17Z",
-      "session_id": "sess_1784322687_fcf57a_511",
+      "last_updated": "2026-07-18T18:53:03Z",
+      "session_id": "sess_1784400586_5cfab1",
       "artifacts": [
         {
           "type": "plan",
@@ -1464,14 +1481,14 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
       "dependencies": [],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-16T00:50:52Z",
+      "last_updated": "2026-07-18T18:53:08Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1487,7 +1504,7 @@
         }
       ],
       "blockers": "Route B funded (user decision, alignment audit). Plan v4 (plans/11_tprime-repair-cs5-completeness.md): Phase 1-2 = GATE repairing the TPrime inhabitance transcription defect (Context.lean:215/217/219; transcribe already-landed sorry-free probes), then Simpson 1994 Ch 7-8 labelled bounded-context CS5 completeness (8.2.5 T-Comp symmetry, 8.2.6 bounded canonical model, bounded prime lemma, truth lemma). Prime-theory route (512) and independent-<= route (516) abandoned/superseded. Next: /implement 517 --lit --hard (--lit required: Ch 7-8 not yet mined).",
-      "session_id": "sess_1784156551_995e9d",
+      "session_id": "sess_1784400586_5cfab1",
       "plan_metadata": {
         "phases": 26,
         "complexity": "complex",

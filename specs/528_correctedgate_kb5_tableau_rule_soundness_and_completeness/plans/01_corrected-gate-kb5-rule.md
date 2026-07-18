@@ -243,7 +243,7 @@ bound for the new rule, mirroring `modalApplyOneKb5'_specCore` (`FiveSimplificat
 
 ---
 
-### Phase 3: Frame soundness theorem [NOT STARTED]
+### Phase 3: Frame soundness theorem [IN PROGRESS]
 
 **Goal**: Land `modalTableauKb5''_sound (φ) (h : modalTableauKb5'' φ = .closed) : kb5Valid φ`,
 mirroring `modalTableauKb5'_sound` (`FrameSoundness.lean:~4821`), proved directly against `kb5FC`

@@ -70,17 +70,23 @@ Zorn-over-contexts expressible at all.
   with a `Preorder` instance.
 - `Deriv`: the set-lifted consequence relation bridging `Context.Γ : Set` and `NIK`'s finitary
   `List`, plus `Deriv.mono` (monotonicity under `Context.le`) and `Deriv.ofNIK`.
-- `TPrime`: Simpson's 𝒯-prime context (`:5953`) -- clause 0 (classical model of `𝒯`) plus the
-  four numbered clauses (deductive closure, consistency, disjunction property, diamond
-  property). **The Consistency clause is what banishes `Ω`** (the exploding, everywhere-true
-  world) -- see the module-level note below.
+- `TPrime`: Simpson's 𝒯-prime context (`:5953`) -- clause 0 (**domain-relative** classical model
+  of `𝒯`, `ClassicalModelOn`) plus the four numbered clauses (deductive closure -- **relativized
+  to `x ∈ G.X`** --, consistency, disjunction property, diamond property). Clauses 0 and 1 are
+  the task 517 Phase 1 repair. **The Consistency clause is what banishes `Ω`** (the exploding,
+  everywhere-true world) -- see the module-level note below.
 - `TS5`: the fixed target frame theory `𝒯_S5 := {χ_T, χ_B, χ_4}` (`IKTB4`), chosen so that its
   axiom set matches CSLib's `CS5ModalAxiom` schema-for-schema -- see its docstring for why the
   `IKT5` presentation is deliberately not used.
+- `classicalModelOn_TS5_iff`: `ClassicalModelOn TS5 D R` unfolds to domain-relative
+  reflexivity/symmetry/transitivity on `D`, at no extra cost over the type-wide form.
 - `equivalence_of_refl_eucl`: reflexive + Euclidean ⟹ equivalence relation (retained as the
   record that the `IKT5` presentation agrees).
-- `equivalence_of_classicalModel_TS5`: `⊨_cl 𝒯_S5 ⟹ Equivalence`, consumed by the frame-class
-  match.
+- `equivalence_of_classicalModel_TS5`: `⊨_cl 𝒯_S5 ⟹ Equivalence` (type-wide; retained, not what
+  `TPrime.clModel` supplies post-repair).
+- `EquivalenceOn` / `equivalence_of_classicalModelOn_TS5`: the **domain-relative** equivalence
+  `TPrime.clModel` at `TS5` actually supplies (task 517 Phase 1, item 5's design choice) --
+  consumed by the frame-class match (Phase 7).
 
 ## Why the Consistency clause matters (guardrail analysis, `cs5Incest_forces_symm`)
 
@@ -95,6 +101,40 @@ yields plain box-symmetry there -- a true, harmless theorem, not a contradiction
 *because* `B_K` has no `Ω` (that construction's concern; not re-derived here, but the load-bearing
 Consistency clause it depends on is landed in this file as a **defining clause of `TPrime`**, not
 something derived from the other clauses).
+
+## Why the repaired `TPrime` does not re-trip the three prime-theory guardrails
+
+Task 517 Phase 1 repairs `TPrime`'s clauses 0-1 (domain-relative `ClassicalModelOn`, relativized
+`deductiveClosure`) and `NIK`'s `(⊥E)`/`(∨E)` (`Deduction.lean`, cross-label). None of these
+repairs turn a labelled bounded context into a **prime theory** -- the object CSLib's mainline
+canonical-model guardrails are about -- so each guardrail is checked explicitly and does not
+re-fire:
+
+1. **`cs5_symmetric_tail_box_gap` (`CS5.lean:712` -- THE prime-theory Lindenbaum wall).** That
+   wall is a construction that fixes one component (a head theory) while extending the other,
+   and cannot satisfy the symmetric back-clause and refute the box subject jointly. `TPrime`
+   above is a **single Zorn object**: `Context.Γ : Set (LabelledFormula Atom)` and `Context.G`
+   grow *together* under `Context.le`'s plain, unbounded inclusion order (no fixed head, no
+   bound -- see "The key structural insight" above). The repair does not introduce a head or a
+   bound: `NIK`'s cross-label `efq`/`orE` only widen two elimination rules to an independent
+   conclusion label, and the relativized clauses only add a domain hypothesis `x ∈ G.X`. The
+   "simultaneous maximal pair" the wall's own docstring names as the missing object is exactly
+   what this Zorn poset produces. **Guardrail does not apply.**
+2. **`cs5Incest_forces_symm` (`CS5Canonical.lean:643`, axiom-free).** Fatal only in composition
+   with an exploding `Ω`-world (theory `⊤`, reachable from everywhere). `TPrime`'s Consistency
+   clause (`∀ x ∈ G.X, ¬ Deriv 𝒯 G Γ (x ∶ ⊥)`, unchanged by this repair) banishes `Ω` by
+   construction, and the repair *sharpens* this: cross-label `(⊥E)` means a single `z:⊥` would
+   collapse every `x:A` at once (`NIKX.consistency_step` in
+   `probes/fig41-crosslabel-gate.lean`), which is precisely why Simpson calls consistency
+   "immediate" (p. 93). No `Ω`-node exists for the guardrail to become fatal against; it remains
+   a true, harmless theorem about the downstream `B_K` model. **Guardrail does not apply.**
+3. **`cs5TwoSidedR_iff_cs5Tail` (`CS5Canonical.lean:511`).** Equates Simpson's two-sided `R` with
+   the old `cs5Tail` wall **over CS5 quasi-prime theories**. `TPrime` contexts are not quasi-prime
+   theories: worlds are graph nodes (`Context.G : Graph Atom`) carrying an explicit relation
+   `G.R`, and this repair keeps the canonical relation as the **raw** graph relation (clause 0 is
+   about `G.R` itself, domain-relativized -- not a two-sided `R` reconstructed from theory
+   membership). The `iff` has no quasi-prime-theory hypothesis to fire on here.
+   **Guardrail does not apply.**
 
 ## References
 
@@ -213,10 +253,28 @@ of `𝒯` (clause 0) and the four numbered clauses hold. **The Consistency claus
 (the exploding, everywhere-inconsistent world) -- see the module docstring, "Why the Consistency
 clause matters". -/
 structure TPrime (𝒯 : Set GeomAxiom) (Atom : Type u) : Type u extends Context 𝒯 Atom where
-  /-- Clause 0: `G` is a classical model of `𝒯`. -/
-  clModel : ClassicalModel 𝒯 G.R
-  /-- Clause 1: deductive closure -- `Γ ⊢_G x:A ⟹ x:A ∈ Γ`. -/
-  deductiveClosure : ∀ (x : Label Atom) (A : Proposition Atom), Deriv 𝒯 G Γ (x ∶ A) → (x ∶ A) ∈ Γ
+  /-- Clause 0: `G` is a classical model of `𝒯`, **domain-relative** (Simpson's actual
+  `H ⊨_CL 𝒯`, `:5953`, quantifiers ranging over `G`'s underlying set `G.X`, not the whole
+  `Label Atom` type). **Task 517 Phase 1 repair**: the type-wide `ClassicalModel 𝒯 G.R` this
+  clause previously used is a transcription defect that provably empties `TPrime` at `𝒯 = TS5`
+  (`clModel .T` chained with `Graph.edge_mem` forces `G.X = univ`, contradicting `coinfinite`;
+  see `probes/rchi-internalization-gate.lean`'s `tPrime_TS5_false`). `ClassicalModelOn` is the
+  fix, transcribed from that probe's §6-7; it costs nothing at `TS5` (`classicalModelOn_TS5_iff`
+  below) and matches Simpson's canonical-model construction, which fixes satisfaction *in the
+  structure `H`* (p. 94) rather than type-wide. -/
+  clModel : ClassicalModelOn 𝒯 G.X G.R
+  /-- Clause 1: deductive closure -- `Γ ⊢_G x:A ⟹ x:A ∈ Γ`, **relativized to `x ∈ G.X`**.
+  **Task 517 Phase 1 repair**: the type-wide quantifier this clause previously used is the
+  `𝒯`-agnostic emptiness driver -- `NIK.impI` + `NIK.assumption` derive `x:A⊃A` at *every* label
+  with no premises, so the type-wide clause forces `(x ∶ A⊃A) ∈ Γ` for every label, hence (via
+  `ctxSubset`) `G.X = univ`, contradicting `coinfinite`, for **every** `𝒯` including `𝒯 = ∅`
+  (`probes/prime-lemma-blockers.lean`'s `tPrime_false`/`instIsEmptyTPrime`). Simpson's clause 1
+  (p. 92, "if `Γ ⊢^𝒯_G x:A` then `x:A ∈ Γ`") is itself a judgement about labels *of `G`*, and
+  Lemma 5.3.1's own deductive-closure step needs exactly the relativized form: extending
+  `(H, Δ ∪ {y:B})` to a context requires `y ∈ H.X` (`Context.ctxSubset`), which only the
+  relativized clause supplies (`probes/prime-lemma-blockers.lean`'s
+  `deductiveClosure_relativized_kills_the_chain`). -/
+  deductiveClosure : ∀ x ∈ G.X, ∀ (A : Proposition Atom), Deriv 𝒯 G Γ (x ∶ A) → (x ∶ A) ∈ Γ
   /-- Clause 2: consistency -- `∀ x` in `G`, `Γ ⊬_G x:⊥`. **This is what banishes `Ω`**; it is a
   *defining* clause of `TPrime`, not something derived from the other clauses. -/
   consistency : ∀ x ∈ G.X, ¬ Deriv 𝒯 G Γ (x ∶ Proposition.bot)
@@ -260,6 +318,25 @@ theorem GeomAxiom.B_mem_TS5 : GeomAxiom.B ∈ TS5 := Or.inr (Or.inl rfl)
 
 theorem GeomAxiom.Four_mem_TS5 : GeomAxiom.Four ∈ TS5 := Or.inr (Or.inr rfl)
 
+/-- **The domain-relative repair is free at `TS5`**: `ClassicalModelOn TS5 D R` unfolds to
+exactly the domain-relative reflexivity/symmetry/transitivity clauses, with no cost beyond
+`ClassicalModel`'s type-wide unfolding. Transcribed from
+`probes/rchi-internalization-gate.lean:300-312`. Consumed by
+`equivalence_of_classicalModelOn_TS5` below. -/
+theorem classicalModelOn_TS5_iff {D : Set (Label Atom)} {R : Label Atom → Label Atom → Prop} :
+    ClassicalModelOn TS5 D R ↔
+      ((∀ x ∈ D, R x x) ∧ (∀ x ∈ D, ∀ y ∈ D, R x y → R y x) ∧
+        (∀ x ∈ D, ∀ y ∈ D, ∀ z ∈ D, R x y → R y z → R x z)) := by
+  constructor
+  · intro h
+    exact ⟨h GeomAxiom.T GeomAxiom.T_mem_TS5, h GeomAxiom.B GeomAxiom.B_mem_TS5,
+      h GeomAxiom.Four GeomAxiom.Four_mem_TS5⟩
+  · rintro ⟨hT, hB, hF⟩ χ hχ
+    rcases hχ with rfl | rfl | rfl
+    · exact hT
+    · exact hB
+    · exact hF
+
 /-- **Reflexive + Euclidean ⟹ equivalence relation.** A relation satisfying `χ_T` and `χ_5` is
 automatically symmetric (via reflexivity, instantiating Euclideanness at the reflexive point)
 and transitive (via that derived symmetry, instantiating Euclideanness again); together with
@@ -287,5 +364,41 @@ theorem equivalence_of_classicalModel_TS5 {R : Label Atom → Label Atom → Pro
   refl := h GeomAxiom.T GeomAxiom.T_mem_TS5
   symm := fun {x y} hxy => h GeomAxiom.B GeomAxiom.B_mem_TS5 x y hxy
   trans := fun {x y z} hxy hyz => h GeomAxiom.Four GeomAxiom.Four_mem_TS5 x y z hxy hyz
+
+/-! ## The domain-relative equivalence design choice (task 517 Phase 1, item 5)
+
+**Design choice, resolved here**: under the `ClassicalModelOn` repair, `TPrime.clModel` only
+supplies reflexivity/symmetry/transitivity **on `G.X`**, not type-wide, so the equivalence the
+frame-class match (Phase 7) needs is necessarily **domain-relative**, not the type-wide
+`Equivalence` `equivalence_of_classicalModel_TS5` above produces. This module commits to
+carrying a domain-relative equivalence throughout (`EquivalenceOn`), rather than switching the
+world domain to the subtype `↥H.X` -- the domain-relative-predicate route requires no change to
+`Context`/`TPrime`'s existing `Label Atom`-indexed fields, whereas a subtype-domain route would
+ripple through every clause. `equivalence_of_classicalModel_TS5` above is retained unchanged (a
+true, harmless fact about the type-wide clause, e.g. for callers not needing domain-relativity);
+it is `equivalence_of_classicalModelOn_TS5` below that Phase 7 consumes. -/
+
+/-- **Domain-relative equivalence**: `R` is reflexive, symmetric and transitive **on `D`** only
+(no claim is made about pairs outside `D`). The domain-relative analogue of `Equivalence` that
+`TPrime.clModel : ClassicalModelOn 𝒯 G.X G.R` supports. -/
+structure EquivalenceOn (D : Set (Label Atom)) (R : Label Atom → Label Atom → Prop) : Prop where
+  /-- Reflexivity on `D`. -/
+  refl : ∀ x ∈ D, R x x
+  /-- Symmetry on `D`. -/
+  symm : ∀ x ∈ D, ∀ y ∈ D, R x y → R y x
+  /-- Transitivity on `D`. -/
+  trans : ∀ x ∈ D, ∀ y ∈ D, ∀ z ∈ D, R x y → R y z → R x z
+
+/-- A relation domain-relatively modelling `TS5` is a domain-relative equivalence relation:
+`H ⊨_CL^{H.X} 𝒯_S5 ⟹ H` is reflexive, symmetric and transitive **on `H.X`**. This is exactly
+`TPrime`'s repaired clause 0 instantiated at `𝒯_S5`, and is what the frame-class match (Phase 7)
+consumes to discharge `cs5FCIncest`'s reflexivity, transitivity, and `cs5Incest` conjuncts over
+the domain-relative canonical model. Immediate from `classicalModelOn_TS5_iff`, for the same
+reason `equivalence_of_classicalModel_TS5` is immediate from `ClassicalModel`: `χ_T`/`χ_B`/`χ_4`
+unfold, via `GeomAxiom.HoldsOn`, to literally domain-relative reflexivity/symmetry/transitivity. -/
+theorem equivalence_of_classicalModelOn_TS5 {D : Set (Label Atom)}
+    {R : Label Atom → Label Atom → Prop} (h : ClassicalModelOn TS5 D R) : EquivalenceOn D R :=
+  let ⟨hT, hB, hF⟩ := classicalModelOn_TS5_iff.mp h
+  { refl := hT, symm := hB, trans := hF }
 
 end Cslib.Logic.Modal.Labelled

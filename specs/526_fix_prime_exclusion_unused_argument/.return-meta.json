@@ -1,0 +1,35 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-18T00:15:33Z",
+  "artifacts": [
+    {
+      "path": "specs/526_fix_prime_exclusion_unused_argument/summaries/01_nolint-deriv-excludes-summary.md",
+      "type": "summary",
+      "summary": "Execution summary: added @[nolint unusedArguments] + retention comment before def DerivExcludes in PrimeExclusion.lean; full CI pipeline verified clean except one unrelated pre-existing test failure"
+    }
+  ],
+  "partial_progress": {
+    "stage": "complete",
+    "details": "Phase 1 completed: attribute + comment added, build/lint/checkInitImports/lint-style/shake/mk_all all clean; lake test has one pre-existing unrelated failure in CslibTests/ModalFrameSeparation.lean",
+    "lint_count_start": null,
+    "lint_count_current": 0,
+    "phases_completed": 1,
+    "last_completed_phase": "Phase 1: Add @[nolint unusedArguments] to DerivExcludes"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "lake test reported one failure in CslibTests/ModalFrameSeparation.lean (S5/Five decide reduction), confirmed pre-existing and unrelated: zero import relationship to PrimeExclusion.lean, file untouched by this change, no local modifications in git status (last touched by an unrelated commit d5e528b0)."
+  },
+  "metadata": {
+    "session_id": "sess_1784333163_06a765_526",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
+  }
+}

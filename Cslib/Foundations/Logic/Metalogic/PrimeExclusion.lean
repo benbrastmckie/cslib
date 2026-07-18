@@ -325,6 +325,10 @@ def bigOr : List F → F
 `bigOr l ∉ T`. When `T` is deductively closed this is equivalent to "no finite disjunction of
 `E` is derivable from `T`" -- the Lindenbaum-pair exclusion condition (cf. ianshil/CK
 `pair_extCKH_prv`). The `l = []` case (`bigOr [] = ⊥`) recovers ordinary consistency of `T`. -/
+-- `_D` is retained to match the sibling signatures (`DeductivelyClosed D S`,
+-- `Admissible D Cons S`, `SetExcludingSupersets D Cons S E`) even though the body only
+-- references `E`, `T`, and `bigOr`.
+@[nolint unusedArguments]
 def DerivExcludes (_D : DerivationSystem F) (E : Set F) (T : Set F) : Prop :=
   ∀ l : List F, (∀ x ∈ l, x ∈ E) → bigOr l ∉ T
 

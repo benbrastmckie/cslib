@@ -1,6 +1,7 @@
 import Cslib.Init
 import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 import Mathlib.Order.SetNotation
+import Mathlib.Order.Zorn
 
 /-! # Task 517 Phase 3 — the chain-union / cofinite-encoding obstacle
 
@@ -512,5 +513,95 @@ theorem NIK.drop_redundant_edge {G : Graph Atom} {x y : Label Atom} (hxy : TClos
     {Γ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom} (h : NIK 𝒯 (G.addEdge x y) Γ φ) :
     NIK 𝒯 G Γ φ :=
   h.weaken_tclosure (fun a b hab => (TClosure.addEdge_redundant hxy a b).mp hab) (fun _ hψ => hψ)
+
+/-! ### Packaging the chain union as a genuine `Context` -/
+
+variable {ι : Type u} [Preorder ι]
+
+/-- **The chain union, packaged as a genuine `Context 𝒯 Atom`.** Phase 3's `unionG`/`unionΓ`
+produced only the graph and formula-set; the Zorn upper-bound step needs the union to satisfy
+`Context`'s own three side conditions (`ctxSubset`, `coinfinite`, `dwitnessMem`), each following
+directly from every chain member already being a genuine `Context` sharing the chain's single
+reserve `V'` (`hV'`/`hCV'`). -/
+def ChainCtx.unionContext [Nonempty ι] (𝒞 : ChainCtx 𝒯 Atom ι) : Context 𝒯 Atom where
+  G := 𝒞.unionG
+  Γ := 𝒞.unionΓ
+  ctxSubset := by
+    rintro φ hφ
+    obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hφ
+    exact Set.mem_iUnion.mpr ⟨i, (𝒞.C i).ctxSubset φ hi⟩
+  coinfinite := ⟨𝒞.V', 𝒞.hV', fun x hx => by
+    obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hx
+    exact 𝒞.hCV' i x hi⟩
+  dwitnessMem := by
+    rintro x A hx
+    obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hx
+    obtain ⟨hR, hmem⟩ := (𝒞.C i).dwitnessMem x A hi
+    exact ⟨⟨i, hR⟩, Set.mem_iUnion.mpr ⟨i, hmem⟩⟩
+
+/-- Every chain member is `≤` the union context (Simpson's "`(⋃Gᵢ,⋃Γᵢ)` is an upper bound",
+`chunk_0102.md`), at the level of the actual `Context.le` order, not merely the raw
+`Graph`/`Set` inclusions `unionG`/`unionΓ` individually satisfy. -/
+theorem ChainCtx.le_unionContext [Nonempty ι] (𝒞 : ChainCtx 𝒯 Atom ι) (i : ι) :
+    𝒞.C i ≤ 𝒞.unionContext :=
+  ⟨⟨fun _ hx => Set.mem_iUnion.mpr ⟨i, hx⟩, fun _ _ hxy => ⟨i, hxy⟩⟩,
+    fun _ hφ => Set.mem_iUnion.mpr ⟨i, hφ⟩⟩
+
+/-! ### Simpson's poset `C` and the Zorn maximal element -/
+
+section PrimeC
+
+variable (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Proposition Atom)
+
+/-- **Simpson's poset `C`** (`:5990`, *"the set `C` of all contexts `(G',Γ') ⊇ (G,Γ)` such that
+the underlying set of `G'` is contained in `W(V')` and `Γ' ⊬_G' x:A`"*): contexts extending
+`(G₀,Γ₀)`, confined to the reserve `V' := G₀.coinfinite.choose` (Simpson fixes *one* shared `V'`
+for the whole poset, taken from the base context's own clause-1 witness — matching `ChainCtx`'s
+single shared `V'`), that still fail to derive the excluded `x₀:A₀`. -/
+def primeC : Set (Context 𝒯 Atom) :=
+  {D | G₀ ≤ D ∧ (∀ x ∈ D.G.X, Label.InW G₀.coinfinite.choose x) ∧
+    ¬ Deriv 𝒯 D.G D.Γ (x₀ ∶ A₀)}
+
+/-- The base context `(G₀,Γ₀)` is itself in `C`, given the defining hypothesis
+`Γ₀ ⊬_{G₀} x₀:A₀` — `C` is nonempty. -/
+theorem primeC_mem_base (h : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) : G₀ ∈ primeC G₀ x₀ A₀ :=
+  ⟨Context.le_refl G₀, G₀.coinfinite.choose_spec.2, h⟩
+
+/-- **Every chain in `C` has an upper bound in `C`** (Simpson: *"It is easily seen that
+`(⋃ᵢGᵢ,⋃ᵢΓᵢ)` is also in `C`. So every chain in `C` has an upper bound."*, `chunk_0102.md`).
+Packages the chain as a `ChainCtx` sharing the poset's fixed reserve `V' :=
+G₀.coinfinite.choose`, and reuses Phase 3's `chain_closure` for the one nontrivial conjunct
+(`¬ Deriv`). Takes membership of the base context as an explicit hypothesis (`h0`) rather than
+re-deriving it, so the empty-chain case has an upper-bound witness available. -/
+theorem primeC_chain_bddAbove (h0 : G₀ ∈ primeC G₀ x₀ A₀) (c : Set (Context 𝒯 Atom))
+    (hc : c ⊆ primeC G₀ x₀ A₀) (hchain : IsChain (· ≤ ·) c) :
+    ∃ ub ∈ primeC G₀ x₀ A₀, ∀ z ∈ c, z ≤ ub := by
+  rcases c.eq_empty_or_nonempty with hempty | hne
+  · exact ⟨G₀, h0, by simp [hempty]⟩
+  · haveI : Nonempty ↥c := hne.to_subtype
+    let 𝒞 : ChainCtx 𝒯 Atom ↥c :=
+      { C := Subtype.val
+        mono := fun _ _ hab => hab
+        dir := fun a b => by
+          obtain ⟨z, hz, haz, hbz⟩ := hchain.directedOn a.val a.property b.val b.property
+          exact ⟨⟨z, hz⟩, haz, hbz⟩
+        V' := G₀.coinfinite.choose
+        hV' := G₀.coinfinite.choose_spec.1
+        hCV' := fun i x hx => (hc i.property).2.1 x hx }
+    refine ⟨𝒞.unionContext, ⟨?_, ?_, ?_⟩, fun z hz => 𝒞.le_unionContext ⟨z, hz⟩⟩
+    · obtain ⟨i₀⟩ := (inferInstance : Nonempty ↥c)
+      exact Context.le_trans (hc i₀.property).1 (𝒞.le_unionContext i₀)
+    · intro x hx
+      obtain ⟨i, hi⟩ := Set.mem_iUnion.mp hx
+      exact (hc i.property).2.1 x hi
+    · exact 𝒞.chain_closure (fun i => (hc i.property).2.2)
+
+/-- **Zorn's Lemma applied to `C`**: `C` has a maximal element (Simpson: *"Therefore, by Zorn's
+Lemma, `C` has a maximal element `(H,Δ)`."*, `chunk_0102.md`). -/
+theorem primeC_exists_maximal (h0 : G₀ ∈ primeC G₀ x₀ A₀) :
+    ∃ H, Maximal (· ∈ primeC G₀ x₀ A₀) H :=
+  zorn_le₀ (primeC G₀ x₀ A₀) (fun c hc hchain => primeC_chain_bddAbove G₀ x₀ A₀ h0 c hc hchain)
+
+end PrimeC
 
 end Cslib.Logic.Modal.Labelled

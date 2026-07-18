@@ -1,30 +1,31 @@
 {
   "status": "implemented",
   "skeleton": false,
-  "phases_completed": 1,
+  "phases_completed": 2,
   "phases_total": 9,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_path": null,
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 2,
-    "next_action_hint": "Dispatch Phase 2 (INHABITEDNESS GATE): construct an inhabitant of the repaired TPrime at 𝒯 = ∅ (or prove no emptiness chain survives the repair) in probes/, per plan 11 Phase 2 tasks 1-3. Phase 1's repair (domain-relative ClassicalModelOn + relativized deductiveClosure in TPrime clauses 0-1, cross-label efq/orE in NIK) is landed, green, sorry-free; the old tPrime_false/instIsEmptyTPrime proofs from probes/prime-lemma-blockers.lean no longer type-check against the repaired TPrime (their premises required type-wide clauses that no longer exist), which is the intended repair signal, but no inhabitant has been constructed in mainline or probes yet -- that is explicitly Phase 2's deliverable per the plan, not Phase 1's."
+    "next_phase": 3,
+    "next_action_hint": "Dispatch Phase 3 (chain-union / cofinite-encoding obstacle, Simpson 5.1 + Ch 7-8's bounded-context finite-support handling). Phase 2's gate is clear: probes/inhabitedness-gate-probe.lean proves TPrime.gx_ne_univ (for every TPrime P and every 𝒯, P.G.X ≠ Set.univ) -- the shared conclusion both pre-repair emptiness drivers (tPrime_false / tPrime_TS5_false) relied on is now unreachable, via freshWitness_notMem_GX pinpointing the exact label that blocks each driver's first step. No explicit TPrime inhabitant was constructed (the plan's sanctioned weaker-gate alternative was taken instead: a full inhabitant needs either Phase 4's Zorn maximalisation or an unestablished NIK substitution/cut-admissibility lemma, out of scope for a gate check -- documented in the probe's module docstring under 'Why a full explicit inhabitant is NOT attempted here'). Phase 3 is gated by this go result and depends on Phase 1."
   },
-  "summary": "Phase 1 (THE GATE) complete: transcribed the cross-label (⊥E)/(∨E) NIK constructors and re-proved NIK.weaken from probes/fig41-crosslabel-gate.lean into Deduction.lean; added GeomAxiom.HoldsOn/ClassicalModelOn/ClassicalModelOn.of_classicalModel from probes/rchi-internalization-gate.lean into Deduction.lean; retyped TPrime.clModel to domain-relative ClassicalModelOn and relativized deductiveClosure to x ∈ G.X in Context.lean per probes/prime-lemma-blockers.lean's diagnosis; added classicalModelOn_TS5_iff, EquivalenceOn, and equivalence_of_classicalModelOn_TS5 (the domain-relative equivalence Phase 7 will consume) resolving the plan's item-5 design choice; added the required non-re-trip docstring covering all three guardrails (cs5_symmetric_tail_box_gap, cs5Incest_forces_symm, cs5TwoSidedR_iff_cs5Tail). Full project build green, zero sorry / zero new axiom / zero vacuous defs in the two touched files, checkInitImports/lake lint/lint-style all clean (2 pre-existing unrelated lint errors in FiveSimplification.lean, not ours), CS5Canonical.lean/CKExtension.lean confirmed unaffected.",
+  "summary": "Phase 2 (INHABITEDNESS GATE) complete: re-ran both pre-repair emptiness drivers (tPrime_false/clause-1 and tPrime_TS5_false/clause-0-at-TS5) against the Phase-1-repaired TPrime in a new probe. Proved freshWitness_notMem_GX (the coinfinite-witness label both drivers instantiated their clause at is never in G.X under the repaired, relativized clauses), driver1_blocked/driver2_blocked (each driver's first proof step is now unconstructible), and the capstone TPrime.gx_ne_univ (the shared conclusion G.X = Set.univ both drivers needed is unreachable, for every 𝒯 -- not just the two instances). Took the plan's sanctioned weaker-gate route rather than a full explicit inhabitant, per task 2's own escape hatch; the ruled-out full-construction alternatives and why are documented in the probe's module docstring.",
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Deduction.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean"
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/inhabitedness-gate-probe.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/progress/phase-2-progress.json"
   ],
   "verification": {
     "build_passed": true,
-    "full_lake_build_passed": true,
-    "check_init_imports_passed": true,
-    "lake_lint_clean_in_scope": true,
-    "lint_style_passed": true,
-    "sorry_count_in_scope": 0,
+    "probe_module_build_passed": true,
+    "sorry_count_in_probe": 0,
+    "sorry_count_in_scope_mainline_files": 0,
     "new_axiom_count": 0,
+    "axioms_in_probe": ["propext", "Classical.choice", "Quot.sound"],
     "vacuous_count": 0,
+    "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true
   }
 }

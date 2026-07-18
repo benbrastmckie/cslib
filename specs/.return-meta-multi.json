@@ -1,12 +1,16 @@
 {
-  "status": "completed",
+  "status": "partial",
   "metadata": {
     "tasks_completed": [
-      528,
-      525
+      533,
+      529,
+      532,
+      531
     ],
-    "tasks_failed": [],
-    "cycles_used": 5,
+    "tasks_failed": [
+      530
+    ],
+    "cycles_used": 2,
     "multi_task_mode": true
   }
 }

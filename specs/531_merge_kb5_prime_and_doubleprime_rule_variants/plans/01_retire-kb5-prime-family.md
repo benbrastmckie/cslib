@@ -1,7 +1,7 @@
 # Implementation Plan: Merge KB5 Prime and Double-Prime Rule Variants
 
 - **Task**: 531 - Merge KB5 prime and double-prime tableau rule variants
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: None (the concurrent FrameCompleteness.lean docstring task has already landed; no sequencing conflict remains)
 - **Research Inputs**: reports/01_kb5-prime-doubleprime-merge-research.md

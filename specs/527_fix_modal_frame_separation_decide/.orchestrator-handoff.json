@@ -1,0 +1,28 @@
+{
+  "status": "implemented",
+  "task_number": 527,
+  "session_id": "sess_1784333163_06a765_527",
+  "summary": "Replaced the two stuck decide examples in CslibTests/ModalFrameSeparation.lean (S5, Five) with the already-proven separation theorems boxImp_s5Valid and boxImp_not_fiveValid from FrameSoundness.lean, mirroring the existing kb5Valid example (plan Option (b)), switched Atom from Bool to Unit on those two examples, and updated all three docstrings to remove stale decide-routing claims. lake build CslibTests.ModalFrameSeparation and lake test are green (exit 0). checkInitImports, lake lint, lint-style, shake, and mk_all all pass clean for the modified file. Zero sorries, zero new axioms introduced.",
+  "artifacts": [
+    {
+      "path": "specs/527_fix_modal_frame_separation_decide/summaries/01_fix-decide-frame-separation-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary documenting the two example replacements, docstring updates, and full CI pipeline verification results."
+    },
+    {
+      "path": "CslibTests/ModalFrameSeparation.lean",
+      "type": "modified_source",
+      "summary": "S5 and Five examples now proved via boxImp_s5Valid/boxImp_not_fiveValid instead of stuck decide; Atom switched to Unit; all three docstrings updated to remove decide-routing claims."
+    },
+    {
+      "path": "specs/527_fix_modal_frame_separation_decide/plans/01_fix-decide-frame-separation.md",
+      "type": "plan",
+      "summary": "Plan-level status and Phase 1 marked COMPLETED; all checklist items checked off."
+    }
+  ],
+  "phases_completed": 1,
+  "phases_total": 1,
+  "next_action_hint": "No further implementation action needed. Task ready for status sync to [COMPLETED] and archival via /todo.",
+  "blockers": [],
+  "continuation_context": null
+}

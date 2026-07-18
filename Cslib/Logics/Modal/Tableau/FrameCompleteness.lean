@@ -3516,46 +3516,86 @@ private lemma extractModelKb5_root_reach_scout {α : Type*} {r : α → α → P
   Relation.EuclGen.eucl (Relation.EuclGen.base (Relation.SymmGen.of_rel_symm h1))
     (Relation.EuclGen.base (Relation.SymmGen.of_rel h2))
 
-/-! ## Phase 23 Blocker: `modalTableauKb5_complete` -- genuine root-reach obstruction
+omit [Hashable Atom] in
+/-- **Task 525 Phase 3 scout: the deep-chain gap `modalApplyOneKb5'` still cannot close.**
+`modalApplyOneKb5'` (task 524) already repairs the *shallow* gap the scout lemma above records
+(the root's own box formulas now dump to the full known cluster, including a self-target, once
+the cluster is nonempty). But the closure relation's symmetry, combined with the SAME scout
+derivation, forces a **deeper**, structurally unrepairable gap: whenever a *non-root* world `w`
+is connected to the root via a raw two-hop chain `0 → a → w` (`a` non-root, e.g. a routine
+witness-reuse mint that first mints `a` from the root, then mints `w` from `a`'s own diamond),
+`extractModelKb5`'s relation places `w` adjacent to the root (`.r w 0`, via `EuclGen.symm_of_symm`
+applied to the scout derivation) -- yet `modalKb5BoxAllFull b ψ w`'s non-root cluster-dump arm
+**unconditionally excludes target `0`** regardless of the trigger `w` (`modalKb5BoxAllFull_mem`'s
+dichotomy: a `0`-labeled output requires the trigger itself to be `0`). So a box-positive formula
+`T(□ψ)@w` at exactly such a `w` can never force `T(ψ)@0 ∈ b` through this rule, no matter how
+saturated the branch becomes -- the rule's own definition rules it out, not merely a proof
+strategy failing to find the argument.
 
-**Finding (before any further code was written, per the mandatory pre-code analysis)**: the scout
-lemma above confirms that `extractModelKb5`'s relation relates the root `0` to *every* world
-reachable via a raw-edge path from a direct root successor, not merely to the direct successors
-themselves. This is **forced**, not a choice: `extractModelKb5`'s relation is the *least*
-`kb5FC`-satisfying relation containing every raw edge (`Relation.EuclGen.least` applied to
-`Relation.SymmGen`), and raw-edge survival (`extractModelKb5_hasEdge_imp_r`, required by every
-extraction in this file to support the box-negative/diamond-positive "K-style" witness cases,
-mirroring `extractModelFive_hasEdge_imp_r`) plus `Std.Symm` plus `Relation.RightEuclidean`
-*jointly* force `(extractModelKb5 b acc).r 0 c` whenever a raw chain `0 → a → ⋯ → c` exists, for
-**any** relation satisfying those three properties -- not only this specific closure.
+This is not hypothetical: a concrete Lean-checked witness exists (verified via `#eval`/
+`native_decide` outside this file, since kernel `decide` reduction on a real `modalTableauKb5'`
+run stalls -- the same pre-existing `Decidable`-reduction issue task 515 left in
+`ModalFrameSeparation.lean`). For `φ₀ := ¬(◇◇□p)`, `modalTableauKb5' φ₀` produces an open branch
+with raw edges `0 → 1 → 2`, `T(□p)@2 ∈ b`, and `T(p)@0 ∉ b`; `(extractModelKb5 b acc).r 2 0` holds
+by exactly the construction this lemma packages, so the branch is Hintikka-saturated yet
+`extractModelKb5` does *not* actually satisfy `T(□p)@2`'s claim at world `0` -- the truth lemma's
+general statement (quantifying over **every** trigger `w`, not only the root) is false for this
+rule, not merely difficult to prove. -/
+private lemma extractModelKb5_nonRoot_boxPos_gap
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {ψ : Proposition Atom} {a w : WorldIndex} (hw : w ≠ (0 : WorldIndex))
+    (h1 : acc.hasEdge 0 a = true) (h2 : acc.hasEdge a w = true) :
+    (extractModelKb5 b acc).r w (0 : WorldIndex) ∧
+    (⟨.pos, ψ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex) ∉
+      modalKb5BoxAllFull b ψ w := by
+  refine ⟨?_, ?_⟩
+  · rw [extractModelKb5_r]
+    exact Relation.EuclGen.symm_of_symm inferInstance (extractModelKb5_root_reach_scout h1 h2)
+  · intro hmem
+    rcases (modalKb5BoxAllFull_mem hmem).2 with ⟨_, _, hne⟩ | ⟨_, hw0, _⟩
+    · exact hne rfl
+    · exact hw hw0
 
-This breaks the truth lemma's root box-positive case: `T(□ψ)@0 ∈ b` needs `T(ψ)@w' ∈ b` for every
-`w'` with `(extractModelKb5 b acc).r 0 w'`, but `modalFiveBoxAll`'s root arm (the same rule Phase
-22 reuses unmodified for `modalApplyOneKb5`, deliberately restricted to direct successors --
-*that* restriction is exactly what Five's soundness needs, since Five's root is not itself
-reflexive) only forces content at **direct** `acc.hasEdge 0 w'` successors. A raw chain
-`0 → a → c` (`a` non-root, minting a fresh witness `c` because no reuse candidate exists yet --
-a routine, reachable shape under Route (a)'s witness-reuse mint arms) is exactly the case where
-`T(ψ)@c ∈ b` is not forced by the existing rule, yet `(extractModelKb5 b acc).r 0 c` holds.
+/-! ## Phase 3 Blocker (task 525): `modalTruthLemmaKb5` is false for `modalApplyOneKb5'`
 
-**This is not "5/KB5 completeness is impossible."** K5/KB5 completeness via a rooted Euclidean
-tableau is well known to be achievable (Blackburn–de Rijke–Venema §4.8-4.9); the obstruction is
-narrower and structural: `modalApplyOneKb5 := modalApplyOneFive` (Phase 22's literal alias,
-"factor, not clone") is a **root-restricted** rule, deliberately so for Five's soundness, and that
-restriction is precisely what a genuine KB5 completeness proof cannot route around while reusing
-the *same* rule. Reaching `modalTableauKb5_complete` requires a **KB5-specific** propagation rule
-(root box/diamond triggers dumping to the *full* known non-root cluster, matching the non-root
-arm's own unconditional propagation, since the model forces the root into the same equivalence
-class as everyone it can reach) -- and, once root becomes reflexive whenever it has a successor
-(`Relation.symm_rightEuclidean_root_refl`, `Euclidean.lean`), the rule would additionally need to
-propagate root's own box content back onto world `0` itself. Such a rule is no longer definable as
-an alias of `modalApplyOneFive`: it needs its own soundness proof (the *same* unrestricted
-propagation would be **unsound** for the strictly larger `fiveFC` class, so "factor, not clone"
-does not apply to this direction), and its own completeness argument built to match. This is
-substantial, genuinely new tableau-rule design and proof work -- comparable in scope to
-Phases 15-21's Five construction -- not a proof-engineering gap closable by a different closure
-choice or a cleverer induction. Marked `[BLOCKED]` per the escalation protocol; **not** re-narrated
-as an impossibility, and not attempted with a `sorry` or placeholder. -/
+**Finding**: task 524's `modalApplyOneKb5'` repairs the shallow root-only gap the original
+Phase 23 blocker (superseded by this note) recorded, but `extractModelKb5_nonRoot_boxPos_gap`
+above proves a deeper, structurally unrepairable gap survives: the general KB5 truth lemma the
+plan (`specs/525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md`)
+specifies -- branch membership agreeing with `extractModelKb5`-satisfaction at **every** world,
+including non-root trigger worlds connected to the root by a raw two-hop (or longer) chain -- is
+**false** for `modalApplyOneKb5'`, not merely unproved. `modalKb5BoxAllFull`'s non-root cluster-
+dump arm unconditionally excludes target `0` regardless of which world triggers it (only a
+literal `w = 0` trigger gets the self-target arm), while the closure relation's global symmetry
+(`extractModelKb5_symm`) plus the already-landed scout derivation together force `.r w 0` whenever
+`w` is connected to the root by *any* two-hop raw chain, root-triggered or not.
+
+**Reproducible witness**: `φ₀ := ¬(◇◇□p)` (`Proposition.imp (.diamond (.diamond (.box (.atom
+false)))) .bot`, `Atom := Bool`). Running `modalTableauKb5' φ₀` (verified via `lean_run_code`
+`#eval`/`native_decide` outside this file -- kernel `decide` stalls on the real tableau
+computation, the same pre-existing issue task 515 left in `ModalFrameSeparation.lean`) yields an
+open branch `b`/`acc` with raw edges `acc.edges = [(1, 2), (0, 1)]`, `T(□p)@2 ∈ b`, and
+`T(p)@0 ∉ b`. `(extractModelKb5 b acc).r 2 (0 : WorldIndex)` is independently proved (no
+`native_decide` needed) from `acc.hasEdge 0 1 = true`/`acc.hasEdge 1 2 = true` alone, exactly by
+`extractModelKb5_nonRoot_boxPos_gap`'s construction. So `T(□p)@2 ∈ b` while
+`¬ Satisfies (extractModelKb5 b acc) 2 (Proposition.box (.atom false))` (world `0` fails `atom
+false` and `.r 2 0` holds) -- a genuine, checked failure of the truth lemma's would-be statement,
+not a proof search that has not yet succeeded.
+
+**This is not "KB5 completeness is impossible"** (Blackburn–de Rijke–Venema §4.8-4.9 confirms it is
+achievable via a rooted Euclidean tableau in general), but reaching it from this specific
+`extractModelKb5`/`modalApplyOneKb5'` pairing is not possible without a rule change, and
+`modalApplyOneKb5'` is frozen (task 524's landed, sorry-free deliverable; out of this task's
+file_scope to modify). A genuine fix would need either: (i) a rule whose box-positive/diamond-
+negative propagation dumps to the full known cluster *unconditionally* including target `0`
+whenever the cluster is connected to the root by **any** length chain (not just literal `w = 0`
+triggers), which likely requires a different bookkeeping device (e.g. tracking cluster membership
+directly rather than via `w == 0` trigger identity), or (ii) a different model extraction that
+does not let non-root-triggered chains reach the root semantically while the rule stays
+root-trigger-gated. Both are substantial new rule/extraction design, comparable in scope to the
+original Phases 15-21 Five construction -- not a proof-engineering gap closable by a cleverer
+induction on the existing rule. Marked `[BLOCKED]` per the escalation protocol; **not** attempted
+with a `sorry` or placeholder, and `modalApplyOneKb5'` is not modified to try to route around it. -/
 
 end Cslib.Logic.Modal.Tableau
 

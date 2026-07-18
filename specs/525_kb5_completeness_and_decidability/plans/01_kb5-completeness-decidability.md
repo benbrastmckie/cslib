@@ -205,7 +205,49 @@ rather than Five's root/non-root dichotomy.
 
 ---
 
-### Phase 3: KB5 truth lemma `modalTruthLemmaKb5` [NOT STARTED]
+### Phase 3: KB5 truth lemma `modalTruthLemmaKb5` [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: `modalTruthLemmaKb5` as specified (branch membership agreeing with
+  `extractModelKb5`-satisfaction at every world `w`, including non-root triggers) cannot be
+  proved — it is **false** for `modalApplyOneKb5'`, not merely difficult.
+- **What was tried**: Phases 1-2 landed cleanly (reachability infra + Hintikka insertion
+  lemmas, all `lean_verify`-clean). Attempting Phase 3's box-positive case for a general trigger
+  `w` (not just `w = 0`) surfaced that `w' = 0` is reachable via `(extractModelKb5 b acc).r w w'`
+  for `w ≠ 0` (a non-root trigger connected to root by a two-hop raw chain), and
+  `hintikkaKb5'_box_pos`'s hypothesis for this case (`w = 0 ∧ cluster nonempty`) cannot be
+  discharged since the actual trigger `w ≠ 0`.
+- **Why it's stuck**: this is a genuine, Lean-verified mathematical gap, not a proof-search
+  failure. See `extractModelKb5_nonRoot_boxPos_gap` and the `## Phase 3 Blocker (task 525)`
+  module note (`FrameCompleteness.lean`, replacing the old Phase 23 blocker note) for the full
+  proof and a reproducible witness: `φ₀ := ¬(◇◇□p)` makes `modalTableauKb5' φ₀` produce an open
+  branch with raw edges `[(1,2),(0,1)]`, `T(□p)@2 ∈ b`, `T(p)@0 ∉ b`, and
+  `(extractModelKb5 b acc).r 2 0` holds (proved, not just observed) — a genuine countermodel-side
+  failure: the extracted model does not actually satisfy what the branch asserts. Root cause:
+  `modalKb5BoxAllFull`'s non-root cluster-dump arm unconditionally excludes target `0` regardless
+  of the trigger, while the closure's symmetry lets *any* two-hop-connected non-root trigger reach
+  root in the model.
+  - Kernel `decide` does **not** reduce the real `modalTableauKb5'` computation (a pre-existing
+    stall from task 515, also affecting `ModalFrameSeparation.lean`); the witness above was
+    confirmed via `lean_run_code` (`#eval`/`native_decide`, not committed), but the *general*
+    structural fact (`extractModelKb5_nonRoot_boxPos_gap`) is landed as a fully kernel-checked,
+    `native_decide`-free lemma in `FrameCompleteness.lean`.
+- **What is needed**: `modalApplyOneKb5'` is frozen (task 524's landed deliverable; out of this
+  task's file_scope). A genuine fix needs either (i) a rule whose box-positive/diamond-negative
+  propagation dumps to the full known cluster unconditionally including target `0` whenever the
+  cluster is connected to root by *any* length chain (not just literal `w = 0` triggers) — likely
+  requiring a cluster-membership bookkeeping device rather than trigger-identity gating — or (ii) a
+  different model extraction that does not let non-root-triggered chains reach the root
+  semantically while the rule stays root-trigger-gated. Both are new rule/extraction design
+  comparable in scope to the original Phases 15-21 Five construction; this is a follow-on task,
+  not a completion of this plan.
+- **Prohibited workarounds**: no `sorry`, no `def X := True`/vacuous placeholder, no modification
+  of `modalApplyOneKb5'`/`modalTableauKb5'_sound` (frozen, out of scope).
+
+**Downstream impact**: Phases 4, 5, 6, 7 all depend (directly or transitively) on
+`modalTruthLemmaKb5` and are marked `[BLOCKED]` below per the escalation protocol — none of
+`modalOpenBranchKb5'_countermodel`/`modalTableauKb5'_complete`/`kb5Valid_decides`/
+`instDecidableKb5Valid` can be built without it.
 
 **Goal**: Land `modalTruthLemmaKb5`, mirroring `modalTruthLemmaFive`
 (FrameCompleteness.lean:2693-2886) against `extractModelKb5`: for an open Hintikka branch of
@@ -246,7 +288,9 @@ formula, by strong induction on `modalComplexity`.
 
 ---
 
-### Phase 4: KB5 open-branch supporting facts (Hintikka lift, accSourcesKnown, accTargetsKnown) [NOT STARTED]
+### Phase 4: KB5 open-branch supporting facts (Hintikka lift, accSourcesKnown, accTargetsKnown) [BLOCKED]
+
+**BLOCKER**: depends on Phase 3, which is blocked (`modalTruthLemmaKb5` is false for `modalApplyOneKb5'`, see Phase 3's blocker note above). Not attempted -- building this phase's supply lemmas would only feed a completeness theorem that cannot close.
 
 **Goal**: Land the entry-point plumbing the completeness theorem consumes for `modalApplyOneKb5'`,
 mirroring the Five supply lemmas invoked inside `modalTableauFive_complete`
@@ -290,7 +334,9 @@ generic Hintikka lift, `accSourcesKnown` via the generic open-branch lemma, and 
 
 ---
 
-### Phase 5: `modalOpenBranchKb5'_countermodel`, `modalTableauKb5'_complete`, decidability [NOT STARTED]
+### Phase 5: `modalOpenBranchKb5'_countermodel`, `modalTableauKb5'_complete`, decidability [BLOCKED]
+
+**BLOCKER**: depends on Phases 3 and 4, both blocked. `modalTableauKb5'_complete` cannot be stated as a theorem (its proof obligation, `modalTruthLemmaKb5`, is false) without either modifying the frozen `modalApplyOneKb5'` rule (out of scope) or a new rule/extraction design (out of scope for this plan). Not attempted.
 
 **Goal**: Assemble the countermodel wrapper, the completeness theorem wired through the
 `modalTableauKb5'` entry point, and the decidability instance.
@@ -329,7 +375,9 @@ generic Hintikka lift, `accSourcesKnown` via the generic open-branch lemma, and 
 
 ---
 
-### Phase 6: Documentation reconciliation [NOT STARTED]
+### Phase 6: Documentation reconciliation [BLOCKED]
+
+**BLOCKER**: depends on Phase 5 (blocked). The plan's Phase 6 goal was to retire the Phase 23 blocker note as delivered; instead, `FrameCompleteness.lean`'s blocker note has been REPLACED with a new, more precise `## Phase 3 Blocker (task 525)` note (see Phase 3 above) documenting the deeper gap found in this task. The `FiveSimplification.lean`/`S5Simplification.lean` "completeness is deferred"/"remains open" framing has intentionally been LEFT AS-IS (not reconciled to "delivered"), since completeness is genuinely still not delivered -- reconciling those notes to claim delivery would be false. No edits made to either file (both outside this task's actual file_scope for a completed deliverable in any case).
 
 **Goal**: Update every stale framing that describes KB5 completeness as blocked/open, now that it
 is delivered. Keep the scout lemma as documentation of the design constraint the new rule
@@ -372,7 +420,9 @@ satisfies — do NOT delete it or reframe it as an open blocker.
 
 ---
 
-### Phase 7: Regression tests + full CI pipeline [NOT STARTED]
+### Phase 7: Regression tests + full CI pipeline [BLOCKED]
+
+**BLOCKER**: depends on Phase 5 (blocked) for `instDecidableKb5Valid` -- there is no new decidability instance to exercise in `ModalFrameSeparation.lean`. The full CSLib CI pipeline is still run (see task-level verification below) to confirm the landed Phase 1/2 additions do not regress the build; `ModalFrameSeparation.lean` is not edited since its `instDecidableKb5Valid`-is-not-yet-landed framing remains accurate.
 
 **Goal**: Extend `ModalFrameSeparation.lean` to exercise the new decidability instance, then run
 the full CSLib CI pipeline to completion.

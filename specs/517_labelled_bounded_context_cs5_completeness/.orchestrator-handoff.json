@@ -1,99 +1,85 @@
 {
   "status": "implemented",
-  "skeleton": true,
-  "phases_completed": 5,
+  "skeleton": false,
+  "phases_completed": 6,
   "phases_total": 11,
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
       "plan_version": 5,
-      "note": "Phase 5 of v5 marked [COMPLETED]. flo_oldlabel_transport is fully sorry-free and axiom-clean."
+      "note": "Phase 6 of v5 marked [COMPLETED]. primeLemma is fully sorry-free and axiom-clean -- the Phase 4.5 completion milestone."
     },
     {
       "type": "implementation",
       "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "summary": "Phase 5: added substFn/substFn_self/substFn_other/List.map_substFn_eq_self and NIK.relabelFresh (all sorry-free, axiom-clean) -- a one-directional relabeling transport theorem generalizing NIK.swap_relabel to a non-involutive substitution `a ↦ b` that fixes `b` outright. flo_oldlabel_transport is discharged from NIK.relabelFresh exactly as NIK.freshWitness_transport was built from NIK.swap_relabel, and is now fully sorry-free (documented deviation: a rank-indexed/well-founded induction using FLO-2, as the plan anticipated, turned out to be unnecessary -- the one-directional substitution avoids the naive-swap collision by construction without needing FLO at all)."
+      "summary": "Phase 6: closed ChainCtx.deriv_reflect and dwitness_mem_of_maximal's diamond old-label sub-case. Relocated substFn/NIK.relabelFresh earlier in the file (content unchanged) so both use sites can reach them before FloSeq/FLO are defined. Added two new graph-generic corollaries built directly from NIK.relabelFresh -- NIK.oldLabelTransport and NIK.diaWitnessTransportOld -- needing no FloSeq/FLO at all (only source-witness freshness, never target freshness). Added GChain (a graph-only chain abstraction, dropping Context's dwitnessMem/coinfinite obligations which NIK never reads) and NIK.reflectChain (a master structural-induction reflection theorem: reflects an arbitrary NIK-derivation over a chain's union graph down to a single member, picking one fresh witness per (BoxI)/(DiaE) node and rebuilding the whole cofinite family via the one-directional transport) to close deriv_reflect, which had no prior proof skeleton. Closed dwitness_mem_of_maximal via NIK.diaWitnessTransportOld applied directly to H.G. Added a new explicit hypothesis hx0 : x0 in G0.G.X to dwitness_mem_of_maximal/diamond_of_maximal/primeLemma (a standard well-formedness assumption, matching Simpson's own implicit convention that the excluded judgement's label is a label of the graph) to rule out the one genuinely new edge case the transport surfaces (excluded label coinciding with the freshly-adjoined witness). Added Label.ne_dwitness_self (structural non-self-reference) as a small supporting lemma."
     },
     {
       "type": "summary",
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/15_flo-oldlabel-transport-phase5-summary.md",
-      "summary": "Phase 5 implementation summary, including the Plan Deviations section explaining why rank induction was unnecessary."
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/16_phase6-primelemma-sorry-free-summary.md",
+      "summary": "Phase 6 implementation summary, including the headline finding that primeLemma never depended on the FLO/FloSeq reconstruction at all, and the Plan Deviations section."
     }
   ],
   "sorry_inventory": [
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 396,
-      "statement": "theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} : Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ",
+      "line": 1961,
+      "statement": "theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ) : FLO 𝒮 (σ + 1) -- one sorry remaining, in the FLO-2 clause's `redundantEdge` case, sub-case where the edge is genuinely new (not inherited from stage σ)",
       "strategic": true,
-      "assumption": "Assumes the swap-transport argument extends to labels already present in some chain member's domain ('old' labels), not just the shared coinfinite reserve.",
-      "why_deferred": "flo_oldlabel_transport (Phase 5, now sorry-free) supplies exactly this fact for a FloSeq-staged context; ChainCtx is a distinct (more general) abstraction over an arbitrary Preorder ι, not literally a FloSeq. Phase 6 wires the fact in -- either by adapting deriv_reflect's statement to consume a FloSeq-staged chain (matching how primeC'_exists_maximal will supply H), or by re-deriving an analogous ChainCtx-level transport corollary from flo_oldlabel_transport's proof technique (NIK.relabelFresh applies unchanged; only the housing theorem differs).",
-      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport / NIK.relabelFresh into deriv_reflect."
+      "assumption": "Assumes the newly-adjoined redundant edge's introduction stage coheres with FLO-2's exact-locality requirement.",
+      "why_deferred": "CONFIRMED mathematically inadmissible for an unconstrained FloSeq (Phase 2 finding). RESOLVED ALONG THE FAIR-SCHEDULE TRACE by Phase 4: flo_succ_fair is fully sorry-free. flo_succ itself is deliberately left untouched per the Postmortem Constraints ('MUST preserve... flo_succ... verbatim') and is simply superseded (not relied upon) by flo_succ_fair. UNCHANGED by Phases 5-6. NOT on primeLemma's dependency path (primeLemma routes through primeC_exists_maximal, the plain zorn_le₀ Zorn maximalisation, not the FLO apparatus at all).",
+      "follow_up_task": "None required for plan progress (superseded by flo_succ_fair, and confirmed non-blocking for primeLemma). Optional cleanup only, per explicit orchestrator instruction: DO NOT TOUCH."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 944,
-      "statement": "theorem dwitness_mem_of_maximal ... : Label.dwitness y B ∈ H.G.X (diamond-witness maximality, 'old label' cofinite-range sub-case)",
-      "strategic": true,
-      "assumption": "Assumes the single witnessing NIK-derivation at v = dwitness y B can be transported to a diaE-style cofinite premise (∀y'∉L, ...) covering every y' outside a FINITE exclusion set L, including y' already present in H.G.X ('old' labels).",
-      "why_deferred": "SAME root cause as deriv_reflect, now directly dischargeable: flo_oldlabel_transport (Phase 5, sorry-free) is exactly this fact, PROVIDED H is `𝒮.H σ` for some FloSeq 𝒮 and stage σ (H here is Maximal (· ∈ primeC ...), which Phase 4's primeC'_exists_maximal supplies as `𝒮.H σ0`). Phase 6 wires this in.",
-      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport into dwitness_mem_of_maximal's diamond old-label sub-case."
-    },
-    {
-      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1453,
-      "statement": "theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ) : FLO 𝒮 (σ + 1) -- one sorry remaining, in the FLO-2 clause's `redundantEdge` case, sub-case `x = a, y = b` where the edge (a,b) is genuinely new (not inherited from stage σ)",
-      "strategic": true,
-      "assumption": "Assumes the newly-adjoined redundant edge (a,b)'s introduction stage coheres with FLO-2's exact-locality requirement `max (rankOf a) (rankOf b) = sInf {τ | edge τ}`.",
-      "why_deferred": "CONFIRMED mathematically inadmissible for an unconstrained FloSeq (Phase 2 finding). RESOLVED ALONG THE FAIR-SCHEDULE TRACE by Phase 4: flo_succ_fair is fully sorry-free -- see flo_succ_fair/flo_holds_everywhere, verified lean_verify-clean. flo_succ itself (this entry, Phase 2) is deliberately left untouched per the Postmortem Constraints and its own sorryAx remains, but is simply superseded (not relied upon) by flo_succ_fair for any schedule satisfying hRedundant. UNCHANGED by Phase 5. Retained for traceability, not because it blocks anything further.",
-      "follow_up_task": "None required for plan progress (superseded by flo_succ_fair). Optional cleanup, non-blocking."
-    },
-    {
-      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1784,
+      "line": 2292,
       "statement": "theorem primeC'_exists_maximal (x₀ A₀ h0 𝒮 hfair hRedundant hprimeC) : ∃ σ, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒮.H σ) ∧ FLO 𝒮 σ -- one sorry remaining: the 'no strict primeC-extension exists' half of the Maximal conjunct, at σ0 := Ordinal.lsub (choose ∘ hfair)",
       "strategic": true,
       "assumption": "Assumes hfair's one-shot-per-task firing, past a bound σ0 strictly after every task's guaranteed firing, is sufficient for 𝒮.H σ0 to be closed under every primeC-preserving one-step extension (i.e. Maximal).",
-      "why_deferred": "IDENTIFIED in Phase 4 (distinct from, and deeper than, the redundantEdge finding): stepExt's .formula/.diaWitness branches are no-ops when their precondition fails; a task's precondition can become newly satisfiable only AFTER its one hfair-guaranteed firing. hfair gives no re-attempt guarantee, so sigma0's 𝒮.H σ0 need not be primeC-maximal. FLO 𝒮 σ0 (via flo_holds_everywhere) and 𝒮.H σ0 ∈ primeC (via hprimeC σ0) are BOTH sorry-free; only this one conjunct-half is open. UNCHANGED by Phase 5 -- Phase 5 deliberately did not depend on this sorry (flo_oldlabel_transport only consumes FLO 𝒮 σ, sorry-free via flo_holds_everywhere, not Maximal).",
-      "follow_up_task": "Plan v5: (1) strengthen hfair to a cofinal, precondition-aware fairness hypothesis; (2) prove a cardinality/ordinal-stabilization lemma showing a cofinally-fair, primeC-preserving, monotone-growing schedule stabilizes at a maximal stage. See summaries/14_flo-maximal-phase4-summary.md for the full gap analysis. Needed before Phase 6 can complete `primeLemma`'s FULL sorry-free status end-to-end (deriv_reflect/dwitness_mem_of_maximal can be closed independently of this one, but `primeLemma` itself routes through primeC'_exists_maximal too)."
+      "why_deferred": "IDENTIFIED in Phase 4: stepExt's .formula/.diaWitness branches are no-ops when their precondition fails; a task's precondition can become newly satisfiable only AFTER its one hfair-guaranteed firing. hfair gives no re-attempt guarantee. FLO 𝒮 σ0 (via flo_holds_everywhere) and 𝒮.H σ0 ∈ primeC (via hprimeC σ0) are BOTH sorry-free; only this one conjunct-half is open. NOT attempted in Phase 6: my Phase-6 finding (that the old-label transport is graph-generic and needs no FLO) means this sorry is NOT on primeLemma's dependency path -- primeLemma is assembled from primeC_exists_maximal (plain zorn_le₀), not primeC'_exists_maximal. Closing this sorry is no longer required for primeLemma's sorry-free status; it remains open only for a hypothetical future need of the FLO apparatus itself (e.g. if a later phase wants the FLO-carrying maximal context for some other purpose).",
+      "follow_up_task": "Not required for plan progress (primeLemma does not need it -- CONFIRMED this dispatch via lean_verify: no sorryAx in primeLemma's dependency closure). If ever needed: (1) strengthen hfair to a cofinal, precondition-aware fairness hypothesis; (2) prove a cardinality/ordinal-stabilization lemma. See summaries/14_flo-maximal-phase4-summary.md for the full gap analysis."
     }
   ],
   "blockers": [],
   "continuation_path": null,
-  "next_action_hint": "Phase 5 of plan v5 is COMPLETED and committed (task 517 phase 5). flo_oldlabel_transport is fully sorry-free and lean_verify-clean ([propext, Classical.choice, Quot.sound], no sorryAx), together with the new reusable general lemma NIK.relabelFresh and its substFn helper machinery. DOCUMENTED DEVIATION: the plan anticipated a well-founded/rank induction using FLO-2 to avoid the naive-swap collision; a simpler one-directional (non-involutive) substitution sufficed instead, avoiding the collision by construction without needing FLO/rankOf at all -- see the Plan Deviations section of summaries/15_flo-oldlabel-transport-phase5-summary.md and the module docstring immediately above flo_oldlabel_transport in the probe. Next dispatch: /implement 517 --hard --lit targeting Phase 6 (wire flo_oldlabel_transport into deriv_reflect at probe line 396 and dwitness_mem_of_maximal's diamond old-label sub-case at probe line 944, then re-verify primeLemma). NOTE for Phase 6: deriv_reflect is stated over the more general ChainCtx abstraction (arbitrary Preorder ι), not literally a FloSeq -- Phase 6 will need to either restate/adapt deriv_reflect to consume a FloSeq-staged chain (matching how dwitness_mem_of_maximal's H = 𝒮.H σ0 will supply it) or re-derive an analogous ChainCtx-level corollary using the same NIK.relabelFresh technique. primeLemma's own full sorry-free status additionally still needs the primeC'_exists_maximal Maximal-conjunct sorry (line 1784, pre-existing, Phase 4) closed -- that is a SEPARATE, deeper obstacle from the old-label transport this phase resolved; Phase 6 can close deriv_reflect/dwitness_mem_of_maximal independently of it, but primeLemma end-to-end will need both. Do NOT retry any of the five ruled-out shortcuts (Postmortem Constraints). Preserve: Phase 1's Stage/FloTask/stepExt/FloSeq/rankOf/FLO definitions, Phase 2's FloSeq.mono/flo_succ, Phase 3's flo_limit, Phase 4's flo_succ_fair/flo_holds_everywhere/primeC'_exists_maximal, and this phase's substFn/NIK.relabelFresh/flo_oldlabel_transport verbatim (do not redefine).",
+  "next_action_hint": "Phase 6 of plan v5 is COMPLETED and committed (task 517 phase 6, two commits: 'phase 6.1: close ChainCtx.deriv_reflect...' and 'phase 6: close dwitness_mem_of_maximal...'). primeLemma is fully sorry-free and lean_verify-clean ([propext, Classical.choice, Quot.sound], no sorryAx) -- THE PHASE 4.5 COMPLETION MILESTONE IS MET. HEADLINE FINDING for the next dispatch: primeLemma is assembled from primeC_exists_maximal (the plain zorn_le₀ Zorn maximalisation), NOT primeC'_exists_maximal (the FLO-carrying reconstruction) -- it never needed FLO. The old-label obstacle both remaining Phase-6 sorries shared is resolvable entirely at the NIK/Graph level via a ONE-DIRECTIONAL (substFn, non-involutive) relabeling that needs freshness of only the SOURCE witness, never the target -- unlike swapFn (involutive, corrupts old-label structure) or no-relabelling (needs an unboundedly-indexed chain family), which the divergence audit correctly ruled out for THEIR OWN techniques but did not anticipate this fourth technique. The FLO apparatus (Stage/FloTask/stepExt/FloSeq/rankOf/FLO/flo_succ/flo_limit/flo_succ_fair/flo_holds_everywhere/primeC'_exists_maximal/flo_oldlabel_transport, Phases 1-5) remains landed VERBATIM (Postmortem Constraints) and is NOT deleted, but is confirmed NOT load-bearing for primeLemma. Next dispatch: /implement 517 --lit targeting Phase 7 (transcribe primeLemma + supporting clause theorems from the probe into Cslib/ mainline). FLAGGED FOR CONFIRMATION (analogous to the existing Phase-4 T-Comp flag already in the plan): since primeLemma does not depend on the FLO apparatus, Phase 7 could transcribe primeLemma alone (via primeC_exists_maximal/zorn_le₀) WITHOUT the FLO carrier, simplifying the mainline transcription relative to the plan's original scope -- confirm with the user/orchestrator before Phase 7 begins whether the FLO apparatus should ALSO be transcribed (e.g. for its own independent research value) or left in probes/ as an unused (but correct, landed) exploratory line. Also note the new hx₀ : x₀ ∈ G₀.G.X hypothesis primeLemma now carries -- Phase 7's mainline transcription and any downstream caller (Phase 8-10) must supply it; this is expected to be trivially available wherever primeLemma is actually invoked (the 'root' world of the base graph), consistent with Simpson's own implicit convention, but should be double-checked against the actual call site once Phase 8-10 are written. Preserve Phases 1-5's landed assets verbatim; preserve this phase's new GChain/NIK.reflectChain/NIK.oldLabelTransport/NIK.diaWitnessTransportOld/Label.ne_dwitness_self/exists_index_of_subset_unionΓ verbatim.",
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 6,
-    "next_action_hint": "Wire flo_oldlabel_transport (sorry-free) into deriv_reflect (probe line 396) and dwitness_mem_of_maximal (probe line 944). deriv_reflect's ChainCtx abstraction is more general than FloSeq -- reconcile by either adapting its statement or deriving a ChainCtx-level corollary via the same NIK.relabelFresh technique. primeLemma's full end-to-end sorry-free status additionally needs primeC'_exists_maximal's remaining Maximal-conjunct sorry (line 1784) closed, a separate deeper obstacle not targeted by Phase 5 or (necessarily) by Phase 6.",
+    "next_phase": 7,
+    "next_action_hint": "Transcribe primeLemma (fully sorry-free, axiom-clean) and its supporting clause theorems into Cslib/ mainline. primeLemma routes through primeC_exists_maximal (zorn_le₀), not the FLO apparatus -- flag for confirmation whether Phase 7 should also transcribe the (correct, landed, but non-load-bearing) FLO machinery or leave it in probes/. primeLemma now carries a new hx₀ : x₀ ∈ G₀.G.X hypothesis that downstream callers must supply.",
     "obstacle_deeper_than_dispatch": false
   },
-  "summary": "Phase 5 of plan v5 implemented: proved flo_oldlabel_transport (the shared old-label reflection lemma, 'the mathematical crux') fully sorry-free and axiom-clean. Documented deviation from the plan's anticipated proof shape: Task 5.1 expected a well-founded/rank induction using FLO-2's edge-locality bound to avoid the naive-swap collision the Postmortem Constraints flag (swapFn's involution also relocates the old label's own structure onto the fresh witness). Closer analysis found a simpler sufficient construction -- a one-directional (non-involutive) relabeling substFn a b (a maps to b, identity everywhere else, in particular fixing b) never touches b's own incident edges at all, avoiding the collision by construction (satisfying the task's own stated requirement) via a different construction than anticipated. The only freshness fact used is y0 not in the ambient graph's domain (already part of the theorem's fixed Phase-1 signature); FLO/rankOf/FLO-2 are not needed by the proof, so the well-founded induction of Task 5.1 and the separate assembly of Task 5.2 both turned out to be unnecessary -- flo_oldlabel_transport's single conclusion already covers every y' (fresh or old, dwitness-shaped or not) uniformly in one shot; NIK.freshWitness_transport is the special case where y' also happens to be fresh. Landed the reusable general lemma NIK.relabelFresh (mirrors NIK.swap_relabel's case shape, ~150 lines) plus substFn/substFn_self/substFn_other/List.map_substFn_eq_self, all sorry-free and axiom-clean. lake env lean on the probe is clean: exit 0, zero errors, sorry count unchanged at 4 (the pre-existing deriv_reflect/dwitness_mem_of_maximal/flo_succ/primeC'_exists_maximal strategic sorries from Phases 2-4, all preserved verbatim, none newly introduced). --lit re-read of chunk_0102.md/chunk_0103.md confirmed no further textual guidance beyond what prior phases already extracted (the fresh-vs-old label distinction is an artifact of this development's cofinite-quantifier Lean encoding, not present in Simpson's informal proof). Zero-debt invariant holds: zero Cslib/ mainline files touched; Phases 1-4's landed assets (Stage/FloTask/stepExt/FloSeq/rankOf/FLO, FloSeq.mono, flo_succ, flo_limit, flo_succ_fair/flo_holds_everywhere/primeC'_exists_maximal) and Phase 3/4's NIK.swap_relabel/NIK.freshWitness_transport/NIK.diaWitness_transport were not edited -- the new machinery is additive. Plan v5 Phase 5 heading updated to [COMPLETED] with both checklist items (5.1, 5.2) annotated as deviations plus the --lit task marked done. Committed as 'task 517 phase 5: prove flo_oldlabel_transport (shared old-label reflection lemma)'.",
+  "summary": "Phase 6 of plan v5 implemented: closed both of ChainCtx.deriv_reflect and dwitness_mem_of_maximal's diamond old-label strategic sorries, and confirmed primeLemma is now FULLY SORRY-FREE and axiom-clean -- the Phase 4.5 completion milestone. deriv_reflect (which had no prior proof skeleton) was closed via a new GChain (graph-only chain) + NIK.reflectChain master reflection induction; dwitness_mem_of_maximal was closed via NIK.diaWitnessTransportOld applied directly to H.G. Both use two new graph-generic corollaries of NIK.relabelFresh (Phase 5's substFn machinery, relocated earlier in the file so both use sites can reach it before FloSeq/FLO exist): NIK.oldLabelTransport and NIK.diaWitnessTransportOld. HEADLINE CORRECTIVE FINDING: the prior three-dispatch diagnosis that this obstacle needs 'route (a)' (the FLO/FloSeq transfinite reconstruction) assumed swap-based (involutive) transport or no-relabelling reuse -- both genuinely fail for old labels, as that diagnosis correctly established. Neither obstacle applies to a ONE-DIRECTIONAL (substFn, non-involutive) relabeling, which needs freshness of only the SOURCE witness, never the target. This is a fourth technique the divergence audit did not test. Consequently primeLemma -- assembled from primeC_exists_maximal (plain zorn_le₀), not primeC'_exists_maximal (the FLO reconstruction) -- never needed FLO at all. lean_verify primeLemma: axioms [propext, Classical.choice, Quot.sound], no sorryAx -- confirmed independent of primeC'_exists_maximal's own remaining Maximal-conjunct sorry and flo_succ's superseded redundantEdge sorry, neither of which is on primeLemma's dependency path. Closing dwitness_mem_of_maximal surfaced one genuinely new requirement (excluded label x₀ must differ from the freshly-adjoined witness v), discharged by a new explicit hypothesis hx₀ : x₀ ∈ G₀.G.X threaded through dwitness_mem_of_maximal/diamond_of_maximal/primeLemma -- a standard well-formedness assumption matching Simpson's own implicit convention, not a weakening of any FLO- or old-label-related argument. Also added Label.ne_dwitness_self (structural non-self-reference, by recursion on Label) and exists_index_of_subset_unionΓ (finite-list chain-index-covering helper for deriv_reflect). lake env lean on the probe is clean: exit 0, zero errors, sorry count DOWN from 4 to 2 -- the two remaining sorries (flo_succ's superseded redundantEdge branch, primeC'_exists_maximal's deeper Maximal-conjunct gap) are both pre-existing, documented, explicitly out of this phase's scope (Postmortem Constraints / the plan's own Rollback/Contingency section), and CONFIRMED via lean_verify not to appear in primeLemma's axiom footprint. Zero-debt invariant holds: zero Cslib/ mainline files touched; Phases 1-5's landed assets not edited (only relocated: substFn/NIK.relabelFresh moved earlier in the file, content byte-identical). Plan v5 Phase 6 heading updated to [COMPLETED], Preserved Assets table's primeLemma row updated to [COMPLETED]. Committed as two green sub-step commits: 'task 517 phase 6.1: close ChainCtx.deriv_reflect via graph-generic old-label transport' and 'task 517 phase 6: close dwitness_mem_of_maximal; primeLemma now fully sorry-free'.",
   "modified_files": [
     "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/15_flo-oldlabel-transport-phase5-summary.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/summaries/16_phase6-primelemma-sorry-free-summary.md"
   ],
   "verification": {
     "build_passed": true,
     "probe_module_build_passed": true,
-    "sorry_count_in_probe": 4,
+    "sorry_count_in_probe": 2,
     "sorry_count_in_scope_mainline_files": 0,
     "new_axiom_count": 0,
-    "axioms_in_probe": [
+    "axioms_in_probe_overall": [
       "propext",
       "Classical.choice",
       "Quot.sound",
-      "sorryAx (4 documented sorries: deriv_reflect, dwitness_mem_of_maximal, flo_succ (superseded, untouched), primeC'_exists_maximal (narrowed))"
+      "sorryAx (2 documented, pre-existing, out-of-scope sorries: flo_succ's superseded redundantEdge branch, primeC'_exists_maximal's Maximal-conjunct)"
     ],
     "vacuous_count": 0,
     "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true,
-    "primeLemma_fully_sorry_free": false,
-    "flo_oldlabel_transport_sorry_free": true,
-    "flo_oldlabel_transport_axiom_clean": true,
-    "nik_relabelFresh_sorry_free": true,
-    "nik_relabelFresh_axiom_clean": true
+    "primeLemma_fully_sorry_free": true,
+    "primeLemma_axiom_clean": true,
+    "primeLemma_axioms": ["propext", "Classical.choice", "Quot.sound"],
+    "deriv_reflect_sorry_free": true,
+    "deriv_reflect_axiom_clean": true,
+    "dwitness_mem_of_maximal_sorry_free": true,
+    "dwitness_mem_of_maximal_axiom_clean": true,
+    "diamond_of_maximal_sorry_free": true,
+    "diamond_of_maximal_axiom_clean": true
   }
 }

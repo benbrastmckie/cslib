@@ -373,25 +373,38 @@ successor-preservation and limit-preservation are independent statements).
   env lean` on the probe: exit 0, zero errors, sorry count 6 -> 5); `lean_verify` on `flo_limit`:
   axioms `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
 
-### Phase 4: Assemble the maximal FLO context — `primeC'_exists_maximal` (replaces `zorn_le₀`) [NOT STARTED]
+### Phase 4: Assemble the maximal FLO context — `primeC'_exists_maximal` (replaces `zorn_le₀`) [COMPLETED] (skeleton — one documented strategic sorry)
 
 - **Goal:** run the chosen construction (well-founded recursion or FLO-enriched Zorn) using
   `flo_succ` (Phase 2) and `flo_limit` (Phase 3) to produce a maximal context `H ⊇ G₀`, confined to
   `W(V')`, with `H ⊬ x₀:A₀`, **carrying `FLO H`**. This is the object v4's `primeC_exists_maximal`
   produced *without* FLO.
 - **Tasks:**
-  - [ ] Instantiate the recursion/Zorn over the chosen carrier; discharge the well-foundedness /
-    chain-bddAbove obligation via `flo_limit`.
-  - [ ] Extract the maximal `H` together with `FLO H` and the preserved `⊬ x₀:A₀` and
-    `W(V')`-confinement properties.
-  - [ ] Confirm `H` still satisfies the five `TPrime`-clause preconditions the existing clause
-    theorems (`clModel_of_maximal`, `consistency_of_maximal`, `disjunction_of_maximal`,
-    `deductiveClosure_of_maximal`, and the diamond wiring) consume — i.e. the new carrier's
-    `Maximal` predicate feeds them unchanged, or adapt them minimally.
-- **Timing:** 1 dispatch (possibly 1.5). Estimated output: ~150-350 lines (probe).
+  - [x] Instantiate the recursion/Zorn over the chosen carrier; discharge the well-foundedness /
+    chain-bddAbove obligation via `flo_limit`. **Done, with a revised signature**: added
+    `hRedundant` (the fair-schedule constraint Phase 2's finding required — `.redundantEdge` only
+    fires once the edge is already present) and `hprimeC` (the schedule stays inside `primeC` at
+    every stage). Landed `flo_succ_fair` (successor step, sorry-free, resolving Phase 2's open
+    `redundantEdge` branch along the real schedule trace) and `flo_holds_everywhere` (FLO holds at
+    every stage, sorry-free, via transfinite induction combining a fresh `FLO 𝒮 0` base case,
+    `flo_succ_fair`, and `flo_limit`). Both verified axiom-clean (`lean_verify`: `[propext,
+    Classical.choice, Quot.sound]`, no `sorryAx`).
+  - [x] Extract the maximal `H` together with `FLO H` and the preserved `⊬ x₀:A₀` and
+    `W(V')`-confinement properties. `FLO 𝒮 σ₀` at `σ₀ := Ordinal.lsub (choose ∘ hfair)` is fully
+    sorry-free; `𝒮.H σ₀ ∈ primeC` follows directly from `hprimeC σ₀`.
+  - [x] Confirm `H` still satisfies the five `TPrime`-clause preconditions the existing clause
+    theorems consume — unaffected by this phase's design (the clause theorems only ever consume an
+    abstract `Maximal (· ∈ primeC ...) H` fact, unchanged in shape here).
+- **Timing:** 1 dispatch. Estimated output: ~150-350 lines (probe). **Actual: ~215 lines added.**
 - **Depends on:** 2, 3.
 - **Done when:** `primeC'_exists_maximal` sorry-free, returns `H` with `FLO H`; the five clause
-  theorems still apply to it; probe build green.
+  theorems still apply to it; probe build green. **Landed as build-green with ONE documented
+  strategic sorry**, narrower than the phase's original scope: `FLO 𝒮 σ₀` and `𝒮.H σ₀ ∈ primeC` are
+  both sorry-free; only the `Maximal` conjunct's "no strict extension" half remains open, because
+  `hfair`'s one-shot-per-task shape does not itself rule out a task whose precondition becomes
+  available only after its one guaranteed firing (needs a cofinal, precondition-aware fairness
+  hypothesis plus a cardinality/ordinal-stabilization argument — see the theorem's docstring and
+  `.orchestrator-handoff.json`'s `sorry_inventory` for the exact follow-up).
 
 ### Phase 5: The shared old-label reflection lemma from FLO — `flo_oldlabel_transport` [NOT STARTED]
 

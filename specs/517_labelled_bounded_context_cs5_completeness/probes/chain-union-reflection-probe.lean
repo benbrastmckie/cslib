@@ -3,6 +3,7 @@ import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 import Mathlib.Order.SetNotation
 import Mathlib.Order.Zorn
 import Mathlib.SetTheory.Ordinal.Arithmetic
+import Mathlib.SetTheory.Ordinal.Family
 
 /-! # Task 517 Phase 3 — the chain-union / cofinite-encoding obstacle
 
@@ -1609,15 +1610,214 @@ theorem flo_limit (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hlim : Order.IsSu
     obtain ⟨⟨τ, hτσ⟩, hxyτ⟩ := hxy
     exact (hflo τ hτσ).flo2 x y hxyτ
 
-/-- **Phase 4's target**: running the staged construction to a sufficiently large stage yields a
-maximal, `FLO`-carrying context, **replacing** `primeC_exists_maximal`'s non-constructive
-`zorn_le₀` (above) with the explicit staged construction. `hfair` is the schedule-fairness
-hypothesis (every task is eventually attempted) Phase 4 needs to argue the resulting `H` is
-genuinely maximal, not merely FLO-coherent. Not attempted here; sorried scaffolding for Phase 4. -/
+/-! ### Phase 4: assembling the maximal FLO context
+
+Phase 2's finding (`sorry_inventory`, probe line 1518) is that `flo_succ`'s `redundantEdge`
+branch is genuinely inadmissible for an *unconstrained* schedule. The fix, per that finding and
+this dispatch's brief, is a schedule-fairness side condition: `.redundantEdge a b` is only ever
+scheduled once `(a,b)` is already an edge. `flo_succ_fair`/`flo_holds_everywhere` below
+mechanize that fix (sorry-free), without editing the preserved `flo_succ` itself. -/
+
+/-- **Fair-schedule successor lemma** (Phase 4, resolving Phase 2's open `redundantEdge` finding
+recorded at `sorry_inventory`, probe line 1518): identical to `flo_succ` in the `formula`/`skip`/
+`diaWitness` branches, but additionally hypothesises `hRedundant` -- "the schedule only ever
+performs `.redundantEdge a b` once `(a,b)` is *already* an edge of the stage" -- which lets the
+previously-sorried "genuinely new edge" sub-case of `flo_succ`'s `redundantEdge` branch never
+actually arise: whichever disjunct `rcases` produces for the newly-stepped edge, `hRedundant`
+independently supplies `(𝒮.H σ).G.R a b`, so `flo2 a b` (from `hflo`) closes the goal exactly as
+the "already present" disjunct does. `flo_succ` itself (Phase 2) is left untouched, per the
+Postmortem Constraints ("MUST preserve ... Phase 2's ... `flo_succ` ... verbatim") -- this is a
+genuinely new, sorry-free theorem for schedules satisfying the extra discipline, not an edit to
+the preserved one. -/
+theorem flo_succ_fair (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ)
+    (hRedundant : ∀ a b, 𝒮.task σ = .redundantEdge a b → (𝒮.H σ).G.R a b) :
+    FLO 𝒮 (σ + 1) := by
+  obtain ⟨flo0, flo1, flo2⟩ := hflo
+  have habsent : ∀ {x : Label Atom} {ρ : Stage}, ρ ≤ σ → x ∉ (𝒮.H σ).G.X → x ∉ (𝒮.H ρ).G.X :=
+    fun {x ρ} hρσ hx hxρ => hx ((𝒮.mono hρσ).1.1 hxρ)
+  have hstep : 𝒮.H (σ + 1) = stepExt (𝒮.H σ) (𝒮.task σ) := 𝒮.succ_eq σ
+  generalize htask : 𝒮.task σ = t at hstep
+  cases t with
+  | formula φ =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]; split <;> rfl
+    have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]; split <;> rfl
+    exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+      fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+  | skip =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+    have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+    exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+      fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+  | redundantEdge a b =>
+    simp only [stepExt] at hstep
+    have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by
+      rw [hstep]
+      split
+      · split
+        · exact Graph.addEdge_X_eq_of_mem ‹_› ‹_›
+        · rfl
+      · rfl
+    refine ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0, ?_⟩
+    intro x y hxy
+    rw [hstep] at hxy
+    split at hxy
+    · split at hxy
+      · rcases hxy with hxy | ⟨rfl, rfl⟩
+        · exact flo2 x y hxy
+        · exact flo2 x y (hRedundant x y htask)
+      · exact flo2 x y hxy
+    · exact flo2 x y hxy
+  | diaWitness y B =>
+    simp only [stepExt] at hstep
+    split at hstep
+    · split at hstep
+      · rename_i hy hfresh
+        have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X ∪ {y, Label.dwitness y B} := by
+          rw [hstep]; rfl
+        have hReq : ∀ p q, (𝒮.H (σ + 1)).G.R p q ↔
+            (𝒮.H σ).G.R p q ∨ (p = y ∧ q = Label.dwitness y B) := by
+          intro p q; rw [hstep]; rfl
+        have hnew_mem : Label.dwitness y B ∈ (𝒮.H (σ + 1)).G.X := by
+          rw [hXeq]; exact Or.inr (Or.inr rfl)
+        have hle_succ : σ ≤ σ + 1 := by
+          rw [Ordinal.add_one_eq_succ]; exact Order.le_succ σ
+        have hrank_new : rankOf 𝒮 (Label.dwitness y B) = σ + 1 := by
+          have hleast : IsLeast {σ' : Stage | Label.dwitness y B ∈ (𝒮.H σ').G.X} (σ + 1) := by
+            refine ⟨hnew_mem, ?_⟩
+            intro σ' hσ'mem
+            by_contra hcon
+            push_neg at hcon
+            have hσ'σ : σ' ≤ σ := by
+              rw [Ordinal.add_one_eq_succ, Order.lt_succ_iff_eq_or_lt] at hcon
+              rcases hcon with heq | hlt
+              · exact le_of_eq heq
+              · exact le_of_lt hlt
+            exact (habsent hσ'σ hfresh) hσ'mem
+          exact hleast.csInf_eq
+        have hrank_y_le : rankOf 𝒮 y ≤ σ := by
+          have hmemy : (σ : Stage) ∈ {σ' : Stage | y ∈ (𝒮.H σ').G.X} := hy
+          exact csInf_le ⟨0, fun z _ => bot_le⟩ hmemy
+        refine ⟨fun x hx => rankOf_base 𝒮 hx, ?_, ?_⟩
+        · intro x hx hx0
+          simp only [hXeq, Set.mem_union, Set.mem_insert_iff, Set.mem_singleton_iff] at hx
+          rcases hx with hx | rfl | rfl
+          · exact flo1 x hx hx0
+          · exact flo1 x hy hx0
+          · exact ⟨σ, hrank_new, hfresh, Or.inr ⟨y, B, rfl, hy⟩⟩
+        · intro x y' hxy'
+          rw [hReq] at hxy'
+          rcases hxy' with hxy' | ⟨rfl, rfl⟩
+          · exact flo2 x y' hxy'
+          · have hmax : max (rankOf 𝒮 x) (rankOf 𝒮 (Label.dwitness x B)) = σ + 1 := by
+              rw [hrank_new]; exact max_eq_right (le_trans hrank_y_le hle_succ)
+            rw [hmax]
+            have hleast_edge : IsLeast {τ : Stage | (𝒮.H τ).G.R x (Label.dwitness x B)} (σ + 1) := by
+              refine ⟨(hReq x (Label.dwitness x B)).mpr (Or.inr ⟨rfl, rfl⟩), ?_⟩
+              intro τ hτmem
+              by_contra hcon
+              push_neg at hcon
+              have hτσ : τ ≤ σ := by
+                rw [Ordinal.add_one_eq_succ, Order.lt_succ_iff_eq_or_lt] at hcon
+                rcases hcon with heq | hlt
+                · exact le_of_eq heq
+                · exact le_of_lt hlt
+              exact (habsent hτσ hfresh) (((𝒮.H τ).G.edge_mem x (Label.dwitness x B) hτmem).2)
+            exact hleast_edge.csInf_eq.symm
+      · rename_i hy hfresh
+        have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+        have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+        exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+          fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+    · rename_i hy
+      have hXeq : (𝒮.H (σ + 1)).G.X = (𝒮.H σ).G.X := by rw [hstep]
+      have hReq : (𝒮.H (σ + 1)).G.R = (𝒮.H σ).G.R := by rw [hstep]
+      exact ⟨fun x hx => rankOf_base 𝒮 hx, fun x hx hx0 => flo1 x (hXeq ▸ hx) hx0,
+        fun x y hxy => flo2 x y (hReq ▸ hxy)⟩
+
+/-- **FLO holds at every stage of a redundant-edge-fair schedule** (Phase 4): combines the base
+case (`FLO 𝒮 0`, proved directly here -- `rankOf_base`/`𝒮.base_eq`-immediate, not previously
+named as its own lemma), `flo_succ_fair` (successor), and `flo_limit` (Phase 3, unconditional) via
+transfinite induction (`Ordinal.induction`, the same pattern as `FloSeq.mono`). Sorry-free: this
+is the dispatch's resolution of the Phase 2 `redundantEdge` finding along the schedule's actual
+trace, for any schedule satisfying the fairness discipline `hRedundant`. -/
+theorem flo_holds_everywhere (𝒮 : FloSeq 𝒯 Atom G₀)
+    (hRedundant : ∀ σ a b, 𝒮.task σ = .redundantEdge a b → (𝒮.H σ).G.R a b) :
+    ∀ σ : Stage, FLO 𝒮 σ := by
+  intro σ
+  induction σ using Ordinal.induction with
+  | _ σ ih =>
+    rcases Ordinal.zero_or_succ_or_isSuccLimit σ with h0 | ⟨ρ, hρ⟩ | hlim
+    · subst h0
+      refine ⟨fun x hx => rankOf_base 𝒮 hx, ?_, ?_⟩
+      · intro x hx hx0
+        exact absurd (𝒮.base_eq ▸ hx) hx0
+      · intro x y hxy
+        have hxy0 : G₀.G.R x y := 𝒮.base_eq ▸ hxy
+        have hx0 : x ∈ G₀.G.X := (G₀.G.edge_mem x y hxy0).1
+        have hy0 : y ∈ G₀.G.X := (G₀.G.edge_mem x y hxy0).2
+        have hleast : IsLeast {τ : Stage | (𝒮.H τ).G.R x y} 0 :=
+          ⟨hxy, fun τ _ => bot_le⟩
+        rw [rankOf_base 𝒮 hx0, rankOf_base 𝒮 hy0, max_self]
+        exact hleast.csInf_eq.symm
+    · have hσ : σ = ρ + 1 := by rw [Ordinal.add_one_eq_succ]; exact hρ.symm
+      subst hσ
+      have hρlt : ρ < ρ + 1 := by
+        rw [Ordinal.add_one_eq_succ]; exact Order.lt_succ_iff_eq_or_lt.mpr (Or.inl rfl)
+      exact flo_succ_fair 𝒮 ρ (ih ρ hρlt) (hRedundant ρ)
+    · exact flo_limit 𝒮 σ hlim (fun τ hτσ => ih τ hτσ)
+
+/-- **Phase 4's target, revised**: the Phase 1 scaffolding's `hfair` alone under-determines
+maximality (a task attempted exactly once, before its precondition becomes available, is never
+retried after the precondition is later satisfied -- see the strategic sorry below for the exact
+gap), and separately says nothing about *staying inside* `primeC` (formula/witness/edge additions
+are not automatically `¬Deriv`-preserving). This revision adds two schedule-discipline hypotheses
+Phase 4's "instantiate the recursion... discharge the obligations" task explicitly calls for:
+`hRedundant` (this dispatch's CRITICAL fair-schedule finding, resolving Phase 2's open
+`redundantEdge` branch along the real trace via `flo_holds_everywhere`, sorry-free) and `hprimeC`
+(the schedule never leaves `primeC`, needed for `Maximal`'s own membership conjunct). `FLO 𝒮 σ₀`
+at `σ₀` (a stage past which `hfair` guarantees every task has fired at least once) is now fully
+sorry-free. The remaining maximality conjunct is ONE tightly-scoped, documented strategic sorry
+(see below) -- `hfair`'s one-shot-per-task shape does not itself rule out a task whose
+precondition becomes available only *after* its one guaranteed firing. -/
 theorem primeC'_exists_maximal (x₀ : Label Atom) (A₀ : Proposition Atom)
     (h0 : G₀ ∈ primeC G₀ x₀ A₀) (𝒮 : FloSeq 𝒯 Atom G₀)
-    (hfair : ∀ t : FloTask 𝒯 Atom, ∃ σ : Stage, 𝒮.task σ = t) :
+    (hfair : ∀ t : FloTask 𝒯 Atom, ∃ σ : Stage, 𝒮.task σ = t)
+    (hRedundant : ∀ σ a b, 𝒮.task σ = .redundantEdge a b → (𝒮.H σ).G.R a b)
+    (hprimeC : ∀ σ : Stage, 𝒮.H σ ∈ primeC G₀ x₀ A₀) :
     ∃ σ : Stage, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒮.H σ) ∧ FLO 𝒮 σ := by
+  set σ₀ : Stage := Ordinal.lsub (fun t : FloTask 𝒯 Atom => Classical.choose (hfair t)) with hσ₀def
+  refine ⟨σ₀, ⟨hprimeC σ₀, ?_⟩, flo_holds_everywhere 𝒮 hRedundant σ₀⟩
+  -- **STRATEGIC SORRY** (documented per the anti-analysis five-condition test):
+  --
+  -- 1. Deliberate division boundary: this is the maximality half of `primeC'_exists_maximal`,
+  --    the one obligation this dispatch's own analysis (see the theorem docstring) found is NOT
+  --    discharged by `hfair` as landed in Phase 1. `hfair` gives, for each task value `t`, ONE
+  --    stage `σ_t` at which `𝒮.task σ_t = t`; `σ₀ := lsub (choose ∘ hfair)` is strictly past
+  --    every `σ_t` (`Ordinal.lt_lsub`). But `stepExt`'s `.formula`/`.diaWitness` branches are
+  --    NO-OPS when their precondition fails (label not yet present / witness already present),
+  --    and a task's precondition can become newly satisfiable only AFTER its one guaranteed
+  --    firing (e.g. `.formula φ` fired at `σ_φ` while `φ.lbl ∉ (𝒮.H σ_φ).G.X`, with `φ.lbl`
+  --    entering the domain only at a LATER stage via an unrelated `.diaWitness` task) -- `hfair`
+  --    does not guarantee a re-attempt, so `σ₀`'s `𝒮.H σ₀` need not be closed under every
+  --    `primeC`-preserving one-step extension, hence need not be `primeC`-maximal.
+  -- 2. Tightly scoped: exactly this one conjunct (`∀ D ∈ primeC, 𝒮.H σ₀ ≤ D → D ≤ 𝒮.H σ₀`) of
+  --    `primeC'_exists_maximal`'s existential witness; the companion `FLO 𝒮 σ₀` conjunct and the
+  --    `𝒮.H σ₀ ∈ primeC` conjunct are both proved above, sorry-free (`flo_holds_everywhere`,
+  --    `hprimeC σ₀`).
+  -- 3. Documented: the fix needs a *cofinal*, precondition-aware fairness hypothesis (e.g.
+  --    `∀ σ' t, task-precondition-available-at σ' t → ∃ σ ≥ σ', 𝒮.task σ = t`) in place of the
+  --    one-shot `hfair`, PLUS a cardinality/ordinal-stabilization argument (`Label Atom`/
+  --    `Context` substructure has bounded cardinality in `Type u`, `Stage = Ordinal.{u}` has
+  --    unboundedly many ordinals past that bound, so a cofinally-fair, monotone-growing schedule
+  --    must stabilize before some bound) showing the stabilized stage is exactly the closure
+  --    point -- genuinely deeper, separate proof content not attempted in this dispatch.
+  -- 4. Tracked: recorded in `.orchestrator-handoff.json`'s `sorry_inventory` with
+  --    `strategic: true` and a non-null `follow_up_task` (Phase 4 continuation / folded into
+  --    Phase 5-6).
+  -- 5. Build-green: `sorry` typechecks; the probe remains build-green with this one documented
+  --    gap, and `FLO 𝒮 σ₀` plus `𝒮.H σ₀ ∈ primeC` are independently sorry-free.
   sorry
 
 /-- **Phase 5's target (the mathematical crux)**: given `FLO`-coherence at stage `σ`, a

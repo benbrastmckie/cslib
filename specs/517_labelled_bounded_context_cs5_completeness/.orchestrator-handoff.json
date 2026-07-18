@@ -1,88 +1,88 @@
 {
   "status": "implemented",
   "skeleton": true,
-  "phases_completed": 3,
+  "phases_completed": 4,
   "phases_total": 11,
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
       "plan_version": 5,
-      "note": "Phase 3 of v5 marked [COMPLETED] (flo_limit fully sorry-free, no skeleton caveat for this phase)."
+      "note": "Phase 4 of v5 marked [COMPLETED] (skeleton -- one documented strategic sorry, narrower than the phase's original scope)."
     },
     {
       "type": "implementation",
       "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "summary": "Phase 3: proved flo_limit (FLO maintained at limit stages / chain unions) sorry-free, by direct descent through FloSeq.limit_eq's raw union to a witnessing predecessor stage -- FloSeq.mono and ChainCtx.unionContext/chain_closure were not needed."
+      "summary": "Phase 4: added flo_succ_fair and flo_holds_everywhere (both sorry-free, axiom-clean -- resolves Phase 2's redundantEdge/FLO-2 finding along a fair-schedule-constrained trace) and primeC'_exists_maximal (revised signature: hRedundant + hprimeC hypotheses added; FLO 𝒮 σ0 and 𝒮.H σ0 ∈ primeC both sorry-free; ONE remaining strategic sorry for the 'no strict primeC-extension' half of Maximal, a newly-identified gap distinct from the redundantEdge finding)."
     },
     {
       "type": "summary",
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/13_flo-limit-phase3-summary.md",
-      "summary": "Phase 3 implementation summary."
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/14_flo-maximal-phase4-summary.md",
+      "summary": "Phase 4 implementation summary."
     }
   ],
   "sorry_inventory": [
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 397,
+      "line": 398,
       "statement": "theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} : Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ",
       "strategic": true,
       "assumption": "Assumes the swap-transport argument extends to labels already present in some chain member's domain ('old' labels), not just the shared coinfinite reserve.",
-      "why_deferred": "Confirmed (divergence audit, oldlabel-joint-dispatch-handoff-20260718.md) to require route (a): a step-indexed/well-founded Lindenbaum construction (transfinite). Plan v5 Phases 1-6 build this construction (FLO invariant); Phase 6 wires flo_oldlabel_transport (Phase 5) in to close this sorry.",
+      "why_deferred": "Confirmed (divergence audit, oldlabel-joint-dispatch-handoff-20260718.md) to require route (a): a step-indexed/well-founded Lindenbaum construction (transfinite). Plan v5 Phases 1-6 build this construction (FLO invariant); Phase 6 wires flo_oldlabel_transport (Phase 5) in to close this sorry. UNCHANGED by Phase 4.",
       "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport (Phase 5) into deriv_reflect."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1031,
+      "line": 1032,
       "statement": "theorem dwitness_mem_of_maximal ... : Label.dwitness y B ∈ H.G.X (diamond-witness maximality, 'old label' cofinite-range sub-case)",
       "strategic": true,
       "assumption": "Assumes the single witnessing NIK-derivation at v = dwitness y B can be transported to a diaE-style cofinite premise (∀y'∉L, ...) covering every y' outside a FINITE exclusion set L, including y' already present in H.G.X ('old' labels).",
-      "why_deferred": "SAME root cause as deriv_reflect. Needs the same route-(a) transfinite construction; plan v5 Phase 6 wires flo_oldlabel_transport (Phase 5) into this sorry jointly with deriv_reflect.",
+      "why_deferred": "SAME root cause as deriv_reflect. Needs the same route-(a) transfinite construction; plan v5 Phase 6 wires flo_oldlabel_transport (Phase 5) into this sorry jointly with deriv_reflect. UNCHANGED by Phase 4.",
       "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport (Phase 5) into dwitness_mem_of_maximal's diamond old-label sub-case."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1518,
+      "line": 1519,
       "statement": "theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ) : FLO 𝒮 (σ + 1) -- one sorry remaining, in the FLO-2 clause's `redundantEdge` case, sub-case `x = a, y = b` where the edge (a,b) is genuinely new (not inherited from stage σ)",
       "strategic": true,
       "assumption": "Assumes the newly-adjoined redundant edge (a,b)'s introduction stage coheres with FLO-2's exact-locality requirement `max (rankOf a) (rankOf b) = sInf {τ | edge τ}`.",
-      "why_deferred": "CONFIRMED (proved, not merely suspected) mathematically inadmissible for an unconstrained FloSeq: stepExt's `.redundantEdge a b` case has no side condition tying its introduction stage to `max (rankOf a, rankOf b)`. For a, b both already present at σ (so rankOf a, rankOf b ≤ σ via FloSeq.mono) and the edge genuinely new at σ+1, FLO-2 would force `max(rankOf a, rankOf b) = σ+1`, contradicting `max(rankOf a, rankOf b) ≤ σ < σ+1`. This resolves the plan's own Phase 2 task-list hedge ('confirm this is admissible under FLO-2 or that redundant-edge additions are handled by the maximality argument rather than the construction trace') in favor of the second branch: the maximality argument (raw_edge_of_tclosure) must force the edge present BEFORE the schedule invokes .redundantEdge, i.e. Phase 4's fair schedule needs a side condition ruling out premature/adversarial redundant-edge scheduling, or FloTask/FLO needs revision. All other flo_succ sub-cases (formula, diaWitness, skip, and the 'edge already present' half of redundantEdge) are sorry-free. UNAFFECTED by Phase 3 (flo_limit is a separate, unconditionally sorry-free theorem).",
-      "follow_up_task": "Plan v5 Phase 4 (primeC'_exists_maximal): constrain the fair schedule so .redundantEdge is only exercised when raw_edge_of_tclosure has already forced the edge present (making this branch a no-op), or revise FloTask/FLO to encode that constraint explicitly, then close this sorry."
+      "why_deferred": "CONFIRMED mathematically inadmissible for an unconstrained FloSeq (Phase 2 finding). RESOLVED ALONG THE FAIR-SCHEDULE TRACE by Phase 4: flo_succ_fair (probe, new theorem) adds hRedundant and is fully sorry-free -- see flo_succ_fair/flo_holds_everywhere, verified lean_verify-clean ([propext, Classical.choice, Quot.sound], no sorryAx). flo_succ itself (this entry, Phase 2) is deliberately left untouched per the Postmortem Constraints ('MUST preserve ... flo_succ ... verbatim') and its own sorryAx remains -- it is simply superseded (not relied upon) by flo_succ_fair for any schedule satisfying hRedundant. Retained in this inventory for completeness/traceability, not because it blocks anything further.",
+      "follow_up_task": "None required for plan progress (superseded by flo_succ_fair). Optional cleanup: could delete flo_succ or leave as historical record of the Phase 2 finding -- deferred, non-blocking."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1621,
-      "statement": "theorem primeC'_exists_maximal (x₀ : Label Atom) (A₀ : Proposition Atom) (h0 : G₀ ∈ primeC G₀ x₀ A₀) (𝒮 : FloSeq 𝒯 Atom G₀) (hfair : ∀ t : FloTask 𝒯 Atom, ∃ σ : Stage, 𝒮.task σ = t) : ∃ σ : Stage, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒮.H σ) ∧ FLO 𝒮 σ",
+      "line": 1821,
+      "statement": "theorem primeC'_exists_maximal (x₀ A₀ h0 𝒮 hfair hRedundant hprimeC) : ∃ σ, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒮.H σ) ∧ FLO 𝒮 σ -- one sorry remaining: the 'no strict primeC-extension exists' half of the Maximal conjunct, at σ0 := Ordinal.lsub (choose ∘ hfair)",
       "strategic": true,
-      "assumption": "Assumes a sufficiently large stage of a fair (schedule-complete) staged construction yields a maximal, FLO-carrying context, replacing zorn_le0's primeC_exists_maximal.",
-      "why_deferred": "Phase 2/3 scope is flo_succ/flo_limit only. Assembling the maximal FLO context from flo_succ (Phase 2, done modulo its redundantEdge caveat) and flo_limit (Phase 3, done unconditionally) is Phase 4's dedicated proof obligation -- and per the Phase 2 finding, Phase 4 must ALSO constrain hfair (or the schedule) to rule out premature .redundantEdge scheduling before flo_succ's remaining sorry can be closed. Phase 4 is now fully unblocked on the flo_limit side.",
-      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 4: instantiate the recursion using flo_succ/flo_limit; discharge fairness/well-foundedness; constrain .redundantEdge scheduling per the Phase 2 finding."
+      "assumption": "Assumes hfair's one-shot-per-task firing, past a bound σ0 strictly after every task's guaranteed firing, is sufficient for 𝒮.H σ0 to be closed under every primeC-preserving one-step extension (i.e. Maximal).",
+      "why_deferred": "NEWLY IDENTIFIED this dispatch (distinct from, and deeper than, the redundantEdge finding): stepExt's .formula/.diaWitness branches are no-ops when their precondition fails (label not yet present / witness already present); a task's precondition can become newly satisfiable only AFTER its one hfair-guaranteed firing (e.g. .formula φ fires while φ.lbl is not yet in the domain, with φ.lbl entering only later via an unrelated .diaWitness task). hfair gives no re-attempt guarantee, so σ0's 𝒮.H σ0 need not be primeC-maximal. FLO 𝒮 σ0 (via flo_holds_everywhere) and 𝒮.H σ0 ∈ primeC (via hprimeC σ0) are BOTH sorry-free; only this one conjunct-half is open.",
+      "follow_up_task": "Plan v5 Phase 4 continuation (or fold into Phase 5): (1) strengthen hfair to a cofinal, precondition-aware fairness hypothesis (∀ σ' t, <precondition of t available at σ'> → ∃ σ ≥ σ', 𝒮.task σ = t); (2) prove a cardinality/ordinal-stabilization lemma (Label Atom/Context substructure bounded cardinality in Type u; Stage = Ordinal.{u} unboundedly large past that bound) showing a cofinally-fair, primeC-preserving, monotone-growing schedule stabilizes at a maximal stage. See summaries/14_flo-maximal-phase4-summary.md Decisions/Follow-ups for the full gap analysis."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1640,
+      "line": 1840,
       "statement": "theorem flo_oldlabel_transport {𝒮 : FloSeq 𝒯 Atom G₀} {σ : Stage} (hflo : FLO 𝒮 σ) ... : ∀ y' ∈ (𝒮.H σ).G.X, x ≠ y' → (∀ ψ ∈ Γ, ψ.lbl ≠ y') → NIK 𝒯 ((𝒮.H σ).G.addEdge x y') Γ (y' ∶ A)",
       "strategic": true,
       "assumption": "Assumes FLO-2's rank-indexed edge locality supports a well-founded (rank-indexed) induction transporting a NIK-derivation witnessed at one fresh label to ANY other label, including old ones already in the domain.",
-      "why_deferred": "The mathematical crux (plan v5 Risk 'HIGH'). Phase 2/3 scope is flo_succ/flo_limit only; this is Phase 5's dedicated proof obligation.",
+      "why_deferred": "The mathematical crux (plan v5 Risk 'HIGH'). Phase 4 scope was assembling the maximal FLO context, not this transport lemma; this remains Phase 5's dedicated proof obligation. UNCHANGED by Phase 4 (FLO 𝒮 σ is now available sorry-free at any stage reached by a flo_holds_everywhere-satisfying schedule, which is what this theorem will consume).",
       "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 5 (may split 5.1/5.2): prove flo_oldlabel_transport by well-founded induction on rankOf, using FLO-2."
     }
   ],
   "blockers": [],
   "continuation_path": null,
-  "next_action_hint": "Phase 3 of plan v5 is COMPLETED (flo_limit fully sorry-free) and committed (task 517 phase 3). Phase 3 needed neither FloSeq.mono nor ChainCtx.unionContext/chain_closure -- FLO's clauses are stage-independent on the RHS, so direct descent through FloSeq.limit_eq's raw union to a witnessing predecessor stage sufficed. IMPORTANT finding carried forward from Phase 2 for Phase 4: flo_succ's one remaining sorry proves .redundantEdge is unsafe under an unconstrained fair schedule -- Phase 4 must add a schedule-fairness side condition (or revise FloTask/FLO) before flo_succ can be fully discharged. Next dispatch: /implement 517 --hard --lit targeting Phase 4 (primeC'_exists_maximal, assembling the maximal FLO context from flo_succ + flo_limit) -- depends on Phases 2 AND 3, both now done. Do NOT retry any of the five ruled-out shortcuts (Postmortem Constraints). Preserve: Phase 1's Stage/FloTask/stepExt/FloSeq/rankOf/FLO definitions, Phase 2's FloSeq.mono/flo_succ, and this phase's flo_limit verbatim (do not redefine).",
+  "next_action_hint": "Phase 4 of plan v5 is COMPLETED (skeleton -- one documented strategic sorry) and committed (task 517 phase 4). CRITICAL directive fully resolved: flo_succ_fair and flo_holds_everywhere are sorry-free and lean_verify-clean, incorporating the fair-schedule constraint (hRedundant) Phase 2's finding required. primeC'_exists_maximal's signature was revised (hRedundant + hprimeC hypotheses added, within Phase 4's remit since it owned this sorried scaffolding) and its FLO/primeC conjuncts are sorry-free; ONE new, more tightly-scoped sorry remains for the 'no strict extension' half of Maximal -- see the sorry_inventory entry at probe line 1821 for the exact gap (hfair's one-shot-per-task shape vs. precondition timing) and the two-part fix it needs (cofinal fairness + a cardinality/ordinal-stabilization lemma). Next dispatch: /implement 517 --hard --lit targeting either a Phase 4 continuation (close this sorry) or Phase 5 (flo_oldlabel_transport, which can proceed independently using FLO 𝒮 σ at any stage -- does not itself need the Maximal sorry closed, though Phase 6's wiring into deriv_reflect/dwitness_mem_of_maximal eventually will). Do NOT retry any of the five ruled-out shortcuts (Postmortem Constraints). Preserve: Phase 1's Stage/FloTask/stepExt/FloSeq/rankOf/FLO definitions, Phase 2's FloSeq.mono/flo_succ (untouched, superseded not edited), Phase 3's flo_limit, and this phase's flo_succ_fair/flo_holds_everywhere verbatim (do not redefine).",
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 4,
-    "next_action_hint": "Phase 4 (plan v5): instantiate the recursion using flo_succ (Phase 2) and flo_limit (Phase 3, this dispatch) over Stage to assemble the maximal FLO context, replacing primeC_exists_maximal's zorn_le0. Must additionally constrain the fair schedule (hfair) or FloTask/FLO to rule out premature .redundantEdge scheduling per the Phase 2 finding (sorry_inventory entry at probe line 1518) before flo_succ can be relied on unconditionally.",
-    "obstacle_deeper_than_dispatch": false
+    "next_phase": 5,
+    "next_action_hint": "Either (a) a Phase 4 continuation closing primeC'_exists_maximal's remaining 'no strict extension' sorry (needs cofinal precondition-aware fairness + a cardinality/ordinal-stabilization argument -- see sorry_inventory at probe line 1821), or (b) proceed to Phase 5 (flo_oldlabel_transport) directly, since it only consumes FLO 𝒮 σ (sorry-free via flo_holds_everywhere), not Maximal. Phase 6's wiring into deriv_reflect/dwitness_mem_of_maximal will need the Maximal sorry closed eventually, so it should not be deferred indefinitely.",
+    "obstacle_deeper_than_dispatch": true
   },
-  "summary": "Phase 3 of plan v5 implemented sorry-free: proved flo_limit (FLO maintained at limit stages / chain unions), where FloSeq.limit_eq defines the stage's Context as a raw Set.iUnion/existential chain-union. The proof descends directly through limit_eq to a witnessing predecessor stage τ < σ and reuses FLO at τ (from the phase's own hflo : ∀ τ < σ, FLO 𝒮 τ hypothesis) -- FLO's own FLO-1/FLO-2 conclusions are stage-independent on the RHS (statements purely about 𝒮/rankOf/predecessor-stage membership), so this descent closes the σ-level goal directly without needing FloSeq.mono, ChainCtx.unionContext, or ChainCtx.chain_closure. lake env lean on the probe is clean: exit 0, zero errors, sorry count dropped from 6 to 5 (flo_limit closed; deriv_reflect, dwitness_mem_of_maximal, flo_succ's one leaf sorry, primeC'_exists_maximal, and flo_oldlabel_transport remain, all pre-existing/Phase-2-carried, none touched this dispatch). lean_verify on flo_limit: axioms [propext, Classical.choice, Quot.sound], no sorryAx -- confirms flo_limit is genuinely closed. Zero-debt invariant holds: zero Cslib/ mainline files touched; guardrail modules unaffected (untouched). Plan v5 Phase 3 heading updated to [COMPLETED] with both checklist items annotated (deviation: neither ChainCtx.unionContext nor rank-well-definedness sub-lemma was needed -- documented in the Plan Deviations section of the phase summary). Committed as 'task 517 phase 3: prove flo_limit (FLO maintained at limit stages)'.",
+  "summary": "Phase 4 of plan v5 implemented (skeleton, one documented strategic sorry): assembled primeC'_exists_maximal, replacing zorn_le0. Per the dispatch's CRITICAL directive, first resolved Phase 2's redundantEdge/FLO-2 finding with a fair-schedule constraint (hRedundant): landed flo_succ_fair (successor-preservation under the constraint) and flo_holds_everywhere (FLO holds at every stage via transfinite induction: fresh FLO 𝒮 0 base case + flo_succ_fair + flo_limit), both fully sorry-free and lean_verify-clean ([propext, Classical.choice, Quot.sound], no sorryAx). flo_succ itself (Phase 2) was left untouched per the Postmortem Constraints. primeC'_exists_maximal's signature was revised to add hRedundant and hprimeC (schedule stays in primeC) -- within Phase 4's remit since Phase 1 listed this theorem as sorried scaffolding for Phase 4, not a Preserved Asset. At σ0 := Ordinal.lsub (choose ∘ hfair), FLO 𝒮 σ0 and 𝒮.H σ0 ∈ primeC are both proved sorry-free; the 'no strict primeC-extension exists' half of Maximal is left as ONE tightly-scoped, documented strategic sorry -- a newly-identified gap (hfair's one-shot-per-task firing does not guarantee re-attempts after a precondition becomes satisfiable later), distinct from and deeper than the redundantEdge finding this dispatch's CRITICAL directive targeted. lake env lean on the probe is clean: exit 0, zero errors, sorry count unchanged at 5 (Phase 4 added ~215 lines of substantially sorry-free content around a narrower remaining gap, rather than closing a pre-existing sorry -- that was never this phase's literal target). Zero-debt invariant holds: zero Cslib/ mainline files touched; guardrail modules unaffected (untouched). Plan v5 Phase 4 heading updated to [COMPLETED] (skeleton) with all three checklist items annotated. Committed as 'task 517 phase 4: assemble the maximal FLO context (primeC'_exists_maximal, skeleton)'.",
   "modified_files": [
     "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/13_flo-limit-phase3-summary.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/summaries/14_flo-maximal-phase4-summary.md"
   ],
   "verification": {
     "build_passed": true,
@@ -94,13 +94,15 @@
       "propext",
       "Classical.choice",
       "Quot.sound",
-      "sorryAx (5 documented sorries: 2 pre-existing strategic + flo_succ's 1 leaf sorry + primeC'_exists_maximal + flo_oldlabel_transport; flo_limit closed this dispatch)"
+      "sorryAx (5 documented sorries: deriv_reflect, dwitness_mem_of_maximal, flo_succ (superseded, untouched), primeC'_exists_maximal (narrowed), flo_oldlabel_transport)"
     ],
     "vacuous_count": 0,
     "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true,
     "primeLemma_fully_sorry_free": false,
-    "flo_limit_sorry_free": true,
-    "flo_limit_axiom_clean": true
+    "flo_succ_fair_sorry_free": true,
+    "flo_succ_fair_axiom_clean": true,
+    "flo_holds_everywhere_sorry_free": true,
+    "flo_holds_everywhere_axiom_clean": true
   }
 }

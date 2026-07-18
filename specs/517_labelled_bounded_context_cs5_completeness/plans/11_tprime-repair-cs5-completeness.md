@@ -395,6 +395,31 @@ confirming the gap is structural (inherent to the cofinite-quantification encodi
 dispatch's explicit permission; both occurrences are tracked together in `sorry_inventory` with a
 shared `follow_up_task`.
 
+**Joint follow-up dispatch (task 517) result — NOT discharged, diagnosis sharpened, "Phase 4.5"
+flagged for reconsideration.** A dedicated dispatch targeting both `deriv_reflect` and
+`dwitness_mem_of_maximal` jointly (per this plan's own recommendation above) re-investigated
+three further shortcuts beyond routes (a)/(b) and ruled all three out formally (full argument in
+`probes/chain-union-reflection-probe.lean`'s new module section preceding `ChainCtx.deriv_reflect`,
+and in `dwitness_mem_of_maximal`'s expanded sorry comment): (1) redefining `Deriv` with a
+finite-subgraph existential (matching Simpson's own `:5090` finitary bundling of relational and
+formula open assumptions) reduces to the identical uniform-index obstruction one level down, not a
+fix; (2) reusing the induction hypothesis directly at "old" labels (skipping the swap) supplies
+the fact but with a different chain index per label, and `Directed` only bounds finitely many
+indices at once, not an unboundedly-indexed family; (3) a "bounded-old-label" conditional
+strengthening of `ChainCtx` (a single index dominating every old label) would provably close the
+gap but is not a consequence of `ChainCtx`'s current merely-`Directed` definition. **Conclusion**:
+route (a) is confirmed as the only viable resolution, and is larger than a single dispatch — it
+requires replacing `zorn_le₀` with a step-indexed/well-founded Lindenbaum construction (transfinite
+recursion, since `Atom : Type u` is not assumed countable, so Simpson's own "denumerable ⟹
+choice-free iterative construction" remark, `chunk_0103.md`, does not directly bound the recursion
+at `ω`) carrying a "no label is old outside the base context or a fresh/reserve-drawn adjunction"
+invariant through every step. **Flagged, not acted on unilaterally** (redefining scope is outside
+a single dispatch's authority, per this plan's own precedent for Phase 5): recommend the
+orchestrator/user open a new, dedicated multi-phase planning effort ("Phase 4.5") for this
+construction rather than dispatching further quick follow-ups against the current `probes/`
+scaffold. Until then, `primeLemma` remains assembled with these two documented, tracked strategic
+sorries (not fully sorry-free); Phase 4 stays `[PARTIAL]`.
+
 ### Phase 5: T-Comp graph completion (Simpson Lemma 8.2.5) — symmetry [NOT STARTED]
 
 **FLAGGED for reconsideration (Phase 4 finding, not acted on unilaterally)**: Phase 4's `--lit`

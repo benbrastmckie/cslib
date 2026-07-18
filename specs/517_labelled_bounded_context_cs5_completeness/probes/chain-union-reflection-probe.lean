@@ -292,15 +292,82 @@ def unionG [Nonempty ι] : Graph Atom where
 /-- The union formula set `⋃ᵢ Γᵢ`. -/
 def unionΓ : Set (LabelledFormula Atom) := ⋃ i, (𝒞.C i).Γ
 
+/-! ## Joint follow-up dispatch (task 517): sharpened root-cause diagnosis of the "old label"
+obstacle shared by `deriv_reflect` (below) and `dwitness_mem_of_maximal` (Phase 4 section)
+
+**Re-investigated fresh in this dispatch** (on top of the two candidate routes (a)/(b) the plan
+and the two prior handoffs already named and could not close): three further, independently
+plausible shortcuts were tried and are now **provably ruled out**, sharpening the diagnosis from
+"needs a different construction" to a precise account of *why* no purely local fix exists.
+
+**The core tension.** `NIK.boxI`/`NIK.diaE`'s cofinite-quantification encoding (`Deduction.lean`'s
+module docstring: chosen, POPLmark-style, "to make weakening... immediate, without a separate
+renaming/permutation lemma") gives EQUIVARIANCE (uniform behaviour under relabelling) **for
+free only when the cofinite family is built by a uniform, swap-invariant construction** (exactly
+what `NIK.swap_relabel`-style proofs do, bottom-up, when *introducing* a fresh witness). It does
+**not** give, for free, a way to *recover* a cofinite family from a single instance obtained via
+an **existential** (choice-based) argument — a Zorn-maximal element, or an induction hypothesis
+that only supplies "for the specific `y` you feed it, *some* chain index/graph exists," with no
+uniformity promised across different `y`. Reconstructing the cofinite family from one witness
+needs either (i) a single object (index / graph) that already dominates *every* label the family
+ranges over — impossible in general when the "already-old" label set is unboundedly indexed and
+possibly infinite — or (ii) an external invariant limiting which labels can *ever* be "old" in
+the first place (this is exactly candidate route (a)).
+
+**Shortcut 1 (ruled out): redefine `Deriv` with a finite-subgraph existential.** Simpson's own
+`:5090` bundles relational open assumptions (`y₁Rz₁,…,yₘRzₘ`) into the *same finite* list as
+formula open assumptions (`x₁:A₁,…,xₙ:Aₙ`) — suggesting `Deriv 𝒯 G Γ φ` should perhaps
+existentially quantify over a **finite sub-graph** `G₀ ≤ G`, not just a finite sub-list of `Γ`
+(as it currently does; `Context.lean`'s `Deriv` passes the *whole*, possibly-infinite `G`
+straight through to `NIK`). Tested: this does **not** help. The identical `boxI`/`diaE` case
+would then need a *single* finite `G₀` valid **uniformly across the whole cofinite family**
+(`∀y∉L, NIK 𝒯 (G₀.addEdge x y) Γ (y:A)`), and by the same argument as below, different `y`'s
+sub-derivations can each need a genuinely different finite `G₀_y` with no common finite bound —
+the obstruction re-appears one level down, unchanged in kind. This is not a `Deriv` transcription
+defect; it is intrinsic to the cofinite encoding.
+
+**Shortcut 2 (ruled out): skip the swap, reuse the induction hypothesis directly at each "old"
+`y`.** For `y ∈ (C i).G.X` (chain setting) this genuinely *does* supply `∃ i_y, NIK 𝒯 (C i_y).G
+Γ₀ (y:A)` with no relabelling needed. But `i_y` depends on `y`, and `ChainCtx.dir` (`Directed`)
+only bounds **finitely many** indices at once (two at a time, extended finitely by induction);
+nothing bounds the *unboundedly-indexed*, potentially infinite family `{i_y | y old, y ∉ L}` by
+one shared index. The same difficulty that blocked the swap route blocks the no-swap route.
+
+**Shortcut 3 (ruled out as a general fix, but recorded as a genuine conditional strengthening):**
+if `ChainCtx` carried an extra hypothesis "`∃ i*, ∀ y ∈ unionG.X, InW V' y → False → y ∈ (C
+i*).G.X`" (i.e. a single index already dominates *every* old label appearing anywhere in the
+union), reflection *would* close: combine `i*` with the fresh-witness index `i₀` via
+`𝒞.dir` applied to the two-element set `{i₀, i*}`. This is a real, provable implication — but it
+is a **strengthening of `ChainCtx`'s hypotheses**, not a consequence of its current (merely
+`Directed`, not bounded) definition; nothing in `primeC`/`primeC_chain_bddAbove` currently
+supplies such an `i*`, and supplying one in general requires exactly what route (a) needs: a
+construction where "old" labels are provably confined to a boundable set at every stage.
+
+**Conclusion (sharper than the prior two handoffs, same eventual recommendation): both
+`deriv_reflect` and `dwitness_mem_of_maximal` need route (a) — a step-indexed / well-founded
+Lindenbaum construction (transfinite recursion, since `Atom : Type u` is not assumed countable,
+so Simpson's own "denumerable ⟹ choice-free iterative construction" remark, `chunk_0103.md`, does
+not directly bound the recursion at `ω`) that maintains, as an *invariant carried through every
+step*, "every label in the domain built so far is either in the base `G₀.G.X` or was adjoined at
+some step as a fresh, reserve-drawn (or `dwitness`-of-already-known) label." No such construction
+exists in this file or in Mathlib's `zorn_le₀` (a bare, non-constructive existence result). This
+is a substantial, independently-scoped undertaking — re-deriving Phase 4's whole
+`primeC`/`primeC_chain_bddAbove`/`primeC_exists_maximal` apparatus via well-founded recursion
+instead of `zorn_le₀` — not a fix expressible as a single additional lemma in this file. It should
+be planned as its own dedicated multi-phase effort (a "Phase 4.5") rather than re-attempted as a
+quick follow-up dispatch. -/
+
 /-- **The reflection theorem** — Simpson's elided "easily seen" step (p. 92, `chunk_0102.md`),
 mechanized as far as this dispatch could take it, landed here as a **documented strategic
 sorry** per the anti-analysis five-condition test (`.claude/context/contracts/anti-analysis.md`):
 
 1. **Deliberate division boundary**: the plan's own Phase 3 contingency names exactly this
    escalation route ("if it cannot be settled, escalate before spending Phase 4's Zorn
-   dispatch"); this is not an abandoned attempt.
+   dispatch"); this is not an abandoned attempt. A dedicated joint follow-up dispatch
+   (task 517) re-investigated three further shortcuts and ruled all three out formally — see the
+   "Joint follow-up dispatch" section immediately above this docstring.
 2. **Tightly scoped**: exactly this one theorem.
-3. **Documented** (this docstring):
+3. **Documented** (this docstring; full analysis in the module section above):
    - **What is proven** (`NIK.swap_relabel`/`NIK.freshWitness_transport` above): a `boxI`/`diaE`
      premise reflects to a single chain index for witnesses drawn from the chain's shared
      coinfinite reserve `V'ᶜ` -- pick any `y₀ ∈ V'ᶜ` outside the exclusion set, reflect the IH at
@@ -311,18 +378,18 @@ sorry** per the anti-analysis five-condition test (`.claude/context/contracts/an
    - **What remains open**: `boxI`/`diaE`'s cofinite quantifier ranges over *every* `y ∉ L` in
      `Label Atom`, not just `V'ᶜ`. For `y` that already lies in some `(C i).G.X` (an "old" label,
      not drawn from the reserve), the swap-transport argument does not apply directly: swapping
-     `y₀ ↔ y` could collide with structure the chain already built at `y`. Closing this needs
-     either (a) an invariant that Phase 4's *concrete* Zorn construction only ever extends a
-     context by reserve-drawn (fresh) labels at each step -- true by construction of Lemma
-     5.3.1's argument (deductive-closure/disjunction/diamond steps each adjoin at most one fresh
-     witness), but only statable once Phase 4's construction exists -- or (b) a separate argument
-     for "old" `y` reusing `Deriv.mono`/monotonicity directly (since an "old" `y ∈ (C i).G.X` is,
-     by directedness, already dominated by some concrete chain member, so the *fact* needed there
-     may already be available without any relabeling at all). Route (a) is the natural one given
-     Phase 4 supplies the construction.
+     `y₀ ↔ y` could collide with structure the chain already built at `y`. **Closing this needs
+     route (a)**: an invariant that the construction only ever extends a context by reserve-drawn
+     (fresh) labels at each step, carried via a step-indexed/well-founded reconstruction of the
+     whole Zorn argument (Mathlib's `zorn_le₀` is non-constructive and cannot supply this).
+     Route (b) (a monotonicity argument reusing the IH directly for old labels, no relabelling)
+     was tested this dispatch and does not close the gap either: see "Shortcut 2" above — the
+     obstruction is the *unbounded family of distinct chain indices*, which no single application
+     of `Deriv.mono`/directedness resolves.
 4. **Tracked**: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
-   `follow_up_task` pointing at Phase 4 (the Zorn application, which supplies the concrete
-   extension-step invariant needed to close route (a) above).
+   `follow_up_task` pointing at a **new, dedicated "Phase 4.5" planning effort** (transfinite
+   Lindenbaum construction with a fresh-labels-only invariant) — not a further quick dispatch;
+   see the module section above for why the fix is scoped larger than one lemma.
 5. **Build-green**: `lake env lean` on this file (verified) succeeds with this `sorry` present. -/
 theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} :
     Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ := by
@@ -913,13 +980,16 @@ theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {
       -- **STRATEGIC SORRY** (documented per the anti-analysis five-condition test):
       --
       -- 1. Deliberate division boundary: this is the SAME cofinite-quantification obstacle
-      --    Phase 3's `deriv_reflect` hit (chain-union-reflection-probe.lean:326-328) --
-      --    `NIK.diaE`'s eigenvariable premise `∀y'∉L, ...` ranges over EVERY label outside a
-      --    FINITE `L`, including labels already in `H.G.X` ("old" labels), for which
-      --    `NIK.diaWitness_transport` (built above, mirroring Phase 3's
-      --    `NIK.freshWitness_transport`) does not apply -- its own hypothesis needs the TARGET
-      --    label fresh w.r.t. `H.G.X`, which cannot be guaranteed merely by choosing the label
-      --    outside a *finite* exclusion set when `H.G.X` may be infinite.
+      --    `deriv_reflect` hits (see the "Joint follow-up dispatch" module section preceding
+      --    `ChainCtx.deriv_reflect`, ~line 295, for the full sharpened root-cause diagnosis
+      --    established by a dedicated joint dispatch, task 517) -- `NIK.diaE`'s eigenvariable
+      --    premise `∀y'∉L, ...` ranges over EVERY label outside a FINITE `L`, including labels
+      --    already in `H.G.X` ("old" labels), for which `NIK.diaWitness_transport` (built above,
+      --    mirroring `NIK.freshWitness_transport`) does not apply -- its own hypothesis needs the
+      --    TARGET label fresh w.r.t. `H.G.X`, which cannot be guaranteed merely by choosing the
+      --    label outside a *finite* exclusion set when `H.G.X` may be infinite (and, for a
+      --    Zorn-maximal `H`, generically IS infinite -- maximality forces `H.G.X` to be "as large
+      --    as possible" subject to `V'`-confinement).
       -- 2. Tightly scoped: exactly the "build the cofinite `diaE` premise from the single
       --    witness `v = dwitness y B`" step -- everything else in this clause (the extension's
       --    `Context` validity, the maximality wiring, the fresh-label sub-case via
@@ -927,19 +997,34 @@ theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {
       -- 3. Documented: what is proven -- `hNIKv` gives the ONE witnessing instance at `v` itself
       --    (always usable, `v` fresh by `hfresh`); `NIK.diaWitness_transport` transports this to
       --    any OTHER label `y'` that is *also* fresh w.r.t. `H.G.X` (not just outside a finite
-      --    set). What remains open: for `y'` in the finite-complement range that happens to
-      --    already lie in `H.G.X` ("old"), a different argument is needed -- most likely
-      --    `Deriv.mono`/monotonicity reused directly (an "old" `y'` is, by the maximal `H` itself
-      --    being the ambient fixed point, not obviously reachable by a *shorter* argument without
-      --    either (a) the same chain-indexed extension-step invariant Phase 3's docstring
-      --    describes (not available from Mathlib's non-constructive `zorn_le₀`, confirmed not
-      --    naturally supplied by this dispatch's construction), or (b) a genuinely new
-      --    substitution/cut-style argument. Forcing either without a settled resolution risks a
-      --    subtly wrong general-position proof, matching the plan's own ~100%/dispatch
-      --    transcription-defect base rate.
+      --    set). What remains open, and WHY (joint dispatch, task 517, three additional
+      --    shortcuts tested and ruled out beyond the plan's own two candidates):
+      --      - A naive swap `swapFn v y'` for an "old" `y' ∈ H.G.X` is not merely unproven but
+      --        actively INVALID whenever `H.G` has any edge incident to `y'` other than possibly
+      --        `(y,y')` itself: such an edge `(p,y')` swaps to `(p,v)`, which is not an edge of
+      --        the target graph `H.G.addEdge y y'` (the target graph does not know about `v` at
+      --        all) -- the swap corrupts pre-existing structure at `y'`, not just failing to
+      --        prove the desired fact.
+      --      - Reusing an already-established fact at `y'` directly (skipping the swap) does not
+      --        help either in this single-maximal-element setting (no chain/index family is even
+      --        available here to reuse from) and, in the analogous chain setting
+      --        (`deriv_reflect`), reduces to a distinct-index-per-label problem directedness
+      --        cannot bound (see "Shortcut 2" in the module section near `deriv_reflect`).
+      --      - Choosing a cleverer finite exclusion set `L` does not help: `L` must stay finite,
+      --        but `H.G.X` is (generically) infinite, so infinitely many "old" labels remain
+      --        outside any finite `L` regardless of how `L` is chosen.
+      --    Closing this needs route (a): an invariant that the *construction* of `H` (not just
+      --    its final maximality property) only ever adjoins fresh (reserve-drawn or
+      --    dwitness-of-already-known) labels at each step -- unavailable from Mathlib's
+      --    non-constructive `zorn_le₀`, and requiring a step-indexed/well-founded reconstruction
+      --    of the whole Zorn argument (a "Phase 4.5", scoped larger than a single dispatch; see
+      --    the module section above `deriv_reflect` for the full argument, including why
+      --    Simpson's own "denumerable ⟹ choice-free iterative" remark, `chunk_0103.md`, does not
+      --    directly transfer here since `Atom : Type u` is not assumed countable).
       -- 4. Tracked: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
-      --    `follow_up_task: "Phase 3/4 joint follow-up: cofinite-quantification vs finite-graph-
-      --    domain reconciliation"`.
+      --    `follow_up_task: "Phase 4.5 (NEW, dedicated multi-phase effort): step-indexed /
+      --    well-founded Lindenbaum construction with a fresh-labels-only invariant, replacing
+      --    zorn_le₀ in primeC_exists_maximal -- not a further quick joint dispatch."`
       -- 5. Build-green: `lake env lean` on this file (verified) succeeds with this `sorry`
       --    present.
       sorry

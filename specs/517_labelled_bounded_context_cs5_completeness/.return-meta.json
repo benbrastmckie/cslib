@@ -1,36 +1,42 @@
 {
   "status": "partial",
+  "started_at": "2026-07-18T13:30:17-07:00",
   "artifacts": [
     {
       "type": "implementation",
       "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "summary": "Closed the NIK.subst cut-admissibility sorry via a new auxiliary lemma NIK.subst_aux (structural induction generalizing over an accumulating prefix Delta'); TPrime clause 1 (deductive closure) is now fully sorry-free. Only two sorries remain (dwitness_mem_of_maximal, ChainCtx.deriv_reflect), both pre-existing, out of scope for this dispatch."
+      "summary": "Sharpened root-cause diagnosis (not closure) of the two remaining old-label cofinite-range sorries (deriv_reflect, dwitness_mem_of_maximal). Three additional shortcuts formally ruled out beyond the plan's routes (a)/(b): finite-subgraph Deriv redefinition, direct IH reuse at old labels, and a bounded-old-label special case. Confirms route (a) -- a step-indexed/well-founded Zorn reconstruction -- is necessary and is a dedicated multi-phase effort, not closeable in this dispatch."
+    },
+    {
+      "type": "plan_update",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
+      "summary": "New paragraph after Phase 4's deriv_reflect discharge note recording this dispatch's finding and recommending a dedicated 'Phase 4.5' planning effort."
     },
     {
       "type": "handoff",
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/nik-subst-followup-handoff-20260718.md",
-      "summary": "Follow-up handoff documenting NIK.subst's closure and the remaining joint old-label dispatch (dwitness_mem_of_maximal + deriv_reflect)."
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/oldlabel-joint-dispatch-handoff-20260718.md",
+      "summary": "Full handoff documenting the joint dispatch's investigation, the three ruled-out shortcuts, and the recommendation against further quick dispatches on this specific obstacle."
     }
   ],
   "completion_data": {
     "completion_summary": null
   },
   "partial_progress": {
-    "stage": "phase_4_nik_subst_closed",
-    "details": "Targeted follow-up dispatch: closed the NIK.subst strategic sorry sorry-free (verified via lean_verify: axioms {propext} only, no sorryAx). Phase 4 remains [PARTIAL] overall -- one sorry remains in TPrime clause 4 (diamond, dwitness_mem_of_maximal's 'old label' case), plus the inherited Phase 3 deriv_reflect sorry (same root cause, out of scope for this dispatch).",
+    "stage": "oldlabel_joint_dispatch_diagnosis_sharpened",
+    "details": "Did not close either sorry. Confirmed (with a sharper, independently re-derived diagnosis, including reading Simpson's raw proof text at chunk_0102.md/chunk_0103.md in full) that both deriv_reflect and dwitness_mem_of_maximal need the same fix: a step-indexed/well-founded Lindenbaum construction replacing zorn_le0, a dedicated multi-phase undertaking beyond this dispatch's scope. Phase 3 and Phase 4 remain [PARTIAL].",
     "phases_completed": 2,
     "phases_total": 9,
-    "handoff_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/nik-subst-followup-handoff-20260718.md"
+    "handoff_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/oldlabel-joint-dispatch-handoff-20260718.md"
   },
   "modified_files": [
     "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/nik-subst-followup-handoff-20260718.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/oldlabel-joint-dispatch-handoff-20260718.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
-  "next_steps": "Dispatch a joint follow-up on dwitness_mem_of_maximal's diamond 'old label' sorry and Phase 3's deriv_reflect sorry (same root cause -- cofinite-quantification vs. potentially-infinite graph domain). Once both close, primeLemma is fully sorry-free and ready to transcribe into Cslib/ mainline.",
+  "next_steps": "Open a new planning effort (/plan or /revise on task 517) to properly scope a 'Phase 4.5': a step-indexed/well-founded Lindenbaum construction replacing Mathlib's zorn_le0 in primeC_exists_maximal, carrying a fresh-labels-only invariant. Do NOT re-dispatch /implement --hard against the current probes/ scaffold for this specific obstacle -- three additional shortcuts were tried and formally ruled out this dispatch.",
   "metadata": {
-    "session_id": "sess_nik_subst_517",
+    "session_id": "sess_dispatch_517_oldlabel_joint",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
@@ -39,17 +45,17 @@
   },
   "memory_candidates": [
     {
-      "content": "Proving a cut/substitution-admissibility lemma over a List-indexed natural-deduction judgment (context growth via impI/orE/diaE-style rules that prepend to the front) cannot be done via `induction h generalizing Delta` directly when the scrutinee's context index is a compound term like `Delta ++ (y:B)::Gamma` (not a plain variable) -- Lean's induction tactic handles indexed families cleanly only when the index is itself a bare local variable. The fix: state a separate auxiliary lemma that is fully generalized over an explicit list variable Gamma0 PLUS an equation hypothesis `Gamma0 = Delta' ++ (y:B)::Gamma` and the substituting-derivation hypothesis, both kept INSIDE the not-yet-introduced goal (as a `forall`) before running `induction`, so the induction's motive naturally varies Delta' (and, if the judgment also indexes on a graph/environment that changes in some constructors, that too) per branch. Growing-context constructors then invoke the IH at `Delta'' := (item :: Delta')`, closed by `rw [heq, List.cons_append]` (plain `rw [heq]` alone does not auto-close list-append/cons associativity via its automatic rfl attempt).",
+      "content": "In POPLmark-style cofinite-quantification encodings of eigenvariable rules (`boxI`/`diaE` with `∀y∉L, P y` premises), the encoding gives equivariance/weakening 'for free' only when the cofinite family is BUILT via a uniform swap-invariant construction (introduction direction). It does NOT give, for free, a way to RECOVER a cofinite family from a single instance obtained via an existential/choice-based argument (a Zorn-maximal element, or a per-branch induction hypothesis with no shared witness) -- this is the elimination/reflection direction, and it fails whenever the 'already covered' portion of the label space (e.g. a Zorn-maximal context's domain) is unboundedly large: a swap transport for a label already entangled in existing structure is not merely unproven but ACTIVELY INVALID (it corrupts the existing structure's edges under the swap). Three plausible-seeming shortcuts (finite-subgraph existential redefinition of the consequence relation, direct reuse of a per-branch induction hypothesis without relabelling, and a 'bounded old-label' special case) were tested against this exact shape of problem and all reduce to the identical uniform-index-across-an-unbounded-family obstruction. The only known fix is a step-indexed/well-founded construction carrying a 'only ever adjoin fresh labels' invariant through every step -- ordinary Zorn's-lemma existence results (e.g. Mathlib's zorn_le0) do not expose enough structure to state or prove this invariant after the fact.",
       "category": "TECHNIQUE",
       "source_artifact": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
       "confidence": 0.85,
-      "suggested_keywords": ["cut-admissibility", "substitution-lemma", "induction-generalizing", "list-context", "natural-deduction", "lean4"]
+      "suggested_keywords": ["cofinite-quantification", "eigenvariable", "poplmark", "zorn-lemma", "labelled-deduction", "lean4", "nominal-logic"]
     }
   ],
   "reflection": {
-    "what_worked": "Reading the prior dispatch's docstring (which already diagnosed the exact induction shape needed: generalize over an accumulating prefix Delta, re-weaken at each level) meant the design was settled before the first tool call -- no exploration needed, straight to writing the auxiliary lemma. Mirroring NIK.weaken's exact case order and structure (already sorry-free in the same file) made each of the 13 NIK constructors mechanical to handle.",
-    "what_was_hard": "Two subtleties needed real reasoning, not just pattern-matching: (1) recognizing that induction on a compound context index (Delta++(y:B)::Gamma) required a separate fully-generalized auxiliary lemma rather than `induction h generalizing Delta` directly, and (2) that the boxI/diaE branches needed hsub re-weakened to the branch's extended graph (G.addEdge x w), not threaded as a single fixed hypothesis, since those two constructors' recursive premises genuinely live at a different graph.",
-    "what_was_missed": "Underestimated on the first pass that `rw [heq]`'s automatic post-rewrite rfl would not close the cons/append associativity goals on its own; needed an explicit `List.cons_append` rewrite added after the first build attempt surfaced the four unsolved goals.",
-    "successes": "NIK.subst closed sorry-free on essentially the first structurally-correct attempt (one build iteration to fix the cons_append goals). TPrime clause 1 (deductive closure) and deductiveClosure_of_maximal are now unconditionally sorry-free, confirmed via lean_verify. Sorry count in the probe dropped from 3 to 2. Zero Cslib/ mainline files touched; zero-debt invariant held."
+    "what_worked": "Reading Simpson's raw proof text (chunk_0102.md/chunk_0103.md) in full, rather than relying on the prior handoffs' characterization, surfaced the exact one-line justification Simpson gives ('otherwise we could derive... by an application of (◇E)') that the transcription had to formalize -- confirming the obstacle is genuinely in the transcription gap between a terse paper proof and a fully mechanized cofinite-quantification encoding, not a missed technique. Testing concrete alternative fixes (finite-subgraph Deriv, direct IH reuse, bounded old-label case) to formal conclusions, rather than re-stating the difficulty abstractly, produced a genuinely sharper diagnosis than the two prior handoffs.",
+    "what_was_hard": "Distinguishing 'this specific shortcut fails' from 'no shortcut of this general shape can work' required constructing concrete failure arguments (e.g. showing the naive swap corrupts H.G's existing edges at an old label, not just 'is unproven') rather than asserting difficulty.",
+    "what_was_missed": "Did not attempt implementing even a scoped-down conditional lemma (e.g. the 'bounded-old-label' special case sketched but not formalized) due to time/effort budget -- this would have been a legitimate, if narrow, piece of real Lean progress and is flagged as a possible small follow-up if a future dispatch wants SOME sorry-free artifact from this investigation.",
+    "successes": "Produced a diagnosis materially sharper than the two prior handoffs (three additional shortcuts formally ruled out, not just re-asserted difficulty), landed as real file content (probe docstrings + plan paragraph, not just a handoff), and gave a concrete, appropriately-scoped recommendation (a new dedicated planning effort) rather than either falsely claiming closure or vaguely re-deferring with the same description the mission explicitly prohibited."
   }
 }

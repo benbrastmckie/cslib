@@ -1792,7 +1792,7 @@
     {
       "project_number": 525,
       "project_name": "kb5_completeness_and_decidability",
-      "status": "planning",
+      "status": "blocked",
       "task_type": "cslib",
       "description": "Completes task 515's re-scoped Phase 23 deliverable, resuming after the KB5-specific propagation rule and its soundness proof (New Task 1 / the task this depends on) are landed. Land `theorem modalTableauKb5_complete (phi) (h : kb5Valid phi) : modalTableauKb5 phi = .closed` (or the tableau-entry-point-equivalent name matching whatever New Task 1's new rule is wired through) in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, via extractModelKb5 (already landed sorry-free, FrameCompleteness.lean:3230-3270) plus the Phase 12 lift pattern used by modalTableauFive_complete. Build (or extend) the Euclidean-symmetric truth lemma's root box-positive case using New Task 1's rule: T(box psi)@0 in b must imply T(psi)@w' for every w' with (extractModelKb5 b acc).r 0 w', discharged via the full-cluster-dump plus root-reflexive-propagation guarantees New Task 1 proved sound against kb5FC. Land `instance instDecidableKb5Valid (phi) : Decidable (kb5Valid phi)`, mirroring instDecidableFiveValid's two-direction (soundness/completeness) decidability construction. Remove or update the 'Phase 23 Blocker' /-! -/ note (FrameCompleteness.lean:3300-3339) and reconcile the SCOUT section framing (FrameCompleteness.lean:3272-3299) to reflect the delivered state (the scout lemma extractModelKb5_root_reach_scout should stay as documentation of the design constraint the new rule satisfies, not read as an open blocker). Reconcile the '5/KB5 Coverage via the S5 Route' docstring in FrameCompleteness.lean and the 'Scope Note: Pure-K5 / Pure-5' block in Cslib/Logics/Modal/Tableau/S5Simplification.lean (both located by content, not stale line numbers) to state KB5 completeness as delivered. Extend CslibTests/ModalFrameSeparation.lean's kb5Valid regression coverage to use instDecidableKb5Valid / by decide now that the instance exists, replacing the current term-proof-only (boxImp_not_kb5Valid) check where appropriate. Run the full CSLib CI pipeline (lake build, checkInitImports, lake lint, lint-style, lake test, shake) to completion -- this was the one item Phase 23 left pending purely due to the concurrent LoopChecking.lean interruption from an unrelated task (511); by the time this task runs that file should be resolved, so this should require no further code changes, just verification. Constraint: zero sorry, zero new axiom declarations; every new public declaration lean_verify-clean.",
       "effort": "5-8 hours",
@@ -1808,32 +1808,39 @@
         "CslibTests/ModalFrameSeparation.lean"
       ],
       "created": "2026-07-17T22:34:22Z",
-      "last_updated": "2026-07-17T23:59:36Z",
+      "last_updated": "2026-07-18T00:44:58Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 515"
+        },
+        {
+          "type": "plan",
+          "path": "specs/525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md",
+          "summary": "7-phase KB5 completeness + instDecidableKb5Valid + CI plan"
         }
       ],
-      "session_id": "sess_1784329467_424a02_525"
+      "session_id": "sess_1784329467_424a02_525",
+      "blockers": "Phase 3 (modalTruthLemmaKb5) is mathematically FALSE for task 524's frozen modalApplyOneKb5' rule -- proved via extractModelKb5_nonRoot_boxPos_gap + concrete witness. Phases 1-2 landed (lean_verify-clean, committed); Phases 3-7 blocked. Needs a follow-on task designing a genuinely new KB5 rule or model extraction (cluster-membership bookkeeping, not trigger-identity gating). Not re-runnable as written. See /spawn 525."
     },
     {
       "project_number": 526,
       "project_name": "fix_prime_exclusion_unused_argument",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix unusedArguments lint error in PrimeExclusion.lean",
       "description": "lake lint (batteries/runLinter) reports one `unusedArguments` linter error in Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean. Locate the flagged declaration (a hypothesis/argument bound in a def or theorem signature that is never used in the body and is not underscore-prefixed), and resolve it per CONTRIBUTING.md conventions: either prefix the unused binder with `_` (preferred when the argument is structurally required for the signature, e.g. an abstract `DerivationSystem`/typeclass parameter kept for uniformity with sibling lemmas) or remove it if genuinely dead. Do NOT alter the public API surface of `prime_exclusion`/`prime_set_exclusion` or their downstream instantiations in MinLindenbaum.lean/IntLindenbaum.lean without confirming callers still compile. Single-file change. Re-verify with `lake build` + `lake lint` (expect the PrimeExclusion unusedArguments error gone, no new warnings). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue.",
       "parent_task": 502,
       "created": "2026-07-18T00:04:48Z",
-      "last_updated": "2026-07-18T00:04:48Z",
+      "last_updated": "2026-07-18T00:22:23Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "topic": "Code Hygiene",
       "file_scope": [
         "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean"
-      ]
+      ],
+      "session_id": "sess_1784333163_06a765_526"
     },
     {
       "project_number": 527,

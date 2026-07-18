@@ -1,0 +1,31 @@
+{
+  "status": "partial",
+  "summary": "Phases 1-2 landed cleanly and are lean_verify-clean (zero sorry, zero new axioms): KB5 symmetric-Euclidean reachability/known-worlds infra and the full-cluster Hintikka insertion lemmas (mirroring the Five analogues, collapsed since modalKb5BoxAllFull's non-root arm is trigger-unconditional). Phase 3 (modalTruthLemmaKb5) was found to be MATHEMATICALLY FALSE for the frozen modalApplyOneKb5' rule, not merely unproved: a non-root trigger world connected to root by a raw two-hop chain makes extractModelKb5's relation place it adjacent to root (via the closure's global symmetry), yet modalKb5BoxAllFull's non-root cluster-dump arm unconditionally excludes target 0 regardless of the trigger. This is proved as a standalone, lean_verify-clean structural lemma (extractModelKb5_nonRoot_boxPos_gap, FrameCompleteness.lean) and corroborated by a reproducible concrete witness (phi0 := not(diamond(diamond(box p))), Atom := Bool: modalTableauKb5' phi0 opens a branch with raw edges [(1,2),(0,1)], T(box p)@2 in b, T(p)@0 NOT in b, and (extractModelKb5 b acc).r 2 0 holds -- verified via lean_run_code #eval/native_decide outside the committed file, since kernel decide stalls reducing the real tableau computation, a pre-existing task-515 issue). Phases 4-7 all depend on Phase 3 and are marked [BLOCKED] as downstream. modalApplyOneKb5' is task 524's frozen deliverable and was not modified. Full CSLib CI pipeline was run: lake build (full project, 3238 jobs, pass, no regressions), checkInitImports (pass), lake lint (pass, zero warnings), lint-style (pass), lake shake (pass for FrameCompleteness.lean; pre-existing unrelated suggestions for other files left untouched), mk_all (no update needed). lake test FAILS but this was confirmed via git stash to be a PRE-EXISTING failure (kernel decide stall reducing instDecidableS5Valid/instDecidableFiveValid in CslibTests/ModalFrameSeparation.lean) that predates and is unrelated to this task's changes.",
+  "phases_completed": 2,
+  "phases_total": 7,
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md"
+  ],
+  "blockers": [
+    {
+      "phase": 3,
+      "title": "modalTruthLemmaKb5 is false for modalApplyOneKb5'",
+      "what_failed": "The general KB5 truth lemma (branch membership agreeing with extractModelKb5-satisfaction at every world, including non-root triggers) cannot be proved -- it is false, confirmed by a Lean-checked structural lemma plus a reproducible witness.",
+      "why_stuck": "modalKb5BoxAllFull's non-root cluster-dump arm unconditionally excludes target 0 regardless of the trigger world (only a literal w=0 trigger gets the self-target arm), while extractModelKb5's relation is globally symmetric, so any non-root world connected to root by a raw two-hop (or longer) chain gets placed adjacent to root in the model. This lets a non-root trigger's box-positive formula require T(psi)@0 in b, which the rule structurally can never emit.",
+      "root_cause_lemma": "Cslib.Logic.Modal.Tableau.extractModelKb5_nonRoot_boxPos_gap (FrameCompleteness.lean)",
+      "reproducible_witness": "phi0 := Proposition.imp (.diamond (.diamond (.box (.atom false)))) .bot, Atom := Bool. modalTableauKb5' phi0 opens with acc.edges = [(1,2),(0,1)], T(box p)@2 in b, T(p)@0 not in b, (extractModelKb5 b acc).r 2 0 holds (proved).",
+      "what_is_needed": "modalApplyOneKb5' is frozen (task 524's landed, sorry-free deliverable; out of this task's file_scope). A genuine fix needs either (i) a rule whose box-positive/diamond-negative propagation dumps to the full known cluster unconditionally including target 0 whenever the cluster is connected to root by any length chain (needs a cluster-membership bookkeeping device rather than trigger-identity gating), or (ii) a different model extraction that does not let non-root-triggered chains reach the root semantically while the rule stays root-trigger-gated. Both are new rule/extraction design comparable in scope to the original Five construction (Phases 15-21 of the prior 515 plan) -- a follow-on task, not a continuation of this plan.",
+      "prohibited_workarounds_respected": "No sorry, no vacuous placeholder, no modification of the frozen modalApplyOneKb5'/modalTableauKb5'_sound, no new axioms."
+    },
+    {
+      "phase": "4-7",
+      "title": "Downstream of Phase 3",
+      "what_failed": "Not attempted -- each depends (directly or transitively) on modalTruthLemmaKb5.",
+      "why_stuck": "modalOpenBranchKb5'_countermodel / modalTableauKb5'_complete / kb5Valid_decides / instDecidableKb5Valid all require the Phase 3 truth lemma as their proof obligation.",
+      "what_is_needed": "Resolution of the Phase 3 blocker via a follow-on rule/extraction design task."
+    }
+  ],
+  "continuation_context": "A follow-on task should scope a genuinely new KB5 rule (or model extraction) capable of handling cluster connectivity through non-root intermediate worlds -- see extractModelKb5_nonRoot_boxPos_gap's docstring and the 'Phase 3 Blocker (task 525)' module note in FrameCompleteness.lean for the full technical argument and design directions (i)/(ii). Phases 1-2's landed lemmas (symmEuclGen_mem_modalKnownWorlds_iff, extractModelKb5_root_reach_mem_modalKnownWorlds, modalKb5BoxAllFull_mem_of, modalKb5DiaNegAllFull_mem_of, hintikkaKb5'_box_pos, hintikkaKb5'_diamond_neg) remain valid and reusable regardless of which design direction is chosen, since they only encode true facts about the existing (frozen) rule and closure, not the false general truth lemma. The pre-existing lake test decide-reduction stall (instDecidableS5Valid/instDecidableFiveValid in ModalFrameSeparation.lean) is unrelated to this task and should be tracked/fixed separately if desired.",
+  "next_action_hint": "Do not re-attempt Phase 3-7 of this plan without first resolving the rule/extraction design gap in a dedicated follow-on task (spawn via /spawn 525 or a new /task). This plan's remaining phases are not re-runnable as written."
+}

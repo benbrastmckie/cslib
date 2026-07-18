@@ -1,5 +1,5 @@
 ---
-next_project_number: 528
+next_project_number: 529
 ---
 
 # TODO
@@ -11,11 +11,12 @@ next_project_number: 528
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,512,519,522,523,525 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506,515,517 | 36,37,181,317,407,425,449,511,512,525 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,504 | 39,40,375,515 | foundations, modal logic, code hygiene |
-| 4 | 300,412 | 41,503,504,506 | modal logic, code hygiene |
-| 5 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,512,519,522,523,528 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506,517,525 | 36,37,181,317,407,425,449,511,512,528 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,515 | 39,40,375,525 | foundations, modal logic, code hygiene |
+| 4 | 412,504 | 41,515 | modal logic, code hygiene |
+| 5 | 300 | 503,504,506 | modal logic |
+| 6 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -43,10 +44,11 @@ next_project_number: 528
   └─ 517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
-525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
-  └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
-    └─ 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+528 [RESEARCHED] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
+  └─ 525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
+    └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
+      └─ 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+        └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -100,6 +102,38 @@ next_project_number: 528
 
 ## Tasks
 
+### 528. Correctedgate kb5 tableau rule soundness and completeness
+- **Effort**: 10-14 hours
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [525_kb5_completeness_and_decidability/reports/02_spawn-analysis.md]
+
+**Description**: Task 525 (KB5 tableau completeness + kb5Valid decidability) is blocked because its Phase 3 truth lemma `modalTruthLemmaKb5` is mathematically FALSE for task 524's frozen `modalApplyOneKb5'` rule. This was proven in-repo as `extractModelKb5_nonRoot_boxPos_gap` (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean) with a concrete witness (phi0 = NOT(DIAMOND(DIAMOND(BOX p))): open branch with acc.edges = [(1,2),(0,1)], T(BOX p)@2 in branch, T(p)@0 NOT in branch, yet the extracted relation .r 2 0 holds -- a genuine countermodel-side failure). This has been architecturally pinned to ONE misplaced boolean gate (see specs/525_kb5_completeness_and_decidability/reports/02_s5-architecture-investigation.md, the authoritative root-cause report for this task -- read it in full before starting).
+
+ROOT CAUSE: `modalKb5BoxAllFull`'s world-0-target arm (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:1544, dually the diamond-negative arm at :1561) is gated on `w == 0 && clusterNonempty`. The CORRECT gate is `clusterNonempty` alone -- drop the trigger-identity conjunct (`w == 0`) so a non-root trigger also dumps its box-positive content onto world 0 when the cluster is connected to the root. The mint arms (T(DIAMOND phi)/F(BOX phi)) stay UNTOUCHED -- task 524 already established (FiveSimplification.lean:1517-1522, and the R7 refutation at S5Simplification.lean:1944-2035, machine-checked) that existential shapes must keep witness-reuse mints or termination diverges; only the universal-shape gate changes.
+
+DO NOT modify `modalApplyOneKb5'`, its `RuleApplicationSpecCore` instance, its termination bound (`Kb5'WorldInv`), or `modalTableauKb5'_sound` -- these are a FROZEN, landed, sound task-524 deliverable. Instead, CLONE `modalApplyOneKb5'`/`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` into a new rule (naming per repo convention, e.g. `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv` and a dispatcher such as `modalApplyOneKb5''`) with the corrected gate. The new rule sits BESIDE the frozen one, exactly as `modalApplyOneKb5'` already sits beside the `modalApplyOneKb5 := modalApplyOneFive` alias.
+
+EXTRACTION: `extractModelKb5 := extractModelWith (fun r => Relation.EuclGen (Relation.SymmGen r))` (FrameCompleteness.lean:3230-3270) is ALREADY the total/universal cluster on the branch's connected edge-touched world set -- the least PER (symmetric right-Euclidean relation) over a connected symmetric graph is total on its field. NO re-extraction and NO new cluster-membership bookkeeping device is needed: cluster membership for KB5 IS known-world-ness, already certified by the landed `accReachableInv` invariant (Cslib/Logics/Modal/Tableau/FrameSoundness.lean) and already consumed by task 524's soundness proof. Handoff fix (ii) -- keep the trigger-gated rule, change the extraction instead -- is a PROVEN DEAD END per the scout-lemma remark at FrameCompleteness.lean:3507-3511 (any kb5FC-satisfying relation preserving raw edges forces `r w 0` for chain-connected non-root `w`, so no admissible extraction can rescue a root-trigger-gated rule). Do not pursue this alternative.
+
+Deliver the following in ONE coherent implementation (internal phases as needed, but do not split into separate tasks -- see rationale below):
+
+1. NEW RULE: A corrected-gate rule cloning `modalApplyOneKb5'`/`modalKb5BoxAllFull`/`modalKb5DiaNegAllFull`, with the 0-target arm's gate changed from `w == 0 && clusterNonempty` to `clusterNonempty` alone (mint arms unchanged). Include the fresh `RuleApplicationSpecCore` instance and re-derived termination bound (mechanical clone of `modalApplyOneKb5'_specCore`; output-shape bounds should be unchanged since the emitted set only grows by at most the single @0 formula already present in the root-trigger case task 524 handled). Fresh membership dichotomy: target known-non-root, OR target 0 with cluster nonempty (trigger no longer appears in the dichotomy).
+
+2. SOUNDNESS: A kb5FC-direct soundness theorem mirroring `modalTableauKb5'_sound` (FrameSoundness.lean:4821). This is nearly free: task 524's trigger-agnostic lemma family already covers 3 of 4 (trigger,target) cases -- `reachable_imp_related_kb5` (FrameSoundness.lean:1582) for (w=0,v!=0); `accReachableInv_related_kb5` (FrameSoundness.lean:1610) for (w!=0,v!=0); `accReachableInv_kb5_root_refl` (FrameSoundness.lean:1633) for (w=0,v=0). The ONLY new case is (w!=0,v=0), discharged by symmetrizing `reachable_imp_related_kb5` -- a one-line application of `Std.Symm.symm` (or the repo's equivalent symmetry combinator), not new mathematics.
+
+3. TRUTH LEMMA + COMPLETENESS + DECIDABILITY: `modalTruthLemmaKb5` (mirroring `modalTruthLemmaFive`, FrameCompleteness.lean:2693-2886, by strong induction on modalComplexity), then `modalOpenBranchKb5'_countermodel` (mirror at FrameCompleteness.lean:2886) and `modalTableauKb5'_complete` (mirror at FrameCompleteness.lean:3131-3198, wired through the new rule's entry point) and `kb5Valid_decides` plus `instance instDecidableKb5Valid (phi) : Decidable (kb5Valid phi)` (mirroring `fiveValid_decides`/`instDecidableFiveValid`, FrameCompleteness.lean:3203-3216). REUSE task 525's already-landed Phase 1 lemmas verbatim: `symmEuclGen_mem_modalKnownWorlds_iff`, `extractModelKb5_root_reach_mem_modalKnownWorlds` (both in FrameCompleteness.lean, in the KB5 extraction section after `extractModelKb5_hasEdge_imp_r` ~3270). Task 525's Phase 2 Hintikka lemmas (`modalKb5BoxAllFull_mem_of`, `modalKb5DiaNegAllFull_mem_of`, `hintikkaKb5'_box_pos`, `hintikkaKb5'_diamond_neg`) are pinned to the FROZEN rule's trigger-sensitive dichotomy and survive only as a documentation/pattern precedent -- they need MECHANICAL RE-DERIVATION against the new rule's simpler trigger-free dichotomy (this is expected to be near-copies, not fresh design). The root box-positive case (trigger w=0 reaching every cluster world including w'=0) is exactly what the new rule's full-cluster + root-reflexive emission is designed to discharge per the architecture report Section 2.3: given `.r w v` (closure), `symmEuclGen_mem_modalKnownWorlds_iff` puts v in the known set; if v!=0 the unconditional non-root arm covers it; if v=0, any closure derivation contains at least one raw edge whose target is known and non-root, giving the cluster-nonempty witness the corrected gate needs.
+
+4. DOCS + CI: Reconcile stale blocker/scope framing in FrameCompleteness.lean (the '## Phase 3 Blocker (task 525)' note left by task 525's implementer, and the older '## 5 / KB5 (Euclidean) Coverage via the S5 Route' docstring at ~565), FiveSimplification.lean (the 'completeness is deferred to a follow-on task' note ~1424-1443), and S5Simplification.lean (the 'KB5's completeness specifically remains open' sentence in the '## Scope Note: Pure-K5 / Pure-5' block ~2037+) to state KB5 completeness as delivered via the new rule's completeness theorem. Per no-task-references-in-deliverables.md, use durable anchors (declaration names, section headings) in these .lean docstrings, NEVER ephemeral task numbers. Extend CslibTests/ModalFrameSeparation.lean to exercise `instDecidableKb5Valid` / `by decide` and update its docstring framing (currently states the instance 'is not yet landed'). Diagnose (do not silently absorb) the pre-existing `decide`-reduction kernel stall in `modalExpandBranchesGen`'s fuel recursion (S5Simplification.lean:1959-1963, affects ModalFrameSeparation.lean) -- this stall is ORTHOGONAL to this fix and pre-existing from an earlier task; determine whether landing the new decidability instance resolves, sidesteps, or must be explicitly documented as still-present, and track any remaining stall as a separate follow-on concern rather than folding a fix for it into this task. Run the full CSLib CI pipeline in order per cslib.md: `lake build`, `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`, `lake shake --add-public --keep-implied --keep-prefix`. If `lake build` surfaces LoopChecking.lean errors NOT caused by this task's changes, report them as a concurrent condition (that file is owned by a separate, still-partial task) -- do NOT edit LoopChecking.lean.
+
+HARD CONSTRAINTS (apply to every phase): zero sorry, zero new axiom declarations, every new public declaration `lean_verify`-clean (fully-qualified name check). If any proof phase genuinely cannot close, mark it [BLOCKED] in the plan with the exact reached `lean_goal` state and what is missing -- NEVER insert a `sorry`, `admit`, or vacuous placeholder (`:= True`/`trivial`) to force a green build. Do not modify `modalApplyOneKb5'`, its specCore instance, its termination bound, or `modalTableauKb5'_sound` (frozen task-524 deliverables, out of scope). Do not touch `extractModelS5` or the S5 completeness route (unaffected by this fix per the architecture report). Do not edit LoopChecking.lean.
+
+Upon completion, task 525 should be revisited: its remaining Phases 3-7 are either fully absorbed by this new task's deliverables (in which case task 525 should be marked superseded/completed by reference to this task's landed declarations) or reduced to thin reconciliation -- determine which at task 525's resume time by diffing this task's landed declarations against task 525's Phase 3-7 goals in specs/525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md.
+
+---
+
 ### 527. Fix stuck decide in ModalFrameSeparation.lean regression test
 - **Status**: [COMPLETED]
 - **Task Type**: cslib
@@ -125,7 +159,7 @@ next_project_number: 528
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 524
+- **Dependencies**: Task 524, Task 528
 - **Research**: [515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md]
 - **Plan**: [525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md]
 

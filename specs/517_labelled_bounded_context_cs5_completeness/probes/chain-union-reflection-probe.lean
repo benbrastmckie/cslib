@@ -209,4 +209,42 @@ theorem NIK.swap_relabel {a b : Label Atom} {G : Graph Atom} {Γ : List (Labelle
       have := hstep hf'
       simpa [hy_def] using this
 
+/-! ## Freshness transport: the corollary the reflection argument actually consumes -/
+
+/-- If `f = swapFn a b` fixes every label occurring in `Γ` (i.e. `a,b` are both fresh w.r.t.
+`Γ`), relabeling does nothing to `Γ`. -/
+theorem List.map_swapFn_eq_self {a b : Label Atom} {Γ : List (LabelledFormula Atom)}
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ a ∧ ψ.lbl ≠ b) :
+    Γ.map (fun ψ => swapFn a b ψ.lbl ∶ ψ.prop) = Γ := by
+  conv_rhs => rw [← List.map_id (l := Γ)]
+  refine List.map_congr_left (fun ψ hψ => ?_)
+  obtain ⟨h1, h2⟩ := hΓ ψ hψ
+  simp [swapFn_other h1 h2]
+
+/-- **Freshness transport.** The corollary `NIK.swap_relabel` is built for: a derivation
+witnessed at one fresh label `y₀` transports to *any* other label `y`, provided both are fresh
+w.r.t. the ambient graph `G`, the pivot label `x`, and the context `Γ`. This is exactly what lets
+a chain-union reflection argument turn "the induction hypothesis holds at *some* fresh `y₀`" into
+"the rebuilt `boxI`/`diaE` premise holds at *every* sufficiently fresh `y`" (see the module
+docstring's diagnosis). -/
+theorem NIK.freshWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {x y₀ y : Label Atom} {A : Proposition Atom} (h : NIK 𝒯 (G.addEdge x y₀) Γ (y₀ ∶ A))
+    (hy₀X : y₀ ∉ G.X) (hyX : y ∉ G.X) (hxy₀ : x ≠ y₀) (hxy : x ≠ y)
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀ ∧ ψ.lbl ≠ y) : NIK 𝒯 (G.addEdge x y) Γ (y ∶ A) := by
+  have hf : ∀ p q, (G.addEdge x y₀).R p q →
+      (G.addEdge x y).R (swapFn y₀ y p) (swapFn y₀ y q) := by
+    intro p q hpq
+    rcases hpq with hpq | ⟨rfl, rfl⟩
+    · have hp : p ≠ y₀ := fun hp => hy₀X (hp ▸ (G.edge_mem p q hpq).1)
+      have hq : q ≠ y₀ := fun hq => hy₀X (hq ▸ (G.edge_mem p q hpq).2)
+      -- `p, q ∈ G.X` (edge endpoints), and `y ∉ G.X`, so `p, q ≠ y` too.
+      have hp' : p ≠ y := fun hp => hyX (hp ▸ (G.edge_mem p q hpq).1)
+      have hq' : q ≠ y := fun hq => hyX (hq ▸ (G.edge_mem p q hpq).2)
+      rw [swapFn_other hp hp', swapFn_other hq hq']
+      exact Or.inl hpq
+    · rw [swapFn_other hxy₀ hxy, swapFn_left]
+      exact Or.inr ⟨rfl, rfl⟩
+  have hstep := h.swap_relabel (a := y₀) (b := y) (G' := G.addEdge x y) hf
+  rwa [List.map_swapFn_eq_self hΓ, show swapFn y₀ y y₀ = y from swapFn_left y₀ y] at hstep
+
 end Cslib.Logic.Modal.Labelled

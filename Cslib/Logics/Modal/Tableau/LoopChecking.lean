@@ -3427,6 +3427,123 @@ structure S4LoopInv (φ₀ : Proposition Atom)
   `signedSubfmls φ₀`: the pigeonhole argument's injection target (Phase 6). -/
   keysInUniverse : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀
 
+/-! ## `bClosure`/`eClosure` (task 511, Phase 5 -- documented strategic-sorry skeletons)
+
+Both remaining `S4LoopInv` fields need machinery genuinely beyond a mechanical case split:
+
+- **`eClosure`** needs a formula-subset composite for the T-self (`modalTBoxSelf`/
+  `modalTDiaNegSelf`, `FrameRules.lean`) and 4-propagation (`modalFourBoxProp`/
+  `modalFourDiaNegProp`) outputs at the 12 non-minting shapes' T/4-relevant leaves, mirroring
+  `modalApplyOneT_boxPos_diaNeg_known_S4`/`modalApplyOneS4Rules_boxPos_diaNeg_known_S4`'s
+  existing case-split shape but concluding `x.formula ∈ modalSubfmls sf.formula` (via K's own
+  PUBLIC `modalApplyOne_boxPos_outputs_subset`/`modalApplyOne_diamondNeg_outputs_subset` for the
+  underlying K piece, plus trivial `modalSubfmls_self_mem`-style facts for the T-self/4-prop
+  pieces, since T-self emits the box/diamond's own argument -- one step into `modalSubfmls
+  sf.formula` -- and 4-prop emits `sf.formula` itself unchanged) then composing via
+  `modalSubfmls_trans_S4` with `hb`'s own bound on `sf`. At the 2 minting shapes, the new
+  formulas' bound is already available via the `keyLowerBd`-adjacent groundwork
+  (`successorBirthContent_boxNeg_subset_relevantSetFinset`-style reasoning extended to
+  `modalUniverseS4` membership rather than `relevantSetFinset`).
+- **`bClosure`** needs the label-side bound `modalMaxWorld b < modalWorldBoundS4 φ₀` (the STRICT
+  form) available BEFORE any mint can occur, so the newly-minted witness's label
+  (`modalNextWorld b = modalMaxWorld b + 1`) stays `≤ modalWorldBoundS4 φ₀`. This is exactly
+  Phase 6's own pigeonhole deliverable (`modalKnownWorlds_nodup` +
+  `modalKnownWorlds_length_le_worldBoundS4`, injecting known worlds into `keys` via `keysTotal`/
+  `keysDistinct`/`keysInUniverse`, cardinality via `signedSubfmls_powerset_card` +
+  `List.Nodup.length_le_card`/`Finset.card_le_card_of_injOn`, then a "worlds are consecutive from
+  0" fact to convert the length bound into a STRICT `modalMaxWorld` bound) -- genuinely a
+  prerequisite of `bClosure`'s OWN preservation, not merely Phase 6's later corollary, since
+  `bClosure`'s minting-case obligation needs the bound to hold on the PRE-step branch `b` to
+  guarantee the freshly-minted label stays in range. Both are landed here as complete theorem
+  STATEMENTS (not vacuous placeholders) with `sorry` bodies, each carrying every hypothesis its
+  own preservation genuinely needs (mirroring every other field's signature shape in this
+  section) -- ready for a continuation dispatch to discharge without any further design work. -/
+
+/-- **`eClosure`'s driver-level preservation -- STRATEGIC SORRY** (task 511, Phase 5, documented
+gap; see the section docstring above for the exact remaining proof obligation). -/
+lemma modalStepBranchS4_preserves_eClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (heclosure : ∀ x ∈ e, x ∈ modalUniverseS4 φ₀)
+    (hknown : accTargetsKnown b acc)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverseS4 φ₀ := by
+  sorry
+
+/-- **`bClosure`'s driver-level preservation -- STRATEGIC SORRY** (task 511, Phase 5, documented
+gap; see the section docstring above for the exact remaining proof obligation -- the pigeonhole
+world-bound argument, Phase 6's own core deliverable, is a genuine prerequisite here). -/
+lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hKT : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hknown : accTargetsKnown b acc)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS4 φ₀ := by
+  sorry
+
+/-- **`modalStepBranchS4_preserves_S4LoopInv`** (task 511, Phase 5 assembly): every
+`modalStepBranchS4Keyed` step preserves `S4LoopInv`, over every branch/expanded-set pair it
+produces (any `b' ∈ newBs` paired with any `e' ∈ newExps` -- valid because `modalStepBranchS4Keyed`
+never produces distinct `newExps` entries for distinct `newBs` entries: the `.branching` arm
+maps EVERY branch to the identical `e ++ [sf]`, and the `.linear`/`.persistent` arms produce
+singleton lists of each, so any member of one is definitionally paired with any member of the
+other). Also threads and re-establishes the proof-internal `keysWorldsKnown` auxiliary invariant
+(not an `S4LoopInv` field itself, `modalStepBranchS4_preserves_keysWorldsKnown`'s own
+docstring) needed by `accFresh`/`accKnown`'s own preservation, so a continuation dispatch driving
+this assembly through repeated steps (Phase 6/7) can re-supply it at each call.
+
+**Eight of the ten fields are fully closed, zero sorry** (`keysDistinct`/`keyLowerBd`/
+`keysInUniverse`/`keysTotal`: the four "key" fields, closed across dispatches 2-5; `eNodup`/
+`outDegEq`/`accFresh`/`accKnown`: closed this dispatch). **Two fields
+(`bClosure`/`eClosure`) are documented strategic-sorry skeletons** -- see the section docstring
+immediately above `modalStepBranchS4_preserves_eClosure` for the precise remaining obligation
+each needs; both are genuinely non-mechanical (the `bClosure` gap in particular requires Phase
+6's own pigeonhole deliverable as a prerequisite, not merely a corollary). -/
+theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hinv : S4LoopInv φ₀ b e acc keys)
+    (hKW : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    (∀ b' ∈ newBs, ∀ e' ∈ newExps, S4LoopInv φ₀ b' e' newAcc keys') ∧
+    (∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → w ∈ modalKnownWorlds b') := by
+  obtain ⟨hbC, heN, heC, haF, haK, hoD, hkT, hkL, hkD, hkI⟩ := hinv
+  refine ⟨?_, modalStepBranchS4_preserves_keysWorldsKnown φ₀ b e acc keys newBs newExps newAcc
+    keys' hKW hstep⟩
+  intro b' hb' e' he'
+  exact
+    { bClosure := modalStepBranchS4_preserves_bClosure φ₀ b e acc keys newBs newExps newAcc keys'
+        hbC hkT hkD hkI haK hstep b' hb'
+      eNodup := modalStepBranchS4_preserves_eNodup φ₀ b e acc keys newBs newExps newAcc keys'
+        hstep heN e' he'
+      eClosure := modalStepBranchS4_preserves_eClosure φ₀ b e acc keys newBs newExps newAcc keys'
+        hbC heC haK hstep e' he'
+      accFresh := modalStepBranchS4_preserves_accFresh φ₀ b e acc keys newBs newExps newAcc keys'
+        haK hKW haF hstep b' hb'
+      accKnown := modalStepBranchS4_preserves_accKnown φ₀ b e acc keys newBs newExps newAcc keys'
+        haK hKW hstep b' hb'
+      outDegEq := modalStepBranchS4_preserves_outDegEq φ₀ b e acc keys newBs newExps newAcc keys'
+        haK hoD hstep e' he'
+      keysTotal := modalStepBranchS4_preserves_keysTotal φ₀ b e acc keys newBs newExps newAcc
+        keys' haK hkT hstep b' hb'
+      keyLowerBd := modalStepBranchS4_preserves_keyLowerBd φ₀ b e acc keys newBs newExps newAcc
+        keys' hbC hkL hstep b' hb'
+      keysDistinct := modalStepBranchS4_preserves_keysDistinct φ₀ b e acc keys newBs newExps
+        newAcc keys' hkD hstep
+      keysInUniverse := modalStepBranchS4_preserves_keysInUniverse φ₀ b e acc keys newBs newExps
+        newAcc keys' hbC hkI hstep }
+
 end Cslib.Logic.Modal.Tableau
 
 end

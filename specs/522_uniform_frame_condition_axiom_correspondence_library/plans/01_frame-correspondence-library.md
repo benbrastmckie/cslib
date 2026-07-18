@@ -2,7 +2,7 @@
 
 - **Task**: 522 - Uniform frame-condition-to-axiom correspondence library
 - **Status**: [IMPLEMENTING]
-- **Effort**: 6 hours (Phase 1 autonomous ~1.5h; Phases 3-5 ~4.5h gated behind Zulip)
+- **Effort**: 6 hours (Phase 1 complete ~1.5h; Phases 3-5 ~4.5h — unblocked, design decision resolved 2026-07-18)
 - **Dependencies**: None (research complete)
 - **Research Inputs**: reports/01_frame-condition-correspondence-survey.md
 - **Artifacts**: plans/01_frame-correspondence-library.md (this file)
@@ -22,9 +22,10 @@ same established pattern (modalT/Four/B/D/Five), then rewiring the ~23 byte-iden
 cases across the 14 `Systems/*/Soundness.lean` files that carry a frame axiom.
 
 Definition of done: (Phase 1) a new additive core file compiles sorry-free and lint-clean, wired
-into the import graph, changing no existing proof; (Phases 3-5, gated) the 14 consumer soundness
-files delegate their modal cases to the new lemmas with public signatures unchanged, and the full
-`lake build` + `lake lint` pass.
+into the import graph, changing no existing proof; (Phases 3-5) the 14 consumer soundness files
+delegate their modal cases to the new lemmas with public signatures unchanged, and the full
+`lake build` + `lake lint` pass. The interface design is resolved (user, 2026-07-18), so Phases
+3-5 are unblocked; the Zulip step is a non-blocking pre-PR heads-up (Phase 2).
 
 ### Research Integration
 
@@ -63,7 +64,7 @@ No ROADMAP.md consulted for this dispatch (no roadmap flag).
 - Consume existing Std/Foundations classes; define no new frame-property predicates.
 - Rewire the 14 `Systems/*/Soundness.lean` frame-axiom cases to single-line `exact` calls while
   keeping `<sys>_axiom_sound` / `<sys>_soundness` public signatures byte-stable.
-- Keep the multi-file consumer refactor behind an explicit human Zulip-coordination gate.
+- Land the multi-file consumer refactor to CI-green; the user posts a Zulip heads-up before the PR.
 
 **Non-Goals**:
 - No unifying typeclass across classical + birelational + constructive semantics.
@@ -77,7 +78,7 @@ No ROADMAP.md consulted for this dispatch (no roadmap flag).
 
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| Multi-file consumer refactor lands without library-maintainer alignment (CONTRIBUTING.md:149) | H | H | Phases 3-5 marked BLOCKED-PENDING-ZULIP; orchestrator cannot proceed past Phase 2 gate. |
+| Multi-file consumer refactor lands without library-maintainer alignment (CONTRIBUTING.md:149) | H | M | Design decision resolved (user, 2026-07-18); implementation proceeds to CI-green, but the user posts a Zulip heads-up (Phase 2) before the PR lands. No PR/push is autonomous (pr-prohibition.md). |
 | New file not registered in import/build graph → not compiled or unreachable | M | M | Phase 1 wires `FrameCorrespondence` into `Metalogic/Soundness.lean` import and verifies via scoped `lake build` of a downstream consumer + checks any root aggregator glob. |
 | Lint failure (docBlame/defLemma/lowerCamelCase/topNamespace) blocks PR | M | M | Follow the sibling `Satisfies.implyK_axiom` convention exactly; docstring every lemma; run `lake lint` in Phase 1. |
 | `modalFive`/`modalD` box-neg-bot encodings mismatch the concrete axiom constructor shape | M | M | Phase 1 copies the exact goal shape from an existing consumer inline case (K5/D) and confirms with `lean_goal` before finalizing. |
@@ -90,12 +91,16 @@ No ROADMAP.md consulted for this dispatch (no roadmap flag).
 | Wave | Phases | Blocked by |
 |------|--------|------------|
 | 1 | 1 | -- |
-| 2 | 2 | 1 |
-| 3 | 3, 4 | 2 |
-| 4 | 5 | 3, 4 |
+| 2 | 3, 4 | 1 |
+| 3 | 5 | 3, 4 |
+| — | 2 (non-blocking pre-PR heads-up) | user, before `/pr` |
 
-Phases within the same wave can execute in parallel. Phase 1 is the only autonomously-implementable
-phase; Phases 2-5 are gated on human Zulip coordination (see Phase 2).
+Phases within the same wave can execute in parallel. Phase 1 (additive core) is complete. The
+public-interface design decision is **resolved** (user, 2026-07-18): explicit-hypothesis primary
+signature form, one coherent PR wiring the 14 consumers via one-line delegation. Phases 3-5 are
+therefore unblocked and autonomously implementable to CI-green; the remaining Zulip step is a
+pre-PR *heads-up* to the modal-logic group (Phase 2), performed by the user before the PR lands —
+not a design gate on implementation.
 
 ---
 
@@ -160,50 +165,53 @@ and CI-green on its own** — it is the sanctioned split from the gated consumer
 
 ---
 
-### Phase 2: Zulip coordination gate [BLOCKED-PENDING-ZULIP]
+### Phase 2: Zulip pre-PR heads-up [IN PROGRESS]
 
-**Goal**: Obtain library-maintainer alignment on the multi-file consumer refactor before touching
-the 14 `Systems/*/Soundness.lean` files. Per `CONTRIBUTING.md:149`, major development across a
-shared, actively-developed subtree is strongly recommended to be discussed on Zulip first.
+**Goal**: Give the modal-logic working group a courtesy heads-up on the multi-file consumer
+refactor before the PR lands. The *design decision is resolved* (user, 2026-07-18): explicit-
+hypothesis primary interface, one coherent PR. Per `CONTRIBUTING.md:149`, major development across
+a shared, actively-developed subtree is coordinated on Zulip — here that coordination is a pre-PR
+heads-up, since the interface choice is settled, not an open design question blocking implementation.
 
-**This is a human coordination step the orchestrator cannot perform.** Autonomous execution MUST
-stop here after Phase 1. Do not begin Phases 3-5 until a human confirms Zulip alignment.
+**This heads-up is a user step performed before the PR lands; it does NOT block Phases 3-5.**
+Autonomous implementation may proceed to CI-green independently. No PR is created autonomously
+(pr-prohibition.md): the user runs `/pr` after posting the heads-up.
 
-**Tasks** (human-performed):
-- [ ] Post a Zulip scope note to the modal-logic working group including: the axiom⇔property map
+**Tasks** (user-performed, before PR lands — not before implementation):
+- [ ] Post a Zulip scope heads-up to the modal-logic working group: the axiom⇔property map
       (research §2), the placement decision (new `FrameCorrespondence.lean` imported by
       `Soundness.lean`), the explicit-hypothesis-primary interface choice, and confirmation that the
       §1.2 completeness-FC family and birelational de-duplication are deferred to separate follow-ups.
-- [ ] Confirm the 14-file blast radius and stable-signature approach with maintainers.
-- [ ] Record alignment (thread link) and unblock Phases 3-5.
+- [ ] Note the 14-file blast radius and stable-signature approach.
 
-**Timing**: Asynchronous / human-gated (not agent execution time).
+**Timing**: Asynchronous / user-performed (not agent execution time; runs before `/pr`, in parallel
+with or after CI-green implementation).
 
 **Depends on**: 1
 
 **Verification**:
-- A Zulip thread exists with maintainer acknowledgement of scope, placement, and blast radius.
-- Phases 3-5 remain BLOCKED until this is recorded.
+- A Zulip heads-up thread exists before the PR lands. (Implementation of Phases 3-5 does not wait
+  on it.)
 
 ---
 
-### Phase 3: Consumer refactor — single-property systems [BLOCKED-PENDING-ZULIP]
+### Phase 3: Consumer refactor — single-property systems [COMPLETED]
 
 **Goal**: Rewire the 5 single-frame-property systems' `<sys>_axiom_sound` modal cases to single-line
 `exact` calls into the Phase 1 lemmas, keeping public signatures byte-stable.
 
 **Tasks**:
-- [ ] `Systems/T/Soundness.lean` — `| modalT φ => exact Satisfies.modalT_axiom m h_refl w φ`.
-- [ ] `Systems/B/Soundness.lean` — `| modalB φ => exact Satisfies.modalB_axiom m h_symm w φ`.
-- [ ] `Systems/D/Soundness.lean` — `| modalD φ => exact Satisfies.modalD_axiom m h_serial w φ`.
-- [ ] `Systems/K4/Soundness.lean` — `| modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ`.
-- [ ] `Systems/K5/Soundness.lean` — `| modalFive φ => exact Satisfies.modalFive_axiom m h_eucl w φ`.
-- [ ] Confirm each `<sys>_axiom_sound` / `<sys>_soundness` signature (and threaded hypothesis names)
-      is unchanged.
+- [x] `Systems/T/Soundness.lean` — `| modalT φ => exact Satisfies.modalT_axiom m h_refl w φ`.
+- [x] `Systems/B/Soundness.lean` — `| modalB φ => exact Satisfies.modalB_axiom m h_symm w φ`.
+- [x] `Systems/D/Soundness.lean` — `| modalD φ => exact Satisfies.modalD_axiom m h_serial w φ`.
+- [x] `Systems/K4/Soundness.lean` — `| modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ`.
+- [x] `Systems/K5/Soundness.lean` — `| modalFive φ => exact Satisfies.modalFive_axiom m h_eucl w φ`.
+- [x] Confirm each `<sys>_axiom_sound` / `<sys>_soundness` signature (and threaded hypothesis names)
+      is unchanged. *(verified via `git diff` — only modal case bodies changed, signatures byte-identical)*
 
 **Timing**: ~1 hour
 
-**Depends on**: 2
+**Depends on**: 1 (Phase 2 is a non-blocking pre-PR heads-up)
 
 **Files to modify**:
 - `Cslib/Logics/Modal/Metalogic/Systems/{T,B,D,K4,K5}/Soundness.lean` — one modal case each.
@@ -215,7 +223,7 @@ stop here after Phase 1. Do not begin Phases 3-5 until a human confirms Zulip al
 
 ---
 
-### Phase 4: Consumer refactor — multi-property systems [BLOCKED-PENDING-ZULIP]
+### Phase 4: Consumer refactor — multi-property systems [NOT STARTED]
 
 **Goal**: Rewire the 9 multi-frame-property systems' modal cases to `exact` the Phase 1 lemmas,
 keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file sets).
@@ -234,7 +242,7 @@ keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file set
 
 **Timing**: ~1.5 hours
 
-**Depends on**: 2
+**Depends on**: 1 (Phase 2 is a non-blocking pre-PR heads-up)
 
 **Files to modify**:
 - `Cslib/Logics/Modal/Metalogic/Systems/{S4,S5,K45,KB5,D4,D5,D45,DB,TB}/Soundness.lean`.
@@ -247,7 +255,7 @@ keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file set
 
 ---
 
-### Phase 5: Full verification and PR preparation [BLOCKED-PENDING-ZULIP]
+### Phase 5: Full verification and PR preparation [NOT STARTED]
 
 **Goal**: Confirm the whole change set builds and lints cleanly end-to-end, then hand off for PR.
 
@@ -297,6 +305,7 @@ keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file set
 - **Consumer refactor (Phases 3-4)** is per-file and mechanical: if any `<sys>/Soundness.lean` fails
   to build, revert that one file to its inline case (the original body is preserved in git) and
   continue with the others; the additive core remains valid independently.
-- **If Zulip alignment is not obtained**, ship Phase 1 alone as a standalone additive PR (research
-  §5: additive-only core is a straightforward, low-risk PR) and leave the consumer refactor for a
-  later coordinated change.
+- **If maintainers object on the pre-PR heads-up**, ship Phase 1 alone as a standalone additive PR
+  (research §5: additive-only core is a straightforward, low-risk PR) and leave the consumer
+  refactor for a later coordinated change. (The design decision is resolved, so this is a
+  fallback-on-objection, not the expected path.)

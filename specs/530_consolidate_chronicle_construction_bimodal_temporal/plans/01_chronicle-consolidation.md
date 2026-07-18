@@ -308,7 +308,58 @@ research §5.3).
 
 ---
 
-### Phase 3b: Generic CEE RecursiveWalks [NOT STARTED]
+### Phase 3b: Generic CEE RecursiveWalks [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: The phase's primary deliverable -- a generic `c5ForwardWalk`/
+  `c5BackwardWalk` over `ChronicleInterface F` -- cannot be landed without reopening and
+  reversing Phase 1's already-closed, already-documented decision to keep `Chronicle`
+  logic-local.
+- **What was tried**: Read Temporal's `CounterexampleElimination/RecursiveWalks.lean` in
+  full (1125 lines) and Bimodal's `CounterexampleElimination/Interface.lean` signatures
+  (3048 lines total; `c5ForwardWalk`/`c5BackwardWalk` at lines 224/810). Confirmed both
+  `C5ForwardWalkResult`/`C5BackwardWalkResult` are `structure`s indexed by
+  `χ : Chronicle Atom` (each tree's own **local** `Chronicle` structure -- a genuinely
+  separate Lean type per tree, not an alias to the generic
+  `Cslib.Foundations.Logic.Metalogic.Chronicle.Types.Chronicle F`, confirmed by reading
+  `ChronicleTypes.lean`'s "Chronicle Structure" section: `structure Chronicle (Atom :
+  Type*) where f : Rat → Set (Formula Atom) ...`). The walk proof bodies are saturated
+  with `rcases`/`simp only [χ', Finset.mem_insert] at ha hb`-style pattern-matching on
+  Chronicle-structure-literal-derived Finset-membership subterms (e.g. `χ' := ⟨fun q => if
+  q = y then C else χ.f q, g', insert y χ.dom⟩` followed immediately by `rcases ha with rfl
+  | ha`) -- this is *exactly* the failure signature Phase 1's own docstring names: "several
+  `rcases`/pattern-matching proofs there destructure Finset-membership subterms nested
+  inside condition statements... the extra (defeq but not eagerly-reduced) `.toGeneric`
+  projection layer caused `rcases`/`simp` to no longer recognize the term as a Finset."
+  Also surveyed Phase 3c's `EliminationResult` (both trees) and Phase 4a/4b's
+  `ChronicleConstruction.lean` (`singletonChronicle : ... → Chronicle Atom`, `omegaChain`,
+  `limitG`, `chronicle_model_exists`, etc.) -- all likewise indexed by/returning the
+  tree-local `Chronicle Atom`, confirming the identical entanglement extends through the
+  rest of the plan's remaining phases (3c, 4a, 4b all consume or produce
+  `Chronicle`-typed/`Chronicle`-indexed values).
+- **Why it's stuck**: Phase 1 already attempted exactly this bridge (a `toGeneric : Chronicle
+  Atom → Chronicle F` conversion) and found it compiles standalone but breaks `rcases`/
+  `simp` in downstream `CounterexampleElimination/*.lean` files -- the very files this
+  phase's deliverable lives in. Re-attempting the same bridge here would very likely
+  reproduce the identical breakage, this time across ~1125+3048 lines of dense
+  case-splitting proof rather than the small structures Phase 3a safely kept logic-local.
+  This is not a single resistant lemma (the sanctioned "note and continue" contingency) --
+  it is the phase's entire primary deliverable, which `plan-compliance.md` requires
+  escalating rather than silently descoping.
+- **What is needed**: A plan-owner decision (via `/revise`) on one of two paths: (a) accept
+  that `c5ForwardWalk`/`c5BackwardWalk` (and, by the same evidence, Phase 3c's elimination
+  driver and Phase 4a/4b's `ChronicleConstruction`) stay logic-local/duplicated, formally
+  descoping Phases 3b-4b to "surveyed, confirmed blocked, no lift" and moving the plan
+  straight to Phase 5 cleanup; or (b) invest in a deeper architectural change -- replacing
+  each tree's local `Chronicle` with a true type-level alias to the generic `Chronicle F`
+  (e.g. `abbrev Chronicle (Atom) := Cslib.Foundations...Chronicle (Formula Atom)`, using
+  reducible aliasing rather than a projection function, which might avoid the specific
+  `.toGeneric`-layer breakage Phase 1 hit) -- but this revisits Phase 1's closed decision
+  and is a materially larger, riskier undertaking than "lift one more layer," so it needs
+  explicit sign-off rather than being attempted opportunistically mid-Phase-3b.
+- **Prohibited workarounds**: Do NOT use `sorry`, `def X := True`, or any vacuous
+  placeholder. Do NOT force a `toGeneric` bridge attempt without owner sign-off given
+  Phase 1 already demonstrated its failure mode on this exact file category.
 
 **Goal**: Land the generic `c5ForwardWalk` (~540 lines both) and `c5BackwardWalk` (~560/545) walk
 machinery as a generic module.

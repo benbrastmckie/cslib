@@ -2,9 +2,74 @@
 
 - **Task**: 530 - Consolidate chronicle construction (Bimodal/Temporal)
 - **Plan**: plans/01_chronicle-consolidation.md
-- **Status**: PARTIAL -- Phases 0-2 of 9 completed and committed; Phases 3a-5 remain.
+- **Status**: PARTIAL -- Phases 0-3a of 9 completed and committed; Phase 3b BLOCKED
+  (architectural finding, needs plan-owner decision); Phases 3c-5 not attempted pending
+  that decision.
 
-## Update (this run): Phase 2 completed (commit `cb61119a`)
+## Update (this run, 4th dispatch): Phase 3a completed (commit `c7493875`); Phase 3b BLOCKED
+
+**Phase 3a landed** (see plan file for the full deviation writeup): the fresh-rational
+Finset helpers (`exists_rat_gt_finset`/`exists_rat_lt_finset`/`exists_rat_between_not_in_finset`,
+zero `ChronicleInterface`/`Formula` dependency) and the three `BurgessR3Maximal_g_content_sub`/
+`_sdc`/`_bot_not_mem` MCS-level lemmas are now generic in
+`Cslib/Foundations/Logic/Metalogic/Chronicle/CounterexampleElimination/Structures.lean`, with
+both trees re-exporting under existing names. No new `ChronicleInterface` fields were needed --
+`until_implies_F_in_mcs` (Phase 2), `futureNecessitation`, `futureKDist`,
+`someFutureAllFutureNegAbsurd`, and `dcs_modus_ponens ∘ mcs_is_dcs` (for
+`implication_property`) already covered every primitive. `C5Counterexample`/
+`C5'Counterexample`, `c2'_preserved_on_old_adjacent`, and `burgessR3Maximal_from_h_content_sub`
+stayed logic-local per the Phase 3a survey's own recommendation. `lake shake` flagged
+`PointInsertion`/`CanonicalModel` imports (and the `CanonicalModel` `open`) as newly-unused in
+Bimodal's `BurgessHelpers.lean` after the lift; removed both. Full `lake build`
+(3242 jobs)/`lake lint`/`lake exe lint-style`/`lake exe checkInitImports`/`lake test` all green;
+zero new sorries/axioms.
+
+### Phase 3b: BLOCKED -- major architectural finding (see plan file's Phase 3b blocker for the
+full writeup; summarized here for the next dispatch)
+
+Read Temporal's `CounterexampleElimination/RecursiveWalks.lean` in full (1125 lines) and
+Bimodal's `CounterexampleElimination/Interface.lean` signatures (3048 lines;
+`c5ForwardWalk`/`c5BackwardWalk` at lines 224/810). **Finding**: `C5ForwardWalkResult`/
+`C5BackwardWalkResult` (both trees) are `structure`s indexed by `χ : Chronicle Atom` --
+each tree's own **local** `Chronicle` structure (confirmed via `ChronicleTypes.lean`: `structure
+Chronicle (Atom : Type*) where f : Rat → Set (Formula Atom) ...`), NOT the generic
+`Cslib.Foundations.Logic.Metalogic.Chronicle.Types.Chronicle F`. The walk proof bodies are
+saturated with `rcases`/`simp only [χ', Finset.mem_insert] at ha hb`-style pattern-matching on
+Chronicle-structure-literal-derived Finset-membership subterms -- exactly the failure signature
+Phase 1's own docstring already named and rejected a `toGeneric` bridge over ("the extra (defeq
+but not eagerly-reduced) `.toGeneric` projection layer caused `rcases`/`simp` to no longer
+recognize the term as a Finset").
+
+**This entanglement was also confirmed to extend to Phase 3c and Phase 4a/4b**: Phase 3c's
+`EliminationResult` (both trees) is likewise indexed by `Chronicle Atom`, and Phase 4a/4b's
+`ChronicleConstruction.lean` core functions (`singletonChronicle`, `omegaChain`, `limitG`,
+`chronicle_model_exists`, etc.) all consume/produce `Chronicle Atom` directly -- confirmed via
+signature grep, not a full read, but the pattern is unambiguous (these files exist specifically
+to build/manipulate Chronicle values).
+
+**Why this is a BLOCKED escalation, not a "keep logic-local and continue" annotation**: Phase
+3a's logic-local carve-outs were small (2 structures, 2 lemmas, ~15-100 lines each) within a
+phase whose main deliverable (3 lemmas + 3 helpers) *did* land generically. Phase 3b's
+resistant content is the phase's *entire* primary deliverable, and the same root cause
+(confirmed, not hypothesized) propagates through the *rest of the plan*. Per
+`plan-compliance.md`, a deviation of this scope on `.lean` files must be raised as a blocker for
+plan-owner decision, not silently descoped.
+
+**What is needed to unblock** (see plan file for full text): a `/revise` decision between (a)
+formally descoping Phases 3b-4b to "surveyed, confirmed blocked by Chronicle-locality, no
+generic lift" and moving straight to Phase 5 cleanup, accepting that only `ChronicleTypes`/
+`RRelation`/the small Phase-3a lemmas end up shared (the ~5000-line CEE/Construction dedup the
+plan's Phase 3c description anticipated does not happen); or (b) a deeper architectural retry --
+replacing each tree's local `Chronicle` with a true reducible type alias to the generic
+`Chronicle F` (`abbrev` rather than a projection function) to see whether that specific
+technique avoids Phase 1's `.toGeneric`-layer breakage. Option (b) reopens Phase 1's closed
+decision and is materially riskier/larger than continuing the current phase-by-phase lift, so it
+needs explicit sign-off rather than opportunistic mid-phase attempt.
+
+**No lean files were changed for Phase 3b** (nothing was found safe to lift); only the plan file
+was updated to mark it `[BLOCKED]` with the full writeup above.
+
+## Update (3rd dispatch): Phase 2 completed (commit `cb61119a`)
 
 Landed the ~37-lemma shared core of `RRelation.lean` as a generic Foundations module,
 extending `ChronicleInterface` with 21 new statement-only fields (13 raw axiom-Deriv facts
@@ -228,7 +293,12 @@ budget.
 
 ## Continuation
 
-See `.orchestrator-handoff.json` for the structured resume point. In short: resume at
-Phase 3a (`CounterexampleElimination/Structures.lean` + `BurgessHelpers.lean`). See the
-"Phase 3a Survey" section above for the concrete decomposition and the `Chronicle`-locality
-wrinkle found while scoping it -- read that section before writing any code for 3a.
+See `.orchestrator-handoff.json` for the structured resume point. In short: Phase 3a is
+complete and committed (`c7493875`). Phase 3b is `[BLOCKED]` on a plan-owner decision -- **do
+not attempt further generic lifting of `c5ForwardWalk`/`c5BackwardWalk` (or Phase 3c's
+elimination driver, or Phase 4a/4b's `ChronicleConstruction`) without first reading the Phase
+3b blocker writeup** in both this file and the plan file, and without an explicit `/revise`
+decision on the two paths documented there (descope 3b-4b to logic-local and skip to Phase 5
+cleanup, vs. a deeper `Chronicle`-type-alias architectural retry). Resuming with a plain
+`/implement` re-dispatch should re-surface this blocker for user review rather than silently
+retrying the same doomed bridge.

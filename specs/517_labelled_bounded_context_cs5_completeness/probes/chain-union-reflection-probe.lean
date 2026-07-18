@@ -791,4 +791,32 @@ theorem disjunction_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A
     · exact Or.inr (mem_of_maximal_addFormula hmax hyX hC)
   · exact Or.inl (mem_of_maximal_addFormula hmax hyX hB)
 
+/-! ### Clause 4 (diamond property) -/
+
+/-- **`(◇E)`-shaped freshness transport.** A corollary of `NIK.swap_relabel` (Phase 3), in the
+same family as `NIK.freshWitness_transport` but for `diaE`'s premise shape (the fresh witness
+labels the *assumption*, not the conclusion): a derivation witnessed at one fresh label `y₀`
+transports to any other label `y`, both fresh w.r.t. the ambient graph, the pivot `x`, the
+untouched conclusion label `z`, and the context `Γ`. -/
+theorem NIK.diaWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {x z y₀ y : Label Atom} {A C : Proposition Atom}
+    (h : NIK 𝒯 (G.addEdge x y₀) ((y₀ ∶ A) :: Γ) (z ∶ C)) (hy₀X : y₀ ∉ G.X) (hyX : y ∉ G.X)
+    (hxy₀ : x ≠ y₀) (hxy : x ≠ y) (hzy₀ : z ≠ y₀) (hzy : z ≠ y)
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀ ∧ ψ.lbl ≠ y) : NIK 𝒯 (G.addEdge x y) ((y ∶ A) :: Γ) (z ∶ C) := by
+  have hf : ∀ p q, (G.addEdge x y₀).R p q →
+      (G.addEdge x y).R (swapFn y₀ y p) (swapFn y₀ y q) := by
+    intro p q hpq
+    rcases hpq with hpq | ⟨rfl, rfl⟩
+    · have hp : p ≠ y₀ := fun hp => hy₀X (hp ▸ (G.edge_mem p q hpq).1)
+      have hq : q ≠ y₀ := fun hq => hy₀X (hq ▸ (G.edge_mem p q hpq).2)
+      have hp' : p ≠ y := fun hp => hyX (hp ▸ (G.edge_mem p q hpq).1)
+      have hq' : q ≠ y := fun hq => hyX (hq ▸ (G.edge_mem p q hpq).2)
+      rw [swapFn_other hp hp', swapFn_other hq hq']
+      exact Or.inl hpq
+    · rw [swapFn_other hxy₀ hxy, swapFn_left]
+      exact Or.inr ⟨rfl, rfl⟩
+  have hstep := h.swap_relabel (a := y₀) (b := y) (G' := G.addEdge x y) hf
+  simp only [List.map_cons, swapFn_left, List.map_swapFn_eq_self hΓ, swapFn_other hzy₀ hzy] at hstep
+  exact hstep
+
 end Cslib.Logic.Modal.Labelled

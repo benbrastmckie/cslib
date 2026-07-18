@@ -10,7 +10,7 @@
       "statement": "theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} : Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ",
       "strategic": true,
       "assumption": "Assumes every label y a boxI/diaE cofinite premise ranges over reflects to a single chain index; the swap-transport argument only establishes this for labels drawn from the chain's shared coinfinite reserve V'^c, not for 'old' labels already present in some chain member's domain.",
-      "why_deferred": "Inherited from Phase 3, NOT discharged this dispatch despite being the secondary objective. Investigated: Phase 3's proposed route (a) -- 'the concrete Zorn construction only ever extends by fresh labels at each step' -- is NOT naturally available from Mathlib's zorn_le0 (a non-constructive existence result with no exposed step-indexed extension sequence). Phase 4 independently hit the IDENTICAL obstacle in the diamond clause (see the other new sorry below), confirming this is a structural gap in the cofinite-quantification encoding vs. Context.G.X's potentially-infinite domain, not a one-off. Forcing either candidate route without a settled resolution risks a subtly wrong general-position proof.",
+      "why_deferred": "Inherited from Phase 3, NOT discharged this dispatch despite being the secondary objective. Investigated: Phase 3's proposed route (a) -- 'the concrete Zorn construction only ever extends by fresh labels at each step' -- is NOT naturally available from Mathlib's zorn_le0 (a non-constructive existence result with no exposed step-indexed extension sequence). Phase 4 independently hit the IDENTICAL obstacle in the diamond clause (see the other sorry below), confirming this is a structural gap in the cofinite-quantification encoding vs. Context.G.X's potentially-infinite domain, not a one-off. Forcing either candidate route without a settled resolution risks a subtly wrong general-position proof.",
       "follow_up_task": "Joint dispatch investigating both this sorry and dwitness_mem_of_maximal's sorry together, since both are the same root obstacle -- likely needs either a genuinely different (constructive, step-indexed) Zorn construction, or a new monotonicity-based argument for 'old' labels not yet found."
     },
     {
@@ -19,41 +19,31 @@
       "statement": "theorem dwitness_mem_of_maximal ... : Label.dwitness y B ∈ H.G.X (diamond-witness maximality, 'old label' cofinite-range sub-case)",
       "strategic": true,
       "assumption": "Assumes the single witnessing NIK-derivation at v = dwitness y B can be transported to a diaE-style cofinite premise (∀y'∉L, ...) covering every y' outside a FINITE exclusion set L, including y' already present in H.G.X ('old' labels).",
-      "why_deferred": "NIK.diaWitness_transport (built this dispatch, a new diaE-shaped corollary of Phase 3's NIK.swap_relabel) only transports to TARGET labels fresh w.r.t. H.G.X; it cannot supply the fact for 'old' y' since its own hypothesis requires y'∉G.X, and H.G.X may be infinite so this cannot be guaranteed merely by choosing y' outside a finite L. This is the SAME root obstacle as Phase 3's deriv_reflect sorry above, confirmed independently. The fresh-label half of this argument, and all surrounding Context/maximality machinery, IS proven sorry-free.",
+      "why_deferred": "NIK.diaWitness_transport (built in an earlier dispatch, a new diaE-shaped corollary of Phase 3's NIK.swap_relabel) only transports to TARGET labels fresh w.r.t. H.G.X; it cannot supply the fact for 'old' y' since its own hypothesis requires y'∉G.X, and H.G.X may be infinite so this cannot be guaranteed merely by choosing y' outside a finite L. This is the SAME root obstacle as Phase 3's deriv_reflect sorry above, confirmed independently. The fresh-label half of this argument, and all surrounding Context/maximality machinery, IS proven sorry-free.",
       "follow_up_task": "Joint dispatch investigating both this sorry and deriv_reflect's sorry together (same root obstacle)."
-    },
-    {
-      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 988,
-      "statement": "theorem NIK.subst {G y B Γ Δ φ} (h : NIK 𝒯 G (Δ ++ (y∶B)::Γ) φ) (hsub : NIK 𝒯 G Γ (y∶B)) : NIK 𝒯 G (Δ++Γ) φ",
-      "strategic": true,
-      "assumption": "Cut/substitution admissibility for NIK: a derivation using y:B as an open assumption, combined with a derivation of y:B itself, yields a derivation without that assumption.",
-      "why_deferred": "A genuinely new lemma this dispatch discovered Simpson's own deductive-closure argument silently relies on (chunk_0103.md: 'Then Delta,y:B not-derive x:A, for otherwise would contradict that Delta not-derive x:A' -- the 'otherwise' step IS this substitution), not named in the plan's Phase 4 task list. The natural proof generalizes over an accumulating prefix Delta (since impI/orE/diaE prepend items during the induction) while re-weakening the substituting derivation at each level -- a standard but nontrivial induction whose exact generalization pattern this dispatch's remaining budget did not reach. Everything downstream of this lemma (Deriv.subst, deductiveClosure_of_maximal) is proven sorry-free modulo this one fact.",
-      "follow_up_task": "Dedicated cut-admissibility dispatch for NIK.subst."
     }
   ],
   "blockers": [],
-  "continuation_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-4-handoff-20260718.md",
+  "continuation_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/nik-subst-followup-handoff-20260718.md",
   "continuation_context": {
     "is_successor": false,
     "next_phase": 4,
-    "next_action_hint": "Two independent follow-ups (either order): (1) NIK.subst (cut admissibility) -- closes TPrime clause 1 (deductive closure) entirely. (2) dwitness_mem_of_maximal's 'old label' sub-case -- closes TPrime clause 4 (diamond) and, jointly with the SAME-root-cause Phase 3 deriv_reflect sorry, likely also closes that inherited sorry. A joint dispatch on (2) + deriv_reflect is recommended over two separate ones, since both need the same underlying resolution (either a constructive step-indexed Zorn construction, or a new 'old label' monotonicity argument). Once both are closed, primeLemma (Simpson's Prime Lemma 5.3.1) is fully sorry-free and ready to transcribe into Cslib/ mainline. Also: reconsider Phase 5 ('T-Comp graph completion -- symmetry') -- this dispatch's --lit research found it is likely UNNEEDED for a TPrime-typed target (see plan Phase 5's flagged note and the probe's module docstring 'unbounded vs bounded' section)."
+    "next_action_hint": "NIK.subst (cut admissibility) is CLOSED this dispatch -- TPrime clause 1 (deductive closure) is now fully sorry-free. The only remaining work is a joint dispatch on the two 'old label' cofinite-range sorries: dwitness_mem_of_maximal's diamond sub-case (closes TPrime clause 4) and Phase 3's deriv_reflect sorry -- same root cause (cofinite-quantification encoding vs. potentially-infinite graph/context domain), two candidate routes already ruled out (see sorry_inventory). Once both close, primeLemma (Simpson's Prime Lemma 5.3.1) is fully sorry-free and ready to transcribe into Cslib/ mainline. Also still open: reconsider Phase 5 ('T-Comp graph completion -- symmetry') -- Phase 4's --lit research found it is likely UNNEEDED for a TPrime-typed target (see plan Phase 5's flagged note)."
   },
-  "summary": "Phase 4 (Bounded Prime Lemma / Zorn over whole contexts): assembled Simpson's Prime Lemma 5.3.1 (primeLemma) end to end in probes/chain-union-reflection-probe.lean, extended in place from Phase 3. Of TPrime's five clauses: clause 0 (clModel, via a new 'redundant edge' maximality argument reconstructed from Simpson's stated property since GeomAxiom has no existential axioms), consistency, and disjunction are FULLY PROVEN sorry-free. Deductive closure and diamond each have their outer maximality wiring proven sorry-free, routing through exactly one new, well-documented strategic sorry apiece for genuinely new sub-lemmas this dispatch discovered were needed (cut admissibility; a cofinite-range 'old label' case matching Phase 3's own unresolved obstacle). RESEARCH FINDING: --lit research (Simpson chunk_0165/0166, Lemma 8.2.5) resolved the plan's flagged bounded-vs-unbounded risk in favor of the unbounded Ch5 route (matches TPrime's landed raw clModel), which likely makes Phase 5 unneeded -- flagged in the plan, not unilaterally skipped. Secondary objective (discharging Phase 3's deriv_reflect sorry) was investigated and NOT achieved -- confirmed it shares the identical root cause as the new diamond sorry (Mathlib's zorn_le0 is non-constructive, does not supply the step-indexed extension invariant either sorry's natural closing route needs). Zero-debt invariant holds: all work in probes/, zero sorry/axiom/vacuous under Cslib/, guardrail modules unaffected (confirmed via scoped build).",
+  "summary": "Targeted follow-up dispatch (task 517, Phase 4 continuation): closed the NIK.subst cut/substitution-admissibility sorry in probes/chain-union-reflection-probe.lean via a new auxiliary lemma NIK.subst_aux -- structural induction on the NIK-derivation, generalizing over an accumulating prefix Delta' (mirroring NIK.weaken's impI/orE/diaE case shape) and re-weakening the substituting derivation to each case's own graph (boxI/diaE extend the graph by one edge). TPrime clause 1 (deductive closure) is now fully sorry-free, alongside clauses 0/2/3 -- four of five TPrime clauses sorry-free. Only clause 4 (diamond) still carries a sorry (dwitness_mem_of_maximal's 'old label' case, same root cause as Phase 3's deriv_reflect). Verified via lean_verify: NIK.subst axioms = {propext} only; deductiveClosure_of_maximal axioms = {propext, Classical.choice, Quot.sound}, no sorryAx in either. Build green: lake env lean on the probe exits 0 with exactly two declaration-uses-sorry warnings (down from three). Zero-debt invariant holds: all work in probes/, Cslib/ mainline untouched by this dispatch, guardrail modules unaffected.",
   "modified_files": [
     "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/progress/phase-4-progress.json",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-4-handoff-20260718.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/10_phase4-bounded-prime-lemma-summary.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/nik-subst-followup-handoff-20260718.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
   "verification": {
     "build_passed": true,
     "probe_module_build_passed": true,
-    "sorry_count_in_probe": 3,
+    "sorry_count_in_probe": 2,
     "sorry_count_in_scope_mainline_files": 0,
     "new_axiom_count": 0,
-    "axioms_in_probe": ["propext", "Classical.choice", "Quot.sound", "sorryAx (3 documented strategic sorries)"],
+    "axioms_in_probe": ["propext", "Classical.choice", "Quot.sound", "sorryAx (2 documented strategic sorries)"],
     "vacuous_count": 0,
     "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true

@@ -959,33 +959,89 @@ theorem diamond_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ 
 
 /-! ### Clause 1 (deductive closure) -/
 
+/-- **Auxiliary, `Δ`-generalized form of `NIK.subst`.** States the substitution/cut fact for an
+arbitrary scrutinee context `Γ₀` together with a proof `Γ₀ = Δ' ++ (y∶B) :: Γ` pinpointing where
+the cut formula sits, so that induction on the `NIK`-derivation can freely grow `Δ'` in the
+`impI`/`orE`/`diaE` cases (which prepend to the front of the *whole* context) while re-weakening
+the substituting derivation `hsub` to whichever graph the current case's premises live at
+(`boxI`/`diaE` extend the graph by one edge via `Graph.addEdge`). `NIK.subst` below specializes
+this at `Δ' := Δ`, `Γ₀ := Δ ++ (y∶B) :: Γ` via `rfl`. -/
+theorem NIK.subst_aux {y : Label Atom} {B : Proposition Atom} {Γ : List (LabelledFormula Atom)} :
+    ∀ {G : Graph Atom} {Γ₀ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom},
+      NIK 𝒯 G Γ₀ φ → ∀ Δ' : List (LabelledFormula Atom), Γ₀ = Δ' ++ (y ∶ B) :: Γ →
+      NIK 𝒯 G Γ (y ∶ B) → NIK 𝒯 G (Δ' ++ Γ) φ := by
+  intro G Γ₀ φ hderiv
+  induction hderiv with
+  | assumption G Γ₀ φ hmem =>
+      intro Δ' heq hsub
+      rw [heq] at hmem
+      rcases List.mem_append.mp hmem with hmem | hmem
+      · exact .assumption G (Δ' ++ Γ) φ (List.mem_append_left _ hmem)
+      · rcases List.mem_cons.mp hmem with rfl | hmem
+        · exact hsub.weaken (Graph.le_refl _) (fun ψ hψ => List.mem_append_right _ hψ)
+        · exact .assumption G (Δ' ++ Γ) φ (List.mem_append_right _ hmem)
+  | efq G Γ₀ x y0 A _ ih =>
+      intro Δ' heq hsub
+      exact .efq G (Δ' ++ Γ) x y0 A (ih Δ' heq hsub)
+  | andI G Γ₀ x A B' _ _ ihA ihB =>
+      intro Δ' heq hsub
+      exact .andI G (Δ' ++ Γ) x A B' (ihA Δ' heq hsub) (ihB Δ' heq hsub)
+  | andE1 G Γ₀ x A B' _ ih =>
+      intro Δ' heq hsub
+      exact .andE1 G (Δ' ++ Γ) x A B' (ih Δ' heq hsub)
+  | andE2 G Γ₀ x A B' _ ih =>
+      intro Δ' heq hsub
+      exact .andE2 G (Δ' ++ Γ) x A B' (ih Δ' heq hsub)
+  | orI1 G Γ₀ x A B' _ ih =>
+      intro Δ' heq hsub
+      exact .orI1 G (Δ' ++ Γ) x A B' (ih Δ' heq hsub)
+  | orI2 G Γ₀ x A B' _ ih =>
+      intro Δ' heq hsub
+      exact .orI2 G (Δ' ++ Γ) x A B' (ih Δ' heq hsub)
+  | orE G Γ₀ x y0 A B' C _ _ _ ihor ihA ihB =>
+      intro Δ' heq hsub
+      refine .orE G (Δ' ++ Γ) x y0 A B' C (ihor Δ' heq hsub) ?_ ?_
+      · exact ihA ((x ∶ A) :: Δ') (by rw [heq, List.cons_append]) hsub
+      · exact ihB ((x ∶ B') :: Δ') (by rw [heq, List.cons_append]) hsub
+  | impI G Γ₀ x A B' _ ih =>
+      intro Δ' heq hsub
+      exact .impI G (Δ' ++ Γ) x A B' (ih ((x ∶ A) :: Δ') (by rw [heq, List.cons_append]) hsub)
+  | impE G Γ₀ x A B' _ _ ihimp ihA =>
+      intro Δ' heq hsub
+      exact .impE G (Δ' ++ Γ) x A B' (ihimp Δ' heq hsub) (ihA Δ' heq hsub)
+  | boxE G Γ₀ x y0 A hR _ ih =>
+      intro Δ' heq hsub
+      exact .boxE G (Δ' ++ Γ) x y0 A hR (ih Δ' heq hsub)
+  | boxI L hLfin G Γ₀ x A _ ih =>
+      intro Δ' heq hsub
+      refine .boxI L hLfin G (Δ' ++ Γ) x A ?_
+      intro w hw
+      have hle : G ≤ G.addEdge x w := ⟨Set.subset_union_left, fun _ _ h => Or.inl h⟩
+      have hsub' : NIK 𝒯 (G.addEdge x w) Γ (y ∶ B) := hsub.weaken hle (fun _ h => h)
+      exact ih w hw Δ' heq hsub'
+  | diaI G Γ₀ x y0 A hR _ ih =>
+      intro Δ' heq hsub
+      exact .diaI G (Δ' ++ Γ) x y0 A hR (ih Δ' heq hsub)
+  | diaE L hLfin G Γ₀ x z A B' hdia _ ihdia ih =>
+      intro Δ' heq hsub
+      refine .diaE L hLfin G (Δ' ++ Γ) x z A B' (ihdia Δ' heq hsub) ?_
+      intro w hw
+      have hle : G ≤ G.addEdge x w := ⟨Set.subset_union_left, fun _ _ h => Or.inl h⟩
+      have hsub' : NIK 𝒯 (G.addEdge x w) Γ (y ∶ B) := hsub.weaken hle (fun _ h => h)
+      exact ih w hw ((w ∶ A) :: Δ') (by rw [heq, List.cons_append]) hsub'
+
 /-- **`NIK`-level substitution / cut admissibility.** If `φ` is derivable from
 `Δ ++ (y:B) :: Γ` and `y:B` is itself derivable from `Γ`, then `φ` is derivable from `Δ ++ Γ`
 alone — the one fact Simpson's deductive-closure argument needs that the other three clauses do
 not (Simpson `chunk_0103.md`, *"Then `Δ,y:B ⊬_H x:A` (for otherwise would contradict that
-`Δ⊬_H x:A`)"* — the "otherwise" step is exactly this substitution). **STRATEGIC SORRY**
-(anti-analysis five-condition test):
-1. Deliberate division boundary: flagged by name in the plan's Phase 4 task list ("Deductive
-   closure: relativized clause + maximality... needs `y ∈ H.X`") but the plan does not name the
-   *cut* step Simpson's own proof silently relies on; this is a genuine additional lemma this
-   dispatch discovered is required, not an abandoned attempt at a known target.
-2. Tightly scoped: exactly this one structural fact about `NIK`; every OTHER clause (0, 2, 3, and
-   4's fresh-label half) is proven sorry-free above, including the surrounding maximality wiring
-   for clause 1 itself (`deductiveClosure_of_maximal` below reduces to exactly this lemma).
-3. Documented: the natural proof is by induction on the *first* derivation, substituting the
-   second wherever an `assumption` rule consumed exactly `y:B` — but `NIK.assumption`'s context
-   argument is a bare `List`, and the growing-context rules (`impI`, `orE`, `diaE`) prepend items
-   during the induction, so the induction must generalize over an accumulating prefix `Δ` while
-   re-weakening the substituting derivation at each level (`NIK.weaken`) — a standard but
-   nontrivial induction (comparable in shape to `NIK.weaken`/`NIK.swap_relabel` above, but with a
-   genuinely different generalization pattern this dispatch's remaining budget did not reach).
-4. Tracked: recorded in the handoff `sorry_inventory` with `strategic: true`, `follow_up_task`
-   pointing at a dedicated cut-admissibility dispatch.
-5. Build-green: `lake env lean` on this file (verified) succeeds with this `sorry` present. -/
+`Δ⊬_H x:A`)"* — the "otherwise" step is exactly this substitution). Proved by
+`NIK.subst_aux`: induction on the derivation of `φ`, generalizing over the accumulating prefix
+`Δ'` (needed because `impI`/`orE`/`diaE` prepend to the *whole* context during the induction) and
+re-weakening `hsub` to each case's own graph (`boxI`/`diaE` extend the graph by one edge). -/
 theorem NIK.subst {G : Graph Atom} {y : Label Atom} {B : Proposition Atom}
     {Γ Δ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom}
-    (h : NIK 𝒯 G (Δ ++ (y ∶ B) :: Γ) φ) (hsub : NIK 𝒯 G Γ (y ∶ B)) : NIK 𝒯 G (Δ ++ Γ) φ := by
-  sorry
+    (h : NIK 𝒯 G (Δ ++ (y ∶ B) :: Γ) φ) (hsub : NIK 𝒯 G Γ (y ∶ B)) : NIK 𝒯 G (Δ ++ Γ) φ :=
+  NIK.subst_aux h Δ rfl hsub
 
 /-- The `Deriv`-level form of `NIK.subst`, lifted through finite witnessing sublists — the shape
 `deductiveClosure_of_maximal` actually consumes. -/
@@ -1034,9 +1090,13 @@ theorem deductiveClosure_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Ato
 /-- **Simpson's Prime Lemma 5.3.1** (`chunk_0102.md`/`chunk_0103.md`, pp. 92-93): if `(G,Γ)` is a
 context and `Γ ⊬_G x:A`, there is a `𝒯`-prime context `(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A`. Assembles
 `primeC_exists_maximal` (the Zorn maximalisation) with the five `TPrime` clause theorems above.
-The maximal element's `TPrime` structure carries `clModel`/`consistency`/`disjunction`/`diamond`
-sorry-free; `deductiveClosure` routes through the one documented strategic sorry `NIK.subst`
-(cut admissibility) — see that theorem's docstring. -/
+The maximal element's `TPrime` structure carries `clModel`/`consistency`/`disjunction`/
+`deductiveClosure` sorry-free — `deductiveClosure`'s one dependency, `NIK.subst` (cut
+admissibility), was closed by a follow-up dispatch via `NIK.subst_aux` (structural induction,
+generalizing over the accumulating prefix `Δ'`, mirroring `NIK.weaken`'s case shape). `diamond`
+still routes through `dwitness_mem_of_maximal`'s one remaining documented strategic sorry (the
+"old label" cofinite-range sub-case, same root cause as `ChainCtx.deriv_reflect`'s Phase 3
+sorry) — see that theorem's docstring. -/
 theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Proposition Atom)
     (h0 : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) :
     ∃ P : TPrime 𝒯 Atom, G₀ ≤ P.toContext ∧ ¬ Deriv 𝒯 P.G P.Γ (x₀ ∶ A₀) := by

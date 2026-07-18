@@ -355,11 +355,13 @@ inhabitant of the repaired `TPrime`. Depends on Phases 2, 3.
    - **Consistency**: sorry-free, immediate via cross-label `NIK.efq` (`consistency_of_maximal`).
    - **Disjunction**: sorry-free, via `Deriv.orE` (set-lifted `(∨E)`, no cut needed) +
      `mem_of_maximal_addFormula` (`disjunction_of_maximal`).
-   - **Deductive closure**: outer maximality wiring sorry-free (`deductiveClosure_of_maximal`);
-     routes through ONE new documented strategic sorry, `NIK.subst` (cut/substitution
-     admissibility) — a genuinely new lemma Simpson's own proof silently relies on but this
-     dispatch's remaining budget did not close (see that theorem's docstring for the full
-     five-condition justification).
+   - **Deductive closure**: sorry-free, fully. `deductiveClosure_of_maximal`'s one dependency,
+     `NIK.subst` (cut/substitution admissibility) — a genuinely new lemma Simpson's own proof
+     silently relies on that the original Phase 4 dispatch's remaining budget did not close — was
+     discharged by a dedicated follow-up dispatch via `NIK.subst_aux`: structural induction on the
+     derivation, generalizing over the accumulating prefix `Δ'` (needed since `impI`/`orE`/`diaE`
+     prepend to the whole context) and re-weakening the substituting derivation to each case's own
+     graph (`boxI`/`diaE` extend the graph by one edge). `TPrime` clause 1 is now sorry-free.
    - **Diamond**: outer maximality wiring and the fresh-label half sorry-free
      (`dwitness_mem_of_maximal`, `diamond_of_maximal`, via new `NIK.diaWitness_transport`);
      routes through ONE new documented strategic sorry for the "old label" cofinite-range
@@ -371,11 +373,14 @@ inhabitant of the repaired `TPrime`. Depends on Phases 2, 3.
 **Verification**: `lake env lean` on `probes/chain-union-reflection-probe.lean` green (verified,
 repeatedly, through incremental additions). Zero-debt invariant holds: **zero** `sorry`/new
 `axiom`/vacuous def under `Cslib/` (mainline untouched this phase — all work in `probes/`, per
-Phase 3's own precedent). **Three** total `sorry`s remain in the probe (all documented strategic
-sorries meeting the anti-analysis five-condition test): the inherited Phase 3 `deriv_reflect`
-sorry (NOT discharged — see below), the new `NIK.subst` sorry, and the new diamond "old label"
-sorry. Guardrail modules (`CS5Canonical.lean`, `CKExtension.lean`) unaffected (untouched, confirmed
-via scoped build).
+Phase 3's own precedent). **Two** total `sorry`s now remain in the probe (down from three — the
+`NIK.subst` cut-admissibility sorry was closed by a dedicated follow-up dispatch; `TPrime` clause 1
+/ deductive closure is now fully sorry-free), both documented strategic sorries meeting the
+anti-analysis five-condition test: the inherited Phase 3 `deriv_reflect` sorry (NOT discharged —
+see below) and the diamond "old label" sorry (`dwitness_mem_of_maximal`) — the two remaining
+sorries share the same root cause (cofinite-quantification vs. finite-graph-domain, see below) and
+are recommended for a joint follow-up dispatch. Guardrail modules (`CS5Canonical.lean`,
+`CKExtension.lean`) unaffected (untouched, confirmed via scoped build).
 
 **On discharging Phase 3's `deriv_reflect` sorry (secondary dispatch objective)**: NOT discharged.
 Phase 3's docstring named two candidate closing routes: (a) an invariant that the concrete Zorn

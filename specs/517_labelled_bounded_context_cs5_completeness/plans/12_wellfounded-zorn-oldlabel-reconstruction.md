@@ -515,23 +515,54 @@ successor-preservation and limit-preservation are independent statements).
   the dispatch brief and Postmortem Constraints; the substantive milestone, a fully sorry-free
   `primeLemma`, is met.)
 
-### Phase 7: Transcribe `primeLemma` + FLO machinery into `Cslib/` mainline [NOT STARTED]
+### Phase 7: Transcribe `primeLemma` + FLO machinery into `Cslib/` mainline [COMPLETED]
 
 - **Goal:** move the now-sorry-free construction, the FLO machinery, the clause theorems, and
   `primeLemma` from the probe into a new mainline file under `Constructive/Labelled/` (or
   `Constructive/`), zero-debt. Mechanical transcription of already-green content.
 - **Tasks:**
-  - [ ] (7.1) Transcribe the FLO carrier, `flo_succ`, `flo_limit`, `primeC'_exists_maximal`, and
+  - [x] (7.1) Transcribe the FLO carrier, `flo_succ`, `flo_limit`, `primeC'_exists_maximal`, and
     `flo_oldlabel_transport` into mainline; `import Cslib.Init`; scoped `lake build` green.
-  - [ ] (7.2) Transcribe the five clause theorems, `deriv_reflect`/chain-closure, the diamond wiring,
+    *(deviation: FLO machinery NOT transcribed to mainline — resolved scope decision from the
+    orchestrator continuation brief. Phase 6 established `primeLemma` routes through
+    `primeC_exists_maximal` (plain `zorn_le₀`), not the FLO apparatus; the FLO machinery
+    (`Stage`/`FloSeq`/`FLO`/`flo_succ`/`flo_limit`/`primeC'_exists_maximal`/
+    `flo_oldlabel_transport`) is non-load-bearing for `primeLemma` and still carries 2 open,
+    documented sorries (`flo_succ`'s superseded `redundantEdge` branch;
+    `primeC'_exists_maximal`'s `Maximal`-conjunct half). Since mainline transcription must be
+    zero-debt (sorry-free), transcribing FLO would either introduce debt or require re-proving
+    the 2 open sorries out of scope for this phase. The FLO apparatus stays in `probes/
+    chain-union-reflection-probe.lean`, preserved verbatim, as correct scaffolding — out of
+    scope for mainline pending a future task if ever needed.)*
+  - [x] (7.2) Transcribe the five clause theorems, `deriv_reflect`/chain-closure, the diamond wiring,
     and `primeLemma`; scoped `lake build` green.
-  - [ ] `lean_verify` on the mainline `primeLemma`: axioms ⊆ `[propext, Classical.choice,
-    Quot.sound]`; zero sorry / zero new axiom / zero vacuous def.
+    *(deviation: scope narrowed per the same resolved decision — transcribed `primeLemma` and its
+    actual sorry-free dependency closure only: `swapFn`/`NIK.swap_relabel`/
+    `NIK.freshWitness_transport`, `substFn`/`NIK.relabelFresh`, `NIK.oldLabelTransport`/
+    `NIK.diaWitnessTransportOld`, `GChain`/`TClosure.reflectChain`/`NIK.reflectChain`,
+    `ChainCtx`/`ChainCtx.deriv_reflect`/`ChainCtx.chain_closure`, `primeC`/`primeC_mem_base`/
+    `primeC_chain_bddAbove`/`primeC_exists_maximal`, the five clause theorems
+    (`clModel_of_maximal`/`deductiveClosure_of_maximal`/`consistency_of_maximal`/
+    `disjunction_of_maximal`/`diamond_of_maximal`, via `dwitness_mem_of_maximal` and
+    `NIK.subst`/`NIK.subst_aux`), and `primeLemma` itself — landed in new file
+    `Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean`.)*
+  - [x] `lean_verify` on the mainline `primeLemma`: axioms ⊆ `[propext, Classical.choice,
+    Quot.sound]`; zero sorry / zero new axiom / zero vacuous def. **Confirmed**: `lean_verify`
+    returned `{"axioms":["propext","Classical.choice","Quot.sound"],"warnings":[]}` for both
+    `primeLemma` and `dwitness_mem_of_maximal`.
 - **Timing:** 1-2 dispatches (split 7.1/7.2 if >300 lines each). Estimated output: ~300-600 lines
-  (mainline, split across sub-phases).
+  (mainline, split across sub-phases). **Actual: 1 dispatch, ~1660 lines** (narrower scope per
+  the FLO-exclusion deviation above; the file is larger than the original FLO+primeLemma estimate
+  because it is dominated by the `NIK`-level reflection/relabeling apparatus, not because more
+  was transcribed than planned).
 - **Depends on:** 6.
 - **Done when:** mainline `primeLemma` builds green, sorry-free, axiom-clean; guardrail modules
-  re-checked to still build.
+  re-checked to still build. **MET.** Full CSLib CI pipeline green: scoped `lake build`,
+  `lake exe checkInitImports`, `lake lint` (0 warnings for the new file), `lake exe lint-style`
+  (0 warnings), `lake shake` (no suggestions for the new file), `lake exe mk_all --module`
+  (`Cslib.lean` updated), `lake test` (green), full `lake build` (3243/3243 jobs green,
+  guardrail modules — `Context.lean`/`Deduction.lean`/`Syntax.lean`/`CS5Canonical.lean` —
+  unregressed).
 
 > **Flagged for confirmation (carried from v4, Phase 4 `--lit` finding — do NOT delete, do NOT
 > build without confirming): original Phase 5 (T-Comp graph completion, Simpson Lemma 8.2.5,

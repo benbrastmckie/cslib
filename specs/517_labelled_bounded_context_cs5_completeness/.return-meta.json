@@ -1,22 +1,23 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-18T15:25:00-07:00",
-  "completed_at": "2026-07-18T16:45:00-07:00",
+  "started_at": "2026-07-18T16:06:59-07:00",
+  "completed_at": "2026-07-18T16:18:07-07:00",
   "artifacts": [
-    "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean",
+    "Cslib.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/16_phase6-primelemma-sorry-free-summary.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/summaries/17_phase7-primelemma-mainline-transcription-summary.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
   "partial_progress": {
     "stage": "complete",
-    "details": "Phase 6 closed both target sorries (ChainCtx.deriv_reflect, dwitness_mem_of_maximal). primeLemma is fully sorry-free and axiom-clean (lean_verify: [propext, Classical.choice, Quot.sound], no sorryAx) -- the Phase 4.5 completion milestone. Two pre-existing, documented, out-of-scope sorries remain (flo_succ superseded redundantEdge branch; primeC'_exists_maximal Maximal-conjunct), neither on primeLemma's dependency path.",
+    "details": "Phase 7 transcribed primeLemma + its actual sorry-free dependency closure (NIK relabeling/reflection apparatus, GChain/ChainCtx, primeC Zorn poset, five clause theorems) into new mainline file Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean. SCOPE DEVIATION (resolved by orchestrator brief): FLO machinery NOT transcribed -- non-load-bearing for primeLemma per Phase 6, carries 2 open sorries, stays in probes/ verbatim.",
     "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 6
+    "lint_count_current": 0,
+    "phases_completed": 7
   },
   "metadata": {
-    "session_id": "orchestrator-continuation",
+    "session_id": "orchestrator-continuation-phase7",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
@@ -24,12 +25,11 @@
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 2,
-    "sorry_count_note": "2 pre-existing, documented, out-of-scope sorries (flo_succ superseded branch; primeC'_exists_maximal Maximal-conjunct); down from 4 at dispatch start. Zero sorries in primeLemma's dependency closure (lean_verify-confirmed).",
+    "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "ci_pipeline_note": "Probe-only work (Postmortem Constraints: no Cslib/ mainline touched before Phase 7); verification is lake env lean on the probe (exit 0, zero errors) plus per-theorem lean_verify axiom checks, matching the plan's own probe-scoped Testing & Validation criteria."
+    "ci_pipeline_note": "Full 7-step CSLib CI pipeline run and green: lake build (scoped + full 3243/3243), lake exe checkInitImports (pass), lake lint (zero warnings for new file), lake exe lint-style (zero warnings), lake shake (no suggestions for new file), lake exe mk_all --module (Cslib.lean updated), lake test (green, 9235/9235). lean_verify on primeLemma and dwitness_mem_of_maximal: axioms = [propext, Classical.choice, Quot.sound], no sorryAx. Guardrail modules (Context.lean, Deduction.lean, Syntax.lean, CS5Canonical.lean) unregressed."
   }
 }

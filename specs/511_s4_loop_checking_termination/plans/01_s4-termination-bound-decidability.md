@@ -324,105 +324,176 @@ chain, so each wave contains a single phase.
     minting shapes vs the 12 non-minting ones. Zero sorry, zero new axiom (`lean_verify`:
     `propext`/`Classical.choice`/`Quot.sound` only). **All 4 of `S4LoopInv`'s key fields
     (`keysDistinct`/`keyLowerBd`/`keysInUniverse`/`keysTotal`) are now CLOSED.**
-  - [ ] Assemble `modalStepBranchS4_preserves_S4LoopInv` *(not reached this dispatch -- the four
-    key fields are now unblocked, but the six "rule-independent" fields (`bClosure`/`eNodup`/
-    `eClosure`/`accFresh`/`accKnown`/`outDegEq`) still need a bridge lemma showing
-    `modalStepBranchS4Keyed`'s `(newBs, newExps, newAcc)` projection agrees with
-    `modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys) b e acc`'s own output, so the six
-    already-proven generic preservation lemmas (`modalStepBranch_preserves_accFreshInv_gen`
-    (`Soundness.lean`), `modalStepBranch_preserves_outDegEq_gen`,
-    `modalStepBranch_preserves_accTargetsKnown_gen`, `modalStepBranch_eClosure_gen`,
-    `modalStepBranch_preserves_expandedNodup_gen` (all `FmpMeasure.lean`), plus a `bClosure`
-    outputs-subset-style generic fact, can be reused rather than re-derived. This bridge was
-    scoped but not built this dispatch -- see the continuation note below)*.
-- **Timing:** ~11 hours across five dispatches (3h dispatch 1: analysis + counterexample, no code;
+  - [x] **`modalStepBranchS4_preserves_keysDistinct` -- driver-level wrapper CLOSED** (the
+    combinator `keysUpdate_preserves_keysDistinct` was already closed dispatch 2, but the
+    `modalStepBranchS4Keyed`-level wrapper the assembly needs had not been built until this
+    dispatch).
+  - [x] **`modalStepBranchS4_preserves_eNodup` -- CLOSED.** Fully rule/keys-agnostic (only the
+    top-level `RuleResult` constructor shape matters), direct case split mirroring the generic
+    `modalStepBranch_preserves_expandedNodup_gen`'s proof shape.
+  - [x] **`modalStepBranchS4_preserves_outDegEq` -- CLOSED.** Reuses K's own public
+    `modalApplyOne_outDeg_step` at the minting shapes' unblocked sub-case; the blocked sub-case
+    reuses the identical `outDeg_addEdge_self_S4`/`_ne_S4` argument since `outDeg`'s bookkeeping
+    is insensitive to whether the edge's target is fresh or a recorded-key world.
+  - [x] **`modalStepBranchS4_preserves_accFresh`/`_accKnown` -- CLOSED.** Landed a new
+    proof-internal auxiliary invariant `keysWorldsKnown` (every recorded key's world is a known
+    branch world; NOT a new `S4LoopInv` field -- threaded as an extra hypothesis/conclusion
+    alongside the struct instead, to avoid reopening the completed Phase 4 design) plus its own
+    preservation lemma. This was the key missing piece the "generic bridge" plan (below, now
+    superseded) did not anticipate: `modalApplyOneS4Keyed`'s guard-BLOCKED minting sub-case adds
+    an edge to `blockingWorldS4Keyed`'s result (a recorded-key world), NOT a genuinely fresh
+    witness, so the standard `hFreshLocal`-style dichotomy the generic `_gen` lemmas need
+    (`(apply sf b acc).fst = .linear (wsf::rest)` nonempty, headed by the target) does NOT hold
+    there (`modalApplyOneS4Keyed`'s blocked case returns `.linear []`, genuinely empty) --
+    `keysWorldsKnown` is what closes the gap instead, via `modalNextWorld_gt`.
+  - [x] **Assemble `modalStepBranchS4_preserves_S4LoopInv` -- LANDED, 8/10 fields closed.** The
+    four key fields (dispatches 2-5) plus `eNodup`/`outDegEq`/`accFresh`/`accKnown` (this
+    dispatch) are fully closed, zero sorry. **`bClosure`/`eClosure` are landed as documented
+    strategic-sorry skeletons** (`modalStepBranchS4_preserves_bClosure`/`_eClosure`), each a
+    complete, non-vacuous theorem statement with `sorry` body -- see the continuation note below
+    for exactly what each needs. **The "generic bridge to `modalStepBranchGen`" plan below is
+    SUPERSEDED**: discovered this dispatch that the generic `_gen` lemmas' `hFreshLocal`/
+    `hOutDegStep`-style per-call hypotheses do not cleanly retrofit to `modalApplyOneS4Keyed`
+    (the guard's blocked case's `.linear []` shape breaks `hFreshLocal`'s dichotomy, and
+    `modalStepBranch_eClosure_gen`/generic `bClosure` are keyed to K's own `modalUniverse`/
+    `modalWorldBound`, not `modalUniverseS4`/`modalWorldBoundS4`) -- every field actually closed
+    this dispatch used a DIRECT case split on `modalStepBranchS4Keyed`'s own definition instead
+    (the same style as the four key fields), not the generic bridge.
+- **Timing:** ~13 hours across six dispatches (3h dispatch 1: analysis + counterexample, no code;
   ~2h dispatch 2: guard redesign, `keysDistinct` closure, bounded `keyLowerBd` attempt that did not
   close; ~2h dispatch 3: closed `keyLowerBd`'s minting-case fact plus driver-level assembly
   groundwork; ~2h dispatch 4: assembled `modalStepBranchS4_preserves_keyLowerBd` fully, landed
   `modalStepBranchS4_preserves_keysInUniverse`, landed Phase 7's independent
-  `modalHintikkaSetS4_eq` bridge; this dispatch (~2h): closed `modalStepBranchS4_preserves_keysTotal`
-  -- the crux -- by building the full K+T+4 known-worlds dichotomy from scratch; did not reach the
-  final `S4LoopInv` assembly after scoping the six-field generic bridge's remaining cost).
+  `modalHintikkaSetS4_eq` bridge; ~2h dispatch 5: closed `modalStepBranchS4_preserves_keysTotal`
+  -- the crux -- by building the full K+T+4 known-worlds dichotomy from scratch; this dispatch
+  (~2h): closed 4 more fields (`eNodup`/`outDegEq`/`accFresh`/`accKnown`), landed the assembly
+  theorem with 8/10 fields fully closed and 2 documented strategic sorries for the remaining
+  `bClosure`/`eClosure`).
 - **Depends on:** 4
 
-**Continuation note** (Phase 5, this dispatch -- `keysTotal` now CLOSED, the crux; the six
-inherited rule-independent fields and the final `S4LoopInv` assembly are the last remaining gap):
+**Continuation note** (this dispatch -- 8/10 `S4LoopInv` fields now CLOSED; `bClosure`/`eClosure`
+are documented strategic-sorry skeletons, the last remaining gap before Phase 5 fully closes):
 
 - **What's now closed this dispatch**:
-  - `modalStepBranchS4_preserves_keysTotal` -- **the crux, CLOSED.** Required building an
-    entirely new known-worlds dichotomy for `modalApplyOneS4Rules` (composing K+T+4 rule
-    layers), which did not exist anywhere in the codebase (S5/Five have flatter analogues,
-    S4 did not). Landed: `mem_successorsOf_hasEdge_S4`, `modalKnownWorlds_fold_spec_S4` /
-    `mem_modalKnownWorlds_S4` / `modalKnownWorlds_mono_append_S4` (private local
-    re-derivations of `FmpMeasure.lean` originals, mirroring `S5Simplification.lean`'s
-    equivalents), `mintGroup_label_eq_freshWorld_S4` (mirrors `FmpMeasure.lean`'s private
-    `mintGroup_label_eq_freshWorld`), `modalApplyOneT_boxPos_diaNeg_known_S4` (K+T layer:
-    self-propagation stays at `sf.label`, known since `sf ∈ b`),
-    `modalApplyOneS4Rules_boxPos_diaNeg_known_S4` (composes the 4-rule layer on top, using
-    `accTargetsKnown` + `mem_successorsOf_hasEdge_S4` to show 4-rule propagation targets are
-    known), `modalApplyOne_nonModal_known_S4` (the 10 plain propositional shapes, via
-    `modalApplyOne_prop_outputs_subset`), the composite `modalApplyOneS4Keyed_nonMint_known_S4`
-    (all 12 non-minting leaves at once), and `modalStepBranchS4Keyed_keys_subset` (`keys ⊆
-    keys'` always). The final assembly reuses the SAME hkeq/case-split skeleton
-    `keyLowerBd`/`keysInUniverse` used, split top-level on the two minting shapes (where the
-    fresh label is exactly `modalNextWorld b`, covered by the new key) vs the 12 non-minting
-    ones (where `modalApplyOneS4Keyed_nonMint_known_S4` shows no new label is ever introduced,
-    so `keys ⊆ keys'` suffices). All zero sorry, zero new axiom (`lean_verify`:
-    `propext`/`Classical.choice`/`Quot.sound` only throughout).
-  - **All 4 of `S4LoopInv`'s key fields are now CLOSED**: `keysDistinct` (dispatch 2),
-    `keyLowerBd` + `keysInUniverse` (dispatch 4), `keysTotal` (this dispatch).
+  - `modalStepBranchS4_preserves_keysDistinct` -- driver-level wrapper around the already-closed
+    `keysUpdate_preserves_keysDistinct` combinator.
+  - `modalApplyOneS4Keyed_nonMint_snd_eq_acc` -- composite: `acc` is literally unchanged at all
+    12 non-minting shapes (mirrors `modalApplyOneS4Keyed_nonMint_known_S4`'s case split,
+    extracting the `.snd`-half instead of the known-worlds half).
+  - `modalStepBranchS4_preserves_eNodup` -- fully rule/keys-agnostic.
+  - `outDeg_addEdge_self_S4`/`_ne_S4`, `modalApplyOne_boxNeg_mint_snd_S4`/
+    `_diamondPos_mint_snd_S4` (local re-derivations/twins of existing groundwork) plus
+    `modalStepBranchS4_preserves_outDegEq` -- reuses K's own public `modalApplyOne_outDeg_step`
+    at the unblocked minting sub-case; the blocked sub-case's `outDeg` bookkeeping is insensitive
+    to whether the edge target is fresh or a recorded-key world.
+  - **`keysWorldsKnown`, a new proof-internal auxiliary invariant** (`∀ w k, (w,k) ∈ keys → w ∈
+    modalKnownWorlds b`; deliberately NOT a new `S4LoopInv` struct field, to avoid reopening the
+    completed Phase 4 design -- threaded as an extra hypothesis/conclusion alongside the struct
+    at every call site instead) plus its own preservation lemma
+    `modalStepBranchS4_preserves_keysWorldsKnown`.
+  - `accFreshInv_append_S4`/`hasEdge_addEdge_cases_S4` (local re-derivations) plus
+    `modalStepBranchS4_preserves_accFresh`/`_accKnown` -- CLOSED, both consuming
+    `keysWorldsKnown` at the guard's BLOCKED minting sub-case (see the design-correction note
+    below).
+  - `modalStepBranchS4_preserves_S4LoopInv` -- the assembly, landed. 8/10 fields fully closed,
+    zero sorry: the four key fields (`keysDistinct`/`keyLowerBd`/`keysInUniverse`/`keysTotal`,
+    dispatches 2-5) plus `eNodup`/`outDegEq`/`accFresh`/`accKnown` (this dispatch).
+    `bClosure`/`eClosure` are documented strategic-sorry skeletons
+    (`modalStepBranchS4_preserves_bClosure`/`_eClosure`).
 
-- **What remains open**: the full `modalStepBranchS4_preserves_S4LoopInv` assembly also needs
-  the six "rule-independent" fields (`bClosure`, `eNodup`, `eClosure`, `accFresh`, `accKnown`,
-  `outDegEq`) proven preserved for `modalStepBranchS4Keyed` specifically. GENERIC preservation
-  lemmas already exist for `modalStepBranchGen apply` (confirmed present this dispatch, exact
-  names): `modalStepBranch_preserves_accFreshInv_gen` (`Soundness.lean`),
+- **Design correction discovered this dispatch (supersedes the prior "generic bridge" plan)**:
+  the previous dispatch's continuation note proposed bridging `modalStepBranchS4Keyed` to
+  `modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys)` so the SIX existing generic `_gen`
+  preservation lemmas (`modalStepBranch_preserves_accFreshInv_gen`,
   `modalStepBranch_preserves_outDegEq_gen`, `modalStepBranch_preserves_accTargetsKnown_gen`,
-  `modalStepBranch_eClosure_gen`, `modalStepBranch_preserves_expandedNodup_gen` (all
-  `FmpMeasure.lean`) -- plus a `bClosure` (branch-stays-in-universe) generic fact not yet located
-  by name, needs a targeted search (likely `modalStepBranch_outputs_subset_gen` or similar; K's
-  own non-generic `modalStepBranch_preserves_universe`-style lemma is the pattern to mirror if no
-  generic form exists). `modalStepBranchS4Keyed` is NOT literally
-  `modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys) b e acc` (it returns a 4-tuple with `keys'`
-  bolted on, not the generic driver's 3-tuple) -- a bridge lemma showing the
-  `(newBs, newExps, newAcc)` projection of a `modalStepBranchS4Keyed` step agrees with the
-  generic driver's own output (same `apply`, same `b.findSome?` selection, same `.linear`/
-  `.branching`/`.persistent`/`.notApplicable` dispatch, `keys'` just dropped) is needed before
-  those generic lemmas can be reused. This bridge is mechanical (the two definitions are
-  near-identical in shape -- `modalStepBranchS4Keyed`'s inner match literally wraps the same
-  `apply sf b acc` call and the same four-way `RuleResult` dispatch as `modalStepBranchGen`,
-  with only the `keys'` computation bolted on as an extra `have` binding that doesn't affect
-  the first three tuple components), but was not built this dispatch after prioritizing
-  `keysTotal`'s closure within budget.
+  `modalStepBranch_eClosure_gen`, `modalStepBranch_preserves_expandedNodup_gen`, plus a
+  `bClosure` generic fact) could be reused "mechanically". Two structural facts, found while
+  actually attempting this, make that not viable as stated:
+  1. **`hFreshLocal`-shaped hypotheses don't fit the guard's blocked case.** The generic
+     `accFreshInv_gen`/`accTargetsKnown_gen` lemmas need `(apply sf b acc).fst = .linear
+     (wsf::rest)` (a NONEMPTY linear result headed by the edge's target) whenever `acc` changes.
+     `modalApplyOneS4Keyed`'s guard-BLOCKED minting sub-case returns `.linear []` (genuinely
+     EMPTY) while still adding an edge to `blockingWorldS4Keyed`'s result -- this shape never
+     satisfies the dichotomy. The actual fix (found and used this dispatch) is the
+     `keysWorldsKnown` auxiliary invariant, which bounds the blocked edge's target via
+     "it's a recorded-key world, hence known, hence `< modalNextWorld b`" instead of via
+     genuine freshness.
+  2. **`modalStepBranch_eClosure_gen`/the generic `bClosure` fact are keyed to K's own
+     `modalUniverse`/`modalWorldBound`, not `modalUniverseS4`/`modalWorldBoundS4`.** Even with a
+     working bridge, these lemmas' CONCLUSIONS are stated over the wrong universe/bound pair;
+     S4-local re-derivations (mirroring `modalApplyOne_outputs_subset`'s shape but retargeted)
+     would be needed regardless of the bridge.
+  Every field actually closed this dispatch used a DIRECT case split on
+  `modalStepBranchS4Keyed`'s own definition (the same style the four key fields already used),
+  never the generic bridge. The bridge lemma itself was never built and is not needed by any
+  landed proof.
 
-- **What is needed** (concrete, for a continuation dispatch): (a) build the
-  `modalStepBranchS4Keyed`-to-`modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys)` bridge lemma
-  (`∀ ... , modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs,newExps,newAcc,keys') →
-  modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys) b e acc = some (newBs,newExps,newAcc)` --
-  provable via the same `List.exists_of_findSome?_eq_some` + `RuleResult` case-split technique
-  used throughout this phase), (b) locate or build the generic `bClosure` preservation fact
-  (search `modalStepBranch.*outputs_subset.*_gen` or mirror K's own non-generic universe
-  preservation), (c) instantiate all six generic lemmas at `apply := modalApplyOneS4Keyed φ₀
-  keys` via the bridge from (a), (d) assemble `modalStepBranchS4_preserves_S4LoopInv` from the
-  four now-closed key fields (this dispatch) plus the six bridged fields, (e) proceed to Phase 6
-  (pigeonhole world bound, which directly consumes `keysTotal` -- now unblocked) and Phase 7's
+- **What remains open -- `bClosure`/`eClosure`, both landed as documented strategic-sorry
+  skeletons** (`modalStepBranchS4_preserves_bClosure`/`_eClosure` in `LoopChecking.lean`,
+  immediately after the `S4LoopInv` struct definition; each is a complete, non-vacuous theorem
+  STATEMENT carrying every hypothesis its eventual proof needs, not a placeholder):
+  - **`eClosure`** needs a formula-subset composite for the T-self (`modalTBoxSelf`/
+    `modalTDiaNegSelf`, `FrameRules.lean`) and 4-propagation (`modalFourBoxProp`/
+    `modalFourDiaNegProp`) outputs at the 12 non-minting shapes' T/4-relevant leaves, mirroring
+    `modalApplyOneT_boxPos_diaNeg_known_S4`/`modalApplyOneS4Rules_boxPos_diaNeg_known_S4`'s
+    existing case-split shape but concluding `x.formula ∈ modalSubfmls sf.formula` (via K's own
+    PUBLIC `modalApplyOne_boxPos_outputs_subset`/`modalApplyOne_diamondNeg_outputs_subset` for
+    the underlying K piece -- these ARE reusable, unlike the generic driver lemmas above -- plus
+    trivial `modalSubfmls_self_mem`-style facts for the T-self/4-prop pieces) then composing via
+    the already-built `modalSubfmls_trans_S4` with `hb`'s own bound on `sf`. At the 2 minting
+    shapes, the new formulas' bound needs the same style of extension the `keyLowerBd`
+    groundwork already used (`successorBirthContent_boxNeg_subset_relevantSetFinset`-style
+    reasoning, retargeted to `modalUniverseS4` membership).
+  - **`bClosure`** needs the STRICT label-side bound `modalMaxWorld b < modalWorldBoundS4 φ₀`
+    available BEFORE any mint can occur (so the newly-minted witness's label `modalNextWorld b =
+    modalMaxWorld b + 1` stays within `modalUniverseS4`'s fixed world range). This is exactly
+    Phase 6's own pigeonhole deliverable -- `modalKnownWorlds_nodup` +
+    `modalKnownWorlds_length_le_worldBoundS4` (inject known worlds into `keys` via `keysTotal`,
+    injectivity via `keysDistinct`, codomain bound via `keysInUniverse` +
+    `signedSubfmls_powerset_card`, `List.Nodup.length_le_card`/`Finset.card_le_card_of_injOn`),
+    then a "worlds are consecutive from 0" fact converting the length bound into the STRICT
+    `modalMaxWorld` bound -- but is genuinely a PREREQUISITE of `bClosure`'s own step-wise
+    preservation (needed on the PRE-step branch `b`, to guarantee any fresh mint stays in
+    range), not merely Phase 6's later corollary applied once at the end. A continuation
+    dispatch building Phase 6's pigeonhole lemmas will very likely close `bClosure` as a
+    byproduct (or vice versa).
+
+- **What is needed** (concrete, for a continuation dispatch): (a) build Phase 6's pigeonhole
+  lemmas (`modalKnownWorlds_nodup`, `modalKnownWorlds_length_le_worldBoundS4`,
+  `modalStepBranchS4_worldBound : modalMaxWorld b < modalWorldBoundS4 φ₀`, all three fully
+  specified in Phase 6's own task list below) -- these unblock `bClosure` directly; (b) discharge
+  `modalStepBranchS4_preserves_bClosure`'s `sorry` using (a); (c) build the T-self/4-prop
+  formula-subset composite (mirroring the known-worlds composite's shape) and discharge
+  `modalStepBranchS4_preserves_eClosure`'s `sorry`; (d) re-verify
+  `modalStepBranchS4_preserves_S4LoopInv` is then fully sorry-free (`lean_verify`); (e) proceed
+  to Phase 6's remaining packaging (should be largely done as a byproduct of (a)) and Phase 7's
   remaining decision-recording/closure-or-block tasks.
 
-- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`/`trivial`, or any vacuous
-  placeholder anywhere. All lemmas landed this dispatch are complete, closed proofs. Did NOT
-  weaken any `S4LoopInv` field's statement to force a proof through.
+- **Prohibited workarounds**: Did NOT use `def X := True`/`trivial` or any vacuous placeholder
+  anywhere. The two `sorry`s landed this dispatch are documented strategic-sorry skeletons per
+  the hard-mode Recovery Discipline contract (complete theorem statements, not placeholders),
+  not a substitute for genuine proof effort -- eight of ten fields ARE complete, closed proofs
+  this dispatch, and the two sorry'd fields' remaining obligations are precisely scoped above.
+  Did NOT weaken any `S4LoopInv` field's statement to force a proof through.
 
 - **Scope note**: Phases 1-4 remain fully valid, green, sorry/axiom-free. All four of
-  `S4LoopInv`'s key fields (`keysDistinct`/`keyLowerBd`/`keysInUniverse`/`keysTotal`) are now
-  CLOSED. The six inherited rule-independent fields' bridge, plus the final `S4LoopInv`
-  assembly, remain the honest residual gap, with a precise, concrete account of what each needs
-  (above).
-- **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green (scoped). Zero
-  sorry, zero new axiom (`lean_verify` on `modalStepBranchS4_preserves_keysTotal`:
-  `propext`/`Classical.choice`/`Quot.sound` only). `lake test` still fails on
+  `S4LoopInv`'s key fields plus `eNodup`/`outDegEq`/`accFresh`/`accKnown` (8 of 10 total) are now
+  CLOSED, zero sorry. `bClosure`/`eClosure` (2 of 10) are documented strategic-sorry skeletons
+  with a precise, concrete account of what each needs (above) -- the honest residual gap before
+  Phase 5 fully closes.
+- **Verification:** `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green (scoped). Exactly
+  2 `sorry`s in the file, both in the documented skeletons (`grep -c '\bsorry\b'` on non-comment
+  lines confirms). Zero new axiom on every CLOSED lemma (`lean_verify` on
+  `modalStepBranchS4_preserves_accFresh`/`_accKnown`: `propext`/`Classical.choice`/`Quot.sound`
+  only); `modalStepBranchS4_preserves_S4LoopInv` itself correctly reports `sorryAx` (expected,
+  since it depends on the two sorry'd fields). `lake test` still fails on
   `CslibTests/ModalFrameSeparation.lean` (`decide` stuck on `instDecidableFiveValid`) --
   confirmed via `git log`/`git status` to be entirely task 515's S5/Five decidability work,
-  unrelated to any file this task modifies; NOT a regression from this dispatch.
+  unrelated to any file this task modifies; NOT a regression from this dispatch. Full-project
+  `lake build` also fails this dispatch, entirely in `Cslib/Logics/Bimodal/Metalogic/
+  BXCanonical/Chronicle/CounterexampleElimination/*.lean` -- confirmed via `git status` to be
+  uncommitted, in-progress edits from the concurrent task 517 session (flagged in this
+  dispatch's own delegation context), not this task's file scope; NOT a regression here either.
 
 ### Phase 6: Pigeonhole world bound (closes Phase 8) [IN PROGRESS]
 

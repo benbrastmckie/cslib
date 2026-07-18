@@ -11,11 +11,11 @@ next_project_number: 528
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,504,511,519,522,523,525 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506,515 | 36,37,181,317,407,425,449,511,525 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
-| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
-| 99 | 512,517 | 512,517 | modal logic |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,512,519,522,523,525 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506,515,517 | 36,37,181,317,407,425,449,511,512,525 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,413,504 | 39,40,375,515 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,503,504,506 | modal logic, code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -39,17 +39,16 @@ next_project_number: 528
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
+  └─ 517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
   └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
+    └─ 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+      └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
-512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a 
-  └─ 517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
-    └─ 512 [BLOCKED] — Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a  (see above)
 
 ### Temporal Logic
 
@@ -218,7 +217,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 509, Task 512, Task 516
+- **Dependencies**: Task 509, Task 512
 - **Research**: [517_labelled_bounded_context_cs5_completeness/reports/07_team-research.md]
 - **Plan**: [517_labelled_bounded_context_cs5_completeness/plans/08_ch5-canonical-model-fs-gate.md]
 
@@ -231,7 +230,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 514, Task 524, Task 525
+- **Dependencies**: Task 525
 - **Research**:
   - [515_s5_universal_rule_termination_unblock_504/reports/01_s5-termination-implementation-blueprint.md]
   - [515_s5_universal_rule_termination_unblock_504/reports/03_s5-infrastructure-deep-research.md]
@@ -248,7 +247,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 509, Task 517
+- **Dependencies**: Task 509
 - **Research**:
   - [512_cs5_box_backward_atom_sum_completeness/reports/01_box-backward-atom-sum.md]
   - [512_cs5_box_backward_atom_sum_completeness/reports/02_phase3-seed-consistency.md]
@@ -302,7 +301,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 513, Task 505
+- **Dependencies**: Task 515
 - **Plan**: [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/plans/01_s5-kb5-euclidean-decidability.md]
 - **Research**:
   - [504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/reports/01_frame-specific-tableau-extensions.md]
@@ -319,7 +318,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 513
+- **Dependencies**: None
 - **Research**:
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/01_frame-specific-tableau-extensions.md]
   - [503_generalize_k_tableau_driver_and_complete_tsystem_decidabilit/reports/02_spawn-analysis.md]

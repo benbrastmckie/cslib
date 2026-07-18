@@ -34,7 +34,11 @@
         }
       ],
       "blockers": "Phase 5 is 3/4 closed: keysDistinct + keyLowerBd + keysInUniverse landed (zero sorry/axiom). Remaining: modalStepBranchS4_preserves_keysTotal needs a new S4-specific known-worlds-step dichotomy lemma composing K/T/4 rule layers (scope comparable to keyLowerBd's two-dispatch closure), plus the modalStepBranchS4Keyed->modalStepBranchGen bridge for the 6 rule-independent fields, then the S4LoopInv assembly. Phase 6 (pigeonhole world bound) is blocked on keysTotal (its injective map IS keysTotal's witness); Phase 7 remainder depends on Phase 6. Full recipe: handoffs/03_phase5-keylowerbd-keysinuniverse-closed.md. Standing permission to land partial per task description.",
-      "completion_summary": "PARTIAL: Phases 1-4 remain green (zero sorry/axiom). Phase 5's named crux (keyLowerBd minting-case fact) is now closed and verified, plus reusable driver-level assembly groundwork landed. The full driver-level preservation lemma (modalStepBranchS4_preserves_keyLowerBd) and keysTotal/keysInUniverse/full S4LoopInv assembly remain open but are now pure mechanical casework, not proof-engineering research. Phases 6-7 not attempted (depend on Phase 5). Recommend continuation dispatch to finish the assembly."
+      "completion_summary": "PARTIAL: Phases 1-4 remain green (zero sorry/axiom). Phase 5's named crux (keyLowerBd minting-case fact) is now closed and verified, plus reusable driver-level assembly groundwork landed. The full driver-level preservation lemma (modalStepBranchS4_preserves_keyLowerBd) and keysTotal/keysInUniverse/full S4LoopInv assembly remain open but are now pure mechanical casework, not proof-engineering research. Phases 6-7 not attempted (depend on Phase 5). Recommend continuation dispatch to finish the assembly.",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ]
     },
     {
       "project_number": 502,
@@ -1178,9 +1182,7 @@
       "effort": "10-14 hours",
       "parent_task": 300,
       "topic": "Modal Logic",
-      "dependencies": [
-        513
-      ],
+      "dependencies": [],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-07-15T00:09:20Z",
       "artifacts": [
@@ -1217,7 +1219,14 @@
       ],
       "blockers": "Phase 6 [BLOCKED] on task 513 (generic soundness). Phases 1-5 COMPLETE and green: generic driver + interface (1-2), termination measure via task 507 (3), T driver instantiation (4), T truth lemma + tValid completeness (5, commit 14d9931c). Phase 6 Decidable(tValid) needs modalTableauT phi = .closed -> tValid phi, i.e. the SOUNDNESS direction lifted to driver level; modalStepBranch_preserves_sat (Soundness.lean) is still K-concrete -- the mirror of the completeness gap task 510 closed. Escalated to task 513. Phase 7 interface docs PARTIAL (completeness contract documented). Zero sorry/axiom.",
       "previous_status": "planned",
-      "session_id": "sess_1784054776_0fc973_503"
+      "session_id": "sess_1784054776_0fc973_503",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/Saturation.lean",
+        "Cslib/Logics/Modal/Tableau/FmpMeasure.lean",
+        "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+      ]
     },
     {
       "project_number": 504,
@@ -1229,8 +1238,7 @@
       "parent_task": 300,
       "topic": "Modal Logic",
       "dependencies": [
-        513,
-        505
+        515
       ],
       "created": "2026-07-14T17:57:00Z",
       "last_updated": "2026-07-15T06:03:43Z",
@@ -1264,7 +1272,12 @@
       "session_id": "sess_1784075478_630e1e_504",
       "notes": "Implementation interrupted by API session limit mid-Phase 3; no phases committed. Plan complete, recovery WIP saved to specs/504_.../recovery/. Resume with /implement 504 after limit reset.",
       "blockers": "Phases 2/4/5/6 blocked by a PROVEN mathematical obstruction: modalApplyOneS5_rankStep_not_dischargeable (S5Simplification.lean) is a complete sorry-free, axiom-free proof that RuleApplicationSpec.rankStep is FALSE for the universal S5 rule (unrestricted box-propagation to every known world has no edge-relation guaranteeing rank-compatibility). Re-attempting the B/T mirror approach is proven futile. Requires a NEW task: a restricted S5 rule design preserving rank-compatibility, or a bespoke S5-specific termination argument bypassing RuleApplicationSpec (scope comparable to S4/task-511 loop-checking). Delivered CI-green: Phase 1 (universal rule + driver instantiation), Phase 3 (extractModelS5 via Relation.EqvGen + RightEuclidean exposure), Phase 7-partial (RightEuclidean/pure-K5 docstring).",
-      "completion_summary": "Partial delivery (2/7 phases CI-green, sorry/axiom-free): S5 universal rule + driver instantiation (Phase 1) and countermodel extraction via Relation.EqvGen with RightEuclidean exposure (Phase 3, Phase 7 rightEuclidean pulled forward). Phase 2 discharge proven impossible via mechanized counterexample; Phases 4/5/6 transitively blocked. Recommend spawning s5-universal-rule-termination follow-up."
+      "completion_summary": "Partial delivery (2/7 phases CI-green, sorry/axiom-free): S5 universal rule + driver instantiation (Phase 1) and countermodel extraction via Relation.EqvGen with RightEuclidean exposure (Phase 3, Phase 7 rightEuclidean pulled forward). Phase 2 discharge proven impossible via mechanized counterexample; Phases 4/5/6 transitively blocked. Recommend spawning s5-universal-rule-termination follow-up.",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ]
     },
     {
       "project_number": 506,
@@ -1308,7 +1321,11 @@
         }
       ],
       "blockers": "Phase 8 [BLOCKED]: #worlds <= 2^|Sf| termination bound. worldSetsDistinct is not a genuine per-step invariant of modalStepBranchS4 (persistent firings mutate known-world sets without re-checking distinctness; minting guard checks source not new-world content). Phases 1-7 delivered green (Definition of Done met), zero sorry/axiom. Phase 9 (Decidable (s4Valid phi)) unreachable without the bound. Escalated to follow-on task 511 with documented goal state; standing [BLOCKED] permission exercised per plan.",
-      "session_id": "sess_1784054776_0fc973_506"
+      "session_id": "sess_1784054776_0fc973_506",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ]
     },
     {
       "project_number": 512,
@@ -1318,8 +1335,7 @@
       "topic": "Modal Logic",
       "description": "Prove CS5 (constructive S5 = CK+T+4+B) Kripke completeness via a BIRELATIONAL canonical model (Dosen 1985 / Bozic-Dosen 1984 / Simpson 1994 / Marin-Morales-Strassburger 2021), SUPERSEDING the abandoned doubled-atom \"atom-sum\" architecture. Established across reports 03-05 (six dispatches): (a) the doubled-atom repair AND any direct attack within CSLib's two-sided cs5Tail architecture are eliminated -- the two-sided back-inclusion boxInv T subset H IS the negation-completeness step quasi-prime theories cannot take (mechanized: cs5_two_sided_witness_can_fail_to_omit, cs5FC''_hub_forces_spoke_connectivity, cs5_symmetric_tail_box_gap); (b) CS5 IS complete -- CS5 == IS5 (CS5.lean:93-99), Pacheco's CKB=IKB collapse extends to S5 (mechanized via cs5_dia_or, cs5_dia_bot_imp_bot), so \"bank a negative result\" is REFUTED (no genuine obstruction exists); (c) the birelational route uses a ONE-SIDED relation R = boxInv Gamma subset Delta with symmetry as the <=-mediated incestuality frame condition (Marin Thm 7.1), under which box-backward dissolves to the landed box_refuting_theory. Phase-1 GO/NO-GO gate PASSED (cs5_box_backward_onesided, sorry-free/axiom-clean). Active plan: plans/02_birelational-pivot.md (7 phases; Phase 1 COMPLETE). Remaining: discard the ~520-line CS5Combined scaffold (Phase 2); define one-sided R + incestuality frame class (Phase 3); REWORK CS5 soundness over the new frame class -- TOUCHES landed task-509 cs5FC'' (Phase 4, high-cost, ~250-400 lines, preserve 509 proofs alongside); verify canonical-frame incestuality Dosen-style, negation-completeness-free (Phase 5); land cs5_box_backward + cs5_truth_lemma (Phase 6); cs5_completeness + file split (Phase 7). Zero-debt invariant: no sorry, no new axiom at any phase boundary. BibKeys added: Dosen1985, BozicDosen1984, Ewald1986, AlechinaMendlerdePaivaRitter2001, MarinMoralesStrassburger2021. Depends on 509.",
       "dependencies": [
-        509,
-        517
+        509
       ],
       "parent_task": 509,
       "created": "2026-07-14T23:59:00Z",
@@ -1379,7 +1395,12 @@
           "summary": "necessity transfer summary (backfilled by --sync)"
         }
       ],
-      "blockers": "CS5 completeness BLOCKED across all known-mechanizable routes in CSLib's current canonical representation (NOT incompleteness -- CS5 == IS5 is complete/sound). Phase-7 gate FAILED with two axiom-free mechanized lemmas: cs5Incest_forces_symm (cs5Incest collapses to PLAIN symmetry over any CKSegment world type, because <= is head-inclusion and boxInv is monotone -- independent of world engineering) and cs5TwoSidedR_iff_cs5Tail (Simpson's two-sided R = the old cs5Tail wall for CS5 quasi-prime theories, via cs5_boxInv_subset_iff / the B axiom's box-diamond duality). Combined with cs5_symmetric_tail_box_gap (task 509): plain symmetry on the canonical frame is exactly what box-backward cannot have -- the symmetry-verification and box-backward obligations are JOINTLY UNSATISFIABLE for any single design over CSLib theory-inclusion worlds. Root cause: CSLib identifies the intuitionistic <= with theory-inclusion; Simpson/Marin birelational IS5 completeness needs <= as an INDEPENDENT preorder (the source of the missing <=-room). Closing CS5 requires a FOUNDATIONAL change (independent-<= / labelled canonical model, or a non-canonical technique) touching shared CK/CT/CS4 infra -- a human decision. Landed real contributions: mechanized obstruction lemmas + the birelational soundness rework (cs5_axiom_sound_incest, axiom-free)."
+      "blockers": "CS5 completeness BLOCKED across all known-mechanizable routes in CSLib's current canonical representation (NOT incompleteness -- CS5 == IS5 is complete/sound). Phase-7 gate FAILED with two axiom-free mechanized lemmas: cs5Incest_forces_symm (cs5Incest collapses to PLAIN symmetry over any CKSegment world type, because <= is head-inclusion and boxInv is monotone -- independent of world engineering) and cs5TwoSidedR_iff_cs5Tail (Simpson's two-sided R = the old cs5Tail wall for CS5 quasi-prime theories, via cs5_boxInv_subset_iff / the B axiom's box-diamond duality). Combined with cs5_symmetric_tail_box_gap (task 509): plain symmetry on the canonical frame is exactly what box-backward cannot have -- the symmetry-verification and box-backward obligations are JOINTLY UNSATISFIABLE for any single design over CSLib theory-inclusion worlds. Root cause: CSLib identifies the intuitionistic <= with theory-inclusion; Simpson/Marin birelational IS5 completeness needs <= as an INDEPENDENT preorder (the source of the missing <=-room). Closing CS5 requires a FOUNDATIONAL change (independent-<= / labelled canonical model, or a non-canonical technique) touching shared CK/CT/CS4 infra -- a human decision. Landed real contributions: mechanized obstruction lemmas + the birelational soundness rework (cs5_axiom_sound_incest, axiom-free).",
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean"
+      ]
     },
     {
       "project_number": 515,
@@ -1391,8 +1412,6 @@
       "effort": "8-12 hours",
       "parent_task": 504,
       "dependencies": [
-        514,
-        524,
         525
       ],
       "artifacts": [
@@ -1509,7 +1528,13 @@
         "skeleton": false,
         "follow_up_tasks": []
       },
-      "blockers": "KB5 completeness (modalTableauKb5_complete, instDecidableKb5Valid) blocked: reusing modalApplyOneFive's root-restricted rule (Phase 22 'factor, not clone' alias) is provably incomplete for kb5Valid -- extractModelKb5's forced closure EuclGen(SymmGen acc.hasEdge) relates root to indirect chain targets (0->a->c) that the root-restricted rule never propagates content to, breaking the truth lemma's root box-positive case. Machine-checked witness: extractModelKb5_root_reach_scout (zero axioms). NOT an impossibility (BdRV 4.8-4.9); fix requires a NEW KB5-specific propagation rule with its own soundness+completeness (Phases 15-21-scale) -- spawn a follow-up task. Everything else delivered green sorry-free/axiom-clean: S5 chain, fiveValid decidability, KB5 soundness."
+      "blockers": "KB5 completeness (modalTableauKb5_complete, instDecidableKb5Valid) blocked: reusing modalApplyOneFive's root-restricted rule (Phase 22 'factor, not clone' alias) is provably incomplete for kb5Valid -- extractModelKb5's forced closure EuclGen(SymmGen acc.hasEdge) relates root to indirect chain targets (0->a->c) that the root-restricted rule never propagates content to, breaking the truth lemma's root box-positive case. Machine-checked witness: extractModelKb5_root_reach_scout (zero axioms). NOT an impossibility (BdRV 4.8-4.9); fix requires a NEW KB5-specific propagation rule with its own soundness+completeness (Phases 15-21-scale) -- spawn a follow-up task. Everything else delivered green sorry-free/axiom-clean: S5 chain, fiveValid decidability, KB5 soundness.",
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/S5Simplification.lean",
+        "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
+        "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ]
     },
     {
       "project_number": 517,
@@ -1520,8 +1545,7 @@
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
       "dependencies": [
         509,
-        512,
-        516
+        512
       ],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
@@ -1637,7 +1661,13 @@
           }
         ]
       },
-      "next_artifact_number": 9
+      "next_artifact_number": 9,
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Deduction.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean"
+      ]
     },
     {
       "project_number": 519,
@@ -1727,7 +1757,11 @@
           "summary": "Implementation plan"
         }
       ],
-      "blockers": "Phase 1 (additive 5-lemma FrameCorrespondence.lean core) landed green, committed e1b98339, axioms []. Phases 2-5 (14-file Systems/*/Soundness.lean consumer refactor) are BLOCKED-PENDING-ZULIP per CONTRIBUTING.md:149 — require human Zulip coordination before any further autonomous implementation."
+      "blockers": "Phase 1 (additive 5-lemma FrameCorrespondence.lean core) landed green, committed e1b98339, axioms []. Phases 2-5 (14-file Systems/*/Soundness.lean consumer refactor) are BLOCKED-PENDING-ZULIP per CONTRIBUTING.md:149 — require human Zulip coordination before any further autonomous implementation.",
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Systems/",
+        "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean"
+      ]
     },
     {
       "project_number": 523,
@@ -1751,6 +1785,10 @@
           "type": "plan",
           "summary": "Implementation plan"
         }
+      ],
+      "file_scope": [
+        "Cslib/Logics/Modal/ProofSystem/Instances/",
+        "Cslib/Logics/Modal/Metalogic/Systems/"
       ]
     },
     {
@@ -1808,7 +1846,7 @@
         "CslibTests/ModalFrameSeparation.lean"
       ],
       "created": "2026-07-17T22:34:22Z",
-      "last_updated": "2026-07-18T00:44:58Z",
+      "last_updated": "2026-07-18T16:20:34Z",
       "artifacts": [
         {
           "type": "research",
@@ -1821,8 +1859,9 @@
           "summary": "7-phase KB5 completeness + instDecidableKb5Valid + CI plan"
         }
       ],
-      "session_id": "sess_1784329467_424a02_525",
-      "blockers": "Phase 3 (modalTruthLemmaKb5) is mathematically FALSE for task 524's frozen modalApplyOneKb5' rule -- proved via extractModelKb5_nonRoot_boxPos_gap + concrete witness. Phases 1-2 landed (lean_verify-clean, committed); Phases 3-7 blocked. Needs a follow-on task designing a genuinely new KB5 rule or model extraction (cluster-membership bookkeeping, not trigger-identity gating). Not re-runnable as written. See /spawn 525."
+      "session_id": "sess_1784391589_fb6e95",
+      "blockers": "Phase 3 (modalTruthLemmaKb5) is mathematically FALSE for task 524's frozen modalApplyOneKb5' rule -- proved via extractModelKb5_nonRoot_boxPos_gap + concrete witness. Phases 1-2 landed (lean_verify-clean, committed); Phases 3-7 blocked. Needs a follow-on task designing a genuinely new KB5 rule or model extraction (cluster-membership bookkeeping, not trigger-identity gating). Not re-runnable as written. See /spawn 525.",
+      "previous_status": "blocked"
     },
     {
       "project_number": 526,

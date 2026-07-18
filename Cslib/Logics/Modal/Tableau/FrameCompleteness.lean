@@ -3488,6 +3488,104 @@ lemma hintikkaKb5'_diamond_neg
       intro x hx heq
       exact hkf (heq ▸ hx)
 
+/-! ### Re-Derived Hintikka Insertion Lemmas for the Corrected-Gate Rule
+
+`hintikkaKb5''_box_pos`/`hintikkaKb5''_diamond_neg` are the trigger-free analogues of
+`hintikkaKb5'_box_pos`/`hintikkaKb5'_diamond_neg`: the dichotomy `hcond` they consume drops the
+`w = 0` conjunct entirely, since `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s self-target arm
+fires for any trigger `w`. This is precisely the extra case the frozen rule's dichotomy could
+never cover -- and precisely what `extractModelKb5_nonRoot_boxPos_gap` below shows is REQUIRED
+for the truth lemma: a non-root world `w`'s box-positive content must reach the root regardless
+of whether `w` happens to be the FIRST world to raise `T(□ψ)`. -/
+
+/-- **Trigger-free KB5-analogue of `hintikkaFive_box_pos`**: on a `modalApplyOneKb5''`-saturated
+branch, `T(□ψ)@w ∈ b` forces `T(ψ)@v ∈ b` at any target `v` matching `modalKb5BoxAllUniv`'s
+dichotomy -- either `v` is known and non-root (unconditional in the trigger `w`), or `v = 0` with
+the known cluster nonempty (unconditional in `w` too, unlike the frozen rule). Proof is
+`by_contra` mirroring `hintikkaKb5'_box_pos`, substituting `modalKb5BoxAllUniv_mem_of` for the
+root/non-root split lemma pair and `modalApplyOneKb5''_boxPos_eq`/`modalApplyOneKb5''Prop` for
+their frozen counterparts. -/
+lemma hintikkaKb5''_box_pos
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5'' b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalKb5BoxAllUniv b ψ w := modalKb5BoxAllUniv_mem_of hnotin hcond
+  have hcond2 := hH.2.1 (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond2
+  have hK := modalApplyOne_boxPos_eq
+    (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneKb5''_boxPos_eq] at hcond2
+  unfold modalApplyOneKb5''Prop at hcond2
+  rcases hp : modalApplyOne
+      (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond2 hK
+  simp only at hcond2 hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond2
+    split_ifs at hcond2 with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond2 _ hall)
+  · dsimp only at hcond2
+    by_cases hkf : (⟨.pos, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
+/-- **Trigger-free KB5-analogue of `hintikkaFive_diamond_neg`**, dual of
+`hintikkaKb5''_box_pos`: `F(◇ψ)@w ∈ b` forces `F(ψ)@v ∈ b` at any target `v` matching
+`modalKb5DiaNegAllUniv`'s dichotomy. -/
+lemma hintikkaKb5''_diamond_neg
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalHintikkaSetGen modalApplyOneKb5'' b acc)
+    (ψ : Proposition Atom) (w v : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hcond : (v ∈ modalKnownWorlds b ∧ v ≠ (0 : WorldIndex)) ∨
+      (v = (0 : WorldIndex) ∧ ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex))) :
+    (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hnotin
+  have hall : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalKb5DiaNegAllUniv b ψ w := modalKb5DiaNegAllUniv_mem_of hnotin hcond
+  have hcond2 := hH.2.1 (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) hmem
+  simp only at hcond2
+  have hK := modalApplyOne_diamondNeg_eq
+    (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) rfl ψ rfl b acc
+  rw [modalApplyOneKb5''_diaNeg_eq] at hcond2
+  unfold modalApplyOneKb5''Prop at hcond2
+  rcases hp : modalApplyOne
+      (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      with ⟨kResult, kAcc⟩
+  rw [hp] at hcond2 hK
+  simp only at hcond2 hK
+  rcases hK with hK | ⟨out0, hK⟩ <;> subst hK
+  · dsimp only at hcond2
+    split_ifs at hcond2 with hemp
+    · rw [List.isEmpty_iff] at hemp
+      rw [hemp] at hall
+      simp at hall
+    · exact hnotin (hcond2 _ hall)
+  · dsimp only at hcond2
+    by_cases hkf : (⟨.neg, ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ out0
+    · exact hnotin (hcond2 _ (List.mem_append_left _ hkf))
+    · refine hnotin (hcond2 _ (List.mem_append_right out0 ?_))
+      simp only [List.mem_filter]
+      refine ⟨hall, ?_⟩
+      simp only [Bool.not_eq_true', List.any_eq_false, beq_iff_eq]
+      intro x hx heq
+      exact hkf (heq ▸ hx)
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

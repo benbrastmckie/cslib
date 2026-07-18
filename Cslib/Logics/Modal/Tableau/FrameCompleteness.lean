@@ -4191,6 +4191,126 @@ lemma modalLoopInvHintikkaKb5''_initial (φ₀ : Proposition Atom) :
     exact Nat.zero_le _
   · exact label_mem_modalKnownWorlds (List.mem_singleton_self _)
 
+/-! ## Kb5'' Completeness and `kb5Valid` Decidability (task 528 Phase 7)
+
+Mirrors Five's own Phase 21b assembly (`modalOpenBranchFive_countermodel`/`modalTableauFive_
+complete`/`fiveValid_decides`/`instDecidableFiveValid` above) at the corrected-gate rule, threading
+the extra `h0`/root-known-ness ingredient `modalTruthLemmaKb5` (Phase 5) and `ModalLoopAuxKb5''`
+(Phase 6) both need beyond Five's own two-hypothesis shape. -/
+
+/-- An open Kb5'' Hintikka branch with `F(φ)@0 ∈ b` (and the known-world edge closure
+`accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot`/root-known-ness) yields a **symmetric
+right-Euclidean-frame** Kripke countermodel to `φ`. Mirrors `modalOpenBranchFive_countermodel`,
+threading the extra `h0` hypothesis `modalTruthLemmaKb5` (Phase 5) needs. -/
+theorem modalOpenBranchKb5''_countermodel
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (φ : Proposition Atom)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    (hRoot : accTargetsNeRoot acc) (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (hH : modalHintikkaSetGen modalApplyOneKb5'' b acc)
+    (hF : (⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    ¬ Satisfies (extractModelKb5 b acc) 0 φ :=
+  (modalTruthLemmaKb5 b acc hSrc hTgt hRoot h0 hH φ 0).2 hF
+
+/-- **Kb5''-completeness of the modal tableau**: if `φ₀` is `kb5Valid`, the corrected-gate KB5
+tableau closes on it. Contrapositively: an open branch is a genuine symmetric right-Euclidean-frame
+countermodel. Assembled from the four landed pieces at `apply := modalApplyOneKb5''` --
+`modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxKb5''`, Phase 6),
+`modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean`),
+`modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown` (Phase 6),
+`modalExpandBranchesGen_openBranch_initial_mem`, and `modalOpenBranchKb5''_countermodel` above --
+with `extractModelKb5_rightEuclidean`/`extractModelKb5_symm` discharging `kb5FC` for free. Mirrors
+`modalTableauFive_complete`. -/
+theorem modalTableauKb5''_complete (φ₀ : Proposition Atom) (h : kb5Valid φ₀) :
+    modalTableauKb5'' φ₀ = .closed := by
+  cases htab : modalTableauKb5'' φ₀ with
+  | closed => rfl
+  | openBranch b a =>
+    exfalso
+    have h' : modalExpandBranchesGen modalApplyOneKb5''
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] (modalFuel φ₀) = .openBranch b a := htab
+    have hH : modalHintikkaSetGen modalApplyOneKb5'' b a :=
+      modalExpandBranchesHintikka modalApplyOneKb5'' modalApplyOneKb5''_specCore φ₀
+        (ModalLoopAuxKb5'' φ₀) (ModalLoopAuxKb5''_stepPreserved φ₀) (ModalLoopAuxKb5''_bounds φ₀)
+        (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl (modalExpMeasure_entry_le_fuel φ₀)
+        (by
+          intro i bi ei ai hib hie hia
+          match i with
+          | 0 =>
+            simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia
+            subst hib; subst hie; subst hia
+            exact modalLoopInvHintikkaKb5''_initial φ₀
+          | n + 1 => simp at hib)
+        b a h'
+    have hSrc : accSourcesKnown b a :=
+      modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneKb5''
+        modalApplyOneKb5''_fresh_local (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          exact accSourcesKnown_empty _)
+        b a h'
+    have hTgtRootKnown : accTargetsKnown b a ∧ (0 : WorldIndex) ∈ modalKnownWorlds b ∧
+        accTargetsNeRoot a :=
+      modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown (modalFuel φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (by
+          intro p hp
+          simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+          subst hp
+          refine ⟨?_, ?_, ?_⟩
+          · intro w w' hedge
+            simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+            exact absurd hedge (by decide)
+          · exact label_mem_modalKnownWorlds (List.mem_singleton_self _)
+          · intro w w' hedge
+            simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+            exact absurd hedge (by decide))
+        b a h'
+    have hmemInit : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+      modalExpandBranchesGen_openBranch_initial_mem modalApplyOneKb5'' (modalFuel φ₀)
+        (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty]
+        rfl rfl
+        (fun b₀ hb₀ => by
+          simp only [List.mem_singleton] at hb₀
+          subst hb₀
+          simp)
+        b a h'
+    have hFC : kb5FC (extractModelKb5 b a).r :=
+      ⟨extractModelKb5_symm b a, extractModelKb5_rightEuclidean b a⟩
+    exact modalOpenBranchKb5''_countermodel b a φ₀ hSrc hTgtRootKnown.1 hTgtRootKnown.2.2
+      hTgtRootKnown.2.1 hH hmemInit (h WorldIndex (extractModelKb5 b a) hFC 0)
+
+/-- **The modal Kb5'' tableau decides KB5-validity**: `modalTableauKb5'' φ₀` closes exactly when
+`φ₀` is `kb5Valid`. Combines soundness (`modalTableauKb5''_sound`, `FrameSoundness.lean`) with
+completeness (above). Mirrors `fiveValid_decides`. -/
+theorem kb5Valid_decides (φ₀ : Proposition Atom) :
+    modalTableauKb5'' φ₀ = .closed ↔ kb5Valid φ₀ :=
+  ⟨modalTableauKb5''_sound φ₀, modalTableauKb5''_complete φ₀⟩
+
+/-- **KB5-validity is decidable**: decide by running the modal Kb5'' tableau and consulting
+`kb5Valid_decides`. No `Fintype Atom` assumption is needed, since the tableau computation itself
+is the decision procedure. Mirrors `instDecidableFiveValid`.
+
+This is the constructive witness to KB5's decidability -- the terminating, corrected-gate
+full-cluster rule `modalApplyOneKb5''` supplies the finite-search half. -/
+instance instDecidableKb5Valid (φ₀ : Proposition Atom) : Decidable (kb5Valid φ₀) :=
+  match h : modalTableauKb5'' φ₀ with
+  | .closed => .isTrue ((kb5Valid_decides φ₀).mp h)
+  | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauKb5''_complete φ₀ hv] at h; cases h)
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

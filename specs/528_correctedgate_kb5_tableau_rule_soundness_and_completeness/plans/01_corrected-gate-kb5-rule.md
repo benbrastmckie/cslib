@@ -436,7 +436,7 @@ corrected rule.
 
 ---
 
-### Phase 6: Open-branch supply lemmas for the new rule [IN PROGRESS]
+### Phase 6: Open-branch supply lemmas for the new rule [COMPLETED]
 
 **Goal**: Land the entry-point plumbing the completeness theorem consumes for `modalApplyOneKb5''`,
 mirroring the Five supply lemmas invoked inside `modalTableauFive_complete`
@@ -444,19 +444,29 @@ mirroring the Five supply lemmas invoked inside `modalTableauFive_complete`
 lift), `accSourcesKnown`, and a KB5 `accTargetsKnown` open-branch preservation analogue.
 
 **Tasks**:
-- [ ] Hintikka lift for `modalApplyOneKb5''`: instantiate the generic `modalExpandBranchesHintikka`
+- [x] Hintikka lift for `modalApplyOneKb5''`: instantiate the generic `modalExpandBranchesHintikka`
       with `modalApplyOneKb5''_specCore` (Phase 2) and a `ModalLoopAuxKb5''` loop invariant +
       step-preservation + bounds. Leverage the Phase 2 world invariant (coinciding with
       `FiveWorldInv`) to reuse Five's bound machinery; re-prove only the arms where the new rule's
       propagation differs.
-      *NOT YET STARTED -- see handoff `handoffs/02_phase5-complete-phase6-continuation.md` for the
-      full analysis. This is genuinely the single largest remaining piece of work in the plan
-      (estimated 300-500+ lines mirroring `modalApplyOneFive_worldGrowth` (~90 lines) and
-      `modalStepBranchFive_preserves_worldInv` (~220 lines), both rule-specific tag-counting
-      bookkeeping that does not transfer via the mint-arm agreement lemmas the way Phase 4/6.2's
-      work did, because `FiveWorldInv`'s termination measure needs a TIGHT per-step growth
-      argument, not just the `outputsSubsetUniverse` catalog-membership bound Phase 2 already
-      landed).*
+      *(deviation: altered -- the mint (existential) shapes of `modalApplyOneKb5''_worldGrowth`
+      ported `modalApplyOneFive_worldGrowth` near-verbatim as anticipated, but
+      `ModalLoopAuxKb5''` needed a THIRD bundled conjunct beyond Five's `bClosure ∧ FiveWorldInvE`
+      pair -- root-known-ness (`0 ∈ modalKnownWorlds b`) -- because the corrected propagation
+      gate's `modalApplyOneKb5''Prop_boxPos_diaNeg_eq` (Phase 3) needs it as an ambient hypothesis
+      and `AuxStepPreserved`'s own ambient hypotheses (`accFreshInv`/`accTargetsKnown`) do not
+      supply it. Landed in `Cslib/Logics/Modal/Tableau/FiveSimplification.lean`:
+      `modalApplyOneKb5''_worldGrowth`, `modalStepBranchKb5''_preserves_worldInv` (both reuse
+      `FiveWorldInvE`/`expandedRootTagsFive`/`usedTagsFiveNonRoot`/`mintTags` directly, no
+      `Kb5''`-named fork, per the handoff's naming recommendation). Landed in
+      `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`: `ModalLoopAuxKb5''` (three-conjunct),
+      `ModalLoopAuxKb5''_bounds`, `ModalLoopAuxKb5''_stepPreserved` (root-known-ness preservation
+      via the already-landed `modalStepBranchGen_knownWorlds_mono_C`, Phase 6.2),
+      `modalLoopInvHintikkaKb5''_initial`. The propagation-shape case of `worldGrowth` was indeed
+      easier than Five's own, per the handoff's LOW-risk prediction: `modalApplyOneKb5''Prop_
+      boxPos_diaNeg_eq` already shows `.snd = acc` unconditionally there, so no tag-counting
+      argument was needed, only the `h0` threading. All `lean_verify`-clean, zero sorry, identical
+      axiom profile.)*
 - [x] `accSourcesKnown`: apply the generic `modalExpandBranchesGen_openBranch_accSourcesKnown` with
       `modalApplyOneKb5''` + the Phase 2 freshness helper — this bridge is generic in the rule and
       should apply directly.
@@ -485,9 +495,9 @@ lift), `accSourcesKnown`, and a KB5 `accTargetsKnown` open-branch preservation a
       `modalStepBranchKb5''_preserves_accTargetsKnown_and_NeRoot_and_rootKnown`, and the top-loop
       `modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown`. All
       `lean_verify`-clean, zero sorry, identical axiom profile.*
-- [ ] `lean_verify` every new declaration.
-      *Done for all Phase 6.2 (accTargetsNeRoot+rootKnown) declarations; the Hintikka-lift
-      declarations (Phase 6.1 per the handoff's numbering) remain to be landed and verified.*
+- [x] `lean_verify` every new declaration.
+      *Done for all Phase 6.2 (accTargetsNeRoot+rootKnown) AND Phase 6.1/6.3/6.4 (Hintikka lift)
+      declarations. All clean: `propext`/`Classical.choice`/`Quot.sound` only, zero sorry.*
 
 **Timing**: 2 hours (revised estimate: 2 hours actual for the accTargetsNeRoot+rootKnown piece
 landed so far; the still-outstanding Hintikka lift is now estimated at 3-5 hours given its true
@@ -511,40 +521,48 @@ worldInv`'s actual size and rule-specific-bookkeeping depth were read in full)
 
 ---
 
-### Phase 7: Completeness + decidability assembly [NOT STARTED]
+### Phase 7: Completeness + decidability assembly [COMPLETED]
 
 **Goal**: Assemble the countermodel wrapper, the completeness theorem wired through the
 `modalTableauKb5''` entry point, and the decidability instance.
 
 **Tasks**:
-- [ ] `modalOpenBranchKb5''_countermodel`: thin wrapper mirroring `modalOpenBranchFive_countermodel`
+- [x] `modalOpenBranchKb5''_countermodel`: thin wrapper mirroring `modalOpenBranchFive_countermodel`
       (`FrameCompleteness.lean:~2886`), returning the `extractModelKb5` Kripke countermodel by
       invoking `modalTruthLemmaKb5` (Phase 5) at `F(φ)@0`, with `extractModelKb5_rightEuclidean`
       (:3249) + `extractModelKb5_symm` (:3259) discharging `kb5FC` for free.
-- [ ] `modalTableauKb5''_complete (φ₀) (h : kb5Valid φ₀) : modalTableauKb5'' φ₀ = .closed`: mirror
+- [x] `modalTableauKb5''_complete (φ₀) (h : kb5Valid φ₀) : modalTableauKb5'' φ₀ = .closed`: mirror
       `modalTableauFive_complete` (:~3131-3198), substituting `modalApplyOneKb5''`, the Phase 6
       supply lemmas, `modalOpenBranchKb5''_countermodel`, and `kb5FC`. Use `modalTableauKb5''_eq`
       (Phase 1) to normalize the entry point to `modalTableauGen modalApplyOneKb5''`.
-- [ ] `kb5Valid_decides (φ₀) : modalTableauKb5'' φ₀ = .closed ↔ kb5Valid φ₀ :=
+      *(deviation: altered -- no explicit rewrite via `modalTableauKb5''_eq` was needed: exactly as
+      Five's own proof relies on `modalTableauFive_eq`/`modalTableauGen` being defeq (`rfl`), the
+      `cases htab : modalTableauKb5'' φ₀ with ...` pattern already typechecks `htab` directly
+      against the `modalExpandBranchesGen modalApplyOneKb5'' ...` equality with no explicit
+      rewrite step. Same effect, fewer lines.)*
+- [x] `kb5Valid_decides (φ₀) : modalTableauKb5'' φ₀ = .closed ↔ kb5Valid φ₀ :=
       ⟨modalTableauKb5''_sound φ₀, modalTableauKb5''_complete φ₀⟩`, mirroring `fiveValid_decides`
       (:3203), pairing Phase 3 soundness with Phase 7 completeness.
-- [ ] `instance instDecidableKb5Valid (φ₀) : Decidable (kb5Valid φ₀)`, mirroring
+- [x] `instance instDecidableKb5Valid (φ₀) : Decidable (kb5Valid φ₀)`, mirroring
       `instDecidableFiveValid` (:3213): match on `modalTableauKb5'' φ₀`.
-- [ ] `lean_verify` all four declarations.
+- [x] `lean_verify` all four declarations.
+      *All clean: `propext`/`Classical.choice`/`Quot.sound` only, zero sorry.*
 
-**Timing**: 1.5 hours
+**Timing**: 1.5 hours (actual: ~30 minutes, mechanical port once Phase 6 landed)
 
 **Depends on**: 3, 5, 6
 
 **Files to modify**:
-- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — the four declarations, placed where the
-  stale Phase 3 Blocker note currently sits (to be reconciled in Phase 8).
+- `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` — the four declarations.
+      *(deviation: altered -- placed immediately after the Phase 6 `ModalLoopAuxKb5''` section
+      (before the pre-existing SCOUT block) rather than at the stale Phase 3 Blocker note's
+      location; the Blocker note itself is reconciled in place during Phase 8, not moved.)*
 
 **Verification**:
-- `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` succeeds.
-- `lean_verify` clean; zero sorry, zero new axioms.
+- `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` succeeds. **Done.**
+- `lean_verify` clean; zero sorry, zero new axioms. **Done.**
 - Sanity: `#eval`/`by decide` behavior on a small known-`kb5Valid` / known-non-`kb5Valid` formula
-  (subject to the pre-existing kernel stall, diagnosed in Phase 8).
+  (subject to the pre-existing kernel stall, diagnosed in Phase 8). *Deferred to Phase 8 per plan.*
 
 ---
 

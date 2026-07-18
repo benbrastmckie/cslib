@@ -309,7 +309,7 @@ mirroring `modalTableauKb5'_sound` (`FrameSoundness.lean:~4821`), proved directl
 
 ---
 
-### Phase 4: Re-derived KB5 Hintikka insertion lemmas [NOT STARTED]
+### Phase 4: Re-derived KB5 Hintikka insertion lemmas [COMPLETED]
 
 **Goal**: Re-derive the full-cluster Hintikka insertion lemmas against the new rule's trigger-free
 dichotomy — `modalKb5BoxAllUniv_mem_of`, `modalKb5DiaNegAllUniv_mem_of`, `hintikkaKb5''_box_pos`,
@@ -317,22 +317,34 @@ dichotomy — `modalKb5BoxAllUniv_mem_of`, `modalKb5DiaNegAllUniv_mem_of`, `hint
 (`FrameCompleteness.lean:3409/:3449`).
 
 **Tasks**:
-- [ ] Land the `_mem_of` insertion lemmas (`by_contra` direction: if `T(ψ)@w' ∉ b` then it appears
+- [x] Land the `_mem_of` insertion lemmas (`by_contra` direction: if `T(ψ)@w' ∉ b` then it appears
       in `modalKb5BoxAllUniv b ψ w`), mirroring the frozen `modalKb5BoxAllFull_mem_of` pattern.
       Place beside the Phase 1 dichotomies in `FiveSimplification.lean` (in scope — no escalation).
-- [ ] Land `hintikkaKb5''_box_pos`: from a `modalHintikkaSetGen modalApplyOneKb5''` set and
+      Landed `modalKb5BoxAllUniv_mem_of`/`modalKb5DiaNegAllUniv_mem_of` exactly as scoped, trigger-
+      free (the `w = 0` conjunct dropped from the self-target condition).
+- [x] Land `hintikkaKb5''_box_pos`: from a `modalHintikkaSetGen modalApplyOneKb5''` set and
       `T(□ψ)@w ∈ b`, certify `T(ψ)@w' ∈ b` for every cluster world `w'` including the root-reflexive
       `w' = 0` — the case the frozen rule's dichotomy could not cover but the corrected trigger-free
       arm now does.
-- [ ] Land `hintikkaKb5''_diamond_neg` dually.
-- [ ] Build/locate the **∃-raw-edge-in-derivation helper** (Risk 3): any closure derivation of
+- [x] Land `hintikkaKb5''_diamond_neg` dually.
+- [x] Build/locate the **∃-raw-edge-in-derivation helper** (Risk 3): any closure derivation of
       `(extractModelKb5 b acc).r w 0` contains at least one raw edge whose target is known and
       non-root (via `accTargetsKnown`/`accTargetsNeRoot`, cf. `FrameCompleteness.lean:~3497`),
       supplying the `clusterNonempty` witness the corrected `v=0` arm needs. State it as a named
       lemma so Phase 5 can consume it.
-- [ ] Reuse the free generic bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
+      *(deviation: altered -- landed `extractModelKb5_clusterNonempty_of_reach_root`, simpler than
+      the "raw-edge chain" framing anticipated: given `hr : (extractModelKb5 b acc).r w 0` and
+      `w ≠ 0`, `w` itself is always a valid `clusterNonempty` witness (known + non-root), derived
+      directly from the already-landed `symmEuclGen_mem_modalKnownWorlds_iff`'s `.mpr` direction at
+      `(w, 0)` plus the "root always known" invariant `h0` (the same one `FrameSoundness.lean`'s
+      fuel induction threads) -- no `accTargetsNeRoot`/raw-edge-chain case analysis needed.*
+- [x] Reuse the free generic bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
       (`Completeness.lean:~1007-1019`) for box-negative/diamond-positive directions — no new work.
-- [ ] `lean_verify` every new declaration.
+      *(deferred to Phase 5 -- these are consumed at truth-lemma call sites, not declared here.)*
+- [x] `lean_verify` every new declaration: `modalKb5BoxAllUniv_mem_of`,
+      `modalKb5DiaNegAllUniv_mem_of`, `hintikkaKb5''_box_pos`, `hintikkaKb5''_diamond_neg`,
+      `extractModelKb5_clusterNonempty_of_reach_root` all confirmed clean: `propext`/`Quot.sound`
+      only (the witness helper fully constructive, zero axioms), zero `sorry`.
 
 **Timing**: 1.5 hours
 

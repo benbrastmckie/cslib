@@ -3636,33 +3636,17 @@ lemma modalApplyOneKb5''_eq_of_prop_shape
   rw [modalApplyOneKb5''_eq_of_not_mint_shape sf b acc ⟨h3, h4⟩,
     modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg sf b acc ⟨h1, h2⟩]
 
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- **Raw edges never self-loop**: every recorded accessibility edge's source and target are
-distinct worlds. True of any branch built by minting a fresh child for every edge-adding rule
-application (the same freshness `modalNextWorld_gt` supplies throughout this file); needed below
-to rule out `(extractModelKb5 b acc).r 0 0` supplying the box-positive/diamond-negative truth
-lemma's `clusterNonempty` witness "for free" without a genuine second known world. Threaded as an
-abstract hypothesis exactly like `accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot`; its
-discharge for a real tableau run is deferred alongside theirs (Phase 6/7). -/
-def accEdgeIrrefl (acc : Accessibility) : Prop :=
-  ∀ w w', acc.hasEdge w w' → w ≠ w'
-
-/-- **Structural fact underlying the root-self-relate case**: any
-`Relation.EuclGen (Relation.SymmGen r) x y` derivation, given `r` never relates any point to
-itself, contains at least one genuine base edge between two DISTINCT points -- propagates
-trivially through the `eucl` case, which needs neither of its own endpoints, only that ONE of its
-two premises already supplies such a witness (so `ih1` alone suffices; `ih2` is unused, exactly
-mirroring `euclGen_ne_root_of_hasEdge_ne_root`'s single-premise-use shape above). -/
-private lemma euclGen_symmGen_exists_ne_base {α : Type*} {r : α → α → Prop}
-    (hirr : ∀ a, ¬ r a a) {x y : α} (h : Relation.EuclGen (Relation.SymmGen r) x y) :
-    ∃ p q, p ≠ q ∧ Relation.SymmGen r p q := by
+/-- **Any `EuclGen (SymmGen r)` derivation contains a genuine base edge somewhere**: trivial
+induction, propagating through the `eucl` case via `ih1` alone (mirrors
+`euclGen_ne_root_of_hasEdge_ne_root`'s single-premise-use shape). No side conditions on `r`
+needed -- unlike an earlier draft of this fact, this does NOT require `r` irreflexive (which is
+not actually true of a real tableau-derived `Accessibility` once witness-reuse is taken into
+account: a reused witness world could coincide with its own trigger). -/
+private lemma euclGen_symmGen_exists_base {α : Type*} {r : α → α → Prop} {a b : α}
+    (h : Relation.EuclGen (Relation.SymmGen r) a b) :
+    ∃ p q, Relation.SymmGen r p q := by
   induction h with
-  | base hab =>
-    rename_i a b
-    by_cases heq : a = b
-    · subst heq
-      rcases hab with hab | hab <;> exact absurd hab (hirr a)
-    · exact ⟨a, b, heq, hab⟩
+  | base hab => exact ⟨_, _, hab⟩
   | eucl _ _ ih1 _ => exact ih1
 
 omit [Hashable Atom] in
@@ -3670,26 +3654,24 @@ omit [Hashable Atom] in
 `extractModelKb5_clusterNonempty_of_reach_root` (Phase 4), which handles a non-root world
 reaching the root; this covers the residual case where the closure relates the root to itself
 (`(extractModelKb5 b acc).r 0 0`), which the box-positive/diamond-negative truth-lemma cases need
-regardless of whether the trigger `w` is itself `0`. -/
+regardless of whether the trigger `w` is itself `0`. Only needs `hTgt`/`hRoot`
+(`accTargetsNeRoot`, one-sided: raw edges never TARGET the root) -- `euclGen_symmGen_exists_base`
+extracts SOME genuine base edge (in either symmetrized direction), and whichever direction
+actually fired has its target both known (`hTgt`) and non-root (`hRoot`) for free. -/
 lemma extractModelKb5_clusterNonempty_of_root_selfRelate
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc) (hIrr : accEdgeIrrefl acc)
+    (hTgt : accTargetsKnown b acc) (hRoot : accTargetsNeRoot acc)
     (hr : (extractModelKb5 b acc).r (0 : WorldIndex) (0 : WorldIndex)) :
     ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex) := by
   rw [extractModelKb5_r] at hr
-  obtain ⟨p, q, hpq, hbase⟩ := euclGen_symmGen_exists_ne_base
-    (fun w (hw : acc.hasEdge w w = true) => absurd rfl (hIrr w w hw)) hr
-  rcases hbase with hbase | hbase
-  · rcases eq_or_ne p (0 : WorldIndex) with rfl | hp0
-    · exact ⟨q, hTgt _ _ hbase, Ne.symm hpq⟩
-    · exact ⟨p, hSrc _ _ hbase, hp0⟩
-  · rcases eq_or_ne p (0 : WorldIndex) with rfl | hp0
-    · exact ⟨q, hSrc _ _ hbase, Ne.symm hpq⟩
-    · exact ⟨p, hTgt _ _ hbase, hp0⟩
+  obtain ⟨p, q, hpq⟩ := euclGen_symmGen_exists_base hr
+  rcases hpq with hpq | hpq
+  · exact ⟨q, hTgt _ _ hpq, hRoot _ _ hpq⟩
+  · exact ⟨p, hTgt _ _ hpq, hRoot _ _ hpq⟩
 
 /-- **The KB5 modal truth lemma** (task 528 Phase 5): on a `modalApplyOneKb5''`-saturated open
-branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`), never self-loop
-(`hIrr`), and whose root is always known (`h0`), branch membership and
+branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`), never target the root
+(`hRoot`), and whose root is always known (`h0`), branch membership and
 `extractModelKb5`-satisfaction agree, at every world and both signs. This is the lemma that is
 mathematically FALSE for the frozen `modalApplyOneKb5'` rule
 (`extractModelKb5_nonRoot_boxPos_gap` below) and TRUE for the corrected-gate rule: the trigger-free
@@ -3699,7 +3681,7 @@ unconditionally in the trigger `w`, via `extractModelKb5_clusterNonempty_of_reac
 lemma modalTruthLemmaKb5
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
-    (hIrr : accEdgeIrrefl acc) (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (hRoot : accTargetsNeRoot acc) (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
     (hH : modalHintikkaSetGen modalApplyOneKb5'' b acc) :
     ∀ (φ : Proposition Atom) (w : WorldIndex),
       (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelKb5 b acc) w φ) ∧
@@ -3858,7 +3840,7 @@ lemma modalTruthLemmaKb5
           rcases eq_or_ne w' (0 : WorldIndex) with rfl | hw'ne
           · refine Or.inr ⟨rfl, ?_⟩
             rcases eq_or_ne w (0 : WorldIndex) with rfl | hwne
-            · exact extractModelKb5_clusterNonempty_of_root_selfRelate b acc hSrc hTgt hIrr hr
+            · exact extractModelKb5_clusterNonempty_of_root_selfRelate b acc hTgt hRoot hr
             · exact extractModelKb5_clusterNonempty_of_reach_root b acc hSrc hTgt h0 hwne hr
           · exact Or.inl ⟨(symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt hpath).mp hw,
               hw'ne⟩
@@ -3886,7 +3868,7 @@ lemma modalTruthLemmaKb5
           rcases eq_or_ne w' (0 : WorldIndex) with rfl | hw'ne
           · refine Or.inr ⟨rfl, ?_⟩
             rcases eq_or_ne w (0 : WorldIndex) with rfl | hwne
-            · exact extractModelKb5_clusterNonempty_of_root_selfRelate b acc hSrc hTgt hIrr hw'
+            · exact extractModelKb5_clusterNonempty_of_root_selfRelate b acc hTgt hRoot hw'
             · exact extractModelKb5_clusterNonempty_of_reach_root b acc hSrc hTgt h0 hwne hw'
           · exact Or.inl ⟨(symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt hpath).mp hw,
               hw'ne⟩

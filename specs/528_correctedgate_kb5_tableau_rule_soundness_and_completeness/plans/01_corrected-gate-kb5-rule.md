@@ -388,18 +388,27 @@ corrected rule.
       `w ≠ 0`, Phase 4's `extractModelKb5_clusterNonempty_of_reach_root` supplies the witness
       exactly as scoped; but for `w = 0` (the closure relating the root to ITSELF,
       `(extractModelKb5 b acc).r 0 0`), that Phase 4 lemma does not apply (it requires `w ≠ 0`),
-      and no existing lemma covered this residual case. Landed two new small helpers to close it:
-      `accEdgeIrrefl` (new abstract hypothesis, mirroring `accSourcesKnown`/`accTargetsKnown`/
-      `accTargetsNeRoot`'s existing pattern of threading structural facts about raw edges that
-      hold for any real tableau-derived `Accessibility` but are not derivable from `hSrc`/`hTgt`
-      alone -- "raw edges never self-loop", true because every edge-adding rule application mints
-      a fresh, hence distinct, child) and `extractModelKb5_clusterNonempty_of_root_selfRelate`
-      (given `hIrr` and root-self-relation, extracts a genuine known non-root witness via the new
-      general structural lemma `euclGen_symmGen_exists_ne_base`: any `EuclGen (SymmGen r) x y`
-      derivation, given `r` irreflexive, contains a real base edge between two distinct points,
-      by trivial induction through the `eucl` case). `modalTruthLemmaKb5`'s signature thus adds
-      `hIrr : accEdgeIrrefl acc` alongside `hSrc`/`hTgt`/`h0`/`hH`, discharge deferred to Phase 6/7
-      exactly as `accTargetsNeRoot`'s discharge was deferred to Five's Phase 21.)*
+      and no existing lemma covered this residual case. First attempt introduced a NEW abstract
+      hypothesis `accEdgeIrrefl` ("raw edges never self-loop, anywhere") -- discovered mid-proof
+      to be UNSAFE to assume: witness-reuse (`modalApplyOneKb5''_agree_or_reuse_ne_root`) searches
+      `modalKnownWorlds b` for an existing matching formula and does not exclude the trigger's own
+      label, so a self-loop via reuse is not structurally ruled out in general. Corrected to reuse
+      the ALREADY-ESTABLISHED, provably-true `accTargetsNeRoot` hypothesis instead (raw edges never
+      *target* the root specifically -- true because `witnessWorldFive`'s search explicitly
+      excludes `0` and mint targets are always fresh, hence non-root; the SAME fact Five's Phase 21
+      already fully proved discharges, directly reusable since Kb5'''s mint arms are verbatim
+      Five's per Phase 1). Landed `euclGen_symmGen_exists_base` (any `EuclGen (SymmGen r) a b`
+      derivation contains a genuine base edge SOMEWHERE, unconditionally -- trivial induction
+      through the `eucl` case, no side conditions on `r` needed) and
+      `extractModelKb5_clusterNonempty_of_root_selfRelate` (extracts the witness from whichever
+      symmetrized direction of that base edge actually fired, using `hTgt`+`hRoot` alone, no
+      `hSrc` needed). `modalTruthLemmaKb5`'s signature thus adds `hRoot : accTargetsNeRoot acc`
+      alongside `hSrc`/`hTgt`/`h0`/`hH`, discharge deferred to Phase 6/7 via a Kb5''-specific
+      top-loop propagation mirroring Five's Phase 21 (`modalApplyOneFive_edge_target_ne_root` /
+      `modalStepBranchFive_preserves_accTargetsNeRoot` / `modalExpandBranchesFive_openBranch_
+      accTargetsKnown_and_NeRoot`), substituting the Kb5''-specific bridges
+      (`modalApplyOneKb5''_agree_or_reuse_ne_root`, `modalApplyOneKb5''Prop_knownWorlds_step`)
+      already landed in Phases 1-3.)*
 - [x] Box-negative / diamond-positive cases: reuse `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
       + `extractModelKb5_hasEdge_imp_r` (:3268), mirroring the Five arms.
       *Landed verbatim as scoped, no KB5-specific work needed.*
@@ -427,7 +436,7 @@ corrected rule.
 
 ---
 
-### Phase 6: Open-branch supply lemmas for the new rule [NOT STARTED]
+### Phase 6: Open-branch supply lemmas for the new rule [IN PROGRESS]
 
 **Goal**: Land the entry-point plumbing the completeness theorem consumes for `modalApplyOneKb5''`,
 mirroring the Five supply lemmas invoked inside `modalTableauFive_complete`

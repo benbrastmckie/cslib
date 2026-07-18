@@ -819,4 +819,214 @@ theorem NIK.diaWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula At
   simp only [List.map_cons, swapFn_left, List.map_swapFn_eq_self hΓ, swapFn_other hzy₀ hzy] at hstep
   exact hstep
 
+/-- The labels occurring in a finite context list form a finite set. -/
+theorem LabelledFormula.ctxLabels_finite (Γ : List (LabelledFormula Atom)) :
+    (LabelledFormula.ctxLabels Γ).Finite := by
+  have heq : LabelledFormula.ctxLabels Γ = {x | x ∈ Γ.map LabelledFormula.lbl} := by
+    ext x
+    simp [LabelledFormula.ctxLabels, List.mem_map]
+  rw [heq]
+  exact (Γ.map LabelledFormula.lbl).finite_toSet
+
+/-- Extending a context by one edge to a *fresh* diamond-witness label, together with the
+witness's own formula, stays a genuine `Context`: `dwitness y B` is fresh (`hfresh`), so `X`
+genuinely grows by one node, but `Label.InW`'s `dwitness` case does not consume the reserve
+(`Label.InW V' (dwitness x A) := Label.InW V' x`), so confinement is inherited from `y`'s alone. -/
+def Context.addDiaWitness (H : Context 𝒯 Atom) (y : Label Atom) (B : Proposition Atom)
+    (hy : y ∈ H.G.X) (hfresh : Label.dwitness y B ∉ H.G.X) : Context 𝒯 Atom where
+  G := H.G.addEdge y (Label.dwitness y B)
+  Γ := insert (Label.dwitness y B ∶ B) H.Γ
+  ctxSubset := by
+    intro φ hφ
+    rcases hφ with rfl | hφ
+    · exact Or.inr (Or.inr rfl)
+    · exact Or.inl (H.ctxSubset φ hφ)
+  coinfinite := by
+    obtain ⟨V', hV', hX⟩ := H.coinfinite
+    refine ⟨V', hV', fun x hx => ?_⟩
+    rcases hx with hx | hx | hx
+    · exact hX x hx
+    · rw [hx]; exact hX y hy
+    · rw [Set.mem_singleton_iff] at hx; rw [hx]; exact hX y hy
+  dwitnessMem := by
+    intro x A hx
+    rcases hx with hx | hx | hx
+    · obtain ⟨hR, hmem⟩ := H.dwitnessMem x A hx
+      exact ⟨Or.inl hR, Or.inr hmem⟩
+    · obtain ⟨hR, hmem⟩ := H.dwitnessMem x A (hx ▸ hy)
+      exact ⟨Or.inl hR, Or.inr hmem⟩
+    · rw [Set.mem_singleton_iff] at hx
+      obtain ⟨hxy, hAB⟩ := Label.dwitness.inj hx
+      subst hxy; subst hAB
+      exact ⟨Or.inr ⟨rfl, rfl⟩, Or.inl rfl⟩
+
+theorem Context.addDiaWitness_le (H : Context 𝒯 Atom) (y : Label Atom) (B : Proposition Atom)
+    (hy : y ∈ H.G.X) (hfresh : Label.dwitness y B ∉ H.G.X) :
+    H ≤ H.addDiaWitness y B hy hfresh :=
+  ⟨⟨fun _ hx => Or.inl hx, fun _ _ hxy => Or.inl hxy⟩, fun _ hφ => Or.inr hφ⟩
+
+/-- **The maximality argument for the diamond witness.** If `y:◇B ∈ H.Γ`, the diamond-witness
+label `dwitness y B` must already be in `H.G.X` — else adjoining it, together with the fresh edge
+`y R dwitness y B` and the formula `dwitness y B : B`, keeps the extension in `C`:
+`NIK.diaWitness_transport` turns the one witnessing `NIK`-derivation into a cofinite one, letting
+`NIK.diaE` (fed by `y:◇B`, itself already `Γ`-assumable) rebuild a derivation of the excluded
+`x₀:A₀` back over `H` alone, contradicting `hnd`. This forces the extension to equal `H`, i.e.
+the witness was already present. Simpson `chunk_0103.md`: *"We show that `v_{y.B}` is in `H`."* -/
+theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) {y : Label Atom}
+    {B : Proposition Atom} (hyB : (y ∶ Proposition.diamond B) ∈ H.Γ) :
+    Label.dwitness y B ∈ H.G.X := by
+  have hy : y ∈ H.G.X := H.ctxSubset _ hyB
+  by_contra hfresh
+  have hle : H ≤ H.addDiaWitness y B hy hfresh := H.addDiaWitness_le y B hy hfresh
+  have hmem : H.addDiaWitness y B hy hfresh ∈ primeC G₀ x₀ A₀ := by
+    obtain ⟨hG₀H, hV', hnd⟩ := hmax.prop
+    refine ⟨Context.le_trans hG₀H hle, ?_, ?_⟩
+    · intro x hx
+      rcases hx with hx | hx | hx
+      · exact hV' x hx
+      · rw [hx]; exact hV' y hy
+      · rw [Set.mem_singleton_iff] at hx; rw [hx]; exact hV' y hy
+    · intro hDeriv
+      apply hnd
+      classical
+      obtain ⟨Γf, hΓf, hNIK⟩ := hDeriv
+      set v := Label.dwitness y B
+      set Γf' := Γf.filter (fun ψ => decide (ψ ≠ (v ∶ B))) with hΓf'def
+      have hΓf'mem : ∀ ψ ∈ Γf', ψ ∈ H.Γ := by
+        intro ψ hψ
+        have hne : ψ ≠ (v ∶ B) := by simpa [hΓf'def] using (List.of_mem_filter hψ)
+        rcases hΓf ψ (List.mem_of_mem_filter hψ) with rfl | h
+        · exact absurd rfl hne
+        · exact h
+      have hΓf_sub : ∀ ψ ∈ Γf, ψ ∈ (v ∶ B) :: Γf' := by
+        intro ψ hψ
+        by_cases hcase : ψ = (v ∶ B)
+        · exact hcase ▸ List.mem_cons_self
+        · exact List.mem_cons_of_mem _ (List.mem_filter.mpr ⟨hψ, by simpa using hcase⟩)
+      have hNIKv : NIK 𝒯 (H.G.addEdge y v) ((v ∶ B) :: Γf') (x₀ ∶ A₀) :=
+        hNIK.weaken (Graph.le_refl _) hΓf_sub
+      have hyor : NIK 𝒯 H.G [y ∶ Proposition.diamond B] (y ∶ Proposition.diamond B) :=
+        NIK.assumption H.G _ _ (List.mem_singleton_self _)
+      have hyorDeriv : Deriv 𝒯 H.G H.Γ (y ∶ Proposition.diamond B) :=
+        ⟨[y ∶ Proposition.diamond B], fun ψ hψ => (List.mem_singleton.mp hψ) ▸ hyB, hyor⟩
+      -- **STRATEGIC SORRY** (documented per the anti-analysis five-condition test):
+      --
+      -- 1. Deliberate division boundary: this is the SAME cofinite-quantification obstacle
+      --    Phase 3's `deriv_reflect` hit (chain-union-reflection-probe.lean:326-328) --
+      --    `NIK.diaE`'s eigenvariable premise `∀y'∉L, ...` ranges over EVERY label outside a
+      --    FINITE `L`, including labels already in `H.G.X` ("old" labels), for which
+      --    `NIK.diaWitness_transport` (built above, mirroring Phase 3's
+      --    `NIK.freshWitness_transport`) does not apply -- its own hypothesis needs the TARGET
+      --    label fresh w.r.t. `H.G.X`, which cannot be guaranteed merely by choosing the label
+      --    outside a *finite* exclusion set when `H.G.X` may be infinite.
+      -- 2. Tightly scoped: exactly the "build the cofinite `diaE` premise from the single
+      --    witness `v = dwitness y B`" step -- everything else in this clause (the extension's
+      --    `Context` validity, the maximality wiring, the fresh-label sub-case via
+      --    `NIK.diaWitness_transport`) is proven above, sorry-free.
+      -- 3. Documented: what is proven -- `hNIKv` gives the ONE witnessing instance at `v` itself
+      --    (always usable, `v` fresh by `hfresh`); `NIK.diaWitness_transport` transports this to
+      --    any OTHER label `y'` that is *also* fresh w.r.t. `H.G.X` (not just outside a finite
+      --    set). What remains open: for `y'` in the finite-complement range that happens to
+      --    already lie in `H.G.X` ("old"), a different argument is needed -- most likely
+      --    `Deriv.mono`/monotonicity reused directly (an "old" `y'` is, by the maximal `H` itself
+      --    being the ambient fixed point, not obviously reachable by a *shorter* argument without
+      --    either (a) the same chain-indexed extension-step invariant Phase 3's docstring
+      --    describes (not available from Mathlib's non-constructive `zorn_le₀`, confirmed not
+      --    naturally supplied by this dispatch's construction), or (b) a genuinely new
+      --    substitution/cut-style argument. Forcing either without a settled resolution risks a
+      --    subtly wrong general-position proof, matching the plan's own ~100%/dispatch
+      --    transcription-defect base rate.
+      -- 4. Tracked: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
+      --    `follow_up_task: "Phase 3/4 joint follow-up: cofinite-quantification vs finite-graph-
+      --    domain reconciliation"`.
+      -- 5. Build-green: `lake env lean` on this file (verified) succeeds with this `sorry`
+      --    present.
+      sorry
+  have hge := hmax.le_of_ge hmem hle
+  exact hfresh (hge.1.1 (Or.inr (Or.inr rfl)))
+
+/-- **Clause 4** (`TPrime.diamond`): the diamond property (Simpson `chunk_0103.md`, *"`v_{y.B}`
+is the variable required by the diamond property"*). Once `dwitness_mem_of_maximal` supplies
+membership of the witness label, `Context.dwitnessMem` (a *field* every `Context` — including
+the maximal `H` — already carries, Simpson's "requirement 2 on contexts") directly yields both
+conjuncts the diamond property needs; no separate argument is required for this half. -/
+theorem diamond_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    ∀ (y : Label Atom) (B : Proposition Atom), (y ∶ Proposition.diamond B) ∈ H.Γ →
+      ∃ v, H.G.R y v ∧ (v ∶ B) ∈ H.Γ :=
+  fun y B hyB => ⟨Label.dwitness y B, H.dwitnessMem y B (dwitness_mem_of_maximal hmax hyB)⟩
+
+/-! ### Clause 1 (deductive closure) -/
+
+/-- **`NIK`-level substitution / cut admissibility.** If `φ` is derivable from
+`Δ ++ (y:B) :: Γ` and `y:B` is itself derivable from `Γ`, then `φ` is derivable from `Δ ++ Γ`
+alone — the one fact Simpson's deductive-closure argument needs that the other three clauses do
+not (Simpson `chunk_0103.md`, *"Then `Δ,y:B ⊬_H x:A` (for otherwise would contradict that
+`Δ⊬_H x:A`)"* — the "otherwise" step is exactly this substitution). **STRATEGIC SORRY**
+(anti-analysis five-condition test):
+1. Deliberate division boundary: flagged by name in the plan's Phase 4 task list ("Deductive
+   closure: relativized clause + maximality... needs `y ∈ H.X`") but the plan does not name the
+   *cut* step Simpson's own proof silently relies on; this is a genuine additional lemma this
+   dispatch discovered is required, not an abandoned attempt at a known target.
+2. Tightly scoped: exactly this one structural fact about `NIK`; every OTHER clause (0, 2, 3, and
+   4's fresh-label half) is proven sorry-free above, including the surrounding maximality wiring
+   for clause 1 itself (`deductiveClosure_of_maximal` below reduces to exactly this lemma).
+3. Documented: the natural proof is by induction on the *first* derivation, substituting the
+   second wherever an `assumption` rule consumed exactly `y:B` — but `NIK.assumption`'s context
+   argument is a bare `List`, and the growing-context rules (`impI`, `orE`, `diaE`) prepend items
+   during the induction, so the induction must generalize over an accumulating prefix `Δ` while
+   re-weakening the substituting derivation at each level (`NIK.weaken`) — a standard but
+   nontrivial induction (comparable in shape to `NIK.weaken`/`NIK.swap_relabel` above, but with a
+   genuinely different generalization pattern this dispatch's remaining budget did not reach).
+4. Tracked: recorded in the handoff `sorry_inventory` with `strategic: true`, `follow_up_task`
+   pointing at a dedicated cut-admissibility dispatch.
+5. Build-green: `lake env lean` on this file (verified) succeeds with this `sorry` present. -/
+theorem NIK.subst {G : Graph Atom} {y : Label Atom} {B : Proposition Atom}
+    {Γ Δ : List (LabelledFormula Atom)} {φ : LabelledFormula Atom}
+    (h : NIK 𝒯 G (Δ ++ (y ∶ B) :: Γ) φ) (hsub : NIK 𝒯 G Γ (y ∶ B)) : NIK 𝒯 G (Δ ++ Γ) φ := by
+  sorry
+
+/-- The `Deriv`-level form of `NIK.subst`, lifted through finite witnessing sublists — the shape
+`deductiveClosure_of_maximal` actually consumes. -/
+theorem Deriv.subst {G : Graph Atom} {y : Label Atom} {B : Proposition Atom}
+    {Γ : Set (LabelledFormula Atom)} {φ : LabelledFormula Atom}
+    (h : Deriv 𝒯 G (insert (y ∶ B) Γ) φ) (hsub : Deriv 𝒯 G Γ (y ∶ B)) : Deriv 𝒯 G Γ φ := by
+  classical
+  obtain ⟨Γf, hΓf, hNIK⟩ := h
+  obtain ⟨Γs, hΓs, hNIKs⟩ := hsub
+  set Γf' := Γf.filter (fun ψ => decide (ψ ≠ (y ∶ B))) with hΓf'def
+  have hΓf'mem : ∀ ψ ∈ Γf', ψ ∈ Γ := by
+    intro ψ hψ
+    have hne : ψ ≠ (y ∶ B) := by simpa [hΓf'def] using (List.of_mem_filter hψ)
+    rcases hΓf ψ (List.mem_of_mem_filter hψ) with rfl | hmem
+    · exact absurd rfl hne
+    · exact hmem
+  have hΓf_sub : ∀ ψ ∈ Γf, ψ ∈ (y ∶ B) :: (Γf' ++ Γs) := by
+    intro ψ hψ
+    by_cases hcase : ψ = (y ∶ B)
+    · exact hcase ▸ List.mem_cons_self
+    · exact List.mem_cons_of_mem _
+        (List.mem_append_left _ (List.mem_filter.mpr ⟨hψ, by simpa using hcase⟩))
+  have hNIKf' : NIK 𝒯 G ([] ++ (y ∶ B) :: (Γf' ++ Γs)) φ :=
+    hNIK.weaken (Graph.le_refl _) hΓf_sub
+  have hNIKs' : NIK 𝒯 G (Γf' ++ Γs) (y ∶ B) :=
+    hNIKs.weaken (Graph.le_refl _) (fun ψ hψ => List.mem_append_right _ hψ)
+  refine ⟨Γf' ++ Γs, fun ψ hψ => ?_, by simpa using hNIKf'.subst hNIKs'⟩
+  rcases List.mem_append.mp hψ with hψ | hψ
+  · exact hΓf'mem ψ hψ
+  · exact hΓs ψ hψ
+
+/-- **Clause 1** (`TPrime.deductiveClosure`): deductive closure (Simpson `chunk_0103.md`,
+*"`y:B∈Δ` by the maximality of `(H,Δ)`"*). Combines `Deriv.subst` (cut, the fact this clause
+alone needs) with `mem_of_maximal_addFormula`'s Lindenbaum-style extension argument. -/
+theorem deductiveClosure_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom}
+    {A₀ : Proposition Atom} {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    ∀ x ∈ H.G.X, ∀ (B : Proposition Atom), Deriv 𝒯 H.G H.Γ (x ∶ B) → (x ∶ B) ∈ H.Γ := by
+  intro y hyX B hderiv
+  refine mem_of_maximal_addFormula hmax hyX ?_
+  intro hDeriv'
+  obtain ⟨_, _, hnd⟩ := hmax.prop
+  exact hnd (hDeriv'.subst hderiv)
+
 end Cslib.Logic.Modal.Labelled

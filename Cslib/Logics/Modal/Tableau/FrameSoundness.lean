@@ -5620,6 +5620,184 @@ theorem modalExpandBranchesKb5'_closed_unsatIn
                   exact (forall₂_replicate_right.mp hunsat_newBs b' hb'_mem) hb'_sat
                 exact List.Forall₂.cons hbh_unsat hunsat_bt
 
+
+/-! ### Corrected-Gate Fuel-Induction Assembly
+
+Mirrors the Kb5' fuel induction exactly, with one addition: the threaded invariant is
+strengthened from `FiveSoundInv` alone to `Kb5''SoundInv` (`FiveSoundInv` plus the "root always
+known" fact `modalApplyOneKb5''Prop_knownWorlds_step`'s `h0` parameter needs), since the
+corrected rule's self-target arm can fire from any trigger, not just the root. -/
+
+/-- The combined per-step invariant the corrected-gate KB5 fuel induction threads: `FiveSoundInv`
+(`accFreshInv`/`accReachableInv`/`accTargetsKnown`) plus the "root always known" fact every
+branch in this tableau satisfies (it starts from the singleton `[F(φ)@0]`, formulas never
+removed). Mirrors `FiveSoundInv`, strengthened for the corrected rule's needs. -/
+def Kb5''SoundInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) : Prop :=
+  FiveSoundInv b acc ∧ (0 : WorldIndex) ∈ modalKnownWorlds b
+
+/-- **The corrected-gate KB5 fuel induction**: `modalExpandBranchesGen modalApplyOneKb5''`
+closing implies every branch is unsatisfiable-in-`kb5FC`. Mirrors
+`modalExpandBranchesKb5'_closed_unsatIn`, threading `Kb5''SoundInv` in place of `FiveSoundInv`
+and reusing `modalStepBranch_preserves_accFreshInv_gen`/
+`modalStepBranch_preserves_accTargetsKnown_gen` (both generic, instantiated at
+`modalApplyOneKb5''`/`modalApplyOneKb5''_fresh_local`),
+`modalStepBranchKb5''_preserves_accReachableInv` (already landed, bundling the reachability and
+root-known preservation together), and the per-step satisfiability bridge
+`modalStepBranchKb5''_preserves_satIn` above. -/
+theorem modalExpandBranchesKb5''_closed_unsatIn
+    (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      List.Forall₂ (fun b acc => Kb5''SoundInv b acc) branches accs →
+      modalExpandBranchesGen modalApplyOneKb5'' branches expandedSets accs fuel = .closed →
+      List.Forall₂ (fun b acc => ¬branchSatisfiableIn kb5FC b acc) branches accs := by
+  induction fuel with
+  | zero =>
+    intro branches expandedSets accs hlength hlength_accs hInv h
+    simp only [modalExpandBranchesGen] at h
+    split at h
+    · simp at h
+    · rename_i hfind
+      refine List.forall₂_iff_zip.mpr ⟨hlength_accs.symm, ?_⟩
+      intro b a hmem
+      have hfn := (List.findSome?_eq_none_iff.mp hfind) _ hmem
+      have hcl : isModalClosed b = true := by
+        cases h : isModalClosed b with
+        | true => rfl
+        | false => simp [h] at hfn
+      exact modalClosed_unsatIn kb5FC b hcl a
+  | succ fuel' ih =>
+    intro branches expandedSets accs hlength hlength_accs hInv h
+    suffices key : ∀ (pending pendingExp :
+          List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (done doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility),
+        pendingExp.length = pending.length →
+        pendingAccs.length = pending.length →
+        doneExp.length = done.length →
+        doneAccs.length = done.length →
+        List.Forall₂ (fun b a => Kb5''SoundInv b a) pending pendingAccs →
+        List.Forall₂ (fun b a => Kb5''SoundInv b a) done doneAccs →
+        modalExpandBranchesGen.processNext modalApplyOneKb5''
+          fuel' pending pendingExp pendingAccs done doneExp doneAccs = .closed →
+        List.Forall₂ (fun b a => ¬branchSatisfiableIn kb5FC b a) pending pendingAccs from
+      key branches expandedSets accs [] [] []
+        hlength hlength_accs rfl rfl hInv List.Forall₂.nil
+        (by simpa [modalExpandBranchesGen] using h)
+    intro pending
+    induction pending with
+    | nil =>
+      intro _ _ _ _ _ _ _ _ _ hInv_pending _ _
+      cases hInv_pending
+      exact List.Forall₂.nil
+    | cons bh bt ih_inner =>
+      intro pendingExp pendingAccs done doneExp doneAccs
+        hpendingExpLen hpendingAccsLen hdoneExpLen hdoneAccsLen
+        hInv_pending hInv_done hinner
+      cases pendingAccs with
+      | nil => simp at hpendingAccsLen
+      | cons a restAs =>
+        cases pendingExp with
+        | nil => simp at hpendingExpLen
+        | cons e es =>
+          simp only [List.length_cons, Nat.add_right_cancel_iff] at hpendingExpLen hpendingAccsLen
+          cases hInv_pending with
+          | cons hInv_bh hInv_rest =>
+            have hFresh_bh : accFreshInv bh a := hInv_bh.1.1
+            have hReach_bh : accReachableInv bh a := hInv_bh.1.2.1
+            have hKnown_bh : accTargetsKnown bh a := hInv_bh.1.2.2
+            have h0_bh : (0 : WorldIndex) ∈ modalKnownWorlds bh := hInv_bh.2
+            simp only [modalExpandBranchesGen.processNext] at hinner
+            by_cases hcl : isModalClosed bh = true
+            · rw [if_pos hcl] at hinner
+              apply List.Forall₂.cons
+              · exact modalClosed_unsatIn kb5FC bh hcl a
+              · exact ih_inner es restAs (done ++ [bh]) (doneExp ++ [e]) (doneAccs ++ [a])
+                    (by simp [hpendingExpLen])
+                    (by simp [hpendingAccsLen])
+                    (by simp [hdoneExpLen])
+                    (by simp [hdoneAccsLen])
+                    hInv_rest
+                    (List.rel_append hInv_done
+                      (List.Forall₂.cons hInv_bh List.Forall₂.nil))
+                    hinner
+            · simp only [Bool.not_eq_true] at hcl
+              rw [if_neg (by simp [hcl])] at hinner
+              cases hstep_eq : modalStepBranchGen modalApplyOneKb5'' bh e a with
+              | none => rw [hstep_eq] at hinner; simp at hinner
+              | some step =>
+                obtain ⟨newBs, newExps, newAcc⟩ := step
+                rw [hstep_eq] at hinner
+                have hnewExpLen : newExps.length = newBs.length := by
+                  unfold modalStepBranchGen at hstep_eq
+                  obtain ⟨sf, -, hf⟩ := List.exists_of_findSome?_eq_some hstep_eq
+                  rcases h_apply : (modalApplyOneKb5'' sf bh a) with ⟨result, _⟩
+                  simp only [h_apply] at hf
+                  cases result with
+                  | notApplicable => simp at hf
+                  | _ =>
+                    split_ifs at hf
+                    simp only [Option.some.injEq, Prod.mk.injEq] at hf
+                    obtain ⟨rfl, rfl, -⟩ := hf; simp [List.length_map]
+                have hInvNew : List.Forall₂ (fun b a => Kb5''SoundInv b a)
+                    newBs (List.replicate newBs.length newAcc) :=
+                  forall₂_replicate_right.mpr (fun b' hb' =>
+                    ⟨⟨modalStepBranch_preserves_accFreshInv_gen modalApplyOneKb5''
+                          modalApplyOneKb5''_fresh_local bh e a newBs newExps newAcc hstep_eq
+                          hFresh_bh b' hb',
+                      (modalStepBranchKb5''_preserves_accReachableInv bh e a newBs
+                          newExps newAcc hstep_eq hKnown_bh hReach_bh h0_bh b' hb').1,
+                      modalStepBranch_preserves_accTargetsKnown_gen modalApplyOneKb5''
+                          modalApplyOneKb5''_fresh_local bh e a newBs newExps newAcc hstep_eq
+                          hKnown_bh b' hb'⟩,
+                     (modalStepBranchKb5''_preserves_accReachableInv bh e a newBs
+                        newExps newAcc hstep_eq hKnown_bh hReach_bh h0_bh b' hb').2⟩)
+                have hInvAll : List.Forall₂ (fun b a => Kb5''SoundInv b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  List.rel_append (List.rel_append hInv_done hInvNew) hInv_rest
+                have hunsat_all :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn kb5FC b a)
+                    (done ++ newBs ++ bt)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs) :=
+                  ih (done ++ newBs ++ bt) (doneExp ++ newExps ++ es)
+                    (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+                    (by simp only [List.length_append]; omega)
+                    (by simp only [List.length_append, List.length_replicate]; omega)
+                    hInvAll hinner
+                have hunsat_newBs_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn kb5FC b a)
+                    (newBs ++ bt) (List.replicate newBs.length newAcc ++ restAs) := by
+                  have h := List.forall₂_drop done.length hunsat_all
+                  rw [List.append_assoc done newBs bt, List.drop_left,
+                      List.append_assoc doneAccs (List.replicate newBs.length newAcc) restAs,
+                      List.drop_left' hdoneAccsLen] at h
+                  exact h
+                have hunsat_bt :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn kb5FC b a)
+                    bt restAs := by
+                  have h := List.forall₂_drop newBs.length hunsat_newBs_bt
+                  rw [List.drop_left,
+                      List.drop_left' List.length_replicate] at h
+                  exact h
+                have hunsat_newBs :
+                    List.Forall₂ (fun b a => ¬branchSatisfiableIn kb5FC b a)
+                    newBs (List.replicate newBs.length newAcc) := by
+                  have h := List.forall₂_take newBs.length hunsat_newBs_bt
+                  rw [List.take_left,
+                      List.take_left' List.length_replicate] at h
+                  exact h
+                have hbh_unsat : ¬branchSatisfiableIn kb5FC bh a := by
+                  intro hbh_sat
+                  obtain ⟨b', hb'_mem, hb'_sat⟩ :=
+                    modalStepBranchKb5''_preserves_satIn
+                      bh e a newBs newExps newAcc hstep_eq hbh_sat hFresh_bh hReach_bh
+                  exact (forall₂_replicate_right.mp hunsat_newBs b' hb'_mem) hb'_sat
+                exact List.Forall₂.cons hbh_unsat hunsat_bt
 /-- **Task 524, the KB5 full-cluster soundness capstone**: if `modalTableauKb5'` closes on
 `F(φ)`, then `φ` is `kb5Valid` -- proved **directly** against `kb5FC`, not via
 `fiveValid_imp_kb5Valid`/`kb5FC_imp_fiveFC` (the frame-class-monotonicity shortcut below, which
@@ -5650,6 +5828,44 @@ theorem modalTableauKb5'_sound (φ : Proposition Atom) (h : modalTableauKb5' φ 
     (List.Forall₂.cons hInv0 List.Forall₂.nil)
     (by
       have h' : modalExpandBranchesGen modalApplyOneKb5'
+          [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+          [Accessibility.empty] (modalFuel φ) = .closed := h
+      exact h')
+  cases hunsat with
+  | cons h_unsat _ => exact h_unsat hsat
+
+/-- **The corrected-gate KB5 soundness capstone**: if `modalTableauKb5''` closes on `F(φ)`, then
+`φ` is `kb5Valid` -- proved **directly** against `kb5FC`. Mirrors `modalTableauKb5'_sound`,
+feeding `modalExpandBranchesKb5''_closed_unsatIn` at the initial configuration
+`[[F(φ)@0]] [[]] [Accessibility.empty]`, with the initial `Kb5''SoundInv` witness built from
+`accFreshInv_empty`, `accReachableInv_initial`, the trivial vacuous `accTargetsKnown` for the
+edgeless empty accessibility relation, and the trivial "root known" fact for the singleton seed
+branch `[F(φ)@0]` (its only label is `0`). -/
+theorem modalTableauKb5''_sound (φ : Proposition Atom) (h : modalTableauKb5'' φ = .closed) :
+    kb5Valid φ := by
+  intro World m hFC w
+  by_contra hnotsat
+  have hsat : branchSatisfiableIn kb5FC [⟨.neg, φ, 0⟩] Accessibility.empty :=
+    ⟨World, m, fun _ => w, hFC,
+      fun w1 w2 hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge]),
+      fun sf hmem => by
+        simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem
+        subst hmem
+        exact ⟨fun h => by simp at h, fun _ => hnotsat⟩⟩
+  have h0 : (0 : WorldIndex) ∈ modalKnownWorlds
+      [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] :=
+    (mem_modalKnownWorlds_FS _ 0).mpr
+      ⟨(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex), List.mem_cons_self, rfl⟩
+  have hInv0 : Kb5''SoundInv
+      [(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] Accessibility.empty :=
+    ⟨⟨accFreshInv_empty _, accReachableInv_initial φ,
+      fun w w' hedge => absurd hedge (by simp [Accessibility.empty, Accessibility.hasEdge])⟩, h0⟩
+  have hunsat := modalExpandBranchesKb5''_closed_unsatIn (modalFuel φ)
+    [[⟨.neg, φ, 0⟩]] [[]] [Accessibility.empty]
+    rfl rfl
+    (List.Forall₂.cons hInv0 List.Forall₂.nil)
+    (by
+      have h' : modalExpandBranchesGen modalApplyOneKb5''
           [[(⟨.neg, φ, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
           [Accessibility.empty] (modalFuel φ) = .closed := h
       exact h')

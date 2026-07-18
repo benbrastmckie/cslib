@@ -243,14 +243,14 @@ bound for the new rule, mirroring `modalApplyOneKb5'_specCore` (`FiveSimplificat
 
 ---
 
-### Phase 3: Frame soundness theorem [IN PROGRESS]
+### Phase 3: Frame soundness theorem [COMPLETED]
 
 **Goal**: Land `modalTableauKb5''_sound (φ) (h : modalTableauKb5'' φ = .closed) : kb5Valid φ`,
 mirroring `modalTableauKb5'_sound` (`FrameSoundness.lean:~4821`), proved directly against `kb5FC`
 (`FrameSoundness.lean:1293`).
 
 **Tasks**:
-- [ ] Assemble the soundness proof reusing task 524's trigger-agnostic semantic lemma family for
+- [x] Assemble the soundness proof reusing task 524's trigger-agnostic semantic lemma family for
       the four `(trigger w, target v)` cases:
       - `w=0, v≠0`: `reachable_imp_related_kb5` (`FrameSoundness.lean:1582`).
       - `w≠0, v≠0`: `accReachableInv_related_kb5` (:1610).
@@ -258,10 +258,41 @@ mirroring `modalTableauKb5'_sound` (`FrameSoundness.lean:~4821`), proved directl
       - `w≠0, v=0` (**new case**): symmetrize `reachable_imp_related_kb5` via `Std.Symm.symm`
         (or the repo's symmetry combinator) — a one-liner. State a small named helper
         (`reachable_imp_related_kb5_symm`) if inline symmetrization is awkward.
-- [ ] Thread the new `*Univ` emission through the same soundness scaffolding the frozen rule used;
+      Landed exactly as scoped: `reachable_imp_related_kb5_symm` (one-liner), consumed by
+      `modalKb5BoxAllUniv_soundIn`/`modalKb5DiaNegAllUniv_soundIn`'s `lbl ≠ 0` self-target
+      sub-case.
+- [x] Thread the new `*Univ` emission through the same soundness scaffolding the frozen rule used;
       the corrected 0-target arm now also fires for `w≠0`, which is exactly the case the new
       symmetrization discharges.
-- [ ] `lean_verify` the theorem and any helper.
+      *(deviation: altered/expanded -- assembling `modalTableauKb5''_sound` required re-deriving
+      the ENTIRE Kb5' fuel-induction chain (not just the rule-soundness lemmas the task bullets
+      above scope), because `modalStepBranchKb5'_preserves_accReachableInv` /
+      `modalStepBranchKb5'_preserves_satIn` / `modalExpandBranchesKb5'_closed_unsatIn` are all
+      hard-coded to `modalApplyOneKb5'` with no generic/parametric entry point (unlike
+      completeness's `RuleApplicationSpecCore` abstraction). Landed the full mirror chain:
+      `modalApplyOneKb5''Prop_boxPos_diaNeg_eq`/`_knownWorlds_step` (`FiveSimplification.lean`,
+      alongside their Kb5' analogues), `modalStepBranchKb5''_preserves_accReachableInv`,
+      `modalStepBranchKb5''_preserves_satIn`, `Kb5''SoundInv` + `modalExpandBranchesKb5''_closed_unsatIn`,
+      and the `modalTableauKb5''_sound` capstone (all `FrameSoundness.lean`). Discovered along the
+      way: the corrected rule's self-target arm (fires for ANY trigger, not just the root) breaks
+      the frozen rule's implicit assumption that the self-target's world `0` is known via the
+      trigger's own known-ness -- needed a genuine new "root always known"
+      (`(0 : WorldIndex) ∈ modalKnownWorlds b`) invariant, threaded explicitly as a hypothesis
+      through the `knownWorlds_step`/`accReachableInv`-preservation/fuel-induction layer (trivial
+      to establish and preserve: true at the singleton seed branch, preserved by
+      `modalKnownWorlds_mono_append_FS` since branches only grow). This invariant was NOT needed
+      by the semantic soundness lemmas (`modalKb5BoxAllUniv_soundIn` et al.) or by
+      `modalStepBranchKb5''_preserves_satIn`, since `WorldIndex := Nat` makes the F2-style
+      world-bound argument free via `Nat.zero_le` and the semantic root-reflexivity lemma
+      (`accReachableInv_kb5_root_refl`) never depended on the trigger being the root in the first
+      place -- only the syntactic known-worlds bookkeeping needed it.*
+- [x] `lean_verify` the theorem and any helper: `reachable_imp_related_kb5_symm`,
+      `modalKb5BoxAllUniv_soundIn`, `modalKb5DiaNegAllUniv_soundIn`,
+      `modalApplyOneKb5''Prop_boxPos_diaNeg_eq`, `modalApplyOneKb5''Prop_knownWorlds_step`,
+      `modalStepBranchKb5''_preserves_accReachableInv`, `modalStepBranchKb5''_preserves_satIn`,
+      `modalExpandBranchesKb5''_closed_unsatIn`, `modalTableauKb5''_sound` all confirmed clean:
+      only `propext`/`Classical.choice`/`Quot.sound` (identical to the frozen chain's axiom set,
+      `reachable_imp_related_kb5_symm` fully constructive with zero axioms), zero `sorry`.
 
 **Timing**: 1.5 hours
 

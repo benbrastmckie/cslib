@@ -1,59 +1,110 @@
 {
-  "status": "partial",
-  "skeleton": false,
-  "phases_completed": 2,
-  "phases_total": 9,
+  "status": "implemented",
+  "skeleton": true,
+  "phases_completed": 1,
+  "phases_total": 11,
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
+      "plan_version": 5,
+      "supersedes": "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
+      "note": "Phase 1 of v5 marked [COMPLETED]. v5 supersedes v4's Phase 3-4 completion path with a well-founded/transfinite Zorn reconstruction (FLO invariant) that discharges both 'old label' strategic sorries."
+    },
+    {
+      "type": "implementation",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "summary": "Phase 1: FLO carrier scaffolding appended -- Stage (Ordinal), FloTask, stepExt (+ sorry-free stepExt_le), FloSeq, rankOf (+ sorry-free rankOf_base), the non-vacuous FLO structure, and four sorried downstream obligations (flo_succ, flo_limit, primeC'_exists_maximal, flo_oldlabel_transport)."
+    }
+  ],
   "sorry_inventory": [
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 396,
-      "statement": "theorem deriv_reflect [Nonempty \u03b9] {\u03c6 : LabelledFormula Atom} : Deriv \ud835\udcaf (\ud835\udc9e.unionG) \ud835\udc9e.union\u0393 \u03c6 \u2192 \u2203 i, Deriv \ud835\udcaf (\ud835\udc9e.C i).G (\ud835\udc9e.C i).\u0393 \u03c6",
+      "line": 397,
+      "statement": "theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} : Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ φ → ∃ i, Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ φ",
       "strategic": true,
       "assumption": "Assumes the swap-transport argument extends to labels already present in some chain member's domain ('old' labels), not just the shared coinfinite reserve.",
-      "why_deferred": "Joint dispatch (task 517) re-investigated three ADDITIONAL shortcuts beyond the plan's routes (a)/(b), all formally ruled out: (1) a finite-subgraph existential in Deriv reduces to the same uniform-index obstruction one level down; (2) reusing the induction hypothesis directly at old labels supplies a fact but with a different chain index per label, and Directed only bounds finitely many indices at once; (3) a 'bounded-old-label' conditional strengthening of ChainCtx would close the gap but is not derivable from ChainCtx's current definition. Conclusion: route (a) is confirmed necessary and requires replacing zorn_le\u2080 with a step-indexed/well-founded Lindenbaum construction (transfinite, since Atom : Type u is not assumed countable) -- a dedicated multi-phase effort, not a lemma-sized gap. Full argument in the probe's new module section preceding ChainCtx.deriv_reflect.",
-      "follow_up_task": "NEW dedicated planning effort ('Phase 4.5'): step-indexed/well-founded Lindenbaum construction replacing zorn_le\u2080 in primeC_exists_maximal, carrying a fresh-labels-only invariant. Recommend /plan or /revise on task 517, not a further /implement --hard dispatch against the current probe."
+      "why_deferred": "Confirmed (divergence audit, oldlabel-joint-dispatch-handoff-20260718.md) to require route (a): a step-indexed/well-founded Lindenbaum construction (transfinite, since Atom : Type u is not assumed countable). Plan v5 Phases 1-6 build this construction (FLO invariant); Phase 1 (this dispatch) lands the carrier + FLO + the sorried flo_oldlabel_transport signature that Phase 5 proves and Phase 6 wires in to close this sorry.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport (Phase 5) into deriv_reflect."
     },
     {
       "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-      "line": 1030,
-      "statement": "theorem dwitness_mem_of_maximal ... : Label.dwitness y B \u2208 H.G.X (diamond-witness maximality, 'old label' cofinite-range sub-case)",
+      "line": 1031,
+      "statement": "theorem dwitness_mem_of_maximal ... : Label.dwitness y B ∈ H.G.X (diamond-witness maximality, 'old label' cofinite-range sub-case)",
       "strategic": true,
-      "assumption": "Assumes the single witnessing NIK-derivation at v = dwitness y B can be transported to a diaE-style cofinite premise (\u2200y'\u2209L, ...) covering every y' outside a FINITE exclusion set L, including y' already present in H.G.X ('old' labels).",
-      "why_deferred": "SAME root cause as deriv_reflect (confirmed, not just asserted, by this joint dispatch). Additionally confirmed by direct inspection of NIK.diaE's constructor: a naive swap swapFn v y' for old y' is not merely unproven but ACTIVELY INVALID whenever H.G has any edge incident to y' other than possibly (y,y') -- such an edge swaps to an edge touching v, which the target graph H.G.addEdge y y' does not know about. Needs the same route-(a) transfinite construction as deriv_reflect.",
-      "follow_up_task": "Same as deriv_reflect: NEW dedicated planning effort ('Phase 4.5'), joint with deriv_reflect's fix (same underlying construction closes both)."
+      "assumption": "Assumes the single witnessing NIK-derivation at v = dwitness y B can be transported to a diaE-style cofinite premise (∀y'∉L, ...) covering every y' outside a FINITE exclusion set L, including y' already present in H.G.X ('old' labels).",
+      "why_deferred": "SAME root cause as deriv_reflect. Needs the same route-(a) transfinite construction; plan v5 Phase 6 wires flo_oldlabel_transport (Phase 5) into this sorry jointly with deriv_reflect.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 6: wire flo_oldlabel_transport (Phase 5) into dwitness_mem_of_maximal's diamond old-label sub-case."
+    },
+    {
+      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "line": 1419,
+      "statement": "theorem flo_succ (𝒞 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒞 σ) : FLO 𝒞 (σ + 1)",
+      "strategic": true,
+      "assumption": "Assumes stepExt preserves FLO-coherence across one successor step, extending rankOf by any newly-adjoined label(s) at that step.",
+      "why_deferred": "Phase 1 is explicitly scoped to DEFINITIONS with sorried theorem signatures, not proofs (plan v5 Phase 1 'Goal'/'Done when'). Successor-preservation is Phase 2's dedicated proof obligation.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 2: prove flo_succ for addFormula/addDiaWitness/addRedundantEdge."
+    },
+    {
+      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "line": 1427,
+      "statement": "theorem flo_limit (𝒞 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hlim : Order.IsSuccLimit σ) (hflo : ∀ τ < σ, FLO 𝒞 τ) : FLO 𝒞 σ",
+      "strategic": true,
+      "assumption": "Assumes the raw chain-union at a limit stage (FloSeq.limit_eq) preserves FLO-coherence, with rankOf extended coherently (each label keeps its earlier birth stage).",
+      "why_deferred": "Phase 1 scope (definitions only). Limit-preservation is Phase 3's dedicated proof obligation, parallel to Phase 2 in the plan's wave structure.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 3: prove flo_limit via ChainCtx.unionContext-style reasoning."
+    },
+    {
+      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "line": 1438,
+      "statement": "theorem primeC'_exists_maximal (x₀ : Label Atom) (A₀ : Proposition Atom) (h0 : G₀ ∈ primeC G₀ x₀ A₀) (𝒞 : FloSeq 𝒯 Atom G₀) (hfair : ∀ t : FloTask 𝒯 Atom, ∃ σ : Stage, 𝒞.task σ = t) : ∃ σ : Stage, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒞.H σ) ∧ FLO 𝒞 σ",
+      "strategic": true,
+      "assumption": "Assumes a sufficiently large stage of a fair (schedule-complete) staged construction yields a maximal, FLO-carrying context, replacing zorn_le0's primeC_exists_maximal.",
+      "why_deferred": "Phase 1 scope (definitions only). Assembling the maximal FLO context from flo_succ (Phase 2) and flo_limit (Phase 3) is Phase 4's dedicated proof obligation.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 4: instantiate the recursion using flo_succ/flo_limit; discharge fairness/well-foundedness."
+    },
+    {
+      "file": "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
+      "line": 1457,
+      "statement": "theorem flo_oldlabel_transport {𝒞 : FloSeq 𝒯 Atom G₀} {σ : Stage} (hflo : FLO 𝒞 σ) ... : ∀ y' ∈ (𝒞.H σ).G.X, x ≠ y' → (∀ ψ ∈ Γ, ψ.lbl ≠ y') → NIK 𝒯 ((𝒞.H σ).G.addEdge x y') Γ (y' ∶ A)",
+      "strategic": true,
+      "assumption": "Assumes FLO-2's rank-indexed edge locality supports a well-founded (rank-indexed) induction transporting a NIK-derivation witnessed at one fresh label to ANY other label, including old ones already in the domain.",
+      "why_deferred": "The mathematical crux (plan v5 Risk 'HIGH'). Phase 1 scope is definitions/signatures only; this is Phase 5's dedicated proof obligation, the load-bearing lemma Phase 6 uses to close both deriv_reflect and dwitness_mem_of_maximal.",
+      "follow_up_task": "Plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) Phase 5 (may split 5.1/5.2): prove flo_oldlabel_transport by well-founded induction on rankOf, using FLO-2."
     }
   ],
   "blockers": [],
-  "continuation_path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/oldlabel-joint-dispatch-handoff-20260718.md",
+  "continuation_path": null,
+  "next_action_hint": "Phase 1 of plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) is COMPLETED and committed (task 517 phase 1). Next dispatch: /implement 517 --hard --lit targeting Phase 2 (flo_succ, successor-stage FLO preservation) and/or Phase 3 (flo_limit, limit-stage FLO preservation) -- these are parallel (Wave 2 in the plan's dependency table) and may be dispatched independently or in the same session. Do NOT retry any of the five ruled-out shortcuts (Postmortem Constraints). Preserve: Phase 1's Stage/FloTask/stepExt/FloSeq/rankOf/FLO definitions verbatim (do not redefine); TPrime clauses 0-3; NIK.subst; Phase 3 (of the earlier v4 numbering) NIK.swap_relabel/freshWitness_transport/diaWitness_transport.",
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 4,
-    "next_action_hint": "primeLemma is NOT fully sorry-free after this dispatch -- both old-label sorries remain, confirmed (with a sharper, independently re-derived diagnosis) to need the SAME fix: a step-indexed/well-founded Lindenbaum construction replacing Mathlib's zorn_le0 in primeC_exists_maximal (route (a)), which is a dedicated multi-phase undertaking ('Phase 4.5'), not a lemma-sized gap closeable by another quick dispatch. Three additional shortcuts were tried and formally ruled out this dispatch (finite-subgraph Deriv, direct IH reuse at old labels, and a bounded-old-label special case) -- see sorry_inventory and the handoff markdown for the full argument. RECOMMENDATION: do not re-dispatch /implement --hard against the current probes/ scaffold for this specific obstacle; instead open a new planning effort (/plan or /revise on task 517) to properly scope the transfinite construction as its own set of phases. Everything else remains as before: TPrime clauses 0/1/2/3 (clModel, deductiveClosure, consistency, disjunction) are sorry-free; only clause 4 (diamond, via dwitness_mem_of_maximal) and the inherited Phase 3 deriv_reflect sorry remain.",
-    "obstacle_deeper_than_dispatch": true
+    "next_phase": 2,
+    "next_action_hint": "Phase 2 (plan v5): prove flo_succ -- each of stepExt's three operative cases (addFormula, addDiaWitness, addRedundantEdge) preserves FLO, extending rankOf by the new label(s) (if any) at the current successor stage. Phase 3 (parallel, Wave 2): prove flo_limit via the raw chain-union in FloSeq.limit_eq, connecting back to ChainCtx.unionContext once monotonicity is established. Both consume Phase 1's FLO structure/rankOf definitions verbatim.",
+    "obstacle_deeper_than_dispatch": false
   },
-  "summary": "Joint dispatch (task 517) targeting the two remaining 'old label' cofinite-range sorries (deriv_reflect, dwitness_mem_of_maximal). Did NOT close either sorry -- confirmed, via fresh first-principles re-derivation (including reading Simpson's raw proof text at chunk_0102.md/chunk_0103.md in full) and three newly-tested shortcuts (all formally ruled out), that both share the same root cause and both require route (a): a step-indexed/well-founded Zorn reconstruction, which is a dedicated multi-phase effort beyond a single dispatch's scope, not a missed lemma. Landed the sharpened diagnosis as real file content: a new module-level analysis section in the probe (before ChainCtx.deriv_reflect) plus an expanded sorry comment on dwitness_mem_of_maximal, both explicitly ruling out the three additional shortcuts with concrete arguments (not just re-asserting difficulty). Updated the plan (11_tprime-repair-cs5-completeness.md) with a new paragraph recording this finding and recommending a dedicated 'Phase 4.5' planning effort rather than further quick dispatches. Build verified green (lake env lean on the probe: same two pre-existing sorry warnings, no new errors, no regressions). Zero-debt invariant holds: zero Cslib/ mainline files touched, guardrail modules unaffected.",
+  "summary": "Phase 1 of plan v5 (plans/12_wellfounded-zorn-oldlabel-reconstruction.md) implemented as a skeleton: lands the well-founded maximalisation carrier (Stage := Ordinal, FloTask, stepExt) and the non-vacuous FLO invariant (FLO-0/FLO-1/FLO-2) in probes/chain-union-reflection-probe.lean, per the mechanism decision recorded in the probe (route (i): explicit Ordinal-indexed recursion, rejecting route (ii) zorn_le0-over-FLO-enriched-carrier). Two lemmas (stepExt_le, rankOf_base) are proved sorry-free -- satisfies the H2 formal-proof-line bar. The four downstream obligations (flo_succ, flo_limit, primeC'_exists_maximal, flo_oldlabel_transport) are landed as documented, tracked, build-green strategic sorries meeting the five-condition test -- Phase 1's explicit 'DEFINITIONS not proofs' scope. lake env lean on the probe is clean: zero errors, exactly 6 sorry warnings (2 pre-existing + 4 new, all in sorry_inventory). primeLemma's axiom footprint is unchanged (propext, sorryAx, Classical.choice, Quot.sound) -- no regression. Zero-debt invariant holds: zero Cslib/ mainline files touched; guardrail modules unaffected (untouched). Plan v5 Phase 1 heading updated to [COMPLETED] with all five checklist items checked off. Committed as 'task 517 phase 1: define well-founded maximalisation carrier + FLO invariant'.",
   "modified_files": [
     "specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/11_tprime-repair-cs5-completeness.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/oldlabel-joint-dispatch-handoff-20260718.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
-    "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json"
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
   "verification": {
     "build_passed": true,
     "probe_module_build_passed": true,
-    "sorry_count_in_probe": 2,
+    "sorry_count_in_probe": 6,
     "sorry_count_in_scope_mainline_files": 0,
     "new_axiom_count": 0,
     "axioms_in_probe": [
       "propext",
       "Classical.choice",
       "Quot.sound",
-      "sorryAx (2 documented strategic sorries, unchanged count)"
+      "sorryAx (6 documented sorries: 2 pre-existing strategic + 4 new Phase 1 skeleton signatures)"
     ],
     "vacuous_count": 0,
     "mainline_cslib_files_touched": false,
     "guardrail_modules_unaffected": true,
-    "primeLemma_fully_sorry_free": false
+    "primeLemma_fully_sorry_free": false,
+    "stepExt_le_sorry_free": true,
+    "rankOf_base_sorry_free": true
   }
 }

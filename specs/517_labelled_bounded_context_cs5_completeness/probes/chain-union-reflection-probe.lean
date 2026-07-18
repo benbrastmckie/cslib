@@ -2,6 +2,7 @@ import Cslib.Init
 import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 import Mathlib.Order.SetNotation
 import Mathlib.Order.Zorn
+import Mathlib.SetTheory.Ordinal.Arithmetic
 
 /-! # Task 517 Phase 3 — the chain-union / cofinite-encoding obstacle
 
@@ -1194,5 +1195,265 @@ theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Propos
       disjunction := disjunction_of_maximal hmax
       diamond := diamond_of_maximal hmax },
     hG₀H, hnd⟩
+
+/-! ## Task 517 Plan v5 Phase 1 — the well-founded maximalisation carrier + the FLO invariant
+
+**Objective** (plan `12_wellfounded-zorn-oldlabel-reconstruction.md`, Phase 1): land, in `probes/`,
+the concrete Lean definitions of the stepped/well-founded construction and the FLO
+("fresh-labels-only extension") invariant that Phases 2-6 use to replace `zorn_le₀` in
+`primeC_exists_maximal` and discharge the shared "old label" root cause of `deriv_reflect`
+(~line 295 above) and `dwitness_mem_of_maximal` (~line 942 above). This section produces
+DEFINITIONS that typecheck plus two immediately-provable lemmas (`stepExt_le`, `rankOf_base`,
+both sorry-free), and states the four downstream obligations (`flo_succ`, `flo_limit`,
+`primeC'_exists_maximal`, `flo_oldlabel_transport`) as sorried theorem signatures per the plan's
+"Done when" criterion -- proofs are Phases 2-6's job, not this one's.
+
+## `--lit` grounding (plan Phase 1 Task 1)
+
+Read `chunk_0102.md` (the Prime Lemma proof, confirming Simpson's own Zorn-over-chains argument
+gives no step-indexed structure to reuse directly -- `"It is easily seen that (⋃Gᵢ,⋃Γᵢ) is also
+in C"` is exactly the elided step `ChainCtx.deriv_reflect` mechanizes, and offers no hint about
+*which* labels a chain member may already contain) and `chunk_0103.md` (confirming, verbatim, the
+denumerable-vs-general remark: *"as the set of formulae and the set `W(V)` are both denumerable,
+the prime lemma can actually be proved without using any form of the axiom of choice. However, in
+a choice-free proof, `(H,Δ)` would have to be obtained by a laborious iterative construction."*).
+This is the textual basis for the Postmortem Constraints' binding rule that the construction here
+must be **transfinite, not `ω`-indexed**: Simpson's own remark is conditioned on `W(V)`
+denumerability, which holds for his fixed countable `PrefixVar := ℕ` but does **not** transfer to
+this file's `Atom : Type u` (an arbitrary type), so the recursion cannot be bounded at `ω`.
+
+## Mechanism decision (Risk "the crux", SETTLED for Phases 2-6)
+
+**Route (i): explicit well-founded/`Ordinal`-indexed recursion**, producing a genuine staged
+sequence `H : Stage → Context 𝒯 Atom` (`FloSeq` below). **Rejected**: route (ii), `zorn_le₀` over
+an FLO-enriched carrier. Reasons: (1) the plan's own Phase 1 task list asks for a genuine staged
+sequence with successor/limit structure -- "the task enumeration..., the single-step extension
+function, and the stage context `H_σ`" -- which route (i) supplies directly and route (ii) does
+not (a Zorn existence result exposes no extension sequence, exactly the reason `zorn_le₀` over the
+*plain* carrier was ruled out for `primeC_exists_maximal` itself); (2) route (ii) would still need
+an equivalent birth-rank trace bundled into the FLO-enriched carrier's `≤`-chain-closure step to
+make chain unions FLO-coherent, which duplicates this file's already-landed `ChainCtx` machinery
+(above) for no simplification. Do not reopen this choice without a concrete counterexample
+(Postmortem Constraints).
+
+## Contents
+
+- `Stage`: the construction's stage-index type (`Ordinal.{u}`, transfinite per the grounding
+  above).
+- `FloTask`: one single-step extension task, reusing `Context.addFormula`/`addDiaWitness`/
+  `addRedundantEdge` (Phase 4, above) verbatim.
+- `stepExt` / `stepExt_le`: the single-step extension function (total, via classical case-splits
+  on each task's side conditions) and the proof that it never shrinks -- **sorry-free**.
+- `FloSeq`: a staged FLO construction -- an ordinal-indexed sequence of contexts extending `G₀`,
+  built by `stepExt` at successor stages and by raw chain-union at limit stages.
+- `rankOf` / `rankOf_base`: the derived birth-rank function (least stage of membership) and the
+  proof that base labels have rank `0` -- **sorry-free**.
+- `FLO`: the fresh-labels-only extension invariant, bundling FLO-0/FLO-1/FLO-2 exactly as stated
+  in the plan Overview, relative to a `FloSeq` and a stage. Confirmed non-vacuous (see the
+  docstring on `FLO` below): it genuinely constrains `rankOf`, the birth-stage of every non-base
+  label, and every edge's introduction stage -- it is not `:= True`/`Unit`.
+- `flo_succ` / `flo_limit` / `primeC'_exists_maximal` / `flo_oldlabel_transport`: the four
+  downstream obligations (Phases 2, 3, 4, 5 respectively), stated as sorried signatures.
+
+## Provenance
+
+Literature: `chunk_0102.md`, `chunk_0103.md` (Lemma 5.3.1, the Prime Lemma proof and the
+denumerable-vs-general remark, §5.3). PDF offset +9.
+-/
+
+/-- **The stage-index type**: transfinite ordinals in the universe of `Atom`, not `ω` -- see the
+`--lit` grounding above and the Postmortem Constraints (`Atom : Type u` is not assumed countable,
+so Simpson's own denumerable-hence-choice-free remark, `chunk_0103.md`, does not bound the
+recursion at `ω`). -/
+abbrev Stage : Type (u + 1) := Ordinal.{u}
+
+/-- **One single-step extension task**: which of the three landed `Context` extension operations
+(`Context.addFormula`/`Context.addDiaWitness`/`Context.addRedundantEdge`, Phase 4 above) to
+attempt at a given stage, or to skip (no obligation pending, or the precondition fails and
+`stepExt` falls back to the identity). Encodes Simpson's Lindenbaum-style enumeration of
+obligations: `formula` covers deductive-closure/disjunction test-additions (and clause 0's
+"redundant edge" argument's own formula-level analogue), `diaWitness` covers the diamond property
+(FLO-1(b)), and `redundantEdge` covers clause 0's maximality argument (`raw_edge_of_tclosure`,
+above) directly. -/
+inductive FloTask (𝒯 : Set GeomAxiom) (Atom : Type u) : Type u where
+  /-- Test-add a formula `φ` at an existing label. -/
+  | formula (φ : LabelledFormula Atom) : FloTask 𝒯 Atom
+  /-- Adjoin the diamond witness `dwitness y B` for an existing label `y` (FLO-1(b)). -/
+  | diaWitness (y : Label Atom) (B : Proposition Atom) : FloTask 𝒯 Atom
+  /-- Adjoin a redundant edge `(a,b)` between two already-present labels; introduces no new
+  label. -/
+  | redundantEdge (a b : Label Atom) : FloTask 𝒯 Atom
+  /-- No obligation pending at this stage (padding: the genuine obligations may be sparser than
+  the enumeration index `Stage`). -/
+  | skip : FloTask 𝒯 Atom
+
+open Classical in
+/-- **The single-step extension function**, made total via classical case-splits on each task's
+side conditions -- defaulting to the identity extension (itself `≤`-trivial, `Context.le_refl`)
+when a precondition fails, e.g. the formula's label is not (yet) in the domain, or the diamond
+witness is already present. Reuses the three landed operations verbatim -- exactly the "reusing
+the landed `Context.addFormula`/`Context.addDiaWitness`/`Context.addRedundantEdge` operations"
+the plan's Phase 1 task list calls for. -/
+noncomputable def stepExt (H : Context 𝒯 Atom) : FloTask 𝒯 Atom → Context 𝒯 Atom
+  | .formula φ => if hφ : φ.lbl ∈ H.G.X then H.addFormula φ hφ else H
+  | .diaWitness y B =>
+      if hy : y ∈ H.G.X then
+        if hfresh : Label.dwitness y B ∉ H.G.X then H.addDiaWitness y B hy hfresh else H
+      else H
+  | .redundantEdge a b =>
+      if ha : a ∈ H.G.X then
+        if hb : b ∈ H.G.X then H.addRedundantEdge a b ha hb else H
+      else H
+  | .skip => H
+
+/-- **`stepExt` never shrinks**: every single step is a genuine `Context.le` extension (the
+operative cases reuse the three landed `_le` lemmas; the fallback/skip cases are `Context.le_refl`
+outright). Sorry-free: this is the H2 formal-proof-line bar for this dispatch. -/
+theorem stepExt_le (H : Context 𝒯 Atom) (t : FloTask 𝒯 Atom) : H ≤ stepExt H t := by
+  cases t with
+  | formula φ =>
+      simp only [stepExt]
+      split
+      · exact H.addFormula_le _ _
+      · exact Context.le_refl H
+  | diaWitness y B =>
+      simp only [stepExt]
+      split
+      · split
+        · exact H.addDiaWitness_le _ _ _ _
+        · exact Context.le_refl H
+      · exact Context.le_refl H
+  | redundantEdge a b =>
+      simp only [stepExt]
+      split
+      · split
+        · exact H.addRedundantEdge_le _ _ _ _
+        · exact Context.le_refl H
+      · exact Context.le_refl H
+  | skip => simp only [stepExt]; exact Context.le_refl H
+
+variable (G₀ : Context 𝒯 Atom)
+
+/-- **A staged FLO construction**: an ordinal-indexed sequence of contexts extending `G₀`, built
+by `stepExt` (above) at successor stages and by raw chain-union at limit stages, together with a
+fixed task-enumeration schedule. This is the concrete object Phase 4
+(`primeC'_exists_maximal`) instantiates and Phases 2-3 (`flo_succ`/`flo_limit`) show is
+FLO-coherent at every stage. The limit clause is stated directly via `Set` union (not by invoking
+`ChainCtx.unionContext` at *definition* time, which would need `H` already proved `Monotone` on
+`{τ // τ < σ}` -- a proof obligation, not a definitional one); Phase 3 shows this coincides with
+`ChainCtx.unionContext` once `flo_succ`-style monotonicity is established. -/
+structure FloSeq (𝒯 : Set GeomAxiom) (Atom : Type u) (G₀ : Context 𝒯 Atom) : Type (u + 1) where
+  /-- The staged sequence of contexts, `H_σ`. -/
+  H : Stage → Context 𝒯 Atom
+  /-- The task performed at each successor step. -/
+  task : Stage → FloTask 𝒯 Atom
+  /-- Base stage: `H_0 = G₀`. -/
+  base_eq : H 0 = G₀
+  /-- Successor stages extend by one `stepExt` step. -/
+  succ_eq : ∀ σ : Stage, H (σ + 1) = stepExt (H σ) (task σ)
+  /-- Limit stages take the raw union of every earlier stage (Simpson's chain-union step,
+  `chunk_0102.md`, specialised to the well-order below `σ`). -/
+  limit_eq : ∀ σ : Stage, Order.IsSuccLimit σ →
+    (H σ).G.X = ⋃ τ : {τ // τ < σ}, (H τ.1).G.X ∧
+    (H σ).G.R = (fun a b => ∃ τ : {τ // τ < σ}, (H τ.1).G.R a b) ∧
+    (H σ).Γ = ⋃ τ : {τ // τ < σ}, (H τ.1).Γ
+
+variable {G₀}
+
+/-- **The derived birth-rank function**: the least stage at which a label enters the staged
+construction's domain. Junk-valued (defaults to `0`, `Ordinal`'s bottom) on labels that never
+appear -- harmless, since `FLO`'s clauses below only ever constrain `rankOf` on labels actually
+present at the stage in question. -/
+noncomputable def rankOf (𝒮 : FloSeq 𝒯 Atom G₀) (x : Label Atom) : Stage :=
+  sInf {σ : Stage | x ∈ (𝒮.H σ).G.X}
+
+/-- **(FLO-0), sorry-free**: every base label has rank `0` -- immediate from `base_eq` and `0`
+being `Stage`'s bottom element. This is the H2 second sorry-free landmark: `FLO`'s base clause is
+not merely stated but already discharged for any `FloSeq`, independent of Phases 2-6. -/
+theorem rankOf_base (𝒮 : FloSeq 𝒯 Atom G₀) {x : Label Atom} (hx : x ∈ G₀.G.X) :
+    rankOf 𝒮 x = 0 := by
+  have hmem : (0 : Stage) ∈ {σ : Stage | x ∈ (𝒮.H σ).G.X} := by
+    show x ∈ (𝒮.H 0).G.X
+    rw [𝒮.base_eq]
+    exact hx
+  exact le_antisymm (csInf_le ⟨0, fun _ _ => bot_le⟩ hmem) bot_le
+
+/-- **The FLO invariant** (plan Overview, "The FLO invariant" section): fixes the base context
+`G₀` and states, relative to a staged construction `𝒮` and a stage `σ`, that `rankOf 𝒮` is a
+faithful extension history for `𝒮.H σ`:
+
+- **(FLO-0) base**: every base label has rank `0` (already proved in general, `rankOf_base`, so
+  restated here for bundling convenience rather than left as fresh proof burden).
+- **(FLO-1) fresh at birth**: every label in `(𝒮.H σ).G.X` beyond `G₀.G.X` has a rank that is a
+  *successor* stage `τ + 1`, was absent at the immediately preceding stage `τ`, and is either (a)
+  not of `dwitness` form (a "prime"/formula-add step introducing a genuinely new label) or (b) is
+  `Label.dwitness w B` for some `w` already present at stage `τ`. Case (a)'s precise source pool
+  (the plan Overview's reserve `V'ᶜ`) is pinned down by Phase 2 as part of proving `stepExt`
+  preserves `primeC`'s own `V'`-confinement side condition; this file states only the birth-stage
+  freshness shape, per Phase 1's "DEFINITIONS, not proofs" scope.
+- **(FLO-2) edge locality**: every edge `(x,y) ∈ (𝒮.H σ).G.R` first appears at stage
+  `max (rankOf 𝒮 x) (rankOf 𝒮 y)`, and not before.
+
+**Non-vacuity** (Phase 1's "Done when" gate): `FLO` is a genuine `structure` with three
+independent constraints on `rankOf`/`𝒮.H`, never `:= True`/`Unit`/`trivial` -- FLO-0 forces
+`rankOf` to vanish exactly on `G₀`'s domain, FLO-1 forces every other label's rank to be a
+successor with a specific shape, and FLO-2 pins every edge's introduction stage exactly. A
+`FloSeq` satisfying `FLO` at every stage is a strictly stronger object than an arbitrary
+`Context.le`-monotone sequence. -/
+structure FLO (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) : Prop where
+  /-- (FLO-0), restated for bundling convenience (see `rankOf_base`, already sorry-free). -/
+  flo0 : ∀ x ∈ G₀.G.X, rankOf 𝒮 x = 0
+  /-- (FLO-1) fresh at birth. -/
+  flo1 : ∀ x ∈ (𝒮.H σ).G.X, x ∉ G₀.G.X →
+    ∃ τ : Stage, rankOf 𝒮 x = τ + 1 ∧ x ∉ (𝒮.H τ).G.X ∧
+      ((∀ w B, x ≠ Label.dwitness w B) ∨ ∃ w B, x = Label.dwitness w B ∧ w ∈ (𝒮.H τ).G.X)
+  /-- (FLO-2) edge locality. -/
+  flo2 : ∀ x y, (𝒮.H σ).G.R x y →
+    (max (rankOf 𝒮 x) (rankOf 𝒮 y) = sInf {τ : Stage | (𝒮.H τ).G.R x y})
+
+/-- **Phase 2's target**: `stepExt` preserves `FLO`-coherence across a successor step, extending
+`rankOf` by the newly-adjoined label(s) (if any) at the just-taken step. Not attempted here per
+Phase 1's scope ("DEFINITIONS ... not proofs"); this signature is the sorried scaffolding Phase 2
+discharges. -/
+theorem flo_succ (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hflo : FLO 𝒮 σ) : FLO 𝒮 (σ + 1) := by
+  sorry
+
+/-- **Phase 3's target**: `FLO`-coherence is preserved at limit stages -- the raw chain-union
+(`FloSeq.limit_eq`) of an `FLO`-coherent stretch of the construction is again `FLO`-coherent, with
+`rankOf` extended coherently (every label keeps the birth stage it already had below `σ`). Not
+attempted here; sorried scaffolding for Phase 3. -/
+theorem flo_limit (𝒮 : FloSeq 𝒯 Atom G₀) (σ : Stage) (hlim : Order.IsSuccLimit σ)
+    (hflo : ∀ τ < σ, FLO 𝒮 τ) : FLO 𝒮 σ := by
+  sorry
+
+/-- **Phase 4's target**: running the staged construction to a sufficiently large stage yields a
+maximal, `FLO`-carrying context, **replacing** `primeC_exists_maximal`'s non-constructive
+`zorn_le₀` (above) with the explicit staged construction. `hfair` is the schedule-fairness
+hypothesis (every task is eventually attempted) Phase 4 needs to argue the resulting `H` is
+genuinely maximal, not merely FLO-coherent. Not attempted here; sorried scaffolding for Phase 4. -/
+theorem primeC'_exists_maximal (x₀ : Label Atom) (A₀ : Proposition Atom)
+    (h0 : G₀ ∈ primeC G₀ x₀ A₀) (𝒮 : FloSeq 𝒯 Atom G₀)
+    (hfair : ∀ t : FloTask 𝒯 Atom, ∃ σ : Stage, 𝒮.task σ = t) :
+    ∃ σ : Stage, Maximal (· ∈ primeC G₀ x₀ A₀) (𝒮.H σ) ∧ FLO 𝒮 σ := by
+  sorry
+
+/-- **Phase 5's target (the mathematical crux)**: given `FLO`-coherence at stage `σ`, a
+`NIK`-derivation witnessed at one label `y₀` fresh w.r.t. the ambient graph transports to ANY
+other label `y'` in `(𝒮.H σ).G.X` -- including "old" labels already present, not just fresh ones
+-- generalising `NIK.freshWitness_transport` (above) beyond the shared coinfinite reserve. This is
+exactly the fact `ChainCtx.deriv_reflect` (~line 395) and `dwitness_mem_of_maximal`'s diamond
+sub-case (~line 1030) could not close without it (see the module analysis preceding
+`ChainCtx.deriv_reflect`, ~line 295): FLO-2's `rankOf`-indexed edge locality is what makes a
+rank-indexed (well-founded) induction transport the witnessing derivation across old labels
+legitimate, where a bare `swapFn` transposition is not (Postmortem Constraints: "do not
+naive-swap `swapFn v y'` for an 'old' label"). Not attempted here; sorried scaffolding for
+Phase 5. -/
+theorem flo_oldlabel_transport {𝒮 : FloSeq 𝒯 Atom G₀} {σ : Stage} (hflo : FLO 𝒮 σ)
+    {x y₀ : Label Atom} {A : Proposition Atom} {Γ : List (LabelledFormula Atom)}
+    (h : NIK 𝒯 ((𝒮.H σ).G.addEdge x y₀) Γ (y₀ ∶ A)) (hy₀ : y₀ ∉ (𝒮.H σ).G.X) (hxy₀ : x ≠ y₀)
+    (hΓ : ∀ ψ ∈ Γ, ψ.lbl ≠ y₀) :
+    ∀ y' ∈ (𝒮.H σ).G.X, x ≠ y' → (∀ ψ ∈ Γ, ψ.lbl ≠ y') →
+      NIK 𝒯 ((𝒮.H σ).G.addEdge x y') Γ (y' ∶ A) := by
+  sorry
 
 end Cslib.Logic.Modal.Labelled

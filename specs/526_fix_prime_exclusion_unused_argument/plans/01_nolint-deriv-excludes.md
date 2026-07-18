@@ -1,7 +1,7 @@
 # Implementation Plan: Task #526
 
 - **Task**: 526 - Fix `unusedArguments` lint error on `DerivExcludes` in PrimeExclusion.lean
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 0.4 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/526_fix_prime_exclusion_unused_argument/.orchestrator-handoff.json (research handoff)

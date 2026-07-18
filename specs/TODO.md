@@ -11,7 +11,7 @@ next_project_number: 528
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,504,511,519,522,523,525,527 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,504,511,519,522,523,525 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,506,515 | 36,37,181,317,407,425,449,511,525 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
@@ -94,10 +94,6 @@ next_project_number: 528
 
 519 [NOT STARTED] — Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
 
-### Testing
-
-527 [NOT STARTED] — lake test fails on CslibTests/ModalFrameSeparation.lean: the `dec
-
 ### Uncategorized
 
 511 [PARTIAL] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
@@ -106,7 +102,7 @@ next_project_number: 528
 ## Tasks
 
 ### 527. Fix stuck decide in ModalFrameSeparation.lean regression test
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Testing
 - **Dependencies**: None

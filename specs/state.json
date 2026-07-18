@@ -1845,20 +1845,21 @@
     {
       "project_number": 527,
       "project_name": "fix_modal_frame_separation_decide",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Fix stuck decide in ModalFrameSeparation.lean regression test",
       "description": "lake test fails on CslibTests/ModalFrameSeparation.lean: the `decide`-based regression checks for the S5-vs-5 frame-class separation (`example : decide (s5Valid ...) = true := by decide` and `example : decide (fiveValid ...) = false := by decide`) get stuck / fail to reduce against `instDecidableS5Valid` / `instDecidableFiveValid`. This is a live regression (the file builds these countermodel checks via the tableau's Decidable instances rather than the semantic proofs). Diagnose why the `decide` kernel reduction no longer terminates/succeeds on the S5 and Five decidability instances: check whether a recent change to the modal tableau / validity Decidable instances (this area is under active work in the KB5 metalogic tasks) altered the reduction behaviour or made the instance non-computable. Fix so `lake test` passes on this file again — either by repairing the Decidable instance's computability or, if `decide` is genuinely no longer viable, by replacing the stuck `decide` checks with the proven separation theorems (mirroring the existing `kb5Valid` case at line 42, which already uses `boxImp_not_kb5Valid` from FrameSoundness.lean instead of `decide`). Verify with `lake build` + `lake test` (ModalFrameSeparation green). Surfaced during vet of task 502 as a pre-existing, out-of-scope issue; verified unrelated to the Segment.lean import change via git-stash reproduction.",
       "parent_task": 502,
       "created": "2026-07-18T00:04:48Z",
-      "last_updated": "2026-07-18T00:04:48Z",
+      "last_updated": "2026-07-18T00:59:52Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "topic": "Testing",
       "file_scope": [
         "CslibTests/ModalFrameSeparation.lean",
         "Cslib/Logics/Modal/**"
-      ]
+      ],
+      "session_id": "sess_1784333163_06a765_527"
     }
   ],
   "repository_health": {

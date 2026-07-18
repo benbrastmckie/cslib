@@ -1867,13 +1867,13 @@
     {
       "project_number": 523,
       "project_name": "schema_union_axiom_combinator_for_proofsystem_instances",
-      "status": "blocked",
+      "status": "planned",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "low",
       "description": "Schema-union axiom combinator to replace the hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean. RECONCILED COUNT: there are 14 such inductives ({K,T,B,D,S4,K4,K5,K45,D4,D5,D45,DB,TB,KB5}Axiom), not 15 - S5.lean already reuses Modal.ModalAxiom directly and is the exact pattern the combinator should generalize to. Build a SchemaUnion/axiom-combinator so each system is expressed as a union of shared axiom schemas rather than a bespoke re-listing inductive. Gated on a Zulip design decision (representation A: closed inductive of schema tags, vs B: Set/predicate union). DESIGN DECISION (resolved, user 2026-07-18): Representation = A (schema-tag union). Build ModalSchemaTag inductive + ModalSchemaTag.Holds + SchemaUnion (S : Finset ModalSchemaTag) := fun χ => ∃ t ∈ S, t.Holds χ; each system = one-line SchemaUnion over its tag set. Collapse the 24 XAxiom_implies_YAxiom subsumption lemmas to one generic lemma + Finset.subset facts; soundness = per-tag validity table + one unionSound combinator. Accept the elimination-form change downstream (cases|ctor → obtain ⟨t,ht,hφ⟩; fin_cases t) and the ~36 genuine hand-rewrites in InterSystem/IntToClassical.lean. Keep intuitionistic/minimal families (IK/MK/CK/IS5/MT ModalAxiom) OUT of scope. Stage additively, each stage CI-green/zero-debt; Zulip heads-up before the PR lands (large shared-subtree blast radius).",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-18T22:07:27Z",
+      "last_updated": "2026-07-18T23:51:05Z",
       "session_id": "sess_1784412310_87a91c_523",
       "artifacts": [
         {
@@ -1891,7 +1891,7 @@
         "Cslib/Logics/Modal/ProofSystem/Instances/",
         "Cslib/Logics/Modal/Metalogic/Systems/"
       ],
-      "blockers": "Plan is a design/staging document, not autonomously implementable. Per CONTRIBUTING.md:147 the task hits both 'new cross-cutting abstraction' and 'major refactoring', each independently mandating a Zulip design decision (Representation A vs B) before ANY implementation phase. Sequence AFTER tasks 520 and 521."
+      "blockers": null
     },
     {
       "project_number": 524,

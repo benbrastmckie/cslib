@@ -1,16 +1,13 @@
 {
   "status": "partial",
   "metadata": {
-    "tasks_completed": [
-      533,
-      529,
-      532,
-      531
-    ],
+    "tasks_completed": [],
     "tasks_failed": [
-      530
+      522,
+      523
     ],
-    "cycles_used": 2,
-    "multi_task_mode": true
+    "cycles_used": 1,
+    "multi_task_mode": true,
+    "halt_reason": "Both tasks gated on human Zulip design/alignment per CONTRIBUTING.md; autonomous dispatch explicitly forbidden by task plans/continuation. Halted without escalation."
   }
 }

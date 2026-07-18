@@ -1,17 +1,7 @@
 {
   "status": "planned",
   "task_number": 523,
-  "session_id": "sess_1784322687_fcf57a_523",
-  "phase": "plan",
-  "artifacts": [
-    "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md"
-  ],
-  "summary": "Plan created as a DESIGN + STAGING document, not an autonomously-implementable plan. Plan-level Status is [BLOCKED]. Phase 1 is a MANDATORY Zulip design decision gate (CONTRIBUTING.md:147 — task hits both 'cross-cutting abstraction' and 'major refactoring'); all implementation phases (2-7) are [BLOCKED] pending that decision AND the Rep A vs Rep B choice. Staged additive rollout (Rep A): Phase 3 Stage A (introduce ModalSchemaTag/SchemaUnion/unionSound/subsumption alongside inductives + 15 bridge equivalences), Phase 4 Stage B (migrate 15 soundness files to unionSound — net deletion), Phase 5 Stage C (collapse 24 subsumption lemmas to Finset.subset facts — net deletion), Phase 6 Stage D-1 (hand-migrate IntToClassical.lean ~36 cross-family sites), Phase 7 Stage D-2 (swap 15 instance registrations, delete inductives last). Every stage CI-green and zero-debt. Sequenced AFTER tasks 520 and 521 (Phase 2 verification gate). Rep B fallback (macro-generated inductives, near-zero blast, one PR) documented as contingency. Appendix A carries the ready-to-post Zulip message.",
-  "recommendation": "DO NOT dispatch /implement or /orchestrate. Post the Appendix A Zulip proposal, obtain a maintainer steer on (1) def SchemaUnion vs macro inductives, (2) S5 ModalAxiom unification, (3) landing order vs 520/521. After the decision lands and 520/521 have landed, run /plan --hard 523 to expand the chosen representation's stages into per-file sub-phases.",
-  "next_command": "(hold — human Zulip coordination required before /implement 523)",
-  "blockers": [
-    "Mandatory Zulip design decision (CONTRIBUTING.md:147) before ANY implementation — Phase 1 gate.",
-    "Open design decision: Representation A (def SchemaUnion) vs Representation B (macro-generated inductives), plus S5 ModalAxiom unification question.",
-    "Sequence AFTER in-flight tasks 520 (composite conservativity in Modularity.lean) and 521 (minimal-base dedup) to avoid rework on the shared InterSystem surface — Phase 2 verification gate."
-  ]
+  "summary": "Re-plan v2 for the schema-union axiom combinator: design decision RESOLVED (Representation A); prior Zulip design gate lifted. Expanded Stages A-D into 8 phases (~20 agent runs) of per-file/per-group sub-phases, each H8-sized. Phase 1 core scaffolding; Phase 2 unionSound + tag validity table; Phase 3 tag sets + 15 bridges (3.1-3.4); Phase 4 soundness migration (4.1-4.4); Phase 5 AxiomSubsumption -> Finset.subset (5.1-5.2); Phase 6 IntToClassical ~36 sites (6.1-6.3); Phase 7 15 instance swaps (7.1-7.4); Phase 8 delete inductives + finalize (strictly last). Additive zero-debt: every commit CI-green, no sorry, no new axiom. Zulip heads-up is a non-blocking pre-PR courtesy, not a gate.",
+  "artifacts": ["specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md"],
+  "phases_total": 8
 }

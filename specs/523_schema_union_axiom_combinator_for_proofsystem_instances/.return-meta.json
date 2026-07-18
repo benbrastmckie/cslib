@@ -4,19 +4,43 @@
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md",
-      "summary": "Design + staging plan (7 phases) for the schema-union axiom combinator; first gate is a mandatory Zulip design decision, all implementation phases BLOCKED pending it."
+      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
+      "summary": "Per-file rollout plan (v2, Rep A resolved): 8 phases / ~20 agent runs expanding Stages A-D into per-file/per-group sub-phases; H8-sized; postmortem constraints + preserved-assets accounting; Zulip heads-up is non-blocking."
     }
   ],
-  "next_steps": "Post the Appendix A Zulip proposal per CONTRIBUTING.md:147 and obtain a design decision (Rep A vs B, S5 disposition, sequencing after 520/521). Do NOT run /implement or /orchestrate until Phase 1 resolves.",
+  "next_steps": "Design decision RESOLVED (Rep A). Ready for /implement or /orchestrate. Execute Phase 1 (scaffolding) first; follow the wave map. Non-blocking Zulip heads-up before the user runs /pr.",
   "metadata": {
     "session_id": "sess_1784322687_fcf57a_523",
-    "agent_type": "planner-agent",
+    "agent_type": "planner-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 7,
-    "estimated_hours": "28-35 (Rep A) / 8-12 (Rep B fallback)",
-    "dependency_waves": [[1], [2], [3], [4, 5, 6], [7]]
+    "delegation_path": [
+      "orchestrator",
+      "plan",
+      "planner-hard-agent"
+    ],
+    "phase_count": 8,
+    "estimated_hours": "24-32",
+    "dependency_waves": [
+      [
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        4,
+        5,
+        6
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ]
+    ],
+    "postmortem_rules_count": 7
   },
   "memory_candidates": [
     {
@@ -24,11 +48,18 @@
       "category": "PATTERN",
       "source_artifact": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md",
       "confidence": 0.75,
-      "suggested_keywords": ["lean4", "modal-logic", "typeclass-insulation", "schema-union-combinator", "additive-refactor", "blast-radius"]
+      "suggested_keywords": [
+        "lean4",
+        "modal-logic",
+        "typeclass-insulation",
+        "schema-union-combinator",
+        "additive-refactor",
+        "blast-radius"
+      ]
     }
   ],
   "partial_progress": {
     "stage": "planning_complete",
-    "details": "Staged design+staging plan written; plan-level Status is [BLOCKED] behind the mandatory Zulip design gate (Phase 1). Not autonomously implementable."
+    "details": "v2 per-file plan written; plan-level Status [PLANNED]; no design gate."
   }
 }

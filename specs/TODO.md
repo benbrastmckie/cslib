@@ -1,5 +1,5 @@
 ---
-next_project_number: 535
+next_project_number: 536
 ---
 
 # TODO
@@ -11,10 +11,11 @@ next_project_number: 535
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,511,517,519,522,523,530,534 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506 | 36,37,181,317,407,425,449,511 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,506 | foundations, modal logic, code hygiene |
-| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,517,519,522,523,530,534,535 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,506 | 39,40,375,511 | foundations, modal logic, code hygiene |
+| 4 | 300,412 | 41,506 | modal logic, code hygiene |
+| 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -39,9 +40,10 @@ next_project_number: 535
 517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Uniform frame-condition to axiom correspondence library for modal
 523 [PLANNED] — Schema-union axiom combinator to replace the hand-written per-sys
-300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-  └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived (see above)
+535 [NOT STARTED] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
+  └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+    └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+      └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 
 ### Temporal Logic
 
@@ -88,12 +90,22 @@ next_project_number: 535
 
 ### Uncategorized
 
-511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-  └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
-530 [IMPLEMENTING] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+530 [BLOCKED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 
 ## Tasks
+
+### 535. Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
+- **Effort**: 10-16 hours
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: None
+- **Research**: [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
+
+**Description**: Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.
+
+---
 
 ### 534. Pure K5/5 Euclidean tableau completeness without the equivalence route
 - **Status**: [NOT STARTED]
@@ -138,7 +150,7 @@ next_project_number: 535
 ---
 
 ### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Dependencies**: None
 - **Research**: [530_consolidate_chronicle_construction_bimodal_temporal/reports/01_chronicle-dedup-research.md]
@@ -337,7 +349,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ### 511. S4 loop checking termination
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
-- **Dependencies**: None
+- **Dependencies**: Task 535
 - **Plan**: [511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md]
 - **Research**: [511_s4_loop_checking_termination/reports/01_s4-termination-guard-redesign.md]
 - **Summary**: [511_s4_loop_checking_termination/summaries/01_s4-termination-bound-decidability-summary.md]

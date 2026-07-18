@@ -1770,6 +1770,93 @@ private lemma modalApplyOne_nonModal_known_S4
     rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
       simp_all
 
+/-- **Composite non-mint known-worlds fact for `modalApplyOneS4Keyed`**: at any signed formula
+outside the two minting shapes (`F(□φ)@w`, `T(◇φ)@w`), `modalApplyOneS4Keyed` reduces to
+`modalApplyOneS4` (its own wildcard branch), which reduces to `modalApplyOneS4Rules` (no guard
+outside the minting shapes) -- either at the two T/4-relevant shapes
+(`modalApplyOneS4Rules_boxPos_diaNeg_known_S4`) or, combined with the disjointness of the
+minting/T4-relevant shape sets, at a genuinely non-modal shape
+(`modalApplyOne_nonModal_known_S4`). Every emitted formula's label stays inside
+`modalKnownWorlds b`: exactly the fact `keysTotal`'s preservation needs at its 12 non-minting
+`sf.sign`/`sf.formula` leaves. -/
+private lemma modalApplyOneS4Keyed_nonMint_known_S4
+    (φ₀ : Proposition Atom) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (match (modalApplyOneS4Keyed φ₀ keys sf b acc).fst with
+      | .linear fs => ∀ x ∈ fs, x.label ∈ modalKnownWorlds b
+      | .branching brs => ∀ x ∈ brs.flatten, x.label ∈ modalKnownWorlds b
+      | .persistent fs => ∀ x ∈ fs, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True) := by
+  obtain ⟨h1, h2⟩ := h
+  have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+    unfold modalApplyOneS4Keyed
+    rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+      simp_all
+  rw [heq1, modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc ⟨h1, h2⟩]
+  by_cases h2' : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+  · have hres := (modalApplyOneS4Rules_boxPos_diaNeg_known_S4 sf b acc hsfmem hknown h2').2
+    rcases hr : (modalApplyOneS4Rules sf b acc).fst with lf | brs | pf | -
+    · rw [hr] at hres; exact hres.elim
+    · rw [hr] at hres; exact hres.elim
+    · rw [hr] at hres; exact hres
+    · rw [hr] at hres; trivial
+  · have hnbd : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => h2' (Or.inl hc), fun hc => h2' (Or.inr hc)⟩
+    rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc hnbd,
+        modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc hnbd]
+    have hnb : ∀ φ, sf.formula ≠ .box φ := by
+      intro φ hfe
+      rcases hs : sf.sign with _ | _
+      · exact h2' (Or.inl ⟨hs, φ, hfe⟩)
+      · exact h1 ⟨hs, φ, hfe⟩
+    have hnd : ∀ φ, sf.formula ≠ .diamond φ := by
+      intro φ hfe
+      rcases hs : sf.sign with _ | _
+      · exact h2 ⟨hs, φ, hfe⟩
+      · exact h2' (Or.inr ⟨hs, φ, hfe⟩)
+    exact (modalApplyOne_nonModal_known_S4 sf b acc hsfmem hnb hnd).2
+
+/-- Every key threaded through `modalStepBranchS4Keyed` survives as a step: `keys' = keys` (the
+12 non-minting leaves) or `keys' = keys ++ [newEntry]` (the two minting leaves' unblocked case),
+so `keys ⊆ keys'` always. Needed for `keysTotal`'s preservation to lift OLD known worlds' keys
+forward. -/
+private lemma modalStepBranchS4Keyed_keys_subset
+    (φ₀ : Proposition Atom) (b e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    keys ⊆ keys' := by
+  unfold modalStepBranchS4Keyed at hstep
+  obtain ⟨sf, -, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  rw [hkeq]
+  intro p hp
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf]
+  all_goals first
+    | exact hp
+    | skip
+  case neg.neg.box =>
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · exact List.mem_append_left _ hp
+    · exact hp
+  case neg.pos.diamond =>
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · exact List.mem_append_left _ hp
+    · exact hp
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

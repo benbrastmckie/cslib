@@ -137,14 +137,14 @@ written, mark it `[BLOCKED]` with the reached `lean_goal` state and what is miss
 membership dichotomy, cloning the frozen `*Full` helpers with the single gate change.
 
 **Tasks**:
-- [ ] Clone `modalKb5BoxAllFull` (`FiveSimplification.lean:1535`) into `modalKb5BoxAllUniv`,
+- [x] Clone `modalKb5BoxAllFull` (`FiveSimplification.lean:1535`) into `modalKb5BoxAllUniv`,
       changing the 0-target arm gate from `w == 0 && (clusterNonempty)` to `(clusterNonempty)`
       alone. Leave the non-root cluster-dump arm and the mint arms (`T(◇φ)`/`F(□φ)`) UNTOUCHED.
-- [ ] Clone `modalKb5DiaNegAllFull` (:1552) into `modalKb5DiaNegAllUniv` dually.
-- [ ] Clone the `modalApplyOneKb5'Prop` dispatcher (:1755) into `modalApplyOneKb5''Prop` /
+- [x] Clone `modalKb5DiaNegAllFull` (:1552) into `modalKb5DiaNegAllUniv` dually.
+- [x] Clone the `modalApplyOneKb5'Prop` dispatcher (:1755) into `modalApplyOneKb5''Prop` /
       `modalApplyOneKb5''`, routing box-positive/diamond-negative shapes through the new `*Univ`
       helpers; keep all other shapes identical to the frozen dispatcher.
-- [ ] Define the entry point `modalTableauKb5''` (mirror `modalTableauKb5'`, :2133) and its
+- [x] Define the entry point `modalTableauKb5''` (mirror `modalTableauKb5'`, :2133) and its
       `modalTableauKb5''_eq` normalization lemma (mirror :2150) giving
       `modalTableauKb5'' φ = modalTableauGen modalApplyOneKb5'' φ`.
 - [x] State the fresh trigger-free membership dichotomy `modalKb5BoxAllUniv_mem` (and dual
@@ -186,26 +186,46 @@ membership dichotomy, cloning the frozen `*Full` helpers with the single gate ch
 
 ---
 
-### Phase 2: specCore instance + termination/world bound [NOT STARTED]
+### Phase 2: specCore instance + termination/world bound [COMPLETED]
 
 **Goal**: Land `modalApplyOneKb5''_specCore` (`RuleApplicationSpecCore`) and the termination/world
 bound for the new rule, mirroring `modalApplyOneKb5'_specCore` (`FiveSimplification.lean:2662`) and
 `Kb5'WorldInv` (:3539).
 
 **Tasks**:
-- [ ] Establish `Kb5''WorldInv` (or reuse `Kb5'WorldInv`/`FiveWorldInv` directly): confirm the new
+- [x] Establish `Kb5''WorldInv` (or reuse `Kb5'WorldInv`/`FiveWorldInv` directly): confirm the new
       rule mints no new worlds relative to the frozen rule (the gate change only adds a formula at
       the existing world `0`), so the world invariant coincides — likely `rfl` to `FiveWorldInv`
       exactly as `Kb5'WorldInv_eq` (:3549). Land the `modalMaxWorld_lt_worldBound` analogue
       (mirror :3556) if a fresh name is required.
-- [ ] Land `modalApplyOneKb5''_specCore : RuleApplicationSpecCore modalApplyOneKb5''` mirroring
+      *Confirmed rule-independent exactly as predicted: `Kb5''WorldInv := FiveWorldInv` is `rfl`
+      (`Kb5''WorldInv_eq`), and `modalMaxWorld_lt_worldBound_of_Kb5''WorldInv` is a free corollary,
+      since `modalApplyOneKb5''Prop_boxPos_diaNeg_shape` confirms the propagation shapes never
+      mint (same argument `Kb5'WorldInv_eq` already used).*
+- [x] Land `modalApplyOneKb5''_specCore : RuleApplicationSpecCore modalApplyOneKb5''` mirroring
       `modalApplyOneKb5'_specCore` (:2662), consuming the Phase 1 dichotomy. Output-shape bounds
       should be unchanged since the emitted set grows by at most the single `@0` formula already
       present in the root-trigger case task 524 handled.
-- [ ] Land any `_fresh_local`/freshness helper the completeness plumbing consumes (mirror
+      *(deviation: altered -- the F2 (`outputsSubsetUniverse`) discharge for the self-target arm
+      does NOT go through a `modalKnownWorlds b`-membership argument the way the frozen `Full`
+      rule's proof does (`modalKb5BoxAllFull_mem_known` + `hlknown : l ∈ modalKnownWorlds b`,
+      valid there only because that arm's trigger `w` is forced `= 0`). For the corrected `Univ`
+      rule the self-target arm fires for ANY trigger, so `x.label = 0` is no longer tied to the
+      trigger's known-ness. Resolved directly and MORE simply than the frozen proof: since
+      `WorldIndex := Nat`, `(0 : WorldIndex) ≤ modalWorldBound φ0` holds unconditionally via
+      `Nat.zero_le`, so `mem_modalUniverse_of_Five` discharges the self-target case with no
+      known-worlds reasoning at all -- confirming the `Full` rule's own docstring aside ("The
+      self-target case needs no separate world-bound argument", `FiveSimplification.lean`) that
+      the frozen proof itself did not exploit. This also means Phase 1's deferred `_mem_known`
+      lemma was never needed at all -- superseded by this direct bound.*
+- [x] Land any `_fresh_local`/freshness helper the completeness plumbing consumes (mirror
       `modalApplyOneKb5'_fresh_local`, referenced at `FrameSoundness.lean:~4762`) if it is
-      rule-specific.
-- [ ] `lean_verify` every new declaration.
+      rule-specific. Landed as `modalApplyOneKb5''_fresh_local` (F1 discharge).
+- [x] `lean_verify` every new declaration: `modalApplyOneKb5''_specCore`,
+      `modalApplyOneKb5''_outputsSubsetUniverse`, `modalMaxWorld_lt_worldBound_of_Kb5''WorldInv`,
+      and all F1/F3/F7/F8/F9/F10/F11'/F12' discharge lemmas confirmed clean: only
+      `propext`/`Classical.choice`/`Quot.sound` (identical axiom set to the frozen
+      `modalApplyOneKb5'_specCore`, i.e. no new axioms), zero `sorry`.
 
 **Timing**: 2 hours
 

@@ -223,22 +223,24 @@ with or after CI-green implementation).
 
 ---
 
-### Phase 4: Consumer refactor — multi-property systems [NOT STARTED]
+### Phase 4: Consumer refactor — multi-property systems [COMPLETED]
 
 **Goal**: Rewire the 9 multi-frame-property systems' modal cases to `exact` the Phase 1 lemmas,
 keeping signatures byte-stable. Runs in parallel with Phase 3 (disjoint file sets).
 
 **Tasks**:
-- [ ] `Systems/S4/Soundness.lean` — modalT→`h_refl`, modalFour→`h_trans`.
-- [ ] `Systems/S5/Soundness.lean` — modalT→`h_refl`, modalFour→`h_trans`, modalFive→`h_eucl`;
+- [x] `Systems/S4/Soundness.lean` — modalT→`h_refl`, modalFour→`h_trans`.
+- [x] `Systems/S5/Soundness.lean` — modalT→`h_refl`, modalFour→`h_trans`, modalFive→`h_eucl`;
       **preserve any inline symmetry derivation** (non-frame-axiom logic) untouched.
-- [ ] `Systems/K45/Soundness.lean` — modalFour→`h_trans`, modalFive→`h_eucl`.
-- [ ] `Systems/KB5/Soundness.lean` — modalB→`h_symm`, modalFive→`h_eucl`.
-- [ ] `Systems/D4/Soundness.lean` — modalD→`h_serial`, modalFour→`h_trans`.
-- [ ] `Systems/D5/Soundness.lean` — modalD→`h_serial`, modalFive→`h_eucl`.
-- [ ] `Systems/D45/Soundness.lean` — modalD→`h_serial`, modalFour→`h_trans`, modalFive→`h_eucl`.
-- [ ] `Systems/DB/Soundness.lean` — modalD→`h_serial`, modalB→`h_symm`.
-- [ ] `Systems/TB/Soundness.lean` — modalT→`h_refl`, modalB→`h_symm`.
+      *(confirmed: S5's modalB case, which derives symmetry from h_eucl+h_refl inline, was left
+      untouched — only modalT and modalFour were rewired to the FrameCorrespondence lemmas)*
+- [x] `Systems/K45/Soundness.lean` — modalFour→`h_trans`, modalFive→`h_eucl`.
+- [x] `Systems/KB5/Soundness.lean` — modalB→`h_symm`, modalFive→`h_eucl`.
+- [x] `Systems/D4/Soundness.lean` — modalD→`h_serial`, modalFour→`h_trans`.
+- [x] `Systems/D5/Soundness.lean` — modalD→`h_serial`, modalFive→`h_eucl`.
+- [x] `Systems/D45/Soundness.lean` — modalD→`h_serial`, modalFour→`h_trans`, modalFive→`h_eucl`.
+- [x] `Systems/DB/Soundness.lean` — modalD→`h_serial`, modalB→`h_symm`.
+- [x] `Systems/TB/Soundness.lean` — modalT→`h_refl`, modalB→`h_symm`.
 
 **Timing**: ~1.5 hours
 

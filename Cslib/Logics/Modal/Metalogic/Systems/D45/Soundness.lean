@@ -54,18 +54,9 @@ theorem d45_axiom_sound {World : Type*} {φ : Proposition Atom}
   | efq φ => exact Satisfies.efq_axiom m w φ
   | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
   | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalD φ =>
-    intro h_box h_box_neg
-    obtain ⟨w', hr⟩ := h_serial.serial w
-    exact h_box_neg w' hr (h_box w' hr)
-  | modalFour φ =>
-    intro h_box w₁ hr₁ w₂ hr₂
-    exact h_box w₂ (h_trans w w₁ w₂ hr₁ hr₂)
-  | modalFive φ =>
-    intro hdiam v hrv hbox_neg_v
-    apply hdiam
-    intro u hru hsat
-    exact hbox_neg_v u (h_eucl w v u hrv hru) hsat
+  | modalD φ => exact Satisfies.modalD_axiom m h_serial w φ
+  | modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ
+  | modalFive φ => exact Satisfies.modalFive_axiom m h_eucl w φ
   | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
   | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
   | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ

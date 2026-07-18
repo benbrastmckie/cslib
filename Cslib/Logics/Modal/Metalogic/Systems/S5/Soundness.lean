@@ -47,12 +47,8 @@ theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
   | efq φ => exact Satisfies.efq_axiom m w φ
   | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
   | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalT φ =>
-    intro h_box
-    exact h_box w (h_refl w)
-  | modalFour φ =>
-    intro h_box w₁ hr₁ w₂ hr₂
-    exact h_box w₂ (h_trans w w₁ w₂ hr₁ hr₂)
+  | modalT φ => exact Satisfies.modalT_axiom m h_refl w φ
+  | modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ
   | modalB φ =>
     intro hφ w' hr h_box_neg
     have h_symm : m.r w' w := h_eucl w w' w hr (h_refl w)

@@ -51,14 +51,8 @@ theorem d5_axiom_sound {World : Type*} {φ : Proposition Atom}
   | efq φ => exact Satisfies.efq_axiom m w φ
   | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
   | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalD φ =>
-    intro h_box h_box_neg
-    obtain ⟨w', hr⟩ := h_serial.serial w
-    exact h_box_neg w' hr (h_box w' hr)
-  | modalFive φ =>
-    intro h_diam w' hr h_box_neg_w'
-    exact h_diam (fun w'' hr' h_phi =>
-      h_box_neg_w' w'' (h_eucl w w' w'' hr hr') h_phi)
+  | modalD φ => exact Satisfies.modalD_axiom m h_serial w φ
+  | modalFive φ => exact Satisfies.modalFive_axiom m h_eucl w φ
   | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
   | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
   | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ

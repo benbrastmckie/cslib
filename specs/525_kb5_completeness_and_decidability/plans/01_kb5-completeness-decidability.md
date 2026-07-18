@@ -1,7 +1,7 @@
 # Implementation Plan: Task #525
 
 - **Task**: 525 - KB5 completeness and decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: 14 hours
 - **Dependencies**: Task 524 (COMPLETE — `modalApplyOneKb5'`, `modalTableauKb5'_sound`, `Kb5'WorldInv`, `modalApplyOneKb5'_specCore`, `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` all landed)
 - **Research Inputs**: specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md

@@ -1,73 +1,49 @@
 {
-  "status": "partial",
-  "skeleton": true,
-  "summary": "Phase 5 (S4LoopInv preservation, 'the crux'): closed 4 more of the 6 remaining fields this dispatch -- modalStepBranchS4_preserves_eNodup/outDegEq/accFresh/accKnown -- joining the four 'key' fields already closed across prior dispatches (keysDistinct/keyLowerBd/keysInUniverse/keysTotal). Landed the assembly theorem modalStepBranchS4_preserves_S4LoopInv with 8 of 10 fields fully closed, zero sorry, zero new axiom. The remaining 2 fields (bClosure, eClosure) are landed as documented strategic-sorry skeletons: complete, non-vacuous theorem statements carrying every hypothesis their eventual proof needs, not placeholders. Discovered and documented a design correction: the prior dispatch's 'generic bridge to modalStepBranchGen' plan does not work as stated -- modalApplyOneS4Keyed's guard-BLOCKED minting sub-case returns RuleResult.linear [] (genuinely empty), which breaks the generic _gen lemmas' hFreshLocal-style dichotomy (needs a NONEMPTY linear result headed by the edge's target); and the generic eClosure/bClosure facts are keyed to K's own modalUniverse/modalWorldBound, not modalUniverseS4/modalWorldBoundS4. Every field actually closed this dispatch used a direct case split on modalStepBranchS4Keyed's own definition instead (same style as the four key fields), never the generic bridge. Landed a new proof-internal auxiliary invariant keysWorldsKnown (every recorded key's world is a known branch world; deliberately NOT a new S4LoopInv struct field, threaded as an extra hypothesis/conclusion alongside the struct instead) that closes the gap the generic bridge could not. bClosure's remaining gap needs Phase 6's own pigeonhole world-bound argument as a genuine PREREQUISITE (not merely a later corollary): the minting case needs the strict bound to hold on the pre-step branch before concluding the freshly-minted label stays in range. eClosure needs a formula-subset composite for T-self/4-propagation outputs mirroring the existing known-worlds composite but for modalSubfmls membership (K's own public modalApplyOne_boxPos_outputs_subset/modalApplyOne_diamondNeg_outputs_subset ARE reusable here, unlike the generic driver lemmas). Scoped build green throughout (9 incremental green commits this dispatch). lake exe lint-style clean on the modified file. Full-project lake build fails entirely in Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/*.lean -- confirmed via git status to be uncommitted, in-progress edits from the concurrent task 517 session (flagged in this dispatch's own delegation context), not a regression from this task.",
-  "phases_completed": 4,
+  "status": "implemented",
+  "skeleton": false,
+  "summary": "Landed Phase 6's pigeonhole world-bound lemmas and used them to discharge both of Phase 5's remaining strategic sorries (bClosure, eClosure), fully closing modalStepBranchS4_preserves_S4LoopInv -- all 10 S4LoopInv fields now proven, zero sorry, zero new axiom. Corrected the prior dispatch's analysis: modalStepBranchS4Keyed's newExps component is e ++ [sf] (or e unchanged for .persistent) -- it only ever gains the selected formula sf (already in b, hence covered by hb directly), never the rule's output content (that goes to newBs, bClosure's concern, not eClosure's). eClosure closed immediately via the same case-split shape as the already-landed modalStepBranchS4_preserves_eNodup. bClosure needed the T-self/4-propagation formula-subset composite the prior dispatch had mis-attributed to eClosure (built as modalApplyOneS4Keyed_nonMint_universe_S4 and its supporting pieces, mirroring the existing known-worlds composite's case-split shape but concluding full modalUniverseS4 membership) for its 12 non-minting shapes, plus Phase 6's own pigeonhole world-bound (modalStepBranchS4_worldBound) as a genuine prerequisite for its 2 minting shapes (the freshly-minted witness's label needs the STRICT modalMaxWorld b < modalWorldBoundS4 phi0 bound to hold on the pre-step branch). Phase 6's pigeonhole deliverable required a new proof-internal auxiliary invariant worldsContiguousS4 (known worlds form the contiguous range {0,...,maxWorld}; NOT an S4LoopInv field, mirrors the keysWorldsKnown precedent, threaded as an extra hypothesis/conclusion) plus its own preservation lemma, since density of world labels does not otherwise follow from S4LoopInv's existing fields -- this was not anticipated in the plan's original Phase 6 task wording but is a necessary, mechanical extension of the same threading pattern already established. Also built S4-local mirrors of FmpMeasure.lean's modalUniverse constructor/extraction facts (mem_modalUniverseS4_of, modalUniverseS4_mem_label) and minting-content subset facts (modalApplyOne_boxNeg/diamondPos_outputs_subset_S4, boxProps/diaNegProps_outputs_subset_S4) needed by bClosure's 2 minting shapes. The assembly theorem modalStepBranchS4_preserves_S4LoopInv now threads worldsContiguousS4 alongside keysWorldsKnown (extra hypothesis in, extra conclusion out, third conjunct) so a Phase 7 continuation dispatch can re-supply both across repeated steps. Scoped build green throughout (5 incremental green commits this dispatch, one per logical unit: universe-membership groundwork, eClosure closure, pigeonhole lemmas, bClosure closure, stale-docstring reconciliation). checkInitImports and lint-style clean. Plan file's Phase 5 and Phase 6 headings marked [COMPLETED]; stale multi-page continuation narrative trimmed to closure summaries. Did NOT start Phase 7 per dispatch scope. Full-project lake build/lake test were not run (dispatch instructions explicitly scoped verification to Cslib.Logics.Modal.Tableau.LoopChecking; concurrent task 517/530/531 sessions have uncommitted edits to unrelated files that would show as unrelated full-project failures).",
+  "phases_completed": 6,
   "phases_total": 7,
-  "sorry_inventory": [
-    {
-      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "line": 3474,
-      "declaration": "Cslib.Logic.Modal.Tableau.modalStepBranchS4_preserves_eClosure",
-      "kind": "documented_strategic_sorry",
-      "reason": "Needs a formula-subset composite for the T-self (modalTBoxSelf/modalTDiaNegSelf) and 4-propagation (modalFourBoxProp/modalFourDiaNegProp) outputs at the 12 non-minting shapes' T/4-relevant leaves, mirroring modalApplyOneT_boxPos_diaNeg_known_S4/modalApplyOneS4Rules_boxPos_diaNeg_known_S4's existing case-split shape but concluding x.formula ∈ modalSubfmls sf.formula (via K's public modalApplyOne_boxPos_outputs_subset/modalApplyOne_diamondNeg_outputs_subset for the K piece, plus modalSubfmls_self_mem-style facts for the T-self/4-prop pieces), composed via the already-built modalSubfmls_trans_S4. At the 2 minting shapes, needs a keyLowerBd-groundwork-style extension (successorBirthContent_boxNeg_subset_relevantSetFinset-style reasoning, retargeted to modalUniverseS4 membership).",
-      "follow_up_task": "Continue task 511 (s4_loop_checking_termination) Phase 5: build the eClosure formula-subset composite and discharge modalStepBranchS4_preserves_eClosure's sorry."
-    },
-    {
-      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-      "line": 3491,
-      "declaration": "Cslib.Logic.Modal.Tableau.modalStepBranchS4_preserves_bClosure",
-      "kind": "documented_strategic_sorry",
-      "reason": "Needs the STRICT label-side bound modalMaxWorld b < modalWorldBoundS4 phi0 available BEFORE any mint can occur. This is Phase 6's own pigeonhole deliverable (modalKnownWorlds_nodup + modalKnownWorlds_length_le_worldBoundS4, injecting known worlds into keys via keysTotal/keysDistinct/keysInUniverse, cardinality via signedSubfmls_powerset_card + List.Nodup.length_le_card/Finset.card_le_card_of_injOn, then a consecutive-worlds fact converting the length bound into the strict modalMaxWorld bound) but is a genuine PREREQUISITE of bClosure's own step-wise preservation (needed on the pre-step branch b), not merely Phase 6's later corollary.",
-      "follow_up_task": "Continue task 511 (s4_loop_checking_termination) Phase 6: build the pigeonhole world-bound lemmas (modalKnownWorlds_nodup, modalKnownWorlds_length_le_worldBoundS4, modalStepBranchS4_worldBound), then reuse them to discharge modalStepBranchS4_preserves_bClosure's sorry (Phase 5) as a byproduct."
-    }
-  ],
-  "blockers": [
-    {
-      "phase": 5,
-      "target": "Close modalStepBranchS4_preserves_bClosure",
-      "verbatim_goal": "∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS4 φ₀ -- given hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀, hKT/hKD/hKI (keysTotal/keysDistinct/keysInUniverse on keys), hknown : accTargetsKnown b acc, hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')",
-      "what_was_tried": "Attempted to reuse K's own modalApplyOne_outputs_subset (public, FmpMeasure.lean) directly; found it is keyed to modalUniverse/modalWorldBound (K's own, different/smaller bound), not modalUniverseS4/modalWorldBoundS4, so not directly reusable. Confirmed the minting case's label bound (modalNextWorld b ≤ modalWorldBoundS4 φ₀) genuinely requires the STRICT pigeonhole bound modalMaxWorld b < modalWorldBoundS4 φ₀ to hold on the PRE-step branch (not derivable from bClosure applied to b alone, which only gives the non-strict ≤ version -- off by one at the boundary).",
-      "why_it_failed": "Not a failure -- correctly scoped as needing Phase 6's own pigeonhole deliverable as a prerequisite, which was out of this dispatch's realistic budget alongside the 4 fields actually closed. Landed as a documented strategic-sorry skeleton per Recovery Discipline rather than rushed/unsound."
-    },
-    {
-      "phase": 5,
-      "target": "Close modalStepBranchS4_preserves_eClosure",
-      "verbatim_goal": "∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverseS4 φ₀ -- given hb, heclosure : ∀ x ∈ e, x ∈ modalUniverseS4 φ₀, hknown, hstep",
-      "what_was_tried": "Located reusable public K-level facts (modalApplyOne_prop_outputs_subset, modalApplyOne_boxPos_outputs_subset, modalApplyOne_diamondNeg_outputs_subset) that cover the propositional and K-modal-rule pieces. Identified that the T-self (modalTBoxSelf/modalTDiaNegSelf) and 4-propagation (modalFourBoxProp/modalFourDiaNegProp) pieces need their OWN formula-subset facts (not yet built anywhere in the codebase), mirroring the existing known-worlds composite's case-split shape.",
-      "why_it_failed": "Not a failure -- correctly scoped as needing a new formula-subset composite (comparable effort to the keysTotal known-worlds composite, itself a full prior dispatch's work), which was out of this dispatch's realistic remaining budget after prioritizing 4 other fields to full closure. Landed as a documented strategic-sorry skeleton per Recovery Discipline."
-    }
-  ],
-  "continuation_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
+  "sorry_inventory": [],
+  "blockers": [],
+  "continuation_path": null,
   "continuation_context": {
-    "recommended_action": "Build Phase 6's pigeonhole lemmas (modalKnownWorlds_nodup, modalKnownWorlds_length_le_worldBoundS4, modalStepBranchS4_worldBound) and use them to discharge modalStepBranchS4_preserves_bClosure's sorry; separately, build the T-self/4-propagation formula-subset composite (mirroring modalApplyOneT_boxPos_diaNeg_known_S4/modalApplyOneS4Rules_boxPos_diaNeg_known_S4's shape) to discharge modalStepBranchS4_preserves_eClosure's sorry. Once both are closed, re-verify modalStepBranchS4_preserves_S4LoopInv via lean_verify (should report only propext/Classical.choice/Quot.sound, no sorryAx), mark Phase 5 [COMPLETED], and proceed to Phase 6's remaining packaging (likely mostly done as a byproduct) then Phase 7.",
     "plan_path": "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
     "files_modified": [
-      "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
+      "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md"
     ],
     "reusable_lemmas_landed_this_dispatch": [
-      "modalStepBranchS4_preserves_keysDistinct",
-      "modalApplyOneS4Keyed_nonMint_snd_eq_acc",
-      "modalStepBranchS4_preserves_eNodup",
-      "outDeg_addEdge_self_S4",
-      "outDeg_addEdge_ne_S4",
-      "modalStepBranchS4_preserves_outDegEq",
-      "modalApplyOne_boxNeg_mint_snd_S4",
-      "modalApplyOne_diamondPos_mint_snd_S4",
-      "modalStepBranchS4_preserves_keysWorldsKnown",
-      "accFreshInv_append_S4",
-      "hasEdge_addEdge_cases_S4",
-      "modalStepBranchS4_preserves_accFresh",
-      "modalStepBranchS4_preserves_accKnown",
-      "modalStepBranchS4_preserves_S4LoopInv",
-      "modalStepBranchS4_preserves_eClosure (sorry skeleton)",
-      "modalStepBranchS4_preserves_bClosure (sorry skeleton)"
+      "mem_modalUniverseS4_of",
+      "mem_modalUniverseS4_of'",
+      "modalUniverseS4_mem_label",
+      "mem_boxPositivesOf_S4",
+      "boxProps_outputs_subset_S4",
+      "diaNegProps_outputs_subset_S4",
+      "modalApplyOne_diamondPos_outputs_subset_S4",
+      "modalApplyOne_boxNeg_outputs_subset_S4",
+      "modalApplyOne_boxPos_fst_S4",
+      "modalApplyOne_diamondNeg_fst_S4",
+      "modalApplyOne_boxPos_snd_S4",
+      "modalApplyOne_diamondNeg_snd_S4",
+      "modalApplyOneT_boxPos_diaNeg_universe_S4",
+      "modalApplyOneS4Rules_boxPos_diaNeg_universe_S4",
+      "modalApplyOne_nonModal_universe_S4",
+      "modalApplyOneS4Keyed_nonMint_universe_S4",
+      "modalStepBranchS4_preserves_eClosure (CLOSED, zero sorry)",
+      "foldl_max_le_of_forall_le",
+      "modalMaxWorld_le_of_forall_label_le",
+      "worldsContiguousS4",
+      "modalStepBranchS4_preserves_worldsContiguousS4",
+      "modalKnownWorlds_nodup_S4",
+      "modalKnownWorlds_length_le_worldBoundS4",
+      "modalStepBranchS4_worldBound",
+      "modalStepBranchS4_preserves_bClosure (CLOSED, zero sorry)",
+      "modalStepBranchS4_preserves_S4LoopInv (fully closed, all 10 fields, zero sorry)"
     ],
-    "phases_landed": [1, 2, 3, 4],
-    "phase_partial": 5,
-    "phases_not_attempted": [6],
-    "phase_partial_secondary": 7,
-    "next_action_hint": "Build Phase 6's pigeonhole world-bound lemmas first (they directly unblock bClosure's sorry); the eClosure formula-subset composite is independent and can be tackled in parallel or afterward."
+    "phases_landed": [1, 2, 3, 4, 5, 6],
+    "phases_not_attempted": [7],
+    "next_action_hint": "Phase 7 (Phase 9 decidability): the Hintikka-alignment bridge modalHintikkaSetS4_eq is already landed (independent, prior dispatch). Remaining Phase 7 tasks: (a) record Planner Decision 2 (recommend spawning the abstract termination-measure interface, 9-A, as a separate task rather than inlining it in CompletenessLoop.lean, shared with tasks 505/513); (b) wire fuel sufficiency from modalStepBranchS4_worldBound (now available) plus the 9-A/9-B decision to derive Decidable (s4Valid phi) against Cube.S4; (c) otherwise mark [BLOCKED] with the exact open goal state and the spawned task number. modalStepBranchS4_preserves_S4LoopInv is now the fully-closed loop invariant a Phase 7 induction over repeated modalStepBranchS4Keyed calls can consume directly, re-supplying worldsContiguousS4/keysWorldsKnown at each step from the assembly theorem's own third/second conjuncts."
   },
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",

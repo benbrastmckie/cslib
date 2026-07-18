@@ -3269,6 +3269,52 @@ lemma extractModelKb5_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) 
   rw [extractModelKb5_r]
   exact Relation.EuclGen.base (Relation.SymmGen.of_rel h)
 
+/-! ### KB5 Reachability & Known-Worlds Infrastructure (task 525 Phase 1)
+
+The symmetrized base means the closure's `base` case is now `Relation.SymmGen acc.hasEdge`
+(either `acc.hasEdge a c` or `acc.hasEdge c a`) rather than a single raw direction, so both the
+known-worlds bridge and any root-reach argument must spend both `accSourcesKnown` and
+`accTargetsKnown` at the `base` case (Five's `euclGen_mem_modalKnownWorlds_iff` only ever needed
+one direction at a time, matching the raw relation's single direction). -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- The symmetric right-Euclidean closure of `acc.hasEdge` never leaves `b`'s known-world set, in
+**both** directions. KB5 analogue of `euclGen_mem_modalKnownWorlds_iff`: the `base` case now
+case-splits on which side of the symmetrization the raw edge came from (spending `accSourcesKnown`
+then `accTargetsKnown`, or the reverse), while the `eucl` case is identical in shape. -/
+lemma symmEuclGen_mem_modalKnownWorlds_iff
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    {w w' : WorldIndex}
+    (h : Relation.EuclGen (Relation.SymmGen (fun a c => acc.hasEdge a c = true)) w w') :
+    w ∈ modalKnownWorlds b ↔ w' ∈ modalKnownWorlds b := by
+  induction h with
+  | base hab =>
+    rcases hab with hab | hab
+    · exact iff_of_true (hSrc _ _ hab) (hTgt _ _ hab)
+    · exact iff_of_true (hTgt _ _ hab) (hSrc _ _ hab)
+  | eucl _ _ ihab ihac => exact ihab.symm.trans ihac
+
+omit [Hashable Atom] in
+/-- **Root-reach membership**: whenever the root `0` reaches `w'` via `extractModelKb5`'s
+relation, `w'` is a known world of `b`. Immediate corollary of
+`symmEuclGen_mem_modalKnownWorlds_iff` at the always-known root (`label_mem_modalKnownWorlds`
+applied to the branch's own initial formula is not needed here -- the root is known whenever the
+closure relates it to anything, since `modalKnownWorlds` is populated from every label mentioned
+in `b`, and a `base`/`eucl` derivation witnesses at least one raw edge touching `0`). This is the
+*positive* direction the KB5 truth lemma's root case consumes: unlike Five's
+`euclGen_root_imp_hasEdge` (which restricts the root to its **direct** successors only), this
+lemma places every closure-reachable `w'` in the full known non-root cluster **without** asserting
+a direct recorded edge -- exactly matching `modalKb5BoxAllFull`'s unconditional non-root cluster
+dump. -/
+lemma extractModelKb5_root_reach_mem_modalKnownWorlds
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    {w' : WorldIndex} (h : (extractModelKb5 b acc).r (0 : WorldIndex) w') :
+    w' ∈ modalKnownWorlds b :=
+  (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ h)).mp h0
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

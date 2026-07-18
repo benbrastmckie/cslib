@@ -1,40 +1,44 @@
 {
-  "session_id": "sess_1784333163_06a765",
+  "session_id": "sess_1784392507_023576",
   "task_numbers": [
-    526,
-    527
+    528,
+    525
   ],
   "waves": [
     [
-      526,
-      527
+      528
+    ],
+    [
+      525
     ]
   ],
+  "dependency_graph": {
+    "528": [],
+    "525": [
+      "528"
+    ]
+  },
   "max_cycles": 10,
-  "cycle_count": 4,
-  "failed_tasks": [
-    {
-      "task": 525,
-      "reason": "blocked: proven mathematical gap at Phase 3; needs follow-on rule/extraction design task"
-    }
-  ],
+  "cycle_count": 5,
+  "failed_tasks": [],
   "completed_tasks": [
-    524
+    528,
+    525
   ],
   "current_statuses": {
-    "524": "completed",
-    "525": "blocked"
+    "528": "completed",
+    "525": "completed"
   },
   "task_dirs": {
-    "526": "specs/526_fix_prime_exclusion_unused_argument",
-    "527": "specs/527_fix_modal_frame_separation_decide"
+    "528": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness",
+    "525": "specs/525_kb5_completeness_and_decidability"
   },
   "research_agents": {
-    "526": "cslib-research-agent",
-    "527": "cslib-research-agent"
+    "528": "cslib-research-agent",
+    "525": "cslib-research-agent"
   },
   "implement_agents": {
-    "526": "cslib-implementation-agent",
-    "527": "cslib-implementation-agent"
+    "528": "cslib-implementation-agent",
+    "525": "cslib-implementation-agent"
   }
 }

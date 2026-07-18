@@ -11,12 +11,10 @@ next_project_number: 529
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,517,519,522,523,528 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,506,525 | 36,37,181,317,407,425,449,511,528 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,413,515 | 39,40,375,525 | foundations, modal logic, code hygiene |
-| 4 | 412,504 | 41,515 | modal logic, code hygiene |
-| 5 | 300 | 503,504,506 | modal logic |
-| 6 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,515,517,519,522,523 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,504,506 | 36,37,181,317,407,425,449,511,515 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
+| 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -40,14 +38,12 @@ next_project_number: 529
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
+515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
+  └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 517 [PLANNED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
-528 [IMPLEMENTING] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
-  └─ 525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
-    └─ 515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
-      └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-        └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 
@@ -103,7 +99,7 @@ next_project_number: 529
 
 ### 528. Correctedgate kb5 tableau rule soundness and completeness
 - **Effort**: 10-14 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -156,7 +152,7 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 
 ### 525. Kb5 completeness and decidability
 - **Effort**: 5-8 hours
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 524, Task 528

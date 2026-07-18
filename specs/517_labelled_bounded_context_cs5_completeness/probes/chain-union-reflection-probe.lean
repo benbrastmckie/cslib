@@ -689,4 +689,106 @@ theorem consistency_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A
   obtain ⟨Γ₀, hΓ₀, hNIK⟩ := hDeriv
   exact hnd ⟨Γ₀, hΓ₀, NIK.efq H.G Γ₀ x x₀ A₀ hNIK⟩
 
+/-- Extending a context by one formula at a label already in `G.X` stays a genuine `Context`
+(same `G`; `coinfinite` is `G`-only, unaffected; `dwitnessMem`'s target membership only grows). -/
+def Context.addFormula (H : Context 𝒯 Atom) (φ : LabelledFormula Atom) (hφ : φ.lbl ∈ H.G.X) :
+    Context 𝒯 Atom where
+  G := H.G
+  Γ := insert φ H.Γ
+  ctxSubset := by
+    intro ψ hψ
+    rcases hψ with rfl | hψ
+    · exact hφ
+    · exact H.ctxSubset ψ hψ
+  coinfinite := H.coinfinite
+  dwitnessMem := fun x A hx =>
+    let ⟨hR, hmem⟩ := H.dwitnessMem x A hx
+    ⟨hR, Or.inr hmem⟩
+
+theorem Context.addFormula_le (H : Context 𝒯 Atom) (φ : LabelledFormula Atom)
+    (hφ : φ.lbl ∈ H.G.X) : H ≤ H.addFormula φ hφ :=
+  ⟨Graph.le_refl H.G, fun _ hψ => Or.inr hψ⟩
+
+/-- **The maximality argument, specialised to formula membership.** If `H` is maximal in `C` and
+`(H, H.Γ ∪ {φ})` still fails to derive the excluded `x₀:A₀`, `φ` was already a member of `H.Γ` —
+Simpson's Lindenbaum-style pattern for the deductive-closure/disjunction/diamond clauses. -/
+theorem mem_of_maximal_addFormula {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) {φ : LabelledFormula Atom}
+    (hφ : φ.lbl ∈ H.G.X) (hnd' : ¬ Deriv 𝒯 H.G (insert φ H.Γ) (x₀ ∶ A₀)) : φ ∈ H.Γ := by
+  have hle : H ≤ H.addFormula φ hφ := H.addFormula_le φ hφ
+  have hmem : H.addFormula φ hφ ∈ primeC G₀ x₀ A₀ := by
+    obtain ⟨hG₀H, hV', _⟩ := hmax.prop
+    exact ⟨Context.le_trans hG₀H hle, hV', hnd'⟩
+  exact (hmax.le_of_ge hmem hle).2 (Set.mem_insert φ H.Γ)
+
+/-- **`Deriv`-level `(∨E)`.** If `y:B∨C` is `Deriv`-derivable from `Γ`, and both `Γ∪{y:B}` and
+`Γ∪{y:C}` `Deriv`-derive `φ`, then `Γ` alone `Deriv`-derives `φ` — the set-lifted form of
+`NIK.orE`, discharging the two extension assumptions via the rule itself (no cut needed: `y:B∨C`
+is combined with the two branch derivations directly). -/
+theorem Deriv.orE {G : Graph Atom} {Γ : Set (LabelledFormula Atom)} {y : Label Atom}
+    {B C : Proposition Atom} {φ : LabelledFormula Atom}
+    (hor : Deriv 𝒯 G Γ (y ∶ Proposition.or B C)) (hB : Deriv 𝒯 G (insert (y ∶ B) Γ) φ)
+    (hC : Deriv 𝒯 G (insert (y ∶ C) Γ) φ) : Deriv 𝒯 G Γ φ := by
+  classical
+  obtain ⟨Γ0, hΓ0, hNIK0⟩ := hor
+  obtain ⟨Γ1, hΓ1, hNIK1⟩ := hB
+  obtain ⟨Γ2, hΓ2, hNIK2⟩ := hC
+  set Γ1' := Γ1.filter (fun ψ => decide (ψ ≠ (y ∶ B))) with hΓ1'def
+  set Γ2' := Γ2.filter (fun ψ => decide (ψ ≠ (y ∶ C))) with hΓ2'def
+  have hΓ1'mem : ∀ ψ ∈ Γ1', ψ ∈ Γ := by
+    intro ψ hψ
+    have hne : ψ ≠ (y ∶ B) := by simpa [hΓ1'def] using (List.of_mem_filter hψ)
+    rcases hΓ1 ψ (List.mem_of_mem_filter hψ) with rfl | h
+    · exact absurd rfl hne
+    · exact h
+  have hΓ2'mem : ∀ ψ ∈ Γ2', ψ ∈ Γ := by
+    intro ψ hψ
+    have hne : ψ ≠ (y ∶ C) := by simpa [hΓ2'def] using (List.of_mem_filter hψ)
+    rcases hΓ2 ψ (List.mem_of_mem_filter hψ) with rfl | h
+    · exact absurd rfl hne
+    · exact h
+  refine ⟨Γ0 ++ Γ1' ++ Γ2', ?_, ?_⟩
+  · intro ψ hψ
+    rcases List.mem_append.mp hψ with hψ | hψ
+    · rcases List.mem_append.mp hψ with hψ | hψ
+      · exact hΓ0 ψ hψ
+      · exact hΓ1'mem ψ hψ
+    · exact hΓ2'mem ψ hψ
+  · have hmem01 : ∀ ψ ∈ Γ0, ψ ∈ Γ0 ++ Γ1' ++ Γ2' := fun ψ hψ =>
+      List.mem_append_left _ (List.mem_append_left _ hψ)
+    have hmem1B : ∀ ψ ∈ Γ1, ψ ∈ (y ∶ B) :: (Γ0 ++ Γ1' ++ Γ2') := by
+      intro ψ hψ
+      by_cases hcase : ψ = (y ∶ B)
+      · exact hcase ▸ List.mem_cons_self
+      · refine List.mem_cons_of_mem _ (List.mem_append_left _ (List.mem_append_right _ ?_))
+        exact List.mem_filter.mpr ⟨hψ, by simpa using hcase⟩
+    have hmem2C : ∀ ψ ∈ Γ2, ψ ∈ (y ∶ C) :: (Γ0 ++ Γ1' ++ Γ2') := by
+      intro ψ hψ
+      by_cases hcase : ψ = (y ∶ C)
+      · exact hcase ▸ List.mem_cons_self
+      · refine List.mem_cons_of_mem _ (List.mem_append_right _ ?_)
+        exact List.mem_filter.mpr ⟨hψ, by simpa using hcase⟩
+    exact NIK.orE G (Γ0 ++ Γ1' ++ Γ2') y φ.lbl B C φ.prop
+      (hNIK0.weaken (Graph.le_refl G) hmem01)
+      (hNIK1.weaken (Graph.le_refl G) hmem1B) (hNIK2.weaken (Graph.le_refl G) hmem2C)
+
+/-- **Clause 3** (`TPrime.disjunction`): the disjunction property (Simpson `chunk_0103.md`,
+*"either `y:B∈Δ` or `y:C∈Δ`"*), via `Deriv.orE` + `mem_of_maximal_addFormula` for each disjunct —
+no cut needed, since `y:B∨C ∈ H.Γ` is already assumable directly. -/
+theorem disjunction_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    ∀ (y : Label Atom) (B C : Proposition Atom), (y ∶ Proposition.or B C) ∈ H.Γ →
+      (y ∶ B) ∈ H.Γ ∨ (y ∶ C) ∈ H.Γ := by
+  intro y B C hmemBC
+  obtain ⟨_, _, hnd⟩ := hmax.prop
+  have hyX : y ∈ H.G.X := H.ctxSubset _ hmemBC
+  have hyor : Deriv 𝒯 H.G H.Γ (y ∶ Proposition.or B C) :=
+    ⟨[y ∶ Proposition.or B C], fun ψ hψ => (List.mem_singleton.mp hψ) ▸ hmemBC,
+      NIK.assumption H.G _ _ (List.mem_singleton_self _)⟩
+  by_cases hB : Deriv 𝒯 H.G (insert (y ∶ B) H.Γ) (x₀ ∶ A₀)
+  · by_cases hC : Deriv 𝒯 H.G (insert (y ∶ C) H.Γ) (x₀ ∶ A₀)
+    · exact absurd (Deriv.orE hyor hB hC) hnd
+    · exact Or.inr (mem_of_maximal_addFormula hmax hyX hC)
+  · exact Or.inl (mem_of_maximal_addFormula hmax hyX hB)
+
 end Cslib.Logic.Modal.Labelled

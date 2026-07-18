@@ -1,5 +1,5 @@
 ---
-next_project_number: 530
+next_project_number: 535
 ---
 
 # TODO
@@ -11,9 +11,9 @@ next_project_number: 530
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,503,511,515,517,519,522,523,529 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,504,506 | 36,37,181,317,407,425,449,511,515 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,300,413 | 39,40,375,503,504,506 | foundations, modal logic, code hygiene |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,511,517,519,522,523,529,530,532,533 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,506,531 | 36,37,181,317,407,425,449,511,529 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,413,534 | 39,40,375,506,531 | foundations, modal logic, code hygiene |
 | 4 | 412,414 | 41,181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -26,7 +26,7 @@ next_project_number: 530
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
 317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
-  └─ 375 [NOT STARTED] — Complete the cross-system equivalence story by folding the tablea
+  └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
@@ -36,16 +36,12 @@ next_project_number: 530
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-503 [BLOCKED] — Parametrize the K tableau driver (Cslib/Logics/Modal/Tableau/Satu
-  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r
-515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
-  └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
-    └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
-522 [PARTIAL] — Design and build a uniform frame-condition-to-axiom correspondenc
-523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
+522 [PARTIAL] — Uniform frame-condition to axiom correspondence library for modal
+523 [PLANNED] — Schema-union axiom combinator to replace the hand-written per-sys
+300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-  └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
+  └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived (see above)
 
 ### Temporal Logic
 
@@ -68,11 +64,11 @@ next_project_number: 530
 
 ### Code Hygiene
 
-393 [NOT STARTED] — Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING befo
+393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
-413 [NOT STARTED] — [Split from task 278.] Simplify Propositional/ proofs that use ma
-414 [NOT STARTED] — [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ p
+413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
+414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ### Pr & Upstreaming
 
@@ -95,8 +91,58 @@ next_project_number: 530
 511 [IMPLEMENTING] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
 529 [NOT STARTED] — Add @[nolint unusedArguments] to modalKb5BoxAllUniv (Cslib/Logics
+  └─ 531 [NOT STARTED] — REDUNDANCY CLEANUP. Cslib/Logics/Modal/Tableau/ carries two compl
+    └─ 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+530 [NOT STARTED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
+532 [NOT STARTED] — CLEANUP. Now that the generic tableau driver and T/S5/5/Euclidean
+533 [NOT STARTED] — COMPLETENESS GAP. Cslib/Logics/Modal/Metalogic/Intuitionistic/Tru
 
 ## Tasks
+
+### 534. Pure K5/5 Euclidean tableau completeness without the equivalence route
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 531
+
+**Description**: COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.
+
+---
+
+### 533. Discharge the 3 sorries in the intuitionistic modal truth lemma
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: COMPLETENESS GAP. Cslib/Logics/Modal/Metalogic/Intuitionistic/TruthLemma.lean carries 3 active sorries that leave IK/IT/IS4/IS5 completeness (ivalid_completeness/mvalid_completeness in Intuitionistic/Completeness.lean) resting on unproven obligations. Discharge them so the intuitionistic modal grid is fully sorry-free, matching the classical cube. Verify against the birelational semantics (Modal/Semantics/Birelational.lean) and the shared CanonicalModel/PrimeTheory infrastructure. Zero sorry, zero new axioms.
+
+---
+
+### 532. Reconcile stale [BLOCKED] docstrings left by completed decidability tasks
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 503, Task 504, Task 515
+
+**Description**: CLEANUP. Now that the generic tableau driver and T/S5/5/Euclidean decidability are delivered, several docstrings still narrate them as blocked. Sweep and correct: Cslib/Logics/Modal/Tableau/GenericDriver.lean (~lines 131/149 still say Phase-6 Decidable tValid is blocked, though instDecidableTValid is live), plus any residual [BLOCKED]/pending narratives in Saturation.lean / FrameCompleteness.lean / CompletenessLoop.lean referencing the now-landed T/S5/Euclidean instances. Use durable anchors (declaration names, file/section references), never task-number citations, per the no-task-references rule. Docstring-only; no proof changes.
+
+---
+
+### 531. Merge the KB5 prime/double-prime tableau rule variants into one rule
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 529
+
+**Description**: REDUNDANCY CLEANUP. Cslib/Logics/Modal/Tableau/ carries two complementary but overlapping KB5 rule families: modalApplyOneKb5 prime (FiveSimplification.lean, ~200 refs, repairs the shallow root-only gap) and modalApplyOneKb5 double-prime (~377 refs, corrected-gate full-cluster rule handling the deeper edge-target case), each with a Prop sibling and duplicated root/non-root split lemma pairs. Both are currently load-bearing (referenced by live soundness/completeness theorems). Merge them into a single rule with one set of split lemmas - a genuine proof-merge (NOT a delete of the prime variant), retiring the redundant lemma pairs once the merged rule discharges every downstream obligation. Must stay sorry-free and axiom-clean; verify instDecidableKb5Valid/modalTableauKb5-complete still hold after the merge.
+
+---
+
+### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/ and Cslib/Logics/Temporal/Metalogic/Chronicle/ are two nearly-identical full trees sharing 8 filenames (ChronicleConstruction, ChronicleToCountermodel, ChronicleTypes, CounterexampleElimination, PointInsertion, RRelation, ...) with ~89% overlap. The partial task-454 consolidation already lifted PointInsertion; extend that: factor the shared chronicle/countermodel-elimination machinery into a label-generic module under Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only SinceSeedConsistency.lean) and have both the bimodal and temporal trees instantiate it. Preserve all landed sorry-free results; this is a structural dedup, not a proof change. Watch the bimodal discrete-completeness sorries (blocked on external port) - do not entangle them.
+
+---
 
 ### 529. Fix lake lint unusedArguments failures in FiveSimplification.lean (KB5 corrected-gate rule)
 - **Status**: [NOT STARTED]
@@ -195,7 +241,7 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 - **Research**: [523_schema_union_axiom_combinator_for_proofsystem_instances/reports/01_schema-union-combinator-blast-radius.md]
 - **Plan**: [523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md]
 
-**Description**: Replace the 15 hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean (KAxiom, TAxiom, ... each re-listing overlapping constructors implyK/implyS/efq/modalK/andI..orE/diaDuality) with a compositional schema-union combinator that builds <Sys>Axiom from a chosen set of shared axiom-schema predicates. The consumption interface (HasAxiomK/HasAxiomImplyK/HasAxiomEFQ typeclasses in Cslib/Foundations/Logic/ProofSystem.lean) is ALREADY uniform, demonstrating a generic layer is feasible. This is the deepest 'elegant compositional' refactor and the highest-risk (touches every system's axiom declaration and all downstream soundness/completeness that pattern-match on constructors). MUST coordinate on Zulip per CONTRIBUTING before implementing. Start as a RESEARCH task to design the combinator and assess the blast radius on existing proofs. Parallel-safe with task 515 in principle but broad enough to warrant sequencing after 520/521.
+**Description**: Schema-union axiom combinator to replace the hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean. RECONCILED COUNT: there are 14 such inductives ({K,T,B,D,S4,K4,K5,K45,D4,D5,D45,DB,TB,KB5}Axiom), not 15 - S5.lean already reuses Modal.ModalAxiom directly and is the exact pattern the combinator should generalize to. Build a SchemaUnion/axiom-combinator so each system is expressed as a union of shared axiom schemas rather than a bespoke re-listing inductive. Gated on a Zulip design decision (representation A: closed inductive of schema tags, vs B: Set/predicate union).
 
 ---
 
@@ -207,7 +253,7 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 - **Research**: [522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md]
 - **Plan**: [522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md]
 
-**Description**: Design and build a uniform frame-condition-to-axiom correspondence library for modal logic. Currently each soundness direction reproves the axiom-frame-property correspondence case-by-case: classical conditions inline in each Systems/<Sys>/Soundness.lean (e.g. s4_axiom_sound over 'reflexive, transitive'), and birelational conditions as ad-hoc local FC predicates (ms4FC, is4FC, cs4FC', ...) re-declared per file. There is no shared 'axiom X <-> frame property P' library. Provide reusable correspondence lemmas (reflexivity<->T, transitivity<->4, symmetry<->B, seriality<->D, euclidean<->5) that the per-system soundness proofs consume, so new systems can be assembled by choosing frame properties rather than reproving soundness. RESEARCH task first (survey how Systems/*/Soundness.lean and the birelational FC predicates express conditions, and whether a single Frame-property typeclass layer can unify classical + birelational). Coordinate scope on Zulip per CONTRIBUTING if it touches many files. Parallel-safe with task 515.
+**Description**: Uniform frame-condition to axiom correspondence library for modal soundness. RECONCILED: Phase 1 delivered sorry-free - Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean provides the five explicit-hypothesis correspondence lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom), registered in the barrel and re-exported via Soundness.lean. REMAINING (the actual dedup payoff): wire the 14 downstream Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean consumers to delegate to this library instead of reproving axiom-frame correspondence case-by-case; they are currently still byte-identical case-by-case proofs. Was gated pending a Zulip design decision on the library shape.
 
 ---
 
@@ -267,7 +313,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 515. S5 universal rule termination unblock 504
 - **Effort**: 8-12 hours
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 525
@@ -314,7 +360,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 504. S5 and kb55route euclidean decidability via generic tableau 
 - **Effort**: 5-7 hours
-- **Status**: [PARTIAL]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 515
@@ -331,7 +377,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 503. Generalize k tableau driver and complete tsystem decidabilit
 - **Effort**: 10-14 hours
-- **Status**: [BLOCKED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -616,7 +662,7 @@ After implementation:
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 180, Task 181, Task 215, Task 299, Task 300, Task 301, Task 444
 
-**Description**: [Split from task 278.] Simplify Modal/, Temporal/, and Bimodal/ proofs that use manual `simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*]` lists or verbose tactic chains over the task-268 normalization lemmas (including the Temporal/FromPropositional and Bimodal/Embedding/TemporalEmbedding embedding simp lemmas); replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Sequence after the modal-family proof-development settles: Modal 299/300; Temporal 180 (G/H primitives rewrite FromPropositional.lean), 241, 301; Bimodal 181 (propagates constructors through TemporalEmbedding.lean), 215, 275; plus the file-structure pass 321. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
+**Description**: Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual simp only [listImp_*, bigconj_*, toTemporal_*, toBimodal_*] lists and long tactic chains) using the EXISTING normalization/embedding lemmas. RECONCILED: original premise cited task-268 'co-tags' which was abandoned - re-scoped to the lemmas that actually exist. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 
 ---
 
@@ -626,7 +672,7 @@ After implementation:
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 317, Task 375
 
-**Description**: [Split from task 278.] Simplify Propositional/ proofs that use manual `simp only [listImp_*, bigconj_*]` lists or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the new co-tags make the explicit lists redundant. Covers Hilbert/ND/completeness/decidability proof sites in Cslib/Logics/Propositional/. Sequence after the major PL proof-development tasks land (317 tableau completeness, 370 int/min decidability, 375 proof-system equivalence) and the Logics/Foundations file-structure pass (321). Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
+**Description**: Simplify verbose Propositional/ proofs (manual simp only [listImp_*, bigconj_*] lists and long tactic chains) using the EXISTING normalization lemmas (listImp_axiom_k/_s in Foundations/Logic/Metalogic/ListImplication.lean, bigconj_* in the syntax files). RECONCILED: the original premise cited task-268 'co-tags' as the enabler, but task 268 was abandoned - re-scoped to use the normalization lemmas that actually exist, replacing explicit rewrite lists with simp/grind where they are now redundant. Lower priority proof-golf; verify each simplification keeps the proof sorry-free.
 
 ---
 
@@ -706,9 +752,9 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 391
+- **Dependencies**: None
 
-**Description**: Tier-3, cross-cutting — coordinate on Zulip per CONTRIBUTING before refactor. (a) Factor one generic quotient-Lindenbaum construction over the 3 parallel builds (~2100 lines): HilbertLindenbaum, HilbertLindenbaumRel, HilbertAlgCompleteness (4th in Bimodal). (b) Make litCtx_congr public and parameterize the 3 Classical completeness files (~700 lines, litCtx_congr' copied 3x) over the axiom predicate via GenericMCSBridge/HasMinimalAxioms. (c) Assess 3 Soundness modules + 8 conservativity modules + LJ/LK helper duplication. Source: §5.5.
+**Description**: Consolidate duplicated Lindenbaum / MCS / conservativity constructions across the logic families. Duplication confirmed present: multiple parallel Lindenbaum algebra variants (HilbertLindenbaumAlgebra, ImpLindenbaumAlgebra, RelLindenbaumAlgebra, LindenbaumAlg) and MCS-extension variants (lindenbaumMCS/lindenbaumMCSSet/bimodal_lindenbaum); GenericMCSBridge.lean duplicated x4 (Propositional/Modal/Bimodal.Core/Temporal Metalogic dirs) as thin per-family re-instantiations of one Foundations pattern; LiftViaMorphism.lean x3 (Modal InterSystem, Propositional Semantics/Algebra, Bimodal ConservativeExtension). Consolidate onto the shared Foundations generic-MCS and morphism-lift machinery, retiring the per-family copies where they add no value. (Dependency on the archived-completed docstring task dropped.)
 
 ---
 
@@ -718,7 +764,7 @@ After implementation:
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 317
 
-**Description**: Complete the cross-system equivalence story by folding the tableau (and remaining sequent) decision systems into the proof-system TFAE. Cslib/Logics/Propositional/ProofSystemEquivalence.lean currently proves Hilbert<->ND<->LK for CPL (cplProofSystemsTfae) and Hilbert<->ND<->LJ for IPL (iplProofSystemsTfae), plus the MPL Hilbert<->ND two-way. Add the missing edges so the equivalence is genuinely complete across all proof systems: classical Tautology <-> LK provability <-> closed classical tableau, and intuitionistic validity <-> LJ provability <-> closed intuitionistic tableau, extending the TFAE lists accordingly. Requires the tableau soundness+completeness to be green (task 316 done for soundness; task 317 for completeness) and the classical tableau build repaired (task 363). No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 317, 363.
+**Description**: Fold the TABLEAU decision systems into the propositional proof-system TFAE. RECONCILED: the sequent edges are ALREADY done - Cslib/Logics/Propositional/ProofSystemEquivalence.lean has cplProofSystemsTfae (Hilbert/ND/LK) and iplProofSystemsTfae (Hilbert/ND/LJ). REMAINING: add the tableau nodes to both TFAEs, wiring Propositional/Tableau/{Classical,Intuitionistic,Minimal}/Completeness.lean into the equivalence. Depends on task 317 (propositional tableau completeness) landing its remaining sorries.
 
 ---
 
@@ -778,13 +824,13 @@ After implementation:
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 299, Task 503, Task 504, Task 505, Task 506
+- **Dependencies**: Task 506
 - **Research**:
   - [300_modal_extensions_t_s4_s5/reports/01_frame-specific-tableau-extensions.md]
   - [300_modal_extensions_t_s4_s5/reports/02_spawn-analysis.md]
 - **Plan**: [300_modal_extensions_t_s4_s5/plans/01_frame-extensions-implementation.md]
 
-**Description**: Extend modal K tableau (task 299) with frame-specific rules for reflexive (T), transitive (S4), and equivalence-relation (S5) frames. T: reflexivity rule (box phi at w implies phi at w). S4: transitivity-aware propagation with loop-checking for termination. S5: equivalence-class simplification (mirrors bimodal approach). Include rules for B (symmetric) and 5 (Euclidean) to cover full modal cube. Each extension needs own completeness proof showing extracted countermodel satisfies frame condition. Files: FrameRules.lean, LoopChecking.lean, S5Simplification.lean, FrameSoundness.lean, FrameCompleteness.lean. Estimated: 1,200-1,800 lines.
+**Description**: Umbrella task for modal frame extensions T/S4/S5 (and the derived B/D/5/Euclidean cube corners). RECONCILED: T (instDecidableTValid), B (instDecidableBValid), S5 (instDecidableS5Valid), and 5/Euclidean (instDecidableFiveValid/instDecidableKb5Valid) are all delivered sorry-free in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean via the generic tableau driver. The SOLE remaining phase is S4 (reflexive-transitive) loop-checking termination bound and decidability, tracked by task 506 (gated on the S4 termination task). This umbrella closes when S4 decidability (instDecidableS4Valid) lands.
 
 ---
 

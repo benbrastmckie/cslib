@@ -3876,6 +3876,244 @@ lemma modalTruthLemmaKb5
           hintikkaKb5''_diamond_neg b acc hH ψ w w' hmem hcond
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2 hF hsψ
 
+/-! ### Phase 6: Top-Loop Propagation of `accTargetsNeRoot` and Root-Known-ness
+for `modalApplyOneKb5''`
+
+`modalTruthLemmaKb5` (Phase 5) takes `accTargetsNeRoot acc` and `(0 : WorldIndex) ∈
+modalKnownWorlds b` as abstract hypotheses, exactly as `modalOpenBranchFive_countermodel` took
+`accTargetsNeRoot acc` (Five's Phase 21). This section discharges both for a **real**
+`modalTableauKb5''`/`modalExpandBranchesKb5''` run, mirroring Five's Phase 21
+(`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot`) with one addition: the KB5''
+per-call root-isolation fact (`modalApplyOneKb5''_edge_target_ne_root` below) routes through
+`modalApplyOneKb5''Prop_knownWorlds_step` (Phase 3), which -- unlike Five's analogue -- ALSO needs
+`(0 : WorldIndex) ∈ modalKnownWorlds b` as an ambient hypothesis (the "root always known"
+invariant Phase 3 already discovered and threaded through the soundness side). So the top-loop
+induction below bundles THREE invariants together (`accTargetsKnown`, `accTargetsNeRoot`, and
+root-known-ness), not Five's two -- `accSourcesKnown`/`accTargetsKnown` individually remain free
+via the fully generic `modalExpandBranchesGen_openBranch_accSourcesKnown`/
+`_accTargetsKnown` (`BDriver.lean`), consuming only `modalApplyOneKb5''_fresh_local` (Phase 2);
+those generic bridges are used directly at the Phase 7 assembly site and are NOT re-derived here. -/
+
+omit [DecidableEq Atom] [Hashable Atom] in
+private lemma modalKnownWorlds_fold_spec_C
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex) :
+    ∀ x, x ∈ l.foldl (fun ws sf => if ws.any (· == sf.label) then ws else sf.label :: ws) ws0 ↔
+      x ∈ ws0 ∨ ∃ sf ∈ l, sf.label = x := by
+  induction l generalizing ws0 with
+  | nil => simp
+  | cons sf rest ih =>
+    by_cases hc : ws0.any (· == sf.label)
+    · simp only [List.foldl_cons, if_pos hc]
+      intro x
+      rw [ih ws0]
+      have hmemws0 : sf.label ∈ ws0 := by simpa [List.any_eq_true] using hc
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl h
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (hfeq ▸ hmemws0)
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+    · simp only [List.foldl_cons, if_neg hc]
+      intro x
+      rw [ih (sf.label :: ws0)]
+      constructor
+      · rintro (h | ⟨sf', hsf', rfl⟩)
+        · rcases List.mem_cons.mp h with rfl | h
+          · exact Or.inr ⟨sf, List.mem_cons_self, rfl⟩
+          · exact Or.inl h
+        · exact Or.inr ⟨sf', List.mem_cons_of_mem _ hsf', rfl⟩
+      · rintro (h | ⟨sf', hsf', hfeq⟩)
+        · exact Or.inl (List.mem_cons_of_mem _ h)
+        · rcases List.mem_cons.mp hsf' with rfl | hsf'
+          · exact Or.inl (by simp [hfeq])
+          · exact Or.inr ⟨sf', hsf', hfeq⟩
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma mem_modalKnownWorlds` (unavailable
+across files): membership in `modalKnownWorlds l` iff some formula of `l` carries that label. -/
+private lemma mem_modalKnownWorlds_C
+    (l : List (SignedFormula (Proposition Atom) WorldIndex)) (x : WorldIndex) :
+    x ∈ modalKnownWorlds l ↔ ∃ sf ∈ l, sf.label = x := by
+  unfold modalKnownWorlds
+  simpa using modalKnownWorlds_fold_spec_C l [] x
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_mono_append`:
+appending formulas to the front of a branch only grows its known-worlds set. -/
+private lemma modalKnownWorlds_mono_append_C
+    (xs b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    ∀ x ∈ modalKnownWorlds b, x ∈ modalKnownWorlds (xs ++ b) := by
+  intro x hx
+  rw [mem_modalKnownWorlds_C] at hx ⊢
+  obtain ⟨sf, hsf, rfl⟩ := hx
+  exact ⟨sf, List.mem_append_right _ hsf, rfl⟩
+
+/-- **Every new branch a step produces is the old branch with formulas prepended**, hence
+`modalKnownWorlds`-monotone over it. Rule-generic (any `apply`); mirrors the `hbsub` fact inside
+`FmpMeasure.lean`'s `modalStepBranch_preserves_accTargetsKnown_gen` proof, exposed here as its own
+lemma since Phase 6 needs it for root-known-ness preservation, not just `accTargetsKnown`. -/
+private lemma modalStepBranchGen_knownWorlds_mono_C
+    (apply : RuleApply Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen apply b e acc = some (newBs, newExps, newAcc)) :
+    ∀ b' ∈ newBs, modalKnownWorlds b ⊆ modalKnownWorlds b' := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hfstc : (apply sf b acc).fst with nf | brs | nf | _
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact modalKnownWorlds_mono_append_C nf b
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+    exact modalKnownWorlds_mono_append_C br b
+  · rw [hfstc] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    intro b' hb'
+    rw [← hsf.1] at hb'
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact modalKnownWorlds_mono_append_C nf b
+  · rw [hfstc] at hsf; simp at hsf
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases` (unavailable
+across files): decompose membership of an edge in `acc.addEdge w w'`. Mirrors
+`hasEdge_addEdge_cases_Five`. -/
+private lemma hasEdge_addEdge_cases_C {acc : Accessibility} {w w' a a' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge a a' = true) :
+    (a = w ∧ a' = w') ∨ acc.hasEdge a a' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  rcases h with ⟨hw, hw'⟩ | h
+  · exact Or.inl ⟨hw.symm, hw'.symm⟩
+  · exact Or.inr h
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- A fresh world is never the root: `modalNextWorld b = modalMaxWorld b + 1 ≥ 1`
+unconditionally, since `WorldIndex := Nat`. Mirrors `modalNextWorld_ne_zero_Five`. -/
+private lemma modalNextWorld_ne_zero_C
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalNextWorld b ≠ (0 : WorldIndex) :=
+  Nat.succ_ne_zero (modalMaxWorld b)
+
+/-- **`modalApplyOneKb5''`'s edge-target root-isolation, per call**: whenever a step of
+`modalApplyOneKb5''` records a new accessibility edge, that edge's target is non-root. Combines
+`modalApplyOneKb5''_agree_or_reuse_ne_root` (reuse edges target a witness already known non-root
+there) with `modalApplyOneKb5''Prop_knownWorlds_step` (a genuine mint edge's target is
+`modalNextWorld b`, non-root since `WorldIndex := Nat`). Unlike Five's analogue
+(`modalApplyOneFive_edge_target_ne_root`), also takes `h0` --
+`modalApplyOneKb5''Prop_knownWorlds_step` needs the root-known invariant Phase 3 discovered.
+Mirrors `modalApplyOneFive_edge_target_ne_root`. -/
+lemma modalApplyOneKb5''_edge_target_ne_root
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b) :
+    (modalApplyOneKb5'' sf b acc).snd = acc ∨
+      ∃ w', (modalApplyOneKb5'' sf b acc).snd = acc.addEdge sf.label w' ∧
+        w' ≠ (0 : WorldIndex) := by
+  rcases modalApplyOneKb5''_agree_or_reuse_ne_root sf b acc with heq | ⟨sf', -, -, hsf'ne, heq⟩
+  · rw [heq]
+    rcases modalApplyOneKb5''Prop_knownWorlds_step sf b acc hsfmem hknown h0 with
+      ⟨hsnd, -⟩ | ⟨hsnd, -⟩
+    · exact Or.inl hsnd
+    · exact Or.inr ⟨modalNextWorld b, hsnd, modalNextWorld_ne_zero_C b⟩
+  · rw [heq]
+    exact Or.inr ⟨sf'.label, rfl, hsf'ne⟩
+
+/-- **Single-step preservation of `accTargetsNeRoot` at `modalApplyOneKb5''`**, given
+`accTargetsKnown` and root-known-ness as ambient invariants. Mirrors
+`modalStepBranchFive_preserves_accTargetsNeRoot`. -/
+theorem modalStepBranchKb5''_preserves_accTargetsNeRoot
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneKb5'' b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (hroot : accTargetsNeRoot acc) :
+    accTargetsNeRoot newAcc := by
+  simp only [modalStepBranchGen] at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  have hnewAcc : newAcc = (modalApplyOneKb5'' sf b acc).snd := by
+    rcases hfstc : (modalApplyOneKb5'' sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp only [Option.some.injEq, Prod.mk.injEq] at hsf; exact hsf.2.2.symm
+    · rw [hfstc] at hsf; simp at hsf
+  rw [hnewAcc]
+  rcases modalApplyOneKb5''_edge_target_ne_root sf b acc hsfmem hknown h0 with
+    hsame | ⟨w', hsnd, hw'ne⟩
+  · rw [hsame]; exact hroot
+  · rw [hsnd]
+    intro w1 w1' hedge
+    rcases hasEdge_addEdge_cases_C hedge with ⟨-, rfl⟩ | hold
+    · exact hw'ne
+    · exact hroot _ _ hold
+
+/-- **Joint single-step preservation of `accTargetsKnown`, `accTargetsNeRoot`, and root-known-ness**
+at `modalApplyOneKb5''`: bundles the generic `modalStepBranch_preserves_accTargetsKnown_gen` (at
+`modalApplyOneKb5''_fresh_local`) with `modalStepBranchKb5''_preserves_accTargetsNeRoot` above and
+`modalStepBranchGen_knownWorlds_mono_C` (for root-known-ness), so the top-loop induction below can
+maintain all three together. Mirrors `modalStepBranchFive_preserves_accTargetsKnown_and_NeRoot`,
+extended with the third conjunct. -/
+theorem modalStepBranchKb5''_preserves_accTargetsKnown_and_NeRoot_and_rootKnown
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility)
+    (hstep : modalStepBranchGen modalApplyOneKb5'' b e acc = some (newBs, newExps, newAcc))
+    (hknown : accTargetsKnown b acc) (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (hroot : accTargetsNeRoot acc) :
+    (∀ b' ∈ newBs, accTargetsKnown b' newAcc ∧ (0 : WorldIndex) ∈ modalKnownWorlds b') ∧
+      accTargetsNeRoot newAcc :=
+  ⟨fun b' hb' =>
+      ⟨modalStepBranch_preserves_accTargetsKnown_gen modalApplyOneKb5''
+        modalApplyOneKb5''_fresh_local b e acc newBs newExps newAcc hstep hknown b' hb',
+       modalStepBranchGen_knownWorlds_mono_C modalApplyOneKb5'' b e acc newBs newExps newAcc
+         hstep b' hb' h0⟩,
+    modalStepBranchKb5''_preserves_accTargetsNeRoot b e acc newBs newExps newAcc hstep hknown h0
+      hroot⟩
+
+/-- **Top-loop propagation of `accTargetsKnown`, `accTargetsNeRoot`, and root-known-ness, together,
+at `modalApplyOneKb5''`**: instantiates the generic `modalExpandBranchesGen_openBranch_gen`
+(`BDriver.lean`) at the conjoined predicate `P := fun b acc => accTargetsKnown b acc ∧
+(0 ∈ modalKnownWorlds b) ∧ accTargetsNeRoot acc`. Mirrors
+`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot`, extended with the third conjunct
+`modalTruthLemmaKb5` (Phase 5) needs. -/
+theorem modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown (fuel : Nat) :
+    ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+      (accs : List Accessibility),
+      expandedSets.length = branches.length →
+      accs.length = branches.length →
+      (∀ p ∈ branches.zip accs, accTargetsKnown p.1 p.2 ∧
+        (0 : WorldIndex) ∈ modalKnownWorlds p.1 ∧ accTargetsNeRoot p.2) →
+      ∀ (bR : List (SignedFormula (Proposition Atom) WorldIndex)) (aR : Accessibility),
+        modalExpandBranchesGen modalApplyOneKb5'' branches expandedSets accs fuel =
+          .openBranch bR aR →
+        accTargetsKnown bR aR ∧ (0 : WorldIndex) ∈ modalKnownWorlds bR ∧ accTargetsNeRoot aR :=
+  modalExpandBranchesGen_openBranch_gen modalApplyOneKb5''
+    (fun b acc => accTargetsKnown b acc ∧ (0 : WorldIndex) ∈ modalKnownWorlds b ∧
+      accTargetsNeRoot acc)
+    (by
+      intro b e acc newBs newExps newAcc hstep hp b' hb'
+      have hboth := modalStepBranchKb5''_preserves_accTargetsKnown_and_NeRoot_and_rootKnown b e acc
+        newBs newExps newAcc hstep hp.1 hp.2.1 hp.2.2
+      exact ⟨(hboth.1 b' hb').1, (hboth.1 b' hb').2, hboth.2⟩)
+    fuel
+
 /-! ### SCOUT: does `extractModelKb5`'s root reach stay within direct successors?
 
 `modalFiveBoxAll`'s root-trigger arm (reused verbatim as `modalApplyOneKb5 := modalApplyOneFive`,

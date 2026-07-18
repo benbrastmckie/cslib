@@ -39,13 +39,13 @@
     {
       "project_number": 502,
       "project_name": "fix_segment_import_minimization",
-      "status": "planned",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Minimize Segment.lean imports per lake shake recommendation",
       "description": "lake shake flags Cslib/Logics/Modal/Metalogic/Constructive/Segment.lean: replace the transitive `public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory` with direct imports of `Cslib.Logics.Modal.Metalogic.DerivationTree` and `Cslib.Foundations.Logic.Metalogic.PrimeExclusion` (the two modules whose declarations Segment.lean actually consumes). Do NOT remove the plain `import Cslib.Init` line (shake's suggestion there is the systemic out-of-scope pattern and would violate CONTRIBUTING.md's Cslib.Init mandate). Single-file, single-import-line change; re-verify with lake build + lake shake --add-public --keep-implied --keep-prefix. From vet of task 493.",
       "parent_task": 493,
       "created": "2026-07-14T15:19:36Z",
-      "last_updated": "2026-07-17T23:20:10Z",
+      "last_updated": "2026-07-18T00:00:36Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -59,8 +59,9 @@
         }
       ],
       "topic": "Code Hygiene",
-      "session_id": "sess_1784330211_e1fa40",
-      "blockers": "Single-import replacement in Segment.lean breaks its downstream consumer SegmentLindenbaum.lean, which relied on Segment.lean transitive public re-export of modalDeductiveClosure (PrimeTheory.lean) and deductionTheorem (DeductionTheorem.lean). Research zero-symbols-consumed claim was scoped to Segment.lean only, not its consumer. Segment.lean reverted to original (zero delta). FIX: add direct public imports of PrimeTheory + Modal/Metalogic/DeductionTheorem to SegmentLindenbaum.lean first, then re-apply the Segment.lean edit. plan-level [BLOCKED]."
+      "session_id": "sess_1784332299_d86bc5",
+      "blockers": "Single-import replacement in Segment.lean breaks its downstream consumer SegmentLindenbaum.lean, which relied on Segment.lean transitive public re-export of modalDeductiveClosure (PrimeTheory.lean) and deductionTheorem (DeductionTheorem.lean). Research zero-symbols-consumed claim was scoped to Segment.lean only, not its consumer. Segment.lean reverted to original (zero delta). FIX: add direct public imports of PrimeTheory + Modal/Metalogic/DeductionTheorem to SegmentLindenbaum.lean first, then re-apply the Segment.lean edit. plan-level [BLOCKED].",
+      "completion_summary": "Replaced Segment.lean's transitive public import of Intuitionistic/PrimeTheory with direct public imports of Foundations/PrimeExclusion and DerivationTree; added consumer-first direct imports to SegmentLindenbaum.lean. Full lake build (3238/3238), checkInitImports, lint-style, and shake all clean (only known Cslib.Init false-positive remains)."
     },
     {
       "project_number": 465,
@@ -1755,7 +1756,7 @@
     {
       "project_number": 524,
       "project_name": "kb5_full_cluster_rule_and_soundness",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Task 515's Phase 22 landed `modalApplyOneKb5 := modalApplyOneFive` as a literal alias (Cslib/Logics/Modal/Tableau/FiveSimplification.lean:1436), sound for KB5 only because 'factor, not clone' lets a Five-sound rule transfer to the strictly-stronger kb5FC frame class. That alias only propagates content at DIRECT `acc.hasEdge` successors of the root -- by design, since Five's own soundness needs exactly that restriction (Five's root is not reflexive). But `extractModelKb5`'s relation (Cslib/Logics/Modal/Tableau/FrameCompleteness.lean:3230) is forced to be `Relation.EuclGen (Relation.SymmGen acc.hasEdge)`, the least kb5FC-satisfying relation preserving every raw edge -- and this relation relates the root to INDIRECT chain targets too (a raw chain `0 -> a -> c` where non-root `a` mints a fresh witness `c` gives `(extractModelKb5 b acc).r 0 c`). This is proved by the already-landed, sorry-free, zero-axiom witness lemma `extractModelKb5_root_reach_scout` (FrameCompleteness.lean:3294), and confirmed algebraically to hold for ANY kb5FC-satisfying relation preserving raw edges -- not an artifact of this specific closure operator. Deliver a genuinely NEW KB5-specific tableau rule (a plausible name is `modalApplyOneKb5'`, landed either in FiveSimplification.lean's KB5 section or a new Kb5Simplification.lean -- implementer's choice) whose root box/diamond trigger propagates to the FULL known non-root cluster (matching the non-root propagation arm's own unconditional behavior), and which ALSO propagates the root's own box content back onto world 0 itself, justified by the already-landed `Relation.symm_rightEuclidean_root_refl` (Cslib/Foundations/Relation/Euclidean.lean:362: a rooted symmetric+right-Euclidean frame makes the root reflexive whenever it has a successor). Re-derive the termination bound for the new rule (Phase 19a's bound does not transfer for free since the new rule is no longer definitionally modalApplyOneFive). Land the RuleApplicationSpecCore instance for the new rule (mirroring modalApplyOneFive_specCore's nine-field discharge, FiveSimplification.lean:1389-1441). Land a NEW soundness theorem in Cslib/Logics/Modal/Tableau/FrameSoundness.lean, proved DIRECTLY against kb5FC (the frame-class-monotonicity shortcut Phase 22 used is NOT available here -- the new rule's unrestricted root propagation would be unsound for the strictly larger fiveFC class, per the Phase 23 blocker note at FrameCompleteness.lean:3300-3339). Reuse without re-deriving: extractModelKb5 and its extraction lemmas (extractModelKb5_r/_rightEuclidean/_symm/_hasEdge_imp_r, FrameCompleteness.lean:3230-3270), extractModelKb5_root_reach_scout (FrameCompleteness.lean:3294, the counterexample characterizing exactly what the new rule must handle), EuclGen.symm_of_symm + its Std.Symm (EuclGen r) instance and Relation.EuclGen/Relation.SymmGen (Cslib/Foundations/Relation/Euclidean.lean), Relation.symm_rightEuclidean_root_refl (Euclidean.lean:362), and the entire green S5/Five rule-design pattern in FiveSimplification.lean (mint-arm guards, witness reuse, source-split termination tagging) as structural template. Constraint: zero sorry, zero new axiom declarations anywhere; every new public declaration must be lean_verify-clean (only the standard [propext, Classical.choice, Quot.sound] subset). Do not introduce a vacuous placeholder (def X := True / theorem X := trivial) if a step cannot be completed -- mark [BLOCKED] instead per plan-compliance.md and lean4.md. Do not touch Cslib/Logics/Modal/Tableau/LoopChecking.lean unless it is already resolved by task 511's concurrent session by the time this task runs (check first).",
       "effort": "6-10 hours",
@@ -1768,7 +1769,7 @@
         "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
       ],
       "created": "2026-07-17T22:34:22Z",
-      "last_updated": "2026-07-17T23:11:10Z",
+      "last_updated": "2026-07-17T23:59:15Z",
       "artifacts": [
         {
           "type": "research",
@@ -1779,6 +1780,11 @@
           "type": "plan",
           "path": "specs/524_kb5_full_cluster_rule_and_soundness/plans/01_kb5-full-cluster-rule-soundness.md",
           "summary": "6-phase KB5 full-cluster rule + termination + specCore + kb5FC-direct soundness plan"
+        },
+        {
+          "type": "summary",
+          "path": "specs/524_kb5_full_cluster_rule_and_soundness/summaries/01_kb5-full-cluster-rule-soundness-summary.md",
+          "summary": "KB5 full-cluster rule + kb5FC-direct soundness implementation summary"
         }
       ],
       "session_id": "sess_1784329467_424a02_524"
@@ -1786,7 +1792,7 @@
     {
       "project_number": 525,
       "project_name": "kb5_completeness_and_decidability",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "description": "Completes task 515's re-scoped Phase 23 deliverable, resuming after the KB5-specific propagation rule and its soundness proof (New Task 1 / the task this depends on) are landed. Land `theorem modalTableauKb5_complete (phi) (h : kb5Valid phi) : modalTableauKb5 phi = .closed` (or the tableau-entry-point-equivalent name matching whatever New Task 1's new rule is wired through) in Cslib/Logics/Modal/Tableau/FrameCompleteness.lean, via extractModelKb5 (already landed sorry-free, FrameCompleteness.lean:3230-3270) plus the Phase 12 lift pattern used by modalTableauFive_complete. Build (or extend) the Euclidean-symmetric truth lemma's root box-positive case using New Task 1's rule: T(box psi)@0 in b must imply T(psi)@w' for every w' with (extractModelKb5 b acc).r 0 w', discharged via the full-cluster-dump plus root-reflexive-propagation guarantees New Task 1 proved sound against kb5FC. Land `instance instDecidableKb5Valid (phi) : Decidable (kb5Valid phi)`, mirroring instDecidableFiveValid's two-direction (soundness/completeness) decidability construction. Remove or update the 'Phase 23 Blocker' /-! -/ note (FrameCompleteness.lean:3300-3339) and reconcile the SCOUT section framing (FrameCompleteness.lean:3272-3299) to reflect the delivered state (the scout lemma extractModelKb5_root_reach_scout should stay as documentation of the design constraint the new rule satisfies, not read as an open blocker). Reconcile the '5/KB5 Coverage via the S5 Route' docstring in FrameCompleteness.lean and the 'Scope Note: Pure-K5 / Pure-5' block in Cslib/Logics/Modal/Tableau/S5Simplification.lean (both located by content, not stale line numbers) to state KB5 completeness as delivered. Extend CslibTests/ModalFrameSeparation.lean's kb5Valid regression coverage to use instDecidableKb5Valid / by decide now that the instance exists, replacing the current term-proof-only (boxImp_not_kb5Valid) check where appropriate. Run the full CSLib CI pipeline (lake build, checkInitImports, lake lint, lint-style, lake test, shake) to completion -- this was the one item Phase 23 left pending purely due to the concurrent LoopChecking.lean interruption from an unrelated task (511); by the time this task runs that file should be resolved, so this should require no further code changes, just verification. Constraint: zero sorry, zero new axiom declarations; every new public declaration lean_verify-clean.",
       "effort": "5-8 hours",
@@ -1802,14 +1808,15 @@
         "CslibTests/ModalFrameSeparation.lean"
       ],
       "created": "2026-07-17T22:34:22Z",
-      "last_updated": "2026-07-17T22:34:22Z",
+      "last_updated": "2026-07-17T23:59:36Z",
       "artifacts": [
         {
           "type": "research",
           "path": "specs/515_s5_universal_rule_termination_unblock_504/reports/02_spawn-analysis.md",
           "summary": "Spawn analysis from parent task 515"
         }
-      ]
+      ],
+      "session_id": "sess_1784329467_424a02_525"
     }
   ],
   "repository_health": {

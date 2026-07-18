@@ -4800,6 +4800,411 @@ theorem modalMaxWorld_lt_worldBound_of_Kb5''WorldInv {φ₀ : Proposition Atom}
     modalMaxWorld b < modalWorldBound φ₀ :=
   modalMaxWorld_lt_worldBound_of_FiveWorldInv (Kb5''WorldInv_eq φ₀ b ▸ hW)
 
+/-! ## Step-Preservation of the World-Bound Invariant for `modalApplyOneKb5''` (task 528 Phase 6)
+
+Mirrors `modalStepBranchFive_preserves_worldInv` above declaration-for-declaration, reusing
+`FiveWorldInvE`/`expandedRootTagsFive`/`usedTagsFiveNonRoot`/`mintTags` directly (no `Kb5''`-named
+fork of these -- per this file's own precedent above, they are already rule-independent, and the
+`Kb5''WorldInv`/`Kb5''WorldInv_eq` aliasing pattern is reserved for names call sites elsewhere
+actually reference by their own `Kb5''`-labeled identity; `FiveWorldInvE` has no such external
+caller yet, so introducing a same-content alias here would only add surface area). The mint
+(existential) shapes of `modalApplyOneKb5''_worldGrowth` below port `modalApplyOneFive_worldGrowth`
+near-verbatim (Phase 1 already confirmed the mint arms are byte-identical witness-reuse behavior);
+the propagation (box-positive/diamond-negative) shape is fresh, resting on
+`modalApplyOneKb5''Prop_boxPos_diaNeg_eq` (Phase 3) instead of Five's own analogue -- unlike Five,
+this needs the extra ambient hypothesis `h0 : 0 ∈ modalKnownWorlds b` the corrected gate's
+self-target arm requires (its cluster-membership dichotomy no longer ties `x.label = 0` to the
+trigger's own known-ness, since the gate now fires for *any* trigger, not only `w = 0`). -/
+
+/-- **World-growth dichotomy for `modalApplyOneKb5''`**: mirrors `modalApplyOneFive_worldGrowth`.
+The two mint shapes are Five's own case split verbatim, substituting
+`modalApplyOneKb5''_diaPos_eq_or_reuse`/`modalApplyOneKb5''_boxNeg_eq_or_reuse` (Phase 1) for the
+Five originals. The propagation shape is fresh: `modalApplyOneKb5''Prop_boxPos_diaNeg_eq` (Phase
+3) already shows no growth is possible there (accessibility unchanged, every emitted label
+known), given the extra `h0` hypothesis its self-target arm needs. -/
+lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (hsfform : sf.formula ∈ modalSubfmls φ₀) :
+    (match (modalApplyOneKb5'' sf b acc).fst with
+      | .linear formulas =>
+          (∀ x ∈ formulas, x.label ∈ modalKnownWorlds b) ∨
+          (∃ s ψ, (s, ψ) ∉ usedTagsFiveNonRoot φ₀ b ∧ (s, ψ) ∈ mintTags φ₀ ∧
+            (⟨s, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+              formulas ∧
+            ∀ x ∈ formulas, x.label = modalNextWorld b) ∨
+          (sf.label = (0 : WorldIndex) ∧ ∃ ψ,
+            ((sf.sign = Sign.pos ∧ sf.formula = Proposition.diamond ψ) ∨
+             (sf.sign = Sign.neg ∧ sf.formula = Proposition.box ψ)) ∧
+            (sf.sign, ψ) ∈ mintTags φ₀ ∧
+            (⟨sf.sign, ψ, modalNextWorld b⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+              formulas ∧
+            ∀ x ∈ formulas, x.label = modalNextWorld b)
+      | .branching branches => ∀ x ∈ branches.flatten, x.label ∈ modalKnownWorlds b
+      | .persistent formulas => ∀ x ∈ formulas, x.label ∈ modalKnownWorlds b
+      | .notApplicable => True) := by
+  by_cases hmint : (sf.sign = Sign.pos ∧ ∃ φ, sf.formula = Proposition.diamond φ) ∨
+      (sf.sign = Sign.neg ∧ ∃ φ, sf.formula = Proposition.box φ)
+  · rcases hmint with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf hsfform
+      subst hs; subst hf
+      have hφmem : φ ∈ modalSubfmls (Proposition.diamond φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_Five hφmem hsfform
+      have htagmem : (Sign.pos, φ) ∈ mintTags φ₀ := mem_mintTags_of_diamond_mem hsfform
+      by_cases hz : w = (0 : WorldIndex)
+      · subst hz
+        have heq : modalApplyOneKb5''
+            (⟨.pos, .diamond φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc =
+            modalApplyOneKb5''Prop
+              (⟨.pos, .diamond φ, (0 : WorldIndex)⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) b acc := by
+          unfold modalApplyOneKb5''; simp
+        rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+          modalApplyOne_diamondPos_mint_fst]
+        exact Or.inr (Or.inr ⟨rfl, φ, Or.inl ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
+          modalApplyOne_diamondPos_mint_label b φ (0 : WorldIndex)⟩)
+      · cases hw : witnessWorldFive b Sign.pos φ with
+        | none =>
+          have heq : modalApplyOneKb5''
+              (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              modalApplyOneKb5''Prop
+                (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+            unfold modalApplyOneKb5''
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+            modalApplyOne_diamondPos_mint_fst]
+          exact Or.inr (Or.inl ⟨Sign.pos, φ,
+            witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
+            modalApplyOne_diamondPos_mint_label b φ w⟩)
+        | some w' =>
+          have heq : modalApplyOneKb5''
+              (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              (RuleResult.linear [⟨.pos, φ, w'⟩], acc.addEdge w w') := by
+            unfold modalApplyOneKb5''
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq]
+          refine Or.inl (fun z hz' => ?_)
+          simp only [List.mem_singleton] at hz'; subst hz'
+          exact label_mem_modalKnownWorlds (witnessWorldFive_mem hw).1
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf hsfform
+      subst hs; subst hf
+      have hφmem : φ ∈ modalSubfmls (Proposition.box φ) :=
+        List.mem_cons_of_mem _ (modalSubfmls_self_mem φ)
+      have hφsub : φ ∈ modalSubfmls φ₀ := modalSubfmls_trans_Five hφmem hsfform
+      have htagmem : (Sign.neg, φ) ∈ mintTags φ₀ := mem_mintTags_of_box_mem hsfform
+      by_cases hz : w = (0 : WorldIndex)
+      · subst hz
+        have heq : modalApplyOneKb5''
+            (⟨.neg, .box φ, (0 : WorldIndex)⟩ : SignedFormula (Proposition Atom) WorldIndex)
+            b acc =
+            modalApplyOneKb5''Prop
+              (⟨.neg, .box φ, (0 : WorldIndex)⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) b acc := by
+          unfold modalApplyOneKb5''; simp
+        rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+          modalApplyOne_boxNeg_mint_fst]
+        exact Or.inr (Or.inr ⟨rfl, φ, Or.inr ⟨rfl, rfl⟩, htagmem, List.mem_cons_self,
+          modalApplyOne_boxNeg_mint_label b φ (0 : WorldIndex)⟩)
+      · cases hw : witnessWorldFive b Sign.neg φ with
+        | none =>
+          have heq : modalApplyOneKb5''
+              (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              modalApplyOneKb5''Prop
+                (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+            unfold modalApplyOneKb5''
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq, modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg _ b acc (by simp),
+            modalApplyOne_boxNeg_mint_fst]
+          exact Or.inr (Or.inl ⟨Sign.neg, φ,
+            witnessWorldFive_none_not_mem_usedTagsFiveNonRoot hw, htagmem, List.mem_cons_self,
+            modalApplyOne_boxNeg_mint_label b φ w⟩)
+        | some w' =>
+          have heq : modalApplyOneKb5''
+              (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc =
+              (RuleResult.linear [⟨.neg, φ, w'⟩], acc.addEdge w w') := by
+            unfold modalApplyOneKb5''
+            dsimp only
+            rw [if_neg (by simpa using hz), hw]
+          rw [heq]
+          refine Or.inl (fun z hz' => ?_)
+          simp only [List.mem_singleton] at hz'; subst hz'
+          exact label_mem_modalKnownWorlds (witnessWorldFive_mem hw).1
+  · rw [modalApplyOneKb5''_eq_of_not_mint_shape sf b acc
+        ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩]
+    by_cases hprop : (sf.sign = Sign.pos ∧ ∃ φ, sf.formula = Proposition.box φ) ∨
+        (sf.sign = Sign.neg ∧ ∃ φ, sf.formula = Proposition.diamond φ)
+    · obtain ⟨hsndeq, hor⟩ :=
+        modalApplyOneKb5''Prop_boxPos_diaNeg_eq sf b acc hsfmem hknown h0 hprop
+      rcases hor with hnot | ⟨out, hpers, hlabel⟩
+      · rw [hnot]; trivial
+      · rw [hpers]; exact hlabel
+    · rw [modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg sf b acc
+          ⟨fun hc => hprop (Or.inl hc), fun hc => hprop (Or.inr hc)⟩]
+      have hsflabel : sf.label ∈ modalKnownWorlds b :=
+        (mem_modalKnownWorlds_Five b sf.label).mpr ⟨sf, hsfmem, rfl⟩
+      have hprop2 := modalApplyOne_prop_outputs_subset sf
+      unfold modalApplyOne
+      by_cases hpa :
+          (tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf).isApplicable
+      · simp only [hpa, if_true]
+        rcases hpr : tryAllPropRules modalAndOf? modalOrOf? modalImpOf? modalNegOf? sf with
+          formulas | branches | formulas | -
+        · rw [hpr] at hprop2
+          refine Or.inl (fun z hz => ?_)
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hprop2
+          intro z hz
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hprop2
+          intro z hz
+          rw [(hprop2 z hz).2]; exact hsflabel
+        · rw [hpr] at hpa
+          simp [RuleResult.isApplicable] at hpa
+      · rw [if_neg hpa]
+        rcases hs : sf.sign with _ | _ <;>
+          rcases hf : sf.formula with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ <;> simp_all
+
+/-- **Combined `e`-aware step-preservation for `modalApplyOneKb5''`'s two conjuncts**: one
+`modalStepBranchGen modalApplyOneKb5''` step preserves both `∀x∈b,x∈modalUniverse φ₀` and
+`FiveWorldInvE φ₀ b e` on every `(b', e')` child pair, given the extra ambient
+`h0 : 0 ∈ modalKnownWorlds b` the corrected gate's propagation shape needs. Mirrors
+`modalStepBranchFive_preserves_worldInv` declaration-for-declaration, threading `h0` through to
+`modalApplyOneKb5''_worldGrowth` and substituting `modalApplyOneKb5''_outputsSubsetUniverse` (F2)
+for Five's own F2 discharge. -/
+theorem modalStepBranchKb5''_preserves_worldInv {φ₀ : Proposition Atom}
+    {b e : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    {bs es : List (List (SignedFormula (Proposition Atom) WorldIndex))} {acc' : Accessibility}
+    (hb : ∀ x ∈ b, x ∈ modalUniverse φ₀) (hWE : FiveWorldInvE φ₀ b e)
+    (hFresh : accFreshInv b acc) (hK : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    (h : modalStepBranchGen modalApplyOneKb5'' b e acc = some (bs, es, acc')) :
+    ∀ p ∈ bs.zip es, (∀ x ∈ p.1, x ∈ modalUniverse φ₀) ∧ FiveWorldInvE φ₀ p.1 p.2 := by
+  have hW : modalMaxWorld b < modalWorldBound φ₀ :=
+    modalMaxWorld_lt_worldBound_of_FiveWorldInv (FiveWorldInvE_imp_FiveWorldInv hWE)
+  simp only [modalStepBranchGen] at h
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some h
+  by_cases hexp : e.any (· == sf) = true
+  · rw [if_pos hexp] at hsf; exact absurd hsf (by simp)
+  · rw [if_neg hexp] at hsf
+    have hsfform : sf.formula ∈ modalSubfmls φ₀ := modalUniverse_mem_formula_Five (hb sf hsfmem)
+    have hgrowth := modalApplyOneKb5''_worldGrowth (φ₀ := φ₀) sf b acc hsfmem hK h0 hsfform
+    have houts := modalApplyOneKb5''_outputsSubsetUniverse φ₀ sf b acc hb hsfmem hFresh hW
+    unfold FiveWorldInvE at hWE
+    rcases hfstc : (modalApplyOneKb5'' sf b acc).fst with nf | brs | nf | _
+    · rw [hfstc] at hsf houts hgrowth
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro p hp
+      rw [← hsf.1, ← hsf.2.1] at hp
+      simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+      subst hp
+      dsimp only
+      have hbClosure : ∀ x ∈ nf ++ b, x ∈ modalUniverse φ₀ := by
+        intro x hx
+        simp only [List.mem_append] at hx
+        rcases hx with hx | hx
+        · exact houts x hx
+        · exact hb x hx
+      refine ⟨hbClosure, ?_⟩
+      unfold FiveWorldInvE
+      rcases hgrowth with hknownall | ⟨s, ψ, hnotused, htagmem, hmemnf, hlabelall⟩ |
+          ⟨hroot, ψ, hshape, htagmem, hmemnf, hlabelall⟩
+      · have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
+          apply modalMaxWorld_le_of_forall_label_le_Five
+          intro z hz
+          simp only [List.mem_append] at hz
+          rcases hz with hz | hz
+          · exact known_label_le_modalMaxWorld_Five (hknownall z hz)
+          · exact label_le_modalMaxWorld hz
+        have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
+          Finset.card_le_card
+            (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
+        have hE : (expandedRootTagsFive φ₀ b e).card ≤
+            (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card :=
+          Finset.card_le_card (expandedRootTagsFive_mono
+            (fun x hx => List.mem_append_right _ hx) (fun x hx => List.mem_append_left _ hx))
+        calc modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := hmaxle
+          _ ≤ (usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card := hWE
+          _ ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card +
+              (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hN hE
+      · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
+          apply le_antisymm
+          · apply modalMaxWorld_le_of_forall_label_le_Five
+            intro z hz
+            simp only [List.mem_append] at hz
+            rcases hz with hz | hz
+            · rw [hlabelall z hz]
+            · exact le_of_lt (modalNextWorld_gt b z hz)
+          · exact label_le_modalMaxWorld (List.mem_append_left _ hmemnf)
+        have hNsub : usedTagsFiveNonRoot φ₀ b ⊆ usedTagsFiveNonRoot φ₀ (nf ++ b) :=
+          usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx)
+        have hnewmem : (s, ψ) ∈ usedTagsFiveNonRoot φ₀ (nf ++ b) := by
+          simp only [usedTagsFiveNonRoot, Finset.mem_filter]
+          refine ⟨htagmem, ?_⟩
+          exact List.any_eq_true.mpr
+            ⟨⟨s, ψ, modalNextWorld b⟩, List.mem_append_left _ hmemnf,
+              by simp [modalNextWorld]⟩
+        have hNcard : (usedTagsFiveNonRoot φ₀ b).card + 1 ≤
+            (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
+          Finset.card_lt_card
+            ((Finset.ssubset_iff_of_subset hNsub).mpr ⟨(s, ψ), hnewmem, hnotused⟩)
+        have hE : (expandedRootTagsFive φ₀ b e).card ≤
+            (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card :=
+          Finset.card_le_card (expandedRootTagsFive_mono
+            (fun x hx => List.mem_append_right _ hx) (fun x hx => List.mem_append_left _ hx))
+        rw [hmaxeq]
+        change modalMaxWorld b + 1 ≤ _
+        calc modalMaxWorld b + 1 ≤
+              ((usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card) + 1 :=
+                Nat.add_le_add_right hWE 1
+          _ = ((usedTagsFiveNonRoot φ₀ b).card + 1) + (expandedRootTagsFive φ₀ b e).card := by ring
+          _ ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card +
+              (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hNcard hE
+      · have hmaxeq : modalMaxWorld (nf ++ b) = modalNextWorld b := by
+          apply le_antisymm
+          · apply modalMaxWorld_le_of_forall_label_le_Five
+            intro z hz
+            simp only [List.mem_append] at hz
+            rcases hz with hz | hz
+            · rw [hlabelall z hz]
+            · exact le_of_lt (modalNextWorld_gt b z hz)
+          · exact label_le_modalMaxWorld (List.mem_append_left _ hmemnf)
+        have hEsub :
+            expandedRootTagsFive φ₀ b e ⊆ expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf]) :=
+          expandedRootTagsFive_mono (fun x hx => List.mem_append_right _ hx)
+            (fun x hx => List.mem_append_left _ hx)
+        have hnotmem : (sf.sign, ψ) ∉ expandedRootTagsFive φ₀ b e := by
+          simp only [expandedRootTagsFive, Finset.mem_filter, not_and]
+          intro _ hany
+          obtain ⟨x, hxmem, hxeq⟩ := List.any_eq_true.mp hany
+          simp only [Bool.and_eq_true, Bool.or_eq_true, beq_iff_eq] at hxeq
+          obtain ⟨⟨hxlab, hxshape⟩, hxexp⟩ := hxeq
+          obtain ⟨y, hymem, hyeq⟩ := List.any_eq_true.mp hxexp
+          have hyx : y = x := beq_iff_eq.mp hyeq
+          have hlabeq : x.label = sf.label := hxlab.trans hroot.symm
+          have hxeqsf : x = sf := by
+            rcases hshape with ⟨hs, hf⟩ | ⟨hs, hf⟩
+            · rcases hxshape with ⟨⟨hspos, hxs⟩, hxf⟩ | ⟨⟨hsneg, hxs⟩, hxf⟩
+              · have hsigneq : x.sign = sf.sign := hxs.trans hs.symm
+                have hformeq : x.formula = sf.formula := hxf.trans hf.symm
+                calc x = (⟨x.sign, x.formula, x.label⟩ :
+                    SignedFormula (Proposition Atom) WorldIndex) := rfl
+                  _ = (⟨sf.sign, sf.formula, sf.label⟩ :
+                      SignedFormula (Proposition Atom) WorldIndex) := by
+                    rw [hsigneq, hformeq, hlabeq]
+                  _ = sf := rfl
+              · rw [hs] at hsneg; exact absurd hsneg (by decide)
+            · rcases hxshape with ⟨⟨hspos, hxs⟩, hxf⟩ | ⟨⟨hsneg, hxs⟩, hxf⟩
+              · rw [hs] at hspos; exact absurd hspos (by decide)
+              · have hsigneq : x.sign = sf.sign := hxs.trans hs.symm
+                have hformeq : x.formula = sf.formula := hxf.trans hf.symm
+                calc x = (⟨x.sign, x.formula, x.label⟩ :
+                    SignedFormula (Proposition Atom) WorldIndex) := rfl
+                  _ = (⟨sf.sign, sf.formula, sf.label⟩ :
+                      SignedFormula (Proposition Atom) WorldIndex) := by
+                    rw [hsigneq, hformeq, hlabeq]
+                  _ = sf := rfl
+          have hyeqsf : y = sf := hyx.trans hxeqsf
+          exact hexp (hyeqsf ▸ List.any_eq_true.mpr ⟨y, hymem, by simp⟩)
+        have hnewmem : (sf.sign, ψ) ∈ expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf]) := by
+          simp only [expandedRootTagsFive, Finset.mem_filter]
+          refine ⟨htagmem, List.any_eq_true.mpr ⟨sf, List.mem_append_right _ hsfmem, ?_⟩⟩
+          rcases hshape with ⟨hs, hf⟩ | ⟨hs, hf⟩ <;> simp [hroot, hs, hf]
+        have hEcard : (expandedRootTagsFive φ₀ b e).card + 1 ≤
+            (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card :=
+          Finset.card_lt_card
+            ((Finset.ssubset_iff_of_subset hEsub).mpr ⟨(sf.sign, ψ), hnewmem, hnotmem⟩)
+        have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
+          Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
+        rw [hmaxeq]
+        change modalMaxWorld b + 1 ≤ _
+        calc modalMaxWorld b + 1 ≤
+              ((usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card) + 1 :=
+                Nat.add_le_add_right hWE 1
+          _ = (usedTagsFiveNonRoot φ₀ b).card +
+              ((expandedRootTagsFive φ₀ b e).card + 1) := by ring
+          _ ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card +
+              (expandedRootTagsFive φ₀ (nf ++ b) (e ++ [sf])).card := Nat.add_le_add hN hEcard
+    · rw [hfstc] at hsf houts hgrowth
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro p hp
+      rw [← hsf.1, ← hsf.2.1] at hp
+      obtain ⟨hp1, hp2⟩ := List.of_mem_zip hp
+      obtain ⟨br, hbr, hp1eq⟩ := List.mem_map.mp hp1
+      obtain ⟨-, -, hp2eq⟩ := List.mem_map.mp hp2
+      have hpeq : p = (br ++ b, e ++ [sf]) := by
+        obtain ⟨p1, p2⟩ := p
+        simp only [Prod.mk.injEq]
+        exact ⟨hp1eq.symm, hp2eq.symm⟩
+      subst hpeq
+      dsimp only
+      have hbClosure : ∀ x ∈ br ++ b, x ∈ modalUniverse φ₀ := by
+        intro x hx
+        simp only [List.mem_append] at hx
+        rcases hx with hx | hx
+        · exact houts x (List.mem_flatten.mpr ⟨br, hbr, hx⟩)
+        · exact hb x hx
+      refine ⟨hbClosure, ?_⟩
+      unfold FiveWorldInvE
+      have hmaxle : modalMaxWorld (br ++ b) ≤ modalMaxWorld b := by
+        apply modalMaxWorld_le_of_forall_label_le_Five
+        intro z hz
+        simp only [List.mem_append] at hz
+        rcases hz with hz | hz
+        · exact known_label_le_modalMaxWorld_Five (hgrowth z (List.mem_flatten.mpr ⟨br, hbr, hz⟩))
+        · exact label_le_modalMaxWorld hz
+      have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (br ++ b)).card :=
+        Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
+      have hE : (expandedRootTagsFive φ₀ b e).card ≤
+          (expandedRootTagsFive φ₀ (br ++ b) (e ++ [sf])).card :=
+        Finset.card_le_card (expandedRootTagsFive_mono
+          (fun x hx => List.mem_append_right _ hx) (fun x hx => List.mem_append_left _ hx))
+      calc modalMaxWorld (br ++ b) ≤ modalMaxWorld b := hmaxle
+        _ ≤ (usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card := hWE
+        _ ≤ (usedTagsFiveNonRoot φ₀ (br ++ b)).card +
+            (expandedRootTagsFive φ₀ (br ++ b) (e ++ [sf])).card := Nat.add_le_add hN hE
+    · rw [hfstc] at hsf houts hgrowth
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      intro p hp
+      rw [← hsf.1, ← hsf.2.1] at hp
+      simp only [List.zip_cons_cons, List.zip_nil_right, List.mem_singleton] at hp
+      subst hp
+      dsimp only
+      have hbClosure : ∀ x ∈ nf ++ b, x ∈ modalUniverse φ₀ := by
+        intro x hx
+        simp only [List.mem_append] at hx
+        rcases hx with hx | hx
+        · exact houts x hx
+        · exact hb x hx
+      refine ⟨hbClosure, ?_⟩
+      unfold FiveWorldInvE
+      have hmaxle : modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := by
+        apply modalMaxWorld_le_of_forall_label_le_Five
+        intro z hz
+        simp only [List.mem_append] at hz
+        rcases hz with hz | hz
+        · exact known_label_le_modalMaxWorld_Five (hgrowth z hz)
+        · exact label_le_modalMaxWorld hz
+      have hN : (usedTagsFiveNonRoot φ₀ b).card ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card :=
+        Finset.card_le_card (usedTagsFiveNonRoot_mono (fun x hx => List.mem_append_right _ hx))
+      have hE : (expandedRootTagsFive φ₀ b e).card ≤
+          (expandedRootTagsFive φ₀ (nf ++ b) e).card :=
+        Finset.card_le_card (expandedRootTagsFive_mono
+          (fun x hx => List.mem_append_right _ hx) (fun x hx => hx))
+      calc modalMaxWorld (nf ++ b) ≤ modalMaxWorld b := hmaxle
+        _ ≤ (usedTagsFiveNonRoot φ₀ b).card + (expandedRootTagsFive φ₀ b e).card := hWE
+        _ ≤ (usedTagsFiveNonRoot φ₀ (nf ++ b)).card +
+            (expandedRootTagsFive φ₀ (nf ++ b) e).card := Nat.add_le_add hN hE
+    · rw [hfstc] at hsf; simp at hsf
+
 end Cslib.Logic.Modal.Tableau
 
 end

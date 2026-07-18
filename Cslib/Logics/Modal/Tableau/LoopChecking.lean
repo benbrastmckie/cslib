@@ -2152,6 +2152,127 @@ lemma modalStepBranchS4_preserves_eNodup (φ₀ : Proposition Atom)
     exact hnodup
   · rw [hres] at hsf; simp at hsf
 
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `outDeg` under `addEdge` at the matching source: local re-derivation of `FmpMeasure.lean`'s
+`private lemma outDeg_addEdge_self` (unavailable across files). -/
+private lemma outDeg_addEdge_self_S4 (acc : Accessibility) (w wf : WorldIndex) :
+    outDeg (acc.addEdge w wf) w = outDeg acc w + 1 := by
+  simp [outDeg, Accessibility.successorsOf, Accessibility.addEdge]
+
+omit [DecidableEq Atom] [Hashable Atom] in
+/-- `outDeg` under `addEdge` is unchanged at any world other than the edge's source: local
+re-derivation of `FmpMeasure.lean`'s `private lemma outDeg_addEdge_ne` (unavailable across
+files). -/
+private lemma outDeg_addEdge_ne_S4 (acc : Accessibility) (w wf w' : WorldIndex) (h : w' ≠ w) :
+    outDeg (acc.addEdge w wf) w' = outDeg acc w' := by
+  simp only [outDeg, Accessibility.successorsOf, Accessibility.addEdge, List.filterMap_cons]
+  have : (w == w') = false := by simp only [beq_eq_false_iff_ne]; exact fun heq => h heq.symm
+  simp [this]
+
+/-- **`keysWorldsKnown`, a proof-internal auxiliary invariant** (not an `S4LoopInv` field: adding
+one would reopen the already-`[COMPLETED]` Phase 4 struct design): every RECORDED key's world is
+already a known world of the branch. Not literally implied by any single `S4LoopInv` field
+(`keysTotal` only gives the converse direction), but true by construction -- `keys` only ever
+gains an entry `(modalNextWorld b, ...)` in the SAME step that mints the branch formula carrying
+that exact label, so the keyed world is known from the moment its key is recorded onward. Needed
+by `accFresh`/`accKnown`'s preservation, whose guard-BLOCKED minting sub-case adds an edge to
+`blockingWorldS4Keyed`'s result `wBlock` -- a RECORDED-key world, not necessarily K's usual
+"freshly-minted" witness, so the standard `hFreshLocal`-style dichotomy (nonempty `.linear`
+headed by the fresh witness) does not apply; `wBlock ∈ modalKnownWorlds b` is what closes the
+gap instead. Threaded as an extra hypothesis/conclusion alongside `S4LoopInv` at every call site
+(including the final assembly), exactly like `RuleApplicationSpec`-style raw hypotheses
+elsewhere in this development. -/
+lemma modalStepBranchS4_preserves_keysWorldsKnown (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hKW : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → w ∈ modalKnownWorlds b' := by
+  have hsuper := modalStepBranchS4Keyed_branch_superset φ₀ b e acc keys newBs newExps newAcc
+    keys' hstep
+  have hold : ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b' := by
+    intro b' hb' w k hwk
+    obtain ⟨sf', hsf', hlab⟩ := (mem_modalKnownWorlds_S4 b w).mp (hKW w k hwk)
+    exact (mem_modalKnownWorlds_S4 b' w).mpr ⟨sf', hsuper b' hb' sf' hsf', hlab⟩
+  have hstep0 := hstep
+  unfold modalStepBranchS4Keyed at hstep0
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep0
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro b' hb' w k hwk
+  rw [hkeq] at hwk
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at hwk
+  all_goals first
+    | exact hold b' hb' w k hwk
+    | skip
+  case neg.neg.box =>
+    have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, -⟩ := hwk
+        subst hweq
+        have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rw [mem_modalKnownWorlds_S4]
+        exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+    · simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+  case neg.pos.diamond =>
+    have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, -⟩ := hwk
+        subst hweq
+        have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rw [mem_modalKnownWorlds_S4]
+        exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+    · simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+
 /-! ## S4 Hintikka Set -/
 
 /-- A modal S4 Hintikka set: the S4 analogue of `modalHintikkaSet` (Saturation.lean),

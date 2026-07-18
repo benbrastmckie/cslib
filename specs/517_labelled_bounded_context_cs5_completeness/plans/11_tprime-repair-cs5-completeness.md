@@ -1,7 +1,7 @@
 # Implementation Plan v4: Task #517 — Labelled Bounded-Context CS5 Completeness, gated on repairing `TPrime` inhabitance
 
 - **Task**: 517 - labelled_bounded_context_cs5_completeness
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: HIGH, HIGH uncertainty. ~1500-2500 line new framework, ~zero reuse of the
   prime-theory canonical machinery. Phase 1 (the gate) is mostly *transcription* of already-landed
   sorry-free probe scaffolds (~1-2 dispatches, LOW risk). The proof legs (Phases 3, 4, 6) are the
@@ -237,7 +237,7 @@ Simpson Ch 7-8 chunks (Lemmas 8.2.5, 8.2.6, the bounded prime lemma) before tran
 research gap flagged above. `--hard` is recommended throughout (this task has 3 prior plan versions
 without convergence and a history of analysis-only dispatches — both `--hard` triggers).
 
-### Phase 1: THE GATE — repair the four-defect transcription so `TPrime` is inhabitable [NOT STARTED]
+### Phase 1: THE GATE — repair the four-defect transcription so `TPrime` is inhabitable [COMPLETED]
 
 **Objective**: make `TPrime 𝒯 Atom` inhabitable by fixing all four transcription defects in
 `Cslib/.../Labelled/`, in place, zero-debt. No downstream phase is dispatched until this lands green.

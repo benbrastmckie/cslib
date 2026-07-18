@@ -2053,14 +2053,19 @@ and the tableau built on it (`modalApplyOneFive`/`modalTableauFive`, `FiveSimpli
 `extractModelFive`/`modalTableauFive_complete`, `FrameCompleteness.lean`). Pure-5 validity and
 completeness are fully delivered this way; KB5's rule and soundness are delivered too
 (`modalApplyOneKb5`/`modalTableauKb5_sound`, `FrameSoundness.lean`, by frame-class monotonicity
-over the same rule), while KB5's **completeness** specifically remains open -- see
-`FrameCompleteness.lean`'s dedicated blocker note beside `extractModelKb5` for why reusing
-`modalApplyOneFive`'s root-restricted propagation rule does not suffice once the frame is also
-required to be symmetric, and what a fix would require. This is a **rule-design gap**, not an
-impossibility. The instruction below remains correct and unaffected by any of this: `EuclGen`
-lives in `Cslib/Foundations/Relation/Euclidean.lean`, beside the `RightEuclidean` API and
-mirroring `SymmGen`/`EqvGen`'s placement in `Confluence.lean` -- **do not** introduce a custom
-`EuclGen` closure operator in this file. -/
+over the same rule), and KB5's **completeness** is fully delivered too, via a corrected-gate
+full-cluster rule sitting beside `modalApplyOneKb5'` (`modalApplyOneKb5''`,
+`FiveSimplification.lean`'s `## The Corrected-Gate KB5 Rule` section) that reaches the full known
+non-root cluster on ANY trigger, not only a root trigger -- see `FrameCompleteness.lean`'s
+`modalTruthLemmaKb5`/`modalTableauKb5''_complete`/`kb5Valid_decides`/`instDecidableKb5Valid`. The
+dedicated blocker note beside `extractModelKb5` there is retained as documentation of why reusing
+`modalApplyOneFive`'s root-restricted propagation rule (and even `modalApplyOneKb5'`'s shallower
+root-only repair) does not suffice once the frame is also required to be symmetric; that was a
+**rule-design gap**, not an impossibility, and the corrected-gate rule is the fix. The instruction
+below remains correct and unaffected by any of this: `EuclGen` lives in
+`Cslib/Foundations/Relation/Euclidean.lean`, beside the `RightEuclidean` API and mirroring
+`SymmGen`/`EqvGen`'s placement in `Confluence.lean` -- **do not** introduce a custom `EuclGen`
+closure operator in this file. -/
 
 /-! ## `RuleApplicationSpecCore` for `modalApplyOneS5w` (task 515 Phase 9)
 

@@ -600,12 +600,17 @@ machinery this file's neighbours already build, and only the closure operator an
 rule are genuinely new. KB5's **rule and soundness** are delivered too (`modalApplyOneKb5`,
 `modalTableauKb5_sound`, by a "factor, not clone" frame-class-monotonicity argument: the
 unmodified Five rule is already sound for the strictly stronger `kb5FC` class). **KB5
-completeness is the one piece that remains open** -- `modalApplyOneFive`'s root-restricted
-propagation, essential to Five's own soundness, is provably insufficient once the frame is required
-to be symmetric too; see the dedicated blocker note beside `extractModelKb5` below for the precise
-argument and a machine-checked scout lemma. This is a **rule-design gap for the completeness
-direction**, not an impossibility: K5/KB5 completeness via a rooted Euclidean tableau is standard
-in the literature (Blackburn–de Rijke–Venema §4.8-4.9).
+completeness is now fully delivered too**, via a corrected-gate full-cluster rule
+(`modalApplyOneKb5''`, `modalTableauKb5''_complete`, `kb5Valid_decides`, `instDecidableKb5Valid`
+below): `modalApplyOneFive`'s root-restricted propagation, essential to Five's own soundness, is
+provably insufficient once the frame is required to be symmetric too (see the dedicated blocker
+note beside `extractModelKb5` below, retained as documentation of exactly why the naive
+root-restricted gate is unrepairable for the frozen `modalApplyOneKb5'` rule) -- the fix drops the
+trigger-identity conjunct from the self-target gate (`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`),
+firing the cluster-dump arm whenever the known cluster has any non-root member, regardless of which
+world triggered it. This confirms K5/KB5 completeness via a rooted Euclidean tableau is exactly as
+standard here as in the literature (Blackburn–de Rijke–Venema §4.8-4.9), once the propagation gate
+matches the closure relation's actual totality on the cluster.
 
 **Genuine pure-K5 / pure-5** (Euclidean *without* full equivalence -- i.e. a frame satisfying only
 `RightEuclidean`, and for KB5 additionally `Std.Symm`, but not necessarily `Std.Refl`/`IsTrans` as
@@ -614,8 +619,8 @@ closure operator (`Cslib/Foundations/Relation/Euclidean.lean`) -- the least righ
 containing a given relation, built exactly because Mathlib ships no such "Euclidean closure"
 analogous to `Relation.EqvGen`/`Relation.SymmGen` -- lands the countermodel extractor
 `extractModelFive` (5, via `EuclGen acc.hasEdge`, complete) and `extractModelKb5` (KB5, via a
-symmetric variant of the same closure, extraction infrastructure landed but its truth lemma and
-completeness theorem blocked, see below) together with `modalTruthLemmaFive` and the completeness
+symmetric variant of the same closure, now also complete -- `modalTruthLemmaKb5`,
+`modalTableauKb5''_complete` below) together with `modalTruthLemmaFive` and the completeness
 theorem `modalTableauFive_complete`. `extractModelS5` itself remains untouched and is not the route
 pure-K5/5 uses. -/
 
@@ -4379,12 +4384,13 @@ private lemma extractModelKb5_nonRoot_boxPos_gap
     · exact hne rfl
     · exact hw hw0
 
-/-! ## Phase 3 Blocker (task 525): `modalTruthLemmaKb5` is false for `modalApplyOneKb5'`
+/-! ## Frozen-Rule Blocker: `modalTruthLemmaKb5`'s original statement is false for
+`modalApplyOneKb5'`
 
-**Finding**: task 524's `modalApplyOneKb5'` repairs the shallow root-only gap the original
-Phase 23 blocker (superseded by this note) recorded, but `extractModelKb5_nonRoot_boxPos_gap`
-above proves a deeper, structurally unrepairable gap survives: the general KB5 truth lemma the
-plan (`specs/525_kb5_completeness_and_decidability/plans/01_kb5-completeness-decidability.md`)
+**Finding**: `modalApplyOneKb5'` repairs the shallow root-only gap an earlier scout-lemma finding
+(superseded by this note) recorded, but `extractModelKb5_nonRoot_boxPos_gap`
+above proves a deeper, structurally unrepairable gap survives: the general KB5 truth lemma this
+section's original design goal
 specifies -- branch membership agreeing with `extractModelKb5`-satisfaction at **every** world,
 including non-root trigger worlds connected to the root by a raw two-hop (or longer) chain -- is
 **false** for `modalApplyOneKb5'`, not merely unproved. `modalKb5BoxAllFull`'s non-root cluster-
@@ -4396,7 +4402,8 @@ literal `w = 0` trigger gets the self-target arm), while the closure relation's 
 **Reproducible witness**: `φ₀ := ¬(◇◇□p)` (`Proposition.imp (.diamond (.diamond (.box (.atom
 false)))) .bot`, `Atom := Bool`). Running `modalTableauKb5' φ₀` (verified via `lean_run_code`
 `#eval`/`native_decide` outside this file -- kernel `decide` stalls on the real tableau
-computation, the same pre-existing issue task 515 left in `ModalFrameSeparation.lean`) yields an
+computation, the same pre-existing kernel-reduction issue documented in `CslibTests/
+ModalFrameSeparation.lean`) yields an
 open branch `b`/`acc` with raw edges `acc.edges = [(1, 2), (0, 1)]`, `T(□p)@2 ∈ b`, and
 `T(p)@0 ∉ b`. `(extractModelKb5 b acc).r 2 (0 : WorldIndex)` is independently proved (no
 `native_decide` needed) from `acc.hasEdge 0 1 = true`/`acc.hasEdge 1 2 = true` alone, exactly by
@@ -4408,17 +4415,29 @@ not a proof search that has not yet succeeded.
 **This is not "KB5 completeness is impossible"** (Blackburn–de Rijke–Venema §4.8-4.9 confirms it is
 achievable via a rooted Euclidean tableau in general), but reaching it from this specific
 `extractModelKb5`/`modalApplyOneKb5'` pairing is not possible without a rule change, and
-`modalApplyOneKb5'` is frozen (task 524's landed, sorry-free deliverable; out of this task's
-file_scope to modify). A genuine fix would need either: (i) a rule whose box-positive/diamond-
-negative propagation dumps to the full known cluster *unconditionally* including target `0`
-whenever the cluster is connected to the root by **any** length chain (not just literal `w = 0`
-triggers), which likely requires a different bookkeeping device (e.g. tracking cluster membership
-directly rather than via `w == 0` trigger identity), or (ii) a different model extraction that
-does not let non-root-triggered chains reach the root semantically while the rule stays
-root-trigger-gated. Both are substantial new rule/extraction design, comparable in scope to the
-original Phases 15-21 Five construction -- not a proof-engineering gap closable by a cleverer
-induction on the existing rule. Marked `[BLOCKED]` per the escalation protocol; **not** attempted
-with a `sorry` or placeholder, and `modalApplyOneKb5'` is not modified to try to route around it. -/
+`modalApplyOneKb5'` itself stays frozen (its own landed, sorry-free deliverable is preserved
+byte-for-byte; it is deliberately not modified to try to route around this gap). A genuine fix
+needs either: (i) a rule whose box-positive/diamond-negative propagation dumps to the full known
+cluster *unconditionally* including target `0` whenever the cluster is connected to the root by
+**any** length chain (not just literal `w = 0` triggers), which likely requires a different
+bookkeeping device (e.g. tracking cluster membership directly rather than via `w == 0` trigger
+identity), or (ii) a different model extraction that does not let non-root-triggered chains reach
+the root semantically while the rule stays root-trigger-gated. Both are substantial new
+rule/extraction design, comparable in scope to the original Five construction (`modalApplyOneFive`
+and its supporting `EuclGen`/witness-reuse machinery above) -- not a proof-engineering gap closable
+by a cleverer induction on the existing rule.
+
+**Resolved**: option (i) above is exactly what the corrected-gate rule `modalApplyOneKb5''`
+implements (`modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`, dropping the trigger-identity conjunct
+from the self-target gate so it fires whenever the known cluster has any non-root member,
+regardless of which world triggered it). `modalTruthLemmaKb5` is proved TRUE for
+`modalApplyOneKb5''` above, and `modalTableauKb5''_complete`/`kb5Valid_decides`/
+`instDecidableKb5Valid` (above) deliver full KB5 completeness and decidability on top of it. This
+blocker note, the scout lemma (`extractModelKb5_root_reach_scout`), and the witness above are
+retained in full as documentation of exactly why the naive root-restricted gate is unrepairable --
+they are not stale, since `modalApplyOneKb5'` genuinely remains incomplete and frozen; only the
+*overall* KB5-completeness goal is now delivered, via the corrected-gate rule beside it, not by
+fixing this one. -/
 
 end Cslib.Logic.Modal.Tableau
 

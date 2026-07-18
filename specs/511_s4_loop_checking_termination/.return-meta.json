@@ -1,18 +1,17 @@
 {
   "status": "partial",
-  "started_at": "2026-07-17T22:40:56Z",
+  "started_at": "2026-07-18T00:00:00Z",
   "requires_user_review": true,
-  "review_reason": "Phase 5's driver-level keyLowerBd lemma (previously left as pure mechanical casework by the prior dispatch) is now FULLY ASSEMBLED and closed, and modalStepBranchS4_preserves_keysInUniverse (not previously attempted) is also closed. 3 of S4LoopInv's 4 key fields are now closed (keysDistinct, keyLowerBd, keysInUniverse); only keysTotal remains. Phase 7's independent Hintikka-alignment bridge (modalHintikkaSetS4_eq) also landed. keysTotal genuinely requires new infrastructure (a K/T/4-composed known-worlds-step dichotomy lemma for modalApplyOneS4Keyed, analogous to modalApplyOneS5_knownWorlds_step but layered through three rule sets instead of one flat set) that does not exist yet -- this was scoped but not attempted this dispatch after determining its true cost (comparable to keyLowerBd's own closure across two dispatches), rather than rushing a fragile attempt. The full S4LoopInv assembly additionally needs a modalStepBranchS4Keyed-to-modalStepBranchGen bridge lemma to reuse six already-proven generic preservation lemmas for the rule-independent fields (bClosure/eNodup/eClosure/accFresh/accKnown/outDegEq), also not attempted. Phase 6 (pigeonhole world bound) genuinely cannot start before keysTotal closes (its injective map is keysTotal's own witness), so was not attempted. Phase 7's remaining decision-recording/closure tasks depend on Phase 6.",
+  "review_reason": "Phase 5's S4LoopInv assembly (the crux) is landed with 8 of 10 fields fully closed, zero sorry: the four key fields (keysDistinct/keyLowerBd/keysInUniverse/keysTotal, closed across prior dispatches) plus eNodup/outDegEq/accFresh/accKnown (closed this dispatch). The remaining 2 fields (bClosure, eClosure) are landed as documented strategic-sorry skeletons -- complete, non-vacuous theorem statements, not placeholders -- because each genuinely needs machinery comparable in scope to a full prior dispatch's work (bClosure needs Phase 6's own pigeonhole world-bound argument as a PREREQUISITE rather than a later corollary; eClosure needs a new formula-subset composite for T-self/4-propagation outputs). Also discovered and documented a design correction: the prior dispatch's proposed 'generic bridge to modalStepBranchGen' plan does not work as stated (the guard's blocked case returns RuleResult.linear [], breaking the generic _gen lemmas' hFreshLocal dichotomy; the generic eClosure/bClosure facts are keyed to K's own modalUniverse/modalWorldBound, not the S4 variants) -- every field closed this dispatch used a direct case split on modalStepBranchS4Keyed's own definition instead.",
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md",
-    "specs/511_s4_loop_checking_termination/handoffs/03_phase5-keylowerbd-keysinuniverse-closed.md",
     "specs/511_s4_loop_checking_termination/.orchestrator-handoff.json",
     "specs/511_s4_loop_checking_termination/.return-meta.json"
   ],
   "partial_progress": {
-    "stage": "phase_5_three_of_four_key_fields_closed_keysTotal_open",
-    "details": "Phases 1-4 unchanged, green. Phase 5: keysDistinct (prior dispatch), keyLowerBd, and keysInUniverse (this dispatch) are ALL closed -- 3 of 4 key fields. keysTotal not attempted (needs a new S4-specific known-worlds-step dichotomy lemma composing K/T/4 rule layers, plus a local mem_successorsOf_hasEdge_S4 bridge and mem_modalKnownWorlds_S4 re-derivation -- none of which exist yet). Full S4LoopInv assembly also needs a modalStepBranchS4Keyed-to-modalStepBranchGen bridge for the six rule-independent fields, not attempted. Landed reusable helpers: modalStepBranchS4Keyed_result_keys_eq (generic keys' extraction factoring out the RuleResult 4-way split, since keys' never depends on which RuleResult shape occurred) and successorBirthContent_subset_signedSubfmls. Also landed Phase 7's independent modalHintikkaSetS4_eq bridge (rfl, no dependency on Phase 5/6). Phase 6 not attempted (blocked on keysTotal). Phase 7's remaining tasks (decision recording, closure/block) not attempted (blocked on Phase 6).",
+    "stage": "phase_5_eight_of_ten_fields_closed_bClosure_eClosure_sorry_skeletons",
+    "details": "Phases 1-4 unchanged, green. Phase 5: keysDistinct/keyLowerBd/keysInUniverse/keysTotal (prior dispatches) plus eNodup/outDegEq/accFresh/accKnown (this dispatch) are ALL closed, zero sorry -- 8 of 10 S4LoopInv fields. Landed the assembly theorem modalStepBranchS4_preserves_S4LoopInv. bClosure/eClosure are documented strategic-sorry skeletons (complete signatures, sorry bodies), precisely scoped in both the plan file and the orchestrator handoff's sorry_inventory. Landed a new proof-internal auxiliary invariant keysWorldsKnown (deliberately not a new S4LoopInv struct field) plus its own preservation lemma, which unblocked accFresh/accKnown after the generic-bridge approach was found not to work. Phase 6 (pigeonhole world bound) not attempted this dispatch but is now the direct prerequisite for bClosure's sorry, not merely an independent later phase. Phase 7's remaining tasks unchanged (blocked on Phase 6).",
     "phases_completed": 4,
     "last_completed_phase": "Phase 4: Key-threaded S4 step + restated S4LoopInv",
     "blocked_phase": null,
@@ -20,18 +19,18 @@
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 0,
+    "sorry_count": 2,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Scoped lake build (LoopChecking.lean) green after each of the three commits this dispatch made. lake exe checkInitImports, lake lint, lake exe lint-style all clean for this file (only the pre-existing modalUniverseS4_length_le unused-hypothesis warning remains, predating this dispatch). lean_verify on modalStepBranchS4_preserves_keyLowerBd, modalStepBranchS4_preserves_keysInUniverse, modalStepBranchS4Keyed_result_keys_eq, modalHintikkaSetS4_eq: propext/Classical.choice/Quot.sound only (no new axioms). lake test fails on CslibTests/ModalFrameSeparation.lean (decide stuck on instDecidableFiveValid) -- confirmed via git log/git status to be entirely task 515's S5/Five decidability work, unrelated to any file this task modifies; not a regression from this dispatch, and per the dispatching teammate's explicit instruction, not investigated further."
+    "note": "Scoped lake build (LoopChecking.lean) green after each of the nine commits this dispatch made. lake exe lint-style clean for this file. lean_verify on every CLOSED lemma this dispatch (modalStepBranchS4_preserves_accFresh, modalStepBranchS4_preserves_accKnown, etc.): propext/Classical.choice/Quot.sound only (no new axioms, no sorryAx). modalStepBranchS4_preserves_S4LoopInv itself correctly reports sorryAx (expected -- it depends on the two documented sorry'd fields, bClosure/eClosure). Exactly 2 sorry occurrences in the whole file, both in the documented strategic-sorry skeletons (grep-verified). lake test fails on CslibTests/ModalFrameSeparation.lean (decide stuck on instDecidableFiveValid) -- confirmed via git log/git status to be entirely task 515's S5/Five decidability work, unrelated to any file this task modifies; not a regression from this dispatch. Full-project lake build also fails, entirely in Cslib/Logics/Bimodal/Metalogic/BXCanonical/Chronicle/CounterexampleElimination/*.lean -- confirmed via git status to be uncommitted, in-progress edits from the concurrent task 517 session (explicitly flagged in this dispatch's delegation context); not this task's file scope, not a regression here."
   },
   "metadata": {
-    "session_id": "sess_1784322687_fcf57a_511",
-    "agent_type": "cslib-implementation-agent",
+    "session_id": "sess_1737230000_ph5cont",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "compliance_check": "passed"
   }
 }

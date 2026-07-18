@@ -1,9 +1,19 @@
 {
-  "status": "partial",
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/504_s5_and_kb55route_euclidean_decidability_via_generic_tableau_/plans/02_kb5-euclidean-residual.md",
+    "summary": "Corrective revision: S5 decidability recorded SATISFIED (live instDecidableS5Valid via task 515 witness-rule route); residual narrowed to 5/KB5-Euclidean completeness, gated on task 525 KB5 redesign; deps 513/505 demoted to informational."
+  }],
+  "next_steps": "Recommend transitioning task 504 to PARTIAL (S5 half delivered; only the KB5-Euclidean completeness residual remains, blocked on task 525). Keep dep [515] (chains to 525). Do NOT dispatch /implement 504 until 525 lands a sorry-free KB5 completeness/decision result.",
   "metadata": {
-    "cycles_used": 2,
-    "final_state": "blocked",
-    "blocker_type": "proven-obstruction",
-    "followup": "spawn s5-universal-rule-termination"
+    "session_id": "sess_1784333163_06a765",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 3,
+    "estimated_hours": 3,
+    "reports_integrated": ["ROADMAP-alignment-audit.md"],
+    "recommended_status": "PARTIAL",
+    "revision_mode": "plan_revision"
   }
 }

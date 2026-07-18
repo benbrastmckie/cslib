@@ -46,8 +46,8 @@ next_project_number: 529
 523 [PLANNED] — Replace the 15 hand-written per-system axiom inductives in Cslib/
 528 [RESEARCHED] — Task 525 (KB5 tableau completeness + kb5Valid decidability) is bl
   └─ 525 [BLOCKED] — Completes task 515's re-scoped Phase 23 deliverable, resuming aft
-    └─ 515 [BLOCKED] — Implement the terminating S5 tableau machinery recommended by tas
-      └─ 504 [BLOCKED] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
+    └─ 515 [BLOCKED] — PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau
+      └─ 504 [PARTIAL] — Deliver plan Phases 3 and 7 of task 300 (specs/300_modal_extensio
         └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Extend modal K tableau (task 299) with frame-specific rules for r (see above)
@@ -272,7 +272,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Plan**: [515_s5_universal_rule_termination_unblock_504/plans/05_s5-termination-machinery.md]
 - **Summary**: [515_s5_universal_rule_termination_unblock_504/summaries/16_phase21-hintikka-wall-landed-completed.md]
 
-**Description**: Implement the terminating S5 tableau machinery recommended by task 514 to unblock task 504 Phases 2/4/5/6 (S5/KB5 Euclidean decidability). The edge-local rank measure is PROVEN inapplicable to S5's universal rule (task 504: modalApplyOneS5_rankStep_not_dischargeable) -- do NOT re-attempt the B/T mirror. Implement instead, per task 514's recommendation, either (a) a restricted S5 rule design preserving rank-compatibility while still achieving full equivalence-closure reachability, or (b) a bespoke S5-specific termination argument (prefix loop-checking / global caching / filtration-based FMP) that does NOT route through RuleApplicationSpec.rankStep. Deliver: the S5 termination/decidability spec replacing or supplementing modalApplyOneS5_spec; the generic Hintikka lift + truth lemma over the universal relation (Phase 4); S5 soundness triple modalTableauS5_sound (Phase 5); s5Valid + Decidable (s5Valid phi) against Cube.S5 (Phase 6); and 5/KB5 validity + completeness via Satisfies.five (Basic.lean) and Cslib/Foundations/Relation/Euclidean.lean RightEuclidean API (Phase 7 completion). REUSE the CI-green Phase 1/3 assets already landed and committed by task 504: S5Simplification.lean (universal rule modalApplyOneS5 + driver instantiation) and FrameCompleteness.lean (extractModelS5 via Relation.EqvGen + RightEuclidean exposure). Zero sorry, zero new axiom; run full CSLib CI (lake build, checkInitImports, lint-style, lint, test, shake) at every milestone and commit incrementally at each green milestone; scope git add narrowly (concurrent sessions). If a sub-piece cannot close sorry-free, mark [BLOCKED] with the exact open goal state -- never introduce debt. Files: Cslib/Logics/Modal/Tableau/S5Simplification.lean, GenericDriver.lean (if interface extension needed), FrameSoundness.lean, FrameCompleteness.lean.
+**Description**: PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau machinery, S5 soundness/completeness, S5 decidability, and the full Euclidean-5 route are all landed sorry-free and CI-green (headline commit af593180): modalTableauS5_sound (FrameSoundness.lean:2991), modalTableauS5_complete (FrameCompleteness.lean:2340), s5Valid_decides/instDecidableS5Valid (FrameCompleteness.lean:2411/2422), fiveValid_decides/instDecidableFiveValid (FrameCompleteness.lean:3203/3213). The rank obstruction was engineered around via a witness-reuse mint rule. The SOLE remaining deliverable is KB5 completeness + Decidable kb5Valid, delegated to child task 525: task 524's KB5 rule was mechanically proven insufficient (extractModelKb5_nonRoot_boxPos_gap, FrameCompleteness.lean:3544, sorry-free), so KB5 needs a NEW rule + extraction design (achievable per Blackburn-de Rijke-Venema 4.8-4.9), not a re-run. Deps corrected: dropped stale 514 (archived, research-only) and insufficient 524; real gate is 525. Do NOT re-attempt against task 524's frozen modalApplyOneKb5' rule -- its truth lemma is a machine-checked falsehood. Off-roadmap; no roadmap claims.
 
 ---
 
@@ -332,7 +332,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 504. S5 and kb55route euclidean decidability via generic tableau 
 - **Effort**: 5-7 hours
-- **Status**: [BLOCKED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 515

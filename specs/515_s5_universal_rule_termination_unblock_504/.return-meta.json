@@ -1,0 +1,24 @@
+{
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/515_s5_universal_rule_termination_unblock_504/plans/08_s5-termination-machinery.md",
+    "summary": "Corrective revision (v7): records the S5/5 mandate as DELIVERED (live sorry-free instances), drops stale deps 514/524, delegates the KB5 residual (Phase 23) to child task 525."
+  }],
+  "next_steps": "Apply recommended status. PRIMARY: mark 515 [BLOCKED] on 525 (parent-tracker; S5 delivered, only KB5 residual remains, gated on 525's redesign). ALTERNATIVE: mark 515 [COMPLETED] on its delivered S5 mandate and drop the 515->525 edge, letting 525 carry KB5 independently. Recommend a new_description reflecting S5-delivered + KB5-delegated.",
+  "metadata": {
+    "session_id": "sess_1784333163_06a765",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "revision_mode": "plan_revision",
+    "phase_count": 25,
+    "estimated_hours": 60,
+    "reports_integrated": ["ROADMAP-alignment-audit.md"],
+    "deps_dropped": [514, 524],
+    "deps_retained": [525],
+    "recommended_status": "BLOCKED",
+    "recommended_status_gate": 525,
+    "recommended_status_alternative": "COMPLETED",
+    "new_description": "PARENT TRACKER (S5 mandate DELIVERED). The terminating S5 tableau machinery, S5 soundness/completeness, S5 decidability, and the full Euclidean-5 route are all landed sorry-free and CI-green (headline commit af593180): modalTableauS5_sound (FrameSoundness.lean:2991), modalTableauS5_complete (FrameCompleteness.lean:2340), s5Valid_decides/instDecidableS5Valid (FrameCompleteness.lean:2411/2422), fiveValid_decides/instDecidableFiveValid (FrameCompleteness.lean:3203/3213). The rank obstruction was engineered around via a witness-reuse mint rule. The SOLE remaining deliverable is KB5 completeness + Decidable kb5Valid, delegated to child task 525: task 524's KB5 rule was mechanically proven insufficient (extractModelKb5_nonRoot_boxPos_gap, FrameCompleteness.lean:3544, sorry-free), so KB5 needs a NEW rule + extraction design (achievable per Blackburn-de Rijke-Venema 4.8-4.9), not a re-run. Deps corrected: dropped stale 514 (archived, research-only) and insufficient 524; real gate is 525. Do NOT re-attempt against task 524's frozen modalApplyOneKb5' rule -- its truth lemma is a machine-checked falsehood. Off-roadmap; no roadmap claims."
+  }
+}

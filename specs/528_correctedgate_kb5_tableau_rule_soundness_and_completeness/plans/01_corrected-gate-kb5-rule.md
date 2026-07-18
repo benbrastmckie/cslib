@@ -362,7 +362,7 @@ dichotomy — `modalKb5BoxAllUniv_mem_of`, `modalKb5DiaNegAllUniv_mem_of`, `hint
 
 ---
 
-### Phase 5: Truth lemma `modalTruthLemmaKb5` [NOT STARTED]
+### Phase 5: Truth lemma `modalTruthLemmaKb5` [COMPLETED]
 
 **Goal**: Land `modalTruthLemmaKb5`, mirroring `modalTruthLemmaFive` (`FrameCompleteness.lean:2693-2886`)
 against `extractModelKb5`: for an open Hintikka branch of `modalApplyOneKb5''`, branch membership
@@ -371,20 +371,45 @@ and `extractModelKb5`-satisfaction agree at every world and formula, by strong i
 corrected rule.
 
 **Tasks**:
-- [ ] Port the propositional cases (`imp`/`and`/`or`/`atom`/`bot`) from `modalTruthLemmaFive`,
+- [x] Port the propositional cases (`imp`/`and`/`or`/`atom`/`bot`) from `modalTruthLemmaFive`,
       substituting the `modalApplyOneKb5''` prop-shape agreement lemma (locate/state the analogue of
       `modalApplyOneKb5'Prop_eq_of_not_boxPos_diaNeg`, `FrameSoundness.lean:~4252`, in a
       `FrameCompleteness`-usable form).
-- [ ] Box-positive case (`.box ψ`): for `w'` with `(extractModelKb5 b acc).r w w'`, use the landed
+      *Landed `modalApplyOneKb5''_eq_of_prop_shape` (chains the already-landed
+      `modalApplyOneKb5''_eq_of_not_mint_shape`/`modalApplyOneKb5''Prop_eq_of_not_boxPos_diaNeg`),
+      mirroring `modalApplyOneFive_eq_of_prop_shape` exactly. Propositional cases port verbatim.*
+- [x] Box-positive case (`.box ψ`): for `w'` with `(extractModelKb5 b acc).r w w'`, use the landed
       task-525 Phase 1 reachability lemmas `symmEuclGen_mem_modalKnownWorlds_iff` (:3285) and
       `extractModelKb5_root_reach_mem_modalKnownWorlds` (:3310) to place `w'` in the cluster, then
       Phase 4's `hintikkaKb5''_box_pos` to obtain `T(ψ)@w' ∈ b`, then IH. **The crux**: when
       `v = 0`, discharge via Phase 4's ∃-raw-edge helper supplying the `clusterNonempty` witness —
       this is exactly where the frozen rule's gap (`extractModelKb5_nonRoot_boxPos_gap`) dissolves.
-- [ ] Box-negative / diamond-positive cases: reuse `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
+      *(deviation: expanded -- the `v = 0` sub-case genuinely splits on the trigger `w`: for
+      `w ≠ 0`, Phase 4's `extractModelKb5_clusterNonempty_of_reach_root` supplies the witness
+      exactly as scoped; but for `w = 0` (the closure relating the root to ITSELF,
+      `(extractModelKb5 b acc).r 0 0`), that Phase 4 lemma does not apply (it requires `w ≠ 0`),
+      and no existing lemma covered this residual case. Landed two new small helpers to close it:
+      `accEdgeIrrefl` (new abstract hypothesis, mirroring `accSourcesKnown`/`accTargetsKnown`/
+      `accTargetsNeRoot`'s existing pattern of threading structural facts about raw edges that
+      hold for any real tableau-derived `Accessibility` but are not derivable from `hSrc`/`hTgt`
+      alone -- "raw edges never self-loop", true because every edge-adding rule application mints
+      a fresh, hence distinct, child) and `extractModelKb5_clusterNonempty_of_root_selfRelate`
+      (given `hIrr` and root-self-relation, extracts a genuine known non-root witness via the new
+      general structural lemma `euclGen_symmGen_exists_ne_base`: any `EuclGen (SymmGen r) x y`
+      derivation, given `r` irreflexive, contains a real base edge between two distinct points,
+      by trivial induction through the `eucl` case). `modalTruthLemmaKb5`'s signature thus adds
+      `hIrr : accEdgeIrrefl acc` alongside `hSrc`/`hTgt`/`h0`/`hH`, discharge deferred to Phase 6/7
+      exactly as `accTargetsNeRoot`'s discharge was deferred to Five's Phase 21.)*
+- [x] Box-negative / diamond-positive cases: reuse `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
       + `extractModelKb5_hasEdge_imp_r` (:3268), mirroring the Five arms.
-- [ ] Diamond-negative case: dual to box-positive, via `hintikkaKb5''_diamond_neg`.
-- [ ] `lean_verify` the lemma.
+      *Landed verbatim as scoped, no KB5-specific work needed.*
+- [x] Diamond-negative case: dual to box-positive, via `hintikkaKb5''_diamond_neg`.
+      *Landed as the dual of the box-positive case, same `hIrr`-based residual-case handling.*
+- [x] `lean_verify` the lemma.
+      *`modalTruthLemmaKb5` confirmed clean: `propext`/`Classical.choice`/`Quot.sound` only
+      (identical to the frozen chain's axiom set -- no new axioms), zero `sorry`. Also verified
+      `modalApplyOneKb5''_eq_of_prop_shape` and `extractModelKb5_clusterNonempty_of_root_selfRelate`
+      clean. Scoped build (`lake build Cslib.Logics.Modal.Tableau.FrameCompleteness`) green.*
 
 **Timing**: 2.5 hours
 

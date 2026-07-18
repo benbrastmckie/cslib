@@ -1,39 +1,24 @@
 {
-  "status": "partial",
+  "status": "in_progress",
   "started_at": "2026-07-18T16:43:50Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/plans/01_corrected-gate-kb5-rule.md",
-      "summary": "8-phase plan; Phases 1-4 marked [COMPLETED] with deviation annotations"
-    },
-    {
-      "type": "handoff",
-      "path": "specs/528_correctedgate_kb5_tableau_rule_soundness_and_completeness/handoffs/01_phases-1-4-complete-phase5-continuation.md",
-      "summary": "Detailed continuation context for Phase 5 (truth lemma) onward"
+      "summary": "8-phase plan; Phases 1-5 marked [COMPLETED] with deviation annotations, resuming Phase 6"
     }
   ],
-  "requires_user_review": true,
-  "review_reason": "4 of 8 phases complete (Phases 1-4: corrected-gate rule definitions, RuleApplicationSpecCore, frame soundness capstone, and re-derived Hintikka insertion lemmas). Remaining phases (5: truth lemma -- the highest-complexity phase and the one that was mathematically false for the frozen rule; 6: open-branch supply lemmas; 7: completeness/decidability assembly; 8: docs reconciliation + CI) were not attempted in this session due to scope -- this is genuinely a multi-session task. All landed work is fully verified (lean_verify clean, zero sorry, zero new axioms, lake build green) and committed incrementally. No phase is marked [BLOCKED]; work simply has not yet reached phases 5-8.",
   "partial_progress": {
-    "stage": "phase-4-complete",
-    "details": "Phases 1-4 landed and committed across 12 commits. Phase 1+2: FiveSimplification.lean (corrected-gate rule defs, trigger-free dichotomy, RuleApplicationSpecCore 9-field instance, world invariant, mem_of introduction lemmas). Phase 3: FrameSoundness.lean (rule-level semantic soundness with new symmetrization case, knownWorlds_step with root-known invariant threaded, accReachableInv/satIn preservation, fuel induction, modalTableauKb5''_sound capstone). Phase 4: FrameCompleteness.lean (trigger-free Hintikka insertion lemmas, cluster-nonempty witness helper for the truth lemma's v=0 case). Key discovery documented in the plan file and handoff: the corrected rule's self-target arm (fires for any trigger, not just the root) needs a new 'root always known' (0 in modalKnownWorlds b) invariant for the SYNTACTIC knownWorlds-membership bookkeeping (threaded as an explicit hypothesis, trivial to establish/preserve), but NOT for the semantic soundness lemmas or the F2 world-bound argument (both free via existing facts / Nat.zero_le).",
+    "stage": "phase-5-complete",
+    "details": "Phase 5 (truth lemma modalTruthLemmaKb5) landed and lean_verify-clean: propext/Classical.choice/Quot.sound only, zero sorry. This is the lemma that was mathematically FALSE for the frozen task-524 rule and is now TRUE for the corrected-gate rule. Landed modalApplyOneKb5''_eq_of_prop_shape (propositional-case dispatcher bridge), accEdgeIrrefl (new abstract hypothesis: raw edges never self-loop, mirroring accSourcesKnown/accTargetsKnown/accTargetsNeRoot's pattern, discharge deferred to Phase 6/7), euclGen_symmGen_exists_ne_base (general structural helper), and extractModelKb5_clusterNonempty_of_root_selfRelate (residual w=0 self-relate case Phase 4's clusterNonempty_of_reach_root did not cover). Scoped build of FiveSimplification+FrameSoundness+FrameCompleteness together green.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4
+    "phases_completed": 5
   },
   "metadata": {
     "session_id": "sess_1784392507_023576_528",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "note": "Scoped builds (FiveSimplification.lean, FrameSoundness.lean, FrameCompleteness.lean, individually and together) all green. Full CSLib CI pipeline (lake lint, lint-style, mk_all, shake, test) was not run in this session -- deferred to Phase 8 per the plan, which is not yet reached."
   }
 }

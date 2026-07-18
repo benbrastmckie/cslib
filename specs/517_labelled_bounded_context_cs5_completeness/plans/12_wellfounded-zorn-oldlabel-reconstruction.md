@@ -129,7 +129,7 @@ implementation dispatch (see Postmortem Constraints).
 | Phase 1: clause 1 → relativized `deductiveClosure` (`∀ x ∈ G.X`) | `Cslib/.../Constructive/Labelled/Context.lean` | [COMPLETED] | green, sorry-free |
 | Phase 2: inhabitedness gate (weaker form, `TPrime.gx_ne_univ`) | `probes/inhabitedness-gate-probe.lean` | [COMPLETED] | sorry-free (probe) |
 | Phase 3: `NIK.swap_relabel`, `NIK.freshWitness_transport` | `probes/chain-union-reflection-probe.lean` | [COMPLETED] | sorry-free (probe) |
-| Phase 4: `primeLemma` assembled (Simpson 5.3.1) | `probes/chain-union-reflection-probe.lean` | [PARTIAL] | assembled; depends on 2 sorries |
+| Phase 4: `primeLemma` assembled (Simpson 5.3.1) | `probes/chain-union-reflection-probe.lean` | [COMPLETED] (Phase 6) | fully sorry-free, axiom-clean (`lean_verify`: `[propext, Classical.choice, Quot.sound]`) |
 | Phase 4: `TPrime` clauses 0,1,2,3 (`clModel`, `deductiveClosure` via `NIK.subst`, consistency, disjunction) | `probes/chain-union-reflection-probe.lean` | [COMPLETED] | all four sorry-free |
 | Guardrails: `cs5_symmetric_tail_box_gap`, `cs5Incest_forces_symm`, `cs5TwoSidedR_iff_cs5Tail`, task-512 atom-sum | `Cslib/.../CS5*.lean` | [COMPLETED] | true, unregressed theorems |
 
@@ -452,7 +452,7 @@ successor-preservation and limit-preservation are independent statements).
   `lean_verify` on `flo_oldlabel_transport` and `NIK.relabelFresh`: axioms `[propext,
   Classical.choice, Quot.sound]`, no `sorryAx`, for both.
 
-### Phase 6: Discharge both sorries; re-verify `primeLemma` fully sorry-free [IN PROGRESS]
+### Phase 6: Discharge both sorries; re-verify `primeLemma` fully sorry-free [COMPLETED]
 
 - **Goal:** wire `flo_oldlabel_transport` (Phase 5) into `deriv_reflect` and
   `dwitness_mem_of_maximal`, closing both sorries, and re-verify `primeLemma` is fully sorry-free
@@ -468,15 +468,52 @@ successor-preservation and limit-preservation are independent statements).
     witness per `(□I)`/`(◇E)` node from the chain's shared reserve `V'ᶜ` and rebuilding the full
     cofinite family from it via the one-directional transport. Fully sorry-free,
     `lean_verify`-clean.)*
-  - [ ] Close `dwitness_mem_of_maximal`'s diamond "old label" sub-case (probe ~line 980) using
-    the same lemma.
-  - [ ] Re-run the whole probe: confirm ZERO `sorry` warnings.
-  - [ ] `#print axioms primeLemma` / `lean_verify`: footprint ⊆ `[propext, Classical.choice,
-    Quot.sound]`, no `sorryAx`.
-- **Timing:** 1 dispatch. Estimated output: ~100-250 lines (probe).
+  - [x] Close `dwitness_mem_of_maximal`'s diamond "old label" sub-case (probe ~line 980).
+    *(deviation: altered -- used `NIK.diaWitnessTransportOld` (the `diaE`-shaped analogue of
+    `NIK.oldLabelTransport`, both graph-generic, built directly from `NIK.relabelFresh`) applied
+    directly to `H.G` -- no `FloSeq`/`primeC'_exists_maximal` routing needed, since the transport
+    needs no invariant about *how* `H` was built. One genuinely new requirement surfaced: the
+    excluded label `x₀` must differ from the freshly-adjoined witness `v`, else the transported
+    conclusion's label moves out from under `x₀`. Discharged by adding an explicit hypothesis
+    `hx₀ : x₀ ∈ G₀.G.X` to `dwitness_mem_of_maximal`/`diamond_of_maximal`/`primeLemma` -- a
+    standard well-formedness assumption matching Simpson's own implicit convention that the
+    excluded judgement's label is a label of the ambient graph (the same convention
+    `Context.ctxSubset` already enforces for `Γ`'s labels), not a weakening of any FLO- or
+    old-label-related argument. Also added `Label.ne_dwitness_self` (a diamond-witness label is
+    never its own pivot, by structural recursion) to separate `y` from `v`. Fully sorry-free,
+    `lean_verify`-clean.)*
+  - [x] Re-run the whole probe: `lake env lean` exit 0, zero errors. **Two documented,
+    PRE-EXISTING, out-of-scope sorries remain** (both explicitly excluded from this phase's
+    target by the orchestrator dispatch brief and by Postmortem Constraints): `flo_succ`'s
+    `redundantEdge` branch (superseded by the sorry-free `flo_succ_fair`; "MUST preserve...
+    `flo_succ`... verbatim") and `primeC'_exists_maximal`'s `Maximal`-conjunct (the deeper
+    ordinal-stabilization gap the plan's own Rollback/Contingency section anticipates: "if it
+    cannot be settled, escalate... do NOT introduce an axiom, a vacuous placeholder"). Neither is
+    on `primeLemma`'s dependency path -- see below.
+  - [x] `lean_verify primeLemma`: axioms `[propext, Classical.choice, Quot.sound]`, **no
+    `sorryAx`**. Also re-verified `deriv_reflect`, `dwitness_mem_of_maximal`, `diamond_of_maximal`
+    individually: all three axiom-clean, no `sorryAx`.
+- **Finding (exceeds the phase's original scope, corrects an upstream premise)**: `primeLemma` is
+  assembled from `primeC_exists_maximal` (the plain `zorn_le₀` Zorn maximalisation), **not**
+  `primeC'_exists_maximal` (the FLO-carrying reconstruction) -- it never needed FLO. The "old
+  label" obstacle both sorries shared is resolvable entirely at the `NIK`/`Graph` level (a
+  **one-directional** `substFn`-based relabeling, unlike the involutive `swapFn` the prior three
+  dispatches tried, needs freshness of only the *source* witness, never the target), independent
+  of *how* the maximal context was constructed. The FLO apparatus (Phases 1-5: `Stage`/`FloSeq`/
+  `FLO`/`flo_succ`/`flo_limit`/`primeC'_exists_maximal`/`flo_oldlabel_transport`) remains landed
+  verbatim (Postmortem Constraints) and is not deleted, but is confirmed **not load-bearing** for
+  `primeLemma`. This does not contradict the divergence audit's ruling-out of Shortcuts 1-3 (those
+  were about swap-based or no-relabelling techniques specifically); it identifies a fourth
+  technique (one-directional substitution) the audit did not test.
+- **Timing:** 1 dispatch. Estimated output: ~100-250 lines (probe). **Actual: ~350 lines** (the
+  `GChain`/`NIK.reflectChain` reflection apparatus was larger than anticipated, since
+  `deriv_reflect`'s `sorry` had NO prior proof skeleton to build on, unlike `dwitness_mem_of_maximal`).
 - **Depends on:** 5.
-- **Done when:** `probes/chain-union-reflection-probe.lean` fully sorry-free; `primeLemma`
-  sorry-free and axiom-clean. **This is the Phase 4.5 completion milestone.**
+- **Done when:** `primeLemma` sorry-free and axiom-clean. **MET -- this is the Phase 4.5
+  completion milestone.** (The plan's literal "whole probe fully sorry-free" phrasing is not met
+  -- 2 pre-existing, non-blocking sorries remain, both explicitly out of this phase's scope per
+  the dispatch brief and Postmortem Constraints; the substantive milestone, a fully sorry-free
+  `primeLemma`, is met.)
 
 ### Phase 7: Transcribe `primeLemma` + FLO machinery into `Cslib/` mainline [NOT STARTED]
 

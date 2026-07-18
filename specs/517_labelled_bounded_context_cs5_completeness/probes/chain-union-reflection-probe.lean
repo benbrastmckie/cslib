@@ -1416,15 +1416,39 @@ theorem Context.addDiaWitness_le (H : Context 𝒯 Atom) (y : Label Atom) (B : P
     H ≤ H.addDiaWitness y B hy hfresh :=
   ⟨⟨fun _ hx => Or.inl hx, fun _ _ hxy => Or.inl hxy⟩, fun _ hφ => Or.inr hφ⟩
 
+/-- **Structural non-self-reference**: a diamond-witness label is never equal to its own pivot --
+`dwitness` strictly grows the label, so `y = Label.dwitness y B` is impossible for any `B`.
+Proved by structural recursion on `y` (the only nontrivial case, `y = Label.dwitness x A`, reduces
+to the same fact for the strictly smaller `x` via injectivity). Needed by
+`dwitness_mem_of_maximal` (Task 517 Phase 6) to separate the excluded label `x₀` from the newly
+adjoined witness `v`. -/
+theorem Label.ne_dwitness_self : ∀ (y : Label Atom) (B : Proposition Atom), y ≠ Label.dwitness y B
+  | .var _, _ => fun h => nomatch h
+  | .dwitness x A, B => fun h => by
+      injection h with h1 _
+      exact Label.ne_dwitness_self x A h1
+
 /-- **The maximality argument for the diamond witness.** If `y:◇B ∈ H.Γ`, the diamond-witness
 label `dwitness y B` must already be in `H.G.X` — else adjoining it, together with the fresh edge
 `y R dwitness y B` and the formula `dwitness y B : B`, keeps the extension in `C`:
 `NIK.diaWitness_transport` turns the one witnessing `NIK`-derivation into a cofinite one, letting
 `NIK.diaE` (fed by `y:◇B`, itself already `Γ`-assumable) rebuild a derivation of the excluded
 `x₀:A₀` back over `H` alone, contradicting `hnd`. This forces the extension to equal `H`, i.e.
-the witness was already present. Simpson `chunk_0103.md`: *"We show that `v_{y.B}` is in `H`."* -/
+the witness was already present. Simpson `chunk_0103.md`: *"We show that `v_{y.B}` is in `H`."*
+
+**`hx₀ : x₀ ∈ G₀.G.X`** (Task 517 Phase 6, new hypothesis): Simpson's own Prime Lemma statement
+(`chunk_0102.md`, *"`Γ ⊬_G x:A`"*) presupposes the excluded judgement's label `x` is a label of
+the ambient graph `G` -- exactly the standing convention every other `Deriv`/`NIK` judgement in
+this development already carries via `Context.ctxSubset` for `Γ`'s own labels. This hypothesis
+was implicit, not previously threaded explicitly; it is needed here (and nowhere else in the
+already-landed clauses) to rule out the *only* case the graph-generic old-label transport
+(`NIK.diaWitnessTransportOld`) cannot handle: the excluded label `x₀` coinciding with the freshly
+adjoined witness `v = dwitness y B` itself, which would make the transported conclusion's label
+move out from under `x₀`. Given `hx₀` and `hG₀H : G₀ ≤ H` (from `hmax`), `x₀ ∈ H.G.X`, while
+`v ∉ H.G.X` (`hfresh`, the `by_contra` hypothesis) -- so `x₀ ≠ v` always, and the transport
+applies unconditionally. -/
 theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
-    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) {y : Label Atom}
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) (hx₀ : x₀ ∈ G₀.G.X) {y : Label Atom}
     {B : Proposition Atom} (hyB : (y ∶ Proposition.diamond B) ∈ H.Γ) :
     Label.dwitness y B ∈ H.G.X := by
   have hy : y ∈ H.G.X := H.ctxSubset _ hyB
@@ -1461,57 +1485,44 @@ theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {
         NIK.assumption H.G _ _ (List.mem_singleton_self _)
       have hyorDeriv : Deriv 𝒯 H.G H.Γ (y ∶ Proposition.diamond B) :=
         ⟨[y ∶ Proposition.diamond B], fun ψ hψ => (List.mem_singleton.mp hψ) ▸ hyB, hyor⟩
-      -- **STRATEGIC SORRY** (documented per the anti-analysis five-condition test):
-      --
-      -- 1. Deliberate division boundary: this is the SAME cofinite-quantification obstacle
-      --    `deriv_reflect` hits (see the "Joint follow-up dispatch" module section preceding
-      --    `ChainCtx.deriv_reflect`, ~line 295, for the full sharpened root-cause diagnosis
-      --    established by a dedicated joint dispatch, task 517) -- `NIK.diaE`'s eigenvariable
-      --    premise `∀y'∉L, ...` ranges over EVERY label outside a FINITE `L`, including labels
-      --    already in `H.G.X` ("old" labels), for which `NIK.diaWitness_transport` (built above,
-      --    mirroring `NIK.freshWitness_transport`) does not apply -- its own hypothesis needs the
-      --    TARGET label fresh w.r.t. `H.G.X`, which cannot be guaranteed merely by choosing the
-      --    label outside a *finite* exclusion set when `H.G.X` may be infinite (and, for a
-      --    Zorn-maximal `H`, generically IS infinite -- maximality forces `H.G.X` to be "as large
-      --    as possible" subject to `V'`-confinement).
-      -- 2. Tightly scoped: exactly the "build the cofinite `diaE` premise from the single
-      --    witness `v = dwitness y B`" step -- everything else in this clause (the extension's
-      --    `Context` validity, the maximality wiring, the fresh-label sub-case via
-      --    `NIK.diaWitness_transport`) is proven above, sorry-free.
-      -- 3. Documented: what is proven -- `hNIKv` gives the ONE witnessing instance at `v` itself
-      --    (always usable, `v` fresh by `hfresh`); `NIK.diaWitness_transport` transports this to
-      --    any OTHER label `y'` that is *also* fresh w.r.t. `H.G.X` (not just outside a finite
-      --    set). What remains open, and WHY (joint dispatch, task 517, three additional
-      --    shortcuts tested and ruled out beyond the plan's own two candidates):
-      --      - A naive swap `swapFn v y'` for an "old" `y' ∈ H.G.X` is not merely unproven but
-      --        actively INVALID whenever `H.G` has any edge incident to `y'` other than possibly
-      --        `(y,y')` itself: such an edge `(p,y')` swaps to `(p,v)`, which is not an edge of
-      --        the target graph `H.G.addEdge y y'` (the target graph does not know about `v` at
-      --        all) -- the swap corrupts pre-existing structure at `y'`, not just failing to
-      --        prove the desired fact.
-      --      - Reusing an already-established fact at `y'` directly (skipping the swap) does not
-      --        help either in this single-maximal-element setting (no chain/index family is even
-      --        available here to reuse from) and, in the analogous chain setting
-      --        (`deriv_reflect`), reduces to a distinct-index-per-label problem directedness
-      --        cannot bound (see "Shortcut 2" in the module section near `deriv_reflect`).
-      --      - Choosing a cleverer finite exclusion set `L` does not help: `L` must stay finite,
-      --        but `H.G.X` is (generically) infinite, so infinitely many "old" labels remain
-      --        outside any finite `L` regardless of how `L` is chosen.
-      --    Closing this needs route (a): an invariant that the *construction* of `H` (not just
-      --    its final maximality property) only ever adjoins fresh (reserve-drawn or
-      --    dwitness-of-already-known) labels at each step -- unavailable from Mathlib's
-      --    non-constructive `zorn_le₀`, and requiring a step-indexed/well-founded reconstruction
-      --    of the whole Zorn argument (a "Phase 4.5", scoped larger than a single dispatch; see
-      --    the module section above `deriv_reflect` for the full argument, including why
-      --    Simpson's own "denumerable ⟹ choice-free iterative" remark, `chunk_0103.md`, does not
-      --    directly transfer here since `Atom : Type u` is not assumed countable).
-      -- 4. Tracked: recorded in this dispatch's `sorry_inventory` with `strategic: true`,
-      --    `follow_up_task: "Phase 4.5 (NEW, dedicated multi-phase effort): step-indexed /
-      --    well-founded Lindenbaum construction with a fresh-labels-only invariant, replacing
-      --    zorn_le₀ in primeC_exists_maximal -- not a further quick joint dispatch."`
-      -- 5. Build-green: `lake env lean` on this file (verified) succeeds with this `sorry`
-      --    present.
-      sorry
+      -- **CLOSED (Task 517 Phase 6)**: same fix as `ChainCtx.deriv_reflect` -- the module analysis
+      -- this comment used to carry (swap-based transport needs target freshness; no-swap reuse
+      -- needs an unboundedly-indexed family) diagnoses the obstacle correctly for the techniques
+      -- it tested, but the one-directional `substFn`-based transport (`NIK.diaWitnessTransportOld`,
+      -- built from `NIK.relabelFresh`) needs freshness of only the *source* witness `v`, not the
+      -- target, so the single instance `hNIKv` already supplies the whole cofinite family. The one
+      -- genuine extra requirement -- the excluded label `x₀` must differ from `v` itself, else the
+      -- transported conclusion's label would move out from under `x₀` -- is discharged by the new
+      -- `hx₀ : x₀ ∈ G₀.G.X` hypothesis (this theorem's docstring) together with `v ∉ H.G.X`
+      -- (`hfresh`).
+      have hx₀H : x₀ ∈ H.G.X := hG₀H.1.1 hx₀
+      have hxv : x₀ ≠ v := fun heq => hfresh (heq ▸ hx₀H)
+      have hyv : y ≠ v := Label.ne_dwitness_self y B
+      have hΓf'lbl : ∀ ψ ∈ Γf', ψ.lbl ≠ v :=
+        fun ψ hψ heq => hfresh (heq ▸ H.ctxSubset ψ (hΓf'mem ψ hψ))
+      set Γcomb : List (LabelledFormula Atom) := (y ∶ Proposition.diamond B) :: Γf' with hΓcombdef
+      have hΓcomb_mem : ∀ ψ ∈ Γcomb, ψ ∈ H.Γ := by
+        intro ψ hψ
+        rcases List.mem_cons.mp hψ with rfl | hψ
+        · exact hyB
+        · exact hΓf'mem ψ hψ
+      have hΓcomb_lbl : ∀ ψ ∈ Γcomb, ψ.lbl ≠ v := by
+        intro ψ hψ
+        rcases List.mem_cons.mp hψ with rfl | hψ
+        · exact hyv
+        · exact hΓf'lbl ψ hψ
+      have hdia : NIK 𝒯 H.G Γcomb (y ∶ Proposition.diamond B) :=
+        NIK.assumption H.G Γcomb _ List.mem_cons_self
+      have hNIKv' : NIK 𝒯 (H.G.addEdge y v) ((v ∶ B) :: Γcomb) (x₀ ∶ A₀) :=
+        hNIKv.weaken (Graph.le_refl _) (fun ψ hψ => by
+          rcases List.mem_cons.mp hψ with rfl | hψ
+          · exact List.mem_cons_self
+          · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hψ))
+      have hall : ∀ y' ∉ ({v} : Set (Label Atom)),
+          NIK 𝒯 (H.G.addEdge y y') ((y' ∶ B) :: Γcomb) (x₀ ∶ A₀) :=
+        fun y' _ => NIK.diaWitnessTransportOld hNIKv' hfresh hyv hxv hΓcomb_lbl y'
+      exact ⟨Γcomb, hΓcomb_mem,
+        NIK.diaE {v} (Set.finite_singleton v) H.G Γcomb y x₀ B A₀ hdia hall⟩
   have hge := hmax.le_of_ge hmem hle
   exact hfresh (hge.1.1 (Or.inr (Or.inr rfl)))
 
@@ -1521,10 +1532,10 @@ membership of the witness label, `Context.dwitnessMem` (a *field* every `Context
 the maximal `H` — already carries, Simpson's "requirement 2 on contexts") directly yields both
 conjuncts the diamond property needs; no separate argument is required for this half. -/
 theorem diamond_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A₀ : Proposition Atom}
-    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) :
+    {H : Context 𝒯 Atom} (hmax : Maximal (· ∈ primeC G₀ x₀ A₀) H) (hx₀ : x₀ ∈ G₀.G.X) :
     ∀ (y : Label Atom) (B : Proposition Atom), (y ∶ Proposition.diamond B) ∈ H.Γ →
       ∃ v, H.G.R y v ∧ (v ∶ B) ∈ H.Γ :=
-  fun y B hyB => ⟨Label.dwitness y B, H.dwitnessMem y B (dwitness_mem_of_maximal hmax hyB)⟩
+  fun y B hyB => ⟨Label.dwitness y B, H.dwitnessMem y B (dwitness_mem_of_maximal hmax hx₀ hyB)⟩
 
 /-! ### Clause 1 (deductive closure) -/
 
@@ -1659,15 +1670,30 @@ theorem deductiveClosure_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Ato
 /-- **Simpson's Prime Lemma 5.3.1** (`chunk_0102.md`/`chunk_0103.md`, pp. 92-93): if `(G,Γ)` is a
 context and `Γ ⊬_G x:A`, there is a `𝒯`-prime context `(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A`. Assembles
 `primeC_exists_maximal` (the Zorn maximalisation) with the five `TPrime` clause theorems above.
-The maximal element's `TPrime` structure carries `clModel`/`consistency`/`disjunction`/
-`deductiveClosure` sorry-free — `deductiveClosure`'s one dependency, `NIK.subst` (cut
-admissibility), was closed by a follow-up dispatch via `NIK.subst_aux` (structural induction,
-generalizing over the accumulating prefix `Δ'`, mirroring `NIK.weaken`'s case shape). `diamond`
-still routes through `dwitness_mem_of_maximal`'s one remaining documented strategic sorry (the
-"old label" cofinite-range sub-case, same root cause as `ChainCtx.deriv_reflect`'s Phase 3
-sorry) — see that theorem's docstring. -/
+
+**FULLY SORRY-FREE (Task 517 Phase 6, the Phase 4.5 completion milestone)**: all five clauses --
+`clModel`/`consistency`/`disjunction`/`deductiveClosure` (closed by a prior follow-up dispatch via
+`NIK.subst_aux`) and now `diamond` (`dwitness_mem_of_maximal`, closed this phase via
+`NIK.diaWitnessTransportOld`) -- are sorry-free. `lean_verify`: axioms `[propext,
+Classical.choice, Quot.sound]`, no `sorryAx`.
+
+**Note on the FLO reconstruction (Phases 1-5)**: `primeLemma` is assembled from
+`primeC_exists_maximal` (the plain `zorn_le₀` Zorn maximalisation), NOT `primeC'_exists_maximal`
+(the FLO-carrying reconstruction) -- it does not need FLO at all. The "old label" obstacle both
+`deriv_reflect` and `dwitness_mem_of_maximal` hit turned out to be resolvable at the `NIK`/`Graph`
+level alone (`NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld`, built from `NIK.relabelFresh`),
+independent of *how* the maximal `H` was constructed. The FLO apparatus (`Stage`/`FloSeq`/`FLO`/
+`flo_succ`/`flo_limit`/`primeC'_exists_maximal`/`flo_oldlabel_transport`) remains landed (Postmortem
+Constraints: preserved verbatim) but is not on `primeLemma`'s critical path; `primeC'_exists_maximal`'s
+own remaining `Maximal`-conjunct sorry and `flo_succ`'s superseded `redundantEdge` sorry are
+consequently non-blocking for this theorem. **New hypothesis `hx₀ : x₀ ∈ G₀.G.X`**: Simpson's own
+statement of the judgement `Γ ⊬_G x:A` presupposes `x` is a label of `G` (the standing convention
+every other `Deriv`/`NIK` judgement in this development already carries for `Γ`'s own labels via
+`Context.ctxSubset`); it was implicit before this phase and is now threaded explicitly because
+`dwitness_mem_of_maximal` needs it to separate the excluded label `x₀` from the freshly adjoined
+diamond witness (see that theorem's docstring for the exact argument). -/
 theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Proposition Atom)
-    (h0 : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) :
+    (hx₀ : x₀ ∈ G₀.G.X) (h0 : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) :
     ∃ P : TPrime 𝒯 Atom, G₀ ≤ P.toContext ∧ ¬ Deriv 𝒯 P.G P.Γ (x₀ ∶ A₀) := by
   obtain ⟨H, hmax⟩ := primeC_exists_maximal G₀ x₀ A₀ (primeC_mem_base G₀ x₀ A₀ h0)
   obtain ⟨hG₀H, _, hnd⟩ := hmax.prop
@@ -1676,7 +1702,7 @@ theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Propos
       deductiveClosure := deductiveClosure_of_maximal hmax
       consistency := consistency_of_maximal hmax
       disjunction := disjunction_of_maximal hmax
-      diamond := diamond_of_maximal hmax },
+      diamond := diamond_of_maximal hmax hx₀ },
     hG₀H, hnd⟩
 
 /-! ## Task 517 Plan v5 Phase 1 — the well-founded maximalisation carrier + the FLO invariant

@@ -3315,6 +3315,26 @@ lemma extractModelKb5_root_reach_mem_modalKnownWorlds
     w' ∈ modalKnownWorlds b :=
   (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ h)).mp h0
 
+omit [Hashable Atom] in
+/-- **The ∃-raw-edge-in-derivation witness for the corrected rule's self-target arm** (task 528
+Phase 4, Risk 3): any world `w` (other than the root) that reaches the root under
+`extractModelKb5`'s relation is itself a known non-root world -- exactly the `clusterNonempty`
+witness `hintikkaKb5''_box_pos`/`hintikkaKb5''_diamond_neg`'s `v = 0` arm needs. Immediate from
+`symmEuclGen_mem_modalKnownWorlds_iff`'s `.mpr` direction at `(w, 0)`, given the root is known
+(`h0`, the same "root always known" invariant `FrameSoundness.lean`'s fuel induction already
+threads) -- no new closure-structural argument is needed beyond what
+`symmEuclGen_mem_modalKnownWorlds_iff` already supplies; `w` itself is always a valid non-root
+witness whenever it is related to the root at all. -/
+lemma extractModelKb5_clusterNonempty_of_reach_root
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hSrc : accSourcesKnown b acc) (hTgt : accTargetsKnown b acc)
+    (h0 : (0 : WorldIndex) ∈ modalKnownWorlds b)
+    {w : WorldIndex} (hwne : w ≠ (0 : WorldIndex))
+    (hr : (extractModelKb5 b acc).r w (0 : WorldIndex)) :
+    ∃ u ∈ modalKnownWorlds b, u ≠ (0 : WorldIndex) :=
+  ⟨w, (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ hr)).mpr h0,
+    hwne⟩
+
 /-! ### KB5 Full-Cluster Hintikka Insertion Lemmas (task 525 Phase 2)
 
 `modalKb5BoxAllFull`/`modalKb5DiaNegAllFull` (`FiveSimplification.lean`) are unconditional in the

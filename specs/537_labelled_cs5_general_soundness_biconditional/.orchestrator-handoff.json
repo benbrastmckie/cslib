@@ -1,23 +1,33 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "summary": "Phase 7 of plan v3 (plans/03_direct-route-forest.md) is COMPLETE: `boxI_lift` (the tree-cascade Lifting Lemma, Simpson 8.1.3) is landed in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean, sorry-free and axiom-clean. This continuation dispatch added the ancestor-walk assembly on top of the already-committed `raise_subtree`/`ht_le_of_reflTransGen`: `siblings_disjoint` (a small reusable sibling-closure-disjointness helper, generalizing the disjointness argument already proved inline inside `raise_subtree`'s `insert` case), `boxI_lift_ancestor` (the Finset-exclusion-parametrized ancestor-walk induction that fixes the previously-diagnosed unsoundness), and `boxI_lift` itself (a thin wrapper specializing `excl := ∅`). Documented, necessary correction to the prior handoff's transcribed schema (not a design re-opening): `boxI_lift_ancestor`'s edge conjunct checks Finset-exclusion membership via the edge's TARGET, not its SOURCE as the handoff's schema had it -- the source-side check is unprovable at the boundary edge into the excluded branch (e.g. the ancestor edge q -> z itself), since `cs5FCIncest` has no 'raise-source-only, keep-target-exact' conjunct. The two-piece downward/ancestor decomposition and all five key decisions recorded in the dispatch-1 handoff are otherwise unchanged and were followed verbatim.",
+  "status": "blocked",
+  "summary": "Phase 8 [BLOCKED]: the generalized NIK induction motive (`∀ ρ, IsDerivationForest G → raw-edge-cond → Γ-cond → CKForces r v botForces (ρ φ.lbl) φ.prop`) is mathematically FALSE for `NIK.efq`/`NIK.orE`'s cross-label conclusion, machine-verified this dispatch via a two-point disconnected countermodel (`World := Pt (one|two)`, `≤:=Eq`, `r:=Eq`, `botForces:=(·=one)`; `cs5FCIncest r` and every `CKValidFC` explosion/upward-closure axiom hold; `CKForces bot` holds at `one` while `CKForces (atom ())` is False at `two`). `boxI`/`diaE`/`boxE`/`diaI` ARE tractable exactly as the plan anticipated (via `boxI_lift`, `box_iff_TClosure`/`dia_iff_TClosure`, `box_gives_here`) -- the obstruction is confined to two of the 'straightforward' propositional constructors. This is a mathematical gap discovered by directly attempting the case (per anti-churn discipline), not a Phase 7 engineering overrun, so Phase 10's contingency does not apply. No proof/theorem code was added or altered this dispatch; only the module docstring in Soundness.lean was updated documenting the finding (new 'Fifth dispatch' section), and the plan file's Phase 8 heading was marked [BLOCKED]. Build green, zero debt preserved, Phases 1-7 unregressed.",
   "phases_completed": 7,
   "phases_total": 10,
   "skeleton": false,
   "sorry_inventory": [],
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": 8,
+      "type": "mathematical",
+      "target": "NIK.efq / NIK.orE cross-label soundness under the generalized induction motive",
+      "verbatim_goal": "CKForces r v botForces (ρ y) A -- from ih: CKForces r v botForces (ρ x) Proposition.bot (i.e. botForces (ρ x)), for arbitrary A and an adversarially-chosen ρ with y ∉ G.X ∪ ctxLabels Γ (unconstrained by raw edge-cond and Γ-cond, since NIK.efq places no relation between x and y)",
+      "root_cause": "NIK.efq/NIK.orE are cross-label with the conclusion label fully independent of the premise label (unlike boxE/diaI, which always carry a TClosure edge, or boxI/diaE, whose fresh label is added to G.X via addEdge before use). A machine-verified two-point countermodel (lean_run_code, this dispatch) shows botForces need not propagate to an r/≤-disconnected point even under every cs5FCIncest + CKValidFC hypothesis, so the naive universally-quantified-ρ motive is false for this case, independent of the specific proof term.",
+      "what_was_tried": "Direct transcription attempt of the generalized motive per the plan; verification that boxI/diaE/boxE/diaI close cleanly under it; construction and lean_run_code verification of a countermodel refuting the efq case specifically; assessment of two candidate fixes (a not-yet-landed 'IsDerivationForest built from Graph.trivial via addEdge chain implies G.X is TClosure-TS5-total' connectivity lemma, and an existential-motive reformulation) -- both assessed as out-of-phase-8-scope, re-plan-sized work.",
+      "what_is_needed": "A dedicated follow-up phase/task to (1) prove the connectivity lemma and (2) reformulate the main induction's motive existentially, re-verifying all 12 constructors against the new motive. See handoffs/08_phase8-blocked-crosslabel-efq.md for the full analysis and recommended scope."
+    }
+  ],
   "next_phase": "8",
-  "next_phase_hint": "Phase 8: Main NIK induction (motive amended), close boxI case, assemble nik_TS5_soundness. boxI_lift is now available with the exact audit §3 signature the plan's Phase 8 task list expects.",
-  "next_command": "/implement 537 --hard --lit",
+  "next_phase_hint": "Phase 8 remains [BLOCKED] pending a re-plan: prove the connectivity lemma (IsDerivationForest built from Graph.trivial via addEdge chain implies TClosure TS5-totality on G.X) and reformulate the induction motive existentially for efq/orE, then re-verify boxI/diaE/boxE/diaI plus the 8 label-local constructors against it.",
+  "next_command": "/plan 537 --hard --lit (re-plan Phase 8 scope) or /spawn 537",
   "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
   "plan_version": 3,
   "deviations": [
     {
-      "phase": 7,
-      "description": "boxI_lift_ancestor's edge conjunct (conjunct 3) checks the Finset-exclusion antecedent via the edge's target `b`, not the source `a` as the dispatch-1 handoff's transcribed schema specified.",
-      "reason": "Checking via `a` is unprovable at the boundary edge into the excluded branch (source outside the excluded closure, target inside it, e.g. the ancestor edge q -> z): cs5FCIncest has no raise-source-only-keep-target-exact conjunct, so r(raised q)(old ρ z) is not generally derivable. Checking via `b` correctly drops exactly the boundary edge (established separately by the caller's own cs5FCIncest_raise fact) from the internal obligation. Documented in boxI_lift_ancestor's docstring; the overall strategy is unchanged."
+      "phase": 8,
+      "description": "Phase 8 was not implemented; it is recorded [BLOCKED] with a documented mathematical finding rather than attempted proof code, per the escalation protocol (no sorry, no unsound proof, no vacuous placeholder).",
+      "reason": "The generalized induction motive prescribed by the plan for Phase 8 is machine-verified false for the NIK.efq/NIK.orE cross-label cases; forcing a proof would require either an unsound step or a substantial, unplanned redesign (a new connectivity lemma plus an existential-motive reformulation of the whole induction) that is genuinely re-plan scale, not a dispatch continuation."
     }
   ],
   "continuation_context": null,
@@ -30,23 +40,23 @@
     "preserved_assets_unregressed": true,
     "build_passed": true,
     "checkInitImports_passed": true,
-    "lake_lint_passed": true,
-    "lint_style_passed": true,
-    "lean_verify_siblings_disjoint": {"axioms": ["propext", "Quot.sound"], "sorryAx": false},
-    "lean_verify_boxI_lift_ancestor": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
-    "lean_verify_boxI_lift": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
-    "full_ci_note": "lake shake and lake test not run this dispatch (deferred to Phase 9 regression gate per the plan's own phase split); lake build (scoped), checkInitImports, lake lint, and lake exe lint-style all run and green."
+    "full_ci_note": "Only the module docstring in Soundness.lean was edited (no theorem/proof code). Scoped lake build green; no new long-line lint warnings (verified via awk length check). Full lake lint/lint-style/shake/test not re-run this dispatch since no proof code changed and Phase 7's prior dispatch already confirmed them green on the pre-existing code."
   },
   "artifacts": [
     {
+      "type": "handoff",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/08_phase8-blocked-crosslabel-efq.md",
+      "summary": "Full analysis of the Phase 8 blocker: the exact goal, the machine-verified countermodel, why natural fixes are out of scope, and the recommended follow-up."
+    },
+    {
       "type": "source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added siblings_disjoint, boxI_lift_ancestor, and boxI_lift after raise_subtree, before end Cslib.Logic.Modal.Labelled (~230 lines)."
+      "summary": "Added 'Fifth dispatch (task 537 Phase 8, [BLOCKED])' section to the module docstring documenting the cross-label efq/orE soundness gap and the countermodel. No proof/theorem code changed."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "summary": "Phase 7 heading marked [COMPLETED]; task checklist items checked off with a note on the documented target-vs-source exclusion-check deviation."
+      "summary": "Phase 8 heading changed to [BLOCKED] with a blocked note summarizing the finding and pointing to the handoff."
     }
   ],
   "session_id": "sess_1784471495_4fb1e9",

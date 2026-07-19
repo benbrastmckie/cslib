@@ -1,44 +1,50 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-19T18:00:00Z",
+  "status": "partial",
+  "started_at": "2026-07-19T18:28:13Z",
+  "requires_user_review": true,
   "phases_completed": 7,
   "phases_total": 10,
-  "skeleton": false,
-  "sorry_inventory": [],
-  "memory_candidates": [
-    "Lean 4 Finset-exclusion induction gotcha: when parametrizing an induction with an explicit `excl : Finset` to carve out a branch the caller already owns, the edge-conjunct's membership check must be on the edge's TARGET, not its SOURCE. Checking the source lets the boundary edge INTO the excluded branch (source outside, target inside) fall under the obligation, which is generally unprovable if the underlying relation has no 'raise-source-only, keep-target-exact' primitive (here `cs5FCIncest`). Checking the target correctly excludes exactly that boundary edge (and everything inside the excluded closure), deferring it to the caller's own separately-established fact.",
-    "Lean 4 pattern: `Relation.ReflTransGen.head`/`.tail`/`.cases_head`/`.cases_tail` do NOT support dot-notation when the first explicit argument's type is a plain relation fact (e.g. `G.R a b`) rather than a `ReflTransGen` fact itself -- `hab.head hbc` fails with 'Invalid field notation' since `hab : G.R a b` has head symbol `G.R`, not `Relation.ReflTransGen`. Must call fully-qualified: `Relation.ReflTransGen.head hab hbc`.",
-    "Lean 4 `subst` direction gotcha (generalizes prior ReflTransGen-cases lessons): `subst h` for `h : a = b` eliminates whichever variable is on the side Lean judges eliminable, and for two plain local variables this can eliminate the OLDER/outer-scoped one (e.g. `subst huzeq` for `huzeq : u = z` eliminated `z`, not `u`, breaking every subsequent reference to `z` within that same tactic block with 'unknown identifier'). When both sides are local variables used elsewhere in the SAME tactic block, prefer `rw [h] at otherHyp` over `subst h` to avoid unpredictably renaming an outer variable out of existence.",
-    "CSLib tree-cascade lifting lemma pattern (task 537 Phase 7, Simpson 8.1.3): split into (1) a downward-cascade helper (raise a node + its full forward-reachable closure through a chosen Finset of un-excluded direct children, well-founded on a rank-based Set.ncard measure) and (2) a Finset-exclusion-parametrized ancestor-walk induction (walk up the unique-parent chain, at each ancestor invoking the downward helper for the un-excluded sibling branches, combining via an if-then-else on ReflTransGen-reachability from the current node). A small reusable 'siblings_disjoint' lemma (distinct children of a common parent have disjoint forward-reachable closures, via unique-parent + graded-rank) is needed by BOTH the downward helper's own combine step and the ancestor-walk's exclusion-identity conjunct -- worth factoring out as a standalone theorem rather than reproving inline twice."
-  ],
   "artifacts": [
     {
-      "type": "source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added siblings_disjoint, boxI_lift_ancestor, and boxI_lift (Phase 7 completion). All sorry-free, axiom-clean."
+      "type": "lean-module-docstring",
+      "summary": "Added 'Fifth dispatch (task 537 Phase 8, [BLOCKED])' section documenting the cross-label efq/orE soundness gap and its machine-verified countermodel. No theorem/proof code changed."
     },
     {
-      "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "summary": "Phase 7 heading -> [COMPLETED]; task checklist checked off with the documented target-vs-source deviation noted."
+      "type": "plan",
+      "summary": "Phase 8 heading marked [BLOCKED] with a blocked note."
     },
     {
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/08_phase8-blocked-crosslabel-efq.md",
       "type": "handoff",
+      "summary": "Full analysis: exact goal, machine-verified countermodel, why natural fixes are out of scope, recommended follow-up."
+    },
+    {
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/09_phase8-blocked-crosslabel-efq-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary for the blocked Phase 8 dispatch."
+    },
+    {
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
-      "summary": "Full orchestrator handoff: status implemented, phases_completed 7/10, next_phase 8, sorry_inventory empty, deviation documented."
+      "type": "handoff-json",
+      "summary": "Machine-readable handoff: status blocked, blockers array populated with the efq/orE finding."
     }
   ],
+  "partial_progress": {
+    "stage": "phase_8_blocked",
+    "details": "Generalized-induction motive for the main NIK soundness theorem is machine-verified FALSE for the cross-label NIK.efq/NIK.orE constructors (a two-point disconnected countermodel refutes it). boxI/diaE/boxE/diaI confirmed tractable exactly as planned. Recorded [BLOCKED] per escalation protocol; no sorry, no unsound proof, no new axiom."
+  },
+  "memory_candidates": [
+    "CSLib Labelled soundness: NIK.efq/NIK.orE (Deduction.lean) are cross-label rules whose conclusion label is fully independent of the premise label. Under CSLib's Wijesekera-style CKForces/CKValidFC semantics (per-world botForces, not Simpson's bivalent semantics), a naive 'generalize the soundness induction over an arbitrary interpretation ρ' motive is mathematically FALSE for these two constructors: botForces need not propagate to an r/≤-disconnected world. Machine-verified via a two-point countermodel (World := Pt one|two, ≤:=Eq, r:=Eq). Any future general soundness proof for this labelled system must either (a) prove a connectivity lemma that IsDerivationForest-built-from-Graph.trivial-via-addEdge implies TClosure-totality on G.X, or (b) use an existential-motive reformulation (∃ρ' agreeing with ρ on G.X∪ctxLabels Γ). The one-point model trick (World := Unit) used elsewhere in this file masks this issue rather than resolving it, since every map into Unit is trivially constant."
+  ],
   "verification": {
-    "verification_passed": true,
+    "verification_passed": false,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports + lake lint + lint-style all green; lake shake/lake test deferred to Phase 9 regression gate per plan)"
-  },
-  "partial_progress": {
-    "stage": "phase_7_complete",
-    "details": "boxI_lift landed and axiom-clean, closing the boxI producer side. Phase 8 (main NIK induction, close boxI case, assemble nik_TS5_soundness) is next per the plan; not started this dispatch per mission scope."
+    "ci_pipeline_passed": false
   },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",

@@ -434,7 +434,30 @@ if-then-else-on-`ReflTransGen`-membership pattern `raise_subtree`'s own `insert`
 a nonempty `excl` from the level below). Estimated remaining size: ~120-180 lines, same proof
 style/tactics already exercised in `raise_subtree` (no new mathematical content, pure engineering
 completion of an already-identified fix). No mathematical wall was hit at any point.
-### Phase 8: Main NIK induction (motive amended), close boxI case, assemble nik_TS5_soundness [NOT STARTED]
+### Phase 8: Main NIK induction (motive amended), close boxI case, assemble nik_TS5_soundness [BLOCKED]
+
+**Phase 8 blocked note (2026-07-19)**: Attempted the generalized induction exactly as specified
+(motive `∀ ρ, IsDerivationForest G → raw-edge-cond → Γ-cond → CKForces r v botForces (ρ φ.lbl)
+φ.prop`, reusing `nik_soundness_onePoint`'s skeleton). `boxI`/`diaE`/`boxE`/`diaI` are NOT the
+obstruction (their fix is exactly as this plan anticipated, using `boxI_lift`/`box_iff_TClosure`/
+`dia_iff_TClosure`/`box_gives_here`). The obstruction is in TWO of the "9 straightforward
+propositional constructors": `NIK.efq` and `NIK.orE` (Deduction.lean:252,277), which are
+**cross-label** with NO constraint relating the premise's label to the conclusion's independent
+label (unlike `boxE`/`diaI`, which always carry a `TClosure` edge). A two-point countermodel was
+built and machine-verified this dispatch (`lean_run_code`: `World := Pt (one|two)`, `≤:=Eq`,
+`r:=Eq`; `cs5FCIncest r` holds; all `CKValidFC` explosion/upward-closure axioms hold; `botForces :=
+(·=one)`; `CKForces bot` holds at `one` while `CKForces (atom ()) ` is FALSE at `two`) showing the
+naive "∀ ρ" motive is **false** whenever `efq`'s conclusion label is not already constrained by
+`G.X ∪ ctxLabels Γ` — this is a **mathematical**, not engineering, gap, discovered only by directly
+attempting the case (per the anti-churn discipline), and is NOT covered by Phase 10 (scoped solely
+to a Phase 7 `boxI_lift` engineering overrun). Full details, the exact countermodel, and the two
+candidate fixes assessed as out-of-phase-8-scope (a not-yet-landed "G.X is TClosure TS5-total on a
+connected component" lemma; an existential-motive reformulation) are recorded in
+`Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean`'s module docstring, "Fifth
+dispatch" section. Zero debt preserved: no `.lean` proof code was touched (only the module
+docstring was updated); no `sorry`; no new axiom; Phases 1-7 unregressed. See
+`specs/537_labelled_cs5_general_soundness_biconditional/handoffs/08_phase8-blocked-crosslabel-efq.md`
+for the full handoff and recommended follow-up scope.
 
 - **Goal:** Complete the 12-constructor `NIK` induction generalized over an arbitrary interpretation
   `ρ` and model (reusing the `nik_soundness_onePoint` skeleton, Soundness.lean:666), with the motive

@@ -1,10 +1,10 @@
 {
   "total_churn": 2,
   "target_churn": {
-    "boxI_lift": 2
+    "boxI_lift": 0
   },
   "adversarial_triggers": 0,
   "audit_dispatches": 0,
   "gate_c_pivots": 1,
-  "note": "boxI_lift strike 2 is a PLANNED multi-dispatch continuation (raise_subtree helper landed green + Finset-exclusion fix precisely specified), not no-progress churn; audit already done in cycle 8"
+  "note": "boxI_lift RESOLVED at Phase 7 completion (commit 49224515)"
 }

@@ -292,6 +292,75 @@ as a non-failure outcome, not a fourth thrash). This dispatch pursued both prong
    `cs5_soundness_derivable_incest`, `CS5Canonical.lean:373`) be authorized as the follow-up scope.
    Zero debt: no `sorry`, no new axiom, `cs5FCIncest` unweakened, all Preserved Assets unregressed.
 
+## Fifth dispatch (task 537 Phase 8, `[BLOCKED]`: cross-label `efq`/`orE` soundness gap)
+
+Phases 1-7 (`box_iff_base`/`dia_iff_base`/`box_iff_TClosure`/`dia_iff_TClosure`, `cs5FCIncest_lift`/
+`cs5FCIncest_raise`, `box_gives_here`, `boxI_raise_step`/`boxI_lift_star`, `IsDerivationForest`/
+`forest_trivial`/`forest_addEdge_fresh`, `boxI_lift`) are all landed sorry-free and are the correct
+foundation. Phase 8's own mission -- "generalize `nik_soundness_onePoint` over an arbitrary `ρ` and
+model, `∀ ρ, IsDerivationForest G → (raw edge-cond) → (Γ-cond) → CKForces r v botForces (ρ φ.lbl)
+φ.prop`, reusing the skeleton verbatim for 9 'straightforward' propositional constructors" -- hits a
+genuine, machine-verified **mathematical** obstruction in exactly two of those "straightforward"
+cases, `NIK.efq` and `NIK.orE` (Deduction.lean:252,277), **not an engineering gap** and **not
+covered by Phase 10** (Phase 10 is scoped solely to a Phase 7 `boxI_lift` engineering overrun; this
+is a Phase 8 finding about `efq`/`orE`, discovered only once their generalized cases were actually
+attempted, per the anti-churn discipline of machine-checking before escalating).
+
+**The gap.** `NIK.efq`/`NIK.orE` are **cross-label** per Figure 4-1 (confirmed correct for
+*completeness*, `PrimeLemma.lean`'s `consistency_of_maximal`, chunk 0103): `efq`'s conclusion label
+`y` is *fully independent* of the premise's label `x` -- Deduction.lean's constructor places **no**
+constraint relating `x` and `y` (unlike `boxE`/`diaI`, which always carry a `TClosure` edge, or
+`boxI`/`diaE`, whose fresh `y` is added to the graph via `addEdge` before any subderivation uses
+it). Consequently, for the naive "∀ ρ" motive, discharging `efq`'s case requires deriving
+`CKForces r v botForces (ρ y) A` (arbitrary `A`) from `botForces (ρ x)` (via the premise's IH) at a
+`ρ` the *adversary* supplies -- and when `y ∉ G.X ∪ ctxLabels Γ` (permitted by the constructor's
+type; raw edge-cond and Γ-cond say nothing about `ρ y` in that case), the adversary may set `ρ y` to
+a point in a different, `r`/`≤`-disconnected component of the model where `A` fails. This is **not**
+a hand-wave: a two-point countermodel was built and machine-verified (`lean_run_code`, this
+dispatch) witnessing exactly this: `World := Pt` (`one | two`), `≤ := Eq` (discrete `Preorder`),
+`r := Eq`.
+`cs5FCIncest r` holds (all five conjuncts collapse to reflexivity facts under `r = ≤ = Eq`); the
+three `CKValidFC` explosion axioms and both upward-closure conditions hold (again trivially, since
+`≤ = Eq`); `botForces := (· = .one)`; `CKForces r val botForces .one Proposition.bot` holds
+(`botForces .one` is `True`) while `CKForces r val botForces .two (Proposition.atom ())` is `False`
+(`val .two () = False`). So `botForces` genuinely need not propagate to a `≤`/`r`-unrelated point,
+even under every hypothesis `cs5FCIncest`/`CKValidFC` supplies -- confirming the naive motive is
+**false**, independent of which specific `NIK` proof term is being inducted on.
+
+**Why this differs from `nik_soundness_onePoint`'s successful `efq` case.** There, `World := Unit`,
+so *every* function `Label Atom → Unit` is trivially constant (`ρ x = ρ y = ()` always) -- the
+one-point trick masks the cross-label subtlety entirely, rather than resolving it. It does not
+generalize: a genuinely non-degenerate `World` (needed for `boxI`/`diaE` to carry non-trivial modal
+content at all) reopens exactly the gap above.
+
+**Why the natural fixes do not close it within this phase's scope.**
+- *Restricting to `y ∈ G.X ∪ ctxLabels Γ` and using the "`TClosure TS5` is total on a connected
+  component" fact (module docstring's earlier "Refined analysis" section, §1)* only half-works:
+  `IsDerivationForest` (Phase 6) intentionally allows a **disconnected** forest (finite + graded
+  rank + unique parent, with no "single root"/connectivity conjunct) precisely so it stays provable
+  by structural induction without threading extra history; the "always a single tree from
+  `Graph.trivial`" fact that would make `TClosure TS5 G.R` total on `G.X` is a *strictly stronger*
+  invariant `IsDerivationForest` does not carry, so this sub-case would need new machinery beyond
+  what Phase 6 landed.
+- *Making the whole induction's motive existential (`∃ ρ' agreeing with ρ on G.X ∪ ctxLabels Γ, ...
+  ∧ CKForces r v botForces (ρ' φ.lbl) φ.prop`), giving `efq`/`orE` freedom to reassign `ρ` at a
+  genuinely-fresh `y`* is consistent with `boxI`/`diaE` (whose fresh `y` is already added to
+  `G.X` by `addEdge`, so it is "pinned" and the existential wrapper does not rob them of the exact
+  value they need) and with the label-local rules (whose shared label is pinned identically across
+  every premise) -- but it still needs the `y ∈ G.X ∪ ctxLabels Γ` sub-case of `efq`/`orE` closed by
+  the connectivity fact above, which is not available. This existential reformulation is also a
+  substantial redesign of the induction's own shape, not a "transcribe the skeleton" step -- exactly
+  the kind of scope growth the Postmortem Constraints warn against inventing unilaterally mid-phase.
+
+**Disposition.** Per the escalation protocol (machine-check before escalating; no `sorry`, no new
+axiom, no vacuous placeholder to force a result): this is recorded as a genuine `[BLOCKED]` finding
+for Phase 8, routed to a follow-up scoped to closing the `efq`/`orE` cases (most promising path:
+prove a "`IsDerivationForest` + built via `Graph.trivial`/`addEdge` ⟹ `G.X` is `TClosure TS5`-total"
+connectivity lemma, then an existential-motive reformulation of the main induction restricted to
+that closed sub-case). Phases 1-7 are unaffected, unregressed, and remain the correct foundation;
+no `.lean` proof code was added or altered this dispatch (this docstring update is the only change
+to this file).
+
 ## Contents (this dispatch)
 
 - `cs5FCIncest_lift`: the interpretation-lifting building block (item 2's core ingredient).

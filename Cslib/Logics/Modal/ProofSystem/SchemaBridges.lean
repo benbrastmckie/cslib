@@ -255,4 +255,190 @@ theorem schemaUnion_bTags_iff_BAxiom {φ : Proposition Atom} :
     | diaDualityFwd φ => exact ⟨.diaDualityFwd, by decide, φ, rfl⟩
     | diaDualityBack φ => exact ⟨.diaDualityBack, by decide, φ, rfl⟩
 
+/-! ## Sub-Phase 3.2: K4, K5, K45, S4 -/
+
+/-- System K4's tag set: `kCore ∪ {modalFour}` (transitivity). -/
+def k4Tags : Finset ModalSchemaTag := insert .modalFour kCore
+
+/-- System K5's tag set: `kCore ∪ {modalFive}` (Euclideanness). -/
+def k5Tags : Finset ModalSchemaTag := insert .modalFive kCore
+
+/-- System K45's tag set: `kCore ∪ {modalFour, modalFive}`. -/
+def k45Tags : Finset ModalSchemaTag := insert .modalFour (insert .modalFive kCore)
+
+/-- System S4's tag set: `kCore ∪ {modalT, modalFour}`. -/
+def s4Tags : Finset ModalSchemaTag := insert .modalT (insert .modalFour kCore)
+
+/-- Bridge: `SchemaUnion k4Tags φ ↔ K4Axiom φ`. -/
+theorem schemaUnion_k4Tags_iff_K4Axiom {φ : Proposition Atom} :
+    SchemaUnion k4Tags φ ↔ K4Axiom φ := by
+  constructor
+  · intro h
+    simp only [k4Tags, kCore, SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+      ModalSchemaTag.Holds] at h
+    rcases h with ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+    all_goals first
+      | exact K4Axiom.implyK _ _
+      | exact K4Axiom.implyS _ _ _
+      | exact K4Axiom.efq _
+      | exact K4Axiom.peirce _ _
+      | exact K4Axiom.modalK _ _
+      | exact K4Axiom.modalFour _
+      | exact K4Axiom.andI _ _
+      | exact K4Axiom.andE1 _ _
+      | exact K4Axiom.andE2 _ _
+      | exact K4Axiom.orI1 _ _
+      | exact K4Axiom.orI2 _ _
+      | exact K4Axiom.orE _ _ _
+      | exact K4Axiom.diaDualityFwd _
+      | exact K4Axiom.diaDualityBack _
+  · intro h
+    cases h with
+    | implyK φ ψ => exact ⟨.implyK, by decide, φ, ψ, rfl⟩
+    | implyS φ ψ χ => exact ⟨.implyS, by decide, φ, ψ, χ, rfl⟩
+    | efq φ => exact ⟨.efq, by decide, φ, rfl⟩
+    | peirce φ ψ => exact ⟨.peirce, by decide, φ, ψ, rfl⟩
+    | modalK φ ψ => exact ⟨.modalK, by decide, φ, ψ, rfl⟩
+    | modalFour φ => exact ⟨.modalFour, by decide, φ, rfl⟩
+    | andI φ ψ => exact ⟨.andI, by decide, φ, ψ, rfl⟩
+    | andE1 φ ψ => exact ⟨.andE1, by decide, φ, ψ, rfl⟩
+    | andE2 φ ψ => exact ⟨.andE2, by decide, φ, ψ, rfl⟩
+    | orI1 φ ψ => exact ⟨.orI1, by decide, φ, ψ, rfl⟩
+    | orI2 φ ψ => exact ⟨.orI2, by decide, φ, ψ, rfl⟩
+    | orE φ ψ χ => exact ⟨.orE, by decide, φ, ψ, χ, rfl⟩
+    | diaDualityFwd φ => exact ⟨.diaDualityFwd, by decide, φ, rfl⟩
+    | diaDualityBack φ => exact ⟨.diaDualityBack, by decide, φ, rfl⟩
+
+/-- Bridge: `SchemaUnion k5Tags φ ↔ K5Axiom φ`. -/
+theorem schemaUnion_k5Tags_iff_K5Axiom {φ : Proposition Atom} :
+    SchemaUnion k5Tags φ ↔ K5Axiom φ := by
+  constructor
+  · intro h
+    simp only [k5Tags, kCore, SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+      ModalSchemaTag.Holds] at h
+    rcases h with ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+    all_goals first
+      | exact K5Axiom.implyK _ _
+      | exact K5Axiom.implyS _ _ _
+      | exact K5Axiom.efq _
+      | exact K5Axiom.peirce _ _
+      | exact K5Axiom.modalK _ _
+      | exact K5Axiom.modalFive _
+      | exact K5Axiom.andI _ _
+      | exact K5Axiom.andE1 _ _
+      | exact K5Axiom.andE2 _ _
+      | exact K5Axiom.orI1 _ _
+      | exact K5Axiom.orI2 _ _
+      | exact K5Axiom.orE _ _ _
+      | exact K5Axiom.diaDualityFwd _
+      | exact K5Axiom.diaDualityBack _
+  · intro h
+    cases h with
+    | implyK φ ψ => exact ⟨.implyK, by decide, φ, ψ, rfl⟩
+    | implyS φ ψ χ => exact ⟨.implyS, by decide, φ, ψ, χ, rfl⟩
+    | efq φ => exact ⟨.efq, by decide, φ, rfl⟩
+    | peirce φ ψ => exact ⟨.peirce, by decide, φ, ψ, rfl⟩
+    | modalK φ ψ => exact ⟨.modalK, by decide, φ, ψ, rfl⟩
+    | modalFive φ => exact ⟨.modalFive, by decide, φ, rfl⟩
+    | andI φ ψ => exact ⟨.andI, by decide, φ, ψ, rfl⟩
+    | andE1 φ ψ => exact ⟨.andE1, by decide, φ, ψ, rfl⟩
+    | andE2 φ ψ => exact ⟨.andE2, by decide, φ, ψ, rfl⟩
+    | orI1 φ ψ => exact ⟨.orI1, by decide, φ, ψ, rfl⟩
+    | orI2 φ ψ => exact ⟨.orI2, by decide, φ, ψ, rfl⟩
+    | orE φ ψ χ => exact ⟨.orE, by decide, φ, ψ, χ, rfl⟩
+    | diaDualityFwd φ => exact ⟨.diaDualityFwd, by decide, φ, rfl⟩
+    | diaDualityBack φ => exact ⟨.diaDualityBack, by decide, φ, rfl⟩
+
+/-- Bridge: `SchemaUnion k45Tags φ ↔ K45Axiom φ`. -/
+theorem schemaUnion_k45Tags_iff_K45Axiom {φ : Proposition Atom} :
+    SchemaUnion k45Tags φ ↔ K45Axiom φ := by
+  constructor
+  · intro h
+    simp only [k45Tags, kCore, SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+      ModalSchemaTag.Holds] at h
+    rcases h with ⟨φ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+    all_goals first
+      | exact K45Axiom.implyK _ _
+      | exact K45Axiom.implyS _ _ _
+      | exact K45Axiom.efq _
+      | exact K45Axiom.peirce _ _
+      | exact K45Axiom.modalK _ _
+      | exact K45Axiom.modalFour _
+      | exact K45Axiom.modalFive _
+      | exact K45Axiom.andI _ _
+      | exact K45Axiom.andE1 _ _
+      | exact K45Axiom.andE2 _ _
+      | exact K45Axiom.orI1 _ _
+      | exact K45Axiom.orI2 _ _
+      | exact K45Axiom.orE _ _ _
+      | exact K45Axiom.diaDualityFwd _
+      | exact K45Axiom.diaDualityBack _
+  · intro h
+    cases h with
+    | implyK φ ψ => exact ⟨.implyK, by decide, φ, ψ, rfl⟩
+    | implyS φ ψ χ => exact ⟨.implyS, by decide, φ, ψ, χ, rfl⟩
+    | efq φ => exact ⟨.efq, by decide, φ, rfl⟩
+    | peirce φ ψ => exact ⟨.peirce, by decide, φ, ψ, rfl⟩
+    | modalK φ ψ => exact ⟨.modalK, by decide, φ, ψ, rfl⟩
+    | modalFour φ => exact ⟨.modalFour, by decide, φ, rfl⟩
+    | modalFive φ => exact ⟨.modalFive, by decide, φ, rfl⟩
+    | andI φ ψ => exact ⟨.andI, by decide, φ, ψ, rfl⟩
+    | andE1 φ ψ => exact ⟨.andE1, by decide, φ, ψ, rfl⟩
+    | andE2 φ ψ => exact ⟨.andE2, by decide, φ, ψ, rfl⟩
+    | orI1 φ ψ => exact ⟨.orI1, by decide, φ, ψ, rfl⟩
+    | orI2 φ ψ => exact ⟨.orI2, by decide, φ, ψ, rfl⟩
+    | orE φ ψ χ => exact ⟨.orE, by decide, φ, ψ, χ, rfl⟩
+    | diaDualityFwd φ => exact ⟨.diaDualityFwd, by decide, φ, rfl⟩
+    | diaDualityBack φ => exact ⟨.diaDualityBack, by decide, φ, rfl⟩
+
+/-- Bridge: `SchemaUnion s4Tags φ ↔ S4Axiom φ`. -/
+theorem schemaUnion_s4Tags_iff_S4Axiom {φ : Proposition Atom} :
+    SchemaUnion s4Tags φ ↔ S4Axiom φ := by
+  constructor
+  · intro h
+    simp only [s4Tags, kCore, SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+      ModalSchemaTag.Holds] at h
+    rcases h with ⟨φ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+    all_goals first
+      | exact S4Axiom.implyK _ _
+      | exact S4Axiom.implyS _ _ _
+      | exact S4Axiom.efq _
+      | exact S4Axiom.peirce _ _
+      | exact S4Axiom.modalK _ _
+      | exact S4Axiom.modalT _
+      | exact S4Axiom.modalFour _
+      | exact S4Axiom.andI _ _
+      | exact S4Axiom.andE1 _ _
+      | exact S4Axiom.andE2 _ _
+      | exact S4Axiom.orI1 _ _
+      | exact S4Axiom.orI2 _ _
+      | exact S4Axiom.orE _ _ _
+      | exact S4Axiom.diaDualityFwd _
+      | exact S4Axiom.diaDualityBack _
+  · intro h
+    cases h with
+    | implyK φ ψ => exact ⟨.implyK, by decide, φ, ψ, rfl⟩
+    | implyS φ ψ χ => exact ⟨.implyS, by decide, φ, ψ, χ, rfl⟩
+    | efq φ => exact ⟨.efq, by decide, φ, rfl⟩
+    | peirce φ ψ => exact ⟨.peirce, by decide, φ, ψ, rfl⟩
+    | modalK φ ψ => exact ⟨.modalK, by decide, φ, ψ, rfl⟩
+    | modalT φ => exact ⟨.modalT, by decide, φ, rfl⟩
+    | modalFour φ => exact ⟨.modalFour, by decide, φ, rfl⟩
+    | andI φ ψ => exact ⟨.andI, by decide, φ, ψ, rfl⟩
+    | andE1 φ ψ => exact ⟨.andE1, by decide, φ, ψ, rfl⟩
+    | andE2 φ ψ => exact ⟨.andE2, by decide, φ, ψ, rfl⟩
+    | orI1 φ ψ => exact ⟨.orI1, by decide, φ, ψ, rfl⟩
+    | orI2 φ ψ => exact ⟨.orI2, by decide, φ, ψ, rfl⟩
+    | orE φ ψ χ => exact ⟨.orE, by decide, φ, ψ, χ, rfl⟩
+    | diaDualityFwd φ => exact ⟨.diaDualityFwd, by decide, φ, rfl⟩
+    | diaDualityBack φ => exact ⟨.diaDualityBack, by decide, φ, rfl⟩
+
 end Cslib.Logic.Modal

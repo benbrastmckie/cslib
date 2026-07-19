@@ -347,9 +347,19 @@ DB:{modalK,modalD,modalB}` — each unioned with the 13-tag `kCore` (proposition
   `schemaUnion_bTags_iff_BAxiom` report only `propext`/`Quot.sound`). Scoped `lake build`,
   `lake exe checkInitImports`, `lake exe lint-style` all green. No instance file modified.
 
-**Sub-phase 3.2 — K4, K5, K45, S4** [NOT STARTED]
-- [ ] Define the four tag sets; prove the four bridge equivalences.
+**Sub-phase 3.2 — K4, K5, K45, S4** [COMPLETED]
+- [x] Define the four tag sets; prove the four bridge equivalences.
 - Estimated output: ~150-250 lines.
+- **Completion note**: Appended to `SchemaBridges.lean`. Tag sets cross-checked against
+  `Instances/{K4,K5,K45,S4}.lean` constructors: K4 = `kCore ∪ {modalFour}`, K5 = `kCore ∪
+  {modalFive}`, K45 = `kCore ∪ {modalFour, modalFive}`, S4 = `kCore ∪ {modalT, modalFour}`.
+  First build attempt on K45/S4 (the two-differentiator cases) failed with `subst` errors from
+  a miscounted `rcases` pattern (15 disjuncts expected — 2 single-arg differentiators + 13
+  `kCore` — but the pattern had only 14 slots and silently dropped `orI2` mid-sequence); fixed
+  by re-deriving the exact 15-slot arity sequence and rewriting both `rcases` lines. Zero
+  `sorry`, zero new axiom (`lean_verify` on `schemaUnion_k45Tags_iff_K45Axiom` and
+  `schemaUnion_s4Tags_iff_S4Axiom` report only `propext`/`Quot.sound`). Scoped `lake build`,
+  `checkInitImports`, `lint-style` all green. No instance file modified.
 
 **Sub-phase 3.3 — S5, TB, KB5** [NOT STARTED]
 - [ ] Define the three tag sets; prove bridges. For S5, bridge `SchemaUnion s5Tags φ ↔ ModalAxiom φ`

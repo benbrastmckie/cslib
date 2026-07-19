@@ -1,45 +1,23 @@
 {
-  "task_number": 537,
-  "session_id": "sess_1784471495_4fb1e9",
-  "phase": "research",
-  "status": "researched",
-  "orchestrator_mode": true,
-  "next_phase_hint": "Direct route is now source-grounded AND machine-verified as ACHIEVABLE, overturning the prior [BLOCKED]. Proceed to /plan 537: build a fresh implementation plan for the DIRECT route (box/diamond persistence-iff across the TClosure class + boxI lifting lemma). Do NOT plan the Hilbert adequacy bridge (user declined) or the L_m sequent system (this report shows neither is needed).",
-  "next_command": "/plan 537",
-  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "VERIFIED (Simpson1994:86, MarinMoralesStrassburger2021:962); all claims cite chunks read this pass",
-  "verdict": "DIRECT route ACHIEVABLE; prior four-dispatch [BLOCKED] REFUTED (it proved the wrong lemma). No adequacy bridge, no sorry, no new axiom, cs5FCIncest unweakened, NIK unchanged.",
-  "key_findings": [
-    "Q1 (Simpson Ch.8, chunks 0151-0158): soundness = tree-restricted induction + Lifting Lemma 8.1.3; the (box-I) case absorbs the adversarial successor into a FRESH child via lifting, not an exact frame edge. NIKTheorem is theoremhood-over-Graph.trivial = a tree = Simpson's provable case (Thm 8.1.1/8.1.4).",
-    "Q2 (MMS 2021, chunks 0026/0028/0046): DIRECT birelational soundness for incestuality (Thm 7.2) works by mapping FRESH labels to frame-supplied existential witnesses; sequents carry only EXPLICIT relational atoms, so a closed edge between two fixed points is never validated as an exact edge. This is the standard move the in-repo attempts missed.",
-    "Q3 diagnosis: CKForces box clause (Forcing.lean:75) is IDENTICAL to the standard birelational clause -- NOT stronger. The wall is architectural: boxE/diaI (Deduction.lean:288-303) carry a TClosure-closed edge premise, and the prior CLIQUE edge-cond invariant (TClosure -> exact r-edge) was the mistake. Fix: RAW edge-cond invariant + box/diamond persistence.",
-    "Wall A DISSOLVED (machine-verified axiom-free): box_iff_base / dia_iff_base -- box/diamond forced equivalently across a raw edge (both directions) via hincest/hfour/hsymbox/htrans; extends over the whole TClosure {T,B,Four} class by Iff.rfl/symm/trans (eucl unreachable, Five not in TS5).",
-    "Wall B = standard Lifting Lemma 8.1.3, needed for boxI ONLY: F1 = landed cs5FCIncest_lift (Soundness.lean:322); F2 = hsymbox then hincest (machine-verified, 3 lines). diaE uses le_refl and needs no lift."
-  ],
-  "machine_verification": "All mathematical cruxes checked via lean_run_code with #print axioms = 'does not depend on any axioms': box_iff_base, dia_iff_base, box_gives_here, F1, F2. Faithful inline restatement of cs5FCIncest's five conjuncts (CS5Canonical.lean:255-260).",
-  "ranked_next_steps": [
-    "1. Land box_iff_base/dia_iff_base then box_iff_TClosure/dia_iff_TClosure (TClosure induction) -- LOW risk, cruxes already compile.",
-    "2. Land F2 and package single-step lifting next to cs5FCIncest_lift (=F1) -- LOW risk.",
-    "3. Build the boxI tree-lifting lemma (Simpson 8.1.3 analogue; freshness/tree invariant threading F1/F2) -- MAIN risk, own phase.",
-    "4. Assemble nik_TS5_soundness: 12-constructor NIK induction generalized over rho+model (reuse nik_soundness_onePoint skeleton, Soundness.lean:345), RAW edge-cond + Gamma-cond; boxE/diaI via step 1, boxI via step 3, diaE via le_refl, propositional verbatim.",
-    "5. Regression gate: cs5_completeness, nik_TS5_consistent, cs5_soundness_derivable_incest unchanged; cs5FCIncest unweakened; lake build green; lean_verify (no sorryAx)."
-  ],
-  "completion_estimate": "~80-85% for the full direct route (was ~25-30% for the declined bridge); risk concentrated solely in the boxI tree-lifting recursion (item 3).",
-  "zero_debt_confirmed": {
-    "no_sorry": true,
-    "no_new_axiom": true,
-    "cs5FCIncest_unweakened": true,
-    "NIK_unchanged": true,
-    "no_lean_files_modified_this_pass": true
-  },
-  "blockers": [],
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Wrote direct-route plan v2 (plans/02_direct-route.md), superseding obsolete 01 (refuted exact-edge-symmetry wall). 7 H8-sized phases, de-risking order: (1-2) box/diamond forcing-equivalence over TClosure class dissolves Wall A, (3) F2+here-helpers, (4.1/4.2) Simpson Lifting Lemma boxI recursion (sole risk), (5) assemble nik_TS5_soundness, (6) regression gate, (7) contingency [BLOCKED] handoff. Zero-debt; skeleton=false.",
   "artifacts": [
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
-      "type": "report",
-      "summary": "Source-grounded, machine-verified verdict: direct route achievable; H3 reference-grounding table; H4 adversarial table; lemma-by-lemma mapping; ranked planner next steps."
-    }
+    {"type": "plan", "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md"}
   ],
-  "completed": "2026-07-19T16:25:00Z"
+  "blockers": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
+    "specs/state.json"
+  ],
+  "decisions_made": [
+    "Direct route only (no bridge/L_m/new file); all work in Soundness.lean; raw not clique edge-cond.",
+    "Risk isolated to Phase 4.2 boxI lifting; stall routes to Phase 7 [BLOCKED], never a sorry. skeleton=false."
+  ],
+  "dead_ends": [
+    "TClosure edge -> exact r-edge (exact symmetry): false-in-general, killed 4 dispatches, do not retry."
+  ],
+  "plan_markers_verified": true
 }

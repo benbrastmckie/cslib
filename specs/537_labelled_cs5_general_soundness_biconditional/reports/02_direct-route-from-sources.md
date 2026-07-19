@@ -175,7 +175,7 @@ I attempted to refute my own conclusion. Every load-bearing algebraic claim was 
 (`lean_run_code`, `#print axioms`), which is the specific failure mode of the prior four dispatches
 (hand-analysis of a wall that was the wrong lemma).
 
-| Claim | Source / Counterexample | Verdict |
+| Claim | Source/Counterexample | Verdict |
 |---|---|---|
 | Wall A's `.symm` case (box) is dischargeable WITHOUT exact symmetry, via `hincest`+`hfour` | `box_iff_base` compiles, "does not depend on any axioms"; grounded in MMS 0046 fresh-witness technique | **CONFIRMED (machine-verified)** |
 | Same for the diamond side | `dia_iff_base` compiles axiom-free (`hsymbox`+`htrans`; `hincest`+`hsymbox`+`htrans`) | **CONFIRMED (machine-verified)** |

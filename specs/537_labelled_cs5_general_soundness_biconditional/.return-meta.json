@@ -1,33 +1,29 @@
 {
   "task_number": 537,
-  "agent_type": "cslib-research-hard-agent",
+  "agent_type": "planner-hard-agent",
   "session_id": "sess_1784471495_4fb1e9",
-  "status": "researched",
-  "phase": "research",
+  "status": "planned",
+  "phase": "plan",
   "orchestrator_mode": true,
-  "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"],
-  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
-  "findings_count": 4,
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "VERIFIED: Simpson1994 (references.bib:86), MarinMoralesStrassburger2021 (references.bib:962). All source claims cite specific chunks READ this pass (Simpson 0151-0160; MMS 0026,0028,0043,0044,0046,0048) -- no [UNVERIFIED] transcription fallbacks.",
-  "adversarial_verification_triggered": true,
-  "adversarial_verification_result": "CONFIRMED and STRENGTHENED. Prior four-dispatch [BLOCKED] conclusion REFUTED: it proved the wrong lemma (TClosure edge -> exact r-edge, which needs exact symmetry, false-in-general and unnecessary). Every mathematical crux of the corrected direct route was machine-verified sorry-free/axiom-free via lean_run_code + #print axioms (box_iff_base, dia_iff_base, F1, F2, box_gives_here). No ## Revised Direction restart triggered.",
-  "result_summary": "The DIRECT route to nik_TS5_soundness is ACHIEVABLE (no adequacy bridge, no sorry, no new axiom, cs5FCIncest unweakened). Grounded in the actual primary sources read this pass: Simpson Ch.8 (soundness = tree-restricted induction + Lifting Lemma 8.1.3; NIKTheorem is theoremhood-over-a-tree = his provable case) and MMS 2021 (direct birelational soundness for incestuality via fresh-label absorption of frame-supplied existential witnesses). DIAGNOSIS (Q3): CKForces box clause (Forcing.lean:75) is IDENTICAL to the standard birelational clause -- NOT stronger; the wall is architectural (boxE/diaI carry a TClosure-closed edge premise) and the prior clique edge-cond invariant was the mistake. FIX (machine-verified): Wall A dissolves via box/diamond forcing-EQUIVALENCE across the TClosure {T,B,Four} class (CKForces(rho x)(box A) iff CKForces(rho y)(box A)), proved from hincest/hfour/hsymbox/htrans raised witnesses (NO exact symmetry); Wall B is Simpson's standard Lifting Lemma needed for boxI ONLY, with F1 = landed cs5FCIncest_lift and F2 derivable in 3 lines (diaE uses le_refl, needs no lift). Direct-route completion estimate raised to ~80-85%, risk concentrated solely in the boxI tree-lifting recursion.",
-  "memory_candidates": [
-    "Labelled-CS5 boxE/diaI soundness over cs5FCIncest is discharged by box/diamond forcing-EQUIVALENCE across the TClosure {T,B,Four} class (CKForces(rho x)(box A) iff CKForces(rho y)(box A)), proved from hincest/hfour/hsymbox/htrans raised witnesses -- NOT by validating each closed edge as an exact r-edge. The exact-r-symmetry lemma that blocked four dispatches is both false-in-general and unnecessary. (machine-verified axiom-free via lean_run_code)",
-    "cs5FCIncest yields BOTH birelational confluence directions: F1 (source-raise) = landed cs5FCIncest_lift (Soundness.lean:322); F2 (target-raise) = hsymbox then hincest, three lines. Simpson's Lifting Lemma 8.1.3 therefore transfers; only boxI needs it (diaE uses le_refl, needs none).",
-    "General method (Simpson 1994 chunk 0158 + MMS 2021 chunks 0026/0046): to prove labelled soundness against frame-condition rules, maintain a RAW edge-cond invariant and push raised/existential witnesses through the modal forcing clause at the point of use -- never a TClosure-clique invariant. This is MMS's fresh-witness technique; it sidesteps the non-tree-excursion obstruction for theoremhood-over-a-tree.",
-    "When a formal-proof task is declared [BLOCKED] on a hand-analyzed 'wall', re-examine whether the blocking lemma is the RIGHT decomposition before escalating scope: task 537's four dispatches machine-never-checked their wall and were disproved in one lean_run_code pass once the correct (persistence, not clique) lemma was identified."
-  ],
+  "started_at": "2026-07-19T16:40:00Z",
+  "completed": "2026-07-19T16:45:00Z",
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
   "artifacts": [
     {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
-      "type": "report",
-      "summary": "Source-grounded, machine-verified verdict that the DIRECT route is achievable; H3 reference-grounding table (chunk -> claim -> Lean target); H4 adversarial table; lemma-by-lemma mapping; ranked planner next steps."
+      "type": "plan",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
+      "summary": "Hard-mode direct-route plan v2 (supersedes 01): 7 phases, H8-sized, de-risking order, zero-debt, contingency [BLOCKED] handoff (no sorry)."
     }
   ],
-  "next_steps": "Run /plan 537 to create implementation plan",
-  "next_command": "/plan 537",
-  "started_at": "2026-07-19T16:00:00Z",
-  "completed": "2026-07-19T16:25:00Z"
+  "next_steps": "Run /implement 537 to execute the plan (Phase 1: box_iff_base / dia_iff_base).",
+  "next_command": "/implement 537",
+  "metadata": {
+    "session_id": "sess_1784471495_4fb1e9",
+    "agent_type": "planner-hard-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+    "phase_count": 7,
+    "estimated_hours": 12,
+    "postmortem_rules_count": 8
+  }
 }

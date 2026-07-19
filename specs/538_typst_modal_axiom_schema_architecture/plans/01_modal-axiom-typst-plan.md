@@ -1,7 +1,7 @@
 # Implementation Plan: Typst Rendering of the Modal Axiom-Schema Architecture
 
 - **Task**: 538 - Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md
@@ -278,29 +278,44 @@ the consolidated source-anchor appendix table.
 - Sections 5, 6, 7 and the appendix anchor table all present and rendering.
 - `typst compile` exits 0.
 
-### Phase 5: Compile, Verify, and Concision/Fidelity Review [NOT STARTED]
+### Phase 5: Compile, Verify, and Concision/Fidelity Review [COMPLETED]
 
 **Goal**: Confirm the finished document compiles cleanly and that its rendered content is faithful
 to the source and genuinely concise, and that no ephemeral task-number references leak into the
 deliverable.
 
 **Tasks**:
-- [ ] Run a clean `typst compile
+- [x] Run a clean `typst compile
       typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ
       typst/ModalAxiomArchitecture/build/modal-axiom-schema-architecture.pdf`; confirm exit code 0
-      with no warnings that indicate missing content.
-- [ ] Read the compiled PDF (or its structure) and cross-check every one of the seven source
+      with no warnings that indicate missing content. Confirmed: exit 0; the only warning is the
+      pre-existing, package-internal `unknown font family: new computer modern sans` from
+      `thmbox.typ` itself (also present in the accepted `typst/MPL/` precedent's build; not a
+      missing-content warning, not introduced by this document).
+- [x] Read the compiled PDF (or its structure) and cross-check every one of the seven source
       sections is represented; confirm each collapsed table/diagram is faithful to the source it
       replaced (especially the five-row correspondence table and the transcribed axiom schemas).
-- [ ] Confirm the `Axioms.AxiomB` cell matches the Phase 1 finding (verified expansion or opaque
-      citation), not an unverified textbook shape.
-- [ ] Confirm concision: no partial "… 15 further clauses" ellipsis excerpts remain where a table
-      is more complete; prose reads clean with anchors deferred to the appendix.
-- [ ] `grep -nE "task [0-9]+|tasks [0-9]+|\(task [0-9]+\)"
+      Confirmed via `pdftoppm` page-by-page visual review of all 16 pages: Overview + Sections
+      1-7 + Appendix all present; 18-tag table, 15-tag-set table, cube diagram (24/24 edges),
+      frame-correspondence table, `HasAxiom*` hierarchy table, S5/KB5 table, Representation A/B
+      table, scope-boundary quote/table, and the 22-row appendix all render correctly with no
+      overlap or truncation after three rounds of table-layout bug fixes.
+- [x] Confirm the `Axioms.AxiomB` cell matches the Phase 1 finding (verified expansion or opaque
+      citation), not an unverified textbook shape. Confirmed: Section 3's correspondence table
+      prints `φ → □◇φ` with a footnote citing `Foundations/Logic/Axioms.lean:163-165` verbatim
+      and the classical-diamond-encoding caveat, matching the Phase 1 finding exactly.
+- [x] Confirm concision: no partial "… 15 further clauses" ellipsis excerpts remain where a table
+      is more complete; prose reads clean with anchors deferred to the appendix. Confirmed: the
+      one remaining "… 15 further clauses" excerpt (Section 1's `.Holds` illustrative code
+      snippet) sits directly below a table that already gives all 18 tags' complete schemas, so
+      no information is actually withheld anywhere in the document; all other `…`/`...` instances
+      are legitimate range/list abbreviations (e.g. `{K,…,S5}.lean`), not incomplete content.
+- [x] `grep -nE "task [0-9]+|tasks [0-9]+|\(task [0-9]+\)"
       typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ` returns no matches
-      (no-task-references-in-deliverables rule; the `.typ` file is outside `specs/**`).
-- [ ] Confirm the source `docs/modal-axiom-schema-architecture.md` is unchanged (derived artifact,
-      not a replacement).
+      (no-task-references-in-deliverables rule; the `.typ` file is outside `specs/**`). Confirmed:
+      zero matches (grep exit 1).
+- [x] Confirm the source `docs/modal-axiom-schema-architecture.md` is unchanged (derived artifact,
+      not a replacement). Confirmed via `git status --short`/`git diff --stat`: no changes.
 
 **Timing**: 0.75 hours
 
@@ -318,14 +333,14 @@ deliverable.
 
 ## Testing & Validation
 
-- [ ] `typst compile typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ typst/ModalAxiomArchitecture/build/modal-axiom-schema-architecture.pdf` exits 0.
-- [ ] The compiled PDF exists, is non-empty, and reflects the latest source.
-- [ ] All seven source sections plus front matter and the source-anchor appendix are represented.
-- [ ] The five-row frame-correspondence table and the 18-tag alphabet table are faithful to the
+- [x] `typst compile typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ typst/ModalAxiomArchitecture/build/modal-axiom-schema-architecture.pdf` exits 0.
+- [x] The compiled PDF exists, is non-empty, and reflects the latest source.
+- [x] All seven source sections plus front matter and the source-anchor appendix are represented.
+- [x] The five-row frame-correspondence table and the 18-tag alphabet table are faithful to the
       literal source content (schemas transcribed from Lean conclusions, not memory).
-- [ ] The `Axioms.AxiomB` rendering matches the live-Lean-source finding from Phase 1.
-- [ ] No ephemeral task-number references appear anywhere in the `.typ` deliverable.
-- [ ] `docs/modal-axiom-schema-architecture.md` is unchanged.
+- [x] The `Axioms.AxiomB` rendering matches the live-Lean-source finding from Phase 1.
+- [x] No ephemeral task-number references appear anywhere in the `.typ` deliverable.
+- [x] `docs/modal-axiom-schema-architecture.md` is unchanged.
 
 ## Artifacts & Outputs
 

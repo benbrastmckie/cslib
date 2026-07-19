@@ -1,0 +1,23 @@
+{
+  "status": "verified",
+  "summary": "VERDICT: CONFIRMED. Simpson1994 Fig 4-1 (printed p.69 = PDF p.78) prints BOTH (⊥E) [premise x:⊥, conclusion y:A] and (∨E) [major x:A∨B, minors/conclusion y:C, discharging [x:A],[x:B]] cross-label, with NO side condition on either (only *(□I) and †(◇E) are marked). CSLib transcribes both label-local (Deduction.lean:206 efq, :225 orE). Both ARE strict weakenings, and Lemma 5.3.1's proof (p.93 raster) needs BOTH at full disconnected generality: the disjunction property is proved verbatim 'by an application of (∨E)' with major y:B∨C and conclusion the fixed unrelated x:A, and consistency is 'immediate, because Δ ⊬ x:A' only if z:⊥ collapses to an edge-free x:A. Phase 21's reading is correct; three refutation attempts failed. HOWEVER the dispatch's stated blast radius is FALSE and this is the actionable finding: NIK occurs in exactly TWO files (Labelled/Deduction.lean, Labelled/Context.lean); CK/CT/CS4/CS5 NEVER import Labelled; there is NO landed soundness proof over NIK; the sole induction over the relation is NIK.weaken. Probe §4 rebuilds the repaired system (NIKX) and re-proves that induction sorry-free with the two cases threading one extra label and their scripts otherwise unchanged. The repair is TWO constructor signatures plus TWO one-line proof-case edits with zero downstream consumers — not a mainline soundness rewrite. The premise on which authorization was declined is incorrect. Scope-shrinking bonus (machine-checked): every EDGE-CONNECTED cross-label instance is already derivable label-locally (efq_crossLabel_of_edge, any 𝒯, no frame axiom), and Simpson's k3 (◇⊥⊃⊥) and k4 (◇(A∨B)⊃◇A∨◇B) both derive label-locally at TS5 — so the repair adds ONLY the disconnected instances, which is exactly what Lemma 5.3.1 needs.",
+  "phases_completed": 12,
+  "phases_total": 26,
+  "skeleton": false,
+  "blockers": [
+    "Phase 21 remains [BLOCKED]: the efq/orE generalization in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Deduction.lean requires user authorization, previously declined on the (now-refuted) grounds that it would require re-proving landed CK/CT/CS4/CS5 soundness. Recommend re-asking with the corrected blast radius: 2 constructor signatures + 2 proof-case edits, single induction (NIK.weaken), zero downstream consumers."
+  ],
+  "continuation_context": "Fig 4-1 cross-label claim is CONFIRMED for both rules; the repair bundle keeps efq and orE but their cost collapses. Repair diff shape (NOT applied — territory was reports/+probes/ only): efq gains an independent conclusion label y (x y : Label Atom; premise x:⊥, conclusion y:A); orE gains an independent conclusion label y (minors and conclusion at y, branch assumptions still discharged at x). Then in NIK.weaken (Deduction.lean:275): '| efq G Γ x A _ ih => exact .efq G' Δ x A (ih hG hΓ)' becomes '| efq G Γ x y A _ ih => exact .efq G' Δ x y A (ih hG hΓ)', and the orE case threads y identically. Deriv.mono / Deriv.ofNIK (Context.lean:194-207) consume NIK.weaken as a black box and are signature-stable. Soundness of both repaired rules is semantically trivial (x:⊥ satisfied nowhere ⇒ cross-label (⊥E) vacuous; cross-label (∨E) splits on a fact about x to conclude about y). probes/fig41-crosslabel-gate.lean §4 contains the full repaired inductive (NIKX) and its re-proved weakening lemma, ready to transcribe. Probe §1-§3 (efq_crossLabel_of_edge, dia_bot_elim_TS5, dia_or_dist_TS5) should be carried forward as regression tests — they must still hold after the repair since the cross-label rules subsume the label-local ones. deductiveClosure and clModel remain independent of this question and were not audited.",
+  "next_action_hint": "Re-ask the user to authorize the efq/orE generalization, presenting the corrected blast radius from reports/10 (CK/CT/CS4/CS5 never import Labelled; NIK lives in 2 files; NIK.weaken is the only induction; probe §4 already re-proves it). If authorized, transcribe probes/fig41-crosslabel-gate.lean §4's NIKX signatures into Deduction.lean's NIK and thread the extra label through NIK.weaken's efq/orE cases, then rebuild Labelled.Context.",
+  "artifacts": [
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/10_fig41-crosslabel-verification.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/fig41-crosslabel-gate.lean"
+  ],
+  "modified_files": [
+    "specs/517_labelled_bounded_context_cs5_completeness/reports/10_fig41-crosslabel-verification.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/probes/fig41-crosslabel-gate.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
+  ],
+  "sorry_inventory": []
+}

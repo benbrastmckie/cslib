@@ -1638,14 +1638,14 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
       "dependencies": [],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-18T22:07:32Z",
+      "last_updated": "2026-07-19T02:20:00Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1660,13 +1660,13 @@
           "summary": "Plan v5: well-founded Zorn / FLO-invariant reconstruction for the old-label obstacle"
         },
         {
-          "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/14_flo-maximal-phase4-summary.md",
+          "path": "specs/517_labelled_bounded_context_cs5_completeness/summaries/18_phase8-canonical-model-truth-lemma-summary.md",
           "type": "summary",
-          "summary": "Implementation summary: 14_flo-maximal-phase4-summary.md"
+          "summary": "Implementation summary: 18_phase8-canonical-model-truth-lemma-summary.md"
         }
       ],
-      "blockers": "Route B funded (user decision, alignment audit). Plan v4 (plans/11_tprime-repair-cs5-completeness.md): Phase 1-2 = GATE repairing the TPrime inhabitance transcription defect (Context.lean:215/217/219; transcribe already-landed sorry-free probes), then Simpson 1994 Ch 7-8 labelled bounded-context CS5 completeness (8.2.5 T-Comp symmetry, 8.2.6 bounded canonical model, bounded prime lemma, truth lemma). Prime-theory route (512) and independent-<= route (516) abandoned/superseded. Next: /implement 517 --lit --hard (--lit required: Ch 7-8 not yet mined).",
-      "session_id": "sess_1784412320_0eed91",
+      "blockers": "PHASE 10 BLOCKED (cs5_completeness assembly). Phases 1-9 landed sorry-free/axiom-clean (build 3245/3245, test 9237/9237, unregressed). Phase 10 is NOT a pure composition of Phases 7-9: the contrapositive argument must seed primeLemma from (not Derivable CS5ModalAxiom phi), which requires a bridge NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi = Simpson 1994 Ch.6 ADEQUACY THEOREM (translate graph-labelled NIK natural-deduction proofs into single-formula Hilbert proofs). This bridge exists nowhere in Cslib/ (Deduction/Syntax/Context docstrings reserve it for a not-yet-created Adequacy.lean). It was attempted before as Track C (plans/02): C1-C4 landed sorry-free in probes/, but C5 (pathSpine) flagged 'THE TRUE CRUX, HIGH risk' and never started; state.json already records 'Do NOT dispatch C5' pending a decision gate. Segment/MCS route confirmed inapplicable to CS5. DECISION REQUIRED (requires_user_review): (A) commit to a dedicated Adequacy-bridge sub-effort resuming Track C C5-C8 (HIGH-risk, multi-dispatch) -- spawn as its own bounded task; or (B) restate cs5_completeness's target to avoid the Hilbert bridge (changes Definition of done, needs sign-off). Full analysis: handoffs/phase-10-adequacy-bridge-blocker-20260718.md.",
+      "session_id": "sess_1784426695_5a54b8",
       "plan_metadata": {
         "phases": 26,
         "complexity": "complex",

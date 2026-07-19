@@ -1,68 +1,44 @@
 {
   "task_number": 537,
-  "agent_type": "cslib-implementation-hard-agent",
+  "agent_type": "cslib-research-hard-agent",
   "session_id": "sess_1784471495_4fb1e9",
-  "status": "partial",
-  "phase": "implement",
+  "status": "researched",
+  "phase": "research",
   "orchestrator_mode": true,
-  "started_at": "2026-07-19T16:24:02Z",
-  "completed": "2026-07-19T16:49:15Z",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-  "phases_completed": 4,
-  "phases_total": 7,
-  "requires_user_review": true,
+  "focus_prompt": "divergence audit boxI_lift tree-shape invariant",
+  "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"],
+  "verdict": "DIRECT ROUTE COMPLETABLE -- lift the Phase 4.2 [BLOCKED]; do NOT route to Phase 7/follow-up",
+  "hypothesis_confirmed": true,
+  "graph_can_contain_cycles": false,
+  "findings_count": 9,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "verified (Simpson1994 @phdthesis, MarinMoralesStrassburger2021 @article both present in references.bib)",
+  "requires_user_review": false,
   "artifacts": [
     {
-      "type": "lean_source",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added boxI_lift_star: a Finset-indexed generalization of Phase 4.1's boxI_raise_step, raising x together with a finite set of ALL its direct raw-neighbours (either direction), chained via Finset.induction using cs5FCIncest_lift/cs5FCIncest_raise. Sorry-free, axiom-clean. Does not close the full recursive tree cascade or the boxI case; see the section docstring and the Phase 7 handoff for the precise, machine-checked reason (a rank/unique-parent invariant on Graph, not yet established anywhere, is needed for the general case -- confirmed via a 3-cycle counterexample)."
-    },
-    {
-      "type": "plan",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 4.2 heading marked [BLOCKED]; checklist items annotated partial/not-reached/done with landed-location and handoff references."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/04_phase4-2-boxI-lift-blocked.md",
-      "summary": "Phase 7 BLOCKED handoff: exact blocker (3-cycle counterexample against a fully general boxI_lift), what landed (boxI_lift_star), recommended follow-up route, verification evidence."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
-      "summary": "H9 orchestrator handoff, status partial, sorry_inventory empty, populated blockers entry, continuation_context.next_phase_hint = Phase 7."
-    },
-    {
-      "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/04_phase4-2-boxI-lift-star-summary.md",
-      "summary": "Implementation summary for this dispatch, including Plan Deviations section."
+      "type": "report",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md",
+      "summary": "Divergence audit resolving the Phase 4.2 boxI_lift blocker. NIK derivations are finite rooted forests by construction (boxI/diaE add only existing->fresh-sink edges from Graph.trivial); the 3-cycle refutes only the over-general lemma. Thread IsDerivationForest through the Phase 5 motive; complete boxI_lift as a hypothesis-taking standalone lemma reusing landed F1/F2. Grounded in Simpson1994 8.1.3/8.1.2 (chunks 0154-0156) + MMS2021 Def 5.1. Includes revised Phase 4.2a/4.2b/5 sequence, H4 adversarial table, H3 grounding table."
     }
   ],
-  "next_steps": "Route to Phase 7 (BLOCKED handoff to follow-up, contingency-only phase). Do NOT retry Phase 4.2 open-endedly with the same approach; do NOT attempt Phase 5 until the rank/unique-parent invariant gap on Graph is resolved (Phase 5's boxI case needs the full boxI_lift, not just boxI_lift_star). See handoffs/04_phase4-2-boxI-lift-blocked.md for the concrete follow-up route.",
-  "next_command": "/implement 537 (Phase 7) or /spawn 537 to scope a dedicated follow-up task for the Graph rank/unique-parent invariant",
-  "phases_completed_detail": {
-    "phase_number": "4.2",
-    "phase_name": "Iterate the raise over the finite tree; close the boxI case",
-    "outcome": "BLOCKED (sanctioned)",
-    "lemmas_landed": ["boxI_lift_star"],
-    "lemmas_not_landed": ["boxI_lift (general)", "boxI case closure"]
+  "next_steps": "Run /revise 537 to fold the revised Phase 4.2a/4.2b/5 sequence into plan v3, then /implement 537 --hard from Phase 4.2a. Do NOT execute Phase 7 [BLOCKED].",
+  "next_command": "/revise 537",
+  "verification": {
+    "sorry_introduced": false,
+    "new_axiom_introduced": false,
+    "source_files_modified": false,
+    "cs5FCIncest_unweakened": true
   },
   "memory_candidates": [
-    "`classical` (invoked before Finset.induction/Function.update in the same tactic block scope) DOES resolve DecidableEq (Label Atom) for a generic Atom parameter via Classical.propDecidable-backed instance resolution -- this corrects the Phase 4.1 dispatch's dead_ends note, which claimed Function.update fails without a directly-supplied DecidableEq instance. It works fine as long as `classical` precedes the relevant tactic call in the same proof scope.",
-    "cs5FCIncest's raised-witness conjuncts (hfour/hsymbox/hincest) have no 'raise one endpoint, keep the other exact' variant, so raising one endpoint of an r-edge always forces the other to move too (to some >=-successor). This makes any 'lift the interpretation at one label' construction over a graph inherently a CASCADE over that label's raw-connected component, not a local, single-hop operation -- true generality requires an acyclicity/rank invariant on the graph, verified necessary via a concrete 3-cycle counterexample (unique-parent-per-target alone is insufficient)."
+    "In Cslib.Logic.Modal.Labelled, the raw R-graph of any NIK derivation is a finite rooted forest BY CONSTRUCTION: only boxI/diaE add edges (Deduction.lean:297,309), always addEdge x y with y a cofinitely-fresh sink and x pre-existing, from Graph.trivial. A tree/acyclicity invariant on NIK derivations needs no new Graph field -- it is a threaded motive hypothesis (discharged at Graph.trivial, preserved per constructor), never a standalone fact about arbitrary Graph.",
+    "A boxI_lift / Lifting-Lemma-style lemma stated over an ARBITRARY finite Graph is genuinely false (3-cycle counterexample), but this does not block soundness: the tree-RESTRICTED lift is what the boxI case needs, and Simpson 1994 Lemma 8.1.3 is itself stated only for trees. When a 'general' lemma is refuted by a counterexample, check whether the induction that consumes it ever supplies that counterexample -- a discharged motive hypothesis often makes the general statement unnecessary.",
+    "For cs5FCIncest-model soundness, box_iff_base/dia_iff_base (forcing-equivalence across an r-edge, no exact symmetry) dissolve the boxE/diaI 'exact-symmetry' wall that earlier dispatches assessed INTRACTABLE/GATE-C; after that breakthrough the only residual is the boxI producer lift. Re-audit stale 'intractable' docstring verdicts against later same-file breakthroughs before trusting them."
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness + checkInitImports only, per single-phase dispatch scope; full lake lint/lint-style/shake/mk_all/test deferred to the Phase 6 regression gate, consistent with the Phase 4.1 dispatch's precedent)"
-  },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",
-    "agent_type": "cslib-implementation-hard-agent",
+    "agent_type": "cslib-research-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+    "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"]
   }
 }

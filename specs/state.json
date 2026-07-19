@@ -2158,6 +2158,11 @@
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
           "type": "plan",
           "summary": "Hard-mode direct-route plan (v2, supersedes 01): prove nik_TS5_soundness directly via box/diamond forcing-equivalence over the TClosure class (Wall A dissolved) + Simpson Lifting Lemma 8.1.3 (F1 landed, F2 tiny). De-risking order; zero-debt; contingency [BLOCKED] handoff, no sorry."
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md",
+          "type": "report",
+          "summary": "Divergence audit resolving the Phase 4.2 boxI_lift blocker. VERDICT: direct route COMPLETABLE (not [BLOCKED]). The 3-cycle refutes only boxI_lift-over-arbitrary-Graph; NIK derivations are finite rooted forests by construction (only boxI/diaE add edges, always existing->fresh-sink from Graph.trivial). Thread IsDerivationForest (X.Finite + graded rank + unique-parent) through the Phase 5 motive; complete boxI_lift as a hypothesis-taking standalone lemma reusing landed F1/F2/boxI_raise_step. Grounded in Simpson1994 8.1.3/8.1.2 (chunks 0154-0156, tree-restricted Lifting Lemma) + MMS2021 Def 5.1. Includes revised Phase 4.2a/4.2b/5 sequence."
         }
       ],
       "plan_metadata": {

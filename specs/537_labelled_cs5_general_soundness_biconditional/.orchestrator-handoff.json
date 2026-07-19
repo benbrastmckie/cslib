@@ -1,67 +1,79 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "partial",
-  "summary": "Phase 4.2 of direct-route plan v2 attempted and BLOCKED (sanctioned outcome, not a sorry): iterating boxI_raise_step over the finite derivation tree to obtain a fully general boxI_lift is unsound without an as-yet-unestablished rank/unique-parent (rooted-forest) invariant on Graph -- confirmed via a concrete 3-cycle counterexample (x->a->b->x) that satisfies 'unique parent per target' yet forces two independent, non-coincident existential raises on the newly-discovered node. This invariant is the module docstring's own flagged 'item 1: the tree-shape invariant', not-yet-established work belonging to the main induction (Phase 5), genuinely out of Phase 4.2's single-file scope. Landed instead: boxI_lift_star, a sound generalization of Phase 4.1's boxI_raise_step from ONE raw-neighbour of x to a finite Finset of x's DIRECT raw-neighbours (both directions), chained via Finset.induction using cs5FCIncest_lift/cs5FCIncest_raise. Sorry-free, axiom-clean ([propext, Classical.choice, Quot.sound] only). Does not close the full recursive cascade (grandchildren) or the boxI case itself. Scoped build green, no Preserved Asset regressed, cs5FCIncest unweakened.",
-  "phases_completed": 4,
-  "phases_total": 7,
-  "skeleton": false,
-  "sorry_inventory": [],
-  "blockers": [
+  "phase": "research",
+  "status": "researched",
+  "summary": "Divergence audit of the Phase 4.2 boxI_lift blocker. VERDICT: the direct route is COMPLETABLE; the [BLOCKED] should be LIFTED, not routed to a follow-up. The 3-cycle counterexample in handoffs/04 refutes only boxI_lift stated over an ARBITRARY finite Graph. It does NOT refute the tree-restricted boxI_lift soundness actually needs, because no NIK constructor can build a cyclic raw graph: only boxI (Deduction.lean:297) and diaE (:309) add edges, each addEdge x y with y a cofinitely-fresh sink and x pre-existing, starting from Graph.trivial (:316). So the raw R-graph of every derivation is a finite rooted forest by construction. This is exactly the invariant Simpson's published soundness proof relies on (Simpson1994 Lemma 8.1.3 is stated 'Let G be a tree'; his 8.1.2 boxI case reads 'Let G'=G u {xRy} which is a tree as y is not in G' -- chunks 0154-0156, read directly). CSLib's landed cs5FCIncest_lift (F1) / cs5FCIncest_raise (F2) are the exact analogues of the F1/F2 Simpson's Lifting-Lemma cascade uses. The earlier INTRACTABLE/GATE-C verdicts predate and are superseded by the Phase 1-3 box_iff_base/dia_iff_base breakthrough that dissolved the consumer-side exact-symmetry wall; the ONLY residual is the boxI producer lift = the tree cascade. Recommended: fold IsDerivationForest (X.Finite + graded rank + unique-parent) into the Phase 5 motive (discharged at Graph.trivial, preserved per constructor), and complete boxI_lift as a standalone lemma taking that invariant + raw edge-cond as hypotheses, reusing boxI_raise_step per node.",
+  "verdict": "DIRECT ROUTE COMPLETABLE -- un-block Phase 4.2; do NOT route to Phase 7 [BLOCKED]/follow-up",
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "verified (Simpson1994 @phdthesis, MarinMoralesStrassburger2021 @article both present in references.bib)",
+  "adversarial_verification_triggered": true,
+  "adversarial_result": "confirmed (no revision to verdict; strengthened the invariant with a third conjunct G.X.Finite that the blocker's 2-conjunct framing omitted; confirmed diaE needs no lift and the consumer-side wall is already down)",
+  "hypothesis_confirmed": true,
+  "graph_can_contain_cycles": false,
+  "next_phase": "plan",
+  "next_phase_hint": "Run /revise 537 (or /plan 537 --hard --lit) to fold the revised Phase 4.2a/4.2b/5 sequence into plan v3, then /implement 537 --hard from Phase 4.2a. Do NOT execute Phase 7.",
+  "next_command": "/revise 537",
+  "revised_phase_sequence": [
     {
-      "phase": "4.2",
-      "what_failed": "boxI_lift (fully general finite-tree cascade of boxI_raise_step) not provable as stated for an arbitrary finite Graph.",
-      "what_was_tried": "Landed boxI_lift_star: a Finset.induction chaining cs5FCIncest_lift (F1, down edges R x n) / cs5FCIncest_raise (F2, up edges R n x) across ALL of x's DIRECT raw-neighbours simultaneously, holding x's target fixed at the original raise fact hwx. Sorry-free, build green, axiom-clean.",
-      "root_cause": "cs5FCIncest has no 'raise one endpoint only, keep the other exact' conjunct, so raising x forces every raw-neighbour to move, and a neighbour with its OWN further neighbours forces a cascade. A fully general cascade needs the raw graph to be an acyclic, rank-graded rooted forest (a rank function ht : Label Atom -> Nat with R a b -> ht b = ht a + 1, PLUS unique-parent-per-target) to avoid simultaneous, generally non-coincident raise constraints on a newly-discovered node -- verified via a hand-constructed 3-cycle counterexample (x->a, a->b, b->x) that satisfies unique-parent-per-target alone but still creates the conflict. Graph (Syntax.lean:110) has no finiteness or acyclicity field; this invariant does not exist anywhere in the codebase yet.",
-      "what_is_needed": "Establish (or thread through the Phase 5 main induction directly) a rank/depth + unique-parent invariant on the raw graph relation used at each boxI/diaE step, then redo the boxI_lift_star-style Finset cascade under that invariant to cover the full raw-connected component of x, not just direct neighbours.",
-      "verbatim_goal_text": "Prove `boxI_lift` by finite induction over the derivation tree, invoking `boxI_raise_step` node-by-node (the raising, not any exact edge, accommodates `w' >= rho x`)."
+      "phase": "4.2a",
+      "name": "Derivation-forest invariant (NEW, small)",
+      "goal": "Define IsDerivationForest over Syntax.lean Graph (3 conjuncts: X.Finite, graded rank ht with G.R a b -> ht b = ht a + 1, unique-parent G.R a1 b -> G.R a2 b -> a1=a2); prove forest_trivial and forest_addEdge_fresh (fresh y preserves forest via Function.update ht y (ht x + 1)).",
+      "estimate_lines": "40-70",
+      "depends_on": [],
+      "risk": "low"
+    },
+    {
+      "phase": "4.2b",
+      "name": "boxI_lift (the tree cascade) -- the one concentrated-risk unit",
+      "goal": "State boxI_lift taking IsDerivationForest G + raw edge-cond (forall a b, G.R a b -> r (rho a)(rho b)) + rho x <= w' as hypotheses; conclude exists rho' with rho' x = w', rho' >= rho pointwise, raw edge-cond preserved, and CKForces-persistence. Prove by well-founded recursion on ht-distance over the finite component of x, applying boxI_raise_step (F1 for down edges, F2 for up edges) once per node using the already-raised unique parent's value. Reuse boxI_lift_star's Gamma-persistence bookkeeping.",
+      "estimate_lines": "120-220",
+      "depends_on": ["4.1 (boxI_raise_step, landed)", "4.2 (boxI_lift_star, landed)", "4.2a"],
+      "risk": "medium (engineering, not soundness; may want its own dispatch or a raise_component_by_distance helper)"
+    },
+    {
+      "phase": "5",
+      "name": "Main NIK induction, motive amended",
+      "goal": "Add IsDerivationForest G to the Phase 5 motive alongside raw edge-cond + Gamma-cond. boxI via boxI_lift + fresh y (y not in L u G.X; exists since Label infinite, L/G.X finite -- reuse exists_fresh_notMem_of_coinfinite / addFreshVar) + forest_addEdge_fresh + ckforces_persistence, mapping sigma y = u. diaE via le_refl (NO lift). boxE/diaI via box_iff_TClosure/dia_iff_TClosure + box_gives_here (all landed). 9 other constructors from the nik_soundness_onePoint skeleton generalized over rho. Discharge the motive at Graph.trivial via forest_trivial; land nik_TS5_soundness. Remove the stale INTRACTABLE/GATE-C/'What remains' docstring notes.",
+      "estimate_lines": "150-300",
+      "depends_on": ["2", "4.2b"],
+      "risk": "low-medium"
+    },
+    {
+      "phase": "6",
+      "name": "Regression gate + full-project verification (unchanged)",
+      "depends_on": ["5"]
+    },
+    {
+      "phase": "7",
+      "name": "Contingency-only -- now fires ONLY on a 4.2b engineering overrun, and even then routes a scoped follow-up for boxI_lift alone, not a soundness-direction [BLOCKED]",
+      "depends_on": []
     }
   ],
-  "continuation_context": {
-    "next_phase": "7",
-    "next_phase_hint": "Phase 7",
-    "next_phase_name": "BLOCKED handoff to follow-up (contingency only)",
-    "depends_on": "4.2 stall (this dispatch)",
-    "note": "Phase 4.2 heading set to [BLOCKED] in the plan. handoffs/04_phase4-2-boxI-lift-blocked.md records the full machine-checked blocker analysis and a concrete follow-up route (establish the rank/unique-parent invariant on Graph, or thread it through Phase 5's induction motive directly, then redo the Finset cascade). Do NOT retry Phase 4.2 open-endedly; do NOT attempt Phase 5 without first resolving this invariant gap, since Phase 5's boxI case needs the full boxI_lift, not just boxI_lift_star."
-  },
+  "zero_debt_constraints": "unchanged: no sorry, no new axiom, cs5FCIncest unweakened (CS5Canonical.lean:255), no Preserved Asset regressed",
   "artifacts": [
     {
-      "type": "lean_source",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added boxI_lift_star (Finset-indexed generalization of boxI_raise_step to x's direct raw-neighbours, chained via Finset.induction), plus a section docstring documenting the residual recursive-cascade obstruction and why a fully general boxI_lift needs a not-yet-established rank/unique-parent invariant on Graph. Inserted between boxI_raise_step (Phase 4.1) and the one-point soundness section."
-    },
-    {
-      "type": "plan",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 4.2 heading updated to [BLOCKED]; checklist items annotated PARTIAL/NOT REACHED/DONE with landed-location and handoff references."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/04_phase4-2-boxI-lift-blocked.md",
-      "summary": "Full BLOCKED handoff: exact blocker (3-cycle counterexample), what landed (boxI_lift_star), recommended follow-up route, verification evidence."
+      "type": "report",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md",
+      "summary": "Full audit: Source-to-Implementation mapping (Tier 1), derivation-graph structure proof, invariant placement recommendation, lemma-by-lemma completion path, soundness check (3-cycle unreachable), Simpson/MMS cross-check, H4 adversarial table, revised phase sequence, H3 grounding table, 3 memory candidates."
     }
   ],
+  "key_source_findings": [
+    "Deduction.lean:297,309 -- boxI/diaE are the ONLY edge-adding rules; both addEdge x y, y cofinitely fresh, x pre-existing.",
+    "Deduction.lean:316 -- NIKTheorem fixes G = Graph.trivial (one node, no edges).",
+    "Syntax.lean:118 -- edge_mem confines edges to X, so a fresh y not in G.X has no edges (cannot close a cycle).",
+    "Soundness.lean:322,337 -- cs5FCIncest_lift (F1) / cs5FCIncest_raise (F2) landed = Simpson's Lifting-Lemma primitives.",
+    "Soundness.lean:374,392,422,437 -- box_iff_base/dia_iff_base/box_iff_TClosure/dia_iff_TClosure dissolved the consumer-side exact-symmetry wall (raw edge-cond only, no clique).",
+    "Simpson1994 chunk 0154 -- Lemma 8.1.3 'Let G be a tree'; fails for non-tree G (Figure 8-1) = published analogue of the 3-cycle.",
+    "Simpson1994 chunk 0155 -- 8.1.3 proof = F2 up the unique path + F1 down each off-path unique path.",
+    "Simpson1994 chunk 0156 -- main induction restricts to trees; boxI case 'G'=G u {xRy} which is a tree as y is not in G'.",
+    "MarinMoralesStrassburger2021 chunk 0026 -- Def 5.1 G-interpretation = the raw edge-cond invariant threaded through Phase 5."
+  ],
   "verification": {
-    "verification_passed": true,
-    "sorry_count_this_file": 0,
-    "vacuous_count": 0,
-    "new_axiom_count": 0,
-    "build_passed": true,
-    "check_init_imports_passed": true,
-    "lean_verify_boxI_lift_star": "axioms: [propext, Classical.choice, Quot.sound]"
+    "sorry_introduced": false,
+    "new_axiom_introduced": false,
+    "source_files_modified": false,
+    "note": "Audit/research only -- no Lean source edited. Deliverables: report 03, state.json artifacts, this handoff, .return-meta.json."
   },
-  "commit": "9ccbcf27",
-  "files_modified": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-    "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-    "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/04_phase4-2-boxI-lift-blocked.md"
-  ],
-  "decisions_made": [
-    "Did not attempt to force a fully general boxI_lift via an ad-hoc/unverified acyclicity assumption smuggled in without justification; instead constructed and verified a concrete counterexample (3-cycle) showing why 'unique parent' alone is insufficient, then scoped the landed lemma (boxI_lift_star) to exactly the sound sub-case (direct neighbours only), per the plan's zero-debt and blocked-honesty contract.",
-    "Used `classical` (providing Classical.propDecidable, hence DecidableEq (Label Atom) via typeclass resolution) once at the top of the tactic proof, before Finset.induction and Function.update -- this DOES resolve the DecidableEq obligation for a generic Atom type, contradicting the prior Phase 4.1 dispatch's 'dead_ends' note that Function.update fails without a directly-supplied DecidableEq instance. Correction: it works when `classical` precedes the Finset.induction/Function.update usage in the same tactic block scope."
-  ],
-  "dead_ends": [
-    "Attempting to state boxI_lift for an arbitrary finite Graph.X (Set.Finite hypothesis only, no acyclicity): the 3-cycle x->a->b->x is finite, raw-connected, and satisfies unique-parent-per-target, yet the natural Finset-cascade induction hits a genuine, unresolvable double-constraint on the last-discovered node. This is a real mathematical obstruction, not a tactic-level gap -- confirmed by hand-tracing the F1/F2 applications, not merely asserted."
-  ],
-  "plan_markers_verified": true
+  "session_id": "sess_1784471495_4fb1e9",
+  "orchestrator_mode": true
 }

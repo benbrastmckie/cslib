@@ -1,6 +1,8 @@
 {
-  "total_churn": 0,
-  "target_churn": {},
+  "total_churn": 1,
+  "target_churn": {
+    "boxI_lift": 1
+  },
   "adversarial_triggers": 0,
   "audit_dispatches": 0,
   "gate_c_pivots": 1

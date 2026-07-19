@@ -1,64 +1,33 @@
 {
-  "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "blocked",
-  "summary": "Phase 8 [BLOCKED]: the generalized NIK induction motive (`∀ ρ, IsDerivationForest G → raw-edge-cond → Γ-cond → CKForces r v botForces (ρ φ.lbl) φ.prop`) is mathematically FALSE for `NIK.efq`/`NIK.orE`'s cross-label conclusion, machine-verified this dispatch via a two-point disconnected countermodel (`World := Pt (one|two)`, `≤:=Eq`, `r:=Eq`, `botForces:=(·=one)`; `cs5FCIncest r` and every `CKValidFC` explosion/upward-closure axiom hold; `CKForces bot` holds at `one` while `CKForces (atom ())` is False at `two`). `boxI`/`diaE`/`boxE`/`diaI` ARE tractable exactly as the plan anticipated (via `boxI_lift`, `box_iff_TClosure`/`dia_iff_TClosure`, `box_gives_here`) -- the obstruction is confined to two of the 'straightforward' propositional constructors. This is a mathematical gap discovered by directly attempting the case (per anti-churn discipline), not a Phase 7 engineering overrun, so Phase 10's contingency does not apply. No proof/theorem code was added or altered this dispatch; only the module docstring in Soundness.lean was updated documenting the finding (new 'Fifth dispatch' section), and the plan file's Phase 8 heading was marked [BLOCKED]. Build green, zero debt preserved, Phases 1-7 unregressed.",
-  "phases_completed": 7,
-  "phases_total": 10,
-  "skeleton": false,
-  "sorry_inventory": [],
-  "blockers": [
-    {
-      "phase": 8,
-      "type": "mathematical",
-      "target": "NIK.efq / NIK.orE cross-label soundness under the generalized induction motive",
-      "verbatim_goal": "CKForces r v botForces (ρ y) A -- from ih: CKForces r v botForces (ρ x) Proposition.bot (i.e. botForces (ρ x)), for arbitrary A and an adversarially-chosen ρ with y ∉ G.X ∪ ctxLabels Γ (unconstrained by raw edge-cond and Γ-cond, since NIK.efq places no relation between x and y)",
-      "root_cause": "NIK.efq/NIK.orE are cross-label with the conclusion label fully independent of the premise label (unlike boxE/diaI, which always carry a TClosure edge, or boxI/diaE, whose fresh label is added to G.X via addEdge before use). A machine-verified two-point countermodel (lean_run_code, this dispatch) shows botForces need not propagate to an r/≤-disconnected point even under every cs5FCIncest + CKValidFC hypothesis, so the naive universally-quantified-ρ motive is false for this case, independent of the specific proof term.",
-      "what_was_tried": "Direct transcription attempt of the generalized motive per the plan; verification that boxI/diaE/boxE/diaI close cleanly under it; construction and lean_run_code verification of a countermodel refuting the efq case specifically; assessment of two candidate fixes (a not-yet-landed 'IsDerivationForest built from Graph.trivial via addEdge chain implies G.X is TClosure-TS5-total' connectivity lemma, and an existential-motive reformulation) -- both assessed as out-of-phase-8-scope, re-plan-sized work.",
-      "what_is_needed": "A dedicated follow-up phase/task to (1) prove the connectivity lemma and (2) reformulate the main induction's motive existentially, re-verifying all 12 constructors against the new motive. See handoffs/08_phase8-blocked-crosslabel-efq.md for the full analysis and recommended scope."
-    }
-  ],
-  "next_phase": "8",
-  "next_phase_hint": "Phase 8 remains [BLOCKED] pending a re-plan: prove the connectivity lemma (IsDerivationForest built from Graph.trivial via addEdge chain implies TClosure TS5-totality on G.X) and reformulate the induction motive existentially for efq/orE, then re-verify boxI/diaE/boxE/diaI plus the 8 label-local constructors against it.",
-  "next_command": "/plan 537 --hard --lit (re-plan Phase 8 scope) or /spawn 537",
-  "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-  "plan_version": 3,
-  "deviations": [
-    {
-      "phase": 8,
-      "description": "Phase 8 was not implemented; it is recorded [BLOCKED] with a documented mathematical finding rather than attempted proof code, per the escalation protocol (no sorry, no unsound proof, no vacuous placeholder).",
-      "reason": "The generalized induction motive prescribed by the plan for Phase 8 is machine-verified false for the NIK.efq/NIK.orE cross-label cases; forcing a proof would require either an unsound step or a substantial, unplanned redesign (a new connectivity lemma plus an existential-motive reformulation of the whole induction) that is genuinely re-plan scale, not a dispatch continuation."
-    }
-  ],
-  "continuation_context": null,
-  "verification": {
-    "sorry_introduced": false,
-    "new_axiom_introduced": false,
-    "source_files_modified": ["Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"],
-    "cs5FCIncest_unweakened": true,
-    "graph_unmodified": true,
-    "preserved_assets_unregressed": true,
-    "build_passed": true,
-    "checkInitImports_passed": true,
-    "full_ci_note": "Only the module docstring in Soundness.lean was edited (no theorem/proof code). Scoped lake build green; no new long-line lint warnings (verified via awk length check). Full lake lint/lint-style/shake/test not re-run this dispatch since no proof code changed and Phase 7's prior dispatch already confirmed them green on the pre-existing code."
-  },
-  "artifacts": [
-    {
-      "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/08_phase8-blocked-crosslabel-efq.md",
-      "summary": "Full analysis of the Phase 8 blocker: the exact goal, the machine-verified countermodel, why natural fixes are out of scope, and the recommended follow-up."
-    },
-    {
-      "type": "source",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added 'Fifth dispatch (task 537 Phase 8, [BLOCKED])' section to the module docstring documenting the cross-label efq/orE soundness gap and the countermodel. No proof/theorem code changed."
-    },
-    {
-      "type": "plan",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "summary": "Phase 8 heading changed to [BLOCKED] with a blocked note summarizing the finding and pointing to the handoff."
-    }
-  ],
+  "status": "researched",
+  "task_number": 537,
   "session_id": "sess_1784471495_4fb1e9",
-  "orchestrator_mode": true
+  "agent_type": "cslib-research-hard-agent",
+  "phase": "phase_8_divergence_audit",
+  "orchestrator_mode": true,
+  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
+  "verdict": "nik_TS5_soundness is TRUE and provable; the Phase-8 countermodel refutes the naive forall-rho motive only, not the theorem.",
+  "key_findings": [
+    "REFUTED the connectivity hypothesis (task Q2): NIK.boxI/diaE (Deduction.lean:297,309) carry no x-in-G.X premise and Graph.addEdge sets X := G.X union {x,y} (Syntax.lean:149), so boxI/diaE applied at a dangling efq/orE label create a G.R-disconnected component. IsDerivationForest correctly omits connectivity because it is not preserved. Q4 option A (connectivity lemma -> TClosure-total) is NOT viable.",
+    "MACHINE-VERIFIED axiom-free: botForces propagates bidirectionally along any single r-edge under cs5FCIncest+CKValidFC (backward via cs5Incest + bf_uc + bf_r). Closes the CONNECTED efq sub-case only.",
+    "orE is NOT part of the obstruction: an existential motive discharges it single-branch with no coordination. Handoff 08 overstated orE.",
+    "efq with y not in G.X union ctxLabels-Gamma closes by teleporting rho' y to the exploding premise point + ckforces_of_exploding.",
+    "Sole residual: efq where bot is derived in a component disconnected from the conclusion label. This is exactly Simpson 8.1.2's unavoidable non-tree excursion (chunk 0158); Simpson/MMS both dodge cross-label bot-E via bivalence/explicit-atom sequents, which CSLib's fallible CKForces deviation reopens."
+  ],
+  "recommended_paths": [
+    {"id": "P3", "risk": "LOW", "summary": "Hilbert-labelled adequacy bridge (Strategy 3): prove nik_TS5_to_hilbert (Simpson Ch.6 adequacy, specialized to Graph.trivial theoremhood), then nik_TS5_soundness := cs5_soundness_derivable_incest (nik_TS5_to_hilbert h). Reuses the landed sorry-free Hilbert soundness (CS5Canonical.lean:373); sidesteps the efq excursion. Main risk = the Ch.6 bridge (est 150-300 lines, own research pass). Endorsed by Simpson 8.1.2 and the 4th-dispatch GATE-C."},
+    {"id": "PD", "risk": "HIGH", "summary": "Direct existential-teleport induction. Phase 8.1 bot_backward/bot_iff_edge/bot_iff_TClosure (LOW, verified). Phase 8.2 existential-monotone motive: 8 propositional cases via sequential threading + ckforces_persistence, boxE/diaI via box_iff_TClosure+box_gives_here, boxI via boxI_lift, diaE via le_refl, orE single-branch (MEDIUM). Phase 8.3 the efq bot-locality lemma (HIGH/genuinely-open; gate: pivot to P3 if unprovable in budget). Phase 8.4 assemble + regression gate."}
+  ],
+  "do_not": [
+    "Do NOT pursue the connectivity-lemma path (Q4 option A) -- connectivity is not an invariant (refuted).",
+    "Do NOT weaken efq/orE to require y in G.X -- completeness needs the cross-label disconnected form (Deduction.lean:245-253; PrimeLemma.consistency_of_maximal).",
+    "Do NOT introduce sorry, a new axiom, or weaken cs5FCIncest."
+  ],
+  "preserved_assets_unregressed": true,
+  "landed_assets_count": 14,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "VERIFIED (Simpson1994 references.bib:86; MarinMoralesStrassburger2021 references.bib:962)",
+  "adversarial_verification_triggered": true,
+  "revised_direction_restart": false,
+  "next_steps": "Run /plan 537 to create a revised Phase 8 plan selecting Path P3 (recommended) or Path PD; both integrate report 04."
 }

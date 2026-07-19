@@ -1,34 +1,14 @@
 {
-  "status": "partial",
+  "status": "researched",
   "started_at": "2026-07-19T18:28:13Z",
   "requires_user_review": true,
   "phases_completed": 7,
   "phases_total": 10,
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "type": "lean-module-docstring",
-      "summary": "Added 'Fifth dispatch (task 537 Phase 8, [BLOCKED])' section documenting the cross-label efq/orE soundness gap and its machine-verified countermodel. No theorem/proof code changed."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "type": "plan",
-      "summary": "Phase 8 heading marked [BLOCKED] with a blocked note."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/08_phase8-blocked-crosslabel-efq.md",
-      "type": "handoff",
-      "summary": "Full analysis: exact goal, machine-verified countermodel, why natural fixes are out of scope, recommended follow-up."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/09_phase8-blocked-crosslabel-efq-summary.md",
-      "type": "summary",
-      "summary": "Implementation summary for the blocked Phase 8 dispatch."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
-      "type": "handoff-json",
-      "summary": "Machine-readable handoff: status blocked, blockers array populated with the efq/orE finding."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
+      "type": "report",
+      "summary": "Cross-label efq/orE motive divergence audit: theorem TRUE, connectivity hypothesis REFUTED, efq residual = Simpson non-tree excursion; recommends Hilbert bridge (P3) primary, existential-teleport (PD) alternative."
     }
   ],
   "partial_progress": {
@@ -36,20 +16,32 @@
     "details": "Generalized-induction motive for the main NIK soundness theorem is machine-verified FALSE for the cross-label NIK.efq/NIK.orE constructors (a two-point disconnected countermodel refutes it). boxI/diaE/boxE/diaI confirmed tractable exactly as planned. Recorded [BLOCKED] per escalation protocol; no sorry, no unsound proof, no new axiom."
   },
   "memory_candidates": [
-    "CSLib Labelled soundness: NIK.efq/NIK.orE (Deduction.lean) are cross-label rules whose conclusion label is fully independent of the premise label. Under CSLib's Wijesekera-style CKForces/CKValidFC semantics (per-world botForces, not Simpson's bivalent semantics), a naive 'generalize the soundness induction over an arbitrary interpretation ρ' motive is mathematically FALSE for these two constructors: botForces need not propagate to an r/≤-disconnected world. Machine-verified via a two-point countermodel (World := Pt one|two, ≤:=Eq, r:=Eq). Any future general soundness proof for this labelled system must either (a) prove a connectivity lemma that IsDerivationForest-built-from-Graph.trivial-via-addEdge implies TClosure-totality on G.X, or (b) use an existential-motive reformulation (∃ρ' agreeing with ρ on G.X∪ctxLabels Γ). The one-point model trick (World := Unit) used elsewhere in this file masks this issue rather than resolving it, since every map into Unit is trivially constant."
+    "CSLib labelled soundness: connectivity is NOT a derivation-graph invariant. NIK.boxI/diaE (Deduction.lean:297,309) carry no x-in-G.X side-condition and Graph.addEdge sets X := G.X union {x,y}, so boxI/diaE at a dangling efq/orE label create a G.R-disconnected component. Any soundness proof relying on 'TClosure TS5 G.R total on G.X' is unsound; IsDerivationForest rightly omits connectivity because it is not preserved.",
+    "botForces is r-connectivity-invariant under cs5FCIncest+CKValidFC (machine-verified axiom-free): forward via bf_r, backward via cs5Incest + bf_uc + bf_r. Transports over TClosure {T,B,Four} like box_iff_TClosure. Closes the connected efq sub-case only.",
+    "Fallible-world (CKForces/botForces) cross-label bot-E soundness is a genuinely hard case matching Simpson 8.1.2's 'non-tree excursions unavoidable' (direct N(T) needs L_m/Hilbert). Simpson/MMS dodge it via bivalence/explicit-atom sequents; CSLib's fallible-world deviation reopens it. Prefer the Hilbert adequacy bridge (cs5_soundness_derivable_incest, CS5Canonical.lean:373) over a direct induction."
   ],
   "verification": {
-    "verification_passed": false,
+    "verification_passed": true,
     "sorry_count": 0,
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": false
+    "note": "audit only; two lemmas machine-verified axiom-free via lean_run_code (bot_backward, bot_iff_edge); no proof code written to the module."
   },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  }
+    "delegation_path": [
+      "orchestrator",
+      "implement",
+      "cslib-implementation-hard-agent"
+    ]
+  },
+  "agent_type": "cslib-research-hard-agent",
+  "findings_count": 6,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "VERIFIED (Simpson1994 references.bib:86; MarinMoralesStrassburger2021 references.bib:962)",
+  "next_steps": "Run /plan 537 to create implementation plan"
 }

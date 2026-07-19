@@ -117,6 +117,7 @@ next_project_number: 539
   - [537_labelled_cs5_general_soundness_biconditional/reports/01_general-soundness-strategies.md]
   - [537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md]
   - [537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md]
+  - [537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md]
 - **Plan**:
   - [537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md]
   - [537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md]

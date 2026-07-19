@@ -11,7 +11,7 @@ next_project_number: 538
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,536,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
@@ -42,8 +42,7 @@ next_project_number: 538
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-536 [NOT STARTED] — Document the modal axiom-schema architecture in a new docs/ direc
-537 [PLANNED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 
 ### Temporal Logic
 
@@ -97,7 +96,7 @@ next_project_number: 538
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517
@@ -113,10 +112,13 @@ next_project_number: 538
 ---
 
 ### 536. Document modal axiom schema architecture
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: markdown
 - **Topic**: Modal Logic
 - **Dependencies**: Task 523
+- **Research**: [536_document_modal_axiom_schema_architecture/reports/01_modal-axiom-schema-architecture.md]
+- **Plan**: [536_document_modal_axiom_schema_architecture/plans/01_modal-axiom-schema-architecture.md]
+- **Summary**: [536_document_modal_axiom_schema_architecture/summaries/01_modal-axiom-schema-architecture-summary.md]
 
 **Description**: Document the modal axiom-schema architecture in a new docs/ directory (create docs/ if absent). Write a durable architecture/design document covering the compositional design that the SchemaUnion combinator and the FrameCorrespondence library together establish: (1) the ModalSchemaTag 18-tag alphabet + ModalSchemaTag.Holds (schema = set of instances, existential encoding) + SchemaUnion (S : Finset ModalSchemaTag) combinator; (2) subsumption expressed as Finset.subset — the modal cube (K ⊂ T ⊂ S4 ⊂ S5, …) as a decide-able computation on tag sets, replacing the hand-written per-edge subsumption lemmas; (3) compositional soundness via unionSound as a syntax/semantics factorization, and how it consumes the five frame-condition→validity lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom) from Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean — i.e. the frame-correspondence library (semantic side) and the schema-union combinator (syntactic side) are the two halves of one abstraction with unionSound as the hinge; (4) the representation-agnostic HasAxiom* typeclass insulation layer (Foundations/Logic/ProofSystem.lean); (5) the S5 = T+4+B disposition and why the KB5→S5 edge is deliberately omitted; (6) the design rationale — why Representation A (schema-tag def + Finset union) was chosen over Representation B (macro-generated inductives) for long-term foundations; (7) the scope boundary and how the intuitionistic/minimal families are a future instance of the same abstraction, not a fork. Cross-reference the actual module/file names as durable anchors. IMPORTANT: per .claude/rules/no-task-references-in-deliverables.md, the docs/ deliverable MUST NOT cite task numbers (522/523/etc.) — reference module names, file paths, and lemma names instead. Source material: the design invariants and phase structure in specs/523's plans/02 and reports/01, and the landed code in SchemaUnion.lean / SchemaSoundness.lean / FrameCorrespondence.lean once task 523 completes.
 

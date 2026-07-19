@@ -1,33 +1,7 @@
 {
-  "status": "implemented",
-  "partial_progress": {
-    "phases_completed": 4,
-    "phases_total": 4
-  },
-  "artifacts": [
-    {
-      "type": "doc",
-      "path": "docs/modal-axiom-schema-architecture.md",
-      "summary": "Durable architecture document covering all seven task areas: the 18-tag ModalSchemaTag alphabet + SchemaUnion combinator, subsumption as Finset.subset with Cube.lean disambiguation, the unionSound syntax/semantics hinge, the HasAxiom* insulation layer, the S5=T+4+B disposition and omitted KB5->S5 edge, the Representation A vs B rationale, and the intuitionistic/minimal scope boundary."
-    },
-    {
-      "type": "summary",
-      "path": "specs/536_document_modal_axiom_schema_architecture/summaries/01_modal-axiom-schema-architecture-summary.md",
-      "summary": "Implementation summary for the four-phase documentation task."
-    }
-  ],
-  "completion_data": {
-    "completion_summary": "Authored docs/modal-axiom-schema-architecture.md (new repo-root docs/ directory), a durable architecture document covering all seven planned areas of the SchemaUnion/FrameCorrespondence modal-logic design, with every signature and file path re-verified against landed source, zero task-number citations, the reconciled 14+ModalAxiom count, and an explicit Cube.lean disambiguation."
-  },
-  "memory_candidates": [],
-  "modified_files": [
-    "docs/modal-axiom-schema-architecture.md"
-  ],
+  "status": "completed",
   "metadata": {
-    "session_id": "sess_1784477860_9aae52",
-    "agent_type": "general-implementation-agent",
-    "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
-    "phases_completed": 4,
-    "phases_total": 4
+    "cycles_used": 3,
+    "final_state": "completed"
   }
 }

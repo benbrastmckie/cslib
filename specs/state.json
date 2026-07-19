@@ -2084,26 +2084,44 @@
     {
       "project_number": 536,
       "project_name": "document_modal_axiom_schema_architecture",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "markdown",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Document the modal axiom-schema architecture in a new docs/ directory (create docs/ if absent). Write a durable architecture/design document covering the compositional design that the SchemaUnion combinator and the FrameCorrespondence library together establish: (1) the ModalSchemaTag 18-tag alphabet + ModalSchemaTag.Holds (schema = set of instances, existential encoding) + SchemaUnion (S : Finset ModalSchemaTag) combinator; (2) subsumption expressed as Finset.subset — the modal cube (K ⊂ T ⊂ S4 ⊂ S5, …) as a decide-able computation on tag sets, replacing the hand-written per-edge subsumption lemmas; (3) compositional soundness via unionSound as a syntax/semantics factorization, and how it consumes the five frame-condition→validity lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom) from Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean — i.e. the frame-correspondence library (semantic side) and the schema-union combinator (syntactic side) are the two halves of one abstraction with unionSound as the hinge; (4) the representation-agnostic HasAxiom* typeclass insulation layer (Foundations/Logic/ProofSystem.lean); (5) the S5 = T+4+B disposition and why the KB5→S5 edge is deliberately omitted; (6) the design rationale — why Representation A (schema-tag def + Finset union) was chosen over Representation B (macro-generated inductives) for long-term foundations; (7) the scope boundary and how the intuitionistic/minimal families are a future instance of the same abstraction, not a fork. Cross-reference the actual module/file names as durable anchors. IMPORTANT: per .claude/rules/no-task-references-in-deliverables.md, the docs/ deliverable MUST NOT cite task numbers (522/523/etc.) — reference module names, file paths, and lemma names instead. Source material: the design invariants and phase structure in specs/523's plans/02 and reports/01, and the landed code in SchemaUnion.lean / SchemaSoundness.lean / FrameCorrespondence.lean once task 523 completes.",
       "created": "2026-07-19T08:08:12Z",
-      "last_updated": "2026-07-19T08:08:12Z",
-      "session_id": "sess_1784448492_d8ba13",
+      "last_updated": "2026-07-19T16:36:28Z",
+      "session_id": "sess_1784477860_9aae52",
       "dependencies": [
         523
       ],
       "parent_task": 523,
       "file_scope": [
         "docs/"
-      ]
+      ],
+      "artifacts": [
+        {
+          "path": "specs/536_document_modal_axiom_schema_architecture/reports/01_modal-axiom-schema-architecture.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/536_document_modal_axiom_schema_architecture/plans/01_modal-axiom-schema-architecture.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/536_document_modal_axiom_schema_architecture/summaries/01_modal-axiom-schema-architecture-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "Wrote docs/modal-axiom-schema-architecture.md (507 lines) documenting the modal axiom-schema architecture: 18-tag ModalSchemaTag alphabet, SchemaUnion combinator, Finset.subset subsumption cube, unionSound soundness hinge consuming the five FrameCorrespondence lemmas, HasAxiom* insulation layer, S5=T+4+B disposition, and Representation A vs B rationale. Zero task-number citations; durable module/lemma anchors throughout."
     },
     {
       "project_number": 537,
       "project_name": "labelled_cs5_general_soundness_biconditional",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Prove the general labelled SOUNDNESS direction nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, completing Simpson 1994 Thm 8.1.4's biconditional for CSLib constructive CS5/IS5. CONTEXT (from parent task 517, which delivered the completeness direction): cs5_completeness (Completeness.lean:132) and the anti-vacuity certificate nik_TS5_consistent + nik_soundness_onePoint (Soundness.lean) are LANDED sorry-free/axiom-clean. cs5FCIncest_lift (Soundness.lean:181) is a landed building block. THE OPEN OBSTRUCTION (established across 3 dispatches, no forced sorry): TS5={T,B,Four} makes TClosure TS5 G.R the TOTAL relation on the always-connected derivation graph, so the box edge-condition is an r-CLIQUE condition across all labels, not tree-adjacency; and cs5FCIncest's hfour/hsymbox/hincest conjuncts only ever produce EXISTENTIALLY-raised relational witnesses, whereas CKForces's box clause (and boxE) need EXACT edges/symmetry between independently-fixed points (persistence is only upward). No asymmetric countermodel refuted the obstruction; no closure proof completed it -- GENUINELY OPEN. THREE CANDIDATE STRATEGIES (ranked; none is a plain direct-implementation dispatch -- each needs research/re-plan): (1) prove cs5FCIncest forces symmetric/clique closure on finitely-generated substructures -- cheapest, possibly reuses the FLO closure machinery from parent Phases 1-7; (2) formalize Simpson's own modified sequent system L_m(TS5, empty), his stated fix for exactly this problem; (3) build the deferred Simpson Ch.6 Hilbert-labelled ADEQUACY bridge (NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi) and obtain labelled soundness as a corollary of the already-landed Hilbert soundness cs5_soundness_derivable_incest (CS5Canonical.lean:373) -- note this resurrects the bridge task 517 deliberately avoided (Track C, C5 'THE TRUE CRUX'). Full analysis: specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-blocked-20260719c.md and Soundness.lean's refined-analysis docstring. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not weaken cs5FCIncest; do not regress parent's landed completeness/anti-vacuity. Research MUST use --lit (Simpson Ch 8 soundness, Lifting Lemma 8.1.3, L_m modified sequent system). BibKeys: Simpson1994, MarinMoralesStrassburger2021. HIGH uncertainty (the direct route may be genuinely open). Start with strategy (1) as a research/probe pass before committing. Depends on 517.",
@@ -2112,7 +2130,7 @@
       ],
       "parent_task": 517,
       "created": "2026-07-19T04:10:00Z",
-      "last_updated": "2026-07-19T16:45:00Z",
+      "last_updated": "2026-07-19T15:49:59Z",
       "priority": null,
       "effort": "15-40 hours",
       "file_scope": [

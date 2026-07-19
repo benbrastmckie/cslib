@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
+public import Mathlib.Data.Set.Card
 
 /-! # Labelled-System Soundness (Task 517 Phase 11, Simpson 1994 Thm 8.1.4, Soundness Direction)
 
@@ -844,6 +845,172 @@ theorem ht_le_of_reflTransGen {Atom : Type u} {G : Graph Atom} {ht : Label Atom 
   | tail _ hyz ih =>
       have heq := hgrad _ _ hyz
       omega
+
+/-- **Downward cascade: raise a node and its entire forward-reachable closure through a chosen
+Finset of direct raw-neighbours.** Given `p` already targeted to raise to `wp` (`ρ p ≤ wp`) and a
+`Finset C` of direct raw-`R`-successors of `p` to process, produces a re-interpretation `ρ'` with
+`ρ' p = wp`, monotone everywhere, re-establishing: the direct edges `p → c` for `c ∈ C` (via
+`cs5FCIncest_lift`/F1); every raw edge among the forward-reachable closure of each `c ∈ C` (via
+recursive `cs5FCIncest_lift` applications, well-founded on `Set.ncard {q ∈ G.X | ht q ≥ ht p}`,
+strictly decreasing at each child since graded rank forces `ht c = ht p + 1 > ht p`); and leaving
+everything outside `{p} ∪ ⋃ c ∈ C, {z | c ↝ z}` exactly as `ρ` had it. Disjointness of different
+children's closures is derived inline from the unique-parent conjunct (no separate tree lemma
+needed). -/
+theorem raise_subtree {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {v : World → Atom → Prop} {botForces : World → Prop}
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → v w p → v w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    {G : Graph Atom} {ht : Label Atom → ℕ}
+    (hfin : G.X.Finite) (hgrad : ∀ a b, G.R a b → ht b = ht a + 1)
+    (huniq : ∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂)
+    {ρ : Label Atom → World} (hedge : ∀ a b, G.R a b → r (ρ a) (ρ b)) :
+    ∀ n : ℕ, ∀ p : Label Atom, p ∈ G.X → Set.ncard {q ∈ G.X | ht q ≥ ht p} ≤ n →
+    ∀ C : Finset (Label Atom), (∀ c ∈ C, G.R p c) →
+    ∀ wp : World, ρ p ≤ wp →
+    ∃ ρ' : Label Atom → World, ρ' p = wp ∧ (∀ z, ρ z ≤ ρ' z) ∧
+      (∀ c ∈ C, r (ρ' p) (ρ' c)) ∧
+      (∀ c ∈ C, ∀ a b, Relation.ReflTransGen G.R c a → G.R a b → r (ρ' a) (ρ' b)) ∧
+      (∀ z, z ≠ p → (∀ c ∈ C, ¬ Relation.ReflTransGen G.R c z) → ρ' z = ρ z) ∧
+      (∀ {φ : Proposition Atom} {z}, CKForces r v botForces (ρ z) φ →
+        CKForces r v botForces (ρ' z) φ) := by
+  intro n
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    intro p hpX hcard C
+    classical
+    induction C using Finset.induction with
+    | empty =>
+        intro _ wp hwp
+        refine ⟨fun z => if z = p then wp else ρ z, if_pos rfl, ?_, by simp, by simp, ?_, ?_⟩
+        · intro z; by_cases hz : z = p
+          · subst hz; simpa using hwp
+          · simp [hz]
+        · intro z hzp _; simp [hzp]
+        · intro φ z hz
+          by_cases hzp : z = p
+          · subst hzp; simpa using ckforces_persistence v_uc bf_uc hwp hz
+          · simpa [hzp] using hz
+    | insert c C' hcC' ih' =>
+        intro hC wp hwp
+        have hC' : ∀ cm ∈ C', G.R p cm := fun cm hcm => hC cm (Finset.mem_insert_of_mem hcm)
+        obtain ⟨ρ₁, hρ1p, hρ1mono, hρ1direct, hρ1desc, hρ1out, hρ1pers⟩ := ih' hC' wp hwp
+        have hcp : G.R p c := hC c (Finset.mem_insert_self c C')
+        have hcX : c ∈ G.X := (G.edge_mem p c hcp).2
+        have hcht : ht c = ht p + 1 := hgrad p c hcp
+        -- `c` is not reachable back to `p`: rank would have to decrease.
+        have hpc : ¬ Relation.ReflTransGen G.R c p := by
+          intro hreach
+          have := ht_le_of_reflTransGen hgrad hreach
+          omega
+        -- measure strictly decreases at the child `c`.
+        have hpXset : {q | q ∈ G.X ∧ ht q ≥ ht p}.Finite := hfin.subset (fun q hq => hq.1)
+        have hsub : {q | q ∈ G.X ∧ ht q ≥ ht c} ⊂ {q | q ∈ G.X ∧ ht q ≥ ht p} := by
+          constructor
+          · intro q hq
+            simp only [Set.mem_setOf_eq] at hq ⊢
+            exact ⟨hq.1, by omega⟩
+          · intro hcontra
+            have hp' := hcontra (show p ∈ {q | q ∈ G.X ∧ ht q ≥ ht p} from ⟨hpX, le_refl (ht p)⟩)
+            simp only [Set.mem_setOf_eq] at hp'
+            omega
+        have hn' : {q | q ∈ G.X ∧ ht q ≥ ht c}.ncard < n :=
+          lt_of_lt_of_le (Set.ncard_lt_ncard hsub hpXset) hcard
+        -- raise `c` itself via F1, relative to the *original* `ρ`.
+        obtain ⟨c', hcc', hwc'⟩ := cs5FCIncest_lift hfc (hedge p c hcp) hwp
+        -- recurse into `c`'s own full downward closure.
+        have hCcSub : {cc | G.R c cc} ⊆ G.X := fun cc hcc => (G.edge_mem c cc hcc).2
+        have hCcFin : {cc | G.R c cc}.Finite := hfin.subset hCcSub
+        have hCcMem : ∀ cc ∈ hCcFin.toFinset, G.R c cc := fun cc hcc => hCcFin.mem_toFinset.mp hcc
+        obtain ⟨ρc, hρcp, hρcmono, hρcdirect, hρcdesc, hρcout, hρcpers⟩ :=
+          ih _ hn' c hcX (le_refl _) hCcFin.toFinset hCcMem c' hcc'
+        -- `ρc`'s direct/descendant clauses, unfolded from "all children" to plain `G.R c _`.
+        have hρc_full_direct : ∀ b, G.R c b → r (ρc c) (ρc b) := fun b hb =>
+          hρcdirect b (hCcFin.mem_toFinset.mpr hb)
+        have hρc_full_desc : ∀ a b, Relation.ReflTransGen G.R c a → G.R a b → r (ρc a) (ρc b) := by
+          intro a b ha hab
+          rcases Relation.ReflTransGen.cases_head ha with heq | ⟨cc, hccc, hcca⟩
+          · rw [← heq]; exact hρc_full_direct b (heq ▸ hab)
+          · exact hρcdesc cc (hCcFin.mem_toFinset.mpr hccc) a b hcca hab
+        -- nothing reachable from a sibling `cm ∈ C'` is also reachable from `c` (unique-parent
+        -- applied to the last edge of whichever path would witness the overlap).
+        have hkey : ∀ cm ∈ C', ∀ a, Relation.ReflTransGen G.R cm a →
+            ¬ Relation.ReflTransGen G.R c a := by
+          intro cm hcmC' a ha
+          induction ha with
+          | refl =>
+              intro hca
+              rcases eq_or_ne cm c with rfl | hne
+              · exact hcC' hcmC'
+              · cases hca with
+                | refl => exact hne rfl
+                | tail hcy hycm =>
+                    rename_i y
+                    have hpcm : G.R p cm := hC' cm hcmC'
+                    have hyp : y = p := huniq y p cm hycm hpcm
+                    exact hpc (hyp ▸ hcy)
+          | tail hcma' ha'a ih2 =>
+              rename_i mid a'
+              intro hca
+              rcases eq_or_ne a' c with heq | hne
+              · have ha'c : G.R mid c := heq ▸ ha'a
+                have hap : mid = p := huniq mid p c ha'c hcp
+                have hcmp : Relation.ReflTransGen G.R cm p := hap ▸ hcma'
+                have hle := ht_le_of_reflTransGen hgrad hcmp
+                have hcmht : ht cm = ht p + 1 := hgrad p cm (hC' cm hcmC')
+                omega
+              · cases hca with
+                | refl => exact hne rfl
+                | tail hcy hya =>
+                    rename_i y
+                    have hya' : y = mid := huniq y mid a' hya ha'a
+                    exact ih2 (hya' ▸ hcy)
+        classical
+        refine ⟨fun z => if Relation.ReflTransGen G.R c z then ρc z else ρ₁ z,
+          ?_, ?_, ?_, ?_, ?_, ?_⟩
+        · simp only [if_neg hpc]; exact hρ1p
+        · intro z
+          by_cases hz : Relation.ReflTransGen G.R c z
+          · simp only [if_pos hz]; exact hρcmono z
+          · simp only [if_neg hz]; exact hρ1mono z
+        · intro cm hcm
+          rcases Finset.mem_insert.mp hcm with heq | hcmC'
+          · rw [heq]
+            simp only [if_neg hpc, if_pos (Relation.ReflTransGen.refl (a := c))]
+            rw [hρ1p, hρcp]; exact hwc'
+          · simp only [if_neg hpc, if_neg (hkey cm hcmC' cm Relation.ReflTransGen.refl)]
+            exact hρ1p ▸ hρ1direct cm hcmC'
+        · intro cm hcm a b ha hab
+          rcases Finset.mem_insert.mp hcm with heq | hcmC'
+          · rw [heq] at ha
+            have hb : Relation.ReflTransGen G.R c b := ha.tail hab
+            simp only [if_pos ha, if_pos hb]
+            exact hρc_full_desc a b ha hab
+          · have hna : ¬ Relation.ReflTransGen G.R c a := hkey cm hcmC' a ha
+            have hnb : ¬ Relation.ReflTransGen G.R c b := by
+              intro hb
+              cases hb with
+              | refl =>
+                  have hap : a = p := huniq a p c hab hcp
+                  have hcmp : Relation.ReflTransGen G.R cm p := hap ▸ ha
+                  have hle := ht_le_of_reflTransGen hgrad hcmp
+                  have hcmht : ht cm = ht p + 1 := hgrad p cm (hC' cm hcmC')
+                  omega
+              | tail hcy hyb =>
+                  rename_i y
+                  have hya : y = a := huniq y a b hyb hab
+                  exact hna (hya ▸ hcy)
+            simp only [if_neg hna, if_neg hnb]
+            exact hρ1desc cm hcmC' a b ha hab
+        · intro z hzp hzC
+          have hzc : ¬ Relation.ReflTransGen G.R c z := hzC c (Finset.mem_insert_self c C')
+          simp only [if_neg hzc]
+          exact hρ1out z hzp (fun cm hcm => hzC cm (Finset.mem_insert_of_mem hcm))
+        · intro φ z hz
+          by_cases hzc : Relation.ReflTransGen G.R c z
+          · simp only [if_pos hzc]; exact hρcpers hz
+          · simp only [if_neg hzc]
+            exact hρ1pers hz
 
 end Cslib.Logic.Modal.Labelled
 

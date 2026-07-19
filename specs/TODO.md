@@ -11,7 +11,7 @@ next_project_number: 539
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,538 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
@@ -43,7 +43,6 @@ next_project_number: 539
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-538 [PLANNED] — Turn docs/modal-axiom-schema-architecture.md into a clear and con
 
 ### Temporal Logic
 
@@ -96,12 +95,13 @@ next_project_number: 539
 ## Tasks
 
 ### 538. Typst modal axiom schema architecture
-- **Status**: [PLANNED]
+- **Status**: [COMPLETED]
 - **Task Type**: typst
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md]
 - **Plan**: [538_typst_modal_axiom_schema_architecture/plans/01_modal-axiom-typst-plan.md]
+- **Summary**: [538_typst_modal_axiom_schema_architecture/summaries/01_modal-axiom-typst-summary.md]
 
 **Description**: Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly
 

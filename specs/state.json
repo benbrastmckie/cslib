@@ -4,12 +4,12 @@
     {
       "project_number": 538,
       "project_name": "typst_modal_axiom_schema_architecture",
-      "status": "planned",
+      "status": "completed",
       "task_type": "typst",
       "description": "Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly",
       "topic": "Modal Logic",
       "created": "2026-07-19T18:25:12Z",
-      "last_updated": "2026-07-19T18:36:36Z",
+      "last_updated": "2026-07-19T19:01:51Z",
       "session_id": "sess_1784485549_e832a2",
       "artifacts": [
         {
@@ -21,8 +21,14 @@
           "path": "specs/538_typst_modal_axiom_schema_architecture/plans/01_modal-axiom-typst-plan.md",
           "type": "plan",
           "summary": "Typst implementation plan"
+        },
+        {
+          "path": "specs/538_typst_modal_axiom_schema_architecture/summaries/01_modal-axiom-typst-summary.md",
+          "type": "summary",
+          "summary": "Typst implementation summary"
         }
-      ]
+      ],
+      "completion_summary": "Rendered docs/modal-axiom-schema-architecture.md as a self-contained Typst document at typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ, compiling cleanly to a 16-page PDF. Reuses typst/MPL house style (thmbox, austere AMS aesthetic, box/diamond macros); collapses redundant prose into tables and a fletcher modal-cube diagram; resolved the AxiomB expansion against live Lean source."
     },
     {
       "project_number": 530,

@@ -1,0 +1,16 @@
+{
+  "phase": 2,
+  "phase_name": "Area 2 (subsumption as Finset.subset) and Area 3 (unionSound hinge)",
+  "started_at": "2026-07-19T18:25:00Z",
+  "last_updated": "2026-07-19T18:45:00Z",
+  "objectives": [
+    {"id": 1, "description": "Write Area 2 section (SchemaUnion.subsumption, 15 tag sets, 24 edges)", "status": "done", "files_touched": ["docs/modal-axiom-schema-architecture.md"]},
+    {"id": 2, "description": "Add Cube.lean semantic-vs-syntactic disambiguation note", "status": "done", "files_touched": ["docs/modal-axiom-schema-architecture.md"]},
+    {"id": 3, "description": "Write Area 3 section (FrameCorrespondence lemmas, FrameValidatesTag, unionSound)", "status": "done", "files_touched": ["docs/modal-axiom-schema-architecture.md"]},
+    {"id": 4, "description": "Replace task-number phrasing from SchemaSoundness.lean docstring with module names", "status": "done", "files_touched": ["docs/modal-axiom-schema-architecture.md"]}
+  ],
+  "current_objective": 4,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": []
+}

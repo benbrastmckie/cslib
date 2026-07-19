@@ -141,3 +141,182 @@ theorem SchemaUnion.union_iff {Sa Sb : Finset ModalSchemaTag} {φ : Proposition 
 lemmas), `Cslib/Logics/Modal/Metalogic/DerivationTree.lean` (`ModalAxiom`, line 69),
 `Cslib/Logics/Modal/ProofSystem/Instances/{K,…,S5}.lean` (the 15 per-system instance-registration
 files).
+
+---
+
+## 2. Subsumption as `Finset.subset`: The Syntactic Modal Cube
+
+**Durable anchors**: `SchemaUnion.subsumption` (in
+`Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean`),
+`Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` (the 15 per-system tag sets),
+`Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean` (the 24 direct-edge lemmas).
+
+The modal cube — the familiar inclusion order K ⊂ T ⊂ S4 ⊂ S5, and its 11 further systems and
+their edges — used to be witnessed by 24 hand-written, per-edge subsumption lemmas, each proved
+by a bespoke case analysis over the source system's axiom inductive. `SchemaUnion` replaces all
+24 with one generic lemma:
+
+```lean
+theorem SchemaUnion.subsumption {Sa Sb : Finset ModalSchemaTag} (hsub : Sa ⊆ Sb)
+    {φ : Proposition Atom} (h : SchemaUnion Sa φ) : SchemaUnion Sb φ
+```
+
+Enlarging the tag set only weakens the resulting predicate — the proof is three lines
+(`obtain ⟨t, ht, hφ⟩ := h; exact ⟨t, hsub ht, hφ⟩`). Every `XAxiom_implies_YAxiom` lemma across
+the cube is now `SchemaUnion.subsumption (by decide) h`: a `decide`-able `Finset.subset` fact,
+discharged automatically because `ModalSchemaTag` is a finite `DecidableEq` type and every
+system's tag set is a concrete `Finset` literal built from `insert`/`kCore`. This is the
+framing point of the whole design: **the modal cube's `⊆`-order IS the `⊆`-order on tag sets** —
+subsumption is no longer a proved fact about 15 independent inductives, it is a computation on
+15 `Finset` values.
+
+The 15 per-system tag sets (`SchemaTags.lean`) are each the shared 13-tag core, `kCore`, unioned
+with a subset of the 5 modal-strength differentiator tags:
+
+```lean
+def kCore : Finset ModalSchemaTag :=  -- 13 tags: implyK, implyS, efq, peirce, modalK,
+  …                                    -- andI, andE1, andE2, orI1, orI2, orE,
+                                        -- diaDualityFwd, diaDualityBack
+def kTags   : Finset ModalSchemaTag := kCore
+def tTags   : Finset ModalSchemaTag := insert .modalT kCore
+def dTags   : Finset ModalSchemaTag := insert .modalD kCore
+def bTags   : Finset ModalSchemaTag := insert .modalB kCore                              -- KB
+def k4Tags  : Finset ModalSchemaTag := insert .modalFour kCore
+def k5Tags  : Finset ModalSchemaTag := insert .modalFive kCore
+def k45Tags : Finset ModalSchemaTag := insert .modalFour (insert .modalFive kCore)
+def s4Tags  : Finset ModalSchemaTag := insert .modalT (insert .modalFour kCore)
+def s5Tags  : Finset ModalSchemaTag := insert .modalT (insert .modalFour (insert .modalB kCore))
+def tbTags  : Finset ModalSchemaTag := insert .modalT (insert .modalB kCore)
+def kb5Tags : Finset ModalSchemaTag := insert .modalB (insert .modalFive kCore)
+def d4Tags  : Finset ModalSchemaTag := insert .modalD (insert .modalFour kCore)
+def d5Tags  : Finset ModalSchemaTag := insert .modalD (insert .modalFive kCore)
+def d45Tags : Finset ModalSchemaTag := insert .modalD (insert .modalFour (insert .modalFive kCore))
+def dbTags  : Finset ModalSchemaTag := insert .modalD (insert .modalB kCore)
+```
+
+The 24 direct edges in `AxiomSubsumption.lean` — each now a one-line `SchemaUnion.subsumption (by
+decide) h` proof, where previously each was a hand-written per-edge `match`/`cases` lemma — are:
+
+- From K: K→T, K→D, K→B(KB), K→K4, K→K5 (5 edges)
+- From D: D→D4, D→D5, D→DB (3 edges)
+- From T: T→S4, T→TB (2 edges)
+- From B(KB): B→TB, B→DB, B→KB5 (3 edges)
+- From K4: K4→S4, K4→D4, K4→K45 (3 edges)
+- From K5: K5→D5, K5→K45, K5→KB5 (3 edges)
+- From K45: K45→D45 (1 edge)
+- From D4: D4→D45 (1 edge)
+- From D5: D5→D45 (1 edge)
+- Into S5: S4→`ModalAxiom` (S5), TB→`ModalAxiom` (S5) (2 edges)
+
+Total: 5+3+2+3+3+3+1+1+1+2 = 24.
+
+### Disambiguation: this is not `Cslib/Logics/Modal/Cube.lean`
+
+CSLib has a second, pre-existing artifact also called "the modal cube":
+`Cslib/Logics/Modal/Cube.lean` defines each classical system as a **semantic** frame-class — a
+`Set (Model World Atom)` characterized by a frame property, e.g.
+
+```lean
+def T World Atom := logic {m : Model World Atom | Std.Refl m.r}
+```
+
+`Cube.lean` was authored for a different purpose (the semantic frame-class cube) and predates the
+schema-union combinator. **It must not be conflated with the syntactic tag-set cube described in
+this section** (`AxiomSubsumption.lean` / `SchemaTags.lean`, over `Finset ModalSchemaTag`). The
+two are independent "modal cube" artifacts living side by side in the codebase:
+
+| Artifact | File | Kind | Each system is a… |
+|---|---|---|---|
+| Semantic frame-class cube | `Cslib/Logics/Modal/Cube.lean` | pre-existing, frame-based | `Set (Model World Atom)` |
+| Syntactic tag-set cube | `Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean` + `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` | new, proof-theoretic | `Finset ModalSchemaTag` |
+
+This document is about the syntactic tag-set cube only.
+
+---
+
+## 3. `unionSound`: The Syntax/Semantics Hinge
+
+**Durable anchors**: `unionSound`, `FrameValidatesTag` (both in
+`Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean`); `Satisfies.modalT_axiom`,
+`Satisfies.modalFour_axiom`, `Satisfies.modalB_axiom`, `Satisfies.modalD_axiom`,
+`Satisfies.modalFive_axiom` (in `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean`).
+
+Subsumption is the syntactic collapse; soundness is the semantic one. Just as the 24 subsumption
+edges collapse to one generic lemma, the 15 systems' soundness proofs collapse to one master
+lemma, `unionSound`, built on a small reusable library of frame-condition-to-validity
+correspondence facts.
+
+**The five frame-correspondence lemmas** (`FrameCorrespondence.lean`) each show that a
+modal-strength differentiator axiom is valid on any model whose accessibility relation satisfies
+the matching frame condition:
+
+```lean
+lemma Satisfies.modalT_axiom {World : Type*} (m : Model World Atom)
+    (h_refl : ∀ w, m.r w w) (w : World) (φ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.box φ) φ)
+
+lemma Satisfies.modalFour_axiom {World : Type*} (m : Model World Atom)
+    (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃) (w : World)
+    (φ : Proposition Atom) :
+    Satisfies m w (Proposition.imp (Proposition.box φ) (Proposition.box (Proposition.box φ)))
+
+lemma Satisfies.modalB_axiom {World} (m : Model World Atom)
+    (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁) (w) (φ) : Satisfies m w (Axioms.AxiomB φ)
+
+lemma Satisfies.modalD_axiom {World} (m : Model World Atom) (h_serial : Relation.Serial m.r) (w) (φ) :
+    Satisfies m w (Proposition.imp (Proposition.box φ)
+      (Proposition.imp (Proposition.box (Proposition.imp φ Proposition.bot)) Proposition.bot))
+
+lemma Satisfies.modalFive_axiom {World} (m : Model World Atom)
+    (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃) (w) (φ) :
+    Satisfies m w (((Proposition.box (φ.imp .bot)).imp .bot).imp
+      (Proposition.box ((Proposition.box (φ.imp .bot)).imp .bot)))
+```
+
+Each lemma's docstring records its provenance verbatim against Blackburn, de Rijke, and Venema's
+*Modal Logic* (Cambridge, 2001), Chapter 4, Definition 4.9 and Table 4.1 — the standard reference
+for modal frame correspondence — and against the per-system soundness proofs the correspondence
+facts were extracted from.
+
+**`FrameValidatesTag`** packages the semantic obligation uniformly over all 18 tags: `True` for
+the 13 frame-unconditional tags, and exactly the frame-condition hypothesis for the 5
+differentiators — a deliberate design choice that keeps the interface `unionSound` consumes
+uniform, so the 13 trivial obligations discharge by `trivial` rather than requiring a type-level
+conditional split:
+
+```lean
+def FrameValidatesTag {World} (m : Model World Atom) : ModalSchemaTag → Prop
+  | .modalT => ∀ w, m.r w w
+  | .modalD => Relation.Serial m.r
+  | .modalB => ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁
+  | .modalFour => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃
+  | .modalFive => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃
+  | .implyK | .implyS | .efq | .peirce | .modalK
+  | .andI | .andE1 | .andE2 | .orI1 | .orI2 | .orE
+  | .diaDualityFwd | .diaDualityBack => True
+```
+
+**`unionSound`** is the master combinator — the hinge itself:
+
+```lean
+theorem unionSound {World : Type*} (S : Finset ModalSchemaTag) (m : Model World Atom)
+    (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ : Proposition Atom} (h : SchemaUnion S φ)
+    (w : World) : Satisfies m w φ
+```
+
+Its proof is a single `cases t with` over all 18 tags. The 13 frame-unconditional cases reuse the
+existing validity atoms in `Cslib/Logics/Modal/Metalogic/Soundness.lean`
+(`Satisfies.implyK_axiom`, …, `Satisfies.diaDualityBack_axiom`) read-only, and the 5
+differentiator cases each delegate directly to the corresponding `FrameCorrespondence` lemma
+above (e.g. `exact Satisfies.modalT_axiom m hval w φ'`) rather than re-deriving the frame
+argument inline.
+
+Put plainly: the frame-correspondence library (the semantic side) and the schema-union
+combinator (the syntactic side) are two halves of one abstraction, and `unionSound` is the hinge
+between them — every per-system soundness proof specializes this one lemma instead of
+re-deriving a per-system case-split.
+
+**Durable anchors for this section**: `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean`
+(the five `Satisfies.modal*_axiom` lemmas), `Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean`
+(`FrameValidatesTag`, `unionSound`), `Cslib/Logics/Modal/Metalogic/Soundness.lean` (the 13
+frame-unconditional validity atoms `unionSound` reuses).

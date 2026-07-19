@@ -138,24 +138,24 @@ Area 1 (the vocabulary the whole design rests on).
 
 ---
 
-### Phase 2: Area 2 (subsumption as `Finset.subset`) and Area 3 (`unionSound` hinge) [NOT STARTED]
+### Phase 2: Area 2 (subsumption as `Finset.subset`) and Area 3 (`unionSound` hinge) [COMPLETED]
 
 **Goal**: Author the two "collapse" sections that are the core elegance argument — the syntactic
 tag-set cube and the syntax/semantics soundness factorization.
 
 **Tasks**:
-- [ ] Write the Area 2 section: `SchemaUnion.subsumption` (embed signature) as the single generic
+- [x] Write the Area 2 section: `SchemaUnion.subsumption` (embed signature) as the single generic
       lemma replacing hand-written per-edge subsumption; explain that each `XAxiom_implies_YAxiom`
       is now `SchemaUnion.subsumption (by decide) h`, a `decide`-able `Finset.subset` fact holding
       because `ModalSchemaTag` is finite + `DecidableEq` and the 15 tag sets are concrete `Finset`
       literals over `kCore`. Reproduce the 15 per-system tag-set definitions (from
       `SchemaTags.lean`) and summarize the 24 direct edges (from `AxiomSubsumption.lean`); framing
-      point: the modal cube K ⊂ T ⊂ S4 ⊂ S5 IS the `⊆`-order on tag sets.
-- [ ] Add the REQUIRED disambiguation note/footnote: `Cslib/Logics/Modal/Cube.lean` is a
+      point: the modal cube K ⊂ T ⊂ S4 ⊂ S5 IS the `⊆`-order on tag sets. *(completed)*
+- [x] Add the REQUIRED disambiguation note/footnote: `Cslib/Logics/Modal/Cube.lean` is a
       pre-existing, SEMANTIC frame-class cube (each system a `Set (Model World Atom)`), authored for
       a different purpose; it MUST NOT be conflated with the new SYNTACTIC tag-set cube in
-      `AxiomSubsumption.lean` / `SchemaTags.lean`. Name both file paths explicitly.
-- [ ] Write the Area 3 section: the five frame-condition→validity lemmas
+      `AxiomSubsumption.lean` / `SchemaTags.lean`. Name both file paths explicitly. *(completed)*
+- [x] Write the Area 3 section: the five frame-condition→validity lemmas
       `Satisfies.modalT_axiom` / `modalFour_axiom` / `modalB_axiom` / `modalD_axiom` /
       `modalFive_axiom` in `FrameCorrespondence.lean` (embed at least the `modalT` and `modalFour`
       signatures); `FrameValidatesTag` as the uniform 18-tag semantic obligation (`True` for the 13
@@ -165,10 +165,10 @@ tag-set cube and the syntax/semantics soundness factorization.
       `FrameCorrespondence` lemma. State plainly: the frame-correspondence library (semantic side)
       and the schema-union combinator (syntactic side) are two halves of one abstraction, with
       `unionSound` as the hinge. Reproduce the Blackburn/de Rijke/Venema *Modal Logic* Ch. 4 (Def
-      4.9, Table 4.1) citation as a durable provenance anchor.
-- [ ] When drawing on `SchemaSoundness.lean`'s module docstring, replace its task-number phrasing
+      4.9, Table 4.1) citation as a durable provenance anchor. *(completed)*
+- [x] When drawing on `SchemaSoundness.lean`'s module docstring, replace its task-number phrasing
       (522/523) with the module names (`FrameCorrespondence.lean` semantic side /
-      `SchemaUnion.lean` + `SchemaTags.lean` syntactic side).
+      `SchemaUnion.lean` + `SchemaTags.lean` syntactic side). *(completed)*
 
 **Timing**: ~1 hour
 

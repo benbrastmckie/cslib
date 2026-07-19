@@ -1,36 +1,24 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-18T00:00:00Z",
-  "requires_user_review": true,
-  "review_reason": "Phase 10 (cs5_completeness assembly) is blocked: it requires a Hilbert-to-labelled 'Adequacy' bridge theorem (Simpson Ch.6) that does not exist anywhere in Cslib/ and that an earlier decomposition of this same task explicitly flagged as HIGH risk and left unfinished (Track C, C5-C8 never built). See handoffs/phase-10-adequacy-bridge-blocker-20260718.md for full analysis and the recommended follow-up.",
+  "status": "planned",
+  "started_at": "2026-07-19T00:00:00Z",
   "artifacts": [
-    {"type": "plan", "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md"},
-    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-10-adequacy-bridge-blocker-20260718.md"},
-    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"}
+    {
+      "type": "plan",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/13_labelled-completeness-full-soundness.md",
+      "summary": "Revised plan v6: Phases 1-9 preserved [COMPLETED] verbatim; Phase 10 retargeted to labelled-system completeness (Option B, CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi) as a landed-lemma composition with honest naming; new Phase 11 adds full labelled soundness (sub-phased) completing the Simpson 8.1.4 biconditional plus anti-vacuity certificate; bookkeeping resequenced to Phase 12."
+    }
   ],
-  "blocked_phase": 10,
-  "partial_progress": {
-    "stage": "blocked",
-    "details": "Phase 10 blocked before any Lean edit during scoping/research; Phase 11 not attempted (depends on 10). Phases 1-9 remain landed sorry-free/axiom-clean, unregressed.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 9,
-    "blocked_phase_name": "Phase 10: cs5_completeness assembly"
-  },
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": null,
-    "ci_pipeline_passed": null,
-    "note": "No Lean files were modified this dispatch, so the CI pipeline was not re-run; Cslib/ is unchanged from the Phase 9 handoff's green state (build 3245/3245, test 9237/9237)."
-  },
+  "next_steps": "Run /implement 517 to execute the revised plan (Phase 10 completeness composition + Phase 11 labelled soundness sub-phases 11.1/11.2/11.3 + Phase 12 bookkeeping). Phases 10 and 11 may run concurrently.",
   "metadata": {
     "session_id": "orchestrator-dispatch",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "blocked_escalation"
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "revision_mode": "plan_revision",
+    "phase_count": 12,
+    "phases_preserved": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "phases_revised": [10],
+    "phases_added": [11],
+    "phases_resequenced": {"old_11": 12},
+    "reports_integrated": ["reports/11_option-b-labelled-completeness-confirmation.md"]
   }
 }

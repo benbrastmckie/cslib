@@ -9,6 +9,8 @@ module
 public import Cslib.Logics.Modal.Basic
 public import Cslib.Foundations.Logic.Metalogic.Consistency
 public import Cslib.Foundations.Logic.Axioms
+public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
+public import Cslib.Logics.Modal.ProofSystem.SchemaTags
 
 /-! # DerivationTree -- Parameterized Syntactic Proof System for Normal Modal Logics
 
@@ -47,9 +49,12 @@ variable {Atom : Type*}
 
 /-! ## Axiom Schemata -/
 
-/-- Axiom schemata for S5 modal logic.
+/-- Axiom schemata for S5 modal logic, as the schema-union combinator over `s5Tags` (Phase 8
+redefinition, task 523: the inductive is retired; `ModalAxiom` is now definitionally
+`SchemaUnion s5Tags`, preserving the name and public API via redefinition-in-place).
 
-The 16 axiom constructors cover:
+The 16 axiom-schema families covered by `s5Tags` (`kCore ∪ {modalT, modalFour, modalB}`;
+S5 = T + 4 + B, carrying `modalB` and NOT `modalFive`):
 - **Propositional** (4): `implyK` (weakening), `implyS` (distribution), `efq` (ex falso),
   `peirce` (double negation elimination / Peirce's law)
 - **Modal** (4): `modalK` (K distribution), `modalT` (reflexivity), `modalFour` (transitivity),
@@ -61,61 +66,7 @@ The 16 axiom constructors cover:
   section).
 
 Together with modus ponens and necessitation, these axioms characterize S5. -/
-inductive ModalAxiom : Proposition Atom → Prop where
-  /-- Weakening: `φ → (ψ → φ)` -/
-  | implyK (φ ψ : Proposition Atom) :
-      ModalAxiom (φ.imp (ψ.imp φ))
-  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
-  | implyS (φ ψ χ : Proposition Atom) :
-      ModalAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
-  /-- Ex falso quodlibet: `⊥ → φ` -/
-  | efq (φ : Proposition Atom) :
-      ModalAxiom (Proposition.bot.imp φ)
-  /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
-  | peirce (φ ψ : Proposition Atom) :
-      ModalAxiom (((φ.imp ψ).imp φ).imp φ)
-  /-- K distribution: `□(φ → ψ) → (□φ → □ψ)` -/
-  | modalK (φ ψ : Proposition Atom) :
-      ModalAxiom ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ)))
-  /-- T / reflexivity: `□φ → φ` -/
-  | modalT (φ : Proposition Atom) :
-      ModalAxiom ((Proposition.box φ).imp φ)
-  /-- 4 / transitivity: `□φ → □□φ` -/
-  | modalFour (φ : Proposition Atom) :
-      ModalAxiom ((Proposition.box φ).imp (Proposition.box (Proposition.box φ)))
-  /-- B / symmetry: `φ → □◇φ`, stated via the canonical raw-encoded `Axioms.AxiomB` (task 441:
-  `diamond` is now a native constructor, so this axiom stays in the raw encoded shape; native
-  `◇` is bridged in via the duality schemata, see `Metalogic/MCS.lean`). -/
-  | modalB (φ : Proposition Atom) :
-      ModalAxiom (Axioms.AxiomB φ)
-  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)`.
-
-  Sanctioned schema (task 441): with native `and`/`or`/`diamond` constructors, this
-  characterization axiom is necessary (it was a derivable theorem under the prior
-  Łukasiewicz encoding, so this is conservative). See `Axioms.AndI`. -/
-  | andI (φ ψ : Proposition Atom) :
-      ModalAxiom (Axioms.AndI φ ψ)
-  /-- Left conjunction elimination: `φ ∧ ψ → φ`. See `Axioms.AndE1`. -/
-  | andE1 (φ ψ : Proposition Atom) :
-      ModalAxiom (Axioms.AndE1 φ ψ)
-  /-- Right conjunction elimination: `φ ∧ ψ → ψ`. See `Axioms.AndE2`. -/
-  | andE2 (φ ψ : Proposition Atom) :
-      ModalAxiom (Axioms.AndE2 φ ψ)
-  /-- Left disjunction introduction: `φ → φ ∨ ψ`. See `Axioms.OrI1`. -/
-  | orI1 (φ ψ : Proposition Atom) :
-      ModalAxiom (Axioms.OrI1 φ ψ)
-  /-- Right disjunction introduction: `ψ → φ ∨ ψ`. See `Axioms.OrI2`. -/
-  | orI2 (φ ψ : Proposition Atom) :
-      ModalAxiom (Axioms.OrI2 φ ψ)
-  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`. See `Axioms.OrE`. -/
-  | orE (φ ψ χ : Proposition Atom) :
-      ModalAxiom (Axioms.OrE φ ψ χ)
-  /-- Diamond duality, forward direction: `◇φ → ¬□¬φ`. See `Axioms.AxiomDiaDualityFwd`. -/
-  | diaDualityFwd (φ : Proposition Atom) :
-      ModalAxiom (Axioms.AxiomDiaDualityFwd φ)
-  /-- Diamond duality, backward direction: `¬□¬φ → ◇φ`. See `Axioms.AxiomDiaDualityBack`. -/
-  | diaDualityBack (φ : Proposition Atom) :
-      ModalAxiom (Axioms.AxiomDiaDualityBack φ)
+abbrev ModalAxiom : Proposition Atom → Prop := SchemaUnion s5Tags
 
 /-! ## Derivation Trees -/
 

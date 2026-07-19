@@ -1,5 +1,5 @@
 ---
-next_project_number: 538
+next_project_number: 539
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 538
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,538 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
@@ -43,6 +43,7 @@ next_project_number: 538
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+538 [NOT STARTED] — Turn docs/modal-axiom-schema-architecture.md into a clear and con
 
 ### Temporal Logic
 
@@ -93,6 +94,16 @@ next_project_number: 538
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 
 ## Tasks
+
+### 538. Typst modal axiom schema architecture
+- **Status**: [NOT STARTED]
+- **Task Type**: typst
+- **Topic**: Modal Logic
+- **Dependencies**: None
+
+**Description**: Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly
+
+---
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours

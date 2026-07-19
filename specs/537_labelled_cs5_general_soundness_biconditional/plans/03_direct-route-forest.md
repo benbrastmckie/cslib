@@ -347,7 +347,7 @@ lemmas reports `{propext, Classical.choice, Quot.sound}` only (no new axiom, no 
   green; `lean_verify` on `forest_trivial` and `forest_addEdge_fresh` reports axiom-clean (no
   `sorryAx`); `grep -nE '\bsorry\b'` finds no NEW tactic `sorry`.
 
-### Phase 7: Tree-cascade lifting lemma boxI_lift [PARTIAL]
+### Phase 7: Tree-cascade lifting lemma boxI_lift [COMPLETED]
 
 This is the sole concentrated-risk phase (audit: ~90% mathematically completable; ~60% single
 dispatch — the risk is **engineering**, not soundness). It carries the budget cap and the sole
@@ -357,28 +357,23 @@ route to the Phase 10 contingency.
   `IsDerivationForest G` as a hypothesis, completing the finite-component cascade `boxI_lift_star`
   left open. This closes the `boxI` **producer** side.
 - **Tasks:**
-  - [ ] State `boxI_lift` with the audit §3 signature (schematically):
+  - [x] State `boxI_lift` with the audit §3 signature (schematically):
         `cs5FCIncest r → (v upward-closed) → (botForces upward-closed) → IsDerivationForest G →`
         `(∀ a b, G.R a b → r (ρ a) (ρ b)) → ρ x ≤ w' →`
         `∃ ρ', ρ' x = w' ∧ (∀ z, ρ z ≤ ρ' z) ∧ (∀ a b, G.R a b → r (ρ' a) (ρ' b)) ∧`
         `(∀ {φ z}, CKForces r v botForces (ρ z) φ → CKForces r v botForces (ρ' z) φ)`.
-        Confirm the exact `cs5FCIncest`/`CKForces` argument shapes against the live API before
-        committing the signature (machine-check with `lean_multi_attempt`).
-  - [ ] **Recommended internal decomposition (commit each green sub-step):** land a helper
-        `raise_component_by_distance` first — process the finite connected component of `x` in
-        increasing `ht`-distance order (well-founded on the invariant's `ht`, finite by `G.X.Finite`);
-        at each node `m`, its **unique** neighbour `n` toward `x` is already raised, so re-establish
-        the single incident edge via `cs5FCIncest_lift` (edge `n→m`, F1) or `cs5FCIncest_raise`
-        (edge `m→n`, F2) — one `boxI_raise_step` application per node. Unique-parent + graded rank
-        guarantee each node receives exactly ONE constraint (this is precisely what defeats the
-        3-cycle, where `b` received two). Then assemble `boxI_lift` from the helper (raise `x` to
-        `w'`, invoke the component raise, package Γ-persistence via `ckforces_persistence` as in
-        `boxI_lift_star`). The recursion strategy (strong induction on rank `ht` vs. structural
-        re-root) is left to the implementer; the rank route reuses the invariant's `ht` directly
-        and is recommended (audit §"residual uncertainty").
-  - [ ] If the **engineering** genuinely overruns budget across dispatches (NOT a mathematical wall —
-        machine-check the specific stuck sub-goal first), STOP and route to **Phase 10**
-        (`[BLOCKED]` handoff scoped to `boxI_lift` alone), NOT a `sorry`, NOT an undirected retry.
+        Landed verbatim to this signature (`boxI_lift`, `Soundness.lean`).
+  - [x] **Internal decomposition landed** (differs from the plan's original
+        `raise_component_by_distance`-single-helper sketch; see the dispatch-1 partial-progress
+        note below for the two-piece split actually used): `raise_subtree` (downward cascade,
+        dispatch 1) + `siblings_disjoint` + `boxI_lift_ancestor` (Finset-exclusion ancestor walk,
+        dispatch 2) assemble `boxI_lift`. Documented deviation: `boxI_lift_ancestor`'s edge
+        conjunct checks Finset-exclusion membership via the edge's *target*, not *source* (the
+        dispatch-1 handoff's transcribed schema checked the source, which is unprovable at the
+        boundary edge into the excluded branch — see `boxI_lift_ancestor`'s docstring for the
+        full justification). The overall two-piece downward/ancestor strategy and all key
+        decisions from the dispatch-1 handoff are unchanged.
+  - [x] Engineering did NOT overrun budget across the two dispatches; Phase 10 not invoked.
 - **Estimated output:** ~120-220 lines. **Bounded unit:** one lemma (optionally one helper +
   the lemma) with a FIXED, finite attack surface — the finite component of `x`, recursion terminating
   by `G.X.Finite` + the `ht` rank. Concrete stopping condition = `boxI_lift` compiles with the stated

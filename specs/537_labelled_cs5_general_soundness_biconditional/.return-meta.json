@@ -1,25 +1,31 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-19T17:22:33Z",
-  "phases_completed": 6,
+  "status": "implemented",
+  "started_at": "2026-07-19T18:00:00Z",
+  "phases_completed": 7,
   "phases_total": 10,
   "skeleton": false,
   "sorry_inventory": [],
   "memory_candidates": [
-    "Lean 4 Relation.ReflTransGen gotcha: `induction`/`cases` on a `Relation.ReflTransGen r a b` hypothesis auto-generalizes any locally-bound `b` it depends on, renaming it to a fresh inaccessible variable per case (the pre-existing local `b` becomes an unrelated leftover). Use `rename_i` immediately after entering a case and verify via `lean_goal` which fresh name plays which role before writing the rest of the branch -- do not assume the original variable name is still live.",
-    "Lean 4 rfl-substitution direction gotcha (generalizes an earlier-recorded lesson): `rcases h with rfl | ...` on an equation between two PRE-EXISTING local variables (not a freshly-`intro`'d one) can substitute in either direction and is not predictable from binder order alone -- observed eliminating the OLDER variable in favor of the newer one. Use a named `heq` and explicit `rw [heq]` instead of `rfl` whenever both sides of the equation are pre-existing variables referenced elsewhere in context.",
-    "Lean 4 well-founded recursion pattern: for a 'raise a node + its finite forward-reachable closure through a Finset of children' style recursion (tree-cascade lifting lemmas), `Set.ncard {q ∈ X | ht q ≥ ht p}` (using an existing graded-rank function) is a clean, easy-to-work-with strictly-decreasing measure for the recursive call on each child -- avoids constructing a bespoke BFS-distance function. Disjointness of different children's downward closures follows from a single `huniq`-style unique-parent application at the LAST edge of whichever path would witness an overlap -- no general cycle-freeness/BFS-uniqueness lemma is needed."
+    "Lean 4 Finset-exclusion induction gotcha: when parametrizing an induction with an explicit `excl : Finset` to carve out a branch the caller already owns, the edge-conjunct's membership check must be on the edge's TARGET, not its SOURCE. Checking the source lets the boundary edge INTO the excluded branch (source outside, target inside) fall under the obligation, which is generally unprovable if the underlying relation has no 'raise-source-only, keep-target-exact' primitive (here `cs5FCIncest`). Checking the target correctly excludes exactly that boundary edge (and everything inside the excluded closure), deferring it to the caller's own separately-established fact.",
+    "Lean 4 pattern: `Relation.ReflTransGen.head`/`.tail`/`.cases_head`/`.cases_tail` do NOT support dot-notation when the first explicit argument's type is a plain relation fact (e.g. `G.R a b`) rather than a `ReflTransGen` fact itself -- `hab.head hbc` fails with 'Invalid field notation' since `hab : G.R a b` has head symbol `G.R`, not `Relation.ReflTransGen`. Must call fully-qualified: `Relation.ReflTransGen.head hab hbc`.",
+    "Lean 4 `subst` direction gotcha (generalizes prior ReflTransGen-cases lessons): `subst h` for `h : a = b` eliminates whichever variable is on the side Lean judges eliminable, and for two plain local variables this can eliminate the OLDER/outer-scoped one (e.g. `subst huzeq` for `huzeq : u = z` eliminated `z`, not `u`, breaking every subsequent reference to `z` within that same tactic block with 'unknown identifier'). When both sides are local variables used elsewhere in the SAME tactic block, prefer `rw [h] at otherHyp` over `subst h` to avoid unpredictably renaming an outer variable out of existence.",
+    "CSLib tree-cascade lifting lemma pattern (task 537 Phase 7, Simpson 8.1.3): split into (1) a downward-cascade helper (raise a node + its full forward-reachable closure through a chosen Finset of un-excluded direct children, well-founded on a rank-based Set.ncard measure) and (2) a Finset-exclusion-parametrized ancestor-walk induction (walk up the unique-parent chain, at each ancestor invoking the downward helper for the un-excluded sibling branches, combining via an if-then-else on ReflTransGen-reachability from the current node). A small reusable 'siblings_disjoint' lemma (distinct children of a common parent have disjoint forward-reachable closures, via unique-parent + graded-rank) is needed by BOTH the downward helper's own combine step and the ancestor-walk's exclusion-identity conjunct -- worth factoring out as a standalone theorem rather than reproving inline twice."
   ],
   "artifacts": [
     {
-      "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/07_phase7-boxI-lift-partial-summary.md",
-      "summary": "Phase 7 partial summary: ht_le_of_reflTransGen + raise_subtree landed sorry-free/axiom-clean; boxI_lift assembly not yet landed, exact fix specified for continuation."
+      "type": "source",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+      "summary": "Added siblings_disjoint, boxI_lift_ancestor, and boxI_lift (Phase 7 completion). All sorry-free, axiom-clean."
+    },
+    {
+      "type": "plan",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
+      "summary": "Phase 7 heading -> [COMPLETED]; task checklist checked off with the documented target-vs-source deviation noted."
     },
     {
       "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/07_phase7-boxI-lift-partial.md",
-      "summary": "Continuation handoff with the corrected Finset-exclusion-parametrized induction statement, key decisions, and what not to retry."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
+      "summary": "Full orchestrator handoff: status implemented, phases_completed 7/10, next_phase 8, sorry_inventory empty, deviation documented."
     }
   ],
   "verification": {
@@ -28,11 +34,11 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports run; full lake lint/lint-style/shake/test deferred to Phase 9 regression gate per plan)"
+    "ci_pipeline_passed": "partial (scoped build + checkInitImports + lake lint + lint-style all green; lake shake/lake test deferred to Phase 9 regression gate per plan)"
   },
   "partial_progress": {
-    "stage": "phase_7_partial",
-    "details": "ht_le_of_reflTransGen and raise_subtree landed, committed, sorry-free, axiom-clean. boxI_lift ancestor-walk assembly drafted, found unsound via live lean_goal checking, fix specified but not implemented within budget. Continuation handoff written with exact remaining sub-goal."
+    "stage": "phase_7_complete",
+    "details": "boxI_lift landed and axiom-clean, closing the boxI producer side. Phase 8 (main NIK induction, close boxI case, assemble nik_TS5_soundness) is next per the plan; not started this dispatch per mission scope."
   },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",

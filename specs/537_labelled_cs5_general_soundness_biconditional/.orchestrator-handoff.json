@@ -1,33 +1,26 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "partial",
-  "summary": "Phase 7 of plan v3 (plans/03_direct-route-forest.md): landed and committed two sorry-free, axiom-clean lemmas toward boxI_lift in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean -- `ht_le_of_reflTransGen` (rank non-decreasing along forward G.R-reachability, a direct consequence of the graded-rank conjunct) and `raise_subtree` (the recommended downward-cascade helper: raise a node already fixed to a target together with the forward-reachable closure through a chosen Finset of direct raw-neighbours, via repeated cs5FCIncest_lift/F1, well-founded on Set.ncard {q in G.X | ht q >= ht p}; disjointness of sibling closures derived from a last-edge unique-parent argument, no general cycle-freeness lemma needed). `boxI_lift` itself (the ancestor-walk assembly on top of raise_subtree) was drafted but found unsound in its recursive step via live lean_goal checking BEFORE further code was written -- the naive induction hypothesis at each ancestor covers all of G's edges unconditionally, which would let it silently re-derive the already-descended child branch's value, conflicting with that branch's pinned target. This is an engineering induction-hypothesis-shape defect, not a mathematical wall: the fix (a Finset exclusion parameter mirroring raise_subtree's own mechanism, inverted) is fully specified in the plan's Phase 7 partial-progress note and the handoff markdown, but was not implemented within this dispatch's budget. The unsound draft was discarded (never committed, no sorry ever written).",
-  "phases_completed": 6,
+  "status": "implemented",
+  "summary": "Phase 7 of plan v3 (plans/03_direct-route-forest.md) is COMPLETE: `boxI_lift` (the tree-cascade Lifting Lemma, Simpson 8.1.3) is landed in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean, sorry-free and axiom-clean. This continuation dispatch added the ancestor-walk assembly on top of the already-committed `raise_subtree`/`ht_le_of_reflTransGen`: `siblings_disjoint` (a small reusable sibling-closure-disjointness helper, generalizing the disjointness argument already proved inline inside `raise_subtree`'s `insert` case), `boxI_lift_ancestor` (the Finset-exclusion-parametrized ancestor-walk induction that fixes the previously-diagnosed unsoundness), and `boxI_lift` itself (a thin wrapper specializing `excl := ∅`). Documented, necessary correction to the prior handoff's transcribed schema (not a design re-opening): `boxI_lift_ancestor`'s edge conjunct checks Finset-exclusion membership via the edge's TARGET, not its SOURCE as the handoff's schema had it -- the source-side check is unprovable at the boundary edge into the excluded branch (e.g. the ancestor edge q -> z itself), since `cs5FCIncest` has no 'raise-source-only, keep-target-exact' conjunct. The two-piece downward/ancestor decomposition and all five key decisions recorded in the dispatch-1 handoff are otherwise unchanged and were followed verbatim.",
+  "phases_completed": 7,
   "phases_total": 10,
   "skeleton": false,
   "sorry_inventory": [],
-  "blockers": [
-    {
-      "phase": 7,
-      "target": "boxI_lift (ancestor-walk assembly over raise_subtree)",
-      "verbatim_goal": "State boxI_lift with the audit §3 signature (schematically): cs5FCIncest r → (v upward-closed) → (botForces upward-closed) → IsDerivationForest G → (∀ a b, G.R a b → r (ρ a) (ρ b)) → ρ x ≤ w' → ∃ ρ', ρ' x = w' ∧ (∀ z, ρ z ≤ ρ' z) ∧ (∀ a b, G.R a b → r (ρ' a) (ρ' b)) ∧ (∀ {φ z}, CKForces r v botForces (ρ z) φ → CKForces r v botForces (ρ' z) φ).",
-      "what_was_tried": "Ancestor walk up the unique-parent chain via cs5FCIncest_raise (F2), invoking raise_subtree for sibling branches, with the outer strong-induction-on-ht-x hypothesis applied unconditionally at each ancestor.",
-      "why_it_failed": "The induction hypothesis's conclusion covers all of G's edges unconditionally, so applying it to the parent would let it silently re-derive the child branch's value independently via its own internal raise_subtree call, conflicting with that branch's already-pinned target -- fixed by adding a Finset exclusion parameter (exact corrected statement recorded in plans/03_direct-route-forest.md Phase 7 partial-progress note)."
-    }
-  ],
-  "next_phase": "7",
-  "next_phase_hint": "Phase 7 continuation: implement boxI_lift using the corrected Finset-exclusion-parametrized ancestor-walk induction specified in plans/03_direct-route-forest.md's Phase 7 partial-progress note and specs/537_labelled_cs5_general_soundness_biconditional/handoffs/07_phase7-boxI-lift-partial.md. raise_subtree and ht_le_of_reflTransGen are landed and reusable; no further mathematical content is needed, only the exclusion-parameter engineering completion (~120-180 estimated lines).",
+  "blockers": [],
+  "next_phase": "8",
+  "next_phase_hint": "Phase 8: Main NIK induction (motive amended), close boxI case, assemble nik_TS5_soundness. boxI_lift is now available with the exact audit §3 signature the plan's Phase 8 task list expects.",
   "next_command": "/implement 537 --hard --lit",
   "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
   "plan_version": 3,
-  "deviations": [],
-  "continuation_context": {
-    "is_successor": true,
-    "helper_landed": ["ht_le_of_reflTransGen", "raise_subtree"],
-    "handoff_markdown": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/07_phase7-boxI-lift-partial.md",
-    "progress_file": "specs/537_labelled_cs5_general_soundness_biconditional/progress/phase-7-progress.json"
-  },
+  "deviations": [
+    {
+      "phase": 7,
+      "description": "boxI_lift_ancestor's edge conjunct (conjunct 3) checks the Finset-exclusion antecedent via the edge's target `b`, not the source `a` as the dispatch-1 handoff's transcribed schema specified.",
+      "reason": "Checking via `a` is unprovable at the boundary edge into the excluded branch (source outside the excluded closure, target inside it, e.g. the ancestor edge q -> z): cs5FCIncest has no raise-source-only-keep-target-exact conjunct, so r(raised q)(old ρ z) is not generally derivable. Checking via `b` correctly drops exactly the boundary edge (established separately by the caller's own cs5FCIncest_raise fact) from the internal obligation. Documented in boxI_lift_ancestor's docstring; the overall strategy is unchanged."
+    }
+  ],
+  "continuation_context": null,
   "verification": {
     "sorry_introduced": false,
     "new_axiom_introduced": false,
@@ -37,29 +30,23 @@
     "preserved_assets_unregressed": true,
     "build_passed": true,
     "checkInitImports_passed": true,
-    "lean_verify_ht_le_of_reflTransGen": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
-    "lean_verify_raise_subtree": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false}
+    "lake_lint_passed": true,
+    "lint_style_passed": true,
+    "lean_verify_siblings_disjoint": {"axioms": ["propext", "Quot.sound"], "sorryAx": false},
+    "lean_verify_boxI_lift_ancestor": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
+    "lean_verify_boxI_lift": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
+    "full_ci_note": "lake shake and lake test not run this dispatch (deferred to Phase 9 regression gate per the plan's own phase split); lake build (scoped), checkInitImports, lake lint, and lake exe lint-style all run and green."
   },
   "artifacts": [
     {
       "type": "source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added ht_le_of_reflTransGen + raise_subtree (task 537 Phase 7, partial); boxI_lift not yet added. Also added public import Mathlib.Data.Set.Card for Set.ncard."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/07_phase7-boxI-lift-partial.md",
-      "summary": "Full continuation handoff: exact remaining sub-goal, key decisions binding successors, what not to retry."
-    },
-    {
-      "type": "progress",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/progress/phase-7-progress.json",
-      "summary": "Phase 7 objective tracking: helper objectives (1-2) done, boxI_lift assembly (3) blocked pending Finset-exclusion fix."
+      "summary": "Added siblings_disjoint, boxI_lift_ancestor, and boxI_lift after raise_subtree, before end Cslib.Logic.Modal.Labelled (~230 lines)."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "summary": "Phase 7 heading marked [PARTIAL]; partial-progress note appended with the exact corrected induction statement for the continuation dispatch."
+      "summary": "Phase 7 heading marked [COMPLETED]; task checklist items checked off with a note on the documented target-vs-source exclusion-check deviation."
     }
   ],
   "session_id": "sess_1784471495_4fb1e9",

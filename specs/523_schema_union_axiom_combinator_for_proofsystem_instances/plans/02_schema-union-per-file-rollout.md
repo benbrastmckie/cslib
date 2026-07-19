@@ -716,16 +716,74 @@ name and continue to typecheck without further edits to this file.
 
 ---
 
-### Phase 7: Swap 15 instance registrations to `SchemaUnion` [NOT STARTED]
+### Phase 7: Swap 15 instance registrations to `SchemaUnion` [IN PROGRESS]
 
 **Goal**: Rewrite each `HasAxiom*` instance registration in `Instances/*.lean` to discharge its
 fields from `SchemaUnion` (via the Phase 3 bridge where convenient), replacing witness
 constructions like `KAxiom.implyK _`. Inductives are NOT deleted here (that is Phase 8). Split into
 per-cluster sub-phases (~4 files each).
 
-**Sub-phase 7.1 — K, T, D, B** [NOT STARTED]
-- [ ] Rewrite the `HasAxiom*` instance fields in `Instances/{K,T,D,B}.lean` to build from `SchemaUnion`.
+**Import-cycle finding (recorded at start of 7.1, binding on all of Phase 7)**: the plan's stated
+mechanism (`schemaUnion_kTags_iff_KAxiom.mp ⟨.implyK, by decide, φ, ψ, rfl⟩`, reusing the exact
+Phase-3 bridge lemma from `SchemaBridges.lean`) is **not importable** from any `Instances/*.lean`
+file. Empirically confirmed via a direct `lake build` attempt (adding
+`public import Cslib.Logics.Modal.ProofSystem.SchemaBridges` to `Instances/K.lean` and building):
+`error: Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean: bad import
+'Cslib.Logics.Modal.ProofSystem.Instances'` plus a `build cycle detected` diagnostic. Root cause:
+`SchemaBridges.lean` (Phase 3, untouched, correctly so per Preserved Assets) imports the
+`Instances` barrel, which imports every individual `Instances/{sys}.lean` file — so any
+`Instances/{sys}.lean` importing `SchemaBridges.lean` back is a genuine cycle in the acyclic
+import DAG, not a workaround-able name resolution issue. **Resolution** (does not touch
+`SchemaBridges.lean`/`SchemaUnion.lean`, only edits the target `Instances/*.lean` file, per
+territory): each `Instances/{sys}.lean` file additionally imports only
+`Cslib.Logics.Modal.ProofSystem.SchemaUnion` (verified acyclic: `SchemaUnion.lean` imports only
+`Modal.Basic`, `Foundations.Logic.Axioms`, `Mathlib.Data.Finset.Basic` — none of which depend on
+`Instances`), and gains one `private theorem {sys}Tags_of_schemaUnion` per file: a file-local
+forward-direction (`SchemaUnion → <Sys>Axiom`) discharge lemma, structurally identical to the
+`.mp` half of that system's Phase-3 bridge (same tag-set shape, same `SchemaUnion.insert_iff` /
+`SchemaUnion.empty_iff` unfolding, same per-constructor `all_goals first | exact …`), but
+re-derived locally since the canonical copy in `SchemaBridges.lean` cannot be imported. `private`
+scoping means the (identical-across-files-in-spirit but locally-named) theorem cannot collide
+with `SchemaBridges.lean`'s public bridge names even though both exist in the merged environment
+for any downstream file that imports both. Every registration field now reads
+`({sys}Tags_of_schemaUnion ⟨.tag, by decide, _, …, rfl⟩)` instead of a raw `<Sys>Axiom.ctor`
+call — the only remaining raw-constructor references in each file are the ~13-16 `exact
+<Sys>Axiom.ctor _ …` lines *inside* that file's own private helper (unavoidable: constructing an
+inhabitant of a still-live `inductive` requires applying one of its constructors somewhere; the
+canonical `SchemaBridges.lean` bridge has the same property). This preserves the real Phase-8
+payoff: once Phase 8 redefines `inductive <Sys>Axiom` as `def <Sys>Axiom := SchemaUnion sysTags`,
+each field's `⟨.tag, by decide, _, …, rfl⟩` witness becomes directly usable as `<Sys>Axiom …` by
+defeq, so Phase 8 only needs to delete the (now-dead) private helper and strip the
+`{sys}Tags_of_schemaUnion` wrapper text from each field — a small, mechanical diff — rather than
+re-deriving `SchemaUnion` witnesses from scratch in 15 files. This finding and resolution apply
+uniformly to sub-phases 7.1-7.4; it is not re-litigated per sub-phase below.
+
+**Sub-phase 7.1 — K, T, D, B** [COMPLETED]
+- [x] Rewrite the `HasAxiom*` instance fields in `Instances/{K,T,D,B}.lean` to build from `SchemaUnion`.
 - Estimated output: ~150-260 lines.
+- **Completion note**: Per the import-cycle finding above, each file gained a `public import
+  Cslib.Logics.Modal.ProofSystem.SchemaUnion` and one `private theorem {k,t,d,b}Tags_of_schemaUnion`
+  (placed inside `namespace Cslib.Logic.Modal` / `section ModalInstances`, immediately before the
+  registrations it serves). K's tag set is `kCore` alone (13 tags, no differentiator beyond
+  `modalK`); T/D/B each add one differentiator (`modalT`/`modalD`/`modalB`) — 14 tags. Every
+  `HasAxiomImplyK`/…/`HasAxiomT`/`HasAxiomD`/`HasAxiomB`/`HasAxiomAndI`/…/`HasAxiomDiaDualityBack`
+  field across all four files now reads `⟨Modal.DerivationTree.ax [] _
+  ({sys}Tags_of_schemaUnion ⟨.tag, by decide, _, …, rfl⟩)⟩`, replacing the prior raw
+  `Modal.{Sys}Axiom.ctor _ …` call. All four `inductive {K,T,D,B}Axiom` definitions are
+  unmodified and still present (grep-confirmed: `^inductive {Sys}Axiom` present exactly once per
+  file). Zero `sorry` (grep-confirmed empty across all four files), zero new axiom (`lean_verify`
+  on `kTags_of_schemaUnion`, `tTags_of_schemaUnion`, `bTags_of_schemaUnion` all report only
+  `propext`/`Quot.sound`). Scoped `lake build` of all four modules green; additionally rebuilt the
+  `Instances` barrel, `SchemaBridges.lean`, `AxiomSubsumption.lean`, and `IntToClassical.lean`
+  (the four files whose imports transitively touch these four instance files) to confirm no
+  downstream breakage — all green. `lake exe checkInitImports` clean. `lake lint --builtin-lint`
+  on all four modules: "No environment linters registered" (matches the pre-existing pattern for
+  these modules per Phase 6's notes) plus a clean final "Linting passed for Cslib". `lake exe
+  lint-style` clean (no line-length or other text-lint violations after wrapping the inlined
+  `Finset` literal and `rcases` pattern to stay under the 100-column limit — an early attempt
+  without wrapping tripped `linter.style.longLine`, fixed by word-wrapping both to a 70-column
+  budget before the enclosing indent). Net line delta: +210/-55 across the four files (the private
+  per-file helper is the dominant addition, as expected from the import-cycle finding above).
 
 **Sub-phase 7.2 — K4, K5, K45, S4** [NOT STARTED]
 - [ ] Rewrite `Instances/{K4,K5,K45,S4}.lean`.

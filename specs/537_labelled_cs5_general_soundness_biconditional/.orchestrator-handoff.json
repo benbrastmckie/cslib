@@ -1,45 +1,46 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Revised hard-mode plan v3 (plans/03_direct-route-forest.md) folds the tree-shape-invariant audit (report 03) and UN-BLOCKS the Phase 4.2 boxI_lift blocker. Phases 1-5 are LANDED (marked [COMPLETED], not re-planned): box_iff_base/dia_iff_base (Phase 1), box_iff_TClosure/dia_iff_TClosure (Phase 2), cs5FCIncest_raise (F2)/box_gives_here (Phase 3), boxI_raise_step (Phase 4), boxI_lift_star (Phase 5) -- all sorry-free, axiom-clean, committed. The remaining boxI work is restructured into 4 new phases plus a contingency: Phase 6 defines IsDerivationForest (THREE conjuncts -- X.Finite + graded rank + unique-parent; the earlier 2-conjunct framing omitted finiteness) as a threaded def over Syntax.lean's Graph (NOT a new Graph field -- would perturb completeness/CanonicalModel) with forest_trivial + forest_addEdge_fresh; Phase 7 proves the tree-restricted boxI_lift taking IsDerivationForest as a hypothesis, completing the finite-component cascade by reusing boxI_raise_step/boxI_lift_star per node (the sole concentrated risk -- ENGINEERING, ~60% single-dispatch, ~90% mathematically completable); Phase 8 threads IsDerivationForest through the main NIK-induction motive, closes the boxI case (boxI_lift + fresh-eigenvariable Function.update sigma y u + forest_addEdge_fresh + persistence), and assembles nik_TS5_soundness at Graph.trivial; Phase 9 is the regression gate; Phase 10 is contingency-only, firing ONLY on a Phase 7 engineering overrun (routes a scoped follow-up for boxI_lift alone, never a soundness-direction [BLOCKED], never a sorry).",
-  "plan_version": 3,
-  "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-  "supersedes": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Phase 6 of plan v3 (plans/03_direct-route-forest.md) landed sorry-free and axiom-clean in Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean: `IsDerivationForest (G : Graph Atom) : Prop` (the three conjuncts -- G.X.Finite, graded rank `∃ ht, ∀ a b, G.R a b → ht b = ht a + 1`, unique parent `∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂` -- exactly as specified, no conjunct dropped), `forest_trivial : IsDerivationForest (Graph.trivial Atom)` (2-line term-mode proof, vacuous over Graph.trivial's empty edge relation), and `forest_addEdge_fresh : IsDerivationForest G → x ∈ G.X → y ∉ G.X → IsDerivationForest (G.addEdge x y)` (tactic-mode, ~30 lines, extending the rank via `Function.update ht y (ht x + 1)`). No new axiom, no Graph structure modification, no Preserved Asset touched. Pure graph scaffolding with zero dependency on the model or forcing relation, exactly matching the audit's recommended shape (report 03 §1-3).",
+  "phases_completed": 6,
+  "phases_total": 10,
   "skeleton": false,
-  "phase_count": 10,
-  "completed_phases": [1, 2, 3, 4, 5],
-  "first_open_phase": 6,
-  "next_phase": "implement",
-  "next_phase_hint": "Run /implement 537 --hard --lit starting from Phase 6 (IsDerivationForest invariant). The orchestrator heading-scan picks the first non-[COMPLETED] phase = Phase 6. Do NOT execute Phase 10 unless Phase 7's ENGINEERING (not mathematics) genuinely overruns budget across dispatches.",
+  "sorry_inventory": [],
+  "blockers": [],
+  "next_phase": "7",
+  "next_phase_hint": "Phase 7: state and prove the tree-restricted boxI_lift (Simpson 8.1.3, chunk 0155), taking IsDerivationForest G as a hypothesis, completing the finite-component cascade boxI_lift_star left open. This is the plan's sole concentrated-risk phase (engineering, not mathematics) -- recommend landing the helper raise_component_by_distance as its own green sub-step before assembling boxI_lift.",
   "next_command": "/implement 537 --hard --lit",
-  "dependency_waves": [[1, 2, 3, 4, 5], [6], [7], [8], [9]],
-  "concentrated_risk_phase": 7,
-  "concentrated_risk_note": "boxI_lift finite-component cascade. Risk is ENGINEERING, not soundness (audit report 03: ~90% mathematically completable, ~60% single dispatch). Recommended internal decomposition: land helper raise_component_by_distance as its own green sub-step first, then assemble boxI_lift. Recursion recommended via strong induction on the invariant's rank ht (finite by G.X.Finite).",
-  "postmortem_constraints_count": 12,
-  "zero_debt_constraints": "no sorry, no new axiom under Cslib/, cs5FCIncest unweakened (CS5Canonical.lean:255), Graph structure unmodified (Syntax.lean:110), no Preserved Asset regressed (14 assets)",
-  "preserved_assets_count": 14,
-  "reference_grounding_tier": 1,
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
-      "summary": "Hard-mode direct-route plan v3: Phases 1-5 landed [COMPLETED]; Phase 6 IsDerivationForest + preservation lemmas; Phase 7 boxI_lift tree cascade; Phase 8 main NIK induction (motive amended) + assemble nik_TS5_soundness; Phase 9 regression gate; Phase 10 engineering-overrun contingency. Preserves the 14-asset Preserved-Assets table and the H3 Tier-1 source mapping (Simpson1994 0154-0156, MMS2021 0026)."
-    },
-    {
-      "type": "report",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md",
-      "summary": "AUTHORITATIVE revised sequence: finite-rooted-forest verdict, IsDerivationForest 3-conjunct invariant, threading recommendation, lemma-by-lemma completion path, H4 adversarial table, H3 grounding table."
-    }
+  "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
+  "plan_version": 3,
+  "deviations": [
+    "forest_addEdge_fresh's graded-rank case originally used `rcases hab with hab | ⟨rfl, rfl⟩` on the new-edge disjunct `a = x ∧ b = y`; Lean's subst eliminated the outer binders `x`/`y` (substituting them with `a`/`b`) rather than the reverse, which orphaned subsequent bare references to `x`/`y` (build error: \"unknown identifier x/y\"). Fixed by keeping the equalities as named hypotheses `ha : a = x`, `hb : b = y` and rewriting the goal with them (`rw [ha, hb, ...]`) instead of destructive `subst`/`rfl`-pattern. No change to the lemma's statement, scope, or the plan's task sequence -- purely a tactic-level fix, verified green."
   ],
   "verification": {
     "sorry_introduced": false,
     "new_axiom_introduced": false,
-    "source_files_modified": false,
+    "source_files_modified": ["Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"],
     "cs5FCIncest_unweakened": true,
     "graph_unmodified": true,
-    "note": "Planning only -- no Lean source edited. Deliverables: plan v3, state.json (plan_version 3, phases 10, waves), TODO.md regen, this handoff, .return-meta.json."
+    "preserved_assets_unregressed": true,
+    "build_passed": true,
+    "checkInitImports_passed": true,
+    "lean_verify_forest_trivial": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
+    "lean_verify_forest_addEdge_fresh": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false},
+    "lean_verify_boxI_lift_star_spot_check": {"axioms": ["propext", "Classical.choice", "Quot.sound"], "sorryAx": false, "note": "spot-check that Phase 5's Preserved Asset is unregressed"}
   },
+  "artifacts": [
+    {
+      "type": "source",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+      "summary": "Added IsDerivationForest def + forest_trivial + forest_addEdge_fresh (task 537 Phase 6), inserted between boxI_lift_star and the one-point-soundness section."
+    },
+    {
+      "type": "plan",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
+      "summary": "Phase 6 heading marked [COMPLETED], its three tasks checked off, and a completion note appended documenting the subst-elimination fix."
+    }
+  ],
   "session_id": "sess_1784471495_4fb1e9",
   "orchestrator_mode": true
 }

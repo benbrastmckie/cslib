@@ -306,24 +306,35 @@ The orchestrator heading-scan picks the first non-`[COMPLETED]` phase: **Phase 6
 - **Do NOT re-plan or re-derive.** Preserved Asset. This was the partial deliverable of plan v2's
   `[BLOCKED]` Phase 4.2; the audit confirms it is sound forward progress to build Phase 7 on.
 
-### Phase 6: Derivation-forest invariant IsDerivationForest + preservation lemmas [NOT STARTED]
+### Phase 6: Derivation-forest invariant IsDerivationForest + preservation lemmas [COMPLETED]
 
 - **Goal:** Define the threaded invariant and its two preservation lemmas — the small,
   self-contained graph scaffolding `boxI_lift` (Phase 7) and the Phase 8 motive both require.
   Grounded in Simpson chunk 0156 ("restrict attention to trees"; "G′ = G ∪ {xRy} tree as y not in
   G") and the codebase structure (`Deduction.lean` edge-adding rules, `Syntax.lean:118 edge_mem`).
 - **Tasks:**
-  - [ ] Define `IsDerivationForest (G : Graph Atom) : Prop` with the THREE conjuncts (audit §1):
+  - [x] Define `IsDerivationForest (G : Graph Atom) : Prop` with the THREE conjuncts (audit §1):
         `G.X.Finite` ∧ `(∃ ht : Label Atom → ℕ, ∀ a b, G.R a b → ht b = ht a + 1)` (graded rank ⟹
         directed-acyclic) ∧ `(∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂)` (unique parent ⟹ no
         undirected diamond). Match the exact `Graph` field names from `Syntax.lean:110`.
-  - [ ] Prove `forest_trivial : IsDerivationForest (Graph.trivial Atom)` — `ht := fun _ => 0`; no
+  - [x] Prove `forest_trivial : IsDerivationForest (Graph.trivial Atom)` — `ht := fun _ => 0`; no
         edges so graded/unique-parent vacuous; `X = {var 0}` finite (audit §3 step 1, ~5 lines).
-  - [ ] Prove `forest_addEdge_fresh : IsDerivationForest G → x ∈ G.X → y ∉ G.X →
+  - [x] Prove `forest_addEdge_fresh : IsDerivationForest G → x ∈ G.X → y ∉ G.X →
         IsDerivationForest (G.addEdge x y)` — `ht' := Function.update ht y (ht x + 1)`; new edge
         `x→y` graded by construction; unique-parent preserved because `y ∉ G.X` ⟹ `y` gains exactly
         one source `x`; finiteness via `Set.Finite.union`/`Set.finite_insert` (audit §3 step 2).
         This is the exact preservation `NIK.boxI`/`NIK.diaE` (`addEdge x y`, `y` fresh) require.
+
+**Phase 6 completion note (2026-07-19)**: All three tasks landed exactly as specified, no
+deviation. `IsDerivationForest` is a `def` with the three conjuncts verbatim; `forest_trivial`
+(2 lines, term-mode) and `forest_addEdge_fresh` (~30 lines, tactic-mode, `classical` + explicit
+case split avoiding an `rcases … | ⟨rfl, rfl⟩` ambiguity that would substitute-away the outer
+`x`/`y` binders — fixed by keeping the equalities as named hypotheses `ha`/`hb` and `rw`-ing
+instead of destructive `subst`). `lake build …Labelled.Soundness` green; `lean_verify` on both
+lemmas reports `{propext, Classical.choice, Quot.sound}` only (no new axiom, no `sorryAx`);
+`lake exe checkInitImports` clean; no NEW tactic `sorry` (grep confirms only prose mentions).
+`boxI_lift_star` spot-re-verified unregressed (same three standard axioms). Committed at
+`task 537 phase 6: IsDerivationForest + preservation lemmas`.
 - **Estimated output:** ~40-70 lines. **Bounded unit:** one `def` + two lemmas, each provable in
   isolation over `Syntax.lean`'s `Graph` with zero dependency on the model or forcing; concrete
   stopping condition = all three compile. Passes the bounded-unit test (fixed, finite attack

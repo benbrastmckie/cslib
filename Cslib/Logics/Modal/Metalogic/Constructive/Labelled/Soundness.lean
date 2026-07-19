@@ -648,6 +648,74 @@ theorem boxI_lift_star {Atom : Type u} {World : Type v} [Preorder World]
           · rw [Function.update_of_ne hzn]
             exact hρ₁pers hz
 
+/-! ## Derivation-forest invariant (task 537 Phase 6, Simpson 8.1.3 "restrict attention to trees")
+
+Simpson's Lifting Lemma 8.1.3 is stated for `G` a **tree** (chunk 0154); the `boxI_lift`-over-an-
+arbitrary-`Graph` statement is genuinely FALSE (the 3-cycle `x→a→b→x` in `handoffs/04` forces node
+`b` to satisfy two independent, generally-incompatible raise constraints). The raw `R`-graph of
+every `NIK` derivation is, however, a finite rooted forest **by construction**: `Graph.trivial`
+(`Syntax.lean:123`) is the one-node, zero-edge base, and the only two edge-adding constructors,
+`NIK.boxI` (`Deduction.lean:297`) and `NIK.diaE` (`Deduction.lean:309`), both call `G.addEdge x y`
+with `y` chosen outside a finite exclusion set -- always `existing → fresh`, never closing a
+cycle (audit report `03_tree-shape-invariant-audit.md` §1). `IsDerivationForest` packages the
+three conjuncts this fact needs (finiteness, graded rank, unique parent -- audit §1/§4: dropping
+either the rank or the unique-parent conjunct alone reopens either the 3-cycle or the
+`x→a→b`/`x→c→b` diamond); it is threaded as a hypothesis through the soundness induction motive
+(Phase 8), NOT added as a new `Graph` field, since the canonical model's graph
+(`CanonicalModel.lean`) is not a finite forest (audit §2). -/
+
+/-- **Derivation-forest invariant** (Simpson 8.1.3, chunk 0156). Three conjuncts, all
+independently necessary (audit report 03 §1/§4): `G.X` is finite (needed for `boxI_lift`'s
+finite-component recursion, Phase 7); `G.R` is **graded** by some rank function `ht` (rules out
+*directed* cycles, e.g. the 3-cycle `x→a→b→x`); and every node has a **unique parent** under `G.R`
+(rules out *undirected* diamonds, e.g. `x→a→b`, `x→c→b`). Together, graded rank + unique parent
+make `G` a genuine finite rooted forest. -/
+def IsDerivationForest {Atom : Type u} (G : Graph Atom) : Prop :=
+  G.X.Finite ∧
+    (∃ ht : Label Atom → ℕ, ∀ a b, G.R a b → ht b = ht a + 1) ∧
+    (∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂)
+
+/-- **The trivial graph is a derivation forest.** `Graph.trivial` has no edges, so the
+graded-rank and unique-parent conjuncts hold vacuously (the constant rank `fun _ => 0` works);
+its node set `{var 0}` is finite. Discharges `IsDerivationForest` at the base of the soundness
+induction (`nik_TS5_soundness`, Phase 8). -/
+theorem forest_trivial {Atom : Type u} : IsDerivationForest (Graph.trivial Atom) :=
+  ⟨Set.finite_singleton _, ⟨fun _ => 0, fun _ _ hab => hab.elim⟩, fun _ _ _ hab _ => hab.elim⟩
+
+/-- **Adding a fresh-sink edge preserves the derivation-forest invariant.** If `G` is a
+derivation forest and `y ∉ G.X` (so `y` is genuinely fresh), then `G.addEdge x y` -- the graph
+extension `NIK.boxI`/`NIK.diaE` perform -- is again a derivation forest. The new rank function
+`Function.update ht y (ht x + 1)` grades the new edge `x → y` by construction; unique-parent is
+preserved because `y`, being fresh, gains exactly one source (`x`) and no old target's source set
+changes; finiteness follows from `Set.Finite.union`/`Set.Finite.insert`. This is exactly the
+preservation `NIK.boxI` (`Deduction.lean:297`) / `NIK.diaE` (`Deduction.lean:309`) require. -/
+theorem forest_addEdge_fresh {Atom : Type u} {G : Graph Atom} (hG : IsDerivationForest G)
+    {x y : Label Atom} (hx : x ∈ G.X) (hy : y ∉ G.X) :
+    IsDerivationForest (G.addEdge x y) := by
+  classical
+  obtain ⟨hfin, ⟨ht, hht⟩, huniq⟩ := hG
+  refine ⟨?_, ⟨Function.update ht y (ht x + 1), ?_⟩, ?_⟩
+  · exact hfin.union (Set.Finite.insert x (Set.finite_singleton y))
+  · intro a b hab
+    rcases hab with hab | ⟨ha, hb⟩
+    · have haG : a ∈ G.X := (G.edge_mem a b hab).1
+      have hbG : b ∈ G.X := (G.edge_mem a b hab).2
+      have hay : a ≠ y := fun h => hy (h ▸ haG)
+      have hby : b ≠ y := fun h => hy (h ▸ hbG)
+      rw [Function.update_of_ne hby, Function.update_of_ne hay]
+      exact hht a b hab
+    · rw [ha, hb, Function.update_self]
+      have hxy : x ≠ y := fun h => hy (h ▸ hx)
+      rw [Function.update_of_ne hxy]
+  · intro a₁ a₂ b hab1 hab2
+    rcases hab1 with hab1 | ⟨ha1, hb1⟩
+    · rcases hab2 with hab2 | ⟨ha2, hb2⟩
+      · exact huniq a₁ a₂ b hab1 hab2
+      · exact absurd (hb2 ▸ (G.edge_mem a₁ b hab1).2) hy
+    · rcases hab2 with hab2 | ⟨ha2, hb2⟩
+      · exact absurd (hb1 ▸ (G.edge_mem a₂ b hab2).2) hy
+      · exact ha1.trans ha2.symm
+
 /-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the

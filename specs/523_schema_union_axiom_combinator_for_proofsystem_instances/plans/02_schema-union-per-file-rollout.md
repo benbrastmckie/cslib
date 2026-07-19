@@ -315,7 +315,7 @@ collapse the per-system case-splits into named lemma applications rather than ra
 
 ---
 
-### Phase 3: Per-system tag sets + 15 bridge equivalences [IN PROGRESS]
+### Phase 3: Per-system tag sets + 15 bridge equivalences [COMPLETED]
 
 **Goal**: Define `kCore` and the 15 per-system `Finset ModalSchemaTag` tag sets, and prove the
 bridge equivalences `SchemaUnion sysTags φ ↔ <Sys>Axiom φ` — additive; the inductives stay live.
@@ -396,6 +396,37 @@ DB:{modalK,modalD,modalB}` — each unioned with the 13-tag `kCore` (proposition
 - Zero-`sorry`; each bridge proved as a genuine `↔` (no `sorry`, no `admit`).
 - No instance file modified.
 - **Done when**: all 15 bridge equivalences compile sorry-free; commit per group.
+
+**Phase completion note**: All four sub-phases (3.1-3.4) landed in NEW
+`Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean` (786 lines): `kCore` (13 shared tags,
+defined as explicit nested `insert … ∅`, not the `{a,b,c}` literal sugar — that sugar's last
+element is a `Singleton`, not `insert _ ∅`, so the elimination API's `insert_iff`/`empty_iff`
+don't fire on it) plus the 15 per-system tag sets and their 15 bridge equivalences
+(`SchemaUnion sysTags φ ↔ <Sys>Axiom φ`, S5 bridging to the pre-existing `ModalAxiom`). Every
+tag set was cross-checked against its target inductive's actual constructors (`awk`-extracted
+from `Instances/{K,T,D,B,K4,K5,K45,S4,TB,KB5,D4,D5,D45,DB}.lean` and `ModalAxiom` in
+`Metalogic/DerivationTree.lean`) before being finalized, confirming: K = `kCore` exactly (no
+differentiator beyond `modalK`); T/D/B/K4/K5 each `kCore ∪ {1 differentiator}`; K45/S4/D4/D5/DB
+each `kCore ∪ {2 differentiators}`; S5/D45 each `kCore ∪ {3 differentiators}`; TB/KB5 each
+`kCore ∪ {2 differentiators}`. The elimination API (`SchemaUnion.insert_iff`,
+`SchemaUnion.empty_iff`) sufficed for every forward direction once `kCore` was redefined via
+explicit `insert`; the two-and-three-differentiator cases (K45/S4 in 3.2, S5 in 3.3) each
+tripped a miscounted `rcases` slot count on the first attempt (a slot silently dropped mid-list,
+desyncing all subsequent arities) — both were root-caused and fixed by re-deriving the exact
+slot-count arithmetic (differentiator count + 13) before writing the pattern; every
+2-differentiator case afterward (TB/KB5/D4/D5/DB) reused the once-corrected 15-slot pattern and
+built green on the first attempt. Backward directions used the direct `SchemaUnion` witness
+construction (`⟨.tag, by decide, …, rfl⟩`) uniformly, needing no simp unfolding. Zero `sorry`,
+zero new axiom across all 15 bridges (`lean_verify` spot-checked on one bridge per sub-phase:
+`schemaUnion_kTags_iff_KAxiom`, `schemaUnion_bTags_iff_BAxiom`,
+`schemaUnion_k45Tags_iff_K45Axiom`, `schemaUnion_s4Tags_iff_S4Axiom`,
+`schemaUnion_s5Tags_iff_ModalAxiom`, `schemaUnion_kb5Tags_iff_KB5Axiom`,
+`schemaUnion_d45Tags_iff_D45Axiom`, `schemaUnion_dbTags_iff_DBAxiom` — all report only
+`propext`/`Quot.sound`). Full `lake lint` and scoped `lake build` both green after the final
+sub-phase; `lake exe checkInitImports` and `lake exe lint-style` green throughout. No instance
+file, `SchemaUnion.lean`, or `DerivationTree.lean` was modified — fully additive, as scoped. The
+deliberately-omitted `KB5 → S5` subsumption edge was grep-confirmed absent (subsumption itself
+is out of scope for Phase 3; that is Phase 5).
 
 ---
 

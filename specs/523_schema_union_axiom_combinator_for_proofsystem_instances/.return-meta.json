@@ -1,33 +1,34 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-19T14:26:56Z",
-  "finished_at": "2026-07-19T14:33:03Z",
-  "phases_completed": "7/8 (Phase 8 sub-phase 8.1 complete; 8.2 blocked; 8.3 not started)",
+  "status": "implemented",
+  "started_at": "2026-07-19T00:00:00Z",
+  "finished_at": "2026-07-19T09:00:00Z",
+  "phases_completed": "8/8 (Phase 8 sub-phases 8.1-8.4 all COMPLETED; overall plan and task 523 Status -> COMPLETED)",
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/ProofSystem/SchemaTags.lean",
-      "type": "lean-source",
-      "summary": "NEW file: kCore + 15 per-system tag sets relocated here from SchemaBridges.lean, importing only SchemaUnion.lean (resolves the Phase-7 import-cycle finding)."
-    },
-    {
-      "path": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
-      "type": "lean-source",
-      "summary": "Now imports SchemaTags.lean; tag-set defs removed; 15 bridge proofs unchanged and still green."
+      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/07_phase8-redefine-in-place-final-completion-summary.md",
+      "type": "summary",
+      "summary": "Phase 8 sub-phase 8.4 + task 523 completion summary: per-group site counts, CI pipeline results, net line delta, sorry/axiom state."
     },
     {
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "type": "plan",
-      "summary": "Phase 8 heading -> [BLOCKED]; 8.1 -> [COMPLETED]; 8.2 -> [BLOCKED] with full grep-confirm finding recorded inline."
+      "summary": "Phase 8, sub-phase 8.4, and overall plan Status all marked [COMPLETED] with inline verification detail."
     },
     {
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Full blocker record: 15 Systems/*/Completeness.lean files contain live <Sys>Axiom/ModalAxiom constructor-construction sites (explicit + anonymous dot-notation) not migrated in Phases 4/6/7 and not in Phase 8's file scope; redefining any inductive now would break their compilation."
+      "path": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
+      "type": "lean-source",
+      "summary": "DELETED: all 15 bridge equivalences became identities after the Phase 8.3 abbrev redefinition, and 8.4a-8.4d simplified every call site to the bare SchemaUnion witness, leaving this file with zero users."
+    },
+    {
+      "path": "Cslib.lean",
+      "type": "lean-source",
+      "summary": "Barrel updated via mk_all --module: added SchemaSoundness, SchemaTags, SchemaUnion (previously missing); SchemaBridges naturally absent."
     }
   ],
   "memory_candidates": [
-    "CSLib task 523 Phase 8: the grep-confirm step before retiring an inductive must scan ALL consumer files, not just the ones a plan's 'Files to modify' list anticipates -- Systems/*/Completeness.lean silently held live constructor-construction sites (both explicit named constructors and anonymous dot-notation resolved via expected type) that Phases 4/6/7 never touched.",
-    "Lean dot-notation semantics: 'Foo.bar' (explicit or anonymous '.bar' resolved via expected type) requires a literally declared 'Foo.bar' constant; redefining an inductive 'Foo' as 'abbrev/def Foo := ...' removes all its constructors, so any remaining '.bar'-shaped construction site is a hard 'unknown identifier' compile failure, not a warning -- this is a reliable static check (grep for '<TypeName>\\.' plus anonymous '.ctorName' at call sites whose expected type unifies to that type) before any inductive-to-def/abbrev redefinition."
+    "CSLib task 523 Phase 8.4: once an inductive is redefined as `abbrev X := Y`, every existing bridge lemma `X <-> Y` becomes `Iff.rfl` and every `(bridge).mp/.mpr` call-site wrapper around a witness of type `X`/`Y` can be mechanically dropped via a regular textual sed transformation (`(schemaUnion_..._iff_...).mp <witness>` -> `<witness>`) -- this is safe specifically because `abbrev` (not `def`) makes the two types definitionally *and* syntactically interchangeable for elaboration purposes, so no further tactic proof is needed at any call site.",
+    "CSLib CI: `lake exe mk_all --module` can lag behind file additions across several completed sub-phases -- SchemaSoundness.lean, SchemaTags.lean, and SchemaUnion.lean had all existed and built green since early Phase-8 sub-phases but were absent from the Cslib.lean barrel until the terminal sub-phase's mk_all run; always run mk_all as part of final verification even if no new files were added in the current dispatch, since earlier dispatches may have deferred it.",
+    "CSLib task 523: when computing a task's net-line-delta against a pre-refactor baseline on a shared branch, `git diff --numstat <baseline> HEAD -- <task's tree>` can pick up unrelated concurrent-session commits touching files in the same subtree (e.g. a different task's work under Cslib/Logics/Modal/Metalogic/Constructive/Labelled/) -- exclude those files explicitly by name and report both the task-scoped and whole-tree figures for transparency."
   ],
   "verification": {
     "verification_passed": true,
@@ -35,6 +36,19 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped builds green + checkInitImports clean; full lake lint/lint-style/shake/mk_all/test deferred since Phase 8 sub-phase 8.2/8.3 -- the phases those gate -- did not complete this dispatch)"
+    "ci_pipeline_passed": true,
+    "checkInitImports_passed": true,
+    "lint_passed": true,
+    "lint_style_passed": true,
+    "test_passed": true,
+    "shake_passed": true,
+    "net_line_delta_task_scope": -622,
+    "net_line_delta_whole_modal_tree": -40
+  },
+  "metadata": {
+    "session_id": "task523-phase84",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

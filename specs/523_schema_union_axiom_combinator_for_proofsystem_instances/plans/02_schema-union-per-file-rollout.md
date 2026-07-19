@@ -614,7 +614,49 @@ depends only on Phase 3.
 
 ---
 
-### Phase 6: Hand-migrate `IntToClassical.lean` (~36 sites) [NOT STARTED]
+### Phase 6: Hand-migrate `IntToClassical.lean` (~36 sites) [IN PROGRESS]
+
+**Site enumeration (recorded at start of 6.1, ground-truthed against the actual file, superseding
+the ~36 estimate)**: a full grep of `IntToClassical.lean` for constructor patterns
+(`⟨.ax [] _ (`, `KAxiom.`/`TAxiom.`/`S4Axiom.`/`ModalAxiom.`, `match h with`, `cases h with`,
+`obtain`/`rcases` on axiom-typed hypotheses) found:
+
+- **12 raw-constructor witness-construction sites** (`⟨.ax [] _ (<Sys>Axiom.ctor …)⟩`): 10 on
+  `KAxiom` (`implyK`, `implyS`, `efq`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`, `modalK` —
+  lines 64/69/74/79/84/89/94/99/104/110), 1 on `TAxiom` (`modalT`, line 535, inside the
+  `itAxiom_derivable_in_T` match), 1 on `S4Axiom` (`modalFour`, line 646, inside
+  `is4Axiom_derivable_in_S4`). These are exactly the sites that break once Phase 8 redefines
+  `<Sys>Axiom` as a constructorless `SchemaUnion` `def` — hence in scope.
+- **0 in-scope destructuring sites**: the file's four `match h with` blocks
+  (`ikAxiom_derivable_in_K`, `itAxiom_derivable_in_T`, `is4Axiom_derivable_in_S4`,
+  `is5Axiom_derivable_in_S5`) all destructure the OUT-OF-SCOPE intuitionistic inductives
+  (`IKModalAxiom`/`ITModalAxiom`/`IS4ModalAxiom`/`IS5ModalAxiom`), which are permanent (never
+  redefined) per the postmortem constraints — these matches need no elimination-API migration and
+  must NOT be touched. All `obtain`/`rcases` sites destructure the single-field `Derivable`
+  wrapper (`⟨d⟩`), unrelated to axiom representation, and also need no change.
+- The `HasAxiom*` typeclass field accesses (`HasAxiomK.K`, `HasAxiomB.B`,
+  `HasAxiomDiaDualityFwd.diaDualityFwd`, etc.) are the representation-agnostic insulation layer
+  (Preserved Assets) and are correctly left untouched throughout.
+
+**Ground-truth deviation from the plan's ~36 estimate**: the actual in-scope site count is 12, not
+~36 (the estimate over-counted arms of the out-of-scope intuitionistic-family `match` statements,
+which do not need migration). All 12 real sites are migrated below; no site is skipped.
+
+**Recorded 3-cluster partition (fixed, non-overlapping, ~4 sites each)**:
+- Cluster 1 (6.1): `implyK`, `implyS`, `efq`, `andI` (`KAxiom`, lines 64/69/74/79).
+- Cluster 2 (6.2): `andE1`, `andE2`, `orI1`, `orI2` (`KAxiom`, lines 84/89/94/99).
+- Cluster 3 (6.3): `orE`, `modalK` (`KAxiom`, lines 104/110) + `modalT` (`TAxiom`, line 535,
+  cross-family: `IT`→`T` bridge) + `modalFour` (`S4Axiom`, line 646, cross-family: `IS4`→`S4`
+  bridge) — the two cross-family witness sites prioritized per the dispatch instructions.
+
+**Migration pattern used (elimination API + Phase-3 bridge, not raw `fin_cases`)**: each
+`⟨.ax [] _ (<Sys>Axiom.ctor args)⟩` becomes `⟨.ax [] _ (schemaUnion_<sys>Tags_iff_<Sys>Axiom.mp
+⟨.ctor, by decide, args, rfl⟩)⟩` — i.e. construct the `SchemaUnion` existential witness directly
+(byte-identical shape to the retired constructor argument, per `ModalSchemaTag.Holds`) and push it
+through the Phase-3 bridge's `.mp` direction. This removes the direct dependence on
+`<Sys>Axiom.ctor` (which disappears when Phase 8 redefines `<Sys>Axiom` as a `SchemaUnion` `def`)
+while keeping the resulting term's type unchanged (`<Sys>Axiom φ`), so no downstream caller of
+these theorems needs any change.
 
 **Goal**: Perform the irreducible hand-migration of the ~36 constructor/destructuring sites in
 `IntToClassical.lean` (774 lines) — genuine intuitionistic→classical derivation work plus

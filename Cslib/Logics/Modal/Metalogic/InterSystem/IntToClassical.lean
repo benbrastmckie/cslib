@@ -16,6 +16,7 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Cslib.Foundations.Logic.Theorems.Modal.Basic
 public import Cslib.Foundations.Logic.Theorems.Combinators
 
@@ -58,25 +59,28 @@ variable {Atom : Type*}
 
 /-! ## Direct Schemata (Literal `KAxiom` Instances) -/
 
-/-- `IK`'s `implyK` is a literal `KAxiom` instance. -/
+/-- `IK`'s `implyK` is a `KAxiom` instance, produced via the Phase-3 `SchemaUnion` elimination
+bridge (`schemaUnion_kTags_iff_KAxiom`) rather than the retired-in-Phase-8 `KAxiom.implyK`
+constructor name directly, so this site survives the Phase 8 redefinition of `KAxiom` as a
+constructorless `SchemaUnion` `def`. -/
 theorem k_derivable_of_ik_implyK {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (φ.imp (ψ.imp φ)) :=
-  ⟨.ax [] _ (KAxiom.implyK φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.implyK, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `implyS` is a literal `KAxiom` instance. -/
+/-- `IK`'s `implyS` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_implyS {φ ψ χ : Proposition Atom} :
     Derivable (@KAxiom Atom) ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  ⟨.ax [] _ (KAxiom.implyS φ ψ χ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)⟩
 
-/-- `IK`'s `efq` is a literal `KAxiom` instance. -/
+/-- `IK`'s `efq` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_efq {φ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Proposition.bot.imp φ) :=
-  ⟨.ax [] _ (KAxiom.efq φ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.efq, by decide, φ, rfl⟩)⟩
 
-/-- `IK`'s `andI` is a literal `KAxiom` instance. -/
+/-- `IK`'s `andI` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_andI {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndI φ ψ) :=
-  ⟨.ax [] _ (KAxiom.andI φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andI, by decide, φ, ψ, rfl⟩)⟩
 
 /-- `IK`'s `andE1` is a literal `KAxiom` instance. -/
 theorem k_derivable_of_ik_andE1 {φ ψ : Proposition Atom} :

@@ -891,56 +891,90 @@ finalize) — depends on 4, 5, 6, 7 (all now complete).
 
 ---
 
-### Phase 8: Delete the 15 inductives (+ `ModalAxiom` disposition), finalize [NOT STARTED]
+### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [NOT STARTED]
 
 **Goal**: The terminal, once-everything-else-is-green step: **redefine each `<Sys>Axiom` in place**
-as a one-line `SchemaUnion` def (preserving the public name, retiring the inductive), resolve S5's
-`ModalAxiom`, drop dead scaffolding bridges, and confirm the net-line-negative result.
+as `SchemaUnion sysTags` (preserving the public name, retiring the inductive), resolve S5's
+`ModalAxiom` the same way, and — per the resolved THOROUGH-finish decision (user, 2026-07-19) —
+remove ALL scaffolding: simplify the ~78 now-trivial bridge call sites, delete `SchemaBridges.lean`
+and the 15 Phase-7 private helpers entirely, and confirm the net-line-negative result.
 
-**End-state design decision (redefine, do NOT delete-and-alias)** — the elegant, lower-churn
-finish: replace each `<Sys>Axiom` *inductive* with `def <Sys>Axiom : Proposition Atom → Prop :=
-SchemaUnion sysTags` (the same name, now compositionally defined). The 13-line duplication dies;
-the *name* `<Sys>Axiom` survives by redefinition, so downstream references and the `HasAxiom*`
-instances keep resolving with NO rename and NO deprecated alias for these names. The
-elimination-form migration (`cases | ctor` → the Phase-2 elimination API) already happened in
-Phases 4/6/7, so the constructorless `def` form is safe here. Once redefined, each Phase-3 bridge
-`SchemaUnion sysTags φ ↔ <Sys>Axiom φ` becomes `Iff.rfl` and its lemma is deleted as dead
-scaffolding.
+**End-state design decision (redefine, do NOT delete-and-alias)** — replace each `<Sys>Axiom`
+*inductive* with `<Sys>Axiom := SchemaUnion sysTags` (the same name, now compositionally defined).
+The 13-line duplication dies; the *name* survives by redefinition, so downstream references and the
+`HasAxiom*` instances keep resolving with NO rename and NO deprecated alias. The elimination-form
+migration already happened in Phases 4/6/7, so the constructorless form is safe here.
 
-**Tasks**:
-- [ ] Confirm (grep) that no *constructor* construction/destructuring site (`.ctor` patterns)
-      targets any `<Sys>Axiom` inductive — all such sites were migrated to the elimination API in
-      Phases 4/6/7. (References to `<Sys>Axiom` as a *predicate* are expected and remain valid
-      after redefinition.)
-- [ ] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean`: replace each `inductive <Sys>Axiom` with
-      `def <Sys>Axiom : Proposition Atom → Prop := SchemaUnion sysTags` (name preserved). Add a
-      `@[simp]` unfolding lemma per system where it aids downstream rewriting.
-- [ ] Resolve S5's `ModalAxiom` (`Metalogic/DerivationTree.lean:64`) by the SAME redefine-in-place
-      principle: prefer `def ModalAxiom : Proposition Atom → Prop := SchemaUnion s5Tags`, preserving
-      the name so `MCS.lean`, `Metalogic/Soundness.lean`, and `Bimodal/…/ModalConservativity.lean`
-      need no rewrite. Only if a constructor-level dependency in those three files genuinely blocks
-      redefinition, fall back to keep-inductive-plus-bridge (record which branch was taken and why).
-- [ ] Remove now-dead bridge lemmas that were pure scaffolding; keep any that remain public API
-      (with `@[deprecated]` alias if a name was public).
-- [ ] Final full `lake build`; `lean_verify` on `k_soundness`, an S5 soundness lemma, and a
-      representative subsumption fact to confirm no `sorry` and no new axiom.
-- [ ] Confirm net line count is negative vs. the pre-refactor baseline.
+**Reducibility (THOROUGH finish, user 2026-07-19)**: prefer `abbrev <Sys>Axiom := SchemaUnion
+sysTags` so `<Sys>Axiom φ` and `SchemaUnion sysTags φ` are definitionally interchangeable and the
+~78 bridge conversions collapse to identities that can be dropped outright. If `abbrev` causes
+over-eager unfolding, `simp`-loop, elaboration-perf, or unreadable-goal problems anywhere, fall
+back to `def <Sys>Axiom := SchemaUnion sysTags` + a `@[simp]` unfolding lemma per system, and
+record which systems needed the fallback and why. Either way the end state has NO surviving
+`SchemaBridges.lean` and NO private helpers.
 
-**Estimated output**: ~150-300 lines of net deletion + re-route edits. **Depends on**: 4, 5, 6, 7.
+**Architecture note (import-cycle finding, Phase 7)**: `SchemaBridges.lean` imports the `Instances`
+barrel, so `Instances/*.lean` cannot import it. The tag sets (`kCore` + the 15 `sysTags`) currently
+live in `SchemaBridges.lean` and MUST be relocated to a foundational file importing only
+`SchemaUnion.lean` before the inductives can be redefined in terms of them — this is sub-phase 8.1.
+The tag sets belong at the foundation anyway (a system's tag set is its essence, not scaffolding).
+
+**Sub-phase 8.1 — relocate tag sets to a foundational file** [NOT STARTED]
+- [ ] Create `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` (imports only `SchemaUnion.lean`);
+      move `kCore` + the 15 `sysTags` definitions there from `SchemaBridges.lean`.
+- [ ] Point `SchemaBridges.lean` (and any other current user of the tag sets) at `SchemaTags.lean`;
+      bridges stay intact and green for now. Pure move, no semantic change.
+- Verify: scoped `lake build` of `SchemaTags`, `SchemaBridges`, and downstream green; zero `sorry`.
+
+**Sub-phase 8.2 — redefine the inductives; trivialize bridges; delete private helpers** [NOT STARTED]
+- [ ] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
+      `<Sys>Axiom`/`ModalAxiom` inductive (all migrated in Phases 4/6/7). Predicate references remain.
+- [ ] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean` and S5's `ModalAxiom`
+      (`Metalogic/DerivationTree.lean:64`) as `abbrev/def := SchemaUnion sysTags` (per the
+      reducibility decision above), importing `SchemaTags.lean`. Delete the 15 Phase-7 private
+      `{sys}Tags_of_schemaUnion` helpers (now redundant).
+- [ ] Replace each bridge proof in `SchemaBridges.lean` with `Iff.rfl` (or delete it if unused after
+      8.3) so the file still compiles at this checkpoint.
+- Verify: scoped `lake build` of Instances barrel, DerivationTree, SchemaBridges, and the three S5
+      consumers (`MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean`) green;
+      inductives grep-confirmed gone; every public name still resolves; zero `sorry`, no new axiom.
+
+**Sub-phase 8.3 — simplify the ~78 call sites; delete scaffolding; final full verify** [NOT STARTED]
+- [ ] Simplify the bridge call sites now that the forms are interchangeable: `Systems/*/Soundness.lean`
+      (15, drop `(bridge.mpr h_ax)` → `h_ax`), `InterSystem/AxiomSubsumption.lean` (48 refs, drop the
+      `.mp/.mpr` wrapping), `InterSystem/IntToClassical.lean` (15 refs).
+- [ ] Delete `SchemaBridges.lean` entirely (its bridges are now identities with no remaining users);
+      keep any lemma that is genuinely public API only behind a `@[deprecated]` alias in an acyclic
+      location — expected: none survive.
+- [ ] Final FULL `lake build`; `lake exe checkInitImports`; `lake lint`; `lake exe lint-style`;
+      `lake test`; `lake exe mk_all --module` (barrel update for the new/removed files);
+      `lean_verify` on `k_soundness`, an S5 soundness lemma, `KAxiom_implies_TAxiom`, and `unionSound`
+      to confirm no `sorry` and no new axiom.
+- [ ] Confirm net line count is negative vs. the pre-refactor baseline (the Phase-7 +597 reverses here).
+
+**Estimated output**: ~400-700 lines of net deletion + re-route edits, across three committed
+sub-phases. **Depends on**: 4, 5, 6, 7.
 
 **Files to modify**:
+- NEW `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` (relocated tag sets).
 - `Cslib/Logics/Modal/ProofSystem/Instances/{K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB}.lean`
-  (each `inductive <Sys>Axiom` redefined in place as `def <Sys>Axiom := SchemaUnion sysTags`; name preserved).
-- `Cslib/Logics/Modal/Metalogic/DerivationTree.lean` — `ModalAxiom` disposition (conditional).
-- `MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean` — conditional
-  re-route if S5 unified.
+  (inductive → `abbrev/def := SchemaUnion sysTags`; private helper deleted).
+- `Cslib/Logics/Modal/Metalogic/DerivationTree.lean` — `ModalAxiom` redefinition.
+- `Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean`, `InterSystem/AxiomSubsumption.lean`,
+  `InterSystem/IntToClassical.lean` — bridge-call-site simplification (8.3).
+- DELETE `Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean`.
+- `MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean` — only if the S5
+  redefinition needs a re-route (expected: none, since `ModalAxiom` keeps its name).
+- `Cslib.lean` barrel — via `mk_all --module` (new `SchemaTags`, removed `SchemaBridges`).
 
 **Verification**:
-- Full `lake build` green; zero-`sorry`; no new axiom (`lean_verify`).
-- All 15 inductives removed (or `ModalAxiom` retained per the recorded branch); every prior public
-  theorem/instance name resolves (direct or via alias).
+- Full `lake build` + `lake lint` + `lake exe lint-style` + `lake test` green; zero-`sorry`; no new
+  axiom (`lean_verify`).
+- All 15 inductives retired; `SchemaBridges.lean` and the 15 private helpers gone; every prior public
+  theorem/instance name resolves (direct, since names are preserved by redefinition).
 - Net line count negative vs. baseline.
-- **Done when**: the whole library builds sorry-free with the inductives gone and public API intact.
+- **Done when**: the whole library builds sorry-free with the inductives gone, no scaffolding
+  remaining, and public API intact.
 
 ---
 

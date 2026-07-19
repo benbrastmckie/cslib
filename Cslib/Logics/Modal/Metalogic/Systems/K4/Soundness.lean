@@ -8,6 +8,9 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
+public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic K4
 
@@ -41,27 +44,14 @@ variable {Atom : Type*}
 
 /-- Every axiom of K4 is valid over transitive frames.
 
-Axiom 4 (`□φ → □□φ`) uses transitivity (Blackburn Theorem 4.27).
-Propositional axioms and K are valid on all frames. -/
+Routed through `unionSound`: `k4Tags` carries exactly one differentiator (`modalFour`),
+discharged by `h_trans`; the 13 core-tag obligations discharge by `trivial`. -/
 theorem k4_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : K4Axiom φ) (m : Model World Atom)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
-    (w : World) : Satisfies m w φ := by
-  cases h_ax with
-  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
-  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
-  | efq φ => exact Satisfies.efq_axiom m w φ
-  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
-  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ
-  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
-  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
-  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
-  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
-  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
-  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
-  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
-  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+    (w : World) : Satisfies m w φ :=
+  unionSound k4Tags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_trans)
+    (schemaUnion_k4Tags_iff_K4Axiom.mpr h_ax) w
 
 
 /-! ## K4 Soundness Theorems -/

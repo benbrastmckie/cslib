@@ -8,6 +8,9 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
+public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic K5
 
@@ -35,26 +38,16 @@ variable {Atom : Type*}
 
 /-! ## K5 Axiom Soundness -/
 
-/-- Every axiom of K5 is valid over Euclidean frames. -/
+/-- Every axiom of K5 is valid over Euclidean frames.
+
+Routed through `unionSound`: `k5Tags` carries exactly one differentiator (`modalFive`),
+discharged by `h_eucl`; the 13 core-tag obligations discharge by `trivial`. -/
 theorem k5_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : K5Axiom φ) (m : Model World Atom)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (w : World) : Satisfies m w φ := by
-  cases h_ax with
-  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
-  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
-  | efq φ => exact Satisfies.efq_axiom m w φ
-  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
-  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalFive φ => exact Satisfies.modalFive_axiom m h_eucl w φ
-  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
-  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
-  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
-  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
-  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
-  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
-  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
-  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+    (w : World) : Satisfies m w φ :=
+  unionSound k5Tags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_eucl)
+    (schemaUnion_k5Tags_iff_K5Axiom.mpr h_ax) w
 
 
 /-! ## K5 Soundness Theorems -/

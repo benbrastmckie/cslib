@@ -454,9 +454,16 @@ theorem names stay stable; use the Phase 3 bridge where a caller still expects t
   `lake build` of all four modules, `lake exe checkInitImports`, and `lake exe lint-style` all
   green.
 
-**Sub-phase 4.2 — K4, K5, K45, S4** [NOT STARTED]
-- [ ] Rewrite the four soundness proofs through `unionSound`.
+**Sub-phase 4.2 — K4, K5, K45, S4** [COMPLETED]
+- [x] Rewrite the four soundness proofs through `unionSound`.
 - Files: `Systems/{K4,K5,K45,S4}/Soundness.lean`. Estimated output: ~120-220 lines.
+- **Completion note**: Same `unionSound sysTags m hfc (bridge.mpr h_ax) w` pattern as 4.1. K4/K5
+  each supply one frame hyp (`h_trans`/`h_eucl`); K45/S4 each supply two
+  (`h_trans`/`h_eucl` and `h_refl`/`h_trans` respectively) via
+  `first | trivial | exact h1 | exact h2` — confirms the pattern scales to multi-differentiator
+  tag sets without change. Public names byte-stable. Zero `sorry`, zero new axiom (`lean_verify`
+  on `k45_soundness` and `s4_axiom_sound` report only `propext`/`Classical.choice`/`Quot.sound`).
+  Scoped `lake build` of all four modules, `checkInitImports`, `lint-style` all green.
 
 **Sub-phase 4.3 — S5, TB, KB5** [NOT STARTED]
 - [ ] Rewrite the three soundness proofs; keep the S5 public soundness names stable.

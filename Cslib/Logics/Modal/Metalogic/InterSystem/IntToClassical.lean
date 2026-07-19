@@ -16,7 +16,6 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS4
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IS5
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Cslib.Foundations.Logic.Theorems.Modal.Basic
 public import Cslib.Foundations.Logic.Theorems.Combinators
 
@@ -59,60 +58,68 @@ variable {Atom : Type*}
 
 /-! ## Direct Schemata (Literal `KAxiom` Instances) -/
 
-/-- `IK`'s `implyK` is a `KAxiom` instance, produced via the Phase-3 `SchemaUnion` elimination
-bridge (`schemaUnion_kTags_iff_KAxiom`) rather than the retired-in-Phase-8 `KAxiom.implyK`
-constructor name directly, so this site survives the Phase 8 redefinition of `KAxiom` as a
-constructorless `SchemaUnion` `def`. -/
+/-- `IK`'s `implyK` is a `KAxiom` instance, produced as a bare `SchemaUnion kTags` witness
+rather than the retired `KAxiom.implyK` constructor name directly -- `KAxiom` is now
+`abbrev KAxiom := SchemaUnion kTags` (Phase 8 sub-phase 8.3), so this witness typechecks
+directly by defeq. -/
 theorem k_derivable_of_ik_implyK {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (φ.imp (ψ.imp φ)) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.implyK, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.implyK, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `implyS` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `implyS` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_implyS {φ ψ χ : Proposition Atom} :
     Derivable (@KAxiom Atom) ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.implyS, by decide, φ, ψ, χ, rfl⟩⟩
 
-/-- `IK`'s `efq` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `efq` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_efq {φ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Proposition.bot.imp φ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.efq, by decide, φ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.efq, by decide, φ, rfl⟩⟩
 
-/-- `IK`'s `andI` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `andI` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_andI {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndI φ ψ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andI, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.andI, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `andE1` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `andE1` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_andE1 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndE1 φ ψ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andE1, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.andE1, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `andE2` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `andE2` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_andE2 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndE2 φ ψ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andE2, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.andE2, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `orI1` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `orI1` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_orI1 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrI1 φ ψ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orI1, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.orI1, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `orI2` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `orI2` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_orI2 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrI2 φ ψ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orI2, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.orI2, by decide, φ, ψ, rfl⟩⟩
 
-/-- `IK`'s `orE` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
+/-- `IK`'s `orE` is a `KAxiom` instance
+produced as a bare `SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_orE {φ ψ χ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrE φ ψ χ) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.orE, by decide, φ, ψ, χ, rfl⟩⟩
 
-/-- `IK`'s `k` (`k1`/Kb, `□(φ → ψ) → (□φ → □ψ)`) is a `KAxiom` instance via the `SchemaUnion`
-bridge (see `implyK` above). -/
+/-- `IK`'s `k` (`k1`/Kb, `□(φ → ψ) → (□φ → □ψ)`) is a `KAxiom` instance produced as a bare
+`SchemaUnion` witness (see `implyK` above). -/
 theorem k_derivable_of_ik_k {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom)
       ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))) :=
-  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.modalK, by decide, φ, ψ, rfl⟩)⟩
+  ⟨.ax [] _ ⟨.modalK, by decide, φ, ψ, rfl⟩⟩
 
 /-! ## Derived Schemata -/
 
@@ -518,8 +525,8 @@ theorem t_derivable_of_it_tDia {φ : Proposition Atom} :
 
 /-- Every `ITModalAxiom` instance is `Derivable` in classical `T`: the 14 `IK`-inherited
 constructors lift via `Derivable_mono (fun _ => KAxiom_implies_TAxiom)` composed with
-`ikAxiom_derivable_in_K`; `tBox` is a `TAxiom` instance via the `SchemaUnion` bridge
-(`schemaUnion_tTags_iff_TAxiom`); `tDia` is `t_derivable_of_it_tDia`. -/
+`ikAxiom_derivable_in_K`; `tBox` is a bare `SchemaUnion tTags` witness (`TAxiom` is now
+`abbrev TAxiom := SchemaUnion tTags`); `tDia` is `t_derivable_of_it_tDia`. -/
 theorem itAxiom_derivable_in_T {φ : Proposition Atom} (h : ITModalAxiom φ) :
     Derivable (@TAxiom Atom) φ :=
   match h with
@@ -537,7 +544,7 @@ theorem itAxiom_derivable_in_T {φ : Proposition Atom} (h : ITModalAxiom φ) :
   | .cd _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_cd
   | .idb _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_idb
   | .dbot => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_dbot
-  | .tBox φ => ⟨.ax [] _ (schemaUnion_tTags_iff_TAxiom.mp ⟨.modalT, by decide, φ, rfl⟩)⟩
+  | .tBox φ => ⟨.ax [] _ ⟨.modalT, by decide, φ, rfl⟩⟩
   | .tDia _ => t_derivable_of_it_tDia
 
 /-- **The `IT → T` bridge**: every `IT`-derivable formula is `T`-derivable. -/
@@ -614,8 +621,8 @@ theorem s4_derivable_of_is4_fourDia {φ : Proposition Atom} :
 
 /-- Every `IS4ModalAxiom` instance is `Derivable` in classical `S4`: the 16 `IT`-inherited
 constructors lift via `Derivable_mono (fun _ => TAxiom_implies_S4Axiom)` composed with
-`itAxiom_derivable_in_T`; `fourBox` is a `S4Axiom` instance via the `SchemaUnion` bridge
-(`schemaUnion_s4Tags_iff_S4Axiom`); `fourDia` is `s4_derivable_of_is4_fourDia`. -/
+`itAxiom_derivable_in_T`; `fourBox` is a bare `SchemaUnion s4Tags` witness (`S4Axiom` is
+now `abbrev S4Axiom := SchemaUnion s4Tags`); `fourDia` is `s4_derivable_of_is4_fourDia`. -/
 theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) :
     Derivable (@S4Axiom Atom) φ :=
   match h with
@@ -648,7 +655,7 @@ theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) 
       Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tBox φ))
   | .tDia φ =>
       Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tDia φ))
-  | .fourBox φ => ⟨.ax [] _ (schemaUnion_s4Tags_iff_S4Axiom.mp ⟨.modalFour, by decide, φ, rfl⟩)⟩
+  | .fourBox φ => ⟨.ax [] _ ⟨.modalFour, by decide, φ, rfl⟩⟩
   | .fourDia _ => s4_derivable_of_is4_fourDia
 
 /-- **The `IS4 → S4` bridge**: every `IS4`-derivable formula is `S4`-derivable. -/

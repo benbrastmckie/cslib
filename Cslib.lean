@@ -406,6 +406,7 @@ public import Cslib.Logics.Modal.Metalogic.Minimal.MS5
 public import Cslib.Logics.Modal.Metalogic.Minimal.MT
 public import Cslib.Logics.Modal.Metalogic.Minimal.MinCompleteness
 public import Cslib.Logics.Modal.Metalogic.Minimal.MinExtension
+public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.ConservativeExtension
@@ -468,6 +469,8 @@ public import Cslib.Logics.Modal.ProofSystem.Instances.S4
 public import Cslib.Logics.Modal.ProofSystem.Instances.S5
 public import Cslib.Logics.Modal.ProofSystem.Instances.T
 public import Cslib.Logics.Modal.ProofSystem.Instances.TB
+public import Cslib.Logics.Modal.ProofSystem.SchemaTags
+public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
 public import Cslib.Logics.Modal.Semantics.Birelational
 public import Cslib.Logics.Modal.Tableau.BDriver
 public import Cslib.Logics.Modal.Tableau.Branch

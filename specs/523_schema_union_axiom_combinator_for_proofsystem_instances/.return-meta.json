@@ -1,46 +1,37 @@
 {
-  "status": "planned",
-  "started_at": "2026-07-17T00:00:00Z",
+  "status": "implemented",
+  "started_at": "2026-07-19T08:06:43Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "summary": "Per-file rollout plan (v2, Rep A resolved): 8 phases / ~20 agent runs expanding Stages A-D into per-file/per-group sub-phases; H8-sized; postmortem constraints + preserved-assets accounting; Zulip heads-up is non-blocking."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
+      "summary": "Phase 1: ModalSchemaTag (18-tag alphabet), ModalSchemaTag.Holds (per-tag existential formula meaning cross-checked against real Instances/*.lean and S5 ModalAxiom constructors), SchemaUnion (Finset-indexed union predicate), and the single generic subsumption lemma SchemaUnion.subsumption. Purely additive; zero downstream blast."
     }
   ],
-  "next_steps": "Design decision RESOLVED (Rep A). Ready for /implement or /orchestrate. Execute Phase 1 (scaffolding) first; follow the wave map. Non-blocking Zulip heads-up before the user runs /pr.",
+  "next_steps": "Phase 1 complete and committed. Phase 2 (unionSound combinator + per-tag validity table) is next per the wave map; depends only on Phase 1.",
   "metadata": {
-    "session_id": "sess_1784322687_fcf57a_523",
-    "agent_type": "planner-hard-agent",
+    "session_id": "sess_task523_phase1",
+    "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "plan",
-      "planner-hard-agent"
-    ],
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "phase_count": 8,
+    "phases_completed": 1,
+    "phases_total": 8,
     "estimated_hours": "24-32",
-    "dependency_waves": [
-      [
-        1
-      ],
-      [
-        2,
-        3
-      ],
-      [
-        4,
-        5,
-        6
-      ],
-      [
-        7
-      ],
-      [
-        8
-      ]
-    ],
     "postmortem_rules_count": 7
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial (scoped build + checkInitImports + full lake lint green; full lake test/shake/mk_all not run for this additive single-file phase)"
   },
   "memory_candidates": [
     {
@@ -56,10 +47,17 @@
         "additive-refactor",
         "blast-radius"
       ]
+    },
+    {
+      "content": "In Lean 4, an existential over a formula-metavariable followed by dot-notation field projection on that bound variable in the equation body (e.g. `∃ φ ψ, χ = φ.imp (ψ.imp φ)`) fails to elaborate with 'Invalid field notation: Type of φ is not known' because dot notation needs the bound variable's type resolved before the body is elaborated, and Lean does not backward-infer it from the later `χ = ...` equation. Fix: add an explicit type ascription on the existential binder, e.g. `∃ φ ψ : Proposition Atom, χ = φ.imp (ψ.imp φ)`.",
+      "category": "GOTCHA",
+      "source_artifact": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
+      "confidence": 0.85,
+      "suggested_keywords": ["lean4", "elaboration-order", "dot-notation", "existential-binder-type"]
     }
   ],
   "partial_progress": {
-    "stage": "planning_complete",
-    "details": "v2 per-file plan written; plan-level Status [PLANNED]; no design gate."
+    "stage": "phase_1_complete",
+    "details": "SchemaUnion.lean created, built, linted, sorry/axiom-checked, committed. Phase 1 marked [COMPLETED] in plan. Stopping per single-phase dispatch scope; Phase 2 not started."
   }
 }

@@ -1,7 +1,7 @@
 # Implementation Plan: Schema-Union Axiom Combinator for Modal ProofSystem Instances (v2)
 
 - **Task**: 523 - Replace the 15 hand-written per-system axiom inductives with a compositional schema-union combinator
-- **Status**: [PLANNED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: ~24-32 hours (Representation A, staged additive rollout across ~20 agent runs)
 - **Dependencies**: Tasks 520 and 521 (both COMPLETED — sequencing prerequisite satisfied)
 - **Research Inputs**: reports/01_schema-union-combinator-blast-radius.md
@@ -211,19 +211,33 @@ exact placement/imports at Phase 1 and keeps them consistent thereafter.
 
 ---
 
-### Phase 1: Core scaffolding — `ModalSchemaTag` + `SchemaUnion` + generic subsumption [NOT STARTED]
+### Phase 1: Core scaffolding — `ModalSchemaTag` + `SchemaUnion` + generic subsumption [COMPLETED]
 
 **Goal**: Land the tag alphabet, per-tag `Holds`, the `SchemaUnion` combinator, and the single
 generic subsumption lemma in a new file — purely additive, no existing file altered.
 
 **Tasks**:
-- [ ] Define `inductive ModalSchemaTag` (18 tags: `implyK implyS efq peirce modalK modalT modalD
+- [x] Define `inductive ModalSchemaTag` (18 tags: `implyK implyS efq peirce modalK modalT modalD
       modalB modalFour modalFive andI andE1 andE2 orI1 orI2 orE diaDualityFwd diaDualityBack`) with
       `deriving DecidableEq`.
-- [ ] Define `ModalSchemaTag.Holds : ModalSchemaTag → Proposition Atom → Prop` — one existential
+- [x] Define `ModalSchemaTag.Holds : ModalSchemaTag → Proposition Atom → Prop` — one existential
       clause per tag (formula-level meaning; cite report §3 code block for the shapes).
-- [ ] Define `SchemaUnion (S : Finset ModalSchemaTag) : Proposition Atom → Prop := fun χ => ∃ t ∈ S, t.Holds χ`.
-- [ ] Prove the generic subsumption lemma: `Sᴬ ⊆ Sᴮ → SchemaUnion Sᴬ φ → SchemaUnion Sᴮ φ`.
+- [x] Define `SchemaUnion (S : Finset ModalSchemaTag) : Proposition Atom → Prop := fun χ => ∃ t ∈ S, t.Holds χ`.
+- [x] Prove the generic subsumption lemma: `Sᴬ ⊆ Sᴮ → SchemaUnion Sᴬ φ → SchemaUnion Sᴮ φ`.
+
+**Completion note**: Landed in `Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean` (confirmed
+location, matching the proposed path). Depends only on `Cslib.Logics.Modal.Basic`,
+`Cslib.Foundations.Logic.Axioms`, and `Mathlib.Data.Finset.Basic` (added for `Finset`) — no
+system-specific file (`Instances/*.lean`, `DerivationTree.lean`, `ProofSystem.lean`) imported.
+Each `.Holds` clause's proposition shape was cross-checked against the real constructors in
+`Instances/{K,T,D,B,K4,K5}.lean` and S5's `ModalAxiom` (`Metalogic/DerivationTree.lean:64`).
+Deviation from the literal report §3 sketch: existential binders needed an explicit
+`: Proposition Atom` type ascription (`∃ φ ψ : Proposition Atom, …`) because dot-notation
+field projection (`φ.imp …`) cannot resolve before the binder's type is known — the report's
+code sketch omitted this and was elaboration-order-fragile as written. Zero `sorry`, zero new
+axiom (`lean_verify` on `SchemaUnion` and `SchemaUnion.subsumption` reports only
+`propext`/`Quot.sound`). Scoped `lake build`, `lake exe checkInitImports`, and full `lake lint`
+all green.
 
 **Estimated output**: ~150-250 lines. **Depends on**: none.
 

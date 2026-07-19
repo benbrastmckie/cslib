@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.T.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Completeness Theorem for Modal Logic T
 
@@ -55,9 +56,9 @@ def tFC : ∀ {World : Type u}, Model World Atom → Prop :=
 /-- The canonical T model satisfies `tFC`: its accessibility relation is reflexive. -/
 private theorem t_canonical_FC : tFC (CanonicalModel (@TAxiom Atom)) :=
   fun S => canonical_refl
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .modalT φ)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
     S
 
 /-- Pre-applied T truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
@@ -65,20 +66,20 @@ private theorem t_truth_lemma_applied (S : CanonicalWorld (@TAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@TAxiom Atom)) S φ ↔ φ ∈ S.val :=
   truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    (fun φ ψ => .andI φ ψ)
-    (fun φ ψ => .andE1 φ ψ)
-    (fun φ ψ => .andE2 φ ψ)
-    (fun φ ψ => .orI1 φ ψ)
-    (fun φ ψ => .orI2 φ ψ)
-    (fun φ ψ χ => .orE φ ψ χ)
-    (fun φ => .diaDualityFwd φ)
-    (fun φ => .diaDualityBack φ)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- T soundness adapter matching the `strong_soundness` callback shape.
@@ -119,10 +120,10 @@ theorem t_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
         Satisfies m w phi) :
     ModalSetDerivable (@TAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @TAxiom Atom) (FC := tFC)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     t_truth_lemma_applied
     t_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -160,10 +161,10 @@ theorem t_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @TAxiom Atom) (FC := tFC)
       t_sound_cb
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
+      (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => (schemaUnion_tTags_iff_TAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
       t_truth_lemma_applied
       t_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

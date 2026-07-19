@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Completeness Theorem for Modal Logic K
 
@@ -338,19 +339,19 @@ theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@KAxiom Atom)) S φ ↔ φ ∈ S.val :=
   k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ ψ => .andI φ ψ)
-    (fun φ ψ => .andE1 φ ψ)
-    (fun φ ψ => .andE2 φ ψ)
-    (fun φ ψ => .orI1 φ ψ)
-    (fun φ ψ => .orI2 φ ψ)
-    (fun φ ψ χ => .orE φ ψ χ)
-    (fun φ => .diaDualityFwd φ)
-    (fun φ => .diaDualityBack φ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- K soundness adapter matching the `strong_soundness` callback shape.
@@ -373,10 +374,10 @@ theorem k_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition A
     ModalSemanticEntails (fun _ => True) Gamma phi :=
   (strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     k_truth_lemma_applied
     trivial).mpr h
 
@@ -391,10 +392,10 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
     ModalSetDerivable (@KAxiom Atom) Gamma phi :=
   (strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     k_truth_lemma_applied
     trivial).mp h
 
@@ -410,10 +411,10 @@ theorem k_strong_completeness_iff {Gamma : Set (Proposition Atom)} {phi : Propos
     ModalSetDerivable (@KAxiom Atom) Gamma phi :=
   strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     k_truth_lemma_applied
     trivial
 
@@ -431,10 +432,10 @@ theorem k_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
       ModalSemanticEntails (fun _ => True) {ψ | ψ ∈ L} phi :=
   compactness (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     k_truth_lemma_applied
     trivial
     h
@@ -452,10 +453,10 @@ theorem k_completeness (φ : Proposition Atom)
       ∀ w, Satisfies m w φ) :
     Derivable (@KAxiom Atom) φ :=
   weak_completeness (Axioms := @KAxiom Atom) (FC := fun _ => True)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_kTags_iff_KAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     k_truth_lemma_applied
     trivial
     (fun W m _ w => h_valid W m w)

@@ -10,6 +10,7 @@ public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Strong Completeness for Modal Logic B (KB)
 
@@ -51,29 +52,29 @@ def bFC : ∀ {World : Type u}, Model World Atom → Prop :=
 /-- The canonical B model satisfies `bFC`: its accessibility relation is symmetric. -/
 private theorem b_canonical_FC : bFC (CanonicalModel (@BAxiom Atom)) :=
   canonical_symm
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalB φ)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.modalB, by decide, φ, rfl⟩)
 
 /-- Pre-applied B truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem b_truth_lemma_applied (S : CanonicalWorld (@BAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@BAxiom Atom)) S φ ↔ φ ∈ S.val :=
   k_truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ ψ => .andI φ ψ)
-    (fun φ ψ => .andE1 φ ψ)
-    (fun φ ψ => .andE2 φ ψ)
-    (fun φ ψ => .orI1 φ ψ)
-    (fun φ ψ => .orI2 φ ψ)
-    (fun φ ψ χ => .orE φ ψ χ)
-    (fun φ => .diaDualityFwd φ)
-    (fun φ => .diaDualityBack φ)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- B soundness adapter matching the `strong_soundness` callback shape.
@@ -114,10 +115,10 @@ theorem b_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
         Satisfies m w phi) :
     ModalSetDerivable (@BAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @BAxiom Atom) (FC := bFC)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     b_truth_lemma_applied
     b_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -155,10 +156,10 @@ theorem b_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @BAxiom Atom) (FC := bFC)
       b_sound_cb
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
+      (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => (schemaUnion_bTags_iff_BAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
       b_truth_lemma_applied
       b_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

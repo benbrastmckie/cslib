@@ -1012,6 +1012,247 @@ theorem raise_subtree {Atom : Type u} {World : Type v} [Preorder World]
           · simp only [if_neg hzc]
             exact hρ1pers hz
 
+/-! ## Ancestor-walk assembly of `boxI_lift` (task 537 Phase 7 completion)
+
+`raise_subtree` (above) is the downward-cascade piece. This section adds the upward piece — an
+**ancestor walk** from `x` toward the root, invoking `raise_subtree` at each ancestor for the
+sibling branches hanging off it — and assembles the two into `boxI_lift`.
+
+**Why a plain unconditional ancestor induction is unsound**: an induction hypothesis whose
+conclusion covers *every* edge of `G` unconditionally would, at each ancestor step, re-derive the
+child branch it just came from via its own internal `raise_subtree` call, with no guarantee that
+call picks the SAME value already pinned for that branch two levels down. The fix,
+`boxI_lift_ancestor` below, threads an explicit `excl : Finset (Label Atom)` parameter through the
+induction: `excl` names the direct child (always a singleton in practice, `{}` only at the very
+top) whose entire downward closure is owned by the caller and must be left untouched. -/
+
+/-- **Sibling closures are disjoint.** Two distinct raw-`R`-children `c₁ ≠ c₂` of a common node
+`p` have disjoint forward-reachable closures: nothing reachable from `c₁` is also reachable from
+`c₂`. Generalizes the sibling-disjointness argument proved inline inside `raise_subtree`'s
+`insert` case (there specialized to one fixed new child vs. a `Finset` of already-processed
+siblings) to two arbitrary named children, for reuse by `boxI_lift_ancestor`'s combine step. Same
+proof shape: induct on the reachability witness, and at each step use `huniq` (unique parent) at
+the last edge together with `ht_le_of_reflTransGen`/`hgrad` to rule out reaching back up to the
+common parent `p`. -/
+theorem siblings_disjoint {Atom : Type u} {G : Graph Atom} {ht : Label Atom → ℕ}
+    (hgrad : ∀ a b, G.R a b → ht b = ht a + 1)
+    (huniq : ∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂)
+    {p c₁ c₂ : Label Atom} (hc₁ : G.R p c₁) (hc₂ : G.R p c₂) (hne : c₁ ≠ c₂) :
+    ∀ u, Relation.ReflTransGen G.R c₁ u → ¬ Relation.ReflTransGen G.R c₂ u := by
+  intro u h1
+  induction h1 with
+  | refl =>
+      intro hca
+      cases hca with
+      | refl => exact hne rfl
+      | tail hcy hyc1 =>
+          rename_i y
+          have hyp : y = p := huniq y p c₁ hyc1 hc₁
+          have hreach : Relation.ReflTransGen G.R c₂ p := hyp ▸ hcy
+          have hle := ht_le_of_reflTransGen hgrad hreach
+          have hc2ht : ht c₂ = ht p + 1 := hgrad p c₂ hc₂
+          omega
+  | tail hc1mid hmida' ih =>
+      rename_i mid a'
+      intro hca
+      cases hca with
+      | refl =>
+          have hmidp : mid = p := huniq mid p c₂ hmida' hc₂
+          have hreach : Relation.ReflTransGen G.R c₁ p := hmidp ▸ hc1mid
+          have hle := ht_le_of_reflTransGen hgrad hreach
+          have hc1ht : ht c₁ = ht p + 1 := hgrad p c₁ hc₁
+          omega
+      | tail hcy hya' =>
+          rename_i y
+          have hya : y = mid := huniq y mid a' hya' hmida'
+          exact ih (hya ▸ hcy)
+
+/-- **Ancestor-walk assembly.** Raises `z` (already targeted at `wz`) together with EVERY edge of
+`G` except those "owned" by the caller — namely edges reachable from (or into) some excluded
+child `e ∈ excl` of `z`. Walks up `z`'s unique-parent chain via `cs5FCIncest_raise` (F2),
+invoking `raise_subtree` at `z` itself (over the un-excluded children) and recursing via the
+strong induction on `n` (an upper bound for `ht`, strictly decreasing at each ancestor step since
+graded rank forces `ht` of a parent to be strictly smaller). At the top-level call from
+`boxI_lift`, `excl := ∅`, so the exclusion machinery vacuously drops out and conjunct 3 covers
+*every* edge of `G`.
+
+**Deviation from the plan's transcribed schema (documented, not a design re-opening):** conjunct
+3's exclusion check is on the edge's *target* `b`, not its *source* `a` (plan note handoff
+`07_phase7-boxI-lift-partial.md` checks `a`). Checking via `a` is unprovable at the boundary edge
+into the excluded branch (e.g. the ancestor edge `q → z` itself, with `a = q` outside the
+excluded closure but `b = z` inside it): `cs5FCIncest` has no "raise-source-only, keep-target-
+exact" conjunct (see `boxI_lift_star`'s section docstring), so `r (raised q) (old ρ z)` is not
+generally derivable. Checking via `b` correctly drops exactly the boundary edge (and everything
+inside the excluded closure) from the obligation, since that edge is established separately by
+the caller's own `cs5FCIncest_raise` fact before combining. This is the SAME Finset-exclusion
+strategy the handoff specifies, with the one membership-check side corrected for provability;
+the two-piece downward/ancestor decomposition and all five key decisions in the handoff are
+unchanged. -/
+theorem boxI_lift_ancestor {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {v : World → Atom → Prop} {botForces : World → Prop}
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → v w p → v w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    {G : Graph Atom} {ht : Label Atom → ℕ}
+    (hfin : G.X.Finite) (hgrad : ∀ a b, G.R a b → ht b = ht a + 1)
+    (huniq : ∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂)
+    {ρ : Label Atom → World} (hedge : ∀ a b, G.R a b → r (ρ a) (ρ b)) :
+    ∀ n : ℕ, ∀ z : Label Atom, ht z ≤ n → z ∈ G.X →
+    ∀ wz : World, ρ z ≤ wz →
+    ∀ excl : Finset (Label Atom), (∀ e ∈ excl, G.R z e) →
+    ∃ ρ' : Label Atom → World, ρ' z = wz ∧ (∀ u, ρ u ≤ ρ' u) ∧
+      (∀ a b, G.R a b → (∀ e ∈ excl, ¬ Relation.ReflTransGen G.R e b) → r (ρ' a) (ρ' b)) ∧
+      (∀ {φ : Proposition Atom} {u}, CKForces r v botForces (ρ u) φ →
+        CKForces r v botForces (ρ' u) φ) ∧
+      (∀ u, (∃ e ∈ excl, Relation.ReflTransGen G.R e u) → ρ' u = ρ u) := by
+  intro n
+  induction n using Nat.strong_induction_on with
+  | _ n ihn =>
+    intro z hzn hzX wz hwz excl hexcl
+    classical
+    have hCzSub : {cc | G.R z cc ∧ cc ∉ excl} ⊆ G.X := fun cc hcc => (G.edge_mem z cc hcc.1).2
+    have hCzFin : {cc | G.R z cc ∧ cc ∉ excl}.Finite := hfin.subset hCzSub
+    have hCzMem : ∀ c ∈ hCzFin.toFinset, G.R z c := fun c hc => (hCzFin.mem_toFinset.mp hc).1
+    have hCzNotExcl : ∀ c ∈ hCzFin.toFinset, c ∉ excl := fun c hc => (hCzFin.mem_toFinset.mp hc).2
+    obtain ⟨ρz, hρzz, hρzmono, hρzdirect, hρzdesc, hρzout, hρzpers⟩ :=
+      raise_subtree hfc v_uc bf_uc hfin hgrad huniq hedge
+        (Set.ncard {q ∈ G.X | ht q ≥ ht z}) z hzX (le_refl _)
+        hCzFin.toFinset hCzMem wz hwz
+    by_cases hparent : ∃ q, G.R q z
+    · obtain ⟨q, hqz⟩ := hparent
+      have hqX : q ∈ G.X := (G.edge_mem q z hqz).1
+      have hqzht : ht z = ht q + 1 := hgrad q z hqz
+      obtain ⟨q', hqq', hq'wz⟩ := cs5FCIncest_raise hfc (hedge q z hqz) hwz
+      have hqn : ht q < n := by omega
+      obtain ⟨ρq, hρqq, hρqmono, hρqedge, hρqpers, hρqout⟩ :=
+        ihn (ht q) hqn q (le_refl _) hqX q' hqq' {z}
+          (by intro e he; rw [Finset.mem_singleton] at he; subst he; exact hqz)
+      have hzq : ¬ Relation.ReflTransGen G.R z q := by
+        intro hzqreach
+        have hle := ht_le_of_reflTransGen hgrad hzqreach
+        omega
+      refine ⟨fun u => if Relation.ReflTransGen G.R z u then ρz u else ρq u, ?_, ?_, ?_, ?_, ?_⟩
+      · simp only [if_pos (Relation.ReflTransGen.refl (a := z))]
+        exact hρzz
+      · intro u
+        by_cases hu : Relation.ReflTransGen G.R z u
+        · simp only [if_pos hu]; exact hρzmono u
+        · simp only [if_neg hu]; exact hρqmono u
+      · intro a b hab hbex
+        by_cases hbz : b = z
+        · subst hbz
+          have haq : a = q := huniq a q b hab hqz
+          subst haq
+          simp only [if_neg hzq, if_pos (Relation.ReflTransGen.refl (a := b))]
+          rw [hρqq, hρzz]
+          exact hq'wz
+        · by_cases hzb : Relation.ReflTransGen G.R z b
+          · rcases hzb.cases_head with heq | ⟨c, hzc, hcb⟩
+            · exact absurd heq.symm hbz
+            · by_cases hcExcl : c ∈ excl
+              · exact absurd hcb (hbex c hcExcl)
+              · have hcCz : c ∈ hCzFin.toFinset := hCzFin.mem_toFinset.mpr ⟨hzc, hcExcl⟩
+                rcases hcb.cases_tail with heqc | ⟨mid, hcmid, hmidb⟩
+                · have haz : a = z := huniq a z b hab (heqc ▸ hzc)
+                  subst haz
+                  simp only [if_pos (Relation.ReflTransGen.refl (a := a)), if_pos hzb]
+                  rw [heqc]
+                  exact hρzdirect c hcCz
+                · have hamid : mid = a := huniq mid a b hmidb hab
+                  have hza : Relation.ReflTransGen G.R z a :=
+                    hamid ▸ Relation.ReflTransGen.head hzc hcmid
+                  simp only [if_pos hza, if_pos hzb]
+                  exact hρzdesc c hcCz a b (hamid ▸ hcmid) hab
+          · have hza : ¬ Relation.ReflTransGen G.R z a := fun h => hzb (h.tail hab)
+            simp only [if_neg hza, if_neg hzb]
+            exact hρqedge a b hab
+              (by intro e he; rw [Finset.mem_singleton] at he; subst he; exact hzb)
+      · intro φ u hf
+        by_cases hu : Relation.ReflTransGen G.R z u
+        · simp only [if_pos hu]; exact hρzpers hf
+        · simp only [if_neg hu]; exact hρqpers hf
+      · rintro u ⟨e, he, hreach⟩
+        have hze : Relation.ReflTransGen G.R z u :=
+          Relation.ReflTransGen.head (hexcl e he) hreach
+        simp only [if_pos hze]
+        have huz : u ≠ z := by
+          intro huzeq
+          rw [huzeq] at hreach
+          have h1 := ht_le_of_reflTransGen hgrad hreach
+          have h2 := hgrad z e (hexcl e he)
+          omega
+        have hnoCz : ∀ c ∈ hCzFin.toFinset, ¬ Relation.ReflTransGen G.R c u := by
+          intro c hc
+          exact siblings_disjoint hgrad huniq (hexcl e he) (hCzMem c hc)
+            (fun heq => hCzNotExcl c hc (heq ▸ he)) u hreach
+        exact hρzout u huz hnoCz
+    · simp only [not_exists] at hparent
+      refine ⟨ρz, hρzz, hρzmono, ?_, ?_, ?_⟩
+      · intro a b hab hbex
+        by_cases hza : Relation.ReflTransGen G.R z a
+        · rcases hza.cases_head with heq | ⟨c, hzc, hca⟩
+          · subst heq
+            have hbExcl : b ∉ excl := fun hbe => hbex b hbe Relation.ReflTransGen.refl
+            have hcCz : b ∈ hCzFin.toFinset := hCzFin.mem_toFinset.mpr ⟨hab, hbExcl⟩
+            exact hρzdirect b hcCz
+          · by_cases hcExcl : c ∈ excl
+            · exact absurd (hca.tail hab) (hbex c hcExcl)
+            · have hcCz : c ∈ hCzFin.toFinset := hCzFin.mem_toFinset.mpr ⟨hzc, hcExcl⟩
+              exact hρzdesc c hcCz a b hca hab
+        · have haz : a ≠ z := fun h => hza (h ▸ Relation.ReflTransGen.refl)
+          have hnCa : ∀ c ∈ hCzFin.toFinset, ¬ Relation.ReflTransGen G.R c a := fun c hc hreach =>
+            hza (Relation.ReflTransGen.head (hCzMem c hc) hreach)
+          have ha_eq : ρz a = ρ a := hρzout a haz hnCa
+          have hbz : b ≠ z := fun hbeq => hparent a (hbeq ▸ hab)
+          have hnCb : ∀ c ∈ hCzFin.toFinset, ¬ Relation.ReflTransGen G.R c b := by
+            intro c hc hreach
+            rcases hreach.cases_tail with heq | ⟨mid, hcmid, hmidb⟩
+            · exact haz (huniq a z c (heq ▸ hab) (hCzMem c hc))
+            · have hamid : mid = a := huniq mid a b hmidb hab
+              exact hza (Relation.ReflTransGen.head (hCzMem c hc) (hamid ▸ hcmid))
+          have hb_eq : ρz b = ρ b := hρzout b hbz hnCb
+          rw [ha_eq, hb_eq]
+          exact hedge a b hab
+      · intro φ u hf
+        exact hρzpers hf
+      · rintro u ⟨e, he, hreach⟩
+        have huz : u ≠ z := by
+          intro huzeq
+          rw [huzeq] at hreach
+          have h1 := ht_le_of_reflTransGen hgrad hreach
+          have h2 := hgrad z e (hexcl e he)
+          omega
+        have hnoCz : ∀ c ∈ hCzFin.toFinset, ¬ Relation.ReflTransGen G.R c u := by
+          intro c hc
+          exact siblings_disjoint hgrad huniq (hexcl e he) (hCzMem c hc)
+            (fun heq => hCzNotExcl c hc (heq ▸ he)) u hreach
+        exact hρzout u huz hnoCz
+
+/-- **The tree-cascade Lifting Lemma** (Simpson 8.1.3, chunks 0154-0155), completing the
+finite-component cascade `boxI_lift_star` left open. Raises `x`'s interpretation to any `w' ≥
+ρ x`, re-establishing the raw edge-cond over the WHOLE derivation graph `G` (not just `x`'s own
+component: elsewhere, `ρ'` agrees with `ρ`, and the standing `hedge` hypothesis already covers
+those edges) and persisting all `CKForces`/Γ-cond facts. Thin wrapper around
+`boxI_lift_ancestor`, specialized to `excl := ∅`: the exclusion machinery's hypotheses become
+vacuously true (no `e ∈ ∅`), so conjunct 3 reduces to full, unconditional coverage of `G.R`. -/
+theorem boxI_lift {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {v : World → Atom → Prop} {botForces : World → Prop}
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → v w p → v w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    {G : Graph Atom} (hforest : IsDerivationForest G)
+    {ρ : Label Atom → World} (hedge : ∀ a b, G.R a b → r (ρ a) (ρ b))
+    {x : Label Atom} (hxX : x ∈ G.X) {w' : World} (hxw' : ρ x ≤ w') :
+    ∃ ρ' : Label Atom → World, ρ' x = w' ∧ (∀ z, ρ z ≤ ρ' z) ∧
+      (∀ a b, G.R a b → r (ρ' a) (ρ' b)) ∧
+      (∀ {φ : Proposition Atom} {z}, CKForces r v botForces (ρ z) φ →
+        CKForces r v botForces (ρ' z) φ) := by
+  obtain ⟨hfin, ⟨ht, hgrad⟩, huniq⟩ := hforest
+  obtain ⟨ρ', hρ'x, hρ'mono, hρ'edge, hρ'pers, -⟩ :=
+    boxI_lift_ancestor hfc v_uc bf_uc hfin hgrad huniq hedge
+      (ht x) x (le_refl _) hxX w' hxw' ∅ (by simp)
+  exact ⟨ρ', hρ'x, hρ'mono, fun a b hab => hρ'edge a b hab (by simp), fun {φ} {z} hf => hρ'pers hf⟩
+
 end Cslib.Logic.Modal.Labelled
 
 end

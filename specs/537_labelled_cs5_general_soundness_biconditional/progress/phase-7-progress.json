@@ -23,18 +23,26 @@
     {
       "id": 3,
       "description": "Assemble boxI_lift itself: ancestor walk from x to the root via cs5FCIncest_raise (F2), invoking raise_subtree for sibling branches at each level",
-      "status": "blocked",
-      "note": "Confirmed via live lean_goal iteration that the naive recursive call at each ancestor (reusing the same all-of-G-covering induction hypothesis) is unsound: it would let the recursion silently re-derive the child branch's value independently, conflicting with the already-pinned target. Fix identified but not yet implemented: generalize the ancestor-walk induction (both the zero/no-parent case and the succ/has-parent case) to carry an explicit Finset exclusion parameter mirroring raise_subtree's own Finset-of-children mechanism (inverted: exclude the child whose closure the caller already owns). Precise remaining statement and combine strategy recorded in plans/03_direct-route-forest.md Phase 7 partial-progress note.",
-      "files_touched": []
+      "status": "done",
+      "note": "Landed via siblings_disjoint + boxI_lift_ancestor (Finset-exclusion ancestor-walk induction) + boxI_lift (thin excl:=∅ wrapper). One documented correction to the transcribed schema: the exclusion-membership check in the edge conjunct is on the edge's target, not source (source-side is unprovable at the boundary edge into the excluded branch, since cs5FCIncest has no raise-source-only-keep-target-exact conjunct). Sorry-free, axiom-clean.",
+      "files_touched": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"
+      ]
     }
   ],
-  "current_objective": 3,
+  "current_objective": null,
   "approaches_tried": [
     {
       "approach": "Ancestor-chain + downward-cascade decomposition using raise_subtree as the downward piece, with the outer ancestor-walk induction hypothesis stated as \"covers all of G's edges unconditionally\" and applied directly at each ancestor via ihn",
       "result": "blocked",
       "reason": "The unconditional induction hypothesis at ancestor q would freely re-derive the value of the child branch we came from (via its own internal raise_subtree call), which need not match the already-pinned target value fixed for that branch two levels down. Diagnosed via live lean_goal before writing any further code; not a math wall (F1/F2/unique-parent/graded-rank all still sufficient) -- purely an induction-hypothesis-shape engineering issue, fixed by adding a Finset exclusion parameter (see plan Phase 7 note for the exact corrected statement)."
+    },
+    {
+      "approach": "Finset-exclusion ancestor-walk induction (boxI_lift_ancestor), checking the exclusion antecedent via the edge's source (a), exactly as the dispatch-1 handoff's schema transcribed it",
+      "result": "corrected",
+      "reason": "Unprovable at the boundary edge into the excluded branch (ancestor edge q->z: a=q outside the excluded closure, b=z inside it) -- would require r(raised q)(old ρ z), and cs5FCIncest has no raise-source-only-keep-target-exact conjunct. Corrected to check via the edge's target (b) instead, which vacuously drops exactly the boundary edge (handled separately by the caller's own cs5FCIncest_raise fact). Documented in boxI_lift_ancestor's docstring; not a re-opening of the overall strategy."
     }
   ],
-  "handoff_count": 1
+  "handoff_count": 1,
+  "phase_status": "complete"
 }

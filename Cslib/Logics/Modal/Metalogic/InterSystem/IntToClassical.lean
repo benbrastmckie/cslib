@@ -82,25 +82,25 @@ theorem k_derivable_of_ik_andI {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndI φ ψ) :=
   ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andI, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `andE1` is a literal `KAxiom` instance. -/
+/-- `IK`'s `andE1` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_andE1 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndE1 φ ψ) :=
-  ⟨.ax [] _ (KAxiom.andE1 φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andE1, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `andE2` is a literal `KAxiom` instance. -/
+/-- `IK`'s `andE2` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_andE2 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.AndE2 φ ψ) :=
-  ⟨.ax [] _ (KAxiom.andE2 φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.andE2, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `orI1` is a literal `KAxiom` instance. -/
+/-- `IK`'s `orI1` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_orI1 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrI1 φ ψ) :=
-  ⟨.ax [] _ (KAxiom.orI1 φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orI1, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `orI2` is a literal `KAxiom` instance. -/
+/-- `IK`'s `orI2` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_orI2 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrI2 φ ψ) :=
-  ⟨.ax [] _ (KAxiom.orI2 φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orI2, by decide, φ, ψ, rfl⟩)⟩
 
 /-- `IK`'s `orE` is a literal `KAxiom` instance. -/
 theorem k_derivable_of_ik_orE {φ ψ χ : Proposition Atom} :

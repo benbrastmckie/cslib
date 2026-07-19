@@ -664,14 +664,17 @@ cross-family witness construction. NO inductive is deleted here. Split into per-
 the implementer partitions the ~36 sites into three balanced clusters at the start of 6.1 and
 records the partition so 6.2/6.3 have fixed, non-overlapping scope.
 
-**Sub-phase 6.1 — cluster 1 (destructuring sites, ~first third)** [NOT STARTED]
-- [ ] Migrate the first ~12 sites: `cases … with | ctor` → `obtain ⟨t, ht, hφ⟩ := h; fin_cases t <;> …`
-      (or via the Phase 3 bridge where cleaner).
-- Estimated output: ~120-260 lines.
+**Sub-phase 6.1 — cluster 1 (`implyK`/`implyS`/`efq`/`andI`)** [COMPLETED]
+- [x] Migrate the 4 `KAxiom` raw-constructor witness sites to `schemaUnion_kTags_iff_KAxiom.mp`
+      over a directly-constructed `SchemaUnion` witness.
+- **Completion note**: site enumeration (12 real sites, not ~36 — see the enumeration note above
+  the sub-phases) and the 3-cluster partition were recorded above. Scoped build green, zero
+  `sorry`, `checkInitImports` clean.
 
-**Sub-phase 6.2 — cluster 2 (destructuring sites, ~second third)** [NOT STARTED]
-- [ ] Migrate the next ~12 sites.
-- Estimated output: ~120-260 lines.
+**Sub-phase 6.2 — cluster 2 (`andE1`/`andE2`/`orI1`/`orI2`)** [COMPLETED]
+- [x] Migrate the 4 `KAxiom` raw-constructor witness sites the same way.
+- **Completion note**: scoped build green, zero `sorry`, `checkInitImports` clean. No destructuring
+  sites existed in this cluster (all 4 are witness-construction, per the enumeration note).
 
 **Sub-phase 6.3 — cluster 3 (witness-construction sites, `⟨.ax _ _ h⟩`)** [NOT STARTED]
 - [ ] Migrate the remaining ~12 sites, prioritizing the cross-family witness constructions that

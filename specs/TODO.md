@@ -11,8 +11,8 @@ next_project_number: 538
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,523,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,511,536 | 36,37,181,317,407,425,449,523,535 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,536,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
 | 5 | 414 | 181,215,300,301 | code hygiene |
@@ -38,13 +38,12 @@ next_project_number: 538
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 522 [PR READY] — Uniform frame-condition to axiom correspondence library for modal
-523 [IMPLEMENTING] — Schema-union axiom combinator to replace the hand-written per-sys
-  └─ 536 [NOT STARTED] — Document the modal axiom-schema architecture in a new docs/ direc
 535 [NOT STARTED] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+536 [NOT STARTED] — Document the modal axiom-schema architecture in a new docs/ direc
+537 [RESEARCHING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 
 ### Temporal Logic
 
@@ -98,7 +97,7 @@ next_project_number: 538
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517
@@ -276,12 +275,15 @@ Upon completion, task 525 should be revisited: its remaining Phases 3-7 are eith
 ---
 
 ### 523. Schema union axiom combinator for proofsystem instances
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [523_schema_union_axiom_combinator_for_proofsystem_instances/reports/01_schema-union-combinator-blast-radius.md]
-- **Plan**: [523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md]
+- **Plan**:
+  - [523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md]
+  - [523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md]
+- **Summary**: [523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/07_phase8-redefine-in-place-final-completion-summary.md]
 
 **Description**: Schema-union axiom combinator to replace the hand-written per-system axiom inductives in Cslib/Logics/Modal/ProofSystem/Instances/*.lean. RECONCILED COUNT: there are 14 such inductives ({K,T,B,D,S4,K4,K5,K45,D4,D5,D45,DB,TB,KB5}Axiom), not 15 - S5.lean already reuses Modal.ModalAxiom directly and is the exact pattern the combinator should generalize to. Build a SchemaUnion/axiom-combinator so each system is expressed as a union of shared axiom schemas rather than a bespoke re-listing inductive. Gated on a Zulip design decision (representation A: closed inductive of schema tags, vs B: Set/predicate union). DESIGN DECISION (resolved, user 2026-07-18): Representation = A (schema-tag union). Build ModalSchemaTag inductive + ModalSchemaTag.Holds + SchemaUnion (S : Finset ModalSchemaTag) := fun χ => ∃ t ∈ S, t.Holds χ; each system = one-line SchemaUnion over its tag set. Collapse the 24 XAxiom_implies_YAxiom subsumption lemmas to one generic lemma + Finset.subset facts; soundness = per-tag validity table + one unionSound combinator. Accept the elimination-form change downstream (cases|ctor → obtain ⟨t,ht,hφ⟩; fin_cases t) and the ~36 genuine hand-rewrites in InterSystem/IntToClassical.lean. Keep intuitionistic/minimal families (IK/MK/CK/IS5/MT ModalAxiom) OUT of scope. Stage additively, each stage CI-green/zero-debt; Zulip heads-up before the PR lands (large shared-subtree blast radius).
 

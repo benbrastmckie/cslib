@@ -5,42 +5,38 @@
   "status": "implemented",
   "phase": "implement",
   "orchestrator_mode": true,
-  "started_at": "2026-07-19T16:07:32Z",
-  "completed": "2026-07-19T16:25:00Z",
+  "started_at": "2026-07-19T16:11:14Z",
+  "completed": "2026-07-19T16:30:00Z",
   "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
-  "phases_completed": 3,
+  "phases_completed": 4,
   "phases_total": 7,
   "artifacts": [
     {
       "type": "lean_source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added cs5FCIncest_raise (= plan's F2, target-raise confluence direction) and box_gives_here (box-forcing 'here' extraction via hrefl), ~25 lines, both sorry-free and axiom-free."
+      "summary": "Added boxI_raise_step (lines 450-516): the single-node interpretation-raise step of Simpson's Lifting Lemma 8.1.3. Given raw-edge-cond rho, node x, raw R-neighbour n of x (either direction), and w >= rho x, produces rho' agreeing with rho off {x, n}, rho' x = w, re-establishing the x-n raw edge fact (F1 down / F2 up) and Gamma-cond persistence at n via ckforces_persistence. Sorry-free, axiom-clean."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 3 heading marked [COMPLETED]; F2/box_gives_here checklist items checked off, dual diamond helper marked deferred to Phase 5."
-    },
-    {
-      "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/05_phase3-f2-here-helpers-summary.md",
-      "summary": "Phase 3 implementation summary with Plan Deviations section documenting the deferred dual diamond here-helper."
+      "summary": "Phase 4.1 heading marked [COMPLETED]; both checklist items checked off with landed-location notes."
     },
     {
       "type": "handoff",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
-      "summary": "H9 orchestrator handoff, status implemented, sorry_inventory empty, next_phase 4."
+      "summary": "H9 orchestrator handoff, status implemented, sorry_inventory empty, next_phase 4.2."
     }
   ],
-  "next_steps": "Run /implement 537 to execute Phase 4.1 (boxI_raise_step single-node interpretation raise).",
+  "next_steps": "Run /implement 537 to execute Phase 4.2 (iterate boxI_raise_step node-by-node over the finite derivation tree to obtain boxI_lift, then discharge the NIK.boxI case). Hard budget cap + blocked-honesty exit to Phase 7 applies.",
   "next_command": "/implement 537",
   "phases_completed_detail": {
-    "phase_number": 3,
-    "phase_name": "F2 target-raise + reflexive here-extraction helpers",
-    "lemmas_landed": ["cs5FCIncest_raise", "box_gives_here"]
+    "phase_number": "4.1",
+    "phase_name": "Single-node interpretation-raise step",
+    "lemmas_landed": ["boxI_raise_step"]
   },
   "memory_candidates": [
-    "In task 537's direct-route plan, prose shorthand like 'F1'/'F2' (from the source report's H3 mapping table) names the underlying mathematical confluence direction, not a mandated literal Lean identifier -- F1 is landed as cs5FCIncest_lift and F2 as cs5FCIncest_raise, following the codebase's descriptive-name convention rather than bare letter-names."
+    "cs5FCIncest-model raise/interpretation lemmas over Label Atom need `classical` (not Function.update) to build an if-then-else re-interpretation function, because Function.update requires DecidableEq on the label type, which is not available for a generic Atom parameter. `Function.update_noteq` is not a real Mathlib lemma name; the correct one is `Function.update_of_ne` (note its argument/direction convention differs from the naive guess).",
+    "boxI_raise_step (Soundness.lean) is deliberately scoped to ONE raw-R-neighbour per invocation, not all of a node's neighbours simultaneously -- avoids an unresolved bidirectional-edge case (R x n and R n x both holding) that cs5FCIncest alone cannot discharge without an extra antisymmetry-style assumption. Phase 4.2 should invoke it once per tree edge during a traversal, not try to raise a whole neighbourhood in one call."
   ],
   "verification": {
     "verification_passed": true,
@@ -48,7 +44,7 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports only, per single-phase dispatch scope; full lake lint/lint-style/shake/mk_all/test deferred to Phase 6 regression gate)"
+    "ci_pipeline_passed": "partial (scoped build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness + checkInitImports only, per single-phase dispatch scope; full lake lint/lint-style/shake/mk_all/test deferred to the Phase 6 regression gate)"
   },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",

@@ -2,33 +2,28 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "implemented",
-  "summary": "Phase 3 of direct-route plan v2 landed: cs5FCIncest_raise (= plan's F2, target-raise confluence direction, via hsymbox then hincest) and box_gives_here (box-forcing 'here' extraction via the hrefl instance) in Soundness.lean. Both sorry-free and axiom-clean. Scoped build green, checkInitImports passes, no Preserved Asset regressed. The dual diamond here-helper was deferred to Phase 5 per the plan's own conditional gate (see decisions_made).",
-  "phases_completed": 3,
+  "summary": "Phase 4.1 of direct-route plan v2 landed: boxI_raise_step in Soundness.lean, the single-node interpretation-raise step of Simpson's Lifting Lemma 8.1.3 (chunks 0154-0155). Given a raw-edge-cond interpretation rho, a node x, and any w >= rho x, plus a designated raw-R-neighbour n of x (either direction), it produces rho' agreeing with rho off {x, n}, with rho' x = w, re-establishing the raw edge fact at the x-n edge (via cs5FCIncest_lift/F1 down, or cs5FCIncest_raise/F2 up) and Gamma-cond persistence at n via ckforces_persistence. Sorry-free and axiom-clean. Scoped build green, checkInitImports passes, no Preserved Asset regressed. Phase 4.2 (iterating this step over the finite tree to obtain the full boxI_lift and discharge the NIK.boxI case) is NOT attempted in this dispatch, per the single-phase (4.1-only) dispatch scope.",
+  "phases_completed": 4,
   "phases_total": 7,
   "skeleton": false,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
-    "next_phase": 4,
-    "next_phase_name": "boxI tree-lifting lemma (Simpson Lifting Lemma 8.1.3 analogue), split 4.1/4.2",
-    "depends_on": "3 (satisfied)",
-    "note": "Phase 4.1 states boxI_raise_step (single-node interpretation raise, threading F1=cs5FCIncest_lift and F2=cs5FCIncest_raise, plus ckforces_persistence for Gamma-cond). This is the plan's sole concentrated-risk phase (~80-85% confidence); it carries a hard budget cap and a blocked-honesty exit to Phase 7, never an open-ended retry. If diaI's goal state in Phase 5 needs the dual diamond here-helper deferred from Phase 3, land it there where its concrete shape is dictated by the actual goal."
+    "next_phase": "4.2",
+    "next_phase_name": "Iterate the raise over the finite tree; close the boxI case",
+    "depends_on": "4.1 (satisfied)",
+    "note": "boxI_raise_step is deliberately scoped to ONE designated raw-R-neighbour n per invocation (not all of x's neighbours simultaneously), to keep the atomic step small and sidestep an unresolved bidirectional-edge case (R x n and R n x both holding for the same n, which the actual derivation-tree graph should never produce but which this lemma does not itself assume away). Phase 4.2 must invoke boxI_raise_step once per tree edge along a traversal outward from x (structural or well-founded recursion over the graph's finite construction via addEdge), chaining each newly-raised value forward to the next edge, to assemble the full Lifting Lemma boxI_lift. This is the plan's sole concentrated-risk phase; it carries its own hard budget cap and blocked-honesty exit to Phase 7, never an open-ended retry."
   },
   "artifacts": [
     {
       "type": "lean_source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added cs5FCIncest_raise and box_gives_here (~25 lines total), inserted immediately after cs5FCIncest_lift (F1) and before the Phase 1 box_iff_base/dia_iff_base section. cs5FCIncest_raise: r w u -> u <= u' -> exists w', w <= w' and r w' u', via hsymbox hwu huu' then hincest on the resulting edge. box_gives_here: CKForces ... w (box A) -> CKForces ... w A, via hbox w (le_refl w) w (hrefl w), mirroring the tBox axiom case (CS5Canonical.lean:313)."
+      "summary": "Added boxI_raise_step (lines 450-516), inserted between the Phase 2 TClosure section (dia_iff_TClosure) and the one-point soundness section. Statement: given cs5FCIncest r, upward-closure hyps v_uc/bf_uc for CKForces persistence, raw-edge-cond hedge : forall a b, R a b -> r (rho a) (rho b), x n : Label Atom with x <> n, w >= rho x, and hR : R x n or R n x, produces exists rho', rho' x = w and (forall z, rho z <= rho' z) and (r (rho' x) (rho' n) or r (rho' n) (rho' x)) and (CKForces at rho n implies CKForces at rho' n). Proved via classical (for the if-then-else Decidable instances), case-splitting on hR into the F1 (cs5FCIncest_lift) down case and F2 (cs5FCIncest_raise) up case, defining rho' as an explicit if-then-else re-interpretation at {x, n}."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 3 heading updated to [COMPLETED]; F2 and box_gives_here checklist items checked off; the dual diamond here-helper item marked deferred ([~]) with an inline note pointing to Phase 5."
-    },
-    {
-      "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/05_phase3-f2-here-helpers-summary.md",
-      "summary": "Phase 3 implementation summary, including the Plan Deviations section documenting the deferred dual diamond here-helper."
+      "summary": "Phase 4.1 heading updated to [COMPLETED]; both checklist items checked off with landed-location notes."
     }
   ],
   "verification": {
@@ -38,18 +33,19 @@
     "new_axiom_count": 0,
     "build_passed": true,
     "check_init_imports_passed": true,
-    "lean_verify_cs5FCIncest_raise": "axioms: []",
-    "lean_verify_box_gives_here": "axioms: []"
+    "lean_verify_boxI_raise_step": "axioms: [propext, Classical.choice, Quot.sound]"
   },
-  "commit": "pending (recorded post-write)",
+  "commit": "9183da1a",
   "files_modified": [
     "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
     "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md"
   ],
   "decisions_made": [
-    "Deferred the dual diamond here-helper (Phase 3's third, conditionally-gated task: 'IF needed for diaI') to Phase 5, where the diaI case of the main NIK soundness induction will supply a concrete goal to derive its required signature from. The plan gave F2 and box_gives_here exact target signatures but left this third item conditional with no concrete type -- landing a guessed shape now risked an unused or wrongly-typed lemma. No sorry, axiom, or vacuous placeholder was used; the item is explicitly carried forward, not dropped.",
-    "Named the plan's shorthand 'F2' as cs5FCIncest_raise (matching the sibling F1 lemma's descriptive name cs5FCIncest_lift), consistent with CSLib naming conventions -- the plan and report used 'F2' only as prose shorthand for the underlying confluence direction, not a mandated literal identifier (per the H3 mapping table's own phrasing, 'F1' likewise names the already-landed cs5FCIncest_lift, not a literal 'F1' identifier)."
+    "Scoped boxI_raise_step to ONE designated raw-R-neighbour n of x per invocation, rather than attempting to raise ALL of x's neighbours simultaneously in a single call. A single-invocation design covering arbitrarily many neighbours would need to resolve, for each neighbour z, whether R x z or R z x (or, pathologically, both) applies via a non-canonical Classical.choose per neighbour, and the both-directions-at-once case has no proof from cs5FCIncest alone without an additional antisymmetry-style hypothesis on R at x. Restricting to one neighbour per call keeps the lemma small, avoids that unresolved case, and matches the mission's 'Bounded unit: one lemma about a single raise' framing; Phase 4.2 is expected to invoke it once per tree edge.",
+    "Constructed rho' via an explicit `classical`-backed if-then-else function (not Function.update), because Function.update requires a `DecidableEq (Label Atom)` instance that is not available for a generic Atom; `classical` supplies the needed propositional Decidable instances for the if-then-else conditions z = x / z = n without imposing DecidableEq on Label Atom."
   ],
-  "dead_ends": [],
+  "dead_ends": [
+    "Function.update (Function.update rho n n') x w: fails to elaborate without a DecidableEq (Label Atom) instance, which is not derivable for a generic Atom type; also Function.update_noteq is not the correct Mathlib lemma name (it is Function.update_of_ne, with a different argument/direction convention) -- switched to an explicit if-then-else construction under `classical` instead."
+  ],
   "plan_markers_verified": true
 }

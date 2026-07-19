@@ -1,32 +1,36 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "summary": "Phase 9 (frame-class match) complete: new file FrameClass.lean proves cs5FCIncest_canonWorld_r, bundling all five cs5FCIncest conjuncts for the general CanonWorld TS5 Atom type over the raw CanonWorld.r relation (no restricted world-type subtype needed). All five component lemmas sorry-free and axiom-clean. Full CSLib CI pipeline green (build 3245/3245, test 9237/9237, guardrails unregressed).",
+  "status": "blocked",
+  "summary": "Phase 10 (cs5_completeness assembly) is BLOCKED before any Lean edit: the contrapositive completeness argument needs a bridge from Hilbert-style Derivable/DerivationTree to the labelled NIK/Deriv system (Simpson's Chapter 6 Adequacy Theorem), which nothing in Phases 1-9 built and which an earlier decomposition of this same task (Track C, plans/02) already identified as 'THE TRUE CRUX, HIGH risk' and left unfinished at C5/8. No sorry, axiom, or vacuous definition was introduced. Phase 11 not attempted (depends on 10). Full blocker writeup: handoffs/phase-10-adequacy-bridge-blocker-20260718.md.",
   "artifacts": [
     {"type": "plan", "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md"},
-    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-9-handoff-20260718.md"}
+    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-10-adequacy-bridge-blocker-20260718.md"}
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
+  "blockers": [
+    "Phase 10 needs NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi (Simpson Ch.6 Adequacy Theorem) to seed primeLemma from ¬Derivable CS5ModalAxiom φ. This bridge does not exist anywhere in Cslib/; Deduction.lean/Syntax.lean/Context.lean's own docstrings reserve it for a not-yet-created Adequacy.lean. An earlier decomposition of task 517 (Track C, plans/02_decomposed-track-a-b-c.md) attempted this bridge and landed C1-C4 sorry-free in probes/ but explicitly flagged C5 (pathSpine) as 'THE TRUE CRUX, HIGH risk' and never started it; state.json's task-517 entry independently records 'Do NOT dispatch C5' pending a decision gate. The Segment/MCS canonical-model route that supplies this for CK/CT/CS4 is confirmed inapplicable to CS5 (SegmentLindenbaum.lean: 'This is false for CS5'). Needed to unblock: a dedicated follow-up (new phases or a spawned task) resuming Track C at C5-C8, or explicit user direction to restate cs5_completeness's target."
+  ],
+  "next_action_hint": "spawn_or_replan",
   "files_modified": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/FrameClass.lean",
-    "Cslib.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-9-handoff-20260718.md"
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-10-adequacy-bridge-blocker-20260718.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json"
   ],
   "decisions_made": [
-    "Target cs5FCIncest (not the older cs5FC''), matching CS5Canonical.lean's soundness theorems (cs5_axiom_sound_incest); the plan's top-level 'Definition of done' text naming cs5FC'' predates the task-512 birelational pivot",
-    "CanonWorld as built in Phase 8 (the general type ranging over every TPrime TS5 Atom) instantiates cs5FCIncest's frame-condition signature directly; no restricted world-type subtype was needed, resolving the open design question from the Phase 8 handoff",
-    "cs5Incest_forces_symm and cs5TwoSidedR_iff_cs5Tail (the two landed guardrails) are inapplicable to CanonWorld.r by construction: box-based-relation vs. raw-graph-relation, and quasi-prime-theory vs. graph-node-context, respectively -- documented at point of use in FrameClass.lean's module docstring"
+    "Did not attempt Phase 11 (bookkeeping) since the plan declares it Depends on: 10, and this dispatch did not silently reorder the plan's task sequence (plan-compliance.md).",
+    "Did not weaken cs5_completeness's target (e.g. to NIKTheorem TS5 phi) to route around the missing bridge -- that would silently narrow the task's Definition of done without user sign-off.",
+    "Did not attempt a partial/sorry'd version of the Adequacy bridge -- explicitly prohibited (zero-debt invariant, Postmortem Constraints); the bridge is HIGH-risk, multi-dispatch work by this task's own prior estimate (Track C reached only C1-C4 across multiple dispatches)."
   ],
-  "dead_ends": [],
+  "dead_ends": [
+    "Segment/MCS canonical-model route (SegmentLindenbaum.lean) -- confirmed inapplicable to CS5 by its own module docstring, and by task 509/512's box-backward wall (cs5_symmetric_tail_box_gap/cs5Incest_forces_symm/cs5TwoSidedR_iff_cs5Tail).",
+    "Reusing NIK.relabelFresh/NIK.oldLabelTransport (the 'cofinite-from-one' trick that closed Phase 8's box-backward case) -- does not generalize to the Hilbert-translation problem; it is internal to NIK and never touches DerivationTree/Derivable."
+  ],
   "sorry_inventory": [],
   "continuation_context": {
     "phases_completed": 9,
     "phases_total": 11,
     "next_phase": 10,
-    "next_phase_note": "cs5_completeness assembly: contrapositive composition of primeLemma (Phase 7) + canon_truth_lemma (Phase 8) + cs5FCIncest_canonWorld_r (Phase 9, this dispatch) into cs5_completeness : CKValidFC cs5FCIncest φ -> Derivable CS5ModalAxiom φ. All ingredients landed sorry-free; no blockers.",
+    "next_phase_note": "Phase 10 is [BLOCKED], not [IN PROGRESS] or [NOT STARTED]. Do not re-dispatch /implement 517 expecting a standard-effort close; the blocker requires a dedicated Adequacy-bridge sub-effort (Track C, C5-C8, see handoffs/phase-10-adequacy-bridge-blocker-20260718.md) or explicit user direction on restating the target.",
     "orchestrator_mode": true
   },
   "plan_markers_verified": true

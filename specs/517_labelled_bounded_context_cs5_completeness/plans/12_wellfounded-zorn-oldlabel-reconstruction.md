@@ -673,23 +673,100 @@ successor-preservation and limit-preservation are independent statements).
   `CanonicalModel.lean`/`CS5Canonical.lean` -- unregressed). `lean_verify
   cs5FCIncest_canonWorld_r`: axioms `["propext","Quot.sound"]`, no `sorryAx`.
 
-### Phase 10: `cs5_completeness` assembly [NOT STARTED]
+### Phase 10: `cs5_completeness` assembly [BLOCKED]
 
 - **Goal:** compose Phases 7-9 into `cs5_completeness : CKValidFC cs5FC'' φ → Derivable
   CS5ModalAxiom φ`, sorry-free and axiom-clean. (Carried from v4 Phase 8.)
 - **Tasks:**
   - [ ] Contrapositive assembly: `¬ Derivable` ⟹ prime context refuting `φ` (`primeLemma`, Phase 7)
     ⟹ canonical model + truth lemma (Phase 8) ⟹ frame-class member (Phase 9) ⟹ `¬ CKValidFC cs5FC''`.
+    *(deviation: blocked before any Lean was written — see BLOCKER below. The contrapositive's
+    seed step, `¬ Derivable CS5ModalAxiom φ ⟹ ¬ Deriv 𝒯_S5 G₀ Γ₀ (x₀ ∶ φ)` for a suitable base
+    `(G₀,Γ₀,x₀)`, is not a restatement of Phases 7-9's output — it requires a genuinely new,
+    unbuilt bridge between the Hilbert-style `DerivationTree`/`Derivable` system and the labelled
+    `NIK`/`Deriv` system.)*
   - [ ] Reuse only what genuinely transfers (`Proposition`/`Proposition.map`,
     `DerivationTree`/`Derivable`, `CS5ModalAxiom`, task-512's axiom-free soundness where the frame
-    class matches).
-- **Timing:** 1 dispatch. Estimated output: ~100-250 lines (mainline).
+    class matches). *(deviation: not attempted — blocked upstream of this step.)*
+- **Timing:** 1 dispatch. Estimated output: ~100-250 lines (mainline). **Actual: 0 lines landed;
+  blocked during scoping/research before any Lean edit.**
 - **Depends on:** 8, 9.
 - **Done when:** full `lake build`; `lean_verify cs5_completeness` axioms ⊆ `[propext,
   Classical.choice, Quot.sound]`; full CSLib CI order green.
 
+**BLOCKER (Phase 10)**:
+- **What failed**: the phase's own task list assumes the "contrapositive assembly" is a pure
+  composition of Phases 7-9's already-landed outputs (`primeLemma`, `canon_truth_lemma`,
+  `cs5FCIncest_canonWorld_r`). It is not. To invoke `primeLemma (G₀) (x₀) (φ) (hx₀) (h0)`, the
+  dispatch needs `h0 : ¬ Deriv 𝒯_S5 G₀.G G₀.Γ (x₀ ∶ φ)` for some base labelled context. The only
+  hypothesis Phase 10 is given is `¬ Derivable CS5ModalAxiom φ` — a fact about the **unlabelled**,
+  Hilbert-style `DerivationTree`/`Derivable` system (`Cslib/Logics/Modal/Metalogic/
+  DerivationTree.lean:134,201`). `Deriv`/`NIK` (`Cslib/Logics/Modal/Metalogic/Constructive/
+  Labelled/Deduction.lean:240`) is a **different, graph-labelled natural-deduction system** with
+  no axiom-schema constructor at all (T/B/4 enter only via `TClosure`-closed edges, not via a
+  Hilbert-style `.ax` rule). Converting `¬ Derivable(φ)` into `¬ Deriv 𝒯_S5 (trivial graph) ∅ (x₀
+  ∶ φ)` (equivalently `¬ NIKTheorem 𝒯_S5 φ`, `Deduction.lean:316`) needs, by contraposition, the
+  theorem **`NIKTheorem 𝒯_S5 φ → Derivable CS5ModalAxiom φ`** — i.e. that every labelled-system
+  proof can be translated into a Hilbert-style proof. This is exactly Simpson's **Chapter 6
+  Adequacy Theorem** (internalizing a multi-label, graph-structured derivation into a single
+  nested-modality Hilbert formula), not a restatement of anything Phases 7-9 built.
+- **What was tried**: (1) exhaustive source search across `Cslib/Logics/Modal/` for any existing
+  `NIK ↔ DerivationTree`/`Derivable` bridge — none exists; `Deduction.lean`, `Syntax.lean`, and
+  `Context.lean`'s own module docstrings explicitly name this gap and reserve it for a **separate,
+  not-yet-created file `Adequacy.lean`** ("the adequacy bridge, developed separately... quantifies
+  over the `NIK` relation... needed nothing more from this file"). (2) Checked whether the
+  alternative Segment/MCS canonical-model route (`SegmentLindenbaum.lean`, used successfully for
+  `CK`/`CT`/`CS4`'s `CKValidFC`-completeness) could sidestep the need for this bridge — it cannot:
+  that route is the one task 517 exists to route AROUND, because it hits the box-backward wall
+  documented by `cs5_symmetric_tail_box_gap`/`cs5Incest_forces_symm`/`cs5TwoSidedR_iff_cs5Tail`
+  (task 509/512's dead ends; `SegmentLindenbaum.lean`'s own module docstring confirms "This is
+  false for `CS5`"). (3) Checked this task's own earlier decomposition
+  (`plans/02_decomposed-track-a-b-c.md`, `handoffs/00_RESUME-HERE.md`) for prior work on precisely
+  this bridge: it exists, under the name **"Track C" / "the adequacy bridge" (Simpson Lemma
+  6.1.2/6.2.2)**, and was explicitly flagged there as **"THE TRUE CRUX, HIGH risk"** after four
+  sub-phases (C1-C4: `Tele`/`Conj`, formulas 6.7/6.8, `LTree`/`star`/`prune`/`fullSubtree` +
+  unfolding identity) landed sorry-free in `probes/lemma612-scaffold.lean` and
+  `probes/track-c-c1-tele-conj.lean`, but **C5 (`pathSpine`, the whole-path recursion + its
+  commutation with `addChild`) was never started**, and C6-C8 (the truth-lemma cases consuming
+  C5) were never reached. (4) Attempted to find a smaller-scope shortcut specific to this task's
+  own toolkit (`NIK.relabelFresh`/`NIK.oldLabelTransport`, the "cofinite-from-one" trick that
+  closed Phase 8's box-backward case and Phase 5/6's "old label" sorries without the Ch.6
+  apparatus) — that trick is internal to `NIK` (it transports one NIK-derivation across labels,
+  never touching Hilbert) and does not translate: the missing step here is not "cofinite from
+  one" but "graph-labelled proof from single-formula proof," a different problem in kind, because
+  even a `NIKTheorem`-level derivation (starting from `Γ = []`) recurses through `boxI`/`diaE`
+  sub-derivations with non-empty, multi-label `Γ`s internally, so the general "internalize an
+  arbitrary open-assumption, multi-label context into one nested-modal formula" problem is
+  unavoidable and is not smaller than the Ch.6 theorem C5-C8 were built to solve.
+- **Why it's stuck**: this is a substantial, independently-scoped formalization project (Simpson's
+  Chapter 6 Adequacy Theorem, ~4-8+ dispatches by this task's own prior estimate, HIGH risk),
+  not a same-dispatch corollary of Phases 7-9. Plan 12 (v5) carried Phase 10's task list forward
+  from v4 "largely unchanged" while its Phases 1-9 focused on a different obstacle (the "old
+  label"/FLO reconstruction inside `primeLemma`); neither v4 nor v5's Phase 10 text accounts for
+  the Hilbert-to-labelled bridge, and no phase 1-9 dispatch built it (Phases 7-9 transcribe/build
+  purely *inside* the labelled system or purely semantically — none touch `DerivationTree`/
+  `Derivable`).
+- **What is needed**: a dedicated follow-up plan (new phases, or a new task) to build
+  `Adequacy.lean`: at minimum the theorem `NIKTheorem 𝒯_S5 φ → Derivable CS5ModalAxiom φ` (or the
+  more general form `NIK`-derivability implies `Derivable`-derivability of a suitably
+  internalized formula), by resuming `probes/lemma612-scaffold.lean`'s Track C at **C5**
+  (`pathSpine` + its `addChild` commutation lemma) and proceeding through **C6-C8** (the
+  induction cases that discharge the general translation), then wiring the result into Phase 10's
+  contrapositive assembly. This is scoped, bounded, HIGH-risk work explicitly separable from
+  Phases 1-9's (now complete) FLO/primeLemma/canonical-model/frame-class content.
+- **Prohibited workarounds**: do NOT use `sorry`, `def cs5_completeness := True`/`trivial`, or any
+  vacuous placeholder to close this gap. Do NOT weaken `cs5_completeness`'s target away from
+  `Derivable CS5ModalAxiom φ` (e.g. substituting `NIKTheorem 𝒯_S5 φ`) without explicit user
+  sign-off — that would silently narrow the task's own "Definition of done."
+
 ### Phase 11: Bookkeeping and paper fixes [NOT STARTED]
 
+- **Note (this dispatch)**: not attempted -- `Depends on: 10`, and Phase 10 is `[BLOCKED]` (see
+  its blocker note above and `handoffs/phase-10-adequacy-bridge-blocker-20260718.md`). Most of
+  this phase's tasks are mechanically independent of Phase 10's Lean content (bookkeeping/
+  docstring fixes, not proof work) and a future dispatch or the user MAY choose to run them ahead
+  of Phase 10's resolution -- this dispatch did not do so unilaterally, per plan-compliance.md's
+  sequencing rule.
 - **Goal:** clear the recorded follow-ups. (Carried from v4 Phase 9.)
 - **Tasks:**
   - [ ] Transcribe `cs5_fs` (the v3 decision-gate result, currently in `probes/`) into `Cslib/`.

@@ -239,23 +239,31 @@ table and the dense `extends`-chain paragraph into a legible tree/list.
 - Section 4 hierarchy rendered with the same-shape-as-cube callout.
 - `typst compile` exits 0.
 
-### Phase 4: Sections 5-7 and the Source-Anchor Appendix [NOT STARTED]
+### Phase 4: Sections 5-7 and the Source-Anchor Appendix [COMPLETED]
 
 **Goal**: Author the remaining sections (S5 = T+4+B; Design Rationale A vs. B; Scope Boundary) and
 the consolidated source-anchor appendix table.
 
 **Tasks**:
-- [ ] Section 5: render `s5Tags` vs. `kb5Tags` side by side (math or a 2-row table) and the short
+- [x] Section 5: render `s5Tags` vs. `kb5Tags` side by side (math or a 2-row table) and the short
       prose explaining why the `KB5 -> S5` edge is mechanically absent (the `decide`-false
       consequence).
-- [ ] Section 6: render the Representation A vs. B trade-off as the two-column comparison table
+- [x] Section 6: render the Representation A vs. B trade-off as the two-column comparison table
       (research Section 3.7) replacing the source's prose bullets.
-- [ ] Section 7: render the module-docstring excerpt via `#quote(block: true)` (optionally inside a
+- [x] Section 7: render the module-docstring excerpt via `#quote(block: true)` (optionally inside a
       `remark(...)`); list the out-of-scope intuitionistic/minimal families with their anchors.
-- [ ] Appendix: build one consolidated source-anchor table (File:lines | Declaration — section
+      Rendered the quote directly (not nested in a remark box) since the docstring text is already
+      visually distinct via `#quote(block: true)`; a remark wrapper would be redundant.
+- [x] Appendix: build one consolidated source-anchor table (File:lines | Declaration — section
       supported), mirroring `typst/MPL/chapters/06-appendix.typ`; wrap in `#text(size: 9.5pt)[...]`
-      if needed to fit page width.
-- [ ] `typst compile`; confirm exit 0.
+      if needed to fit page width. Used `8.7pt` and a compact `(§N, note)` column format (grepped
+      exact line numbers for every anchor against live source) after an initial `9pt` pass still
+      overflowed the header.
+- [x] `typst compile`; confirm exit 0. Confirmed, after fixing the appendix table's column-width
+      squeeze (same class of bug as Phase 2/3) and dropping an incidental "Phase 1 open item"
+      process-metadata phrase from one appendix cell (out of caution around the
+      no-task-references-in-deliverables rule's spirit, even though "Phase 1" is not a literal
+      task-number pattern).
 
 **Timing**: 1.0 hour
 

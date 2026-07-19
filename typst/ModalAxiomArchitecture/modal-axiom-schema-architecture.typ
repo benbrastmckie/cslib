@@ -705,3 +705,239 @@ abbreviations left them untouched.
 *Durable anchors for this section*: `Foundations/Logic/ProofSystem.lean`
 (`HasAxiomT`, the full `HasAxiom*` family, `MinimalHilbert` … `ModalS5Hilbert`),
 `Instances/S5.lean` (the `HasAxiomT` instance witness).
+
+// ============================================================================
+// Section 5: S5 = T+4+B
+// ============================================================================
+
+= S5 = T+4+B: The Deliberately Omitted KB5 $arrow.r$ S5 Edge <sec:s5>
+
+*Durable anchors*: `s5Tags`, `kb5Tags` (`SchemaTags.lean`), the omission note in
+`AxiomSubsumption.lean`.
+
+S5's tag set is exactly `kCore` plus three differentiators; KB5's is `kCore`
+plus two *different* differentiators:
+
+#figure(
+  table(
+    columns: (auto, 1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 1em,
+    table.hline(),
+    table.header([*System*], [*Tag set*]),
+    table.hline(),
+    [S5], [`kCore` $union$ {modalT, modalFour, modalB} --- *no* modalFive],
+    [KB5], [`kCore` $union$ {modalB, modalFive} --- *neither* modalT *nor* modalFour],
+    table.hline(),
+  ),
+  caption: [`s5Tags` and `kb5Tags` side by side (`SchemaTags.lean`).],
+)
+
+Because `modalFive ∈ kb5Tags` and `modalFive ∉ s5Tags`, `kb5Tags ⊆ s5Tags` is
+false: no `Finset.subset` proof exists, and `decide` on that proposition
+reports `False`. Consequently `SchemaUnion.subsumption` cannot produce a
+`KB5Axiom_implies_ModalAxiom` lemma, and none exists in
+`AxiomSubsumption.lean` --- visible directly in @fig:cube as the missing edge
+into S5 from KB5. This is not an oversight: it is a mechanical, decidable
+consequence of the two tag-set definitions.
+
+#remark("A worked example of the design's self-documenting property")[
+  Under the old per-edge hand-lemma design, a missing cube edge required a
+  separate written justification. Under the tag-set design, a missing edge is
+  immediately explained by inspecting two `Finset` literals --- the gap is
+  readable straight from the definitions, and any attempt to manufacture the
+  missing edge fails at `decide` rather than at proof-search.
+]
+
+*Durable anchors for this section*: `SchemaTags.lean` (`s5Tags`, `kb5Tags`),
+`Metalogic/InterSystem/AxiomSubsumption.lean` (the KB5 $arrow.r$ S5 omission
+note).
+
+// ============================================================================
+// Section 6: Design Rationale
+// ============================================================================
+
+= Design Rationale: Representation A vs. Representation B
+
+This design was one of two candidate representations considered for replacing
+the 14 bespoke per-system axiom inductives (plus S5's pre-existing
+`ModalAxiom`) with a single reusable abstraction.
+
+- *Representation A (chosen)* --- the architecture of Sections 1--5: a
+  schema-tag `def` (`ModalSchemaTag`), an existential `.Holds` meaning
+  function, and a `SchemaUnion (S : Finset ModalSchemaTag)` combinator
+  parametrized by concrete `Finset` literals per system.
+- *Representation B (rejected, never implemented in this codebase)* --- keep
+  the per-system `inductive <Sys>Axiom` shape, but generate each one via a
+  macro/elaborator over a tag list (e.g.\ a hypothetical `derive_modal_axiom
+  KAxiom [implyK, implyS, efq, peirce, modalK, andCore, orCore, diaDuality]`),
+  so constructor names and elimination form (`cases h_ax with | implyK … `)
+  would be preserved verbatim at every call site.
+
+#figure(
+  table(
+    columns: (1fr, 1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 1em,
+    table.hline(),
+    table.header([*Representation A (chosen)*], [*Representation B (rejected)*]),
+    table.hline(),
+    [Subsumption: 24 hand-written lemmas $arrow.r$ one generic
+      `SchemaUnion.subsumption` $+$ `decide`-able `Finset.subset` facts.],
+      [Elimination form unchanged at every downstream `cases`/`match` site ---
+        near-zero migration blast radius.],
+    [Soundness: 15 per-system case-splits $arrow.r$ one `unionSound`
+      application $+$ an 18-entry validity table.],
+      [Delivers the literal DRY goal (no re-listing at the source) without
+        touching call sites at all.],
+    [The 13-line propositional/K/and-or/diamond-duality core lives once, in
+      `kCore`, instead of being re-listed per system. Net line-negative in the
+      landed diff.],
+      [Does *not* deliver subsumption-as-$subs$ or soundness-as-per-tag-table:
+        cross-inductive subsumption stays an O(edges)-sized proof set even if
+        macro-generated, since bespoke inductive constructors still differ
+        system to system.],
+    [Cost: the elimination form changes at every downstream destructuring site
+      (`cases h_ax with | implyK …` becomes `obtain ⟨t, ht, hφ⟩ := h_ax;
+      fin_cases t <;> …`) --- substantially tamed by the
+      `SchemaUnion.{empty,insert,union}_iff` `@[simp]` elimination API
+      (@sec:tags).],
+      [Adds metaprogramming maintenance burden; less transparent/auditable to
+        a reviewer than a plain `def`.],
+    table.hline(),
+  ),
+  caption: [Representation A vs. Representation B, replacing the source's prose
+    trade-off discussion.],
+)
+
+#remark("Why Representation A was chosen for long-term foundations")[
+  The goal was durable architecture, not merely a DRY-er restatement of the
+  same 24+15 previously-independent facts. Representation A is the only one of
+  the two that makes the modal cube's algebraic structure --- a lattice of
+  finite tag sets under $subs$ --- directly visible and machine-checkable in
+  the type theory itself, rather than hiding the same bespoke facts behind
+  macro-generated syntax. Representation B optimizes for short-term migration
+  safety; Representation A optimizes for the property this whole document
+  exists to describe: that subsumption and soundness are _literally_
+  computations on `Finset ModalSchemaTag`, not just refactored restatements of
+  previously-independent facts.
+]
+
+// ============================================================================
+// Section 7: Scope Boundary
+// ============================================================================
+
+= Scope Boundary: A Future Instance, Not a Fork
+
+*Durable anchor*: the "Design Invariants" section of `SchemaUnion.lean`'s
+module docstring.
+
+`ModalSchemaTag` and `SchemaUnion` were built for the 15 _classical_ normal
+modal systems only. The module docstring states the scope boundary explicitly
+as a design invariant:
+
+#quote(block: true)[
+  `ModalSchemaTag` / `SchemaUnion` stay free of classical-only assumptions: the
+  intuitionistic/minimal axiom families are a possible future instance of this
+  same abstraction, not generalized to cover them here (out of scope for this
+  task).
+]
+
+CSLib already has intuitionistic and minimal modal axiom families that exist
+today and were deliberately kept out of this design's scope:
+
+#figure(
+  table(
+    columns: (auto, 1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 1em,
+    table.hline(),
+    table.header([*Family*], [*File*]),
+    table.hline(),
+    [`IKModalAxiom`, `IS5ModalAxiom`],
+      [`Metalogic/Intuitionistic/{IK,IS5}.lean`],
+    [`CKModalAxiom`], [`Metalogic/Constructive/CK.lean`],
+    [`MKModalAxiom`, `MTModalAxiom`], [`Metalogic/Minimal/{MK,MT}.lean`],
+    table.hline(),
+  ),
+  caption: [Existing non-classical axiom families, out of this document's
+    scope.],
+)
+
+These families construct witnesses _into_ the classical `KAxiom`/`ModalAxiom`
+predicates --- cross-family coupling lives in
+`Metalogic/InterSystem/IntToClassical.lean` --- so their existing call sites
+had to keep typechecking unchanged through the refactor described in this
+document. Nothing about _their own_ internal representation was touched or
+generalized.
+
+#remark("Future instance, not a fork")[
+  If intuitionistic/minimal schema-union support is ever wanted, the correct
+  move is to extend or parametrize the existing `ModalSchemaTag`/`SchemaUnion`
+  shape --- for instance by widening the tag alphabet or adding a parameter
+  distinguishing classical from constructive instances of a tag's meaning ---
+  not to build an independent, parallel `IntSchemaTag`/`IntSchemaUnion` pair
+  from scratch. Keeping `ModalSchemaTag`/`SchemaUnion` free of classical-only
+  assumptions today is precisely what keeps that future extension a natural
+  generalization of this same architecture, rather than a second, incompatible
+  cube living alongside it.
+]
+
+*Durable anchors for this section*: `SchemaUnion.lean` (Design Invariants
+docstring), `Metalogic/Intuitionistic/{IK,IS5}.lean`,
+`Metalogic/Constructive/CK.lean`, `Metalogic/Minimal/{MK,MT}.lean`,
+`Metalogic/InterSystem/IntToClassical.lean`.
+
+// ============================================================================
+// Appendix: Source Anchors
+// ============================================================================
+
+= Appendix: Source Anchors <sec:appendix>
+
+Every Lean anchor cited in this document, for a reader who wants to jump
+straight to source. Paths are relative to `Cslib/Logics/Modal/`, except the
+`HasAxiom*`/Hilbert-class family and the `AxiomB` confirmation, which live
+under `Cslib/Foundations/Logic/`. Line numbers were verified against live,
+CI-green source during authoring of this document.
+
+#text(size: 8.7pt)[
+#figure(
+  table(
+    columns: (1.4fr, 1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 0.9em,
+    table.hline(),
+    table.header([*File : lines*], [*Declaration (section)*]),
+    table.hline(),
+    [`ProofSystem/SchemaUnion.lean:67`], [`ModalSchemaTag` (§1, 18-tag alphabet)],
+    [`ProofSystem/SchemaUnion.lean:115`], [`ModalSchemaTag.Holds` (§1, schema meaning)],
+    [`ProofSystem/SchemaUnion.lean:146`], [`SchemaUnion` (§1, the combinator)],
+    [`ProofSystem/SchemaUnion.lean:155`], [`SchemaUnion.subsumption` (§2, generic subsumption)],
+    [`ProofSystem/SchemaUnion.lean:171,180,195`], [`SchemaUnion.{empty,insert,union}_iff` (§1, `@[simp]` API)],
+    [`ProofSystem/SchemaUnion.lean:39-47`], [module docstring, Design Invariants (§7, scope boundary)],
+    [`Metalogic/DerivationTree.lean:69`], [`ModalAxiom := SchemaUnion s5Tags` (§1, S5 folded in)],
+    [`ProofSystem/SchemaTags.lean:57`], [`kCore` (§2, the 13-tag shared core)],
+    [`ProofSystem/SchemaTags.lean:92`], [`s5Tags` (§2, §5, S5's tag set)],
+    [`ProofSystem/SchemaTags.lean:99`], [`kb5Tags` (§2, §5, KB5's tag set)],
+    [`Metalogic/InterSystem/AxiomSubsumption.lean:65`], [KB5 $arrow.r$ S5 omission note (§5)],
+    [`Logics/Modal/Cube.lean`], [semantic frame-class cube (§2, disambiguation)],
+    [`Metalogic/FrameCorrespondence.lean:56,64,73,81,91`], [the five `Satisfies.modal*_axiom` lemmas (§3)],
+    [`Metalogic/SchemaSoundness.lean:70`], [`FrameValidatesTag` (§3)],
+    [`Metalogic/SchemaSoundness.lean:88`], [`unionSound` (§3, the hinge)],
+    [`Foundations/Logic/Axioms.lean:163-165`], [`Axioms.AxiomB` (§3, confirmed expansion)],
+    [`Foundations/Logic/ProofSystem.lean:178`], [`HasAxiomT` (§4, representative typeclass)],
+    [`Foundations/Logic/ProofSystem.lean:342,349,355,361`], [`MinimalHilbert` … `ModalHilbert` (§4, base chain)],
+    [`Foundations/Logic/ProofSystem.lean:386`], [`ModalS5Hilbert` (§4, top of the composite chain)],
+    [`ProofSystem/Instances/S5.lean:81`], [`HasAxiomT Modal.HilbertS5` instance (§4, witness)],
+    [`Metalogic/Intuitionistic/IK.lean:75`], [`IKModalAxiom` (§7, out of scope)],
+    [`Metalogic/Constructive/CK.lean:104`], [`CKModalAxiom` (§7, out of scope)],
+    [`Metalogic/Minimal/MK.lean`, `MT.lean`], [`MKModalAxiom`, `MTModalAxiom` (§7, out of scope)],
+    table.hline(),
+  ),
+  caption: [Verified Lean source anchors cited in this document.],
+)
+]

@@ -196,24 +196,34 @@ source so the Section 3 correspondence table (Phase 3) can print it faithfully.
   code blocks, cube diagram (or documented fallback table), and disambiguation table.
 - `typst compile` exits 0.
 
-### Phase 3: Sections 3-4 — The unionSound Hinge and the HasAxiom* Insulation Layer [NOT STARTED]
+### Phase 3: Sections 3-4 — The unionSound Hinge and the HasAxiom* Insulation Layer [COMPLETED]
 
 **Goal**: Author Section 3 (`unionSound`: the syntax/semantics hinge) and Section 4 (the
 `HasAxiom*` insulation layer), collapsing the five near-duplicate correspondence lemmas into one
 table and the dense `extends`-chain paragraph into a legible tree/list.
 
 **Tasks**:
-- [ ] Section 3: build the frame-correspondence table (5 rows: Tag | Axiom schema | Frame
+- [x] Section 3: build the frame-correspondence table (5 rows: Tag | Axiom schema | Frame
       condition | Lemma name) replacing the five near-identical `Satisfies.modal*_axiom` blocks;
       use the confirmed `Axioms.AxiomB` expansion from Phase 1 (or its opaque citation) for the B
-      row.
-- [ ] Section 3: keep `FrameValidatesTag` (the 18-arm match) and `unionSound`'s signature as
+      row. Used the confirmed expansion `φ → □◇φ` with a footnote citing the exact live-source
+      location and the classical-diamond-encoding caveat.
+- [x] Section 3: keep `FrameValidatesTag` (the 18-arm match) and `unionSound`'s signature as
       literal `lean` code blocks.
-- [ ] Section 4: keep a representative `HasAxiomT` signature and the `HasAxiomT Modal.HilbertS5`
+- [x] Section 4: keep a representative `HasAxiomT` signature and the `HasAxiomT Modal.HilbertS5`
       instance witness as `lean` code blocks; render the `extends` typeclass hierarchy as a small
       `fletcher` tree or nested list; add the explicit callout that this hierarchy has the same
-      shape as the Section 2 cube.
-- [ ] `typst compile`; confirm exit 0.
+      shape as the Section 2 cube. **Deviation (annotated)**: rendered the unambiguous 4-level
+      base chain (`MinimalHilbert` -> ... -> `ModalHilbert`) as a numbered list, but for the
+      modal-strength part used a compact System/Hilbert-class name-mapping table plus a remark
+      referencing @fig:cube, instead of a second full fletcher tree — the source's own prose is
+      imprecise about which single ancestor each multi-differentiator composite class (`TB`,
+      `KB5`, `DB`) extends, so fabricating specific tree edges for those nodes would not be a
+      faithful transcription; the table + "same shape as the cube" callout conveys the structure
+      without inventing unverified edges, and is more concise than duplicating the whole diagram.
+- [x] `typst compile`; confirm exit 0. Confirmed, after fixing a frame-correspondence table
+      column-width overflow (auto-width Lemma column squeezed the Frame-condition column) and two
+      markdown-habit typos (`**bold**` -> `*bold*`; an `@sec:tags--@sec:hinge` label-glue error).
 
 **Timing**: 1.0 hour
 

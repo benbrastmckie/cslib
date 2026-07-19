@@ -506,3 +506,202 @@ cube of this section:
     This document is about the syntactic tag-set cube only.],
 )
 ]
+
+// ============================================================================
+// Section 3: unionSound -- The Syntax/Semantics Hinge
+// ============================================================================
+
+= `unionSound`: The Syntax/Semantics Hinge <sec:hinge>
+
+*Durable anchors*: `unionSound`, `FrameValidatesTag` (`Metalogic/SchemaSoundness.lean`);
+`Satisfies.modalT_axiom`, `Satisfies.modalFour_axiom`, `Satisfies.modalB_axiom`,
+`Satisfies.modalD_axiom`, `Satisfies.modalFive_axiom` (`Metalogic/FrameCorrespondence.lean`).
+
+Subsumption is the syntactic collapse (@sec:cube); soundness is the semantic
+one. Just as the 24 subsumption edges collapse to one generic lemma, the 15
+systems' soundness proofs collapse to one master lemma, #lean("unionSound"),
+built on a small reusable library of frame-condition-to-validity
+correspondence facts.
+
+== The five frame-correspondence lemmas
+
+Each of the five modal-strength differentiator axioms is valid on any model
+whose accessibility relation satisfies the matching frame condition
+(`FrameCorrespondence.lean`), replacing five near-identical
+`Satisfies.modal*_axiom` blocks with one table:
+
+#text(size: 9pt)[
+#figure(
+  table(
+    columns: (0.7fr, 1.2fr, 1.9fr, 1.1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 0.6em,
+    table.hline(),
+    table.header([*Tag*], [*Axiom schema*], [*Frame condition*], [*Lemma\ (`Satisfies.…`)*]),
+    table.hline(),
+    [`modalT`], [$nec phi.alt imp phi.alt$], [$forall w, m.r(w,w)$ (reflexive)],
+      [`modalT_axiom`],
+    [`modalFour`], [$nec phi.alt imp nec nec phi.alt$],
+      [$forall w_1 w_2 w_3, m.r(w_1,w_2) imp m.r(w_2,w_3) imp m.r(w_1,w_3)$ (transitive)],
+      [`modalFour_axiom`],
+    [`modalB`], [$phi.alt imp nec poss phi.alt$ #footnote[Confirmed against live
+        source (`Foundations/Logic/Axioms.lean:163-165`): `Axioms.AxiomB φ := φ →
+        □(□(φ → ⊥) → ⊥)`. This is the textbook shape `φ → □◇φ` with $poss$
+        classically encoded as $not nec not$ (no primitive `HasDia` in this
+        signature).]],
+      [$forall w_1 w_2, m.r(w_1,w_2) imp m.r(w_2,w_1)$ (symmetric)],
+      [`modalB_axiom`],
+    [`modalD`], [$nec phi.alt imp poss phi.alt$], [`Relation.Serial` $m.r$ (serial)],
+      [`modalD_axiom`],
+    [`modalFive`], [$poss phi.alt imp nec poss phi.alt$],
+      [$forall w_1 w_2 w_3, m.r(w_1,w_2) imp m.r(w_1,w_3) imp m.r(w_2,w_3)$ (Euclidean)],
+      [`modalFive_axiom`],
+    table.hline(),
+  ),
+  caption: [The five frame-correspondence lemmas, replacing five near-identical
+    `Satisfies.modal*_axiom` Lean blocks. Each lemma's docstring records its
+    provenance against Blackburn, de Rijke, and Venema, _Modal Logic_
+    (Cambridge, 2001), Chapter 4, Definition 4.9 and Table 4.1.],
+) <fig:correspondence>
+]
+
+== `FrameValidatesTag` and `unionSound`
+
+`FrameValidatesTag` packages the semantic obligation uniformly over all 18
+tags: `True` for the 13 frame-unconditional tags, and exactly the
+frame-condition hypothesis for the 5 differentiators --- keeping the interface
+`unionSound` consumes uniform, so the 13 trivial obligations discharge by
+`trivial` rather than requiring a type-level conditional split:
+
+```lean
+def FrameValidatesTag {World} (m : Model World Atom) : ModalSchemaTag → Prop
+  | .modalT => ∀ w, m.r w w
+  | .modalD => Relation.Serial m.r
+  | .modalB => ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁
+  | .modalFour => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃
+  | .modalFive => ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃
+  | .implyK | .implyS | .efq | .peirce | .modalK
+  | .andI | .andE1 | .andE2 | .orI1 | .orI2 | .orE
+  | .diaDualityFwd | .diaDualityBack => True
+```
+
+#lean("unionSound") is the master combinator --- the hinge itself:
+
+```lean
+theorem unionSound {World : Type*} (S : Finset ModalSchemaTag) (m : Model World Atom)
+    (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ : Proposition Atom} (h : SchemaUnion S φ)
+    (w : World) : Satisfies m w φ
+```
+
+Its proof is a single `cases t with` over all 18 tags. The 13
+frame-unconditional cases reuse the existing validity atoms in
+`Metalogic/Soundness.lean` (`Satisfies.implyK_axiom`, …,
+`Satisfies.diaDualityBack_axiom`) read-only, and the 5 differentiator cases
+each delegate directly to the corresponding `FrameCorrespondence` lemma above
+(e.g.\ `exact Satisfies.modalT_axiom m hval w φ'`) rather than re-deriving the
+frame argument inline.
+
+#remark("The hinge, plainly")[
+  The frame-correspondence library (semantic side) and the schema-union
+  combinator (syntactic side) are two halves of one abstraction, and
+  `unionSound` is the hinge between them --- every per-system soundness proof
+  specializes this one lemma instead of re-deriving a per-system case-split.
+]
+
+*Durable anchors for this section*: `Metalogic/FrameCorrespondence.lean` (the
+five `Satisfies.modal*_axiom` lemmas), `Metalogic/SchemaSoundness.lean`
+(`FrameValidatesTag`, `unionSound`), `Metalogic/Soundness.lean` (the 13
+frame-unconditional validity atoms `unionSound` reuses).
+
+// ============================================================================
+// Section 4: The HasAxiom* Insulation Layer
+// ============================================================================
+
+= The `HasAxiom*` Insulation Layer <sec:insulation>
+
+*Durable anchor*: `Cslib/Foundations/Logic/ProofSystem.lean`.
+
+Everything in Sections 1--3 (@sec:tags, @sec:cube, @sec:hinge) lives at the _axiom-predicate_ layer: the
+definition of which `Proposition` instances count as axioms for a given
+system. A separate, higher layer --- `Foundations/Logic/ProofSystem.lean` ---
+defines one `HasAxiom*` typeclass per schema (`HasAxiomImplyK`,
+`HasAxiomImplyS`, `HasAxiomEFQ`, `HasAxiomPeirce`, `HasAxiomK`, `HasAxiomT`,
+`HasAxiom4`, `HasAxiomB`, `HasAxiom5`, `HasAxiomD`, the and/or family, and
+`HasAxiomDiaDualityFwd`/`Back`, plus non-modal and temporal classes outside
+this document's scope). A representative signature:
+
+```lean
+class HasAxiomT where
+  T {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomT φ)
+```
+
+Crucially, `HasAxiomT` asserts _derivability of the axiom instance_ --- it says
+nothing about _how the underlying `<Sys>Axiom` predicate is constructed_.
+These typeclasses are bundled via `extends` into a hierarchy of Hilbert-system
+classes:
+
++ `MinimalHilbert` extends into `IntuitionisticHilbert`,
++ which extends into `ClassicalHilbert`,
++ which extends into `ModalHilbert`.
+
+`ModalHilbert` is then extended by one class per modal-strength differentiator
+or combination, graph-isomorphic to the Section 2 cube (@fig:cube) --- each
+`Modal{Sys}Hilbert` class plays the role of the corresponding node:
+
+#figure(
+  table(
+    columns: (auto, 1fr, auto, 1fr),
+    stroke: none,
+    align: left,
+    column-gutter: 0.8em,
+    table.hline(),
+    table.header([*System*], [*Hilbert class*], [*System*], [*Hilbert class*]),
+    table.hline(),
+    [K], [`ModalHilbert`], [TB], [`ModalTBHilbert`],
+    [T], [`ModalTHilbert`], [KB5], [`ModalKB5Hilbert`],
+    [D], [`ModalDHilbert`], [D4], [`ModalD4Hilbert`],
+    [KB], [`ModalBHilbert`], [D5], [`ModalD5Hilbert`],
+    [K4], [`ModalK4Hilbert`], [D45], [`ModalD45Hilbert`],
+    [K5], [`ModalK5Hilbert`], [DB], [`ModalDBHilbert`],
+    [S4], [`ModalS4Hilbert`], [S5], [`ModalS5Hilbert`],
+    [K45], [`ModalK45Hilbert`], [], [],
+    table.hline(),
+  ),
+  caption: [The `extends` hierarchy's node names, in the same 15-node/24-edge
+    shape as @fig:cube: `ModalS4Hilbert extends ModalTHilbert`,
+    `ModalK45Hilbert extends ModalK4Hilbert`, `ModalTBHilbert`/`ModalKB5Hilbert`/
+    `ModalD4Hilbert`/`ModalD5Hilbert`/`ModalDBHilbert` each extend their
+    respective single-differentiator ancestor, `ModalD45Hilbert extends
+    ModalD4Hilbert`, up to `ModalS5Hilbert extends ModalS4Hilbert`.],
+)
+
+#remark("Same shape as the cube")[
+  This is not a coincidence: the `HasAxiom*` layer is representation-agnostic
+  (it only ever asks for a `DerivableIn` proof), so the class hierarchy tracks
+  the same $subs$-order on differentiator sets that @sec:cube already
+  established for tag sets. Two independent layers, one shape.
+]
+
+*Why this is "representation-agnostic insulation"*, not merely asserted but
+verified in the landed code: `Instances/S5.lean` discharges `HasAxiomT` for
+`Modal.HilbertS5` by constructing a `DerivationTree` witness,
+
+```lean
+instance : HasAxiomT Modal.HilbertS5 (F := Modal.Proposition Atom) where
+  T := ⟨Modal.DerivationTree.ax [] _ (⟨.modalT, by decide, _, rfl⟩)⟩
+```
+
+i.e.\ a tag-membership proof (`.modalT ∈ s5Tags`, discharged by `decide`) plus
+a `.Holds` witness. `HasAxiomT` itself never inspects whether the underlying
+`<Sys>Axiom` predicate is a bespoke `inductive` or a `SchemaUnion` combinator
+--- it only ever requires a `DerivableIn` proof. This is the load-bearing
+property that made the `SchemaUnion` refactor additive with zero blast radius
+at every downstream consumer: the `Systems/*/Completeness.lean` and
+`Systems/*/ConservativeExtension.lean` layers route exclusively through this
+`HasAxiom*`/bundled-class layer, so replacing 14 inductives with `SchemaUnion`
+abbreviations left them untouched.
+
+*Durable anchors for this section*: `Foundations/Logic/ProofSystem.lean`
+(`HasAxiomT`, the full `HasAxiom*` family, `MinimalHilbert` … `ModalS5Hilbert`),
+`Instances/S5.lean` (the `HasAxiomT` instance witness).

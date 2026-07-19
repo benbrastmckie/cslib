@@ -131,6 +131,36 @@ blast-radius findings, and the resolved design decision.
 - The elimination-form change and the ~36 `IntToClassical.lean` hand-rewrites are ACCEPTED costs,
   not risks to be avoided.
 
+**Design invariants (the principled foundations this refactor exists to establish)** — these are
+what make Representation A *elegant* rather than merely de-duplicated; treat them as binding, not
+aspirational:
+
+1. **Subsumption IS `Finset.subset`; the modal cube IS a computation on tag sets.** The system
+   hierarchy (K ⊂ T ⊂ S4 ⊂ S5, …) must be *literally* the ⊆-order on per-system tag sets, so each
+   `XAxiom_implies_YAxiom` reduces to a `Finset.subset` fact discharged by `decide` through the
+   single generic subsumption lemma. Do not reintroduce per-edge hand proofs. This is the primary
+   structural payoff.
+2. **Soundness is a syntax/semantics factorization, and it COMPOSES WITH TASK 522.** `unionSound`
+   separates *which schemata* (the tag set — syntax) from *why each is valid* (the per-tag frame
+   condition — semantics). The five frame-conditioned tags (`modalT/D/B/Four/Five`) map one-to-one
+   onto the five lemmas already delivered in `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean`
+   (`Satisfies.modalT_axiom`/`modalFour_axiom`/`modalB_axiom`/`modalD_axiom`/`modalFive_axiom`,
+   explicit-hypothesis form). The per-tag validity table (Phase 2) MUST consume those library
+   lemmas as its witnesses — not re-prove the frame arguments inline. 522 (semantic side) and 523
+   (syntactic side) are the two halves of one abstraction; `unionSound` is the hinge.
+3. **`.Holds` is the faithful "schema = set of its instances" encoding.** Keep the existential-
+   over-metavariables form (`∃ φ ψ, χ = …`) and `Finset` (not `Set`) for the tag collection — the
+   alphabet is finite (18), so `Finset` gives `DecidableEq`, decidable membership, and the
+   subsumption lattice for free. Do not swap to a decidable-pattern or `Set` encoding for local
+   convenience.
+4. **S5 unification removes a special case, it does not add one.** `S5Axiom` becomes
+   `SchemaUnion (core ∪ {modalT, modalFour, modalB})`, folding legacy `ModalAxiom` into the same
+   scheme behind a `@[deprecated]` alias — never a bespoke branch retained alongside the combinator.
+5. **Scope-open, not forked.** Build the combinator for the classical 15; keep `ModalSchemaTag` /
+   `SchemaUnion` free of classical-only assumptions so the intuitionistic/minimal families are a
+   *future instance* of the same abstraction, not a parallel copy — WITHOUT generalizing to cover
+   them now (out of scope; YAGNI).
+
 ## Goals & Non-Goals
 
 **Goals**:
@@ -224,8 +254,13 @@ per-system case-splits.
       (h : SchemaUnion S φ) (w) : Satisfies m w φ` (report §5 signature).
 - [ ] Populate the 13 frame-unconditional entries by reusing the existing atoms in
       `Metalogic/Soundness.lean` (`Satisfies.implyK_axiom`, …, `diaDualityBack`) — read-only reuse.
-- [ ] Port the 5 frame-conditioned validity proofs (`modalT/D/B/Four/Five`) from the current
-      inline per-system soundness proofs into the table.
+- [ ] Populate the 5 frame-conditioned entries (`modalT/D/B/Four/Five`) by **delegating to the
+      task-522 library lemmas** in `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean`
+      (`Satisfies.modalT_axiom (m) (h_refl) (w) (φ)`, `modalFour_axiom (h_trans)`,
+      `modalB_axiom (h_symm)`, `modalD_axiom (h_serial)`, `modalFive_axiom (h_eucl)`) — do NOT
+      re-prove the frame arguments inline (design invariant 2, the 522 composition). `FrameValidatesTag`
+      for these five is exactly the explicit frame hypothesis those lemmas take; `unionSound`'s
+      `hfc` obligation threads it. Add `public import ...FrameCorrespondence` here.
 
 **Estimated output**: ~200-350 lines. **Depends on**: 1.
 

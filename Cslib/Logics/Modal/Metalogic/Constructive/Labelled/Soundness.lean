@@ -810,6 +810,41 @@ theorem nik_TS5_consistent {Atom : Type u} :
   intro h
   exact nik_soundness_onePoint (val := fun _ _ => True) h (by simp)
 
+/-! ## Tree-cascade lifting lemma (task 537 Phase 7, Simpson 8.1.3, chunks 0154-0155)
+
+Completes the finite-component cascade `boxI_lift_star` left open (see that section's docstring),
+taking `IsDerivationForest G` as an explicit hypothesis (audit report 03 §3). The recursion is
+split into two independently-tractable pieces, avoiding any need for a general BFS/cycle-freeness
+theorem over the raw `Graph`:
+
+1. **`ht_le_of_reflTransGen`**: rank is non-decreasing along forward `G.R`-reachability -- a
+   direct consequence of the graded-rank conjunct, needing no acyclicity argument.
+2. **`raise_subtree`**: the "downward cascade" -- given a node `p` already raised to a *fixed*
+   target `wp`, raise `p` together with the entire forward-reachable closure through a chosen
+   `Finset` of `p`'s direct raw-neighbours, via repeated `cs5FCIncest_lift` (F1). Proved by
+   well-founded recursion on `Set.ncard {q ∈ G.X | ht q ≥ ht p}` (strictly decreasing at each
+   child, since graded rank forces `ht c > ht p`), nested with `Finset.induction` over the
+   sibling set at each level. Disjointness of different children's downward closures follows
+   directly from the unique-parent conjunct (no separate tree lemma needed): if a shared
+   descendant existed, unique-parent applied to the last edge of the closing path forces the two
+   children to coincide.
+3. **`boxI_lift`**: raises `x` to the adversarial `w'` via `cs5FCIncest_raise`-driven walk up the
+   (unique, by unique-parent) ancestor chain, invoking `raise_subtree` for the sibling branches
+   hanging off each ancestor, and `raise_subtree` once more for `x`'s own full descendant set. -/
+
+/-- **Rank is non-decreasing along forward `G.R`-reachability.** If `z` is reachable from `a` via
+zero or more raw `R`-steps, then `ht a ≤ ht z`. Pure consequence of the graded-rank conjunct of
+`IsDerivationForest` (no acyclicity/BFS-uniqueness argument needed): each step strictly increases
+`ht` by exactly 1, so it can never come back down. -/
+theorem ht_le_of_reflTransGen {Atom : Type u} {G : Graph Atom} {ht : Label Atom → ℕ}
+    (hgrad : ∀ a b, G.R a b → ht b = ht a + 1) {a z : Label Atom}
+    (h : Relation.ReflTransGen G.R a z) : ht a ≤ ht z := by
+  induction h with
+  | refl => exact le_refl _
+  | tail _ hyz ih =>
+      have heq := hgrad _ _ hyz
+      omega
+
 end Cslib.Logic.Modal.Labelled
 
 end

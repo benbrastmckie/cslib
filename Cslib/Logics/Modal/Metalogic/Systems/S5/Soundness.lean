@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic S5
@@ -54,7 +53,7 @@ theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
   have h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁ :=
     fun w₁ w₂ hr => h_eucl w₁ w₂ w₁ hr (h_refl w₁)
   unionSound s5Tags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_s5Tags_iff_ModalAxiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## S5 Soundness Theorems -/

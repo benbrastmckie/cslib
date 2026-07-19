@@ -37,7 +37,7 @@ next_project_number: 537
 ### Modal Logic
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-517 [IMPLEMENTING] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
+517 [BLOCKED] — ROUTE B (user-funded, full build): Build a LABELLED / bounded-con
 522 [PR READY] — Uniform frame-condition to axiom correspondence library for modal
 523 [IMPLEMENTING] — Schema-union axiom combinator to replace the hand-written per-sys
   └─ 536 [NOT STARTED] — Document the modal axiom-schema architecture in a new docs/ direc
@@ -329,7 +329,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 
 ### 517. Labelled bounded context cs5 completeness
 - **Effort**: 40-70 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

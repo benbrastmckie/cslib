@@ -430,15 +430,29 @@ is out of scope for Phase 3; that is Phase 5).
 
 ---
 
-### Phase 4: Migrate 15 per-system soundness proofs to `unionSound` [NOT STARTED]
+### Phase 4: Migrate 15 per-system soundness proofs to `unionSound` [IN PROGRESS]
 
 **Goal**: Replace each `Systems/*/Soundness.lean` case-split with a `unionSound` call fed by that
 system's tag→validity table (net deletion), one small group per agent run. Public soundness
 theorem names stay stable; use the Phase 3 bridge where a caller still expects the inductive form.
 
-**Sub-phase 4.1 — K, T, D, B** [NOT STARTED]
-- [ ] Rewrite `<sys>_axiom_sound` (K/T/D/B) through `unionSound` + the per-system tag→validity table.
+**Sub-phase 4.1 — K, T, D, B** [COMPLETED]
+- [x] Rewrite `<sys>_axiom_sound` (K/T/D/B) through `unionSound` + the per-system tag→validity table.
 - Files: `Systems/{K,T,D,B}/Soundness.lean`. Estimated output: ~120-220 lines net (deletion-heavy).
+- **Completion note**: Each `<sys>_axiom_sound` is now `unionSound sysTags m hfc (bridge.mpr h_ax) w`
+  where `hfc := fun t ht => by fin_cases ht <;> first | trivial | exact <frame_hyp>` (K has no
+  frame hyp — all 13 goals close by `trivial`; T/D/B each supply exactly one: `h_refl`/`h_serial`/
+  `h_symm`). `fin_cases ht` required an explicit `public import Mathlib.Tactic.FinCases` in each
+  file — not transitively available via `Cslib.Init`/`SchemaBridges`/`SchemaSoundness` (first
+  build attempt failed with "unknown tactic"; fixed by adding the direct import, permitted since
+  only the 15 `Systems/*/Soundness.lean` files are in scope for this phase). Public names
+  (`k_axiom_sound`, `k_soundness`, `k_soundness_derivable`, `t_axiom_sound`, `t_soundness`,
+  `d_axiom_sound`, `d_soundness`, `b_axiom_sound`, `b_soundness`) all byte-stable — only the
+  `_axiom_sound` bodies changed; the `_soundness`/`_soundness_derivable` wrappers were untouched
+  since they already just call `<sys>_axiom_sound`. Zero `sorry`, zero new axiom (`lean_verify` on
+  `k_soundness` and `b_axiom_sound` report only `propext`/`Classical.choice`/`Quot.sound`). Scoped
+  `lake build` of all four modules, `lake exe checkInitImports`, and `lake exe lint-style` all
+  green.
 
 **Sub-phase 4.2 — K4, K5, K45, S4** [NOT STARTED]
 - [ ] Rewrite the four soundness proofs through `unionSound`.

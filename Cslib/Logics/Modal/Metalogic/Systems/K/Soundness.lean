@@ -8,6 +8,9 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
+public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
+public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic K
 
@@ -37,24 +40,16 @@ variable {Atom : Type*}
 
 /-! ## K Axiom Soundness (BRV Definition 4.9 for K) -/
 
-/-- Every axiom of K is valid over all frames (no frame conditions needed). -/
+/-- Every axiom of K is valid over all frames (no frame conditions needed).
+
+Routed through the schema-union master soundness lemma `unionSound`: `kTags` carries no
+modal-strength differentiator (K's `modalK` is already in `kCore`), so every per-tag
+obligation discharges by `trivial`. -/
 theorem k_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : KAxiom φ) (m : Model World Atom)
-    (w : World) : Satisfies m w φ := by
-  cases h_ax with
-  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
-  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
-  | efq φ => exact Satisfies.efq_axiom m w φ
-  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
-  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
-  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
-  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
-  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
-  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
-  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
-  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
-  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+    (w : World) : Satisfies m w φ :=
+  unionSound kTags m (fun t ht => by fin_cases ht <;> trivial)
+    (schemaUnion_kTags_iff_KAxiom.mpr h_ax) w
 
 
 /-! ## K Soundness Theorems -/

@@ -984,11 +984,11 @@ become identities and are dropped in 8.4.
       rollout (SchemaUnion.lean's design invariants exclude intuitionistic/minimal families) and
       were excluded from the grep-gate scope.
 
-**Sub-phase 8.3 — redefine the inductives; trivialize bridges; delete private helpers** [NOT STARTED]
+**Sub-phase 8.3 — redefine the inductives; trivialize bridges; delete private helpers** [COMPLETED]
 
 *(Unblocked once 8.2 lands and the grep-gate below passes. The blocker finding from the first
 attempt is preserved verbatim as the first task's note.)*
-- [ ] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
+- [x] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
       `<Sys>Axiom`/`ModalAxiom` inductive (migrated in Phases 4/6/7 AND now 8.2). Predicate references remain.
       **FIRST-ATTEMPT FINDING (now addressed by 8.2): this check FAILED on the first try.** All 15 `Systems/*/Completeness.lean` files
       (`K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB`) contain live constructor-construction
@@ -1024,17 +1024,32 @@ attempt is preserved verbatim as the first task's note.)*
       existential-witness form — mirroring the `⟨.tag, by decide, …, rfl⟩` pattern already used
       in `IntToClassical.lean` and the Phase-7 private helpers — BEFORE the inductives can be
       redefined).
-- [ ] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean` and S5's `ModalAxiom`
+- [x] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean` and S5's `ModalAxiom`
       (`Metalogic/DerivationTree.lean:64`) as `abbrev/def := SchemaUnion sysTags` (per the
       reducibility decision above), importing `SchemaTags.lean`. Delete the 15 Phase-7 private
-      `{sys}Tags_of_schemaUnion` helpers (now redundant). **NOT STARTED — blocked by the grep-confirm
-      finding above.**
-- [ ] Replace each bridge proof in `SchemaBridges.lean` with `Iff.rfl` (or delete it if unused after
-      8.3) so the file still compiles at this checkpoint. **NOT STARTED — blocked.**
+      `{sys}Tags_of_schemaUnion` helpers (now redundant).
+      DONE — `abbrev` used for all 15 systems (no fallback to `def` was needed anywhere;
+      no over-eager-unfolding/simp-loop/elaboration-perf/readability problems observed).
+      Landed in 4 committed sub-groups: 8.3a (K,T,D,B — commit `d9fe0c8b`), 8.3b
+      (K4,K5,K45,S4 — commit `4d0383b1`), 8.3c (S5 via `ModalAxiom`,TB,KB5 — commit
+      `6a51dfaa`), 8.3d (D4,D5,D45,DB — commit `87560f3a`). Each system's private helper's
+      callers (the `HasAxiom*` instance registrations in the same file) were updated to use
+      the bare `⟨tag, by decide, …, rfl⟩` witness directly (now type-checks against the
+      abbrev-unfolded `SchemaUnion` form).
+- [x] Replace each bridge proof in `SchemaBridges.lean` with `Iff.rfl` (or delete it if unused after
+      8.3) so the file still compiles at this checkpoint.
+      DONE — all 15 bridge theorems in `SchemaBridges.lean` now read `:= Iff.rfl`; the file
+      is kept (not deleted) per this sub-phase's scope — deletion is 8.4.
 - Verify: scoped `lake build` of Instances barrel, DerivationTree, SchemaBridges, and the three S5
       consumers (`MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean`) green;
       inductives grep-confirmed gone; every public name still resolves; zero `sorry`, no new axiom.
-      **NOT REACHED.**
+      DONE — all scoped builds green (`lake build` of the Instances barrel, SchemaBridges,
+      DerivationTree, MCS, Metalogic/Soundness, and
+      Bimodal/.../ModalConservativity all succeed); repo-wide grep for `inductive
+      <Sys>Axiom `/`inductive ModalAxiom ` returns no matches (all 15 retired); `lean_verify`
+      on `k_soundness`, `s5_soundness`, and `KAxiom_implies_TAxiom` shows only
+      `propext`/`Classical.choice`/`Quot.sound` (no new axiom); zero `sorry` in any file
+      touched this sub-phase; `lake exe checkInitImports` clean.
 
 **Sub-phase 8.4 — simplify ALL bridge call sites; delete scaffolding; final full verify** [NOT STARTED]
 - [ ] Simplify the bridge call sites now that the `abbrev` forms are interchangeable (drop the

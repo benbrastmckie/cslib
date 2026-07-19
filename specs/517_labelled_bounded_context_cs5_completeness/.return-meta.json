@@ -1,24 +1,48 @@
 {
-  "status": "planned",
+  "status": "partial",
   "started_at": "2026-07-19T00:00:00Z",
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/13_labelled-completeness-full-soundness.md",
-      "summary": "Revised plan v6: Phases 1-9 preserved [COMPLETED] verbatim; Phase 10 retargeted to labelled-system completeness (Option B, CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi) as a landed-lemma composition with honest naming; new Phase 11 adds full labelled soundness (sub-phased) completing the Simpson 8.1.4 biconditional plus anti-vacuity certificate; bookkeeping resequenced to Phase 12."
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Completeness.lean",
+      "summary": "Phase 10: cs5_completeness (labelled-system completeness, Option B), sorry-free, axiom-clean [propext, Classical.choice, Quot.sound]."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+      "summary": "Phase 11.1 (partial): cs5FCIncest_lift, the interpretation-lifting building block for full labelled soundness, sorry-free, axiom-free. Module docstring records the full remaining architecture."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-lifting-lemma-handoff-20260719.md",
+      "summary": "Continuation handoff: Simpson's Lifting Lemma needs F1/F2 CKForces lacks; cs5FCIncest_lift is the confirmed substitute; concrete 5-step plan for the next Phase 11.1/11.2/11.3 dispatch."
     }
   ],
-  "next_steps": "Run /implement 517 to execute the revised plan (Phase 10 completeness composition + Phase 11 labelled soundness sub-phases 11.1/11.2/11.3 + Phase 12 bookkeeping). Phases 10 and 11 may run concurrently.",
+  "partial_progress": {
+    "stage": "phase-11-in-progress",
+    "details": "Phase 10 fully landed and committed (a7830559). Phase 11.1 partially landed: cs5FCIncest_lift sorry-free/axiom-free. Main soundness induction (tree-shape invariant, graph-lifting-for-trees, 12-constructor induction), Phase 11.2 (TClosure validation + assembly), Phase 11.3 (anti-vacuity) remain for a future dispatch. Not blocked -- architecture is understood and documented.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 10
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "note": "verification_passed reflects that everything landed this dispatch (Phase 10 complete, Phase 11.1's partial building block) is sorry-free/axiom-clean/CI-green. Phase 11 as a WHOLE (nik_TS5_soundness, nik_TS5_consistent) is not yet proven -- status is partial for that reason, not a verification failure."
+  },
+  "requires_user_review": false,
+  "blocked_phase": null,
+  "next_phase": 11,
+  "next_steps": "Re-dispatch /implement 517 to continue Phase 11.1 (tree-shape invariant + graph-lifting-for-trees lemma + main 12-constructor NIK soundness induction), then Phase 11.2 (TClosure validation, assemble nik_TS5_soundness), then Phase 11.3 (nik_TS5_consistent). Full architecture in the Phase 11 handoff and Soundness.lean's module docstring. Phase 12 remains correctly deferred until Phase 11 completes (plan's own sequencing).",
   "metadata": {
     "session_id": "orchestrator-dispatch",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "revision_mode": "plan_revision",
-    "phase_count": 12,
-    "phases_preserved": [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    "phases_revised": [10],
-    "phases_added": [11],
-    "phases_resequenced": {"old_11": 12},
-    "reports_integrated": ["reports/11_option-b-labelled-completeness-confirmation.md"]
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

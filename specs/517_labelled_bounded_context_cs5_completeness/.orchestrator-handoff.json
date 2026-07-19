@@ -1,38 +1,48 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "revise",
-  "status": "planned",
-  "summary": "Revised plan v6 (plans/13_labelled-completeness-full-soundness.md) synthesizing plan 12 with reports/11. Phases 1-9 preserved verbatim as landed [COMPLETED] assets. Phase 10 RESTATED from the blocked Hilbert target to the labelled target cs5_completeness : CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi (Simpson 8.1.4 completeness direction, Option B, user-approved), now a genuine composition of landed lemmas with no new hard lemma and honest labelled-system naming/docstring. New Phase 11 adds full labelled soundness NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi (sub-phased 11.1/11.2/11.3) completing the 8.1.4 biconditional plus anti-vacuity certificate nik_TS5_consistent. Old bookkeeping phase resequenced to Phase 12.",
+  "phase": "implement",
+  "status": "partial",
+  "summary": "Phase 10 (cs5_completeness, labelled-system completeness, Option B) LANDED sorry-free and axiom-clean, committed (a7830559). Phase 11 (full labelled soundness) IN PROGRESS: sub-phase 11.1 partially landed -- cs5FCIncest_lift (the interpretation-lifting building block, a Wijesekera-side substitute for Simpson's F1/F2-based Lifting Lemma, derived from cs5FCIncest's own cs5Incest/r_symBox conjuncts) is sorry-free and axiom-free in new file Soundness.lean. The main soundness induction (tree-shape invariant + graph-lifting lemma + 12-constructor induction), Phase 11.2 (TClosure validation + assembly), and Phase 11.3 (anti-vacuity) are NOT yet attempted -- substantial remaining proof engineering, NOT a blocker (architecture is understood and documented in Soundness.lean's module docstring and the phase-11 handoff). Phase 12 correctly not started (plan sequencing: Depends on 10, 11).",
   "artifacts": [
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Completeness.lean"},
+    {"type": "lean_file", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"},
     {"type": "plan", "path": "specs/517_labelled_bounded_context_cs5_completeness/plans/13_labelled-completeness-full-soundness.md"},
-    {"type": "report", "path": "specs/517_labelled_bounded_context_cs5_completeness/reports/11_option-b-labelled-completeness-confirmation.md"}
+    {"type": "handoff", "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-lifting-lemma-handoff-20260719.md"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+    "Cslib.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/13_labelled-completeness-full-soundness.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-lifting-lemma-handoff-20260719.md",
     "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json",
     "specs/517_labelled_bounded_context_cs5_completeness/.return-meta.json"
   ],
   "decisions_made": [
-    "Retarget Phase 10 to labelled-system completeness (Option B): cs5_completeness : CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi (NIKTheorem Deduction.lean:316, TS5 Context.lean:313). Retires the v5 Hilbert-target BLOCKER (unbuilt Ch.6 adequacy bridge) with user sign-off.",
-    "Phase 10 is a genuine composition of already-landed Phases 6-9 (primeLemma seed from not-NIKTheorem + canon_truth_lemma + cs5FCIncest_canonWorld_r + five canon* side-conditions); no new hard lemma.",
-    "Honest naming REQUIRED: theorem name + module docstring state labelled-system (NIK/Deriv) completeness and defer Hilbert equivalence to the deliberately-unbuilt Simpson Ch.6 bridge; never a silent Hilbert relabel.",
-    "Add Phase 11 (new): full labelled soundness NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, sub-phased 11.1 (non-R-theory NIK fragment) / 11.2 (R-theory geometric-frame-condition cases + assembly) / 11.3 (anti-vacuity nik_TS5_consistent). Completes the 8.1.4 biconditional and closes the labelled soundness/completeness asymmetry (repo has Hilbert soundness at CS5Canonical.lean:373 but not labelled).",
-    "Bookkeeping/paper-fixes phase resequenced from Phase 11 to Phase 12 (Depends on 10, 11)."
+    "Phase 10 landed exactly as specified: cs5_completeness : CKValidFC.{u,u} cs5FCIncest phi -> NIKTheorem TS5 phi, honest labelled-system naming/docstring, contrapositive composition via Context.trivialBase/deriv_trivialBase_iff (new small bridging lemmas) + primeLemma + canon_truth_lemma + cs5FCIncest_canonWorld_r + five canon* side-conditions. Used CKValidFC.{u,u} (not an independent second universe v) matching the segment-analogue idiom ckvalidFC_completeness (CKExtension.lean:248) -- the plan's pseudocode CKValidFC.{u,v} is not literally type-correct for a completeness theorem that must instantiate World at the specific canonical model CanonWorld TS5 Atom : Type u.",
+    "Phase 11 --lit read of Simpson Ch.8 (S8.1.2/8.1.3/Thm 8.1.4, reflowed L1367-1425) found the soundness direction needs his birelational Lifting Lemma (8.1.3), built on F1/F2 confluence his model has but CSLib's target CKForces semantics (Forcing.lean) deliberately lacks (Wijesekera-style, chosen because bare CK is otherwise incomplete for confluent models). A literal transcription is therefore not available -- flagged as a literature-fidelity deviation, not silently mixed with novel steps.",
+    "Forked a sub-agent to verify by hand-derivation whether cs5FCIncest's own conjuncts supply a substitute for the missing F1/F2. CONFIRMED: cs5Incest + r_symBox + transitivity-of-<= derive exactly the needed single-edge F2-analogue (r w u -> w<=w' -> exists u'>=u, r w' u'). Landed as cs5FCIncest_lift, sorry-free, axiom-free.",
+    "Decided NOT to mark Phase 11 [BLOCKED]: nothing is stuck, missing a mathlib lemma, or mathematically unclear -- the remaining work (tree-shape invariant, graph-lifting-lemma-for-trees, 12-constructor induction, TClosure validation) is substantial-but-standard proof engineering matching the plan's own H8 sizing (11.1 alone estimated 1-2 dispatches). Used the normal multi-dispatch continuation path (status partial + continuation_context) instead of the Escalation Protocol.",
+    "Phase 12 correctly NOT started: the plan's own sequencing note ('it is sequenced last (Depends on: 10, 11) so the state.json blockers rewrite and docstring fixes reflect the final landed completeness + soundness result rather than an intermediate state') explicitly directs deferring it until Phase 11 completes."
   ],
   "dead_ends": [
     "Hilbert target + Simpson Chapter 6 adequacy bridge (Option A / Track C C5-C8): unnecessary for the completeness goal, ~25-30% research territory, no mechanization anywhere. Do NOT resume probes/lemma612-scaffold.lean's Track C for this task.",
-    "Chapter 3 / Theorem 3.3.4 direct Hilbert Fischer-Servi canonical model: reuses none of task 517's landed assets and is blocked for CS5 on the FS/box-backward wall."
+    "Chapter 3 / Theorem 3.3.4 direct Hilbert Fischer-Servi canonical model: reuses none of task 517's landed assets and is blocked for CS5 on the FS/box-backward wall.",
+    "A literal transcription of Simpson's Lifting Lemma (8.1.3) proof: it is built on his birelational model's F1/F2 confluence conditions, which CKForces (CSLib's target semantics for this task) deliberately does not have. Do not attempt to port the F1/F2 argument verbatim; use cs5FCIncest_lift (cs5Incest + r_symBox based) instead."
   ],
   "sorry_inventory": [],
   "continuation_context": {
-    "phases_completed": 9,
+    "phases_completed": 10,
     "phases_total": 12,
-    "next_phase": 10,
-    "next_phase_note": "Phase 10 and Phase 11 may run concurrently (Phase 11 soundness is a fresh NIK-derivation induction independent of Phase 10). Phase 10 ~= 1 dispatch (composition). Phase 11 ~= 2-4 dispatches across sub-phases. Phase 12 ~= 1 dispatch (bookkeeping).",
-    "option_b_completeness_signature": "theorem cs5_completeness (phi : Proposition Atom) : CKValidFC.{u,v} cs5FCIncest phi -> NIKTheorem TS5 phi",
-    "soundness_signature": "theorem nik_TS5_soundness (phi : Proposition Atom) : NIKTheorem TS5 phi -> CKValidFC.{u,v} cs5FCIncest phi",
+    "next_phase": 11,
+    "next_phase_note": "Phase 11.1 continuation: build (1) the tree-shape invariant (always instantiate NIK's (boxI)/(diaE) cofinite premise at a label fresh to the whole derivation so far, keeping G tree-shaped), (2) the graph-lifting lemma for trees (propagate cs5FCIncest_lift + ckforces_persistence down a tree's descendants via structural/well-founded recursion -- the tree analogue of Simpson's 8.1.3), (3) the main 12-constructor NIK soundness induction using (1)+(2). Then Phase 11.2 (validate TClosure edges against cs5FCIncest's conjuncts per T/B/4, mirroring cs5_axiom_sound_incest's per-axiom-schema case structure; assemble nik_TS5_soundness). Then Phase 11.3 (nik_TS5_consistent via a one-point reflexive cs5FCIncest model -- this specific corollary does NOT need steps 1-3's tree machinery at all, since a one-point model makes every interpretation trivially unique/lifted -- and can be attempted independently/early if useful). Full architecture and worked derivation in specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-lifting-lemma-handoff-20260719.md and Soundness.lean's module docstring. Phase 12 (bookkeeping) remains blocked on Phase 11 per the plan's own sequencing -- do not attempt it early.",
+    "landed_this_dispatch": {
+      "cs5_completeness": "CKValidFC.{u,u} cs5FCIncest phi -> NIKTheorem TS5 phi, sorry-free, axioms [propext, Classical.choice, Quot.sound]",
+      "cs5FCIncest_lift": "cs5FCIncest r -> r w u -> w <= w' -> exists u' >= u, r w' u', sorry-free, axiom-free"
+    },
+    "soundness_signature": "theorem nik_TS5_soundness (phi : Proposition Atom) : NIKTheorem TS5 phi -> CKValidFC.{u,u} cs5FCIncest phi",
     "anti_vacuity_signature": "theorem nik_TS5_consistent : not (NIKTheorem TS5 (Proposition.bot : Proposition Atom))",
     "orchestrator_mode": true
   },

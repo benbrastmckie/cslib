@@ -815,7 +815,7 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
   Propositional Tableau files unregressed). `lean_verify cs5_completeness`: axioms
   `["propext","Classical.choice","Quot.sound"]`, no `sorryAx`.
 
-### Phase 11: Full labelled soundness `NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ` + anti-vacuity certificate [NOT STARTED]
+### Phase 11: Full labelled soundness `NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ` + anti-vacuity certificate [IN PROGRESS]
 
 - **Goal:** prove the **converse** (soundness) direction of Simpson 8.1.4, completing the labelled
   **biconditional** `CKValidFC cs5FCIncest φ ↔ NIKTheorem TS5 φ`, and derive the anti-vacuity
@@ -842,7 +842,38 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
 
 - **Sub-phases (each ≤ one agent run; internally sequential 11.1 → 11.2 → 11.3):**
 
-  - **11.1 — Interpretation machinery + soundness for the non-`(R𝒯)` `NIK` fragment.**
+  - **11.1 — Interpretation machinery + soundness for the non-`(R𝒯)` `NIK` fragment. [IN PROGRESS,
+    partial — see below]**
+
+    **Landed this dispatch**: `cs5FCIncest_lift` (`Soundness.lean`), sorry-free, axiom-free. This
+    is the key semantic finding that makes Phase 11 tractable at all: Simpson's own Theorem 8.1.4
+    soundness proof (`8.1.2`) rests on his birelational Lifting Lemma (8.1.3), built from `F1`/`F2`
+    confluence his birelational model has. CSLib's target semantics (`CKForces`, `Forcing.lean`) is
+    **deliberately built without `F1`/`F2`** (Wijesekera-style, chosen because bare `CK` is
+    otherwise incomplete for confluent models — see `Forcing.lean`'s own module docstring). A
+    literal transcription of Simpson's Lifting Lemma is therefore **not available** — this was
+    verified by direct algebraic derivation attempt, not assumed. **The dispatch confirmed a
+    Wijesekera-side substitute exists**: `cs5FCIncest`'s own `cs5Incest`/`r_symBox` conjuncts
+    together derive exactly the single-edge case the Lifting Lemma needs (`r w u → w ≤ w' → ∃u' ≥
+    u, r w' u'`), via a clean two-step composition (`cs5Incest` then `r_symBox`, chained by `≤`
+    transitivity) — landed as `cs5FCIncest_lift`. This is flagged as a genuinely new derivation for
+    this development (not a transcription of Simpson's F1/F2 argument), per the literature-fidelity
+    discipline.
+
+    **NOT landed this dispatch** (remains for the next Phase-11 dispatch — see `Soundness.lean`'s
+    module docstring "What remains" section and the continuation handoff for full detail): (1) the
+    tree-shape invariant (always instantiating `(□I)`/`(◇E)`'s cofinite premise at a fresh label,
+    keeping the raw graph tree-shaped through the induction, mirroring Simpson's own tree
+    restriction on Theorem 8.1.4 itself); (2) the graph-lifting lemma proper (propagating
+    `cs5FCIncest_lift` + `ckforces_persistence` down a tree's descendants via structural/
+    well-founded recursion, the tree analogue of Simpson's 8.1.3); (3) the main 12-constructor
+    soundness induction using (1)+(2). None of these are blocked — (1)-(3) are estimated
+    substantial-but-standard proof engineering (the plan's own H8 sizing already anticipated 1-2
+    dispatches for 11.1 alone), not a research gap. *(deviation: 11.1's own "Done when" criterion —
+    "the non-`(R𝒯)` fragment's soundness is sorry-free" — is NOT met this dispatch; only the
+    interpretation-machinery building block is landed. Escalation Protocol was considered and
+    explicitly NOT invoked: this is a scope/budget continuation, not a blocker — nothing here is
+    stuck, unclear, or missing a mathlib lemma; the architecture is understood and documented.)*
     - **Goal:** set up the general soundness statement (over an arbitrary labelled context `Γ ⊢^TS5_G
       x:A`, or directly the `NIKTheorem` special case if the general form is not needed for the
       induction to go through), define/locate the interpretation of a labelled graph `G` into a

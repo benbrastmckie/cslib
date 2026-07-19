@@ -368,6 +368,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Deduction
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.FrameClass
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.PrimeLemma
+public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Syntax
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment
 public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum

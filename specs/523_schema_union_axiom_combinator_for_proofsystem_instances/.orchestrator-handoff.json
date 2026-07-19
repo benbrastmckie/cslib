@@ -1,87 +1,64 @@
 {
-  "status": "implemented",
+  "status": "partial",
   "task_number": 523,
-  "summary": "Phase 7 of 8 complete (all four sub-phases 7.1/7.2/7.3/7.4). All 15 HasAxiom* instance registration files in Cslib/Logics/Modal/ProofSystem/Instances/*.lean now discharge their fields from SchemaUnion instead of raw <Sys>Axiom/ModalAxiom constructor calls. The plan's literal mechanism (importing SchemaBridges.lean's bridge lemma directly into each registration site, e.g. schemaUnion_kTags_iff_KAxiom.mp) is architecturally blocked by a genuine import cycle: SchemaBridges.lean imports the Instances barrel, which imports every individual Instances/{sys}.lean file, so any Instances/{sys}.lean importing SchemaBridges.lean back is a cycle -- confirmed empirically via a direct lake build attempt (bad import + build cycle detected). Resolved by giving each Instances/{sys}.lean file its own private {sys}Tags_of_schemaUnion helper theorem, importing only the acyclic Cslib.Logics.Modal.ProofSystem.SchemaUnion and independently re-deriving (not copy-importing) that system's Phase-3 bridge forward direction using the same SchemaUnion.insert_iff/empty_iff elimination API and per-constructor case-split shape. Every one of the ~211 HasAxiom* fields across the 15 files now reads '({sys}Tags_of_schemaUnion <tag-witness>)' instead of a raw constructor call. S5 is the one structural special case: Instances/S5.lean defines no inductive of its own (it reuses Modal.ModalAxiom from Metalogic/DerivationTree.lean) but is still part of the barrel SchemaBridges.lean imports, so the identical cycle and identical resolution applied. All 15 target inductives (14 in Instances/*.lean plus ModalAxiom in DerivationTree.lean) are grep-confirmed still defined and completely unmodified, ready for Phase 8. Zero sorry, zero new axiom across all 15 files. Every HasAxiom* instance resolves under its original name/signature (verified by successful typeclass-directed elaboration in every scoped build -- a field-name/signature mismatch would fail to elaborate). Net line delta across the 15 files: +817/-220 (+597 net), driven entirely by the disclosed, necessary private-helper duplication; Phase 8 is expected to delete all 15 private helpers alongside their target inductives, recovering a large net deletion at that point.",
-  "phases_completed": 7,
-  "phases_total": 8,
-  "sub_phases_completed": ["7.1", "7.2", "7.3", "7.4"],
-  "modified_files": [
-    "Cslib/Logics/Modal/ProofSystem/Instances/K.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/T.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/D.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/B.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/K4.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/K5.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/K45.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/S4.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/S5.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/TB.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/KB5.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/D4.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/D5.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/D45.lean",
-    "Cslib/Logics/Modal/ProofSystem/Instances/DB.lean",
-    "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md"
-  ],
-  "sub_phase_grouping": {
-    "7.1": ["K", "T", "D", "B"],
-    "7.2": ["K4", "K5", "K45", "S4"],
-    "7.3": ["S5", "TB", "KB5"],
-    "7.4": ["D4", "D5", "D45", "DB"]
+  "summary": "Sub-phase 8.1 (relocate kCore + 15 sysTags to Cslib/Logics/Modal/ProofSystem/SchemaTags.lean) completed and committed, green. Sub-phase 8.2 (redefine the 14 <Sys>Axiom inductives + S5's ModalAxiom as SchemaUnion) is BLOCKED at its mandated grep-confirm step: all 15 Systems/*/Completeness.lean files contain live constructor-construction sites for the inductives Phase 8.2 would retire, which were never migrated in Phases 4/6/7 and are not listed anywhere in this phase's file scope. Redefining any inductive now would break these 15 files' compilation with hard 'unknown identifier' / unresolvable dot-notation-projection errors, not warnings. No inductive was redefined; no sorry introduced; no axiom introduced; SchemaBridges.lean's 15 bridge proofs are untouched (still full Iff proofs, not Iff.rfl). 8.3 is untouched and out of scope until 8.2 lands.",
+  "phases_completed": "7/8 (Phase 8 sub-phase 8.1 complete; 8.2 blocked; 8.3 not started)",
+  "sub_phase_status": {
+    "8.1": "COMPLETED - committed 5b84ff2b",
+    "8.2": "BLOCKED - see blockers",
+    "8.3": "NOT STARTED - depends on 8.2"
   },
+  "modified_files": [
+    "Cslib/Logics/Modal/ProofSystem/SchemaTags.lean (NEW - kCore + 15 sysTags relocated here from SchemaBridges.lean)",
+    "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (imports SchemaTags.lean; tag-set defs removed; bridge proofs unchanged)",
+    "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md (Phase 8 heading -> [BLOCKED]; 8.1 -> [COMPLETED]; 8.2 -> [BLOCKED] with full finding recorded)"
+  ],
+  "reducibility_fallback_used": "N/A -- no inductive was redefined in this dispatch (blocked before reaching the abbrev-vs-def decision point). No system needed the def+simp fallback because no system was attempted.",
   "sorry_inventory": [],
-  "blockers": [],
-  "deviations": [
+  "axiom_check": "No new axiom introduced (no redefinition was performed). Inductives remain fully live.",
+  "inductives_retired": false,
+  "abbrev_vs_def_per_system": "not yet decided -- 8.2 did not proceed to redefinition",
+  "blockers": [
     {
-      "phase": "7 (all sub-phases, finding recorded once at 7.1 start, applied uniformly)",
-      "description": "Plan specified routing each registration field through the Phase-3 bridge lemma (e.g. schemaUnion_kTags_iff_KAxiom.mp) imported directly from SchemaBridges.lean. This is not importable from any Instances/*.lean file: SchemaBridges.lean imports the Instances barrel (Cslib.Logics.Modal.ProofSystem.Instances), which imports every individual Instances/{sys}.lean file, so the reverse import creates a genuine cycle in Lean's acyclic module dependency graph. Confirmed via a direct lake build attempt on Instances/K.lean: 'error: Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean: bad import Cslib.Logics.Modal.ProofSystem.Instances' plus a 'build cycle detected' diagnostic.",
-      "resolution": "Each Instances/{sys}.lean file imports only Cslib.Logics.Modal.ProofSystem.SchemaUnion (verified acyclic: SchemaUnion.lean imports only Modal.Basic, Foundations.Logic.Axioms, Mathlib.Data.Finset.Basic) and gains one private theorem {sys}Tags_of_schemaUnion -- a file-local, independently re-derived (not copy-imported) reproduction of that system's Phase-3 bridge forward direction, using the same SchemaUnion.insert_iff/empty_iff elimination API and the same per-constructor case-split structure as the canonical SchemaBridges.lean bridge. Every registration field routes through this private helper instead of a raw constructor call. private scoping prevents any name collision with SchemaBridges.lean's public bridge names in any file that imports both. SchemaBridges.lean and SchemaUnion.lean were NOT modified (Preserved Assets / Phase 3 territory fully respected).",
-      "impact": "Phase 7's line count is line-positive (+597 net) rather than roughly neutral, entirely due to the 15 duplicated private helpers (~15-40 lines each, larger for higher-differentiator systems like S5/D45). This is expected to reverse at Phase 8: once each inductive is redefined as def <Sys>Axiom := SchemaUnion sysTags, every private helper becomes dead code (the SchemaUnion witness becomes directly usable as <Sys>Axiom by defeq) and Phase 8 deletes all 15 helpers alongside the inductives/ModalAxiom they target, plus strips the now-unneeded wrapper call from each field."
+      "phase": "8.2",
+      "what_failed": "The mandated pre-redefinition grep-confirm step ('no constructor construction/destructuring site targets any <Sys>Axiom/ModalAxiom inductive; all migrated in Phases 4/6/7') fails against the actual repo state.",
+      "evidence": [
+        "Explicit named constructors (case 1): Cslib/Logics/Modal/Metalogic/Systems/D4/Completeness.lean:60-64 -- '(fun φ ψ => D4Axiom.implyK φ ψ) (fun φ ψ χ => D4Axiom.implyS φ ψ χ) (fun φ => D4Axiom.efq φ) (fun φ ψ => D4Axiom.modalK φ ψ) (fun φ => D4Axiom.modalD φ) ... (fun φ => D4Axiom.modalFour φ)', passed as constructor-witness callbacks into the generic lemmas d_canonical_serial / canonical_trans. Same pattern confirmed at Systems/D5/Completeness.lean:60-64, Systems/D45/Completeness.lean:59-67, Systems/DB/Completeness.lean:60-64 (D5Axiom, D45Axiom, DBAxiom respectively).",
+        "Anonymous dot-notation constructors (case 2, ALL 15 systems): e.g. Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean:425-450 and :491+, Systems/K/Completeness.lean:341-401, Systems/T/Completeness.lean:58-124, Systems/B/Completeness.lean:54-119, Systems/K4/Completeness.lean:51-116, Systems/K5/Completeness.lean:51-116, Systems/K45/Completeness.lean:54-80, Systems/S4/Completeness.lean:55-82, Systems/S5/Completeness.lean:56-84, Systems/TB/Completeness.lean:65-92, Systems/KB5/Completeness.lean:56-82, and analogous blocks in D4/D5/D45/DB/Completeness.lean at ~71-76, 118-119, 160-161 -- '(fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) (fun φ => .efq φ) ...' elaborated against expected type '∀ φ ψ, Axioms (...)' with Axioms unified to the concrete <Sys>Axiom/ModalAxiom from the enclosing theorem's CanonicalWorld (@<Sys>Axiom Atom) argument, so '.implyK' resolves via dot-notation to '<Sys>Axiom.implyK' -- a literal constructor projection, exactly as in case 1."
+      ],
+      "root_cause": "Phases 4, 6, and 7 migrated Soundness.lean, InterSystem/AxiomSubsumption.lean, InterSystem/IntToClassical.lean, and the 15 instance registrations (Instances/*.lean) to consume SchemaUnion via the bridge equivalences, but Systems/*/Completeness.lean (a distinct file family: d_canonical_serial / canonical_trans / *_truth_lemma / *_completeness) was never in scope for any prior phase and is not listed in Phase 8's 'Files to modify' section. These files construct axiom-predicate witnesses directly via the inductive's constructors (both named and anonymous dot-notation) -- exactly the class of site the Phase 8.2 grep-confirm step exists to catch before redefinition. If any <Sys>Axiom/ModalAxiom is redefined as abbrev/def := SchemaUnion sysTags while these call sites still stand, '<Sys>Axiom.implyK' (and the equivalent anonymous '.implyK') becomes an unresolvable dot-notation projection -- a hard compile failure across all 15 systems' Completeness.lean files, not a warning.",
+      "what_was_tried": "Ran the plan-mandated grep across Cslib/ for '<Sys>Axiom.' and 'ModalAxiom.' patterns (excluding each system's own Instances/*.lean and SchemaBridges.lean, where such patterns are expected/already migrated). Cross-checked the intuitionistic/minimal/constructive-family hits (CS5ModalAxiom, IS4ModalAxiom, MS4ModalAxiom, ITModalAxiom, IS5ModalAxiom, MS5ModalAxiom, MTModalAxiom, CS4ModalAxiom, CTModalAxiom) and confirmed they are a SEPARATE, out-of-scope inductive family (per Postmortem Constraints, not to be touched) rather than false positives on the classical 15. Read the generic lemma signatures (d_canonical_serial, d_truth_lemma in Systems/D/Completeness.lean) and confirmed they are parameterized over an abstract Axioms : Proposition Atom -> Prop and take predicate-shaped hypotheses -- the failure is specifically the caller's constructor-shaped witness supply, not the generic lemma's own signature. Did NOT perform a live break-and-revert build experiment (would have required editing an Instances/*.lean inductive on a shared, concurrently-committing working tree merely to reproduce an outcome that is unambiguous from Lean's dot-notation-resolution semantics: Foo.bar requires a literally declared Foo.bar constant, and none exists once Foo is a def/abbrev rather than an inductive with a bar constructor).",
+      "what_is_needed": "A dedicated migration of all 15 Systems/*/Completeness.lean files from direct-constructor / anonymous-dot-notation witness supply to the SchemaUnion existential-witness form already established as house style in IntToClassical.lean and the Phase-7 private helpers, i.e. '⟨.implyK, by decide, φ, ψ, rfl⟩ : SchemaUnion sysTags (...)' in place of 'D4Axiom.implyK φ ψ' / '.implyK φ ψ'. This is naturally either (a) a new sub-phase inserted before 8.2 redefinition (e.g. 8.1.5), or (b) folded into 8.2's scope with an expanded file list -- but is NOT something this dispatch should do silently, since it is unplanned scope (15 files, none listed in Phase 8's 'Files to modify') and the plan-compliance rule requires escalating a would-be plan deviation rather than substituting a different step. Recommend the user/orchestrator revise the plan to add this sub-phase explicitly before the next 8.2 dispatch."
     }
   ],
+  "deviations": [],
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 8,
-    "next_phase_name": "Delete the 15 inductives (+ ModalAxiom disposition), finalize",
-    "pointer": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md, Phase 8 section",
-    "notes": "Phase 8 redefines each inductive <Sys>Axiom as def <Sys>Axiom := SchemaUnion sysTags (name preserved) and resolves S5's ModalAxiom disposition per its own recorded end-state design decision. In addition to the plan's stated Phase 8 tasks, Phase 8 must also: (1) delete the 15 private {sys}Tags_of_schemaUnion helpers added in Phase 7 (dead scaffolding once the redefinition makes the SchemaUnion witness directly usable by defeq); (2) simplify each registration field from '({sys}Tags_of_schemaUnion <tag-witness>)' to the bare witness '<tag-witness>' (a small, mechanical per-field text change); (3) review whether the public import of SchemaUnion.lean added to each Instances/{sys}.lean file in Phase 7 is still needed post-redefinition (likely yes, since the def body itself references SchemaUnion) or can be simplified. This additional cleanup is the direct payback for Phase 7's line-positive net delta and should make Phase 8 close out net-line-negative overall as the plan requires.",
-    "depends_on": "Phase 8 depends on 4, 5, 6, 7 -- all now complete."
+    "next_phase": "8.2 (after a plan revision)",
+    "next_phase_name": "Migrate Systems/*/Completeness.lean to SchemaUnion witnesses, THEN redefine the 14 <Sys>Axiom inductives + S5's ModalAxiom",
+    "pointer": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md, Phase 8 sub-phase 8.2 section",
+    "notes": "8.1's SchemaTags.lean is ready and unaffected by this blocker -- no rework needed there. Before 8.2 can proceed, the plan needs an explicit sub-phase (or expanded 8.2 file scope) covering the 15 Systems/*/Completeness.lean files, migrating their axiom-witness callbacks from raw/anonymous constructor calls to SchemaUnion existential witnesses. Only after that lands can the 14 Instances/*.lean inductives and DerivationTree.lean's ModalAxiom be safely redefined as abbrev/def := SchemaUnion sysTags without breaking Completeness.lean. 8.3 (call-site simplification across Soundness.lean/AxiomSubsumption.lean/IntToClassical.lean, SchemaBridges.lean deletion, full build) remains untouched.",
+    "depends_on": "8.2 depends on a plan revision to add the Completeness.lean migration; 8.3 depends on 8.2."
   },
   "verification": {
     "sorry_count": 0,
     "vacuous_count": 0,
     "new_axiom_count": 0,
     "inductives_still_defined": 15,
-    "scoped_build_all_15_modules": "green",
-    "downstream_rebuild": "Instances barrel, SchemaBridges.lean, AxiomSubsumption.lean, IntToClassical.lean, Metalogic.DerivationTree all rebuilt green after every sub-phase -- no downstream breakage at any point",
-    "check_init_imports": "clean (run after every sub-phase)",
-    "lint_style": "clean (run after every sub-phase; one early longLine violation from an unwrapped Finset literal was fixed by word-wrapping to a 70-column budget before final commit)",
-    "lake_lint_builtin": "clean -- 'No environment linters registered' per Instances/*.lean file (matches the pre-existing pattern noted in Phase 6's handoff), overall 'Linting passed for Cslib'",
-    "lean_verify_spot_checks": [
-      {"theorem": "Cslib.Logic.Modal.kTags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.tTags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.bTags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.k45Tags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.s4Tags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.s5Tags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.kb5Tags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.d45Tags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]},
-      {"theorem": "Cslib.Logic.Modal.dbTags_of_schemaUnion", "axioms": ["propext", "Quot.sound"]}
-    ],
-    "net_line_delta": "+817/-220 (+597 net) across the 15 Instances/*.lean files (git diff --stat vs. pre-Phase-7 baseline)",
+    "scoped_build_schematags_schemabridges_axiomsubsumption": "green",
+    "check_init_imports": "clean",
+    "lean_verify_spot_checks": "not run this dispatch (no new theorems introduced beyond the pure relocation; SchemaTags.lean/SchemaBridges.lean bridge proofs are textually unchanged, only relocated)",
+    "net_line_delta_8_1": "SchemaTags.lean +~120 new lines; SchemaBridges.lean -~67 net lines (tag-set defs removed, import + doc note added)",
     "per_subphase_commits": [
-      "3430a7af task 523 phase 7.1: swap K/T/D/B instance registrations to SchemaUnion",
-      "6afb2c75 task 523 phase 7.2: swap K4/K5/K45/S4 instance registrations to SchemaUnion",
-      "f238aaf7 task 523 phase 7.3: swap S5/TB/KB5 instance registrations to SchemaUnion",
-      "4f28e5e0 task 523 phase 7: complete instance registration swap to SchemaUnion (7.4 + phase note)"
+      "5b84ff2b task 523 phase 8.1: relocate kCore + 15 sysTags to SchemaTags.lean"
     ]
   },
   "artifacts": [
     {
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "type": "plan",
-      "summary": "Phase 7 marked [COMPLETED] with the import-cycle finding recorded once (above sub-phase 7.1) and applied uniformly, per-sub-phase completion notes for 7.1-7.4, and a phase-level completion note pointing to Phase 8."
+      "summary": "Phase 8 heading marked [BLOCKED]; sub-phase 8.1 marked [COMPLETED] with verification notes; sub-phase 8.2 marked [BLOCKED] with the full grep-confirm finding, evidence citations, root cause, and recommended next step recorded inline."
     }
   ],
-  "requires_user_review": false
+  "requires_user_review": true
 }

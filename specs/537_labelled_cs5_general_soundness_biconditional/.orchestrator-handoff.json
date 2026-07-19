@@ -50,7 +50,7 @@
     "check_init_imports_passed": true,
     "lean_verify_boxI_lift_star": "axioms: [propext, Classical.choice, Quot.sound]"
   },
-  "commit": "PENDING",
+  "commit": "9ccbcf27",
   "files_modified": [
     "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
     "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",

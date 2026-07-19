@@ -235,17 +235,22 @@ Phase order is de-risking order (report 02 ranked steps): land the machine-verif
 - **Verification / Done when:** `Soundness.lean` builds green; both TClosure lemmas sorry-free and
   axiom-clean (`lean_verify`); no tactic `sorry`.
 
-### Phase 3: F2 target-raise + reflexive here-extraction helpers [NOT STARTED]
+### Phase 3: F2 target-raise + reflexive here-extraction helpers [COMPLETED]
 
 - **Goal:** Land the second confluence direction `F2` and the small "extract A here" helpers that
   the `boxE`/`diaI` closures and the Phase 4 lifting both consume (report 02 §4(A)/(B)).
 - **Tasks:**
-  - [ ] Prove `F2 : r w u → u ≤ u' → ∃ w', w ≤ w' ∧ r w' u'` (report: `hsymbox` then `hincest`,
+  - [x] Prove `F2 : r w u → u ≤ u' → ∃ w', w ≤ w' ∧ r w' u'` (report: `hsymbox` then `hincest`,
         ~3 lines). Place it next to the landed `cs5FCIncest_lift` (= F1, Soundness.lean:322).
-  - [ ] Prove `box_gives_here : CKForces … w (□A) → CKForces … w A` via the `hrefl` instance
+        Landed as `cs5FCIncest_raise` (Soundness.lean, immediately after `cs5FCIncest_lift`).
+  - [x] Prove `box_gives_here : CKForces … w (□A) → CKForces … w A` via the `hrefl` instance
         (`hbox w (le_refl w) w (hrefl w)`, mirroring CS5Canonical.lean:313).
-  - [ ] Prove the dual diamond here-helper if needed for `diaI` (dia-iff + `hrefl` +
-        `ckforces_persistence`, Forcing.lean:122).
+  - [~] Dual diamond here-helper if needed for `diaI` (dia-iff + `hrefl` + `ckforces_persistence`,
+        Forcing.lean:122): DEFERRED to Phase 5. Unlike `F2`/`box_gives_here`, the plan gates this
+        item conditionally ("if needed") and gives no concrete target signature; Phase 5's `diaI`
+        induction case has not been written yet, so its exact required shape is not yet knowable.
+        Guessing a shape now risks landing an unused or wrongly-shaped lemma. See Plan Deviations
+        in the Phase 3 summary.
 - **Estimated output:** ~60-120 lines. **Bounded unit:** F2 + 1-2 here-helpers, each a handful of
   lines from a single conjunct; stopping condition = all compile.
 - **Timing:** one agent run.

@@ -327,6 +327,34 @@ theorem cs5FCIncest_lift {World : Type*} [Preorder World] {r : World → World �
   obtain ⟨t, hw't, hu₁t⟩ := hsymbox hu₁w hww'
   exact ⟨t, hu_u₁.trans hu₁t, hw't⟩
 
+/-- **Confluence direction `F2` (target-raise) for `cs5FCIncest` models.** Dual to
+`cs5FCIncest_lift` (`F1`, source-raise): raising the *target* of an `r`-edge along `≤` still
+reaches *some* `≤`-upward extension of the old source. Derived directly from `cs5FCIncest`'s
+`hsymbox` conjunct (raise the target across `≤`, landing at a fresh point `t` with `w ≤ t`) then
+`hincest` (the fresh point's edge back-witnesses a `≤`-successor `w'` of `t`, hence of `w`, with
+`r w' u'`). Needed alongside `F1` for the `boxI` tree-lifting recursion (Phase 4); `diaE` needs
+neither. -/
+theorem cs5FCIncest_raise {World : Type*} [Preorder World] {r : World → World → Prop}
+    (hfc : cs5FCIncest r) {w u u' : World} (hwu : r w u) (huu' : u ≤ u') :
+    ∃ w', w ≤ w' ∧ r w' u' := by
+  obtain ⟨_, _, _, hsymbox, hincest⟩ := hfc
+  obtain ⟨t, hru't, hwt⟩ := hsymbox hwu huu'
+  obtain ⟨w', htw', hw'u'⟩ := hincest hru't
+  exact ⟨w', hwt.trans htw', hw'u'⟩
+
+/-- **Box-forcing "here" extraction.** `CKForces … w (□A)` instantiated at `w` itself, via the
+`hrefl` instance (`r w w`), yields the bare `CKForces … w A` fact -- mirroring the `tBox` axiom
+case (`CS5Canonical.lean:313`: `hbox w' (le_refl w') w' (hrefl w')`). Consumed by the `boxE`/
+`boxI` cases of the main soundness induction (Phase 5). -/
+theorem box_gives_here {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {val : World → Atom → Prop} {botForces : World → Prop}
+    {w : World} {A : Proposition Atom}
+    (hbox : CKForces r val botForces w (.box A)) :
+    CKForces r val botForces w A := by
+  obtain ⟨hrefl, _, _, _, _⟩ := hfc
+  exact hbox w (le_refl w) w (hrefl w)
+
 /-! ## Base forcing-equivalence lemmas (task 537 Phase 1, direct-route report §4(A))
 
 Dissolves the ex-"Wall A" obstruction (the `TClosure → exact r-edge`/exact-symmetry lemma

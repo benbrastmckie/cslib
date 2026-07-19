@@ -2,33 +2,33 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "implemented",
-  "summary": "Phase 2 of direct-route plan v2 landed: box_iff_TClosure and dia_iff_TClosure, extending the Phase-1 base forcing-equivalence biconditionals over the entire TClosure {T,B,Four} class by induction on the TClosure derivation, in Soundness.lean. Both sorry-free and axiom-clean. Scoped build green, checkInitImports passes, no Preserved Asset regressed.",
-  "phases_completed": 2,
+  "summary": "Phase 3 of direct-route plan v2 landed: cs5FCIncest_raise (= plan's F2, target-raise confluence direction, via hsymbox then hincest) and box_gives_here (box-forcing 'here' extraction via the hrefl instance) in Soundness.lean. Both sorry-free and axiom-clean. Scoped build green, checkInitImports passes, no Preserved Asset regressed. The dual diamond here-helper was deferred to Phase 5 per the plan's own conditional gate (see decisions_made).",
+  "phases_completed": 3,
   "phases_total": 7,
   "skeleton": false,
   "sorry_inventory": [],
   "blockers": [],
   "continuation_context": {
-    "next_phase": 3,
-    "next_phase_name": "F2 target-raise + reflexive here-extraction helpers",
-    "depends_on": "none (logically independent of Phases 1-2; sequenced after them by single-file territory on Soundness.lean)",
-    "note": "Phase 3 lands F2 (hsymbox then hincest, ~3 lines, next to the landed cs5FCIncest_lift = F1) and box_gives_here (hrefl instance) plus a dual diamond here-helper if needed, per plan Phase 3 task list."
+    "next_phase": 4,
+    "next_phase_name": "boxI tree-lifting lemma (Simpson Lifting Lemma 8.1.3 analogue), split 4.1/4.2",
+    "depends_on": "3 (satisfied)",
+    "note": "Phase 4.1 states boxI_raise_step (single-node interpretation raise, threading F1=cs5FCIncest_lift and F2=cs5FCIncest_raise, plus ckforces_persistence for Gamma-cond). This is the plan's sole concentrated-risk phase (~80-85% confidence); it carries a hard budget cap and a blocked-honesty exit to Phase 7, never an open-ended retry. If diaI's goal state in Phase 5 needs the dual diamond here-helper deferred from Phase 3, land it there where its concrete shape is dictated by the actual goal."
   },
   "artifacts": [
     {
       "type": "lean_source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added box_iff_TClosure and dia_iff_TClosure theorems (~30 lines) directly after dia_iff_base, before the one-point soundness section. Each proved by induction on TClosure TS5 R x y: base reduces to box_iff_base/dia_iff_base via an explicit raw edge-cond hypothesis (hedge : ∀ a b, R a b → r (ρ a) (ρ b)); refl -> Iff.rfl; symm -> Iff.symm of IH; trans -> Iff.trans; eucl -> absurd via GeomAxiom.noConfusion since Five ∉ TS5."
+      "summary": "Added cs5FCIncest_raise and box_gives_here (~25 lines total), inserted immediately after cs5FCIncest_lift (F1) and before the Phase 1 box_iff_base/dia_iff_base section. cs5FCIncest_raise: r w u -> u <= u' -> exists w', w <= w' and r w' u', via hsymbox hwu huu' then hincest on the resulting edge. box_gives_here: CKForces ... w (box A) -> CKForces ... w A, via hbox w (le_refl w) w (hrefl w), mirroring the tBox axiom case (CS5Canonical.lean:313)."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 2 heading updated to [COMPLETED]; both checklist items checked off."
+      "summary": "Phase 3 heading updated to [COMPLETED]; F2 and box_gives_here checklist items checked off; the dual diamond here-helper item marked deferred ([~]) with an inline note pointing to Phase 5."
     },
     {
       "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/04_phase2-box-dia-iff-tclosure-summary.md",
-      "summary": "Phase 2 implementation summary, including the Plan Deviation note on the concretized signature."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/05_phase3-f2-here-helpers-summary.md",
+      "summary": "Phase 3 implementation summary, including the Plan Deviations section documenting the deferred dual diamond here-helper."
     }
   ],
   "verification": {
@@ -38,8 +38,8 @@
     "new_axiom_count": 0,
     "build_passed": true,
     "check_init_imports_passed": true,
-    "lean_verify_box_iff_TClosure": "axioms: []",
-    "lean_verify_dia_iff_TClosure": "axioms: []"
+    "lean_verify_cs5FCIncest_raise": "axioms: []",
+    "lean_verify_box_gives_here": "axioms: []"
   },
   "commit": "pending (recorded post-write)",
   "files_modified": [
@@ -47,8 +47,8 @@
     "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md"
   ],
   "decisions_made": [
-    "Concretized the plan's shorthand `TClosure TS5 R a b -> (CKForces ... a (box A) <-> CKForces ... b (box A))` into the only well-typed form: Deduction.lean's TClosure is hardwired to Label Atom (not a generic World), so box_iff_TClosure/dia_iff_TClosure take x y : Label Atom, an interpretation rho : Label Atom -> World, and an explicit raw edge-cond hypothesis hedge, concluding forcing-equivalence at (rho x)/(rho y). This matches the plan's exact case breakdown (base/refl/symm/trans/eucl) verbatim -- documented as a Plan Deviation (signature concretization, not a strategy substitution) in the phase summary.",
-    "Did not reopen any TClosure-clique or exact-symmetry decomposition; hedge is the raw edge-cond invariant exactly as the Postmortem Constraints require."
+    "Deferred the dual diamond here-helper (Phase 3's third, conditionally-gated task: 'IF needed for diaI') to Phase 5, where the diaI case of the main NIK soundness induction will supply a concrete goal to derive its required signature from. The plan gave F2 and box_gives_here exact target signatures but left this third item conditional with no concrete type -- landing a guessed shape now risked an unused or wrongly-typed lemma. No sorry, axiom, or vacuous placeholder was used; the item is explicitly carried forward, not dropped.",
+    "Named the plan's shorthand 'F2' as cs5FCIncest_raise (matching the sibling F1 lemma's descriptive name cs5FCIncest_lift), consistent with CSLib naming conventions -- the plan and report used 'F2' only as prose shorthand for the underlying confluence direction, not a mandated literal identifier (per the H3 mapping table's own phrasing, 'F1' likewise names the already-landed cs5FCIncest_lift, not a literal 'F1' identifier)."
   ],
   "dead_ends": [],
   "plan_markers_verified": true

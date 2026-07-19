@@ -1,70 +1,45 @@
 {
   "task_number": 537,
   "session_id": "sess_1784471495_4fb1e9",
-  "phase": "implement",
-  "status": "blocked",
+  "phase": "research",
+  "status": "researched",
   "orchestrator_mode": true,
-  "gate_outcome": "C",
-  "next_phase_hint": "Phase 4 doc-only work is COMPLETE. Task 537's direct route is [BLOCKED] pending a user/orchestrator decision on whether to authorize Strategy 3 (Ch.6 adequacy bridge) as a new follow-up task. Do NOT dispatch a fifth undirected direct attempt at nik_TS5_soundness; do NOT autonomously start Strategy 3 under this task.",
-  "next_command": null,
-  "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md",
-  "phases_completed": 1,
-  "phases_total": 7,
-  "skeleton": false,
-  "dependency_waves": [[1],[2,4,5],[3,6],[7]],
-  "phase_4_result": {
-    "phase": 4,
-    "title": "BLOCKED handoff + Strategy-3 scope-reopening recommendation (contingency)",
-    "heading_status": "[COMPLETED]",
-    "outcome": "Documentation-only phase completed. Wrote durable [BLOCKED] handoff at handoffs/phase-1-gate-c-blocked-20260719.md documenting Wall A (exact r-symmetry probe, GATE-C, budget-exhausted not refuted) with the full Phase-1 evidence trail including the new ZZ translation-invariant difference-semigroup-must-be-a-subgroup argument (rules out that whole infinite countermodel family) and the hsymbox+htrans collapse (kills the naive Nat countermodel), plus Wall B (box-introduction adversarial-u exactness at Forcing.lean:75, standing independently of Wall A). No .lean edits made; zero debt confirmed.",
-    "docs_written": [
-      "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/phase-1-gate-c-blocked-20260719.md",
-      "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md (Phase 4 heading -> [COMPLETED], checklist checked off, plan-level Status field -> [BLOCKED])"
-    ],
-    "recommendation": "Authorize Strategy 3 (Simpson Ch.6 Hilbert-labelled adequacy bridge: NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi, then nik_TS5_soundness as a one-line corollary of the landed sorry-free cs5_soundness_derivable_incest) as a SEPARATE FOLLOW-UP TASK. This is a deliberate scope escalation -- parent task 517 avoided this scope on purpose -- requiring a new Adequacy.lean module (absent today) and rated ~25-30% on the Phase-6 C5 commutation crux. This is a user/orchestrator decision, NOT something to start autonomously under task 537."
-  },
-  "blockers": [
-    {
-      "target": "nik_TS5_soundness direct route (Wall A exact r-symmetry)",
-      "verbatim_goal": "NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi",
-      "wall": "Wall A: cs5FCIncest r -> r a b -> r b a (exact symmetry on the finitely-generated cs5FCIncest substructure, the TClosure.symm edge-validation case) -- budget-exhausted probe across 4 independent dispatches (3 under parent task 517, 1 under this task), NOT a concrete refutation. Wall B (box-introduction adversarial-u exactness at Forcing.lean:75) stands independently even if Wall A were closed.",
-      "recommended_followup": "Strategy 3 Ch.6 adequacy bridge as a new task"
-    }
+  "next_phase_hint": "Direct route is now source-grounded AND machine-verified as ACHIEVABLE, overturning the prior [BLOCKED]. Proceed to /plan 537: build a fresh implementation plan for the DIRECT route (box/diamond persistence-iff across the TClosure class + boxI lifting lemma). Do NOT plan the Hilbert adequacy bridge (user declined) or the L_m sequent system (this report shows neither is needed).",
+  "next_command": "/plan 537",
+  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "VERIFIED (Simpson1994:86, MarinMoralesStrassburger2021:962); all claims cite chunks read this pass",
+  "verdict": "DIRECT route ACHIEVABLE; prior four-dispatch [BLOCKED] REFUTED (it proved the wrong lemma). No adequacy bridge, no sorry, no new axiom, cs5FCIncest unweakened, NIK unchanged.",
+  "key_findings": [
+    "Q1 (Simpson Ch.8, chunks 0151-0158): soundness = tree-restricted induction + Lifting Lemma 8.1.3; the (box-I) case absorbs the adversarial successor into a FRESH child via lifting, not an exact frame edge. NIKTheorem is theoremhood-over-Graph.trivial = a tree = Simpson's provable case (Thm 8.1.1/8.1.4).",
+    "Q2 (MMS 2021, chunks 0026/0028/0046): DIRECT birelational soundness for incestuality (Thm 7.2) works by mapping FRESH labels to frame-supplied existential witnesses; sequents carry only EXPLICIT relational atoms, so a closed edge between two fixed points is never validated as an exact edge. This is the standard move the in-repo attempts missed.",
+    "Q3 diagnosis: CKForces box clause (Forcing.lean:75) is IDENTICAL to the standard birelational clause -- NOT stronger. The wall is architectural: boxE/diaI (Deduction.lean:288-303) carry a TClosure-closed edge premise, and the prior CLIQUE edge-cond invariant (TClosure -> exact r-edge) was the mistake. Fix: RAW edge-cond invariant + box/diamond persistence.",
+    "Wall A DISSOLVED (machine-verified axiom-free): box_iff_base / dia_iff_base -- box/diamond forced equivalently across a raw edge (both directions) via hincest/hfour/hsymbox/htrans; extends over the whole TClosure {T,B,Four} class by Iff.rfl/symm/trans (eucl unreachable, Five not in TS5).",
+    "Wall B = standard Lifting Lemma 8.1.3, needed for boxI ONLY: F1 = landed cs5FCIncest_lift (Soundness.lean:322); F2 = hsymbox then hincest (machine-verified, 3 lines). diaE uses le_refl and needs no lift."
   ],
-  "phase_1_result": {
-    "phase": 1,
-    "title": "Decisive symmetry/clique-closure probe with hard pivot gate",
-    "heading_status": "[BLOCKED]",
-    "outcome": "GATE-C: neither a sorry-free exact-symmetry lemma (cs5FCIncest r -> r a b -> r b a) nor a countermodel was landed within the bounded single-run budget. Explicitly sanctioned non-failure terminal state per the plan's pivot gate.",
-    "evidence": [
-      "Proof attempt: live lean_goal + lean_multi_attempt state (not hand analysis alone) confirms the hincest/hfour/hsymbox cascade never re-pins the two original fixed points -- e.g. htrans-chasing hab/hincest produces h7 : r b2 a (b <= b2, raised) instead of r b a; hfour hab hb_b1 h1 produces hvt : r v a (v >= a, raised) instead of r b a. aesop and tauto both fail outright. Independently reproduces the third dispatch's documented finding.",
-      "Countermodel attempt 1: hand-built r n m := (n>=2 v m>=2) v n=m v (n=0 ^ m=1) on Nat, checked against all five cs5FCIncest conjuncts by hand -- FAILS htrans (r 1 2 and r 2 0 both hold via the >=2 clause, forcing r 1 0 by transitivity, collapsing the intended asymmetry). Reproduces the documented hsymbox+htrans collapse pattern via an independent construction.",
-      "Countermodel attempt 2 (new this dispatch): translation-invariant difference-set analysis over Z (r n m := (m-n) in D) shows any additive sub-semigroup D containing 0, unbounded both above and below (the SB/IN requirements translated), is forced by a Bezout-plus-scaling argument to equal g*Z for some g>=1 -- a subgroup, hence symmetric. No translation-invariant countermodel exists. Does not by itself prove the fully general (non-translation-invariant Preorder) claim.",
-      "Zorn/chain-union pattern assessed and found structurally infeasible within this probe's budget: hfour/hsymbox take their raised point u' as a hypothesis (not an axiom-supplied existential -- only hincest's witness is existential), so there is no direct set-of-reachable-pairs poset whose maximal element pins the two ORIGINAL fixed points a, b exactly. Building one is genuinely new, multi-dispatch-scale infrastructure (plan's own ~150-300+ line estimate), not a bounded-probe-sized task."
-    ],
-    "docstring_location": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean, \"Fourth dispatch (task 537 Phase 1 probe, GATE-C)\" section",
-    "recommendation": "Authorize Phase 4 ([BLOCKED] handoff, documentation only) next, which itself recommends Strategy 3 (Hilbert-labelled adequacy bridge, Phases 5-7) as the follow-up scope, per the plan's pre-wired pivot routing. Do NOT dispatch a fifth undirected direct-implementation attempt -- the plan's Postmortem Constraints and this dispatch's no-loop gate both forbid it."
-  },
-  "sorry_inventory": [],
-  "hard_constraints_verified": {
+  "machine_verification": "All mathematical cruxes checked via lean_run_code with #print axioms = 'does not depend on any axioms': box_iff_base, dia_iff_base, box_gives_here, F1, F2. Faithful inline restatement of cs5FCIncest's five conjuncts (CS5Canonical.lean:255-260).",
+  "ranked_next_steps": [
+    "1. Land box_iff_base/dia_iff_base then box_iff_TClosure/dia_iff_TClosure (TClosure induction) -- LOW risk, cruxes already compile.",
+    "2. Land F2 and package single-step lifting next to cs5FCIncest_lift (=F1) -- LOW risk.",
+    "3. Build the boxI tree-lifting lemma (Simpson 8.1.3 analogue; freshness/tree invariant threading F1/F2) -- MAIN risk, own phase.",
+    "4. Assemble nik_TS5_soundness: 12-constructor NIK induction generalized over rho+model (reuse nik_soundness_onePoint skeleton, Soundness.lean:345), RAW edge-cond + Gamma-cond; boxE/diaI via step 1, boxI via step 3, diaE via le_refl, propositional verbatim.",
+    "5. Regression gate: cs5_completeness, nik_TS5_consistent, cs5_soundness_derivable_incest unchanged; cs5FCIncest unweakened; lake build green; lean_verify (no sorryAx)."
+  ],
+  "completion_estimate": "~80-85% for the full direct route (was ~25-30% for the declined bridge); risk concentrated solely in the boxI tree-lifting recursion (item 3).",
+  "zero_debt_confirmed": {
     "no_sorry": true,
     "no_new_axiom": true,
     "cs5FCIncest_unweakened": true,
-    "preserved_assets_unregressed": true,
-    "build_green": true
+    "NIK_unchanged": true,
+    "no_lean_files_modified_this_pass": true
   },
-  "build_verification": "lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness: Build completed successfully (734 jobs) -- re-verified green during Phase 4 (job count grew due to unrelated concurrent work elsewhere in the tree; no errors).",
+  "blockers": [],
   "artifacts": [
     {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/phase-1-gate-c-blocked-20260719.md",
-      "type": "handoff",
-      "summary": "Durable [BLOCKED] handoff: Wall A (exact r-symmetry, GATE-C, budget-exhausted) full evidence trail including the ZZ difference-semigroup argument and hsymbox+htrans collapse; Wall B (box-introduction adversarial-u) noted as standing independently; GREEN/zero-debt build state; Strategy-3 follow-up-task recommendation."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md",
-      "type": "plan",
-      "summary": "Phase 4 heading -> [COMPLETED], all 4 checklist items checked; plan-level Status field -> [BLOCKED]; Phases 2,3,5,6,7 left [NOT STARTED]."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
+      "type": "report",
+      "summary": "Source-grounded, machine-verified verdict: direct route achievable; H3 reference-grounding table; H4 adversarial table; lemma-by-lemma mapping; ranked planner next steps."
     }
   ],
-  "completed": "2026-07-19T15:45:00Z"
+  "completed": "2026-07-19T16:25:00Z"
 }

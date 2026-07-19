@@ -43,7 +43,7 @@ next_project_number: 538
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 536 [NOT STARTED] — Document the modal axiom-schema architecture in a new docs/ direc
-537 [RESEARCHING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+537 [RESEARCHED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 
 ### Temporal Logic
 
@@ -97,11 +97,13 @@ next_project_number: 538
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517
-- **Research**: [537_labelled_cs5_general_soundness_biconditional/reports/01_general-soundness-strategies.md]
+- **Research**:
+  - [537_labelled_cs5_general_soundness_biconditional/reports/01_general-soundness-strategies.md]
+  - [537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md]
 - **Plan**: [537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md]
 
 **Description**: Prove the general labelled SOUNDNESS direction nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, completing Simpson 1994 Thm 8.1.4's biconditional for CSLib constructive CS5/IS5. CONTEXT (from parent task 517, which delivered the completeness direction): cs5_completeness (Completeness.lean:132) and the anti-vacuity certificate nik_TS5_consistent + nik_soundness_onePoint (Soundness.lean) are LANDED sorry-free/axiom-clean. cs5FCIncest_lift (Soundness.lean:181) is a landed building block. THE OPEN OBSTRUCTION (established across 3 dispatches, no forced sorry): TS5={T,B,Four} makes TClosure TS5 G.R the TOTAL relation on the always-connected derivation graph, so the box edge-condition is an r-CLIQUE condition across all labels, not tree-adjacency; and cs5FCIncest's hfour/hsymbox/hincest conjuncts only ever produce EXISTENTIALLY-raised relational witnesses, whereas CKForces's box clause (and boxE) need EXACT edges/symmetry between independently-fixed points (persistence is only upward). No asymmetric countermodel refuted the obstruction; no closure proof completed it -- GENUINELY OPEN. THREE CANDIDATE STRATEGIES (ranked; none is a plain direct-implementation dispatch -- each needs research/re-plan): (1) prove cs5FCIncest forces symmetric/clique closure on finitely-generated substructures -- cheapest, possibly reuses the FLO closure machinery from parent Phases 1-7; (2) formalize Simpson's own modified sequent system L_m(TS5, empty), his stated fix for exactly this problem; (3) build the deferred Simpson Ch.6 Hilbert-labelled ADEQUACY bridge (NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi) and obtain labelled soundness as a corollary of the already-landed Hilbert soundness cs5_soundness_derivable_incest (CS5Canonical.lean:373) -- note this resurrects the bridge task 517 deliberately avoided (Track C, C5 'THE TRUE CRUX'). Full analysis: specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-blocked-20260719c.md and Soundness.lean's refined-analysis docstring. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not weaken cs5FCIncest; do not regress parent's landed completeness/anti-vacuity. Research MUST use --lit (Simpson Ch 8 soundness, Lifting Lemma 8.1.3, L_m modified sequent system). BibKeys: Simpson1994, MarinMoralesStrassburger2021. HIGH uncertainty (the direct route may be genuinely open). Start with strategy (1) as a research/probe pass before committing. Depends on 517.

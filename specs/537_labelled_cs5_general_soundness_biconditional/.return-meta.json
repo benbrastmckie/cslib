@@ -1,54 +1,33 @@
 {
   "task_number": 537,
-  "agent_type": "cslib-implementation-hard-agent",
+  "agent_type": "cslib-research-hard-agent",
   "session_id": "sess_1784471495_4fb1e9",
-  "status": "partial",
-  "phase": "implement",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+  "status": "researched",
+  "phase": "research",
   "orchestrator_mode": true,
-  "plan_path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md",
-  "phase_number": 4,
-  "phases_completed": 1,
-  "phases_total": 7,
-  "gate_outcome": "C",
-  "requires_user_review": true,
-  "result_summary": "Phase 4 (documentation-only GATE-C contingency) is COMPLETE. Task 537 remains [BLOCKED] on the direct route: Phase 1's decisive symmetry probe (Wall A, exact r-symmetry on cs5FCIncest, the TClosure.symm case) exhausted its budget across 4 independent dispatches without a proof or countermodel -- a sanctioned non-failure terminal per the plan's pivot gate, not a defect. This dispatch wrote a durable [BLOCKED] handoff (handoffs/phase-1-gate-c-blocked-20260719.md) with the full evidence trail (including a new ZZ translation-invariant difference-semigroup argument ruling out one whole countermodel family, and the hsymbox+htrans collapse killing the naive Nat countermodel), confirmed Wall B (box-introduction adversarial-u exactness, Forcing.lean:75) stands independently, verified zero debt (no sorry, no axiom, no regression, cs5FCIncest unweakened, build green 734/734), and recommends -- without authorizing -- Strategy 3 (Simpson Ch.6 Hilbert-labelled adequacy bridge) as a SEPARATE FOLLOW-UP TASK requiring explicit user/orchestrator sign-off. No .lean files were modified in this dispatch. Downstream plan Phases 2, 3, 5, 6, 7 remain [NOT STARTED] pending that decision.",
+  "delegation_path": ["orchestrator", "research", "cslib-research-hard-agent"],
+  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
+  "findings_count": 4,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "VERIFIED: Simpson1994 (references.bib:86), MarinMoralesStrassburger2021 (references.bib:962). All source claims cite specific chunks READ this pass (Simpson 0151-0160; MMS 0026,0028,0043,0044,0046,0048) -- no [UNVERIFIED] transcription fallbacks.",
+  "adversarial_verification_triggered": true,
+  "adversarial_verification_result": "CONFIRMED and STRENGTHENED. Prior four-dispatch [BLOCKED] conclusion REFUTED: it proved the wrong lemma (TClosure edge -> exact r-edge, which needs exact symmetry, false-in-general and unnecessary). Every mathematical crux of the corrected direct route was machine-verified sorry-free/axiom-free via lean_run_code + #print axioms (box_iff_base, dia_iff_base, F1, F2, box_gives_here). No ## Revised Direction restart triggered.",
+  "result_summary": "The DIRECT route to nik_TS5_soundness is ACHIEVABLE (no adequacy bridge, no sorry, no new axiom, cs5FCIncest unweakened). Grounded in the actual primary sources read this pass: Simpson Ch.8 (soundness = tree-restricted induction + Lifting Lemma 8.1.3; NIKTheorem is theoremhood-over-a-tree = his provable case) and MMS 2021 (direct birelational soundness for incestuality via fresh-label absorption of frame-supplied existential witnesses). DIAGNOSIS (Q3): CKForces box clause (Forcing.lean:75) is IDENTICAL to the standard birelational clause -- NOT stronger; the wall is architectural (boxE/diaI carry a TClosure-closed edge premise) and the prior clique edge-cond invariant was the mistake. FIX (machine-verified): Wall A dissolves via box/diamond forcing-EQUIVALENCE across the TClosure {T,B,Four} class (CKForces(rho x)(box A) iff CKForces(rho y)(box A)), proved from hincest/hfour/hsymbox/htrans raised witnesses (NO exact symmetry); Wall B is Simpson's standard Lifting Lemma needed for boxI ONLY, with F1 = landed cs5FCIncest_lift and F2 derivable in 3 lines (diaE uses le_refl, needs no lift). Direct-route completion estimate raised to ~80-85%, risk concentrated solely in the boxI tree-lifting recursion.",
   "memory_candidates": [
-    "cs5FCIncest r -> r a b -> r b a (exact symmetry on the finitely-generated substructure) remains genuinely open after a 4th independent dispatch: hincest/hfour/hsymbox raised witnesses cascade indefinitely without re-pinning the two original fixed points, confirmed via live lean_goal/lean_multi_attempt state.",
-    "Any translation-invariant (difference-set) countermodel attempt over Z collapses: an additive sub-semigroup of Z containing 0 that is unbounded both above and below is forced (Bezout + scaling) to equal g*Z for some g, i.e. a subgroup, hence symmetric -- so no countermodel exists in this natural infinite family.",
-    "The Zorn/chain-union pattern (reused from PrimeLemma.lean's Lindenbaum construction) does not transfer to this problem: hfour/hsymbox take their raised point as a hypothesis, not an axiom-supplied existential, so there is no natural set-of-pairs poset whose maximal element pins two ALREADY-FIXED points exactly.",
-    "When a bounded decisive probe hits neither GATE-A (proof) nor GATE-B (countermodel), the sanctioned response is a documented [BLOCKED] handoff plus a follow-up-task recommendation for the next-largest strategy -- never a strategic sorry and never an undirected repeat dispatch at the same wall."
+    "Labelled-CS5 boxE/diaI soundness over cs5FCIncest is discharged by box/diamond forcing-EQUIVALENCE across the TClosure {T,B,Four} class (CKForces(rho x)(box A) iff CKForces(rho y)(box A)), proved from hincest/hfour/hsymbox/htrans raised witnesses -- NOT by validating each closed edge as an exact r-edge. The exact-r-symmetry lemma that blocked four dispatches is both false-in-general and unnecessary. (machine-verified axiom-free via lean_run_code)",
+    "cs5FCIncest yields BOTH birelational confluence directions: F1 (source-raise) = landed cs5FCIncest_lift (Soundness.lean:322); F2 (target-raise) = hsymbox then hincest, three lines. Simpson's Lifting Lemma 8.1.3 therefore transfers; only boxI needs it (diaE uses le_refl, needs none).",
+    "General method (Simpson 1994 chunk 0158 + MMS 2021 chunks 0026/0046): to prove labelled soundness against frame-condition rules, maintain a RAW edge-cond invariant and push raised/existential witnesses through the modal forcing clause at the point of use -- never a TClosure-clique invariant. This is MMS's fresh-witness technique; it sidesteps the non-tree-excursion obstruction for theoremhood-over-a-tree.",
+    "When a formal-proof task is declared [BLOCKED] on a hand-analyzed 'wall', re-examine whether the blocking lemma is the RIGHT decomposition before escalating scope: task 537's four dispatches machine-never-checked their wall and were disproved in one lean_run_code pass once the correct (persistence, not clique) lemma was identified."
   ],
   "artifacts": [
     {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/phase-1-gate-c-blocked-20260719.md",
-      "type": "handoff",
-      "summary": "Durable [BLOCKED] handoff: Wall A (exact r-symmetry, GATE-C, budget-exhausted) full evidence trail including the ZZ difference-semigroup argument and hsymbox+htrans collapse; Wall B (box-introduction adversarial-u) noted as standing independently; GREEN/zero-debt build state; Strategy-3 follow-up-task recommendation."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md",
-      "type": "plan",
-      "summary": "Phase 4 heading -> [COMPLETED], all 4 checklist items checked; plan-level Status field -> [BLOCKED]; Phases 2,3,5,6,7 left [NOT STARTED]."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "status blocked, phases_completed 1/7, blockers array with verbatim goal and Wall A/B description, sorry_inventory empty, build re-verified green (734/734), Strategy-3 follow-up recommendation."
-    },
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/02_gate-c-blocked-handoff-summary.md",
-      "type": "summary",
-      "summary": "Implementation summary for the Phase 4 documentation-only dispatch: what changed, decisions, impacts, follow-ups."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
+      "type": "report",
+      "summary": "Source-grounded, machine-verified verdict that the DIRECT route is achievable; H3 reference-grounding table (chunk -> claim -> Lean target); H4 adversarial table; lemma-by-lemma mapping; ranked planner next steps."
     }
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": null
-  },
-  "started_at": "2026-07-19T15:09:12Z",
-  "completed": "2026-07-19T15:45:00Z"
+  "next_steps": "Run /plan 537 to create implementation plan",
+  "next_command": "/plan 537",
+  "started_at": "2026-07-19T16:00:00Z",
+  "completed": "2026-07-19T16:25:00Z"
 }

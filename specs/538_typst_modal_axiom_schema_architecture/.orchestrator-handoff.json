@@ -1,0 +1,29 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Read docs/modal-axiom-schema-architecture.md (508 lines, 7 sections) in full and the codebase's one existing Typst precedent (typst/MPL/) to extract house style (thmbox theorem environments, AMS austere aesthetic, notation macros). Identified concrete redundancy-trim opportunities (Section 3's five near-duplicate Lean lemmas -> one table; Section 2's 24-edge prose list -> a fletcher cube diagram) and verified locally that a typst compile smoke test (Lean-fenced code block + box/diamond math + table) succeeds with thmbox 0.3.0 and fletcher cached offline. Report recommends a single self-contained file at typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ (not a multi-file MPL-style scaffold), with build output to build/modal-axiom-schema-architecture.pdf.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "Output path: typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ, a single self-contained file (no separate template.typ/notation/ split) since the source is one ~500-line document, not a multi-chapter report like the existing typst/MPL/ precedent.",
+    "Reuse typst/MPL house style directly: @preview/thmbox:0.3.0 theorem environments (definition/theorem/lemma/axiom/remark), New Computer Modern font, austere no-fill AMS aesthetic, and the nec/poss (square.stroked/diamond.stroked) notation macros from typst/MPL/notation/shared-notation.typ.",
+    "Collapse Section 3's five near-identical Satisfies.modal*_axiom Lean signatures into one table (Tag | schema | frame condition | lemma name) -- the single largest verbosity-trim opportunity in the source.",
+    "Replace Section 2's 24-edge prose bulleted list with a fletcher package diagram of the modal cube (15 nodes, 24 edges); treated as a stretch enhancement, not a blocking requirement, with a grouped-table fallback if layout proves too fiddly.",
+    "Keep ~6-7 singular, load-bearing Lean signatures (ModalSchemaTag inductive, SchemaUnion def, the three @[simp] elimination lemmas, FrameValidatesTag, unionSound, the HasAxiomT instance witness) as literal fenced Lean code blocks for fidelity -- this document's whole point is precise verified signatures, unlike the more narrative typst/MPL precedent which never uses raw Lean code blocks.",
+    "Compiled a local typst smoke test confirming Lean-fenced raw code blocks, square.stroked/diamond.stroked math, and tables all render correctly with typst 0.14.2 and locally cached thmbox 0.3.0 / fletcher packages -- no network fetch required at implementation time."
+  ],
+  "dead_ends": [
+    "Co-locating the .typ file in docs/ alongside the .md source was considered and rejected -- typst/ is this repo's established convention for Typst deliverables (with its own build/ output subdirectory), and docs/ currently holds only Markdown."
+  ],
+  "continuation_context": null,
+  "session_id": "sess_1784485549_e832a2",
+  "orchestrator_mode": true
+}

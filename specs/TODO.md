@@ -43,7 +43,7 @@ next_project_number: 539
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-538 [NOT STARTED] — Turn docs/modal-axiom-schema-architecture.md into a clear and con
+538 [RESEARCHED] — Turn docs/modal-axiom-schema-architecture.md into a clear and con
 
 ### Temporal Logic
 
@@ -96,10 +96,11 @@ next_project_number: 539
 ## Tasks
 
 ### 538. Typst modal axiom schema architecture
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: typst
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md]
 
 **Description**: Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Direct-Route General Labelled CS5 Soundness (nik_TS5_soundness)
 
 - **Task**: 537 - Prove the general labelled soundness direction, completing Simpson 1994 Thm 8.1.4's biconditional
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 8-14 hours (mainline; risk concentrated in Phase 4.2)
 - **Dependencies**: 517 (delivered completeness + anti-vacuity + landed building blocks)
 - **Research Inputs**: reports/02_direct-route-from-sources.md (Tier 1, H4-verified, all cruxes machine-verified axiom-free)
@@ -194,18 +194,18 @@ as the conditional contingency terminal reachable from a Phase 4.2 stall.
 Phase order is de-risking order (report 02 ranked steps): land the machine-verified cruxes
 (Phases 1-3) first, each sorry-free and build-green, before the concentrated-risk Phase 4.2.
 
-### Phase 1: Base forcing-equivalence lemmas box_iff_base, dia_iff_base [NOT STARTED]
+### Phase 1: Base forcing-equivalence lemmas box_iff_base, dia_iff_base [COMPLETED]
 
 - **Goal:** Land the two machine-verified base biconditionals that dissolve the ex-"Wall A"
   (report 02 §4(A)). These are the load-bearing cruxes and are already known to compile axiom-free.
 - **Tasks:**
-  - [ ] State and prove `box_iff_base : r a b → ((∀ w' ≥ a, ∀ u, r w' u → P u) ↔ (∀ w' ≥ b, ∀ u,
+  - [x] State and prove `box_iff_base : r a b → ((∀ w' ≥ a, ∀ u, r w' u → P u) ↔ (∀ w' ≥ b, ∀ u,
         r w' u → P u))` with `P` an arbitrary predicate. Forward direction via `hfour`; backward
         (ex-"symm") via `hincest` then `hfour`. Cite `cs5FCIncest` conjuncts (CS5Canonical.lean:255).
-  - [ ] State and prove `dia_iff_base : r a b → ((∀ w' ≥ a, ∃ u, r w' u ∧ Q u) ↔ (∀ w' ≥ b, ∃ u,
+  - [x] State and prove `dia_iff_base : r a b → ((∀ w' ≥ a, ∃ u, r w' u ∧ Q u) ↔ (∀ w' ≥ b, ∃ u,
         r w' u ∧ Q u))` with `Q` arbitrary. Forward via `hsymbox`+`htrans`; backward via
         `hincest`+`hsymbox`+`htrans`.
-  - [ ] Confirm the clause shapes match `CKForces_box` / `CKForces_diamond` (Forcing.lean:106/:112)
+  - [x] Confirm the clause shapes match `CKForces_box` / `CKForces_diamond` (Forcing.lean:106/:112)
         so the lemmas apply to real forcing goals (predicates `P`/`Q` are NOT assumed upward-closed).
 - **Estimated output:** ~120-180 lines. **Bounded unit:** two named lemmas, each provable in
   isolation from the `cs5FCIncest` conjuncts; concrete stopping condition = both compile.

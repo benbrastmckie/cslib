@@ -327,6 +327,55 @@ theorem cs5FCIncest_lift {World : Type*} [Preorder World] {r : World → World �
   obtain ⟨t, hw't, hu₁t⟩ := hsymbox hu₁w hww'
   exact ⟨t, hu_u₁.trans hu₁t, hw't⟩
 
+/-! ## Base forcing-equivalence lemmas (task 537 Phase 1, direct-route report §4(A))
+
+Dissolves the ex-"Wall A" obstruction (the `TClosure → exact r-edge`/exact-symmetry lemma
+that GATE-C confirmed unprovable, see the module docstring's "Fourth dispatch" section above).
+`boxE`/`diaI` soundness never needs exact `r`-symmetry between two independently-fixed points;
+it needs only that `CKForces` at a `□`/`◇`-formula is **forcing-equivalent** across an
+`r`-related pair, discharged directly from `cs5FCIncest`'s raised-witness conjuncts
+(`hfour`/`hincest` for `□`; `hsymbox`/`htrans`/`hincest` for `◇`). `P`/`Q` are arbitrary
+predicates (NOT assumed upward-closed); the clause shapes below match `CKForces_box`/
+`CKForces_diamond` (`Forcing.lean:106,112`) exactly, so these lemmas apply directly to real
+`CKForces (_) (□A)`/`CKForces (_) (◇A)` goals via `P := fun u => CKForces r v botForces u A`. -/
+
+/-- **Box-forcing base equivalence.** If `r a b`, the "`□`-successor" clause is equivalent
+whether quantified from `a` or from `b`: forward via `hfour` (raise the successor's witness
+down to an `a`-successor); backward — the ex-"Wall A" `.symm` direction — via `hincest` (raise
+a witness `b'` with `r b' a`) then `hfour` again. Neither direction needs exact `r`-symmetry. -/
+theorem box_iff_base {World : Type*} [Preorder World] {r : World → World → Prop}
+    (hfc : cs5FCIncest r) {a b : World} (hab : r a b) {P : World → Prop} :
+    (∀ w' ≥ a, ∀ u, r w' u → P u) ↔ (∀ w' ≥ b, ∀ u, r w' u → P u) := by
+  obtain ⟨_, _, hfour, _, hincest⟩ := hfc
+  constructor
+  · intro H w' hw' u hru
+    obtain ⟨v, hav, hvu⟩ := hfour hab hw' hru
+    exact H v hav u hvu
+  · intro H w' hw' u hru
+    obtain ⟨b', hbb', hb'a⟩ := hincest hab
+    obtain ⟨v, hb'v, hrvu⟩ := hfour hb'a hw' hru
+    exact H v (hbb'.trans hb'v) u hrvu
+
+/-- **Diamond-forcing base equivalence.** If `r a b`, the "`◇`-successor" clause is equivalent
+whether quantified from `a` or from `b`: forward via `hsymbox` (raise the target across `≤`)
+then `htrans` (compose back to the original successor); backward — the ex-"Wall A" `.symm`
+direction — via `hincest` (raise a witness `b'` with `r b' a`) then `hsymbox`+`htrans` again.
+Neither direction needs exact `r`-symmetry. -/
+theorem dia_iff_base {World : Type*} [Preorder World] {r : World → World → Prop}
+    (hfc : cs5FCIncest r) {a b : World} (hab : r a b) {Q : World → Prop} :
+    (∀ w' ≥ a, ∃ u, r w' u ∧ Q u) ↔ (∀ w' ≥ b, ∃ u, r w' u ∧ Q u) := by
+  obtain ⟨_, htrans, _, hsymbox, hincest⟩ := hfc
+  constructor
+  · intro H w' hw'
+    obtain ⟨t, hrw't, hat⟩ := hsymbox hab hw'
+    obtain ⟨u, hrtu, hqu⟩ := H t hat
+    exact ⟨u, htrans hrw't hrtu, hqu⟩
+  · intro H w' hw'
+    obtain ⟨b', hbb', hb'a⟩ := hincest hab
+    obtain ⟨t, hrw't, hb't⟩ := hsymbox hb'a hw'
+    obtain ⟨u, hrtu, hqu⟩ := H t (hbb'.trans hb't)
+    exact ⟨u, htrans hrw't hrtu, hqu⟩
+
 /-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the

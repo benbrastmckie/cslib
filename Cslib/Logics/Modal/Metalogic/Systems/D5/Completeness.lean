@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D5.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Strong Completeness for Modal Logic D5
 
@@ -58,36 +57,36 @@ private theorem d5_canonical_FC : d5FC (CanonicalModel (@D5Axiom Atom)) := by
   · constructor
     intro S
     exact d_canonical_serial
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalD, by decide, φ, rfl⟩) S
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalD, by decide, φ, rfl⟩) S
   · exact canonical_eucl_from_5
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalFive, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalFive, by decide, φ, rfl⟩)
 
 /-- Pre-applied D5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem d5_truth_lemma_applied (S : CanonicalWorld (@D5Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@D5Axiom Atom)) S φ ↔ φ ∈ S.val :=
   d_truth_lemma
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.modalD, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩) S φ
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalD, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩) S φ
 
 /-- D5 soundness adapter matching the `strong_soundness` callback shape. -/
 private theorem d5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -129,10 +128,10 @@ theorem d5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@D5Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @D5Axiom Atom) (FC := d5FC)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
     d5_truth_lemma_applied
     d5_canonical_FC
     (fun World m w ⟨hSer, hEucl⟩ h_sat => h World m w hSer hEucl h_sat)
@@ -173,10 +172,10 @@ theorem d5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @D5Axiom Atom) (FC := d5FC)
       d5_sound_cb
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_d5Tags_iff_D5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
       d5_truth_lemma_applied
       d5_canonical_FC
       (fun World m w ⟨hSer, hEucl⟩ h_sat => h World m w hSer hEucl h_sat)

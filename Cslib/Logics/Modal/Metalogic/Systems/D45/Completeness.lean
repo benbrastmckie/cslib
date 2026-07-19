@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D45.Soundness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Strong Completeness for Modal Logic D45
 
@@ -57,42 +56,42 @@ def d45FC : ∀ {World : Type u}, Model World Atom → Prop :=
 transitive, and Euclidean. -/
 private theorem d45_canonical_FC : d45FC (CanonicalModel (@D45Axiom Atom)) := by
   refine ⟨?_, canonical_trans
-      (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalFour, by decide, φ, rfl⟩),
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.modalFour, by decide, φ, rfl⟩),
     canonical_eucl_from_5
-      (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalFive, by decide, φ, rfl⟩)⟩
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalFive, by decide, φ, rfl⟩)⟩
   constructor
   intro S
   exact d_canonical_serial
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalD, by decide, φ, rfl⟩) S
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalD, by decide, φ, rfl⟩) S
 
 /-- Pre-applied D45 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem d45_truth_lemma_applied (S : CanonicalWorld (@D45Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@D45Axiom Atom)) S φ ↔ φ ∈ S.val :=
   d_truth_lemma
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.modalD, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩) S φ
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalD, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩) S φ
 
 /-- D45 soundness adapter matching the `strong_soundness` callback shape. -/
 private theorem d45_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -136,10 +135,10 @@ theorem d45_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposit
         Satisfies m w phi) :
     ModalSetDerivable (@D45Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @D45Axiom Atom) (FC := d45FC)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
     d45_truth_lemma_applied
     d45_canonical_FC
     (fun World m w ⟨hSer, hTrans, hEucl⟩ h_sat => h World m w hSer hTrans hEucl h_sat)
@@ -183,10 +182,10 @@ theorem d45_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @D45Axiom Atom) (FC := d45FC)
       d45_sound_cb
-      (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_d45Tags_iff_D45Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
       d45_truth_lemma_applied
       d45_canonical_FC
       (fun World m w ⟨hSer, hTrans, hEucl⟩ h_sat => h World m w hSer hTrans hEucl h_sat)

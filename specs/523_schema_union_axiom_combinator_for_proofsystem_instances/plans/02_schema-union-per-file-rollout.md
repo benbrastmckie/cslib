@@ -891,7 +891,7 @@ finalize) — depends on 4, 5, 6, 7 (all now complete).
 
 ---
 
-### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [BLOCKED]
+### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [IN PROGRESS]
 
 **Goal**: The terminal, once-everything-else-is-green step: **redefine each `<Sys>Axiom` in place**
 as `SchemaUnion sysTags` (preserving the public name, retiring the inductive), resolve S5's
@@ -929,10 +929,44 @@ The tag sets belong at the foundation anyway (a system's tag set is its essence,
       `...SchemaBridges`, and `...Metalogic.InterSystem.AxiomSubsumption` all green;
       `lake exe checkInitImports` clean; zero `sorry` in touched files.
 
-**Sub-phase 8.2 — redefine the inductives; trivialize bridges; delete private helpers** [BLOCKED]
-- [x] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
-      `<Sys>Axiom`/`ModalAxiom` inductive (all migrated in Phases 4/6/7). Predicate references remain.
-      **FINDING (blocker): this check FAILS.** All 15 `Systems/*/Completeness.lean` files
+**Sub-phase 8.2 — migrate the 15 `Completeness.lean` witness sites (additive)** [NOT STARTED]
+
+Discovered during the first 8.2 attempt (finding preserved below under the old 8.2 heading, now
+8.3): all 15 `Systems/*/Completeness.lean` files construct axiom witnesses via constructors
+(~364 sites total, e.g. `(fun φ ψ => .implyK φ ψ)` and `(fun φ => D4Axiom.modalD φ)` callbacks
+passed into the canonical-model/truth-lemma machinery). The research blast-radius table wrongly
+marked `Completeness.lean` "insulated"; it is in fact the LARGEST constructor consumer, and no
+earlier phase touched it. These must be migrated BEFORE the inductives can be redefined (8.3).
+
+**Approach — additive, bridge-based, proof-internals UNTOUCHED**: convert each construction
+callback to the `SchemaUnion` existential-witness form wrapped through the Phase-3 bridge, so it
+still yields a genuine `<Sys>Axiom` value while the inductive is LIVE:
+`(fun φ ψ => .implyK φ ψ)` → `(fun φ ψ => (schemaUnion_sysTags_iff_SysAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)`.
+Because the callback still produces a `<Sys>Axiom` value, the generic completeness lemmas that
+CONSUME these callbacks (`d_canonical_serial`, `canonical_trans`, the truth lemmas, …) are NOT
+touched — only the witness *construction* changes. `Completeness.lean` imports `SchemaBridges.lean`
++ `SchemaTags.lean` (no cycle: `SchemaBridges` imports the `ProofSystem/Instances` barrel, not
+`Metalogic/Systems/*/Completeness`). After the 8.3 `abbrev` redefinition these bridge wrappers
+become identities and are dropped in 8.4.
+
+- [ ] 8.2a — `Systems/{K,T,D,B}/Completeness.lean`: migrate all constructor-witness sites to the
+      bridge form above. Scoped `lake build` of each module green; zero `sorry`. Commit.
+- [ ] 8.2b — `Systems/{K4,K5,K45,S4}/Completeness.lean`. Commit.
+- [ ] 8.2c — `Systems/{S5,TB,KB5}/Completeness.lean` (S5 via the `ModalAxiom` bridge). Commit.
+- [ ] 8.2d — `Systems/{D4,D5,D45,DB}/Completeness.lean` (these carry explicit named `<Sys>Axiom.ctor`
+      forms too — migrate both the named and the anonymous-dot shapes). Commit.
+- Verify (each group): scoped `lake build` of each touched `Completeness.lean` green; the generic
+  completeness lemmas unchanged; zero `sorry`, no new axiom. The inductives stay LIVE.
+- **Done when**: grep finds NO remaining constructor-construction site (`.ctor` / `<Sys>Axiom.ctor`)
+  for any `<Sys>Axiom`/`ModalAxiom` across all of `Cslib/` — i.e. 8.3's grep-gate will pass.
+
+**Sub-phase 8.3 — redefine the inductives; trivialize bridges; delete private helpers** [NOT STARTED]
+
+*(Unblocked once 8.2 lands and the grep-gate below passes. The blocker finding from the first
+attempt is preserved verbatim as the first task's note.)*
+- [ ] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
+      `<Sys>Axiom`/`ModalAxiom` inductive (migrated in Phases 4/6/7 AND now 8.2). Predicate references remain.
+      **FIRST-ATTEMPT FINDING (now addressed by 8.2): this check FAILED on the first try.** All 15 `Systems/*/Completeness.lean` files
       (`K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB`) contain live constructor-construction
       sites for the very inductives Phase 8.2 would retire — NOT migrated in Phases 4/6/7 (those
       phases touched `Soundness.lean`, `AxiomSubsumption.lean`, `IntToClassical.lean`, and the
@@ -978,10 +1012,12 @@ The tag sets belong at the foundation anyway (a system's tag set is its essence,
       inductives grep-confirmed gone; every public name still resolves; zero `sorry`, no new axiom.
       **NOT REACHED.**
 
-**Sub-phase 8.3 — simplify the ~78 call sites; delete scaffolding; final full verify** [NOT STARTED]
-- [ ] Simplify the bridge call sites now that the forms are interchangeable: `Systems/*/Soundness.lean`
-      (15, drop `(bridge.mpr h_ax)` → `h_ax`), `InterSystem/AxiomSubsumption.lean` (48 refs, drop the
-      `.mp/.mpr` wrapping), `InterSystem/IntToClassical.lean` (15 refs).
+**Sub-phase 8.4 — simplify ALL bridge call sites; delete scaffolding; final full verify** [NOT STARTED]
+- [ ] Simplify the bridge call sites now that the `abbrev` forms are interchangeable (drop the
+      `(bridge.mp/.mpr …)` wrappers, leaving the bare `SchemaUnion` witness / hypothesis):
+      `Systems/*/Completeness.lean` (~364 sites from 8.2), `Systems/*/Soundness.lean` (15 files),
+      `InterSystem/AxiomSubsumption.lean` (48 refs), `InterSystem/IntToClassical.lean` (15 refs).
+      Do this per-group with scoped green builds, not one monolithic edit.
 - [ ] Delete `SchemaBridges.lean` entirely (its bridges are now identities with no remaining users);
       keep any lemma that is genuinely public API only behind a `@[deprecated]` alias in an acyclic
       location — expected: none survive.

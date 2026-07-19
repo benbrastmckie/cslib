@@ -1,5 +1,5 @@
 {
-  "next_project_number": 537,
+  "next_project_number": 538,
   "active_projects": [
     {
       "project_number": 530,
@@ -1638,14 +1638,14 @@
     {
       "project_number": 517,
       "project_name": "labelled_bounded_context_cs5_completeness",
-      "status": "blocked",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "ROUTE B (user-funded, full build): Build a LABELLED / bounded-context canonical model framework for CSLib constructive modal logic and prove CS5 (== IS5) constructive Kripke COMPLETENESS over it -- the only faithful path remaining. WHY THIS EXISTS (exhaustively established, mechanized + literature-grounded across tasks 509/512/516): every route that keeps CSLib's PRIME-THEORY canonical model is dead for ONE root reason -- prime non-maximal theories lack negation-completeness, so the symmetric back-clause is jointly unsatisfiable with refuting the box subject. Mechanized guardrail set (all sorry-free/axiom-clean): cs5_symmetric_tail_box_gap (CS5.lean:712, task 509 -- THE wall), cs5Incest_forces_symm (CS5Canonical.lean:643, axiom-free -- any <=-mediated condition collapses to plain symmetry since ckforces_persistence + cval force head-monotonicity under ANY <=), cs5TwoSidedR_iff_cs5Tail (CS5Canonical.lean:511 -- Simpson two-sided R == the old cs5Tail wall over CS5 quasi-prime theories), plus task-512's atom-sum results. Dead: atom-sum doubled-atom (512), one-sided-R (512 ph5), two-sided-R (512 ph7), independent-<= (516 report 01 -- refuted: Simpson uses <= = subset VERBATIM, Section 3.3), Simpson-faithful prime-theory Route A (516 report 02, ~95% -- Simpson NEVER does symmetric box-backward in prime-theory form; his Section 3.3 prime model is an 'outline' deferring IS5 symmetry to Fischer Servi). CS5 IS complete (CS5 == IS5, CS5.lean:93-99) -- the block is representational, NOT incompleteness. THE METHOD (Simpson 1994 Ch 7-8, the rigorous IS5 proof he actually carries out; extended by Marin-Morales-Strassburger 2021's labelled line): abandon prime theories for LABELLED 'T-prime bounded contexts'. Key targets: T-Comp graph completion (Simpson Lemma 8.2.5) for symmetry; the bounded canonical model lemma over labelled membership y:B in A (Lemma 8.2.6) for box-backward; a BOUNDED prime lemma; then the truth lemma and cs5_completeness. NOTE (important, settled by 516 report 02): the classical decidability-of-derivability step in Simpson's box-backward is NOT a blocker -- Lean has Classical.em; the prime-theory structural gap was the blocker, and labelled bounded contexts sidestep it. SCOPE: ~1500-2500 lines, ~ZERO reuse of the existing prime-theory canonical machinery (CKSegment/Segment/SegmentLindenbaum do not transfer) -- this is a NEW framework. Reuse what genuinely transfers: Proposition/Proposition.map (Basic.lean), the DerivationTree/Derivable infrastructure, the CS5ModalAxiom set, and task-512's landed CS5 soundness (cs5_axiom_sound_incest / cs5_soundness_incest, axiom-free) where the frame class matches. Any design MUST explain why it does not trip the four guardrail lemmas (labelled contexts are not prime theories, so cs5_symmetric_tail_box_gap should not apply -- state why explicitly). CONSTRAINTS: NO sorry, NO new axiom under Cslib/; zero-debt at every phase boundary; do NOT regress landed CK/CT/CS4/CS5 soundness or task-509 cs5FC''; build alongside. BibKeys: Simpson1994 (Ch 7-8), MarinMoralesStrassburger2021, Dosen1985, BozicDosen1984, AlechinaMendlerdePaivaRitter2001, Wijesekera1990, Pacheco2024 (all in references.bib). Research MUST use --lit (mine Simpson Ch 7-8 chunks: Lemmas 8.2.5, 8.2.6, the bounded prime lemma). HIGH effort, HIGH uncertainty. Depends on 509, 512, 516.",
       "dependencies": [],
       "parent_task": 512,
       "created": "2026-07-15T15:03:35Z",
-      "last_updated": "2026-07-19T04:00:00Z",
+      "last_updated": "2026-07-19T04:12:00Z",
       "priority": null,
       "effort": "40-70 hours",
       "artifacts": [
@@ -1665,7 +1665,7 @@
           "summary": "Plan v6: Option-B labelled completeness (Simpson 8.1.4) + full labelled soundness biconditional"
         }
       ],
-      "blockers": "PARTIAL SUCCESS + SOUNDNESS OPEN. DELIVERED sorry-free/axiom-clean (build 3250/3250, CI green): (1) cs5_completeness : CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi (Completeness.lean:132) -- the task's headline result, CS5/IS5 constructive Kripke completeness over the labelled framework, matching Simpson Thm 8.1.4 completeness direction; (2) nik_TS5_consistent : not (NIKTheorem TS5 bot) (Soundness.lean:365) -- anti-vacuity certificate, so the completeness result is provably non-vacuous. OPEN: the general biconditional soundness nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi is BLOCKED on a genuinely open question after 3 dispatches (anti-churn honored, no forced sorry): cs5FCIncest's hfour/hsymbox/hincest only yield EXISTENTIALLY-raised relational witnesses, but CKForces's box clause + boxE need EXACT edges/symmetry between independently-fixed points; no asymmetric countermodel refuted the obstruction and no closure proof completed it. Full analysis: handoffs/phase-11-general-soundness-blocked-20260719c.md. THREE re-plan/research-scale strategies (none a direct-impl dispatch): (1) prove cs5FCIncest forces clique/symmetric closure on finitely-generated substructures (cheapest, may reuse FLO machinery from Phases 1-7); (2) formalize Simpson's modified sequent system L_m(TS5, empty); (3) build the Ch.6 Hilbert-labelled bridge (previously deferred) and get labelled soundness as a corollary of the landed cs5_soundness_derivable_incest. AWAITING USER DECISION: accept completeness+non-vacuity as deliverable and spawn soundness as a follow-up task, OR pursue a specific soundness strategy.",
+      "blockers": "",
       "session_id": "sess_1784426695_5a54b8",
       "plan_metadata": {
         "phases": 26,
@@ -1768,6 +1768,10 @@
         "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Context.lean",
         "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
         "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean"
+      ],
+      "completion_summary": "Delivered CS5/IS5 constructive Kripke COMPLETENESS over a new labelled bounded-context canonical model, sorry-free and axiom-clean (build 3250/3250, full CI green): cs5_completeness : CKValidFC cs5FCIncest phi -> NIKTheorem TS5 phi (Completeness.lean), matching Simpson 1994 Thm 8.1.4's completeness direction. This is the faithful path the prior prime-theory routes (parent 512, and 509/516) could not reach -- the prime non-maximal negation-completeness wall is genuinely sidestepped by labelled T-prime bounded contexts (Simpson Ch 7-8: FLO reconstruction, primeLemma, canonical model + truth lemma 5.3.2/8.2.6, frame-class match to cs5FCIncest). Target restated from the Hilbert statement to the labelled NIKTheorem TS5 statement (user-signed-off Option B, literature-confirmed faithful/non-vacuous in reports/11: Simpson's own completeness targets the labelled system, Hilbert equivalence being a separate Ch.6 composition). Non-vacuity certified by nik_TS5_consistent : not (NIKTheorem TS5 bot) + nik_soundness_onePoint (Soundness.lean). The general biconditional SOUNDNESS direction (nik_TS5_soundness) surfaced a genuinely open obstruction (cs5FCIncest yields only existentially-raised witnesses; box/boxE need exact edges between independently-fixed points) and was spawned as follow-up task 537 with three candidate strategies. Zero-debt maintained throughout; no landed CK/CT/CS4/CS5 soundness regressed.",
+      "roadmap_items": [
+        "General labelled soundness nik_TS5_soundness (Simpson 8.1.4 biconditional) -> follow-up task 537"
       ]
     },
     {
@@ -2083,6 +2087,25 @@
       "parent_task": 523,
       "file_scope": [
         "docs/"
+      ]
+    },
+    {
+      "project_number": 537,
+      "project_name": "labelled_cs5_general_soundness_biconditional",
+      "status": "not_started",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Prove the general labelled SOUNDNESS direction nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, completing Simpson 1994 Thm 8.1.4's biconditional for CSLib constructive CS5/IS5. CONTEXT (from parent task 517, which delivered the completeness direction): cs5_completeness (Completeness.lean:132) and the anti-vacuity certificate nik_TS5_consistent + nik_soundness_onePoint (Soundness.lean) are LANDED sorry-free/axiom-clean. cs5FCIncest_lift (Soundness.lean:181) is a landed building block. THE OPEN OBSTRUCTION (established across 3 dispatches, no forced sorry): TS5={T,B,Four} makes TClosure TS5 G.R the TOTAL relation on the always-connected derivation graph, so the box edge-condition is an r-CLIQUE condition across all labels, not tree-adjacency; and cs5FCIncest's hfour/hsymbox/hincest conjuncts only ever produce EXISTENTIALLY-raised relational witnesses, whereas CKForces's box clause (and boxE) need EXACT edges/symmetry between independently-fixed points (persistence is only upward). No asymmetric countermodel refuted the obstruction; no closure proof completed it -- GENUINELY OPEN. THREE CANDIDATE STRATEGIES (ranked; none is a plain direct-implementation dispatch -- each needs research/re-plan): (1) prove cs5FCIncest forces symmetric/clique closure on finitely-generated substructures -- cheapest, possibly reuses the FLO closure machinery from parent Phases 1-7; (2) formalize Simpson's own modified sequent system L_m(TS5, empty), his stated fix for exactly this problem; (3) build the deferred Simpson Ch.6 Hilbert-labelled ADEQUACY bridge (NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi) and obtain labelled soundness as a corollary of the already-landed Hilbert soundness cs5_soundness_derivable_incest (CS5Canonical.lean:373) -- note this resurrects the bridge task 517 deliberately avoided (Track C, C5 'THE TRUE CRUX'). Full analysis: specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-blocked-20260719c.md and Soundness.lean's refined-analysis docstring. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not weaken cs5FCIncest; do not regress parent's landed completeness/anti-vacuity. Research MUST use --lit (Simpson Ch 8 soundness, Lifting Lemma 8.1.3, L_m modified sequent system). BibKeys: Simpson1994, MarinMoralesStrassburger2021. HIGH uncertainty (the direct route may be genuinely open). Start with strategy (1) as a research/probe pass before committing. Depends on 517.",
+      "dependencies": [
+        517
+      ],
+      "parent_task": 517,
+      "created": "2026-07-19T04:10:00Z",
+      "last_updated": "2026-07-19T04:10:00Z",
+      "priority": null,
+      "effort": "15-40 hours",
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"
       ]
     }
   ],

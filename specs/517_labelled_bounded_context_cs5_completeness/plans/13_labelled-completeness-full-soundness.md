@@ -916,18 +916,44 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
       toolkit, escalate `[BLOCKED]` with the exact failing goal — do NOT `sorry`/axiom/vacuous-def,
       and do NOT weaken `cs5FCIncest` (zero-debt invariant).
 
-  - **11.3 — Anti-vacuity certificate `nik_TS5_consistent`.**
+  - **11.3 — Anti-vacuity certificate `nik_TS5_consistent`. [COMPLETED]**
+
+    **Landed this dispatch, via the plan's own pre-authorized accelerant route** (Rollback/
+    Contingency, and the prior dispatch's continuation handoff "optional accelerant" note):
+    `nik_TS5_consistent` is proved **directly**, against a one-point model, via a new
+    self-contained 12-constructor soundness induction `nik_soundness_onePoint` (`Soundness.lean`),
+    rather than as a corollary of the not-yet-landed general `nik_TS5_soundness`. Because the
+    one-point model collapses every label's interpretation to the same unique world, the
+    outstanding tree-lifting machinery (items 1-2 of Phase 11.1's "What remains", still needed for
+    the *general* theorem) is not needed for this specific corollary — sorry-free, axiom-clean
+    (`[propext, Classical.choice, Quot.sound]`), no `sorryAx`. *(deviation: task order relative to
+    11.1/11.2 — this sub-phase's mathematical content and final statement are unchanged from the
+    plan's own spec, only its proof route and dispatch-ordering relative to 11.1/11.2 differ, per
+    the plan's own pre-authorization of this exact fallback.)*
     - **Goal:** derive `¬ NIKTheorem TS5 (⊥ : Proposition Atom)` as a corollary of `nik_TS5_soundness`
       applied to `⊥` against a one-point reflexive `cs5FCIncest` model with `botForces = False`
       (which refutes `⊥`). This certifies Phase 10's completeness is a *meaningful* statement (not
       vacuously true because `N(IS5)` proves everything) — reports/11's one residual vacuity concern.
     - **Tasks:**
-      - [ ] Construct (or reuse) the one-point reflexive `cs5FCIncest` witness model with
-        `botForces = False`; show it refutes `⊥` (`¬ CKValidFC cs5FCIncest ⊥`).
-      - [ ] Compose with `nik_TS5_soundness` to conclude `nik_TS5_consistent`.
+      - [x] Construct (or reuse) the one-point reflexive witness model with `botForces = False`;
+        show it refutes `⊥`. *(deviation: implemented as the plain-`CKForces` one-point model
+        `nik_soundness_onePoint` directly consumes, rather than a `cs5FCIncest` witness composed
+        with `CKValidFC` — `nik_TS5_consistent`'s statement never mentions `CKValidFC`/
+        `cs5FCIncest`, so no frame-condition witness was needed; see `Soundness.lean`'s "The
+        anti-vacuity route taken" docstring section for the full justification.)*
+      - [x] Compose to conclude `nik_TS5_consistent`. *(deviation: composed with
+        `nik_soundness_onePoint` directly, not `nik_TS5_soundness` — see above.)*
     - **Done when:** `nik_TS5_consistent` sorry-free, `lean_verify` clean; full CSLib CI order green.
-    - **Timing:** 1 dispatch (small). Est. ~40-100 lines.
-    - **Depends on:** 11.2.
+      **MET.** `lean_verify` on both `nik_soundness_onePoint` and `nik_TS5_consistent`: axioms
+      `["propext","Classical.choice","Quot.sound"]`, no `sorryAx`. Full CSLib CI pipeline green:
+      `lake build` (3247/3247), `lake exe checkInitImports` (pass), `lake lint` (0 warnings),
+      `lake exe lint-style` (0 warnings), `lake shake` (no suggestions for `Soundness.lean`),
+      `lake exe mk_all --module` (no change needed — already registered), `lake test`
+      (9241/9242 jobs; pre-existing sorries in unrelated Propositional Tableau files unregressed).
+    - **Timing:** 1 dispatch (small). Est. ~40-100 lines. **Actual: ~95 lines** (docstring +
+      `nik_soundness_onePoint` + `nik_TS5_consistent`).
+    - **Depends on:** 11.2 (per plan sequencing) — **superseded**: landed independently of 11.2 via
+      the pre-authorized direct route (see above).
 
 - **Timing (phase total):** 2-4 dispatches across 11.1-11.3.
 - **Depends on:** 9 (independent of Phase 10; may run concurrently with Phase 10 — see Dependency
@@ -937,7 +963,7 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
   from Phases 10+11 (state it as a bundling `theorem cs5_labelled_iff` if convenient); full CSLib CI
   order green; guardrails unregressed.
 
-### Phase 12: Bookkeeping and paper fixes [NOT STARTED]
+### Phase 12: Bookkeeping and paper fixes [IN PROGRESS]
 
 - **Note:** most of this phase's tasks are mechanically independent of the Phase 10/11 Lean content
   (bookkeeping/docstring fixes, not proof work); it is sequenced last (`Depends on: 10, 11`) so the

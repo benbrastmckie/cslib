@@ -1,50 +1,133 @@
 {
   "status": "implemented",
   "task_number": 523,
-  "summary": "Phase 3 of 8 complete: landed kCore (13 shared tags) and all 15 per-system Finset ModalSchemaTag tag sets, plus the 15 bridge equivalences SchemaUnion sysTags φ ↔ <Sys>Axiom φ (S5 bridges to the pre-existing ModalAxiom), in a new file Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (786 lines). Executed sequentially as sub-phases 3.1 (kCore+K/T/D/B), 3.2 (K4/K5/K45/S4), 3.3 (S5/TB/KB5), 3.4 (D4/D5/D45/DB), each committed independently once green. kCore is defined via explicit nested `insert … ∅` rather than the `{a,b,c}` literal sugar (the sugar's trailing element is a Singleton, not insert-into-∅, so the Phase-2 elimination API doesn't fire on it -- caught on the first build attempt and fixed). Every tag set was cross-checked against its target inductive's actual constructors (extracted via awk from Instances/*.lean and DerivationTree.lean, not assumed from the plan's prose) before being finalized -- zero deviation from the plan's §1.3 table. Forward direction of each bridge: simp-unfolds SchemaUnion sysTags φ via the elimination API (SchemaUnion.insert_iff/empty_iff) into the named tag disjunction, then `rcases` + `all_goals first | exact <Sys>Axiom.<ctor> _ … | …` closes each resulting goal. Backward direction: direct SchemaUnion witness `⟨.tag, by decide, …, rfl⟩`, no simp needed. Two proof-mechanics bugs were caught and fixed during implementation (both on 2-/3-differentiator systems): a `rcases` slot-count miscount that silently dropped orI2 mid-pattern on the first K45/S4 attempt (3.2) and recurred once more on the first S5 attempt (3.3); both root-caused by re-deriving the exact differentiator-count+13 slot arithmetic, after which every subsequent same-shape system (TB/KB5/D4/D5/DB, D45) built green on the first attempt. Zero sorry, zero new axiom across all 15 bridges. Scoped `lake build` green after every sub-phase; full `lake lint`, `lake exe checkInitImports`, and `lake exe lint-style` all green after the final sub-phase. No instance file, SchemaUnion.lean, or DerivationTree.lean was modified -- fully additive, as scoped. The deliberately-omitted KB5 → S5 subsumption edge was grep-confirmed absent (subsumption is Phase 5's scope). Stopping here per single-phase dispatch scope; Phases 4-8 not started.",
-  "phases_completed": 3,
+  "summary": "Phase 4 of 8 complete: all 15 per-system `<sys>_axiom_sound` proofs (K, T, D, B, K4, K5, K45, S4, S5, TB, KB5, D4, D5, D45, DB) in `Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean` now route through the single master `unionSound` lemma (`Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean`, Phase 2) fed by that system's Phase-3 tag set + bridge equivalence (`Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean`). Each proof reduces to `unionSound sysTags m (fun t ht => by fin_cases ht <;> trivial) (bridge.mpr h_ax) w` -- the per-system 13-constructor case-split is gone. `fin_cases ht` substitutes the concrete tag for each element of `sysTags`; Lean's `trivial` tactic (rfl/contradiction/assumption) closes the 13 core-tag `True` goals AND every differentiator-tag goal via its `assumption` fallback, since the system's frame hypothesis (`h_refl`/`h_trans`/`h_symm`/`h_serial`/`h_eucl`) is already in local context after substitution -- no system needed an explicit `exact h_*` branch. This was discovered mid-dispatch: a first-attempt `first | trivial | exact h_*` form (following the task's suggested shape) built green on K45/S4 (sub-phase 4.2) but the compiler's `linter.unreachableTactic`/`linter.unusedTactic` flagged the `exact` branches as dead code; root-caused and simplified retroactively across sub-phases 4.1-4.3 in the same dispatch (4.4 used the simplified form from the start). S5's `modalB` (symmetry) obligation -- which pre-migration was proved inline from `h_refl`+`h_eucl` since S5 = T+4+B and never took an `h_symm` parameter -- is now a local `have h_symm := fun w₁ w₂ hr => h_eucl w₁ w₂ w₁ hr (h_refl w₁)` feeding the same uniform `hfc` term, preserving `s5_axiom_sound`'s exact original signature. `fin_cases` required an explicit `public import Mathlib.Tactic.FinCases` added to each of the 15 files (not transitively available via `Cslib.Init`/`SchemaBridges`/`SchemaSoundness`; caught on the first K build attempt, which errored 'unknown tactic') -- permitted since only the 15 `Systems/*/Soundness.lean` files were in scope. Every public theorem/instance name is byte-stable (`k_soundness`, `k_soundness_derivable`, all 15 `<sys>_axiom_sound`, all 15 `<sys>_soundness`) -- only the `_axiom_sound` proof bodies changed; the `_soundness`/`_soundness_derivable` wrappers already just called `<sys>_axiom_sound` and needed no edits. Executed sequentially as sub-phases 4.1 (K/T/D/B), 4.2 (K4/K5/K45/S4), 4.3 (S5/TB/KB5 + retroactive hfc simplification across 4.1-4.3), 4.4 (D4/D5/D45/DB), each committed independently once green. Zero sorry across all 15 files (full grep), zero new axiom (spot-checked via `lean_verify` on `k_soundness`, `k45_soundness`, `s5_soundness`, `d45_soundness`, `b_axiom_sound`, `s4_axiom_sound`, `kb5_axiom_sound`, `db_axiom_sound` -- all report only propext/Classical.choice/Quot.sound). Scoped `lake build` of all 15 modules, `lake exe checkInitImports`, and `lake exe lint-style` all green with zero warnings. No file outside `Systems/*/Soundness.lean` was touched -- `SchemaUnion.lean`, `SchemaSoundness.lean`, `SchemaBridges.lean` (Phases 1-3), the 15 instance files, and `DerivationTree.lean` are all unmodified. Net line delta across the 15 files vs. the pre-Phase-4 baseline: 149 insertions, 277 deletions = -128 lines net (`git diff --stat`). Stopping here per single-phase dispatch scope; Phases 5-8 not started.",
+  "phases_completed": 4,
   "phases_total": 8,
   "modified_files": [
-    "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
     "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md"
   ],
-  "confirmed_file_location": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (matches the plan's proposed location exactly; no relocation needed)",
-  "placement_deviation": "none -- SchemaBridges.lean imports SchemaUnion.lean + the ProofSystem.Instances barrel (all 15 per-system instance files, transitively including DerivationTree.lean for ModalAxiom) per the plan's explicit instruction; purely additive, no existing file modified besides the plan tracker",
   "sorry_inventory": [],
   "blockers": [],
-  "kCore_definition": "def kCore : Finset ModalSchemaTag := insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <| insert .modalK <| insert .andI <| insert .andE1 <| insert .andE2 <| insert .orI1 <| insert .orI2 <| insert .orE <| insert .diaDualityFwd <| insert .diaDualityBack ∅ (explicit nested insert, NOT {a,b,c} literal sugar -- see placement_deviation-adjacent note in summary)",
-  "tag_set_table": {
-    "kTags": "kCore (no differentiator beyond modalK)",
-    "tTags": "kCore ∪ {modalT}", "dTags": "kCore ∪ {modalD}", "bTags": "kCore ∪ {modalB}",
-    "k4Tags": "kCore ∪ {modalFour}", "k5Tags": "kCore ∪ {modalFive}",
-    "k45Tags": "kCore ∪ {modalFour, modalFive}", "s4Tags": "kCore ∪ {modalT, modalFour}",
-    "s5Tags": "kCore ∪ {modalT, modalFour, modalB}", "tbTags": "kCore ∪ {modalT, modalB}",
-    "kb5Tags": "kCore ∪ {modalB, modalFive}", "d4Tags": "kCore ∪ {modalD, modalFour}",
-    "d5Tags": "kCore ∪ {modalD, modalFive}", "d45Tags": "kCore ∪ {modalD, modalFour, modalFive}",
-    "dbTags": "kCore ∪ {modalD, modalB}"
+  "per_system_routing_table": {
+    "k_axiom_sound": "unionSound kTags -- no differentiator, trivial only",
+    "t_axiom_sound": "unionSound tTags -- h_refl (modalT)",
+    "d_axiom_sound": "unionSound dTags -- h_serial (modalD)",
+    "b_axiom_sound": "unionSound bTags -- h_symm (modalB)",
+    "k4_axiom_sound": "unionSound k4Tags -- h_trans (modalFour)",
+    "k5_axiom_sound": "unionSound k5Tags -- h_eucl (modalFive)",
+    "k45_axiom_sound": "unionSound k45Tags -- h_trans, h_eucl (modalFour, modalFive)",
+    "s4_axiom_sound": "unionSound s4Tags -- h_refl, h_trans (modalT, modalFour)",
+    "s5_axiom_sound": "unionSound s5Tags -- h_refl, h_trans, derived h_symm from h_refl+h_eucl (modalT, modalFour, modalB); signature unchanged (no h_symm param)",
+    "tb_axiom_sound": "unionSound tbTags -- h_refl, h_symm (modalT, modalB)",
+    "kb5_axiom_sound": "unionSound kb5Tags -- h_symm, h_eucl (modalB, modalFive)",
+    "d4_axiom_sound": "unionSound d4Tags -- h_serial, h_trans (modalD, modalFour)",
+    "d5_axiom_sound": "unionSound d5Tags -- h_serial, h_eucl (modalD, modalFive)",
+    "d45_axiom_sound": "unionSound d45Tags -- h_serial, h_trans, h_eucl (modalD, modalFour, modalFive)",
+    "db_axiom_sound": "unionSound dbTags -- h_serial, h_symm (modalD, modalB)"
   },
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 4,
-    "next_phase_goal": "Migrate the 15 per-system soundness proofs to unionSound: replace each Systems/*/Soundness.lean case-split with a unionSound call fed by that system's tag→validity table (net deletion). Split into sub-phases 4.1 (K/T/D/B), 4.2 (K4/K5/K45/S4), 4.3 (S5/TB/KB5), 4.4 (D4/D5/D45/DB). Public soundness theorem names stay stable; use the Phase 3 bridge where a caller still expects the inductive form.",
-    "depends_on": "Phase 2 (unionSound) and Phase 3 (bridges + tag sets) -- both now complete",
-    "also_unblocked": "Phase 5 (AxiomSubsumption.lean → Finset.subset facts, depends on Phase 1 + Phase 3) and Phase 6 (IntToClassical.lean hand-migration, depends on Phase 3) can now also proceed; per the wave map, Phases 4/5/6 are wave 3 and may run in parallel across distinct file territories."
+    "next_phase": 5,
+    "next_phase_goal": "Replace AxiomSubsumption.lean's 24 hand-written XAxiom_implies_YAxiom lemmas with Finset.subset facts fed to the Phase-1 generic SchemaUnion.subsumption lemma. Sub-phase 5.1: the 24 subsumption facts (preserve each public name or @[deprecated] alias; verify the deliberately-omitted KB5 -> S5 edge stays omitted). Sub-phase 5.2: call-site name updates in Lifting.lean/Modularity.lean.",
+    "next_phase_alt": "Phase 6 (IntToClassical.lean hand-migration, ~36 sites) also depends only on Phase 3 (now complete) and is independent of Phase 5 -- both are wave-3 phases per the plan's dependency map and may run in parallel across distinct file territories (AxiomSubsumption.lean/Lifting.lean/Modularity.lean vs. IntToClassical.lean).",
+    "depends_on": "Phase 4 (this phase) has no downstream dependents in Phase 5/6; Phase 7 (instance registration swap) depends on Phase 6, and Phase 8 (inductive deletion) depends on Phases 4, 5, 6, 7 all being complete."
   },
   "artifacts": [
     {
-      "path": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K/Soundness.lean",
       "type": "lean_file",
-      "summary": "Phase 3 (new file, 786 lines): kCore + 15 per-system tag sets + 15 bridge equivalences SchemaUnion sysTags φ ↔ <Sys>Axiom φ. Sorry-free, no new axioms, fully additive."
+      "summary": "k_axiom_sound migrated to unionSound kTags; k_soundness/k_soundness_derivable unchanged."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+      "type": "lean_file",
+      "summary": "t_axiom_sound migrated to unionSound tTags (h_refl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+      "type": "lean_file",
+      "summary": "d_axiom_sound migrated to unionSound dTags (h_serial)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+      "type": "lean_file",
+      "summary": "b_axiom_sound migrated to unionSound bTags (h_symm)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+      "type": "lean_file",
+      "summary": "k4_axiom_sound migrated to unionSound k4Tags (h_trans)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+      "type": "lean_file",
+      "summary": "k5_axiom_sound migrated to unionSound k5Tags (h_eucl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+      "type": "lean_file",
+      "summary": "k45_axiom_sound migrated to unionSound k45Tags (h_trans, h_eucl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+      "type": "lean_file",
+      "summary": "s4_axiom_sound migrated to unionSound s4Tags (h_refl, h_trans)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+      "type": "lean_file",
+      "summary": "s5_axiom_sound migrated to unionSound s5Tags; symmetry derived locally from h_refl+h_eucl to preserve the original (h_refl, h_trans, h_eucl)-only signature."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean",
+      "type": "lean_file",
+      "summary": "tb_axiom_sound migrated to unionSound tbTags (h_refl, h_symm)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+      "type": "lean_file",
+      "summary": "kb5_axiom_sound migrated to unionSound kb5Tags (h_symm, h_eucl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+      "type": "lean_file",
+      "summary": "d4_axiom_sound migrated to unionSound d4Tags (h_serial, h_trans)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+      "type": "lean_file",
+      "summary": "d5_axiom_sound migrated to unionSound d5Tags (h_serial, h_eucl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+      "type": "lean_file",
+      "summary": "d45_axiom_sound migrated to unionSound d45Tags (h_serial, h_trans, h_eucl)."
+    },
+    {
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
+      "type": "lean_file",
+      "summary": "db_axiom_sound migrated to unionSound dbTags (h_serial, h_symm)."
     },
     {
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "type": "plan",
-      "summary": "Phase 3 and all four sub-phase checklists checked off; heading updated to [COMPLETED] with completion notes per sub-phase plus an overall phase-completion note."
-    },
-    {
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/03_schema-bridges-tag-sets-summary.md",
-      "type": "summary",
-      "summary": "Phase 3 implementation summary."
+      "summary": "Phase 4 and all four sub-phase checklists checked off; heading updated to [COMPLETED] with completion notes per sub-phase plus an overall phase-completion note."
     }
   ]
 }

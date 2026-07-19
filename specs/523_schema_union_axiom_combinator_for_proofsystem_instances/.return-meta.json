@@ -1,36 +1,106 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-19T08:38:35Z",
+  "started_at": "2026-07-19T08:56:31Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
-      "summary": "Per-file rollout plan (v2, Rep A resolved). Phase 3 (per-system tag sets + 15 bridge equivalences) now [COMPLETED], all four sub-phases checked off with completion notes."
+      "summary": "Per-file rollout plan (v2, Rep A resolved). Phase 4 (migrate 15 per-system soundness proofs to unionSound) now [COMPLETED], all four sub-phases checked off with completion notes."
     },
     {
       "type": "lean_file",
-      "path": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
-      "summary": "New file (786 lines), Phase 3: kCore (13 shared tags, explicit nested insert) + 15 per-system Finset ModalSchemaTag tag sets + 15 bridge equivalences SchemaUnion sysTags φ ↔ <Sys>Axiom φ (S5 bridges to the pre-existing ModalAxiom). Zero sorry, zero new axiom, fully additive -- no instance file, SchemaUnion.lean, or DerivationTree.lean modified."
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K/Soundness.lean",
+      "summary": "k_axiom_sound migrated to unionSound kTags."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/T/Soundness.lean",
+      "summary": "t_axiom_sound migrated to unionSound tTags (h_refl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D/Soundness.lean",
+      "summary": "d_axiom_sound migrated to unionSound dTags (h_serial)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/B/Soundness.lean",
+      "summary": "b_axiom_sound migrated to unionSound bTags (h_symm)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K4/Soundness.lean",
+      "summary": "k4_axiom_sound migrated to unionSound k4Tags (h_trans)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K5/Soundness.lean",
+      "summary": "k5_axiom_sound migrated to unionSound k5Tags (h_eucl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
+      "summary": "k45_axiom_sound migrated to unionSound k45Tags (h_trans, h_eucl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S4/Soundness.lean",
+      "summary": "s4_axiom_sound migrated to unionSound s4Tags (h_refl, h_trans)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+      "summary": "s5_axiom_sound migrated to unionSound s5Tags; symmetry derived locally from h_refl+h_eucl (original signature preserved, no h_symm param)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/TB/Soundness.lean",
+      "summary": "tb_axiom_sound migrated to unionSound tbTags (h_refl, h_symm)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/KB5/Soundness.lean",
+      "summary": "kb5_axiom_sound migrated to unionSound kb5Tags (h_symm, h_eucl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D4/Soundness.lean",
+      "summary": "d4_axiom_sound migrated to unionSound d4Tags (h_serial, h_trans)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D5/Soundness.lean",
+      "summary": "d5_axiom_sound migrated to unionSound d5Tags (h_serial, h_eucl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/D45/Soundness.lean",
+      "summary": "d45_axiom_sound migrated to unionSound d45Tags (h_serial, h_trans, h_eucl)."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/Systems/DB/Soundness.lean",
+      "summary": "db_axiom_sound migrated to unionSound dbTags (h_serial, h_symm)."
     },
     {
       "type": "summary",
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/03_schema-bridges-tag-sets-summary.md",
-      "summary": "Phase 3 implementation summary."
+      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/04_migrate-soundness-proofs-unionsound-summary.md",
+      "summary": "Phase 4 implementation summary."
     },
     {
       "type": "handoff",
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/.orchestrator-handoff.json",
-      "summary": "Phase 3 orchestrator handoff: status implemented, phases_completed=3/8, sorry_inventory empty, next_phase=4 (migrate soundness proofs to unionSound)."
+      "summary": "Phase 4 orchestrator handoff: status implemented, phases_completed=4/8, sorry_inventory empty, next_phase=5 (AxiomSubsumption.lean -> Finset.subset facts; Phase 6 IntToClassical.lean also unblocked and can run in parallel)."
     }
   ],
-  "next_steps": "Phase 3 complete and committed (4 sub-phase commits: 3.1 kCore+K/T/D/B, 3.2 K4/K5/K45/S4, 3.3 S5/TB/KB5, 3.4 D4/D5/D45/DB). Phase 4 (migrate 15 per-system soundness proofs to unionSound) is next per the wave map; Phase 5 (AxiomSubsumption.lean -> Finset.subset facts) and Phase 6 (IntToClassical.lean hand-migration) are also now unblocked (both depend on Phase 3) and form wave 3 alongside Phase 4 -- may run in parallel across distinct file territories.",
+  "next_steps": "Phase 4 complete and committed (4 sub-phase commits: 4.1 K/T/D/B, 4.2 K4/K5/K45/S4, 4.3 S5/TB/KB5 + retroactive hfc simplification, 4.4 D4/D5/D45/DB). Phase 5 (AxiomSubsumption.lean -> Finset.subset facts) and Phase 6 (IntToClassical.lean hand-migration) both depend only on Phase 3 (complete) and are independent of Phase 4 and of each other -- both are wave-3 phases and may proceed next, in parallel across distinct file territories.",
   "metadata": {
-    "session_id": "sess_dispatch_523_phase3",
+    "session_id": "sess_dispatch_523_phase4",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "phase_count": 8,
-    "phases_completed": 3,
+    "phases_completed": 4,
     "phases_total": 8,
     "estimated_hours": "24-32",
     "postmortem_rules_count": 7
@@ -41,33 +111,33 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped builds after every sub-phase + full lake lint + checkInitImports + lint-style all green for this additive one-file phase; full lake test/shake/mk_all not run -- not required until later phases touch consumer files)"
+    "ci_pipeline_passed": "partial (scoped builds of all 15 touched modules + checkInitImports + lint-style all green with zero warnings; full lake test/shake/mk_all not run -- not required until later phases touch consumer/instance files)"
   },
   "memory_candidates": [
     {
-      "content": "In Lean 4/Mathlib, the Finset literal sugar `{a, b, c}` does NOT desugar uniformly to nested `insert`: its trailing element is built via the `Singleton` typeclass instance, not `insert _ ∅`. If a downstream elimination API only provides simp lemmas for `insert` and `∅` (e.g. `SchemaUnion.insert_iff : SchemaUnion (insert t S) φ ↔ t.Holds φ ∨ SchemaUnion S φ` and `SchemaUnion.empty_iff : SchemaUnion ∅ φ ↔ False`), a Finset built with `{a,b,c}` sugar will unfold partway and then get stuck on the trailing singleton term, producing a confusing `subst`/type-mismatch error rather than a clean 'lemma not found'. Fix: define the Finset via explicit nested `insert a (insert b (insert c ∅))` when its elements need to fully unfold through an insert/empty-only simp set.",
+      "content": "In Lean 4/Mathlib, the `trivial` tactic tries `rfl`, `contradiction`, and `assumption` (in that order) before failing -- not just closing literal `True` goals. When writing a uniform per-case discharge tactic like `fun t ht => by fin_cases ht <;> first | trivial | exact h1 | exact h2 | ...` where some cases reduce to `True` and others reduce to a hypothesis already in local context, the `exact h*` branches after `trivial` are dead code: `trivial`'s `assumption` fallback already finds and applies the matching local hypothesis. This is detectable via `lake build`'s `linter.unreachableTactic`/`linter.unusedTactic` warnings (not an error, so it's easy to miss/commit accidentally) and fixable by collapsing to bare `<;> trivial`.",
       "category": "GOTCHA",
-      "source_artifact": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Systems/K45/Soundness.lean",
       "confidence": 0.85,
-      "suggested_keywords": ["lean4", "finset", "singleton-vs-insert", "simp-unfolding", "elaboration-gotcha"]
+      "suggested_keywords": ["lean4", "trivial-tactic", "assumption-fallback", "unreachable-tactic-linter", "dead-code"]
     },
     {
-      "content": "When proving N structurally-similar `SchemaUnion sysTags φ ↔ <Sys>Axiom φ`-style bridge lemmas across systems with varying differentiator-tag counts (1, 2, or 3 extra tags unioned with a shared core), the `rcases`/`rintro` pattern that destructures the simp-unfolded disjunction needs EXACTLY `(differentiator count) + (core size)` comma-separated sub-patterns in the precise nesting order (outermost insert first), each with the right existential arity. Undercounting by even one slot silently drops a middle tag from the pattern and desyncs every subsequent arity, surfacing many slots later as a confusing `subst: invalid equality proof` error rather than a slot-count error at the dropped position. Mitigation: before writing the rcases line for a new differentiator-count shape, explicitly enumerate the tag order and arity list (e.g. as a numbered comment) rather than eyeballing it; once correct for one system of a given shape, the same slot-count pattern reliably transfers to every other system sharing that shape.",
+      "content": "The Lean 4 `fin_cases` tactic (for case-splitting on a concrete `Finset`/`Fintype` membership hypothesis) lives in `Mathlib.Tactic.FinCases` and is NOT transitively re-exported by common downstream modules like `Mathlib.Tactic.Common` or files that merely use `Finset` (e.g. `Mathlib.Data.Finset.Basic`). A file that defines/uses Finsets but never previously needed case-splitting on membership can hit an 'unknown tactic' error at the exact `fin_cases` call site the first time it's introduced, even though the rest of the Finset API works fine -- fix by adding an explicit `import Mathlib.Tactic.FinCases` (or `public import` under the Lean 4 module system) to that specific file.",
       "category": "GOTCHA",
-      "source_artifact": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Systems/K/Soundness.lean",
       "confidence": 0.85,
-      "suggested_keywords": ["lean4", "rcases", "rintro", "arity-mismatch", "disjunction-destructuring", "schema-union-combinator"]
+      "suggested_keywords": ["lean4", "fin_cases", "mathlib-import", "unknown-tactic", "finset"]
     },
     {
-      "content": "For a family of `<Sys>Axiom` inductives that are each provably equivalent to `SchemaUnion sysTags`, the bridge equivalence's two directions want DIFFERENT proof strategies for best ergonomics: forward (SchemaUnion -> inductive) benefits from simp-unfolding the union via an insert/empty elimination API into a named disjunction, then closing each resulting goal with `all_goals first | exact Ctor1 _ … | exact Ctor2 _ … | …` (arity mismatches make `exact` fail cleanly, so goal order need not match the `first` list order); backward (inductive -> SchemaUnion) is simpler as a direct anonymous-constructor witness `cases h with | ctor args => exact ⟨.tag, by decide, args…, rfl⟩` with no simp needed at all, since you already know exactly which tag and witness to supply once you've cased on the constructor.",
+      "content": "When migrating a family of per-system soundness theorems to a shared combinator (`unionSound sysTags m hfc bridgeWitness w`), a system whose original proof derived one of its frame-validity facts inline from OTHER frame hypotheses (rather than taking it as a direct parameter) -- e.g. S5's symmetry, derived from reflexivity+Euclideanness rather than a standalone `h_symm` parameter, since S5 = T+4+B carries no independent symmetry hypothesis -- should reproduce that derivation as a local `have` term feeding the combinator's uniform obligation-discharge tactic, rather than changing the theorem's public signature to add the missing hypothesis. This preserves byte-stable public signatures across the migration while still routing through the shared combinator.",
       "category": "PATTERN",
-      "source_artifact": "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean",
-      "confidence": 0.8,
-      "suggested_keywords": ["lean4", "iff-proof", "bridge-lemma", "schema-union-combinator", "proof-ergonomics"]
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/Systems/S5/Soundness.lean",
+      "confidence": 0.85,
+      "suggested_keywords": ["lean4", "soundness-migration", "signature-preservation", "derived-hypothesis", "schema-union-combinator"]
     }
   ],
   "partial_progress": {
-    "stage": "phase_3_complete",
-    "details": "SchemaBridges.lean created (kCore + 15 tag sets + 15 bridges) across 4 sub-phase commits (3.1-3.4), each independently green. Phase 3 marked [COMPLETED] in plan with per-sub-phase and overall completion notes. Handoff, summary, and metadata all written. Stopping per single-phase dispatch scope; Phase 4+ not started."
+    "stage": "phase_4_complete",
+    "details": "All 15 Systems/*/Soundness.lean files migrated to unionSound across 4 sub-phase commits (4.1-4.4), each independently green. Phase 4 marked [COMPLETED] in plan with per-sub-phase and overall completion notes. Handoff, summary, and metadata all written. Stopping per single-phase dispatch scope; Phase 5+ not started."
   }
 }

@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D.Soundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 
 /-! # Completeness Theorem for Modal Logic D (KD)
 
@@ -423,11 +422,11 @@ private theorem d_canonical_FC : dFC (CanonicalModel (@DAxiom Atom)) := by
   constructor
   intro S
   exact d_canonical_serial
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.modalD, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalD, by decide, φ, rfl⟩)
     S
 
 /-- Pre-applied D truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
@@ -435,20 +434,20 @@ theorem d_truth_lemma_applied (S : CanonicalWorld (@DAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@DAxiom Atom)) S φ ↔ φ ∈ S.val :=
   d_truth_lemma
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.modalD, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalD, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- D soundness adapter matching the `strong_soundness` callback shape.
@@ -489,10 +488,10 @@ theorem d_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
         Satisfies m w phi) :
     ModalSetDerivable (@DAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @DAxiom Atom) (FC := dFC)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
     d_truth_lemma_applied
     d_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -530,10 +529,10 @@ theorem d_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @DAxiom Atom) (FC := dFC)
       d_sound_cb
-      (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_dTags_iff_DAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
       d_truth_lemma_applied
       d_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

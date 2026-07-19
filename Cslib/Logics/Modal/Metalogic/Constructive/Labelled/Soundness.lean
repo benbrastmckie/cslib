@@ -14,7 +14,11 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 **Status: interpretation machinery (Phase 11.1, partial) + anti-vacuity certificate (Phase 11.3,
 COMPLETE). General `nik_TS5_soundness` assessed INTRACTABLE at standard single-dispatch
 implementation effort after three dispatches (see "Third dispatch" section below) -- recommend a
-dedicated re-plan/research pass, not a fourth direct-implementation attempt.** This module lands
+dedicated re-plan/research pass, not a fourth direct-implementation attempt.** A fourth,
+time-boxed decisive probe (task 537 Phase 1) re-confirmed this assessment via live tactic-state
+evidence and closes the decision with **GATE-C** (`[BLOCKED]`, no proof, no countermodel,
+Strategy-3 authorized as the sanctioned next route) -- see "Fourth dispatch (task 537 Phase 1
+probe, GATE-C)" below. This module lands
 (1) the first, reusable building block of the full labelled soundness direction
 `nik_TS5_soundness : NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ`, which will complete the Simpson
 8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and (2) the anti-vacuity
@@ -236,6 +240,56 @@ probe whether the obstruction is real or just unexplored. The finding:
    None of (a)-(c) is attempted in this dispatch; each is genuinely re-plan/research-pass scale,
    not a direct continuation. No `sorry`, no new axiom, and no vacuous placeholder was introduced
    to force a result -- per the anti-churn directive, this finding is landed as documentation only.
+
+## Fourth dispatch (task 537 Phase 1 probe, GATE-C)
+
+Task 537's plan (`specs/537_.../plans/01_general-soundness.md`) re-opened the direct route as a
+single **time-boxed decisive probe with a hard pivot gate**: prove the exact-symmetry lemma
+`cs5FCIncest r → r a b → r b a` on the finitely-generated substructure (GATE-A), or construct a
+concrete countermodel (GATE-B), or record `[BLOCKED]` within budget (GATE-C, explicitly sanctioned
+as a non-failure outcome, not a fourth thrash). This dispatch pursued both prongs and reached
+**GATE-C**:
+
+1. **Proof attempt, verified via live `lean_goal`/`lean_multi_attempt` state (not just hand
+   analysis).** Chasing `hincest` on `hab : r a b` gives `h1 : r b₁ a` (`b ≤ b₁`); `hincest` on
+   `h1` gives `h2 : r a₁ b₁` (`a ≤ a₁`); `htrans h2 h1 : r a₁ a` (exact); `htrans (r a₁ a) hab :
+   r a₁ b` (exact) -- structurally identical to `hab` but with the source raised from `a` to
+   `a₁`. Iterating (`hincest` on this raised fact, then `htrans` twice) produces `h7 : r b₂ a`
+   (`b ≤ b₂`) -- the *target* `a` is reached again, but only from a **raised** `b₂`, never from
+   the original, pinned `b`. `hfour hab hb_b₁ h1` independently produces the same shape:
+   `hvt : r v a` for some `v ≥ a`, not `r b a`. Both automation (`aesop`, `tauto`) and the manual
+   chase fail to close `r b a` exactly, confirming (via tool-verified goal states, not
+   assumption) that `hincest`/`hfour`/`hsymbox`'s raised witnesses cascade indefinitely without
+   ever re-pinning the two original, fixed points -- the same root obstruction the third dispatch
+   found, now independently reproduced.
+2. **Countermodel attempt.** A translation-invariant candidate on `ℕ` (`r n m := (n ≥ 2 ∨ m ≥ 2)
+   ∨ n = m ∨ (n = 0 ∧ m = 1)`, designed to hold the asymmetric edge `r 0 1 ∧ ¬ r 1 0` while
+   using "everything ≥ 2 relates to everything" to try to satisfy `hincest`/`hfour`/`hsymbox`)
+   was checked by hand against all five conjuncts and **fails `htrans`**: `r 1 2` and `r 2 0` both
+   hold (via the `≥2` clause), forcing `r 1 0` by transitivity -- reproducing exactly the
+   "`hsymbox`+`htrans` collapse" pattern the third dispatch's hand-probe already hit, via an
+   independent construction. A difference-set (`r n m := (m - n) ∈ D`) analysis over `ℤ` shows
+   this is not a coincidence of the specific attempt: any additive sub-semigroup `D ⊆ ℤ`
+   containing `0` that is unbounded both above and below (`hsymbox`/`hincest`'s respective
+   requirements once translated through the difference-set encoding) is forced, by a
+   Bezout-plus-scaling argument, to equal `g ℤ` for some `g ≥ 1` -- i.e. a **subgroup**, hence
+   automatically symmetric. No translation-invariant countermodel exists; this is a genuinely new
+   (this-dispatch) structural finding, not merely a repeated empirical failure, though it does not
+   itself constitute a proof for arbitrary (non-translation-invariant) `Preorder World`.
+3. **Zorn/chain-union pattern assessed infeasible within this probe's budget, not attempted.** The
+   plan's suggested technique needs a poset of *sets* (chains have union upper bounds
+   automatically, regardless of `World`'s structure) analogous to `PrimeLemma.lean`'s Lindenbaum
+   construction -- but `hfour`/`hsymbox` take their raised point `u'` as a *hypothesis*, not an
+   existential the axiom lets us choose (only `hincest`'s witness is existential), so there is no
+   direct set-of-reachable-pairs poset whose maximal element pins the two ORIGINAL fixed points
+   `a`, `b` exactly; building one is genuinely new infrastructure at the plan's own estimated
+   150-300+ line, multi-dispatch re-plan scale, not a bounded-probe-sized task.
+4. **GATE-C recorded.** No proof, no countermodel within budget. Per the plan's pivot gate, this
+   is the explicitly sanctioned, non-failure terminal state: `[BLOCKED]` handoff routes to
+   **Phase 4** (`specs/537_.../plans/01_general-soundness.md`), recommending Strategy 3 (the
+   Hilbert-labelled adequacy bridge, obtaining `nik_TS5_soundness` as a corollary of the landed
+   `cs5_soundness_derivable_incest`, `CS5Canonical.lean:373`) be authorized as the follow-up scope.
+   Zero debt: no `sorry`, no new axiom, `cs5FCIncest` unweakened, all Preserved Assets unregressed.
 
 ## Contents (this dispatch)
 

@@ -203,6 +203,37 @@ recommendation to the user/orchestrator to authorize the Strategy-3 scope reopen
 
 ## Adversarial Self-Verification (H4)
 
+### Claim Verification Table (divergence audit — second-pass grounding against live Lean API)
+
+Each load-bearing claim was re-checked against the actual in-repo source this pass (not the prior
+dispatch's assertions). Source-specific *numbers* from the papers remain `[UNVERIFIED against live
+corpus]` (this session's literature retrieval is degraded/unavailable), but every claim resolves to
+a definite Verdict against **in-repo, CI-green evidence**. No claim was REFUTED; the report's
+analysis and ranking survive the audit intact.
+
+| Claim | Source/Counterexample | Verdict |
+|-------|-----------------------|---------|
+| 1. `base`/`refl`/`trans` edge-validation cases dischargeable by exact `hrefl`/`htrans` conjuncts (`CS5Canonical.lean:255`). | `CS5Canonical.lean:255-260`: clause 1 = `∀ w, r w w` (exact refl), clause 2 = `∀ {w u t}, r w u → r u t → r w t` (exact plain trans). `TClosure` constructors (`Deduction.lean:198-208`) are `base/refl/symm/trans/eucl`; for `TS5={T,B,Four}` the `eucl` constructor needs `Five ∈ 𝒯` and is unreachable. `refl`↦`hrefl`, `trans`↦`htrans` discharge exactly; `base` is the raw edge. | **CONFIRMED** |
+| 2. Entire direct-route crux reduces to `TClosure.symm` case = exact symmetry of `r` on `cs5FCIncest` models. | `Deduction.lean:202` — `symm` is the sole `TS5`-active constructor with no exact `cs5FCIncest` discharge (only raised-witness `cs5Incest`). `Soundness.lean:190-207` documents the exact open question ("no finite countermodel found; positive proof also not completed; genuinely unresolved"). | **CONFIRMED** |
+| 3. Second wall: box-introduction (`Forcing.lean:75`) needs the fresh label mapped EXACTLY to adversarial successor `u`, so clique closure is necessary but NOT sufficient. | `Forcing.lean:75`: `.box φ => ∀ w', w ≤ w' → ∀ u, r w' u → CKForces … u φ` — `u` is universally quantified (adversarial, not proof-chosen). API fact exact; the "necessary-but-not-sufficient" conclusion is a sound analytic inference from that binder shape (upward-only persistence, `Forcing.lean:122`). | **CONFIRMED** (API exact; sufficiency-gap is analytic, ~90%) |
+| 4. FLO machinery is a context-Lindenbaum engine, off-mainline in `probes/` with two open sorries; only the generic Zorn pattern is reusable. | `PrimeLemma.lean:47-63` scope note: mainline `primeLemma` uses plain `zorn_le₀`; FLO apparatus "remains … in `probes/`" carrying "two open, documented, non-blocking sorries (`flo_succ`'s `redundantEdge` branch; `primeC'_exists_maximal`'s `Maximal`-conjunct half)". `grep` finds no `sorry` token in `PrimeLemma.lean` itself — sorries physically reside in `specs/517_…/probes/` (dir confirmed present). Engine is prime/Lindenbaum context-maximalisation, not relational-clique closure. | **CONFIRMED** (citation `:47-63` is the *documentation* of the sorries; they live in the probe file) |
+| 5. Strategy 3 payoff = one-line corollary of landed `cs5_soundness_derivable_incest` (`CS5Canonical.lean:373`); `Adequacy.lean` absent (bridge unbuilt); rated ~25-30%. | `CS5Canonical.lean:373` is exactly the sorry-free `theorem cs5_soundness_derivable_incest : Derivable CS5ModalAxiom φ → CKValidFC cs5FCIncest φ`. Repo-wide `find -iname Adequacy.lean` → NONE (bridge genuinely unbuilt). The ~25-30% figure is a parent-report (11 Q4 / 02) cross-reference, `[UNVERIFIED against live corpus]` but in-repo durable. | **CONFIRMED** (percentage `[UNVERIFIED against live corpus]`, in-repo anchored) |
+| 6. Both BibKeys exist in `references.bib` (`Simpson1994` line 86; `MarinMoralesStrassburger2021` line 962). | `grep -n` → `86:@phdthesis{Simpson1994,` and `962:@article{MarinMoralesStrassburger2021,` — exact line matches. | **CONFIRMED** |
+
+**Ranking re-confirmation**: the audit CONFIRMS the report's ranked recommendation unchanged —
+**(1) Strategy 1 as a single time-boxed decisive probe with a hard pivot gate; (2) Strategy 3
+(Hilbert-labelled adequacy bridge) as pre-planned fallback; (3) Strategy 2 (`L_m` sequent system)
+last.** Grounds: Strategy 1's two nested walls are both verified real (Claims 2+3), so its success
+probability is genuinely bounded but its information value (decisive lemma-or-countermodel) is
+highest and cheapest; Strategy 3's payoff verifiably reuses a landed sorry-free theorem
+(Claim 5, `:373`) whereas Strategy 2 must additionally *build* a soundness proof over an
+`[UNVERIFIED]` source (§8.1.2) with zero in-repo reuse. No verified fact reorders these. The
+zero-debt constraints (no `sorry`, no new axiom under `Cslib/`, no weakening of `cs5FCIncest`, no
+regression of parent completeness/anti-vacuity) are carried unchanged; the blocked-honesty flag
+(unresolved probe ⟹ `[BLOCKED]`, never a placeholder) stands.
+
+### Narrative challenges (first pass, retained)
+
 I re-read the draft adversarially and challenged each load-bearing claim.
 
 - **Challenge: "the crux is *only* the symmetry lemma" (Strategy 1 (a))** — could Strategy 1 be

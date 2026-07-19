@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic D4 (KD4)
@@ -52,7 +51,7 @@ theorem d4_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (w : World) : Satisfies m w φ :=
   unionSound d4Tags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_d4Tags_iff_D4Axiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## D4 Soundness Theorems -/

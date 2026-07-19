@@ -256,16 +256,29 @@ all green.
 
 ### Phase 2: `unionSound` combinator + per-tag validity table [NOT STARTED]
 
-**Goal**: Provide the generic soundness combinator and the 18-entry tag→validity table (13
-frame-unconditional atoms reused; 5 frame-conditioned proofs ported), so Phase 4 can delete the
-per-system case-splits.
+**Goal**: Provide the generic soundness combinator, the 18-entry tag→validity table (13
+frame-unconditional atoms reused; 5 frame-conditioned entries delegated to the task-522
+`FrameCorrespondence` lemmas), AND a generic `SchemaUnion` elimination API, so Phases 4/6/7 can
+collapse the per-system case-splits into named lemma applications rather than raw `fin_cases`.
 
 **Tasks**:
-- [ ] Define `FrameValidatesTag m t` (per-tag semantic obligation) relating a `ModalSchemaTag` to
-      the relevant frame condition (reflexive/serial/symmetric/transitive/Euclidean for the 5
-      differentiators; unconditional for the other 13).
+- [ ] Define `FrameValidatesTag m t` (per-tag semantic obligation) **uniformly over all 18 tags**:
+      it returns `True` for the 13 frame-unconditional tags and, for the 5 differentiators, returns
+      *exactly the frame hypothesis its task-522 lemma takes* (`∀ w, m.r w w` for `modalT`;
+      seriality/symmetry/transitivity/Euclideanness for `modalD/B/Four/Five`). Uniformity over all
+      18 — not a conditional/unconditional split at the type level — is a design invariant: the 13
+      trivial obligations discharge by `trivial`, keeping `unionSound`'s `hfc` interface uniform.
 - [ ] State and prove `unionSound (S) (m) (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ}
-      (h : SchemaUnion S φ) (w) : Satisfies m w φ` (report §5 signature).
+      (h : SchemaUnion S φ) (w) : Satisfies m w φ` (report §5 signature) as the SINGLE master
+      soundness lemma; every per-system soundness proof (Phase 4) specializes it — no per-system
+      soundness structure survives.
+- [ ] **Elimination API (design invariant — tame the ~50 destructuring sites with named lemmas,
+      not raw `fin_cases`)**: extend `SchemaUnion.lean` (additive) with the generic membership /
+      unfolding lemmas for `SchemaUnion` over `Finset` structure — at minimum `SchemaUnion`
+      unfolding over `∅` / `insert` / `∪`, and a `@[simp]` `mem`-style characterization — so that a
+      downstream `SchemaUnion sysTags φ` rewrites to the named disjunction of its tags' `.Holds`
+      via `simp`, and destructuring sites read as named rewrites rather than copy-pasted
+      `fin_cases t <;> simp_all`. Complete this API ONCE here; Phases 4/6/7 consume it.
 - [ ] Populate the 13 frame-unconditional entries by reusing the existing atoms in
       `Metalogic/Soundness.lean` (`Satisfies.implyK_axiom`, …, `diaDualityBack`) — read-only reuse.
 - [ ] Populate the 5 frame-conditioned entries (`modalT/D/B/Four/Five`) by **delegating to the
@@ -279,9 +292,15 @@ per-system case-splits.
 **Estimated output**: ~200-350 lines. **Depends on**: 1.
 
 **Files to modify**:
-- NEW `Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean` (proposed location).
+- NEW `Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean` (proposed location) — `FrameValidatesTag`,
+  `unionSound`, the 18-entry validity table.
+- `Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean` — extend additively with the generic
+  elimination API (membership / unfolding `@[simp]` lemmas over `∅`/`insert`/`∪`). Additive only;
+  the Phase-1 declarations are unchanged.
 - `Cslib/Logics/Modal/Metalogic/Soundness.lean` — read-only reuse (no edits, or minimal
   `FrameValidatesTag` glue only if unavoidable).
+- `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean` — read-only reuse (the 5 frame-condition
+  lemmas as the differentiator-tag validity witnesses).
 
 **Verification**:
 - Scoped `lake build Cslib.Logics.Modal.Metalogic.SchemaSoundness` green.
@@ -469,16 +488,33 @@ only; inductive definitions untouched until Phase 8).
 
 ### Phase 8: Delete the 15 inductives (+ `ModalAxiom` disposition), finalize [NOT STARTED]
 
-**Goal**: The terminal, once-everything-else-is-green step: remove the now-unused inductives,
-resolve S5's `ModalAxiom`, drop dead scaffolding bridges, and confirm the net-line-negative result.
+**Goal**: The terminal, once-everything-else-is-green step: **redefine each `<Sys>Axiom` in place**
+as a one-line `SchemaUnion` def (preserving the public name, retiring the inductive), resolve S5's
+`ModalAxiom`, drop dead scaffolding bridges, and confirm the net-line-negative result.
+
+**End-state design decision (redefine, do NOT delete-and-alias)** — the elegant, lower-churn
+finish: replace each `<Sys>Axiom` *inductive* with `def <Sys>Axiom : Proposition Atom → Prop :=
+SchemaUnion sysTags` (the same name, now compositionally defined). The 13-line duplication dies;
+the *name* `<Sys>Axiom` survives by redefinition, so downstream references and the `HasAxiom*`
+instances keep resolving with NO rename and NO deprecated alias for these names. The
+elimination-form migration (`cases | ctor` → the Phase-2 elimination API) already happened in
+Phases 4/6/7, so the constructorless `def` form is safe here. Once redefined, each Phase-3 bridge
+`SchemaUnion sysTags φ ↔ <Sys>Axiom φ` becomes `Iff.rfl` and its lemma is deleted as dead
+scaffolding.
 
 **Tasks**:
-- [ ] Confirm (grep) that no construction/destructuring site targets any `<Sys>Axiom` inductive.
-- [ ] Delete the 14 `<Sys>Axiom` inductives from `Instances/*.lean`.
-- [ ] Resolve S5's `ModalAxiom` (`Metalogic/DerivationTree.lean:64`): if fully superseded by
-      `s5Tags`/`SchemaUnion`, re-route `MCS.lean`, `Metalogic/Soundness.lean`,
-      `Bimodal/…/ModalConservativity.lean` and delete it; otherwise keep it and retain only its
-      bridge (record which branch was taken and why).
+- [ ] Confirm (grep) that no *constructor* construction/destructuring site (`.ctor` patterns)
+      targets any `<Sys>Axiom` inductive — all such sites were migrated to the elimination API in
+      Phases 4/6/7. (References to `<Sys>Axiom` as a *predicate* are expected and remain valid
+      after redefinition.)
+- [ ] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean`: replace each `inductive <Sys>Axiom` with
+      `def <Sys>Axiom : Proposition Atom → Prop := SchemaUnion sysTags` (name preserved). Add a
+      `@[simp]` unfolding lemma per system where it aids downstream rewriting.
+- [ ] Resolve S5's `ModalAxiom` (`Metalogic/DerivationTree.lean:64`) by the SAME redefine-in-place
+      principle: prefer `def ModalAxiom : Proposition Atom → Prop := SchemaUnion s5Tags`, preserving
+      the name so `MCS.lean`, `Metalogic/Soundness.lean`, and `Bimodal/…/ModalConservativity.lean`
+      need no rewrite. Only if a constructor-level dependency in those three files genuinely blocks
+      redefinition, fall back to keep-inductive-plus-bridge (record which branch was taken and why).
 - [ ] Remove now-dead bridge lemmas that were pure scaffolding; keep any that remain public API
       (with `@[deprecated]` alias if a name was public).
 - [ ] Final full `lake build`; `lean_verify` on `k_soundness`, an S5 soundness lemma, and a
@@ -489,7 +525,7 @@ resolve S5's `ModalAxiom`, drop dead scaffolding bridges, and confirm the net-li
 
 **Files to modify**:
 - `Cslib/Logics/Modal/ProofSystem/Instances/{K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB}.lean`
-  (inductive definitions removed).
+  (each `inductive <Sys>Axiom` redefined in place as `def <Sys>Axiom := SchemaUnion sysTags`; name preserved).
 - `Cslib/Logics/Modal/Metalogic/DerivationTree.lean` — `ModalAxiom` disposition (conditional).
 - `MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean` — conditional
   re-route if S5 unified.

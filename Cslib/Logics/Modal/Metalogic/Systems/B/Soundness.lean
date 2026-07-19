@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic B (KB)
@@ -46,7 +45,7 @@ theorem b_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
     (w : World) : Satisfies m w φ :=
   unionSound bTags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_bTags_iff_BAxiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## B Soundness Theorems -/

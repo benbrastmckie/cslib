@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic T
@@ -47,7 +46,7 @@ theorem t_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_refl : ∀ w, m.r w w)
     (w : World) : Satisfies m w φ :=
   unionSound tTags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_tTags_iff_TAxiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## T Soundness Theorems -/

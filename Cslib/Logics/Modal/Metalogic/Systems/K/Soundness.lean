@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic K
@@ -49,7 +48,7 @@ theorem k_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : KAxiom φ) (m : Model World Atom)
     (w : World) : Satisfies m w φ :=
   unionSound kTags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_kTags_iff_KAxiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## K Soundness Theorems -/

@@ -50,7 +50,7 @@ theorem k4_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : K4Axiom φ) (m : Model World Atom)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (w : World) : Satisfies m w φ :=
-  unionSound k4Tags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_trans)
+  unionSound k4Tags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_k4Tags_iff_K4Axiom.mpr h_ax) w
 
 

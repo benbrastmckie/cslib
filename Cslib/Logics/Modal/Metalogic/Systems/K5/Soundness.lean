@@ -46,7 +46,7 @@ theorem k5_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : K5Axiom φ) (m : Model World Atom)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
     (w : World) : Satisfies m w φ :=
-  unionSound k5Tags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_eucl)
+  unionSound k5Tags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_k5Tags_iff_K5Axiom.mpr h_ax) w
 
 

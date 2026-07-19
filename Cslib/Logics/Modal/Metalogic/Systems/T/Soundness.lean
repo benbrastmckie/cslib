@@ -46,7 +46,7 @@ theorem t_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : TAxiom φ) (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)
     (w : World) : Satisfies m w φ :=
-  unionSound tTags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_refl)
+  unionSound tTags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_tTags_iff_TAxiom.mpr h_ax) w
 
 

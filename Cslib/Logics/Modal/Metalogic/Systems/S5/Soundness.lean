@@ -7,6 +7,9 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.Soundness
+public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
+public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
+public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic S5
 
@@ -34,33 +37,24 @@ variable {Atom : Type*}
 
 /-! ## S5 Axiom Soundness -/
 
-/-- Every axiom of S5 is valid over S5 frames (reflexive, transitive, Euclidean). -/
+/-- Every axiom of S5 is valid over S5 frames (reflexive, transitive, Euclidean).
+
+Routed through `unionSound`: `s5Tags` carries three differentiators (`modalT`, `modalFour`,
+`modalB`). `modalT`/`modalFour` discharge directly from `h_refl`/`h_trans`; `modalB`
+(symmetry) is not a direct hypothesis here (S5 = T+4+B, not T+4+B+5, so no `h_symm` parameter
+exists) — it is derived from `h_refl` and `h_eucl` exactly as the pre-migration proof did
+inline (`m.r w₂ w₁` from `m.r w₁ w₂` via Euclideanness at `w₁, w₂, w₁` with the reflexivity
+witness `m.r w₁ w₁`). -/
 theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : ModalAxiom φ) (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
-    (w : World) : Satisfies m w φ := by
-  cases h_ax with
-  | implyK φ ψ => exact Satisfies.implyK_axiom m w φ ψ
-  | implyS φ ψ χ => exact Satisfies.implyS_axiom m w φ ψ χ
-  | efq φ => exact Satisfies.efq_axiom m w φ
-  | peirce φ ψ => exact Satisfies.peirce_axiom m w φ ψ
-  | modalK φ ψ => exact Satisfies.modalK_axiom m w φ ψ
-  | modalT φ => exact Satisfies.modalT_axiom m h_refl w φ
-  | modalFour φ => exact Satisfies.modalFour_axiom m h_trans w φ
-  | modalB φ =>
-    intro hφ w' hr h_box_neg
-    have h_symm : m.r w' w := h_eucl w w' w hr (h_refl w)
-    exact h_box_neg w h_symm hφ
-  | andI φ ψ => exact Satisfies.andI_axiom m w φ ψ
-  | andE1 φ ψ => exact Satisfies.andE1_axiom m w φ ψ
-  | andE2 φ ψ => exact Satisfies.andE2_axiom m w φ ψ
-  | orI1 φ ψ => exact Satisfies.orI1_axiom m w φ ψ
-  | orI2 φ ψ => exact Satisfies.orI2_axiom m w φ ψ
-  | orE φ ψ χ => exact Satisfies.orE_axiom m w φ ψ χ
-  | diaDualityFwd φ => exact Satisfies.diaDualityFwd_axiom m w φ
-  | diaDualityBack φ => exact Satisfies.diaDualityBack_axiom m w φ
+    (w : World) : Satisfies m w φ :=
+  have h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁ :=
+    fun w₁ w₂ hr => h_eucl w₁ w₂ w₁ hr (h_refl w₁)
+  unionSound s5Tags m (fun t ht => by fin_cases ht <;> trivial)
+    (schemaUnion_s5Tags_iff_ModalAxiom.mpr h_ax) w
 
 
 /-! ## S5 Soundness Theorems -/

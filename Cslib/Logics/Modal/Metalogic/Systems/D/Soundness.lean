@@ -45,7 +45,7 @@ theorem d_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : DAxiom φ) (m : Model World Atom)
     (h_serial : Relation.Serial m.r)
     (w : World) : Satisfies m w φ :=
-  unionSound dTags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_serial)
+  unionSound dTags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_dTags_iff_DAxiom.mpr h_ax) w
 
 

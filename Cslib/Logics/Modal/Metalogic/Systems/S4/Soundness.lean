@@ -52,8 +52,7 @@ theorem s4_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (w : World) : Satisfies m w φ :=
-  unionSound s4Tags m
-    (fun t ht => by fin_cases ht <;> first | trivial | exact h_refl | exact h_trans)
+  unionSound s4Tags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_s4Tags_iff_S4Axiom.mpr h_ax) w
 
 

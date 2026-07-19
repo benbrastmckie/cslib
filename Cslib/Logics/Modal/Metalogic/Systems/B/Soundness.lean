@@ -45,7 +45,7 @@ theorem b_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : BAxiom φ) (m : Model World Atom)
     (h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)
     (w : World) : Satisfies m w φ :=
-  unionSound bTags m (fun t ht => by fin_cases ht <;> first | trivial | exact h_symm)
+  unionSound bTags m (fun t ht => by fin_cases ht <;> trivial)
     (schemaUnion_bTags_iff_BAxiom.mpr h_ax) w
 
 

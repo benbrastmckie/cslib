@@ -465,9 +465,33 @@ theorem names stay stable; use the Phase 3 bridge where a caller still expects t
   on `k45_soundness` and `s4_axiom_sound` report only `propext`/`Classical.choice`/`Quot.sound`).
   Scoped `lake build` of all four modules, `checkInitImports`, `lint-style` all green.
 
-**Sub-phase 4.3 — S5, TB, KB5** [NOT STARTED]
-- [ ] Rewrite the three soundness proofs; keep the S5 public soundness names stable.
+**Sub-phase 4.3 — S5, TB, KB5** [COMPLETED]
+- [x] Rewrite the three soundness proofs; keep the S5 public soundness names stable.
 - Files: `Systems/{S5,TB,KB5}/Soundness.lean`. Estimated output: ~100-200 lines.
+- **Completion note**: Same `unionSound sysTags m hfc (bridge.mpr h_ax) w` pattern. S5's original
+  `modalB` case derived symmetry inline from `h_refl`+`h_eucl` (S5 = T+4+B, so it never took an
+  `h_symm` parameter); the migrated proof reproduces that derivation as a local
+  `have h_symm : ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁ := fun w₁ w₂ hr => h_eucl w₁ w₂ w₁ hr (h_refl w₁)`
+  fed into `unionSound`'s `hfc`, preserving `s5_axiom_sound`'s exact original signature (still
+  `h_refl`/`h_trans`/`h_eucl`, no `h_symm` parameter). TB/KB5 both take their differentiator
+  hyps (`h_refl`/`h_symm` and `h_symm`/`h_eucl` respectively) directly.
+  **Mid-phase simplification (applies retroactively to 4.1 and 4.2 too)**: the `hfc` term was
+  first written as `fun t ht => by fin_cases ht <;> first | trivial | exact h1 | exact h2 | …`
+  (mirroring the plan prompt's suggested shape), but `lake build` on K45/S4 surfaced
+  `linter.unreachableTactic`/`linter.unusedTactic` warnings — Lean's built-in `trivial` tactic
+  already tries `assumption` as a fallback after `rfl`, so it alone closes every one of the 13
+  core-tag `True` goals AND every differentiator-tag goal (since the matching frame hypothesis
+  is already in local context after `fin_cases` substitutes the concrete tag), making every
+  `exact h_*` branch dead code. Simplified uniformly to `fun t ht => by fin_cases ht <;> trivial`
+  across all 9 systems built so far (K/T/D/B/K4/K5/K45/S4/S5) — zero warnings, same proof term
+  shape, no docstring content changed (the "discharged by h_*" prose remains accurate: `trivial`'s
+  `assumption` step is exactly that discharge). All nine re-verified green after the
+  simplification. `fin_cases ht` required an explicit `public import Mathlib.Tactic.FinCases`
+  in every file (not transitively available; permitted since only the 15
+  `Systems/*/Soundness.lean` files are in scope this phase). Public names all byte-stable. Zero
+  `sorry`, zero new axiom (`lean_verify` on `s5_soundness` and `kb5_axiom_sound` report only
+  `propext`/`Classical.choice`/`Quot.sound`). Scoped `lake build` of all nine modules touched so
+  far, `checkInitImports`, `lint-style` all green with no warnings.
 
 **Sub-phase 4.4 — D4, D5, D45, DB** [NOT STARTED]
 - [ ] Rewrite the four soundness proofs through `unionSound`.

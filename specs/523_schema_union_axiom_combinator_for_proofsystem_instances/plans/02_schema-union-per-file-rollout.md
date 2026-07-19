@@ -361,10 +361,25 @@ DB:{modalK,modalD,modalB}` — each unioned with the 13-tag `kCore` (proposition
   `schemaUnion_s4Tags_iff_S4Axiom` report only `propext`/`Quot.sound`). Scoped `lake build`,
   `checkInitImports`, `lint-style` all green. No instance file modified.
 
-**Sub-phase 3.3 — S5, TB, KB5** [NOT STARTED]
-- [ ] Define the three tag sets; prove bridges. For S5, bridge `SchemaUnion s5Tags φ ↔ ModalAxiom φ`
+**Sub-phase 3.3 — S5, TB, KB5** [COMPLETED]
+- [x] Define the three tag sets; prove bridges. For S5, bridge `SchemaUnion s5Tags φ ↔ ModalAxiom φ`
       (S5 = T+4+B; generalize toward `Modal.ModalAxiom` per the decision).
 - Estimated output: ~120-200 lines.
+- **Completion note**: Appended to `SchemaBridges.lean`. `s5Tags = kCore ∪ {modalT, modalFour,
+  modalB}` cross-checked against `ModalAxiom`'s actual 16 constructors in
+  `Metalogic/DerivationTree.lean` (13 core + `modalT`/`modalFour`/`modalB`, confirming S5 = T+4+B
+  and carries `modalB` NOT `modalFive`, per the resolved design decision — the `KB5 → S5`
+  subsumption edge stays deliberately absent; grep-confirmed no such edge was introduced here,
+  as expected since Phase 3 is tag sets + bridges only, not subsumption, which is Phase 5).
+  `tbTags = kCore ∪ {modalT, modalB}`, `kb5Tags = kCore ∪ {modalB, modalFive}`, both
+  cross-checked against `Instances/{TB,KB5}.lean`. Same `rcases`-arity mistake as 3.2 recurred
+  on the first `s5Tags` build attempt (3-differentiator case needs 16 slots, not 15; `orI2`
+  under-counted again) — fixed by re-deriving the exact slot sequence; `tbTags`/`kb5Tags`
+  (2-differentiator, same shape as 3.2's K45/S4) built green on the first attempt by reusing the
+  already-corrected 15-slot pattern. Zero `sorry`, zero new axiom (`lean_verify` on
+  `schemaUnion_s5Tags_iff_ModalAxiom` and `schemaUnion_kb5Tags_iff_KB5Axiom` report only
+  `propext`/`Quot.sound`). Scoped `lake build`, `checkInitImports`, `lint-style` all green. No
+  instance file or `DerivationTree.lean` modified.
 
 **Sub-phase 3.4 — D4, D5, D45, DB** [NOT STARTED]
 - [ ] Define the four tag sets; prove the four bridge equivalences.

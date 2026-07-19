@@ -1,28 +1,18 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-18T23:20:29Z",
-  "completed_at": "2026-07-18T23:59:00Z",
+  "started_at": "2026-07-18T23:50:25Z",
   "artifacts": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean",
-    "Cslib.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/FrameClass.lean",
     "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/summaries/18_phase8-canonical-model-truth-lemma-summary.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-8-handoff-20260718.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-9-handoff-20260718.md",
+    "Cslib.lean"
   ],
   "partial_progress": {
-    "stage": "complete",
-    "details": "Phase 8 (canonical model + truth lemma, Simpson 5.3.2/8.2.6) fully landed in one dispatch: CanonWorld/CanonWorld.le/CanonWorld.r/canonVal/canonBotForces (8.1), and canon_truth_lemma by induction on all seven Proposition cases including both box-backward and imp-backward reductio directions (8.2). T-Comp confirmed unneeded; Ch.6 tree-surgery bridge confirmed unneeded. New mainline file Cslib/Logics/Modal/Metalogic/Constructive/Labelled/CanonicalModel.lean.",
+    "stage": "phase_9_complete",
+    "details": "Phase 9 (frame-class match) landed: cs5FCIncest_canonWorld_r bundling five conjuncts, sorry-free and axiom-clean, over the general CanonWorld TS5 Atom type. Full CSLib CI pipeline green.",
     "lint_count_start": null,
-    "lint_count_current": 0,
-    "phases_completed": 8
-  },
-  "metadata": {
-    "session_id": "orchestrator-continuation-phase8",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "lint_count_current": null,
+    "phases_completed": 9
   },
   "verification": {
     "verification_passed": true,
@@ -31,6 +21,13 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "ci_pipeline_note": "Full 7-step CSLib CI pipeline run and green: lake build (scoped + full 3244/3244), lake exe checkInitImports (pass), lake lint (0 warnings after @[nolint unusedArguments] on two by-design-unused args), lake exe lint-style (0 warnings), lake shake (no suggestions for the new file), lake exe mk_all --module (Cslib.lean updated), lake test (green, 9235/9236 built; pre-existing sorries in unrelated Propositional Tableau files unregressed). lean_verify on canon_truth_lemma and Context.addFreshVar: axioms = [propext, Classical.choice, Quot.sound], no sorryAx. Zero sorry/zero new axiom/zero vacuous definitions in the new file."
+    "lean_verify_axioms": ["propext", "Quot.sound"]
+  },
+  "metadata": {
+    "session_id": "orchestrator-continuation",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

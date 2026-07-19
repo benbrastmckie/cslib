@@ -365,6 +365,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Forcing
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Deduction
+public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.FrameClass
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.PrimeLemma
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Syntax
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment

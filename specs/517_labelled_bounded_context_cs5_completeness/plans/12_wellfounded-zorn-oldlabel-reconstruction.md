@@ -622,21 +622,56 @@ successor-preservation and limit-preservation are independent statements).
   unrelated Propositional Tableau files unregressed). `lean_verify canon_truth_lemma`: axioms
   `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
 
-### Phase 9: Frame-class match — domain-relative equivalence ⟹ `cs5FCIncest` [NOT STARTED]
+### Phase 9: Frame-class match — domain-relative equivalence ⟹ `cs5FCIncest` [COMPLETED]
 
 - **Goal:** discharge the frame-class conditions `cs5FC''`/`cs5FCIncest` needs from
   `ClassicalModelOn TS5 H.X H.R`. (Carried from v4 Phase 7.)
 - **Tasks:**
-  - [ ] Derive the domain-relative `Equivalence` on `H.X` (reflexive, symmetric, transitive) via the
+  - [x] Derive the domain-relative `Equivalence` on `H.X` (reflexive, symmetric, transitive) via the
     Phase-1-of-v4 design choice (domain-relative equivalence or `↥H.X` subtype) and
-    `classicalModelOn_TS5_iff`.
-  - [ ] Match the `cs5FCIncest` conjuncts. **Citation**: `cs5Incest`/`cs5FCIncest` live at
-    `CS5Canonical.lean:234,255`.
-  - [ ] State non-trip of `cs5Incest_forces_symm` (Consistency banishes `Ω`) and
-    `cs5TwoSidedR_iff_cs5Tail` (not quasi-prime theories) at the point of use.
-- **Timing:** 1-2 dispatches. Estimated output: ~150-350 lines (mainline).
+    `classicalModelOn_TS5_iff`. Landed as `TPrime.equivOn` (near-immediate, as expected: a direct
+    projection of `equivalence_of_classicalModelOn_TS5` already landed in `Context.lean`).
+  - [x] Match the `cs5FCIncest` conjuncts. **Citation**: `cs5Incest`/`cs5FCIncest` live at
+    `CS5Canonical.lean:234,255`. *(deviation: altered -- target is `cs5FCIncest` specifically, not
+    the older `cs5FC''` (`CKExtension.lean:184`, task 509): `CS5Canonical.lean`'s soundness
+    theorems (`cs5_axiom_sound_incest`) are proved only over `cs5FCIncest`, which the birelational
+    pivot (task 512) documents as `cs5FC''` with its plain-symmetry conjunct replaced by
+    `cs5Incest`; matching `cs5FC''` itself would leave soundness/completeness targeting different
+    frame classes. This is the plan's own "Definition of done" text lagging the later CS5Canonical
+    pivot, not a scope substitution.)* Design nuance resolved: `CanonWorld` as built (the
+    **general** type, ranging over every `TPrime TS5 Atom`, matching Simpson's `𝒦^𝒯`) instantiates
+    `cs5FCIncest`'s signature DIRECTLY -- no restricted world-type subtype was needed. This works
+    (unlike the analogous match failing for `CS5Canonical.lean`'s `CS5CanonSegment`/
+    `CS5PrimeSegment`) because `CanonWorld.r` is the RAW graph relation with genuine
+    `EquivalenceOn`-witnessed symmetry, not a box-based one-sided containment subject to the
+    monotonicity-collapse argument that sinks the `CS5Canonical.lean` route at the universally
+    reachable exploding world `Ω`. Landed in new file `Cslib/Logics/Modal/Metalogic/Constructive/
+    Labelled/FrameClass.lean`: `CanonWorld.r_refl`/`CanonWorld.r_trans` (plain
+    reflexivity/transitivity), `CanonWorld.r_rebase` (the `fourBox`-style re-basing conjunct,
+    transitivity only), `CanonWorld.r_symBox` (the `bBox`-style re-basing conjunct, needs
+    symmetry), `CanonWorld.r_incest` (`cs5Incest`, the `bDia` instance, witness `u' := u`, plain
+    symmetry), bundled into `cs5FCIncest_canonWorld_r`. All five sorry-free,
+    `lean_verify`-clean (axioms ⊆ `[propext, Quot.sound]`, no `sorryAx`).
+  - [x] State non-trip of `cs5Incest_forces_symm` (Consistency banishes `Ω`) and
+    `cs5TwoSidedR_iff_cs5Tail` (not quasi-prime theories) at the point of use. Documented in
+    `FrameClass.lean`'s module docstring ("Point-of-use notes on the two landed guardrails"):
+    `cs5Incest_forces_symm` is inapplicable (its `hbox` hypothesis presumes a box-based relation;
+    `CanonWorld.r` is not box-based, and coincidentally lands on the same "true, harmless plain
+    symmetry" outcome that theorem's own docstring anticipates for a relation with no reachable
+    `Ω`); `cs5TwoSidedR_iff_cs5Tail` is inapplicable (its hypotheses require `QuasiPrime
+    CS5ModalAxiom` theories; `TPrime` contexts are graph-node structures, not quasi-prime
+    theories, matching `Context.lean`'s existing guardrail-3 analysis).
+- **Timing:** 1-2 dispatches. Estimated output: ~150-350 lines (mainline). **Actual: 1 dispatch,
+  ~200 lines** (new file `FrameClass.lean`).
 - **Depends on:** 8.
-- **Done when:** `lake build` green; sorry-free; guardrails unregressed.
+- **Done when:** `lake build` green; sorry-free; guardrails unregressed. **MET.** Full CSLib CI
+  pipeline green: scoped `lake build` (`Labelled.FrameClass`), `lake exe checkInitImports` (pass),
+  `lake lint` (0 warnings for the new file), `lake exe lint-style` (0 warnings), `lake shake`
+  (no suggestions for the new file), `lake exe mk_all --module` (`Cslib.lean` updated), `lake test`
+  (green, 9237/9237 -- pre-existing sorries in unrelated Propositional Tableau files
+  unregressed), full `lake build` (3245/3245 jobs green; guardrail modules -- `Context.lean`/
+  `CanonicalModel.lean`/`CS5Canonical.lean` -- unregressed). `lean_verify
+  cs5FCIncest_canonWorld_r`: axioms `["propext","Quot.sound"]`, no `sorryAx`.
 
 ### Phase 10: `cs5_completeness` assembly [NOT STARTED]
 

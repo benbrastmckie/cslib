@@ -53,40 +53,40 @@ def s5FC : ∀ {World : Type u}, Model World Atom → Prop :=
 transitive, and Euclidean. -/
 private theorem s5_canonical_FC : s5FC (CanonicalModel (@ModalAxiom Atom)) :=
   ⟨fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
       S,
    canonical_trans
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ),
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalFour, by decide, φ, rfl⟩),
    canonical_eucl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ)
-      (fun φ => .modalB φ)
-      (fun φ ψ => .modalK φ ψ)⟩
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalFour, by decide, φ, rfl⟩)
+      (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalB, by decide, φ, rfl⟩)
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)⟩
 
 /-- Pre-applied S5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem s5_truth_lemma_applied (S : CanonicalWorld (@ModalAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@ModalAxiom Atom)) S φ ↔ φ ∈ S.val :=
   truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    (fun φ ψ => .andI φ ψ)
-    (fun φ ψ => .andE1 φ ψ)
-    (fun φ ψ => .andE2 φ ψ)
-    (fun φ ψ => .orI1 φ ψ)
-    (fun φ ψ => .orI2 φ ψ)
-    (fun φ ψ χ => .orE φ ψ χ)
-    (fun φ => .diaDualityFwd φ)
-    (fun φ => .diaDualityBack φ)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- S5 soundness adapter matching the `strong_soundness` callback shape.
@@ -131,10 +131,10 @@ theorem s5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@ModalAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @ModalAxiom Atom) (FC := s5FC)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     s5_truth_lemma_applied
     s5_canonical_FC
     (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)
@@ -178,10 +178,10 @@ theorem s5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @ModalAxiom Atom) (FC := s5FC)
       s5_sound_cb
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => (schemaUnion_s5Tags_iff_ModalAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
       s5_truth_lemma_applied
       s5_canonical_FC
       (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)

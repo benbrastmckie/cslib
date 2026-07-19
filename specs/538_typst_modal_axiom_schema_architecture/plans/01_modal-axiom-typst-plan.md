@@ -154,27 +154,34 @@ source so the Section 3 correspondence table (Phase 3) can print it faithfully.
 - The exact `Axioms.AxiomB` expansion (or the explicit opaque-citation decision) is recorded for
   use in Phase 3.
 
-### Phase 2: Sections 1-2 — Schema-Tag Alphabet and the Syntactic Modal Cube [NOT STARTED]
+### Phase 2: Sections 1-2 — Schema-Tag Alphabet and the Syntactic Modal Cube [COMPLETED]
 
 **Goal**: Author Section 1 (The Schema-Tag Alphabet) and Section 2 (Subsumption as
 `Finset.subset` — the syntactic modal cube), applying the research's table/diagram collapses.
 
 **Tasks**:
-- [ ] Section 1: render `ModalSchemaTag`'s 18 tags as a table (tag x schema, grouped by role)
+- [x] Section 1: render `ModalSchemaTag`'s 18 tags as a table (tag x schema, grouped by role)
       instead of the source's partial `.Holds` code excerpt; keep the `SchemaUnion` definition and
       the three `@[simp]` elimination lemmas as short literal `lean` code blocks; include the
       literal `abbrev ModalAxiom := SchemaUnion s5Tags` line and the "14 renamed abbrevs + S5"
-      fact.
-- [ ] Section 2: keep `SchemaUnion.subsumption` as a short `lean` code block; render the 15
+      fact. **Enhancement over plan**: the 18-tag schema column was transcribed from the literal
+      doc-comment on each `ModalSchemaTag` constructor in live `SchemaUnion.lean` (grepped
+      directly), not reconstructed from the source doc's partial excerpt — strictly more faithful
+      than the plan's minimum bar.
+- [x] Section 2: keep `SchemaUnion.subsumption` as a short `lean` code block; render the 15
       tag-set `def`s as a table (System | `kCore ∪ {differentiators}`).
-- [ ] Section 2: author the `fletcher` cube diagram (15 nodes, 24 edges) per research Section 3.4
+- [x] Section 2: author the `fletcher` cube diagram (15 nodes, 24 edges) per research Section 3.4
       to replace the 24-edge prose list; iterate on `(row, col)` placement for legibility. If
       layout proves too fiddly, fall back to the grouped Source-system-to-edges table (do not
-      block on pixel-perfect layout).
-- [ ] Section 2: keep the disambiguation table vs. `Cube.lean` (already table-shaped in the source).
-- [ ] Transcribe all axiom-schema shapes from the literal Lean `Satisfies.*_axiom` conclusions /
+      block on pixel-perfect layout). Achieved: layered DAG (K at row 0, 5 one-differentiator
+      systems at row 1, 7 two-differentiator systems at row 2, S5/D45 at row 3), all 24 edges
+      present, legible with some expected edge crossings (visually verified against the rendered
+      PDF). No fallback needed.
+- [x] Section 2: keep the disambiguation table vs. `Cube.lean` (already table-shaped in the source).
+- [x] Transcribe all axiom-schema shapes from the literal Lean `Satisfies.*_axiom` conclusions /
       source text, not from memory.
-- [ ] `typst compile`; confirm exit 0.
+- [x] `typst compile`; confirm exit 0. Confirmed, after fixing two table-layout bugs found during
+      visual review (see Deviations below).
 
 **Timing**: 1.25 hours
 

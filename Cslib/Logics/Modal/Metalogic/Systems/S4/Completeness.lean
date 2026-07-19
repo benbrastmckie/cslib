@@ -52,34 +52,34 @@ def s4FC : ∀ {World : Type u}, Model World Atom → Prop :=
 and transitive. -/
 private theorem s4_canonical_FC : s4FC (CanonicalModel (@S4Axiom Atom)) :=
   ⟨fun S => canonical_refl
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalT φ)
+      (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.modalT, by decide, φ, rfl⟩)
       S,
    canonical_trans
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .modalFour φ)⟩
+      (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.modalFour, by decide, φ, rfl⟩)⟩
 
 /-- Pre-applied S4 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem s4_truth_lemma_applied (S : CanonicalWorld (@S4Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@S4Axiom Atom)) S φ ↔ φ ∈ S.val :=
   truth_lemma
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
-    (fun φ ψ => .modalK φ ψ)
-    (fun φ => .modalT φ)
-    (fun φ ψ => .andI φ ψ)
-    (fun φ ψ => .andE1 φ ψ)
-    (fun φ ψ => .andE2 φ ψ)
-    (fun φ ψ => .orI1 φ ψ)
-    (fun φ ψ => .orI2 φ ψ)
-    (fun φ ψ χ => .orE φ ψ χ)
-    (fun φ => .diaDualityFwd φ)
-    (fun φ => .diaDualityBack φ)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.modalT, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- S4 soundness adapter matching the `strong_soundness` callback shape.
@@ -123,10 +123,10 @@ theorem s4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@S4Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @S4Axiom Atom) (FC := s4FC)
-    (fun φ ψ => .implyK φ ψ)
-    (fun φ ψ χ => .implyS φ ψ χ)
-    (fun φ => .efq φ)
-    (fun φ ψ => .peirce φ ψ)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
     s4_truth_lemma_applied
     s4_canonical_FC
     (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)
@@ -167,10 +167,10 @@ theorem s4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @S4Axiom Atom) (FC := s4FC)
       s4_sound_cb
-      (fun φ ψ => .implyK φ ψ)
-      (fun φ ψ χ => .implyS φ ψ χ)
-      (fun φ => .efq φ)
-      (fun φ ψ => .peirce φ ψ)
+      (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => (schemaUnion_s4Tags_iff_S4Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
       s4_truth_lemma_applied
       s4_canonical_FC
       (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)

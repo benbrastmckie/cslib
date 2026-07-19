@@ -62,35 +62,35 @@ def tbFC : ∀ {World : Type u}, Model World Atom → Prop :=
 and symmetric. -/
 private theorem tb_canonical_FC : tbFC (CanonicalModel (@TBAxiom Atom)) :=
   ⟨fun S => canonical_refl
-      (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.modalT, by decide, φ, rfl⟩)
       S,
    canonical_symm
-      (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.modalB, by decide, φ, rfl⟩)⟩
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalB, by decide, φ, rfl⟩)⟩
 
 /-- Pre-applied TB truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem tb_truth_lemma_applied (S : CanonicalWorld (@TBAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@TBAxiom Atom)) S φ ↔ φ ∈ S.val :=
   truth_lemma
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.modalT, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ => ⟨.modalT, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- TB soundness adapter matching the `strong_soundness` callback shape.
@@ -134,10 +134,10 @@ theorem tb_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@TBAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @TBAxiom Atom) (FC := tbFC)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
     tb_truth_lemma_applied
     tb_canonical_FC
     (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)
@@ -178,10 +178,10 @@ theorem tb_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @TBAxiom Atom) (FC := tbFC)
       tb_sound_cb
-      (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_tbTags_iff_TBAxiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
       tb_truth_lemma_applied
       tb_canonical_FC
       (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)

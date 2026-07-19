@@ -53,34 +53,34 @@ def kb5FC : ∀ {World : Type u}, Model World Atom → Prop :=
 and Euclidean (from axioms B and 5). -/
 private theorem kb5_canonical_FC : kb5FC (CanonicalModel (@KB5Axiom Atom)) :=
   ⟨canonical_symm
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.modalB, by decide, φ, rfl⟩),
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalB, by decide, φ, rfl⟩),
    canonical_eucl_from_5
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-      (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.modalFive, by decide, φ, rfl⟩)⟩
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+      (fun φ => ⟨.modalFive, by decide, φ, rfl⟩)⟩
 
 /-- Pre-applied KB5 truth lemma: satisfaction at world `S` iff membership in `S.val`. -/
 private theorem kb5_truth_lemma_applied (S : CanonicalWorld (@KB5Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@KB5Axiom Atom)) S φ ↔ φ ∈ S.val :=
   k_truth_lemma
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.diaDualityBack, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
+    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
     S φ
 
 /-- KB5 soundness adapter matching the `strong_soundness` callback shape.
@@ -124,10 +124,10 @@ theorem kb5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposit
         Satisfies m w phi) :
     ModalSetDerivable (@KB5Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @KB5Axiom Atom) (FC := kb5FC)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
     kb5_truth_lemma_applied
     kb5_canonical_FC
     (fun World m w ⟨hSymm, hEucl⟩ h_sat => h World m w hSymm hEucl h_sat)
@@ -169,10 +169,10 @@ theorem kb5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @KB5Axiom Atom) (FC := kb5FC)
       kb5_sound_cb
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => (schemaUnion_kb5Tags_iff_KB5Axiom).mp ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
+      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
+      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
+      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
       kb5_truth_lemma_applied
       kb5_canonical_FC
       (fun World m w ⟨hSymm, hEucl⟩ h_sat => h World m w hSymm hEucl h_sat)

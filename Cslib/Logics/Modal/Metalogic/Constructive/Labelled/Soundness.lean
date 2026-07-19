@@ -12,14 +12,17 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 /-! # Labelled-System Soundness (Task 517 Phase 11, Simpson 1994 Thm 8.1.4, Soundness Direction)
 
 **Status: interpretation machinery (Phase 11.1, partial) + anti-vacuity certificate (Phase 11.3,
-COMPLETE).** This module lands (1) the first, reusable building block of the full labelled
-soundness direction `nik_TS5_soundness : NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ`, which will
-complete the Simpson 8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and
-(2) the anti-vacuity certificate `nik_TS5_consistent : ¬ NIKTheorem TS5 ⊥`, landed via a
-**direct, self-contained route** (see "The anti-vacuity route taken" below) rather than as a
-corollary of the not-yet-landed general theorem. The general `nik_TS5_soundness` (Phase 11.1's
-tree-lifting machinery + Phase 11.2's `TClosure` validation) is **not yet landed** -- see "What
-remains" below and the continuation handoff at
+COMPLETE). General `nik_TS5_soundness` assessed INTRACTABLE at standard single-dispatch
+implementation effort after three dispatches (see "Third dispatch" section below) -- recommend a
+dedicated re-plan/research pass, not a fourth direct-implementation attempt.** This module lands
+(1) the first, reusable building block of the full labelled soundness direction
+`nik_TS5_soundness : NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ`, which will complete the Simpson
+8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and (2) the anti-vacuity
+certificate `nik_TS5_consistent : ¬ NIKTheorem TS5 ⊥`, landed via a **direct, self-contained
+route** (see "The anti-vacuity route taken" below) rather than as a corollary of the
+not-yet-landed general theorem. The general `nik_TS5_soundness` (Phase 11.1's tree-lifting
+machinery + Phase 11.2's `TClosure` validation) is **not yet landed** -- see "What remains" below,
+"Third dispatch" below (the current, sharpest assessment), and the continuation handoffs at
 `specs/517_labelled_bounded_context_cs5_completeness/handoffs/`.
 
 ## The anti-vacuity route taken: `nik_soundness_onePoint` (Phase 11.3, direct, not via 11.1/11.2)
@@ -149,6 +152,90 @@ attempt does not re-discover it from scratch:
   `hfour`/`hsymbox`/`hincest` pairwise, not a tree-depth recursion. This lemma is not yet attempted
   in Lean; it is the concrete next step for items 1-2, and should supersede their original
   "propagate down the tree" phrasing above (kept for historical context, not as the target shape).
+
+## Third dispatch: why the direct-induction route is now assessed INTRACTABLE at standard effort
+(NOT yet reduced to code; this is a decisive tractability finding, not a missing-lemma gap)
+
+This dispatch (the third to touch general `nik_TS5_soundness`) attempted to actually close the
+finite-clique-relift lemma the second dispatch's "Refined analysis" section above targets, both
+for the `(□I)` producer side (a fresh label's exact image) and, independently, for the `(□E)`
+consumer side (an *already-fixed*, non-fresh label reached via a `TClosure.symm`-derived edge).
+Both sides hit the same root obstruction, confirmed by direct Lean-level proof attempts (not just
+re-stated architecture), and a battery of finite hand-constructed candidate models was used to
+probe whether the obstruction is real or just unexplored. The finding:
+
+1. **A type-level observation.** Of `cs5FCIncest`'s five conjuncts, only `hrefl` and `htrans`
+   have a *non-existential* (`∀`-only) conclusion; `hfour`, `hsymbox`, and `hincest` all conclude
+   `∃ v/t/u', ... ∧ r ...` — a *raised* witness, never the exact original point. Consequently the
+   only way to derive an EXACT fact `r a b` for two independently-fixed points `a`, `b` is a chain
+   of `hrefl`/`htrans` composed from already-exact "seed" facts — `hfour`/`hsymbox`/`hincest` can
+   only ever *introduce* a fresh raised point into the chain, never pin one down to a
+   pre-specified target. This directly blocks the `(□I)` producer side: `CKForces`'s `box` clause
+   (`Forcing.lean:75`) universally quantifies its successor `u` (`∀ w' ≥ w, ∀ u, r w' u → ...`) --
+   `u` is handed to the proof adversarially, not chosen by it -- so the fresh label `y`'s
+   interpretation must be *exactly* `u` (persistence only goes upward, so a raised substitute
+   `u' ≥ u` cannot be "rounded back down"), yet the edge-cond fact `r (ρ a) u` this exactness
+   demands, for every other already-used label `a`, is exactly the kind of fact `hfour`
+   cannot produce without also raising `a`'s own image -- as the second dispatch found -- and
+   THIS dispatch additionally traced that raising `a` does not itself terminate in an exact fact
+   either, for the same reason one level up.
+2. **The `(□E)`-consumer side needs the same exactness, independently of freshness.** `boxE`
+   consumes an *arbitrary* `TClosure`-derived edge `hR : TClosure 𝒯 G.R x y`, including one
+   derived via `.symm` (`B ∈ TS5`) from a *raw, one-directional* edge `G.R y x` (`Graph.addEdge`
+   only ever adds a directed `a = x ∧ b = y` disjunct, never both directions). If the "natural"
+   invariant only interprets raw edges directly (`r (ρ y) (ρ x)` from `G.R y x`), soundly using
+   `boxE` at the `TClosure.symm`-reversed edge needs `r (ρ x) (ρ y)` -- i.e. *exact* symmetry of
+   `r` on this specific already-fixed pair, where `x`/`y` are NOT necessarily fresh (they may
+   already be pinned by other uses in `Γ` or earlier subderivations, so their images cannot be
+   freely raised without invalidating those other uses). `cs5Incest` supplies only the raised
+   substitute (`r w u → ∃ u' ≥ u, r u' w`), not exact symmetry.
+3. **Finite hand-constructed models could not exhibit a stable asymmetric example.** Several
+   candidate finite relations on `Fin n`/`ℕ` (with the standard linear `≤`) satisfying
+   `hincest`+`hfour` kept being forced, by exact `htrans` composing the newly-introduced raised
+   witnesses back around, into satisfying full symmetric (indeed often total/clique) closure on
+   the finitely-generated substructure anyway -- e.g. a 3-point "cycle + backward witnesses"
+   attempt (`0 → 1`, a `hincest`-mandated back-witness `2 → 0`, forcing `2 → 1` by `htrans`)
+   remained genuinely asymmetric (`r 0 1` without `r 1 0`) only until `hsymbox` was patched by
+   adding an outgoing edge from `1`, at which point `htrans` immediately chained it back into
+   `r 1 0`, collapsing the intended asymmetry. This was reproduced under several variations and
+   never escaped: **no finite countermodel refuting `cs5FCIncest → ` symmetry-on-generated-points
+   was found**, but a full formal proof of the positive direction (`cs5FCIncest` DOES force
+   symmetric/clique closure on any finitely-generated substructure) was also not completed --
+   direct proof attempts chaining `hincest`/`hfour`/`hsymbox` pairwise did not close either. This
+   is genuinely unresolved, not merely unattempted: it is the single largest scope unknown left in
+   this proof direction, and resolving it (either direction) would decisively settle whether the
+   clique-relift lemma is provable by finite induction, or needs different machinery entirely.
+4. **A concrete, actionable recommendation for whoever picks this up next**, given (3)'s
+   "finite models keep collapsing into full closure" pattern: this looks structurally like a
+   FIXPOINT/closure-completion problem (build the smallest `r`-clique containing a given finite
+   seed and closed under `hincest`/`hfour`/`hsymbox`'s raised witnesses), not a simple
+   induction-over-a-fixed-finite-set problem -- which is exactly the shape of the `FLO`
+   maximal-extension machinery already landed for the completeness direction (Phases 1-7,
+   `PrimeLemma.lean`/probes). **Investigating whether the landed `FLO`/chain-union machinery can
+   be reused or adapted for this closure construction is the single most promising concrete next
+   step**, ahead of either of the two heavier alternatives below.
+5. **Escalation-protocol assessment (per the task's anti-churn directive): this direction is NOT
+   tractable at standard single-dispatch implementation effort.** Three dispatches have each
+   materially sharpened the obstruction (not thrashed or repeated prior work), converging on a
+   genuine open mathematical question (item 3 above), not a missing Mathlib lemma or a
+   straightforward-but-long proof. Recommended next steps, in order of estimated cost:
+   - (a) **Cheapest, try first**: a focused (few-hour) investigation of whether `cs5FCIncest`
+     provably forces symmetric/clique closure on finitely-generated substructures (item 3's open
+     question), reusing/adapting the `FLO` closure machinery (item 4) if it resolves positively.
+   - (b) **Simpson's own recommended route** (`8.1.2`, quoted above): formalize the modified
+     sequent system `L_m(𝒯, ∅)` with `𝒯`-closure baked into `(⊃L)`/`(⊃R)_m`, which Simpson states
+     is needed *specifically* to avoid the non-tree-excursion problem this dispatch keeps hitting.
+     Substantial new proof-theoretic infrastructure (a new derivation system + translation lemmas
+     + its own soundness proof) -- re-plan scale (likely 300-600+ lines), not a dispatch
+     continuation.
+   - (c) Build the Hilbert-labelled equivalence bridge (Ch. 6, already flagged as deferred future
+     work in this plan's Phase 12 notes) and obtain labelled soundness as a corollary of the
+     *already-proven*, sorry-free `cs5_soundness_derivable_incest` (`CS5Canonical.lean:373`) --
+     this is exactly the large Ch. 6 gap Option B of this plan deliberately deferred, so reopening
+     it is itself a scope decision for the user/orchestrator, not this dispatch.
+   None of (a)-(c) is attempted in this dispatch; each is genuinely re-plan/research-pass scale,
+   not a direct continuation. No `sorry`, no new axiom, and no vacuous placeholder was introduced
+   to force a result -- per the anti-churn directive, this finding is landed as documentation only.
 
 ## Contents (this dispatch)
 

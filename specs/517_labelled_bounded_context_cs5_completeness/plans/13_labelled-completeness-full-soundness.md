@@ -815,7 +815,30 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
   Propositional Tableau files unregressed). `lean_verify cs5_completeness`: axioms
   `["propext","Classical.choice","Quot.sound"]`, no `sorryAx`.
 
-### Phase 11: Full labelled soundness `NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ` + anti-vacuity certificate [IN PROGRESS]
+### Phase 11: Full labelled soundness `NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ` + anti-vacuity certificate [BLOCKED]
+
+**Third-dispatch update (this dispatch):** sub-phases 11.1/11.2 (the general `nik_TS5_soundness`)
+are now assessed **[BLOCKED]** -- not a missing-lemma gap but a genuine, decisively-narrowed
+mathematical obstruction, confirmed by direct Lean-level proof attempts on both the `(□I)`
+producer side and the `(□E)` consumer side, plus a battery of finite hand-constructed candidate
+models. See `Soundness.lean`'s "Third dispatch: why the direct-induction route is now assessed
+INTRACTABLE at standard effort" docstring section for the full writeup, and
+`handoffs/phase-11-general-soundness-blocked-20260719c.md` for the handoff. 11.3 remains
+**[COMPLETED]** (unaffected, landed in the prior dispatch). **BLOCKER**: `cs5FCIncest`'s
+`hfour`/`hsymbox`/`hincest` conjuncts only ever yield existentially-raised relational witnesses,
+never exact edges between two independently-fixed points, yet (a) `CKForces`'s `box` clause hands
+the induction an adversarially-fixed successor `u` that must be interpreted *exactly* (persistence
+is only upward), and (b) `boxE` consumes `TClosure`-derived edges (including `.symm`-reversed ones
+from already-fixed, non-fresh labels) that need *exact* symmetry `cs5Incest` does not supply. What
+would unblock: either (i) a proof that `cs5FCIncest` forces symmetric/clique closure on any
+finitely-generated substructure (open question, not resolved this dispatch either direction --
+the most promising avenue, possibly reusing the landed `FLO` closure machinery), (ii) formalizing
+Simpson's own alternative route (the modified sequent system `L_m(TS5,∅)`, his stated fix for
+exactly this problem), or (iii) building the deferred Hilbert-labelled equivalence bridge (Ch. 6)
+to obtain labelled soundness as a corollary of the already-proven `cs5_soundness_derivable_incest`.
+Each is re-plan/research-pass scale, not a fourth direct-implementation dispatch. **Prohibited
+workarounds not used**: no `sorry`, no new axiom, no vacuous placeholder, and `cs5FCIncest` was
+not weakened.
 
 - **Goal:** prove the **converse** (soundness) direction of Simpson 8.1.4, completing the labelled
   **biconditional** `CKValidFC cs5FCIncest φ ↔ NIKTheorem TS5 φ`, and derive the anti-vacuity
@@ -842,8 +865,12 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
 
 - **Sub-phases (each ≤ one agent run; internally sequential 11.1 → 11.2 → 11.3):**
 
-  - **11.1 — Interpretation machinery + soundness for the non-`(R𝒯)` `NIK` fragment. [IN PROGRESS,
-    partial — see below]**
+  - **11.1 — Interpretation machinery + soundness for the non-`(R𝒯)` `NIK` fragment. [BLOCKED,
+    partial — see below]** *(deviation: escalated to `[BLOCKED]` this (third) dispatch per the
+    Escalation Protocol — see the Phase 11 heading's blocker note above and
+    `Soundness.lean`'s "Third dispatch" docstring section for the full analysis. Not a
+    scope/budget continuation like the prior two dispatches' framing; this dispatch found the
+    obstruction to be a genuine open mathematical question, not a remaining-effort estimate.)*
 
     **Landed this dispatch**: `cs5FCIncest_lift` (`Soundness.lean`), sorry-free, axiom-free. This
     is the key semantic finding that makes Phase 11 tractable at all: Simpson's own Theorem 8.1.4
@@ -897,7 +924,9 @@ of `primeLemma`/`canon_truth_lemma`, so 10 and 11 may run concurrently. Phase 11
     - **Depends on:** 9 (needs the landed `CKForces`/`CKValidFC`/`cs5FCIncest` semantics; independent
       of Phase 10).
 
-  - **11.2 — The `(R𝒯)` geometric-frame-condition cases + assemble `nik_TS5_soundness`.**
+  - **11.2 — The `(R𝒯)` geometric-frame-condition cases + assemble `nik_TS5_soundness`. [BLOCKED]**
+    *(deviation: escalated to `[BLOCKED]` this dispatch, jointly with 11.1 -- the two sub-phases'
+    obstructions are the same root cause, see the Phase 11 heading's blocker note above.)*
     - **Goal:** discharge the "more difficult" `(R𝒯)` cases — the `TClosure`-closed T/B/4 edges of
       `TS5` — showing each geometric frame condition of `cs5FCIncest` validates its corresponding
       `(R𝒯)` edge rule under the interpretation, handling the non-tree excursions Simpson flags.

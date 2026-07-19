@@ -549,22 +549,52 @@ import lines and a short doc-comment addition per file).
 
 ---
 
-### Phase 5: Replace `AxiomSubsumption.lean` with `Finset.subset` facts [IN PROGRESS]
+### Phase 5: Replace `AxiomSubsumption.lean` with `Finset.subset` facts [COMPLETED]
 
 **Goal**: Collapse the 24 hand-written `XAxiom_implies_YAxiom` lemmas (~524 lines) to
 `Finset.subset`-backed facts via the Phase 1 generic subsumption lemma, then update the few call
 sites. Net deletion.
 
-**Sub-phase 5.1 — 24 subsumption facts** [NOT STARTED]
-- [ ] Replace each of the 24 subsumption lemmas with a `Finset.subset` fact fed to the generic
+**Sub-phase 5.1 — 24 subsumption facts** [COMPLETED]
+- [x] Replace each of the 24 subsumption lemmas with a `Finset.subset` fact fed to the generic
       `subsumption` lemma; preserve each public lemma name (or provide a `@[deprecated]` alias).
-- [ ] Verify the deliberately-omitted `KB5 → S5` edge stays omitted (S5 = T+4+B, not `modalFive`).
+- [x] Verify the deliberately-omitted `KB5 → S5` edge stays omitted (S5 = T+4+B, not `modalFive`).
 - File: `InterSystem/AxiomSubsumption.lean`. Estimated output: ~120-220 lines net (deletion-heavy).
+- **Completion note**: Every one of the 24 lemmas now reads
+  `schemaUnion_yTags_iff_YAxiom.mp (SchemaUnion.subsumption (by decide)
+  (schemaUnion_xTags_iff_XAxiom.mpr h))` — no hand-written `match`/`cases` on constructors
+  remains. `by decide` discharges each `xTags ⊆ yTags` obligation against the concrete `Finset`s
+  from `SchemaBridges.lean`; elaboration order (expected-type propagation from the outer `.mp`
+  down through `SchemaUnion.subsumption`'s implicit `Sb`, then from the inner `.mpr h` up through
+  `Sa`) resolves both implicit tag-set arguments before `decide` runs, so no explicit type
+  ascription was needed on any of the 24 sites. Added `public import` of `SchemaUnion.lean` and
+  `SchemaBridges.lean` (previously only `Instances` was imported). The deliberately-omitted
+  `KB5 → S5` edge stays absent and is now mechanically explained in the module doc: `kb5Tags`
+  carries `modalFive`, which is not a member of `s5Tags` (S5 = T+4+B, carries `modalB` not
+  `modalFive`), so no `hsub : kb5Tags ⊆ s5Tags` term exists — grep-confirmed no such lemma was
+  introduced. Zero `sorry`, zero new axiom (`lean_verify` on `KAxiom_implies_TAxiom`,
+  `K45Axiom_implies_D45Axiom`, and `S4Axiom_implies_ModalAxiom` all report only
+  `propext`/`Quot.sound`). Scoped `lake build`, `lake exe checkInitImports`, and
+  `lake exe lint-style` all green. Net line delta: 73 insertions, 368 deletions = **-295 lines
+  net** (`git diff --stat`).
 
-**Sub-phase 5.2 — call-site name updates** [NOT STARTED]
-- [ ] Update the (few) call sites in `Lifting.lean` / `Modularity.lean` that reference subsumption
+**Sub-phase 5.2 — call-site name updates** [COMPLETED]
+- [x] Update the (few) call sites in `Lifting.lean` / `Modularity.lean` that reference subsumption
       lemma names — call-site NAMES only, no structural change (these files are insulated).
 - Files: `InterSystem/Lifting.lean`, `InterSystem/Modularity.lean`. Estimated output: ~30-80 lines.
+- **Completion note**: Investigated both files line-by-line (excluding doc comments) for actual
+  code references to any of the 24 subsumption lemma names. Found none: `Lifting.lean` is fully
+  parametric (`Derivable_mono`/`liftDerivation`/etc. take `Axioms1 Axioms2 : Proposition Atom →
+  Prop` and `h_sub : ∀ φ, Axioms1 φ → Axioms2 φ` as free hypotheses — the 24 lemmas are usage
+  *examples* in the module doc comment only, e.g. `KAxiom_implies_TAxiom` at line 37, which
+  remains accurate verbatim since the name/signature is preserved). `Modularity.lean` references
+  the axiom *predicates* directly (`KAxiom`, `TAxiom`, `S4Axiom`, `ModalAxiom`, plus the
+  out-of-scope minimal/intuitionistic families) but never applies any of the 24 subsumption
+  lemma *names* as terms. Both files already built green against the Phase-5.1 changes with zero
+  edits (confirming the plan's "insulated... no structural change" framing was correct and, in
+  this instance, the "few call sites" resolved to zero actual call sites needing a name change —
+  only the one accurate doc-comment mention). Scoped `lake build` of both modules green; no file
+  modified in this sub-phase.
 
 **Depends on**: 1 (generic subsumption) and 3 (tag sets). Independent of Phase 4.
 
@@ -573,6 +603,14 @@ sites. Net deletion.
 - All 24 subsumption facts proved via the generic lemma; zero-`sorry`; no `KB5 → S5` edge.
 - **Done when**: `AxiomSubsumption.lean` contains no hand-written per-edge `match`, all 24 names
   resolve, and dependent files build; commit per sub-phase.
+
+**Phase completion note**: Both sub-phases land together as intended. `AxiomSubsumption.lean`
+went from 524 lines of 24 near-identical 13-20-line `match`-on-constructor proofs to 24
+two-line generic-lemma applications (net -295 lines). `Lifting.lean`/`Modularity.lean` required
+no edits since neither has an actual code call site for any of the 24 lemma names — both were
+already insulated as the plan anticipated. Zero `sorry`, zero new axiom across all three files.
+Next phase: Phase 6 (hand-migrate `IntToClassical.lean`, ~36 sites) — independent of Phase 5,
+depends only on Phase 3.
 
 ---
 

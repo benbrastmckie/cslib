@@ -320,3 +320,96 @@ re-deriving a per-system case-split.
 (the five `Satisfies.modal*_axiom` lemmas), `Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean`
 (`FrameValidatesTag`, `unionSound`), `Cslib/Logics/Modal/Metalogic/Soundness.lean` (the 13
 frame-unconditional validity atoms `unionSound` reuses).
+
+---
+
+## 4. The `HasAxiom*` Insulation Layer
+
+**Durable anchor**: `Cslib/Foundations/Logic/ProofSystem.lean`
+
+Everything in Sections 1-3 lives at the *axiom-predicate* layer: the definition of which
+`Proposition` instances count as axioms for a given system. A separate, higher layer —
+`Cslib/Foundations/Logic/ProofSystem.lean` — defines one `HasAxiom*` typeclass per schema
+(`HasAxiomImplyK`, `HasAxiomImplyS`, `HasAxiomEFQ`, `HasAxiomPeirce`, `HasAxiomK`, `HasAxiomT`,
+`HasAxiom4`, `HasAxiomB`, `HasAxiom5`, `HasAxiomD`, the and/or family
+`HasAxiomAndI`/`AndE1`/`AndE2`/`OrI1`/`OrI2`/`OrE`, and `HasAxiomDiaDualityFwd`/`Back`, plus
+non-modal and temporal `HasAxiom*` classes outside this document's scope). A representative
+signature:
+
+```lean
+class HasAxiomT where
+  T {φ : F} : InferenceSystem.DerivableIn S (Axioms.AxiomT φ)
+```
+
+Crucially, `HasAxiomT` asserts *derivability of the axiom instance* (`InferenceSystem.DerivableIn
+S (Axioms.AxiomT φ)`) — it says nothing about *how the underlying `<Sys>Axiom` predicate is
+constructed*. These typeclasses are bundled via `extends` into a hierarchy of Hilbert-system
+classes: `MinimalHilbert` extends into `IntuitionisticHilbert`, which extends into
+`ClassicalHilbert`, which extends into `ModalHilbert`; `ModalHilbert` is then extended by one
+class per modal-strength differentiator or combination (`ModalTHilbert`, `ModalDHilbert`,
+`ModalBHilbert`, `ModalK4Hilbert`, `ModalK5Hilbert`), and those in turn are extended by the
+composite systems (`ModalS4Hilbert` extends `ModalTHilbert`; `ModalK45Hilbert` extends
+`ModalK4Hilbert`; `ModalTBHilbert`, `ModalKB5Hilbert`, `ModalD4Hilbert`, `ModalD5Hilbert`,
+`ModalDBHilbert` each extend their respective single-differentiator ancestor; `ModalD45Hilbert`
+extends `ModalD4Hilbert`), up to `ModalS5Hilbert` extending `ModalS4Hilbert`.
+
+**Why this is "representation-agnostic insulation"**, not merely asserted but verified in the
+landed code: `Instances/S5.lean` discharges `HasAxiomT` for `Modal.HilbertS5` by constructing a
+`DerivationTree` witness,
+
+```lean
+instance : HasAxiomT Modal.HilbertS5 (F := Modal.Proposition Atom) where
+  T := ⟨Modal.DerivationTree.ax [] _ (⟨.modalT, by decide, _, rfl⟩)⟩
+```
+
+i.e. a tag-membership proof (`.modalT ∈ s5Tags`, discharged by `decide`) plus a `.Holds` witness.
+`HasAxiomT` itself never inspects whether the underlying `<Sys>Axiom` predicate is a bespoke
+`inductive` or a `SchemaUnion` combinator — it only ever requires a `DerivableIn` proof. This is
+the load-bearing property that made the `SchemaUnion` refactor additive with zero blast radius at
+every downstream consumer: the `Systems/*/Completeness.lean` and
+`Systems/*/ConservativeExtension.lean` layers (one file per system apiece) route exclusively
+through this `HasAxiom*`/bundled-class layer, so replacing 14 inductives with `SchemaUnion`
+abbreviations left them untouched.
+
+**Durable anchors for this section**: `Cslib/Foundations/Logic/ProofSystem.lean` (`HasAxiomT`,
+the full `HasAxiom*` family, `MinimalHilbert` … `ModalS5Hilbert`), `Instances/S5.lean` (the
+`HasAxiomT` instance witness).
+
+---
+
+## 5. S5 = T+4+B: The Deliberately Omitted KB5→S5 Edge
+
+**Durable anchors**: `s5Tags`, `kb5Tags` (`SchemaTags.lean`), the omission note in
+`AxiomSubsumption.lean`.
+
+S5's tag set is exactly the K-core plus three differentiators — T, 4, and B:
+
+```lean
+def s5Tags  : Finset ModalSchemaTag := insert .modalT (insert .modalFour (insert .modalB kCore))
+```
+
+i.e. `kCore ∪ {modalT, modalFour, modalB}`. Notably, `s5Tags` does **not** contain `modalFive`.
+KB5's tag set, by contrast, is:
+
+```lean
+def kb5Tags : Finset ModalSchemaTag := insert .modalB (insert .modalFive kCore)
+```
+
+i.e. `kCore ∪ {modalB, modalFive}` — it carries `modalFive` but neither `modalT` nor `modalFour`.
+
+Because `modalFive ∈ kb5Tags` and `modalFive ∉ s5Tags`, `kb5Tags ⊆ s5Tags` is false: no
+`Finset.subset` proof exists, and `decide` on that proposition reports `False`. Consequently
+`SchemaUnion.subsumption` cannot produce a `KB5Axiom_implies_ModalAxiom` lemma, and none exists in
+`AxiomSubsumption.lean`. This is not an oversight — it is a mechanical, decidable consequence of
+the two tag-set definitions, and `AxiomSubsumption.lean`'s own documentation states the omission
+explicitly alongside the 24 edges that do hold.
+
+This is a useful worked example of the design's self-documenting property: under the old
+per-edge hand-lemma design, a missing cube edge required a separate written justification. Under
+the tag-set design, a missing edge is immediately explained by inspecting two `Finset` literals —
+the gap is readable straight from the definitions, and any attempt to manufacture the missing
+edge fails at `decide` rather than at proof-search.
+
+**Durable anchors for this section**: `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean`
+(`s5Tags`, `kb5Tags`), `Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean` (the
+KB5→S5 omission note).

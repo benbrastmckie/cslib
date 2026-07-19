@@ -184,12 +184,12 @@ tag-set cube and the syntax/semantics soundness factorization.
 
 ---
 
-### Phase 3: Area 4 (`HasAxiom*` insulation) and Area 5 (S5=T+4+B, omitted KB5→S5) [NOT STARTED]
+### Phase 3: Area 4 (`HasAxiom*` insulation) and Area 5 (S5=T+4+B, omitted KB5→S5) [COMPLETED]
 
 **Goal**: Author the insulation-layer section and the disposition section.
 
 **Tasks**:
-- [ ] Write the Area 4 section: `Cslib/Foundations/Logic/ProofSystem.lean` defines one `HasAxiom*`
+- [x] Write the Area 4 section: `Cslib/Foundations/Logic/ProofSystem.lean` defines one `HasAxiom*`
       typeclass per schema, each asserting `InferenceSystem.DerivableIn S (Axioms.X …)` — an
       assertion about *derivability of the axiom instance*, never about how the underlying
       `<Sys>Axiom` predicate is constructed (embed the representative `class HasAxiomT` signature).
@@ -199,15 +199,15 @@ tag-set cube and the syntax/semantics soundness factorization.
       `DerivationTree` witness (e.g. `⟨.modalT, by decide, _, rfl⟩`), so the typeclass never
       inspects `inductive` vs `SchemaUnion`. Note this is the load-bearing fact that made the
       refactor additive with zero blast radius at the `Systems/*/Completeness.lean` and
-      `Systems/*/ConservativeExtension.lean` layers.
-- [ ] Write the Area 5 section: `s5Tags = kCore ∪ {modalT, modalFour, modalB}` (T+4+B, carries
+      `Systems/*/ConservativeExtension.lean` layers. *(completed)*
+- [x] Write the Area 5 section: `s5Tags = kCore ∪ {modalT, modalFour, modalB}` (T+4+B, carries
       `modalB`, NOT `modalFive`) vs `kb5Tags = kCore ∪ {modalB, modalFive}`; since `modalFive ∈
       kb5Tags` but `modalFive ∉ s5Tags`, `kb5Tags ⊆ s5Tags` is false and `SchemaUnion.subsumption`
       cannot produce a `KB5Axiom_implies_ModalAxiom` lemma — the omission is a decidable
       consequence of the tag-set definitions, not an oversight. Use this as a worked example of the
       design's self-documenting property: a missing cube edge is now a mechanical `decide` failure
       readable straight from the two tag-set defs. Anchor to `s5Tags`/`kb5Tags` in `SchemaTags.lean`
-      and the omission doc comment in `AxiomSubsumption.lean`.
+      and the omission doc comment in `AxiomSubsumption.lean`. *(completed)*
 
 **Timing**: ~45 minutes
 

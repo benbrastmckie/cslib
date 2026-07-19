@@ -549,7 +549,7 @@ import lines and a short doc-comment addition per file).
 
 ---
 
-### Phase 5: Replace `AxiomSubsumption.lean` with `Finset.subset` facts [NOT STARTED]
+### Phase 5: Replace `AxiomSubsumption.lean` with `Finset.subset` facts [IN PROGRESS]
 
 **Goal**: Collapse the 24 hand-written `XAxiom_implies_YAxiom` lemmas (~524 lines) to
 `Finset.subset`-backed facts via the Phase 1 generic subsumption lemma, then update the few call

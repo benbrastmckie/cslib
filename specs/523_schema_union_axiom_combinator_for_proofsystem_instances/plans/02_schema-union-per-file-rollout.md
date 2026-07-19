@@ -315,7 +315,7 @@ collapse the per-system case-splits into named lemma applications rather than ra
 
 ---
 
-### Phase 3: Per-system tag sets + 15 bridge equivalences [NOT STARTED]
+### Phase 3: Per-system tag sets + 15 bridge equivalences [IN PROGRESS]
 
 **Goal**: Define `kCore` and the 15 per-system `Finset ModalSchemaTag` tag sets, and prove the
 bridge equivalences `SchemaUnion sysTags φ ↔ <Sys>Axiom φ` — additive; the inductives stay live.
@@ -328,10 +328,24 @@ S5:{modalK,modalT,modalFour,modalB} TB:{modalK,modalT,modalB} KB5:{modalK,modalB
 D4:{modalK,modalD,modalFour} D5:{modalK,modalD,modalFive} D45:{modalK,modalD,modalFour,modalFive}
 DB:{modalK,modalD,modalB}` — each unioned with the 13-tag `kCore` (propositional + and/or + diaDuality).
 
-**Sub-phase 3.1 — `kCore` + K, T, D, B** [NOT STARTED]
-- [ ] Define `kCore` (the 13 shared tags) and the K/T/D/B tag sets.
-- [ ] Prove bridges `SchemaUnion kTags φ ↔ KAxiom φ`, and the T/D/B analogues.
+**Sub-phase 3.1 — `kCore` + K, T, D, B** [COMPLETED]
+- [x] Define `kCore` (the 13 shared tags) and the K/T/D/B tag sets.
+- [x] Prove bridges `SchemaUnion kTags φ ↔ KAxiom φ`, and the T/D/B analogues.
 - Estimated output: ~150-250 lines.
+- **Completion note**: Landed in NEW `Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean`.
+  `kCore` defined as explicit nested `insert` terminating in `∅` (NOT the `{a, b, c}` literal
+  sugar — that sugar's last element desugars to a `Singleton` instance, not `insert _ ∅`, so
+  `SchemaUnion.insert_iff`/`empty_iff` do not fire on it; discovered via a failed first build
+  attempt, fixed by switching to explicit nested `insert … ∅`). All four tag sets
+  cross-checked against their inductive's actual constructors (`Instances/{K,T,D,B}.lean`):
+  K = `kCore` exactly (no differentiator beyond `modalK`, already in `kCore`); T/D/B each
+  `insert .modal{T,D,B} kCore`. Forward direction: `simp only [tag, kCore,
+  SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false, ModalSchemaTag.Holds] at h` then
+  `rcases`/`all_goals first | exact <Sys>Axiom.<ctor> _ … | …`. Backward direction: `cases h`
+  then direct `SchemaUnion` witness `⟨.ctor, by decide, …, rfl⟩` (no simp needed). Zero `sorry`,
+  zero new axiom (`lean_verify` on `schemaUnion_kTags_iff_KAxiom` and
+  `schemaUnion_bTags_iff_BAxiom` report only `propext`/`Quot.sound`). Scoped `lake build`,
+  `lake exe checkInitImports`, `lake exe lint-style` all green. No instance file modified.
 
 **Sub-phase 3.2 — K4, K5, K45, S4** [NOT STARTED]
 - [ ] Define the four tag sets; prove the four bridge equivalences.

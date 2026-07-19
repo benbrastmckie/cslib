@@ -102,16 +102,17 @@ theorem k_derivable_of_ik_orI2 {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrI2 φ ψ) :=
   ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orI2, by decide, φ, ψ, rfl⟩)⟩
 
-/-- `IK`'s `orE` is a literal `KAxiom` instance. -/
+/-- `IK`'s `orE` is a `KAxiom` instance via the `SchemaUnion` bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_orE {φ ψ χ : Proposition Atom} :
     Derivable (@KAxiom Atom) (Cslib.Logic.Axioms.OrE φ ψ χ) :=
-  ⟨.ax [] _ (KAxiom.orE φ ψ χ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.orE, by decide, φ, ψ, χ, rfl⟩)⟩
 
-/-- `IK`'s `k` (`k1`/Kb, `□(φ → ψ) → (□φ → □ψ)`) is a literal `KAxiom.modalK` instance. -/
+/-- `IK`'s `k` (`k1`/Kb, `□(φ → ψ) → (□φ → □ψ)`) is a `KAxiom` instance via the `SchemaUnion`
+bridge (see `implyK` above). -/
 theorem k_derivable_of_ik_k {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom)
       ((Proposition.box (φ.imp ψ)).imp ((Proposition.box φ).imp (Proposition.box ψ))) :=
-  ⟨.ax [] _ (KAxiom.modalK φ ψ)⟩
+  ⟨.ax [] _ (schemaUnion_kTags_iff_KAxiom.mp ⟨.modalK, by decide, φ, ψ, rfl⟩)⟩
 
 /-! ## Derived Schemata -/
 
@@ -517,8 +518,8 @@ theorem t_derivable_of_it_tDia {φ : Proposition Atom} :
 
 /-- Every `ITModalAxiom` instance is `Derivable` in classical `T`: the 14 `IK`-inherited
 constructors lift via `Derivable_mono (fun _ => KAxiom_implies_TAxiom)` composed with
-`ikAxiom_derivable_in_K`; `tBox` is a literal `TAxiom.modalT` instance; `tDia` is
-`t_derivable_of_it_tDia`. -/
+`ikAxiom_derivable_in_K`; `tBox` is a `TAxiom` instance via the `SchemaUnion` bridge
+(`schemaUnion_tTags_iff_TAxiom`); `tDia` is `t_derivable_of_it_tDia`. -/
 theorem itAxiom_derivable_in_T {φ : Proposition Atom} (h : ITModalAxiom φ) :
     Derivable (@TAxiom Atom) φ :=
   match h with
@@ -536,7 +537,7 @@ theorem itAxiom_derivable_in_T {φ : Proposition Atom} (h : ITModalAxiom φ) :
   | .cd _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_cd
   | .idb _ _ => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_idb
   | .dbot => Derivable_mono (fun _ => KAxiom_implies_TAxiom) k_derivable_of_ik_dbot
-  | .tBox φ => ⟨.ax [] _ (TAxiom.modalT φ)⟩
+  | .tBox φ => ⟨.ax [] _ (schemaUnion_tTags_iff_TAxiom.mp ⟨.modalT, by decide, φ, rfl⟩)⟩
   | .tDia _ => t_derivable_of_it_tDia
 
 /-- **The `IT → T` bridge**: every `IT`-derivable formula is `T`-derivable. -/
@@ -613,8 +614,8 @@ theorem s4_derivable_of_is4_fourDia {φ : Proposition Atom} :
 
 /-- Every `IS4ModalAxiom` instance is `Derivable` in classical `S4`: the 16 `IT`-inherited
 constructors lift via `Derivable_mono (fun _ => TAxiom_implies_S4Axiom)` composed with
-`itAxiom_derivable_in_T`; `fourBox` is a literal `S4Axiom.modalFour` instance; `fourDia` is
-`s4_derivable_of_is4_fourDia`. -/
+`itAxiom_derivable_in_T`; `fourBox` is a `S4Axiom` instance via the `SchemaUnion` bridge
+(`schemaUnion_s4Tags_iff_S4Axiom`); `fourDia` is `s4_derivable_of_is4_fourDia`. -/
 theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) :
     Derivable (@S4Axiom Atom) φ :=
   match h with
@@ -647,7 +648,7 @@ theorem is4Axiom_derivable_in_S4 {φ : Proposition Atom} (h : IS4ModalAxiom φ) 
       Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tBox φ))
   | .tDia φ =>
       Derivable_mono (fun _ => TAxiom_implies_S4Axiom) (itAxiom_derivable_in_T (.tDia φ))
-  | .fourBox φ => ⟨.ax [] _ (S4Axiom.modalFour φ)⟩
+  | .fourBox φ => ⟨.ax [] _ (schemaUnion_s4Tags_iff_S4Axiom.mp ⟨.modalFour, by decide, φ, rfl⟩)⟩
   | .fourDia _ => s4_derivable_of_is4_fourDia
 
 /-- **The `IS4 → S4` bridge**: every `IS4`-derivable formula is `S4`-derivable. -/

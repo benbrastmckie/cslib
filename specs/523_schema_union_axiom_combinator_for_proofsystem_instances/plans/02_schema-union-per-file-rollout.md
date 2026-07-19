@@ -614,7 +614,7 @@ depends only on Phase 3.
 
 ---
 
-### Phase 6: Hand-migrate `IntToClassical.lean` (~36 sites) [IN PROGRESS]
+### Phase 6: Hand-migrate `IntToClassical.lean` (~36 sites) [COMPLETED]
 
 **Site enumeration (recorded at start of 6.1, ground-truthed against the actual file, superseding
 the ~36 estimate)**: a full grep of `IntToClassical.lean` for constructor patterns
@@ -676,11 +676,23 @@ records the partition so 6.2/6.3 have fixed, non-overlapping scope.
 - **Completion note**: scoped build green, zero `sorry`, `checkInitImports` clean. No destructuring
   sites existed in this cluster (all 4 are witness-construction, per the enumeration note).
 
-**Sub-phase 6.3 — cluster 3 (witness-construction sites, `⟨.ax _ _ h⟩`)** [NOT STARTED]
-- [ ] Migrate the remaining ~12 sites, prioritizing the cross-family witness constructions that
-      build classical `KAxiom`/`ModalAxiom` witnesses; keep every out-of-scope intuitionistic/minimal
-      call site typechecking (via the Phase 3 bridge).
-- Estimated output: ~120-260 lines.
+**Sub-phase 6.3 — cluster 3 (`orE`/`modalK` + cross-family `modalT`/`modalFour`)** [COMPLETED]
+- [x] Migrate `orE`, `modalK` (`KAxiom`) to the `SchemaUnion` bridge.
+- [x] Migrate the two cross-family witness sites: `TAxiom.modalT` (inside
+      `itAxiom_derivable_in_T`'s `.tBox` arm) via `schemaUnion_tTags_iff_TAxiom.mp`, and
+      `S4Axiom.modalFour` (inside `is4Axiom_derivable_in_S4`'s `.fourBox` arm) via
+      `schemaUnion_s4Tags_iff_S4Axiom.mp`. Updated the two enclosing theorems' docstrings
+      (`itAxiom_derivable_in_T`, `is4Axiom_derivable_in_S4`) to describe the bridge-based
+      construction accurately instead of the retired constructor names.
+- **Completion note**: all 4 sites in this cluster migrated; both cross-family witness sites
+  (`tBox`, `fourBox`) kept their enclosing `match` on the out-of-scope `ITModalAxiom`/
+  `IS4ModalAxiom` inductives completely untouched — only the leaf witness term changed. Confirmed
+  by grep that zero `⟨.ax [] _ (<Sys>Axiom.ctor …)⟩` raw-constructor sites remain anywhere in the
+  file. Scoped build green, zero `sorry`, `checkInitImports` clean, `lake lint --builtin-lint`
+  clean (no environment linters registered for this module; text-linter warnings present are
+  pre-existing in `Modal/Basic.lean`, unrelated to this file), `lake exe lint-style` clean.
+  `lean_verify` on `k_derivable_of_ik_implyK`, `itAxiom_derivable_in_T`, and
+  `is4Axiom_derivable_in_S4` all report only `propext`/`Quot.sound` (no `sorryAx`, no new axiom).
 
 **Depends on**: 3 (needs bridges). Independent of Phases 4/5.
 
@@ -691,6 +703,16 @@ records the partition so 6.2/6.3 have fixed, non-overlapping scope.
 - Zero-`sorry`; cross-family witness-construction sites still valid; no inductive deleted.
 - **Done when**: all ~36 sites migrated across the three clusters, file builds sorry-free, and no
   `<Sys>Axiom`/`ModalAxiom` inductive has been removed; commit per cluster.
+
+**Phase completion note**: all 12 real in-scope sites (ground-truthed against the ~36 estimate,
+see the enumeration note above) migrated across 6.1/6.2/6.3. Zero `sorry`, zero new axiom, no
+inductive deleted (`KAxiom`, `TAxiom`, `S4Axiom`, `ModalAxiom`, and all 5 out-of-scope
+intuitionistic families remain live inductives, exactly as required). Public API unchanged: every
+migrated theorem (`k_derivable_of_ik_*`, `itAxiom_derivable_in_T`, `is4Axiom_derivable_in_S4`)
+keeps its original name and type; only the internal witness-construction term changed. This
+pre-empts the Phase 8 break: once `KAxiom`/`TAxiom`/`S4Axiom` are redefined in place as
+constructorless `SchemaUnion` `def`s, these 12 sites no longer reference a retired constructor
+name and continue to typecheck without further edits to this file.
 
 ---
 

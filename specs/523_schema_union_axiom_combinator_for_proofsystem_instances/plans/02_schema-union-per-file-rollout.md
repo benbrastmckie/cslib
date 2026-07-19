@@ -785,9 +785,22 @@ uniformly to sub-phases 7.1-7.4; it is not re-litigated per sub-phase below.
   budget before the enclosing indent). Net line delta: +210/-55 across the four files (the private
   per-file helper is the dominant addition, as expected from the import-cycle finding above).
 
-**Sub-phase 7.2 — K4, K5, K45, S4** [NOT STARTED]
-- [ ] Rewrite `Instances/{K4,K5,K45,S4}.lean`.
+**Sub-phase 7.2 — K4, K5, K45, S4** [COMPLETED]
+- [x] Rewrite `Instances/{K4,K5,K45,S4}.lean`.
 - Estimated output: ~150-260 lines.
+- **Completion note**: Same private-per-file-helper pattern as 7.1 (see the import-cycle finding
+  above 7.1). K4/K5 each add one differentiator (`modalFour`/`modalFive`, 14 tags); K45 adds two
+  (`modalFour`, `modalFive`, 15 tags); S4 adds two (`modalT`, `modalFour`, 15 tags) — confirming
+  the pattern scales to multi-differentiator tag sets with no change beyond the tag list. Every
+  `HasAxiom*` field (including the differentiator fields `HasAxiom4.four`, `HasAxiom5.five`) now
+  routes through its file's `{k4,k5,k45,s4}Tags_of_schemaUnion` private helper. All four
+  `inductive {K4,K5,K45,S4}Axiom` definitions unmodified and still present (grep-confirmed). Zero
+  `sorry`, zero new axiom (`lean_verify` on `k45Tags_of_schemaUnion` and `s4Tags_of_schemaUnion`
+  report only `propext`/`Quot.sound`). Scoped `lake build` of all four modules green; rebuilt the
+  `Instances` barrel, `SchemaBridges.lean`, `AxiomSubsumption.lean`, `IntToClassical.lean` green
+  (no downstream breakage). `checkInitImports` clean; `lint-style` clean; `lake lint --builtin-lint`
+  clean ("No environment linters registered" per-file, "Linting passed for Cslib" overall). Net
+  line delta: +216/-58 across the four files.
 
 **Sub-phase 7.3 — S5, TB, KB5** [NOT STARTED]
 - [ ] Rewrite `Instances/{S5,TB,KB5}.lean` (S5 discharges via the `ModalAxiom` bridge).

@@ -430,7 +430,7 @@ is out of scope for Phase 3; that is Phase 5).
 
 ---
 
-### Phase 4: Migrate 15 per-system soundness proofs to `unionSound` [IN PROGRESS]
+### Phase 4: Migrate 15 per-system soundness proofs to `unionSound` [COMPLETED]
 
 **Goal**: Replace each `Systems/*/Soundness.lean` case-split with a `unionSound` call fed by that
 system's tag→validity table (net deletion), one small group per agent run. Public soundness
@@ -493,9 +493,17 @@ theorem names stay stable; use the Phase 3 bridge where a caller still expects t
   `propext`/`Classical.choice`/`Quot.sound`). Scoped `lake build` of all nine modules touched so
   far, `checkInitImports`, `lint-style` all green with no warnings.
 
-**Sub-phase 4.4 — D4, D5, D45, DB** [NOT STARTED]
-- [ ] Rewrite the four soundness proofs through `unionSound`.
+**Sub-phase 4.4 — D4, D5, D45, DB** [COMPLETED]
+- [x] Rewrite the four soundness proofs through `unionSound`.
 - Files: `Systems/{D4,D5,D45,DB}/Soundness.lean`. Estimated output: ~120-220 lines.
+- **Completion note**: Same `unionSound sysTags m (fun t ht => by fin_cases ht <;> trivial)
+  (bridge.mpr h_ax) w` pattern as 4.1-4.3 (the simplified, warning-free `hfc` form from the start
+  — no retroactive fix needed for this group). D4/D5/DB each carry two differentiators
+  (`modalD`+`modalFour`/`modalFive`/`modalB`); D45 carries three (`modalD`, `modalFour`,
+  `modalFive`). Public names byte-stable. Zero `sorry`, zero new axiom (`lean_verify` on
+  `d45_soundness` and `db_axiom_sound` report only `propext`/`Classical.choice`/`Quot.sound`).
+  Scoped `lake build` of all four modules, `checkInitImports`, `lint-style` all green with no
+  warnings.
 
 **Depends on**: 2 (needs `unionSound`) and 3 (needs bridges + tag sets).
 
@@ -504,6 +512,40 @@ theorem names stay stable; use the Phase 3 bridge where a caller still expects t
 - Public soundness theorem names unchanged (or deprecated alias); zero-`sorry`.
 - **Done when**: every migrated soundness theorem discharges via `unionSound` with its original
   public name and no `sorry`; commit per group.
+
+**Phase completion note**: All four sub-phases (4.1-4.4) landed across the 15
+`Systems/*/Soundness.lean` files. Every `<sys>_axiom_sound` (and S5's `s5_axiom_sound`) now reads
+`unionSound sysTags m (fun t ht => by fin_cases ht <;> trivial) (bridge.mpr h_ax) w` — the
+per-system case-split structure is gone; `unionSound` (Phase 2) is the single point where any
+per-tag proof obligation is discharged. `fin_cases ht` substitutes the concrete tag for each
+element of `sysTags`; Lean's `trivial` tactic (which tries `rfl`/`contradiction`/`assumption`)
+closes the 13 core-tag `True` goals via its `True.intro`/`rfl` path and every differentiator-tag
+goal via its `assumption` fallback, since the matching frame hypothesis (`h_refl`/`h_trans`/
+`h_symm`/`h_serial`/`h_eucl`) is already in local context with the exact required type — no
+system needed an explicit `exact h_*` branch once this was discovered (a first-attempt
+`first | trivial | exact h_*` form on K45/S4 in 4.2 surfaced
+`linter.unreachableTactic`/`linter.unusedTactic` warnings, root-caused and simplified
+retroactively across 4.1-4.3 in the same dispatch; 4.4 used the simplified form from the start).
+S5's `modalB` (symmetry) obligation, which pre-migration was proved inline from `h_refl`+`h_eucl`
+(S5 = T+4+B, never took an `h_symm` parameter), is now a local `have h_symm := fun w₁ w₂ hr =>
+h_eucl w₁ w₂ w₁ hr (h_refl w₁)` feeding the same uniform `hfc` term — `s5_axiom_sound`'s original
+signature (`h_refl`/`h_trans`/`h_eucl`, no `h_symm`) is preserved exactly. `fin_cases` required an
+explicit `public import Mathlib.Tactic.FinCases` added to each of the 15 files (not transitively
+available via `Cslib.Init`/`SchemaBridges`/`SchemaSoundness`) — permitted since only the 15
+`Systems/*/Soundness.lean` files are in scope for Phase 4. Every public theorem/instance name
+(`k_soundness`, `k_soundness_derivable`, all 15 `<sys>_axiom_sound`, all 15 `<sys>_soundness`)
+is byte-stable — only the `_axiom_sound` bodies changed; the `_soundness`/`_soundness_derivable`
+wrappers already just called `<sys>_axiom_sound` and needed no edits. Zero `sorry` across all 15
+files (full grep), zero new axiom (spot-checked via `lean_verify` on `k_soundness`,
+`k45_soundness`, `s5_soundness`, `d45_soundness`, and four `_axiom_sound` lemmas — all report only
+`propext`/`Classical.choice`/`Quot.sound`). Scoped `lake build` of all 15 modules,
+`lake exe checkInitImports`, and `lake exe lint-style` all green with zero warnings. No file
+outside `Systems/*/Soundness.lean` was touched; `SchemaUnion.lean`, `SchemaSoundness.lean`,
+`SchemaBridges.lean`, the 15 instance files, and `DerivationTree.lean` are all unmodified. Net
+line delta across the 15 files (`git diff --stat` vs. the pre-Phase-4 baseline): 149 insertions,
+277 deletions = **-128 lines net** (each ~13-20-line `cases h_ax with | ctor => exact
+Satisfies.<tag>_axiom ...` block collapsed to a 2-4 line `unionSound` term, offset by ~4 new
+import lines and a short doc-comment addition per file).
 
 ---
 

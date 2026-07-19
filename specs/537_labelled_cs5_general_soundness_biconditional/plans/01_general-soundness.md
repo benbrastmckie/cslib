@@ -1,7 +1,7 @@
 # Implementation Plan: General Labelled CS5 Soundness (nik_TS5_soundness)
 
 - **Task**: 537 - Prove the general labelled soundness direction completing Simpson 1994 Thm 8.1.4's biconditional
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED] (Phase 1 GATE-C; see `handoffs/phase-1-gate-c-blocked-20260719.md`; Strategy-3 follow-up task recommended, not authorized here)
 - **Effort**: 6-40 hours (branch-dependent; probe phase is the sole guaranteed run)
 - **Dependencies**: 517 (delivered completeness + anti-vacuity, all landed)
 - **Research Inputs**: reports/01_general-soundness-strategies.md (Tier 1, H4-verified, 6/6 claims CONFIRMED)
@@ -252,19 +252,23 @@ Preserved Assets unregressed. **Next: Phase 4** (`[BLOCKED]` handoff + Strategy-
   `checkInitImports` / `lake test` unregressed. Done when: `nik_TS5_soundness` is sorry-free and
   axiom-clean and the biconditional is complete.
 
-### Phase 4: BLOCKED handoff + Strategy-3 scope-reopening recommendation (contingency) [NOT STARTED]
+### Phase 4: BLOCKED handoff + Strategy-3 scope-reopening recommendation (contingency) [COMPLETED]
 
 - **Goal:** When Phase 1 hits GATE-C (or Phase 2 / Phase 6 escalates), record an honest `[BLOCKED]`
   terminal state on the direct route WITHOUT adding any debt, and write a handoff that routes to an
   authorized Strategy-3 follow-up task. This is the sanctioned no-loop, no-sorry response.
 - **Tasks:**
-  - [ ] Write a `[BLOCKED]` handoff under `specs/537.../handoffs/` documenting the exact blocker
+  - [x] Write a `[BLOCKED]` handoff under `specs/537.../handoffs/` documenting the exact blocker
         (which wall, budget exhausted vs. concrete obstruction) and the current green build state.
-  - [ ] Recommend to the user/orchestrator that Strategy-3 (Ch.6 adequacy bridge) scope be
+        See `handoffs/phase-1-gate-c-blocked-20260719.md`.
+  - [x] Recommend to the user/orchestrator that Strategy-3 (Ch.6 adequacy bridge) scope be
         authorized as a follow-up task — this is a scope escalation task 517 deliberately avoided,
         so it is a user/orchestrator call, not an autonomous continuation.
-  - [ ] Set the task status to `[BLOCKED]`; leave the plan's downstream phases `[NOT STARTED]`.
-  - [ ] Confirm no `sorry`/axiom/regression was introduced.
+  - [x] Set the task status to `[BLOCKED]`; leave the plan's downstream phases `[NOT STARTED]`.
+  - [x] Confirm no `sorry`/axiom/regression was introduced: `grep` for tactic-level `sorry` in
+        `Soundness.lean` finds none (only 3 docstring-prose mentions of the word); `lake build`
+        of `Soundness.lean` re-verified green (734/734); `cs5FCIncest` unweakened; all Preserved
+        Assets unregressed.
 - **Timing:** short; one agent run (documentation only, no `.lean` proof edits).
 - **Depends on:** 1 (GATE-C), or escalation from 2 or 6.
 - **Zero-debt contract:** no `sorry`, no new axiom, no weakening, no regression — verified before

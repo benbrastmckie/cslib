@@ -376,6 +376,49 @@ theorem dia_iff_base {World : Type*} [Preorder World] {r : World → World → P
     obtain ⟨u, hrtu, hqu⟩ := H t (hbb'.trans hb't)
     exact ⟨u, htrans hrw't hrtu, hqu⟩
 
+/-! ## TClosure-class extension (task 537 Phase 2, direct-route report §4(A))
+
+Extends `box_iff_base`/`dia_iff_base` over the entire `TClosure {T,B,Four}` class by induction on
+the `TClosure` derivation, giving the transport lemmas the `boxE`/`diaI` cases of the eventual
+main induction (Phase 5) will need. `ρ` interprets `Label Atom` labels into the model's `World`;
+`R` is the raw graph relation (`G.R` at the point of use, Phase 5) and `hedge` is the **raw**
+edge-cond invariant (`∀ a b, R a b → r (ρ a) (ρ b)`, MMS Def 5.1, chunk 0026) -- never a
+`TClosure`-clique invariant (the refuted decomposition, see the module docstring's "Third
+dispatch"/"Refined analysis" sections and the plan's Postmortem Constraints). `eucl` is
+unreachable at `𝒯 = TS5`: `GeomAxiom.Five ∈ TS5` unfolds to a three-way constructor-clash
+disjunction (`Five = T ∨ Five = B ∨ Five = Four`), each closed by `GeomAxiom.noConfusion`. -/
+
+/-- **Box-forcing equivalence over the whole `TClosure {T,B,Four}` class.** `base` reduces to
+`box_iff_base` via the raw edge-cond invariant; `refl`/`symm`/`trans` are the trivial `Iff`
+closure (`Iff.rfl`/`Iff.symm`/`Iff.trans`); `eucl` is vacuous since `Five ∉ TS5`. -/
+theorem box_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {R : Label Atom → Label Atom → Prop} {ρ : Label Atom → World}
+    (hedge : ∀ a b, R a b → r (ρ a) (ρ b)) {x y : Label Atom} (hxy : TClosure TS5 R x y)
+    {P : World → Prop} :
+    (∀ w' ≥ ρ x, ∀ u, r w' u → P u) ↔ (∀ w' ≥ ρ y, ∀ u, r w' u → P u) := by
+  induction hxy with
+  | base h => exact box_iff_base hfc (hedge _ _ h)
+  | refl _ _ => exact Iff.rfl
+  | symm _ _ ih => exact ih.symm
+  | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
+  | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
+
+/-- **Diamond-forcing equivalence over the whole `TClosure {T,B,Four}` class.** Dual to
+`box_iff_TClosure`, reducing `base` to `dia_iff_base` via the same raw edge-cond invariant. -/
+theorem dia_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {R : Label Atom → Label Atom → Prop} {ρ : Label Atom → World}
+    (hedge : ∀ a b, R a b → r (ρ a) (ρ b)) {x y : Label Atom} (hxy : TClosure TS5 R x y)
+    {Q : World → Prop} :
+    (∀ w' ≥ ρ x, ∃ u, r w' u ∧ Q u) ↔ (∀ w' ≥ ρ y, ∃ u, r w' u ∧ Q u) := by
+  induction hxy with
+  | base h => exact dia_iff_base hfc (hedge _ _ h)
+  | refl _ _ => exact Iff.rfl
+  | symm _ _ ih => exact ih.symm
+  | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
+  | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
+
 /-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the

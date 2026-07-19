@@ -216,16 +216,16 @@ Phase order is de-risking order (report 02 ranked steps): land the machine-verif
 - **Verification / Done when:** `lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness`
   green; `lean_verify` on each new lemma reports axiom-clean; `grep` finds no tactic `sorry`.
 
-### Phase 2: TClosure-class extension box_iff_TClosure, dia_iff_TClosure [NOT STARTED]
+### Phase 2: TClosure-class extension box_iff_TClosure, dia_iff_TClosure [COMPLETED]
 
 - **Goal:** Extend the Phase 1 base biconditionals over the entire `TClosure {T,B,Four}` class by
   induction on `TClosure` (report 02 §4(A)), giving the transport lemmas the `boxE`/`diaI` cases need.
 - **Tasks:**
-  - [ ] Prove `box_iff_TClosure : TClosure TS5 R a b → (CKForces … a (□A) ↔ CKForces … b (□A))`
+  - [x] Prove `box_iff_TClosure : TClosure TS5 R a b → (CKForces … a (□A) ↔ CKForces … b (□A))`
         by induction on the `TClosure` derivation: `base` → `box_iff_base`; `refl` → `Iff.rfl`;
         `symm` → `Iff.symm` of the IH; `trans` → `Iff.trans`; `eucl` → `False.elim` (Five ∉ TS5,
         Deduction.lean:207-208).
-  - [ ] Prove `dia_iff_TClosure` dually from `dia_iff_base`.
+  - [x] Prove `dia_iff_TClosure` dually from `dia_iff_base`.
 - **Estimated output:** ~90-150 lines. **Bounded unit:** two lemmas, each a five-case `TClosure`
   induction with every case a one-liner; stopping condition = both compile.
 - **Timing:** one agent run.

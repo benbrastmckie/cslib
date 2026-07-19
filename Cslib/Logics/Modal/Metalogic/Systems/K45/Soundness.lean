@@ -9,7 +9,6 @@ module
 public import Cslib.Logics.Modal.Metalogic.Soundness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 public import Cslib.Logics.Modal.Metalogic.SchemaSoundness
-public import Cslib.Logics.Modal.ProofSystem.SchemaBridges
 public import Mathlib.Tactic.FinCases
 
 /-! # Soundness Theorem for Modal Logic K45
@@ -55,7 +54,7 @@ theorem k45_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
     (w : World) : Satisfies m w φ :=
   unionSound k45Tags m (fun t ht => by fin_cases ht <;> trivial)
-    (schemaUnion_k45Tags_iff_K45Axiom.mpr h_ax) w
+    h_ax w
 
 
 /-! ## K45 Soundness Theorems -/

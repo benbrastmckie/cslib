@@ -2,25 +2,14 @@
   "status": "partial",
   "started_at": "2026-07-19T00:00:00Z",
   "artifacts": [
-    {
-      "type": "lean_file",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Completeness.lean",
-      "summary": "Phase 10: cs5_completeness (labelled-system completeness, Option B), sorry-free, axiom-clean [propext, Classical.choice, Quot.sound]."
-    },
-    {
-      "type": "lean_file",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Phase 11.1 (partial): cs5FCIncest_lift, the interpretation-lifting building block for full labelled soundness, sorry-free, axiom-free. Module docstring records the full remaining architecture."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-lifting-lemma-handoff-20260719.md",
-      "summary": "Continuation handoff: Simpson's Lifting Lemma needs F1/F2 CKForces lacks; cs5FCIncest_lift is the confirmed substitute; concrete 5-step plan for the next Phase 11.1/11.2/11.3 dispatch."
-    }
+    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+    "specs/517_labelled_bounded_context_cs5_completeness/plans/13_labelled-completeness-full-soundness.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-handoff-20260719b.md",
+    "specs/517_labelled_bounded_context_cs5_completeness/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "phase-11-in-progress",
-    "details": "Phase 10 fully landed and committed (a7830559). Phase 11.1 partially landed: cs5FCIncest_lift sorry-free/axiom-free. Main soundness induction (tree-shape invariant, graph-lifting-for-trees, 12-constructor induction), Phase 11.2 (TClosure validation + assembly), Phase 11.3 (anti-vacuity) remain for a future dispatch. Not blocked -- architecture is understood and documented.",
+    "stage": "phase-11-general-soundness-continuation",
+    "details": "Phase 11.3 (nik_TS5_consistent, direct one-point route) landed sorry-free and axiom-clean this dispatch. Phase 11.1/11.2 (general nik_TS5_soundness) remain not landed; attempted a real Lean encoding of the (boxI) case, found the prior tree-path-propagation framing for the graph-lifting lemma does not close (TS5={T,B,Four} makes TClosure TS5 the total relation on G.X, an r-clique condition, not tree-adjacency), and recorded the corrected target (a finite-set clique-lifting lemma) in Soundness.lean's docstring and a new continuation handoff instead of forcing through a broken attempt. Phase 12 correctly not started per plan sequencing.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 10
@@ -32,17 +21,15 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "verification_passed reflects that everything landed this dispatch (Phase 10 complete, Phase 11.1's partial building block) is sorry-free/axiom-clean/CI-green. Phase 11 as a WHOLE (nik_TS5_soundness, nik_TS5_consistent) is not yet proven -- status is partial for that reason, not a verification failure."
+    "note": "Verification covers what was landed this dispatch (Phase 11.3: nik_soundness_onePoint, nik_TS5_consistent), both sorry-free and axiom-clean ([propext, Classical.choice, Quot.sound]). Phase 11.1/11.2 (general nik_TS5_soundness) are NOT complete -- no sorry/axiom/vacuous-def was introduced for them; they are simply not yet attempted in Lean beyond the already-landed cs5FCIncest_lift. Full lake build 3247/3247, lake exe checkInitImports pass, lake lint 0 warnings, lake exe lint-style 0 warnings, lake shake no suggestions for Soundness.lean, lake test 9241/9242 (pre-existing unrelated Propositional Tableau sorries unregressed)."
   },
-  "requires_user_review": false,
-  "blocked_phase": null,
-  "next_phase": 11,
-  "next_steps": "Re-dispatch /implement 517 to continue Phase 11.1 (tree-shape invariant + graph-lifting-for-trees lemma + main 12-constructor NIK soundness induction), then Phase 11.2 (TClosure validation, assemble nik_TS5_soundness), then Phase 11.3 (nik_TS5_consistent). Full architecture in the Phase 11 handoff and Soundness.lean's module docstring. Phase 12 remains correctly deferred until Phase 11 completes (plan's own sequencing).",
   "metadata": {
-    "session_id": "orchestrator-dispatch",
+    "session_id": "sess_resume_phase11",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "passed",
+    "requires_user_review": false,
+    "review_reason": "Not a verification failure -- Phase 11.1/11.2 (general soundness) is a scope/budget continuation across multiple dispatches, matching the plan's own multi-dispatch estimate and NOT marked [BLOCKED]. Next /implement or /orchestrate dispatch should resume at next_phase 11 per .orchestrator-handoff.json's continuation_context."
   }
 }

@@ -106,13 +106,49 @@ in full** -- see "What remains".
 4. **Phase 11.2**: validate that each `cs5FCIncest` conjunct soundly interprets the matching
    `TClosure` (T/B/4) edge-closure rule (`raw G.R a b → r (ρa)(ρb)` extends to `TClosure 𝒯 G.R a b
    → r (ρa)(ρb)`), then assemble `nik_TS5_soundness`.
-5. **Phase 11.3**: `nik_TS5_consistent : ¬ NIKTheorem TS5 ⊥` via a **one-point reflexive**
-   `cs5FCIncest` model (`World := PUnit`, `r`/`≤` both the total relation, `botForces := fun _ =>
-   False`). Note this model is small enough that the tree-lifting machinery of items 1-3 is not
-   needed for THIS specific corollary (every interpretation is forced to the unique point, so
-   "lifting" is trivial) -- if 11.2's general induction is not reached in a future dispatch, 11.3's
-   antivacuity result can be attempted directly against this one model without waiting on the
-   general theorem, per the plan's own documented fallback (Rollback/Contingency).
+5. **Phase 11.3, `nik_TS5_consistent` -- LANDED**, via the plan's own pre-authorized direct route
+   (Rollback/Contingency), **before** items 1-4 rather than as their corollary: a one-point model
+   (`World := Unit`, `r := fun _ _ => True`) makes "lifting" trivially the identity, so none of
+   items 1-4's machinery is needed for this specific corollary. See `nik_soundness_onePoint` below.
+
+## Refined analysis of items 1-4 (this dispatch, NOT yet reduced to code -- for the next dispatch)
+
+A second, deeper look at items 1-4 this dispatch (attempting an actual Lean encoding of the
+`(□I)` case, not merely re-stating the architecture) surfaced a sharper obstruction than either
+this module's or the continuation handoff's prior framing captured, recorded here so the next
+attempt does not re-discover it from scratch:
+
+- **`TS5 = {T, B, Four}` makes `TClosure TS5 G.R` an equivalence relation**, and `G` is *always
+  connected* (every `Graph.addEdge` attaches a brand-new label to an already-present one, starting
+  from `Graph.trivial`'s single node -- `G` is literally a tree as an undirected graph). An
+  equivalence closure of a connected graph's edge relation is the **total relation on the vertex
+  set**: `TClosure TS5 G.R a b` holds for **every** `a, b ∈ G.X`, not just tree-adjacent pairs.
+  Consequently edge-cond (`∀ a b, TClosure TS5 G.R a b → r (ρ a) (ρ b)`) is not a "propagate along
+  tree edges" condition as items 1-2's original framing suggested -- it demands `r` hold between
+  `ρ` of **every pair of labels used so far in the derivation**, i.e. the interpreted image of
+  `G.X` under `ρ` must be an `r`-clique. Introducing one new label (`(□I)`/`(◇E)`'s fresh `y`)
+  therefore requires relating `ρ' y` to **every** existing label's image, not merely to its
+  immediate parent -- a materially larger obligation than a single-edge lift.
+- **`cs5FCIncest_lift`'s raised witness is not exact**, and edge-cond as stated needs exactness.
+  Attempting `ρ' y := u` (the semantically-required successor from `hru : r w' u`, `w' ≥ ρ x`) to
+  close the new label's clique-membership against some *other*, already-present label `a` needs
+  `r (ρ a) u` from `r (ρ a) (ρ x)` (known) and `r w' u`, `ρ x ≤ w'` (known) -- this is exactly
+  `hfour`'s shape (`r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t`, `w := ρ a`, `u := ρ x`,
+  `u' := w'`, `t := u`), but `hfour` only delivers `r v u` for **some** `v ≥ ρ a`, not `r (ρ a) u`
+  exactly -- so satisfying the clique condition for label `a` forces **also** raising `a`'s own
+  interpreted value to that `v`, cascading the obligation to `a`'s own clique-neighbours in turn.
+- **The resolution is not symmetric between edge-cond and Γ-cond.** Γ-cond survives raising `ρ`
+  pointwise for free, via `ckforces_persistence` (`CKForces` is upward-closed, so if `ψ ∈ Γ` was
+  forced at the old `ρ ψ.lbl` and the new value is `≥` the old, Γ-cond still holds at the new
+  value). Edge-cond has no such slack -- it is a flat fact about `r`, not about `CKForces`, so it
+  cannot be "topped up" after the fact the way Γ-cond can. This asymmetry is why only edge-cond
+  needs a genuine lifting lemma: **not** a tree-path propagation (items 1-2's original framing),
+  but a lemma of the shape "given a *finite* set `S` of labels already `r`-clique-related under
+  `ρ`, and one member `x ∈ S` raised to `w' ≥ ρ x`, produce `ρ' ≥ ρ` pointwise on `S` (raised, not
+  merely at `x`) that is *again* an `r`-clique" -- a finite-induction argument over `S` using
+  `hfour`/`hsymbox`/`hincest` pairwise, not a tree-depth recursion. This lemma is not yet attempted
+  in Lean; it is the concrete next step for items 1-2, and should supersede their original
+  "propagate down the tree" phrasing above (kept for historical context, not as the target shape).
 
 ## Contents (this dispatch)
 

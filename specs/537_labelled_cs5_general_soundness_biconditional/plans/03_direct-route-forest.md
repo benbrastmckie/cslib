@@ -347,7 +347,7 @@ lemmas reports `{propext, Classical.choice, Quot.sound}` only (no new axiom, no 
   green; `lean_verify` on `forest_trivial` and `forest_addEdge_fresh` reports axiom-clean (no
   `sorryAx`); `grep -nE '\bsorry\b'` finds no NEW tactic `sorry`.
 
-### Phase 7: Tree-cascade lifting lemma boxI_lift [NOT STARTED]
+### Phase 7: Tree-cascade lifting lemma boxI_lift [PARTIAL]
 
 This is the sole concentrated-risk phase (audit: ~90% mathematically completable; ~60% single
 dispatch — the risk is **engineering**, not soundness). It carries the budget cap and the sole
@@ -394,6 +394,51 @@ route to the Phase 10 contingency.
 - **Verification / Done when:** `Soundness.lean` builds green; `lean_verify` on `boxI_lift` (and any
   helper) reports axiom-clean; no NEW tactic `sorry`.
 
+**Phase 7 partial-progress note (2026-07-19, dispatch 1)**: Landed and committed, sorry-free,
+axiom-clean:
+- `ht_le_of_reflTransGen` — rank is non-decreasing along forward `G.R`-reachability (pure
+  consequence of graded rank; ~10 lines).
+- `raise_subtree` — the downward-cascade helper (audit's "process the finite component... in
+  increasing `ht`-distance order", restricted to the DOWNWARD direction): given `p` already raised
+  to a fixed `wp`, raises `p` together with the forward-reachable closure through a chosen
+  `Finset` of direct raw-neighbours, via repeated `cs5FCIncest_lift` (F1). Well-founded on
+  `Set.ncard {q ∈ G.X | ht q ≥ ht p}` (strictly decreasing at each child). Disjointness of
+  different children's closures follows directly from the unique-parent conjunct (last-edge
+  argument, no general cycle-freeness/BFS-uniqueness lemma needed) — this de-risks the audit's
+  "residual uncertainty" note. ~170 lines, `lean_verify` reports `{propext, Classical.choice,
+  Quot.sound}` only.
+
+**Remaining sub-goal (precise, for continuation dispatch)**: assemble `boxI_lift` itself from
+`raise_subtree` via an **ancestor walk** (raise `x` to `w'`, then walk up the unique-parent chain
+toward the root via `cs5FCIncest_raise`/F2, invoking `raise_subtree` for sibling branches hanging
+off each ancestor). This dispatch confirmed (via live `lean_goal` iteration) that the naive
+"`ihn q hqn hqX q' hqq'`" recursive call at each ancestor `q` is UNSOUND as stated: the induction
+hypothesis's own conclusion promises to cover *all* of `G`'s edges, which would let it silently
+re-derive `q`'s child `z`'s value independently via its own internal `raise_subtree` call —
+conflicting with `z`'s already-pinned target `wz`. **Fix (identified, not yet implemented)**:
+generalize the ancestor-walk induction to carry an explicit exclusion parameter mirroring
+`raise_subtree`'s own Finset-of-children mechanism (inverted: a Finset/singleton of children
+whose entire downward closure is *already handled by the caller* and must be left untouched),
+threaded through both the `noParent` base lemma and the `succ` inductive step:
+```
+∀ n, ∀ z, ht z ≤ n → z ∈ G.X → ∀ wz, ρ z ≤ wz → ∀ (excl : Finset (Label Atom)),
+  (∀ e ∈ excl, G.R z e) →
+  ∃ ρ', ρ' z = wz ∧ (∀ u, ρ u ≤ ρ' u) ∧
+    (∀ a b, G.R a b → (∀ e ∈ excl, ¬ Relation.ReflTransGen G.R e a) → r (ρ' a) (ρ' b)) ∧
+    (∀ u, (∀ e ∈ excl, ¬ Relation.ReflTransGen G.R e u) →
+      ∀ {φ}, CKForces r v botForces (ρ u) φ → CKForces r v botForces (ρ' u) φ) ∧
+    (∀ u, (∃ e ∈ excl, Relation.ReflTransGen G.R e u) → ρ' u = ρ u)
+```
+Top-level call (from `boxI_lift`) uses `excl := ∅` (vacuous, full coverage). The `succ`-with-parent
+case calls `raise_subtree` with `C := {cc | G.R z cc ∧ cc ∉ excl}` (z's closure minus what the
+caller already owns) to get `ρz`, F2-raises `q` to get `q'`, then recurses via `ihn q hqn hqX q'
+hqq' {z} (proof G.R q z)` (excluding `z`'s branch, now safely — `ihn`'s conclusion no longer
+promises to touch `z`'s closure) to get `ρq`, then **combines** `ρz`/`ρq` via the same
+if-then-else-on-`ReflTransGen`-membership pattern `raise_subtree`'s own `insert` case uses. The
+`noParent`/zero case is the same lemma specialized (a root reached via the walk, generally with
+a nonempty `excl` from the level below). Estimated remaining size: ~120-180 lines, same proof
+style/tactics already exercised in `raise_subtree` (no new mathematical content, pure engineering
+completion of an already-identified fix). No mathematical wall was hit at any point.
 ### Phase 8: Main NIK induction (motive amended), close boxI case, assemble nik_TS5_soundness [NOT STARTED]
 
 - **Goal:** Complete the 12-constructor `NIK` induction generalized over an arbitrary interpretation

@@ -1,18 +1,25 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-19T17:14:27Z",
+  "status": "partial",
+  "started_at": "2026-07-19T17:22:33Z",
   "phases_completed": 6,
   "phases_total": 10,
   "skeleton": false,
   "sorry_inventory": [],
   "memory_candidates": [
-    "Lean 4 subst/rfl-pattern gotcha: rcases with `⟨rfl, rfl⟩` on a disjunct like `a = x ∧ b = y` inside a tactic proof can eliminate the OUTER binder (x, y) rather than the freshly-`intro`'d one (a, b), silently orphaning later bare references to the outer names ('unknown identifier' errors). Safer to keep the equalities as named hypotheses and `rw` with them instead of destructive subst when both sides of the equation are local free variables."
+    "Lean 4 Relation.ReflTransGen gotcha: `induction`/`cases` on a `Relation.ReflTransGen r a b` hypothesis auto-generalizes any locally-bound `b` it depends on, renaming it to a fresh inaccessible variable per case (the pre-existing local `b` becomes an unrelated leftover). Use `rename_i` immediately after entering a case and verify via `lean_goal` which fresh name plays which role before writing the rest of the branch -- do not assume the original variable name is still live.",
+    "Lean 4 rfl-substitution direction gotcha (generalizes an earlier-recorded lesson): `rcases h with rfl | ...` on an equation between two PRE-EXISTING local variables (not a freshly-`intro`'d one) can substitute in either direction and is not predictable from binder order alone -- observed eliminating the OLDER variable in favor of the newer one. Use a named `heq` and explicit `rw [heq]` instead of `rfl` whenever both sides of the equation are pre-existing variables referenced elsewhere in context.",
+    "Lean 4 well-founded recursion pattern: for a 'raise a node + its finite forward-reachable closure through a Finset of children' style recursion (tree-cascade lifting lemmas), `Set.ncard {q ∈ X | ht q ≥ ht p}` (using an existing graded-rank function) is a clean, easy-to-work-with strictly-decreasing measure for the recursive call on each child -- avoids constructing a bespoke BFS-distance function. Disjointness of different children's downward closures follows from a single `huniq`-style unique-parent application at the LAST edge of whichever path would witness an overlap -- no general cycle-freeness/BFS-uniqueness lemma is needed."
   ],
   "artifacts": [
     {
       "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/06_forest-invariant-phase6.md",
-      "summary": "Phase 6 implementation summary: IsDerivationForest def + forest_trivial + forest_addEdge_fresh landed sorry-free and axiom-clean."
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/07_phase7-boxI-lift-partial-summary.md",
+      "summary": "Phase 7 partial summary: ht_le_of_reflTransGen + raise_subtree landed sorry-free/axiom-clean; boxI_lift assembly not yet landed, exact fix specified for continuation."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/07_phase7-boxI-lift-partial.md",
+      "summary": "Continuation handoff with the corrected Finset-exclusion-parametrized induction statement, key decisions, and what not to retry."
     }
   ],
   "verification": {
@@ -24,8 +31,8 @@
     "ci_pipeline_passed": "partial (scoped build + checkInitImports run; full lake lint/lint-style/shake/test deferred to Phase 9 regression gate per plan)"
   },
   "partial_progress": {
-    "stage": "complete",
-    "details": "Phase 6 landed and committed; handoff routes to Phase 7 (boxI_lift, concentrated risk phase)"
+    "stage": "phase_7_partial",
+    "details": "ht_le_of_reflTransGen and raise_subtree landed, committed, sorry-free, axiom-clean. boxI_lift ancestor-walk assembly drafted, found unsound via live lean_goal checking, fix specified but not implemented within budget. Continuation handoff written with exact remaining sub-goal."
   },
   "metadata": {
     "session_id": "sess_1784471495_4fb1e9",

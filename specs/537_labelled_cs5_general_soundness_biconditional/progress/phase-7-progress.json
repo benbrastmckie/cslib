@@ -1,0 +1,40 @@
+{
+  "phase": 7,
+  "phase_name": "Tree-cascade lifting lemma boxI_lift",
+  "started_at": "2026-07-19T17:22:33Z",
+  "last_updated": "2026-07-19T18:55:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Land ht_le_of_reflTransGen (rank non-decreasing along forward reachability)",
+      "status": "done",
+      "files_touched": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"
+      ]
+    },
+    {
+      "id": 2,
+      "description": "Land raise_subtree helper (downward cascade over a chosen Finset of direct neighbours, well-founded on Set.ncard {q in G.X | ht q >= ht p})",
+      "status": "done",
+      "files_touched": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean"
+      ]
+    },
+    {
+      "id": 3,
+      "description": "Assemble boxI_lift itself: ancestor walk from x to the root via cs5FCIncest_raise (F2), invoking raise_subtree for sibling branches at each level",
+      "status": "blocked",
+      "note": "Confirmed via live lean_goal iteration that the naive recursive call at each ancestor (reusing the same all-of-G-covering induction hypothesis) is unsound: it would let the recursion silently re-derive the child branch's value independently, conflicting with the already-pinned target. Fix identified but not yet implemented: generalize the ancestor-walk induction (both the zero/no-parent case and the succ/has-parent case) to carry an explicit Finset exclusion parameter mirroring raise_subtree's own Finset-of-children mechanism (inverted: exclude the child whose closure the caller already owns). Precise remaining statement and combine strategy recorded in plans/03_direct-route-forest.md Phase 7 partial-progress note.",
+      "files_touched": []
+    }
+  ],
+  "current_objective": 3,
+  "approaches_tried": [
+    {
+      "approach": "Ancestor-chain + downward-cascade decomposition using raise_subtree as the downward piece, with the outer ancestor-walk induction hypothesis stated as \"covers all of G's edges unconditionally\" and applied directly at each ancestor via ihn",
+      "result": "blocked",
+      "reason": "The unconditional induction hypothesis at ancestor q would freely re-derive the value of the child branch we came from (via its own internal raise_subtree call), which need not match the already-pinned target value fixed for that branch two levels down. Diagnosed via live lean_goal before writing any further code; not a math wall (F1/F2/unique-parent/graded-rank all still sufficient) -- purely an induction-hypothesis-shape engineering issue, fixed by adding a Finset exclusion parameter (see plan Phase 7 note for the exact corrected statement)."
+    }
+  ],
+  "handoff_count": 1
+}

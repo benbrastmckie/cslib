@@ -1,28 +1,25 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
-  "summary": "Read docs/modal-axiom-schema-architecture.md (508 lines, 7 sections) in full and the codebase's one existing Typst precedent (typst/MPL/) to extract house style (thmbox theorem environments, AMS austere aesthetic, notation macros). Identified concrete redundancy-trim opportunities (Section 3's five near-duplicate Lean lemmas -> one table; Section 2's 24-edge prose list -> a fletcher cube diagram) and verified locally that a typst compile smoke test (Lean-fenced code block + box/diamond math + table) succeeds with thmbox 0.3.0 and fletcher cached offline. Report recommends a single self-contained file at typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ (not a multi-file MPL-style scaffold), with build output to build/modal-axiom-schema-architecture.pdf.",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "Created a 5-phase, fully sequential implementation plan (est. 4.75h) for rendering docs/modal-axiom-schema-architecture.md as a single self-contained Typst document at typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ (build output to build/modal-axiom-schema-architecture.pdf). Phase 1 stands up the scaffold/preamble/notation/front-matter and resolves the flagged open item by grepping live Lean source for the exact Axioms.AxiomB expansion before it is printed. Phases 2-4 author the seven source sections in outline order (Schema-Tag Alphabet + syntactic cube; unionSound hinge + HasAxiom* insulation; S5/Design Rationale/Scope Boundary + source-anchor appendix), collapsing the source's redundant passages into tables and one fletcher cube diagram while keeping load-bearing Lean signatures as literal fenced code blocks. Each authoring phase ends with an incremental typst compile. Phase 5 verifies a clean compile (exit 0), cross-checks fidelity and concision against the source, and greps the deliverable for ephemeral task-number references per the no-task-references rule. Plan reuses typst/MPL house style and notation macros throughout.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md"
+      "type": "plan",
+      "path": "specs/538_typst_modal_axiom_schema_architecture/plans/01_modal-axiom-typst-plan.md"
     }
   ],
   "blockers": [],
-  "next_action_hint": "plan",
+  "next_action_hint": "implement",
   "files_modified": [],
   "decisions_made": [
-    "Output path: typst/ModalAxiomArchitecture/modal-axiom-schema-architecture.typ, a single self-contained file (no separate template.typ/notation/ split) since the source is one ~500-line document, not a multi-chapter report like the existing typst/MPL/ precedent.",
-    "Reuse typst/MPL house style directly: @preview/thmbox:0.3.0 theorem environments (definition/theorem/lemma/axiom/remark), New Computer Modern font, austere no-fill AMS aesthetic, and the nec/poss (square.stroked/diamond.stroked) notation macros from typst/MPL/notation/shared-notation.typ.",
-    "Collapse Section 3's five near-identical Satisfies.modal*_axiom Lean signatures into one table (Tag | schema | frame condition | lemma name) -- the single largest verbosity-trim opportunity in the source.",
-    "Replace Section 2's 24-edge prose bulleted list with a fletcher package diagram of the modal cube (15 nodes, 24 edges); treated as a stretch enhancement, not a blocking requirement, with a grouped-table fallback if layout proves too fiddly.",
-    "Keep ~6-7 singular, load-bearing Lean signatures (ModalSchemaTag inductive, SchemaUnion def, the three @[simp] elimination lemmas, FrameValidatesTag, unionSound, the HasAxiomT instance witness) as literal fenced Lean code blocks for fidelity -- this document's whole point is precise verified signatures, unlike the more narrative typst/MPL precedent which never uses raw Lean code blocks.",
-    "Compiled a local typst smoke test confirming Lean-fenced raw code blocks, square.stroked/diamond.stroked math, and tables all render correctly with typst 0.14.2 and locally cached thmbox 0.3.0 / fletcher packages -- no network fetch required at implementation time."
+    "Fully sequential 5-phase plan (single-file .typ deliverable means each authoring phase builds on the previous; no parallel waves).",
+    "Phase 1 folds the Axioms.AxiomB live-Lean grep verification in early, before Section 3's correspondence table is authored in Phase 3, so the B-row schema is confirmed (or explicitly cited opaquely) before it is printed.",
+    "Each authoring phase ends with an incremental typst compile so compilation errors surface early rather than only in the final verification phase.",
+    "Fletcher cube diagram kept as a stretch enhancement with a grouped-table fallback (planned degradation, not failure); axiom schemas transcribed from literal Lean Satisfies.*_axiom conclusions, not textbook memory.",
+    "Phase 5 explicitly greps the .typ deliverable for task-number citation patterns to honor the no-task-references-in-deliverables rule, since the file lives outside specs/**."
   ],
-  "dead_ends": [
-    "Co-locating the .typ file in docs/ alongside the .md source was considered and rejected -- typst/ is this repo's established convention for Typst deliverables (with its own build/ output subdirectory), and docs/ currently holds only Markdown."
-  ],
+  "dead_ends": [],
   "continuation_context": null,
   "session_id": "sess_1784485549_e832a2",
   "orchestrator_mode": true

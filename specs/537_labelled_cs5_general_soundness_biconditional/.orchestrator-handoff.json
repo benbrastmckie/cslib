@@ -1,0 +1,24 @@
+{
+  "task_number": 537,
+  "session_id": "sess_1784471495_4fb1e9",
+  "phase": "research",
+  "status": "researched",
+  "orchestrator_mode": true,
+  "next_command": "/plan 537",
+  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/01_general-soundness-strategies.md",
+  "reference_grounding_tier": 1,
+  "adversarial_verification_triggered": true,
+  "direct_route_assessment": "GENUINELY OPEN -- confirmed and sharpened vs 3 prior dispatches",
+  "recommended_route": "Strategy 1 as time-boxed decisive probe with hard pivot gate; Strategy 3 pre-planned fallback skeleton; Strategy 2 reserve",
+  "planner_guidance": {
+    "size_strategy_1_as": "single bounded probe phase + decision gate, NOT a multi-phase build",
+    "decision_gate": "symmetry/clique lemma closed => thread through NIK induction (2-3 phases); countermodel found => direct route DEAD, pivot to Strategy 3; neither within budget => [BLOCKED] + recommend Strategy-3 scope reopening (do NOT loop a 4th direct attempt)",
+    "pre_authorize": "Strategy-3 (Ch.6 adequacy bridge) scope reopening as contingency -- it is a scope escalation task 517 deliberately avoided",
+    "hard_constraints": ["no sorry", "no new axiom under Cslib/", "do not weaken cs5FCIncest", "do not regress landed completeness/anti-vacuity"]
+  },
+  "bibkey_status": {
+    "Simpson1994": "verified in references.bib; live corpus UNAVAILABLE (claims marked [UNVERIFIED against live corpus])",
+    "MarinMoralesStrassburger2021": "verified in references.bib; live corpus UNAVAILABLE"
+  },
+  "churn_warning": "3 prior task-517 dispatches already exhausted the direct-implementation route; any Strategy-1 phase MUST carry an explicit no-loop gate."
+}

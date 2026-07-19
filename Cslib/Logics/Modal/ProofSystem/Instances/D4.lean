@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
 
 /-! # Instance Registration for Modal Logic D4
 
@@ -93,6 +94,45 @@ namespace Cslib.Logic.Modal
 
 section ModalInstances
 
+/-- Local forward-direction discharge from `SchemaUnion` to `D4Axiom`, used by
+the instance registrations below. Mirrors the `.mp` half of
+`Cslib.Logics.Modal.ProofSystem.SchemaBridges.schemaUnion_d4Tags_iff_D4Axiom`;
+it cannot import that theorem directly because `SchemaBridges.lean` imports the
+`Instances` barrel (which imports this file), so importing it here would create an
+import cycle (confirmed via a direct `lake build` attempt: `bad import
+'Cslib.Logics.Modal.ProofSystem.Instances'`). Only `SchemaUnion.lean` (which does not
+depend on `Instances`) is imported here. Phase 8 deletes this helper alongside the
+`inductive D4Axiom` it targets, once the redefinition makes the conversion a
+defeq no-op. -/
+private theorem d4Tags_of_schemaUnion {χ : Proposition Atom}
+    (h : SchemaUnion (insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <|
+      insert .modalK <| insert .andI <| insert .andE1 <| insert .andE2 <|
+      insert .orI1 <| insert .orI2 <| insert .orE <| insert .diaDualityFwd
+      <| insert .diaDualityBack <| insert .modalD <| insert .modalFour ∅ :
+      Finset ModalSchemaTag) χ) : D4Axiom χ := by
+  simp only [SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+    ModalSchemaTag.Holds] at h
+  rcases h with ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
+      ⟨φ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+  all_goals first
+    | exact D4Axiom.implyK _ _
+    | exact D4Axiom.implyS _ _ _
+    | exact D4Axiom.efq _
+    | exact D4Axiom.peirce _ _
+    | exact D4Axiom.modalK _ _
+    | exact D4Axiom.andI _ _
+    | exact D4Axiom.andE1 _ _
+    | exact D4Axiom.andE2 _ _
+    | exact D4Axiom.orI1 _ _
+    | exact D4Axiom.orI2 _ _
+    | exact D4Axiom.orE _ _ _
+    | exact D4Axiom.diaDualityFwd _
+    | exact D4Axiom.diaDualityBack _
+    | exact D4Axiom.modalD _
+    | exact D4Axiom.modalFour _
+
 /-! ### System D4 Instances -/
 
 instance : InferenceSystem Modal.HilbertD4
@@ -117,43 +157,43 @@ instance :
     HasAxiomImplyK Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   implyK := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.implyK _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.implyK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomImplyS Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   implyS := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.implyS _ _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.implyS, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomEFQ Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   efq := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.efq _)⟩
+    (d4Tags_of_schemaUnion ⟨.efq, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomPeirce Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   peirce := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.peirce _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.peirce, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomK Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   K := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.modalK _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.modalK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomD Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   D := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.modalD _)⟩
+    (d4Tags_of_schemaUnion ⟨.modalD, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiom4 Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   four := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.modalFour _)⟩
+    (d4Tags_of_schemaUnion ⟨.modalFour, by decide, _, rfl⟩)⟩
 
 instance :
     ModalHilbert Modal.HilbertD4
@@ -172,49 +212,49 @@ instance :
     HasAxiomAndI Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   andI := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.andI _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.andI, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE1 Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   andE1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.andE1 _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.andE1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE2 Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   andE2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.andE2 _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.andE2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI1 Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   orI1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.orI1 _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.orI1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI2 Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   orI2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.orI2 _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.orI2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrE Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   orE := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.orE _ _ _)⟩
+    (d4Tags_of_schemaUnion ⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityFwd Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.diaDualityFwd _)⟩
+    (d4Tags_of_schemaUnion ⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityBack Modal.HilbertD4
       (F := Modal.Proposition Atom) where
   diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (Modal.D4Axiom.diaDualityBack _)⟩
+    (d4Tags_of_schemaUnion ⟨.diaDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

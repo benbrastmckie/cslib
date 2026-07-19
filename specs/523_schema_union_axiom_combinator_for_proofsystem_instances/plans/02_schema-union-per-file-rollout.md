@@ -716,7 +716,7 @@ name and continue to typecheck without further edits to this file.
 
 ---
 
-### Phase 7: Swap 15 instance registrations to `SchemaUnion` [IN PROGRESS]
+### Phase 7: Swap 15 instance registrations to `SchemaUnion` [COMPLETED]
 
 **Goal**: Rewrite each `HasAxiom*` instance registration in `Instances/*.lean` to discharge its
 fields from `SchemaUnion` (via the Phase 3 bridge where convenient), replacing witness
@@ -824,9 +824,18 @@ uniformly to sub-phases 7.1-7.4; it is not re-litigated per sub-phase below.
   `ModalAxiom`). `checkInitImports` clean; `lint-style` clean; `lake lint --builtin-lint` clean.
   Net line delta: +168/-46 across the three files.
 
-**Sub-phase 7.4 — D4, D5, D45, DB** [NOT STARTED]
-- [ ] Rewrite `Instances/{D4,D5,D45,DB}.lean`.
+**Sub-phase 7.4 — D4, D5, D45, DB** [COMPLETED]
+- [x] Rewrite `Instances/{D4,D5,D45,DB}.lean`.
 - Estimated output: ~150-260 lines.
+- **Completion note**: Same private-per-file-helper pattern as 7.1-7.3. D4/D5 each add two
+  differentiators (`modalD`+`modalFour`/`modalFive`, 15 tags); D45 adds three (`modalD`,
+  `modalFour`, `modalFive`, 16 tags); DB adds two (`modalD`, `modalB`, 15 tags). All four
+  `inductive {D4,D5,D45,DB}Axiom` definitions unmodified and still present (grep-confirmed). Zero
+  `sorry`, zero new axiom (`lean_verify` on `d45Tags_of_schemaUnion` and `dbTags_of_schemaUnion`
+  report only `propext`/`Quot.sound`). Scoped `lake build` of all four modules green; rebuilt the
+  `Instances` barrel, `SchemaBridges.lean`, `AxiomSubsumption.lean`, `IntToClassical.lean` green.
+  `checkInitImports` clean; `lint-style` clean; `lake lint --builtin-lint` clean. Net line delta:
+  +223/-61 across the four files.
 
 **Depends on**: 3 (bridges) and 6 (IntToClassical migrated first, so instance-side changes never
 strand a live cross-family witness site).
@@ -839,6 +848,46 @@ only; inductive definitions untouched until Phase 8).
 - Every `HasAxiom*` instance still resolves under its original name; zero-`sorry`; inductives still present.
 - **Done when**: all 15 instances discharge their fields from `SchemaUnion` and build sorry-free,
   with the inductives still defined; commit per group.
+
+**Phase completion note**: All four sub-phases (7.1-7.4) landed across the 15
+`Cslib/Logics/Modal/ProofSystem/Instances/*.lean` files. The plan's literal mechanism (importing
+`SchemaBridges.lean`'s bridge lemma directly into each `Instances/*.lean` file) is architecturally
+blocked by a genuine import cycle — empirically confirmed at the start of 7.1 via a direct
+`lake build` attempt (`SchemaBridges.lean` imports the `Instances` barrel, which imports every
+individual `Instances/{sys}.lean` file, so the reverse import is a cycle, not a naming issue).
+The resolution (recorded in full above 7.1, applied uniformly across 7.1-7.4): each
+`Instances/{sys}.lean` file imports only `Cslib.Logics.Modal.ProofSystem.SchemaUnion` (verified
+acyclic) and gains one `private theorem {sys}Tags_of_schemaUnion`, a file-local reproduction of
+that system's Phase-3 bridge's forward (`SchemaUnion → <Sys>Axiom`) direction — structurally
+identical to (and independently re-derived from, not copy-imported from) the corresponding
+`schemaUnion_{sys}Tags_iff_{Sys}Axiom.mp` proof in `SchemaBridges.lean`. `private` scoping
+prevents any name collision with `SchemaBridges.lean`'s public bridge names in any downstream
+file that imports both. Every one of the ~211 `HasAxiom*` registration fields across the 15 files
+now reads `({sys}Tags_of_schemaUnion ⟨.tag, by decide, _, …, rfl⟩)` instead of a raw
+`<Sys>Axiom.ctor _ …` / `ModalAxiom.ctor _ …` call — S5 is the one structural special case (no
+local inductive; discharges against the pre-existing `Modal.ModalAxiom` in
+`Metalogic/DerivationTree.lean`, subject to the identical cycle and identical resolution since
+`Instances/S5.lean` is still part of the barrel `SchemaBridges.lean` imports). All 15 target
+inductives (`KAxiom, TAxiom, DAxiom, BAxiom, K4Axiom, K5Axiom, K45Axiom, S4Axiom, TBAxiom,
+KB5Axiom, D4Axiom, D5Axiom, D45Axiom, DBAxiom` in their respective `Instances/*.lean` files, plus
+`ModalAxiom` in `Metalogic/DerivationTree.lean`) are grep-confirmed still defined and completely
+unmodified — ready for Phase 8's redefinition. Zero `sorry` across all 15 files (full grep), zero
+new axiom (spot-checked via `lean_verify` on one private helper per sub-phase group — all report
+only `propext`/`Quot.sound`). Every `HasAxiom*` instance still resolves under its original
+name/signature (confirmed by successful typeclass-directed elaboration during scoped builds — a
+field-name or signature mismatch would have failed to elaborate against the `HasAxiom*` class).
+Scoped `lake build` of all 15 modules green; `Instances` barrel, `SchemaBridges.lean`,
+`AxiomSubsumption.lean`, and `IntToClassical.lean` (every file that transitively imports any of
+the 15) rebuilt green after each sub-phase, confirming no downstream breakage at any point.
+`lake exe checkInitImports`, `lake exe lint-style`, and `lake lint --builtin-lint` all clean
+throughout (no new environment or text lint violations; the only build warnings seen anywhere are
+pre-existing `linter.flexible` notes in `Modal/Basic.lean`, unrelated to this phase). Net line
+delta across the 15 files: +817/-220 = **+597 lines net** (the file-local private bridge
+duplication, one clear, disclosed, and necessary consequence of the import-cycle finding, is the
+entire reason this phase is line-positive rather than roughly neutral — Phase 8 is expected to
+delete all 15 private helpers alongside their target inductives, recovering a large net deletion
+at that point). Next phase: Phase 8 (delete the 15 inductives + `ModalAxiom` disposition,
+finalize) — depends on 4, 5, 6, 7 (all now complete).
 
 ---
 

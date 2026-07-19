@@ -8,6 +8,7 @@ module
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Foundations.Logic.ProofSystem
 public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
+public import Cslib.Logics.Modal.ProofSystem.SchemaTags
 
 /-! # Instance Registration for Modal Logic K
 
@@ -25,59 +26,17 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic K.
+/-- Axiom schemata for modal logic K, as the schema-union combinator over `kTags` (Phase 8
+redefinition, task 523: the 13-constructor inductive is retired; `KAxiom` is now definitionally
+`SchemaUnion kTags`, preserving the name and public API via redefinition-in-place).
 
-The 5 axiom constructors cover:
+The 5 axiom-schema families covered by `kTags`:
 - **Propositional** (4): `implyK` (weakening), `implyS` (distribution), `efq` (ex falso),
   `peirce` (double negation elimination / Peirce's law)
-- **Modal** (1): `modalK` (K distribution) -/
-inductive KAxiom : Proposition Atom → Prop where
-  /-- Weakening: `φ → (ψ → φ)` -/
-  | implyK (φ ψ : Proposition Atom) :
-      KAxiom (Proposition.imp φ (Proposition.imp ψ φ))
-  /-- Distribution: `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))` -/
-  | implyS (φ ψ χ : Proposition Atom) :
-      KAxiom (Proposition.imp (Proposition.imp φ (Proposition.imp ψ χ))
-        (Proposition.imp (Proposition.imp φ ψ) (Proposition.imp φ χ)))
-  /-- Ex falso quodlibet: `⊥ → φ` -/
-  | efq (φ : Proposition Atom) :
-      KAxiom (Proposition.imp Proposition.bot φ)
-  /-- Peirce's law / DNE: `((φ → ψ) → φ) → φ` -/
-  | peirce (φ ψ : Proposition Atom) :
-      KAxiom (Proposition.imp (Proposition.imp (Proposition.imp φ ψ) φ) φ)
-  /-- K distribution: `□(φ → ψ) → (□φ → □ψ)` -/
-  | modalK (φ ψ : Proposition Atom) :
-      KAxiom (Proposition.imp (Proposition.box (Proposition.imp φ ψ))
-        (Proposition.imp (Proposition.box φ) (Proposition.box ψ)))
-  /-- Conjunction introduction: `φ → (ψ → φ ∧ ψ)`.
-
-  Sanctioned schema (task 441): with native `and`/`or`/`diamond` constructors, this
-  characterization axiom is necessary (it was a derivable theorem under the prior
-  Łukasiewicz encoding, so this is conservative). See `Axioms.AndI`. -/
-  | andI (φ ψ : Proposition Atom) :
-      KAxiom (Axioms.AndI φ ψ)
-  /-- Left conjunction elimination: `φ ∧ ψ → φ`. See `Axioms.AndE1`. -/
-  | andE1 (φ ψ : Proposition Atom) :
-      KAxiom (Axioms.AndE1 φ ψ)
-  /-- Right conjunction elimination: `φ ∧ ψ → ψ`. See `Axioms.AndE2`. -/
-  | andE2 (φ ψ : Proposition Atom) :
-      KAxiom (Axioms.AndE2 φ ψ)
-  /-- Left disjunction introduction: `φ → φ ∨ ψ`. See `Axioms.OrI1`. -/
-  | orI1 (φ ψ : Proposition Atom) :
-      KAxiom (Axioms.OrI1 φ ψ)
-  /-- Right disjunction introduction: `ψ → φ ∨ ψ`. See `Axioms.OrI2`. -/
-  | orI2 (φ ψ : Proposition Atom) :
-      KAxiom (Axioms.OrI2 φ ψ)
-  /-- Disjunction elimination: `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`. See `Axioms.OrE`. -/
-  | orE (φ ψ χ : Proposition Atom) :
-      KAxiom (Axioms.OrE φ ψ χ)
-  /-- Diamond duality, forward direction: `◇φ → ¬□¬φ`. See `Axioms.AxiomDiaDualityFwd`. -/
-  | diaDualityFwd (φ : Proposition Atom) :
-      KAxiom (Axioms.AxiomDiaDualityFwd φ)
-  /-- Diamond duality, backward direction: `¬□¬φ → ◇φ`. See `Axioms.AxiomDiaDualityBack`. -/
-  | diaDualityBack (φ : Proposition Atom) :
-      KAxiom (Axioms.AxiomDiaDualityBack φ)
-
+- **Modal** (1): `modalK` (K distribution)
+- plus the and/or/diamond-duality characterization tags (`andI, andE1, andE2, orI1, orI2, orE,
+  diaDualityFwd, diaDualityBack`), all part of `kCore`. -/
+abbrev KAxiom : Proposition Atom → Prop := SchemaUnion kTags
 
 end Cslib.Logic.Modal
 
@@ -86,43 +45,6 @@ end Cslib.Logic.Modal
 namespace Cslib.Logic.Modal
 
 section ModalInstances
-
-/-- Local forward-direction discharge from `SchemaUnion` to `KAxiom`, used by
-the instance registrations below. Mirrors the `.mp` half of
-`Cslib.Logics.Modal.ProofSystem.SchemaBridges.schemaUnion_kTags_iff_KAxiom`;
-it cannot import that theorem directly because `SchemaBridges.lean` imports the
-`Instances` barrel (which imports this file), so importing it here would create an
-import cycle (confirmed via a direct `lake build` attempt: `bad import
-'Cslib.Logics.Modal.ProofSystem.Instances'`). Only `SchemaUnion.lean` (which does not
-depend on `Instances`) is imported here. Phase 8 deletes this helper alongside the
-`inductive KAxiom` it targets, once the redefinition makes the conversion a
-defeq no-op. -/
-private theorem kTags_of_schemaUnion {χ : Proposition Atom}
-    (h : SchemaUnion (insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <|
-      insert .modalK <| insert .andI <| insert .andE1 <| insert .andE2 <|
-      insert .orI1 <| insert .orI2 <| insert .orE <| insert .diaDualityFwd
-      <| insert .diaDualityBack ∅ :
-      Finset ModalSchemaTag) χ) : KAxiom χ := by
-  simp only [SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
-    ModalSchemaTag.Holds] at h
-  rcases h with ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
-      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
-      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
-      ⟨φ', rfl⟩
-  all_goals first
-    | exact KAxiom.implyK _ _
-    | exact KAxiom.implyS _ _ _
-    | exact KAxiom.efq _
-    | exact KAxiom.peirce _ _
-    | exact KAxiom.modalK _ _
-    | exact KAxiom.andI _ _
-    | exact KAxiom.andE1 _ _
-    | exact KAxiom.andE2 _ _
-    | exact KAxiom.orI1 _ _
-    | exact KAxiom.orI2 _ _
-    | exact KAxiom.orE _ _ _
-    | exact KAxiom.diaDualityFwd _
-    | exact KAxiom.diaDualityBack _
 
 /-! ### System K Instances -/
 
@@ -148,31 +70,31 @@ instance :
     HasAxiomImplyK Modal.HilbertK
       (F := Modal.Proposition Atom) where
   implyK := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.implyK, by decide, _, _, rfl⟩)⟩
+    (⟨.implyK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomImplyS Modal.HilbertK
       (F := Modal.Proposition Atom) where
   implyS := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.implyS, by decide, _, _, _, rfl⟩)⟩
+    (⟨.implyS, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomEFQ Modal.HilbertK
       (F := Modal.Proposition Atom) where
   efq := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.efq, by decide, _, rfl⟩)⟩
+    (⟨.efq, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomPeirce Modal.HilbertK
       (F := Modal.Proposition Atom) where
   peirce := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.peirce, by decide, _, _, rfl⟩)⟩
+    (⟨.peirce, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomK Modal.HilbertK
       (F := Modal.Proposition Atom) where
   K := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.modalK, by decide, _, _, rfl⟩)⟩
+    (⟨.modalK, by decide, _, _, rfl⟩)⟩
 
 instance :
     ModalHilbert Modal.HilbertK
@@ -183,49 +105,49 @@ instance :
     HasAxiomAndI Modal.HilbertK
       (F := Modal.Proposition Atom) where
   andI := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.andI, by decide, _, _, rfl⟩)⟩
+    (⟨.andI, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE1 Modal.HilbertK
       (F := Modal.Proposition Atom) where
   andE1 := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.andE1, by decide, _, _, rfl⟩)⟩
+    (⟨.andE1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE2 Modal.HilbertK
       (F := Modal.Proposition Atom) where
   andE2 := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.andE2, by decide, _, _, rfl⟩)⟩
+    (⟨.andE2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI1 Modal.HilbertK
       (F := Modal.Proposition Atom) where
   orI1 := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.orI1, by decide, _, _, rfl⟩)⟩
+    (⟨.orI1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI2 Modal.HilbertK
       (F := Modal.Proposition Atom) where
   orI2 := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.orI2, by decide, _, _, rfl⟩)⟩
+    (⟨.orI2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrE Modal.HilbertK
       (F := Modal.Proposition Atom) where
   orE := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.orE, by decide, _, _, _, rfl⟩)⟩
+    (⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityFwd Modal.HilbertK
       (F := Modal.Proposition Atom) where
   diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
+    (⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityBack Modal.HilbertK
       (F := Modal.Proposition Atom) where
   diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (kTags_of_schemaUnion ⟨.diaDualityBack, by decide, _, rfl⟩)⟩
+    (⟨.diaDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

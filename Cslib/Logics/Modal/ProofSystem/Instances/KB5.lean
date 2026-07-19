@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
 
 /-! # Instance Registration for Modal Logic KB5
 
@@ -93,6 +94,45 @@ namespace Cslib.Logic.Modal
 
 section ModalInstances
 
+/-- Local forward-direction discharge from `SchemaUnion` to `KB5Axiom`, used by
+the instance registrations below. Mirrors the `.mp` half of
+`Cslib.Logics.Modal.ProofSystem.SchemaBridges.schemaUnion_kb5Tags_iff_KB5Axiom`;
+it cannot import that theorem directly because `SchemaBridges.lean` imports the
+`Instances` barrel (which imports this file), so importing it here would create an
+import cycle (confirmed via a direct `lake build` attempt: `bad import
+'Cslib.Logics.Modal.ProofSystem.Instances'`). Only `SchemaUnion.lean` (which does not
+depend on `Instances`) is imported here. Phase 8 deletes this helper alongside the
+`inductive KB5Axiom` it targets, once the redefinition makes the conversion a
+defeq no-op. -/
+private theorem kb5Tags_of_schemaUnion {χ : Proposition Atom}
+    (h : SchemaUnion (insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <|
+      insert .modalK <| insert .andI <| insert .andE1 <| insert .andE2 <|
+      insert .orI1 <| insert .orI2 <| insert .orE <| insert .diaDualityFwd
+      <| insert .diaDualityBack <| insert .modalB <| insert .modalFive ∅ :
+      Finset ModalSchemaTag) χ) : KB5Axiom χ := by
+  simp only [SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+    ModalSchemaTag.Holds] at h
+  rcases h with ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
+      ⟨φ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+  all_goals first
+    | exact KB5Axiom.implyK _ _
+    | exact KB5Axiom.implyS _ _ _
+    | exact KB5Axiom.efq _
+    | exact KB5Axiom.peirce _ _
+    | exact KB5Axiom.modalK _ _
+    | exact KB5Axiom.andI _ _
+    | exact KB5Axiom.andE1 _ _
+    | exact KB5Axiom.andE2 _ _
+    | exact KB5Axiom.orI1 _ _
+    | exact KB5Axiom.orI2 _ _
+    | exact KB5Axiom.orE _ _ _
+    | exact KB5Axiom.diaDualityFwd _
+    | exact KB5Axiom.diaDualityBack _
+    | exact KB5Axiom.modalB _
+    | exact KB5Axiom.modalFive _
+
 /-! ### System KB5 Instances -/
 
 instance : InferenceSystem Modal.HilbertKB5
@@ -117,43 +157,43 @@ instance :
     HasAxiomImplyK Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   implyK := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.implyK _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.implyK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomImplyS Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   implyS := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.implyS _ _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.implyS, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomEFQ Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   efq := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.efq _)⟩
+    (kb5Tags_of_schemaUnion ⟨.efq, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomPeirce Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   peirce := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.peirce _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.peirce, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomK Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   K := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.modalK _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.modalK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomB Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   B := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.modalB _)⟩
+    (kb5Tags_of_schemaUnion ⟨.modalB, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiom5 Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   five := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.modalFive _)⟩
+    (kb5Tags_of_schemaUnion ⟨.modalFive, by decide, _, rfl⟩)⟩
 
 instance :
     ModalHilbert Modal.HilbertKB5
@@ -172,49 +212,49 @@ instance :
     HasAxiomAndI Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   andI := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.andI _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.andI, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE1 Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   andE1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.andE1 _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.andE1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE2 Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   andE2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.andE2 _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.andE2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI1 Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   orI1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.orI1 _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.orI1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI2 Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   orI2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.orI2 _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.orI2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrE Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   orE := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.orE _ _ _)⟩
+    (kb5Tags_of_schemaUnion ⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityFwd Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.diaDualityFwd _)⟩
+    (kb5Tags_of_schemaUnion ⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityBack Modal.HilbertKB5
       (F := Modal.Proposition Atom) where
   diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (Modal.KB5Axiom.diaDualityBack _)⟩
+    (kb5Tags_of_schemaUnion ⟨.diaDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

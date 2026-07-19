@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Foundations.Logic.ProofSystem
+public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
 
 /-! # Instance Registration for Modal Logic TB
 
@@ -92,6 +93,45 @@ namespace Cslib.Logic.Modal
 
 section ModalInstances
 
+/-- Local forward-direction discharge from `SchemaUnion` to `TBAxiom`, used by
+the instance registrations below. Mirrors the `.mp` half of
+`Cslib.Logics.Modal.ProofSystem.SchemaBridges.schemaUnion_tbTags_iff_TBAxiom`;
+it cannot import that theorem directly because `SchemaBridges.lean` imports the
+`Instances` barrel (which imports this file), so importing it here would create an
+import cycle (confirmed via a direct `lake build` attempt: `bad import
+'Cslib.Logics.Modal.ProofSystem.Instances'`). Only `SchemaUnion.lean` (which does not
+depend on `Instances`) is imported here. Phase 8 deletes this helper alongside the
+`inductive TBAxiom` it targets, once the redefinition makes the conversion a
+defeq no-op. -/
+private theorem tbTags_of_schemaUnion {χ : Proposition Atom}
+    (h : SchemaUnion (insert .implyK <| insert .implyS <| insert .efq <| insert .peirce <|
+      insert .modalK <| insert .andI <| insert .andE1 <| insert .andE2 <|
+      insert .orI1 <| insert .orI2 <| insert .orE <| insert .diaDualityFwd
+      <| insert .diaDualityBack <| insert .modalT <| insert .modalB ∅ :
+      Finset ModalSchemaTag) χ) : TBAxiom χ := by
+  simp only [SchemaUnion.insert_iff, SchemaUnion.empty_iff, or_false,
+    ModalSchemaTag.Holds] at h
+  rcases h with ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ |
+      ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', rfl⟩ | ⟨φ', ψ', χ', rfl⟩ | ⟨φ', rfl⟩ |
+      ⟨φ', rfl⟩ | ⟨φ', rfl⟩ | ⟨φ', rfl⟩
+  all_goals first
+    | exact TBAxiom.implyK _ _
+    | exact TBAxiom.implyS _ _ _
+    | exact TBAxiom.efq _
+    | exact TBAxiom.peirce _ _
+    | exact TBAxiom.modalK _ _
+    | exact TBAxiom.andI _ _
+    | exact TBAxiom.andE1 _ _
+    | exact TBAxiom.andE2 _ _
+    | exact TBAxiom.orI1 _ _
+    | exact TBAxiom.orI2 _ _
+    | exact TBAxiom.orE _ _ _
+    | exact TBAxiom.diaDualityFwd _
+    | exact TBAxiom.diaDualityBack _
+    | exact TBAxiom.modalT _
+    | exact TBAxiom.modalB _
+
 /-! ### System TB Instances -/
 
 instance : InferenceSystem Modal.HilbertTB
@@ -116,43 +156,43 @@ instance :
     HasAxiomImplyK Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   implyK := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.implyK _ _)⟩
+    (tbTags_of_schemaUnion ⟨.implyK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomImplyS Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   implyS := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.implyS _ _ _)⟩
+    (tbTags_of_schemaUnion ⟨.implyS, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomEFQ Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   efq := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.efq _)⟩
+    (tbTags_of_schemaUnion ⟨.efq, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomPeirce Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   peirce := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.peirce _ _)⟩
+    (tbTags_of_schemaUnion ⟨.peirce, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomK Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   K := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.modalK _ _)⟩
+    (tbTags_of_schemaUnion ⟨.modalK, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomT Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   T := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.modalT _)⟩
+    (tbTags_of_schemaUnion ⟨.modalT, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomB Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   B := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.modalB _)⟩
+    (tbTags_of_schemaUnion ⟨.modalB, by decide, _, rfl⟩)⟩
 
 instance :
     ModalHilbert Modal.HilbertTB
@@ -171,49 +211,49 @@ instance :
     HasAxiomAndI Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   andI := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.andI _ _)⟩
+    (tbTags_of_schemaUnion ⟨.andI, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE1 Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   andE1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.andE1 _ _)⟩
+    (tbTags_of_schemaUnion ⟨.andE1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomAndE2 Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   andE2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.andE2 _ _)⟩
+    (tbTags_of_schemaUnion ⟨.andE2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI1 Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   orI1 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.orI1 _ _)⟩
+    (tbTags_of_schemaUnion ⟨.orI1, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrI2 Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   orI2 := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.orI2 _ _)⟩
+    (tbTags_of_schemaUnion ⟨.orI2, by decide, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomOrE Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   orE := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.orE _ _ _)⟩
+    (tbTags_of_schemaUnion ⟨.orE, by decide, _, _, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityFwd Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   diaDualityFwd := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.diaDualityFwd _)⟩
+    (tbTags_of_schemaUnion ⟨.diaDualityFwd, by decide, _, rfl⟩)⟩
 
 instance :
     HasAxiomDiaDualityBack Modal.HilbertTB
       (F := Modal.Proposition Atom) where
   diaDualityBack := ⟨Modal.DerivationTree.ax [] _
-    (Modal.TBAxiom.diaDualityBack _)⟩
+    (tbTags_of_schemaUnion ⟨.diaDualityBack, by decide, _, rfl⟩)⟩
 
 end ModalInstances
 

@@ -802,9 +802,27 @@ uniformly to sub-phases 7.1-7.4; it is not re-litigated per sub-phase below.
   clean ("No environment linters registered" per-file, "Linting passed for Cslib" overall). Net
   line delta: +216/-58 across the four files.
 
-**Sub-phase 7.3 — S5, TB, KB5** [NOT STARTED]
-- [ ] Rewrite `Instances/{S5,TB,KB5}.lean` (S5 discharges via the `ModalAxiom` bridge).
+**Sub-phase 7.3 — S5, TB, KB5** [COMPLETED]
+- [x] Rewrite `Instances/{S5,TB,KB5}.lean` (S5 discharges via the `ModalAxiom` bridge).
 - Estimated output: ~120-220 lines.
+- **Completion note**: Same private-per-file-helper pattern as 7.1/7.2 (see the import-cycle
+  finding above 7.1) — including for S5, which is the special case: `S5.lean` does not define its
+  own inductive (it reuses `Modal.ModalAxiom` from `Metalogic/DerivationTree.lean`), but is still
+  part of the `Instances` barrel that `SchemaBridges.lean` imports, so the same cycle applies and
+  the same private-helper resolution is needed; `s5Tags_of_schemaUnion`'s target type is
+  `ModalAxiom χ` (16 tags: `kCore` + `modalT`/`modalFour`/`modalB`, cross-checked against
+  `ModalAxiom`'s 16 constructors in `DerivationTree.lean` — confirms S5 = T+4+B, carries `modalB`
+  not `modalFive`, matching Phase 3's finding; the deliberately-omitted `KB5 → S5` subsumption
+  edge is Phase 5 territory, untouched here). TB adds two differentiators (`modalT`, `modalB`, 15
+  tags); KB5 adds two (`modalB`, `modalFive`, 15 tags). All three target inductives
+  (`TBAxiom`, `KB5Axiom`, and `ModalAxiom` in `DerivationTree.lean`) unmodified and still present
+  (grep-confirmed). Zero `sorry`, zero new axiom (`lean_verify` on `s5Tags_of_schemaUnion` and
+  `kb5Tags_of_schemaUnion` report only `propext`/`Quot.sound`). Scoped `lake build` of all three
+  modules green; rebuilt the `Instances` barrel, `SchemaBridges.lean`, `AxiomSubsumption.lean`,
+  `IntToClassical.lean`, and `Metalogic.DerivationTree` green (no downstream breakage, including
+  no breakage to `DerivationTree.lean` from S5's registrations still resolving against
+  `ModalAxiom`). `checkInitImports` clean; `lint-style` clean; `lake lint --builtin-lint` clean.
+  Net line delta: +168/-46 across the three files.
 
 **Sub-phase 7.4 — D4, D5, D45, DB** [NOT STARTED]
 - [ ] Rewrite `Instances/{D4,D5,D45,DB}.lean`.

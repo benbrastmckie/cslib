@@ -17,15 +17,13 @@ classical normal modal systems' axiom predicates as a `SchemaUnion` instance
 
 ## Why This Foundational File Exists (Import-Cycle Architecture Note)
 
-`SchemaBridges.lean` imports the `Instances` barrel (to state and prove the bridge equivalences
-`SchemaUnion sysTags φ ↔ <Sys>Axiom φ` against the pre-existing per-system inductives), so
-`Instances/*.lean` files cannot import `SchemaBridges.lean` without an import cycle (confirmed
-via a direct `lake build` attempt in Phase 7: `bad import 'Cslib.Logics.Modal.ProofSystem.
+The now-deleted `SchemaBridges.lean` (Phase 3-8.3 scaffolding, removed in Phase 8 sub-phase 8.4
+once its bridge equivalences became identities with no remaining users) imported the `Instances`
+barrel, so `Instances/*.lean` files could not import it without an import cycle (confirmed via a
+direct `lake build` attempt in Phase 7: `bad import 'Cslib.Logics.Modal.ProofSystem.
 Instances'`). Since the per-system tag sets are needed *inside* `Instances/*.lean` (Phase 8
-redefines each `<Sys>Axiom` in place as `SchemaUnion sysTags`), the tag sets must live in a
-foundational file that imports only `SchemaUnion.lean` -- this file. `SchemaBridges.lean` is
-updated (this sub-phase) to import from here instead of defining these tag sets itself; its
-bridge proofs are untouched and stay green.
+redefines each `<Sys>Axiom` in place as `SchemaUnion sysTags`), the tag sets live in this
+foundational file, which imports only `SchemaUnion.lean`.
 
 The tag sets belong at the foundation anyway: a system's tag set is its essence (which schemata
 it admits), not scaffolding built on top of the system.
@@ -41,9 +39,8 @@ it admits), not scaffolding built on top of the system.
 ## References
 
 * Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean -- `ModalSchemaTag`, `SchemaUnion`, elim. API
-* Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean -- bridge equivalences using these tag sets
 * Cslib/Logics/Modal/ProofSystem/Instances/{K,T,D,B,...}.lean -- the 15 per-system axiom
-  inductives (redefined in terms of these tag sets, Phase 8)
+  predicates (`abbrev <Sys>Axiom := SchemaUnion sysTags`, Phase 8)
 -/
 
 @[expose] public section

@@ -266,15 +266,21 @@ This is the sole concentrated-risk phase (report 02 "Uncertain claims", ~80-85%)
 into two bounded sub-phases so each lands sorry-free and build-green in isolation. Phase 4.2 is the
 residual risk and carries the blocked-honesty exit to Phase 7.
 
-#### Phase 4.1: Single-node interpretation-raise step [NOT STARTED]
+#### Phase 4.1: Single-node interpretation-raise step [COMPLETED]
 
 - **Goal:** Prove the inductive step of Simpson's Lifting Lemma 8.1.3 (chunks 0154-0155): raising
   the interpretation at ONE node preserves the raw edge-cond and Γ-cond, threading F1/F2.
 - **Tasks:**
-  - [ ] State `boxI_raise_step`: given a raw-edge-cond interpretation `ρ`, a node `x`, and any
+  - [x] State `boxI_raise_step`: given a raw-edge-cond interpretation `ρ`, a node `x`, and any
         `w ≥ ρ x`, produce `ρ'` with `ρ' x = w`, `ρ' z ≥ ρ z` for all `z`, re-establishing the raw
         edge-cond via F1 (down) / F2 (up) and Γ-cond via `ckforces_persistence` (Forcing.lean:122).
-  - [ ] Prove it sorry-free for a single raise. Keep the freshness bookkeeping explicit and finite.
+        Landed at `Soundness.lean:472`, scoped to one designated raw-`R`-neighbour `n` of `x` per
+        call (down via `R x n`/F1, up via `R n x`/F2); `ρ'` agrees with `ρ` off `{x, n}` via an
+        explicit `if`-based re-interpretation (`classical` for the `Decidable` instances). Phase
+        4.2 iterates this atomic step node-by-node over the finite tree.
+  - [x] Prove it sorry-free for a single raise. Keep the freshness bookkeeping explicit and finite.
+        Sorry-free, axiom-clean (`lean_verify`: `propext`/`Classical.choice`/`Quot.sound` only, no
+        `sorryAx`). `lake build` green; `lake exe checkInitImports` clean.
 - **Estimated output:** ~120-220 lines. **Bounded unit:** one lemma about a single raise; stopping
   condition = it compiles and re-establishes both invariants. If it exceeds ~300 lines or the
   invariant threading does not close, STOP and route to Phase 7 — do NOT open-endedly retry.

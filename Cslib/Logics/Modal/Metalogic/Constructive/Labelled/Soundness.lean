@@ -447,6 +447,79 @@ theorem dia_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
   | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
   | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
 
+/-! ## Single-node interpretation-raise step (task 537 Phase 4.1, Simpson Lifting Lemma 8.1.3
+inductive step, chunks 0154-0155)
+
+This is the atomic building block of Simpson's Lifting Lemma: raising the interpretation `ρ` at
+ONE node `x` to some `w ≥ ρ x`, re-establishing the raw edge-cond at ONE `x`-adjacent raw edge
+(via `cs5FCIncest_lift`/`F1`, the "down" direction `R x n`, or `cs5FCIncest_raise`/`F2`, the "up"
+direction `R n x`) and Γ-cond persistence at the raised neighbour (via `ckforces_persistence`).
+Phase 4.2 (not attempted in this dispatch) iterates this step node-by-node over the finite
+derivation tree to assemble the full Lifting Lemma feeding `boxI`. -/
+
+/-- **Single-node interpretation-raise step.** Given a raw-edge-cond interpretation `ρ`
+(`hedge : ∀ a b, R a b → r (ρ a) (ρ b)`), a node `x`, a distinct raw-`R`-neighbour `n` of `x`
+(edge in either direction, `hR`), and any raise `w ≥ ρ x`, produces a re-interpretation `ρ'`
+agreeing with `ρ` off `{x, n}` -- so `ρ' z ≥ ρ z` for every label `z` -- with `ρ' x = w`,
+re-establishing:
+- the raw edge fact between `x` and `n`, in whichever direction `hR` supplied (down via `F1`,
+  up via `F2`);
+- persistence, at `n`'s raised value, of any `CKForces`-fact that held at the old `ρ n` (Γ-cond),
+  via `ckforces_persistence`.
+
+Only `x` and `n` move; all other labels are left exactly as `ρ` had them -- Phase 4.2 chains
+this step node-by-node along the tree to raise every affected descendant/ancestor in turn. -/
+theorem boxI_raise_step {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {v : World → Atom → Prop} {botForces : World → Prop}
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → v w p → v w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    {R : Label Atom → Label Atom → Prop} {ρ : Label Atom → World}
+    (hedge : ∀ a b, R a b → r (ρ a) (ρ b))
+    {x n : Label Atom} (hxn : x ≠ n) {w : World} (hwx : ρ x ≤ w) (hR : R x n ∨ R n x) :
+    ∃ ρ' : Label Atom → World, ρ' x = w ∧ (∀ z, ρ z ≤ ρ' z) ∧
+      (r (ρ' x) (ρ' n) ∨ r (ρ' n) (ρ' x)) ∧
+      (∀ {φ : Proposition Atom}, CKForces r v botForces (ρ n) φ →
+        CKForces r v botForces (ρ' n) φ) := by
+  classical
+  rcases hR with h | h
+  · -- down: F1 raises the target `n` alongside the raised source `x`.
+    obtain ⟨n', hnn', hwn'⟩ := cs5FCIncest_lift hfc (hedge x n h) hwx
+    refine ⟨fun z => if z = x then w else if z = n then n' else ρ z, if_pos rfl, ?_, Or.inl ?_, ?_⟩
+    · intro z
+      dsimp only
+      by_cases hz : z = x
+      · subst hz; rw [if_pos rfl]; exact hwx
+      · rw [if_neg hz]
+        by_cases hz' : z = n
+        · subst hz'; rw [if_pos rfl]; exact hnn'
+        · rw [if_neg hz']
+    · dsimp only
+      rw [if_pos rfl, if_neg (Ne.symm hxn), if_pos rfl]
+      exact hwn'
+    · intro φ hφ
+      dsimp only
+      rw [if_neg (Ne.symm hxn), if_pos rfl]
+      exact ckforces_persistence v_uc bf_uc hnn' hφ
+  · -- up: F2 raises the source `n` alongside the raised target `x`.
+    obtain ⟨n', hnn', hn'w⟩ := cs5FCIncest_raise hfc (hedge n x h) hwx
+    refine ⟨fun z => if z = x then w else if z = n then n' else ρ z, if_pos rfl, ?_, Or.inr ?_, ?_⟩
+    · intro z
+      dsimp only
+      by_cases hz : z = x
+      · subst hz; rw [if_pos rfl]; exact hwx
+      · rw [if_neg hz]
+        by_cases hz' : z = n
+        · subst hz'; rw [if_pos rfl]; exact hnn'
+        · rw [if_neg hz']
+    · dsimp only
+      rw [if_neg (Ne.symm hxn), if_pos rfl, if_pos rfl]
+      exact hn'w
+    · intro φ hφ
+      dsimp only
+      rw [if_neg (Ne.symm hxn), if_pos rfl]
+      exact ckforces_persistence v_uc bf_uc hnn' hφ
+
 /-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the

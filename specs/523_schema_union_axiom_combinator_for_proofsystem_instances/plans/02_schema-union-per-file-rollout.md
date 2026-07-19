@@ -1,7 +1,7 @@
 # Implementation Plan: Schema-Union Axiom Combinator for Modal ProofSystem Instances (v2)
 
 - **Task**: 523 - Replace the 15 hand-written per-system axiom inductives with a compositional schema-union combinator
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: ~24-32 hours (Representation A, staged additive rollout across ~20 agent runs)
 - **Dependencies**: Tasks 520 and 521 (both COMPLETED — sequencing prerequisite satisfied)
 - **Research Inputs**: reports/01_schema-union-combinator-blast-radius.md
@@ -891,7 +891,7 @@ finalize) — depends on 4, 5, 6, 7 (all now complete).
 
 ---
 
-### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [IN PROGRESS]
+### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [COMPLETED]
 
 **Goal**: The terminal, once-everything-else-is-green step: **redefine each `<Sys>Axiom` in place**
 as `SchemaUnion sysTags` (preserving the public name, retiring the inductive), resolve S5's
@@ -1051,20 +1051,45 @@ attempt is preserved verbatim as the first task's note.)*
       `propext`/`Classical.choice`/`Quot.sound` (no new axiom); zero `sorry` in any file
       touched this sub-phase; `lake exe checkInitImports` clean.
 
-**Sub-phase 8.4 — simplify ALL bridge call sites; delete scaffolding; final full verify** [NOT STARTED]
-- [ ] Simplify the bridge call sites now that the `abbrev` forms are interchangeable (drop the
+**Sub-phase 8.4 — simplify ALL bridge call sites; delete scaffolding; final full verify** [COMPLETED]
+- [x] Simplify the bridge call sites now that the `abbrev` forms are interchangeable (drop the
       `(bridge.mp/.mpr …)` wrappers, leaving the bare `SchemaUnion` witness / hypothesis):
       `Systems/*/Completeness.lean` (~364 sites from 8.2), `Systems/*/Soundness.lean` (15 files),
       `InterSystem/AxiomSubsumption.lean` (48 refs), `InterSystem/IntToClassical.lean` (15 refs).
       Do this per-group with scoped green builds, not one monolithic edit.
-- [ ] Delete `SchemaBridges.lean` entirely (its bridges are now identities with no remaining users);
+      DONE — 8.4a (432 sites across all 15 `Completeness.lean` files, 4 sub-groups:
+      K/T/D/B, K4/K5/K45/S4, S5/TB/KB5, D4/D5/D45/DB, each scoped-build green and
+      committed); 8.4b (15 `Soundness.lean` files, one site each, same 4 sub-groups);
+      8.4c (`AxiomSubsumption.lean`, all 24 direct-edge lemmas simplified to
+      `SchemaUnion.subsumption (by decide) h`); 8.4d (`IntToClassical.lean`, 12 code
+      sites + stale docstring references updated). Every `SchemaBridges` import dropped
+      from all 32 consumer files.
+- [x] Delete `SchemaBridges.lean` entirely (its bridges are now identities with no remaining users);
       keep any lemma that is genuinely public API only behind a `@[deprecated]` alias in an acyclic
       location — expected: none survive.
-- [ ] Final FULL `lake build`; `lake exe checkInitImports`; `lake lint`; `lake exe lint-style`;
+      DONE — repo-wide grep confirmed zero remaining `schemaUnion_..._iff_...` call sites and
+      zero remaining imports of `ProofSystem.SchemaBridges` outside the file itself before
+      deletion; none of the 15 bridge lemmas were public API relied on elsewhere, so no
+      `@[deprecated]` alias was needed. File deleted; full `lake build` green immediately
+      after.
+- [x] Final FULL `lake build`; `lake exe checkInitImports`; `lake lint`; `lake exe lint-style`;
       `lake test`; `lake exe mk_all --module` (barrel update for the new/removed files);
       `lean_verify` on `k_soundness`, an S5 soundness lemma, `KAxiom_implies_TAxiom`, and `unionSound`
       to confirm no `sorry` and no new axiom.
-- [ ] Confirm net line count is negative vs. the pre-refactor baseline (the Phase-7 +597 reverses here).
+      DONE — all 7 CI steps green: full `lake build` (3250/3250 jobs), `checkInitImports`
+      clean, `lake lint` clean, `lake exe lint-style` clean, `lake test` green (9242/9242
+      jobs), `mk_all --module` added `SchemaSoundness`/`SchemaTags`/`SchemaUnion` to the
+      barrel (previously missing) with `SchemaBridges` naturally absent, `lake shake`
+      flagged zero of this sub-phase's touched files (repo-wide pre-existing shake debt
+      in unrelated Propositional/Temporal modules only, out of scope). `lean_verify`:
+      `k_soundness`, `s5_soundness`, `KAxiom_implies_TAxiom`, `unionSound` all show only
+      `propext`/`Classical.choice`/`Quot.sound` (or a subset), zero `sorry`.
+- [x] Confirm net line count is negative vs. the pre-refactor baseline (the Phase-7 +597 reverses here).
+      DONE — `git diff --numstat ad2d13d6^ HEAD -- Cslib/Logics/Modal/` (baseline = parent
+      of the first task-523 code commit) excluding the two files touched by the
+      concurrent task-517/537 session (`Constructive/Labelled/{Completeness,Soundness}.lean`,
+      pure additions unrelated to this refactor): **+1483/-2105, net -622 lines**. Even
+      including those two unrelated files the whole-`Modal/` net is still negative (-40).
 
 **Estimated output**: ~400-700 lines of net deletion + re-route edits, across three committed
 sub-phases. **Depends on**: 4, 5, 6, 7.
@@ -1103,16 +1128,16 @@ step is the user's to perform; agents do not post to Zulip or create the PR.
 
 ## Testing & Validation
 
-- [ ] Scoped `lake build` green after EVERY sub-phase (additive/staged discipline — every
+- [x] Scoped `lake build` green after EVERY sub-phase (additive/staged discipline — every
       intermediate commit CI-green).
-- [ ] No `sorry` and no new `axiom` at any intermediate state (`grep -n sorry` on touched files;
+- [x] No `sorry` and no new `axiom` at any intermediate state (`grep -n sorry` on touched files;
       `lean_verify` spot-checks on `k_soundness`, an S5 soundness lemma, a representative
       `XAxiom_implies_YAxiom` fact, and `unionSound`).
-- [ ] Public API surface unchanged: `k_soundness`, the S5 soundness lemmas, `KAxiom_implies_TAxiom`
+- [x] Public API surface unchanged: `k_soundness`, the S5 soundness lemmas, `KAxiom_implies_TAxiom`
       (+ 23 siblings), the `HasAxiom*` instances resolve at every stage (stable or deprecated alias).
-- [ ] The deliberately-absent `KB5 → S5` subsumption edge remains absent.
-- [ ] Final full `lake build` green and net line-negative vs. the pre-refactor baseline.
-- [ ] CSLib CI pipeline / `/vet` clean before the user runs `/pr`.
+- [x] The deliberately-absent `KB5 → S5` subsumption edge remains absent.
+- [x] Final full `lake build` green and net line-negative vs. the pre-refactor baseline.
+- [x] CSLib CI pipeline / `/vet` clean before the user runs `/pr`.
 
 ## Artifacts & Outputs
 

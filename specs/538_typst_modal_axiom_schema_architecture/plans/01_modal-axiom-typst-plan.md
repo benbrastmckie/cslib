@@ -1,7 +1,7 @@
 # Implementation Plan: Typst Rendering of the Modal Axiom-Schema Architecture
 
 - **Task**: 538 - Turn docs/modal-axiom-schema-architecture.md into a clear and concise Typst document that presents the architecture lucidly and directly
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 4.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/538_typst_modal_axiom_schema_architecture/reports/01_modal-axiom-typst-research.md
@@ -105,30 +105,40 @@ Phases within the same wave can execute in parallel. This plan is fully sequenti
 edit the same single `.typ` file, so each authoring phase builds on the previous one's output and
 none may run concurrently.
 
-### Phase 1: Scaffold, Preamble, Front Matter, and Resolve the AxiomB Open Item [NOT STARTED]
+### Phase 1: Scaffold, Preamble, Front Matter, and Resolve the AxiomB Open Item [COMPLETED]
 
 **Goal**: Stand up the project directory and a compiling skeleton document (preamble, notation
 macros, title/front matter), and resolve the exact `Axioms.AxiomB` expansion against live Lean
 source so the Section 3 correspondence table (Phase 3) can print it faithfully.
 
 **Tasks**:
-- [ ] Read `docs/modal-axiom-schema-architecture.md` in full to work from exact source content.
-- [ ] Create `typst/ModalAxiomArchitecture/` and `typst/ModalAxiomArchitecture/build/`.
-- [ ] Author the preamble in `modal-axiom-schema-architecture.typ`: `#import "@preview/thmbox:0.3.0"`,
+- [x] Read `docs/modal-axiom-schema-architecture.md` in full to work from exact source content.
+- [x] Create `typst/ModalAxiomArchitecture/` and `typst/ModalAxiomArchitecture/build/`.
+- [x] Author the preamble in `modal-axiom-schema-architecture.typ`: `#import "@preview/thmbox:0.3.0"`,
       `thmbox-init`, `#set text(font: "New Computer Modern", size: 11pt)`,
       `#set heading(numbering: "1.1")`, `#set par(justify: true, ...)`,
       `#set page(margin: 1.75in, numbering: "1")`, the theorem-environment shows, and the two
       breakability shows (`#show figure: set block(breakable: true)`).
-- [ ] Define the local notation macros: `nec = $square.stroked$`, `poss = $diamond.stroked$`,
+- [x] Define the local notation macros: `nec = $square.stroked$`, `poss = $diamond.stroked$`,
       `imp = $arrow.r$`, `falsum = $bot$` (matching `typst/MPL/notation/shared-notation.typ`
       verbatim), plus any local helpers needed.
-- [ ] Author the unnumbered title block: title, subtitle, "CSLib — Internal Document" byline,
+- [x] Author the unnumbered title block: title, subtitle, "CSLib — Internal Document" byline,
       date; decide (lightweight) whether to include a `#outline()` — recommended omitted at this
-      length, but record the decision.
-- [ ] Run `grep -rn "AxiomB" Cslib/Logics/Modal/` (and widen to `Cslib/**/*.lean` if needed) to
+      length, but record the decision. Decision: omitted (recorded inline as a comment in the
+      `.typ` source, directly below the title page).
+- [x] Run `grep -rn "AxiomB" Cslib/Logics/Modal/` (and widen to `Cslib/**/*.lean` if needed) to
       confirm the exact definition of `Axioms.AxiomB`; record the confirmed expansion (e.g.
       `φ → □◇φ`) or, if unresolved, the decision to cite it opaquely as `AxiomB(φ)`.
-- [ ] `typst compile` the skeleton to `build/modal-axiom-schema-architecture.pdf`; confirm exit 0.
+      **Resolved**: widened grep to `Cslib/**/*.lean` found the definition in
+      `Cslib/Foundations/Logic/Axioms.lean:163-165` (not under `Cslib/Logics/Modal/`, which only
+      has call sites): `protected abbrev AxiomB (φ : F) : F := HasImp.imp φ (HasBox.box
+      (HasImp.imp (HasBox.box (HasImp.imp φ HasBot.bot)) HasBot.bot))`, with docstring "Symmetry
+      axiom B: `φ → □◇φ`" and an explicit note that ◇ is classically encoded as `¬□¬φ` (no
+      primitive `HasDia` in this signature). The textbook shape `φ → □◇φ` is confirmed verbatim;
+      Phase 3's correspondence table will print `φ → □◇φ` with a footnote on the classical
+      diamond encoding, not the opaque-citation fallback.
+- [x] `typst compile` the skeleton to `build/modal-axiom-schema-architecture.pdf`; confirm exit 0.
+      Confirmed: exit 0, PDF written (39058 bytes).
 
 **Timing**: 0.75 hours
 

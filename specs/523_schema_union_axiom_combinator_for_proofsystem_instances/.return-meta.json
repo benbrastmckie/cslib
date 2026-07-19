@@ -1,26 +1,36 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-19T08:06:43Z",
+  "started_at": "2026-07-19T08:31:20Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
-      "summary": "Per-file rollout plan (v2, Rep A resolved): 8 phases / ~20 agent runs expanding Stages A-D into per-file/per-group sub-phases; H8-sized; postmortem constraints + preserved-assets accounting; Zulip heads-up is non-blocking."
+      "summary": "Per-file rollout plan (v2, Rep A resolved): 8 phases / ~20 agent runs expanding Stages A-D into per-file/per-group sub-phases; H8-sized; postmortem constraints + preserved-assets accounting; Zulip heads-up is non-blocking. Phase 2 now [COMPLETED]."
+    },
+    {
+      "type": "lean_file",
+      "path": "Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean",
+      "summary": "Phase 2 (new file): FrameValidatesTag (uniform 18-tag frame-validity obligation: True for 13 frame-unconditional tags, exact frame hypothesis for modalT/D/B/Four/Five) and unionSound (single master soundness lemma -- 13 branches reuse Metalogic/Soundness.lean atoms, 5 differentiator branches delegate to FrameCorrespondence.lean lemmas with no inline frame reasoning)."
     },
     {
       "type": "lean_file",
       "path": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
-      "summary": "Phase 1: ModalSchemaTag (18-tag alphabet), ModalSchemaTag.Holds (per-tag existential formula meaning cross-checked against real Instances/*.lean and S5 ModalAxiom constructors), SchemaUnion (Finset-indexed union predicate), and the single generic subsumption lemma SchemaUnion.subsumption. Purely additive; zero downstream blast."
+      "summary": "Phase 2: additively extended with the generic elimination API (SchemaUnion.empty_iff, SchemaUnion.insert_iff, SchemaUnion.union_iff, all @[simp]). Phase 1 declarations (ModalSchemaTag, .Holds, SchemaUnion, SchemaUnion.subsumption) unchanged."
+    },
+    {
+      "type": "summary",
+      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/02_unionsound-validity-table-elimination-api-summary.md",
+      "summary": "Phase 2 implementation summary."
     }
   ],
-  "next_steps": "Phase 1 complete and committed. Phase 2 (unionSound combinator + per-tag validity table) is next per the wave map; depends only on Phase 1.",
+  "next_steps": "Phase 2 complete and committed. Phase 3 (per-system tag sets + 15 bridge equivalences, split into sub-phases 3.1-3.4) is next per the wave map; depends only on Phase 1 (SchemaUnion), independent of Phase 2. New file: Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (proposed location).",
   "metadata": {
-    "session_id": "sess_task523_phase1",
+    "session_id": "dispatch-523-phase2",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "phase_count": 8,
-    "phases_completed": 1,
+    "phases_completed": 2,
     "phases_total": 8,
     "estimated_hours": "24-32",
     "postmortem_rules_count": 7
@@ -31,33 +41,26 @@
     "vacuous_count": 0,
     "axiom_count": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports + full lake lint green; full lake test/shake/mk_all not run for this additive single-file phase)"
+    "ci_pipeline_passed": "partial (scoped builds of both touched modules + checkInitImports + full lake lint + lake exe lint-style all green; full lake test/shake/mk_all not run for this additive two-file phase)"
   },
   "memory_candidates": [
     {
-      "content": "In a Lean modal-logic proof library, a representation-agnostic typeclass consumption layer (HasAxiom* bundled into ModalHilbert/ModalS4Hilbert/... via extends) plus a predicate-parametric derivation type (DerivationTree over Axioms : Proposition -> Prop) makes a compositional set-of-schemata combinator (SchemaUnion (S : Finset Tag)) feasible with a NET-LINE-NEGATIVE, INSULATED blast radius: per-system soundness case-splits and hand-written O(edges) subsumption lemmas are DELETED (replaced by one generic unionSound + Finset.subset facts), while completeness/conservativity/lifting are untouched because they route through the typeclass fields rather than the inductive's constructors. The irreducible hand cost is the file doing genuine cross-family derivation work (intuitionistic->classical), not the raw destructuring-site count. Staged additive rollout (introduce combinator alongside inductives with bridge equivalences, migrate consumers one file at a time, delete inductives last) keeps every intermediate commit CI-green and zero-debt.",
+      "content": "In a Lean modal-logic library where 5 of N shared axiom schemata each require a distinct frame condition (reflexivity/seriality/symmetry/transitivity/Euclideanness) to be valid while the rest are frame-unconditional, a single uniform per-tag obligation function (e.g. `FrameValidatesTag (m) : Tag -> Prop`, `True` for the unconditional tags and the exact frame-hypothesis shape for the conditioned ones) lets one master soundness combinator (`unionSound (S) (m) (hfc : forall t in S, FrameValidatesTag m t) ...`) discharge every case via `cases t with | tag => ... exact ExistingLemma m hval ...` -- no conditional/unconditional split at the type level, no re-derivation of the frame arguments. This composes cleanly with a semantics library that already exposes each frame-condition-to-validity correspondence as an explicit-hypothesis lemma (rather than a typeclass instance), since the master combinator can pass the obligation's proof straight through as that lemma's explicit argument.",
       "category": "PATTERN",
-      "source_artifact": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/01_schema-union-staged-rollout.md",
-      "confidence": 0.75,
-      "suggested_keywords": [
-        "lean4",
-        "modal-logic",
-        "typeclass-insulation",
-        "schema-union-combinator",
-        "additive-refactor",
-        "blast-radius"
-      ]
+      "source_artifact": "Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean",
+      "confidence": 0.8,
+      "suggested_keywords": ["lean4", "modal-logic", "soundness", "frame-correspondence", "schema-union-combinator", "uniform-obligation"]
     },
     {
-      "content": "In Lean 4, an existential over a formula-metavariable followed by dot-notation field projection on that bound variable in the equation body (e.g. `∃ φ ψ, χ = φ.imp (ψ.imp φ)`) fails to elaborate with 'Invalid field notation: Type of φ is not known' because dot notation needs the bound variable's type resolved before the body is elaborated, and Lean does not backward-infer it from the later `χ = ...` equation. Fix: add an explicit type ascription on the existential binder, e.g. `∃ φ ψ : Proposition Atom, χ = φ.imp (ψ.imp φ)`.",
-      "category": "GOTCHA",
+      "content": "For a Finset-indexed union predicate `SchemaUnion (S : Finset Tag) : Prop := exists t in S, t.Holds`, providing three @[simp] elimination lemmas -- `SchemaUnion empty_iff : SchemaUnion (empty) phi <-> False`, `SchemaUnion insert_iff : SchemaUnion (insert t S) phi <-> t.Holds phi \\/ SchemaUnion S phi`, and `SchemaUnion union_iff : SchemaUnion (Sa union Sb) phi <-> SchemaUnion Sa phi \\/ SchemaUnion Sb phi` -- lets `simp` unfold a concrete `SchemaUnion {t1, t2, ...} phi` (built via Finset insert/union notation) into the named disjunction of its tags' Holds clauses, replacing raw `fin_cases t <;> simp_all` destructuring at every downstream consumption site with named rewrites. Build this API once alongside the combinator's definition, not per-consumer.",
+      "category": "PATTERN",
       "source_artifact": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
-      "confidence": 0.85,
-      "suggested_keywords": ["lean4", "elaboration-order", "dot-notation", "existential-binder-type"]
+      "confidence": 0.8,
+      "suggested_keywords": ["lean4", "finset", "simp-lemma", "elimination-api", "schema-union-combinator"]
     }
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "SchemaUnion.lean created, built, linted, sorry/axiom-checked, committed. Phase 1 marked [COMPLETED] in plan. Stopping per single-phase dispatch scope; Phase 2 not started."
+    "stage": "phase_2_complete",
+    "details": "SchemaSoundness.lean created (FrameValidatesTag, unionSound); SchemaUnion.lean additively extended (empty_iff, insert_iff, union_iff). Both built green, sorry/axiom-checked, lint-checked, committed. Phase 2 marked [COMPLETED] in plan. Stopping per single-phase dispatch scope; Phase 3 not started."
   }
 }

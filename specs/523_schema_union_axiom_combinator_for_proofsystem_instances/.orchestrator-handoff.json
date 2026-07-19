@@ -1,33 +1,45 @@
 {
   "status": "implemented",
   "task_number": 523,
-  "summary": "Phase 1 of 8 complete: landed the additive core scaffolding for the schema-union axiom combinator in a new file, Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean. Defines `ModalSchemaTag` (18-tag alphabet, `deriving DecidableEq`), `ModalSchemaTag.Holds` (one existential clause per tag, each proposition shape cross-checked against the real `<Sys>Axiom` constructors in Instances/{K,T,D,B,K4,K5}.lean and S5's `ModalAxiom` in Metalogic/DerivationTree.lean), `SchemaUnion` (Finset-indexed union predicate), and the single generic subsumption lemma `SchemaUnion.subsumption`. Depends only on Cslib.Logics.Modal.Basic, Cslib.Foundations.Logic.Axioms, and Mathlib.Data.Finset.Basic (added for Finset) -- no system-specific file touched. Zero sorry, zero new axiom. Scoped `lake build`, `lake exe checkInitImports`, and full `lake lint` all green. Stopping here per single-phase dispatch scope; Phases 2-8 not started.",
-  "phases_completed": 1,
+  "summary": "Phase 2 of 8 complete: landed the additive unionSound combinator and 18-entry per-tag validity table in a new file, Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean, plus the generic SchemaUnion elimination API additively appended to Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean. `FrameValidatesTag` is defined uniformly over all 18 tags (True for the 13 frame-unconditional tags; the exact frame-condition hypothesis -- reflexivity/seriality/symmetry/transitivity/Euclideanness -- for modalT/D/B/Four/Five). `unionSound (S) (m) (hfc : forall t in S, FrameValidatesTag m t) {phi} (h : SchemaUnion S phi) (w) : Satisfies m w phi` is the single master soundness lemma: the 13 frame-unconditional branches reuse Metalogic/Soundness.lean's existing atoms verbatim (Satisfies.implyK_axiom, ..., Satisfies.diaDualityBack_axiom); the 5 differentiator branches thread hfc's hval straight through as the explicit frame-hypothesis argument to the task-522 FrameCorrespondence.lean lemmas (Satisfies.modalT_axiom, modalFour_axiom, modalB_axiom, modalD_axiom, modalFive_axiom) with no inline frame reasoning. The elimination API (SchemaUnion.empty_iff, SchemaUnion.insert_iff, SchemaUnion.union_iff, all @[simp]) additively extends SchemaUnion.lean so a concrete SchemaUnion sysTags phi rewrites via simp into a named tag disjunction. Zero sorry, zero new axiom. Scoped `lake build` for both modules, `lake exe checkInitImports`, full `lake lint`, and `lake exe lint-style` all green. Stopping here per single-phase dispatch scope; Phases 3-8 not started.",
+  "phases_completed": 2,
   "phases_total": 8,
   "modified_files": [
+    "Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean",
     "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
     "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md"
   ],
-  "confirmed_file_location": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean (matches the plan's proposed location exactly; no relocation needed)",
-  "placement_deviation": "none -- proposed location confirmed against the actual import graph (imports only Modal.Basic + Foundations.Logic.Axioms + Mathlib.Data.Finset.Basic, nothing system-specific)",
+  "confirmed_file_location": "Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean (matches the plan's proposed location exactly; no relocation needed)",
+  "placement_deviation": "none -- SchemaSoundness.lean imports SchemaUnion.lean + Metalogic/Soundness.lean + Metalogic/FrameCorrespondence.lean per the plan's explicit instruction; SchemaUnion.lean's elimination API additions are purely additive, Phase 1 declarations unchanged",
   "sorry_inventory": [],
   "blockers": [],
+  "unionSound_signature": "theorem unionSound {World : Type*} (S : Finset ModalSchemaTag) (m : Model World Atom) (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ : Proposition Atom} (h : SchemaUnion S φ) (w : World) : Satisfies m w φ",
   "continuation_context": {
     "is_successor": false,
-    "next_phase": 2,
-    "next_phase_goal": "unionSound combinator + per-tag validity table (FrameValidatesTag, delegating the 5 frame-conditioned tags to the task-522 FrameCorrespondence.lean lemmas, not re-proving inline). New file: Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean (proposed location).",
-    "depends_on": "Phase 1 (this dispatch) only"
+    "next_phase": 3,
+    "next_phase_goal": "Per-system tag sets + 15 bridge equivalences: define kCore + the 15 per-system Finset ModalSchemaTag tag sets and prove SchemaUnion sysTags φ ↔ <Sys>Axiom φ for each, split into sub-phases 3.1 (kCore+K/T/D/B), 3.2 (K4/K5/K45/S4), 3.3 (S5/TB/KB5), 3.4 (D4/D5/D45/DB). New file: Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (proposed location).",
+    "depends_on": "Phase 1 only (SchemaUnion); independent of Phase 2"
   },
   "artifacts": [
     {
+      "path": "Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean",
+      "type": "lean_file",
+      "summary": "FrameValidatesTag (uniform 18-tag frame-validity obligation) and unionSound (single master soundness lemma) -- Phase 2 core scaffolding, sorry-free, no new axioms."
+    },
+    {
       "path": "Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean",
       "type": "lean_file",
-      "summary": "ModalSchemaTag, ModalSchemaTag.Holds, SchemaUnion, SchemaUnion.subsumption -- Phase 1 core scaffolding, sorry-free, no new axioms."
+      "summary": "Additively extended (Phase 1 declarations unchanged) with the generic elimination API: SchemaUnion.empty_iff, SchemaUnion.insert_iff, SchemaUnion.union_iff, all @[simp]."
     },
     {
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "type": "plan",
-      "summary": "Phase 1 checklist items checked off; heading updated to [COMPLETED] with a completion note recording the confirmed file location and the elaboration-order deviation from the report's code sketch."
+      "summary": "Phase 2 checklist items checked off; heading updated to [COMPLETED] with a completion note recording the proof structure and verification results."
+    },
+    {
+      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/summaries/02_unionsound-validity-table-elimination-api-summary.md",
+      "type": "summary",
+      "summary": "Phase 2 implementation summary."
     }
   ]
 }

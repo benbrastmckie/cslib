@@ -1,41 +1,13 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-19T09:28:41Z",
-  "completed_at": "2026-07-19T09:50:19Z",
-  "phases_completed": 7,
-  "phases_total": 8,
-  "artifacts": [
-    {
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
-      "type": "plan",
-      "summary": "Phase 7 (all sub-phases 7.1-7.4) marked [COMPLETED] with import-cycle finding and per-sub-phase completion notes."
-    },
-    {
-      "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/.orchestrator-handoff.json",
-      "type": "handoff",
-      "summary": "Phase 7 handoff: status implemented, phases_completed=7/8, sorry_inventory empty, next-phase pointer to Phase 8."
-    }
-  ],
+  "status": "in_progress",
+  "started_at": "2026-07-19T14:26:56Z",
+  "artifacts": [],
   "partial_progress": {
-    "stage": "complete",
-    "details": "All four sub-phases (7.1 K/T/D/B, 7.2 K4/K5/K45/S4, 7.3 S5/TB/KB5, 7.4 D4/D5/D45/DB) landed and committed individually. All 15 HasAxiom* instance registration files discharge from SchemaUnion via a file-local private {sys}Tags_of_schemaUnion helper (necessitated by an empirically-confirmed import cycle between SchemaBridges.lean and the Instances barrel -- see handoff deviations). All 15 target inductives remain live and unmodified. Zero sorry, zero new axiom."
-  },
-  "memory_candidates": [
-    {
-      "fact": "SchemaBridges.lean (Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean) imports the Instances barrel (Cslib.Logics.Modal.ProofSystem.Instances), which imports every individual Instances/{sys}.lean file. Any future work wanting to reference a SchemaBridges.lean bridge lemma FROM an Instances/*.lean file will hit a hard import cycle -- confirmed empirically via lake build, not just inferred. The correct pattern (used in Phase 7 of the schema-union-axiom-combinator task) is a file-local private helper theorem that imports only SchemaUnion.lean (acyclic) and independently re-derives the needed direction.",
-      "tags": ["cslib", "lean4", "modal-logic", "import-cycle", "schema-union"]
-    }
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true
+    "stage": "initializing",
+    "details": "Agent started, parsing delegation context for Phase 8.1/8.2"
   },
   "metadata": {
-    "session_id": "sess_task523_phase7",
+    "session_id": "task523-phase8",
     "agent_type": "cslib-implementation-hard-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]

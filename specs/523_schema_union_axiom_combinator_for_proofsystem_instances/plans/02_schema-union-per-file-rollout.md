@@ -891,7 +891,7 @@ finalize) — depends on 4, 5, 6, 7 (all now complete).
 
 ---
 
-### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [NOT STARTED]
+### Phase 8: Redefine-in-place finish — retire inductives + full scaffolding removal [BLOCKED]
 
 **Goal**: The terminal, once-everything-else-is-green step: **redefine each `<Sys>Axiom` in place**
 as `SchemaUnion sysTags` (preserving the public name, retiring the inductive), resolve S5's
@@ -919,25 +919,64 @@ live in `SchemaBridges.lean` and MUST be relocated to a foundational file import
 `SchemaUnion.lean` before the inductives can be redefined in terms of them — this is sub-phase 8.1.
 The tag sets belong at the foundation anyway (a system's tag set is its essence, not scaffolding).
 
-**Sub-phase 8.1 — relocate tag sets to a foundational file** [NOT STARTED]
-- [ ] Create `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` (imports only `SchemaUnion.lean`);
+**Sub-phase 8.1 — relocate tag sets to a foundational file** [COMPLETED]
+- [x] Create `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean` (imports only `SchemaUnion.lean`);
       move `kCore` + the 15 `sysTags` definitions there from `SchemaBridges.lean`.
-- [ ] Point `SchemaBridges.lean` (and any other current user of the tag sets) at `SchemaTags.lean`;
+- [x] Point `SchemaBridges.lean` (and any other current user of the tag sets) at `SchemaTags.lean`;
       bridges stay intact and green for now. Pure move, no semantic change.
 - Verify: scoped `lake build` of `SchemaTags`, `SchemaBridges`, and downstream green; zero `sorry`.
+      DONE — `lake build Cslib.Logics.Modal.ProofSystem.SchemaTags`,
+      `...SchemaBridges`, and `...Metalogic.InterSystem.AxiomSubsumption` all green;
+      `lake exe checkInitImports` clean; zero `sorry` in touched files.
 
-**Sub-phase 8.2 — redefine the inductives; trivialize bridges; delete private helpers** [NOT STARTED]
-- [ ] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
+**Sub-phase 8.2 — redefine the inductives; trivialize bridges; delete private helpers** [BLOCKED]
+- [x] Confirm (grep) no *constructor* (`.ctor`) construction/destructuring site targets any
       `<Sys>Axiom`/`ModalAxiom` inductive (all migrated in Phases 4/6/7). Predicate references remain.
+      **FINDING (blocker): this check FAILS.** All 15 `Systems/*/Completeness.lean` files
+      (`K,T,D,B,K4,K5,K45,S4,S5,TB,KB5,D4,D5,D45,DB`) contain live constructor-construction
+      sites for the very inductives Phase 8.2 would retire — NOT migrated in Phases 4/6/7 (those
+      phases touched `Soundness.lean`, `AxiomSubsumption.lean`, `IntToClassical.lean`, and the
+      instance registrations; `Completeness.lean` was out of scope for all of them and is not
+      listed anywhere in this Phase 8 section's "Files to modify"). Two concrete shapes found:
+      1. Explicit named constructors in `D4`, `D5`, `D45`, `DB`'s `Completeness.lean` (e.g.
+         `Cslib/Logics/Modal/Metalogic/Systems/D4/Completeness.lean:60-64`:
+         `(fun φ ψ => D4Axiom.implyK φ ψ) (fun φ ψ χ => D4Axiom.implyS φ ψ χ) (fun φ => D4Axiom.efq φ)
+         (fun φ ψ => D4Axiom.modalK φ ψ) (fun φ => D4Axiom.modalD φ) ... (fun φ => D4Axiom.modalFour φ)`,
+         passed as constructor-witness callbacks into the generic lemmas `d_canonical_serial` /
+         `canonical_trans` (from `Systems/D/Completeness.lean`) and `Systems/S4/Completeness.lean`'s
+         analogue). `D4Axiom.implyK` etc. are literal declared-name dot-projections onto the
+         `D4Axiom` inductive's constructors; they do not exist once `D4Axiom` is redefined as
+         `abbrev/def := SchemaUnion d4Tags` (a `def`, not an inductive/structure) — this is a
+         hard "unknown identifier" compile failure, not a warning.
+      2. Anonymous-constructor dot-notation in ALL 15 files' `..._truth_lemma`-shaped call sites
+         (e.g. `Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean:425-450`,
+         `Systems/K/Completeness.lean:341-353`, `Systems/S5/Completeness.lean:76-84`, etc.):
+         `(fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) (fun φ => .efq φ) ...` — elaborated
+         against the expected type `∀ φ ψ, Axioms (...)` with `Axioms` unified to the concrete
+         `<Sys>Axiom`/`ModalAxiom` from the enclosing theorem's `CanonicalWorld (@<Sys>Axiom Atom)`
+         argument, so `.implyK` resolves to `<Sys>Axiom.implyK` (a constructor projection) exactly
+         as in case 1 — same failure mode once the inductive is retired.
+      Per this sub-phase's own instruction ("If any live constructor site remains, STOP and
+      report it — do not proceed to redefinition") and the dispatch's plan-compliance escalation
+      rule, redefinition is NOT performed. Fixing `Completeness.lean` (15 files, not listed in
+      this phase's file scope, and explicitly reserved call-site work belongs with 8.3-style
+      call-site simplification) is out of scope for this dispatch. See handoff for the full
+      blocker record and next-step recommendation (a dedicated sub-phase, e.g. 8.1.5 or folded
+      into 8.2, to migrate these 15 `Completeness.lean` files to the `SchemaUnion`
+      existential-witness form — mirroring the `⟨.tag, by decide, …, rfl⟩` pattern already used
+      in `IntToClassical.lean` and the Phase-7 private helpers — BEFORE the inductives can be
+      redefined).
 - [ ] Redefine the 14 `<Sys>Axiom` in `Instances/*.lean` and S5's `ModalAxiom`
       (`Metalogic/DerivationTree.lean:64`) as `abbrev/def := SchemaUnion sysTags` (per the
       reducibility decision above), importing `SchemaTags.lean`. Delete the 15 Phase-7 private
-      `{sys}Tags_of_schemaUnion` helpers (now redundant).
+      `{sys}Tags_of_schemaUnion` helpers (now redundant). **NOT STARTED — blocked by the grep-confirm
+      finding above.**
 - [ ] Replace each bridge proof in `SchemaBridges.lean` with `Iff.rfl` (or delete it if unused after
-      8.3) so the file still compiles at this checkpoint.
+      8.3) so the file still compiles at this checkpoint. **NOT STARTED — blocked.**
 - Verify: scoped `lake build` of Instances barrel, DerivationTree, SchemaBridges, and the three S5
       consumers (`MCS.lean`, `Metalogic/Soundness.lean`, `Bimodal/…/ModalConservativity.lean`) green;
       inductives grep-confirmed gone; every public name still resolves; zero `sorry`, no new axiom.
+      **NOT REACHED.**
 
 **Sub-phase 8.3 — simplify the ~78 call sites; delete scaffolding; final full verify** [NOT STARTED]
 - [ ] Simplify the bridge call sites now that the forms are interchangeable: `Systems/*/Soundness.lean`

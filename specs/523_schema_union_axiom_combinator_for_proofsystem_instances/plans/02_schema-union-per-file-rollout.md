@@ -929,7 +929,7 @@ The tag sets belong at the foundation anyway (a system's tag set is its essence,
       `...SchemaBridges`, and `...Metalogic.InterSystem.AxiomSubsumption` all green;
       `lake exe checkInitImports` clean; zero `sorry` in touched files.
 
-**Sub-phase 8.2 — migrate the 15 `Completeness.lean` witness sites (additive)** [NOT STARTED]
+**Sub-phase 8.2 — migrate the 15 `Completeness.lean` witness sites (additive)** [COMPLETED]
 
 Discovered during the first 8.2 attempt (finding preserved below under the old 8.2 heading, now
 8.3): all 15 `Systems/*/Completeness.lean` files construct axiom witnesses via constructors
@@ -949,16 +949,40 @@ touched — only the witness *construction* changes. `Completeness.lean` imports
 `Metalogic/Systems/*/Completeness`). After the 8.3 `abbrev` redefinition these bridge wrappers
 become identities and are dropped in 8.4.
 
-- [ ] 8.2a — `Systems/{K,T,D,B}/Completeness.lean`: migrate all constructor-witness sites to the
+- [x] 8.2a — `Systems/{K,T,D,B}/Completeness.lean`: migrate all constructor-witness sites to the
       bridge form above. Scoped `lake build` of each module green; zero `sorry`. Commit.
-- [ ] 8.2b — `Systems/{K4,K5,K45,S4}/Completeness.lean`. Commit.
-- [ ] 8.2c — `Systems/{S5,TB,KB5}/Completeness.lean` (S5 via the `ModalAxiom` bridge). Commit.
-- [ ] 8.2d — `Systems/{D4,D5,D45,DB}/Completeness.lean` (these carry explicit named `<Sys>Axiom.ctor`
+      DONE — commit `30d3c807` (110 sites: K 33, T 25, D 27, B 25).
+- [x] 8.2b — `Systems/{K4,K5,K45,S4}/Completeness.lean`. Commit.
+      DONE — commit `837b6551`.
+- [x] 8.2c — `Systems/{S5,TB,KB5}/Completeness.lean` (S5 via the `ModalAxiom` bridge). Commit.
+      DONE — commit `8068ef15`.
+- [x] 8.2d — `Systems/{D4,D5,D45,DB}/Completeness.lean` (these carry explicit named `<Sys>Axiom.ctor`
       forms too — migrate both the named and the anonymous-dot shapes). Commit.
+      DONE — commit `d0c319aa` (126 sites: D4 30 = 8 named + 22 anon, D5 31 = 9 named + 22 anon,
+      D45 34 = 12 named + 22 anon, DB 31 = 9 named + 22 anon).
 - Verify (each group): scoped `lake build` of each touched `Completeness.lean` green; the generic
   completeness lemmas unchanged; zero `sorry`, no new axiom. The inductives stay LIVE.
+      DONE — all 15 modules build green together (`lake build` of all 15 `Completeness`
+      targets, 696 jobs, zero errors); `grep -rn sorry` over all 15 files returns nothing;
+      `lean_verify` spot-checks (one per group) show only `propext`, `Classical.choice`,
+      `Quot.sound`; `lake exe checkInitImports` and scoped `lake lint` clean.
 - **Done when**: grep finds NO remaining constructor-construction site (`.ctor` / `<Sys>Axiom.ctor`)
   for any `<Sys>Axiom`/`ModalAxiom` across all of `Cslib/` — i.e. 8.3's grep-gate will pass.
+      CONFIRMED — final repo-wide grep-gate (run once, after all four groups landed):
+      `grep -rnE '\(fun [^=]*=> \.[A-Za-z0-9]+ [^)]*\)' Cslib/Logics/Modal/Metalogic/Systems/*/Completeness.lean`
+      and
+      `grep -rnE '(K|T|D|B|K4|K5|K45|S4|S5|TB|KB5|D4|D5|D45|DB)Axiom\.(implyK|implyS|efq|peirce|modalK|modalT|modalD|modalB|modalFour|modalFive|andI|andE1|andE2|orI1|orI2|orE|diaDualityFwd|diaDualityBack) ' Cslib/Logics/Modal/Metalogic/Systems/*/Completeness.lean`
+      both return **no matches** (exit 1) across all 15 files. A supplementary check of the
+      previously-migrated consumer files (`Systems/*/Soundness.lean`, `InterSystem/*.lean`,
+      `ProofSystem/Instances/*.lean`, `Metalogic/DerivationTree.lean`) also returns no matches
+      outside `SchemaBridges.lean`/`IntToClassical.lean` (the bridge definitions and their
+      Phase-6 reference usage, which are supposed to contain these forms). 8.3's grep-gate is
+      confirmed clean; sub-phase 8.3 (redefine the inductives) may proceed as a separate
+      dispatch. Note: intuitionistic/constructive families (`IS4Axiom`, `CS5Canonical`,
+      `OrImpConservative`) also use `.implyK`/`.efq`/etc.-style anonymous constructors against
+      their OWN unrelated inductives — these are explicitly out of scope for the schema-union
+      rollout (SchemaUnion.lean's design invariants exclude intuitionistic/minimal families) and
+      were excluded from the grep-gate scope.
 
 **Sub-phase 8.3 — redefine the inductives; trivialize bridges; delete private helpers** [NOT STARTED]
 

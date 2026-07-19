@@ -1,64 +1,96 @@
 {
   "status": "partial",
   "task_number": 523,
-  "summary": "Sub-phase 8.1 (relocate kCore + 15 sysTags to Cslib/Logics/Modal/ProofSystem/SchemaTags.lean) completed and committed, green. Sub-phase 8.2 (redefine the 14 <Sys>Axiom inductives + S5's ModalAxiom as SchemaUnion) is BLOCKED at its mandated grep-confirm step: all 15 Systems/*/Completeness.lean files contain live constructor-construction sites for the inductives Phase 8.2 would retire, which were never migrated in Phases 4/6/7 and are not listed anywhere in this phase's file scope. Redefining any inductive now would break these 15 files' compilation with hard 'unknown identifier' / unresolvable dot-notation-projection errors, not warnings. No inductive was redefined; no sorry introduced; no axiom introduced; SchemaBridges.lean's 15 bridge proofs are untouched (still full Iff proofs, not Iff.rfl). 8.3 is untouched and out of scope until 8.2 lands.",
-  "phases_completed": "7/8 (Phase 8 sub-phase 8.1 complete; 8.2 blocked; 8.3 not started)",
+  "summary": "Sub-phase 8.2 (migrate the 15 Systems/*/Completeness.lean witness sites to the SchemaUnion bridge-witness form) is now COMPLETE and green, resolving the blocker recorded in the prior handoff. All 15 files (K, T, D, B, K4, K5, K45, S4, S5, TB, KB5, D4, D5, D45, DB) had their axiom-witness CONSTRUCTION callbacks (both anonymous dot-notation `.tag args` and, for D4/D5/D45/DB, explicit named `<Sys>Axiom.tag args`) rewritten to `(schemaUnion_sysTags_iff_SysAxiom).mp <tag-witness>` form, split across 4 groups and 2 concurrent dispatches on this task: 8.2a (K/T/D/B, commit 30d3c807), 8.2b (K4/K5/K45/S4, commit 837b6551), 8.2c (S5/TB/KB5, commit 8068ef15), 8.2d (D4/D5/D45/DB, commit d0c319aa, this dispatch). The 15 axiom inductives stay LIVE (none redefined); the generic completeness lemmas that consume the callbacks (d_canonical_serial, canonical_trans, canonical_eucl_from_5, the *_truth_lemma family, strong_completeness, compactness, ...) are untouched. The repo-wide grep-gate that sub-phase 8.3's redefinition step depends on is now confirmed clean (see verification.grep_gate below). Sub-phase 8.1 (SchemaTags.lean relocation) remains complete from the prior dispatch. Sub-phases 8.3 (redefine the inductives; trivialize bridges; delete private helpers) and 8.4 (simplify bridge call sites; delete SchemaBridges.lean) are explicitly OUT OF SCOPE for this dispatch and NOT STARTED -- do not proceed to them without a fresh dispatch, per the orchestrator's explicit instruction.",
+  "phases_completed": "Phase 8 sub-phases 8.1 and 8.2 complete; 8.3 and 8.4 not started",
   "sub_phase_status": {
     "8.1": "COMPLETED - committed 5b84ff2b",
-    "8.2": "BLOCKED - see blockers",
-    "8.3": "NOT STARTED - depends on 8.2"
+    "8.2": "COMPLETED - committed 30d3c807 (8.2a), 837b6551 (8.2b), 8068ef15 (8.2c), d0c319aa (8.2d)",
+    "8.3": "NOT STARTED - unblocked now that 8.2's grep-gate is clean; do not start without a fresh dispatch",
+    "8.4": "NOT STARTED - depends on 8.3"
   },
   "modified_files": [
-    "Cslib/Logics/Modal/ProofSystem/SchemaTags.lean (NEW - kCore + 15 sysTags relocated here from SchemaBridges.lean)",
-    "Cslib/Logics/Modal/ProofSystem/SchemaBridges.lean (imports SchemaTags.lean; tag-set defs removed; bridge proofs unchanged)",
-    "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md (Phase 8 heading -> [BLOCKED]; 8.1 -> [COMPLETED]; 8.2 -> [BLOCKED] with full finding recorded)"
+    "Cslib/Logics/Modal/Metalogic/Systems/K/Completeness.lean (8.2a)",
+    "Cslib/Logics/Modal/Metalogic/Systems/T/Completeness.lean (8.2a)",
+    "Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean (8.2a)",
+    "Cslib/Logics/Modal/Metalogic/Systems/B/Completeness.lean (8.2a)",
+    "Cslib/Logics/Modal/Metalogic/Systems/K4/Completeness.lean (8.2b)",
+    "Cslib/Logics/Modal/Metalogic/Systems/K5/Completeness.lean (8.2b)",
+    "Cslib/Logics/Modal/Metalogic/Systems/K45/Completeness.lean (8.2b)",
+    "Cslib/Logics/Modal/Metalogic/Systems/S4/Completeness.lean (8.2b)",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Completeness.lean (8.2c, via ModalAxiom bridge)",
+    "Cslib/Logics/Modal/Metalogic/Systems/TB/Completeness.lean (8.2c)",
+    "Cslib/Logics/Modal/Metalogic/Systems/KB5/Completeness.lean (8.2c)",
+    "Cslib/Logics/Modal/Metalogic/Systems/D4/Completeness.lean (8.2d, named + anonymous forms)",
+    "Cslib/Logics/Modal/Metalogic/Systems/D5/Completeness.lean (8.2d, named + anonymous forms)",
+    "Cslib/Logics/Modal/Metalogic/Systems/D45/Completeness.lean (8.2d, named + anonymous forms)",
+    "Cslib/Logics/Modal/Metalogic/Systems/DB/Completeness.lean (8.2d, named + anonymous forms)",
+    "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md (sub-phase 8.2 heading -> [COMPLETED]; all four group checkboxes checked with commit hashes; grep-gate result recorded inline)"
   ],
-  "reducibility_fallback_used": "N/A -- no inductive was redefined in this dispatch (blocked before reaching the abbrev-vs-def decision point). No system needed the def+simp fallback because no system was attempted.",
-  "sorry_inventory": [],
-  "axiom_check": "No new axiom introduced (no redefinition was performed). Inductives remain fully live.",
-  "inductives_retired": false,
-  "abbrev_vs_def_per_system": "not yet decided -- 8.2 did not proceed to redefinition",
-  "blockers": [
-    {
-      "phase": "8.2",
-      "what_failed": "The mandated pre-redefinition grep-confirm step ('no constructor construction/destructuring site targets any <Sys>Axiom/ModalAxiom inductive; all migrated in Phases 4/6/7') fails against the actual repo state.",
-      "evidence": [
-        "Explicit named constructors (case 1): Cslib/Logics/Modal/Metalogic/Systems/D4/Completeness.lean:60-64 -- '(fun φ ψ => D4Axiom.implyK φ ψ) (fun φ ψ χ => D4Axiom.implyS φ ψ χ) (fun φ => D4Axiom.efq φ) (fun φ ψ => D4Axiom.modalK φ ψ) (fun φ => D4Axiom.modalD φ) ... (fun φ => D4Axiom.modalFour φ)', passed as constructor-witness callbacks into the generic lemmas d_canonical_serial / canonical_trans. Same pattern confirmed at Systems/D5/Completeness.lean:60-64, Systems/D45/Completeness.lean:59-67, Systems/DB/Completeness.lean:60-64 (D5Axiom, D45Axiom, DBAxiom respectively).",
-        "Anonymous dot-notation constructors (case 2, ALL 15 systems): e.g. Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean:425-450 and :491+, Systems/K/Completeness.lean:341-401, Systems/T/Completeness.lean:58-124, Systems/B/Completeness.lean:54-119, Systems/K4/Completeness.lean:51-116, Systems/K5/Completeness.lean:51-116, Systems/K45/Completeness.lean:54-80, Systems/S4/Completeness.lean:55-82, Systems/S5/Completeness.lean:56-84, Systems/TB/Completeness.lean:65-92, Systems/KB5/Completeness.lean:56-82, and analogous blocks in D4/D5/D45/DB/Completeness.lean at ~71-76, 118-119, 160-161 -- '(fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) (fun φ => .efq φ) ...' elaborated against expected type '∀ φ ψ, Axioms (...)' with Axioms unified to the concrete <Sys>Axiom/ModalAxiom from the enclosing theorem's CanonicalWorld (@<Sys>Axiom Atom) argument, so '.implyK' resolves via dot-notation to '<Sys>Axiom.implyK' -- a literal constructor projection, exactly as in case 1."
-      ],
-      "root_cause": "Phases 4, 6, and 7 migrated Soundness.lean, InterSystem/AxiomSubsumption.lean, InterSystem/IntToClassical.lean, and the 15 instance registrations (Instances/*.lean) to consume SchemaUnion via the bridge equivalences, but Systems/*/Completeness.lean (a distinct file family: d_canonical_serial / canonical_trans / *_truth_lemma / *_completeness) was never in scope for any prior phase and is not listed in Phase 8's 'Files to modify' section. These files construct axiom-predicate witnesses directly via the inductive's constructors (both named and anonymous dot-notation) -- exactly the class of site the Phase 8.2 grep-confirm step exists to catch before redefinition. If any <Sys>Axiom/ModalAxiom is redefined as abbrev/def := SchemaUnion sysTags while these call sites still stand, '<Sys>Axiom.implyK' (and the equivalent anonymous '.implyK') becomes an unresolvable dot-notation projection -- a hard compile failure across all 15 systems' Completeness.lean files, not a warning.",
-      "what_was_tried": "Ran the plan-mandated grep across Cslib/ for '<Sys>Axiom.' and 'ModalAxiom.' patterns (excluding each system's own Instances/*.lean and SchemaBridges.lean, where such patterns are expected/already migrated). Cross-checked the intuitionistic/minimal/constructive-family hits (CS5ModalAxiom, IS4ModalAxiom, MS4ModalAxiom, ITModalAxiom, IS5ModalAxiom, MS5ModalAxiom, MTModalAxiom, CS4ModalAxiom, CTModalAxiom) and confirmed they are a SEPARATE, out-of-scope inductive family (per Postmortem Constraints, not to be touched) rather than false positives on the classical 15. Read the generic lemma signatures (d_canonical_serial, d_truth_lemma in Systems/D/Completeness.lean) and confirmed they are parameterized over an abstract Axioms : Proposition Atom -> Prop and take predicate-shaped hypotheses -- the failure is specifically the caller's constructor-shaped witness supply, not the generic lemma's own signature. Did NOT perform a live break-and-revert build experiment (would have required editing an Instances/*.lean inductive on a shared, concurrently-committing working tree merely to reproduce an outcome that is unambiguous from Lean's dot-notation-resolution semantics: Foo.bar requires a literally declared Foo.bar constant, and none exists once Foo is a def/abbrev rather than an inductive with a bar constructor).",
-      "what_is_needed": "A dedicated migration of all 15 Systems/*/Completeness.lean files from direct-constructor / anonymous-dot-notation witness supply to the SchemaUnion existential-witness form already established as house style in IntToClassical.lean and the Phase-7 private helpers, i.e. '⟨.implyK, by decide, φ, ψ, rfl⟩ : SchemaUnion sysTags (...)' in place of 'D4Axiom.implyK φ ψ' / '.implyK φ ψ'. This is naturally either (a) a new sub-phase inserted before 8.2 redefinition (e.g. 8.1.5), or (b) folded into 8.2's scope with an expanded file list -- but is NOT something this dispatch should do silently, since it is unplanned scope (15 files, none listed in Phase 8's 'Files to modify') and the plan-compliance rule requires escalating a would-be plan deviation rather than substituting a different step. Recommend the user/orchestrator revise the plan to add this sub-phase explicitly before the next 8.2 dispatch."
+  "per_group_site_counts": {
+    "8.2a_K_T_D_B": {"K": 33, "T": 25, "D": 27, "B": 25, "total": 110},
+    "8.2b_K4_K5_K45_S4": {"note": "committed by the concurrent dispatch; exact per-file breakdown in commit 837b6551's message"},
+    "8.2c_S5_TB_KB5": {"note": "committed by the concurrent dispatch; exact per-file breakdown in commit 8068ef15's message"},
+    "8.2d_D4_D5_D45_DB": {
+      "D4": {"named": 8, "anon": 22, "total": 30},
+      "D5": {"named": 9, "anon": 22, "total": 31},
+      "D45": {"named": 12, "anon": 22, "total": 34},
+      "DB": {"named": 9, "anon": 22, "total": 31},
+      "total": 126
     }
-  ],
+  },
+  "reducibility_fallback_used": "N/A -- no inductive was redefined in this dispatch (that is sub-phase 8.3, out of scope here).",
+  "sorry_inventory": [],
+  "axiom_check": "No new axiom introduced. lean_verify spot-checks (one theorem per group): k_truth_lemma_applied (K, group 8.2a), d4_strong_completeness / d45_canonical_FC / db_strong_completeness_iff / d5_completeness (group 8.2d) all show only propext, Classical.choice, Quot.sound.",
+  "inductives_retired": false,
+  "abbrev_vs_def_per_system": "not yet decided -- deferred to sub-phase 8.3",
+  "blockers": [],
   "deviations": [],
   "continuation_context": {
     "is_successor": false,
-    "next_phase": "8.2 (after a plan revision)",
-    "next_phase_name": "Migrate Systems/*/Completeness.lean to SchemaUnion witnesses, THEN redefine the 14 <Sys>Axiom inductives + S5's ModalAxiom",
-    "pointer": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md, Phase 8 sub-phase 8.2 section",
-    "notes": "8.1's SchemaTags.lean is ready and unaffected by this blocker -- no rework needed there. Before 8.2 can proceed, the plan needs an explicit sub-phase (or expanded 8.2 file scope) covering the 15 Systems/*/Completeness.lean files, migrating their axiom-witness callbacks from raw/anonymous constructor calls to SchemaUnion existential witnesses. Only after that lands can the 14 Instances/*.lean inductives and DerivationTree.lean's ModalAxiom be safely redefined as abbrev/def := SchemaUnion sysTags without breaking Completeness.lean. 8.3 (call-site simplification across Soundness.lean/AxiomSubsumption.lean/IntToClassical.lean, SchemaBridges.lean deletion, full build) remains untouched.",
-    "depends_on": "8.2 depends on a plan revision to add the Completeness.lean migration; 8.3 depends on 8.2."
+    "next_phase": "8.3",
+    "next_phase_name": "Redefine the 14 <Sys>Axiom inductives + S5's ModalAxiom as SchemaUnion; trivialize SchemaBridges.lean; delete the 15 Phase-7 private helpers",
+    "pointer": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md, Phase 8 sub-phase 8.3 section",
+    "notes": "8.3's own grep-confirm precondition is now satisfied by 8.2's completion -- see verification.grep_gate below. Per the orchestrator's explicit instruction to this dispatch, sub-phase 8.3 (redefinition) should be dispatched SEPARATELY, not folded into this run. When 8.3 is dispatched: redefine each <Sys>Axiom (Instances/*.lean) and S5's ModalAxiom (Metalogic/DerivationTree.lean:64) as abbrev/def := SchemaUnion sysTags (per the reducibility decision in the plan, preferring abbrev, falling back to def + @[simp] unfolding lemma per system if abbrev causes elaboration/simp-loop problems), replace each SchemaBridges.lean proof with Iff.rfl (or delete if unused), delete the 15 Phase-7 private helpers, and verify the Instances barrel / DerivationTree / SchemaBridges / MCS.lean / Metalogic/Soundness.lean / Bimodal ModalConservativity.lean all still build green with the inductives grep-confirmed gone.",
+    "depends_on": "8.3 depends on 8.2 (now satisfied); 8.4 depends on 8.3."
   },
   "verification": {
     "sorry_count": 0,
     "vacuous_count": 0,
     "new_axiom_count": 0,
     "inductives_still_defined": 15,
-    "scoped_build_schematags_schemabridges_axiomsubsumption": "green",
+    "build_passed": true,
+    "ci_pipeline_passed": "partial -- scoped builds (all 15 Completeness modules, 696 jobs), lake exe checkInitImports, and scoped lake lint all green for the touched files; full lake test / lake shake / lake exe mk_all not run this dispatch (out of scope for an additive sub-phase; deferred to 8.3/8.4/final task wrap-up)",
     "check_init_imports": "clean",
-    "lean_verify_spot_checks": "not run this dispatch (no new theorems introduced beyond the pure relocation; SchemaTags.lean/SchemaBridges.lean bridge proofs are textually unchanged, only relocated)",
-    "net_line_delta_8_1": "SchemaTags.lean +~120 new lines; SchemaBridges.lean -~67 net lines (tag-set defs removed, import + doc note added)",
+    "lean_verify_spot_checks": [
+      {"theorem": "Cslib.Logic.Modal.k_truth_lemma_applied", "axioms": ["propext", "Classical.choice", "Quot.sound"]},
+      {"theorem": "Cslib.Logic.Modal.d4_strong_completeness", "axioms": ["propext", "Classical.choice", "Quot.sound"]},
+      {"theorem": "Cslib.Logic.Modal.d45_canonical_FC", "axioms": ["propext", "Classical.choice", "Quot.sound"]},
+      {"theorem": "Cslib.Logic.Modal.db_strong_completeness_iff", "axioms": ["propext", "Classical.choice", "Quot.sound"]},
+      {"theorem": "Cslib.Logic.Modal.d5_completeness", "axioms": ["propext", "Classical.choice", "Quot.sound"]}
+    ],
+    "grep_gate": {
+      "commands": [
+        "grep -rnE '\\(fun [^=]*=> \\.[A-Za-z0-9]+ [^)]*\\)' Cslib/Logics/Modal/Metalogic/Systems/*/Completeness.lean",
+        "grep -rnE '(K|T|D|B|K4|K5|K45|S4|S5|TB|KB5|D4|D5|D45|DB)Axiom\\.(implyK|implyS|efq|peirce|modalK|modalT|modalD|modalB|modalFour|modalFive|andI|andE1|andE2|orI1|orI2|orE|diaDualityFwd|diaDualityBack) ' Cslib/Logics/Modal/Metalogic/Systems/*/Completeness.lean"
+      ],
+      "result": "No matches (exit 1) for either command across all 15 Systems/*/Completeness.lean files. Supplementary check of Systems/*/Soundness.lean, InterSystem/*.lean, ProofSystem/Instances/*.lean, and Metalogic/DerivationTree.lean also returns no matches outside SchemaBridges.lean/IntToClassical.lean (the bridge definitions and their sanctioned Phase-6 usage). CONFIRMED CLEAN -- sub-phase 8.3's grep-gate precondition is satisfied.",
+      "excluded_out_of_scope": "Intuitionistic/constructive families (IS4Axiom, CS5ModalAxiom/CS5Canonical helpers, OrImpConservative's Hilbert-system predicates) also use anonymous `.implyK`/`.efq`/etc. constructor notation against their OWN unrelated inductives. These are explicitly out of scope for the classical schema-union rollout (SchemaUnion.lean's design invariants exclude intuitionistic/minimal families) and were excluded from the grep-gate scope; they are unaffected by 8.2/8.3/8.4."
+    },
     "per_subphase_commits": [
-      "5b84ff2b task 523 phase 8.1: relocate kCore + 15 sysTags to SchemaTags.lean"
+      "5b84ff2b task 523 phase 8.1: relocate kCore + 15 sysTags to SchemaTags.lean",
+      "30d3c807 task 523 phase 8.2a: migrate K/T/D/B Completeness.lean witness sites to SchemaUnion bridges",
+      "837b6551 task 523 phase 8.2b: migrate K4/K5/K45/S4 Completeness.lean witness sites to SchemaUnion bridges",
+      "8068ef15 task 523 phase 8.2c: migrate S5/TB/KB5 Completeness.lean witness sites to SchemaUnion bridges",
+      "d0c319aa task 523 phase 8.2d: migrate D4/D5/D45/DB Completeness.lean witness sites to SchemaUnion bridges"
     ]
   },
   "artifacts": [
     {
       "path": "specs/523_schema_union_axiom_combinator_for_proofsystem_instances/plans/02_schema-union-per-file-rollout.md",
       "type": "plan",
-      "summary": "Phase 8 heading marked [BLOCKED]; sub-phase 8.1 marked [COMPLETED] with verification notes; sub-phase 8.2 marked [BLOCKED] with the full grep-confirm finding, evidence citations, root cause, and recommended next step recorded inline."
+      "summary": "Sub-phase 8.2 heading marked [COMPLETED]; all four group checkboxes (8.2a-8.2d) checked off with commit hashes; the repo-wide grep-gate command and clean result recorded inline as the precondition confirmation for sub-phase 8.3."
     }
   ],
-  "requires_user_review": true
+  "requires_user_review": false
 }

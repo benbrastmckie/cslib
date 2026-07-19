@@ -1,8 +1,6 @@
 {
-  "total_churn": 1,
-  "target_churn": {
-    "tPrime-uninhabited": 1
-  },
+  "total_churn": 0,
+  "target_churn": {},
   "adversarial_triggers": 0,
-  "audit_dispatches": 0
+  "audit_dispatches": 1
 }

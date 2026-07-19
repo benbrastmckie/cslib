@@ -1,33 +1,11 @@
 {
-  "status": "implemented",
-  "started_at": "2026-07-18T23:50:25Z",
-  "artifacts": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/FrameClass.lean",
-    "specs/517_labelled_bounded_context_cs5_completeness/plans/12_wellfounded-zorn-oldlabel-reconstruction.md",
-    "specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-9-handoff-20260718.md",
-    "Cslib.lean"
-  ],
-  "partial_progress": {
-    "stage": "phase_9_complete",
-    "details": "Phase 9 (frame-class match) landed: cs5FCIncest_canonWorld_r bundling five conjuncts, sorry-free and axiom-clean, over the general CanonWorld TS5 Atom type. Full CSLib CI pipeline green.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 9
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "lean_verify_axioms": ["propext", "Quot.sound"]
-  },
+  "status": "partial",
   "metadata": {
-    "session_id": "orchestrator-continuation",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "cycles_used": 5,
+    "max_cycles": 5,
+    "final_state": "implementing",
+    "phases_completed": 9,
+    "phases_total": 11,
+    "next_phase": 10
   }
 }

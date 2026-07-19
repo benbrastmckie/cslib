@@ -254,7 +254,7 @@ all green.
 
 ---
 
-### Phase 2: `unionSound` combinator + per-tag validity table [NOT STARTED]
+### Phase 2: `unionSound` combinator + per-tag validity table [COMPLETED]
 
 **Goal**: Provide the generic soundness combinator, the 18-entry tag→validity table (13
 frame-unconditional atoms reused; 5 frame-conditioned entries delegated to the task-522
@@ -262,32 +262,37 @@ frame-unconditional atoms reused; 5 frame-conditioned entries delegated to the t
 collapse the per-system case-splits into named lemma applications rather than raw `fin_cases`.
 
 **Tasks**:
-- [ ] Define `FrameValidatesTag m t` (per-tag semantic obligation) **uniformly over all 18 tags**:
+- [x] Define `FrameValidatesTag m t` (per-tag semantic obligation) **uniformly over all 18 tags**:
       it returns `True` for the 13 frame-unconditional tags and, for the 5 differentiators, returns
       *exactly the frame hypothesis its task-522 lemma takes* (`∀ w, m.r w w` for `modalT`;
       seriality/symmetry/transitivity/Euclideanness for `modalD/B/Four/Five`). Uniformity over all
       18 — not a conditional/unconditional split at the type level — is a design invariant: the 13
       trivial obligations discharge by `trivial`, keeping `unionSound`'s `hfc` interface uniform.
-- [ ] State and prove `unionSound (S) (m) (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ}
+- [x] State and prove `unionSound (S) (m) (hfc : ∀ t ∈ S, FrameValidatesTag m t) {φ}
       (h : SchemaUnion S φ) (w) : Satisfies m w φ` (report §5 signature) as the SINGLE master
       soundness lemma; every per-system soundness proof (Phase 4) specializes it — no per-system
       soundness structure survives.
-- [ ] **Elimination API (design invariant — tame the ~50 destructuring sites with named lemmas,
+- [x] **Elimination API (design invariant — tame the ~50 destructuring sites with named lemmas,
       not raw `fin_cases`)**: extend `SchemaUnion.lean` (additive) with the generic membership /
       unfolding lemmas for `SchemaUnion` over `Finset` structure — at minimum `SchemaUnion`
       unfolding over `∅` / `insert` / `∪`, and a `@[simp]` `mem`-style characterization — so that a
       downstream `SchemaUnion sysTags φ` rewrites to the named disjunction of its tags' `.Holds`
       via `simp`, and destructuring sites read as named rewrites rather than copy-pasted
       `fin_cases t <;> simp_all`. Complete this API ONCE here; Phases 4/6/7 consume it.
-- [ ] Populate the 13 frame-unconditional entries by reusing the existing atoms in
+- [x] Populate the 13 frame-unconditional entries by reusing the existing atoms in
       `Metalogic/Soundness.lean` (`Satisfies.implyK_axiom`, …, `diaDualityBack`) — read-only reuse.
-- [ ] Populate the 5 frame-conditioned entries (`modalT/D/B/Four/Five`) by **delegating to the
+- [x] Populate the 5 frame-conditioned entries (`modalT/D/B/Four/Five`) by **delegating to the
       task-522 library lemmas** in `Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean`
       (`Satisfies.modalT_axiom (m) (h_refl) (w) (φ)`, `modalFour_axiom (h_trans)`,
       `modalB_axiom (h_symm)`, `modalD_axiom (h_serial)`, `modalFive_axiom (h_eucl)`) — do NOT
       re-prove the frame arguments inline (design invariant 2, the 522 composition). `FrameValidatesTag`
       for these five is exactly the explicit frame hypothesis those lemmas take; `unionSound`'s
       `hfc` obligation threads it. Add `public import ...FrameCorrespondence` here.
+
+**Completion note**: Landed in NEW `Cslib/Logics/Modal/Metalogic/SchemaSoundness.lean`
+(`FrameValidatesTag`, `unionSound`) and additively extended `Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean`
+(`SchemaUnion.empty_iff`, `SchemaUnion.insert_iff`, `SchemaUnion.union_iff`, all `@[simp]`).
+`unionSound` proceeds by `obtain ⟨t, ht, hφ⟩ := h; have hval := hfc t ht; cases t with | tag => obtain ⟨…, rfl⟩ := hφ; exact Satisfies.<tag>_axiom …` — 13 branches invoke the `Metalogic/Soundness.lean` atoms directly; the 5 differentiator branches (`modalT/D/B/Four/Five`) pass `hval : FrameValidatesTag m t` straight through as the explicit frame-hypothesis argument to the corresponding `FrameCorrespondence.lean` lemma (`Satisfies.modalT_axiom m hval w φ'`, etc.) with no inline frame reasoning. Built green on the first attempt for both files; zero `sorry`, zero new axiom (`lean_verify` on `unionSound`, `SchemaUnion.insert_iff`, `SchemaUnion.union_iff`, `SchemaUnion.empty_iff` all report only `propext`/`Classical.choice`/`Quot.sound`). Scoped builds, `checkInitImports`, full `lake lint`, and `lake exe lint-style` all green. No deviation from the plan's task sequence or file placement.
 
 **Estimated output**: ~200-350 lines. **Depends on**: 1.
 

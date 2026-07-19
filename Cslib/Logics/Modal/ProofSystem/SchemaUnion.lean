@@ -31,6 +31,10 @@ system-specific file. Nothing downstream is changed by landing this file.
 - `SchemaUnion.subsumption`: the single generic subsumption lemma — enlarging the tag set only
   weakens the resulting predicate. Downstream `XAxiom_implies_YAxiom` lemmas (Phase 5) become
   `Finset.subset` facts discharged through this one lemma.
+- `SchemaUnion.empty_iff`, `SchemaUnion.insert_iff`, `SchemaUnion.union_iff`: the generic
+  elimination API — `@[simp]` unfolding lemmas over `Finset` structure (`∅`/`insert`/`∪`) so a
+  concrete `SchemaUnion sysTags φ` rewrites via `simp` into the named disjunction of its tags'
+  `.Holds`, rather than being destructured via raw `fin_cases`.
 
 ## Design Invariants
 
@@ -152,5 +156,51 @@ theorem SchemaUnion.subsumption {Sa Sb : Finset ModalSchemaTag} (hsub : Sa ⊆ S
     {φ : Proposition Atom} (h : SchemaUnion Sa φ) : SchemaUnion Sb φ := by
   obtain ⟨t, ht, hφ⟩ := h
   exact ⟨t, hsub ht, hφ⟩
+
+/-! ## Elimination API
+
+Generic membership/unfolding lemmas for `SchemaUnion` over `Finset` structure (`∅`, `insert`,
+`∪`), so that a downstream `SchemaUnion sysTags φ` (Phase 3's per-system tag sets, built from
+`insert`/`∪` on the 18-tag alphabet) rewrites via `simp` into the named disjunction of its tags'
+`.Holds`. This lets destructuring sites read as named rewrites rather than copy-pasted
+`fin_cases t <;> simp_all` — the design invariant this API exists to establish (built once,
+here; consumed by Phases 4/6/7). -/
+
+/-- `SchemaUnion` over the empty tag set never holds — there is no tag to witness it. -/
+@[simp]
+theorem SchemaUnion.empty_iff {φ : Proposition Atom} :
+    SchemaUnion (∅ : Finset ModalSchemaTag) φ ↔ False := by
+  simp [SchemaUnion]
+
+/-- `SchemaUnion` over `insert t S` holds iff `φ` is an instance of `t` itself, or `SchemaUnion`
+already holds over `S`. This is the "membership" unfolding step: repeated application (with
+`SchemaUnion.empty_iff` as the base case) rewrites `SchemaUnion {t₁, t₂, …} φ` into the named
+disjunction `t₁.Holds φ ∨ t₂.Holds φ ∨ … ∨ False`. -/
+@[simp]
+theorem SchemaUnion.insert_iff {t : ModalSchemaTag} {S : Finset ModalSchemaTag}
+    {φ : Proposition Atom} :
+    SchemaUnion (insert t S) φ ↔ t.Holds φ ∨ SchemaUnion S φ := by
+  constructor
+  · rintro ⟨t', ht', hφ⟩
+    rcases Finset.mem_insert.mp ht' with rfl | ht'
+    · exact Or.inl hφ
+    · exact Or.inr ⟨t', ht', hφ⟩
+  · rintro (hφ | ⟨t', ht', hφ⟩)
+    · exact ⟨t, Finset.mem_insert_self t S, hφ⟩
+    · exact ⟨t', Finset.mem_insert_of_mem ht', hφ⟩
+
+/-- `SchemaUnion` distributes over `Finset` union: `SchemaUnion (Sa ∪ Sb) φ` holds iff `φ` is an
+instance of some tag in `Sa` or some tag in `Sb`. -/
+@[simp]
+theorem SchemaUnion.union_iff {Sa Sb : Finset ModalSchemaTag} {φ : Proposition Atom} :
+    SchemaUnion (Sa ∪ Sb) φ ↔ SchemaUnion Sa φ ∨ SchemaUnion Sb φ := by
+  constructor
+  · rintro ⟨t, ht, hφ⟩
+    rcases Finset.mem_union.mp ht with ht | ht
+    · exact Or.inl ⟨t, ht, hφ⟩
+    · exact Or.inr ⟨t, ht, hφ⟩
+  · rintro (⟨t, ht, hφ⟩ | ⟨t, ht, hφ⟩)
+    · exact ⟨t, Finset.mem_union_left _ ht, hφ⟩
+    · exact ⟨t, Finset.mem_union_right _ ht, hφ⟩
 
 end Cslib.Logic.Modal

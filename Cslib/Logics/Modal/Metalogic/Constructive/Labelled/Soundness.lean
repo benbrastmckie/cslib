@@ -520,6 +520,134 @@ theorem boxI_raise_step {Atom : Type u} {World : Type v} [Preorder World]
       rw [if_neg (Ne.symm hxn), if_pos rfl]
       exact ckforces_persistence v_uc bf_uc hnn' hφ
 
+/-! ## Star-lifting over a finite set of direct neighbours (task 537 Phase 4.2, partial)
+
+**Mission-scope finding (read before extending):** the plan's Phase 4.2 goal is to iterate
+`boxI_raise_step` "node-by-node over the finite derivation tree" to obtain a fully general
+`boxI_lift`. Attempting this directly (this dispatch) surfaces a genuine, previously
+under-specified obstruction: raising `x` to an adversarial `w'` forces *every* raw-`R`-neighbour
+of `x` to also move (via F1/F2 -- `cs5FCIncest` has no "raise-source-only, keep-target-exact"
+conjunct), and if a neighbour has further neighbours of its own, the raise must cascade. A
+**fully general** cascade over an arbitrary finite `Graph` is UNSOUND without an explicit
+acyclicity/unique-parent invariant: the 3-cycle `x→a→b→x` satisfies "each target has a unique
+raw-edge source" (no violation of that weaker property) yet forces the newly-discovered node `b`
+to satisfy *two* simultaneous, generally-unsatisfiable raise constraints (one from `a→b`, one from
+`b→x`) when the cascade reaches it. Ruling this out needs a rank/depth function `ht : Label Atom →
+ℕ` with `∀ a b, G.R a b → ht b = ht a + 1` (graded, so no cycle can exist) PLUS "each label has at
+most one raw-edge source" -- together these make `G` a genuine rooted forest. This is *exactly*
+the module docstring's "item 1: the tree-shape invariant" (see "What remains" above), which is
+explicitly flagged there as separate, not-yet-established work belonging to the main induction
+(Phase 5), not to this single-file, node-level phase. Building and threading that invariant is
+out of Phase 4.2's scope (it is not a `boxI_raise_step`-iteration task; it is graph/forest theory
+for `Graph` that does not yet exist anywhere in this development).
+
+What IS landed below, sound and needing no extra invariant: `boxI_lift_star`, which chains
+`cs5FCIncest_lift`/`cs5FCIncest_raise` over a **finite set of `x`'s direct raw-neighbours**
+(both directions), raising `x` once and each direct neighbour once. This is the natural,
+fully-general-safe extension of Phase 4.1's single-neighbour `boxI_raise_step` to finitely many
+neighbours at once, and is genuine forward progress toward `boxI_lift`. It does **not** by
+itself complete the Lifting Lemma or close the `NIK.boxI` case: a neighbour's *own* further
+neighbours (grandchildren of `x`, in tree terms) are left unraised, which is exactly the residual
+recursive-cascade gap above. Per the plan's blocked-honesty gate, the residual generalization
+(and hence closing the `boxI` case) is routed to Phase 7 rather than forced via `sorry` or an
+undirected retry. -/
+
+/-- **Star-lifting: raise `x` together with a finite set of its direct raw-neighbours.** Chains
+`cs5FCIncest_lift` (F1, "down" edges `R x n`) / `cs5FCIncest_raise` (F2, "up" edges `R n x`)
+across every `n` in a `Finset` `N` of labels raw-adjacent to `x`, holding `x`'s target `w` fixed
+(via the ORIGINAL raise fact `hwx : ρ x ≤ w`, never re-derived from an intermediate value) while
+raising each `n ∈ N` in turn. Proved by `Finset.induction` on `N`; unlike `boxI_raise_step`, `N`
+may be empty or contain arbitrarily many (finitely many) neighbours, but does **not** recurse into
+`N`'s own further neighbours (see the section docstring above for why that is the residual,
+not-yet-established generalization). -/
+theorem boxI_lift_star {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {v : World → Atom → Prop} {botForces : World → Prop}
+    (v_uc : ∀ {w w' : World} (p : Atom), w ≤ w' → v w p → v w' p)
+    (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    {R : Label Atom → Label Atom → Prop} {ρ : Label Atom → World}
+    (hedge : ∀ a b, R a b → r (ρ a) (ρ b))
+    {x : Label Atom} {w : World} (hwx : ρ x ≤ w) :
+    ∀ N : Finset (Label Atom), x ∉ N → (∀ n ∈ N, R x n ∨ R n x) →
+      ∃ ρ' : Label Atom → World, ρ' x = w ∧ (∀ z, ρ z ≤ ρ' z) ∧
+        (∀ n ∈ N, r (ρ' x) (ρ' n) ∨ r (ρ' n) (ρ' x)) ∧
+        (∀ z, z ≠ x → z ∉ N → ρ' z = ρ z) ∧
+        (∀ {φ : Proposition Atom} {z}, CKForces r v botForces (ρ z) φ →
+          CKForces r v botForces (ρ' z) φ) := by
+  classical
+  intro N
+  induction N using Finset.induction with
+  | empty =>
+      intro _ _
+      refine ⟨fun z => if z = x then w else ρ z, if_pos rfl, ?_, by simp, ?_, ?_⟩
+      · intro z
+        by_cases hz : z = x
+        · subst hz; simpa using hwx
+        · simp [hz]
+      · intro z hzx _; simp [hzx]
+      · intro φ z hz
+        by_cases hzx : z = x
+        · subst hzx; simpa using ckforces_persistence v_uc bf_uc hwx hz
+        · simpa [hzx] using hz
+  | insert n N' hnN' ih =>
+      intro hxN hR
+      have hxn : x ≠ n := (ne_of_mem_of_not_mem (Finset.mem_insert_self n N') hxN).symm
+      have hxN' : x ∉ N' := fun h => hxN (Finset.mem_insert_of_mem h)
+      have hR' : ∀ m ∈ N', R x m ∨ R m x := fun m hm => hR m (Finset.mem_insert_of_mem hm)
+      obtain ⟨ρ₁, hρ₁x, hρ₁mono, hρ₁edge, hρ₁out, hρ₁pers⟩ := ih hxN' hR'
+      have hRn : R x n ∨ R n x := hR n (Finset.mem_insert_self n N')
+      rcases hRn with hRxn | hRnx
+      · obtain ⟨n', hnn', hwn'⟩ := cs5FCIncest_lift hfc (hedge x n hRxn) hwx
+        refine ⟨Function.update ρ₁ n n', ?_, ?_, ?_, ?_, ?_⟩
+        · rw [Function.update_of_ne hxn, hρ₁x]
+        · intro z
+          by_cases hz : z = n
+          · subst hz; rw [Function.update_self]; exact hnn'
+          · rw [Function.update_of_ne hz]; exact hρ₁mono z
+        · intro m hm
+          rcases Finset.mem_insert.mp hm with rfl | hm
+          · rw [Function.update_of_ne hxn, Function.update_self, hρ₁x]
+            exact Or.inl hwn'
+          · have hmn : m ≠ n := ne_of_mem_of_not_mem hm hnN'
+            rw [Function.update_of_ne hxn, Function.update_of_ne hmn]
+            exact hρ₁edge m hm
+        · intro z hzx hzN
+          have hzn : z ≠ n := (ne_of_mem_of_not_mem (Finset.mem_insert_self n N') hzN).symm
+          have hzN' : z ∉ N' := fun h => hzN (Finset.mem_insert_of_mem h)
+          rw [Function.update_of_ne hzn]
+          exact hρ₁out z hzx hzN'
+        · intro φ z hz
+          by_cases hzn : z = n
+          · rw [hzn, Function.update_self]
+            exact ckforces_persistence v_uc bf_uc hnn' (hzn ▸ hz)
+          · rw [Function.update_of_ne hzn]
+            exact hρ₁pers hz
+      · obtain ⟨n', hnn', hn'w⟩ := cs5FCIncest_raise hfc (hedge n x hRnx) hwx
+        refine ⟨Function.update ρ₁ n n', ?_, ?_, ?_, ?_, ?_⟩
+        · rw [Function.update_of_ne hxn, hρ₁x]
+        · intro z
+          by_cases hz : z = n
+          · subst hz; rw [Function.update_self]; exact hnn'
+          · rw [Function.update_of_ne hz]; exact hρ₁mono z
+        · intro m hm
+          rcases Finset.mem_insert.mp hm with rfl | hm
+          · rw [Function.update_of_ne hxn, Function.update_self, hρ₁x]
+            exact Or.inr hn'w
+          · have hmn : m ≠ n := ne_of_mem_of_not_mem hm hnN'
+            rw [Function.update_of_ne hxn, Function.update_of_ne hmn]
+            exact hρ₁edge m hm
+        · intro z hzx hzN
+          have hzn : z ≠ n := (ne_of_mem_of_not_mem (Finset.mem_insert_self n N') hzN).symm
+          have hzN' : z ∉ N' := fun h => hzN (Finset.mem_insert_of_mem h)
+          rw [Function.update_of_ne hzn]
+          exact hρ₁out z hzx hzN'
+        · intro φ z hz
+          by_cases hzn : z = n
+          · rw [hzn, Function.update_self]
+            exact ckforces_persistence v_uc bf_uc hnn' (hzn ▸ hz)
+          · rw [Function.update_of_ne hzn]
+            exact hρ₁pers hz
+
 /-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the

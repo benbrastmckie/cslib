@@ -291,28 +291,38 @@ residual risk and carries the blocked-honesty exit to Phase 7.
 - **Verification / Done when:** `Soundness.lean` builds green; `boxI_raise_step` sorry-free and
   axiom-clean.
 
-#### Phase 4.2: Iterate the raise over the finite tree; close the boxI case [NOT STARTED]
+#### Phase 4.2: Iterate the raise over the finite tree; close the boxI case [BLOCKED]
 
 - **Goal:** Iterate `boxI_raise_step` over the finite derivation tree to obtain the full lifting
   lemma `boxI_lift`, then discharge the `NIK.boxI` case (Deduction.lean:297-300): raise so `ρ x`
   lands at the adversarial `w'`, map the fresh child to `u` exactly (Simpson §8.1.2, chunk 0156).
 - **Tasks:**
-  - [ ] Prove `boxI_lift` by finite induction over the tree, invoking `boxI_raise_step` node-by-node
-        (the raising, not any exact edge, accommodates `w' ≥ ρ x`).
+  - [~] Prove `boxI_lift` by finite induction over the tree, invoking `boxI_raise_step` node-by-node
+        (the raising, not any exact edge, accommodates `w' ≥ ρ x`). PARTIAL: landed
+        `boxI_lift_star` (Soundness.lean, "Star-lifting" section), generalizing the single-neighbour
+        raise to a finite `Finset` of `x`'s DIRECT raw-neighbours (sorry-free, axiom-clean). Does
+        NOT close the full recursive cascade to grandchildren -- see
+        `handoffs/04_phase4-2-boxI-lift-blocked.md` for the machine-checked reason (a fully general
+        cascade needs a rank/unique-parent "tree-shape" invariant on `Graph` that does not yet
+        exist anywhere in this codebase; a concrete 3-cycle counterexample shows "unique parent"
+        alone is insufficient).
   - [ ] Close the `boxI` obligation of the main induction using `boxI_lift` + the fresh-eigenvariable
-        mapping `ρ' y = v`.
-  - [ ] If the recursion genuinely stalls within the budget, STOP and route to **Phase 7**
-        (`[BLOCKED]` handoff), NOT a `sorry`, NOT an undirected retry.
+        mapping `ρ' y = v`. NOT REACHED (depends on the full `boxI_lift`, not yet landed).
+  - [x] If the recursion genuinely stalls within the budget, STOP and route to **Phase 7**
+        (`[BLOCKED]` handoff), NOT a `sorry`, NOT an undirected retry. DONE: this is that stop —
+        see `handoffs/04_phase4-2-boxI-lift-blocked.md`.
 - **Estimated output:** ~150-300 lines. **Bounded unit:** the finite-tree induction + the boxI case
   closure; concrete stopping condition = the boxI case closes OR the documented budget is hit and
-  Phase 7 fires.
+  Phase 7 fires. **Landed this dispatch:** ~95 lines (`boxI_lift_star` + docstring), sorry-free,
+  axiom-clean, build green.
 - **Timing:** one agent run, hard budget cap.
 - **Depends on:** 4.1
 - **Zero-debt contract:** no `sorry`, no new axiom, `cs5FCIncest` unweakened, no Preserved Asset
-  touched.
+  touched. Verified: `boxI_lift_star` depends only on `[propext, Classical.choice, Quot.sound]`.
 - **Blocked-honesty sub-gate:** stall at budget → **Phase 7** (`[BLOCKED]`), never a `sorry`.
+  TRIGGERED this dispatch -- routed to Phase 7, see handoff above.
 - **Verification / Done when:** `Soundness.lean` builds green; `boxI_lift` and the boxI case
-  sorry-free and axiom-clean.
+  sorry-free and axiom-clean. NOT YET MET (build IS green; `boxI_lift`/boxI case not yet landed).
 
 ### Phase 5: Assemble nik_TS5_soundness through the NIK induction [NOT STARTED]
 

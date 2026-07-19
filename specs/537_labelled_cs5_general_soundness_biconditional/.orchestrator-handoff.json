@@ -1,29 +1,44 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "summary": "Phase 4.1 of direct-route plan v2 landed: boxI_raise_step in Soundness.lean, the single-node interpretation-raise step of Simpson's Lifting Lemma 8.1.3 (chunks 0154-0155). Given a raw-edge-cond interpretation rho, a node x, and any w >= rho x, plus a designated raw-R-neighbour n of x (either direction), it produces rho' agreeing with rho off {x, n}, with rho' x = w, re-establishing the raw edge fact at the x-n edge (via cs5FCIncest_lift/F1 down, or cs5FCIncest_raise/F2 up) and Gamma-cond persistence at n via ckforces_persistence. Sorry-free and axiom-clean. Scoped build green, checkInitImports passes, no Preserved Asset regressed. Phase 4.2 (iterating this step over the finite tree to obtain the full boxI_lift and discharge the NIK.boxI case) is NOT attempted in this dispatch, per the single-phase (4.1-only) dispatch scope.",
+  "status": "partial",
+  "summary": "Phase 4.2 of direct-route plan v2 attempted and BLOCKED (sanctioned outcome, not a sorry): iterating boxI_raise_step over the finite derivation tree to obtain a fully general boxI_lift is unsound without an as-yet-unestablished rank/unique-parent (rooted-forest) invariant on Graph -- confirmed via a concrete 3-cycle counterexample (x->a->b->x) that satisfies 'unique parent per target' yet forces two independent, non-coincident existential raises on the newly-discovered node. This invariant is the module docstring's own flagged 'item 1: the tree-shape invariant', not-yet-established work belonging to the main induction (Phase 5), genuinely out of Phase 4.2's single-file scope. Landed instead: boxI_lift_star, a sound generalization of Phase 4.1's boxI_raise_step from ONE raw-neighbour of x to a finite Finset of x's DIRECT raw-neighbours (both directions), chained via Finset.induction using cs5FCIncest_lift/cs5FCIncest_raise. Sorry-free, axiom-clean ([propext, Classical.choice, Quot.sound] only). Does not close the full recursive cascade (grandchildren) or the boxI case itself. Scoped build green, no Preserved Asset regressed, cs5FCIncest unweakened.",
   "phases_completed": 4,
   "phases_total": 7,
   "skeleton": false,
   "sorry_inventory": [],
-  "blockers": [],
+  "blockers": [
+    {
+      "phase": "4.2",
+      "what_failed": "boxI_lift (fully general finite-tree cascade of boxI_raise_step) not provable as stated for an arbitrary finite Graph.",
+      "what_was_tried": "Landed boxI_lift_star: a Finset.induction chaining cs5FCIncest_lift (F1, down edges R x n) / cs5FCIncest_raise (F2, up edges R n x) across ALL of x's DIRECT raw-neighbours simultaneously, holding x's target fixed at the original raise fact hwx. Sorry-free, build green, axiom-clean.",
+      "root_cause": "cs5FCIncest has no 'raise one endpoint only, keep the other exact' conjunct, so raising x forces every raw-neighbour to move, and a neighbour with its OWN further neighbours forces a cascade. A fully general cascade needs the raw graph to be an acyclic, rank-graded rooted forest (a rank function ht : Label Atom -> Nat with R a b -> ht b = ht a + 1, PLUS unique-parent-per-target) to avoid simultaneous, generally non-coincident raise constraints on a newly-discovered node -- verified via a hand-constructed 3-cycle counterexample (x->a, a->b, b->x) that satisfies unique-parent-per-target alone but still creates the conflict. Graph (Syntax.lean:110) has no finiteness or acyclicity field; this invariant does not exist anywhere in the codebase yet.",
+      "what_is_needed": "Establish (or thread through the Phase 5 main induction directly) a rank/depth + unique-parent invariant on the raw graph relation used at each boxI/diaE step, then redo the boxI_lift_star-style Finset cascade under that invariant to cover the full raw-connected component of x, not just direct neighbours.",
+      "verbatim_goal_text": "Prove `boxI_lift` by finite induction over the derivation tree, invoking `boxI_raise_step` node-by-node (the raising, not any exact edge, accommodates `w' >= rho x`)."
+    }
+  ],
   "continuation_context": {
-    "next_phase": "4.2",
-    "next_phase_name": "Iterate the raise over the finite tree; close the boxI case",
-    "depends_on": "4.1 (satisfied)",
-    "note": "boxI_raise_step is deliberately scoped to ONE designated raw-R-neighbour n per invocation (not all of x's neighbours simultaneously), to keep the atomic step small and sidestep an unresolved bidirectional-edge case (R x n and R n x both holding for the same n, which the actual derivation-tree graph should never produce but which this lemma does not itself assume away). Phase 4.2 must invoke boxI_raise_step once per tree edge along a traversal outward from x (structural or well-founded recursion over the graph's finite construction via addEdge), chaining each newly-raised value forward to the next edge, to assemble the full Lifting Lemma boxI_lift. This is the plan's sole concentrated-risk phase; it carries its own hard budget cap and blocked-honesty exit to Phase 7, never an open-ended retry."
+    "next_phase": "7",
+    "next_phase_hint": "Phase 7",
+    "next_phase_name": "BLOCKED handoff to follow-up (contingency only)",
+    "depends_on": "4.2 stall (this dispatch)",
+    "note": "Phase 4.2 heading set to [BLOCKED] in the plan. handoffs/04_phase4-2-boxI-lift-blocked.md records the full machine-checked blocker analysis and a concrete follow-up route (establish the rank/unique-parent invariant on Graph, or thread it through Phase 5's induction motive directly, then redo the Finset cascade). Do NOT retry Phase 4.2 open-endedly; do NOT attempt Phase 5 without first resolving this invariant gap, since Phase 5's boxI case needs the full boxI_lift, not just boxI_lift_star."
   },
   "artifacts": [
     {
       "type": "lean_source",
       "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Added boxI_raise_step (lines 450-516), inserted between the Phase 2 TClosure section (dia_iff_TClosure) and the one-point soundness section. Statement: given cs5FCIncest r, upward-closure hyps v_uc/bf_uc for CKForces persistence, raw-edge-cond hedge : forall a b, R a b -> r (rho a) (rho b), x n : Label Atom with x <> n, w >= rho x, and hR : R x n or R n x, produces exists rho', rho' x = w and (forall z, rho z <= rho' z) and (r (rho' x) (rho' n) or r (rho' n) (rho' x)) and (CKForces at rho n implies CKForces at rho' n). Proved via classical (for the if-then-else Decidable instances), case-splitting on hR into the F1 (cs5FCIncest_lift) down case and F2 (cs5FCIncest_raise) up case, defining rho' as an explicit if-then-else re-interpretation at {x, n}."
+      "summary": "Added boxI_lift_star (Finset-indexed generalization of boxI_raise_step to x's direct raw-neighbours, chained via Finset.induction), plus a section docstring documenting the residual recursive-cascade obstruction and why a fully general boxI_lift needs a not-yet-established rank/unique-parent invariant on Graph. Inserted between boxI_raise_step (Phase 4.1) and the one-point soundness section."
     },
     {
       "type": "plan",
       "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
-      "summary": "Phase 4.1 heading updated to [COMPLETED]; both checklist items checked off with landed-location notes."
+      "summary": "Phase 4.2 heading updated to [BLOCKED]; checklist items annotated PARTIAL/NOT REACHED/DONE with landed-location and handoff references."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/04_phase4-2-boxI-lift-blocked.md",
+      "summary": "Full BLOCKED handoff: exact blocker (3-cycle counterexample), what landed (boxI_lift_star), recommended follow-up route, verification evidence."
     }
   ],
   "verification": {
@@ -33,19 +48,20 @@
     "new_axiom_count": 0,
     "build_passed": true,
     "check_init_imports_passed": true,
-    "lean_verify_boxI_raise_step": "axioms: [propext, Classical.choice, Quot.sound]"
+    "lean_verify_boxI_lift_star": "axioms: [propext, Classical.choice, Quot.sound]"
   },
-  "commit": "9183da1a",
+  "commit": "PENDING",
   "files_modified": [
     "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-    "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md"
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
+    "specs/537_labelled_cs5_general_soundness_biconditional/handoffs/04_phase4-2-boxI-lift-blocked.md"
   ],
   "decisions_made": [
-    "Scoped boxI_raise_step to ONE designated raw-R-neighbour n of x per invocation, rather than attempting to raise ALL of x's neighbours simultaneously in a single call. A single-invocation design covering arbitrarily many neighbours would need to resolve, for each neighbour z, whether R x z or R z x (or, pathologically, both) applies via a non-canonical Classical.choose per neighbour, and the both-directions-at-once case has no proof from cs5FCIncest alone without an additional antisymmetry-style hypothesis on R at x. Restricting to one neighbour per call keeps the lemma small, avoids that unresolved case, and matches the mission's 'Bounded unit: one lemma about a single raise' framing; Phase 4.2 is expected to invoke it once per tree edge.",
-    "Constructed rho' via an explicit `classical`-backed if-then-else function (not Function.update), because Function.update requires a `DecidableEq (Label Atom)` instance that is not available for a generic Atom; `classical` supplies the needed propositional Decidable instances for the if-then-else conditions z = x / z = n without imposing DecidableEq on Label Atom."
+    "Did not attempt to force a fully general boxI_lift via an ad-hoc/unverified acyclicity assumption smuggled in without justification; instead constructed and verified a concrete counterexample (3-cycle) showing why 'unique parent' alone is insufficient, then scoped the landed lemma (boxI_lift_star) to exactly the sound sub-case (direct neighbours only), per the plan's zero-debt and blocked-honesty contract.",
+    "Used `classical` (providing Classical.propDecidable, hence DecidableEq (Label Atom) via typeclass resolution) once at the top of the tactic proof, before Finset.induction and Function.update -- this DOES resolve the DecidableEq obligation for a generic Atom type, contradicting the prior Phase 4.1 dispatch's 'dead_ends' note that Function.update fails without a directly-supplied DecidableEq instance. Correction: it works when `classical` precedes the Finset.induction/Function.update usage in the same tactic block scope."
   ],
   "dead_ends": [
-    "Function.update (Function.update rho n n') x w: fails to elaborate without a DecidableEq (Label Atom) instance, which is not derivable for a generic Atom type; also Function.update_noteq is not the correct Mathlib lemma name (it is Function.update_of_ne, with a different argument/direction convention) -- switched to an explicit if-then-else construction under `classical` instead."
+    "Attempting to state boxI_lift for an arbitrary finite Graph.X (Set.Finite hypothesis only, no acyclicity): the 3-cycle x->a->b->x is finite, raw-connected, and satisfies unique-parent-per-target, yet the natural Finset-cascade induction hits a genuine, unresolvable double-constraint on the last-discovered node. This is a real mathematical obstruction, not a tactic-level gap -- confirmed by hand-tracing the F1/F2 applications, not merely asserted."
   ],
   "plan_markers_verified": true
 }

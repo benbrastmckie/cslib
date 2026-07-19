@@ -413,3 +413,95 @@ edge fails at `decide` rather than at proof-search.
 **Durable anchors for this section**: `Cslib/Logics/Modal/ProofSystem/SchemaTags.lean`
 (`s5Tags`, `kb5Tags`), `Cslib/Logics/Modal/Metalogic/InterSystem/AxiomSubsumption.lean` (the
 KB5→S5 omission note).
+
+---
+
+## 6. Design Rationale: Representation A vs. Representation B
+
+This design was one of two candidate representations considered for replacing the 14 bespoke
+per-system axiom inductives (plus S5's pre-existing `ModalAxiom`) with a single reusable
+abstraction.
+
+**Representation A (chosen)** — the architecture described in Sections 1-5: a schema-tag `def`
+(`ModalSchemaTag`), an existential `.Holds` meaning function, and a `SchemaUnion (S : Finset
+ModalSchemaTag)` combinator parametrized by concrete `Finset` literals per system.
+
+**Representation B (rejected, never implemented in this codebase)** — keep the per-system
+`inductive <Sys>Axiom` shape, but generate each one via a macro/elaborator over a tag list (e.g.
+a hypothetical `derive_modal_axiom KAxiom [implyK, implyS, efq, peirce, modalK, andCore, orCore,
+diaDuality]`), so constructor names and elimination form (`cases h_ax with | implyK … `) would be
+preserved verbatim at every call site.
+
+**The trade-off**:
+
+- **Representation A wins on three fronts.** (a) Subsumption collapses from 24 hand-written
+  lemmas to one generic `SchemaUnion.subsumption` application plus `decide`-able `Finset.subset`
+  facts (Section 2). (b) Soundness collapses from 15 per-system case-splits to one `unionSound`
+  application plus an 18-entry validity table (Section 3). (c) The 13-line
+  propositional/K/and-or/diamond-duality core no longer needs re-listing per system — it lives
+  once, in `kCore`. The migration to Representation A ended up net line-negative in the actual
+  landed diff (more lines deleted than added) — the DRY gains outweighed the one-time migration
+  cost.
+- **Representation A costs.** The *elimination form* changes at every downstream destructuring
+  site: `cases h_ax with | implyK … | modalK …` becomes `obtain ⟨t, ht, hφ⟩ := h_ax; fin_cases t
+  <;> …`. This cost is substantially tamed by the `SchemaUnion.{empty,insert,union}_iff`
+  `@[simp]` elimination API described in Section 1, which turns most such sites into named `simp`
+  rewrites rather than raw `fin_cases` destructuring.
+- **Representation B wins on migration safety.** Its near-zero downstream blast radius — every
+  existing `cases`/`match` site keeps typechecking unchanged — and it delivers the literal DRY
+  goal (no re-listing at the source) without touching call sites at all.
+- **Representation B costs.** It does not deliver the set-theoretic subsumption-as-`⊆` or
+  soundness-as-per-tag-table properties: cross-inductive subsumption would stay an
+  O(edges)-sized set of proofs even if each were macro-generated, since the elimination form
+  (bespoke inductive constructors) still differs system to system. It also adds metaprogramming
+  maintenance burden and is less transparent/auditable to a reviewer than a plain `def`.
+
+**Why Representation A was chosen for long-term foundations**: the goal was durable architecture,
+not merely a DRY-er restatement of the same 24+15 previously-independent facts. Representation A
+is the only one of the two that makes the modal cube's algebraic structure — a lattice of finite
+tag sets under `⊆` — directly visible and machine-checkable in the type theory itself, rather
+than hiding the same bespoke facts behind macro-generated syntax. Representation B optimizes for
+short-term migration safety; Representation A optimizes for the property this whole document
+exists to describe: that subsumption and soundness are *literally* computations on `Finset
+ModalSchemaTag`, not just refactored restatements of previously-independent facts.
+
+---
+
+## 7. Scope Boundary: A Future Instance, Not a Fork
+
+**Durable anchor**: the "Design Invariants" section of
+`Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean`'s module docstring.
+
+`ModalSchemaTag` and `SchemaUnion` were built for the 15 *classical* normal modal systems only.
+The module docstring states the scope boundary explicitly as a design invariant:
+
+> `ModalSchemaTag` / `SchemaUnion` stay free of classical-only assumptions: the
+> intuitionistic/minimal axiom families are a possible future instance of this same abstraction,
+> not generalized to cover them here (out of scope for this task).
+
+CSLib already has intuitionistic and minimal modal axiom families that exist today and were
+deliberately kept out of this design's scope: `IKModalAxiom` and `IS5ModalAxiom`
+(`Cslib/Logics/Modal/Metalogic/Intuitionistic/IK.lean` and
+`Cslib/Logics/Modal/Metalogic/Intuitionistic/IS5.lean`), `CKModalAxiom`
+(`Cslib/Logics/Modal/Metalogic/Constructive/CK.lean`), and `MKModalAxiom` and `MTModalAxiom`
+(`Cslib/Logics/Modal/Metalogic/Minimal/MK.lean` and
+`Cslib/Logics/Modal/Metalogic/Minimal/MT.lean`). These families construct witnesses *into* the
+classical `KAxiom`/`ModalAxiom` predicates — cross-family coupling lives in
+`Cslib/Logics/Modal/Metalogic/InterSystem/IntToClassical.lean` — so their existing call sites had
+to keep typechecking unchanged through the refactor described in this document. Nothing about
+*their own* internal representation was touched or generalized.
+
+The "future instance, not a fork" framing is the key point: if intuitionistic/minimal schema-union
+support is ever wanted, the correct move is to extend or parametrize the existing
+`ModalSchemaTag`/`SchemaUnion` shape — for instance by widening the tag alphabet or adding a
+parameter distinguishing classical from constructive instances of a tag's meaning — not to build
+an independent, parallel `IntSchemaTag`/`IntSchemaUnion` pair from scratch. Keeping
+`ModalSchemaTag`/`SchemaUnion` free of classical-only assumptions today is precisely what keeps
+that future extension a natural generalization of this same architecture, rather than a
+second, incompatible cube living alongside it.
+
+**Durable anchors for this section**: `Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean` (Design
+Invariants docstring), `Cslib/Logics/Modal/Metalogic/Intuitionistic/{IK,IS5}.lean`,
+`Cslib/Logics/Modal/Metalogic/Constructive/CK.lean`,
+`Cslib/Logics/Modal/Metalogic/Minimal/{MK,MT}.lean`,
+`Cslib/Logics/Modal/Metalogic/InterSystem/IntToClassical.lean`.

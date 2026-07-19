@@ -1,7 +1,7 @@
 # Implementation Plan: Modal Axiom-Schema Architecture Documentation
 
 - **Task**: 536 - Document the modal axiom-schema architecture in a new docs/ directory
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: 523 (schema-union axiom combinator; status: completed)
 - **Research Inputs**: reports/01_modal-axiom-schema-architecture.md
@@ -222,13 +222,13 @@ tag-set cube and the syntax/semantics soundness factorization.
 
 ---
 
-### Phase 4: Area 6 (Rep A vs B rationale), Area 7 (scope boundary), and final consistency pass [NOT STARTED]
+### Phase 4: Area 6 (Rep A vs B rationale), Area 7 (scope boundary), and final consistency pass [COMPLETED]
 
 **Goal**: Author the rationale and scope-boundary sections, then run the whole-document consistency
 and hard-constraint verification pass.
 
 **Tasks**:
-- [ ] Write the Area 6 section: contrast Representation A (chosen — schema-tag `def` + `.Holds` +
+- [x] Write the Area 6 section: contrast Representation A (chosen — schema-tag `def` + `.Holds` +
       `SchemaUnion` over `Finset ModalSchemaTag`) against Representation B (rejected — macro-generated
       per-system inductives). Present the recorded trade-off in code/architecture vocabulary only
       (NO task numbers): Rep A collapses subsumption to one lemma + `decide` and soundness to one
@@ -236,26 +236,36 @@ and hard-constraint verification pass.
       structure (a lattice of finite tag sets under `⊆`) directly visible and machine-checkable; Rep
       B minimizes downstream blast radius but only hides the same bespoke facts behind
       metaprogramming and does not deliver subsumption-as-`⊆` or soundness-as-per-tag-table.
-      Conclude with why A was chosen for long-term foundations.
-- [ ] Write the Area 7 section: the scope boundary. `ModalSchemaTag`/`SchemaUnion` are kept free of
+      Conclude with why A was chosen for long-term foundations. *(completed)*
+- [x] Write the Area 7 section: the scope boundary. `ModalSchemaTag`/`SchemaUnion` are kept free of
       classical-only assumptions so the intuitionistic/minimal families are a *future instance of
       the same abstraction, not a fork* — quote the "Design Invariants" docstring in
       `SchemaUnion.lean`. Explain that today's intuitionistic/minimal families
       (`IKModalAxiom`, `MKModalAxiom`, `CKModalAxiom`, `IS5ModalAxiom`, `MTModalAxiom`) were kept out
       of scope and construct witnesses *into* the classical predicates (cross-family coupling in
       `InterSystem/IntToClassical.lean`); the correct future move is to extend/parametrize the
-      existing tag alphabet, not build a parallel `IntSchemaTag`/`IntSchemaUnion`.
-- [ ] Before citing the intuitionistic/minimal family paths, run
+      existing tag alphabet, not build a parallel `IntSchemaTag`/`IntSchemaUnion`. *(completed)*
+- [x] Before citing the intuitionistic/minimal family paths, run
       `grep -rn "IKModalAxiom\|MKModalAxiom\|CKModalAxiom\|IS5ModalAxiom\|MTModalAxiom" Cslib/Logics/Modal/`
-      to pin the exact file paths, and cite only paths confirmed to exist.
-- [ ] Final consistency pass over the whole file:
-      - [ ] Run `grep -nE 'task[ -]?[0-9]|\b52[23]\b|\b536\b' docs/modal-axiom-schema-architecture.md`
-            and confirm zero matches (no task-number citations anywhere).
-      - [ ] Confirm the count phrasing is consistent throughout (14 retired inductives + S5's
-            `ModalAxiom`; never "15 inductives").
-      - [ ] Confirm the `Cube.lean` disambiguation is present.
-      - [ ] Spot-check any quoted Lean signature against its named source file (`grep`/`Read`) if
-            there is any doubt about drift.
+      to pin the exact file paths, and cite only paths confirmed to exist. *(completed: confirmed
+      IK.lean, IS5.lean under Metalogic/Intuitionistic/, CK.lean under Metalogic/Constructive/,
+      MK.lean and MT.lean under Metalogic/Minimal/, via `grep -rln "inductive
+      IKModalAxiom\|inductive MKModalAxiom\|inductive CKModalAxiom\|inductive
+      IS5ModalAxiom\|inductive MTModalAxiom" Cslib/Logics/Modal/`)*
+- [x] Final consistency pass over the whole file:
+      - [x] Run `grep -nE 'task[ -]?[0-9]|\b52[23]\b|\b536\b' docs/modal-axiom-schema-architecture.md`
+            and confirm zero matches (no task-number citations anywhere). *(completed: zero matches,
+            exit code 1)*
+      - [x] Confirm the count phrasing is consistent throughout (14 retired inductives + S5's
+            `ModalAxiom`; never "15 inductives"). *(completed: "15 inductives" grep also returns
+            zero matches; canonical phrasing appears in Overview and is reused consistently)*
+      - [x] Confirm the `Cube.lean` disambiguation is present. *(completed: Section 2's
+            "Disambiguation" subsection with comparison table)*
+      - [x] Spot-check any quoted Lean signature against its named source file (`grep`/`Read`) if
+            there is any doubt about drift. *(completed: all signatures re-verified directly
+            against source files during authoring — SchemaUnion.lean, SchemaTags.lean,
+            FrameCorrespondence.lean, SchemaSoundness.lean, ProofSystem.lean,
+            AxiomSubsumption.lean, Instances/S5.lean, DerivationTree.lean)*
 
 **Timing**: ~45 minutes
 
@@ -271,17 +281,17 @@ and hard-constraint verification pass.
 
 ## Testing & Validation
 
-- [ ] `docs/modal-axiom-schema-architecture.md` exists and is non-empty.
-- [ ] All seven task areas are covered, each in a dedicated section, in order.
-- [ ] `grep -nE 'task[ -]?[0-9]|\b52[23]\b|\b536\b' docs/modal-axiom-schema-architecture.md` returns
-      no matches (hard constraint: no task-number citations).
-- [ ] The count is reconciled as "14 retired `<Sys>Axiom` inductives + S5's pre-existing
-      `ModalAxiom`"; the phrase "15 inductives" does not appear.
-- [ ] The `Cube.lean` (semantic) vs syntactic tag-set cube disambiguation is present and names both
-      file paths.
-- [ ] Every embedded Lean signature matches the verified signatures in the research report; any
+- [x] `docs/modal-axiom-schema-architecture.md` exists and is non-empty. *(508 lines)*
+- [x] All seven task areas are covered, each in a dedicated section, in order.
+- [x] `grep -nE 'task[ -]?[0-9]|\b52[23]\b|\b536\b' docs/modal-axiom-schema-architecture.md` returns
+      no matches (hard constraint: no task-number citations). *(verified: exit code 1, zero matches)*
+- [x] The count is reconciled as "14 retired `<Sys>Axiom` inductives + S5's pre-existing
+      `ModalAxiom`"; the phrase "15 inductives" does not appear. *(verified via grep)*
+- [x] The `Cube.lean` (semantic) vs syntactic tag-set cube disambiguation is present and names both
+      file paths. *(Section 2, "Disambiguation" subsection)*
+- [x] Every embedded Lean signature matches the verified signatures in the research report; any
       family file path (intuitionistic/minimal) cited was confirmed on disk via grep.
-- [ ] Durable anchors used throughout: `SchemaUnion.lean`, `SchemaTags.lean`,
+- [x] Durable anchors used throughout: `SchemaUnion.lean`, `SchemaTags.lean`,
       `FrameCorrespondence.lean`, `SchemaSoundness.lean`, `DerivationTree.lean`,
       `Foundations/Logic/ProofSystem.lean`, `InterSystem/AxiomSubsumption.lean`, `Cube.lean`.
 

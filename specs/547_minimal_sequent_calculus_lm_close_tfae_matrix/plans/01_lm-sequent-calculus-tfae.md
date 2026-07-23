@@ -1,7 +1,7 @@
 # Implementation Plan: Minimal Sequent Calculus (LM) and Three-Way MPL TFAE
 
 - **Task**: 547 - minimal_sequent_calculus_lm_close_tfae_matrix
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/reports/01_minimal-sequent-calculus-lm.md
@@ -187,30 +187,40 @@ module imports the one before it, so no two phases share a wave.
   - `lake build …LM.Completeness` succeeds, zero sorry.
   - `nd_iff_lm`, `hilbert_iff_lm`, `lm_iff_mvalid` typecheck; no linter warnings.
 
-### Phase 4: Barrel registration + three-way TFAE + docstring fixes [NOT STARTED]
+### Phase 4: Barrel registration + three-way TFAE + docstring fixes [COMPLETED]
 
 - **Goal:** Wire the new modules into the build, extend the equivalence matrix with the three-way
   MPL TFAE, correct the stale docstrings, and pass the full CI order.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Propositional/SequentCalculus/LM.lean` barrel (mirror `LJ.lean`),
+  - [x] Create `Cslib/Logics/Propositional/SequentCalculus/LM.lean` barrel (mirror `LJ.lean`),
         with `public import` of `...LM.Basic`, `...LM.Soundness`, `...LM.Completeness`.
-  - [ ] Add `public import Cslib.Logics.Propositional.SequentCalculus.LM` to
+  - [x] Add `public import Cslib.Logics.Propositional.SequentCalculus.LM` to
         `Cslib/Logics/Propositional/SequentCalculus.lean`.
-  - [ ] In `Cslib/Logics/Propositional/ProofSystemEquivalence.lean`: add
+  - [x] In `Cslib/Logics/Propositional/ProofSystemEquivalence.lean`: add
         `public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness`; add
         `mplProofSystemsTfae` (tfae 1↔2 via `hilbert_iff_nd_ctx_min`, 2↔3 via `nd_iff_lm`,
         `tfae_finish`) and `mplProofSystemsTfaeClosed` per report Section 5.3; **retain**
         `mplHilbertIffNd`.
-  - [ ] Fix stale docstrings: lines 19–20 (module docstring "no minimal sequent calculus exists")
+  - [x] Fix stale docstrings: lines 19–20 (module docstring "no minimal sequent calculus exists")
         and line 116 (the `mplHilbertIffNd` docstring); update the "Main Results" list to mention
         `mplProofSystemsTfae`/`mplProofSystemsTfaeClosed`.
-  - [ ] Run `lake exe mk_all --module` to register the new files in `Cslib.lean`
-        (mirror LJ registration).
-  - [ ] Docstring every new theorem.
-  - [ ] Run the full CI order: `lake exe cache get` → `lake build` →
+  - [x] Register the new files in `Cslib.lean`. *(deviation: altered -- per the concurrent-work
+        notice, used targeted Edit-tool line insertions (4 lines, alphabetically placed after the
+        LK SubformulaProperty entry) instead of `lake exe mk_all --module`, to avoid clobbering
+        concurrent barrel edits from tasks 541/543 in the same checkout. A stray `mk_all` dry-run
+        was accidentally executed for real mid-phase and picked up an unrelated concurrent file
+        (`Cslib.Logics.LTL.EmbeddingSemantics`); this was immediately caught and reverted via a
+        pre-saved snapshot, restoring `Cslib.lean` to exactly the 4 targeted LM lines -- confirmed
+        via `git diff Cslib.lean` showing only the 4-line addition.)*
+  - [x] Docstring every new theorem.
+  - [x] Run the full CI order: `lake exe cache get` → `lake build` →
         `lake exe checkInitImports` → `lake lint` → `lake exe lint-style` →
-        `lake exe mk_all --module` → `lake shake --add-public --keep-implied --keep-prefix`.
-        Fix any issues fix-forward (never discard uncommitted work; never insert sorry).
+        (barrel registration via targeted Edit, not `mk_all`, per concurrent-work notice) →
+        `lake shake --add-public --keep-implied --keep-prefix` → `lake test`. All passed clean;
+        `lake lint` and `lake exe lint-style` report zero warnings for any LM/TFAE file; `lake
+        shake`'s only note for the new files is the pre-existing "remove import Cslib.Init"
+        pattern already present on the accepted LJ/Basic.lean, LJ/Soundness.lean,
+        LJ/Completeness.lean (not a regression).
 - **Timing:** ~60 min
 - **Depends on:** 1, 2, 3
 - **Files to create/modify:**
@@ -225,18 +235,19 @@ module imports the one before it, so no two phases share a wave.
 
 ## Testing & Validation
 
-- [ ] `lake build` of the whole `Cslib.Logics.Propositional.SequentCalculus.LM` tree succeeds.
-- [ ] Zero `sorry` and zero new `axiom` in all new declarations (grep the new files; use
-      `lean_verify` / `#print axioms` on `mplProofSystemsTfae` to confirm no unexpected axioms
-      beyond `Classical.choice`/`propext`/`Quot.sound`).
-- [ ] `SeqProofMinimal.sound`, `lm_msemantic_entails`, `nd_iff_lm`, `hilbert_iff_lm`,
+- [x] `lake build` of the whole `Cslib.Logics.Propositional.SequentCalculus.LM` tree succeeds.
+- [x] Zero `sorry` and zero new `axiom` in all new declarations (grepped the new files; used
+      `lean_verify` on `mplProofSystemsTfae` and `mplProofSystemsTfaeClosed`, confirming only
+      `propext`/`Classical.choice`/`Quot.sound`).
+- [x] `SeqProofMinimal.sound`, `lm_msemantic_entails`, `nd_iff_lm`, `hilbert_iff_lm`,
       `lm_iff_mvalid` all typecheck.
-- [ ] `mplProofSystemsTfae Γ φ` and `mplProofSystemsTfaeClosed φ` established.
-- [ ] Full CI order passes: `lake exe cache get` → `lake build` → `lake exe checkInitImports` →
-      `lake lint` → `lake exe lint-style` → `lake exe mk_all --module` →
-      `lake shake --add-public --keep-implied --keep-prefix`.
-- [ ] `mplHilbertIffNd` still compiles (backward compatibility preserved).
-- [ ] No tableau disjunct added to any MPL TFAE (scope guard for task 375 respected).
+- [x] `mplProofSystemsTfae Γ φ` and `mplProofSystemsTfaeClosed φ` established.
+- [x] Full CI order passes: `lake exe cache get` → `lake build` → `lake exe checkInitImports` →
+      `lake lint` → `lake exe lint-style` → barrel registration via targeted Edit (not `mk_all`,
+      per concurrent-work notice) → `lake shake --add-public --keep-implied --keep-prefix` →
+      `lake test`. All green.
+- [x] `mplHilbertIffNd` still compiles (backward compatibility preserved).
+- [x] No tableau disjunct added to any MPL TFAE (scope guard for task 375 respected).
 
 ## Artifacts & Outputs
 

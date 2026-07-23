@@ -10,6 +10,7 @@ import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.Defs
 public import Cslib.Logics.Propositional.SequentCalculus.LK
 public import Cslib.Logics.Propositional.SequentCalculus.LJ
+public import Cslib.Logics.Propositional.SequentCalculus.LM
 
 /-! # Sequent Calculus for Propositional Logic
 

@@ -9,15 +9,16 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Completeness
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness
 public import Mathlib.Data.List.TFAE
 import Mathlib.Tactic.TFAE
 
 /-! # Proof System Equivalences for Propositional Logic
 
 This module collects three-way equivalences between the Hilbert-style proof system,
-natural deduction (ND), and sequent calculus for classical (CPL) and intuitionistic (IPL)
-propositional logic, stated as `List.TFAE` theorems. For minimal logic (MPL), only a
-two-way Hilbert–ND equivalence is available (no minimal sequent calculus exists in CSLib).
+natural deduction (ND), and sequent calculus for classical (CPL), intuitionistic (IPL), and
+minimal (MPL) propositional logic, stated as `List.TFAE` theorems. All three logic strengths
+now have a three-way equivalence, making the proof-system × logic matrix structurally symmetric.
 
 ## Main Results
 
@@ -25,14 +26,17 @@ two-way Hilbert–ND equivalence is available (no minimal sequent calculus exist
 - `cplProofSystemsTfaeClosed`: CPL three-way equivalence at the empty context.
 - `iplProofSystemsTfae`: IPL three-way equivalence (Hilbert, ND, LJ), context-based.
 - `iplProofSystemsTfaeClosed`: IPL three-way equivalence at the empty context.
-- `mplHilbertIffNd`: MPL two-way equivalence (Hilbert ↔ ND), context-based.
+- `mplProofSystemsTfae`: MPL three-way equivalence (Hilbert, ND, LM), context-based.
+- `mplProofSystemsTfaeClosed`: MPL three-way equivalence at the empty context.
+- `mplHilbertIffNd`: MPL two-way equivalence (Hilbert ↔ ND), context-based (retained for
+  backward compatibility; superseded but not replaced by `mplProofSystemsTfae`).
 
 ## Dependencies
 
 The proofs are purely compositional, relying on existing bridge theorems:
 - `hilbert_iff_nd_ctx_cl`, `nd_iff_lk` (LK completeness)
 - `hilbert_iff_nd_ctx_int`, `nd_iff_lj` (LJ completeness)
-- `hilbert_iff_nd_ctx_min` (ND equivalence)
+- `hilbert_iff_nd_ctx_min`, `nd_iff_lm` (LM completeness)
 -/
 
 @[expose] public section
@@ -109,12 +113,43 @@ theorem iplProofSystemsTfaeClosed (φ : PL.Proposition Atom) :
 
 /-! ## Minimal Propositional Logic (MPL) -/
 
+/-- **MPL Three-Way Equivalence** (context-based): For any context `Γ` and formula `φ`,
+the following are equivalent:
+1. Hilbert derivability: `Deriv MinPropAxiom Γ.toList φ`
+2. ND derivability: `DerivableIn (AxiomTheory MinPropAxiom) (Γ ⊢ φ)`
+3. LM provability: `Nonempty (SeqProofMinimal (Γ ⊢ φ))`
+
+Proved by composing `hilbert_iff_nd_ctx_min` (1 ↔ 2) and `nd_iff_lm` (2 ↔ 3). This makes the
+MPL row structurally symmetric with the CPL (`LK`) and IPL (`LJ`) rows. -/
+theorem mplProofSystemsTfae (Γ : Ctx Atom) (φ : PL.Proposition Atom) :
+    [Deriv MinPropAxiom Γ.toList φ,
+     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) (Γ ⊢ φ),
+     Nonempty (SeqProofMinimal (Γ ⊢ φ))].TFAE := by
+  tfae_have 1 ↔ 2 := hilbert_iff_nd_ctx_min
+  tfae_have 2 ↔ 3 := nd_iff_lm
+  tfae_finish
+
+/-- **MPL Three-Way Equivalence** (closed): At the empty context, the following are equivalent:
+1. Hilbert derivability: `Derivable MinPropAxiom φ`
+2. ND derivability: `DerivableIn (AxiomTheory MinPropAxiom) (∅ ⊢ φ)`
+3. LM provability: `Nonempty (SeqProofMinimal (∅ ⊢ φ))`
+
+Obtained from `mplProofSystemsTfae` at `Γ = ∅` via `Finset.toList_empty`. -/
+theorem mplProofSystemsTfaeClosed (φ : PL.Proposition Atom) :
+    [Derivable MinPropAxiom φ,
+     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom)
+       ((∅ : Ctx Atom) ⊢ φ),
+     Nonempty (SeqProofMinimal ((∅ : Ctx Atom) ⊢ φ))].TFAE := by
+  have h := mplProofSystemsTfae (∅ : Ctx Atom) φ
+  simp only [Finset.toList_empty] at h
+  exact h
+
 /-- **MPL Two-Way Equivalence** (context-based): For any context `Γ` and formula `φ`,
 Hilbert derivability with `MinPropAxiom` from `Γ.toList` is equivalent to ND derivability
 under `AxiomTheory MinPropAxiom` from `Γ`.
 
-No minimal sequent calculus (LM) exists in CSLib, so only a two-way equivalence is available.
-This re-exports `hilbert_iff_nd_ctx_min` for discoverability. -/
+Retained for backward compatibility; re-exports `hilbert_iff_nd_ctx_min` for discoverability.
+Superseded by the three-way `mplProofSystemsTfae`, which additionally includes LM provability. -/
 theorem mplHilbertIffNd {Γ : Ctx Atom} {φ : PL.Proposition Atom} :
     Deriv MinPropAxiom Γ.toList φ ↔
     DerivableIn (AxiomTheory (@MinPropAxiom Atom) : Theory Atom) (Γ ⊢ φ) :=

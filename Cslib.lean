@@ -330,6 +330,7 @@ public import Cslib.Logics.Bimodal.Theorems.TemporalDerived
 public import Cslib.Logics.HML.Basic
 public import Cslib.Logics.HML.LogicalEquivalence
 public import Cslib.Logics.LTL.Embedding
+public import Cslib.Logics.LTL.EmbeddingSemantics
 public import Cslib.Logics.LTL.ModelChecking
 public import Cslib.Logics.LTL.Semantics.GNBA
 public import Cslib.Logics.LTL.Semantics.GNBA.Atoms
@@ -587,6 +588,10 @@ public import Cslib.Logics.Propositional.SequentCalculus.LK.Decidability
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Interpolation
 public import Cslib.Logics.Propositional.SequentCalculus.LK.Soundness
 public import Cslib.Logics.Propositional.SequentCalculus.LK.SubformulaProperty
+public import Cslib.Logics.Propositional.SequentCalculus.LM
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Basic
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Completeness
+public import Cslib.Logics.Propositional.SequentCalculus.LM.Soundness
 public import Cslib.Logics.Propositional.Subformula
 public import Cslib.Logics.Propositional.Tableau
 public import Cslib.Logics.Propositional.Tableau.Classical

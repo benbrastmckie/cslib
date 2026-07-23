@@ -6,6 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 
+public import Cslib.Foundations.Data.OmegaSequence.Init
 public import Cslib.Logics.LTL.Embedding
 public import Cslib.Logics.LTL.Semantics.Satisfies
 public import Cslib.Logics.Temporal.Semantics.Satisfies
@@ -88,6 +89,58 @@ theorem sat_or_iff (M : Temporal.TemporalModel ℕ Atom) (t : ℕ) (φ ψ : Temp
     rcases h with hφ | hψ
     · exact absurd hφ hnφ
     · exact hψ
+
+/-- The main bridge theorem: `Formula.toTemporal` preserves satisfaction. LTL satisfaction of
+`φ` at the `n`-dropped word `w.drop n` agrees with Temporal satisfaction of `φ.toTemporal` at
+time `n` in the bridge model `toTemporalModel v w`, for every `n`. -/
+theorem satisfies_toTemporal (v : Atom → State → Prop) (w : ωSequence State) (n : ℕ)
+    (φ : Formula Atom) :
+    Satisfies v (w.drop n) φ ↔ Temporal.Satisfies (toTemporalModel v w) n φ.toTemporal := by
+  induction φ generalizing n with
+  | atom p =>
+    simp only [Formula.toTemporal, Satisfies.atom_iff, Temporal.Satisfies.atom_iff,
+      toTemporalModel, Cslib.ωSequence.head_drop]
+  | bot =>
+    simp only [Formula.toTemporal, Satisfies.bot_iff, Temporal.Satisfies]
+  | imp φ ψ ihφ ihψ =>
+    simp only [Formula.toTemporal, Satisfies.imp_iff, Temporal.Satisfies.imp_iff, ihφ, ihψ]
+  | next φ ih =>
+    simp only [Formula.toTemporal]
+    rw [Satisfies.next_iff, Cslib.ωSequence.tail_drop', ih (n + 1), Temporal.Satisfies.untl_iff]
+    constructor
+    · intro h
+      exact ⟨n + 1, by omega, h, fun r hr1 hr2 => absurd hr2 (by omega)⟩
+    · rintro ⟨s, hns, hsat, hguard⟩
+      have hs : s = n + 1 := by
+        by_contra hne
+        exact hguard (n + 1) (by omega) (by omega)
+      rwa [hs] at hsat
+  | untl φ ψ ihφ ihψ =>
+    simp only [Formula.toTemporal, Temporal.Formula.reflexiveUntl, Satisfies.untl_iff,
+      Temporal.Satisfies.untl_iff, sat_or_iff, sat_and_iff, Cslib.ωSequence.drop_drop, ihφ, ihψ]
+    constructor
+    · rintro ⟨j, hevent, hguard⟩
+      obtain _ | k := j
+      · exact Or.inl hevent
+      · refine Or.inr ⟨hguard 0 (by omega), n + (k + 1), by omega, hevent, ?_⟩
+        intro r hnr hrs
+        have hi : r - n < k + 1 := by omega
+        have hh := hguard (r - n) hi
+        have hrn : n + (r - n) = r := by omega
+        rwa [hrn] at hh
+    · rintro (hb | ⟨ha, s, hns, hsb, hguard⟩)
+      · exact ⟨0, hb, fun k hk => absurd hk (by omega)⟩
+      · refine ⟨s - n, ?_, ?_⟩
+        · have hrn : n + (s - n) = s := by omega
+          rw [hrn]
+          exact hsb
+        · intro k hk
+          rcases Nat.eq_zero_or_pos k with hk0 | hkpos
+          · subst hk0
+            exact ha
+          · have h1 : n < n + k := by omega
+            have h2 : n + k < s := by omega
+            exact hguard (n + k) h1 h2
 
 end Cslib.Logic.LTL
 

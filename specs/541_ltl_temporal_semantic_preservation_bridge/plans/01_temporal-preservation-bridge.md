@@ -132,29 +132,37 @@ consumes the prior phase's declarations).
   - `lake build Cslib.Logics.LTL.EmbeddingSemantics` succeeds.
   - `lean_verify` on `toTemporalModel` and the two helpers reports no `sorry` / no unexpected axioms.
 
-### Phase 2: Prove the main bridge theorem `satisfies_toTemporal` [NOT STARTED]
+### Phase 2: Prove the main bridge theorem `satisfies_toTemporal` [COMPLETED]
 
 - **Goal:** Prove the satisfaction-preservation theorem sorry-free by `induction φ generalizing n`,
   following the research's case-by-case discharge path exactly (plan-compliance: do not substitute
   an alternative strategy).
 - **Tasks:**
-  - [ ] State `theorem satisfies_toTemporal (v : Atom → State → Prop) (w : ωSequence State) (n : ℕ)
+  - [x] State `theorem satisfies_toTemporal (v : Atom → State → Prop) (w : ωSequence State) (n : ℕ)
         (φ : LTL.Formula Atom) : LTL.Satisfies v (w.drop n) φ ↔
         Temporal.Satisfies (toTemporalModel v w) n φ.toTemporal` with a docstring.
-  - [ ] `induction φ generalizing n`.
-  - [ ] **atom p** case: rewrite LHS `v p (w.drop n).head` with `head_drop` to `v p (w n)`;
+  - [x] `induction φ generalizing n`.
+  - [x] **atom p** case: rewrite LHS `v p (w.drop n).head` with `head_drop` to `v p (w n)`;
         close by `simp [head_drop]` / `Iff.rfl` against `(toTemporalModel v w).valuation n p`.
-  - [ ] **bot** case: both `False`, `Iff.rfl`.
-  - [ ] **imp φ ψ** case: discharge via the two IHs at the same `n`.
-  - [ ] **next φ** case (`toTemporal = .untl .bot (toTemporal φ)`): rewrite LHS to
+        *(deviation: altered -- required adding `public import
+        Cslib.Foundations.Data.OmegaSequence.Init` (the four reindexing simp lemmas live there, not
+        in `.Defs`, which is all that was transitively available) and using the fully-qualified
+        `Cslib.ωSequence.head_drop` name to disambiguate against `Stream'.head_drop`/
+        `RelSeries.head_drop`. No change to the discharge strategy.)*
+  - [x] **bot** case: both `False`, `Iff.rfl`.
+  - [x] **imp φ ψ** case: discharge via the two IHs at the same `n`.
+  - [x] **next φ** case (`toTemporal = .untl .bot (toTemporal φ)`): rewrite LHS to
         `Satisfies v (w.drop (n+1)) φ` via `tail_drop'`; apply IH at `n+1`; use `omega`-backed ℕ
         discreteness to force the strict-until witness `s = n+1` (guard `⊥` forbids any strictly
         intermediate point). Use `lean_multi_attempt` to validate both directions before editing.
-  - [ ] **untl φ₁ φ₂** case (`toTemporal = reflexiveUntl a b = b ∨ (a ∧ (a U b))`): reindex LHS with
+        *(deviation: altered -- `lean_multi_attempt` produced malformed match-arm errors on this
+        multi-line tactic block; validated instead via direct `Edit` + `lean_goal` inspection per
+        edit, same net verification discipline.)*
+  - [x] **untl φ₁ φ₂** case (`toTemporal = reflexiveUntl a b = b ∨ (a ∧ (a U b))`): reindex LHS with
         `drop_drop` and the two IHs; unfold RHS with the local `sat_or` / `sat_and` helpers plus the
         Temporal `untl` unfolding; perform the `j = 0` (left disjunct) vs `j ≥ 1` (right disjunct)
         reconciliation; discharge the `r = n + k` index bijection with `omega` (`k := r - n`).
-  - [ ] Confirm no goals remain via `lean_goal`; then `lake build Cslib.Logics.LTL.EmbeddingSemantics`.
+  - [x] Confirm no goals remain via `lean_goal`; then `lake build Cslib.Logics.LTL.EmbeddingSemantics`.
 - **Timing:** ~75 min
 - **Depends on:** 1
 - **Files to modify:**

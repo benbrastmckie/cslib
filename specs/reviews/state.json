@@ -1,7 +1,7 @@
 {
   "_schema_version": "1.0.0",
   "_comment": "Review state tracking",
-  "_last_updated": "2026-07-17T20:29:34Z",
+  "_last_updated": "2026-07-23T17:20:19Z",
   "reviews": [
     {
       "review_id": "review-20260608",
@@ -246,12 +246,38 @@
         523
       ],
       "registries_updated": []
+    },
+    {
+      "review_id": "review-2026-07-23",
+      "date": "2026-07-23T17:20:19Z",
+      "scope": "Propositional, modal, temporal logic trees + wiring and shared infrastructure",
+      "report_path": "specs/reviews/review-2026-07-23.md",
+      "summary": {
+        "files_reviewed": 508,
+        "critical_issues": 0,
+        "high_issues": 4,
+        "medium_issues": 14,
+        "low_issues": 14
+      },
+      "tasks_created": [
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548
+      ],
+      "registries_updated": []
     }
   ],
   "statistics": {
-    "total_reviews": 15,
-    "last_review": "2026-07-17T20:29:34Z",
-    "total_issues_found": 85,
-    "total_tasks_created": 17
+    "total_reviews": 16,
+    "last_review": "2026-07-23T17:20:19Z",
+    "total_issues_found": 117,
+    "total_tasks_created": 27
   }
 }

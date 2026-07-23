@@ -294,25 +294,33 @@ theorem d_canonical_serial
 
 /-! ## Truth Lemma
 
-There are three truth lemma families in the metalogic, each parameterized over
-the axiom set and differing in which box-witness lemma they use:
+Task 539 (consolidation): prior to this task, the metalogic carried **three** truth-lemma
+families, each parameterized over the axiom set and differing only in which box-witness lemma
+it used (a T-requiring family in this file, a K-specific family in `Systems/K/Completeness.lean`,
+and a D-specific family in `Systems/D/Completeness.lean`) -- 545 duplicated lines in total, even
+though the box case genuinely needs only `EFQ + K` from `kCore` and never axiom T or D.
 
-- **`truth_lemma`** (this file): For logics containing axiom T. Uses
-  `mcs_box_witness` from MCS.lean which relies on axiom T for the box-witness
-  consistency argument. Used by: S5, T, S4, TB.
+**There is now a single generic route.** `truth_lemma` below (promoted from the former
+K-specific family, since its box-witness argument is the weakest hypothesis and therefore
+serves every system) is THE truth lemma for all 15 classical systems in the modal cube (K, T, D,
+B, K4, K5, K45, S4, S5, TB, KB5, D4, D5, D45, DB). This works because every one of the 15
+systems' axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags` (verified in research):
+enlarging a schema-union tag set only weakens the resulting predicate (`SchemaUnion.subsumption`,
+`ProofSystem/SchemaUnion.lean`), so a proof that only needs the 13 `kCore` tags transfers to any
+superset. Each system wires `truth_lemma` in via the `canonicalTruthLemmaOfKCore` convenience
+wrapper below, feeding a single `(h : kCore ⊆ sysTags)` subset fact through the 13 `holds*`
+witness helpers (`ProofSystem/SchemaTags.lean`) rather than restating each witness by hand.
 
-- **`k_truth_lemma`** (KCompleteness.lean): For logics NOT containing axiom T.
-  Uses a K-specific box witness (`mcs_box_witness_k`) that avoids axiom T.
-  Used by: K, B, K4, K5, K45, KB5.
+The now-vacated name `truth_lemma` is deliberately reused (not renamed to `canonical_truth_lemma`,
+which is already taken by the intuitionistic truth lemma at
+`Metalogic/Intuitionistic/TruthLemma.lean` in the same namespace). The intuitionistic/constructive
+subtrees are unrelated to this consolidation and keep their own separate `canonical_truth_lemma`
+/ `ck_truth_lemma`.
 
-- **`d_truth_lemma`** (DCompleteness.lean): For logics containing axiom D but
-  NOT axiom T. Uses a D-specific box witness (`d_mcs_box_witness`) that replaces
-  axiom T with axiom D + necessitation for the seriality argument. Used by: D,
-  D4, D5, D45, DB.
-
-All three families share the same canonical model definition (`CanonicalModel`)
-from this file. Logics differ only in which frame properties are provable for
-the canonical accessibility relation. -/
+All 15 systems share the same canonical model definition (`CanonicalModel`) from this file.
+Logics differ only in which frame properties are provable for the canonical accessibility
+relation (`canonical_refl`, `canonical_trans`, `canonical_symm`, `canonical_eucl`,
+`canonical_eucl_from_5`, `d_canonical_serial`), never in the truth lemma itself. -/
 
 /-- From `L |- bot` where `L <= {psi | box psi in S} union {neg phi}`, derive `False`, without
 axiom T. Task 539: promoted from `Systems/K/Completeness.lean` (`k_derive_box_from_inconsistency`)

@@ -1,7 +1,7 @@
 # Implementation Plan: Consolidate Modal Truth Lemma to a Single Generic Route
 
 - **Task**: 539 - consolidate_modal_truth_lemma_single_generic_route
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 11 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/539_consolidate_modal_truth_lemma_single_generic_route/reports/01_truth-lemma-consolidation.md
@@ -365,20 +365,35 @@ fact per block.
 
 ---
 
-### Phase 8: Docstring Fix, Full Build, Lint, and Sorry Audit [NOT STARTED]
+### Phase 8: Docstring Fix, Full Build, Lint, and Sorry Audit [COMPLETED]
 
 **Goal**: Rewrite the stale "three truth lemma families" docstring, run the full build and linter,
 and confirm the classical subtree is sorry-free and axiom-clean.
 
 **Tasks**:
-- [ ] Rewrite `Metalogic/Completeness.lean:240-260` to describe the single promoted `truth_lemma`
+- [x] Rewrite `Metalogic/Completeness.lean:240-260` to describe the single promoted `truth_lemma`
   and note that the intuitionistic/constructive subtrees keep their separate
   `canonical_truth_lemma` / `ck_truth_lemma` (unrelated).
-- [ ] Run full `lake build` on the modal metalogic tree.
-- [ ] Run `lake lint` (docBlame, defsWithUnderscore) and resolve any findings on new helpers.
-- [ ] Run `lean_verify` on the promoted `truth_lemma` to confirm no `sorry` and no unexpected
-  axioms.
-- [ ] Grep the classical `Systems/` subtree for `sorry` to confirm zero.
+- [x] Run full `lake build` on the modal metalogic tree. Ran the full project `lake build`
+  (3254 jobs) -- all green.
+- [x] Run `lake lint` (docBlame, defsWithUnderscore) and resolve any findings on new helpers.
+  `lake lint` reports "Linting passed for Cslib" -- zero warnings anywhere, including the new
+  `holds*`/`coreSubset`/`canonicalTruthLemmaOfKCore` declarations.
+- [x] Run `lean_verify` on the promoted `truth_lemma` to confirm no `sorry` and no unexpected
+  axioms. Result: `{"axioms":["propext","Classical.choice","Quot.sound"]}` -- only the standard
+  foundational axioms, no `sorryAx`, no new axioms. Also verified
+  `canonicalTruthLemmaOfKCore` with the same clean result.
+- [x] Grep the classical `Systems/` subtree for `sorry` to confirm zero. Confirmed: `grep -rn
+  "\bsorry\b" Cslib/Logics/Modal/Metalogic/Systems/` returns nothing.
+
+**Additional verification beyond the plan's checklist** (full CSLib CI pipeline, all green):
+`lake exe cache get` (already warm), `lake exe checkInitImports` (silent success), `lake exe
+lint-style` (silent success), `lake shake --add-public --keep-implied --keep-prefix` (reports
+pre-existing findings across unrelated parts of the repo -- zero findings for any file this task
+touched, confirming the Phase 4/5 import drops left every touched file's imports minimal), `lake
+exe mk_all --module` ("No update necessary" -- no new files), `lake test` (full `CslibTests/`
+suite green). Also confirmed zero vacuous-definition patterns
+(`def X := True`/`trivial`/`Unit`) in every file this task touched.
 
 **Timing**: ~1 hour
 
@@ -397,14 +412,18 @@ and confirm the classical subtree is sorry-free and axiom-clean.
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.Modal.Metalogic.Completeness` passes after each Metalogic-editing
+- [x] `lake build Cslib.Logics.Modal.Metalogic.Completeness` passes after each Metalogic-editing
   phase (1, 2, 3)
-- [ ] `lake build` passes for each `Systems/*/Completeness.lean` leaf after its repoint (Phases 4-7)
-- [ ] Full `lake build` of the modal metalogic tree passes (Phase 8)
-- [ ] `lake lint` clean, including `defsWithUnderscore` / `docBlame` on the new `_of` helpers
-- [ ] `lean_verify` on the promoted `truth_lemma`: no `sorry`, no unexpected axioms
-- [ ] Zero `sorry` across the classical `Systems/` subtree (grep audit)
-- [ ] `by decide` count reduced from the research-confirmed baseline of 432 (record final count)
+- [x] `lake build` passes for each `Systems/*/Completeness.lean` leaf after its repoint (Phases 4-7)
+- [x] Full `lake build` of the modal metalogic tree passes (Phase 8) -- full project `lake build`
+  (3254 jobs), all green
+- [x] `lake lint` clean, including `defsWithUnderscore` / `docBlame` on the new `_of` helpers --
+  "Linting passed for Cslib"
+- [x] `lean_verify` on the promoted `truth_lemma`: no `sorry`, no unexpected axioms -- confirmed,
+  only `propext`/`Classical.choice`/`Quot.sound`
+- [x] Zero `sorry` across the classical `Systems/` subtree (grep audit) -- confirmed
+- [x] `by decide` count reduced from the research-confirmed baseline of 432 (record final count)
+  -- **final count: 141** (67% reduction)
 
 ## Artifacts & Outputs
 

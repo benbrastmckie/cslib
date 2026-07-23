@@ -176,60 +176,6 @@ theorem d_mcs_box_witness
       hWT (Set.mem_union_right _ (Set.mem_singleton _))
     exact mcs_not_mem_of_neg h_implyK h_implyS hT_mcs h_neg
 
-/-! ## Canonical Seriality (Blackburn Theorem 4.28 clause 3) -/
-
-/-- **Canonical Seriality**: The canonical model for any DAxiom-containing system
-is serial.
-
-This is Blackburn Theorem 4.28 clause 3: "it suffices to show that the canonical model
-for KD is right-unbounded [serial]."
-
-The proof shows {psi | box psi in S} is consistent using a D+NEC contradiction argument,
-then extends to MCS via Lindenbaum. -/
-theorem d_canonical_serial
-    {Axioms : Proposition Atom → Prop}
-    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
-    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
-      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
-    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
-    (h_K : ∀ (φ ψ : Proposition Atom),
-      Axioms ((Proposition.box (φ.imp ψ)).imp
-        ((Proposition.box φ).imp (Proposition.box ψ))))
-    (h_D : ∀ (φ : Proposition Atom),
-      Axioms ((Proposition.box φ).imp
-        ((Proposition.box (φ.imp .bot)).imp .bot)))
-    (S : CanonicalWorld Axioms) :
-    ∃ T : CanonicalWorld Axioms, (CanonicalModel Axioms).r S T := by
-  let W := {ψ : Proposition Atom | (□ψ) ∈ S.val}
-  have hW : SetConsistent Axioms W := by
-    intro L hL
-    unfold Metalogic.Consistent
-    intro ⟨d_bot⟩
-    have h_all_box : ∀ x ∈ L, (□x) ∈ S.val := fun x hx => hL x hx
-    have h_box_bot : (□⊥) ∈ S.val :=
-      derive_box_from_box_context h_implyK h_implyS h_K S.property d_bot h_all_box
-    -- Raw shape (task 441: `diamond` is native, no longer defeq to `Axioms.AxiomD`'s RHS).
-    have h_diamond_bot :
-        ((Proposition.box (Proposition.bot.imp Proposition.bot)).imp Proposition.bot) ∈ S.val :=
-      mcs_mp_axiom h_implyK h_implyS S.property h_box_bot (h_D ⊥)
-    have d_top : DerivationTree Axioms [] (Proposition.imp .bot .bot) :=
-      .ax [] _ (h_efq Proposition.bot)
-    have d_box_top : DerivationTree Axioms []
-        (Proposition.box (Proposition.imp .bot .bot)) :=
-      .necessitation _ d_top
-    have h_box_top : (□(⊥ → ⊥)) ∈ S.val :=
-      modal_closed_under_derivation h_implyK h_implyS S.property
-        (L := []) (fun _ h => nomatch h) ⟨d_box_top⟩
-    have h_bot : ⊥ ∈ S.val :=
-      modal_implication_property h_implyK h_implyS S.property
-        h_diamond_bot h_box_top
-    exact mcs_bot_not_mem S.property h_bot
-  obtain ⟨T, hWT, hT_mcs⟩ := modal_lindenbaum hW
-  let T' : CanonicalWorld Axioms := ⟨T, hT_mcs⟩
-  refine ⟨T', ?_⟩
-  intro φ h_box
-  exact hWT h_box
-
 /-! ## Truth Lemma for D -/
 
 /-- **Truth Lemma for D**: For any canonical world `S` and formula `phi`,

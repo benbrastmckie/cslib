@@ -7,6 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.MCS
+public import Cslib.Logics.Modal.ProofSystem.SchemaTags
 
 /-! # Completeness for Normal Modal Logics
 
@@ -237,6 +238,60 @@ theorem canonical_eucl_from_5
   exact mcs_bot_not_mem T.property
     (modal_implication_property h_implyK h_implyS T.property h_diam_T h_box_dne_T)
 
+/-- **Canonical Seriality**: The canonical model for any DAxiom-containing system
+is serial.
+
+This is Blackburn Theorem 4.28 clause 3: "it suffices to show that the canonical model
+for KD is right-unbounded [serial]." Task 539: promoted from
+`Systems/D/Completeness.lean` so it survives the D-family repoint and remains available to
+all 5 D-family `d_canonical_FC` consumers via their existing `import Metalogic.Completeness`.
+
+The proof shows {psi | box psi in S} is consistent using a D+NEC contradiction argument,
+then extends to MCS via Lindenbaum. -/
+theorem d_canonical_serial
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp
+        ((Proposition.box φ).imp (Proposition.box ψ))))
+    (h_D : ∀ (φ : Proposition Atom),
+      Axioms ((Proposition.box φ).imp
+        ((Proposition.box (φ.imp .bot)).imp .bot)))
+    (S : CanonicalWorld Axioms) :
+    ∃ T : CanonicalWorld Axioms, (CanonicalModel Axioms).r S T := by
+  let W := {ψ : Proposition Atom | (□ψ) ∈ S.val}
+  have hW : SetConsistent Axioms W := by
+    intro L hL
+    unfold Metalogic.Consistent
+    intro ⟨d_bot⟩
+    have h_all_box : ∀ x ∈ L, (□x) ∈ S.val := fun x hx => hL x hx
+    have h_box_bot : (□⊥) ∈ S.val :=
+      derive_box_from_box_context h_implyK h_implyS h_K S.property d_bot h_all_box
+    -- Raw shape (task 441: `diamond` is native, no longer defeq to `Axioms.AxiomD`'s RHS).
+    have h_diamond_bot :
+        ((Proposition.box (Proposition.bot.imp Proposition.bot)).imp Proposition.bot) ∈ S.val :=
+      mcs_mp_axiom h_implyK h_implyS S.property h_box_bot (h_D ⊥)
+    have d_top : DerivationTree Axioms [] (Proposition.imp .bot .bot) :=
+      .ax [] _ (h_efq Proposition.bot)
+    have d_box_top : DerivationTree Axioms []
+        (Proposition.box (Proposition.imp .bot .bot)) :=
+      .necessitation _ d_top
+    have h_box_top : (□(⊥ → ⊥)) ∈ S.val :=
+      modal_closed_under_derivation h_implyK h_implyS S.property
+        (L := []) (fun _ h => nomatch h) ⟨d_box_top⟩
+    have h_bot : ⊥ ∈ S.val :=
+      modal_implication_property h_implyK h_implyS S.property
+        h_diamond_bot h_box_top
+    exact mcs_bot_not_mem S.property h_bot
+  obtain ⟨T, hWT, hT_mcs⟩ := modal_lindenbaum hW
+  let T' : CanonicalWorld Axioms := ⟨T, hT_mcs⟩
+  refine ⟨T', ?_⟩
+  intro φ h_box
+  exact hWT h_box
+
 /-! ## Truth Lemma
 
 There are three truth lemma families in the metalogic, each parameterized over
@@ -259,18 +314,135 @@ All three families share the same canonical model definition (`CanonicalModel`)
 from this file. Logics differ only in which frame properties are provable for
 the canonical accessibility relation. -/
 
+/-- From `L |- bot` where `L <= {psi | box psi in S} union {neg phi}`, derive `False`, without
+axiom T. Task 539: promoted from `Systems/K/Completeness.lean` (`k_derive_box_from_inconsistency`)
+-- the generic route this file's `truth_lemma` now uses for every one of the 15 classical
+systems, since `kCore ⊆ sysTags` for all of them.
+
+When `neg phi not in L`, all elements of L have box-versions in S. From `L |- bot`,
+we derive `L |- phi` via EFQ, then use `derive_box_from_box_context` to get
+`box phi in S`, contradicting `h_not_box`. -/
+theorem k_derive_box_from_inconsistency
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp
+        ((Proposition.box φ).imp (Proposition.box ψ))))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ : Proposition Atom} (h_not_box : (□φ) ∉ S)
+    {L : List (Proposition Atom)}
+    (hL : ∀ x ∈ L, x ∈ {ψ | (□ψ) ∈ S} ∪ {(¬φ)})
+    (d_bot : DerivationTree Axioms L ⊥) : False := by
+  classical
+  let L' := L.filter (· ≠ (¬φ))
+  have h_L'_box : ∀ ψ ∈ L', (□ψ) ∈ S := by
+    intro ψ hψ
+    simp only [L', List.mem_filter, decide_eq_true_eq] at hψ
+    rcases hL ψ hψ.1 with h | h
+    · exact h
+    · exact absurd h hψ.2
+  by_cases h_neg_in_L : (¬φ) ∈ L
+  · -- Case: neg phi in L -- identical to existing code (does not use h_T)
+    have h_perm : ∀ x, x ∈ L → x ∈ (¬φ) :: L' := by
+      intro x hx
+      by_cases hxn : x = (¬φ)
+      · exact List.mem_cons.mpr (Or.inl hxn)
+      · exact List.mem_cons.mpr (Or.inr (by
+          simp only [L', List.mem_filter, decide_eq_true_eq]; exact ⟨hx, hxn⟩))
+    have d_reord := DerivationTree.weakening L ((¬φ) :: L')
+      ⊥ d_bot h_perm
+    have d_dne := deductionTheorem h_implyK h_implyS L' (¬φ)
+      ⊥ d_reord
+    let neg_phi := (¬φ)
+    have efq_ax : DerivationTree Axioms L' (Proposition.bot.imp φ) :=
+      .weakening [] L' _ (.ax [] _ (h_efq φ)) (fun _ h => nomatch h)
+    have ik : DerivationTree Axioms L'
+        ((Proposition.bot.imp φ).imp (neg_phi.imp (Proposition.bot.imp φ))) :=
+      .weakening [] L' _ (.ax [] _ (h_implyK (Proposition.bot.imp φ) neg_phi))
+        (fun _ h => nomatch h)
+    have step_k := DerivationTree.modus_ponens L' _ _ ik efq_ax
+    have is_ax : DerivationTree Axioms L'
+        ((neg_phi.imp (Proposition.bot.imp φ)).imp
+         ((neg_phi.imp Proposition.bot).imp (neg_phi.imp φ))) :=
+      .weakening [] L' _ (.ax [] _ (h_implyS neg_phi Proposition.bot φ))
+        (fun _ h => nomatch h)
+    have step_s := DerivationTree.modus_ponens L' _ _ is_ax step_k
+    have step3 := DerivationTree.modus_ponens L' _ _ step_s d_dne
+    have peirce_ax : DerivationTree Axioms L'
+        (((φ.imp Proposition.bot).imp φ).imp φ) :=
+      .weakening [] L' _ (.ax [] _ (h_peirce φ Proposition.bot))
+        (fun _ h => nomatch h)
+    have d_phi := DerivationTree.modus_ponens L' _ _ peirce_ax step3
+    exact h_not_box (derive_box_from_box_context h_implyK h_implyS h_K h_mcs
+      d_phi h_L'_box)
+  · have h_all_box : ∀ x ∈ L, (□x) ∈ S := by
+      intro x hx
+      rcases hL x hx with h | h
+      · exact h
+      · exact absurd (h ▸ hx) h_neg_in_L
+    have efq_ax : DerivationTree Axioms L (Proposition.bot.imp φ) :=
+      .weakening [] L _ (.ax [] _ (h_efq φ)) (fun _ h => nomatch h)
+    have d_phi : DerivationTree Axioms L φ :=
+      .modus_ponens L .bot φ efq_ax d_bot
+    exact h_not_box (derive_box_from_box_context h_implyK h_implyS h_K h_mcs
+      d_phi h_all_box)
+
+/-- **Box Witness** (BRV Lemma 4.20, generic route): If `box phi not in S` and `S` is MCS, then
+there exists an MCS `T` such that `forall psi, box psi in S -> psi in T` and `phi not in T`. No
+axiom T hypothesis needed -- task 539: promoted from `Systems/K/Completeness.lean`
+(`k_mcs_box_witness`). -/
+theorem k_mcs_box_witness
+    {Axioms : Proposition Atom → Prop}
+    (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
+    (h_implyS : ∀ (φ ψ χ : Proposition Atom),
+      Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
+    (h_efq : ∀ (φ : Proposition Atom), Axioms (Proposition.bot.imp φ))
+    (h_peirce : ∀ (φ ψ : Proposition Atom),
+      Axioms (((φ.imp ψ).imp φ).imp φ))
+    (h_K : ∀ (φ ψ : Proposition Atom),
+      Axioms ((Proposition.box (φ.imp ψ)).imp
+        ((Proposition.box φ).imp (Proposition.box ψ))))
+    {S : Set (Proposition Atom)} (h_mcs : SetMaximalConsistent Axioms S)
+    {φ : Proposition Atom} (h_not_box : (□φ) ∉ S) :
+    ∃ T : Set (Proposition Atom), SetMaximalConsistent Axioms T ∧
+      (∀ ψ, (□ψ) ∈ S → ψ ∈ T) ∧ φ ∉ T := by
+  let W := {ψ : Proposition Atom | (□ψ) ∈ S} ∪ {(¬φ)}
+  have hW : SetConsistent Axioms W := by
+    intro L hL
+    unfold Metalogic.Consistent
+    intro ⟨d_bot⟩
+    exact k_derive_box_from_inconsistency h_implyK h_implyS h_efq h_peirce h_K
+      h_mcs h_not_box hL d_bot
+  obtain ⟨T, hWT, hT_mcs⟩ := modal_lindenbaum hW
+  refine ⟨T, hT_mcs, ?_, ?_⟩
+  · intro ψ h_box
+    exact hWT (Set.mem_union_left _ h_box)
+  · have h_neg : (¬φ) ∈ T :=
+      hWT (Set.mem_union_right _ (Set.mem_singleton _))
+    exact mcs_not_mem_of_neg h_implyK h_implyS hT_mcs h_neg
+
 /-- **Truth Lemma**: For any canonical world `S` and formula `phi`,
 `Satisfies (CanonicalModel Axioms) S phi <-> phi in S.val`.
+
+Task 539: this is THE single generic truth lemma for all 15 classical systems, promoted (and
+renamed) from `Systems/K/Completeness.lean`'s `k_truth_lemma` -- the box case needs only
+`EFQ + K` from `kCore` (`k_mcs_box_witness` above), and since every one of the 15 systems'
+axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags`, this one route serves all of
+them (no axiom T or D needed). This reuses the name vacated by the deleted T-requiring
+`truth_lemma` -- NOT `canonical_truth_lemma`, which is already taken by the intuitionistic truth
+lemma in the same namespace (`Metalogic/Intuitionistic/TruthLemma.lean`).
 
 Task 441: gains `.and`/`.or`/`.diamond` cases (native constructors). The `.and`/`.or` cases use
 the `mcs_and_mem_iff`/`mcs_or_mem_iff` MCS closure lemmas (`MCS.lean`, Phase 5) plus the
 structural-recursion IHs at the immediate subformulas -- the payoff of native constructors: no
-Lukasiewicz-bridge lemma is needed. The `.diamond` case reuses `mcs_box_witness` (the same
+Lukasiewicz-bridge lemma is needed. The `.diamond` case reuses `k_mcs_box_witness` (the same
 box-witness consistency lemma the `.box` case uses) applied to `¬φ` instead of `φ`, bridging to
-native `◇` membership via `mcs_dia_to_raw`/`mcs_raw_to_dia` (`MCS.lean`, Phase 5) -- this is the
-canonical "existence lemma" the plan anticipated as high-risk, but it turns out to need no new
-Lindenbaum-style argument: `mcs_box_witness`'s existing construction already produces exactly the
-witness world the diamond case needs. -/
+native `◇` membership via `mcs_dia_to_raw`/`mcs_raw_to_dia` (`MCS.lean`, Phase 5). -/
 theorem truth_lemma
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -282,8 +454,6 @@ theorem truth_lemma
     (h_K : ∀ (φ ψ : Proposition Atom),
       Axioms ((Proposition.box (φ.imp ψ)).imp
         ((Proposition.box φ).imp (Proposition.box ψ))))
-    (h_T : ∀ (φ : Proposition Atom),
-      Axioms ((Proposition.box φ).imp φ))
     (h_andI : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndI φ ψ))
     (h_andE1 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE1 φ ψ))
     (h_andE2 : ∀ (φ ψ : Proposition Atom), Axioms (Cslib.Logic.Axioms.AndE2 φ ψ))
@@ -334,10 +504,10 @@ theorem truth_lemma
             .weakening [] _ _ (.ax [] _ (h_peirce φ ψ)) (fun _ h => nomatch h)
           exact ⟨.modus_ponens _ _ _ d_peirce' d_dt⟩
         have h_sat_phi :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
             h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h_phi_S
         have h_psi_S :=
-          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
             h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp
             (h_sat h_sat_phi)
         have h_neg_psi_S : (¬ψ) ∈ S.val := by
@@ -364,63 +534,63 @@ theorem truth_lemma
           (modal_implication_property h_implyK h_implyS S.property
             h_neg_psi_S h_psi_S)
     · intro h_mem h_sat_phi
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
         h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr
         (modal_implication_property h_implyK h_implyS S.property h_mem
-          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+          ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
             h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp
             h_sat_phi))
   | .and φ ψ => by
     constructor
     · intro h_sat
       exact (mcs_and_mem_iff h_implyK h_implyS h_andI h_andE1 h_andE2 S.property).mpr
-        ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K
             h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp h_sat.1,
-         (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+         (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
             h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp h_sat.2⟩
     · intro h_mem
       obtain ⟨h1, h2⟩ :=
         (mcs_and_mem_iff h_implyK h_implyS h_andI h_andE1 h_andE2 S.property).mp h_mem
-      exact ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      exact ⟨(truth_lemma h_implyK h_implyS h_efq h_peirce h_K
                 h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h1,
-             (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+             (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
                 h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr h2⟩
   | .or φ ψ => by
     constructor
     · intro h_sat
       apply (mcs_or_mem_iff h_implyK h_implyS h_orI1 h_orI2 h_orE S.property).mpr
       cases h_sat with
-      | inl h1 => exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      | inl h1 => exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mp h1)
-      | inr h2 => exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      | inr h2 => exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mp h2)
     · intro h_mem
       rcases (mcs_or_mem_iff h_implyK h_implyS h_orI1 h_orI2 h_orE S.property).mp h_mem
         with h1 | h2
-      · exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      · exact Or.inl ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S φ).mpr h1)
-      · exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      · exact Or.inr ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack S ψ).mpr h2)
   | .box φ => by
     constructor
     · intro h_sat
       by_contra h_not_box
       obtain ⟨T, hT_mcs, hST, h_phi_not_T⟩ :=
-        mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K h_T
+        k_mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K
           S.property h_not_box
       exact h_phi_not_T
-        ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        ((truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack
           ⟨T, hT_mcs⟩ φ).mp (h_sat ⟨T, hT_mcs⟩ hST))
     · intro h_box T hST
-      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+      exact (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
         h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack T φ).mpr
         (hST φ h_box)
   | .diamond φ => by
     constructor
     · rintro ⟨T', hR, hSatT'⟩
       have h_phi_T' : φ ∈ T'.val :=
-        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack T' φ).mp hSatT'
       by_contra h_not_dia
       have h_box_neg : (□¬φ) ∈ S.val := by
@@ -434,14 +604,30 @@ theorem truth_lemma
         mcs_not_mem_of_neg h_implyK h_implyS S.property
           (mcs_dia_to_raw h_implyK h_implyS h_dualFwd S.property h_dia)
       obtain ⟨T, hT_mcs, hST, h_neg_not_T⟩ :=
-        mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K h_T
+        k_mcs_box_witness h_implyK h_implyS h_efq h_peirce h_K
           S.property h_box_neg_not_S
       have h_phi_T : φ ∈ T :=
         (mcs_mem_iff_neg_not_mem h_implyK h_implyS hT_mcs).mpr h_neg_not_T
       exact ⟨⟨T, hT_mcs⟩, hST,
-        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K h_T
+        (truth_lemma h_implyK h_implyS h_efq h_peirce h_K
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack
           ⟨T, hT_mcs⟩ φ).mpr h_phi_T⟩
+
+/-- **Convenience Wrapper**: the promoted `truth_lemma` pre-applied to any `SchemaUnion S`
+whose tag set `S` contains `kCore`, via a single `(h : kCore ⊆ S)` subset fact.
+
+Task 539: every one of the 15 classical systems' axiom predicates is `SchemaUnion sysTags` with
+`kCore ⊆ sysTags` (verified in research), so this one wrapper -- fed by the 13 `holds*` helpers
+in `ProofSystem.SchemaTags` -- replaces each system's bespoke 13-witness
+`*_truth_lemma_applied` block with a single `canonicalTruthLemmaOfKCore (by decide) S φ` call. -/
+theorem canonicalTruthLemmaOfKCore {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (w : CanonicalWorld (SchemaUnion S)) (φ : Proposition Atom) :
+    Satisfies (CanonicalModel (SchemaUnion S)) w φ ↔ φ ∈ w.val :=
+  truth_lemma
+    (holdsImplyK h) (holdsImplyS h) (holdsEfq h) (holdsPeirce h) (holdsModalK h)
+    (holdsAndI h) (holdsAndE1 h) (holdsAndE2 h) (holdsOrI1 h) (holdsOrI2 h) (holdsOrE h)
+    (holdsDiaDualityFwd h) (holdsDiaDualityBack h)
+    w φ
 
 /-! ## Consistency of Negation -/
 

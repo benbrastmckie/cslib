@@ -111,4 +111,85 @@ def d45Tags : Finset ModalSchemaTag :=
 /-- System DB's tag set: `kCore ∪ {modalD, modalB}`. -/
 def dbTags : Finset ModalSchemaTag := insert .modalD (insert .modalB kCore)
 
+/-! ## Generic Per-Core-Tag Witness Helpers
+
+Task 539: thin one-liners over `SchemaUnion.subsumption`, one per `kCore` tag. Given
+`h : kCore ⊆ S` for any per-system tag set `S`, each helper produces the corresponding
+axiom-schema witness for `SchemaUnion S` -- collapsing what used to be 13 copy-pasted
+`⟨.tag, by decide, …, rfl⟩` witness terms per call site (432 across the 15 systems' truth
+lemma applications, strong-completeness, and compactness invocations) down to a single
+`(by decide : kCore ⊆ S)` subset fact shared by all 13. Named without the originally-proposed
+`_of` suffix (`implyKOf`, …) since `defsWithUnderscore` flags underscores in declaration
+names; `holds*` reads naturally as "S holds the *-schema witness". -/
+
+variable {Atom : Type u}
+
+/-- `SchemaUnion S` holds the `implyK` witness `φ → (ψ → φ)` whenever `kCore ⊆ S`. -/
+theorem holdsImplyK {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (φ.imp (ψ.imp φ)) :=
+  SchemaUnion.subsumption h ⟨.implyK, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `implyS` witness (distribution) whenever `kCore ⊆ S`. -/
+theorem holdsImplyS {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ χ : Proposition Atom) :
+    SchemaUnion S ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  SchemaUnion.subsumption h ⟨.implyS, by decide, φ, ψ, χ, rfl⟩
+
+/-- `SchemaUnion S` holds the `efq` witness `⊥ → φ` whenever `kCore ⊆ S`. -/
+theorem holdsEfq {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ : Proposition Atom) : SchemaUnion S (Proposition.bot.imp φ) :=
+  SchemaUnion.subsumption h ⟨.efq, by decide, φ, rfl⟩
+
+/-- `SchemaUnion S` holds the `peirce` witness `((φ → ψ) → φ) → φ` whenever `kCore ⊆ S`. -/
+theorem holdsPeirce {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (((φ.imp ψ).imp φ).imp φ) :=
+  SchemaUnion.subsumption h ⟨.peirce, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `modalK` witness `□(φ → ψ) → (□φ → □ψ)` whenever `kCore ⊆ S`. -/
+theorem holdsModalK {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) :
+    SchemaUnion S ((Proposition.box (φ.imp ψ)).imp
+      ((Proposition.box φ).imp (Proposition.box ψ))) :=
+  SchemaUnion.subsumption h ⟨.modalK, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `andI` witness whenever `kCore ⊆ S`. -/
+theorem holdsAndI {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AndI φ ψ) :=
+  SchemaUnion.subsumption h ⟨.andI, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `andE1` witness whenever `kCore ⊆ S`. -/
+theorem holdsAndE1 {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AndE1 φ ψ) :=
+  SchemaUnion.subsumption h ⟨.andE1, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `andE2` witness whenever `kCore ⊆ S`. -/
+theorem holdsAndE2 {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AndE2 φ ψ) :=
+  SchemaUnion.subsumption h ⟨.andE2, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `orI1` witness whenever `kCore ⊆ S`. -/
+theorem holdsOrI1 {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.OrI1 φ ψ) :=
+  SchemaUnion.subsumption h ⟨.orI1, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `orI2` witness whenever `kCore ⊆ S`. -/
+theorem holdsOrI2 {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.OrI2 φ ψ) :=
+  SchemaUnion.subsumption h ⟨.orI2, by decide, φ, ψ, rfl⟩
+
+/-- `SchemaUnion S` holds the `orE` witness whenever `kCore ⊆ S`. -/
+theorem holdsOrE {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ ψ χ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.OrE φ ψ χ) :=
+  SchemaUnion.subsumption h ⟨.orE, by decide, φ, ψ, χ, rfl⟩
+
+/-- `SchemaUnion S` holds the `diaDualityFwd` witness whenever `kCore ⊆ S`. -/
+theorem holdsDiaDualityFwd {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiaDualityFwd φ) :=
+  SchemaUnion.subsumption h ⟨.diaDualityFwd, by decide, φ, rfl⟩
+
+/-- `SchemaUnion S` holds the `diaDualityBack` witness whenever `kCore ⊆ S`. -/
+theorem holdsDiaDualityBack {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
+    (φ : Proposition Atom) : SchemaUnion S (Cslib.Logic.Axioms.AxiomDiaDualityBack φ) :=
+  SchemaUnion.subsumption h ⟨.diaDualityBack, by decide, φ, rfl⟩
+
 end Cslib.Logic.Modal

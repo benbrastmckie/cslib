@@ -224,20 +224,21 @@ collapse to a single subset fact. Confirm no import cycle.
 
 ---
 
-### Phase 4: Repoint K-Family [IN PROGRESS]
+### Phase 4: Repoint K-Family [COMPLETED]
 
 **Goal**: Repoint the 6 K-family systems (K, B, K4, K5, K45, KB5) `*_truth_lemma_applied` at the
 convenience wrapper, shrink K to the ~180-line sibling shape, and drop now-redundant imports.
 
 **Tasks**:
-- [ ] Repoint each `*_truth_lemma_applied` for K, B, K4, K5, K45, KB5 to
-  `canonicalTruthLemma_of_kCore (by decide) S φ` (13 witnesses -> 1 subset fact).
-- [ ] Shrink `Systems/K/Completeness.lean` to the sibling instance shape (its promoted machinery
-  now lives in Metalogic).
-- [ ] Drop redundant `public import ...Systems.K.Completeness` where a leaf imported it only for
+- [x] Repoint each `*_truth_lemma_applied` for K, B, K4, K5, K45, KB5 to
+  `canonicalTruthLemmaOfKCore (by decide) S φ` (13 witnesses -> 1 subset fact).
+- [x] Shrink `Systems/K/Completeness.lean` to the sibling instance shape (its promoted machinery
+  now lives in Metalogic). (done in the Phase 1 combined pass; K/Completeness.lean is now
+  ~185 lines, matching the B/K4/K5 sibling shape)
+- [x] Drop redundant `public import ...Systems.K.Completeness` where a leaf imported it only for
   `k_truth_lemma` (e.g. B, `line 11`), since the promoted `truth_lemma` lives in
-  `Metalogic.Completeness`.
-- [ ] Build each of the 6 leaves.
+  `Metalogic.Completeness`. Dropped from B, K4, K5, K45, KB5.
+- [x] Build each of the 6 leaves.
 
 **Timing**: ~1.5 hours
 

@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K45.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Strong Completeness for Modal Logic K45
@@ -64,21 +63,7 @@ private theorem k45_canonical_FC : k45FC (CanonicalModel (@K45Axiom Atom)) :=
 private theorem k45_truth_lemma_applied (S : CanonicalWorld (@K45Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@K45Axiom Atom)) S φ ↔ φ ∈ S.val :=
-  k_truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- K45 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K45 is `k45FC m = (trans) ∧ (eucl)`. -/
@@ -111,7 +96,7 @@ theorem k45_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition
 over all transitive, Euclidean frames, then `phi` is set-derivable from `Gamma`
 using `K45Axiom`.
 
-Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+Delegates to the parametric `strong_completeness` with `k45_truth_lemma_applied`
 and `k45_canonical_FC`. -/
 theorem k45_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),

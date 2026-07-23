@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K5.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
 
 /-! # Strong Completeness for Modal Logic K5
 
@@ -57,21 +56,7 @@ private theorem k5_canonical_FC : k5FC (CanonicalModel (@K5Axiom Atom)) :=
 private theorem k5_truth_lemma_applied (S : CanonicalWorld (@K5Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@K5Axiom Atom)) S φ ↔ φ ∈ S.val :=
-  k_truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- K5 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K5 is `k5FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃`. -/
@@ -102,7 +87,7 @@ theorem k5_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
 /-- **Strong Completeness for K5**: If `phi` is a semantic consequence of `Gamma`
 over all Euclidean frames, then `phi` is set-derivable from `Gamma` using `K5Axiom`.
 
-Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+Delegates to the parametric `strong_completeness` with `k5_truth_lemma_applied`
 and `k5_canonical_FC`. -/
 theorem k5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),

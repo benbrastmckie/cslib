@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.B.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Strong Completeness for Modal Logic B (KB)
@@ -60,21 +59,7 @@ private theorem b_canonical_FC : bFC (CanonicalModel (@BAxiom Atom)) :=
 private theorem b_truth_lemma_applied (S : CanonicalWorld (@BAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@BAxiom Atom)) S φ ↔ φ ∈ S.val :=
-  k_truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- B soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for B is `bFC m = ∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁`. -/
@@ -105,7 +90,7 @@ theorem b_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition A
 /-- **Strong Completeness for B**: If `phi` is a semantic consequence of `Gamma`
 over all symmetric frames, then `phi` is set-derivable from `Gamma` using `BAxiom`.
 
-Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+Delegates to the parametric `strong_completeness` with `b_truth_lemma_applied`
 and `b_canonical_FC`. -/
 theorem b_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),

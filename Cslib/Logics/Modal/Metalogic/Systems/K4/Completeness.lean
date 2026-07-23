@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.K4.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.K.Completeness
 public import Cslib.Logics.Modal.ProofSystem.Instances
 
 /-! # Strong Completeness for Modal Logic K4
@@ -56,21 +55,7 @@ private theorem k4_canonical_FC : k4FC (CanonicalModel (@K4Axiom Atom)) :=
 private theorem k4_truth_lemma_applied (S : CanonicalWorld (@K4Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@K4Axiom Atom)) S φ ↔ φ ∈ S.val :=
-  k_truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- K4 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K4 is `k4FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃`. -/
@@ -101,7 +86,7 @@ theorem k4_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition 
 /-- **Strong Completeness for K4**: If `phi` is a semantic consequence of `Gamma`
 over all transitive frames, then `phi` is set-derivable from `Gamma` using `K4Axiom`.
 
-Delegates to the parametric `strong_completeness` with `k_truth_lemma_applied`
+Delegates to the parametric `strong_completeness` with `k4_truth_lemma_applied`
 and `k4_canonical_FC`. -/
 theorem k4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
     (h : ∀ (World : Type u) (m : Model World Atom) (w : World),

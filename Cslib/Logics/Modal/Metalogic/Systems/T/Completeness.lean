@@ -66,6 +66,10 @@ private theorem t_truth_lemma_applied (S : CanonicalWorld (@TAxiom Atom))
     Satisfies (CanonicalModel (@TAxiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ tTags`: feeds the `holds*` helpers so `t_strong_completeness`/`t_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ tTags := by decide
+
 /-- T soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for T is `tFC m = ∀ w, m.r w w`. -/
 private theorem t_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -104,10 +108,10 @@ theorem t_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
         Satisfies m w phi) :
     ModalSetDerivable (@TAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @TAxiom Atom) (FC := tFC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     t_truth_lemma_applied
     t_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -145,10 +149,10 @@ theorem t_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @TAxiom Atom) (FC := tFC)
       t_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       t_truth_lemma_applied
       t_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

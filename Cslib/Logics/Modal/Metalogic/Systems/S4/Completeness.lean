@@ -67,6 +67,10 @@ private theorem s4_truth_lemma_applied (S : CanonicalWorld (@S4Axiom Atom))
     Satisfies (CanonicalModel (@S4Axiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ s4Tags`: feeds the `holds*` helpers so `s4_strong_completeness`/`s4_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ s4Tags := by decide
+
 /-- S4 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for S4 is `s4FC m = (∀ w, m.r w w) ∧ (∀ w₁ w₂ w₃, ...)`. -/
 private theorem s4_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -108,10 +112,10 @@ theorem s4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@S4Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @S4Axiom Atom) (FC := s4FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     s4_truth_lemma_applied
     s4_canonical_FC
     (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)
@@ -152,10 +156,10 @@ theorem s4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @S4Axiom Atom) (FC := s4FC)
       s4_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       s4_truth_lemma_applied
       s4_canonical_FC
       (fun World m w ⟨hRefl, hTrans⟩ h_sat => h World m w hRefl hTrans h_sat)

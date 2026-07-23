@@ -74,6 +74,10 @@ private theorem s5_truth_lemma_applied (S : CanonicalWorld (@ModalAxiom Atom))
     Satisfies (CanonicalModel (@ModalAxiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ s5Tags`: feeds the `holds*` helpers so `s5_strong_completeness`/`s5_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ s5Tags := by decide
+
 /-- S5 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for S5 is `s5FC m = (∀ w, m.r w w) ∧ (∀ ..., trans) ∧ (∀ ..., eucl)`. -/
 private theorem s5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -116,10 +120,10 @@ theorem s5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@ModalAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @ModalAxiom Atom) (FC := s5FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     s5_truth_lemma_applied
     s5_canonical_FC
     (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)
@@ -163,10 +167,10 @@ theorem s5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @ModalAxiom Atom) (FC := s5FC)
       s5_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       s5_truth_lemma_applied
       s5_canonical_FC
       (fun World m w ⟨hRefl, hTrans, hEucl⟩ h_sat => h World m w hRefl hTrans hEucl h_sat)

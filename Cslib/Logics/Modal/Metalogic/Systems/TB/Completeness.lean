@@ -78,6 +78,10 @@ private theorem tb_truth_lemma_applied (S : CanonicalWorld (@TBAxiom Atom))
     Satisfies (CanonicalModel (@TBAxiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ tbTags`: feeds the `holds*` helpers so `tb_strong_completeness`/`tb_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ tbTags := by decide
+
 /-- TB soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for TB is `tbFC m = (∀ w, m.r w w) ∧ (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)`. -/
 private theorem tb_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -119,10 +123,10 @@ theorem tb_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@TBAxiom Atom) Gamma phi :=
   strong_completeness (Axioms := @TBAxiom Atom) (FC := tbFC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     tb_truth_lemma_applied
     tb_canonical_FC
     (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)
@@ -163,10 +167,10 @@ theorem tb_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @TBAxiom Atom) (FC := tbFC)
       tb_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       tb_truth_lemma_applied
       tb_canonical_FC
       (fun World m w ⟨hRefl, hSymm⟩ h_sat => h World m w hRefl hSymm h_sat)

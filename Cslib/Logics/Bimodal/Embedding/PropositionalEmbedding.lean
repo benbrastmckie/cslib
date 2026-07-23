@@ -68,14 +68,17 @@ foldable into the generic lemmas. -/
 theorem PL.Proposition.toBimodal_eq_embed (φ : PL.Proposition Atom) :
     φ.toBimodal = φ.embed := rfl
 
-/-- Direct embedding preserves and (Lukasiewicz encoding). -/
-@[simp]
+/-- Direct embedding preserves and (Lukasiewicz encoding).
+
+Not tagged `@[simp]`: since `toBimodal_eq_embed` is `@[simp]`, this lemma's LHS is no longer in
+simp-normal form (it simplifies further via `toBimodal_eq_embed` + the generic `embed_and`),
+which `simpNF` correctly flags as a dead/redundant simp lemma. -/
 theorem PL.Proposition.toBimodal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toBimodal =
       .imp (.imp φ₁.toBimodal (.imp φ₂.toBimodal .bot)) .bot := rfl
 
-/-- Direct embedding preserves or (Lukasiewicz encoding). -/
-@[simp]
+/-- Direct embedding preserves or (Lukasiewicz encoding). See `toBimodal_and` for why this is not
+tagged `@[simp]`. -/
 theorem PL.Proposition.toBimodal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toBimodal =
       .imp (.imp φ₁.toBimodal .bot) φ₂.toBimodal := rfl
@@ -84,14 +87,16 @@ theorem PL.Proposition.toBimodal_or (φ₁ φ₂ : PL.Proposition Atom) :
 theorem PL.Proposition.toBimodal_neg (φ : PL.Proposition Atom) :
     (PL.Proposition.neg φ).toBimodal = Bimodal.Formula.neg φ.toBimodal := rfl
 
-/-- The diagram PL → Modal → Bimodal commutes with the direct path PL → Bimodal. -/
-@[simp]
+/-- The diagram PL → Modal → Bimodal commutes with the direct path PL → Bimodal.
+
+Not tagged `@[simp]`: its LHS `φ.toModal.toBimodal` is no longer in simp-normal form once
+`toModal_eq_embed` is `@[simp]` (`simpNF` flags it as dead/redundant). -/
 theorem PL.Proposition.toModal_toBimodal (φ : PL.Proposition Atom) :
     φ.toModal.toBimodal = φ.toBimodal := by
   induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto
 
-/-- The diagram PL → Temporal → Bimodal commutes with the direct path PL → Bimodal. -/
-@[simp]
+/-- The diagram PL → Temporal → Bimodal commutes with the direct path PL → Bimodal. See
+`toModal_toBimodal` for why this is not tagged `@[simp]`. -/
 theorem PL.Proposition.toTemporal_toBimodal (φ : PL.Proposition Atom) :
     φ.toTemporal.toBimodal = φ.toBimodal := by
   induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto

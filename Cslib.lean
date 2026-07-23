@@ -113,6 +113,7 @@ public import Cslib.Foundations.Logic.Tableau.SignedFormula
 public import Cslib.Foundations.Logic.Theorems
 public import Cslib.Foundations.Logic.Theorems.BigConj
 public import Cslib.Foundations.Logic.Theorems.Combinators
+public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 public import Cslib.Foundations.Logic.Theorems.Modal.Basic
 public import Cslib.Foundations.Logic.Theorems.Modal.S5
 public import Cslib.Foundations.Logic.Theorems.Propositional.Connectives

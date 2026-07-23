@@ -1,7 +1,7 @@
 # Implementation Plan: Retire wrap/unwrap Combinator Bridge Layers
 
 - **Task**: 540 - retire_wrap_unwrap_combinator_bridge_layers
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None (coordinate with tasks 393/41 only if Phase 6 requires editing GenericMCSBridge — see Non-Goals)
 - **Research Inputs**: specs/540_retire_wrap_unwrap_combinator_bridge_layers/reports/01_bridge-lemma-elimination.md
@@ -353,36 +353,77 @@ unfolder per target. Keep `_and/_or/_neg` and the entire Modal→Bimodal / Tempo
 
 ---
 
-### Phase 7: Full verification [NOT STARTED]
+### Phase 7: Full verification [COMPLETED]
 
 **Goal**: Confirm the whole refactor is green and debt-free across the repository.
 
 **Tasks**:
-- [ ] `lake build` (full) green.
-- [ ] `lake exe checkInitImports` clean.
-- [ ] `lake lint` clean on all touched files (watch `docBlame` on the new generic defs).
-- [ ] Confirm zero new `sorry` and no new axioms (`lean_verify` / grep for `sorry`/`axiom`).
+- [x] `lake build` (full) green. *(3255 jobs, twice: once after Phase 6, once again after the
+  Phase 7 simpNF/import fixes below.)*
+- [x] `lake exe checkInitImports` clean.
+- [x] `lake lint` clean on all touched files (watch `docBlame` on the new generic defs).
+  *(deviation: altered -- the first run found 8 `simpNF` errors, exactly the Phase-5-flagged
+  normal-form-drift risk resurfacing one layer up: the RETAINED `_and`/`_or` and
+  `toModal_toBimodal`/`toTemporal_toBimodal` `@[simp]` lemmas were no longer in simp-normal
+  form once `toX_eq_embed` became `@[simp]`, since their LHS now simplifies further via
+  `toX_eq_embed` + the generic `embed_and`/`embed_or`. Fixed by dropping the now-redundant
+  `@[simp]` attribute from those 8 declarations (keeping them as plain, by-name-citable theorems;
+  `scoped grind =` retained where present, since `grind` is a separate mechanism unaffected by
+  simp normal-form) across `Modal/FromPropositional.lean`, `Temporal/FromPropositional.lean`, and
+  `Bimodal/Embedding/PropositionalEmbedding.lean`. Re-ran `lake lint`: 0 errors.)*
+- [x] Confirm zero new `sorry` and no new axioms (`lean_verify` / grep for `sorry`/`axiom`).
+  *(zero `sorry`/`axiom` in all 15 touched files, confirmed by per-file grep; repo-wide baseline
+  counts (144 pre-existing `sorry`, 28 pre-existing `axiom`, 1 pre-existing unrelated vacuous
+  `theorem ... := trivial` in `Computability/URM/Basic.lean`) are unchanged by this task's diff.)*
+- [x] `lake exe lint-style` clean *(deviation: added -- not originally listed as a separate task
+  item, but is CI pipeline step 4; ran clean, 0 issues.)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reviewed *(deviation: added -- CI
+  pipeline step 7. Found one genuine unused import in a touched file
+  (`Bimodal/Theorems/Combinators.lean`'s now-dead `Perpetuity.Helpers` import after the `open
+  ... (unwrap)` removal) and fixed it. Also flagged `CanonicalModel.lean`'s `Cslib.Init`/
+  `Metalogic.MCS`/`Semantics.Birelational` imports as removable; empirically tested this by
+  actually removing them and rebuilding -- `CanonicalModel.lean` itself still compiled, but the
+  downstream `Modal/Metalogic/Intuitionistic/TruthLemma.lean` (which relies on `CanonicalModel`'s
+  `public import` of `Semantics.Birelational` to transitively reach `BForces`) broke. Reverted
+  this suggestion: `lake shake`'s per-file minimization does not account for downstream files
+  depending on a file's own `public import` re-export chain, so it is unsafe to apply blindly here.
+  Left `CanonicalModel.lean`'s import list as Phase 6 wrote it; confirmed full `lake build` green
+  with the revert in place.)*
+- [x] `lake exe mk_all --module` *(deviation: added -- CI pipeline step 6, needed since Phase 1
+  added a new file; updated `Cslib.lean` to list `DerivationCombinators.lean`.)*
+- [x] `lake test` *(deviation: added -- CI pipeline step 5; exit 0, all tests pass.)*
 
 **Timing**: ~0.5 hour
 
 **Depends on**: 2, 3, 4, 5, 6
 
 **Files to modify**:
-- None (verification only).
+- None planned; in practice also touched (simpNF/import fixes discovered during verification):
+  `Cslib/Logics/Modal/FromPropositional.lean`, `Cslib/Logics/Temporal/FromPropositional.lean`,
+  `Cslib/Logics/Bimodal/Embedding/PropositionalEmbedding.lean` (drop dead `@[simp]`),
+  `Cslib/Logics/Bimodal/Theorems/Combinators.lean` (drop dead import), `Cslib.lean` (`mk_all`).
 
 **Verification**:
-- All commands above pass; no regressions introduced.
+- All commands above pass; no regressions introduced. Full CSLib CI pipeline (8 steps) green.
 
 ## Testing & Validation
 
-- [ ] Full `lake build` green with all phases applied.
-- [ ] `lake build Cslib.Logics.Temporal`, `…Bimodal`, `…Modal` each green (scoped checks per phase).
-- [ ] `lake exe checkInitImports` and `lake lint` clean on touched files.
-- [ ] No new `sorry`, no new axioms, no vacuous definitions (zero-debt invariant preserved).
-- [ ] All three `wrap`/`unwrap`(`'`) primitive pairs removed; no dangling by-name references.
-- [ ] The 9 PL→X `_atom/_bot/_imp` restatements removed; `_and/_or/_neg` and X→Bimodal files intact.
-- [ ] Downstream `Temporal/Metalogic/**` (~21 files) and `Bimodal/Metalogic/**` (~18 files) compile
-  unchanged (option B1 name preservation confirmed).
+- [x] Full `lake build` green with all phases applied (3255 jobs).
+- [x] `lake build Cslib.Logics.Temporal`, `…Bimodal`, `…Modal` each green (scoped checks per
+  phase; no single barrel module exists for these three trees, so verification used
+  `Cslib.Logics.Temporal.Metalogic` (953 jobs), `Cslib.Logics.Bimodal.Theorems.*`/`Metalogic.*`
+  scoped builds, and `Cslib.Logics.Modal.Metalogic` (793/799 jobs), plus the full-repo build).
+- [x] `lake exe checkInitImports` and `lake lint` clean on touched files (both 0 issues after the
+  Phase 7 simpNF fix).
+- [x] No new `sorry`, no new axioms, no vacuous definitions (zero-debt invariant preserved) --
+  confirmed by per-file grep across all 15 touched/created files.
+- [x] All three `wrap`/`unwrap`(`'`) primitive pairs removed; no dangling by-name references --
+  confirmed by a repo-wide `\bwrap\b|\bunwrap\b` grep excluding docstrings/prose (0 code hits).
+- [x] The 9 PL→X `_atom/_bot/_imp` restatements removed; `_and/_or/_neg` and X→Bimodal files intact.
+- [x] Downstream `Temporal/Metalogic/**` (~21 files) and `Bimodal/Metalogic/**` (~18 files) compile
+  unchanged (option B1 name preservation confirmed) -- plus 4 additional hidden Bimodal consumers
+  of `unwrap` discovered and fixed (see Phase 4 deviation notes) that were outside the original
+  ~18-file estimate.
 
 ## Artifacts & Outputs
 

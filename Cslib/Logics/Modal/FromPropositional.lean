@@ -57,8 +57,12 @@ The RHS is stated in the *raw* nested `imp`/`bot` shape (not the native `Modal.P
 constructor introduced by task 441): the shared `PL.Proposition.embed` skeleton
 (`Cslib.Logics.Propositional.Embedding`) is classical-scope only and always emits the
 Łukasiewicz encoding for `and`/`or`, regardless of whether the target type has a native `and`.
-See the module-level docstring there for the encoding rationale. -/
-@[simp]
+See the module-level docstring there for the encoding rationale.
+
+Not tagged `@[simp]`: since `toModal_eq_embed` is `@[simp]`, this lemma's LHS is no longer in
+simp-normal form (it simplifies further via `toModal_eq_embed` + the generic `embed_and`), which
+`simpNF` correctly flags as a dead/redundant simp lemma. The statement is retained as a plain
+theorem (used by name in `modal_satisfies_toModal_iff_evaluate` below via `simp only`). -/
 theorem PL.Proposition.toModal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toModal =
       .imp (.imp φ₁.toModal (.imp φ₂.toModal .bot)) .bot := rfl
@@ -66,8 +70,7 @@ theorem PL.Proposition.toModal_and (φ₁ φ₂ : PL.Proposition Atom) :
 /-- Embedding preserves or (Lukasiewicz encoding).
 
 See `PL.Proposition.toModal_and` for why the RHS is the raw nested shape rather than the
-native `Modal.Proposition.or` constructor. -/
-@[simp]
+native `Modal.Proposition.or` constructor, and for why this is not tagged `@[simp]`. -/
 theorem PL.Proposition.toModal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toModal = .imp (.imp φ₁.toModal .bot) φ₂.toModal := rfl
 

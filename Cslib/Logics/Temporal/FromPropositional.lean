@@ -51,14 +51,20 @@ foldable into the generic lemmas. -/
 theorem PL.Proposition.toTemporal_eq_embed (φ : PL.Proposition Atom) :
     φ.toTemporal = φ.embed := rfl
 
-/-- Embedding preserves and (Lukasiewicz encoding). -/
-@[simp, scoped grind =]
+/-- Embedding preserves and (Lukasiewicz encoding).
+
+Not tagged `@[simp]`: since `toTemporal_eq_embed` is `@[simp]`, this lemma's LHS is no longer in
+simp-normal form (it simplifies further via `toTemporal_eq_embed` + the generic `embed_and`),
+which `simpNF` correctly flags as a dead/redundant simp lemma. `grind` is retained since it is a
+separate automation mechanism unaffected by simp normal-form. -/
+@[scoped grind =]
 theorem PL.Proposition.toTemporal_and (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.and φ₁ φ₂).toTemporal =
     .imp (.imp φ₁.toTemporal (.imp φ₂.toTemporal .bot)) .bot := rfl
 
-/-- Embedding preserves or (Lukasiewicz encoding). -/
-@[simp, scoped grind =]
+/-- Embedding preserves or (Lukasiewicz encoding). See `toTemporal_and` for why this is not
+tagged `@[simp]`. -/
+@[scoped grind =]
 theorem PL.Proposition.toTemporal_or (φ₁ φ₂ : PL.Proposition Atom) :
     (PL.Proposition.or φ₁ φ₂).toTemporal =
     .imp (.imp φ₁.toTemporal .bot) φ₂.toTemporal := rfl

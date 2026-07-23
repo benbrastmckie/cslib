@@ -56,6 +56,11 @@ theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
     Satisfies (CanonicalModel (@KAxiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ kTags`: K's tag set is `kCore` alone. Feeds the `holds*` helpers so every
+`*_strong_completeness`/`*_compactness`/`*_completeness` call site below shares this single
+subset fact instead of repeating 4 `by decide` witnesses each (task 539). -/
+private theorem coreSubset : kCore ⊆ kTags := by decide
+
 /-- K soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K is trivial (`fun _ => True`), so the hypothesis is discarded. -/
 private theorem k_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -76,10 +81,10 @@ theorem k_strong_soundness {Gamma : Set (Proposition Atom)} {phi : Proposition A
     ModalSemanticEntails (fun _ => True) Gamma phi :=
   (strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k_truth_lemma_applied
     trivial).mpr h
 
@@ -94,10 +99,10 @@ theorem k_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositio
     ModalSetDerivable (@KAxiom Atom) Gamma phi :=
   (strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k_truth_lemma_applied
     trivial).mp h
 
@@ -113,10 +118,10 @@ theorem k_strong_completeness_iff {Gamma : Set (Proposition Atom)} {phi : Propos
     ModalSetDerivable (@KAxiom Atom) Gamma phi :=
   strong_completeness_iff (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k_truth_lemma_applied
     trivial
 
@@ -134,10 +139,10 @@ theorem k_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
       ModalSemanticEntails (fun _ => True) {ψ | ψ ∈ L} phi :=
   compactness (Axioms := @KAxiom Atom) (FC := fun _ => True)
     k_sound_cb
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k_truth_lemma_applied
     trivial
     h
@@ -155,10 +160,10 @@ theorem k_completeness (φ : Proposition Atom)
       ∀ w, Satisfies m w φ) :
     Derivable (@KAxiom Atom) φ :=
   weak_completeness (Axioms := @KAxiom Atom) (FC := fun _ => True)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k_truth_lemma_applied
     trivial
     (fun W m _ w => h_valid W m w)

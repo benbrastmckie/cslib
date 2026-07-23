@@ -57,6 +57,10 @@ private theorem k4_truth_lemma_applied (S : CanonicalWorld (@K4Axiom Atom))
     Satisfies (CanonicalModel (@K4Axiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ k4Tags`: feeds the `holds*` helpers so `k4_strong_completeness`/`k4_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ k4Tags := by decide
+
 /-- K4 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K4 is `k4FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃`. -/
 private theorem k4_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -95,10 +99,10 @@ theorem k4_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@K4Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @K4Axiom Atom) (FC := k4FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k4_truth_lemma_applied
     k4_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -136,10 +140,10 @@ theorem k4_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @K4Axiom Atom) (FC := k4FC)
       k4_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       k4_truth_lemma_applied
       k4_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

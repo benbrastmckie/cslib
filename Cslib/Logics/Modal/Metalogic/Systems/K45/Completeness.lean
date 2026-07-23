@@ -65,6 +65,10 @@ private theorem k45_truth_lemma_applied (S : CanonicalWorld (@K45Axiom Atom))
     Satisfies (CanonicalModel (@K45Axiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ k45Tags`: feeds the `holds*` helpers so `k45_strong_completeness`/`k45_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ k45Tags := by decide
+
 /-- K45 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K45 is `k45FC m = (trans) ∧ (eucl)`. -/
 private theorem k45_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -106,10 +110,10 @@ theorem k45_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposit
         Satisfies m w phi) :
     ModalSetDerivable (@K45Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @K45Axiom Atom) (FC := k45FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k45_truth_lemma_applied
     k45_canonical_FC
     (fun World m w ⟨hTrans, hEucl⟩ h_sat => h World m w hTrans hEucl h_sat)
@@ -151,10 +155,10 @@ theorem k45_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @K45Axiom Atom) (FC := k45FC)
       k45_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       k45_truth_lemma_applied
       k45_canonical_FC
       (fun World m w ⟨hTrans, hEucl⟩ h_sat => h World m w hTrans hEucl h_sat)

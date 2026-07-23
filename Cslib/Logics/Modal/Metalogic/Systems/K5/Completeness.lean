@@ -58,6 +58,10 @@ private theorem k5_truth_lemma_applied (S : CanonicalWorld (@K5Axiom Atom))
     Satisfies (CanonicalModel (@K5Axiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ k5Tags`: feeds the `holds*` helpers so `k5_strong_completeness`/`k5_compactness`
+below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ k5Tags := by decide
+
 /-- K5 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for K5 is `k5FC m = ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃`. -/
 private theorem k5_sound_cb {World : Type u} (m : Model World Atom) (w : World)
@@ -96,10 +100,10 @@ theorem k5_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Propositi
         Satisfies m w phi) :
     ModalSetDerivable (@K5Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @K5Axiom Atom) (FC := k5FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     k5_truth_lemma_applied
     k5_canonical_FC
     (fun World m w hFC h_sat => h World m w hFC h_sat)
@@ -137,10 +141,10 @@ theorem k5_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom}
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @K5Axiom Atom) (FC := k5FC)
       k5_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       k5_truth_lemma_applied
       k5_canonical_FC
       (fun World m w hFC h_sat => h World m w hFC h_sat)

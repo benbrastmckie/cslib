@@ -44,20 +44,12 @@ def PL.Proposition.toTemporal (φ : PL.Proposition Atom) : Temporal.Formula Atom
 instance instCoePLToTemporal : Coe (PL.Proposition Atom) (Temporal.Formula Atom) where
   coe := PL.Proposition.toTemporal
 
-/-- Embedding preserves atom. -/
+/-- `toTemporal` unfolds to the generic `embed` skeleton. Reaches
+`embed_atom`/`embed_bot`/`embed_imp` via simp, so the `_atom`/`_bot`/`_imp` restatements are
+foldable into the generic lemmas. -/
 @[simp, scoped grind =]
-theorem PL.Proposition.toTemporal_atom (p : Atom) :
-    (PL.Proposition.atom p : PL.Proposition Atom).toTemporal = Temporal.Formula.atom p := rfl
-
-/-- Embedding preserves bot. -/
-@[simp, scoped grind =]
-theorem PL.Proposition.toTemporal_bot :
-    (PL.Proposition.bot : PL.Proposition Atom).toTemporal = Temporal.Formula.bot := rfl
-
-/-- Embedding preserves imp. -/
-@[simp, scoped grind =]
-theorem PL.Proposition.toTemporal_imp (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.imp φ₁ φ₂).toTemporal = Temporal.Formula.imp φ₁.toTemporal φ₂.toTemporal := rfl
+theorem PL.Proposition.toTemporal_eq_embed (φ : PL.Proposition Atom) :
+    φ.toTemporal = φ.embed := rfl
 
 /-- Embedding preserves and (Lukasiewicz encoding). -/
 @[simp, scoped grind =]

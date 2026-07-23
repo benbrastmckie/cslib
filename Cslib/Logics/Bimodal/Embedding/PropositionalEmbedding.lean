@@ -30,7 +30,11 @@ bimodal logic formulas, instantiating the shared `PropositionalEmbedding` skelet
 See `Cslib.Logics.Propositional.Embedding` for the shared typeclass, the `embed` skeleton,
 and the classical-scope limitation note (Łukasiewicz / [Wajsberg1938] / [McKinsey1939]).
 The `and`/`or` Łukasiewicz encodings are the same as those used in `toModal` and `toTemporal`,
-which is why all three commuting-diamond lemmas close by `induction φ <;> simp [*]`.
+which is why all three commuting-diamond lemmas close by
+`induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto` (the explicit `HasImp.imp`/
+`HasBot.bot` unfolds are needed once `toModal`/`toTemporal`/`toBimodal` are simp-normalized to
+the typeclass-generic `embed`, so the retained per-target `_and`/`_or` restatements can still
+match against the underlying concrete constructors).
 -/
 
 @[expose] public section
@@ -48,7 +52,8 @@ instance instPropositionalEmbeddingBimodal :
 Thin wrapper over `PL.Proposition.embed` using the `Bimodal.Formula` instance of
 `PropositionalEmbedding`. The `and`/`or` cases use the Łukasiewicz encoding via
 `{bot, imp}` — the same encoding as `toModal` and `toTemporal`, which is why the
-commuting-diamond lemmas below close by `induction φ <;> simp [*]`.
+commuting-diamond lemmas below close by
+`induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto`.
 (Classical scope only; see `Cslib.Logics.Propositional.Embedding`.) -/
 def PL.Proposition.toBimodal (φ : PL.Proposition Atom) : Bimodal.Formula Atom := φ.embed
 
@@ -56,21 +61,12 @@ def PL.Proposition.toBimodal (φ : PL.Proposition Atom) : Bimodal.Formula Atom :
 instance instCoePLToBimodal : Coe (PL.Proposition Atom) (Bimodal.Formula Atom) where
   coe := PL.Proposition.toBimodal
 
-/-- Direct embedding preserves atom. -/
+/-- `toBimodal` unfolds to the generic `embed` skeleton. Reaches
+`embed_atom`/`embed_bot`/`embed_imp` via simp, so the `_atom`/`_bot`/`_imp` restatements are
+foldable into the generic lemmas. -/
 @[simp]
-theorem PL.Proposition.toBimodal_atom (p : Atom) :
-    (PL.Proposition.atom p : PL.Proposition Atom).toBimodal = Bimodal.Formula.atom p := rfl
-
-/-- Direct embedding preserves bot. -/
-@[simp]
-theorem PL.Proposition.toBimodal_bot :
-    (PL.Proposition.bot : PL.Proposition Atom).toBimodal = Bimodal.Formula.bot := rfl
-
-/-- Direct embedding preserves imp. -/
-@[simp]
-theorem PL.Proposition.toBimodal_imp (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.imp φ₁ φ₂).toBimodal =
-      Bimodal.Formula.imp φ₁.toBimodal φ₂.toBimodal := rfl
+theorem PL.Proposition.toBimodal_eq_embed (φ : PL.Proposition Atom) :
+    φ.toBimodal = φ.embed := rfl
 
 /-- Direct embedding preserves and (Lukasiewicz encoding). -/
 @[simp]
@@ -92,18 +88,18 @@ theorem PL.Proposition.toBimodal_neg (φ : PL.Proposition Atom) :
 @[simp]
 theorem PL.Proposition.toModal_toBimodal (φ : PL.Proposition Atom) :
     φ.toModal.toBimodal = φ.toBimodal := by
-  induction φ <;> simp [*]
+  induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto
 
 /-- The diagram PL → Temporal → Bimodal commutes with the direct path PL → Bimodal. -/
 @[simp]
 theorem PL.Proposition.toTemporal_toBimodal (φ : PL.Proposition Atom) :
     φ.toTemporal.toBimodal = φ.toBimodal := by
-  induction φ <;> simp [*]
+  induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto
 
 /-- The embedding diamond commutes:
     going through Modal is the same as going through Temporal. -/
 theorem PL.Proposition.embedding_commutes (φ : PL.Proposition Atom) :
     φ.toModal.toBimodal = φ.toTemporal.toBimodal := by
-  simp
+  induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto
 
 end Cslib.Logic

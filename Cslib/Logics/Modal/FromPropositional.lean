@@ -45,20 +45,11 @@ def PL.Proposition.toModal (φ : PL.Proposition Atom) : Modal.Proposition Atom :
 instance instCoePLToModal : Coe (PL.Proposition Atom) (Modal.Proposition Atom) where
   coe := PL.Proposition.toModal
 
-/-- Embedding preserves atom. -/
+/-- `toModal` unfolds to the generic `embed` skeleton. Reaches `embed_atom`/`embed_bot`/`embed_imp`
+via simp, so the `_atom`/`_bot`/`_imp` restatements are foldable into the generic lemmas. -/
 @[simp]
-theorem PL.Proposition.toModal_atom (p : Atom) :
-    (PL.Proposition.atom p : PL.Proposition Atom).toModal = Modal.Proposition.atom p := rfl
-
-/-- Embedding preserves bot. -/
-@[simp]
-theorem PL.Proposition.toModal_bot :
-    (PL.Proposition.bot : PL.Proposition Atom).toModal = Modal.Proposition.bot := rfl
-
-/-- Embedding preserves imp. -/
-@[simp]
-theorem PL.Proposition.toModal_imp (φ₁ φ₂ : PL.Proposition Atom) :
-    (PL.Proposition.imp φ₁ φ₂).toModal = Modal.Proposition.imp φ₁.toModal φ₂.toModal := rfl
+theorem PL.Proposition.toModal_eq_embed (φ : PL.Proposition Atom) :
+    φ.toModal = φ.embed := rfl
 
 /-- Embedding preserves and (Lukasiewicz encoding).
 
@@ -101,7 +92,7 @@ theorem modal_satisfies_toModal_iff_evaluate
   | atom p => rfl
   | bot => rfl
   | imp φ ψ ih1 ih2 =>
-    simp only [PL.Proposition.toModal_imp, Modal.Satisfies, PL.Evaluate]
+    simp only [PL.Proposition.toModal_eq_embed, PL.Proposition.embed_imp, PL.Evaluate]
     exact ⟨fun h he => ih2.mp (h (ih1.mpr he)),
            fun h hm => ih2.mpr (h (ih1.mp hm))⟩
   | and φ ψ ih1 ih2 =>

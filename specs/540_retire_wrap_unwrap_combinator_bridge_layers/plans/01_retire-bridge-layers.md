@@ -216,21 +216,30 @@ tree-structural temporal helpers.
 
 ---
 
-### Phase 5: Embedding consolidation (PL→X only) [NOT STARTED]
+### Phase 5: Embedding consolidation (PL→X only) [COMPLETED]
 
 **Goal**: Fold the 9 drop-eligible `_atom/_bot/_imp` restatements for `toModal`/`toTemporal`/
 `toBimodal` into the generic `embed_*` `@[simp]` lemmas, via a single `toX_eq_embed` `@[simp]`
 unfolder per target. Keep `_and/_or/_neg` and the entire Modal→Bimodal / Temporal→Bimodal files.
 
 **Tasks**:
-- [ ] Add `@[simp] theorem toModal_eq_embed : φ.toModal = φ.embed := rfl` (and `toTemporal_eq_embed`,
+- [x] Add `@[simp] theorem toModal_eq_embed : φ.toModal = φ.embed := rfl` (and `toTemporal_eq_embed`,
   `toBimodal_eq_embed`) so simp reaches `embed_*`; prefer this over making `toX` an `abbrev`.
-- [ ] Delete the 9 restatements: `toModal_atom/bot/imp` (`Modal/FromPropositional.lean:50-61`),
+- [x] Delete the 9 restatements: `toModal_atom/bot/imp` (`Modal/FromPropositional.lean:50-61`),
   `toTemporal_atom/bot/imp` (`Temporal/FromPropositional.lean:49-60`), `toBimodal_atom/bot/imp`
   (`Bimodal/Embedding/PropositionalEmbedding.lean:59-73`).
-- [ ] **Keep** `_and/_or/_neg`, and do **not** touch `ModalEmbedding.lean` or `TemporalEmbedding.lean`.
-- [ ] Treat normal-form drift as the real risk: validate with a full build of all three logic trees,
-  not just the edited files.
+- [x] **Keep** `_and/_or/_neg`, and do **not** touch `ModalEmbedding.lean` or `TemporalEmbedding.lean`.
+- [x] Treat normal-form drift as the real risk: validate with a full build of all three logic trees,
+  not just the edited files. *(deviation: altered -- the flagged risk materialized exactly as
+  predicted: `PL.Proposition.toModal_toBimodal`/`toTemporal_toBimodal`/`embedding_commutes` in
+  `Bimodal/Embedding/PropositionalEmbedding.lean` broke because `embed`'s `imp`/`and`/`or` cases
+  produce typeclass-generic `HasImp.imp`/`HasBot.bot`-headed terms, which do not syntactically
+  match the retained per-target `_imp`/`_and`/`_or` lemmas' concrete-constructor-headed LHS
+  patterns for simp's discrimination tree. Fixed (not reverted) by changing those 3 proofs from
+  `induction φ <;> simp [*]` to `induction φ <;> simp [*, HasImp.imp, HasBot.bot] <;> tauto`,
+  which explicitly unfolds the typeclass projections back to the concrete constructors before
+  matching; verified via `lean_multi_attempt` before editing, then via full `lake build` (3254
+  jobs green, zero new sorries in touched files).)*
 
 **Timing**: ~1 hour
 

@@ -8,6 +8,7 @@ module
 
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
 public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
+public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 
 /-!
 # Generalized Necessitation for Temporal Logic
@@ -55,19 +56,22 @@ noncomputable def reverseDeduction {Γ : Context Atom} {A B : Formula Atom}
 
 /-! ## Contrapositive -/
 
+-- NOTE: `Temporal` is open in this file, and `S` is scoped prefix notation for the temporal
+-- "Since" operator, so the generic layer's `S` type-tag argument must be supplied positionally
+-- via `@` rather than as `(S := Temporal.HilbertBX)` (see `PropositionalHelpers.lean`).
+
 /-- Derive ⊢ (A→B) → (¬B→¬A) (contraposition).
-    Delegates to Foundations via wrap/unwrap. -/
+    Delegates to the generic `DerivationCombinators` layer. -/
 noncomputable def contraposeImp (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] ((A.imp B).imp (B.neg.imp A.neg)) :=
-  unwrap (@Cslib.Logic.Theorems.Propositional.Connectives.contrapose_imp
-    _ _ _ Temporal.HilbertBX _ _ (φ := A) (ψ := B))
+  @Theorems.DerivationCombinators.contraposeImp _ _ _ Temporal.HilbertBX _ _ A B
 
 /-- From ⊢ A → B derive ⊢ ¬B → ¬A (contraposition of a proof).
-    Delegates to Foundations via wrap/unwrap. -/
+    Delegates to the generic `DerivationCombinators` layer. -/
 noncomputable def contraposition {A B : Formula Atom}
     (h : DerivationTree FrameClass.Base [] (A.imp B)) :
     DerivationTree FrameClass.Base [] (B.neg.imp A.neg) :=
-  unwrap (Cslib.Logic.Theorems.Propositional.Connectives.contraposition (wrap h))
+  @Theorems.DerivationCombinators.contraposition _ _ _ Temporal.HilbertBX _ _ A B h
 
 /-! ## Past Necessitation -/
 

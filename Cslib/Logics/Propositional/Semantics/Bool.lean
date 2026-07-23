@@ -37,13 +37,13 @@ the two worlds: `Bool` computation to `Prop` metatheory.
 
 `BoolEvaluate` and `instDecidableTautology` are the canonical computable DPLL/SAT decision
 path for classical propositional logic. A future DPLL/Tseitin/CNF procedure (Matthew Doty's
-forthcoming work — not yet in-tree) should refine these two declarations and reuse the
-existing `Bool↔Prop` bridge (`boolEvaluateEq`, `propEvaluateEq` in
-`Semantics/Algebra/Bridge.lean`) rather than re-deriving it.
+forthcoming work — not yet in-tree) should refine these two declarations and reuse this
+module's own direct `Bool ↔ Prop` bridge (`BoolEvaluate_eq_iff`, `Evaluate_eq_BoolEvaluate`,
+`tautology_iff_boolEvaluate_true`, all defined above) rather than re-deriving it.
 
-For the unified three-evaluator story (`Evaluate` / `BoolEvaluate` / `AlgEvaluate`), see
-`Semantics/Algebra/Bridge.lean`, which establishes `boolEvaluateEq` and `propEvaluateEq`
-as the canonical bridge lemmas.
+See also `Semantics/Algebra/Bridge.lean` for an algebraic reformulation of the
+`Evaluate` / `BoolEvaluate` / `AlgEvaluate` correspondence; it is an independent, self-contained
+development with no in-tree consumer, not the canonical bridge for future work to route through.
 
 ## References
 

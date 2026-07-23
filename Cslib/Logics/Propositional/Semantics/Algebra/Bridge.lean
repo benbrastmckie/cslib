@@ -13,9 +13,12 @@ public import Cslib.Logics.Propositional.Semantics.Bool
 
 /-! # Bridge Lemmas Between Evaluators
 
-This module is the single canonical home of the **ONE evaluation story** for propositional
-logic: it proves that `Evaluate` (Prop-valued) and `BoolEvaluate` (Bool-valued) are both
-special cases of the generic algebraic evaluator `AlgEvaluate`.
+This module is a self-contained development of the three-evaluator correspondence for
+propositional logic: it proves that `Evaluate` (Prop-valued) and `BoolEvaluate` (Bool-valued)
+are both special cases of the generic algebraic evaluator `AlgEvaluate`. It has no in-tree
+consumer; `Bool.lean` maintains its own direct `Evaluate ↔ BoolEvaluate` bridge
+(`BoolEvaluate_eq_iff` et al.) for the CPL soundness/decidability chain, and this module is an
+independent algebraic reformulation rather than the route that chain uses.
 
 ## Evaluators
 

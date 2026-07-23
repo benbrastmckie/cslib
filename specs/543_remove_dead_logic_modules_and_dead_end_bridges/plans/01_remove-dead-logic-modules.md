@@ -134,31 +134,32 @@ touch disjoint files and may run in parallel; Phase 3 verifies the combined resu
 
 ---
 
-### Phase 2: Truth-fix Group-3 overclaiming docstrings [NOT STARTED]
+### Phase 2: Truth-fix Group-3 overclaiming docstrings [COMPLETED]
 
 - **Goal:** Make the Group-3 docstrings honest — remove claims that `Bridge.lean` /
   `KripkeBridge.lean` are reused by downstream work, and point future work at the actual in-tree
   bridge. No code, definition, or proof changes.
 - **Tasks:**
-  - [ ] `Cslib/Logics/Propositional/Semantics/Bool.lean` (~lines 41-46 and the follow-on
+  - [x] `Cslib/Logics/Propositional/Semantics/Bool.lean` (~lines 41-46 and the follow-on
         "three-evaluator story" sentence ~47-49): redirect future DPLL/Tseitin work to Bool.lean's
         *own* direct Bool↔Prop bridge (`BoolEvaluate_eq_iff`, `Evaluate_eq_BoolEvaluate`,
         `tautology_iff_boolEvaluate_true`) as the thing to reuse, and demote the
         `Semantics/Algebra/Bridge.lean` mention to a "see also (algebraic reformulation)" rather
         than the canonical bridge to reuse.
-  - [ ] `Cslib/Logics/Propositional/Semantics/Algebra.lean` (~lines 49-51): reframe "The canonical
+  - [x] `Cslib/Logics/Propositional/Semantics/Algebra.lean` (~lines 49-51): reframe "The canonical
         narrative tying all three evaluators together lives in `Semantics/Algebra/Bridge.lean`" to
         a neutral pointer describing `Bridge.lean` as a self-contained development of the
         `Evaluate`/`BoolEvaluate` ↔ `AlgEvaluate` correspondence with no in-tree consumer.
-  - [ ] `Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean` (module header `/-! ... -/`):
+  - [x] `Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean` (module header `/-! ... -/`):
         reframe from "canonical bridge reused by downstream work" to "self-contained development of
         the three-evaluator correspondence; no in-tree consumer."
-  - [ ] `Cslib/Logics/Propositional/Semantics/Algebra/KripkeBridge.lean` (module header; the design
+  - [x] `Cslib/Logics/Propositional/Semantics/Algebra/KripkeBridge.lean` (module header; the design
         note at ~lines 59-62 already half-states this): add an explicit "independent showcase — the
         IPL completeness chain uses the derivability route in `Algebra.Completeness`, not this
         semantic duality; no chain routes through this module" note.
-  - [ ] `lake build` (targeted: `Cslib.Logics.Propositional.Semantics.Algebra` and the two bridge
-        modules) to confirm the doc-comment edits change no elaboration.
+  - [x] `lake build` (targeted: `Cslib.Logics.Propositional.Semantics.Algebra` and the two bridge
+        modules) to confirm the doc-comment edits change no elaboration. Green (715 jobs,
+        `Bool.lean` built transitively as a dependency of `Bridge.lean`).
 - **Timing:** ~30 min
 - **Depends on:** none
 - **Files to modify:**

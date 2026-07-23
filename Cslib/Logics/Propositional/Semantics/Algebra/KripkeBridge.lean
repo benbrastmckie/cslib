@@ -61,6 +61,11 @@ direction of the Kripke–algebraic duality. The converse (Kripke validity impli
 validity) holds but requires the Lindenbaum–Tarski construction and is proved in
 `Algebra.Completeness` via the derivability route.
 
+This module is an independent showcase of the Kripke–algebraic duality, not a link in the IPL
+completeness chain: that chain uses the derivability route in `Algebra.Completeness`, not the
+semantic duality established here. No in-tree completeness or soundness result routes through
+this module.
+
 ## References
 
 * [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Section 2.2

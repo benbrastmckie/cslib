@@ -47,8 +47,9 @@ it can be any element of the algebra. At the `HeytingAlgebra` and `BooleanAlgebr
 the parameter entirely).
 
 `AlgEvaluate` specializes to `Evaluate` (Prop-valued, via `propEvaluateEq`) and `BoolEvaluate`
-(Bool-valued, computable, via `boolEvaluateEq`). The canonical narrative tying all three
-evaluators together lives in `Semantics/Algebra/Bridge.lean`.
+(Bool-valued, computable, via `boolEvaluateEq`). `Semantics/Algebra/Bridge.lean` is a
+self-contained development of the `Evaluate` / `BoolEvaluate` ↔ `AlgEvaluate` correspondence;
+it has no in-tree consumer.
 
 ## Hilbert-Primary Architecture
 

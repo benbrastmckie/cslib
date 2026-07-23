@@ -10,6 +10,8 @@ import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
 public import Cslib.Logics.Modal.Metalogic.MCS
 public import Cslib.Logics.Modal.Semantics.Birelational
+public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
+public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 
 /-! # Canonical Model for Intuitionistic Modal Logic
 
@@ -66,6 +68,7 @@ These names and shapes are used verbatim by `canonicalR` below and by the later 
 namespace Cslib.Logic.Modal
 
 open Cslib.Logic
+open Cslib.Logic.Metalogic.GenericMCS
 
 variable {Atom : Type*}
 
@@ -219,20 +222,23 @@ private def dia_mono
     DerivationTree Axioms [] ((◇A).imp (◇B)) :=
   .modus_ponens [] _ _ (.ax [] _ (h_Kdia A B)) (.necessitation _ (.ax [] _ hAB))
 
-/-- Empty-context implication composition: from `⊢ A → B` and `⊢ B → C`, derive `⊢ A → C`. -/
+/-- Empty-context implication composition: from `⊢ A → B` and `⊢ B → C`, derive `⊢ A → C`.
+
+Routes through the generic `Theorems.DerivationCombinators.impTransD` combinator at
+`ClosedHilbert (DerivationTree Axioms)`, made available by locally supplying
+`HasMinimalAxioms Axioms` from the `h_implyK`/`h_implyS` witnesses (which activates the
+existing `[HasMinimalAxioms Axioms] → HilbertTree (DerivationTree Axioms)` instance in
+`GenericMCSBridge.lean`, used here read-only). -/
 private noncomputable def imp_trans0
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
       Axioms ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))))
     {A B C : Proposition Atom}
     (d1 : DerivationTree Axioms [] (A.imp B)) (d2 : DerivationTree Axioms [] (B.imp C)) :
-    DerivationTree Axioms [] (A.imp C) := by
-  have hA : DerivationTree Axioms [A] A := .assumption [A] A (List.mem_cons.mpr (Or.inl rfl))
-  have hB : DerivationTree Axioms [A] B :=
-    .modus_ponens [A] A B (.weakening [] [A] _ d1 (fun _ h => nomatch h)) hA
-  have hC : DerivationTree Axioms [A] C :=
-    .modus_ponens [A] B C (.weakening [] [A] _ d2 (fun _ h => nomatch h)) hB
-  exact deductionTheorem h_implyK h_implyS [] A C hC
+    DerivationTree Axioms [] (A.imp C) :=
+  haveI : HasMinimalAxioms Axioms := ⟨h_implyK, h_implyS⟩
+  @Cslib.Logic.Theorems.DerivationCombinators.impTransD
+    _ _ _ (ClosedHilbert (DerivationTree Axioms)) _ _ A B C d1 d2
 
 /-- **Box-of-disjuncts**: `⊢ (bigOr (l'.map box)) → (□ (bigOr l'))` -- a disjunction of already
 -boxed formulas implies the box of the (unboxed) disjunction. Proved by induction on `l'` via

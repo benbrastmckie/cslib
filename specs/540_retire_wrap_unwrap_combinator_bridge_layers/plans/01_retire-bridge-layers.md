@@ -303,7 +303,7 @@ unfolder per target. Keep `_and/_or/_neg` and the entire Modal→Bimodal / Tempo
 
 ---
 
-### Phase 6: Modal `imp_trans0` re-route (optional / scope-guarded) [NOT STARTED]
+### Phase 6: Modal `imp_trans0` re-route (optional / scope-guarded) [COMPLETED]
 
 **Goal**: Replace only Modal's pure-propositional `imp_trans0` body with a call to the generic
 `impTransD`/`imp_trans` at `HilbertOf Axioms`, **iff** the existing
@@ -311,24 +311,45 @@ unfolder per target. Keep `_and/_or/_neg` and the entire Modal→Bimodal / Tempo
 `box_mono`/`dia_mono`/`boxOr_of_boxDisj`/`box_mono_or_*` are genuinely modal and are left as-is.
 
 **Tasks**:
-- [ ] Confirm `MinimalHilbert (Modal.HilbertOf Axioms)` resolves at
+- [x] Confirm `MinimalHilbert (Modal.HilbertOf Axioms)` resolves at
   `Modal/Metalogic/Intuitionistic/CanonicalModel.lean:223` via import + instance resolution only.
-- [ ] If resolvable: replace `imp_trans0`'s body (currently a manual `deductionTheorem` + K/S witness
-  proof) with the generic combinator; keep the signature stable.
-- [ ] If instance resolution requires ANY change to `GenericMCSBridge.lean`: do **not** edit it —
+  *(deviation: altered -- `Modal.HilbertOf` no longer exists; tasks 539/543/547 (landed since this
+  plan was written) retired it in favor of the generic `ClosedHilbert (DerivationTree Axioms)` tag
+  (per `GenericMCSBridge.lean`'s own module docstring: "HilbertOf Axioms has no external
+  references (grep-confirmed), this bundle is now retired"). Re-located the target by symbol
+  name: the analogous existing, read-only-usable instance is
+  `instance [HasMinimalAxioms Axioms] : HilbertTree (DerivationTree Axioms)` at
+  `GenericMCSBridge.lean:88`, which activates the generic (Foundations, non-guarded)
+  `MinimalHilbert (ClosedHilbert (DerivationTree Axioms))` instance from
+  `Cslib/Foundations/Logic/Metalogic/GenericMCS.lean`. `imp_trans0`'s two existing value
+  parameters `h_implyK`/`h_implyS` are exactly the two fields `HasMinimalAxioms` needs, so
+  `haveI : HasMinimalAxioms Axioms := ⟨h_implyK, h_implyS⟩` supplies it locally with no signature
+  change.)*
+- [x] If resolvable: replace `imp_trans0`'s body (currently a manual `deductionTheorem` + K/S witness
+  proof) with the generic combinator; keep the signature stable. *(confirmed resolvable; body
+  replaced with
+  `@Theorems.DerivationCombinators.impTransD _ _ _ (ClosedHilbert (DerivationTree Axioms)) _ _ A B
+  C d1 d2` under the local `haveI`; signature unchanged, all 4 call sites
+  (`imp_trans0 h_implyK h_implyS ...`) untouched and still compile.)*
+- [x] If instance resolution requires ANY change to `GenericMCSBridge.lean`: do **not** edit it —
   mark this phase `[BLOCKED]` with a note to coordinate with tasks 393/41, and proceed to Phase 7
-  without this change.
+  without this change. *(not triggered -- `git diff --stat` on `GenericMCSBridge.lean` confirms
+  zero changes; the file was imported and its existing instance used read-only, exactly as
+  sanctioned.)*
 
 **Timing**: ~1 hour
 
 **Depends on**: 1
 
 **Files to modify**:
-- `Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean` - `imp_trans0` body only (if
-  unblocked).
+- `Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean` - `imp_trans0` body, plus two
+  new imports (`GenericMCSBridge`, `DerivationCombinators`) and one new `open` needed to reach the
+  relocated instance.
 
 **Verification**:
-- `lake build Cslib.Logics.Modal` green, or phase marked `[BLOCKED]` with rationale and no file edit.
+- `lake build Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel` green (648 jobs);
+  `lake build Cslib.Logics.Modal.Metalogic` green (793 jobs); zero diff on `GenericMCSBridge.lean`;
+  zero new `sorry`/`axiom` in the touched file.
 
 ---
 

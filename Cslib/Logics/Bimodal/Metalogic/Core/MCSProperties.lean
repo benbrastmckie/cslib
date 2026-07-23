@@ -293,7 +293,7 @@ theorem SetMaximalConsistent.negation_complete {fc : FrameClass}
 
 noncomputable section
 
-open Cslib.Logic.Bimodal.Theorems.Perpetuity (contraposition impTrans doubleNegation unwrap)
+open Cslib.Logic.Bimodal.Theorems.Perpetuity (contraposition impTrans doubleNegation)
 
 /--
 Derived temp_4: G phi -> GG phi.
@@ -334,9 +334,8 @@ def temp4Derived (phi : Formula Atom) :
     -- Derive |- top -> (X -> top and X) using pairing
     have h_pair : DerivationTree FrameClass.Base ([] : List (Formula Atom))
         (Formula.top.imp (X.imp (Formula.top.and X))) := by
-      exact unwrap
-        (@Cslib.Logic.Theorems.Combinators.pairing (Formula Atom) _ _
-          Bimodal.HilbertTM _ _ (Formula.top (Atom := Atom)) X)
+      exact (@Cslib.Logic.Theorems.Combinators.pairing (Formula Atom) _ _
+          Bimodal.HilbertTM _ _ (Formula.top (Atom := Atom)) X).toDerivation
     -- mp: |- X -> top and X
     exact DerivationTree.modus_ponens [] _ _ h_pair h_top
   have ff_to_f_top_and : DerivationTree FrameClass.Base ([] : List (Formula Atom))

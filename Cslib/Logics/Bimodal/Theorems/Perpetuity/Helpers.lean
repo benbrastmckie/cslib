@@ -6,7 +6,7 @@ Authors: Benjamin Brast-McKie
 
 module
 public import Cslib.Logics.Bimodal.ProofSystem.Instances
-public import Cslib.Foundations.Logic.Theorems.Propositional.Connectives
+public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 
 /-! # Perpetuity Helper Lemmas
 
@@ -16,6 +16,11 @@ These helpers derive each temporal component of the always operator from box:
 - `boxToPast`: `⊢ □φ → Hφ` (temporal duality on MF)
 - `boxToPresent`: `⊢ □φ → φ` (MT axiom)
 - `tempFutureDerived`: `⊢ □φ → G(□φ)` (M4 + MF + MT)
+
+The propositional combinators below delegate to the generic
+`Cslib.Logic.Theorems.DerivationCombinators` raw-typed layer, which is directly applicable since
+`Bimodal.HilbertTM⇓φ` is definitionally `DerivationTree .Base [] φ` -- no local `wrap`/`unwrap`
+bridge is needed.
 
 ## References
 
@@ -43,64 +48,53 @@ local notation:50 "⊢ " phi =>
 local notation:50 Gamma " ⊢ " phi =>
   Bimodal.DerivationTree Bimodal.FrameClass.Base Gamma phi
 
-/-! ## Typeclass Bridge
-
-The InferenceSystem instance maps `HilbertTM=>φ` to `DerivationTree .Base [] φ`.
-Since `InferenceSystem.DerivableIn HilbertTM φ = Nonempty (DerivationTree .Base [] φ)`,
-we can convert freely between the two representations.
--/
-
 noncomputable section
 
-/-- Convert a derivation tree to a Nonempty (for typeclass functions). -/
-lemma wrap {φ : Bimodal.Formula Atom}
-    (d : ⊢ φ) : InferenceSystem.DerivableIn Bimodal.HilbertTM φ := ⟨d⟩
-
-/-- Extract a derivation tree from Nonempty (from typeclass functions). -/
-def unwrap {φ : Bimodal.Formula Atom}
-    (h : InferenceSystem.DerivableIn Bimodal.HilbertTM φ) : ⊢ φ := h.some
+-- NOTE: `Bimodal` is not opened in this file (its scoped notation for temporal operators would
+-- conflict with local names); qualified `Bimodal.` access and positional `@`-application below
+-- match the pre-existing convention in this file.
 
 /-- Transitivity: from `⊢ φ → ψ` and `⊢ ψ → χ`, derive `⊢ φ → χ`. -/
 def impTrans {φ ψ χ : Bimodal.Formula Atom}
     (h1 : ⊢ φ.imp ψ) (h2 : ⊢ ψ.imp χ) : ⊢ φ.imp χ :=
-  unwrap (Theorems.Combinators.imp_trans (wrap h1) (wrap h2))
+  @Theorems.DerivationCombinators.impTransD _ _ _ Bimodal.HilbertTM _ _ φ ψ χ h1 h2
 
 /-- Identity: `⊢ φ → φ`. -/
 def identity (φ : Bimodal.Formula Atom) : ⊢ φ.imp φ :=
-  unwrap (@Theorems.Combinators.identity _ _ _ Bimodal.HilbertTM _ _ φ)
+  @Theorems.DerivationCombinators.identity _ _ _ Bimodal.HilbertTM _ _ φ
 
 /-- Combine three implications into conjunction. -/
 def combineImpConj3 {φ₀ φ₁ φ₂ φ₃ : Bimodal.Formula Atom}
     (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) (h3 : ⊢ φ₀.imp φ₃) :
     ⊢ φ₀.imp (φ₁.and (φ₂.and φ₃)) :=
-  unwrap (Theorems.Combinators.combine_imp_conj_3 (wrap h1) (wrap h2) (wrap h3))
+  @Theorems.DerivationCombinators.combineImpConj3 _ _ _ Bimodal.HilbertTM _ _ φ₀ φ₁ φ₂ φ₃ h1 h2 h3
 
 /-- Combine two implications into conjunction. -/
 def combineImpConj {φ₀ φ₁ φ₂ : Bimodal.Formula Atom}
     (h1 : ⊢ φ₀.imp φ₁) (h2 : ⊢ φ₀.imp φ₂) :
     ⊢ φ₀.imp (φ₁.and φ₂) :=
-  unwrap (Theorems.Combinators.combine_imp_conj (wrap h1) (wrap h2))
+  @Theorems.DerivationCombinators.combineImpConj _ _ _ Bimodal.HilbertTM _ _ φ₀ φ₁ φ₂ h1 h2
 
 /-- DNI: `⊢ φ → ¬¬φ`. -/
 def dni (φ : Bimodal.Formula Atom) : ⊢ φ.imp φ.neg.neg :=
-  unwrap (@Theorems.Combinators.dni _ _ _ Bimodal.HilbertTM _ _ φ)
+  @Theorems.DerivationCombinators.dni _ _ _ Bimodal.HilbertTM _ _ φ
 
 /-- Contraposition: from `⊢ φ → ψ`, derive `⊢ ¬ψ → ¬φ`. -/
 def contraposition {φ ψ : Bimodal.Formula Atom}
     (h : ⊢ φ.imp ψ) : ⊢ ψ.neg.imp φ.neg :=
-  unwrap (Theorems.Propositional.Connectives.contraposition (wrap h))
+  @Theorems.DerivationCombinators.contraposition _ _ _ Bimodal.HilbertTM _ _ φ ψ h
 
 /-- Double negation elimination: `⊢ ¬¬φ → φ`. -/
 def doubleNegation (φ : Bimodal.Formula Atom) : ⊢ φ.neg.neg.imp φ :=
-  unwrap (@Theorems.Propositional.Core.double_negation _ _ _ Bimodal.HilbertTM _ _ (φ := φ))
+  @Theorems.DerivationCombinators.doubleNegation _ _ _ Bimodal.HilbertTM _ _ φ
 
 /-- Left conjunction elimination: `⊢ (φ₁ ∧ φ₂) → φ₁`. -/
 def lceImp (φ₁ φ₂ : Bimodal.Formula Atom) : ⊢ (φ₁.and φ₂).imp φ₁ :=
-  unwrap (@Theorems.Propositional.Core.lce_imp _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
+  @Theorems.DerivationCombinators.lceImp _ _ _ Bimodal.HilbertTM _ _ φ₁ φ₂
 
 /-- Right conjunction elimination: `⊢ (φ₁ ∧ φ₂) → φ₂`. -/
 def rceImp (φ₁ φ₂ : Bimodal.Formula Atom) : ⊢ (φ₁.and φ₂).imp φ₂ :=
-  unwrap (@Theorems.Propositional.Core.rce_imp _ _ _ Bimodal.HilbertTM _ _ (φ := φ₁) (ψ := φ₂))
+  @Theorems.DerivationCombinators.rceImp _ _ _ Bimodal.HilbertTM _ _ φ₁ φ₂
 
 /-! ## Helper Lemmas: Temporal Components -/
 

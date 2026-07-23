@@ -17,7 +17,8 @@ public import Cslib.Logics.Bimodal.Theorems.Perpetuity.Helpers
 
 This module provides fundamental propositional reasoning combinators for the
 Bimodal proof system. Most combinators delegate to the generic Foundations
-equivalents via the wrap/unwrap bridge pattern, eliminating redundant proofs.
+equivalents via `InferenceSystem.DerivableIn.toDerivation` (the same bridge function
+`wrap`/`unwrap` used to duplicate), eliminating redundant proofs.
 
 ## Main Combinators
 
@@ -42,8 +43,9 @@ equivalents via the wrap/unwrap bridge pattern, eliminating redundant proofs.
 
 ## Bridge Pattern
 
-The wrap/unwrap bridge delegates to generic Foundations theorems:
-- `unwrap`: Extract `DerivationTree .Base [] φ` from `Nonempty`
+Delegation to generic Foundations theorems uses:
+- `InferenceSystem.DerivableIn.toDerivation`: Extract `DerivationTree .Base [] φ` (noncomputably,
+  via `Classical.choice`) from `InferenceSystem.DerivableIn`
 - `lift`: Promote from `.Base` to any `fc` via `FrameClass.base_le`
 - For input-taking theorems: lift the curried generic form and apply modus
   ponens with concrete inputs at `fc` level.
@@ -62,7 +64,6 @@ namespace Cslib.Logic.Bimodal.Theorems.Combinators
 
 open Cslib.Logic
 open Cslib.Logic.Bimodal
-open Cslib.Logic.Bimodal.Theorems.Perpetuity (unwrap)
 
 -- Use _root_.Cslib.Logic.Theorems.Combinators to avoid name collision
 -- with definitions in this namespace (both under Cslib.Logic.*.Theorems.Combinators)
@@ -79,7 +80,7 @@ def impTrans {fc : FrameClass} {A B C : Formula Atom}
     (h2 : DerivationTree fc [] (B.imp C)) : DerivationTree fc [] (A.imp C) :=
   -- bCombinator: ⊢ (B→C) → (A→B) → (A→C) at Base, lifted to fc
   let curried := DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
   DerivationTree.modus_ponens [] _ _
     (DerivationTree.modus_ponens [] _ _ curried h2) h1
 
@@ -97,7 +98,7 @@ Identity combinator: `⊢ A → A` (SKK construction).
 def identity {fc : FrameClass} (A : Formula Atom) :
     DerivationTree fc [] (A.imp A) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.identity _ _ _ Bimodal.HilbertTM _ _ A))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.identity _ _ _ Bimodal.HilbertTM _ _ A).toDerivation)
 
 /--
 B combinator (composition): `⊢ (B → C) → (A → B) → (A → C)`.
@@ -105,7 +106,7 @@ B combinator (composition): `⊢ (B → C) → (A → B) → (A → C)`.
 def bCombinator {fc : FrameClass} {A B C : Formula Atom} :
     DerivationTree fc [] ((B.imp C).imp ((A.imp B).imp (A.imp C))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
 
 /--
 Flip combinator (C): `⊢ (A → B → C) → (B → A → C)`.
@@ -113,7 +114,7 @@ Flip combinator (C): `⊢ (A → B → C) → (B → A → C)`.
 def flip {fc : FrameClass} {A B C : Formula Atom} :
     DerivationTree fc [] ((A.imp (B.imp C)).imp (B.imp (A.imp C))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.flip _ _ _ Bimodal.HilbertTM _ _ A B C))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.flip _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
 
 /--
 Single application lemma (app1): `⊢ A → (A → B) → B`.
@@ -121,7 +122,7 @@ Single application lemma (app1): `⊢ A → (A → B) → B`.
 def app1 {fc : FrameClass} {A B : Formula Atom} :
     DerivationTree fc [] (A.imp ((A.imp B).imp B)) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.app1 _ _ _ Bimodal.HilbertTM _ _ A B))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.app1 _ _ _ Bimodal.HilbertTM _ _ A B).toDerivation)
 
 /--
 Double application lemma (app2): `⊢ A → B → (A → B → C) → C`.
@@ -129,7 +130,7 @@ Double application lemma (app2): `⊢ A → B → (A → B → C) → C`.
 def app2 {fc : FrameClass} {A B C : Formula Atom} :
     DerivationTree fc [] (A.imp (B.imp ((A.imp (B.imp C)).imp C))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.app2 _ _ _ Bimodal.HilbertTM _ _ A B C))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.app2 _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
 
 /--
 Pairing combinator: `⊢ A → B → A ∧ B`.
@@ -137,7 +138,7 @@ Pairing combinator: `⊢ A → B → A ∧ B`.
 def pairing {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] (A.imp (B.imp (A.and B))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.pairing _ _ _ Bimodal.HilbertTM _ _ A B))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.pairing _ _ _ Bimodal.HilbertTM _ _ A B).toDerivation)
 
 /--
 Double negation introduction: `⊢ A → ¬¬A`.
@@ -145,7 +146,7 @@ Double negation introduction: `⊢ A → ¬¬A`.
 def dni {fc : FrameClass} (A : Formula Atom) :
     DerivationTree fc [] (A.imp A.neg.neg) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Combinators.dni _ _ _ Bimodal.HilbertTM _ _ A))
+    ((@_root_.Cslib.Logic.Theorems.Combinators.dni _ _ _ Bimodal.HilbertTM _ _ A).toDerivation)
 
 /--
 Combine two implications into a conjunction implication.

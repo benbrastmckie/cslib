@@ -208,19 +208,36 @@ the aliases of the Perpetuity pair are removed before that pair itself is delete
 
 ---
 
-### Phase 4: Bimodal Perpetuity `Helpers` repoint + delete wrap/unwrap [NOT STARTED]
+### Phase 4: Bimodal Perpetuity `Helpers` repoint + delete wrap/unwrap [COMPLETED]
 
 **Goal**: Repoint the 8 Perpetuity delegating combinator defs to the generic layer and delete
 Perpetuity's `wrap`/`unwrap`, now that Connectives' aliases (Phase 3) are gone. Keep the 4 genuinely
 tree-structural temporal helpers.
 
 **Tasks**:
-- [ ] Repoint `impTrans`, `identity`, `combineImpConj3`, `combineImpConj`, `dni`, `contraposition`,
+- [x] Repoint `impTrans`, `identity`, `combineImpConj3`, `combineImpConj`, `dni`, `contraposition`,
   `doubleNegation`, `lceImp`, `rceImp` to `DerivationCombinators.*` one-liners.
-- [ ] **Keep** `boxToFuture`, `boxToPast`, `boxToPresent`, `tempFutureDerived` unchanged.
-- [ ] Grep `wrap`/`unwrap` by name across `Bimodal/**` (research §7 flags
+- [x] **Keep** `boxToFuture`, `boxToPast`, `boxToPresent`, `tempFutureDerived` unchanged.
+- [x] Grep `wrap`/`unwrap` by name across `Bimodal/**` (research §7 flags
   `Bimodal/Metalogic/Core/MCSProperties.lean` — confirm it references the combinator defs, not the
-  primitives) before deleting `Perpetuity/Helpers.lean:56,60`.
+  primitives) before deleting `Perpetuity/Helpers.lean:56,60`. *(deviation: altered -- the grep
+  found a materially wider blast radius than research §7's single flagged file: FOUR separate
+  files consume Perpetuity's `unwrap` by name via `open ... Perpetuity (unwrap)` /
+  same-namespace access, none of which are in this phase's original Files-to-modify list:
+  `Bimodal/Theorems/Combinators.lean` (8 call sites), `Bimodal/Metalogic/Core/MCSProperties.lean`
+  (1 call site, confirmed it also uses the *retained* `contraposition`/`impTrans`/`doubleNegation`
+  combinator names unaffected), `Bimodal/Theorems/Perpetuity/Principles.lean` (4 call sites, same
+  namespace as Helpers so no explicit `open`), and `Bimodal/Theorems/TemporalDerived.lean` (10
+  call sites). All 23 call sites were repointed to
+  `InferenceSystem.DerivableIn.toDerivation` directly (the exact function `unwrap` was duplicating
+  -- no new bridge, per the plan's core thesis), since these theorems delegate to
+  `Theorems.Temporal.TemporalDerived`/`Theorems.Modal.S5`/raw `Theorems.Combinators`, which are
+  outside the propositional `DerivationCombinators` layer's scope. Two calls
+  (`Perpetuity/Principles.lean`'s `modal5`) needed the previously-all-`_` implicit `S`/`φ`
+  positions filled in explicitly, since `unwrap`'s concrete `Bimodal.HilbertTM`-typed signature had
+  been silently pinning them where the generic `.toDerivation` does not. Verified with a full
+  `lake build` (3255 jobs green) and a zero-result repo-wide by-name grep for `wrap`/`unwrap`
+  after deletion.)*
 
 **Timing**: ~1 hour
 
@@ -229,9 +246,20 @@ tree-structural temporal helpers.
 **Files to modify**:
 - `Cslib/Logics/Bimodal/Theorems/Perpetuity/Helpers.lean` - repoint defs, delete wrap/unwrap, keep
   the 4 tree-structural helpers.
+- `Cslib/Logics/Bimodal/Theorems/Combinators.lean` - repoint 8 `unwrap(...)` call sites to
+  `.toDerivation`, drop the `Perpetuity (unwrap)` open *(deviation: added -- hidden consumer)*.
+- `Cslib/Logics/Bimodal/Metalogic/Core/MCSProperties.lean` - repoint 1 `unwrap(...)` call site,
+  narrow the `Perpetuity (...)` open to drop `unwrap` *(deviation: added -- hidden consumer, the
+  one research §7 flagged)*.
+- `Cslib/Logics/Bimodal/Theorems/Perpetuity/Principles.lean` - repoint 4 `unwrap(...)` call sites
+  (same-namespace access, no `open` line to edit) *(deviation: added -- hidden consumer)*.
+- `Cslib/Logics/Bimodal/Theorems/TemporalDerived.lean` - repoint 10 `unwrap(...)` call sites, drop
+  the `Perpetuity (unwrap)` open *(deviation: added -- hidden consumer)*.
 
 **Verification**:
-- `lake build Cslib.Logics.Bimodal` green; `MCSProperties.lean` still compiles.
+- `lake build` (full, 3255 jobs) green; `MCSProperties.lean` and all four newly-discovered
+  consumers compile; zero remaining by-name `wrap`/`unwrap` code references repo-wide (grep
+  excludes docstrings/prose).
 
 ---
 

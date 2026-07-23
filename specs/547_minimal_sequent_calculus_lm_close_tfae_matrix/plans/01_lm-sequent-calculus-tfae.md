@@ -152,29 +152,31 @@ module imports the one before it, so no two phases share a wave.
   - `lake build …LM.Soundness` succeeds, zero sorry.
   - `SeqProofMinimal.sound` and `lm_msemantic_entails` typecheck; no linter warnings.
 
-### Phase 3: LM/Completeness.lean — axiom proofs, ND→LM, and bridges [NOT STARTED]
+### Phase 3: LM/Completeness.lean — axiom proofs, ND→LM, and bridges [COMPLETED]
 
 - **Goal:** Establish completeness for LM: 8 minimal axiom proof-trees, the axiom dispatch, the
   ND→LM translation, and the `nd_iff_lm` / `hilbert_iff_lm` / `lm_iff_mvalid` bridges.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean` with standard
+  - [x] Create `Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean` with standard
         header, importing `...LM.Soundness`, the `Metalogic` completeness backend
         (`min_strong_completeness`, `min_soundness_completeness`), and the Hilbert–ND bridge
         (`hilbert_iff_nd_ctx_min`).
-  - [ ] Port the 8 `lmAxiom…` schemata mirroring `ljAxiom…` (`LJ/Completeness.lean:71–167`):
+  - [x] Port the 8 `lmAxiom…` schemata mirroring `ljAxiom…` (`LJ/Completeness.lean:71–167`):
         `implyK, implyS, andI, andE1, andE2, orI1, orI2, orE`. **Drop `ljAxiomEfq`** (uses `botL`).
         Keep as `def`/`noncomputable def` (Type-valued proof-tree constructions).
-  - [ ] Add `lmOfMinAxiom : MinPropAxiom φ → Nonempty (SeqProofMinimal (Γ ⊢ φ))` mirroring
+  - [x] Add `lmOfMinAxiom : MinPropAxiom φ → Nonempty (SeqProofMinimal (Γ ⊢ φ))` mirroring
         `ljOfIntAxiom` with 8 cases (no `efq` case).
-  - [ ] Add `ndToLM` (mirror `ndToLJ`, `LJ/Completeness.lean:193`): arms
+  - [x] Add `ndToLM` (mirror `ndToLJ`, `LJ/Completeness.lean:193`): arms
         `ax, ass, andI, andE1, andE2, orI1, orI2, orE, impI, impE` transfer directly; the `efq`
         arm is discharged via `absurd` on the uninhabited `[IsIntuitionistic (AxiomTheory
         MinPropAxiom)]`. Mark `noncomputable` (Prop-valued axioms → `Classical.choice`).
-  - [ ] Add `nd_iff_lm` (→ via `ndToLM`; ← via `SeqProofMinimal.sound → MSemanticEntails →
+        *(added helper `not_isIntuitionistic_axiomTheory_minPropAxiom` in this file, mirroring
+        `not_isIntuitionistic_mpl`, to discharge the `efq` arm.)*
+  - [x] Add `nd_iff_lm` (→ via `ndToLM`; ← via `SeqProofMinimal.sound → MSemanticEntails →
         min_strong_completeness → SetDerivable MinPropAxiom → (rw ← hilbert_iff_nd_ctx_min) →
         weakening`), `hilbert_iff_lm := hilbert_iff_nd_ctx_min.trans nd_iff_lm`, and
         `lm_iff_mvalid`.
-  - [ ] Docstring every new declaration; `theorem` for the Prop-valued bridges, `def`/`noncomputable
+  - [x] Docstring every new declaration; `theorem` for the Prop-valued bridges, `def`/`noncomputable
         def` for the proof-tree constructions (`defLemma` compliance).
 - **Timing:** ~90 min
 - **Depends on:** 1, 2

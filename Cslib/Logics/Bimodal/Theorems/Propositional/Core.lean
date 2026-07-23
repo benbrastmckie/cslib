@@ -10,7 +10,7 @@ public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 public import Cslib.Logics.Bimodal.ProofSystem.Instances
 public import Cslib.Logics.Bimodal.Syntax.Formula
 public import Cslib.Logics.Bimodal.Theorems.Combinators
-public import Cslib.Foundations.Logic.Theorems.Propositional.Core
+public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 
 /-!
 # Core Propositional Proof Combinators
@@ -18,8 +18,9 @@ public import Cslib.Foundations.Logic.Theorems.Propositional.Core
 Core propositional reasoning combinators for the Hilbert-style proof system.
 Contains LEM, efq, ecq, raa, disjunction intro, conjunction elim, and rcp.
 
-Most theorems delegate to the generic Foundations equivalents via the wrap/unwrap
-bridge pattern.
+Most theorems delegate to the generic `Cslib.Logic.Theorems.DerivationCombinators` raw-typed
+layer, which is directly applicable since `Bimodal.HilbertTM⇓φ` is definitionally
+`DerivationTree .Base [] φ` -- no local `wrap`/`unwrap` bridge is needed.
 
 Ported from BimodalLogic/Theories/Bimodal/Theorems/Propositional/Core.lean
 -/
@@ -34,63 +35,58 @@ namespace Cslib.Logic.Bimodal.Theorems.Propositional
 open Cslib.Logic
 open Cslib.Logic.Bimodal
 open Cslib.Logic.Bimodal.Theorems.Combinators
-open Cslib.Logic.Bimodal.Theorems.Perpetuity (unwrap)
 
 variable {Atom : Type*}
 
 noncomputable section
 
+-- NOTE: `Bimodal` is open in this file, and `S` is scoped infix notation for the "Since"
+-- temporal operator (`Bimodal/Syntax/Formula.lean`), so the generic layer's `S` type-tag
+-- argument must be supplied positionally via `@` rather than as `(S := Bimodal.HilbertTM)`.
+
 /-- `⊢ A ∨ ¬A`: law of excluded middle. -/
 def lem (A : Formula Atom) : DerivationTree FrameClass.Base [] (A.or A.neg) :=
-  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.neg_identity
-    _ _ _ Bimodal.HilbertTM _ _ (φ := A))
+  @Theorems.DerivationCombinators.lem _ _ _ Bimodal.HilbertTM _ _ A
 
 /-- `⊢ ⊥ → φ`: ex falso quodlibet (explosion) axiom. -/
 def efqAxiom {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] (Formula.bot.imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.efq_axiom
-      _ _ _ Bimodal.HilbertTM _ _ (φ := φ)))
+    (@Theorems.DerivationCombinators.efqAxiom _ _ _ Bimodal.HilbertTM _ _ φ)
 
 /-- `⊢ ((φ → ψ) → φ) → φ`: Peirce's law. -/
 def peirceAxiom {fc : FrameClass} (φ ψ : Formula Atom) :
     DerivationTree fc [] (((φ.imp ψ).imp φ).imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.peirce_axiom
-      _ _ _ Bimodal.HilbertTM _ _ (φ := φ) (ψ := ψ)))
+    (@Theorems.DerivationCombinators.peirceAxiom _ _ _ Bimodal.HilbertTM _ _ φ ψ)
 
 /-- `⊢ ¬¬φ → φ`: double negation elimination. -/
 def doubleNegation {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] (φ.neg.neg.imp φ) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.double_negation
-      _ _ _ Bimodal.HilbertTM _ _ (φ := φ)))
+    (@Theorems.DerivationCombinators.doubleNegation _ _ _ Bimodal.HilbertTM _ _ φ)
 
 /-- `⊢ A → (¬A → B)`: reductio ad absurdum (derives anything from a contradiction). -/
 def raa (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] (A.imp (A.neg.imp B)) :=
-  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.raa
-    _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B))
+  @Theorems.DerivationCombinators.raa _ _ _ Bimodal.HilbertTM _ _ A B
 
 /-- `⊢ ¬A → (A → B)`: explosion from negated hypothesis. -/
 def efqNeg (A B : Formula Atom) :
     DerivationTree FrameClass.Base [] (A.neg.imp (A.imp B)) :=
-  unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.efq_neg
-    _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B))
+  @Theorems.DerivationCombinators.efqNeg _ _ _ Bimodal.HilbertTM _ _ A B
 
 /-- `⊢ (A ∧ B) → A`: left conjunction elimination as implication. -/
 def lceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp A) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.lce_imp
-      _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B)))
+    (@Theorems.DerivationCombinators.lceImp _ _ _ Bimodal.HilbertTM _ _ A B)
 
 /-- `⊢ (A ∧ B) → B`: right conjunction elimination as implication. -/
 def rceImp {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] ((A.and B).imp B) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    (unwrap (@_root_.Cslib.Logic.Theorems.Propositional.Core.rce_imp
-      _ _ _ Bimodal.HilbertTM _ _ (φ := A) (ψ := B)))
+    (@Theorems.DerivationCombinators.rceImp _ _ _ Bimodal.HilbertTM _ _ A B)
 
 -- ecq, ldi, rdi, lce, rce use context-based proofs and are kept as-is
 

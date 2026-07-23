@@ -172,22 +172,27 @@ downstream `Temporal/Metalogic/**` consumer untouched.
 
 ---
 
-### Phase 3: Bimodal Core + Connectives repoint + delete wrap'/unwrap' [NOT STARTED]
+### Phase 3: Bimodal Core + Connectives repoint + delete wrap'/unwrap' [COMPLETED]
 
 **Goal**: Repoint the delegating defs in `Theorems/Propositional/{Core,Connectives}.lean` to the
 generic layer and delete Connectives' `wrap'`/`unwrap'` aliases. This phase precedes Phase 4 so that
 the aliases of the Perpetuity pair are removed before that pair itself is deleted.
 
 **Tasks**:
-- [ ] Core: repoint `lem`, `efqAxiom`, `peirceAxiom`, `doubleNegation`, `raa`, `efqNeg`, `lceImp`,
+- [x] Core: repoint `lem`, `efqAxiom`, `peirceAxiom`, `doubleNegation`, `raa`, `efqNeg`, `lceImp`,
   `rceImp` to the generic layer; **keep** `ecq`, `ldi`, `rdi`, `rcp`, `lce`, `rce` (context/tree
-  structural) unchanged.
-- [ ] Connectives: repoint `classicalMerge`, `iffIntro`, `contraposeImp`, `contraposition`,
+  structural) unchanged. *(deviation: altered -- positional `@`-application used instead of
+  `(S := Bimodal.HilbertTM)`: this file opens `Cslib.Logic.Bimodal`, and `S` is scoped infix
+  notation for the "Since" operator there (`Bimodal/Syntax/Formula.lean:105`), so the named-arg
+  form does not parse, matching the same issue found in Phase 2.)*
+- [x] Connectives: repoint `classicalMerge`, `iffIntro`, `contraposeImp`, `contraposition`,
   `contraposeIff`, `iffNegIntro`, `demorgan*`; **keep** `iffElimLeft/Right` and re-route or keep
-  `demorganConjNeg/DisjNeg`.
-- [ ] Retain the `{fc}`-polymorphic `DerivationTree.lift (FrameClass.base_le fc)` shim as a one-line
+  `demorganConjNeg/DisjNeg`. *(deviation: altered -- same positional-`@`-application pattern as
+  Core, for the same "Since"-notation reason; `demorganConjNeg`/`demorganDisjNeg` needed no change
+  since they only compose the already-repointed `iffIntro`/`demorgan*Forward/Backward` by name.)*
+- [x] Retain the `{fc}`-polymorphic `DerivationTree.lift (FrameClass.base_le fc)` shim as a one-line
   per-target wrapper where the generic layer only yields `.Base` (do not expect zero lines).
-- [ ] Delete Connectives' `wrap'`/`unwrap'` (`Connectives.lean:45,50`) once its defs no longer use
+- [x] Delete Connectives' `wrap'`/`unwrap'` (`Connectives.lean:45,50`) once its defs no longer use
   them.
 
 **Timing**: ~1.5 hours

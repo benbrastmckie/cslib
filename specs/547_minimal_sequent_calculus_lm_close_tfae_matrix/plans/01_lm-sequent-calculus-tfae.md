@@ -122,24 +122,27 @@ module imports the one before it, so no two phases share a wave.
   - `lake build Cslib.Logics.Propositional.SequentCalculus.LM.Basic` succeeds, zero sorry.
   - `not_isIntuitionistic_mpl` typechecks; no linter warnings on the new file.
 
-### Phase 2: LM/Soundness.lean — soundness against minimal Kripke semantics [NOT STARTED]
+### Phase 2: LM/Soundness.lean — soundness against minimal Kripke semantics [COMPLETED]
 
 - **Goal:** Prove `SeqProofMinimal.sound` generalizing `bot_forces` from `fun _ => False` to an
   arbitrary upward-closed `bf`, plus the `MSemanticEntails` corollary that feeds completeness/TFAE.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Propositional/SequentCalculus/LM/Soundness.lean` with standard header,
+  - [x] Create `Cslib/Logics/Propositional/SequentCalculus/LM/Soundness.lean` with standard header,
         importing `...LM.Basic` and the Kripke semantics / `SemanticConsequence` modules used by
         `LJ/Soundness.lean`.
-  - [ ] State and prove `SeqProofMinimal.sound` per report Section 5.1 (induction on the proof `d`):
+  - [x] State and prove `SeqProofMinimal.sound` per report Section 5.1 (induction on the proof `d`):
         arms `ax, andL, andR, orL, orR1, orR2, impL, weakL, cut` transfer verbatim from
         `LJProof.sound` (`LJ/Soundness.lean:53`), threading the real `bf`/`bf_uc` in place of
         `fun _ => False`.
-  - [ ] Close the `impR` arm with `iforces_persistence v_uc bf_uc hw' (hant C hC)` (report Section 6).
-  - [ ] Close the `botL` arm with `exact absurd (by assumption) not_isIntuitionistic_mpl`.
-  - [ ] Add corollary `lm_msemantic_entails {Γ A} (d : SeqProofMinimal (Γ ⊢ A)) :
+  - [x] Close the `impR` arm with `iforces_persistence v_uc bf_uc hw' (hant C hC)` (report Section 6).
+  - [x] Close the `botL` arm with `exact absurd (by assumption) not_isIntuitionistic_mpl`.
+  - [x] Add corollary `lm_msemantic_entails {Γ A} (d : SeqProofMinimal (Γ ⊢ A)) :
         MSemanticEntails (↑Γ) A` (mirror `lj_sound`), routing through
-        `MSemanticEntails_of_MValid` where appropriate.
-  - [ ] Docstring every new declaration; use `theorem` for these Prop-valued results.
+        `MSemanticEntails_of_MValid` where appropriate. *(deviation: altered -- proved directly via
+        `d.sound` mirroring the inline `h_entail` pattern used in `nd_iff_lj`
+        (`LJ/Completeness.lean:261`) rather than via `MSemanticEntails_of_MValid`, since the source
+        is a proof tree, not an `MValid` fact; both routes are equivalent here)*
+  - [x] Docstring every new declaration; use `theorem` for these Prop-valued results.
 - **Timing:** ~75 min
 - **Depends on:** 1
 - **Files to create/modify:**

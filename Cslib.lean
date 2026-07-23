@@ -101,7 +101,6 @@ public import Cslib.Foundations.Logic.Metalogic.PrimeExclusion
 public import Cslib.Foundations.Logic.Metalogic.ProofSystemMorphism
 public import Cslib.Foundations.Logic.Metalogic.SetDeduction
 public import Cslib.Foundations.Logic.ProofSystem
-public import Cslib.Foundations.Logic.PropositionalTableau
 public import Cslib.Foundations.Logic.Tableau
 public import Cslib.Foundations.Logic.Tableau.Branch
 public import Cslib.Foundations.Logic.Tableau.Closure

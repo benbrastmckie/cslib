@@ -16,9 +16,9 @@ A sign indicates the "truth status" asserted for a formula in a tableau branch.
 Positive (T) means the formula is asserted true; negative (F) means it is asserted false.
 Signed formulas are the atomic units from which tableau branches are built.
 
-This type unifies the `PropSign` from `Cslib.Foundations.Logic.PropositionalTableau` and the
-`Sign` used in the bimodal tableau, both of which are structurally identical two-element types.
-This module supersedes both with a single canonical definition.
+This type unifies the earlier `PropSign` and the `Sign` used in the bimodal tableau, both of
+which are structurally identical two-element types. This module supersedes both with a single
+canonical definition.
 
 ## Main Definitions
 

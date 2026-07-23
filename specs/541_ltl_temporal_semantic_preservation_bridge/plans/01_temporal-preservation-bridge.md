@@ -171,21 +171,24 @@ consumes the prior phase's declarations).
   - `lake build Cslib.Logics.LTL.EmbeddingSemantics` succeeds.
   - `lean_verify Cslib.Logic.LTL.satisfies_toTemporal` reports no `sorry` and only standard axioms.
 
-### Phase 3: Prove the consumer corollary `satisfiable_toTemporal` [NOT STARTED]
+### Phase 3: Prove the consumer corollary `satisfiable_toTemporal` [COMPLETED]
 
 - **Goal:** Prove the satisfiability transfer corollary, wiring the main theorem at `n = 0` so
   `toTemporal` gains a genuine downstream consumer.
 - **Tasks:**
-  - [ ] State `theorem satisfiable_toTemporal {Atom State : Type*} (φ : LTL.Formula Atom)
+  - [x] State `theorem satisfiable_toTemporal {Atom State : Type*} (φ : LTL.Formula Atom)
         (h : LTL.Satisfiable (State := State) φ) : Temporal.Satisfiable φ.toTemporal` with a
         docstring (note the explicit `(State := State)` binder — `State` is an implicit module
-        variable of `LTL.Satisfiable`).
-  - [ ] `obtain ⟨v, w, hsat⟩ := h`.
-  - [ ] Provide `D := ℕ` with its `LinearOrder ℕ` / `Nontrivial ℕ` instances, `M := toTemporalModel v w`,
+        variable of `LTL.Satisfiable`). *(deviation: altered -- `{Atom State : Type*}` are not
+        re-bound on the theorem's own line since they are already the file's ambient section
+        `variable`s (auto-included since both appear in the statement); redeclaring them would
+        just shadow the same names. The `(State := State)` explicit binder is present as planned.)*
+  - [x] `obtain ⟨v, w, hsat⟩ := h`.
+  - [x] Provide `D := ℕ` with its `LinearOrder ℕ` / `Nontrivial ℕ` instances, `M := toTemporalModel v w`,
         `t := 0`.
-  - [ ] Reduce the goal `Satisfies M 0 φ.toTemporal` to `hsat` via `satisfies_toTemporal` at `n = 0`
+  - [x] Reduce the goal `Satisfies M 0 φ.toTemporal` to `hsat` via `satisfies_toTemporal` at `n = 0`
         and `drop_zero : w.drop 0 = w`.
-  - [ ] `lean_goal` to confirm closure; `lake build Cslib.Logics.LTL.EmbeddingSemantics`.
+  - [x] `lean_goal` to confirm closure; `lake build Cslib.Logics.LTL.EmbeddingSemantics`.
 - **Timing:** ~20 min
 - **Depends on:** 2
 - **Files to modify:**

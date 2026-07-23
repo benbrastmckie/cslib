@@ -76,22 +76,7 @@ private theorem tb_canonical_FC : tbFC (CanonicalModel (@TBAxiom Atom)) :=
 private theorem tb_truth_lemma_applied (S : CanonicalWorld (@TBAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@TBAxiom Atom)) S φ ↔ φ ∈ S.val :=
-  truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => ⟨.modalT, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- TB soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for TB is `tbFC m = (∀ w, m.r w w) ∧ (∀ w₁ w₂, m.r w₁ w₂ → m.r w₂ w₁)`. -/

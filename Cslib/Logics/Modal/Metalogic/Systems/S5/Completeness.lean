@@ -72,22 +72,7 @@ private theorem s5_canonical_FC : s5FC (CanonicalModel (@ModalAxiom Atom)) :=
 private theorem s5_truth_lemma_applied (S : CanonicalWorld (@ModalAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@ModalAxiom Atom)) S φ ↔ φ ∈ S.val :=
-  truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => ⟨.modalT, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩)
-    S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- S5 soundness adapter matching the `strong_soundness` callback shape.
 The frame condition for S5 is `s5FC m = (∀ w, m.r w w) ∧ (∀ ..., trans) ∧ (∀ ..., eucl)`. -/

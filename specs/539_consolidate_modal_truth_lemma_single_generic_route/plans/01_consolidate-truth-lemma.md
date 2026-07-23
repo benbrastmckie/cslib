@@ -295,15 +295,18 @@ DB) at the wrapper, and use the relocated `d_canonical_serial`.
 
 ---
 
-### Phase 6: Repoint T-Family [NOT STARTED]
+### Phase 6: Repoint T-Family [COMPLETED]
 
 **Goal**: Repoint the 4 T-family systems (T, S4, S5, TB) at the wrapper, dropping the now-unused
 `h_T` witness.
 
 **Tasks**:
-- [ ] Repoint each `*_truth_lemma_applied` for T, S4, S5, TB to
-  `canonicalTruthLemma_of_kCore (by decide) S φ` (drops the extra `h_T` witness).
-- [ ] Build each of the 4 leaves.
+- [x] Repoint each `*_truth_lemma_applied` for T, S4, S5, TB to
+  `canonicalTruthLemmaOfKCore (by decide) S φ` (drops the extra `h_T` witness). *(note: these
+  four files were left calling the old 14-argument `truth_lemma` -- now type-incorrect since the
+  promoted `truth_lemma` dropped `h_T` in Phase 1 -- so this repoint was required, not optional,
+  to bring the tree back to green; verified via scoped build immediately after)*
+- [x] Build each of the 4 leaves.
 
 **Timing**: ~1 hour
 

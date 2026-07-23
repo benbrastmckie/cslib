@@ -1,7 +1,7 @@
 # Implementation Plan: Remove Dead Logic Modules and Dead-End Bridges
 
 - **Task**: 543 - remove_dead_logic_modules_and_dead_end_bridges
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_dead-logic-modules-triage.md
@@ -174,20 +174,31 @@ touch disjoint files and may run in parallel; Phase 3 verifies the combined resu
 
 ---
 
-### Phase 3: Full verification and LOC accounting [NOT STARTED]
+### Phase 3: Full verification and LOC accounting [COMPLETED]
 
 - **Goal:** Prove the combined change is clean library-wide, confirm the Group-2 keep decision via
   the test suite, and record the net LOC delta and per-module decisions for the summary.
 - **Tasks:**
-  - [ ] Full `lake build` — entire library compiles with `PropositionalTableau` removed.
-  - [ ] `lake test` — confirms the `HilbertSearch` suite (`CslibTests/HilbertSearch.lean`) is still
-        green, empirically validating the Group-2 KEEP decision.
-  - [ ] Final `lake exe checkInitImports` + `lake shake` clean.
-  - [ ] Record `git diff --stat` net LOC delta (expected: down, driven by the ~213-line Group-1
-        removal; Groups 2-3 net near-zero, comment-only).
-  - [ ] Compile the per-module decision record for the completion summary: Group 1 DELETE
+  - [x] Full `lake build` — entire library compiles with `PropositionalTableau` removed. Green
+        (3249 jobs; one transient concurrent-build olean-staleness error resolved on retry, see
+        Phase 1 note).
+  - [x] `lake test` — confirms the `HilbertSearch` suite (`CslibTests/HilbertSearch.lean`) is still
+        green, empirically validating the Group-2 KEEP decision. Full `lake test` reported exit
+        code 0; the `CslibTests.HilbertSearch` target was additionally built directly
+        (`lake build CslibTests.HilbertSearch`, 664 jobs, green) as a targeted confirmation since
+        the full-suite log output is very large.
+  - [x] Final `lake exe checkInitImports` + `lake shake` clean. `checkInitImports`: no output
+        (clean). `shake`: no findings reference any task-543-touched file (`PropositionalTableau`,
+        `Cslib.lean`, `Tableau/PropositionalRules.lean`, `Tableau/Sign.lean`,
+        `Semantics/Bool.lean`, `Semantics/Algebra.lean`, `Semantics/Algebra/Bridge.lean`,
+        `Semantics/Algebra/KripkeBridge.lean`); remaining findings are pre-existing and unrelated,
+        left untouched per plan.
+  - [x] Record `git diff --stat` net LOC delta (expected: down, driven by the ~213-line Group-1
+        removal; Groups 2-3 net near-zero, comment-only). Actual: 8 files changed, 24
+        insertions(+), 228 deletions(-) — net **-204 lines**.
+  - [x] Compile the per-module decision record for the completion summary: Group 1 DELETE
         (evidence), Group 2 KEEP (premise refuted — test suite green), Group 3 KEEP + docstring
-        truth-fix (routing rejected).
+        truth-fix (routing rejected). See summary artifact.
 - **Timing:** ~30 min
 - **Depends on:** 1, 2
 - **Files to modify:** none (verification and reporting only).
@@ -198,13 +209,13 @@ touch disjoint files and may run in parallel; Phase 3 verifies the combined resu
 
 ## Testing & Validation
 
-- [ ] `grep -rn "PropositionalTableau" --include=*.lean Cslib Cslib.lean` returns no matches.
-- [ ] Full `lake build` succeeds.
-- [ ] `lake test` succeeds; the `HilbertSearch` suite is green.
-- [ ] `lake exe checkInitImports` reports no missing/extra barrel entries.
-- [ ] `lake shake` reports no stale imports tied to the deletion.
-- [ ] No new `sorry` and no new axiom introduced (`git diff` shows deletions + comment rewords only).
-- [ ] The four Group-3 docstrings no longer overclaim a nonexistent consumer relationship.
+- [x] `grep -rn "PropositionalTableau" --include=*.lean Cslib Cslib.lean` returns no matches.
+- [x] Full `lake build` succeeds.
+- [x] `lake test` succeeds; the `HilbertSearch` suite is green.
+- [x] `lake exe checkInitImports` reports no missing/extra barrel entries.
+- [x] `lake shake` reports no stale imports tied to the deletion.
+- [x] No new `sorry` and no new axiom introduced (`git diff` shows deletions + comment rewords only).
+- [x] The four Group-3 docstrings no longer overclaim a nonexistent consumer relationship.
 
 ## Artifacts & Outputs
 

@@ -1423,32 +1423,92 @@
     {
       "project_number": 539,
       "project_name": "consolidate_modal_truth_lemma_single_generic_route",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "high",
       "description": "TRUTH-LEMMA CONSOLIDATION (review 2026-07-23, H1). The canonical-model truth lemma is proved three times: k_truth_lemma (Systems/K/Completeness.lean:163, fully generic — box case needs only EFQ+K from kCore), truth_lemma (Metalogic/Completeness.lean:274, demands a semantically unnecessary h_T), d_truth_lemma (Systems/D/Completeness.lean:241, unnecessary h_D). Since every one of the 15 axiom predicates contains kCore, all 15 systems can use k_truth_lemma. Work: (1) promote k_truth_lemma into Metalogic/Completeness.lean as THE truth lemma (rename canonical_truth_lemma); (2) relocate the shared machinery out of the K/D leaf files (k_derive_box_from_inconsistency, k_mcs_box_witness, d_canonical_serial) so K/D shrink to the ~180-line instance shape of their 13 siblings; (3) delete truth_lemma, mcs_box_witness, mcs_box_closure, and the D-route box block (~545 duplicated lines); (4) repoint all 15 *_truth_lemma_applied at the promoted lemma; (5) dedupe the 13-tag schema-witness blocks — 432 `by decide` invocations copy-pasted across the 15 Systems/*/Completeness.lean files and re-listed inside each *_strong_completeness and *_compactness — via one generic core-witness lemma discharged from Finset.subset facts (SchemaUnion.insert_iff / SchemaUnion.subsumption, SchemaUnion.lean:155,179). Zero sorry, zero semantic change; the tree is currently sorry-free and must stay so.",
-      "created": "2026-07-23T17:20:09Z"
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T19:29:37Z",
+      "session_id": "sess_1784830583_796850_539",
+      "artifacts": [
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/reports/01_truth-lemma-consolidation.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/plans/01_consolidate-truth-lemma.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/summaries/01_consolidate-truth-lemma-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "Completed all 8 phases: promoted k_truth_lemma into Metalogic/Completeness.lean as the single generic truth_lemma route (reusing the vacated name, not canonical_truth_lemma), deleted the two redundant families (old T-requiring truth_lemma, D-route block) and their dead support code, relocated d_canonical_serial, added 13 holds* witness helpers plus the canonicalTruthLemmaOfKCore wrapper, repointed all 15 *_truth_lemma_applied, and deduped by-decide witness blocks from 432 to 141. Zero sorry in the classical Systems/ subtree, zero new axioms, full CSLib CI pipeline green (lake build 3254 jobs, checkInitImports, lake lint clean, lint-style clean, lake shake no findings, mk_all no update needed, lake test green)."
     },
     {
       "project_number": 540,
       "project_name": "retire_wrap_unwrap_combinator_bridge_layers",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Foundations",
       "priority": "high",
       "description": "BRIDGE-LEMMA ELIMINATION (review 2026-07-23, H2). The same 8-10 propositional combinators (doubleNegation, impTrans, lceImp, rceImp, dni, identity, pairing, ...) are re-declared statement-for-statement behind local wrap/unwrap bridges in THREE places: Temporal/Metalogic/PropositionalHelpers.lean (wrap:51, unwrap:56), Bimodal/Theorems/Perpetuity/Helpers.lean (wrap:56, unwrap:60), Bimodal/Theorems/Propositional/{Core,Connectives}.lean (28 defs, ~58 unwrap uses). These bridges exist solely because DerivationTree-style derivability and the Foundations InferenceSystem-indexed derivability share no definitional surface. Meanwhile Modal bypasses Foundations/Logic/Theorems entirely and reproves combinators locally (e.g. private imp_trans0 at Modal/Metalogic/Intuitionistic/CanonicalModel.lean:223). Work: (1) prove the wrapper family ONCE, generic over a Hilbert/InferenceSystem typeclass instance — the same pattern GenericMCS already uses for the deduction theorem — and have Temporal/Bimodal/Modal obtain the combinators by instance resolution; (2) delete the three wrap/unwrap wrapper layers; (3) route Modal's local combinator reproofs through the generic layer; (4) drop the 34 per-target rfl embedding-commutation restatements (toModal_atom/bot/imp at Modal/FromPropositional.lean:50-60; toTemporal_* at Temporal/FromPropositional.lean:49-59; Bimodal/Embedding/PropositionalEmbedding.lean:61-71 and the TemporalEmbedding/ModalEmbedding rfl blocks) in favor of the generic embed_* @[simp] lemmas already in Propositional/Embedding.lean:92-104, keeping only genuinely per-target lemmas (_and/_or/_neg/_box/_untl). SCOPE GUARD: tasks 393 (Lindenbaum/MCS consolidation) and 41 (completeness infra) own the MCS/deduction-theorem seams — this task owns only the combinator-wrapper and embedding-rfl layers; coordinate before touching GenericMCSBridge files.",
-      "created": "2026-07-23T17:20:09Z"
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T20:19:22Z",
+      "session_id": "sess_1784830583_796850_540",
+      "artifacts": [
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/reports/01_bridge-lemma-elimination.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/plans/01_retire-bridge-layers.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/summaries/01_retire-bridge-layers-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": ""
     },
     {
       "project_number": 541,
       "project_name": "ltl_temporal_semantic_preservation_bridge",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "priority": "high",
       "description": "SEMANTIC GAP (review 2026-07-23, H3). Cslib/Logics/LTL/Embedding.lean:48 defines Formula.toTemporal (LTL -> Priorean tense logic) but the file contains ZERO theorems; its docstring (lines 22-27, 44-47) asserts the map is chosen 'to preserve semantics' — including a reflexive-until vs strict-until reconciliation — that is never proven. No file imports the module: LTL is a disconnected island despite complete, sorry-free GNBA correctness (gnba_language_eq, Baier-Katoen 5.39), omega-regularity (Formula.isRegular), and ltlModelChecking results that currently cannot transfer to the Temporal tree. Work: prove the satisfaction-preservation theorem LTL.Satisfies phi v <-> Temporal.Satisfies phi.toTemporal over the corresponding nat-indexed flow, settling the until-convention reconciliation, and wire at least one LTL result across the bridge (e.g. satisfiability transfer) so the module has a consumer. If the bridge is unprovable as currently stated, correct the translation and document the discrepancy — do not leave the unverified docstring claim standing. Zero sorry.",
-      "created": "2026-07-23T17:20:09Z"
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:52:55Z",
+      "session_id": "sess_1784830583_796850_541",
+      "artifacts": [
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/reports/01_ltl-temporal-bridge-research.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "All 4 phases complete. Created Cslib/Logics/LTL/EmbeddingSemantics.lean (semantics-only bridge, no Metalogic import): toTemporalModel def, local sat_and_iff/sat_or_iff classical helpers, theorem satisfies_toTemporal (induction on formula generalizing time index n, all 5 cases atom/bot/imp/next/untl discharged per research's verified strategy -- next case uses omega-backed ℕ discreteness forcing witness s=n+1, untl case reconciles LTL reflexive-until against reflexiveUntl via j=0/j>=1 split with r=n+k index bijection closed by omega), and corollary satisfiable_toTemporal (LTL satisfiability -> Temporal satisfiability, wired at n=0 via drop_zero). Both theorems sorry-free with only standard axioms (propext, Classical.choice, Quot.sound). Registered Cslib.Logics.LTL.EmbeddingSemantics in Cslib.lean barrel via targeted single-line Edit insertion (not mk_all regeneration, per concurrent-checkout instruction; a concurrent task's later mk_all run also incorporated the same line). Full CSLib CI pipeline passed: lake build (full project, 3254 jobs), lake exe checkInitImports, lake lint (\"Linting passed for Cslib\", zero warnings on new file), lake exe lint-style (zero violations on new file), lake shake (no entry for new file -- imports already minimal), lake test (full CslibTests/ suite, exit 0). Zero sorry, zero new axioms, zero vacuous definitions introduced. No changes to Formula.toTemporal or its docstring -- translation confirmed correct as written."
     },
     {
       "project_number": 542,
@@ -1463,12 +1523,32 @@
     {
       "project_number": 543,
       "project_name": "remove_dead_logic_modules_and_dead_end_bridges",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
       "description": "DEAD CODE (review 2026-07-23, M5-M7). Three dead or dead-end module groups in the logic trees: (1) Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines) — header literally reads 'DEPRECATED: superseded by Cslib.Foundations.Logic.Tableau'; zero real imports (the two grep hits are docstring prose); sole build entry is the root barrel Cslib.lean:104. Delete the file and drop the barrel line. (2) Foundations/Logic/Automation/HilbertSearch.lean (268-line hilbert_search proof-search tactic) — imported by nothing; the two references (Bimodal AxiomMatcher.lean:48, ProofExtraction.lean:222) are 'when ported' comments. Either wire it into the Modal/Bimodal Hilbert derivations that hand-roll combinator proofs, or remove it (removal is acceptable; git preserves it). (3) Propositional/Semantics/Algebra/Bridge.lean (boolEvaluateEq/propEvaluateEq bridge, imported by nothing despite Semantics/Bool.lean:38-42 telling future work to reuse it) and KripkeBridge.lean (Kripke-algebraic Heyting duality, consumed by no completeness chain): either route Semantics/Bool.lean and the IPL completeness chain through them so their canonical-status docstrings become true, or explicitly mark both as independent showcase developments. Decision per module documented in the summary; net LOC should go down.",
-      "created": "2026-07-23T17:20:09Z"
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:53:03Z",
+      "session_id": "sess_1784830583_796850_543",
+      "artifacts": [
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/reports/01_dead-logic-modules-triage.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "All 3 phases complete. Phase 1: deleted Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines, Group 1 DELETE) plus its barrel line and reworded 2 dangling provenance docstrings. Phase 2: truth-fixed 4 Group-3 overclaiming docstrings (Bool.lean, Algebra.lean, Bridge.lean, KripkeBridge.lean) declaring them independent showcases with no in-tree consumer -- no code/proof changes. Phase 3: full lake build (3249 jobs) green, lake test exit 0 with CslibTests.HilbertSearch built directly as targeted confirmation of the Group-2 KEEP decision (premise refuted), checkInitImports clean, lake shake has no findings tied to any touched file. Net LOC delta: 8 files changed, 24 insertions(+), 228 deletions(-) = -204 lines. No new sorry or axiom introduced."
     },
     {
       "project_number": 544,
@@ -1503,12 +1583,32 @@
     {
       "project_number": 547,
       "project_name": "minimal_sequent_calculus_lm_close_tfae_matrix",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "medium",
       "description": "GAP FILL (review 2026-07-23, L5). The proof-system x logic matrix has a documented hole at (SequentCalculus, Minimal): Propositional/Metalogic/ProofSystemEquivalence.lean:19 states minimal logic gets only the two-way mplHilbertIffNd because 'no minimal sequent calculus exists in CSLib', while classical and intuitionistic get three-way TFAE (cplProofSystemsTfae, iplProofSystemsTfae). Work: add Cslib/Logics/Propositional/SequentCalculus/LM/ mirroring the existing LJ tree structure — rules (LJ minus ex falso / with restricted right rules per the standard minimal-logic sequent presentation), soundness against the minimal Kripke semantics (the min_soundness/min_completeness semantic layer already exists sorry-free), completeness, and equivalence with the minimal Hilbert system — then extend the equivalence to a symmetric three-way mplProofSystemsTfae. Cut elimination for LM may follow the LJ development where applicable but is not required for the TFAE. SCOPE GUARD: tableau membership in the TFAE stays out of scope (task 375 owns folding tableau systems into the TFAE). Zero sorry.",
-      "created": "2026-07-23T17:20:09Z"
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:53:13Z",
+      "session_id": "sess_1784830583_796850_547",
+      "artifacts": [
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/reports/01_minimal-sequent-calculus-lm.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/plans/01_lm-sequent-calculus-tfae.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/summaries/01_lm-sequent-calculus-tfae-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "All 4 phases completed and committed. LM/Basic.lean (LMProof alias + not_isIntuitionistic_mpl), LM/Soundness.lean (SeqProofMinimal.sound over arbitrary bot_forces + lm_msemantic_entails), LM/Completeness.lean (8 lmAxiom schemata, lmOfMinAxiom, ndToLM, nd_iff_lm/hilbert_iff_lm/lm_iff_mvalid), LM.lean barrel + SequentCalculus.lean wiring + mplProofSystemsTfae/mplProofSystemsTfaeClosed in ProofSystemEquivalence.lean + stale docstring fixes. Cslib.lean registered via 4 targeted Edit-tool insertions (not mk_all, to avoid clobbering concurrent tasks 541/543 barrel edits). Zero sorry, zero new axioms (lean_verify confirmed only propext/Classical.choice/Quot.sound on both TFAE theorems). Full CI order (cache get, build, checkInitImports, lint, lint-style, shake, test) all green."
     },
     {
       "project_number": 548,

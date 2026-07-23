@@ -1,6 +1,7 @@
 {
-  "status": "in_progress",
+  "status": "implemented",
   "started_at": "2026-07-23T18:33:01Z",
+  "completed_at": "2026-07-23T19:10:00Z",
   "artifacts": [
     {
       "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/reports/01_dead-logic-modules-triage.md",
@@ -9,19 +10,34 @@
     {
       "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
       "type": "plan"
+    },
+    {
+      "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/summaries/01_remove-dead-logic-modules-summary.md",
+      "type": "summary"
     }
   ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Agent started, parsing delegation context",
+    "stage": "complete",
+    "details": "All 3 phases complete. Phase 1 (delete PropositionalTableau + fix provenance docstrings) committed 5d1a8e5a. Phase 2 (truth-fix Group-3 docstrings) committed 2794a102. Phase 3 (full verification + LOC accounting) committed 9b756156. Summary committed fbad202f.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 0
+    "phases_completed": 3,
+    "last_completed_phase": "Phase 3: Full verification and LOC accounting"
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": true,
+    "notes": "sorry_count/axiom_count/vacuous_count reflect files touched by this task (net new introduced by this diff); repo-wide baseline (144 pre-existing sorries, 25 pre-existing axioms) is unrelated and untouched. Full lake build (3249 jobs) green after one transient concurrent-build retry. lake test exit 0; CslibTests.HilbertSearch built directly as targeted confirmation (664 jobs green). checkInitImports clean. lake shake has no findings tied to any task-543 file. Net LOC delta: 8 files changed, 24 insertions(+), 228 deletions(-) = -204 lines."
   },
   "metadata": {
     "session_id": "sess_1784830583_796850_543",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"]
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"],
+    "compliance_check": "passed"
   }
 }

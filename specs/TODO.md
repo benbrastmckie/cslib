@@ -11,7 +11,7 @@ next_project_number: 549
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,539,540,541,542,543,544,545,546,547 | -- | foundations, propositional logic, modal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,542,544,545,546 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
@@ -21,7 +21,6 @@ next_project_number: 549
 
 ### Foundations
 
-540 [NOT STARTED] — BRIDGE-LEMMA ELIMINATION (review 2026-07-23, H2). The same 8-10 p
 41 [NOT STARTED] — Abstract shared completeness infrastructure between temporal and 
 
 ### Propositional Logic
@@ -35,7 +34,6 @@ next_project_number: 549
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 545 [NOT STARTED] — ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consoli
-547 [NOT STARTED] — GAP FILL (review 2026-07-23, L5). The proof-system x logic matrix
 
 ### Modal Logic
 
@@ -47,14 +45,12 @@ next_project_number: 549
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-539 [NOT STARTED] — TRUTH-LEMMA CONSOLIDATION (review 2026-07-23, H1). The canonical-
 546 [NOT STARTED] — REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/
 
 ### Temporal Logic
 
 425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-541 [NOT STARTED] — SEMANTIC GAP (review 2026-07-23, H3). Cslib/Logics/LTL/Embedding.
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
 
@@ -75,7 +71,6 @@ next_project_number: 549
 393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
-543 [NOT STARTED] — DEAD CODE (review 2026-07-23, M5-M7). Three dead or dead-end modu
 544 [NOT STARTED] — NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L1
 412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
@@ -115,10 +110,13 @@ next_project_number: 549
 ---
 
 ### 547. Minimal sequent calculus lm close tfae matrix
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [547_minimal_sequent_calculus_lm_close_tfae_matrix/reports/01_minimal-sequent-calculus-lm.md]
+- **Plan**: [547_minimal_sequent_calculus_lm_close_tfae_matrix/plans/01_lm-sequent-calculus-tfae.md]
+- **Summary**: [547_minimal_sequent_calculus_lm_close_tfae_matrix/summaries/01_lm-sequent-calculus-tfae-summary.md]
 
 **Description**: GAP FILL (review 2026-07-23, L5). The proof-system x logic matrix has a documented hole at (SequentCalculus, Minimal): Propositional/Metalogic/ProofSystemEquivalence.lean:19 states minimal logic gets only the two-way mplHilbertIffNd because 'no minimal sequent calculus exists in CSLib', while classical and intuitionistic get three-way TFAE (cplProofSystemsTfae, iplProofSystemsTfae). Work: add Cslib/Logics/Propositional/SequentCalculus/LM/ mirroring the existing LJ tree structure — rules (LJ minus ex falso / with restricted right rules per the standard minimal-logic sequent presentation), soundness against the minimal Kripke semantics (the min_soundness/min_completeness semantic layer already exists sorry-free), completeness, and equivalence with the minimal Hilbert system — then extend the equivalence to a symmetric three-way mplProofSystemsTfae. Cut elimination for LM may follow the LJ development where applicable but is not required for the TFAE. SCOPE GUARD: tableau membership in the TFAE stays out of scope (task 375 owns folding tableau systems into the TFAE). Zero sorry.
 
@@ -155,10 +153,13 @@ next_project_number: 549
 ---
 
 ### 543. Remove dead logic modules and dead end bridges
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: None
+- **Research**: [543_remove_dead_logic_modules_and_dead_end_bridges/reports/01_dead-logic-modules-triage.md]
+- **Plan**: [543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md]
+- **Summary**: [543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md]
 
 **Description**: DEAD CODE (review 2026-07-23, M5-M7). Three dead or dead-end module groups in the logic trees: (1) Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines) — header literally reads 'DEPRECATED: superseded by Cslib.Foundations.Logic.Tableau'; zero real imports (the two grep hits are docstring prose); sole build entry is the root barrel Cslib.lean:104. Delete the file and drop the barrel line. (2) Foundations/Logic/Automation/HilbertSearch.lean (268-line hilbert_search proof-search tactic) — imported by nothing; the two references (Bimodal AxiomMatcher.lean:48, ProofExtraction.lean:222) are 'when ported' comments. Either wire it into the Modal/Bimodal Hilbert derivations that hand-roll combinator proofs, or remove it (removal is acceptable; git preserves it). (3) Propositional/Semantics/Algebra/Bridge.lean (boolEvaluateEq/propEvaluateEq bridge, imported by nothing despite Semantics/Bool.lean:38-42 telling future work to reuse it) and KripkeBridge.lean (Kripke-algebraic Heyting duality, consumed by no completeness chain): either route Semantics/Bool.lean and the IPL completeness chain through them so their canonical-status docstrings become true, or explicitly mark both as independent showcase developments. Decision per module documented in the summary; net LOC should go down.
 
@@ -175,30 +176,39 @@ next_project_number: 549
 ---
 
 ### 541. Ltl temporal semantic preservation bridge
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
+- **Research**: [541_ltl_temporal_semantic_preservation_bridge/reports/01_ltl-temporal-bridge-research.md]
+- **Plan**: [541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md]
+- **Summary**: [541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md]
 
 **Description**: SEMANTIC GAP (review 2026-07-23, H3). Cslib/Logics/LTL/Embedding.lean:48 defines Formula.toTemporal (LTL -> Priorean tense logic) but the file contains ZERO theorems; its docstring (lines 22-27, 44-47) asserts the map is chosen 'to preserve semantics' — including a reflexive-until vs strict-until reconciliation — that is never proven. No file imports the module: LTL is a disconnected island despite complete, sorry-free GNBA correctness (gnba_language_eq, Baier-Katoen 5.39), omega-regularity (Formula.isRegular), and ltlModelChecking results that currently cannot transfer to the Temporal tree. Work: prove the satisfaction-preservation theorem LTL.Satisfies phi v <-> Temporal.Satisfies phi.toTemporal over the corresponding nat-indexed flow, settling the until-convention reconciliation, and wire at least one LTL result across the bridge (e.g. satisfiability transfer) so the module has a consumer. If the bridge is unprovable as currently stated, correct the translation and document the discrepancy — do not leave the unverified docstring claim standing. Zero sorry.
 
 ---
 
 ### 540. Retire wrap unwrap combinator bridge layers
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Foundations
 - **Dependencies**: None
+- **Research**: [540_retire_wrap_unwrap_combinator_bridge_layers/reports/01_bridge-lemma-elimination.md]
+- **Plan**: [540_retire_wrap_unwrap_combinator_bridge_layers/plans/01_retire-bridge-layers.md]
+- **Summary**: [540_retire_wrap_unwrap_combinator_bridge_layers/summaries/01_retire-bridge-layers-summary.md]
 
 **Description**: BRIDGE-LEMMA ELIMINATION (review 2026-07-23, H2). The same 8-10 propositional combinators (doubleNegation, impTrans, lceImp, rceImp, dni, identity, pairing, ...) are re-declared statement-for-statement behind local wrap/unwrap bridges in THREE places: Temporal/Metalogic/PropositionalHelpers.lean (wrap:51, unwrap:56), Bimodal/Theorems/Perpetuity/Helpers.lean (wrap:56, unwrap:60), Bimodal/Theorems/Propositional/{Core,Connectives}.lean (28 defs, ~58 unwrap uses). These bridges exist solely because DerivationTree-style derivability and the Foundations InferenceSystem-indexed derivability share no definitional surface. Meanwhile Modal bypasses Foundations/Logic/Theorems entirely and reproves combinators locally (e.g. private imp_trans0 at Modal/Metalogic/Intuitionistic/CanonicalModel.lean:223). Work: (1) prove the wrapper family ONCE, generic over a Hilbert/InferenceSystem typeclass instance — the same pattern GenericMCS already uses for the deduction theorem — and have Temporal/Bimodal/Modal obtain the combinators by instance resolution; (2) delete the three wrap/unwrap wrapper layers; (3) route Modal's local combinator reproofs through the generic layer; (4) drop the 34 per-target rfl embedding-commutation restatements (toModal_atom/bot/imp at Modal/FromPropositional.lean:50-60; toTemporal_* at Temporal/FromPropositional.lean:49-59; Bimodal/Embedding/PropositionalEmbedding.lean:61-71 and the TemporalEmbedding/ModalEmbedding rfl blocks) in favor of the generic embed_* @[simp] lemmas already in Propositional/Embedding.lean:92-104, keeping only genuinely per-target lemmas (_and/_or/_neg/_box/_untl). SCOPE GUARD: tasks 393 (Lindenbaum/MCS consolidation) and 41 (completeness infra) own the MCS/deduction-theorem seams — this task owns only the combinator-wrapper and embedding-rfl layers; coordinate before touching GenericMCSBridge files.
 
 ---
 
 ### 539. Consolidate modal truth lemma single generic route
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [539_consolidate_modal_truth_lemma_single_generic_route/reports/01_truth-lemma-consolidation.md]
+- **Plan**: [539_consolidate_modal_truth_lemma_single_generic_route/plans/01_consolidate-truth-lemma.md]
+- **Summary**: [539_consolidate_modal_truth_lemma_single_generic_route/summaries/01_consolidate-truth-lemma-summary.md]
 
 **Description**: TRUTH-LEMMA CONSOLIDATION (review 2026-07-23, H1). The canonical-model truth lemma is proved three times: k_truth_lemma (Systems/K/Completeness.lean:163, fully generic — box case needs only EFQ+K from kCore), truth_lemma (Metalogic/Completeness.lean:274, demands a semantically unnecessary h_T), d_truth_lemma (Systems/D/Completeness.lean:241, unnecessary h_D). Since every one of the 15 axiom predicates contains kCore, all 15 systems can use k_truth_lemma. Work: (1) promote k_truth_lemma into Metalogic/Completeness.lean as THE truth lemma (rename canonical_truth_lemma); (2) relocate the shared machinery out of the K/D leaf files (k_derive_box_from_inconsistency, k_mcs_box_witness, d_canonical_serial) so K/D shrink to the ~180-line instance shape of their 13 siblings; (3) delete truth_lemma, mcs_box_witness, mcs_box_closure, and the D-route box block (~545 duplicated lines); (4) repoint all 15 *_truth_lemma_applied at the promoted lemma; (5) dedupe the 13-tag schema-witness blocks — 432 `by decide` invocations copy-pasted across the 15 Systems/*/Completeness.lean files and re-listed inside each *_strong_completeness and *_compactness — via one generic core-witness lemma discharged from Finset.subset facts (SchemaUnion.insert_iff / SchemaUnion.subsumption, SchemaUnion.lean:155,179). Zero sorry, zero semantic change; the tree is currently sorry-free and must stay so.
 

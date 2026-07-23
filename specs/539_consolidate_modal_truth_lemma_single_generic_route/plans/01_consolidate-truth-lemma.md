@@ -258,21 +258,24 @@ convenience wrapper, shrink K to the ~180-line sibling shape, and drop now-redun
 
 ---
 
-### Phase 5: Repoint and Shrink D-Family [NOT STARTED]
+### Phase 5: Repoint and Shrink D-Family [COMPLETED]
 
 **Goal**: Delete the duplicated D-route box block, repoint the 5 D-family systems (D, D4, D5, D45,
 DB) at the wrapper, and use the relocated `d_canonical_serial`.
 
 **Tasks**:
-- [ ] Delete `d_derive_box_from_inconsistency` (`Systems/D/Completeness.lean:57-138`).
-- [ ] Delete `d_mcs_box_witness` (`Systems/D/Completeness.lean:146-177`).
-- [ ] Delete `d_truth_lemma` (`Systems/D/Completeness.lean:241-412`).
-- [ ] Repoint each `*_truth_lemma_applied` for D, D4, D5, D45, DB to
-  `canonicalTruthLemma_of_kCore (by decide) S φ` (drops the extra `h_D` witness).
-- [ ] Confirm each D-family `d_canonical_FC` uses the relocated `d_canonical_serial` from Metalogic.
-- [ ] Drop redundant imports if any D leaf imported `Systems.D.Completeness` only for the deleted
-  block.
-- [ ] Build each of the 5 leaves.
+- [x] Delete `d_derive_box_from_inconsistency` (`Systems/D/Completeness.lean:57-138`).
+- [x] Delete `d_mcs_box_witness` (`Systems/D/Completeness.lean:146-177`).
+- [x] Delete `d_truth_lemma` (`Systems/D/Completeness.lean:241-412`).
+- [x] Repoint each `*_truth_lemma_applied` for D, D4, D5, D45, DB to
+  `canonicalTruthLemmaOfKCore (by decide) S φ` (drops the extra `h_D` witness).
+- [x] Confirm each D-family `d_canonical_FC` uses the relocated `d_canonical_serial` from Metalogic.
+  (their bodies were unchanged, and all 5 build green pulling `d_canonical_serial` transitively
+  through `import Metalogic.Completeness`)
+- [x] Drop redundant imports if any D leaf imported `Systems.D.Completeness` only for the deleted
+  block. Dropped from D4, D5, D45, DB (all four only used `d_canonical_serial`/`d_truth_lemma`,
+  both now gone/relocated).
+- [x] Build each of the 5 leaves.
 
 **Timing**: ~1.5 hours
 

@@ -8,7 +8,6 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Completeness
 public import Cslib.Logics.Modal.Metalogic.Systems.D4.Soundness
-public import Cslib.Logics.Modal.Metalogic.Systems.D.Completeness
 
 /-! # Strong Completeness for Modal Logic D4
 
@@ -30,8 +29,8 @@ is equivalent to set-derivability using `D4Axiom`.
 ## References
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
-* Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean -- D completeness
-  (canonical serial, d_truth_lemma)
+* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated, task 539)
+  and the generic `truth_lemma` / `canonicalTruthLemmaOfKCore` wrapper
 -/
 
 @[expose] public section
@@ -71,21 +70,7 @@ private theorem d4_canonical_FC : d4FC (CanonicalModel (@D4Axiom Atom)) := by
 private theorem d4_truth_lemma_applied (S : CanonicalWorld (@D4Axiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@D4Axiom Atom)) S φ ↔ φ ∈ S.val :=
-  d_truth_lemma
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.modalK, by decide, φ, ψ, rfl⟩)
-    (fun φ => ⟨.modalD, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.andI, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.andE2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI1, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ => ⟨.orI2, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.orE, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.diaDualityFwd, by decide, φ, rfl⟩)
-    (fun φ => ⟨.diaDualityBack, by decide, φ, rfl⟩) S φ
+  canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- D4 soundness adapter matching the `strong_soundness` callback shape. -/
 private theorem d4_sound_cb {World : Type u} (m : Model World Atom) (w : World)

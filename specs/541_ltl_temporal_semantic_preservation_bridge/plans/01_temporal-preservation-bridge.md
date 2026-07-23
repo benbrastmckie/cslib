@@ -1,7 +1,7 @@
 # Implementation Plan: LTL-to-Temporal Semantic Preservation Bridge
 
 - **Task**: 541 - ltl_temporal_semantic_preservation_bridge
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/541_ltl_temporal_semantic_preservation_bridge/reports/01_ltl-temporal-bridge-research.md
@@ -197,21 +197,34 @@ consumes the prior phase's declarations).
   - `lake build Cslib.Logics.LTL.EmbeddingSemantics` succeeds.
   - `lean_verify Cslib.Logic.LTL.satisfiable_toTemporal` reports no `sorry`.
 
-### Phase 4: Barrel registration and CSLib CI verification [NOT STARTED]
+### Phase 4: Barrel registration and CSLib CI verification [COMPLETED]
 
 - **Goal:** Register the new module in the `Cslib.lean` barrel and pass the full CSLib CI gate
   sequence.
 - **Tasks:**
-  - [ ] Run `lake exe mk_all --module` to add `Cslib.Logics.LTL.EmbeddingSemantics` to `Cslib.lean`
+  - [x] Run `lake exe mk_all --module` to add `Cslib.Logics.LTL.EmbeddingSemantics` to `Cslib.lean`
         (verify the new import line appears near the existing `Cslib.Logics.LTL.Embedding` entry).
-  - [ ] Run `lake exe checkInitImports` (confirm the new file imports `Cslib.Init`).
-  - [ ] Run `lake build` (full project) — syntax linters run during build.
-  - [ ] Run `lake lint` — resolve any docBlame / defLemma / defsWithUnderscore / unusedSectionVars
+        *(deviation: altered -- per explicit orchestrator delegation instruction (concurrent-work
+        notice: two other agents were editing this checkout), performed a targeted single-line
+        `Edit` insertion of `public import Cslib.Logics.LTL.EmbeddingSemantics` immediately after
+        the `Embedding` line in `Cslib.lean` instead of running `mk_all`, which would regenerate
+        the whole barrel file and risk clobbering concurrent sessions' in-flight edits. The
+        resulting line placement is identical to what `mk_all` would have produced
+        (alphabetical, directly after `Embedding`, before `ModelChecking`).)*
+  - [x] Run `lake exe checkInitImports` (confirm the new file imports `Cslib.Init`).
+  - [x] Run `lake build` (full project) — syntax linters run during build.
+  - [x] Run `lake lint` — resolve any docBlame / defLemma / defsWithUnderscore / unusedSectionVars
         warnings on the new declarations (add docstrings, keep Prop results as `theorem`, `omit`
-        unused section vars).
-  - [ ] Run `lake exe lint-style` (use `--fix` for text-lint autofixes if needed).
-  - [ ] Run `lake shake --add-public --keep-implied --keep-prefix` to confirm imports are minimal
-        (or `--fix`).
+        unused section vars). *(zero warnings for `EmbeddingSemantics.lean`; `lake lint` reported
+        "Linting passed for Cslib" repo-wide.)*
+  - [x] Run `lake exe lint-style` (use `--fix` for text-lint autofixes if needed). *(zero
+        violations for `EmbeddingSemantics.lean`.)*
+  - [x] Run `lake shake --add-public --keep-implied --keep-prefix` to confirm imports are minimal
+        (or `--fix`). *(no entry for `EmbeddingSemantics.lean` in the shake report -- imports
+        already minimal; the report's other entries are pre-existing repo-wide suggestions for
+        files outside this task's scope, left untouched per the concurrent-work notice.)*
+  - [x] Additionally ran `lake test` (full `CslibTests/` suite per the mandatory 8-step CI
+        pipeline) -- passed with exit 0.
 - **Timing:** ~40 min
 - **Depends on:** 3
 - **Files to modify:**
@@ -223,14 +236,14 @@ consumes the prior phase's declarations).
 
 ## Testing & Validation
 
-- [ ] `lake build Cslib.Logics.LTL.EmbeddingSemantics` compiles the new file with zero errors.
-- [ ] `lake build` (full project) succeeds after barrel registration.
-- [ ] `lean_verify` confirms `satisfies_toTemporal` and `satisfiable_toTemporal` are sorry-free and
+- [x] `lake build Cslib.Logics.LTL.EmbeddingSemantics` compiles the new file with zero errors.
+- [x] `lake build` (full project) succeeds after barrel registration.
+- [x] `lean_verify` confirms `satisfies_toTemporal` and `satisfiable_toTemporal` are sorry-free and
       axiom-clean.
-- [ ] `lake exe checkInitImports` passes (new file imports `Cslib.Init`).
-- [ ] `lake lint` reports no environment-linter warnings on the new declarations.
-- [ ] `lake exe lint-style` reports no text-lint violations.
-- [ ] Grep confirms `Cslib.Logics.LTL.EmbeddingSemantics` now imports `Cslib.Logics.LTL.Embedding`
+- [x] `lake exe checkInitImports` passes (new file imports `Cslib.Init`).
+- [x] `lake lint` reports no environment-linter warnings on the new declarations.
+- [x] `lake exe lint-style` reports no text-lint violations.
+- [x] Grep confirms `Cslib.Logics.LTL.EmbeddingSemantics` now imports `Cslib.Logics.LTL.Embedding`
       (the island has a consumer).
 
 ## Artifacts & Outputs

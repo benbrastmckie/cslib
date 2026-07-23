@@ -324,20 +324,31 @@ DB) at the wrapper, and use the relocated `d_canonical_serial`.
 
 ---
 
-### Phase 7: Dedupe Strong-Completeness / Compactness Witness Blocks [NOT STARTED]
+### Phase 7: Dedupe Strong-Completeness / Compactness Witness Blocks [COMPLETED]
 
 **Goal**: Replace the remaining 4-witness `by decide` blocks inside each `*_strong_completeness`
 and `*_compactness` across all 15 systems with the `SchemaUnion.*_of` helpers, sharing one subset
 fact per block.
 
 **Tasks**:
-- [ ] For each of the 15 systems, replace the 4 inline `by decide` witnesses in
+- [x] For each of the 15 systems, replace the 4 inline `by decide` witnesses in
   `*_strong_completeness` (needs `implyK/implyS/efq/peirce`, all kCore) with `SchemaUnion.*_of h`
-  helper applications sharing one `(by decide : kCore ⊆ S)` fact.
-- [ ] Do the same for the 4 witnesses in each `*_compactness`.
-- [ ] Confirm the `by decide` count drops materially from the baseline 432 (research-confirmed
-  count) and record the new count.
-- [ ] Build each affected leaf.
+  helper applications sharing one `(by decide : kCore ⊆ S)` fact. *(deviation: named
+  `holdsImplyK`/etc. per the Phase 3 naming decision, and used a per-file `private theorem
+  coreSubset : kCore ⊆ <sysTags> := by decide` rather than an inline `(by decide : kCore ⊆ S)` at
+  each call site -- same effect, one fact shared across all of that file's call sites)*
+- [x] Do the same for the 4 witnesses in each `*_compactness`.
+- [x] Confirm the `by decide` count drops materially from the baseline 432 (research-confirmed
+  count) and record the new count. **New count: 141** (432 -> 141, a 67% reduction). The
+  remaining 141 are: (a) the per-system `coreSubset` facts themselves (15, one per file), (b)
+  differentiator-tag witnesses inside `canonical_FC` proofs (`modalT`/`modalD`/`modalB`/
+  `modalFour`/`modalFive`, which are NOT part of `kCore` and so fall outside this phase's
+  `implyK/implyS/efq/peirce` dedup scope by design), and (c) the `canonicalTruthLemmaOfKCore (by
+  decide) S φ` call in each `*_truth_lemma_applied` (Phases 4-6, 15 more `by decide` sites, one
+  per system, each proving that same file's `kCore ⊆ sysTags` fact -- arguably a 16th
+  `coreSubset`-shaped duplicate per file, but left as constructed in Phases 4-6 per the plan's
+  literal call shape `canonicalTruthLemmaOfKCore (by decide) S φ`).
+- [x] Build each affected leaf.
 
 **Timing**: ~1.5 hours
 

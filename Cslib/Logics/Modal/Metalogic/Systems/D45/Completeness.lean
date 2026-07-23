@@ -78,6 +78,11 @@ private theorem d45_truth_lemma_applied (S : CanonicalWorld (@D45Axiom Atom))
     Satisfies (CanonicalModel (@D45Axiom Atom)) S φ ↔ φ ∈ S.val :=
   canonicalTruthLemmaOfKCore (by decide) S φ
 
+/-- `kCore ⊆ d45Tags`: feeds the `holds*` helpers so `d45_strong_completeness`/
+`d45_compactness` below share this single subset fact instead of repeating 4 `by decide`
+witnesses (task 539). -/
+private theorem coreSubset : kCore ⊆ d45Tags := by decide
+
 /-- D45 soundness adapter matching the `strong_soundness` callback shape. -/
 private theorem d45_sound_cb {World : Type u} (m : Model World Atom) (w : World)
     (L : List (Proposition Atom))
@@ -120,10 +125,10 @@ theorem d45_strong_completeness {Gamma : Set (Proposition Atom)} {phi : Proposit
         Satisfies m w phi) :
     ModalSetDerivable (@D45Axiom Atom) Gamma phi :=
   strong_completeness (Axioms := @D45Axiom Atom) (FC := d45FC)
-    (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-    (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-    (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-    (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+    (holdsImplyK coreSubset)
+    (holdsImplyS coreSubset)
+    (holdsEfq coreSubset)
+    (holdsPeirce coreSubset)
     d45_truth_lemma_applied
     d45_canonical_FC
     (fun World m w ⟨hSer, hTrans, hEucl⟩ h_sat => h World m w hSer hTrans hEucl h_sat)
@@ -167,10 +172,10 @@ theorem d45_compactness {Gamma : Set (Proposition Atom)} {phi : Proposition Atom
   obtain ⟨L, hL_sub, hL_sem⟩ :=
     compactness (Axioms := @D45Axiom Atom) (FC := d45FC)
       d45_sound_cb
-      (fun φ ψ => ⟨.implyK, by decide, φ, ψ, rfl⟩)
-      (fun φ ψ χ => ⟨.implyS, by decide, φ, ψ, χ, rfl⟩)
-      (fun φ => ⟨.efq, by decide, φ, rfl⟩)
-      (fun φ ψ => ⟨.peirce, by decide, φ, ψ, rfl⟩)
+      (holdsImplyK coreSubset)
+      (holdsImplyS coreSubset)
+      (holdsEfq coreSubset)
+      (holdsPeirce coreSubset)
       d45_truth_lemma_applied
       d45_canonical_FC
       (fun World m w ⟨hSer, hTrans, hEucl⟩ h_sat => h World m w hSer hTrans hEucl h_sat)

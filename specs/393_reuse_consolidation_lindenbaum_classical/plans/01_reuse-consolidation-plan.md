@@ -147,30 +147,36 @@ each lands independently `lake build`-verified.
 - **Verification:**
   - `lake build` green; the added text is a comment/docstring (no code semantics changed).
 
-### Phase 2: Cluster B — retire the three LiftViaMorphism overlays [NOT STARTED]
+### Phase 2: Cluster B — retire the three LiftViaMorphism overlays [COMPLETED]
 
 - **Goal:** Delete the three demonstration-only overlays and all their build wiring (~607 lines
   removed), the fastest, lowest-risk win.
 - **Tasks:**
-  - [ ] Delete the three files:
+  - [x] Delete the three files:
     `Cslib/Logics/Modal/Metalogic/InterSystem/LiftViaMorphism.lean`,
     `Cslib/Logics/Propositional/Semantics/Algebra/LiftViaMorphism.lean`,
     `Cslib/Logics/Bimodal/Metalogic/ConservativeExtension/LiftViaMorphism.lean`.
-  - [ ] Remove the three `public import` lines in `Cslib.lean` (Bimodal ~250, Modal ~385,
+  - [x] Remove the three `public import` lines in `Cslib.lean` (Bimodal ~250, Modal ~385,
     Propositional ~560) — match by exact module path, not line number, since numbers shift after
     the first removal; re-grep `LiftViaMorphism` in `Cslib.lean` to confirm zero remain.
-  - [ ] Edit the prose mention at `Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean:57`
+    *(re-read Cslib.lean fresh via Read immediately before each of the three edits, per the
+    concurrency coordination note; confirmed zero matches remain after all three removals.)*
+  - [x] Edit the prose mention at `Cslib/Logics/Propositional/Semantics/Algebra/ConjImpConservative.lean:57`
     to drop `LiftViaMorphism.lean` from the parenthesized file list (keep the sentence
     grammatical).
   - [ ] Optional (only if it adds narrative value at zero cost): append a single short
     example/doc block to `Foundations/Logic/Metalogic/ProofSystemMorphism.lean` capturing the
     "family lift is an instance of the generic `Metalogic.Deriv.map`" narrative that the three
     overlays existed to demonstrate. Skip if it risks any build weight; the retirement stands
-    on its own without it.
-  - [ ] Run a full `lake build` to confirm no transitive instance/def was consumed (planning
+    on its own without it. *(deviation: skipped -- plan explicitly authorizes skipping if it
+    risks any build weight; the retirement stands on its own without it, and this file lies
+    outside this run's granted territory in any case.)*
+  - [x] Run a full `lake build` to confirm no transitive instance/def was consumed (planning
     greps indicate none: no `instance` decls in the deleted files, no external references to
     their headline symbols). If red, restore the specific deletion that caused it and report.
-  - [ ] Commit on green.
+    *(Green: 3250/3250 jobs, down from the 3253-job baseline, matching the 3 removed modules.
+    `lake exe checkInitImports` also clean.)*
+  - [x] Commit on green. *(commit 169e73e8)*
 - **Timing:** ~1 hour (build-bound)
 - **Depends on:** 1
 - **Files to modify:**

@@ -2019,6 +2019,76 @@ theorem sigAtFuel_mono_fuel_le {Atom : Type u} {G : Graph Atom} {Γ : List (Labe
     · have : m = n + 1 := le_antisymm hmn hge
       simpa [this] using cs5_deriv_imp_self (sigAtFuel G Γ hfin (n + 1) z)
 
+/-! ## `nikTrFuel` fuel-sufficiency (the ancestor walk stops naturally at the root)
+
+Unlike `sigAtFuel`, `nikTrFuel`'s wrap step is asymmetric (an implication/box guard, not a
+conjunction), so extra fuel does not unconditionally derive a monotone relationship the way
+`sigAtFuel_mono_fuel` does: adding one more ancestor-level genuinely CHANGES the formula's shape.
+What IS true is fuel-*sufficiency*: once fuel is at least the remaining ancestor-chain length
+(bounded by the graded-rank witness `ht`), `nikTrFuel` has already reached a label with no
+further parent and stops -- so it computes literally the SAME value for any larger sufficient
+fuel (the recursion never touches the "extra" fuel, since the `else` branch fires as soon as no
+parent exists, regardless of how much fuel remains). This is the genuine fuel-sufficiency fact
+flagged (but not yet needed) since Phase 8.1; it IS needed here to reconcile `nikTr`'s globally
+fixed fuel (`hfin.toFinset.card + 1`, sufficient for EVERY label) with the reduced fuel
+`nikTrFuel`'s own recursion exposes one level up from any given label. -/
+
+/-- **One-step unfold of `nikTrFuel` given an explicit parent witness.** A `rw`-safe helper: unlike
+`simp only [nikTrFuel]`, this fires exactly once (its own statement's `n` is an opaque variable,
+not itself of `_+1` shape), avoiding the runaway re-unfolding a direct `simp only [nikTrFuel]`
+would trigger once `n` is later instantiated to another `_+1` term. -/
+theorem nikTrFuel_succ_eq {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {hfin : G.X.Finite} (huniq : ∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂) {n : ℕ}
+    {cur q : Label Atom} (hRq : G.R q cur) (inner : Proposition Atom) :
+    nikTrFuel G Γ hfin (n + 1) cur inner = nikTrFuel G Γ hfin n q
+      (Proposition.imp (Proposition.and (bigAndL (factsAt Γ q))
+          (bigAndL ((hfin.subset (fun c hc => (G.edge_mem q c hc.1).2) :
+              {c | G.R q c ∧ c ≠ cur}.Finite).toFinset.toList.map
+            (fun c => Proposition.box (sigAt G Γ hfin c)))))
+        (Proposition.box inner)) := by
+  have hex : ∃ q', G.R q' cur := ⟨q, hRq⟩
+  have hchoose : Classical.choose hex = q :=
+    huniq (Classical.choose hex) q cur (Classical.choose_spec hex) hRq
+  simp only [nikTrFuel, dif_pos hex, hchoose]
+
+/-- **`nikTrFuel` is unchanged at a parentless label, for any fuel.** -/
+theorem nikTrFuel_no_parent {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {hfin : G.X.Finite} {cur : Label Atom} (hno : ¬ ∃ q, G.R q cur) (m : ℕ)
+    (inner : Proposition Atom) : nikTrFuel G Γ hfin m cur inner = inner := by
+  cases m with
+  | zero => rfl
+  | succ m => simp only [nikTrFuel, dif_neg hno]
+
+/-- **`nikTrFuel` is fuel-invariant once fuel is sufficient** (`≥ ht cur`, the remaining
+ancestor-chain length to the root): `nikTrFuel (n+1) cur inner = nikTrFuel n cur inner`. Proved by
+induction on an upper bound `k` for `ht cur` (using the graded-rank witness to show `ht`
+strictly decreases along the ancestor walk, terminating the induction). -/
+theorem nikTrFuel_fuel_invariant_step {Atom : Type u} {G : Graph Atom}
+    {Γ : List (LabelledFormula Atom)} {ht : Label Atom → ℕ}
+    (hht : ∀ a b, G.R a b → ht b = ht a + 1)
+    (huniq : ∀ a₁ a₂ b, G.R a₁ b → G.R a₂ b → a₁ = a₂) (hfin : G.X.Finite) :
+    ∀ (k : ℕ) (cur : Label Atom), ht cur ≤ k →
+      ∀ (n : ℕ), ht cur ≤ n → ∀ (inner : Proposition Atom),
+        nikTrFuel G Γ hfin (n + 1) cur inner = nikTrFuel G Γ hfin n cur inner
+  | 0, cur, _ => by
+      intro n _ inner
+      have hno : ¬ ∃ q, G.R q cur := by
+        rintro ⟨q, hq⟩
+        have := hht q cur hq
+        omega
+      rw [nikTrFuel_no_parent hno, nikTrFuel_no_parent hno]
+  | (k + 1), cur, hk => by
+      intro n hn inner
+      by_cases hex : ∃ q, G.R q cur
+      · obtain ⟨q, hRq⟩ := hex
+        have hqrank : ht cur = ht q + 1 := hht q cur hRq
+        have hqk : ht q ≤ k := by omega
+        obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
+        have hqn' : ht q ≤ n' := by omega
+        rw [nikTrFuel_succ_eq huniq hRq, nikTrFuel_succ_eq huniq hRq]
+        exact nikTrFuel_fuel_invariant_step hht huniq hfin k q hqk n' hqn' _
+      · rw [nikTrFuel_no_parent hex, nikTrFuel_no_parent hex]
+
 end Cslib.Logic.Modal.Labelled
 
 end

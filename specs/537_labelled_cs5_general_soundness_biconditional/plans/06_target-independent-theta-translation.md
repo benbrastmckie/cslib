@@ -518,7 +518,7 @@ definition once, and this probe methodology is now proven to catch exactly that 
         `place root φ = φ` by `rfl`, and `caseE_collapse` shows the Phase 20 modus-ponens
         assembly mechanism works given a hypothetical adequacy-shaped derivation.
 
-**Dispatch 1 finding (this run): gate reports FAIL, on case D only (A/B/C/E all PASS).** The
+**Dispatch 1 finding: gate reports FAIL, on case D only (A/B/C/E all PASS).** The
 flat, depth-indexed `place(x,A) := □^{d(x)}A` is machine-confirmed insufficient for `orE` once the
 disjunction sits at depth ≥ 1 — closing it needs `□(A∨B) ⊃ (□A∨□B)`, the same non-theorem that
 killed the plan-v4 fully-boxed flat shortcut, and no alternative route was found. Per the FAIL
@@ -527,10 +527,42 @@ must design and validate a layered alternative `place` — e.g. `Θ_0 ⊃ □(Θ
 per-level antecedents carry the raw (unboxed) disjunction at the right nesting level so `orE`'s
 Hilbert axiom applies directly, rather than to a flattened `□^d`-wrapped formula — and re-run ALL
 FIVE cases (A/B/C/D/E) against it, since a layered redesign changes `Θ` as well as `place` and
-could disturb the currently-passing cases. Phase 9 stays `[IN PROGRESS]`; Phase 10+ remains
-BLOCKED by this gate until a candidate passes all five cases.
-  - [ ] Write the gate verdict into the probe's header comment: PASS/FAIL per case, plus the final
-        `Θ`/`place` definitions to be transcribed into `Cslib/` in Phase 11.
+could disturb the currently-passing cases.
+
+**Dispatch 2 finding (`probes/theta_place_layered.lean`, sorry-free, no `sorryAx`, exit 0):** `Θ`
+kept completely unchanged (`sigAt` + `orphanFacts`, still a Preserved Asset, still
+target-independent). `place` redesigned to recurse into `∨`: `place(x,P∨Q) := place(x,P) ∨
+place(x,Q)` (by `rfl`, no theorem), flat `boxIter (ht x) A` otherwise. Result:
+- A/B/C/E: **PASS**, unaffected (`place` only diverges from dispatch 1's flat definition at
+  depth ≥ 1 on `∨`-headed formulas; all four cases use `ht0`/depth 0 throughout, re-verified via
+  `place_zero`/`place_ht0`, now by structural induction rather than `rfl`).
+- D: **NOT an unconditional PASS**, but dispatch 1's finding is REFUTED as a blanket claim.
+  `caseD_orE_core_layered` closes the exact adversarial `orE`-at-depth-≥1 core step with **zero**
+  bridge, zero box-or-distribution theorem, using only `place`'s `∨`-recursion (`rfl`) + the
+  already-valid `inject` (`box_and_intro`, dispatch 1's own finding) + the plain Hilbert `orE`
+  axiom — PROVIDED the major premise's own translation (`hOr`) is available in split form. This
+  is machine-confirmed to hold for FREE, no extra hypothesis, whenever the disjunction arose via
+  `orI1`/`orI2` (`hOr_split_from_orI1`). The residual, precisely localized and machine-confirmed
+  (`hOr_split_needs_bridge_from_flat`, non-vacuous per `place_ht2_c2_atom`): if the disjunction
+  instead arose via the ASSUMPTION rule (Γ literally asserts a compound fact `y:(A∨B)`), `sigAt`'s
+  fixed recursive structure (Preserved Asset, cannot be changed) can only ever deliver the flat
+  boxed form there, and reaching split form from flat form still needs the same non-theorem
+  bridge. **This narrows dispatch 1's finding from "orE always needs the bridge" to "orE needs
+  the bridge only if a disjunctive fact is ever a raw context assumption rather than
+  introduced via `orI1`/`orI2`"** — a Phase-13-scoped question (what shape does
+  `cs5_completeness`'s canonical construction give `Γ`'s facts?) outside Phase 9's remit to
+  resolve. Per the 3-run cap, one dispatch remains; the next Phase 9 dispatch (if used) should
+  either (a) inspect `cs5_completeness`'s Γ-construction to determine whether compound-fact
+  assumptions are actually possible in the derivations `nik_adequacy` will be applied to (if not,
+  case D becomes an unconditional PASS with no further redesign needed), or (b) accept the
+  conditional result and route Phase 13/14/16 to carry the `orI1`/`orI2`-vs-assumption case split
+  through explicitly. Phase 9 stays `[IN PROGRESS]`; Phase 10+ remains BLOCKED by this gate until
+  a candidate reports an unconditional PASS on all five cases, OR the task explicitly accepts the
+  conditional result and threads the residual into Phase 13's design.
+  - [x] Write the gate verdict into the probe's header comment: PASS / conditional-PASS-with-
+        precisely-localized-residual per case (`theta_place_layered.lean`'s header comment).
+        Final `Θ`/`place` definitions (subject to the Phase 13 residual above) to be transcribed
+        into `Cslib/` in Phase 11, once the residual is resolved one way or the other.
 - **PASS criterion (the gate):** cases A, B, C each fail to refute the candidate — the reductio
   does **not** compile while the corresponding positive derivation **does** — AND case E's collapse
   compiles, AND case D's finding is recorded. The probe file compiles under `lake env lean` at exit

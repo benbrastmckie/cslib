@@ -10,45 +10,32 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Context
 public import Mathlib.Data.Set.Card
 
-/-! # Labelled-System Soundness (Task 517 Phase 11, Simpson 1994 Thm 8.1.4, Soundness Direction)
+/-! # Labelled-System Soundness (Simpson 1994 Thm 8.1.4, Soundness Direction)
 
-**Status: interpretation machinery (Phase 11.1, partial) + anti-vacuity certificate (Phase 11.3,
-COMPLETE). General `nik_TS5_soundness` assessed INTRACTABLE at standard single-dispatch
-implementation effort after three dispatches (see "Third dispatch" section below) -- recommend a
-dedicated re-plan/research pass, not a fourth direct-implementation attempt.** A fourth,
-time-boxed decisive probe (task 537 Phase 1) re-confirmed this assessment via live tactic-state
-evidence and closes the decision with **GATE-C** (`[BLOCKED]`, no proof, no countermodel,
-Strategy-3 authorized as the sanctioned next route) -- see "Fourth dispatch (task 537 Phase 1
-probe, GATE-C)" below. This module lands
-(1) the first, reusable building block of the full labelled soundness direction
-`nik_TS5_soundness : NIKDerivable TS5 φ → CKValidFC cs5FCIncest φ`, which will complete the Simpson
-8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and (2) the anti-vacuity
-certificate `nik_TS5_consistent : ¬ NIKDerivable TS5 ⊥`, landed via a **direct, self-contained
-route** (see "The anti-vacuity route taken" below) rather than as a corollary of the
-not-yet-landed general theorem. The general `nik_TS5_soundness` (Phase 11.1's tree-lifting
-machinery + Phase 11.2's `TClosure` validation) is **not yet landed** -- see "What remains" below,
-"Third dispatch" below (the current, sharpest assessment), and the continuation handoffs at
-`specs/517_labelled_bounded_context_cs5_completeness/handoffs/`.
+**Status.** This module lands (1) a first, reusable building block of the full labelled soundness
+direction `nik_TS5_soundness : NIKDerivable TS5 φ → CKValidFC cs5FCIncest φ`, which will complete
+the Simpson 8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and (2) the
+anti-vacuity certificate `nik_TS5_consistent : ¬ NIKDerivable TS5 ⊥`, landed via a **direct,
+self-contained route** (see "The anti-vacuity route taken" below) rather than as a corollary of
+the not-yet-landed general theorem. The general `nik_TS5_soundness` is **not yet landed**: the
+tree-shape invariant and graph-lifting machinery are outstanding (see "What remains" below), and
+the direct-induction route to the general theorem has been assessed intractable at standard
+effort pending resolution of a genuine open mathematical question (see "The exact-symmetry
+obstruction" below), with a routed recommendation to pursue the Hilbert-labelled adequacy bridge
+instead (see "Recommended next step" below).
 
-## The anti-vacuity route taken: `nik_soundness_onePoint` (Phase 11.3, direct, not via 11.1/11.2)
+## The anti-vacuity route taken: `nik_soundness_onePoint` (direct, not via the general induction)
 
-The plan's own Phase 11.3 description explicitly sanctions proving `nik_TS5_consistent` directly
-against a **one-point reflexive** witness model, independently of the general `nik_TS5_soundness`
-theorem, "if 11.2's general induction is not reached in a future dispatch" (Rollback/Contingency;
-also the prior dispatch's continuation handoff, "optional accelerant" note). This dispatch takes
-exactly that route, landing it **before** the general theorem rather than after: `nik_TS5_soundness`
-requires the still-outstanding tree-lifting machinery (see "What remains"), but a *soundness
-argument specialized to the one-point model* `World := Unit`, `r := fun _ _ => True` sidesteps the
-Lifting Lemma entirely -- **every** interpretation of every label collapses to the same unique
-point, so "lifting the interpretation at one label" is trivially the identity, and no tree-shape
-invariant or graph-lifting recursion is needed at all. `nik_soundness_onePoint` is a full
-12-constructor structural induction over `NIK`, proved directly against this one model (not a
-special case of a not-yet-existing general theorem), and `nik_TS5_consistent` is then immediate:
-instantiate `botForces := fun _ => False`, so `CKForces ... () ⊥` reduces to `False` outright.
-This is flagged explicitly as a deviation from the plan's literal sub-phase *sequencing*
-(11.1 → 11.2 → 11.3) -- not from its mathematical *content*, since the plan's own Rollback/
-Contingency section pre-authorizes exactly this route as a documented fallback, and the final
-theorem statement `nik_TS5_consistent : ¬ NIKDerivable TS5 (⊥ : Proposition Atom)` is unchanged.
+`nik_TS5_consistent` can be proved directly against a **one-point reflexive** witness model,
+independently of the general `nik_TS5_soundness` theorem: `nik_TS5_soundness` requires the
+still-outstanding tree-lifting machinery (see "What remains"), but a *soundness argument
+specialized to the one-point model* `World := Unit`, `r := fun _ _ => True` sidesteps the Lifting
+Lemma entirely -- **every** interpretation of every label collapses to the same unique point, so
+"lifting the interpretation at one label" is trivially the identity, and no tree-shape invariant
+or graph-lifting recursion is needed at all. `nik_soundness_onePoint` is a full 12-constructor
+structural induction over `NIK`, proved directly against this one model (not a special case of a
+not-yet-existing general theorem), and `nik_TS5_consistent` is then immediate: instantiate
+`botForces := fun _ => False`, so `CKForces ... () ⊥` reduces to `False` outright.
 
 ## `--lit`: Simpson's Chapter 8 soundness argument (reflowed `L1367-1423`, PDF offset +9)
 
@@ -80,8 +67,8 @@ Simpson's own Lifting-Lemma proof does not transfer verbatim; a literal transcri
 available. Per the literature-fidelity discipline (`lean4.md`), this deviation is flagged
 explicitly rather than silently mixed with novel steps.
 
-**The key finding (this dispatch, verified by hand and cross-checked): `cs5FCIncest`'s own
-`cs5Incest`/`r_symBox` conjuncts supply a Wijesekera-side substitute for the missing `F1`/`F2`.**
+**The key finding (verified by hand and cross-checked): `cs5FCIncest`'s own `cs5Incest`/
+`r_symBox` conjuncts supply a Wijesekera-side substitute for the missing `F1`/`F2`.**
 `cs5FCIncest_lift` below proves exactly the single-edge case Simpson's Lifting Lemma needs at each
 node of the tree it lifts: raising the *source* of an `r`-edge along `≤` still reaches *some*
 upward extension of the old target. Composed with `ckforces_persistence` (`Forcing.lean:122`,
@@ -91,7 +78,7 @@ This makes a *tree-restricted* Lifting Lemma analogue for `cs5FCIncest` models p
 Simpson's own restriction of Theorem 8.1.4 and the Lifting Lemma to `G` a tree), **not yet proved
 in full** -- see "What remains".
 
-## What remains (handoff for the next Phase 11.1 dispatch)
+## What remains
 
 1. **The tree-shape invariant.** `NIK`'s `(□I)`/`(◇E)` rules quantify cofinitely over the fresh
    label `y` (`∀ y ∉ L, ...`); the main soundness induction must always instantiate this
@@ -111,20 +98,19 @@ in full** -- see "What remains".
    interpretation `ρ` (edge-cond + Γ-cond), concluding `CKForces (ρ x) A`. The `(□I)`/`(◇E)` cases
    use (1)+(2) to instantiate the cofinite premise at a fresh label mapped to the semantically
    required world; `boxE`/`diaI` need item 4 below for their `TClosure`-edge hypothesis.
-4. **Phase 11.2**: validate that each `cs5FCIncest` conjunct soundly interprets the matching
-   `TClosure` (T/B/4) edge-closure rule (`raw G.R a b → r (ρa)(ρb)` extends to `TClosure 𝒯 G.R a b
-   → r (ρa)(ρb)`), then assemble `nik_TS5_soundness`.
-5. **Phase 11.3, `nik_TS5_consistent` -- LANDED**, via the plan's own pre-authorized direct route
-   (Rollback/Contingency), **before** items 1-4 rather than as their corollary: a one-point model
-   (`World := Unit`, `r := fun _ _ => True`) makes "lifting" trivially the identity, so none of
-   items 1-4's machinery is needed for this specific corollary. See `nik_soundness_onePoint` below.
+4. **`TClosure` validation**: validate that each `cs5FCIncest` conjunct soundly interprets the
+   matching `TClosure` (T/B/4) edge-closure rule (`raw G.R a b → r (ρa)(ρb)` extends to `TClosure
+   𝒯 G.R a b → r (ρa)(ρb)`), then assemble `nik_TS5_soundness`.
+5. **`nik_TS5_consistent` -- landed**, via the direct route above, independently of items 1-4
+   rather than as their corollary: a one-point model (`World := Unit`, `r := fun _ _ => True`)
+   makes "lifting" trivially the identity, so none of items 1-4's machinery is needed for this
+   specific corollary. See `nik_soundness_onePoint` below.
 
-## Refined analysis of items 1-4 (this dispatch, NOT yet reduced to code -- for the next dispatch)
+## The exact-symmetry obstruction to the general theorem
 
-A second, deeper look at items 1-4 this dispatch (attempting an actual Lean encoding of the
-`(□I)` case, not merely re-stating the architecture) surfaced a sharper obstruction than either
-this module's or the continuation handoff's prior framing captured, recorded here so the next
-attempt does not re-discover it from scratch:
+A deeper look at items 1-4 (attempting an actual Lean encoding of the `(□I)` case, not merely
+the architecture sketch above) surfaces a sharper obstruction, recorded here so a future attempt
+does not re-discover it from scratch:
 
 - **`TS5 = {T, B, Four}` makes `TClosure TS5 G.R` an equivalence relation**, and `G` is *always
   connected* (every `Graph.addEdge` attaches a brand-new label to an already-present one, starting
@@ -158,16 +144,14 @@ attempt does not re-discover it from scratch:
   in Lean; it is the concrete next step for items 1-2, and should supersede their original
   "propagate down the tree" phrasing above (kept for historical context, not as the target shape).
 
-## Third dispatch: why the direct-induction route is now assessed INTRACTABLE at standard effort
-(NOT yet reduced to code; this is a decisive tractability finding, not a missing-lemma gap)
+## Why the direct-induction route is assessed intractable at standard effort
 
-This dispatch (the third to touch general `nik_TS5_soundness`) attempted to actually close the
-finite-clique-relift lemma the second dispatch's "Refined analysis" section above targets, both
-for the `(□I)` producer side (a fresh label's exact image) and, independently, for the `(□E)`
-consumer side (an *already-fixed*, non-fresh label reached via a `TClosure.symm`-derived edge).
-Both sides hit the same root obstruction, confirmed by direct Lean-level proof attempts (not just
-re-stated architecture), and a battery of finite hand-constructed candidate models was used to
-probe whether the obstruction is real or just unexplored. The finding:
+Attempting to actually close the finite-clique-relift lemma the "exact-symmetry obstruction"
+section above targets, both for the `(□I)` producer side (a fresh label's exact image) and,
+independently, for the `(□E)` consumer side (an *already-fixed*, non-fresh label reached via a
+`TClosure.symm`-derived edge), surfaces the same root obstruction, confirmed by direct Lean-level
+proof attempts (not just architecture), and a battery of finite hand-constructed candidate models
+was used to probe whether the obstruction is real or just unexplored. The finding:
 
 1. **A type-level observation.** Of `cs5FCIncest`'s five conjuncts, only `hrefl` and `htrans`
    have a *non-existential* (`∀`-only) conclusion; `hfour`, `hsymbox`, and `hincest` all conclude
@@ -181,9 +165,8 @@ probe whether the obstruction is real or just unexplored. The finding:
    interpretation must be *exactly* `u` (persistence only goes upward, so a raised substitute
    `u' ≥ u` cannot be "rounded back down"), yet the edge-cond fact `r (ρ a) u` this exactness
    demands, for every other already-used label `a`, is exactly the kind of fact `hfour`
-   cannot produce without also raising `a`'s own image -- as the second dispatch found -- and
-   THIS dispatch additionally traced that raising `a` does not itself terminate in an exact fact
-   either, for the same reason one level up.
+   cannot produce without also raising `a`'s own image, and raising `a` does not itself terminate
+   in an exact fact either, for the same reason one level up.
 2. **The `(□E)`-consumer side needs the same exactness, independently of freshness.** `boxE`
    consumes an *arbitrary* `TClosure`-derived edge `hR : TClosure 𝒯 G.R x y`, including one
    derived via `.symm` (`B ∈ TS5`) from a *raw, one-directional* edge `G.R y x` (`Graph.addEdge`
@@ -210,46 +193,41 @@ probe whether the obstruction is real or just unexplored. The finding:
    is genuinely unresolved, not merely unattempted: it is the single largest scope unknown left in
    this proof direction, and resolving it (either direction) would decisively settle whether the
    clique-relift lemma is provable by finite induction, or needs different machinery entirely.
-4. **A concrete, actionable recommendation for whoever picks this up next**, given (3)'s
-   "finite models keep collapsing into full closure" pattern: this looks structurally like a
-   FIXPOINT/closure-completion problem (build the smallest `r`-clique containing a given finite
-   seed and closed under `hincest`/`hfour`/`hsymbox`'s raised witnesses), not a simple
-   induction-over-a-fixed-finite-set problem -- which is exactly the shape of the `FLO`
-   maximal-extension machinery already landed for the completeness direction (Phases 1-7,
-   `PrimeLemma.lean`/probes). **Investigating whether the landed `FLO`/chain-union machinery can
-   be reused or adapted for this closure construction is the single most promising concrete next
-   step**, ahead of either of the two heavier alternatives below.
-5. **Escalation-protocol assessment (per the task's anti-churn directive): this direction is NOT
-   tractable at standard single-dispatch implementation effort.** Three dispatches have each
-   materially sharpened the obstruction (not thrashed or repeated prior work), converging on a
-   genuine open mathematical question (item 3 above), not a missing Mathlib lemma or a
+4. **A concrete, actionable recommendation**, given (3)'s "finite models keep collapsing into
+   full closure" pattern: this looks structurally like a FIXPOINT/closure-completion problem
+   (build the smallest `r`-clique containing a given finite seed and closed under
+   `hincest`/`hfour`/`hsymbox`'s raised witnesses), not a simple induction-over-a-fixed-finite-set
+   problem -- which is exactly the shape of the `FLO` maximal-extension machinery already landed
+   for the completeness direction (`PrimeLemma.lean`). **Investigating whether the landed
+   `FLO`/chain-union machinery can be reused or adapted for this closure construction is the
+   single most promising concrete next step**, ahead of either of the two heavier alternatives
+   below.
+5. **This direction is not tractable at standard effort.** The obstruction above converges on a
+   genuine open mathematical question (item 3), not a missing Mathlib lemma or a
    straightforward-but-long proof. Recommended next steps, in order of estimated cost:
-   - (a) **Cheapest, try first**: a focused (few-hour) investigation of whether `cs5FCIncest`
-     provably forces symmetric/clique closure on finitely-generated substructures (item 3's open
+   - (a) **Cheapest, try first**: a focused investigation of whether `cs5FCIncest` provably
+     forces symmetric/clique closure on finitely-generated substructures (item 3's open
      question), reusing/adapting the `FLO` closure machinery (item 4) if it resolves positively.
    - (b) **Simpson's own recommended route** (`8.1.2`, quoted above): formalize the modified
      sequent system `L_m(𝒯, ∅)` with `𝒯`-closure baked into `(⊃L)`/`(⊃R)_m`, which Simpson states
-     is needed *specifically* to avoid the non-tree-excursion problem this dispatch keeps hitting.
-     Substantial new proof-theoretic infrastructure (a new derivation system + translation lemmas
-     + its own soundness proof) -- re-plan scale (likely 300-600+ lines), not a dispatch
-     continuation.
-   - (c) Build the Hilbert-labelled equivalence bridge (Ch. 6, already flagged as deferred future
-     work in this plan's Phase 12 notes) and obtain labelled soundness as a corollary of the
-     *already-proven*, sorry-free `cs5_soundness_derivable_incest` (`CS5Canonical.lean:373`) --
-     this is exactly the large Ch. 6 gap Option B of this plan deliberately deferred, so reopening
-     it is itself a scope decision for the user/orchestrator, not this dispatch.
-   None of (a)-(c) is attempted in this dispatch; each is genuinely re-plan/research-pass scale,
-   not a direct continuation. No `sorry`, no new axiom, and no vacuous placeholder was introduced
-   to force a result -- per the anti-churn directive, this finding is landed as documentation only.
+     is needed *specifically* to avoid the non-tree-excursion problem above. Substantial new
+     proof-theoretic infrastructure (a new derivation system + translation lemmas + its own
+     soundness proof).
+   - (c) Build the Hilbert-labelled equivalence bridge (Ch. 6) and obtain labelled soundness as a
+     corollary of the *already-proven*, sorry-free `cs5_soundness_derivable_incest`
+     (`CS5Canonical.lean:373`) -- this reopens the large Ch. 6 gap deliberately deferred elsewhere,
+     so pursuing it is itself a scope decision.
+   None of (a)-(c) is attempted here; each is substantial new work in its own right. No `sorry`,
+   no new axiom, and no vacuous placeholder was introduced to force a result -- this finding is
+   landed as documentation only.
 
-## Fourth dispatch (task 537 Phase 1 probe, GATE-C)
+## The exact-symmetry lemma: proof and countermodel attempts
 
-Task 537's plan (`specs/537_.../plans/01_general-soundness.md`) re-opened the direct route as a
-single **time-boxed decisive probe with a hard pivot gate**: prove the exact-symmetry lemma
-`cs5FCIncest r → r a b → r b a` on the finitely-generated substructure (GATE-A), or construct a
-concrete countermodel (GATE-B), or record `[BLOCKED]` within budget (GATE-C, explicitly sanctioned
-as a non-failure outcome, not a fourth thrash). This dispatch pursued both prongs and reached
-**GATE-C**:
+The direct route was also pursued via a **time-boxed decisive probe with a hard pivot gate**:
+prove the exact-symmetry lemma `cs5FCIncest r → r a b → r b a` on the finitely-generated
+substructure, or construct a concrete countermodel, or record the obstruction as a genuinely
+blocked open question within budget (a sanctioned, non-failure outcome). Both prongs were
+pursued, with the following result:
 
 1. **Proof attempt, verified via live `lean_goal`/`lean_multi_attempt` state (not just hand
    analysis).** Chasing `hincest` on `hab : r a b` gives `h1 : r b₁ a` (`b ≤ b₁`); `hincest` on
@@ -261,50 +239,45 @@ as a non-failure outcome, not a fourth thrash). This dispatch pursued both prong
    `hvt : r v a` for some `v ≥ a`, not `r b a`. Both automation (`aesop`, `tauto`) and the manual
    chase fail to close `r b a` exactly, confirming (via tool-verified goal states, not
    assumption) that `hincest`/`hfour`/`hsymbox`'s raised witnesses cascade indefinitely without
-   ever re-pinning the two original, fixed points -- the same root obstruction the third dispatch
-   found, now independently reproduced.
+   ever re-pinning the two original, fixed points.
 2. **Countermodel attempt.** A translation-invariant candidate on `ℕ` (`r n m := (n ≥ 2 ∨ m ≥ 2)
    ∨ n = m ∨ (n = 0 ∧ m = 1)`, designed to hold the asymmetric edge `r 0 1 ∧ ¬ r 1 0` while
    using "everything ≥ 2 relates to everything" to try to satisfy `hincest`/`hfour`/`hsymbox`)
    was checked by hand against all five conjuncts and **fails `htrans`**: `r 1 2` and `r 2 0` both
-   hold (via the `≥2` clause), forcing `r 1 0` by transitivity -- reproducing exactly the
-   "`hsymbox`+`htrans` collapse" pattern the third dispatch's hand-probe already hit, via an
-   independent construction. A difference-set (`r n m := (m - n) ∈ D`) analysis over `ℤ` shows
-   this is not a coincidence of the specific attempt: any additive sub-semigroup `D ⊆ ℤ`
-   containing `0` that is unbounded both above and below (`hsymbox`/`hincest`'s respective
-   requirements once translated through the difference-set encoding) is forced, by a
-   Bezout-plus-scaling argument, to equal `g ℤ` for some `g ≥ 1` -- i.e. a **subgroup**, hence
-   automatically symmetric. No translation-invariant countermodel exists; this is a genuinely new
-   (this-dispatch) structural finding, not merely a repeated empirical failure, though it does not
-   itself constitute a proof for arbitrary (non-translation-invariant) `Preorder World`.
-3. **Zorn/chain-union pattern assessed infeasible within this probe's budget, not attempted.** The
-   plan's suggested technique needs a poset of *sets* (chains have union upper bounds
-   automatically, regardless of `World`'s structure) analogous to `PrimeLemma.lean`'s Lindenbaum
-   construction -- but `hfour`/`hsymbox` take their raised point `u'` as a *hypothesis*, not an
-   existential the axiom lets us choose (only `hincest`'s witness is existential), so there is no
-   direct set-of-reachable-pairs poset whose maximal element pins the two ORIGINAL fixed points
-   `a`, `b` exactly; building one is genuinely new infrastructure at the plan's own estimated
-   150-300+ line, multi-dispatch re-plan scale, not a bounded-probe-sized task.
-4. **GATE-C recorded.** No proof, no countermodel within budget. Per the plan's pivot gate, this
-   is the explicitly sanctioned, non-failure terminal state: `[BLOCKED]` handoff routes to
-   **Phase 4** (`specs/537_.../plans/01_general-soundness.md`), recommending Strategy 3 (the
-   Hilbert-labelled adequacy bridge, obtaining `nik_TS5_soundness` as a corollary of the landed
-   `cs5_soundness_derivable_incest`, `CS5Canonical.lean:373`) be authorized as the follow-up scope.
-   Zero debt: no `sorry`, no new axiom, `cs5FCIncest` unweakened, all Preserved Assets unregressed.
+   hold (via the `≥2` clause), forcing `r 1 0` by transitivity -- reproducing the same
+   "`hsymbox`+`htrans` collapse" pattern via an independent construction. A difference-set
+   (`r n m := (m - n) ∈ D`) analysis over `ℤ` shows this is not a coincidence of the specific
+   attempt: any additive sub-semigroup `D ⊆ ℤ` containing `0` that is unbounded both above and
+   below (`hsymbox`/`hincest`'s respective requirements once translated through the
+   difference-set encoding) is forced, by a Bezout-plus-scaling argument, to equal `g ℤ` for
+   some `g ≥ 1` -- i.e. a **subgroup**, hence automatically symmetric. No translation-invariant
+   countermodel exists; this is a genuine structural finding, not merely a repeated empirical
+   failure, though it does not itself constitute a proof for arbitrary (non-translation-invariant)
+   `Preorder World`.
+3. **Zorn/chain-union pattern assessed infeasible, not attempted.** The natural technique needs a
+   poset of *sets* (chains have union upper bounds automatically, regardless of `World`'s
+   structure) analogous to `PrimeLemma.lean`'s Lindenbaum construction -- but `hfour`/`hsymbox`
+   take their raised point `u'` as a *hypothesis*, not an existential the axiom lets us choose
+   (only `hincest`'s witness is existential), so there is no direct set-of-reachable-pairs poset
+   whose maximal element pins the two ORIGINAL fixed points `a`, `b` exactly; building one is
+   genuinely new infrastructure, estimated at 150-300+ lines.
+4. **No proof, no countermodel found within the probe's budget.** This is recorded as a genuinely
+   blocked open question (see "The exact-symmetry obstruction" above), recommending the
+   Hilbert-labelled adequacy bridge -- obtaining `nik_TS5_soundness` as a corollary of the landed
+   `cs5_soundness_derivable_incest`, `CS5Canonical.lean:373` -- as the follow-up route. Zero debt:
+   no `sorry`, no new axiom, `cs5FCIncest` unweakened, all landed results unregressed.
 
-## Fifth dispatch (task 537 Phase 8, `[BLOCKED]`: cross-label `efq`/`orE` soundness gap)
+## The cross-label `efq`/`orE` soundness gap
 
-Phases 1-7 (`box_iff_base`/`dia_iff_base`/`box_iff_TClosure`/`dia_iff_TClosure`, `cs5FCIncest_lift`/
+`box_iff_base`/`dia_iff_base`/`box_iff_TClosure`/`dia_iff_TClosure`, `cs5FCIncest_lift`/
 `cs5FCIncest_raise`, `box_gives_here`, `boxI_raise_step`/`boxI_lift_star`, `IsDerivationForest`/
-`forest_trivial`/`forest_addEdge_fresh`, `boxI_lift`) are all landed sorry-free and are the correct
-foundation. Phase 8's own mission -- "generalize `nik_soundness_onePoint` over an arbitrary `ρ` and
-model, `∀ ρ, IsDerivationForest G → (raw edge-cond) → (Γ-cond) → CKForces r v botForces (ρ φ.lbl)
-φ.prop`, reusing the skeleton verbatim for 9 'straightforward' propositional constructors" -- hits a
-genuine, machine-verified **mathematical** obstruction in exactly two of those "straightforward"
-cases, `NIK.efq` and `NIK.orE` (Deduction.lean:252,277), **not an engineering gap** and **not
-covered by Phase 10** (Phase 10 is scoped solely to a Phase 7 `boxI_lift` engineering overrun; this
-is a Phase 8 finding about `efq`/`orE`, discovered only once their generalized cases were actually
-attempted, per the anti-churn discipline of machine-checking before escalating).
+`forest_trivial`/`forest_addEdge_fresh`, `boxI_lift` are all landed sorry-free and are the correct
+foundation. Generalizing `nik_soundness_onePoint` over an arbitrary `ρ` and model,
+`∀ ρ, IsDerivationForest G → (raw edge-cond) → (Γ-cond) → CKForces r v botForces (ρ φ.lbl)
+φ.prop`, reusing the skeleton verbatim for the 9 "straightforward" propositional constructors,
+hits a genuine, machine-verified **mathematical** obstruction in exactly two of those
+"straightforward" cases, `NIK.efq` and `NIK.orE` (Deduction.lean:252,277) -- **not an engineering
+gap**, discovered only once their generalized cases were actually attempted.
 
 **The gap.** `NIK.efq`/`NIK.orE` are **cross-label** per Figure 4-1 (confirmed correct for
 *completeness*, `PrimeLemma.lean`'s `consistency_of_maximal`, chunk 0103): `efq`'s conclusion label
@@ -316,9 +289,8 @@ it). Consequently, for the naive "∀ ρ" motive, discharging `efq`'s case requi
 `ρ` the *adversary* supplies -- and when `y ∉ G.X ∪ ctxLabels Γ` (permitted by the constructor's
 type; raw edge-cond and Γ-cond say nothing about `ρ y` in that case), the adversary may set `ρ y` to
 a point in a different, `r`/`≤`-disconnected component of the model where `A` fails. This is **not**
-a hand-wave: a two-point countermodel was built and machine-verified (`lean_run_code`, this
-dispatch) witnessing exactly this: `World := Pt` (`one | two`), `≤ := Eq` (discrete `Preorder`),
-`r := Eq`.
+a hand-wave: a two-point countermodel was built and machine-verified (`lean_run_code`)
+witnessing exactly this: `World := Pt` (`one | two`), `≤ := Eq` (discrete `Preorder`), `r := Eq`.
 `cs5FCIncest r` holds (all five conjuncts collapse to reflexivity facts under `r = ≤ = Eq`); the
 three `CKValidFC` explosion axioms and both upward-closure conditions hold (again trivially, since
 `≤ = Eq`); `botForces := (· = .one)`; `CKForces r val botForces .one Proposition.bot` holds
@@ -333,15 +305,15 @@ one-point trick masks the cross-label subtlety entirely, rather than resolving i
 generalize: a genuinely non-degenerate `World` (needed for `boxI`/`diaE` to carry non-trivial modal
 content at all) reopens exactly the gap above.
 
-**Why the natural fixes do not close it within this phase's scope.**
+**Why the natural fixes do not close it.**
 - *Restricting to `y ∈ G.X ∪ ctxLabels Γ` and using the "`TClosure TS5` is total on a connected
-  component" fact (module docstring's earlier "Refined analysis" section, §1)* only half-works:
-  `IsDerivationForest` (Phase 6) intentionally allows a **disconnected** forest (finite + graded
-  rank + unique parent, with no "single root"/connectivity conjunct) precisely so it stays provable
-  by structural induction without threading extra history; the "always a single tree from
+  component" fact (see "The exact-symmetry obstruction" above)* only half-works:
+  `IsDerivationForest` intentionally allows a **disconnected** forest (finite + graded rank +
+  unique parent, with no "single root"/connectivity conjunct) precisely so it stays provable by
+  structural induction without threading extra history; the "always a single tree from
   `Graph.trivial`" fact that would make `TClosure TS5 G.R` total on `G.X` is a *strictly stronger*
-  invariant `IsDerivationForest` does not carry, so this sub-case would need new machinery beyond
-  what Phase 6 landed.
+  invariant `IsDerivationForest` does not carry, so this sub-case needs new machinery beyond what
+  is currently landed.
 - *Making the whole induction's motive existential (`∃ ρ' agreeing with ρ on G.X ∪ ctxLabels Γ, ...
   ∧ CKForces r v botForces (ρ' φ.lbl) φ.prop`), giving `efq`/`orE` freedom to reassign `ρ` at a
   genuinely-fresh `y`* is consistent with `boxI`/`diaE` (whose fresh `y` is already added to
@@ -349,23 +321,22 @@ content at all) reopens exactly the gap above.
   value they need) and with the label-local rules (whose shared label is pinned identically across
   every premise) -- but it still needs the `y ∈ G.X ∪ ctxLabels Γ` sub-case of `efq`/`orE` closed by
   the connectivity fact above, which is not available. This existential reformulation is also a
-  substantial redesign of the induction's own shape, not a "transcribe the skeleton" step -- exactly
-  the kind of scope growth the Postmortem Constraints warn against inventing unilaterally mid-phase.
+  substantial redesign of the induction's own shape, not a straightforward extension of the
+  skeleton above.
 
-**Disposition.** Per the escalation protocol (machine-check before escalating; no `sorry`, no new
-axiom, no vacuous placeholder to force a result): this is recorded as a genuine `[BLOCKED]` finding
-for Phase 8, routed to a follow-up scoped to closing the `efq`/`orE` cases (most promising path:
-prove a "`IsDerivationForest` + built via `Graph.trivial`/`addEdge` ⟹ `G.X` is `TClosure TS5`-total"
-connectivity lemma, then an existential-motive reformulation of the main induction restricted to
-that closed sub-case). Phases 1-7 are unaffected, unregressed, and remain the correct foundation;
-no `.lean` proof code was added or altered this dispatch (this docstring update is the only change
-to this file).
+**Disposition.** No `sorry`, no new axiom, no vacuous placeholder to force a result: this is
+recorded as a genuine open finding, routed to a follow-up scoped to closing the `efq`/`orE` cases
+(most promising path: prove a "`IsDerivationForest` + built via `Graph.trivial`/`addEdge` ⟹
+`G.X` is `TClosure TS5`-total" connectivity lemma, then an existential-motive reformulation of the
+main induction restricted to that closed sub-case). Everything else in this file is unaffected,
+unregressed, and remains the correct foundation.
 
-## Contents (this dispatch)
+## Contents
 
-- `cs5FCIncest_lift`: the interpretation-lifting building block (item 2's core ingredient).
+- `cs5FCIncest_lift`: the interpretation-lifting building block (the graph-lifting lemma's core
+  ingredient).
 - `nik_soundness_onePoint`: a full 12-constructor `NIK` soundness induction against the
-  one-point model, proved directly (Phase 11.3's accelerant route, see above).
+  one-point model, proved directly (the anti-vacuity route above).
 - `nik_TS5_consistent`: the anti-vacuity certificate, `¬ NIKDerivable TS5 ⊥`, a direct one-line
   corollary of `nik_soundness_onePoint`.
 
@@ -402,8 +373,8 @@ theorem cs5FCIncest_lift {World : Type*} [Preorder World] {r : World → World �
 reaches *some* `≤`-upward extension of the old source. Derived directly from `cs5FCIncest`'s
 `hsymbox` conjunct (raise the target across `≤`, landing at a fresh point `t` with `w ≤ t`) then
 `hincest` (the fresh point's edge back-witnesses a `≤`-successor `w'` of `t`, hence of `w`, with
-`r w' u'`). Needed alongside `F1` for the `boxI` tree-lifting recursion (Phase 4); `diaE` needs
-neither. -/
+`r w' u'`). Needed alongside `F1` for the `boxI` tree-lifting recursion of the general soundness
+theorem; `diaE` needs neither. -/
 theorem cs5FCIncest_raise {World : Type*} [Preorder World] {r : World → World → Prop}
     (hfc : cs5FCIncest r) {w u u' : World} (hwu : r w u) (huu' : u ≤ u') :
     ∃ w', w ≤ w' ∧ r w' u' := by
@@ -415,7 +386,7 @@ theorem cs5FCIncest_raise {World : Type*} [Preorder World] {r : World → World 
 /-- **Box-forcing "here" extraction.** `CKForces … w (□A)` instantiated at `w` itself, via the
 `hrefl` instance (`r w w`), yields the bare `CKForces … w A` fact -- mirroring the `tBox` axiom
 case (`CS5Canonical.lean:313`: `hbox w' (le_refl w') w' (hrefl w')`). Consumed by the `boxE`/
-`boxI` cases of the main soundness induction (Phase 5). -/
+`boxI` cases of the main soundness induction. -/
 theorem box_gives_here {Atom : Type u} {World : Type v} [Preorder World]
     {r : World → World → Prop} (hfc : cs5FCIncest r)
     {val : World → Atom → Prop} {botForces : World → Prop}
@@ -425,10 +396,10 @@ theorem box_gives_here {Atom : Type u} {World : Type v} [Preorder World]
   obtain ⟨hrefl, _, _, _, _⟩ := hfc
   exact hbox w (le_refl w) w (hrefl w)
 
-/-! ## Base forcing-equivalence lemmas (task 537 Phase 1, direct-route report §4(A))
+/-! ## Base forcing-equivalence lemmas
 
-Dissolves the ex-"Wall A" obstruction (the `TClosure → exact r-edge`/exact-symmetry lemma
-that GATE-C confirmed unprovable, see the module docstring's "Fourth dispatch" section above).
+Dissolves the exact-symmetry obstruction (the `TClosure → exact r-edge`/exact-symmetry lemma
+confirmed unprovable at standard effort, see "The exact-symmetry obstruction" section above).
 `boxE`/`diaI` soundness never needs exact `r`-symmetry between two independently-fixed points;
 it needs only that `CKForces` at a `□`/`◇`-formula is **forcing-equivalent** across an
 `r`-related pair, discharged directly from `cs5FCIncest`'s raised-witness conjuncts
@@ -439,8 +410,9 @@ predicates (NOT assumed upward-closed); the clause shapes below match `CKForces_
 
 /-- **Box-forcing base equivalence.** If `r a b`, the "`□`-successor" clause is equivalent
 whether quantified from `a` or from `b`: forward via `hfour` (raise the successor's witness
-down to an `a`-successor); backward — the ex-"Wall A" `.symm` direction — via `hincest` (raise
-a witness `b'` with `r b' a`) then `hfour` again. Neither direction needs exact `r`-symmetry. -/
+down to an `a`-successor); backward — the direction that would need exact `r`-symmetry if taken
+literally — via `hincest` (raise a witness `b'` with `r b' a`) then `hfour` again. Neither
+direction needs exact `r`-symmetry. -/
 theorem box_iff_base {World : Type*} [Preorder World] {r : World → World → Prop}
     (hfc : cs5FCIncest r) {a b : World} (hab : r a b) {P : World → Prop} :
     (∀ w' ≥ a, ∀ u, r w' u → P u) ↔ (∀ w' ≥ b, ∀ u, r w' u → P u) := by
@@ -456,9 +428,9 @@ theorem box_iff_base {World : Type*} [Preorder World] {r : World → World → P
 
 /-- **Diamond-forcing base equivalence.** If `r a b`, the "`◇`-successor" clause is equivalent
 whether quantified from `a` or from `b`: forward via `hsymbox` (raise the target across `≤`)
-then `htrans` (compose back to the original successor); backward — the ex-"Wall A" `.symm`
-direction — via `hincest` (raise a witness `b'` with `r b' a`) then `hsymbox`+`htrans` again.
-Neither direction needs exact `r`-symmetry. -/
+then `htrans` (compose back to the original successor); backward — the direction that would need
+exact `r`-symmetry if taken literally — via `hincest` (raise a witness `b'` with `r b' a`) then
+`hsymbox`+`htrans` again. Neither direction needs exact `r`-symmetry. -/
 theorem dia_iff_base {World : Type*} [Preorder World] {r : World → World → Prop}
     (hfc : cs5FCIncest r) {a b : World} (hab : r a b) {Q : World → Prop} :
     (∀ w' ≥ a, ∃ u, r w' u ∧ Q u) ↔ (∀ w' ≥ b, ∃ u, r w' u ∧ Q u) := by
@@ -474,16 +446,16 @@ theorem dia_iff_base {World : Type*} [Preorder World] {r : World → World → P
     obtain ⟨u, hrtu, hqu⟩ := H t (hbb'.trans hb't)
     exact ⟨u, htrans hrw't hrtu, hqu⟩
 
-/-! ## TClosure-class extension (task 537 Phase 2, direct-route report §4(A))
+/-! ## TClosure-class extension
 
 Extends `box_iff_base`/`dia_iff_base` over the entire `TClosure {T,B,Four}` class by induction on
 the `TClosure` derivation, giving the transport lemmas the `boxE`/`diaI` cases of the eventual
-main induction (Phase 5) will need. `ρ` interprets `Label Atom` labels into the model's `World`;
-`R` is the raw graph relation (`G.R` at the point of use, Phase 5) and `hedge` is the **raw**
-edge-cond invariant (`∀ a b, R a b → r (ρ a) (ρ b)`, MMS Def 5.1, chunk 0026) -- never a
-`TClosure`-clique invariant (the refuted decomposition, see the module docstring's "Third
-dispatch"/"Refined analysis" sections and the plan's Postmortem Constraints). `eucl` is
-unreachable at `𝒯 = TS5`: `GeomAxiom.Five ∈ TS5` unfolds to a three-way constructor-clash
+main soundness induction will need. `ρ` interprets `Label Atom` labels into the model's `World`;
+`R` is the raw graph relation (`G.R` at the point of use in the main induction) and `hedge` is
+the **raw** edge-cond invariant (`∀ a b, R a b → r (ρ a) (ρ b)`, MMS Def 5.1, chunk 0026) -- never
+a `TClosure`-clique invariant (the refuted decomposition; see "The exact-symmetry obstruction" and
+"Why the direct-induction route is assessed intractable at standard effort" sections above).
+`eucl` is unreachable at `𝒯 = TS5`: `GeomAxiom.Five ∈ TS5` unfolds to a three-way constructor-clash
 disjunction (`Five = T ∨ Five = B ∨ Five = Four`), each closed by `GeomAxiom.noConfusion`. -/
 
 /-- **Box-forcing equivalence over the whole `TClosure {T,B,Four}` class.** `base` reduces to
@@ -517,15 +489,15 @@ theorem dia_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
   | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
   | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
 
-/-! ## Single-node interpretation-raise step (task 537 Phase 4.1, Simpson Lifting Lemma 8.1.3
-inductive step, chunks 0154-0155)
+/-! ## Single-node interpretation-raise step (Simpson Lifting Lemma 8.1.3 inductive step,
+chunks 0154-0155)
 
 This is the atomic building block of Simpson's Lifting Lemma: raising the interpretation `ρ` at
 ONE node `x` to some `w ≥ ρ x`, re-establishing the raw edge-cond at ONE `x`-adjacent raw edge
 (via `cs5FCIncest_lift`/`F1`, the "down" direction `R x n`, or `cs5FCIncest_raise`/`F2`, the "up"
 direction `R n x`) and Γ-cond persistence at the raised neighbour (via `ckforces_persistence`).
-Phase 4.2 (not attempted in this dispatch) iterates this step node-by-node over the finite
-derivation tree to assemble the full Lifting Lemma feeding `boxI`. -/
+The star-lifting step below iterates this step node-by-node over the finite derivation tree to
+assemble the full Lifting Lemma feeding `boxI`. -/
 
 /-- **Single-node interpretation-raise step.** Given a raw-edge-cond interpretation `ρ`
 (`hedge : ∀ a b, R a b → r (ρ a) (ρ b)`), a node `x`, a distinct raw-`R`-neighbour `n` of `x`
@@ -537,8 +509,9 @@ re-establishing:
 - persistence, at `n`'s raised value, of any `CKForces`-fact that held at the old `ρ n` (Γ-cond),
   via `ckforces_persistence`.
 
-Only `x` and `n` move; all other labels are left exactly as `ρ` had them -- Phase 4.2 chains
-this step node-by-node along the tree to raise every affected descendant/ancestor in turn. -/
+Only `x` and `n` move; all other labels are left exactly as `ρ` had them -- the star-lifting step
+below chains this step node-by-node along the tree to raise every affected descendant/ancestor
+in turn. -/
 theorem boxI_raise_step {Atom : Type u} {World : Type v} [Preorder World]
     {r : World → World → Prop} (hfc : cs5FCIncest r)
     {v : World → Atom → Prop} {botForces : World → Prop}
@@ -590,11 +563,11 @@ theorem boxI_raise_step {Atom : Type u} {World : Type v} [Preorder World]
       rw [if_neg (Ne.symm hxn), if_pos rfl]
       exact ckforces_persistence v_uc bf_uc hnn' hφ
 
-/-! ## Star-lifting over a finite set of direct neighbours (task 537 Phase 4.2, partial)
+/-! ## Star-lifting over a finite set of direct neighbours
 
-**Mission-scope finding (read before extending):** the plan's Phase 4.2 goal is to iterate
-`boxI_raise_step` "node-by-node over the finite derivation tree" to obtain a fully general
-`boxI_lift`. Attempting this directly (this dispatch) surfaces a genuine, previously
+**Obstruction to a fully general iteration (read before extending):** the natural way to
+generalize `boxI_raise_step` is to iterate it "node-by-node over the finite derivation tree" to
+obtain a fully general `boxI_lift`. Attempting this directly surfaces a genuine, previously
 under-specified obstruction: raising `x` to an adversarial `w'` forces *every* raw-`R`-neighbour
 of `x` to also move (via F1/F2 -- `cs5FCIncest` has no "raise-source-only, keep-target-exact"
 conjunct), and if a neighbour has further neighbours of its own, the raise must cascade. A
@@ -605,22 +578,20 @@ to satisfy *two* simultaneous, generally-unsatisfiable raise constraints (one fr
 `b→x`) when the cascade reaches it. Ruling this out needs a rank/depth function `ht : Label Atom →
 ℕ` with `∀ a b, G.R a b → ht b = ht a + 1` (graded, so no cycle can exist) PLUS "each label has at
 most one raw-edge source" -- together these make `G` a genuine rooted forest. This is *exactly*
-the module docstring's "item 1: the tree-shape invariant" (see "What remains" above), which is
-explicitly flagged there as separate, not-yet-established work belonging to the main induction
-(Phase 5), not to this single-file, node-level phase. Building and threading that invariant is
-out of Phase 4.2's scope (it is not a `boxI_raise_step`-iteration task; it is graph/forest theory
-for `Graph` that does not yet exist anywhere in this development).
+"the tree-shape invariant" (see "What remains" above), which is flagged there as separate,
+not-yet-established work belonging to the main induction, not to this single-node-level step.
+Building and threading that invariant is not a `boxI_raise_step`-iteration task; it is graph/forest
+theory for `Graph` that does not yet exist anywhere in this development.
 
 What IS landed below, sound and needing no extra invariant: `boxI_lift_star`, which chains
 `cs5FCIncest_lift`/`cs5FCIncest_raise` over a **finite set of `x`'s direct raw-neighbours**
 (both directions), raising `x` once and each direct neighbour once. This is the natural,
-fully-general-safe extension of Phase 4.1's single-neighbour `boxI_raise_step` to finitely many
+fully-general-safe extension of the single-neighbour `boxI_raise_step` to finitely many
 neighbours at once, and is genuine forward progress toward `boxI_lift`. It does **not** by
 itself complete the Lifting Lemma or close the `NIK.boxI` case: a neighbour's *own* further
 neighbours (grandchildren of `x`, in tree terms) are left unraised, which is exactly the residual
-recursive-cascade gap above. Per the plan's blocked-honesty gate, the residual generalization
-(and hence closing the `boxI` case) is routed to Phase 7 rather than forced via `sorry` or an
-undirected retry. -/
+recursive-cascade gap above. The residual generalization (and hence closing the `boxI` case) is
+addressed below rather than forced via `sorry` or an undirected retry. -/
 
 /-- **Star-lifting: raise `x` together with a finite set of its direct raw-neighbours.** Chains
 `cs5FCIncest_lift` (F1, "down" edges `R x n`) / `cs5FCIncest_raise` (F2, "up" edges `R n x`)
@@ -718,28 +689,27 @@ theorem boxI_lift_star {Atom : Type u} {World : Type v} [Preorder World]
           · rw [Function.update_of_ne hzn]
             exact hρ₁pers hz
 
-/-! ## Derivation-forest invariant (task 537 Phase 6, Simpson 8.1.3 "restrict attention to trees")
+/-! ## Derivation-forest invariant (Simpson 8.1.3 "restrict attention to trees")
 
 Simpson's Lifting Lemma 8.1.3 is stated for `G` a **tree** (chunk 0154); the `boxI_lift`-over-an-
-arbitrary-`Graph` statement is genuinely FALSE (the 3-cycle `x→a→b→x` in `handoffs/04` forces node
-`b` to satisfy two independent, generally-incompatible raise constraints). The raw `R`-graph of
-every `NIK` derivation is, however, a finite rooted forest **by construction**: `Graph.trivial`
+arbitrary-`Graph` statement is genuinely FALSE (the 3-cycle `x→a→b→x` forces node `b` to satisfy
+two independent, generally-incompatible raise constraints). The raw `R`-graph of every `NIK`
+derivation is, however, a finite rooted forest **by construction**: `Graph.trivial`
 (`Syntax.lean:123`) is the one-node, zero-edge base, and the only two edge-adding constructors,
 `NIK.boxI` (`Deduction.lean:297`) and `NIK.diaE` (`Deduction.lean:309`), both call `G.addEdge x y`
 with `y` chosen outside a finite exclusion set -- always `existing → fresh`, never closing a
-cycle (audit report `03_tree-shape-invariant-audit.md` §1). `IsDerivationForest` packages the
-three conjuncts this fact needs (finiteness, graded rank, unique parent -- audit §1/§4: dropping
-either the rank or the unique-parent conjunct alone reopens either the 3-cycle or the
-`x→a→b`/`x→c→b` diamond); it is threaded as a hypothesis through the soundness induction motive
-(Phase 8), NOT added as a new `Graph` field, since the canonical model's graph
-(`CanonicalModel.lean`) is not a finite forest (audit §2). -/
+cycle. `IsDerivationForest` packages the three conjuncts this fact needs (finiteness, graded
+rank, unique parent: dropping either the rank or the unique-parent conjunct alone reopens either
+the 3-cycle or the `x→a→b`/`x→c→b` diamond); it is threaded as a hypothesis through the soundness
+induction motive, NOT added as a new `Graph` field, since the canonical model's graph
+(`CanonicalModel.lean`) is not a finite forest. -/
 
 /-- **Derivation-forest invariant** (Simpson 8.1.3, chunk 0156). Three conjuncts, all
-independently necessary (audit report 03 §1/§4): `G.X` is finite (needed for `boxI_lift`'s
-finite-component recursion, Phase 7); `G.R` is **graded** by some rank function `ht` (rules out
-*directed* cycles, e.g. the 3-cycle `x→a→b→x`); and every node has a **unique parent** under `G.R`
-(rules out *undirected* diamonds, e.g. `x→a→b`, `x→c→b`). Together, graded rank + unique parent
-make `G` a genuine finite rooted forest. -/
+independently necessary: `G.X` is finite (needed for `boxI_lift`'s finite-component recursion);
+`G.R` is **graded** by some rank function `ht` (rules out *directed* cycles, e.g. the 3-cycle
+`x→a→b→x`); and every node has a **unique parent** under `G.R` (rules out *undirected* diamonds,
+e.g. `x→a→b`, `x→c→b`). Together, graded rank + unique parent make `G` a genuine finite rooted
+forest. -/
 def IsDerivationForest {Atom : Type u} (G : Graph Atom) : Prop :=
   G.X.Finite ∧
     (∃ ht : Label Atom → ℕ, ∀ a b, G.R a b → ht b = ht a + 1) ∧
@@ -748,7 +718,7 @@ def IsDerivationForest {Atom : Type u} (G : Graph Atom) : Prop :=
 /-- **The trivial graph is a derivation forest.** `Graph.trivial` has no edges, so the
 graded-rank and unique-parent conjuncts hold vacuously (the constant rank `fun _ => 0` works);
 its node set `{var 0}` is finite. Discharges `IsDerivationForest` at the base of the soundness
-induction (`nik_TS5_soundness`, Phase 8). -/
+induction (`nik_TS5_soundness`). -/
 theorem forest_trivial {Atom : Type u} : IsDerivationForest (Graph.trivial Atom) :=
   ⟨Set.finite_singleton _, ⟨fun _ => 0, fun _ _ hab => hab.elim⟩, fun _ _ _ hab _ => hab.elim⟩
 
@@ -786,7 +756,7 @@ theorem forest_addEdge_fresh {Atom : Type u} {G : Graph Atom} (hG : IsDerivation
       · exact absurd (hb1 ▸ (G.edge_mem a₂ b hab2).2) hy
       · exact ha1.trans ha2.symm
 
-/-! ## One-point soundness and the anti-vacuity certificate (Phase 11.3) -/
+/-! ## One-point soundness and the anti-vacuity certificate -/
 
 /-- **Soundness of `N_IK(𝒯)` against the one-point model, for any `𝒯`.** Every label of the
 derivation is interpreted at the unique point `()` of `Unit`, with the modal relation set to the
@@ -870,22 +840,22 @@ theorem nik_soundness_onePoint {Atom : Type u} {𝒯 : Set GeomAxiom} {val : Uni
         · exact hAu
         · exact hΓ _ hψ)
 
-/-- **Anti-vacuity certificate** (Phase 11.3): `N(TS5)` does not prove `⊥`. Direct corollary of
+/-- **Anti-vacuity certificate**: `N(TS5)` does not prove `⊥`. Direct corollary of
 `nik_soundness_onePoint`, instantiated with `botForces := fun _ => False`: were `⊥` a theorem,
 `nik_soundness_onePoint` would force `CKForces ... () ⊥ = False` (`Γ = []` discharges the
-context-condition vacuously), a contradiction. This certifies Phase 10's `cs5_completeness` is a
-*meaningful* statement (`N(TS5)` does not prove everything), per reports/11 condition 2. -/
+context-condition vacuously), a contradiction. This certifies `cs5_completeness`
+(`Completeness.lean`) is a *meaningful* statement (`N(TS5)` does not prove everything). -/
 theorem nik_TS5_consistent {Atom : Type u} :
     ¬ NIKDerivable TS5 (Proposition.bot : Proposition Atom) := by
   intro h
   exact nik_soundness_onePoint (val := fun _ _ => True) h (by simp)
 
-/-! ## Tree-cascade lifting lemma (task 537 Phase 7, Simpson 8.1.3, chunks 0154-0155)
+/-! ## Tree-cascade lifting lemma (Simpson 8.1.3, chunks 0154-0155)
 
 Completes the finite-component cascade `boxI_lift_star` left open (see that section's docstring),
-taking `IsDerivationForest G` as an explicit hypothesis (audit report 03 §3). The recursion is
-split into two independently-tractable pieces, avoiding any need for a general BFS/cycle-freeness
-theorem over the raw `Graph`:
+taking `IsDerivationForest G` as an explicit hypothesis. The recursion is split into two
+independently-tractable pieces, avoiding any need for a general BFS/cycle-freeness theorem over
+the raw `Graph`:
 
 1. **`ht_le_of_reflTransGen`**: rank is non-decreasing along forward `G.R`-reachability -- a
    direct consequence of the graded-rank conjunct, needing no acyclicity argument.
@@ -1081,7 +1051,7 @@ theorem raise_subtree {Atom : Type u} {World : Type v} [Preorder World]
           · simp only [if_neg hzc]
             exact hρ1pers hz
 
-/-! ## Ancestor-walk assembly of `boxI_lift` (task 537 Phase 7 completion)
+/-! ## Ancestor-walk assembly of `boxI_lift`
 
 `raise_subtree` (above) is the downward-cascade piece. This section adds the upward piece — an
 **ancestor walk** from `x` toward the root, invoking `raise_subtree` at each ancestor for the

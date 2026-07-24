@@ -105,4 +105,112 @@ theorem box_and_intro {X Y : Proposition ℕ} :
     ⟨.ax [] _ (.k Y (X.and Y))⟩
   exact cs5_deriv_uncurry (cs5_deriv_imp_trans hk1 hk2)
 
+/-! ## Common witness data (reused from `nik_adequacy_falseness.lean`) -/
+
+/-- The trivial graph over `ℕ` atoms: `X = {var 0}`, `R = ∅`. -/
+noncomputable abbrev Gt : Graph ℕ := Graph.trivial ℕ
+
+theorem Gt_fin : (Gt).X.Finite := Set.finite_singleton _
+
+/-- The root, in `Gt.X`. -/
+abbrev r : Label ℕ := Label.var 0
+
+/-- A disconnected label: `yy ∉ Gt.X`, no edges touching it. -/
+abbrev yy : Label ℕ := Label.var 1
+
+/-- The trivial rank function: constant `0` (matches `forest_trivial`'s witness; every label,
+in-graph or not, gets depth `0`). -/
+def ht0 : Label ℕ → ℕ := fun _ => 0
+
+/-- `place` at depth `0` is the identity, definitionally. -/
+theorem place_ht0 (x : Label ℕ) (A : Proposition ℕ) : place ht0 x A = A := rfl
+
+/-! ## Case A: disconnected conclusion (`nik_adequacy_is_false`'s witness) -/
+
+/-- Context asserting `⊥` at the (in-graph) root. -/
+abbrev Ctx : List (LabelledFormula ℕ) := [(r ∶ Proposition.bot)]
+
+theorem factsAt_Ctx_r : factsAt Ctx r = [Proposition.bot] := by
+  simp [factsAt]
+
+theorem r_reaches_r : Relation.ReflTransGen Gt.R r r := .refl
+
+theorem orphanFacts_Ctx_r : orphanFacts Gt Ctx r = [] := by
+  simp [orphanFacts, r_reaches_r]
+
+/-- **Case A, positive direction**: `Θ(Gt,Ctx) ⊃ place(yy,A)` is derivable for EVERY `A`, at the
+disconnected conclusion label `yy ∉ Gt.X` -- the exact witness that refuted `nikTr`
+(`nik_adequacy_is_false`). No `x ∈ G.X` hypothesis appears anywhere in this statement. -/
+theorem caseA_theta_imp_place (A : Proposition ℕ) :
+    Derivable CS5ModalAxiom ((Theta Gt Ctx Gt_fin r).imp (place ht0 yy A)) := by
+  rw [place_ht0]
+  apply deriv_bot_imp_any
+  have hsig : Derivable CS5ModalAxiom ((sigAt Gt Ctx Gt_fin r).imp Proposition.bot) :=
+    sigAt_imp_of_factsAt_imp Gt_fin r
+      (by rw [factsAt_Ctx_r]; exact bigAndL_mem (List.mem_singleton_self _))
+  exact cs5_deriv_imp_trans
+    ⟨.ax [] _ (.andE1 (sigAt Gt Ctx Gt_fin r) (bigAndL (orphanFacts Gt Ctx r)))⟩ hsig
+
+/-! ## Case B: disconnected context (`rooted_restricted_adequacy_is_false`'s witness) -/
+
+/-- Context asserting `⊥` at an out-of-graph label. -/
+abbrev Ctx' : List (LabelledFormula ℕ) := [(yy ∶ Proposition.bot)]
+
+theorem factsAt_Ctx'_r : factsAt Ctx' r = [] := by
+  simp [factsAt]
+
+/-- `Gt.R` (the trivial graph's edge relation) is always `False`, so its reflexive-transitive
+closure only ever relates a label to itself. -/
+theorem reflTransGen_Gt_eq {a b : Label ℕ} (h : Relation.ReflTransGen Gt.R a b) : a = b := by
+  induction h with
+  | refl => rfl
+  | tail _ hbc _ => exact hbc.elim
+
+theorem yy_not_reaches_r : ¬ Relation.ReflTransGen Gt.R r yy := by
+  intro h
+  exact absurd (reflTransGen_Gt_eq h) (by simp [r, yy, Label.var.injEq])
+
+theorem orphanFacts_Ctx'_r : orphanFacts Gt Ctx' r = [Proposition.bot] := by
+  simp [orphanFacts, yy_not_reaches_r]
+
+/-- **Case B, positive direction**: `Θ(Gt,Ctx') ⊃ place(r,A)` is derivable for every `A`, with the
+`⊥`-fact living at the DISCONNECTED CONTEXT label `yy` (not the conclusion label!) and the
+conclusion at the in-graph root `r`. This is the exact witness the plan's known-in-advance risk
+names: the naive `Θ := sigAt … root` alone is refuted here (it never sees `yy`'s fact), so this
+positive derivation is possible ONLY because of the orphan-context component. -/
+theorem caseB_theta_imp_place (A : Proposition ℕ) :
+    Derivable CS5ModalAxiom ((Theta Gt Ctx' Gt_fin r).imp (place ht0 r A)) := by
+  rw [place_ht0]
+  apply deriv_bot_imp_any
+  have horph : Derivable CS5ModalAxiom ((bigAndL (orphanFacts Gt Ctx' r)).imp Proposition.bot) := by
+    rw [orphanFacts_Ctx'_r]
+    exact bigAndL_mem (List.mem_singleton_self _)
+  exact cs5_deriv_imp_trans
+    ⟨.ax [] _ (.andE2 (sigAt Gt Ctx' Gt_fin r) (bigAndL (orphanFacts Gt Ctx' r)))⟩ horph
+
+/-! ## Case C: `premise_escapes_graph` shape -- no `x ∈ G.X` / `labels(Γ) ⊆ G.X` restriction -/
+
+/-- Every label mentioned in `Ctx` lies in `Gt.X` (mirrors `premise_escapes_graph`'s
+`ctx_labels_in_X`): the "well-formed context" side condition holds here, yet `Case A`'s positive
+derivation above required NO such hypothesis and no `yy ∈ Gt.X` hypothesis either. This confirms
+the candidate does not merely dodge Case A's refutation by re-introducing the uninductive
+restriction that established fact 3 rules out. -/
+theorem ctx_labels_in_X : ∀ φ ∈ Ctx, φ.lbl ∈ Gt.X := by
+  intro φ hφ; simp at hφ; subst hφ; rfl
+
+theorem yy_not_mem_X : yy ∉ Gt.X := by simp [Gt, Graph.trivial]
+
+/-- **Case C**: conjoining the two facts that made the label-restricted variant (established
+fact 3) uninductive -- every `Ctx`-label lies in `Gt.X` (`ctx_labels_in_X`) while the conclusion
+label `yy` escapes it (`yy_not_mem_X`) -- with Case A's positive derivation, which is still
+derivable **with no `x ∈ G.X` or `labels(Γ) ⊆ G.X` hypothesis anywhere in its signature**. -/
+theorem caseC_no_restriction_needed (A : Proposition ℕ) :
+    (∀ φ ∈ Ctx, φ.lbl ∈ Gt.X) ∧ yy ∉ Gt.X ∧
+      Derivable CS5ModalAxiom ((Theta Gt Ctx Gt_fin r).imp (place ht0 yy A)) :=
+  ⟨ctx_labels_in_X, yy_not_mem_X, caseA_theta_imp_place A⟩
+
+#print axioms caseA_theta_imp_place
+#print axioms caseB_theta_imp_place
+#print axioms caseC_no_restriction_needed
+
 end Probe537Theta

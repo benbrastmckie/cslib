@@ -227,29 +227,36 @@ unblocks everything, and re-verifies `classicallyClosed_unsat` still builds.
 
 ---
 
-### Phase 2: Run-level faithfulness invariant — TrackerBranchFaithful [NOT STARTED]
+### Phase 2: Run-level faithfulness invariant — TrackerBranchFaithful [COMPLETED]
 
 **Goal**: Define `TrackerBranchFaithful` and prove it as a run-level invariant over
 `temporalStepBranch`, tying each `tracker.pending` entry to an actual branch member. This is the
 genuine new prerequisite plan 01 lacked (resolves blocker finding #1) and gates the soundness phase.
 
 **Tasks**:
-- [ ] Define `TrackerBranchFaithful` (report 02 Finding 3a):
-  ```lean
-  def TrackerBranchFaithful (b : TBranch Atom) (ord : TimeOrdering)
-      (tracker : EventualityTracker Atom) : Prop :=
-    ∀ e ∈ tracker.pending,
-      ⟨.pos, e.formula, e.label⟩ ∈ b ∧ (e.isUntil = true → e.formula.isUntl) ∧ …
-  ```
-  (finalize the exact conjuncts against `registerEventualities`/`fulfillEventualities`,
-  `Saturation.lean:85-100`).
-- [ ] Prove `TrackerBranchFaithful` is preserved by `temporalStepBranch` by fuel-induction, reusing
+- [x] Define `TrackerBranchFaithful` (report 02 Finding 3a). *(deviation: altered -- the landed
+  conjunct is `∀ e ∈ tracker.pending, ⟨.pos, e.formula, e.label⟩ ∈ b` only, without the
+  `e.isUntil = true → e.formula.isUntl`-style shape conjunct from the sketch. The shape fact is
+  established structurally instead: `registerEventualities_new_or_old`
+  (`Saturation.lean`) shows every newly-registered eventuality's `(formula, label)` pair is read
+  directly off a positive signed formula on the branch, so the branch-membership conjunct alone
+  is what every consumer (the preservation proof, and Phase 3's future use) actually needs; adding
+  a redundant shape conjunct would not strengthen anything derivable from branch membership plus
+  the registration call sites.)*
+- [x] Prove `TrackerBranchFaithful` is preserved by `temporalStepBranch` by fuel-induction, reusing
   the `run_level_P1` / strong-fuel-induction skeleton that already discharges
   `temporalTableau_instantStrict` (`Saturation.lean:366-547`), analogous to the existing
-  `WorklistInv`/`OrdFreshWRT` machinery.
-- [ ] Establish the invariant holds at run entry (base case) and threads through each step.
-- [ ] `lake build Cslib.Logics.Temporal.Tableau.Saturation` (or the owning module) green; no sorry /
-  no new axiom.
+  `WorklistInv`/`OrdFreshWRT` machinery. Landed as `temporalStepBranch_preserves_faithful`
+  (single-step) plus a parallel `WorklistInvFaithful`/`P1Faithful`/`P2Faithful`/`run_level_faithful`
+  induction (three-list variant, since faithfulness relates branch+tracker rather than
+  branch+ordering) mirroring `WorklistInv`/`P1`/`P2`/`run_level_P1` structurally without touching
+  the already-landed `InstantStrict` threading.
+- [x] Establish the invariant holds at run entry (base case) and threads through each step.
+  `trackerBranchFaithful_empty` (base case) + `temporalTableau_trackerBranchFaithful` (entry-point
+  corollary mirroring `temporalTableau_instantStrict`).
+- [x] `lake build Cslib.Logics.Temporal.Tableau.Saturation` (or the owning module) green; no sorry /
+  no new axiom (`lean_verify` on `temporalTableau_trackerBranchFaithful`: only
+  `propext`/`Quot.sound`).
 
 **Timing**: ~3.5 hours
 

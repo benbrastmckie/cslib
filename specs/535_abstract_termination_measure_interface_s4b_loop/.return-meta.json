@@ -3,15 +3,15 @@
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
     {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md"},
-    {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/02_phase6-progress-summary.md"},
-    {"type": "handoff", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/03_phase7-11-continuation.md"}
+    {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/03_phase7-recovery-summary.md"},
+    {"type": "handoff", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/04_phase8-11-assessment-and-continuation.md"}
   ],
   "partial_progress": {
-    "stage": "phase6-complete",
-    "details": "Landed Phase 6 (S4KeyedHintikkaInv bundle + monotonicity/weakening lemmas), commit 828aefd4. Phases 7-11 remain per continuation handoff 03_phase7-11-continuation.md.",
-    "phases_completed": 6,
+    "stage": "phase7-complete",
+    "details": "Recovered ~376 uncommitted lines left by a session-limit-killed prior dispatch (Phase 7 skeleton), fixed 3 build-blocking bugs, landed Phase 7 (modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv), commit 1ce152b6. Phase 8 assessed (technical map written) but not attempted this dispatch. Phase 9 remains [BLOCKED]; Phases 10-11 transitively blocked. Phases 1-6 previously landed.",
+    "phases_completed": 7,
     "phases_total": 11,
-    "last_completed_phase": "Phase 6: Keys-threaded Hintikka-tracking invariant bundle"
+    "last_completed_phase": "Phase 7: Single-step invariant preservation"
   },
   "verification": {
     "verification_passed": true,
@@ -19,9 +19,11 @@
     "vacuous_count": 0,
     "axiom_count_new": 0,
     "build_passed": true,
-    "note": "Scoped build (lake build Cslib.Logics.Modal.Tableau.LoopChecking) green; full CI pipeline not re-run this dispatch since task remains in-progress (phases 7-11 outstanding), matching the prior dispatch's own interim-status precedent."
+    "ci_pipeline_passed": true,
+    "note": "Full CSLib CI pipeline run this dispatch: lake build (green, 847 jobs), lake exe checkInitImports (clean), lake lint (no new warnings), lake exe lint-style (clean), lake shake (no new findings), lake exe mk_all --module (no update necessary)."
   },
-  "requires_user_review": false,
+  "requires_user_review": true,
+  "review_reason": "Phase 9 (S4 blocked-mint-redirect soundness) is [BLOCKED] on a genuine mathematical gap (S4's non-symmetric frame lacks the reachability invariant the soundness argument needs); Phases 10-11 are transitively blocked via Phase 9. Resolving Phase 9 likely requires revising frozen task-511 code (blockingWorldS4Keyed), which is out of this plan's stated scope -- a re-plan or user decision is needed before Phases 9-11 can proceed. Phase 8 remains independent and viable but was not attempted this dispatch (insufficient remaining runway after Phase 7 recovery work).",
   "metadata": {
     "session_id": "sess_1784905751_756cda_535",
     "agent_type": "cslib-implementation-agent",

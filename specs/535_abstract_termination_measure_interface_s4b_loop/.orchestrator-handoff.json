@@ -2,7 +2,7 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Landed Phase 6 of plan v02 (S4KeyedHintikkaInv keys-threaded Hintikka-tracking invariant bundle + its monotonicity/weakening lemma), lean_verify-clean and sorry-free, committed as 828aefd4. Phases 7-11 (single-step preservation, top-loop induction, soundness redirect lemma, soundness top-loop, completeness/decidability) remain, per continuation handoff.",
+  "summary": "Recovered a session-limit-killed prior dispatch's ~376 uncommitted lines (Phase 7 skeleton), fixed 3 build-blocking bugs (a redundant clear, a helper lemma broken by Lean's equation-compiler auto-reverting a match-dependent hypothesis into its motive, and two hinveq haves stated with bare sf instead of the exposed structure literal), and landed Phase 7 (modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv), lean_verify-clean and sorry-free, committed as 1ce152b6. Full CSLib CI pipeline green. Phase 8 was assessed (technical map written) but not attempted this dispatch. Phase 9 remains [BLOCKED] (S4's non-symmetric frame lacks a reachability invariant); Phases 10-11 are transitively blocked via Phase 9.",
   "artifacts": [
     {
       "type": "plan",
@@ -10,31 +10,36 @@
     },
     {
       "type": "summary",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/02_phase6-progress-summary.md"
+      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/03_phase7-recovery-summary.md"
     },
     {
       "type": "handoff",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/03_phase7-11-continuation.md"
+      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/04_phase8-11-assessment-and-continuation.md"
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Phase 9 (S4 blocked-mint-redirect soundness lemma) is [BLOCKED]: the redirect's soundness obligation has no supporting reachability fact in S4LoopInv's ten frozen fields, and S4's s4FC (reflexive+transitive, not symmetric) does not admit the common-origin-reachability argument S5's analogous rule relies on. Recommended fix (revising frozen blockingWorldS4Keyed to restrict redirect candidates to acc-reachable worlds) touches task-511 frozen code, out of this plan's stated non-goals -- needs a re-plan or explicit user decision before Phases 9-11 can proceed."
+  ],
   "next_action_hint": "implement",
   "files_modified": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md",
-    "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/02_phase6-progress-summary.md",
-    "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/03_phase7-11-continuation.md"
+    "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/03_phase7-recovery-summary.md",
+    "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/04_phase8-11-assessment-and-continuation.md"
   ],
   "decisions_made": [
-    "S4KeyedHintikkaInv carries ONLY the five Hintikka-specific conjuncts (hintikkaInv/eBoxOnlyNeg/eBoxNegWitness/eDiamondOnlyPos/eDiamondPosWitness), NOT the universe-closure/keys-bookkeeping conjuncts already covered by the frozen S4LoopInv -- threaded as a separate ambient hypothesis at each call site rather than duplicated into one struct, matching how S4LoopInv's own preservation theorem already threads keysWorldsKnown/worldsContiguousS4 as separate hypotheses rather than struct fields.",
-    "modalApplyOneT_snd_eq/modalApplyOneS4Rules_snd_eq established the accessibility-output component of the T/4-rule-augmented dispatch is UNCONDITIONALLY identical to raw K's own modalApplyOne snd (the propagation arms only ever touch .fst) -- this simplified the hasEdge-monotonicity proof considerably versus threading a full RuleApplicationSpecCore-style freshLocal field through every dispatch layer."
+    "modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv consumes the ambient S4LoopInv φ₀ b e acc keys hypothesis directly (for keyLowerBd's blocked-witness argument) rather than re-deriving keysWorldsKnown/worldsContiguousS4 inline as a separate triple.",
+    "No separate _none_saturated analogue lemma was needed for Phase 7: the three-way mint-unblocked/mint-blocked/non-mint split plus findSome?_eq_some's some-witness and split_ifs at hsf with hexp already rule out the saturated case at selection time.",
+    "Deleted the broken helper lemma keysMatch_eq_keys_of_not_mint as dead code (its hnbd hypothesis, depending on the same s/φ being matched, got auto-reverted into its compiled matcher's motive by Lean's equation compiler, making it permanently non-defeq to the call sites' own hnbd-free inline match term). Replaced all 4 call sites with the same rcases+dsimp idiom already proven to work at modalStepBranchS4_preserves_keyLowerBd (LoopChecking.lean:1491).",
+    "Re-confirmed the prior dispatch's a2d9d836 assessment: Phase 8 does not depend on Phase 9 and remains fully worth pursuing; Phases 10-11 are transitively blocked via 9 and should not be attempted until 9 is resolved or the task is re-planned around the obstruction."
   ],
   "dead_ends": [
-    "Proving `.snd` equality through modalApplyOneT/modalApplyOneS4Rules's nested let+match definitions required TWO fixes beyond the naive approach: (1) rcases on the .fst PROJECTION does not substitute into a goal whose match scrutinizes the let-bound pair variable -- must rcases the WHOLE pair via `rcases hk : (modalApplyOne sf b acc) with <kResult, kAcc>`; (2) even after that, `exact`/`rfl` can fail through an intervening `have foo := ...; match ...` binder unless a bare `dsimp only` (not `simp only [hk]`, which triggers an unused-simp-argument lint warning since the rewrite already happened via the rcases destructuring) forces the reduction first. Documented with the exact working tactic sequence in the continuation handoff to save re-discovery time in Phase 7, which will very likely need more of these."
+    "Sign's constructor order is `pos, neg` (Cslib/Foundations/Logic/Tableau/Sign.lean:47-50), NOT `neg, pos` -- a naive top-to-bottom reading of a match's `.neg,.box`/`.pos,.diamond` arms suggests the wrong surviving-goal order after `rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with ...`; the actual order is (pos,diamond) then (neg,box).",
+    "Stating a `match s, φ with ...` equality in a lemma's conclusion, with a separate hypothesis (hnbd) whose type also depends on s/φ, causes Lean's equation compiler to auto-revert that hypothesis into the compiled matcher's motive -- making the lemma permanently non-defeq to a DIFFERENT match term (e.g. one unfolded from an unrelated function definition) that has no such hypothesis in its own local context. Avoid stating lemmas this way; prefer inline rcases+dsimp at the call site instead, mirroring existing working precedent in the file."
   ],
   "continuation_context": {
-    "handoff_path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/03_phase7-11-continuation.md",
-    "phases_completed": 6,
+    "handoff_path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/04_phase8-11-assessment-and-continuation.md",
+    "phases_completed": 7,
     "phases_total": 11
   },
   "plan_markers_verified": true

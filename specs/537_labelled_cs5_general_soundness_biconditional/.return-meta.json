@@ -1,33 +1,49 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-24T12:30:00Z",
-  "completed_at": "2026-07-24T12:55:00Z",
+  "status": "planned",
+  "started_at": "2026-07-24T12:40:00Z",
+  "completed_at": "2026-07-24T13:05:00Z",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/05_efq-orE-motive-defect-and-path.md",
-      "summary": "Research report: verifies file is green/zero-sorry/zero-axiom; enumerates remaining obligations (efq/orE, 4 modal cases, nik_adequacy assembly, 8.4, 9, 10); and delivers the key finding that the planned next step (root-connectivity invariant) targets a FALSE nik_adequacy statement because the landed nikTr is target-oriented and drops (G,Gamma) for disconnected-y efq/orE. Recommends a Phase 8.1 translation redesign to a target-independent Theta(G,Gamma) => place(x,A) shape, closing efq via the CS5 T axiom, after resolving the OCR-corrupted Simpson section 6.1 source."
+      "type": "plan",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/06_target-independent-theta-translation.md",
+      "summary": "Plan v6: retargets the labelled->Hilbert adequacy bridge from the machine-refuted target-oriented nikTr to a target-independent Theta(G,Gamma) => place(x,A) translation, gated behind a mandatory adversarial probe-validation phase, with the 12-constructor induction decomposed into six bounded constructor-group phases."
     }
   ],
-  "requires_user_review": true,
-  "partial_progress": {
-    "stage": "research-complete",
-    "details": "Research dispatch complete. Ground-truth verified: scoped build green (960 jobs, exit 0), zero real sorry/admit/axiom (all grep hits are docstring prose). Key finding: nik_adequacy with the landed target-oriented nikTr is mathematically FALSE at the disconnected-y efq case (Deduction.lean:247 places no constraint on y; nikTr drops the whole graph, giving a false obligation of shape (TT) => atom, refuted via CS5 consistency). The planned root-connectivity invariant does not fix this (it only scopes y in G.X). Recommended: redesign the translation to target-independent Theta(G,Gamma) => place(x,A); efq closes via CS5 T-axiom; resolve OCR-corrupted Simpson 6.1 source first.",
-    "phases_completed": 7
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": null,
-    "note": "Scoped build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness completed successfully (960 jobs, exit 0). grep confirms zero real sorry/admit/axiom in the file. No implementation performed this dispatch (research only)."
-  },
+  "next_steps": "Run /implement 537 to execute the revised plan. The first dispatchable phase is Phase 9 (MANDATORY PROBE GATE, probes/ territory only). Phase 8 is a closed historical record and must not be resumed.",
   "metadata": {
-    "session_id": "research-537",
-    "agent_type": "cslib-research-agent",
+    "session_id": "revise-537",
+    "agent_type": "reviser-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 23,
+    "dispatchable_phase_count": 14,
+    "estimated_hours": 45,
+    "plan_version": 6,
+    "reports_integrated": [
+      "06_falseness-machine-check.md",
+      "05_efq-orE-motive-defect-and-path.md",
+      "04_crosslabel-motive-audit.md",
+      "03_tree-shape-invariant-audit.md",
+      "02_direct-route-from-sources.md"
+    ]
+  },
+  "memory_candidates": [
+    {
+      "content": "When a formalization plan's central definition is reconstructed from a damaged/OCR'd literature source, make the FIRST phase a scratch-probe gate: assume the intended theorem as a hypothesis in a non-library probe file and try to derive False from it, using only landed sorry-free facts. A compiling reductio is a proof the target statement is false, catching a bad definition before hundreds of lines of induction infrastructure are built on it. Keep the probe as a permanent artifact -- it doubles as the regression suite for the redesigned definition.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/537_labelled_cs5_general_soundness_biconditional/plans/06_target-independent-theta-translation.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["falseness-probe", "reductio", "lean4", "plan-validation", "ocr-source", "adequacy"]
+    },
+    {
+      "content": "In labelled-sequent to Hilbert adequacy bridges, the translation's antecedent must be TARGET-INDEPENDENT (a function of the graph and context only). A target-dependent antecedent that walks the conclusion label's ancestor spine silently discards the whole graph and context whenever the conclusion label is disconnected, making the adequacy statement false at cross-label rules like (bottom-E) and (or-E). Restricting the conclusion label to the graph does not fix it -- the counterexample migrates to a context label outside the graph.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/537_labelled_cs5_general_soundness_biconditional/reports/06_falseness-machine-check.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["labelled-deduction", "adequacy", "translation", "cross-label", "simpson-1994", "modal-logic"]
+    }
+  ],
+  "modified_files": [
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/06_target-independent-theta-translation.md"
+  ]
 }

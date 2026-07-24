@@ -85,7 +85,7 @@ next_project_number: 555
 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
   └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
   └─ 548 [NOT STARTED] — (Modal Logic: COMPLETENESS-MATRIX GAP (review 2026-07-) (see above)
-552 [NOT STARTED] — Shared calculus-conformance and rule-completeness repair unblocki
+552 [RESEARCHED] — Shared calculus-conformance and rule-completeness repair unblocki
   └─ 317 [BLOCKED] — (Propositional Logic: Fill the propositional tableau completen) (see above)
   └─ 425 [BLOCKED] — (Temporal Logic: [Decomposed from task 301, blocker C.] E) (see above)
 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
@@ -114,9 +114,10 @@ next_project_number: 555
 ---
 
 ### 552. Tableau calculus conformance rule completeness repair
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Dependencies**: None
+- **Research**: [552_tableau_calculus_conformance_rule_completeness_repair/reports/01_tableau-conformance-rule-completeness.md]
 
 **Description**: Shared calculus-conformance and rule-completeness repair unblocking BOTH the temporal PTL FMP/decidability front and the propositional tableau completeness front, which independently converged on the same class of defect: a rule set too weak to close valid formulas, combined with fuel machinery justified by a bound that does not hold. DELIVERABLE 1 (shared, do first): a CONFORMANCE HARNESS that executes each tableau on a corpus of known-valid and known-invalid formulas and asserts the verdict. This class of defect is invisible to type-checking and was found only by execution, so the harness is the asset that prevents recurrence. DELIVERABLE 2 (temporal, seriality): the G and H rules propagate only to ord.futureOf t and return .notApplicable when it is empty (Rules.lean approx 227-244), and the only fresh-time path from a negative until is gated on ord.timeCount greater than 0 (Rules.lean approx 312), which is false at the root. Add the missing seriality rule. DELIVERABLE 3 (temporal, time cap): the same timeCount gate hard-caps times at 4; on the valid family with iterated F the verdict flips to OPEN at exactly k=4. Remove the cap. DELIVERABLE 4 (temporal, fuel): temporalFuel equals 4n^2+12n+10 (Saturation.lean approx 78), which is quadratic, while its own docstring justifies it by a 2^n type-count bound. Measured minimal sufficient fuel on a tautology family fits 1.5*2^k-2, so the bound is FALSE at the current constant and merely restating it is not available. Either raise the constant or add the missing deduplication. DELIVERABLE 5 (temporal, trackers): Saturation.lean approx 156-158 returns the tracker unchanged on the .branching arm, so recurring untlPos and sncePos copies are never registered pending. Saturation.lean approx 303 replicates one tracker across all output branches, but untlPos's two branches have genuinely different pending sets, so the return type must become a list of EventualityTracker. DELIVERABLE 6 (propositional): the persistent T-implication rule is positive-only and never plants F-tags, leaving subformula determinacy and bivalence unprovable in the current 6-rule calculus. Add the missing branching rule. Every rule addition requires a soundness re-audit of the affected calculus. Evidence: the executed counterexamples and the measured fuel table are recorded in the temporal task's report on the island-versus-periodic strategic decision.
 

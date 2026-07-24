@@ -2102,7 +2102,7 @@
     {
       "project_number": 552,
       "project_name": "tableau_calculus_conformance_rule_completeness_repair",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [
@@ -2112,7 +2112,58 @@
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean"
       ],
       "description": "Shared calculus-conformance and rule-completeness repair unblocking BOTH the temporal PTL FMP/decidability front and the propositional tableau completeness front, which independently converged on the same class of defect: a rule set too weak to close valid formulas, combined with fuel machinery justified by a bound that does not hold. DELIVERABLE 1 (shared, do first): a CONFORMANCE HARNESS that executes each tableau on a corpus of known-valid and known-invalid formulas and asserts the verdict. This class of defect is invisible to type-checking and was found only by execution, so the harness is the asset that prevents recurrence. DELIVERABLE 2 (temporal, seriality): the G and H rules propagate only to ord.futureOf t and return .notApplicable when it is empty (Rules.lean approx 227-244), and the only fresh-time path from a negative until is gated on ord.timeCount greater than 0 (Rules.lean approx 312), which is false at the root. Add the missing seriality rule. DELIVERABLE 3 (temporal, time cap): the same timeCount gate hard-caps times at 4; on the valid family with iterated F the verdict flips to OPEN at exactly k=4. Remove the cap. DELIVERABLE 4 (temporal, fuel): temporalFuel equals 4n^2+12n+10 (Saturation.lean approx 78), which is quadratic, while its own docstring justifies it by a 2^n type-count bound. Measured minimal sufficient fuel on a tautology family fits 1.5*2^k-2, so the bound is FALSE at the current constant and merely restating it is not available. Either raise the constant or add the missing deduplication. DELIVERABLE 5 (temporal, trackers): Saturation.lean approx 156-158 returns the tracker unchanged on the .branching arm, so recurring untlPos and sncePos copies are never registered pending. Saturation.lean approx 303 replicates one tracker across all output branches, but untlPos's two branches have genuinely different pending sets, so the return type must become a list of EventualityTracker. DELIVERABLE 6 (propositional): the persistent T-implication rule is positive-only and never plants F-tags, leaving subformula determinacy and bivalence unprovable in the current 6-rule calculus. Add the missing branching rule. Every rule addition requires a soundness re-audit of the affected calculus. Evidence: the executed counterexamples and the measured fuel table are recorded in the temporal task's report on the island-versus-periodic strategic decision.",
-      "blockers": null
+      "blockers": null,
+      "last_updated": "2026-07-24T22:47:45Z",
+      "session_id": "sess_1784932373_e8a083",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/reports/01_tableau-conformance-rule-completeness.md",
+          "type": "report",
+          "summary": "Hard-mode research report: source-verification of all six deliverables against HEAD, 44 executed conformance verdicts, 3 measured fuel tables, H3 source-to-implementation mapping with 5 verified BibKeys, named soundness re-audit obligations per calculus, a 5-attack adversarial verification pass (2 claims refuted), and a prioritized P0-P4 plan with dependency reasoning."
+        }
+      ],
+      "memory_candidates": [
+        {
+          "topic": "CSLib CslibTests conformance harness for decision procedures",
+          "content": "To execute a Cslib decision procedure in a CslibTests file, the file needs BOTH 'import X' and 'public meta import X' for the SAME module: without the plain import, defs referencing constructors fail with 'may not access declaration ... imported as meta'; without the meta import, #eval fails with 'Invalid meta definition _eval, ... is not accessible here'. decide/native_decide/rfl do NOT work on tableau drivers -- they compile to WellFounded.fix via nested 'let rec' and stall in the kernel (documented at CslibTests/ModalFrameSeparation.lean:19-35). Assertion idiom is '#guard_msgs in #eval' with a String- or Bool-valued verdict adapter, since the result types derive neither Repr nor BEq.",
+          "keywords": [
+            "cslib",
+            "CslibTests",
+            "eval",
+            "public meta import",
+            "native_decide",
+            "WellFounded.fix",
+            "conformance harness",
+            "decision procedure"
+          ]
+        },
+        {
+          "topic": "Executed conformance testing finds tableau defects type-checking cannot",
+          "content": "A tableau calculus can be fully sorry-free, green under lake build, and carry landed invariant-preservation proofs while still returning the wrong verdict on textbook-valid formulas. In one dispatch, 44 #eval probes against two sorry-free CSLib tableaux found 12 wrong verdicts, six of which no prior research report had recorded across multiple hard-mode dispatches. The defect class is rule-set incompleteness, invisible to the type checker because every landed lemma is about invariant preservation, not about which formulas close. Run the decision procedure on a known-valid/known-invalid corpus BEFORE investing in completeness proofs.",
+          "keywords": [
+            "tableau",
+            "conformance",
+            "rule completeness",
+            "executed verdicts",
+            "sorry-free but wrong",
+            "decision procedure testing"
+          ]
+        },
+        {
+          "topic": "Intuitionistic tableau T-implication: the Fitting split is the minimal fix, not Lindenbaum completion",
+          "content": "When an intuitionistic tableau's persistent T(phi->psi) rule is positive-only (only ever adds T(psi) where T(phi) is already present), the completeness truth lemma's T-imp case is blocked. The recorded remedy in such situations is often a Lindenbaum-style 'decide every subformula at every fresh world' completion rule, which branches 2^|Sub(phi0)| ways. That is over-scoped: because the truth lemma is bidirectional (proving both the T-forces and F-refutes directions simultaneously), the standard Fitting Ch.4 branching rule T(phi->psi)@w -> [F(phi)@w'] | [T(psi)@w'] supplies exactly the disjunction needed. Full subformula bivalence is never required.",
+          "keywords": [
+            "intuitionistic tableau",
+            "Fitting1983",
+            "truth lemma",
+            "sat_timp",
+            "bivalence",
+            "determinacy",
+            "Lindenbaum"
+          ]
+        }
+      ]
     },
     {
       "project_number": 553,

@@ -46,7 +46,7 @@ next_project_number: 552
 
 ### Temporal Logic
 
-425 [RESEARCHING] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [RESEARCHED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -628,7 +628,7 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [RESEARCHING]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: None
@@ -636,7 +636,7 @@ After implementation:
   - [425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md]
   - [425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md]
 - **Summary**: [425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md]
-- **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/03_blocker-reassessment-remaining-obligations.md]
+- **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/04_island-vs-periodic-strategic-decision.md]
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 

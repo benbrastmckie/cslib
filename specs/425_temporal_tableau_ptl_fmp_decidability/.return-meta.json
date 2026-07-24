@@ -1,27 +1,43 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-07-24T12:30:00Z",
-  "completed_at": "2026-07-24T12:55:00Z",
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "task_number": 425,
+  "session_id": "sess_1784920807_37031e_425",
   "artifacts": [
+    "specs/425_temporal_tableau_ptl_fmp_decidability/reports/04_island-vs-periodic-strategic-decision.md"
+  ],
+  "findings_count": 9,
+  "adversarial_verification_triggered": true,
+  "adversarial_revisions": [
+    "Inverted polarity of the island-model failure mode (positive universals, not eventualities)",
+    "P1 downgraded from 'hard but open' to 'false at the current constant'",
+    "Added unrecorded obligations O1-O3 for the composed bi-lasso model"
+  ],
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "all verified in references.bib (Reynolds1994, HodkinsonReynolds2006, Burgess1982I, CaleiroViganoVolpe2013, Gabbay1993, Smullyan1968, VardiWolper1986)",
+  "central_finding": "openBranch_branchSat is FALSE as stated: two calculus defects (C1 no seriality rule, Rules.lean:227-234/310-321; C2 hard-coded timeCount<4 cap, Rules.lean:312) make temporalTableau return .openBranch on validDiscrete formulas. Verified by executed lake env lean evaluation.",
+  "strategic_answer": "Neither island nor periodic is the binding constraint. Island is insufficient (positive allFuture/allPast over NoMaxOrder), periodic machinery stays on the critical path but is incomplete (no composed bi-lasso model exists; obligations O1-O3 unstated). Calculus repair must come first.",
+  "p1_verdict": "false_at_current_constant: temporalFuel is quadratic (Saturation.lean:76-78) while measured minimal sufficient fuel grows as 1.5*2^k-2; docstring cites a 2^n bound. Fix is (a) raise fuel to 2^Theta(n) or (b) add timeType dedup; option (c) restate the bound is NOT available.",
+  "p2_verdict": "confirmed_real: Saturation.lean:156-158 passes tracker through unchanged on the .branching arm. Minimal fix requires changing temporalStepBranch's return type to List (EventualityTracker Atom) because Saturation.lean:303 replicates one tracker across all output branches.",
+  "recommended_phases": ["A: executable conformance harness", "B: seriality rule (C1)", "C: remove timeCount cap + fuel decision (C2)", "D: per-branch eventuality trackers (P2)", "E: instant-image contiguity lemma (O1, parallelizable)", "F: re-derive model requirement", "G+: truth lemmas and assembly"],
+  "requires_user_review": true,
+  "user_review_reason": "Scope escalation: task moves from 'finish FMP completeness' to 'repair the temporal tableau calculus' (Rules.lean/Saturation.lean surgery). Recommend /spawn 425 for phases B, C, D as separate tasks.",
+  "memory_candidates": [
     {
-      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/reports/03_blocker-reassessment-remaining-obligations.md",
-      "type": "report",
-      "summary": "Blocker re-assessment: deps 426 (archived/completed) and 542 (completed) are STALE and unrelated to the real gap; recommend clearing them. Real blocker is a NEW structural gap (fuel-sufficiency/pigeonhole theorem not yet in codebase + EventualityTracker .branching-arm registration defect), documented in Completeness.lean. Source is zero-debt green (scoped build 1249 jobs, no sorries in Temporal tree); target lemmas simply not declared yet. Smallest remaining set = 2 prerequisites (P1 fuel-sufficiency, P2 tracker fix), not 5 lemmas. Task 317 hit the same fuel-sufficiency wall and is [BLOCKED] (precedent that P1 is architectural). Recommended: clear stale deps, /spawn 425 into tracker-fix + fuel-sufficiency subtasks, then /revise; strategic island-vs-periodic model question to settle first."
+      "title": "Executable #eval conformance probes refute formal-blocker framings cheaply",
+      "content": "Three prior research rounds on a Lean tableau attributed a completeness block to an unformalized fuel-sufficiency theorem. A 7-line #eval of the decision procedure on known-valid formulas refuted the target theorem outright in one dispatch, exposing two calculus defects nobody had recorded. For any executable decision procedure in Lean, run it on known-valid and known-invalid inputs BEFORE planning proof work about it.",
+      "tags": ["lean4", "tableau", "research-method", "verification"]
+    },
+    {
+      "title": "Island countermodels fail on positive universals, not eventualities",
+      "content": "A countermodel extracted from a finite tableau branch over an infinite NoMaxOrder domain (e.g. Z) reads false at every unpopulated point. This SATISFIES negative eventualities (F(Fp)@t) vacuously but FALSIFIES positive universals (T(Gp)@t), since G requires content at every later point. The intuition that 'unfulfilled eventualities are the problem' is inverted. Any finite-branch extraction needs a total extension (lasso/stutter) of branch content to the whole domain.",
+      "tags": ["temporal-logic", "fmp", "countermodel", "lean4"]
+    },
+    {
+      "title": "Check fuel-constant growth rate against its own docstring justification",
+      "content": "A fuel bound whose docstring cites a 2^n state-space bound but whose formula is quadratic in n is arithmetically insufficient on its face. Reading the constant's growth rate against its stated justification is a seconds-long check that can settle a 'fuel sufficiency' research question that otherwise reads as open. Confirm empirically by measuring the minimal fuel at which known-valid inputs still close, across a size-indexed family.",
+      "tags": ["lean4", "termination", "fuel", "research-method"]
     }
   ],
-  "partial_progress": {
-    "stage": "report_written",
-    "details": "Research dispatch complete; report 03 written and verified non-empty"
-  },
-  "recommendations": {
-    "stale_dependencies_to_clear": [426, 542],
-    "status_correction": "deps 426/542 resolved but genuine P1/P2 gap remains; not ready to implement",
-    "next_action": "/spawn 425 (Subtask A: EventualityTracker .branching registration fix; Subtask B: fuel-sufficiency/pigeonhole theorem) then /revise 425; or /research 425 --hard to settle island-vs-periodic strategic question first"
-  },
-  "metadata": {
-    "session_id": "sess_1784920807_37031e_425",
-    "agent_type": "cslib-research-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
-  }
+  "next_steps": "Run /revise 425 to replace plan-04 Phases 4c-7 with the calculus-correctness front (Phases A-G), or /spawn 425 to create separate tasks for phases B, C, D."
 }

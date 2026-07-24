@@ -198,7 +198,7 @@ the cross-base file in place, re-point importers, and leave the build green.
 
 ---
 
-### Phase 3: Consolidate the Monotonicity layer [NOT STARTED]
+### Phase 3: Consolidate the Monotonicity layer [COMPLETED]
 
 **Goal**: Replace the 3 same-base Monotonicity files with one `LatticeMonotonicity.lean`,
 re-point `Modularity.lean`, and leave the build green.

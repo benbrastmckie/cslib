@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical
-public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeMonotonicity
+public import Cslib.Logics.Modal.Metalogic.InterSystem.LatticeMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthMonotonicity
 public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
 

@@ -403,7 +403,20 @@ too").
   - Exclusion lemma compiles sorry-free; scoped `lake build` green.
   - Zero sorry/admit in the file.
 
-### Phase 7: Formally Isolate the Research-Grade Obligation as a Named Open Lemma [NOT STARTED]
+### Phase 7: Formally Isolate the Research-Grade Obligation as a Named Open Lemma [COMPLETED]
+
+**Landed**: `CS5PairSeedDisjunctionProperty` (named, non-vacuous `Prop`-valued open obligation,
+docstring records provenance -- [Pacheco2024] Lemma 16, unsound as published, no semantic
+witness, status open) plus the sorry-free conditional theorem
+`cs5Pair_derivExcludes_of_disjunctionProperty`, taking `hL`/`hR`/`hOpen` as **explicit**
+hypotheses (per the Phase-4-blocked contingency) and proving `DerivExcludes` at the two-sided
+seed by case analysis on the `bigOr` list argument (`[]` via `hL`+EFQ; singleton via `hL`/`hR`
+composed with `cs5Pair_orBot_imp_self`; length ≥ 2 via `hOpen` composed with the new
+`cs5Pair_bigOr_imp_or` helper). `lean_verify` confirms only `propext`/`Classical.choice`/
+`Quot.sound`. Scoped build green (730 jobs); zero sorry/admit in the file
+(`lake lint` flags one **pre-existing** `docBlame` gap on `cs5PairSeed` from Phase 3 -- a
+`/-! -/` section-header comment sits where a `/-- -/` declaration docstring is expected; out of
+this phase's scope, left for Phase 8's documentation pass).
 
 - **Goal:** State the one remaining obligation precisely, as a **named `Prop`-valued definition**
   with a docstring recording its provenance and status — **never** as a `sorry`, never as a

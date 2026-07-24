@@ -323,4 +323,160 @@ theorem cs5PairSeed_mem_iff {H : Set (Proposition Atom)} {x : Proposition (Atom 
         (∃ ψ ∈ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H), cs5PairTauR ψ = x) := by
   simp only [cs5PairSeed, Set.mem_union, Set.mem_image]
 
+/-! ## The Named Open Obligation and the Conditional `DerivExcludes` Reduction
+
+**Cross-inertness (blocked).** The support lemma originally planned to reduce `DerivExcludes` at
+the two-sided seed to the two individual exclusions `τ_L (□A) ∉ cl(seed)` / `τ_R A ∉ cl(seed)` did
+not close: the natural "necessitation-only-from-`[]`" invariant for bare-`□` conclusions in
+`modalDerivationSystem` is **false** for `CS5PairAxiom` -- `modus_ponens` against the embedded
+`CS5ModalAxiom.bBox` schema (`φ → □(◇φ)`, `CS5.lean:216`) produces a bare-`□` conclusion that is
+neither an assumption nor a necessitation witness, so the sketched structural induction does not
+go through. The individual exclusions (`τ_L (□A) ∉ cl(seed)`, `τ_R A ∉ cl(seed)`) are therefore
+**not** landed as theorems here; `cs5Pair_derivExcludes_of_disjunctionProperty` below takes them
+as explicit open hypotheses `hL`/`hR` instead, per the plan's own R-B contingency.
+
+**The named open obligation.** What remains genuinely open -- and *is* isolated here as a single
+named, non-vacuous `Prop`-valued definition, never asserted as a theorem -- is the constructive
+disjunction property at the two-sided seed. -/
+
+/-- **OPEN OBLIGATION (unproven, deliberately not a theorem).** The constructive disjunction
+property of `CS5PairAxiom` under the `boxInv` cross-constraint, at the two-sided seed: for a
+theory `H` and formula `A`,
+
+    τ_L (□A) ⊔ τ_R A ∉ cl_{CS5PairAxiom} (cs5PairSeed H).
+
+At the *seed* the theory is **not** prime, so "neither disjunct is derivable" (`hL`/`hR` above)
+does not give "the disjunction is not derivable" -- constructively the disjunction is strictly
+weaker, and `cs5Pair_derivExcludes_of_disjunctionProperty` below shows exactly this gap is the
+only piece `DerivExcludes` needs beyond `hL`/`hR`.
+
+**Provenance.** This is [Pacheco2024]'s Lemma 16. Its published proof is **unsound** in this
+setting: it uses the negation-completeness move `ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`, which is invalid for a
+poset-maximal quasi-prime theory (see this module's opening docstring, "Distinct from the
+discarded `CS5Combined` scaffold"). The identical obligation defeated the earlier `CS5Combined`
+atom-sum scaffold (`cs5Combined_seed_excludes`, never closed, since removed).
+
+**No semantic witness exists.** `CS5PairAxiom`'s cross-axioms are sound only under a *common*
+valuation for both copies, which identifies `τ_L X` with `τ_R X` and collapses `cross1` to
+`□B → B`; in every such model `τ_R A` is forced whenever `A ∈ H`. So no sound model separates the
+seed from the excluded set, and a soundness/countermodel argument cannot discharge this -- it is
+a purely syntactic separation fact.
+
+**Status.** Open here. A correct proof is expected to require a cut-free/nested-sequent argument
+([Marin2021]) rather than a direct Hilbert derivation. Stated as a definition, not asserted: this
+module contains no `sorry`. -/
+def CS5PairSeedDisjunctionProperty (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
+  (cs5PairTauL (Proposition.box A)).or (cs5PairTauR A) ∉
+    modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)
+
+/-- Every element of a list drawn from `{a, b}` composes, via `cs5Pair_hOrI1`/`hOrI2`/`hOrE`, into
+a derivation of `bigOr l → a ⊔ b`; the `[]` base case uses `cs5Pair_hEFQ`. Feeds the `x :: y ::
+rest` (length ≥ 2) branch of `cs5Pair_derivExcludes_of_disjunctionProperty`. -/
+theorem cs5Pair_bigOr_imp_or {a b : Proposition (Atom ⊕ Atom)}
+    (l : List (Proposition (Atom ⊕ Atom))) (hl : ∀ x ∈ l, x = a ∨ x = b) :
+    Deriv (@CS5PairAxiom Atom) [] ((Metalogic.bigOr l).imp (a.or b)) := by
+  induction l with
+  | nil => exact cs5Pair_hEFQ (a.or b)
+  | cons x xs ih =>
+    have hx : x = a ∨ x = b := hl x (List.mem_cons_self ..)
+    have hxs : ∀ y ∈ xs, y = a ∨ y = b := fun y hy => hl y (List.mem_cons_of_mem _ hy)
+    have hximp : Deriv CS5PairAxiom [] (x.imp (a.or b)) := by
+      cases hx with
+      | inl h => rw [h]; exact cs5Pair_hOrI1 a b
+      | inr h => rw [h]; exact cs5Pair_hOrI2 a b
+    have hxsimp : Deriv CS5PairAxiom [] ((Metalogic.bigOr xs).imp (a.or b)) := ih hxs
+    have hOrE := cs5Pair_hOrE x (Metalogic.bigOr xs) (a.or b)
+    exact mp_deriv (mp_deriv hOrE hximp) hxsimp
+
+/-- `⊢ (x ⊔ ⊥) → x`, via `orE` composed with the identity (`Metalogic.empty_imp_id`) and
+`cs5Pair_hEFQ`. Feeds the singleton-list branch of `cs5Pair_derivExcludes_of_disjunctionProperty`
+(`bigOr [x] = x ⊔ ⊥` by `Metalogic.bigOr`'s equations). -/
+theorem cs5Pair_orBot_imp_self (x : Proposition (Atom ⊕ Atom)) :
+    Deriv (@CS5PairAxiom Atom) [] ((x.or Proposition.bot).imp x) := by
+  have hidx : Deriv CS5PairAxiom [] (x.imp x) :=
+    Metalogic.empty_imp_id (modalDerivationSystem CS5PairAxiom) cs5Pair_hCut x
+  have hbotx : Deriv CS5PairAxiom [] (Proposition.bot.imp x) := cs5Pair_hEFQ x
+  have horE := cs5Pair_hOrE x Proposition.bot x
+  exact mp_deriv (mp_deriv horE hidx) hbotx
+
+/-- **The conditional `DerivExcludes` reduction.** Consumes the two individual exclusions
+`hL`/`hR` and the named open obligation `hOpen` as **explicit hypotheses** -- since Phase 4
+(cross-inertness) is blocked, `hL`/`hR` are not available as theorems here either; both remain
+open pending a future cross-inertness argument or the spawned disjunction-property subtask. The
+theorem itself is proved by case analysis on the `List` argument of `DerivExcludes`
+(`Metalogic.PrimeExclusion.lean:332`): the `[]` case is consistency of `T` via `hL` + `EFQ`; the
+singleton cases are `hL`/`hR` directly (via `cs5Pair_orBot_imp_self`); the two-element-and-longer
+case reduces to `hOpen` (via `cs5Pair_bigOr_imp_or`). Sorry-free regardless of which hypotheses a
+future caller can discharge as theorems. -/
+theorem cs5Pair_derivExcludes_of_disjunctionProperty {H : Set (Proposition Atom)}
+    {A : Proposition Atom}
+    (hL : cs5PairTauL (Proposition.box A) ∉
+      modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H))
+    (hR : cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H))
+    (hOpen : CS5PairSeedDisjunctionProperty H A) :
+    Metalogic.DerivExcludes (modalDerivationSystem (@CS5PairAxiom Atom))
+      {cs5PairTauL (Proposition.box A), cs5PairTauR A}
+      (modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)) := by
+  intro l hl
+  have hmem : ∀ x ∈ l, x = cs5PairTauL (Proposition.box A) ∨ x = cs5PairTauR A := by
+    intro x hx
+    have := hl x hx
+    simpa [Set.mem_insert_iff, Set.mem_singleton_iff] using this
+  set T := modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H) with hT
+  match l, hmem with
+  | [], _ =>
+    intro hbot
+    apply hL
+    have hd : (modalDerivationSystem (@CS5PairAxiom Atom)).Deriv [Proposition.bot]
+        (cs5PairTauL (Proposition.box A)) :=
+      mp_deriv (weakening_deriv (cs5Pair_hEFQ (cs5PairTauL (Proposition.box A)))
+          (by simp)) (assumption_deriv (List.mem_singleton_self _))
+    exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS [Proposition.bot]
+      (cs5PairTauL (Proposition.box A))
+      (fun x hx => by rw [List.mem_singleton] at hx; rw [hx]; exact hbot) hd
+  | [x], hmem =>
+    intro hxT
+    have hx : x = cs5PairTauL (Proposition.box A) ∨ x = cs5PairTauR A :=
+      hmem x (List.mem_singleton_self _)
+    have hxorbot_imp_x := cs5Pair_orBot_imp_self x
+    have hxT' : x ∈ T := by
+      have hd : (modalDerivationSystem (@CS5PairAxiom Atom)).Deriv [x.or Proposition.bot] x :=
+        mp_deriv (weakening_deriv hxorbot_imp_x (by simp))
+          (assumption_deriv (List.mem_singleton_self _))
+      exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS [x.or Proposition.bot] x
+        (fun y hy => by rw [List.mem_singleton] at hy; rw [hy]; exact hxT) hd
+    rcases hx with rfl | rfl
+    · exact hL hxT'
+    · exact hR hxT'
+  | x :: y :: rest, hmem =>
+    intro hbig
+    apply hOpen
+    have hderiv := cs5Pair_bigOr_imp_or (x :: y :: rest) hmem
+    have hd : (modalDerivationSystem (@CS5PairAxiom Atom)).Deriv
+        [Metalogic.bigOr (x :: y :: rest)]
+        ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A)) :=
+      mp_deriv (weakening_deriv hderiv (by simp))
+        (assumption_deriv (List.mem_singleton_self _))
+    exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS
+      [Metalogic.bigOr (x :: y :: rest)] ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
+      (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hbig) hd
+
+/-! ## Open Obligations
+
+**Proved, this module:**
+- `cs5PairAxiom_left_derivable`/`cs5PairAxiom_right_derivable`, `crossCond_left_stable`/
+  `crossCond_right_stable`, the full primeness-engine hypothesis bundle (`cs5Pair_hImplyK`
+  through `cs5Pair_hCut`), `cs5PairSeed` and its membership lemmas, and the conditional
+  `cs5Pair_derivExcludes_of_disjunctionProperty`.
+- **Not proved:** the cross-inertness support lemma (blocked, see above), the two individual
+  seed exclusions `hL`/`hR` (skipped -- depended on cross-inertness), and the named open
+  obligation `CS5PairSeedDisjunctionProperty` itself (research-grade, no semantic witness,
+  carried by the spawned subtask).
+- **What a discharge would unlock:** `hL`, `hR`, and `CS5PairSeedDisjunctionProperty H A` together
+  instantiate `Metalogic.prime_set_exclusion` (via the bundle above) at `CS5PairAxiom`, giving a
+  prime admissible `T ⊇ cl(cs5PairSeed H)` excluding `{τ_L (□A), τ_R A}`; projecting `T`'s two
+  components back through `cs5PairTauL`/`cs5PairTauR` would then be the candidate box-backward
+  pair `⟨H', T'⟩` feeding a native `cs5_completeness''` -- not attempted by this module (see the
+  Non-Goals of the governing plan). -/
+
 end Cslib.Logic.Modal

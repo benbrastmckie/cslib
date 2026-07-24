@@ -159,13 +159,17 @@ value, most judgment-heavy, well-localized.
 
 ---
 
-### Phase 2: Modal/Tableau — Completeness/Loop Cluster [NOT STARTED]
+### Phase 2: Modal/Tableau — Completeness/Loop Cluster [IN PROGRESS]
 
 **Goal**: Strip provenance from the heaviest Modal/Tableau files (the completeness/loop half of
 the 516-hit / 17-file bucket).
 
 **Tasks**:
-- [ ] `Tableau/FrameCompleteness.lean` (103 hits) — includes an embedded `specs/NNN` link: delete it (top priority).
+- [x] `Tableau/FrameCompleteness.lean` (103 hits) — includes an embedded `specs/NNN` link: delete it (top priority).
+  *(done: all task/phase/specs provenance stripped across the K/T/B/S5/Five/KB5 sections;
+  internal "Phase N" cross-references rewritten to "above"/"below"/lemma-name anchors; the
+  embedded `specs/515_.../probes/five-s5-separation.lean` link replaced with a pointer to the
+  in-tree `FrameSoundness.lean` lemmas it was citing; `lake build` green, zero live sorry)*
 - [ ] `Tableau/CompletenessLoop.lean` (73 hits).
 - [ ] `Tableau/LoopChecking.lean` (72 hits).
 - [ ] `Tableau/Completeness.lean` (Modal, 32 hits — distinct from the Temporal file in Phase 1).

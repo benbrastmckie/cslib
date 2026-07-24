@@ -407,7 +407,7 @@ theorem modalOpenBranchS4_countermodel
   ⟨(modalTruthLemmaS4 φ₀ b acc hH φ₀ 0).2 hF,
     ⟨extractModelS4_refl b acc, extractModelS4_trans b acc⟩⟩
 
-/-! ## B (Symmetric Frame) Extraction (task 505 Phase 5)
+/-! ## B (Symmetric Frame) Extraction
 
 Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
 *symmetric closure* `Relation.SymmGen` of `acc.hasEdge` as the model's relation (Strategy B,
@@ -418,7 +418,7 @@ closure-at-extraction, instantiated with `Cl := Relation.SymmGen`). The frame in
 `Relation.SymmGen r a b` is literally `r a b ∨ r b a` (a `def`, not an inductive), so case
 analysis on a `SymmGen` hypothesis is a plain `Or` split -- the forward direction reduces to
 K's own successor argument, the backward direction to B's own predecessor argument
-(`hintikkaB_box_pos`/`hintikkaB_diamond_neg`, Phase 6 below). -/
+(`hintikkaB_box_pos`/`hintikkaB_diamond_neg`, below). -/
 
 /-- Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
 *symmetric closure* `Relation.SymmGen` of `acc.hasEdge` as the model's relation (Strategy B,
@@ -467,23 +467,22 @@ lemma extractModelB_hasEdge_symm_imp_r (b : List (SignedFormula (Proposition Ato
   rw [extractModelB_r]
   exact Relation.SymmGen.of_rel_symm h
 
-/-! ## S5 (Equivalence Frame) Extraction (task 504 Phase 3)
+/-! ## S5 (Equivalence Frame) Extraction
 
 Extract a Kripke model from an open branch `b` and accessibility relation `acc`, using the
 *equivalence closure* `Relation.EqvGen` of `acc.hasEdge` as the model's relation (Strategy B,
 closure-at-extraction, instantiated with `Cl := Relation.EqvGen`). This extraction is
 **independent of the tableau rule** -- a pure closure-model construction over any branch/
-accessibility pair -- and is delivered here regardless of the *bypassed* Phase 2 rule discharge
-(superseded by the witness-reuse rule `modalApplyOneS5w`, `S5Simplification.lean`; see that
-file's "Phase 2 Obstruction" section).
+accessibility pair -- and is delivered here regardless of the bypassed S5 rule-discharge
+obstruction (superseded by the witness-reuse rule `modalApplyOneS5w`, `S5Simplification.lean`;
+see that file's rule-discharge-obstruction discussion).
 
-**Correction against the plan**: the plan cites `Relation.EqvGen.instIsEquiv`, but no such
-instance exists in Mathlib (confirmed: `infer_instance` fails for
-`IsEquiv _ (Relation.EqvGen r)`; only `Relation.EqvGen.is_equivalence : Equivalence (EqvGen r)`
-and the individual constructors `.refl`/`.symm`/`.trans` are provided). `instIsEquivEqvGen`
+Note: `Relation.EqvGen.instIsEquiv` does not exist in Mathlib (confirmed: `infer_instance` fails
+for `IsEquiv _ (Relation.EqvGen r)`; only `Relation.EqvGen.is_equivalence : Equivalence (EqvGen
+r)` and the individual constructors `.refl`/`.symm`/`.trans` are provided). `instIsEquivEqvGen`
 below builds the instance directly from those constructors -- three one-line proofs, no new
-mathematical content, exactly the "for free off Mathlib" claim the plan makes, just assembled by
-hand rather than found pre-packaged. -/
+mathematical content, assembled by hand from Mathlib's primitives rather than found
+pre-packaged. -/
 
 /-- `IsEquiv` for `Relation.EqvGen`: built directly from the closure's own constructors
 (`.refl`/`.symm`/`.trans`), since Mathlib ships no unconditional instance for this combination
@@ -548,12 +547,12 @@ lemma extractModelS5_refl (b : List (SignedFormula (Proposition Atom) WorldIndex
 omit [Hashable Atom] in
 /-- `extractModelS5`'s relation satisfies `Relation.RightEuclidean`, obtained directly from
 `IsEquiv`'s `symm` + `trans` projections: `r a b → r a c → r b c` follows by symmetry (`r a b`
-gives `r b a`) then transitivity (`r b a` with `r a c` gives `r b c`). This is the free 5/KB5
-(Euclidean) exposure the plan's Phase 7 targets -- delivered here since it depends only on
-`extractModelS5_equiv` (Phase 3), independent of the *bypassed* Phase 2 rule discharge
-(superseded by the witness-reuse rule `modalApplyOneS5w`, `S5Simplification.lean`). There is
-**no** `RightEuclidean.symm` lemma (confirmed against `Defs.lean:49`); the plan's documented
-alternative route via `Relation.symm_rightEuclidean_iff_trans`
+gives `r b a`) then transitivity (`r b a` with `r a c` gives `r b c`). This is a free 5/KB5
+(Euclidean) exposure -- delivered here since it depends only on `extractModelS5_equiv` above,
+independent of the bypassed S5 rule-discharge obstruction (superseded by the witness-reuse rule
+`modalApplyOneS5w`, `S5Simplification.lean`). There is **no** `RightEuclidean.symm` lemma
+(confirmed against `Defs.lean:49`); an alternative route via
+`Relation.symm_rightEuclidean_iff_trans`
 (`Cslib/Foundations/Relation/Euclidean.lean:236`) requires a `[Std.Symm r]` instance that is not
 available generically for `Relation.EqvGen`, so this lemma instead builds the `RightEuclidean`
 witness directly from `IsEquiv`'s own `symm`/`trans` fields (both routes are mathematically
@@ -564,22 +563,16 @@ lemma extractModelS5_rightEuclidean (b : List (SignedFormula (Proposition Atom) 
   have hequiv := extractModelS5_equiv b acc
   exact ⟨fun hab hac => hequiv.trans _ _ _ (hequiv.symm _ _ hab) hac⟩
 
-/-! ## 5 / KB5 (Euclidean) Coverage via the S5 Route: Status (task 504 Phase 7)
+/-! ## 5 / KB5 (Euclidean) Coverage via the S5 Route: Status
 
-`extractModelS5_rightEuclidean` above delivers the free Euclidean exposure the plan's Phase 7
-targets: `Relation.RightEuclidean (extractModelS5 b acc).r` holds unconditionally, since every
-equivalence relation is right-Euclidean. This is genuinely independent of Phase 2 (it only needs
-`extractModelS5_equiv`, a Phase 3 result).
-
-**CORRECTED (this docstring previously framed the gap below as a SCHEDULING dependency --
-*"needs `modalTableauS5_complete`/`modalTableauS5_sound` as its proof engine, both transitively
-blocked by Phase 2"* -- which is wrong on the mathematics and misled a prior planning cycle into
-attempting a route that provably cannot arrive).**
+`extractModelS5_rightEuclidean` above delivers a free Euclidean exposure:
+`Relation.RightEuclidean (extractModelS5 b acc).r` holds unconditionally, since every
+equivalence relation is right-Euclidean. This is genuinely independent of the bypassed S5
+rule-discharge obstruction (it only needs `extractModelS5_equiv` above).
 
 **What is actually true: 5/KB5 is not deliverable *via the S5 tableau route*, at all, regardless
 of whether `modalTableauS5_complete`/`modalTableauS5_sound` exist.** This is a **frame-class
-inclusion obstruction**, proven (not argued) by
-`specs/515_s5_universal_rule_termination_unblock_504/probes/five-s5-separation.lean`
+inclusion obstruction**, proven (not argued) in `FrameSoundness.lean`
 (sorry-free, **zero axioms**): `s5FC = Std.Refl r ∧ Relation.RightEuclidean r`
 (`FrameSoundness.lean:1273`), but `fiveFC = Relation.RightEuclidean r` **alone** (:1282,
 reflexivity absent) and `kb5FC = Std.Symm r ∧ Relation.RightEuclidean r` (:1291, reflexivity
@@ -589,9 +582,9 @@ vacuously while `p` is false, and reflexivity -- exactly what `fiveFC`/`kb5FC` d
 what this validity depends on. Hence `fiveValid ⊊ s5Valid` and `kb5Valid ⊊ s5Valid`
 (`fiveValid_ssubset_s5Valid`, `kb5Valid_ssubset_s5Valid`, with supporting `boxImp_s5Valid`,
 `boxImp_not_fiveValid`, `boxImp_not_kb5Valid`, `fiveValid_imp_s5Valid`, `kb5Valid_imp_s5Valid`,
-`s5FC_imp_fiveFC`, `s5FC_imp_kb5FC` in the probe): **no sound+complete decision procedure for
-`s5Valid` composes into one for `fiveValid`/`kb5Valid`**, no matter how the S5 tableau itself is
-built or proven.
+`s5FC_imp_fiveFC`, `s5FC_imp_kb5FC`, all in `FrameSoundness.lean`): **no sound+complete decision
+procedure for `s5Valid` composes into one for `fiveValid`/`kb5Valid`**, no matter how the S5
+tableau itself is built or proven.
 
 **This is a route obstruction, NOT an impossibility of the deliverable.** 5 (Euclidean) validity
 and completeness ARE delivered -- by a dedicated Euclidean route built on top of the S5 cluster
@@ -626,9 +619,9 @@ symmetric variant of the same closure, now also complete -- `modalTruthLemmaKb5`
 theorem `modalTableauFive_complete`. `extractModelS5` itself remains untouched and is not the route
 pure-K5/5 uses. -/
 
-/-! ## T Modal Truth Lemma (task 503 Phase 5)
+/-! ## T Modal Truth Lemma
 
-`modalExpandBranchesT_hintikka` (`TDriver.lean`, delivered by task 510) produces a
+`modalExpandBranchesT_hintikka` (`TDriver.lean`) produces a
 `modalHintikkaSetGen modalApplyOneT bR aR` witness from an open `modalExpandBranchesT` result.
 This section closes the remaining gap: the T truth lemma against `extractModelT` and `tValid`
 completeness.
@@ -637,10 +630,10 @@ completeness.
 (`modalApplyOneT_eq_of_not_boxPos_diaNeg`, `FrameRules.lean`), so every propositional case and
 the box-negative/diamond-positive modal cases reduce to exactly the K argument (the latter two
 via the free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`,
-`Completeness.lean`, task 510). The box-positive and diamond-negative cases are genuinely new:
+`Completeness.lean`). The box-positive and diamond-negative cases are genuinely new:
 `hintikkaT_box_pos`/`hintikkaT_diamond_neg` below combine the K argument (raw recorded edge,
 `Relation.ReflGen.single`) with the T self-propagation conjunct (reflexive self-edge,
-`Relation.ReflGen.refl`), as task 510's own research anticipated
+`Relation.ReflGen.refl`)
 (`hintikka_box_pos`/`hintikka_diamond_neg` are payload-reading and irreducibly K-specific). -/
 
 omit [Hashable Atom] in
@@ -755,8 +748,8 @@ private lemma modalTDiaNegSelf_cases_of_ne_nil
   · exact ⟨rfl, by simpa using h⟩
 
 /-- **T-analog of `hintikka_box_pos`** (`Completeness.lean`, genuinely new content -- not
-inherited from K, per task 510's research note that this bridge is payload-reading and
-irreducibly K-specific): `T(□ψ)@w ∈ b` together with the reflexive closure
+inherited from K, since this bridge is payload-reading and irreducibly K-specific):
+`T(□ψ)@w ∈ b` together with the reflexive closure
 `Relation.ReflGen acc.hasEdge w w'` (i.e. `w' = w` or a raw recorded edge `w → w'`) and
 `modalHintikkaSetGen modalApplyOneT b acc` imply `T(ψ)@w' ∈ b`.
 
@@ -909,7 +902,7 @@ Proof by strong induction on `modalComplexity φ`, mirroring `modalTruthLemma` (
 the propositional cases (`atom`/`bot`/`imp`/`and`/`or`) reuse the public, apply-agnostic
 consistency kit and K's `modalApplyOne_*` bridge lemmas verbatim, routed through
 `modalApplyOneT_eq_of_not_box_diamond`; the box-negative/diamond-positive cases reuse the free
-generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` (task 510) directly
+generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen` directly
 (unaffected minting shapes); the box-positive/diamond-negative cases consume the genuinely-new
 `hintikkaT_box_pos`/`hintikkaT_diamond_neg` bridges above, with the model's `r w w'` unfolding to
 exactly the `Relation.ReflGen` hypothesis those bridges want (`extractModelT_r`). -/
@@ -1087,10 +1080,10 @@ theorem modalOpenBranchT_countermodel
     ¬ Satisfies (extractModelT b acc) 0 φ :=
   (modalTruthLemmaT b acc hH φ 0).2 hF
 
-/-! ## Task 513 Phase 5: T Soundness Discharges + `modalTableauT_sound` -/
+/-! ## T Soundness Discharges + `modalTableauT_sound` -/
 
 omit [Hashable Atom] in
-/-- **Task 513 (Phase 5, S-agree for T)**: `modalApplyOneT` agrees with `modalApplyOne` off
+/-- **S-agree for T**: `modalApplyOneT` agrees with `modalApplyOne` off
 the two propagating shapes -- exactly `modalApplyOneT_eq_of_not_boxPos_diaNeg`
 (`FrameRules.lean`) verbatim; zero new proof content. Discharges
 `modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`'s `hAgree`
@@ -1103,10 +1096,10 @@ theorem hAgreeT
     modalApplyOneT sf b acc = modalApplyOne sf b acc :=
   modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc h
 
-/-- **Task 513 (Phase 5, S-boxPos for T)**: frame-relativized semantic soundness of
+/-- **S-boxPos for T**: frame-relativized semantic soundness of
 `modalApplyOneT`'s box-positive output at `FC := reflFC`. Splits `RuleResultSat` over the
 `kForms ++ selfNew.filter …` append (`modalApplyOneT_boxPos_fst`, `TDriver.lean`): the
-`kForms` half is Phase 1's `modalApplyOne_boxPos_sound` (K, `FC` unused); the `selfNew` half
+`kForms` half is `modalApplyOne_boxPos_sound` (K, `FC` unused); the `selfNew` half
 (at most one extra formula, `T(φ)@lbl` from `T(□φ)@lbl` at the *same* world) is justified
 directly by reflexivity (`hFC.refl (f lbl) : m.r (f lbl) (f lbl)`), mirroring
 `branchSatisfiableIn_reflFC_boxPos_mem`/`modalTBoxSelf_sound`
@@ -1158,7 +1151,7 @@ theorem modalApplyOneT_boxPos_soundIn
           subst hmem'
           exact sfSat_pos m f φ lbl hselfSat
 
-/-- **Task 513 (Phase 5, S-diaNeg for T)**: dual of `modalApplyOneT_boxPos_soundIn` for the
+/-- **S-diaNeg for T**: dual of `modalApplyOneT_boxPos_soundIn` for the
 diamond-negative shape. -/
 theorem modalApplyOneT_diaNeg_soundIn
     {W : Type} (m : Model W Atom) (f : WorldIndex → W)
@@ -1208,10 +1201,10 @@ theorem modalApplyOneT_diaNeg_soundIn
           subst hmem'
           exact sfSat_neg m f φ lbl hselfSat
 
-/-- **Task 513 (Phase 5)**: `modalTableauT` is sound: if the T tableau closes on `F(φ)`, then
+/-- `modalTableauT` is sound: if the T tableau closes on `F(φ)`, then
 `φ` is `tValid`. Contrapositive over `reflFC`, mirroring `modalTableau_sound`
 (`Soundness.lean`) and the K zero-regression derivation `modalTableau_sound_frame_gen`
-(`FrameSoundness.lean`, Phase 4): feeds `modalExpandBranchesGen_closed_unsatIn reflFC
+(`FrameSoundness.lean`): feeds `modalExpandBranchesGen_closed_unsatIn reflFC
 modalApplyOneT` at the initial configuration `[[F(φ)@0]] [[]] [Accessibility.empty]`. The
 initial `branchSatisfiableIn reflFC` witness uses the reflexive falsifying model directly
 (available since `tValid = frameValid reflFC` quantifies only reflexive models, so the
@@ -1248,9 +1241,9 @@ theorem modalTableauT_sound (φ : Proposition Atom) (h : modalTableauT φ = .clo
 
 /-! ## `tValid` Completeness -/
 
-/-- **T-completeness of the modal tableau** (task 503 Phase 5): if the T tableau on `φ0` returns
+/-- **T-completeness of the modal tableau**: if the T tableau on `φ0` returns
 an open branch, `φ0` is not T-valid. Mirrors `modalTableau_complete`
-(`CompletenessLoop.lean`): combines `modalExpandBranchesT_hintikka` (task 510, `TDriver.lean`)
+(`CompletenessLoop.lean`): combines `modalExpandBranchesT_hintikka` (`TDriver.lean`)
 instantiated at the initial configuration (via `modalLoopInvGen_initial` and the fuel bridge
 `modalExpMeasure_entry_le_fuel`, both un-privatized for this purpose per their own docstrings),
 the generic initial-branch membership persistence lemma
@@ -1295,11 +1288,11 @@ theorem modalTableauT_complete (φ0 : Proposition Atom)
   intro htv
   exact hnot (htv WorldIndex (extractModelT b a) (extractModelT_refl b a) 0)
 
-/-! ## Task 513 Phase 6: `tValid` Decidability -/
+/-! ## `tValid` Decidability -/
 
-/-- **The modal T tableau decides T-validity** (task 513 Phase 6 / task 503 Phase 6 target):
+/-- **The modal T tableau decides T-validity**:
 `modalTableauT φ0` closes exactly when `φ0` is T-valid. Combines soundness
-(`modalTableauT_sound`, Phase 5) with completeness (`modalTableauT_complete`, above) via the
+(`modalTableauT_sound`, above) with completeness (`modalTableauT_complete`, above) via the
 two-constructor dichotomy of `ModalTableauResult`. Mirrors `modalTableau_decides`
 (`CompletenessLoop.lean`) line-for-line. -/
 theorem tValid_decides (φ0 : Proposition Atom) :
@@ -1311,7 +1304,7 @@ theorem tValid_decides (φ0 : Proposition Atom) :
     | closed => rfl
     | openBranch b a => exact absurd htv (modalTableauT_complete φ0 htab)
 
-/-- **T-validity is decidable** (task 513 Phase 6 / task 503 Phase 6 target): decide by running
+/-- **T-validity is decidable**: decide by running
 the modal T tableau and consulting `tValid_decides`. No `Fintype Atom` assumption is needed,
 since the tableau computation itself is the decision procedure. Mirrors `instDecidableKValid`
 (`CompletenessLoop.lean`) line-for-line. -/
@@ -1320,7 +1313,7 @@ instance instDecidableTValid (φ0 : Proposition Atom) : Decidable (tValid φ0) :
   | .closed => .isTrue ((tValid_decides φ0).mp h)
   | .openBranch _ _ => .isFalse (modalTableauT_complete φ0 h)
 
-/-! ## B Modal Truth Lemma (task 505 Phase 6)
+/-! ## B Modal Truth Lemma
 
 `modalExpandBranchesB_hintikka` (`BDriver.lean`) produces a `modalHintikkaSetGen modalApplyOneB
 bR aR` witness from an open `modalExpandBranchesB` result. This section closes the remaining
@@ -1330,7 +1323,7 @@ gap: the B truth lemma against `extractModelB` and `bValid` completeness.
 (`modalApplyOneB_eq_of_not_boxPos_diaNeg`, `FrameRules.lean`), so every propositional case and
 the box-negative/diamond-positive modal cases reduce to exactly the K argument (the latter two
 via the free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`,
-`Completeness.lean`, task 510) -- these only need a *forward* raw edge witness, which survives
+`Completeness.lean`) -- these only need a *forward* raw edge witness, which survives
 into the symmetric closure via `extractModelB_hasEdge_imp_r` (`Or.inl`), so no B-specific content
 is needed there. The box-positive and diamond-negative cases are genuinely new:
 `hintikkaB_box_pos`/`hintikkaB_diamond_neg` below case-split `Relation.SymmGen`'s two disjuncts --
@@ -1356,8 +1349,8 @@ private lemma modalApplyOneB_eq_of_not_box_diamond
   modalApplyOneB_eq_of_not_boxPos_diaNeg sf b acc
     ⟨fun ⟨_, φ, h⟩ => hnb φ h, fun ⟨_, φ, h⟩ => hnd φ h⟩
 
-/-- **B-analog of `hintikka_box_pos`/`hintikkaT_box_pos`** (genuinely new content per task 510's
-research note that this bridge is payload-reading and irreducibly per-system): `T(□ψ)@w ∈ b`
+/-- **B-analog of `hintikka_box_pos`/`hintikkaT_box_pos`** (genuinely new content, since this
+bridge is payload-reading and irreducibly per-system): `T(□ψ)@w ∈ b`
 together with the symmetric closure `Relation.SymmGen acc.hasEdge w w'` and `accSourcesKnown b
 acc` imply `T(ψ)@w' ∈ b`.
 
@@ -1700,16 +1693,16 @@ theorem modalOpenBranchB_countermodel
     ¬ Satisfies (extractModelB b acc) 0 φ :=
   (modalTruthLemmaB b acc hSrc hH φ 0).2 hF
 
-/-! ## `bValid` Completeness (task 505 Phase 8) -/
+/-! ## `bValid` Completeness -/
 
 /-- **B-completeness of the modal tableau**: if the B tableau on `φ0` returns an open branch,
 `φ0` is not B-valid. Mirrors `modalTableauT_complete`: combines `modalExpandBranchesB_hintikka`
 instantiated at the initial configuration, the generic initial-branch membership persistence
 lemma (`modalExpandBranchesGen_openBranch_initial_mem`), the `accSourcesKnown` top-loop
-propagation lemma (`modalExpandBranchesGen_openBranch_accSourcesKnown`, `BDriver.lean`,
-task 505 -- the piece with no T analogue, since T never needs known-worlds reasoning), and the
+propagation lemma (`modalExpandBranchesGen_openBranch_accSourcesKnown`, `BDriver.lean` --
+the piece with no T analogue, since T never needs known-worlds reasoning), and the
 B countermodel extraction above. This direction is fully generic and does **not** depend on
-task 513's soundness-chain generalization. -/
+the generalized soundness-chain machinery below. -/
 theorem modalTableauB_complete (φ0 : Proposition Atom)
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {a : Accessibility}
     (h : modalTableauB φ0 = .openBranch b a) :
@@ -1760,16 +1753,15 @@ theorem modalTableauB_complete (φ0 : Proposition Atom)
   intro htv
   exact hnot (htv WorldIndex (extractModelB b a) (extractModelB_symm b a) 0)
 
-/-! ## Task 505 Phase 9: B Soundness Discharges + `modalTableauB_sound`
+/-! ## B Soundness Discharges + `modalTableauB_sound`
 
-Task 513 landed (during this dispatch) the generalized frame-relativized soundness chain
+The generalized frame-relativized soundness chain
 (`modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`,
-`FrameSoundness.lean`), taking three raw hypotheses (`hAgree`/`hBoxPos`/`hDiaNeg`) rather than
+`FrameSoundness.lean`) takes three raw hypotheses (`hAgree`/`hBoxPos`/`hDiaNeg`) rather than
 a hard-coded `modalApplyOne`. B's soundness side therefore only needs to supply its own
-`hAgree`/`hBoxPos`/`hDiaNeg` triple and instantiate -- mirroring exactly how task 513 itself
-instantiated T (`hAgreeT`, `modalApplyOneT_boxPos_soundIn`, `modalApplyOneT_diaNeg_soundIn`,
-`modalTableauT_sound`). This closes the loop the plan originally isolated as a `[BLOCKED]`
-Phase 9 fallback: no fallback is needed since task 513 landed before this phase ran. -/
+`hAgree`/`hBoxPos`/`hDiaNeg` triple and instantiate -- mirroring exactly how T is
+instantiated (`hAgreeT`, `modalApplyOneT_boxPos_soundIn`, `modalApplyOneT_diaNeg_soundIn`,
+`modalTableauT_sound`). -/
 
 omit [Hashable Atom] in
 /-- **S-agree for B**: `modalApplyOneB` agrees with `modalApplyOne` off the two propagating
@@ -1916,7 +1908,7 @@ theorem modalTableauB_sound (φ : Proposition Atom) (h : modalTableauB φ = .clo
 
 /-- **The modal B tableau decides B-validity**: `modalTableauB φ0` closes exactly when `φ0` is
 B-valid. Combines soundness (`modalTableauB_sound`) with completeness
-(`modalTableauB_complete`, Phase 8) via the two-constructor dichotomy of
+(`modalTableauB_complete`, above) via the two-constructor dichotomy of
 `ModalTableauResult`. Mirrors `tValid_decides` line-for-line. -/
 theorem bValid_decides (φ0 : Proposition Atom) :
     modalTableauB φ0 = .closed ↔ bValid φ0 := by
@@ -1935,7 +1927,7 @@ instance instDecidableBValid (φ0 : Proposition Atom) : Decidable (bValid φ0) :
   | .closed => .isTrue ((bValid_decides φ0).mp h)
   | .openBranch _ _ => .isFalse (modalTableauB_complete φ0 h)
 
-/-! ## S5 Modal Truth Lemma (task 515 Phase 8 / task 504 Phase 4)
+/-! ## S5 Modal Truth Lemma
 
 `extractModelS5`'s relation is the *equivalence closure* `Relation.EqvGen acc.hasEdge`
 (`extractModelS5_r`) -- worlds an arbitrary alternating chain of recorded edges apart are
@@ -1951,7 +1943,7 @@ T's/B's take a `ReflGen`/`SymmGen` path. This is the sense in which S5's univers
 The only remaining obligation is that `Relation.EqvGen acc.hasEdge` never leaves the known-world
 set, supplied by `eqvGen_mem_modalKnownWorlds_iff` below.
 
-This section is **independent of the S5 termination chain** (`S5LoopInv`, Phases 3-6) and of the
+This section is **independent of the S5 termination chain** (`S5LoopInv`) and of the
 still-unbuilt spec-free Hintikka lift: like `modalTruthLemmaT`/`modalTruthLemmaB`, it consumes a
 `modalHintikkaSetGen modalApplyOneS5 b acc` witness as a *hypothesis*. It is therefore the half
 of S5 completeness that does not route through `RuleApplicationSpec` -- see this file's "5 / KB5
@@ -2066,7 +2058,7 @@ lemma hintikkaS5_diamond_neg
       intro x hx heq
       exact hkf (heq ▸ hx)
 
-/-- **The S5 modal truth lemma** (task 515 Phase 8 / task 504 Phase 4): on an
+/-- **The S5 modal truth lemma**: on an
 `modalApplyOneS5`-saturated open branch whose recorded edges stay inside the known-world set,
 branch membership and `extractModelS5`-satisfaction agree, at every world and both signs.
 
@@ -2075,7 +2067,7 @@ Mirrors `modalTruthLemmaT`/`modalTruthLemmaB` structurally: the propositional ca
 `modalApplyOne_*` bridge lemmas verbatim, routed through
 `modalApplyOneS5_eq_of_not_boxPos_diaNeg`; the box-negative/diamond-positive (minting) cases
 reuse the free generic projection bridges `hintikka_box_neg_gen`/`hintikka_diamond_pos_gen`
-(task 510) directly, since a raw recorded edge survives into the equivalence closure via
+directly, since a raw recorded edge survives into the equivalence closure via
 `extractModelS5_hasEdge_imp_r`.
 
 The box-positive/diamond-negative cases are where S5 differs from every other system in the
@@ -2264,7 +2256,7 @@ by that lemma's hypothesis having been *generalized* from the bundled
 bundled form was unusable for S5 on principle -- `RuleApplicationSpec modalApplyOneS5` is
 mathematically false at `rankStep` (`modalApplyOneS5_rankStep_not_dischargeable`) -- but the
 `freshLocal` fact itself holds of `modalApplyOneS5` unconditionally
-(`modalApplyOneS5_fresh_local`, task 515 Phase 7), since the S5 arms never touch accessibility.
+(`modalApplyOneS5_fresh_local`), since the S5 arms never touch accessibility.
 Generalizing cost B nothing: its call site now passes `modalApplyOneB_spec.freshLocal`. -/
 theorem modalExpandBranchesS5_openBranch_accSourcesKnown (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -2279,25 +2271,22 @@ theorem modalExpandBranchesS5_openBranch_accSourcesKnown (fuel : Nat) :
   modalExpandBranchesGen_openBranch_accSourcesKnown modalApplyOneS5 modalApplyOneS5_fresh_local
     fuel
 
-/-! ### How the four completeness ingredients are now supplied (historical scope note, RESOLVED)
+/-! ### How the four completeness ingredients are supplied
 
-This note tracked the four things `modalTableauS5_complete` (below) needs at the open branch
-`(b, a)` returned by `modalTableauS5 φ0`. All four are now landed, after `modalTableauS5` was
-re-based onto the witness-reuse rule `modalApplyOneS5w` (`S5Simplification.lean`), which
-terminates at K's own `modalFuel`:
+`modalTableauS5_complete` (below) needs four things at the open branch
+`(b, a)` returned by `modalTableauS5 φ0`, all supplied via the witness-reuse rule
+`modalApplyOneS5w` (`S5Simplification.lean`), which terminates at K's own `modalFuel`:
 
 1. `F(φ0)@0 ∈ b` -- `modalExpandBranchesGen_openBranch_initial_mem` (fully generic).
 2. `accSourcesKnown b a` -- `modalExpandBranchesGen_openBranch_accSourcesKnown` at
    `modalApplyOneS5w` (its only hypothesis is `modalApplyOneS5w_fresh_local`).
 3. `accTargetsKnown b a` -- `modalExpandBranchesGen_openBranch_accTargetsKnown` (`BDriver.lean`),
    the top-loop propagation of the generic step-level fact, at `modalApplyOneS5w`.
-4. `modalHintikkaSetGen modalApplyOneS5w b a` -- once "the wall", now supplied by
+4. `modalHintikkaSetGen modalApplyOneS5w b a` -- supplied by
    `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) at `Aux := ModalLoopAuxS5w φ0`. That
    parametric lift reaches the a-priori world bound through an opaque `Aux`, and S5w's
    instantiation discharges it by tag-cardinality counting (`S5wTagInv`/`S5wWorldInv`,
-   `modalMaxWorld_lt_worldBound_of_S5w`) with **no rank map** -- superseding the abandoned route
-   through a keyed loop invariant, which is retired to
-   `specs/515_.../archive/04_s5loopinv-preservation.lean`. `hintikka_congr`
+   `modalMaxWorld_lt_worldBound_of_S5w`) with **no rank map** needed. `hintikka_congr`
    (`S5Simplification.lean`) then converts this into the `modalHintikkaSetGen modalApplyOneS5`
    witness `modalOpenBranchS5_countermodel` consumes.
 
@@ -2431,7 +2420,7 @@ instance instDecidableS5Valid (φ₀ : Proposition Atom) : Decidable (s5Valid φ
   | .closed => .isTrue ((s5Valid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauS5_complete φ₀ hv] at h; cases h)
 
-/-! ## 5 (Euclidean Frame) Extraction (task 515 Phase 20)
+/-! ## 5 (Euclidean Frame) Extraction
 
 `extractModelS5_rightEuclidean` above already delivers *some* Euclidean coverage, but only for the
 S5 route's `EqvGen`-closed model, which is unconditionally reflexive -- strictly narrower than a
@@ -2487,12 +2476,12 @@ relate the root to itself, so universal propagation is unsound as a target there
 Euclidean truth lemma's universal-propagation direction genuinely needs the tableau's accessibility
 edges to never *target* the root -- true of every edge a real `modalTableauFive` run ever records
 (mint arms always target a strictly fresh, hence positive, world; Route (a)'s reuse arm only ever
-reuses a non-root witness, `modalApplyOneFive_agree_or_reuse_ne_root`, Phase 19b) -- but, exactly
-like `accSourcesKnown`/`accTargetsKnown`, this phase takes it as an **abstract hypothesis** of the
-truth lemma rather than re-deriving the top-loop preservation argument that would discharge it for
-an actual tableau run. That discharge (alongside the existing `accSourcesKnown`/`accTargetsKnown`
-witnesses) is Phase 21's obligation when it instantiates `modalTableauFive_complete` from a genuine
-open branch.
+reuses a non-root witness, `modalApplyOneFive_agree_or_reuse_ne_root`) -- but, exactly
+like `accSourcesKnown`/`accTargetsKnown`, this section takes it as an **abstract hypothesis** of
+the truth lemma rather than re-deriving the top-loop preservation argument that would discharge it
+for an actual tableau run. That discharge (alongside the existing `accSourcesKnown`/
+`accTargetsKnown` witnesses) is the obligation of the "Top-Loop Propagation" section below, when
+it instantiates `modalTableauFive_complete` from a genuine open branch.
 
 This hypothesis is **not** a mere convenience: without it, the universal-propagation direction is
 false in general. A raw edge `acc.hasEdge w 0` would witness a model relation `r w 0` that
@@ -2503,7 +2492,7 @@ omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Raw edge root-isolation**: every recorded accessibility edge's *target* is a non-root world.
 See the section note above for why this is a genuinely new, necessary hypothesis (not derivable
 from `accSourcesKnown`/`accTargetsKnown` alone) and why discharging it for a real tableau run is
-deferred to Phase 21. -/
+handled by the "Top-Loop Propagation" section below. -/
 def accTargetsNeRoot (acc : Accessibility) : Prop :=
   ∀ w w', acc.hasEdge w w' → w' ≠ (0 : WorldIndex)
 
@@ -2552,7 +2541,7 @@ lemma euclGen_mem_modalKnownWorlds_iff
   | base hab => exact iff_of_true (hSrc _ _ hab) (hTgt _ _ hab)
   | eucl _ _ ihab ihac => exact ihab.symm.trans ihac
 
-/-! ## Five Modal Truth Lemma (task 515 Phase 20)
+/-! ## Five Modal Truth Lemma
 
 `modalFiveBoxAll`/`modalFiveDiaNegAll` (`FiveSimplification.lean`) are **root/non-root
 asymmetric**: a non-root trigger propagates to the full non-root cluster (sound via the codomain
@@ -2679,7 +2668,7 @@ lemma hintikkaFive_diamond_neg
       intro x hx heq
       exact hkf (heq ▸ hx)
 
-/-- **The Five modal truth lemma** (task 515 Phase 20): on an `modalApplyOneFive`-saturated open
+/-- **The Five modal truth lemma**: on an `modalApplyOneFive`-saturated open
 branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`) and never target the
 root (`hRoot`), branch membership and `extractModelFive`-satisfaction agree, at every world and
 both signs.
@@ -2889,7 +2878,7 @@ countermodel to `φ`. Mirrors `modalOpenBranchS5_countermodel`.
 
 Together with `extractModelFive_rightEuclidean` (which discharges `fiveFC` for free), this is the
 countermodel half of Five completeness: it is exactly the input `modalTableauFive_complete`
-(Phase 21) would consume. -/
+below consumes. -/
 theorem modalOpenBranchFive_countermodel
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (φ : Proposition Atom)
@@ -2900,10 +2889,10 @@ theorem modalOpenBranchFive_countermodel
     ¬ Satisfies (extractModelFive b acc) 0 φ :=
   (modalTruthLemmaFive b acc hSrc hTgt hRoot hH φ 0).2 hF
 
-/-! ## Top-Loop Propagation of `accTargetsNeRoot` (task 515 Phase 21)
+/-! ## Top-Loop Propagation of `accTargetsNeRoot`
 
 `modalOpenBranchFive_countermodel` takes `accTargetsNeRoot acc` as an abstract hypothesis
-(Phase 20's design finding: the universal-propagation direction of the truth lemma is false in
+(the universal-propagation direction of the truth lemma is false in
 general without it). This section discharges it for a **real** `modalTableauFive`/
 `modalExpandBranchesFive` run, exactly as `modalExpandBranchesGen_openBranch_accSourcesKnown`/
 `_accTargetsKnown` (`BDriver.lean`) already discharge `hSrc`/`hTgt`, so `modalTableauFive_complete`
@@ -2913,7 +2902,7 @@ Unlike `accSourcesKnown`/`accTargetsKnown` (which are preserved by *any* rule sa
 generic `hFreshLocal` dichotomy), root-isolation is a fact specific to `modalApplyOneFive`'s own
 guard shape (`FiveSimplification.lean`): a genuine mint targets `modalNextWorld b`, always
 positive since `WorldIndex := Nat`; a Route (a) reuse targets a witness that
-`modalApplyOneFive_agree_or_reuse_ne_root` (Phase 19b) already certifies non-root. Also unlike
+`modalApplyOneFive_agree_or_reuse_ne_root` already certifies non-root. Also unlike
 `accSourcesKnown`/`accTargetsKnown` individually, `accTargetsNeRoot`'s single-step preservation
 needs `accTargetsKnown` as an ambient invariant (to invoke
 `modalApplyOneFiveProp_knownWorlds_step`'s own `hknown` hypothesis) -- the same "necessary THIRD
@@ -2944,7 +2933,7 @@ private lemma modalNextWorld_ne_zero_Five
 
 /-- **`modalApplyOneFive`'s edge-target root-isolation, per call**: whenever a step of
 `modalApplyOneFive` records a new accessibility edge, that edge's target is non-root. Combines
-`modalApplyOneFive_agree_or_reuse_ne_root` (Phase 19b: a reuse edge's target is the witness
+`modalApplyOneFive_agree_or_reuse_ne_root` (a reuse edge's target is the witness
 `sf'.label`, already known non-root there) with `modalApplyOneFiveProp_knownWorlds_step` (a
 genuine mint edge's target is `modalNextWorld b`, non-root since `WorldIndex := Nat` gives
 `modalNextWorld b = modalMaxWorld b + 1 ≥ 1` unconditionally). The per-call companion
@@ -3038,7 +3027,7 @@ theorem modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot (fuel : Na
       exact ⟨hboth.1 b' hb', hboth.2⟩)
     fuel
 
-/-! ## `ModalLoopAuxFive`: the Hintikka Wall's `Aux` Instantiation (Phase 21b, recipe step 3)
+/-! ## `ModalLoopAuxFive`: the Hintikka Wall's `Aux` Instantiation (recipe step 3)
 
 Assembles `modalStepBranchFive_preserves_worldInv` (`FiveSimplification.lean`) into the
 `AuxStepPreserved`/`AuxBounds` pair `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) needs
@@ -3066,8 +3055,7 @@ def ModalLoopAuxFive (φ₀ : Proposition Atom)
 omit [Hashable Atom] in
 /-- **`ModalLoopAuxFive` entails the world bound**: the pointwise `AuxBounds` obligation,
 discharged by routing `FiveWorldInvE` back to the already-landed, `e`-independent `FiveWorldInv`
-(`FiveWorldInvE_imp_FiveWorldInv`) and then `modalMaxWorld_lt_worldBound_of_FiveWorldInv`
-(Phase 19a). -/
+(`FiveWorldInvE_imp_FiveWorldInv`) and then `modalMaxWorld_lt_worldBound_of_FiveWorldInv`. -/
 theorem ModalLoopAuxFive_bounds (φ₀ : Proposition Atom) :
     AuxBounds φ₀ (ModalLoopAuxFive φ₀) := by
   rintro b e acc ⟨-, hWE⟩
@@ -3112,18 +3100,18 @@ lemma modalLoopInvHintikkaFive_initial (φ₀ : Proposition Atom) :
   · simp only [FiveWorldInvE, modalMaxWorld, List.foldl_cons, List.foldl_nil]
     exact Nat.zero_le _
 
-/-! ## Five Completeness and `fiveValid` Decidability (Phase 21b, recipe step 4)
+/-! ## Five Completeness and `fiveValid` Decidability (recipe step 4)
 
 `modalTableauFive` runs the witness-reuse, root-aware rule `modalApplyOneFive`
 (`FiveSimplification.lean`), which terminates at K's own `modalFuel`. Items 1-3 of the
 completeness ingredients are supplied by the generic top-loop lemmas at `modalApplyOneFive`
 (`modalApplyOneFive_fresh_local` is the only hypothesis they take) plus the bespoke
-`accTargetsNeRoot` top-loop pair (Phase 21.1), and item 4 -- "the wall" -- is supplied by
+`accTargetsNeRoot` top-loop pair above, and item 4 -- "the wall" -- is supplied by
 `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) at `Aux := ModalLoopAuxFive φ₀` (recipe
 steps 1-3 above). Unlike the S5 chain, no `hintikka_congr`-style bridge is needed:
-`modalTableauFive` already runs `modalApplyOneFive` directly (Phase 21's investigation finding,
+`modalTableauFive` already runs `modalApplyOneFive` directly --
 `modalOpenBranchFive_countermodel` above already takes `modalHintikkaSetGen modalApplyOneFive`
-as its witness). -/
+as its witness. -/
 
 /-- **Five-completeness of the modal tableau**: if `φ₀` is `fiveValid`, the Five tableau closes
 on it. Contrapositively: an open branch is a genuine right-Euclidean-frame countermodel.
@@ -3131,7 +3119,7 @@ on it. Contrapositively: an open branch is a genuine right-Euclidean-frame count
 Assembled from the four landed pieces at `apply := modalApplyOneFive` --
 `modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxFive`),
 `modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean`),
-`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot` (Phase 21.1),
+`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot` (above),
 `modalExpandBranchesGen_openBranch_initial_mem`, and `modalOpenBranchFive_countermodel` above --
 with `extractModelFive_rightEuclidean` discharging `fiveFC` for free. Mirrors
 `modalTableauS5_complete`. -/
@@ -3222,7 +3210,7 @@ instance instDecidableFiveValid (φ₀ : Proposition Atom) : Decidable (fiveVali
   | .closed => .isTrue ((fiveValid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauFive_complete φ₀ hv] at h; cases h)
 
-/-! ## KB5 (Symmetric-Euclidean/PER Frame) Extraction -- SCOUTING (task 515 Phase 23)
+/-! ## KB5 (Symmetric-Euclidean/PER Frame) Extraction
 
 Extract a Kripke model using the *symmetric right-Euclidean closure*
 `Relation.EuclGen (Relation.SymmGen acc.hasEdge)` as the model's relation: right-Euclidean
@@ -3276,7 +3264,7 @@ lemma extractModelKb5_hasEdge_imp_r (b : List (SignedFormula (Proposition Atom) 
   rw [extractModelKb5_r]
   exact Relation.EuclGen.base (Relation.SymmGen.of_rel h)
 
-/-! ### KB5 Reachability & Known-Worlds Infrastructure (task 525 Phase 1)
+/-! ### KB5 Reachability & Known-Worlds Infrastructure
 
 The symmetrized base means the closure's `base` case is now `Relation.SymmGen acc.hasEdge`
 (either `acc.hasEdge a c` or `acc.hasEdge c a`) rather than a single raw direction, so both the
@@ -3323,8 +3311,8 @@ lemma extractModelKb5_root_reach_mem_modalKnownWorlds
   (symmEuclGen_mem_modalKnownWorlds_iff b acc hSrc hTgt (extractModelKb5_r b acc ▸ h)).mp h0
 
 omit [Hashable Atom] in
-/-- **The ∃-raw-edge-in-derivation witness for the corrected rule's self-target arm** (task 528
-Phase 4, Risk 3): any world `w` (other than the root) that reaches the root under
+/-- **The ∃-raw-edge-in-derivation witness for the corrected rule's self-target arm**: any world
+`w` (other than the root) that reaches the root under
 `extractModelKb5`'s relation is itself a known non-root world -- exactly the `clusterNonempty`
 witness `hintikkaKb5''_box_pos`/`hintikkaKb5''_diamond_neg`'s `v = 0` arm needs. Immediate from
 `symmEuclGen_mem_modalKnownWorlds_iff`'s `.mpr` direction at `(w, 0)`, given the root is known
@@ -3440,7 +3428,7 @@ lemma hintikkaKb5''_diamond_neg
       intro x hx heq
       exact hkf (heq ▸ hx)
 
-/-! ### Phase 5: The KB5 Truth Lemma (task 528)
+/-! ### The KB5 Truth Lemma
 
 `modalTruthLemmaKb5` is the lemma that was mathematically FALSE for the retired frozen root-gated
 rule (see `modalTruthLemmaKb5`'s docstring for the retained counterexample) and is now TRUE for the
@@ -3485,7 +3473,7 @@ private lemma euclGen_symmGen_exists_base {α : Type*} {r : α → α → Prop} 
 
 omit [Hashable Atom] in
 /-- **Cluster-nonempty witness for the root-self-relate case**: complements
-`extractModelKb5_clusterNonempty_of_reach_root` (Phase 4), which handles a non-root world
+`extractModelKb5_clusterNonempty_of_reach_root` (above), which handles a non-root world
 reaching the root; this covers the residual case where the closure relates the root to itself
 (`(extractModelKb5 b acc).r 0 0`), which the box-positive/diamond-negative truth-lemma cases need
 regardless of whether the trigger `w` is itself `0`. Only needs `hTgt`/`hRoot`
@@ -3503,14 +3491,14 @@ lemma extractModelKb5_clusterNonempty_of_root_selfRelate
   · exact ⟨q, hTgt _ _ hpq, hRoot _ _ hpq⟩
   · exact ⟨p, hTgt _ _ hpq, hRoot _ _ hpq⟩
 
-/-- **The KB5 modal truth lemma** (task 528 Phase 5): on a `modalApplyOneKb5''`-saturated open
+/-- **The KB5 modal truth lemma**: on a `modalApplyOneKb5''`-saturated open
 branch whose recorded edges stay inside the known-world set (`hSrc`/`hTgt`), never target the root
 (`hRoot`), and whose root is always known (`h0`), branch membership and
 `extractModelKb5`-satisfaction agree, at every world and both signs. This is the lemma that is
 mathematically FALSE for the retired frozen root-gated rule and TRUE for the corrected-gate rule:
 the trigger-free dichotomy lets the box-positive/diamond-negative cases discharge their `v = 0`
 sub-case unconditionally in the trigger `w`, via `extractModelKb5_clusterNonempty_of_reach_root`
-(Phase 4, `w ≠ 0`) and `extractModelKb5_clusterNonempty_of_root_selfRelate` (above, `w = 0`).
+(above, `w ≠ 0`) and `extractModelKb5_clusterNonempty_of_root_selfRelate` (above, `w = 0`).
 
 **Why the retired rule could never prove this (counterexample, preserved here as documentation)**:
 the retired rule's box-positive/diamond-negative propagation dumped a self-target `0` only when
@@ -3732,23 +3720,24 @@ lemma modalTruthLemmaKb5
           hintikkaKb5''_diamond_neg b acc hH ψ w w' hmem hcond
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2 hF hsψ
 
-/-! ### Phase 6: Top-Loop Propagation of `accTargetsNeRoot` and Root-Known-ness
+/-! ### Top-Loop Propagation of `accTargetsNeRoot` and Root-Known-ness
 for `modalApplyOneKb5''`
 
-`modalTruthLemmaKb5` (Phase 5) takes `accTargetsNeRoot acc` and `(0 : WorldIndex) ∈
+`modalTruthLemmaKb5` (above) takes `accTargetsNeRoot acc` and `(0 : WorldIndex) ∈
 modalKnownWorlds b` as abstract hypotheses, exactly as `modalOpenBranchFive_countermodel` took
-`accTargetsNeRoot acc` (Five's Phase 21). This section discharges both for a **real**
-`modalTableauKb5''`/`modalExpandBranchesKb5''` run, mirroring Five's Phase 21
-(`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot`) with one addition: the KB5''
+`accTargetsNeRoot acc` for Five. This section discharges both for a **real**
+`modalTableauKb5''`/`modalExpandBranchesKb5''` run, mirroring Five's own
+`modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot` with one addition: the KB5''
 per-call root-isolation fact (`modalApplyOneKb5''_edge_target_ne_root` below) routes through
-`modalApplyOneKb5''Prop_knownWorlds_step` (Phase 3), which -- unlike Five's analogue -- ALSO needs
-`(0 : WorldIndex) ∈ modalKnownWorlds b` as an ambient hypothesis (the "root always known"
-invariant Phase 3 already discovered and threaded through the soundness side). So the top-loop
-induction below bundles THREE invariants together (`accTargetsKnown`, `accTargetsNeRoot`, and
-root-known-ness), not Five's two -- `accSourcesKnown`/`accTargetsKnown` individually remain free
-via the fully generic `modalExpandBranchesGen_openBranch_accSourcesKnown`/
-`_accTargetsKnown` (`BDriver.lean`), consuming only `modalApplyOneKb5''_fresh_local` (Phase 2);
-those generic bridges are used directly at the Phase 7 assembly site and are NOT re-derived here. -/
+`modalApplyOneKb5''Prop_knownWorlds_step` (`FiveSimplification.lean`), which -- unlike Five's
+analogue -- ALSO needs `(0 : WorldIndex) ∈ modalKnownWorlds b` as an ambient hypothesis (the
+"root always known" invariant that lemma's own development already threads through the soundness
+side). So the top-loop induction below bundles THREE invariants together (`accTargetsKnown`,
+`accTargetsNeRoot`, and root-known-ness), not Five's two -- `accSourcesKnown`/`accTargetsKnown`
+individually remain free via the fully generic
+`modalExpandBranchesGen_openBranch_accSourcesKnown`/`_accTargetsKnown` (`BDriver.lean`), consuming
+only `modalApplyOneKb5''_fresh_local` (`FiveSimplification.lean`); those generic bridges are used
+directly at the assembly site below and are NOT re-derived here. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
 private lemma modalKnownWorlds_fold_spec_C
@@ -3810,7 +3799,7 @@ private lemma modalKnownWorlds_mono_append_C
 /-- **Every new branch a step produces is the old branch with formulas prepended**, hence
 `modalKnownWorlds`-monotone over it. Rule-generic (any `apply`); mirrors the `hbsub` fact inside
 `FmpMeasure.lean`'s `modalStepBranch_preserves_accTargetsKnown_gen` proof, exposed here as its own
-lemma since Phase 6 needs it for root-known-ness preservation, not just `accTargetsKnown`. -/
+lemma since this section needs it for root-known-ness preservation, not just `accTargetsKnown`. -/
 private lemma modalStepBranchGen_knownWorlds_mono_C
     (apply : RuleApply Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -3871,8 +3860,8 @@ private lemma modalNextWorld_ne_zero_C
 there) with `modalApplyOneKb5''Prop_knownWorlds_step` (a genuine mint edge's target is
 `modalNextWorld b`, non-root since `WorldIndex := Nat`). Unlike Five's analogue
 (`modalApplyOneFive_edge_target_ne_root`), also takes `h0` --
-`modalApplyOneKb5''Prop_knownWorlds_step` needs the root-known invariant Phase 3 discovered.
-Mirrors `modalApplyOneFive_edge_target_ne_root`. -/
+`modalApplyOneKb5''Prop_knownWorlds_step` needs the root-known invariant that lemma's own
+development discovered. Mirrors `modalApplyOneFive_edge_target_ne_root`. -/
 lemma modalApplyOneKb5''_edge_target_ne_root
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -3948,7 +3937,7 @@ at `modalApplyOneKb5''`**: instantiates the generic `modalExpandBranchesGen_open
 (`BDriver.lean`) at the conjoined predicate `P := fun b acc => accTargetsKnown b acc ∧
 (0 ∈ modalKnownWorlds b) ∧ accTargetsNeRoot acc`. Mirrors
 `modalExpandBranchesFive_openBranch_accTargetsKnown_and_NeRoot`, extended with the third conjunct
-`modalTruthLemmaKb5` (Phase 5) needs. -/
+`modalTruthLemmaKb5` (above) needs. -/
 theorem modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),
@@ -3970,7 +3959,7 @@ theorem modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootK
       exact ⟨(hboth.1 b' hb').1, (hboth.1 b' hb').2, hboth.2⟩)
     fuel
 
-/-! ## `ModalLoopAuxKb5''`: the Hintikka Wall's `Aux` Instantiation (task 528 Phase 6)
+/-! ## `ModalLoopAuxKb5''`: the Hintikka Wall's `Aux` Instantiation
 
 Assembles `modalStepBranchKb5''_preserves_worldInv` (`FiveSimplification.lean`) into the
 `AuxStepPreserved`/`AuxBounds` pair `modalExpandBranchesHintikka` (`CompletenessLoop.lean`) needs
@@ -3979,7 +3968,7 @@ to supply the fourth completeness ingredient -- the Hintikka "wall" -- for a rea
 `modalLoopInvHintikkaFive_initial` above, extended with a THIRD bundled conjunct (root-known-ness)
 `AuxStepPreserved`'s ambient hypotheses (`accFreshInv`/`accTargetsKnown`) do not supply but
 `modalApplyOneKb5''_worldGrowth`'s propagation-shape case needs -- the same pattern this file's
-Phase 6 top-loop section above already established for `accTargetsKnown ∧ accTargetsNeRoot ∧
+top-loop propagation section above already established for `accTargetsKnown ∧ accTargetsNeRoot ∧
 rootKnown`. `FiveWorldInvE`/`expandedRootTagsFive` are reused directly (no `Kb5''`-named fork --
 per `FiveSimplification.lean`'s own Kb5''-termination-bound precedent, these are already
 rule-independent, so aliasing would only add surface area with no new content). -/
@@ -4007,7 +3996,7 @@ theorem ModalLoopAuxKb5''_bounds (φ₀ : Proposition Atom) :
 `modalUniverse`-closure and `FiveWorldInvE` conjuncts are discharged together by
 `modalStepBranchKb5''_preserves_worldInv` (`FiveSimplification.lean`), fed the root-known-ness
 conjunct as its extra `h0` hypothesis; root-known-ness itself is preserved for every child branch
-by `modalStepBranchGen_knownWorlds_mono_C` (this file's Phase 6 top-loop section above). -/
+by `modalStepBranchGen_knownWorlds_mono_C` (this file's top-loop propagation section above). -/
 theorem ModalLoopAuxKb5''_stepPreserved (φ₀ : Proposition Atom) :
     AuxStepPreserved modalApplyOneKb5'' (ModalLoopAuxKb5'' φ₀) := by
   rintro b e acc newBs newExps newAcc hstep hFresh hKnown ⟨hb, hWE, h0⟩ p hp
@@ -4047,17 +4036,17 @@ lemma modalLoopInvHintikkaKb5''_initial (φ₀ : Proposition Atom) :
     exact Nat.zero_le _
   · exact label_mem_modalKnownWorlds (List.mem_singleton_self _)
 
-/-! ## Kb5'' Completeness and `kb5Valid` Decidability (task 528 Phase 7)
+/-! ## Kb5'' Completeness and `kb5Valid` Decidability
 
-Mirrors Five's own Phase 21b assembly (`modalOpenBranchFive_countermodel`/`modalTableauFive_
+Mirrors Five's own assembly (`modalOpenBranchFive_countermodel`/`modalTableauFive_
 complete`/`fiveValid_decides`/`instDecidableFiveValid` above) at the corrected-gate rule, threading
-the extra `h0`/root-known-ness ingredient `modalTruthLemmaKb5` (Phase 5) and `ModalLoopAuxKb5''`
-(Phase 6) both need beyond Five's own two-hypothesis shape. -/
+the extra `h0`/root-known-ness ingredient `modalTruthLemmaKb5` (above) and `ModalLoopAuxKb5''`
+(above) both need beyond Five's own two-hypothesis shape. -/
 
 /-- An open Kb5'' Hintikka branch with `F(φ)@0 ∈ b` (and the known-world edge closure
 `accSourcesKnown`/`accTargetsKnown`/`accTargetsNeRoot`/root-known-ness) yields a **symmetric
 right-Euclidean-frame** Kripke countermodel to `φ`. Mirrors `modalOpenBranchFive_countermodel`,
-threading the extra `h0` hypothesis `modalTruthLemmaKb5` (Phase 5) needs. -/
+threading the extra `h0` hypothesis `modalTruthLemmaKb5` (above) needs. -/
 theorem modalOpenBranchKb5''_countermodel
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) (φ : Proposition Atom)
@@ -4071,9 +4060,9 @@ theorem modalOpenBranchKb5''_countermodel
 /-- **Kb5''-completeness of the modal tableau**: if `φ₀` is `kb5Valid`, the corrected-gate KB5
 tableau closes on it. Contrapositively: an open branch is a genuine symmetric right-Euclidean-frame
 countermodel. Assembled from the four landed pieces at `apply := modalApplyOneKb5''` --
-`modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxKb5''`, Phase 6),
+`modalExpandBranchesHintikka` (the spec-free Hintikka lift, at `ModalLoopAuxKb5''`, above),
 `modalExpandBranchesGen_openBranch_accSourcesKnown` (`BDriver.lean`),
-`modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown` (Phase 6),
+`modalExpandBranchesKb5''_openBranch_accTargetsKnown_and_NeRoot_and_rootKnown` (above),
 `modalExpandBranchesGen_openBranch_initial_mem`, and `modalOpenBranchKb5''_countermodel` above --
 with `extractModelKb5_rightEuclidean`/`extractModelKb5_symm` discharging `kb5FC` for free. Mirrors
 `modalTableauFive_complete`. -/

@@ -469,7 +469,7 @@ output splits three ways:
 - **Blocked:** 2026-07-24 — `nik_adequacy` against `nikTr` machine-proven FALSE
   (`probes/nik_adequacy_falseness.lean`; reports/06_falseness-machine-check.md).
 
-### Phase 9: MANDATORY PROBE GATE — adversarial validation of `Θ ⊃ place` [IN PROGRESS]
+### Phase 9: MANDATORY PROBE GATE — adversarial validation of `Θ ⊃ place` [BLOCKED]
 
 **This is a hard gate, not a suggestion. No Phase 10+ work may begin until this phase reports
 PASS.** Rationale: a prose reconstruction from a damaged source already produced a false-making
@@ -563,6 +563,49 @@ place(x,Q)` (by `rfl`, no theorem), flat `boxIter (ht x) A` otherwise. Result:
         precisely-localized-residual per case (`theta_place_layered.lean`'s header comment).
         Final `Θ`/`place` definitions (subject to the Phase 13 residual above) to be transcribed
         into `Cslib/` in Phase 11, once the residual is resolved one way or the other.
+
+**Dispatch 3 finding (FINAL, 3/3 cap; `probes/theta_place_final_gate.lean`, sorry-free, no
+`sorryAx`, exit 0): the residual is resolved — definitively, against the candidate.** Rather than
+inspecting `cs5_completeness`'s canonical construction (dispatch 2's suggested next step), this
+dispatch answers the reachability question directly from `Deduction.lean`'s own `NIK` constructor
+signatures: `impI`/`orE`/`diaE` extend `Γ` with a **fully unrestricted** `Proposition Atom` (no
+atomicity side-condition anywhere in the inductive definition). Since `nik_adequacy`'s own stated
+signature (line 660, above) is established to quantify over **every** `Γ` with **no**
+`x ∈ G.X`/`labels(Γ) ⊆ G.X` restriction, its `assumption`-case proof obligation must be discharged
+for every `Γ` reachable via `NIK`'s own rules — independently of what any *particular* caller
+(`cs5_completeness` included) happens to instantiate. This makes the Phase-13-scoped
+`cs5_completeness`-inspection route moot: the obstruction is intrinsic to the calculus, not to a
+specific canonical-model construction.
+
+Two machine-checked parts settle it:
+1. `compound_assumption_derivation` — a genuine, closed `NIK TS5` term (not a hypothesis)
+   discharging a literally-compound (`P0 ∨ P1`) context assumption via ordinary `impI` (proving
+   the unremarkable `c2 : (P0∨P1) ⊃ (P0∨P1)`), at depth 1 below root (`Gt2`/`c2`, the same case-D
+   graph dispatches 1-2 used). This is the concrete reachability witness.
+2. `hOrFlat_concrete` — NOT a hypothesis: concretely DERIVED, by unfolding `sigAt`'s actual
+   `factsAt`-fold at `c2` (`sigAtFuel_ΓCompound_c2_imp` + `sigAt_r_imp_box_sigAtFuel_c2`, using
+   only the landed Preserved-Asset `sigAtFuel`/`bigAndL` machinery), that `Θ(Gt2,ΓCompound,r)`
+   implies ONLY the flat `□(P0∨P1)` — never the split `□P0 ∨ □P1` — for exactly the `Γ` (1) shows
+   is genuinely reachable. `caseD_assumption_needs_bridge` then shows closing the resulting
+   split-form obligation needs exactly the established non-theorem bridge, with no alternative
+   route found (same non-exhaustive-but-thorough search dispatches 1-2 conducted; not
+   re-attempted here per the hard instruction against re-litigating the bridge).
+
+**GATE VERDICT: (b) GATE FAIL, definitive.** The layered `Θ`/`place` candidate (dispatch 2)
+cannot complete `nik_adequacy` in general — the obstruction is structurally forced by `sigAt`'s
+WHOLESALE (non-recursive) `factsAt`-fold, which cannot see inside a context fact's own top
+connective, combined with `place` recursing into `∨` only at the point of TARGET translation,
+never inside `Θ`'s CONTEXT translation. The fix would require `sigAt` itself to split compound
+context facts recursively — exactly the kind of change the postmortem constraints forbid (`sigAt`
+is a Preserved Asset), so it is out of Phase 9's remit. **Phase 9's 3-dispatch cap is exhausted
+with a definitive FAIL. This phase is `[BLOCKED]`; the task must escalate for a re-plan** — either
+(i) lift the `sigAt`-frozen postmortem constraint and redesign `Θ`'s context-fold to split
+compound facts recursively, or (ii) abandon the target-independent-`Θ` strategy for the
+alternative `nikTr`-per-label route already partially landed in `Soundness.lean` (`sigAt_assumption`
+closes `assumption` for free there, since it concludes AT the assumption's own label with no
+boxing at all — but that route has its own, *different*, documented obstruction: `efq`/`orE`'s
+cross-label lowest-common-ancestor bridging, `Soundness.lean:1889-1911`, not adjudicated here).
+Phase 10+ remains BLOCKED pending this re-plan decision.
 - **PASS criterion (the gate):** cases A, B, C each fail to refute the candidate — the reductio
   does **not** compile while the corresponding positive derivation **does** — AND case E's collapse
   compiles, AND case D's finding is recorded. The probe file compiles under `lake env lean` at exit

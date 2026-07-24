@@ -212,24 +212,34 @@ only.
   `∀ keys`). All `lean_verify`-confirmed `propext`/`Classical.choice`/`Quot.sound` only;
   `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green, zero new warnings, zero `sorry`.
 
-### Phase 5 (handoff 3c): `modalFuelS4` + entry-measure sufficiency + fuel repoint [NOT STARTED]
+### Phase 5 (handoff 3c): `modalFuelS4` + entry-measure sufficiency + fuel repoint [COMPLETED]
 
 - **Goal:** Define an S4-specific fuel from `modalUniverseS4 φ₀`'s length and prove the entry
   configuration's measure is within it, then repoint `modalTableauS4Keyed`'s fuel argument.
   CONFIRMED not free: at `modalComplexity φ₀ = 0`, `modalWorldBoundS4 φ₀ ≤ 4` exceeds K's
   `modalWorldBound φ₀ = 1`, so `modalFuel φ₀` is not provably sufficient.
 - **Tasks:**
-  - [ ] Define `modalFuelS4 φ₀ := 3 ^ (2 * (modalUniverseS4 φ₀).length + 1)` (or similar closed form).
-  - [ ] Prove entry-measure ≤ `modalFuelS4 φ₀`, mirroring `modalExpMeasure_entry_le_fuel`'s proof
+  - [x] Define `modalFuelS4 φ₀ := 3 ^ (2 * (modalUniverseS4 φ₀).length + 1)` (or similar closed form).
+        *(landed as `modalFuelS4 φ₀ := 3 ^ (4 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1))`
+        -- the exact closed form `modalFuel` itself uses, with `modalWorldBoundS4` swapped in;
+        placed early in the file, right after `modalUniverseS4_length_le`, so it is in scope for
+        `modalTableauS4Keyed`'s def which comes later.)*
+  - [x] Prove entry-measure ≤ `modalFuelS4 φ₀`, mirroring `modalExpMeasure_entry_le_fuel`'s proof
         shape (`FmpMeasure.lean:208-247`) via `modalWork`'s `|U\b|+|U\e|` form — no K-fuel comparison.
-  - [ ] Repoint `modalTableauS4Keyed`'s fuel argument (Phase 1 def) from `modalFuel φ₀` to
+        *(landed as `modalExpMeasure_entry_le_fuelS4`; the `modalWork ≤ 2*U.length` step transfers
+        verbatim since it is universe-agnostic.)*
+  - [x] Repoint `modalTableauS4Keyed`'s fuel argument (Phase 1 def) from `modalFuel φ₀` to
         `modalFuelS4 φ₀` (small, safe def edit; the only edit to a Phase-1 declaration).
-  - [ ] `lean_build` green; no `sorry`; `lean_verify` axiom-clean.
+  - [x] `lean_build` green; no `sorry`; `lean_verify` axiom-clean.
 - **Timing:** 2 hours (~100-150 lines)
 - **Depends on:** 1 (edits `modalTableauS4Keyed`'s fuel argument)
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive + one-line fuel repoint).
 - **Verification:** `lean_goal` no remaining goals on the entry-measure lemma; `modalTableauS4Keyed`
   recompiles green with the new fuel; `lean_verify` axiom-clean.
+- **Completed:** 2026-07-24. `lean_verify modalExpMeasure_entry_le_fuelS4`: `propext`/`Quot.sound`
+  only. Regression check `lean_verify hintikka_congr_S4` (consumes `modalExpandBranchesS4Keyed`,
+  `modalTableauS4Keyed`'s sibling def): unchanged, `propext`/`Classical.choice`/`Quot.sound` only.
+  `lake build` green, zero new warnings, zero `sorry`.
 
 ### Phase 6 (handoff 3d-i): Keys-threaded Hintikka-tracking invariant bundle [NOT STARTED]
 

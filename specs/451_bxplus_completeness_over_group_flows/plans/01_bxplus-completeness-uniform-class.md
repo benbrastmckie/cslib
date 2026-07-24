@@ -141,7 +141,7 @@ general lemma the research identified (reusable, unlocks task 450).
 
 ---
 
-### Phase 2: `validMetricUniform` definition + soundness over `U` [IN PROGRESS]
+### Phase 2: `validMetricUniform` definition + soundness over `U` [COMPLETED]
 
 **Goal**: Define the uniform-class validity `U` and prove BX⁺ soundness over it (packaging option
 (b)), so soundness and completeness are stated over the same class.
@@ -184,7 +184,7 @@ is exactly task 449's `axiom_sound_metric`).
 
 ---
 
-### Phase 3: Uniformity axioms satisfied at every chronicle point [NOT STARTED]
+### Phase 3: Uniformity axioms satisfied at every chronicle point [IN PROGRESS]
 
 **Goal**: Prove the new propagation lemma(s): the chronicle model built from a Metric-MCS
 satisfies each of the four uniformity axiom formulas at every chronicle point — the Metric analogue

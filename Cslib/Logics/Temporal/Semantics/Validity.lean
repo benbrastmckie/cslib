@@ -42,6 +42,8 @@ discrete are incomparable (neither implies the other).
 
 - `Temporal.valid`, `Temporal.validSerial`, `Temporal.validDense`,
   `Temporal.validDiscrete`: Validity quantified over appropriate linear orders.
+- `Temporal.validMetricUniform`: Validity over the uniform class `U` (the four
+  metric-uniformity axiom schemata hold at every point of every model).
 - `Temporal.semanticConsequence`: Semantic consequence from a context.
 - `Temporal.satisfiable`, `Temporal.formulaSatisfiable`: Satisfiability.
 - Scoped notation: `⊨ φ` for validity, `Γ ⊨ φ` for semantic consequence
@@ -97,6 +99,34 @@ def validDiscrete (φ : Formula Atom) : Prop :=
   ∀ (D : Type) [LinearOrder D] [Nontrivial D]
     [NoMaxOrder D] [NoMinOrder D]
     [SuccOrder D] [PredOrder D] [IsSuccArchimedean D]
+    (M : TemporalModel D Atom) (t : D),
+    Satisfies M t φ
+
+/-- The uniform-frame condition at `D`: the four metric-uniformity axiom schemata
+(`discrete_symm_fwd/bwd`, `discrete_propagate_fwd/bwd`) are satisfied at every point of every
+model on `D`. Since the four schemata are built purely from `⊥`/`⊤` (no atoms), this condition
+is purely structural on the order `D`; it is the propositional stand-in for membership in
+Burgess's uniform class `U`, packaged as an explicit hypothesis because no Mathlib typeclass
+captures "uniform" directly. -/
+def uniformFrameCondition (D : Type*) [LinearOrder D] : Prop :=
+  ∀ (M : TemporalModel D Atom) (t : D),
+    Satisfies M t ((Formula.untl Formula.bot Formula.top).imp
+      (Formula.snce Formula.bot Formula.top)) ∧
+    Satisfies M t ((Formula.snce Formula.bot Formula.top).imp
+      (Formula.untl Formula.bot Formula.top)) ∧
+    Satisfies M t ((Formula.untl Formula.bot Formula.top).imp
+      (Formula.allFuture (Formula.untl Formula.bot Formula.top))) ∧
+    Satisfies M t ((Formula.untl Formula.bot Formula.top).imp
+      (Formula.allPast (Formula.untl Formula.bot Formula.top)))
+
+/-- A formula is valid over the uniform class `U`: serial linear orders satisfying
+`uniformFrameCondition`. This is Burgess's "uniform" (dense-or-discrete-uniform) class. The
+explicit `uniformFrameCondition` hypothesis plays the role that `[DenselyOrdered D]` plays in
+`validDense` — a structural condition on `D` — packaged as a `Prop` argument instead of an
+instance. -/
+def validMetricUniform (φ : Formula Atom) : Prop :=
+  ∀ (D : Type) [LinearOrder D] [Nontrivial D] [NoMaxOrder D] [NoMinOrder D]
+    (_h_uniform : uniformFrameCondition (Atom := Atom) D)
     (M : TemporalModel D Atom) (t : D),
     Satisfies M t φ
 

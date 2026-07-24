@@ -275,6 +275,16 @@ lemma modalUniverseS4_length_le (φ₀ : Proposition Atom) :
       ≤ (modalWorldBoundS4 φ₀ + 1) * (2 * (2 * modalComplexity φ₀ + 1)) := houter
     _ = 2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
 
+/-- The S4-specific closed-form fuel bound for the keyed driver, built the same way `modalFuel`
+is (`Saturation.lean`) but over the S4 pigeonhole world bound `modalWorldBoundS4` instead of the
+tree-shaped `modalWorldBound`: `modalFuel φ₀` is confirmed NOT provably sufficient for the S4
+keyed loop (at `modalComplexity φ₀ = 0`, `modalWorldBoundS4 φ₀ = 4` exceeds K's
+`modalWorldBound φ₀ = 1`). Declared here (alongside `modalWorldBoundS4`/`modalUniverseS4`) so it
+is in scope for `modalTableauS4Keyed`'s fuel argument below; sufficiency is proved later by
+`modalExpMeasure_entry_le_fuelS4`. -/
+def modalFuelS4 (φ₀ : Proposition Atom) : Nat :=
+  3 ^ (4 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1))
+
 /-! ## Signed-Key Finite Codomain
 
 The stable-key infrastructure the redesigned guard/invariant below consumes: the fixed
@@ -4729,14 +4739,15 @@ def modalExpandBranchesS4Keyed
 
 /-- The keyed S4 modal tableau decision procedure: the entry point for the bespoke keyed driver,
 mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with `keys := []`
-at the start (no world has been born yet). Fuel is `modalFuel φ` (K's fuel), confirmed sufficient
-for the S4 keyed loop in Phase 3 against the pigeonhole world bound `modalWorldBoundS4`. The
-live `modalTableauS4` is NOT redefined; `instDecidableS4Valid` (Phase 5) points at this
-declaration instead. -/
+at the start (no world has been born yet). Fuel is `modalFuelS4 φ`, the S4-specific fuel bound
+(sufficiency: `modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT provably
+sufficient for the S4 keyed loop's pigeonhole world bound `modalWorldBoundS4`. The live
+`modalTableauS4` is NOT redefined; `instDecidableS4Valid` (Phase 11) points at this declaration
+instead. -/
 def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
     [⟨.neg, φ, 0⟩]
-  modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty] [[]] (modalFuel φ)
+  modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty] [[]] (modalFuelS4 φ)
 
 /-! ## Congruence Gate: `hintikka_congr_S4`
 
@@ -5402,6 +5413,60 @@ private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
       ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
     exact modalApplyOneS4Keyed_nonMint_universe_S4 φ₀ keys sf b acc hb hsfmem hknown hnbd
+
+/-! ## Keyed-Driver Termination Measure: Entry-Measure Sufficiency for `modalFuelS4`
+
+`modalFuel φ₀` (K's fuel) is confirmed NOT provably sufficient for the S4 keyed loop: at
+`modalComplexity φ₀ = 0`, `modalWorldBoundS4 φ₀ = 2 ^ (2 * 1) = 4` exceeds K's
+`modalWorldBound φ₀ = 1`. The dedicated `modalFuelS4` (defined earlier, alongside
+`modalWorldBoundS4`/`modalUniverseS4`, so it is in scope for `modalTableauS4Keyed`'s fuel
+argument) is shown sufficient here, mirroring `modalExpMeasure_entry_le_fuel`
+(`FmpMeasure.lean:208-251`). -/
+
+/-- **Entry-measure sufficiency for `modalFuelS4`**: at the S4 keyed tableau's entry point, the
+worklist measure over `modalUniverseS4 φ₀` is bounded by `modalFuelS4 φ₀`. Direct transcription
+of `modalExpMeasure_entry_le_fuel` (`FmpMeasure.lean:208-251`), substituting `modalUniverseS4`/
+`modalWorldBoundS4`/`modalUniverseS4_length_le` for their K counterparts -- the
+`modalWork ≤ 2 * U.length` step is universe-agnostic (`List.countP_le_length` + `simp` on the
+empty expanded-set case), so it transfers verbatim. -/
+lemma modalExpMeasure_entry_le_fuelS4 (φ₀ : Proposition Atom) :
+    modalExpMeasure (modalUniverseS4 φ₀) [[(⟨.neg, φ₀, 0⟩ :
+      SignedFormula (Proposition Atom) WorldIndex)]] [[]] ≤ modalFuelS4 φ₀ := by
+  have hmeas : modalExpMeasure (modalUniverseS4 φ₀)
+      [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+      = 3 ^ modalWork (modalUniverseS4 φ₀)
+          [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] [] := by
+    simp [modalExpMeasure]
+  rw [hmeas]
+  have hwork : modalWork (modalUniverseS4 φ₀)
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      ≤ 2 * (modalUniverseS4 φ₀).length := by
+    unfold modalWork
+    have h1 : (modalUniverseS4 φ₀).countP
+        (fun sf => !(([(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]).any
+          (· == sf))) ≤ (modalUniverseS4 φ₀).length :=
+      List.countP_le_length
+    have h2 : (modalUniverseS4 φ₀).countP
+        (fun sf => !((([] : List (SignedFormula (Proposition Atom) WorldIndex))).any
+          (· == sf))) = (modalUniverseS4 φ₀).length := by
+      simp
+    omega
+  have hUlen := modalUniverseS4_length_le φ₀
+  have hfinal : modalWork (modalUniverseS4 φ₀)
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] [] ≤
+      4 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by
+    have h2U : 2 * (modalUniverseS4 φ₀).length ≤
+        2 * (2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)) :=
+      Nat.mul_le_mul_left 2 hUlen
+    have heq : 2 * (2 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)) =
+        4 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1) := by ring
+    rw [heq] at h2U
+    omega
+  calc 3 ^ modalWork (modalUniverseS4 φ₀)
+        [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+      ≤ 3 ^ (4 * (2 * modalComplexity φ₀ + 1) * (modalWorldBoundS4 φ₀ + 1)) :=
+        Nat.pow_le_pow_right (by norm_num) hfinal
+    _ = modalFuelS4 φ₀ := rfl
 
 end Cslib.Logic.Modal.Tableau
 

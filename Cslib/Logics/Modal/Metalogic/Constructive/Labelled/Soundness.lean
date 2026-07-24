@@ -1672,6 +1672,55 @@ theorem sigAt_assumption {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFo
     List.mem_filter.mpr ⟨h, by simp⟩
   exact List.mem_map.mpr ⟨(y ∶ A), hfilt, rfl⟩
 
+/-! ### The six `P`-generic label-local cases
+
+`andI`/`andE1`/`andE2`/`orI1`/`orI2`/`impE` never inspect `sigAt`'s internal structure at all --
+each is a direct instantiation of the propositional toolkit at `P := sigAt G Γ hfin x`. -/
+
+/-- **`NIK.andI`'s core translation.** -/
+theorem sigAt_andI {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (hA : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A))
+    (hB : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp B)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.and B)) :=
+  cs5_deriv_imp_and hA hB
+
+/-- **`NIK.andE1`'s core translation.** -/
+theorem sigAt_andE1 {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.and B))) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A) :=
+  cs5_deriv_imp_andE1 h
+
+/-- **`NIK.andE2`'s core translation.** -/
+theorem sigAt_andE2 {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.and B))) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp B) :=
+  cs5_deriv_imp_andE2 h
+
+/-- **`NIK.orI1`'s core translation.** -/
+theorem sigAt_orI1 {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.or B)) :=
+  cs5_deriv_imp_orI1 h
+
+/-- **`NIK.orI2`'s core translation.** -/
+theorem sigAt_orI2 {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp B)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.or B)) :=
+  cs5_deriv_imp_orI2 h
+
+/-- **`NIK.impE`'s core translation.** -/
+theorem sigAt_impE {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {x : Label Atom} {A B : Proposition Atom}
+    (himp : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.imp B)))
+    (hA : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp B) :=
+  cs5_deriv_imp_mp himp hA
+
 end Cslib.Logic.Modal.Labelled
 
 end

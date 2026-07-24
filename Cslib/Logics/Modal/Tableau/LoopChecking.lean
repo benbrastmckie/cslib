@@ -6405,6 +6405,139 @@ private lemma modalExpMeasure_append_S4
       = modalExpMeasure U l1 e1 + modalExpMeasure U l2 e2 := by
   simp only [modalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
 
+omit [Hashable Atom] in
+/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_const_exp`
+(`:3204`), territory-local per Phase 3/8's own convention (`_S4` suffix) since the upstream
+lemma is `private` and out of territory. Identical proof, universe-generic in `U`.
+
+**Plan deviation note**: the v3 plan's Phase 8 task list named only `modalExpMeasure_split`/
+`modalExpMeasure_append` as the private helpers needing re-derivation; `modalExpMeasure_const_exp`
+is a third private helper the generic engine (`modalExpMeasure_step_lt_gen`) also relies on
+(`FmpMeasure.lean:3276`), overlooked in that enumeration. Re-derived here, by the same mechanical
+pattern, since Phase 9 (below) needs it. -/
+private lemma modalExpMeasure_const_exp_S4
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex)) :
+    modalExpMeasure U newBs (newBs.map (fun _ => newExp))
+      = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
+  simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
+
+/-! ## Phase 9: Keyed Per-Step Measure Decrease over `modalUniverseS4`
+
+Transcription of `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean:3227`, public but hardwired to
+K's `modalUniverse φ0`/`modalWorldBound φ0`) over `modalUniverseS4 φ₀`/`modalWorldBoundS4 φ₀`.
+Direct instantiation does not typecheck (see the plan's "Measure-Decrease Lead"), so the proof
+below is a line-by-line transcription consuming: Phase 3's four universe-generic combinatorial
+primitives (`_S4`-suffixed above), Phase 4's three landed per-call obligations
+(`modalApplyOneS4Keyed_branchingLength_S4`/`_persistentFresh_S4`/`_outputsSubsetUniverse_S4`),
+and Phase 8's projection bridge (`modalStepBranchS4Keyed_proj_stepBranchGen`) plus its local
+`modalExpMeasure_split_S4`/`_append_S4` helpers (and the `_const_exp_S4` helper just above).
+`hstep` is phrased directly against the keyed 4-tuple stepper `modalStepBranchS4Keyed` (dropping
+`keys'` via the Phase 8 bridge inside the proof), matching what Phase 10's top-loop induction
+will have in hand at each call site. The `hOutputsSubsetUniverse` obligation's extra hypotheses
+(`hknown`/`hWC`/`hKT`/`hKD`/`hKI`, in place of the generic template's `accFreshInv`/strict-world-
+bound pair) are threaded as raw hypotheses here rather than derived; Phase 10 supplies them from
+the ambient `S4LoopInv`. -/
+
+/-- **The keyed engine**: one `modalStepBranchS4Keyed` step strictly decreases the base-3 damped
+worklist measure over `modalUniverseS4 φ₀` by at least one. -/
+lemma modalExpMeasure_step_lt_S4Keyed
+    (φ₀ : Proposition Atom) (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverseS4 φ₀)
+    (hknown : accTargetsKnown bh acc)
+    (hWC : worldsContiguousS4 bh)
+    (hKT : ∀ w ∈ modalKnownWorlds bh, ∃ k, (w, k) ∈ keys)
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hstep : modalStepBranchS4Keyed φ₀ bh e acc keys =
+      some (newBs, newBs.map (fun _ => newExp), newAcc, keys')) :
+    modalExpMeasure (modalUniverseS4 φ₀) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverseS4 φ₀) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  have hstepGen := modalStepBranchS4Keyed_proj_stepBranchGen φ₀ bh e acc keys
+    newBs (newBs.map (fun _ => newExp)) newAcc keys' hstep
+  set U := modalUniverseS4 φ₀ with hUdef
+  have hrhs : modalExpMeasure U (done ++ bh :: bt) (doneExp ++ e :: es) =
+      modalExpMeasure U done doneExp + 3 ^ modalWork U bh e + modalExpMeasure U bt es :=
+    modalExpMeasure_split_S4 U done doneExp bh e bt es hdlen
+  have hlhs : modalExpMeasure U (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
+      modalExpMeasure U done doneExp +
+        (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum +
+        modalExpMeasure U bt es := by
+    have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
+      simp [List.length_append, hdlen]
+    rw [modalExpMeasure_append_S4 U (done ++ newBs) bt
+          (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
+        modalExpMeasure_append_S4 U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        modalExpMeasure_const_exp_S4 U newBs newExp]
+  rw [hrhs, hlhs]
+  suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
+      3 ^ modalWork U bh e by omega
+  simp only [modalStepBranchGen] at hstepGen
+  obtain ⟨sf, hsfmem, hfound⟩ := List.exists_of_findSome?_eq_some hstepGen
+  split_ifs at hfound with hany
+  simp only [Bool.not_eq_true] at hany
+  have hsfU : sf ∈ U := hb sf hsfmem
+  rcases hca : (modalApplyOneS4Keyed φ₀ keys sf bh acc).1 with nf | brs | nf | -
+  · -- linear
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    have hdrop : modalWork U (nf ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (nf ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (nf ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · -- branching
+    have hlen2 : brs.length = 2 :=
+      modalApplyOneS4Keyed_branchingLength_S4 φ₀ keys sf bh acc brs hca
+    obtain ⟨b0, b1, hbrs⟩ : ∃ b0 b1, brs = [b0, b1] := by
+      match brs, hlen2 with
+      | [b0, b1], _ => exact ⟨b0, b1, rfl⟩
+    subst hbrs
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+    have hdrop0 : modalWork U (b0 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (b0 ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right b0 hz)
+    have hdrop1 : modalWork U (b1 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (b1 ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right b1 hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (b0 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    have h1 : modalWork U (b1 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    exact pow3_two_add_one_le hC h0 h1
+  · -- persistent
+    rw [hca] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    obtain ⟨hnfne, hnffresh⟩ :=
+      modalApplyOneS4Keyed_persistentFresh_S4 φ₀ keys sf bh acc nf hca
+    obtain ⟨x0, hx0mem⟩ := List.exists_mem_of_ne_nil nf hnfne
+    have hclosure := modalApplyOneS4Keyed_outputsSubsetUniverse_S4 φ₀ keys sf bh acc hb hsfmem
+      hknown hWC hKT hKD hKI
+    rw [hca] at hclosure
+    have hx0U : x0 ∈ U := hclosure x0 hx0mem
+    have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
+    have hx0b' : x0 ∈ nf ++ bh := List.mem_append_left bh hx0mem
+    have hdrop : modalWork U (nf ++ bh) newExp + 1 ≤ modalWork U bh newExp :=
+      modalWork_drop_persistent_S4 U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
+        (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh newExp := by omega
+    have h0 : modalWork U (nf ++ bh) newExp ≤ modalWork U bh newExp - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · rw [hca] at hfound; simp at hfound
+
 end Cslib.Logic.Modal.Tableau
 
 end

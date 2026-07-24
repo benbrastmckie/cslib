@@ -87,6 +87,11 @@
           "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md",
           "type": "plan",
           "summary": "Chronicle consolidation 9-phase plan"
+        },
+        {
+          "path": "specs/530_consolidate_chronicle_construction_bimodal_temporal/summaries/01_chronicle-consolidation-summary.md",
+          "type": "summary",
+          "summary": "chronicle consolidation summary (backfilled by --sync)"
         }
       ],
       "session_id": "sess_1784402996_48ad02_530",
@@ -144,6 +149,11 @@
           "type": "handoff",
           "path": "specs/511_s4_loop_checking_termination/handoffs/02_phase5-keylowerbd-fact-closed.md",
           "summary": "keyLowerBd minting-case fact closed; driver-level assembly recipe for continuation"
+        },
+        {
+          "path": "specs/511_s4_loop_checking_termination/reports/02_spawn-analysis.md",
+          "type": "report",
+          "summary": "spawn analysis (backfilled by --sync)"
         }
       ],
       "blockers": "Phase 5 is 3/4 closed: keysDistinct + keyLowerBd + keysInUniverse landed (zero sorry/axiom). Remaining: modalStepBranchS4_preserves_keysTotal needs a new S4-specific known-worlds-step dichotomy lemma composing K/T/4 rule layers (scope comparable to keyLowerBd's two-dispatch closure), plus the modalStepBranchS4Keyed->modalStepBranchGen bridge for the 6 rule-independent fields, then the S4LoopInv assembly. Phase 6 (pigeonhole world bound) is blocked on keysTotal (its injective map IS keysTotal's witness); Phase 7 remainder depends on Phase 6. Full recipe: handoffs/03_phase5-keylowerbd-keysinuniverse-closed.md. Standing permission to land partial per task description.",
@@ -1146,6 +1156,16 @@
         {
           "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md",
           "type": "plan"
+        },
+        {
+          "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md",
+          "type": "plan",
+          "summary": "ptl fmp decidability plan (backfilled by --sync)"
+        },
+        {
+          "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md",
+          "type": "summary",
+          "summary": "ptl fmp summary (backfilled by --sync)"
         }
       ],
       "dependencies": [
@@ -1460,6 +1480,11 @@
           "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md",
           "type": "plan",
           "summary": "Implementation plan"
+        },
+        {
+          "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/summaries/01_frame-correspondence-library-summary.md",
+          "type": "summary",
+          "summary": "frame correspondence library summary (backfilled by --sync)"
         }
       ],
       "blockers": null,
@@ -1502,6 +1527,11 @@
           "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/01_keyed-s4-driver-plan.md",
           "type": "plan",
           "summary": "5-phase keyed-S4-driver plan with the hintikka_congr_S4 crux gated early (Wave 1), a dependency-wave table, risks/mitigations, and per-phase hard-constraint enforcement (zero sorry, zero new axiom, lean_verify-clean, [BLOCKED]-with-exact-goal on failure)."
+        },
+        {
+          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/01_keyed-s4-driver-summary.md",
+          "type": "summary",
+          "summary": "keyed s4 driver summary (backfilled by --sync)"
         }
       ],
       "topic": "Modal Logic",
@@ -1562,6 +1592,51 @@
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
           "type": "report",
           "summary": "Divergence audit of the Phase 8 cross-label efq/orE [BLOCKED]. VERDICT: nik_TS5_soundness is TRUE (naive motive refuted only). REFUTES the task's connectivity hypothesis: NIK.boxI/diaE have no x in G.X side-condition, so boxI-at-a-dangling-efq/orE-label creates a G.R-disconnected component; IsDerivationForest rightly omits connectivity because it is not preserved -> Q4 option A (connectivity lemma) not viable. Machine-verified axiom-free that botForces propagates bidirectionally along an r-edge (closes the CONNECTED efq sub-case only). orE is fine under an existential motive (single-branch); efq-with-y-not-in-domain closes by teleport-to-exploding-point; the sole residual is efq with bot derived in a component disconnected from the conclusion label = Simpson 8.1.2's non-tree excursion. Recommends Path P3 (Hilbert adequacy bridge -> corollary of landed cs5_soundness_derivable_incest, lowest risk) primary; Path PD (existential-teleport induction + a novel bot-locality lemma, higher risk) alternative. Reuses all 14 landed assets. Zero-debt."
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/02_gate-c-blocked-handoff-summary.md",
+          "type": "summary",
+          "summary": "gate c blocked handoff summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/03_phase1-box-dia-iff-base-summary.md",
+          "type": "summary",
+          "summary": "phase1 box dia iff base summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/04_phase2-box-dia-iff-tclosure-summary.md",
+          "type": "summary",
+          "summary": "phase2 box dia iff tclosure summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/04_phase4-2-boxI-lift-star-summary.md",
+          "type": "summary",
+          "summary": "phase4 2 boxI lift star summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/05_phase3-f2-here-helpers-summary.md",
+          "type": "summary",
+          "summary": "phase3 f2 here helpers summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/06_phase6-forest-invariant-summary.md",
+          "type": "summary",
+          "summary": "phase6 forest invariant summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/07_phase7-boxI-lift-partial-summary.md",
+          "type": "summary",
+          "summary": "phase7 boxI lift partial summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/08_phase7-boxI-lift-complete-summary.md",
+          "type": "summary",
+          "summary": "phase7 boxI lift complete summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/09_phase8-blocked-crosslabel-efq-summary.md",
+          "type": "summary",
+          "summary": "phase8 blocked crosslabel efq summary (backfilled by --sync)"
         }
       ],
       "plan_metadata": {
@@ -1698,6 +1773,11 @@
           "path": "specs/541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md",
           "type": "summary",
           "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/summaries/01_temporal-preservation-bridge-summary.md",
+          "type": "summary",
+          "summary": "temporal preservation bridge summary (backfilled by --sync)"
         }
       ],
       "completion_summary": "All 4 phases complete. Created Cslib/Logics/LTL/EmbeddingSemantics.lean (semantics-only bridge, no Metalogic import): toTemporalModel def, local sat_and_iff/sat_or_iff classical helpers, theorem satisfies_toTemporal (induction on formula generalizing time index n, all 5 cases atom/bot/imp/next/untl discharged per research's verified strategy -- next case uses omega-backed ℕ discreteness forcing witness s=n+1, untl case reconciles LTL reflexive-until against reflexiveUntl via j=0/j>=1 split with r=n+k index bijection closed by omega), and corollary satisfiable_toTemporal (LTL satisfiability -> Temporal satisfiability, wired at n=0 via drop_zero). Both theorems sorry-free with only standard axioms (propext, Classical.choice, Quot.sound). Registered Cslib.Logics.LTL.EmbeddingSemantics in Cslib.lean barrel via targeted single-line Edit insertion (not mk_all regeneration, per concurrent-checkout instruction; a concurrent task's later mk_all run also incorporated the same line). Full CSLib CI pipeline passed: lake build (full project, 3254 jobs), lake exe checkInitImports, lake lint (\"Linting passed for Cslib\", zero warnings on new file), lake exe lint-style (zero violations on new file), lake shake (no entry for new file -- imports already minimal), lake test (full CslibTests/ suite, exit 0). Zero sorry, zero new axioms, zero vacuous definitions introduced. No changes to Formula.toTemporal or its docstring -- translation confirmed correct as written."
@@ -1761,6 +1841,11 @@
           "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
           "type": "summary",
           "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/summaries/01_remove-dead-logic-modules-summary.md",
+          "type": "summary",
+          "summary": "remove dead logic modules summary (backfilled by --sync)"
         }
       ],
       "completion_summary": "All 3 phases complete. Phase 1: deleted Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines, Group 1 DELETE) plus its barrel line and reworded 2 dangling provenance docstrings. Phase 2: truth-fixed 4 Group-3 overclaiming docstrings (Bool.lean, Algebra.lean, Bridge.lean, KripkeBridge.lean) declaring them independent showcases with no in-tree consumer -- no code/proof changes. Phase 3: full lake build (3249 jobs) green, lake test exit 0 with CslibTests.HilbertSearch built directly as targeted confirmation of the Group-2 KEEP decision (premise refuted), checkInitImports clean, lake shake has no findings tied to any touched file. Net LOC delta: 8 files changed, 24 insertions(+), 228 deletions(-) = -204 lines. No new sorry or axiom introduced."

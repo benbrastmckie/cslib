@@ -1886,6 +1886,63 @@ theorem sigAt_impI {Atom : Type u} {G : Graph Atom} (hforest : IsDerivationFores
     Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.imp B)) :=
   cs5_deriv_imp_trans_under (sigAt_cons_self_imp hforest hfin) (cs5_deriv_imp_of_derivable _ hIH)
 
+/-! ## Wrap-monotonicity: reusable infrastructure for the cross-label cases (`efq`/`orE`)
+
+**Design correction discovered while attempting `efq` (documented here for the next dispatch,
+per the escalation protocol -- NOT a machine-checked obstruction, a pre-emptive analysis before
+committing further Lean work).** The "core" motive used by all 8 lemmas above --
+`Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A)`, with `nikTr` applied only ONCE at the very
+end via `nikTr_of_sigAt_imp` -- is insufficient for `efq`/`orE`. Both are CROSS-label: `efq`'s
+premise is at `x`, conclusion at an arbitrary (possibly unrelated-in-the-tree) `y`; `orE`'s major
+premise is at `x`, its two branch conclusions at `y`. A "core" fact `⊢ (sigAt x) ⊃ ⊥` only
+packages `x`'s OWN subtree information -- it carries no relation to `y`'s subtree at all, so
+`⊢ (sigAt y) ⊃ A` for arbitrary `A` does NOT follow from it (unlike `nikTr`, `sigAt` alone omits
+the ancestor-wrap's off-spine-sibling conjuncts, which is exactly where `y`'s branch would enter
+`x`'s translation once threaded up to their lowest common ancestor). Since `IsDerivationForest`
+guarantees a SINGLE rooted tree (not a forest of several components -- every label enters `G.X`
+via `addEdge` from an existing node, starting from `Graph.trivial`'s one node), `x` and `y` DO
+share an ancestor path to the common root, and Simpson's full `nikTr`-wrapped translation (not
+the bare `sigAt`-core) is almost certainly what actually carries this connection. Closing `efq`/
+`orE` therefore needs `nik_adequacy`'s motive restated at the full `nikTr` level (not the `sigAt`
+core), PLUS an explicit lowest-common-ancestor bridging argument relating `x`'s and `y`'s
+ancestor-wraps above their shared prefix. This is a substantial addition, not yet attempted in
+Lean; `nikTrFuel_mono` below is the first reusable piece such a redesign needs (the "wrap
+preserves entailment, not just closed derivability" strengthening of `nikTrFuel_of_derivable`),
+proved now since it is needed regardless of the exact shape the final cross-label bridge takes. -/
+
+/-- **`P`-generic box monotonicity**: from `⊢ X ⊃ Y`, derive `⊢ □X ⊃ □Y` (necessitation + the `k`
+axiom). -/
+theorem cs5_deriv_box_mono {Atom : Type u} {X Y : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (X.imp Y)) :
+    Derivable CS5ModalAxiom ((Proposition.box X).imp (Proposition.box Y)) := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dnec⟩ : Derivable CS5ModalAxiom (Proposition.box (X.imp Y)) := ⟨.necessitation _ d⟩
+  exact ⟨.modus_ponens [] _ _ (.ax [] _ (.k X Y)) dnec⟩
+
+/-- **`P`-generic congruence in the consequent**: from `⊢ U ⊃ V`, derive `⊢ (P⊃U) ⊃ (P⊃V)`. -/
+theorem cs5_deriv_imp_congr_right {Atom : Type u} (P : Proposition Atom) {U V : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (U.imp V)) :
+    Derivable CS5ModalAxiom ((P.imp U).imp (P.imp V)) := by
+  obtain ⟨ds⟩ := cs5_deriv_imp_of_derivable P h
+  exact ⟨.modus_ponens [] _ _ (.ax [] _ (.implyS P U V)) ds⟩
+
+/-- **`nikTrFuel` preserves entailment** (not just closed derivability, strengthening
+`nikTrFuel_of_derivable`): from `⊢ X ⊃ Y`, derive `⊢ (nikTrFuel … X) ⊃ (nikTrFuel … Y)`, for any
+fuel/starting label. Each ancestor level lifts `X⊃Y` through `□` (`cs5_deriv_box_mono`) and then
+through the level's `antecedent ⊃ ·` guard (`cs5_deriv_imp_congr_right`), recursing up via the
+induction hypothesis. -/
+theorem nikTrFuel_mono {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {hfin : G.X.Finite} (n : ℕ) (cur : Label Atom) {X Y : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (X.imp Y)) :
+    Derivable CS5ModalAxiom ((nikTrFuel G Γ hfin n cur X).imp (nikTrFuel G Γ hfin n cur Y)) := by
+  induction n generalizing cur X Y with
+  | zero => simpa [nikTrFuel]
+  | succ n ih =>
+      by_cases hq : ∃ q, G.R q cur
+      · simp only [nikTrFuel, dif_pos hq]
+        exact ih (Classical.choose hq) (cs5_deriv_imp_congr_right _ (cs5_deriv_box_mono h))
+      · simpa [nikTrFuel, dif_neg hq] using h
+
 end Cslib.Logic.Modal.Labelled
 
 end

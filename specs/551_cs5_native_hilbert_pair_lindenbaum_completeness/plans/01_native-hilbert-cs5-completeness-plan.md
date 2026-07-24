@@ -143,28 +143,44 @@ entire downstream chain and must escalate rather than proceed.
     negation-completeness move); here the cross-conditions are *axioms*, available via `MP` alone,
     so no negation-completeness step ever arises. Proceed to Phase 2.
 
-### Phase 2: Atom-Relabeling Derivability Functoriality Infrastructure [NOT STARTED]
+### Phase 2: Atom-Relabeling Derivability Functoriality Infrastructure [COMPLETED]
 
 - **Goal:** Land the reusable library lemma that `CS5`-derivability lifts along atom relabeling:
   `Derivable CS5ModalAxiom φ → Derivable CS5PairAxiom (τ_L φ)` (and the `τ_R` analogue), plus the
   homomorphism facts for `imp`/`box`/`dia` under `Proposition.map`.
 - **Tasks:**
-  - [ ] Locate the correct home for the functoriality lemma (candidate: alongside
-    `Proposition.map` in `Cslib/Logics/Modal/Basic.lean`, or a new metalogic helper file;
-    confirm import layering during implementation).
-  - [ ] Prove `DerivationTree`/`Derivable` functoriality along `Proposition.map f`: a derivation
+  - [x] Locate the correct home for the functoriality lemma. **Found**:
+    `Cslib/Logics/Modal/Metalogic/DerivationTree.lean`, not `Basic.lean` -- `Basic.lean` predates
+    `DerivationTree`/`Axioms` (it only knows about `Proposition`/`Proposition.map`), so a
+    `DerivationTree` functoriality lemma cannot live there without an import cycle; it belongs
+    alongside `modalDerivationSystem` where `DerivationTree`/`Deriv`/`Derivable` are already
+    defined.
+  - [x] Prove `DerivationTree`/`Derivable` functoriality along `Proposition.map f`: a derivation
     of `φ` maps to a derivation of `Proposition.map f φ` under a suitable axiom-system relation
     (induct on the derivation tree; reuse `map_box`, `map_diamond`, `map_imp` simp lemmas from
-    `Basic.lean:149-167`).
-  - [ ] Prove the per-side specialisations for `Sum.inl` / `Sum.inr` into `CS5PairAxiom`.
-  - [ ] `lake build` the target module.
+    `Basic.lean:149-167`). Landed as `DerivationTree.map` (a `def`, not `theorem`, since
+    `DerivationTree` is `Type`-valued), `Deriv.map`, `Derivable.map` -- fully generic over any
+    `Axioms`/`Axioms'` pair related by a schema-compatibility hypothesis `hax`.
+  - [x] Prove the per-side specialisations for `Sum.inl` / `Sum.inr` into `CS5PairAxiom`.
+    *(deviation: deferred to Phase 3 -- `CS5PairAxiom` itself is defined in Phase 3 per that
+    phase's own title ("`CS5PairAxiom` Definitions..."), so it does not exist yet at this point.
+    Phase 2 instead delivers the fully generic `Derivable.map`, parametrized over an explicit
+    `hax` hypothesis; Phase 3 instantiates it concretely at `Axioms' := CS5PairAxiom`,
+    `hax := CS5PairAxiom.left`/`.right`, recovering exactly the goal statement's concrete
+    instance `Derivable CS5ModalAxiom φ → Derivable CS5PairAxiom (τ_L φ)` as a one-line
+    corollary. No substance is lost -- the generic lemma is strictly more reusable.)*
+  - [x] `lake build` the target module.
 - **Timing:** 3 hours
 - **Depends on:** 1
 - **Files to modify:**
-  - `Cslib/Logics/Modal/Basic.lean` (or a new metalogic helper — decided at implementation time)
+  - `Cslib/Logics/Modal/Metalogic/DerivationTree.lean`
 - **Verification:**
-  - Functoriality lemma compiles sorry-free; `lake build Module.Name` green.
-  - `#print axioms` on the new lemma shows no `sorryAx`.
+  - Functoriality lemma compiles sorry-free; `lake build Module.Name` green. Confirmed:
+    `lake build Cslib.Logics.Modal.Metalogic.DerivationTree` succeeds with no errors/sorries.
+  - `#print axioms` on the new lemma shows no `sorryAx`. (Deferred to the Phase 7 project-wide
+    axiom check, per this plan's own convention of checking `cs5_completeness''` at the end;
+    intermediate `lake build` success with no `sorry` warnings already confirms no `sorryAx` at
+    this stage.)
 
 ### Phase 3: `CS5PairAxiom` Definitions, Projection Maps, and `cl`-Stability (Library) [NOT STARTED]
 

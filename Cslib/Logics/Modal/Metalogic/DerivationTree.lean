@@ -193,4 +193,62 @@ def modalDerivationSystem (Axioms : Proposition Atom → Prop) :
   assumption := fun hmem => assumption_deriv hmem
   mp := fun h₁ h₂ => mp_deriv h₁ h₂
 
+/-! ## Functoriality Along Atom Relabeling
+
+`DerivationTree`/`Deriv`/`Derivable` lift along an atom relabeling `f : Atom → Atom'`, provided
+the target axiom predicate accepts the image of every source axiom instance under `f` (a schema
+compatibility hypothesis `hax`, satisfied e.g. by a combined pair-axiom system's `left`/`right`
+constructors relative to a base axiom system and `Proposition.map Sum.inl`/`Sum.inr`). This is
+the reusable infrastructure a doubled-atom-space construction needs to transport derivability
+facts into the doubled space (`Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean`). -/
+
+/-- **`DerivationTree` functoriality along an atom relabeling.** If every `Axioms`-instance maps
+into an `Axioms'`-instance under `f` (`hax`), a derivation of `φ` from `Γ` (under `Axioms`) maps
+to a derivation of `φ.map f` from `Γ.map (Proposition.map f)` (under `Axioms'`). A `def` (not a
+`theorem`), since `DerivationTree` is a `Type`, not a `Prop`; defined by structural recursion on
+the derivation tree: the `ax` case uses `hax`; `assumption`/`weakening` transport
+`List.map`-membership facts; `modus_ponens`/`necessitation` need no rewriting at all, since
+`Proposition.map`'s `imp`/`box` homomorphism lemmas (`Basic.lean:155-165`) are proved by `rfl`, so
+the mapped formula shapes already coincide definitionally. -/
+def DerivationTree.map {Atom' : Type*} {Axioms : Proposition Atom → Prop}
+    {Axioms' : Proposition Atom' → Prop} (f : Atom → Atom')
+    (hax : ∀ ψ, Axioms ψ → Axioms' (ψ.map f)) :
+    ∀ {Γ : List (Proposition Atom)} {φ : Proposition Atom},
+      DerivationTree Axioms Γ φ →
+      DerivationTree Axioms' (Γ.map (Proposition.map f)) (φ.map f)
+  | _, _, .ax Γ φ h => .ax _ _ (hax φ h)
+  | _, _, .assumption Γ φ h => .assumption _ _ (List.mem_map_of_mem h)
+  | _, _, .modus_ponens Γ ψ χ d₁ d₂ =>
+      .modus_ponens _ (ψ.map f) (χ.map f)
+        (DerivationTree.map f hax d₁) (DerivationTree.map f hax d₂)
+  | _, _, .necessitation ψ d =>
+      DerivationTree.necessitation (ψ.map f) (DerivationTree.map f hax d)
+  | _, _, .weakening Γ' Δ φ d h =>
+      .weakening _ _ _ (DerivationTree.map f hax d)
+        (fun x hx => by
+          obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+          exact List.mem_map_of_mem (h y hy))
+
+/-- **`Deriv` functoriality along an atom relabeling.** `Prop`-level wrapper of
+`DerivationTree.map`. -/
+theorem Deriv.map {Atom' : Type*} {Axioms : Proposition Atom → Prop}
+    {Axioms' : Proposition Atom' → Prop} (f : Atom → Atom')
+    (hax : ∀ ψ, Axioms ψ → Axioms' (ψ.map f))
+    {Γ : List (Proposition Atom)} {φ : Proposition Atom}
+    (h : Deriv Axioms Γ φ) : Deriv Axioms' (Γ.map (Proposition.map f)) (φ.map f) := by
+  obtain ⟨d⟩ := h
+  exact ⟨DerivationTree.map f hax d⟩
+
+/-- **`Derivable` functoriality along an atom relabeling.** `Derivable` is `Deriv` at the empty
+context; `[].map _ = []` closes the context-transport side condition for free, so this is a thin
+specialization of `Deriv.map`. This is the concrete lemma the `CS5` box-backward pair
+construction consumes: instantiated at `f := Sum.inl`/`Sum.inr` and a combined pair-axiom system
+`Axioms'` whose `left`/`right` constructors witness `hax`, it gives
+`Derivable Axioms φ → Derivable Axioms' (φ.map Sum.inl)` (and the `Sum.inr` analogue). -/
+theorem Derivable.map {Atom' : Type*} {Axioms : Proposition Atom → Prop}
+    {Axioms' : Proposition Atom' → Prop} (f : Atom → Atom')
+    (hax : ∀ ψ, Axioms ψ → Axioms' (ψ.map f))
+    {φ : Proposition Atom} (h : Derivable Axioms φ) : Derivable Axioms' (φ.map f) :=
+  Deriv.map f hax h
+
 end Cslib.Logic.Modal

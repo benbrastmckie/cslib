@@ -1,5 +1,5 @@
 ---
-next_project_number: 552
+next_project_number: 555
 ---
 
 # TODO
@@ -11,10 +11,10 @@ next_project_number: 552
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,400,409,425,440,463,465,466,519,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,430,450,456,497,511 | 36,37,181,317,425,535 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
-| 4 | 300 | 506 | modal logic |
+| 1 | 36,37,181,226,400,409,440,463,465,466,519,530,534,535,537,551,552,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 2 | 39,40,215,317,425,450,511,553 | 36,37,181,535,552 | propositional logic, temporal logic, bimodal logic |
+| 3 | 41,301,375,430,456,497,506,548 | 39,40,317,425,511,535 | foundations, propositional logic, modal logic, ... |
+| 4 | 300,413 | 375,506 | modal logic, code hygiene |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -26,11 +26,11 @@ next_project_number: 552
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
+400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
+409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
-400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
@@ -41,15 +41,17 @@ next_project_number: 552
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+  └─ 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 551 [IMPLEMENTING] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
-425 [RESEARCHED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
 
 ### Bimodal Logic
 
@@ -83,7 +85,39 @@ next_project_number: 552
 
 ### Uncategorized
 
+552 [NOT STARTED] — Shared calculus-conformance and rule-completeness repair unblocki
+  └─ 317 [BLOCKED] — (Propositional Logic: Fill the propositional tableau completen) (see above)
+  └─ 425 [BLOCKED] — (Temporal Logic: [Decomposed from task 301, blocker C.] E) (see above)
+554 [NOT STARTED] — Research-only task: establish or refute the CS5 pair-seed disjunc
+
 ## Tasks
+
+### 554. Cs5 pair seed disjunction property cutfree research
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.
+
+---
+
+### 553. S4 loop guard soundness reachability restriction
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: Task 535
+
+**Description**: Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.
+
+---
+
+### 552. Tableau calculus conformance rule completeness repair
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Shared calculus-conformance and rule-completeness repair unblocking BOTH the temporal PTL FMP/decidability front and the propositional tableau completeness front, which independently converged on the same class of defect: a rule set too weak to close valid formulas, combined with fuel machinery justified by a bound that does not hold. DELIVERABLE 1 (shared, do first): a CONFORMANCE HARNESS that executes each tableau on a corpus of known-valid and known-invalid formulas and asserts the verdict. This class of defect is invisible to type-checking and was found only by execution, so the harness is the asset that prevents recurrence. DELIVERABLE 2 (temporal, seriality): the G and H rules propagate only to ord.futureOf t and return .notApplicable when it is empty (Rules.lean approx 227-244), and the only fresh-time path from a negative until is gated on ord.timeCount greater than 0 (Rules.lean approx 312), which is false at the root. Add the missing seriality rule. DELIVERABLE 3 (temporal, time cap): the same timeCount gate hard-caps times at 4; on the valid family with iterated F the verdict flips to OPEN at exactly k=4. Remove the cap. DELIVERABLE 4 (temporal, fuel): temporalFuel equals 4n^2+12n+10 (Saturation.lean approx 78), which is quadratic, while its own docstring justifies it by a 2^n type-count bound. Measured minimal sufficient fuel on a tautology family fits 1.5*2^k-2, so the bound is FALSE at the current constant and merely restating it is not available. Either raise the constant or add the missing deduplication. DELIVERABLE 5 (temporal, trackers): Saturation.lean approx 156-158 returns the tracker unchanged on the .branching arm, so recurring untlPos and sncePos copies are never registered pending. Saturation.lean approx 303 replicates one tracker across all output branches, but untlPos's two branches have genuinely different pending sets, so the return type must become a list of EventualityTracker. DELIVERABLE 6 (propositional): the persistent T-implication rule is positive-only and never plants F-tags, leaving subformula determinacy and bivalence unprovable in the current 6-rule calculus. Add the missing branching rule. Every rule addition requires a soundness re-audit of the affected calculus. Evidence: the executed counterexamples and the measured fuel table are recorded in the temporal task's report on the island-versus-periodic strategic decision.
+
+---
 
 ### 551. Cs5 native hilbert pair lindenbaum completeness
 - **Effort**: large
@@ -628,10 +662,10 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [RESEARCHED]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 552
 - **Plan**:
   - [425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md]
   - [425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md]
@@ -765,7 +799,7 @@ After implementation:
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 552
 - **Plan**:
   - [plans/03_b2-fuel-sufficiency.md]
   - [317_propositional_tableau_completeness/plans/01_tableau-completeness-plan.md]

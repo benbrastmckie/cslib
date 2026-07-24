@@ -10,6 +10,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 
 /-! # Conservative Extension: IPL over IPL⟨∧,→,⊤⟩
 
@@ -52,36 +53,12 @@ open Proposition Theory InferenceSystem DerivableIn
 
 universe u
 
-/-! ## Generic Axiom-Monotonicity Combinator -/
+/-! ## Generic Axiom-Monotonicity Combinators (relocated)
 
-/-- Axiom-monotonicity: given an axiom subsumption `h_sub : ∀ φ, Axioms1 φ → Axioms2 φ`,
-lift a `DerivationTree Axioms1 Γ φ` to a `DerivationTree Axioms2 Γ φ`. -/
-def liftDerivationTree
-    {Atom : Type u}
-    {Axioms1 Axioms2 : PL.Proposition Atom → Prop}
-    (h_sub : ∀ ψ, Axioms1 ψ → Axioms2 ψ)
-    {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
-    DerivationTree Axioms1 Γ φ → DerivationTree Axioms2 Γ φ
-  | .ax Γ φ h => .ax Γ φ (h_sub φ h)
-  | .assumption Γ φ h => .assumption Γ φ h
-  | .modusPonens Γ φ ψ d₁ d₂ =>
-      .modusPonens Γ φ ψ (liftDerivationTree h_sub d₁) (liftDerivationTree h_sub d₂)
-  | .weakening Γ Δ φ d h => .weakening Γ Δ φ (liftDerivationTree h_sub d) h
-
-/-! ## Axiom-Monotonicity Lemma -/
-
-/-- **Axiom-monotonicity**: if every axiom of `A₁` is also an axiom of `A₂`, then every
-formula derivable from `A₁` is also derivable from `A₂`.
-
-This is the "subsumption" or "monotonicity" lemma for Hilbert derivability. It lifts the
-pointwise axiom inclusion `h_sub : ∀ ψ, A₁ ψ → A₂ ψ` to a derivability inclusion
-`Derivable A₁ φ → Derivable A₂ φ` using `liftDerivationTree`. -/
-theorem derivable_mono {Atom : Type u}
-    {A₁ A₂ : PL.Proposition Atom → Prop}
-    (h_sub : ∀ ψ, A₁ ψ → A₂ ψ)
-    {φ : PL.Proposition Atom}
-    (h : Derivable A₁ φ) : Derivable A₂ φ :=
-  let ⟨d⟩ := h; ⟨liftDerivationTree h_sub d⟩
+`liftDerivationTree` and `derivable_mono` now live in `FragmentConservativity.lean` (Part B
+consolidation of the fragment-conservativity sprawl); they are re-exported here transitively via
+the `public import` above so that every existing consumer of this file continues to resolve
+them unchanged. -/
 
 /-! ## Hilbert-Primary Conservative Extension -/
 

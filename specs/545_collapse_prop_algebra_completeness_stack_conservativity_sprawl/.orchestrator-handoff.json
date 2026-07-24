@@ -1,0 +1,36 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "type": "plan",
+  "summary": "5-phase sequential implementation plan for the Propositional/Semantics/Algebra consolidation. Part B (conservativity sprawl, higher value, done first): phase 1 creates a thin generic `structure FragmentConservativity P` core (mirroring the CanAlgComplete structure-by-reuse idiom) with the 3 generic derived theorems + relocated liftDerivationTree/derivable_mono; phase 2 adds four `def` instances (Imp, ConjImp, ConjImpBot, OrImp) reusing each retained hard-direction proof verbatim (OrImp's is sequent-calculus, kept as-is); phase 3 re-expresses the 4x3 boilerplate as thin corollaries preserving all nonzero-use-site names and reduces per-fragment files to shims. Part A (completeness stack, phase 4): adopt CanAlgComplete as the documented terminal interface, collapse the zero-consumer *_iff_chain family in ConservativeChain.lean, and reclassify the load-bearing piecewise theorems (MPL.hilbert_alg_complete, conjImp_brouwerian_complete) in docstrings ONLY — kept public. Phase 5 is the full CI gate. Zero-sorry mechanical refactor; no proof re-derived.",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "Escalation-only, not a current blocker: if Part-A pressure escalates beyond the zero-consumer *_iff_chain set (e.g. privatizing MPL.hilbert_alg_complete [20 use-sites incl. Foundations/Logic/ProofSystem.lean] or conjImp_brouwerian_complete [14 use-sites]), the implementer must mark the task [BLOCKED] for user review rather than break Foundations and the IPL/CPL siblings. Plan Phase 4 keeps those names public and touches only their docstrings.",
+      "phase": "phase-4",
+      "severity": "soft"
+    }
+  ],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md"
+  ],
+  "decisions_made": [
+    "Sequence Part B (phases 1-3) before Part A (phase 4) per research; both touch ConservativeChain.lean so the whole plan is fully sequential (5 waves, one phase each).",
+    "Committed design: two-file split (thin FragmentConservativity.lean core + FragmentConservativityInstances.lean) with single-file collapse as the documented fallback if the import union proves manageable.",
+    "Only the generic #2/#3/#4 skeleton is consolidated; each fragment's hard-direction #1 (incl. OrImp's sequent-calculus route) is reused verbatim.",
+    "Preserve every nonzero-use-site public name/signature via one-line corollaries or re-exports; never delete or privatize load-bearing names.",
+    "HilbertLindenbaum.lean and all GenericMCS/cross-family files remain untouched (task 393 territory)."
+  ],
+  "dead_ends": [
+    "Demoting/privatizing HilbertCompleteness/BrouwerianCompleteness piecewise theorems (the naive task-A reading) — breaks Foundations/Logic/ProofSystem.lean and IPL/CPL siblings; explicitly excluded from the plan.",
+    "Single generic algebra route for all four conservativity hard directions — OrImp uses LJ cut elimination, not an algebra; each hard direction stays fragment-specific."
+  ],
+  "plan_markers_verified": true
+}

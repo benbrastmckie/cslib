@@ -59,9 +59,9 @@ CSLib contains **two independent decision procedures** for `Derivable IntPropAxi
 - **Module**: `Tableau/Intuitionistic/DecisionProcedure.lean`
 - **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
   Decides via `instDecidableIValid` composed with `int_soundness_completeness`.
-- **Axiom profile**: Carries the pre-existing 317 `sorryAx` from four open completeness sorries
-  (`Scheme.lean:246`, `Scheme.lean:519`, `Completeness.lean:113`,
-  `Minimal/Completeness.lean:110`). Will become sorry-free when task 317 lands.
+- **Axiom profile**: Carries `sorryAx` from four open completeness sorries (`Scheme.lean:246`,
+  `Scheme.lean:519`, `Completeness.lean:113`, `Minimal/Completeness.lean:110`). Will become
+  sorry-free once those four are discharged.
 - **Exposed as**: `instDecidableDerivableIntPropAxiom` (the **sole registered `Decidable`
   instance** for `Derivable IntPropAxiom φ`).
 - **Role**: Canonical extension-facing instance. The modal, temporal, and bimodal extensions
@@ -307,20 +307,21 @@ Proof by structural induction on `ψ` with `w` fixed:
   field with modus ponens.
 - **and**, **or**: direct from IHs + DCCS closure field / primality field.
 
-**Infrastructure relationship** (task 422 — factoring deferred):
+**Infrastructure relationship** (factoring deferred):
 This lemma is the FMP analogue of the parametric `truthLemma S b …` in
-`Tableau/Intuitionistic/Scheme.lean:234` (the 317-owned sorry). Both prove a
-"forcing ↔ membership" statement, but over **disjoint carrier types**:
+`Tableau/Intuitionistic/Scheme.lean:234`. Both prove a "forcing ↔ membership" statement, but
+over **disjoint carrier types**:
 - `int_fin_truth_lemma`: world type `IntFinWorld φ` (Finset-carrier `Σ`-bounded prime DCCS,
   resting on the `IntLindenbaum.lean` substrate: `int_imp_witness`, `int_prime_exclusion`,
   `intDeductiveClosure`). Carrier is a `Finset (Proposition Atom)`. **Sorry-free.**
 - `truthLemma`: world type `Nat` (tableau branch labels from `IBranch`). Carrier is a
-  signed-branch occurrence predicate. **Currently sorry** (task 317).
+  signed-branch occurrence predicate. **Currently sorry.**
 
 Factoring a common truth-lemma or world-type abstraction spanning these two carrier systems
 is **explicitly deferred**: the carriers are structurally incompatible, coupling them would
-thread through the still-open parametric `truthLemma` sorry, and the payoff is low while 317
-is open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP lemma. -/
+thread through the still-open parametric `truthLemma` sorry, and the payoff is low while that
+sorry remains open. Cross-reference: `min_fin_truth_lemma` for the analogous minimal FMP
+lemma. -/
 theorem int_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : IntFinWorld φ) :
     ∀ {ψ : PL.Proposition Atom}, ψ ∈ φ.subformulas →

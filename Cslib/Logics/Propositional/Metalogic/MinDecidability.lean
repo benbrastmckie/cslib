@@ -63,10 +63,10 @@ CSLib contains **two independent decision procedures** for `Derivable MinPropAxi
 - **Module**: `Tableau/Minimal/DecisionProcedure.lean`
 - **Mechanism**: Constructive signed-tableau proof-search with countermodel extraction.
   Decides via `instDecidableMValid` composed with `min_soundness_completeness`.
-- **Axiom profile**: Carries the pre-existing 317 `sorryAx` from open completeness sorries
-  (`Scheme.lean:246`, `Scheme.lean:519`, `Minimal/Completeness.lean:110`). Will become
-  sorry-free when task 317 lands. (Minimal reuses the shared parametric `truthLemma minScheme`
-  from `Scheme.lean:246`, so it also depends on that sorry.)
+- **Axiom profile**: Carries `sorryAx` from open completeness sorries (`Scheme.lean:246`,
+  `Scheme.lean:519`, `Minimal/Completeness.lean:110`). Will become sorry-free once those are
+  discharged. (Minimal reuses the shared parametric `truthLemma minScheme` from
+  `Scheme.lean:246`, so it also depends on that sorry.)
 - **Exposed as**: `instDecidableDerivableMinPropAxiom` (the **sole registered `Decidable`
   instance** for `Derivable MinPropAxiom φ`).
 - **Role**: Canonical extension-facing instance for minimal propositional logic.
@@ -274,22 +274,22 @@ Proof by structural induction on `ψ` with `w` fixed:
   field with modus ponens.
 - **and**, **or**: direct from IHs + deductive closure field / primality field.
 
-**Infrastructure relationship** (task 422 — factoring deferred):
+**Infrastructure relationship** (factoring deferred):
 This lemma is the Minimal FMP analogue of the parametric `truthLemma S b …` in
-`Tableau/Intuitionistic/Scheme.lean:234` (the 317-owned sorry, also used by the minimal
-tableau via `truthLemma minScheme`). Both prove "forcing ↔ membership" statements, but over
-**disjoint carrier types**:
+`Tableau/Intuitionistic/Scheme.lean:234` (also used by the minimal tableau via
+`truthLemma minScheme`). Both prove "forcing ↔ membership" statements, but over **disjoint
+carrier types**:
 - `min_fin_truth_lemma`: world type `MinFinWorld φ` (Finset-carrier `Σ`-bounded prime
   MinTheory worlds, resting on the minimal Lindenbaum substrate: `min_imp_witness`,
   `min_prime_exclusion`). Unlike the intuitionistic FMP, `⊥` may be forced at some worlds
   (`minFinBotForces w := (⊥ ∈ w.carrier)`). Carrier is a `Finset (Proposition Atom)`.
   **Sorry-free.**
 - `truthLemma minScheme`: world type `Nat` (tableau branch labels). `modelBot` is the
-  minimal-closure predicate applied to branch labels. **Currently sorry** (task 317).
+  minimal-closure predicate applied to branch labels. **Currently sorry.**
 
 Factoring a common truth-lemma or world-type abstraction is **explicitly deferred**: the
 carriers are structurally incompatible, coupling them would thread through the open
-`truthLemma` sorry, and the payoff is low while 317 is open.
+`truthLemma` sorry, and the payoff is low while that sorry remains open.
 Cross-reference: `int_fin_truth_lemma` for the analogous intuitionistic FMP lemma. -/
 theorem min_fin_truth_lemma {φ : PL.Proposition Atom}
     (w : MinFinWorld φ) :

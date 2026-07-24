@@ -1,6 +1,30 @@
 {
-  "next_project_number": 549,
+  "next_project_number": 551,
   "active_projects": [
+    {
+      "project_number": 550,
+      "project_name": "remove_bimodal_temporal_linter_suppressions",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files",
+      "description": "Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSProperties.lean, Bimodal/Theorems/{Combinators,Perpetuity/Helpers,Perpetuity/Principles,Propositional/Connectives,Propositional/Core,TemporalDerived}.lean, Temporal/Metalogic/{GeneralizedNecessitation,PropositionalHelpers}.lean) carry file-scoped `set_option linter.style.{emptyLine,longLine,setOption} false` / `set_option linter.{flexible,unusedSimpArgs} false`, inherited verbatim from the external BimodalLogic port. Reformat each file to satisfy the disabled linters (wrap long lines, remove stray blank lines, resolve flexible/unused-simp-arg findings) and drop the suppressions, or narrow them to per-declaration `set_option ... in` where only one declaration is affected.",
+      "created": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:04:32Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
+    {
+      "project_number": 549,
+      "project_name": "prune_canonicalmodel_redundant_imports",
+      "status": "not_started",
+      "task_type": "cslib",
+      "title": "Prune shake-flagged redundant imports in CanonicalModel.lean (task 540 follow-up)",
+      "description": "lake shake --add-public --keep-implied --keep-prefix flags Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean's `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused now that task 540 added GenericMCSBridge/DerivationCombinators imports to the same file. Verify with `lake shake --fix` or manual removal, then `lake build` the module to confirm no regression (the MCS/Birelational names are referenced only in docstring prose, not as used Lean identifiers, per current inspection).",
+      "created": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:04:32Z",
+      "next_artifact_number": 1,
+      "artifacts": []
+    },
     {
       "project_number": 530,
       "project_name": "consolidate_chronicle_construction_bimodal_temporal",

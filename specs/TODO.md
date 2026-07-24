@@ -1,17 +1,17 @@
 ---
-next_project_number: 549
+next_project_number: 551
 ---
 
 # TODO
 
 ## Task Order
 
-*Updated 2026-07-23. Generated from state.json dependency graph.*
+*Updated 2026-07-24. Generated from state.json dependency graph.*
 
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,542,544,545,546 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,542,544,545,546,549,550 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300,412 | 41,506 | modal logic, code hygiene |
@@ -96,8 +96,28 @@ next_project_number: 549
 
 530 [BLOCKED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
+549 [NOT STARTED] — lake shake --add-public --keep-implied --keep-prefix flags Cslib/
+550 [NOT STARTED] — Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSPropert
 
 ## Tasks
+
+### 550. Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSProperties.lean, Bimodal/Theorems/{Combinators,Perpetuity/Helpers,Perpetuity/Principles,Propositional/Connectives,Propositional/Core,TemporalDerived}.lean, Temporal/Metalogic/{GeneralizedNecessitation,PropositionalHelpers}.lean) carry file-scoped `set_option linter.style.{emptyLine,longLine,setOption} false` / `set_option linter.{flexible,unusedSimpArgs} false`, inherited verbatim from the external BimodalLogic port. Reformat each file to satisfy the disabled linters (wrap long lines, remove stray blank lines, resolve flexible/unused-simp-arg findings) and drop the suppressions, or narrow them to per-declaration `set_option ... in` where only one declaration is affected.
+
+---
+
+### 549. Prune shake-flagged redundant imports in CanonicalModel.lean (task 540 follow-up)
+- **Status**: [NOT STARTED]
+- **Task Type**: cslib
+- **Dependencies**: None
+
+**Description**: lake shake --add-public --keep-implied --keep-prefix flags Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean's `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused now that task 540 added GenericMCSBridge/DerivationCombinators imports to the same file. Verify with `lake shake --fix` or manual removal, then `lake build` the module to confirm no regression (the MCS/Birelational names are referenced only in docstring prose, not as used Lean identifiers, per current inspection).
+
+---
 
 ### 548. Decidability remaining eight modal cube corners
 - **Status**: [NOT STARTED]

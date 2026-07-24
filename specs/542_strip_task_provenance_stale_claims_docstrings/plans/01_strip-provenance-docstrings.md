@@ -391,7 +391,7 @@ owned by Phase 1 (`Bool.lean`, `Algebra/Bridge.lean`, `Temporal/Tableau/Complete
 
 ---
 
-### Phase 7: Bimodal + Foundations/Logic + §4.3 Judgment Review [NOT STARTED]
+### Phase 7: Bimodal + Foundations/Logic + §4.3 Judgment Review [PARTIAL]
 
 **Goal**: Strip provenance from Bimodal (excluding the Chronicle file owned by Phase 1) and
 `Foundations/Logic`, and perform the concentrated judgment-required §4.3 review. ~120 hits plus the
@@ -399,15 +399,65 @@ owned by Phase 1 (`Bool.lean`, `Algebra/Bridge.lean`, `Temporal/Tableau/Complete
 read in context.
 
 **Tasks**:
-- [ ] Bimodal (27 files minus `Chronicle/ChronicleToCountermodelBasic.lean`), incl.
+- [x] Bimodal (27 files minus `Chronicle/ChronicleToCountermodelBasic.lean`), incl.
   `Metalogic/Separation/Hierarchy/HierarchyInduction.lean` — delete its embedded `specs/NNN` link.
-- [ ] `Foundations/Logic/**` (9 files), incl.
+  *(done: PointInsertion/Since.lean, ChronicleConstruction.lean, PointInsertion/Seeds.lean,
+  HierarchyInduction.lean (specs/157 link deleted), Formula.lean, Decidability/
+  {Correctness,TraceCertificate}.lean, ConservativeExtension/LiftViaMorphism.lean,
+  PointInsertion/{Burgess,XuGuard}.lean, PointInsertion.lean, HierarchyCompletion.lean,
+  Quasimodel/Construction.lean, Embedding/{Temporal,Modal}Embedding.lean -- commits
+  96f69fd5, 0c33f4d5, 02e531a2, 2bdc8f3b.
+  *(deviation: skipped -- 8 files own live blockers for still-open, non-archived tasks and
+  were left untouched to avoid corrupting their continuation notes: `Chronicle/
+  ChronicleToCountermodel.lean` (task 36, "blocked", 12+ live sorries), `Bundle/
+  SuccRelation.lean` and `Bundle/UntilSinceCoherence.lean` (task 37, "blocked", 9 live
+  sorries combined), `BXCanonical/Frame.lean` (task 36, 1 live sorry), `BXCanonical/
+  Completeness.lean` (task 36, "Pending (task 36, WeakCanonical)" barrel-file note),
+  `ConservativeExtension/TemporalConservativity.lean` (task 450, "not_started", whose own
+  description states "This task OWNS TemporalConservativity.lean" and plans to rewrite the
+  same docstring section this sweep would touch), `Chronicle/ChronicleTypes.lean` and
+  `Chronicle/CounterexampleElimination/BurgessHelpers.lean` (task 530, "blocked", mirroring
+  the same "## Status (task 530, Phase N)" live plan-phase tracking as the Temporal-side
+  skips). `Chronicle/RRelation.lean` and `Chronicle/CounterexampleElimination/Structures.lean`
+  are also task-530-owned (same pattern) and were likewise skipped. One additional file,
+  `Bimodal/Syntax/SubformulaClosure/TemporalFormulas.lean`, was left untouched out of
+  caution: its "deferred to a follow-up continuation" / "Placeholder for forward references
+  from later phases" note has no live sorry but reads as an open scope note for unspecified
+  future work and could not be confidently attributed to a completed task within this
+  dispatch's time budget.)*
+- [x] `Foundations/Logic/**` (9 files), incl.
   `Metalogic/Chronicle/{ChronicleInterface,SinceSeedConsistency}.lean` — delete their embedded `specs/NNN` links.
+  *(done: `SinceSeedConsistency.lean` fully stripped (archived task-454, embedded specs/454
+  link deleted) plus a stale-claim correction in its "## Status" section -- commit 0b0d56c3;
+  `Connectives.lean`, `Metalogic/PrimeExclusion.lean`, `Metalogic/GenericMCS.lean`,
+  `Metalogic/Consistency.lean` stripped (archived task-30/31/173/340/452/480) plus a
+  stale-claim correction in Connectives.lean -- commit bfa55104.
+  *(deviation: skipped -- `Metalogic/Chronicle/ChronicleInterface.lean`,
+  `Metalogic/Chronicle/CounterexampleElimination/Structures.lean`, and
+  `Metalogic/Chronicle/RRelation.lean` all cite "task-530 Phase N" as their own active
+  construction plan (task 530 status: "blocked", live `specs/530_.../plans/` directory),
+  confirmed by task 530's own description: "factor the shared chronicle/countermodel-
+  elimination machinery into a label-generic module under
+  Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only
+  SinceSeedConsistency.lean)" -- i.e. these three files ARE that in-progress, blocked work,
+  distinct from the already-completed SinceSeedConsistency.lean.)*
 - [ ] §4.3 judgment pass: for each `no longer` (43), `used to` (28), `previously` (17),
   `bypassed` (2), `refactor` (4), `migration` (1) hit across all five trees, read in context and
   delete **only** when the sentence is about development history; **keep** when it is about the
   mathematics (e.g. "`R` is no longer symmetric on the sub-frame").
-- [ ] `lake build` of the touched Bimodal and Foundations/Logic modules.
+  *(deviation: deferred -- a substantial fraction of these phrases were incidentally resolved
+  as part of the task/phase provenance cleanup in phases 5-7 (e.g. every "is no longer defeq"
+  / "no longer definitionally" sentence tied to the Temporal/Bimodal G/H-primitive-constructor
+  and IK-diamond-native provenance was rewritten while stripping the adjacent task citation),
+  but a dedicated, exhaustive line-by-line sweep of the full §4.3 phrase inventory across all
+  five trees was not completed as a separate pass within this dispatch's time budget. A
+  continuation dispatch should re-run the grep in the Testing & Validation checklist below
+  and read each remaining hit in context.)*
+- [x] `lake build` of the touched Bimodal and Foundations/Logic modules.
+  *(every touched module builds green with zero live sorry; full-tree grep across
+  Cslib/Logics/Bimodal/ and Cslib/Foundations/Logic/ for task/phase/specs/renamed-from/
+  formerly/probes patterns now returns exactly the 12 deliberately-skipped files above,
+  nothing else.)*
 
 **Timing**: 1 hour
 

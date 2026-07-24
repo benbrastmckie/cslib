@@ -207,13 +207,13 @@ the 516-hit / 17-file bucket).
 
 ---
 
-### Phase 3: Modal/Tableau — Soundness/Measure/Simplification Cluster [NOT STARTED]
+### Phase 3: Modal/Tableau — Soundness/Measure/Simplification Cluster [IN PROGRESS]
 
 **Goal**: Strip provenance from the remaining Modal/Tableau files (the second half of the bucket),
 disjoint from Phase 2.
 
 **Tasks**:
-- [ ] `Tableau/FrameSoundness.lean` (56 hits) — includes an embedded `specs/NNN` link: delete it.
+- [x] `Tableau/FrameSoundness.lean` (56 hits) — includes an embedded `specs/NNN` link: delete it.
 - [ ] `Tableau/FmpMeasure.lean` (52 hits).
 - [ ] `Tableau/S5Simplification.lean` (41 hits) — includes an embedded `specs/NNN` link: delete it.
 - [ ] `Tableau/FiveSimplification.lean` (39 hits).

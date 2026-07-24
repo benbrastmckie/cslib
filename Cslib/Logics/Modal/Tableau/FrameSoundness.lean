@@ -129,13 +129,13 @@ lemma branchSatisfiableIn_trivial_imp [DecidableEq Atom] [Hashable Atom]
   obtain ⟨W, m, f, -, hedges, hb⟩ := h
   exact ⟨W, m, f, hedges, hb⟩
 
-/-! ## Task 513 Phase 1: Frame-Relativized Closed-Branch Unsatisfiability -/
+/-! ## Frame-Relativized Closed-Branch Unsatisfiability -/
 
-/-- **Task 513 (Phase 1)**: a classically closed modal branch is unsatisfiable-in-`FC`, for any
+/-- A classically closed modal branch is unsatisfiable-in-`FC`, for any
 frame condition `FC`. Trivial generalization of `modalClosed_unsat` (`SoundnessStep.lean:92`):
 dropping the `FC m.r` witness from a `branchSatisfiableIn FC` hypothesis recovers exactly the
 frame-free `branchSatisfiable` hypothesis `modalClosed_unsat` consumes. Feeds the closed-leaf
-case of the generic fuel induction `modalExpandBranchesGen_closed_unsatIn` (Phase 3). -/
+case of the generic fuel induction `modalExpandBranchesGen_closed_unsatIn` below. -/
 lemma modalClosed_unsatIn [DecidableEq Atom] (FC : FrameCondition)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (hclosed : isModalClosed b = true) (acc : Accessibility) :
@@ -143,9 +143,9 @@ lemma modalClosed_unsatIn [DecidableEq Atom] (FC : FrameCondition)
   intro ⟨W, m, f, _, hedges, hb⟩
   exact modalClosed_unsat b hclosed acc ⟨W, m, f, hedges, hb⟩
 
-/-- **Task 513 (Phase 1)**: `FC`-lifted variant of `negImp_alpha_preserved`
+/-- `FC`-lifted variant of `negImp_alpha_preserved`
 (`SoundnessStep.lean`) for the generic `impNeg` arm of the frame-relativized crux
-(`modalStepBranchGen_preserves_satIn`, Phase 2): if `F(A → C)@lbl` fails to be satisfied by
+(`modalStepBranchGen_preserves_satIn` below): if `F(A → C)@lbl` fails to be satisfied by
 `(m, f)` (with `FC m.r`), and `b` (with accessibility `acc`) is otherwise `branchSatisfiableIn
 FC`, then `[T(A)@lbl, F(C)@lbl] ++ b` is `branchSatisfiableIn FC`. Identical proof to the K
 original, with the `FC m.r` witness threaded through unchanged (the model `(W, m)` is never
@@ -172,9 +172,9 @@ lemma negImp_alpha_preserved_gen (FC : FrameCondition)
   · exact ⟨fun h => by simp at h, fun _ => hnc⟩
   · exact hb sf' hmem_old
 
-/-! ## Task 513 Phase 2: The Generic Frame-Relativized Soundness Crux -/
+/-! ## The Generic Frame-Relativized Soundness Crux -/
 
-/-- **Task 513 (Phase 2, the crux)**: `modalStepBranchGen apply` preserves `branchSatisfiableIn
+/-- **The crux**: `modalStepBranchGen apply` preserves `branchSatisfiableIn
 FC` at a single step, given three raw frame-relativized soundness hypotheses on `apply`:
 
 - `hAgree` (S-agree): `apply` agrees with `modalApplyOne` off the two propagating shapes
@@ -719,13 +719,13 @@ theorem modalStepBranchGen_preserves_satIn [DecidableEq Atom] [Hashable Atom]
               exact (hb sf' hmem_old).2 hsign
       | diamond φ => exact absurd (Or.inr ⟨rfl, φ, rfl⟩) hshape
 
-/-! ## Task 513 Phase 3: Generic Frame-Relativized Fuel Induction -/
+/-! ## Generic Frame-Relativized Fuel Induction -/
 
-/-- **Task 513 (Phase 3)**: `modalExpandBranchesGen apply` closing implies every branch is
+/-- `modalExpandBranchesGen apply` closing implies every branch is
 unsatisfiable-in-`FC`. Port of `modalExpandBranches_closed_unsat` (`Soundness.lean`), swapping
-in the generic step (`modalStepBranchGen_preserves_satIn`, Phase 2), the generic freshness
-lemma (`modalStepBranch_preserves_accFreshInv_gen`, already generic from task 510), and
-`modalClosed_unsatIn` (Phase 1). Takes the same three raw soundness hypotheses as Phase 2 plus
+in the generic step (`modalStepBranchGen_preserves_satIn` above), the generic freshness
+lemma `modalStepBranch_preserves_accFreshInv_gen`, and
+`modalClosed_unsatIn` above. Takes the same three raw soundness hypotheses as the crux above plus
 `hFreshLocal` (the `RuleApplicationSpec` F1 shape) for the fuel wrapper's freshness
 maintenance. -/
 theorem modalExpandBranchesGen_closed_unsatIn [DecidableEq Atom] [Hashable Atom]
@@ -912,16 +912,16 @@ theorem modalTableau_sound_frame [DecidableEq Atom] [Hashable Atom] (φ : Propos
   rw [frameValid_trivialFC_iff_kValid]
   exact modalTableau_sound φ h
 
-/-- **Task 513 (Phase 4, K zero-regression)**: `modalTableau_sound_frame`, re-derived through
-the *generic* frame-relativized chain (`modalExpandBranchesGen_closed_unsatIn`, Phase 3)
+/-- `modalTableau_sound_frame`, re-derived through
+the *generic* frame-relativized chain (`modalExpandBranchesGen_closed_unsatIn` above)
 instantiated at `apply := modalApplyOne`, `FC := trivialFC`, discharging `hAgree` by `rfl`
-(`modalApplyOne` agrees with itself), `hBoxPos`/`hDiaNeg` by Phase 1's
-`modalApplyOne_boxPos_sound`/`modalApplyOne_diaNeg_sound` (`FC` unused), and `hFreshLocal` by
+(`modalApplyOne` agrees with itself), `hBoxPos`/`hDiaNeg` by
+`modalApplyOne_boxPos_sound`/`modalApplyOne_diaNeg_sound` above (`FC` unused), and `hFreshLocal` by
 `modalApplyOne_fresh` (`Soundness.lean`). This exhibits K as a trivial universe-0 instance of
 the generic soundness chain **without** touching K's canonical `Type*` API
 (`modalStepBranch_preserves_sat`, `modalExpandBranches_closed_unsat`, `modalTableau_sound`,
 `kValid`, `modalTableau_decides`, `instDecidableKValid` all remain byte-identical and
-untouched -- confirmed by `git diff`). -/
+untouched). -/
 theorem modalTableau_sound_frame_gen [DecidableEq Atom] [Hashable Atom] (φ : Proposition Atom)
     (h : modalTableau φ = .closed) :
     frameValid trivialFC φ := by
@@ -1162,7 +1162,7 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
 
-/-! ## B (Symmetric Frame, task 505 Phase 7) -/
+/-! ## B (Symmetric Frame) -/
 
 /-- The symmetric frame condition: `Std.Symm m.r`. Instantiates `frameValid`/
 `branchSatisfiableIn` for the modal logic B (`Cube.B`, `{m | Std.Symm m.r}`). -/
@@ -1255,10 +1255,10 @@ lemma modalBDiaNegBack_sound [DecidableEq Atom] [Hashable Atom]
   rw [hxeq]
   exact branchSatisfiableIn_symmFC_diaNeg_pred_mem h hmem hedge
 
-/-! ## S5 (Equivalence Frame), Five, KB5 (task 515 Phase 1)
+/-! ## S5 (Equivalence Frame), Five, KB5
 
 The frame-condition surface for S5's universal-cluster tableau (`S5Simplification.lean`) and
-the 5/KB5 semantic bridge (task 504 Phases 4/7). `s5FC` mirrors `s4FC` (reflexive +
+the 5/KB5 semantic bridge. `s5FC` mirrors `s4FC` (reflexive +
 transitive) with `IsTrans` replaced by `Relation.RightEuclidean`: reflexive + (right)
 Euclidean is equivalent to an equivalence relation (`Relation.symm_rightEuclidean_iff_trans`,
 `Cslib/Foundations/Relation/Euclidean.lean`, together with reflexivity giving symmetry and
@@ -1296,16 +1296,14 @@ def kb5FC : FrameCondition := fun {_} r => Std.Symm r ∧ Relation.RightEuclidea
 right-Euclidean, at every world. Matches `Cube.KB5`. -/
 def kb5Valid (φ : Proposition Atom) : Prop := frameValid kb5FC φ
 
-/-! ## S5 vs 5/KB5 Frame-Class Separation (task 515 Phase 23, ported from the probe)
+/-! ## S5 vs 5/KB5 Frame-Class Separation
 
-Ported verbatim from `specs/515_s5_universal_rule_termination_unblock_504/probes/
-five-s5-separation.lean` (sorry-free, **zero axioms** there and here) into the live tree, per
-Phase 23's task list: this is the standing, machine-checked proof that `s5FC` is a *strictly*
+The standing, machine-checked (sorry-free, zero-axiom) proof that `s5FC` is a *strictly*
 larger frame class than `fiveFC`/`kb5FC`, so no `s5Valid` decision procedure can ever decide
-`fiveValid`/`kb5Valid` by composition -- the durable record that stops a future dispatch from
+`fiveValid`/`kb5Valid` by composition -- the durable record that rules out
 "simplifying" the Euclidean route into the S5 one. See `FrameCompleteness.lean`'s "5/KB5 Coverage
 via the S5 Route" note for the full narrative and `kb5FC_imp_fiveFC`/`fiveValid_imp_kb5Valid`
-above for the (independent) one-level-down `kb5FC ⇒ fiveFC` bridge Phase 22 needed for soundness.
+above for the (independent) one-level-down `kb5FC ⇒ fiveFC` bridge needed for soundness.
 -/
 
 /-- `s5FC` entails `fiveFC` by projection: S5 frames are Euclidean frames with reflexivity added.
@@ -1386,7 +1384,7 @@ theorem kb5Valid_ssubset_s5Valid :
   ⟨fun φ => kb5Valid_imp_s5Valid φ,
    ⟨.imp (.box (.atom ())) (.atom ()), boxImp_s5Valid (), boxImp_not_kb5Valid⟩⟩
 
-/-! ## Task 515 Phase 7: S5 Soundness Bridge
+/-! ## S5 Soundness Bridge
 
 `modalApplyOneS5`'s accessibility output is unconditionally identical to K's
 (`modalApplyOneS5_snd_eq`, `S5Simplification.lean`), so the `freshLocal`/`knownWorlds`-step
@@ -1421,7 +1419,7 @@ lemma modalApplyOneS5_fresh_local
 
 /-! ### The Reachability Invariant
 
-Task 515 Phase 4/5 already landed `modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean:860`),
+`modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean:860`) is
 the S5 analogue of K's `modalApplyOne_knownWorlds_step` used directly below. -/
 
 /-- Every known world of a branch is reachable from world `0` via the recorded accessibility
@@ -1483,15 +1481,14 @@ lemma accReachableInv_related_s5
   hFC.2.rightEuclidean (reachable_imp_related_s5 hFC hacc (hreach w hw))
     (reachable_imp_related_s5 hFC hacc (hreach w' hw'))
 
-/-! ### Task 515 Phase 19 (Route 1): the Euclidean (non-reflexive) reachability discharge
+/-! ### The Euclidean (Non-Reflexive) Reachability Discharge
 
 `fiveFC := Relation.RightEuclidean r` drops `s5FC`'s reflexivity conjunct, so
 `reachable_imp_related_s5`'s base case (`hFC.1.refl (f 0)`) is unavailable -- and genuinely
-false at the frame level (the `Fin 3` counterexample recorded in Phase 19's blocker record:
-`RightEuclidean` with `¬ r 0 2`). Route (1) (`reports/07_phase19-soundness-blocker-remediation.md`)
-resolves this by restricting root-triggered propagation to direct successors
+false at the frame level (witnessed by a `Fin 3` counterexample: `RightEuclidean` with
+`¬ r 0 2`). This is resolved by restricting root-triggered propagation to direct successors
 (`modalFiveBoxAll`/`modalFiveDiaNegAll`'s `hasEdge 0 w'` guard) and discharging non-root-triggered
-propagation through the **codomain equivalence** (`Relation.rooted_cluster_isEquiv`, Phase 17)
+propagation through the **codomain equivalence** (`Relation.rooted_cluster_isEquiv`)
 rather than frame reflexivity. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
@@ -1560,7 +1557,7 @@ lemma accReachableInv_related_five
     hEquiv.symm (⟨f w, hw_cod⟩ : Relation.cod m.r) ⟨f s', hs'_cod⟩ hD
   exact Relation.RightEuclidean.rightEuclidean hD' hs'w'
 
-/-! ### Task 524: the KB5 full-cluster reachability discharge
+/-! ### The KB5 Full-Cluster Reachability Discharge
 
 `kb5FC := Std.Symm m.r ∧ Relation.RightEuclidean m.r` adds symmetry on top of `fiveFC`, which
 gives a **direct** induction on `accReachableInv`'s `ReflTransGen` path -- no cod-equivalence
@@ -1622,7 +1619,7 @@ lemma accReachableInv_related_kb5
   exact Relation.RightEuclidean.rightEuclidean h0w h0w'
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- **Root self-reflexivity discharge** (task 524, `Relation.symm_rightEuclidean_root_refl`): if
+/-- **Root self-reflexivity discharge** (`Relation.symm_rightEuclidean_root_refl`): if
 the known cluster of `b` has *some* non-root member `v`, the root is related to itself in the
 model under `kb5FC`. This is exactly the semantic justification for
 `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s self-target arm (fires unconditionally whenever the
@@ -1748,7 +1745,7 @@ private lemma hasEdge_addEdge_self_FS (acc : Accessibility) (w w' : WorldIndex) 
     (acc.addEdge w w').hasEdge w w' = true := by
   simp [Accessibility.addEdge, Accessibility.hasEdge]
 
-/-! ### Task 515 Phase 19: `accReachableInv` Preservation for `modalApplyOneFive`
+/-! ### `accReachableInv` Preservation for `modalApplyOneFive`
 
 Stated directly over `modalApplyOneFive` (no `RuleApply`/`S5SoundSpec` abstraction: Five has only
 the one shipped rule), consuming `modalApplyOneFiveProp_knownWorlds_step` and
@@ -2029,7 +2026,7 @@ lemma modalStepBranchS5w_preserves_accReachableInv
 
 /-! ### Rule-Level S5 Semantic Soundness -/
 
-/-- **Task 515 (Phase 7)**: frame-relativized semantic soundness of `modalApplyOneS5`'s
+/-- Frame-relativized semantic soundness of `modalApplyOneS5`'s
 box-positive output under `s5FC`, given `accReachableInv`. K's own bounded propagation
 (`kForms`, at `acc.successorsOf lbl`) is sound via the existing `modalApplyOne_boxPos_sound`
 (direct-edge relatedness, `FC` unused); the S5-added universal propagation
@@ -2135,21 +2132,21 @@ lemma modalS5DiaNegAll_soundIn
 /-! ### The Bespoke S5 Fuel-Induction Assembly
 
 The generic `modalStepBranchGen_preserves_satIn`/`modalExpandBranchesGen_closed_unsatIn`
-(Task 513 Phases 2-3) cannot be instantiated at `apply := modalApplyOneS5` directly: their
+cannot be instantiated at `apply := modalApplyOneS5` directly: their
 `hBoxPos`/`hDiaNeg` parameters are universally quantified over *all* `(b, acc)` pairs, with no
 parameter slot to receive `accReachableInv b acc` -- a fact about *this specific* `(b, acc)`'s
 computational history, not derivable from `hacc` alone for an arbitrary pair. The theorems below
-are bespoke S5 specializations: the box-positive/diamond-negative branches are replaced by the
-landed `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` (consuming the threaded
+are bespoke S5 specializations: the box-positive/diamond-negative branches are replaced by
+`modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn` (consuming the threaded
 `accReachableInv` witness); every other shape is *identical* to the generic crux's own "not
 shape" branch (reachability is irrelevant there -- only the two S5-relevant shapes need it) and
 is reused verbatim via `modalApplyOneS5_eq_of_not_boxPos_diaNeg`. -/
 
-/-- **Task 515 (Phase 7)**: the combined per-step invariant the S5 fuel induction threads:
+/-- The combined per-step invariant the S5 fuel induction threads:
 `accFreshInv` (fresh-world confinement, needed by the two K-minting shapes inside the per-step
-satisfiability lemma), `accReachableInv` (the new Phase 7 invariant, needed by the two
+satisfiability lemma), `accReachableInv` (needed by the two
 S5-relevant shapes), and `accTargetsKnown` (needed to preserve `accReachableInv` itself across a
-step, via the landed `modalStepBranchS5_preserves_accReachableInv`). Bundled into one `Prop` so
+step, via `modalStepBranchS5_preserves_accReachableInv`). Bundled into one `Prop` so
 a single `List.Forall₂` threads all three through the outer induction, mirroring how
 `modalExpandBranchesGen_closed_unsatIn` threads `accFreshInv` alone. -/
 def S5SoundInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -2993,15 +2990,15 @@ theorem modalTableauS5_sound (φ : Proposition Atom) (h : modalTableauS5 φ = .c
     s5Valid φ :=
   modalTableauS5w_sound φ h
 
-/-! ### Task 515 (Phase 19): Rule-Level Five/KB5 Semantic Soundness
+/-! ### Rule-Level Five/KB5 Semantic Soundness
 
-The Route (1) root/non-root split lands here: `modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn`
+The root/non-root split lands here: `modalFiveBoxAll_soundIn`/`modalFiveDiaNegAll_soundIn`
 discharge the root-triggered arm directly via `hacc` on the `modalFiveBoxAll_root_hasEdge`/
 `modalFiveDiaNegAll_root_hasEdge` witness (`FiveSimplification.lean`), and the non-root-triggered
 arm via the codomain-equivalence discharge `accReachableInv_related_five`. Mirrors
 `modalS5BoxAll_soundIn`/`modalS5DiaNegAll_soundIn`. -/
 
-/-- **Task 515 (Phase 19)**: frame-relativized semantic soundness of `modalApplyOneFiveProp`'s
+/-- Frame-relativized semantic soundness of `modalApplyOneFiveProp`'s
 box-positive output under `fiveFC`, given `accReachableInv`. K's own bounded propagation
 (`kForms`, at `acc.successorsOf lbl`) is sound via the existing `modalApplyOne_boxPos_sound`
 (direct-edge relatedness, `FC` unused); the root-aware universal propagation
@@ -3120,7 +3117,7 @@ lemma modalFiveDiaNegAll_soundIn
 /-! ### Corrected-Gate Rule-Level Semantic Soundness
 
 `modalKb5BoxAllUniv_soundIn`/`modalKb5DiaNegAllUniv_soundIn` discharge the corrected-gate rule's
-two propagation shapes directly against `kb5FC`, reusing task 524's landed three-case semantic
+two propagation shapes directly against `kb5FC`, reusing the three-case semantic
 family (`reachable_imp_related_kb5`/`accReachableInv_related_kb5`/`accReachableInv_kb5_root_refl`)
 for the non-root-target and trigger-is-root cases verbatim, plus one new one-liner
 (`reachable_imp_related_kb5_symm`) for the genuinely new fourth case: a non-root trigger firing
@@ -3281,7 +3278,7 @@ lemma modalKb5DiaNegAllUniv_soundIn
     · exact hKformSat x hx
     · exact hallSat x hx
 
-/-- **Task 515 (Phase 19)**: the combined per-step invariant the Five fuel induction threads:
+/-- The combined per-step invariant the Five fuel induction threads:
 `accFreshInv`, `accReachableInv`, and `accTargetsKnown`. Mirrors `S5SoundInv`. -/
 def FiveSoundInv (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : Prop :=
@@ -3389,7 +3386,7 @@ lemma modalStepBranchKb5''_preserves_accReachableInv
     · rw [hfstc] at hdich; exact hdich.elim
     · rw [hfstc] at hsf; simp at hsf
 
-/-! ### The Bespoke Five/KB5 Fuel-Induction Assembly (Task 515, Phase 19b)
+/-! ### The Bespoke Five/KB5 Fuel-Induction Assembly
 
 The Five analogue of the S5 bespoke chain above. Since `modalApplyOneFive` is the **only**
 shipped Five rule (no separate unguarded-rule stage, unlike S5's `modalApplyOneS5`/
@@ -3946,12 +3943,12 @@ theorem modalStepBranchFive_preserves_satIn
               exact (hb sf' hmem_old).2 hsign
       | diamond φ => exact absurd (Or.inr ⟨rfl, φ, rfl⟩) hshape
 
-/-- **Task 515 (Phase 19b)**: the Five fuel induction: `modalExpandBranchesGen modalApplyOneFive`
+/-- The Five fuel induction: `modalExpandBranchesGen modalApplyOneFive`
 closing implies every branch is unsatisfiable-in-`fiveFC`. Direct, non-generic analogue of
 `modalExpandBranchesS5Gen_closed_unsatIn`, threading `FiveSoundInv` via `List.Forall₂` and reusing
 `modalStepBranch_preserves_accFreshInv_gen`/`modalStepBranch_preserves_accTargetsKnown_gen` (both
 generic, instantiated at `modalApplyOneFive`/`modalApplyOneFive_fresh_local`),
-`modalStepBranchFive_preserves_accReachableInv` (already landed, non-generic), and the per-step
+`modalStepBranchFive_preserves_accReachableInv` (non-generic), and the per-step
 satisfiability bridge `modalStepBranchFive_preserves_satIn` above. -/
 theorem modalExpandBranchesFive_closed_unsatIn
     (fuel : Nat) :
@@ -4900,13 +4897,13 @@ theorem modalTableauKb5''_sound (φ : Proposition Atom) (h : modalTableauKb5'' �
   cases hunsat with
   | cons h_unsat _ => exact h_unsat hsat
 
-/-! ## KB5 Soundness via Frame-Class Monotonicity (task 515 Phase 22)
+/-! ## KB5 Soundness via Frame-Class Monotonicity
 
 `modalTableauKb5` (`FiveSimplification.lean`) is definitionally `modalTableauFive` -- the "factor,
 not clone" decision recorded in that file's KB5-instantiation module note. Soundness for `kb5Valid`
 is therefore not a re-derived fuel-induction chain but a two-line corollary of
 `modalTableauFive_sound` composed with the frame-class monotonicity below, mirroring the
-`specs/515_.../probes/five-s5-separation.lean` bridging pattern
+S5/Five separation proof's bridging pattern
 (`s5FC_imp_fiveFC`/`fiveValid_imp_s5Valid`) one level down the frame-class hierarchy
 (`kb5FC ⇒ fiveFC ⇒ trivialFC`, matching `s5FC ⇒ fiveFC`/`s5FC ⇒ kb5FC`'s already-probed shape). -/
 
@@ -4921,7 +4918,7 @@ symmetric-and-Euclidean) subclass. Mirrors the separation probe's `fiveValid_imp
 theorem fiveValid_imp_kb5Valid (φ : Proposition Atom) (h : fiveValid φ) : kb5Valid φ :=
   fun World m hFC w => h World m hFC.2 w
 
-/-- **The KB5 soundness capstone** (task 515 Phase 22): if the KB5 tableau closes on `F(φ)`, then
+/-- **The KB5 soundness capstone**: if the KB5 tableau closes on `F(φ)`, then
 `φ` is `kb5Valid`. Since `modalTableauKb5 = modalTableauFive` definitionally
 (`FiveSimplification.lean`'s `modalTableauKb5_eq_modalTableauFive`), this is a direct corollary of
 `modalTableauFive_sound` composed with `fiveValid_imp_kb5Valid` -- no bespoke fuel-induction

@@ -6538,6 +6538,110 @@ lemma modalExpMeasure_step_lt_S4Keyed
     exact pow3_add_one_le hC h0
   · rw [hca] at hfound; simp at hfound
 
+/-! ## Phase 10: Top-Loop Induction — `modalExpandBranchesS4Keyed_hintikka`
+
+Assembles the termination top-loop: an open branch produced by the keyed driver is a Hintikka
+set for the live S4 rule. Structural port of `modalExpandBranchesHintikka`
+(`CompletenessLoop.lean:1430-1740`) with the per-index invariant taken as the CONJUNCTION
+`S4LoopInv ∧ S4KeyedHintikkaInv ∧ keysWorldsKnown ∧ worldsContiguousS4` (there is no single
+bundled structure playing `ModalLoopInvHintikka`'s role for the keyed driver, per Phase 6's
+deliberate non-bundling), and threading the extra `keys` worklist column throughout. -/
+
+/-- **Local re-derivation** of `CompletenessLoop.lean`'s `private modalStepBranchGen_newExps_const`
+(`:515`), specialized to the keyed 4-tuple stepper (dropping the `keys'` component from the
+conclusion, which plays no role in the constant-expanded-set fact). Identical case-split proof. -/
+private lemma modalStepBranchS4Keyed_newExps_const (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    ∃ newExp, newExps = newBs.map (fun _ => newExp) := by
+  unfold modalStepBranchS4Keyed at hstep
+  obtain ⟨sf, hsfmem, hsf⟩ := List.exists_of_findSome?_eq_some hstep
+  split_ifs at hsf with hexp
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -, -⟩ := hsf
+    exact ⟨e ++ [sf], rfl⟩
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -, -⟩ := hsf
+    exact ⟨e ++ [sf], by simp [List.map_map, Function.comp_def]⟩
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, rfl, -, -⟩ := hsf
+    exact ⟨e, rfl⟩
+  · rw [hres] at hsf; simp at hsf
+
+/-- **Local re-derivation** of the saturated-leaf characterisation
+(`modalStepBranchGen_none_saturated`, `Completeness.lean:809`, public but phrased against the
+generic 3-tuple driver, hence not directly applicable to the keyed 4-tuple stepper), mirroring
+Phase 7's own `findSome?_eq_none_iff` + case-split idiom rather than routing through a
+generic-driver projection for the `none` direction. -/
+private lemma modalStepBranchS4Keyed_none_saturated (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = none)
+    (sf : SignedFormula (Proposition Atom) WorldIndex) (hsfb : sf ∈ b) :
+    sf ∈ e ∨ (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable := by
+  unfold modalStepBranchS4Keyed at hstep
+  rw [List.findSome?_eq_none_iff] at hstep
+  have hbody := hstep sf hsfb
+  by_cases hany : e.any (· == sf) = true
+  · left
+    simp only [List.any_eq_true] at hany
+    obtain ⟨sf', hme, heq⟩ := hany
+    simp only [beq_iff_eq] at heq
+    exact heq ▸ hme
+  · right
+    simp only [Bool.not_eq_true] at hany
+    simp only [hany] at hbody
+    rcases hca : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨res, newAcc0⟩
+    simp only [hca] at hbody
+    rcases res with out | brs | out | _
+    · exact absurd hbody (by simp)
+    · exact absurd hbody (by simp)
+    · exact absurd hbody (by simp)
+    · rfl
+
+/-- The keyed box-negative rule is never `.notApplicable`: unblocked, it reduces to K's own
+`modalApplyOne_boxNeg_witness` (always `.linear (_ :: _)`); blocked, it is `.linear []`
+(`modalApplyOneS4Keyed_boxNeg_blocked_eq`). Either way the result constructor is `.linear`, never
+`.notApplicable`. Guard-independent: holds for ANY `blockingWorldS4Keyed` outcome, so unaffected
+by R1's guard-narrowing risk. -/
+private lemma modalApplyOneS4Keyed_boxNeg_ne_notApplicable (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Keyed φ₀ keys
+        (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1
+      ≠ .notApplicable := by
+  rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ w with _ | wBlock
+  · rw [modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ w hblock]
+    obtain ⟨-, rest, hfst⟩ := modalApplyOne_boxNeg_witness b acc ψ w
+    rw [hfst]; simp
+  · rw [modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ w wBlock hblock]
+    simp
+
+/-- Dual of `modalApplyOneS4Keyed_boxNeg_ne_notApplicable` for the diamond-positive shape. -/
+private lemma modalApplyOneS4Keyed_diaPos_ne_notApplicable (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Keyed φ₀ keys
+        (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1
+      ≠ .notApplicable := by
+  rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ w with _ | wBlock
+  · rw [modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ w hblock]
+    obtain ⟨-, rest, hfst⟩ := modalApplyOne_diamondPos_witness b acc ψ w
+    rw [hfst]; simp
+  · rw [modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ w wBlock hblock]
+    simp
+
 end Cslib.Logic.Modal.Tableau
 
 end

@@ -4,47 +4,52 @@
   "session_id": "sess_1784866674_c9da04_542",
   "orchestrator_mode": true,
   "type": "implement",
-  "summary": "Resumed after a prior dispatch was terminated mid-edit by an API session limit, leaving uncommitted partial edits in FrameSoundness.lean and the plan file. Reviewed and reconciled that diff first (finished stripping the four remaining hits it missed, verified build/sorry, committed 7fa923cd), then completed Phase 3 (Modal/Tableau Soundness/Measure/Simplification Cluster) in full: FmpMeasure.lean (4378ecc7, 52 hits), S5Simplification.lean (03057474, 41 hits -- pervasive 'Termination Machinery Plan v5, Phase N' citations replaced with durable section-name anchors, plus a stale [BLOCKED]/'COMPILED IN RESEARCH' status marker corrected on what are actually completed sorry-free obstruction proofs), FiveSimplification.lean (27316733, 39 hits, including reports/07-08 research-report citations a supplementary grep caught beyond the original hit count), GenericDriver.lean (70121234, 36 hits, including a mislabeled 'the plan's Architectural Note' self-reference fixed to correctly cite this file's own module docstring), and the remaining lighter Modal/Tableau infrastructure files -- Defs.lean, Rules.lean, SoundnessStep.lean, Soundness.lean, Saturation.lean, TDriver.lean, BDriver.lean (d842d08b, 2a135eae) -- including one stale claim in BDriver.lean ('grep returned zero hits... not yet built') that is false today and was corrected to state the current fact. FrameRules.lean/Closure.lean/Branch.lean confirmed zero provenance hits. All touched modules build clean with zero live sorry and zero new axioms; per-file lake build confirmed at every step. Phases 4-8 (Modal/Metalogic/Constructive, Modal/Metalogic remainder + ProofSystem, Propositional/Temporal remainder, Bimodal + Foundations/Logic + the section 4.3 judgment review, and the final whole-tree CI gate) have not been started. Roughly 610/1299 provenance lines (~47%) are now resolved across Phases 1-3. See the handoff document for full continuation context, including new methodology notes about research-report citations, mislabeled self-references, and verifying stale 'gap' claims against the current tree before rewording.",
+  "summary": "Resumed from a killed dispatch (uncommitted partial edit in Deduction.lean). Finished Deduction.lean, then completed Phases 4, 5, and 6 in full, and Phase 7 (Bimodal + Foundations/Logic) mostly, all with green scoped builds and zero live sorry introduced. Phase 4: Modal/Metalogic/Constructive incl. Labelled/ (8 files). Phase 5: Modal/Metalogic remainder + ProofSystem (Intuitionistic 7 files, InterSystem 7, Systems 15, Minimal 2, ProofSystem 16, root Metalogic files 5) -- corrected 2 stale claims (IntToClassical.lean, SchemaUnion.lean). Phase 6: Propositional + Temporal remainder (30 of 39 files stripped; 9 deliberately skipped as live continuation docs for still-open tasks 317/implementing, 425/not_started, 530/blocked) -- corrected 2 more stale claims (Embedding.lean, LK/Interpolation.lean). Phase 7: Bimodal + Foundations/Logic (17 of 30 files stripped; 13 skipped as live blockers for tasks 36/37/450/530, all non-archived/non-terminal status) -- corrected 1 more stale claim (SinceSeedConsistency.lean); the dedicated section-4.3 judgment-phrase sweep (no longer/used to/previously/bypassed/refactor/migration) was NOT run as a separate exhaustive pass, though many instances were incidentally resolved. Phase 8 (full CI gate) not run -- depends on Phase 7 being fully complete. Every touched file (100+) was individually scoped-built green with a live-sorry check before commit. Full continuation context, the complete skip-list with task-status justifications, and methodology notes are in handoffs/04_phase4-7-partial-handoff.md.",
   "artifacts": [
     {
       "path": "specs/542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md",
       "type": "plan",
-      "description": "Plan with Phases 1-3 all marked [COMPLETED]; per-task checklist items annotated with what was done"
+      "description": "Plan with Phases 1-6 marked [COMPLETED], Phase 7 marked [PARTIAL] with full per-file deviation documentation and task-status justifications for every skipped file"
     },
     {
-      "path": "specs/542_strip_task_provenance_stale_claims_docstrings/summaries/01_strip-provenance-docstrings-summary.md",
-      "type": "summary",
-      "description": "Implementation summary covering Phase 1-2 completion (stale; predates this session's Phase 3 work), plan deviations, and verification state"
-    },
-    {
-      "path": "specs/542_strip_task_provenance_stale_claims_docstrings/handoffs/03_phase3-complete-handoff.md",
+      "path": "specs/542_strip_task_provenance_stale_claims_docstrings/handoffs/04_phase4-7-partial-handoff.md",
       "type": "handoff",
-      "description": "Continuation context: Phase 4 file list and priorities, methodology notes for research-report citations, mislabeled self-references, stale-claim verification, and literal bold [BLOCKED]/[COMPLETED] status markers, recommended next steps"
+      "description": "Full continuation context: what was done per phase, complete skip-list with owning-task statuses, what remains (finish Phase 7 judgment pass + Phase 8 CI gate), methodology notes for detecting live-blocker entanglement vs. genuine stale provenance"
     }
   ],
   "continuation_context": {
-    "phases_completed": 3,
+    "phases_completed": 6,
     "phases_total": 8,
-    "phase_1_status": "completed",
-    "phase_2_status": "completed",
-    "phase_3_status": "completed",
-    "phases_4_through_8_status": "not_started",
-    "next_files": [
-      "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean (64 hits)",
-      "Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean (47 hits)",
-      "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean (58 hits)",
-      "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/PrimeLemma.lean (45 hits)",
-      "Cslib/Logics/Modal/Metalogic/Constructive/{CS4,CKExtension}.lean",
-      "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/{Completeness,Context}.lean"
+    "phase_4_status": "completed",
+    "phase_5_status": "completed",
+    "phase_6_status": "completed",
+    "phase_7_status": "partial (task/phase stripping done for non-blocked files; section-4.3 judgment pass deferred)",
+    "phase_8_status": "not_started",
+    "skipped_files_owning_tasks": {
+      "317": "implementing -- Propositional/Tableau/Intuitionistic/{Scheme,Expansion,Completeness}.lean, Tableau/Minimal/Completeness.lean",
+      "425": "not_started -- Temporal/Tableau/{Soundness,TimeOrdering}.lean",
+      "530": "blocked -- Temporal and Bimodal Chronicle/{ChronicleTypes,RRelation}.lean, Chronicle/CounterexampleElimination/{Structures,BurgessHelpers}.lean (both trees + Foundations copies)",
+      "36": "blocked -- Bimodal ChronicleToCountermodel.lean, BXCanonical/{Frame,Completeness}.lean",
+      "37": "blocked -- Bimodal Bundle/{SuccRelation,UntilSinceCoherence}.lean",
+      "450": "not_started (explicitly owns file) -- Bimodal ConservativeExtension/TemporalConservativity.lean"
+    },
+    "commits_this_session": [
+      "38e1bf22", "372b4372", "5b4d596d", "f6dc0540", "134a011b",
+      "d5a0cffa", "b17ba378", "1c1a7b35", "84f09f09", "f8a500d1", "9d56bede", "2cb19694",
+      "c01c97d8", "fa8d34b3", "f883a6db",
+      "d53e825a", "670009c8", "a39caada", "4a67afda", "08f7cf1d", "b0e6bb85", "f0dbd0d8",
+      "eb85feb2", "97c4a540",
+      "0b0d56c3", "bfa55104", "96f69fd5", "0c33f4d5", "02e531a2", "2bdc8f3b", "69556c25"
     ],
-    "commits_this_session": ["7fa923cd", "4378ecc7", "03057474", "27316733", "70121234", "d842d08b", "2a135eae"],
-    "full_ci_gate_run": false
+    "full_ci_gate_run": false,
+    "stale_claims_corrected_this_session": 6
   },
   "coordinate_task_status": {
-    "543": "completed (item b resolved)",
-    "438": "pr_ready (no overlap)",
-    "425": "not_started (owns Temporal FMP gap, item c)",
-    "301": "blocked (co-owns Temporal FMP gap, item c)",
-    "226": "researched (covers item d DPLL work)"
+    "317": "implementing -- do not touch Scheme.lean/Expansion.lean/Completeness.lean/Minimal-Completeness.lean cluster",
+    "425": "not_started -- do not touch Temporal Tableau/{Soundness,TimeOrdering}.lean",
+    "530": "blocked -- do not touch either tree's ChronicleTypes/RRelation/CounterexampleElimination-Structures cluster",
+    "36": "blocked -- do not touch Bimodal ChronicleToCountermodel.lean/BXCanonical Frame.lean/Completeness.lean",
+    "37": "blocked -- do not touch Bimodal Bundle/SuccRelation.lean/UntilSinceCoherence.lean",
+    "450": "not_started, explicitly owns TemporalConservativity.lean -- do not touch"
   }
 }

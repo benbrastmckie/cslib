@@ -1,47 +1,17 @@
 {
-  "status": "researched",
-  "started_at": "2026-07-19T18:28:13Z",
-  "requires_user_review": true,
-  "phases_completed": 7,
-  "phases_total": 10,
-  "artifacts": [
-    {
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
-      "type": "report",
-      "summary": "Cross-label efq/orE motive divergence audit: theorem TRUE, connectivity hypothesis REFUTED, efq residual = Simpson non-tree excursion; recommends Hilbert bridge (P3) primary, existential-teleport (PD) alternative."
-    }
-  ],
-  "partial_progress": {
-    "stage": "phase_8_blocked",
-    "details": "Generalized-induction motive for the main NIK soundness theorem is machine-verified FALSE for the cross-label NIK.efq/NIK.orE constructors (a two-point disconnected countermodel refutes it). boxI/diaE/boxE/diaI confirmed tractable exactly as planned. Recorded [BLOCKED] per escalation protocol; no sorry, no unsound proof, no new axiom."
-  },
-  "memory_candidates": [
-    "CSLib labelled soundness: connectivity is NOT a derivation-graph invariant. NIK.boxI/diaE (Deduction.lean:297,309) carry no x-in-G.X side-condition and Graph.addEdge sets X := G.X union {x,y}, so boxI/diaE at a dangling efq/orE label create a G.R-disconnected component. Any soundness proof relying on 'TClosure TS5 G.R total on G.X' is unsound; IsDerivationForest rightly omits connectivity because it is not preserved.",
-    "botForces is r-connectivity-invariant under cs5FCIncest+CKValidFC (machine-verified axiom-free): forward via bf_r, backward via cs5Incest + bf_uc + bf_r. Transports over TClosure {T,B,Four} like box_iff_TClosure. Closes the connected efq sub-case only.",
-    "Fallible-world (CKForces/botForces) cross-label bot-E soundness is a genuinely hard case matching Simpson 8.1.2's 'non-tree excursions unavoidable' (direct N(T) needs L_m/Hilbert). Simpson/MMS dodge it via bivalence/explicit-atom sequents; CSLib's fallible-world deviation reopens it. Prefer the Hilbert adequacy bridge (cs5_soundness_derivable_incest, CS5Canonical.lean:373) over a direct induction."
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "note": "audit only; two lemmas machine-verified axiom-free via lean_run_code (bot_backward, bot_iff_edge); no proof code written to the module."
-  },
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
+    "summary": "Plan v4 revising Phase 8 [BLOCKED]: pivots main-theorem architecture to the Hilbert-labelled adequacy bridge (Path P3), preserving all landed Phases 1-7; Path PD kept as documented fallback (Phase 11)"
+  }],
+  "next_steps": "Run /implement 537 to execute the revised plan (Phase 8: nik_TS5_to_hilbert adequacy bridge)",
   "metadata": {
-    "session_id": "sess_1784471495_4fb1e9",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": [
-      "orchestrator",
-      "implement",
-      "cslib-implementation-hard-agent"
-    ]
-  },
-  "agent_type": "cslib-research-hard-agent",
-  "findings_count": 6,
-  "adversarial_verification_triggered": true,
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "VERIFIED (Simpson1994 references.bib:86; MarinMoralesStrassburger2021 references.bib:962)",
-  "next_steps": "Run /plan 537 to create implementation plan"
+    "session_id": "sess_1784905751_756cda_537",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "reviser-agent"],
+    "phase_count": 11,
+    "estimated_hours": 12,
+    "reports_integrated": ["04_crosslabel-motive-audit.md"]
+  }
 }

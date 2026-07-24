@@ -360,7 +360,7 @@
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-13T06:28:44Z",
+      "last_updated": "2026-07-24T15:10:46Z",
       "next_artifact_number": 3,
       "artifacts": [
         {
@@ -501,7 +501,7 @@
       ],
       "dependencies": [],
       "parent_task": 298,
-      "session_id": "sess_1783922075_911857_317"
+      "session_id": "sess_1784905751_756cda_317"
     },
     {
       "project_number": 300,
@@ -1135,12 +1135,12 @@
     {
       "project_number": 425,
       "project_name": "temporal_tableau_ptl_fmp_decidability",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-07-24T14:16:36Z",
+      "last_updated": "2026-07-24T15:10:41Z",
       "next_artifact_number": 4,
       "artifacts": [
         {
@@ -1173,7 +1173,7 @@
         542
       ],
       "parent_task": 301,
-      "session_id": "sess_1784902333_908252",
+      "session_id": "sess_1784905751_756cda_425",
       "memory_candidates": [
         {
           "content": "A temporal tableau whose TimeOrdering places each fresh time at instant t +/- 1 (immediate integer successor/predecessor) and whose untlPos rule asserts T(event) at that successor with no guard-between clause decides Temporal.validDiscrete, NOT Temporal.valid or validSerial. The untlPos branch is sound only when the open interval (t,t') is empty (discreteness). Concrete separation witness: the discreteness axiom G'bot & H'bot is validDiscrete but not valid (fails over the dense rationals), per Burgess 1982 I sec 1.5/sec 2.",
@@ -1363,19 +1363,20 @@
     {
       "project_number": 451,
       "project_name": "bxplus_completeness_over_group_flows",
-      "status": "not_started",
+      "status": "researching",
       "task_type": "cslib",
       "title": "BX+ completeness over ordered-abelian-group time flows",
       "description": "Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.\n\nGOAL: Prove BX+ (Temporal FrameClass.Metric) COMPLETE over the class of ordered-abelian-group temporal frames: every formula valid on all group-ordered flows is BX+-derivable (equivalently, every BX+-consistent formula has a group-ordered countermodel).\n\nResearch must decide the construction. Candidate routes (see specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md):\n- Adapt the existing Temporal completeness machinery (Chronicle / MCS construction under Cslib/Logics/Temporal/Metalogic/Chronicle/) to yield a countermodel whose order embeds into an ordered abelian group.\n- Loewenheim-Skolem to a countable model, then Cantor (Order.iso_of_countable_dense) for the dense case plus a discreteness case-split, transporting satisfaction along the sound Satisfies.orderIso transport lemma sketched in the 445 report section 7.\nLiterature grounding: Xu1988, Burgess1984 sec 6.1, Gabbay1993 (irreflexivity rule), Reynolds. Confirm exactly which frame class BX+ is genuinely complete over before committing.\n\nZero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out to need an open / research-level lemma, escalate with the exact goal rather than papering over it.\n",
       "parent_task": 180,
       "created": "2026-07-01T07:00:00Z",
-      "last_updated": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-24T15:11:05Z",
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
         449
       ],
-      "topic": "Bimodal Logic"
+      "topic": "Bimodal Logic",
+      "session_id": "sess_1784905751_756cda_451"
     },
     {
       "project_number": 497,
@@ -1496,7 +1497,7 @@
     {
       "project_number": 535,
       "project_name": "abstract_termination_measure_interface_s4b_loop",
-      "status": "planned",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
       "description": "Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.",
@@ -1510,7 +1511,7 @@
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
       "created": "2026-07-18T21:19:09Z",
-      "last_updated": "2026-07-24T15:06:49Z",
+      "last_updated": "2026-07-24T15:10:37Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -1534,7 +1535,7 @@
         }
       ],
       "topic": "Modal Logic",
-      "session_id": "sess_1784905305_471f78"
+      "session_id": "sess_1784905751_756cda_535"
     },
     {
       "project_number": 537,
@@ -1636,26 +1637,27 @@
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/09_phase8-blocked-crosslabel-efq-summary.md",
           "type": "summary",
           "summary": "phase8 blocked crosslabel efq summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
+          "type": "plan",
+          "summary": "Plan v4 (supersedes v3): pivots the main-theorem architecture after the Phase 8 cross-label efq/orE [BLOCKED]. Preserves all landed Phases 1-7 (14 preserved assets + IsDerivationForest + boxI_lift). Primary route P3 (Simpson Ch.6 Hilbert-labelled adequacy bridge nik_TS5_to_hilbert -> nik_TS5_soundness as a corollary of landed cs5_soundness_derivable_incest, ~70% closable): Phase 8 bridge (crux), Phase 9 corollary+docstring cleanup, Phase 10 regression gate. Phase 11 fallback route PD (existential-teleport induction + novel bot-locality lemma, ~35% closable) entered only if the bridge overruns. Refutes plan v3's connectivity-lemma fix (connectivity not a graph invariant). Zero-debt: no sorry, no new axiom, Graph unmodified, cs5FCIncest unweakened."
         }
       ],
       "plan_metadata": {
-        "phases": 10,
-        "total_effort_hours": 10,
+        "phases": 11,
+        "total_effort_hours": 12,
         "complexity": "complex",
         "research_integrated": true,
-        "plan_version": 3,
+        "plan_version": 4,
         "dependency_waves": [
           [
             1,
             2,
             3,
             4,
-            5
-          ],
-          [
-            6
-          ],
-          [
+            5,
+            6,
             7
           ],
           [
@@ -1663,6 +1665,12 @@
           ],
           [
             9
+          ],
+          [
+            10
+          ],
+          [
+            11
           ]
         ],
         "reports_integrated": [
@@ -1680,6 +1688,11 @@
             "path": "reports/03_tree-shape-invariant-audit.md",
             "integrated_in_plan_version": 3,
             "integrated_date": "2026-07-19"
+          },
+          {
+            "path": "reports/04_crosslabel-motive-audit.md",
+            "integrated_in_plan_version": 4,
+            "integrated_date": "2026-07-24"
           }
         ],
         "skeleton": false,
@@ -1989,7 +2002,7 @@
     {
       "project_number": 551,
       "project_name": "cs5_native_hilbert_pair_lindenbaum_completeness",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.",
@@ -2000,7 +2013,7 @@
       ],
       "parent_task": null,
       "created": "2026-07-24T00:00:00Z",
-      "last_updated": "2026-07-24T00:00:00Z",
+      "last_updated": "2026-07-24T15:16:42Z",
       "priority": "medium",
       "effort": "large",
       "file_scope": [
@@ -2009,16 +2022,60 @@
         "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean",
         "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean"
       ],
-      "session_id": "session_013h2qsatYrD4BG7EE4C8niu",
+      "session_id": "sess_1784905751_756cda_551",
       "next_artifact_number": 2,
       "artifacts": [
         {
           "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md",
           "type": "report",
           "summary": "Route B (native Hilbert CS5 completeness) research report: obstruction, mechanized negatives, and the Atom-sum pair-primeness repair"
+        },
+        {
+          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/01_native-hilbert-cs5-completeness-plan.md",
+          "type": "plan",
+          "summary": ""
         }
       ],
-      "plan_metadata": {}
+      "plan_metadata": {
+        "phases": 8,
+        "total_effort_hours": 18,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 1,
+        "dependency_waves": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ],
+          [
+            7
+          ],
+          [
+            8
+          ]
+        ],
+        "reports_integrated": [
+          {
+            "path": "reports/01_route-b-native-hilbert-cs5-research.md",
+            "integrated_in_plan_version": 1,
+            "integrated_date": "2026-07-24"
+          }
+        ]
+      }
     }
   ],
   "repository_health": {

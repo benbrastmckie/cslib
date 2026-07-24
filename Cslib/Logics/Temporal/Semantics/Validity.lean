@@ -125,6 +125,20 @@ def satisfiable (φ : Formula Atom) : Prop :=
 /-- A formula is satisfiable (alternative name). -/
 abbrev formulaSatisfiable (φ : Formula Atom) : Prop := satisfiable φ
 
+/-- A formula is satisfiable over a discrete-serial linear order: there exists a model on
+a discrete-serial domain (`NoMaxOrder`, `NoMinOrder`, `SuccOrder`, `PredOrder`,
+`IsSuccArchimedean`) and a time where it holds. Mirrors `satisfiable` with the frame class
+matched to `validDiscrete`, so that the two notions are properly dual (report 02 Finding
+2.1: this is the discrete-time satisfiability predicate needed to state
+`temporalTableau_sound`/`temporalTableau_complete` against `validDiscrete` rather than
+`valid`). -/
+def satisfiableDiscrete (φ : Formula Atom) : Prop :=
+  ∃ (D : Type) (_ : LinearOrder D) (_ : Nontrivial D)
+    (_ : NoMaxOrder D) (_ : NoMinOrder D)
+    (_ : SuccOrder D) (_ : PredOrder D) (_ : IsSuccArchimedean D)
+    (M : TemporalModel D Atom) (t : D),
+    Satisfies M t φ
+
 namespace Validity
 
 /-! ## Validity Reduction Lemmas -/
@@ -200,6 +214,23 @@ theorem satisfiable_not_valid_neg {φ : Formula Atom}
   obtain ⟨D, hord, hnt, M, t, h_sat⟩ := h
   have h_neg := @h_valid D hord hnt M t
   exact h_neg h_sat
+
+/-- Discrete validity is the dual of discrete satisfiability of the negation: `φ` is valid
+over all discrete-serial linear orders iff `¬φ` is not satisfiable over any discrete-serial
+linear order. Mirrors `satisfiable_not_valid_neg`, strengthened to a biconditional over the
+discrete-serial frame class (report 02 Finding 2.1); this is the bridge consumed by
+`instDecidableValid`'s `validDiscrete φ ↔ temporalTableau (¬φ) = .closed` construction. -/
+theorem validDiscrete_iff_not_satisfiableDiscrete_neg {φ : Formula Atom} :
+    validDiscrete φ ↔ ¬ satisfiableDiscrete (¬φ) := by
+  constructor
+  · intro h hsat
+    obtain ⟨D, hord, hnt, hnmax, hnmin, hsucc, hpred, harch, M, t, hsat_neg⟩ := hsat
+    exact (Satisfies.neg_iff M t φ).mp hsat_neg
+      (@h D hord hnt hnmax hnmin hsucc hpred harch M t)
+  · intro h D hord hnt hnmax hnmin hsucc hpred harch M t
+    by_contra hnot
+    exact h ⟨D, hord, hnt, hnmax, hnmin, hsucc, hpred, harch, M, t,
+      (Satisfies.neg_iff M t φ).mpr hnot⟩
 
 end Validity
 

@@ -67,6 +67,14 @@ blockers: (1) a run-level `InstantStrict` proof, (2) FMP for the Until/Since cas
 * [R. Reynolds, *An axiomatization of prior's tense logic*][Reynolds1994]
 * [R. Smullyan, *First-Order Logic*][Smullyan1968] (propositional truth lemma pattern)
 * Propositional Classical Completeness.lean (proof template)
+* [I. Hodkinson and M. Reynolds, *Temporal Logic*][HodkinsonReynolds2006] (Handbook of Modal
+  Logic, ch. 11, §5.8: the bidirectional ultimately-periodic bi-lasso ℤ-model construction
+  underlying `extractModelℤ`)
+* [C. Caleiro, L. Viganò, and M. Volpe, *On the Mosaic Method for Many-Dimensional Modal
+  Logics*][CaleiroViganoVolpe2013] (§4.3: the mosaic-decidability route for `valid`, surveyed
+  and rejected as non-transferable to the discrete case decided here)
+* [D. Gabbay, I. Hodkinson, and M. Reynolds, *Temporal Expressive Completeness in the Presence
+  of Gaps*][Gabbay1993]
 -/
 
 @[expose] public section

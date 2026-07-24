@@ -1,7 +1,7 @@
 # Implementation Plan: PTL Finite Model Property and Temporal Tableau Decidability (validDiscrete-corrected)
 
 - **Task**: 425 - temporal_tableau_ptl_fmp_decidability
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 26 hours
 - **Dependencies**: Sibling tasks 423, 424 (only for the final task-301 registration of `instDecidableValid`; all eight phases below are independently buildable without them)
 - **Research Inputs**:
@@ -173,14 +173,14 @@ Phase 2 and Phase 5 depends only on Phase 4 (they do not depend on each other). 
 order: land Phase 1 first (small, unblocks everything), then spike Phase 4's core definition while
 Phase 2 proceeds in parallel.
 
-### Phase 1: Semantics and domain foundation — satisfiableDiscrete, branchSat restriction, references [NOT STARTED]
+### Phase 1: Semantics and domain foundation — satisfiableDiscrete, branchSat restriction, references [COMPLETED]
 
 **Goal**: Add the discrete satisfiability predicate and its dual lemma, restrict `branchSat`'s
 existential domain to the discrete-serial frame class, and land the three missing BibKeys. Small,
 unblocks everything, and re-verifies `classicallyClosed_unsat` still builds.
 
 **Tasks**:
-- [ ] Add `satisfiableDiscrete` to `Semantics/Validity.lean`, mirroring `satisfiable` with the
+- [x] Add `satisfiableDiscrete` to `Semantics/Validity.lean`, mirroring `satisfiable` with the
   discrete-serial instance binders (report 02 Finding 2.1):
   ```lean
   def satisfiableDiscrete (φ : Formula Atom) : Prop :=
@@ -189,20 +189,26 @@ unblocks everything, and re-verifies `classicallyClosed_unsat` still builds.
       (_ : SuccOrder D) (_ : PredOrder D) (_ : IsSuccArchimedean D)
       (M : TemporalModel D Atom) (t : D), Satisfies M t φ
   ```
-- [ ] Add the discrete dual lemma `validDiscrete_iff_not_satisfiableDiscrete_neg :
+- [x] Add the discrete dual lemma `validDiscrete_iff_not_satisfiableDiscrete_neg :
   validDiscrete φ ↔ ¬ satisfiableDiscrete (¬φ)`, mirroring `satisfiable_not_valid_neg`
-  (`Validity.lean:197`) verbatim with the discrete binders.
-- [ ] Restrict `branchSat` (`Soundness.lean:79-87`): add the five discrete-serial instance binders
+  (`Validity.lean:197`) verbatim with the discrete binders. *(deviation: altered -- proved as a
+  genuine biconditional via `Satisfies.neg_iff` + classical `by_contra` on the backward
+  direction, rather than a verbatim one-direction mirror, since the target signature in Goals
+  is an `↔`.)*
+- [x] Restrict `branchSat` (`Soundness.lean:79-87`): add the five discrete-serial instance binders
   (`NoMaxOrder`, `NoMinOrder`, `SuccOrder`, `PredOrder`, `IsSuccArchimedean`) to the existential,
   keeping the order-preservation and branch-faithfulness clauses unchanged (report 02 Finding 2.2).
-- [ ] Confirm `classicallyClosed_unsat` (`Soundness.lean:97`) still builds — it only destructs the
+- [x] Confirm `classicallyClosed_unsat` (`Soundness.lean:97`) still builds — it only destructs the
   existential; the extra binders are discarded with `_`.
-- [ ] Add BibKeys `HodkinsonReynolds2006`, `CaleiroViganoVolpe2013`, and the 1993 "gaps" article to
-  `references.bib`; update the `## References` sections of `Soundness.lean`/`Completeness.lean` to
-  canonical `[Author, *Title*][BibKey]` format (they currently carry only the legacy
-  `[Reynolds1994]` citation).
-- [ ] `lake build Cslib.Logics.Temporal.Tableau.Soundness` and
-  `lake build Cslib.Logics.Temporal.Semantics.Validity` green; no sorry / no new axiom.
+- [x] Add BibKeys `HodkinsonReynolds2006`, `CaleiroViganoVolpe2013`, and the 1993 "gaps" article
+  (`Gabbay1993`) to `references.bib`; update the `## References` sections of
+  `Soundness.lean`/`Completeness.lean` to canonical `[Author, *Title*][BibKey]` format (they
+  previously carried only the legacy `[Reynolds1994]` citation).
+- [x] `lake build Cslib.Logics.Temporal.Tableau.Soundness` and
+  `lake build Cslib.Logics.Temporal.Semantics.Validity` green; no sorry / no new axiom
+  (`lean_verify` confirms only `propext`/`Classical.choice`/`Quot.sound` on both new
+  declarations; `Cslib.Logics.Temporal.Tableau.Completeness` also confirmed green since its
+  References section was touched).
 
 **Timing**: ~1.5 hours
 

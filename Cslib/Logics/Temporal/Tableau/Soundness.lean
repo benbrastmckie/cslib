@@ -58,6 +58,13 @@ gap and the F(U) propagation soundness argument.
 
 * Modal `Soundness.lean` (proof template)
 * [R. Reynolds, *An axiomatization of prior's tense logic*][Reynolds1994]
+* [I. Hodkinson and M. Reynolds, *Temporal Logic*][HodkinsonReynolds2006] (Handbook of Modal
+  Logic, ch. 11, §5.4, §5.8: tableau soundness, filtration, and the FMP for discrete PTL)
+* [C. Caleiro, L. Viganò, and M. Volpe, *On the Mosaic Method for Many-Dimensional Modal
+  Logics*][CaleiroViganoVolpe2013] (§4.3: the mosaic-decidability route for `valid`, surveyed
+  and rejected as non-transferable to the discrete case decided here)
+* [D. Gabbay, I. Hodkinson, and M. Reynolds, *Temporal Expressive Completeness in the Presence
+  of Gaps*][Gabbay1993]
 -/
 
 @[expose] public section
@@ -71,15 +78,27 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-! ## Branch Satisfiability -/
 
 /-- A branch `b` with time ordering `ord` is satisfiable if there exists a temporal model
-`M` over some time domain `D` (a nontrivial linear order), and a time assignment
-`f : TimeIndex → D`, such that:
+`M` over some discrete-serial time domain `D` (matching the frame class of
+`Temporal.validDiscrete`/`Temporal.satisfiableDiscrete`: a nontrivial linear order with
+`NoMaxOrder`, `NoMinOrder`, `SuccOrder`, `PredOrder`, `IsSuccArchimedean`), and a time
+assignment `f : TimeIndex → D`, such that:
 - The assignment is order-preserving: if `(t, t') ∈ ord.constraints` then `f t < f t'`.
 - Every T(φ)@t on the branch satisfies `Satisfies M (f t) φ`.
-- Every F(φ)@t on the branch satisfies `¬Satisfies M (f t) φ`. -/
+- Every F(φ)@t on the branch satisfies `¬Satisfies M (f t) φ`.
+
+The existential domain is restricted to the discrete-serial frame class (report 02 Finding
+2.2) rather than the bare `[LinearOrder D] [Nontrivial D]` used in the earlier draft: the
+tableau's `untlPos` rule (`Rules.lean`) places its Until witness at the immediate
+integer successor of the current time, which is sound only under discreteness (the
+discreteness axiom `G'⊥ ∧ H'⊥` separates `validDiscrete` from `valid`, `[Burgess1982I]`
+§1.5, §2). -/
 def branchSat
     (b : TBranch Atom)
     (ord : TimeOrdering) : Prop :=
-  ∃ (D : Type) (_ : LinearOrder D) (_ : Nontrivial D) (M : TemporalModel D Atom)
+  ∃ (D : Type) (_ : LinearOrder D) (_ : Nontrivial D)
+    (_ : NoMaxOrder D) (_ : NoMinOrder D)
+    (_ : SuccOrder D) (_ : PredOrder D) (_ : IsSuccArchimedean D)
+    (M : TemporalModel D Atom)
     (f : TimeIndex → D),
     (∀ t t', (t, t') ∈ ord.constraints → f t < f t') ∧
     ∀ sf ∈ b,
@@ -99,7 +118,7 @@ lemma classicallyClosed_unsat
     (ord : TimeOrdering)
     (hclosed : isClassicallyClosed b = true) :
     ¬branchSat b ord := by
-  intro ⟨D, _, _, M, f, _, hb⟩
+  intro ⟨D, _, _, _, _, _, _, _, M, f, _, hb⟩
   simp only [isClassicallyClosed, ClosureCondition.isClosed] at hclosed
   have hsome : (ClosureCondition.findClosure b).isSome = true := hclosed
   rw [Option.isSome_iff_exists] at hsome

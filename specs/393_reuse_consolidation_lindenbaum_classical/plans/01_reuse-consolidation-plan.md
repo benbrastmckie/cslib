@@ -1,7 +1,7 @@
 # Implementation Plan: Reuse-Consolidation of Lindenbaum / MCS / Conservativity Constructions
 
 - **Task**: 393 - reuse_consolidation_lindenbaum_classical
-- **Status**: [IMPLEMENTING]
+- **Status**: COMPLETED
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/393_reuse_consolidation_lindenbaum_classical/reports/01_reuse-consolidation-survey.md

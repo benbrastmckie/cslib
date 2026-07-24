@@ -1,29 +1,18 @@
 {
   "status": "partial",
-  "started_at": "2026-07-24T16:10:37Z",
+  "started_at": "2026-07-24T12:30:00Z",
+  "completed_at": "2026-07-24T12:55:00Z",
   "artifacts": [
     {
-      "type": "lean",
-      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-      "summary": "Phase 8.1 landed: bigAndL/factsAt/sigAtFuel/sigAt/nikTrFuel/nikTr, a fuel-bounded transcription of Simpson's Fig. 6-1/6-2 tree-depth-indexed Hilbert translation (Lemma 6.1.2), plus two sanity examples. Sorry-free, axiom-clean."
-    },
-    {
-      "type": "plan",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/05_tree-recursive-hilbert-bridge.md",
-      "summary": "Sub-step 8.1's checklist marked done with three deviation annotations (OCR source corruption, fuel-based recursion instead of ht-indexed, top-padded sanity examples); Phase 8 remains [IN PROGRESS]."
-    },
-    {
-      "type": "summary",
-      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/11_phase8-1-nikTr-translation-summary.md",
-      "summary": "Implementation summary for this dispatch (Phase 8.1 only)."
+      "type": "report",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/05_efq-orE-motive-defect-and-path.md",
+      "summary": "Research report: verifies file is green/zero-sorry/zero-axiom; enumerates remaining obligations (efq/orE, 4 modal cases, nik_adequacy assembly, 8.4, 9, 10); and delivers the key finding that the planned next step (root-connectivity invariant) targets a FALSE nik_adequacy statement because the landed nikTr is target-oriented and drops (G,Gamma) for disconnected-y efq/orE. Recommends a Phase 8.1 translation redesign to a target-independent Theta(G,Gamma) => place(x,A) shape, closing efq via the CS5 T axiom, after resolving the OCR-corrupted Simpson section 6.1 source."
     }
   ],
-  "requires_user_review": false,
+  "requires_user_review": true,
   "partial_progress": {
-    "stage": "phase-8-substep-8.1-landed",
-    "details": "Landed and committed Phase 8 sub-step 8.1 (nikTr tree-depth translation + sanity examples) of plan v5. Sub-steps 8.2 (propositional + cross-label efq/orE cases), 8.3 (modal cases), 8.4 (specialisation), and Phases 9-10 remain not started. No concrete machine-checked obstruction was hit; this is scope matching the plan's own four-to-six-dispatch sizing for Phase 8, not a wall. A new concrete prerequisite for 8.2 surfaced: a fuel-sufficiency lemma for sigAtFuel/nikTrFuel across an addEdge extension.",
-    "lint_count_start": null,
-    "lint_count_current": null,
+    "stage": "research-complete",
+    "details": "Research dispatch complete. Ground-truth verified: scoped build green (960 jobs, exit 0), zero real sorry/admit/axiom (all grep hits are docstring prose). Key finding: nik_adequacy with the landed target-oriented nikTr is mathematically FALSE at the disconnected-y efq case (Deduction.lean:247 places no constraint on y; nikTr drops the whole graph, giving a false obligation of shape (TT) => atom, refuted via CS5 consistency). The planned root-connectivity invariant does not fix this (it only scopes y in G.X). Recommended: redesign the translation to target-independent Theta(G,Gamma) => place(x,A); efq closes via CS5 T-axiom; resolve OCR-corrupted Simpson 6.1 source first.",
     "phases_completed": 7
   },
   "verification": {
@@ -33,13 +22,12 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": null,
-    "note": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness) green; lake exe checkInitImports clean; lake exe lint-style on the modified file clean; grep confirms zero sorry/axiom in the file. Full 7-step CI pipeline (lake lint whole-project / shake / test) not re-run this dispatch since status is partial, not implemented -- deferred to the dispatch that completes Phase 8-10."
+    "note": "Scoped build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness completed successfully (960 jobs, exit 0). grep confirms zero real sorry/admit/axiom in the file. No implementation performed this dispatch (research only)."
   },
   "metadata": {
-    "session_id": "sess_1784905751_756cda_537",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"],
-    "compliance_check": "passed"
+    "session_id": "research-537",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

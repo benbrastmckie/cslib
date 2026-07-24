@@ -1576,7 +1576,7 @@
     {
       "project_number": 537,
       "project_name": "labelled_cs5_general_soundness_biconditional",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Prove the general labelled SOUNDNESS direction nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, completing Simpson 1994 Thm 8.1.4's biconditional for CSLib constructive CS5/IS5. CONTEXT (from parent task 517, which delivered the completeness direction): cs5_completeness (Completeness.lean:132) and the anti-vacuity certificate nik_TS5_consistent + nik_soundness_onePoint (Soundness.lean) are LANDED sorry-free/axiom-clean. cs5FCIncest_lift (Soundness.lean:181) is a landed building block. THE OPEN OBSTRUCTION (established across 3 dispatches, no forced sorry): TS5={T,B,Four} makes TClosure TS5 G.R the TOTAL relation on the always-connected derivation graph, so the box edge-condition is an r-CLIQUE condition across all labels, not tree-adjacency; and cs5FCIncest's hfour/hsymbox/hincest conjuncts only ever produce EXISTENTIALLY-raised relational witnesses, whereas CKForces's box clause (and boxE) need EXACT edges/symmetry between independently-fixed points (persistence is only upward). No asymmetric countermodel refuted the obstruction; no closure proof completed it -- GENUINELY OPEN. THREE CANDIDATE STRATEGIES (ranked; none is a plain direct-implementation dispatch -- each needs research/re-plan): (1) prove cs5FCIncest forces symmetric/clique closure on finitely-generated substructures -- cheapest, possibly reuses the FLO closure machinery from parent Phases 1-7; (2) formalize Simpson's own modified sequent system L_m(TS5, empty), his stated fix for exactly this problem; (3) build the deferred Simpson Ch.6 Hilbert-labelled ADEQUACY bridge (NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi) and obtain labelled soundness as a corollary of the already-landed Hilbert soundness cs5_soundness_derivable_incest (CS5Canonical.lean:373) -- note this resurrects the bridge task 517 deliberately avoided (Track C, C5 'THE TRUE CRUX'). Full analysis: specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-blocked-20260719c.md and Soundness.lean's refined-analysis docstring. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not weaken cs5FCIncest; do not regress parent's landed completeness/anti-vacuity. Research MUST use --lit (Simpson Ch 8 soundness, Lifting Lemma 8.1.3, L_m modified sequent system). BibKeys: Simpson1994, MarinMoralesStrassburger2021. HIGH uncertainty (the direct route may be genuinely open). Start with strategy (1) as a research/probe pass before committing. Depends on 517.",
@@ -1585,7 +1585,7 @@
       ],
       "parent_task": 517,
       "created": "2026-07-19T04:10:00Z",
-      "last_updated": "2026-07-24T19:21:24Z",
+      "last_updated": "2026-07-24T19:29:06Z",
       "priority": null,
       "effort": "15-40 hours",
       "file_scope": [
@@ -1595,19 +1595,9 @@
       "next_artifact_number": 5,
       "artifacts": [
         {
-          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/01_general-soundness-strategies.md",
-          "type": "report",
-          "summary": "Three-strategy feasibility for general labelled CS5 soundness; direct route genuinely open; recommend Strategy 1 probe+gate, Strategy 3 fallback"
-        },
-        {
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/01_general-soundness.md",
           "type": "plan",
           "summary": "Hard-mode plan: Strategy-1 probe with hard pivot gate (GATE-A proof / GATE-B countermodel / GATE-C blocked), direct-route continuation, and Strategy-3 adequacy-bridge fallback; zero-debt (no sorry, [BLOCKED] handoff instead)"
-        },
-        {
-          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/02_direct-route-from-sources.md",
-          "type": "report",
-          "summary": "Source-grounded (Simpson Ch.8 + MMS 2021, chunks read directly): DIRECT route ACHIEVABLE. Prior [BLOCKED] proved the WRONG lemma. Wall A (exact r-symmetry) dissolved by box/diamond forcing-equivalence across TClosure class (machine-verified axiom-free); Wall B = standard Lifting Lemma 8.1.3, F1 landed + F2 derivable. Lemma-by-lemma mapping + ranked next steps."
         },
         {
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/02_direct-route.md",
@@ -1615,19 +1605,9 @@
           "summary": "Hard-mode direct-route plan (v2, supersedes 01): prove nik_TS5_soundness directly via box/diamond forcing-equivalence over the TClosure class (Wall A dissolved) + Simpson Lifting Lemma 8.1.3 (F1 landed, F2 tiny). De-risking order; zero-debt; contingency [BLOCKED] handoff, no sorry."
         },
         {
-          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/03_tree-shape-invariant-audit.md",
-          "type": "report",
-          "summary": "Divergence audit resolving the Phase 4.2 boxI_lift blocker. VERDICT: direct route COMPLETABLE (not [BLOCKED]). The 3-cycle refutes only boxI_lift-over-arbitrary-Graph; NIK derivations are finite rooted forests by construction (only boxI/diaE add edges, always existing->fresh-sink from Graph.trivial). Thread IsDerivationForest (X.Finite + graded rank + unique-parent) through the Phase 5 motive; complete boxI_lift as a hypothesis-taking standalone lemma reusing landed F1/F2/boxI_raise_step. Grounded in Simpson1994 8.1.3/8.1.2 (chunks 0154-0156, tree-restricted Lifting Lemma) + MMS2021 Def 5.1. Includes revised Phase 4.2a/4.2b/5 sequence."
-        },
-        {
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/03_direct-route-forest.md",
           "type": "plan",
           "summary": "Hard-mode direct-route plan v3 (supersedes 02): folds the tree-shape-invariant audit (report 03). Un-blocks the Phase 4.2 boxI_lift blocker. Phases 1-5 LANDED (box_iff_base/dia_iff_base, box_iff_TClosure/dia_iff_TClosure, cs5FCIncest_raise/box_gives_here, boxI_raise_step, boxI_lift_star). Remaining: Phase 6 IsDerivationForest (3-conjunct threaded invariant: X.Finite + graded rank + unique-parent) + forest_trivial/forest_addEdge_fresh; Phase 7 boxI_lift (tree cascade, sole concentrated engineering risk); Phase 8 main NIK induction (motive amended) + close boxI case + assemble nik_TS5_soundness; Phase 9 regression gate; Phase 10 contingency [BLOCKED] on engineering overrun only. Zero-debt: no sorry, no new axiom, Graph unmodified, cs5FCIncest unweakened."
-        },
-        {
-          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
-          "type": "report",
-          "summary": "Divergence audit of the Phase 8 cross-label efq/orE [BLOCKED]. VERDICT: nik_TS5_soundness is TRUE (naive motive refuted only). REFUTES the task's connectivity hypothesis: NIK.boxI/diaE have no x in G.X side-condition, so boxI-at-a-dangling-efq/orE-label creates a G.R-disconnected component; IsDerivationForest rightly omits connectivity because it is not preserved -> Q4 option A (connectivity lemma) not viable. Machine-verified axiom-free that botForces propagates bidirectionally along an r-edge (closes the CONNECTED efq sub-case only). orE is fine under an existential motive (single-branch); efq-with-y-not-in-domain closes by teleport-to-exploding-point; the sole residual is efq with bot derived in a component disconnected from the conclusion label = Simpson 8.1.2's non-tree excursion. Recommends Path P3 (Hilbert adequacy bridge -> corollary of landed cs5_soundness_derivable_incest, lowest risk) primary; Path PD (existential-teleport induction + a novel bot-locality lemma, higher risk) alternative. Reuses all 14 landed assets. Zero-debt."
         },
         {
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/02_gate-c-blocked-handoff-summary.md",
@@ -1678,6 +1658,11 @@
           "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
           "type": "plan",
           "summary": "Plan v4 (supersedes v3): pivots the main-theorem architecture after the Phase 8 cross-label efq/orE [BLOCKED]. Preserves all landed Phases 1-7 (14 preserved assets + IsDerivationForest + boxI_lift). Primary route P3 (Simpson Ch.6 Hilbert-labelled adequacy bridge nik_TS5_to_hilbert -> nik_TS5_soundness as a corollary of landed cs5_soundness_derivable_incest, ~70% closable): Phase 8 bridge (crux), Phase 9 corollary+docstring cleanup, Phase 10 regression gate. Phase 11 fallback route PD (existential-teleport induction + novel bot-locality lemma, ~35% closable) entered only if the bridge overruns. Refutes plan v3's connectivity-lemma fix (connectivity not a graph invariant). Zero-debt: no sorry, no new axiom, Graph unmodified, cs5FCIncest unweakened."
+        },
+        {
+          "path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/05_efq-orE-motive-defect-and-path.md",
+          "type": "report",
+          "summary": "efq/orE motive defect: landed nikTr makes nik_adequacy false; recommended Theta redesign"
         }
       ],
       "plan_metadata": {

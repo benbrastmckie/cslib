@@ -62,8 +62,8 @@ theorem mcs_g_bot_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω) :
     Formula.allFuture Formula.bot ∉ Ω := by
   intro h_g_bot
-  -- Task 180 (F1): G(⊥) ∈ Ω is no longer defeq to ¬F(¬⊥) ∈ Ω now that G is primitive;
-  -- convert via mcs_allFuture_iff (neg bot / top coincide definitionally, Phase 5 note).
+  -- G(⊥) ∈ Ω is not defeq to ¬F(¬⊥) ∈ Ω since G is primitive; convert via
+  -- mcs_allFuture_iff (neg bot / top coincide definitionally).
   have h' := (mcs_allFuture_iff h_mcs).mp h_g_bot
   exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h' (mcs_f_top_mem h_mcs))
 
@@ -72,8 +72,8 @@ theorem mcs_h_bot_not_mem
     {Ω : Set (Formula Atom)} (h_mcs : Temporal.SetMaximalConsistent Ω) :
     Formula.allPast Formula.bot ∉ Ω := by
   intro h_h_bot
-  -- Task 180 (F1): H(⊥) ∈ Ω is no longer defeq to ¬P(¬⊥) ∈ Ω now that H is primitive;
-  -- convert via mcs_allPast_iff.
+  -- H(⊥) ∈ Ω is not defeq to ¬P(¬⊥) ∈ Ω since H is primitive; convert via
+  -- mcs_allPast_iff.
   have h' := (mcs_allPast_iff h_mcs).mp h_h_bot
   exact mcs_bot_not_mem h_mcs (temporal_implication_property h_mcs h' (mcs_p_top_mem h_mcs))
 
@@ -202,8 +202,8 @@ theorem mcs_g_trans
     (h_g : (𝐆ψ) ∈ Ω) : Formula.allFuture (Formula.allFuture ψ) ∈ Ω := by
   by_contra h_not_gg
   let X := Formula.someFuture (Formula.neg ψ)
-  -- Task 180 (F1): ¬(G(Gψ)) ∈ Ω is no longer defeq to F(¬¬X) ∈ Ω now that G is primitive
-  -- (𝐆ψ is no longer defeq to ¬X). Two-stage repair:
+  -- ¬(G(Gψ)) ∈ Ω is not defeq to F(¬¬X) ∈ Ω since G is primitive (𝐆ψ is not defeq to
+  -- ¬X). Two-stage repair:
   -- Stage A: G(Gψ) ∉ Ω gives F(¬(Gψ)) ∈ Ω via mcs_not_allFuture_iff.
   have h_stepA : Formula.someFuture (Formula.neg (Formula.allFuture ψ)) ∈ Ω :=
     (mcs_not_allFuture_iff h_mcs).mp h_not_gg
@@ -235,7 +235,7 @@ theorem mcs_g_trans
     mcs_mp_axiom h_mcs h_g_dne
       (.right_mono_until (Formula.neg (Formula.neg X)) X Formula.top)
   have h_ff := temporal_implication_property h_mcs h_bx3 h_f_neg_g
-  -- Task 180 (F1): h_g : Gψ ∈ Ω is no longer defeq to ¬X ∈ Ω; convert via mcs_allFuture_iff.
+  -- h_g : Gψ ∈ Ω is not defeq to ¬X ∈ Ω; convert via mcs_allFuture_iff.
   exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_g) (mcs_ff_imp_f h_mcs h_ff)
 
 /-- H(ψ) → H(H(ψ)) in MCS (H-transitivity via P-idempotency). -/
@@ -245,7 +245,7 @@ theorem mcs_h_trans
     (h_h : (𝐇ψ) ∈ Ω) : Formula.allPast (Formula.allPast ψ) ∈ Ω := by
   by_contra h_not_hh
   let X := Formula.somePast (Formula.neg ψ)
-  -- Task 180 (F1): past dual of mcs_g_trans's Stage A/B repair.
+  -- Past dual of mcs_g_trans's Stage A/B repair.
   have h_stepA : Formula.somePast (Formula.neg (Formula.allPast ψ)) ∈ Ω :=
     (mcs_not_allPast_iff h_mcs).mp h_not_hh
   have h_bridge : DerivationTree FrameClass.Base [] ((Formula.neg X).imp (Formula.allPast ψ)) :=
@@ -272,7 +272,7 @@ theorem mcs_h_trans
     mcs_mp_axiom h_mcs h_h_dne
       (.right_mono_since (Formula.neg (Formula.neg X)) X Formula.top)
   have h_pp := temporal_implication_property h_mcs h_bx3 h_p_neg_h
-  -- Task 180 (F1): h_h : Hψ ∈ Ω is no longer defeq to ¬X ∈ Ω; convert via mcs_allPast_iff.
+  -- h_h : Hψ ∈ Ω is not defeq to ¬X ∈ Ω; convert via mcs_allPast_iff.
   exact mcs_not_mem_of_neg h_mcs ((mcs_allPast_iff h_mcs).mp h_h) (mcs_pp_imp_p h_mcs h_pp)
 
 /-- If futureSet(Ω₁) ⊆ Ω₂, then pastSet(Ω₂) ⊆ Ω₁. Uses BX4. -/
@@ -284,7 +284,7 @@ theorem past_of_future_subset
     ∀ ψ, (𝐇ψ) ∈ Ω₂ → ψ ∈ Ω₁ := by
   intro ψ h_h
   by_contra h_not
-  -- Task 180 (F1): h_h : Hψ ∈ Ω₂ is no longer defeq to ¬P(¬ψ) ∈ Ω₂ now that H is primitive.
+  -- h_h : Hψ ∈ Ω₂ is not defeq to ¬P(¬ψ) ∈ Ω₂ since H is primitive.
   have h_h' : Formula.neg (Formula.somePast (Formula.neg ψ)) ∈ Ω₂ :=
     (mcs_allPast_iff h_mcs₂).mp h_h
   exact mcs_not_mem_of_neg h_mcs₂ h_h'
@@ -300,7 +300,7 @@ theorem future_of_past_subset
     ∀ ψ, (𝐆ψ) ∈ Ω₂ → ψ ∈ Ω₁ := by
   intro ψ h_g
   by_contra h_not
-  -- Task 180 (F1): h_g : Gψ ∈ Ω₂ is no longer defeq to ¬F(¬ψ) ∈ Ω₂ now that G is primitive.
+  -- h_g : Gψ ∈ Ω₂ is not defeq to ¬F(¬ψ) ∈ Ω₂ since G is primitive.
   have h_g' : Formula.neg (Formula.someFuture (Formula.neg ψ)) ∈ Ω₂ :=
     (mcs_allFuture_iff h_mcs₂).mp h_g
   exact mcs_not_mem_of_neg h_mcs₂ h_g'

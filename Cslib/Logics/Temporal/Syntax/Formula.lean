@@ -16,7 +16,8 @@ public import Mathlib.Data.Finset.Lattice.Basic
 This module defines the formula type for temporal logic with primitives
 `{atom, bot, imp, untl, snce, allFuture, allPast}`. The `untl` (until) and `snce` (since)
 operators are the basic existential temporal modalities; `allFuture` (G) and `allPast` (H)
-are primitive universal temporal modalities promoted to constructors (task 180).
+are primitive universal temporal modalities, promoted from derived abbreviations to
+constructors.
 
 ## Main definitions
 
@@ -58,9 +59,9 @@ expansion in `Axioms.lean`.
 - `somePast φ` (𝐏 φ): `⊤ S φ` — φ held at some past point (Pnueli: `snce ⊤ φ`)
 - `allPast φ` (𝐇 φ): primitive constructor — φ held at all past points
 
-The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ` hold as *theorems* (task 180,
-Phase 8), not as definitional equalities. Promoting G/H to constructors enables
-intuitionistic temporal logics where `Gφ` is strictly stronger than `¬𝐅¬φ`.
+The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ` hold as *theorems*, not as
+definitional equalities. Promoting G/H to constructors enables intuitionistic temporal logics
+where `Gφ` is strictly stronger than `¬𝐅¬φ`.
 
 ## Convention Note
 
@@ -91,7 +92,7 @@ namespace Cslib.Logic.Temporal
 
 Primitives: atoms, falsum, implication, until, since, allFuture (G), allPast (H).
 
-`allFuture` and `allPast` are primitive universal temporal operators (task 180).
+`allFuture` and `allPast` are primitive universal temporal operators.
 The derived existential operators `someFuture` (F) and `somePast` (P) remain abbreviations:
 `𝐅φ = ⊤ U φ` and `𝐏φ = ⊤ S φ`. The classical equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ`
 hold as theorems (see `allFutureIffNegSomeFutureNeg`). -/
@@ -106,11 +107,11 @@ inductive Formula (Atom : Type u) : Type u where
   | untl (φ₁ φ₂ : Formula Atom)
   /-- Since temporal operator: φ₁ S φ₂. -/
   | snce (φ₁ φ₂ : Formula Atom)
-  /-- All future (globally): G φ — φ holds at all strictly future times. Primitive constructor
-  (task 180). Classical equivalence `𝐆φ ↔ ¬𝐅¬φ` is a theorem, not a definition. -/
+  /-- All future (globally): G φ — φ holds at all strictly future times. Primitive constructor.
+  Classical equivalence `𝐆φ ↔ ¬𝐅¬φ` is a theorem, not a definition. -/
   | allFuture (φ : Formula Atom)
-  /-- All past (historically): H φ — φ held at all strictly past times. Primitive constructor
-  (task 180). Classical equivalence `𝐇φ ↔ ¬𝐏¬φ` is a theorem, not a definition. -/
+  /-- All past (historically): H φ — φ held at all strictly past times. Primitive constructor.
+  Classical equivalence `𝐇φ ↔ ¬𝐏¬φ` is a theorem, not a definition. -/
   | allPast (φ : Formula Atom)
 deriving DecidableEq
 
@@ -127,12 +128,12 @@ instance : TemporalConnectives (Formula Atom) where
 
 /-- Negation: ¬φ := φ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.neg` default. -/
 abbrev Formula.neg (φ : Formula Atom) : Formula Atom := PropositionalConnectives.neg φ
 
 /-- Verum / top: ⊤ := ⊥ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.top` default. -/
 abbrev Formula.top : Formula Atom := PropositionalConnectives.top
 
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/
@@ -153,8 +154,8 @@ abbrev Formula.iff (φ₁ φ₂ : Formula Atom) : Formula Atom :=
 abbrev Formula.someFuture (φ : Formula Atom) : Formula Atom :=
   .untl .top φ
 
--- Note: `Formula.allFuture` and `Formula.allPast` are now inductive constructors
--- (task 180 promotion). The notation `𝐆`/`𝐇` binds directly to the constructors.
+-- Note: `Formula.allFuture` and `Formula.allPast` are inductive constructors.
+-- The notation `𝐆`/`𝐇` binds directly to the constructors.
 
 /-- Some past: 𝐏 φ := ⊤ S φ.
     Pnueli convention: `snce guard event` — ⊤ is the trivial guard,
@@ -215,7 +216,7 @@ Pattern-aware cases for derived temporal operators (Pnueli convention: `untl gua
 def complexity : Formula Atom → Nat
   | .atom _ => 1
   | .bot => 1
-  -- G(φ) and H(φ) are now primitive constructors (task 180)
+  -- G(φ) and H(φ) are primitive constructors
   | .allFuture φ => 1 + complexity φ
   | .allPast φ => 1 + complexity φ
   -- R(φ, ψ) = release = imp (untl (imp φ bot) (imp ψ bot)) bot  [¬(¬φ_guard U ¬ψ_event) in Pnueli]

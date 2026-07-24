@@ -27,7 +27,7 @@ EVENT (holds at the witness point):
 This matches `Cslib.Logics.LTL` and the `Formula.someFuture` definition
 (`someFuture φ = untl ⊤ φ`, where ⊤ is the trivial guard and φ is the event).
 
-`allFuture` and `allPast` are now primitive constructors (task 180) with direct
+`allFuture` and `allPast` are primitive constructors with direct
 structural satisfaction clauses:
 - `allFuture φ` at `t`: `∀ s, t < s → Satisfies M s φ`
 - `allPast φ` at `t`: `∀ s, s < t → Satisfies M s φ`
@@ -60,8 +60,8 @@ The evaluation is defined recursively on formula structure:
 - Implication: standard material conditional.
 - Until U(ψ,φ): ∃ s > t, φ(s) ∧ ∀ r ∈ (t,s), ψ(r).  (ψ=GUARD, φ=EVENT)
 - Since S(ψ,φ): ∃ s < t, φ(s) ∧ ∀ r ∈ (s,t), ψ(r).  (ψ=GUARD, φ=EVENT)
-- AllFuture G(φ): ∀ s > t, φ(s).  (primitive constructor, task 180)
-- AllPast H(φ): ∀ s < t, φ(s).  (primitive constructor, task 180)
+- AllFuture G(φ): ∀ s > t, φ(s).  (primitive constructor)
+- AllPast H(φ): ∀ s < t, φ(s).  (primitive constructor)
 -/
 def Satisfies (M : TemporalModel D Atom) (t : D) : Formula Atom → Prop
   | .atom p => M.valuation t p
@@ -160,7 +160,7 @@ theorem somePast_iff (M : TemporalModel D Atom) (t : D)
 
 /-- All future (G φ): φ holds at all future times.
 
-With `allFuture` as a primitive constructor (task 180), this is definitional. -/
+With `allFuture` as a primitive constructor, this is definitional. -/
 @[simp]
 theorem allFuture_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
@@ -170,7 +170,7 @@ theorem allFuture_iff (M : TemporalModel D Atom) (t : D)
 
 /-- All past (H φ): φ holds at all past times.
 
-With `allPast` as a primitive constructor (task 180), this is definitional. -/
+With `allPast` as a primitive constructor, this is definitional. -/
 @[simp]
 theorem allPast_iff (M : TemporalModel D Atom) (t : D)
     (φ : Formula Atom) :
@@ -180,7 +180,7 @@ theorem allPast_iff (M : TemporalModel D Atom) (t : D)
 
 /-! ## Semantic Bridge Lemmas
 
-With `allFuture`/`allPast` as primitive constructors (task 180), the classical
+With `allFuture`/`allPast` as primitive constructors, the classical
 equivalences `𝐆φ ↔ ¬𝐅¬φ` and `𝐇φ ↔ ¬𝐏¬φ` are no longer definitional (they were a
 `defeq` abbreviation before this promotion). They remain semantically valid (classical
 logic on `Prop` justifies the quantifier-negation swap), so we record them here as

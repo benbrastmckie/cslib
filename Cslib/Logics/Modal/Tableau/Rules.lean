@@ -19,15 +19,15 @@ K-specific modal rules, all indexed by `WorldIndex` labels.
 ## Main Definitions
 
 - `modalApplyOne`: Apply the first applicable rule to a signed modal formula.
-- `tryAllPropRules_pos`/`_neg`: generic reduction lemmas for `tryAllPropRules` (task 510,
+- `tryAllPropRules_pos`/`_neg`: generic reduction lemmas for `tryAllPropRules`,
   relocated here from `Completeness.lean` — they mention no `Atom`-specific content and are
-  needed by the shape lemmas below, which must live upstream of `Completeness.lean`).
-- `modalApplyOne_boxPos_eq`/`_diamondNeg_eq`: the Propagating-class shape lemmas (task 510),
+  needed by the shape lemmas below, which must live upstream of `Completeness.lean`.
+- `modalApplyOne_boxPos_eq`/`_diamondNeg_eq`: the Propagating-class shape lemmas,
   relocated here from `CompletenessLoop.lean` with the persistent payload
   existentially-quantified so `RuleApplicationSpec`'s F9/F10 fields can be discharged by T/B/S5
   as well as K.
-- `modalApplyOne_boxNeg_witness`/`_diamondPos_witness`: the Minting-class witness lemmas (task
-  510), relocated here from `CompletenessLoop.lean` unchanged, discharging F11/F12.
+- `modalApplyOne_boxNeg_witness`/`_diamondPos_witness`: the Minting-class witness lemmas,
+  relocated here from `CompletenessLoop.lean` unchanged, discharging F11/F12.
 
 ## K Modal Rules
 
@@ -70,7 +70,7 @@ Returns `(result, newAcc)` where:
 The dispatch priority is:
 1. Propositional rules (via `tryAllPropRules`), using `modalNegOf?`/`modalOrOf?`/
    `modalAndOf?`/`modalImpOf?` for the native `and`/`or` constructors and the derived
-   negation `abbrev` (task 441).
+   negation `abbrev`.
 2. K modal rules: `boxPos`, `diamondPos`, `boxNeg`, `diamondNeg`.
 
 IMPORTANT: `boxPos` and `diamondNeg` use `.persistent` (source stays on branch to re-fire
@@ -163,7 +163,7 @@ def modalApplyOne
     -- No rule matched
     | _, _ => (.notApplicable, acc)
 
-/-! ## Generic `tryAllPropRules` Reduction Lemmas (task 510, relocated from `Completeness.lean`)
+/-! ## Generic `tryAllPropRules` Reduction Lemmas (Relocated from `Completeness.lean`)
 
 These two lemmas are entirely generic over the decomposer functions and formula/label types
 (no `Atom`-specific content) and are needed by the shape/witness lemmas below, which must live
@@ -219,7 +219,7 @@ theorem tryAllPropRules_neg {F L : Type*}
     simp [tryAllPropRules, List.map, List.find?, applyPropRule, RuleResult.isApplicable,
       SignedFormula.pos, SignedFormula.neg, hA, hO, hI, hN]
 
-/-! ## Shape and Witness Lemmas for the Propagating and Minting Rule Classes (task 510)
+/-! ## Shape and Witness Lemmas for the Propagating and Minting Rule Classes
 
 These four lemmas classify `modalApplyOne`'s per-shape behaviour for the Propagating class
 (`boxPos`/`diamondNeg`, never `.linear`/`.branching`) and the Minting class
@@ -237,7 +237,7 @@ produces `.notApplicable` or `.persistent`. Stated against an opaque `sf` (rathe
 `⟨.pos, .box ψ, w⟩` constructor) so call sites never need to destructure a signed formula whose
 components are entangled with an unrelated `rfl`-substitution elsewhere in the proof.
 
-The persistent payload is **existentially quantified** (task 510, `RuleApplicationSpec`'s F9
+The persistent payload is **existentially quantified** (`RuleApplicationSpec`'s F9
 `boxPosNotExpanding`): every use site discards it (it only contradicts the `.linear`/`.branching`
 case split), and quantifying it is what lets T's/B's/S5's own Propagating payload (differing
 from K's concrete `boxPropagation` list) discharge this fact too. -/
@@ -295,7 +295,7 @@ omit [Hashable Atom] in
 witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted `.linear`
 list with the witness `F(ψ)@w'` (unlike `boxPos`/`diamondNeg`, `boxNeg` never checks an
 emptiness guard, so it is always applicable). K discharge for `RuleApplicationSpec`'s F11
-`boxNegWitness` (task 510). -/
+`boxNegWitness`. -/
 theorem modalApplyOne_boxNeg_witness
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (ψ : Proposition Atom) (w : WorldIndex) :
@@ -319,8 +319,7 @@ omit [Hashable Atom] in
 fresh witness world `w' := modalNextWorld b`, adds the edge `w → w'`, and heads the emitted
 `.linear` list with the witness `T(ψ)@w'` (`diamondPos` is native and, like `boxNeg`, never
 checks an emptiness guard, so it is always applicable). Symmetric to
-`modalApplyOne_boxNeg_witness`. K discharge for `RuleApplicationSpec`'s F12 `diaPosWitness`
-(task 510). -/
+`modalApplyOne_boxNeg_witness`. K discharge for `RuleApplicationSpec`'s F12 `diaPosWitness`. -/
 theorem modalApplyOne_diamondPos_witness
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (ψ : Proposition Atom) (w : WorldIndex) :

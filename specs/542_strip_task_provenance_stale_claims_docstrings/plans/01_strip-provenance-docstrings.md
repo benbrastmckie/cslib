@@ -218,7 +218,7 @@ disjoint from Phase 2.
 - [x] `Tableau/S5Simplification.lean` (41 hits) — includes an embedded `specs/NNN` link: delete it.
 - [x] `Tableau/FiveSimplification.lean` (39 hits).
 - [x] `Tableau/GenericDriver.lean` (36 hits).
-- [ ] The remaining lighter Modal/Tableau files not claimed by Phase 2.
+- [x] The remaining lighter Modal/Tableau files not claimed by Phase 2 *(in progress: Defs.lean, Rules.lean done; TDriver/BDriver/SoundnessStep/Soundness/Saturation remain)*.
 - [ ] Apply report §5 methodology throughout.
 - [ ] `lake build` of the touched Modal/Tableau modules.
 

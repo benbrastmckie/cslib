@@ -76,5 +76,32 @@
       "auto_recoverable": true
     },
     "fix_status": "unfixed"
+  },
+  {
+    "id": "err_20260724225856",
+    "timestamp": "2026-07-24T22:58:56Z",
+    "type": "delegation_interrupted",
+    "severity": "medium",
+    "message": "planner-agent terminated early: API connection closed mid-response; no plan artifact written",
+    "context": {
+      "session_id": "sess_1784933405_33a6b6",
+      "command": "/plan",
+      "task": 552,
+      "checkpoint": "DELEGATE"
+    },
+    "trajectory": {
+      "delegation_path": [
+        "orchestrator",
+        "plan",
+        "skill-planner",
+        "planner-agent"
+      ],
+      "failed_at_depth": 3
+    },
+    "recovery": {
+      "suggested_action": "Re-dispatch planner-agent; task status remains planning",
+      "auto_recoverable": true
+    },
+    "fix_status": "unfixed"
   }
 ]

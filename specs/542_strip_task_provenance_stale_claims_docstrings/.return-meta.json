@@ -3,13 +3,13 @@
   "started_at": "2026-07-24T05:39:51Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_5_complete",
-    "details": "Phases 1-5 complete. Phase 5 (Modal/Metalogic remainder: Intuitionistic, InterSystem, Systems, Minimal, ProofSystem, plus root-level Metalogic files) fully stripped; full-tree grep for task/phase/specs/renamed-from/formerly/probes patterns is empty across Cslib/Logics/Modal/Metalogic and Cslib/Logics/Modal/ProofSystem. Two stale claims corrected (IntToClassical.lean, SchemaUnion.lean). Continuing to Phase 6 (Propositional + Temporal remainder).",
+    "stage": "phase_6_complete",
+    "details": "Phases 1-6 complete. Phase 6 (Propositional + Temporal remainder) fully stripped except 9 deliberately-skipped files documenting live blockers for still-open tasks 317 (implementing), 425 (not_started), and 530 (blocked) -- each with full justification in the plan file. Two more stale claims corrected (Embedding.lean, LK/Interpolation.lean). Continuing to Phase 7 (Bimodal + Foundations/Logic + judgment review).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5,
+    "phases_completed": 6,
     "phases_total": 8,
-    "last_completed_phase": "Phase 5: Modal/Metalogic Remainder + ProofSystem"
+    "last_completed_phase": "Phase 6: Propositional + Temporal (remainder)"
   },
   "metadata": {
     "session_id": "sess_1784866674_c9da04_542",

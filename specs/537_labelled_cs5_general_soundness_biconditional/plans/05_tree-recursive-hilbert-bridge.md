@@ -392,27 +392,68 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
 #### Sub-step 8.2 — Adequacy induction: propositional + cross-label (`efq`, `orE`) cases `[IN PROGRESS]`
 
 - **Tasks:**
-  - [ ] State the main adequacy lemma `nik_adequacy : NIK TS5 G Γ (x ∶ A) → Derivable CS5ModalAxiom
+  - [x] State the main adequacy lemma `nik_adequacy : NIK TS5 G Γ (x ∶ A) → Derivable CS5ModalAxiom
         (nikTr G Γ (x ∶ A))` (adjust to the landed `NIK` spelling, Deduction.lean:316; instantiate
-        the axiom set to `{χ_T, χ_B, χ_4}` = `CS5ModalAxiom` per Thm 6.2.1).
-  - [ ] Open the 12-constructor `induction … with` and discharge the **8 label-local propositional
+        the axiom set to `{χ_T, χ_B, χ_4}` = `CS5ModalAxiom` per Thm 6.2.1). *(deviation: altered --
+        per this sub-step's own green criterion's sanctioned fallback, `nik_adequacy` itself is NOT
+        yet stated as a single `induction … with` block (Lean requires all 12 cases at once); instead
+        landed as ten standalone "core" helper lemmas (`sigAt_*`, see below) that the actual
+        `induction` will consume once 8.3's modal cases are also ready. `nikTr_of_sigAt_imp`
+        packages the one-time wrap from a "core" `sigAt`-level fact to the full `nikTr` statement.)*
+  - [x] Open the 12-constructor `induction … with` and discharge the **8 label-local propositional
         constructors** (`assumption`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `impI`, `impE`)
         using standard `Derivable CS5ModalAxiom` combinators from CS5Canonical and the per-label
-        box-depth from `nikTr`.
+        box-depth from `nikTr`. *(deviation: altered -- landed as standalone lemmas `sigAt_assumption`,
+        `sigAt_andI`, `sigAt_andE1`, `sigAt_andE2`, `sigAt_orI1`, `sigAt_orI2`, `sigAt_impE`,
+        `sigAt_impI`, each proving the "core" `sigAt`-level fact rather than being a case inside a
+        completed `induction` block, per the reason above. All 8 landed sorry-free and axiom-clean,
+        supported by a new reusable propositional-combinator toolkit (`cs5_deriv_imp_trans`/`_and`/
+        `_andE1`/`_andE2`/`_orI1`/`_orI2`/`_mp`/`_of_derivable`/`_self`/`_trans_under`,
+        `cs5_deriv_curry`/`_uncurry`), `bigAndL_mem`/`_mono`/`_cons`, `factsAt_cons_ne`/`_self`, the
+        rank-based context-extension congruence `sigAtFuel_congr_above_rank`, and the ancestor-wrap
+        bridge `nikTrFuel_of_derivable`/`nikTr_of_sigAt_imp`. `impI` additionally needed
+        `sigAt_cons_self_imp`, the hardest of the eight.)*
   - [ ] Discharge the **two cross-label constructors** `efq` and `orE` — the cases the flat shortcuts
-        died on. Under the faithful nesting each label carries its own box-depth, so no cross-depth
-        re-boxing is required: `orE` translates by case-analysis at the appropriate depth; `efq`
-        translates using PD.1's landed `bot_*` lemmas for the `⊥`-label handling. Machine-check each
-        stuck sub-goal (`lean_goal` / `lean_multi_attempt`) before declaring anything a wall.
+        died on. **NOT machine-attempted yet.** *(deviation: deferred -- before writing any Lean for
+        these two cases, a design-level analysis (see the new `Soundness.lean` docstring section
+        "Wrap-monotonicity: reusable infrastructure for the cross-label cases") found that the
+        "core" `sigAt`-only motive used for the 8 cases above is INSUFFICIENT for `efq`/`orE`: a bare
+        `sigAt x` fact only packages `x`'s own subtree, with no route to an unrelated label `y`,
+        whereas `nikTr`'s full ancestor-wrap threads in off-spine sibling subtrees (including `y`'s,
+        once traced to the lowest common ancestor) -- and `IsDerivationForest` guarantees a SINGLE
+        rooted tree (not several disjoint components), so `x`,`y` always share such an ancestor.
+        Closing `efq`/`orE` therefore needs `nik_adequacy`'s motive restated at the full `nikTr`
+        level (not the `sigAt` core) PLUS an explicit lowest-common-ancestor bridging argument --
+        this is NOT the PD.1 `bot_*` route originally anticipated (those are semantic/`CKForces`
+        lemmas from the superseded direct-motive route, not reusable for this syntactic bridge).
+        This is a pre-emptive design correction, not a machine-checked proof obstruction (no
+        concrete Lean goal was attempted and refuted); the reusable infrastructure a nikTr-level
+        redesign needs was landed regardless: `cs5_deriv_box_mono` (necessitation + `k`),
+        `cs5_deriv_imp_congr_right`, and `nikTrFuel_mono` (the "wrap preserves entailment, not just
+        closed derivability" strengthening of `nikTrFuel_of_derivable`).)*
 - **Green criterion / Done when:** the 10 constructor cases of `nik_adequacy` compile sorry-free
   (the 4 modal cases may remain open ONLY inside a scratch buffer, never in the committed file —
   land 8.2 by committing the file with the 10 cases proven and the modal cases stubbed via a
   structured `induction` that is completed in 8.3; if Lean's single-`induction` shape forbids a
   partial commit, keep 8.2's green artifact as the standalone helper lemmas the modal cases will
   consume, and defer stating `nik_adequacy` itself to 8.3). `Soundness.lean` builds green; commit.
-- **Estimated output:** ~150-350 lines. **Depends on:** 8.1.
+  **[PARTIAL]** -- 8 of 10 in-scope constructors landed as standalone core lemmas (sorry-free,
+  axiom-clean, scoped build green, each individually committed); `efq`/`orE` remain, now with a
+  documented motive-design correction (see above) that the next dispatch should apply BEFORE
+  attempting Lean proofs for either case.
+- **Estimated output:** ~150-350 lines. **Depends on:** 8.1. **Actual so far:** ~440 lines across
+  eight commits (toolkit + bigAndL_mem, ancestor-wrap bridge, sigAt-core infra + `assumption`, the
+  six `P`-generic cases, `sigAtFuel_congr_above_rank`, `sigAt_cons_self_imp`, `sigAt_impI`,
+  `nikTrFuel_mono` + motive-design writeup) -- already at the top of the estimated range, confirming
+  this sub-step alone likely needs (at least) one further dispatch, matching Phase 8's own
+  worst-case 6-run sizing.
 - **Reuses:** PD.1 `bot_backward`/`bot_iff_edge`/`bot_iff_TClosure`; CS5Canonical Hilbert combinators.
-- **Zero-debt contract:** as 8.1.
+  *(deviation: PD.1's `bot_*` lemmas turned out NOT reusable here -- they are semantic/`CKForces`
+  facts for the superseded direct-motive route, not syntactic `Derivable`/`sigAt` facts. The
+  cross-label bridge will need new syntactic infrastructure instead; see the `efq`/`orE` deviation
+  note above.)*
+- **Zero-debt contract:** as 8.1. Verified: no `sorry`, no new `axiom` in the committed file; scoped
+  `lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness` green after every commit.
 
 #### Sub-step 8.3 — Adequacy induction: modal (`boxI`, `boxE`, `diaI`, `diaE`) cases
 

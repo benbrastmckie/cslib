@@ -1587,6 +1587,47 @@ theorem bigAndL_mem {Atom : Type u} {L : List (Proposition Atom)} {A : Propositi
     · exact ⟨.ax [] _ (.andE1 A (bigAndL L'))⟩
     · exact cs5_deriv_imp_trans ⟨.ax [] _ (.andE2 B (bigAndL L'))⟩ (ih hA)
 
+/-! ## Ancestor-wrap-of-derivable: the generic bridge from a `sigAt`-core fact to `nikTr`
+
+The key structural fact making the adequacy induction tractable: `nikTrFuel`'s ancestor walk
+wraps its accumulator `inner` at each level as `antecedent ⊃ □(inner)`. If `inner` is *already* a
+closed `CS5ModalAxiom` theorem (context-independent), necessitation gives `⊢ □inner` and
+`implyK` discharges `antecedent` unconditionally, **regardless of what `antecedent` is** -- so
+the whole wrap, however many ancestor levels it threads through, remains a closed theorem. This
+turns each constructor case's real work into proving a "core" fact purely about `sigAt` at the
+constructor's own label (no ancestor-walking needed there at all); the wrap is applied once,
+generically, to package the core fact into the full `nikTr` translation. -/
+
+/-- **Ancestor-wrap preserves derivability.** If `inner` is a closed `CS5ModalAxiom` theorem, then
+`nikTrFuel G Γ hfin n cur inner` (wrapping `inner` through `n` ancestor levels starting at `cur`)
+is too, for every `n` and starting label `cur`. -/
+theorem nikTrFuel_of_derivable {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {hfin : G.X.Finite} (n : ℕ) (cur : Label Atom) (inner : Proposition Atom)
+    (h : Derivable CS5ModalAxiom inner) :
+    Derivable CS5ModalAxiom (nikTrFuel G Γ hfin n cur inner) := by
+  induction n generalizing cur inner with
+  | zero => simpa [nikTrFuel]
+  | succ n ih =>
+      by_cases hq : ∃ q, G.R q cur
+      · obtain ⟨d⟩ := h
+        have hbox : Derivable CS5ModalAxiom (Proposition.box inner) := ⟨.necessitation inner d⟩
+        obtain ⟨dbox⟩ := hbox
+        simp only [nikTrFuel, dif_pos hq]
+        exact ih (Classical.choose hq) _ ⟨.modus_ponens [] (Proposition.box inner) _
+          (.ax [] _ (.implyK (Proposition.box inner) _)) dbox⟩
+      · simp only [nikTrFuel, dif_neg hq]
+        exact h
+
+/-- **`nikTr` from a `sigAt`-core implication.** Specializes `nikTrFuel_of_derivable` to `nikTr`'s
+own fuel/base-formula choice (`Γ@x ⊃ A`, walked up `x`'s ancestor chain): every constructor case
+of the adequacy induction reduces to proving `⊢ (sigAt G Γ hfin x) ⊃ A` (the "core" fact at `x`
+alone, no ancestor-walking), then invoking this once. -/
+theorem nikTr_of_sigAt_imp {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    {hfin : G.X.Finite} {x : Label Atom} {A : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp A)) :
+    Derivable CS5ModalAxiom (nikTr G Γ hfin x A) :=
+  nikTrFuel_of_derivable _ x _ h
+
 end Cslib.Logic.Modal.Labelled
 
 end

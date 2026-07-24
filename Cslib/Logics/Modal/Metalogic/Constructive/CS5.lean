@@ -12,16 +12,15 @@ public import Mathlib.Data.Fintype.Pi
 
 /-! # CS5: Constructive Modal Logic S5 (Soundness, and the Symmetric-Tail Completeness Route)
 
-This module instantiates the task-501 frame-condition-parametrized segment scaffold
-(`CKExtension.lean`) at the constructive analogue of `S5`: `CS5` = `CS4` (`CS4.lean`) plus the two
-`B` schemata `bBox : A → □◇A` and `bDia : ◇□A → A`.
+This module instantiates the frame-condition-parametrized segment scaffold (`CKExtension.lean`)
+at the constructive analogue of `S5`: `CS5` = `CS4` (`CS4.lean`) plus the two `B` schemata
+`bBox : A → □◇A` and `bDia : ◇□A → A`.
 
-**Adversarial finding (research report, Deliverable 3.1; carried over from task 494
-Deliverable 6): `CS5` is axiomatized here via `B` (symmetry), NOT via the classical euclidean/`5`
-axiom `◇A → □◇A`.** The classical canonical-euclideanness route needs negation-completeness,
-unavailable to quasi-prime theories (which are *further* from negation-complete than task 494's
-prime theories — they additionally admit the exploding theory `Set.univ`). Symmetry closure is
-fully positive (MP-closure only); reflexivity (`T`) + transitivity (`4`) + symmetry (`B`) give an
+**`CS5` is axiomatized here via `B` (symmetry), NOT via the classical euclidean/`5` axiom
+`◇A → □◇A`.** The classical canonical-euclideanness route needs negation-completeness,
+unavailable to quasi-prime theories (which are *further* from negation-complete than plain prime
+theories — they additionally admit the exploding theory `Set.univ`). Symmetry closure is fully
+positive (MP-closure only); reflexivity (`T`) + transitivity (`4`) + symmetry (`B`) give an
 equivalence relation, Simpson's constructive `S5` frame class.
 
 `CS5` is sound for `CKValidFC cs5FC` — Wijesekera-style fallible-world validity restricted to
@@ -29,40 +28,38 @@ frames whose modal relation `r` is reflexive, ≤-composed-transitive, and ≤-c
 (`cs5FC`, `CKExtension.lean`). `CS5` is **also** sound for the weakened frame condition `cs5FC''`
 (`cs5_axiom_sound''`, all 17 axioms, axiom-free) — see below.
 
-**Task 508's published negative verdict is refuted (task 509).** Task 508 claimed `bDia` is
-"not sound over `cs5FCweak`, the natural `CS5` analogue of the weakened frame condition that
-makes `CS4` work" and that this was "a soundness failure which no amount of canonical-model work
-on the completeness side can fix." Both claims are corrected:
+**An earlier analysis claimed `bDia` is "not sound over `cs5FCweak`, the natural `CS5` analogue
+of the weakened frame condition that makes `CS4` work" and that this was "a soundness failure
+which no amount of canonical-model work on the completeness side can fix." Both claims are
+corrected here:**
 
 - `cs5FCweak` is **not** the natural analogue of the frame condition that makes `CS4`
   completeness work. It omits **plain symmetry** (`r w u → r u w`, exactly the clause `bDia`
   needs) and **plain transitivity**; that omission, not a real obstruction, is why `bDia` was
   unsound over it. Its countermodel relation `wr'` is itself not plainly symmetric
-  (`Cslib.Logic.Modal.wr'_not_symm`, `probes/cs5-symmetry-probe.lean`), so it refutes nothing
-  about the correctly-shaped frame condition below; 508's countermodel remains *sound*, it simply
-  does not bear on `cs5FC''`.
+  (`Cslib.Logic.Modal.wr'_not_symm`), so it refutes nothing about the correctly-shaped frame
+  condition below; the countermodel remains *sound*, it simply does not bear on `cs5FC''`.
 - The correctly-shaped weakened frame condition, `cs5FC''` (`CKExtension.lean`) — reflexivity,
   *plain* transitivity, *plain* symmetry, the `cs4FC'` re-basing clause, and the weakened
   ≤-composed symmetry `FCsym_box` — validates **all 17** `CS5` axioms
   (`cs5_axiom_sound''`, this module, axiom-free) and genuinely weakens `cs5FC`
   (`cs5FC_implies_cs5FC''`, `CKExtension.lean`).
 
-Task 508 also read the canonical failure of `FCbdia` (its strong, ≤-saturated symmetry clause) at
-`u := cexpl`, the exploding tail world, as evidence that constructive `S5` canonical completeness
-needs negation-completeness. This does not survive the symmetric-tail design (Phase 5, below):
-`boxInv Set.univ = Set.univ`, so **no consistent head has an exploding member in its symmetric
-tail** — `Set.univ`-freeness follows directly from the tail's `boxInv t ⊆ H` clause, with **no**
-appeal to `cs5_dia_bot_imp_bot` (508's nominated "one lead", which turned out to be unnecessary).
-And canonical symmetry is obtained **by construction** (`cs5Tail_symm`: the tail's two clauses
-simply swap), **never derived** from maximality — so the negation-completeness objection 508
-raised (`B ∉ w.head ⇒ ¬B ∈ w.head`, unavailable for quasi-prime heads) never arises. This is the
-step 508 called "the known-hard core of constructive `S5` canonical completeness"; here it is
-free.
+The earlier analysis also read the canonical failure of `FCbdia` (its strong, ≤-saturated
+symmetry clause) at `u := cexpl`, the exploding tail world, as evidence that constructive `S5`
+canonical completeness needs negation-completeness. This does not survive the symmetric-tail
+design (below): `boxInv Set.univ = Set.univ`, so **no consistent head has an exploding member in
+its symmetric tail** — `Set.univ`-freeness follows directly from the tail's `boxInv t ⊆ H`
+clause, with **no** appeal to `cs5_dia_bot_imp_bot`. And canonical symmetry is obtained **by
+construction** (`cs5Tail_symm`: the tail's two clauses simply swap), **never derived** from
+maximality — so the negation-completeness objection (`B ∉ w.head ⇒ ¬B ∈ w.head`, unavailable for
+quasi-prime heads) never arises. This is the step the earlier analysis called "the known-hard
+core of constructive `S5` canonical completeness"; here it is free.
 
 **Completeness is open at exactly one, precisely-located sub-problem: the truth lemma's
 box-backward case** (`□A ∉ H` ⟹ some symmetric-tail member of a *possibly-larger* head omits
-`A`). This is narrower and better-understood than 508's blanket verdict — soundness is not in
-question (`cs5_axiom_sound''`, all 17 axioms, axiom-free), the canonical frame conditions are
+`A`). This is narrower and better-understood than the earlier blanket verdict — soundness is not
+in question (`cs5_axiom_sound''`, all 17 axioms, axiom-free), the canonical frame conditions are
 fully established (`cs5FC''_cs5Mreach`), and the diamond cases are free
 (`cs5Tail_dia_of_mem`/`cs5_diam_witness`, no exclusion parameter needed, unlike `CS4`).
 
@@ -76,25 +73,23 @@ material below (`cs5BoxGapR_fc`/`cs5BoxGap_box_p_or_box_q_at_w`/`cs5BoxGap_not_b
 `□p ∉ Th(w)`, `q ∉ Th(w)` simultaneously, so the gap's hypotheses are jointly satisfiable, not an
 artifact of a weak proof attempt.
 
-**Task 509 Phases 8-10 attempted the simultaneous pair construction the gap calls for, and did
-not close it.** The attempt (design: build `H'`/`T` together via a Zorn pair poset carrying
-*designated-formula* exclusion invariants `□A ∉ H'`, `A ∉ T` — never a bot-exclusion poset, and
-never Pacheco's unsound Lemma 16 primeness step) established a clean seed construction, a clean
-chain-upper-bound step, and a clean general order fact transferring pair-maximality to
-per-component maximality (`probes/cs5-pair-primeness.lean`), but stopped short of usable
-primeness: the natural cross-condition invariant (`boxInv X ⊆ Y`, the other component held fixed)
-is not stable under the deductive-closure operator the library's single-formula primeness engine
-(`Metalogic.prime_maximal_is_prime`) requires — a genuine finding, not anticipated by the original
-research report, documented in full in that probe's module docstring together with a sketched (not
-built) repair via a combined derivation system over `Atom ⊕ Atom`. Completeness for `CS5` over
-`cs5FC''` therefore remains **open specifically at the box-backward pair construction** — not
-blocked at the library level, and not for the reason 508 originally claimed.
+**Attempting the simultaneous pair construction the gap calls for has not yet closed it.** The
+attempt (design: build `H'`/`T` together via a Zorn pair poset carrying *designated-formula*
+exclusion invariants `□A ∉ H'`, `A ∉ T` — never a bot-exclusion poset, and never Pacheco's unsound
+Lemma 16 primeness step) established a clean seed construction, a clean chain-upper-bound step,
+and a clean general order fact transferring pair-maximality to per-component maximality, but
+stopped short of usable primeness: the natural cross-condition invariant (`boxInv X ⊆ Y`, the
+other component held fixed) is not stable under the deductive-closure operator the library's
+single-formula primeness engine (`Metalogic.prime_maximal_is_prime`) requires — a genuine
+finding, with a sketched (not built) repair via a combined derivation system over `Atom ⊕ Atom`.
+Completeness for `CS5` over `cs5FC''` therefore remains **open specifically at the box-backward
+pair construction** — not blocked at the library level.
 
 **`CS5` is theorem-for-theorem Simpson's `IS5`** (Pacheco, `Pacheco2024`, Theorem 13; his
 Conclusion states the constructive and intuitionistic variants of `DB`/`TB`/`KB5`/`S5` coincide).
 This is unlike `CK`/`CT`/`CS4`, which genuinely differ from their intuitionistic counterparts —
 `B` re-derives the two axioms bare `CK` deliberately drops: `k3` (`◇(A ∨ B) → ◇A ∨ ◇B`, this
-module's `cs5_dia_or`) and `k5` (`◇⊥ → ⊥`, task 508's `cs5_dia_bot_imp_bot`)
+module's `cs5_dia_or`) and `k5` (`◇⊥ → ⊥`, `cs5_dia_bot_imp_bot`)
 (`ArisakaDasStrassburger2015` reports both facts for the general `B`-extension). So `CS5` is
 **not** a constructively distinct logic from `IS5`, and this module does not present it as one.
 The completeness theorem proved here is still worth having: it targets the fallible-world
@@ -109,14 +104,7 @@ inside that regime.
 established result.** His Lemma 18 (the two-sided Lindenbaum pair construction the box-backward
 case needs) delegates its primeness step to Lemma 16, whose proof contains an unlabelled
 negation-completeness move (`ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`) that a poset-maximal, quasi-prime `Θ` does not
-license; wherever this module or its probes cite `Pacheco2024`, this distinction is made
-explicit — see `probes/cs5-pair-primeness.lean` for the confirmation-against-the-paper and the
-sound replacement.
-
-For the full mechanized analysis (refutation of 508's verdict, the symmetric-tail design, the
-box-backward gap, and the Pacheco cross-check), see
-`specs/509_rescope_CK_CS5_constructive_completeness/reports/01_cs5-symmetric-tail-construction.md`
-and the `probes/` directory in that task's spec folder.
+license; wherever this module cites `Pacheco2024`, this distinction is made explicit.
 
 ## Main Definitions
 
@@ -124,8 +112,8 @@ and the `probes/` directory in that task's spec folder.
   euclidean-5).
 - `cs5_axiom_sound`/`cs5_soundness`/`cs5_soundness_derivable`: soundness for `CKValidFC cs5FC`.
 - `cs5_axiom_sound''`/`cs5_soundness''`/`cs5_soundness_derivable''`: soundness for
-  `CKValidFC cs5FC''` (the weakened, genuinely-more-general frame condition; the half task 508
-  declared impossible), axiom-free for `cs5_axiom_sound''`.
+  `CKValidFC cs5FC''` (the weakened, genuinely-more-general frame condition; the half the earlier
+  analysis declared impossible), axiom-free for `cs5_axiom_sound''`.
 - `or_box_imp_box_or`/`dia_or_box_imp_or`: the disjunction-of-boxes identity that discharges the
   `prime_set_exclusion` side conditions against exclusion sets of *boxes* (not diamonds).
 - `cs5_dia_or`: `CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B` (`k3`), corroborating the `CS5 ≡ IS5` collapse.
@@ -135,8 +123,8 @@ and the `probes/` directory in that task's spec folder.
   simultaneous pair construction, not a sequential one.
 - `CS5BoxGapWorld`/`cs5BoxGapR_fc`/`cs5BoxGap_box_p_or_box_q_at_w`/`cs5BoxGap_not_box_p_at_w`/
   `cs5BoxGap_not_q_at_w`: the three-world `cs5FC''` countermodel witnessing that
-  `cs5_symmetric_tail_box_gap`'s hypotheses are jointly satisfiable (task 509 Phase 11 Branch B) —
-  the box-backward gap is non-vacuous, not an artifact of a weak proof attempt.
+  `cs5_symmetric_tail_box_gap`'s hypotheses are jointly satisfiable — the box-backward gap is
+  non-vacuous, not an artifact of a weak proof attempt.
 
 ## References
 
@@ -150,16 +138,14 @@ and the `probes/` directory in that task's spec folder.
   Logics*][ArisakaDasStrassburger2015] — source of the `B ⊢ k3, k5` fact corroborating
   `CS5 ≡ IS5`.
 
-**Status (task 509, final, Phase 11 Branch B)**: soundness over both `cs5FC` and the weakened
-`cs5FC''` is fully established (axiom-free for `cs5_axiom_sound''`); the canonical frame
-conditions are fully established (`cs5FC''_cs5Mreach`); the diamond cases of a prospective truth
-lemma are free. Completeness is open at exactly the truth lemma's box-backward case, precisely
-located by `cs5_symmetric_tail_box_gap` and shown non-vacuous by the `CS5BoxGapWorld`
-countermodel above. This is **not** a library-level "`CS5` completeness is blocked" verdict — it
-is a narrow, well-understood, and non-vacuous open sub-problem, materially different from and
-better-characterized than task 508's original (refuted) claim. A follow-up task attempting the
-combined-derivation-system repair sketched in `probes/cs5-pair-primeness.lean` is the identified
-path to closing it.
+**Status**: soundness over both `cs5FC` and the weakened `cs5FC''` is fully established
+(axiom-free for `cs5_axiom_sound''`); the canonical frame conditions are fully established
+(`cs5FC''_cs5Mreach`); the diamond cases of a prospective truth lemma are free. Completeness is
+open at exactly the truth lemma's box-backward case, precisely located by
+`cs5_symmetric_tail_box_gap` and shown non-vacuous by the `CS5BoxGapWorld` countermodel above.
+This is **not** a library-level "`CS5` completeness is blocked" verdict — it is a narrow,
+well-understood, and non-vacuous open sub-problem. The identified path to closing it is the
+combined-derivation-system repair over `Atom ⊕ Atom` sketched above.
 -/
 
 @[expose] public section
@@ -352,8 +338,9 @@ theorem cs5_soundness_derivable {φ : Proposition Atom}
 
 /-- **Every `CS5ModalAxiom` instance is `CKValidFC cs5FC''`** (the weakened frame condition:
 reflexivity, plain transitivity, plain symmetry, the `cs4FC'` re-basing clause, and the
-weakened ≤-composed symmetry `FCsym_box`). This is the half task 508 declared impossible. It is
-`cs5_axiom_sound`'s proof with exactly four cases changed relative to the `cs5FC` version above:
+weakened ≤-composed symmetry `FCsym_box`). This is the half the earlier analysis declared
+impossible. It is `cs5_axiom_sound`'s proof with exactly four cases changed relative to the
+`cs5FC` version above:
 - `fourDia` (`◇◇A → ◇A`): uses **plain** transitivity `htrans hru hut` directly (no `≤`-chaining
   needed, since `cs5FC''`'s transitivity clause is already the plain `u' := u` form).
 - `fourBox` (`□A → □□A`): uses `hfour hru hu' hrt`, the `cs4FC'` re-basing clause, to obtain a
@@ -361,8 +348,7 @@ weakened ≤-composed symmetry `FCsym_box`). This is the half task 508 declared 
 - `bDia` (`◇□A → A`): uses **plain** symmetry `hsymm hru` directly (no `le_refl` padding needed).
 - `bBox` (`A → □◇A`): uses `hsymbox hru hu'`, the weakened ≤-composed symmetry, to obtain a
   witness `t` with `w'' ≤ t`; `A@t` follows from `A@w'` by persistence along `w'' ≤ t`.
-The other 13 cases are verbatim from `cs5_axiom_sound`. Transcribed from
-`probes/cs5-symmetry-probe.lean` (verified, axiom-free). -/
+The other 13 cases are verbatim from `cs5_axiom_sound` (verified, axiom-free). -/
 theorem cs5_axiom_sound'' {φ : Proposition Atom} (h_ax : CS5ModalAxiom φ) :
     CKValidFC.{u, v} cs5FC'' φ := by
   intro World _ r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
@@ -485,12 +471,11 @@ private def box_mono_or_right (B B' : Proposition Atom) :
 /-- **`⊢ (□B ∨ □B') → □(B ∨ B')`** — a *disjunction of boxes* implies the *box of the
 disjunction*. Pure `CK` (necessitation + `Kb` + `orI`/`orE`); no `T`/`4`/`B`. This is the
 identity that lets an n-ary `DerivExcludes` side condition against an exclusion set of *boxes*
-`E := {□B | B ∉ H}` be collapsed to the single formula `□(⋁Bᵢ)` for `prime_set_exclusion`
-(Phase 6). It is exactly the step task 508 §4(c) believed was unavailable: that section rejected
-simultaneous exclusion because `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in bare `CK`, but
-irrelevant here, since the exclusion set in this construction is a set of **boxes**, not
-diamonds, and boxes distribute the right way. Transcribed from `probes/cs5-canonical-probe.lean`
-(verified, axiom-free). -/
+`E := {□B | B ∉ H}` be collapsed to the single formula `□(⋁Bᵢ)` for `prime_set_exclusion`. It is
+exactly the step an earlier analysis believed was unavailable: that analysis rejected simultaneous
+exclusion because `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in bare `CK`, but irrelevant here,
+since the exclusion set in this construction is a set of **boxes**, not diamonds, and boxes
+distribute the right way (verified, axiom-free). -/
 private def or_box_box_or (B B' : Proposition Atom) :
     DerivationTree (@CS5ModalAxiom Atom) []
       (((Proposition.box B).or (Proposition.box B')).imp (Proposition.box (B.or B'))) :=
@@ -506,9 +491,8 @@ theorem or_box_imp_box_or (B B' : Proposition Atom) :
 
 /-- **`⊢ ◇(□B ∨ □B') → (B ∨ B')`** in `CS5`. Chain: `or_box_imp_box_or` under `◇` (necessitation
 + `Kd`), then `bDia` at `B ∨ B'`. Together with primality of a head `H`, this discharges the
-`DerivExcludes` precondition of `prime_set_exclusion` against `E := {□B | B ∉ H}` (Phase 6): if
-`◇(⋁□Bᵢ) ∈ H` then `⋁Bᵢ ∈ H`, so some `Bᵢ ∈ H` — contradicting `Bᵢ ∉ H`. Transcribed from
-`probes/cs5-canonical-probe.lean` (verified, axiom-free). -/
+`DerivExcludes` precondition of `prime_set_exclusion` against `E := {□B | B ∉ H}`: if
+`◇(⋁□Bᵢ) ∈ H` then `⋁Bᵢ ∈ H`, so some `Bᵢ ∈ H` — contradicting `Bᵢ ∉ H` (verified, axiom-free). -/
 theorem dia_or_box_imp_or (B B' : Proposition Atom) :
     Derivable (@CS5ModalAxiom Atom)
       ((◇((Proposition.box B).or (Proposition.box B'))).imp (B.or B')) := by
@@ -545,13 +529,13 @@ private noncomputable def cs5_impTrans {a b c : Proposition Atom}
 
 /-- **`CS5 ⊢ ◇(A ∨ B) → ◇A ∨ ◇B`** — the `k3`/`Cd` axiom that bare `CK` deliberately lacks.
 Arisaka–Das–Straßburger (`ArisakaDasStrassburger2015`) report that the `B` axioms entail `k3`
-and `k5` (`◇⊥ → ⊥`, task 508's `cs5_dia_bot_imp_bot`) — the very two axioms `CK` drops. This
-matters beyond the derivation itself: task 508 §4(c) rejected simultaneous Lindenbaum exclusion
-on the ground that `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in `CK`/`CT`/`CS4`, **false in
-`CS5`**, so that impossibility argument never applied to `CS5` at all.
+and `k5` (`◇⊥ → ⊥`, `cs5_dia_bot_imp_bot`) — the very two axioms `CK` drops. This matters beyond
+the derivation itself: an earlier analysis rejected simultaneous Lindenbaum exclusion on the
+ground that `◇(A ∨ B) → ◇A ∨ ◇B` is underivable — true in `CK`/`CT`/`CS4`, **false in `CS5`**, so
+that impossibility argument never applied to `CS5` at all.
 
 Derivation: `bBox` on each disjunct, then `or_box_imp_box_or`, then necessitation + `Kd`, then
-`bDia`. Transcribed from `probes/cs5-k3-probe.lean` (verified, axiom-free). -/
+`bDia` (verified, axiom-free). -/
 theorem cs5_dia_or (A B : Proposition Atom) :
     Derivable (@CS5ModalAxiom Atom) ((◇(A.or B)).imp ((◇A).or (◇B))) := by
   have hA : DerivationTree (@CS5ModalAxiom Atom) []
@@ -581,11 +565,11 @@ theorem cs5_dia_or (A B : Proposition Atom) :
 /-- **`boxInv T ⊆ H ↔ T ⊆ diaInv H`** for quasi-prime `H`, `T`. `→` is `bBox`; `←` is `bDia`.
 Pacheco (`Pacheco2024`, chunk `01990319adea2569`) defines the `CKB` canonical relation as
 `Γ ∼c ∆ iff Γ□ ⊆ ∆ and ∆ ⊆ Γ♦` — a **diamond**-inverse containment on the right, where the
-symmetric tail (Phase 5) uses a **box**-inverse containment (`boxInv t ⊆ H`). This lemma shows
+symmetric tail (below) uses a **box**-inverse containment (`boxInv t ⊆ H`). This lemma shows
 the two are the *same relation* over `CS5`: `cs5Tail H = {t | QuasiPrime t ∧ boxInv H ⊆ t ∧
 boxInv t ⊆ H}` and Pacheco's `∼c` coincide, and his Lemma 15 ("`∼c` is symmetric") is `cs5Tail`'s
-definitional symmetry with the equivalence inlined. Transcribed from `probes/cs5-tail-probe.lean`
-(verified, axiom-free). `diaInv` is defined at `Segment.lean:106`. -/
+definitional symmetry with the equivalence inlined (verified, axiom-free). `diaInv` is defined
+at `Segment.lean:106`. -/
 theorem cs5_boxInv_subset_iff {H T : Set (Proposition Atom)}
     (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (hT : QuasiPrime (@CS5ModalAxiom Atom) T) :
     boxInv T ⊆ H ↔ T ⊆ diaInv H := by
@@ -597,27 +581,22 @@ theorem cs5_boxInv_subset_iff {H T : Set (Proposition Atom)}
 
 /-! ## The Symmetric Tail
 
-**Plan-ordering note (task 509 Phase 5)**: the plan's Phase 5 task list additionally includes
-`cs5Seg`/`CS5Segment`/`cs5Mreach`/`CS5Segment.ofHead`/`cs5Val`/`cs5Bot` and the upward-closure
-lemmas. Building those requires a proof of `cs5Seg`'s `CKSegment.diam_witness` field
-(`∀ A, ◇A ∈ head → ∃ t ∈ tail, A ∈ t`), which is exactly `cs5_diam_witness` — the deliverable of
-Phase 6, not yet available at this point. (Unlike `CS4.lean`'s `cs4Seg`, which discharges
-`diam_witness` inline from the *pre-existing* `dia_refuting_theory`, `CS5` has no such
-pre-existing ingredient; `cs5_diam_witness` is exactly what Phase 6 builds.) This is a genuine
-dependency-ordering correction relative to the plan's literal Phase 5 task list (whose own
-dependency table has Phase 6 depending on Phase 5, not vice versa): the segment-type
-declarations below are landed immediately after `cs5_diam_witness` (Phase 6), not in this
-section. Everything in this section is independent of `CS5Segment` and is fully landed now. -/
+**Ordering note**: this section does not yet include `cs5Seg`/`CS5Segment`/`cs5Mreach`/
+`CS5Segment.ofHead`/`cs5Val`/`cs5Bot` and the upward-closure lemmas. Building those requires a
+proof of `cs5Seg`'s `CKSegment.diam_witness` field (`∀ A, ◇A ∈ head → ∃ t ∈ tail, A ∈ t`), which
+is exactly `cs5_diam_witness` — not yet available at this point. (Unlike `CS4.lean`'s `cs4Seg`,
+which discharges `diam_witness` inline from the *pre-existing* `dia_refuting_theory`, `CS5` has
+no such pre-existing ingredient; `cs5_diam_witness` is built below instead.) The segment-type
+declarations are therefore landed immediately after `cs5_diam_witness`, not in this section.
+Everything in this section is independent of `CS5Segment` and is fully landed now. -/
 
-/-- `□B ∈ H → □□B ∈ H` — axiom `4` (box form). Transcribed from `probes/cs5-tail-probe.lean`
-(verified, axiom-free). -/
+/-- `□B ∈ H → □□B ∈ H` — axiom `4` (box form). (verified, axiom-free). -/
 theorem cs5_box_four {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
     {B : Proposition Atom} (h : Proposition.box B ∈ H) :
     Proposition.box (Proposition.box B) ∈ H :=
   mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.fourBox B)) h
 
-/-- `boxInv H ⊆ H` — axiom `T` (box form). Transcribed from `probes/cs5-tail-probe.lean`
-(verified, axiom-free). -/
+/-- `boxInv H ⊆ H` — axiom `T` (box form). (verified, axiom-free). -/
 theorem cs5_boxInv_subset {H : Set (Proposition Atom)}
     (hH : QuasiPrime (@CS5ModalAxiom Atom) H) : boxInv H ⊆ H :=
   fun B hB => mem_head_mp hH.closed (mem_of_axiom hH.closed (CS5ModalAxiom.tBox B)) hB
@@ -627,28 +606,25 @@ theorem cs5_boxInv_subset {H : Set (Proposition Atom)}
 (`cs5Tail_symm`, below) rather than derived. This clause is **not** a design choice:
 `fcbdia_forces_symmetry` (below) shows every `bDia`-adequate frame condition forces it on any
 segment-based world type. Note `CS5` needs **no** `E`/exclusion parameter, unlike `cs4Tail` —
-the tail is determined by the head alone. Transcribed from `probes/cs5-tail-probe.lean`
-(verified). -/
+the tail is determined by the head alone. (verified). -/
 def cs5Tail (H : Set (Proposition Atom)) : Set (Set (Proposition Atom)) :=
   {t | QuasiPrime (@CS5ModalAxiom Atom) t ∧ boxInv H ⊆ t ∧ boxInv t ⊆ H}
 
-/-- **Reflexivity**: `H ∈ cs5Tail H`, from `tBox` on both clauses. Transcribed from
-`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+/-- **Reflexivity**: `H ∈ cs5Tail H`, from `tBox` on both clauses. (verified, axiom-free). -/
 theorem cs5Tail_refl {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
     H ∈ cs5Tail H :=
   ⟨hH, cs5_boxInv_subset hH, cs5_boxInv_subset hH⟩
 
 /-- **Symmetry, definitional.** The two tail clauses simply swap. No axiom, no maximality,
-nothing derived — this is the step task 508 called "the known-hard core of constructive `S5`
-canonical completeness". Hard gate (task 509): must report **no axiom dependencies at all**.
-Transcribed from `probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+nothing derived — this is the step an earlier analysis called "the known-hard core of
+constructive `S5` canonical completeness" (verified, axiom-free: **no axiom dependencies at
+all**). -/
 theorem cs5Tail_symm {H T : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H)
     (h : T ∈ cs5Tail H) : H ∈ cs5Tail T :=
   ⟨hH, h.2.2, h.2.1⟩
 
 /-- **Transitivity.** Uses `cs5_box_four` on each side: forward, `□B ∈ H → □□B ∈ H → □B ∈ U →
-B ∈ T`; backward, `□B ∈ T → □□B ∈ T → □B ∈ U → B ∈ H`. Transcribed from
-`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+B ∈ T`; backward, `□B ∈ T → □□B ∈ T → □B ∈ U → B ∈ H`. (verified, axiom-free). -/
 theorem cs5Tail_trans {H U T : Set (Proposition Atom)}
     (hH : QuasiPrime (@CS5ModalAxiom Atom) H) (hT : QuasiPrime (@CS5ModalAxiom Atom) T)
     (h1 : U ∈ cs5Tail H) (h2 : T ∈ cs5Tail U) : T ∈ cs5Tail H :=
@@ -658,10 +634,10 @@ theorem cs5Tail_trans {H U T : Set (Proposition Atom)}
 
 /-- **`Set.univ`-freeness is free.** `boxInv Set.univ = Set.univ`, so an exploding tail member
 forces an exploding head. Hence for every consistent head the symmetric tail contains no
-exploding member — with **no** appeal to `cs5_dia_bot_imp_bot` (task 508's nominated "one
-lead", which turned out to be unnecessary). This is what voids 508's canonical refutation of
-`FCbdia` (which took `u := cexpl ∈ w.tail` for consistent `w`). Transcribed from
-`probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+exploding member — with **no** appeal to `cs5_dia_bot_imp_bot` (an earlier analysis's nominated
+"one lead", which turned out to be unnecessary). This is what voids the earlier canonical
+refutation of `FCbdia` (which took `u := cexpl ∈ w.tail` for consistent `w`) (verified,
+axiom-free). -/
 theorem cs5Tail_univ_free {H : Set (Proposition Atom)}
     (h : (Set.univ : Set (Proposition Atom)) ∈ cs5Tail H) : H = Set.univ :=
   Set.eq_univ_of_univ_subset (fun _B _ => h.2.2 (Set.mem_univ _))
@@ -671,8 +647,8 @@ contains `A`, then `◇A ∈ H` — by `bBox` (`A → □◇A`) and the `boxInv 
 refutes `◇A` at `H` *itself* (take the witness world `:= H`, no separate refuting segment
 needed). Consequence: `CS5` needs **no** exclusion parameter, no `cs5Tail` `E` argument, no
 `dia_refuting_theory`, no `diamRefutingSegment` — all of which `CS4` required. The tail is
-determined by the head alone, which is exactly what makes symmetry definitional. Transcribed
-from `probes/cs5-tail-probe.lean` (verified, axiom-free). -/
+determined by the head alone, which is exactly what makes symmetry definitional (verified,
+axiom-free). -/
 theorem cs5Tail_dia_of_mem {H T : Set (Proposition Atom)}
     (hT : QuasiPrime (@CS5ModalAxiom Atom) T) (h : T ∈ cs5Tail H)
     {A : Proposition Atom} (hA : A ∈ T) : (◇A) ∈ H :=
@@ -683,9 +659,8 @@ theorem cs5Tail_dia_of_mem {H T : Set (Proposition Atom)}
 (`◇□A → A`): forcing `A` at `w` is only obtainable by persistence from some `t ≤ w`. On any
 segment-based world type, `FCbdia` implies `boxInv u.head ⊆ w.head` whenever `r w u` — because
 `box_reflect` gives `boxInv u'.head ⊆ t.head` and `t ≤ w` gives `t.head ⊆ w.head`. So the
-symmetric tail is not one design among many: it is *forced*. Task 508 read this as an
-obstruction; it is in fact a specification. Transcribed from `probes/cs5-canonical-probe.lean`
-(verified, axiom-free). -/
+symmetric tail is not one design among many: it is *forced*. An earlier analysis read this as
+an obstruction; it is in fact a specification (verified, axiom-free). -/
 theorem fcbdia_forces_symmetry {Axioms : Proposition Atom → Prop}
     {w u : CKSegment Axioms} (hru : cmreach w u)
     (hfc : ∀ {w u : CKSegment Axioms}, cmreach w u →
@@ -703,12 +678,11 @@ Consequence: for `H` prime with `□(p ∨ □q) ∈ H`, `□p ∉ H`, `q ∉ H`
 box-backward case has **no** witness at `H` itself — no `T` in `H`'s symmetric tail omits `p`.
 The box-backward case must therefore move to a strictly larger head `H' ⊇ H` (here: one
 containing `q`), which enlarges `boxInv H'` in turn. That circularity is the real open problem:
-`H'` and `T` must be built as a simultaneous maximal pair, not sequentially (Phases 8-10).
+`H'` and `T` must be built as a simultaneous maximal pair, not sequentially.
 
 This argument is purely structural — it uses only primality of `T` and the two tail clauses, no
 `CS5` axiom. It therefore applies to every symmetric-tail design, and by `fcbdia_forces_symmetry`
-the tail must be symmetric. Transcribed from `probes/cs5-canonical-probe.lean` (verified,
-axiom-free). -/
+the tail must be symmetric (verified, axiom-free). -/
 theorem cs5_symmetric_tail_box_gap {H T : Set (Proposition Atom)}
     (hT : QuasiPrime (@CS5ModalAxiom Atom) T) {p q : Proposition Atom}
     (hbox : Proposition.box (p.or (Proposition.box q)) ∈ H)
@@ -717,26 +691,24 @@ theorem cs5_symmetric_tail_box_gap {H T : Set (Proposition Atom)}
   · exact h
   · exact absurd (hsym h) hq
 
-/-! ## `diam_witness` via `prime_set_exclusion` (Phase 6)
+/-! ## `diam_witness` via `prime_set_exclusion`
 
 Proves `cs5_diam_witness`: `◇A ∈ H ⟹ ∃ t ∈ cs5Tail H, A ∈ t`. Instantiates `prime_set_exclusion`
-at `S := boxInv H ∪ {A}`, `E := {□B | B ∉ H}`. Discharges `DerivExcludes` by the report's
-four-step argument: (1) `S ⊢ bigOr l` for `l` drawn from `E` splits (`modal_deriv_imp_of_union`)
+at `S := boxInv H ∪ {A}`, `E := {□B | B ∉ H}`. Discharges `DerivExcludes` by a four-step
+argument: (1) `S ⊢ bigOr l` for `l` drawn from `E` splits (`modal_deriv_imp_of_union`)
 into `L' ⊆ boxInv H` deriving `A → bigOr l`; (2) `box_mem_of_boxed_context` places
 `□(A → bigOr l) ∈ H`; (3) `Kd` on `◇A ∈ H` gives `◇(bigOr l) ∈ H`; (4) since `l`'s elements are
 all `□`-shaped with un-boxed witnesses excluded from `H`, `or_box_imp_box_bigOr`/`bDia` give
 `bigOr Bs ∈ H`, and primality of `H` finds a witness `B ∈ Bs` with `B ∈ H` — contradicting
-`Bs`'s exclusion. **One case the report's sketch does not spell out**: `H` exploding (`⊥ ∈ H`)
+`Bs`'s exclusion. **One additional case beyond the basic argument**: `H` exploding (`⊥ ∈ H`)
 makes `S` itself inconsistent (`boxInv H = Set.univ`), so `DerivExcludes` at `l := []` would be
 false; handled by a leading case split, with `T := Set.univ` as the direct witness when `H`
 explodes (mirrors `CKSegment.ofHead`'s `cexpl`-style base case). The non-exploding branch also
-needs `CS5 ⊢ ◇⊥ → ⊥` (`cs5_dia_bot_imp_bot`, transcribed from `specs/508_.../probes/
-cs5-obstruction-verified.lean`, verified) to convert `◇⊥ ∈ H` into `⊥ ∈ H`. -/
+needs `CS5 ⊢ ◇⊥ → ⊥` (`cs5_dia_bot_imp_bot`, verified) to convert `◇⊥ ∈ H` into `⊥ ∈ H`. -/
 
 /-- **`CS5 ⊢ ◇⊥ → ⊥`** (unlike `CK`/`CT`/`CS4`). Derivation: `efq` gives `⊥ → □⊥`; necessitation
-gives `□(⊥ → □⊥)`; `Kd` gives `◇⊥ → ◇□⊥`; `bDia` at `⊥` gives `◇□⊥ → ⊥`. Transcribed from
-`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean` (verified),
-now load-bearing (Phase 6's exploding-head case split) rather than a merely-mentioned fact. -/
+gives `□(⊥ → □⊥)`; `Kd` gives `◇⊥ → ◇□⊥`; `bDia` at `⊥` gives `◇□⊥ → ⊥` (verified), now
+load-bearing (the exploding-head case split above) rather than a merely-mentioned fact. -/
 theorem cs5_dia_bot_imp_bot :
     Derivable (@CS5ModalAxiom Atom)
       ((◇(Proposition.bot : Proposition Atom)).imp Proposition.bot) := by
@@ -866,8 +838,8 @@ deductively closed `S` deriving no finite disjunction of `E`, there is a quasi-p
 still deriving no finite disjunction of `E`. Thin wrapper around `Metalogic.prime_set_exclusion`
 with `Cons := fun _ => True` — the set-exclusion analogue of `quasi_prime_exclusion`
 (`SegmentLindenbaum.lean`), which wraps the single-formula `Metalogic.prime_exclusion` the same
-way. Placed here (not `SegmentLindenbaum.lean`) since Phase 4 scoped that file to list-splitting/
-finite-conjunction helpers only. Factored out because Phase 7 reuses it twice. -/
+way. Placed here (not `SegmentLindenbaum.lean`) since that file is scoped to list-splitting/
+finite-conjunction helpers only. Factored out because it is reused below. -/
 private theorem quasi_prime_set_exclusion
     {S : Set (Proposition Atom)}
     (h_closed : Metalogic.DeductivelyClosed (modalDerivationSystem (@CS5ModalAxiom Atom)) S)
@@ -964,10 +936,10 @@ theorem cs5_diam_witness {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5Moda
 
 /-! ## The `CS5` World Type
 
-Lands the `CS5Segment` machinery deferred from Phase 5 (see that section's plan-ordering note):
-`cs5Seg`'s `diam_witness` field needs exactly `cs5_diam_witness` (Phase 6, now available).
-Mirrors `CS4.lean:341-455`/`:526-550`, but with **no** exclusion parameter — `cs5Tail` is
-determined by the head alone, so `CS5Segment` carries only its underlying segment and the
+Lands the `CS5Segment` machinery deferred from "The Symmetric Tail" section above (see that
+section's ordering note): `cs5Seg`'s `diam_witness` field needs exactly `cs5_diam_witness`, now
+available. Mirrors `CS4.lean:341-455`/`:526-550`, but with **no** exclusion parameter — `cs5Tail`
+is determined by the head alone, so `CS5Segment` carries only its underlying segment and the
 tail-shape invariant. -/
 
 /-- The `CS5` canonical segment at head `H`: tail is exactly `cs5Tail H`. Unlike `cs4Seg`, needs
@@ -1029,16 +1001,17 @@ theorem cs5Bot_mreach_wit {w : CS5Segment Atom} (hb : cs5Bot w) :
       (◇Proposition.bot))
   exact ⟨CS5Segment.ofHead (w.seg.tail_qprime t ht_mem), ht_mem, ht_bot⟩
 
-/-! ## Canonical `FCsym_box` (Phase 7)
+/-! ## Canonical `FCsym_box`
 
 Proves `cs5_fcsymbox_theory`, the theory-level content of `bBox`'s canonical clause:
 `boxInv w ⊆ u`, `u ⊆ u'` (all quasi-prime) ⟹ `∃ t ∈ cs5Tail u', w ⊆ t`. Instantiates
 `prime_set_exclusion` (via `quasi_prime_set_exclusion`) at `S := boxInv u' ∪ w`,
-`E := {□B | B ∉ u'}` — a union of two *substantial* sets, needing Phase 4's `list_split_union`/
-`bigAnd`/`derivImpBigAndOfAppend` (unlike Phase 6's `S := boxInv H ∪ {A}`, a substantial-set-
-plus-singleton). Step 3 of the four-step discharge: from `L₂ ⊆ w`, pack `C := bigAnd L₂ ∈ w`;
-`bBox` gives `□◇C ∈ w`; `boxInv w ⊆ u ⊆ u'` gives `◇C ∈ u'`. Same exploding-head case split as
-Phase 6 (`u'` exploding ⟹ `T := Set.univ` directly). -/
+`E := {□B | B ∉ u'}` — a union of two *substantial* sets, needing `list_split_union`/`bigAnd`/
+`derivImpBigAndOfAppend` (unlike the `diam_witness` proof's `S := boxInv H ∪ {A}` above, a
+substantial-set-plus-singleton). Step 3 of the four-step discharge: from `L₂ ⊆ w`, pack
+`C := bigAnd L₂ ∈ w`; `bBox` gives `□◇C ∈ w`; `boxInv w ⊆ u ⊆ u'` gives `◇C ∈ u'`. Same
+exploding-head case split as the `diam_witness` proof above (`u'` exploding ⟹ `T := Set.univ`
+directly). -/
 
 theorem cs5_fcsymbox_theory {w u u' : Set (Proposition Atom)}
     (hw : QuasiPrime (@CS5ModalAxiom Atom) w) (hu' : QuasiPrime (@CS5ModalAxiom Atom) u')
@@ -1109,7 +1082,7 @@ theorem cs5_fcsymbox_theory {w u u' : Set (Proposition Atom)}
             (Proposition.bot))) (fun _ h => nomatch h))
             (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))⟩)
 
-/-! ## Canonical `FC4'` (Phase 7)
+/-! ## Canonical `FC4'`
 
 Proves `cs5_fc4_theory`, the theory-level content of `fourBox`'s re-basing clause: `boxInv w ⊆
 u`, `u ⊆ u'`, `boxInv u' ⊆ t`, `boxInv t ⊆ u'` (all quasi-prime) ⟹ `∃ v, w ⊆ v ∧ t ∈ cs5Tail v`.
@@ -1117,7 +1090,8 @@ Instantiates `prime_set_exclusion` at `S := boxInv t ∪ w`, `E := {□B | B ∉
 round from `FCsym_box`: the `boxInv t ⊆ V` half of `t ∈ cs5Tail V` and `w ⊆ V` both come free
 from the seed; only `boxInv V ⊆ t` needs the exclusion argument. Step 3 needs `◇C ∈ t` for `C :=
 ⋀Δ ∈ w`: `bBox` gives `□◇C ∈ w`; `4` (`cs5_box_four`) gives `□□◇C ∈ w`, i.e. `□◇C ∈ boxInv w ⊆ u
-⊆ u'`, i.e. `◇C ∈ boxInv u' ⊆ t`. Same exploding-`t` case split as `FCsym_box`/Phase 6. -/
+⊆ u'`, i.e. `◇C ∈ boxInv u' ⊆ t`. Same exploding-`t` case split as `FCsym_box`/the `diam_witness`
+proof above. -/
 
 theorem cs5_fc4_theory {w u u' t : Set (Proposition Atom)}
     (hw : QuasiPrime (@CS5ModalAxiom Atom) w) (ht : QuasiPrime (@CS5ModalAxiom Atom) t)
@@ -1243,25 +1217,23 @@ theorem cs5FC''_cs5Mreach : cs5FC'' (@cs5Mreach Atom) :=
   ⟨cs5_refl, fun h1 h2 => cs5_trans h1 h2, fun h => cs5_symm h,
    fun h1 h2 h3 => cs5_fc4 h1 h2 h3, fun h1 h2 => cs5_fcsymbox h1 h2⟩
 
-/-! ## The Box-Backward Gap Is Non-Vacuous (Task 509, Phase 11 Branch B)
+/-! ## The Box-Backward Gap Is Non-Vacuous
 
 **Completeness for `CS5` over `cs5FC''` is left open at exactly one, precisely-located
-sub-problem: the truth lemma's box-backward case.** Task 509 Phases 8-10 attempted to close it
-via a simultaneous Zorn pair construction (`H'`/`T` built together, mirroring the *technique* of
-Pacheco's Lemma 18, never its unsound primeness step) and got as far as: a clean seed
-construction (`probes/cs5-pair-primeness.lean`, `cs5_pair_seed_mem`), a clean chain-upper-bound
-step (`cs5_pair_chain_union_mem`), and a clean general order fact transferring pair-maximality to
-per-component maximality (`cs5_pair_maximal_component_left`/`_right`) — but this stopped short of
-usable primeness, because the natural cross-condition invariant is not stable under the
-deductive-closure operator the library's single-formula primeness engine
-(`Metalogic.prime_maximal_is_prime`) requires. Full account in that probe's module docstring and
-`specs/509_.../plans/01_cs5-symmetric-tail-completeness.md`'s Phase 9 blocker note. This is
-**not** a soundness issue (`cs5_axiom_sound''` is complete and axiom-free) and **not** the
-collapsed-model issue 508 raised (canonical symmetry is definitional, `cs5Tail_symm`, never
-derived) — it is a specific, narrow, and better-understood gap than either.
+sub-problem: the truth lemma's box-backward case.** Attempting to close it via a simultaneous
+Zorn pair construction (`H'`/`T` built together, mirroring the *technique* of Pacheco's Lemma 18,
+never its unsound primeness step) got as far as: a clean seed construction
+(`cs5_pair_seed_mem`), a clean chain-upper-bound step (`cs5_pair_chain_union_mem`), and a clean
+general order fact transferring pair-maximality to per-component maximality
+(`cs5_pair_maximal_component_left`/`_right`) — but this stopped short of usable primeness,
+because the natural cross-condition invariant is not stable under the deductive-closure operator
+the library's single-formula primeness engine (`Metalogic.prime_maximal_is_prime`) requires. This
+is **not** a soundness issue (`cs5_axiom_sound''` is complete and axiom-free) and **not** the
+collapsed-model issue raised by an earlier analysis (canonical symmetry is definitional,
+`cs5Tail_symm`, never derived) — it is a specific, narrow, and better-understood gap than either.
 
 This section lands the mechanized evidence that the gap is **real, not an artifact of a weak
-proof attempt**: `cs5_symmetric_tail_box_gap` (Phase 5, above) shows the *sequential* route (find
+proof attempt**: `cs5_symmetric_tail_box_gap` (above) shows the *sequential* route (find
 a witness in `H`'s own symmetric tail) provably cannot work whenever `□(p ∨ □q) ∈ H` and
 `q ∉ H`; the three-world model below exhibits a concrete `cs5FC''` frame realizing exactly that
 configuration together with `□p ∉ H`, so the gap's hypotheses are jointly satisfiable — the

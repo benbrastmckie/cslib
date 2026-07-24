@@ -28,9 +28,6 @@ establish fundamental connections between modal necessity (□) and temporal ope
 * Ported from BimodalLogic/Theories/Bimodal/Theorems/Perpetuity/Principles.lean
 -/
 
-set_option linter.style.longLine false
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems.Perpetuity
@@ -155,7 +152,6 @@ future/past K distribution, and combineImpConj3. -/
 def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.always := by
   have m5 := modal5 φ
   have tf := tempFutureDerived φ.diamond
-
   -- TD for □◇φ: □◇φ → H□◇φ
   have td : ⊢ φ.diamond.box.imp φ.diamond.box.allPast := by
     have tf_swap : ⊢ φ.diamond.swapTemporal.box.imp φ.diamond.swapTemporal.box.allFuture :=
@@ -164,7 +160,6 @@ def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.alwa
     simp only [Bimodal.Formula.swapTemporal, Bimodal.Formula.swapTemporal_involution,
       Bimodal.Formula.swapTemporal_allFuture] at td_result
     exact td_result
-
   -- Step 1: ◇φ → H◇φ
   have past_comp : ⊢ φ.diamond.imp φ.diamond.allPast := by
     have chain1 := impTrans m5 td
@@ -181,10 +176,8 @@ def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.alwa
     have pk := pastKDist φ.diamond.box φ.diamond
     have past_bridge := Bimodal.DerivationTree.modus_ponens [] _ _ pk past_mt
     exact impTrans chain1 past_bridge
-
   -- Step 2: ◇φ → ◇φ (identity)
   have present_comp := identity φ.diamond
-
   -- Step 3: ◇φ → G◇φ
   have future_comp : ⊢ φ.diamond.imp φ.diamond.allFuture := by
     have chain2 := impTrans m5 tf
@@ -193,7 +186,6 @@ def persistence (φ : Bimodal.Formula Atom) : ⊢ φ.diamond.imp φ.diamond.alwa
     have fk := futureKDist φ.diamond.box φ.diamond
     have future_bridge := Bimodal.DerivationTree.modus_ponens [] _ _ fk future_mt
     exact impTrans chain2 future_bridge
-
   exact combineImpConj3 past_comp present_comp future_comp
 
 /-- P5: `◇▽φ → △◇φ` (persistent possibility).

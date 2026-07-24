@@ -135,15 +135,15 @@ drop the `longLine` (real) and `emptyLine` (dead) file-scoped suppressions.
 
 ---
 
-### Phase 3: Perpetuity/Principles — remove blank lines, drop suppressions [NOT STARTED]
+### Phase 3: Perpetuity/Principles — remove blank lines, drop suppressions [COMPLETED]
 
 **Goal**: Remove the 5 stray in-command blank lines flagged by `emptyLine`, then drop the
 `longLine` (dead) and `emptyLine` (real) file-scoped suppressions, resolving `emptyLine` last.
 
 **Tasks**:
-- [ ] Remove (or replace with a comment where it aids readability) the 5 blank lines inside the `persistence` proof and following declarations (report original numbering: L158, L167, L184, L187, L196).
-- [ ] Delete the file-scoped `linter.style.longLine` (dead) suppression.
-- [ ] Delete the file-scoped `linter.style.emptyLine` suppression LAST (it only fires once the file is otherwise warning-free).
+- [x] Remove (or replace with a comment where it aids readability) the 5 blank lines inside the `persistence` proof and following declarations (report original numbering: L158, L167, L184, L187, L196).
+- [x] Delete the file-scoped `linter.style.longLine` (dead) suppression.
+- [x] Delete the file-scoped `linter.style.emptyLine` suppression LAST (it only fires once the file is otherwise warning-free).
 
 **Timing**: 25 minutes
 

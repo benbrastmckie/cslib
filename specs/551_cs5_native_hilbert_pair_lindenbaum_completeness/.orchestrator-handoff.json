@@ -4,8 +4,14 @@
   "status": "partial",
   "summary": "Plan 02 (incremental-assets-deferred-route), Phases 1-3 of 8 completed sorry-free, as scoped for this dispatch: (1) extended CS5PairAxiom with a nine-constructor whole-type propositional core; (2) discharged the generic primeness engine's hImplyK/hImplyS/hEFQ/hOrI1/hOrI2/hOrE/hCut preconditions at CS5PairAxiom as named library lemmas, sanity-checked against prime_set_exclusion (zero errors, DerivExcludes the sole remaining hole); (3) defined the two-sided seed cs5PairSeed plus its injection and membership-inversion lemmas. Phases 4-8 (cross-inertness hard gate, the two individual exclusions, the named open obligation CS5PairSeedDisjunctionProperty, and the CI/documentation gate) were explicitly out of scope for this dispatch and were not attempted -- none of them are blocked, they are simply not yet dispatched. Supersedes the stale plan-01-round handoff previously recorded here.",
   "artifacts": [
-    {"type": "plan", "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/02_incremental-assets-deferred-route.md"},
-    {"type": "summary", "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/02_incremental-assets-phases-1-3-summary.md"}
+    {
+      "type": "plan",
+      "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/02_incremental-assets-deferred-route.md"
+    },
+    {
+      "type": "summary",
+      "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/02_incremental-assets-phases-1-3-summary.md"
+    }
   ],
   "blockers": [],
   "next_action_hint": "implement",
@@ -19,5 +25,8 @@
     "Phase 2's #check-level sanity check against prime_set_exclusion performed via lean_run_code and recorded in the plan/summary, not left as a permanent declaration in the tracked file"
   ],
   "dead_ends": [],
-  "plan_markers_verified": true
+  "plan_markers_verified": true,
+  "phases_completed": 3,
+  "phases_total": 8,
+  "sorry_inventory": []
 }

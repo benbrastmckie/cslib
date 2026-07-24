@@ -1,7 +1,7 @@
 # Implementation Plan: Native Hilbert CS5 Completeness via Atom-Sum Pair Lindenbaum
 
 - **Task**: 551 - cs5_native_hilbert_pair_lindenbaum_completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: 18 hours
 - **Dependencies**: 517, 509, 508
 - **Research Inputs**: reports/01_route-b-native-hilbert-cs5-research.md
@@ -221,7 +221,7 @@ entire downstream chain and must escalate rather than proceed.
     project-wide checker cannot run; this file's own `import Cslib.Init` compliance is manually
     confirmed above and will be re-verified by the full pipeline at Phase 7.
 
-### Phase 4: Combined-Theory Primeness via Single-Set Exclusion [NOT STARTED]
+### Phase 4: Combined-Theory Primeness via Single-Set Exclusion [BLOCKED]
 
 - **Goal:** Apply the existing single-formula primeness engine to the ONE combined theory:
   instantiate `prime_maximal_is_prime` / `quasi_prime_set_exclusion` excluding the 2-element set
@@ -241,6 +241,92 @@ entire downstream chain and must escalate rather than proceed.
   - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (or `CS5Completeness.lean`)
 - **Verification:**
   - Prime combined theory `T'` obtained sorry-free; `lake build Module.Name` green.
+
+**BLOCKER** (Phase 4):
+
+- **What failed**: Discharging the `DerivExcludes`/seed-exclusion precondition needed to invoke
+  `prime_exclusion`/`prime_set_exclusion` at the combined theory, excluding
+  `E := {τ_L(□A), τ_R A}` from the natural seed
+  `S₀ := τ_L''H ∪ τ_R''(cl(boxInv H))`.
+
+- **What was tried**:
+  1. Attempted to invoke `prime_maximal_is_prime`/`prime_exclusion` directly at `CS5PairAxiom` (as
+     landed in Phase 3, with `left`/`right` constructors restricted to *pure*-tagged copies of
+     `CS5ModalAxiom`) and discovered these generic lemmas require
+     `hOrE : ∀ A B χ : Proposition (Atom ⊕ Atom), CS5PairAxiom (OrE A B χ)` for **arbitrary**
+     (including genuinely *mixed*, e.g. `(atom (inl p)).or (atom (inr q))`) `A`, `B`, `χ` — not
+     just pure-tagged ones. Phase 3's `CS5PairAxiom` (only `left`/`right`/`cross1`/`cross2`) does
+     **not** satisfy this: it only supplies `orE`-style schemata via `left`/`right` when `A`, `B`,
+     `χ` all happen to be pure-tagged images of a *single* untagged formula, never for mixed
+     combinations. This is a genuine gap in Phase 3's `CS5PairAxiom`, not previously visible
+     because Phase 3 never invoked `prime_exclusion`-family lemmas against it.
+  2. Sketched a fix: extend `CS5PairAxiom` with a *full* propositional core
+     (`implyK`/`implyS`/`efq`/`andI`/`andE1`/`andE2`/`orI1`/`orI2`/`orE`) quantified over the
+     **entire** `Proposition (Atom ⊕ Atom)` type (not routed through `τ_L`/`τ_R` at all), while
+     keeping the *modal* schemata (`k`/`kdia`/`tBox`/`tDia`/`fourDia`/`fourBox`/`bBox`/`bDia`)
+     confined to pure-tagged copies via `left`/`right` (so the only place `L`/`R` content ever
+     mixes modally is the two designated `cross1`/`cross2` bridges). This design is plausible and
+     would resolve the `hOrE` gap (a mechanical, ~9-constructor addition), but does **not**, by
+     itself, resolve the deeper issue below.
+  3. Attempted to discharge the seed-exclusion fact
+     `(τ_L(□A)).or (τ_R A) ∉ cl_{CS5PairAxiom}(S₀)` (to which the general `DerivExcludes` over the
+     2-element set `E` reduces, via a `bigOr`-monotonicity argument analogous to
+     `bigOr_append_left`/`or_right_mono` in `PrimeExclusion.lean`, which itself is straightforward
+     and NOT the blocker). Considered three routes:
+     - **Semantic (via `cs5PairAxiom_sound`, Phase 1)**: ruled out. Soundness only certifies
+       *globally valid* formulas (theorems); the seed-exclusion fact is about the specific,
+       *non-maximal* theory `H`'s content, which requires a semantic characterization of "exactly
+       what `H` forces" — but that characterization is precisely the truth lemma the whole task
+       is building, so this route is circular.
+     - **Signature-collapse (via `DerivationTree.map`/`Derivable.map`, Phase 2, along a
+       "retraction" `ρ := Sum.elim id id : Atom ⊕ Atom → Atom`)**: ruled out. `ρ` maps
+       `CS5PairAxiom.cross1 B`'s conclusion `(box (τ_L B)).imp (τ_R B)` to `(box B).imp B` under
+       the identity relabeling on each side — **not** a `CS5ModalAxiom` instance (`□B → B` is not
+       sound for `CS5` in general; only `T`'s weaker forms are). So `ρ` is not
+       schema-compatible with `CS5PairAxiom`, and the collapse technique cannot be used at all
+       (confirms, independently, that the cross-axioms are not "too strong" in this specific
+       sense — consistent with, but not the same check as, Phase 1's probe).
+     - **Direct syntactic conservativity** (`Derivable CS5PairAxiom (τ_L φ) → Derivable
+       CS5ModalAxiom φ`, and the context-relative generalisation Phase 4 actually needs, from a
+       *mixed* seed `S₀` built from both `H` and `boxInv H`): sketched an induction-on-derivation
+       argument (tracking, for empty-context theorems, whether a pure-tagged conclusion's untag is
+       already `CS5ModalAxiom`-derivable; using `CS5ModalAxiom.tBox` (`□B → B`) to show that
+       applying `cross1`/`cross2` to an already-reducible boxed antecedent preserves
+       reducibility). This sketch is *plausible* but is a genuine, undeveloped metatheoretic
+       result — not a "mapping exercise" — and the version Phase 4 actually needs is **stronger**
+       still: context-relative (from the two-sided seed `S₀`, not just the empty context),
+       requiring simultaneous tracking of both the `H`-side and `boxInv H`-side content. This is
+       the same shape of difficulty as Pacheco's original Lemma 16 defect (the *disjunction
+       property under mutual constraint*), now recurring one level up in the combined-theory
+       encoding rather than in the two-set pair poset the archived probe used.
+
+- **Why it's stuck**: `prime_exclusion`/`prime_set_exclusion`'s technical requirements
+  (`hOrE`, `hCut`, etc.) are stated over the **entire** ambient formula type, which forces
+  `CS5PairAxiom` to admit propositional reasoning at genuinely mixed formulas. Once that is
+  admitted (as it must be), showing the specific 2-element exclusion set stays excluded from
+  the *specific* seed `S₀` requires a conservativity/projection-faithfulness argument relating
+  `CS5PairAxiom`-derivability from a two-sided context back to `CS5ModalAxiom`-derivability on
+  each side — precisely the "R2" risk the plan flagged for **Phase 5**, but it turns out to
+  already be load-bearing at **Phase 4**'s seed-exclusion step, not deferrable to Phase 5 as the
+  phase decomposition assumed. This conservativity claim is plausible but unproven; its proof (if
+  it exists) is a substantial, self-contained metatheoretic result comparable in difficulty to
+  the original box-backward obstruction the whole task exists to resolve — not a mechanical
+  continuation of Phases 1-3's infrastructure.
+
+- **What is needed**: Either (a) a full, rigorously-checked proof of the context-relative
+  conservativity lemma sketched above (likely its own multi-hour-to-multi-day research effort,
+  possibly warranting a dedicated sub-task with its own literature/proof-search pass — Pacheco's
+  own Lemma 16/17 area is the natural place to look for a *correct* replacement technique, since
+  his Lemma 16 defect is the unsound version of exactly this same disjunction-under-constraint
+  problem), or (b) a re-scoped Phase 4 design that avoids needing conservativity at the seed
+  stage entirely (e.g. by finding a way to characterize `DerivExcludes` for `S₀` directly from
+  the `T`/`tBox`-driven structure of `boxInv H ⊆ H` without a general projection theorem — not
+  identified in this dispatch).
+
+- **Prohibited workarounds**: Per `lean4.md`/`cslib-implementation-agent.md`, no `sorry`, no
+  vacuous placeholder, and no silent substitution of a weaker/different construction were used to
+  paper over this gap. Phases 1-3 remain landed sorry-free and are not affected by this blocker
+  (they do not depend on the conservativity claim).
 
 ### Phase 5: Projection Back to the Prime Pair `⟨H', T⟩` (R2 Conservativity) [NOT STARTED]
 

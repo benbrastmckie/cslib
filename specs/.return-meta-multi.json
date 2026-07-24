@@ -2,17 +2,19 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      451
-    ],
-    "tasks_failed": [
-      317,
-      551,
-      425,
-      537,
       535
     ],
-    "cycles_used": 23,
-    "max_cycles": 25,
+    "tasks_blocked": [
+      425,
+      537,
+      551
+    ],
+    "tasks_spawned": [
+      552,
+      553,
+      554
+    ],
+    "cycles_used": 8,
     "multi_task_mode": true
   }
 }

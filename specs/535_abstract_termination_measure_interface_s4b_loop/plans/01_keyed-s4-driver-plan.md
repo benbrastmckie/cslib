@@ -1,7 +1,7 @@
 # Implementation Plan: Bespoke Keyed S4 Driver — Close `Decidable (s4Valid φ)`
 
 - **Task**: 535 - Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: 12 hours (range 10-16)
 - **Dependencies**: None (parent 511 Phases 1-6 are landed, frozen, and consumed read-only)
 - **Research Inputs**: specs/535_abstract_termination_measure_interface_s4b_loop/reports/01_termination-interface-survey.md
@@ -160,7 +160,83 @@ shape `modalApplyOneS4Keyed φ₀ keys` falls through to `modalApplyOneS4 φ₀`
     the exact goal recorded.
   - `lean_verify` reports only `propext`/`Classical.choice`/`Quot.sound`.
 
-### Phase 3: Termination / Hintikka top-loop — `modalExpandBranchesS4Keyed_hintikka` [NOT STARTED]
+### Phase 3: Termination / Hintikka top-loop — `modalExpandBranchesS4Keyed_hintikka` [BLOCKED]
+
+**BLOCKER** (Phase 3):
+- **What failed**: no Lean code was written for this phase (correctly, per the hard constraint
+  against partial/placeholder proofs) — the phase was analyzed in depth and found to require
+  substantially more original proof engineering than the plan/survey's "nearly free" estimate,
+  so implementation was not started until a viable, scoped strategy could be confirmed, and the
+  scope confirmed exceeds what remains safely completable in this dispatch.
+- **What was tried**: read the full landed precedent this phase is modeled on
+  (`modalExpandBranchesHintikka`/`ModalLoopInvHintikka`/`AuxStepPreserved`/`AuxBounds`,
+  `CompletenessLoop.lean:229-1650`) and the measure-decrease engine it depends on
+  (`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean:3227-3329`, plus its combinatorial core
+  `modalCount_notMem_append_drop`/`modalCount_notMem_mono`/`modalWork_drop_linear`/
+  `modalWork_drop_persistent`, `FmpMeasure.lean:2788-2922`), and cross-checked the frozen S4Keyed
+  ingredients (`modalStepBranchS4Keyed`, `S4LoopInv`, `modalStepBranchS4_worldBound`,
+  `modalStepBranchS4_preserves_S4LoopInv`) against them.
+- **Why it's stuck** (root cause, confirmed by source reading, not conjecture):
+  1. **Every landed top-loop lemma this phase would "instantiate" is hard-wired to a SINGLE
+     FIXED `apply : RuleApply Atom` used identically at every step of its fuel induction**
+     (`modalExpandBranchesHintikka`'s own `apply` parameter, threaded unchanged through
+     `AuxStepPreserved`/`ModalLoopInvHintikka`/the whole induction). The keyed S4 rule
+     `modalApplyOneS4Keyed φ₀ keys` is NOT fixed — `keys` grows at every step
+     (`modalStepBranchS4Keyed`'s own `keys'` output), so the rule value genuinely differs from
+     step to step. `modalExpandBranchesHintikka` cannot be instantiated at this rule at all; a
+     bespoke, keys-threaded analogue of the ENTIRE `ModalLoopInvHintikka`/`AuxStepPreserved`
+     apparatus (roughly 1400 lines in the K/S5/B precedent) is required, not a substitution port.
+  2. **The measure-decrease engine has the same fixed-`apply` shape**
+     (`modalExpMeasure_step_lt_gen`'s `apply` parameter), AND its four combinatorial primitives
+     (`modalCount_notMem_append_drop`, `modalCount_notMem_mono`, `modalWork_drop_linear`,
+     `modalWork_drop_persistent`) are `private` to `FmpMeasure.lean` — outside this task's
+     additive-only territory (`LoopChecking.lean`/`FrameCompleteness.lean` only) — so they cannot
+     be called and must be re-derived (not merely re-parametrized) inside the territory files.
+     These four are, encouragingly, fully generic (no `apply`/`φ0` dependence) and mechanically
+     re-derivable (~150-200 lines); the harder remaining part is instantiating the three per-call
+     obligations (`hBranchingLength`/`hPersistentFresh`/`hOutputsSubsetUniverse`-style facts) for
+     `modalApplyOneS4Keyed φ₀ keys`, universally quantified over `keys` so each step can supply
+     its own instantiation — this looks achievable by case-splitting into the mint-unblocked case
+     (reduces to `modalApplyOne`, whose analogous facts already exist:
+     `modalApplyOne_persistent_props`/`modalApplyOne_branching_length`, `FmpMeasure.lean:3062,
+     3125`), the mint-blocked case (`.linear []`, trivially satisfies all three vacuously), and
+     the non-mint case (already-landed `modalApplyOneS4Keyed_nonMint_universe_S4`,
+     `LoopChecking.lean:2456`, private but same-file-accessible from further code in
+     `LoopChecking.lean`).
+  3. **Fuel-sufficiency is confirmed NOT free**: comparing growth rates directly (not
+     conjecture) — at `modalComplexity φ₀ = 0`, `modalWorldBoundS4 φ₀ = 2^(2·|Sf|) ≤ 2^2 = 4`
+     while K's own `modalWorldBound φ₀ = (2·0+1)^(0+1) = 1` — S4's pigeonhole bound EXCEEDS K's at
+     small complexity, so `modalFuel φ₀` (K's fuel, independent of `modalWorldBoundS4`) is not
+     provably sufficient in general. Confirms survey Open Q3: a fresh `modalFuelS4 φ₀`, defined
+     directly from `modalUniverseS4 φ₀`'s length (mirroring `modalExpMeasure_entry_le_fuel`,
+     `FmpMeasure.lean:208-247`) rather than reused from `modalFuel`, is the correct fix — this
+     requires changing Phase 1's `modalTableauS4Keyed` fuel argument (a small, safe def edit, not
+     a redesign).
+  4. Given (1)-(3), a **good-faith review of what remains after the measure engine** (item 2)
+     shows the Hintikka-tracking invariant itself (`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/
+     `eDiamondOnlyPos`/`eDiamondPosWitness`-style fields) is *also* tractable, not merely
+     hand-waved: `modalHintikkaClauseGen` carves out **all** box/diamond shapes (both signs) as
+     vacuous `True`, so the only real tracking burden is (a) propositional shapes, which are
+     branch/`acc`-independent (`modalApplyOne_fst_eq_of_not_box`-style: same argument already
+     landed for K) and hence trivially monotone as the branch grows, and (b) the box-negative/
+     diamond-positive witness-existence facts, which are permanent once an edge/witness formula
+     is recorded (`acc`/`b` only ever grow). None of this is a new mathematical risk; it is
+     substantial *transcription volume* (estimated 1000-1500 new lines across the measure engine,
+     the keys-threaded invariant bundle, its single-step preservation lemma, and the ~250-line
+     top-loop induction itself), which is not safely completable to a fully verified, sorry-free
+     state within this dispatch's remaining budget without risking an incomplete or unbuildable
+     intermediate state.
+- **What is needed**: a dedicated follow-on implementation dispatch (recommend `--hard` with H8
+  phase-sizing, decomposed as: 3a — re-derive the four generic combinatorial primitives; 3b —
+  establish the three per-call obligations for `modalApplyOneS4Keyed φ₀ keys` (∀ keys); 3c —
+  define `modalFuelS4 φ₀` and prove entry-measure sufficiency, adjusting Phase 1's fuel value;
+  3d — build the keys-threaded `ModalLoopInvHintikka`-analogue bundle + its single-step
+  preservation lemma; 3e — assemble the top-loop induction `modalExpandBranchesS4Keyed_hintikka`
+  itself, closing with `hintikka_congr_S4` (Phase 2, already landed) to reach the concrete
+  `modalHintikkaSetS4 φ₀ b acc` form). See the continuation handoff
+  (`handoffs/01_phase3-5-continuation.md`) for the full technical map.
+- **Prohibited workarounds**: no `sorry`/`admit`/vacuous placeholder was inserted; no
+  under-scoped theorem statement was committed without proof.
 
 - **Goal:** Prove that an open branch produced by the keyed driver is a Hintikka set for the keyed
   rule — the "nearly free" termination half — by transcribing the generic loop's termination
@@ -190,7 +266,35 @@ shape `modalApplyOneS4Keyed φ₀ keys` falls through to `modalApplyOneS4 φ₀`
   - Frozen `modalStepBranchS4_preserves_S4LoopInv`/`modalStepBranchS4_worldBound` unchanged
     (consumed, not edited).
 
-### Phase 4: Soundness — `modalTableauS4Keyed_sound` [NOT STARTED]
+### Phase 4: Soundness — `modalTableauS4Keyed_sound` [BLOCKED]
+
+**BLOCKER** (Phase 4):
+- **What failed**: no Lean code was written; analysis found this phase shares Phase 3's
+  root-cause family (fixed-`apply` top-loop machinery) plus its own, independent gap.
+- **What was tried**: read the soundness top-loop precedent
+  (`modalExpandBranchesGen_closed_unsatIn`, `FrameSoundness.lean:731-`), which is (like Phase 3's
+  precedent) hard-wired to a single fixed `apply` across its whole fuel induction, so it cannot
+  be instantiated at the keys-varying `modalApplyOneS4Keyed φ₀ keys` either. Searched for any
+  existing S4 minting-shape soundness lemma (`blockingWorldS4`/`blockingWorldS4Keyed`'s
+  redirect-to-existing-world semantics) via `grep` across `FrameSoundness.lean`/`LoopChecking.lean`
+  — none exists (confirms the research survey's finding: "No `modalTableauS4_sound` anywhere").
+  The landed `branchSatisfiableIn_s4FC_boxPos_trans_mem`/`_diaNeg_trans_mem`
+  (`FrameSoundness.lean:1085,1106`) cover only the *persistent* 4-rule propagation arms (T(□φ)@w
+  unchanged at a successor), not the guarded minting shapes this phase actually needs.
+- **Why it's stuck**: proving that redirecting a blocked mint to an existing `wBlock` (instead of
+  minting a genuinely fresh world) preserves `branchSatisfiableIn s4FC` is genuinely new semantic
+  content — it must show `wBlock`'s existing valuation already witnesses whatever the fresh
+  world would have (using `S4LoopInv.keyLowerBd`: the birth key only *lower-bounds* the live
+  relevant set, not equals it, since relevant sets grow after birth) — not an assembly of landed
+  pieces. Additionally, the top-loop wrapper needs the same bespoke keys-threaded induction as
+  Phase 3 (root cause 1 above applies identically here).
+- **What is needed**: (a) a new semantic lemma establishing the blocked-mint redirect preserves
+  `branchSatisfiableIn s4FC`, built from `S4LoopInv.keyLowerBd`/`keysDistinct` and the reflexive-
+  transitive frame condition; (b) a bespoke keys-threaded soundness top-loop induction mirroring
+  `modalExpandBranchesGen_closed_unsatIn`'s structure. Both are appropriately scoped as follow-on
+  sub-phases after Phase 3's measure/invariant machinery lands (shared infrastructure). See the
+  continuation handoff for the technical map.
+- **Prohibited workarounds**: no `sorry`/`admit`/vacuous placeholder was inserted.
 
 - **Goal:** Prove `modalTableauS4Keyed φ = .closed → s4Valid φ` directly about the keyed driver
   (survey Open Q2: direct, avoiding a full driver-equality).
@@ -207,7 +311,14 @@ shape `modalApplyOneS4Keyed φ₀ keys` falls through to `modalApplyOneS4 φ₀`
 - **Verification:**
   - `lean_goal` no remaining goals; `lean_verify` axiom-clean.
 
-### Phase 5: Completeness + decidability — `s4Valid_decides` / `instDecidableS4Valid` [NOT STARTED]
+### Phase 5: Completeness + decidability — `s4Valid_decides` / `instDecidableS4Valid` [BLOCKED]
+
+**BLOCKER** (Phase 5)*(deviation: blocked by dependency -- Phase 5 depends on Phases 2 (done), 3
+(blocked), and 4 (blocked); it was not independently attempted since its every ingredient
+(`modalExpandBranchesS4Keyed_hintikka` from Phase 3, `modalTableauS4Keyed_sound` from Phase 4) is
+unavailable)*. No Lean code was written for this phase. See the Phase 3/4 blockers above and the
+continuation handoff for the technical map; `modalTableauS4Keyed_complete`/`s4Valid_decides`/
+`instDecidableS4Valid` should be attempted only after Phases 3-4 land.
 
 - **Goal:** Prove completeness and land the `Decidable` instance, closing the task and resuming
   parent 511 Phase 7.

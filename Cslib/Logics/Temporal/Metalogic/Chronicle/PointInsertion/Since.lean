@@ -62,13 +62,13 @@ lemma lemma24WithGuard {A : Set (Formula Atom)}
       exact Set.Subset.trans h_gc_B₀ h_B₀_sub_D
     exact ⟨B', D, h_D_mcs, h_eta_D, h_g_sub_D, h_R3M_AB'D, h_γ_B'⟩
 
-/-! ## Phase 4: Since-Direction Mirrors -/
+/-! ## Since-Direction Mirrors -/
 
-/-- The `SinceSeedInterface` instance for Temporal (task 454): populates every field of the
+/-- The `SinceSeedInterface` instance for Temporal: populates every field of the
 shared Foundations interface with Temporal's own apparatus at `FrameClass.Base`. Used to
 delegate to the generic `lemma27SinceSeed`/`l27s*` helpers
 (`Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency`) instead of duplicating
-them locally (task-454 Phase 1). -/
+them locally. -/
 private noncomputable def temporalSinceInterface : Cslib.Logic.Metalogic.Chronicle.SinceSeedInterface (Formula Atom) where
   bot := Formula.bot
   imp := Formula.imp
@@ -146,36 +146,38 @@ private noncomputable def temporalSinceInterface : Cslib.Logic.Metalogic.Chronic
   somePastAllPastNegAbsurd := by
     intro _ hmcs psi hp hh; exact somePast_allPast_neg_absurd hmcs psi hp hh
 
-/-- Since-direction seed: B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}. Relocated (task-454
-Phase 1) to the shared `Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency`
-module; this is a thin alias fixing Temporal's interface instance. -/
+/-- Since-direction seed: B ∪ {eta} ∪ {untl(γ, β∧xi) | β∈B, γ∈C}. Relocated to the shared
+`Cslib.Foundations.Logic.Metalogic.Chronicle.SinceSeedConsistency` module; this is a thin
+alias fixing Temporal's interface instance. -/
 @[nolint unusedArguments]
 private def lemma27SinceSeed (_A B C : Set (Formula Atom)) (xi eta : Formula Atom) :
     Set (Formula Atom) :=
   Cslib.Logic.Metalogic.Chronicle.lemma27SinceSeed temporalSinceInterface _A B C xi eta
 
-/-- Extract γ' events from component 3 elements of a list. Relocated (task-454 Phase 1). -/
+/-- Extract γ' events from component 3 elements of a list. Relocated to the shared
+Foundations module. -/
 private noncomputable def l27sC5EventList (B C : Set (Formula Atom)) (xi : Formula Atom)
     (L : List (Formula Atom)) : List (Formula Atom) :=
   Cslib.Logic.Metalogic.Chronicle.l27sC5EventList temporalSinceInterface B C xi L
 
-/-- Elements of l27sC5EventList are in C. Relocated (task-454 Phase 1). -/
+/-- Elements of l27sC5EventList are in C. Relocated to the shared Foundations module. -/
 private theorem l27s_c5_event_list_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {γ : Formula Atom} (hγ : γ ∈ l27sC5EventList B C xi L) : γ ∈ C :=
   Cslib.Logic.Metalogic.Chronicle.l27s_c5_event_list_mem temporalSinceInterface hγ
 
-/-- Extract β' guards from component 3 elements. Relocated (task-454 Phase 1). -/
+/-- Extract β' guards from component 3 elements. Relocated to the shared Foundations
+module. -/
 private noncomputable def l27sB5GuardList (B C : Set (Formula Atom)) (xi : Formula Atom)
     (L : List (Formula Atom)) : List (Formula Atom) :=
   Cslib.Logic.Metalogic.Chronicle.l27sB5GuardList temporalSinceInterface B C xi L
 
-/-- Elements of l27sB5GuardList are in B. Relocated (task-454 Phase 1). -/
+/-- Elements of l27sB5GuardList are in B. Relocated to the shared Foundations module. -/
 private theorem l27s_b5_guard_list_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {β : Formula Atom} (hβ : β ∈ l27sB5GuardList B C xi L) : β ∈ B :=
   Cslib.Logic.Metalogic.Chronicle.l27s_b5_guard_list_mem temporalSinceInterface hβ
 
-/-- For a component 3 element, the extracted γ' is in c5_event_list. Relocated
-(task-454 Phase 1). -/
+/-- For a component 3 element, the extracted γ' is in c5_event_list. Relocated to the
+shared Foundations module. -/
 private theorem l27s_c5_γ_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {β' γ' : Formula Atom}
     (hφ : Formula.untl (Formula.and β' xi) γ' ∈ L)
@@ -183,8 +185,8 @@ private theorem l27s_c5_γ_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     γ' ∈ l27sC5EventList B C xi L :=
   Cslib.Logic.Metalogic.Chronicle.l27s_c5_γ_mem temporalSinceInterface hφ hβ' hγ'
 
-/-- For a component 3 element, the extracted β' is in b5_guard_list. Relocated
-(task-454 Phase 1). -/
+/-- For a component 3 element, the extracted β' is in b5_guard_list. Relocated to the
+shared Foundations module. -/
 private theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     {L : List (Formula Atom)} {β' γ' : Formula Atom}
     (hφ : Formula.untl (Formula.and β' xi) γ' ∈ L)
@@ -192,8 +194,8 @@ private theorem l27s_b5_β_mem {B C : Set (Formula Atom)} {xi : Formula Atom}
     β' ∈ l27sB5GuardList B C xi L :=
   Cslib.Logic.Metalogic.Chronicle.l27s_b5_β_mem temporalSinceInterface hφ hβ' hγ'
 
-/-- Since-direction seed consistency. Uses BX5'+BX7'+BX13' chain. Delegates (task-454
-Phase 2) to the generic `Cslib.Logic.Metalogic.Chronicle.lemma_2_7_since_seed_consistent`. -/
+/-- Since-direction seed consistency. Uses BX5'+BX7'+BX13' chain. Delegates to the generic
+`Cslib.Logic.Metalogic.Chronicle.lemma_2_7_since_seed_consistent`. -/
 private theorem lemma_2_7_since_seed_consistent {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A)
     (h_mcs_C : Temporal.SetMaximalConsistent C)
@@ -209,7 +211,7 @@ private theorem lemma_2_7_since_seed_consistent {A B C : Set (Formula Atom)}
 
 /-- **Lemma 2.7 (Since direction)**: Given BurgessR3Maximal(A, B, C) with
 snce(xi, eta) ∈ C and xi ∉ B, construct MCS D with eta ∈ D splitting the R3 pair.
-Returns xi ∈ B'' via DC(B ∪ {xi}) Zorn seed. Delegates (task-454 Phase 2) to the generic
+Returns xi ∈ B'' via DC(B ∪ {xi}) Zorn seed. Delegates to the generic
 `Cslib.Logic.Metalogic.Chronicle.lemma_2_7_since`. -/
 theorem lemma_2_7_since {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A)
@@ -233,8 +235,8 @@ theorem lemma_2_7_since {A B C : Set (Formula Atom)}
     h_mcs_A h_mcs_C h_r3m h_B_dcs h_gc xi eta h_since h_xi_not_B
 
 /-- **Lemma 2.8 (Since direction) seed consistency**: Same seed as lemma_2_7_since
-but with ¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A instead of xi ∉ B. Delegates (task-454
-Phase 4) to the generic `Cslib.Logic.Metalogic.Chronicle.lemma_2_8_since_seed_consistent`. -/
+but with ¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A instead of xi ∉ B. Delegates to the generic
+`Cslib.Logic.Metalogic.Chronicle.lemma_2_8_since_seed_consistent`. -/
 private theorem lemma_2_8_since_seed_consistent {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A)
     (h_mcs_C : Temporal.SetMaximalConsistent C)
@@ -249,8 +251,8 @@ private theorem lemma_2_8_since_seed_consistent {A B C : Set (Formula Atom)}
     h_mcs_A h_mcs_C h_r3m h_B_dcs h_gc xi eta h_since h_neg_disj
 
 /-- **Lemma 2.8 (Since direction)**: Given BurgessR3Maximal(A, B, C) with
-snce(xi, eta) ∈ C and ¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A. Delegates (task-454 Phase 4) to
-the generic `Cslib.Logic.Metalogic.Chronicle.lemma_2_8_since`. -/
+snce(xi, eta) ∈ C and ¬(eta ∨ (xi ∧ snce(xi, eta))) ∈ A. Delegates to the generic
+`Cslib.Logic.Metalogic.Chronicle.lemma_2_8_since`. -/
 theorem lemma_2_8_since {A B C : Set (Formula Atom)}
     (h_mcs_A : Temporal.SetMaximalConsistent A)
     (h_mcs_C : Temporal.SetMaximalConsistent C)

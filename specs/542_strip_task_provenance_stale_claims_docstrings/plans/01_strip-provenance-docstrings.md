@@ -326,17 +326,57 @@ Systems 21, Minimal 6) plus `ProofSystem` (39). ~179 hits.
 
 ---
 
-### Phase 6: Propositional + Temporal (remainder) [NOT STARTED]
+### Phase 6: Propositional + Temporal (remainder) [COMPLETED]
 
 **Goal**: Strip provenance from Propositional and Temporal, excluding the three specific-item files
 owned by Phase 1 (`Bool.lean`, `Algebra/Bridge.lean`, `Temporal/Tableau/Completeness.lean`).
 ~156 hits.
 
 **Tasks**:
-- [ ] `Propositional/Tableau/Intuitionistic/Scheme.lean` (61 hits) and the rest of Propositional (19 files minus Bool.lean and Algebra/Bridge.lean).
-- [ ] Temporal (22 files minus `Tableau/Completeness.lean`).
-- [ ] Apply report §5 methodology throughout.
-- [ ] `lake build` of the touched Propositional and Temporal modules.
+- [x] `Propositional/Tableau/Intuitionistic/Scheme.lean` (61 hits) and the rest of Propositional (19 files minus Bool.lean and Algebra/Bridge.lean).
+  *(deviation: skipped -- `Scheme.lean`, `Tableau/Intuitionistic/Expansion.lean`,
+  `Tableau/Intuitionistic/Completeness.lean`, and `Tableau/Minimal/Completeness.lean` are
+  live continuation/blocker documentation for task 317 (state.json status: "implementing"),
+  which owns four real open `sorry`s in this exact cluster (`Scheme.lean:585,1438`,
+  `Completeness.lean:133`, `Minimal/Completeness.lean:125`) plus explicit STOP-gate findings
+  and orchestrator re-plan recommendations tied 1:1 to task 317's own plan-phase numbering.
+  Another task's own description in TODO.md explicitly instructs "Do NOT touch" specific
+  sorries in this cluster. Rewriting the Phase-N labels here risks breaking the
+  correspondence to task 317's still-open plan and corrupting its continuation notes; this is
+  live project state, not stale provenance. `IntDecidability.lean`/`MinDecidability.lean`,
+  which only *reference* this cluster's open sorries from outside it, were still stripped
+  (task-number citations replaced with file:line anchors) since editing a downstream
+  reference carries none of that risk. All other 17 Propositional files (Embedding.lean,
+  SequentCalculus/{LK,LJ}/Interpolation.lean, Semantics/Algebra/*, Metalogic/
+  {GenericMCSBridge,GenericLindenbaum,Int/MinDecidability}.lean, Tableau/Classical/*,
+  NaturalDeduction/Basic.lean, Tableau/Intuitionistic/Soundness.lean) were stripped --
+  commits d53e825a, 670009c8. Two stale claims corrected: Embedding.lean said Modal/Temporal/
+  Bimodal formula types lack native and/or (Modal.Proposition has since gained HasAnd/HasOr);
+  LK/Interpolation.lean said the hard Maehara cases were "deferred to Phase 3" even though all
+  cases are fully proved sorry-free.)*
+- [x] Temporal (22 files minus `Tableau/Completeness.lean`).
+  *(deviation: skipped -- `Tableau/Soundness.lean` and `Tableau/TimeOrdering.lean` document a
+  genuinely still-open blocker owned by not-yet-started task 425 (state.json status:
+  "not_started"), whose own description cross-references `Tableau/Soundness.lean:23-54` by
+  file:line for the exact obstruction ("<= 2^n time types" / loop-detection) it will resolve;
+  and `Chronicle/ChronicleTypes.lean`, `Chronicle/CounterexampleElimination/Structures.lean`,
+  `Chronicle/RRelation.lean` document task 530's own active plan-phase structure (state.json
+  status: "blocked"; task 530 has a live `specs/530_.../plans/` directory whose phase
+  numbering these "## Status (task 530, Phase N)" headers mirror directly, including one
+  forward-reference to a not-yet-made "Phase 4b duality-theorem decision"). All other 17
+  Temporal files (Formula.lean, Satisfies.lean, CompletenessHelpers.lean,
+  ChronicleConstruction.lean, PointInsertion/{Since,Seeds}.lean, Theorems.lean,
+  Subformulas.lean, MCS.lean, Chronicle/Frame.lean, ProofSystem/Axioms.lean,
+  WitnessSeed.lean, GeneralizedNecessitation.lean, DenseCompleteness.lean,
+  Tableau/{Rules,Saturation}.lean) were stripped -- commits a39caada, 4a67afda, 08f7cf1d,
+  b0e6bb85, f0dbd0d8, eb85feb2. All referenced archived tasks (180, 340, 426, 439, 454)
+  confirmed absent from active state.json entries before editing.)*
+- [x] Apply report §5 methodology throughout.
+- [x] `lake build` of the touched Propositional and Temporal modules.
+  *(every touched module builds green with zero live sorry; full-tree grep across
+  Cslib/Logics/Propositional/ and Cslib/Logics/Temporal/ for task/phase/specs/renamed-from/
+  formerly/probes patterns now returns exactly the 9 deliberately-skipped files above, nothing
+  else.)*
 
 **Timing**: 1 hour
 

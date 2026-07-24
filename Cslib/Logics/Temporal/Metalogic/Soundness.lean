@@ -324,6 +324,10 @@ theorem axiom_sound {D : Type*} [LinearOrder D] [NoMaxOrder D] [NoMinOrder D]
     exact (Satisfies.sat_allPast_iff_neg_somePast_neg M t φ).mpr
   | density _ => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
   | dense_indicator => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_symm_fwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_symm_bwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_propagate_fwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_propagate_bwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
 
 /-! ## Swap Temporal Duality -/
 

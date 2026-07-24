@@ -15,8 +15,9 @@ BX temporal proof system.
 
 ## Organization
 
-- `FrameClass`: Classification for axiom validity (Base, Dense, Discrete)
-- `Axiom`: Inductive type with 26 constructors (4 propositional + 22 temporal)
+- `FrameClass`: Classification for axiom validity (Base, Dense, Discrete, Metric)
+- `Axiom`: Inductive type with 26 constructors (4 propositional + 22 temporal), plus 2 density
+  and 4 metric-uniformity constructors gated by `minFrameClass`
 - `minFrameClass`: Minimum frame class for each axiom
 -/
 
@@ -36,11 +37,14 @@ Frame class classification for axiom validity.
 - `Base`: all base axioms are valid on all linear orders
 - `Dense`: extends Base with density axioms
 - `Discrete`: extends Base with discreteness axioms
+- `Metric`: extends Base with metric uniformity axioms, valid on ordered-abelian-group time
+  (incomparable to `Dense`/`Discrete`)
 -/
 inductive FrameClass where
   | Base
   | Dense
   | Discrete
+  | Metric
   deriving Repr, DecidableEq, Inhabited, BEq, Hashable
 
 instance : LE FrameClass where
@@ -48,6 +52,7 @@ instance : LE FrameClass where
     | .Base, _ => True
     | .Dense, .Dense => True
     | .Discrete, .Discrete => True
+    | .Metric, .Metric => True
     | _, _ => False
 
 instance : DecidableRel (LE.le : FrameClass → FrameClass → Prop) :=
@@ -66,10 +71,11 @@ theorem FrameClass.base_le (fc : FrameClass) : FrameClass.Base ≤ fc := by
 /--
 Axiom schemata for temporal logic under the Burgess-Xu (BX) system.
 
-28 constructors organized into three layers:
+Organized into layers:
 - **Propositional** (4): Classical propositional tautologies
 - **BX Temporal** (22): Burgess-Xu axioms for Until/Since on linear orders
 - **Density** (2): Axioms valid on dense linear orders
+- **Metric Uniformity** (4): Axioms valid on ordered-abelian-group time (`FrameClass.Metric`)
 -/
 inductive Axiom : Formula Atom → Type u where
   -- Layer 1: Propositional (4)
@@ -222,6 +228,32 @@ inductive Axiom : Formula Atom → Type u where
   | dense_indicator :
       Axiom (Formula.untl Formula.bot Formula.top).neg
 
+  -- Layer: Metric Uniformity (4)
+
+  /-- Metric symmetry (fwd): U(⊥,⊤) → S(⊥,⊤). Immediate successor ⇒ immediate predecessor.
+      Metric uniformity / homogeneity of ordered-abelian-group time (negation symmetry). -/
+  | discrete_symm_fwd :
+      Axiom ((Formula.untl Formula.bot Formula.top).imp
+        (Formula.snce Formula.bot Formula.top))
+
+  /-- Metric symmetry (bwd): S(⊥,⊤) → U(⊥,⊤). Immediate predecessor ⇒ immediate successor.
+      Metric uniformity / homogeneity of ordered-abelian-group time (negation symmetry). -/
+  | discrete_symm_bwd :
+      Axiom ((Formula.snce Formula.bot Formula.top).imp
+        (Formula.untl Formula.bot Formula.top))
+
+  /-- Metric propagation (fwd): U(⊥,⊤) → G(U(⊥,⊤)). Metric uniformity / homogeneity of
+      ordered-abelian-group time: translation-invariance forwards. -/
+  | discrete_propagate_fwd :
+      Axiom ((Formula.untl Formula.bot Formula.top).imp
+        (Formula.allFuture (Formula.untl Formula.bot Formula.top)))
+
+  /-- Metric propagation (bwd): U(⊥,⊤) → H(U(⊥,⊤)). Metric uniformity / homogeneity of
+      ordered-abelian-group time: translation-invariance backwards. -/
+  | discrete_propagate_bwd :
+      Axiom ((Formula.untl Formula.bot Formula.top).imp
+        (Formula.allPast (Formula.untl Formula.bot Formula.top)))
+
   -- Layer 4: G/H classical-equivalence bridge axioms (4)
   -- These connect the primitive `allFuture`/`allPast` constructors
   -- to the Foundation-level derived encodings `¬F¬φ` / `¬P¬φ`.
@@ -257,6 +289,10 @@ def Axiom.minFrameClass {φ : Formula Atom} :
     Cslib.Logic.Temporal.Axiom φ → FrameClass
   | .density _ => .Dense
   | .dense_indicator => .Dense
+  | .discrete_symm_fwd => .Metric
+  | .discrete_symm_bwd => .Metric
+  | .discrete_propagate_fwd => .Metric
+  | .discrete_propagate_bwd => .Metric
   | _ => .Base
 
 end Cslib.Logic.Temporal

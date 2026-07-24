@@ -122,6 +122,10 @@ theorem axiom_sound_dense {D : Type*} [LinearOrder D] [DenselyOrdered D]
       exact axiom_sound (.allPast_to_classic _) (FrameClass.base_le _) M t
   | classic_to_allPast =>
       exact axiom_sound (.classic_to_allPast _) (FrameClass.base_le _) M t
+  | discrete_symm_fwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_symm_bwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_propagate_fwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
+  | discrete_propagate_bwd => exact absurd _h_fc (by simp [Axiom.minFrameClass, LE.le])
 
 end Cslib.Logic.Temporal
 

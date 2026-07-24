@@ -50,8 +50,8 @@ private theorem F_neg_of_G_not {A : Set (Formula Atom)}
     (𝐅(¬φ)) ∈ A := by
   rcases temporal_negation_complete h_mcs (Formula.someFuture φ.neg) with h | h
   · exact h
-  · -- Task 180 (F1): h : (someFuture φ.neg).neg ∈ A is no longer definitionally allFuture φ
-    -- ∈ A now that G is primitive; convert via mcs_allFuture_iff before the contradiction.
+  · -- h : (someFuture φ.neg).neg ∈ A is not defeq to allFuture φ ∈ A since G is
+    -- primitive; convert via mcs_allFuture_iff before the contradiction.
     exact absurd ((mcs_allFuture_iff h_mcs).mpr h) h_Gφ_not
 
 /-- If H(φ) ∉ MCS A, then P(¬φ) ∈ A. Dual of `F_neg_of_G_not`. -/
@@ -61,8 +61,8 @@ private theorem P_neg_of_H_not {A : Set (Formula Atom)}
     (𝐏(¬φ)) ∈ A := by
   rcases temporal_negation_complete h_mcs (Formula.somePast φ.neg) with h | h
   · exact h
-  · -- Task 180 (F1): h : ¬P(¬φ) ∈ A is no longer definitionally H(φ) ∈ A now that H is
-    -- primitive; convert via mcs_allPast_iff before the contradiction.
+  · -- h : ¬P(¬φ) ∈ A is not defeq to H(φ) ∈ A since H is primitive; convert via
+    -- mcs_allPast_iff before the contradiction.
     exact absurd ((mcs_allPast_iff h_mcs).mpr h) h_Hφ_not
 
 /-! ## Lemma 2.4: Until Witness Endpoint Construction -/
@@ -100,7 +100,7 @@ private theorem F_mem_of_g_content_sub {A C : Set (Formula Atom)}
     -- Contrapositive: ⊢ ¬F(γ) → ¬F(¬¬γ)
     have h_contra : DerivationTree FrameClass.Base [] ((Formula.someFuture γ).neg.imp (Formula.someFuture γ.neg.neg).neg) :=
       contraposition h_F_mono
-    -- Task 180 (F1): ¬F(¬¬γ) → G(¬γ) is no longer defeq (G is now primitive); bridge via
+    -- ¬F(¬¬γ) → G(¬γ) is not defeq (G is primitive); bridge via
     -- the classic_to_allFuture axiom, then compose with the contrapositive above.
     have h_bridge : DerivationTree FrameClass.Base [] ((Formula.someFuture γ.neg.neg).neg.imp
         (Formula.allFuture γ.neg)) :=

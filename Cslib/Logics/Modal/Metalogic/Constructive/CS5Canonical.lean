@@ -9,64 +9,58 @@ module
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5
 
-/-! # `CS5` Birelational Canonical Model (Task 512 Pivot)
+/-! # `CS5` Birelational Canonical Model
 
-This module is being rebuilt as the **birelational canonical model** for `CS5` (Božić–Došen
-1984 / Došen 1985 IS5 / Simpson 1994 / Alechina–Mendler–de Paiva–Ritter 2001), replacing the
-abandoned doubled-atom `CS5Combined` atom-sum scaffold (task 512 plan 01, DISCARDED this phase
-— see `specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md`, Phase
-2). The doubled-atom approach attempted to close `CS5`'s box-backward truth-lemma case via a
-simultaneous-pair construction over `Atom ⊕ Atom`; five dispatches confirmed this re-enters
-Pacheco's unsound negation-completeness move (`cs5Combined_seed_excludes`, never closed — see
-git history for the removed content).
+This module defines the **birelational canonical model** for `CS5` (Božić–Došen 1984 / Došen
+1985 IS5 / Simpson 1994 / Alechina–Mendler–de Paiva–Ritter 2001). It replaces an earlier
+doubled-atom `CS5Combined` atom-sum scaffold that attempted to close `CS5`'s box-backward
+truth-lemma case via a simultaneous-pair construction over `Atom ⊕ Atom`; that approach
+re-entered Pacheco's unsound negation-completeness move (`cs5Combined_seed_excludes`, never
+closed — see git history for the removed content) and was discarded.
 
-The birelational pivot makes the canonical relation **one-sided** (`Γ R Δ ⟺ boxInv Γ ⊆ Δ`,
+The birelational approach makes the canonical relation **one-sided** (`Γ R Δ ⟺ boxInv Γ ⊆ Δ`,
 Simpson's `{B | □B ∈ X} ⊆ Y`), dissolving box-backward to the plain one-sided prime lemma
-(`box_refuting_theory`, `SegmentLindenbaum.lean`) — confirmed negation-completeness-free at the
-Phase 1 gate
-(`specs/512_cs5_box_backward_atom_sum_completeness/probes/phase1-onesided-box-backward-gate.lean`,
-`cs5_box_backward_onesided`). Symmetry becomes a global ≤-mediated **incestuality** frame
+(`box_refuting_theory`, `SegmentLindenbaum.lean`) — confirmed negation-completeness-free
+(`cs5_box_backward_onesided`). Symmetry becomes a global ≤-mediated **incestuality** frame
 condition (Marin–Morales–Straßburger 2021 Thm 7.1) instead of a per-world back-inclusion baked
 into `cs5Tail` (`CS5.lean:632`).
 
-## Status (Phase 2 of the pivot: scaffold discard)
+## Scaffold discard
 
-This phase removes the `CS5Combined` doubled-atom machinery (`CS5Combined`, `cs5_axiom_relabel`,
-`τL`/`τR`, `cs5Combined_necTransfer`, `cs5CombinedTail`/`cs5CombinedSeg`/`CS5CombinedSegment`/
+The `CS5Combined` doubled-atom machinery (`CS5Combined`, `cs5_axiom_relabel`, `τL`/`τR`,
+`cs5Combined_necTransfer`, `cs5CombinedTail`/`cs5CombinedSeg`/`CS5CombinedSegment`/
 `cs5CombinedMreach`, and every port of `CS5.lean`'s canonical-model machinery over the doubled
-atom space) as dead code — none of it survives the pivot, and nothing else in `Cslib/` referenced
-it (confirmed by grep before removal). `Proposition.map` — the one still-useful primitive from
-plan 01 — already lives in `Cslib/Logics/Modal/Basic.lean`, not here, so no file-split action was
-needed this phase.
+atom space) has been removed as dead code — none of it survives the birelational approach, and
+nothing else in `Cslib/` references it. `Proposition.map` — the one still-useful primitive from
+that earlier approach — lives in `Cslib/Logics/Modal/Basic.lean`, not here.
 
-The two general negative results the pivot's research explicitly retains stay in their original
-files, untouched by this discard:
+The two general negative results retained from that investigation stay in their original files:
 - `cs5_symmetric_tail_box_gap` (`CS5.lean:712`) — the mechanized diagnosis of why the two-sided
   `cs5Tail` back-inclusion is the box-backward wall.
 - `cs5FC''_hub_forces_spoke_connectivity` (`CKExtension.lean:220`) — the general fact that plain
   symmetry + plain transitivity force hub-and-spoke collapse (irrelevant as an obstruction to the
-  new incestuality-based design, but a documented fact in its own right).
+  incestuality-based design, but a documented fact in its own right).
 
-## Status (Phase 3 of the pivot: birelational frame class)
+## Birelational frame class
 
-This phase defines the one-sided canonical relation `cs5OnesidedR`, the one-sided canonical
+This module defines the one-sided canonical relation `cs5OnesidedR`, the one-sided canonical
 world type (`cs5CanonTail`/`cs5CanonSeg`/`CS5CanonSegment`/`cs5CanonMreach`, mirroring
 `CS4.lean`'s one-sided-`R` `cs4Tail`/`cs4Seg`/`CS4Segment`/`cs4Mreach` template rather than the
 discarded two-sided `cs5Tail`/`CS5Segment`), and the ≤-mediated S5 **incestuality** frame
 condition (`cs5Incest`, bundled into `cs5FCIncest`) that REPLACES `cs5FC''`'s plain-symmetry +
-plain-transitivity conjuncts (`CKExtension.lean:184`, task 509, left untouched — this phase adds
-a new definition alongside it, per the plan's rollback note, rather than editing it in place).
+plain-transitivity conjuncts (`CKExtension.lean:184`, left untouched — this module adds a new
+definition alongside it rather than editing it in place).
 
-## Status (Phase 4 of the pivot: soundness over `cs5FCIncest`)
+## Soundness over `cs5FCIncest`
 
-This phase re-proves `CS5` soundness (all 17 `CS5ModalAxiom` cases,
+This module also re-proves `CS5` soundness (all 17 `CS5ModalAxiom` cases,
 `cs5_axiom_sound_incest`/`cs5_soundness_incest`/`cs5_soundness_derivable_incest`) over
-`cs5FCIncest`. Along the way it CORRECTS two aspects of Phase 3's landed definitions (both
-`cs5Incest` and `cs5FCIncest` remain the same NAMES, uncomsumed by anything outside this file,
-so revising their statements is safe and non-regressive — see each definition's docstring for
-the full derivation):
+`cs5FCIncest`. Along the way it CORRECTS two aspects of the birelational frame class's initial
+definitions (both `cs5Incest` and `cs5FCIncest` retain their names, unconsumed by anything
+outside this file, so revising their statements is safe and non-regressive — see each
+definition's docstring for the full derivation):
 
-- `cs5Incest` was mis-instantiated: Phase 3 derived it as the `bBox` instance of Marin Thm 7.1
+- `cs5Incest` was mis-instantiated at first: derived as the `bBox` instance of Marin Thm 7.1
   (`k=l=0,m=n=1`), which turns out to coincide with the already-kept `FCsym_box` clause and so
   contributes nothing new. The genuinely new `B`-soundness content is the OTHER instance,
   `bDia` (`k=l=1,m=n=0`); `cs5Incest` is corrected to that shape.
@@ -77,18 +71,13 @@ the full derivation):
   actually replaced by (corrected) `cs5Incest`.
 
 `cs5FCIncest` is therefore `cs5FC''` with ONLY its plain-symmetry conjunct replaced —
-`cs5FC''` itself (task 509, `CKExtension.lean`) is left completely untouched, per the plan's
-rollback note; this phase adds the reworked soundness theorems alongside it, in this file.
+`cs5FC''` itself (`CKExtension.lean`) is left completely untouched; this module adds the
+reworked soundness theorems alongside it.
 
-**Deliberately NOT done this phase** (Phase 5's obligation): proving the canonical model
-(`cs5CanonMreach`) actually SATISFIES `cs5FCIncest`'s re-basing/incestuality clauses (beyond the
-free reflexivity fact `cs5CanonRefl` landed in Phase 3). The real `cs5_box_backward` in
-`Cslib/` (Phase 6, already scaffolded sorry-free in the Phase 1 probe); the truth lemma and
-`cs5_completeness` (Phase 7) are likewise untouched.
-
-The birelational frame class (one-sided `R` + incestuality condition) was added in Phase 3;
-soundness (this phase) is Phase 4; canonical verification, box-backward, and the truth lemma
-follow in Phases 5-7. See the plan file for the full phase breakdown.
+**Deliberately not done here**: proving the canonical model (`cs5CanonMreach`) actually
+SATISFIES `cs5FCIncest`'s re-basing/incestuality clauses (beyond the free reflexivity fact
+`cs5CanonRefl` landed above). The real `cs5_box_backward` is scaffolded sorry-free but not yet
+landed in `Cslib/`; the truth lemma and `cs5_completeness` are likewise still outstanding.
 
 ## References
 
@@ -117,10 +106,9 @@ variable {Atom : Type u}
 Simpson's `{B | □B ∈ X} ⊆ Y` (`Simpson1994`, corpus chunk `682e04d443e7bbd7`): the modal clause
 with **no** "back" clause baked in, replacing the discarded two-sided `cs5Tail`
 (`CS5.lean:632`, `boxInv H ⊆ t ∧ boxInv t ⊆ H`) that was the box-backward wall
-(`cs5_symmetric_tail_box_gap`, `CS5.lean:712`). Verified negation-completeness-free at Phase 1
-(`specs/512_cs5_box_backward_atom_sum_completeness/probes/phase1-onesided-box-backward-gate.lean`,
-`cs5_box_backward_onesided`) — landed here with the identical signature so Phase 6 can restate
-that probe's theorem directly in `Cslib/`. -/
+(`cs5_symmetric_tail_box_gap`, `CS5.lean:712`). Verified negation-completeness-free
+(`cs5_box_backward_onesided`) — landed here with the identical signature so `cs5_box_backward`
+can eventually restate that theorem directly in `Cslib/`. -/
 
 /-- **The one-sided `CS5` canonical relation.** `Γ R Δ` iff `boxInv Γ ⊆ Δ`. Symmetry is NOT a
 per-world clause of this relation; it is the global ≤-mediated incestuality frame condition
@@ -133,8 +121,8 @@ def cs5OnesidedR (Γ Δ : Set (Proposition Atom)) : Prop :=
 Mirrors `CS4.lean`'s one-sided-`R` template (`cs4Tail`/`cs4Seg`/`CS4Segment`/`cs4Mreach`,
 `CS4.lean:341-386`) rather than the discarded two-sided `cs5Tail`/`CS5Segment`/`cs5Mreach`
 (`CS5.lean:632-994`). Unlike `CS4Segment`, no excluded-diamond field is threaded through the
-world type: the Phase 1 gate showed the one-sided box-backward case needs no hereditary
-invariant beyond the plain prime lemma, so `cs5CanonSeg`'s tail is exactly the GENERIC maximal
+world type: the one-sided box-backward case needs no hereditary invariant beyond the plain prime
+lemma, so `cs5CanonSeg`'s tail is exactly the GENERIC maximal
 tail `CKSegment.ofHead` already builds for any axiom system (`Segment.lean:142-150`) — this
 section names it `cs5CanonTail`/`cs5CanonSeg` for module-local readability and to expose the
 `tail_eq` invariant `CS5CanonSegment` needs, not because the construction differs from
@@ -149,8 +137,8 @@ def cs5CanonTail (H : Set (Proposition Atom)) : Set (Set (Proposition Atom)) :=
 
 /-- The `CS5` canonical segment at head `H`: the maximal one-sided tail. Diamonds are witnessed
 by the exploding theory `Set.univ` (always in `cs5CanonTail H`) — the box-BACKWARD direction
-that needs a genuine Lindenbaum witness omitting a specific formula is `cs5_box_backward`
-(Phase 6), not a `CKSegment` field. -/
+that needs a genuine Lindenbaum witness omitting a specific formula is `cs5_box_backward`,
+still outstanding, not a `CKSegment` field. -/
 def cs5CanonSeg {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom Atom) H) :
     CKSegment (@CS5ModalAxiom Atom) where
   head := H
@@ -185,7 +173,7 @@ def CS5CanonSegment.ofHead {H : Set (Proposition Atom)}
 /-- `cs5CanonMreach` is reflexive: `boxInv H ⊆ H` is axiom `T` (`cs5_boxInv_subset`,
 `CS5.lean:621`). Free from the axioms — no separate `refl` invariant is threaded through the
 world type, matching `cs4_refl`/`cs5_refl`. The REMAINING frame-condition clauses
-(re-basing/incestuality) are Phase 5's obligation, not proved here. -/
+(re-basing/incestuality) are not proved here. -/
 theorem cs5CanonRefl (P : CS5CanonSegment Atom) : cs5CanonMreach P P := by
   change P.seg.head ∈ P.seg.tail
   rw [P.tail_eq]
@@ -203,9 +191,9 @@ Marin–Morales–Straßburger Thm 7.1 (`marinmoralesstrassburger_2021...`, chun
 an intuitionistic modal frame `⟨W, R, ≤⟩` validates the Scott–Lemmon path axiom
 `◇ᵏ□ˡA ⊃ □ᵐ◇ⁿA` iff `wRᵏu ∧ wRᵐv ⟹ ∃u′. u ≤ u′ ∧ ∃x. u′Rˡx ∧ vRⁿx`.
 
-`CS5`'s `B` axiom has TWO forms, and they are DIFFERENT instances of this schema (Phase 4
-correction to Phase 3's docstring — the definition below is unchanged in its final form, but
-its derivation was mis-attributed): `bBox` is `k = l = 0, m = n = 1` (`◇⁰□⁰A ⊃ □¹◇¹A`, since
+`CS5`'s `B` axiom has TWO forms, and they are DIFFERENT instances of this schema (the definition
+below is unchanged in its final form, but its derivation was initially mis-attributed): `bBox`
+is `k = l = 0, m = n = 1` (`◇⁰□⁰A ⊃ □¹◇¹A`, since
 `◇⁰□⁰A` is just `A`): `R⁰` is the identity, so `wR⁰u`/`u′R⁰x` collapse to `u = w`/`x = u′`,
 giving `r w v ⟹ ∃u′ ≥ w, r v u′` — but this is *exactly* the `u′ := u` (`le_refl`)
 specialization of `cs5FC''`'s `FCsym_box` clause (kept verbatim below, third conjunct of
@@ -230,28 +218,26 @@ slack). Cross-checked against Simpson's F1/F2 forward/backward confluence (`≤�
 `R∘≤ ⊆ ≤∘R`, corpus `Simpson1994`): those are the general birelational monotonicity conditions
 any `CKForces`-style model already satisfies structurally (via `box_reflect`'s upward closure
 through `≤`); `cs5Incest` is the ADDITIONAL S5-specific ingredient on top. Proving the canonical
-model (`cs5CanonMreach`) satisfies this is Phase 5's obligation, NOT this phase's. -/
+model (`cs5CanonMreach`) satisfies this remains outstanding. -/
 def cs5Incest {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   ∀ {w u : World}, r w u → ∃ u', u ≤ u' ∧ r u' w
 
-/-- **The birelational `CS5` incestuality frame condition** (task 512 pivot). Mirrors
-`cs5FC''`'s bundling style (`CKExtension.lean:184`, task 509) exactly, but swaps ONE bundled
-conjunct (Phase 4 correction to Phase 3's plan: dropping BOTH plain transitivity and plain
-symmetry, as Phase 3 originally did, breaks `fourDia`'s soundness — its truth-lemma goal is
-also a "point" fact with no `≤`-room, so no `≤`-mediated substitute can replace EXACT
-transitivity the way `cs4FC'`/`FCsym_box` could weaken `fourBox`'s composition; see
-`cs5_axiom_sound_incest`'s `fourDia` case, verbatim from `cs5_axiom_sound''`). Reflexivity,
-PLAIN transitivity (`fourDia`, kept — NOT weakenable, see above), the `cs4FC'`-style `fourBox`
-re-basing clause, and the `FCsym_box`-style `bBox` clause are all KEPT verbatim from `cs5FC''`;
-ONLY `cs5FC''`'s plain symmetry (`bDia`) conjunct is DROPPED and replaced by `cs5Incest` (the
-`bDia`-specific Marin instance `k=l=1,m=n=0`, genuinely distinct from the `bBox`-specific
-instance `FCsym_box` already covers — see the section docstring). Per report 04 Q3,
-`cs5FC''_hub_forces_spoke_connectivity`'s hub-and-spoke obstruction (derived from PLAIN
-transitivity + PLAIN symmetry JOINTLY) no longer applies once EITHER conjunct is dropped;
-dropping plain symmetry alone already dissolves it as a canonical-model design constraint, so
-keeping plain transitivity is safe. Soundness of the 17 `CS5ModalAxiom` cases over this bundle —
-in particular the genuinely new incestuality-mediated soundness argument for `bDia` — is
-`cs5_axiom_sound_incest` below. -/
+/-- **The birelational `CS5` incestuality frame condition.** Mirrors `cs5FC''`'s bundling style
+(`CKExtension.lean:184`) exactly, but swaps ONE bundled conjunct (dropping BOTH plain
+transitivity and plain symmetry breaks `fourDia`'s soundness — its truth-lemma goal is also a
+"point" fact with no `≤`-room, so no `≤`-mediated substitute can replace EXACT transitivity the
+way `cs4FC'`/`FCsym_box` could weaken `fourBox`'s composition; see `cs5_axiom_sound_incest`'s
+`fourDia` case, verbatim from `cs5_axiom_sound''`). Reflexivity, PLAIN transitivity (`fourDia`,
+kept — NOT weakenable, see above), the `cs4FC'`-style `fourBox` re-basing clause, and the
+`FCsym_box`-style `bBox` clause are all KEPT verbatim from `cs5FC''`; ONLY `cs5FC''`'s plain
+symmetry (`bDia`) conjunct is DROPPED and replaced by `cs5Incest` (the `bDia`-specific Marin
+instance `k=l=1,m=n=0`, genuinely distinct from the `bBox`-specific instance `FCsym_box` already
+covers — see the section docstring). `cs5FC''_hub_forces_spoke_connectivity`'s hub-and-spoke
+obstruction (derived from PLAIN transitivity + PLAIN symmetry JOINTLY) no longer applies once
+EITHER conjunct is dropped; dropping plain symmetry alone already dissolves it as a
+canonical-model design constraint, so keeping plain transitivity is safe. Soundness of the 17
+`CS5ModalAxiom` cases over this bundle — in particular the genuinely new incestuality-mediated
+soundness argument for `bDia` — is `cs5_axiom_sound_incest` below. -/
 def cs5FCIncest {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   (∀ w, r w w)
     ∧ (∀ {w u t}, r w u → r u t → r w t)
@@ -259,10 +245,10 @@ def cs5FCIncest {World : Type*} [Preorder World] (r : World → World → Prop) 
     ∧ (∀ {w u u'}, r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t)
     ∧ cs5Incest r
 
-/-! ## Soundness over `cs5FCIncest` (Phase 4)
+/-! ## Soundness over `cs5FCIncest`
 
 Ports `cs5_axiom_sound''`'s 15 non-`B` cases and the `fourBox`/`bBox` cases VERBATIM
-(`CS5.lean:366`, task 509) — none of them touch the conjunct that changed. Only the `bDia` case
+(`CS5.lean:366`) — none of them touch the conjunct that changed. Only the `bDia` case
 is genuinely new: it discharges via `cs5Incest` (the corrected `bDia`-instance of Marin Thm 7.1,
 `k=l=1,m=n=0`) instead of `cs5FC''`'s plain symmetry conjunct. -/
 
@@ -377,7 +363,7 @@ theorem cs5_soundness_derivable_incest {φ : Proposition Atom}
   exact cs5_soundness_incest d r hfc val botForces v_uc bf_uc bf_val bf_r bf_r_wit w
     (fun _ h => nomatch h)
 
-/-! ## `CKForces` Clauses Remain Served (Confirmation, Phase 3 Task 4)
+/-! ## `CKForces` Clauses Remain Served
 
 `CKForces` (`Forcing.lean:67`) is generic over any `World`/`r`/`val`/`botForces`, independent of
 which frame condition `r` happens to satisfy: the propositional cases (atom/bot/and/or/imp) and
@@ -385,22 +371,21 @@ the box-forward/diamond-both cases depend only on `≤`, `cmreach`-style `r`, `b
 `diam_witness` — all of which `cs5CanonSeg`/`CS5CanonSegment`/`cs5CanonMreach` above supply,
 exactly matching `CS4.lean`'s one-sided-`R` template (`cs4_truth_lemma`, `CS4.lean:457`). Only
 the truth lemma's box-BACKWARD case (`□A ∈ head → CKForces (□A)`) needs anything beyond this
-generic machinery — the plain one-sided prime lemma (`cs5_box_backward`, Phase 6) — and nothing
-about `cs5FCIncest` is needed for that case either (the Phase 1 gate's whole point: box-backward
-is frame-condition-independent). Landing the actual truth lemma is Phase 7's obligation. -/
+generic machinery — the plain one-sided prime lemma (`cs5_box_backward`, still outstanding) —
+and nothing about `cs5FCIncest` is needed for that case either (box-backward is
+frame-condition-independent). Landing the actual truth lemma remains outstanding. -/
 
-/-! ## Adversarial Verification: `cs5Incest` Fails on `CS5CanonSegment` (Phase 5)
+/-! ## Adversarial Verification: `cs5Incest` Fails on `CS5CanonSegment`
 
-Phase 5's task was to prove `cs5Incest (@cs5CanonMreach Atom)` — the canonical model literally
-satisfies the ≤-mediated incestuality condition. Direct attempt shows this is **mathematically
-false**, for a reason independent of negation-completeness: `boxInv` is monotone in its
-argument, so for `cs5Incest`'s witness `u' ≥ u` (i.e. `u.head ⊆ u'.head`) to satisfy `r u' w`
-(`boxInv u'.head ⊆ w.head`), it is *necessary* that `boxInv u.head ⊆ w.head` already holds (any
-`□C ∈ u.head` persists into `u'.head`, and `w.head` is untouched by the choice of `u'`) —
-extending `u` can never help satisfy the goal, so only `u' := u` (up to the ≤-order) is ever a
-candidate. So `cs5Incest cs5CanonMreach` is equivalent, on this world type, to *plain* symmetry
-of `cs5CanonMreach` — exactly the naive two-sided condition Marin Remark 7.3 (and this pivot's
-whole design) says is wrong intuitionistically.
+Proving `cs5Incest (@cs5CanonMreach Atom)` — that the canonical model literally satisfies the
+≤-mediated incestuality condition — is **mathematically false**, for a reason independent of
+negation-completeness: `boxInv` is monotone in its argument, so for `cs5Incest`'s witness
+`u' ≥ u` (i.e. `u.head ⊆ u'.head`) to satisfy `r u' w` (`boxInv u'.head ⊆ w.head`), it is
+*necessary* that `boxInv u.head ⊆ w.head` already holds (any `□C ∈ u.head` persists into
+`u'.head`, and `w.head` is untouched by the choice of `u'`) — extending `u` can never help
+satisfy the goal, so only `u' := u` (up to the ≤-order) is ever a candidate. So `cs5Incest
+cs5CanonMreach` is equivalent, on this world type, to *plain* symmetry of `cs5CanonMreach` —
+exactly the naive two-sided condition Marin Remark 7.3 says is wrong intuitionistically.
 
 The counterexample: the exploding world `Ω` (head `Set.univ`) is `cs5CanonMreach`-reachable
 from **every** canonical world `P` (`boxInv P.head ⊆ Set.univ` trivially), yet `Ω` cannot reach
@@ -408,11 +393,9 @@ back to any non-exploding `P` (`Ω`'s head is already maximal, so `Ω' = Ω` is 
 `boxInv Set.univ = Set.univ ⊆ P.head` forces `P.head = Set.univ`). Combined with the fact that
 `CS5` is consistent (witnessed below via a one-point model), this produces an outright `False`
 from `cs5Incest (@cs5CanonMreach Atom)` — **not a proof-search failure, a genuine
-counterexample**. See the Phase 5 blocker writeup
-(`specs/512_cs5_box_backward_atom_sum_completeness/plans/02_birelational-pivot.md`) for the full
-analysis and the design options this opens up (restrict to a hereditary world subtype, à la
-`CS4Segment`'s `excl` invariant, task 508; or weaken `cs5Incest` to an existential clause
-excluding the exploding case, à la `cs4FC'`). -/
+counterexample**. Design options this opens up: restrict to a hereditary world subtype, à la
+`CS4Segment`'s `excl` invariant; or weaken `cs5Incest` to an existential clause excluding the
+exploding case, à la `cs4FC'`. -/
 
 /-- The exploding canonical world is reachable from every canonical world: `boxInv P.head ⊆
 Set.univ` trivially. -/
@@ -454,14 +437,14 @@ theorem cs5_consistent_incest : ¬ Derivable (@CS5ModalAxiom Atom) Proposition.b
     (fun _ _ _ => trivial) (fun _ h => h.elim) (fun _ h => h.elim)
     (fun h _ => h.elim) (fun h => h.elim) Unit.unit
 
-/-- **`cs5Incest` FAILS for `cs5CanonMreach` (Phase 5 blocker, mechanized).** Combines
+/-- **`cs5Incest` FAILS for `cs5CanonMreach` (mechanized).** Combines
 `cs5Incest_cs5CanonMreach_forces_univ` (if incestuality held, every canonical world would be
 exploding) with `cs5_consistent_incest` (there is a non-exploding canonical world, realized via
 `quasi_head_realization` at the underivable `⊥`) for an outright contradiction. This is **not**
-the negation-completeness wall (Phase 1's gate) — it is a distinct, purely set-theoretic
-obstruction (monotonicity of `boxInv` against a fixed target, defeated by the universally
-reachable exploding world) specific to verifying frame conditions on the *unrestricted*
-`CS5CanonSegment` world type landed in Phase 3. -/
+the negation-completeness wall — it is a distinct, purely set-theoretic obstruction
+(monotonicity of `boxInv` against a fixed target, defeated by the universally reachable
+exploding world) specific to verifying frame conditions on the *unrestricted* `CS5CanonSegment`
+world type landed above. -/
 theorem cs5Incest_cs5CanonMreach_false : ¬ cs5Incest (@cs5CanonMreach Atom) := by
   intro hincest
   obtain ⟨T, hT, hbotT⟩ := quasi_head_realization
@@ -471,43 +454,39 @@ theorem cs5Incest_cs5CanonMreach_false : ¬ cs5Incest (@cs5CanonMreach Atom) := 
   have huniv' : T = Set.univ := huniv
   exact hbotT (huniv' ▸ Set.mem_univ _)
 
-/-! ## Phase 6: Simpson's Two-Sided Canonical Relation (task 512 plan 03)
+/-! ## Simpson's Two-Sided Canonical Relation
 
 Restores the diamond clause `{◇A | A ∈ Δ} ⊆ Γ` (Simpson 1994, corpus chunk `682e04d443e7bbd7`)
 alongside the box clause `boxInv Γ ⊆ Δ` kept from `cs5OnesidedR` above. -/
 
 /-- **Simpson's two-sided `CS5` canonical relation**: `Γ R Δ` iff `boxInv Γ ⊆ Δ` (the box clause,
 Simpson's `{B | □B ∈ Γ} ⊆ Δ`, kept from `cs5OnesidedR`) AND `Δ ⊆ diaInv Γ` (the diamond clause,
-Simpson's `{◇A | A ∈ Δ} ⊆ Γ`, i.e. `∀ A, A ∈ Δ → (◇A) ∈ Γ`, restored here). **Note on the plan's
-inline formula**: `plans/03_canonical-frame-redesign.md`'s Phase 6 task list states the second
-clause as `∀ A, (◇A) ∈ Δ → (◇A) ∈ Γ`; that is a typo relative to Simpson's own quote (which
-quantifies over `A ∈ Δ`, not `◇A ∈ Δ`) reproduced verbatim in report 06. This definition uses the
-textually-correct Simpson clause, cross-checked directly against `cs5_boxInv_subset_iff`
-(`CS5.lean:589`) below. -/
+Simpson's `{◇A | A ∈ Δ} ⊆ Γ`, i.e. `∀ A, A ∈ Δ → (◇A) ∈ Γ`, restored here). This uses the
+textually-correct Simpson clause (quantifying over `A ∈ Δ`, not `◇A ∈ Δ`), cross-checked directly
+against `cs5_boxInv_subset_iff` (`CS5.lean:589`) below. -/
 def cs5TwoSidedR (Γ Δ : Set (Proposition Atom)) : Prop :=
   boxInv Γ ⊆ Δ ∧ Δ ⊆ diaInv Γ
 
-/-- **DECISIVE STRUCTURAL FACT (the Phase 6/7 crux, and the finding that settles the gate).**
-For quasi-prime `Γ`, `Δ`, `cs5TwoSidedR Γ Δ` is EXTENSIONALLY THE SAME RELATION as `Δ ∈ cs5Tail Γ`
-(`CS5.lean:632`, the discarded "old wall" two-sided box-BOTH-directions relation
-`boxInv Γ ⊆ Δ ∧ boxInv Δ ⊆ Γ`). Proof: `cs5_boxInv_subset_iff` (`CS5.lean:589`,
-`boxInv T ⊆ H ↔ T ⊆ diaInv H`, already landed, axiom-free) instantiated at `H := Γ, T := Δ` reads
-`boxInv Δ ⊆ Γ ↔ Δ ⊆ diaInv Γ` — i.e. Simpson's diamond clause `Δ ⊆ diaInv Γ` is LITERALLY
-EQUIVALENT (an `↔`, not a one-way implication) to the reverse box clause `boxInv Δ ⊆ Γ`, for ANY
-pair of quasi-prime `CS5`-theories. This holds because `CS5`'s `B` axiom (`bBox` + `bDia`, both
-`CS5ModalAxiom` constructors) makes diamond-membership and reverse-box-non-membership dual at the
-level of every individual quasi-prime theory — independent of which accessibility relation is
-under discussion, independent of `Ω`-exclusion, independent of any world-type engineering.
+/-- **Decisive structural fact.** For quasi-prime `Γ`, `Δ`, `cs5TwoSidedR Γ Δ` is EXTENSIONALLY
+THE SAME RELATION as `Δ ∈ cs5Tail Γ` (`CS5.lean:632`, the discarded "old wall" two-sided
+box-BOTH-directions relation `boxInv Γ ⊆ Δ ∧ boxInv Δ ⊆ Γ`). Proof: `cs5_boxInv_subset_iff`
+(`CS5.lean:589`, `boxInv T ⊆ H ↔ T ⊆ diaInv H`, already landed, axiom-free) instantiated at
+`H := Γ, T := Δ` reads `boxInv Δ ⊆ Γ ↔ Δ ⊆ diaInv Γ` — i.e. Simpson's diamond clause
+`Δ ⊆ diaInv Γ` is LITERALLY EQUIVALENT (an `↔`, not a one-way implication) to the reverse box
+clause `boxInv Δ ⊆ Γ`, for ANY pair of quasi-prime `CS5`-theories. This holds because `CS5`'s
+`B` axiom (`bBox` + `bDia`, both `CS5ModalAxiom` constructors) makes diamond-membership and
+reverse-box-non-membership dual at the level of every individual quasi-prime theory —
+independent of which accessibility relation is under discussion, independent of `Ω`-exclusion,
+independent of any world-type engineering.
 
-**This refutes report 06's central technical claim** that "Simpson's verification does not face
-the `boxInv`-monotonicity problem because it routes the witness through the diamond clause, not
-through `boxInv`" (report 06 §Sub-question 2, §Sub-question 4 point 1): for `CS5` specifically,
-restoring the diamond clause is NOT restoring independent information — it is restoring EXACTLY
-the `cs5Tail` relation Phase 3 replaced, in disguise. See `cs5Incest_forces_symm` and
-`cs5Incest_cs5PrimeMreach_false` below for the mechanized consequence: verifying `cs5Incest` on any
-one-sided-tail world type forces every tail member into `cs5Tail`-shape, which
-`cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized) shows cannot admit the
-box-refuting witness box-backward (Phase 9) needs. -/
+**This shows restoring the diamond clause is NOT restoring independent information** (contrary
+to the natural expectation that routing the witness through the diamond clause, rather than
+through `boxInv` directly, would sidestep the `boxInv`-monotonicity problem): for `CS5`
+specifically, it is restoring EXACTLY the `cs5Tail` relation replaced above, in disguise. See
+`cs5Incest_forces_symm` and `cs5Incest_cs5PrimeMreach_false` below for the mechanized
+consequence: verifying `cs5Incest` on any one-sided-tail world type forces every tail member
+into `cs5Tail`-shape, which `cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized)
+shows cannot admit the box-refuting witness box-backward needs. -/
 theorem cs5TwoSidedR_iff_cs5Tail {Γ Δ : Set (Proposition Atom)}
     (hΓ : QuasiPrime (@CS5ModalAxiom Atom) Γ) (hΔ : QuasiPrime (@CS5ModalAxiom Atom) Δ) :
     cs5TwoSidedR Γ Δ ↔ Δ ∈ cs5Tail Γ := by
@@ -529,12 +508,12 @@ theorem cs5TwoSidedR_symm {Γ Δ : Set (Proposition Atom)}
   (cs5TwoSidedR_iff_cs5Tail hΔ hΓ).mpr
     (cs5Tail_symm hΓ ((cs5TwoSidedR_iff_cs5Tail hΓ hΔ).mp h))
 
-/-! ## Phase 6 continued: The `Ω`-Excluding One-Sided World Type (`CS5PrimeSegment`)
+/-! ## The `Ω`-Excluding One-Sided World Type (`CS5PrimeSegment`)
 
 Clones `CS4Segment`'s `excl`/`excl_head` hereditary-invariant pattern (`CS4.lean:373-403`) onto
 `cs5OnesidedR`'s one-sided box tail, giving a world type carrying a hereditary excluded-diamond
-invariant. Built ALONGSIDE `CS5CanonSegment` (Phase 3) and `cs5TwoSidedR` above; nothing here
-edits Phase 3/5's declarations. -/
+invariant. Built ALONGSIDE `CS5CanonSegment` and `cs5TwoSidedR` above; nothing here edits
+either's declarations. -/
 
 /-- `4`-diamond contrapositive for `CS5`: `◇A ∉ H → ◇◇A ∉ H`. The hereditary closure step (CS4
 precedent `cs4_not_dia_dia`, `CS4.lean:317`, using `fourDia` here instead) that lets an
@@ -579,7 +558,7 @@ def cs5PrimeSeg {H : Set (Proposition Atom)} (hH : QuasiPrime (@CS5ModalAxiom At
 `excl := none` (e.g. `.ofHead`) do NOT exclude the exploding world `Ω` from their tail** — the
 `E = some A` exclusion clause is vacuous when `E = none`, exactly mirroring `CS4Segment` (which
 never needed to banish `Ω`, since `CS4`'s frame condition has no incestuality-style clause). This
-is the CS4-template's blind spot for `CS5`'s Phase 7 obligation, diagnosed precisely below. -/
+is the CS4-template's blind spot for `CS5`, diagnosed precisely below. -/
 structure CS5PrimeSegment (Atom : Type u) where
   /-- The underlying segment. -/
   seg : CKSegment (@CS5ModalAxiom Atom)
@@ -622,16 +601,16 @@ theorem cs5Prime_refl (P : CS5PrimeSegment Atom) : cs5PrimeMreach P P := by
   rw [P.tail_eq]
   exact ⟨P.seg.head_qprime, cs5_boxInv_subset P.seg.head_qprime, P.excl_head⟩
 
-/-! ## Phase 7: GO/NO-GO GATE — `cs5Incest` on the redesigned frame
+/-! ## `cs5Incest` on the Redesigned Frame
 
 Attempts to verify the UNCHANGED `cs5Incest` (`:234`) on the `◇`-exclusion one-sided relation
 `cs5PrimeMreach`, mirroring `cs4FC'_cs4Mreach`'s diamond-side technique
-(`CS4.lean:441`). **RESULT: GATE FAILURE**, mechanized below (`cs5Incest_cs5PrimeMreach_false`)
+(`CS4.lean:441`). **RESULT: FAILURE**, mechanized below (`cs5Incest_cs5PrimeMreach_false`)
 via TWO independent, sorry-free arguments — a general one (`cs5Incest_forces_symm`, tied to
 `cs5TwoSidedR_iff_cs5Tail` above) and a concrete one (Ω remains reachable from `.ofHead`-built
-worlds, exactly as in Phase 5). -/
+worlds, exactly as with `cs5CanonMreach` above). -/
 
-/-- **General monotonicity collapse** (generalizes Phase 5's `cs5CanonMreach`-specific argument
+/-- **General monotonicity collapse** (generalizes the `cs5CanonMreach`-specific argument above
 to ANY box-based canonical relation on ANY `CKSegment`-style world type, independent of
 `Ω`-exclusion or world-type engineering). `≤` is head-inclusion on every `CKSegment`-lifted
 `Preorder` in this file (`CKSegment.le_iff`, `Segment.lean:167`); if `r` implies the forward box
@@ -662,8 +641,7 @@ theorem cs5PrimeMreach_ofHead_to_univ {H : Set (Proposition Atom)}
   change (Set.univ : Set (Proposition Atom)) ∈ cs5PrimeTail H none
   exact ⟨quasiPrime_univ, Set.subset_univ _, by rintro A ⟨⟩⟩
 
-/-- **`cs5Incest` FAILS for `cs5PrimeMreach` (Phase 7 GATE FAILURE, mechanized).** Two independent
-routes combine here:
+/-- **`cs5Incest` FAILS for `cs5PrimeMreach` (mechanized).** Two independent routes combine here:
 1. `cs5Incest_forces_symm` shows that IF `cs5Incest cs5PrimeMreach` held, THEN
    `boxInv (head u) ⊆ head w` whenever `cs5PrimeMreach w u` — in particular at
    `w := .ofHead hT` (`T` realizing an underivable formula, hence non-exploding) and
@@ -673,18 +651,18 @@ routes combine here:
    forces `Set.univ ⊆ T`, i.e. `T = Set.univ` — contradicting `T`'s non-explosion (`⊥ ∉ T`,
    witnessed via `quasi_head_realization` at the underivable `⊥`, `cs5_consistent_incest`).
 
-This is the SAME shape of contradiction as Phase 5's `cs5Incest_cs5CanonMreach_false` (`Ω`
-universally reachable, no witness can route back to a non-exploding world) — showing the Phase 6
-redesign's `Ω`-exclusion mechanism (CS4's per-tail `excl` field) does not actually solve the
-problem it was built for: it excludes `Ω` only from tails explicitly constructed with
+This is the SAME shape of contradiction as `cs5Incest_cs5CanonMreach_false` above (`Ω`
+universally reachable, no witness can route back to a non-exploding world) — showing the
+two-sided-R redesign's `Ω`-exclusion mechanism (CS4's per-tail `excl` field) does not actually
+solve the problem it was built for: it excludes `Ω` only from tails explicitly constructed with
 `excl := some _`, never from the base `.ofHead` worlds `cs5Incest` must quantify over. Combined
 with `cs5TwoSidedR_iff_cs5Tail` above (Simpson's diamond clause is, for `CS5`, PROVABLY THE SAME
 relation as the old two-sided `cs5Tail` wall), this is not a fixable implementation gap: any
 world type whose reachability relation genuinely carries Simpson's diamond clause is forced into
 `cs5Tail`-shape, which `cs5_symmetric_tail_box_gap` (`CS5.lean:712`, already mechanized) shows
-cannot admit the box-refuting witness (omitting a specific formula) that box-backward (Phase 9)
-needs. **Report 06's verdict (A) is refuted: option (B), a genuine structural wall, is confirmed
-for the two-sided-R redesign as well.** -/
+cannot admit the box-refuting witness (omitting a specific formula) that box-backward needs.
+**This confirms a genuine structural wall for the two-sided-R redesign as well, not merely a
+fixable implementation gap.** -/
 theorem cs5Incest_cs5PrimeMreach_false : ¬ cs5Incest (@cs5PrimeMreach Atom) := by
   intro hincest
   obtain ⟨T, hT, hbotT⟩ := quasi_head_realization

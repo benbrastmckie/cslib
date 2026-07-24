@@ -1125,13 +1125,13 @@
     {
       "project_number": 425,
       "project_name": "temporal_tableau_ptl_fmp_decidability",
-      "status": "partial",
+      "status": "researched",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-07-24T10:37:48Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-07-24T13:11:50Z",
+      "next_artifact_number": 3,
       "artifacts": [
         {
           "path": "specs/425_temporal_tableau_ptl_fmp_decidability/reports/01_ptl-fmp-decidability-survey.md",
@@ -1142,6 +1142,11 @@
           "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md",
           "type": "plan",
           "summary": "6-phase sorry-free implementation plan with dependency-wave analysis, per-phase build/verify gates, and Phase B contingency (finite ZMod k fallback)."
+        },
+        {
+          "path": "specs/425_temporal_tableau_ptl_fmp_decidability/reports/02_validity-notion-fmp-grounding.md",
+          "type": "report",
+          "summary": "Definitive verdict: the temporal tableau decides Temporal.validDiscrete (not valid, not validSerial). Corrected target statements for branchSat/soundness/completeness/instDecidableValid against validDiscrete/satisfiableDiscrete; correct eventuality-defect unsatisfiability argument (run-level TrackerBranchFaithful invariant + IsSuccArchimedean pumping); source-to-implementation mapping for the bidirectional ultimately-periodic (bi-lasso) ZZ-model; plan-revision phase restructure."
         }
       ],
       "dependencies": [
@@ -1149,7 +1154,44 @@
         542
       ],
       "parent_task": 301,
-      "session_id": "sess_1784888487_837ef1_425"
+      "session_id": "sess_1784898052_286a24",
+      "memory_candidates": [
+        {
+          "content": "A temporal tableau whose TimeOrdering places each fresh time at instant t +/- 1 (immediate integer successor/predecessor) and whose untlPos rule asserts T(event) at that successor with no guard-between clause decides Temporal.validDiscrete, NOT Temporal.valid or validSerial. The untlPos branch is sound only when the open interval (t,t') is empty (discreteness). Concrete separation witness: the discreteness axiom G'bot & H'bot is validDiscrete but not valid (fails over the dense rationals), per Burgess 1982 I sec 1.5/sec 2.",
+          "keywords": [
+            "temporal tableau",
+            "validDiscrete",
+            "discreteness axiom",
+            "Until rule",
+            "successor order",
+            "Burgess 1982"
+          ],
+          "topic": "cslib-temporal-tableau"
+        },
+        {
+          "content": "For a branchSat-style satisfiability predicate that an eventuality-defect soundness lemma must refute (not branchSat), the existential domain must match the frame class the tableau searches: restrict to discrete-serial (NoMaxOrder+NoMinOrder+SuccOrder+PredOrder+IsSuccArchimedean, i.e. ZZ-like) rather than arbitrary LinearOrder+Nontrivial. Over the general domain the defect lemma is false (a dense two-witness model satisfies it); IsSuccArchimedean is what enables the finite-successor-distance 'least witness' pumping/pigeonhole contradiction.",
+          "keywords": [
+            "branchSat",
+            "IsSuccArchimedean",
+            "eventuality defect",
+            "unsatisfiability",
+            "discrete serial",
+            "frame class"
+          ],
+          "topic": "cslib-temporal-tableau"
+        },
+        {
+          "content": "A tableau eventuality-defect lemma with bare hypothesis 'findEventualityDefect b ord tracker = some t' is not provable as stated: nothing ties tracker.pending entries to actual T(phi)@label members of the branch. That link holds only by construction during a temporalStepBranch run (registerEventualities/fulfillEventualities). Thread a run-level TrackerBranchFaithful invariant proved by fuel-induction over the run, mirroring the existing temporalTableau_instantStrict skeleton.",
+          "keywords": [
+            "eventuality tracker",
+            "run-level invariant",
+            "faithfulness",
+            "temporalStepBranch",
+            "fuel induction"
+          ],
+          "topic": "cslib-temporal-tableau"
+        }
+      ]
     },
     {
       "project_number": 430,

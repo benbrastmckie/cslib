@@ -47,7 +47,7 @@ next_project_number: 551
 
 ### Temporal Logic
 
-425 [PARTIAL] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [RESEARCHED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -601,11 +601,13 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 426, Task 542
-- **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/01_ptl-fmp-decidability-survey.md]
+- **Research**:
+  - [425_temporal_tableau_ptl_fmp_decidability/reports/01_ptl-fmp-decidability-survey.md]
+  - [425_temporal_tableau_ptl_fmp_decidability/reports/02_validity-notion-fmp-grounding.md]
 - **Plan**: [425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md]
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.

@@ -1,0 +1,32 @@
+{
+  "status": "partial",
+  "summary": "Phase A (soundness half: eventualityDefect_unsat + temporalTableau_sound) blocked during pre-implementation analysis, before any .lean file was edited. Tracing the exact semantics of findEventualityDefect/isSubsetBlocked/allEventualitiesFulfilledOrDuplicated against branchSat and untl_iff/snce_iff found three compounding issues: (1) the lemma's bare hypotheses do not tie tracker entries back to actual branch members (that link only holds during a live run); (2) a single subset-blocked ancestor/descendant pair is provably insufficient to derive a contradiction from branchSat (an explicit non-contradictory witness assignment was constructed by hand); (3) a deeper mismatch -- branchSat's domain is fully general (LinearOrder/Nontrivial, no seriality/discreteness) but the untlPos rule's branch1 case is only sound under a discreteness/successor assumption, and Metalogic/Soundness.lean + Metalogic/Completeness.lean both target Temporal.validSerial, not the fully general Temporal.valid this plan's Phase F specifies; validSerial/validDense/validDiscrete are a documented incomparable hierarchy, and the tableau's ℤ/successor TimeOrdering design most plausibly corresponds to validDiscrete. This is a plan-revision-scale finding, not a same-dispatch implementation fix. 0/6 phases completed; Cslib/Logics/Temporal/Tableau/ is unchanged.",
+  "phases_completed": 0,
+  "phases_total": 6,
+  "artifacts": [
+    {
+      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md",
+      "type": "summary",
+      "summary": "Dispatch outcome, three-part technical blocker finding, plan deviations, and recommended next action."
+    },
+    {
+      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/handoffs/01_phase-a-blocker-handoff.md",
+      "type": "handoff",
+      "summary": "Continuation handoff documenting the Phase A blocker in full technical detail with file:line citations."
+    },
+    {
+      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md",
+      "type": "plan",
+      "summary": "Phase A marked [BLOCKED] with full blocker writeup; Phase B annotated with cross-reference note; plan-level Status set to [BLOCKED]."
+    }
+  ],
+  "blockers": [
+    "Phase A's eventualityDefect_unsat, as stated, is not provable from its bare hypotheses: tracker-branch faithfulness is not part of the static lemma signature, and a single subset-blocked ancestor/descendant pair is semantically insufficient to derive a contradiction from branchSat.",
+    "Deeper mismatch: branchSat's fully general LinearOrder/Nontrivial domain and this plan's Phase F target (Decidable (Temporal.valid φ)) are very likely the wrong validity notion for what the tableau's successor-based rules (untlPos, TimeOrdering) actually decide -- the rest of the Temporal metalogic layer (Metalogic/Soundness.lean, Metalogic/Completeness.lean) targets Temporal.validSerial, and the tableau's ℤ/successor design most plausibly corresponds to Temporal.validDiscrete instead.",
+    "Sibling tasks 423/424 still block final instDecidableValid task-301 registration regardless (carried over from the original plan; unaffected by this dispatch's finding)."
+  ],
+  "continuation_context": {
+    "handoff_path": "specs/425_temporal_tableau_ptl_fmp_decidability/handoffs/01_phase-a-blocker-handoff.md"
+  },
+  "next_action_hint": "Run a dedicated research pass before further implementation: /research 425 --lit --hard, grounding against the cited [Reynolds1994] source and a close read of Metalogic/Completeness.lean's and Metalogic/Soundness.lean's exact frame-class hypotheses, to settle which validity notion (valid/validSerial/validDiscrete) the tableau decides, whether branchSat needs a discreteness domain correction, and what run-level tracker/branch-faithfulness invariant eventualityDefect_unsat needs. Then /revise 425 before the next /implement 425."
+}

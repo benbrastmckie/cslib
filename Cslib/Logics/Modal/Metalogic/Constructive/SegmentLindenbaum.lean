@@ -17,14 +17,14 @@ This module provides the saturation/realization layer for the `CK` canonical seg
 quasi-prime extension (Lindenbaum at the trivially-true consistency predicate) and the three
 *refuting-theory* lemmas consumed by the backward truth-lemma cases (`CKTruthLemma.lean`).
 
-**For `CK`/`CT`/`CS4`, the plan's feared "two-level tail-assembly fixpoint" does not arise**:
+**For `CK`/`CT`/`CS4`, the feared "two-level tail-assembly fixpoint" does not arise**:
 following ianshil/CK `general_seg_completeness.v`, tails are set comprehensions
 (`CKSegment.ofHead`'s maximal tail, and the diamond-refuting restricted tail built in
 `CKTruthLemma.lean`), so the only constructions needed here are *single-theory* prime extensions
 plus the boxed-context transfer lemma (`box_mem_of_boxed_context`, the `K`-rule analogue for
 deductively closed sets).
 
-**This is false for `CS5`** (task 509): the symmetric tail's truth-lemma box-backward case can
+**This is false for `CS5`**: the symmetric tail's truth-lemma box-backward case can
 require enlarging a head `H` to `H' ⊇ H` and its tail `T` *simultaneously* — enlarging `H'`
 enlarges `boxInv H'` in turn, so `H'` and `T` cannot be built as two sequential single-theory
 extensions (`cs5_symmetric_tail_box_gap`,
@@ -279,9 +279,9 @@ theorem segment_realization
   obtain ⟨T, hT, hφT⟩ := quasi_head_realization h_implyK h_implyS h_orE h_nd
   exact ⟨CKSegment.ofHead hT, hφT⟩
 
-/-! ## List Splitting and Finite Conjunction (task 509)
+/-! ## List Splitting and Finite Conjunction
 
-Bookkeeping helpers for the `CS5` canonical-relation obligations (`CS5.lean` Phases 6-7), which
+Bookkeeping helpers for the `CS5` canonical-relation obligations (`CS5.lean`), which
 instantiate `prime_set_exclusion`'s base set `S` at a **union of two sets**
 (`boxInv u'.head ∪ w.head`, `w.head ∪ boxInv t.head`). `prime_set_exclusion`'s `hCut` parameter
 already takes the singleton form `S ∪ {a}` (`modal_deriv_imp_of_union`, reused unchanged above),

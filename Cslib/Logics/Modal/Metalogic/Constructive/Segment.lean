@@ -29,7 +29,7 @@ does not prove `◇⊥ → ⊥`, so its canonical model *must* contain a fallibl
 - `QuasiPrime`: deductively closed + disjunction property (no consistency requirement);
   equivalently `Metalogic.PrimeAdmissible` at the trivially-true consistency predicate.
 - `boxInv`/`diaInv`: the box/diamond inverse images of a theory.
-- `CKSegment`: the segment world type, parametric over `Axioms` (so task 501's CT/CS4/CS5
+- `CKSegment`: the segment world type, parametric over `Axioms` (so the `CT`/`CS4`/`CS5`
   extensions can reuse it).
 - `cexpl`: the exploding segment (`head = tail-member = Set.univ`).
 - `CKSegment.ofHead`: every quasi-prime theory is the head of a segment (with the *maximal*

@@ -21,9 +21,8 @@ because `◇` is primitive (not `□`-definable) in this framework's `Propositio
 restricted to frames whose modal relation `r` is reflexive (`ctFC`, `CKExtension.lean`). The
 canonical model is built over `CTSegment`, a restricted subtype of `CKSegment CTModalAxiom`
 carrying reflexivity of the canonical accessibility (`cmreach`) as an invariant — this port is
-necessitated by the primary obstruction task 501's research report identifies: `ctFC` does
-**not** hold globally on raw `CKSegment CTModalAxiom` (a consistent-head segment with tail
-`{Set.univ}` is well-formed but not `cmreach`-reflexive).
+necessitated because `ctFC` does **not** hold globally on raw `CKSegment CTModalAxiom` (a
+consistent-head segment with tail `{Set.univ}` is well-formed but not `cmreach`-reflexive).
 
 ## Main Definitions
 
@@ -200,10 +199,9 @@ theorem ct_soundness_derivable {φ : Proposition Atom}
 /-! ## The `CT` World Subtype -/
 
 /-- **`CT` canonical worlds**: segments whose head is a modal successor of itself — the
-`T`-invariant `seg.head ∈ seg.tail`, i.e. `cmreach seg seg`. Restricting to this subtype is the
-primary implementation challenge of task 501 (report D3.4): `ctFC` does **not** hold on raw
-`CKSegment CTModalAxiom` (a segment with a consistent head and tail `{Set.univ}` is well-formed
-but not `cmreach`-reflexive). -/
+`T`-invariant `seg.head ∈ seg.tail`, i.e. `cmreach seg seg`. Restricting to this subtype is
+necessary because `ctFC` does **not** hold on raw `CKSegment CTModalAxiom` (a segment with a
+consistent head and tail `{Set.univ}` is well-formed but not `cmreach`-reflexive). -/
 structure CTSegment (Atom : Type u) where
   /-- The underlying `CT` segment. -/
   seg : CKSegment (@CTModalAxiom Atom)

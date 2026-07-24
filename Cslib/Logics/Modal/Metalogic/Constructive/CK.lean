@@ -273,7 +273,7 @@ theorem ck_soundness_completeness {φ : Proposition Atom} :
 
 /-! ## Secondary: Soundness for the Birelational `∃`-Diamond Semantics
 
-`CK` is also *sound* for the birelational `BForces` semantics of task 490, provided the
+`CK` is also *sound* for the birelational `BForces` semantics, provided the
 explosion conditions are added to `MValid` — the notion `EValid` below. It is **not
 complete** for `EValid`: `Cd = ◇(φ∨ψ) → ◇φ∨◇ψ` is `EValid` (indeed `MValid`) via the plain
 `∃` diamond clause but not `CK`-derivable. These results document the precise relationship

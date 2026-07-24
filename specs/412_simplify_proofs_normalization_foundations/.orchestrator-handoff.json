@@ -1,0 +1,12 @@
+{
+  "status": "implemented",
+  "phases_completed": 2,
+  "phases_total": 2,
+  "artifacts": [
+    {
+      "path": "specs/412_simplify_proofs_normalization_foundations/summaries/01_narrow-normalization-collapses-summary.md",
+      "type": "summary"
+    }
+  ],
+  "session_id": "sess_1784866674_c9da04_412"
+}

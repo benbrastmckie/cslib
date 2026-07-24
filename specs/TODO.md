@@ -11,10 +11,10 @@ next_project_number: 551
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,393,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,542,544,545,546 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,451,456,511 | 36,37,181,317,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
-| 4 | 300,412 | 41,506 | modal logic, code hygiene |
+| 1 | 36,37,226,317,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,545,546 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,393,409,430,451,456,511,544 | 36,37,317,407,425,449,535,545,546 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,181,413,506,542,548 | 39,40,375,393,511,544 | foundations, modal logic, bimodal logic, ... |
+| 4 | 300,450 | 181,449,506 | modal logic, bimodal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -33,7 +33,7 @@ next_project_number: 551
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
-545 [NOT STARTED] — ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consoli
+545 [IMPLEMENTING] — ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consoli
 
 ### Modal Logic
 
@@ -45,7 +45,7 @@ next_project_number: 551
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-546 [NOT STARTED] — REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/
+546 [IMPLEMENTING] — REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/
 
 ### Temporal Logic
 
@@ -60,21 +60,21 @@ next_project_number: 551
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
-181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
 449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
+  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
   └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
+181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
+  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
 
 ### Code Hygiene
 
-393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
-544 [NOT STARTED] — NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L1
-412 [NOT STARTED] — [Split from task 278.] Simplify proofs in Foundations/Logic/ that
+393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
+542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
+544 [NOT STARTED] — NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L1
+  └─ 542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring  (see above)
 
 ### Pr & Upstreaming
 
@@ -147,20 +147,24 @@ next_project_number: 551
 ---
 
 ### 546. Factor intersystem lattice onto schemaunion
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Research**: [546_factor_intersystem_lattice_onto_schemaunion/reports/01_intersystem-lattice-onto-schemaunion.md]
+- **Plan**: [546_factor_intersystem_lattice_onto_schemaunion/plans/01_intersystem-lattice-consolidation.md]
 
 **Description**: REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/InterSystem/ carries 8 near-parallel files (~890 lines): ConstructiveLatticeSubsumption.lean (108), IntuitionisticLatticeSubsumption.lean (110), MinimalLatticeSubsumption.lean (104), PropositionalStrengthSubsumption.lean (230), plus four matching *Monotonicity.lean (83-88 each) — all proving the same 'direct-edge axiom subsumption via constructor case-split' shape (their own docstrings say so: ConstructiveLatticeSubsumption.lean:16-19, MinimalLatticeSubsumption.lean:16-19). The classical track already has the generic lemma this wants — SchemaUnion.subsumption (SchemaUnion.lean:155) — and SchemaUnion.lean:46-48 explicitly flags extending the SchemaUnion mechanism to the non-classical axiom families as intended but unrealized. Work: either (a) migrate the intuitionistic/minimal/constructive axiom families onto SchemaUnion (preferred — realizes the documented intent, and shrinks the parallel Lindenbaum/prime-theory scaffolding duplication between the Intuitionistic and Minimal tracks), or (b) factor a track-generic subsumption/monotonicity combinator parameterized over the axiom-tag type, collapsing the 8 files to instantiations. Zero sorry; all 8 files are currently sorry-free.
 
 ---
 
 ### 545. Collapse prop algebra completeness stack conservativity sprawl
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
+- **Research**: [545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/reports/01_algebra-consolidation-research.md]
+- **Plan**: [545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md]
 
 **Description**: ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consolidations in Cslib/Logics/Propositional/Semantics/Algebra/: (1) COMPLETENESS STACK: a three-layer unification stack (FragmentGeneric.lean -> BrouwerianCompletenessGeneric.lean -> CanAlgComplete.lean) was added on top of the retained piecewise completeness files (HilbertCompleteness.lean, MplConservativeChain.lean, BrouwerianCompleteness.lean); CanAlgComplete's own docstring says it bundles results 'already proved piecewise' and 'only the unifying abstraction was missing', yet the piecewise public statements were never retired — four files express one fragment-completeness fact. Pick CanAlgComplete as the terminal generic interface; demote the subsumed piecewise completeness theorems to private corollaries inside it or delete the duplicated public statements. (2) FRAGMENT-CONSERVATIVITY SPRAWL: eight sibling files each carry one fragment-conservativity result (ImpConservative.lean, ConjImpConservative.lean, ConjImpBotConservative.lean, OrImpConservative.lean, Conservative.lean, ConservativeChain.lean ~19KB, MplConservativeChain.lean ~15KB, HilbertConservativeGlivenko.lean) in a near-linear import chain with no shared generic core — consolidate into a single FragmentConservativity.lean parameterized by the fragment predicate. SCOPE GUARD: task 393 owns CROSS-FAMILY conservativity/Lindenbaum consolidation; this task is strictly the intra-Propositional Algebra fragment layer — confirm the boundary against 393's plan before starting. Zero sorry; all inputs are currently sorry-free and must remain so.
 
@@ -170,7 +174,7 @@ next_project_number: 551
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: None
+- **Dependencies**: Task 545, Task 546
 
 **Description**: NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L11). Mechanical rename sweep across the four logic families: (1) VALIDITY VOCABULARY: Propositional uses Tautology (Semantics/Bool.lean:90); Modal has no top-level validity predicate (only pointed Modal[m,w |= phi] at Modal/Basic.lean:277); Temporal uses capitalized Valid/ValidSerial/ValidDense/ValidDiscrete (Semantics/Validity.lean:74-94); Bimodal uses lowercase valid/validDense/validDiscrete (Semantics/Validity.lean:49,117,129). Align on ONE convention (lowercase valid* suggested), starting with the Temporal-Bimodal pair which share identical FrameClass vocabulary and differ only in capitalization. (2) Add the missing turnstile notation to Temporal: Bimodal defines |= phi and Gamma |= phi (Semantics/Validity.lean:60,81); Temporal has none — add the same scoped notation. (3) COMPLETENESS SUFFIX: Algebra layer uses _complete (44 uses: alg_complete, brouwerian_complete, ...) vs Metalogic layer _completeness (prop_completeness, int_completeness, min_completeness, ...) — standardize on _completeness (Mathlib longer-form convention). (4) NIKTheorem (Modal/Metalogic/Constructive/Labelled/Deduction.lean:316) breaks the otherwise-uniform Derivable naming (Propositional/ProofSystem/Derivation.lean:128, Modal/Metalogic/DerivationTree.lean:152, Bimodal/ProofSystem/Derivable.lean:38, Temporal/ProofSystem/Derivable.lean:35) — rename to NIKDerivable or NIK.Derivable. (5) S5 keeps legacy abbrev ModalAxiom := SchemaUnion s5Tags in Metalogic/DerivationTree.lean:69 while all 14 siblings define <Sys>Axiom in ProofSystem/Instances/<Sys>.lean — rename S5Axiom and relocate to Instances/S5.lean (keep a deprecated alias if churn is wide). (6) Conservativity names split between <x>_conservative_extension (Temporal:61, Modal:54, Bimodal PropositionalConservativity:97) and bimodal_conservative_over_<y> (ModalConservativity:246, TemporalConservativity:289) — standardize one scheme across all five. DISTINCT from task 497 (imp vs impl constructor naming) — do not touch that seam. Sequence AFTER tasks 539/540 land to avoid rebasing renames across those refactors.
 
@@ -193,7 +197,7 @@ next_project_number: 551
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: None
+- **Dependencies**: Task 544, Task 546
 
 **Description**: DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring references to 'Task N' / 'Phase M' / 'now-deleted ...' / rollout narratives across the Modal tree — concentrated in Metalogic/GenericMCSBridge.lean, MCS.lean, SchemaSoundness.lean, SchemaTags.lean:18-30, Constructive/Labelled/PrimeLemma.lean:49-51,844,1684-1696, Constructive/Labelled/Soundness.lean:238-355, Intuitionistic/TruthLemma.lean:29,152,305 — documenting how the code was built rather than what it proves, and violating .claude/rules/no-task-references-in-deliverables.md. Sweep all four logic trees (Modal, Propositional, Temporal, Bimodal) plus Foundations/Logic: keep mathematical contracts and literature references, delete task/phase/implementation-history provenance. Also fix the specific stale/dead items: (a) Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean:51 claims 'one remaining sorry' but the file is now sorry-free; (b) Propositional/Semantics/Algebra/Bridge.lean:16 claims to be 'the single canonical home of the ONE evaluation story' while imported by nothing (soften or make true — coordinate with task 543 which decides that file's fate); (c) delete the ~40-line commented-out proof carcass with commented sorry markers in Temporal/Tableau/Completeness.lean:962-1005 (live gap owned by tasks 425/301 — leave a one-line pointer); (d) Propositional/Semantics/Bool.lean:40 forward-references 'Matthew Doty's forthcoming work' — verify covered by task 226 and remove the rot-prone reference. Coordinate with task 438 (comment-cleanup PR already committed) to avoid re-editing its files.
 
@@ -621,10 +625,13 @@ After implementation:
 ---
 
 ### 412. Simplify proofs normalization foundations
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 41
+- **Research**: [412_simplify_proofs_normalization_foundations/reports/01_simplify-normalization-proof-sites.md]
+- **Plan**: [412_simplify_proofs_normalization_foundations/plans/01_narrow-normalization-collapses.md]
+- **Summary**: [412_simplify_proofs_normalization_foundations/summaries/01_narrow-normalization-collapses-summary.md]
 
 **Description**: [Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.
 
@@ -696,7 +703,7 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: None
+- **Dependencies**: Task 545, Task 546
 
 **Description**: Consolidate duplicated Lindenbaum / MCS / conservativity constructions across the logic families. Duplication confirmed present: multiple parallel Lindenbaum algebra variants (HilbertLindenbaumAlgebra, ImpLindenbaumAlgebra, RelLindenbaumAlgebra, LindenbaumAlg) and MCS-extension variants (lindenbaumMCS/lindenbaumMCSSet/bimodal_lindenbaum); GenericMCSBridge.lean duplicated x4 (Propositional/Modal/Bimodal.Core/Temporal Metalogic dirs) as thin per-family re-instantiations of one Foundations pattern; LiftViaMorphism.lean x3 (Modal InterSystem, Propositional Semantics/Algebra, Bimodal ConservativeExtension). Consolidate onto the shared Foundations generic-MCS and morphism-lift machinery, retiring the per-family copies where they add no value. (Dependency on the archived-completed docstring task dropped.)
 
@@ -853,7 +860,7 @@ Note: countermodel_dense (ChronicleToCountermodelBasic.lean:825) and completenes
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
-- **Dependencies**: Task 180
+- **Dependencies**: Task 180, Task 393
 - **Research**: [181_bimodal_primitive_dia_always_historically/reports/01_bimodal-primitive-expansion-research.md]
 
 **Description**: Propagate primitive diamond, allFuture, and allPast constructors to the Bimodal layer, giving {atom, bot, imp, and, or, box, dia, untl, snce, allFuture, allPast} (11 primitives). This is the union of Modal (task 179) and Temporal (task 180) primitive sets. Scope: (1) Syntax/Formula.lean: add .dia/.allFuture/.allPast constructors, update all match cases. (2) Semantics/Truth.lean: structural truthAt clauses. (3) ProofSystem: axiom constructors for diamond duality and G/H axioms. (4) Embedding: extend ModalEmbedding (.dia), TemporalEmbedding (.allFuture/.allPast). (5) Metalogic: propagate through ~50 files (Core, Soundness, Completeness, BXCanonical, ConservativeExtension, Separation, Decidability, Algebraic). Follow task 177 playbook. (6) Classical equivalences become theorems. Verify full CI. Estimated ~50 files, ~2000 lines, similar scope to task 177.

@@ -1,7 +1,7 @@
 # Implementation Plan: Simplify Normalization Proof Sites (Narrowed Scope)
 
 - **Task**: 412 - simplify_proofs_normalization_foundations
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 1 hour
 - **Dependencies**: 41 (`abstract_completeness_infrastructure`, not started) — deferred sites excluded from this plan so no hard block remains
 - **Research Inputs**: reports/01_simplify-normalization-proof-sites.md
@@ -119,16 +119,21 @@ Phases within the same wave can execute in parallel.
   - `lake build Cslib.Foundations.Logic.Metalogic.ListDeduction` passes with no warnings.
   - `lean_verify` (or grep) confirms no `sorry` introduced in either file.
 
-### Phase 2: Full CSLib CI verification gate [NOT STARTED]
+### Phase 2: Full CSLib CI verification gate [COMPLETED]
 
 - **Goal:** Confirm the two edits pass the complete CSLib CI pipeline.
 - **Tasks:**
-  - [ ] `lake build` (full project) — passes.
-  - [ ] `lake test` — passes.
-  - [ ] `lake exe checkInitImports` — passes.
-  - [ ] `lake exe lint-style` — passes.
-  - [ ] `lake shake` — passes (no import changes expected; no new imports were added).
-  - [ ] Confirm the working tree is `sorry`-free.
+  - [x] `lake build` (full project) — passes (3255/3255 jobs).
+  - [x] `lake test` — passes (9247/9247 jobs).
+  - [x] `lake exe checkInitImports` — passes (no output, exit 0).
+  - [x] `lake exe lint-style` — passes (no output, exit 0).
+  - [x] `lake lint` — "Linting passed for Cslib."
+  - [x] `lake shake` — no findings for either modified file (pre-existing
+    findings/warnings/sorries in unrelated `Tableau/*` files only; matches the
+    established precedent of ignoring out-of-scope shake/build noise, see
+    `specs/550_remove_bimodal_temporal_linter_suppressions/summaries/01_drop-linter-suppressions-summary.md`).
+  - [x] Confirm the working tree is `sorry`-free in the two modified files (repo-wide
+    pre-existing sorry count of 144 is unrelated, entirely outside `Foundations/Logic/`).
 - **Timing:** ~20 minutes (assumes Mathlib cache present; run `lake exe cache get` first if not)
 - **Depends on:** 1
 - **Verification:**
@@ -138,13 +143,13 @@ Phases within the same wave can execute in parallel.
 
 ## Testing & Validation
 
-- [ ] `lake build` passes (full project).
-- [ ] `lake test` passes.
-- [ ] `lake exe checkInitImports` passes.
-- [ ] `lake exe lint-style` passes.
-- [ ] `lake shake` passes.
-- [ ] No `sorry`, no new axioms, no new declarations introduced.
-- [ ] Only `BigConj.lean` and `ListDeduction.lean` are modified.
+- [x] `lake build` passes (full project).
+- [x] `lake test` passes.
+- [x] `lake exe checkInitImports` passes.
+- [x] `lake exe lint-style` passes.
+- [x] `lake shake` passes (no findings for either modified file).
+- [x] No `sorry`, no new axioms, no new declarations introduced.
+- [x] Only `BigConj.lean` and `ListDeduction.lean` are modified.
 
 ## Artifacts & Outputs
 

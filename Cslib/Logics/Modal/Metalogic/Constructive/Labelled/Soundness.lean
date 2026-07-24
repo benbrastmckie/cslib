@@ -1943,6 +1943,48 @@ theorem nikTrFuel_mono {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledForm
         exact ih (Classical.choose hq) (cs5_deriv_imp_congr_right _ (cs5_deriv_box_mono h))
       · simpa [nikTrFuel, dif_neg hq] using h
 
+/-- **`bigAndL` congruence over a pointwise-implied `List.map`**: if `⊢ (f a) ⊃ (g a)` for every
+`a ∈ L`, then `⊢ (bigAndL (L.map f)) ⊃ (bigAndL (L.map g))`. -/
+theorem bigAndL_imp_of_pointwise {Atom : Type u} {α : Type v} {L : List α}
+    {f g : α → Proposition Atom}
+    (h : ∀ a ∈ L, Derivable CS5ModalAxiom ((f a).imp (g a))) :
+    Derivable CS5ModalAxiom ((bigAndL (L.map f)).imp (bigAndL (L.map g))) := by
+  induction L with
+  | nil => exact cs5_deriv_imp_of_derivable (bigAndL []) (cs5_deriv_imp_self Proposition.bot)
+  | cons a L' ih =>
+    have hfa : Derivable CS5ModalAxiom (((f a).and (bigAndL (L'.map f))).imp (f a)) :=
+      ⟨.ax [] _ (.andE1 (f a) (bigAndL (L'.map f)))⟩
+    have hga : Derivable CS5ModalAxiom (((f a).and (bigAndL (L'.map f))).imp (g a)) :=
+      cs5_deriv_imp_trans hfa (h a (List.mem_cons_self ..))
+    have hrest : Derivable CS5ModalAxiom
+        (((f a).and (bigAndL (L'.map f))).imp (bigAndL (L'.map f))) :=
+      ⟨.ax [] _ (.andE2 (f a) (bigAndL (L'.map f)))⟩
+    have hrest' : Derivable CS5ModalAxiom
+        (((f a).and (bigAndL (L'.map f))).imp (bigAndL (L'.map g))) :=
+      cs5_deriv_imp_trans hrest (ih (fun b hb => h b (List.mem_cons_of_mem _ hb)))
+    have : bigAndL (f a :: L'.map f) = (f a).and (bigAndL (L'.map f)) := rfl
+    have hgoal : bigAndL (g a :: L'.map g) = (g a).and (bigAndL (L'.map g)) := rfl
+    rw [List.map_cons, List.map_cons, this, hgoal]
+    exact cs5_deriv_imp_and hga hrest'
+
+/-- **`sigAtFuel` context-monotonicity**: if every `Γ`-fact at every label is also a `Δ`-fact
+(`Δ ⊇ Γ` pointwise), then `⊢ (sigAtFuel … Δ …) ⊃ (sigAtFuel … Γ …)`, for any fuel/label -- the
+"more information implies less information" direction, needing no rank or reachability argument
+at all (unlike `sigAtFuel_congr_above_rank`, this holds at every label uniformly, including
+siblings and unrelated branches, since it only ever needs `bigAndL_mono` at each level). -/
+theorem sigAtFuel_mono_context {Atom : Type u} {G : Graph Atom}
+    {Γ Δ : List (LabelledFormula Atom)}
+    (hΓΔ : ∀ z ψ, ψ ∈ factsAt Γ z → ψ ∈ factsAt Δ z) (hfin : G.X.Finite) :
+    ∀ (n : ℕ) (z : Label Atom),
+      Derivable CS5ModalAxiom ((sigAtFuel G Δ hfin n z).imp (sigAtFuel G Γ hfin n z))
+  | 0, z => by simpa [sigAtFuel] using bigAndL_mono (hΓΔ z)
+  | (n + 1), z => by
+      simp only [sigAtFuel]
+      exact cs5_deriv_imp_and (cs5_deriv_imp_trans ⟨.ax [] _ (.andE1 _ _)⟩ (bigAndL_mono (hΓΔ z)))
+        (cs5_deriv_imp_trans ⟨.ax [] _ (.andE2 _ _)⟩
+          (bigAndL_imp_of_pointwise (fun c _ =>
+            cs5_deriv_box_mono (sigAtFuel_mono_context hΓΔ hfin n c))))
+
 end Cslib.Logic.Modal.Labelled
 
 end

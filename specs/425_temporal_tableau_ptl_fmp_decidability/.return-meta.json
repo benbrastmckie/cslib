@@ -1,34 +1,18 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-24T15:12:16Z",
-  "requires_user_review": true,
-  "review_reason": "Phase 3 (eventualityDefect_unsat) blocked: the report-02 pigeonhole sketch does not appear to close as a local fact about branchSat. Needs research/planning input before implementation can continue on Phase 3 and (transitively) Phase 8. Phases 4-7 remain open and independently implementable.",
-  "artifacts": [
-    {"type": "summary", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/03_ptl-fmp-validity-corrected-summary.md"},
-    {"type": "plan", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md"}
-  ],
-  "partial_progress": {
-    "stage": "phase_4_spiked",
-    "details": "Phases 1-2 complete and committed (satisfiableDiscrete/branchSat discrete restriction/references; TrackerBranchFaithful run-level invariant). Phase 3 blocked with documented finding. Phase 4 spiked (periodicReduce/extractModelℤPeriodic + 3 property lemmas via Mathlib toIcoMod, confirmed tractable) and committed as PARTIAL. Phases 5-8 not started.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 2,
-    "last_completed_phase": "Phase 2: Run-level faithfulness invariant"
-  },
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": false,
-    "notes": "All touched modules (Semantics.Validity, Tableau.Soundness, Tableau.Saturation, Tableau.Completeness) build green individually and together with known downstream consumers (Metalogic.DenseCompleteness, LTL.EmbeddingSemantics). lint-style clean on touched files. Project-wide `lake lint`/bare `lake build` currently fail on Cslib/Logics/Modal/Tableau/LoopChecking.lean -- unrelated in-progress work from a concurrent session, not touched by this task, so full-project CI (steps 3, 6, 7 of the CSLib pipeline) could not be exercised project-wide this dispatch."
-  },
+  "status": "planned",
+  "artifacts": [{
+    "type": "plan",
+    "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/04_completeness-front-rescope.md",
+    "summary": "Plan v4: restructures the unblocked completeness front (bi-lasso FMP, Phases 4-7) first; re-scopes the blocked soundness half + decidability instance (Phases 3, 8) out to a separate research task with an exact open goal (Option B)."
+  }],
+  "next_steps": "Run /implement 425 to execute Phases 4-7 (bi-lasso completeness). Separately, spawn a soundness research task carrying the 'Deferred Deliverable' open goal before the decidability instance can be planned.",
   "metadata": {
     "session_id": "sess_1784905751_756cda_425",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"],
-    "compliance_check": "passed"
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "reviser-agent"],
+    "phase_count": 4,
+    "estimated_hours": 15,
+    "reports_integrated": ["02_validity-notion-fmp-grounding.md"],
+    "rescope_decision": "Option B — soundness (Phase 3) + decidability instance (Phase 8) deferred to a new research task; this plan's terminus is temporalTableau_complete (Phase 7)."
   }
 }

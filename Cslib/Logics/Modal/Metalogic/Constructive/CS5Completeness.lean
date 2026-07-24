@@ -268,4 +268,59 @@ theorem cs5Pair_hCut {U : Set (Proposition (Atom ⊕ Atom))}
       · exact Set.mem_union_left _ hu)
     hd
 
+/-! ## The Two-Sided Seed `cs5PairSeed`
+
+The base set every downstream seed-exclusion statement (the cross-inertness lemma, the two
+individual exclusions, and the named open obligation) refers to -- defined once here so all
+later phases share the identical definition. Two components, each with its own provenance:
+
+- **`cs5PairTauL '' H`**: the left-tagged image of the head `H` itself, i.e. the box-backward
+  pair's head component under construction.
+- **`cs5PairTauR '' (modalDeductiveClosure CS5ModalAxiom (boxInv H))`**: the right-tagged image
+  of the `CS5`-deductive closure of `H`'s box-inverse `boxInv H` (`Segment.lean:103`,
+  `{B | □B ∈ H}`) -- the "tail-side" content the symmetric canonical model's box-backward case
+  needs (`cs5_symmetric_tail_box_gap`, `CS5.lean:686`), pre-saturated by `modalDeductiveClosure`
+  (`Intuitionistic/PrimeTheory.lean:78`) so that later exclusion arguments see a deductively
+  closed tail rather than the bare box-inverse set. -/
+def cs5PairSeed (H : Set (Proposition Atom)) : Set (Proposition (Atom ⊕ Atom)) :=
+  cs5PairTauL '' H ∪ cs5PairTauR '' (modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H))
+
+/-- `cs5PairTauL` is injective: the left tagging map never collapses two distinct left-copy
+formulas together. A corollary of `Proposition.map_injective` (`Sum.inl` is injective); used by
+`cs5PairSeed_mem_iff` to rule out tag collision within the left branch -- the witnessing `φ`
+recovered from a left-tagged element of the seed is uniquely determined. -/
+theorem cs5PairTauL_injective : Function.Injective (@cs5PairTauL Atom) :=
+  Proposition.map_injective Sum.inl_injective
+
+/-- `cs5PairTauR` is injective: the right tagging map never collapses two distinct right-copy
+formulas together. Symmetric to `cs5PairTauL_injective`, ruling out tag collision within the
+right branch. -/
+theorem cs5PairTauR_injective : Function.Injective (@cs5PairTauR Atom) :=
+  Proposition.map_injective Sum.inr_injective
+
+/-- **Left injection into the seed.** Every `φ ∈ H` tags into `cs5PairSeed H` via `cs5PairTauL`. -/
+theorem cs5PairSeed_mem_left {H : Set (Proposition Atom)} {φ : Proposition Atom} (hφ : φ ∈ H) :
+    cs5PairTauL φ ∈ cs5PairSeed H :=
+  Set.mem_union_left _ (Set.mem_image_of_mem cs5PairTauL hφ)
+
+/-- **Right injection into the seed.** Every `φ` in the `CS5`-deductive closure of `boxInv H`
+tags into `cs5PairSeed H` via `cs5PairTauR`. -/
+theorem cs5PairSeed_mem_right {H : Set (Proposition Atom)} {φ : Proposition Atom}
+    (hφ : φ ∈ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H)) :
+    cs5PairTauR φ ∈ cs5PairSeed H :=
+  Set.mem_union_right _ (Set.mem_image_of_mem cs5PairTauR hφ)
+
+/-- **Membership-inversion for the seed.** Every element of `cs5PairSeed H` arises from exactly
+one of the two tagging maps: either it is `cs5PairTauL φ` for some `φ ∈ H`, or it is
+`cs5PairTauR ψ` for some `ψ` in the `CS5`-deductive closure of `boxInv H`
+(`cs5PairTauL_injective`/`cs5PairTauR_injective` rule out tag collision within each branch, so
+the witnessing `φ`/`ψ` is uniquely determined whichever branch an element falls in). This is the
+case-split the cross-inertness lemma and the two individual exclusions (later phases) induct
+against. -/
+theorem cs5PairSeed_mem_iff {H : Set (Proposition Atom)} {x : Proposition (Atom ⊕ Atom)} :
+    x ∈ cs5PairSeed H ↔
+      (∃ φ ∈ H, cs5PairTauL φ = x) ∨
+        (∃ ψ ∈ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H), cs5PairTauR ψ = x) := by
+  simp only [cs5PairSeed, Set.mem_union, Set.mem_image]
+
 end Cslib.Logic.Modal

@@ -277,23 +277,26 @@ still executes and the plan still delivers its headline artifact.
     the sole *substantive* remaining hole, confirming the bundle is complete.
   - Zero sorry/admit in the file.
 
-### Phase 3: The Two-Sided Seed `cs5PairSeed` [NOT STARTED]
+### Phase 3: The Two-Sided Seed `cs5PairSeed` [COMPLETED]
 
 - **Goal:** Define, once and canonically, the two-sided seed that every downstream exclusion
   statement refers to, plus its basic membership lemmas. Small phase by design: Phases 4-6 and
   Phase 7 all depend on this definition being fixed, and Phase 7 must be able to proceed even if
   Phase 4 blocks.
 - **Tasks:**
-  - [ ] Define
+  - [x] Define
     `cs5PairSeed (H : Set (Proposition Atom)) : Set (Proposition (Atom ⊕ Atom)) :=
     cs5PairTauL '' H ∪ cs5PairTauR '' (modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H))`,
     using `boxInv` from `Segment.lean:103` and `modalDeductiveClosure` from `PrimeTheory.lean:78`.
-  - [ ] Prove the two injection lemmas: `φ ∈ H → cs5PairTauL φ ∈ cs5PairSeed H` and
+  - [x] Prove the two injection lemmas: `φ ∈ H → cs5PairTauL φ ∈ cs5PairSeed H` and
     `φ ∈ modalDeductiveClosure CS5ModalAxiom (boxInv H) → cs5PairTauR φ ∈ cs5PairSeed H`.
-  - [ ] Prove the membership-inversion lemma: every element of `cs5PairSeed H` is either
+  - [x] Prove the membership-inversion lemma: every element of `cs5PairSeed H` is either
     `τ_L φ` with `φ ∈ H` or `τ_R ψ` with `ψ ∈ cl_{CS5}(boxInv H)` — the case-split Phases 4-6
     induct against. Use `Proposition.map_injective` (`Basic.lean:199`) to rule out tag collision.
-  - [ ] Docstring the seed's role and its two components' provenance.
+    *(implemented as `cs5PairTauL_injective`/`cs5PairTauR_injective` corollaries of
+    `Proposition.map_injective`, cited in `cs5PairSeed_mem_iff`'s docstring; the inversion
+    lemma itself is proved directly by `simp only [cs5PairSeed, Set.mem_union, Set.mem_image]`.)*
+  - [x] Docstring the seed's role and its two components' provenance.
 - **Timing:** 1.5 hours
 - **Depends on:** 1
 - **Files to modify:**

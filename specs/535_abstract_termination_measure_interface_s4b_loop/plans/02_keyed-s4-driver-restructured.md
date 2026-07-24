@@ -326,7 +326,7 @@ only.
 - **Verification:** `lean_goal` no remaining goals; `lean_verify instDecidableS5Valid`/`modalTableauB`
   regression check passes; `lean_verify` axiom-clean.
 
-### Phase 9 (handoff 4-i): S4 blocked-mint-redirect soundness lemma [NOT STARTED]
+### Phase 9 (handoff 4-i): S4 blocked-mint-redirect soundness lemma [BLOCKED]
 
 - **Goal:** Prove the genuinely-new semantic content: redirecting a blocked mint to an existing
   `wBlock` (instead of minting a fresh world) preserves `branchSatisfiableIn s4FC`. No such lemma
@@ -345,6 +345,61 @@ only.
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` or
   `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (additive; whichever hosts the `s4FC` context).
 - **Verification:** `lean_goal` no remaining goals; `lean_verify` axiom-clean.
+
+**BLOCKED (structural, source-grounded, pre-proof-attempt)**: The redirect emitted by
+`modalApplyOneS4Keyed` at the two minting shapes (`LoopChecking.lean:710-722`) is
+`(.linear [], acc.addEdge sf.label wBlock)` — a bare accessibility edge `lbl → wBlock` with NO
+new branch formula. To preserve `branchSatisfiableIn s4FC b newAcc` against an *arbitrary*
+witnessing `(W, m, f)` for the pre-step branch (the shape every soundness lemma in this codebase
+is stated over — `branchSatisfiableIn`'s `∃ (W) (m) (f), ...`, `FrameSoundness.lean:110`), the
+only new proof obligation is `m.r (f lbl) (f wBlock)` (from `hacc` widened to the new edge); the
+formula side is free (nothing new is asserted). `wBlock` is selected by `blockingWorldS4Keyed`
+(`LoopChecking.lean:469-474`) as `(keys.filter (fun wk => wk.2 = successorBirthContent φ₀ b s φ
+w)).map Prod.fst |>.min?` — i.e. the least world (by RECORDED birth key) among **all** of
+`modalKnownWorlds b`, with **no restriction to worlds reachable from `lbl`** via `acc`. Checked
+every field of the frozen `S4LoopInv` (`bClosure`, `eNodup`, `eClosure`, `accFresh`, `accKnown`,
+`outDegEq`, `keysTotal`, `keyLowerBd`, `keysDistinct`, `keysInUniverse`,
+`LoopChecking.lean:~150-180`, re-grep) plus the two proof-internal auxiliaries
+(`keysWorldsKnown`/`worldsContiguousS4`, `LoopChecking.lean:2858`/`3559`) — none of them relate
+`wBlock` to `lbl` via any accessibility path; `keyLowerBd` only lower-bounds a world's OWN
+recorded key against its OWN live relevant set, and `keysDistinct` only separates DISTINCT
+worlds' keys, neither says anything about reachability between two specific worlds.
+
+The codebase's own precedent for exactly this kind of "cheap redirect edge" soundness argument —
+S5's witness-reuse rule `modalApplyOneS5w` (`S5Simplification.lean:519`), proved sound via
+`accReachableInv`/`accReachableInv_related_s5` (`FrameSoundness.lean:1432-1482`) — is EXPLICITLY
+built on `s5FC`'s **equivalence-relation** closure (`s5FC := Std.Refl ∧ IsTrans ∧ Std.Symm`,
+composing via `Relation.RightEuclidean.rightEuclidean`, i.e. symmetry): two worlds *both*
+reachable from a common origin (`0`) are related to EACH OTHER only because symmetry lets the
+witness be "folded back" through the origin (`reachable_imp_related_s5`,
+`FrameSoundness.lean:1456-1466`, docstring: "Composed with `s4FC`'s equivalence-relation closure,
+common reachability from `0` gives full pairwise relatedness" — S5's OWN docstring names the
+ingredient explicitly). `s4FC := Std.Refl ∧ IsTrans` (`FrameSoundness.lean:1047`) has NO symmetry
+conjunct: two worlds both reachable from a common ancestor are NOT, in general, related to each
+other under a merely reflexive-transitive (non-symmetric) relation — a tree-shaped `m.r` with two
+unrelated siblings both descending from `0` is a standard countermodel to that inference, and nothing
+in `s4FC` rules it out. The S5 technique therefore does not transfer; S4 redirect soundness would
+need `wBlock` DIRECTLY reachable from `lbl` (`Relation.ReflTransGen acc.hasEdge lbl wBlock`), which
+`blockingWorldS4Keyed`'s unrestricted `keys`-wide search does not guarantee (its candidate domain
+is every recorded world, not just `lbl`'s current or future `acc`-descendants/ancestors).
+
+**Conclusion**: as currently scoped, Phase 9's stated lemma cannot be discharged from the frozen
+task-511 invariants without either (a) a NEW invariant restricting `blockingWorldS4Keyed`'s
+candidate domain to worlds already `acc`-reachable from (or to) `lbl` — which would require
+editing the frozen `blockingWorldS4`/`blockingWorldS4Keyed` guard, explicitly out of scope per
+this plan's Non-Goals ("Any edit to frozen Phase 1-6 deliverables beyond consuming them"; the
+guard is task-511, not this task's Phases 1-6) — or (b) a different semantic argument not
+requiring `m.r (f lbl) (f wBlock)` directly, which this dispatch did not find and which the only
+existing same-shape precedent (S5's `accReachableInv`) structurally rules out for a
+non-symmetric frame. **Recommendation**: re-plan Phase 9 (and its dependents, Phases 10-11) as a
+follow-on task that either (i) revises the (task-511-owned) `blockingWorldS4Keyed` guard to
+restrict candidates to `acc`-reachable worlds and re-verifies `keyLowerBd`/`keysDistinct`
+preservation still hold under the narrower guard, or (ii) investigates whether the redirect can
+be proven sound via a wholly different route (e.g. building the witnessing model directly from
+the tableau's own construction rather than closing over an arbitrary one). Phases 7 and 8 do
+**not** depend on Phase 9 (they are the *termination*/Hintikka-completeness line, not the
+*soundness* line) and retain full value; this dispatch proceeds to them. Phases 10-11 are
+blocked-by-dependency on Phase 9 and are not attempted this dispatch.
 
 ### Phase 10 (handoff 4-ii): Keys-threaded soundness top-loop — `modalTableauS4Keyed_sound` [NOT STARTED]
 

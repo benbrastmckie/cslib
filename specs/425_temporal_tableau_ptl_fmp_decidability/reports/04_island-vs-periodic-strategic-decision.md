@@ -445,8 +445,16 @@ Run, with a generous timeout, in a scratch file importing
 ```
 
 A row reading `(k, _, "OPEN", "CLOSED")` is a direct executed proof that `temporalFuel` is
-insufficient and that P1 is false at the current constant. (Expected `k ≥ 12`; budget several
-minutes — `2^k` branches.)
+insufficient and that P1 is false at the current constant. Expected `k ≥ 12`.
+
+**Attempt record (this dispatch)**: run twice and abandoned. Even the *cheap* half — the shipped-fuel
+verdict alone for `k ∈ [10,14]`, with no 40000-fuel comparison — exceeded a 550-second budget and
+was killed (`exit=124`, no output). Note that `taut k` is **purely propositional**: no temporal
+operator occurs in it, so defects C1/C2 cannot influence its verdict and fuel exhaustion is the
+only available explanation for an `OPEN` result. Whoever re-runs this should either budget tens of
+minutes for kernel `#eval`, or compile the evaluation (`native_decide`-style / a `main` executable
+via `lake exe`) to escape the kernel interpreter — the ~`2^k` branch blowup is the cost, and it is
+itself corroborating evidence for the exponential step count argued above.
 
 ### Revisions triggered by verification
 

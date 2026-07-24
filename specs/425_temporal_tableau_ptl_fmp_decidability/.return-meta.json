@@ -17,26 +17,49 @@
   "bibkey_verification_status": "all verified in references.bib (Reynolds1994, HodkinsonReynolds2006, Burgess1982I, CaleiroViganoVolpe2013, Gabbay1993, Smullyan1968, VardiWolper1986)",
   "central_finding": "openBranch_branchSat is FALSE as stated: two calculus defects (C1 no seriality rule, Rules.lean:227-234/310-321; C2 hard-coded timeCount<4 cap, Rules.lean:312) make temporalTableau return .openBranch on validDiscrete formulas. Verified by executed lake env lean evaluation.",
   "strategic_answer": "Neither island nor periodic is the binding constraint. Island is insufficient (positive allFuture/allPast over NoMaxOrder), periodic machinery stays on the critical path but is incomplete (no composed bi-lasso model exists; obligations O1-O3 unstated). Calculus repair must come first.",
-  "p1_verdict": "false_at_current_constant: temporalFuel is quadratic (Saturation.lean:76-78) while measured minimal sufficient fuel grows as 1.5*2^k-2; docstring cites a 2^n bound. Fix is (a) raise fuel to 2^Theta(n) or (b) add timeType dedup; option (c) restate the bound is NOT available.",
+  "p1_verdict": "false_at_current_constant: temporalFuel is quadratic (Saturation.lean:76-78) while measured minimal sufficient fuel grows as 1.5*2^k-2; docstring cites a 2^n bound. Fix is (a) raise fuel to 2^Theta(n) or (b) add timeType dedup; option (c) restate the bound is NOT available. Direct crossing evaluation (k=12-14) attempted twice and abandoned (exit=124, >550s, no output) \u2014 kernel #eval is too slow; recorded in the report with a compiled-evaluation workaround.",
   "p2_verdict": "confirmed_real: Saturation.lean:156-158 passes tracker through unchanged on the .branching arm. Minimal fix requires changing temporalStepBranch's return type to List (EventualityTracker Atom) because Saturation.lean:303 replicates one tracker across all output branches.",
-  "recommended_phases": ["A: executable conformance harness", "B: seriality rule (C1)", "C: remove timeCount cap + fuel decision (C2)", "D: per-branch eventuality trackers (P2)", "E: instant-image contiguity lemma (O1, parallelizable)", "F: re-derive model requirement", "G+: truth lemmas and assembly"],
+  "recommended_phases": [
+    "A: executable conformance harness",
+    "B: seriality rule (C1)",
+    "C: remove timeCount cap + fuel decision (C2)",
+    "D: per-branch eventuality trackers (P2)",
+    "E: instant-image contiguity lemma (O1, parallelizable)",
+    "F: re-derive model requirement",
+    "G+: truth lemmas and assembly"
+  ],
   "requires_user_review": true,
   "user_review_reason": "Scope escalation: task moves from 'finish FMP completeness' to 'repair the temporal tableau calculus' (Rules.lean/Saturation.lean surgery). Recommend /spawn 425 for phases B, C, D as separate tasks.",
   "memory_candidates": [
     {
       "title": "Executable #eval conformance probes refute formal-blocker framings cheaply",
       "content": "Three prior research rounds on a Lean tableau attributed a completeness block to an unformalized fuel-sufficiency theorem. A 7-line #eval of the decision procedure on known-valid formulas refuted the target theorem outright in one dispatch, exposing two calculus defects nobody had recorded. For any executable decision procedure in Lean, run it on known-valid and known-invalid inputs BEFORE planning proof work about it.",
-      "tags": ["lean4", "tableau", "research-method", "verification"]
+      "tags": [
+        "lean4",
+        "tableau",
+        "research-method",
+        "verification"
+      ]
     },
     {
       "title": "Island countermodels fail on positive universals, not eventualities",
       "content": "A countermodel extracted from a finite tableau branch over an infinite NoMaxOrder domain (e.g. Z) reads false at every unpopulated point. This SATISFIES negative eventualities (F(Fp)@t) vacuously but FALSIFIES positive universals (T(Gp)@t), since G requires content at every later point. The intuition that 'unfulfilled eventualities are the problem' is inverted. Any finite-branch extraction needs a total extension (lasso/stutter) of branch content to the whole domain.",
-      "tags": ["temporal-logic", "fmp", "countermodel", "lean4"]
+      "tags": [
+        "temporal-logic",
+        "fmp",
+        "countermodel",
+        "lean4"
+      ]
     },
     {
       "title": "Check fuel-constant growth rate against its own docstring justification",
       "content": "A fuel bound whose docstring cites a 2^n state-space bound but whose formula is quadratic in n is arithmetically insufficient on its face. Reading the constant's growth rate against its stated justification is a seconds-long check that can settle a 'fuel sufficiency' research question that otherwise reads as open. Confirm empirically by measuring the minimal fuel at which known-valid inputs still close, across a size-indexed family.",
-      "tags": ["lean4", "termination", "fuel", "research-method"]
+      "tags": [
+        "lean4",
+        "termination",
+        "fuel",
+        "research-method"
+      ]
     }
   ],
   "next_steps": "Run /revise 425 to replace plan-04 Phases 4c-7 with the calculus-correctness front (Phases A-G), or /spawn 425 to create separate tasks for phases B, C, D."

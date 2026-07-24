@@ -57,7 +57,7 @@ def valid (φ : Formula Atom) : Prop :=
 /--
 Notation for validity: `⊨ φ` means `valid φ`.
 -/
-notation:50 "⊨ " φ:50 => valid φ
+scoped notation:50 "⊨ " φ:50 => valid φ
 
 /--
 Semantic consequence: `Γ ⊨ φ` means φ is true in all models where
@@ -78,7 +78,7 @@ def semanticConsequence (Γ : Context Atom) (φ : Formula Atom) :
 /--
 Notation for semantic consequence: `Γ ⊨ φ`.
 -/
-notation:50 Γ:50 " ⊨ " φ:50 => semanticConsequence Γ φ
+scoped notation:50 Γ:50 " ⊨ " φ:50 => semanticConsequence Γ φ
 
 /--
 A context is satisfiable in temporal type `D` if there exists a

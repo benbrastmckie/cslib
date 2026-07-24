@@ -44,6 +44,8 @@ discrete are incomparable (neither implies the other).
   `Temporal.validDiscrete`: Validity quantified over appropriate linear orders.
 - `Temporal.semanticConsequence`: Semantic consequence from a context.
 - `Temporal.satisfiable`, `Temporal.formulaSatisfiable`: Satisfiability.
+- Scoped notation: `⊨ φ` for validity, `Γ ⊨ φ` for semantic consequence
+  (`open scoped Cslib.Logic.Temporal` to use).
 
 ## Main Results
 
@@ -105,6 +107,12 @@ def semanticConsequence (Γ : Context Atom) (φ : Formula Atom) : Prop :=
     (M : TemporalModel D Atom) (t : D),
     (∀ ψ ∈ Γ, Satisfies M t ψ) →
     Satisfies M t φ
+
+/-- Notation for validity: `⊨ φ` means `valid φ`. -/
+scoped notation:50 "⊨ " φ:50 => valid φ
+
+/-- Notation for semantic consequence: `Γ ⊨ φ`. -/
+scoped notation:50 Γ:50 " ⊨ " φ:50 => semanticConsequence Γ φ
 
 /-- A formula is satisfiable if there exists some nontrivial model and time
 where it holds. The `Nontrivial` requirement matches the `valid` quantifier,

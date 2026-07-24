@@ -128,20 +128,24 @@ matching forms, updating all references and docstrings, without corrupting the E
 - `grep -nw 'Valid\|ValidSerial\|ValidDense\|ValidDiscrete\|SemanticConsequence\|Satisfiable\|FormulaSatisfiable'`
   in the Temporal tree returns only the two guarded prose occurrences.
 
-### Phase 2: Temporal turnstile notation, scoped (item 2) [NOT STARTED]
+### Phase 2: Temporal turnstile notation, scoped (item 2) [COMPLETED]
 
 **Goal**: Add the `⊨` turnstile notation pair to Temporal as `scoped`, and convert Bimodal's
 existing turnstile pair to `scoped`, fixing any use-sites that then need `open scoped`.
 
 **Tasks**:
-- [ ] In `Temporal/Semantics/Validity.lean` (after the renamed `valid` / `semanticConsequence`),
+- [x] In `Temporal/Semantics/Validity.lean` (after the renamed `valid` / `semanticConsequence`),
       add inside `namespace Cslib.Logic.Temporal`:
       `scoped notation:50 "⊨ " φ:50 => valid φ` and
       `scoped notation:50 Γ:50 " ⊨ " φ:50 => semanticConsequence Γ φ`.
-- [ ] In `Bimodal/Semantics/Validity.lean:60,81`, convert the existing two turnstile notations to
+- [x] In `Bimodal/Semantics/Validity.lean:60,81`, convert the existing two turnstile notations to
       `scoped` inside `namespace Cslib.Logic.Bimodal`.
-- [ ] Scan Bimodal use-sites of `⊨` and add `open scoped Cslib.Logic.Bimodal` where the notation
-      is now needed but no longer globally in scope.
+- [x] Scan Bimodal use-sites of `⊨` and add `open scoped Cslib.Logic.Bimodal` where the notation
+      is now needed but no longer globally in scope *(all 4 code use-sites --
+      Metalogic/Decidability.lean, Metalogic/Soundness/Soundness.lean,
+      Metalogic/Decidability/Correctness.lean, FrameConditions/Validity.lean -- already had a
+      bare `open Cslib.Logic.Bimodal`, which also activates scoped notation in Lean 4, so no
+      `open scoped` additions were needed; all four build clean)*.
 
 **Timing**: 45 min
 

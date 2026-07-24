@@ -257,7 +257,7 @@ This section generalizes `prime_exclusion` from excluding a single formula `phi`
 an entire set `Σ`: given an admissible `S` that derives no finite disjunction of `Σ`, there is
 a prime admissible `T ⊇ S` that still derives no finite disjunction of `Σ`. This is the
 "Lindenbaum-pair" construction needed by the intuitionistic modal canonical-model box/diamond
-witnesses (task 480), which must extend a set to a prime theory avoiding an entire set of
+witnesses, which must extend a set to a prime theory avoiding an entire set of
 formulas, not just one.
 
 `prime_exclusion` is NOT refactored to route through this generalization (kept independent to
@@ -555,7 +555,7 @@ excluded formula to an excluded set `E`.
 The proof applies Zorn's lemma to `SetExcludingSupersets D Cons S E`, using
 `set_excluding_chain_union` for the chain condition and `set_maximal_is_prime` for primality.
 This is the "Lindenbaum-pair" construction consumed by the intuitionistic modal canonical-model
-box/diamond witnesses (task 480).
+box/diamond witnesses.
 
 See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Lemma 5.5, and
 ianshil/CK `Lindenbaum_pair`/`pair_extCKH_prv`. -/

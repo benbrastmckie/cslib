@@ -25,7 +25,7 @@ parameterized over an abstract derivation relation. The key components are:
 - Closure properties (`closed_under_derivation`, `implication_property`,
   `negation_complete`) conditional on the deduction theorem.
 
-Downstream modal (task 30) and temporal (task 31) metalogic tasks instantiate
+Downstream modal and temporal metalogic modules instantiate
 `DerivationSystem` from their concrete `DerivationTree` types and supply deduction
 theorem proofs.
 

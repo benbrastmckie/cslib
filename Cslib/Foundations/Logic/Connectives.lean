@@ -35,10 +35,10 @@ hierarchy.
 
 Negation and verum are shared derived connectives: `neg φ := φ → ⊥` and `top := ⊥ → ⊥`
 are valid in minimal, intuitionistic, and classical logic alike ([Johansson1937], [Prawitz1965]).
-These are now provided as **defaulted fields** on `PropositionalConnectives` (task 340), giving
+These are provided as **defaulted fields** on `PropositionalConnectives`, giving
 a single canonical source for the Lukasiewicz encodings. Each concrete formula type delegates
 its local `abbrev`s (`Proposition.neg`, `Formula.neg`, etc.) to these defaults.
-Biconditional (`iff`) is deferred to task 173 after `HasAnd` is instantiated on the formula types.
+Biconditional (`iff`) is deferred until `HasAnd` is instantiated on all the formula types.
 
 ## Module Routing
 
@@ -140,10 +140,10 @@ class HasOr (F : Type*) where
 
 /-- Propositional connectives: falsum and implication, with derived negation and verum.
 
-`HasAnd` and `HasOr` are defined as standalone atomic classes in this module.
-Extending `PropositionalConnectives` to include them is deferred to task 173,
-when the four concrete formula types will be updated to provide `and`/`or`
-explicitly in their instances.
+`HasAnd` and `HasOr` are defined as standalone atomic classes in this module rather than
+folded into `PropositionalConnectives`, since not every concrete formula type provides
+`and`/`or` explicitly yet (`Modal.Proposition` and `PL.Proposition` do; `Temporal.Formula`
+and `Bimodal.Formula` do not).
 
 The fields `neg` and `top` carry Lukasiewicz defaults valid in minimal, intuitionistic,
 and classical logic ([Johansson1937], [Prawitz1965]). Concrete formula types may delegate

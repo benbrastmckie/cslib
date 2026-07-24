@@ -74,7 +74,7 @@ introduced; the generalization is conservative.
   deduction theorem `Bimodal/Metalogic/Core/DeductionTheorem.lean`.
 - **Bimodal (fc)**: tag `HilbertTMFc fc`; same bridge; fc deduction theorem in same file.
 
-## Generic `HilbertTree` Bridge (task 452)
+## Generic `HilbertTree` Bridge
 
 Beyond the predicate/type/seam architecture above, the four `GenericMCSBridge.lean` files
 (Propositional, Modal, Temporal, Bimodal) also share a near-verbatim **tree-bridge trio**:
@@ -184,7 +184,7 @@ class HasMinimalAxioms (Axioms : F → Prop) : Prop where
 /-! ## `HilbertTree`: Generic Type-Valued Derivation-Tree Bridge
 
 The material below is parametric over an abstract `D : List F → F → Type*` and imports no
-per-logic material — it is shared by every `GenericMCSBridge.lean` file (task 452). -/
+per-logic material — it is shared by every `GenericMCSBridge.lean` file. -/
 
 variable {D : List F → F → Type*}
 

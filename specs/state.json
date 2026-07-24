@@ -1,5 +1,5 @@
 {
-  "next_project_number": 551,
+  "next_project_number": 552,
   "active_projects": [
     {
       "project_number": 550,
@@ -1986,6 +1986,40 @@
       ],
       "description": "COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidability instances exist for only 6 of the 15 modal-cube systems: K (Tableau/CompletenessLoop.lean:2295), T (FrameCompleteness.lean:1318), KB (:1933), S5 (:2429), K5/Five (:3220), KB5 (:4165); S4 is in flight (tasks 506/511/535 own the loop-checking termination). The 8 remaining corners — D, K4, K45, D4, D5, D45, DB, TB — have sorry-free soundness + strong completeness + compactness + conservative extension but NO Valid predicate, no tableau driver, and no Decidable instance: the decidability column of the cube is ragged. Work (BLOCKED on 511/535 landing the S4 termination machinery): extend the generic tableau driver to the remaining corners — transitive corners (K4, K45, D4, D45) reuse the S4 loop-checking mechanism; serial corners (D, D5, DB) need a serial successor rule; TB composes the existing T and B rules. Where filtration/FMP is cheaper than loop-checking for a given corner, route via FMP instead. Acceptance: either a Decidable instance per corner, or an explicit documented out-of-scope note per corner stating why (e.g. cost/benefit), so the matrix is intentionally complete rather than accidentally ragged. Zero sorry, zero new axioms; keep all frozen deliverables from 300/534/506 untouched.",
       "created": "2026-07-23T17:20:09Z"
+    },
+    {
+      "project_number": 551,
+      "project_name": "cs5_native_hilbert_pair_lindenbaum_completeness",
+      "status": "researched",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "description": "Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.",
+      "dependencies": [
+        517,
+        509,
+        508
+      ],
+      "parent_task": null,
+      "created": "2026-07-24T00:00:00Z",
+      "last_updated": "2026-07-24T00:00:00Z",
+      "priority": "medium",
+      "effort": "large",
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean",
+        "Cslib/Logics/Modal/Metalogic/Constructive/CKExtension.lean",
+        "Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean"
+      ],
+      "session_id": "session_013h2qsatYrD4BG7EE4C8niu",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md",
+          "type": "report",
+          "summary": "Route B (native Hilbert CS5 completeness) research report: obstruction, mechanized negatives, and the Atom-sum pair-primeness repair"
+        }
+      ],
+      "plan_metadata": {}
     }
   ],
   "repository_health": {

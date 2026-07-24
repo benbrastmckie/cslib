@@ -1,5 +1,5 @@
 ---
-next_project_number: 551
+next_project_number: 552
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 551
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,400,405,407,425,438,440,451,463,465,466,474,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,400,405,407,425,438,440,451,463,465,466,474,519,522,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,409,430,450,456,497,511 | 36,37,181,317,407,425,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300 | 506 | modal logic |
@@ -44,6 +44,7 @@ next_project_number: 551
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+551 [RESEARCHED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
@@ -90,6 +91,18 @@ next_project_number: 551
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 
 ## Tasks
+
+### 551. Cs5 native hilbert pair lindenbaum completeness
+- **Effort**: large
+- **Status**: [RESEARCHED]
+- **Task Type**: cslib
+- **Topic**: Modal Logic
+- **Dependencies**: Task 517, Task 509, Task 508
+- **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md]
+
+**Description**: Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.
+
+---
 
 ### 550. Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files
 - **Status**: [COMPLETED]

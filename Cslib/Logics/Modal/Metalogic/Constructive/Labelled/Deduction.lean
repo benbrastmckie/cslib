@@ -91,11 +91,11 @@ path. See that file's `TS5` docstring for the full rationale.
 - `GeomAxiom.HoldsOn` / `ClassicalModelOn`: the **domain-relative** classical-model semantics
   (Simpson's actual `H ⊨_CL 𝒯`, quantifiers ranging over a structure's underlying set, not the
   whole `Label Atom` type). `Context.lean`'s `TPrime.clModel` uses this, not the type-wide form
-  -- see the task 517 Phase 1 repair note there.
+  -- see the repair note there.
 - `TClosure`: the 𝒯-closure of a relation, realizing `(R_χ)` for every axiom of `GeomAxiom`.
 - `NIK`: the labelled natural-deduction relation `Γ ⊢_G x:A`, i.e. `N_IK(𝒯)` (Figure 4-1 plus the
-  geometric extension). **`(⊥E)`/`(∨E)` are cross-label**, per Figure 4-1 (task 517 Phase 1
-  repair; see the two constructors' docstrings and `Context.lean`'s non-re-trip note).
+  geometric extension). **`(⊥E)`/`(∨E)` are cross-label**, per Figure 4-1 (see the two
+  constructors' docstrings and `Context.lean`'s non-re-trip note).
 - `NIK.weaken`: the combined weakening / graph-morphism lemma (Prop. 4.4.1).
 - `NIK.smoke_boxE`: the required smoke-test derivation `x:□A, xRy ⊢ y:A` via `(□E)`.
 
@@ -154,10 +154,9 @@ def ClassicalModel (𝒯 : Set GeomAxiom) (R : Label Atom → Label Atom → Pro
 
 /-- The **domain-relative** classical-model clause for a single geometric axiom: Simpson's
 `H ⊨_CL χ` quantifies over the structure `H`'s underlying set (`:5953`), not the whole `Label
-Atom` type. Transcribed from `probes/rchi-internalization-gate.lean:221-227` (task 517 Phase 1;
-see that probe's `tPrime_TS5_false` for why the type-wide `GeomAxiom.Holds` above is a
-transcription defect that empties `TPrime`, and `Context.lean`'s `TPrime.clModel` for the
-repaired clause 0 that uses this instead). -/
+Atom` type. The type-wide `GeomAxiom.Holds` above is a transcription defect that would empty
+`TPrime`; see `Context.lean`'s `TPrime.clModel` for the repaired clause 0 that uses this
+instead. -/
 def GeomAxiom.HoldsOn (χ : GeomAxiom) (D : Set (Label Atom))
     (R : Label Atom → Label Atom → Prop) : Prop :=
   match χ with
@@ -167,16 +166,14 @@ def GeomAxiom.HoldsOn (χ : GeomAxiom) (D : Set (Label Atom))
   | .Five => ∀ x ∈ D, ∀ y ∈ D, ∀ z ∈ D, R x y → R x z → R y z
 
 /-- `R ⊨_cl 𝒯` on domain `D`: `R` is a domain-relative classical model of every axiom in `𝒯`
-(Simpson `:5953` clause 0, quantifiers ranging over `D`). Transcribed from
-`probes/rchi-internalization-gate.lean:229-232`. -/
+(Simpson `:5953` clause 0, quantifiers ranging over `D`). -/
 def ClassicalModelOn (𝒯 : Set GeomAxiom) (D : Set (Label Atom))
     (R : Label Atom → Label Atom → Prop) : Prop :=
   ∀ χ ∈ 𝒯, χ.HoldsOn D R
 
 /-- The type-wide statement implies the domain-relative one on any domain, but **not
 conversely** -- a relation can be a domain-relative classical model of `𝒯` while failing the
-type-wide clause outside that domain (`probes/rchi-internalization-gate.lean`'s counterexample,
-§6). Transcribed from `probes/rchi-internalization-gate.lean:235-243`. -/
+type-wide clause outside that domain. -/
 theorem ClassicalModelOn.of_classicalModel {𝒯 : Set GeomAxiom} {D : Set (Label Atom)}
     {R : Label Atom → Label Atom → Prop} (h : ClassicalModel 𝒯 R) : ClassicalModelOn 𝒯 D R := by
   intro χ hχ
@@ -244,11 +241,9 @@ inductive NIK (𝒯 : Set GeomAxiom) : Graph Atom → List (LabelledFormula Atom
       (h : φ ∈ Γ) : NIK 𝒯 G Γ φ
   /-- `(⊥E)`, **cross-label**, per Figure 4-1 (`:4630-4670`, page raster p. 69/PDF p. 78 --
   the text layer destroys this figure): premise `x:⊥`, conclusion `y:A` at an *independent*
-  label `y`. Transcribed from `probes/fig41-crosslabel-gate.lean:138-139` (task 517 Phase 1;
-  see that probe's `efq_crossLabel_of_edge`/`dia_bot_elim_TS5` for the adversarial confirmation
-  that the label-local form CSLib previously used is a strict, defect-causing weakening --
+  label `y`. The label-local form (concluding only `x:A`) is a strict, defect-causing weakening:
   Lemma 5.3.1's "Consistency is immediate" step (p. 93) needs exactly this cross-label form for
-  *disconnected* labels, which no amount of `(□E)`-walking along an edge can recover). -/
+  *disconnected* labels, which no amount of `(□E)`-walking along an edge can recover. -/
   | efq (G : Graph Atom) (Γ : List (LabelledFormula Atom)) (x y : Label Atom)
       (A : Proposition Atom) (h : NIK 𝒯 G Γ (x ∶ .bot)) : NIK 𝒯 G Γ (y ∶ A)
   /-- `(∧I)`, label-local. -/
@@ -269,11 +264,10 @@ inductive NIK (𝒯 : Set GeomAxiom) : Graph Atom → List (LabelledFormula Atom
       (A B : Proposition Atom) (h : NIK 𝒯 G Γ (x ∶ B)) : NIK 𝒯 G Γ (x ∶ .or A B)
   /-- `(∨E)`, **cross-label**, per Figure 4-1: major premise `x:A∨B`, minor premises and the
   conclusion at an *independent* label `y`, branch assumptions still discharged at `x` (matching
-  Figure 4-1's discharge brackets `[x:A]`/`[x:B]` over the two `y:C` sub-derivations).
-  Transcribed from `probes/fig41-crosslabel-gate.lean:153-156` (task 517 Phase 1); see that
-  probe's `disjunction_step`/`dia_or_dist_TS5` for why the label-local restriction previously
-  used blocks Lemma 5.3.1's disjunction-property step (p. 93), which case-splits a disjunction
-  sitting at one label to conclude a fixed, unrelated excluded formula at another. -/
+  Figure 4-1's discharge brackets `[x:A]`/`[x:B]` over the two `y:C` sub-derivations). The
+  label-local restriction (concluding only at `x`) blocks Lemma 5.3.1's disjunction-property
+  step (p. 93), which case-splits a disjunction sitting at one label to conclude a fixed,
+  unrelated excluded formula at another. -/
   | orE (G : Graph Atom) (Γ : List (LabelledFormula Atom)) (x y : Label Atom)
       (A B C : Proposition Atom) (hor : NIK 𝒯 G Γ (x ∶ .or A B))
       (hA : NIK 𝒯 G ((x ∶ A) :: Γ) (y ∶ C)) (hB : NIK 𝒯 G ((x ∶ B) :: Γ) (y ∶ C)) :

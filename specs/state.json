@@ -1496,7 +1496,7 @@
     {
       "project_number": 535,
       "project_name": "abstract_termination_measure_interface_s4b_loop",
-      "status": "partial",
+      "status": "planned",
       "task_type": "cslib",
       "title": "Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
       "description": "Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.",
@@ -1510,8 +1510,8 @@
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
       "created": "2026-07-18T21:19:09Z",
-      "last_updated": "2026-07-24T10:37:44Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-07-24T15:06:49Z",
+      "next_artifact_number": 2,
       "artifacts": [
         {
           "type": "research",
@@ -1524,18 +1524,17 @@
           "summary": "Termination-interface survey: confirms the threaded-state root cause against source, documents the new no-modalTableauS4_sound scope finding, recommends the bespoke keyed S4 driver (path b) with a 5-phase decomposition and component/precedent map, and documents path (a) generic state-threading as the deprioritized alternative with regression-risk rationale."
         },
         {
-          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/01_keyed-s4-driver-plan.md",
-          "type": "plan",
-          "summary": "5-phase keyed-S4-driver plan with the hintikka_congr_S4 crux gated early (Wave 1), a dependency-wave table, risks/mitigations, and per-phase hard-constraint enforcement (zero sorry, zero new axiom, lean_verify-clean, [BLOCKED]-with-exact-goal on failure)."
-        },
-        {
           "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/01_keyed-s4-driver-summary.md",
           "type": "summary",
           "summary": "keyed s4 driver summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md",
+          "type": "plan"
         }
       ],
       "topic": "Modal Logic",
-      "session_id": "sess_1784888487_837ef1_535"
+      "session_id": "sess_1784905305_471f78"
     },
     {
       "project_number": 537,

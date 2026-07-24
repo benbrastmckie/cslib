@@ -1,42 +1,26 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-24T10:38:23Z",
-  "completed_at": "2026-07-24T10:58:00Z",
-  "requires_user_review": true,
-  "review_reason": "Phases 3-5 of the plan are BLOCKED. In-depth source analysis found the landed generic top-loop lemmas these phases were modeled on (modalExpandBranchesHintikka, modalExpandBranchesGen_closed_unsatIn) are hard-wired to a single fixed rule-application function across their whole fuel induction, whereas the keyed S4 driver's rule genuinely varies per step (keys grows monotonically). None of the generic machinery is directly instantiable, and no S4 soundness lemma exists anywhere in the codebase yet. A bespoke, keys-threaded analogue of each is required (est. 1500-2500 new lines), well beyond the plan's original 10-16 hour estimate. Recommend re-planning Phases 3-5 as a dedicated --hard follow-on per the continuation handoff.",
+  "status": "planned",
+  "started_at": "2026-07-24T11:00:00Z",
+  "completed_at": "2026-07-24T11:12:00Z",
   "artifacts": [
     {
-      "type": "summary",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/01_keyed-s4-driver-summary.md",
-      "summary": "Implementation summary: Phases 1-2 complete and committed; Phases 3-5 blocked with root-cause analysis and a continuation handoff."
-    },
-    {
-      "type": "handoff",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/01_phase3-5-continuation.md",
-      "summary": "Full technical map for a follow-on dispatch: sub-phase decomposition (3a-3e), reusable existing lemmas identified, confirmed fuel-insufficiency arithmetic, and the Phase 4/5 gaps."
+      "type": "plan",
+      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md",
+      "summary": "Revised plan (v2): preserves Phases 1-2 verbatim as [COMPLETED]; restructures the blocked v1 Phases 3-5 into 9 one-agent-run-sized phases (3-11) per the continuation handoff's 3a-3e/4/5 decomposition, splitting the two oversized rows."
     }
   ],
-  "partial_progress": {
-    "stage": "phases_3_5_blocked",
-    "details": "Phases 1-2 landed (modalExpandBranchesS4Keyed, modalTableauS4Keyed, hintikka_congr_S4 in LoopChecking.lean), lake-build-green, zero sorry, lean_verify axiom-clean, committed. Phases 3-5 blocked per plan file annotations and the continuation handoff.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 2
-  },
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": true,
-    "notes": "CI pipeline (cache/build/checkInitImports/lint/lint-style/shake/mk_all/test) run and green for the additive Phases 1-2 change. Verification pertains to the landed subset only; Phases 3-5 were never attempted in Lean code (no sorry/placeholder to check there)."
-  },
+  "next_steps": "Run /implement 535 (recommended --hard) to execute the restructured plan starting at Phase 3.",
   "metadata": {
-    "session_id": "sess_1784888487_837ef1_535",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "session_id": "sess_1784905305_471f78",
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 11,
+    "phases_completed": 2,
+    "phases_remaining": 9,
+    "estimated_hours": 24,
+    "reports_integrated": [
+      "reports/01_termination-interface-survey.md",
+      "handoffs/01_phase3-5-continuation.md"
+    ]
   }
 }

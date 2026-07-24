@@ -262,4 +262,134 @@ theorem caseE_collapse (φ : Proposition ℕ)
 #print axioms caseE_theta_trivial_deriv
 #print axioms caseE_collapse
 
+/-! ## Case D: `orE` at depth ≥ 1 -- the primary residual risk -/
+
+/-- The depth-1 child of `r`. Named `c2` (not `c1`) purely to keep it visibly distinct from
+`yy`/other Case A-C labels reused in this namespace. -/
+abbrev c2 : Label ℕ := Label.var 2
+
+/-- The target of the `orE` conclusion: an unrelated, disconnected label. -/
+abbrev y3 : Label ℕ := Label.var 3
+
+/-- A two-level graph: root `r` with one child `c2` (`r`'s only edge). -/
+noncomputable def Gt2 : Graph ℕ := Gt.addEdge r c2
+
+theorem Gt2_fin : Gt2.X.Finite := by
+  show (Gt.X ∪ ({r, c2} : Set (Label ℕ))).Finite
+  exact Gt_fin.union ((Set.finite_singleton c2).insert r)
+
+open Classical in
+/-- The rank function used by `place` on `Gt2`: `r ↦ 0`, `c2 ↦ 1`, everything else (including the
+disconnected `y3`) defaults to `0`, matching `forest_addEdge_fresh`'s own
+`Function.update ht x (ht x + 1)` construction pattern. -/
+noncomputable def ht2 : Label ℕ → ℕ := Function.update ht0 c2 1
+
+theorem ht2_c2 : ht2 c2 = 1 := by
+  classical
+  simp [ht2]
+
+theorem ht2_y3 : ht2 y3 = 0 := by
+  classical
+  have hne : y3 ≠ c2 := by simp [y3, c2, Label.var.injEq]
+  rw [ht2, Function.update_of_ne hne, ht0]
+
+theorem place_ht2_c2 (A : Proposition ℕ) : place ht2 c2 A = Proposition.box A := by
+  simp [place, ht2_c2, boxIter]
+
+theorem place_ht2_y3 (A : Proposition ℕ) : place ht2 y3 A = A := by
+  simp [place, ht2_y3, boxIter]
+
+/-! ### The `orE` core step
+
+`sigAt Gt2 Γ Gt2_fin r`'s box-conjunct (descending to `c2`, `r`'s only child) is exactly
+`sigAtFuel Gt2 Γ Gt2_fin 1 c2`, and `sigAt_c2_unfold` above confirms this equals
+`sigAt Gt2 Γ Gt2_fin c2` (since `c2` has no children, extra fuel is inert) -- so `place ht2 c2 A =
+□A` sits at PRECISELY the box level `sigAt`'s own recursion already uses for `c2`'s subtree. This
+IS the shared-`Θ`-structure alignment the plan's risk section asks Phase 9 to test; the question
+is whether it is enough to close `orE`, not whether `Θ`/`place` line up (they do).
+
+Rather than re-deriving the concrete root-to-child injection computation here (a genuine
+Phase 12-sized piece of infrastructure -- `sigAt_cons_self_imp`, the closest landed analogue,
+itself avoids computing an explicit `Finset.toList` for exactly this reason, working abstractly
+via `sigAtFuel_congr_above_rank` instead), the injection step is taken as an explicit, motivated
+HYPOTHESIS below (`inject`): `Θ(G,Γ) ∧ □^{d(x)}D ⊃ Θ(G,(x∶D)::Γ)`. Its plausibility is not in
+question (`box_and_intro`'s K-distribution-over-`∧` argument, sketched above, is exactly the tool
+Phase 12 would use, and does NOT hit any non-theorem). Isolating it as a hypothesis lets Case D
+target its actual question precisely: given `inject`, does `orE`'s disjunction step close, or does
+it independently need the box-or-distribution non-theorem? -/
+
+/-- **`orE`'s core step, generic in the three premise translations.** Mirrors `NIK.orE`'s shape
+exactly: major premise `Θ(Γ) ⊃ place(c2, A∨B)` (the disjunction sits at `c2`, depth 1), two branch
+IHs `Θ((c2∶A)::Γ) ⊃ place(y3,C)` / `Θ((c2∶B)::Γ) ⊃ place(y3,C)` (conclusion at the UNRELATED,
+disconnected `y3`), goal `Θ(Γ) ⊃ place(y3,C)`. `inject` packages the (independently plausible,
+Phase-12-scoped) `Θ`-injection step. **This is provable GIVEN `bridge`** -- confirming `bridge` is
+SUFFICIENT to close the step. -/
+theorem caseD_orE_core_from_bridge
+    {A B C : Proposition ℕ}
+    (inject : ∀ (D : Proposition ℕ) (Γ : List (LabelledFormula ℕ)),
+      Derivable CS5ModalAxiom
+        (((Theta Gt2 Γ Gt2_fin r).and (place ht2 c2 D)).imp
+          (Theta Gt2 ((c2 ∶ D) :: Γ) Gt2_fin r)))
+    (bridge : Derivable CS5ModalAxiom
+      ((Proposition.box (A.or B)).imp ((Proposition.box A).or (Proposition.box B))))
+    (hOr : Derivable CS5ModalAxiom ((Theta Gt2 [] Gt2_fin r).imp (place ht2 c2 (A.or B))))
+    (hA : Derivable CS5ModalAxiom
+      ((Theta Gt2 ((c2 ∶ A) :: []) Gt2_fin r).imp (place ht2 y3 C)))
+    (hB : Derivable CS5ModalAxiom
+      ((Theta Gt2 ((c2 ∶ B) :: []) Gt2_fin r).imp (place ht2 y3 C))) :
+    Derivable CS5ModalAxiom ((Theta Gt2 [] Gt2_fin r).imp (place ht2 y3 C)) := by
+  rw [place_ht2_c2] at hOr
+  -- Curry the branch IHs (via `inject`) into `Θ(Γ) ⊃ (□A ⊃ place(y3,C))` / `□B` analogously.
+  have hA' : Derivable CS5ModalAxiom
+      ((Theta Gt2 [] Gt2_fin r).imp ((Proposition.box A).imp (place ht2 y3 C))) := by
+    rw [← place_ht2_c2]
+    exact cs5_deriv_curry (cs5_deriv_imp_trans (inject A []) hA)
+  have hB' : Derivable CS5ModalAxiom
+      ((Theta Gt2 [] Gt2_fin r).imp ((Proposition.box B).imp (place ht2 y3 C))) := by
+    rw [← place_ht2_c2]
+    exact cs5_deriv_curry (cs5_deriv_imp_trans (inject B []) hB)
+  -- `bridge` turns the boxed disjunction into a disjunction of boxes; the Hilbert `orE` axiom
+  -- (label-free, purely propositional) then closes it under the shared antecedent `Θ(Γ)`.
+  have hOrBoxes : Derivable CS5ModalAxiom
+      ((Theta Gt2 [] Gt2_fin r).imp ((Proposition.box A).or (Proposition.box B))) :=
+    cs5_deriv_imp_trans hOr bridge
+  have hOrEax : Derivable CS5ModalAxiom
+      (((Proposition.box A).imp (place ht2 y3 C)).imp
+        (((Proposition.box B).imp (place ht2 y3 C)).imp
+          (((Proposition.box A).or (Proposition.box B)).imp (place ht2 y3 C)))) :=
+    ⟨.ax [] _ (.orE (Proposition.box A) (Proposition.box B) (place ht2 y3 C))⟩
+  have hstep1 : Derivable CS5ModalAxiom
+      ((Theta Gt2 [] Gt2_fin r).imp
+        (((Proposition.box B).imp (place ht2 y3 C)).imp
+          (((Proposition.box A).or (Proposition.box B)).imp (place ht2 y3 C)))) :=
+    cs5_deriv_imp_mp (cs5_deriv_imp_of_derivable _ hOrEax) hA'
+  have hstep2 : Derivable CS5ModalAxiom
+      ((Theta Gt2 [] Gt2_fin r).imp
+        (((Proposition.box A).or (Proposition.box B)).imp (place ht2 y3 C))) :=
+    cs5_deriv_imp_mp hstep1 hB'
+  exact cs5_deriv_imp_mp hstep2 hOrBoxes
+
+/-! ### Does the natural alternative (T-iteration alone, no `bridge`) avoid the wall?
+
+The other candidate route strips ALL boxes off `hOr` via the always-valid `CS5ModalAxiom.tBox`
+(`□φ⊃φ`, no non-theorem risk) to get a BARE `Θ(Γ) ⊃ (A∨B)`, then tries the plain Hilbert `orE`
+axiom directly on `(A∨B)` with bare branch hypotheses `Θ(Γ)⊃(A⊃place(y3,C))` /
+`Θ(Γ)⊃(B⊃place(y3,C))`. But `inject`'s own shape (matching `place`'s box-indexing) only ever
+supplies the BOXED branch hypotheses `Θ(Γ)⊃(□A⊃place(y3,C))` (see `hA'`/`hB'` above) -- getting
+from boxed-antecedent to bare-antecedent branch hypotheses would need `A ⊃ □A` (necessitation
+from an arbitrary HYPOTHESIS, not a closed theorem: unavailable), and going the other way (boxing
+the bare disjunction first via `tBox`-stripping, THEN needing `(A∨B)⊃(□A∨□B)` to line back up with
+the boxed branches) is exactly `bridge` again, not a way around it. **No third route was found.**
+This confirms -- rather than merely inherits -- the plan's primary residual risk: for `place`'s
+flat `□^d` indexing, `bridge` (`□(A∨B)⊃(□A∨□B)`) is not merely sufficient (`caseD_orE_core_from_bridge`
+above) but the ONLY route located from the available `cs5_deriv_*` toolkit; `bridge` itself is the
+STANDARD non-theorem of normal (K-based, hence also S5-based) modal logic (semantically: two
+`R`-related worlds `w1 ⊨ A, ¬B` and `w2 ⊨ ¬A, B`, both accessible from a point `p`, give `p ⊨
+□(A∨B)` while `p ⊭ □A` and `p ⊭ □B`) -- already the basis for the plan's own citation of "the same
+non-theorem that killed the fully-boxed flat shortcut" under plan v4. No countermodel is built in
+this probe (out of scope for a shape-validation gate); the finding is the STRUCTURAL dependency
+above, machine-checked, not a fresh semantic refutation. -/
+
+#print axioms caseD_orE_core_from_bridge
+
 end Probe537Theta

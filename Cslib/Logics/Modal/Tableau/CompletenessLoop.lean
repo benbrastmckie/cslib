@@ -15,7 +15,7 @@ public import Cslib.Logics.Modal.Tableau.S5Simplification
 /-! # Modal K Tableau Completeness Loop: Combined-Invariant Single-Step Preservation
 
 This module bundles the five loop invariants needed to run the modal K tableau's completeness
-fuel-induction (task 442 Phase 5b): world/expanded-set universe closure and the rank-map
+fuel-induction: world/expanded-set universe closure and the rank-map
 bookkeeping (`ModalPotentialInv`, `FmpMeasure.lean`), the Φ-based world-bound witness
 (`modalStepBranch_worldBound`), and the Hintikka expanded-set invariant on the branch's expanded
 set (`modalStepBranch_hintikka_inv`, `Completeness.lean`). It proves that one `modalStepBranch`
@@ -26,7 +26,7 @@ step preserves this bundle on every child branch it produces, while the base-3 c
 
 - `ModalLoopInv`: the bundled per-branch loop invariant threaded across the completeness
   fuel-induction.
-- `ModalLoopInvGen` (task 510): `ModalLoopInv`, generalized over an abstract
+- `ModalLoopInvGen`: `ModalLoopInv`, generalized over an abstract
   `apply : RuleApply Atom`. Only `hintikkaInv` mentions `apply`; the other six conjuncts are
   already rule-agnostic. Bridged to `ModalLoopInv` via `ModalLoopInv_iff_gen` rather than
   identified definitionally, so `ModalLoopInv` stays byte-identical.
@@ -36,12 +36,12 @@ step preserves this bundle on every child branch it produces, while the base-3 c
 - `modalStep_preserves_invariant`: one `modalStepBranch` step preserves `ModalLoopInv` (under a
   single shared rank map `rank'`) on every child branch/expanded-set pair, and strictly decreases
   `modalExpMeasure` by at least one.
-- `modalExpandBranchesGen_hintikka` (task 510, the crux): the generic top-loop Hintikka lemma,
+- `modalExpandBranchesGen_hintikka` (the crux): the generic top-loop Hintikka lemma,
   over an abstract `(apply, spec)`, concluding in `modalHintikkaSetGen apply bR aR` (not the
-  concrete `modalHintikkaSet bR aR`) -- this is what lets 503 (T), 505 (B), and 506 (S4) consume
+  concrete `modalHintikkaSet bR aR`) -- this is what lets the T, B, and S4 systems consume
   the generic Hintikka-set statement shape. `TDriver.lean`'s `modalExpandBranchesT_hintikka`
   one-liner is the structural proof this generalization succeeded. `RuleApplicationSpec` grows
-  from seven fields (task 507) to eleven (F8 `localShapeInvariance` through F12 `diaPosWitness`,
+  from seven fields to eleven (F8 `localShapeInvariance` through F12 `diaPosWitness`,
   `GenericDriver.lean`) to support this. K's `modalExpandBranches_hintikka`,
   `modalStep_preserves_invariant`, `ModalLoopInv`, and every other public K declaration in this
   module retain byte-identical statements, re-derived as corollaries via `modalStepBranch_eq`/
@@ -63,8 +63,8 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## The Bundled Loop Invariant -/
 
-/-- **Bundled loop invariant** (task 442 Phase 5a) threaded across the completeness
-fuel-induction (Phase 5b): the `ModalPotentialInv` bundle (branch/expanded-set universe
+/-- **Bundled loop invariant** threaded across the completeness
+fuel-induction: the `ModalPotentialInv` bundle (branch/expanded-set universe
 closure, `acc` freshness/known-targets, out-degree correspondence, rank-map bookkeeping,
 `FmpMeasure.lean:2215`), the Φ-based potential bound needed by `modalStepBranch_worldBound` to
 conclude the a-priori world bound survives a step, and the Hintikka expanded-set invariant
@@ -104,7 +104,7 @@ structure ModalLoopInv (φ0 : Proposition Atom)
     ∃ w', acc.hasEdge w w' = true ∧
       (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
   /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos` (i.e. is
-  `diamondPos`-shaped, `T(◇φ)@w`). Task 441: `diamond` is a native constructor, so
+  `diamondPos`-shaped, `T(◇φ)@w`). `diamond` is a native constructor, so
   `diamondPos` genuinely mints a fresh world (symmetric to `boxNeg`) and needs the same
   sign-discrimination invariant as `eBoxOnlyNeg`: `modalHintikkaClause` is vacuously `True` for
   *any* diamond-shaped formula regardless of sign, whereas `modalHintikkaSet`'s second conjunct
@@ -116,7 +116,7 @@ structure ModalLoopInv (φ0 : Proposition Atom)
   eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
   /-- Every `diamondPos`-shaped formula `T(◇ψ)@w` in the expanded set `e` already has a witness
   successor on the branch: `∃ w', acc.hasEdge w w' ∧ T(ψ)@w' ∈ b`. Needed for `modalHintikkaSet`'s
-  fourth conjunct (task 441), symmetric to `eBoxNegWitness`'s third conjunct. Sound because
+  fourth conjunct, symmetric to `eBoxNegWitness`'s third conjunct. Sound because
   `diamondPos` is *always* applicable (`Rules.lean:93-116` never checks an emptiness guard,
   unlike `boxPos`/`diamondNeg`), so once `T(◇ψ)@w` is expanded (added to `e`), its witness
   `T(ψ)@w'` and edge `w → w'` are created immediately (`modalApplyOne_diamondPos_witness` below)
@@ -126,7 +126,7 @@ structure ModalLoopInv (φ0 : Proposition Atom)
     ∃ w', acc.hasEdge w w' = true ∧
       (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
 
-/-- **Generic bundled loop invariant** (task 510): `ModalLoopInv`, generalized over an abstract
+/-- **Generic bundled loop invariant**: `ModalLoopInv`, generalized over an abstract
 `apply : RuleApply Atom`. Only `hintikkaInv` mentions `apply` (via `modalHintikkaClauseGen`); the
 other six conjuncts are already rule-agnostic (statements mention no rule function at all). Kept
 as its own `structure` (not derived from `ModalLoopInv`) to preserve K's byte-identical public
@@ -159,7 +159,7 @@ structure ModalLoopInvGen (apply : RuleApply Atom) (φ0 : Proposition Atom)
     ∃ w', acc.hasEdge w w' = true ∧
       (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
 
-/-- Bridge (task 510): `ModalLoopInv` and `ModalLoopInvGen modalApplyOne` are logically
+/-- Bridge: `ModalLoopInv` and `ModalLoopInvGen modalApplyOne` are logically
 equivalent (constructor/destructor on the seven fields, each field either `Iff.rfl`-trivial or
 `modalHintikkaClause_eq`-rewritten). Kept as an `Iff` rather than an `abbrev`/definitional
 identification so `ModalLoopInv` stays a genuinely distinct `structure` -- the anonymous
@@ -243,9 +243,9 @@ tag-cardinality identity. `Aux` is therefore threaded as an opaque, step-preserv
 (`AuxStepPreserved`) from which the bound is derived pointwise (`AuxBounds`), never as a bound
 scalar on its own. -/
 
-/-- **`Aux` is preserved by one `modalStepBranchGen apply` step** (task 515 Phase 11.5: re-arity'd
+/-- **`Aux` is preserved by one `modalStepBranchGen apply` step** (re-arity'd
 to thread `e` as an explicit `Aux` argument). An adversarial audit
-(`06_k-aux-unprovability-audit.md`) machine-checked that the prior `b → acc → Prop` shape is not
+machine-checked that the prior `b → acc → Prop` shape is not
 merely unproven at K's instantiation
 but **refutable**: a minting step advances `acc` and `e` in lockstep (`acc ↦ acc.addEdge l w'`,
 `e ↦ e ++ [sf]`), so an `Aux` with no `e` slot re-asserts the post-state obligation at the
@@ -273,15 +273,15 @@ def AuxStepPreserved (apply : RuleApply Atom)
 `ModalLoopInvHintikka.aux` stand in for `ModalLoopInvGen`'s `phiBound` conjunct wherever the
 world bound (`modalMaxWorld b < modalWorldBound φ0`) is needed, e.g. by
 `modalExpMeasure_step_lt_gen` (`FmpMeasure.lean`) in a step-preservation port. Re-arity'd
-alongside `AuxStepPreserved` (task 515 Phase 11.5) to thread `e`. -/
+alongside `AuxStepPreserved` to thread `e`. -/
 def AuxBounds (φ0 : Proposition Atom)
     (Aux : List (SignedFormula (Proposition Atom) WorldIndex) →
            List (SignedFormula (Proposition Atom) WorldIndex) → Accessibility → Prop) : Prop :=
   ∀ (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
     Aux b e acc → modalMaxWorld b < modalWorldBound φ0
 
-/-- **Rank-free bundled loop invariant, `Aux`-parametrized** (task 510's `ModalLoopInvGen`,
-generalized further). Carries the five rank-free conjuncts of `ModalPotentialInv` directly
+/-- **Rank-free bundled loop invariant, `Aux`-parametrized** (a further generalization of
+`ModalLoopInvGen`). Carries the five rank-free conjuncts of `ModalPotentialInv` directly
 (`bClosure`, `eClosure`, `eNodup`, `accFresh`, `accKnown`) plus the five Hintikka-witness
 conjuncts unchanged from `ModalLoopInvGen`, and replaces `potentialInv`/`phiBound` with a single
 opaque `aux : Aux b acc` field. `rankBound`/`rankEdge`/`outDegEq` (`ModalPotentialInv`'s
@@ -328,10 +328,10 @@ structure ModalLoopInvHintikka (apply : RuleApply Atom) (φ0 : Proposition Atom)
 
 /-- **K's instantiation of `Aux`**: existentially quantify over a rank map witnessing both the
 remaining `ModalPotentialInv` fields (`outDegEq`, `rankBound`, `rankEdge`) and the exact
-`phiBound` conservation identity. Task 515 Phase 11.5: `e` is now threaded as `Aux`'s own second
+`phiBound` conservation identity. `e` is now threaded as `Aux`'s own second
 argument (matching every other per-branch use of `ModalLoopInvHintikka`'s `e` parameter at the
 invocation site) rather than closed over via currying -- the prior curried-`e` shape is exactly
-what the adversarial audit (`06_k-aux-unprovability-audit.md`) proved makes a closed
+what the adversarial audit proved makes a closed
 `AuxStepPreserved` witness for this instantiation refutable, since a minting step advances `e`
 but a curried-`e` `Aux` cannot observe the advance. -/
 def ModalLoopAuxK (φ0 : Proposition Atom)
@@ -351,8 +351,8 @@ theorem ModalLoopAuxK_bounds (φ0 : Proposition Atom) :
 /-- **`ModalLoopInvGen` is logically equivalent to `ModalLoopInvHintikka` at K's `Aux`**
 (confirms `ModalLoopAuxK` elaborates in the strongest sense -- a full bridge, not merely a
 type-check). Constructor/destructor on the shared eleven conjuncts plus `ModalPotentialInv`'s
-three remaining rank-dependent fields, packaged into/out of the existential `aux` field. Note
-(task 515 Phase 11.5, per the audit): this bridge is stated at a single fixed `(b, e, acc)` and
+three remaining rank-dependent fields, packaged into/out of the existential `aux` field. Note:
+this bridge is stated at a single fixed `(b, e, acc)` and
 so never exercises a step -- it confirms `ModalLoopAuxK` elaborates soundly, but is not itself a
 step-preservation witness; that is `ModalLoopAuxK_stepPreserved` below. -/
 theorem ModalLoopInvGen_iff_hintikka_auxK (apply : RuleApply Atom) (φ0 : Proposition Atom)
@@ -369,8 +369,8 @@ theorem ModalLoopInvGen_iff_hintikka_auxK (apply : RuleApply Atom) (φ0 : Propos
 /-! ### S5w's `Aux` Instantiation -/
 
 /-- **S5w's instantiation of `Aux`**: the landed tag/world invariants (`S5Simplification.lean`),
-needing no rank map at all. The trailing `Accessibility` argument, and now also the `e` argument
-(task 515 Phase 11.5 re-arity), are required by `Aux`'s shared signature
+needing no rank map at all. The trailing `Accessibility` argument, and the `e` argument, are
+required by `Aux`'s shared signature
 (`AuxStepPreserved`/`AuxBounds`/`ModalLoopInvHintikka` all expect
 `List (SignedFormula …) → List (SignedFormula …) → Accessibility → Prop`) but genuinely unused
 here. -/
@@ -390,8 +390,8 @@ theorem ModalLoopAuxS5w_bounds (φ₀ : Proposition Atom) :
 /-- **`ModalLoopAuxS5w` is step-preserved**: the `AuxStepPreserved` obligation for S5w's
 instantiation, discharged directly by the already-landed
 `modalStepBranchS5w_preserves_worldInv`, which is exactly this statement's conclusion under the
-same three hypotheses (`hT`/`hW` packaged as `Aux`, `hK` the `accTargetsKnown` ambient). Task 515
-Phase 11.5 re-arity: the conclusion now ranges over `newBs.zip newExps` rather than bare `newBs`;
+same three hypotheses (`hT`/`hW` packaged as `Aux`, `hK` the `accTargetsKnown` ambient). The
+conclusion now ranges over `newBs.zip newExps` rather than bare `newBs`;
 `(List.of_mem_zip hp).1` replaces the prior direct `hb'` membership, the only change this
 instantiation needs. Unlike K's instantiation, this discharges completely here: no rank map, no
 potential, no further step-preservation machinery needed. -/
@@ -434,7 +434,7 @@ lemma modalLoopInvHintikkaS5w_initial (φ₀ : Proposition Atom) :
   · simp only [S5wWorldInv, modalMaxWorld, List.foldl_cons, List.foldl_nil]
     exact Nat.zero_le _
 
-/-- **Generic branch-side universe-closure preservation** (task 510):
+/-- **Generic branch-side universe-closure preservation**:
 `modalLoopGen_bClosure`, over an abstract `(apply, spec)`, discharged by
 `spec.outputsSubsetUniverse`. Body is `modalLoop_bClosure`'s exact proof with
 `modalApplyOne ↦ apply`, `modalStepBranch ↦ modalStepBranchGen apply`, and
@@ -495,7 +495,7 @@ formula on each child branch stays inside `U(φ0)`, combining the source branch-
 top-level case split of the `private` `modalStepBranch_eClosure` (`FmpMeasure.lean:2166`), but
 for the branch side rather than the expanded-set side.
 
-Byte-identical-statement corollary of `modalLoopGen_bClosure` (task 510) via `modalStepBranch_eq`
+Byte-identical-statement corollary of `modalLoopGen_bClosure` via `modalStepBranch_eq`
 and K's `modalApplyOne_spec`. -/
 private lemma modalLoop_bClosure
     (φ0 : Proposition Atom)
@@ -510,7 +510,7 @@ private lemma modalLoop_bClosure
   modalLoopGen_bClosure modalApplyOne modalApplyOne_spec φ0 b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep) hb hAccInv hW
 
-/-- **Generic constant-expanded-set fact** (task 510): `modalStepBranchGen_newExps_const`, over
+/-- **Generic constant-expanded-set fact**: `modalStepBranchGen_newExps_const`, over
 an abstract `apply`. Takes **no** field -- driver-structural. -/
 private lemma modalStepBranchGen_newExps_const
     (apply : RuleApply Atom)
@@ -543,7 +543,7 @@ set `newExp` (either `e` unchanged, for the `.persistent` case, or `e ++ [sf]`, 
 the generic fact `modalExpMeasure_step_lt`'s hypothesis shape (`FmpMeasure.lean:3029`) assumes as
 given; here it is derived from a generic `hstep`.
 
-Byte-identical-statement corollary of `modalStepBranchGen_newExps_const` (task 510) via
+Byte-identical-statement corollary of `modalStepBranchGen_newExps_const` via
 `modalStepBranch_eq`. -/
 private lemma modalStepBranch_newExps_const
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -554,7 +554,7 @@ private lemma modalStepBranch_newExps_const
   modalStepBranchGen_newExps_const modalApplyOne b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep)
 
-/-- **Generic F9 discharge** (task 510): `modalLoopGen_eBoxOnlyNeg`, over an abstract
+/-- **Generic F9 discharge**: `modalLoopGen_eBoxOnlyNeg`, over an abstract
 `(apply, spec)`. The statement mentions no `apply` at all (already rule-agnostic); only the
 proof needs `spec.boxPosNotExpanding` (F9) to rule out `sf_exp`'s result being
 `.linear`/`.branching` when it is `boxPos`-shaped -- the payload (`out`/`kForms`) is discarded
@@ -626,7 +626,7 @@ appended `sf_exp` must itself have sign `.neg` whenever its formula is box-shape
 `sf_exp` were `.pos`-box-shaped, `modalApplyOne_boxPos_eq` would force its own result to be
 `.notApplicable`/`.persistent`, contradicting the linear/branching case split.
 
-Byte-identical-statement corollary of `modalLoopGen_eBoxOnlyNeg` (task 510) via
+Byte-identical-statement corollary of `modalLoopGen_eBoxOnlyNeg` via
 `modalStepBranch_eq`. -/
 private lemma modalLoop_eBoxOnlyNeg
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -638,7 +638,7 @@ private lemma modalLoop_eBoxOnlyNeg
   modalLoopGen_eBoxOnlyNeg modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep) he
 
-/-- **Generic F10 discharge** (task 510): `modalLoopGen_eDiamondOnlyPos`, dual of
+/-- **Generic F10 discharge**: `modalLoopGen_eDiamondOnlyPos`, dual of
 `modalLoopGen_eBoxOnlyNeg` via `spec.diaNegNotExpanding`. -/
 private lemma modalLoopGen_eDiamondOnlyPos
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
@@ -700,10 +700,10 @@ private lemma modalLoopGen_eDiamondOnlyPos
   · rw [hfstc] at hsf; simp at hsf
 
 /-- Preservation of the `eDiamondOnlyPos` invariant across a `modalStepBranch` step: mirrors
-`modalLoop_eBoxOnlyNeg`'s case split (task 441: `diamondNeg` is the symmetric never-linear/
+`modalLoop_eBoxOnlyNeg`'s case split (`diamondNeg` is the symmetric never-linear/
 branching shape, dismissed via `modalApplyOne_diamondNeg_eq`).
 
-Byte-identical-statement corollary of `modalLoopGen_eDiamondOnlyPos` (task 510) via
+Byte-identical-statement corollary of `modalLoopGen_eDiamondOnlyPos` via
 `modalStepBranch_eq`. -/
 private lemma modalLoop_eDiamondOnlyPos
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -721,7 +721,7 @@ private lemma hasEdge_addEdge_mono {acc : Accessibility} {w w' x y : WorldIndex}
   simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
   simp [h]
 
-/-- **Generic accessibility-edge monotonicity** (task 510): `modalApplyGen_hasEdge_mono`, over an
+/-- **Generic accessibility-edge monotonicity**: `modalApplyGen_hasEdge_mono`, over an
 abstract `apply`, given the raw `hFreshLocal` hypothesis (`RuleApplicationSpec`'s existing F1
 `freshLocal` field, `GenericDriver.lean`). **No new field** -- `freshLocal`'s own dichotomy is
 exactly what the deleted `modalLoop_snd_eq_or_addEdge` restated verbatim for K, so this
@@ -744,7 +744,7 @@ private lemma modalApplyGen_hasEdge_mono
 /-- Accessibility edges only grow across one `modalApplyOne` application: an edge present
 before the step is still present in the (possibly-updated) accessibility relation afterward.
 
-Byte-identical-statement corollary of `modalApplyGen_hasEdge_mono` (task 510) via K's own
+Byte-identical-statement corollary of `modalApplyGen_hasEdge_mono` via K's own
 `modalApplyOne_fresh_local`. -/
 private lemma modalApplyOne_hasEdge_mono
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -753,7 +753,7 @@ private lemma modalApplyOne_hasEdge_mono
     (modalApplyOne sf b acc).snd.hasEdge w w' = true :=
   modalApplyGen_hasEdge_mono modalApplyOne modalApplyOne_fresh_local sf b acc h
 
-/-- **Generic F11+freshLocal discharge** (task 510): `modalLoopGen_eBoxNegWitness`, over an
+/-- **Generic F11+freshLocal discharge**: `modalLoopGen_eBoxNegWitness`, over an
 abstract `(apply, spec)`. For old `e`-elements the witness/edge from `he` transfers to every
 child branch/accessibility via `b ⊆ b'` (branches only grow) and `modalApplyGen_hasEdge_mono`
 (`spec.freshLocal`, `acc`-edges only grow); for a freshly-appended `sf_exp` that is itself
@@ -838,7 +838,7 @@ to every child branch/accessibility via `b ⊆ b'` (branches only grow) and
 `modalApplyOne_hasEdge_mono` (`acc`-edges only grow); for a freshly-appended `sf_exp` that is
 itself `boxNeg`-shaped, `modalApplyOne_boxNeg_witness` constructs the witness and edge directly.
 
-Byte-identical-statement corollary of `modalLoopGen_eBoxNegWitness` (task 510) via
+Byte-identical-statement corollary of `modalLoopGen_eBoxNegWitness` via
 `modalStepBranch_eq`. -/
 private lemma modalLoop_eBoxNegWitness
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -856,7 +856,7 @@ private lemma modalLoop_eBoxNegWitness
   modalLoopGen_eBoxNegWitness modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep) he
 
-/-- **Generic F12+freshLocal discharge** (task 510): `modalLoopGen_eDiamondPosWitness`, dual of
+/-- **Generic F12+freshLocal discharge**: `modalLoopGen_eDiamondPosWitness`, dual of
 `modalLoopGen_eBoxNegWitness` via `spec.diaPosWitness'` (F12'). -/
 private lemma modalLoopGen_eDiamondPosWitness
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
@@ -933,10 +933,10 @@ private lemma modalLoopGen_eDiamondPosWitness
   · rw [hfstc] at hsf; simp at hsf
 
 /-- Preservation of the `eDiamondPosWitness` invariant across a `modalStepBranch` step: mirrors
-`modalLoop_eBoxNegWitness`'s case split (task 441: `diamondPos` is the symmetric fresh-world
+`modalLoop_eBoxNegWitness`'s case split (`diamondPos` is the symmetric fresh-world
 witness rule, via `modalApplyOne_diamondPos_witness`).
 
-Byte-identical-statement corollary of `modalLoopGen_eDiamondPosWitness` (task 510) via
+Byte-identical-statement corollary of `modalLoopGen_eDiamondPosWitness` via
 `modalStepBranch_eq`. -/
 private lemma modalLoop_eDiamondPosWitness
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -954,16 +954,16 @@ private lemma modalLoop_eDiamondPosWitness
   modalLoopGen_eDiamondPosWitness modalApplyOne modalApplyOne_spec b e acc newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep) he
 
-/-! ## Step Preservation for `ModalLoopInvHintikka` (task 515 Phase 11)
+/-! ## Step Preservation for `ModalLoopInvHintikka`
 
 The five rule-dependent helpers above (`modalLoopGen_bClosure`, `_eBoxOnlyNeg`,
 `_eDiamondOnlyPos`, `_eBoxNegWitness`, `_eDiamondPosWitness`) are declared against the full
 `RuleApplicationSpec`, but each proof body only ever consumes a Core field
 (`outputsSubsetUniverse`, `boxPosNotExpanding`, `diaNegNotExpanding`, `freshLocal`,
-`boxNegWitness'`/`diaPosWitness'`). Weakening those five declarations in place is Phase 12's
-remit (the broader Core-only signature pass), so instead this section lands five purely-additive
-`_core`-suffixed twins -- identical proof bodies, parametrized over `RuleApplicationSpecCore`
-directly -- leaving every existing declaration above untouched. -/
+`boxNegWitness'`/`diaPosWitness'`). Weakening those five declarations in place to a Core-only
+signature is left for a future generalization pass, so instead this section lands five
+purely-additive `_core`-suffixed twins -- identical proof bodies, parametrized over
+`RuleApplicationSpecCore` directly -- leaving every existing declaration above untouched. -/
 
 private lemma modalLoopGen_bClosure_core
     (apply : RuleApply Atom) (hcore : RuleApplicationSpecCore apply)
@@ -1281,7 +1281,7 @@ private lemma modalLoopGen_eDiamondPosWitness_core
       List.mem_append.mpr (Or.inr hwit)⟩
   · rw [hfstc] at hsf; simp at hsf
 
-/-- **Step preservation for `ModalLoopInvHintikka`** (task 515 Phase 11): a port of
+/-- **Step preservation for `ModalLoopInvHintikka`**: a port of
 `modalStepGen_preserves_invariant` to the rank-free, `Aux`-parametrized invariant, with the two
 `potential_step`-derived lines (the existential rank witness and the `phiBound` re-derivation)
 removed and replaced by the caller-supplied `AuxStepPreserved`/`AuxBounds` facts. Only needs
@@ -1347,11 +1347,10 @@ lemma modalStepHintikka_preserves_inv
     rw [hNewExpEq]
     exact hdrop
 
-/-- **`modalStepHintikka_preserves_inv` instantiated at S5w's `Aux`** (task 515 Phase 11, half of
-the phase's verification bar): concretely discharges the generic lemma above at
-`Aux := ModalLoopAuxS5w φ0`, using the already-landed `modalApplyOneS5w_specCore` (Phase 9),
-`ModalLoopAuxS5w_stepPreserved`, and `ModalLoopAuxS5w_bounds` (Phase 10/prior in this file).
-`ModalLoopAuxS5w` ignores its (now-present, Phase 11.5) `e` argument entirely, since S5w's
+/-- **`modalStepHintikka_preserves_inv` instantiated at S5w's `Aux`**: concretely discharges the
+generic lemma above at `Aux := ModalLoopAuxS5w φ0`, using the already-landed
+`modalApplyOneS5w_specCore`, `ModalLoopAuxS5w_stepPreserved`, and `ModalLoopAuxS5w_bounds` (both
+above, in this file). `ModalLoopAuxS5w` ignores its `e` argument entirely, since S5w's
 tag/world invariants need no rank map. -/
 theorem modalStepHintikka_preserves_inv_S5w
     (φ0 : Proposition Atom)
@@ -1368,12 +1367,11 @@ theorem modalStepHintikka_preserves_inv_S5w
     (ModalLoopAuxS5w φ0) (ModalLoopAuxS5w_stepPreserved φ0) (ModalLoopAuxS5w_bounds φ0) b e acc
     newBs newExps newAcc hstep hinv
 
-/-- **`modalStepHintikka_preserves_inv` instantiated at K's `Aux`** (task 515 Phase 11.5, the
-other half of Phase 11's verification bar, closed here after the audit's re-arity fix): unlike
+/-- **`modalStepHintikka_preserves_inv` instantiated at K's `Aux`**: unlike
 S5w, this instantiation is **generic over any `apply` with a full `RuleApplicationSpec`** -- not
 per-logic -- so K, T, and B all get their `AuxStepPreserved` witness from this one theorem. This
-is the "K/T/B pay nothing" guarantee named in Phase 10, actually delivered. Every field is
-discharged by a landed, public lemma: `spec.toCore`-parametrized `_core` twins (Phase 11) for the
+is the intended "K/T/B pay nothing" guarantee, actually delivered here. Every field is
+discharged by a landed, public lemma: `spec.toCore`-parametrized `_core` twins (above) for the
 five rule-dependent conjuncts, `modalStepBranch_potential_step_gen` (`FmpMeasure.lean`) for the
 rank witness and `rankBound`/`rankEdge`/`phiBound` conservation, and -- the crux --
 `modalStepBranch_preserves_outDegEq_gen`, whose conclusion is already stated at the **new**
@@ -1743,17 +1741,17 @@ theorem modalExpandBranchesHintikka
 
 /-! ## The Combined-Invariant Single-Step Preservation Lemma -/
 
-/-- **Generic combined-invariant single-step preservation** (task 510, the composition crux):
+/-- **Generic combined-invariant single-step preservation** (the composition crux):
 `modalStepGen_preserves_invariant`, over an abstract `(apply, spec)`. Composes exactly eight
-step lemmas -- seven already available from task 507 as bundled `(apply, spec)` forms
+step lemmas -- seven already available as bundled `(apply, spec)` forms
 (`modalStepBranchGen_potential_step`, `_preserves_accTargetsKnown`, `_preserves_outDegEq`,
 `modalStepBranch_preserves_expandedNodup_gen` [no field], `_eClosure`, `_expMeasure_step_lt`, and
 the rule-agnostic `modalMaxWorld_lt_worldBound_of_phiBound`); the eighth,
-`modalStepBranch_preserves_accFreshInv_gen`, comes from Phase 4 (`Soundness.lean`), called with
+`modalStepBranch_preserves_accFreshInv_gen`, comes from `Soundness.lean`, called with
 `spec.freshLocal`. The five rule-dependent conjuncts (`modalLoopGen_bClosure`,
 `modalStepBranchGen_hintikka_inv` [raw F8, `spec.localShapeInvariance`],
-`modalLoopGen_eBoxOnlyNeg`/`_eBoxNegWitness`/`_eDiamondOnlyPos`/`_eDiamondPosWitness`) are fed
-from Phases 3, 5, 6. -/
+`modalLoopGen_eBoxOnlyNeg`/`_eBoxNegWitness`/`_eDiamondOnlyPos`/`_eDiamondPosWitness`) are
+declared above. -/
 lemma modalStepGen_preserves_invariant
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom)
@@ -1819,7 +1817,7 @@ lemma modalStepGen_preserves_invariant
     rw [hNewExpEq]
     exact hdrop
 
-/-- **Combined-invariant single-step preservation** (task 442 Phase 5a): given the bundled loop
+/-- **Combined-invariant single-step preservation**: given the bundled loop
 invariant `ModalLoopInv` holds pre-step and `modalStepBranch b e acc = some (newBs, newExps,
 newAcc)`, there is a single shared rank map `rank'` under which the bundle holds on every child
 branch/expanded-set pair, and the base-3 counting measure `modalExpMeasure` strictly decreases.
@@ -1827,7 +1825,7 @@ Composes P2 (`modalStepBranch_worldBound`, `modalStepBranch_potential_step`), P3
 (`modalExpMeasure_step_lt`, supplying its `hb`/`hInv`/`hW` hypotheses from the bundle), P4
 (`modalStepBranch_hintikka_inv`), and the green `modalStepBranch_preserves_accFreshInv`.
 
-Byte-identical-statement corollary of `modalStepGen_preserves_invariant` (task 510) via
+Byte-identical-statement corollary of `modalStepGen_preserves_invariant` via
 `modalStepBranch_eq`/`ModalLoopInv_iff_gen`. -/
 lemma modalStep_preserves_invariant
     (φ0 : Proposition Atom)
@@ -1847,14 +1845,15 @@ lemma modalStep_preserves_invariant
       ((ModalLoopInv_iff_gen φ0 b e acc rank).mp hinv)
   exact ⟨rank', fun p hp => (ModalLoopInv_iff_gen φ0 p.1 p.2 newAcc rank').mpr (hAll p hp), hmeas⟩
 
-/-! ## The Top-Loop Hintikka Lemma (task 442 Phase 5b; generalized task 510) -/
+/-! ## The Top-Loop Hintikka Lemma -/
 
-/-- **Generic top-loop Hintikka lemma** (task 510, the crux): if `modalExpandBranchesGen apply`
+/-- **Generic top-loop Hintikka lemma** (the crux): if `modalExpandBranchesGen apply`
 returns an open branch, that branch (with its accessibility relation) is a **generic** modal
 Hintikka set, `modalHintikkaSetGen apply bR aR` -- **not** the concrete `modalHintikkaSet bR aR`.
 This is the acceptance-critical conclusion type: `modalHintikkaSetGen` is spec-free
-(`Saturation.lean`), so 505/506 can consume this statement shape at their own `apply`, and T's
-one-liner discharge (`TDriver.lean`) is the structural proof this criterion was met.
+(`Saturation.lean`), so the B and S4 systems can consume this statement shape at their own
+`apply`, and T's one-liner discharge (`TDriver.lean`) is the structural proof this criterion was
+met.
 
 **Now a corollary of `modalExpandBranchesHintikka`** (above), instantiated at K's own
 `Aux := ModalLoopAuxK φ0`. This statement is unchanged from -- and its consumers
@@ -1892,9 +1891,9 @@ lemma modalExpandBranchesGen_hintikka
       (ModalLoopInvGen_iff_hintikka_auxK apply φ0 bi ei ai).mp (hInv i bi ei ai hb he ha))
     bR aR h
 
-/-- **Top-loop Hintikka lemma** (task 442 Phase 5b): if `modalExpandBranches` returns an open
+/-- **Top-loop Hintikka lemma**: if `modalExpandBranches` returns an open
 branch, that branch (with its accessibility relation) is a modal Hintikka set, provided the
-bundled loop invariant `ModalLoopInv` (Phase 5a) holds for every branch/expanded-set/`acc` triple
+bundled loop invariant `ModalLoopInv` (above) holds for every branch/expanded-set/`acc` triple
 in the initial worklist under *some* per-index rank map, and the worklist's `modalExpMeasure` is
 bounded by the available fuel.
 
@@ -1914,7 +1913,7 @@ measure bound, splitting the new worklist's indices into the unchanged `done`/`b
 the freshly-produced `newBs` region (all sharing the single constant expanded-set `newExp` and
 accessibility relation `newAcc`, `modalStepBranch_newExps_const`).
 
-Byte-identical-statement corollary of `modalExpandBranchesGen_hintikka` (task 510, the crux) via
+Byte-identical-statement corollary of `modalExpandBranchesGen_hintikka` (the crux) via
 `modalExpandBranches_eq`/`modalHintikkaSet_eq`/`ModalLoopInv_iff_gen`. -/
 lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
@@ -1942,7 +1941,7 @@ lemma modalExpandBranches_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
   exact modalExpandBranchesGen_hintikka modalApplyOne modalApplyOne_spec φ0 fuel branches
     expandedSets accs hlen hlenA hfuel hInv' bR aR h
 
-/-! ## Initial-Branch Membership Persistence (task 442 Phase 6) -/
+/-! ## Initial-Branch Membership Persistence -/
 
 /-- One `modalStepBranch` step preserves membership of a fixed formula `sf` already on the
 branch: mirrors `modalLoop_bClosure`'s case split (every child branch is `newForms ++ b` or
@@ -1987,7 +1986,7 @@ branch: mirrors `modalLoop_bClosure`'s case split (every child branch is `newFor
 `br ++ b` for some `br`/`newForms`, so any pre-existing branch member survives via
 `List.mem_append_right`).
 
-Byte-identical-statement corollary of `modalStepBranchGen_mem_preserved` (task 510) via
+Byte-identical-statement corollary of `modalStepBranchGen_mem_preserved` via
 `modalStepBranch_eq`. -/
 private lemma modalStepBranch_mem_preserved
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1999,9 +1998,9 @@ private lemma modalStepBranch_mem_preserved
   modalStepBranchGen_mem_preserved modalApplyOne b e acc sf hsf newBs newExps newAcc
     (modalStepBranch_eq b e acc ▸ hstep)
 
-/-- **Generic initial-branch membership persistence** (task 510): `modalExpandBranchesGen_
+/-- **Generic initial-branch membership persistence**: `modalExpandBranchesGen_
 openBranch_initial_mem`, over an abstract `apply`. Takes **no** field -- driver-structural, needed
-by 503 for its own T-system truth lemma. Not `private` (task 503 Phase 5): the proof is genuinely
+by the T system for its own truth lemma. Not `private`: the proof is genuinely
 `apply`-agnostic (never inspects `apply`'s output shape), so `modalTableauT_complete`
 (`FrameCompleteness.lean`) reuses it directly at `apply := modalApplyOneT` rather than
 re-deriving an identical T-specific copy. -/
@@ -2121,9 +2120,9 @@ lemma modalExpandBranchesGen_openBranch_initial_mem
 `modalExpandBranches`. Mirrors the classical propositional tableau's
 `classicalExpandBranches_openBranch_initial_mem`
 (`Classical/Completeness.lean:1164`), extended with the per-branch `acc` parallel list. Used to
-show `F(φ0)@0` is on the countermodel branch (task 442 Phase 6).
+show `F(φ0)@0` is on the countermodel branch.
 
-Byte-identical-statement corollary of `modalExpandBranchesGen_openBranch_initial_mem` (task 510)
+Byte-identical-statement corollary of `modalExpandBranchesGen_openBranch_initial_mem`
 via `modalExpandBranches_eq`. -/
 private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
     (sf : SignedFormula (Proposition Atom) WorldIndex) :
@@ -2140,12 +2139,11 @@ private lemma modalExpandBranches_openBranch_initial_mem (fuel : Nat)
   exact modalExpandBranchesGen_openBranch_initial_mem modalApplyOne fuel sf branches expandedSets
     accs hlen hlenA hAll bR aR h
 
-/-! ## Initial Loop Invariant and the Public Completeness/Decidability Results
-(task 442 Phase 6, FINAL) -/
+/-! ## Initial Loop Invariant and the Public Completeness/Decidability Results -/
 
-/-- **Generic initial-configuration loop invariant** (task 510): `modalLoopInvGen_initial`, over
+/-- **Generic initial-configuration loop invariant**: `modalLoopInvGen_initial`, over
 an abstract `apply`. Takes **no** field -- the five rule-dependent conjuncts are all vacuous over
-`e = []`, so nothing about `apply` is ever consulted. Not `private` (task 503 Phase 5): reused
+`e = []`, so nothing about `apply` is ever consulted. Not `private`: reused
 directly at `apply := modalApplyOneT` by `modalTableauT_complete` (`FrameCompleteness.lean`). -/
 lemma modalLoopInvGen_initial (apply : RuleApply Atom) (φ0 : Proposition Atom) :
     ModalLoopInvGen apply φ0
@@ -2222,16 +2220,16 @@ map `fun _ => modalDepth φ0`. Every `ModalPotentialInv` field is either a direc
 `hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`, all quantified over `e = []`); `phiBound` is an
 exact equality driven by `geomCap`'s defining recursion (`geomCap_succ`), not merely a bound.
 
-Byte-identical-statement corollary of `modalLoopInvGen_initial` (task 510) via
+Byte-identical-statement corollary of `modalLoopInvGen_initial` via
 `ModalLoopInv_iff_gen`. -/
 private lemma modalLoopInv_initial (φ0 : Proposition Atom) :
     ModalLoopInv φ0 [(⟨.neg, φ0, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
       Accessibility.empty (fun _ => modalDepth φ0) :=
   (ModalLoopInv_iff_gen φ0 _ _ _ _).mpr (modalLoopInvGen_initial modalApplyOne φ0)
 
-/-- **K-completeness of the modal tableau** (task 442 Phase 6, FINAL): if the tableau on `φ0`
+/-- **K-completeness of the modal tableau**: if the tableau on `φ0`
 returns an open branch, `φ0` is not K-valid. Combines the top-loop Hintikka lemma
-(`modalExpandBranches_hintikka`, Phase 5b) instantiated at the initial configuration (via
+(`modalExpandBranches_hintikka`, above) instantiated at the initial configuration (via
 `modalLoopInv_initial` and the fuel bridge `modalExpMeasure_entry_le_fuel`), the initial-branch
 membership persistence lemma (`modalExpandBranches_openBranch_initial_mem`, above) showing
 `F(φ0)@0` survives to the returned branch, and the countermodel extraction theorem
@@ -2276,7 +2274,7 @@ theorem modalTableau_complete (φ0 : Proposition Atom)
   intro hkv
   exact hnot (hkv WorldIndex (extractModel b a) 0)
 
-/-- **The modal K tableau decides K-validity** (task 442 Phase 6, FINAL): `modalTableau φ0`
+/-- **The modal K tableau decides K-validity**: `modalTableau φ0`
 closes exactly when `φ0` is K-valid. Combines soundness (`modalTableau_sound`,
 `Soundness.lean:334`) with completeness (`modalTableau_complete`, above) via the two-constructor
 dichotomy of `ModalTableauResult`. -/
@@ -2289,7 +2287,7 @@ theorem modalTableau_decides (φ0 : Proposition Atom) :
     | closed => rfl
     | openBranch b a => exact absurd hkv (modalTableau_complete φ0 htab)
 
-/-- **K-validity is decidable** (task 442 Phase 6, FINAL): decide by running the modal K
+/-- **K-validity is decidable**: decide by running the modal K
 tableau and consulting `modalTableau_decides`. No `Fintype Atom` assumption is needed, since the
 tableau computation itself is the decision procedure. -/
 instance instDecidableKValid (φ0 : Proposition Atom) : Decidable (kValid φ0) :=

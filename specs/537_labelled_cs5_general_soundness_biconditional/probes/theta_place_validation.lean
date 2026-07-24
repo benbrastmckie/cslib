@@ -213,4 +213,53 @@ theorem caseC_no_restriction_needed (A : Proposition ℕ) :
 #print axioms caseB_theta_imp_place
 #print axioms caseC_no_restriction_needed
 
+/-! ## Case E: `Graph.trivial` collapse (the Phase 20 assembly step) -/
+
+theorem factsAt_nil_r : factsAt ([] : List (LabelledFormula ℕ)) r = [] := by
+  simp [factsAt]
+
+theorem orphanFacts_nil_r : orphanFacts Gt ([] : List (LabelledFormula ℕ)) r = [] := by
+  simp [orphanFacts]
+
+theorem no_edges_Gt (a b : Label ℕ) : ¬ Gt.R a b := fun h => h
+
+/-- **`sigAt Gt [] Gt_fin r` is a CS5 tautology** (unfolds to a pure conjunction of `bigAndL []`
+tautology-pads, `Gt` having no edges and `[]` carrying no facts). -/
+theorem sigAt_nil_r_deriv : Derivable CS5ModalAxiom (sigAt Gt [] Gt_fin r) := by
+  have hcard : Gt_fin.toFinset.card = 1 := by
+    have : Gt_fin.toFinset = {Label.var 0} := by ext c; simp [Gt, Graph.trivial]
+    simp [this]
+  have hempty : {c | Gt.R r c} = (∅ : Set (Label ℕ)) := by ext c; simp [no_edges_Gt]
+  have hunfold : sigAt Gt [] Gt_fin r = Proposition.and (bigAndL (factsAt [] r)) (bigAndL []) := by
+    rw [sigAt, hcard, sigAtFuel]
+    congr 1
+    simp [Set.Finite.toFinset_eq_empty.mpr hempty]
+  rw [hunfold, factsAt_nil_r]
+  exact deriv_and bigAndL_nil_deriv bigAndL_nil_deriv
+
+/-- **`Θ(Graph.trivial,[])` is a CS5 tautology.** -/
+theorem caseE_theta_trivial_deriv :
+    Derivable CS5ModalAxiom (Theta Gt ([] : List (LabelledFormula ℕ)) Gt_fin r) := by
+  have horph : Derivable CS5ModalAxiom (bigAndL (orphanFacts Gt ([] : List (LabelledFormula ℕ)) r)) := by
+    rw [orphanFacts_nil_r]; exact bigAndL_nil_deriv
+  exact deriv_and sigAt_nil_r_deriv horph
+
+/-- `place` at the root, depth `0`, is the identity: `place ht0 root φ = φ`. -/
+theorem caseE_place_eq (φ : Proposition ℕ) : place ht0 r φ = φ := rfl
+
+/-- **The Phase 20 collapse itself**: GIVEN a (hypothetical -- not yet the full adequacy
+induction, which is Phases 13-19's job) derivation of `Θ(Gt,[]) ⊃ place(r,φ)`, modus ponens with
+`caseE_theta_trivial_deriv` yields `⊢ φ` directly -- the exact mechanism `nik_TS5_to_hilbert`
+(Phase 20) needs to strip the translation off a closed `NIKTheorem` derivation. -/
+theorem caseE_collapse (φ : Proposition ℕ)
+    (h : Derivable CS5ModalAxiom ((Theta Gt ([] : List (LabelledFormula ℕ)) Gt_fin r).imp
+      (place ht0 r φ))) : Derivable CS5ModalAxiom φ := by
+  rw [caseE_place_eq] at h
+  obtain ⟨dimp⟩ := h
+  obtain ⟨dtriv⟩ := caseE_theta_trivial_deriv
+  exact ⟨.modus_ponens [] _ _ dimp dtriv⟩
+
+#print axioms caseE_theta_trivial_deriv
+#print axioms caseE_collapse
+
 end Probe537Theta

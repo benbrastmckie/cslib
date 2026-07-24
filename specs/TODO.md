@@ -11,8 +11,8 @@ next_project_number: 555
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,463,465,466,511,519,530,534,551,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
-| 2 | 39,40,215,317,425,450,506,537,548 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,400,409,440,463,465,466,511,519,530,534,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 2 | 39,40,215,317,425,450,506,537,548,551 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,301,375,430,456,497 | 39,40,317,425,506 | foundations, propositional logic, modal logic, ... |
 | 4 | 413,414 | 181,215,300,301,375 | code hygiene |
 
@@ -35,12 +35,12 @@ next_project_number: 555
 ### Modal Logic
 
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-551 [IMPLEMENTING] — Deliver NATIVE Hilbert canonical-model completeness for construct
 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
   └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived (see above)
 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
+551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
@@ -91,6 +91,7 @@ next_project_number: 555
 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
 554 [NOT STARTED] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — (Modal Logic: Prove the general labelled SOUNDNESS dir) (see above)
+  └─ 551 [BLOCKED] — (Modal Logic: Deliver NATIVE Hilbert canonical-model c) (see above)
 
 ## Tasks
 
@@ -123,10 +124,10 @@ next_project_number: 555
 
 ### 551. Cs5 native hilbert pair lindenbaum completeness
 - **Effort**: large
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: None
+- **Dependencies**: Task 554
 - **Probe**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/probes/cs5-pair-combined-atomsum.lean]
 - **Summary**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/01_native-hilbert-cs5-completeness-summary.md]
 - **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/03_remaining-obligations-and-path.md]

@@ -2015,11 +2015,13 @@
     {
       "project_number": 551,
       "project_name": "cs5_native_hilbert_pair_lindenbaum_completeness",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.",
-      "dependencies": [],
+      "dependencies": [
+        554
+      ],
       "parent_task": null,
       "created": "2026-07-24T00:00:00Z",
       "last_updated": "2026-07-24T19:41:44Z",
@@ -2095,7 +2097,7 @@
           }
         ]
       },
-      "blockers": "Phase 4 conservativity lemma is research-level/open (report 02: Route 4 verdict). USER DECISION REQUIRED: (a) accept Route A (CS5=IS5 collapse via is5_completeness) — sound and bounded but violates the task native-Hilbert mandate (first confirm the bounded premise CS5 |- idb/k4 per report 01 sec 10); (b) re-scope task to phases 1-3 assets + open-lemma escalation; (c) fund a dedicated research task for the context-relative conservativity theorem. Phases 1-3 landed sorry-free (probe, DerivationTree.map, CS5Completeness.lean)."
+      "blockers": "Phases 4-6 blocked on the cross-inertness support lemma. The structural DerivationTree induction the plan sketched is keyed on a necessitation-only-from-empty-context box invariant, machine-verified FALSE for CS5PairAxiom: modus_ponens against CS5ModalAxiom.bBox (phi implies box-diamond-phi, CS5.lean:216) yields a bare-box conclusion that is neither an assumption nor a necessitation witness. This is the plan own anticipated risk R-B (as hard as obligation 3). Phases 5-6 depend on Phase 4 and were skipped per the plan sanctioned fallback. DELIVERED: phases 1,2,3 (propositional-core extension, primeness-engine bundle, two-sided seed), phase 7 (the named open obligation CS5PairSeedDisjunctionProperty plus its sorry-free conditional DerivExcludes theorem), and phase 8 (docs/CI). All sorry-free, build green at 730 jobs. Gated on the cut-free/nested-sequent research task, which now carries a dual-consumer brief covering this obligation and the labelled-soundness task disjunction wall."
     },
     {
       "project_number": 552,

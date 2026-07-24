@@ -5737,6 +5737,72 @@ lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
     obtain ⟨w', hedge, hwit⟩ := hinv.eDiamondPosWitness sf hsf ψ w hsfeq
     exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
 
+/-! ## Phase 7: Single-Step Invariant Preservation -/
+
+omit [Hashable Atom] in
+/-- **Blocked-redirect witness membership**: when the keys-aware minting guard blocks
+(redirects to `wBlock` instead of minting), the witness formula `⟨s, φ, wBlock⟩` the redirect
+implicitly relies on is ALREADY on the branch `b` -- chained through `S4LoopInv.keyLowerBd`
+(a world's recorded birth key lower-bounds its live relevant set) and the definitional
+insert-membership of `successorBirthContent`. This is what lets `eBoxNegWitness`/
+`eDiamondPosWitness` survive the blocked minting case below without asserting any new branch
+formula (the blocked case's `.linear []` result adds none). -/
+lemma modalStepBranchS4Keyed_blocked_witness_mem (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w wBlock : WorldIndex)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ w = some wBlock) :
+    (⟨s, φ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ w wBlock hblock
+  have hsub := hkL wBlock (successorBirthContent φ₀ b s φ w) hkey
+  have hmem : (s, φ) ∈ successorBirthContent φ₀ b s φ w := by
+    unfold successorBirthContent
+    exact Finset.mem_insert_self _ _
+  have hrel := hsub hmem
+  unfold relevantSetFinset at hrel
+  rw [Finset.mem_filter] at hrel
+  simp only [List.any_eq_true, beq_iff_eq] at hrel
+  obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
+  rw [heq] at hsf'mem
+  exact hsf'mem
+
+/-- **`modalApplyOneS4Keyed` is never expanding at the T/4-relevant shapes**
+(`T(□φ)@w`, `F(◇φ)@w`): outside the two KEYED minting shapes (`F(□φ)@w`/`T(◇φ)@w` -- disjoint
+from these), `modalApplyOneS4Keyed` falls through definitionally to `modalApplyOneS4`, which
+itself falls through to `modalApplyOneS4Rules` at these same two shapes
+(`modalApplyOneS4`'s own `| _, _ =>` catch-all). Composes
+`modalApplyOneS4Rules_boxPos_diaNeg_known_S4` (same-file `private`) with that double
+definitional fall-through. This is what makes `eBoxOnlyNeg`/`eDiamondOnlyPos` provable below: a
+pos-box/neg-diamond formula can never be the `sf_exp` a `.linear`/`.branching` step appends to
+`e`. -/
+private lemma modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hsfmem : sf ∈ b) (hknown : accTargetsKnown b acc)
+    (h : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+         (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)) :
+    (modalApplyOneS4Keyed φ₀ keys sf b acc).fst = .notApplicable ∨
+    ∃ out, (modalApplyOneS4Keyed φ₀ keys sf b acc).fst = .persistent out := by
+  have heq : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4Rules sf b acc := by
+    rcases h with ⟨hs, φ, hf⟩ | ⟨hs, φ, hf⟩
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf
+      subst hs; subst hf
+      rfl
+    · obtain ⟨s, ff, w⟩ := sf
+      simp only at hs hf
+      subst hs; subst hf
+      rfl
+  rw [heq]
+  obtain ⟨-, hmatch⟩ := modalApplyOneS4Rules_boxPos_diaNeg_known_S4 sf b acc hsfmem hknown h
+  rcases hres : (modalApplyOneS4Rules sf b acc).fst with nf | brs | nf | _
+  · rw [hres] at hmatch; exact absurd hmatch (by simp)
+  · rw [hres] at hmatch; exact absurd hmatch (by simp)
+  · exact Or.inr ⟨nf, rfl⟩
+  · exact Or.inl rfl
+
 end Cslib.Logic.Modal.Tableau
 
 end

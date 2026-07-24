@@ -241,27 +241,45 @@ only.
   `modalTableauS4Keyed`'s sibling def): unchanged, `propext`/`Classical.choice`/`Quot.sound` only.
   `lake build` green, zero new warnings, zero `sorry`.
 
-### Phase 6 (handoff 3d-i): Keys-threaded Hintikka-tracking invariant bundle [IN PROGRESS]
+### Phase 6 (handoff 3d-i): Keys-threaded Hintikka-tracking invariant bundle [COMPLETED]
 
 - **Goal:** Define the bespoke keys-threaded analogue of the `ModalLoopInvHintikka` bundle
   (`CompletenessLoop.lean:262-337`) and prove its monotone-field lemmas, WITHOUT yet proving
   full single-step preservation (Phase 7).
 - **Tasks:**
-  - [ ] Define the invariant structure/predicate threading `keys` as an extra argument, with fields
+  - [x] Define the invariant structure/predicate threading `keys` as an extra argument, with fields
         analogous to `hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`.
         Exploit `modalHintikkaClauseGen` (`Completeness.lean:652`) carving ALL box/diamond shapes
         (both signs) as vacuous `True` — the real tracking burden is only propositional shapes +
         box-negative/diamond-positive witness existence.
-  - [ ] Prove the propositional-shape field is branch/`acc`-independent
+        *(landed as `S4KeyedHintikkaInv`, carrying ONLY the five Hintikka-specific conjuncts —
+        the universe-closure/keys-bookkeeping conjuncts already live in the frozen `S4LoopInv`
+        and are threaded as a separate ambient hypothesis rather than duplicated.)*
+  - [x] Prove the propositional-shape field is branch/`acc`-independent
         (`modalApplyOne_fst_eq_of_not_box`-style; landed for K), hence trivially monotone as the
         branch grows.
-  - [ ] Prove the witness-existence fields are permanent once recorded (`acc`/`b` only grow — same
+        *(landed as `modalApplyOneS4Keyed_fst_eq_of_not_box` (F8 discharge, two dispatch layers
+        deeper than T's own `modalApplyOneT_localShapeInvariance`) + a territory-local
+        re-derivation `modalHintikkaClauseGen_lift_S4` of `Completeness.lean`'s `private`
+        `modalHintikkaClauseGen_lift`, composed in `S4KeyedHintikkaInv_weaken`'s `hintikkaInv`
+        case.)*
+  - [x] Prove the witness-existence fields are permanent once recorded (`acc`/`b` only grow — same
         monotonicity argument as K/S5/B's landed fields).
-  - [ ] `lean_build` green; no `sorry`; `lean_verify` axiom-clean.
+        *(landed as the `eBoxNegWitness`/`eDiamondPosWitness` cases of `S4KeyedHintikkaInv_weaken`,
+        consuming raw `hbsub`/`haccsub` hypotheses; the supporting `modalApplyOneS4Keyed_hasEdge_mono`
+        per-call fact — built from the unconditional accessibility-snd equalities
+        `modalApplyOneT_snd_eq`/`modalApplyOneS4Rules_snd_eq` against raw K plus
+        `modalApplyOne_fresh_local` — is the per-step instantiation Phase 7 will feed into
+        `haccsub`.)*
+  - [x] `lean_build` green; no `sorry`; `lean_verify` axiom-clean.
 - **Timing:** 3 hours (~250-400 lines)
 - **Depends on:** none (definitions + monotonicity consume only landed rules)
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive).
 - **Verification:** `lean_goal` no remaining goals on each field lemma; `lean_verify` axiom-clean.
+- **Completed:** 2026-07-24 (commit `828aefd4`). `lean_verify` confirmed
+  `modalApplyOneS4Keyed_fst_eq_of_not_box`/`modalApplyOneS4Keyed_hasEdge_mono`/
+  `S4KeyedHintikkaInv_weaken` each `propext`/`Classical.choice`/`Quot.sound` only;
+  `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green, zero new warnings, zero `sorry`.
 
 ### Phase 7 (handoff 3d-ii): Single-step invariant preservation [NOT STARTED]
 

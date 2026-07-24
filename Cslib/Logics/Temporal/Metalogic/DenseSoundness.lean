@@ -21,7 +21,7 @@ base soundness theorem to `FrameClass.Dense`.
 - `dense_indicator_sound`: ¬U(⊤, ⊥) is valid on DenselyOrdered domains.
 - `axiom_sound_dense`: All 28 axioms are valid on dense serial linear orders.
 - `soundness_dense`: Derivation tree soundness at FrameClass.Dense.
-- `soundness_thderivable_dense`: ThDerivableFc .Dense implies ValidDense.
+- `soundness_thderivable_dense`: ThDerivableFc .Dense implies validDense.
 
 ## References
 

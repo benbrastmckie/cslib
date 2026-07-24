@@ -27,7 +27,7 @@ which by the truth lemma gives membership.
 
 - `dense_indicator_in_all_limit_points`: neg U(top, bot) in limitF(x) for all x.
 - `chronicleDenselyOrderedDense`: DenselyOrdered for chronicle from Dense-MCS.
-- `completeness_dense`: ValidDense phi -> ThDerivableFc .Dense phi.
+- `completeness_dense`: validDense phi -> ThDerivableFc .Dense phi.
 -/
 
 @[expose] public section
@@ -250,7 +250,7 @@ lemma chronicleDenselyOrderedDense
 If phi is valid over all dense serial linear temporal orders, then phi is
 Dense-derivable in the BX+Dense proof system. -/
 theorem completeness_dense {φ : Formula Atom}
-    (h_valid : ValidDense φ) :
+    (h_valid : validDense φ) :
     Temporal.ThDerivableFc FrameClass.Dense φ := by
   by_contra h_not_deriv
   have h_cons := neg_consistent_of_not_derivable_dense h_not_deriv

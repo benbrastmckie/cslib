@@ -1021,7 +1021,7 @@ formalized) prevents `openBranch_branchSat` from being stated as a real theorem,
 ```lean
 -- BLOCKED: depends on openBranch_branchSat.
 --
--- lemma temporalTableau_complete (φ : Formula Atom) (h : Valid φ) :
+-- lemma temporalTableau_complete (φ : Formula Atom) (h : valid φ) :
 --     temporalTableau φ = .closed := by
 --   cases hresult : temporalTableau φ with
 --   | closed => rfl
@@ -1034,7 +1034,7 @@ formalized) prevents `openBranch_branchSat` from being stated as a real theorem,
 ```lean
 -- BLOCKED: requires both soundness and completeness theorems.
 --
--- instance instDecidableValid (φ : Formula Atom) : Decidable (Valid φ) :=
+-- instance instDecidableValid (φ : Formula Atom) : Decidable (valid φ) :=
 --   match hresult : temporalTableau φ with
 --   | .closed => Decidable.isTrue (temporalTableau_sound hresult)
 --   | .openBranch b ord => Decidable.isFalse (openBranch_countermodel hresult)

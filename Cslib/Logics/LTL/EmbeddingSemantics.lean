@@ -146,7 +146,7 @@ theorem satisfies_toTemporal (v : Atom → State → Prop) (w : ωSequence State
 satisfiability. Wires `satisfies_toTemporal` at `n = 0` via `drop_zero`, giving `toTemporal` a
 genuine downstream consumer. -/
 theorem satisfiable_toTemporal (φ : Formula Atom) (h : Satisfiable (State := State) φ) :
-    Temporal.Satisfiable φ.toTemporal := by
+    Temporal.satisfiable φ.toTemporal := by
   obtain ⟨v, w, hsat⟩ := h
   exact ⟨ℕ, inferInstance, inferInstance, toTemporalModel v w, 0,
     (satisfies_toTemporal v w 0 φ).mp (by simpa using hsat)⟩

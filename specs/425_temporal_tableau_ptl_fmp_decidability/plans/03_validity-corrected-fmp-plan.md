@@ -1,7 +1,7 @@
 # Implementation Plan: PTL Finite Model Property and Temporal Tableau Decidability (validDiscrete-corrected)
 
 - **Task**: 425 - temporal_tableau_ptl_fmp_decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: 26 hours
 - **Dependencies**: Sibling tasks 423, 424 (only for the final task-301 registration of `instDecidableValid`; all eight phases below are independently buildable without them)
 - **Research Inputs**:

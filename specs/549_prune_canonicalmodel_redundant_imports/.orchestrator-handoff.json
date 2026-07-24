@@ -1,0 +1,16 @@
+{
+  "status": "implemented",
+  "summary": "Removed two redundant public import lines (MCS, Birelational) from CanonicalModel.lean and relocated the Birelational import to its true direct consumer, TruthLemma.lean. Full CSLib CI verification (scoped Completeness build, checkInitImports, scoped lint-style, scoped lake lint, mk_all, full lake test, scoped shake) all green with zero sorries/axioms introduced.",
+  "artifacts": [
+    {
+      "path": "specs/549_prune_canonicalmodel_redundant_imports/summaries/01_prune-redundant-imports-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary documenting the two-file import relocation, full CI pipeline verification results, and confirmation of zero plan deviations."
+    }
+  ],
+  "blockers": [],
+  "continuation_context": "Task fully complete; no follow-up needed. Both edited files retain import Cslib.Init. Completeness.lean was intentionally left untouched per plan non-goals.",
+  "next_action_hint": "Mark task 549 COMPLETED in state.json (orchestrator postflight).",
+  "phases_completed": 1,
+  "phases_total": 1
+}

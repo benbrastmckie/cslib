@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.CanonicalModel
+public import Cslib.Logics.Modal.Semantics.Birelational
 
 /-! # Truth Lemma for Intuitionistic Modal Logic
 

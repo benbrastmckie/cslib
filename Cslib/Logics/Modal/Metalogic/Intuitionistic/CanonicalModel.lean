@@ -8,8 +8,6 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Intuitionistic.PrimeTheory
-public import Cslib.Logics.Modal.Metalogic.MCS
-public import Cslib.Logics.Modal.Semantics.Birelational
 public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Foundations.Logic.Theorems.DerivationCombinators
 

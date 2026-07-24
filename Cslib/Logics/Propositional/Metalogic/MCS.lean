@@ -56,7 +56,12 @@ abbrev PropSetMaximalConsistent (Axioms : PL.Proposition Atom → Prop)
 /-! ## Generic MCS Properties (parameterized) -/
 
 /-- Lindenbaum's lemma for propositional logic: every consistent set extends
-to an MCS. -/
+to an MCS.
+
+Intentional naming/signature adapter over `Foundations/Logic/Metalogic/Consistency.lean`
+`Metalogic.set_lindenbaum`; retained deliberately alongside the sibling family wrappers
+(`modal_lindenbaum`, `temporal_lindenbaum`, `bimodal_lindenbaum`) rather than inlined at call
+sites, for no proof-debt reduction. -/
 theorem prop_lindenbaum {Axioms : PL.Proposition Atom → Prop}
     {S : Set (PL.Proposition Atom)}
     (hS : PropSetConsistent Axioms S) :

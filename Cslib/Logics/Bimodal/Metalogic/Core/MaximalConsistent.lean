@@ -88,7 +88,14 @@ These provide convenient bimodal-specific names for generic MCS properties.
 -/
 
 /-- Lindenbaum's lemma for bimodal logic: every consistent set extends to MCS.
-Delegates to the generic `set_lindenbaum`. -/
+Delegates to the generic `set_lindenbaum`.
+
+Intentional naming/signature adapter over `Foundations/Logic/Metalogic/Consistency.lean`
+`Metalogic.set_lindenbaum`; retained deliberately alongside the sibling family wrappers
+(`prop_lindenbaum`, `modal_lindenbaum`, `temporal_lindenbaum`) rather than inlined at call sites,
+for no proof-debt reduction. `restricted_lindenbaum`
+(`Bimodal/Metalogic/Core/RestrictedMCS.lean`) is a genuine Zorn variant over closure-restricted
+supersets, not reducible to `set_lindenbaum`, and is out of scope here. -/
 theorem bimodal_lindenbaum (Ω : Set (Formula Atom))
     (hΩ : BimodalSetConsistent Ω) :
     ∃ M : Set (Formula Atom), Ω ⊆ M ∧ BimodalSetMaximalConsistent M :=

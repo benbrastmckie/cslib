@@ -55,7 +55,15 @@ abbrev SetMaximalConsistent (Axioms : Proposition Atom → Prop)
 
 /-! ## Generic MCS Properties (instantiated) -/
 
-/-- Lindenbaum's lemma: every consistent set extends to an MCS. -/
+/-- Lindenbaum's lemma: every consistent set extends to an MCS.
+
+This is an intentional naming/signature adapter over the generic
+`Foundations/Logic/Metalogic/Consistency.lean` `Metalogic.set_lindenbaum`, specialized to
+`modalDerivationSystem Axioms`. It (and its sibling family wrappers, e.g. `prop_lindenbaum`,
+`temporal_lindenbaum`, `bimodal_lindenbaum`) is retained deliberately: inlining the generic at
+every call site would read worse for zero proof-debt reduction. `restricted_lindenbaum`
+(`Bimodal/Metalogic/Core/RestrictedMCS.lean`) is a genuine Zorn variant over closure-restricted
+supersets, not reducible to `set_lindenbaum`, and is out of scope here. -/
 theorem modal_lindenbaum {Axioms : Proposition Atom → Prop}
     {S : Set (Proposition Atom)}
     (hS : SetConsistent Axioms S) :

@@ -36,17 +36,17 @@ next_project_number: 552
 ### Modal Logic
 
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-535 [PARTIAL] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
+535 [RESEARCHED] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-537 [PARTIAL] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
+537 [RESEARCHING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+551 [RESEARCHED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
-425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [RESEARCHED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -87,14 +87,14 @@ next_project_number: 552
 
 ### 551. Cs5 native hilbert pair lindenbaum completeness
 - **Effort**: large
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 517, Task 509, Task 508
+- **Dependencies**: None
 - **Plan**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/01_native-hilbert-cs5-completeness-plan.md]
 - **Probe**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/probes/cs5-pair-combined-atomsum.lean]
 - **Summary**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/01_native-hilbert-cs5-completeness-summary.md]
-- **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/02_conservativity-blocker-route-decision.md]
+- **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/03_remaining-obligations-and-path.md]
 
 **Description**: Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.
 
@@ -257,7 +257,7 @@ next_project_number: 552
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517
@@ -288,13 +288,13 @@ next_project_number: 552
 
 ### 535. Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
 - **Effort**: 10-16 hours
-- **Status**: [PARTIAL]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**:
   - [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
-  - [535_abstract_termination_measure_interface_s4b_loop/reports/01_termination-interface-survey.md]
+  - [535_abstract_termination_measure_interface_s4b_loop/reports/02_remaining-work-and-phase9-obstruction.md]
 - **Summary**: [535_abstract_termination_measure_interface_s4b_loop/summaries/01_keyed-s4-driver-summary.md]
 - **Plan**: [535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md]
 
@@ -636,17 +636,15 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [BLOCKED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 426, Task 542
-- **Research**:
-  - [425_temporal_tableau_ptl_fmp_decidability/reports/01_ptl-fmp-decidability-survey.md]
-  - [425_temporal_tableau_ptl_fmp_decidability/reports/02_validity-notion-fmp-grounding.md]
+- **Dependencies**: None
 - **Plan**:
   - [425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md]
   - [425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md]
 - **Summary**: [425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md]
+- **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/03_blocker-reassessment-remaining-obligations.md]
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 

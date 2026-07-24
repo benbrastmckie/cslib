@@ -2,13 +2,14 @@
   "status": "partial",
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
+    {"type": "report", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/reports/02_remaining-work-and-phase9-obstruction.md"},
     {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md"},
     {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/03_phase7-recovery-summary.md"},
     {"type": "handoff", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/04_phase8-11-assessment-and-continuation.md"}
   ],
   "partial_progress": {
-    "stage": "phase7-complete",
-    "details": "Recovered ~376 uncommitted lines left by a session-limit-killed prior dispatch (Phase 7 skeleton), fixed 3 build-blocking bugs, landed Phase 7 (modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv), commit 1ce152b6. Phase 8 assessed (technical map written) but not attempted this dispatch. Phase 9 remains [BLOCKED]; Phases 10-11 transitively blocked. Phases 1-6 previously landed.",
+    "stage": "research-complete",
+    "details": "Research dispatch verifying current state and remaining work. Confirmed against fresh build: lake build Cslib.Logics.Modal.Tableau.LoopChecking GREEN (847 jobs, exit 0), zero code sorry/admit across all four file_scope files, Phases 1-7 landed and verified present. Remaining: Phase 8 (top-loop hintikka, unblocked, tractable), Phase 9 (blocked-mint-redirect soundness, BLOCKED on genuine mathematical gap), Phases 10-11 (transitively blocked via 9). Independently re-confirmed the Phase 9 obstruction against source (blockingWorldS4Keyed unrestricted candidate search + s4FC non-symmetric = no reachability fact; S5 witness-reuse precedent relies on symmetry and does not transfer; B never mints). Report written with concrete recommended path: dispatch Phase 8 now (decoupled), escalate Phase 9 guard-restriction as a scoped Non-Goals decision.",
     "phases_completed": 7,
     "phases_total": 11,
     "last_completed_phase": "Phase 7: Single-step invariant preservation"
@@ -20,14 +21,14 @@
     "axiom_count_new": 0,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Full CSLib CI pipeline run this dispatch: lake build (green, 847 jobs), lake exe checkInitImports (clean), lake lint (no new warnings), lake exe lint-style (clean), lake shake (no new findings), lake exe mk_all --module (no update necessary)."
+    "note": "Fresh build this dispatch: lake build Cslib.Logics.Modal.Tableau.LoopChecking green (847 jobs, exit 0). Working tree clean on Cslib/Logics/Modal/Tableau/*. Zero code sorry/admit; only docstring-prose 'sorry' mentions at LoopChecking.lean:4619, FrameCompleteness.lean:576, GenericDriver.lean:62. 8 pre-existing unusedSimpArgs lint warnings, none in this task's additions."
   },
   "requires_user_review": true,
-  "review_reason": "Phase 9 (S4 blocked-mint-redirect soundness) is [BLOCKED] on a genuine mathematical gap (S4's non-symmetric frame lacks the reachability invariant the soundness argument needs); Phases 10-11 are transitively blocked via Phase 9. Resolving Phase 9 likely requires revising frozen task-511 code (blockingWorldS4Keyed), which is out of this plan's stated scope -- a re-plan or user decision is needed before Phases 9-11 can proceed. Phase 8 remains independent and viable but was not attempted this dispatch (insufficient remaining runway after Phase 7 recovery work).",
+  "review_reason": "Research confirms Phase 9 (S4 blocked-mint-redirect soundness) is BLOCKED on a genuine mathematical gap, not a proof-engineering one: modalTableauS4Keyed_sound is likely FALSE as stated under the current unrestricted blockingWorldS4Keyed guard, because an edge lbl->wBlock to a same-content-but-unreachable world is not semantically forced in an arbitrary reflexive-transitive (non-symmetric) S4 model. The plan revision needs a decision: (Route i, recommended) restrict blockingWorldS4Keyed candidates to acc-reachable worlds -- but this edits FROZEN task-511 code, outside this plan's Non-Goals, so requires user/owner authorization; or (Route ii) re-architect the soundness statement via canonical-model construction. Phase 8 is independent, tractable, and should be dispatched immediately regardless of the Phase 9 resolution.",
   "metadata": {
     "session_id": "sess_1784905751_756cda_535",
-    "agent_type": "cslib-implementation-agent",
-    "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"]
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

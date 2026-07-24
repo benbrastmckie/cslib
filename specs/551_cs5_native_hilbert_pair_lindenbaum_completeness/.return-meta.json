@@ -1,27 +1,28 @@
 {
   "status": "partial",
-  "started_at": "2026-07-24T09:00:00Z",
-  "finished_at": "2026-07-24T09:30:00Z",
+  "started_at": "2026-07-24T00:00:00Z",
+  "finished_at": "2026-07-24T00:00:00Z",
   "requires_user_review": true,
   "artifacts": [
-    {"type": "report", "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/02_conservativity-blocker-route-decision.md"}
+    {"type": "report", "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/03_remaining-obligations-and-path.md"}
   ],
   "partial_progress": {
-    "stage": "route_decision_delivered",
-    "details": "Root-caused the Phase-4 conservativity blocker as the constructive disjunction-property-under-constraint (cut-elimination-grade). Recommended Route 4 (declare research-level/open + re-scope, with Route A escalation to user). Confirmed the atom-sum approach re-runs the discarded CS5Combined scaffold (cs5Combined_seed_excludes, never closed)."
+    "stage": "research_delivered",
+    "details": "Delivered report 03. Confirmed against live source + build: (1) dependency blockers 517/509/508 are archived and stale — task is already 'researching', not blocked; (2) scoped lake build GREEN (731 jobs), zero sorries in all four scope files; (3) the goal theorem cs5_completeness'' does NOT exist as a declaration, nor does cs5_box_backward — the deliverable is unbuilt, not sorry-stubbed; (4) the single remaining native obligation is the research-grade seed-exclusion / constructive disjunction-property lemma (report 02's blocker, re-confirmed, no semantic witness). Route A is fully wired on the IS5 side (is5_completeness landed, uses .idb) but CS5 |- idb is unproven (idb absent from Constructive/CS5)."
   },
-  "decision": {
-    "chosen_route": 4,
-    "decisive_reason": "Seed-exclusion (DerivExcludes S0) is the constructive disjunction property of the combined system under the boxInv cross-constraint; it has no semantic witness (cross-axiom soundness forces a common valuation collapsing the two copies, so no model separates S0 from E), has defeated three distinct native attempts, and inside a Hilbert calculus admits no correct technique short of a cut-free/labelled detour (=Route C non-goal). Not a Phase-4 continuation.",
-    "route_1_conservativity": "rejected: identical to discarded cs5Combined_seed_excludes; research-grade; no semantic shortcut",
-    "route_2_restructure": "rejected: seed-exclusion intrinsic to prime_exclusion/prime_set_exclusion and irreducibly syntactic",
-    "route_3_routeA": "sound and mostly landed (is5_completeness landed; k3/k5 landed) but forbidden by native mandate; not a legitimate hybrid; needs CS5 |- idb verified first",
-    "route_4_open_rescope": "RECOMMENDED"
+  "findings": {
+    "blocker_reassessment": "Dependency blockers 517/509/508 are archived/completed and no longer gate; the [BLOCKED] framing is stale (state.json already shows 'researching'). The real blocker is an intrinsic open proof-theoretic lemma, unaffected by the deps.",
+    "build_status": "green_731_jobs_exit0",
+    "sorry_count_scope_files": 0,
+    "goal_theorem_exists": false,
+    "single_open_obligation": "seed-exclusion tau_L(box A) or tau_R A not in cl(S0): constructive disjunction property of CS5PairAxiom under boxInv cross-constraint (= Pacheco Lemma 16, unsound as published; no semantic witness)",
+    "route_a_ready": "is5_completeness landed (IS5.lean:364); first gate is proving CS5 |- idb (idb absent from Constructive/CS5)"
   },
+  "recommendation": "User route decision required. Route A (collapse to IS5, RECOMMENDED for a shippable theorem): prove cs5_derives_idb first, then cs5_iff_is5_derivable + cs5FC_iff_is5FC_valid + compose is5_completeness. Route Native-incremental (mandate-preserving): land propositional-core CS5PairAxiom extension + the two individual exclusions, isolate the disjunction-property lemma as a named open obligation (no sorry), spawn a dedicated cut-free/nested-sequent research sub-task.",
   "metadata": {
-    "session_id": "sess_1784905751_756cda_551",
+    "session_id": "sess_1784920807_37031e_551",
     "agent_type": "cslib-research-agent",
-    "delegation_depth": 2,
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-research-agent"]
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

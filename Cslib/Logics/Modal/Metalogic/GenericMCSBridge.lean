@@ -178,17 +178,13 @@ noncomputable def listDerivToTree [HasMinimalAxioms Axioms]
 
 /-- Bidirectional derivability equivalence between `modalDerivationSystem Axioms` and
 the algebraic derivation system at `S := ClosedHilbert (DerivationTree Axioms)`, for any
-`Axioms` satisfying `HasMinimalAxioms`. -/
+`Axioms` satisfying `HasMinimalAxioms`. Assembled via the generic
+`GenericMCS.deriv_iff_algebraic_of_forward` (Foundations). -/
 theorem modal_deriv_iff_algebraic [HasMinimalAxioms Axioms]
     {Γ : List (Proposition Atom)} {φ : Proposition Atom} :
     (modalDerivationSystem Axioms).Deriv Γ φ ↔
-    (modalAlgDS Axioms (Atom := Atom)).Deriv Γ φ := by
-  unfold modalDerivationSystem Deriv
-  constructor
-  · intro ⟨d⟩
-    exact derivTreeToList d
-  · intro h
-    exact ⟨listDerivToTree h⟩
+    (modalAlgDS Axioms (Atom := Atom)).Deriv Γ φ :=
+  GenericMCS.deriv_iff_algebraic_of_forward Iff.rfl derivTreeToList
 
 /-! ## MCS Equivalences -/
 

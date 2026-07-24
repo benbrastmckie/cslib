@@ -166,17 +166,13 @@ noncomputable def listDerivToTree [HasMinimalAxioms Axioms]
 
 /-- Bidirectional derivability equivalence between `propDerivationSystem Axioms` and
 the algebraic derivation system at `S := ClosedHilbert (PL.DerivationTree Axioms)`, for
-any `Axioms` satisfying `HasMinimalAxioms`. -/
+any `Axioms` satisfying `HasMinimalAxioms`. Assembled via the generic
+`GenericMCS.deriv_iff_algebraic_of_forward` (Foundations). -/
 theorem pl_deriv_iff_algebraic [HasMinimalAxioms Axioms]
     {Γ : List (PL.Proposition Atom)} {φ : PL.Proposition Atom} :
     (propDerivationSystem Axioms).Deriv Γ φ ↔
-    (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ := by
-  unfold propDerivationSystem Deriv
-  constructor
-  · intro ⟨d⟩
-    exact derivTreeToList d
-  · intro h
-    exact ⟨listDerivToTree h⟩
+    (propAlgDS Axioms (Atom := Atom)).Deriv Γ φ :=
+  GenericMCS.deriv_iff_algebraic_of_forward Iff.rfl derivTreeToList
 
 /-! ## MCS Equivalences -/
 

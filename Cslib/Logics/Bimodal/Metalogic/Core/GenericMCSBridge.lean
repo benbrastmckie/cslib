@@ -292,7 +292,14 @@ noncomputable def listDerivToTree
 /-! ## Full Derivability Equivalence -/
 
 /-- Bidirectional derivability equivalence between `bimodalDerivationSystem` and
-the algebraic derivation system at `S := Bimodal.HilbertTM`. -/
+the algebraic derivation system at `S := Bimodal.HilbertTM`.
+
+Not routed through the generic `GenericMCS.deriv_iff_algebraic_of_forward` assembler used by
+the Propositional/Modal bridges: `Bimodal.HilbertTM` is its own bespoke `InferenceSystem` tag,
+not the generic `ClosedHilbert (DerivationTree .Base)`, so `HilbertTree` instance search for the
+assembler's target fails even though the two tags are extensionally/definitionally equivalent
+(see the design note above). This 6-line form is already the maximally consolidated shape for
+the Temporal/Bimodal base bridges. -/
 theorem bimodal_deriv_iff_algebraic
     {Γ : Bimodal.Context Atom} {φ : Bimodal.Formula Atom} :
     bimodalDerivationSystem.Deriv Γ φ ↔

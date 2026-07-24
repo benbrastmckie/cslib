@@ -188,45 +188,71 @@ each lands independently `lake build`-verified.
   - Full `lake build` green with the three modules and imports gone; `grep LiftViaMorphism Cslib.lean`
     returns nothing; no `sorry`, no new axioms.
 
-### Phase 3: Cluster C — narrow generalization of the deriv-glue tail [NOT STARTED]
+### Phase 3: Cluster C — narrow generalization of the deriv-glue tail [COMPLETED]
 
 - **Goal:** Remove the last per-family duplication in the MCS bridges — the `*_deriv_iff_algebraic`
   glue scaffold — by hoisting a Foundations helper the four bridges consume, or document the tail
   triple as already consolidated if no clean net-reducing parameterization exists.
 - **Tasks:**
-  - [ ] Confirm the current state in each of the four `GenericMCSBridge.lean` files
+  - [x] Confirm the current state in each of the four `GenericMCSBridge.lean` files
     (Propositional, Modal, Temporal, Bimodal/Core): the `*_setConsistent_iff_algebraic` and
     `*_setMaxConsistent_iff_algebraic` members already delegate one-line to
     `GenericMCS.setConsistent_iff_congr` / `setMaxConsistent_iff_congr` — leave these untouched.
-  - [ ] Assess whether the `*_deriv_iff_algebraic` glue (`unfold <familyDerivationSystem> Deriv;
+    *(confirmed unchanged in all four files.)*
+  - [x] Assess whether the `*_deriv_iff_algebraic` glue (`unfold <familyDerivationSystem> Deriv;
     constructor; · intro ⟨d⟩ => <fwd> d; · intro h => ⟨<bwd> h⟩`) can be captured by a single
     additive Foundations helper in `GenericMCS.lean` parameterized over the two transport maps
     (a forward `Deriv-tree → list-deriv` and a backward `list-deriv → Deriv-tree`), so each family
     supplies only its two maps. Account for the Temporal/Bimodal `_fc` frame-class layer
     (the `*_deriv_iff_algebraic_fc` variants) — the helper must not obstruct them.
-  - [ ] Decision gate:
-    - **If** a clean helper net-reduces lines with zero new proof debt: add the helper to
-      `Foundations/Logic/Metalogic/GenericMCS.lean` (docstring, `theorem`, lowerCamelCase,
-      namespaced), then refactor the four `*_deriv_iff_algebraic` (and, where applicable, the
-      `_fc` wrappers) to consume it.
-    - **Else** (per-family `unfold` targets prevent a clean abstraction, or the helper does not
-      net-reduce): make no code change; add a short durable comment in each bridge stating the
-      tail triple is already maximally consolidated (consistency/MCS delegate to `GenericMCS.*_congr`;
-      the ~6-line deriv glue is irreducibly per-family via `derivTreeToList` / `listDerivToTree`).
-  - [ ] Run `lake build` across all four families, then `lint` and `lint-style` on any new/edited
-    Foundations declaration.
-  - [ ] Commit on green.
+    *(discovery: the additive helper already existed --
+    `GenericMCS.deriv_iff_algebraic_of_forward` in
+    `Foundations/Logic/Metalogic/GenericMCS.lean:262`, with a docstring explicitly documenting
+    "each per-logic bridge supplies its own forward map and assembles the deriv-iff via
+    `deriv_iff_algebraic_of_forward`" -- but none of the four bridges actually called it. No new
+    Foundations code was needed; this phase only had to wire up the four call sites.)*
+  - [x] Decision gate (per-family, since the outcome split): *(deviation: altered -- the actual
+    outcome was a **mixed** hoist/fallback split rather than one decision applying to all four,
+    which the plan's binary framing did not anticipate but its own machinery accommodates.)*
+    - **Propositional, Modal**: hoist succeeds cleanly. `pl_deriv_iff_algebraic` /
+      `modal_deriv_iff_algebraic` route through `GenericMCS.deriv_iff_algebraic_of_forward
+      Iff.rfl derivTreeToList` (verified: `propAlgDS`/`modalAlgDS` are `@[reducible]` aliases for
+      `treeAlgDS D`, so `HilbertTree` instance search for the assembler's target succeeds and
+      `Iff.rfl` closes the definitional bridge). Net reduction: each theorem's 7-line tactic
+      block collapses to a 1-line term proof.
+    - **Temporal, Bimodal (base `_deriv_iff_algebraic`, not `_fc`)**: hoist attempted and
+      reverted. `temporalAlgDS` / `bimodalAlgDS` are built directly over the bespoke
+      `Temporal.HilbertBX` / `Bimodal.HilbertTM` tags (not `treeAlgDS D`), so routing through
+      the assembler fails instance search (`failed to synthesize instance ... HilbertTree fun
+      {Γ} {φ} => DerivationTree FrameClass.Base [] (listImp Γ φ)`) even though the tags are
+      definitionally equivalent per each file's own §3.2 design note. Took the documented
+      fallback: no code change to the theorem body, only a short docstring addition explaining
+      why the same hoist does not apply and that the existing 6-line form is already maximally
+      consolidated. The `_fc` variants (`*_deriv_iff_algebraic_fc`) were left untouched in all
+      cases -- they operate on `Nonempty (D Γ φ)` directly with no intermediate
+      `DerivationSystem`, so they do not fit the assembler's signature and were correctly
+      excluded from the hoist scope per the plan's own caveat.
+  - [x] Run `lake build` across all four families, then `lint` and `lint-style` on any new/edited
+    Foundations declaration. *(All four `GenericMCSBridge.lean` modules build green;
+    `lake exe checkInitImports` clean; `lake lint` and `lake exe lint-style` report zero
+    findings on any of the four files; grep confirms zero `sorry`/`axiom` in the touched files.
+    No Foundations file was edited -- the helper pre-existed -- so no new Foundations lint
+    surface was introduced.)*
+  - [x] Commit on green.
 - **Timing:** ~1.5 hours (build-bound; two possible outcomes)
 - **Depends on:** 1
 - **Files to modify:**
   - `Cslib/Foundations/Logic/Metalogic/GenericMCS.lean` — additive helper (hoist outcome only)
-  - `Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean`
-  - `Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean`
-  - `Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean`
-  - `Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean`
+    *(deviation: no edit needed -- the helper already existed, unused.)*
+  - `Cslib/Logics/Propositional/Metalogic/GenericMCSBridge.lean` — hoisted
+  - `Cslib/Logics/Modal/Metalogic/GenericMCSBridge.lean` — hoisted
+  - `Cslib/Logics/Temporal/Metalogic/GenericMCSBridge.lean` — fallback doc comment only
+  - `Cslib/Logics/Bimodal/Metalogic/Core/GenericMCSBridge.lean` — fallback doc comment only
 - **Verification:**
   - `lake build` green for all four families; `lint` + `lint-style` clean on new decls; no `sorry`,
     no new axioms; if hoist taken, net line count reduced; if fallback taken, only comments added.
+    *(Confirmed: Propositional/Modal net -4 lines each; Temporal/Bimodal net +8/+7 lines
+    respectively, entirely explanatory docstring prose, zero semantic/tactic change.)*
 
 ### Phase 4: Full CI verification and Cluster D handoff note [NOT STARTED]
 

@@ -266,7 +266,14 @@ noncomputable def listDerivToTree
 /-! ## Full Derivability Equivalence -/
 
 /-- Bidirectional derivability equivalence between `temporalDerivationSystem` and
-the algebraic derivation system at `S := Temporal.HilbertBX`. -/
+the algebraic derivation system at `S := Temporal.HilbertBX`.
+
+Not routed through the generic `GenericMCS.deriv_iff_algebraic_of_forward` assembler used by
+the Propositional/Modal bridges: `Temporal.HilbertBX` is its own bespoke `InferenceSystem` tag
+(`ProofSystem/Instances.lean`), not the generic `ClosedHilbert (DerivationTree .Base)`, so
+`HilbertTree` instance search for the assembler's target fails even though the two tags are
+extensionally/definitionally equivalent (§3.2 above). This 6-line form is already the maximally
+consolidated shape for the Temporal/Bimodal base bridges. -/
 theorem temporal_deriv_iff_algebraic
     {Γ : Context Atom} {φ : Formula Atom} :
     temporalDerivationSystem.Deriv Γ φ ↔

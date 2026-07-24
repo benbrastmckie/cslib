@@ -1496,6 +1496,97 @@ example {Atom : Type u} (A : Proposition Atom) :
     simp only [nikTr, nikTrFuel, dif_pos hparent]
     rfl⟩
 
+/-! ## Propositional combinator toolkit over `Derivable CS5ModalAxiom` (Phase 8.2)
+
+A small, `P`-generic Hilbert-combinator toolkit reused by every constructor case of the adequacy
+induction: composing `Derivable CS5ModalAxiom (P.imp A)`-shaped facts (`P` a fixed antecedent --
+in practice `sigAt G Γ hfin x`, never inspected by these lemmas) via the standard propositional
+axioms (`implyK`/`implyS`/`andI`/`andE1`/`andE2`/`orI1`/`orI2`) and modus ponens alone, entirely
+independently of `sigAt`/`nikTr`'s definitions. No new import is needed: `DerivationTree`/
+`Derivable`/`.ax`/`.modus_ponens` are already transitively visible via the `CS5Canonical` import
+(`cs5_soundness_derivable`, `CS5.lean:330`, already uses `Derivable`/`DerivationTree` directly). -/
+
+/-- **Empty-context implication transitivity**: from `⊢ P ⊃ Q` and `⊢ Q ⊃ R`, derive `⊢ P ⊃ R`.
+Built directly from `implyK`/`implyS` and two `modus_ponens` steps (the standard "B-combinator"
+Hilbert derivation), with no context extension and hence no deduction-theorem dependency. -/
+theorem cs5_deriv_imp_trans {Atom : Type u} {P Q R : Proposition Atom}
+    (h1 : Derivable CS5ModalAxiom (P.imp Q)) (h2 : Derivable CS5ModalAxiom (Q.imp R)) :
+    Derivable CS5ModalAxiom (P.imp R) := by
+  obtain ⟨d1⟩ := h1
+  obtain ⟨d2⟩ := h2
+  have hk : DerivationTree CS5ModalAxiom [] ((Q.imp R).imp (P.imp (Q.imp R))) :=
+    .ax [] _ (.implyK (Q.imp R) P)
+  have hpqr : DerivationTree CS5ModalAxiom [] (P.imp (Q.imp R)) :=
+    .modus_ponens [] (Q.imp R) (P.imp (Q.imp R)) hk d2
+  have hs : DerivationTree CS5ModalAxiom [] ((P.imp (Q.imp R)).imp ((P.imp Q).imp (P.imp R))) :=
+    .ax [] _ (.implyS P Q R)
+  have hstep : DerivationTree CS5ModalAxiom [] ((P.imp Q).imp (P.imp R)) :=
+    .modus_ponens [] (P.imp (Q.imp R)) ((P.imp Q).imp (P.imp R)) hs hpqr
+  exact ⟨.modus_ponens [] (P.imp Q) (P.imp R) hstep d1⟩
+
+/-- **`P`-generic conjunction introduction under a shared antecedent**: from `⊢ P⊃A` and `⊢ P⊃B`,
+derive `⊢ P⊃(A∧B)`, via `andI`'s axiom composed through `implyS`. -/
+theorem cs5_deriv_imp_and {Atom : Type u} {P A B : Proposition Atom}
+    (hA : Derivable CS5ModalAxiom (P.imp A)) (hB : Derivable CS5ModalAxiom (P.imp B)) :
+    Derivable CS5ModalAxiom (P.imp (A.and B)) := by
+  have step1 : Derivable CS5ModalAxiom (P.imp (B.imp (A.and B))) :=
+    cs5_deriv_imp_trans hA ⟨.ax [] _ (.andI A B)⟩
+  obtain ⟨d1⟩ := step1
+  obtain ⟨dB⟩ := hB
+  have hs : DerivationTree CS5ModalAxiom []
+      ((P.imp (B.imp (A.and B))).imp ((P.imp B).imp (P.imp (A.and B)))) :=
+    .ax [] _ (.implyS P B (A.and B))
+  have hstep : DerivationTree CS5ModalAxiom [] ((P.imp B).imp (P.imp (A.and B))) :=
+    .modus_ponens [] _ _ hs d1
+  exact ⟨.modus_ponens [] (P.imp B) (P.imp (A.and B)) hstep dB⟩
+
+/-- **`P`-generic left conjunction elimination**: from `⊢ P⊃(A∧B)`, derive `⊢ P⊃A`. -/
+theorem cs5_deriv_imp_andE1 {Atom : Type u} {P A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (P.imp (A.and B))) : Derivable CS5ModalAxiom (P.imp A) :=
+  cs5_deriv_imp_trans h ⟨.ax [] _ (.andE1 A B)⟩
+
+/-- **`P`-generic right conjunction elimination**: from `⊢ P⊃(A∧B)`, derive `⊢ P⊃B`. -/
+theorem cs5_deriv_imp_andE2 {Atom : Type u} {P A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (P.imp (A.and B))) : Derivable CS5ModalAxiom (P.imp B) :=
+  cs5_deriv_imp_trans h ⟨.ax [] _ (.andE2 A B)⟩
+
+/-- **`P`-generic left disjunction introduction**: from `⊢ P⊃A`, derive `⊢ P⊃(A∨B)`. -/
+theorem cs5_deriv_imp_orI1 {Atom : Type u} {P A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (P.imp A)) : Derivable CS5ModalAxiom (P.imp (A.or B)) :=
+  cs5_deriv_imp_trans h ⟨.ax [] _ (.orI1 A B)⟩
+
+/-- **`P`-generic right disjunction introduction**: from `⊢ P⊃B`, derive `⊢ P⊃(A∨B)`. -/
+theorem cs5_deriv_imp_orI2 {Atom : Type u} {P A B : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (P.imp B)) : Derivable CS5ModalAxiom (P.imp (A.or B)) :=
+  cs5_deriv_imp_trans h ⟨.ax [] _ (.orI2 A B)⟩
+
+/-- **`P`-generic modus ponens under a shared antecedent**: from `⊢ P⊃(A⊃B)` and `⊢ P⊃A`, derive
+`⊢ P⊃B`, via `implyS` alone (no auxiliary axiom needed). -/
+theorem cs5_deriv_imp_mp {Atom : Type u} {P A B : Proposition Atom}
+    (himp : Derivable CS5ModalAxiom (P.imp (A.imp B))) (hA : Derivable CS5ModalAxiom (P.imp A)) :
+    Derivable CS5ModalAxiom (P.imp B) := by
+  obtain ⟨dimp⟩ := himp
+  obtain ⟨dA⟩ := hA
+  have hs : DerivationTree CS5ModalAxiom [] ((P.imp (A.imp B)).imp ((P.imp A).imp (P.imp B))) :=
+    .ax [] _ (.implyS P A B)
+  have hstep : DerivationTree CS5ModalAxiom [] ((P.imp A).imp (P.imp B)) :=
+    .modus_ponens [] _ _ hs dimp
+  exact ⟨.modus_ponens [] (P.imp A) (P.imp B) hstep dA⟩
+
+/-- **`bigAndL` projection**: if `A ∈ L`, then `⊢ (bigAndL L) ⊃ A` (repeated `andE1`/`andE2`
+projection down the conjunction spine, terminating at the occurrence of `A`). Discharges the
+`assumption` constructor's translation (via `sigAt`'s outer `bigAndL (factsAt Γ y)` conjunct). -/
+theorem bigAndL_mem {Atom : Type u} {L : List (Proposition Atom)} {A : Proposition Atom}
+    (h : A ∈ L) : Derivable CS5ModalAxiom ((bigAndL L).imp A) := by
+  induction L with
+  | nil => cases h
+  | cons B L' ih =>
+    have hunfold : bigAndL (B :: L') = B.and (bigAndL L') := rfl
+    rw [hunfold]
+    rcases List.mem_cons.mp h with rfl | hA
+    · exact ⟨.ax [] _ (.andE1 A (bigAndL L'))⟩
+    · exact cs5_deriv_imp_trans ⟨.ax [] _ (.andE2 B (bigAndL L'))⟩ (ih hA)
+
 end Cslib.Logic.Modal.Labelled
 
 end

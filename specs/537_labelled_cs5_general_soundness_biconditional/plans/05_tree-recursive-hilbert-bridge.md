@@ -389,7 +389,7 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
 - **Zero-debt contract:** no `sorry` in the committed file, no new axiom, `cs5FCIncest` unweakened,
   `Graph` unmodified, no Preserved Asset touched.
 
-#### Sub-step 8.2 — Adequacy induction: propositional + cross-label (`efq`, `orE`) cases
+#### Sub-step 8.2 — Adequacy induction: propositional + cross-label (`efq`, `orE`) cases `[IN PROGRESS]`
 
 - **Tasks:**
   - [ ] State the main adequacy lemma `nik_adequacy : NIK TS5 G Γ (x ∶ A) → Derivable CS5ModalAxiom
@@ -451,7 +451,7 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
   `lean_verify` axiom-clean on `nikTr`, `nik_adequacy`, and `nik_TS5_to_hilbert`; no NEW tactic
   `sorry` in the committed file.
 
-### Phase 9: Corollary assembly nik_TS5_soundness + docstring cleanup [NOT STARTED]
+### Phase 9: Corollary assembly nik_TS5_soundness + docstring cleanup [IN PROGRESS]
 
 - **Goal:** Assemble the goal theorem as the corollary composing the Phase 8 bridge with the landed
   Hilbert soundness, and retire the stale module-docstring notes (report 04 Path P3 §8b).

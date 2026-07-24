@@ -13,6 +13,7 @@ public import Cslib.Logics.Temporal.Metalogic.Soundness
 public import Cslib.Logics.Temporal.Metalogic.MetricSoundness
 public import Cslib.Logics.Temporal.Metalogic.CompletenessHelpers
 public import Cslib.Logics.Temporal.Metalogic.Completeness
+public import Cslib.Logics.Temporal.Metalogic.MetricCompleteness
 public import Cslib.Logics.Temporal.Metalogic.TemporalContent
 public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers

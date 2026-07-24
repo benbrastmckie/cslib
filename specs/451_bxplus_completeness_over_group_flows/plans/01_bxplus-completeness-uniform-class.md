@@ -1,7 +1,7 @@
 # Implementation Plan: BX⁺ Completeness over the Uniform Class + Dense→ℚ Bridge
 
 - **Task**: 451 - BX+ completeness over ordered-abelian-group time flows
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 9.5 hours
 - **Dependencies**: 449 (BX⁺ definition + oag soundness, already complete)
 - **Research Inputs**: reports/01_bxplus-completeness-frame-class.md
@@ -282,25 +282,28 @@ abelian-group ℚ via Cantor + Phase 1's transport lemma.
 
 ---
 
-### Phase 6: Escalation docstring, barrel wiring, full CI [IN PROGRESS]
+### Phase 6: Escalation docstring, barrel wiring, full CI [COMPLETED]
 
 **Goal**: Record the escalated open lemma, wire the new file into the library, and pass full CI.
 
 **Tasks**:
-- [ ] Complete the `MetricCompleteness.lean` module docstring: state the main results
+- [x] Complete the `MetricCompleteness.lean` module docstring: state the main results
   (`Satisfies_orderIso`, `validMetricUniform`, soundness-over-`U`, `completeness_metric`, ℚ-bridge)
   AND the escalation note — literal BX⁺-over-oag completeness reduces to the open, expected-false
   lemma "every discrete BX⁺-consistent formula has a homogeneous (`ℤ` / `ℤ ×ₗ ℚ`) oag countermodel";
   resolution would need a discreteness/archimedean axiom (a new `FrameClass ≥ Metric`) — a separate
   task, not this one. Cite `Burgess1984` §6.1 (metric = oag time, but metric-operator language) and
   `Xu1988` Thm 2.9 (successor not U,S-definable) as durable anchors. No task numbers in the file.
-- [ ] Add `public import Cslib.Logics.Temporal.Metalogic.MetricCompleteness` to
+  *(written at file creation in Phase 1; verified current in Phase 6, no changes needed)*
+- [x] Add `public import Cslib.Logics.Temporal.Metalogic.MetricCompleteness` to
   `Cslib/Logics/Temporal/Metalogic.lean` barrel.
-- [ ] Run full CSLib CI in order (`cslib.md`): `lake exe cache get`; `lake build`; `lake exe
+- [x] Run full CSLib CI in order (`cslib.md`): `lake exe cache get`; `lake build`; `lake exe
   checkInitImports`; `lake lint`; `lake exe lint-style`; `lake test`; `lake exe mk_all --module`;
   `lake shake --add-public --keep-implied --keep-prefix`. Fix lint (docBlame, defLemma,
   defsWithUnderscore, simpNF, unusedSectionVars, dupNamespace) per research zero-debt notes.
-- [ ] Final `lean_verify` sweep on all new public declarations — confirm zero `sorry`, zero new
+  *(all steps green; zero lint/lint-style/shake findings in the touched files; pre-existing
+  unrelated warnings/sorries in other Cslib files, e.g. Propositional/Tableau, left untouched)*
+- [x] Final `lean_verify` sweep on all new public declarations — confirm zero `sorry`, zero new
   axioms across the deliverable.
 
 **Timing**: ~1 hour
@@ -320,18 +323,19 @@ abelian-group ℚ via Cantor + Phase 1's transport lemma.
 
 ## Testing & Validation
 
-- [ ] `lake build` (full project) green, no `sorry`, no new axioms.
-- [ ] `lean_verify` on each new public declaration: `Satisfies_orderIso`, `validMetricUniform`
+- [x] `lake build` (full project) green, no `sorry`, no new axioms.
+- [x] `lean_verify` on each new public declaration: `Satisfies_orderIso`, `validMetricUniform`
   soundness theorem, axioms-on-chronicle lemma(s), `completeness_metric`, the dense→ℚ bridge
   corollary — all sorry-free with only expected axioms (`Classical.propDecidable` is already a
   local instance in the dense template).
-- [ ] `lake lint` clean (docBlame, defLemma, defsWithUnderscore, simpNF, unusedSectionVars,
-  dupNamespace).
-- [ ] `lake exe checkInitImports` passes (file starts with `import Cslib.Init`).
-- [ ] `lake exe lint-style` clean.
-- [ ] `lake test` passes (`CslibTests/`).
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no changes.
-- [ ] Escalation note present in the module docstring; no `sorry`/axiom stands in for the open
+- [x] `lake lint` clean (docBlame, defLemma, defsWithUnderscore, simpNF, unusedSectionVars,
+  dupNamespace) for all files touched by this task.
+- [x] `lake exe checkInitImports` passes (transitively imports `Cslib.Init` via `MetricSoundness`).
+- [x] `lake exe lint-style` clean.
+- [x] `lake test` passes (`CslibTests/`).
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no changes for the files
+  touched by this task.
+- [x] Escalation note present in the module docstring; no `sorry`/axiom stands in for the open
   oag-completeness lemma.
 
 ## Artifacts & Outputs

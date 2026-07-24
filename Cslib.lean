@@ -639,6 +639,7 @@ public import Cslib.Logics.Temporal.Metalogic.DerivationTree
 public import Cslib.Logics.Temporal.Metalogic.GeneralizedNecessitation
 public import Cslib.Logics.Temporal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Temporal.Metalogic.MCS
+public import Cslib.Logics.Temporal.Metalogic.MetricCompleteness
 public import Cslib.Logics.Temporal.Metalogic.MetricSoundness
 public import Cslib.Logics.Temporal.Metalogic.PropositionalHelpers
 public import Cslib.Logics.Temporal.Metalogic.Soundness

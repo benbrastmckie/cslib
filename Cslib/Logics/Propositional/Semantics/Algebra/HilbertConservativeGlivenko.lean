@@ -50,7 +50,7 @@ under the corresponding `AxiomTheory`. The `hilbert_iff_nd_*` equivalences then 
 ## Architecture
 
 The Hilbert system is primary: theorems are proved directly using Hilbert algebraic completeness
-(`hilbert_alg_complete`) and algebraic infrastructure (`coe_AlgEvaluate`, `glivenko_algebraic`).
+(`hilbert_alg_completeness`) and algebraic infrastructure (`coe_AlgEvaluate`, `glivenko_algebraic`).
 The ND system results are derived as corollaries through the syntactic bridges, which compose
 `hilbert_iff_nd` (the Hilbert/ND equivalence via `AxiomTheory`) with the axiom admissibility
 equivalences from `AxiomAdmissibility.lean`.
@@ -76,21 +76,21 @@ for bot-free formulas. If `φ` is derivable in the intuitionistic Hilbert system
 no `⊥`, then `φ` is already derivable in the minimal Hilbert system.
 
 The proof routes through algebraic validity:
-1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+1. `IPL.hilbert_alg_completeness.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
 2. For any `GeneralizedHeytingAlgebra G` and valuation `v`, instantiate `HAValid φ` at
    `WithBot G` (with `instHeytingAlgebraWithBot`). The embedding lemma `coe_AlgEvaluate` rewrites
    the result back to `AlgEvaluate v bot_val φ = ⊤` in `G` (using bot-freeness and injectivity of
    the coercion `G → WithBot G`).
-3. `MPL.hilbert_alg_complete.mpr` converts `GHAValid φ` back to `Derivable MinPropAxiom φ`.
+3. `MPL.hilbert_alg_completeness.mpr` converts `GHAValid φ` back to `Derivable MinPropAxiom φ`.
 
 This is the primary version, stated directly in the Hilbert setting without the
 `[DecidableEq Atom]` constraint. The ND corollary `ipl_conservative_over_mpl` is below. -/
 theorem hilbertIplConservativeOverMpl {Atom : Type u} {φ : PL.Proposition Atom}
     (hBF : φ.IsBotFree = true) (h : Derivable (@IntPropAxiom Atom) φ) :
     Derivable (@MinPropAxiom Atom) φ := by
-  rw [MPL.hilbert_alg_complete]
+  rw [MPL.hilbert_alg_completeness]
   intro G _ v bot_val
-  have hIPL := IPL.hilbert_alg_complete.mp h (H := WithBot G) (fun x => (v x : WithBot G))
+  have hIPL := IPL.hilbert_alg_completeness.mp h (H := WithBot G) (fun x => (v x : WithBot G))
   rw [coe_AlgEvaluate v bot_val φ hBF] at hIPL
   exact WithBot.coe_eq_coe.mp hIPL
 
@@ -114,8 +114,8 @@ The core of the proof is unchanged from `hilbertGlivenko`: route through `gliven
 classical-fragment completeness unavailable over Heyting/Brouwerian completions.
 
 **Concrete recovery**: `hilbertGlivenko h = hilbertGlivenko_theory PropositionalAxiom IntPropAxiom
-  (fun _ hψ => CPL.hilbert_alg_complete.mp hψ)
-  (fun _ hHA => IPL.hilbert_alg_complete.mpr hHA) h`. -/
+  (fun _ hψ => CPL.hilbert_alg_completeness.mp hψ)
+  (fun _ hHA => IPL.hilbert_alg_completeness.mpr hHA) h`. -/
 theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
     (A_cl A_int : PL.Proposition Atom → Prop)
     [MinimalAxioms A_cl] [MinimalAxioms A_int]
@@ -130,16 +130,16 @@ theorem hilbertGlivenko_theory {Atom : Type u} {φ : PL.Proposition Atom}
 then `¬¬φ` is derivable in the intuitionistic Hilbert system.
 
 The proof routes through `hilbertGlivenko_theory`, instantiating at `PropositionalAxiom` and
-`IntPropAxiom` with the standard completeness facts `CPL.hilbert_alg_complete.mp` (soundness)
-and `IPL.hilbert_alg_complete.mpr` (completeness). This is the primary version, stated directly
+`IntPropAxiom` with the standard completeness facts `CPL.hilbert_alg_completeness.mp` (soundness)
+and `IPL.hilbert_alg_completeness.mpr` (completeness). This is the primary version, stated directly
 in the Hilbert setting without the `[DecidableEq Atom]` constraint. The ND corollary `glivenko`
 is below. -/
 theorem hilbertGlivenko {Atom : Type u} {φ : PL.Proposition Atom}
     (h : Derivable (@PropositionalAxiom Atom) φ) :
     Derivable (@IntPropAxiom Atom) (¬¬φ) :=
   hilbertGlivenko_theory (@PropositionalAxiom Atom) (@IntPropAxiom Atom)
-    (fun _ hψ => CPL.hilbert_alg_complete.mp hψ)
-    (fun _ hHA => IPL.hilbert_alg_complete.mpr hHA)
+    (fun _ hψ => CPL.hilbert_alg_completeness.mp hψ)
+    (fun _ hHA => IPL.hilbert_alg_completeness.mpr hHA)
     h
 
 /-! ## Conservative-via-Embedding Combinator -/

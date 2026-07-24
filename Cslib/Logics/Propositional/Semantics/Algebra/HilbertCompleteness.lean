@@ -96,7 +96,7 @@ Recovered as a corollary of `hilbert_alg_complete_theory`.
 for fragment algebraic completeness — see `canAlgCompleteIsBotFree`. It stays public (20+
 use-sites, including `Foundations/Logic/ProofSystem.lean`); only its role in the completeness
 stack is being reclassified here, not its visibility, name, or signature. -/
-theorem MPL.hilbert_alg_complete {Atom : Type u} {φ : PL.Proposition Atom} :
+theorem MPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} :
     Derivable (@MinPropAxiom Atom) φ ↔ GHAValid.{u, u} φ := by
   constructor
   · intro hd H _ v bot_val
@@ -125,7 +125,7 @@ Recovered as a corollary of `hilbert_alg_complete_theory`.
   `AlgTValid` via `int_alg_axiom_sound`.
 - **Backward**: Instantiate `HAValid` at the Hilbert Lindenbaum algebra for `IntPropAxiom`
   (carrying `hilbertLindenbaumIntHA`); use the `rfl` bridge `⊥ = canonicalBotVal _`. -/
-theorem IPL.hilbert_alg_complete {Atom : Type u} {φ : PL.Proposition Atom} :
+theorem IPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} :
     Derivable (@IntPropAxiom Atom) φ ↔ HAValid.{u, u} φ := by
   constructor
   · intro hd H _ v
@@ -158,7 +158,7 @@ Recovered as a corollary of `hilbert_alg_complete_theory`.
 - **Backward**: Instantiate `BAValid` at the Hilbert Lindenbaum algebra for
   `PropositionalAxiom` (carrying `hilbertLindenbaumClBA`); use the `rfl` bridge
   `⊥ = canonicalBotVal _`. -/
-theorem CPL.hilbert_alg_complete {Atom : Type u} {φ : PL.Proposition Atom} :
+theorem CPL.hilbert_alg_completeness {Atom : Type u} {φ : PL.Proposition Atom} :
     Derivable (@PropositionalAxiom Atom) φ ↔ BAValid.{u, u} φ := by
   constructor
   · intro hd H _ v

@@ -18,7 +18,7 @@ with respect to Hilbert algebras.
 **Soundness** (`imp_hilbert_soundness_derivable`): Every `ImpAxiom`-derivable formula
 evaluates to `⊤` in every Hilbert algebra under every variable assignment.
 
-**Completeness** (`imp_hilbert_complete`): Restricted to `IsImpTopOnly` formulas, if a
+**Completeness** (`imp_hilbert_completeness`): Restricted to `IsImpTopOnly` formulas, if a
 formula evaluates to `⊤` in every Hilbert algebra then it is `ImpAxiom`-derivable. The
 restriction is necessary because `HilbertEvaluate` maps `bot`, `and`, and `or` to `⊤`,
 making those connectives vacuously valid, while `ImpAxiom` has no EFQ or conjunction
@@ -46,7 +46,7 @@ Brouwerian Lindenbaum algebra: no inf operation, no adjunction, just K and S axi
 - `imp_hilbert_soundness_derivable`: `Derivable ImpAxiom φ → HilbertValid φ`
 - `impLindenbaumMk_eq_top_iff`: `[A] = ⊤ ↔ Derivable ImpAxiom A`
 - `impCanonicalV_spec`: truth lemma for `IsImpTopOnly` formulas
-- `imp_hilbert_complete`: `IsImpTopOnly φ → HilbertValid φ → Derivable ImpAxiom φ`
+- `imp_hilbert_completeness`: `IsImpTopOnly φ → HilbertValid φ → Derivable ImpAxiom φ`
 - `imp_hilbert_iff`: `IsImpTopOnly φ → (Derivable ImpAxiom φ ↔ HilbertValid φ)`
 
 ## References
@@ -472,7 +472,7 @@ if an imp-top-only formula is valid in every Hilbert algebra, then it is
 The restriction to `IsImpTopOnly` is necessary: `bot` is vacuously Hilbert-valid
 (since `HilbertEvaluate v bot = ⊤` by definition) but not derivable in `ImpAxiom`
 (no EFQ axiom is available). -/
-theorem imp_hilbert_complete {Atom : Type u} {φ : PL.Proposition Atom}
+theorem imp_hilbert_completeness {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsImpTopOnly = true)
     (h : HilbertValid.{u, u} φ) :
     Derivable ImpAxiom φ := by
@@ -490,7 +490,7 @@ theorem imp_hilbert_iff {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsImpTopOnly = true) :
     Derivable ImpAxiom φ ↔ HilbertValid.{u, u} φ :=
   ⟨imp_hilbert_soundness_derivable,
-   imp_hilbert_complete hfrag⟩
+   imp_hilbert_completeness hfrag⟩
 
 end Cslib.Logic.PL
 

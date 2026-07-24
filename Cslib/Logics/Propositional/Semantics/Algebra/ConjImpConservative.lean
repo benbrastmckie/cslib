@@ -28,10 +28,10 @@ fragment IPL⟨∧,→,⊤⟩ for or-bot-free formulas.
 
 The main theorem mirrors `hilbertIplConservativeOverMpl` in `HilbertConservativeGlivenko.lean`,
 replacing the `WithBot` free completion with the `LowerSet` free join completion:
-1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+1. `IPL.hilbert_alg_completeness.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
 2. Instantiate at `H := LowerSet B` (a `HeytingAlgebra`) with valuation `LowerSet.Iic ∘ v`.
 3. `brouwerianEmbeddingLemma` converts the result to `BrouwerianEvaluate v φ = ⊤`.
-4. `conjImp_brouwerian_complete` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
+4. `conjImp_brouwerian_completeness` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
 
 ## References
 
@@ -64,22 +64,22 @@ system and `φ` contains no `∨` or `⊥`, then `φ` is already derivable in th
 conjunctive-implicational Hilbert system.
 
 The proof routes through algebraic validity:
-1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+1. `IPL.hilbert_alg_completeness.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
 2. For any `BrouwerianSemilattice B` and `v : Atom → B`, instantiate `HAValid φ` at
    `H := LowerSet B` with valuation `LowerSet.Iic ∘ v`. Since `LowerSet B` is a
    `HeytingAlgebra` (via `CompletelyDistribLattice`), this gives
    `AlgEvaluate (LowerSet.Iic ∘ v) ⊥ φ = ⊤`.
 3. `brouwerianEmbeddingLemma` rewrites this to `BrouwerianEvaluate v φ = ⊤`.
-4. `conjImp_brouwerian_complete` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
+4. `conjImp_brouwerian_completeness` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
 
 This is the primary version, stated in the Hilbert setting without `[DecidableEq Atom]`.
 The ND corollary `ipl_conservative_over_conjImp` is below. -/
 theorem hilbertIplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) (h : Derivable (@IntPropAxiom Atom) φ) :
     Derivable (@ConjImpAxiom Atom) φ := by
-  apply conjImp_brouwerian_complete hOBF
+  apply conjImp_brouwerian_completeness hOBF
   intro B _ v
-  have hHA := IPL.hilbert_alg_complete.mp h (H := LowerSet B) (LowerSet.Iic ∘ v)
+  have hHA := IPL.hilbert_alg_completeness.mp h (H := LowerSet B) (LowerSet.Iic ∘ v)
   exact (brouwerianEmbeddingLemma v φ hOBF).mpr hHA
 
 /-! ## Subsumption / Biconditional / ND Corollary (re-homed)

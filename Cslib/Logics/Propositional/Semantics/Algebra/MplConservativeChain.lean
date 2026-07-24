@@ -54,7 +54,7 @@ GHAValid φ
 AlgEvaluate (LowerSet.Iic ∘ v) ⊥ φ = ⊤
     ↓ brouwerianEmbeddingLemma (reverse direction)
 BrouwerianEvaluate v φ = ⊤
-    ↓ conjImp_brouwerian_complete
+    ↓ conjImp_brouwerian_completeness
 Derivable ConjImpAxiom φ
 ```
 
@@ -122,7 +122,7 @@ universe u
 -- Suppress the `BrouwerianSemilattice.toHilbertAlgebra` forgetful instance for the next
 -- theorem. Without this, importing `ImpConservative` (transitively via `FreeMeetExtension` →
 -- `HilbertAlgebra`) creates a typeclass diamond for `Preorder B` in `LowerSet.Iic`,
--- causing `MPL.hilbert_alg_complete.mp h (LowerSet B) ...` to return a term with
+-- causing `MPL.hilbert_alg_completeness.mp h (LowerSet B) ...` to return a term with
 -- `HilbertAlgebra.instPartialOrder` that is rejected by `brouwerianEmbeddingLemma` which
 -- expects `BrouwerianSemilattice.toSemilatticeInf.toPartialOrder`. Suppressing forces the
 -- unique BSL-derived PartialOrder path.
@@ -150,11 +150,12 @@ theorem GHAValid_implies_BrouwerianValid_direct {Atom : Type u} {φ : PL.Proposi
 of IPL⟨∧,→,⊤⟩ for or-bot-free formulas, proved via a direct algebraic route without IPL.
 
 The proof composes:
-1. `MPL.hilbert_alg_complete.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
+1. `MPL.hilbert_alg_completeness.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
 2. `GHAValid_implies_BrouwerianValid_direct` converts `GHAValid φ` to `BrouwerianValid φ` by
    instantiating at `LowerSet B` (a `HeytingAlgebra`, hence a `GeneralizedHeytingAlgebra`)
    and applying `brouwerianEmbeddingLemma`.
-3. `conjImp_brouwerian_complete hOBF` converts `BrouwerianValid φ` to `Derivable ConjImpAxiom φ`.
+3. `conjImp_brouwerian_completeness hOBF` converts `BrouwerianValid φ` to
+   `Derivable ConjImpAxiom φ`.
 
 See also `hilbertMplConservativeOverConjImp` in `ConservativeChain.lean`, which proves the
 same result by routing through `derivableMinOfDerivableInt` (MPL→IPL subsumption) followed
@@ -162,8 +163,8 @@ by `hilbertIplConservativeOverConjImp` (IPL→ConjImp conservativity). -/
 theorem hilbertMplConservativeOverConjImp_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hOBF : φ.IsOrBotFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ConjImpAxiom Atom) φ :=
-  conjImp_brouwerian_complete hOBF
-    (GHAValid_implies_BrouwerianValid_direct hOBF (MPL.hilbert_alg_complete.mp h))
+  conjImp_brouwerian_completeness hOBF
+    (GHAValid_implies_BrouwerianValid_direct hOBF (MPL.hilbert_alg_completeness.mp h))
 
 /-! ## Direct MPL→ConjImpBotMin Conservativity -/
 
@@ -207,11 +208,11 @@ theorem mplAxiom_iff_conjImpAxiom {Atom : Type u} {φ : PL.Proposition Atom}
 extension of MPL⟨∧,→,⊥,⊤⟩ for or-free formulas, proved via a direct algebraic route.
 
 The proof composes:
-1. `MPL.hilbert_alg_complete.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
+1. `MPL.hilbert_alg_completeness.mp h` converts `Derivable MinPropAxiom φ` to `GHAValid φ`.
 2. `GHAValid_implies_BrouwerianBotValid_direct` converts `GHAValid φ` to `BrouwerianBotValid φ`
    by instantiating at `LowerSet B` (a `HeytingAlgebra`, hence a `GeneralizedHeytingAlgebra`)
    with `bot_val = LowerSet.Iic bot_val` and applying `brouwerianBotEmbeddingLemma`.
-3. `conjImpBotMin_brouwerianBot_complete hOF` converts `BrouwerianBotValid φ` to
+3. `conjImpBotMin_brouwerianBot_completeness hOF` converts `BrouwerianBotValid φ` to
    `Derivable ConjImpBotMinAxiom φ`.
 
 This is the fourth step of the MPL fragment tower:
@@ -219,8 +220,8 @@ This is the fourth step of the MPL fragment tower:
 theorem hilbertMplConservativeOverConjImpBot_direct {Atom : Type u} {φ : PL.Proposition Atom}
     (hOF : φ.IsOrFree = true) (h : Derivable (@MinPropAxiom Atom) φ) :
     Derivable (@ConjImpBotMinAxiom Atom) φ :=
-  conjImpBotMin_brouwerianBot_complete hOF
-    (GHAValid_implies_BrouwerianBotValid_direct hOF (MPL.hilbert_alg_complete.mp h))
+  conjImpBotMin_brouwerianBot_completeness hOF
+    (GHAValid_implies_BrouwerianBotValid_direct hOF (MPL.hilbert_alg_completeness.mp h))
 
 /-- **Biconditional**: for or-free formulas, derivability in MinPropAxiom and
 ConjImpBotMinAxiom coincide.

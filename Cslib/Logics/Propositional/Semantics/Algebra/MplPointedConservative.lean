@@ -29,7 +29,7 @@ the algebraic `OrderBot` least element.
 `ConjImpBotMinAxiom`-derivable formula evaluates to `⊤` in every Brouwerian semilattice
 under every variable assignment and every choice of `bot_val`.
 
-**Completeness** (`conjImpBotMin_brouwerianBot_complete`): Restricted to `IsOrFree` formulas,
+**Completeness** (`conjImpBotMin_brouwerianBot_completeness`): Restricted to `IsOrFree` formulas,
 if a formula evaluates to `⊤` in every Brouwerian semilattice with every `bot_val`, then it
 is `ConjImpBotMinAxiom`-derivable.
 
@@ -40,7 +40,7 @@ lemmas `brouwerianBot_implyK_sound`, `brouwerianBot_implyS_sound`, `brouwerianBo
 `brouwerianBot_andE1_sound`, `brouwerianBot_andE2_sound` from `BrouwerianCompletenessGeneric`.
 There are five cases (no efq case since `ConjImpBotMinAxiom` has no ex falso axiom).
 
-**Completeness** delegates directly to the generic `brouwerianBot_complete` from
+**Completeness** delegates directly to the generic `brouwerianBot_completeness` from
 `BrouwerianCompletenessGeneric`, which uses the `HilbertLindenbaumAlgebra ConjImpBotMinAxiom`
 as the canonical model (with `canonicalBotVal = [⊥]`). The `ConjImpAxioms` instance for
 `ConjImpBotMinAxiom` (from `FragmentAxioms`) unlocks the generic machinery.
@@ -50,7 +50,7 @@ as the canonical model (with `canonicalBotVal = [⊥]`). The `ConjImpAxioms` ins
 - `conjImpBotMin_brouwerianBot_axiom_sound`: every `ConjImpBotMinAxiom` evaluates to `⊤`.
 - `conjImpBotMin_brouwerianBot_soundness`: derivation-tree soundness.
 - `conjImpBotMin_brouwerianBot_soundness_derivable`: soundness.
-- `conjImpBotMin_brouwerianBot_complete`: completeness for `IsOrFree` formulas.
+- `conjImpBotMin_brouwerianBot_completeness`: completeness for `IsOrFree` formulas.
 - `conjImpBotMin_brouwerianBot_iff`: biconditional for `IsOrFree` formulas.
 
 ## References
@@ -127,7 +127,7 @@ theorem conjImpBotMin_brouwerianBot_soundness_derivable {Atom : Type*}
 if an or-free formula is valid in every Brouwerian semilattice with every choice of `bot_val`,
 then it is `ConjImpBotMinAxiom`-derivable.
 
-The proof is a corollary of the generic `brouwerianBot_complete` from
+The proof is a corollary of the generic `brouwerianBot_completeness` from
 `BrouwerianCompletenessGeneric`, which instantiates `BrouwerianBotValid` at the
 `HilbertLindenbaumAlgebra ConjImpBotMinAxiom` (with `canonicalBotVal = [⊥]`), applies the
 truth lemma `brouwerianBotCanonicalV_spec`, and closes with `hilbertLindenbaumMk_eq_top_iff`.
@@ -136,11 +136,11 @@ The `ConjImpAxioms` instance for `ConjImpBotMinAxiom` (from `FragmentAxioms`) un
 The restriction to `IsOrFree` is necessary: `a ∨ b` is vacuously valid (since
 `BrouwerianBotEvaluate v bot_val (or a b) = ⊤` by definition) but `ConjImpBotMinAxiom`
 has no disjunction axioms. -/
-theorem conjImpBotMin_brouwerianBot_complete {Atom : Type u} {φ : PL.Proposition Atom}
+theorem conjImpBotMin_brouwerianBot_completeness {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrFree = true)
     (h : BrouwerianBotValid.{u, u} φ) :
     Derivable ConjImpBotMinAxiom φ :=
-  brouwerianBot_complete hfrag h
+  brouwerianBot_completeness hfrag h
 
 /-- **Free-Bot Brouwerian Biconditional for MPL⟨∧,→,⊥,⊤⟩**: For or-free formulas,
 derivability and free-bot Brouwerian validity coincide. -/
@@ -148,7 +148,7 @@ theorem conjImpBotMin_brouwerianBot_iff {Atom : Type u} {φ : PL.Proposition Ato
     (hfrag : φ.IsOrFree = true) :
     Derivable ConjImpBotMinAxiom φ ↔ BrouwerianBotValid.{u, u} φ :=
   ⟨conjImpBotMin_brouwerianBot_soundness_derivable,
-   conjImpBotMin_brouwerianBot_complete hfrag⟩
+   conjImpBotMin_brouwerianBot_completeness hfrag⟩
 
 end Cslib.Logic.PL
 

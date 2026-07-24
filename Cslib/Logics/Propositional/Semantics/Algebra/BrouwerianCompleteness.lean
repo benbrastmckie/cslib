@@ -19,7 +19,7 @@ IPL⟨∧,→,⊤⟩ with respect to Brouwerian semilattices.
 **Soundness** (`conjImp_brouwerian_soundness_derivable`): Every `ConjImpAxiom`-derivable
 formula evaluates to `⊤` in every Brouwerian semilattice under every variable assignment.
 
-**Completeness** (`conjImp_brouwerian_complete`): Restricted to `IsOrBotFree` formulas, if
+**Completeness** (`conjImp_brouwerian_completeness`): Restricted to `IsOrBotFree` formulas, if
 a formula evaluates to `⊤` in every Brouwerian semilattice then it is `ConjImpAxiom`-derivable.
 The restriction is necessary because `BrouwerianEvaluate` maps `bot` and `or` to `⊤`, making
 those connectives vacuously valid, while `ConjImpAxiom` has no EFQ or disjunction axioms.
@@ -39,7 +39,7 @@ equation `BrouwerianEvaluate (canonicalV ConjImpAxiom) φ = hilbertLindenbaumMk 
 ## Main Results
 
 - `conjImp_brouwerian_soundness_derivable`: `Derivable ConjImpAxiom φ → BrouwerianValid φ`
-- `conjImp_brouwerian_complete`: `IsOrBotFree φ → BrouwerianValid φ → Derivable ConjImpAxiom φ`
+- `conjImp_brouwerian_completeness`: `IsOrBotFree φ → BrouwerianValid φ → Derivable ConjImpAxiom φ`
 - `conjImp_brouwerian_iff`: `IsOrBotFree φ → (Derivable ConjImpAxiom φ ↔ BrouwerianValid φ)`
 
 ## References
@@ -155,7 +155,7 @@ for fragment algebraic completeness — see `canAlgCompleteIsOrBotFree`, and (vi
 `fragmentConservativityConjImp`) the `FragmentConservativity` instance in
 `FragmentConservativityInstances.lean`. It stays public (14+ use-sites); only its role in the
 completeness stack is being reclassified here, not its visibility, name, or signature. -/
-theorem conjImp_brouwerian_complete {Atom : Type u} {φ : PL.Proposition Atom}
+theorem conjImp_brouwerian_completeness {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrBotFree = true)
     (h : BrouwerianValid.{u, u} φ) :
     Derivable ConjImpAxiom φ := by
@@ -170,7 +170,7 @@ theorem conjImp_brouwerian_iff {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrBotFree = true) :
     Derivable ConjImpAxiom φ ↔ BrouwerianValid.{u, u} φ :=
   ⟨conjImp_brouwerian_soundness_derivable,
-   conjImp_brouwerian_complete hfrag⟩
+   conjImp_brouwerian_completeness hfrag⟩
 
 end Cslib.Logic.PL
 

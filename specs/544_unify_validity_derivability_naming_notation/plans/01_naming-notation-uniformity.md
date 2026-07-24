@@ -254,24 +254,29 @@ reorganization, keeping the 57 existing sites compiling via a deprecated alias.
 - Scoped `lake build` of the touched Modal/Bimodal/Temporal modules succeeds.
 - `grep -rn '_conservative_extension' Cslib/Logics` returns nothing (all migrated).
 
-### Phase 6: Algebra-layer completeness suffix `_complete` → `_completeness` (item 3) [NOT STARTED]
+### Phase 6: Algebra-layer completeness suffix `_complete` → `_completeness` (item 3) [COMPLETED]
 
 **Goal**: Rename only the six genuine Algebra-layer completeness theorems, per-declaration,
 without touching the excluded property homographs.
 
 **Tasks**:
-- [ ] Rename per-declaration in `Propositional/Semantics/Algebra/`:
+- [x] Rename per-declaration in `Propositional/Semantics/Algebra/`:
       `hilbert_alg_complete`→`hilbert_alg_completeness` (48 refs),
       `conjImp_brouwerian_complete`→`conjImp_brouwerian_completeness` (17),
       `imp_hilbert_complete`→`imp_hilbert_completeness` (10),
       `conjImpBot_pointedBrouwerian_complete`→`conjImpBot_pointedBrouwerian_completeness` (8),
       `conjImpBotMin_brouwerianBot_complete`→`conjImpBotMin_brouwerianBot_completeness` (7),
-      `brouwerianBot_complete`→`brouwerianBot_completeness` (6).
-- [ ] CRITICAL EXCLUSIONS — do NOT touch: the `*negation_complete` family
+      `brouwerianBot_complete`→`brouwerianBot_completeness` (6) *(the rename touched 18 files
+      total, beyond the plan's 5-file estimate, since references extend across the wider
+      Algebra/ fragment-conservativity network; 3 docstring lines grew past the 100-char
+      longLine limit from the longer suffix and were rewrapped)*.
+- [x] CRITICAL EXCLUSIONS — do NOT touch: the `*negation_complete` family
       (`prop_/modal_/temporal_/restricted_mcs_/closure_mcs_/mcs_closure_/algebraic_mcs_negation_complete`,
       174 occurrences) or `propositions_complete` (`HML/Basic.lean:186`) or any local
-      `big_complete`/`small_complete` `have`-names.
-- [ ] Do NOT rename the Tableau-layer `_complete` theorems (out of scope for this run).
+      `big_complete`/`small_complete` `have`-names *(all verified untouched: negation_complete
+      count still 174, propositions_complete still present in HML/Basic.lean, big_complete/
+      small_complete have-names in HilbertConservativeGlivenko.lean untouched)*.
+- [x] Do NOT rename the Tableau-layer `_complete` theorems (out of scope for this run).
 
 **Timing**: 45 min
 

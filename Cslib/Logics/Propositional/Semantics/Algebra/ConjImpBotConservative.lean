@@ -31,14 +31,14 @@ fragment IPL⟨∧,→,⊥,⊤⟩ for or-free formulas.
 
 The main theorem routes through pointed Brouwerian validity via the `NonemptyLowerSet`
 Heyting algebra construction:
-1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+1. `IPL.hilbert_alg_completeness.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
 2. Instantiate at `H := NonemptyLowerSet B` (a `HeytingAlgebra`) with valuation
    `iicNonemptyLowerSet ∘ v`. This gives
    `AlgEvaluate (iicNonemptyLowerSet ∘ v) ⊥ φ = ⊤`.
 3. `nonemptyLowerSet_evaluate_commutes` rewrites this to
    `iicNonemptyLowerSet (PointedBrouwerianEvaluate v φ) = ⊤`.
 4. `iicNonemptyLowerSet_eq_top_iff` extracts `PointedBrouwerianEvaluate v φ = ⊤`.
-5. So `PointedBrouwerianValid φ`, and `conjImpBot_pointedBrouwerian_complete` gives
+5. So `PointedBrouwerianValid φ`, and `conjImpBot_pointedBrouwerian_completeness` gives
    `Derivable ConjImpBotAxiom φ`.
 
 The key improvement over `ConjImpConservative.lean`: the `NonemptyLowerSet` embedding
@@ -71,7 +71,7 @@ system and `φ` contains no `∨`, then `φ` is already derivable in the
 conjunctive-implicational-bot Hilbert system.
 
 The proof routes through pointed Brouwerian validity via the `NonemptyLowerSet` Heyting algebra:
-1. `IPL.hilbert_alg_complete.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
+1. `IPL.hilbert_alg_completeness.mp h` converts `Derivable IntPropAxiom φ` to `HAValid φ`.
 2. For any `BrouwerianSemilattice B` with `OrderBot` and `v : Atom → B`, instantiate `HAValid φ`
    at `H := NonemptyLowerSet B` with valuation `iicNonemptyLowerSet ∘ v`. This gives
    `AlgEvaluate (iicNonemptyLowerSet ∘ v) ⊥ φ = ⊤`.
@@ -79,7 +79,7 @@ The proof routes through pointed Brouwerian validity via the `NonemptyLowerSet` 
    `iicNonemptyLowerSet (PointedBrouwerianEvaluate v φ) = ⊤`.
 4. `iicNonemptyLowerSet_eq_top_iff` extracts `PointedBrouwerianEvaluate v φ = ⊤`.
 5. Since `v` and `B` were arbitrary, `PointedBrouwerianValid φ`.
-6. `conjImpBot_pointedBrouwerian_complete hOF` gives `Derivable ConjImpBotAxiom φ`.
+6. `conjImpBot_pointedBrouwerian_completeness hOF` gives `Derivable ConjImpBotAxiom φ`.
 
 The key distinction from `hilbertIplConservativeOverConjImp` (the or-bot-free version):
 `NonemptyLowerSet` preserves `⊥` via `iicNonemptyLowerSet_bot`, while the plain `LowerSet`
@@ -88,9 +88,9 @@ formulas with `⊥`, extending the result to all or-free (not just or-bot-free) 
 theorem hilbertIplConservativeOverConjImpBot {Atom : Type u} {φ : PL.Proposition Atom}
     (hOF : φ.IsOrFree = true) (h : Derivable (@IntPropAxiom Atom) φ) :
     Derivable (@ConjImpBotAxiom Atom) φ := by
-  apply conjImpBot_pointedBrouwerian_complete hOF
+  apply conjImpBot_pointedBrouwerian_completeness hOF
   intro B _ _ v
-  have hHA := IPL.hilbert_alg_complete.mp h
+  have hHA := IPL.hilbert_alg_completeness.mp h
     (H := NonemptyLowerSet B) (iicNonemptyLowerSet ∘ v)
   rw [← nonemptyLowerSet_evaluate_commutes v φ hOF] at hHA
   exact iicNonemptyLowerSet_eq_top_iff.mp hHA

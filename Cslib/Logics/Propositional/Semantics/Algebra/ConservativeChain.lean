@@ -79,9 +79,9 @@ The algebraic completeness theorems connect both sides:
 |-------|--------|---------|-------------|
 | IPL⟨→,⊤⟩ | `ImpAxiom` | Hilbert algebras | `imp_hilbert_iff` |
 | IPL⟨∧,→,⊤⟩ | `ConjImpAxiom` | Brouwerian semilattices | `conjImp_brouwerian_iff` |
-| MPL | `MinPropAxiom` | GHAs | `MPL.hilbert_alg_complete` |
-| IPL | `IntPropAxiom` | Heyting algebras | `IPL.hilbert_alg_complete` |
-| CPL | `PropositionalAxiom` | Boolean algebras | `CPL.hilbert_alg_complete` |
+| MPL | `MinPropAxiom` | GHAs | `MPL.hilbert_alg_completeness` |
+| IPL | `IntPropAxiom` | Heyting algebras | `IPL.hilbert_alg_completeness` |
+| CPL | `PropositionalAxiom` | Boolean algebras | `CPL.hilbert_alg_completeness` |
 
 ## The Derivability Subsumption Chain
 
@@ -158,20 +158,20 @@ theorem derivability_subsumption_chain {Atom : Type u} {φ : PL.Proposition Atom
 formulas.
 
 The proof routes through derivability using completeness:
-1. `imp_hilbert_complete hITO h` converts `HilbertValid φ` to `Derivable ImpAxiom φ`.
+1. `imp_hilbert_completeness hITO h` converts `HilbertValid φ` to `Derivable ImpAxiom φ`.
 2. `liftDerivationTree` lifts to `Derivable ConjImpAxiom φ` (axiom subsumption).
 3. `conjImp_brouwerian_soundness_derivable` converts to `BrouwerianValid φ`. -/
 theorem HilbertValid_implies_BrouwerianValid_impTopOnly {Atom : Type u}
     {φ : PL.Proposition Atom} (hITO : φ.IsImpTopOnly = true) (h : HilbertValid.{u, u} φ) :
     BrouwerianValid.{u, u} φ := by
-  obtain ⟨d⟩ := imp_hilbert_complete hITO h
+  obtain ⟨d⟩ := imp_hilbert_completeness hITO h
   exact conjImp_brouwerian_soundness_derivable
     ⟨liftDerivationTree (fun ψ hψ => hψ.toConjImpAxiom) d⟩
 
 /-- **Validity subsumption**: GHA-validity implies Brouwerian-validity for or-bot-free formulas.
 
 The proof routes through derivability using completeness:
-1. `MPL.hilbert_alg_complete.mpr h` converts `GHAValid φ` to `Derivable MinPropAxiom φ`.
+1. `MPL.hilbert_alg_completeness.mpr h` converts `GHAValid φ` to `Derivable MinPropAxiom φ`.
 2. `derivableMinOfDerivableInt` lifts to `Derivable IntPropAxiom φ` (subsumption).
 3. `hilbertIplConservativeOverConjImp hOBF` reduces to `Derivable ConjImpAxiom φ`.
 4. `conjImp_brouwerian_soundness_derivable` gives `BrouwerianValid φ`.
@@ -183,7 +183,7 @@ theorem GHAValid_implies_BrouwerianValid_orBotFree {Atom : Type u}
     BrouwerianValid φ :=
   conjImp_brouwerian_soundness_derivable
     (hilbertIplConservativeOverConjImp hOBF
-      (derivableMinOfDerivableInt (MPL.hilbert_alg_complete.mpr h)))
+      (derivableMinOfDerivableInt (MPL.hilbert_alg_completeness.mpr h)))
 
 /-- **Validity subsumption**: HA-validity implies GHA-validity for bot-free formulas.
 
@@ -286,8 +286,8 @@ IPL-strength derivability of `¬¬φ`.
 
 This is a convenience wrapper over `hilbertGlivenko_theory` that discharges the BA-soundness
 and HA-completeness hypotheses via the Hilbert-level completeness theorems:
-- `h_cl ψ hψ = CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ)` (soundness via CPL)
-- `h_int ψ hHA = derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA)` (completeness via IPL)
+- `h_cl ψ hψ = CPL.hilbert_alg_completeness.mp (derivable_mono hcl hψ)` (soundness via CPL)
+- `h_int ψ hHA = derivable_mono hint (IPL.hilbert_alg_completeness.mpr hHA)` (completeness via IPL)
 
 **Design note (deviation from plan)**: The plan proposed using `CPL ⊆ AxiomTheory A_cl` /
 `IPL ⊆ AxiomTheory A_int` as the strength hypotheses, following the ND-theory inclusion
@@ -305,8 +305,8 @@ theorem hilbertGlivenko_strength {Atom : Type u} {φ : PL.Proposition Atom}
     (hint : ∀ ψ, @IntPropAxiom Atom ψ → A_int ψ)
     (h : Derivable A_cl φ) : Derivable A_int (¬¬φ) :=
   hilbertGlivenko_theory A_cl A_int
-    (fun _ hψ => CPL.hilbert_alg_complete.mp (derivable_mono hcl hψ))
-    (fun _ hHA => derivable_mono hint (IPL.hilbert_alg_complete.mpr hHA))
+    (fun _ hψ => CPL.hilbert_alg_completeness.mp (derivable_mono hcl hψ))
+    (fun _ hHA => derivable_mono hint (IPL.hilbert_alg_completeness.mpr hHA))
     h
 
 /-! ## ND Corollaries via Bridges -/

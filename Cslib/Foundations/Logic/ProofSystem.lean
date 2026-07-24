@@ -52,7 +52,7 @@ bimodal tag types have full instances (see
 
 Hilbert-level algebraic completeness, conservative extension, and Glivenko theorems are
 established in `Cslib.Logics.Propositional.Semantics.Algebra.*`:
-- `MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`
+- `MPL.hilbert_alg_completeness`, `IPL.hilbert_alg_completeness`, `CPL.hilbert_alg_completeness`
   (Hilbert completeness, no `[DecidableEq Atom]` required)
 - `hilbertIplConservativeOverMpl`, `hilbertGlivenko` (Hilbert-primary)
 - `ipl_conservative_over_mpl`, `glivenko` (ND corollaries via algebraic bridges)

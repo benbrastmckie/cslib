@@ -71,11 +71,11 @@ equal to `Evaluate`'s `imp` case).
 ## Roadmap
 
 - `baValid_imp_tautology : BAValid φ → Tautology φ` — direct route via
-  `prop_soundness_tautology ∘ CPL.hilbert_alg_complete.mpr`; requires importing
+  `prop_soundness_tautology ∘ CPL.hilbert_alg_completeness.mpr`; requires importing
   `Semantics/Algebra/HilbertCompleteness.lean` and
   `Metalogic/Soundness.lean`.
 - `tautology_iff_baValid : Tautology φ ↔ BAValid φ` — follows from
-  `prop_completeness_iff_tautology.trans CPL.hilbert_alg_complete`; restricted to
+  `prop_completeness_iff_tautology.trans CPL.hilbert_alg_completeness`; restricted to
   `BAValid.{u, u}` (same universe for `Atom` and `H`); a universe-polymorphic form
   may need a `ULift`-based argument.
 

@@ -41,7 +41,7 @@ IPL⟨→,⊤⟩ for imp-top-only formulas.
    - Instantiate at `FreeMeetExtension H` with `freeMeetEmbed ∘ v`.
    - `freeMeetEvaluateEq` rewrites to `freeMeetEmbed (HilbertEvaluate v φ) = ⊤`.
    - `freeMeetEmbed_eq_top_iff` gives `HilbertEvaluate v φ = ⊤`.
-   - `imp_hilbert_complete` closes.
+   - `imp_hilbert_completeness` closes.
 3. **IPL→Imp conservativity** (`hilbertIplConservativeOverImp`): compose Step 1 and Step 2 via
    `hilbertIplConservativeOverConjImp` and `IsImpTopOnly_implies_IsOrBotFree`.
 
@@ -96,11 +96,11 @@ The proof routes through the free BrouwerianSemilattice construction:
    `BrouwerianEvaluate (freeMeetEmbed ∘ v) φ = ⊤`.
 3. `freeMeetEvaluateEq` rewrites this to `freeMeetEmbed (HilbertEvaluate v φ) = ⊤`.
 4. `freeMeetEmbed_eq_top_iff` gives `HilbertEvaluate v φ = ⊤`.
-5. `imp_hilbert_complete` converts to `Derivable ImpAxiom φ`. -/
+5. `imp_hilbert_completeness` converts to `Derivable ImpAxiom φ`. -/
 theorem hilbertConjImpConservativeOverImp {Atom : Type u} {φ : PL.Proposition Atom}
     (hITO : φ.IsImpTopOnly = true) (h : Derivable (@ConjImpAxiom Atom) φ) :
     Derivable (@ImpAxiom Atom) φ := by
-  apply imp_hilbert_complete hITO
+  apply imp_hilbert_completeness hITO
   intro H _ v
   have hBV := conjImp_brouwerian_soundness_derivable h
   have hFME := hBV (FreeMeetExtension H) (freeMeetEmbed ∘ v)

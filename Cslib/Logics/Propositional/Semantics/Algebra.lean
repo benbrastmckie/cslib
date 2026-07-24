@@ -54,8 +54,9 @@ it has no in-tree consumer.
 ## Hilbert-Primary Architecture
 
 The Hilbert system is the primary proof system for this algebraic semantics module. Completeness
-theorems (`MPL.hilbert_alg_complete`, `IPL.hilbert_alg_complete`, `CPL.hilbert_alg_complete`)
-are proved directly via the Hilbert Lindenbaum algebra and do not require `[DecidableEq Atom]`.
+theorems (`MPL.hilbert_alg_completeness`, `IPL.hilbert_alg_completeness`,
+`CPL.hilbert_alg_completeness`) are proved directly via the Hilbert Lindenbaum algebra and do not
+require `[DecidableEq Atom]`.
 
 The ND system inherits results via syntactic bridges. Conservative extension
 (`hilbertIplConservativeOverMpl`) and Glivenko (`hilbertGlivenko`) are proved directly in the

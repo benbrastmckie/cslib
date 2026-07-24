@@ -31,12 +31,12 @@ shared soundness argument for implyK, implyS, andI, andE1, andE2.  Per-tier soun
 when `A` is `IsOrFree`.  The proof is structural induction using the generic Lindenbaum simp
 lemmas `hilbertLindenbaumMk_himp` and `hilbertLindenbaumMk_inf`.
 
-**Generic completeness** (`brouwerianBot_complete`): Instantiate `BrouwerianBotValid` at the
+**Generic completeness** (`brouwerianBot_completeness`): Instantiate `BrouwerianBotValid` at the
 Lindenbaum algebra, rewrite with the truth lemma, then close with `hilbertLindenbaumMk_eq_top_iff`.
 
 **Brouwerian-tier truth lemma** (`brouwerianCanonicalV_spec_generic`): For `IsOrBotFree`
 formulas, `BrouwerianEvaluate (canonicalV Axioms) A = hilbertLindenbaumMk A`. Used to recover
-`conjImp_brouwerian_complete` from `BrouwerianValid`.
+`conjImp_brouwerian_completeness` from `BrouwerianValid`.
 
 ## Main Results
 
@@ -47,7 +47,7 @@ formulas, `BrouwerianEvaluate (canonicalV Axioms) A = hilbertLindenbaumMk A`. Us
   `IsOrBotFree` formulas.
 - `brouwerianBot_soundness_tree`: generic derivation-tree soundness (parametric over axiom-sound).
 - `brouwerianBot_soundness_derivable`: generic derivable-level soundness.
-- `brouwerianBot_complete`: generic completeness for `IsOrFree` formulas.
+- `brouwerianBot_completeness`: generic completeness for `IsOrFree` formulas.
 
 ## References
 
@@ -232,9 +232,9 @@ The proof instantiates `BrouwerianBotValid` at the Hilbert Lindenbaum algebra, r
 truth lemma `brouwerianBotCanonicalV_spec`, and closes with `hilbertLindenbaumMk_eq_top_iff`.
 
 The explicit universe annotation `.{u, u}` follows the pattern of
-`conjImpBotMin_brouwerianBot_complete` in `MplPointedConservative.lean`: both the atom type
+`conjImpBotMin_brouwerianBot_completeness` in `MplPointedConservative.lean`: both the atom type
 and the algebra type live in universe `u`, ensuring universe-safe instantiation. -/
-theorem brouwerianBot_complete {Atom : Type u}
+theorem brouwerianBot_completeness {Atom : Type u}
     {Axioms : PL.Proposition Atom → Prop} [ConjImpAxioms Axioms]
     {φ : PL.Proposition Atom} (hfrag : φ.IsOrFree = true)
     (h : BrouwerianBotValid.{u, u} φ) : Derivable Axioms φ := by

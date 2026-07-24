@@ -15,8 +15,8 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 
 **`CanAlgComplete` is the single documented terminal interface for fragment algebraic
 completeness** in the propositional-algebra completeness stack. Every piecewise completeness
-theorem in this directory (`MPL.hilbert_alg_complete` in `HilbertCompleteness.lean`,
-`conjImp_brouwerian_complete` in `BrouwerianCompleteness.lean`, and the corresponding
+theorem in this directory (`MPL.hilbert_alg_completeness` in `HilbertCompleteness.lean`,
+`conjImp_brouwerian_completeness` in `BrouwerianCompleteness.lean`, and the corresponding
 `MplConservativeChain.lean` results) is a **load-bearing internal input** to one of the three
 instances below (`canAlgCompleteIsBotFree`, `canAlgCompleteIsOrBotFree`,
 `canAlgCompleteIsImpTopOnly`) — those inputs stay public because they have dozens of external
@@ -59,10 +59,11 @@ fragment and cannot be inferred by instance resolution.
 ## Design Notes
 
 This file is **additive**: no existing proof is modified. The three instances are term-level
-compositions of `MPL.hilbert_alg_complete`, `mplAxiom_iff_impAxiom`, `conjImp_brouwerian_complete`,
-`GHAValid_implies_BrouwerianValid_direct`, and the axiom-subsumption lemmas. The canonical algebras
-used are `LowerSet B` (for the Brouwerian route) and `WithBot G` (for the ⊥-free collapse), not a
-bespoke implicative free algebra: the implicational fragment `IsImpTopOnly` is recovered by
+compositions of `MPL.hilbert_alg_completeness`, `mplAxiom_iff_impAxiom`,
+`conjImp_brouwerian_completeness`, `GHAValid_implies_BrouwerianValid_direct`, and the
+axiom-subsumption lemmas. The canonical algebras used are `LowerSet B` (for the Brouwerian route)
+and `WithBot G` (for the ⊥-free collapse), not a bespoke implicative free algebra: the
+implicational fragment `IsImpTopOnly` is recovered by
 fragment subsumption (`IsImpTopOnly → IsOrBotFree → LowerSet B`), so no Rasiowa free implicative
 algebra is required.
 
@@ -117,24 +118,24 @@ theorem canAlgComplete_haValid_iff {Atom : Type u} {P : PL.Proposition Atom → 
 /-! ## Fragment Instances (by Reuse) -/
 
 /-- `IsBotFree` is algebraically completable with target logic `MinPropAxiom` (MPL). Both fields
-are projections of the *total* iff `MPL.hilbert_alg_complete` (which holds for all `φ`), so
+are projections of the *total* iff `MPL.hilbert_alg_completeness` (which holds for all `φ`), so
 ⊥-freeness is not used in the fields themselves — it only matters for the `HAValid` upgrade. -/
 def canAlgCompleteIsBotFree {Atom : Type u} :
     CanAlgComplete (Atom := Atom) Proposition.IsBotFree where
   Ax := MinPropAxiom
-  complete := fun _ h => MPL.hilbert_alg_complete.mpr h
-  sound := fun h => MPL.hilbert_alg_complete.mp h
+  complete := fun _ h => MPL.hilbert_alg_completeness.mpr h
+  sound := fun h => MPL.hilbert_alg_completeness.mp h
 
 /-- `IsOrBotFree` is algebraically completable with target logic `ConjImpAxiom` (IPL⟨∧,→,⊤⟩).
 Completeness routes GHA-validity through the canonical Heyting model `LowerSet B`
 (`GHAValid_implies_BrouwerianValid_direct`) and the Brouwerian completeness theorem
-(`conjImp_brouwerian_complete`); soundness uses axiom subsumption into MPL. -/
+(`conjImp_brouwerian_completeness`); soundness uses axiom subsumption into MPL. -/
 def canAlgCompleteIsOrBotFree {Atom : Type u} :
     CanAlgComplete (Atom := Atom) Proposition.IsOrBotFree where
   Ax := ConjImpAxiom
   complete := fun hφ h =>
-    conjImp_brouwerian_complete hφ (GHAValid_implies_BrouwerianValid_direct hφ h)
-  sound := fun h => MPL.hilbert_alg_complete.mp (derivableMinOfDerivableConjImp h)
+    conjImp_brouwerian_completeness hφ (GHAValid_implies_BrouwerianValid_direct hφ h)
+  sound := fun h => MPL.hilbert_alg_completeness.mp (derivableMinOfDerivableConjImp h)
 
 /-- `IsImpTopOnly` is algebraically completable with target logic `ImpAxiom` (IPL⟨→,⊤⟩).
 Completeness routes through MPL completeness and the conservativity link `mplAxiom_iff_impAxiom`
@@ -143,8 +144,8 @@ subsumption into MPL. No Rasiowa free implicative algebra is required. -/
 def canAlgCompleteIsImpTopOnly {Atom : Type u} :
     CanAlgComplete (Atom := Atom) Proposition.IsImpTopOnly where
   Ax := ImpAxiom
-  complete := fun hφ h => (mplAxiom_iff_impAxiom hφ).mp (MPL.hilbert_alg_complete.mpr h)
-  sound := fun h => MPL.hilbert_alg_complete.mp (derivableMinOfDerivableImp h)
+  complete := fun hφ h => (mplAxiom_iff_impAxiom hφ).mp (MPL.hilbert_alg_completeness.mpr h)
+  sound := fun h => MPL.hilbert_alg_completeness.mp (derivableMinOfDerivableImp h)
 
 end Cslib.Logic.PL
 

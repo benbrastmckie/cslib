@@ -70,7 +70,7 @@ universe u
 
 /-- `IsOrBotFree` has fragment conservativity with target logic `ConjImpAxiom` (IPL⟨∧,→,⊤⟩).
 The hard direction is `hilbertIplConservativeOverConjImp` (the `LowerSet B` Heyting /
-`brouwerianEmbeddingLemma` / `conjImp_brouwerian_complete` route), reused verbatim. -/
+`brouwerianEmbeddingLemma` / `conjImp_brouwerian_completeness` route), reused verbatim. -/
 def fragmentConservativityConjImp {Atom : Type u} :
     FragmentConservativity (Atom := Atom) Proposition.IsOrBotFree where
   Ax := ConjImpAxiom
@@ -79,7 +79,7 @@ def fragmentConservativityConjImp {Atom : Type u} :
 
 /-- `IsImpTopOnly` has fragment conservativity with target logic `ImpAxiom` (IPL⟨→,⊤⟩).
 The hard direction is `hilbertIplConservativeOverImp` (the ConjImp + `FreeMeetExtension` free
-BSL + `freeMeetEvaluateEq` + `imp_hilbert_complete` route), reused verbatim. -/
+BSL + `freeMeetEvaluateEq` + `imp_hilbert_completeness` route), reused verbatim. -/
 def fragmentConservativityImp {Atom : Type u} :
     FragmentConservativity (Atom := Atom) Proposition.IsImpTopOnly where
   Ax := ImpAxiom
@@ -88,7 +88,7 @@ def fragmentConservativityImp {Atom : Type u} :
 
 /-- `IsOrFree` has fragment conservativity with target logic `ConjImpBotAxiom` (IPL⟨∧,→,⊥,⊤⟩).
 The hard direction is `hilbertIplConservativeOverConjImpBot` (the `NonemptyLowerSet` Heyting +
-`nonemptyLowerSet_evaluate_commutes` + `conjImpBot_pointedBrouwerian_complete` route), reused
+`nonemptyLowerSet_evaluate_commutes` + `conjImpBot_pointedBrouwerian_completeness` route), reused
 verbatim. -/
 def fragmentConservativityConjImpBot {Atom : Type u} :
     FragmentConservativity (Atom := Atom) Proposition.IsOrFree where

@@ -40,8 +40,8 @@ This characterizes the "⊥-free" fragment abstractly.
 **Residual — now discharged by `CanAlgComplete` (task 410)**:
 The remaining step — from `HAValid φ` (equivalently `GHAValid φ`) to `Derivable X-logic φ`
 for a specific sub-logic `X` — is **algebraic completeness**. This is not new mathematics:
-it already exists piecewise (`MPL.hilbert_alg_complete`, `mplAxiom_iff_conjImpAxiom`,
-`mplAxiom_iff_impAxiom`, `conjImp_brouwerian_complete`). What was missing was the unifying
+it already exists piecewise (`MPL.hilbert_alg_completeness`, `mplAxiom_iff_conjImpAxiom`,
+`mplAxiom_iff_impAxiom`, `conjImp_brouwerian_completeness`). What was missing was the unifying
 abstraction, now provided by `CanAlgComplete P` in `CanAlgComplete.lean`, which bundles a
 target axiom system together with the completeness and soundness directions and ships three
 instances by reuse:

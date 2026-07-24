@@ -22,7 +22,7 @@ OrderBot`).
 `ConjImpBotAxiom`-derivable formula evaluates to `⊤` in every pointed Brouwerian semilattice
 under every variable assignment.
 
-**Completeness** (`conjImpBot_pointedBrouwerian_complete`): Restricted to `IsOrFree` formulas,
+**Completeness** (`conjImpBot_pointedBrouwerian_completeness`): Restricted to `IsOrFree` formulas,
 if a formula evaluates to `⊤` in every pointed Brouwerian semilattice then it is
 `ConjImpBotAxiom`-derivable. The restriction to `IsOrFree` is necessary because
 `PointedBrouwerianEvaluate` maps `or` to `⊤`, making disjunction vacuously valid, while
@@ -49,7 +49,7 @@ into a Lindenbaum quotient class, and `hilbertLindenbaumMk_eq_top_iff` extracts 
 
 - `conjImpBot_pointedBrouwerian_axiom_sound`: every `ConjImpBotAxiom` evaluates to `⊤`
 - `conjImpBot_pointedBrouwerian_soundness_derivable`: soundness
-- `conjImpBot_pointedBrouwerian_complete`: completeness for `IsOrFree` formulas
+- `conjImpBot_pointedBrouwerian_completeness`: completeness for `IsOrFree` formulas
 - `conjImpBot_pointedBrouwerian_iff`: biconditional for `IsOrFree` formulas
 
 ## References
@@ -147,7 +147,7 @@ via `hilbertLindenbaumMk_eq_top_iff`.
 The restriction to `IsOrFree` is necessary: `a ∨ b` is vacuously pointed Brouwerian-valid
 (since `PointedBrouwerianEvaluate v (or a b) = ⊤` by definition) but `ConjImpBotAxiom`
 has no disjunction axioms. -/
-theorem conjImpBot_pointedBrouwerian_complete {Atom : Type u} {φ : PL.Proposition Atom}
+theorem conjImpBot_pointedBrouwerian_completeness {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrFree = true)
     (h : PointedBrouwerianValid.{u, u} φ) :
     Derivable ConjImpBotAxiom φ := by
@@ -173,7 +173,7 @@ theorem conjImpBot_pointedBrouwerian_iff {Atom : Type u} {φ : PL.Proposition At
     (hfrag : φ.IsOrFree = true) :
     Derivable ConjImpBotAxiom φ ↔ PointedBrouwerianValid.{u, u} φ :=
   ⟨conjImpBot_pointedBrouwerian_soundness_derivable,
-   conjImpBot_pointedBrouwerian_complete hfrag⟩
+   conjImpBot_pointedBrouwerian_completeness hfrag⟩
 
 end Cslib.Logic.PL
 

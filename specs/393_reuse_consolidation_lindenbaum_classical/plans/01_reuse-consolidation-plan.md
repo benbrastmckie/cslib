@@ -107,7 +107,7 @@ Phase 3: `GenericMCSBridge.lean` × 4 + Foundations `GenericMCS.lean`) and are p
 but a single autonomous agent should execute them sequentially with a green commit between so
 each lands independently `lake build`-verified.
 
-### Phase 1: Baseline verification and Cluster A documentation [PARTIAL]
+### Phase 1: Baseline verification and Cluster A documentation [COMPLETED]
 
 - **Goal:** Establish a known-green starting point and record the Cluster A no-action rationale
   as a durable comment so the retained naming adapters are not re-flagged for consolidation.
@@ -124,36 +124,32 @@ each lands independently `lake build`-verified.
     them would inline the generic at every call site for negative readability and zero
     proof-debt reduction). Reference the durable anchor (`Foundations/Logic/Metalogic/Consistency.lean`
     `set_lindenbaum`), never a task number, per no-task-references-in-deliverables.
-    *(deviation: altered -- done for `Modal/Metalogic/MCS.lean` (`modal_lindenbaum`),
-    `Propositional/Metalogic/MCS.lean` (`prop_lindenbaum`), and
-    `Bimodal/Metalogic/Core/MaximalConsistent.lean` (`bimodal_lindenbaum`); each now carries the
-    durable rationale comment and builds/lints clean. `Temporal/Metalogic/MCS.lean`
-    (`temporal_lindenbaum`) was withheld: the delegating orchestrator's concurrency coordination
-    note for this run scopes this agent away from files inside the concurrently-running
-    Temporal/ProofSystem+Metalogic agent's claimed territory, and `Temporal/Metalogic/MCS.lean`
-    falls squarely inside it. A trial edit to all four files was made and reverted (git diff
-    confirmed clean) before Phase 2/3 work began; on reassessment, only the Temporal file poses
-    a genuine same-tree collision risk (the other three families' MCS files are not claimed by
-    any concurrently-listed agent), so the other three were completed here and the deviation was
-    narrowed to Temporal alone. This one remaining documentation-only item carries no proof-debt
-    implication and can be picked up in a follow-on pass once the concurrent Temporal task has
-    landed.)*
+    *(deviation: altered, then completed -- initially done only for `Modal/Metalogic/MCS.lean`
+    (`modal_lindenbaum`), `Propositional/Metalogic/MCS.lean` (`prop_lindenbaum`), and
+    `Bimodal/Metalogic/Core/MaximalConsistent.lean` (`bimodal_lindenbaum`), withholding
+    `Temporal/Metalogic/MCS.lean` because it fell inside the concurrently-running
+    Temporal/ProofSystem+Metalogic agent's (task 449) claimed territory in this same working
+    tree at the time (a trial edit to all four files was made and reverted, git diff confirmed
+    clean, before Phase 2/3 began). Task 449 subsequently completed (its `status: "implemented"`
+    final metadata confirmed) and its concurrent edits did not touch `Temporal/Metalogic/MCS.lean`,
+    so the durable comment was added to `temporal_lindenbaum` as well once the territory was
+    clear, completing all four families. `lake build` green (634 jobs); `lake lint` /
+    `lake exe lint-style` zero findings on the file; zero `sorry`/`axiom` introduced.)*
   - [x] Note in the comment that `restricted_lindenbaum`
     (`Bimodal/Metalogic/Core/RestrictedMCS.lean`) is a genuine Zorn variant over
     closure-restricted supersets, not reducible to `set_lindenbaum`, and is out of scope here.
-    *(done in the Modal and Bimodal comments added above.)*
+    *(done in the Modal, Bimodal, and Temporal comments.)*
   - [x] `lake build` to confirm the comment-only change stays green; commit. *(`lake build`
-    green for the three edited modules (657 jobs); `lake lint` and `lake exe lint-style` report
-    zero findings on any of the three files; zero `sorry`/`axiom` introduced.)*
+    green for all four edited modules; `lake lint` and `lake exe lint-style` report zero
+    findings on any of the four files; zero `sorry`/`axiom` introduced.)*
 - **Timing:** ~0.5 hours (build-bound)
 - **Depends on:** none
 - **Files to modify:**
   - `Cslib/Logics/Modal/Metalogic/MCS.lean` (and sibling MCS files as needed) — add doc comment only
-    *(done for Modal, Propositional, Bimodal/Core; Temporal withheld per the territory deviation
-    above.)*
+    *(done for all four families: Modal, Propositional, Temporal, Bimodal/Core.)*
 - **Verification:**
   - `lake build` green; the added text is a comment/docstring (no code semantics changed).
-    *(confirmed for the three edited files.)*
+    *(confirmed for all four edited files.)*
 
 ### Phase 2: Cluster B — retire the three LiftViaMorphism overlays [COMPLETED]
 

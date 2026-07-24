@@ -64,6 +64,14 @@ abbrev Temporal.SetMaximalConsistent (Ω : Set (Formula Atom)) : Prop :=
 
 /-! ## Generic MCS Properties -/
 
+/-- Lindenbaum's lemma for temporal logic: every consistent set extends to an MCS.
+
+Intentional naming/signature adapter over `Foundations/Logic/Metalogic/Consistency.lean`
+`Metalogic.set_lindenbaum`; retained deliberately alongside the sibling family wrappers
+(`prop_lindenbaum`, `modal_lindenbaum`, `bimodal_lindenbaum`) rather than inlined at call sites,
+for no proof-debt reduction. `restricted_lindenbaum`
+(`Bimodal/Metalogic/Core/RestrictedMCS.lean`) is a genuine Zorn variant over closure-restricted
+supersets, not reducible to `set_lindenbaum`, and is out of scope here. -/
 theorem temporal_lindenbaum {Ω : Set (Formula Atom)}
     (hS : Temporal.SetConsistent Ω) :
     ∃ M : Set (Formula Atom), Ω ⊆ M ∧ Temporal.SetMaximalConsistent M :=

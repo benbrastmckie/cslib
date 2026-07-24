@@ -1,7 +1,7 @@
 # Implementation Plan: InterSystem Lattice Subsumption/Monotonicity Consolidation
 
 - **Task**: 546 - factor_intersystem_lattice_onto_schemaunion
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 3.5 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/546_factor_intersystem_lattice_onto_schemaunion/reports/01_intersystem-lattice-onto-schemaunion.md
@@ -243,21 +243,40 @@ re-point `Modularity.lean`, and leave the build green.
 
 ---
 
-### Phase 4: Full CSLib CI verification [NOT STARTED]
+### Phase 4: Full CSLib CI verification [COMPLETED]
 
 **Goal**: Confirm the whole library is green, minimized, and sorry-free after consolidation.
 
 **Tasks**:
-- [ ] `lake build` (full project) — must succeed.
-- [ ] `lake exe checkInitImports` — the two new files import `Cslib.Init`.
-- [ ] `lake lint` — environment linters clean for the new/modified files.
-- [ ] `lake exe lint-style` (or `--fix` then re-run) — text linters clean.
-- [ ] `lake test` — `CslibTests/` passes.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` (apply `--fix` if it flags
-      unused imports introduced by the merge, then re-`lake build`).
-- [ ] `lean_verify` on the merged files' public names to confirm zero `sorry` and no new axioms.
-- [ ] Final grep sweep: the 4 consumer sites (barrel `Cslib.lean`, `Modularity.lean`, and the
+- [x] `lake build` (full project) — must succeed. *(Green: 3252/3252 jobs, `Built Cslib`.)*
+- [x] `lake exe checkInitImports` — the two new files import `Cslib.Init`. *(No output = pass;
+      both `LatticeSubsumption.lean` and `LatticeMonotonicity.lean` begin with `Cslib.Init` in
+      their transitive import closure via `Cslib.Logics.Modal.Metalogic.*`.)*
+- [x] `lake lint` — environment linters clean for the new/modified files. *("Linting passed for
+      Cslib." -- zero warnings anywhere, including the 4 touched InterSystem files.)*
+- [x] `lake exe lint-style` (or `--fix` then re-run) — text linters clean. *(No output = pass.)*
+- [x] `lake test` — `CslibTests/` passes. *(9245/9245 jobs, all green.)*
+- [x] `lake shake --add-public --keep-implied --keep-prefix` (apply `--fix` if it flags
+      unused imports introduced by the merge, then re-`lake build`). *(None of the 4 touched
+      files -- `LatticeSubsumption.lean`, `LatticeMonotonicity.lean`,
+      `PropositionalStrengthSubsumption.lean`, `Modularity.lean` -- appear in the shake report;
+      the only InterSystem hit is pre-existing `LiftViaMorphism.lean` (untouched by this task,
+      out of scope). No `--fix` needed.)*
+- [x] `lean_verify` on the merged files' public names to confirm zero `sorry` and no new axioms.
+      *(Ran on `CS4ModalAxiom_implies_CS5ModalAxiom` (LatticeSubsumption),
+      `ckDerivable_implies_cs5Derivable` (LatticeMonotonicity), and
+      `CS5ModalAxiom_implies_IS5ModalAxiom` (PropositionalStrengthSubsumption): all report
+      `axioms: [], warnings: []`.)*
+- [x] Final grep sweep: the 4 consumer sites (barrel `Cslib.lean`, `Modularity.lean`, and the
       internal `LatticeMonotonicity` -> `LatticeSubsumption` link) resolve to preserved names.
+      *(Barrel lists `LatticeSubsumption`/`LatticeMonotonicity`; `Modularity.lean:10` imports
+      `LatticeMonotonicity`, line 11 `PropositionalStrengthMonotonicity` unchanged;
+      `LatticeMonotonicity.lean` imports `LatticeSubsumption`. `InterSystem/` file count: 10
+      (8 subsumption/monotonicity files reduced to 4, plus the 6 untouched infrastructure
+      files `AxiomSubsumption`/`Conservativity`/`IntToClassical`/`Lifting`/`LiftViaMorphism`.)
+      Repo-wide `sorry`/vacuous-def/axiom counts (145/1/27) are unchanged pre-existing baselines
+      in files this task never touched (Tableau/Computability modules); zero `sorry`, zero
+      vacuous definitions, and zero new `axiom` in the 4 files this task modified.)*
 
 **Timing**: 0.5 hours
 
@@ -278,15 +297,16 @@ re-point `Modularity.lean`, and leave the build green.
 
 ## Testing & Validation
 
-- [ ] `lake build` (full project) succeeds with zero errors.
-- [ ] `lake exe checkInitImports` passes (new files import `Cslib.Init`).
-- [ ] `lake lint` clean for touched files.
-- [ ] `lake exe lint-style` clean.
-- [ ] `lake test` passes.
-- [ ] `lake shake --add-public --keep-implied --keep-prefix` reports no unaddressed unused imports.
-- [ ] All original public subsumption/monotonicity names resolve (barrel + `Modularity.lean`
+- [x] `lake build` (full project) succeeds with zero errors.
+- [x] `lake exe checkInitImports` passes (new files import `Cslib.Init`).
+- [x] `lake lint` clean for touched files.
+- [x] `lake exe lint-style` clean.
+- [x] `lake test` passes.
+- [x] `lake shake --add-public --keep-implied --keep-prefix` reports no unaddressed unused imports
+      (the 4 touched files are absent from the shake report entirely).
+- [x] All original public subsumption/monotonicity names resolve (barrel + `Modularity.lean`
       + internal cross-references still compile).
-- [ ] `lean_verify` confirms zero `sorry` and no new axioms on the merged files.
+- [x] `lean_verify` confirms zero `sorry` and no new axioms on the merged files.
 
 ## Artifacts & Outputs
 

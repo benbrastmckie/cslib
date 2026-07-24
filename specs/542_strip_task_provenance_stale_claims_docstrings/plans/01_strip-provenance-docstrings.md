@@ -280,17 +280,37 @@ disjoint from Phase 2.
 
 ---
 
-### Phase 5: Modal/Metalogic Remainder + ProofSystem [NOT STARTED]
+### Phase 5: Modal/Metalogic Remainder + ProofSystem [COMPLETED]
 
 **Goal**: Strip provenance from the rest of Modal/Metalogic (Intuitionistic 86, InterSystem 27,
 Systems 21, Minimal 6) plus `ProofSystem` (39). ~179 hits.
 
 **Tasks**:
-- [ ] `Metalogic/Intuitionistic/TruthLemma.lean` (31) and the rest of `Intuitionistic/` (7 files).
-- [ ] `Metalogic/InterSystem/` (7 files), `Metalogic/Systems/` (15 files), `Metalogic/Minimal/` (2 files).
-- [ ] `ProofSystem/` (16 files) incl. `ProofSystem/SchemaTags.lean` (lines ~18-30).
-- [ ] Apply report §5 methodology; watch for `renamed from` narrative around task-544 renames.
-- [ ] `lake build` of the touched modules.
+- [x] `Metalogic/Intuitionistic/TruthLemma.lean` (31) and the rest of `Intuitionistic/` (7 files).
+  *(done: TruthLemma.lean, CanonicalModel.lean, Completeness.lean, PrimeTheory.lean,
+  Extension.lean, IK.lean, IS5.lean -- all 7 files clean; commits d5a0cffa, b17ba378,
+  1c1a7b35, 84f09f09)*
+- [x] `Metalogic/InterSystem/` (7 files), `Metalogic/Systems/` (15 files), `Metalogic/Minimal/` (2 files).
+  *(done: IntToClassical/Modularity/Lifting/LatticeSubsumption/LatticeMonotonicity/
+  AxiomSubsumption/LiftViaMorphism.lean (commit f8a500d1); all 15 Systems/*/Completeness.lean
+  (commit 9d56bede); Minimal/MS5.lean + MinExtension.lean (commit 2cb19694). Also corrected a
+  stale claim in IntToClassical.lean: module docstring described `cd`/`idb` schemata and the
+  final IK->K assembly as "deferred to Phase 7" even though they are fully proved sorry-free
+  in the file already.)*
+- [x] `ProofSystem/` (16 files) incl. `ProofSystem/SchemaTags.lean` (lines ~18-30).
+  *(done: SchemaTags.lean, SchemaUnion.lean, all 14 Instances/*.lean files (commit c01c97d8).
+  Also corrected a stale claim in SchemaUnion.lean describing "future bridge equivalences" and
+  "nothing downstream changed by landing this file" even though the per-system axiom
+  predicates have since been redefined in place as SchemaUnion sysTags.)*
+- [x] Apply report §5 methodology; watch for `renamed from` narrative around task-544 renames.
+  *(no renamed-from/formerly hits found in this phase's scope beyond the two already-handled
+  "formerly split across three files" notes in LatticeSubsumption.lean/LatticeMonotonicity.lean)*
+- [x] `lake build` of the touched modules.
+  *(also cleaned the Modal/Metalogic root-level files not itemized above but within "Metalogic
+  remainder" scope: Soundness.lean, MCS.lean, SchemaSoundness.lean, GenericMCSBridge.lean,
+  Completeness.lean -- commit fa8d34b3. Full-tree grep across Cslib/Logics/Modal/Metalogic/ and
+  Cslib/Logics/Modal/ProofSystem/ for task/phase/specs/renamed-from/formerly/probes patterns is
+  now empty; every touched module builds green with zero live sorry.)*
 
 **Timing**: 1 hour
 

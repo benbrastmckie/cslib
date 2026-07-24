@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic D45, as the schema-union combinator over `d45Tags` (Phase 8
-redefinition, task 523: the inductive is retired; `D45Axiom` is now definitionally
+/-- Axiom schemata for modal logic D45, as the schema-union combinator over `d45Tags`
+(the inductive is retired; `D45Axiom` is now definitionally
 `SchemaUnion d45Tags`, preserving the name and public API via redefinition-in-place).
 
 The 8 axiom-schema families covered by `d45Tags`:

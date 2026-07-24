@@ -17,13 +17,13 @@ classical normal modal systems' axiom predicates as a `SchemaUnion` instance
 
 ## Why This Foundational File Exists (Import-Cycle Architecture Note)
 
-The now-deleted `SchemaBridges.lean` (Phase 3-8.3 scaffolding, removed in Phase 8 sub-phase 8.4
-once its bridge equivalences became identities with no remaining users) imported the `Instances`
-barrel, so `Instances/*.lean` files could not import it without an import cycle (confirmed via a
-direct `lake build` attempt in Phase 7: `bad import 'Cslib.Logics.Modal.ProofSystem.
-Instances'`). Since the per-system tag sets are needed *inside* `Instances/*.lean` (Phase 8
-redefines each `<Sys>Axiom` in place as `SchemaUnion sysTags`), the tag sets live in this
-foundational file, which imports only `SchemaUnion.lean`.
+The now-deleted `SchemaBridges.lean` (transitional scaffolding, removed once its bridge
+equivalences became identities with no remaining users) imported the `Instances` barrel, so
+`Instances/*.lean` files could not import it without an import cycle (confirmed via a direct
+`lake build` attempt: `bad import 'Cslib.Logics.Modal.ProofSystem.Instances'`). Since the
+per-system tag sets are needed *inside* `Instances/*.lean` (each `<Sys>Axiom` is redefined in
+place as `SchemaUnion sysTags`), the tag sets live in this foundational file, which imports only
+`SchemaUnion.lean`.
 
 The tag sets belong at the foundation anyway: a system's tag set is its essence (which schemata
 it admits), not scaffolding built on top of the system.
@@ -40,7 +40,7 @@ it admits), not scaffolding built on top of the system.
 
 * Cslib/Logics/Modal/ProofSystem/SchemaUnion.lean -- `ModalSchemaTag`, `SchemaUnion`, elim. API
 * Cslib/Logics/Modal/ProofSystem/Instances/{K,T,D,B,...}.lean -- the 15 per-system axiom
-  predicates (`abbrev <Sys>Axiom := SchemaUnion sysTags`, Phase 8)
+  predicates (`abbrev <Sys>Axiom := SchemaUnion sysTags`)
 -/
 
 @[expose] public section
@@ -113,7 +113,7 @@ def dbTags : Finset ModalSchemaTag := insert .modalD (insert .modalB kCore)
 
 /-! ## Generic Per-Core-Tag Witness Helpers
 
-Task 539: thin one-liners over `SchemaUnion.subsumption`, one per `kCore` tag. Given
+Thin one-liners over `SchemaUnion.subsumption`, one per `kCore` tag. Given
 `h : kCore ⊆ S` for any per-system tag set `S`, each helper produces the corresponding
 axiom-schema witness for `SchemaUnion S` -- collapsing what used to be 13 copy-pasted
 `⟨.tag, by decide, …, rfl⟩` witness terms per call site (432 across the 15 systems' truth

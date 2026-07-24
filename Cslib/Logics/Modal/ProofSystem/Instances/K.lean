@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic K, as the schema-union combinator over `kTags` (Phase 8
-redefinition, task 523: the 13-constructor inductive is retired; `KAxiom` is now definitionally
+/-- Axiom schemata for modal logic K, as the schema-union combinator over `kTags`
+(the 13-constructor inductive is retired; `KAxiom` is now definitionally
 `SchemaUnion kTags`, preserving the name and public API via redefinition-in-place).
 
 The 5 axiom-schema families covered by `kTags`:

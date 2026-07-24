@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic KB, as the schema-union combinator over `bTags` (Phase 8
-redefinition, task 523: the inductive is retired; `BAxiom` is now definitionally
+/-- Axiom schemata for modal logic KB, as the schema-union combinator over `bTags`
+(the inductive is retired; `BAxiom` is now definitionally
 `SchemaUnion bTags`, preserving the name and public API via redefinition-in-place).
 
 The 6 axiom-schema families covered by `bTags`:

@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic D, as the schema-union combinator over `dTags` (Phase 8
-redefinition, task 523: the inductive is retired; `DAxiom` is now definitionally
+/-- Axiom schemata for modal logic D, as the schema-union combinator over `dTags`
+(the inductive is retired; `DAxiom` is now definitionally
 `SchemaUnion dTags`, preserving the name and public API via redefinition-in-place).
 
 The 6 axiom-schema families covered by `dTags`:

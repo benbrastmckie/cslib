@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic KB5, as the schema-union combinator over `kb5Tags` (Phase 8
-redefinition, task 523: the inductive is retired; `KB5Axiom` is now definitionally
+/-- Axiom schemata for modal logic KB5, as the schema-union combinator over `kb5Tags`
+(the inductive is retired; `KB5Axiom` is now definitionally
 `SchemaUnion kb5Tags`, preserving the name and public API via redefinition-in-place).
 
 The 7 axiom-schema families covered by `kb5Tags`:

@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic S4, as the schema-union combinator over `s4Tags` (Phase 8
-redefinition, task 523: the inductive is retired; `S4Axiom` is now definitionally
+/-- Axiom schemata for modal logic S4, as the schema-union combinator over `s4Tags`
+(the inductive is retired; `S4Axiom` is now definitionally
 `SchemaUnion s4Tags`, preserving the name and public API via redefinition-in-place).
 
 The 7 axiom-schema families covered by `s4Tags`:

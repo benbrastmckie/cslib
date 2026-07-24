@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic TB, as the schema-union combinator over `tbTags` (Phase 8
-redefinition, task 523: the inductive is retired; `TBAxiom` is now definitionally
+/-- Axiom schemata for modal logic TB, as the schema-union combinator over `tbTags`
+(the inductive is retired; `TBAxiom` is now definitionally
 `SchemaUnion tbTags`, preserving the name and public API via redefinition-in-place).
 
 The 7 axiom-schema families covered by `tbTags`:

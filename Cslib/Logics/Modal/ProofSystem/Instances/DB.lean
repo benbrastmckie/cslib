@@ -26,8 +26,8 @@ variable {Atom : Type u}
 
 namespace Cslib.Logic.Modal
 
-/-- Axiom schemata for modal logic DB, as the schema-union combinator over `dbTags` (Phase 8
-redefinition, task 523: the inductive is retired; `DBAxiom` is now definitionally
+/-- Axiom schemata for modal logic DB, as the schema-union combinator over `dbTags`
+(the inductive is retired; `DBAxiom` is now definitionally
 `SchemaUnion dbTags`, preserving the name and public API via redefinition-in-place).
 
 The 7 axiom-schema families covered by `dbTags`:

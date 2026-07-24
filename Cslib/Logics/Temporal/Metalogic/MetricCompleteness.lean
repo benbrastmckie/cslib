@@ -434,4 +434,63 @@ theorem chronicleUniformMetric
     exact (satisfies_bot_top_indep (chronicleModel A h_base_mcs) M t _
       (Or.inr (Or.inr (Or.inr rfl)))).mp h_chron
 
+/-! ## Metric Completeness over `U` -/
+
+set_option linter.unusedSimpArgs false in
+omit [Denumerable (Formula Atom)] in
+/-- If `φ` is not `BX⁺`-derivable, then `{¬φ}` is Metric-consistent. Mirrors
+`neg_consistent_of_not_derivable_dense` with `FrameClass.Dense` replaced by `FrameClass.Metric`. -/
+theorem neg_consistent_of_not_derivable_metric
+    {φ : Formula Atom} (h_not : ¬ Temporal.ThDerivableFc FrameClass.Metric φ) :
+    Temporal.SetConsistentFc FrameClass.Metric ({Formula.neg φ} : Set (Formula Atom)) := by
+  intro L hL
+  unfold Metalogic.Consistent
+  intro ⟨d⟩
+  have d_weak : DerivationTree FrameClass.Metric [Formula.neg φ] Formula.bot :=
+    .weakening L [Formula.neg φ] .bot d (fun x hx => by
+      have := hL x hx; simp only [Set.mem_singleton_iff] at this
+      exact List.mem_cons.mpr (Or.inl this))
+  have d_dne := deductionTheoremFc [] (Formula.neg φ) .bot d_weak
+  let neg_phi := Formula.neg φ
+  have efq : DerivationTree (Atom := Atom) FrameClass.Metric []
+      (Formula.bot.imp φ) := .axiom [] _ (.efq φ) (FrameClass.base_le _)
+  have ik : DerivationTree (Atom := Atom) FrameClass.Metric []
+      ((Formula.bot.imp φ).imp (neg_phi.imp (Formula.bot.imp φ))) :=
+    .axiom [] _ (.imp_s (Formula.bot.imp φ) neg_phi) (FrameClass.base_le _)
+  have step_k := DerivationTree.modus_ponens [] _ _ ik efq
+  have is_ax : DerivationTree (Atom := Atom) FrameClass.Metric []
+      ((neg_phi.imp (Formula.bot.imp φ)).imp
+       ((neg_phi.imp Formula.bot).imp (neg_phi.imp φ))) :=
+    .axiom [] _ (.imp_k neg_phi Formula.bot φ) (FrameClass.base_le _)
+  have step_s := DerivationTree.modus_ponens [] _ _ is_ax step_k
+  have step3 := DerivationTree.modus_ponens [] _ _ step_s d_dne
+  have peirce_ax : DerivationTree (Atom := Atom) FrameClass.Metric []
+      (((φ.imp Formula.bot).imp φ).imp φ) :=
+    .axiom [] _ (.peirce φ Formula.bot) (FrameClass.base_le _)
+  exact h_not ⟨DerivationTree.modus_ponens [] _ _ peirce_ax step3⟩
+
+/-- **BX⁺ Completeness Theorem over the Uniform Class `U`**: if `φ` is valid over the uniform
+class `U`, then `φ` is `BX⁺`-derivable. Mirrors `completeness_dense`: build the chronicle
+countermodel from a Metric-MCS, discharge `validMetricUniform`'s hypothesis with
+`chronicleUniformMetric`, and derive a contradiction from `φ ∉ M`. -/
+theorem completeness_metric {φ : Formula Atom}
+    (h_valid : validMetricUniform φ) :
+    Temporal.BXPlusDerivable φ := by
+  by_contra h_not_deriv
+  have h_cons := neg_consistent_of_not_derivable_metric h_not_deriv
+  obtain ⟨M, hM_sup, hM_mcs⟩ := temporal_lindenbaum_fc h_cons
+  have h_neg_in_M : (¬φ) ∈ M := hM_sup (Set.mem_singleton _)
+  have h_phi_not_M : φ ∉ M := mcs_not_mem_of_neg_fc hM_mcs h_neg_in_M
+  have h_base_mcs := metric_mcs_implies_base_mcs hM_mcs
+  let D := ChronicleSubtype M h_base_mcs
+  let model := chronicleModel M h_base_mcs
+  let t₀ : D := chronicleZero M h_base_mcs
+  have h_uniform : uniformFrameCondition (Atom := Atom) D :=
+    chronicleUniformMetric hM_mcs h_base_mcs
+  have h_sat := h_valid D h_uniform model t₀
+  have h_mem := (chronicle_truth_lemma M h_base_mcs t₀ φ).mp h_sat
+  have h_zero : t₀.val = 0 := rfl
+  rw [h_zero, limit_f_zero] at h_mem
+  exact h_phi_not_M h_mem
+
 end Cslib.Logic.Temporal

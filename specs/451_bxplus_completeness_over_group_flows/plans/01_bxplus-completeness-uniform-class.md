@@ -218,7 +218,7 @@ of `dense_indicator_in_all_limit_points`. This is the chronicle-membership-in-`U
 
 ---
 
-### Phase 4: `completeness_metric` over `U` [IN PROGRESS]
+### Phase 4: `completeness_metric` over `U` [COMPLETED]
 
 **Goal**: Prove `completeness_metric : validMetricUniform φ → BXPlusDerivable φ`, the honest BX⁺
 completeness theorem, mirroring `completeness_dense` exactly.
@@ -248,7 +248,7 @@ completeness theorem, mirroring `completeness_dense` exactly.
 
 ---
 
-### Phase 5: Dense→ℚ (oag) bridge corollary [NOT STARTED]
+### Phase 5: Dense→ℚ (oag) bridge corollary [IN PROGRESS]
 
 **Goal**: Deliver the concrete task-450 artifact: a dense countermodel transports to the ordered-
 abelian-group ℚ via Cantor + Phase 1's transport lemma.

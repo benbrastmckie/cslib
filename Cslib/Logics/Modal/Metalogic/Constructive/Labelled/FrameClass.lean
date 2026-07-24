@@ -10,15 +10,15 @@ import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.CanonicalModel
 public import Cslib.Logics.Modal.Metalogic.Constructive.CS5Canonical
 
-/-! # Frame-Class Match: `CanonWorld.r` satisfies `cs5FCIncest` (Task 517 Phase 9)
+/-! # Frame-Class Match: `CanonWorld.r` satisfies `cs5FCIncest`
 
 This module discharges the frame-class conditions `cs5FCIncest` (`CS5Canonical.lean:255`) needs,
 for the **labelled/bounded-context** canonical model `CanonWorld TS5 Atom` (`CanonicalModel.lean`)
-built from `primeLemma`'s output. This is the frame-class match Phase 10's `cs5_completeness`
-assembly consumes, matching `cs5_axiom_sound_incest`'s target (`CS5Canonical.lean:279`), NOT the
-older `cs5FC''` (`CKExtension.lean:184`, task 509) that `cs5FCIncest` corrects (see
-`CS5Canonical.lean`'s module docstring, "`cs5FCIncest` is therefore `cs5FC''` with ONLY its plain
-symmetry conjunct replaced").
+built from `primeLemma`'s output. This is the frame-class match `cs5_completeness`'s assembly
+consumes, matching `cs5_axiom_sound_incest`'s target (`CS5Canonical.lean:279`), NOT the older
+`cs5FC''` (`CKExtension.lean:184`) that `cs5FCIncest` corrects (see `CS5Canonical.lean`'s module
+docstring, "`cs5FCIncest` is therefore `cs5FC''` with ONLY its plain symmetry conjunct
+replaced").
 
 ## The design nuance this module resolves
 
@@ -50,7 +50,7 @@ structural difference in what the two canonical relations are built from:
 No relation is swapped and no frame condition is weakened to make this go through -- every
 conjunct of `cs5FCIncest` is proved for the literal `CanonWorld.r`/`CanonWorld.le` pair.
 
-## Point-of-use notes on the two landed guardrails (task 517 Phase 9, item 3)
+## Point-of-use notes on the two landed guardrails
 
 - **`cs5Incest_forces_symm` (`CS5Canonical.lean:643`) does not trip here.** That theorem is a
   conditional: IF a box-based relation (`hbox : r w u → boxInv (head w) ⊆ head u`) satisfies
@@ -72,13 +72,13 @@ conjunct of `cs5FCIncest` is proved for the literal `CanonWorld.r`/`CanonWorld.l
 ## Contents
 
 - `TPrime.equivOn`: the domain-relative `EquivalenceOn G.X G.R`, read off `TPrime.clModel` at
-  `TS5` via `equivalence_of_classicalModelOn_TS5` (near-immediate, per the plan).
+  `TS5` via `equivalence_of_classicalModelOn_TS5` (near-immediate).
 - `CanonWorld.r_refl`/`CanonWorld.r_trans`: the plain reflexivity/transitivity conjuncts.
 - `CanonWorld.r_rebase`: the `fourBox`-style re-basing conjunct (needs only transitivity).
 - `CanonWorld.r_symBox`: the `bBox`-style re-basing conjunct (needs symmetry).
 - `CanonWorld.r_incest`: `cs5Incest CanonWorld.r` (the `bDia`-instance; witness `u' := u`, plain
   symmetry).
-- `cs5FCIncest_canonWorld_r`: the bundled frame-class match, consumed by Phase 10.
+- `cs5FCIncest_canonWorld_r`: the bundled frame-class match, consumed by `cs5_completeness`.
 
 ## References
 

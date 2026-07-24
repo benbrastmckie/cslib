@@ -8,10 +8,10 @@ module
 
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.FrameClass
 
-/-! # Labelled-System Completeness (Task 517 Phase 10, Simpson 1994 Thm 8.1.4, Option B)
+/-! # Labelled-System Completeness (Simpson 1994 Thm 8.1.4, Option B)
 
-This module assembles Phases 6-9 into `cs5_completeness`, the **completeness** direction of A. K.
-Simpson's Theorem 8.1.4 [Simpson1994] (reflowed `L1367-1425`) for the graph-**labelled**
+This module assembles the prior results into `cs5_completeness`, the **completeness** direction
+of A. K. Simpson's Theorem 8.1.4 [Simpson1994] (reflowed `L1367-1425`) for the graph-**labelled**
 natural-deduction system `N_IK(𝒯_S5)` (`NIK`/`Deriv`, `Deduction.lean`/`Context.lean`) against
 `cs5FCIncest` birelation models (`CS5Canonical.lean:255`).
 
@@ -22,11 +22,10 @@ natural-deduction system `N_IK(𝒯_S5)` (`NIK`/`Deriv`, `Deduction.lean`/`Conte
 the Hilbert reading (`CKValidFC cs5FCIncest φ → Derivable CS5ModalAxiom φ`) is a *separate*
 composite result, `Thm 6.2.1 ∘ Thm 8.1.4`, that additionally needs Simpson's Chapter 6 adequacy
 bridge (`NIKDerivable TS5 φ → Derivable CS5ModalAxiom φ`). That bridge is **deliberately not built**
-here — it is Option A / Track C C5-C8 (~25-30% research territory, no mechanization anywhere in
-this repository) — see `specs/517_labelled_bounded_context_cs5_completeness/reports/
-11_option-b-labelled-completeness-confirmation.md` for the source-anchored confirmation that
-Option B (this file's target) is a faithful, non-vacuous mechanization of Simpson's completeness
-theorem in its own right, and that the Hilbert identification is explicitly deferred future work.
+here — it is a substantial separate research undertaking, with no mechanization anywhere in this
+repository. Option B (this file's target) is a faithful, non-vacuous mechanization of Simpson's
+completeness theorem in its own right; the Hilbert identification is explicitly deferred future
+work.
 `cs5_completeness` below is never a silent Hilbert relabelling: its type is exactly `CKValidFC
 cs5FCIncest φ → NIKDerivable TS5 φ`, and every identifier it composes (`primeLemma`,
 `canon_truth_lemma`, `cs5FCIncest_canonWorld_r`, the five `canon*` side-conditions) is already
@@ -125,10 +124,9 @@ Theorem 8.1.4, completeness direction). This is completeness of the graph-**labe
 `Deriv` natural-deduction system -- **NOT** the Hilbert axiomatization `CS5ModalAxiom`/
 `Derivable`. It coincides with Hilbert completeness (`Derivable CS5ModalAxiom φ`) only via
 Simpson's Chapter 6 adequacy bridge (Thm 6.2.1), which is **deliberately not built here** (see the
-module docstring's "Scope" section and `specs/517_labelled_bounded_context_cs5_completeness/
-reports/11_option-b-labelled-completeness-confirmation.md`). A genuine composition of Phases 6-9
-(`primeLemma`, `canon_truth_lemma`, `cs5FCIncest_canonWorld_r`, and the five `canon*`
-side-conditions), all already landed sorry-free -- no new hard lemma. -/
+module docstring's "Scope" section). A genuine composition of the prior results (`primeLemma`,
+`canon_truth_lemma`, `cs5FCIncest_canonWorld_r`, and the five `canon*` side-conditions), all
+already landed sorry-free -- no new hard lemma. -/
 theorem cs5_completeness {Atom : Type u} (φ : Proposition Atom) :
     CKValidFC.{u, u} cs5FCIncest φ → NIKDerivable TS5 φ := by
   intro hvalid

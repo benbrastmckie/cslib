@@ -16,30 +16,26 @@ This module lands A. K. Simpson's **canonical model** `𝒦^𝒯` and the **cano
 context `(H,Δ)` and every label `y` in `H`, the semantic satisfaction relation `(H,Δ),y ⊩ B`
 coincides with syntactic membership `y:B ∈ Δ`.
 
-## `--lit` confirmation (Task 517 Phase 8, Step 0)
+## The Canonical Relation is the Raw, Uncompleted `xRy`
 
 `chunk_0103.md` (pp. 93-94) states the canonical model construction verbatim: *"We now construct
 the canonical `𝒯`-model, `𝒦^𝒯 = ⟨W^𝒯, ≤^𝒯, D_(H,Δ), R_(H,Δ), a_(H,Δ)⟩`. Define: `W^𝒯` = the set of
 `𝒯`-prime contexts, `(H,Δ) ≤^𝒯 (H',Δ')` iff `(H,Δ) ⊆ (H',Δ')`, `D_(H,Δ)` = the underlying set of
 `H`, `R_(H,Δ)(x,y)` iff `xRy in H`, `a_(H,Δ)(x)` iff `x:a ∈ Δ`."* -- **the canonical relation is
-the RAW `xRy` in `H`**, confirmed a third time here against the primary source (previously
-confirmed at Phase 4's `--lit` finding and the plan's Postmortem Constraints "Design decisions are
-SETTLED" note). `chunk_0104.md`/`chunk_0105.md` then prove Lemma 5.3.2 case-by-case; the `□`/`◇`
-cases are transcribed essentially verbatim into `canon_truth_lemma` below (see that theorem's
-docstring for the case-by-case citation).
+the RAW `xRy` in `H`**, per the primary source. `chunk_0104.md`/`chunk_0105.md` then prove
+Lemma 5.3.2 case-by-case; the `□`/`◇` cases are transcribed essentially verbatim into
+`canon_truth_lemma` below (see that theorem's docstring for the case-by-case citation).
 
-**T-Comp confirmation (the flagged question from Phase 4/the plan's pre-Phase-8 note)**: this
-module consumes the raw relation `H.G.R` from `primeLemma`'s output **directly** (`CanonWorld.r`
-below is defined from `ctx.G.R`, with no `TClosure`/graph-completion step). Lemma 8.2.6 (`chunk_
-0166.md`, Chapter 8) is the **bounded** canonical model lemma -- a depth-indexed statement about
-*bounded* `𝒯`-prime contexts, part of the Ch 7-8 route the plan's Non-Goals already exclude (the
-landed `TPrime` requires the *unbounded* Ch 5 route, raw `clModel`). Since Lemma 5.3.2's unbounded
-construction is what is mechanized here and it needs no `TClosure`/`T-Comp(H)` completion step at
-any point (every case below closes using either the raw relation directly, or a *fresh* re-
-application of `primeLemma`, never a symmetrized/completed relation), **the original "Phase 5"
-`T-Comp` graph-completion material (Simpson Lemma 8.2.5, symmetry) is confirmed UNNEEDED** for
-this route, as flagged. It is not built; `probes/lemma612-scaffold.lean` remains an untouched
-fallback, not required here.
+This module consumes the raw relation `H.G.R` from `primeLemma`'s output **directly**
+(`CanonWorld.r` below is defined from `ctx.G.R`, with no `TClosure`/graph-completion step).
+Lemma 8.2.6 (`chunk_0166.md`, Chapter 8) is the **bounded** canonical model lemma -- a
+depth-indexed statement about *bounded* `𝒯`-prime contexts, a different route from the one
+mechanized here (the landed `TPrime` requires the *unbounded* Ch 5 route, raw `clModel`). Since
+Lemma 5.3.2's unbounded construction is what is mechanized here and it needs no
+`TClosure`/`T-Comp(H)` completion step at any point (every case below closes using either the
+raw relation directly, or a *fresh* re-application of `primeLemma`, never a
+symmetrized/completed relation), the `T-Comp` graph-completion material (Simpson Lemma 8.2.5,
+symmetry) is **unneeded** for this route and is not built.
 
 ## Main Definitions
 

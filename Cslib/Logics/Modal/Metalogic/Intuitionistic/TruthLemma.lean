@@ -12,36 +12,34 @@ public import Cslib.Logics.Modal.Semantics.Birelational
 
 /-! # Truth Lemma for Intuitionistic Modal Logic
 
-This module contains Phases 3a, 3b, and 3c of the birelational canonical-model truth lemma
-(task 480 plan v4). Phase 3a proves the **five non-modal cases** (`atom`, `bot`, `and`, `or`,
-`imp`) as standalone named helper lemmas, transliterated line-for-line from
-`Cslib.Logic.PL.int_truth_lemma`
+This module builds the birelational canonical-model truth lemma. It first proves the **five
+non-modal cases** (`atom`, `bot`, `and`, `or`, `imp`) as standalone named helper lemmas,
+transliterated line-for-line from `Cslib.Logic.PL.int_truth_lemma`
 (`Cslib/Logics/Propositional/Metalogic/IntStrongCompleteness.lean:108-214`,
-`PL.Proposition Atom` → `Proposition Atom`, `IntPropAxiom` → `Axioms`). Phase 3b adds
+`PL.Proposition Atom` → `Proposition Atom`, `IntPropAxiom` → `Axioms`). It then adds
 `truth_box_case`, the `.box` constructor case, consuming the pair-shaped
-`canonical_box_witness` (Phase 2b) and heredity over `≤ ∘ R`. Phase 3c adds `truth_diamond_case`,
-the `.diamond` constructor case, consuming the single-witness `canonical_diamond_witness`
-(Phase 2c), and assembles all seven cases into the full recursive `canonical_truth_lemma` by
-structural induction on `Proposition`.
+`canonical_box_witness` and heredity over `≤ ∘ R`, and `truth_diamond_case`, the `.diamond`
+constructor case, consuming the single-witness `canonical_diamond_witness`, and finally
+assembles all seven cases into the full recursive `canonical_truth_lemma` by structural
+induction on `Proposition`.
 
 Each case is a **named helper lemma** taking the induction hypothesis (for the `and`/`or`/`imp`/
 `box`/`diamond` cases, which recurse on strict subformulas) as an explicit hypothesis parameter,
-rather than being folded directly into a single recursive definition. This let Phases 3a/3b/3c
-build sorry-free independently before assembly. `canonical_truth_lemma` (Phase 3c) is the payoff:
-it dispatches each constructor to its helper, threading the induction hypothesis obtained from
+rather than being folded directly into a single recursive definition. This lets each case build
+sorry-free independently before assembly. `canonical_truth_lemma` is the payoff: it dispatches
+each constructor to its helper, threading the induction hypothesis obtained from
 `induction φ generalizing w`.
 
 None of the four modal axiom hypotheses (`h_K`, `h_Kdia`, `h_Idb`, `h_Cd`) are threaded here:
-the non-modal cases require no modal axiom (report 03 §4 row 8). `h_efq` is threaded only by
-the `imp` case (via `modal_imp_witness`/`modal_prime_exclusion`), kept separate from the base
-intuitionistic hypotheses so the minimal (task 495) instantiation can omit it.
+the non-modal cases require no modal axiom. `h_efq` is threaded only by the `imp` case (via
+`modal_imp_witness`/`modal_prime_exclusion`), kept separate from the base intuitionistic
+hypotheses so a minimal instantiation can omit it.
 
-`botForces` is kept a **parameter** throughout (never hard-coded to `fun _ => False`), per the
-plan's Goals/Postmortem: this lets the minimal (495) and CK (493) fallible-world
-instantiations reuse `truth_bot_case` without editing this framework. `truth_bot_case` takes an
-explicit bridging hypothesis `h_bot` identifying `botForces w` with `⊥ ∈ w.val`; the
-intuitionistic instantiation (`botForces := fun _ => False`) discharges it using
-`canonical_bot_not_mem` below.
+`botForces` is kept a **parameter** throughout (never hard-coded to `fun _ => False`): this lets
+the minimal and `CK` fallible-world instantiations reuse `truth_bot_case` without editing this
+framework. `truth_bot_case` takes an explicit bridging hypothesis `h_bot` identifying
+`botForces w` with `⊥ ∈ w.val`; the intuitionistic instantiation (`botForces := fun _ => False`)
+discharges it using `canonical_bot_not_mem` below.
 
 ## Main Definitions
 
@@ -50,11 +48,11 @@ intuitionistic instantiation (`botForces := fun _ => False`) discharges it using
 - `canonical_imp_property`: modus-ponens closure for canonical prime worlds (modal analogue of
   `Cslib.Logic.PL.int_dccs_imp_property`).
 - `truth_atom_case`, `truth_bot_case`, `truth_and_case`, `truth_or_case`, `truth_imp_case`: the
-  five non-modal truth-lemma case helpers (Phase 3a).
-- `truth_box_case`: the `.box` truth-lemma case helper (Phase 3b).
-- `truth_diamond_case`: the `.diamond` truth-lemma case helper (Phase 3c).
-- `canonical_truth_lemma`: the assembled truth lemma over all seven `Proposition` constructors
-  (Phase 3c), the payoff Phase 4 (`Completeness.lean`) consumes.
+  five non-modal truth-lemma case helpers.
+- `truth_box_case`: the `.box` truth-lemma case helper.
+- `truth_diamond_case`: the `.diamond` truth-lemma case helper.
+- `canonical_truth_lemma`: the assembled truth lemma over all seven `Proposition` constructors,
+  the payoff `Completeness.lean` consumes.
 
 ## References
 
@@ -113,7 +111,7 @@ theorem canonical_imp_property {w : CanonicalPrimeWorld Axioms} {φ ψ : Proposi
 
 end TruthLemmaHelpers
 
-/-! ## Non-Modal Truth-Lemma Cases (Phase 3a) -/
+/-! ## Non-Modal Truth-Lemma Cases -/
 
 section TruthLemmaCases
 
@@ -131,11 +129,11 @@ theorem truth_atom_case (botForces : CanonicalPrimeWorld Axioms → Prop)
   Iff.rfl
 
 /-- **Bot case** of the (to-be-assembled) `canonical_truth_lemma`, parametric in `botForces`
-(task 480 Goals/Postmortem: `botForces` must remain a hypothesis-supplied parameter, not a
-hard-coded `fun _ => False`, so the minimal (495) / CK (493) fallible-world instantiations can
-reuse this helper without editing the framework). The bridging hypothesis `h_bot` identifies
-`botForces w` with `⊥ ∈ w.val`; for the intuitionistic instantiation (`botForces := fun _ =>
-False`) it is discharged using `canonical_bot_not_mem` above (Phase 4 packages this). Structural
+(`botForces` must remain a hypothesis-supplied parameter, not a hard-coded `fun _ => False`, so
+the minimal / `CK` fallible-world instantiations can reuse this helper without editing the
+framework). The bridging hypothesis `h_bot` identifies `botForces w` with `⊥ ∈ w.val`; for the
+intuitionistic instantiation (`botForces := fun _ => False`) it is discharged using
+`canonical_bot_not_mem` above (`Completeness.lean` packages this). Structural
 analogue of `Cslib.Logic.PL.int_truth_lemma`'s `.bot` case
 (`IntStrongCompleteness.lean:113-116`), generalized from the hard-coded `IForces`
 `.bot`-forces-`False` convention to a parametric `botForces`. -/
@@ -150,8 +148,8 @@ theorem truth_bot_case
 
 /-- **Conjunction case** of the (to-be-assembled) `canonical_truth_lemma`, taking the two
 sub-formula truth-lemma instances (`ihφ`, `ihψ`) as explicit induction-hypothesis parameters
-(task 480 Phase 3a design note: this lets the case build sorry-free before
-`canonical_truth_lemma` itself is assembled in Phase 3c). Transliterated from
+(this lets the case build sorry-free before `canonical_truth_lemma` itself is assembled).
+Transliterated from
 `Cslib.Logic.PL.int_truth_lemma`'s `.and` case (`IntStrongCompleteness.lean:117-159`,
 `PL.Proposition` → `Proposition`, `IntPropAxiom` → `Axioms`; explicit `DerivationTree`
 term-mode, no `simp`/`aesop`). -/
@@ -203,7 +201,7 @@ theorem truth_and_case
 
 /-- **Disjunction case** of the (to-be-assembled) `canonical_truth_lemma`, taking the two
 sub-formula truth-lemma instances (`ihφ`, `ihψ`) as explicit induction-hypothesis parameters
-(same Phase 3a design note as `truth_and_case`). The backward direction uses the canonical
+(same design note as `truth_and_case`). The backward direction uses the canonical
 prime world's disjunction property (`w.property.2`), the payoff of choosing prime theories
 (rather than maximal consistent sets) as canonical worlds. Transliterated from
 `Cslib.Logic.PL.int_truth_lemma`'s `.or` case (`IntStrongCompleteness.lean:160-191`,
@@ -248,11 +246,11 @@ sub-formula truth-lemma instances (`ihφ`, `ihψ`) as explicit induction-hypothe
 **universally quantified over all canonical worlds** (unlike `truth_and_case`/`truth_or_case`,
 this case's forward direction constructs a fresh successor world `T ≥ w` and needs the
 induction hypothesis there, matching exactly what the assembled recursive
-`canonical_truth_lemma` will supply at any world in Phase 3c). Uses `modal_imp_witness`
+`canonical_truth_lemma` will supply at any world). Uses `modal_imp_witness`
 (`PrimeTheory.lean`) to build a theory forcing `φ` but not `ψ`, then `modal_prime_exclusion`
 to make it prime while still excluding `ψ`. No modal axiom (`h_K`/`h_Kdia`/`h_Idb`/`h_Cd`) is
-threaded -- only the base intuitionistic hypotheses plus `h_efq` (kept separate, task 495).
-Transliterated from `Cslib.Logic.PL.int_truth_lemma`'s `.imp` case
+threaded -- only the base intuitionistic hypotheses plus `h_efq` (kept separate). Transliterated
+from `Cslib.Logic.PL.int_truth_lemma`'s `.imp` case
 (`IntStrongCompleteness.lean:192-214`, `PL.Proposition` → `Proposition`,
 `IntPropAxiom` → `Axioms`, `int_imp_witness`/`int_prime_exclusion` →
 `modal_imp_witness`/`modal_prime_exclusion`). -/
@@ -294,7 +292,7 @@ theorem truth_imp_case
 
 end TruthLemmaCases
 
-/-! ## Box Truth-Lemma Case (Phase 3b) -/
+/-! ## Box Truth-Lemma Case -/
 
 section TruthLemmaBoxCase
 
@@ -302,25 +300,23 @@ variable {Axioms : Proposition Atom → Prop}
 
 /-- **Box case** of the (to-be-assembled) `canonical_truth_lemma`: forcing of `□φ` at a
 canonical world coincides with `□φ ∈ w.val`, given the induction hypothesis for `φ`
-**universally quantified over all canonical worlds** (task 480 Phase 3a design note, reused
-here exactly as in `truth_imp_case`: this lets the case build sorry-free before
-`canonical_truth_lemma` itself is assembled in Phase 3c).
+**universally quantified over all canonical worlds** (the same design note as `truth_imp_case`:
+this lets the case build sorry-free before `canonical_truth_lemma` itself is assembled).
 
 Unfolds via `BForces_box` (`∀ w' ≥ w, ∀ u, r w' u → BForces … u φ`, [Simpson1994] clause 3.2).
 
-**Forward direction** (contrapositive): if `□φ ∉ w.val`, `canonical_box_witness` (Phase 2b)
-produces `w' ≥ w` and a prime `u` with `canonicalR w' u` and `φ ∉ u.val`; instantiating the
-forcing hypothesis at this `w'`/`u` and applying `ih u` yields `φ ∈ u.val`, contradicting
-`φ ∉ u.val`.
+**Forward direction** (contrapositive): if `□φ ∉ w.val`, `canonical_box_witness` produces
+`w' ≥ w` and a prime `u` with `canonicalR w' u` and `φ ∉ u.val`; instantiating the forcing
+hypothesis at this `w'`/`u` and applying `ih u` yields `φ ∈ u.val`, contradicting `φ ∉ u.val`.
 
 **Backward direction** (heredity over `≤ ∘ R`): given `□φ ∈ w.val`, any `w' ≥ w` inherits
 `□φ ∈ w'.val` by set inclusion; `canonicalR w' u`'s box clause then gives `φ ∈ u.val` for any
 `u` with `canonicalR w' u`, and `ih u` transports this to forcing.
 
-Threads `h_K`, `h_Kdia`, `h_Idb` (report 03 §4 row 6) -- together with the base intuitionistic
-hypotheses `h_implyK`/`h_implyS`/`h_efq`/`h_orI1`/`h_orI2`/`h_orE`/`h_andI`/`h_andE1`/`h_andE2`
-that `canonical_box_witness` itself requires -- **solely via the call to
-`canonical_box_witness`**; no new axiom is introduced in this phase.
+Threads `h_K`, `h_Kdia`, `h_Idb` -- together with the base intuitionistic hypotheses
+`h_implyK`/`h_implyS`/`h_efq`/`h_orI1`/`h_orI2`/`h_orE`/`h_andI`/`h_andE1`/`h_andE2` that
+`canonical_box_witness` itself requires -- **solely via the call to
+`canonical_box_witness`**; no new axiom is introduced here.
 
 ## References
 
@@ -367,7 +363,7 @@ theorem truth_box_case
 
 end TruthLemmaBoxCase
 
-/-! ## Diamond Truth-Lemma Case (Phase 3c) -/
+/-! ## Diamond Truth-Lemma Case -/
 
 section TruthLemmaDiamondCase
 
@@ -375,7 +371,7 @@ variable {Axioms : Proposition Atom → Prop}
 
 /-- **Diamond case** of the (to-be-assembled) `canonical_truth_lemma`: forcing of `◇φ` at a
 canonical world coincides with `◇φ ∈ w.val`, given the induction hypothesis for `φ`
-**universally quantified over all canonical worlds** (same Phase 3a design note reused for
+**universally quantified over all canonical worlds** (the same design note reused for
 `truth_imp_case`/`truth_box_case`).
 
 Unfolds via `BForces_diamond` (`∃ u, r w u ∧ BForces … u φ`, [Simpson1994] clause 3.5). Unlike
@@ -387,14 +383,13 @@ quantifier appears.
 forcing to `φ ∈ u.val`; `canonicalR w u`'s diamond clause (`.2`, `∀ ψ, ψ ∈ u.val → (◇ψ) ∈ w.val`)
 then gives `◇φ ∈ w.val` directly -- **no modal axiom is needed for this direction**.
 
-**Backward direction**: given `◇φ ∈ w.val`, `canonical_diamond_witness` (Phase 2c) produces a
-single prime `v` with `canonicalR w v` and `φ ∈ v.val`; `ih v` transports this to forcing,
-witnessing the existential.
+**Backward direction**: given `◇φ ∈ w.val`, `canonical_diamond_witness` produces a single prime
+`v` with `canonicalR w v` and `φ ∈ v.val`; `ih v` transports this to forcing, witnessing the
+existential.
 
-Threads `h_Kdia`, `h_Cd` (and `h_dbot`, `h_K` via `diamond_witness_underivable`; report 03 §4
-row 7) **solely via the call to `canonical_diamond_witness`**; no new axiom is introduced in
-this phase. `h_Idb` is **not** threaded (Phase 2c's completion note: confirmed not consumed by
-the diamond side).
+Threads `h_Kdia`, `h_Cd` (and `h_dbot`, `h_K` via `diamond_witness_underivable`) **solely via
+the call to `canonical_diamond_witness`**; no new axiom is introduced here. `h_Idb` is **not**
+threaded (confirmed not consumed by the diamond side).
 
 ## References
 
@@ -435,27 +430,27 @@ theorem truth_diamond_case
 
 end TruthLemmaDiamondCase
 
-/-! ## Assembled Truth Lemma (Phase 3c) -/
+/-! ## Assembled Truth Lemma -/
 
 section TruthLemmaAssembly
 
 variable {Axioms : Proposition Atom → Prop}
 
-/-- **The canonical truth lemma** (task 480, Phase 3c payoff): forcing of any proposition `φ` at
-any canonical prime world `w` coincides with membership `φ ∈ w.val`. Assembled by structural
-induction on `φ`, dispatching each of the seven `Proposition` constructors to its Phase 3a/3b/3c
-helper, threading the induction hypothesis (generalized over all worlds, matching the `imp`/
-`box`/`diamond` cases' universally-quantified IH requirement) at the point of use.
+/-- **The canonical truth lemma**: forcing of any proposition `φ` at any canonical prime world
+`w` coincides with membership `φ ∈ w.val`. Assembled by structural induction on `φ`, dispatching
+each of the seven `Proposition` constructors to its helper (above), threading the induction
+hypothesis (generalized over all worlds, matching the `imp`/`box`/`diamond` cases'
+universally-quantified IH requirement) at the point of use.
 
 Carries the **union of the four modal axioms** `{ h_K, h_Kdia, h_Idb, h_Cd }` (plus `h_dbot`,
-needed transitively by the diamond witness -- report 03 §4 row 8) as parametric hypotheses:
-`h_K`/`h_Kdia`/`h_Idb` are used only by the `box` case (via `truth_box_case`), `h_Kdia`/`h_Cd`/
-`h_dbot` only by the `diamond` case (via `truth_diamond_case`); the non-modal cases (`atom`,
-`bot`, `and`, `or`, `imp`) use none of the four. `botForces` remains a loose parameter throughout
-(bridged by the explicit `h_bot` hypothesis, per Phase 3a's design note), so the minimal (495)
-and CK (493) fallible-world instantiations can reuse this lemma unmodified.
+needed transitively by the diamond witness) as parametric hypotheses: `h_K`/`h_Kdia`/`h_Idb` are
+used only by the `box` case (via `truth_box_case`), `h_Kdia`/`h_Cd`/`h_dbot` only by the
+`diamond` case (via `truth_diamond_case`); the non-modal cases (`atom`, `bot`, `and`, `or`,
+`imp`) use none of the four. `botForces` remains a loose parameter throughout (bridged by the
+explicit `h_bot` hypothesis), so the minimal and `CK` fallible-world instantiations can reuse
+this lemma unmodified.
 
-This is the payoff lemma Phase 4 (`Completeness.lean`) consumes to build `ivalid_completeness`/
+This is the payoff lemma `Completeness.lean` consumes to build `ivalid_completeness`/
 `mvalid_completeness`.
 
 ## References

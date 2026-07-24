@@ -377,7 +377,7 @@ route to the Phase 11 fallback.
 - **Zero-debt contract:** no `sorry`, no new axiom, no weakening, no regression.
 - **Verification / Done when:** all checks above pass; the Simpson 8.1.4 biconditional is complete.
 
-### Phase 11: Fallback route PD — direct existential-teleport induction (contingency only) [IN PROGRESS]
+### Phase 11: Fallback route PD — direct existential-teleport induction (contingency only) [BLOCKED]
 
 - **Goal:** If — contra the ~70% estimate — the Phase 8 Hilbert bridge genuinely overruns budget
   across dispatches (or a concrete defect in it emerges), obtain `nik_TS5_soundness` instead via the
@@ -385,25 +385,116 @@ route to the Phase 11 fallback.
   modal/propositional cases. Entered ONLY from a Phase 8 intractability finding; it does NOT pre-empt
   the P3 main line. Report 04 rates PD's novel sub-lemma (8.3 below) ~35% closable — higher risk than
   the bridge, hence fallback not primary.
+
+**Dispatch finding (2026-07-24, sess_1784905751_756cda_537, resume dispatch).** Design-only pass
+(no `sorry`, no Lean edits beyond the already-committed PD.1): worked out, on paper, a corrected
+formalization of PD.2's existential-monotone motive `M` and stress-tested it case-by-case against
+all 12 `NIK` constructors before writing any Lean, since report 04's one-line motive sketch
+under-specifies two coordination details that matter:
+
+1. **The "agrees with ρ on `G.X ∪ ctxLabels Γ`" conjunct must be *exact equality*, not merely
+   `≤`-monotone**, and must ALSO include the *current goal's own label* `φ.lbl` (i.e. the tracked
+   set is `Dom(G,Γ,φ) := G.X ∪ ctxLabels Γ ∪ {φ.lbl}`, not just `G.X ∪ ctxLabels Γ`). Exact
+   equality on `G.X` is what lets the raw edge-cond `∀a b, G.R a b → r(ρa)(ρb)` transfer for free
+   across sequential premise composition (`andI`/`impE`/orE's minor branch): if two premises share
+   a graph `G`, the second premise's edge-cond hypothesis is only available if the first premise's
+   witness `ρ'` reproduces the SAME `G`-values, not merely dominates them (`r` is not itself
+   `≤`-monotone the way `CKForces` is). A bare "monotone, unconstrained off `G.X∪ctxLabels Γ`"
+   reading (the literal report-04 shorthand) is UNPROVABLE in general: for `efq`'s dangling
+   conclusion label `y ∉ G.X∪ctxLabels Γ`, the input `ρ` assigns `y` an adversarial, ∀-quantified
+   value with no relation to anything else, and `Preorder World` is not assumed directed/a
+   lattice, so no witness `ρ'y ≥ ρy` can also satisfy `botForces(ρ'y)` in general (there need be no
+   common upper bound of an arbitrary point and a `botForces`-holding point). Dropping the bare
+   monotonicity requirement in favour of *exact* agreement on `Dom(G,Γ,φ)` (with **no** constraint
+   at all outside `Dom`, since nothing downstream needs one — verified against every constructor's
+   discharge below) removes this obstruction cleanly.
+2. **A single, unparametrized `Dom(G,Γ,φ)` is still insufficient for the 2-and-3-premise
+   constructors** (`andI`, `impE`, `orE`): a "sibling" premise/branch can need a label protected
+   through an unrelated premise's recursive call even though that label is not in ITS OWN `Dom`
+   (concretely, `orE`'s shared minor-premise/conclusion label `y` is not in the major premise
+   `x:A∨B`'s own `Dom = G.X∪ctxLabels Γ∪{x}` whenever `y` is dangling and `y≠x`, so the major
+   premise's witness has no theorem-level obligation to leave `ρ(y)` untouched). The fix is a
+   **caller-supplied protect-set `T`**: generalize the motive to `∀T ⊇ Dom(G,Γ,φ), ∀ρ, ec → gc →
+   ∃ρ', (ρ'=ρ EXACTLY on T) ∧ CKForces(ρ'φ.lbl)φ.prop`, with composing constructors invoking every
+   sibling IH at a common, explicitly-enlarged `T' := T ∪ {the other premises' labels}` rather than
+   the bare per-call `Dom`.
+
+**Verified tractable under this corrected motive** (worked by hand, not yet in Lean): `assumption`,
+`andI`/`andE1`/`andE2`, `orI1`/`orI2`, `impI` (via `boxI_lift`-style local raise-to-exactly-`w'`
+when the shared label is graph-resident, trivial `Function.update` when dangling — no cascade
+needed either way since the OUTER witness for `impI`/`boxI` is just `ρ' := ρ` unchanged, discharging
+the universal `□`/`⊃` clause by a fresh, internally-scoped IH invocation per successor rather than
+by returning a raised outer witness), `impE`, `boxE`/`diaI` (via the landed `box_iff_TClosure`/
+`dia_iff_TClosure` + `box_gives_here`, plus `cs5FCIncest_lift`+`ckforces_persistence` to promote a
+single-point `diaI` fact to the full universally-quantified diamond clause), `diaE` (`le_refl`, no
+lift, symmetric to `boxE`), `boxI` (via the landed `boxI_lift`/`IsDerivationForest`, `T`-threading
+not required since the outer witness is always `ρ`), and `orE`'s **coordination** itself (via the
+`T`-threading fix above — the report-04 "no coordination" claim was too strong: coordination IS
+needed to protect the minor-premise label through the major premise, but IS mechanically resolvable
+with a wider `T`).
+
+**NOT closed, confirmed genuinely open**: `efq`'s residual — conclusion label `y ∈ Dom` (so `ρ'y`
+is pinned to the ORIGINAL `ρ y`, no teleport freedom) with the premise's `⊥`-label `x` either
+dangling or `r`-disconnected from `y`. This is *exactly* report 04's Finding 5 / Phase-8 `[BLOCKED]`
+countermodel, re-derived independently rather than assumed, and is unaffected by either fix above
+(both fixes address coordination/monotonicity bookkeeping around the motive's *shape*; the `efq`
+residual is a genuine proof-theoretic gap in `N_IK(𝒯)`'s soundness *content* — Simpson's own
+"unavoidable non-tree excursion" (§8.1.2, chunk 0158), which he routes around via `L_m`/Hilbert
+rather than closing directly). Report 04's own confidence on this residual (PD.3, ~35%) stands;
+this dispatch's independent re-derivation found no shortcut and surfaces no reason to raise that
+estimate. Closing it in full would need a genuinely new normalization/cut-style invariant ("any
+`⊥` derivable in a live sub-derivation is already reachable from a live, connected assumption") —
+research-scale, not a transcription task.
+
+**Disposition.** Because `NIK`'s induction is a single closed Lean `induction ... with` covering
+all 12 constructors, the motive cannot be landed as a *buildable*, sorry-free artifact while `efq`'s
+residual remains open — a partial case split is not expressible without a `sorry`, which is
+forbidden. No Lean code for PD.2 was written this dispatch (design-only; verified by hand against
+every constructor before touching the file, per the "machine-check before escalating" discipline —
+the corrected motive's 11 tractable cases were checked structurally, not merely asserted). Per the
+plan's own sanctioned terminal ("Verification / Done when: ... OR a `[BLOCKED]` handoff records the
+concrete PD.3 gap with build green and zero debt"), Phase 11 is marked `[BLOCKED]`. PD.1 remains
+landed, sorry-free, axiom-clean, and unregressed. **Recommendation for a future dispatch/replan**:
+both sanctioned routes (Phase 8's Hilbert Ch. 6 bridge, ~70% per report 04 but 300-600+ line
+tree-recursive translation, not yet attempted in Lean; and this Phase 11 PD route, now with a
+corrected, worked-through motive design for 11/12 cases but a confirmed-open 12th) have been
+seriously investigated across two dispatches without a sorry-free result. A replan should weigh:
+(a) committing the budget to the Hilbert bridge's full tree-recursive construction (Phase 8, the
+lower-residual-risk route on the *content* side, though larger in raw line count), or (b) accepting
+Path PD's `efq` gap as requiring dedicated research (cut-admissibility for `N_IK(𝒯)`) before further
+implementation effort, landing the 11 tractable PD.2 cases only once (a) is confirmed via (b)'s
+research, or a fresh angle on the `efq` residual is found.
+
 - **Tasks (report 04 §Path PD):**
-  - [ ] **PD.1** — Land Finding 3's machine-verified `bot_backward` + `bot_iff_edge` and their
+  - [x] **PD.1** — Land Finding 3's machine-verified `bot_backward` + `bot_iff_edge` and their
         `TClosure {T,B,Four}` transport `bot_iff_TClosure` (copy the `box_iff_TClosure` skeleton,
-        Soundness.lean:422). LOW risk (verified axiom-free in the audit).
+        Soundness.lean:422). LOW risk (verified axiom-free in the audit). **LANDED** (this dispatch,
+        commit `0172b639`): `bot_backward`/`bot_iff_edge`/`bot_iff_TClosure`, sorry-free,
+        axiom-clean (`lean_verify` confirms no `sorryAx`, no new axioms).
   - [ ] **PD.2** — State the existential-monotone soundness motive `M(G,Γ,φ) := ∀ρ, (∀ a b, G.R a b
         → r(ρa)(ρb)) → (∀ψ∈Γ, CKForces (ρ ψ.lbl) ψ.prop) → ∃ρ', (∀z, ρ z ≤ ρ' z) ∧ (agrees with ρ
         on G.X ∪ ctxLabels Γ) ∧ CKForces (ρ' φ.lbl) φ.prop`. Discharge: the 8 label-local
         propositional constructors by sequential premise-threading + `ckforces_persistence`;
         `boxE`/`diaI` via `box_iff_TClosure`/`dia_iff_TClosure` + `box_gives_here`; `boxI` via
         `boxI_lift` (landed); `diaE` via `le_refl` (no lift); `orE` via report 04 Finding 4
-        (single-branch, no coordination). MEDIUM risk.
+        (single-branch, no coordination). MEDIUM risk. *(deviation: this dispatch found the
+        literal motive as stated is unprovable — the bare `∀z,ρz≤ρ'z` conjunct has no witness for
+        `efq`'s adversarial dangling label on a non-directed `Preorder`, and `orE` DOES need
+        coordination (report 04 Finding 4 overstated "no coordination") — see the Phase 11 dispatch
+        finding above for the corrected `Dom(G,Γ,φ):=G.X∪ctxLabels Γ∪{φ.lbl}` + caller-supplied
+        protect-set `T` design, worked by hand for 11/12 constructors but not yet written in Lean,
+        since the 12th (`efq`'s residual) blocks the whole induction from being buildable.)*
   - [ ] **PD.3** — Prove the `efq` `⊥`-locality lemma that closes `efq`-with-disconnected-`⊥`
         (report 04 Finding 5). Candidate: strengthen `M` to also output, when `φ.prop = ⊥`, a domain
         witness `∃ z ∈ G.X ∪ ctxLabels Γ, botForces (ρ' z)`, surviving every constructor. **HIGH
         risk / genuinely open** — the analogue of Simpson's non-tree excursion. Machine-check the
         stuck sub-goal; if unprovable within budget, this is the sanctioned `[BLOCKED]` terminal
-        (scoped handoff, zero debt, follow-up routed), never a `sorry`.
+        (scoped handoff, zero debt, follow-up routed), never a `sorry`. *(deviation: confirmed
+        genuinely open this dispatch, independently re-derived rather than assumed — see the Phase
+        11 dispatch finding above. This is the sanctioned `[BLOCKED]` terminal: build green, zero
+        debt, PD.1 landed, follow-up routed to a replan.)*
   - [ ] **PD.4** — Assemble `nik_TS5_soundness` by specialising `M` to `Graph.trivial`/`[]` and run
-        the Phase 10 regression gate.
+        the Phase 10 regression gate. *(deviation: deferred — blocked on PD.3.)*
 - **Estimated output:** ~150-350 lines across PD.1-PD.4.
 - **Timing:** multiple agent runs, entered only on Phase 8 intractability.
 - **Depends on:** Phase 8 bridge intractability. Reuses Phases 1-7 assets.

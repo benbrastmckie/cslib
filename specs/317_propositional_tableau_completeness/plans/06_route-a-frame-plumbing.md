@@ -789,7 +789,65 @@ dispatch, not another blind implementation attempt.
 
 ---
 
-### Phase 10: [Wave B / CONVERGENCE] Reformulate `intExpandBranches_openBranch_sat` + close sorries 2-4 → sorry-FREE [NOT STARTED]
+### Phase 10: [Wave B / CONVERGENCE] Reformulate `intExpandBranches_openBranch_sat` + close sorries 2-4 → sorry-FREE [BLOCKED]
+
+**RESOLUTION (dispatch `sess_1784905751_756cda_317`, continuing from Phase 9's BLOCKED
+handoff)**: real, additive, sorry-free progress landed on Phase 9's GAP 1 (fuel entanglement),
+but GAP 2 (determinacy) is confirmed BLOCKED by a sharper, source-verified finding: it requires
+a calculus-level redesign, not a `Scheme.lean`-internal discharge, so Phase 10 as scoped
+(`sat_timp`/monotonicity/truthLemma-T-imp closure + sorries 2-4) cannot complete this dispatch.
+
+**GAP 1 CLOSED (new infrastructure, committed)**: added `intTImpRule_output_notMem`,
+`applyAllTImpRules_count_drop`, and `applyPersistenceFixpoint_genuine_of_count_le_fuel` to
+`Scheme.lean` (placed after `intExpMeasure_init_le_fuel`, where `intUniverse`/
+`applyAllTImpRules_subset`/`intCount_notMem_append_drop`/`intCount_notMem_mono` are already in
+scope — NOT immediately after the STOP-gate prose, since those dependencies are defined later in
+the file; Lean requires forward declaration). The headline lemma proves: given branch-containment
+`hb : ∀ x ∈ b, x ∈ intUniverse φ0` and fuel `≥ (intUniverse φ0).countP (fun sf => !(b.any (·==sf)))`
+(the count of not-yet-claimed universe cells), `applyPersistenceFixpoint b edges fuel` is a
+GENUINE fixpoint of `applyAllTImpRules` (one more round changes nothing) — closing exactly the
+gap the Phase-9 STOP-gate identified (`applyPersistenceFixpoint`'s own recursion needed a
+step-lt-style bound distinct from `intExpMeasure_step_lt`, which only bounds the OUTER
+alpha/beta/world-creation loop). Proof mirrors the Phase-7 `intWork`/`intCount_notMem_append_drop`
+engine, restricted to the branch-membership term only (persistence has no separate `e` set):
+each non-fixpoint round strictly drops the count of unclaimed `intUniverse φ0` cells (via
+`intTImpRule`'s own construction guard, which only ever emits a formula NOT already on the
+branch), and the count is bounded by `|intUniverse φ0|` (Phase 6's `intUniverse_length_le`), so
+induction on `fuel` terminates. Sorry-free, ~155 lines, `lake build` GREEN for `Scheme`,
+`Intuitionistic.Completeness`, `Minimal.Completeness`; four inventory sorries unchanged in count
+and (aside from the append-only line shift) location; no new axioms (verified: the new code adds
+no `sorry`/`axiom`, and the modified-file diff is `Scheme.lean` only, +193 lines).
+
+**GAP 2 CONFIRMED BLOCKED (sharper finding this dispatch, not merely re-asserted)**:
+`truthLemma`'s T-imp case needs, given `T(φ'→ψ')@w ∈ b` and a SEMANTIC fact `IForces val w' φ'`
+at an accessible `w'`, to conclude `IForces val w' ψ'`. The only route from the semantic premise
+back into `b`'s syntax is the induction hypothesis `ih_φ'`, whose sole usable direction is
+`T(φ')@w' ∈ b → IForces val w' φ'` (forward only) — the CONVERSE, which the genuine-fixpoint
+fact above would need to fire `sat_timp`, is not given by the induction and is not established
+by any existing Hintikka field (`sat_tand`/`sat_fand`/… only decompose compounds ALREADY on the
+branch). Root cause (verified against `Rules.lean`/`Expansion.lean`, not assumed): the persistent
+`T(→)` rule is `.pos`-only (`Rules.lean:174-186`; `posFormulasAt`/`propagatePersistence`,
+`Expansion.lean`) — F-tags NEVER propagate across worlds. A world `w'` created as the witness for
+one `F(A→B)` obligation gets exactly `T(A)@w'`/`F(B)@w'` (plus their decomposition descendants);
+an UNRELATED subformula `φ'` of `φ0` has no mechanism forcing it to be either `T`- or `F`-tagged
+at `w'`. Bivalence over `Sub(φ0)` at every reachable world is therefore NOT a byproduct of the
+existing rule set (the five decomposition rules + the one world-creating rule) — closing it
+needs a NEW tableau rule (a Lindenbaum-style "decide `ξ` at `w'`" branching step for every
+`ξ ∈ Sub(φ0)` not yet tagged at a freshly created world). This is a calculus-level change to
+`Rules.lean`/`Expansion.lean`, not a completeness-side (`Scheme.lean`) fix, and is OUT OF SCOPE
+for an internal Phase 10 discharge.
+
+**Recommendation for continuation**: spin off a NEW task ("intuitionistic tableau calculus:
+add Sub(φ0) determinacy/completion rule") to research and plan the calculus redesign (adding a
+branching decision rule for undecided `Sub(φ0)` members at each world, auditing its soundness
+impact on `Soundness.lean`/task 316, and re-deriving the fuel/measure machinery for the enlarged
+rule set) BEFORE any further `/implement` dispatch on this plan's Phase 9/10. Once that new
+task lands the determinacy rule/fact, resume Phase 10 here: (a) add `sat_timp` using the
+now-available determinacy fact + the genuine-fixpoint lemma landed this dispatch, (b) close
+`truthLemma`'s T-imp sorry, (c) thread the `intExpMeasure ≤ fuel` invariant to close the fuel-0
+sorry and the two Completeness-bridge sorries. Do NOT attempt sorry/vacuous workarounds for GAP 2
+in the meantime — the calculus-redesign task is the correct escalation path, not another blind
+implementation attempt on the existing rule set.
 
 - **Goal:** The sole serialization point. Add the `intExpMeasure … ≤ fuel` hypothesis to
   `intExpandBranches_openBranch_sat`, close the fuel-0 sorry (2), and supply the Phase-9 monotonicity to

@@ -2655,6 +2655,199 @@ lemma intExpMeasure_init_le_fuel (φ : Proposition Atom) :
         Nat.pow_le_pow_right (by norm_num) hfinal
     _ = intFuel φ := rfl
 
+/-! ## Persistence-loop fuel-sufficiency (task 317 phase 10, `sat_timp` STOP-gate gap 1
+continuation, `Scheme.lean:485-533`)
+
+Closes GAP 1 of the `sat_timp` STOP-gate above: a genuine termination bound for
+`applyPersistenceFixpoint`'s OWN recursion, distinct from `intExpMeasure_step_lt` (which bounds
+the OUTER alpha/beta/world-creation loop only). The key fact: each non-fixpoint round of
+`applyAllTImpRules` strictly drops the count of `intUniverse φ0`-cells not yet on the branch
+(mirrors the `intWork`/`intCount_notMem_append_drop` engine from phase 7, restricted to the
+branch-membership term alone, since persistence has no separate `e` "expanded" set). Since this
+count is bounded above by `|intUniverse φ0|` (a fixed polynomial in `φ0.complexity`), fuel at
+least this count suffices for a genuine fixpoint. GAP 2 (determinacy) is NOT addressed here — see
+the investigation note after `applyPersistenceFixpoint_genuine_of_count_le_fuel` below. -/
+
+omit [Hashable Atom] in
+/-- Every output of `intTImpRule` is, by construction, NOT already on the branch it fires from
+(the rule's inner guard `if b.any (… ψ …) then none else some …` only ever fires on the `else`
+branch, i.e. exactly when `ψ@w'` is absent). -/
+private lemma intTImpRule_output_notMem {φ ψ : Proposition Atom} {w : Nat} {edges : IEdges}
+    {b : IBranch Atom} {x : ISF Atom} (hx : x ∈ intTImpRule φ ψ w edges b) :
+    b.any (· == x) = false := by
+  simp only [intTImpRule, List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  split at hxeq
+  · split at hxeq
+    · simp at hxeq
+    · rename_i hnotψ
+      simp only [Option.some.injEq] at hxeq
+      rw [← hxeq, Bool.eq_false_iff]
+      intro hcon
+      apply hnotψ
+      rw [List.any_eq_true] at hcon ⊢
+      obtain ⟨sf, hsfmem, hsfeq⟩ := hcon
+      refine ⟨sf, hsfmem, ?_⟩
+      rw [beq_iff_eq] at hsfeq
+      simp [hsfeq]
+  · simp at hxeq
+
+/-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of `intUniverse φ0`
+cells not yet on the branch, given branch-containment `hb` (task 317 phase 10, gap 1
+continuation; mirrors `intWork_drop`'s combinatorial core, restricted to the branch-membership
+term since persistence tracks no separate expanded set). -/
+private lemma applyAllTImpRules_count_drop
+    {φ0 : Proposition Atom} {b : IBranch Atom} {edges : IEdges}
+    (hb : ∀ x ∈ b, x ∈ intUniverse φ0)
+    (hne : (applyAllTImpRules b edges).length ≠ b.length) :
+    (intUniverse φ0).countP (fun sf => !((applyAllTImpRules b edges).any (· == sf))) + 1 ≤
+      (intUniverse φ0).countP (fun sf => !(b.any (· == sf))) := by
+  have happend : applyAllTImpRules b edges =
+      b ++ (b.filterMap fun sf =>
+        match sf.sign, sf.formula with
+        | .pos, .imp φ ψ =>
+          let toAdd := intTImpRule φ ψ sf.label edges b
+          if toAdd.isEmpty then none else some toAdd
+        | _, _ => none).flatten := rfl
+  set nf := (b.filterMap fun sf =>
+        match sf.sign, sf.formula with
+        | .pos, .imp φ ψ =>
+          let toAdd := intTImpRule φ ψ sf.label edges b
+          if toAdd.isEmpty then none else some toAdd
+        | _, _ => none) with hnf_def
+  have hne' : nf.flatten ≠ [] := by
+    intro hcontra
+    apply hne
+    rw [happend, hcontra, List.append_nil]
+  obtain ⟨x, hxmem⟩ := List.exists_mem_of_ne_nil _ hne'
+  have hxU : x ∈ intUniverse φ0 := by
+    have hsub := applyAllTImpRules_subset (φ0 := φ0) (edges := edges) hb (x := x)
+    apply hsub
+    rw [happend]
+    exact List.mem_append_right b hxmem
+  have hxnotb : b.any (· == x) = false := by
+    simp only [hnf_def, List.mem_flatten, List.mem_filterMap] at hxmem
+    obtain ⟨toAdd, ⟨sf, hsfmem, hsfeq⟩, hxmem⟩ := hxmem
+    obtain ⟨s, ff, l⟩ := sf
+    cases s with
+    | neg => simp at hsfeq
+    | pos =>
+      cases ff with
+      | atom p => simp at hsfeq
+      | bot => simp at hsfeq
+      | and a c => simp at hsfeq
+      | or a c => simp at hsfeq
+      | imp φ ψ =>
+        simp only at hsfeq
+        split at hsfeq
+        · simp at hsfeq
+        · simp only [Option.some.injEq] at hsfeq
+          rw [← hsfeq] at hxmem
+          exact intTImpRule_output_notMem hxmem
+  have hdrop := intCount_notMem_append_drop (intUniverse φ0) b x hxU hxnotb
+  have hmono := intCount_notMem_mono (intUniverse φ0) (b ++ [x]) (applyAllTImpRules b edges)
+    (by
+      rw [happend]
+      intro z hz
+      rw [List.mem_append, List.mem_singleton] at hz
+      rcases hz with hz | rfl
+      · exact List.mem_append_left _ hz
+      · exact List.mem_append_right _ hxmem)
+  omega
+
+/-- **Genuine-fixpoint sufficiency** (task 317 phase 10, closes `sat_timp` STOP-gate GAP 1):
+`applyPersistenceFixpoint b edges fuel` is a genuine fixpoint of `applyAllTImpRules` — applying
+one more round changes nothing — whenever the fuel is at least the count of `intUniverse φ0`
+cells not yet claimed by `b`. Combined with `intUniverse_length_le` (a fixed polynomial bound in
+`φ0.complexity`), any fuel `≥ |intUniverse φ0|` suffices regardless of `b`'s shape. -/
+private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
+    {φ0 : Proposition Atom} {edges : IEdges} (b : IBranch Atom) (fuel : Nat)
+    (hb : ∀ x ∈ b, x ∈ intUniverse φ0)
+    (hfuel : (intUniverse φ0).countP (fun sf => !(b.any (· == sf))) ≤ fuel) :
+    applyAllTImpRules (applyPersistenceFixpoint b edges fuel) edges
+      = applyPersistenceFixpoint b edges fuel := by
+  induction fuel generalizing b with
+  | zero =>
+    have hlen : (applyAllTImpRules b edges).length = b.length := by
+      by_contra hne
+      have := applyAllTImpRules_count_drop (φ0 := φ0) hb hne
+      omega
+    have hval : applyAllTImpRules b edges = b := by
+      have happend : applyAllTImpRules b edges = b ++
+          (b.filterMap fun sf =>
+            match sf.sign, sf.formula with
+            | .pos, .imp φ ψ =>
+              let toAdd := intTImpRule φ ψ sf.label edges b
+              if toAdd.isEmpty then none else some toAdd
+            | _, _ => none).flatten := rfl
+      rw [happend] at hlen ⊢
+      have hflat : (b.filterMap fun sf =>
+            match sf.sign, sf.formula with
+            | .pos, .imp φ ψ =>
+              let toAdd := intTImpRule φ ψ sf.label edges b
+              if toAdd.isEmpty then none else some toAdd
+            | _, _ => none).flatten = [] := by
+        have hlen2 := hlen
+        rw [List.length_append] at hlen2
+        exact List.length_eq_zero_iff.mp (by omega)
+      rw [hflat, List.append_nil]
+    simpa [applyPersistenceFixpoint] using hval
+  | succ fuel' ih =>
+    simp only [applyPersistenceFixpoint]
+    split
+    · rename_i hlenb
+      rw [beq_iff_eq] at hlenb
+      have happend : applyAllTImpRules b edges = b ++
+          (b.filterMap fun sf =>
+            match sf.sign, sf.formula with
+            | .pos, .imp φ ψ =>
+              let toAdd := intTImpRule φ ψ sf.label edges b
+              if toAdd.isEmpty then none else some toAdd
+            | _, _ => none).flatten := rfl
+      rw [happend] at hlenb
+      have hflat : (b.filterMap fun sf =>
+            match sf.sign, sf.formula with
+            | .pos, .imp φ ψ =>
+              let toAdd := intTImpRule φ ψ sf.label edges b
+              if toAdd.isEmpty then none else some toAdd
+            | _, _ => none).flatten = [] := by
+        have hlen2 := hlenb
+        rw [List.length_append] at hlen2
+        exact List.length_eq_zero_iff.mp (by omega)
+      rw [happend, hflat, List.append_nil]
+    · rename_i hlenb
+      rw [Bool.not_eq_true, beq_eq_false_iff_ne] at hlenb
+      have hb' : ∀ x ∈ applyAllTImpRules b edges, x ∈ intUniverse φ0 :=
+        applyAllTImpRules_subset hb
+      have hfuel' : (intUniverse φ0).countP
+          (fun sf => !((applyAllTImpRules b edges).any (· == sf))) ≤ fuel' := by
+        have := applyAllTImpRules_count_drop (φ0 := φ0) hb hlenb
+        omega
+      exact ih (applyAllTImpRules b edges) hb' hfuel'
+
+/-! ### GAP 2 investigation (task 317 phase 10 continuation, this dispatch): determinacy remains
+BLOCKED, confirmed by source-level investigation, not merely re-asserted. `truthLemma`'s T-imp
+case needs, for `w'` accessible from `w` with `T(φ'→ψ')@w ∈ b` and `IForces val w' φ'` (a
+SEMANTIC fact), to conclude `IForces val w' ψ'`. The only route into `b`'s syntax is via
+`ih_φ'`, whose sole usable direction is `T(φ')@w' ∈ b → IForces val w' φ'` — its CONVERSE
+(`IForces val w' φ' → T(φ')@w' ∈ b`, needed to invoke the genuine-fixpoint fact above) is not
+given by the induction and is not established by any Hintikka field: `sat_tand`/`sat_fand`/…
+only decompose compounds ALREADY on the branch, and the persistent T(→) rule (`Rules.lean:174`)
+is `.pos`-only (never plants `F`-tags across worlds), so a world `w'` created as the witness for
+one `F(A→B)` obligation has no mechanism forcing an UNRELATED subformula `φ'` of `φ0` to be
+either `T`- or `F`-tagged there. Bivalence over `Sub(φ0)` at every reachable world is not a
+byproduct of the EXISTING rule set (`Rules.lean`'s five decomposition rules + the one
+world-creating rule) — it would need a NEW tableau rule (a Lindenbaum-style "decide `ξ` at `w'`"
+branching step for every `ξ ∈ Sub(φ0)` not yet tagged at a freshly created world), which is a
+calculus-level change to `Rules.lean`/`Expansion.lean`, not a completeness-side (`Scheme.lean`)
+fix. This is OUT OF SCOPE for task 317's Phase 10 as planned (an internal, `Scheme.lean`-only
+discharge) and is recommended as a NEW task (calculus redesign: add a determinacy/completion
+rule), to be researched and planned separately before `sat_timp`/truthLemma's T-imp case can
+close. No field/lemma is stated for `sat_timp` here — adding it now, even in the strictly
+fixpoint-provable weak form, would sit unused (truthLemma's T-imp case needs the full
+disjunction, not just the weak implication), so it is deferred until gap 2 has a resolution
+strategy, per the zero-debt "no unused scaffolding masquerading as progress" standard. -/
+
 end Cslib.Logic.PL
 
 end

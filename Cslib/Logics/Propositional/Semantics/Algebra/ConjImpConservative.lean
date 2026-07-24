@@ -54,7 +54,7 @@ universe u
 
 `liftDerivationTree` and `derivable_mono` live in `FragmentConservativity.lean`, not here: they
 are not used by this file's remaining content, so consumers that need them
-(`ClassicalImpCompleteness.lean`, `LiftViaMorphism.lean`, `MplConservativeChain.lean`) import
+(`ClassicalImpCompleteness.lean`, `MplConservativeChain.lean`) import
 `FragmentConservativity.lean` directly. -/
 
 /-- **Hilbert-primary conservative extension theorem**: IPL is a conservative extension of

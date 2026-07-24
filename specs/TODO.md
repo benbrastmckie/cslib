@@ -11,9 +11,9 @@ next_project_number: 551
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,226,317,393,400,405,407,425,438,440,449,463,465,466,474,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,181,215,301,375,409,430,451,456,497,511 | 36,37,317,393,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,413,450,506,548 | 39,40,181,375,449,511 | foundations, modal logic, bimodal logic, ... |
+| 1 | 36,37,181,226,317,400,405,407,425,438,440,451,463,465,466,474,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,409,430,450,456,497,511 | 36,37,181,317,407,425,535 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300 | 506 | modal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
@@ -38,7 +38,7 @@ next_project_number: 551
 
 405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
 522 [PR READY] — Uniform frame-condition to axiom correspondence library for modal
-535 [NOT STARTED] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
+535 [PARTIAL] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
@@ -47,7 +47,7 @@ next_project_number: 551
 
 ### Temporal Logic
 
-425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [PARTIAL] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -58,15 +58,12 @@ next_project_number: 551
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal
 37 [BLOCKED] — Port continuous extension completeness once developed upstream. T
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
-449 [NOT STARTED] — Foundation for the corrected TM-over-temporal conservativity resu
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-  └─ 451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
-  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S (see above)
+  └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
+451 [NOT STARTED] — Deeper metatheory for the metric tense logic BX+ (defined in task
 
 ### Code Hygiene
 
-393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
@@ -267,11 +264,14 @@ next_project_number: 551
 
 ### 535. Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
 - **Effort**: 10-16 hours
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
-- **Research**: [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
+- **Research**:
+  - [511_s4_loop_checking_termination/reports/02_spawn-analysis.md]
+  - [535_abstract_termination_measure_interface_s4b_loop/reports/01_termination-interface-survey.md]
+- **Plan**: [535_abstract_termination_measure_interface_s4b_loop/plans/01_keyed-s4-driver-plan.md]
 
 **Description**: Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.
 
@@ -462,10 +462,13 @@ Zero-debt: lean_verify on the restated bimodal_conservative_over_temporal must r
 ---
 
 ### 449. Define BX+ (metric tense logic): temporal uniformity axioms, Metric frame class, and soundness over ordered-abelian-group flows
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: None
+- **Research**: [449_define_bxplus_metric_tense_base/reports/01_bxplus-metric-tense-survey.md]
+- **Plan**: [449_define_bxplus_metric_tense_base/plans/01_bxplus-metric-tense-plan.md]
+- **Summary**: [449_define_bxplus_metric_tense_base/summaries/01_bxplus-metric-tense-summary.md]
 
 **Description**: Foundation for the corrected TM-over-temporal conservativity result. Supersedes abandoned task 445; inherits its research at specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md.
 
@@ -598,10 +601,12 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [NOT STARTED]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 426, Task 542
+- **Research**: [425_temporal_tableau_ptl_fmp_decidability/reports/01_ptl-fmp-decidability-survey.md]
+- **Plan**: [425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md]
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 
@@ -703,10 +708,13 @@ After implementation:
 ---
 
 ### 393. Consolidate duplicated Lindenbaum/Classical/conservativity constructions (Zulip first)
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 545, Task 546, Task 542
+- **Research**: [393_reuse_consolidation_lindenbaum_classical/reports/01_reuse-consolidation-survey.md]
+- **Plan**: [393_reuse_consolidation_lindenbaum_classical/plans/01_reuse-consolidation-plan.md]
+- **Summary**: [393_reuse_consolidation_lindenbaum_classical/summaries/01_reuse-consolidation-summary.md]
 
 **Description**: Consolidate duplicated Lindenbaum / MCS / conservativity constructions across the logic families. Duplication confirmed present: multiple parallel Lindenbaum algebra variants (HilbertLindenbaumAlgebra, ImpLindenbaumAlgebra, RelLindenbaumAlgebra, LindenbaumAlg) and MCS-extension variants (lindenbaumMCS/lindenbaumMCSSet/bimodal_lindenbaum); GenericMCSBridge.lean duplicated x4 (Propositional/Modal/Bimodal.Core/Temporal Metalogic dirs) as thin per-family re-instantiations of one Foundations pattern; LiftViaMorphism.lean x3 (Modal InterSystem, Propositional Semantics/Algebra, Bimodal ConservativeExtension). Consolidate onto the shared Foundations generic-MCS and morphism-lift machinery, retiring the per-family copies where they add no value. (Dependency on the archived-completed docstring task dropped.)
 

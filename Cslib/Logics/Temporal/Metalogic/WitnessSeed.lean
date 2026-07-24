@@ -49,8 +49,8 @@ lemma someFuture_allFuture_neg_absurd {M : Set (Formula Atom)}
   have hImpl := DerivationTree.modus_ponens [] _ _ h_bx3
     (DerivationTree.temporal_necessitation _ (dni psi))
   have h_sf_nn := temporal_implication_property h_mcs (theoremInMcs h_mcs hImpl) h_F
-  -- Task 180 canary (PM8, highest-fan-out site): h_G_neg : G(¬ψ) ∈ M is no longer defeq to
-  -- ¬F(¬¬ψ) ∈ M now that G is primitive; convert via mcs_allFuture_iff before applying.
+  -- h_G_neg : G(¬ψ) ∈ M is not defeq to ¬F(¬¬ψ) ∈ M since G is primitive; convert via
+  -- mcs_allFuture_iff before applying.
   exact mcs_not_mem_of_neg h_mcs ((mcs_allFuture_iff h_mcs).mp h_G_neg) h_sf_nn
 
 lemma somePast_allPast_neg_absurd {M : Set (Formula Atom)}

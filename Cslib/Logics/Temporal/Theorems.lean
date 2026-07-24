@@ -17,15 +17,14 @@ Barrel import for temporal theorem modules:
 - `TemporalDerived`: 20+ derived theorems (G/H distribution, contraposition, etc.)
 - `FrameConditions`: Frame condition typeclasses (Linear, Serial, Dense, Discrete)
 
-## Classical Equivalences (task 180, Phase 9)
+## Classical Equivalences
 
-`allFuture` (`𝐆`) and `allPast` (`𝐇`) were promoted from derived abbreviations to primitive
-`Formula` constructors (task 180) so that intuitionistic temporal logics — where `𝐆φ` is
-strictly stronger than `¬𝐅¬φ` — are expressible ([Boudou2017]). The classical duality
-`𝐆φ ↔ ¬𝐅¬φ` / `𝐇φ ↔ ¬𝐏¬φ` therefore can no longer be definitional; it is packaged below as a
-theorem, assembled from the two-directional bridge axioms
-(`Axiom.allFuture_to_classic`/`Axiom.classic_to_allFuture`, and the past duals) that were
-proved *sound* in `Metalogic.Soundness`/`Metalogic.DenseSoundness`.
+`allFuture` (`𝐆`) and `allPast` (`𝐇`) are primitive `Formula` constructors, not derived
+abbreviations, so that intuitionistic temporal logics — where `𝐆φ` is strictly stronger than
+`¬𝐅¬φ` — are expressible ([Boudou2017]). The classical duality `𝐆φ ↔ ¬𝐅¬φ` / `𝐇φ ↔ ¬𝐏¬φ` is
+therefore not definitional; it is packaged below as a theorem, assembled from the
+two-directional bridge axioms (`Axiom.allFuture_to_classic`/`Axiom.classic_to_allFuture`, and
+the past duals) that were proved *sound* in `Metalogic.Soundness`/`Metalogic.DenseSoundness`.
 
 **Honesty caveat (D3):** this equivalence is a theorem *about* `HilbertBX`, built by packaging
 two axioms — it is not *derived* from the propositional/mono axioms of the system. Attempting

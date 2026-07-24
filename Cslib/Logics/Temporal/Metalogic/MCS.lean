@@ -131,15 +131,14 @@ theorem mcs_mem_iff_neg_not_mem
     {φ : Formula Atom} : φ ∈ Ω ↔ (¬φ) ∉ Ω :=
   MCSProperties.mcs_mem_iff_neg_not_mem (temporal_setMaxConsistent_iff_algebraic.mp h_mcs)
 
-/-! ## Classical bridge lemmas (task 180, F4)
+/-! ## Classical bridge lemmas
 
-Before task 180, `𝐆φ ≡ ¬𝐅¬φ` was a *definitional* equality, so MCS proofs could freely
-`change` between the two forms. Now that `allFuture`/`allPast` are primitive `Formula`
-constructors (no longer derived from `someFuture`/`neg`), this equivalence is a *theorem*,
-proved here from the four `allFuture_to_classic`/`classic_to_allFuture`/`allPast_to_classic`/
+Since `allFuture`/`allPast` are primitive `Formula` constructors (not derived from
+`someFuture`/`neg`), `𝐆φ ≡ ¬𝐅¬φ` is not a *definitional* equality; it is a *theorem*, proved
+here from the four `allFuture_to_classic`/`classic_to_allFuture`/`allPast_to_classic`/
 `classic_to_allPast` bridge axioms (`ProofSystem/Axioms.lean`). Every MCS-level site that
-used to rely on the old defeq is repaired by routing through `mcs_allFuture_iff` /
-`mcs_allPast_iff` (or their negated-form companions below) instead. -/
+would otherwise rely on defeq instead routes through `mcs_allFuture_iff` / `mcs_allPast_iff`
+(or their negated-form companions below). -/
 
 /-- MCS-level bridge: `𝐆φ ∈ Ω ↔ ¬𝐅¬φ ∈ Ω`, derived from the `allFuture_to_classic`/
 `classic_to_allFuture` bridge axioms. The central reconnection lemma for sites broken by

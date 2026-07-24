@@ -78,7 +78,7 @@ theorem imp_right_mem_subformulas (ψ χ : Formula Atom) :
 /-- Subformulas of allPast include the inner formula. -/
 theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐇ψ) := by
-  -- allPast ψ is now a primitive constructor (task 180)
+  -- allPast ψ is a primitive constructor
   simp only [subformulas, List.mem_cons]
   right
   exact self_mem_subformulas ψ
@@ -86,7 +86,7 @@ theorem allPast_inner_mem_subformulas (ψ : Formula Atom) :
 /-- Subformulas of allFuture include the inner formula. -/
 theorem allFuture_inner_mem_subformulas (ψ : Formula Atom) :
     ψ ∈ subformulas (𝐆ψ) := by
-  -- allFuture ψ is now a primitive constructor (task 180)
+  -- allFuture ψ is a primitive constructor
   simp only [subformulas, List.mem_cons]
   right
   exact self_mem_subformulas ψ

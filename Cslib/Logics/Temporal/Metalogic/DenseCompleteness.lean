@@ -200,8 +200,8 @@ theorem dense_indicator_in_all_limit_points
     have h_g := g_dense_indicator_in_dense_mcs h_dense_mcs
     have h_neg_until_g : utb.neg.allFuture ∈ limitF A h_base_mcs 0 := by
       rw [limit_f_zero]; exact h_g
-    -- `limit_satisfies_c4` is stated in the raw `¬(ξ U η)` encoding (task 180: `allFuture` is
-    -- now a primitive constructor, no longer defeq to `¬(⊤ U ¬·)`). Bridge via
+    -- `limit_satisfies_c4` is stated in the raw `¬(ξ U η)` encoding (`allFuture` is a
+    -- primitive constructor, not defeq to `¬(⊤ U ¬·)`). Bridge via
     -- `mcs_allFuture_iff` to convert the `𝐆(¬utb)` membership above into the raw form.
     have h_mcs_zero := limit_c0 A h_base_mcs 0 h0
     have h_neg_until_g' : (Formula.untl Formula.top utb.neg.neg).neg ∈ limitF A h_base_mcs 0 :=

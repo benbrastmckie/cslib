@@ -223,7 +223,7 @@ inductive Axiom : Formula Atom → Type u where
       Axiom (Formula.untl Formula.bot Formula.top).neg
 
   -- Layer 4: G/H classical-equivalence bridge axioms (4)
-  -- These connect the primitive `allFuture`/`allPast` constructors (task 180)
+  -- These connect the primitive `allFuture`/`allPast` constructors
   -- to the Foundation-level derived encodings `¬F¬φ` / `¬P¬φ`.
 
   /-- G-to-¬F¬ (bridge): allFuture φ → ¬(someFuture (¬φ)).

@@ -103,7 +103,7 @@ noncomputable def tempKDistDerived (φ ψ : Formula Atom) :
         (Axiom.right_mono_until (ψ.neg.imp φ.neg).neg (φ.imp ψ).neg Formula.top) trivial)
       (DerivationTree.temporal_necessitation _ neg_contra)
   have G_contra := contraposition F_step
-  -- G_contra : ⊢ ¬F¬(φ→ψ) → ¬F¬(¬ψ→¬φ). Task 180: F is no longer defeq to ¬G¬, so convert
+  -- G_contra : ⊢ ¬F¬(φ→ψ) → ¬F¬(¬ψ→¬φ). F is not defeq to ¬G¬, so convert
   -- both ends to G-form via the bridge axioms (top-level chain, ordinary transitivity).
   have G_contra' : DerivationTree FrameClass.Base []
       ((φ.imp ψ).allFuture.imp (ψ.neg.imp φ.neg).allFuture) :=

@@ -21,13 +21,13 @@ branch, we can extract a finite Kripke countermodel refuting the formula.
 - `modalTableau_complete`: `modalTableau φ = .openBranch b acc → ¬ kValid φ`.
 - `modalTableau_decides`: `modalTableau φ = .closed ↔ kValid φ`.
 - `modalHintikkaClauseGen`/`_eq`, `modalStepBranchGen_none_saturated`,
-  `modalStepBranchGen_hintikka_inv` (task 510): the `Completeness.lean` half of the generic
+  `modalStepBranchGen_hintikka_inv`: the `Completeness.lean` half of the generic
   Hintikka/saturation chain, generalized over an abstract `apply : RuleApply Atom`. Since this
   file is strictly upstream of `GenericDriver.lean` (via `FmpMeasure.lean`), these `_gen` lemmas
   take **raw** per-field hypotheses (only F8 `localShapeInvariance`) rather than a bundled
   `spec : RuleApplicationSpec apply` argument; `GenericDriver.lean`/`CompletenessLoop.lean`
   callers supply `spec.localShapeInvariance` directly. `hintikka_box_neg_gen`/
-  `hintikka_diamond_pos_gen`: free (no-field) projection bridges for 505/506.
+  `hintikka_diamond_pos_gen`: free (no-field) projection bridges for the B and S4 systems.
 
 ## Strategy
 
@@ -141,7 +141,7 @@ lemma openBranch_noContradiction
         List.any_eq_true.mpr ⟨⟨.neg, φ, w⟩, hneg, by simp⟩
       simp [hany] at hno
 
-/-! ## Per-Rule Semantic Bridge Lemmas (Phase 5b) -/
+/-! ## Per-Rule Semantic Bridge Lemmas -/
 
 omit [Hashable Atom] in
 /-- Box-positive bridge: `T(□ψ)@w ∈ b`, `acc.hasEdge w w' = true`, `modalHintikkaSet b acc`
@@ -214,7 +214,7 @@ lemma hintikka_box_neg
 
 omit [Hashable Atom] in
 /-- Diamond-positive bridge: `T(◇ψ)@w ∈ b` implies `∃ w', acc.hasEdge w w' = true ∧ T(ψ)@w' ∈ b`
-(task 441: `diamond` is now a native, genuinely-firing constructor). This follows directly
+(`diamond` is now a native, genuinely-firing constructor). This follows directly
 from the fourth conjunct of `modalHintikkaSet`. -/
 lemma hintikka_diamond_pos
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -227,7 +227,7 @@ lemma hintikka_diamond_pos
 
 omit [Hashable Atom] in
 /-- Diamond-negative bridge: `F(◇ψ)@w ∈ b`, `acc.hasEdge w w' = true`, `modalHintikkaSet b acc`
-imply `F(ψ)@w' ∈ b` (task 441: `diamondNeg` universal propagation, mirroring `hintikka_box_pos`
+imply `F(ψ)@w' ∈ b` (`diamondNeg` universal propagation, mirroring `hintikka_box_pos`
 since `diamondNeg`'s rule shape -- persistent propagation to all recorded successors -- is
 structurally identical to `boxPos`, just with sign `.neg` and no `boxPositivesOf` indirection).
 
@@ -269,13 +269,13 @@ The truth lemma therefore cannot use uniform implication bridge lemmas; instead 
 induction on `modalComplexity`. The lemmas below provide that reduction. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Inversion: if `modalAndOf? φ` succeeds then `φ` is the native conjunction (task 441). -/
+/-- Inversion: if `modalAndOf? φ` succeeds then `φ` is the native conjunction. -/
 lemma modalAndOf?_eq {φ x y : Proposition Atom} (h : modalAndOf? φ = some (x, y)) :
     φ = .and x y := by
   unfold modalAndOf? at h; split at h <;> simp_all
 
 omit [DecidableEq Atom] [Hashable Atom] in
-/-- Inversion: if `modalOrOf? φ` succeeds then `φ` is the native disjunction (task 441). -/
+/-- Inversion: if `modalOrOf? φ` succeeds then `φ` is the native disjunction. -/
 lemma modalOrOf?_eq {φ x y : Proposition Atom} (h : modalOrOf? φ = some (x, y)) :
     φ = .or x y := by
   unfold modalOrOf? at h; split at h <;> simp_all
@@ -299,7 +299,7 @@ lemma modalNegOf?_eq {φ x : Proposition Atom} (h : modalNegOf? φ = some x) :
     φ = .imp x .bot := by
   unfold modalNegOf? at h; split at h <;> simp_all
 
--- `tryAllPropRules_pos`/`_neg` relocated to `Rules.lean` (task 510): they are entirely generic
+-- `tryAllPropRules_pos`/`_neg` relocated to `Rules.lean`: they are entirely generic
 -- (no `Atom`-specific content) and needed upstream by `Rules.lean`'s Propagating-class shape
 -- lemmas. Reached here transitively (`Completeness → Saturation → Rules`).
 
@@ -373,7 +373,7 @@ lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
 
 /-- Reduction of `modalApplyOne` on a positive conjunction: `andPos` fires directly since
 `modalAndOf?` matches the native `.and` constructor first in `tryAllPropRules`'s priority
-order (task 441: no encoding disambiguation needed). -/
+order (no encoding disambiguation needed). -/
 lemma modalApplyOne_and_pos (φ ψ : Proposition Atom) (w : WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     (modalApplyOne ⟨.pos, .and φ ψ, w⟩ b acc).1 = .linear [⟨.pos, φ, w⟩, ⟨.pos, ψ, w⟩] := by
@@ -416,7 +416,7 @@ lemma modalApplyOne_or_neg (φ ψ : Proposition Atom) (w : WorldIndex)
   rw [modalApplyOne_eq_prop_of_applicable ⟨.neg, .or φ ψ, w⟩ b acc happ, tryAllPropRules_neg]
   simp [modalAndOf?, modalOrOf?]
 
-/-! ## Modal Truth Lemma (Phase 5c) -/
+/-! ## Modal Truth Lemma -/
 
 /-- Modal Truth Lemma: membership in a Hintikka branch tracks satisfaction in the
 extracted Kripke model `extractModel b acc`.
@@ -472,7 +472,7 @@ lemma modalTruthLemma
       refine ⟨fun hmem => absurd hmem (openBranch_noTBot b hH.1 w), ?_⟩
       intro _; exact extractModel_bot_false b acc w
     | imp a c =>
-      -- Task 441: `and`/`or` are native constructors disjoint from `.imp`, so the only
+      -- `and`/`or` are native constructors disjoint from `.imp`, so the only
       -- disambiguation needed is `c = ⊥` (negation) vs `c ≠ ⊥` (proper implication) --
       -- no encoding-priority cascade through andOf?/orOf? is needed any more.
       rcases eq_or_ne c Proposition.bot with rfl | hne
@@ -521,7 +521,7 @@ lemma modalTruthLemma
           exact (IH c (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).2 hymem
             (hsa ((IH a (by rw [← hφ]; simp only [modalComplexity_imp]; omega) w).1 hxmem))
     | and φ' ψ' =>
-      -- andPos/andNeg: native conjunction (task 441), no encoding-priority cascade needed.
+      -- andPos/andNeg: native conjunction, no encoding-priority cascade needed.
       constructor
       · intro hmem
         have hcond := hH.2.1 ⟨.pos, .and φ' ψ', w⟩ hmem
@@ -542,7 +542,7 @@ lemma modalTruthLemma
         · exact absurd hsψ ((IH ψ' (by rw [← hφ]; simp only [modalComplexity_and]; omega) w).2
             (hbr ⟨.neg, ψ', w⟩ (by simp)))
     | or φ' ψ' =>
-      -- orPos/orNeg: native disjunction (task 441), no encoding-priority cascade needed.
+      -- orPos/orNeg: native disjunction, no encoding-priority cascade needed.
       constructor
       · intro hmem
         have hcond := hH.2.1 ⟨.pos, .or φ' ψ', w⟩ hmem
@@ -572,7 +572,7 @@ lemma modalTruthLemma
         obtain ⟨w', hw', hF⟩ := hintikka_box_neg b acc hH ψ w hmem
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').2 hF (hall w' hw')
     | diamond ψ =>
-      -- Task 441: `diamond` is now a native, genuinely-firing constructor (see the historical
+      -- `diamond` is now a native, genuinely-firing constructor (see the historical
       -- note in the `## Saturation Characterisation` section below); bridged via
       -- `hintikka_diamond_pos`/the `diamondNeg` universal-propagation rule.
       constructor
@@ -584,7 +584,7 @@ lemma modalTruthLemma
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
           (hintikka_diamond_neg b acc hH ψ w w' hmem hw') hsψ
 
-/-! ## Open-Branch Countermodel (Phase 5d) -/
+/-! ## Open-Branch Countermodel -/
 
 /-- An open Hintikka branch with `F(φ)@0 ∈ b` yields a Kripke countermodel to `φ`.
 
@@ -597,12 +597,12 @@ theorem modalOpenBranch_countermodel
     ¬ Satisfies (extractModel b acc) 0 φ :=
   (modalTruthLemma b acc hH φ 0).2 hF
 
-/-! ## Saturation Characterisation (Phase 4, task 442)
+/-! ## Saturation Characterisation
 
 Two single-step lemmas about `modalStepBranch`, ported from the classical propositional
 tableau's `classicalStepBranch_none_saturated` / `classicalStepBranch_hintikka_inv`
-(`Classical/Completeness.lean:694,722`), feeding the future top-loop lemma
-`modalExpandBranches_hintikka` (task 442 Phase 5).
+(`Classical/Completeness.lean:694,722`), feeding the top-loop lemma
+`modalExpandBranches_hintikka` (`CompletenessLoop.lean`).
 
 `modalStepBranch_hintikka_inv` is stated against `(modalApplyOne sf b acc).1`, carving out
 `.box _`-shaped formulas (both signs): `boxNeg` (`.neg, .box _`) mints a branch-fresh world
@@ -631,7 +631,7 @@ def modalHintikkaClause (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) : Prop :=
   match φ with
   | .box _ => True
-  | .diamond _ => True  -- task 441: diamondPos also mints a fresh world; see the section note
+  | .diamond _ => True  -- diamondPos also mints a fresh world; see the section note
   | _ =>
     match (modalApplyOne ⟨s, φ, w⟩ X Y).1 with
     | .linear out => ∀ sf' ∈ out, sf' ∈ X
@@ -639,7 +639,7 @@ def modalHintikkaClause (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     | .persistent out => ∀ sf' ∈ out, sf' ∈ X
     | .notApplicable => True
 
-/-- **Generic box-excluded rule-application clause** (task 510): `modalHintikkaClause`,
+/-- **Generic box-excluded rule-application clause**: `modalHintikkaClause`,
 generalized over an abstract `apply : RuleApply Atom`. One-token substitution
 (`modalApplyOne ↦ apply`). Note this carve-out is deliberately **coarser** than
 `modalHintikkaSetGen`'s conjunct 2: vacuous for *any* box/diamond-shaped `φ` (both signs),
@@ -662,7 +662,7 @@ def modalHintikkaClauseGen (apply : RuleApply Atom) (s : Sign) (φ : Proposition
     | .persistent out => ∀ sf' ∈ out, sf' ∈ X
     | .notApplicable => True
 
-/-- Bridge (task 510): `modalHintikkaClause` is exactly `modalHintikkaClauseGen modalApplyOne`.
+/-- Bridge: `modalHintikkaClause` is exactly `modalHintikkaClauseGen modalApplyOne`.
 Closes by `rfl`. -/
 theorem modalHintikkaClause_eq (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
     (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) :
@@ -673,10 +673,10 @@ depend on the branch or accessibility relation. Propositional rules are formula-
 (`modalApplyOne_imp_pos`/`_neg`, `modalApplyOne_and_pos`/`_neg`, `modalApplyOne_or_pos`/`_neg`,
 themselves independent of `b`/`acc`), and `.atom`/`.bot` formulas never match a propositional
 rule nor a modal rule, so `modalApplyOne` returns the constant `.notApplicable` for them
-regardless of `b`/`acc`. Task 441: `diamond` is excluded alongside `box` since `diamondPos`
+regardless of `b`/`acc`. `diamond` is excluded alongside `box` since `diamondPos`
 now genuinely mints a fresh world (`modalNextWorld b`), depending on `b`.
 
-De-privatized (task 510): this is the K discharge for `RuleApplicationSpec`'s F8
+De-privatized: this is the K discharge for `RuleApplicationSpec`'s F8
 `localShapeInvariance` field (`GenericDriver.lean`), which needs to reach this lemma from
 downstream via `modalApplyOne_spec`. -/
 theorem modalApplyOne_fst_eq_of_not_box
@@ -707,7 +707,7 @@ theorem modalApplyOne_fst_eq_of_not_box
   | box ψ => exact absurd rfl (hnb ψ)
   | diamond ψ => exact absurd rfl (hnd ψ)
 
-/-- **Generic lifting lemma** (task 510): `modalHintikkaClauseGen_lift`, taking a raw
+/-- **Generic lifting lemma**: `modalHintikkaClauseGen_lift`, taking a raw
 `hLocalShapeInvariance` hypothesis (`RuleApplicationSpec`'s F8 field, `GenericDriver.lean`) in
 place of the K-specific `modalApplyOne_fst_eq_of_not_box`. Kept as a raw hypothesis rather than a
 bundled `spec` argument: `RuleApplicationSpec` is defined in `GenericDriver.lean`, which imports
@@ -789,7 +789,7 @@ non-`box` `φ`; `box`-shaped `φ` is vacuous on both sides). Used by
 new one, since `modalApplyOne`'s output for non-`box` formulas does not depend on `b`/`acc`
 (`modalApplyOne_fst_eq_of_not_box`), so growing the branch only grows the witness set.
 
-Byte-identical-statement corollary of `modalHintikkaClauseGen_lift` (task 510) via
+Byte-identical-statement corollary of `modalHintikkaClauseGen_lift` via
 `modalHintikkaClause_eq`. -/
 private lemma modalHintikkaClause_lift
     (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
@@ -801,7 +801,7 @@ private lemma modalHintikkaClause_lift
   exact modalHintikkaClauseGen_lift modalApplyOne modalApplyOne_fst_eq_of_not_box s φ w b b'
     acc acc' hsub hInv
 
-/-- **Generic saturated-leaf characterisation** (task 510): `modalStepBranchGen_none_saturated`,
+/-- **Generic saturated-leaf characterisation**: `modalStepBranchGen_none_saturated`,
 generalized over an abstract `apply`. Takes **no** field -- verified rule-agnostic: the proof
 only ever `rcases` on the four `RuleResult` constructor shapes, touching `apply` opaquely.
 Body is `modalStepBranch_none_saturated`'s exact proof with `modalApplyOne ↦ apply` and
@@ -838,7 +838,7 @@ expanded set `e` or has `modalApplyOne` (evaluated at `b`, `acc`) return `notApp
 (the branch is saturated). Port of `classicalStepBranch_none_saturated`
 (`Classical/Completeness.lean:694`), threaded with `acc`.
 
-Byte-identical-statement corollary of `modalStepBranchGen_none_saturated` (task 510) via
+Byte-identical-statement corollary of `modalStepBranchGen_none_saturated` via
 `modalStepBranch_eq`. -/
 lemma modalStepBranch_none_saturated
     {b e : List (SignedFormula (Proposition Atom) WorldIndex)}
@@ -848,13 +848,13 @@ lemma modalStepBranch_none_saturated
     sf ∈ e ∨ (modalApplyOne sf b acc).1 = .notApplicable :=
   modalStepBranchGen_none_saturated modalApplyOne (modalStepBranch_eq b e acc ▸ hstep) sf hsfb
 
-/-- **Generic Hintikka-invariant single-step preservation** (task 510): raw F8
+/-- **Generic Hintikka-invariant single-step preservation**: raw F8
 (`hLocalShapeInvariance`) is its only field input; the rest is driver case-split. Body is
 `modalStepBranch_hintikka_inv`'s exact proof with `modalApplyOne ↦ apply`,
 `modalStepBranch ↦ modalStepBranchGen apply`, and `modalHintikkaClause ↦
 modalHintikkaClauseGen apply` (via `modalHintikkaClauseGen_lift`, fed `hLocalShapeInvariance`
 directly in place of `modalApplyOne_fst_eq_of_not_box`). Public (not `private`, unlike its
-`_lift` helper): the Phase 7 crux (`CompletenessLoop.lean`, task 510) calls this directly with
+`_lift` helper): the composition crux in `CompletenessLoop.lean` calls this directly with
 `spec.localShapeInvariance`. -/
 lemma modalStepBranchGen_hintikka_inv
     (apply : RuleApply Atom)
@@ -986,7 +986,7 @@ re-fires when new successors are added and is never marked expanded
 (`Saturation.lean:116-117`) — so unlike the classical port's `.persistent` case (identical
 to `.linear`), here there is no `sf = sf_exp` sub-case to discharge at all.
 
-Byte-identical-statement corollary of `modalStepBranchGen_hintikka_inv` (task 510) via
+Byte-identical-statement corollary of `modalStepBranchGen_hintikka_inv` via
 `modalStepBranch_eq`/`modalHintikkaClause_eq`. -/
 lemma modalStepBranch_hintikka_inv
     (b e : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -1001,9 +1001,9 @@ lemma modalStepBranch_hintikka_inv
   exact modalStepBranchGen_hintikka_inv modalApplyOne modalApplyOne_fst_eq_of_not_box b e acc
     newBs newExps newAcc (modalStepBranch_eq b e acc ▸ hstep) hInv_b
 
-/-- **Free projection bridge, generic** (task 510): box-negative bridge for `modalHintikkaSetGen`
+/-- **Free projection bridge, generic**: box-negative bridge for `modalHintikkaSetGen`
 -- pure projection of conjunct 3, mentions no `apply`, costs nothing (~6 lines). Delivered for
-505/506 alongside `hintikka_diamond_pos_gen`. -/
+the B and S4 systems alongside `hintikka_diamond_pos_gen`. -/
 lemma hintikka_box_neg_gen
     (apply : RuleApply Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -1014,7 +1014,7 @@ lemma hintikka_box_neg_gen
       (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
   hH.2.2.1 ψ w hmem
 
-/-- **Free projection bridge, generic** (task 510): diamond-positive bridge for
+/-- **Free projection bridge, generic**: diamond-positive bridge for
 `modalHintikkaSetGen` -- pure projection of conjunct 4, mentions no `apply`. -/
 lemma hintikka_diamond_pos_gen
     (apply : RuleApply Atom)

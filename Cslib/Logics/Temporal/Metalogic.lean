@@ -10,6 +10,7 @@ public import Cslib.Logics.Temporal.Metalogic.DerivationTree
 public import Cslib.Logics.Temporal.Metalogic.DeductionTheorem
 public import Cslib.Logics.Temporal.Metalogic.MCS
 public import Cslib.Logics.Temporal.Metalogic.Soundness
+public import Cslib.Logics.Temporal.Metalogic.MetricSoundness
 public import Cslib.Logics.Temporal.Metalogic.CompletenessHelpers
 public import Cslib.Logics.Temporal.Metalogic.Completeness
 public import Cslib.Logics.Temporal.Metalogic.TemporalContent

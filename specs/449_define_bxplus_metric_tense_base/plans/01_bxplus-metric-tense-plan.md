@@ -1,7 +1,7 @@
 # Implementation Plan: BX⁺ metric tense base
 
 - **Task**: 449 - define_bxplus_metric_tense_base
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 4 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_bxplus-metric-tense-survey.md
@@ -196,19 +196,22 @@ one agent run and independently green-committable.
   - `lake build` green; no `sorry`.
   - `soundness_thderivable_metric` and `BXPlusDerivable` type-check over the metric domain.
 
-### Phase 4: Barrel wiring + full CI [NOT STARTED]
+### Phase 4: Barrel wiring + full CI [COMPLETED]
 
 - **Goal:** Wire the new module into the import graph and pass the full zero-debt CI pipeline.
 - **Tasks:**
-  - [ ] Add `public import Cslib.Logics.Temporal.Metalogic.MetricSoundness` to the barrel
+  - [x] Add `public import Cslib.Logics.Temporal.Metalogic.MetricSoundness` to the barrel
     `Cslib/Logics/Temporal/Metalogic.lean`.
-  - [ ] Run `lake exe mk_all --module` to register the new file in `Cslib.lean`.
-  - [ ] Run `lake exe cache get` (if needed), then `lake build`.
-  - [ ] Run `lake exe checkInitImports` — confirm `Cslib.Init` resolves transitively via the import
+  - [x] Run `lake exe mk_all --module` to register the new file in `Cslib.lean`.
+  - [x] Run `lake exe cache get` (if needed), then `lake build`.
+  - [x] Run `lake exe checkInitImports` — confirm `Cslib.Init` resolves transitively via the import
     chain.
-  - [ ] Run `lake lint`, `lake exe lint-style`, and `lake test`; resolve any docBlame /
+  - [x] Run `lake lint`, `lake exe lint-style`, and `lake test`; resolve any docBlame /
     defsWithUnderscore / dupNamespace / simpNF / unusedSectionVars findings (prefix intentionally
-    unused `_h_fc`/variables with `_`).
+    unused `_h_fc`/variables with `_`). Zero findings across all four commands; no resolution
+    needed. `lake shake` also checked (informational, not in this plan's Testing & Validation
+    gate): the four touched files surface only the same pre-existing repo-wide `Cslib.Init`/
+    public-import normalization backlog already present throughout the codebase, not new debt.
 - **Timing:** ~0.5 hour
 - **Depends on:** 3
 - **Files to modify:**
@@ -221,15 +224,17 @@ one agent run and independently green-committable.
 
 ## Testing & Validation
 
-- [ ] `lake build` exits 0 after each phase (green, independently committable).
-- [ ] `lake exe checkInitImports` passes (new module resolves `Cslib.Init`).
-- [ ] `lake lint` passes (docBlame: docstrings on all new declarations; defLemma: soundness results
+- [x] `lake build` exits 0 after each phase (green, independently committable).
+- [x] `lake exe checkInitImports` passes (new module resolves `Cslib.Init`).
+- [x] `lake lint` passes (docBlame: docstrings on all new declarations; defLemma: soundness results
   are `theorem`s).
-- [ ] `lake exe lint-style` passes.
-- [ ] `lake test` passes.
-- [ ] No `sorry` anywhere in the new/edited files (`grep -rn "sorry" Cslib/Logics/Temporal`).
-- [ ] `BXPlusDerivable` is a real `Prop` abbreviation, not a vacuous `def X := True`.
-- [ ] The two exhaustive-match sites (`axiom_sound`, `axiom_sound_dense`) compile with the four new
+- [x] `lake exe lint-style` passes.
+- [x] `lake test` passes.
+- [x] No `sorry` anywhere in the new/edited files (`grep -rn "sorry" Cslib/Logics/Temporal`
+  confirms zero actual `sorry` tactic uses in the whole Temporal tree; the only textual hits are
+  docstring mentions of "sorry-free" in `Tableau/Completeness.lean`, task 425's territory).
+- [x] `BXPlusDerivable` is a real `Prop` abbreviation, not a vacuous `def X := True`.
+- [x] The two exhaustive-match sites (`axiom_sound`, `axiom_sound_dense`) compile with the four new
   absurd cases.
 
 ## Artifacts & Outputs

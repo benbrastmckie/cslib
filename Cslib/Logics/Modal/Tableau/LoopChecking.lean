@@ -6282,6 +6282,129 @@ theorem modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv (φ₀ : Proposition
       · -- notApplicable: impossible, `findSome?` only returns `some` when applicable.
         rw [hres] at hsf; simp at hsf
 
+/-! ## Phase 8: 4-Tuple Stepper Projection Bridge + Local Measure-Split Helpers
+
+The measure-decrease engine (`modalExpMeasure_step_lt_gen`, `FmpMeasure.lean:3227`) is phrased
+against the generic 3-tuple driver `modalStepBranchGen` (`Saturation.lean:122`), whereas the
+keyed S4 driver `modalStepBranchS4Keyed` returns a 4-tuple with `keys'` bolted on. This section
+bridges the two: `modalStepBranchS4Keyed_proj_stepBranchGen` shows a keyed step implies the
+corresponding generic step at `apply := modalApplyOneS4Keyed φ₀ keys`, dropping the `keys'`
+component. Both drivers scan the same branch `b` via `List.findSome?` with the same
+"already expanded" guard and the same four `RuleResult` arms, so this is a structural
+`findSome?`-congruence argument, not a semantic one. -/
+
+/-- **Generic `findSome?` projection helper**: if a list-scan via `g1` (into a 4-tuple type
+`A × B × Accessibility × K`) succeeds pointwise-projecting to a scan via `g2` (into the
+3-tuple `A × B × Accessibility`, dropping the last component whenever `g1` is `some`, and
+agreeing with `g1` on which elements are skipped/`none`), then `g1`'s scan result projects to
+`g2`'s scan result the same way. Purely structural: no reference to any tableau-specific type. -/
+private lemma stepBranch_findSome?_proj4to3
+    {α A B K : Type*}
+    {g1 : α → Option (A × B × Accessibility × K)}
+    {g2 : α → Option (A × B × Accessibility)}
+    (hpt : ∀ (x : α) (a : A) (bb : B) (c : Accessibility) (k : K),
+      g1 x = some (a, bb, c, k) → g2 x = some (a, bb, c))
+    (hnone : ∀ x : α, g1 x = none → g2 x = none) :
+    ∀ (l : List α) (a : A) (bb : B) (c : Accessibility) (k : K),
+      l.findSome? g1 = some (a, bb, c, k) → l.findSome? g2 = some (a, bb, c) := by
+  intro l
+  induction l with
+  | nil => intro a bb c k h; simp at h
+  | cons x rest ih =>
+    intro a bb c k h
+    rw [List.findSome?_cons] at h
+    rw [List.findSome?_cons]
+    cases hg1 : g1 x with
+    | none =>
+      rw [hg1] at h
+      rw [hnone x hg1]
+      exact ih a bb c k h
+    | some v =>
+      rw [hg1] at h
+      simp only [Option.some.injEq] at h
+      have hg1' : g1 x = some (a, bb, c, k) := by rw [hg1, h]
+      rw [hpt x a bb c k hg1']
+
+/-- **The projection lemma (Phase 8)**: a keyed step at `modalStepBranchS4Keyed φ₀ b e acc keys`
+implies the corresponding step of the generic driver at `apply := modalApplyOneS4Keyed φ₀ keys`,
+dropping the `keys'` component. Both sides select the SAME formula `sf` from `b` (same
+"already expanded" guard `e.any (· == sf)`) and dispatch on the SAME `RuleResult` value
+`(modalApplyOneS4Keyed φ₀ keys sf b acc).1`, since `modalStepBranchGen`'s `apply sf b acc` at
+`apply := modalApplyOneS4Keyed φ₀ keys` computes literally the same pair the keyed stepper
+computes internally. -/
+lemma modalStepBranchS4Keyed_proj_stepBranchGen (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) :
+    modalStepBranchGen (modalApplyOneS4Keyed φ₀ keys) b e acc = some (newBs, newExps, newAcc) := by
+  unfold modalStepBranchS4Keyed at hstep
+  unfold modalStepBranchGen
+  refine stepBranch_findSome?_proj4to3 ?_ ?_ b newBs newExps newAcc keys' hstep
+  · -- hpt: pointwise, the keyed inner computation projects to the generic one.
+    intro sf a bb c k h
+    split_ifs at h ⊢ with hexp
+    rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+    rw [hpair] at h
+    rcases hres : result with nf | brs | nf | -
+    · rw [hres] at h
+      simp only [Option.some.injEq, Prod.mk.injEq] at h ⊢
+      obtain ⟨h1, h2, h3, -⟩ := h
+      exact ⟨h1, h2, h3⟩
+    · rw [hres] at h
+      simp only [Option.some.injEq, Prod.mk.injEq] at h ⊢
+      obtain ⟨h1, h2, h3, -⟩ := h
+      exact ⟨h1, h2, h3⟩
+    · rw [hres] at h
+      simp only [Option.some.injEq, Prod.mk.injEq] at h ⊢
+      obtain ⟨h1, h2, h3, -⟩ := h
+      exact ⟨h1, h2, h3⟩
+    · rw [hres] at h; simp at h
+  · -- hnone: pointwise, both drivers skip the same elements.
+    intro sf h
+    split_ifs at h ⊢ with hexp
+    · rfl
+    · rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+      rw [hpair] at h
+      rcases hres : result with nf | brs | nf | -
+      · rw [hres] at h; simp at h
+      · rw [hres] at h; simp at h
+      · rw [hres] at h; simp at h
+      · rfl
+
+omit [Hashable Atom] in
+/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_split`
+(`:3174`), territory-local per Phase 3's own convention (`_S4` suffix) since the upstream
+lemma is `private` and out of territory. Identical proof, universe-generic in `U`. -/
+private lemma modalExpMeasure_split_S4
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (rest : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (restEs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hlen : done.length = doneExp.length) :
+    modalExpMeasure U (done ++ bh :: rest) (doneExp ++ e :: restEs)
+      = modalExpMeasure U done doneExp + 3 ^ modalWork U bh e
+        + modalExpMeasure U rest restEs := by
+  simp only [modalExpMeasure, List.zip_append hlen, List.zip_cons_cons,
+             List.map_append, List.map_cons, List.sum_append, List.sum_cons]
+  omega
+
+omit [Hashable Atom] in
+/-- **Local re-derivation** of `FmpMeasure.lean`'s `private modalExpMeasure_append`
+(`:3191`), territory-local per Phase 3's own convention. Identical proof, universe-generic
+in `U`. -/
+private lemma modalExpMeasure_append_S4
+    (U : List (SignedFormula (Proposition Atom) WorldIndex))
+    (l1 l2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (e1 e2 : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (h : l1.length = e1.length) :
+    modalExpMeasure U (l1 ++ l2) (e1 ++ e2)
+      = modalExpMeasure U l1 e1 + modalExpMeasure U l2 e2 := by
+  simp only [modalExpMeasure, List.zip_append h, List.map_append, List.sum_append]
+
 end Cslib.Logic.Modal.Tableau
 
 end

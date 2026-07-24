@@ -1,7 +1,7 @@
 # Implementation Plan: PTL Temporal Tableau — Completeness Front (bi-lasso FMP), soundness re-scoped
 
 - **Task**: 425 - temporal_tableau_ptl_fmp_decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Effort**: ~15 hours (active Phases 4-7 only; the soundness/decidability deliverable is
   deferred to a separate research task, see "Re-Scope Decision" below)
 - **Dependencies**: Sibling tasks 423, 424 (only for the eventual task-301 registration of
@@ -233,7 +233,7 @@ Phase numbering is kept aligned with plan 03 (Phases 4-7) so the landed spike, t
 handoff continue to refer to the same phase identities. Phases 1-2 are completed assets (above);
 Phases 3 and 8 are deferred (see "Deferred Deliverable").
 
-### Phase 4: Complete the bi-lasso countermodel — extractModelℤPeriodic wired and re-proved [NOT STARTED]
+### Phase 4: Complete the bi-lasso countermodel — extractModelℤPeriodic wired and re-proved [PARTIAL]
 
 **Goal**: Turn the landed Phase-4 spike into the real bi-lasso `extractModelℤ`: derive the loop
 witness from `isSubsetBlocked`, add the backward past-tail reduction, wire the periodic model in at
@@ -241,48 +241,93 @@ real call sites, add the complete-Hintikka-time-type helper, and re-prove the `e
 property lemmas. This is the crux (report 01 §4, report 02 Finding 4) and the schedule risk.
 
 **Tasks**:
-- [ ] **(4a) Loop-witness extraction.** Add a helper that, from a genuine `isSubsetBlocked b t_new
-  t_anc = true` witness, recovers the ancestor pair `(t_anc, t_new : TimeIndex)` as actual branch
-  labels and establishes `hL : ord.instant t_anc < ord.instant t_new` via `InstantStrict` /
-  `temporalTableau_instantStrict` (`Saturation.lean`). This replaces the spike's free
-  `instAnc`/`instNew`/`hL` parameters with tableau-derived values. Spike the extraction against one
-  concrete witness first (verify `isSubsetBlocked`'s exact signature at `Branch.lean:120-123`).
-- [ ] **(4b) Backward past-tail reduction.** Add `periodicReduce`'s symmetric past-tail analogue
-  (fold instants below `instAnc` back into the loop window) so the model is a full bi-lasso
-  (periodic past + finite middle + periodic future), mirroring `periodicReduce` /
-  `periodicReduce_mem_Ico_of_gt` with a `toIcoMod`-based past fold.
-- [ ] **(4c) Wire and re-prove.** Redefine `extractModelℤ` (`Completeness.lean:142`) to route
-  interior-populated instants to their branch time-type and all other instants to the
-  periodically-reduced loop-body time-type — i.e. make `extractModelℤPeriodic` the real
-  `extractModelℤ` at call sites, not a parallel definition. Re-prove `extractModelℤ_atom_sat_iff`,
-  `extractModelℤ_atomPos_sat`, `extractModelℤ_bot_false`, `extractModelℤ_atom_neg_notSat`,
-  `openBranch_noBotPos`, `openBranch_noContradiction` (`Completeness.lean:99-360`) against the new
-  definition; the spike's three `extractModelℤPeriodic_*` lemmas plus the `Nat`-model versions
-  transfer.
-- [ ] **(4d) Complete-Hintikka-time-type helper.** Add and prove "every ℤ-instant carries a
-  complete Hintikka time-type" (report 01 §8.3): confirm `temporalHintikkaSet` saturation + G/H
-  persistence force the guard onto every intermediate loop instant. This is the guard-between
-  obligation Phases 5-6 consume.
-- [ ] `lake build Cslib.Logics.Temporal.Tableau.Completeness` green (scoped); `lean_verify` reports
-  no `sorryAx` / no new axioms on every new/redefined declaration.
+- [x] **(4a) Loop-witness extraction.** *(deviation: altered — landed the provable **conversion**
+  half only: `instantStrict_constraint_lt` derives `hL : ord.instant t_anc < ord.instant t_new`
+  from `InstantStrict ord` plus a recorded constraint edge `(t_anc, t_new) ∈ ord.constraints`,
+  replacing the spike's free `hL` parameter with a tableau-derived value wherever such an edge is
+  in hand. The **existence** half — recovering such an edge/witness from a genuine
+  `isSubsetBlocked` fact for an *arbitrary* `temporalTableau φ = .openBranch b ord` result — is
+  NOT provable as originally scoped; see the BLOCKER below. `isSubsetBlocked`'s signature at
+  `Branch.lean:120-123` was verified as part of this trace.)*
+- [x] **(4b) Backward past-tail reduction.** Landed in full: `periodicReducePast` +
+  `periodicReducePast_mem_Ico_of_lt` (mirroring `periodicReduce`/`periodicReduce_mem_Ico_of_gt`
+  exactly via the same `toIcoMod` formula with the guard direction flipped), plus
+  `extractModelℤPeriodicPast` and its three property lemmas (`extractModelℤPeriodicPast_atom_sat_iff_of_ge`,
+  `extractModelℤPeriodicPast_atomPos_sat_of_ge`, `extractModelℤPeriodicPast_bot_false`), mirroring
+  the forward spike's `extractModelℤPeriodic` + 3 lemmas. `lean_verify`: only
+  `propext`/`Classical.choice`/`Quot.sound` (forward-reduction file average; the new past-tail
+  declarations themselves introduce no axioms beyond Lean's core three).
+- [ ] **(4c) Wire and re-prove.** *(deviation: skipped — BLOCKED. Requires the existence half of
+  4a, which is not available; see BLOCKER below. `extractModelℤ` remains the pre-existing "island"
+  definition; `extractModelℤPeriodic`/`extractModelℤPeriodicPast` remain parallel, spike-level
+  definitions parameterized by explicit loop witnesses, not wired in as call-site replacements.)*
+- [ ] **(4d) Complete-Hintikka-time-type helper.** *(deviation: skipped — depends on (4c); not
+  attempted.)*
+- [x] `lake build Cslib.Logics.Temporal.Tableau.Completeness` green (scoped, verified); `lean_verify`
+  reports no `sorryAx` / no new axioms on every new declaration landed this round
+  (`periodicReducePast`, `periodicReducePast_mem_Ico_of_lt`, `extractModelℤPeriodicPast` + its 3
+  property lemmas, `instantStrict_constraint_lt`).
 
-**Timing**: ~5 hours (largest phase; schedule risk)
+**BLOCKER** (Phase 4, sub-items 4c/4d and therefore Phases 5-7):
+- **What failed**: Deriving a genuine `isSubsetBlocked`-backed loop witness `(t_anc, t_new)` for an
+  *arbitrary* branch `b`/`ord` returned by `temporalTableau φ = .openBranch b ord` (the premise
+  Phase 4c's wiring and Phases 5-7 all depend on).
+- **What was tried**: Traced the full call graph of `isTemporalClosed` /
+  `findEventualityDefect` / `findBlockedTime` / `isTemporallyBlocked` / `isSubsetBlocked`
+  (`Closure.lean`, `Branch.lean`) against `temporalStepBranch`/`processNext`/`temporalExpandBranches`
+  (`Saturation.lean`) to find where a genuine subset-blocked ancestor pair could be extracted from
+  an open-branch result.
+- **Why it's stuck**: Two compounding structural facts, precisely documented in
+  `Completeness.lean`'s module docstring ("Blocked (FMP Existence Argument)" section, items 2-3):
+  (1) `isTemporalClosed` is re-checked at *every* worklist step, so a branch whose content ever
+  satisfies `isSubsetBlocked` with a still-pending eventuality closes immediately — it can never
+  survive to be returned open with that witness intact; consequently a *genuinely-saturated* open
+  branch (`temporalStepBranch = none`) always has an *empty* eventuality tracker (the plain island
+  model already suffices for it, no periodic construction needed). (2) The periodic construction
+  is therefore only relevant for *fuel-exhausted* open branches (`temporalExpandBranches`'s `fuel =
+  0` fallback), for which no internal `isSubsetBlocked` witness may exist at all at the moment fuel
+  runs out — proving one exists in general requires an independent, unformalized
+  **fuel-sufficiency/pigeonhole theorem** (that `temporalFuel`'s `2^n`-distinct-time-types bound
+  guarantees blocking must already have triggered before fuel exhausts whenever pending
+  eventualities remain). A secondary finding sharpens this: `temporalStepBranch`'s `.branching`
+  arm (used by `untlPos`/`sncePos`/all branching rules) passes `tracker` through unchanged, so a
+  positive Until/Since formula's primary recurring copy is never itself registered into
+  `EventualityTracker.pending` by that call site — `tracker.hasPending` may not even reflect the
+  right fact for the pigeonhole argument to consume.
+- **What is needed**: A dedicated research pass to (a) confirm/refute the fuel-sufficiency
+  theorem's provability and estimate its size, (b) decide whether `EventualityTracker` registration
+  needs to be extended to `.branching` outputs first, and (c) re-scope Phases 4c/4d/5/6/7
+  accordingly (likely as a further plan revision, mirroring how plan 03's Phase 3 blocker drove
+  this round's re-scope).
+- **Prohibited workarounds**: No `sorry`, no `def X := True` or vacuous placeholder, no axiom, no
+  silent narrowing of `openBranch_branchSat`'s statement to dodge the gap. None were used.
+
+**Timing**: ~5 hours budgeted; spent on the tractable 4a-conversion/4b full landing plus the
+BLOCKER trace above; 4c/4d not attempted per the trace's outcome.
 
 **Depends on**: Phase 1 (completed asset)
 
 **Files to modify**:
-- `Cslib/Logics/Temporal/Tableau/Completeness.lean` — loop-witness extraction, backward reduction,
-  redefined `extractModelℤ` + re-proved property lemmas, Hintikka-time-type helper.
+- `Cslib/Logics/Temporal/Tableau/Completeness.lean` — backward reduction (landed), loop-witness
+  conversion helper (landed), updated module docstring documenting the existence gap. Redefined
+  `extractModelℤ` + Hintikka-time-type helper NOT landed (blocked).
 
 **Verification**:
-- Scoped `lake build Cslib.Logics.Temporal.Tableau.Completeness` succeeds.
-- `lean_verify` reports no `sorryAx` / no new axioms.
-- `extractModelℤPeriodic` is the definition actually used by `extractModelℤ` call sites (no
-  orphaned parallel definition).
+- Scoped `lake build Cslib.Logics.Temporal.Tableau.Completeness` succeeds (verified).
+- `lean_verify` reports no `sorryAx` / no new axioms on every new declaration (verified).
+- `extractModelℤPeriodic` is **not** yet the definition used by `extractModelℤ` call sites (blocked
+  — see BLOCKER above); this criterion is unmet by design pending the fuel-sufficiency research.
 
 ---
 
-### Phase 5: Until truth lemma — temporalTruthLemma_untl [NOT STARTED]
+### Phase 5: Until truth lemma — temporalTruthLemma_untl [BLOCKED]
+
+**Blocked by**: Phase 4's 4c/4d BLOCKER above — the periodic model this phase needs to consume is
+not wired in as the real `extractModelℤ`, and the "guard-between" obligation (4d) it also needs is
+not yet proved. Not attempted this round; no vacuous placeholder introduced.
+
+<!-- Original phase text preserved below for the eventual follow-on plan. -->
+
 
 **Goal**: Prove `temporalTruthLemma_untl` over the Phase-4 bi-lasso model: `T(U(g,e))@t` on an open
 branch is satisfied in the countermodel at `D := ℤ`.
@@ -312,7 +357,12 @@ branch is satisfied in the countermodel at `D := ℤ`.
 
 ---
 
-### Phase 6: Since truth lemma — temporalTruthLemma_snce [NOT STARTED]
+### Phase 6: Since truth lemma — temporalTruthLemma_snce [BLOCKED]
+
+**Blocked by**: Phase 5 (chained) and Phase 4's 4c/4d BLOCKER. Not attempted this round.
+
+<!-- Original phase text preserved below for the eventual follow-on plan. -->
+
 
 **Goal**: Prove `temporalTruthLemma_snce` (past direction), ideally as a corollary of Phase 5 via
 the `swapTemporal` duality rather than a full symmetric re-proof.
@@ -340,7 +390,13 @@ the `swapTemporal` duality rather than a full symmetric re-proof.
 
 ---
 
-### Phase 7: Assemble completeness — openBranch_branchSat and temporalTableau_complete [NOT STARTED]
+### Phase 7: Assemble completeness — openBranch_branchSat and temporalTableau_complete [BLOCKED]
+
+**Blocked by**: Phases 5 and 6 (chained) and Phase 4's 4c/4d BLOCKER. Not attempted this round.
+This is this plan's terminus and was not reached.
+
+<!-- Original phase text preserved below for the eventual follow-on plan. -->
+
 
 **Goal**: Combine the full truth lemma (propositional + untl + snce) with the already-landed
 order-preservation (`temporalTableau_instantStrict`) to prove `openBranch_branchSat` at `D := ℤ`,

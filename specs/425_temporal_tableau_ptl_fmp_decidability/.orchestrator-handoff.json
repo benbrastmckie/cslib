@@ -2,39 +2,42 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Completed Phases 1-2 of 8 (satisfiableDiscrete/branchSat discrete restriction/references; TrackerBranchFaithful run-level invariant), both verified zero-debt and committed. Phase 3 (eventualityDefect_unsat) blocked: careful analysis found the report-02 pigeonhole sketch does not close -- branchSat's existential model is not constrained by the tableau's own procedural bookkeeping. Phase 4 (bi-lasso extractModelℤ) spiked and confirmed tractable (periodicReduce via Mathlib toIcoMod, 3 property lemmas) but not completed. Phases 5-8 not started.",
+  "summary": "Plan v04 scoped Phases 4-7 (bi-lasso completeness front); Phases 1-2 preserved, Phase 3/8 deferred to a separate soundness research task per the plan's own re-scope decision (not a partial outcome by itself). This dispatch: Phase 4 landed its tractable sub-items zero-debt and verified (4a's conversion half -- instantStrict_constraint_lt -- and 4b in full -- periodicReducePast + property lemma, extractModelZPeriodicPast + 3 property lemmas). Phase 4c/4d (wiring the periodic model in as the real extractModelZ) hit a genuine structural gap: tracing isTemporalClosed/findEventualityDefect/findBlockedTime/isSubsetBlocked against temporalStepBranch/processNext found that (a) genuinely-saturated open branches always have an empty eventuality tracker (island model already suffices, no periodic construction needed), and (b) fuel-exhausted open branches -- the only case that DOES need the periodic construction -- may carry no isSubsetBlocked witness at all among their own labels, requiring an unformalized fuel-sufficiency/pigeonhole theorem to rule out. Phases 5,6,7 chain from 4c/4d and could not proceed. Full trace recorded in Completeness.lean's module docstring and the plan file.",
   "artifacts": [
-    {"type": "summary", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/03_ptl-fmp-validity-corrected-summary.md"}
+    {"type": "summary", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/04_completeness-front-rescope-summary.md"},
+    {"type": "plan", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/04_completeness-front-rescope.md"}
   ],
   "blockers": [
     {
-      "description": "Phase 3 eventualityDefect_unsat (branchSat b ord -> False given findEventualityDefect = some t and TrackerBranchFaithful) appears unprovable as specified: a duplicated pending Until/Since formula at two branch labels gives two independent existential witnesses in any model, with nothing tying them together. Needs either a run-level model-guided contrapositive induction (much larger than the ~4h estimate) or further research identifying a missing semantic ingredient. Full analysis in plan file under Phase 3's [BLOCKED] heading.",
-      "phase": "phase-3",
+      "description": "Phase 4c/4d cannot generically derive a loop witness (t_anc, t_new) satisfying isSubsetBlocked from an arbitrary temporalTableau openBranch result. Genuinely-saturated open branches always have empty pending trackers (no periodic model needed); fuel-exhausted open branches (the case that DOES need it) may have no internal isSubsetBlocked witness at all, requiring an unformalized fuel-sufficiency/pigeonhole theorem (temporalFuel's 2^n-distinct-time-types bound guarantees blocking triggers before fuel exhausts) that is not yet present anywhere in the codebase. Secondary finding: temporalStepBranch's .branching arm passes EventualityTracker through unchanged, so untlPos/sncePos's primary recurring copy is never registered as pending by that call site either. Full trace in Completeness.lean module docstring ('Blocked (FMP Existence Argument)') and the plan file's Phase 4 BLOCKER writeup.",
+      "phase": "phase-4",
       "severity": "hard"
     }
   ],
-  "next_action_hint": "revise",
+  "next_action_hint": "spawn",
   "files_modified": [
-    "Cslib/Logics/Temporal/Semantics/Validity.lean",
-    "Cslib/Logics/Temporal/Tableau/Soundness.lean",
-    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
     "Cslib/Logics/Temporal/Tableau/Completeness.lean",
-    "references.bib",
-    "specs/425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md"
+    "specs/425_temporal_tableau_ptl_fmp_decidability/plans/04_completeness-front-rescope.md",
+    "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/04_completeness-front-rescope-summary.md"
   ],
   "decisions_made": [
-    "branchSat's discrete-serial restriction (Phase 1) is sound and does not affect classicallyClosed_unsat",
-    "TrackerBranchFaithful needs only branch-membership (not the isUntl-shape conjunct sketched in the plan)",
-    "Phases 4-7 do not depend on Phase 3 per the plan's own wave table, so completeness-side work continued despite the Phase 3 block",
-    "Mathlib's toIcoMod (Mathlib.Algebra.Order.ToIntervalMod) is the right tool for the bi-lasso periodic reduction"
+    "Landed Phase 4a's conversion half only (instantStrict_constraint_lt) rather than a full but weaker/narrowed existence claim -- the existence half genuinely does not hold as stated, so it is documented as a blocker rather than papered over with a restricted hypothesis.",
+    "Phase 4b (backward past-tail reduction) landed in full since it is mechanically independent of the existence-gap: mirrors the already-spiked forward periodicReduce exactly.",
+    "Did not attempt the Fin-indexed cyclic-quotient fallback (report 02 recs.7) in this dispatch -- it requires its own scoping pass against the newly landed periodic-reduction assets and was judged out of reasonable bounded effort for this dispatch; recommended as a next-step option alongside the fuel-sufficiency research route.",
+    "Confirmed bare lake build/lint/checkInitImports remain red on the unrelated concurrent task 535 (Cslib/Logics/Modal/Tableau/LoopChecking.lean) -- not gated on, per delegation instructions; used scoped lake build Cslib.Logics.Temporal.Tableau.Completeness throughout."
   ],
   "dead_ends": [
-    "eventualityDefect_unsat as a local two-point (t, t_anc) fact about branchSat alone -- semantically unconstrained, does not derive a contradiction"
+    "Deriving isSubsetBlocked existence generically from ancestorTimes (Branch.lean) membership: ancestorTimes is a bidirectional (predecessor+successor) transitive closure over ord.constraints, so t_anc in ancestorTimes ord t carries no guaranteed direction/order relative to t -- InstantStrict alone cannot convert an arbitrary ancestorTimes membership into a strict hL without also knowing which direction the traversal took.",
+    "Assuming genuine saturation (temporalStepBranch = none) can occur with nonempty pending eventualities: ruled out, since a live Until/Since branching copy would still be expandable, so full saturation forces an empty tracker (the periodic construction is not needed there at all)."
   ],
   "continuation_context": {
-    "phases_completed": 2,
-    "phases_total": 8,
-    "orchestrator_mode": true
+    "phases_completed": 0,
+    "phases_partial": 1,
+    "phases_blocked": 3,
+    "phases_total": 4,
+    "phase_labels": ["4", "5", "6", "7"],
+    "orchestrator_mode": true,
+    "deferred_scope_note": "Plan-03 Phase 3 (eventualityDefect_unsat/temporalTableau_sound) and Phase 8 (instDecidableValid) remain deferred to a separate soundness research task per plan v04's own Re-Scope Decision -- this deferral is by design, not part of this dispatch's partial outcome, and was correctly out of scope for this dispatch (not attempted, per explicit instruction)."
   },
   "plan_markers_verified": true
 }

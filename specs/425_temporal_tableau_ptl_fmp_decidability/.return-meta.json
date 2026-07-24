@@ -1,18 +1,35 @@
 {
-  "status": "planned",
-  "artifacts": [{
-    "type": "plan",
-    "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/04_completeness-front-rescope.md",
-    "summary": "Plan v4: restructures the unblocked completeness front (bi-lasso FMP, Phases 4-7) first; re-scopes the blocked soundness half + decidability instance (Phases 3, 8) out to a separate research task with an exact open goal (Option B)."
-  }],
-  "next_steps": "Run /implement 425 to execute Phases 4-7 (bi-lasso completeness). Separately, spawn a soundness research task carrying the 'Deferred Deliverable' open goal before the decidability instance can be planned.",
+  "status": "partial",
+  "requires_user_review": true,
+  "review_reason": "Phase 4's 4c/4d (wiring the bi-lasso extractModelZ in as the real countermodel) hit a genuine structural gap: the loop-witness derivation from a genuine isSubsetBlocked fact does not hold generically for an arbitrary open branch, requiring an unformalized fuel-sufficiency/pigeonhole theorem. Phases 5-7 chain from 4c/4d and could not proceed. Full trace in Completeness.lean's module docstring and the plan file's Phase 4 BLOCKER writeup.",
+  "started_at": "2026-07-24T00:00:00Z",
+  "artifacts": [
+    {"type": "summary", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/04_completeness-front-rescope-summary.md"},
+    {"type": "plan", "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/04_completeness-front-rescope.md"}
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count_new": 0,
+    "build_passed": true,
+    "build_scope": "Cslib.Logics.Temporal.Tableau.Completeness (scoped; bare lake build/lint/checkInitImports confirmed red on unrelated concurrent Cslib/Logics/Modal/Tableau/LoopChecking.lean, task 535 territory, not gated on per delegation instructions)",
+    "ci_pipeline_passed": "partial (scoped build + lint-style green; full lake lint/checkInitImports/shake/mk_all/test not runnable due to unrelated concurrent breakage)"
+  },
+  "partial_progress": {
+    "stage": "phase-4-partial-phases-5-7-blocked",
+    "details": "Phase 4: landed 4a's conversion half (instantStrict_constraint_lt) and 4b in full (periodicReducePast + property lemma, extractModelZPeriodicPast + 3 property lemmas), zero-debt, verified. 4c/4d blocked on the existence-half gap. Phases 5,6,7 blocked (chained). Phases 1-2 (prior rounds) and Phase 3/8 (out of scope, deferred) untouched.",
+    "phases_completed": 0,
+    "phases_partial": 1,
+    "phases_blocked": 3,
+    "lint_count_start": null,
+    "lint_count_current": null
+  },
   "metadata": {
     "session_id": "sess_1784905751_756cda_425",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "reviser-agent"],
-    "phase_count": 4,
-    "estimated_hours": 15,
-    "reports_integrated": ["02_validity-notion-fmp-grounding.md"],
-    "rescope_decision": "Option B — soundness (Phase 3) + decidability instance (Phase 8) deferred to a new research task; this plan's terminus is temporalTableau_complete (Phase 7)."
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 3,
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"],
+    "compliance_check": "passed"
   }
 }

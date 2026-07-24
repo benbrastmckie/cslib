@@ -109,26 +109,26 @@ so they cannot overlap.
 
 ---
 
-### Phase 1: Generic FragmentConservativity core [IN PROGRESS]
+### Phase 1: Generic FragmentConservativity core [COMPLETED]
 
 **Goal**: Create the thin generic core file holding the `structure FragmentConservativity`, the three
 generic derived theorems, and the relocated generic combinators — with the tree still green.
 
 **Tasks**:
-- [ ] Create `Cslib/Logics/Propositional/Semantics/Algebra/FragmentConservativity.lean` with the
+- [x] Create `Cslib/Logics/Propositional/Semantics/Algebra/FragmentConservativity.lean` with the
       module-system header copied from `CanAlgComplete.lean` (`import Cslib.Init`, `public import`s,
       `@[expose] public section`).
-- [ ] Define `structure FragmentConservativity {Atom} (P : Proposition Atom → Bool)` with fields
+- [x] Define `structure FragmentConservativity {Atom} (P : Proposition Atom → Bool)` with fields
       `Ax`, `hard`, `sub` (per report §3.2), carrying `universe u` and pinning `Atom`/algebra levels.
       Docstring the structure and every field (docBlame).
-- [ ] Relocate the generic combinators `liftDerivationTree` and `derivable_mono` from
+- [x] Relocate the generic combinators `liftDerivationTree` and `derivable_mono` from
       `ConjImpConservative.lean` into this core (leave a transitional re-export if any sibling still
       references them by the old path).
-- [ ] Derive the three generic theorems from the structure:
+- [x] Derive the three generic theorems from the structure:
       `fragmentConservativity_derivableOfDerivableInt` (from `sub` via `derivable_mono`),
       `fragmentConservativity_iff` (bundle of `hard` + the above),
       `fragmentConservativity_nd` (ND corollary via `derivableInIplIffDerivableInt`).
-- [ ] Run `lake exe mk_all --module` to add the new file to the barrel.
+- [x] Run `lake exe mk_all --module` to add the new file to the barrel.
 
 **Timing**: ~1.5 hours
 
@@ -145,28 +145,32 @@ generic derived theorems, and the relocated generic combinators — with the tre
 
 ---
 
-### Phase 2: Four fragment instances [NOT STARTED]
+### Phase 2: Four fragment instances [COMPLETED]
 
 **Goal**: Provide the four `def` instances of `FragmentConservativity`, each reusing its retained
 hard-direction proof verbatim.
 
 **Tasks**:
-- [ ] Decide file placement (committed design: two-file split — put instances in a sibling
+- [x] Decide file placement (committed design: two-file split — put instances in a sibling
       `FragmentConservativityInstances.lean` importing the core plus the union of fragment machinery;
       fall back to appending into the core only if the import surface proves manageable).
-- [ ] `fragmentConservativityConjImp` (`IsOrBotFree`/`ConjImpAxiom`): reuse the
+- [x] `fragmentConservativityConjImp` (`IsOrBotFree`/`ConjImpAxiom`): reuse the
       `IPL.hilbert_alg_complete` -> `LowerSet B` Heyting -> `brouwerianEmbeddingLemma` ->
       `conjImp_brouwerian_complete` hard direction verbatim; trivial `sub`.
-- [ ] `fragmentConservativityImp` (`IsImpTopOnly`/`ImpAxiom`): reuse the ConjImp +
+- [x] `fragmentConservativityImp` (`IsImpTopOnly`/`ImpAxiom`): reuse the ConjImp +
       `FreeMeetExtension` free BSL + `freeMeetEvaluateEq` + `imp_hilbert_complete` route verbatim.
-- [ ] `fragmentConservativityConjImpBot` (`IsOrFree`/`ConjImpBotAxiom`): reuse the
+- [x] `fragmentConservativityConjImpBot` (`IsOrFree`/`ConjImpBotAxiom`): reuse the
       `NonemptyLowerSet` Heyting + `nonemptyLowerSet_evaluate_commutes` +
       `conjImpBot_pointedBrouwerian_complete` route verbatim.
-- [ ] `fragmentConservativityOrImp` (`IsAndBotFree`/`OrImpAxiom`): reuse the sequent-calculus
+- [x] `fragmentConservativityOrImp` (`IsAndBotFree`/`OrImpAxiom`): reuse the sequent-calculus
       `hilbert_iff_lj` -> `LJProof.cutElim` -> `cutFreeLJ_toOrImp` route verbatim (the non-algebraic
       one out — keep as-is).
-- [ ] Wrap instances in an explicit namespace; `def` (data) not `theorem`; docstring each.
-- [ ] Refresh barrel if a new file was added.
+- [x] Wrap instances in an explicit namespace; `def` (data) not `theorem`; docstring each.
+- [x] Refresh barrel if a new file was added.
+- [x] *(deviation: altered -- the re-homed 4×3 boilerplate theorems are NOT defined in this file
+      in Phase 2 as originally scoped; they are deferred to Phase 3, defined atomically together
+      with removing their bespoke bodies from the four per-fragment files, to avoid a
+      duplicate-declaration name clash. The four instances alone are complete and green here.)*
 
 **Timing**: ~2 hours
 

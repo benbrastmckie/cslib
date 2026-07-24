@@ -4,14 +4,19 @@
   "requires_user_review": false,
   "artifacts": [
     {
+      "type": "summary",
+      "path": "specs/542_strip_task_provenance_stale_claims_docstrings/summaries/01_strip-provenance-docstrings-summary.md",
+      "summary": "Phases 1-2 complete (four specific items; full Modal/Tableau completeness/loop cluster)"
+    },
+    {
       "type": "handoff",
       "path": "specs/542_strip_task_provenance_stale_claims_docstrings/handoffs/02_phase2-complete-handoff.md",
-      "summary": "Phase 2 complete; continuation context for Phase 3 onward"
+      "summary": "Continuation context for Phase 3 onward"
     }
   ],
   "partial_progress": {
     "stage": "phase_2_complete",
-    "details": "Phase 1 complete (commit 040d47e3). Phase 2 complete: FrameCompleteness.lean (3a0d6552), CompletenessLoop.lean (2f93962a), LoopChecking.lean (8d1d66ac), Completeness.lean Modal (bb979e4c), LoopInduction.lean (uncommitted separately, folded into plan-marker commit). Phases 3-8 not started.",
+    "details": "Phase 1 complete (commit 040d47e3, prior session). Phase 2 complete: FrameCompleteness.lean (3a0d6552, prior session), CompletenessLoop.lean (2f93962a), LoopChecking.lean (8d1d66ac), Completeness.lean Modal (bb979e4c), LoopInduction.lean (folded into d7d2f6c9). Phases 3-8 not started.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 2,

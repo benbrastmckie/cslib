@@ -1,9 +1,9 @@
 # Implementation Summary: Strip Task/Phase Provenance and Stale Claims from Logic-Tree Docstrings
 
 - **Task**: 542 - strip_task_provenance_stale_claims_docstrings
-- **Status**: [PARTIAL] — Phase 1 complete, Phase 2 in progress (1 of ~5-6 files)
+- **Status**: [PARTIAL] — Phases 1-2 complete, Phases 3-8 not started
 - **Plan**: plans/01_strip-provenance-docstrings.md
-- **Handoff**: handoffs/01_phase2-partial-handoff.md
+- **Handoff**: handoffs/02_phase2-complete-handoff.md
 
 ## What Was Done
 
@@ -30,7 +30,7 @@
 All four modules build clean (`lake build`); zero live `sorry` tokens confirmed by grep +
 manual inspection of every hit.
 
-### Phase 2: Modal/Tableau — Completeness/Loop Cluster — PARTIAL
+### Phase 2: Modal/Tableau — Completeness/Loop Cluster — COMPLETE
 Completed `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (4,172 lines, 103 provenance
 hits — the single heaviest file in the entire task scope). This file used "Phase N" pervasively
 as an internal, de facto section-numbering device (not just external task citations), so the
@@ -42,23 +42,41 @@ before rewriting). The KB5 section's "retired frozen root-gated rule" counterexa
 documentation was preserved verbatim — it is genuine, explicitly-flagged design documentation,
 not development-history clutter.
 
-`lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` succeeds; zero live `sorry` (one
-correct "sorry-free" prose mention retained).
+Also completed this session:
+- `CompletenessLoop.lean` (2,302 lines, 69 hits): recurring "task 515 Phase N" cross-references
+  dropped or rewritten to "above"/"below"; two ephemeral audit-report-filename citations
+  (`06_k-aux-unprovability-audit.md`) rewritten to describe the audit's finding directly; bare
+  task-number citations without the word "task" ("503 (T), 505 (B), 506 (S4)") reworded to name
+  the systems directly.
+- `LoopChecking.lean` (4,658 lines, 72 hits — the heaviest remaining file in the task):
+  pervasive "task 511 Phase N" citations stripped; two "dispatch"-narrative blocks (describing
+  progress "across dispatches 2-5"/"an earlier dispatch's continuation note") rewritten as
+  current-state descriptions rather than development history; one literal `` `[COMPLETED]` ``
+  phase-status marker embedded in a proof comment, and one "a literal reading of the plan"
+  reference, both removed.
+- `Completeness.lean` (Modal, 1,031 lines, 32 hits, distinct from the Temporal file done in
+  Phase 1): task/phase provenance stripped, including a bare "for 505/506" reworded to "for the
+  B and S4 systems".
+- `LoopInduction.lean` (2 hits): dropped a `(task 404)` citation from an otherwise-legitimate
+  design note about superseded helper lemmas.
 
-**Remaining in Phase 2** (not yet started this session): `CompletenessLoop.lean` (~69-73 hits),
-`LoopChecking.lean` (~72 hits), Modal `Completeness.lean` (~32 hits), and the unassigned small
-Tableau files. See the handoff document for the full continuation plan.
+All five files build clean (`lake build`, scoped per module); zero live `sorry` (one correct
+"zero sorry" prose mention retained in `LoopChecking.lean`). The small driver/infrastructure
+files `TDriver.lean`/`BDriver.lean`/`Defs.lean`/`Rules.lean`/`SoundnessStep.lean`/
+`Soundness.lean`/`Saturation.lean` were deliberately left unclaimed for Phase 3 per the
+continuation handoff's own file-ownership recommendation.
 
 ## What Remains
 
-Phases 2 (rest), 3, 4, 5, 6, 7, 8 are outstanding. This covers the bulk of the ~1,299-line,
-~163-file provenance sweep: the rest of Modal/Tableau, all of Modal/Metalogic/Constructive, the
-Modal/Metalogic remainder + ProofSystem, Propositional/Temporal remainder, Bimodal +
-Foundations/Logic + the concentrated §4.3 judgment review, and the final whole-tree CI gate
-(Phase 8). See `handoffs/01_phase2-partial-handoff.md` for full continuation context, including
-the specific methodology notes for handling the pervasive internal "Phase N" cross-reference
-pattern found in `FrameCompleteness.lean` (and expected to recur in the remaining
-Modal/Tableau and Modal/Metalogic/Constructive files).
+Phases 3, 4, 5, 6, 7, 8 are outstanding. This covers the bulk of the ~1,299-line,
+~163-file provenance sweep: the rest of Modal/Tableau (soundness/measure/simplification
+cluster), all of Modal/Metalogic/Constructive, the Modal/Metalogic remainder + ProofSystem,
+Propositional/Temporal remainder, Bimodal + Foundations/Logic + the concentrated §4.3 judgment
+review, and the final whole-tree CI gate (Phase 8). See
+`handoffs/02_phase2-complete-handoff.md` for full continuation context, including methodology
+notes for the pervasive internal "Phase N" cross-reference pattern, bare task-number citations
+without the word "task", and "dispatch"-history narrative — all three patterns are expected to
+recur in the remaining Modal/Tableau and Modal/Metalogic/Constructive files.
 
 ## Plan Deviations
 
@@ -67,28 +85,32 @@ Modal/Tableau and Modal/Metalogic/Constructive files).
   Results"/"Blocked Obligations"/"Time-Ordering Invariant" sections in addition to the
   plan-specified carcass-block replacement, since this file has no other owning phase and
   leaving residual provenance there would have gone unaddressed by any later phase.
-- **No other deviations.** All Phase 1 checklist items were completed exactly as specified.
-  Phase 2 was not completed within this session's budget; the plan's own phase heading for
-  Phase 2 is left `[IN PROGRESS]` (not `[COMPLETED]`) to reflect this honestly, with the
-  `FrameCompleteness.lean` checklist item marked done and annotated.
+- **No other deviations.** All Phase 1 and Phase 2 checklist items were completed exactly as
+  specified. Phase 2's plan heading is now marked `[COMPLETED]`, with every checklist item
+  annotated with what was done and which commit landed it.
 
 ## Verification
 
-- `lake build` (scoped): green for all five touched `.lean` files
+- `lake build` (scoped): green for all nine touched `.lean` files across Phases 1-2
   (`ChronicleToCountermodelBasic.lean`, Temporal `Completeness.lean`, `Bool.lean`,
-  `FrameCompleteness.lean`).
+  `FrameCompleteness.lean`, `CompletenessLoop.lean`, `LoopChecking.lean`, Modal
+  `Completeness.lean`, `LoopInduction.lean`).
 - `lake build` (full project): not run this session; deferred to Phase 8 per the plan's own
   dependency table (Phase 8 depends on all of Phases 1-7).
 - Zero live `sorry` in all touched files.
 - Zero new axioms (comment/docstring-only edits; no axiom/definition/theorem statements changed).
-- Zero remaining `task N`/`Phase N`/`specs/NNN` provenance in the four touched files (grep
-  confirmed after each edit).
+- Zero remaining `task N`/`Phase N`/`specs/NNN` provenance in the touched files (grep confirmed
+  after each edit), plus the two newly-identified patterns (bare task-number citations without
+  the word "task"; "dispatch"-history narrative) also swept.
 - `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`, `lake shake`, `lake test`: not
   yet run (Phase 8 gate, deferred until all content phases complete).
 
 ## Artifacts
 
 - Plan: `specs/542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md`
-  (phase status markers and per-task checklist annotations updated)
+  (phase status markers and per-task checklist annotations updated; Phases 1-2 now `[COMPLETED]`)
 - Handoff: `specs/542_strip_task_provenance_stale_claims_docstrings/handoffs/01_phase2-partial-handoff.md`
+  (Phase 2 partial, superseded)
+- Handoff: `specs/542_strip_task_provenance_stale_claims_docstrings/handoffs/02_phase2-complete-handoff.md`
+  (Phase 2 complete, current)
 - This summary

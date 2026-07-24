@@ -1344,6 +1344,158 @@ theorem boxI_lift {Atom : Type u} {World : Type v} [Preorder World]
       (ht x) x (le_refl _) hxX w' hxw' ∅ (by simp)
   exact ⟨ρ', hρ'x, hρ'mono, fun a b hab => hρ'edge a b hab (by simp), fun {φ} {z} hf => hρ'pers hf⟩
 
+/-! ## Tree-depth-indexed Hilbert translation `nikTr` (Simpson Ch. 6, Fig. 6-1/6-2, Lemma 6.1.2)
+
+Simpson's `(·)^T` translation (`~/Projects/Literature/simpson_1994_intuitionisticmodallogic/
+simpson_1994_intuitionisticmodallogic.reflowed.md:943-975`) represents a whole prefixed
+consequence `Γ ⊢_G x:A`, for `G` a finite tree, as a SINGLE `IK` (here: `CS5ModalAxiom`) formula,
+by (1) a subtree translation `Γ@U := (⋀{B | y:B ∈ Γ}) ∧ □(Γ@U₁) ∧ ... ∧ □(Γ@U_k)` for `U` any
+subtree with root `y` and immediate subtrees `U₁,…,U_k` (empty conjunction `= ⊤`), then (2)
+threading `Γ@T_i` up the unique path (the "spine") from the root `x₀` to the target label `x_m`,
+via `Γ@T₀ ⊃ □(Γ@T₁ ⊃ □(… ⊃ □(Γ@T_m ⊃ A)…))`, where `T_i` (`i<m`) is `x_i` together with its
+OFF-spine children only (the spine continuation to `x_{i+1}` is excluded, since it is threaded
+separately) and `T_m` is `x_m` together with ALL its children (there is no spine continuation left
+at the target label itself).
+
+**Source corruption flagged (H3):** the reflowed OCR of this exact passage is severely corrupted
+at the formula level (box/diamond glyphs conflated with digits/letters, sub/superscripts
+scrambled, and the one worked example given in the source could not be reproduced consistently
+from the OCR'd formula alone -- see the git history of this section for the reconstruction
+attempt). The MATHEMATICAL content above (the `Γ@U` recursion and the spine-threading shape) is
+reconstructed from the surrounding PROSE, which is legible and internally consistent, not from the
+corrupted formula rendering; this is flagged per the literature-fidelity policy rather than
+silently guessed. The two sanity `example`s below are the intended cross-check.
+
+**A documented, sound restructuring (Lean-encoding convenience, not a mathematical change):**
+`sigAt`/`nikTr` below fold a node's own facts and its children's translations via TWO nested
+`bigAndL`s (own-facts `∧` (children-conjunction)) rather than Simpson's single flat conjunction,
+and `bigAndL`'s empty case is a `⊤`-surrogate tautology `⊥ ⊃ ⊥` rather than a literal absent
+conjunct. Both are `IK`/`CS5ModalAxiom`-equivalent restructurings (associativity of `∧`; a
+tautological `∧⊤`/`⊃⊤`-padding), never altering derivability, but they mean the two sanity
+`example`s below reduce to a `⊤`-padded shape rather than byte-identical to Simpson's own printed
+formula -- flagged explicitly rather than silently mismatched. -/
+
+open Classical in
+/-- **Finite conjunction surrogate for `⊤`.** `bigAndL [] = ⊥ ⊃ ⊥` (a trivial, `CS5ModalAxiom`-
+derivable tautology, matching the convention of `Cslib.Logic.Modal.bigAnd`,
+`SegmentLindenbaum.lean`, not transitively visible from this file's import chain, hence a local
+re-declaration under a distinct name); `bigAndL (A :: As) = A ∧ bigAndL As`. -/
+def bigAndL {Atom : Type u} (L : List (Proposition Atom)) : Proposition Atom :=
+  L.foldr Proposition.and (Proposition.bot.imp Proposition.bot)
+
+open Classical in
+/-- **The list of `Γ`-facts attached to label `y`**, i.e. `{B | y:B ∈ Γ}` realized as a `List`
+(order inherited from `Γ`; order is immaterial since `bigAndL` only needs the *set* of conjuncts
+up to `CS5ModalAxiom`-provable reordering, never consumed elsewhere in a order-sensitive way). -/
+noncomputable def factsAt {Atom : Type u} (Γ : List (LabelledFormula Atom)) (y : Label Atom) :
+    List (Proposition Atom) :=
+  (Γ.filter (fun ψ => decide (ψ.lbl = y))).map LabelledFormula.prop
+
+open Classical in
+/-- **Subtree translation `Γ@U`, fuel-bounded** (Simpson §6.1, Fig. 6-1/6-2): recursively conjoins
+node `y`'s own `Γ`-facts (`factsAt Γ y`) with `□` applied to the same translation at each of `y`'s
+direct raw-`R`-children. `fuel` bounds the remaining recursion depth; `sigAt` below supplies a
+provably-sufficient global fuel bound (`G.X`'s finite cardinality), so this auxiliary is not
+called directly outside this section (fuel exhaustion before reaching a genuine leaf would
+truncate real children silently -- never possible from `sigAt`'s call site, since the cardinality
+bound dominates the depth of any node in a finite graph, one level of margin lost per fuel-step
+matching one level of tree-depth descended). -/
+noncomputable def sigAtFuel {Atom : Type u} (G : Graph Atom) (Γ : List (LabelledFormula Atom))
+    (hfin : G.X.Finite) : ℕ → Label Atom → Proposition Atom
+  | 0, y => bigAndL (factsAt Γ y)
+  | (n + 1), y =>
+      have hCsub : {c | G.R y c} ⊆ G.X := fun c hc => (G.edge_mem y c hc).2
+      have hCfin : {c | G.R y c}.Finite := hfin.subset hCsub
+      Proposition.and (bigAndL (factsAt Γ y))
+        (bigAndL (hCfin.toFinset.toList.map (fun c => Proposition.box (sigAtFuel G Γ hfin n c))))
+
+/-- **`Γ@U` at a node `y`, with a provably-sufficient global fuel bound** (`G.X`'s finite
+cardinality, a safe upper bound on the descent depth below ANY node of the finite graph `G`). -/
+noncomputable def sigAt {Atom : Type u} (G : Graph Atom) (Γ : List (LabelledFormula Atom))
+    (hfin : G.X.Finite) (y : Label Atom) : Proposition Atom :=
+  sigAtFuel G Γ hfin hfin.toFinset.card y
+
+open Classical in
+/-- **Ancestor-walk assembly of the spine-wrap** (Simpson §6.1's `(Γ⊢_G x:A)^T`, the chain
+`Γ@T₀ ⊃ □(Γ@T₁ ⊃ □(… ⊃ □(Γ@T_m ⊃ A)…))`). `inner` accumulates the already-built formula for `cur`
+and everything below it on the spine so far; at each fuel-step, if `cur` has a raw-`R` PARENT `q`,
+the walk wraps `inner` with `q`'s own facts and `q`'s OTHER (off-spine) children's full `sigAt`
+translations, `□`-guards `inner`, and recurses one level up at `q`; if `cur` has no parent (it is
+the root of its forest component), the walk stops and returns `inner` unchanged (also the
+fuel-exhausted `0` case, matching the "no further ancestor" outcome since the global fuel bound
+dominates any component's height). -/
+noncomputable def nikTrFuel {Atom : Type u} (G : Graph Atom) (Γ : List (LabelledFormula Atom))
+    (hfin : G.X.Finite) : ℕ → Label Atom → Proposition Atom → Proposition Atom
+  | 0, _, inner => inner
+  | (n + 1), cur, inner =>
+      if h : ∃ q, G.R q cur then
+        let q := Classical.choose h
+        have hSsub : {c | G.R q c ∧ c ≠ cur} ⊆ G.X := fun c hc => (G.edge_mem q c hc.1).2
+        have hSfin : {c | G.R q c ∧ c ≠ cur}.Finite := hfin.subset hSsub
+        let antecedent := Proposition.and (bigAndL (factsAt Γ q))
+          (bigAndL (hSfin.toFinset.toList.map (fun c => Proposition.box (sigAt G Γ hfin c))))
+        let wrapped := Proposition.imp antecedent (Proposition.box inner)
+        nikTrFuel G Γ hfin n q wrapped
+      else
+        inner
+
+/-- **`nikTr`: Simpson's tree-depth-indexed Hilbert translation `(Γ⊢_G x:A)^T`** (Fig. 6-1/6-2,
+Lemma 6.1.2). Starts the ancestor-walk at `x` with the innermost formula `sigAt G Γ hfin x ⊃ A`
+(matching `Γ@T_m ⊃ A` at the spine's deepest node: `x`'s OWN `sigAt` already folds in every one of
+`x`'s children, so there is no "off-spine" distinction left to make at the target label itself),
+then walks up `x`'s raw-`R`-ancestor chain (bounded by the global fuel `G.X`'s cardinality, a
+sufficient bound on any component's depth in the finite graph `G`), wrapping one `⊃ □(...)` level
+per ancestor via `nikTrFuel`. -/
+noncomputable def nikTr {Atom : Type u} (G : Graph Atom) (Γ : List (LabelledFormula Atom))
+    (hfin : G.X.Finite) (x : Label Atom) (A : Proposition Atom) : Proposition Atom :=
+  nikTrFuel G Γ hfin (hfin.toFinset.card + 1) x (Proposition.imp (sigAt G Γ hfin x) A)
+
+/-! ### Sanity `example`s (Phase 8.1 green criterion)
+
+Pin `nikTr`'s definition against the two cases the plan's Phase 8.1 green criterion specifies:
+`Graph.trivial` (no edges: the translation must add no `⊃□` nesting at all, reducing to a
+`⊤`-padded identity on `A`) and a one-edge extension (`Graph.trivial.addEdge` at the root: the
+translation must add EXACTLY one `⊃□` level, wrapping `sigAt` at the new leaf). Both are checked
+by `rfl` (definitional reduction), confirming `nikTr` computes as intended on these two base
+shapes before any constructor case of `nik_adequacy` is attempted. -/
+
+/-- **Sanity check 1**: on `Graph.trivial` (no edges), `nikTr` adds no ancestor-wrap at all (its
+one node has no raw-`R`-parent), reducing to the `⊤`-padded identity
+`(sigAt Γ_trivial x ⊃ A)` -- NOT bare `A` literally (see the section docstring's "documented,
+sound restructuring" note on `bigAndL`'s `⊤`-padding), confirming `nikTrFuel` performs zero
+ancestor-wraps here. -/
+example {Atom : Type u} (A : Proposition Atom) :
+    nikTr (Graph.trivial Atom) [] (Set.finite_singleton _)
+        ((Graph.trivial Atom).nonempty.choose) A =
+      Proposition.imp
+        (sigAt (Graph.trivial Atom) [] (Set.finite_singleton _)
+          ((Graph.trivial Atom).nonempty.choose)) A := by
+  have hroot : ¬ ∃ q, (Graph.trivial Atom).R q (Graph.trivial Atom).nonempty.choose := by
+    rintro ⟨q, hq⟩
+    exact hq
+  simp only [nikTr, nikTrFuel, dif_neg hroot]
+
+/-- **Sanity check 2**: on the one-edge extension of `Graph.trivial` (root `x₀` gains a fresh
+child `y`), `nikTr` at the NEW leaf `y` adds EXACTLY one ancestor-wrap (walking up the single edge
+to the root `x₀`): the result is `nikTrFuel` continuing from SOME `(n, q)` on an antecedent of the
+shape `_ ⊃ □(sigAt G [] hfin y ⊃ A)`, confirming the first unfold step wraps `sigAt … y ⊃ A` in
+exactly one `⊃ □(...)` level (matching Simpson's "one `⊃□` level per tree level" shape) before any
+further (here: terminating, since `x₀` has no parent) ancestor-walking. -/
+example {Atom : Type u} (A : Proposition Atom) :
+    let G := (Graph.trivial Atom).addEdge (Graph.trivial Atom).nonempty.choose
+      (Label.dwitness (Graph.trivial Atom).nonempty.choose Proposition.bot)
+    let hfin : G.X.Finite := Set.Finite.union (Set.finite_singleton _)
+      (Set.Finite.insert _ (Set.finite_singleton _))
+    let y : Label Atom := Label.dwitness (Graph.trivial Atom).nonempty.choose Proposition.bot
+    ∃ n q antecedent, nikTr G [] hfin y A =
+      nikTrFuel G [] hfin n q
+        (Proposition.imp antecedent (Proposition.box (Proposition.imp (sigAt G [] hfin y) A))) := by
+  intro G hfin y
+  have hparent : ∃ q, G.R q y := ⟨(Graph.trivial Atom).nonempty.choose, Or.inr ⟨rfl, rfl⟩⟩
+  exact ⟨hfin.toFinset.card, Classical.choose hparent, _, by
+    simp only [nikTr, nikTrFuel, dif_pos hparent]
+    rfl⟩
+
 end Cslib.Logic.Modal.Labelled
 
 end

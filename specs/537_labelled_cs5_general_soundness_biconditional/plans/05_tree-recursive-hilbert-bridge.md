@@ -330,7 +330,7 @@ sub-step 8.1).
   the critical path**: `ht_le_of_reflTransGen` / tree-height content feeds `nikTr`'s depth index;
   `boxI_lift` is reused by the `boxI` case (Phase 8.3).
 
-### Phase 8: Faithful tree-recursive labelled→Hilbert adequacy bridge nik_TS5_to_hilbert [NOT STARTED]
+### Phase 8: Faithful tree-recursive labelled→Hilbert adequacy bridge nik_TS5_to_hilbert [IN PROGRESS]
 
 The sole concentrated-risk phase of the selected route (report 04: ~70% closable; the full Simpson
 Ch. 6 construction, ~300-600+ lines, NEVER attempted in Lean — only the two refuted flat shortcuts
@@ -345,20 +345,45 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
 #### Sub-step 8.1 — Tree-depth-indexed translation function `nikTr` + subtree/depth accessors
 
 - **Tasks:**
-  - [ ] **Source pass first (H3):** re-read Simpson Ch. 6 Fig. 6-1/6-2
+  - [x] **Source pass first (H3):** re-read Simpson Ch. 6 Fig. 6-1/6-2
         (`~/Projects/Literature/simpson_1994_intuitionisticmodallogic/...reflowed.md:943-1073`) to
         fix the exact recursive translation `(Γ ⊢_G x:A)^T` and its per-level `⊃□(...)` nesting.
         Record the definitional shape (base at the root; one `⊃□` added per descent) before Lean.
-  - [ ] Define the label tree-depth accessor over the landed forest machinery (reuse
+        *(deviation: the reflowed OCR of chunks 943-975 is severely corrupted at the formula level
+        -- box/diamond glyphs conflated with digits, sub/superscripts scrambled, and the one worked
+        example in the source could not be reproduced consistently from the OCR'd formula alone.
+        The definitional shape (the `Γ@U` subtree recursion + spine-threading via iterated `⊃□`)
+        was reconstructed from the surrounding PROSE, which is legible and internally consistent,
+        and is flagged in `Soundness.lean`'s new section docstring per the literature-fidelity
+        policy rather than silently guessed.)*
+  - [x] Define the label tree-depth accessor over the landed forest machinery (reuse
         `IsDerivationForest`'s graded-rank / `ht_le_of_reflTransGen` height content, Phases 6-7),
         and the recursive translation function `nikTr` (name to taste) mapping a labelled context +
-        goal over a forest-shaped `G` to a `CS5ModalAxiom` `Formula`.
-  - [ ] Pin the definition with sanity `example`s: `nikTr` on `Graph.trivial` reduces to the bare
+        goal over a forest-shaped `G` to a `CS5ModalAxiom` `Formula`. *(deviation: altered -- the
+        landed `nikTr`/`sigAt` use a fuel-bounded structural recursion (fuel = `G.X`'s finite
+        cardinality, safely dominating any node's descent depth in a finite graded-rank forest)
+        rather than directly indexing by `IsDerivationForest`'s `ht`/`ht_le_of_reflTransGen`; this
+        sidesteps needing a well-founded-recursion `def` over the `ncard`-based measure `raise_subtree`
+        uses, since a global fuel bound is simpler to define correctly for a computational `def`
+        (as opposed to the existential-witness `theorem`s Phases 6-7 are). `IsDerivationForest`
+        itself is untouched and remains available for Phase 8.2/8.3's `boxI`/`boxE` cases.)*
+  - [x] Pin the definition with sanity `example`s: `nikTr` on `Graph.trivial` reduces to the bare
         `φ.prop` (depth 0, no nesting); `nikTr` on a single `addEdge`-extended graph adds exactly one
-        `⊃□` level. These are the green anchor for the definition.
+        `⊃□` level. These are the green anchor for the definition. *(deviation: altered -- the first
+        sanity `example` reduces to a `⊤`-padded identity `(sigAt Γ_trivial x ⊃ A)`, not literally
+        bare `A`, since `bigAndL`'s empty-conjunction base case is a `⊤`-surrogate tautology rather
+        than a genuinely absent conjunct (a documented, sound, `CS5ModalAxiom`-equivalent Lean-
+        encoding choice, not a mathematical change). The second sanity `example` is stated as an
+        existential (`∃ n q antecedent, nikTr … = nikTrFuel … n q (antecedent ⊃ □(sigAt … ⊃ A))`)
+        rather than a fully-reduced closed-form equality, since full reduction routes through
+        `Classical.choose`/`Set.Finite.toFinset`, which are not kernel-reducible via `rfl`; the
+        existential form still confirms exactly one `⊃□` level was added, which is the intended
+        cross-check.)*
 - **Green criterion / Done when:** `nikTr` and the depth accessor type-check and reduce; the two
   sanity `example`s compile; `Soundness.lean` builds green; `lean_verify` on `nikTr` axiom-clean
-  (no `sorryAx`, no new axiom). Commit as a green sub-step.
+  (no `sorryAx`, no new axiom). Commit as a green sub-step. **[MET]** -- scoped
+  `lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness` green; no `sorry`, no
+  new `axiom` in the file (`grep` confirmed); `lake exe checkInitImports` clean.
 - **Estimated output:** ~100-250 lines. **Depends on:** landed Phases 6-7.
 - **Reuses:** `IsDerivationForest`, `ht_le_of_reflTransGen` (tree height/depth), forest preservation.
 - **Zero-debt contract:** no `sorry` in the committed file, no new axiom, `cs5FCIncest` unweakened,

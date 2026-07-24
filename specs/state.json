@@ -1,5 +1,5 @@
 {
-  "next_project_number": 540,
+  "next_project_number": 552,
   "active_projects": [
     {
       "project_number": 538,
@@ -2253,7 +2253,7 @@
       }
     },
     {
-      "project_number": 539,
+      "project_number": 551,
       "project_name": "cs5_native_hilbert_pair_lindenbaum_completeness",
       "status": "researched",
       "task_type": "cslib",
@@ -2279,7 +2279,7 @@
       "next_artifact_number": 2,
       "artifacts": [
         {
-          "path": "specs/539_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md",
+          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md",
           "type": "report",
           "summary": "Route B (native Hilbert CS5 completeness) research report: obstruction, mechanized negatives, and the Atom-sum pair-primeness repair"
         }

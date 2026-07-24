@@ -42,7 +42,7 @@ next_project_number: 555
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
   └─ 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
-537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 551 [IMPLEMENTING] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
@@ -291,7 +291,7 @@ next_project_number: 555
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517

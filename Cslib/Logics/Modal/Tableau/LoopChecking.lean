@@ -4767,6 +4767,149 @@ theorem hintikka_congr_S4 (φ₀ : Proposition Atom)
                       rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;>
                         simp_all [modalApplyOneS4Keyed]
 
+/-! ## Keyed-Driver Termination Measure: Combinatorial Primitives
+
+Territory-local re-derivations of the four generic `List.countP`-based combinatorial facts
+underpinning the per-step measure decrease (`FmpMeasure.lean:2788-2922`). Those originals are
+`private` and hence unreachable from this file; since the keyed S4 driver's territory is
+additive-only within `LoopChecking.lean` (not an edit to `FmpMeasure.lean`), the four lemmas are
+re-derived here verbatim (same proofs, `_S4`-suffixed names) rather than exposed upstream. -/
+
+/-- **Combinatorial core** (generic over any `BEq`/`LawfulBEq` type, mirroring
+`modalCount_notMem_append_drop`, `FmpMeasure.lean:2788`): appending `x` (a member of `U`, not yet
+in `l`) to the exclusion list `l` strictly drops, by at least one, the count of `U`-members
+excluded by `l`. -/
+private lemma modalCount_notMem_append_drop_S4
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U l : List α) (x : α)
+    (hxU : x ∈ U) (hxl : l.any (· == x) = false) :
+    U.countP (fun y => !((l ++ [x]).any (· == y))) + 1 ≤
+      U.countP (fun y => !(l.any (· == y))) := by
+  induction U with
+  | nil => simp at hxU
+  | cons u us ih =>
+    rcases List.mem_cons.mp hxU with rfl | hxU'
+    · have h1 : (x :: us).countP (fun y => !(l.any (· == y))) =
+          us.countP (fun y => !(l.any (· == y))) + 1 := by
+        rw [List.countP_cons]; simp [hxl]
+      have h2 : (x :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+          us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+        rw [List.countP_cons]; simp [List.any_append]
+      have hmono : us.countP (fun y => !((l ++ [x]).any (· == y))) ≤
+          us.countP (fun y => !(l.any (· == y))) := by
+        have hsub : List.Sublist (us.filter (fun y => !((l ++ [x]).any (· == y))))
+            (us.filter (fun y => !(l.any (· == y)))) := by
+          apply List.monotone_filter_right
+          intro y hy
+          simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+            Bool.not_or, Bool.and_eq_true] at hy
+          exact hy.1
+        simpa [List.countP_eq_length_filter] using hsub.length_le
+      omega
+    · by_cases hlu : l.any (· == u)
+      · have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+            us.countP (fun y => !(l.any (· == y))) := by
+          rw [List.countP_cons]; simp [hlu]
+        have hlu' : (l ++ [x]).any (· == u) = true := by
+          rw [List.any_append, hlu, Bool.true_or]
+        have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+            us.countP (fun y => !((l ++ [x]).any (· == y))) := by
+          rw [List.countP_cons, hlu']; simp
+        have := ih hxU'
+        omega
+      · by_cases hux : u == x
+        · have hux' : u = x := LawfulBEq.eq_of_beq hux
+          subst hux'
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have h2 : (u :: us).countP (fun y => !((l ++ [u]).any (· == y))) =
+              us.countP (fun y => !((l ++ [u]).any (· == y))) := by
+            rw [List.countP_cons]; simp [List.any_append]
+          have hmono : us.countP (fun y => !((l ++ [u]).any (· == y))) ≤
+              us.countP (fun y => !(l.any (· == y))) := by
+            have hsub : List.Sublist (us.filter (fun y => !((l ++ [u]).any (· == y))))
+                (us.filter (fun y => !(l.any (· == y)))) := by
+              apply List.monotone_filter_right
+              intro y hy
+              simp only [List.any_append, List.any_cons, List.any_nil, Bool.or_false,
+                Bool.not_or, Bool.and_eq_true] at hy
+              exact hy.1
+            simpa [List.countP_eq_length_filter] using hsub.length_le
+          omega
+        · simp only [Bool.not_eq_true] at hlu
+          have h1 : (u :: us).countP (fun y => !(l.any (· == y))) =
+              us.countP (fun y => !(l.any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlu]
+          have hlux' : (l ++ [x]).any (· == u) = false := by
+            rw [List.any_append, hlu, Bool.false_or, List.any_cons, List.any_nil,
+              Bool.or_false, beq_eq_false_iff_ne]
+            simp only [beq_iff_eq] at hux
+            exact fun h => hux h.symm
+          have h2 : (u :: us).countP (fun y => !((l ++ [x]).any (· == y))) =
+              us.countP (fun y => !((l ++ [x]).any (· == y))) + 1 := by
+            rw [List.countP_cons]; simp [hlux']
+          have := ih hxU'
+          omega
+
+/-- **Weak monotonicity** (mirroring `modalCount_notMem_mono`, `FmpMeasure.lean:2865`): growing
+the exclusion list's underlying membership set (`b ⊆ b'`) can only decrease (never increase) the
+count of `U`-members excluded by it. -/
+private lemma modalCount_notMem_mono_S4
+    {α : Type*} [BEq α] [LawfulBEq α]
+    (U b b' : List α)
+    (hsub : ∀ z ∈ b, z ∈ b') :
+    U.countP (fun y => !(b'.any (· == y))) ≤ U.countP (fun y => !(b.any (· == y))) := by
+  have hsubf : List.Sublist (U.filter (fun y => !(b'.any (· == y))))
+      (U.filter (fun y => !(b.any (· == y)))) := by
+    apply List.monotone_filter_right
+    intro y hy
+    rw [Bool.not_eq_true'] at hy ⊢
+    rw [List.any_eq_false] at hy ⊢
+    intro z hz
+    exact hy z (hsub z hz)
+  simpa [List.countP_eq_length_filter] using hsubf.length_le
+
+omit [Hashable Atom] in
+/-- **`R`-drop, linear/branching case** (mirroring `modalWork_drop_linear`,
+`FmpMeasure.lean:2887`): when the fired formula `sf` is added to the expanded set
+(`e' = e ++ [sf]`) and the child branch `b'` weakly extends `b`, the counting measure strictly
+drops by at least one. -/
+private lemma modalWork_drop_linear_S4
+    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hsfU : sf ∈ U) (hsfe : e.any (· == sf) = false) (hsub : ∀ z ∈ b, z ∈ b') :
+    modalWork U b' (e ++ [sf]) + 1 ≤ modalWork U b e := by
+  unfold modalWork
+  have hb := modalCount_notMem_mono_S4 U b b' hsub
+  have he := modalCount_notMem_append_drop_S4 U e sf hsfU hsfe
+  omega
+
+omit [Hashable Atom] in
+/-- **`R`-drop, persistent case** (mirroring `modalWork_drop_persistent`,
+`FmpMeasure.lean:2904`): when the expanded set is unchanged (`boxPos`/`diamondNeg`) but the child
+branch `b'` contains a fresh `U`-member `x0` not on `b`, the counting measure strictly drops by
+at least one. -/
+private lemma modalWork_drop_persistent_S4
+    (U b b' e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (x0 : SignedFormula (Proposition Atom) WorldIndex)
+    (hx0U : x0 ∈ U) (hx0b : x0 ∉ b) (hx0b' : x0 ∈ b') (hsub : ∀ z ∈ b, z ∈ b') :
+    modalWork U b' e + 1 ≤ modalWork U b e := by
+  unfold modalWork
+  have hstep : ∀ z ∈ b ++ [x0], z ∈ b' := by
+    intro z hz
+    rcases List.mem_append.mp hz with hz | hz
+    · exact hsub z hz
+    · rwa [List.mem_singleton.mp hz]
+  have hmono := modalCount_notMem_mono_S4 U (b ++ [x0]) b' hstep
+  have hx0notin : b.any (· == x0) = false := by
+    rw [Bool.eq_false_iff]
+    intro hcon
+    obtain ⟨z, hz, heq⟩ := List.any_eq_true.mp hcon
+    exact hx0b ((LawfulBEq.eq_of_beq heq) ▸ hz)
+  have hdrop := modalCount_notMem_append_drop_S4 U b x0 hx0U hx0notin
+  omega
+
 end Cslib.Logic.Modal.Tableau
 
 end

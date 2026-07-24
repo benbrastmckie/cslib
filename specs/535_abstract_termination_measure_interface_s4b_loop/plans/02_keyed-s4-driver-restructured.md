@@ -1,7 +1,7 @@
 # Implementation Plan: Bespoke Keyed S4 Driver — Restructured Phases 3-5 (v2)
 
 - **Task**: 535 - Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
-- **Status**: [PARTIAL]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 24 hours remaining (range 18-32); Phases 1-2 (~4h) already landed and committed. Total ~28h.
 - **Dependencies**: None (parent 511 Phases 1-6 are landed, frozen, and consumed read-only)
 - **Research Inputs**:
@@ -152,18 +152,24 @@ only.
 - **Completed:** 2026-07-24 (same commit as Phase 1)
 - **Files modified:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive).
 
-### Phase 3 (handoff 3a): Re-derive generic combinatorial measure primitives [NOT STARTED]
+### Phase 3 (handoff 3a): Re-derive generic combinatorial measure primitives [COMPLETED]
 
 - **Goal:** Re-derive, as territory-local `private` lemmas in `LoopChecking.lean`, the four generic
   list-counting facts underpinning the per-step measure decrease. `FmpMeasure.lean`'s copies are
   `private` and out of territory, so they are re-derived (not called).
 - **Tasks:**
-  - [ ] `modalCount_notMem_append_drop` analogue (template `FmpMeasure.lean:2788-2859`, ~70 lines):
+  - [x] `modalCount_notMem_append_drop` analogue (template `FmpMeasure.lean:2788-2859`, ~70 lines):
         generic over any `BEq`/`LawfulBEq`; copy the proof verbatim into a `private` S4-local lemma.
-  - [ ] `modalCount_notMem_mono` analogue (`FmpMeasure.lean:2865-2878`, ~15 lines).
-  - [ ] `modalWork_drop_linear` analogue (`FmpMeasure.lean:2887-2895`, ~10 lines).
-  - [ ] `modalWork_drop_persistent` analogue (`FmpMeasure.lean:2904-2922`, ~20 lines).
-  - [ ] `lean_build` green; no `sorry`; `lean_verify` each axiom-clean.
+        *(landed as `modalCount_notMem_append_drop_S4`)*
+  - [x] `modalCount_notMem_mono` analogue (`FmpMeasure.lean:2865-2878`, ~15 lines).
+        *(landed as `modalCount_notMem_mono_S4`)*
+  - [x] `modalWork_drop_linear` analogue (`FmpMeasure.lean:2887-2895`, ~10 lines).
+        *(landed as `modalWork_drop_linear_S4`)*
+  - [x] `modalWork_drop_persistent` analogue (`FmpMeasure.lean:2904-2922`, ~20 lines).
+        *(landed as `modalWork_drop_persistent_S4`)*
+  - [x] `lean_build` green; no `sorry`; `lean_verify` each axiom-clean.
+- **Completed:** 2026-07-24 (all four `lean_verify`-confirmed `propext`/`Classical.choice`/
+  `Quot.sound` only; `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green, no new warnings).
 - **Timing:** 2 hours (~150-200 lines, mechanical, low risk)
 - **Depends on:** none (consumes only landed public `modalWork`/`modalExpMeasure` defs)
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive; `private` lemmas).

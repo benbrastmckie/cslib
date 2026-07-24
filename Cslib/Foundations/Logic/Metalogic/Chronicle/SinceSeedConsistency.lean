@@ -51,14 +51,13 @@ of the primitives above, so they are generic `def`s parameterized by an interfac
 
 A `structure` (not a `class`) is used because Bimodal needs an *instance family* indexed
 by `fc : FrameClass`, while Temporal needs exactly one instance — explicit passing (as in
-task 452's `HilbertTree`) is clearer than instance resolution across several live `fc`.
+`GenericMCS.lean`'s `HilbertTree`) is clearer than instance resolution across several live `fc`.
 
 ## Status
 
-Phase 0 (signature/defeq skeleton) + Phase 1 (small `l27s*` formula-operator helpers).
-The generic `lemma_2_7_since_seed_consistent` / `lemma_2_8_since_seed_consistent` bodies
-are ported in later phases (2/3/4/5 of the task-454 plan); see
-`specs/454_consolidate_chronicle_pointinsertion_bimodal_temporal/plans/`.
+Complete: the signature/defeq skeleton, the small `l27s*` formula-operator helpers, and the
+generic `lemma_2_7_since_seed_consistent`/`lemma_2_7_since`/`lemma_2_8_since_seed_consistent`/
+`lemma_2_8_since` bodies are all landed sorry-free below.
 
 ## References
 
@@ -171,7 +170,7 @@ structure SinceSeedInterface (F : Type*) where
   allPast : F → F
   /-- All-future (`𝐆`), needed only for `gContent`'s definitional shape. -/
   allFuture : F → F
-  /-- Disjunction (task-454 Phase 4: needed by `lemma_2_8_since`'s `α'` construction).
+  /-- Disjunction (needed by `lemma_2_8_since`'s `α'` construction).
   Negation is NOT a separate field -- both logics' `Formula.neg` is the transparent
   Lukasiewicz encoding `imp _ bot`, so it is always written inline as `imp _ bot` rather
   than through an opaque projection (an opaque `neg` field would block `modusPonens`/
@@ -310,7 +309,7 @@ structure SinceSeedInterface (F : Type*) where
   /-- `⊢ listConj L → φ` for each `φ ∈ L`. -/
   listConjImpliesElem : ∀ (L : List F) (φ : F), φ ∈ L →
     Deriv [] (imp (listConj L) φ)
-  /-- Left monotonicity of `untl` at MCS-membership level (task-454 Phase 2: not
+  /-- Left monotonicity of `untl` at MCS-membership level (not
   derivable from `untlLeftMonoDeriv` alone since it additionally needs
   `theoremInMcs`/`temporal_necessitation` bridging specific to each logic's `𝐆`
   encoding; kept as a field). -/
@@ -324,18 +323,18 @@ structure SinceSeedInterface (F : Type*) where
   superset. -/
   lindenbaum : ∀ {S : Set F}, isSetConsistent Deriv bot S →
     ∃ M, S ⊆ M ∧ isSetMaximalConsistent Deriv bot M
-  /-- De Morgan for disjunction negation (task-454 Phase 4), written with `imp _ bot`
+  /-- De Morgan for disjunction negation, written with `imp _ bot`
   standing for negation throughout (see the `or` field docstring):
   `⊢ ¬(A ∨ B) → ¬A ∧ ¬B`. -/
   demorganDisjNegForward : ∀ (A B : F),
     Deriv [] (imp (imp (or A B) bot) (and (imp A bot) (imp B bot)))
   /-- Right monotonicity of `somePast`-membership under empty-context implication
-  (task-454 Phase 4; mirrors `rightMonoSinceMcs` but for the derived `somePast`
+  (mirrors `rightMonoSinceMcs` but for the derived `somePast`
   operator, which is not assumed reducible to `snce` generically). -/
   pMonoMcs : ∀ {C : Set F}, isSetMaximalConsistent Deriv bot C →
     ∀ {phi psi : F}, Deriv [] (imp phi psi) → somePast phi ∈ C → somePast psi ∈ C
   /-- `somePast psi ∈ M` and `allPast ¬psi ∈ M` (with `¬psi := imp psi bot`) cannot both
-  hold in an MCS (task-454 Phase 4). -/
+  hold in an MCS. -/
   somePastAllPastNegAbsurd : ∀ {M : Set F}, isSetMaximalConsistent Deriv bot M →
     ∀ (psi : F), somePast psi ∈ M → allPast (imp psi bot) ∈ M → False
 
@@ -390,13 +389,13 @@ def gContent (I : SinceSeedInterface F) (M : Set F) : Set F := gContentOf I.allF
 /-- `hContent` w.r.t. `I`'s `allPast`. -/
 def hContent (I : SinceSeedInterface F) (M : Set F) : Set F := hContentOf I.allPast M
 
-/-! ## Since-Direction Seed and Small `l27s*` Helpers (task-454 Phase 1)
+/-! ## Since-Direction Seed and Small `l27s*` Helpers
 
 Ported verbatim (modulo `I.*`-qualification) from the near-byte-identical
 `lemma27SinceSeed`/`l27s*` family shared by both logics' `Since.lean` files. These
 depend only on the formula operators (`and`, `untl`) and pure list plumbing — no
 Burgess/MCS apparatus — so they factor over `SinceSeedInterface` with no additional
-fields. The one non-mechanical proof-line divergence noted in the task-454 research
+fields. The one non-mechanical proof-line divergence between the two logics
 (`simp only [Formula.and, Formula.neg]` in Bimodal vs. `simp only [Formula.and]` in
 Temporal, inside `l27s_b5_β_mem`) is resolved here by using `andInjective` directly
 instead of unfolding `and`/`neg` via `simp`, which sidesteps the divergence entirely. -/
@@ -480,7 +479,7 @@ theorem l27s_b5_β_mem {B C : Set F} {xi : F}
   have h_inj := I.untlInjective h_formula_eq
   exact congr_arg some (I.andInjective h_inj.1).1.symm
 
-/-! ## Deductive Closure is a Closure Operator (task-454 Phase 2)
+/-! ## Deductive Closure is a Closure Operator
 
 Both logics prove `Sig ⊆ deductiveClosure Sig` and
 `ClosedUnderDerivation (deductiveClosure Sig)` by the same argument purely in terms of the
@@ -523,10 +522,10 @@ theorem deductiveClosureClosedUnderDerivation (Sig : Set F) :
     ClosedUnderDerivation I (deductiveClosure I Sig) :=
   deductiveClosureClosed I Sig
 
-/-! ## Generic `lemma_2_7_since_seed_consistent` / `lemma_2_7_since` (task-454 Phase 2)
+/-! ## Generic `lemma_2_7_since_seed_consistent` / `lemma_2_7_since`
 
 Ported from Temporal's `fc := .Base` reading (the two logics' bodies diverge 100%
-mechanically modulo `fc`-threading and notation; see the task-454 research report §1.3). -/
+mechanically modulo `fc`-threading and notation). -/
 
 /-- Since-direction seed consistency. Uses the BX5'+BX7'+BX13' chain (via `I`'s
 apparatus fields) to show the `lemma27SinceSeed` is consistent whenever `xi ∉ B`. -/
@@ -800,7 +799,7 @@ theorem lemma_2_7_since {A B C : Set F}
   exact ⟨B', D, B'', h_B'_max, h_B''_max, h_D_mcs, h_eta_D, h_B_sub_B', h_B_sub_D,
     h_B_sub_B'', h_xi_in_B''⟩
 
-/-! ## Generic `lemma_2_8_since_seed_consistent` / `lemma_2_8_since` (task-454 Phase 4)
+/-! ## Generic `lemma_2_8_since_seed_consistent` / `lemma_2_8_since`
 
 Ported from Temporal's `fc := .Base` reading, mirroring the `lemma_2_7_since` port above.
 Uses the same BX5'+BX7'+BX13' chain but eliminates the D1/D2 cases via `α'` (the negated

@@ -159,7 +159,7 @@ value, most judgment-heavy, well-localized.
 
 ---
 
-### Phase 2: Modal/Tableau — Completeness/Loop Cluster [IN PROGRESS]
+### Phase 2: Modal/Tableau — Completeness/Loop Cluster [COMPLETED]
 
 **Goal**: Strip provenance from the heaviest Modal/Tableau files (the completeness/loop half of
 the 516-hit / 17-file bucket).
@@ -170,12 +170,27 @@ the 516-hit / 17-file bucket).
   internal "Phase N" cross-references rewritten to "above"/"below"/lemma-name anchors; the
   embedded `specs/515_.../probes/five-s5-separation.lean` link replaced with a pointer to the
   in-tree `FrameSoundness.lean` lemmas it was citing; `lake build` green, zero live sorry)*
-- [ ] `Tableau/CompletenessLoop.lean` (73 hits).
-- [ ] `Tableau/LoopChecking.lean` (72 hits).
-- [ ] `Tableau/Completeness.lean` (Modal, 32 hits — distinct from the Temporal file in Phase 1).
-- [ ] Any small remaining Tableau files that naturally group with this cluster (implementer's grouping; must stay disjoint from Phase 3's set).
-- [ ] Apply the report §5 methodology: excise provenance clauses, keep contracts, lemma cross-references, and literature citations; never delete a sole docstring.
-- [ ] `lake build` of the touched Modal/Tableau modules.
+- [x] `Tableau/CompletenessLoop.lean` (73 hits).
+  *(done: task/phase provenance stripped throughout; internal "task 515 Phase N" cross-references
+  rewritten to "above"/"below" or dropped; bare task-number citations ("503/505/506") reworded to
+  name the T/B/S4 systems directly; `lake build` green, zero live sorry; commit 2f93962a)*
+- [x] `Tableau/LoopChecking.lean` (72 hits).
+  *(done: pervasive "task 511 Phase N" section-header and inline citations stripped; two
+  "dispatch"-narrative blocks (bClosure/eClosure closure notes, the `S4LoopInv` preservation
+  theorem docstring) rewritten to describe the current completed state instead of dispatch
+  history; one literal `[COMPLETED]` phase-status marker and one "the plan" reference also
+  removed; `lake build` green, zero live sorry; commit 8d1d66ac)*
+- [x] `Tableau/Completeness.lean` (Modal, 32 hits — distinct from the Temporal file in Phase 1).
+  *(done: task/phase provenance stripped; `lake build` green, zero live sorry; commit bb979e4c)*
+- [x] Any small remaining Tableau files that naturally group with this cluster (implementer's grouping; must stay disjoint from Phase 3's set).
+  *(done: `LoopInduction.lean` (2 hits, completeness/loop-themed per the continuation handoff's
+  own recommendation) cleaned -- dropped a `(task 404)` citation from an otherwise-legitimate
+  design note about superseded helpers. `TDriver.lean`/`BDriver.lean`/`Defs.lean`/`Rules.lean`/
+  `SoundnessStep.lean`/`Soundness.lean`/`Saturation.lean` are driver/infrastructure files left for
+  Phase 3 per the same recommendation; `FrameRules.lean`/`Closure.lean`/`Branch.lean` have zero
+  hits.)*
+- [x] Apply the report §5 methodology: excise provenance clauses, keep contracts, lemma cross-references, and literature citations; never delete a sole docstring.
+- [x] `lake build` of the touched Modal/Tableau modules.
 
 **Timing**: 1.25 hours
 

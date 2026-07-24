@@ -69,7 +69,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 /-! ## Subformula List and Depth -/
 
 /-- Structural subformula list of a `Proposition Atom` (native `and`/`or`/`box`/`diamond`
-recursion, task 441). Every node of `φ`'s syntax tree contributes exactly one entry. -/
+recursion). Every node of `φ`'s syntax tree contributes exactly one entry. -/
 def modalSubfmls : Proposition Atom → List (Proposition Atom)
   | .atom p  => [.atom p]
   | .bot     => [.bot]
@@ -102,7 +102,7 @@ lemma modalSubfmls_length_le (φ : Proposition Atom) :
     omega
 
 /-- Modal (box/diamond-nesting) depth of a `Proposition Atom`: `box`/`diamond` add one,
-`imp`/`and`/`or` take the max of their two sub-depths (task 441: `diamond` is native, and
+`imp`/`and`/`or` take the max of their two sub-depths (`diamond` is native, and
 counts toward depth exactly like `box` since it also creates a fresh world in the tableau). -/
 def modalDepth : Proposition Atom → Nat
   | .atom _ => 0
@@ -250,14 +250,14 @@ lemma modalExpMeasure_entry_le_fuel (φ : Proposition Atom) :
           (modalComplexity φ + 1) + 1)) := Nat.pow_le_pow_right (by norm_num) hfinal
     _ = modalFuel φ := rfl
 
-/-! ## Subformula-Closure: World-Preserving Rules (Phase 1a)
+/-! ## Subformula-Closure: World-Preserving Rules
 
 This section proves that formulas emitted by the propositional (α/β) rules, `boxPos`, and
 `diamondNeg` — the three rule kinds that do NOT mint a fresh world — are structural
 subformulas of the source formula, at a world label that is either unchanged or an existing
 successor. This is the closure fact needed for the rule kinds that cannot breach the world
 bound, so no world-bound hypothesis is consumed here. The two fresh-world-minting rules
-(`diamondPos`, `boxNeg`) and the top-level dispatch lemma are Phase 1b's job. -/
+(`diamondPos`, `boxNeg`) and the top-level dispatch lemma are handled in the next section. -/
 
 /-- Every `Proposition Atom` is a member of its own structural subformula list (the list
 always begins with the formula itself). Marked `@[simp]` so it discharges nested
@@ -359,7 +359,7 @@ lemma modalApplyOne_boxPos_outputs_subset
 /-- `diamondNeg`: `F(◇φ)@w` emits `F(φ)@w'` for each recorded successor `w'` of `w`
 (`Rules.lean:144-153`). Every emitted formula's formula-component is `φ`, a structural
 subformula of the native source formula `◇φ`, at a world label that is an existing recorded
-successor of `w`. Task 441: `diamond` is a native constructor, so `negOf?` no longer matches
+successor of `w`. `diamond` is a native constructor, so `negOf?` does not match
 this shape and this rule arm is the sole dispatch path for `F(◇φ)@w`. -/
 lemma modalApplyOne_diamondNeg_outputs_subset
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -378,7 +378,7 @@ lemma modalApplyOne_diamondNeg_outputs_subset
     subst hxeq
     exact ⟨by simp [modalSubfmls], hw'⟩
 
-/-! ## Subformula-Closure: Fresh-World Rules and Top Dispatch (Phase 1b)
+/-! ## Subformula-Closure: Fresh-World Rules and Top Dispatch
 
 This section proves closure for the two fresh-world-minting linear rules (`diamondPos`,
 `boxNeg`, `Rules.lean:91-139`), which consume the world-bound hypothesis to show the freshly
@@ -522,7 +522,7 @@ private lemma boxProps_outputs_subset (φ0 : Proposition Atom)
 
 /-- Shared closure fact for the `diaNegProps` group propagated by both fresh-world rules
 (`diamondPos`, `Rules.lean:107-115`; `boxNeg`, `Rules.lean:132-140`): each propagated
-`F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (native `diamond` constructor, task 441), hence `ψ`
+`F(ψ)@w'` comes from an `F(◇ψ)@w) ∈ b` (native `diamond` constructor), hence `ψ`
 is a subformula of `φ0`. Factored out since the `diaNegProps` construction is byte-identical
 between the two rules. -/
 private lemma diaNegProps_outputs_subset (φ0 : Proposition Atom)
@@ -562,7 +562,7 @@ groups at `w'` (`Rules.lean:93-116`): the witness `T(φ)@w'`, propagated box-pos
 `T(ψ)@w'` (from `T(□ψ)@w ∈ b`), and propagated diamond-negatives `F(ψ)@w'`
 (from `F(◇ψ)@w ∈ b`). All three groups stay inside `U(φ0)` given the branch invariant `hb`,
 the source membership `hsf`, and the world-bound hypothesis `hW` (consumed for the fresh
-label `w' ≤ W`). Task 441: `diamond` is a native constructor, so the witness is directly a
+label `w' ≤ W`). `diamond` is a native constructor, so the witness is directly a
 subformula of `◇φ` (no encoding to unwind). -/
 lemma modalApplyOne_diamondPos_outputs_subset
     (φ0 : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -706,8 +706,8 @@ lemma modalApplyOne_outputs_subset
     obtain ⟨s, ff, l⟩ := sf
     rcases s with _ | _
     · -- pos: only `.box`/`.diamond` match a K-rule arm; the rest fall through to
-      -- `modalApplyOne`'s `_, _ => .notApplicable` catch-all regardless of `hpa` (task 441:
-      -- `and`/`or`/`imp` are all native/non-diamond-encoded, so no disambiguation is needed).
+      -- `modalApplyOne`'s `_, _ => .notApplicable` catch-all regardless of `hpa`
+      -- (`and`/`or`/`imp` are all native/non-diamond-encoded, so no disambiguation is needed).
       rcases ff with _ | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | φ | φ
       · simp
       · simp
@@ -753,34 +753,32 @@ lemma modalApplyOne_outputs_subset
           exact mem_modalUniverse_of' (Nat.le_of_lt (Nat.lt_of_le_of_lt hxle hW))
             (modalSubfmls_trans hxform (modalUniverse_mem_formula hsfU))
 
-/-! ## World-Count Bound (Phase 2 — the CRUX)
+/-! ## World-Count Bound — the Crux
 
 This section proves the a-priori world bound `modalWorldBound φ0` is a per-step loop
 invariant of `modalStepBranch`. The naive single-step statement (`modalMaxWorld b <
 modalWorldBound φ0` alone as loop invariant) is **not sufficient**: a branch could contain
 a single not-yet-fired minting formula at label `modalWorldBound φ0 - 1`, satisfying the
 naive hypothesis, whose firing mints world `modalWorldBound φ0`, breaching the bound. The
-fix (research §6/C3 contingency) is a proof-only **rank map** recording, for each world, a
+fix is a proof-only **rank map** recording, for each world, a
 remaining modal-depth budget, plus a counting potential `geomCap` (shared,
 `Cslib.Foundations.Logic.Tableau.Measure`) bounding how many further worlds a given budget can
 spawn. `geomCap Sf k` is the exact geometric sum `Σ_{i≤k} Sf^i`, via the standard
 `1 + Sf * geomCap Sf (k-1)` recursion (one root plus up to `Sf` subtrees of budget `k-1`). -/
 
-/-! ## World-Count Bound (Phase 2 continuation): out-degree and rank-map bookkeeping
+/-! ## World-Count Bound: Out-Degree and Rank-Map Bookkeeping
 
-The remaining Phase 2 obligations formalize the hand-verified potential-function argument
-(see the plan's "Continuation" checklist under Phase 2): a proof-only per-world **rank map**
-(remaining modal-depth budget, frozen at world creation as `parent_rank − 1`), an **out-degree**
-counter derived from `acc`, and a **potential** `Φ` combining them that offsets `modalMaxWorld`'s
-growth exactly. This section is obligations (a)-(c): the supporting invariants. -/
+This section formalizes the hand-verified potential-function argument: a proof-only per-world
+**rank map** (remaining modal-depth budget, frozen at world creation as `parent_rank − 1`), an
+**out-degree** counter derived from `acc`, and a **potential** `Φ` combining them that offsets
+`modalMaxWorld`'s growth exactly. This section covers obligations (a)-(c): the supporting
+invariants. -/
 
 /-- `true` when `sf` matches a rule shape that actually mints a fresh world at runtime:
 `boxNeg`'s F-box shape `F(□φ)@w` (`Rules.lean:119-141`) or `diamondPos`'s T-diamond shape
-`T(◇φ)@w` (`Rules.lean:93-116`). Task 441: `diamond` is a native constructor, so `diamondPos`
-now genuinely fires (and mints `acc.addEdge w (modalNextWorld b)`, exactly like `boxNeg`) —
-unlike the pre-441 Lukasiewicz encoding `T((□(φ→⊥))→⊥)@w`, which was always intercepted by
-`tryAllPropRules`'s `negPos` arm before reaching `modalApplyOne`'s modal-rule dispatch (dead
-code). Neither shape is matched by any propositional rule (`.box`/`.diamond` are top-level
+`T(◇φ)@w` (`Rules.lean:93-116`). `diamond` is a native constructor, so `diamondPos`
+genuinely fires (and mints `acc.addEdge w (modalNextWorld b)`, exactly like `boxNeg`).
+Neither shape is matched by any propositional rule (`.box`/`.diamond` are top-level
 constructors distinct from every prop-rule pattern's `.imp`/`.and`/`.or`-headed shape), so
 together they correctly track every `acc`-mutating step. -/
 def isMintingShaped (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
@@ -797,7 +795,7 @@ omit [Hashable Atom] in
 the private `modalApplyOne_fresh` in `Soundness.lean:87`, which cannot be imported across
 files): the result is either `acc` unchanged, or `acc.addEdge sf.label wsf.label` with a
 `.linear` result headed by the fresh witness `wsf`. Not `private`: reused by
-`GenericDriver.lean`'s `modalApplyOne_spec` (task 503) to witness the
+`GenericDriver.lean`'s `modalApplyOne_spec` to witness the
 `RuleApplicationSpec.freshLocal` field. -/
 lemma modalApplyOne_fresh_local
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -817,7 +815,7 @@ lemma modalApplyOne_fresh_local
     | exact Or.inr ⟨_, _, rfl, rfl⟩
     | (left; simp only [apply_ite Prod.snd, ite_self])
 
-/-- **Task 507 Phase 5 (generic form)**: `modalStepBranchGen apply` preserves `Nodup`-ness of the
+/-- **Generic form**: `modalStepBranchGen apply` preserves `Nodup`-ness of the
 expanded set `e`, for **any** `apply : RuleApply Atom` -- fully rule-agnostic, no per-call
 obligation about `apply` needed (only the top-level `RuleResult`-constructor shape matters).
 `modalStepBranch_preserves_expandedNodup` (K) is the trivial instantiation at
@@ -861,16 +859,16 @@ lemma modalStepBranch_preserves_expandedNodup_gen
     exact hnodup
   · rw [hfstc] at hsf; simp at hsf
 
-/-- **P2-obl-a** (precision refinement of the plan's "branch Nodup" shorthand): `modalStepBranch`
-preserves `Nodup`-ness of the **expanded set** `e`, not the raw branch `b`. This is the
-mathematically load-bearing fact for the out-degree bound (P2-obl-c): `b` itself is NOT
+/-- **P2-obl-a** (a precision refinement distinguishing the expanded set from the raw branch):
+`modalStepBranch` preserves `Nodup`-ness of the **expanded set** `e`, not the raw branch `b`.
+This is the mathematically load-bearing fact for the out-degree bound (P2-obl-c): `b` itself is NOT
 generally `Nodup` (propositional α/β rule outputs, e.g. `andPos`'s `T(φ∧ψ)@w ↦ [T(φ)@w,
 T(ψ)@w]`, are emitted unconditionally with no `b`-membership filter, so duplicate branch
 entries can arise when `φ` or `ψ` coincides with an already-present formula — unlike the modal
 rules, which all filter their outputs against `b`). `e`, by contrast, IS exactly `Nodup`: a
 formula is appended to `e` only after the `¬(expanded.any (· == sf))` gate confirms it is not
 already present, so every append extends a `Nodup` list by a genuinely-new element.
-Zero-regression corollary of `modalStepBranch_preserves_expandedNodup_gen` (task 507 Phase 5) at
+Zero-regression corollary of `modalStepBranch_preserves_expandedNodup_gen` at
 `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_preserves_expandedNodup
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -884,7 +882,7 @@ lemma modalStepBranch_preserves_expandedNodup
     hstep hnodup
 
 
-/-! ## Rank-Map Invariant (Phase 2 continuation, obligation b)
+/-! ## Rank-Map Invariant (obligation b)
 
 The rank map `rank : WorldIndex → Nat` records each world's remaining modal-depth budget,
 frozen at creation as `parent_rank − 1`. Two facts are maintained together: `rank` bounds
@@ -970,8 +968,8 @@ private lemma boxProps_rank_bound
 /-- Rank bound for the `diaNegProps` group propagated by both fresh-world rules (shared shape
 between `diamondPos` and `boxNeg`, `Rules.lean:107-115`/`132-140`): each propagated `F(ψ)@freshW`
 is exactly at label `freshW` and has `modalDepth ψ ≤ rank w − 1`, derived from the source
-`F(◇ψ)@w ∈ b`'s rank bound via `modalDepth (.diamond ψ) = 1 + modalDepth ψ ≤ rank w` (task 441:
-`diamond` is a native constructor). -/
+`F(◇ψ)@w ∈ b`'s rank bound via `modalDepth (.diamond ψ) = 1 + modalDepth ψ ≤ rank w`
+(`diamond` is a native constructor). -/
 private lemma diaNegProps_rank_bound
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (w freshW : WorldIndex)
     (rank : WorldIndex → Nat)
@@ -1032,7 +1030,7 @@ private lemma boxPos_rank_bound
 
 /-- Rank bound for `diamondNeg`'s output (propagation to *existing* successors,
 `Rules.lean:144-153`): `F(◇φ)@w`'s propagated `F(φ)@w'` (for `w' ∈ acc.successorsOf w`) has
-`modalDepth φ ≤ rank w'`, transported across the recorded edge `w → w'` (task 441: `diamond`
+`modalDepth φ ≤ rank w'`, transported across the recorded edge `w → w'` (`diamond`
 is a native constructor). -/
 private lemma diamondNeg_rank_bound
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1071,7 +1069,7 @@ private lemma hasEdge_addEdge_cases_local {acc : Accessibility} {w w' a a' : Wor
   · exact Or.inl ⟨hw.symm, hw'.symm⟩
   · exact Or.inr h
 
-/-- **Task 507 (generic per-call rank-step obligation)**: the single-call rank-preservation fact
+/-- **Generic per-call rank-step obligation**: the single-call rank-preservation fact
 `modalStepBranch_exists_rank'`'s proof needs about `modalApplyOne` at each firing, extracted as
 its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only inspects the
 four `RuleResult` constructor shapes) can be replayed for an abstract `apply` given this fact as
@@ -1135,7 +1133,7 @@ lemma modalApplyOne_rank_step
               SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfmem
           exact ⟨rank, fun _ _ => rfl, hedge,
             boxPos_rank_bound b acc φ l rank hbound hedge hψbox⟩
-      · -- diamond φ (diamondPos): mints a fresh world (task 441: native constructor).
+      · -- diamond φ (diamondPos): mints a fresh world (native constructor).
         dsimp only
         have hllt : l < modalNextWorld b :=
           Nat.lt_succ_of_le (label_le_modalMaxWorld hsfmem)
@@ -1217,13 +1215,13 @@ lemma modalApplyOne_rank_step
           exact ⟨rank, fun _ _ => rfl, hedge,
             diamondNeg_rank_bound b acc φ l rank hbound hedge hφdia⟩
 
-/-- **Task 507 Phase 3 (generic form)**: given `rank` satisfying the rank-bound and rank-edge
+/-- **Generic form**: given `rank` satisfying the rank-bound and rank-edge
 invariants pre-step, `modalStepBranchGen apply` produces a `rank'` (agreeing with `rank` off the
 single fresh point `modalNextWorld b`) satisfying both invariants on every child branch and the
 post-step accessibility relation `newAcc`, given the per-call rank-step obligation `hRankStep`
 (the raw hypothesis underlying `RuleApplicationSpec.rankStep`, spelled out here rather than
-bundled to avoid the import cycle with `GenericDriver.lean` -- see the plan's "Architectural
-Note"). `modalStepBranch_exists_rank'` (K) is the trivial instantiation at
+bundled, to avoid an import cycle with `GenericDriver.lean`).
+`modalStepBranch_exists_rank'` (K) is the trivial instantiation at
 `apply := modalApplyOne`, `hRankStep := modalApplyOne_rank_step`. -/
 lemma modalStepBranch_exists_rank'_gen
     (apply : RuleApply Atom)
@@ -1319,7 +1317,7 @@ lemma modalStepBranch_exists_rank'_gen
 `modalStepBranch` produces a `rank'` (agreeing with `rank` off the single fresh point
 `modalNextWorld b`, when a world is minted by `diamondPos`/`boxNeg`) satisfying both invariants
 on every child branch and the post-step accessibility relation `newAcc`. Zero-regression
-corollary of `modalStepBranch_exists_rank'_gen` (task 507 Phase 3) at `apply := modalApplyOne`
+corollary of `modalStepBranch_exists_rank'_gen` at `apply := modalApplyOne`
 via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_exists_rank'
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1339,7 +1337,7 @@ lemma modalStepBranch_exists_rank'
     b e acc newBs newExps newAcc hstep hInv rank hbound hedge
 
 
-/-! ## Out-Degree Bound (Phase 2 continuation, obligation c)
+/-! ## Out-Degree Bound (obligation c)
 
 `boxNeg` (`F(□φ)@w`) is the **only** rule shape that ever mutates `acc` at runtime (see
 `isMintingShaped`'s doc comment for the dead-code argument ruling out `diamondPos`/`diamondNeg`).
@@ -1433,7 +1431,7 @@ private lemma outDeg_addEdge_ne (acc : Accessibility) (w wf w' : WorldIndex) (h 
 
 
 omit [Hashable Atom] in
-/-- **Task 507 (generic per-call outDeg-step obligation)**: the single-call outDeg/expanded-set
+/-- **Generic per-call outDeg-step obligation**: the single-call outDeg/expanded-set
 counting fact `modalStepBranch_preserves_outDegEq`'s proof needs about `modalApplyOne` at each
 firing, extracted as its own lemma so the surrounding driver-unfolding argument (rule-agnostic:
 it only inspects the four `RuleResult` constructor shapes) can be replayed for an abstract
@@ -1480,7 +1478,7 @@ lemma modalApplyOne_outDeg_step
       · -- box φ (boxPos): propagates to existing successors, never mints.
         dsimp only
         split <;> exact houtdeg w
-      · -- diamond φ (diamondPos): mints a fresh world (task 441: native, genuinely minting).
+      · -- diamond φ (diamondPos): mints a fresh world (native, genuinely minting).
         dsimp only
         by_cases hw : w = l
         · rw [hw]
@@ -1512,11 +1510,11 @@ lemma modalApplyOne_outDeg_step
         dsimp only
         split <;> exact houtdeg w
 
-/-- **Task 507 Phase 2 (generic form)**: `modalStepBranchGen apply` preserves the out-degree/
+/-- **Generic form**: `modalStepBranchGen apply` preserves the out-degree/
 expanded-set correspondence for an abstract `apply : RuleApply Atom`, given its per-call
 outDeg-step obligation `hOutDegStep` (the raw hypothesis underlying
-`RuleApplicationSpec.outDegStep`, spelled out here rather than bundled to avoid an import cycle
-with `GenericDriver.lean` -- see the plan's "Architectural Note").
+`RuleApplicationSpec.outDegStep`, spelled out here rather than bundled, to avoid an import cycle
+with `GenericDriver.lean`).
 `modalStepBranch_preserves_outDegEq` (K) is the trivial instantiation at
 `apply := modalApplyOne`, `hOutDegStep := modalApplyOne_outDeg_step`. -/
 lemma modalStepBranch_preserves_outDegEq_gen
@@ -1571,7 +1569,7 @@ lemma modalStepBranch_preserves_outDegEq_gen
 
 /-- **P2-obl-c** supporting invariant: `modalStepBranch` preserves the out-degree/expanded-set
 correspondence `outDeg acc w = |{formulas in e matching isMintingShaped at w}|` for every world
-`w`. Zero-regression corollary of `modalStepBranch_preserves_outDegEq_gen` (task 507 Phase 2) at
+`w`. Zero-regression corollary of `modalStepBranch_preserves_outDegEq_gen` at
 `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_preserves_outDegEq
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1589,8 +1587,8 @@ lemma modalStepBranch_preserves_outDegEq
 
 omit [Hashable Atom] in
 /-- Inversion for `isMintingShaped`: a minting-shaped signed formula is either `boxNeg`-shaped
-(sign `.neg`, formula a box) or `diamondPos`-shaped (sign `.pos`, formula a diamond; task 441:
-native `diamond` genuinely mints). -/
+(sign `.neg`, formula a box) or `diamondPos`-shaped (sign `.pos`, formula a diamond; the
+native `diamond` constructor genuinely mints). -/
 private lemma isMintingShaped_inv
     {sf : SignedFormula (Proposition Atom) WorldIndex} (h : isMintingShaped sf = true) :
     (sf.sign = .neg ∧ ∃ ψ, sf.formula = .box ψ) ∨
@@ -1675,10 +1673,9 @@ lemma outDeg_le_of_expandedNodup
   exact (List.subperm_of_subset hfmnodup hsub).length_le
 
 
-/-! ## Potential Function Φ (Phase 2 continuation, obligation d — DEFINITIONS ONLY)
+/-! ## Potential Function Φ (obligation d — definitions only)
 
-The scalar potential offsetting `modalMaxWorld`'s growth. **Design correction discovered
-during formalization** (documented here for the next dispatch): the naive per-world term
+The scalar potential offsetting `modalMaxWorld`'s growth. The naive per-world term
 `(Sf − outDeg acc w) * geomCap Sf (rank w − 1)` is WRONG at a rank-0 ("leaf") world, because
 `Nat`'s truncated subtraction silently turns `rank w − 1` into `0` when `rank w = 0`, giving
 `geomCap Sf 0 = 1` and a spurious nonzero term `Sf * 1 = Sf` instead of the mathematically
@@ -1704,7 +1701,7 @@ def modalPotential (Sf : Nat) (b : List (SignedFormula (Proposition Atom) WorldI
     (acc : Accessibility) (rank : WorldIndex → Nat) : Nat :=
   ((modalKnownWorlds b).map (modalPotentialTerm Sf acc rank)).sum
 
-/-! ## Known-Worlds and Max-World Bookkeeping (Phase 2 continuation, obligation d — finish)
+/-! ## Known-Worlds and Max-World Bookkeeping (obligation d — finish)
 
 General, `modalStepBranch`-independent facts about `modalKnownWorlds`/`modalMaxWorld` under list
 append, needed to show the potential `Φ` is exactly preserved (up to the single fresh-world
@@ -1883,8 +1880,7 @@ private lemma modalMaxWorld_append_single
     have := label_le_modalMaxWorld (List.mem_append_left b hsf0)
     rwa [hxs sf0 hsf0] at this
 
-/-! ## `accTargetsKnown` Invariant and the Known-Worlds Dichotomy (Phase 2 continuation,
-obligation d — finish)
+/-! ## `accTargetsKnown` Invariant and the Known-Worlds Dichotomy (obligation d — finish)
 
 `accTargetsKnown b acc` records that every accessibility-edge target is a label already
 appearing on the branch. This is needed to lift the `boxPos`/`diamondNeg` closure facts
@@ -1896,10 +1892,10 @@ def accTargetsKnown (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (acc : Accessibility) : Prop :=
   ∀ w w', acc.hasEdge w w' → w' ∈ modalKnownWorlds b
 
-/-- **Task 507 Phase 4 (generic form)**: `modalStepBranchGen apply` preserves `accTargetsKnown`,
+/-- **Generic form**: `modalStepBranchGen apply` preserves `accTargetsKnown`,
 given the per-call freshness dichotomy `hFreshLocal` (the raw hypothesis underlying
-`RuleApplicationSpec.freshLocal`, spelled out here rather than bundled to avoid the import cycle
-with `GenericDriver.lean` -- see the plan's "Architectural Note"). Old edges' targets remain
+`RuleApplicationSpec.freshLocal`, spelled out here rather than bundled, to avoid the import cycle
+with `GenericDriver.lean`). Old edges' targets remain
 known since the branch only grows (`modalKnownWorlds_mono_append`); the one possible new edge
 targets the freshly-minted witness world, which is immediately present on the new branch.
 `modalStepBranch_preserves_accTargetsKnown` (K) is the trivial instantiation at
@@ -1968,7 +1964,7 @@ lemma modalStepBranch_preserves_accTargetsKnown_gen
     · exact hbsub b' hb' (hknown w w' hold)
 
 /-- **P2-obl-d prerequisite**: `modalStepBranch` preserves `accTargetsKnown`. Zero-regression
-corollary of `modalStepBranch_preserves_accTargetsKnown_gen` (task 507 Phase 4) at
+corollary of `modalStepBranch_preserves_accTargetsKnown_gen` at
 `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_preserves_accTargetsKnown
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1982,7 +1978,7 @@ lemma modalStepBranch_preserves_accTargetsKnown
     b e acc newBs newExps newAcc hstep hknown
 
 /-- Shared closure fact for the fresh-world-minting groups (`diamondPos`'s live shape and
-`boxNeg`'s live shape, `Rules.lean:93-141`; task 441: `diamondPos` is native and genuinely
+`boxNeg`'s live shape, `Rules.lean:93-141`; `diamondPos` is native and genuinely
 mints): every emitted formula's label is exactly `modalNextWorld b`, since the witness,
 `boxProps`, and `diaNegProps` are all constructed at that one fresh label. Parametrized over
 the witness's sign/formula so both rule shapes share one proof (mirrors
@@ -2030,7 +2026,7 @@ private lemma mintGroup_label_eq_freshWorld
       · simp at heq
     · simp at heq
 
-/-- **Task 507 (generic per-call knownWorlds-step obligation)**: the single-call known-worlds
+/-- **Generic per-call knownWorlds-step obligation**: the single-call known-worlds
 dichotomy `modalStepBranch_knownWorlds`'s proof needs about `modalApplyOne` at each firing,
 extracted as its own lemma so the surrounding driver-unfolding argument (rule-agnostic: it only
 inspects the four `RuleResult` constructor shapes) can be replayed for an abstract `apply` given
@@ -2124,12 +2120,12 @@ lemma modalApplyOne_knownWorlds_step
           obtain ⟨-, hxsucc⟩ := modalApplyOne_diamondNeg_outputs_subset b acc φ l x hx
           exact hknown l x.label (mem_successorsOf_hasEdge hxsucc)
 
-/-- **Task 507 Phase 4 (generic form)**: the known-worlds/max-world dichotomy for a single
+/-- **Generic form**: the known-worlds/max-world dichotomy for a single
 `modalStepBranchGen apply` step, given the per-call known-worlds-step obligation
 `hKnownWorldsStep` (the raw hypothesis underlying `RuleApplicationSpec.knownWorldsStep`, spelled
-out here rather than bundled to avoid the import cycle with `GenericDriver.lean` -- see the
-plan's "Architectural Note"). Either `acc` is unchanged and every child branch's known-worlds/
-max-world are unchanged (up to `Perm`); or `acc` gains exactly one edge from some known world `l`
+out here rather than bundled, to avoid the import cycle with `GenericDriver.lean`). Either `acc`
+is unchanged and every child branch's known-worlds/max-world are unchanged (up to `Perm`); or
+`acc` gains exactly one edge from some known world `l`
 to the fresh world `modalNextWorld b`, and every child branch's known-worlds/max-world gain
 exactly that one fresh world. `modalStepBranch_knownWorlds` (K) is the trivial instantiation at
 `apply := modalApplyOne`, `hKnownWorldsStep := modalApplyOne_knownWorlds_step`. -/
@@ -2232,7 +2228,7 @@ lemma modalStepBranch_knownWorlds_gen
 
 /-- **P2-obl-d prerequisite**: the known-worlds/max-world dichotomy for a single
 `modalStepBranch` step. Zero-regression corollary of `modalStepBranch_knownWorlds_gen`
-(task 507 Phase 4) at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
+at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
 byte-unchanged. -/
 lemma modalStepBranch_knownWorlds
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2250,7 +2246,7 @@ lemma modalStepBranch_knownWorlds
   exact modalStepBranch_knownWorlds_gen modalApplyOne modalApplyOne_knownWorlds_step
     b e acc newBs newExps newAcc hstep hknown
 
-/-- **Task 507 Phase 4 (generic form)**: the expanded set's `modalUniverse` closure is preserved
+/-- **Generic form**: the expanded set's `modalUniverse` closure is preserved
 across a `modalStepBranchGen apply` step, for **any** `apply : RuleApply Atom` -- this fact needs
 no per-call obligation about `apply` at all, since `e'` is either `e` unchanged (persistent
 rules) or `e ++ [sf]` (linear/branching rules), and in the latter case `sf ∈ modalUniverse φ0`
@@ -2303,7 +2299,7 @@ lemma modalStepBranch_eClosure_gen
   · rw [hfstc] at hsf; simp at hsf
 
 /-- The expanded set's `modalUniverse` closure is preserved across a `modalStepBranch` step.
-Zero-regression corollary of `modalStepBranch_eClosure_gen` (task 507 Phase 4) at
+Zero-regression corollary of `modalStepBranch_eClosure_gen` at
 `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_eClosure
     (φ0 : Proposition Atom)
@@ -2343,12 +2339,12 @@ structure ModalPotentialInv (φ0 : Proposition Atom)
   /-- The rank map decreases by exactly 1 across every recorded accessibility edge (P2-obl-b). -/
   rankEdge : ∀ w w', acc.hasEdge w w' → rank w' + 1 = rank w
 
-/-- **Task 507 Phase 5 (generic form, the crux)**: the exact single-step potential-drop
+/-- **The crux (generic form)**: the exact single-step potential-drop
 identity for an abstract `apply : RuleApply Atom`, given its four per-call/aggregate step
 obligations `hFreshLocal`/`hRankStep`/`hOutDegStep`/`hKnownWorldsStep` (the raw hypotheses
 underlying `RuleApplicationSpec.freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep`, spelled
-out here rather than bundled to avoid the import cycle with `GenericDriver.lean` -- see the
-plan's "Architectural Note"). `modalStepBranchGen apply` preserves `modalMaxWorld b +
+out here rather than bundled, to avoid the import cycle with `GenericDriver.lean`).
+`modalStepBranchGen apply` preserves `modalMaxWorld b +
 modalPotential Sf b acc rank` EXACTLY (`Sf := (modalSubfmls φ0).length`), composing
 `modalStepBranch_exists_rank'_gen` for the rank map and `modalStepBranch_knownWorlds_gen` for the
 known-worlds/max-world bookkeeping. The fresh-world case's `modalMaxWorld` increment of exactly
@@ -2567,7 +2563,7 @@ lemma modalStepBranch_potential_step_gen
       ring
 
 /-- **P2-obl-d (finish)**: the exact single-step potential-drop identity. Zero-regression
-corollary of `modalStepBranch_potential_step_gen` (task 507 Phase 5) at `apply := modalApplyOne`
+corollary of `modalStepBranch_potential_step_gen` at `apply := modalApplyOne`
 via the `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalStepBranch_potential_step
     (φ0 : Proposition Atom)
@@ -2588,7 +2584,7 @@ lemma modalStepBranch_potential_step
     modalApplyOne_rank_step modalApplyOne_outDeg_step modalApplyOne_knownWorlds_step
     φ0 b e acc newBs newExps newAcc rank hstep hinv
 
-/-! ## World-Count Bound (Phase 2 continuation, obligation e — final composition) -/
+/-! ## World-Count Bound (obligation e — final composition) -/
 
 /-- `Sf(φ0) := (modalSubfmls φ0).length` is always positive: `φ0` is always a member of its own
 subformula list via `modalSubfmls_self_mem`. -/
@@ -2653,8 +2649,8 @@ using `Sf ≥ 1` unconditionally and `Sf = 1 → modalDepth φ0 = 0`), `≤ (2 �
 (2 · modalComplexity φ0 + 1) ^ (modalComplexity φ0 + 1)` (`modalDepth_le_complexity` + pow
 monotonicity in the exponent) `= modalWorldBound φ0`.
 
-This is a **documented deviation** from the plan's terse `hb + hW` loop-invariant target: the
-terse form (assuming only `modalMaxWorld b < modalWorldBound φ0` survives a step) is FALSE — a
+A terse `hb + hW` loop-invariant target (assuming only `modalMaxWorld b < modalWorldBound φ0`
+survives a step) is FALSE — a
 branch can carry a single not-yet-fired minting formula at label `modalWorldBound φ0 − 1`,
 satisfying the naive hypothesis, whose firing mints world `modalWorldBound φ0`, breaching the
 bound (see the doc-comment preceding `isMintingShaped` for the full counterexample argument).
@@ -2749,7 +2745,7 @@ lemma modalStepBranch_worldBound_gen
 
 /-- **P2-obl-e (final)**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
 invariant of `modalStepBranch`. Zero-regression corollary of `modalStepBranch_worldBound_gen`
-(task 507 Phase 6) at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
+at `apply := modalApplyOne` via the `modalStepBranch_eq` bridge; statement
 byte-unchanged. -/
 lemma modalStepBranch_worldBound
     (φ0 : Proposition Atom)
@@ -2766,17 +2762,17 @@ lemma modalStepBranch_worldBound
     modalApplyOne_rank_step modalApplyOne_outDeg_step modalApplyOne_knownWorlds_step
     φ0 b e acc newBs newExps newAcc rank hstep hinv hPhiBound
 
-/-! ## Output-Freshness and Per-Rule R-Drop (Phase 3)
+/-! ## Output-Freshness and Per-Rule R-Drop
 
-This section proves the counting measure `modalWork`/`modalExpMeasure` (§3.2) strictly
+This section proves the counting measure `modalWork`/`modalExpMeasure` strictly
 decreases on every `some` step of `modalStepBranch`, completing the port of
 `classicalExpMeasure_step_lt` (`Classical/Completeness.lean:834`). The combinatorial core is a
 `List.countP`-drop lemma (`modalCount_notMem_append_drop`) mirroring
 `classicalBranchComplexity_drop` (`:509`) at unit weight (a pure count, not a complexity sum);
 composed with a weak monotonicity lemma (`modalCount_notMem_mono`, the branch-growth direction),
-it gives the two per-rule-kind drop lemmas `modalWork_drop_linear`/`modalWork_drop_persistent`
-(research §2.2/§3.4). The `.persistent`-producing rules' freshness/nonemptiness fact
-(`modalApplyOne_persistent_props`, research §3.4) is proved directly over the `boxPropagation`/
+it gives the two per-rule-kind drop lemmas `modalWork_drop_linear`/`modalWork_drop_persistent`.
+The `.persistent`-producing rules' freshness/nonemptiness fact
+(`modalApplyOne_persistent_props`) is proved directly over the `boxPropagation`/
 successor-`filterMap` raw expressions (mirroring `modalApplyOne_boxPos_outputs_subset`/
 `modalApplyOne_diamondNeg_outputs_subset`'s style), assembled via the same top-level case
 dispatch as `modalApplyOne_outputs_subset`, before driving the engine `modalExpMeasure_step_lt`
@@ -2882,7 +2878,7 @@ private lemma modalCount_notMem_mono
   simpa [List.countP_eq_length_filter] using hsubf.length_le
 
 omit [Hashable Atom] in
-/-- **`R`-drop, linear/branching case** (research §2.2): when the fired formula `sf` is added
+/-- **`R`-drop, linear/branching case**: when the fired formula `sf` is added
 to the expanded set (`e' = e ++ [sf]`) and the child branch `b'` weakly extends `b` (every rule
 child is `newForms ++ b` for some `newForms`, `Saturation.lean:104-123`), the counting measure
 strictly drops by at least one. No `U`-membership of `newForms` is required: growing `b` to `b'`
@@ -2899,7 +2895,7 @@ private lemma modalWork_drop_linear
   omega
 
 omit [Hashable Atom] in
-/-- **`R`-drop, persistent case** (research §2.2/§3.4): when the expanded set is unchanged
+/-- **`R`-drop, persistent case**: when the expanded set is unchanged
 (`boxPos`/`diamondNeg`) but the child branch `b'` contains a fresh `U`-member `x0` not on `b`
 (guaranteed by `modalApplyOne_persistent_props` below, since persistent rules only ever emit
 nonempty output whose formulas are `∉ b`), the counting measure strictly drops by at least one:
@@ -3055,7 +3051,7 @@ private lemma diamondNeg_filterMap_fresh
     exact hcond _ hxb (by simp)
 
 omit [Hashable Atom] in
-/-- **Persistent-rule nonemptiness and freshness** (research §3.4): whenever
+/-- **Persistent-rule nonemptiness and freshness**: whenever
 `modalApplyOne sf b acc` produces a `.persistent` result, the emitted formulas `nf` are both
 nonempty (the `isEmpty` guard in `boxPos`/`diamondNeg`, `Rules.lean:83-88,142-151`, routes the
 empty case to `.notApplicable` instead) and fresh (`∀ x ∈ nf, x ∉ b`, by the underlying
@@ -3169,7 +3165,7 @@ lemma modalApplyOne_branching_length
         · simp only [if_pos hemp] at hca; simp at hca
         · simp only [if_neg hemp] at hca; simp at hca
 
-/-! ## Strict-Decrease Engine (Phase 3) -/
+/-! ## Strict-Decrease Engine -/
 
 omit [Hashable Atom] in
 /-- `classicalExpMeasure_split`-style additivity (`Classical/Completeness.lean:641`), adapted
@@ -3213,13 +3209,13 @@ private lemma modalExpMeasure_const_exp
       = (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum := by
   simp only [modalExpMeasure, ← List.map_prod_left_eq_zip, List.map_map, Function.comp_def]
 
-/-- **Task 507 Phase 7 (generic form, the engine)**: one `modalStepBranchGen apply` step
+/-- **The engine (generic form)**: one `modalStepBranchGen apply` step
 strictly decreases the base-3 damped worklist measure by at least one, given the
 branch-closure/freshness/world-bound hypotheses `hb`/`hInv`/`hW` and the three per-call/aggregate
 obligations `hBranchingLength`/`hPersistentFresh`/`hOutputsSubsetUniverse`. `hBranchingLength` is
-a **new** raw hypothesis (task 507 Phase 7 discovery): the `.branching` case needs `apply`'s
-branching output to always have exactly two sub-branches, a fact not covered by any of the six
-fields established in Phases 1-6 -- mirrors the new `RuleApplicationSpec.branchingLength` field
+an additional raw hypothesis: the `.branching` case needs `apply`'s
+branching output to always have exactly two sub-branches, a fact not covered by the other
+`RuleApplicationSpec` fields above -- mirrors the `RuleApplicationSpec.branchingLength` field
 (`GenericDriver.lean`), discharged for `modalApplyOne` by the pre-existing
 `modalApplyOne_branching_length`. `hPersistentFresh`/`hOutputsSubsetUniverse` are the raw forms
 of the pre-existing `persistentFresh`/`outputsSubsetUniverse` fields. Case-splits over the four
@@ -3332,10 +3328,10 @@ lemma modalExpMeasure_step_lt_gen
     exact pow3_add_one_le hC h0
   · rw [hca] at hfound; simp at hfound
 
-/-- **The strict-decrease engine** (research §3.6, port of `classicalExpMeasure_step_lt`,
+/-- **The strict-decrease engine** (port of `classicalExpMeasure_step_lt`,
 `Classical/Completeness.lean:834`): one `modalStepBranch` step strictly decreases the base-3
 damped worklist measure by at least one. Zero-regression corollary of
-`modalExpMeasure_step_lt_gen` (task 507 Phase 7) at `apply := modalApplyOne` via the
+`modalExpMeasure_step_lt_gen` at `apply := modalApplyOne` via the
 `modalStepBranch_eq` bridge; statement byte-unchanged. -/
 lemma modalExpMeasure_step_lt
     (φ0 : Proposition Atom)
@@ -3357,7 +3353,7 @@ lemma modalExpMeasure_step_lt
     modalApplyOne_persistent_props modalApplyOne_outputs_subset
     φ0 done bt newBs doneExp es newExp bh e acc newAcc hdlen hb hInv hW hstep
 
-/-! ## Downstream Reuse Helpers (task 503: T, S5, B existing-world propagation)
+/-! ## Downstream Reuse Helpers (T, S5, B existing-world propagation)
 
 The two facts below are public (unlike the closely-related private helpers
 `mem_modalUniverse_of'`/`mem_modalKnownWorlds` they are built from) because they are exactly

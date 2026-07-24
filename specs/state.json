@@ -4,26 +4,62 @@
     {
       "project_number": 550,
       "project_name": "remove_bimodal_temporal_linter_suppressions",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files",
       "description": "Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSProperties.lean, Bimodal/Theorems/{Combinators,Perpetuity/Helpers,Perpetuity/Principles,Propositional/Connectives,Propositional/Core,TemporalDerived}.lean, Temporal/Metalogic/{GeneralizedNecessitation,PropositionalHelpers}.lean) carry file-scoped `set_option linter.style.{emptyLine,longLine,setOption} false` / `set_option linter.{flexible,unusedSimpArgs} false`, inherited verbatim from the external BimodalLogic port. Reformat each file to satisfy the disabled linters (wrap long lines, remove stray blank lines, resolve flexible/unused-simp-arg findings) and drop the suppressions, or narrow them to per-declaration `set_option ... in` where only one declaration is affected.",
       "created": "2026-07-24T02:04:32Z",
-      "last_updated": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:30:56Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/reports/01_linter-suppression-inventory.md",
+          "type": "report",
+          "summary": "Per-file suppression inventory with empirical DEAD/REAL classification, finding line numbers, linter mechanics, fix ordering, verification steps."
+        },
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/plans/01_drop-linter-suppressions.md",
+          "type": "plan",
+          "summary": "5-phase plan: drop dead suppressions, wrap Combinators long lines, remove Principles blank lines, narrow Connectives flexible, full verification gate."
+        },
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/summaries/01_drop-linter-suppressions-summary.md",
+          "type": "summary",
+          "summary": "Dropped/narrowed all inherited linter suppressions across nine Bimodal/Temporal files; wrapped long lines, removed stray blanks, scoped flexible; full CI green."
+        }
+      ],
+      "session_id": "sess_1784858753_022fa6_550",
+      "completion_summary": "Removed all inherited file-scoped linter suppressions across nine Bimodal/Temporal files: dropped 13 dead suppressions, wrapped 6 long lines in Combinators, removed 5 stray blank lines in Perpetuity/Principles, narrowed Connectives flexible to per-declaration set_option ... in; full build, lint, lint-style, test, mk_all, shake all green."
     },
     {
       "project_number": 549,
       "project_name": "prune_canonicalmodel_redundant_imports",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Prune shake-flagged redundant imports in CanonicalModel.lean (task 540 follow-up)",
       "description": "lake shake --add-public --keep-implied --keep-prefix flags Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean's `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused now that task 540 added GenericMCSBridge/DerivationCombinators imports to the same file. Verify with `lake shake --fix` or manual removal, then `lake build` the module to confirm no regression (the MCS/Birelational names are referenced only in docstring prose, not as used Lean identifiers, per current inspection).",
       "created": "2026-07-24T02:04:32Z",
-      "last_updated": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:30:51Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/reports/01_prune-redundant-imports.md",
+          "type": "report",
+          "summary": "Import-hygiene analysis: shake output, two-file change set (remove MCS+Birelational from CanonicalModel, add Birelational to TruthLemma), verification via Completeness build."
+        },
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/plans/01_prune-redundant-imports.md",
+          "type": "plan",
+          "summary": "Single-phase atomic plan: remove MCS+Birelational imports from CanonicalModel, add Birelational to TruthLemma, verify via Completeness build."
+        },
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/summaries/01_prune-redundant-imports-summary.md",
+          "type": "summary",
+          "summary": "Removed MCS+Birelational imports from CanonicalModel, added Birelational to TruthLemma; full verification green (build, lint, shake, mk_all, test)."
+        }
+      ],
+      "session_id": "sess_1784858753_022fa6_549",
+      "completion_summary": "Pruned redundant public imports (MCS, Birelational) from Intuitionistic/CanonicalModel.lean and added the compensating public import of Birelational to TruthLemma.lean; verified with scoped Completeness build, checkInitImports, lint-style, mk_all, shake, and full lake test (all green)."
     },
     {
       "project_number": 530,

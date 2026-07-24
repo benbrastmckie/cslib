@@ -11,8 +11,8 @@ next_project_number: 555
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,463,465,466,519,530,534,535,537,551,552,554 | -- | propositional logic, modal logic, bimodal logic, ... |
-| 2 | 39,40,215,317,425,450,511,553 | 36,37,181,535,552 | propositional logic, temporal logic, bimodal logic |
+| 1 | 36,37,181,226,400,409,440,463,465,466,519,530,534,535,551,552,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 2 | 39,40,215,317,425,450,511,537,553 | 36,37,181,535,552,554 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,301,375,430,456,497,506,548 | 39,40,317,425,511,535 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,413 | 375,506 | modal logic, code hygiene |
 | 5 | 414 | 181,215,300,301 | code hygiene |
@@ -42,8 +42,8 @@ next_project_number: 555
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
   └─ 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
-537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 551 [IMPLEMENTING] — Deliver NATIVE Hilbert canonical-model completeness for construct
+537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 
 ### Temporal Logic
 
@@ -89,6 +89,7 @@ next_project_number: 555
   └─ 317 [BLOCKED] — (Propositional Logic: Fill the propositional tableau completen) (see above)
   └─ 425 [BLOCKED] — (Temporal Logic: [Decomposed from task 301, blocker C.] E) (see above)
 554 [NOT STARTED] — Research-only task: establish or refute the CS5 pair-seed disjunc
+  └─ 537 [BLOCKED] — (Modal Logic: Prove the general labelled SOUNDNESS dir) (see above)
 
 ## Tasks
 
@@ -97,7 +98,7 @@ next_project_number: 555
 - **Task Type**: cslib
 - **Dependencies**: None
 
-**Description**: Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.
+**Description**: Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.  SECOND CONSUMER (widened brief): this research also gates the labelled CS5 general-soundness biconditional task, which hit the SAME obstruction family from an independent direction. Its Phase 9 probe gate failed definitively after three dispatches on the non-theorem box(A-or-B) implies (box-A or box-B) -- box failing to distribute over disjunction, which is the same constructive-disjunction-property wall as the pair-seed obligation above. Machine-checked evidence lives in that task under probes/theta_place_validation.lean, probes/theta_place_layered.lean, and probes/theta_place_final_gate.lean; all three compile clean with no sorryAx and are durable assets for this research. Because two independent formalization fronts converged on the same wall, a cut-free or nested-sequent treatment that recovers disjunction-property reasoning would unblock BOTH. When reporting, state explicitly what each consumer would gain: for the pair-seed task, whether the named open Prop can be discharged; for the labelled-soundness task, whether a context-fold that splits compound context facts is derivable without the box-over-disjunction bridge.
 
 ---
 
@@ -294,7 +295,7 @@ next_project_number: 555
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
-- **Dependencies**: Task 517
+- **Dependencies**: Task 554
 - **Summary**:
   - [537_labelled_cs5_general_soundness_biconditional/summaries/02_gate-c-blocked-handoff-summary.md]
   - [537_labelled_cs5_general_soundness_biconditional/summaries/03_phase1-box-dia-iff-base-summary.md]

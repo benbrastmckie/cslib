@@ -273,7 +273,63 @@ genuine new prerequisite plan 01 lacked (resolves blocker finding #1) and gates 
 
 ---
 
-### Phase 3: Soundness half — eventualityDefect_unsat and temporalTableau_sound [NOT STARTED]
+### Phase 3: Soundness half — eventualityDefect_unsat and temporalTableau_sound [BLOCKED]
+
+**BLOCKER**:
+- **What failed**: `eventualityDefect_unsat` (`branchSat b ord → False` given `findEventualityDefect
+  b ord tracker = some t` and `TrackerBranchFaithful b ord tracker`) appears to be **not actually
+  provable as stated** — the report 02 Finding 3(b) "finite-loop pigeonhole under
+  `IsSuccArchimedean`" sketch does not close, and analysis below suggests the target statement may
+  be false as a standalone fact about `branchSat`.
+- **What was tried**: Worked through the semantic content required to derive a contradiction from
+  `branchSat b ord`. `branchSat` places no constraint beyond "some discrete-serial model M/f
+  satisfies every T/F-signed formula that literally appears on the finite list `b`, at the
+  branch-labels named in `b`". Given `TrackerBranchFaithful` + `allEventualitiesFulfilledOrDuplicated`,
+  the two facts available are `⟨.pos, U, t_anc⟩ ∈ b` and `⟨.pos, U, t⟩ ∈ b` for the same Until/Since
+  formula `U` (the "duplicated" pending eventuality). Under `branchSat`, each independently forces
+  `Satisfies M (f t_anc) U` and `Satisfies M (f t) U` — i.e. `∃ s₁ > f t_anc, …` and `∃ s₂ > f t, …`.
+  These are two *unrelated* existentials: nothing in `branchSat`'s definition ties `f t` to lie
+  between `f t_anc` and its witness `s₁`, nor forces `s₁ = f t` or any other relationship. Since the
+  Until/Since semantic clause (`Satisfies.untl_iff`/`snce_iff`) is purely existential (a witness may
+  be placed anywhere later/earlier in the model), a model can *always* satisfy both assertions
+  independently (e.g. witnessing far out in ℤ), regardless of whether the tableau's own
+  witness-search (`fulfillEventualities`, which is exactly what "still pending" tracks) succeeded.
+  "Still pending" is a fact about the **tableau's own procedural search state**, not a semantic
+  constraint that `branchSat`'s existential model is obligated to respect. No pigeonhole over a
+  finite `timeType` space closes this gap: `isSubsetBlocked`/`allEventualitiesFulfilledOrDuplicated`
+  are checked only against the *syntactic* branch content `b` at the two named labels `t_anc`/`t`,
+  and do not constrain the model's behavior at any of the (unnamed, model-only) intermediate points
+  a `branchSat` witness function is free to choose.
+- **Why it's stuck**: The standard literature argument for eventuality-fulfillment tableau soundness
+  (e.g. Wolper-style LTL/PTL tableaux) is a **rule-soundness / contrapositive induction**: assume an
+  actual model of `¬φ` exists, then show *at every step* the tableau construction can be *guided* by
+  that model so that at least one child branch remains satisfiable by it, and finally that
+  eventuality-defect closure can never be reached while a real model is being followed (because the
+  model's own witness gives an actual, bounded successor-distance that the guided construction
+  discharges before the loop re-forms). This is precisely `temporalStepBranch_preserves_sat`
+  (Soundness.lean's *original* pre-task-425 "Blocked Obligation" #2 — propagation soundness), which
+  is a **run-level, model-first** induction over the *entire construction history*, not a *local*
+  fact about a single already-closed `(b, ord, tracker)` triple in isolation. Report 02 Finding 3(b)
+  substitutes a local two-point pigeonhole for this run-level argument; the substitution does not
+  appear to be sound, because — as shown above — `branchSat`'s existential is not constrained by the
+  tableau's own bookkeeping at all.
+- **What is needed**: Either (a) a substantially larger redesign restating `eventualityDefect_unsat`
+  (and `temporalTableau_sound`) as a genuine run-level, model-guided induction over
+  `temporalStepBranch`/`processNext` (mirroring the *original* blocked obligation #2, not the
+  Phase-2-style branch/tracker invariant alone) — a materially bigger undertaking than the ~4h
+  estimate and likely requiring a fresh planning/research pass — or (b) further research input
+  identifying the missing semantic ingredient (if any) that ties "still pending" to a genuine
+  model-level constraint the report's sketch did not surface. This is flagged back to
+  research/planning rather than forced through with an unjustified or incorrect proof.
+- **Prohibited workarounds**: Did NOT use `sorry`, `def X := True`, or any vacuous placeholder for
+  `eventualityDefect_unsat`/`temporalTableau_sound`; both remain undefined in this dispatch pending
+  the above resolution.
+
+**Downstream note**: Per the plan's own Wave dependency table, Phase 3 gates only Phase 8 (the
+final `Decidable (validDiscrete φ)` instance). Phases 4-7 (the bi-lasso FMP/completeness
+construction) depend only on Phase 1 (Phase 4) and then transitively on each other (5 on 4, 6 on 5,
+7 on 5+6) — **not on Phase 3** — so they remain independently implementable and were continued in
+this dispatch.
 
 **Goal**: Prove that a branch closed by eventuality-defect has no discrete-serial model, then glue
 with the existing classical soundness half to obtain

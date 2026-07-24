@@ -1628,6 +1628,50 @@ theorem nikTr_of_sigAt_imp {Atom : Type u} {G : Graph Atom} {Γ : List (Labelled
     Derivable CS5ModalAxiom (nikTr G Γ hfin x A) :=
   nikTrFuel_of_derivable _ x _ h
 
+/-! ## `sigAt`-core lemmas for the label-local propositional constructors (Phase 8.2)
+
+`sigAt`'s fuel is the GLOBAL constant `hfin.toFinset.card`, which is always `≥ 1` (`G.nonempty`),
+so `sigAt G Γ hfin y` always unfolds one level via `sigAtFuel`'s `(n+1)` branch into
+`bigAndL (factsAt Γ y) ∧ □(...)`, for ANY `y`. `sigAt_imp_of_factsAt_imp` packages this single
+unfold + an `andE1` composition, giving the one fact every "core" constructor lemma below needs
+about `sigAt`'s outer shape without inspecting the box-conjunct at all. -/
+
+/-- **`sigAt`'s fuel is always positive** (`G.nonempty` guarantees at least one node, hence
+`hfin.toFinset` is nonempty). -/
+theorem hfin_toFinset_card_pos {Atom : Type u} {G : Graph Atom} (hfin : G.X.Finite) :
+    0 < hfin.toFinset.card :=
+  Finset.card_pos.mpr (hfin.toFinset_nonempty.mpr G.nonempty)
+
+/-- **`sigAt` implies whatever its own-facts conjunct `bigAndL (factsAt Γ y)` implies.** Since
+`sigAt`'s fuel is always positive, `sigAt G Γ hfin y` unfolds (one `sigAtFuel` step) to
+`bigAndL (factsAt Γ y) ∧ □(...)`; `andE1` then composes any `⊢ (bigAndL (factsAt Γ y)) ⊃ A` into
+`⊢ (sigAt G Γ hfin y) ⊃ A`. -/
+theorem sigAt_imp_of_factsAt_imp {Atom : Type u} {G : Graph Atom}
+    {Γ : List (LabelledFormula Atom)} (hfin : G.X.Finite) (y : Label Atom) {A : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((bigAndL (factsAt Γ y)).imp A)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin y).imp A) := by
+  obtain ⟨n, hn⟩ : ∃ n, hfin.toFinset.card = n + 1 :=
+    ⟨hfin.toFinset.card - 1, (Nat.succ_pred_eq_of_pos (hfin_toFinset_card_pos hfin)).symm⟩
+  have hunfold : sigAt G Γ hfin y = sigAtFuel G Γ hfin (n + 1) y := by
+    unfold sigAt; rw [hn]
+  rw [hunfold]
+  simp only [sigAtFuel]
+  exact cs5_deriv_imp_trans ⟨.ax [] _ (.andE1 (bigAndL (factsAt Γ y)) _)⟩ h
+
+/-- **`NIK.assumption`'s core translation**: if `(y∶A) ∈ Γ`, then `⊢ (sigAt G Γ hfin y) ⊃ A`
+(the fact in the context is exactly one of `bigAndL (factsAt Γ y)`'s conjuncts). -/
+theorem sigAt_assumption {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {y : Label Atom} {A : Proposition Atom}
+    (h : (y ∶ A) ∈ Γ) : Derivable CS5ModalAxiom ((sigAt G Γ hfin y).imp A) := by
+  classical
+  apply sigAt_imp_of_factsAt_imp hfin y
+  apply bigAndL_mem
+  show A ∈ factsAt Γ y
+  unfold factsAt
+  have hfilt : (y ∶ A) ∈ Γ.filter (fun ψ => decide (ψ.lbl = y)) :=
+    List.mem_filter.mpr ⟨h, by simp⟩
+  exact List.mem_map.mpr ⟨(y ∶ A), hfilt, rfl⟩
+
 end Cslib.Logic.Modal.Labelled
 
 end

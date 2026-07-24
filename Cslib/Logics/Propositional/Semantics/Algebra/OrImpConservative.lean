@@ -9,8 +9,7 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.CutElimination
 public import Cslib.Logics.Propositional.SequentCalculus.LJ.Completeness
-public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
+public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms
 
 /-! # Conservative Extension: IPL over IPL⟨∨,→,⊤⟩
 

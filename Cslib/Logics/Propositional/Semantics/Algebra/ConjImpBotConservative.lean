@@ -11,8 +11,6 @@ import Cslib.Init
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.PointedBrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.NonemptyLowerSet
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
-public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
 
 /-! # Conservative Extension: IPL over IPL⟨∧,→,⊥,⊤⟩
 

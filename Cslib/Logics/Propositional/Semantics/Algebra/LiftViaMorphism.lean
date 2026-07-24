@@ -8,7 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Foundations.Logic.Metalogic.ProofSystemMorphism
-public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 
 /-! # PL Derivation Lifting via Proof-System Morphisms
 

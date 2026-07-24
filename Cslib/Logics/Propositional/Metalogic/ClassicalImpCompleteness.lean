@@ -9,7 +9,7 @@ module
 import Cslib.Init
 public import Cslib.Logics.Propositional.ProofSystem.FragmentAxioms
 public import Cslib.Logics.Propositional.Metalogic.Soundness
-public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 
 /-! # Completeness of the Classical Implicational Fragment CPL⟨→,⊤⟩
 

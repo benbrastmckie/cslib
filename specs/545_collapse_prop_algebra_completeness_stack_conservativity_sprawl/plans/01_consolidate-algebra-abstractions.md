@@ -279,18 +279,31 @@ docstrings (keeping them public).
 
 ---
 
-### Phase 5: Full verification gate [NOT STARTED]
+### Phase 5: Full verification gate [COMPLETED]
 
 **Goal**: Confirm the whole tree is green, zero-sorry, barrel-consistent, and lint-clean.
 
 **Tasks**:
-- [ ] `lake exe mk_all --module` (final barrel refresh; confirm no diff churn beyond intended add/remove).
-- [ ] `lake build` (full).
-- [ ] `lake test`.
-- [ ] `lake exe checkInitImports`.
-- [ ] `lake exe lint-style`.
-- [ ] `lake shake` (no new redundant imports introduced by the consolidation).
-- [ ] Final repo-wide grep for `sorry`/`admit`/vacuous def in all touched files — must be empty.
+- [x] `lake exe mk_all --module` (final barrel refresh; confirm no diff churn beyond intended add/remove).
+      *(no diff -- barrel already consistent.)*
+- [x] `lake build` (full). *(3253/3253 jobs green; only pre-existing unrelated warnings/sorries in
+      Tableau/ files, not touched by this task.)*
+- [x] `lake test`. *(exit 0.)*
+- [x] `lake exe checkInitImports`. *(exit 0.)*
+- [x] `lake exe lint-style`. *(exit 0, no output.)*
+- [x] `lake shake` (no new redundant imports introduced by the consolidation).
+      *(found and fixed real dead imports left by Phase 3's boilerplate removal: dropped the
+      now-unused `HilbertConservativeGlivenko`/`FragmentConservativity`/cross-fragment imports
+      from the four per-fragment files, and repointed `ClassicalImpCompleteness.lean`,
+      `LiftViaMorphism.lean`, `MplConservativeChain.lean` to import `FragmentConservativity.lean`
+      directly instead of transitively. Net shake-output line count decreased
+      [2964 -> 2958]; remaining output in touched files is only the project-wide
+      `import Cslib.Init` false-positive (mandated by the Init Import Requirement,
+      not actionable) plus one pre-existing unrelated dead import in `ConservativeChain.lean`
+      predating this task.)*
+- [x] Final repo-wide grep for `sorry`/`admit`/vacuous def in all touched files — must be empty.
+      *(empty; repo-wide sorry/vacuous-def counts elsewhere are pre-existing and outside this
+      task's touched-file set.)*
 
 **Timing**: ~1 hour
 
@@ -305,14 +318,14 @@ docstrings (keeping them public).
 
 ## Testing & Validation
 
-- [ ] `lake build` — full tree compiles.
-- [ ] `lake test` — test suite green.
-- [ ] `lake exe checkInitImports` — every module's `import Cslib.Init` discipline holds.
-- [ ] `lake exe lint-style` — style-clean (docBlame, dupNamespace, topNamespace, defsWithUnderscore).
-- [ ] `lake shake` — no redundant imports introduced.
-- [ ] `lake exe mk_all --module` — barrel matches filesystem (no uncommitted drift).
-- [ ] Zero-sorry: grep for `sorry`/`admit`/vacuous def across `Algebra/` returns nothing.
-- [ ] Every nonzero-use-site public name preserved (repo-wide grep for each name still resolves).
+- [x] `lake build` — full tree compiles.
+- [x] `lake test` — test suite green.
+- [x] `lake exe checkInitImports` — every module's `import Cslib.Init` discipline holds.
+- [x] `lake exe lint-style` — style-clean (docBlame, dupNamespace, topNamespace, defsWithUnderscore).
+- [x] `lake shake` — no redundant imports introduced.
+- [x] `lake exe mk_all --module` — barrel matches filesystem (no uncommitted drift).
+- [x] Zero-sorry: grep for `sorry`/`admit`/vacuous def across `Algebra/` returns nothing.
+- [x] Every nonzero-use-site public name preserved (repo-wide grep for each name still resolves).
 
 ## Artifacts & Outputs
 

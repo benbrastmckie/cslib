@@ -9,8 +9,6 @@ module
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.BrouwerianCompleteness
 public import Cslib.Logics.Propositional.Semantics.Algebra.FreeJoinCompletion
-public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
-public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativity
 
 /-! # Conservative Extension: IPL over IPL⟨∧,→,⊤⟩
 
@@ -52,14 +50,13 @@ open Proposition Theory InferenceSystem DerivableIn
 
 universe u
 
-/-! ## Generic Axiom-Monotonicity Combinators (relocated)
+/-! ## Hilbert-Primary Conservative Extension
 
-`liftDerivationTree` and `derivable_mono` now live in `FragmentConservativity.lean` (Part B
-consolidation of the fragment-conservativity sprawl); they are re-exported here transitively via
-the `public import` above so that every existing consumer of this file continues to resolve
-them unchanged. -/
-
-/-! ## Hilbert-Primary Conservative Extension -/
+`liftDerivationTree` and `derivable_mono` (formerly defined here) now live in
+`FragmentConservativity.lean` (Part B consolidation of the fragment-conservativity sprawl); no
+longer used by this file's remaining content, so the re-export import was dropped -- consumers
+that need them (`ClassicalImpCompleteness.lean`, `LiftViaMorphism.lean`,
+`MplConservativeChain.lean`) now import `FragmentConservativity.lean` directly. -/
 
 /-- **Hilbert-primary conservative extension theorem**: IPL is a conservative extension of
 IPL⟨∧,→,⊤⟩ for or-bot-free formulas. If `φ` is derivable in the intuitionistic Hilbert

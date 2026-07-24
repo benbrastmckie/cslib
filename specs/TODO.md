@@ -41,7 +41,7 @@ next_project_number: 552
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+537 [PARTIAL] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
 551 [PARTIAL] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
@@ -258,7 +258,7 @@ next_project_number: 552
 
 ### 537. Labelled cs5 general soundness biconditional
 - **Effort**: 15-40 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517

@@ -49,14 +49,12 @@ logic has 4 constructors (ax, assumption, modusPonens, weakening); there is no
 
 ## Design Note
 
-This file previously defined a local `HilbertOf Axioms` tag with its own `InferenceSystem`/
-`ModusPonens`/`HasAxiomImplyK`/`HasAxiomImplyS`/`MinimalHilbert` instance bundle. Since
-`HilbertOf Axioms` has no external references (grep-confirmed), this bundle is now retired
-in favor of the generic `ClosedHilbert (PL.DerivationTree Axioms)` tag (Foundations), whose
-`InferenceSystem`/`ModusPonens`/`HasAxiomImplyK`/`HasAxiomImplyS`/`MinimalHilbert` instances
-are supplied automatically from the `HilbertTree (PL.DerivationTree Axioms)` instance below.
-This file still does NOT import `Propositional/Metalogic/DeductionTheorem.lean`, preserving
-the no-cycle property.
+This file uses the generic `ClosedHilbert (PL.DerivationTree Axioms)` tag (Foundations) rather
+than a local `HilbertOf Axioms` bundle, since `HilbertOf Axioms` has no external references
+(grep-confirmed); the generic tag's `InferenceSystem`/`ModusPonens`/`HasAxiomImplyK`/
+`HasAxiomImplyS`/`MinimalHilbert` instances are supplied automatically from the
+`HilbertTree (PL.DerivationTree Axioms)` instance below. This file still does NOT import
+`Propositional/Metalogic/DeductionTheorem.lean`, preserving the no-cycle property.
 
 ## References
 

@@ -19,10 +19,9 @@ importing the heavier `Soundness.lean`.
 
 - `forall₂_replicate_right`: `Forall₂ R xs (replicate xs.length a) ↔ ∀ x ∈ xs, R x a`.
 
-The `forall₂_of_zip_mem`, `forall₂_append_aux`, `forall₂_drop_aux`, and `forall₂_take_aux`
-helpers formerly declared here have been replaced at their call sites by the canonical
-Mathlib lemmas `List.forall₂_iff_zip`, `List.rel_append`, `List.forall₂_drop`, and
-`List.forall₂_take`.
+Call sites needing `forall₂_of_zip_mem`, `forall₂_append_aux`, `forall₂_drop_aux`, or
+`forall₂_take_aux`-style facts use the canonical Mathlib lemmas `List.forall₂_iff_zip`,
+`List.rel_append`, `List.forall₂_drop`, and `List.forall₂_take` directly instead.
 
 ## Design
 

@@ -54,7 +54,7 @@ theorem PL.Proposition.toModal_eq_embed (φ : PL.Proposition Atom) :
 /-- Embedding preserves and (Lukasiewicz encoding).
 
 The RHS is stated in the *raw* nested `imp`/`bot` shape (not the native `Modal.Proposition.and`
-constructor introduced by task 441): the shared `PL.Proposition.embed` skeleton
+constructor): the shared `PL.Proposition.embed` skeleton
 (`Cslib.Logics.Propositional.Embedding`) is classical-scope only and always emits the
 Łukasiewicz encoding for `and`/`or`, regardless of whether the target type has a native `and`.
 See the module-level docstring there for the encoding rationale.

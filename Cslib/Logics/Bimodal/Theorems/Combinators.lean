@@ -16,8 +16,7 @@ public import Cslib.Foundations.Logic.Theorems.Combinators
 
 This module provides fundamental propositional reasoning combinators for the
 Bimodal proof system. Most combinators delegate to the generic Foundations
-equivalents via `InferenceSystem.DerivableIn.toDerivation` (the same bridge function
-`wrap`/`unwrap` used to duplicate), eliminating redundant proofs.
+equivalents via `InferenceSystem.DerivableIn.toDerivation`, avoiding redundant proofs.
 
 ## Main Combinators
 

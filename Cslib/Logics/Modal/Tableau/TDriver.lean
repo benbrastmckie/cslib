@@ -88,8 +88,7 @@ def modalTableauT (φ : Proposition Atom) : ModalTableauResult Atom :=
 
 /-! ## Shape Lemmas for the Two T-Relevant Signed-Formula Shapes
 
-The box-positive/diamond-negative shape dichotomies formerly private to this file
-(`modalApplyOne_boxPos_shape`/`_diamondNeg_shape`) are now the canonical, existentially-quantified
+The box-positive/diamond-negative shape dichotomies are the canonical, existentially-quantified
 `modalApplyOne_boxPos_eq`/`_diamondNeg_eq` in `Rules.lean` (the K discharges for
 `RuleApplicationSpec`'s F9/F10 fields), reached here via the `Rules → Saturation → Completeness →
 FmpMeasure → GenericDriver → TDriver` import chain. -/

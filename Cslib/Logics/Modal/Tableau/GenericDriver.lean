@@ -75,8 +75,8 @@ CI-clean at every step:
 4. **`rankStep`**: given a `rank` map satisfying the depth-bound/edge
    invariants pre-call, `apply` produces a `rank'` (agreeing with `rank` off `modalNextWorld b`)
    satisfying both invariants on `(apply sf b acc).snd`/`.fst`. Needed by
-   `modalStepBranch_exists_rank'_gen`. Discharged by `modalApplyOne_rank_step`, whose body is the
-   exact proof formerly inlined inside `modalStepBranch_exists_rank'`.
+   `modalStepBranch_exists_rank'_gen`. Discharged by `modalApplyOne_rank_step`, whose body matches
+   the corresponding proof in `modalStepBranch_exists_rank'`.
 5. **`outDegStep`**: given the outDeg/expanded-set counting correspondence
    pre-call, `apply` preserves it on `(apply sf b acc).snd`/`.fst`. Needed by
    `modalStepBranch_preserves_outDegEq_gen`. Discharged by `modalApplyOne_outDeg_step`.

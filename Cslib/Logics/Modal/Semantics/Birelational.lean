@@ -43,7 +43,7 @@ It is the semantic base layer for intuitionistic and minimal modal logic.
   bundle the frame/model data and are used for the `IValid`/`MValid` validity definitions.
 - Both `F1` (up-confluence) and `F2` (down-confluence) are included in `BFrame` now. `F2` is
   unused by the lemmas in this file but is the correct IK frame class for downstream
-  intuitionistic (tasks 492-494) and minimal (task 495) completeness work.
+  intuitionistic and minimal completeness work.
 - Reuses `Cslib.Logic.Modal.Proposition` and its `HasBox`/`HasDia`/`HasAnd`/`HasOr`/`Bot`
   connective instances from `Modal/Basic.lean`; no new formula datatype or connective typeclass
   is introduced.

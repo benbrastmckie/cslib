@@ -151,10 +151,9 @@ lemma modalClosed_unsat
 /-- A signed formula `sf` is satisfied by model `m` under world assignment `f`:
 a positive formula must hold at its world, a negative formula must fail there.
 
-Deliberately monomorphic in `{W : Type}` (encoding-independent scaffolding salvaged from
-`wip/task-299-soundness-refactor`); this does not replace or downgrade the shared
-`branchSatisfiable.{v, u}` predicate above, which the completeness loop instantiates at
-explicit universes. -/
+Deliberately monomorphic in `{W : Type}` (encoding-independent scaffolding); this does not
+replace or downgrade the shared `branchSatisfiable.{v, u}` predicate above, which the
+completeness loop instantiates at explicit universes. -/
 def sfSat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
     (sf : SignedFormula (Proposition Atom) WorldIndex) : Prop :=
   (sf.sign = .pos → Satisfies m (f sf.label) sf.formula) ∧

@@ -41,9 +41,8 @@ variable {Atom : Type*}
 Routed through `unionSound`: `s5Tags` carries three differentiators (`modalT`, `modalFour`,
 `modalB`). `modalT`/`modalFour` discharge directly from `h_refl`/`h_trans`; `modalB`
 (symmetry) is not a direct hypothesis here (S5 = T+4+B, not T+4+B+5, so no `h_symm` parameter
-exists) — it is derived from `h_refl` and `h_eucl` exactly as the pre-migration proof did
-inline (`m.r w₂ w₁` from `m.r w₁ w₂` via Euclideanness at `w₁, w₂, w₁` with the reflexivity
-witness `m.r w₁ w₁`). -/
+exists) — it is derived from `h_refl` and `h_eucl` inline (`m.r w₂ w₁` from `m.r w₁ w₂` via
+Euclideanness at `w₁, w₂, w₁` with the reflexivity witness `m.r w₁ w₁`). -/
 theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
     (h_ax : S5Axiom φ) (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)

@@ -391,7 +391,7 @@ owned by Phase 1 (`Bool.lean`, `Algebra/Bridge.lean`, `Temporal/Tableau/Complete
 
 ---
 
-### Phase 7: Bimodal + Foundations/Logic + §4.3 Judgment Review [PARTIAL]
+### Phase 7: Bimodal + Foundations/Logic + §4.3 Judgment Review [COMPLETED]
 
 **Goal**: Strip provenance from Bimodal (excluding the Chronicle file owned by Phase 1) and
 `Foundations/Logic`, and perform the concentrated judgment-required §4.3 review. ~120 hits plus the
@@ -441,18 +441,36 @@ read in context.
   Cslib/Foundations/Logic/Metalogic/Chronicle/ (which currently holds only
   SinceSeedConsistency.lean)" -- i.e. these three files ARE that in-progress, blocked work,
   distinct from the already-completed SinceSeedConsistency.lean.)*
-- [ ] §4.3 judgment pass: for each `no longer` (43), `used to` (28), `previously` (17),
-  `bypassed` (2), `refactor` (4), `migration` (1) hit across all five trees, read in context and
-  delete **only** when the sentence is about development history; **keep** when it is about the
-  mathematics (e.g. "`R` is no longer symmetric on the sub-frame").
-  *(deviation: deferred -- a substantial fraction of these phrases were incidentally resolved
-  as part of the task/phase provenance cleanup in phases 5-7 (e.g. every "is no longer defeq"
-  / "no longer definitionally" sentence tied to the Temporal/Bimodal G/H-primitive-constructor
-  and IK-diamond-native provenance was rewritten while stripping the adjacent task citation),
-  but a dedicated, exhaustive line-by-line sweep of the full §4.3 phrase inventory across all
-  five trees was not completed as a separate pass within this dispatch's time budget. A
-  continuation dispatch should re-run the grep in the Testing & Validation checklist below
-  and read each remaining hit in context.)*
+- [x] §4.3 judgment pass: for each `no longer`, `used to`, `previously`, `bypassed`,
+  `refactor`, `migration` hit across all five trees (excluding the 18 deliberately-skipped
+  live-blocker files), read in context and delete **only** when the sentence is about
+  development history; **keep** when it is about the mathematics (e.g. "`R` is no longer
+  symmetric on the sub-frame").
+  *(done: re-ran the grep across all five trees minus the skip-list -- 41 files, 95 hits.
+  The large majority are "is/are used to VERB" (purpose clauses, e.g. "used to bound the size
+  of...") or genuine mathematical/proof-architecture facts (e.g. "no longer definitionally",
+  "bypassed S5 rule-discharge obstruction", "retired frozen rule's analogous lemma") and were
+  kept unchanged. Nine genuine development-history hits were rewritten to drop the historical
+  framing while preserving the surviving technical content: `K/Completeness.lean` (a stale
+  module-docstring "Main Results" list describing three declarations --
+  `k_derive_box_from_inconsistency`, `k_mcs_box_witness`, bare `k_truth_lemma` -- that no longer
+  exist in the file, since the generic machinery was promoted to `Metalogic.Completeness`;
+  rewritten to describe the file's actual current declarations); `S5/Soundness.lean`
+  ("pre-migration proof" reference dropped); `Modal/Tableau/SoundnessStep.lean` (dropped a
+  `wip/task-299-soundness-refactor` branch-name citation); `Modal/Metalogic/GenericMCSBridge.lean`
+  and `Propositional/Metalogic/GenericMCSBridge.lean` (both "this file previously defined a
+  local `HilbertOf Axioms` tag ... now retired" Design Notes rewritten to describe the current
+  tag choice directly); `Foundations/Logic/Tableau/PropositionalRules.lean` ("refactored from
+  the original monolithic ... module" dropped); `Bimodal/Theorems/Combinators.lean` ("the same
+  bridge function wrap/unwrap used to duplicate" dropped). A second full-tree grep for
+  `task N`/`Task N`/`specs/NNN`/`wip/task-`/`renamed from`/`formerly` (minus the skip-list) also
+  caught six additional stragglers missed by earlier phases' per-file sweeps: `Modal/
+  FromPropositional.lean` and `Modal/Tableau/Completeness.lean` (three `Task 441:` citations,
+  content kept, prefix dropped), `Modal/Semantics/Birelational.lean` (`tasks 492-494`/`task 495`
+  citations dropped, logics named directly), `Modal/Tableau/{GenericDriver,TDriver}.lean` and
+  `Modal/Tableau/LoopInduction.lean` (`formerly private`/`formerly inlined`/`formerly declared`
+  phrasing rewritten to describe the current location/state without the historical framing).
+  Re-ran both greps after edits: zero remaining hits outside the skip-list.)*
 - [x] `lake build` of the touched Bimodal and Foundations/Logic modules.
   *(every touched module builds green with zero live sorry; full-tree grep across
   Cslib/Logics/Bimodal/ and Cslib/Foundations/Logic/ for task/phase/specs/renamed-from/

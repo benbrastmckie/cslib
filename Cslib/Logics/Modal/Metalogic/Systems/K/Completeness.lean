@@ -15,17 +15,20 @@ public import Cslib.Logics.Modal.ProofSystem.Instances
 This module proves completeness for modal logic K via the canonical Kripke model
 construction, following Blackburn, de Rijke, Venema "Modal Logic" (2002), Theorem 4.23.
 
-The key challenge is the K-specific Existence Lemma (BRV Lemma 4.20): the existing
-`mcs_box_witness` requires axiom T, which K does not have. We provide a K-specific
-version `k_mcs_box_witness` that uses EFQ + `derive_box_from_box_context` instead.
+The K-specific Existence Lemma (BRV Lemma 4.20) and Truth Lemma (BRV Lemma 4.21) are supplied
+generically by `Metalogic.Completeness`'s single `SchemaUnion`-parametric route (every classical
+system's axiom predicate is `SchemaUnion sysTags` with `kCore ⊆ sysTags`); this module wires that
+generic route to `KAxiom` via `k_truth_lemma_applied` below and derives K's soundness,
+completeness, and compactness theorems from it.
 
 ## Main Results
 
-- `k_derive_box_from_inconsistency`: K-specific consistency helper (no `h_T`).
-- `k_mcs_box_witness`: K-specific Existence Lemma (BRV Lemma 4.20 for K).
-- `k_truth_lemma`: K-specific Truth Lemma (BRV Lemma 4.21 for K).
-The weak completeness theorem `k_completeness` is derived below as a
-corollary of strong completeness via `ModalSetDerivable_empty_iff`.
+- `k_truth_lemma_applied`: the generic truth lemma applied to `KAxiom`.
+- `k_strong_soundness`, `k_strong_completeness`, `k_strong_completeness_iff`: strong
+  soundness/completeness for K.
+- `k_compactness`: compactness for K semantics.
+- `k_completeness`: the weak completeness theorem, derived as a corollary of strong
+  completeness via `ModalSetDerivable_empty_iff`.
 
 ## References
 
@@ -46,11 +49,10 @@ variable {Atom : Type u}
 Used by K-family systems (B, K4, K5, K45, KB5) to delegate completeness proofs to
 the parametric `strong_completeness` via this shared pre-applied truth lemma.
 
-The generic box-witness machinery this used to need (`k_derive_box_from_inconsistency`,
-`k_mcs_box_witness`) and the truth lemma body itself have been promoted into
-`Metalogic.Completeness` as THE single generic `truth_lemma` route: every one of
-the 15 classical systems' axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags`, so
-one generic route serves all of them; this file only wires the promoted lemma to `KAxiom`. -/
+The generic box-witness machinery and truth lemma body live in `Metalogic.Completeness` as THE
+single generic `truth_lemma` route: every one of the 15 classical systems' axiom predicates is
+`SchemaUnion sysTags` with `kCore ⊆ sysTags`, so one generic route serves all of them; this file
+only wires that generic lemma to `KAxiom`. -/
 theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
     (φ : Proposition Atom) :
     Satisfies (CanonicalModel (@KAxiom Atom)) S φ ↔ φ ∈ S.val :=

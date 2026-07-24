@@ -12,8 +12,7 @@ public import Cslib.Foundations.Logic.Tableau.RuleResult
 /-! # Classical Propositional Tableau Rules
 
 This module provides the 8 standard classical propositional expansion rules for analytic
-tableaux, refactored from the original monolithic propositional-tableau module into the generic
-`RuleResult F L` framework.
+tableaux, within the generic `RuleResult F L` framework.
 
 ## Propositional Rules (Smullyan Uniform Notation)
 

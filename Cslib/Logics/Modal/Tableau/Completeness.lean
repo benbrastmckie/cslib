@@ -316,7 +316,7 @@ lemma modalApplyOne_eq_prop_of_applicable
 
 /-- Reduction of `modalApplyOne` on a positive implication to a decomposer case split.
 
-Task 441: `and`/`or` are native constructors disjoint from `.imp`, so `modalAndOf?`/
+`and`/`or` are native constructors disjoint from `.imp`, so `modalAndOf?`/
 `modalOrOf?` always return `none` on an `.imp`-shaped formula; the statement is simplified
 to the `impPos`/`negPos` split only. -/
 lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
@@ -345,7 +345,7 @@ lemma modalApplyOne_imp_pos (a c : Proposition Atom) (w : WorldIndex)
 
 /-- Reduction of `modalApplyOne` on a negative implication to a decomposer case split.
 
-Task 441: see `modalApplyOne_imp_pos` for why `modalAndOf?`/`modalOrOf?` are always `none`
+See `modalApplyOne_imp_pos` for why `modalAndOf?`/`modalOrOf?` are always `none`
 on an `.imp`-shaped formula. -/
 lemma modalApplyOne_imp_neg (a c : Proposition Atom) (w : WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :

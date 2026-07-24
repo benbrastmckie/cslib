@@ -23,11 +23,6 @@ layer, which is directly applicable since `Bimodal.HilbertTM⇓φ` is definition
 Ported from BimodalLogic/Theories/Bimodal/Theorems/Propositional/Connectives.lean
 -/
 
-set_option linter.style.setOption false
-set_option linter.flexible false
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems.Propositional
@@ -56,6 +51,7 @@ def iffIntro (A B : Formula Atom)
     DerivationTree FrameClass.Base [] ((A.imp B).and (B.imp A)) :=
   @Theorems.DerivationCombinators.iffIntro _ _ _ Bimodal.HilbertTM _ _ A B h1 h2
 
+set_option linter.flexible false in
 /-- `{A ↔ B, A} ⊢ B`: iff elimination left (forward direction) from context. -/
 def iffElimLeft (A B : Formula Atom) :
     DerivationTree FrameClass.Base [((A.imp B).and (B.imp A)), A] B := by
@@ -67,6 +63,7 @@ def iffElimLeft (A B : Formula Atom) :
       (by intro x; simp; intro h; left; exact h)
   exact DerivationTree.modus_ponens _ _ _ h_imp h_a
 
+set_option linter.flexible false in
 /-- `{A ↔ B, B} ⊢ A`: iff elimination right (backward direction) from context. -/
 def iffElimRight (A B : Formula Atom) :
     DerivationTree FrameClass.Base [((A.imp B).and (B.imp A)), B] A := by

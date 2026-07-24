@@ -157,17 +157,17 @@ drop the `longLine` (real) and `emptyLine` (dead) file-scoped suppressions.
 
 ---
 
-### Phase 4: Connectives — narrow flexible, drop suppressions [NOT STARTED]
+### Phase 4: Connectives — narrow flexible, drop suppressions [COMPLETED]
 
 **Goal**: Narrow the `flexible` suppression to per-declaration scope on the two affected
 declarations, then drop the now-redundant file-scoped `flexible`, `setOption`, `emptyLine`
 (dead), and `longLine` (dead) suppressions in the mandated order.
 
 **Tasks**:
-- [ ] Add `set_option linter.flexible false in` immediately before `def iffElimLeft` (~L60) and `def iffElimRight` (~L71) — the two decls whose `simp` side-conditions trigger `flexible` (findings at ~L67 and ~L78). This matches the already-narrowed form in GeneralizedNecessitation.
-- [ ] Delete the file-scoped `linter.flexible` line. With `flexible` scoped, the `setOption` trigger disappears.
-- [ ] Delete the file-scoped `linter.style.setOption` line (only after `flexible` is scoped — dropping it while the file-scoped `flexible` remains re-fires "Unscoped option").
-- [ ] Delete the file-scoped `linter.style.emptyLine` (dead) and `linter.style.longLine` (dead) lines.
+- [x] Add `set_option linter.flexible false in` immediately before `def iffElimLeft` (~L60) and `def iffElimRight` (~L71) — the two decls whose `simp` side-conditions trigger `flexible` (findings at ~L67 and ~L78). This matches the already-narrowed form in GeneralizedNecessitation.
+- [x] Delete the file-scoped `linter.flexible` line. With `flexible` scoped, the `setOption` trigger disappears.
+- [x] Delete the file-scoped `linter.style.setOption` line (only after `flexible` is scoped — dropping it while the file-scoped `flexible` remains re-fires "Unscoped option").
+- [x] Delete the file-scoped `linter.style.emptyLine` (dead) and `linter.style.longLine` (dead) lines.
 
 **Timing**: 25 minutes
 

@@ -44,21 +44,18 @@ off from.
   `NIK.subst`/`NIK.subst_aux`).
 - `primeLemma`: the assembled result.
 
-## Scope note (Task 517 Phase 7 transcription)
+## Scope note
 
-This file transcribes `primeLemma` and its **actual** sorry-free dependency closure from
-`specs/517_labelled_bounded_context_cs5_completeness/probes/chain-union-reflection-probe.lean`
-(Task 517 Phase 6 completion: `primeLemma` fully sorry-free and axiom-clean, `lean_verify` ⊆
-`[propext, Classical.choice, Quot.sound]`). `primeLemma` is assembled via `primeC_exists_maximal`
-(plain `zorn_le₀`, this file) and does **not** need the step-indexed "FLO" (fresh-labels-only
-extension) well-founded reconstruction (`Stage`/`FloSeq`/`FLO`/`flo_succ`/`flo_limit`/
-`primeC'_exists_maximal`/`flo_oldlabel_transport`) that Task 517 plan `12_wellfounded-zorn-
-oldlabel-reconstruction.md` Phases 1-5 built to attack the "old label" obstacle: that obstacle
-is dissolved here instead by the one-directional `substFn`/`NIK.relabelFresh` transport lemmas
-above, independently of how the maximal context is constructed. The FLO apparatus remains
-correct, landed scaffolding in `probes/` (Postmortem Constraints: preserved verbatim) but is
-**not transcribed to mainline**, since it still carries two open, documented, non-blocking
-sorries (`flo_succ`'s superseded `redundantEdge` branch; `primeC'_exists_maximal`'s
+This file lands `primeLemma` and its **actual** sorry-free dependency closure: `primeLemma` is
+fully sorry-free and axiom-clean, `lean_verify` ⊆ `[propext, Classical.choice, Quot.sound]`.
+`primeLemma` is assembled via `primeC_exists_maximal` (plain `zorn_le₀`, this file) and does
+**not** need the step-indexed "FLO" (fresh-labels-only extension) well-founded reconstruction
+(`Stage`/`FloSeq`/`FLO`/`flo_succ`/`flo_limit`/`primeC'_exists_maximal`/`flo_oldlabel_transport`)
+that was originally built to attack the "old label" obstacle: that obstacle is dissolved here
+instead by the one-directional `substFn`/`NIK.relabelFresh` transport lemmas above, independently
+of how the maximal context is constructed. The FLO apparatus remains correct, landed scaffolding
+elsewhere but is **not transcribed to mainline**, since it still carries two open, documented,
+non-blocking sorries (`flo_succ`'s superseded `redundantEdge` branch; `primeC'_exists_maximal`'s
 `Maximal`-conjunct half) and is not on `primeLemma`'s dependency path -- transcribing it here
 would violate this file's zero-debt requirement for no proof-theoretic benefit.
 
@@ -254,16 +251,14 @@ theorem NIK.freshWitness_transport {G : Graph Atom} {Γ : List (LabelledFormula 
   have hstep := h.swap_relabel (a := y₀) (b := y) (G' := G.addEdge x y) hf
   rwa [List.map_swapFn_eq_self hΓ, show swapFn y₀ y y₀ = y from swapFn_left y₀ y] at hstep
 
-/-! ## `substFn`/`NIK.relabelFresh`: one-directional relabeling (relocated from Phase 5, Task 517
-Phase 6)
+/-! ## `substFn`/`NIK.relabelFresh`: one-directional relabeling
 
-**Relocation note**: this block (originally landed by Phase 5 as `flo_oldlabel_transport`'s
-supporting machinery, much later in the file) is moved here, content unchanged, so that
-`ChainCtx.deriv_reflect` and `dwitness_mem_of_maximal` -- both defined below, ahead of Phase 5's
-original position -- can consume it too (Task 517 Phase 6). See `flo_oldlabel_transport`'s
-docstring (further below) for the full mathematical writeup of why a *one-directional*
-substitution, unlike `swapFn`'s involution, never disturbs the target label's own pre-existing
-structure and so needs no freshness hypothesis on the target at all. -/
+**Placement note**: this block (supporting machinery for `flo_oldlabel_transport`, defined much
+later in the file) is placed here, ahead of that original position, so that
+`ChainCtx.deriv_reflect` and `dwitness_mem_of_maximal` -- both defined below -- can consume it
+too. See `flo_oldlabel_transport`'s docstring (further below) for the full mathematical writeup
+of why a *one-directional* substitution, unlike `swapFn`'s involution, never disturbs the target
+label's own pre-existing structure and so needs no freshness hypothesis on the target at all. -/
 
 /-- The one-directional label substitution sending `a ↦ b` and fixing every other label
 (including `b` itself). Unlike `swapFn`, this is **not an involution**: `substFn a b` never sends
@@ -385,7 +380,7 @@ theorem NIK.relabelFresh {a b : Label Atom} {G : Graph Atom} {Γ : List (Labelle
       have := hstep hf'
       simpa [hst] using this
 
-/-- **Old-label transport, graph-generic form** (Task 517 Phase 6): the graph-level fact
+/-- **Old-label transport, graph-generic form**: the graph-level fact
 `flo_oldlabel_transport` (further below) specializes to a `FloSeq` stage -- extracted here,
 BEFORE `FloSeq`/`FLO` exist in the file, because `ChainCtx.deriv_reflect` and
 `dwitness_mem_of_maximal` need exactly this graph-generic form and neither one is stated in terms
@@ -412,7 +407,7 @@ theorem NIK.oldLabelTransport {G : Graph Atom} {x y₀ : Label Atom} {A : Propos
   have hstep := h.relabelFresh (a := y₀) (b := y') (G' := G.addEdge x y') hf
   rwa [List.map_substFn_eq_self hΓ, show substFn y₀ y' y₀ = y' from substFn_self y₀ y'] at hstep
 
-/-- **Old-label diamond-witness transport, graph-generic form** (Task 517 Phase 6): the
+/-- **Old-label diamond-witness transport, graph-generic form**: the
 `substFn`-based analogue of `NIK.diaWitness_transport` above, dropping the freshness requirement
 on the TARGET label `y` -- the one-directional relabeling `substFn y₀ y` never disturbs whatever
 structure the ambient graph `G` already has at `y`, so the transported derivation is valid for
@@ -437,16 +432,15 @@ theorem NIK.diaWitnessTransportOld {G : Graph Atom} {Γ : List (LabelledFormula 
   simp only [List.map_cons, substFn_self, List.map_substFn_eq_self hΓ, substFn_other hzy₀] at hstep
   exact hstep
 
-/-! ## `GChain`: a graph-only chain, and the `NIK`-level reflection theorem (Task 517 Phase 6)
+/-! ## `GChain`: a graph-only chain, and the `NIK`-level reflection theorem
 
-**Finding (corrects the "Joint follow-up dispatch" analysis below, which predates this
-insight)**: that analysis concluded reflection needs "route (a)" (a step-indexed FLO
-reconstruction) because every route it tried transported a *single* witnessed fact to *every*
-other label via a **swap** (`swapFn`, an involution) or via reusing the induction hypothesis with
-a *different* chain index per label (Shortcut 2). Neither obstacle applies to the
-**one-directional** `substFn`-based transport (`NIK.oldLabelTransport`/
-`NIK.diaWitnessTransportOld` above, Phase 5's
-`flo_oldlabel_transport` insight, generalized to an arbitrary graph): it needs freshness of only
+**Finding (corrects the superseded historical analysis below)**: that analysis concluded
+reflection needs a step-indexed FLO reconstruction because every route it tried transported a
+*single* witnessed fact to *every* other label via a **swap** (`swapFn`, an involution) or via
+reusing the induction hypothesis with a *different* chain index per label. Neither obstacle
+applies to the **one-directional** `substFn`-based transport (`NIK.oldLabelTransport`/
+`NIK.diaWitnessTransportOld` above, generalizing the `flo_oldlabel_transport` insight to an
+arbitrary graph): it needs freshness of only
 the *source* witness `y₀`, never the target, so a *single* reflected chain index for `y₀` alone
 already supplies the *entire* cofinite family (fresh or old target labels alike) via
 `oldLabelTransport`/`diaWitnessTransportOld`. This reduces the reflection argument to an ordinary
@@ -576,7 +570,7 @@ theorem TClosure.reflectChain {ι : Type u} [Preorder ι] [Nonempty ι] (𝒢 : 
       exact ⟨i3, .eucl h (hi1.mono (fun a b hab => (𝒢.mono h1).2 a b hab))
         (hi2.mono (fun a b hab => (𝒢.mono h2).2 a b hab))⟩
 
-/-- **The master reflection theorem** (Task 517 Phase 6): a `NIK`-derivation over (an upper bound
+/-- **The master reflection theorem**: a `NIK`-derivation over (an upper bound
 of) a `GChain`'s union graph reflects to a single chain member. Structural induction on the
 derivation, generalizing over the `GChain` itself: the finitely-branching rules merge reflected
 indices via directedness (`𝒢.dir`) and weaken via `𝒢.mono`/`NIK.weaken`; the cofinite rules
@@ -733,7 +727,7 @@ theorem NIK.reflectChain {ι : Type u} [Preorder ι] [Nonempty ι] {V' : Set Pre
       refine ⟨i3, .diaE L hL _ Γ x z A B hi1' (fun y _ => ?_)⟩
       exact NIK.diaWitnessTransportOld hi2' hy₀i3 hxy₀ hzy₀ hΓy₀ y
 
-/-! ## Task 3: chain closure — scaffold, and the precise remaining gap
+/-! ## Chains of contexts and their shared coinfinite reserve
 
 Simpson's own proof of the Prime Lemma fixes a **single, shared** coinfinite `V'` for the whole
 Zorn poset `C` (chunk_0102.md, verbatim: *"Let `V'` be some coinfinite subset of `V` ... Consider
@@ -776,76 +770,29 @@ def unionG [Nonempty ι] : Graph Atom where
 /-- The union formula set `⋃ᵢ Γᵢ`. -/
 def unionΓ : Set (LabelledFormula Atom) := ⋃ i, (𝒞.C i).Γ
 
-/-! ## Joint follow-up dispatch (task 517): sharpened root-cause diagnosis of the "old label"
-obstacle shared by `deriv_reflect` (below) and `dwitness_mem_of_maximal` (Phase 4 section)
+/-! ## Superseded historical analysis of the "old label" obstacle
 
-**Re-investigated fresh in this dispatch** (on top of the two candidate routes (a)/(b) the plan
-and the two prior handoffs already named and could not close): three further, independently
-plausible shortcuts were tried and are now **provably ruled out**, sharpening the diagnosis from
-"needs a different construction" to a precise account of *why* no purely local fix exists.
+**Historical note, kept for context only: the diagnosis below concluded the "old label" obstacle
+shared by `deriv_reflect` (below) and `dwitness_mem_of_maximal` needed a step-indexed /
+well-founded Lindenbaum reconstruction. That conclusion is now known to be wrong** — see
+`NIK.reflectChain`'s docstring above and `deriv_reflect` below for the actual fix, a
+one-directional `substFn`-based transport that needs freshness of only the source witness. This
+section is retained only because it records why three natural shortcuts (a finite-subgraph
+existential in `Deriv`; reusing the induction hypothesis directly at each "old" label without
+relabeling; a conditional strengthening of `ChainCtx`) each independently fail for a
+**swap**-based or **no-relabeling** transport specifically — that negative result is genuine and
+does not depend on the (mistaken) conclusion drawn from it. The core tension driving all three
+attempts: `NIK.boxI`/`NIK.diaE`'s cofinite-quantification encoding gives equivariance (uniform
+behaviour under relabeling) for free only when the cofinite family is built by a uniform,
+swap-invariant construction; it does not give, for free, a way to *recover* a cofinite family
+from a single instance obtained via an existential (choice-based) argument such as a Zorn-maximal
+element. The one-directional `substFn`-based transport used by the actual fix sidesteps this
+tension entirely, rather than resolving it within the swap/no-relabeling framework these three
+shortcuts were confined to. -/
 
-**The core tension.** `NIK.boxI`/`NIK.diaE`'s cofinite-quantification encoding (`Deduction.lean`'s
-module docstring: chosen, POPLmark-style, "to make weakening... immediate, without a separate
-renaming/permutation lemma") gives EQUIVARIANCE (uniform behaviour under relabelling) **for
-free only when the cofinite family is built by a uniform, swap-invariant construction** (exactly
-what `NIK.swap_relabel`-style proofs do, bottom-up, when *introducing* a fresh witness). It does
-**not** give, for free, a way to *recover* a cofinite family from a single instance obtained via
-an **existential** (choice-based) argument — a Zorn-maximal element, or an induction hypothesis
-that only supplies "for the specific `y` you feed it, *some* chain index/graph exists," with no
-uniformity promised across different `y`. Reconstructing the cofinite family from one witness
-needs either (i) a single object (index / graph) that already dominates *every* label the family
-ranges over — impossible in general when the "already-old" label set is unboundedly indexed and
-possibly infinite — or (ii) an external invariant limiting which labels can *ever* be "old" in
-the first place (this is exactly candidate route (a)).
-
-**Shortcut 1 (ruled out): redefine `Deriv` with a finite-subgraph existential.** Simpson's own
-`:5090` bundles relational open assumptions (`y₁Rz₁,…,yₘRzₘ`) into the *same finite* list as
-formula open assumptions (`x₁:A₁,…,xₙ:Aₙ`) — suggesting `Deriv 𝒯 G Γ φ` should perhaps
-existentially quantify over a **finite sub-graph** `G₀ ≤ G`, not just a finite sub-list of `Γ`
-(as it currently does; `Context.lean`'s `Deriv` passes the *whole*, possibly-infinite `G`
-straight through to `NIK`). Tested: this does **not** help. The identical `boxI`/`diaE` case
-would then need a *single* finite `G₀` valid **uniformly across the whole cofinite family**
-(`∀y∉L, NIK 𝒯 (G₀.addEdge x y) Γ (y:A)`), and by the same argument as below, different `y`'s
-sub-derivations can each need a genuinely different finite `G₀_y` with no common finite bound —
-the obstruction re-appears one level down, unchanged in kind. This is not a `Deriv` transcription
-defect; it is intrinsic to the cofinite encoding.
-
-**Shortcut 2 (ruled out): skip the swap, reuse the induction hypothesis directly at each "old"
-`y`.** For `y ∈ (C i).G.X` (chain setting) this genuinely *does* supply `∃ i_y, NIK 𝒯 (C i_y).G
-Γ₀ (y:A)` with no relabelling needed. But `i_y` depends on `y`, and `ChainCtx.dir` (`Directed`)
-only bounds **finitely many** indices at once (two at a time, extended finitely by induction);
-nothing bounds the *unboundedly-indexed*, potentially infinite family `{i_y | y old, y ∉ L}` by
-one shared index. The same difficulty that blocked the swap route blocks the no-swap route.
-
-**Shortcut 3 (ruled out as a general fix, but recorded as a genuine conditional strengthening):**
-if `ChainCtx` carried an extra hypothesis "`∃ i*, ∀ y ∈ unionG.X, InW V' y → False → y ∈ (C
-i*).G.X`" (i.e. a single index already dominates *every* old label appearing anywhere in the
-union), reflection *would* close: combine `i*` with the fresh-witness index `i₀` via
-`𝒞.dir` applied to the two-element set `{i₀, i*}`. This is a real, provable implication — but it
-is a **strengthening of `ChainCtx`'s hypotheses**, not a consequence of its current (merely
-`Directed`, not bounded) definition; nothing in `primeC`/`primeC_chain_bddAbove` currently
-supplies such an `i*`, and supplying one in general requires exactly what route (a) needs: a
-construction where "old" labels are provably confined to a boundable set at every stage.
-
-**Conclusion (sharper than the prior two handoffs, same eventual recommendation): both
-`deriv_reflect` and `dwitness_mem_of_maximal` need route (a) — a step-indexed / well-founded
-Lindenbaum construction (transfinite recursion, since `Atom : Type u` is not assumed countable,
-so Simpson's own "denumerable ⟹ choice-free iterative construction" remark, `chunk_0103.md`, does
-not directly bound the recursion at `ω`) that maintains, as an *invariant carried through every
-step*, "every label in the domain built so far is either in the base `G₀.G.X` or was adjoined at
-some step as a fresh, reserve-drawn (or `dwitness`-of-already-known) label." No such construction
-exists in this file or in Mathlib's `zorn_le₀` (a bare, non-constructive existence result). This
-is a substantial, independently-scoped undertaking — re-deriving Phase 4's whole
-`primeC`/`primeC_chain_bddAbove`/`primeC_exists_maximal` apparatus via well-founded recursion
-instead of `zorn_le₀` — not a fix expressible as a single additional lemma in this file. It should
-be planned as its own dedicated multi-phase effort (a "Phase 4.5") rather than re-attempted as a
-quick follow-up dispatch. -/
-
-/-- **CLOSED (Task 517 Phase 6)**, superseding the "documented strategic sorry" writeup this
-docstring used to carry (kept as history in the module section above). The fix is
-`NIK.reflectChain`: the "old label" obstacle the module analysis above diagnoses only blocks a
-**swap**-based transport or a **no-relabeling** reuse of the induction hypothesis (Shortcuts
-above); the **one-directional** `substFn`-based transport (`NIK.oldLabelTransport`, built from
+/-- `NIK.reflectChain` closes the "old label" obstacle discussed above. The "old label" obstacle
+only blocks a **swap**-based transport or a **no-relabeling** reuse of the induction hypothesis;
+the **one-directional** `substFn`-based transport (`NIK.oldLabelTransport`, built from
 `NIK.relabelFresh`) needs freshness of only the *source* witness, so a single reflected chain
 index already supplies the *entire* cofinite family. `deriv_reflect` packages `𝒞` as a `GChain`
 (dropping the `Context` fields `NIK.reflectChain` never reads), reflects the `Deriv`-level
@@ -886,27 +833,26 @@ theorem deriv_reflect [Nonempty ι] {φ : LabelledFormula Atom} :
   obtain ⟨i'', h1, h2⟩ := 𝒞.dir i i'
   exact ⟨i'', Γ₀, fun ψ hψ => (𝒞.mono h2).2 (hi' ψ hψ), hi.weaken (𝒞.mono h1).1 (fun _ h => h)⟩
 
-/-- **Chain closure** (Phase 3 Task 3): if no chain member derives the excluded formula, neither
-does the union -- the fact the Zorn chain-closure step (Phase 4) needs to show `(⋃Gᵢ,⋃Γᵢ) ∈ C`.
-Immediate contrapositive of `deriv_reflect`; carries no additional proof burden once that theorem
-lands. -/
+/-- **Chain closure**: if no chain member derives the excluded formula, neither does the union
+-- the fact the Zorn chain-closure step below needs to show `(⋃Gᵢ,⋃Γᵢ) ∈ C`. Immediate
+contrapositive of `deriv_reflect`; carries no additional proof burden once that theorem lands. -/
 theorem chain_closure [Nonempty ι] {x : Label Atom} {A : Proposition Atom}
     (hC : ∀ i, ¬ Deriv 𝒯 (𝒞.C i).G (𝒞.C i).Γ (x ∶ A)) : ¬ Deriv 𝒯 (𝒞.unionG) 𝒞.unionΓ (x ∶ A) :=
   fun h => let ⟨i, hi⟩ := 𝒞.deriv_reflect h; hC i hi
 
 end ChainCtx
 
-/-! ## Task 517 Phase 4 — Bounded Prime Lemma (Simpson 5.3.1) — Zorn over whole contexts
+/-! ## Bounded Prime Lemma (Simpson 5.3.1) — Zorn over whole contexts
 
-**Objective** (plan `11_tprime-repair-cs5-completeness.md`, Phase 4): `Γ ⊬_G x:A ⟹ ∃ 𝒯-prime
-(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A` — Simpson's Prime Lemma 5.3.1 (`chunk_0102.md`/`chunk_0103.md`,
-p. 92-93 raster), a Zorn maximalisation over **whole contexts** (`Context 𝒯 Atom`), producing an
-inhabitant of the repaired `TPrime`.
+**Objective**: `Γ ⊬_G x:A ⟹ ∃ 𝒯-prime (H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A` — Simpson's Prime Lemma
+5.3.1 (`chunk_0102.md`/`chunk_0103.md`, p. 92-93 raster), a Zorn maximalisation over **whole
+contexts** (`Context 𝒯 Atom`), producing an inhabitant of the repaired `TPrime`.
 
 ## `--lit` research resolution: unbounded (Ch 5) vs bounded (Ch 7-8) form
 
-The plan flagged a genuine open risk: whether the *bounded* prime lemma (Ch 7-8, Lemma 8.2.6) is
-needed, or the *unbounded* Chapter 5 form (5.3.1) suffices. **Resolved here, against the raster**:
+There is a genuine open question here: whether the *bounded* prime lemma (Ch 7-8, Lemma 8.2.6)
+is needed, or the *unbounded* Chapter 5 form (5.3.1) suffices. **Resolved here, against the
+raster**:
 Simpson's Chapter 8 bounded canonical model (`chunk_0165.md`/`chunk_0166.md`) states Lemma 8.2.5
 — *"If `(H,Δ)` is a 𝒯-prime **bounded** context then `T-Comp(H) ⊨_cl 𝒯`"* — i.e. in the *bounded*
 framework, primeness of `(H,Δ)` does **NOT** entail that the raw relation `H.R` classically models
@@ -920,9 +866,9 @@ is unmistakably a Chapter-5-style (**unbounded**) definition: Simpson's own proo
 𝒯"*) derives clause 0 for the **raw** `H` directly, with no separate completion step, as part of
 the very same maximality argument used for the other four clauses. Since the landed `TPrime`
 already requires raw clause 0, **the unbounded Chapter 5 form is the one that matches it**, and is
-what this file transcribes; the plan's Phase 5 ("T-Comp graph completion … symmetry") is
-consequently unneeded for a `TPrime`-typed target, flagged here (and in this dispatch's handoff)
-for the orchestrator/user to reconsider rather than silently skipped or forced through.
+what this file transcribes; a "T-Comp graph completion … symmetry" step some earlier planning
+considered is consequently unneeded for a `TPrime`-typed target -- flagged here rather than
+silently skipped or forced through.
 
 ## Clause 0 without an existential witness search: the "redundant edge" argument
 
@@ -933,7 +879,7 @@ of *fresh* witness variables. `GeomAxiom` (`T`, `B`, `Four`, `Five`) is **entire
 **no** existential conclusion (`m = 1`, witness vector length `0`) — so that general argument's
 witness-search machinery does not directly transcribe, and this file reconstructs the specialised
 Horn-only argument from Simpson's *stated property* ("H is a classical model of 𝒯"), per the
-plan's transcription discipline. The reconstruction: `NIK`'s only graph-reading rules (`boxE`,
+literature-fidelity discipline. The reconstruction: `NIK`'s only graph-reading rules (`boxE`,
 `diaI`) consume `TClosure 𝒯 G.R`, **not** the raw relation; since `T`, `B`, `Four` are exactly the
 constructors `TClosure` itself already closes under (`.refl`, `.symm`, `.trans`), **any edge `x R
 y` that is already `𝒯`-closure-derivable from the raw relation adds no new `NIK`-derivations when
@@ -956,13 +902,13 @@ keep the extended context in the poset `C` (no new derivations), forcing the ext
   `𝒯`-closure at all.
 - `NIK.drop_redundant_edge`: the corollary consumed by clause 0's maximality argument — a
   `NIK`-derivation over a graph with one closure-redundant edge adjoined transfers back down.
-- `ChainCtx.unionContext`: packages `ChainCtx.unionG`/`unionΓ` (Phase 3) into a genuine
-  `Context 𝒯 Atom` (`ctxSubset`/`coinfinite`/`dwitnessMem`) — the missing piece Phase 3 did not
-  need for the reflection theorem alone but Phase 4's Zorn upper-bound step does.
+- `ChainCtx.unionContext`: packages `ChainCtx.unionG`/`unionΓ` (above) into a genuine
+  `Context 𝒯 Atom` (`ctxSubset`/`coinfinite`/`dwitnessMem`) — the missing piece not needed for
+  the reflection theorem alone but needed by the Zorn upper-bound step below.
 - `primeC`: Simpson's poset `C` (`:5990`) — contexts extending `(G₀,Γ₀)`, confined to `W(V')`,
   that still fail to derive the excluded `x₀:A₀`.
 - `primeC_exists_maximal`: Zorn's lemma applied to `primeC` (via `zorn_le₀`), using
-  `ChainCtx.chain_closure` (Phase 3) for the chain upper bound.
+  `ChainCtx.chain_closure` (above) for the chain upper bound.
 - `primeLemma`: **Simpson's Prime Lemma 5.3.1**, assembled.
 
 ## Provenance
@@ -1076,8 +1022,8 @@ theorem NIK.drop_redundant_edge {G : Graph Atom} {x y : Label Atom} (hxy : TClos
 
 variable {ι : Type u} [Preorder ι]
 
-/-- **The chain union, packaged as a genuine `Context 𝒯 Atom`.** Phase 3's `unionG`/`unionΓ`
-produced only the graph and formula-set; the Zorn upper-bound step needs the union to satisfy
+/-- **The chain union, packaged as a genuine `Context 𝒯 Atom`.** `unionG`/`unionΓ` above
+produce only the graph and formula-set; the Zorn upper-bound step needs the union to satisfy
 `Context`'s own three side conditions (`ctxSubset`, `coinfinite`, `dwitnessMem`), each following
 directly from every chain member already being a genuine `Context` sharing the chain's single
 reserve `V'` (`hV'`/`hCV'`). -/
@@ -1128,7 +1074,7 @@ theorem primeC_mem_base (h : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) : G�
 /-- **Every chain in `C` has an upper bound in `C`** (Simpson: *"It is easily seen that
 `(⋃ᵢGᵢ,⋃ᵢΓᵢ)` is also in `C`. So every chain in `C` has an upper bound."*, `chunk_0102.md`).
 Packages the chain as a `ChainCtx` sharing the poset's fixed reserve `V' :=
-G₀.coinfinite.choose`, and reuses Phase 3's `chain_closure` for the one nontrivial conjunct
+G₀.coinfinite.choose`, and reuses `chain_closure` above for the one nontrivial conjunct
 (`¬ Deriv`). Takes membership of the base context as an explicit hypothesis (`h0`) rather than
 re-deriving it, so the empty-chain case has an upper-bound witness available. -/
 theorem primeC_chain_bddAbove (h0 : G₀ ∈ primeC G₀ x₀ A₀) (c : Set (Context 𝒯 Atom))
@@ -1351,7 +1297,7 @@ theorem disjunction_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {A
 
 /-! ### Clause 4 (diamond property) -/
 
-/-- **`(◇E)`-shaped freshness transport.** A corollary of `NIK.swap_relabel` (Phase 3), in the
+/-- **`(◇E)`-shaped freshness transport.** A corollary of `NIK.swap_relabel` (above), in the
 same family as `NIK.freshWitness_transport` but for `diaE`'s premise shape (the fresh witness
 labels the *assumption*, not the conclusion): a derivation witnessed at one fresh label `y₀`
 transports to any other label `y`, both fresh w.r.t. the ambient graph, the pivot `x`, the
@@ -1427,8 +1373,8 @@ theorem Context.addDiaWitness_le (H : Context 𝒯 Atom) (y : Label Atom) (B : P
 `dwitness` strictly grows the label, so `y = Label.dwitness y B` is impossible for any `B`.
 Proved by structural recursion on `y` (the only nontrivial case, `y = Label.dwitness x A`, reduces
 to the same fact for the strictly smaller `x` via injectivity). Needed by
-`dwitness_mem_of_maximal` (Task 517 Phase 6) to separate the excluded label `x₀` from the newly
-adjoined witness `v`. -/
+`dwitness_mem_of_maximal` to separate the excluded label `x₀` from the newly adjoined witness
+`v`. -/
 theorem Label.ne_dwitness_self : ∀ (y : Label Atom) (B : Proposition Atom), y ≠ Label.dwitness y B
   | .var _, _ => fun h => nomatch h
   | .dwitness x A, B => fun h => by
@@ -1443,7 +1389,7 @@ label `dwitness y B` must already be in `H.G.X` — else adjoining it, together 
 `x₀:A₀` back over `H` alone, contradicting `hnd`. This forces the extension to equal `H`, i.e.
 the witness was already present. Simpson `chunk_0103.md`: *"We show that `v_{y.B}` is in `H`."*
 
-**`hx₀ : x₀ ∈ G₀.G.X`** (Task 517 Phase 6, new hypothesis): Simpson's own Prime Lemma statement
+**`hx₀ : x₀ ∈ G₀.G.X`**: Simpson's own Prime Lemma statement
 (`chunk_0102.md`, *"`Γ ⊬_G x:A`"*) presupposes the excluded judgement's label `x` is a label of
 the ambient graph `G` -- exactly the standing convention every other `Deriv`/`NIK` judgement in
 this development already carries via `Context.ctxSubset` for `Γ`'s own labels. This hypothesis
@@ -1492,16 +1438,13 @@ theorem dwitness_mem_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Atom} {
         NIK.assumption H.G _ _ (List.mem_singleton_self _)
       have hyorDeriv : Deriv 𝒯 H.G H.Γ (y ∶ Proposition.diamond B) :=
         ⟨[y ∶ Proposition.diamond B], fun ψ hψ => (List.mem_singleton.mp hψ) ▸ hyB, hyor⟩
-      -- **CLOSED (Task 517 Phase 6)**: same fix as `ChainCtx.deriv_reflect` -- the module analysis
-      -- this comment used to carry (swap-based transport needs target freshness; no-swap reuse
-      -- needs an unboundedly-indexed family) diagnoses the obstacle correctly for the techniques
-      -- it tested, but the one-directional `substFn`-based transport (`NIK.diaWitnessTransportOld`,
-      -- built from `NIK.relabelFresh`) needs freshness of only the *source* witness `v`, not the
-      -- target, so the single instance `hNIKv` already supplies the whole cofinite family. The one
-      -- genuine extra requirement -- the excluded label `x₀` must differ from `v` itself, else the
-      -- transported conclusion's label would move out from under `x₀` -- is discharged by the new
-      -- `hx₀ : x₀ ∈ G₀.G.X` hypothesis (this theorem's docstring) together with `v ∉ H.G.X`
-      -- (`hfresh`).
+      -- Same fix as `ChainCtx.deriv_reflect`: the one-directional `substFn`-based transport
+      -- (`NIK.diaWitnessTransportOld`, built from `NIK.relabelFresh`) needs freshness of only the
+      -- *source* witness `v`, not the target, so the single instance `hNIKv` already supplies the
+      -- whole cofinite family. The one genuine extra requirement -- the excluded label `x₀` must
+      -- differ from `v` itself, else the transported conclusion's label would move out from under
+      -- `x₀` -- is discharged by the `hx₀ : x₀ ∈ G₀.G.X` hypothesis (this theorem's docstring)
+      -- together with `v ∉ H.G.X` (`hfresh`).
       have hx₀H : x₀ ∈ H.G.X := hG₀H.1.1 hx₀
       have hxv : x₀ ≠ v := fun heq => hfresh (heq ▸ hx₀H)
       have hyv : y ≠ v := Label.ne_dwitness_self y B
@@ -1678,28 +1621,26 @@ theorem deductiveClosure_of_maximal {G₀ : Context 𝒯 Atom} {x₀ : Label Ato
 context and `Γ ⊬_G x:A`, there is a `𝒯`-prime context `(H,Δ) ⊇ (G,Γ)` with `Δ ⊬_H x:A`. Assembles
 `primeC_exists_maximal` (the Zorn maximalisation) with the five `TPrime` clause theorems above.
 
-**FULLY SORRY-FREE (Task 517 Phase 6, the Phase 4.5 completion milestone)**: all five clauses --
-`clModel`/`consistency`/`disjunction`/`deductiveClosure` (closed by a prior follow-up dispatch via
-`NIK.subst_aux`) and now `diamond` (`dwitness_mem_of_maximal`, closed this phase via
+**Fully sorry-free**: all five clauses -- `clModel`/`consistency`/`disjunction`/
+`deductiveClosure` (via `NIK.subst_aux`) and `diamond` (`dwitness_mem_of_maximal`, via
 `NIK.diaWitnessTransportOld`) -- are sorry-free. `lean_verify`: axioms `[propext,
 Classical.choice, Quot.sound]`, no `sorryAx`.
 
-**Note on the FLO reconstruction (Phases 1-5)**: `primeLemma` is assembled from
-`primeC_exists_maximal` (the plain `zorn_le₀` Zorn maximalisation), NOT `primeC'_exists_maximal`
-(the FLO-carrying reconstruction) -- it does not need FLO at all. The "old label" obstacle both
-`deriv_reflect` and `dwitness_mem_of_maximal` hit turned out to be resolvable at the `NIK`/`Graph`
-level alone (`NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld`, built from `NIK.relabelFresh`),
-independent of *how* the maximal `H` was constructed. The FLO apparatus (`Stage`/`FloSeq`/`FLO`/
-`flo_succ`/`flo_limit`/`primeC'_exists_maximal`/`flo_oldlabel_transport`) remains landed (Postmortem
-Constraints: preserved verbatim) but is not on `primeLemma`'s critical path;
-`primeC'_exists_maximal`'s own remaining `Maximal`-conjunct sorry and `flo_succ`'s superseded
-`redundantEdge` sorry are
-consequently non-blocking for this theorem. **New hypothesis `hx₀ : x₀ ∈ G₀.G.X`**: Simpson's own
-statement of the judgement `Γ ⊬_G x:A` presupposes `x` is a label of `G` (the standing convention
-every other `Deriv`/`NIK` judgement in this development already carries for `Γ`'s own labels via
-`Context.ctxSubset`); it was implicit before this phase and is now threaded explicitly because
-`dwitness_mem_of_maximal` needs it to separate the excluded label `x₀` from the freshly adjoined
-diamond witness (see that theorem's docstring for the exact argument). -/
+**Note on the FLO reconstruction**: `primeLemma` is assembled from `primeC_exists_maximal` (the
+plain `zorn_le₀` Zorn maximalisation), NOT `primeC'_exists_maximal` (the FLO-carrying
+reconstruction) -- it does not need FLO at all. The "old label" obstacle both `deriv_reflect` and
+`dwitness_mem_of_maximal` hit turned out to be resolvable at the `NIK`/`Graph` level alone
+(`NIK.oldLabelTransport`/`NIK.diaWitnessTransportOld`, built from `NIK.relabelFresh`), independent
+of *how* the maximal `H` was constructed. The FLO apparatus (`Stage`/`FloSeq`/`FLO`/`flo_succ`/
+`flo_limit`/`primeC'_exists_maximal`/`flo_oldlabel_transport`) remains landed (preserved verbatim)
+but is not on `primeLemma`'s critical path; `primeC'_exists_maximal`'s own remaining
+`Maximal`-conjunct sorry and `flo_succ`'s superseded `redundantEdge` sorry are consequently
+non-blocking for this theorem. **Hypothesis `hx₀ : x₀ ∈ G₀.G.X`**: Simpson's own statement of the
+judgement `Γ ⊬_G x:A` presupposes `x` is a label of `G` (the standing convention every other
+`Deriv`/`NIK` judgement in this development already carries for `Γ`'s own labels via
+`Context.ctxSubset`); it is threaded explicitly here because `dwitness_mem_of_maximal` needs it
+to separate the excluded label `x₀` from the freshly adjoined diamond witness (see that
+theorem's docstring for the exact argument). -/
 theorem primeLemma (G₀ : Context 𝒯 Atom) (x₀ : Label Atom) (A₀ : Proposition Atom)
     (hx₀ : x₀ ∈ G₀.G.X) (h0 : ¬ Deriv 𝒯 G₀.G G₀.Γ (x₀ ∶ A₀)) :
     ∃ P : TPrime 𝒯 Atom, G₀ ≤ P.toContext ∧ ¬ Deriv 𝒯 P.G P.Γ (x₀ ∶ A₀) := by

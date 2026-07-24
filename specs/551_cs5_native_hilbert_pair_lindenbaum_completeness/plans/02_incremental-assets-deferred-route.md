@@ -238,23 +238,23 @@ still executes and the plan still delivers its headline artifact.
     or term `sorry`.
   - `lake exe lint-style` clean on the modified file.
 
-### Phase 2: Discharge the Primeness-Engine Preconditions at `CS5PairAxiom` [NOT STARTED]
+### Phase 2: Discharge the Primeness-Engine Preconditions at `CS5PairAxiom` [COMPLETED]
 
 - **Goal:** Land, as named reusable library lemmas, the hypothesis bundle that
   `prime_exclusion`/`prime_set_exclusion` require at `CS5PairAxiom`. This is the payoff of
   Phase 1 and is useful under either eventual route: it makes the generic engine applicable to the
   combined system at all.
 - **Tasks:**
-  - [ ] Prove `cs5Pair_hImplyK`, `cs5Pair_hImplyS` (needed by `deductionTheorem`,
+  - [x] Prove `cs5Pair_hImplyK`, `cs5Pair_hImplyS` (needed by `deductionTheorem`,
     `PrimeTheory.lean`), `cs5Pair_hEFQ`, `cs5Pair_hOrI1`, `cs5Pair_hOrI2`, `cs5Pair_hOrE` — each
     a one-line `.ax`/constructor application given Phase 1's new constructors, at arbitrary
     `Proposition (Atom ⊕ Atom)`.
-  - [ ] Supply `cs5Pair_hCut` by instantiating the existing generic supplier
+  - [x] Supply `cs5Pair_hCut` by instantiating the existing generic supplier
     `modal_deriv_imp_of_union` (`PrimeTheory.lean`; `SegmentLindenbaum.lean:286-288` confirms it
     already has the singleton `S ∪ {a}` shape `prime_set_exclusion` expects, so **no new cut
     machinery is needed** — only instantiation) at `Axioms := CS5PairAxiom` with
     `cs5Pair_hImplyK`/`cs5Pair_hImplyS`.
-  - [ ] Add a section docstring stating that these lemmas make the generic engine applicable, and
+  - [x] Add a section docstring stating that these lemmas make the generic engine applicable, and
     that the one precondition they do **not** supply is `DerivExcludes` at the two-sided seed
     (forward-referencing Phase 7's named obligation).
 - **Timing:** 2 hours
@@ -266,6 +266,15 @@ still executes and the plan still delivers its headline artifact.
   - Sanity check: the full hypothesis bundle type-checks when passed positionally to
     `prime_set_exclusion` in a `#check`-level elaboration (the remaining hole is `DerivExcludes`
     and nothing else). Record the resulting goal in the phase notes.
+    **Result** (via `lean_run_code`, not left in the tracked file): partially applying
+    `Metalogic.prime_set_exclusion (modalDerivationSystem CS5PairAxiom) (fun _ => True)` with
+    `cs5Pair_hOrI1`/`hOrI2`/`hOrE`/`hEFQ`/`hCut` plus the trivial-`Cons` closure-operator bundle
+    (`modalDeductiveClosure CS5PairAxiom`, `modal_subset_deductive_closure`,
+    `modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS`) elaborates with **zero
+    errors and zero sorries**, leaving exactly `S E : Set (...)`, `hS : Admissible … S`,
+    `h_excl : DerivExcludes … E S`, and the trivial chain-consistency hypothesis (vacuous under
+    `Cons := fun _ => True`) as the remaining arguments — i.e. `DerivExcludes` (via `h_excl`) is
+    the sole *substantive* remaining hole, confirming the bundle is complete.
   - Zero sorry/admit in the file.
 
 ### Phase 3: The Two-Sided Seed `cs5PairSeed` [NOT STARTED]

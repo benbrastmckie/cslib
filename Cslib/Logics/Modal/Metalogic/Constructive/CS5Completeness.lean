@@ -202,4 +202,70 @@ theorem crossCond_right_stable {Z : Set (Proposition (Atom ⊕ Atom))}
       (.weakening [] _ _ (.ax [] _ (CS5PairAxiom.cross2 B)) (fun _ h => nomatch h))
       (.assumption _ _ (List.mem_singleton.mpr rfl))⟩
 
+/-! ## Discharging the Primeness-Engine's Precondition Bundle at `CS5PairAxiom`
+
+The propositional core landed above makes the generic primeness engine's schema hypotheses
+(`hImplyK`/`hImplyS`/`hEFQ`/`hOrI1`/`hOrI2`/`hOrE`/`hCut`,
+`Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean`) dischargeable at `CS5PairAxiom`, at
+*arbitrary* formulas of the combined type -- not just at tagged formulas. Landing these as
+named, reusable library lemmas makes `Metalogic.prime_exclusion`/`Metalogic.prime_set_exclusion`
+applicable to `CS5PairAxiom` at all; this is useful under either eventual route (Route A or
+Route Native, see the module docstring). The one precondition these lemmas do **not** supply is
+`DerivExcludes` at the two-sided seed (`cs5PairSeed`, defined below) -- that is the named open
+obligation forward-referenced from a later phase, not attempted here. -/
+
+/-- The engine's `hImplyK` schema precondition at `CS5PairAxiom`: `φ → (ψ → φ)` is an axiom
+instance for every `φ ψ` in the combined type. Feeds `cs5Pair_hCut` via
+`modal_deriv_imp_of_union`. -/
+theorem cs5Pair_hImplyK (φ ψ : Proposition (Atom ⊕ Atom)) :
+    CS5PairAxiom (φ.imp (ψ.imp φ)) :=
+  .implyK φ ψ
+
+/-- The engine's `hImplyS` schema precondition at `CS5PairAxiom`. Feeds `cs5Pair_hCut` via
+`modal_deriv_imp_of_union`. -/
+theorem cs5Pair_hImplyS (φ ψ χ : Proposition (Atom ⊕ Atom)) :
+    CS5PairAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ))) :=
+  .implyS φ ψ χ
+
+/-- The engine's `hEFQ` precondition at `CS5PairAxiom`: `⊥ → φ` is derivable for every `φ` in
+the combined type. -/
+theorem cs5Pair_hEFQ (φ : Proposition (Atom ⊕ Atom)) :
+    Deriv (@CS5PairAxiom Atom) [] (Proposition.bot.imp φ) :=
+  ⟨.ax [] _ (.efq φ)⟩
+
+/-- The engine's `hOrI1` precondition at `CS5PairAxiom`: `φ → φ ∨ ψ` is derivable. -/
+theorem cs5Pair_hOrI1 (φ ψ : Proposition (Atom ⊕ Atom)) :
+    Deriv (@CS5PairAxiom Atom) [] (φ.imp (φ.or ψ)) :=
+  ⟨.ax [] _ (.orI1 φ ψ)⟩
+
+/-- The engine's `hOrI2` precondition at `CS5PairAxiom`: `ψ → φ ∨ ψ` is derivable. -/
+theorem cs5Pair_hOrI2 (φ ψ : Proposition (Atom ⊕ Atom)) :
+    Deriv (@CS5PairAxiom Atom) [] (ψ.imp (φ.or ψ)) :=
+  ⟨.ax [] _ (.orI2 φ ψ)⟩
+
+/-- The engine's `hOrE` precondition at `CS5PairAxiom`: disjunction elimination is derivable. -/
+theorem cs5Pair_hOrE (φ ψ χ : Proposition (Atom ⊕ Atom)) :
+    Deriv (@CS5PairAxiom Atom) [] ((φ.imp χ).imp ((ψ.imp χ).imp ((φ.or ψ).imp χ))) :=
+  ⟨.ax [] _ (.orE φ ψ χ)⟩
+
+/-- The engine's `hCut` precondition at `CS5PairAxiom`: the deduction-theorem-style cut witness,
+supplied by **instantiating** the existing generic supplier `modal_deriv_imp_of_union`
+(`Intuitionistic/PrimeTheory.lean`) at `Axioms := CS5PairAxiom` with `cs5Pair_hImplyK`/
+`cs5Pair_hImplyS` -- no new cut machinery is needed. `modal_deriv_imp_of_union` already has the
+singleton `S ∪ {a}` shape `prime_set_exclusion` expects (`SegmentLindenbaum.lean:286-288`
+confirms this precedent); the conversion from the engine's `insert a U` shape to that `S ∪ {a}`
+shape via `Set.mem_insert_iff`/`Set.mem_union_left`/`Set.mem_union_right` mirrors
+`quasi_prime_set_exclusion` (`CS5.lean:864-870`) and `modal_prime_exclusion`
+(`Intuitionistic/PrimeTheory.lean:348-353`). -/
+theorem cs5Pair_hCut {U : Set (Proposition (Atom ⊕ Atom))}
+    {L : List (Proposition (Atom ⊕ Atom))} {a b : Proposition (Atom ⊕ Atom)}
+    (hL : ∀ x ∈ L, x ∈ insert a U) (hd : Deriv (@CS5PairAxiom Atom) L b) :
+    ∃ L', (∀ x ∈ L', x ∈ U) ∧ Deriv (@CS5PairAxiom Atom) L' (a.imp b) :=
+  modal_deriv_imp_of_union cs5Pair_hImplyK cs5Pair_hImplyS
+    (fun x hx => by
+      rcases Set.mem_insert_iff.mp (hL x hx) with rfl | hu
+      · exact Set.mem_union_right U (Set.mem_singleton_iff.mpr rfl)
+      · exact Set.mem_union_left _ hu)
+    hd
+
 end Cslib.Logic.Modal

@@ -35,8 +35,8 @@ is a tautology.
 
 This module is sorry-free. All three key lemmas (`classicalRule_preserves_sat`,
 `classically_closed_unsatisfiable`, `classicalTableau_sound`) are fully proved.
-`classicalTableau_complete` in `Classical/Completeness.lean` is also now sorry-free
-(task 376); the entire classical tableau is proved correct.
+`classicalTableau_complete` in `Classical/Completeness.lean` is also sorry-free; the entire
+classical tableau is proved correct.
 
 ## References
 

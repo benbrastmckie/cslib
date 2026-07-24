@@ -1251,8 +1251,8 @@ lemma intExpandBranches_closed_unsat
                     fun sf' hmem' => Nat.ne_of_lt (hfreshAbove_pers.1 sf' hmem')
                   rcases hzip_p with ⟨rfl, rfl⟩ | hmem_rest
                   · -- linearResult bp=bh case: apply intRule_preserves_sat + ih
-                    -- Task 317 phase 4 fix: the dedup (Expansion.lean, `intFImpReuseWitness?`)
-                    -- makes the `newEdge = some e` sub-case branch further on whether an
+                    -- The dedup (Expansion.lean, `intFImpReuseWitness?`) makes the
+                    -- `newEdge = some e` sub-case branch further on whether an
                     -- accessible ancestor can be reused, so `newEdge`/the reuse-witness must be
                     -- resolved here before `hgo` can be matched against the actual recursive call.
                     rcases hnE : newEdge with _ | e_val
@@ -1318,7 +1318,7 @@ lemma intExpandBranches_closed_unsat
                           List.mem_append]
                       exact Or.inr (by simp)
                     · -- World-creating F(φ → ψ) rule: newEdge = some e_val. Run the
-                      -- Sfor-containment loop-check (task 317 plan 04) exactly as `go` does.
+                      -- Sfor-containment loop-check exactly as `go` does.
                       rw [hnE] at hgo hresult_sf
                       simp only [] at hgo
                       rcases hwit : intFImpReuseWitness? bPers edgesP newForms e_val with _ | x
@@ -1398,8 +1398,8 @@ lemma intExpandBranches_closed_unsat
                             List.mem_append]
                         exact Or.inr (by simp)
                       · -- Reuse: an accessible ancestor already contains Sfor(w') and lacks ψ,
-                        -- so F(φ → ψ)@w is discharged without creating w'. Task 317 phase 4 fix:
-                        -- the branch is literally `bPers` (unchanged), so the IH applies directly
+                        -- so F(φ → ψ)@w is discharged without creating w'. The branch is
+                        -- literally `bPers` (unchanged), so the IH applies directly
                         -- to `bPers` itself — no new world/edge, no `intRule_preserves_sat`
                         -- machinery needed, since `hsat_pers` already witnesses satisfaction of
                         -- exactly the branch the recursive call receives.
@@ -1547,7 +1547,7 @@ lemma intExpandBranches_closed_unsat
                             hfreshCombLin hgo bp edgesP ?_ wo hmono_p hsat_p
                         rw [List.zip_append (by simp [hdlength_edges]), List.mem_append]
                         exact Or.inr hmem_rest
-                      · -- Reuse: F(φ → ψ)@w discharged without creating w'. Task 317 phase 4:
+                      · -- Reuse: F(φ → ψ)@w discharged without creating w'.
                         -- `bp` is unaffected (lives in `bt`), so this is the same shape as the
                         -- `none`/`create` bp∈bt cases above, just carrying `bPers`/`edgesH`/`nwH`
                         -- through unchanged instead of an extended branch.

@@ -219,7 +219,7 @@ constructor is structurally unconstructible at MPL strength, not merely inadmiss
 Since `efq` carries `[IsIntuitionistic T]`, every derivation at `MPL` strength
 (`MPL = ∅` admits no `IsIntuitionistic` instance) satisfies this predicate.
 This predicate names the gate-free fragment within the shared derivation inductive
-without introducing a separate `⊥`-rule-free inductive type (which is task 409/W6). -/
+without introducing a separate `⊥`-rule-free inductive type. -/
 def Theory.Derivation.IsBotRuleFree {T : Theory Atom} :
     ∀ {Γ : Ctx Atom} {A : Proposition Atom}, T.Derivation Γ A → Prop
   | _, _, ax _ => True

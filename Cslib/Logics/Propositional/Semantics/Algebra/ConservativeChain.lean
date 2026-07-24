@@ -272,11 +272,10 @@ theorem hilbertMplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition A
 
 /-! ## Glivenko Strength Wrapper
 
-(The zero-consumer `impAxiom_iff_chain` / `conjImpAxiom_iff_chain` / `orImpAxiom_iff_chain` /
-`minAxiom_iff_chain` biconditional restatements formerly here were collapsed as part of the
-Part-A completeness-stack consolidation: each was a `.symm` of an already-public biconditional
-(`hilbertIplConservativeOverX_iff` / the `minAxiom` case) with no external use-site, so they
-added a redundant restatement rather than new content. See `CanAlgComplete.lean` for the
+(The biconditionals `impAxiom_iff_chain` / `conjImpAxiom_iff_chain` / `orImpAxiom_iff_chain` /
+`minAxiom_iff_chain` are not restated here: each is a `.symm` of an already-public
+biconditional (`hilbertIplConservativeOverX_iff` / the `minAxiom` case) with no external
+use-site, so a restatement here would add no new content. See `CanAlgComplete.lean` for the
 documented terminal fragment-completeness interface these biconditionals ultimately feed.) -/
 
 /-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a

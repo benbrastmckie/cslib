@@ -29,7 +29,7 @@ Maehara's method: a structural induction over a cut-free proof.
 - The `cut` case is vacuous since `CutFree` is `False` for `cut` steps.
 - Partition overlap is allowed (cover semantics: `Γ₁ ∪ Γ₂ = Γ`, not disjoint).
 - The invariant is `Nonempty (LKProof …)` to keep the whole proof in `Prop`.
-- Hard cases (`ax`, `andR`, `orL`, `impL`, `impR`) are deferred to Phase 3.
+- All cases, including the hard ones (`ax`, `andR`, `orL`, `impL`, `impR`), are proved below.
 
 ## References
 
@@ -58,8 +58,8 @@ set_option maxHeartbeats 1600000 in
 2. `Γ₁ ⊢ₛ insert I Δ₁` (left half-derivation), and
 3. `insert I Γ₂ ⊢ₛ Δ₂` (right half-derivation).
 
-The `cut` case is vacuous since `CutFree d` is `False` for cut steps. The hard cases
-(`ax`, `andR`, `orL`, `impL`, `impR`) are marked as deferred to Phase 3. -/
+The `cut` case is vacuous since `CutFree d` is `False` for cut steps. The remaining cases
+(`ax`, `andR`, `orL`, `impL`, `impR`) are the hard cases, each proved below. -/
 private lemma maeharaCore {seq : LKSequent Atom} (d : LKProof seq) (hcf : CutFree d) :
     ∀ Γ₁ Γ₂ Δ₁ Δ₂ : Finset (Proposition Atom),
       seq.ant = Γ₁ ∪ Γ₂ → seq.suc = Δ₁ ∪ Δ₂ →

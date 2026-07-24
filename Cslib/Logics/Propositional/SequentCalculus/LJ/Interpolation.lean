@@ -53,9 +53,10 @@ variable {Atom : Type u} [DecidableEq Atom]
 /-! ## Maehara Core Lemma for LJ -/
 
 set_option maxHeartbeats 800000 in
--- The orL and impL two-premise cases each require ~100k heartbeats. After the MPL/IPL unification
--- (task 408) `LJProof`/`LJCutFree`/`mono` are re-exports of the generic `SeqProof T` operations,
--- which adds whnf/unfolding overhead across the full induction; 800k covers it with margin.
+-- The orL and impL two-premise cases each require ~100k heartbeats. Since `LJProof`/
+-- `LJCutFree`/`mono` are re-exports of the generic `SeqProof T` operations (after the MPL/IPL
+-- unification), whnf/unfolding overhead accumulates across the full induction; 800k covers it
+-- with margin.
 /-- **Maehara core for LJ**: For any cut-free LJ proof `d` of `seq` and any cover partition
 `Γ₁ ∪ Γ₂ = seq.1` of the antecedent, there exists an interpolant `I` satisfying:
 1. `I.vars ⊆ Γ₁.vars ∩ (Γ₂ ∪ {seq.2}).vars` (variable constraint),

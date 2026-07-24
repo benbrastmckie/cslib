@@ -15,8 +15,7 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativit
 This module exhibits the propositional-logic axiom-monotonicity combinator
 `liftDerivationTree` as a corollary of the generic functor
 `Cslib.Logic.Metalogic.Deriv.map` applied to a `ProofSigHom` built from the
-subsumption hypothesis. This is the Phase 2 "PL pilot" of the morphism-of-proof-systems
-abstraction (task 419).
+subsumption hypothesis, the PL instance of the morphism-of-proof-systems abstraction.
 
 ## Design
 

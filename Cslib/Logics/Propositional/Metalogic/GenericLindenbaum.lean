@@ -40,12 +40,10 @@ h_cons_ext : GenericTheory Axioms Cons S → (φ → ψ) ∉ S →
     (ii) the deductive-closure-preserves-consistency lemma
         (`intDeductiveClosure_consistent`).
 
-This design is described in the task 407 Phase 5 plan.
-
 ## Design Notes
 
-This substrate is **active and load-bearing**. Re-instantiation of `MinTheory`/`IntDCCS`
-off this substrate was completed in task 407 phase 6 (commit 9242d243). Both consumer
+This substrate is **active and load-bearing**. `MinTheory`/`IntDCCS` are re-instantiated off
+this substrate. Both consumer
 modules import `GenericLindenbaum` and delegate their core Lindenbaum lemmas to the
 `generic_*` definitions here via six thin instances:
 

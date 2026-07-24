@@ -37,7 +37,7 @@ to reduce to `Tautology φ`.
 
 Both directions are now fully proved (sorry-free). `classicalTableau_sound` was proved first;
 `classicalTableau_complete` in `Classical/Completeness.lean` is now also sorry-free, established
-via the base-3 exponential fuel-sufficiency argument (task 376): fuel `3 ^ complexity φ` is
+via the base-3 exponential fuel-sufficiency argument: fuel `3 ^ complexity φ` is
 sufficient to expand every branch, so any branch returned as open is a Hintikka set, yielding
 a Boolean countermodel. The `Decidable` instance and `instDecidableTautology` are both
 sorry-free.

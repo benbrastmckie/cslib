@@ -32,11 +32,11 @@ The `and` and `or` connectives use the Łukasiewicz encodings into `{bot, imp}`:
 These encodings are classically equivalent to `∧` and `∨` but **not** intuitionistically
 ([Wajsberg1938], [McKinsey1939]); the `embed` skeleton therefore targets classical logics.
 
-**Why not use native `and`/`or`?** The Modal, Temporal, and Bimodal formula types do not have
-native `and`/`or` constructors. Only `PL.Proposition` has `HasAnd`/`HasOr` instances (task 173
-is deferred). Pushing `and`/`or` into `PropositionalConnectives` would require updating the
-four concrete formula types simultaneously and falls outside the scope of this consolidation
-(see task 173).
+**Why not use native `and`/`or`?** `Modal.Proposition` has gained native `and`/`or`
+constructors and `HasAnd`/`HasOr` instances (`Modal/Basic.lean`), matching `PL.Proposition`,
+but `Temporal.Formula` and `Bimodal.Formula` do not yet. Pushing `and`/`or` into
+`PropositionalConnectives` would require updating all four concrete formula types
+simultaneously and falls outside the scope of this consolidation.
 
 **Intuitionistic lift.** An intuitionistic embedding faithful to native `∧`/`∨` can be provided
 in the future by instantiating `NativePropositionalEmbedding` for each target. That extension
@@ -127,8 +127,8 @@ A type `F` with native `∧`/`∨` constructors (`HasAnd F`, `HasOr F`) could pr
 faithful embedding of `PL.Proposition` that preserves the native `and`/`or` without
 Łukasiewicz encoding. This class is deliberately **not instantiated here**: it is provided
 as a typed stub to make the extension boundary explicit. Instantiation requires each target
-formula type (`Modal.Proposition`, `Temporal.Formula`, `Bimodal.Formula`) to gain primitive
-`∧`/`∨` constructors, which is deferred to task 173. -/
+formula type to have primitive `∧`/`∨` constructors: `Modal.Proposition` already does
+(`Modal/Basic.lean`), but `Temporal.Formula` and `Bimodal.Formula` do not yet. -/
 class NativePropositionalEmbedding (Atom : Type*) (F : Type*) [HasBot F] [HasImp F]
     [HasAnd F] [HasOr F] where
   /-- Native injection of propositional atoms into the target formula type. -/

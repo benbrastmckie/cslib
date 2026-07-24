@@ -32,12 +32,12 @@ This characterizes the "⊥-free" fragment abstractly.
 - `ghaValid_of_botFree`: for bot-free `φ`, `GHAValid φ` follows from `HAValid φ` — proved
   by the `WithBot` embedding argument, showing that the converse also holds for `IsBotFree`.
 
-## Research-or-Defer Outcome (Phase 7, Task 407 S3)
+## Scope: Generic Mechanism vs. Algebraic Completeness
 
-**Mechanism delivered**: `AlgEvalIndependent` + `isBotFree_eval_independent` +
+**Mechanism delivered here**: `AlgEvalIndependent` + `isBotFree_eval_independent` +
 `isOrBotFree_eval_independent` + `generic_gha_implies_ha` + `ghaValid_of_botFree`.
 
-**Residual — now discharged by `CanAlgComplete` (task 410)**:
+**Discharged by `CanAlgComplete` (`CanAlgComplete.lean`)**:
 The remaining step — from `HAValid φ` (equivalently `GHAValid φ`) to `Derivable X-logic φ`
 for a specific sub-logic `X` — is **algebraic completeness**. This is not new mathematics:
 it already exists piecewise (`MPL.hilbert_alg_completeness`, `mplAxiom_iff_conjImpAxiom`,

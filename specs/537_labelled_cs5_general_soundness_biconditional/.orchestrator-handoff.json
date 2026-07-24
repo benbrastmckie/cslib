@@ -1,33 +1,45 @@
 {
-  "status": "researched",
-  "task_number": 537,
-  "session_id": "sess_1784471495_4fb1e9",
-  "agent_type": "cslib-research-hard-agent",
-  "phase": "phase_8_divergence_audit",
-  "orchestrator_mode": true,
-  "report_path": "specs/537_labelled_cs5_general_soundness_biconditional/reports/04_crosslabel-motive-audit.md",
-  "verdict": "nik_TS5_soundness is TRUE and provable; the Phase-8 countermodel refutes the naive forall-rho motive only, not the theorem.",
-  "key_findings": [
-    "REFUTED the connectivity hypothesis (task Q2): NIK.boxI/diaE (Deduction.lean:297,309) carry no x-in-G.X premise and Graph.addEdge sets X := G.X union {x,y} (Syntax.lean:149), so boxI/diaE applied at a dangling efq/orE label create a G.R-disconnected component. IsDerivationForest correctly omits connectivity because it is not preserved. Q4 option A (connectivity lemma -> TClosure-total) is NOT viable.",
-    "MACHINE-VERIFIED axiom-free: botForces propagates bidirectionally along any single r-edge under cs5FCIncest+CKValidFC (backward via cs5Incest + bf_uc + bf_r). Closes the CONNECTED efq sub-case only.",
-    "orE is NOT part of the obstruction: an existential motive discharges it single-branch with no coordination. Handoff 08 overstated orE.",
-    "efq with y not in G.X union ctxLabels-Gamma closes by teleporting rho' y to the exploding premise point + ckforces_of_exploding.",
-    "Sole residual: efq where bot is derived in a component disconnected from the conclusion label. This is exactly Simpson 8.1.2's unavoidable non-tree excursion (chunk 0158); Simpson/MMS both dodge cross-label bot-E via bivalence/explicit-atom sequents, which CSLib's fallible CKForces deviation reopens."
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "partial",
+  "summary": "Plan v4 (Hilbert-adequacy-bridge). Phases 1-7 landed (sorry-free, axiom-clean, unregressed). Phase 8 (Hilbert-labelled adequacy bridge) is [BLOCKED]: a Simpson Ch.6 source pass found the faithful tree-depth-indexed translation is 300-600+ lines, and two simplified shortcuts were tried and machine-refuted (re-boxing an assumption; case-splitting a disjunction under a box are both impossible in any normal modal Hilbert system). Per the plan's own contingency, work pivoted to Phase 11 (fallback route PD). PD.1 (bot_backward/bot_iff_edge/bot_iff_TClosure) landed sorry-free/axiom-clean. PD.2's motive, as literally stated in the plan/report 04, was found unprovable (bare monotonicity has no witness for efq's adversarial dangling label on a non-directed Preorder); a corrected design (exact-agreement Dom(G,Γ,φ):=G.X∪ctxLabels Γ∪{φ.lbl} + caller-supplied protect-set T) was worked out by hand and verified against 11 of 12 NIK constructors, but PD.3's efq residual (pinned conclusion label, disconnected ⊥-premise) is confirmed genuinely open (independently re-derived, not assumed) -- Simpson's own 'unavoidable non-tree excursion' (Sec 8.1.2). Because NIK's induction is one closed Lean match over all 12 constructors, PD.2 cannot be landed as a buildable sorry-free artifact while PD.3 is open. Phase 11 is marked [BLOCKED] per the plan's own sanctioned terminal. No sorry, no new axiom, build green.",
+  "artifacts": [
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
+    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/10_phase11-blocked-motive-redesign-summary.md"
   ],
-  "recommended_paths": [
-    {"id": "P3", "risk": "LOW", "summary": "Hilbert-labelled adequacy bridge (Strategy 3): prove nik_TS5_to_hilbert (Simpson Ch.6 adequacy, specialized to Graph.trivial theoremhood), then nik_TS5_soundness := cs5_soundness_derivable_incest (nik_TS5_to_hilbert h). Reuses the landed sorry-free Hilbert soundness (CS5Canonical.lean:373); sidesteps the efq excursion. Main risk = the Ch.6 bridge (est 150-300 lines, own research pass). Endorsed by Simpson 8.1.2 and the 4th-dispatch GATE-C."},
-    {"id": "PD", "risk": "HIGH", "summary": "Direct existential-teleport induction. Phase 8.1 bot_backward/bot_iff_edge/bot_iff_TClosure (LOW, verified). Phase 8.2 existential-monotone motive: 8 propositional cases via sequential threading + ckforces_persistence, boxE/diaI via box_iff_TClosure+box_gives_here, boxI via boxI_lift, diaE via le_refl, orE single-branch (MEDIUM). Phase 8.3 the efq bot-locality lemma (HIGH/genuinely-open; gate: pivot to P3 if unprovable in budget). Phase 8.4 assemble + regression gate."}
+  "blockers": [
+    {
+      "description": "Phase 8 (Hilbert-labelled adequacy bridge, nik_TS5_to_hilbert): the faithful Simpson Ch.6 tree-depth-indexed translation is a genuinely large undertaking (300-600+ lines, no existing tree/subtree infrastructure in the codebase); two simplified flattened-translation shortcuts were tried and machine-refuted this dispatch cycle (re-boxing an unboxed hypothesis across labels is unsound in any normal modal logic; case-splitting a disjunction under a box is not a theorem of K or its extensions, confirmed by a two-point countermodel). Not attempted further; sanctioned pivot to Phase 11 per the plan's own contingency.",
+      "phase": "phase-8",
+      "severity": "soft"
+    },
+    {
+      "description": "Phase 11 PD.3 (efq ⊥-locality lemma): confirmed genuinely open. When NIK.efq's conclusion label y is 'pinned' (y in the tracked domain, so the existential witness's value at y is forced to equal the original interpretation) and the premise's bot-label is either dangling or r-disconnected from y, there is no available mechanism to transport botForces across the disconnection under cs5FCIncest + CKValidFC's explosion conditions. This is Simpson's own acknowledged 'unavoidable non-tree excursion' (Sec 8.1.2, chunk 0158), for which he routes around via L_m/Hilbert rather than closing directly in N_IK. Report 04's own confidence (~35%) is unraised by this dispatch's independent re-derivation; closing it would need a new cut-admissibility/normalization-style invariant for N_IK(T) -- research-scale, not transcription.",
+      "phase": "phase-11",
+      "severity": "hard"
+    }
   ],
-  "do_not": [
-    "Do NOT pursue the connectivity-lemma path (Q4 option A) -- connectivity is not an invariant (refuted).",
-    "Do NOT weaken efq/orE to require y in G.X -- completeness needs the cross-label disconnected form (Deduction.lean:245-253; PrimeLemma.consistency_of_maximal).",
-    "Do NOT introduce sorry, a new axiom, or weaken cs5FCIncest."
+  "next_action_hint": "plan",
+  "files_modified": [
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
+    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/10_phase11-blocked-motive-redesign-summary.md"
   ],
-  "preserved_assets_unregressed": true,
-  "landed_assets_count": 14,
-  "reference_grounding_tier": 1,
-  "bibkey_verification_status": "VERIFIED (Simpson1994 references.bib:86; MarinMoralesStrassburger2021 references.bib:962)",
-  "adversarial_verification_triggered": true,
-  "revised_direction_restart": false,
-  "next_steps": "Run /plan 537 to create a revised Phase 8 plan selecting Path P3 (recommended) or Path PD; both integrate report 04."
+  "decisions_made": [
+    "Fixed a stale Phase 11 heading marker ([BLOCKED] -> [IN PROGRESS]) left by the interrupted prior agent's uncommitted edits, since PD.1 was already landed and PD.2-4 work was about to begin; restored to [BLOCKED] at the end of this dispatch per this dispatch's own PD.3 finding.",
+    "Did not write any Lean code for PD.2/PD.3 this dispatch (design-only pass): every one of the 12 NIK constructors' discharge was worked through by hand under a corrected motive design before touching Soundness.lean, per the 'machine-check before escalating' discipline -- this avoided burning budget on a partial Lean transcription that would have been un-committable (a sorry-free build requires all 12 cases, and the 12th is confirmed open).",
+    "Corrected report 04 Finding 4's claim that orE needs 'no coordination' under the existential motive -- found this understates the true requirement (a caller-supplied protect-set T is needed for orE's shared minor-premise/conclusion label), though the coordination IS mechanically resolvable.",
+    "Recommended a replan choice between (a) committing to the Hilbert bridge's full tree-recursive construction (Phase 8, ~70% per report 04, 300-600+ lines) or (b) treating PD.3's efq gap as requiring dedicated cut-admissibility research before further Phase 11 implementation."
+  ],
+  "dead_ends": [
+    "PD.2's motive exactly as stated in the plan/report 04 ('agrees with rho on G.X union ctxLabels Gamma' plus bare 'for all z, rho z <= rho' z' monotonicity): unprovable as literally written -- no witness exists for efq's adversarial dangling label on a non-directed Preorder World. Do not retry this literal shape; use the corrected Dom + protect-set T design documented in the plan's Phase 11 dispatch finding."
+  ],
+  "continuation_context": {
+    "phases_completed": 7,
+    "phases_total": 11,
+    "orchestrator_mode": true,
+    "phase_11_pd1_landed": true,
+    "phase_11_pd2_design_only": "corrected motive worked out by hand for 11/12 constructors, not yet in Lean -- see plan's Phase 11 dispatch-finding block for the full Dom/protect-set-T design",
+    "phase_11_pd3_status": "confirmed genuinely open, independently re-derived",
+    "recommendation": "replan to choose between completing Phase 8's Hilbert Ch.6 bridge in full, or scoping dedicated research into N_IK(T) cut-admissibility for PD.3 before further Phase 11 implementation"
+  }
 }

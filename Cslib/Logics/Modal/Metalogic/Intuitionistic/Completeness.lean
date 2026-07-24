@@ -11,30 +11,29 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.TruthLemma
 
 /-! # Completeness for Intuitionistic Modal Logic (Birelational Canonical Model)
 
-This module is Phase 4 (the final phase) of the birelational canonical-model construction for
-intuitionistic modal logic (task 480 plan v4). It packages the canonical worlds/`Preorder`/
-`canonicalR`/`canonicalVal` (Phase 2a) and the frame conditions `canonical_f1`/`canonical_f2`
-(Phase 2d) into a concrete `BModel` term (`canonicalBModel`), and combines
-`canonical_truth_lemma` (Phase 3c) with `modal_prime_exclusion` (Phase 1) on the target
-(underivable) formula to obtain the two parametric weak-completeness statements
+This module is the final assembly step of the birelational canonical-model construction for
+intuitionistic modal logic. It packages the canonical worlds/`Preorder`/`canonicalR`/
+`canonicalVal` and the frame conditions `canonical_f1`/`canonical_f2` (`CanonicalModel.lean`)
+into a concrete `BModel` term (`canonicalBModel`), and combines `canonical_truth_lemma`
+(`TruthLemma.lean`) with `modal_prime_exclusion` (`PrimeTheory.lean`) on the target (underivable)
+formula to obtain the two parametric weak-completeness statements
 `ivalid_completeness`/`mvalid_completeness`.
 
 Both statements carry the union of the five modal-axiom hypotheses `{ h_K, h_Kdia, h_Idb, h_Cd,
-h_dbot }` established as the definitive minimal set by report 03 (plan v4 Overview), plus the
-intuitionistic base hypotheses, as loose parametric hypotheses -- never global `axiom`s. `h_efq`
-is threaded separately (used, via `canonical_truth_lemma`, by both statements' `imp`/`box` cases)
-and `botForces` remains a truth-lemma parameter throughout: `ivalid_completeness` instantiates it
-to `fun _ => False` (the intuitionistic convention), `mvalid_completeness` instantiates it to an
-arbitrary upward-closed predicate (membership of `⊥` in the world's underlying theory), matching
-[Simpson1994]'s `IValid`/`MValid` distinction. Per the Downstream-Impact Note (plan v4 Overview),
-this framework is a sound completeness witness only for logics containing `Cd + Idb` (task 492 and
-its extensions); bare CK (task 493) cannot reuse the box/diamond witnesses and must build a
-separate segment/fallible-world construction -- out of scope here, flagged only.
+h_dbot }` established as the definitive minimal set, plus the intuitionistic base hypotheses, as
+loose parametric hypotheses -- never global `axiom`s. `h_efq` is threaded separately (used, via
+`canonical_truth_lemma`, by both statements' `imp`/`box` cases) and `botForces` remains a
+truth-lemma parameter throughout: `ivalid_completeness` instantiates it to `fun _ => False` (the
+intuitionistic convention), `mvalid_completeness` instantiates it to an arbitrary upward-closed
+predicate (membership of `⊥` in the world's underlying theory), matching [Simpson1994]'s
+`IValid`/`MValid` distinction. This framework is a sound completeness witness only for logics
+containing `Cd + Idb`; bare CK cannot reuse the box/diamond witnesses and must build a separate
+segment/fallible-world construction -- out of scope here.
 
 A parametric **consistency hook** (`canonical_prime_world_nonempty_of_consistent`) is also
 exposed: given that the axiom system `Axioms` is consistent (`⊥` is not a theorem), the canonical
 model is inhabited by at least one prime world. No concrete axiom system's consistency is
-discharged here (per the plan's Non-Goals) -- this is left to 492/493.
+discharged here.
 
 ## Main Definitions
 
@@ -62,20 +61,20 @@ open Cslib.Logic
 universe u
 variable {Atom : Type u}
 
-/-! ## Canonical Birelational Model Assembly (Phase 4) -/
+/-! ## Canonical Birelational Model Assembly -/
 
 section CanonicalBModelAssembly
 
 variable {Axioms : Proposition Atom → Prop}
 
-/-- **The canonical birelational model** (Phase 4, task 480): assembles `CanonicalPrimeWorld`,
-the canonical `Preorder` instance (set inclusion, Phase 2a), `canonicalR` (Phase 2a), `canonicalVal`
-(Phase 2a), and the frame conditions `canonical_f1`/`canonical_f2` (Phase 2d) into a concrete
+/-- **The canonical birelational model**: assembles `CanonicalPrimeWorld`, the canonical
+`Preorder` instance (set inclusion), `canonicalR`, `canonicalVal`, and the frame conditions
+`canonical_f1`/`canonical_f2` (all `CanonicalModel.lean`) into a concrete
 `BModel (CanonicalPrimeWorld Axioms) Atom` term, confirming the birelational canonical frame/model
-data (`Cslib.Logic.Modal.BModel`, `Birelational.lean`, task 490) is fully instantiated by this
-framework's witnesses. `botForces` is threaded as a **parameter** (per the plan's Goals/Postmortem:
-never hard-coded), together with its upward-closure proof, so both the intuitionistic
-(`ivalid_completeness`, `botForces := fun _ => False`) and minimal (`mvalid_completeness`,
+data (`Cslib.Logic.Modal.BModel`, `Birelational.lean`) is fully instantiated by this framework's
+witnesses. `botForces` is threaded as a **parameter** (never hard-coded), together with its
+upward-closure proof, so both the intuitionistic (`ivalid_completeness`,
+`botForces := fun _ => False`) and minimal (`mvalid_completeness`,
 `botForces := fun w => ⊥ ∈ w.val`) instantiations below reuse this single assembly. -/
 def canonicalBModel
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -112,21 +111,20 @@ def canonicalBModel
 
 end CanonicalBModelAssembly
 
-/-! ## Consistency Hook (Phase 4) -/
+/-! ## Consistency Hook -/
 
 section ConsistencyHook
 
 variable {Axioms : Proposition Atom → Prop}
 
-/-- **Consistency hook** (Phase 4, task 480): if the axiom system `Axioms` is consistent (`⊥` is
-not derivable from the empty context), the canonical model is inhabited by at least one prime
-world. This is a *parametric* statement -- concrete consistency of a specific axiom system (IK,
-CK, ...) is discharged downstream by tasks 492/493, not here (plan v4 Non-Goals: "No
-soundness/consistency discharge of any concrete axiom set -- the framework exposes the hook
-only"). Proved via `modal_prime_exclusion` (Phase 1) excluding `⊥` from the deductive closure of
-`∅`: any finite sublist of the closure of `∅` reduces (`modal_deriv_from_closure_to_S`) to a
-derivation from `∅` itself, i.e. from `[]`, so consistency of the closure follows directly from
-`h_cons`. -/
+/-- **Consistency hook**: if the axiom system `Axioms` is consistent (`⊥` is not derivable from
+the empty context), the canonical model is inhabited by at least one prime world. This is a
+*parametric* statement -- concrete consistency of a specific axiom system (IK, CK, ...) is
+discharged downstream by whichever module instantiates this framework, not here: this framework
+exposes the hook only. Proved via `modal_prime_exclusion` (`PrimeTheory.lean`) excluding `⊥` from
+the deductive closure of `∅`: any finite sublist of the closure of `∅` reduces
+(`modal_deriv_from_closure_to_S`) to a derivation from `∅` itself, i.e. from `[]`, so consistency
+of the closure follows directly from `h_cons`. -/
 theorem canonical_prime_world_nonempty_of_consistent
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -164,7 +162,7 @@ theorem canonical_prime_world_nonempty_of_consistent
 
 end ConsistencyHook
 
-/-! ## Parametric Completeness (Phase 4) -/
+/-! ## Parametric Completeness -/
 
 section ParametricCompleteness
 
@@ -173,7 +171,7 @@ variable {Axioms : Proposition Atom → Prop}
 /-- **Parametric intuitionistic completeness**: any formula `φ` that is `IValid` (forced at every
 world of every birelational model with `botForces := fun _ => False`) is derivable from
 `Axioms`. Carries the union of the five modal-axiom hypotheses `{ h_K, h_Kdia, h_Idb, h_Cd,
-h_dbot }` plus the intuitionistic base (report 03 §4 row 8; plan v4 Overview).
+h_dbot }` plus the intuitionistic base.
 
 Proof by contrapositive on `Derivable Axioms φ`, case-splitting on consistency of the deductive
 closure of `∅` (mirroring `Cslib.Logic.PL.int_strong_completeness`'s Γ = ∅ instantiation):

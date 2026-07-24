@@ -1721,6 +1721,34 @@ theorem sigAt_impE {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula 
     Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp B) :=
   cs5_deriv_imp_mp himp hA
 
+/-! ### `sigAt`-congruence under context extension (needed by `impI`/`orE`/`efq`)
+
+`sigAtFuel`'s recursion at a node `z` only ever descends to `z`'s raw-`R`-children, whose rank
+(under `IsDerivationForest`'s graded-rank witness `ht`) is exactly `ht z + 1`. So if two contexts
+`Γ`, `Δ` agree on `factsAt` everywhere strictly above some rank threshold `r`, their `sigAtFuel`
+values agree at every node of rank `> r` too, for every fuel -- the disagreement (if any) is
+confined to rank `≤ r`, and can never resurface via the children recursion once started above
+`r`. This is the tool that lets a context extension `(x∶C) :: Γ` (which only changes `factsAt` AT
+`x`) be shown not to disturb `sigAt` at any strict descendant of `x` (`ht x < ht ·`). -/
+
+/-- **`sigAtFuel` congruence above a rank threshold.** -/
+theorem sigAtFuel_congr_above_rank {Atom : Type u} {G : Graph Atom} {ht : Label Atom → ℕ}
+    (hht : ∀ a b, G.R a b → ht b = ht a + 1) {Γ Δ : List (LabelledFormula Atom)} {r : ℕ}
+    (hagree : ∀ z, r < ht z → factsAt Γ z = factsAt Δ z) (hfin : G.X.Finite) :
+    ∀ (n : ℕ) (z : Label Atom), r < ht z → sigAtFuel G Γ hfin n z = sigAtFuel G Δ hfin n z
+  | 0, z, hz => by simp only [sigAtFuel, hagree z hz]
+  | (n+1), z, hz => by
+      simp only [sigAtFuel, hagree z hz]
+      congr 1
+      apply congrArg bigAndL
+      apply List.map_congr_left
+      intro c hc
+      have hRzc : G.R z c := (hfin.subset (fun d hd => (G.edge_mem z d hd).2)).mem_toFinset.mp
+        (Finset.mem_toList.mp hc)
+      have hrank : ht c = ht z + 1 := hht z c hRzc
+      have hr : r < ht c := by omega
+      exact congrArg Proposition.box (sigAtFuel_congr_above_rank hht hagree hfin n c hr)
+
 end Cslib.Logic.Modal.Labelled
 
 end

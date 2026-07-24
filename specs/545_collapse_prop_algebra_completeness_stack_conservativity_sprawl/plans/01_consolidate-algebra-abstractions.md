@@ -187,26 +187,37 @@ hard-direction proof verbatim.
 
 ---
 
-### Phase 3: Re-express boilerplate, retire per-fragment surface [NOT STARTED]
+### Phase 3: Re-express boilerplate, retire per-fragment surface [COMPLETED]
 
 **Goal**: Re-express the 4×3 per-fragment boilerplate theorems (#2-#4) as thin corollaries of the
 generic ones, preserving every nonzero-use-site name/signature; reduce the now-redundant per-fragment
 files to re-export shims (or retire them), keeping all external importers resolving.
 
 **Tasks**:
-- [ ] For each fragment, replace the bespoke `derivableXOfDerivableInt` / `hilbertIplConservativeOverX_iff`
+- [x] For each fragment, replace the bespoke `derivableXOfDerivableInt` / `hilbertIplConservativeOverX_iff`
       / `ipl_conservative_over_X` proof bodies with one-line terms delegating to
       `fragmentConservativity_derivableOfDerivableInt` / `_iff` / `_nd` applied to the matching instance.
       Preserve the exact public names and signatures (snake_case theorem names are grandfathered).
-- [ ] Preserve `derivableMinOfDerivableConjImp` / `derivableMinOfDerivableImp` (2 use-sites each,
+      *(deviation: altered -- re-homed into `FragmentConservativityInstances.lean` rather than
+      rewritten in place in the four per-fragment files, since the instance the one-liners need is
+      defined downstream of those files; see Phase 2's deviation note. `ConservativeChain.lean`'s
+      import list was updated (3 individual fragment imports collapsed to one
+      `FragmentConservativityInstances` import) so every consumer keeps resolving the relocated names
+      transitively -- verified green by `lake build`.)*
+- [x] Preserve `derivableMinOfDerivableConjImp` / `derivableMinOfDerivableImp` (2 use-sites each,
       CanAlgComplete inputs) and `GHAValid_implies_BrouwerianValid_direct` (8 use-sites) either in place
-      or as re-exports.
-- [ ] Reduce the emptied per-fragment files (`ImpConservative.lean`, `ConjImpConservative.lean`,
+      or as re-exports. *(untouched -- these live in `CanAlgComplete.lean`/`MplConservativeChain.lean`,
+      outside Phase 3's scope; verified still building.)*
+- [x] Reduce the emptied per-fragment files (`ImpConservative.lean`, `ConjImpConservative.lean`,
       `ConjImpBotConservative.lean`, `OrImpConservative.lean`) to re-export shims pointing at the new
       module, OR retire them and re-home their nonzero-use-site names into the new module.
-- [ ] Confirm `Cslib/Logics/Modal/Metalogic/ClassicalImpCompleteness.lean` (only external importer of
+      *(each file now retains only its hard-direction theorem + supporting machinery; the 12
+      boilerplate theorems are re-homed, not re-exported, into `FragmentConservativityInstances.lean`.)*
+- [x] Confirm `Cslib/Logics/Modal/Metalogic/ClassicalImpCompleteness.lean` (only external importer of
       `ImpConservative`/`ConjImpConservative`) still resolves its transitive imports.
-- [ ] Run `lake exe mk_all --module`; purge any retired file names from the barrel.
+      *(it only used `liftDerivationTree`, re-exported transitively since Phase 1 -- verified green.)*
+- [x] Run `lake exe mk_all --module`; purge any retired file names from the barrel.
+      *(no files added/removed in Phase 3, so no barrel change was needed.)*
 
 **Timing**: ~2 hours
 

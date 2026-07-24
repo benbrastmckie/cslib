@@ -25,12 +25,11 @@ IPL⟨→,⊤⟩ for imp-top-only formulas.
 - `hilbertConjImpConservativeOverImp`: IPL⟨∧,→,⊤⟩ is a conservative extension of IPL⟨→,⊤⟩
   for imp-top-only formulas.
 - `hilbertIplConservativeOverImp`: IPL is a conservative extension of IPL⟨→,⊤⟩ for
-  imp-top-only formulas.
-- `derivableImpOfDerivableInt`: Every `ImpAxiom`-derivable formula is `IntPropAxiom`-derivable
-  (subsumption direction).
-- `hilbertIplConservativeOverImp_iff`: For imp-top-only formulas, IPL and IPL⟨→,⊤⟩ derivability
-  coincide.
-- `ipl_conservative_over_imp`: ND corollary of the conservative extension theorem.
+  imp-top-only formulas. This, together with `hilbertConjImpConservativeOverImp` and
+  `freeMeetEvaluateEq`, is the hard-direction content retained in this file. The generic
+  subsumption/biconditional/ND-corollary boilerplate (`derivableImpOfDerivableInt`,
+  `hilbertIplConservativeOverImp_iff`, `ipl_conservative_over_imp`) is re-homed as a
+  `FragmentConservativity` instance in `FragmentConservativityInstances.lean`.
 
 ## Proof Strategy
 
@@ -125,43 +124,13 @@ theorem hilbertIplConservativeOverImp {Atom : Type u} {φ : PL.Proposition Atom}
   hilbertConjImpConservativeOverImp hITO
     (hilbertIplConservativeOverConjImp (IsImpTopOnly_implies_IsOrBotFree φ hITO) h)
 
-/-! ## Subsumption Direction -/
+/-! ## Subsumption / Biconditional / ND Corollary (re-homed)
 
-/-- **Subsumption**: every formula derivable in the purely implicational Hilbert system is
-derivable in the full intuitionistic Hilbert system.
-
-Uses `liftDerivationTree` with the axiom subsumption chain
-`ImpAxiom → ConjImpAxiom → MinPropAxiom → IntPropAxiom`. -/
-theorem derivableImpOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
-    (h : Derivable (@ImpAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) φ := by
-  obtain ⟨d⟩ := h
-  exact ⟨liftDerivationTree
-    (fun ψ hψ => hψ.toConjImpAxiom.toMinPropAxiom.toIntPropAxiom) d⟩
-
-/-! ## Biconditional -/
-
-/-- **Biconditional**: for imp-top-only formulas, derivability in the intuitionistic Hilbert
-system and derivability in the purely implicational Hilbert system coincide. -/
-theorem hilbertIplConservativeOverImp_iff {Atom : Type u} {φ : PL.Proposition Atom}
-    (hITO : φ.IsImpTopOnly = true) :
-    Derivable (@IntPropAxiom Atom) φ ↔ Derivable (@ImpAxiom Atom) φ :=
-  ⟨hilbertIplConservativeOverImp hITO, derivableImpOfDerivableInt⟩
-
-/-! ## ND Corollary -/
-
-variable {Atom : Type u} [DecidableEq Atom]
-
-/-- **ND conservative extension**: IPL is a conservative extension of IPL⟨→,⊤⟩ for
-imp-top-only formulas. If a formula containing no `∧`, `∨`, or `⊥` is derivable in the ND
-system for IPL, then it is derivable in the purely implicational Hilbert system.
-
-This is derived as a corollary of `hilbertIplConservativeOverImp` via the algebraic
-bridge `derivableInIplIffDerivableInt`. -/
-theorem ipl_conservative_over_imp {A : PL.Proposition Atom}
-    (hITO : A.IsImpTopOnly = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
-    Derivable (@ImpAxiom Atom) A :=
-  hilbertIplConservativeOverImp hITO (derivableInIplIffDerivableInt.mp h)
+The generic subsumption, biconditional, and ND-corollary boilerplate for this fragment
+(`derivableImpOfDerivableInt`, `hilbertIplConservativeOverImp_iff`, `ipl_conservative_over_imp`)
+now lives in `FragmentConservativityInstances.lean`, as one-line consequences of
+`fragmentConservativityImp` applied to the generic `FragmentConservativity` core (Part B
+consolidation). -/
 
 end Cslib.Logic.PL
 

@@ -22,12 +22,11 @@ fragment IPL⟨∨,→,⊤⟩ for and-bot-free formulas.
 - `cutFreeLJ_toOrImp`: A cut-free LJ proof of an and-bot-free sequent `Γ ⊢ C` yields an
   OrImp Hilbert derivation of `C` from any list `L` containing all of `Γ`.
 - `hilbertIplConservativeOverOrImp`: IPL is a conservative extension of IPL⟨∨,→,⊤⟩ for
-  and-bot-free formulas. No `[DecidableEq Atom]` hypothesis.
-- `derivableOrImpOfDerivableInt`: Every `OrImpAxiom`-derivable formula is
-  `IntPropAxiom`-derivable (subsumption).
-- `hilbertIplConservativeOverOrImp_iff`: For and-bot-free formulas, Hilbert IPL derivability
-  and IPL⟨∨,→,⊤⟩ derivability coincide.
-- `ipl_conservative_over_orImp`: ND corollary of the conservative extension theorem.
+  and-bot-free formulas. No `[DecidableEq Atom]` hypothesis. This, together with
+  `cutFreeLJ_toOrImp`, is the hard-direction content retained in this file. The generic
+  subsumption/biconditional/ND-corollary boilerplate (`derivableOrImpOfDerivableInt`,
+  `hilbertIplConservativeOverOrImp_iff`, `ipl_conservative_over_orImp`) is re-homed as a
+  `FragmentConservativity` instance in `FragmentConservativityInstances.lean`.
 
 ## Proof Strategy
 
@@ -212,41 +211,13 @@ theorem hilbertIplConservativeOverOrImp {Atom : Type u} {φ : PL.Proposition Ato
   -- Convert cut-free LJ proof to OrImp Hilbert derivation
   exact cutFreeLJ_toOrImp (by simp) hABF dcf (by simp)
 
-/-! ## Subsumption Direction -/
+/-! ## Subsumption / Biconditional / ND Corollary (re-homed)
 
-/-- **Subsumption**: every formula derivable in the disjunctive-implicational Hilbert system
-is derivable in the full intuitionistic Hilbert system.
-
-Uses `liftDerivationTree` with the axiom subsumption chain
-`OrImpAxiom → MinPropAxiom → IntPropAxiom`. -/
-theorem derivableOrImpOfDerivableInt {Atom : Type u} {φ : PL.Proposition Atom}
-    (h : Derivable (@OrImpAxiom Atom) φ) :
-    Derivable (@IntPropAxiom Atom) φ :=
-  derivable_mono (fun _ hψ => hψ.toMinPropAxiom.toIntPropAxiom) h
-
-/-! ## Biconditional -/
-
-/-- **Biconditional**: for and-bot-free formulas, derivability in the intuitionistic Hilbert
-system and derivability in the disjunctive-implicational Hilbert system coincide. -/
-theorem hilbertIplConservativeOverOrImp_iff {Atom : Type u} {φ : PL.Proposition Atom}
-    (hABF : φ.IsAndBotFree = true) :
-    Derivable (@IntPropAxiom Atom) φ ↔ Derivable (@OrImpAxiom Atom) φ :=
-  ⟨hilbertIplConservativeOverOrImp hABF, derivableOrImpOfDerivableInt⟩
-
-/-! ## ND Corollary -/
-
-variable {Atom : Type u} [DecidableEq Atom]
-
-/-- **ND conservative extension**: IPL is a conservative extension of IPL⟨∨,→,⊤⟩ for
-and-bot-free formulas. If a formula containing no `∧` or `⊥` is derivable in the ND system
-for IPL, then it is derivable in the disjunctive-implicational Hilbert system.
-
-This is derived as a corollary of `hilbertIplConservativeOverOrImp` via the bridge
-`derivableInIplIffDerivableInt`. -/
-theorem ipl_conservative_over_orImp {A : PL.Proposition Atom}
-    (hABF : A.IsAndBotFree = true) (h : DerivableIn (IPL (Atom := Atom)) A) :
-    Derivable (@OrImpAxiom Atom) A :=
-  hilbertIplConservativeOverOrImp hABF (derivableInIplIffDerivableInt.mp h)
+The generic subsumption, biconditional, and ND-corollary boilerplate for this fragment
+(`derivableOrImpOfDerivableInt`, `hilbertIplConservativeOverOrImp_iff`,
+`ipl_conservative_over_orImp`) now lives in `FragmentConservativityInstances.lean`, as one-line
+consequences of `fragmentConservativityOrImp` applied to the generic `FragmentConservativity`
+core (Part B consolidation). -/
 
 end Cslib.Logic.PL
 

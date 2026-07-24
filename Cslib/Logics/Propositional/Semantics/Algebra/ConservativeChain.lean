@@ -7,9 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 import Cslib.Init
-public import Cslib.Logics.Propositional.Semantics.Algebra.ImpConservative
-public import Cslib.Logics.Propositional.Semantics.Algebra.ConjImpConservative
-public import Cslib.Logics.Propositional.Semantics.Algebra.OrImpConservative
+public import Cslib.Logics.Propositional.Semantics.Algebra.FragmentConservativityInstances
 public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertConservativeGlivenko
 public import Cslib.Logics.Propositional.Semantics.Algebra.Conservative
 -- Classical conservativity column (Kalmár / truth-assignment method):

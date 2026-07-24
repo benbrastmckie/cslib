@@ -241,7 +241,7 @@ only.
   `modalTableauS4Keyed`'s sibling def): unchanged, `propext`/`Classical.choice`/`Quot.sound` only.
   `lake build` green, zero new warnings, zero `sorry`.
 
-### Phase 6 (handoff 3d-i): Keys-threaded Hintikka-tracking invariant bundle [NOT STARTED]
+### Phase 6 (handoff 3d-i): Keys-threaded Hintikka-tracking invariant bundle [IN PROGRESS]
 
 - **Goal:** Define the bespoke keys-threaded analogue of the `ModalLoopInvHintikka` bundle
   (`CompletenessLoop.lean:262-337`) and prove its monotone-field lemmas, WITHOUT yet proving

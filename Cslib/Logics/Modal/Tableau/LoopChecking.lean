@@ -5468,6 +5468,275 @@ lemma modalExpMeasure_entry_le_fuelS4 (φ₀ : Proposition Atom) :
         Nat.pow_le_pow_right (by norm_num) hfinal
     _ = modalFuelS4 φ₀ := rfl
 
+/-! ## Phase 6 (handoff 3d-i): Keys-Threaded Hintikka-Tracking Invariant Bundle
+
+The bespoke keys-threaded analogue of the `ModalLoopInvHintikka` bundle
+(`CompletenessLoop.lean:293-325`), for `modalApplyOneS4Keyed φ₀ keys`. `S4LoopInv` (task 511,
+frozen, above) already carries the universe-closure/keys-bookkeeping conjuncts
+(`bClosure`/`eClosure`/`eNodup`/`accFresh`/`accKnown`), so this bundle carries ONLY the five
+Hintikka-specific conjuncts (`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/
+`eDiamondPosWitness`), threaded alongside `S4LoopInv` as a separate ambient hypothesis at each
+call site rather than duplicating its fields. -/
+
+/-- **F8 discharge for `modalApplyOneS4Keyed`** (local shape invariance): outside the two
+minting shapes (`F(□φ)@w`/`T(◇φ)@w`, both signs excluded by `hnb`/`hnd`),
+`modalApplyOneS4Keyed` reduces to raw `modalApplyOne` regardless of `keys` -- the dispatch chain
+`modalApplyOneS4Keyed → modalApplyOneS4 → modalApplyOneS4Rules → modalApplyOneT → modalApplyOne`
+fires its catch-all arm at every layer, since `φ` is neither box- nor diamond-shaped -- so K's
+own `modalApplyOne_fst_eq_of_not_box` transports directly. Mirrors
+`modalApplyOneT_localShapeInvariance` (`TDriver.lean:734`), two layers deeper. -/
+lemma modalApplyOneS4Keyed_fst_eq_of_not_box (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) :
+    (modalApplyOneS4Keyed φ₀ keys ⟨s, φ, w⟩ b acc).1 =
+      (modalApplyOneS4Keyed φ₀ keys ⟨s, φ, w⟩ b' acc').1 := by
+  have hred : ∀ (bb : List (SignedFormula (Proposition Atom) WorldIndex)) (ac : Accessibility),
+      modalApplyOneS4Keyed φ₀ keys (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        bb ac = modalApplyOne (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) bb ac := by
+    intro bb ac
+    have heqS4 : modalApplyOneS4Keyed φ₀ keys
+        (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) bb ac
+        = modalApplyOneS4 φ₀ (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) bb ac := by
+      unfold modalApplyOneS4Keyed
+      rcases hs : s with _ | _ <;> rcases hf : φ with _ | _ | _ | _ | _ | ψ | ψ <;> simp_all
+    rw [heqS4]
+    have hnbd1 : ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .neg ∧
+        ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .box ψ) ∧
+        ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .pos ∧
+        ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .diamond ψ) :=
+      ⟨fun ⟨_, ψ, hfe⟩ => hnb ψ hfe, fun ⟨_, ψ, hfe⟩ => hnd ψ hfe⟩
+    rw [modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ bb ac hnbd1]
+    have hnbd2 : ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .pos ∧
+        ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .box ψ) ∧
+        ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .neg ∧
+        ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .diamond ψ) :=
+      ⟨fun ⟨_, ψ, hfe⟩ => hnb ψ hfe, fun ⟨_, ψ, hfe⟩ => hnd ψ hfe⟩
+    rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg _ bb ac hnbd2,
+        modalApplyOneT_eq_of_not_boxPos_diaNeg _ bb ac hnbd2]
+  rw [hred b acc, hred b' acc']
+  exact modalApplyOne_fst_eq_of_not_box s φ w hnb hnd b b' acc acc'
+
+/-- **Territory-local re-derivation of `modalHintikkaClauseGen_lift`** (`private` to
+`Completeness.lean`, hence unavailable here, per Phase 3's re-derivation precedent): if
+`modalHintikkaClauseGen apply s φ w b acc` holds and `b ⊆ b'`, it holds at `(b', acc')` too,
+given `apply`'s F8 local-shape-invariance. Verbatim transcription of the generic proof, kept
+generic in `apply` (rather than specialized to `modalApplyOneS4Keyed`) for direct auditability
+against its source. -/
+private lemma modalHintikkaClauseGen_lift_S4
+    (apply : RuleApply Atom)
+    (hLocalShapeInvariance : ∀ (s : Sign) (φ : Proposition Atom) (w : WorldIndex),
+      (∀ ψ, φ ≠ .box ψ) → (∀ ψ, φ ≠ .diamond ψ) →
+      ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+        (acc acc' : Accessibility),
+      (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1)
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc acc' : Accessibility) (hsub : b ⊆ b')
+    (hInv : modalHintikkaClauseGen apply s φ w b acc) :
+    modalHintikkaClauseGen apply s φ w b' acc' := by
+  unfold modalHintikkaClauseGen at hInv ⊢
+  rcases φ with p | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
+  · have heq := hLocalShapeInvariance s (.atom p) w (by intro _ h; simp at h)
+        (by intro _ h; simp at h) b b' acc acc'
+    simp only [heq] at hInv
+    rcases hres : (apply (⟨s, .atom p, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
+      simp only [hres] at hInv ⊢
+    · exact fun sf' h => hsub (hInv sf' h)
+    · obtain ⟨br, hbr, hbr'⟩ := hInv
+      exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
+    · exact fun sf' h => hsub (hInv sf' h)
+  · have heq := hLocalShapeInvariance s .bot w (by intro _ h; simp at h)
+        (by intro _ h; simp at h) b b' acc acc'
+    simp only [heq] at hInv
+    rcases hres : (apply (⟨s, .bot, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
+      simp only [hres] at hInv ⊢
+    · exact fun sf' h => hsub (hInv sf' h)
+    · obtain ⟨br, hbr, hbr'⟩ := hInv
+      exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
+    · exact fun sf' h => hsub (hInv sf' h)
+  · have heq := hLocalShapeInvariance s (.imp a c) w (by intro _ h; simp at h)
+        (by intro _ h; simp at h) b b' acc acc'
+    simp only [heq] at hInv
+    rcases hres : (apply (⟨s, .imp a c, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
+      simp only [hres] at hInv ⊢
+    · exact fun sf' h => hsub (hInv sf' h)
+    · obtain ⟨br, hbr, hbr'⟩ := hInv
+      exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
+    · exact fun sf' h => hsub (hInv sf' h)
+  · have heq := hLocalShapeInvariance s (.and x y) w (by intro _ h; simp at h)
+        (by intro _ h; simp at h) b b' acc acc'
+    simp only [heq] at hInv
+    rcases hres : (apply (⟨s, .and x y, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
+      simp only [hres] at hInv ⊢
+    · exact fun sf' h => hsub (hInv sf' h)
+    · obtain ⟨br, hbr, hbr'⟩ := hInv
+      exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
+    · exact fun sf' h => hsub (hInv sf' h)
+  · have heq := hLocalShapeInvariance s (.or x y) w (by intro _ h; simp at h)
+        (by intro _ h; simp at h) b b' acc acc'
+    simp only [heq] at hInv
+    rcases hres : (apply (⟨s, .or x y, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b' acc').1 with out | brs | out | _ <;>
+      simp only [hres] at hInv ⊢
+    · exact fun sf' h => hsub (hInv sf' h)
+    · obtain ⟨br, hbr, hbr'⟩ := hInv
+      exact ⟨br, hbr, fun sf' h => hsub (hbr' sf' h)⟩
+    · exact fun sf' h => hsub (hInv sf' h)
+  · trivial
+  · trivial
+
+omit [Hashable Atom] in
+/-- `modalApplyOneT`'s accessibility output is always exactly K's own: every match arm in
+`modalApplyOneT`'s definition returns the pair's second component unchanged from
+`(modalApplyOne sf b acc).snd` (the T self-propagation arms only ever touch the `.fst`
+formula-output component). -/
+private lemma modalApplyOneT_snd_eq (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneT sf b acc).snd = (modalApplyOne sf b acc).snd := by
+  unfold modalApplyOneT
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    first
+      | rfl
+      | (rcases hk : (modalApplyOne sf b acc) with ⟨kResult, kAcc⟩
+         dsimp only
+         rcases kResult with kf | kbrs | kf | _ <;> (try split_ifs) <;> rfl)
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4Rules`'s accessibility output is always exactly K's own, one layer up: the
+4-rule propagation arms only ever touch the `.fst` formula-output component. -/
+private lemma modalApplyOneS4Rules_snd_eq (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    (modalApplyOneS4Rules sf b acc).snd = (modalApplyOne sf b acc).snd := by
+  unfold modalApplyOneS4Rules
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    first
+      | exact modalApplyOneT_snd_eq sf b acc
+      | (rcases ht : (modalApplyOneT sf b acc) with ⟨tResult, tAcc⟩
+         have hTA : tAcc = (modalApplyOne sf b acc).snd :=
+           (congrArg Prod.snd ht).symm.trans (modalApplyOneT_snd_eq sf b acc)
+         dsimp only
+         rcases tResult with tf | tbrs | tf | _ <;> (try split_ifs) <;> exact hTA)
+
+/-- **Accessibility-edge monotonicity for `modalApplyOneS4Keyed`**: an existing edge survives
+one rule application, for any `keys`. At the two minting shapes, either blocked (a fresh
+`addEdge`, surviving by `hasEdge_addEdge_mono`) or unblocked (reduces to raw
+`modalApplyOne`, `K`'s own `modalApplyOne_fresh_local` dichotomy applies); at every other shape,
+`modalApplyOneS4Keyed` reduces to `modalApplyOneS4Rules` (`heq1`-style, mirroring
+`modalApplyOneS4Keyed_nonMint_universe_S4`), whose accessibility output is unconditionally K's
+own (`modalApplyOneS4Rules_snd_eq`). Needed for the witness-permanence fields of
+`S4KeyedHintikkaInv` to transport across a step. -/
+lemma modalApplyOneS4Keyed_hasEdge_mono (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    {w w' : WorldIndex} (h : acc.hasEdge w w' = true) :
+    (modalApplyOneS4Keyed φ₀ keys sf b acc).snd.hasEdge w w' = true := by
+  have hhasEdge_addEdge : ∀ (x y : WorldIndex), (acc.addEdge x y).hasEdge w w' = true := by
+    intro x y
+    simp only [Accessibility.hasEdge, Accessibility.addEdge, List.any_cons] at h ⊢
+    simp [h]
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · rw [modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock]
+        rcases modalApplyOne_fresh_local (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc with hsame | ⟨wsf, rest, -, hsnd⟩
+        · rw [hsame]; exact h
+        · rw [hsnd]; exact hhasEdge_addEdge _ _
+      · rw [modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock]
+        exact hhasEdge_addEdge _ _
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · rw [modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock]
+        rcases modalApplyOne_fresh_local (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc with hsame | ⟨wsf, rest, -, hsnd⟩
+        · rw [hsame]; exact h
+        · rw [hsnd]; exact hhasEdge_addEdge _ _
+      · rw [modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock]
+        exact hhasEdge_addEdge _ _
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+      unfold modalApplyOneS4Keyed
+      rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+        simp_all
+    rw [heq1, modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc hnbd]
+    -- Whether or not `sf` is boxPos/diaNeg-shaped, `modalApplyOneS4Rules`'s accessibility
+    -- output is unconditionally K's own (`modalApplyOneS4Rules_snd_eq`), and K's own dichotomy
+    -- (`modalApplyOne_fresh_local`) holds for `sf` regardless of its shape.
+    rw [modalApplyOneS4Rules_snd_eq]
+    rcases modalApplyOne_fresh_local sf b acc with hsame | ⟨wsf, rest, -, hsnd⟩
+    · rw [hsame]; exact h
+    · rw [hsnd]; exact hhasEdge_addEdge _ _
+
+/-- **Keys-threaded Hintikka-tracking invariant bundle** for `modalApplyOneS4Keyed φ₀ keys`: the
+bespoke analogue of `ModalLoopInvHintikka`'s five Hintikka-specific conjuncts
+(`CompletenessLoop.lean:310-325`), carrying ONLY those five fields. The universe-closure/
+keys-bookkeeping conjuncts already live in the frozen `S4LoopInv` (task 511) and are threaded as
+a separate ambient hypothesis at each call site rather than duplicated here. -/
+structure S4KeyedHintikkaInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop where
+  /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
+  hintikkaInv : ∀ sf ∈ e,
+    modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys) sf.sign sf.formula sf.label b acc
+  /-- Every box-shaped formula in the expanded set `e` has sign `.neg`. -/
+  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
+  /-- Every `boxNeg`-shaped formula already has a witness successor on the branch. -/
+  eBoxNegWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos`. -/
+  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
+  /-- Every `diamondPos`-shaped formula already has a witness successor on the branch. -/
+  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', acc.hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+
+/-- **`S4KeyedHintikkaInv` weakens across branch/accessibility growth** at a FIXED expanded set
+`e`: this discharges Phase 6's monotonicity obligations directly --
+`hintikkaInv` transports via the branch/`acc`-independence of non-box/diamond shapes
+(`modalHintikkaClauseGen_lift_S4` fed `modalApplyOneS4Keyed_fst_eq_of_not_box`; box/diamond
+shapes are vacuously `True` on both sides), and the two witness-existence fields are permanent
+once recorded since `acc`/`b` only grow (`hbsub`/`haccsub`). `eBoxOnlyNeg`/`eDiamondOnlyPos`
+mention no `b`/`acc` at all and transport unchanged. This is the building block Phase 7's
+single-step preservation composes against the OLD `e`'s facts lifted to the post-step
+`(b', acc')`. -/
+lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
+    (b b' e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc acc' : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hbsub : b ⊆ b')
+    (haccsub : ∀ w w', acc.hasEdge w w' = true → acc'.hasEdge w w' = true)
+    (hinv : S4KeyedHintikkaInv φ₀ b e acc keys) :
+    S4KeyedHintikkaInv φ₀ b' e acc' keys := by
+  refine ⟨?_, hinv.eBoxOnlyNeg, ?_, hinv.eDiamondOnlyPos, ?_⟩
+  · intro sf hsf
+    exact modalHintikkaClauseGen_lift_S4 (modalApplyOneS4Keyed φ₀ keys)
+      (modalApplyOneS4Keyed_fst_eq_of_not_box φ₀ keys) sf.sign sf.formula sf.label b b' acc acc'
+      hbsub (hinv.hintikkaInv sf hsf)
+  · intro sf hsf ψ w hsfeq
+    obtain ⟨w', hedge, hwit⟩ := hinv.eBoxNegWitness sf hsf ψ w hsfeq
+    exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
+  · intro sf hsf ψ w hsfeq
+    obtain ⟨w', hedge, hwit⟩ := hinv.eDiamondPosWitness sf hsf ψ w hsfeq
+    exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
+
 end Cslib.Logic.Modal.Tableau
 
 end

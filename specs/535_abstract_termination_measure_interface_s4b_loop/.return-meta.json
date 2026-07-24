@@ -1,26 +1,19 @@
 {
-  "status": "planned",
-  "started_at": "2026-07-24T11:00:00Z",
-  "completed_at": "2026-07-24T11:12:00Z",
+  "status": "in_progress",
+  "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md",
-      "summary": "Revised plan (v2): preserves Phases 1-2 verbatim as [COMPLETED]; restructures the blocked v1 Phases 3-5 into 9 one-agent-run-sized phases (3-11) per the continuation handoff's 3a-3e/4/5 decomposition, splitting the two oversized rows."
-    }
+    {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md"}
   ],
-  "next_steps": "Run /implement 535 (recommended --hard) to execute the restructured plan starting at Phase 3.",
+  "partial_progress": {
+    "stage": "phase6-start",
+    "details": "Resuming from phase 3-5 continuation; starting Phase 6 (invariant bundle)",
+    "phases_completed": 5,
+    "phases_total": 11
+  },
   "metadata": {
-    "session_id": "sess_1784905305_471f78",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "phase_count": 11,
-    "phases_completed": 2,
-    "phases_remaining": 9,
-    "estimated_hours": 24,
-    "reports_integrated": [
-      "reports/01_termination-interface-survey.md",
-      "handoffs/01_phase3-5-continuation.md"
-    ]
+    "session_id": "sess_1784905751_756cda_535",
+    "agent_type": "cslib-implementation-agent",
+    "delegation_depth": 2,
+    "delegation_path": ["orchestrator", "orchestrate", "skill-orchestrate", "cslib-implementation-agent"]
   }
 }

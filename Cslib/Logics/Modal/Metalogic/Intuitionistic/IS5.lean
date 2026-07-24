@@ -328,7 +328,7 @@ theorem is5_canonical_transitive :
     have hdiadia_w : (◇◇φ) ∈ w.val := hwu.2 (◇φ) hdia_u
     exact canonical_imp_property (axiom_mem (IS5ModalAxiom.fourDia φ)) hdiadia_w
 
-/-- **Canonical symmetry (HIGHEST-RISK closure of task 494)**: the canonical relation `canonicalR`
+/-- **Canonical symmetry**: the canonical relation `canonicalR`
 (over `IS5ModalAxiom`) is symmetric. Both clauses are discharged positively via
 `axiom_mem`/`canonical_imp_property` (no `by_contra`, no negation):
 - box clause of `v → w` (given `canonicalR w v`, `□φ ∈ v.val`, show `φ ∈ w.val`): this is the

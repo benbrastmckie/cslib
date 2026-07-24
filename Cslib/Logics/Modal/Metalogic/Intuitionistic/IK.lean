@@ -11,15 +11,14 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.Completeness
 
 /-! # IK: Intuitionistic Modal Logic K (Soundness + Completeness)
 
-This module instantiates the task-480 birelational canonical-model framework at Simpson's `IK`
+This module instantiates the birelational canonical-model framework at Simpson's `IK`
 (Intuitionistic modal logic K, [Simpson1994] Ch. 3), the base intuitionistic analogue of
 classical `K`. `IK` extends intuitionistic propositional logic with five modal axiom schemata
 (`k1`-`k5`) formed from the box/diamond interaction ("K", "Kdia") and Fischer-Servi
 ("Cd", "Idb") axioms plus the intuitionistic falsum-diamond axiom "Nd". These five schemata are
-*exactly* the task-480 framework's five modal hypotheses `{h_K, h_Kdia, h_Cd, h_Idb, h_dbot}`
-(report 01, adversarially verified): `h_dbot` **is** Nd, not an additional axiom, and no `IK`
-axiom needs a frame condition beyond up/down confluence (`BFrame.f1`/`BFrame.f2`, task 490)
-already present in the framework.
+*exactly* the framework's five modal hypotheses `{h_K, h_Kdia, h_Cd, h_Idb, h_dbot}`:
+`h_dbot` **is** Nd, not an additional axiom, and no `IK` axiom needs a frame condition beyond
+up/down confluence (`BFrame.f1`/`BFrame.f2`) already present in the framework.
 
 ## Main Definitions
 
@@ -31,7 +30,7 @@ already present in the framework.
 - `ik_soundness`/`ik_soundness_derivable`: birelational soundness for `IK`, by structural
   induction on `DerivationTree IKModalAxiom` -- the only genuinely new proof in this file.
 - `ik_completeness`/`ik_consistent`/`ik_soundness_completeness`: pure instantiations of the
-  task-480 parametric completeness (`ivalid_completeness`) at `Axioms := IKModalAxiom`.
+  parametric completeness (`ivalid_completeness`) at `Axioms := IKModalAxiom`.
 
 ## Implementation Notes
 
@@ -68,10 +67,9 @@ variable {Atom : Type u}
 
 /-- Axiom schemata for intuitionistic modal logic `IK` ([Simpson1994], Ch. 3): the 9
 intuitionistic propositional schemata (mirroring `IntPropAxiom`) plus the 5 modal schemata
-`k1`-`k5`. The five modal constructors are exactly the task-480 framework's five modal
-hypotheses `{h_K, h_Kdia, h_Cd, h_Idb, h_dbot}` (report 01 Deliverable 1): `k` = `k1`/Kb,
-`kdia` = `k2`/Kd, `cd` = `k3`/Cd (Fischer-Servi, ◇ over ∨), `idb` = `k4`/Idb (Fischer-Servi
-box), `dbot` = `k5`/Nd (`◇⊥ → ⊥`). -/
+`k1`-`k5`. The five modal constructors are exactly the framework's five modal hypotheses
+`{h_K, h_Kdia, h_Cd, h_Idb, h_dbot}`: `k` = `k1`/Kb, `kdia` = `k2`/Kd, `cd` = `k3`/Cd
+(Fischer-Servi, ◇ over ∨), `idb` = `k4`/Idb (Fischer-Servi box), `dbot` = `k5`/Nd (`◇⊥ → ⊥`). -/
 inductive IKModalAxiom : Proposition Atom → Prop where
   /-- Weakening: `φ → (ψ → φ)`. -/
   | implyK (φ ψ : Proposition Atom) :

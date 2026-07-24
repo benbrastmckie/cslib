@@ -11,13 +11,13 @@ public import Cslib.Logics.Modal.Metalogic.Intuitionistic.IK
 
 /-! # Frame-Condition-Parametrized Extensions of the Birelational Canonical Model
 
-This module is the shared scaffold for task 494 (intuitionistic modal extensions `IT`/`IS4`/`IS5`
-of `IK`, [Simpson1994] Ch. 3). It generalizes the task-480/492 birelational canonical-model
-framework (`IValid`, `ivalid_completeness`, `Completeness.lean`) to validity/completeness over
+This module is the shared scaffold for the intuitionistic modal extensions `IT`/`IS4`/`IS5`
+of `IK`, [Simpson1994] Ch. 3. It generalizes the birelational canonical-model framework
+(`IValid`, `ivalid_completeness`, `Completeness.lean`) to validity/completeness over
 a restricted *class* of birelational frames, cut out by an arbitrary frame condition `FC` on the
 modal relation `r` (e.g. `Reflexive`, `Transitive`, `Symmetric`). This lets each per-system file
 (`IT.lean`, `IS4.lean`, `IS5.lean`) bolt its frame condition onto validity/completeness without
-touching any task-480/492 asset.
+touching the base framework.
 
 The three new declarations here are:
 

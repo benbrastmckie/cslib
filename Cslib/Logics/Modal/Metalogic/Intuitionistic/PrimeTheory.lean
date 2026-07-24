@@ -39,7 +39,7 @@ classical maximal consistent sets used by `Cslib/Logics/Modal/Metalogic/MCS.lean
 Every declaration is parameterized over an `Axioms : Proposition Atom → Prop` predicate with
 the base intuitionistic axioms (`implyK`, `implyS`, `efq`, `orE`) as explicit hypotheses;
 `h_efq` is kept as a hypothesis **separate** from `h_implyK`/`h_implyS`/`h_orE` so that the
-minimal modal logic instantiation (task 495) can omit it.
+minimal modal logic instantiation can omit it.
 
 ## References
 
@@ -263,7 +263,7 @@ theorem modalNegPhiImpPsi_deriv {Axioms : Proposition Atom → Prop}
 closure of `S ∪ {φ}` is an admissible `T ⊇ S` with `φ ∈ T` and `ψ ∉ T`.
 
 `h_efq` is a hypothesis separate from `h_implyK`/`h_implyS` so the minimal modal instantiation
-(task 495) can omit it. -/
+can omit it. -/
 theorem modal_imp_witness
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -308,7 +308,7 @@ theorem modal_imp_witness
 
 Thin wrapper around `Metalogic.prime_exclusion` with `Cons := ModalSetConsistent Axioms`,
 `cl := modalDeductiveClosure Axioms`, and the EFQ bridge supplied via `h_efq`. `h_efq` is kept
-separate from `h_implyK`/`h_implyS`/`h_orE` so the minimal modal instantiation (task 495)
+separate from `h_implyK`/`h_implyS`/`h_orE` so the minimal modal instantiation
 can omit it.
 
 See [A. Chagrov, M. Zakharyaschev, *Modal Logic*][ChagrovZakharyaschev1997], Lemma 5.5. -/

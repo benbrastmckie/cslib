@@ -11,11 +11,10 @@ next_project_number: 555
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,463,465,466,519,530,534,535,551,552,554 | -- | propositional logic, modal logic, bimodal logic, ... |
-| 2 | 39,40,215,317,425,450,511,537,553 | 36,37,181,535,552,554 | propositional logic, modal logic, temporal logic, ... |
-| 3 | 41,301,375,430,456,497,506,548 | 39,40,317,425,511,535 | foundations, propositional logic, modal logic, ... |
-| 4 | 300,413 | 375,506 | modal logic, code hygiene |
-| 5 | 414 | 181,215,300,301 | code hygiene |
+| 1 | 36,37,181,226,400,409,440,463,465,466,511,519,530,534,551,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 2 | 39,40,215,317,425,450,506,537,548 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
+| 3 | 41,300,301,375,430,456,497 | 39,40,317,425,506 | foundations, propositional logic, modal logic, ... |
+| 4 | 413,414 | 181,215,300,301,375 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
 
@@ -36,14 +35,12 @@ next_project_number: 555
 ### Modal Logic
 
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-535 [IMPLEMENTING] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
-  └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
-    └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
-      └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
-    └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
-  └─ 553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
 551 [IMPLEMENTING] — Deliver NATIVE Hilbert canonical-model completeness for construct
+300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
+506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
+  └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived (see above)
 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
+548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 
 ### Temporal Logic
 
@@ -85,9 +82,13 @@ next_project_number: 555
 
 ### Uncategorized
 
+511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
+  └─ 506 [BLOCKED] — (Modal Logic: Deliver plan Phases 5 and 6 of task 300 ) (see above)
+  └─ 548 [NOT STARTED] — (Modal Logic: COMPLETENESS-MATRIX GAP (review 2026-07-) (see above)
 552 [NOT STARTED] — Shared calculus-conformance and rule-completeness repair unblocki
   └─ 317 [BLOCKED] — (Propositional Logic: Fill the propositional tableau completen) (see above)
   └─ 425 [BLOCKED] — (Temporal Logic: [Decomposed from task 301, blocker C.] E) (see above)
+553 [NOT STARTED] — Determine whether the S4 keyed loop-check guard can be made sound
 554 [NOT STARTED] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — (Modal Logic: Prove the general labelled SOUNDNESS dir) (see above)
 
@@ -315,7 +316,7 @@ next_project_number: 555
 
 ### 535. Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
 - **Effort**: 10-16 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

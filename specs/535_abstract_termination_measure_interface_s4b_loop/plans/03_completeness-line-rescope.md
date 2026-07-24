@@ -1,7 +1,7 @@
 # Implementation Plan: Keyed S4 Driver — Completeness-Line Rescope (v3)
 
 - **Task**: 535 - Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 9.5 hours remaining (range 7-14); Phases 1-7 (~18h) landed and committed. Total ~27.5h.
 - **Dependencies**: None for the in-scope completeness line (parent 511 Phases 1-6 are landed, frozen,
   and consumed read-only). The deferred soundness line depends on a separately-spawned task (see

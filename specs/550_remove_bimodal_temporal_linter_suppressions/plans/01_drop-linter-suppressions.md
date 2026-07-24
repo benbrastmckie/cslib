@@ -1,7 +1,7 @@
 # Implementation Plan: Remove Bimodal/Temporal Linter Suppressions
 
 - **Task**: 550 - Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 2 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/550_remove_bimodal_temporal_linter_suppressions/reports/01_linter-suppression-inventory.md
@@ -181,15 +181,15 @@ declarations, then drop the now-redundant file-scoped `flexible`, `setOption`, `
 
 ---
 
-### Phase 5: Whole-task verification (build + CSLib CI) [NOT STARTED]
+### Phase 5: Whole-task verification (build + CSLib CI) [COMPLETED]
 
 **Goal**: Confirm the entire library builds clean and the CSLib CI pipeline passes with all
 suppressions removed/narrowed.
 
 **Tasks**:
-- [ ] Run `lake build` for the full library; confirm zero warnings across all nine touched modules.
-- [ ] Run the CSLib CI order per `.claude/rules/cslib.md`: `checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`.
-- [ ] Confirm GeneralizedNecessitation retains its three scoped `... in` suppressions and no new suppressions were introduced anywhere except the two Connectives `... in` lines.
+- [x] Run `lake build` for the full library; confirm zero warnings across all nine touched modules.
+- [x] Run the CSLib CI order per `.claude/rules/cslib.md`: `checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`.
+- [x] Confirm GeneralizedNecessitation retains its three scoped `... in` suppressions and no new suppressions were introduced anywhere except the two Connectives `... in` lines.
 
 **Timing**: 20 minutes
 
@@ -204,11 +204,11 @@ suppressions removed/narrowed.
 
 ## Testing & Validation
 
-- [ ] Each edited module builds warning-free under `lake build <Module>` (per-phase gate).
-- [ ] Full-library `lake build` is clean.
-- [ ] CSLib CI order passes: `checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`.
-- [ ] No `sorry`, no new axioms, no semantic proof changes; the only added suppressions are the two Connectives `set_option linter.flexible false in` lines.
-- [ ] GeneralizedNecessitation's three scoped `... in` suppressions remain intact.
+- [x] Each edited module builds warning-free under `lake build <Module>` (per-phase gate).
+- [x] Full-library `lake build` is clean.
+- [x] CSLib CI order passes: `checkInitImports`, `lake lint`, `lake exe lint-style`, `lake test`.
+- [x] No `sorry`, no new axioms, no semantic proof changes; the only added suppressions are the two Connectives `set_option linter.flexible false in` lines.
+- [x] GeneralizedNecessitation's three scoped `... in` suppressions remain intact.
 
 ## Artifacts & Outputs
 

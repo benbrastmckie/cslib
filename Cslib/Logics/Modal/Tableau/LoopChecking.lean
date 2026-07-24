@@ -5803,6 +5803,140 @@ private lemma modalApplyOneS4Keyed_boxPos_diaNeg_not_expanding (φ₀ : Proposit
   · exact Or.inr ⟨nf, rfl⟩
   · exact Or.inl rfl
 
+/-- `modalApplyOneS4Keyed φ₀ keys sf b acc` at a non-box/diamond-shaped `sf` is exactly raw
+K's `modalApplyOne sf b acc`, for ANY `keys` -- the dispatch chain `modalApplyOneS4Keyed →
+modalApplyOneS4 → modalApplyOneS4Rules → modalApplyOneT → modalApplyOne` fires its catch-all arm
+at every layer (mirrors the internal `hred` fact inside `modalApplyOneS4Keyed_fst_eq_of_not_box`,
+extracted standalone since that lemma only exposes the branch/`acc`-invariance corollary, not the
+underlying `keys`-independence). -/
+private lemma modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneS4Keyed φ₀ keys (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOne (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+  have heqS4 : modalApplyOneS4Keyed φ₀ keys
+      (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS4 φ₀ (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc := by
+    unfold modalApplyOneS4Keyed
+    rcases hs : s with _ | _ <;> rcases hf : φ with _ | _ | _ | _ | _ | ψ | ψ <;> simp_all
+  rw [heqS4]
+  have hnbd1 : ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .neg ∧
+      ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .box ψ) ∧
+      ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .pos ∧
+      ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .diamond ψ) :=
+    ⟨fun ⟨_, ψ, hfe⟩ => hnb ψ hfe, fun ⟨_, ψ, hfe⟩ => hnd ψ hfe⟩
+  rw [modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ _ b acc hnbd1]
+  have hnbd2 : ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .pos ∧
+      ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .box ψ) ∧
+      ¬ ((⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).sign = .neg ∧
+      ∃ ψ, (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex).formula = .diamond ψ) :=
+    ⟨fun ⟨_, ψ, hfe⟩ => hnb ψ hfe, fun ⟨_, ψ, hfe⟩ => hnd ψ hfe⟩
+  rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg _ b acc hnbd2,
+      modalApplyOneT_eq_of_not_boxPos_diaNeg _ b acc hnbd2]
+
+/-- Corollary of the above: `modalApplyOneS4Keyed φ₀ keys` and `modalApplyOneS4Keyed φ₀ keys'`
+agree at any non-box/diamond-shaped signed formula, for ANY two `keys` lists -- both reduce to
+the SAME `keys`-independent `modalApplyOne`. This is what lets `hintikkaInv`'s clauses for
+box/diamond-EXCLUDED formulas (the only ones `modalHintikkaClauseGen` does not carve out as
+vacuous `True`) transport from the OLD `keys` to the post-step `keys'` below. -/
+private lemma modalApplyOneS4Keyed_keys_indep_of_not_box (φ₀ : Proposition Atom)
+    (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (hnb : ∀ ψ, φ ≠ .box ψ) (hnd : ∀ ψ, φ ≠ .diamond ψ)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalApplyOneS4Keyed φ₀ keys (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS4Keyed φ₀ keys' (⟨s, φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex)
+          b acc := by
+  rw [modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys s φ w hnb hnd b acc,
+      modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box φ₀ keys' s φ w hnb hnd b acc]
+
+/-- `modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys)` does not depend on `keys` at all:
+vacuously `True` on both sides for box/diamond-shaped `φ` (by `modalHintikkaClauseGen`'s own
+carve-out), and reduces to the SAME `keys`-independent `modalApplyOne` call for every other
+shape (`modalApplyOneS4Keyed_keys_indep_of_not_box`). This is exactly what lets Phase 7's single-
+step preservation lift the OLD `e`'s `hintikkaInv` facts (stated over `keys`) to the post-step
+`keys'` without re-deriving anything about the individual formulas of `e`. -/
+private lemma modalHintikkaClauseGen_S4Keyed_keys_indep (φ₀ : Proposition Atom)
+    (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (w : WorldIndex)
+    (X : List (SignedFormula (Proposition Atom) WorldIndex)) (Y : Accessibility) :
+    modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys) s φ w X Y =
+    modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys') s φ w X Y := by
+  unfold modalHintikkaClauseGen
+  rcases φ with p | _ | ⟨a, c⟩ | ⟨x, y⟩ | ⟨x, y⟩ | ψ | ψ
+  · rw [modalApplyOneS4Keyed_keys_indep_of_not_box φ₀ keys keys' s (.atom p) w
+      (by simp) (by simp) X Y]
+  · rw [modalApplyOneS4Keyed_keys_indep_of_not_box φ₀ keys keys' s .bot w
+      (by simp) (by simp) X Y]
+  · rw [modalApplyOneS4Keyed_keys_indep_of_not_box φ₀ keys keys' s (.imp a c) w
+      (by simp) (by simp) X Y]
+  · rw [modalApplyOneS4Keyed_keys_indep_of_not_box φ₀ keys keys' s (.and x y) w
+      (by simp) (by simp) X Y]
+  · rw [modalApplyOneS4Keyed_keys_indep_of_not_box φ₀ keys keys' s (.or x y) w
+      (by simp) (by simp) X Y]
+  · rfl
+  · rfl
+
+/-- **Assembly helper**: given the OLD `e`'s bundle already transported to the post-step
+`(b', acc')` at the OLD `keys` (`S4KeyedHintikkaInv_weaken`), plus the just-selected formula
+`sf`'s own five per-field facts at the post-step `keys'`, assemble the full bundle at
+`e ++ [sf]`. The old-`e` facts are lifted from `keys` to `keys'` via
+`modalHintikkaClauseGen_S4Keyed_keys_indep` (only `hintikkaInv` mentions `keys`; the other four
+fields do not reference `apply`/`keys` at all). -/
+private lemma S4KeyedHintikkaInv_append (φ₀ : Proposition Atom)
+    (b' e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc' : Accessibility)
+    (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (hweak : S4KeyedHintikkaInv φ₀ b' e acc' keys)
+    (hnew_hintikka : modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys') sf.sign sf.formula
+      sf.label b' acc')
+    (hnew_boxOnlyNeg : ∀ ψ, sf.formula = .box ψ → sf.sign = .neg)
+    (hnew_diaOnlyPos : ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos)
+    (hnew_boxNegWitness : ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', acc'.hasEdge w w' = true ∧
+        (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b')
+    (hnew_diaPosWitness : ∀ (ψ : Proposition Atom) (w : WorldIndex),
+      sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+      ∃ w', acc'.hasEdge w w' = true ∧
+        (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b') :
+    S4KeyedHintikkaInv φ₀ b' (e ++ [sf]) acc' keys' := by
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · intro sf' hsf'
+    rcases List.mem_append.mp hsf' with hold | hnewmem
+    · rw [← modalHintikkaClauseGen_S4Keyed_keys_indep φ₀ keys keys' sf'.sign sf'.formula
+        sf'.label b' acc']
+      exact hweak.hintikkaInv sf' hold
+    · simp only [List.mem_singleton] at hnewmem
+      subst hnewmem
+      exact hnew_hintikka
+  · intro sf' hsf' ψ hform
+    rcases List.mem_append.mp hsf' with hold | hnewmem
+    · exact hweak.eBoxOnlyNeg sf' hold ψ hform
+    · simp only [List.mem_singleton] at hnewmem
+      subst hnewmem
+      exact hnew_boxOnlyNeg ψ hform
+  · intro sf' hsf' ψ w hsfeq
+    rcases List.mem_append.mp hsf' with hold | hnewmem
+    · exact hweak.eBoxNegWitness sf' hold ψ w hsfeq
+    · simp only [List.mem_singleton] at hnewmem
+      subst hnewmem
+      exact hnew_boxNegWitness ψ w hsfeq
+  · intro sf' hsf' ψ hform
+    rcases List.mem_append.mp hsf' with hold | hnewmem
+    · exact hweak.eDiamondOnlyPos sf' hold ψ hform
+    · simp only [List.mem_singleton] at hnewmem
+      subst hnewmem
+      exact hnew_diaOnlyPos ψ hform
+  · intro sf' hsf' ψ w hsfeq
+    rcases List.mem_append.mp hsf' with hold | hnewmem
+    · exact hweak.eDiamondPosWitness sf' hold ψ w hsfeq
+    · simp only [List.mem_singleton] at hnewmem
+      subst hnewmem
+      exact hnew_diaPosWitness ψ w hsfeq
+
 end Cslib.Logic.Modal.Tableau
 
 end

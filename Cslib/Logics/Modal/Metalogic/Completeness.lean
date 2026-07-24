@@ -204,8 +204,8 @@ theorem canonical_eucl_from_5
   intro hST hSU φ h_box_T
   by_contra h_phi_not_U
   have h_neg_U := mcs_neg_of_not_mem h_implyK h_implyS U.property h_phi_not_U
-  -- Raw shape (`¬(□¬¬φ)`), matching `Axioms.Axiom5`'s LHS -- NOT native `◇¬φ` (task 441:
-  -- `diamond` is a native constructor, no longer defeq to this raw shape).
+  -- Raw shape (`¬(□¬¬φ)`), matching `Axioms.Axiom5`'s LHS -- NOT native `◇¬φ` (`diamond` is a
+  -- native constructor, not defeq to this raw shape).
   have h_diam_S : (¬(□¬¬φ)) ∈ S.val := by
     by_contra h_diam_not_S
     have h_neg_diam := mcs_neg_of_not_mem h_implyK h_implyS S.property h_diam_not_S
@@ -242,9 +242,9 @@ theorem canonical_eucl_from_5
 is serial.
 
 This is Blackburn Theorem 4.28 clause 3: "it suffices to show that the canonical model
-for KD is right-unbounded [serial]." Task 539: promoted from
-`Systems/D/Completeness.lean` so it survives the D-family repoint and remains available to
-all 5 D-family `d_canonical_FC` consumers via their existing `import Metalogic.Completeness`.
+for KD is right-unbounded [serial]." Lives here (rather than `Systems/D/Completeness.lean`)
+so it remains available to all 5 D-family `d_canonical_FC` consumers via their existing
+`import Metalogic.Completeness`.
 
 The proof shows {psi | box psi in S} is consistent using a D+NEC contradiction argument,
 then extends to MCS via Lindenbaum. -/
@@ -270,7 +270,7 @@ theorem d_canonical_serial
     have h_all_box : ∀ x ∈ L, (□x) ∈ S.val := fun x hx => hL x hx
     have h_box_bot : (□⊥) ∈ S.val :=
       derive_box_from_box_context h_implyK h_implyS h_K S.property d_bot h_all_box
-    -- Raw shape (task 441: `diamond` is native, no longer defeq to `Axioms.AxiomD`'s RHS).
+    -- Raw shape (`diamond` is native, not defeq to `Axioms.AxiomD`'s RHS).
     have h_diamond_bot :
         ((Proposition.box (Proposition.bot.imp Proposition.bot)).imp Proposition.bot) ∈ S.val :=
       mcs_mp_axiom h_implyK h_implyS S.property h_box_bot (h_D ⊥)
@@ -294,28 +294,21 @@ theorem d_canonical_serial
 
 /-! ## Truth Lemma
 
-Task 539 (consolidation): prior to this task, the metalogic carried **three** truth-lemma
-families, each parameterized over the axiom set and differing only in which box-witness lemma
-it used (a T-requiring family in this file, a K-specific family in `Systems/K/Completeness.lean`,
-and a D-specific family in `Systems/D/Completeness.lean`) -- 545 duplicated lines in total, even
-though the box case genuinely needs only `EFQ + K` from `kCore` and never axiom T or D.
+**There is a single generic route.** `truth_lemma` below is THE truth lemma for all 15
+classical systems in the modal cube (K, T, D, B, K4, K5, K45, S4, S5, TB, KB5, D4, D5, D45,
+DB), since the box case genuinely needs only `EFQ + K` from `kCore` and never axiom T or D.
+This works because every one of the 15 systems' axiom predicates is `SchemaUnion sysTags` with
+`kCore ⊆ sysTags`: enlarging a schema-union tag set only weakens the resulting predicate
+(`SchemaUnion.subsumption`, `ProofSystem/SchemaUnion.lean`), so a proof that only needs the 13
+`kCore` tags transfers to any superset. Each system wires `truth_lemma` in via the
+`canonicalTruthLemmaOfKCore` convenience wrapper below, feeding a single
+`(h : kCore ⊆ sysTags)` subset fact through the 13 `holds*` witness helpers
+(`ProofSystem/SchemaTags.lean`) rather than restating each witness by hand.
 
-**There is now a single generic route.** `truth_lemma` below (promoted from the former
-K-specific family, since its box-witness argument is the weakest hypothesis and therefore
-serves every system) is THE truth lemma for all 15 classical systems in the modal cube (K, T, D,
-B, K4, K5, K45, S4, S5, TB, KB5, D4, D5, D45, DB). This works because every one of the 15
-systems' axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags` (verified in research):
-enlarging a schema-union tag set only weakens the resulting predicate (`SchemaUnion.subsumption`,
-`ProofSystem/SchemaUnion.lean`), so a proof that only needs the 13 `kCore` tags transfers to any
-superset. Each system wires `truth_lemma` in via the `canonicalTruthLemmaOfKCore` convenience
-wrapper below, feeding a single `(h : kCore ⊆ sysTags)` subset fact through the 13 `holds*`
-witness helpers (`ProofSystem/SchemaTags.lean`) rather than restating each witness by hand.
-
-The now-vacated name `truth_lemma` is deliberately reused (not renamed to `canonical_truth_lemma`,
-which is already taken by the intuitionistic truth lemma at
-`Metalogic/Intuitionistic/TruthLemma.lean` in the same namespace). The intuitionistic/constructive
-subtrees are unrelated to this consolidation and keep their own separate `canonical_truth_lemma`
-/ `ck_truth_lemma`.
+The name `truth_lemma` here is distinct from `canonical_truth_lemma`, the intuitionistic truth
+lemma at `Metalogic/Intuitionistic/TruthLemma.lean` in the same namespace. The
+intuitionistic/constructive subtrees are unrelated to this classical consolidation and keep
+their own separate `canonical_truth_lemma` / `ck_truth_lemma`.
 
 All 15 systems share the same canonical model definition (`CanonicalModel`) from this file.
 Logics differ only in which frame properties are provable for the canonical accessibility
@@ -323,8 +316,7 @@ relation (`canonical_refl`, `canonical_trans`, `canonical_symm`, `canonical_eucl
 `canonical_eucl_from_5`, `d_canonical_serial`), never in the truth lemma itself. -/
 
 /-- From `L |- bot` where `L <= {psi | box psi in S} union {neg phi}`, derive `False`, without
-axiom T. Task 539: promoted from `Systems/K/Completeness.lean` (`k_derive_box_from_inconsistency`)
--- the generic route this file's `truth_lemma` now uses for every one of the 15 classical
+axiom T. The generic route this file's `truth_lemma` uses for every one of the 15 classical
 systems, since `kCore ⊆ sysTags` for all of them.
 
 When `neg phi not in L`, all elements of L have box-versions in S. From `L |- bot`,
@@ -402,8 +394,7 @@ theorem k_derive_box_from_inconsistency
 
 /-- **Box Witness** (BRV Lemma 4.20, generic route): If `box phi not in S` and `S` is MCS, then
 there exists an MCS `T` such that `forall psi, box psi in S -> psi in T` and `phi not in T`. No
-axiom T hypothesis needed -- task 539: promoted from `Systems/K/Completeness.lean`
-(`k_mcs_box_witness`). -/
+axiom T hypothesis needed. -/
 theorem k_mcs_box_witness
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -437,20 +428,18 @@ theorem k_mcs_box_witness
 /-- **Truth Lemma**: For any canonical world `S` and formula `phi`,
 `Satisfies (CanonicalModel Axioms) S phi <-> phi in S.val`.
 
-Task 539: this is THE single generic truth lemma for all 15 classical systems, promoted (and
-renamed) from `Systems/K/Completeness.lean`'s `k_truth_lemma` -- the box case needs only
+This is THE single generic truth lemma for all 15 classical systems: the box case needs only
 `EFQ + K` from `kCore` (`k_mcs_box_witness` above), and since every one of the 15 systems'
 axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags`, this one route serves all of
-them (no axiom T or D needed). This reuses the name vacated by the deleted T-requiring
-`truth_lemma` -- NOT `canonical_truth_lemma`, which is already taken by the intuitionistic truth
-lemma in the same namespace (`Metalogic/Intuitionistic/TruthLemma.lean`).
+them (no axiom T or D needed). This is distinct from `canonical_truth_lemma`, which is the
+intuitionistic truth lemma in the same namespace (`Metalogic/Intuitionistic/TruthLemma.lean`).
 
-Task 441: gains `.and`/`.or`/`.diamond` cases (native constructors). The `.and`/`.or` cases use
-the `mcs_and_mem_iff`/`mcs_or_mem_iff` MCS closure lemmas (`MCS.lean`, Phase 5) plus the
-structural-recursion IHs at the immediate subformulas -- the payoff of native constructors: no
-Lukasiewicz-bridge lemma is needed. The `.diamond` case reuses `k_mcs_box_witness` (the same
-box-witness consistency lemma the `.box` case uses) applied to `¬φ` instead of `φ`, bridging to
-native `◇` membership via `mcs_dia_to_raw`/`mcs_raw_to_dia` (`MCS.lean`, Phase 5). -/
+Covers `.and`/`.or`/`.diamond` cases (native constructors). The `.and`/`.or` cases use the
+`mcs_and_mem_iff`/`mcs_or_mem_iff` MCS closure lemmas (`MCS.lean`) plus the structural-recursion
+IHs at the immediate subformulas -- the payoff of native constructors: no Lukasiewicz-bridge
+lemma is needed. The `.diamond` case reuses `k_mcs_box_witness` (the same box-witness
+consistency lemma the `.box` case uses) applied to `¬φ` instead of `φ`, bridging to native `◇`
+membership via `mcs_dia_to_raw`/`mcs_raw_to_dia` (`MCS.lean`). -/
 theorem truth_lemma
     {Axioms : Proposition Atom → Prop}
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
@@ -621,13 +610,13 @@ theorem truth_lemma
           h_andI h_andE1 h_andE2 h_orI1 h_orI2 h_orE h_dualFwd h_dualBack
           ⟨T, hT_mcs⟩ φ).mpr h_phi_T⟩
 
-/-- **Convenience Wrapper**: the promoted `truth_lemma` pre-applied to any `SchemaUnion S`
-whose tag set `S` contains `kCore`, via a single `(h : kCore ⊆ S)` subset fact.
+/-- **Convenience Wrapper**: `truth_lemma` pre-applied to any `SchemaUnion S` whose tag set `S`
+contains `kCore`, via a single `(h : kCore ⊆ S)` subset fact.
 
-Task 539: every one of the 15 classical systems' axiom predicates is `SchemaUnion sysTags` with
-`kCore ⊆ sysTags` (verified in research), so this one wrapper -- fed by the 13 `holds*` helpers
-in `ProofSystem.SchemaTags` -- replaces each system's bespoke 13-witness
-`*_truth_lemma_applied` block with a single `canonicalTruthLemmaOfKCore (by decide) S φ` call. -/
+Every one of the 15 classical systems' axiom predicates is `SchemaUnion sysTags` with
+`kCore ⊆ sysTags`, so this one wrapper -- fed by the 13 `holds*` helpers in
+`ProofSystem.SchemaTags` -- replaces each system's bespoke 13-witness `*_truth_lemma_applied`
+block with a single `canonicalTruthLemmaOfKCore (by decide) S φ` call. -/
 theorem canonicalTruthLemmaOfKCore {S : Finset ModalSchemaTag} (h : kCore ⊆ S)
     (w : CanonicalWorld (SchemaUnion S)) (φ : Proposition Atom) :
     Satisfies (CanonicalModel (SchemaUnion S)) w φ ↔ φ ∈ w.val :=

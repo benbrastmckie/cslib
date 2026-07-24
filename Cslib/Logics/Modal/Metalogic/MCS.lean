@@ -163,8 +163,8 @@ theorem mcs_box_box
 /-- If `phi in S` and `S` is MCS, then `box((box(phi -> bot)) -> bot) in S` (using axiom B,
 in its canonical **raw encoded** shape `Axioms.AxiomB`).
 
-Task 441: `diamond` is now a native constructor, no longer definitionally equal to
-`(box (phi -> bot)) -> bot`. `h_B` therefore stays in raw shape (matching how every
+`diamond` is a native constructor, not definitionally equal to `(box (phi -> bot)) -> bot`.
+`h_B` therefore stays in raw shape (matching how every
 `S5Axiom`/`{Sys}Axiom.modalB` constructor is stated, see `ProofSystem/Instances/*.lean`),
 and the conclusion is the raw boxed shape rather than `(□◇φ) ∈ S`. Callers bridge to native
 `◇` membership only *after* unboxing through the canonical relation, using `mcs_raw_to_dia`
@@ -181,12 +181,12 @@ theorem mcs_box_diamond
     (Proposition.box ((Proposition.box (φ.imp Proposition.bot)).imp Proposition.bot)) ∈ S :=
   mcs_mp_axiom h_implyK h_implyS h_mcs h_phi (h_B φ)
 
-/-! ## Diamond Duality Bridges (task 441)
+/-! ## Diamond Duality Bridges
 
-`diamond` is a native constructor, so canonical-model reasoning about `◇φ` can no longer
-rely on `◇φ` unifying syntactically with the raw encoded shape `(□(φ → ⊥)) → ⊥`. These two
+`diamond` is a native constructor, so canonical-model reasoning about `◇φ` cannot rely on
+`◇φ` unifying syntactically with the raw encoded shape `(□(φ → ⊥)) → ⊥`. These two
 lemmas bridge membership in an MCS between the native and raw shapes, using the
-`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata (Phase 2/3). -/
+`AxiomDiaDualityFwd`/`AxiomDiaDualityBack` characterization schemata. -/
 
 /-- Bridge native `◇φ` membership to the raw encoded shape, via `AxiomDiaDualityFwd`. -/
 theorem mcs_dia_to_raw
@@ -269,7 +269,7 @@ theorem mcs_mem_iff_neg_not_mem
     · exact h'
     · exact absurd h' h
 
-/-! ## And/Or MCS Closure (task 441)
+/-! ## And/Or MCS Closure
 
 MCS-membership closure lemmas for the native `and`/`or` constructors, needed by the
 generic truth lemma's `.and`/`.or` cases (`Metalogic/Completeness.lean`). -/

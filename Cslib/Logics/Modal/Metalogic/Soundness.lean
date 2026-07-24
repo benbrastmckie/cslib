@@ -79,9 +79,9 @@ lemma Satisfies.modalK_axiom {World : Type*} (m : Model World Atom) (w : World)
 
 /-! ## Shared And/Or/Diamond-Duality Characterization Axiom Soundness Lemmas
 
-Semantic soundness for the 8 characterization schemata added in task 441 (native
-`and`/`or`/`diamond` constructors). Factored out here so every `Systems/*/Soundness.lean`
-file can reuse a single proof per schema rather than re-deriving it per system. -/
+Semantic soundness for the 8 characterization schemata for the native `and`/`or`/`diamond`
+constructors. Factored out here so every `Systems/*/Soundness.lean` file can reuse a single
+proof per schema rather than re-deriving it per system. -/
 
 /-- Conjunction introduction (`Axioms.AndI`) is valid on all frames. -/
 lemma Satisfies.andI_axiom {World : Type*} (m : Model World Atom) (w : World)

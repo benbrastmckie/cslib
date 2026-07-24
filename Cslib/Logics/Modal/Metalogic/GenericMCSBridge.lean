@@ -48,7 +48,7 @@ context and constructs `⊢ □ψ` via the `InferenceSystem` instance for
 **Backward** (algebraic → tree): extract `d₀ : [] ⊢ listImp Γ φ`, weaken to
 `Γ ⊢ listImp Γ φ`, then apply `unfoldListImpInTree` to eliminate each layer.
 
-## Design Note (task 452, Phase 6)
+## Design Note
 
 This file previously defined a local `HilbertOf Axioms` tag with its own `InferenceSystem`/
 `ModusPonens`/`HasAxiomImplyK`/`HasAxiomImplyS`/`MinimalHilbert` instance bundle. Since
@@ -98,7 +98,7 @@ instance [h : HasMinimalAxioms Axioms] :
 /-- Shorthand for the algebraic derivation system at the generic `ClosedHilbert
 (DerivationTree Axioms)` tag. A thin re-export: the underlying tag changed from the
 retired local `HilbertOf Axioms` to `ClosedHilbert`, but the name and signature are
-unchanged (task 452, Phase 6). -/
+unchanged. -/
 @[reducible] def modalAlgDS (Axioms : Proposition Atom → Prop)
     [HasMinimalAxioms Axioms] :
     Metalogic.DerivationSystem (Proposition Atom) :=

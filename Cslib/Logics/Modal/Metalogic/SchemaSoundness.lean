@@ -18,10 +18,10 @@ combinator (`Cslib.Logics.Modal.ProofSystem.SchemaUnion`). It separates *which* 
 frame-unconditional tags are valid on every model, while the 5 modal-strength differentiator
 tags (`modalT/D/B/Four/Five`) are valid only under a specific frame condition.
 
-`unionSound` is the hinge between this task's syntactic side (the schema-tag alphabet) and the
+`unionSound` is the hinge between the syntactic side (the schema-tag alphabet) and the
 `FrameCorrespondence` semantic side: every per-system soundness proof
-(`Systems/*/Soundness.lean`) will (Phase 4) specialize this one lemma instead of re-deriving a
-per-system case-split.
+(`Systems/*/Soundness.lean`) specializes this one lemma instead of re-deriving a per-system
+case-split.
 
 ## Main Definitions
 

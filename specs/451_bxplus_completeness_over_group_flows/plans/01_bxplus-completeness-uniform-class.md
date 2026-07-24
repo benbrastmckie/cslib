@@ -248,7 +248,7 @@ completeness theorem, mirroring `completeness_dense` exactly.
 
 ---
 
-### Phase 5: Dense→ℚ (oag) bridge corollary [IN PROGRESS]
+### Phase 5: Dense→ℚ (oag) bridge corollary [COMPLETED]
 
 **Goal**: Deliver the concrete task-450 artifact: a dense countermodel transports to the ordered-
 abelian-group ℚ via Cantor + Phase 1's transport lemma.
@@ -282,7 +282,7 @@ abelian-group ℚ via Cantor + Phase 1's transport lemma.
 
 ---
 
-### Phase 6: Escalation docstring, barrel wiring, full CI [NOT STARTED]
+### Phase 6: Escalation docstring, barrel wiring, full CI [IN PROGRESS]
 
 **Goal**: Record the escalated open lemma, wire the new file into the library, and pass full CI.
 

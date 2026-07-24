@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Temporal.Metalogic.MetricSoundness
 public import Cslib.Logics.Temporal.Metalogic.DenseCompleteness
 public import Mathlib.Order.CountableDenseLinearOrder
+public import Mathlib.Algebra.Order.Field.Basic
 
 /-! # BX⁺ Completeness over the Uniform Class + Dense→ℚ Bridge
 
@@ -492,5 +493,46 @@ theorem completeness_metric {φ : Formula Atom}
   have h_zero : t₀.val = 0 := rfl
   rw [h_zero, limit_f_zero] at h_mem
   exact h_phi_not_M h_mem
+
+/-! ## Dense→ℚ (oag) Bridge -/
+
+omit [Denumerable (Formula Atom)] in
+/-- **Dense→ℚ transport corollary**: a countable, dense, serial (no min/max) countermodel for
+`φ` transports to a countermodel for `φ` on the ordered-abelian-group ℚ, via Cantor's
+isomorphism theorem (`Order.iso_of_countable_dense`) and `Satisfies_orderIso`. This is the
+concrete artifact unlocking a semantic route for dense BX⁺-fragment reasoning over oag time. -/
+theorem denseCountermodel_transport_rat {D : Type*} [LinearOrder D]
+    [Countable D] [DenselyOrdered D] [NoMinOrder D] [NoMaxOrder D] [Nonempty D]
+    {φ : Formula Atom} (M : TemporalModel D Atom) (t : D) (h_not_sat : ¬ Satisfies M t φ) :
+    ∃ (M' : TemporalModel ℚ Atom) (t' : ℚ), ¬ Satisfies M' t' φ := by
+  obtain ⟨e⟩ := Order.iso_of_countable_dense D ℚ
+  exact ⟨{ valuation := fun q p => M.valuation (e.symm q) p }, e t,
+    (Satisfies_orderIso e M t φ).not.mp h_not_sat⟩
+
+/-- **Dense-fragment BX⁺ completeness over the oag ℚ**: if `φ` is not derivable in the Dense
+proof system, then `φ` has a countermodel on the ordered-abelian-group ℚ. Mirrors
+`completeness_dense`'s chronicle construction, then transports the resulting dense chronicle
+countermodel to ℚ via `denseCountermodel_transport_rat` (the chronicle carries `Countable`
+via its `Rat`-subtype structure, `DenselyOrdered` via `chronicleDenselyOrderedDense`, and
+`NoMinOrder`/`NoMaxOrder`/`Nonempty` as existing chronicle instances). This is the headline
+bridge corollary consumed by dense semantic-route reasoning over oag time. -/
+theorem denseFragment_countermodel_rat {φ : Formula Atom}
+    (h_not_deriv : ¬ Temporal.ThDerivableFc FrameClass.Dense φ) :
+    ∃ (M : TemporalModel ℚ Atom) (t : ℚ), ¬ Satisfies M t φ := by
+  have h_cons := neg_consistent_of_not_derivable_dense h_not_deriv
+  obtain ⟨M, hM_sup, hM_mcs⟩ := temporal_lindenbaum_fc h_cons
+  have h_neg_in_M : (¬φ) ∈ M := hM_sup (Set.mem_singleton _)
+  have h_phi_not_M : φ ∉ M := mcs_not_mem_of_neg_fc hM_mcs h_neg_in_M
+  have h_base_mcs := dense_mcs_implies_base_mcs hM_mcs
+  let D := ChronicleSubtype M h_base_mcs
+  let model := chronicleModel M h_base_mcs
+  let t₀ : D := chronicleZero M h_base_mcs
+  haveI : DenselyOrdered D := chronicleDenselyOrderedDense hM_mcs h_base_mcs
+  have h_not_sat : ¬ Satisfies model t₀ φ := fun h_sat => by
+    have h_mem := (chronicle_truth_lemma M h_base_mcs t₀ φ).mp h_sat
+    have h_zero : t₀.val = 0 := rfl
+    rw [h_zero, limit_f_zero] at h_mem
+    exact h_phi_not_M h_mem
+  exact denseCountermodel_transport_rat model t₀ h_not_sat
 
 end Cslib.Logic.Temporal

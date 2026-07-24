@@ -2,7 +2,7 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Plan 02 (incremental-assets-deferred-route), Phases 1-3 of 8 completed sorry-free, as scoped for this dispatch: (1) extended CS5PairAxiom with a nine-constructor whole-type propositional core; (2) discharged the generic primeness engine's hImplyK/hImplyS/hEFQ/hOrI1/hOrI2/hOrE/hCut preconditions at CS5PairAxiom as named library lemmas, sanity-checked against prime_set_exclusion (zero errors, DerivExcludes the sole remaining hole); (3) defined the two-sided seed cs5PairSeed plus its injection and membership-inversion lemmas. Phases 4-8 (cross-inertness hard gate, the two individual exclusions, the named open obligation CS5PairSeedDisjunctionProperty, and the CI/documentation gate) were explicitly out of scope for this dispatch and were not attempted -- none of them are blocked, they are simply not yet dispatched. Supersedes the stale plan-01-round handoff previously recorded here.",
+  "summary": "Plan 02 (incremental-assets-deferred-route), dispatch scoped to Phases 4-7. Phase 4 (cross-inertness support lemma, the hard gate) is BLOCKED: the natural necessitation-only-from-[] box invariant the plan's task list sketches is false for CS5PairAxiom (modus_ponens against the embedded CS5ModalAxiom.bBox schema produces a bare-box conclusion from neither an assumption nor a necessitation witness), so the sketched structural induction does not close, and a correct argument would need an invariant of the same order of difficulty as the disjunction property itself (R-B's anticipated risk). Per the plan's own sanctioned fallback, Phases 5-6 (the two individual seed exclusions, which depend on Phase 4) were skipped rather than attempted with a substitute strategy. Phase 7 (the plan's declared floor/headline deliverable, dependent only on Phase 3) landed in full: CS5PairSeedDisjunctionProperty is a real, non-vacuous Prop-valued open obligation (Pacheco 2024 Lemma 16, unsound as published, no semantic witness, open here -- never a sorry, never asserted as a theorem), and cs5Pair_derivExcludes_of_disjunctionProperty is a sorry-free conditional theorem consuming hL/hR/hOpen as explicit hypotheses (hL/hR are not theorems either, since Phase 4 is blocked) and proving DerivExcludes at the two-sided seed by case analysis on the bigOr list argument. Scoped build green (730 jobs); zero sorry/admit census; lean_verify on the new theorem shows only propext/Classical.choice/Quot.sound. Phase 8 (documentation/CI gate) was out of scope for this dispatch and was not attempted.",
   "artifacts": [
     {
       "type": "plan",
@@ -10,23 +10,37 @@
     },
     {
       "type": "summary",
-      "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/02_incremental-assets-phases-1-3-summary.md"
+      "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/03_phases-4-7-summary.md"
     }
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
+  "blockers": [
+    {
+      "phase": 4,
+      "name": "Cross-Inertness Support Lemma",
+      "status": "blocked",
+      "what_was_tried": "Structural induction on DerivationTree, generalizing the conclusion index to Proposition.box psi via `generalize ... at d; induction d with ...`, targeting the sub-lemma `DerivationTree CS5PairAxiom Gamma (box psi) -> (box psi in Gamma) or Derivable CS5PairAxiom psi` (the 'necessitation-only-from-[]' invariant the plan's task list names). The assumption/necessitation/weakening cases close cleanly.",
+      "exact_goal_state": "modus_ponens case: given d1 : Deriv Gamma (phi'.imp psi'), d2 : Deriv Gamma phi', with psi' unified to (box psi) via the generalized equation, `exfalso` is NOT justified -- the case is live, not vacuous.",
+      "root_cause": "CS5ModalAxiom.bBox : phi -> box(dia phi) (CS5.lean:216) has a bare-box formula as the consequent of an implication. modus_ponens against a bBox-derived (or k-chained) hypothesis in Gamma legitimately produces a bare-box conclusion that is neither `box psi in Gamma` (assumption) nor `Derivable ... psi` from necessitation. The naive invariant is therefore false as stated.",
+      "what_is_needed": "A strictly stronger inductive invariant tracking which bare-box formulas over cs5PairSeed H content are K-reachable from seed-drawn assumptions vs. reachable only via a cross1/cross2 bridge -- assessed to be the same order of difficulty as the Phase 7 disjunction-property obligation (R-B's anticipated risk). No semantic/soundness route is available (cross-axioms are sound only under a common valuation collapsing the two copies -- see plan Non-Goals).",
+      "sanctioned_fallback_taken": "Phases 5-6 skipped per plan (both depend on Phase 4). Phase 7 proceeds with hL/hR as explicit open hypotheses, matching the plan's own contingency clause."
+    }
+  ],
+  "next_action_hint": "spawn or implement",
   "files_modified": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean"
+    "Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean",
+    "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/02_incremental-assets-deferred-route.md"
   ],
   "decisions_made": [
-    "Propositional-core constructors (implyK/implyS/efq/andI/andE1/andE2/orI1/orI2/orE) quantified over the entire Proposition (Atom (+) Atom) type rather than routed through cs5PairTauL/cs5PairTauR, per plan 02's Phase 1 mandate -- required because the generic primeness engine's hOrE/hEFQ/hCut hypotheses range over the ambient formula type",
-    "cs5Pair_hCut supplied by instantiating the existing generic modal_deriv_imp_of_union (no new cut machinery), mirroring the quasi_prime_set_exclusion/modal_prime_exclusion insert-to-union conversion precedent",
-    "cs5PairTauL_injective/cs5PairTauR_injective landed as corollaries of Proposition.map_injective to discharge the plan's 'rule out tag collision' requirement for cs5PairSeed_mem_iff",
-    "Phase 2's #check-level sanity check against prime_set_exclusion performed via lean_run_code and recorded in the plan/summary, not left as a permanent declaration in the tracked file"
+    "Marked Phase 4 [BLOCKED] rather than inserting sorry or a vacuous placeholder, per R-C and the plan's explicit fallback path.",
+    "Phases 5-6 marked [SKIPPED - Phase 4 blocked] rather than attempted via an alternative (non-plan) strategy, per plan-compliance.md.",
+    "Phase 7's conditional theorem signature retains hL/hR as explicit hypotheses (unproved) exactly per the plan's 'if Phase 4 blocked' contingency clause, keeping the theorem's public interface stable for a future dispatch that lands Phases 4-6.",
+    "The DerivExcludes case split (empty/singleton/length>=2 list) uses two small new helper lemmas (cs5Pair_bigOr_imp_or, cs5Pair_orBot_imp_self) built from the already-landed Phase 2 hypothesis bundle (hOrI1/hOrI2/hOrE/hEFQ) plus Metalogic.empty_imp_id -- no new cut machinery."
   ],
-  "dead_ends": [],
+  "dead_ends": [
+    "Naive necessitation-only-from-[] box invariant for CS5PairAxiom (see blockers[0]) -- do not retry without first handling the bBox/K-chain counterexample."
+  ],
   "plan_markers_verified": true,
-  "phases_completed": 3,
+  "phases_completed": 4,
   "phases_total": 8,
   "sorry_inventory": []
 }

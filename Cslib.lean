@@ -380,14 +380,12 @@ public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.ConstructiveLatticeMonotonicity
-public import Cslib.Logics.Modal.Metalogic.InterSystem.ConstructiveLatticeSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeMonotonicity
-public import Cslib.Logics.Modal.Metalogic.InterSystem.IntuitionisticLatticeSubsumption
+public import Cslib.Logics.Modal.Metalogic.InterSystem.LatticeSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.LiftViaMorphism
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeMonotonicity
-public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeSubsumption
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Modularity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthMonotonicity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.PropositionalStrengthSubsumption

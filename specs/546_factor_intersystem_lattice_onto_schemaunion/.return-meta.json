@@ -3,12 +3,12 @@
   "started_at": "2026-07-24T04:31:16Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Verified cases h <;> constructor adopted uniformly for all 9 same-base + 8 cross-base subsumption lemmas via scratch-lemma lean_goal checks; no mis-selection observed.",
+    "stage": "phase_2_complete",
+    "details": "Merged 3 same-base Subsumption files into LatticeSubsumption.lean; shortened PropositionalStrengthSubsumption.lean in place; re-pointed 3 Monotonicity imports; regenerated barrel; build green for LatticeSubsumption, PropositionalStrengthSubsumption, and the 3 same-base Monotonicity modules.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1,
-    "last_completed_phase": "Phase 1: Verify one-line proof-shortening tactic"
+    "phases_completed": 2,
+    "last_completed_phase": "Phase 2: Consolidate the Subsumption layer"
   },
   "metadata": {
     "session_id": "sess_1784866674_c9da04_546",

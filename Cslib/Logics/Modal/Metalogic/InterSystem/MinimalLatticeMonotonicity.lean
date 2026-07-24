@@ -7,7 +7,7 @@ Authors: Benjamin Brast-McKie
 module
 
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
-public import Cslib.Logics.Modal.Metalogic.InterSystem.MinimalLatticeSubsumption
+public import Cslib.Logics.Modal.Metalogic.InterSystem.LatticeSubsumption
 
 /-! # Derivability Monotonicity for the Minimal-Base Modal Cube
 

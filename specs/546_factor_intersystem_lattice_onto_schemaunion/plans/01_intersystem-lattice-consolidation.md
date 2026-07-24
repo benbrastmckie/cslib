@@ -149,7 +149,7 @@ per-file adopt/fallback decision.
 
 ---
 
-### Phase 2: Consolidate the Subsumption layer [NOT STARTED]
+### Phase 2: Consolidate the Subsumption layer [COMPLETED]
 
 **Goal**: Replace the 3 same-base Subsumption files with one `LatticeSubsumption.lean`, shorten
 the cross-base file in place, re-point importers, and leave the build green.

@@ -64,166 +64,50 @@ variable {Atom : Type*}
 /-- Every `MKModalAxiom` instance is an `IKModalAxiom` instance: `IK` extends `MK`'s 12
 constructors verbatim with `efq` and `dbot`. -/
 lemma MKModalAxiom_implies_IKModalAxiom {φ : Proposition Atom} (h : MKModalAxiom φ) :
-    IKModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .cd φ ψ => .cd φ ψ
-  | .idb φ ψ => .idb φ ψ
+    IKModalAxiom φ := by
+  cases h <;> constructor
 
 /-- Every `CKModalAxiom` instance is an `IKModalAxiom` instance: `IK` extends `CK`'s 11
 constructors verbatim with `cd`, `idb`, and `dbot`. -/
 lemma CKModalAxiom_implies_IKModalAxiom {φ : Proposition Atom} (h : CKModalAxiom φ) :
-    IKModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .efq φ => .efq φ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
+    IKModalAxiom φ := by
+  cases h <;> constructor
 
 /-! ## Into `IT` -/
 
 /-- Every `MTModalAxiom` instance is an `ITModalAxiom` instance. -/
 lemma MTModalAxiom_implies_ITModalAxiom {φ : Proposition Atom} (h : MTModalAxiom φ) :
-    ITModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .cd φ ψ => .cd φ ψ
-  | .idb φ ψ => .idb φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
+    ITModalAxiom φ := by
+  cases h <;> constructor
 
 /-- Every `CTModalAxiom` instance is an `ITModalAxiom` instance. -/
 lemma CTModalAxiom_implies_ITModalAxiom {φ : Proposition Atom} (h : CTModalAxiom φ) :
-    ITModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .efq φ => .efq φ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
+    ITModalAxiom φ := by
+  cases h <;> constructor
 
 /-! ## Into `IS4` -/
 
 /-- Every `MS4ModalAxiom` instance is an `IS4ModalAxiom` instance. -/
 lemma MS4ModalAxiom_implies_IS4ModalAxiom {φ : Proposition Atom} (h : MS4ModalAxiom φ) :
-    IS4ModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .cd φ ψ => .cd φ ψ
-  | .idb φ ψ => .idb φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
-  | .fourBox φ => .fourBox φ
-  | .fourDia φ => .fourDia φ
+    IS4ModalAxiom φ := by
+  cases h <;> constructor
 
 /-- Every `CS4ModalAxiom` instance is an `IS4ModalAxiom` instance. -/
 lemma CS4ModalAxiom_implies_IS4ModalAxiom {φ : Proposition Atom} (h : CS4ModalAxiom φ) :
-    IS4ModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .efq φ => .efq φ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
-  | .fourBox φ => .fourBox φ
-  | .fourDia φ => .fourDia φ
+    IS4ModalAxiom φ := by
+  cases h <;> constructor
 
 /-! ## Into `IS5` -/
 
 /-- Every `MS5ModalAxiom` instance is an `IS5ModalAxiom` instance. -/
 lemma MS5ModalAxiom_implies_IS5ModalAxiom {φ : Proposition Atom} (h : MS5ModalAxiom φ) :
-    IS5ModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .cd φ ψ => .cd φ ψ
-  | .idb φ ψ => .idb φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
-  | .fourBox φ => .fourBox φ
-  | .fourDia φ => .fourDia φ
-  | .bBox φ => .bBox φ
-  | .bDia φ => .bDia φ
+    IS5ModalAxiom φ := by
+  cases h <;> constructor
 
 /-- Every `CS5ModalAxiom` instance is an `IS5ModalAxiom` instance. -/
 lemma CS5ModalAxiom_implies_IS5ModalAxiom {φ : Proposition Atom} (h : CS5ModalAxiom φ) :
-    IS5ModalAxiom φ :=
-  match h with
-  | .implyK φ ψ => .implyK φ ψ
-  | .implyS φ ψ χ => .implyS φ ψ χ
-  | .efq φ => .efq φ
-  | .andI φ ψ => .andI φ ψ
-  | .andE1 φ ψ => .andE1 φ ψ
-  | .andE2 φ ψ => .andE2 φ ψ
-  | .orI1 φ ψ => .orI1 φ ψ
-  | .orI2 φ ψ => .orI2 φ ψ
-  | .orE φ ψ χ => .orE φ ψ χ
-  | .k φ ψ => .k φ ψ
-  | .kdia φ ψ => .kdia φ ψ
-  | .tBox φ => .tBox φ
-  | .tDia φ => .tDia φ
-  | .fourBox φ => .fourBox φ
-  | .fourDia φ => .fourDia φ
-  | .bBox φ => .bBox φ
-  | .bDia φ => .bDia φ
+    IS5ModalAxiom φ := by
+  cases h <;> constructor
 
 end Cslib.Logic.Modal
 

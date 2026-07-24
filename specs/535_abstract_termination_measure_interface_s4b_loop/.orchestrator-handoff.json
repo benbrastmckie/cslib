@@ -2,11 +2,12 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Plan 03 (completeness-line rescope), Phase P8 landed sorry-free: stepBranch_findSome?_proj4to3 and modalStepBranchS4Keyed_proj_stepBranchGen bridge the keyed 4-tuple stepper to the generic 3-tuple projection, plus local re-derivations modalExpMeasure_split_S4 / modalExpMeasure_append_S4 of the two private FmpMeasure lemmas. Scoped build green (847 jobs, exit 0), zero sorry, frozen blockingWorldS4Keyed guard untouched. NOTE: the dispatching agent stalled on a stream watchdog timeout after writing the code but before building or committing; the orchestrator verified the build green, ran the sorry census, confirmed the guard was untouched, and committed the work. P9 (modalExpMeasure_step_lt_S4Keyed) and P10 (modalExpandBranchesS4Keyed_hintikka) are next and are not blocked.",
-  "phases_completed": 8,
+  "summary": "Plan 03 (completeness-line rescope), Phase P9 landed sorry-free: modalExpMeasure_step_lt_S4Keyed transcribes the public modalExpMeasure_step_lt_gen (FmpMeasure.lean:3227) over modalUniverseS4/modalWorldBoundS4 (direct instantiation does not typecheck against K's hardwired universe). Consumes Phase 3's four universe-generic combinatorial primitives, Phase 4's three landed per-call obligations, and Phase 8's projection bridge + local split/append helpers. One deviation: also landed modalExpMeasure_const_exp_S4, a third private local re-derivation the plan's Phase 8 task list did not enumerate but the generic engine needs. Scoped build green (847 jobs, exit 0), zero sorry, both new declarations lean_verify-clean (propext/Classical.choice/Quot.sound only), lint/lint-style clean in this file (2 pre-existing lake lint errors are in unrelated concurrently-touched files), checkInitImports clean, frozen blockingWorldS4Keyed guard untouched. P10 (modalExpandBranchesS4Keyed_hintikka, top-loop induction) and P11 (modalTableauS4Keyed_complete) are next and are not blocked.",
+  "phases_completed": 9,
   "phases_total": 11,
   "artifacts": [
-    {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/03_completeness-line-rescope.md"}
+    {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/03_completeness-line-rescope.md"},
+    {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/04_phase9-measure-decrease-summary.md"}
   ],
   "blockers": [],
   "sorry_inventory": [],

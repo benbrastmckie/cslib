@@ -570,7 +570,7 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   Phase 9 must transcribe the measure lemma directly against the 4-tuple stepper. Phase 8's second
   and third tasks are independent of the first and land regardless.
 
-### Phase 9: Keyed per-step measure decrease over `modalUniverseS4` [NOT STARTED]
+### Phase 9: Keyed per-step measure decrease over `modalUniverseS4` [COMPLETED]
 
 - **Goal:** Establish the fuel-decrease fact the top-loop induction needs: one step of the keyed
   stepper strictly decreases `modalExpMeasure (modalUniverseS4 φ₀) …`. This is a **transcription** of
@@ -578,11 +578,18 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   called directly, because that lemma is hardwired to `modalUniverse φ0`/`modalWorldBound φ0` while
   this line runs over `modalUniverseS4 φ₀`/`modalWorldBoundS4 φ₀` (see "Measure-Decrease Lead").
 - **Tasks:**
-  - [ ] State `modalExpMeasure_step_lt_S4Keyed`, mirroring `modalExpMeasure_step_lt_gen`'s
+  - [x] State `modalExpMeasure_step_lt_S4Keyed`, mirroring `modalExpMeasure_step_lt_gen`'s
         conclusion shape with `modalUniverse φ0` replaced by `modalUniverseS4 φ₀`, `hW` replaced by
         `modalMaxWorld bh < modalWorldBoundS4 φ₀`, and `hstep` phrased against the keyed stepper via
         Phase 8's projection.
-  - [ ] Feed the three landed Phase 4 obligations at the three hypothesis positions (re-grep exact
+        *(landed with `hstep : modalStepBranchS4Keyed φ₀ bh e acc keys = some (…, keys')`; the
+        proof's first step calls `modalStepBranchS4Keyed_proj_stepBranchGen` to obtain the
+        generic-driver form, which is what the rest of the transcription consumes. The raw
+        `modalMaxWorld bh < modalWorldBoundS4 φ₀` fact is NOT a separate parameter — it is derived
+        internally by `modalApplyOneS4Keyed_outputsSubsetUniverse_S4` from `hWC`/`hKT`/`hKD`/`hKI`,
+        so those five hypotheses replace the generic template's `accFreshInv`/`hW` pair, matching
+        the "not free" note in the next task.)*
+  - [x] Feed the three landed Phase 4 obligations at the three hypothesis positions (re-grep exact
         line numbers first — Phase 8's insertions shift them):
         `modalApplyOneS4Keyed_branchingLength_S4` → `hBranchingLength`;
         `modalApplyOneS4Keyed_persistentFresh_S4` → `hPersistentFresh`;
@@ -590,13 +597,21 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
         carries extra hypotheses** the generic form does not (`hknown`/`hWC`/`hKT`/`hKD`/`hKI`);
         these must be threaded into the lemma's own signature and supplied from the ambient
         `S4LoopInv` at the Phase 10 call site — they are not free.
-  - [ ] Transcribe the four `RuleResult` arms of the generic proof
+        *(landed: all three fed exactly as named, at their post-Phase-8 locations `:5270`/`:5318`/
+        `:5371`; the five extra hypotheses threaded as raw parameters of
+        `modalExpMeasure_step_lt_S4Keyed` itself.)*
+  - [x] Transcribe the four `RuleResult` arms of the generic proof
         (`FmpMeasure.lean:3275-3335`): `.linear` and `.persistent` close via `pow3_add_one_le`,
         `.branching` via `pow3_two_add_one_le` after `hBranchingLength` gives `brs.length = 2`,
         `.notApplicable` is vacuous. The `modalWork`-drop steps consume Phase 3's four primitives at
         `U := modalUniverseS4 φ₀` (they are universe-generic; verified). The split/append steps
         consume Phase 8's local re-derivations.
-  - [ ] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; no `sorry`; `lean_verify`
+        *(landed verbatim per the generic template's case split. One deviation found: the generic
+        proof also needs the **private** `modalExpMeasure_const_exp` (`FmpMeasure.lean:3204`),
+        which Phase 8's task list did not enumerate (only `_split`/`_append` were named) — a third
+        local re-derivation `modalExpMeasure_const_exp_S4` was added alongside the Phase 9 lemma,
+        by the identical re-derivation pattern.)*
+  - [x] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; no `sorry`; `lean_verify`
         axiom-clean. If a step resists, `[BLOCKED]` with the exact `lean_goal`.
 - **Timing:** 2.5 hours (~150-250 lines; mostly mechanical transcription, one genuinely new
   hypothesis-threading decision)
@@ -612,6 +627,15 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   - `lake build` green, zero new warnings; `FmpMeasure.lean` byte-unchanged.
 - **Contingency:** if the transcription reveals that K's universe was load-bearing somewhere beyond
   `hb`/`hW` (R3), stop and record the exact step. Do not weaken the statement to make it close.
+- **Completed:** 2026-07-24 (commit `31557bf1`). `lean_verify` confirms both new declarations
+  (`modalExpMeasure_step_lt_S4Keyed`, `modalExpMeasure_const_exp_S4`) `propext`/
+  `Classical.choice`/`Quot.sound` only. `lake build Cslib.Logics.Modal.Tableau.LoopChecking`:
+  847 jobs, exit 0, zero new warnings versus the Phase 8 baseline (the same 8 pre-existing
+  `unusedSimpArgs` + 1 `unusedDecidableInType` warnings). Zero `sorry` in the file (the one
+  pre-existing docstring-prose mention at `:4619` only). `lake lint`/`lake exe lint-style`: the
+  2 errors surfaced by `lake lint` are in unrelated files (`CS5Completeness.lean`,
+  `Saturation.lean`, from concurrent out-of-scope work) — zero hits in `LoopChecking.lean` from
+  either check. `FmpMeasure.lean` byte-unchanged (read-only). `lake exe checkInitImports`: clean.
 
 ### Phase 10: Top-loop induction — `modalExpandBranchesS4Keyed_hintikka` [NOT STARTED]
 

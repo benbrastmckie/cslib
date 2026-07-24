@@ -19,12 +19,11 @@ the atom-membership valuation, and `canonicalR` is the two-clause canonical acce
 relation required because `◇` is primitive (not `□`-definable) in this framework's
 `Modal.Proposition` datatype.
 
-This file is Phase 2a of a multi-phase construction (task 480 plan v2): it contains
-**definitions only**, no witness proofs. `canonical_box_witness` (Phase 2b),
-`canonical_diamond_witness` (Phase 2c), and the frame conditions `canonical_f1`/`canonical_f2`
-(Phase 2d) are added by subsequent phases in this same file.
+This file starts with **definitions only**, no witness proofs. `canonical_box_witness`,
+`canonical_diamond_witness`, and the frame conditions `canonical_f1`/`canonical_f2` are added by
+subsequent sections in this same file.
 
-## Confirmed `Birelational.lean` API (read during Phase 2a, task 480)
+## `Birelational.lean` API
 
 - `BFrame World` (requires `[Preorder World]`) bundles `r : World → World → Prop`,
   `f1 : ∀ {w w' v}, w ≤ w' → r w v → ∃ v', r w' v' ∧ v ≤ v'` (up-confluence), and
@@ -35,10 +34,10 @@ This file is Phase 2a of a multi-phase construction (task 480 plan v2): it conta
   constructor, in particular `BForces_box` (`∀ w' ≥ w, ∀ u, r w' u → BForces … u φ`) and
   `BForces_diamond` (`∃ u, r w u ∧ BForces … u φ`).
 - `IValid`/`MValid` universally quantify over `World`/`r`/`f1`/`f2`/valuation (and, for
-  `MValid`, `botForces`), matching the report's §7 parametricity requirement.
+  `MValid`, `botForces`).
 
-These names and shapes are used verbatim by `canonicalR` below and by the later phases
-(`canonical_f1`/`canonical_f2` in 2d must match `BFrame.f1`/`BFrame.f2` exactly).
+These names and shapes are used verbatim by `canonicalR` below and by the later sections
+(`canonical_f1`/`canonical_f2` must match `BFrame.f1`/`BFrame.f2` exactly).
 
 ## Main Definitions
 
@@ -75,8 +74,7 @@ variable {Atom : Type*}
 /-- A canonical world for intuitionistic modal logic is a prime modal theory
 (`ModalPrimeTheory Axioms`), parametric over the axiom predicate `Axioms`. Worlds are prime
 (rather than maximal-consistent, as in the classical `MCS.lean` canonical model) so that the
-disjunction property is available for the `or` case of the truth lemma (`TruthLemma.lean`,
-Phase 3). -/
+disjunction property is available for the `or` case of the truth lemma (`TruthLemma.lean`). -/
 def CanonicalPrimeWorld (Axioms : Proposition Atom → Prop) :=
   { S : Set (Proposition Atom) // ModalPrimeTheory Axioms S }
 
@@ -106,7 +104,7 @@ theorem canonicalVal_upward_closed {Axioms : Proposition Atom → Prop}
 /-! ## Canonical Accessibility Relation -/
 
 /-- The canonical accessibility relation `canonicalR w v`, carrying **both** a box clause and a
-diamond clause since `◇` is primitive and not `□`-definable (Wijesekera 1990; report §6.4):
+diamond clause since `◇` is primitive and not `□`-definable (Wijesekera 1990):
 
 - box clause (`□φ ∈ w → φ ∈ v`): every boxed formula true at `w` is true at `v`
   ([Simpson1994], clause 3.2's accessibility side);
@@ -114,26 +112,24 @@ diamond clause since `◇` is primitive and not `□`-definable (Wijesekera 1990
   ([Simpson1994], clause 3.5's accessibility side).
 
 The witness lemmas establishing that this relation actually exists between suitable worlds
-(`canonical_box_witness`, `canonical_diamond_witness`) are proved in Phases 2b/2c. -/
+(`canonical_box_witness`, `canonical_diamond_witness`) are proved below. -/
 def canonicalR {Axioms : Proposition Atom → Prop} (w v : CanonicalPrimeWorld Axioms) : Prop :=
   (∀ φ, (□φ) ∈ w.val → φ ∈ v.val) ∧ (∀ φ, φ ∈ v.val → (◇φ) ∈ w.val)
 
-/-! ## Box Witness Consistency Sub-Lemma (Phase 2b-sublemma)
+/-! ## Box Witness Consistency Sub-Lemma
 
 This section proves `box_witness_pair_underivable`, the modal consistency sub-lemma
-establishing the `DerivExcludes` precondition needed by Phase 2b's seeded prime-extension
-`w'`: no finite disjunction of `Σ := {□B | B ∉ u.val}` is derivable from
+establishing the `DerivExcludes` precondition needed by the seeded prime-extension `w'` below:
+no finite disjunction of `Σ := {□B | B ∉ u.val}` is derivable from
 `Γ := w.val ∪ {◇A | A ∈ u.val}`, given `{ψ | □ψ ∈ w.val} ⊆ u.val`.
 
 Transliterated from ianshil/CK `general_th_completeness.v`, box case (~L211-249; the `Idb`
-selector at ~L231, confirmed verbatim by report 03). The argument needs three modal-axiom
-hypotheses beyond the intuitionistic base -- `h_K` (Kb), `h_Kdia` (Kd), and `h_Idb`
-(Fischer-Servi box bridge, the load-bearing addition resolving the v3 STOP contingency) --
-plus `h_andI`/`h_andE1`/`h_andE2` to combine the finitely many diamond hypotheses a
-derivation may use into a single `◇(bigAnd …)` antecedent before `h_Idb` applies. The
-conjunction hypotheses are a standard part of the intuitionistic `and`/`or` base (already
-axiomatized elsewhere in this framework, e.g. `MCS.lean`'s `mcs_and_mem_iff`) that report 03's
-per-lemma table did not separately enumerate; they introduce no new axiom, only additional
+selector at ~L231). The argument needs three modal-axiom hypotheses beyond the intuitionistic
+base -- `h_K` (Kb), `h_Kdia` (Kd), and `h_Idb` (the Fischer-Servi box bridge) -- plus
+`h_andI`/`h_andE1`/`h_andE2` to combine the finitely many diamond hypotheses a derivation may
+use into a single `◇(bigAnd …)` antecedent before `h_Idb` applies. The conjunction hypotheses
+are a standard part of the intuitionistic `and`/`or` base (already axiomatized elsewhere in this
+framework, e.g. `MCS.lean`'s `mcs_and_mem_iff`); they introduce no new axiom, only additional
 parametric hypotheses in the same style as `h_implyK`/`h_implyS`/etc. -/
 
 section BoxWitnessSublemma
@@ -416,10 +412,9 @@ private theorem bigOr_mem_disjunct (u : CanonicalPrimeWorld Axioms) :
       · obtain ⟨B', hB'mem, hB'u⟩ := bigOr_mem_disjunct u rest hrest
         exact ⟨B', List.mem_cons.mpr (Or.inr hB'mem), hB'u⟩
 
-/-- **Box Witness Consistency Sub-Lemma** (Phase 2b-sublemma, task 480): no finite disjunction
-of `Σ := {□B | B ∉ u.val}` is derivable from `Γ := w.val ∪ {◇A | A ∈ u.val}`, given
-`{ψ | □ψ ∈ w.val} ⊆ u.val`. Discharges the `DerivExcludes` precondition that Phase 2b's seeded
-prime extension `w'` needs.
+/-- **Box Witness Consistency Sub-Lemma**: no finite disjunction of `Σ := {□B | B ∉ u.val}` is
+derivable from `Γ := w.val ∪ {◇A | A ∈ u.val}`, given `{ψ | □ψ ∈ w.val} ⊆ u.val`. Discharges the
+`DerivExcludes` precondition that the seeded prime extension `w'` below needs.
 
 Proof sketch (ianshil/CK `general_th_completeness.v` box case ~L211-249): suppose
 `Γ ⊢ □B₁ ⊔ … ⊔ □Bₙ` via a finite subset using `g₁,…,g_k ∈ w.val` and `◇A₁,…,◇A_m` with each
@@ -524,13 +519,13 @@ theorem box_witness_pair_underivable
 
 end BoxWitnessSublemma
 
-/-! ## Box Witness (Phase 2b)
+/-! ## Box Witness
 
-This section proves `canonical_box_witness`, the corrected PAIR-shaped box witness (report 02
-Deliverable 3; report 03 §4 row 2): from `(□φ) ∉ w.val`, it produces `w' ≥ w` and a prime world
-`u` with `canonicalR w' u` and `φ ∉ u.val`. It also introduces `modal_set_exclusion`, a thin
-wrapper around `Metalogic.prime_set_exclusion` (placed here, NOT in `PrimeTheory.lean`, per the
-plan's postmortem constraint against re-opening Phase 1).
+This section proves `canonical_box_witness`, the corrected PAIR-shaped box witness: from
+`(□φ) ∉ w.val`, it produces `w' ≥ w` and a prime world `u` with `canonicalR w' u` and
+`φ ∉ u.val`. It also introduces `modal_set_exclusion`, a thin wrapper around
+`Metalogic.prime_set_exclusion` (placed here, NOT in `PrimeTheory.lean`, to keep that file
+unmodified).
 
 **Construction** (ianshil/CK `general_th_completeness.v`, box case):
 - **Step 1**: `u` is the prime extension (`modal_prime_exclusion`) of `{ψ | □ψ ∈ w.val}`
@@ -539,7 +534,7 @@ plan's postmortem constraint against re-opening Phase 1).
   `□⊥ ∈ w.val`, hence (via EFQ necessitated + K) `□φ ∈ w.val`, contradicting the hypothesis.
 - **Step 2**: `w'` is the prime extension (`modal_set_exclusion`) of the deductive closure of
   `Γ := w.val ∪ {◇A | A ∈ u.val}`, excluding `Σ := {□B | B ∉ u.val}`. The `DerivExcludes Σ Γ`
-  precondition is exactly `box_witness_pair_underivable` (Phase 2b-sublemma).
+  precondition is exactly `box_witness_pair_underivable` above.
 - The three witness obligations (`w ≤ w'`, `canonicalR w' u`, `φ ∉ u.val`) then hold **by
   construction**: `w ≤ w'` and the diamond clause follow from the seeding
   (`Γ ⊆ closure Γ ⊆ w'.val`); the box clause follows from `Σ`-exclusion (contrapositive,
@@ -584,8 +579,8 @@ private noncomputable def box_context_deriv
 deriving no finite disjunction of `E`, there exists a prime modal theory `T ⊇ S` still deriving
 no finite disjunction of `E`. Thin wrapper around `Metalogic.prime_set_exclusion`, mirroring
 `modal_prime_exclusion` (`PrimeTheory.lean`) but for the generalized set-exclusion condition
-needed by the seeded box witness below. Placed here (NOT `PrimeTheory.lean`) so Phase 1 stays
-untouched. -/
+needed by the seeded box witness below. Placed here (NOT `PrimeTheory.lean`) so that file stays
+unmodified. -/
 theorem modal_set_exclusion
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -630,10 +625,9 @@ theorem modal_set_exclusion
       let ⟨T', hT'C, hLT'⟩ := Metalogic.finite_list_in_chain_member hchain hCne L hL
       (hCsub hT'C).2.1.1 L hLT' hd)
 
-/-- **Box Witness** (Phase 2b, task 480): the corrected PAIR-shaped box witness. From
-`(□φ) ∉ w.val`, produces `w' ≥ w` (a seeded prime extension) and a prime `u` with
-`canonicalR w' u` and `φ ∉ u.val`. The outer `w ≤ w'` is load-bearing, consumed by
-`BForces_box` in Phase 3b (report 02 Deliverable 3; report 03 §4 row 2).
+/-- **Box Witness**: the corrected PAIR-shaped box witness. From `(□φ) ∉ w.val`, produces
+`w' ≥ w` (a seeded prime extension) and a prime `u` with `canonicalR w' u` and `φ ∉ u.val`. The
+outer `w ≤ w'` is load-bearing, consumed by `BForces_box` in `TruthLemma.lean`'s box case.
 
 See [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
 Ch. 3; ianshil/CK `general_th_completeness.v`, box case. -/
@@ -739,30 +733,29 @@ theorem canonical_box_witness
 
 end CanonicalBoxWitness
 
-/-! ## Diamond Witness (Phase 2c)
+/-! ## Diamond Witness
 
 This section proves `canonical_diamond_witness`: from `(◇φ) ∈ w.val`, it produces a single
-prime world `v` with `canonicalR w v` and `φ ∈ v.val`. Unlike the box witness (Phase 2b), no
+prime world `v` with `canonicalR w v` and `φ ∈ v.val`. Unlike the box witness above, no
 extension of `w` itself is needed -- `BForces_diamond` is a bare `∃ v, r w v ∧ …`, so the
 construction is a single seeded prime extension, not a pair.
 
-**Resolution of the Phase 2c STOP contingency** (prior dispatch, plan v4 note): the reference
-mechanization's `cexpl` ("Case A", `◇⊥ ∈ w.val`) branch is **not** reachable for our
-consistent-only `CanonicalPrimeWorld` once a new parametric hypothesis `h_dbot : Axioms
-((◇⊥).imp ⊥)` (the IK axiom `◇⊥ → ⊥`, dropped by bare CK -- report 03 §3) is threaded in. Rather
-than a top-level case split, `h_dbot` slots in as the **base case** of `diaOr_of_diaDisj` (the
-lemma dual to `boxOr_of_boxDisj`, distributing `◇` out over an arbitrary-length disjunction): for
-the empty list, `⊢ (◇⊥).imp ⊥` is exactly `h_dbot`, playing the same structural role there that
-`h_efq` plays in `boxOr_of_boxDisj`'s empty case (`⊢ ⊥.imp (□⊥)`). This absorbs the former "Case
-A" concern entirely into the induction, with no separate branch needed in
+The reference mechanization's `cexpl` ("Case A", `◇⊥ ∈ w.val`) branch is **not** reachable for
+our consistent-only `CanonicalPrimeWorld` once a parametric hypothesis `h_dbot : Axioms
+((◇⊥).imp ⊥)` (the IK axiom `◇⊥ → ⊥`, dropped by bare CK) is threaded in. Rather than a
+top-level case split, `h_dbot` slots in as the **base case** of `diaOr_of_diaDisj` (the lemma
+dual to `boxOr_of_boxDisj`, distributing `◇` out over an arbitrary-length disjunction): for the
+empty list, `⊢ (◇⊥).imp ⊥` is exactly `h_dbot`, playing the same structural role there that
+`h_efq` plays in `boxOr_of_boxDisj`'s empty case (`⊢ ⊥.imp (□⊥)`). This absorbs the "Case A"
+concern entirely into the induction, with no separate branch needed in
 `canonical_diamond_witness` itself.
 
 **Construction** (dual of `canonical_box_witness`, ianshil/CK `general_th_completeness.v`
-diamond case; report 03 §4 row 3): `v` is the prime extension (`modal_set_exclusion`) of the
-deductive closure of `Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, excluding `Σ := {ψ | (◇ψ) ∉ w.val}`. The
-`DerivExcludes Σ Γ` precondition is `diamond_witness_underivable`. The three witness obligations
-then hold by construction: `φ ∈ v.val` and the box clause (`□ψ ∈ w.val → ψ ∈ v.val`) follow from
-the seeding (`Γ ⊆ closure Γ ⊆ v.val`); the diamond clause (`ψ ∈ v.val → ◇ψ ∈ w.val`) follows from
+diamond case): `v` is the prime extension (`modal_set_exclusion`) of the deductive closure of
+`Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, excluding `Σ := {ψ | (◇ψ) ∉ w.val}`. The `DerivExcludes Σ Γ`
+precondition is `diamond_witness_underivable`. The three witness obligations then hold by
+construction: `φ ∈ v.val` and the box clause (`□ψ ∈ w.val → ψ ∈ v.val`) follow from the seeding
+(`Γ ⊆ closure Γ ⊆ v.val`); the diamond clause (`ψ ∈ v.val → ◇ψ ∈ w.val`) follows from
 `Σ`-exclusion (contrapositive, mirroring `canonical_box_witness`'s `hbox_clause`). -/
 
 section CanonicalDiamondWitness
@@ -775,8 +768,8 @@ diamond of a disjunction implies the disjunction of the diamonds. Unlike `boxOr_
 **not** valid for bare K◇ alone: it requires `h_Cd` (Fischer-Servi diamond bridge, ◇-over-∨) at
 each inductive step, and, for the empty list (`bigOr [] = ⊥`), `h_dbot` (`◇⊥ → ⊥`) -- this is
 precisely where "Case A" (`◇⊥` reachable) would obstruct the construction if `h_dbot` were
-unavailable; IK supplies it, bare CK does not (report 03 §3, §5). Analogue of ianshil/CK's
-`Diam_distrib_list_disj`. -/
+unavailable; IK supplies it, bare CK does not. Analogue of ianshil/CK's `Diam_distrib_list_disj`.
+-/
 private noncomputable def diaOr_of_diaDisj
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -843,13 +836,13 @@ private theorem extract_split_dia (w : CanonicalPrimeWorld Axioms) (φ : Proposi
         · rw [hxeq]; exact List.mem_cons.mpr (Or.inl rfl)
         · exact hsub' z hz'
 
-/-- **Diamond Witness Underivability Sub-Lemma** (Phase 2c, task 480): no finite disjunction of
+/-- **Diamond Witness Underivability Sub-Lemma**: no finite disjunction of
 `Σ := {ψ | (◇ψ) ∉ w.val}` is derivable from the deductive closure of
 `Γ := {ψ | □ψ ∈ w.val} ∪ {φ}`, given `(◇φ) ∈ w.val`. Dual of `box_witness_pair_underivable`, but
 simpler: the seed's extra element is the single formula `φ` (not a family indexed by a second
-prime theory), so no `bigAnd`/`h_andI` packing is needed -- confirming the plan v4 hand-trace.
-Consumes only `h_K` (via `box_context_deriv`), `h_Kdia` (K-diamond bridge), and (through
-`diaOr_of_diaDisj`) `h_Cd` and `h_dbot`; **`h_Idb` is not consumed**. -/
+prime theory), so no `bigAnd`/`h_andI` packing is needed. Consumes only `h_K` (via
+`box_context_deriv`), `h_Kdia` (K-diamond bridge), and (through `diaOr_of_diaDisj`) `h_Cd` and
+`h_dbot`; **`h_Idb` is not consumed**. -/
 theorem diamond_witness_underivable
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -919,9 +912,9 @@ theorem diamond_witness_underivable
   obtain ⟨B', hB'mem, rfl⟩ := List.mem_map.mp hBmem
   exact (hlSig B' hB'mem) hBu
 
-/-- **Diamond Witness** (Phase 2c, task 480): from `(◇φ) ∈ w.val`, produces a single prime world
-`v` with `canonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box
-witness), since `BForces_diamond` is a bare existential over successors of `w` itself.
+/-- **Diamond Witness**: from `(◇φ) ∈ w.val`, produces a single prime world `v` with
+`canonicalR w v` and `φ ∈ v.val`. No extension of `w` is needed (unlike the box witness), since
+`BForces_diamond` is a bare existential over successors of `w` itself.
 
 See [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*][Simpson1994],
 Ch. 3; ianshil/CK `general_th_completeness.v`, diamond case. -/
@@ -985,7 +978,7 @@ theorem canonical_diamond_witness
 
 end CanonicalDiamondWitness
 
-/-! ## Frame Confluence Conditions (Phase 2d)
+/-! ## Frame Confluence Conditions
 
 This section proves `canonical_f1` (up-confluence, matching `BFrame.f1`) and `canonical_f2`
 (down-confluence, matching `BFrame.f2`), completing the birelational frame data for the
@@ -994,21 +987,21 @@ canonical model. Confirmed against `Cslib/Logics/Modal/Semantics/Birelational.le
 - `BFrame.f1 : ∀ {w w' v}, w ≤ w' → r w v → ∃ v', r w' v' ∧ v ≤ v'` (up-confluence);
 - `BFrame.f2 : ∀ {w v v'}, r w v → v ≤ v' → ∃ w', w ≤ w' ∧ r w' v'` (down-confluence).
 
-**`canonical_f2` (down-confluence)** transports the box witness (Phase 2b) along the inclusion
+**`canonical_f2` (down-confluence)** transports the box witness above along the inclusion
 `v ≤ v'`: `canonicalR w v`'s box clause gives `{ψ|□ψ∈w.val}⊆v.val⊆v'.val`, exactly the `h_wu`
 precondition `box_witness_pair_underivable` needs (with `u := v'`), so `w'` is built by the same
 seeded prime extension as `canonical_box_witness`'s Step 2, with `u` already given instead of
 freshly constructed. Threads `h_K`, `h_Kdia`, `h_Idb` via `box_witness_pair_underivable`.
 
 **`canonical_f1` (up-confluence)** is the dual construction, generalizing the diamond witness
-(Phase 2c) from a singleton seed `{φ}` to the full prime theory `v.val` as seed: `v'` is the
-prime extension of `Γ := v.val ∪ {ψ|□ψ∈w'.val}` excluding `Σ := {χ|◇χ∉w'.val}`
+above from a singleton seed `{φ}` to the full prime theory `v.val` as seed: `v'` is the prime
+extension of `Γ := v.val ∪ {ψ|□ψ∈w'.val}` excluding `Σ := {χ|◇χ∉w'.val}`
 (`canonical_f1_underivable`). The key bridging step packs the finitely many `v.val`-drawn
-hypotheses into a single conjunction (`bigAnd`, `unpack_conj_partial`, reused from Phase
-2b-sublemma) so that `canonicalR w v`'s diamond clause applies to the SINGLE formula `bigAnd Lv`
-(via `bigAnd_mem_u`), avoiding the invalid "conjunction of diamonds implies diamond of
-conjunction" direction. Threads `h_K` (via `box_context_deriv`), `h_Kdia`, `h_Cd`, `h_dbot` (via
-`diaOr_of_diaDisj`, reused from Phase 2c).
+hypotheses into a single conjunction (`bigAnd`, `unpack_conj_partial`, reused from the box
+witness consistency sub-lemma above) so that `canonicalR w v`'s diamond clause applies to the
+SINGLE formula `bigAnd Lv` (via `bigAnd_mem_u`), avoiding the invalid "conjunction of diamonds
+implies diamond of conjunction" direction. Threads `h_K` (via `box_context_deriv`), `h_Kdia`,
+`h_Cd`, `h_dbot` (via `diaOr_of_diaDisj`, reused from the diamond witness above).
 
 Reference: [A. K. Simpson, *The Proof Theory and Semantics of Intuitionistic Modal Logic*]
 [Simpson1994], Ch. 3, F1/F2 confluence; ianshil/CK `CF_strong_Cd_weak_Idb`/`CF_CdIdb`. -/
@@ -1054,7 +1047,7 @@ private theorem extract_split_union {P Q : Proposition Atom → Prop} :
             · exact List.mem_append.mpr (Or.inl h1)
             · exact List.mem_append.mpr (Or.inr (List.mem_cons.mpr (Or.inr h2)))
 
-/-- **Up-confluence underivability** (Phase 2d): no finite disjunction of `Σ := {χ|◇χ∉w'.val}` is
+/-- **Up-confluence underivability**: no finite disjunction of `Σ := {χ|◇χ∉w'.val}` is
 derivable from `Γ := v.val ∪ {ψ|□ψ∈w'.val}`, given `w ≤ w'` and `canonicalR w v`'s diamond clause.
 Generalizes `diamond_witness_underivable` from a singleton seed `{φ}` to the full prime theory
 `v.val`, packing the finitely many `v.val`-hypotheses into `bigAnd Lv` (`unpack_conj_partial`) so
@@ -1138,9 +1131,9 @@ private theorem canonical_f1_underivable
   obtain ⟨B', hB'mem, rfl⟩ := List.mem_map.mp hBmem
   exact (hlSig B' hB'mem) hBu
 
-/-- **`canonical_f1`** (Phase 2d, task 480): up-confluence, matching `BFrame.f1` exactly. From
-`w ≤ w'` and `canonicalR w v`, produces `v' ≥ v` with `canonicalR w' v'`. See the module docstring
-above for the construction (`canonical_f1_underivable` + `modal_set_exclusion`). -/
+/-- **`canonical_f1`**: up-confluence, matching `BFrame.f1` exactly. From `w ≤ w'` and
+`canonicalR w v`, produces `v' ≥ v` with `canonicalR w' v'`. See the module docstring above for
+the construction (`canonical_f1_underivable` + `modal_set_exclusion`). -/
 theorem canonical_f1
     (h_implyK : ∀ (φ ψ : Proposition Atom), Axioms (φ.imp (ψ.imp φ)))
     (h_implyS : ∀ (φ ψ χ : Proposition Atom),
@@ -1202,7 +1195,7 @@ theorem canonical_f1
     exact hexclT [ψ] hsig hbigOr_mem
   exact ⟨v', ⟨hbox_clause, hdia_clause⟩, hv_le_v'⟩
 
-/-- **`canonical_f2`** (Phase 2d, task 480): down-confluence, matching `BFrame.f2` exactly. From
+/-- **`canonical_f2`**: down-confluence, matching `BFrame.f2` exactly. From
 `canonicalR w v` and `v ≤ v'`, produces `w' ≥ w` with `canonicalR w' v'`. Transports the box
 witness's Step 2 construction (`canonical_box_witness`) along the inclusion `v ≤ v'`: since
 `canonicalR w v`'s box clause gives `{ψ|□ψ∈w.val}⊆v.val⊆v'.val`, `v'` already satisfies the

@@ -187,12 +187,13 @@ omit [DecidableEq Atom] [Hashable Atom] in
 satisfiability of its output.
 
 The `andPos`/`andNeg`/`orPos`/`orNeg` arms consume the native-restated
-`modalAndOf?_eq_some` / `modalOrOf?_eq_some` (task 441: `Satisfies` unfolds `.and`/`.or`
-directly to `∧`/`∨`, so these arms are simpler than the pre-441 Lukasiewicz-encoded
+`modalAndOf?_eq_some` / `modalOrOf?_eq_some` (`Satisfies` unfolds `.and`/`.or`
+directly to `∧`/`∨`, so these arms are simpler than the historical Lukasiewicz-encoded
 version: `andNeg`/`orPos`/`impPos` still need `Classical.em` to pick a branch, but
 `andPos`/`orNeg` extract components/de Morgan constructively with no classical step).
 The `negPos`/`negNeg`/`impPos`/`impNeg` arms transfer directly from the branch reference,
-since negation/implication are unaffected by task 441. -/
+since negation/implication are unaffected by `and`/`or`/`diamond` becoming native
+constructors. -/
 lemma applyPropRule_sat {W : Type} (m : Model W Atom) (f : WorldIndex → W)
     (sf : SignedFormula (Proposition Atom) WorldIndex) (rule : PropTableauRule)
     (hsf : sfSat m f sf) :
@@ -412,7 +413,7 @@ This is the shared tail of the ~18 leaf case-arms of `modalStepBranch_preserves_
 negative-implication α-rule where the antecedent `A` is not itself a negated implication
 (`A ≠ A₁ → ⊥`); see `negImp_alpha_preserved_neg` for that shape.
 
-De-privatized (task 513) so the generic frame-relativized crux (`FrameSoundness.lean`) can
+De-privatized so the generic frame-relativized crux (`FrameSoundness.lean`) can
 consume the K-specific instance directly; an `FC`-lifted variant for the generic `impNeg` arm
 lives alongside `modalStepBranchGen_preserves_satIn` in `FrameSoundness.lean`. -/
 lemma negImp_alpha_preserved
@@ -436,13 +437,13 @@ lemma negImp_alpha_preserved
   · exact ⟨fun h => by simp at h, fun _ => hnc⟩
   · exact hb sf' hmem_old
 
-/-- **Task 513 (Phase 1)**: box-positive arm semantic soundness, extracted from
+/-- Box-positive arm semantic soundness, extracted from
 `modalStepBranch_preserves_sat`'s K monolith (below, the `| box φ =>` arm) as a standalone
 `RuleResultSat`-valued lemma about `modalApplyOne` directly (not `modalStepBranch`). Given
 `T(□φ)@lbl ∈ b` and `b` satisfied by `(m, f)` w.r.t. `acc`, `modalApplyOne`'s output on
 `⟨.pos, .box φ, lbl⟩` leaves `acc` unchanged and is `RuleResultSat`. Consumed by the generic
 frame-relativized crux (`FrameSoundness.lean`) to discharge its `hBoxPos` hypothesis at
-`apply := modalApplyOne`, `FC := trivialFC` (K zero-regression, Phase 4). -/
+`apply := modalApplyOne`, `FC := trivialFC` (the K zero-regression instance). -/
 lemma modalApplyOne_boxPos_sound
     {W : Type} (m : Model W Atom) (f : WorldIndex → W)
     (φ : Proposition Atom) (lbl : WorldIndex)
@@ -484,7 +485,7 @@ lemma modalApplyOne_boxPos_sound
           simp only [Satisfies] at hpos
           exact hpos (f tgt) (hacc lbl tgt hedge))
 
-/-- **Task 513 (Phase 1)**: diamond-negative arm semantic soundness, extracted from
+/-- Diamond-negative arm semantic soundness, extracted from
 `modalStepBranch_preserves_sat`'s K monolith (below, the `| diamond φ =>` arm in the `neg`
 case) as a standalone `RuleResultSat`-valued lemma. Dual of `modalApplyOne_boxPos_sound`. -/
 lemma modalApplyOne_diaNeg_sound

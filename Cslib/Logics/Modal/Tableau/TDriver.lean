@@ -45,7 +45,7 @@ self-propagated formula (`modalTBoxSelf`/`modalTDiaNegSelf`) at the *same* world
 `modalSubfmls` of the source formula -- so each field's "shaped" case combines the corresponding
 K witness (applied to the same `sf`) with a small direct argument for the appended self-conjunct,
 using `FmpMeasure.lean`'s downstream reuse helpers `modalUniverse_mem_of_sameWorld_subfml`/
-`label_mem_modalKnownWorlds` (task 503) for the catalog and known-worlds membership facts.
+`label_mem_modalKnownWorlds` for the catalog and known-worlds membership facts.
 
 ## References
 
@@ -88,7 +88,7 @@ def modalTableauT (φ : Proposition Atom) : ModalTableauResult Atom :=
 
 /-! ## Shape Lemmas for the Two T-Relevant Signed-Formula Shapes
 
-Task 510: the box-positive/diamond-negative shape dichotomies formerly private to this file
+The box-positive/diamond-negative shape dichotomies formerly private to this file
 (`modalApplyOne_boxPos_shape`/`_diamondNeg_shape`) are now the canonical, existentially-quantified
 `modalApplyOne_boxPos_eq`/`_diamondNeg_eq` in `Rules.lean` (the K discharges for
 `RuleApplicationSpec`'s F9/F10 fields), reached here via the `Rules → Saturation → Completeness →
@@ -174,8 +174,8 @@ omit [Hashable Atom] in
 /-- Direct unfolding of `modalApplyOneT`'s `.fst` component at a box-positive shaped signed
 formula, in terms of the underlying `modalApplyOne` (K) result.
 
-De-privatized (task 513) so `FrameCompleteness.lean`'s T soundness discharge
-(`modalApplyOneT_boxPos_soundIn`, Phase 5) can consume it directly. -/
+De-privatized so `FrameCompleteness.lean`'s T soundness discharge
+(`modalApplyOneT_boxPos_soundIn`) can consume it directly. -/
 lemma modalApplyOneT_boxPos_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -199,7 +199,7 @@ omit [Hashable Atom] in
 formula: exactly K's own accessibility output (`modalApplyOneT` never touches `acc` for this
 shape).
 
-De-privatized (task 513) for the same reason as `modalApplyOneT_boxPos_fst`. -/
+De-privatized for the same reason as `modalApplyOneT_boxPos_fst`. -/
 lemma modalApplyOneT_boxPos_snd
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -213,7 +213,7 @@ lemma modalApplyOneT_boxPos_snd
 
 omit [Hashable Atom] in
 /-- Symmetric to `modalApplyOneT_boxPos_fst` for the diamond-negative shape. De-privatized
-(task 513) for `modalApplyOneT_diaNeg_soundIn` (Phase 5). -/
+so `modalApplyOneT_diaNeg_soundIn` can consume it directly. -/
 lemma modalApplyOneT_diamondNeg_fst
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -235,7 +235,7 @@ lemma modalApplyOneT_diamondNeg_fst
 
 omit [Hashable Atom] in
 /-- Symmetric to `modalApplyOneT_boxPos_snd` for the diamond-negative shape. De-privatized
-(task 513) for the same reason as `modalApplyOneT_diamondNeg_fst`. -/
+for the same reason as `modalApplyOneT_diamondNeg_fst`. -/
 lemma modalApplyOneT_diamondNeg_snd
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (φ : Proposition Atom) (w : WorldIndex) :
@@ -726,7 +726,7 @@ private lemma modalApplyOneT_branchingLength
   · rw [modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc (not_shape_of_not_or hshape)] at hbr
     exact modalApplyOne_branching_length sf b acc brs hbr
 
-/-! ## Discharging F8-F12 (task 510: the Hintikka/saturation chain fields) -/
+/-! ## Discharging F8-F12 (the Hintikka/Saturation Chain Fields) -/
 
 /-- **F8 (`localShapeInvariance`)**: outside the two T-relevant shapes (guaranteed here, since
 `φ` is neither box- nor diamond-shaped), `modalApplyOneT` agrees with `modalApplyOne` on both
@@ -837,12 +837,12 @@ private lemma modalApplyOneT_diaPosWitness
   rw [heq]
   exact modalApplyOne_diamondPos_witness b acc ψ w
 
-/-- **`modalApplyOneT` satisfies `RuleApplicationSpec`** (task 503 Phases 4-5; extended to eleven
-fields by task 510): the interface witness for the T driver, combining the eleven fields
+/-- **`modalApplyOneT` satisfies `RuleApplicationSpec`**: the interface witness for the T
+driver, combining the eleven fields
 discharged above. This is the T-system analogue of `GenericDriver.lean`'s
 `modalApplyOne_spec` (K), and unblocks reusing the K-style FMP termination measure
-(`FmpMeasure.lean`/`GenericDriver.lean`, task 507) and the generic Hintikka/saturation chain
-(`CompletenessLoop.lean`, task 510) for `modalTableauT` via the `(apply, spec)`-bundled wrapper
+(`FmpMeasure.lean`/`GenericDriver.lean`) and the generic Hintikka/saturation chain
+(`CompletenessLoop.lean`) for `modalTableauT` via the `(apply, spec)`-bundled wrapper
 theorems. Adding F8-F12 here is what makes `modalExpandBranchesT_hintikka` (below) a one-liner. -/
 theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT where
   freshLocal := modalApplyOneT_freshLocal
@@ -862,43 +862,40 @@ theorem modalApplyOneT_spec : RuleApplicationSpec (Atom := Atom) modalApplyOneT 
     ⟨modalNextWorld b, (modalApplyOneT_diaPosWitness b acc ψ w).1,
       (modalApplyOneT_diaPosWitness b acc ψ w).2⟩
 
-/-! ## T Instantiation of the Generic Hintikka/Saturation Chain (task 510) -/
+/-! ## T Instantiation of the Generic Hintikka/Saturation Chain -/
 
 /-- `modalStepBranchT` is exactly `modalStepBranchGen modalApplyOneT` -- true `rfl`, since
-`modalStepBranchT` is *defined* as that instantiation (`TDriver.lean:67-72`). Convenience bridge
-for 503. -/
+`modalStepBranchT` is *defined* as that instantiation (`TDriver.lean:67-72`). -/
 theorem modalStepBranchT_eq
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     modalStepBranchT b e acc = modalStepBranchGen modalApplyOneT b e acc := rfl
 
-/-- `modalExpandBranchesT` is exactly `modalExpandBranchesGen modalApplyOneT` -- true `rfl`.
-Convenience bridge for 503. -/
+/-- `modalExpandBranchesT` is exactly `modalExpandBranchesGen modalApplyOneT` -- true `rfl`. -/
 theorem modalExpandBranchesT_eq
     (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
     (accs : List Accessibility) (fuel : Nat) :
     modalExpandBranchesT branches expandedSets accs fuel =
       modalExpandBranchesGen modalApplyOneT branches expandedSets accs fuel := rfl
 
-/-- `modalTableauT` is exactly `modalTableauGen modalApplyOneT` -- true `rfl`. Convenience bridge
-for 503. -/
+/-- `modalTableauT` is exactly `modalTableauGen modalApplyOneT` -- true `rfl`. -/
 theorem modalTableauT_eq (φ : Proposition Atom) :
     modalTableauT φ = modalTableauGen modalApplyOneT φ := rfl
 
-/-- **`modalExpandBranchesT_hintikka`** (task 510, delivering task 503 Phase 5's blocking
-lemma): the T-system instantiation of the generic top-loop Hintikka lemma
+/-- **`modalExpandBranchesT_hintikka`**: the T-system instantiation of the generic top-loop
+Hintikka lemma
 (`modalExpandBranchesGen_hintikka`, `CompletenessLoop.lean`), concluding in
 `modalHintikkaSetGen modalApplyOneT bR aR`.
 
 **This is a genuine one-liner** -- direct application of `modalExpandBranchesGen_hintikka` at
-`(modalApplyOneT, modalApplyOneT_spec)`, with no T-specific proof content whatsoever. This is
-the acceptance test for the whole task: it can only typecheck as a one-liner if (a) F9/F10
-(`GenericDriver.lean`) were stated with the existentially-quantified `∃ out` payload rather than
-K's concrete `boxPropagation` shape (AC1), and (b) the crux `modalExpandBranchesGen_hintikka`
-concluded in the generic `modalHintikkaSetGen apply bR aR` rather than the concrete
-`modalHintikkaSet bR aR` (AC2). Had either upstream criterion been violated, T's own `.persistent
+`(modalApplyOneT, modalApplyOneT_spec)`, with no T-specific proof content whatsoever. This
+typechecks as a one-liner only because (a) F9/F10
+(`GenericDriver.lean`) are stated with the existentially-quantified `∃ out` payload rather than
+K's concrete `boxPropagation` shape, and (b) the crux `modalExpandBranchesGen_hintikka`
+concludes in the generic `modalHintikkaSetGen apply bR aR` rather than the concrete
+`modalHintikkaSet bR aR`. Had either criterion not held, T's own `.persistent
 (kForms ++ selfNew.filter …)` payload (`modalApplyOneT_boxPos_fst` above) could not unify with a
 K-shaped field, and this theorem would fail to elaborate -- forcing a T-specific re-derivation
-that would reproduce the exact ~850-line duplication task 510 exists to eliminate. -/
+that would reproduce the ~850-line duplication this generic infrastructure exists to eliminate. -/
 theorem modalExpandBranchesT_hintikka (φ0 : Proposition Atom) (fuel : Nat) :
     ∀ (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
       (accs : List Accessibility),

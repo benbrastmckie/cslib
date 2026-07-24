@@ -21,8 +21,8 @@ It defines the main `modalTableau` entry point and the `ModalTableauResult` type
 - `modalFuel`: Fuel bound (FMP-derived).
 - `modalTableau`: Entry point for the decision procedure.
 - `modalHintikkaSet`: Saturation predicate for open branches.
-- `modalHintikkaSetGen`: `modalHintikkaSet`, generalized over an abstract `apply : RuleApply Atom`
-  (task 510). Spec-free (no `RuleApplicationSpec` obligation) -- lives here, upstream of
+- `modalHintikkaSetGen`: `modalHintikkaSet`, generalized over an abstract `apply : RuleApply Atom`.
+  Spec-free (no `RuleApplicationSpec` obligation) -- lives here, upstream of
   `GenericDriver.lean`, precisely so any system (including S4, which discharges no spec) can
   consume the generic Hintikka-set *statement shape*.
 
@@ -410,8 +410,8 @@ For a branch `b` with accessibility relation `acc`, this holds when:
    `acc.hasEdge w w' = true`) such that `T(φ)@w' ∈ b`.
 
 Conjuncts 3 and 4 are separate because `boxNeg`/`diamondPos` create a FRESH world
-`modalNextWorld b` whose index exceeds all labels in `b` (task 441: `diamondPos` is now a
-genuinely-firing native rule, no longer dead code under the old Lukasiewicz encoding where
+`modalNextWorld b` whose index exceeds all labels in `b` (`diamondPos` is a
+genuinely-firing native rule, not dead code under the old Lukasiewicz encoding where
 `negOf?` always intercepted diamond-shaped formulas first -- see the historical note in
 `Completeness.lean`'s `## Saturation Characterisation` section). Re-evaluating
 `modalApplyOne` against the (larger) final branch would mint an even-fresher witness world
@@ -446,7 +446,7 @@ def modalHintikkaSet
   (∀ (φ : Proposition Atom) (w : WorldIndex),
     ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
 
-/-- **Generic Hintikka set** (task 510): `modalHintikkaSet`, generalized over an abstract
+/-- **Generic Hintikka set**: `modalHintikkaSet`, generalized over an abstract
 `apply : RuleApply Atom`. A one-token substitution (`modalApplyOne ↦ apply` in conjunct 2's
 `let (result, _) := apply sf b acc`); conjuncts 1, 3, 4 mention no rule function at all. This
 definition is **spec-free** -- it depends on nothing from `RuleApplicationSpec`
@@ -479,7 +479,7 @@ def modalHintikkaSetGen (apply : RuleApply Atom)
   (∀ (φ : Proposition Atom) (w : WorldIndex),
     ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', acc.hasEdge w w' = true ∧ ⟨.pos, φ, w'⟩ ∈ b)
 
-/-- Bridge (task 510): `modalHintikkaSet` is exactly `modalHintikkaSetGen modalApplyOne`. Closes
+/-- Bridge: `modalHintikkaSet` is exactly `modalHintikkaSetGen modalApplyOne`. Closes
 by `rfl`, confirming the substitution in `modalHintikkaSetGen` is faithful. Lets K's
 `modalTableau_complete` recover the concrete `modalHintikkaSet` form from a generic conclusion. -/
 theorem modalHintikkaSet_eq (b : List (SignedFormula (Proposition Atom) WorldIndex))

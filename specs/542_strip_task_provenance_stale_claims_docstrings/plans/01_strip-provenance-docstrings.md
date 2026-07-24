@@ -207,7 +207,7 @@ the 516-hit / 17-file bucket).
 
 ---
 
-### Phase 3: Modal/Tableau — Soundness/Measure/Simplification Cluster [IN PROGRESS]
+### Phase 3: Modal/Tableau — Soundness/Measure/Simplification Cluster [COMPLETED]
 
 **Goal**: Strip provenance from the remaining Modal/Tableau files (the second half of the bucket),
 disjoint from Phase 2.
@@ -218,9 +218,9 @@ disjoint from Phase 2.
 - [x] `Tableau/S5Simplification.lean` (41 hits) — includes an embedded `specs/NNN` link: delete it.
 - [x] `Tableau/FiveSimplification.lean` (39 hits).
 - [x] `Tableau/GenericDriver.lean` (36 hits).
-- [x] The remaining lighter Modal/Tableau files not claimed by Phase 2 *(in progress: Defs.lean, Rules.lean done; TDriver/BDriver/SoundnessStep/Soundness/Saturation remain)*.
-- [ ] Apply report §5 methodology throughout.
-- [ ] `lake build` of the touched Modal/Tableau modules.
+- [x] The remaining lighter Modal/Tableau files not claimed by Phase 2 (Defs.lean, Rules.lean, SoundnessStep.lean, Soundness.lean, Saturation.lean, TDriver.lean, BDriver.lean; FrameRules.lean/Closure.lean/Branch.lean had zero provenance hits).
+- [x] Apply report §5 methodology throughout.
+- [x] `lake build` of the touched Modal/Tableau modules.
 
 **Timing**: 1.25 hours
 

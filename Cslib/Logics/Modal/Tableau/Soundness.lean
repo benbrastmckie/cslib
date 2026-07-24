@@ -86,8 +86,8 @@ omit [Hashable Atom] in
 fresh edge `sf.label → modalNextWorld b`; in the latter case the result is `.linear` with a head
 witness whose label is exactly the fresh world `modalNextWorld b`.
 
-De-privatized (task 513) so `FrameSoundness.lean`'s K zero-regression re-derivation
-(`modalTableau_sound_frame`, Phase 4) can discharge its `hFreshLocal` hypothesis directly,
+De-privatized so `FrameSoundness.lean`'s K zero-regression re-derivation
+(`modalTableau_sound_frame`) can discharge its `hFreshLocal` hypothesis directly,
 without importing `FmpMeasure.lean`'s public `modalApplyOne_fresh_local` (which would pull the
 completeness/`GenericDriver` import branch into the soundness-parallel branch). -/
 lemma modalApplyOne_fresh
@@ -110,13 +110,13 @@ lemma modalApplyOne_fresh
         | exact Or.inr ⟨_, _, rfl, rfl⟩
         | (left; simp only [apply_ite Prod.snd, ite_self])
 
-/-- **Freshness maintenance, generic (task 510)**: `modalStepBranchGen apply` preserves the
+/-- **Freshness maintenance, generic form**: `modalStepBranchGen apply` preserves the
 per-branch freshness invariant `accFreshInv`, given the raw `freshLocal`-shaped hypothesis
 `hFreshLocal` for `apply` (`RuleApplicationSpec`'s F1 field, `GenericDriver.lean`). Kept as a raw
 hypothesis rather than a bundled `spec : RuleApplicationSpec apply` argument: `RuleApplicationSpec`
 is defined in `GenericDriver.lean`, which this file must stay upstream of (`Soundness.lean`'s own
-import surface is `Saturation`/`SoundnessStep`/`LoopInduction` only) -- mirrors 507's
-"Architectural Note" pattern in `GenericDriver.lean`. Body is `modalStepBranch_preserves_
+import surface is `Saturation`/`SoundnessStep`/`LoopInduction` only) -- mirrors the
+"Architectural note" pattern in `GenericDriver.lean`. Body is `modalStepBranch_preserves_
 accFreshInv`'s exact proof with `modalApplyOne ↦ apply` and `modalApplyOne_fresh sf b acc ↦
 hFreshLocal sf b acc`. -/
 lemma modalStepBranch_preserves_accFreshInv_gen
@@ -169,13 +169,13 @@ lemma modalStepBranch_preserves_accFreshInv_gen
       exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append (wsf :: rest) b),
              Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append (wsf :: rest) b)⟩
 
-/-- **Freshness maintenance** (task-364 obligation 1): `modalStepBranch` preserves the per-branch
+/-- **Freshness maintenance**: `modalStepBranch` preserves the per-branch
 freshness invariant `accFreshInv`. Every child branch produced satisfies `accFreshInv` against the
 post-step accessibility relation. This is the only genuinely new semantic obligation; the
 anti-monotonicity obligations of the original design are eliminated structurally by the per-branch
 `accs` scheme.
 
-Byte-identical-statement corollary of `modalStepBranch_preserves_accFreshInv_gen` (task 510),
+Byte-identical-statement corollary of `modalStepBranch_preserves_accFreshInv_gen`,
 recovered via `modalStepBranch_eq` and K's own `modalApplyOne_fresh` (which is exactly the
 `freshLocal`-shaped hypothesis the generic lemma needs). -/
 lemma modalStepBranch_preserves_accFreshInv

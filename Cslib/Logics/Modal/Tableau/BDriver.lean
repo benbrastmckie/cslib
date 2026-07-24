@@ -43,7 +43,7 @@ This module instantiates the generic tableau driver (`Saturation.lean`'s `modalS
   extra invariant needed there) -- so the discharge pattern matches T/S5 exactly, as
   `GenericDriver.lean`'s module docstring anticipates for B.
 - `modalExpandBranchesB_hintikka`: one-line instantiation of the generic top-loop Hintikka lemma
-  (task 510) at `(modalApplyOneB, modalApplyOneB_spec)`.
+  at `(modalApplyOneB, modalApplyOneB_spec)`.
 
 ## Strategy
 
@@ -198,7 +198,7 @@ lemma modalApplyOneB_diamondNeg_snd
       SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
     first | rfl | (split_ifs <;> rfl)
 
-/-! ## Local Universe-Membership Helpers (task 505: cross-world variants)
+/-! ## Local Universe-Membership Helpers (Cross-World Variants)
 
 `FmpMeasure.lean`'s `mem_modalUniverse_of`/`modalUniverse_mem_formula`/`modalUniverse_mem_label`/
 `modalSubfmls_trans`/`modalUniverse_mem_of_sameWorld_subfml` are all `private`, and the last is
@@ -1061,16 +1061,14 @@ private lemma modalStepBranchGen_newExps_const_B
     exact ⟨e, rfl⟩
   · rw [hfstc] at hsf; simp at hsf
 
-/-! ## Generic Top-Loop Propagation (Termination Machinery Plan v5, Phase 5)
+/-! ## Generic Top-Loop Propagation
 
 Generalizes the double induction below over an arbitrary step-preserved per-`(branch, acc)`
 predicate `P` -- its body is predicate-agnostic (it never inspects `accSourcesKnown` beyond
 threading it through as a hypothesis), so instantiating at `accSourcesKnown` re-derives the
 original B theorem byte-for-byte, and instantiating at `FmpMeasure.lean`'s `accTargetsKnown`
-closes a genuinely missing generic lemma: `grep` for `openBranch_accTargetsKnown` returned zero
-hits across `Cslib/` before this phase, and the repo's own scope note
-(`FrameCompleteness.lean`) says it is *"not yet built"*. `modalOpenBranchS5_countermodel`
-requires this as its `hTgt` argument. -/
+supplies the generic `openBranch_accTargetsKnown` lemma `modalOpenBranchS5_countermodel`
+requires as its `hTgt` argument (`FrameCompleteness.lean`). -/
 
 /-- **Generic top-loop propagation**: mirrors `CompletenessLoop.lean`'s
 `modalExpandBranchesGen_openBranch_initial_mem`'s double induction (outer on `fuel`, inner on

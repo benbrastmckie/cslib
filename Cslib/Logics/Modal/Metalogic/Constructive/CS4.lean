@@ -11,7 +11,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CKExtension
 
 /-! # CS4: Constructive Modal Logic S4 (Soundness and Completeness)
 
-This module instantiates the task-501 frame-condition-parametrized segment scaffold
+This module instantiates the frame-condition-parametrized segment scaffold
 (`CKExtension.lean`) at the constructive analogue of `S4`: `CS4` = `CT` (`CT.lean`) plus the two
 `4` schemata `fourBox : □A → □□A` and `fourDia : ◇◇A → ◇A`.
 
@@ -19,21 +19,21 @@ This module instantiates the task-501 frame-condition-parametrized segment scaff
 frames whose modal relation `r` is reflexive and ≤-composed-transitive (`cs4FC`,
 `CKExtension.lean`) — and **sound and complete for `CKValidFC cs4FC'`**, a **weakened** frame
 condition (`cs4FC'`, `CKExtension.lean`) that replaces `cs4FC`'s blanket ≤-composed transitivity
-with two existential clauses (task 508).
+with two existential clauses.
 
-## Completeness (task 508)
+## Completeness
 
-Task 501 left `CS4` completeness unresolved: `ck_completeness`'s canonical model needed the
-diamond-backward truth-lemma case to refute an unwarranted `◇A` via a *restricted*-tail witness
-segment (`diamRefutingSegment`, `CKTruthLemma.lean`) whose tail excludes `A`. That exclusion was a
-*one-step* property (`A ∉ t` for `t` a *direct* tail member) that does not propagate through the
-further ≤-composed-transitive successors `cs4FC` universally quantifies over — nothing in the
-one-step construction prevents a further successor from being (or extending to) the exploding
-theory `Set.univ`, which always contains `A`. This was a real obstruction, but it was an
-obstruction **to `cs4FC` specifically** (the frame condition, held fixed as `cs4FC` in task 501),
-not an inherent obstruction to `CS4` completeness — the frame condition is the free parameter.
+`ck_completeness`'s canonical model needs the diamond-backward truth-lemma case to refute an
+unwarranted `◇A` via a *restricted*-tail witness segment (`diamRefutingSegment`,
+`CKTruthLemma.lean`) whose tail excludes `A`. That exclusion is a *one-step* property (`A ∉ t`
+for `t` a *direct* tail member) that does not propagate through the further ≤-composed-transitive
+successors `cs4FC` universally quantifies over — nothing in the one-step construction prevents a
+further successor from being (or extending to) the exploding theory `Set.univ`, which always
+contains `A`. This is a real obstruction, but it is an obstruction **to `cs4FC` specifically**
+(the frame condition, held fixed as `cs4FC`), not an inherent obstruction to `CS4`
+completeness — the frame condition is the free parameter.
 
-Task 508 resolves it with two changes:
+This is resolved with two changes:
 
 1. **Weaken the frame condition** to `cs4FC'` (`CKExtension.lean`), replacing blanket
    ≤-composed transitivity with two existential clauses that the canonical model can actually
@@ -47,10 +47,9 @@ Task 508 resolves it with two changes:
 
 With these two changes, `cs4FC'_cs4Mreach` shows the canonical model satisfies `cs4FC'`, and
 `cs4_truth_lemma` + `ckvalidFC_completeness` (`CKExtension.lean`) yield `cs4_completeness` and
-the soundness-completeness biconditional `cs4_soundness_completeness`. See
-`specs/508_unblock_CK_CS4_CS5_completeness/reports/01_cs4-cs5-completeness-technique.md` for the
-full research analysis. `CT.lean`, `CK.lean`, `Segment.lean`, `SegmentLindenbaum.lean`, and
-`CKTruthLemma.lean` are untouched by this technique — no new foundational abstraction was needed.
+the soundness-completeness biconditional `cs4_soundness_completeness`. `CT.lean`, `CK.lean`,
+`Segment.lean`, `SegmentLindenbaum.lean`, and `CKTruthLemma.lean` are untouched by this
+technique — no new foundational abstraction was needed.
 
 **`CS5` cannot be closed by this same technique** — see `CS5.lean`'s module docstring for the
 mechanized negative result (`bDia` fails soundness over the natural `CS5` analogue of `cs4FC'`).

@@ -1159,12 +1159,12 @@
     {
       "project_number": 425,
       "project_name": "temporal_tableau_ptl_fmp_decidability",
-      "status": "researched",
+      "status": "researching",
       "task_type": "cslib",
       "topic": "Temporal Logic",
       "description": "[Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.",
       "created": "2026-06-30T10:57:13Z",
-      "last_updated": "2026-07-24T19:28:11Z",
+      "last_updated": "2026-07-24T19:34:53Z",
       "next_artifact_number": 4,
       "artifacts": [
         {
@@ -1533,7 +1533,7 @@
     {
       "project_number": 535,
       "project_name": "abstract_termination_measure_interface_s4b_loop",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "title": "Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
       "description": "Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.",
@@ -1547,7 +1547,7 @@
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
       "created": "2026-07-18T21:19:09Z",
-      "last_updated": "2026-07-24T19:27:53Z",
+      "last_updated": "2026-07-24T19:34:58Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -1576,7 +1576,7 @@
     {
       "project_number": 537,
       "project_name": "labelled_cs5_general_soundness_biconditional",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Prove the general labelled SOUNDNESS direction nik_TS5_soundness : NIKTheorem TS5 phi -> CKValidFC cs5FCIncest phi, completing Simpson 1994 Thm 8.1.4's biconditional for CSLib constructive CS5/IS5. CONTEXT (from parent task 517, which delivered the completeness direction): cs5_completeness (Completeness.lean:132) and the anti-vacuity certificate nik_TS5_consistent + nik_soundness_onePoint (Soundness.lean) are LANDED sorry-free/axiom-clean. cs5FCIncest_lift (Soundness.lean:181) is a landed building block. THE OPEN OBSTRUCTION (established across 3 dispatches, no forced sorry): TS5={T,B,Four} makes TClosure TS5 G.R the TOTAL relation on the always-connected derivation graph, so the box edge-condition is an r-CLIQUE condition across all labels, not tree-adjacency; and cs5FCIncest's hfour/hsymbox/hincest conjuncts only ever produce EXISTENTIALLY-raised relational witnesses, whereas CKForces's box clause (and boxE) need EXACT edges/symmetry between independently-fixed points (persistence is only upward). No asymmetric countermodel refuted the obstruction; no closure proof completed it -- GENUINELY OPEN. THREE CANDIDATE STRATEGIES (ranked; none is a plain direct-implementation dispatch -- each needs research/re-plan): (1) prove cs5FCIncest forces symmetric/clique closure on finitely-generated substructures -- cheapest, possibly reuses the FLO closure machinery from parent Phases 1-7; (2) formalize Simpson's own modified sequent system L_m(TS5, empty), his stated fix for exactly this problem; (3) build the deferred Simpson Ch.6 Hilbert-labelled ADEQUACY bridge (NIKTheorem TS5 phi -> Derivable CS5ModalAxiom phi) and obtain labelled soundness as a corollary of the already-landed Hilbert soundness cs5_soundness_derivable_incest (CS5Canonical.lean:373) -- note this resurrects the bridge task 517 deliberately avoided (Track C, C5 'THE TRUE CRUX'). Full analysis: specs/517_labelled_bounded_context_cs5_completeness/handoffs/phase-11-general-soundness-blocked-20260719c.md and Soundness.lean's refined-analysis docstring. CONSTRAINTS: NO sorry, NO new axiom under Cslib/; do not weaken cs5FCIncest; do not regress parent's landed completeness/anti-vacuity. Research MUST use --lit (Simpson Ch 8 soundness, Lifting Lemma 8.1.3, L_m modified sequent system). BibKeys: Simpson1994, MarinMoralesStrassburger2021. HIGH uncertainty (the direct route may be genuinely open). Start with strategy (1) as a research/probe pass before committing. Depends on 517.",
@@ -1585,7 +1585,7 @@
       ],
       "parent_task": 517,
       "created": "2026-07-19T04:10:00Z",
-      "last_updated": "2026-07-24T19:29:06Z",
+      "last_updated": "2026-07-24T19:37:54Z",
       "priority": null,
       "effort": "15-40 hours",
       "file_scope": [
@@ -2023,14 +2023,14 @@
     {
       "project_number": 551,
       "project_name": "cs5_native_hilbert_pair_lindenbaum_completeness",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "description": "Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.",
       "dependencies": [],
       "parent_task": null,
       "created": "2026-07-24T00:00:00Z",
-      "last_updated": "2026-07-24T19:27:36Z",
+      "last_updated": "2026-07-24T19:41:44Z",
       "priority": "medium",
       "effort": "large",
       "file_scope": [
@@ -2042,11 +2042,6 @@
       "session_id": "sess_1784920807_37031e_551",
       "next_artifact_number": 2,
       "artifacts": [
-        {
-          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/01_native-hilbert-cs5-completeness-plan.md",
-          "type": "plan",
-          "summary": ""
-        },
         {
           "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/probes/cs5-pair-combined-atomsum.lean",
           "type": "probe",
@@ -2061,6 +2056,11 @@
           "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/03_remaining-obligations-and-path.md",
           "type": "report",
           "summary": "Remaining obligations and recommended path; blockers 517/509/508 confirmed stale"
+        },
+        {
+          "path": "specs/551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/02_incremental-assets-deferred-route.md",
+          "type": "plan",
+          "summary": "Incremental route-agnostic assets; obligation 3 isolated; route deferred"
         }
       ],
       "plan_metadata": {

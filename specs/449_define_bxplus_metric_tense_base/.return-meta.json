@@ -3,11 +3,11 @@
   "started_at": "2026-07-24T10:38:37Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 complete: FrameClass.Metric added (Base < Metric), four uniformity axiom constructors (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd) added and gated to .Metric in Axiom.minFrameClass, both exhaustive-match sites (axiom_sound, axiom_sound_dense) repaired with absurd cases. Full lake build green (640/640 jobs).",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 complete: new Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean with four *_sound theorems (discrete_symm_fwd/bwd_sound, discrete_propagate_fwd/bwd_sound) ported from bimodal arithmetic, and axiom_sound_metric assembling all 32 axioms. Required an extra Mathlib.Algebra.Order.Group.Defs import beyond the two named in research for NoMaxOrder/NoMinOrder auto-synthesis. lake build green (651/651 jobs), zero sorry.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1
+    "phases_completed": 2
   },
   "metadata": {
     "session_id": "sess_1784888487_837ef1_449",

@@ -130,27 +130,30 @@ one agent run and independently green-committable.
   - `lake build` is green (a missing exhaustive case is a hard, self-announcing compile error).
   - No new `sorry`; every new declaration has a docstring.
 
-### Phase 2: MetricSoundness.lean — four axiom soundness proofs + axiom_sound_metric [NOT STARTED]
+### Phase 2: MetricSoundness.lean — four axiom soundness proofs + axiom_sound_metric [COMPLETED]
 
 - **Goal:** Create the new module and prove each of the four uniformity axioms sound over
   ordered-abelian-group frames, then assemble `axiom_sound_metric`.
 - **Tasks:**
-  - [ ] Create `Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean` with the license header,
+  - [x] Create `Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean` with the license header,
     `module`, and `public import Cslib.Logics.Temporal.Metalogic.Soundness`.
-  - [ ] Prove `discrete_symm_fwd_sound` and `discrete_propagate_fwd_sound` (verbatim ports of the
+  - [x] Prove `discrete_symm_fwd_sound` and `discrete_propagate_fwd_sound` (verbatim ports of the
     machine-verified term-style `calc` proofs from the research report §3 / `Bimodal/.../Soundness.lean`
     `discrete_symm_fwd_valid`, `discrete_propagate_fwd_valid`), under
     `[AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]`.
-  - [ ] Prove `discrete_symm_bwd_sound` and `discrete_propagate_bwd_sound` as the past mirrors
+  - [x] Prove `discrete_symm_bwd_sound` and `discrete_propagate_bwd_sound` as the past mirrors
     (templates `discrete_symm_bwd_valid`/`discrete_propagate_bwd_valid`); same arithmetic spine.
-  - [ ] Assemble `axiom_sound_metric` under `[AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
+  - [x] Assemble `axiom_sound_metric` under `[AddCommGroup D] [LinearOrder D] [IsOrderedAddMonoid D]
     [Nontrivial D]`: the four new constructors dispatch to the `*_sound` lemmas; `density`/
     `dense_indicator` discharge by `absurd` (`.Dense ≰ .Metric`); all Base axioms delegate to
     `axiom_sound … (FrameClass.base_le _) M t` (copy the delegation block from `axiom_sound_dense`,
     `DenseSoundness.lean:91-124`, changing only the frame-class name). Base delegation type-checks
-    with no explicit `NoMaxOrder`/`NoMinOrder` (Mathlib synthesizes them from the metric hypotheses).
-  - [ ] House-style docstring on every new theorem; use `theorem` (Prop-valued), not `def`.
-  - [ ] Use the settled `calc` lemma spine (`sub_lt_self`, `sub_pos`, `add_lt_add_left`,
+    with no explicit `NoMaxOrder`/`NoMinOrder` (Mathlib synthesizes them from the metric hypotheses)
+    *(deviation: altered -- required adding explicit `public import Mathlib.Algebra.Order.Group.Defs`
+    for the `NoMaxOrder`/`NoMinOrder` auto-synthesis instances to resolve; the two candidate imports
+    named in the research report did not carry that instance)*.
+  - [x] House-style docstring on every new theorem; use `theorem` (Prop-valued), not `def`.
+  - [x] Use the settled `calc` lemma spine (`sub_lt_self`, `sub_pos`, `add_lt_add_left`,
     `sub_add_cancel`, `add_sub_sub_cancel`, `sub_sub_cancel`); do NOT substitute `omega`/`aesop`.
 - **Timing:** ~1.5 hours
 - **Depends on:** 1

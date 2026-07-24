@@ -1,15 +1,18 @@
 {
-  "status": "partial",
+  "status": "implemented",
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
-    {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/05_phase10-top-loop-induction-summary.md", "summary": "Phase 10 dispatch summary: modalExpandBranchesS4Keyed_hintikka top-loop induction landed sorry-free."},
-    {"type": "handoff", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/.orchestrator-handoff.json", "summary": "Orchestrator handoff: 10/11 phases complete, P11 (modalTableauS4Keyed_complete) next, not blocked."}
+    {"type": "summary", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/06_phase11-completeness-summary.md", "summary": "Phase 11 dispatch summary: modalTableauS4Keyed_complete landed sorry-free; task's completeness line is COMPLETE (11/11 phases). Records the entry-state (keys seeding) fix required to instantiate the Phase 10 induction at the literal tableau entry, and the two new additive helper declarations needed to close the wiring."},
+    {"type": "handoff", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/.orchestrator-handoff.json", "summary": "Orchestrator handoff: 11/11 phases complete, status implemented. Decidability explicitly deferred to a separately-spawned soundness task."},
+    {"type": "plan", "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/03_completeness-line-rescope.md", "summary": "Phase 11 marked [COMPLETED] with full deviation notes."}
   ],
-  "phases_completed": 10,
+  "phases_completed": 11,
   "phases_total": 11,
   "memory_candidates": [
     "When a keyed/threaded driver has no RuleApplicationSpecCore instance, the generic driver's private *_none_saturated lemma cannot be reused directly against the keyed N-tuple stepper's findSome? shape -- re-derive it locally via List.findSome?_eq_none_iff + case-split (Phase 7's own idiom), rather than projecting through the 3-tuple generic form.",
-    "Before assuming a plan-flagged 'guard-sensitive sub-case' needs new code in the current phase, check whether an earlier landed preservation theorem already fully discharges it internally -- re-deriving may be redundant and the R1-style risk may already be isolated in already-committed code."
+    "Before assuming a plan-flagged 'guard-sensitive sub-case' needs new code in the current phase, check whether an earlier landed preservation theorem already fully discharges it internally -- re-deriving may be redundant and the R1-style risk may already be isolated in already-committed code.",
+    "When a keys-threaded loop invariant (e.g. S4LoopInv.keysTotal: every known world has a recorded birth key) is designed around 'keys are assigned only at minting time', double-check the ENTRY configuration explicitly before assuming it's satisfiable: a pre-existing root world that is 'known' from its very first branch formula but never re-minted can silently violate a keysTotal-style field forever, since preservation-only proofs never need the hypothesis to be true, only implication-stable. Confirm entry satisfiability computationally (simp/lean_goal) before writing the final assembly theorem, not after.",
+    "A multi-line `simp only [...] at h1 h2 h3` tactic call, when the `at` clause's hypothesis list wraps onto a continuation line at a shallower indentation than the `simp only [...]` call itself, can produce a Lean4 parse error ('expected identifier; expected command') rather than a semantic error -- split into separate `simp only [...] at hI` calls per hypothesis instead of relying on line-wrapped `at` clauses."
   ],
   "verification": {
     "verification_passed": true,
@@ -20,8 +23,8 @@
     "ci_pipeline_passed": true
   },
   "partial_progress": {
-    "stage": "phase_10_complete",
-    "details": "Phase 10 (modalExpandBranchesS4Keyed_hintikka) landed and committed. Phase 11 (modalTableauS4Keyed_complete) remains, out of this dispatch's scope (single-phase focus)."
+    "stage": "task_complete",
+    "details": "All 11 phases of plans/03_completeness-line-rescope.md are [COMPLETED]. The task's completeness line (its full rescoped deliverable) is done. Decidability (s4Valid_decides/instDecidableS4Valid) and the soundness line remain explicitly out of scope, deferred to a separately-spawned task per the plan's 'Deferred / Spawned Scope' section."
   },
   "metadata": {
     "session_id": "sess_1784920807_37031e_535",

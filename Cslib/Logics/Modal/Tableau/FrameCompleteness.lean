@@ -4240,6 +4240,50 @@ private lemma modalTableauS4Keyed_initial (φ₀ : Proposition Atom) :
     simp only [List.mem_singleton]
     exact Nat.le_zero.mp hw
 
+/-- **S4-completeness of the keyed modal tableau**: if `φ₀` is `s4Valid`, `modalTableauS4Keyed`
+closes on it. Contrapositively: an open branch is a genuine reflexive-transitive-frame
+countermodel. Assembled from `modalExpandBranchesS4Keyed_hintikka` (`LoopChecking.lean`, fed the
+corrected entry invariant `modalTableauS4Keyed_initial` above),
+`modalExpandBranchesS4Keyed_openBranch_initial_mem` (`LoopChecking.lean`), and
+`modalOpenBranchS4_countermodel` above. Mirrors `modalTableauS5_complete`. -/
+theorem modalTableauS4Keyed_complete (φ₀ : Proposition Atom) (h : s4Valid φ₀) :
+    modalTableauS4Keyed φ₀ = .closed := by
+  cases htab : modalTableauS4Keyed φ₀ with
+  | closed => rfl
+  | openBranch b a =>
+    exfalso
+    have h' : modalExpandBranchesS4Keyed φ₀
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        (modalFuelS4 φ₀) = .openBranch b a := htab
+    have hH : modalHintikkaSetS4 φ₀ b a :=
+      modalExpandBranchesS4Keyed_hintikka φ₀ (modalFuelS4 φ₀)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        rfl rfl rfl (modalExpMeasure_entry_le_fuelS4 φ₀)
+        (by
+          intro i bi ei ai keysi hib hie hia hik
+          match i with
+          | 0 =>
+            simp only [List.getElem?_cons_zero, Option.some.injEq] at hib hie hia hik
+            subst hib; subst hie; subst hia; subst hik
+            exact modalTableauS4Keyed_initial φ₀
+          | n + 1 => simp at hib)
+        b a h'
+    have hmemInit : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b :=
+      modalExpandBranchesS4Keyed_openBranch_initial_mem φ₀ (modalFuelS4 φ₀)
+        (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)
+        [[(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]] [[]]
+        [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))]]
+        rfl rfl rfl
+        (fun b₀ hb₀ => by
+          simp only [List.mem_singleton] at hb₀
+          subst hb₀
+          simp)
+        b a h'
+    obtain ⟨hnsat, hFC⟩ := modalOpenBranchS4_countermodel φ₀ b a hH hmemInit
+    exact hnsat (h WorldIndex (extractModelS4 b a) hFC 0)
+
 end Cslib.Logic.Modal.Tableau
 
 end

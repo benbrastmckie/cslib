@@ -745,34 +745,76 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   a maybe-needed Phase 8 follow-up) was not available, so a direct territory-local
   `_none_saturated` re-derivation against the keyed 4-tuple stepper was added instead.
 
-### Phase 11: Completeness — `modalTableauS4Keyed_complete` [IN PROGRESS]
+### Phase 11: Completeness — `modalTableauS4Keyed_complete` [COMPLETED]
 
 - **Goal:** Land the task's closing deliverable: an open branch from the keyed driver yields a
   countermodel refuting `φ`. **Scope note**: this is the completeness half of v2 Phase 11 only. The
   decidability half (`s4Valid_decides`, `instDecidableS4Valid`) is deferred — do not attempt it here.
 - **Tasks:**
-  - [ ] State and prove `modalTableauS4Keyed_complete`, modeled on `modalTableauS5_complete`
+  - [x] State and prove `modalTableauS4Keyed_complete`, modeled on `modalTableauS5_complete`
         (`FrameCompleteness.lean:2336`), wiring: `modalTruthLemmaS4` (`FrameCompleteness.lean:232`),
         `extractModelS4` + `_refl`/`_trans`/`_hasEdge_imp_r` (`FrameCompleteness.lean:143-188`),
         `modalOpenBranchS4_countermodel` (`FrameCompleteness.lean:401`), `hintikka_congr_S4`
         (Phase 2), and `modalExpandBranchesS4Keyed_hintikka` (Phase 10). All wiring targets are
         verified present; re-grep line numbers before use.
-  - [ ] **Do NOT** state `s4Valid_decides` or register `instDecidableS4Valid`, and do not state a
+        *(landed. Deviation from the wiring list: `hintikka_congr_S4` did NOT need to be invoked
+        directly — Phase 10's `modalExpandBranchesS4Keyed_hintikka` already concludes in the
+        concrete `modalHintikkaSetS4 φ₀ bR aR` form (the bridge is internal to that theorem), which
+        is exactly what `modalOpenBranchS4_countermodel` consumes, so no separate bridging step was
+        needed here.)*
+  - [x] **Do NOT** state `s4Valid_decides` or register `instDecidableS4Valid`, and do not state a
         weakened or one-directional stand-in for either. They require the deferred soundness line.
-  - [ ] Regression check: `lean_verify instDecidableS5Valid` and `modalTableauB` still axiom-clean;
+        *(confirmed: neither declared anywhere; only pre-existing docstring-prose mentions of the
+        names remain, verified by grep below.)*
+  - [x] Regression check: `lean_verify instDecidableS5Valid` and `modalTableauB` still axiom-clean;
         frozen task-511 Phase 1-6 lemmas unchanged.
-  - [ ] `lean_verify modalTableauS4Keyed_complete` axiom-clean.
+        *(confirmed: both `propext`/`Classical.choice`/`Quot.sound` only, no change.)*
+  - [x] `lean_verify modalTableauS4Keyed_complete` axiom-clean.
+        *(confirmed: `propext`/`Classical.choice`/`Quot.sound` only.)*
 - **Timing:** 2.5 hours (~150-250 lines)
 - **Depends on:** 2, 10
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/FrameCompleteness.lean` (additive:
   `modalTableauS4Keyed_complete` only).
+  *(deviation: two additional files/declarations were required, both discovered during this
+  dispatch, both additive/read-only-safe — see "Deviation: entry-state fix" below.)*
 - **Verification:**
-  - `lean_goal` reports no remaining goals on `modalTableauS4Keyed_complete`.
+  - `lean_goal` reports no remaining goals on `modalTableauS4Keyed_complete`. **(done)**
   - `lean_verify modalTableauS4Keyed_complete`: `propext`/`Classical.choice`/`Quot.sound` only.
+    **(done)**
   - `grep -n "instDecidableS4Valid\|s4Valid_decides" Cslib/` returns nothing — confirming the
-    deferred half was not accidentally attempted or stubbed.
+    deferred half was not accidentally attempted or stubbed. **(done: only docstring-prose hits,
+    zero declarations)**
   - Full CSLib CI pipeline green: `lake build`, `lake exe checkInitImports`, `lake lint`,
-    `lake exe lint-style`, `lake shake`, `lake exe mk_all --module`.
+    `lake exe lint-style`, `lake shake`, `lake exe mk_all --module`. **(all green; `lake lint`'s 2
+    errors and the 3 pre-existing `sorry`s from `lake build`'s full run are in unrelated
+    out-of-territory files, matching the Phase 9/10 baseline)**
+- **Deviation: entry-state fix (`modalTableauS4Keyed`'s `keys` seed).** During this dispatch,
+  instantiating `S4LoopInv`/`S4KeyedHintikkaInv` at the literal entry configuration
+  `(b = [F(φ)@0], keys = [])` — required to feed `modalExpandBranchesS4Keyed_hintikka` at `i = 0` —
+  was found to be **unprovable**: `S4LoopInv.keysTotal` (`∀ w ∈ modalKnownWorlds b, ∃ k, (w,k) ∈
+  keys`) requires world `0` (already known from the entry formula's own label) to have a recorded
+  key, but `modalTableauS4Keyed`'s original entry used `keys := []` and no step ever mints world `0`
+  again to backfill one — confirmed computationally via `lean_goal`/`simp [modalKnownWorlds]`
+  reducing the obligation to `⊢ False`. This is a bookkeeping gap in Phase 1's entry (world `0` is
+  pre-existing, not minted, so it was never seeded with a birth key), not a defect in the frozen
+  task-511 `S4LoopInv` struct or in any already-proven Phase 1-10 theorem (all of those are stated
+  for an arbitrary `keys` list and are unaffected by the entry's concrete value). Fixed by changing
+  `modalTableauS4Keyed`'s entry `keyss` argument from `[[]]` to `[[(0, ∅)]]` — the root world seeded
+  with the trivial empty birth key, which trivially satisfies `keysTotal`/`keyLowerBd`/
+  `keysInUniverse`/`keysDistinct`. This is the only edit to a Phase 1-10 declaration in this
+  dispatch; it changes no type, no frozen task-511 code, and no already-proven theorem. Two new
+  additive declarations were required to complete the wiring, both in
+  `Cslib/Logics/Modal/Tableau/LoopChecking.lean`:
+  - `modalTableauS4Keyed_initial` (`FrameCompleteness.lean`, `private`): establishes
+    `S4LoopInv ∧ S4KeyedHintikkaInv ∧ keysWorldsKnown ∧ worldsContiguousS4` at the corrected entry.
+  - `modalExpandBranchesS4Keyed_openBranch_initial_mem` (`LoopChecking.lean`, public): the
+    keyed-driver analogue of `modalExpandBranchesGen_openBranch_initial_mem`, needed because
+    `modalExpandBranchesS4Keyed` is a bespoke driver (not an instance of `modalExpandBranchesGen`),
+    so the generic lemma does not apply. Supplies `F(φ)@0 ∈ b` for the final open branch.
+  Both were necessary, additive-only, and required for the plan's own explicit wiring list to close
+  (the initial invariant and the initial-membership fact are exactly the two premises
+  `modalExpandBranchesS4Keyed_hintikka` and `modalOpenBranchS4_countermodel` need that no landed
+  Phase 1-10 declaration already supplied at the literal entry point).
 
 ## Testing & Validation
 

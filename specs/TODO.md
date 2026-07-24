@@ -11,10 +11,10 @@ next_project_number: 551
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,226,317,400,405,407,438,440,449,463,465,466,474,519,522,530,534,535,537,542 | -- | propositional logic, modal logic, bimodal logic, ... |
-| 2 | 39,40,215,375,393,409,425,430,451,456,511 | 36,37,317,407,449,535,542 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,181,301,413,497,506,548 | 39,40,375,393,425,449,511,535 | foundations, propositional logic, modal logic, ... |
-| 4 | 300,450 | 181,449,506 | modal logic, bimodal logic |
+| 1 | 36,37,226,317,393,400,405,407,425,438,440,449,463,465,466,474,519,522,530,534,535,537 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,181,215,301,375,409,430,451,456,497,511 | 36,37,317,393,407,425,449,535 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,413,450,506,548 | 39,40,181,375,449,511 | foundations, modal logic, bimodal logic, ... |
+| 4 | 300 | 506 | modal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -47,11 +47,10 @@ next_project_number: 551
 
 ### Temporal Logic
 
+425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
-301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
-425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
 
 ### Bimodal Logic
 
@@ -67,9 +66,8 @@ next_project_number: 551
 
 ### Code Hygiene
 
+393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-542 [IMPLEMENTING] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
-  └─ 393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
@@ -196,12 +194,13 @@ next_project_number: 551
 ---
 
 ### 542. Strip task provenance stale claims docstrings
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 544, Task 546
 - **Research**: [542_strip_task_provenance_stale_claims_docstrings/reports/01_docstring-provenance-sweep.md]
 - **Plan**: [542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md]
+- **Summary**: [542_strip_task_provenance_stale_claims_docstrings/summaries/01_strip-provenance-docstrings-summary.md]
 
 **Description**: DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring references to 'Task N' / 'Phase M' / 'now-deleted ...' / rollout narratives across the Modal tree — concentrated in Metalogic/GenericMCSBridge.lean, MCS.lean, SchemaSoundness.lean, SchemaTags.lean:18-30, Constructive/Labelled/PrimeLemma.lean:49-51,844,1684-1696, Constructive/Labelled/Soundness.lean:238-355, Intuitionistic/TruthLemma.lean:29,152,305 — documenting how the code was built rather than what it proves, and violating .claude/rules/no-task-references-in-deliverables.md. Sweep all four logic trees (Modal, Propositional, Temporal, Bimodal) plus Foundations/Logic: keep mathematical contracts and literature references, delete task/phase/implementation-history provenance. Also fix the specific stale/dead items: (a) Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean:51 claims 'one remaining sorry' but the file is now sorry-free; (b) Propositional/Semantics/Algebra/Bridge.lean:16 claims to be 'the single canonical home of the ONE evaluation story' while imported by nothing (soften or make true — coordinate with task 543 which decides that file's fate); (c) delete the ~40-line commented-out proof carcass with commented sorry markers in Temporal/Tableau/Completeness.lean:962-1005 (live gap owned by tasks 425/301 — leave a one-line pointer); (d) Propositional/Semantics/Bool.lean:40 forward-references 'Matthew Doty's forthcoming work' — verify covered by task 226 and remove the rot-prone reference. Coordinate with task 438 (comment-cleanup PR already committed) to avoid re-editing its files.
 

@@ -1,7 +1,7 @@
 # Implementation Plan: Consolidate Propositional Algebra Completeness Stack & Conservativity Sprawl
 
 - **Task**: 545 - Collapse propositional-algebra completeness stack and fragment-conservativity sprawl
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 8 hours
 - **Dependencies**: None (task 393 boundary confirmed disjoint — see Overview)
 - **Research Inputs**: specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/reports/01_algebra-consolidation-research.md

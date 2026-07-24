@@ -11,22 +11,22 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.CKTruthLemma
 
 /-! # Frame-Condition-Parametrized Extensions of the Segment Canonical Model
 
-This module is the shared scaffold for task 501 (constructive modal extensions `CT`/`CS4`/`CS5`
-of `CK`, over the Wijesekera-style fallible-world segment semantics). It generalizes the task-493
+This module is the shared scaffold for constructive modal extensions `CT`/`CS4`/`CS5`
+of `CK`, over the Wijesekera-style fallible-world segment semantics. It generalizes the
 segment canonical-model framework (`CKValid`, `ck_completeness`, `CKTruthLemma.lean`) to
 validity/completeness over a restricted *class* of fallible-world models, cut out by an arbitrary
 frame condition `FC` on the modal relation `r`. This lets each per-system file (`CT.lean`,
 `CS4.lean`, `CS5.lean`) bolt its frame condition onto validity/completeness without touching any
-task-493 asset.
+of that segment canonical-model framework's assets.
 
-Unlike task 494's birelational `Extension.lean` (which is **not** reused here — bare `CK` is
+Unlike the birelational `Extension.lean` (which is **not** reused here — bare `CK` is
 incomplete for the birelational `BForces` semantics; see `CK.lean`'s module docstring), this
 scaffold is segment-based: the sound-and-complete semantics for every `CK` extension is
 `CKForces`/`CKValid` (the ∀∃ diamond, no `F1`/`F2` confluence) restricted to frames whose modal
 relation additionally satisfies `FC`.
 
 **The completeness scaffold is deliberately abstract over the canonical `World` type** (not
-pinned to `CKSegment Axioms`): the primary implementation challenge of task 501 is that the frame
+pinned to `CKSegment Axioms`): the primary implementation challenge here is that the frame
 conditions `ctFC`/`cs4FC`/`cs4FC'`/`cs5FC` do **not** hold globally on raw `CKSegment Axioms` (a
 consistent-head segment with tail `{Set.univ}` is well-formed but not `cmreach`-reflexive, e.g.).
 Each per-system file therefore builds its canonical model over a **restricted world subtype**
@@ -45,7 +45,7 @@ projection — the truth lemma itself (`ck_truth_lemma`) is reused unchanged on 
   (`tDia`/`fourDia`/`bDia`) need only the plain clause, which the ≤-composed one implies via
   `le_refl`. Defined locally over `[Preorder World]` — **not** Mathlib's deprecated
   `Reflexive`/`Transitive`/`Symmetric`.
-- `cs4FC'` (task 508): a **weakened** `CS4` frame condition, replacing `cs4FC`'s blanket
+- `cs4FC'`: a **weakened** `CS4` frame condition, replacing `cs4FC`'s blanket
   ≤-composed transitivity with two existential clauses. `cs4FC_implies_cs4FC'` witnesses that
   every `cs4FC`-frame is a `cs4FC'`-frame. Validity over the weaker `cs4FC'` is what makes `CS4`
   canonical completeness go through (see `CS4.lean`); `cs4FC` is retained unchanged for its
@@ -56,7 +56,8 @@ projection — the truth lemma itself (`ck_truth_lemma`) is reused unchanged on 
   subtype. Takes `h_canonFC : FC r` and a `realize` witness (any underivable formula is refuted
   at some world of the model) and concludes derivability from `CKValidFC FC`-validity.
 - `axiom_mem_head`: a one-line helper (`Axioms φ → φ ∈ s.head` for a `CKSegment Axioms`) used by
-  every per-extension canonical-closure proof, the segment analogue of task 494's `axiom_mem`.
+  every per-extension canonical-closure proof, the segment analogue of the birelational
+  development's `axiom_mem`.
 
 ## References
 
@@ -124,7 +125,7 @@ specialization, via `le_refl`); `fourBox` (`□A → □□A`) needs the full �
 def cs4FC {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   (∀ w, r w w) ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → r w t)
 
-/-- The **weakened** `CS4` frame condition (task 508): reflexivity plus two existential
+/-- The **weakened** `CS4` frame condition: reflexivity plus two existential
 clauses replacing `cs4FC`'s blanket ≤-composed transitivity. `fourBox` (`□A → □□A`) is
 discharged at a *re-based* world `v ≥ w''` rather than at `w''` itself, since `□A@w'`
 quantifies over all `z ≥ w'` (so any `v ≥ w''` still forces `A` there). `fourDia`
@@ -139,7 +140,7 @@ def cs4FC' {World : Type*} [Preorder World] (r : World → World → Prop) : Pro
     ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → ∃ v, w ≤ v ∧ r v t)
     ∧ (∀ {w u}, r w u → ∃ u', u ≤ u' ∧ ∀ t, r u' t → r w t)
 
-/-- **`cs4FC'` genuinely weakens `cs4FC`** (task 508): every `cs4FC`-frame is a `cs4FC'`-frame,
+/-- **`cs4FC'` genuinely weakens `cs4FC`**: every `cs4FC`-frame is a `cs4FC'`-frame,
 witnessed by the trivial choices `v := w` (for the first existential clause) and `u' := u`
 (for the second). Used to re-derive `CS4.lean`'s existing `cs4FC`-soundness theorems as
 corollaries of the (stronger) `cs4FC'`-soundness theorems, and to compose with
@@ -154,14 +155,14 @@ theorem cs4FC_implies_cs4FC' {World : Type*} [Preorder World] {r : World → Wor
 ("order-saturated") symmetry of the modal relation `r`. `bDia` (`◇□A → A`) needs only plain
 symmetry (the `u' := u` specialization); `bBox` (`A → □◇A`) needs the full ≤-composed clause
 `r w u → u ≤ u' → r u' w`. Axiomatized via `B` (symmetry), **not** the classical euclidean/`5`
-axiom (see `CS5.lean`'s module docstring for the adversarial finding carried over from task
-494). Defined locally — not Mathlib's deprecated `Symmetric`. -/
+axiom (see `CS5.lean`'s module docstring for the finding). Defined locally — not Mathlib's
+deprecated `Symmetric`. -/
 def cs5FC {World : Type*} [Preorder World] (r : World → World → Prop) : Prop :=
   (∀ w, r w w)
     ∧ (∀ {w u u' t}, r w u → u ≤ u' → r u' t → r w t)
     ∧ (∀ {w u u'}, r w u → u ≤ u' → r u' w)
 
-/-- **The weakened `CS5` frame condition** (task 509): reflexivity, *plain* transitivity, *plain*
+/-- **The weakened `CS5` frame condition**: reflexivity, *plain* transitivity, *plain*
 symmetry, the `cs4FC'` re-basing clause (`fourBox`), and the weakened ≤-composed symmetry
 `FCsym_box` (`bBox`). Per-clause axiom correspondence: `∀ w, r w w` validates `tBox`/`tDia`;
 plain transitivity `r w u → r u t → r w t` validates `fourDia`; plain symmetry
@@ -170,13 +171,11 @@ plain transitivity `r w u → r u t → r w t` validates `fourDia`; plain symmet
 `r w u → u ≤ u' → ∃ t, r u' t ∧ w ≤ t` validates `bBox`.
 
 **`cs5FC''` is not `cs5FCweak` corrected by relabelling — it fixes a genuine soundness gap.**
-Task 508's `cs5FCweak` is `cs5FC''` *minus* plain symmetry and *minus* plain transitivity; that
+An earlier `cs5FCweak` is `cs5FC''` *minus* plain symmetry and *minus* plain transitivity; that
 omission, not any real obstruction, is why `bDia` was unsound over `cs5FCweak`
-(`bDia_not_valid_over_cs5FCweak`,
-`specs/508_unblock_CK_CS4_CS5_completeness/probes/cs5-obstruction-verified.lean`). That
-countermodel's relation `wr'` is itself not plainly symmetric
-(`Cslib.Logic.Modal.wr'_not_symm`, `probes/cs5-symmetry-probe.lean`), so it says nothing about
-`cs5FC''`. All 17 `CS5` axioms are sound over `cs5FC''`
+(`bDia_not_valid_over_cs5FCweak`). That countermodel's relation `wr'` is itself not plainly
+symmetric (`Cslib.Logic.Modal.wr'_not_symm`), so it says nothing about `cs5FC''`. All 17 `CS5`
+axioms are sound over `cs5FC''`
 (`Cslib.Logic.Modal.cs5_axiom_sound''`, `CS5.lean`) — see that theorem for the mechanized
 soundness proof. Validity over `cs5FC''` is a genuine weakening of validity over `cs5FC`
 (`cs5FC_implies_cs5FC''`), the same direction that makes `CS4` canonical completeness go
@@ -215,8 +214,7 @@ two-sorted systems (e.g. a designated `L`-world connected to many independent `R
 worlds intended to stay mutually unrelated): the frame condition itself forces them into one
 cluster, so any compound (in particular boxed) formula's truth at a spoke world is entangled
 with the hub's own valuation and with every other spoke, not just with that spoke's local
-theory. See `specs/512_cs5_box_backward_atom_sum_completeness/handoffs/` for the completeness
-obligation this was extracted from analyzing. -/
+theory. -/
 theorem cs5FC''_hub_forces_spoke_connectivity {World : Type*} [Preorder World]
     {r : World → World → Prop} (hFC : cs5FC'' r) {w0 T1 T2 : World}
     (h1 : r w0 T1) (h2 : r w0 T2) : r T1 T2 :=
@@ -271,7 +269,8 @@ section AxiomMemHead
 
 variable {Axioms : Proposition Atom → Prop}
 
-/-- **Axiom membership** (segment analogue of task 494's `axiom_mem`): any axiom instance
+/-- **Axiom membership** (segment analogue of the birelational development's `axiom_mem`): any
+axiom instance
 `Axioms φ` belongs to the head of every `CKSegment Axioms`. Used by every per-extension
 canonical-closure proof (`CT`/`CS4`/`CS5`) to place an axiom instance (e.g. `tBox`, `fourDia`,
 `bBox`) into a segment's head, via `mem_of_axiom` and the head's deductive closure. -/

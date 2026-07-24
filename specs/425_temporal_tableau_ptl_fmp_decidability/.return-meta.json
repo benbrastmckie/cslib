@@ -1,56 +1,23 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-24T10:38:30Z",
-  "completed_at": "2026-07-24T12:15:00Z",
-  "requires_user_review": true,
-  "review_reason": "Phase A (eventualityDefect_unsat) blocked during pre-implementation semantic analysis: the lemma's bare hypotheses do not tie tracker entries to actual branch members, a single subset-blocked ancestor/descendant pair is provably insufficient to derive a contradiction from branchSat, and branchSat's fully general LinearOrder/Nontrivial domain plus Phase F's Temporal.valid target are very likely the wrong validity notion for what this successor-based tableau actually decides (Metalogic/Soundness.lean and Metalogic/Completeness.lean both target Temporal.validSerial; the tableau's ℤ/successor design most plausibly corresponds to Temporal.validDiscrete). Recommend a dedicated research pass (/research 425 --lit --hard) and /revise 425 before the next /implement 425.",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/summaries/01_ptl-fmp-summary.md",
-      "type": "summary",
-      "summary": "Dispatch outcome, three-part technical blocker finding, plan deviations, and recommended next action."
-    },
-    {
-      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/handoffs/01_phase-a-blocker-handoff.md",
-      "type": "handoff",
-      "summary": "Continuation handoff documenting the Phase A blocker in full technical detail with file:line citations."
-    },
-    {
-      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/01_ptl-fmp-decidability-plan.md",
       "type": "plan",
-      "summary": "Phase A marked [BLOCKED] with full blocker writeup; Phase B annotated with cross-reference note; plan-level Status set to [BLOCKED]."
+      "path": "specs/425_temporal_tableau_ptl_fmp_decidability/plans/03_validity-corrected-fmp-plan.md",
+      "summary": "Revised plan restating all tableau decidability targets against Temporal.validDiscrete/satisfiableDiscrete per report 02, with two new prerequisite phases (satisfiableDiscrete + branchSat domain restriction; TrackerBranchFaithful run-level invariant) that resolve the plan-01 Phase-A blocker"
     }
   ],
-  "partial_progress": {
-    "stage": "blocked_pre_implementation",
-    "details": "Phase A blocked before any .lean file was edited; Cslib/Logics/Temporal/Tableau/ unchanged.",
-    "lint_count_start": null,
-    "lint_count_current": null,
-    "phases_completed": 0,
-    "phases_total": 6,
-    "last_completed_phase": null
-  },
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 0,
-    "build_passed": null,
-    "ci_pipeline_passed": null,
-    "note": "No Lean code was written or modified this dispatch; CI pipeline was not run because there is nothing new to verify beyond the pre-existing green baseline."
-  },
-  "blockers": [
-    "Phase A's eventualityDefect_unsat is not provable from its bare stated hypotheses (tracker-branch faithfulness gap; two-point insufficiency).",
-    "branchSat's fully general domain and Phase F's Temporal.valid target likely mismatch what the successor-based tableau rules actually decide (likely Temporal.validDiscrete)."
-  ],
-  "modified_files": [],
+  "next_steps": "Run /implement 425 to execute the revised plan (recommend --hard for the formal-verification, literature-grounded phases)",
   "metadata": {
-    "session_id": "sess_1784888487_837ef1_425",
-    "agent_type": "cslib-implementation-agent",
+    "session_id": "sess_1784902333_908252",
+    "agent_type": "reviser-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed",
-    "territory": "Cslib/Logics/Temporal/Tableau/ (untouched this dispatch)"
-  },
-  "next_steps": "Run /research 425 --lit --hard to ground the validity-notion and branchSat-domain questions against [Reynolds1994] and the existing Metalogic/Soundness.lean + Metalogic/Completeness.lean frame-class hypotheses, then /revise 425 before the next /implement 425."
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 8,
+    "estimated_hours": 26,
+    "reports_integrated": [
+      "reports/01_ptl-fmp-decidability-survey.md",
+      "reports/02_validity-notion-fmp-grounding.md"
+    ]
+  }
 }

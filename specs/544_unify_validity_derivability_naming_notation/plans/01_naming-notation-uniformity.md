@@ -1,7 +1,7 @@
 # Implementation Plan: Naming / Notation Uniformity Sweep
 
 - **Task**: 544 - unify_validity_derivability_naming_notation
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 5 hours
 - **Dependencies**: None
 - **Research Inputs**: reports/01_naming-notation-uniformity-sweep.md
@@ -298,17 +298,27 @@ without touching the excluded property homographs.
 - `grep -c 'negation_complete' ` count unchanged from baseline (property family untouched).
 - `grep -nw 'propositions_complete'` still present (untouched).
 
-### Phase 7: Full CI verification [NOT STARTED]
+### Phase 7: Full CI verification [COMPLETED]
 
 **Goal**: Confirm the whole sweep is zero-debt and green across the full CI pipeline.
 
 **Tasks**:
-- [ ] `lake build` (full) succeeds.
-- [ ] `lake test` succeeds.
-- [ ] `lake exe checkInitImports` succeeds.
-- [ ] `lake exe lint-style` succeeds (no new `defsWithUnderscore`/`dupNamespace` from renames).
-- [ ] `lake shake` succeeds (no import regressions; Option A introduces none).
-- [ ] Confirm zero `sorry` and zero new axioms across touched files.
+- [x] `lake build` (full) succeeds -- 3253 jobs, all green.
+- [x] `lake test` succeeds -- 9245 jobs, all green.
+- [x] `lake exe checkInitImports` succeeds -- silent/clean exit.
+- [x] `lake exe lint-style` succeeds (no new `defsWithUnderscore`/`dupNamespace` from renames) --
+      exit 0, no output.
+- [x] `lake shake` succeeds (no import regressions; Option A introduces none) *(shake's pre-
+      existing baseline findings -- ~60 files, all `import Cslib.Init` redundancy or unrelated
+      Mathlib import-shape suggestions -- were cross-checked against every file this task
+      touched; none reference an added/removed import, since no `import`/`public import` line
+      was edited anywhere in this task -- only identifiers were renamed and two notation
+      declarations were added using already-imported symbols, so the dependency graph is
+      provably unchanged)*.
+- [x] Confirm zero `sorry` and zero new axioms across touched files -- verified via
+      `git diff --name-only` against the pre-task commit; every `sorry`/`axiom` grep hit in
+      touched files is prose (docstring mentions of "sorry-free", "axiom predicate", or
+      already-commented-out `-- sorry` lines), zero live `sorry` tactics or `axiom` declarations.
 
 **Timing**: 30 min
 
@@ -322,15 +332,16 @@ without touching the excluded property homographs.
 
 ## Testing & Validation
 
-- [ ] `lake build` green (full tree)
-- [ ] `lake test` green
-- [ ] `lake exe checkInitImports` green
-- [ ] `lake exe lint-style` green
-- [ ] `lake shake` green
-- [ ] Guarded homographs intact: English "Valid" prose (Axioms.lean:216,221),
+- [x] `lake build` green (full tree)
+- [x] `lake test` green
+- [x] `lake exe checkInitImports` green
+- [x] `lake exe lint-style` green
+- [x] `lake shake` green (pre-existing baseline findings only; no regressions from this task)
+- [x] Guarded homographs intact: English "Valid" prose (Axioms.lean:216,221),
       `*negation_complete` family (174), `propositions_complete`
-- [ ] No `sorry`, no new axioms, no weakened proofs
-- [ ] Task-497 seam (`imp` vs `impl`) untouched
+- [x] No `sorry`, no new axioms, no weakened proofs
+- [x] Task-497 seam (`imp` vs `impl`) untouched (no files under the constructor seam were
+      touched by this task's diff)
 
 ## Artifacts & Outputs
 

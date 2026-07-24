@@ -1,0 +1,80 @@
+[
+  {
+    "id": "err_1784907788",
+    "timestamp": "2026-07-24T15:43:08Z",
+    "type": "delegation_interrupted",
+    "severity": "medium",
+    "message": "Task 537 v4 implementation agent stalled mid-stream (API error); progress preserved through commit 0172b639; resume agent re-dispatched",
+    "context": {
+      "session_id": "sess_1784905751_756cda_537",
+      "command": "/orchestrate",
+      "task": 537
+    },
+    "trajectory": {
+      "delegation_path": [
+        "orchestrator",
+        "orchestrate",
+        "skill-orchestrate",
+        "cslib-implementation-agent"
+      ],
+      "failed_at_depth": 2
+    },
+    "recovery": {
+      "suggested_action": "Resume dispatched automatically in-session",
+      "auto_recoverable": true
+    },
+    "fix_status": "unfixed"
+  },
+  {
+    "id": "err_1784911685",
+    "timestamp": "2026-07-24T16:48:05Z",
+    "type": "delegation_interrupted",
+    "severity": "medium",
+    "message": "Task 537 v5 continuation agent reported API stall but RECOVERED and continued (commit 1b893533); duplicate resume agent was spawned and then stopped before making edits. False-positive failure signal.",
+    "context": {
+      "session_id": "sess_1784905751_756cda_537",
+      "command": "/orchestrate",
+      "task": 537
+    },
+    "trajectory": {
+      "delegation_path": [
+        "orchestrator",
+        "orchestrate",
+        "skill-orchestrate",
+        "cslib-implementation-agent"
+      ],
+      "failed_at_depth": 2
+    },
+    "recovery": {
+      "suggested_action": "Resume dispatched automatically in-session",
+      "auto_recoverable": true
+    },
+    "fix_status": "resolved"
+  },
+  {
+    "id": "err_1784916207",
+    "timestamp": "2026-07-24T18:03:27Z",
+    "type": "delegation_interrupted",
+    "severity": "medium",
+    "message": "Task 535 hard-mode agent killed by session usage limit mid-phase-7.3; ~376 uncommitted lines left in LoopChecking.lean; recovery agent dispatched after limit reset with adopt-or-fix-forward instructions",
+    "context": {
+      "session_id": "sess_1784905751_756cda_535",
+      "command": "/orchestrate",
+      "task": 535
+    },
+    "trajectory": {
+      "delegation_path": [
+        "orchestrator",
+        "orchestrate",
+        "skill-orchestrate",
+        "cslib-implementation-hard-agent"
+      ],
+      "failed_at_depth": 2
+    },
+    "recovery": {
+      "suggested_action": "Resume dispatched automatically after limit reset",
+      "auto_recoverable": true
+    },
+    "fix_status": "unfixed"
+  }
+]

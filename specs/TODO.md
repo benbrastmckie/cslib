@@ -11,7 +11,7 @@ next_project_number: 552
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,400,409,425,440,451,463,465,466,519,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,400,409,425,440,463,465,466,519,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,430,450,456,497,511 | 36,37,181,317,425,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300 | 506 | modal logic |
@@ -36,17 +36,17 @@ next_project_number: 552
 ### Modal Logic
 
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-535 [IMPLEMENTING] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
+535 [PARTIAL] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 537 [PARTIAL] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-551 [PARTIAL] — Deliver NATIVE Hilbert canonical-model completeness for construct
+551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
 ### Temporal Logic
 
-425 [IMPLEMENTING] — [Decomposed from task 301, blocker C.] Establish the finite model
+425 [BLOCKED] — [Decomposed from task 301, blocker C.] Establish the finite model
   └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
@@ -59,7 +59,6 @@ next_project_number: 552
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-451 [IMPLEMENTING] — Deeper metatheory for the metric tense logic BX+ (defined in task
 
 ### Code Hygiene
 
@@ -88,14 +87,14 @@ next_project_number: 552
 
 ### 551. Cs5 native hilbert pair lindenbaum completeness
 - **Effort**: large
-- **Status**: [PARTIAL]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 517, Task 509, Task 508
-- **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/01_route-b-native-hilbert-cs5-research.md]
 - **Plan**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/plans/01_native-hilbert-cs5-completeness-plan.md]
 - **Probe**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/probes/cs5-pair-combined-atomsum.lean]
 - **Summary**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/summaries/01_native-hilbert-cs5-completeness-summary.md]
+- **Research**: [551_cs5_native_hilbert_pair_lindenbaum_completeness/reports/02_conservativity-blocker-route-decision.md]
 
 **Description**: Deliver NATIVE Hilbert canonical-model completeness for constructive CS5 over the fallible-world CKValid semantics (cs5_completeness'' : CKValidFC cs5FC'' phi -> Derivable CS5ModalAxiom phi), uniform with the CK/CT/CS4 column -- NOT via IS5 transport (Route A) or the labelled adequacy bridge (Route C). The single open obstruction is the box-backward truth-lemma case: B's symmetry forces a two-sided canonical relation whose witness is a simultaneous maximal-theory PAIR <H',T> with cross-conditions boxInv H' subseteq T, boxInv T subseteq H' and designated-formula exclusions Box A notin H', A notin T. Landed sorry-free: soundness cs5_axiom_sound'' over cs5FC'' (CS5.lean:366), the symmetric tail with symmetry-by-construction (cs5Tail_symm), the collapse axioms cs5_dia_or (k3) + cs5_dia_bot_imp_bot (k5), and 3 of 4 pair-Lindenbaum ingredients (seed/chain-union/component-maximality, probes/cs5-pair-primeness.lean). Every one-set canonical relation is MECHANICALLY refuted (cs5Incest_cs5CanonMreach_false, cs5Incest_cs5PrimeMreach_false, cs5TwoSidedR_iff_cs5Tail, general monotonicity collapse). Pacheco Lemma 18->16 is UNSOUND here (uses phi notin Theta => neg phi in Theta). The gap is component PRIMENESS of the pair: the natural cross-condition predicate Cons_Y Z := boxInv Z subseteq Y is not cl-stable, so prime_maximal_is_prime (PrimeExclusion.lean:428) does not apply. SKETCHED SOUND REPAIR (not built): encode the pair as a SINGLE quasi-prime theory over the doubled atom space Atom (+) Atom under a combined axiom system that internalises the two cross-condition implications, making them cl-stable by construction, then project back via Sum.inl/Sum.inr. Main risk R1: are the combined cross-condition axioms simultaneously sound and closure-stable without breaking per-component primeness -- de-risk in a probe (cs5-pair-combined-atomsum.lean) before any library edit.
 
@@ -289,7 +288,7 @@ next_project_number: 552
 
 ### 535. Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)
 - **Effort**: 10-16 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -453,12 +452,13 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 451. BX+ completeness over ordered-abelian-group time flows
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: Task 449
 - **Research**: [451_bxplus_completeness_over_group_flows/reports/01_bxplus-completeness-frame-class.md]
 - **Plan**: [451_bxplus_completeness_over_group_flows/plans/01_bxplus-completeness-uniform-class.md]
+- **Summary**: [451_bxplus_completeness_over_group_flows/summaries/01_bxplus-completeness-uniform-class-summary.md]
 
 **Description**: Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.
 
@@ -636,7 +636,7 @@ After implementation:
 ---
 
 ### 425. Temporal tableau ptl fmp decidability
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
 - **Dependencies**: Task 426, Task 542

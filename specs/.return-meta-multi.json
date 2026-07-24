@@ -2,25 +2,17 @@
   "status": "partial",
   "metadata": {
     "tasks_completed": [
-      393,
-      449
+      451
     ],
     "tasks_failed": [
-      {
-        "task": 535,
-        "reason": "partial: phases 3-5 blocked (top-loop lemmas hard-wired to fixed rule function; ~1500-2500 lines needed, exceeds plan estimate); continuation handoff at specs/535_abstract_termination_measure_interface_s4b_loop/handoffs/01_phase3-5-continuation.md"
-      },
-      {
-        "task": 425,
-        "reason": "blocked: Phase A semantically unsound as planned (branchSat validity-notion mismatch: valid vs validSerial vs validDiscrete); needs /research 425 --lit --hard then /revise 425"
-      },
-      {
-        "task": 497,
-        "status": "blocked",
-        "reason": "predecessors 425 and 535 failed (partial/blocked); also externally blocked until leanprover/cslib PR #607 merges"
-      }
+      317,
+      551,
+      425,
+      537,
+      535
     ],
-    "cycles_used": 4,
+    "cycles_used": 23,
+    "max_cycles": 25,
     "multi_task_mode": true
   }
 }

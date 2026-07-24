@@ -182,25 +182,44 @@ entire downstream chain and must escalate rather than proceed.
     intermediate `lake build` success with no `sorry` warnings already confirms no `sorryAx` at
     this stage.)
 
-### Phase 3: `CS5PairAxiom` Definitions, Projection Maps, and `cl`-Stability (Library) [NOT STARTED]
+### Phase 3: `CS5PairAxiom` Definitions, Projection Maps, and `cl`-Stability (Library) [COMPLETED]
 
 - **Goal:** Promote the probe-validated `CS5PairAxiom`, tag/projection maps, per-side restriction
   to `CS5ModalAxiom`, and cross-condition `cl`-stability into a library file.
 - **Tasks:**
-  - [ ] Add `CS5PairAxiom` and the `τ_L`/`τ_R` tag maps to the CS5 metalogic files (target:
-    `CS5Canonical.lean` or a new `CS5Completeness.lean`; keep `CS5.lean` axiom-clean).
-  - [ ] Prove per-side `CS5PairAxiom` restricts to `CS5ModalAxiom` (the projection-soundness
-    direction from the probe).
-  - [ ] Land the `cl`-stability lemma for the internalised cross-conditions (library form of
-    Phase 1 prototype (ii)).
-  - [ ] Ensure every new file begins with `import Cslib.Init` (CSLib requirement).
-  - [ ] `lake build` the target module.
+  - [x] Add `CS5PairAxiom` and the `τ_L`/`τ_R` tag maps to the CS5 metalogic files.
+    *(deviation: chose the new-file option -- `CS5Completeness.lean`, not `CS5Canonical.lean`.
+    `CS5Canonical.lean` is dedicated to the birelational route (`cs5CanonMreach`/`cs5FCIncest`),
+    which is a DIFFERENT completeness strategy from this task's target (the original
+    symmetric-tail construction `cs5Tail`/`cs5Mreach`/`CS5Segment` in `CS5.lean`) and already hit
+    its own unrelated wall (`cs5Incest` false on every world type tried there). Mixing this
+    task's pair-Lindenbaum construction into that file would conflate two independent, unrelated
+    routes. `CS5.lean` itself is kept axiom-clean per the plan's own instruction.)*
+  - [x] Prove per-side `CS5PairAxiom` restricts to `CS5ModalAxiom` (the projection-soundness
+    direction from the probe). Landed as the easy transport direction
+    `cs5PairAxiom_left_derivable`/`cs5PairAxiom_right_derivable`
+    (`Derivable CS5ModalAxiom φ → Derivable CS5PairAxiom (τ_L/τ_R φ)`), via Phase 2's
+    `Derivable.map`. The converse (conservativity) direction is Phase 5's R2 lemma.
+  - [x] Land the `cl`-stability lemma for the internalised cross-conditions (library form of
+    Phase 1 prototype (ii)). Landed as `crossCond_left_stable`/`crossCond_right_stable`.
+  - [x] Ensure every new file begins with `import Cslib.Init` (CSLib requirement). Confirmed:
+    `CS5Completeness.lean`'s first import is `import Cslib.Init`.
+  - [x] `lake build` the target module.
 - **Timing:** 2.5 hours
 - **Depends on:** 2
 - **Files to modify:**
-  - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Canonical.lean` (or new `CS5Completeness.lean`)
+  - `Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean` (new file)
+  - `Cslib.lean` (barrel import, added via `lake exe mk_all --module`)
 - **Verification:**
   - Definitions and `cl`-stability lemma compile sorry-free; `lake build Module.Name` green.
+    Confirmed: `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Completeness` succeeds,
+    only a (fixed) line-length style warning, no errors/sorries.
+  - `lake exe mk_all --module` run; `Cslib.lean` updated with the new barrel import.
+  - `lake exe checkInitImports` deferred to Phase 7 -- at time of this phase, a concurrent
+    session's in-progress edit to `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (unrelated to
+    this task's file scope) left the full-project build graph transiently broken, so the
+    project-wide checker cannot run; this file's own `import Cslib.Init` compliance is manually
+    confirmed above and will be re-verified by the full pipeline at Phase 7.
 
 ### Phase 4: Combined-Theory Primeness via Single-Set Exclusion [NOT STARTED]
 

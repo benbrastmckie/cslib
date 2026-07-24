@@ -305,7 +305,36 @@ still executes and the plan still delivers its headline artifact.
   - Definition and three lemmas compile sorry-free; scoped `lake build` green.
   - Zero sorry/admit in the file.
 
-### Phase 4: Cross-Inertness Support Lemma (Hard Gate) [NOT STARTED]
+### Phase 4: Cross-Inertness Support Lemma (Hard Gate) [BLOCKED]
+
+**Blocker record (R-B triggered).** Attempted the structural induction on `DerivationTree`
+the task list sketches, keyed on the "necessitation-only-from-`[]`" invariant for bare-`□`
+conclusions. Concretely tested (via `lean_run_code`, not landed in the tracked file) the
+sub-lemma:
+
+```
+∀ {Γ φ}, DerivationTree CS5PairAxiom Γ (□ψ) → (□ψ ∈ Γ) ∨ Derivable CS5PairAxiom ψ
+```
+
+The `assumption`/`necessitation`/`weakening` cases close cleanly. The `modus_ponens` case does
+**not**: it is *not* vacuous, so `exfalso` is unjustified there. Counterexample witness:
+`CS5PairAxiom.left`/`.right`'s embedded `CS5ModalAxiom.bBox (φ : Proposition Atom) :
+CS5ModalAxiom (φ.imp (□(◇φ)))` (`CS5.lean:216`) has `□(◇φ)` — a **bare box** — as its
+consequent. `modus_ponens` against a `bBox`-derived (or `k`-chained) hypothesis in `Γ` produces
+a bare-box conclusion that is neither an element of `Γ` (assumption) nor an empty-context
+necessitation witness. So the naive box-invariant the plan's task list proposes is **false** as
+stated, and the intended proof route does not go through as sketched.
+
+A correct cross-inertness argument would need a strictly stronger inductive invariant — e.g.
+tracking exactly which bare-box formulas over `cs5PairSeed H` content are "K-reachable" from
+seed-drawn assumptions vs. genuinely reachable only via a `cross1`/`cross2` bridge — which
+re-derives essentially the same order of difficulty R-B flags for the disjunction property
+(Phase 7's obligation). No semantic/soundness route is available either (ruled out per
+Non-Goals: `cross1`'s cross-axioms are sound only under a common valuation, collapsing the two
+copies). Per the plan's explicit fallback (R-B mitigation): **Phases 5 and 6 are skipped**;
+Phase 7 proceeds using `hL`/`hR` as explicit (open) hypotheses per its own contingency clause
+("If Phase 4 blocked ... state the conditional theorem with `hL` and `hR` as explicit hypotheses
+too").
 
 - **Goal:** Land the single support lemma both individual exclusions rest on: from the seed
   `cs5PairSeed H`, the cross-axioms `cross1`/`cross2` contribute nothing new, because their
@@ -334,7 +363,7 @@ still executes and the plan still delivers its headline artifact.
     NOT weaken the statement to something vacuous, and do NOT retry either dead end listed under
     Non-Goals.
 
-### Phase 5: Individual Exclusion `τ_R A ∉ cl(cs5PairSeed H)` [NOT STARTED]
+### Phase 5: Individual Exclusion `τ_R A ∉ cl(cs5PairSeed H)` [SKIPPED — Phase 4 blocked]
 
 - **Goal:** Prove the first of the two individual seed exclusions: given deductively closed
   quasi-prime `H` with `□A ∉ H`, the right-tagged `τ_R A` is not in the `CS5PairAxiom`-closure of
@@ -356,7 +385,7 @@ still executes and the plan still delivers its headline artifact.
   - Exclusion lemma and both auxiliaries compile sorry-free; scoped `lake build` green.
   - Zero sorry/admit in the file.
 
-### Phase 6: Individual Exclusion `τ_L (□A) ∉ cl(cs5PairSeed H)` [NOT STARTED]
+### Phase 6: Individual Exclusion `τ_L (□A) ∉ cl(cs5PairSeed H)` [SKIPPED — Phase 4 blocked]
 
 - **Goal:** Prove the second individual seed exclusion, the left-tagged `□A`.
 - **Tasks:**

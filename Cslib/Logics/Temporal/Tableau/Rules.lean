@@ -384,8 +384,8 @@ respect to all existing constraints. This makes the freshness side-conditions in
 This ensures `branchNextTime b` is truly fresh when the next temporal rule fires at branch `b`.
 
 Combined with `InstantStrict ord`, this is the loop invariant for the completeness threading
-argument (task 426 Phase 3): if both hold for each (branch, ordering) pair in the worklist,
-then after one expansion step, both hold for the new (branch, ordering) pairs. -/
+argument: if both hold for each (branch, ordering) pair in the worklist, then after one
+expansion step, both hold for the new (branch, ordering) pairs. -/
 def OrdFreshWRT (b : TBranch Atom) (ord : TimeOrdering) : Prop :=
   ∀ a c, (a, c) ∈ ord.constraints → a < branchNextTime b ∧ c < branchNextTime b
 

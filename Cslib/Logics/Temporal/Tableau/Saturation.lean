@@ -177,7 +177,7 @@ every produced branch `nb ∈ newBs` is `OrdFreshWRT` with `newOrd`.
 `temporalStepBranch` only ever updates `ord` via a single call to `temporalApplyOne` on
 the found signed formula `sf ∈ b`, so this packages `temporalApplyOne_preserves`
 (Rules.lean) as the inductive step for the run-level `InstantStrict` threading proof
-(task #439 Phase 3). -/
+below. -/
 lemma temporalStepBranch_preserves
     (b expanded : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
     (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord)
@@ -448,9 +448,9 @@ lemma processNext_mismatch_closed
           rcases hmis with h | h | h <;> simp_all
 
 omit [Hashable Atom] in
-/-- Run-level `InstantStrict` threading (task #439 Phase 3): for every `fuel`, `P1 fuel`
+/-- Run-level `InstantStrict` threading: for every `fuel`, `P1 fuel`
 holds. Proved by strong induction on `fuel`; the `fuel'+1` step establishes `P2 fuel'` by a
-nested structural induction on `pending`, using `temporalStepBranch_preserves` (Phase 2) at
+nested structural induction on `pending`, using `temporalStepBranch_preserves` above at
 the branch-expansion step and the outer strong-induction hypothesis (at the *same* `fuel'`)
 to close the cross-call back into `temporalExpandBranches`. -/
 private lemma run_level_P1 : ∀ fuel : Nat, P1 (Atom := Atom) fuel := by
@@ -538,10 +538,10 @@ def temporalTableau (φ : Formula Atom) : TemporalTableauResult Atom :=
     (temporalFuel φ)
 
 omit [Hashable Atom] in
-/-- Entry-point corollary of the run-level `InstantStrict` threading (task #439 Phase 3,
-task #426 Phase 3): whenever `temporalTableau` returns an open branch, its time ordering is
-`InstantStrict`. This is the `hInst` hypothesis needed by `openBranch_branchSat`'s
-order-preservation component in `Completeness.lean` (`D = ℤ`, `f = ord.instant`). -/
+/-- Entry-point corollary of the run-level `InstantStrict` threading above: whenever
+`temporalTableau` returns an open branch, its time ordering is `InstantStrict`. This is the
+`hInst` hypothesis needed by `openBranch_branchSat`'s order-preservation component in
+`Completeness.lean` (`D = ℤ`, `f = ord.instant`). -/
 theorem temporalTableau_instantStrict (φ : Formula Atom) (b : TBranch Atom) (ord : TimeOrdering)
     (h : temporalTableau φ = .openBranch b ord) : TimeOrdering.InstantStrict ord := by
   unfold temporalTableau at h

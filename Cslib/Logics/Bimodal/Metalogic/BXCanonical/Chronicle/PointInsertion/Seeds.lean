@@ -304,16 +304,14 @@ lemma lemma26 (fc : FrameClass) {A C : Set (Formula Atom)}
 - `lemma_2_6_strong`: FALSE under strict semantics (gContent(D) ≤ C unprovable).
   Remains withdrawn.
 
-- `lemma_2_7`: Previously marked FALSE under strict semantics (Phase 3, task 107),
-  but that assessment was for a "D2 branch" proof approach that predated BX13
-  (enrichment_until, Burgess A3a). With BX13 now available (Phase 2, task 107),
-  Burgess's ORIGINAL proof of Lemma 2.7 is valid:
+- `lemma_2_7`: Previously assessed FALSE under strict semantics, but that assessment was for
+  a "D2 branch" proof approach that predated BX13 (enrichment_until, Burgess A3a). With BX13
+  available, Burgess's ORIGINAL proof of Lemma 2.7 is valid:
   1. BX5 (self_accum_until) enriches the Until guard
   2. BX7 (linear_until) provides the three-way disjunction
   3. BX13 (enrichment_until) simplifies the surviving disjunct
   4. BX1/BX2G (monotonicity) rule out two disjuncts
   None of these axioms depend on BX9 (removed) or the T-axiom.
-  **Gate verdict (Phase 5, plan v27): VALID. Proceed with Strategy 1.**
 
 - `lemma_2_8`: May also be recoverable with BX13, but Lemma 2.7 suffices
   for the C5 n>0 sub-case 3 (Burgess Lemma 2.10). Not needed if 2.7 works.

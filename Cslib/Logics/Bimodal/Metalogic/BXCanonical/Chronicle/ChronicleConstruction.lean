@@ -265,8 +265,8 @@ The invariant maintained at every stage is `c0`:
 - c0: every domain point maps to an MCS
 
 Each step calls `eliminatePotentialCounterexample` which produces
-a chronicle with c0. The c2' invariant is no longer threaded through
-finite stages (Phase 7 change); it is vacuously true at the limit
+a chronicle with c0. The c2' invariant is not threaded through
+finite stages; it is vacuously true at the limit
 since the limit domain is dense with no adjacent pairs.
 
 - omegaChain 0 = singletonChronicle A
@@ -888,7 +888,7 @@ Key consequence of C3 at the limit: limitG(x,z) subset limitF(y) for x < y < z.
 
 Since limitG(x,z) = limitG(x,y) inter limitF(y) inter limitG(y,z), the
 intersection is contained in limitF(y). This is the critical property for
-Phase 5B (the guard phi propagates to intermediate points).
+the guard phi to propagate to intermediate points.
 -/
 theorem limit_c3_interval_subset_point (fc : FrameClass) (A : Set (Formula Atom)) (h_mcs : SetMaximalConsistent fc A)
     (x y z : Rat)
@@ -1027,7 +1027,7 @@ The key coherence properties for the truth lemma (ParametricTruthLemma.lean).
 The FMCS structure requires forward_G as a field (it IS an input to the
 truth lemma, not a consequence).
 
-**Proof** (plan v12, Phase 4): Uses the generalized C4 + C0 argument.
+**Proof**: Uses the generalized C4 + C0 argument.
 
 G(φ) = allFuture(φ). In an MCS, G(φ) implies G(φ^{nn}) (by DNI + temporal
 necessitation + K distribution). Then F(neg φ) = neg(G(φ^{nn})) ∉ MCS. By
@@ -1036,9 +1036,9 @@ neg(⊤ U neg φ) ∈ MCS. Applying generalized C4 (for ALL pairs x < y, not jus
 adjacent): neg(untl(⊤, neg φ)) ∈ f(x) and neg φ ∈ f(y) gives ⊤.neg ∈ f(z)
 for some z. Since ⊤ is a theorem, ⊤ and ⊤.neg both in f(z) contradicts C0.
 
-The prior obstruction (plan v11) was that C4 only applied to adjacent pairs,
-making it vacuously true at the dense limit. Plan v12 Phase 1 fixed this by
-generalizing C4 to all pairs x < y (matching Burgess 1982 C4a).
+C4 restricted to adjacent pairs only would be vacuously true at the dense
+limit; generalizing C4 to all pairs x < y (matching Burgess 1982 C4a) is
+what makes this argument go through.
 -/
 
 /--

@@ -48,13 +48,12 @@ forward_G/backward_H through the isomorphism.
 When `U(T,bot)` is in all domain MCS's, the limit domain is discrete with
 SuccOrder/PredOrder. The Z-isomorphism `LimitDomSubtype ≃o Int` via Mathlib's
 `orderIsoIntOfLinearSuccPredArch` additionally requires `IsSuccArchimedean`,
-which has one remaining sorry (the well-founded termination argument for the
-succ chain reaching any target element).
+which is established by a well-founded termination argument showing the succ
+chain reaches any target element.
 
 ## References
 
 - Burgess 1982: "Axioms for tense logic II: Time periods"
-- Task 117 plan: specs/117_.../plans/04_case-split-completeness.md
 -/
 
 @[expose] public section
@@ -420,10 +419,10 @@ The density hypothesis `h_box_dense : Formula.box nextTop.neg ∈ A` (i.e.,
 - From `□(F'T) ∈ N`, we derive `F'T ∈ N` (via modal_t)
 - Then N's chronicle is also dense, enabling its Cantor isomorphism
 
-The case split in Phase 4 should use `□(F'T)` vs `¬□(F'T)` (not `F'T` vs `U(T,⊥)`).
+The case split should use `□(F'T)` vs `¬□(F'T)` (not `F'T` vs `U(T,⊥)`).
 By S5, if `F'T ∈ A` but `□(F'T) ∉ A`, then `¬□(F'T) ∈ A` and `□(¬□(F'T)) ∈ A`,
 meaning some box-accessible world is discrete. This mixed case falls under the
-non-dense branch (with sorry, like the discrete case).
+non-dense branch, handled the same (sorry-free) way as the discrete case.
 -/
 
 /--

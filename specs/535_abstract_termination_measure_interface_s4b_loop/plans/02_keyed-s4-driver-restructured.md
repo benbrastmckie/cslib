@@ -281,28 +281,58 @@ only.
   `S4KeyedHintikkaInv_weaken` each `propext`/`Classical.choice`/`Quot.sound` only;
   `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green, zero new warnings, zero `sorry`.
 
-### Phase 7 (handoff 3d-ii): Single-step invariant preservation [NOT STARTED]
+### Phase 7 (handoff 3d-ii): Single-step invariant preservation [COMPLETED]
 
 - **Goal:** Prove that `modalStepBranchS4Keyed` preserves the Phase 6 invariant bundle from parent
   to every child branch (the `AuxStepPreserved` analogue, `CompletenessLoop.lean:262-337`),
   threading `keys → keys'`.
 - **Tasks:**
-  - [ ] State the single-step preservation lemma: for each child `b'` produced by
+  - [x] State the single-step preservation lemma: for each child `b'` produced by
         `modalStepBranchS4Keyed`, the Phase-6 invariant holds at `(b', e', newAcc, keys')` given it
         holds at `(b, e, acc, keys)`.
-  - [ ] Carry the bundled hypothesis from `modalStepBranchS4_preserves_S4LoopInv`
+        *(landed as `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`.)*
+  - [x] Carry the bundled hypothesis from `modalStepBranchS4_preserves_S4LoopInv`
         (`LoopChecking.lean:4614-4651`): `S4LoopInv φ₀ b' e' newAcc keys' ∧ keysWorldsKnown b' ∧
         worldsContiguousS4 b'`.
-  - [ ] Case-split per rule shape reusing Phase 6's monotone-field lemmas; use an S4Keyed-specific
+        *(altered: the theorem takes the ambient `S4LoopInv φ₀ b e acc keys` hypothesis directly
+        (for `keyLowerBd`'s blocked-witness argument), rather than re-deriving the full
+        `keysWorldsKnown`/`worldsContiguousS4` triple inline — those are consumed unchanged from
+        the frozen `S4LoopInv` structure, not duplicated.)*
+  - [x] Case-split per rule shape reusing Phase 6's monotone-field lemmas; use an S4Keyed-specific
         `_none_saturated` lemma (~25-line analogue of `modalStepBranchGen_none_saturated`,
         `Completeness.lean:809`) for the saturated case.
-  - [ ] `lean_build` green; no `sorry`; `lean_verify` axiom-clean. If it resists, `[BLOCKED]` with
-        exact `lean_goal`.
+        *(altered: no separate `_none_saturated` lemma was needed — `findSome?_eq_some`'s own
+        `some`-witness plus `split_ifs at hsf with hexp` already rules out the saturated
+        (`e.any (· == sf) = true`) sub-case at the point `sf` is selected, so the three-way
+        mint-unblocked/mint-blocked/non-mint split covers every reachable branch directly.)*
+  - [x] `lean_build` green; no `sorry`; `lean_verify` axiom-clean.
 - **Timing:** 3 hours (~200-350 lines)
 - **Depends on:** 6
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive).
 - **Verification:** `lean_goal` no remaining goals; frozen `modalStepBranchS4_preserves_S4LoopInv`
   unchanged; `lean_verify` axiom-clean.
+- **Completed:** 2026-07-24. This dispatch recovered ~376 uncommitted lines left by a
+  session-limit-killed prior agent (the theorem's full case-split skeleton, already essentially
+  correct), then fixed three real bugs blocking the build: (1) a redundant `clear hnbd` after an
+  `obtain` that had already consumed it; (2) a broken helper lemma
+  `keysMatch_eq_keys_of_not_mint` whose `hnbd` hypothesis (depending on the same `s`/`φ` being
+  matched) was auto-reverted into its compiled matcher's motive by Lean's equation compiler,
+  making it permanently non-defeq to the call sites' own (hnbd-free) inline match term — deleted
+  as dead code and replaced at all 4 call sites with an inline `rcases hs : sf.sign with _ | _ <;>
+  rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;> dsimp only [hs, hf]` case split (the
+  same idiom already used successfully at `modalStepBranchS4_preserves_keyLowerBd`,
+  `LoopChecking.lean:1491`) followed by two `absurd ⟨hs, ψ, hf⟩ hnbd.{1,2}` closers for the two
+  surviving (impossible) box/diamond branches — note `Sign`'s constructor order is `pos, neg`
+  (`Sign.lean:47-50`), so the surviving-goal order is (pos,diamond) then (neg,box), NOT the
+  reverse; (3) two `hinveq` `have`s stated with bare `sf` instead of the exposed
+  `⟨sf.sign, sf.formula, sf.label⟩` structure literal, which made the later `rw [hff] at hinveq`
+  steps unable to find `sf.formula` as a rewritable subterm (structure-eta makes the two forms
+  defeq, so restating the type change nothing semantically). `lean_verify` on
+  `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv` confirms
+  `propext`/`Classical.choice`/`Quot.sound` only. Full CSLib CI pipeline (build, checkInitImports,
+  lint, lint-style, shake, mk_all) green with zero new warnings versus the pre-Phase-7 baseline
+  (`lake build Cslib.Logics.Modal.Tableau.LoopChecking`: 847 jobs, success). Zero `sorry` in the
+  file (one pre-existing docstring-prose mention only).
 
 ### Phase 8 (handoff 3e): Top-loop induction — `modalExpandBranchesS4Keyed_hintikka` [NOT STARTED]
 

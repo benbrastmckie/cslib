@@ -369,7 +369,7 @@ with the existing classical soundness half to obtain
 
 ---
 
-### Phase 4: Countermodel redesign — bi-lasso extractModelℤ [NOT STARTED]
+### Phase 4: Countermodel redesign — bi-lasso extractModelℤ [PARTIAL]
 
 **Goal**: Replace the "island" `extractModelℤ` with a bidirectional ultimately-periodic (bi-lasso)
 ℤ-model built from the branch's subset-block structure so that every ℤ-instant carries a complete
@@ -378,22 +378,36 @@ definition. This is the crux (report 01 §4, grounded by report 02 Finding 4) an
 Spike the core definition + one property lemma before Phase 5 commits.
 
 **Tasks**:
-- [ ] **Spike first**: define the periodic valuation and prove one atom property lemma against it;
-  confirm tractability before building the rest of the phase.
-- [ ] Add a loop-extraction helper: from `isSubsetBlocked` recover the subset-blocked ancestor pair
-  `(t_anc, t_new)`, giving prefix `[min .. t_anc]` and loop body `(t_anc .. t_new]`.
-- [ ] Add a periodic-index reduction helper: for `z` beyond the populated range, reduce `z` modulo
-  the loop length back into the loop body (forward tail; symmetric backward loop for the past tail
-  since BX is bidirectional — the bi-lasso: periodic past tail + finite middle + periodic future
-  tail).
-- [ ] Redefine `extractModelℤ` (`Completeness.lean:133-135`) so instants interior to the populated
-  prefix keep their branch time-type and all other instants read the periodically-reduced loop-body
-  time-type. The witness domain is `D := ℤ`, which carries all five discrete-serial instances
-  natively.
-- [ ] Add and prove the "every instant carries a complete Hintikka time-type" helper (report 01
-  §8.3); confirm `temporalHintikkaSet` saturation + G/H persistence force the guard onto every
-  intermediate branch time.
-- [ ] Re-prove the `extractModelℤ_*` atom/bot property lemmas (`extractModel_atom_sat_iff`,
+- [x] **Spike first**: define the periodic valuation and prove one atom property lemma against it;
+  confirm tractability before building the rest of the phase. Landed: `periodicReduce` (using
+  Mathlib's `toIcoMod` for the modular fold-back, `Mathlib.Algebra.Order.ToIntervalMod`),
+  `extractModelℤPeriodic` (the periodic model parameterized by an explicit loop witness
+  `(instAnc instNew : ℤ) (hL : instAnc < instNew)`), plus three property lemmas:
+  `extractModelℤPeriodic_atom_sat_iff_of_le` (identity below `instNew`, the spike's literal ask),
+  `extractModelℤPeriodic_atomPos_sat_of_le`, and — going beyond the minimal ask to confirm the
+  genuinely load-bearing behavior, not just the trivial case — `periodicReduce_mem_Ico_of_gt`
+  (the wraparound reduction always lands back in `[instAnc, instNew)`, proved via
+  `toIcoMod_mem_Ico`). **Spike outcome: tractable.** `noncomputable` is required (`toIcoMod` is
+  noncomputable), matching the task-421 `Decidable`-instance precedent already accepted elsewhere.
+- [ ] *(not started)* Add a loop-extraction helper: from `isSubsetBlocked` recover the
+  subset-blocked ancestor pair `(t_anc, t_new)` as actual `TimeIndex` branch labels (the spike
+  above takes `instAnc`/`instNew : ℤ` and `hL` as free parameters; deriving them from a genuine
+  `isSubsetBlocked b t_new t_anc = true` witness plus `InstantStrict`/ancestor-relationship
+  reasoning to establish `hL : ord.instant t_anc < ord.instant t_new` is unstarted), giving prefix
+  `[min .. t_anc]` and loop body `(t_anc .. t_new]`.
+- [x] Add a periodic-index reduction helper: for `z` beyond the populated range, reduce `z` modulo
+  the loop length back into the loop body. *(deviation: altered/partial -- landed the forward-tail
+  reduction (`periodicReduce`) parameterized by an explicit loop witness; the symmetric
+  backward-loop reduction for the past tail (bidirectional bi-lasso: periodic past tail + finite
+  middle + periodic future tail) is not yet added.)*
+- [ ] *(not started)* Redefine `extractModelℤ` (`Completeness.lean:133-135`) so instants interior
+  to the populated prefix keep their branch time-type and all other instants read the
+  periodically-reduced loop-body time-type -- i.e. wire `extractModelℤPeriodic` up to replace
+  `extractModelℤ` at real call sites, rather than existing as a parallel definition.
+- [ ] *(not started)* Add and prove the "every instant carries a complete Hintikka time-type"
+  helper (report 01 §8.3); confirm `temporalHintikkaSet` saturation + G/H persistence force the
+  guard onto every intermediate branch time.
+- [ ] *(not started)* Re-prove the `extractModelℤ_*` atom/bot property lemmas (`extractModel_atom_sat_iff`,
   `extractModel_bot_false`, `openBranch_noBotPos`, `openBranch_noContradiction`,
   `extractModel_atom_neg_notSat` and ℤ analogues, `Completeness.lean:99-330`) against the new
   definition; the `Nat`-model versions and proof structure transfer.

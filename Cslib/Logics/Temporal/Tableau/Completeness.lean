@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Temporal.Tableau.Soundness
+public import Mathlib.Algebra.Order.ToIntervalMod
 
 /-! # Temporal Tableau Completeness
 
@@ -166,6 +167,82 @@ omit [Hashable Atom] in
 lemma extractModelℤ_bot_false (b : TBranch Atom) (ord : TimeOrdering) (z : ℤ) :
     ¬ Satisfies (extractModelℤ b ord) z .bot :=
   Satisfies.bot_false (extractModelℤ b ord) z
+
+/-! ## Bi-Lasso Periodic Countermodel (Phase 4 Spike)
+
+`extractModelℤ` above is the "island" model: every instant not populated by an actual branch
+label reads uniformly `false`. This is insufficient for the Until/Since truth lemma, which
+needs a witness that may fall *beyond* the branch's last populated instant. The fix (report 01
+§4, grounded by report 02 Finding 4) is a bidirectional ultimately-periodic (bi-lasso) ℤ-model:
+fold every instant beyond the branch's populated range back into a finite "loop window" using
+the time-subset-blocked ancestor pair the tableau's own termination argument already produces.
+
+This section spikes the core periodic-reduction definition and a single property lemma against
+it (plan discipline: confirm tractability before committing to the full redesign). The spike
+takes the loop witness `(instAnc, instNew)` as an explicit hypothesis rather than deriving its
+existence from `isSubsetBlocked`/the fuel-termination argument — that derivation, and the
+"every instant carries a complete Hintikka time-type" helper, are separate, larger sub-tasks of
+this phase. -/
+
+/-- Periodic reduction of an integer into the loop window `[instAnc, instNew)`, using Mathlib's
+`toIcoMod`. Instants at or before `instNew` are left unchanged (the populated prefix and the
+first loop copy); instants beyond `instNew` are folded back by whole multiples of the loop
+length `instNew - instAnc`. -/
+noncomputable def periodicReduce (instAnc instNew : ℤ) (hL : instAnc < instNew) (z : ℤ) : ℤ :=
+  if z ≤ instNew then z else instAnc + toIcoMod (sub_pos.mpr hL) 0 (z - instAnc)
+
+/-- The periodic reduction always lands back inside the loop window `[instAnc, instNew)` for
+instants beyond `instNew`: this is the genuinely load-bearing fact the spike needs to confirm
+(not just the trivial identity-below-`instNew` case) -- `toIcoMod`'s Mathlib characterization
+does the modular-arithmetic work. -/
+lemma periodicReduce_mem_Ico_of_gt (instAnc instNew : ℤ) (hL : instAnc < instNew) (z : ℤ)
+    (hz : instNew < z) :
+    instAnc ≤ periodicReduce instAnc instNew hL z ∧
+      periodicReduce instAnc instNew hL z < instNew := by
+  unfold periodicReduce
+  rw [if_neg (by omega)]
+  have hmem := toIcoMod_mem_Ico (sub_pos.mpr hL) (0 : ℤ) (z - instAnc)
+  rw [Set.mem_Ico] at hmem
+  omega
+
+/-- The bi-lasso periodic countermodel: instants at or before the loop witness `instNew` read
+branch content directly (as `extractModelℤ`); instants beyond `instNew` read the periodically
+reduced instant's branch content instead, so the model never "runs out" of populated content. -/
+noncomputable def extractModelℤPeriodic (b : TBranch Atom) (ord : TimeOrdering)
+    (instAnc instNew : ℤ) (hL : instAnc < instNew) : TemporalModel ℤ Atom where
+  valuation z p := b.any fun sf =>
+    sf.sign == .pos && ord.instant sf.label == periodicReduce instAnc instNew hL z &&
+      sf.formula == .atom p
+
+omit [Hashable Atom] in
+/-- Spike property lemma: for instants already at or before the loop witness `instNew`, the
+periodic model's atom satisfaction agrees exactly with `extractModelℤ`'s (the reduction is the
+identity there). This confirms the periodic reduction is tractable and conservative over the
+populated range before committing to the full Phase 4 redesign. -/
+lemma extractModelℤPeriodic_atom_sat_iff_of_le (b : TBranch Atom) (ord : TimeOrdering)
+    (instAnc instNew : ℤ) (hL : instAnc < instNew) (z : ℤ) (hz : z ≤ instNew) (p : Atom) :
+    Satisfies (extractModelℤPeriodic b ord instAnc instNew hL) z (.atom p) ↔
+    b.any (fun sf => sf.sign == .pos && ord.instant sf.label == z && sf.formula == .atom p) := by
+  simp only [Satisfies.atom_iff, extractModelℤPeriodic, periodicReduce, hz, if_true]
+
+omit [Hashable Atom] in
+/-- T(atom p)@t on a branch, at an instant at or before the loop witness, implies atom p is
+satisfied in the periodic model at that instant. Periodic analogue of
+`extractModelℤ_atomPos_sat`. -/
+lemma extractModelℤPeriodic_atomPos_sat_of_le (b : TBranch Atom) (ord : TimeOrdering)
+    (instAnc instNew : ℤ) (hL : instAnc < instNew) (t : TimeIndex) (p : Atom)
+    (hz : ord.instant t ≤ instNew) (hmem : (⟨.pos, .atom p, t⟩ : TSF Atom) ∈ b) :
+    Satisfies (extractModelℤPeriodic b ord instAnc instNew hL) (ord.instant t) (.atom p) := by
+  rw [extractModelℤPeriodic_atom_sat_iff_of_le b ord instAnc instNew hL (ord.instant t) hz,
+    List.any_eq_true]
+  exact ⟨⟨.pos, .atom p, t⟩, hmem, by simp⟩
+
+omit [Hashable Atom] in
+/-- ⊥ is never satisfied in the periodic model, at any instant. -/
+lemma extractModelℤPeriodic_bot_false (b : TBranch Atom) (ord : TimeOrdering)
+    (instAnc instNew : ℤ) (hL : instAnc < instNew) (z : ℤ) :
+    ¬ Satisfies (extractModelℤPeriodic b ord instAnc instNew hL) z .bot :=
+  Satisfies.bot_false (extractModelℤPeriodic b ord instAnc instNew hL) z
 
 /-! ## Open Branch Structure -/
 

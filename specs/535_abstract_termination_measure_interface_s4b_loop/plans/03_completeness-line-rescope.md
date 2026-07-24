@@ -637,7 +637,7 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   `Saturation.lean`, from concurrent out-of-scope work) — zero hits in `LoopChecking.lean` from
   either check. `FmpMeasure.lean` byte-unchanged (read-only). `lake exe checkInitImports`: clean.
 
-### Phase 10: Top-loop induction — `modalExpandBranchesS4Keyed_hintikka` [NOT STARTED]
+### Phase 10: Top-loop induction — `modalExpandBranchesS4Keyed_hintikka` [COMPLETED]
 
 - **Goal:** Assemble the termination top-loop: an open branch produced by the keyed driver is a
   Hintikka set for the keyed rule, then bridge to the concrete `modalHintikkaSetS4` form. This is the
@@ -649,36 +649,66 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   (5) the `none` (saturated/open) case is where Hintikka clauses are verified per-shape; (6) the
   `some step` case recurses via the outer fuel induction.
 - **Tasks:**
-  - [ ] Thread the per-index invariant as the **conjunction** `S4LoopInv φ₀ bi ei ai keysi ∧
+  - [x] Thread the per-index invariant as the **conjunction** `S4LoopInv φ₀ bi ei ai keysi ∧
         S4KeyedHintikkaInv φ₀ bi ei ai keysi`. There is no single bundled structure playing
         `ModalLoopInvHintikka`'s role for the keyed driver — Phase 6 deliberately did not bundle
         `S4LoopInv`'s fields. Use Phase 7's own call-site convention (ambient `S4LoopInv` plus the
         two proof-internal `keysWorldsKnown`/`worldsContiguousS4` auxiliaries) verbatim.
-  - [ ] Note the **extra `keys`/`keys'` worklist column**: `modalExpandBranchesS4Keyed`
+        *(landed as a literal 4-way conjunction `S4LoopInv ∧ S4KeyedHintikkaInv ∧
+        keysWorldsKnown ∧ worldsContiguousS4` in the per-index hypothesis, rather than nesting
+        the two auxiliaries inside a separate pair — simpler to destructure at each call site.)*
+  - [x] Note the **extra `keys`/`keys'` worklist column**: `modalExpandBranchesS4Keyed`
         (`LoopChecking.lean:4689`) carries `keyss` alongside `branches`/`expandedSets`/`accs`, and its
         `processNext` threads `pendingKeys`/`doneKeys`. Every recursive call and worklist tuple in the
         induction needs the extra component — absent from anything in the generic file.
-  - [ ] `some step` case: consume Phase 7's `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`
+        *(threaded throughout: `keyss` in the outer statement, `pendingKeys`/`doneKeys` in the
+        `key`-suffices restatement and the inner `pending` induction, `List.replicate
+        newBs.length keys'` alongside the `newAcc` replicate in the `some step` recursion.)*
+  - [x] `some step` case: consume Phase 7's `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`
         (`LoopChecking.lean:5949`) for invariant preservation and Phase 9's
         `modalExpMeasure_step_lt_S4Keyed` for the fuel decrease, supplying the latter's
         `hknown`/`hWC`/`hKT`/`hKD`/`hKI` from the ambient `S4LoopInv`.
-  - [ ] `none` (saturated) case: dispatch each Hintikka conjunct per-shape
+        *(landed verbatim, plus `modalStepBranchS4_preserves_S4LoopInv` (Phase 7,
+        `LoopChecking.lean:4624`) consumed for the combined `S4LoopInv`/`keysWorldsKnown`/
+        `worldsContiguousS4` preservation in one call, and a new territory-local
+        `modalStepBranchS4Keyed_newExps_const` (re-deriving `CompletenessLoop.lean`'s `private
+        modalStepBranchGen_newExps_const` for the 4-tuple stepper) to get the constant-`newExp`
+        form the measure lemma's hypothesis requires.)*
+  - [x] `none` (saturated) case: dispatch each Hintikka conjunct per-shape
         (`atom`/`bot`/`imp`/`and`/`or`/`box`/`diamond`, each split on `sign`), as
         `modalExpandBranchesHintikka` does at `CompletenessLoop.lean:1538-1618`. **Do NOT use**
         `modalStepBranchGen_none_saturated` (`Completeness.lean:809`) — mirror Phase 7's own
         `findSome?_eq_some` + `split_ifs at hsf with hexp` case-split idiom instead, which already
         rules out the saturated sub-case at the point `sf` is selected.
-  - [ ] Box-negative / diamond-positive shapes: the keyed driver has **no `RuleApplicationSpecCore`
+        *(landed as a new territory-local `modalStepBranchS4Keyed_none_saturated`, mirroring the
+        `findSome?_eq_none_iff` + case-split idiom directly against the keyed 4-tuple stepper,
+        since no converse/`none`-direction projection to the generic 3-tuple driver was landed in
+        Phase 8.)*
+  - [x] Box-negative / diamond-positive shapes: the keyed driver has **no `RuleApplicationSpecCore`
         instance**, so `hs.boxNegWitness'`/`hs.diaPosWitness'` are unavailable. Use Phase 7's
         `modalStepBranchS4Keyed_blocked_witness_mem` (`LoopChecking.lean:5750`, re-grep) plus
         `S4KeyedHintikkaInv.eBoxNegWitness`/`eDiamondPosWitness` to handle the "matched but redirected
         to a blocked world, so no NEW witness formula emitted" sub-case. **This is the sub-argument
         R1 identifies as guard-sensitive** — keep it localized and clearly delimited in the proof so
         a later guard narrowing has a bounded re-work target.
-  - [ ] Close with `hintikka_congr_S4` (Phase 2, `LoopChecking.lean:4767`) +
+        *(finding: `modalStepBranchS4Keyed_blocked_witness_mem` is NOT called directly from this
+        phase's own code — it is already fully consumed, internally, by Phase 7's landed
+        `modalStepBranchS4Keyed_preserves_S4KeyedHintikkaInv`. By the point this phase's `none`
+        case is reached, every box-neg/dia-pos formula on the branch is provably `∈ e` (two new
+        territory-local lemmas, `modalApplyOneS4Keyed_{boxNeg,diaPos}_ne_notApplicable`, show the
+        keyed rule's result is `.linear _` — never `.notApplicable` — at these two shapes in BOTH
+        the blocked and unblocked sub-cases, guard-independently), so `hHinv.eBoxNegWitness`/
+        `eDiamondPosWitness` (established along the induction path via Phase 7) applies directly
+        with no redirect-specific case split needed HERE. The R1-sensitive sub-case is therefore
+        already isolated inside Phase 7's landed, unmodified code — this phase's own contribution
+        is guard-independent, narrowing R1's future blast radius further than anticipated.)*
+  - [x] Close with `hintikka_congr_S4` (Phase 2, `LoopChecking.lean:4767`) +
         `modalHintikkaSetS4_eq` (`LoopChecking.lean:3884`, re-grep) to reach the concrete
         `modalHintikkaSetS4 φ₀ b acc` target.
-  - [ ] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; no `sorry`; `lean_verify`
+        *(landed as `rw [modalHintikkaSetS4_eq, ← hintikka_congr_S4 φ₀ k]` immediately after
+        obtaining the saturated-leaf invariant, rewriting the goal to the keyed-rule
+        `modalHintikkaSetGen` form before dispatching the four conjuncts.)*
+  - [x] `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; no `sorry`; `lean_verify`
         axiom-clean. If the induction resists, `[BLOCKED]` with the exact `lean_goal`.
 - **Timing:** 3 hours (~200-350 lines). Dispatch `--hard` with real runway (fresh session), per the
   Phase 7 experience that even a near-complete skeleton needed three non-trivial defeq/matcher fixes.
@@ -695,6 +725,25 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
 - **Contingency:** commit at every green sub-step (`task 535 phase 10.{O}: …`). If context runs out
   mid-phase, mark `[PARTIAL]` and write a continuation handoff recording exactly which Hintikka
   conjuncts are discharged and which remain.
+- **Completed:** 2026-07-24. Landed `modalExpandBranchesS4Keyed_hintikka` plus four
+  territory-local helper lemmas: `modalStepBranchS4Keyed_newExps_const`,
+  `modalStepBranchS4Keyed_none_saturated`, `modalApplyOneS4Keyed_boxNeg_ne_notApplicable`,
+  `modalApplyOneS4Keyed_diaPos_ne_notApplicable`. `lean_verify` on the top-loop theorem and on
+  the single-step preservation regression target both confirm `propext`/`Classical.choice`/
+  `Quot.sound` only. `lake build Cslib.Logics.Modal.Tableau.LoopChecking`: 847 jobs, exit 0, zero
+  new warnings versus the Phase 9 baseline (the same 10 pre-existing warnings: 8
+  `unusedSimpArgs` + 1 `unusedSectionVars`-style hypothesis-unused note + 1 `longLine`, none in
+  this task's additions). Zero `sorry` in the file (the one pre-existing docstring-prose mention
+  at `:4619` only). `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`: zero hits in
+  `LoopChecking.lean` (a `lake shake` run surfaces unrelated pre-existing `sorry`s in
+  `Propositional/Tableau/{Intuitionistic,Minimal}` files, out of this task's territory).
+  `lean_verify instDecidableS5Valid` (`FrameCompleteness.lean`) confirms empty extra-axiom set,
+  unaffected. Two deviations from the plan's anticipated shape, both recorded inline above: (1)
+  the R1-sensitive blocked-redirect witness sub-case turned out to be fully absorbed by Phase 7's
+  landed code rather than needing any new call to `modalStepBranchS4Keyed_blocked_witness_mem`
+  from this phase; (2) the `none`-direction projection to the generic 3-tuple driver (flagged as
+  a maybe-needed Phase 8 follow-up) was not available, so a direct territory-local
+  `_none_saturated` re-derivation against the keyed 4-tuple stepper was added instead.
 
 ### Phase 11: Completeness — `modalTableauS4Keyed_complete` [NOT STARTED]
 

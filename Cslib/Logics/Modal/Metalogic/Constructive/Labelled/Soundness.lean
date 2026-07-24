@@ -21,9 +21,9 @@ evidence and closes the decision with **GATE-C** (`[BLOCKED]`, no proof, no coun
 Strategy-3 authorized as the sanctioned next route) -- see "Fourth dispatch (task 537 Phase 1
 probe, GATE-C)" below. This module lands
 (1) the first, reusable building block of the full labelled soundness direction
-`nik_TS5_soundness : NIKTheorem TS5 φ → CKValidFC cs5FCIncest φ`, which will complete the Simpson
+`nik_TS5_soundness : NIKDerivable TS5 φ → CKValidFC cs5FCIncest φ`, which will complete the Simpson
 8.1.4 biconditional alongside `cs5_completeness` (`Completeness.lean`); and (2) the anti-vacuity
-certificate `nik_TS5_consistent : ¬ NIKTheorem TS5 ⊥`, landed via a **direct, self-contained
+certificate `nik_TS5_consistent : ¬ NIKDerivable TS5 ⊥`, landed via a **direct, self-contained
 route** (see "The anti-vacuity route taken" below) rather than as a corollary of the
 not-yet-landed general theorem. The general `nik_TS5_soundness` (Phase 11.1's tree-lifting
 machinery + Phase 11.2's `TClosure` validation) is **not yet landed** -- see "What remains" below,
@@ -48,7 +48,7 @@ instantiate `botForces := fun _ => False`, so `CKForces ... () ⊥` reduces to `
 This is flagged explicitly as a deviation from the plan's literal sub-phase *sequencing*
 (11.1 → 11.2 → 11.3) -- not from its mathematical *content*, since the plan's own Rollback/
 Contingency section pre-authorizes exactly this route as a documented fallback, and the final
-theorem statement `nik_TS5_consistent : ¬ NIKTheorem TS5 (⊥ : Proposition Atom)` is unchanged.
+theorem statement `nik_TS5_consistent : ¬ NIKDerivable TS5 (⊥ : Proposition Atom)` is unchanged.
 
 ## `--lit`: Simpson's Chapter 8 soundness argument (reflowed `L1367-1423`, PDF offset +9)
 
@@ -366,7 +366,7 @@ to this file).
 - `cs5FCIncest_lift`: the interpretation-lifting building block (item 2's core ingredient).
 - `nik_soundness_onePoint`: a full 12-constructor `NIK` soundness induction against the
   one-point model, proved directly (Phase 11.3's accelerant route, see above).
-- `nik_TS5_consistent`: the anti-vacuity certificate, `¬ NIKTheorem TS5 ⊥`, a direct one-line
+- `nik_TS5_consistent`: the anti-vacuity certificate, `¬ NIKDerivable TS5 ⊥`, a direct one-line
   corollary of `nik_soundness_onePoint`.
 
 ## References
@@ -876,7 +876,7 @@ theorem nik_soundness_onePoint {Atom : Type u} {𝒯 : Set GeomAxiom} {val : Uni
 context-condition vacuously), a contradiction. This certifies Phase 10's `cs5_completeness` is a
 *meaningful* statement (`N(TS5)` does not prove everything), per reports/11 condition 2. -/
 theorem nik_TS5_consistent {Atom : Type u} :
-    ¬ NIKTheorem TS5 (Proposition.bot : Proposition Atom) := by
+    ¬ NIKDerivable TS5 (Proposition.bot : Proposition Atom) := by
   intro h
   exact nik_soundness_onePoint (val := fun _ _ => True) h (by simp)
 

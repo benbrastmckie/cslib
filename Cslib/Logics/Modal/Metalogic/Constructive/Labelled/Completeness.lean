@@ -21,20 +21,20 @@ natural-deduction system `N_IK(𝒯_S5)` (`NIK`/`Deriv`, `Deduction.lean`/`Conte
 `CS5ModalAxiom`/`Derivable`.** Simpson's Theorem 8.1.4 itself targets his labelled system `N(𝒯)`;
 the Hilbert reading (`CKValidFC cs5FCIncest φ → Derivable CS5ModalAxiom φ`) is a *separate*
 composite result, `Thm 6.2.1 ∘ Thm 8.1.4`, that additionally needs Simpson's Chapter 6 adequacy
-bridge (`NIKTheorem TS5 φ → Derivable CS5ModalAxiom φ`). That bridge is **deliberately not built**
+bridge (`NIKDerivable TS5 φ → Derivable CS5ModalAxiom φ`). That bridge is **deliberately not built**
 here — it is Option A / Track C C5-C8 (~25-30% research territory, no mechanization anywhere in
 this repository) — see `specs/517_labelled_bounded_context_cs5_completeness/reports/
 11_option-b-labelled-completeness-confirmation.md` for the source-anchored confirmation that
 Option B (this file's target) is a faithful, non-vacuous mechanization of Simpson's completeness
 theorem in its own right, and that the Hilbert identification is explicitly deferred future work.
 `cs5_completeness` below is never a silent Hilbert relabelling: its type is exactly `CKValidFC
-cs5FCIncest φ → NIKTheorem TS5 φ`, and every identifier it composes (`primeLemma`,
+cs5FCIncest φ → NIKDerivable TS5 φ`, and every identifier it composes (`primeLemma`,
 `canon_truth_lemma`, `cs5FCIncest_canonWorld_r`, the five `canon*` side-conditions) is already
 landed sorry-free — this is a genuine *composition*, with no new hard lemma.
 
 ## Proof shape (Simpson `L1367-1425`, the standard contrapositive canonical-model argument)
 
-Assume `¬ NIKTheorem TS5 φ`, i.e. `¬ NIK TS5 (Graph.trivial Atom) [] (x₀ ∶ φ)` for the trivial
+Assume `¬ NIKDerivable TS5 φ`, i.e. `¬ NIK TS5 (Graph.trivial Atom) [] (x₀ ∶ φ)` for the trivial
 graph's distinguished node `x₀`. This is exactly the refutation seed `primeLemma` consumes
 directly (`Context.trivialBase`, below) -- no Hilbert bridge is needed to produce it, which is the
 whole point of Option B:
@@ -61,10 +61,10 @@ module states `cs5_completeness` at `CKValidFC.{u, u}`, not an independently-qua
 
 ## Contents
 
-- `Context.trivialBase`: the base context underlying `NIKTheorem` (the trivial graph, empty
+- `Context.trivialBase`: the base context underlying `NIKDerivable` (the trivial graph, empty
   assumption set), packaged as a `Context TS5 Atom` so `primeLemma` can consume it.
 - `deriv_trivialBase_iff`: `Deriv` against the trivial base's empty `Γ` is exactly `NIK` against
-  the empty list -- the bridge between `NIKTheorem`'s `NIK`-shape and `primeLemma`'s `Deriv`-shape
+  the empty list -- the bridge between `NIKDerivable`'s `NIK`-shape and `primeLemma`'s `Deriv`-shape
   hypothesis.
 - `cs5_completeness`: the assembled labelled-system completeness theorem.
 
@@ -85,9 +85,9 @@ variable {Atom : Type u}
 
 /-! ## The trivial base context -/
 
-/-- The base context underlying `NIKTheorem` (`Deduction.lean:316`): the trivial graph (a single
+/-- The base context underlying `NIKDerivable` (`Deduction.lean:316`): the trivial graph (a single
 node, no edges), paired with the empty assumption set. Packaged as a `Context 𝒯 Atom` so
-`primeLemma` can be seeded directly from `¬ NIKTheorem 𝒯 φ`. -/
+`primeLemma` can be seeded directly from `¬ NIKDerivable 𝒯 φ`. -/
 def Context.trivialBase (𝒯 : Set GeomAxiom) (Atom : Type u) : Context 𝒯 Atom where
   G := Graph.trivial Atom
   Γ := ∅
@@ -105,7 +105,7 @@ theorem Context.mem_trivialBase (𝒯 : Set GeomAxiom) (Atom : Type u) :
 
 /-- `Deriv` against the trivial base context's empty `Γ` is exactly `NIK` against the empty
 assumption list: the only list every one of whose members lies in `∅` is `[]` itself. This bridges
-`NIKTheorem`'s `NIK`-shaped statement to `primeLemma`'s `Deriv`-shaped hypothesis. -/
+`NIKDerivable`'s `NIK`-shaped statement to `primeLemma`'s `Deriv`-shaped hypothesis. -/
 theorem deriv_trivialBase_iff {𝒯 : Set GeomAxiom} {φ : LabelledFormula Atom} :
     Deriv 𝒯 (Context.trivialBase 𝒯 Atom).G (Context.trivialBase 𝒯 Atom).Γ φ ↔
       NIK 𝒯 (Graph.trivial Atom) [] φ := by
@@ -130,7 +130,7 @@ reports/11_option-b-labelled-completeness-confirmation.md`). A genuine compositi
 (`primeLemma`, `canon_truth_lemma`, `cs5FCIncest_canonWorld_r`, and the five `canon*`
 side-conditions), all already landed sorry-free -- no new hard lemma. -/
 theorem cs5_completeness {Atom : Type u} (φ : Proposition Atom) :
-    CKValidFC.{u, u} cs5FCIncest φ → NIKTheorem TS5 φ := by
+    CKValidFC.{u, u} cs5FCIncest φ → NIKDerivable TS5 φ := by
   intro hvalid
   by_contra hn
   set x₀ : Label Atom := (Graph.trivial Atom).nonempty.choose with hx₀def

@@ -313,7 +313,7 @@ inductive NIK (𝒯 : Set GeomAxiom) : Graph Atom → List (LabelledFormula Atom
 
 /-- `A` is a **theorem** of `N_IK(𝒯)` iff `⊢_𝒯 A` over the trivial graph, at the trivial graph's
 distinguished node (Simpson `:5114`). -/
-def NIKTheorem (𝒯 : Set GeomAxiom) (A : Proposition Atom) : Prop :=
+def NIKDerivable (𝒯 : Set GeomAxiom) (A : Proposition Atom) : Prop :=
   NIK 𝒯 (Graph.trivial Atom) [] ((Graph.trivial Atom).nonempty.choose ∶ A)
 
 /-! ## Weakening / graph-morphism lemmas (Prop. 4.4.1) -/

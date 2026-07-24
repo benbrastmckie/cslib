@@ -156,14 +156,14 @@ existing turnstile pair to `scoped`, fixing any use-sites that then need `open s
 - Scoped `lake build Cslib.Logics.Temporal` and `lake build Cslib.Logics.Bimodal` both succeed
   (confirms no unresolved `⊨` after scoping).
 
-### Phase 3: NIKTheorem → NIKDerivable (item 4) [NOT STARTED]
+### Phase 3: NIKTheorem → NIKDerivable (item 4) [COMPLETED]
 
 **Goal**: Rename the lone `…Theorem` predicate to the `Derivable`-family name across its 15 sites.
 
 **Tasks**:
-- [ ] In `Modal/Metalogic/Constructive/Labelled/Deduction.lean:316`, rename
+- [x] In `Modal/Metalogic/Constructive/Labelled/Deduction.lean:316`, rename
       `def NIKTheorem` → `def NIKDerivable`.
-- [ ] Update all 15 references, including the docstring mentions in
+- [x] Update all 15 references, including the docstring mentions in
       `Constructive/Labelled/Completeness.lean` and `Constructive/Labelled/Soundness.lean` (e.g.
       the `nik_TS5_consistent : ¬ NIKTheorem TS5 ⊥` certificate).
 

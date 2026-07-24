@@ -481,40 +481,54 @@ definition once, and this probe methodology is now proven to catch exactly that 
 - **Territory:** `specs/537_labelled_cs5_general_soundness_biconditional/probes/` **only**.
   `Cslib/` MUST remain untouched this phase (`git status --short Cslib/` empty at phase end).
 - **Tasks:**
-  - [ ] (Recommended, non-blocking) Attempt to obtain a legible copy of Simpson §6.1 Fig. 6-1/6-2
-        (`/literature` discovery on `simpson_1994_intuitionisticmodallogic`, a cleaner PDF, or the
-        published thesis). Record whether it was obtained. Every definitional choice still
-        reconstructed from prose MUST be flagged as such in the probe's header comment.
-  - [ ] Write `probes/theta_place_validation.lean`, importing `Soundness.lean` and `CS5Canonical`,
-        and define the candidate `Θ (G Γ hfin)` and `place (G hfin x A)` **there** (scratch, NOT in
-        `Cslib/`). Start from `Θ := sigAt G Γ hfin root` per reports/05-06, and
-        `place := □^{d(x)} A`.
-  - [ ] **Resolve the known-in-advance orphan-context defect.** Re-run probe #2's witness
-        (`Γ = [var 1 ∶ ⊥]` with `var 1 ∉ G.X`, conclusion at the root `var 0 ∈ G.X`) against the
-        candidate. The naive `Θ := sigAt … root` IS refuted by it (see Risks). Extend `Θ` with an
-        orphan-context component — the `Γ`-facts at labels not reachable from the root, conjoined
-        at depth 0 — and re-run. Do not proceed until this witness fails to refute.
-  - [ ] **Adversarial case A — disconnected conclusion.** Port `nik_adequacy_is_false`'s witness
-        (`G = Graph.trivial ℕ`, `Γ = [var 0 ∶ ⊥]`, conclusion at `var 1 ∉ G.X`, `.assumption` then
-        `.efq`) to the candidate statement. Show the reductio **cannot** be completed, and
-        positively: derive `Θ ⊃ place(var 1, A)` for the candidate (it should follow because `Θ`
-        contains `⊥`).
-  - [ ] **Adversarial case B — disconnected context.** As above for
-        `rooted_restricted_adequacy_is_false`'s witness.
-  - [ ] **Adversarial case C — the `premise_escapes_graph` shape.** Exhibit the same context (all
-        labels in `G.X`) deriving `⊥` at a label outside `G.X`, and confirm the candidate statement
-        is *still* provable there — i.e. that the candidate does not merely dodge the refutation by
-        re-introducing an uninductive side condition. **The candidate statement MUST carry no
-        `x ∈ G.X` and no `labels(Γ) ⊆ G.X` hypothesis** (established fact 3).
-  - [ ] **Forward-looking case D — `orE` at depth ≥ 1.** Build a two-level graph with a disjunction
-        at a depth-1 label and an `orE` conclusion at an unrelated label, and machine-check whether
-        closing it requires `□^d(A∨B) ⊃ □^d A ∨ □^d B` (the non-theorem that killed the flat
-        shortcut) or whether the shared-`Θ` structure sidesteps it. Record the finding explicitly —
-        this is the primary residual risk and must be surfaced now, not at Phase 16.
-  - [ ] **Forward-looking case E — collapse at `Graph.trivial`.** Confirm `Θ (Graph.trivial) []` is
-        a CS5 tautology and `place root φ = φ`, so `⊢ Θ ⊃ place root φ` yields `⊢ φ` by modus
-        ponens (the Phase 20 collapse). Reuse the existing probe's `bigAndL_nil_deriv` /
-        `deriv_and` pattern.
+  - [x] (Recommended, non-blocking) Attempt to obtain a legible copy of Simpson §6.1 Fig. 6-1/6-2.
+        **NOT attempted this dispatch** (time-boxed against the hard gate scope; recorded as a
+        still-open, non-blocking mitigation item in the probe's header comment). Every
+        definitional choice below remains a prose/plan reconstruction, flagged as such.
+  - [x] Write `probes/theta_place_validation.lean`, importing `Soundness.lean` and `CS5Canonical`,
+        defining the candidate `Θ (G Γ hfin root)` (= `sigAt G Γ hfin root` conjoined with an
+        orphan-context component) and `place (ht x A)` (= `boxIter (ht x) A`) there (scratch, NOT
+        in `Cslib/`). Compiles clean, zero `sorry`, `#print axioms` shows no `sorryAx`.
+  - [x] **Resolve the known-in-advance orphan-context defect.** Confirmed: Case B below is exactly
+        this witness, and the positive derivation succeeds only via the orphan-context component
+        (`orphanFacts_Ctx'_r` / `caseB_theta_imp_place`).
+  - [x] **Adversarial case A — disconnected conclusion.** `caseA_theta_imp_place` — **PASS**.
+        `Θ(Gt,Ctx) ⊃ place(yy,A)` derived for arbitrary `A`, no reductio possible.
+  - [x] **Adversarial case B — disconnected context.** `caseB_theta_imp_place` — **PASS**.
+  - [x] **Adversarial case C — the `premise_escapes_graph` shape.** `caseC_no_restriction_needed`
+        — **PASS**. No `x ∈ G.X` / `labels(Γ) ⊆ G.X` hypothesis anywhere in the candidate's
+        signature.
+  - [x] **Forward-looking case D — `orE` at depth ≥ 1.** `caseD_orE_core_from_bridge` — **FAIL**.
+        Machine-checked (not merely analytically asserted): the `orE` core step, generic in the
+        three premise translations over a concrete two-level graph (root `r`, depth-1 child `c2`,
+        disconnected conclusion `y3`), is provable **given** the bridge lemma
+        `□(A∨B) ⊃ (□A ∨ □B)` (`caseD_orE_core_from_bridge`, sorry-free), but no route AVOIDING
+        that bridge was found using the full `cs5_deriv_*` toolkit plus a (plausible,
+        Phase-12-scoped, not independently re-derived) `Θ`-injection hypothesis: stripping all
+        boxes via `tBox` gets a bare disjunction but leaves the branch hypotheses boxed
+        (`Θ⊃(□A⊃place(y3,C))`, from `place`'s own indexing), and there is no hypothesis-level
+        necessitation (`A ⊃ □A`) to bridge bare-to-boxed. This CONFIRMS — rather than merely
+        inherits — the plan's flagged primary residual risk for the flat `□^d` `place` shape.
+        See the probe's "Does the natural alternative... avoid the wall?" section for the full
+        writeup. **No countermodel was built** (semantic refutation of the bridge itself is out
+        of scope for a shape-validation gate); the finding is the structural dependency, machine
+        checked.
+  - [x] **Forward-looking case E — collapse at `Graph.trivial`.** `caseE_collapse` /
+        `caseE_theta_trivial_deriv` — **PASS**. `Θ(Graph.trivial,[])` is a CS5 tautology,
+        `place root φ = φ` by `rfl`, and `caseE_collapse` shows the Phase 20 modus-ponens
+        assembly mechanism works given a hypothetical adequacy-shaped derivation.
+
+**Dispatch 1 finding (this run): gate reports FAIL, on case D only (A/B/C/E all PASS).** The
+flat, depth-indexed `place(x,A) := □^{d(x)}A` is machine-confirmed insufficient for `orE` once the
+disjunction sits at depth ≥ 1 — closing it needs `□(A∨B) ⊃ (□A∨□B)`, the same non-theorem that
+killed the plan-v4 fully-boxed flat shortcut, and no alternative route was found. Per the FAIL
+handling below, the **next Phase 9 dispatch** (still within the 3-run cap; this was dispatch 1)
+must design and validate a layered alternative `place` — e.g. `Θ_0 ⊃ □(Θ_1 ⊃ □(…))`, whose
+per-level antecedents carry the raw (unboxed) disjunction at the right nesting level so `orE`'s
+Hilbert axiom applies directly, rather than to a flattened `□^d`-wrapped formula — and re-run ALL
+FIVE cases (A/B/C/D/E) against it, since a layered redesign changes `Θ` as well as `place` and
+could disturb the currently-passing cases. Phase 9 stays `[IN PROGRESS]`; Phase 10+ remains
+BLOCKED by this gate until a candidate passes all five cases.
   - [ ] Write the gate verdict into the probe's header comment: PASS/FAIL per case, plus the final
         `Θ`/`place` definitions to be transcribed into `Cslib/` in Phase 11.
 - **PASS criterion (the gate):** cases A, B, C each fail to refute the candidate — the reductio

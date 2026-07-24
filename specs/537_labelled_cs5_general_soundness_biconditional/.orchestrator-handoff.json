@@ -2,33 +2,61 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "summary": "Plan v5 (faithful tree-recursive Hilbert bridge). This dispatch continued directly from the previous one's motive-design finding (nikTr-level motive needed, not sigAt-core, for efq/orE). Landed three further commits of cross-label infrastructure: sigAtFuel_mono_context (subset-based context monotonicity, holding uniformly at every label including siblings, superseding the earlier rank-threshold congruence in scope), sigAtFuel_mono_fuel/_le (unconditional fuel-gap monotonicity for sigAtFuel), and nikTrFuel_fuel_invariant_step (the genuine fuel-SUFFICIENCY equality lemma flagged since Phase 8.1: nikTrFuel is invariant once fuel exceeds the remaining ancestor-chain length, proved via induction on the graded-rank witness). All sorry-free, axiom-clean, scoped-build green, individually committed. Working through the natural 'propagate bottom up x's ancestor chain to the tree root, then back down to an arbitrary y' proof strategy for efq (avoiding an explicit LCA computation) surfaced a genuine, freshly-identified infrastructure GAP: this strategy needs every label reachable from a single distinguished root via Relation.ReflTransGen G.R, which is TRUE for every actual derivation graph (built from Graph.trivial + addEdge from existing nodes) but is NOT implied by IsDerivationForest's three existing conjuncts (finite + graded rank + unique parent) alone. This is not a machine-checked wall (no concrete efq/orE Lean goal has been attempted and refuted; every piece encountered across two dispatches has had a concrete, provable path, verified by compiling) but the cumulative remaining scope (root-connectivity invariant + preservation lemmas + propagate-up + propagate-down + orE's comparable treatment) is now estimated at 400-600+ further lines, several more dedicated dispatches -- well beyond Phase 8's own worst-case 6-run sizing for the WHOLE phase. Phase 8.2 stays [IN PROGRESS], not [BLOCKED].",
-  "artifacts": [
-    "specs/537_labelled_cs5_general_soundness_biconditional/plans/05_tree-recursive-hilbert-bridge.md",
-    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/13_phase8-2-crosslabel-infra-summary.md"
+  "summary": "Phase 9 MANDATORY PROBE GATE, dispatch 1 of 3 (hard cap). Wrote probes/theta_place_validation.lean (scratch, outside Cslib/) defining the candidate target-independent translation Theta(G,Gamma,root) := sigAt G Gamma hfin root AND bigAndL(orphanFacts G Gamma root), and place(ht,x,A) := boxIter (ht x) A, per the plan. Subjected it to all five adversarial gate cases. RESULT: cases A (disconnected conclusion), B (disconnected context / orphan-component), C (premise_escapes_graph shape, no x-in-G.X restriction), and E (Graph.trivial collapse / Phase 20 assembly) all PASS -- each is a sorry-free, axiom-clean positive derivation, no sorryAx per #print axioms. Case D (orE at depth >= 1) FAILS: built a concrete two-level graph (root r, depth-1 child c2, disconnected target y3) and machine-checked the generic orE core step (caseD_orE_core_from_bridge). It IS provable GIVEN the bridge lemma box(A-or-B) implies (box-A or box-B), but no route avoiding that bridge was found using the full cs5_deriv_* toolkit plus a plausible (Phase-12-scoped, not independently re-derived) Theta-injection hypothesis: stripping boxes via tBox yields a bare disjunction, but the branch hypotheses derived via injection are necessarily boxed (matching place's own box-indexing), and there is no hypothesis-level necessitation to bridge bare-to-boxed. This CONFIRMS (via an actual machine check of the specific inference shape, not merely an inherited assertion) the plan's own flagged primary residual risk: the flat depth-indexed place := box^d A genuinely needs the non-theorem that killed plan v4's fully-boxed flat shortcut, once the disjunction sits at depth >= 1. No semantic countermodel of the bridge lemma itself was built (out of scope for a shape-validation gate -- would need a Kripke-model construction). OVERALL GATE VERDICT: FAIL, on case D only. Per the plan's FAIL-handling instructions, the next Phase 9 dispatch (2 runs remain of the 3-run cap) should design a layered Theta_0 implies box(Theta_1 implies box(...)) alternative whose per-level antecedents carry the disjunction unboxed at the correct nesting level, then re-run ALL FIVE cases against it (a layered redesign changes both Theta and place, so the currently-passing cases must be re-confirmed, not assumed). Only if no candidate closes all five cases within the remaining budget does this route to Phase 23. Cslib/ was not touched by this dispatch (verified via git status --short Cslib/ at every commit boundary); a concurrent, unrelated agent's edit to Cslib/Logics/Modal/Tableau/LoopChecking.lean was neither staged nor committed by this dispatch.",
+  "phases_completed": 0,
+  "phases_total": 14,
+  "sorry_inventory": [],
+  "blockers": [
+    {
+      "phase": 9,
+      "case": "D",
+      "description": "orE at depth >= 1: the flat depth-indexed place(x,A) := box^{d(x)} A requires the non-theorem box(A-or-B) implies (box-A or box-B) to close the orE core step generically; no alternative route was found using the available cs5_deriv_* toolkit plus a plausible Theta-injection hypothesis.",
+      "goal_state": "Derivable CS5ModalAxiom ((Theta Gt2 [] Gt2_fin r).imp (place ht2 y3 C)) from hOr : Theta(Gamma) implies box(A-or-B), hA : Theta((c2:A)::Gamma) implies place(y3,C), hB : Theta((c2:B)::Gamma) implies place(y3,C) -- closes only given an extra bridge hypothesis box(A-or-B) implies (box-A or box-B); stripping via tBox to bare (A-or-B) leaves the branch hypotheses boxed (box-A implies place(y3,C)) with no route to unbox them without necessitation from an arbitrary hypothesis (unavailable) or the bridge itself.",
+      "what_was_tried": "Direct closure via inject + curry + orE Hilbert axiom (works only given bridge); T-iteration-only alternative (strips box off the major premise via tBox, but branch hypotheses remain boxed by construction of the injection step, so the antecedents do not line up).",
+      "root_cause": "place's flat box-iteration conflates all labels at a given depth; disjunction elimination fundamentally needs the box to distribute over the disjunction's TWO cases separately, which the K-axiom based system does not validate (box(A-or-B) does not imply box-A or box-B, standard modal-logic non-theorem, semantically false in general Kripke models with distinct accessible worlds satisfying different disjuncts).",
+      "what_is_needed": "A layered Theta/place redesign (e.g. Theta_0 implies box(Theta_1 implies box(...))) whose per-level antecedents carry the raw, unboxed disjunction at the exact nesting level orE needs, rather than a flattened box^d-wrapped formula -- to be designed and validated (all five cases) in the next Phase 9 dispatch."
+    }
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
+  "continuation_context": {
+    "phases_completed": 0,
+    "phases_total": 14,
+    "phase_9_gate_verdict": "FAIL (case D only; A, B, C, E all PASS)",
+    "phase_9_dispatch_count": 1,
+    "phase_9_dispatch_cap": 3,
+    "next_action_hint": "implement",
+    "next_dispatch_target": "Phase 9, dispatch 2: design a layered Theta_0 implies box(Theta_1 implies box(...)) place/Theta alternative addressing case D's confirmed obstruction, then re-validate ALL FIVE gate cases (A-E) against it in probes/theta_place_validation.lean (or a new probe file). Do NOT begin Phase 10 until the gate reports PASS on all five cases. Do NOT re-litigate the five established facts in the plan Overview. If no candidate closes all five cases within the remaining 2-run budget, route to Phase 23.",
+    "orchestrator_mode": true
+  },
+  "artifacts": [
+    {
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/probes/theta_place_validation.lean",
+      "type": "probe",
+      "summary": "Candidate Theta/place translation and all five adversarial gate cases (A-E); sorry-free, axiom-clean, compiles at exit 0. Cases A, B, C, E PASS; case D FAILS with a precisely machine-checked diagnosis."
+    },
+    {
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/06_target-independent-theta-translation.md",
+      "type": "plan",
+      "summary": "Phase 9 checklist annotated with per-case verdicts and the dispatch-1 finding; Phase 9 remains [IN PROGRESS]."
+    },
+    {
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/14_phase9-probe-gate-partial-summary.md",
+      "type": "summary",
+      "summary": "Full dispatch-1 writeup: what was done, the precise case-D finding, plan deviations, and next steps."
+    }
+  ],
   "files_modified": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
-    "specs/537_labelled_cs5_general_soundness_biconditional/plans/05_tree-recursive-hilbert-bridge.md",
-    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/13_phase8-2-crosslabel-infra-summary.md"
+    "specs/537_labelled_cs5_general_soundness_biconditional/probes/theta_place_validation.lean",
+    "specs/537_labelled_cs5_general_soundness_biconditional/plans/06_target-independent-theta-translation.md",
+    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/14_phase9-probe-gate-partial-summary.md",
+    "specs/537_labelled_cs5_general_soundness_biconditional/.orchestrator-handoff.json"
   ],
   "decisions_made": [
-    "sigAtFuel_mono_context (Delta contains Gamma pointwise implies Derivable(sigAtFuel Delta n z implies sigAtFuel Gamma n z), uniformly at every label) supersedes-in-scope the earlier rank-threshold sigAtFuel_congr_above_rank: the rank-threshold version could only relate labels of strictly greater rank than the extended label, insufficient for SIBLING branches (same rank), which the full ancestor-wrap's off-spine children require.",
-    "nikTrFuel's wrap step is asymmetric (implication/box, not conjunction), so unlike sigAtFuel it has NO unconditional fuel-monotonicity; the genuine fuel-sufficiency EQUALITY (nikTrFuel_fuel_invariant_step) was needed and built, via induction on an upper bound for the graded-rank witness ht.",
-    "Chose the 'propagate through a shared root' proof strategy for efq/orE (rather than an explicit lowest-common-ancestor computation), since G is always a single tree in practice -- but this exposed that IsDerivationForest as currently defined doesn't GUARANTEE single-tree connectivity (only local rank/uniqueness constraints), so a new root-connectivity invariant is needed before the strategy can be completed.",
-    "Did not attempt to define or prove the root-connectivity invariant in this dispatch -- flagged as the concrete next blocker for the next dispatch (or a dedicated /research pass) rather than rushed."
+    "Theta(G,Gamma,root) := sigAt G Gamma hfin root AND bigAndL(orphanFacts G Gamma root), reusing sigAt verbatim per the plan; orphanFacts is the Gamma-facts at labels not reachable from root (Relation.ReflTransGen), confirmed necessary and sufficient for case B.",
+    "place(ht,x,A) := boxIter (ht x) A, with ht an explicit graded-rank witness function (mirroring IsDerivationForest's own Function.update construction pattern) rather than a fully general depth accessor -- appropriately scoped to Phase 9 shape validation, not Phase 10/11's general depth-accessor infrastructure.",
+    "Theta-injection for case D's concrete two-level graph was posited as an explicit named hypothesis rather than independently re-derived, since the landed sigAt_cons_self_imp (closest analogue) itself avoids computing an explicit Finset.toList for this reason -- confirmed this is genuine Phase-12-sized infrastructure, correctly out of Phase 9's scope.",
+    "No semantic countermodel of the box-or-distribution bridge lemma was built; the case D deliverable is the structural machine-checked dependency, not a fresh semantic refutation (judged sufficient per the plan's case-D pass criterion, which asks only that 'the finding is recorded')."
   ],
-  "dead_ends": [],
-  "continuation_context": {
-    "phases_completed": 7,
-    "phases_total": 10,
-    "phase_8_substeps_completed": ["8.1"],
-    "phase_8_substep_8_2_progress": "8 of 10 in-scope constructor core lemmas landed (assumption, andI, andE1, andE2, orI1, orI2, impE, impI); substantial cross-label infrastructure landed (context-monotonicity, fuel-sufficiency); efq and orE themselves not yet attempted",
-    "phase_8_substeps_remaining": ["8.2 (efq/orE)", "8.3", "8.4"],
-    "orchestrator_mode": true,
-    "next_dispatch_target": "Sub-step 8.2 (continued): (1) define a root-connectivity invariant (e.g. IsRootedForest G := exists root, forall z in G.X, Relation.ReflTransGen G.R root z) and prove it preserved by Graph.trivial/addEdge, mirroring forest_trivial/forest_addEdge_fresh; (2) build the propagate-bottom-up-to-root argument for efq using sigAtFuel_mono_context + nikTrFuel_fuel_invariant_step + nikTrFuel_mono; (3) build the propagate-down-from-root argument; (4) extend to orE. Read summary 13 and the plan's Sub-step 8.2 deviation annotation in full before starting -- do not re-derive the analysis from scratch.",
-    "recommendation": "Consider a dedicated /research or /revise pass on the root-connectivity + propagation strategy before further ad hoc implementation, given the accumulated scope (700+ lines landed across two dispatches, cross-label cases not yet started). This is a suggestion, not a mandate: the plan's honesty clause reserves [BLOCKED] for genuine machine-checked obstructions, and none has been found -- route (a) (the faithful bridge) remains the committed line, report 04's ~70% rating stands, and every piece investigated so far has been tractable, verified engineering."
-  }
+  "dead_ends": [
+    "T-iteration-only route for orE (strip all boxes off the major premise via tBox, apply the plain Hilbert orE axiom to the bare disjunction): does not avoid the bridge, because the branch hypotheses obtained via Theta-injection are necessarily boxed at the disjunction's own depth, and there is no hypothesis-level necessitation from bare to boxed."
+  ]
 }

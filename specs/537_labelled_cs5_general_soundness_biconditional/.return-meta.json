@@ -1,16 +1,27 @@
 {
   "status": "partial",
-  "started_at": "2026-07-24T00:00:00Z",
+  "started_at": "2026-07-24T16:10:37Z",
   "artifacts": [
-    "specs/537_labelled_cs5_general_soundness_biconditional/plans/04_hilbert-adequacy-bridge.md",
-    "specs/537_labelled_cs5_general_soundness_biconditional/summaries/10_phase11-blocked-motive-redesign-summary.md"
+    {
+      "type": "lean",
+      "path": "Cslib/Logics/Modal/Metalogic/Constructive/Labelled/Soundness.lean",
+      "summary": "Phase 8.1 landed: bigAndL/factsAt/sigAtFuel/sigAt/nikTrFuel/nikTr, a fuel-bounded transcription of Simpson's Fig. 6-1/6-2 tree-depth-indexed Hilbert translation (Lemma 6.1.2), plus two sanity examples. Sorry-free, axiom-clean."
+    },
+    {
+      "type": "plan",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/plans/05_tree-recursive-hilbert-bridge.md",
+      "summary": "Sub-step 8.1's checklist marked done with three deviation annotations (OCR source corruption, fuel-based recursion instead of ht-indexed, top-padded sanity examples); Phase 8 remains [IN PROGRESS]."
+    },
+    {
+      "type": "summary",
+      "path": "specs/537_labelled_cs5_general_soundness_biconditional/summaries/11_phase8-1-nikTr-translation-summary.md",
+      "summary": "Implementation summary for this dispatch (Phase 8.1 only)."
+    }
   ],
-  "requires_user_review": true,
-  "review_reason": "Both sanctioned routes (Phase 8 Hilbert bridge, Phase 11 PD direct induction) hit genuine mathematical obstructions across two dispatches. Phase 11 is marked [BLOCKED]: PD.1 landed sorry-free/axiom-clean; PD.2's motive needed a corrected design (worked out by hand, verified for 11/12 NIK constructors, not yet in Lean); PD.3 (efq's disconnected-bot residual) confirmed genuinely open, independently re-derived. A replan is recommended to choose between completing the Phase 8 Hilbert Ch.6 bridge in full or scoping dedicated cut-admissibility research for PD.3.",
-  "blocked_phase": "phase-11",
+  "requires_user_review": false,
   "partial_progress": {
-    "stage": "blocked",
-    "details": "Fixed a stale Phase 11 heading marker left by the interrupted prior agent, then attempted PD.2/PD.3 as a design-only pass (no Lean written): re-derived the existential-teleport motive from report 04 by hand against all 12 NIK constructors, found the literal motive unprovable, designed a corrected exact-agreement-domain + protect-set-T motive that closes 11/12 constructors, and confirmed the 12th (efq's residual) is genuinely open. Marked Phase 11 [BLOCKED] per the plan's own sanctioned terminal; wrote implementation summary and orchestrator handoff.",
+    "stage": "phase-8-substep-8.1-landed",
+    "details": "Landed and committed Phase 8 sub-step 8.1 (nikTr tree-depth translation + sanity examples) of plan v5. Sub-steps 8.2 (propositional + cross-label efq/orE cases), 8.3 (modal cases), 8.4 (specialisation), and Phases 9-10 remain not started. No concrete machine-checked obstruction was hit; this is scope matching the plan's own four-to-six-dispatch sizing for Phase 8, not a wall. A new concrete prerequisite for 8.2 surfaced: a fuel-sufficiency lemma for sigAtFuel/nikTrFuel across an addEdge extension.",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 7
@@ -22,7 +33,7 @@
     "axiom_count": 0,
     "build_passed": true,
     "ci_pipeline_passed": null,
-    "note": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness) verified green; no Lean files modified this dispatch (design-only for Phase 11 PD.2/PD.3). Full CI pipeline (lake lint/lint-style/shake/test) not re-run since no Lean code changed from the already-verified commit 0172b639."
+    "note": "Scoped build (lake build Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness) green; lake exe checkInitImports clean; lake exe lint-style on the modified file clean; grep confirms zero sorry/axiom in the file. Full 7-step CI pipeline (lake lint whole-project / shake / test) not re-run this dispatch since status is partial, not implemented -- deferred to the dispatch that completes Phase 8-10."
   },
   "metadata": {
     "session_id": "sess_1784905751_756cda_537",

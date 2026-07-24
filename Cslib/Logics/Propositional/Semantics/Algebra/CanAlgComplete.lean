@@ -13,11 +13,27 @@ public import Cslib.Logics.Propositional.Semantics.Algebra.HilbertCompleteness
 
 /-! # Fragment-Generic Algebraic Completeness
 
+**`CanAlgComplete` is the single documented terminal interface for fragment algebraic
+completeness** in the propositional-algebra completeness stack. Every piecewise completeness
+theorem in this directory (`MPL.hilbert_alg_complete` in `HilbertCompleteness.lean`,
+`conjImp_brouwerian_complete` in `BrouwerianCompleteness.lean`, and the corresponding
+`MplConservativeChain.lean` results) is a **load-bearing internal input** to one of the three
+instances below (`canAlgCompleteIsBotFree`, `canAlgCompleteIsOrBotFree`,
+`canAlgCompleteIsImpTopOnly`) — those inputs stay public because they have dozens of external
+use-sites (see each theorem's own docstring for the exact count), but callers wanting the
+*fragment-completeness* property itself should go through `CanAlgComplete`/`canAlgComplete_iff`
+rather than the piecewise theorems directly.
+
 This module bundles the per-fragment algebraic completeness results (already proved piecewise in
 `HilbertCompleteness.lean`, `MplConservativeChain.lean`, and `BrouwerianCompleteness.lean`) behind
 a single generic interface, `CanAlgComplete P`. It completes the residual documented in
 `FragmentGeneric.lean`: the syntactic side `GHAValid φ → Derivable X-logic φ` is *not* new
 mathematics, only the unifying abstraction was missing.
+
+See also `FragmentConservativity` (`FragmentConservativity.lean`) for the sibling generic
+interface on the *conservativity* (subsumption/biconditional/ND) side of the same fragments;
+`CanAlgComplete` and `FragmentConservativity` together are the two terminal interfaces of the
+propositional-algebra completeness/conservativity stack.
 
 ## The `CanAlgComplete` Property
 

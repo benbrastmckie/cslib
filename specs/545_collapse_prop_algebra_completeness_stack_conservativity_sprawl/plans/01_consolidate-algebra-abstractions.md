@@ -237,25 +237,30 @@ files to re-export shims (or retire them), keeping all external importers resolv
 
 ---
 
-### Phase 4: Part A — terminal interface + collapse *_iff_chain [NOT STARTED]
+### Phase 4: Part A — terminal interface + collapse *_iff_chain [COMPLETED]
 
 **Goal**: Adopt `CanAlgComplete` as the documented terminal fragment-completeness interface, collapse
 the zero-consumer `*_iff_chain` restatements, and reclassify load-bearing piecewise theorems in
 docstrings (keeping them public).
 
 **Tasks**:
-- [ ] Verify (repo-wide grep) that `impAxiom_iff_chain`, `conjImpAxiom_iff_chain`,
+- [x] Verify (repo-wide grep) that `impAxiom_iff_chain`, `conjImpAxiom_iff_chain`,
       `orImpAxiom_iff_chain`, `minAxiom_iff_chain` still have zero external use-sites.
-- [ ] In `ConservativeChain.lean`, delete the four `*_iff_chain` theorems, OR re-express each as a
+- [x] In `ConservativeChain.lean`, delete the four `*_iff_chain` theorems, OR re-express each as a
       one-line corollary of `canAlgComplete_iff` / the retained fragment instances (remove the parallel
-      bespoke proofs either way).
-- [ ] Add/adjust the `CanAlgComplete.lean` docstring to declare it the terminal generic
+      bespoke proofs either way). *(deleted outright -- each was a `.symm` of an already-public
+      biconditional with zero consumers; a docstring note left in their place pointing to
+      `CanAlgComplete.lean`.)*
+- [x] Add/adjust the `CanAlgComplete.lean` docstring to declare it the terminal generic
       fragment-completeness interface.
-- [ ] Reclassify `MPL.hilbert_alg_complete`, `conjImp_brouwerian_complete`, and the other load-bearing
+- [x] Reclassify `MPL.hilbert_alg_complete`, `conjImp_brouwerian_complete`, and the other load-bearing
       inputs in their docstrings as "internal inputs to `CanAlgComplete`" — **docstring text only; do
       NOT change visibility, names, or signatures**.
-- [ ] If any fragment-completeness *restatement* is found to be a literal `canAlgComplete_iff`
+- [x] If any fragment-completeness *restatement* is found to be a literal `canAlgComplete_iff`
       instance, replace only its proof body with a one-line term (keep the name if it has consumers).
+      *(none found: `mplAxiom_iff_conjImpAxiom`/`mplAxiom_iff_impAxiom` are MPL-to-fragment
+      biconditionals, not `canAlgComplete_iff`/`fragmentConservativity_iff` instances -- left
+      untouched.)*
 
 **Timing**: ~1.5 hours
 

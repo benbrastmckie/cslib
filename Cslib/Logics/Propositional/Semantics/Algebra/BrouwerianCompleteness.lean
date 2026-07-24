@@ -147,7 +147,14 @@ and `hilbertLindenbaumMk_eq_top_iff` extracts derivability.
 
 The restriction to `IsOrBotFree` is necessary: `bot` is vacuously Brouwerian-valid
 (since `BrouwerianEvaluate v bot = ⊤` by definition) but not derivable in `ConjImpAxiom`
-(no EFQ axiom is available). -/
+(no EFQ axiom is available).
+
+**Terminal-interface note**: this theorem is a load-bearing *internal input* to
+`CanAlgComplete` (`CanAlgComplete.lean`), which is the single documented terminal interface
+for fragment algebraic completeness — see `canAlgCompleteIsOrBotFree`, and (via
+`fragmentConservativityConjImp`) the `FragmentConservativity` instance in
+`FragmentConservativityInstances.lean`. It stays public (14+ use-sites); only its role in the
+completeness stack is being reclassified here, not its visibility, name, or signature. -/
 theorem conjImp_brouwerian_complete {Atom : Type u} {φ : PL.Proposition Atom}
     (hfrag : φ.IsOrBotFree = true)
     (h : BrouwerianValid.{u, u} φ) :

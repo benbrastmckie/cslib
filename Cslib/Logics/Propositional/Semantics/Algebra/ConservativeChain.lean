@@ -270,41 +270,14 @@ theorem hilbertMplConservativeOverConjImp {Atom : Type u} {φ : PL.Proposition A
     Derivable (@ConjImpAxiom Atom) φ :=
   hilbertIplConservativeOverConjImp hOBF (derivableMinOfDerivableInt h)
 
-/-! ## Biconditional Chain -/
+/-! ## Glivenko Strength Wrapper
 
-/-- **Biconditional for IPL⟨→,⊤⟩ in the chain**: for imp-top-only formulas, derivability
-in ImpAxiom, ConjImpAxiom, MinPropAxiom, and IntPropAxiom all coincide.
-
-This is the key consequence of the full conservative extension chain restricted to
-imp-top-only formulas, composing the biconditionals from each step. -/
-theorem impAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
-    (hITO : φ.IsImpTopOnly = true) :
-    Derivable (@ImpAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
-  hilbertIplConservativeOverImp_iff hITO |>.symm
-
-/-- **Biconditional for IPL⟨∧,→,⊤⟩ in the chain**: for or-bot-free formulas, derivability
-in ConjImpAxiom, MinPropAxiom, and IntPropAxiom all coincide. -/
-theorem conjImpAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
-    (hOBF : φ.IsOrBotFree = true) :
-    Derivable (@ConjImpAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
-  hilbertIplConservativeOverConjImp_iff hOBF |>.symm
-
-/-- **Biconditional for IPL⟨∨,→,⊤⟩ in the chain**: for and-bot-free formulas, derivability
-in OrImpAxiom and IntPropAxiom coincide. This places the disjunctive-implicational fragment
-IPL⟨∨,→,⊤⟩ in the conservative extension chain alongside IPL⟨∧,→,⊤⟩. -/
-theorem orImpAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
-    (hABF : φ.IsAndBotFree = true) :
-    Derivable (@OrImpAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
-  hilbertIplConservativeOverOrImp_iff hABF |>.symm
-
-/-- **Biconditional for MPL in the chain**: for bot-free formulas, derivability in
-MinPropAxiom and IntPropAxiom coincide. -/
-theorem minAxiom_iff_chain {Atom : Type u} {φ : PL.Proposition Atom}
-    (hBF : φ.IsBotFree = true) :
-    Derivable (@MinPropAxiom Atom) φ ↔ Derivable (@IntPropAxiom Atom) φ :=
-  ⟨derivableMinOfDerivableInt, hilbertIplConservativeOverMpl hBF⟩
-
-/-! ## Glivenko Strength Wrapper -/
+(The zero-consumer `impAxiom_iff_chain` / `conjImpAxiom_iff_chain` / `orImpAxiom_iff_chain` /
+`minAxiom_iff_chain` biconditional restatements formerly here were collapsed as part of the
+Part-A completeness-stack consolidation: each was a `.symm` of an already-public biconditional
+(`hilbertIplConservativeOverX_iff` / the `minAxiom` case) with no external use-site, so they
+added a redundant restatement rather than new content. See `CanAlgComplete.lean` for the
+documented terminal fragment-completeness interface these biconditionals ultimately feed.) -/
 
 /-- **Theory-parametric Glivenko (strength wrapper)**: if every axiom of `A_cl` is a
 `PropositionalAxiom` (classical soundness), and every `IntPropAxiom` is an axiom of `A_int`

@@ -89,7 +89,13 @@ Recovered as a corollary of `hilbert_alg_complete_theory`.
 - **Forward**: Apply `hilbert_alg_complete_theory.mp` at `bot_val = ⊥`, discharging
   `AlgTValid` via `min_alg_axiom_sound` (which proves each axiom evaluates to `⊤`).
 - **Backward**: Instantiate `GHAValid` at the Hilbert Lindenbaum algebra for `MinPropAxiom`,
-  apply `canonicalV_spec`, and extract derivability via `hilbertLindenbaumMk_eq_top_iff`. -/
+  apply `canonicalV_spec`, and extract derivability via `hilbertLindenbaumMk_eq_top_iff`.
+
+**Terminal-interface note**: this theorem is a load-bearing *internal input* to
+`CanAlgComplete` (`CanAlgComplete.lean`), which is the single documented terminal interface
+for fragment algebraic completeness — see `canAlgCompleteIsBotFree`. It stays public (20+
+use-sites, including `Foundations/Logic/ProofSystem.lean`); only its role in the completeness
+stack is being reclassified here, not its visibility, name, or signature. -/
 theorem MPL.hilbert_alg_complete {Atom : Type u} {φ : PL.Proposition Atom} :
     Derivable (@MinPropAxiom Atom) φ ↔ GHAValid.{u, u} φ := by
   constructor

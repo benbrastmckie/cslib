@@ -4910,6 +4910,499 @@ private lemma modalWork_drop_persistent_S4
   have hdrop := modalCount_notMem_append_drop_S4 U b x0 hx0U hx0notin
   omega
 
+/-! ## Keyed-Driver Termination Measure: Per-Call Obligations for `modalApplyOneS4Keyed`
+
+The three raw measure-step hypotheses (`hBranchingLength`/`hPersistentFresh`/
+`hOutputsSubsetUniverse`, the shape consumed by `modalExpMeasure_step_lt_gen`,
+`FmpMeasure.lean:3227-3246`) as S4Keyed analogues, each universally quantified over `keys` so a
+single lemma serves every fuel step. Built by the same mint-blocked/mint-unblocked/non-mint case
+split as `modalStepBranchS4_preserves_bClosure`. The T-rule/4-rule propagation arms
+(`modalTBoxSelf`/`modalTDiaNegSelf`/`modalFourBoxProp`/`modalFourDiaNegProp`, `FrameRules.lean`)
+never appear in K's own dispatch, so their persistent-freshness is new content, established here
+via their shared filter-guard shape (mirroring `diamondNeg_filterMap_fresh`,
+`FmpMeasure.lean:3032`). -/
+
+omit [Hashable Atom] in
+/-- `modalTBoxSelf`'s nonempty branch is exactly `[sf]` with `sf ∉ b` by the guard itself. -/
+private lemma modalTBoxSelf_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ modalTBoxSelf b φ w, x ∉ b := by
+  simp only [modalTBoxSelf]
+  split_ifs with h
+  · simp
+  · simp only [List.mem_singleton]
+    rintro x rfl
+    simp only [Bool.not_eq_true] at h
+    rw [List.any_eq_false] at h
+    exact fun hxb => h _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- `modalTDiaNegSelf`'s nonempty branch is exactly `[sf]` with `sf ∉ b`. Dual of
+`modalTBoxSelf_fresh`. -/
+private lemma modalTDiaNegSelf_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ modalTDiaNegSelf b φ w, x ∉ b := by
+  simp only [modalTDiaNegSelf]
+  split_ifs with h
+  · simp
+  · simp only [List.mem_singleton]
+    rintro x rfl
+    simp only [Bool.not_eq_true] at h
+    rw [List.any_eq_false] at h
+    exact fun hxb => h _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- Every formula `modalFourBoxProp` emits is fresh (`∉ b`), by the same `filterMap` guard
+technique as `diamondNeg_filterMap_fresh` (`FmpMeasure.lean:3032`). -/
+private lemma modalFourBoxProp_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ modalFourBoxProp b acc φ w, x ∉ b := by
+  intro x hx
+  simp only [modalFourBoxProp, List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  split_ifs at hxeq with hcond
+  · simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    intro hxb
+    simp only [Bool.not_eq_true] at hcond
+    rw [List.any_eq_false] at hcond
+    exact hcond _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- Every formula `modalFourDiaNegProp` emits is fresh (`∉ b`). Dual of
+`modalFourBoxProp_fresh`. -/
+private lemma modalFourDiaNegProp_fresh
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    ∀ x ∈ modalFourDiaNegProp b acc φ w, x ∉ b := by
+  intro x hx
+  simp only [modalFourDiaNegProp, List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  split_ifs at hxeq with hcond
+  · simp only [Option.some.injEq] at hxeq
+    subst hxeq
+    intro hxb
+    simp only [Bool.not_eq_true] at hcond
+    rw [List.any_eq_false] at hcond
+    exact hcond _ hxb (by simp)
+
+omit [Hashable Atom] in
+/-- **Persistent-rule nonemptiness/freshness for `modalApplyOneT`** (T-augmented K): whenever
+`modalApplyOneT sf b acc` produces a `.persistent` result, the emitted formulas are nonempty and
+fresh. At the two T-relevant shapes (`T(□φ)@w`/`F(◇φ)@w`), composes K's own
+`modalApplyOne_persistent_props` with `modalTBoxSelf_fresh`/`modalTDiaNegSelf_fresh`; at every
+other shape `modalApplyOneT` reduces to `modalApplyOne` directly
+(`modalApplyOneT_eq_of_not_boxPos_diaNeg`), so K's fact applies unchanged. -/
+private lemma modalApplyOneT_persistentFresh
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hca : (modalApplyOneT sf b acc).fst = .persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq] at hca
+    unfold modalApplyOneT at hca
+    dsimp only at hca
+    rcases hk : (modalApplyOne (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      simp only [RuleResult.persistent.injEq] at hca
+      obtain ⟨hkf, hkfresh⟩ := modalApplyOne_persistent_props _ b acc kf hk
+      have hself := modalTBoxSelf_fresh b ψ sf.label
+      refine ⟨?_, ?_⟩
+      · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil hkf _
+      · intro x hx
+        rw [← hca] at hx
+        rcases List.mem_append.mp hx with hxk | hxs
+        · exact hkfresh x hxk
+        · exact hself x (List.mem_of_mem_filter hxs)
+    · rw [hk] at hca
+      dsimp only at hca
+      split_ifs at hca with hemp
+      · simp only [RuleResult.persistent.injEq] at hca
+        refine ⟨?_, ?_⟩
+        · rw [← hca]; simp only [Bool.not_eq_true] at hemp
+          exact List.isEmpty_eq_false_iff.mp hemp
+        · intro x hx; rw [← hca] at hx; exact modalTBoxSelf_fresh b ψ sf.label x hx
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      unfold modalApplyOneT at hca
+      dsimp only at hca
+      rcases hk : (modalApplyOne (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        simp only [RuleResult.persistent.injEq] at hca
+        obtain ⟨hkf, hkfresh⟩ := modalApplyOne_persistent_props _ b acc kf hk
+        have hself := modalTDiaNegSelf_fresh b ψ sf.label
+        refine ⟨?_, ?_⟩
+        · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil hkf _
+        · intro x hx
+          rw [← hca] at hx
+          rcases List.mem_append.mp hx with hxk | hxs
+          · exact hkfresh x hxk
+          · exact hself x (List.mem_of_mem_filter hxs)
+      · rw [hk] at hca
+        dsimp only at hca
+        split_ifs at hca with hemp
+        · simp only [RuleResult.persistent.injEq] at hca
+          refine ⟨?_, ?_⟩
+          · rw [← hca]; simp only [Bool.not_eq_true] at hemp
+            exact List.isEmpty_eq_false_iff.mp hemp
+          · intro x hx; rw [← hca] at hx; exact modalTDiaNegSelf_fresh b ψ sf.label x hx
+    · have heq : modalApplyOneT sf b acc = modalApplyOne sf b acc :=
+        modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩
+      rw [heq] at hca
+      exact modalApplyOne_persistent_props sf b acc nf hca
+
+omit [Hashable Atom] in
+/-- **Branching-length for `modalApplyOneT`**: `modalApplyOneT` never introduces branching at
+the two T-relevant shapes (K's own dispatch is `persistent`/`notApplicable` only there, and the
+T-merge never turns either into `.branching`), so any `.branching` result must come from the
+`_,_` fallthrough, i.e. from `modalApplyOne` directly, where K's own
+`modalApplyOne_branching_length` applies. -/
+private lemma modalApplyOneT_branchingLength
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hca : (modalApplyOneT sf b acc).fst = .branching brs) :
+    brs.length = 2 := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq] at hca
+    unfold modalApplyOneT at hca
+    dsimp only at hca
+    rcases hk : (modalApplyOne (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      dsimp only at hca
+      simp only [RuleResult.branching.injEq] at hca
+      rw [← hca]
+      exact modalApplyOne_branching_length _ b acc kbrs hk
+    · rw [hk] at hca; simp at hca
+    · rw [hk] at hca
+      dsimp only at hca
+      split_ifs at hca
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      unfold modalApplyOneT at hca
+      dsimp only at hca
+      rcases hk : (modalApplyOne (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with kf | kbrs | kf | -
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        dsimp only at hca
+        simp only [RuleResult.branching.injEq] at hca
+        rw [← hca]
+        exact modalApplyOne_branching_length _ b acc kbrs hk
+      · rw [hk] at hca; simp at hca
+      · rw [hk] at hca
+        dsimp only at hca
+        split_ifs at hca
+    · have heq : modalApplyOneT sf b acc = modalApplyOne sf b acc :=
+        modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩
+      rw [heq] at hca
+      exact modalApplyOne_branching_length sf b acc brs hca
+
+omit [Hashable Atom] in
+/-- **Persistent-rule nonemptiness/freshness for `modalApplyOneS4Rules`** (T+4-augmented K):
+same recipe as `modalApplyOneT_persistentFresh`, one layer up -- composes
+`modalApplyOneT_persistentFresh` with `modalFourBoxProp_fresh`/`modalFourDiaNegProp_fresh` at the
+two 4-relevant shapes, and reduces to `modalApplyOneT` directly elsewhere
+(`modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg`). -/
+private lemma modalApplyOneS4Rules_persistentFresh
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hca : (modalApplyOneS4Rules sf b acc).fst = .persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq] at hca
+    unfold modalApplyOneS4Rules at hca
+    dsimp only at hca
+    rcases ht : (modalApplyOneT (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with tf | tbrs | tf | -
+    · rw [ht] at hca; simp at hca
+    · rw [ht] at hca; simp at hca
+    · rw [ht] at hca
+      simp only [RuleResult.persistent.injEq] at hca
+      obtain ⟨htf, htfresh⟩ := modalApplyOneT_persistentFresh _ b acc tf ht
+      have hfour := modalFourBoxProp_fresh b acc ψ sf.label
+      refine ⟨?_, ?_⟩
+      · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil htf _
+      · intro x hx
+        rw [← hca] at hx
+        rcases List.mem_append.mp hx with hxt | hxs
+        · exact htfresh x hxt
+        · exact hfour x (List.mem_of_mem_filter hxs)
+    · rw [ht] at hca
+      dsimp only at hca
+      split_ifs at hca with hemp
+      · simp only [RuleResult.persistent.injEq] at hca
+        refine ⟨?_, ?_⟩
+        · rw [← hca]; simp only [Bool.not_eq_true] at hemp
+          exact List.isEmpty_eq_false_iff.mp hemp
+        · intro x hx; rw [← hca] at hx; exact modalFourBoxProp_fresh b acc ψ sf.label x hx
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      unfold modalApplyOneS4Rules at hca
+      dsimp only at hca
+      rcases ht : (modalApplyOneT (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with tf | tbrs | tf | -
+      · rw [ht] at hca; simp at hca
+      · rw [ht] at hca; simp at hca
+      · rw [ht] at hca
+        simp only [RuleResult.persistent.injEq] at hca
+        obtain ⟨htf, htfresh⟩ := modalApplyOneT_persistentFresh _ b acc tf ht
+        have hfour := modalFourDiaNegProp_fresh b acc ψ sf.label
+        refine ⟨?_, ?_⟩
+        · rw [← hca]; exact List.append_ne_nil_of_left_ne_nil htf _
+        · intro x hx
+          rw [← hca] at hx
+          rcases List.mem_append.mp hx with hxt | hxs
+          · exact htfresh x hxt
+          · exact hfour x (List.mem_of_mem_filter hxs)
+      · rw [ht] at hca
+        dsimp only at hca
+        split_ifs at hca with hemp
+        · simp only [RuleResult.persistent.injEq] at hca
+          refine ⟨?_, ?_⟩
+          · rw [← hca]; simp only [Bool.not_eq_true] at hemp
+            exact List.isEmpty_eq_false_iff.mp hemp
+          · intro x hx; rw [← hca] at hx
+            exact modalFourDiaNegProp_fresh b acc ψ sf.label x hx
+    · have heq : modalApplyOneS4Rules sf b acc = modalApplyOneT sf b acc :=
+        modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩
+      rw [heq] at hca
+      exact modalApplyOneT_persistentFresh sf b acc nf hca
+
+omit [Hashable Atom] in
+/-- **Branching-length for `modalApplyOneS4Rules`**: same argument as
+`modalApplyOneT_branchingLength`, one layer up. -/
+private lemma modalApplyOneS4Rules_branchingLength
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hca : (modalApplyOneS4Rules sf b acc).fst = .branching brs) :
+    brs.length = 2 := by
+  by_cases hbp : sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ
+  · obtain ⟨hs, ψ, hf⟩ := hbp
+    have hsfeq : sf = (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rw [hsfeq] at hca
+    unfold modalApplyOneS4Rules at hca
+    dsimp only at hca
+    rcases ht : (modalApplyOneT (⟨Sign.pos, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst with tf | tbrs | tf | -
+    · rw [ht] at hca; simp at hca
+    · rw [ht] at hca
+      dsimp only at hca
+      simp only [RuleResult.branching.injEq] at hca
+      rw [← hca]
+      exact modalApplyOneT_branchingLength _ b acc tbrs ht
+    · rw [ht] at hca; simp at hca
+    · rw [ht] at hca
+      dsimp only at hca
+      split_ifs at hca
+  · by_cases hdn : sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ
+    · obtain ⟨hs, ψ, hf⟩ := hdn
+      have hsfeq : sf = (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      unfold modalApplyOneS4Rules at hca
+      dsimp only at hca
+      rcases ht : (modalApplyOneT (⟨Sign.neg, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc).fst with tf | tbrs | tf | -
+      · rw [ht] at hca; simp at hca
+      · rw [ht] at hca
+        dsimp only at hca
+        simp only [RuleResult.branching.injEq] at hca
+        rw [← hca]
+        exact modalApplyOneT_branchingLength _ b acc tbrs ht
+      · rw [ht] at hca; simp at hca
+      · rw [ht] at hca
+        dsimp only at hca
+        split_ifs at hca
+    · have heq : modalApplyOneS4Rules sf b acc = modalApplyOneT sf b acc :=
+        modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc ⟨hbp, hdn⟩
+      rw [heq] at hca
+      exact modalApplyOneT_branchingLength sf b acc brs hca
+
+/-- **`hPersistentFresh` obligation for `modalApplyOneS4Keyed`**, for any `keys`: mint-blocked
+gives `.linear []` (vacuous, never `.persistent`); mint-unblocked reduces to raw `modalApplyOne`
+(K's own `modalApplyOne_persistent_props` applies directly); non-mint reduces to
+`modalApplyOneS4Rules` (`modalApplyOneS4Rules_persistentFresh` applies). -/
+private lemma modalApplyOneS4Keyed_persistentFresh_S4
+    (φ₀ : Proposition Atom) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (nf : List (SignedFormula (Proposition Atom) WorldIndex))
+    (hca : (modalApplyOneS4Keyed φ₀ keys sf b acc).fst = .persistent nf) :
+    nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b := by
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2] at hca
+        exact modalApplyOne_persistent_props _ b acc nf hca
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2] at hca; simp at hca
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2] at hca
+        exact modalApplyOne_persistent_props _ b acc nf hca
+      · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2] at hca; simp at hca
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+      unfold modalApplyOneS4Keyed
+      rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+        simp_all
+    rw [heq1, modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc hnbd] at hca
+    by_cases h2' : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · exact modalApplyOneS4Rules_persistentFresh sf b acc nf hca
+    · have hnbd2 : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+          ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+        ⟨fun hc => h2' (Or.inl hc), fun hc => h2' (Or.inr hc)⟩
+      rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc hnbd2,
+          modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc hnbd2] at hca
+      exact modalApplyOne_persistent_props sf b acc nf hca
+
+/-- **`hBranchingLength` obligation for `modalApplyOneS4Keyed`**, for any `keys`: same
+mint-blocked/mint-unblocked/non-mint split as `modalApplyOneS4Keyed_persistentFresh_S4`. -/
+private lemma modalApplyOneS4Keyed_branchingLength_S4
+    (φ₀ : Proposition Atom) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (brs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (hca : (modalApplyOneS4Keyed φ₀ keys sf b acc).fst = .branching brs) :
+    brs.length = 2 := by
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2] at hca
+        exact modalApplyOne_branching_length _ b acc brs hca
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2] at hca; simp at hca
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rw [hsfeq] at hca
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2] at hca
+        exact modalApplyOne_branching_length _ b acc brs hca
+      · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2] at hca; simp at hca
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have heq1 : modalApplyOneS4Keyed φ₀ keys sf b acc = modalApplyOneS4 φ₀ sf b acc := by
+      unfold modalApplyOneS4Keyed
+      rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+        simp_all
+    rw [heq1, modalApplyOneS4_eq_of_not_boxNeg_diaPos φ₀ sf b acc hnbd] at hca
+    by_cases h2' : (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∨
+        (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ)
+    · exact modalApplyOneS4Rules_branchingLength sf b acc brs hca
+    · have hnbd2 : ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .box φ) ∧
+          ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .diamond φ) :=
+        ⟨fun hc => h2' (Or.inl hc), fun hc => h2' (Or.inr hc)⟩
+      rw [modalApplyOneS4Rules_eq_of_not_boxPos_diaNeg sf b acc hnbd2,
+          modalApplyOneT_eq_of_not_boxPos_diaNeg sf b acc hnbd2] at hca
+      exact modalApplyOne_branching_length sf b acc brs hca
+
+/-- **`hOutputsSubsetUniverse` obligation for `modalApplyOneS4Keyed`**, assembled from the
+mint-unblocked outputs-subset facts (`modalApplyOne_boxNeg_outputs_subset_S4`/
+`modalApplyOne_diamondPos_outputs_subset_S4`, needing the STRICT world bound `hW`, supplied by
+`modalStepBranchS4_worldBound`), the vacuous mint-blocked case, and the already-landed
+`modalApplyOneS4Keyed_nonMint_universe_S4` for the 12 non-minting shapes. Mirrors
+`modalStepBranchS4_preserves_bClosure`'s case split exactly, concluding the raw universe-subset
+match fact instead of branch-closure. -/
+private lemma modalApplyOneS4Keyed_outputsSubsetUniverse_S4
+    (φ₀ : Proposition Atom) (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀) (hsfmem : sf ∈ b)
+    (hknown : accTargetsKnown b acc)
+    (hWC : worldsContiguousS4 b)
+    (hKT : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀) :
+    (match (modalApplyOneS4Keyed φ₀ keys sf b acc).fst with
+      | .linear fs => ∀ x ∈ fs, x ∈ modalUniverseS4 φ₀
+      | .branching brs => ∀ x ∈ brs.flatten, x ∈ modalUniverseS4 φ₀
+      | .persistent fs => ∀ x ∈ fs, x ∈ modalUniverseS4 φ₀
+      | .notApplicable => True) := by
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
+    rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+      rw [hsfeq]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2, modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label]
+        exact modalApplyOne_boxNeg_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
+      · have heq2 := modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2]; simp
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+      rw [hsfeq]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 := modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [heq2, modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label]
+        exact modalApplyOne_diamondPos_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
+      · have heq2 := modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [heq2]; simp
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    exact modalApplyOneS4Keyed_nonMint_universe_S4 φ₀ keys sf b acc hb hsfmem hknown hnbd
+
 end Cslib.Logic.Modal.Tableau
 
 end

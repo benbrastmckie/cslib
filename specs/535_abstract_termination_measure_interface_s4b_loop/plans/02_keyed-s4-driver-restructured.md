@@ -176,28 +176,41 @@ only.
 - **Verification:** `lean_goal` no remaining goals on all four; `lean_verify` axiom-clean; frozen
   defs unchanged.
 
-### Phase 4 (handoff 3b): Per-call measure obligations for `modalApplyOneS4Keyed φ₀ keys`, ∀ `keys` [NOT STARTED]
+### Phase 4 (handoff 3b): Per-call measure obligations for `modalApplyOneS4Keyed φ₀ keys`, ∀ `keys` [COMPLETED]
 
 - **Goal:** Establish the three raw measure-step hypotheses (`hBranchingLength`/`hPersistentFresh`/
   `hOutputsSubsetUniverse`, template `FmpMeasure.lean:3227-3246`) as S4Keyed analogues, each
   universally quantified over `keys`, so a single lemma serves every step.
 - **Tasks:**
-  - [ ] Case-split as `modalStepBranchS4_preserves_bClosure` does (search that name in
+  - [x] Case-split as `modalStepBranchS4_preserves_bClosure` does (search that name in
         `LoopChecking.lean` for the template): mint-unblocked / mint-blocked / non-mint.
-  - [ ] **Mint-unblocked** (reduces to `modalApplyOne` via `modalApplyOneS4Keyed_boxNeg_unblocked_eq`/
+  - [x] **Mint-unblocked** (reduces to `modalApplyOne` via `modalApplyOneS4Keyed_boxNeg_unblocked_eq`/
         `_diaPos_unblocked_eq`, `LoopChecking.lean:727,749`): reuse `modalApplyOne_persistent_props`/
         `modalApplyOne_branching_length` (`FmpMeasure.lean:3062,3125`) directly.
-  - [ ] **Mint-blocked** (`.linear []`): all three hold vacuously (empty output, not persistent/branching).
-  - [ ] **Non-mint** (reduces to `modalApplyOneS4Rules`/`modalApplyOneT`): outputs-subset-universe
+  - [x] **Mint-blocked** (`.linear []`): all three hold vacuously (empty output, not persistent/branching).
+  - [x] **Non-mint** (reduces to `modalApplyOneS4Rules`/`modalApplyOneT`): outputs-subset-universe
         from the landed `modalApplyOneS4Keyed_nonMint_universe_S4` (`LoopChecking.lean:2456`,
         same-file-accessible); prove small `persistentFresh`/`branchingLength` lemmas mirroring the
         T/S4Rules dispatch in `modalStepBranchS4_preserves_bClosure`'s non-mint branch.
-  - [ ] `lean_build` green; no `sorry`; `lean_verify` axiom-clean. If a sub-lemma resists,
+        *(landed as `modalApplyOneT_persistentFresh`/`_branchingLength` and
+        `modalApplyOneS4Rules_persistentFresh`/`_branchingLength`, composing K's own
+        `modalApplyOne_persistent_props`/`_branching_length` with four new freshness facts for the
+        T-rule/4-rule propagation helpers: `modalTBoxSelf_fresh`, `modalTDiaNegSelf_fresh`,
+        `modalFourBoxProp_fresh`, `modalFourDiaNegProp_fresh`.)*
+  - [x] `lean_build` green; no `sorry`; `lean_verify` axiom-clean. If a sub-lemma resists,
         `[BLOCKED]` with exact `lean_goal`.
 - **Timing:** 3 hours (~150-300 lines)
 - **Depends on:** none (consumes landed `modalApplyOne`/S4Keyed facts)
 - **Files to modify:** `Cslib/Logics/Modal/Tableau/LoopChecking.lean` (additive).
 - **Verification:** `lean_goal` no remaining goals; `lean_verify` axiom-clean.
+- **Completed:** 2026-07-24. Landed (all `private`, additive, in `LoopChecking.lean`):
+  `modalTBoxSelf_fresh`, `modalTDiaNegSelf_fresh`, `modalFourBoxProp_fresh`,
+  `modalFourDiaNegProp_fresh`, `modalApplyOneT_persistentFresh`, `modalApplyOneT_branchingLength`,
+  `modalApplyOneS4Rules_persistentFresh`, `modalApplyOneS4Rules_branchingLength`,
+  `modalApplyOneS4Keyed_persistentFresh_S4`, `modalApplyOneS4Keyed_branchingLength_S4`,
+  `modalApplyOneS4Keyed_outputsSubsetUniverse_S4` (the three target per-call obligations, each
+  `∀ keys`). All `lean_verify`-confirmed `propext`/`Classical.choice`/`Quot.sound` only;
+  `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green, zero new warnings, zero `sorry`.
 
 ### Phase 5 (handoff 3c): `modalFuelS4` + entry-measure sufficiency + fuel repoint [NOT STARTED]
 

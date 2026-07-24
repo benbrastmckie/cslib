@@ -239,17 +239,32 @@ disjoint from Phase 2.
 
 ---
 
-### Phase 4: Modal/Metalogic/Constructive [NOT STARTED]
+### Phase 4: Modal/Metalogic/Constructive [COMPLETED]
 
 **Goal**: Strip provenance from `Modal/Metalogic/Constructive` (253 hits / 15 files), including the
 `Labelled/` subtree. This sub-area holds the majority of the 24 `specs/NNN` links.
 
 **Tasks**:
-- [ ] `Constructive/CS5Canonical.lean` (64), `CS5.lean` (47), `CS4.lean`, `CKExtension.lean`, and `Labelled/PrimeLemma.lean` (45), `Labelled/Soundness.lean` (58), `Labelled/Completeness.lean`, `Labelled/Context.lean`.
-- [ ] Delete the embedded `specs/NNN` links in `CS4`, `CS5`, `CS5Canonical`, `CKExtension`, `Labelled/Completeness`, `Labelled/Soundness`, `Labelled/PrimeLemma` (top priority).
-- [ ] Note task 544's renames are already in the tree; delete `renamed from`/`formerly` narrative that documents those renames (report §2).
-- [ ] Apply report §5 methodology throughout.
-- [ ] `lake build` of the touched Constructive modules.
+- [x] `Constructive/CS5Canonical.lean` (64), `CS5.lean` (47), `CS4.lean`, `CKExtension.lean`, and `Labelled/PrimeLemma.lean` (45), `Labelled/Soundness.lean` (58), `Labelled/Completeness.lean`, `Labelled/Context.lean`.
+  *(done across commits 5e661da2 (Soundness), 14bdaebc (CS5Canonical), 69b71077 (CS5),
+  7835cece (PrimeLemma), 272ca08c (CKExtension), 627a50d9 (Context), 372b4372 (CS4),
+  f6dc0540 (Completeness))*
+- [x] Delete the embedded `specs/NNN` links in `CS4`, `CS5`, `CS5Canonical`, `CKExtension`, `Labelled/Completeness`, `Labelled/Soundness`, `Labelled/PrimeLemma` (top priority).
+  *(all embedded specs/NNN links removed, including the specs/517 report links in
+  Labelled/CanonicalModel.lean and Labelled/Completeness.lean discovered during the
+  full-tree sweep)*
+- [x] Note task 544's renames are already in the tree; delete `renamed from`/`formerly` narrative that documents those renames (report §2).
+  *(grep for `renamed from`/`formerly` across the tree found nothing remaining)*
+- [x] Apply report §5 methodology throughout.
+- [x] `lake build` of the touched Constructive modules.
+  *(also stripped: Deduction.lean's two remaining probe-file/task-517 citations
+  (commit 38e1bf22); CK.lean, CT.lean, Segment.lean, SegmentLindenbaum.lean bare
+  task-number citations (commit 5b4d596d); Labelled/CanonicalModel.lean,
+  Labelled/FrameClass.lean, Labelled/Completeness.lean full dispatch-narrative
+  rewrite (commit f6dc0540). Full-tree grep across
+  `Cslib/Logics/Modal/Metalogic/Constructive/` for task/phase/specs/renamed-from/
+  formerly/probes patterns is now empty; every touched module builds green with
+  zero live sorry.)*
 
 **Timing**: 1.25 hours
 

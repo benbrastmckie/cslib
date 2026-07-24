@@ -26,8 +26,8 @@ they say nothing about `witnessWorldS5`/`witnessWorldFive` -- apply unchanged, r
 from `S5Simplification.lean`. The witness-reuse-*specific* pieces (`usedTags`/`S5wWorldInv`/
 `modalMaxWorld_lt_worldBound_of_S5w`) do **not** carry over unchanged under the guard; their
 Five-local, source-split analogues (`usedTagsFiveNonRoot`/`usedTagsFiveRoot`/`FiveWorldInv`/
-`modalMaxWorld_lt_worldBound_of_FiveWorldInv`) are defined near the end of this file
-(Phase 19a's termination-bound re-derivation, `reports/08_mint-arm-reuse-route-decision.md`).
+`modalMaxWorld_lt_worldBound_of_FiveWorldInv`) are defined near the end of this file, as part of
+the termination-bound re-derivation this route requires.
 Only the two *propagation* arms (`T(□φ)@w`, `F(◇φ)@w`) differ from `modalApplyOneS5w`'s shape
 directly (Route 1, landed earlier).
 
@@ -44,9 +44,10 @@ directly (Route 1, landed earlier).
   Mirrors `modalApplyOneS5` declaration-for-declaration, substituting `modalFiveBoxAll`/
   `modalFiveDiaNegAll` for `modalS5BoxAll`/`modalS5DiaNegAll`.
 - `modalApplyOneFive`: the shipped rule -- Route (a) guarded witness-reuse (`witnessWorldFive`,
-  the root-`0`-excluding refinement of Phase 1's `witnessWorldS5`) at the two mint shapes, with a
-  root-triggered mint (`sf.label = 0`) never consulting the search at all, falling through to
-  `modalApplyOneFiveProp` everywhere else. Mirrors `modalApplyOneS5w`'s shape modulo this guard.
+  the root-`0`-excluding refinement of `witnessWorldS5`, `S5Simplification.lean`) at the two mint
+  shapes, with a root-triggered mint (`sf.label = 0`) never consulting the search at all, falling
+  through to `modalApplyOneFiveProp` everywhere else. Mirrors `modalApplyOneS5w`'s shape modulo
+  this guard.
 - `modalStepBranchFive`/`modalExpandBranchesFive`/`modalTableauFive`: the 5-system driver,
   instantiated at `apply := modalApplyOneFive` throughout (unlike the S5 chain, which staged
   `modalApplyOneS5`/`modalApplyOneS5w` separately for historical reasons -- Five needs only the
@@ -80,14 +81,14 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 /-! ## Root-Aware Propagation Helpers -/
 
-/-- The root/non-root-asymmetric propagation for box-positives (Route (1), see
-`reports/07_phase19-soundness-blocker-remediation.md`): from `T(□φ)@w`, generate `T(φ)@w'` for
+/-- The root/non-root-asymmetric propagation for box-positives (Route (1)): from `T(□φ)@w`,
+generate `T(φ)@w'` for
 known worlds `w' ≠ 0` of the branch, **excluding the root** from every propagation target
 (unconditionally, exactly as before). When the trigger `w` is the **root** (`w = 0`), an
 **additional** guard restricts the target set to `w'` with a genuine recorded edge
 `acc.hasEdge 0 w'` -- direct root successors -- since `RightEuclidean` alone does not relate the
-root to worlds beyond its direct successors (the `Fin 3` counterexample in Phase 19's blocker
-record). When the trigger `w ≠ 0`, the target set is the full non-root cluster, unchanged: this
+root to worlds beyond its direct successors (witnessed by a `Fin 3` counterexample). When the
+trigger `w ≠ 0`, the target set is the full non-root cluster, unchanged: this
 direction is sound via the codomain equivalence (`Relation.rooted_cluster_isEquiv`), not frame
 reflexivity. The root case's output is a **subset** of the non-root case's (same list, filtered
 further), so every world-bound / catalog-membership fact proved for the old uniform shape
@@ -162,8 +163,8 @@ lemma modalFiveBoxAll_mem {b : List (SignedFormula (Proposition Atom) WorldIndex
 omit [Hashable Atom] in
 /-- **Root-arm edge witness** for `modalFiveBoxAll`: when the trigger is the root (`w = 0`), every
 emitted target `x.label` has a genuine recorded edge `acc.hasEdge 0 x.label`. This is the fact
-Phase 19's `accReachableInv_related_five` root case needs (the standard K-style realized-edge
-argument on `acc.successorsOf 0`). -/
+the reachability bridge's `accReachableInv_related_five` root case needs (the standard
+K-style realized-edge argument on `acc.successorsOf 0`). -/
 lemma modalFiveBoxAll_root_hasEdge {b : List (SignedFormula (Proposition Atom) WorldIndex)}
     {acc : Accessibility} {φ : Proposition Atom}
     {x : SignedFormula (Proposition Atom) WorldIndex}
@@ -247,7 +248,7 @@ lemma modalFiveDiaNegAll_root_hasEdge {b : List (SignedFormula (Proposition Atom
     · rw [if_neg hedge] at heq; exact absurd heq (by simp)
 
 omit [Hashable Atom] in
-/-- **Introduction direction for `modalFiveBoxAll` at a non-root trigger** (task 515 Phase 20),
+/-- **Introduction direction for `modalFiveBoxAll` at a non-root trigger**,
 converse of `modalFiveBoxAll_mem` restricted to `w ≠ 0`: a known, non-root world `v` of `b` not
 already carrying `T(φ)@v` on `b` witnesses `T(φ)@v ∈ modalFiveBoxAll b acc φ w`, provided the
 trigger `w` itself is non-root (so the propagation target set is the full non-root cluster,
@@ -264,7 +265,7 @@ lemma modalFiveBoxAll_mem_of_ne_root {b : List (SignedFormula (Proposition Atom)
   rw [if_neg (by simpa using hvne), if_neg (by simpa using hw), if_neg (by simpa using hnotin)]
 
 omit [Hashable Atom] in
-/-- **Introduction direction for `modalFiveBoxAll` at the root trigger** (task 515 Phase 20),
+/-- **Introduction direction for `modalFiveBoxAll` at the root trigger**,
 converse of `modalFiveBoxAll_mem` restricted to `w = 0`: a known, non-root world `v` reached from
 the root by a genuine recorded edge and not already carrying `T(φ)@v` on `b` witnesses
 `T(φ)@v ∈ modalFiveBoxAll b acc φ 0`. Dual case-split of `modalFiveBoxAll_mem_of_ne_root`. -/
@@ -446,15 +447,14 @@ lemma modalApplyOneFiveProp_boxPos_diaNeg_eq
 
 /-! ## The 5/KB5 Witness-Reuse Rule -/
 
-/-- **Route (a) root-aware mint-arm witness search**
-(`reports/08_mint-arm-reuse-route-decision.md`): the Five-local refinement of `witnessWorldS5`
+/-- **Route (a) root-aware mint-arm witness search**: the Five-local refinement of `witnessWorldS5`
 (`S5Simplification.lean`) that **excludes root `0` from witness candidacy**. Root `0` has
 in-degree zero in a rooted tableau (nothing ever emits an edge *into* the root) and
 `RightEuclidean` (`fiveFC`) does not relate the root to an arbitrary known world absent a recorded
-edge (the two-island adversarial-model kill in `reports/08_*`), so a reuse witness `w' = 0` can
-never be soundly justified. Combined with the root-trigger guard on `modalApplyOneFive` below
+edge (witnessed by a two-island adversarial-model counterexample), so a reuse witness `w' = 0`
+can never be soundly justified. Combined with the root-trigger guard on `modalApplyOneFive` below
 (which never even consults this search when the trigger is root), this closes both the
-root-as-witness and root-as-trigger unsound sub-cases (`reports/08_*`). -/
+root-as-witness and root-as-trigger unsound sub-cases. -/
 def witnessWorldFive (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (s : Sign) (φ : Proposition Atom) : Option WorldIndex :=
   (modalKnownWorlds b).find? (fun w' =>
@@ -474,7 +474,7 @@ lemma witnessWorldFive_mem {b : List (SignedFormula (Proposition Atom) WorldInde
   simpa using hne
 
 /-- The shipped 5/KB5 rule: **Route (a) guarded** witness reuse at the two mint shapes
-(`reports/08_*`) -- (i) a **root-triggered** mint (`sf.label = 0`) never consults the witness
+-- (i) a **root-triggered** mint (`sf.label = 0`) never consults the witness
 search and always falls through to a fresh mint (`modalApplyOneFiveProp`, hence K's own mint arm);
 (ii) a **non-root-triggered** mint consults `witnessWorldFive` (which itself excludes root `0` as
 a candidate witness) and reuses only a genuine non-root witness, falling through to a fresh mint
@@ -1240,9 +1240,9 @@ private lemma modalApplyOneFive_boxNegWitness'
     exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
   · exact ⟨w', by rw [heqp], [], by rw [heqp]⟩
 
-/-! ## Reachability Bridge (Task 515 Phase 19)
+/-! ## Reachability Bridge
 
-The remaining Phase 19 soundness assembly (`modalTableauFive_sound`, `FrameSoundness.lean`) needs
+The remaining soundness assembly (`modalTableauFive_sound`, `FrameSoundness.lean`) needs
 two structural facts about `modalApplyOneFive`/`modalApplyOneFiveProp`, mirroring the S5 chain's
 `modalApplyOneS5_knownWorlds_step` (`S5Simplification.lean`) and `modalApplyOneS5w_s5SoundSpec`
 (`FrameSoundness.lean`). Since Five has only the one shipped rule (no separate unguarded/witness
@@ -1290,7 +1290,7 @@ lemma modalApplyOneFiveProp_knownWorlds_step
 reuse -- emitting `.linear [sf']` for a signed formula `sf'` already present on the branch, plus
 the single edge `sf.label → sf'.label`. The Five analogue of `modalApplyOneS5w_s5SoundSpec`,
 stated directly (no `RuleApply`/`S5SoundSpec` abstraction needed, since Five has only the one
-shipped rule). This is the per-call dichotomy the remaining Phase 19 assembly
+shipped rule). This is the per-call dichotomy the soundness assembly
 (`FrameSoundness.lean`) consumes in place of threading an `S5SoundSpec`-style hypothesis. -/
 lemma modalApplyOneFive_agree_or_reuse
     (sf : SignedFormula (Proposition Atom) WorldIndex)
@@ -1311,7 +1311,7 @@ lemma modalApplyOneFive_agree_or_reuse
     · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   all_goals exact Or.inl (modalApplyOneFive_eq_of_not_mint_shape _ b acc (by simp))
 
-/-- **Task 515 (Phase 19b)**: strengthens `modalApplyOneFive_diaPos_eq_or_reuse` with the fact
+/-- Strengthens `modalApplyOneFive_diaPos_eq_or_reuse` with the fact
 that a reuse call's trigger is never the root -- reuse only fires in the `else` branch of
 `modalApplyOneFive`'s `if sf.label == 0 then .. else ..` guard, i.e. exactly when `w ≠ 0`. Needed
 by `modalStepBranchFive_preserves_satIn` (`FrameSoundness.lean`) to invoke
@@ -1336,7 +1336,7 @@ lemma modalApplyOneFive_diaPos_eq_or_reuse_ne_root
     | none => exact Or.inl rfl
     | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
 
-/-- **Task 515 (Phase 19b)**: dual of `modalApplyOneFive_diaPos_eq_or_reuse_ne_root` for the
+/-- Dual of `modalApplyOneFive_diaPos_eq_or_reuse_ne_root` for the
 box-negative mint shape. -/
 lemma modalApplyOneFive_boxNeg_eq_or_reuse_ne_root
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -1357,7 +1357,7 @@ lemma modalApplyOneFive_boxNeg_eq_or_reuse_ne_root
     | none => exact Or.inl rfl
     | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
 
-/-- **Task 515 (Phase 19b)**: `modalApplyOneFive` either agrees with `modalApplyOneFiveProp`
+/-- `modalApplyOneFive` either agrees with `modalApplyOneFiveProp`
 outright, or fires a witness reuse **away from the root, targeting a non-root witness** --
 strengthens `modalApplyOneFive_agree_or_reuse` with the `sf.label ≠ 0 ∧ sf'.label ≠ 0` facts
 `modalStepBranchFive_preserves_satIn` needs to invoke `accReachableInv_related_five` (which
@@ -1388,8 +1388,8 @@ lemma modalApplyOneFive_agree_or_reuse_ne_root
 
 /-- **`modalApplyOneFive` satisfies `RuleApplicationSpecCore`**: the witness-reuse root-aware rule
 discharges every field the Hintikka/saturation machinery needs, mirroring
-`modalApplyOneS5w_specCore` declaration-for-declaration. This is the interface witness Phase 21's
-parametric Hintikka lift will consume to get 5-completeness for free. -/
+`modalApplyOneS5w_specCore` declaration-for-declaration. This is the interface witness an
+eventual parametric Hintikka lift would consume to get 5-completeness for free. -/
 theorem modalApplyOneFive_specCore :
     RuleApplicationSpecCore (Atom := Atom) modalApplyOneFive where
   freshLocal := modalApplyOneFive_fresh_local
@@ -1402,7 +1402,7 @@ theorem modalApplyOneFive_specCore :
   boxNegWitness' := modalApplyOneFive_boxNegWitness'
   diaPosWitness' := modalApplyOneFive_diaPosWitness'
 
-/-! ## KB5 Instantiation (task 515 Phase 22)
+/-! ## KB5 Instantiation
 
 **Factor, not clone.** `modalApplyOneFive`'s tableau rule is **purely syntactic**: it is a
 function of the branch and the accessibility relation alone, and its definition (and every field
@@ -1414,33 +1414,33 @@ closes is unsatisfiable on **every** Euclidean frame (`fiveFC`). Since
 `Std.Symm` conjunct only narrows the frame class further), a branch unsatisfiable on every
 Euclidean frame is unsatisfiable on every KB5 frame too. **The unmodified `modalApplyOneFive`
 rule is therefore already a sound KB5 tableau rule**: no cloned rule, root-aware mint-arm guard,
-or Phase 18/19a/19b-style termination-bound re-derivation is needed for soundness.
+or any termination-bound re-derivation is needed for soundness.
 `modalApplyOneKb5` below is a plain alias for `modalApplyOneFive`, and
 `modalApplyOneKb5_specCore`/`modalTableauKb5` transfer by definitional equality -- the entire KB5
-driver chain reduces to `rfl` against its Five counterpart. This is *cheaper* than the literal
-three-way clone the plan flags as a fallback, because the syntactic rule genuinely does not
+driver chain reduces to `rfl` against its Five counterpart. This is *cheaper* than a literal
+three-way clone, because the syntactic rule genuinely does not
 depend on which frame condition its soundness proof targets; only the **semantic** wrapper
 differs, and that lives in `FrameSoundness.lean`
 (`fiveValid_imp_kb5Valid`/`modalTableauKb5_sound`) as a frame-class-monotonicity corollary, not a
 re-derived fuel-induction chain.
 
 This factoring is sound *only* for the soundness direction (`.closed → kb5Valid`): completeness
-(`kb5Valid → .closed`, task 515 Phase 23) is a genuinely different question, since `kb5Valid` is
+(`kb5Valid → .closed`) is a genuinely different question, since `kb5Valid` is
 strictly weaker than `fiveValid` (`kb5FC` is a proper subclass of `fiveFC`-frames) and may hold on
-formulas the Five tableau leaves open. Phase 23's own extraction (`extractModelKb5`) is expected
-to need a bespoke symmetric-model construction from an open KB5 branch; that is out of this
-phase's scope.
+formulas the Five tableau leaves open. The completeness direction's own extraction
+(`extractModelKb5`) needs a bespoke symmetric-model construction from an open KB5 branch; that is
+out of scope here.
 
-**Update**: the alias above stays in place (it is still the cheapest sound-only route and nothing
-below retires it), but a `FrameCompleteness.lean` blocker note (retained there as documentation)
-identified that *completeness* needs a genuinely different, KB5-specific rule -- reaching into the
-full known non-root cluster on a root trigger, rather than `modalApplyOneFive`'s edge-gated root
-arm. A first attempt at that rule (root-trigger-gated: the self-target arm fired only when the
-*trigger itself* was the root) was tried and retired: it was sound but only complete up to a
-shallow root-only repair, since `extractModelKb5`'s forced relation reaches non-root-triggered
-worlds too (`modalTruthLemmaKb5`'s docstring, `FrameCompleteness.lean`, retains the counterexample
-witness). Full KB5 completeness is delivered by the corrected-gate rule instead (`## The
-Corrected-Gate KB5 Rule` section below: `modalApplyOneKb5''`, and `FrameCompleteness.lean`'s
+The alias above stays in place (it is still the cheapest sound-only route and nothing
+below retires it), but *completeness* needs a genuinely different, KB5-specific rule -- reaching
+into the full known non-root cluster on a root trigger, rather than `modalApplyOneFive`'s
+edge-gated root arm. A first attempt at that rule (root-trigger-gated: the self-target arm
+fired only when the *trigger itself* was the root) was tried and retired: it was sound but
+only complete up to a shallow root-only repair, since `extractModelKb5`'s forced relation
+reaches non-root-triggered worlds too (`modalTruthLemmaKb5`'s docstring,
+`FrameCompleteness.lean`, retains the counterexample witness). Full KB5 completeness is
+delivered by the corrected-gate rule instead (`## The Corrected-Gate KB5 Rule` section below:
+`modalApplyOneKb5''`, and `FrameCompleteness.lean`'s
 `modalTableauKb5''_complete`/`kb5Valid_decides`/`instDecidableKb5Valid`). -/
 
 /-- The KB5 tableau rule: **literally** `modalApplyOneFive`, not a clone -- see this section's
@@ -1911,7 +1911,7 @@ lemma modalApplyOneKb5''_eq_of_not_mint_shape
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
-/-- **Task 528**: strengthens `modalApplyOneKb5''_diaPos_eq_or_reuse` with the fact that a reuse
+/-- Strengthens `modalApplyOneKb5''_diaPos_eq_or_reuse` with the fact that a reuse
 call's trigger is never the root -- reuse only fires in the `else` branch of
 `modalApplyOneKb5''`'s `if sf.label == 0 then .. else ..` guard, i.e. exactly when `w ≠ 0`.
 Mirrors the retired frozen rule's analogous strengthened case-split helper. -/
@@ -1934,7 +1934,7 @@ lemma modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root
     | none => exact Or.inl rfl
     | some w' => exact Or.inr ⟨w', hwne, rfl, rfl⟩
 
-/-- **Task 528**: dual of `modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root` for the box-negative
+/-- Dual of `modalApplyOneKb5''_diaPos_eq_or_reuse_ne_root` for the box-negative
 mint shape. Mirrors the retired frozen rule's analogous dual lemma. -/
 lemma modalApplyOneKb5''_boxNeg_eq_or_reuse_ne_root
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2002,7 +2002,7 @@ lemma modalApplyOneKb5''_agree_or_reuse
     · exact Or.inr ⟨⟨.neg, φ, w'⟩, (witnessWorldFive_mem hw').1, heq⟩
   all_goals exact Or.inl (modalApplyOneKb5''_eq_of_not_mint_shape _ b acc (by simp))
 
-/-! ## Driver Instantiation (task 528) -/
+/-! ## Driver Instantiation -/
 
 /-- One-step branch expansion for the corrected-gate KB5 tableau: the generic driver
 instantiated at `apply := modalApplyOneKb5''`. -/
@@ -2051,7 +2051,8 @@ witness-reuse behavior); only the two propagation shapes (`.pos .box`/`.neg .dia
 proofs against `modalKb5BoxAllUniv`/`modalKb5DiaNegAllUniv`'s membership facts. Only
 `RuleApplicationSpecCore` (not the extended `RuleApplicationSpec` with its `rankStep`/`outDegStep`/
 `knownWorldsStep` termination-measure fields) is targeted -- this is all the Hintikka/saturation
-completeness machinery (`CompletenessLoop.lean`) consumes, and all this plan's task requires. -/
+completeness machinery (`CompletenessLoop.lean`) consumes, and all the completeness proof
+requires. -/
 
 omit [Hashable Atom] in
 /-- `modalApplyOneKb5''Prop`'s accessibility output agrees with K's `modalApplyOne` at every
@@ -2709,16 +2710,16 @@ theorem modalApplyOneKb5''_specCore :
   boxNegWitness' := modalApplyOneKb5''_boxNegWitness'
   diaPosWitness' := modalApplyOneKb5''_diaPosWitness'
 
-/-! ## Source-Split Termination Invariant (Phase 19a Task 2: Route (a) termination re-derivation)
+/-! ## Source-Split Termination Invariant (Route (a) Termination Re-Derivation)
 
-`reports/08_mint-arm-reuse-route-decision.md`'s termination-bound re-derivation, required by the
-root-aware mint-arm guard (`witnessWorldFive`/`modalApplyOneFive`, landed `56a84d07`). The LANDED
+The termination-bound re-derivation required by the
+root-aware mint-arm guard (`witnessWorldFive`/`modalApplyOneFive`, landed `56a84d07`). The
 `S5w*` tag-injection chain (`S5Simplification.lean`) bounds `modalMaxWorld b` by "≤1 mint per
 `(sign, formula)` tag, GLOBALLY" -- sound for `modalApplyOneS5w`, whose mint arms always consult
 `witnessWorldS5` before minting. Under Five's guard, a root-triggered mint (`sf.label = 0`) never
 consults `witnessWorldFive`, so it may fire even when a non-root witness for the *same* tag
 already exists elsewhere on the branch -- refining the invariant to "≤1 mint per tag PER
-SOURCE-CLASS {root, non-root}" (`reports/08_*`).
+SOURCE-CLASS {root, non-root}".
 
 `mintTags`/`S5wTagInv` (and their tag-membership corollaries `modalApplyOneS5w_diamondPos_tag_mem`
 /`_boxNeg_tag_mem`) are **rule-independent** and reused **verbatim** from `S5Simplification.lean`:
@@ -2733,10 +2734,10 @@ bound (mirroring `S5wWorldInv`/`modalMaxWorld_lt_worldBound_of_S5w`'s own shape,
 take the world-bound invariant as a hypothesis rather than proving it holds at every reachable
 branch). The *inductive* step-preservation proof establishing `FiveWorldInv` holds across the
 whole fuel-driven expansion (the source-split analogue of `S5wTagInv_S5wWorldInv_step`) is
-Phase 19b-scale work, for whatever call site eventually maintains it across the fuel induction --
-consistent with `reports/08_*`'s own scoping (`FiveSimplification.lean`'s `outputsSubsetUniverse`
+left for whatever call site eventually maintains it across the fuel induction --
+`FiveSimplification.lean`'s `outputsSubsetUniverse`
 field already takes its world-bound fact as a raw hypothesis parameter, discharged nowhere in this
-file yet). -/
+file yet. -/
 
 omit [Hashable Atom] in
 /-- **Non-root usedTags** (Route (a) source-split invariant): the subset of `mintTags φ₀` whose
@@ -2757,8 +2758,8 @@ root-mint TRIGGER (`⟨.pos, .diamond ψ, 0⟩` for tag `(pos, ψ)`, `⟨.neg, .
 `(neg, ψ)`) already appears at world `0` of branch `b`. Since `modalApplyOneFive`'s root-triggered
 mint arms never consult a witness search, this source class's contribution to `modalMaxWorld` is
 bounded purely by how many DISTINCT triggers can ever appear at the root -- not by a reuse
-argument -- exactly `reports/08_*`'s "the root contributes at most one mint per tag, bounded by
-the root's own diamond/negated-box subformulas": a formula sitting at the root was never itself
+argument -- exactly this fact: the root contributes at most one mint per tag, bounded by
+the root's own diamond/negated-box subformulas. A formula sitting at the root was never itself
 minted (root formulas arrive by decomposition, never via `witnessWorldFive`), so a root-triggered
 mint for a given tag is always that tag's first mint in the root source-class, and the driver's
 `.linear`-result memoization (`modalStepBranchGen`'s `expanded` bookkeeping, `Saturation.lean`)
@@ -2797,7 +2798,7 @@ lemma usedTagsFiveRoot_mono {φ₀ : Proposition Atom}
   exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
 
 omit [Hashable Atom] in
-/-- **Non-root mint-tag miss** (Route (a) termination re-derivation task 2, non-root case): the
+/-- **Non-root mint-tag miss** (non-root case): the
 direct analogue of `witnessWorldS5_none_not_mem_usedTags` for `witnessWorldFive`.
 `witnessWorldFive b s φ = none` implies `(s, φ)` is not (yet) a used tag in the NON-ROOT
 source-class on `b`: if some non-root `x ∈ b` had `x.sign = s ∧ x.formula = φ`, `witnessWorldFive`'s
@@ -2822,7 +2823,7 @@ lemma witnessWorldFive_none_not_mem_usedTagsFiveNonRoot {φ₀ : Proposition Ato
   exact ⟨hxlabel, List.any_eq_true.mpr ⟨x, hxmem, beq_iff_eq.mpr hxsf⟩⟩
 
 omit [Hashable Atom] in
-/-- **Root-side mint-tag membership** (Route (a) termination re-derivation task 2, the
+/-- **Root-side mint-tag membership** (the
 root-trigger-always-fresh case): if the root-mint trigger `⟨.pos, .diamond φ, 0⟩` is present on
 `b` and `(pos, φ) ∈ mintTags φ₀` (e.g. via `S5wTagInv` + `modalApplyOneS5w_diamondPos_tag_mem`,
 both reused verbatim), then `(pos, φ)` is already a member of `usedTagsFiveRoot φ₀ b` -- witnessed
@@ -2852,8 +2853,8 @@ lemma boxNeg_root_mem_usedTagsFiveRoot {φ₀ : Proposition Atom}
   refine ⟨htag, ?_⟩
   exact List.any_eq_true.mpr ⟨_, hsf, by simp⟩
 
-/-- The source-split world-bound invariant (Route (a) termination re-derivation,
-`reports/08_*`): `modalMaxWorld b` never exceeds the SUM of the non-root usedTags count and the
+/-- The source-split world-bound invariant (Route (a) termination re-derivation):
+`modalMaxWorld b` never exceeds the SUM of the non-root usedTags count and the
 root usedTags count. Refines `S5wWorldInv`'s single global count to the "≤1 mint per tag per
 source-class {root, non-root}" invariant the guarded mint arms require. -/
 def FiveWorldInv (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
@@ -2866,7 +2867,7 @@ still stays strictly under `modalWorldBound φ`, since `modalWorldBound φ = (2c
 `c := modalComplexity φ` dominates `2c + 1` (`Nat.pow_le_pow_right` at exponent `1`), and
 `modalOps φ ≤ c` (`modalOps_le_complexity`) gives `2 * modalOps φ ≤ 2c < 2c + 1 ≤ modalWorldBound
 φ`. The larger constant (`2·modalOps φ₀` vs. the S5 chain's `modalOps φ₀`) that Route (a)'s
-source-split invariant needs -- still LINEAR, not a worse asymptotic (`reports/08_*`). -/
+source-split invariant needs -- still LINEAR, not a worse asymptotic. -/
 lemma two_mul_modalOps_lt_worldBound (φ : Proposition Atom) :
     2 * modalOps φ < modalWorldBound φ := by
   have h1 : modalOps φ ≤ modalComplexity φ := modalOps_le_complexity φ
@@ -2878,13 +2879,13 @@ lemma two_mul_modalOps_lt_worldBound (φ : Proposition Atom) :
   omega
 
 omit [Hashable Atom] in
-/-- **Task 3**: chains `FiveWorldInv`, both `usedTagsFiveNonRoot φ₀ b ⊆ mintTags φ₀` and
+/-- Chains `FiveWorldInv`, both `usedTagsFiveNonRoot φ₀ b ⊆ mintTags φ₀` and
 `usedTagsFiveRoot φ₀ b ⊆ mintTags φ₀` (`Finset.filter_subset`), `mintTags_card_le_modalOps`, and
 `two_mul_modalOps_lt_worldBound` into the Five-local world bound: the drop-in, source-split
 replacement for `modalMaxWorld_lt_worldBound_of_S5w`, at a larger (but still LINEAR, `≈
 2·modalOps φ₀`) constant, matching `outputsSubsetUniverse`'s `hW : modalMaxWorld b <
 modalWorldBound φ0` hypothesis shape exactly, so this theorem can discharge that hypothesis at
-whatever call site eventually maintains `FiveWorldInv` across Phase 19b's fuel induction. -/
+whatever call site eventually maintains `FiveWorldInv` across the fuel induction. -/
 theorem modalMaxWorld_lt_worldBound_of_FiveWorldInv {φ₀ : Proposition Atom}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : FiveWorldInv φ₀ b) :
     modalMaxWorld b < modalWorldBound φ₀ := by
@@ -2899,7 +2900,7 @@ theorem modalMaxWorld_lt_worldBound_of_FiveWorldInv {φ₀ : Proposition Atom}
     _ = 2 * modalOps φ₀ := by ring
     _ < modalWorldBound φ₀ := h3
 
-/-! ## Step-Preservation of `FiveWorldInv` (task 515 Phase 21b: the Hintikka "wall")
+/-! ## Step-Preservation of `FiveWorldInv` (the Hintikka "wall")
 
 The inductive step-preservation proof `FiveSimplification.lean`'s own docstring above flagged as
 deferred. Mirrors `S5Simplification.lean`'s `modalApplyOneS5w_step` /
@@ -3141,7 +3142,7 @@ private lemma modalApplyOne_boxNeg_mint_label
       · simp at heq
     · simp at heq
 
-/-- **World-growth dichotomy for `modalApplyOneFive`** (Phase 21b's per-call step lemma, mirroring
+/-- **World-growth dichotomy for `modalApplyOneFive`** (the per-call step lemma, mirroring
 `modalApplyOneS5w_step` but split for `FiveWorldInvE`'s root/non-root division): given `sf`'s
 formula is a subformula of `φ₀` (so any tag it mints belongs to `mintTags φ₀`), EITHER (a) every
 emitted formula lands at an already-known world (propagation, witness reuse, or propositional
@@ -3590,7 +3591,7 @@ theorem modalMaxWorld_lt_worldBound_of_Kb5''WorldInv {φ₀ : Proposition Atom}
     modalMaxWorld b < modalWorldBound φ₀ :=
   modalMaxWorld_lt_worldBound_of_FiveWorldInv (Kb5''WorldInv_eq φ₀ b ▸ hW)
 
-/-! ## Step-Preservation of the World-Bound Invariant for `modalApplyOneKb5''` (task 528 Phase 6)
+/-! ## Step-Preservation of the World-Bound Invariant for `modalApplyOneKb5''`
 
 Mirrors `modalStepBranchFive_preserves_worldInv` above declaration-for-declaration, reusing
 `FiveWorldInvE`/`expandedRootTagsFive`/`usedTagsFiveNonRoot`/`mintTags` directly (no `Kb5''`-named
@@ -3599,18 +3600,18 @@ fork of these -- per this file's own precedent above, they are already rule-inde
 actually reference by their own `Kb5''`-labeled identity; `FiveWorldInvE` has no such external
 caller yet, so introducing a same-content alias here would only add surface area). The mint
 (existential) shapes of `modalApplyOneKb5''_worldGrowth` below port `modalApplyOneFive_worldGrowth`
-near-verbatim (Phase 1 already confirmed the mint arms are byte-identical witness-reuse behavior);
+near-verbatim (the mint arms are already known to be byte-identical witness-reuse behavior);
 the propagation (box-positive/diamond-negative) shape is fresh, resting on
-`modalApplyOneKb5''Prop_boxPos_diaNeg_eq` (Phase 3) instead of Five's own analogue -- unlike Five,
+`modalApplyOneKb5''Prop_boxPos_diaNeg_eq` instead of Five's own analogue -- unlike Five,
 this needs the extra ambient hypothesis `h0 : 0 ∈ modalKnownWorlds b` the corrected gate's
 self-target arm requires (its cluster-membership dichotomy no longer ties `x.label = 0` to the
 trigger's own known-ness, since the gate now fires for *any* trigger, not only `w = 0`). -/
 
 /-- **World-growth dichotomy for `modalApplyOneKb5''`**: mirrors `modalApplyOneFive_worldGrowth`.
 The two mint shapes are Five's own case split verbatim, substituting
-`modalApplyOneKb5''_diaPos_eq_or_reuse`/`modalApplyOneKb5''_boxNeg_eq_or_reuse` (Phase 1) for the
-Five originals. The propagation shape is fresh: `modalApplyOneKb5''Prop_boxPos_diaNeg_eq` (Phase
-3) already shows no growth is possible there (accessibility unchanged, every emitted label
+`modalApplyOneKb5''_diaPos_eq_or_reuse`/`modalApplyOneKb5''_boxNeg_eq_or_reuse` for the
+Five originals. The propagation shape is fresh: `modalApplyOneKb5''Prop_boxPos_diaNeg_eq`
+already shows no growth is possible there (accessibility unchanged, every emitted label
 known), given the extra `h0` hypothesis its self-target arm needs. -/
 lemma modalApplyOneKb5''_worldGrowth {φ₀ : Proposition Atom}
     (sf : SignedFormula (Proposition Atom) WorldIndex)

@@ -834,7 +834,7 @@ theorem lemma_2_7 (fc : FrameClass) {A B C : Set (Formula Atom)}
   have h_burgessRSince_xi : burgessRSince D xi A := h_snce_xi_D
   have h_burgessR_xi : burgessR A xi D :=
     burgessRSince_implies_burgessR fc h_mcs_A h_D_mcs h_burgessRSince_xi
-  -- Step 6: Derive burgessR(A, β∧xi, D) for all β ∈ B using guard conjunction (Phase 1)
+  -- Step 6: Derive burgessR(A, β∧xi, D) for all β ∈ B using guard conjunction
   have h_burgessR_conj : ∀ β ∈ B, burgessR A (Formula.and β xi) D := by
     intro β hβ
     exact burgessR_conj fc h_mcs_A (h_rSet_A β hβ) h_burgessR_xi

@@ -37,5 +37,4 @@ The construction proceeds in four phases:
 ## References
 
 - Burgess 1982: "Basic tense logic", Section 2, Lemmas 2.4-2.8
-- Task 107 implementation plan, Phase 3
 -/

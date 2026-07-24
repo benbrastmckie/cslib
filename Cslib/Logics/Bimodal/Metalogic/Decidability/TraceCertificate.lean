@@ -52,7 +52,7 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 ## Closure Reason Type
 
 Defined here so TraceCertificate and Closure can both use it.
-Closure.lean (Phase 3) will import this and add detection functions.
+Closure.lean imports this and adds detection functions.
 -/
 
 /--

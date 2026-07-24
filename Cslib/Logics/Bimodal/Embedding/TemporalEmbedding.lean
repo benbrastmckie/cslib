@@ -26,7 +26,7 @@ namespace Cslib.Logic
 
 /-- Embed a temporal formula into bimodal logic.
 
-`allFuture`/`allPast` are primitive constructors on the `Temporal.Formula` side (task 180), but
+`allFuture`/`allPast` are primitive constructors on the `Temporal.Formula` side, but
 `Bimodal.Formula` has no primitive G/H — its `Bimodal.Formula.allFuture`/`allPast` are classical
 abbreviations (`¬F¬φ`/`¬P¬φ`). The embedding therefore maps the temporal primitives to the
 bimodal classical encoding; this is a purely syntactic translation choice for the embedding

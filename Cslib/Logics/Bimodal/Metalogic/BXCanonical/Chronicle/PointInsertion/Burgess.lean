@@ -456,7 +456,7 @@ theorem burgessR3_univ_of_inconsistent_ext (fc : FrameClass) {A B C : Set (Formu
 Given `BurgessR3Maximal(A, B, C)` with A, C MCS and gContent(A) ⊆ C,
 every φ ∈ gContent(A) (i.e., G(φ) ∈ A) must also be in B.
 
-**Proof** (Report 47, task 107 Phase 5b v31, corrected v32):
+**Proof**:
 - **Consistent case** ({φ}∪B consistent): `dc_delta_B_burgessR3` shows
   burgessR3(A, DC({φ}∪B), C) using left_mono_until_G/since_H. But
   `BurgessR3Maximal_extension_fails` gives ¬burgessR3. Contradiction.
@@ -560,8 +560,8 @@ produce MCS D with `¬β ∈ D` and `BurgessR3Maximal(A, B', D)` and
 ## Burgess D₀ Seed Construction (Burgess 1982, p.370)
 
 The original Burgess (1982) approach used a rich D₀ seed with explicit Until/Since
-formulas, requiring BX14 (separation_until) for consistency. Task 115 replaced this
-with the Xu 1988 Lemma 3.2.2 approach: the seed is simply B* ∪ {β.neg}, with
+formulas, requiring BX14 (separation_until) for consistency. This module instead uses
+the Xu 1988 Lemma 3.2.2 approach: the seed is simply B* ∪ {β.neg}, with
 consistency following trivially from `dcs_neg_union_consistent`. The Until/Since
 formulas needed for r(A, B*, D) are already in B* via Xu 3.2.1. -/
 

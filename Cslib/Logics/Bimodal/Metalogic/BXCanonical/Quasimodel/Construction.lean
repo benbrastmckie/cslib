@@ -440,7 +440,7 @@ def ChainWitnessed {Sigma : Finset (Formula Atom)}
     (c : HintikkaRawChain Sigma) : Prop :=
   ∀ h ∈ c.points, ∃ w : BXPoint Atom, ∀ f ∈ h.formulas, f ∈ w.formulas
 
-/-- **Phase 3 main theorem**: `hintikka_chain_exists`.
+/-- **Main theorem**: `hintikka_chain_exists`.
 
     Given a step oracle and a starting Hintikka point `h0` carrying the
     target Until-defect (plus a concrete `BXPoint` witness `w0` backing

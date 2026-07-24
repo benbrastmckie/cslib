@@ -32,7 +32,7 @@ The `FrameClass.Base` parameter structurally excludes axioms with
 - `decide_sound`: If we have a `DerivationTree .Base [] φ`, then `⊨ φ`
 - Frame-class specific soundness is available via `soundness_dense`, `soundness_discrete`
 
-## FMP-Dependent Theorems (Deferred to Task 43)
+## FMP-Dependent Theorems (Deferred)
 
 The following theorems depend on the Finite Model Property and are NOT ported here:
 - `fmp_completeness`: If φ is true in all closure MCS, then φ is provable
@@ -105,7 +105,7 @@ Validity is decidable for TM bimodal logic.
 
 This uses classical logic (`Classical.em`) to establish that validity
 is a decidable property. A constructive decision procedure would require
-completeness (via the Finite Model Property, deferred to Task 43).
+completeness (via the Finite Model Property, not yet ported here).
 -/
 theorem validity_decidable {Atom : Type*} (φ : Formula Atom) :
     (⊨ φ) ∨ ¬(⊨ φ) :=

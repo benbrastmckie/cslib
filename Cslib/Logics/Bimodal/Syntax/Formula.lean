@@ -59,12 +59,12 @@ instance : BimodalConnectives (Formula Atom) where
 
 /-- Negation: ¬φ := φ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.neg` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.neg` default. -/
 abbrev Formula.neg (φ : Formula Atom) : Formula Atom := PropositionalConnectives.neg φ
 
 /-- Verum / top: ⊤ := ⊥ → ⊥.
 
-Delegates to the canonical `PropositionalConnectives.top` default (task 340). -/
+Delegates to the canonical `PropositionalConnectives.top` default. -/
 abbrev Formula.top : Formula Atom := PropositionalConnectives.top
 
 /-- Disjunction: φ₁ ∨ φ₂ := ¬φ₁ → φ₂ -/

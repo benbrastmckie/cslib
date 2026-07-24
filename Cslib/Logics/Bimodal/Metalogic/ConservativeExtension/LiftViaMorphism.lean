@@ -14,8 +14,8 @@ public import Cslib.Logics.Bimodal.ProofSystem.Derivation
 
 This module exhibits Bimodal's frame-class lifting combinator `DerivationTree.lift` as a
 corollary of the generic functor `Cslib.Logic.Metalogic.Deriv.map` applied to a `ProofSigHom`
-built from the frame-class ordering hypothesis `h_le : fc₁ ≤ fc₂`. This is the Phase 4
-"Bimodal frame-class" pilot of the morphism-of-proof-systems abstraction (task 419).
+built from the frame-class ordering hypothesis `h_le : fc₁ ≤ fc₂`, the "Bimodal frame-class"
+instance of the morphism-of-proof-systems abstraction.
 
 ## Design
 

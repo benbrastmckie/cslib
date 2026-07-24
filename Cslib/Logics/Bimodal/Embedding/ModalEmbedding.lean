@@ -25,7 +25,7 @@ namespace Cslib.Logic
 
 /-- Embed a modal formula into bimodal logic.
 
-`Modal.Proposition` has native `and`/`or`/`diamond` constructors (task 441), while
+`Modal.Proposition` has native `and`/`or`/`diamond` constructors, while
 `Bimodal.Formula` still encodes them as derived Łukasiewicz `abbrev`s (`Formula.and`/`.or`/
 `.diamond`, `Formula.lean`); the embedding maps native Modal connectives to the corresponding
 Bimodal `abbrev`. -/

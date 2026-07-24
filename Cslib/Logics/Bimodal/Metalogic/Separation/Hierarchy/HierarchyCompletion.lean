@@ -242,7 +242,7 @@ theorem single_U_formula_separable_noax_param (phi A B : Formula Atom)
     - `.imp`: combine via `imp_separable_with_type`
     - `.untl`: `hasSingleUType` forces args = (A, B)
     - `.snceat ` depth 0: U-free → `u_free_separable_with_type`
-    - `.snceat ` depth 1: `snce_single_U_depth_one_sep_with_U_type` (Phase 2)
+    - `.snceat ` depth 1: `snce_single_U_depth_one_sep_with_U_type`
     - `.snceat ` depth >= 2: IH on children (strict depth decrease), box-normalize,
       apply `snce_single_U_depth_one_sep_with_U_type`. **NO ORACLE.** -/
 theorem single_U_formula_sep_with_U_type_no_oracle (phi A B : Formula Atom)

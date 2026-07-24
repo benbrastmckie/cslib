@@ -21,9 +21,6 @@ tempKDistDerived, and pastKDist at the DerivationTree level.
 * Ported from Cslib/Logics/Bimodal/Theorems/GeneralizedNecessitation.lean
 -/
 
-set_option linter.style.emptyLine false
--- Structural: blank lines between declarations inside @[expose] public section
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic

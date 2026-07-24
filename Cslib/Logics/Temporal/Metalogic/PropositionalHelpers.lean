@@ -25,8 +25,6 @@ instance's raw derivation type) is definitionally `DerivationTree .Base [] φ` -
 * Cslib/Foundations/Logic/Theorems/Combinators.lean -- generic combinators
 -/
 
-set_option linter.style.emptyLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Temporal.Metalogic

@@ -45,10 +45,6 @@ Depends on `DeductionTheorem.lean` for the deduction theorem and
 * Cslib/Foundations/Logic/Metalogic/Consistency.lean -- generic MCS framework
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.setOption false
-set_option linter.flexible false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Metalogic.Core

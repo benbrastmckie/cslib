@@ -27,8 +27,6 @@ bridge is needed.
 * Ported from BimodalLogic/Theories/Bimodal/Theorems/Perpetuity/Helpers.lean
 -/
 
-set_option linter.style.longLine false
-
 -- Do not open Cslib.Logic.Bimodal to avoid scoped notation conflicts
 -- (F, G, H, P are prefix notation for temporal operators)
 

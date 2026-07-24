@@ -25,9 +25,6 @@ layer, which is directly applicable since `Bimodal.HilbertTM⇓φ` is definition
 Ported from BimodalLogic/Theories/Bimodal/Theorems/Propositional/Core.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems.Propositional

@@ -4650,6 +4650,123 @@ theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
       keysInUniverse := modalStepBranchS4_preserves_keysInUniverse φ₀ b e acc keys newBs newExps
         newAcc keys' hbC hkI hstep }
 
+/-! ## Keyed S4 Driver (Bespoke, Path (b))
+
+Task 535 closes `Decidable (s4Valid φ)` via a bespoke, S4-specific `keys`-threaded driver, rather
+than generalizing the shared generic driver (`Saturation.lean`'s `modalExpandBranchesGen`) to
+thread opaque per-branch state -- that path would serve only S4 (K/T/B/S5/Five have all already
+reached decidability via the state-free generic driver) while risking every one of their landed
+proofs. `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` below mirror
+`modalExpandBranchesGen`/`processNext`/`modalTableauGen` structurally (copy-and-thread), with
+`keys` (the stable per-world birth-key list `modalStepBranchS4Keyed` already threads) carried as
+a fourth parallel worklist column alongside `(branch, expanded, acc)`. The live `modalTableauS4`
+is left untouched as the reference artifact the `heq1`-style bridges and `modalHintikkaSetS4_eq`
+consume; `instDecidableS4Valid` (Phase 5) points at `modalTableauS4Keyed` instead. -/
+
+/-- The keyed S4 fuel-based expansion of a list of branches: `modalExpandBranchesGen`
+(`Saturation.lean:201-243`), copy-and-threaded with a fourth `keyss` worklist column carrying
+each pending/done branch's own `keys` list (`modalStepBranchS4Keyed`'s threaded birth-key state),
+and stepped by the keyed stepper `modalStepBranchS4Keyed φ₀` in place of a fixed
+`modalStepBranchGen apply`. At `fuel = 0`, mirrors the generic driver exactly (keys play no role
+in the base case, since it only inspects `branches`/`accs`). At `fuel = fuel' + 1`, the inner
+`processNext` recursion threads `keys` through every arm identically to how it threads `accs`:
+closed branches carry their `keys` to `done` unchanged; a saturated (`none`) branch returns
+`.openBranch` exactly as before (its `keys` value is not part of `ModalTableauResult`, per
+Decision D2 in the module docstring below -- only `(b, acc)` are returned, matching every other
+driver's `ModalTableauResult`); an expanded branch replicates the single returned `keys'` across
+every one of `newBs`' children (matching `modalStepBranchS4Keyed`'s `.branching` arm, which
+produces the SAME `keys'` for every branch it splits into). -/
+def modalExpandBranchesS4Keyed
+    (φ₀ : Proposition Atom)
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+    (fuel : Nat) : ModalTableauResult Atom :=
+  match fuel with
+  | 0 =>
+    -- Fuel exhausted: return first open branch with its local accessibility relation
+    -- (mirrors `modalExpandBranchesGen`'s base case exactly; `keyss` plays no role here,
+    -- since `ModalTableauResult` never carries `keys`).
+    match (branches.zip accs) |>.findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | some (b, a) => .openBranch b a
+    | none => .closed
+  | fuel' + 1 =>
+    -- processNext: iterate through branches, finding the first open one to expand, threading
+    -- `keys` alongside `acc` for every entry.
+    let rec @[nolint docBlame] processNext
+        (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (pendingKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        (doneKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        : ModalTableauResult Atom :=
+      match pending, pendingExp, pendingAccs, pendingKeys with
+      | [], _, _, _ => .closed  -- All branches closed
+      | b :: restBs, e :: restEs, a :: restAs, k :: restKs =>
+        if isModalClosed b then
+          -- Branch is closed: skip it, carry its acc/keys to done
+          processNext restBs restEs restAs restKs (done ++ [b]) (doneExp ++ [e]) (doneAccs ++ [a])
+            (doneKeys ++ [k])
+        else
+          match modalStepBranchS4Keyed φ₀ b e a k with
+          | none =>
+            -- Branch is saturated and open: return with this branch's local acc
+            .openBranch b a
+          | some (newBs, newExps, newAcc, keys') =>
+            -- Expanded: recurse with new branches using newAcc/keys' for each child
+            modalExpandBranchesS4Keyed φ₀
+              (done ++ newBs ++ restBs)
+              (doneExp ++ newExps ++ restEs)
+              (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+              (doneKeys ++ List.replicate newBs.length keys' ++ restKs)
+              fuel'
+      | _, _, _, _ => .closed  -- malformed (length invariant rules this out)
+    processNext branches expandedSets accs keyss [] [] [] []
+
+/-- The keyed S4 modal tableau decision procedure: the entry point for the bespoke keyed driver,
+mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with `keys := []`
+at the start (no world has been born yet). Fuel is `modalFuel φ` (K's fuel), confirmed sufficient
+for the S4 keyed loop in Phase 3 against the pigeonhole world bound `modalWorldBoundS4`. The
+live `modalTableauS4` is NOT redefined; `instDecidableS4Valid` (Phase 5) points at this
+declaration instead. -/
+def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
+  let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
+    [⟨.neg, φ, 0⟩]
+  modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty] [[]] (modalFuel φ)
+
+/-! ## Congruence Gate: `hintikka_congr_S4`
+
+The sole genuinely-novel obligation of the keyed-driver path: the keyed rule
+`modalApplyOneS4Keyed φ₀ keys` and the live rule `modalApplyOneS4 φ₀` agree on Hintikka-set-hood,
+for ANY `keys`. Modeled on `hintikka_congr` (`S5Simplification.lean:604`). As with S5's witness
+rule, the proof is unconditional (no saturation hypothesis needed): `modalHintikkaSetGen`'s
+conjunct 2 (`Saturation.lean`) returns literal `True` at exactly the two shapes
+(`F(□φ)@w`/`T(◇φ)@w`) where `modalApplyOneS4Keyed`/`modalApplyOneS4` can differ (the minting
+guard shapes); at every OTHER shape, `modalApplyOneS4Keyed φ₀ keys` falls through to
+`modalApplyOneS4 φ₀` by the definitional `| _, _ =>` catch-all, so `result` is the identical value
+for both rules and conjunct 2 evaluates identically. Conjuncts 1/3/4 name no rule function at
+all. -/
+
+/-- **`hintikka_congr_S4`**: the keyed and live S4 rules agree on Hintikka-set-hood, for any
+`keys`. -/
+theorem hintikka_congr_S4 (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalHintikkaSetGen (modalApplyOneS4Keyed φ₀ keys) b acc ↔
+      modalHintikkaSetGen (modalApplyOneS4 φ₀) b acc := by
+  unfold modalHintikkaSetGen
+  constructor <;> · rintro ⟨h1, h2, h3, h4⟩
+                    refine ⟨h1, ?_, h3, h4⟩
+                    intro sf hsf
+                    have h := h2 sf hsf
+                    rcases hs : sf.sign with _ | _ <;>
+                      rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;>
+                        simp_all [modalApplyOneS4Keyed]
+
 end Cslib.Logic.Modal.Tableau
 
 end

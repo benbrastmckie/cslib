@@ -3,11 +3,11 @@
   "started_at": "2026-07-24T10:38:37Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phase 2 complete: new Cslib/Logics/Temporal/Metalogic/MetricSoundness.lean with four *_sound theorems (discrete_symm_fwd/bwd_sound, discrete_propagate_fwd/bwd_sound) ported from bimodal arithmetic, and axiom_sound_metric assembling all 32 axioms. Required an extra Mathlib.Algebra.Order.Group.Defs import beyond the two named in research for NoMaxOrder/NoMinOrder auto-synthesis. lake build green (651/651 jobs), zero sorry.",
+    "stage": "phase_3_complete",
+    "details": "Phase 3 complete: swap_valid_of_valid_metric, soundness_metric, soundness_thderivable_metric, and Temporal.BXPlusDerivable added to MetricSoundness.lean. Required an additional Mathlib.Algebra.Order.Monoid.OrderDual import for the OrderDual AddCommGroup/IsOrderedAddMonoid transfer instances. lake build green (655/655 jobs), zero sorry.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 2
+    "phases_completed": 3
   },
   "metadata": {
     "session_id": "sess_1784888487_837ef1_449",

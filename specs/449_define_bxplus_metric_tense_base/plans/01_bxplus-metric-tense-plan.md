@@ -164,27 +164,29 @@ one agent run and independently green-committable.
   - `lake build` compiles the new module green; no `sorry`.
   - `axiom_sound_metric` type-checks with the four metric instance hypotheses only.
 
-### Phase 3: Derivation soundness at Metric + BXPlusDerivable [NOT STARTED]
+### Phase 3: Derivation soundness at Metric + BXPlusDerivable [COMPLETED]
 
 - **Goal:** Extend Temporal derivation soundness to `FrameClass.Metric` and add the `BX⁺`
   derivability abbreviation.
 - **Tasks:**
-  - [ ] Prove `swap_valid_of_valid_metric` (mirror of `swap_valid_of_valid_dense`,
+  - [x] Prove `swap_valid_of_valid_metric` (mirror of `swap_valid_of_valid_dense`,
     `DenseSoundness.lean:141-151`): transfer a metric-valid φ to `swapTemporal φ` via the `OrderDual`
     model. `OrderDual D` preserves all six instances (`AddCommGroup`, `LinearOrder`,
     `IsOrderedAddMonoid`, `Nontrivial`, `NoMaxOrder`, `NoMinOrder`) — verified — so the hypothesis
-    re-instantiates at `OrderDual D`.
-  - [ ] Prove `soundness_metric` (mirror of `soundness_dense`): `match` on the `DerivationTree`
+    re-instantiates at `OrderDual D` *(deviation: altered -- required an additional
+    `public import Mathlib.Algebra.Order.Monoid.OrderDual` for the `IsOrderedAddMonoid Dᵒᵈ`/
+    `AddCommGroup Dᵒᵈ` transfer instances beyond the imports added in Phase 2)*.
+  - [x] Prove `soundness_metric` (mirror of `soundness_dense`): `match` on the `DerivationTree`
     constructors (`.axiom`→`axiom_sound_metric`, `.assumption`, `.modus_ponens`,
     `.temporal_necessitation`, `.temporal_duality`→`swap_valid_of_valid_metric`, `.weakening`).
-  - [ ] Prove `soundness_thderivable_metric : ThDerivableFc FrameClass.Metric φ → Satisfies M t φ`
+  - [x] Prove `soundness_thderivable_metric : ThDerivableFc FrameClass.Metric φ → Satisfies M t φ`
     over the metric domain (mirror `soundness_thderivable_dense`).
-  - [ ] Add `Temporal.BXPlusDerivable (φ : Formula Atom) : Prop := Temporal.ThDerivableFc
+  - [x] Add `Temporal.BXPlusDerivable (φ : Formula Atom) : Prop := Temporal.ThDerivableFc
     FrameClass.Metric φ` with a house-style docstring and `@[nolint dupNamespace]` (mirror
     `Temporal.ThDerivableFc`, `DenseMCS.lean:66`). Add `import`/`public import` of `DenseMCS` (for
     `ThDerivableFc`) to `MetricSoundness.lean`; fallback is inline
     `Nonempty (DerivationTree FrameClass.Metric [] φ)` if the dense dependency is undesirable.
-  - [ ] Ensure `BXPlusDerivable` is a genuine `Prop` abbreviation (not `def X := True`); lowerCamelCase.
+  - [x] Ensure `BXPlusDerivable` is a genuine `Prop` abbreviation (not `def X := True`); lowerCamelCase.
 - **Timing:** ~1 hour
 - **Depends on:** 2
 - **Files to modify:**

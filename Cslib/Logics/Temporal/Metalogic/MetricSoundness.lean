@@ -9,6 +9,7 @@ module
 public import Cslib.Logics.Temporal.Metalogic.Soundness
 public import Cslib.Logics.Temporal.Metalogic.DenseMCS
 public import Mathlib.Algebra.Order.Group.Defs
+public import Mathlib.Algebra.Order.Monoid.OrderDual
 
 /-! # Metric Soundness for Temporal Logic (BX⁺)
 
@@ -185,5 +186,78 @@ theorem axiom_sound_metric {D : Type*} [AddCommGroup D] [LinearOrder D]
       exact axiom_sound (.allPast_to_classic _) (FrameClass.base_le _) M t
   | classic_to_allPast =>
       exact axiom_sound (.classic_to_allPast _) (FrameClass.base_le _) M t
+
+end Cslib.Logic.Temporal
+
+universe u_dom_metric
+
+namespace Cslib.Logic.Temporal
+
+open Cslib.Logic.Temporal
+
+variable {Atom : Type*}
+
+/-! ## Metric Swap Valid -/
+
+/-- Metric version of `swap_valid_of_valid`: if `φ` is satisfied everywhere in all
+ordered-abelian-group serial linear order models, then `swapTemporal φ` is also satisfied.
+Proved by transferring to the dual model (`OrderDual D` preserves `AddCommGroup`,
+`LinearOrder`, `IsOrderedAddMonoid`, and `Nontrivial`). -/
+theorem swap_valid_of_valid_metric
+    {φ : Formula Atom}
+    (h_valid : ∀ (D : Type u_dom_metric) [AddCommGroup D] [LinearOrder D]
+      [IsOrderedAddMonoid D] [Nontrivial D]
+      (M : TemporalModel D Atom) (t : D), Satisfies M t φ)
+    (D : Type u_dom_metric) [AddCommGroup D] [LinearOrder D]
+    [IsOrderedAddMonoid D] [Nontrivial D]
+    (M : TemporalModel D Atom) (t : D) :
+    Satisfies M t (Formula.swapTemporal φ) := by
+  rw [swapTemporal_dual]
+  exact h_valid (OrderDual D) (dualModel M) (OrderDual.toDual t)
+
+/-! ## Metric Soundness Theorem -/
+
+/-- **Soundness at Metric**: If `Γ ⊢[Metric] φ`, then for any ordered-abelian-group serial
+linear order model and any time where all of `Γ` is satisfied, `φ` is also satisfied. -/
+theorem soundness_metric {D : Type*} [AddCommGroup D] [LinearOrder D]
+    [IsOrderedAddMonoid D] [Nontrivial D]
+    {Γ : Context Atom} {φ : Formula Atom}
+    (d : DerivationTree FrameClass.Metric Γ φ)
+    (M : TemporalModel D Atom) (t : D)
+    (h_ctx : ∀ ψ ∈ Γ, Satisfies M t ψ) : Satisfies M t φ := by
+  match d with
+  | .axiom _ ψ h_ax h_fc =>
+    exact axiom_sound_metric h_ax h_fc M t
+  | .assumption _ ψ h_mem =>
+    exact h_ctx ψ h_mem
+  | .modus_ponens _ ψ χ d₁ d₂ =>
+    exact soundness_metric d₁ M t h_ctx (soundness_metric d₂ M t h_ctx)
+  | .temporal_necessitation ψ d' =>
+    simp only [Satisfies.allFuture_iff]
+    intro s hlt
+    exact soundness_metric d' M s (fun _ h => nomatch h)
+  | .temporal_duality ψ d' =>
+    exact swap_valid_of_valid_metric
+      (fun D' _ _ _ _ M' t' => soundness_metric d' M' t' (fun _ h => nomatch h)) D M t
+  | .weakening Γ' Δ ψ d' h_sub =>
+    exact soundness_metric d' M t (fun x hx => h_ctx x (h_sub hx))
+
+/-- **Soundness for Metric-derivable formulas**: If `ThDerivableFc .Metric φ`, then `φ` is
+valid over all ordered-abelian-group serial linear orders. -/
+theorem soundness_thderivable_metric {D : Type*} [AddCommGroup D] [LinearOrder D]
+    [IsOrderedAddMonoid D] [Nontrivial D]
+    {φ : Formula Atom} (h : Temporal.ThDerivableFc FrameClass.Metric φ)
+    (M : TemporalModel D Atom) (t : D) : Satisfies M t φ := by
+  obtain ⟨d⟩ := h
+  exact soundness_metric d M t (fun _ h => nomatch h)
+
+/-! ## BX⁺ Derivability -/
+
+set_option linter.dupNamespace false in
+/-- `BX⁺` derivability: derivability at the metric frame class `FrameClass.Metric`.
+`BX⁺` is the metric tense logic, sound over ordered-abelian-group time. -/
+@[nolint dupNamespace]
+def Temporal.BXPlusDerivable (φ : Formula Atom) : Prop :=
+  Temporal.ThDerivableFc FrameClass.Metric φ
 
 end Cslib.Logic.Temporal

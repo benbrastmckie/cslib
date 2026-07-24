@@ -108,9 +108,7 @@ theorem bigconj_mem_derivable {L : List F} {φ : F}
   | cons a rest ih =>
     cases rest with
     | nil =>
-      simp only [bigconj_singleton] at hconj
-      simp only [List.mem_singleton] at hmem
-      rw [hmem]; exact hconj
+      grind
     | cons b tail =>
       simp only [bigconj_cons_cons] at hconj
       cases hmem with

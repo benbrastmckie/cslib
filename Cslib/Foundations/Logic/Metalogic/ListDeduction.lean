@@ -74,8 +74,7 @@ theorem list_deriv_reflection {Γ : List F} {φ : F}
     rcases h with rfl | h
     · -- φ = ψ, need ListDeriv (φ :: Ψ) φ
       unfold ListDeriv
-      simp only [listImp_cons]
-      exact listImp_axiom_k φ Ψ
+      grind [listImp_axiom_k]
     · -- φ ∈ Ψ, use ih and then weaken
       have ih' := ih h
       unfold ListDeriv at ih' ⊢

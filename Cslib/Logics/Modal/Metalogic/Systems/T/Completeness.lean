@@ -67,7 +67,7 @@ private theorem t_truth_lemma_applied (S : CanonicalWorld (@TAxiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ tTags`: feeds the `holds*` helpers so `t_strong_completeness`/`t_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ tTags := by decide
 
 /-- T soundness adapter matching the `strong_soundness` callback shape.

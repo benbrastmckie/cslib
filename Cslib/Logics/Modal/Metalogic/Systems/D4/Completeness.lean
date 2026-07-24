@@ -29,7 +29,7 @@ is equivalent to set-derivability using `D4Axiom`.
 ## References
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
-* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated, task 539)
+* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated)
   and the generic `truth_lemma` / `canonicalTruthLemmaOfKCore` wrapper
 -/
 
@@ -73,7 +73,7 @@ private theorem d4_truth_lemma_applied (S : CanonicalWorld (@D4Axiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ d4Tags`: feeds the `holds*` helpers so `d4_strong_completeness`/`d4_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ d4Tags := by decide
 
 /-- D4 soundness adapter matching the `strong_soundness` callback shape. -/

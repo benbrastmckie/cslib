@@ -66,7 +66,7 @@ private theorem k45_truth_lemma_applied (S : CanonicalWorld (@K45Axiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ k45Tags`: feeds the `holds*` helpers so `k45_strong_completeness`/`k45_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ k45Tags := by decide
 
 /-- K45 soundness adapter matching the `strong_soundness` callback shape.

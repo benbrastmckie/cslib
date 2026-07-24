@@ -29,7 +29,7 @@ is equivalent to set-derivability using `DBAxiom`.
 ## References
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
-* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated, task 539)
+* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated)
   and the generic `truth_lemma` / `canonicalTruthLemmaOfKCore` wrapper
 -/
 
@@ -74,7 +74,7 @@ private theorem db_truth_lemma_applied (S : CanonicalWorld (@DBAxiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ dbTags`: feeds the `holds*` helpers so `db_strong_completeness`/`db_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ dbTags := by decide
 
 /-- DB soundness adapter matching the `strong_soundness` callback shape. -/

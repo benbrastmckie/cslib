@@ -29,7 +29,7 @@ frames) is equivalent to set-derivability using `D45Axiom`.
 ## References
 
 * [Blackburn, de Rijke, Venema, *Modal Logic*][Blackburn2001], Ch. 4
-* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated, task 539)
+* Cslib/Logics/Modal/Metalogic/Completeness.lean -- `d_canonical_serial` (relocated)
   and the generic `truth_lemma` / `canonicalTruthLemmaOfKCore` wrapper
 -/
 
@@ -80,7 +80,7 @@ private theorem d45_truth_lemma_applied (S : CanonicalWorld (@D45Axiom Atom))
 
 /-- `kCore ⊆ d45Tags`: feeds the `holds*` helpers so `d45_strong_completeness`/
 `d45_compactness` below share this single subset fact instead of repeating 4 `by decide`
-witnesses (task 539). -/
+witnesses. -/
 private theorem coreSubset : kCore ⊆ d45Tags := by decide
 
 /-- D45 soundness adapter matching the `strong_soundness` callback shape. -/

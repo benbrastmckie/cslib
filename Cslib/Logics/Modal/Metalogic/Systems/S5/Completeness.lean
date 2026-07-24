@@ -75,7 +75,7 @@ private theorem s5_truth_lemma_applied (S : CanonicalWorld (@S5Axiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ s5Tags`: feeds the `holds*` helpers so `s5_strong_completeness`/`s5_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ s5Tags := by decide
 
 /-- S5 soundness adapter matching the `strong_soundness` callback shape.

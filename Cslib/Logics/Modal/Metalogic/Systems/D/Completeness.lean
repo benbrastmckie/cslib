@@ -14,12 +14,11 @@ public import Cslib.Logics.Modal.Metalogic.Systems.D.Soundness
 This module proves completeness for modal logic D over serial Kripke frames
 via the canonical model construction (completeness-via-canonicity).
 
-Task 539: the D-specific box-witness route (`d_derive_box_from_inconsistency`,
-`d_mcs_box_witness`, `d_truth_lemma`) has been deleted -- it duplicated the generic route
-now promoted to `Metalogic.Completeness.truth_lemma`, which needs only `EFQ + K` from `kCore`
-and serves D (and all 14 other classical systems) directly via `canonicalTruthLemmaOfKCore`.
-`d_canonical_serial` (a genuine frame property, not a truth-lemma duplicate) is likewise
-relocated to `Metalogic.Completeness` so it survives this file's shrink.
+The D-specific box-witness route (`d_derive_box_from_inconsistency`, `d_mcs_box_witness`,
+`d_truth_lemma`) is not needed here: it would duplicate the generic route
+`Metalogic.Completeness.truth_lemma`, which needs only `EFQ + K` from `kCore` and serves D (and
+all 14 other classical systems) directly via `canonicalTruthLemmaOfKCore`. `d_canonical_serial`
+(a genuine frame property, not a truth-lemma duplicate) lives in `Metalogic.Completeness`.
 
 ## Main Results
 
@@ -72,7 +71,7 @@ theorem d_truth_lemma_applied (S : CanonicalWorld (@DAxiom Atom))
   canonicalTruthLemmaOfKCore (by decide) S φ
 
 /-- `kCore ⊆ dTags`: feeds the `holds*` helpers so `d_strong_completeness`/`d_compactness`
-below share this single subset fact instead of repeating 4 `by decide` witnesses (task 539). -/
+below share this single subset fact instead of repeating 4 `by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ dTags := by decide
 
 /-- D soundness adapter matching the `strong_soundness` callback shape.

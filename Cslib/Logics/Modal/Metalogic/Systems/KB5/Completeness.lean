@@ -70,7 +70,7 @@ private theorem kb5_truth_lemma_applied (S : CanonicalWorld (@KB5Axiom Atom))
 
 /-- `kCore ⊆ kb5Tags`: feeds the `holds*` helpers so `kb5_strong_completeness`/
 `kb5_compactness` below share this single subset fact instead of repeating 4
-`by decide` witnesses (task 539). -/
+`by decide` witnesses. -/
 private theorem coreSubset : kCore ⊆ kb5Tags := by decide
 
 /-- KB5 soundness adapter matching the `strong_soundness` callback shape.

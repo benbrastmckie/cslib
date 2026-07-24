@@ -48,7 +48,7 @@ the parametric `strong_completeness` via this shared pre-applied truth lemma.
 
 The generic box-witness machinery this used to need (`k_derive_box_from_inconsistency`,
 `k_mcs_box_witness`) and the truth lemma body itself have been promoted into
-`Metalogic.Completeness` as THE single generic `truth_lemma` route (task 539): every one of
+`Metalogic.Completeness` as THE single generic `truth_lemma` route: every one of
 the 15 classical systems' axiom predicates is `SchemaUnion sysTags` with `kCore ⊆ sysTags`, so
 one generic route serves all of them; this file only wires the promoted lemma to `KAxiom`. -/
 theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
@@ -58,7 +58,7 @@ theorem k_truth_lemma_applied (S : CanonicalWorld (@KAxiom Atom))
 
 /-- `kCore ⊆ kTags`: K's tag set is `kCore` alone. Feeds the `holds*` helpers so every
 `*_strong_completeness`/`*_compactness`/`*_completeness` call site below shares this single
-subset fact instead of repeating 4 `by decide` witnesses each (task 539). -/
+subset fact instead of repeating 4 `by decide` witnesses each. -/
 private theorem coreSubset : kCore ⊆ kTags := by decide
 
 /-- K soundness adapter matching the `strong_soundness` callback shape.

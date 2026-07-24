@@ -414,23 +414,57 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
         bridge `nikTrFuel_of_derivable`/`nikTr_of_sigAt_imp`. `impI` additionally needed
         `sigAt_cons_self_imp`, the hardest of the eight.)*
   - [ ] Discharge the **two cross-label constructors** `efq` and `orE` — the cases the flat shortcuts
-        died on. **NOT machine-attempted yet.** *(deviation: deferred -- before writing any Lean for
-        these two cases, a design-level analysis (see the new `Soundness.lean` docstring section
-        "Wrap-monotonicity: reusable infrastructure for the cross-label cases") found that the
-        "core" `sigAt`-only motive used for the 8 cases above is INSUFFICIENT for `efq`/`orE`: a bare
-        `sigAt x` fact only packages `x`'s own subtree, with no route to an unrelated label `y`,
-        whereas `nikTr`'s full ancestor-wrap threads in off-spine sibling subtrees (including `y`'s,
-        once traced to the lowest common ancestor) -- and `IsDerivationForest` guarantees a SINGLE
-        rooted tree (not several disjoint components), so `x`,`y` always share such an ancestor.
-        Closing `efq`/`orE` therefore needs `nik_adequacy`'s motive restated at the full `nikTr`
-        level (not the `sigAt` core) PLUS an explicit lowest-common-ancestor bridging argument --
-        this is NOT the PD.1 `bot_*` route originally anticipated (those are semantic/`CKForces`
-        lemmas from the superseded direct-motive route, not reusable for this syntactic bridge).
-        This is a pre-emptive design correction, not a machine-checked proof obstruction (no
-        concrete Lean goal was attempted and refuted); the reusable infrastructure a nikTr-level
-        redesign needs was landed regardless: `cs5_deriv_box_mono` (necessitation + `k`),
-        `cs5_deriv_imp_congr_right`, and `nikTrFuel_mono` (the "wrap preserves entailment, not just
-        closed derivability" strengthening of `nikTrFuel_of_derivable`).)*
+        died on. **NOT machine-attempted yet** (no concrete `efq`/`orE` Lean goal has been opened;
+        all work so far is reusable infrastructure the eventual case proofs will need).
+        *(deviation: deferred -- across TWO dispatches now, a progressively deeper design analysis
+        found:
+        (1) [dispatch N] the "core" `sigAt`-only motive used for the 8 cases above is INSUFFICIENT
+        for `efq`/`orE`: a bare `sigAt x` fact only packages `x`'s own subtree, with no route to an
+        unrelated label `y`, whereas `nikTr`'s full ancestor-wrap threads in off-spine sibling
+        subtrees. PD.1's `bot_*` lemmas (originally earmarked for `efq`) are semantic/`CKForces`
+        facts from the superseded direct-motive route, NOT reusable for this syntactic bridge.
+        (2) [dispatch N+1, this one] closing the gap identified in (1) requires THREE further
+        infrastructure layers, of which the first two are now LANDED and machine-verified:
+          (a) **Context-monotonicity across the whole ancestor wrap** — `sigAtFuel_mono_context`
+              (landed): a Γ-extension `Δ ⊇ Γ` pointwise (not just at descendants of the extended
+              label, which the earlier rank-threshold `sigAtFuel_congr_above_rank` could reach, but
+              also at SIBLING branches sharing the extended label's own rank) always derivably
+              entails the smaller-context translation. Superseding-in-scope, not replacing,
+              `sigAtFuel_congr_above_rank` (still valid, just narrower).
+          (b) **`nikTrFuel` fuel-sufficiency** — `nikTrFuel_fuel_invariant_step` (landed): the fuel
+              amount `nikTr` fixes globally (`card+1`) and the REDUCED fuel exposed one level up
+              inside any `sigAt`/`nikTrFuel` unfold need to be reconciled; proved via induction on
+              an upper bound for the graded-rank witness `ht`, confirming the ancestor walk halts
+              at the true root regardless of leftover fuel. (`sigAtFuel_mono_fuel`/`_le`, an easier
+              UNCONDITIONAL fuel-monotonicity fact needing no sufficiency side-condition at all,
+              landed alongside as a related but distinct tool.)
+          (c) **A root-connectivity invariant — NOT YET DEFINED, the next concrete blocker.**
+              Completing the "propagate `⊥` up `x`'s ancestor chain to the tree's root, then back
+              down to an arbitrary `y`" argument (the natural proof strategy once (a)/(b) are in
+              hand, avoiding an explicit lowest-common-ancestor computation by routing through the
+              root instead) needs EVERY label to be reachable from a single distinguished root via
+              `Relation.ReflTransGen G.R`. This is TRUE for every actual derivation graph (`G` is
+              always built from `Graph.trivial`'s one node via repeated `addEdge` from an EXISTING
+              node), but it is **NOT implied by `IsDerivationForest`'s three existing conjuncts**
+              (finite + graded rank + unique parent) alone -- those are purely LOCAL constraints
+              consistent in principle with several disjoint rank-graded unique-parent components.
+              Closing `efq`/`orE` via the root-propagation strategy needs a NEW invariant (e.g.
+              `IsRootedForest`, or a fourth conjunct added to `IsDerivationForest`) asserting
+              `∃ root, ∀ z ∈ G.X, Relation.ReflTransGen G.R root z`, PLUS preservation lemmas
+              mirroring `forest_trivial`/`forest_addEdge_fresh` (expected straightforward:
+              `Graph.trivial`'s single node trivially reaches itself; `addEdge x y` for fresh `y`
+              preserves reachability-from-root inductively, since the root already reaches `x`).
+        This is a genuine, freshly-identified INFRASTRUCTURE GAP, not a machine-checked proof
+        obstruction against a concrete goal -- (a) and (b) above are proof this general direction
+        is tractable engineering, verified by compiling. But the cumulative remaining scope (root-
+        connectivity + its preservation lemmas, the propagate-up-to-root argument, the propagate-
+        down-from-root `efq` argument, and `orE`'s own comparable-complexity treatment) is
+        substantially larger than originally estimated -- plausibly 400-600+ further lines, i.e.
+        multiple further dedicated dispatches, not "one more lemma." Reusable infrastructure landed
+        regardless of how the redesign is finished: `cs5_deriv_box_mono`, `cs5_deriv_imp_congr_right`,
+        `nikTrFuel_mono`, `bigAndL_imp_of_pointwise`, `sigAtFuel_mono_context`,
+        `sigAtFuel_mono_fuel`/`_le`, `nikTrFuel_succ_eq`, `nikTrFuel_no_parent`,
+        `nikTrFuel_fuel_invariant_step`.)*
 - **Green criterion / Done when:** the 10 constructor cases of `nik_adequacy` compile sorry-free
   (the 4 modal cases may remain open ONLY inside a scratch buffer, never in the committed file —
   land 8.2 by committing the file with the 10 cases proven and the modal cases stubbed via a
@@ -438,15 +472,19 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
   partial commit, keep 8.2's green artifact as the standalone helper lemmas the modal cases will
   consume, and defer stating `nik_adequacy` itself to 8.3). `Soundness.lean` builds green; commit.
   **[PARTIAL]** -- 8 of 10 in-scope constructors landed as standalone core lemmas (sorry-free,
-  axiom-clean, scoped build green, each individually committed); `efq`/`orE` remain, now with a
-  documented motive-design correction (see above) that the next dispatch should apply BEFORE
-  attempting Lean proofs for either case.
-- **Estimated output:** ~150-350 lines. **Depends on:** 8.1. **Actual so far:** ~440 lines across
-  eight commits (toolkit + bigAndL_mem, ancestor-wrap bridge, sigAt-core infra + `assumption`, the
-  six `P`-generic cases, `sigAtFuel_congr_above_rank`, `sigAt_cons_self_imp`, `sigAt_impI`,
-  `nikTrFuel_mono` + motive-design writeup) -- already at the top of the estimated range, confirming
-  this sub-step alone likely needs (at least) one further dispatch, matching Phase 8's own
-  worst-case 6-run sizing.
+  axiom-clean, scoped build green, each individually committed); `efq`/`orE` remain. Substantial
+  reusable cross-label infrastructure (context-monotonicity, fuel-sufficiency) landed this
+  dispatch; the concrete next blocker is a not-yet-defined root-connectivity invariant (see above).
+- **Estimated output:** ~150-350 lines. **Depends on:** 8.1. **Actual so far:** ~690 lines across
+  fourteen commits over two dispatches (toolkit + bigAndL_mem, ancestor-wrap bridge, sigAt-core
+  infra + `assumption`, the six `P`-generic cases, `sigAtFuel_congr_above_rank`,
+  `sigAt_cons_self_imp`, `sigAt_impI`, `nikTrFuel_mono` + motive-design writeup,
+  `sigAtFuel_mono_context`, `sigAtFuel_mono_fuel`/`_le`, `nikTrFuel_fuel_invariant_step`) --
+  roughly double the top of the estimated range, with the cross-label cases (the hardest part,
+  per report 04's own risk rating) still not started. This sub-step needs several more dedicated
+  dispatches, exceeding Phase 8's own worst-case 6-run sizing for the phase as a whole; a plan
+  revision or a dedicated `/research` pass on the root-connectivity + propagation strategy is
+  recommended before the next implementation dispatch, rather than continuing ad hoc.
 - **Reuses:** PD.1 `bot_backward`/`bot_iff_edge`/`bot_iff_TClosure`; CS5Canonical Hilbert combinators.
   *(deviation: PD.1's `bot_*` lemmas turned out NOT reusable here -- they are semantic/`CKForces`
   facts for the superseded direct-motive route, not syntactic `Derivable`/`sigAt` facts. The
@@ -509,7 +547,7 @@ shortcuts.** Each sub-step lands a green, independently-committable Preserved As
 - **Verification / Done when:** `nik_TS5_soundness` sorry-free; `Soundness.lean` builds green;
   `lean_verify` on `nik_TS5_soundness` axiom-clean (no `sorryAx`, no new axiom).
 
-### Phase 10: Regression gate + full-project verification [NOT STARTED]
+### Phase 10: Regression gate + full-project verification [IN PROGRESS]
 
 - **Goal:** Confirm the full project is green and unregressed, the Simpson 8.1.4 biconditional is
   complete, and no debt was added anywhere (report 04 Path P3 §8c).

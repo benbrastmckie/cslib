@@ -11,8 +11,8 @@ next_project_number: 552
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,400,405,407,425,438,440,451,463,465,466,474,519,522,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,409,430,450,456,497,511 | 36,37,181,317,407,425,535 | propositional logic, temporal logic, bimodal logic, ... |
+| 1 | 36,37,181,226,317,400,409,425,440,451,463,465,466,519,530,534,535,537,551 | -- | propositional logic, modal logic, temporal logic, ... |
+| 2 | 39,40,215,301,375,430,450,456,497,511 | 36,37,181,317,425,535 | propositional logic, temporal logic, bimodal logic, ... |
 | 3 | 41,413,506,548 | 39,40,375,511 | foundations, modal logic, code hygiene |
 | 4 | 300 | 506 | modal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
@@ -26,18 +26,16 @@ next_project_number: 552
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [IMPLEMENTING] — Fill the propositional tableau completeness sorries (7 real sorri
+317 [BLOCKED] — Fill the propositional tableau completeness sorries (7 real sorri
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 400 [BLOCKED] — [ENRICHED 2026-06-29 — see specs/400_reconcile_connectives_pr607/
-407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
-  └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
+409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
 
 ### Modal Logic
 
-405 [PR READY] — Simplify the proof machinery in the task-402 modal tableau soundn
-522 [PR READY] — Uniform frame-condition to axiom correspondence library for modal
+534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 535 [IMPLEMENTING] — Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (de
   └─ 511 [BLOCKED] — Follow-on to task 506 (S4 loop-checking): close the S4 terminatio
     └─ 506 [BLOCKED] — Deliver plan Phases 5 and 6 of task 300 combined (specs/300_modal
@@ -61,21 +59,20 @@ next_project_number: 552
   └─ 215 [BLOCKED] — Fill 20 sorry declarations across 5 files in Cslib/Logics/Bimodal (see above)
 181 [NOT STARTED] — Propagate primitive diamond, allFuture, and allPast constructors 
   └─ 450 [NOT STARTED] — Core corrected conservativity result. PR-BLOCKING for task 180. S
-451 [RESEARCHING] — Deeper metatheory for the metric tense logic BX+ (defined in task
+451 [IMPLEMENTING] — Deeper metatheory for the metric tense logic BX+ (defined in task
 
 ### Code Hygiene
 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
+530 [BLOCKED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
 
 ### Pr & Upstreaming
 
-438 [PR READY] — Upstream the comment/docstring cleanups identified by the task 43
-440 [NOT STARTED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
+440 [RESEARCHED] — PR review: GitHub PR https://github.com/leanprover/cslib/pull/648
 465 [PR READY] — Review PR #607 (logical operators): post GitHub review covering t
 466 [PR READY] — Post comment on PR #648 linking the Zulip primitive-bot plus efq 
-474 [PR READY] — Draft Zulip replies confirming CSLib meeting attendance to Montes
 
 ### Tableau Infrastructure
 
@@ -86,9 +83,6 @@ next_project_number: 552
 519 [NOT STARTED] — Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
 
 ### Uncategorized
-
-530 [BLOCKED] — REDUNDANCY CLEANUP. Cslib/Logics/Bimodal/Metalogic/BXCanonical/Ch
-534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 
 ## Tasks
 
@@ -310,6 +304,7 @@ next_project_number: 552
 ### 534. Pure K5/5 Euclidean tableau completeness without the equivalence route
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
+- **Topic**: Modal Logic
 - **Dependencies**: Task 531
 
 **Description**: COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree (instDecidableFiveValid/instDecidableKb5Valid, FrameCompleteness.lean) is delivered via the KB5/S5 equivalence route, which leans on a full-equivalence closure. This task delivers genuine pure-K5 / pure-5 (Euclidean without full equivalence, no Mathlib closure operator) tableau soundness + completeness + decidability - the one modal-cube corner explicitly deferred out of the completed KB5/Euclidean task. Mirror the existing Five/KB5 development but over the bare Euclidean frame condition. Zero sorry, zero new axioms; keep the frozen equivalence-route deliverables untouched.
@@ -319,6 +314,7 @@ next_project_number: 552
 ### 530. Consolidate the duplicated Chronicle construction across Bimodal and Temporal
 - **Status**: [BLOCKED]
 - **Task Type**: cslib
+- **Topic**: Code Hygiene
 - **Dependencies**: None
 - **Research**: [530_consolidate_chronicle_construction_bimodal_temporal/reports/01_chronicle-dedup-research.md]
 - **Plan**: [530_consolidate_chronicle_construction_bimodal_temporal/plans/01_chronicle-consolidation.md]
@@ -329,7 +325,7 @@ next_project_number: 552
 ---
 
 ### 522. Uniform frame condition axiom correspondence library
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -401,7 +397,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 474. Draft zulip replies meeting fragments
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
@@ -455,10 +451,12 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 ---
 
 ### 451. BX+ completeness over ordered-abelian-group time flows
-- **Status**: [RESEARCHING]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Bimodal Logic
 - **Dependencies**: Task 449
+- **Research**: [451_bxplus_completeness_over_group_flows/reports/01_bxplus-completeness-frame-class.md]
+- **Plan**: [451_bxplus_completeness_over_group_flows/plans/01_bxplus-completeness-uniform-class.md]
 
 **Description**: Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.
 
@@ -530,17 +528,18 @@ Definition of done: FrameClass.Metric and the 4 temporal uniformity axioms defin
 ---
 
 ### 440. Review pr leanprover cslib 648
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: pr
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
+- **Research**: [440_review_pr_leanprover_cslib_648/reports/01_pr-review-research.md]
 
 **Description**: PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)
 
 ---
 
 ### 438. Pr task431 comment cleanups
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: PR & Upstreaming
 - **Dependencies**: None
@@ -685,17 +684,18 @@ After implementation:
 ---
 
 ### 409. Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization
-- **Status**: [NOT STARTED]
+- **Status**: [RESEARCHED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 407
+- **Research**: [409_bot_rule_free_nd_option_b/reports/01_bot-free-nd-option-b-research.md]
 
 **Description**: SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5. ALIGNMENT NOTE: this two-inductive split is the Design-B-flavored route that the universal-algebra approach (task 407 option C) deliberately AVOIDS, because it duplicates derivation structure (exclude-then-add at the derivation level). Default remains task 407 option C: ONE derivation type with explosion as a property module. Pursue 409 ONLY if the trigger condition above fires.
 
 ---
 
 ### 407. Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -716,7 +716,7 @@ After implementation:
 ---
 
 ### 405. Proof style cleanup modal soundness
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 404
@@ -770,7 +770,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [IMPLEMENTING]
+- **Status**: [BLOCKED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
@@ -882,6 +882,7 @@ After implementation:
 - **Research**:
   - [226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md]
   - [226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md]
+  - [226_propositional_semantics_upstream_pr/reports/03_upstream-packaging-research.md]
 
 **Description**: Cherry-pick propositional semantics from the local codebase into a <500 LOC follow-up PR stacked on PR #648. PR #648 contributes the formula type and natural deduction; this follow-up adds the semantics layer. Scope: (1) Semantics/Algebra.lean — GHA evaluation with bot_val parameter for minimal/intuitionistic/classical logic. (2) Semantics/Bool.lean — BoolEvaluate with bridge to AlgEvaluate. (3) Semantics/SemanticConsequence.lean — semantic consequence and tautology definitions. (4) Semantics/Kripke.lean — Kripke semantics with botForces for minimal logic (include if LOC budget permits). All four files already exist locally with full implementations. Task is to select, trim, and package for upstream submission. Ensure lake build, lake test, lake exe checkInitImports, lake exe lint-style, and lake shake all pass on the PR branch. Write PR description referencing the Zulip Propositional Logic thread.
 

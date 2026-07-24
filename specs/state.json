@@ -95,7 +95,8 @@
         }
       ],
       "session_id": "sess_1784402996_48ad02_530",
-      "blockers": "Phases 0-3a (4/9) landed sorry-free, committed, full lake test green: ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures+BurgessHelpers. Phases 3b/3c/4a/4b BLOCKED — C5ForwardWalkResult/C5BackwardWalkResult/EliminationResult/ChronicleConstruction are indexed by each tree's LOCAL Chronicle Atom structure; two deep investigations (Phase 1, Phase 3b) confirmed generically bridging it breaks downstream rcases/simp proofs. Needs a /revise scoping decision: (A) deeper Chronicle-structure refactor (exceeds 'structural dedup, not a proof change' scope), or (B) descope 3b-4b, keep the landed lifts, and close as partial consolidation. See specs/530_.../summaries/01_chronicle-consolidation-summary.md Phase 3a Survey + Phase 3b blocker writeup."
+      "blockers": "Phases 0-3a (4/9) landed sorry-free, committed, full lake test green: ChronicleInterface skeleton, generic Types, RRelation shared core, CEE Structures+BurgessHelpers. Phases 3b/3c/4a/4b BLOCKED — C5ForwardWalkResult/C5BackwardWalkResult/EliminationResult/ChronicleConstruction are indexed by each tree's LOCAL Chronicle Atom structure; two deep investigations (Phase 1, Phase 3b) confirmed generically bridging it breaks downstream rcases/simp proofs. Needs a /revise scoping decision: (A) deeper Chronicle-structure refactor (exceeds 'structural dedup, not a proof change' scope), or (B) descope 3b-4b, keep the landed lifts, and close as partial consolidation. See specs/530_.../summaries/01_chronicle-consolidation-summary.md Phase 3a Survey + Phase 3b blocker writeup.",
+      "topic": "Code Hygiene"
     },
     {
       "project_number": 534,
@@ -115,7 +116,8 @@
       "created": "2026-07-18T19:24:35Z",
       "last_updated": "2026-07-18T19:24:35Z",
       "next_artifact_number": 1,
-      "artifacts": []
+      "artifacts": [],
+      "topic": "Modal Logic"
     },
     {
       "project_number": 511,
@@ -239,12 +241,14 @@
     {
       "project_number": 474,
       "project_name": "draft_zulip_replies_meeting_fragments",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "general",
       "topic": "PR & Upstreaming",
       "description": "Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed",
       "created": "2026-07-02T16:08:19Z",
-      "last_updated": "2026-07-02T17:31:34Z"
+      "last_updated": "2026-07-24T15:31:37Z",
+      "session_id": "sess_1784907081_statusfix",
+      "completion_summary": "Drafted Zulip replies for meeting fragments; deliverable zulip-drafts.md produced (Draft A/B plus fact-checked reminder notes) for user review and personalization before posting."
     },
     {
       "project_number": 463,
@@ -288,7 +292,7 @@
     {
       "project_number": 440,
       "project_name": "review_pr_leanprover_cslib_648",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "pr",
       "description": "PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)",
       "sources": [
@@ -310,11 +314,18 @@
         }
       ],
       "created": "2026-06-30T17:38:50Z",
-      "last_updated": "2026-06-30T17:38:50Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
+      "last_updated": "2026-07-24T15:46:10Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/440_review_pr_leanprover_cslib_648/reports/01_pr-review-research.md",
+          "summary": "PR #648 review research: 4 outstanding items (references, Semantics-removal, reviewer reply, #587/#607 coord); branch now merge-conflicted"
+        }
+      ],
       "topic": "PR & Upstreaming",
-      "dependencies": []
+      "dependencies": [],
+      "session_id": "sess_1784907631_dfd0bb_440"
     },
     {
       "project_number": 393,
@@ -355,7 +366,7 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "implementing",
+      "status": "blocked",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the propositional tableau completeness sorries (7 real sorries; soundness is already sorry-free after task 316). The open obligations are the truth-lemma / countermodel-extraction proofs in the three Completeness modules. Classical (Tableau/Classical/Completeness.lean): classicalExpandBranches_hintikka (line ~462) -- note the module's separate build break (bad Mathlib lemma ref + unsolved goals) is repaired first under task 363. Intuitionistic (Tableau/Intuitionistic/Completeness.lean): intTruthLemma (line ~89), intuitionisticOpenBranch_countermodel (~98), intuitionisticTableau_complete (~112). Minimal (Tableau/Minimal/Completeness.lean): minTruthLemma (~168), minOpenBranch_countermodel (~179), minimalTableau_complete (~190). Core technique: Hintikka-set argument -- a saturated open branch satisfies Hintikka conditions, from which a countermodel is extracted (a Boolean valuation for classical; a finite Kripke model for intuitionistic/minimal) and a truth lemma by formula induction matches forced/not-forced to the signed formulas at each world. Because task 369 parameterizes the intuitionistic and minimal tableau over (closurePred, modelBot), the int and min cases should be discharged ONCE as a single parametric truth-lemma/countermodel pair rather than duplicated. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake). Depends on 316, 323, 363, 369.",
@@ -501,7 +512,8 @@
       ],
       "dependencies": [],
       "parent_task": 298,
-      "session_id": "sess_1784905751_756cda_317"
+      "session_id": "sess_1784905751_756cda_317",
+      "blockers": "Gap 2 (Sub(phi0) determinacy/bivalence) unprovable in current 6-rule tableau calculus: persistent T(imp) rule is .pos-only, never plants F-tags. Needs NEW branching rule in Rules.lean/Expansion.lean + soundness re-audit (task 316 territory) + fuel machinery re-derivation. See .orchestrator-handoff.json and plan 06 Phase 10 [BLOCKED] note."
     },
     {
       "project_number": 300,
@@ -690,8 +702,8 @@
       "topic": "Propositional Logic",
       "dependencies": [],
       "created": "2026-06-16T23:00:00Z",
-      "last_updated": "2026-06-17T00:00:00Z",
-      "session_id": "sess_1781736993_cab15d",
+      "last_updated": "2026-07-24T15:47:42Z",
+      "session_id": "sess_1784907631_dfd0bb_226",
       "artifacts": [
         {
           "path": "specs/226_propositional_semantics_upstream_pr/reports/01_upstream-pr-research.md",
@@ -702,9 +714,14 @@
           "path": "specs/226_propositional_semantics_upstream_pr/reports/02_three-way-comparison.md",
           "type": "research",
           "summary": "Three-way comparison: our semantics vs Thomas Waring vs Matthew Doty implementations"
+        },
+        {
+          "type": "report",
+          "path": "specs/226_propositional_semantics_upstream_pr/reports/03_upstream-packaging-research.md",
+          "summary": "Upstream-packaging research: 4 files now 819 LOC (over <500 budget); PR #648 base has only Defs+ND; recommend Package A (Algebra+Bool+Bridge=487 LOC), defer SemanticConsequence (non-upstream deps)."
         }
       ],
-      "next_artifact_number": 3
+      "next_artifact_number": 4
     },
     {
       "project_number": 215,
@@ -887,16 +904,16 @@
     {
       "project_number": 405,
       "project_name": "proof_style_cleanup_modal_soundness",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "description": "Simplify the proof machinery in the task-402 modal tableau soundness redesign before any upstream PR. Targets in Cslib/Logics/Modal/Tableau/Soundness.lean: modalApplyOne_fresh (uses unfold + extract_lets + `repeat first | Or.inl rfl | Or.inr ... | split` plus an apply_ite/ite_self cleanup) and the modalExpandBranches_closed_unsat per-branch accs/Forall2 reformulation. Improve readability/robustness without changing statements. Verify scoped + full lake build green, zero sorry, lint-style pass. Touches the same file as task 404 (sequence after it); overlaps code-hygiene task 321.",
       "dependencies": [
         404
       ],
       "parent_task": 402,
-      "last_updated": "2026-07-01T17:19:02Z",
+      "last_updated": "2026-07-24T15:31:21Z",
       "topic": "Modal Logic",
-      "session_id": "sess_1782924983_6bcecb_405",
+      "session_id": "sess_1784907081_statusfix",
       "artifacts": [
         {
           "type": "report",
@@ -916,12 +933,12 @@
     {
       "project_number": 407,
       "project_name": "mpl_base_structure_first_redesign",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)",
       "description": "DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).",
       "created": "2026-06-29T00:00:00Z",
-      "last_updated": "2026-06-29T00:00:00Z",
+      "last_updated": "2026-07-24T15:31:25Z",
       "next_artifact_number": 5,
       "artifacts": [
         {
@@ -965,7 +982,7 @@
           "summary": "mpl base waves 1 4 (backfilled by --sync)"
         }
       ],
-      "session_id": "sess_1782750230_3ec4a4_407plan",
+      "session_id": "sess_1784907081_statusfix",
       "dependencies": [],
       "topic": "Propositional Logic",
       "plan_metadata": {
@@ -1023,20 +1040,27 @@
           }
         ]
       },
-      "note": "Ready for /pr 407. All 5 pre-submission decisions resolved 2026-06-30 (decisions.md). Q3 (categorical/initiality) implemented as HasInitialBot witness, committed 569f6ac5, green. pr-description.md finalized. PR submission is user-only: run /pr 407."
+      "note": "Ready for /pr 407. All 5 pre-submission decisions resolved 2026-06-30 (decisions.md). Q3 (categorical/initiality) implemented as HasInitialBot witness, committed 569f6ac5, green. pr-description.md finalized. PR submission is user-only: run /pr 407.",
+      "completion_summary": "Redesigned MPL base structure (structure-first): added HasInitialBot to BotProperties.lean, bridge lemmas to BrouwerianBot.lean, and initial-object witness in PointedBrouwerianCompleteness.lean. All four phases completed; scoped and full lake build green (pre-existing Intuitionistic Completeness sorry unrelated); zero new sorry."
     },
     {
       "project_number": 409,
       "project_name": "bot_rule_free_nd_option_b",
-      "status": "not_started",
+      "status": "researched",
       "task_type": "cslib",
       "title": "Literal ⊥-rule-free base ND inductive (option B): split MinDerivation + Explosion; re-cut Curry-Howard & normalization",
       "description": "SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- OPTIONAL / advanced. Task 407 adopts option C (re-frame the task-398 gated efq constructor as the explosion property module; the base relation is ⊥-rule-free UP TO the IsIntuitionistic gate). Option B is the LITERAL structure-first ND: split Theory.Derivation into a genuinely ⊥-rule-free base inductive MinDerivation (no efq constructor) plus an Explosion extension, prove all structural metatheory once on the base, and recover IPL-ND by adjoining efq. TRIGGER CONDITION: only pursue if a concrete downstream consumer needs a physically ⊥-free derivation object (e.g. a minimal-ND normalization theorem, or a lambda-calculus without an abort/efq combinator). COST/RISK: re-opens the single genuinely hard point from task 398 -- the subformula property under efq -- and forces re-cutting Curry-Howard (Theory.Term mirror) and Prawitz normalization (Basic/Reduction/Termination/SubformulaProperty) against the split. Reuse the task-398 decided strategy (atomic restriction + permutation conversions); treat any non-green proof as [BLOCKED], never sorry. HIGH effort -- use --hard. Depends on 407 (and ideally 408). Source: task 407 report 01 §5 option B / §7 W6, report 02 §5. ALIGNMENT NOTE: this two-inductive split is the Design-B-flavored route that the universal-algebra approach (task 407 option C) deliberately AVOIDS, because it duplicates derivation structure (exclude-then-add at the derivation level). Default remains task 407 option C: ONE derivation type with explosion as a property module. Pursue 409 ONLY if the trigger condition above fires.",
       "created": "2026-06-29T00:00:00Z",
-      "last_updated": "2026-06-29T00:00:00Z",
-      "next_artifact_number": 1,
-      "artifacts": [],
-      "session_id": "sess_1782744926_3601df_407_409",
+      "last_updated": "2026-07-24T15:46:47Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/409_bot_rule_free_nd_option_b/reports/01_bot-free-nd-option-b-research.md",
+          "summary": "Option-B ⊥-free ND split research: trigger condition unmet (no consumer needs a physically ⊥-free derivation); recommend defer/BLOCKED. Inventory + base+extension precedent (ExtDerivation) delivered."
+        }
+      ],
+      "session_id": "sess_1784907631_dfd0bb_409",
       "dependencies": [
         407
       ],
@@ -1276,13 +1300,13 @@
     {
       "project_number": 438,
       "project_name": "pr_task431_comment_cleanups",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "priority": "low",
       "description": "Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.",
       "created": "2026-06-30T16:29:40Z",
-      "last_updated": "2026-07-01T13:32:44Z",
-      "session_id": "sess_1782912232_20267a_438",
+      "last_updated": "2026-07-24T15:31:29Z",
+      "session_id": "sess_1784907081_statusfix",
       "dependencies": [],
       "parent_task": 431,
       "topic": "PR & Upstreaming",
@@ -1307,7 +1331,8 @@
           "type": "summary",
           "summary": "PR-prep complete: verified single-file comment-only Basic.lean deletion vs upstream/main, authored pr-description.md, transitioned to PR READY."
         }
-      ]
+      ],
+      "completion_summary": "PR-preparation task (no proof/code edits): verified the stale Term.subst_comm commented stub was already removed from Basic.lean and authored the PR description. Verification phase completed; upstream fetch and grep confirmations clean."
     },
     {
       "project_number": 449,
@@ -1363,15 +1388,26 @@
     {
       "project_number": 451,
       "project_name": "bxplus_completeness_over_group_flows",
-      "status": "researching",
+      "status": "implementing",
       "task_type": "cslib",
       "title": "BX+ completeness over ordered-abelian-group time flows",
       "description": "Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.\n\nGOAL: Prove BX+ (Temporal FrameClass.Metric) COMPLETE over the class of ordered-abelian-group temporal frames: every formula valid on all group-ordered flows is BX+-derivable (equivalently, every BX+-consistent formula has a group-ordered countermodel).\n\nResearch must decide the construction. Candidate routes (see specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md):\n- Adapt the existing Temporal completeness machinery (Chronicle / MCS construction under Cslib/Logics/Temporal/Metalogic/Chronicle/) to yield a countermodel whose order embeds into an ordered abelian group.\n- Loewenheim-Skolem to a countable model, then Cantor (Order.iso_of_countable_dense) for the dense case plus a discreteness case-split, transporting satisfaction along the sound Satisfies.orderIso transport lemma sketched in the 445 report section 7.\nLiterature grounding: Xu1988, Burgess1984 sec 6.1, Gabbay1993 (irreflexivity rule), Reynolds. Confirm exactly which frame class BX+ is genuinely complete over before committing.\n\nZero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out to need an open / research-level lemma, escalate with the exact goal rather than papering over it.\n",
       "parent_task": 180,
       "created": "2026-07-01T07:00:00Z",
-      "last_updated": "2026-07-24T15:11:05Z",
+      "last_updated": "2026-07-24T15:30:54Z",
       "next_artifact_number": 1,
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/451_bxplus_completeness_over_group_flows/reports/01_bxplus-completeness-frame-class.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/451_bxplus_completeness_over_group_flows/plans/01_bxplus-completeness-uniform-class.md",
+          "type": "plan",
+          "summary": ""
+        }
+      ],
       "dependencies": [
         449
       ],
@@ -1463,14 +1499,14 @@
     {
       "project_number": 522,
       "project_name": "uniform_frame_condition_axiom_correspondence_library",
-      "status": "pr_ready",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "Uniform frame-condition to axiom correspondence library for modal soundness. RECONCILED: Phase 1 delivered sorry-free - Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean provides the five explicit-hypothesis correspondence lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom), registered in the barrel and re-exported via Soundness.lean. REMAINING (the actual dedup payoff): wire the 14 downstream Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean consumers to delegate to this library instead of reproving axiom-frame correspondence case-by-case; they are currently still byte-identical case-by-case proofs. Was gated pending a Zulip design decision on the library shape. DESIGN DECISION (resolved, user 2026-07-18): Public signature form = EXPLICIT-HYPOTHESIS primary — lemmas like Satisfies.modalT_axiom' m (h_refl : ∀ w, m.r w w) w φ; the 14 downstream Systems/*/Soundness.lean consumers delegate via one-line exact-delegation passing their existing h_refl/h_trans/… (zero other downstream edits). Additionally expose instance-arg [Std.Refl m.r] forms for new systems. Scope: one coherent PR = additive lemmas (already landed in FrameCorrespondence.lean) + wire the 14 consumers; defer completeness-FC re-expression and birelational dedup to follow-ups. Post a Zulip heads-up before the multi-file PR lands.",
       "created": "2026-07-17T20:46:47Z",
-      "last_updated": "2026-07-18T23:49:14Z",
-      "session_id": "sess_1784322687_fcf57a_522_phase345",
+      "last_updated": "2026-07-24T15:31:33Z",
+      "session_id": "sess_1784907081_statusfix",
       "artifacts": [
         {
           "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md",
@@ -1492,7 +1528,8 @@
       "file_scope": [
         "Cslib/Logics/Modal/Metalogic/Systems/",
         "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean"
-      ]
+      ],
+      "completion_summary": "Uniform frame-condition axiom-correspondence library: executed Phases 3-5 across 14 consumer modules and 15 touched/new files. Full lake build 3243/3243 jobs with no regressions; zero sorry; no Completeness.lean adapter changes needed."
     },
     {
       "project_number": 535,

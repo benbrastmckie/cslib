@@ -1,0 +1,18 @@
+{
+  "status": "researched",
+  "summary": "Trigger condition NOT met: no physically-bot-free consumer exists, so option B is not recommended now; report maps the hypothetical split and re-trigger signals.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/409_bot_rule_free_nd_option_b/reports/01_bot-free-nd-option-b-research.md",
+      "summary": "ND infra inventory (option C landed by 407), trigger-condition evaluation (negative), hypothetical MinDerivation+Explosion split map, subformula-property-under-efq hard point, ExtDerivation base+extension precedent."
+    }
+  ],
+  "memory_candidates": [],
+  "metadata": {
+    "session_id": "sess_1784907631_dfd0bb_409",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

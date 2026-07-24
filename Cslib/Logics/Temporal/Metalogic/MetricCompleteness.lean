@@ -300,4 +300,138 @@ theorem validMetricUniform_imp_oag {φ : Formula Atom} (h : validMetricUniform �
   h D (fun M t => ⟨discrete_symm_fwd_sound M t, discrete_symm_bwd_sound M t,
     discrete_propagate_fwd_sound M t, discrete_propagate_bwd_sound M t⟩) M t
 
+/-! ## Uniformity Axioms Satisfied at Every Chronicle Point -/
+
+/-- A Metric-MCS is also a Base-MCS. Mirrors `dense_mcs_implies_base_mcs`. -/
+theorem metric_mcs_implies_base_mcs
+    {M : Set (Formula Atom)}
+    (h_mcs : Temporal.SetMaximalConsistentFc FrameClass.Metric M) :
+    Temporal.SetMaximalConsistent M := by
+  constructor
+  · intro L hL hd
+    apply h_mcs.1 L hL
+    unfold temporalDerivationSystemFc Temporal.DerivFc
+    unfold temporalDerivationSystem Temporal.Deriv at hd
+    obtain ⟨d⟩ := hd
+    exact ⟨d.lift (FrameClass.base_le .Metric)⟩
+  · intro φ h_not_mem
+    have h_neg := mcs_neg_of_not_mem_fc h_mcs h_not_mem
+    intro h_cons
+    apply h_cons [φ, Formula.neg φ]
+    · intro x hx
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hx
+      rcases hx with rfl | rfl
+      · exact Set.mem_insert _ M
+      · exact Set.mem_insert_of_mem _ h_neg
+    · unfold temporalDerivationSystem Temporal.Deriv
+      exact ⟨.modus_ponens _ φ Formula.bot
+        (.assumption _ (Formula.neg φ) (by simp))
+        (.assumption _ φ (by simp))⟩
+
+variable [Denumerable (Formula Atom)]
+
+/-- **Every Metric theorem holds at every chronicle point.** Since `φ` is derivable at the
+empty context (`⊢[Metric] φ`), both `G(φ)` and `H(φ)` are also derivable, hence members of the
+Metric-MCS seed `A = limitF(0)`; propagate forward/backward to every limit point via the
+chronicle truth lemma. Much more direct than the dense case's `dense_indicator_in_all_limit_points`
+(no C4 trichotomy needed): the four uniformity axioms are theorems, not merely negative facts to
+be defended by contradiction. -/
+theorem metric_theorem_in_all_limit_points
+    {A : Set (Formula Atom)}
+    (h_metric_mcs : Temporal.SetMaximalConsistentFc FrameClass.Metric A)
+    (h_base_mcs : Temporal.SetMaximalConsistent A)
+    {φ : Formula Atom} (h_thm : DerivationTree FrameClass.Metric ([] : Context Atom) φ)
+    (x : Rat) (hx : x ∈ limitDom A h_base_mcs) :
+    φ ∈ limitF A h_base_mcs x := by
+  have h_phi_in_A : φ ∈ A := theoremInMcsFc h_metric_mcs h_thm
+  have h_g_thm : DerivationTree FrameClass.Metric [] φ.allFuture :=
+    DerivationTree.temporal_necessitation _ h_thm
+  have h_g_in_A : φ.allFuture ∈ A := theoremInMcsFc h_metric_mcs h_g_thm
+  have h_h_thm : DerivationTree FrameClass.Metric [] φ.allPast := by
+    have d_swap := DerivationTree.temporal_duality _ h_thm
+    have d_g := DerivationTree.temporal_necessitation _ d_swap
+    have d_h := DerivationTree.temporal_duality _ d_g
+    have h_eq_form : φ.swapTemporal.allFuture.swapTemporal = φ.allPast := by
+      rw [Formula.swapTemporal_allFuture, Formula.swapTemporal_involution]
+    exact h_eq_form ▸ d_h
+  have h_h_in_A : φ.allPast ∈ A := theoremInMcsFc h_metric_mcs h_h_thm
+  rcases lt_trichotomy x 0 with hx_neg | hx_zero | hx_pos
+  · -- x < 0: H(φ) ∈ A = limitF(0); truth lemma gives Sat at all past points.
+    let t₀ : ChronicleSubtype A h_base_mcs := chronicleZero A h_base_mcs
+    have h_zero_mem : φ.allPast ∈ limitF A h_base_mcs 0 := by rw [limit_f_zero]; exact h_h_in_A
+    have h_sat := (chronicle_truth_lemma A h_base_mcs t₀ φ.allPast).mpr h_zero_mem
+    rw [Satisfies.allPast_iff] at h_sat
+    have h_sat_x := h_sat ⟨x, hx⟩ hx_neg
+    exact (chronicle_truth_lemma A h_base_mcs ⟨x, hx⟩ φ).mp h_sat_x
+  · subst hx_zero
+    rw [limit_f_zero]
+    exact h_phi_in_A
+  · -- x > 0: G(φ) ∈ A = limitF(0); truth lemma gives Sat at all future points.
+    let t₀ : ChronicleSubtype A h_base_mcs := chronicleZero A h_base_mcs
+    have h_zero_mem : φ.allFuture ∈ limitF A h_base_mcs 0 := by rw [limit_f_zero]; exact h_g_in_A
+    have h_sat := (chronicle_truth_lemma A h_base_mcs t₀ φ.allFuture).mpr h_zero_mem
+    rw [Satisfies.allFuture_iff] at h_sat
+    have h_sat_x := h_sat ⟨x, hx⟩ hx_pos
+    exact (chronicle_truth_lemma A h_base_mcs ⟨x, hx⟩ φ).mp h_sat_x
+
+omit [Denumerable (Formula Atom)] in
+/-- The four metric-uniformity axiom formulas, being built purely from `⊥`/`⊤`, are satisfied
+(or not) independently of the model's valuation — only the order structure of the domain
+matters. This lets `chronicleUniformMetric` transport membership facts (model-independent) to
+satisfaction facts about an *arbitrary* model on the chronicle domain, not just
+`chronicleModel A h_base_mcs`. -/
+theorem satisfies_bot_top_indep {D : Type*} [LinearOrder D]
+    (M M' : TemporalModel D Atom) (t : D) (ψ : Formula Atom)
+    (h_indep : ψ = (Formula.untl Formula.bot Formula.top).imp
+        (Formula.snce Formula.bot Formula.top) ∨
+      ψ = (Formula.snce Formula.bot Formula.top).imp
+        (Formula.untl Formula.bot Formula.top) ∨
+      ψ = (Formula.untl Formula.bot Formula.top).imp
+        (Formula.allFuture (Formula.untl Formula.bot Formula.top)) ∨
+      ψ = (Formula.untl Formula.bot Formula.top).imp
+        (Formula.allPast (Formula.untl Formula.bot Formula.top))) :
+    Satisfies M t ψ ↔ Satisfies M' t ψ := by
+  rcases h_indep with rfl | rfl | rfl | rfl <;>
+    simp only [Satisfies, Formula.top, PropositionalConnectives.top]
+
+/-- **The chronicle built from a Metric-MCS satisfies `uniformFrameCondition`** at every point:
+the chronicle domain is in the uniform class `U`. This is the chronicle-membership-in-`U`
+witness consumed by `completeness_metric`. -/
+theorem chronicleUniformMetric
+    {A : Set (Formula Atom)}
+    (h_metric_mcs : Temporal.SetMaximalConsistentFc FrameClass.Metric A)
+    (h_base_mcs : Temporal.SetMaximalConsistent A) :
+    uniformFrameCondition (Atom := Atom) (ChronicleSubtype A h_base_mcs) := by
+  intro M t
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · have h_thm : DerivationTree FrameClass.Metric ([] : Context Atom)
+        ((Formula.untl Formula.bot Formula.top).imp (Formula.snce Formula.bot Formula.top)) :=
+      .axiom [] _ .discrete_symm_fwd (le_refl _)
+    have h_mem := metric_theorem_in_all_limit_points h_metric_mcs h_base_mcs h_thm t.val t.property
+    have h_chron := (chronicle_truth_lemma A h_base_mcs t _).mpr h_mem
+    exact (satisfies_bot_top_indep (chronicleModel A h_base_mcs) M t _ (Or.inl rfl)).mp h_chron
+  · have h_thm : DerivationTree FrameClass.Metric ([] : Context Atom)
+        ((Formula.snce Formula.bot Formula.top).imp (Formula.untl Formula.bot Formula.top)) :=
+      .axiom [] _ .discrete_symm_bwd (le_refl _)
+    have h_mem := metric_theorem_in_all_limit_points h_metric_mcs h_base_mcs h_thm t.val t.property
+    have h_chron := (chronicle_truth_lemma A h_base_mcs t _).mpr h_mem
+    exact (satisfies_bot_top_indep (chronicleModel A h_base_mcs) M t _
+      (Or.inr (Or.inl rfl))).mp h_chron
+  · have h_thm : DerivationTree FrameClass.Metric ([] : Context Atom)
+        ((Formula.untl Formula.bot Formula.top).imp
+          (Formula.allFuture (Formula.untl Formula.bot Formula.top))) :=
+      .axiom [] _ .discrete_propagate_fwd (le_refl _)
+    have h_mem := metric_theorem_in_all_limit_points h_metric_mcs h_base_mcs h_thm t.val t.property
+    have h_chron := (chronicle_truth_lemma A h_base_mcs t _).mpr h_mem
+    exact (satisfies_bot_top_indep (chronicleModel A h_base_mcs) M t _
+      (Or.inr (Or.inr (Or.inl rfl)))).mp h_chron
+  · have h_thm : DerivationTree FrameClass.Metric ([] : Context Atom)
+        ((Formula.untl Formula.bot Formula.top).imp
+          (Formula.allPast (Formula.untl Formula.bot Formula.top))) :=
+      .axiom [] _ .discrete_propagate_bwd (le_refl _)
+    have h_mem := metric_theorem_in_all_limit_points h_metric_mcs h_base_mcs h_thm t.val t.property
+    have h_chron := (chronicle_truth_lemma A h_base_mcs t _).mpr h_mem
+    exact (satisfies_bot_top_indep (chronicleModel A h_base_mcs) M t _
+      (Or.inr (Or.inr (Or.inr rfl)))).mp h_chron
+
 end Cslib.Logic.Temporal

@@ -184,7 +184,7 @@ is exactly task 449's `axiom_sound_metric`).
 
 ---
 
-### Phase 3: Uniformity axioms satisfied at every chronicle point [IN PROGRESS]
+### Phase 3: Uniformity axioms satisfied at every chronicle point [COMPLETED]
 
 **Goal**: Prove the new propagation lemma(s): the chronicle model built from a Metric-MCS
 satisfies each of the four uniformity axiom formulas at every chronicle point — the Metric analogue
@@ -218,7 +218,7 @@ of `dense_indicator_in_all_limit_points`. This is the chronicle-membership-in-`U
 
 ---
 
-### Phase 4: `completeness_metric` over `U` [NOT STARTED]
+### Phase 4: `completeness_metric` over `U` [IN PROGRESS]
 
 **Goal**: Prove `completeness_metric : validMetricUniform φ → BXPlusDerivable φ`, the honest BX⁺
 completeness theorem, mirroring `completeness_dense` exactly.

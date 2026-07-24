@@ -11,9 +11,9 @@ next_project_number: 551
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,226,317,400,405,407,425,438,440,449,463,465,466,474,497,519,522,530,534,535,537,545,546 | -- | propositional logic, modal logic, temporal logic, ... |
-| 2 | 39,40,215,301,375,393,409,430,451,456,511,544 | 36,37,317,407,425,449,535,545,546 | propositional logic, temporal logic, bimodal logic, ... |
-| 3 | 41,181,413,506,542,548 | 39,40,375,393,511,544 | foundations, modal logic, bimodal logic, ... |
+| 1 | 36,37,226,317,400,405,407,438,440,449,463,465,466,474,519,522,530,534,535,537,542 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 2 | 39,40,215,375,393,409,425,430,451,456,511 | 36,37,317,407,449,535,542 | propositional logic, temporal logic, bimodal logic, ... |
+| 3 | 41,181,301,413,497,506,548 | 39,40,375,393,425,449,511,535 | foundations, propositional logic, modal logic, ... |
 | 4 | 300,450 | 181,449,506 | modal logic, bimodal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
@@ -33,7 +33,6 @@ next_project_number: 551
 407 [PR READY] — DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat
   └─ 409 [NOT STARTED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
 497 [NOT STARTED] — Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (P
-545 [IMPLEMENTING] — ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consoli
 
 ### Modal Logic
 
@@ -45,14 +44,14 @@ next_project_number: 551
       └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
     └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 537 [IMPLEMENTING] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
-546 [IMPLEMENTING] — REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/
 
 ### Temporal Logic
 
-425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
-  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
 39 [NOT STARTED] — Discrete temporal completeness: prove that every formula valid on
 40 [BLOCKED] — Continuous temporal completeness: completeness for temporal logic
+301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo
+425 [NOT STARTED] — [Decomposed from task 301, blocker C.] Establish the finite model
+  └─ 301 [BLOCKED] — Implement tableau decision procedure for temporal logic (Cslib.Lo (see above)
 
 ### Bimodal Logic
 
@@ -69,12 +68,10 @@ next_project_number: 551
 ### Code Hygiene
 
 463 [NOT STARTED] — Vet found low-severity documentation gaps (code placement itself 
-393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
+542 [IMPLEMENTING] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
+  └─ 393 [NOT STARTED] — Consolidate duplicated Lindenbaum / MCS / conservativity construc
 413 [NOT STARTED] — Simplify verbose Propositional/ proofs (manual simp only [listImp
 414 [NOT STARTED] — Simplify verbose Modal/, Temporal/, and Bimodal/ proofs (manual s
-542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring 
-544 [NOT STARTED] — NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L1
-  └─ 542 [NOT STARTED] — DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring  (see above)
 
 ### Pr & Upstreaming
 
@@ -147,34 +144,39 @@ next_project_number: 551
 ---
 
 ### 546. Factor intersystem lattice onto schemaunion
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
 - **Research**: [546_factor_intersystem_lattice_onto_schemaunion/reports/01_intersystem-lattice-onto-schemaunion.md]
 - **Plan**: [546_factor_intersystem_lattice_onto_schemaunion/plans/01_intersystem-lattice-consolidation.md]
+- **Summary**: [546_factor_intersystem_lattice_onto_schemaunion/summaries/01_intersystem-lattice-consolidation-summary.md]
 
 **Description**: REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/InterSystem/ carries 8 near-parallel files (~890 lines): ConstructiveLatticeSubsumption.lean (108), IntuitionisticLatticeSubsumption.lean (110), MinimalLatticeSubsumption.lean (104), PropositionalStrengthSubsumption.lean (230), plus four matching *Monotonicity.lean (83-88 each) — all proving the same 'direct-edge axiom subsumption via constructor case-split' shape (their own docstrings say so: ConstructiveLatticeSubsumption.lean:16-19, MinimalLatticeSubsumption.lean:16-19). The classical track already has the generic lemma this wants — SchemaUnion.subsumption (SchemaUnion.lean:155) — and SchemaUnion.lean:46-48 explicitly flags extending the SchemaUnion mechanism to the non-classical axiom families as intended but unrealized. Work: either (a) migrate the intuitionistic/minimal/constructive axiom families onto SchemaUnion (preferred — realizes the documented intent, and shrinks the parallel Lindenbaum/prime-theory scaffolding duplication between the Intuitionistic and Minimal tracks), or (b) factor a track-generic subsumption/monotonicity combinator parameterized over the axiom-tag type, collapsing the 8 files to instantiations. Zero sorry; all 8 files are currently sorry-free.
 
 ---
 
 ### 545. Collapse prop algebra completeness stack conservativity sprawl
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: None
 - **Research**: [545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/reports/01_algebra-consolidation-research.md]
 - **Plan**: [545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md]
+- **Summary**: [545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/summaries/01_consolidate-algebra-abstractions-summary.md]
 
 **Description**: ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consolidations in Cslib/Logics/Propositional/Semantics/Algebra/: (1) COMPLETENESS STACK: a three-layer unification stack (FragmentGeneric.lean -> BrouwerianCompletenessGeneric.lean -> CanAlgComplete.lean) was added on top of the retained piecewise completeness files (HilbertCompleteness.lean, MplConservativeChain.lean, BrouwerianCompleteness.lean); CanAlgComplete's own docstring says it bundles results 'already proved piecewise' and 'only the unifying abstraction was missing', yet the piecewise public statements were never retired — four files express one fragment-completeness fact. Pick CanAlgComplete as the terminal generic interface; demote the subsumed piecewise completeness theorems to private corollaries inside it or delete the duplicated public statements. (2) FRAGMENT-CONSERVATIVITY SPRAWL: eight sibling files each carry one fragment-conservativity result (ImpConservative.lean, ConjImpConservative.lean, ConjImpBotConservative.lean, OrImpConservative.lean, Conservative.lean, ConservativeChain.lean ~19KB, MplConservativeChain.lean ~15KB, HilbertConservativeGlivenko.lean) in a near-linear import chain with no shared generic core — consolidate into a single FragmentConservativity.lean parameterized by the fragment predicate. SCOPE GUARD: task 393 owns CROSS-FAMILY conservativity/Lindenbaum consolidation; this task is strictly the intra-Propositional Algebra fragment layer — confirm the boundary against 393's plan before starting. Zero sorry; all inputs are currently sorry-free and must remain so.
 
 ---
 
 ### 544. Unify validity derivability naming notation
-- **Status**: [NOT STARTED]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 545, Task 546
+- **Research**: [544_unify_validity_derivability_naming_notation/reports/01_naming-notation-uniformity-sweep.md]
+- **Plan**: [544_unify_validity_derivability_naming_notation/plans/01_naming-notation-uniformity.md]
+- **Summary**: [544_unify_validity_derivability_naming_notation/summaries/01_naming-notation-uniformity-summary.md]
 
 **Description**: NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L11). Mechanical rename sweep across the four logic families: (1) VALIDITY VOCABULARY: Propositional uses Tautology (Semantics/Bool.lean:90); Modal has no top-level validity predicate (only pointed Modal[m,w |= phi] at Modal/Basic.lean:277); Temporal uses capitalized Valid/ValidSerial/ValidDense/ValidDiscrete (Semantics/Validity.lean:74-94); Bimodal uses lowercase valid/validDense/validDiscrete (Semantics/Validity.lean:49,117,129). Align on ONE convention (lowercase valid* suggested), starting with the Temporal-Bimodal pair which share identical FrameClass vocabulary and differ only in capitalization. (2) Add the missing turnstile notation to Temporal: Bimodal defines |= phi and Gamma |= phi (Semantics/Validity.lean:60,81); Temporal has none — add the same scoped notation. (3) COMPLETENESS SUFFIX: Algebra layer uses _complete (44 uses: alg_complete, brouwerian_complete, ...) vs Metalogic layer _completeness (prop_completeness, int_completeness, min_completeness, ...) — standardize on _completeness (Mathlib longer-form convention). (4) NIKTheorem (Modal/Metalogic/Constructive/Labelled/Deduction.lean:316) breaks the otherwise-uniform Derivable naming (Propositional/ProofSystem/Derivation.lean:128, Modal/Metalogic/DerivationTree.lean:152, Bimodal/ProofSystem/Derivable.lean:38, Temporal/ProofSystem/Derivable.lean:35) — rename to NIKDerivable or NIK.Derivable. (5) S5 keeps legacy abbrev ModalAxiom := SchemaUnion s5Tags in Metalogic/DerivationTree.lean:69 while all 14 siblings define <Sys>Axiom in ProofSystem/Instances/<Sys>.lean — rename S5Axiom and relocate to Instances/S5.lean (keep a deprecated alias if churn is wide). (6) Conservativity names split between <x>_conservative_extension (Temporal:61, Modal:54, Bimodal PropositionalConservativity:97) and bimodal_conservative_over_<y> (ModalConservativity:246, TemporalConservativity:289) — standardize one scheme across all five. DISTINCT from task 497 (imp vs impl constructor naming) — do not touch that seam. Sequence AFTER tasks 539/540 land to avoid rebasing renames across those refactors.
 
@@ -194,10 +196,12 @@ next_project_number: 551
 ---
 
 ### 542. Strip task provenance stale claims docstrings
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
 - **Dependencies**: Task 544, Task 546
+- **Research**: [542_strip_task_provenance_stale_claims_docstrings/reports/01_docstring-provenance-sweep.md]
+- **Plan**: [542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md]
 
 **Description**: DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring references to 'Task N' / 'Phase M' / 'now-deleted ...' / rollout narratives across the Modal tree — concentrated in Metalogic/GenericMCSBridge.lean, MCS.lean, SchemaSoundness.lean, SchemaTags.lean:18-30, Constructive/Labelled/PrimeLemma.lean:49-51,844,1684-1696, Constructive/Labelled/Soundness.lean:238-355, Intuitionistic/TruthLemma.lean:29,152,305 — documenting how the code was built rather than what it proves, and violating .claude/rules/no-task-references-in-deliverables.md. Sweep all four logic trees (Modal, Propositional, Temporal, Bimodal) plus Foundations/Logic: keep mathematical contracts and literature references, delete task/phase/implementation-history provenance. Also fix the specific stale/dead items: (a) Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean:51 claims 'one remaining sorry' but the file is now sorry-free; (b) Propositional/Semantics/Algebra/Bridge.lean:16 claims to be 'the single canonical home of the ONE evaluation story' while imported by nothing (soften or make true — coordinate with task 543 which decides that file's fate); (c) delete the ~40-line commented-out proof carcass with commented sorry markers in Temporal/Tableau/Completeness.lean:962-1005 (live gap owned by tasks 425/301 — leave a one-line pointer); (d) Propositional/Semantics/Bool.lean:40 forward-references 'Matthew Doty's forthcoming work' — verify covered by task 226 and remove the rot-prone reference. Coordinate with task 438 (comment-cleanup PR already committed) to avoid re-editing its files.
 
@@ -357,7 +361,7 @@ NOTE the honest ceiling from 518: prose is recoverable but math symbols are freq
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
-- **Dependencies**: None
+- **Dependencies**: Task 393, Task 425, Task 449, Task 535, Task 542
 
 **Description**: Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.
 
@@ -598,7 +602,7 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Temporal Logic
-- **Dependencies**: Task 426
+- **Dependencies**: Task 426, Task 542
 
 **Description**: [Decomposed from task 301, blocker C.] Establish the finite model property (FMP) for Propositional Temporal Logic and use it to discharge temporalTruthLemma_untl and temporalTruthLemma_snce (Until/Since eventuality fulfilment), which in turn unblock eventualityDefect_unsat, temporalTableau_sound, openBranch_branchSat, temporalTableau_complete, and the final instDecidableValid in Cslib/Logics/Temporal/Tableau/. This is the theoretical gate for full decidability. Mirror the approach of COMPLETED task 421 (min_fmp_decidability), which added a sorry-free Decidable instance via FMP — reuse its pattern/infrastructure where possible. The hardest sub-part; gates task 301 completion. Independent of tasks 423 and 424 in principle, but final wiring of instDecidableValid needs all three landed.
 
@@ -703,7 +707,7 @@ After implementation:
 - **Status**: [NOT STARTED]
 - **Task Type**: cslib
 - **Topic**: Code Hygiene
-- **Dependencies**: Task 545, Task 546
+- **Dependencies**: Task 545, Task 546, Task 542
 
 **Description**: Consolidate duplicated Lindenbaum / MCS / conservativity constructions across the logic families. Duplication confirmed present: multiple parallel Lindenbaum algebra variants (HilbertLindenbaumAlgebra, ImpLindenbaumAlgebra, RelLindenbaumAlgebra, LindenbaumAlg) and MCS-extension variants (lindenbaumMCS/lindenbaumMCSSet/bimodal_lindenbaum); GenericMCSBridge.lean duplicated x4 (Propositional/Modal/Bimodal.Core/Temporal Metalogic dirs) as thin per-family re-instantiations of one Foundations pattern; LiftViaMorphism.lean x3 (Modal InterSystem, Propositional Semantics/Algebra, Bimodal ConservativeExtension). Consolidate onto the shared Foundations generic-MCS and morphism-lift machinery, retiring the per-family copies where they add no value. (Dependency on the archived-completed docstring task dropped.)
 

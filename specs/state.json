@@ -320,7 +320,8 @@
       "session_id": "sess_1782651207_1e893c_393",
       "dependencies": [
         545,
-        546
+        546,
+        542
       ],
       "topic": "Code Hygiene"
     },
@@ -1047,7 +1048,7 @@
         {
           "path": "specs/412_simplify_proofs_normalization_foundations/summaries/01_narrow-normalization-collapses-summary.md",
           "type": "summary",
-          "summary": "Both grind collapses applied; full CSLib CI gate green."
+          "summary": "Both grind collapses applied; full CI gate green; zero sorry."
         }
       ],
       "completion_summary": "Applied both research-confirmed grind collapses (BigConj.lean singleton branch; ListDeduction.lean listImp_axiom_k branch), deleting dead follow-on tactic lines. Full CSLib CI gate green: lake build (3255/3255), lake test (9247/9247), checkInitImports, lint-style, lake lint, lake shake (no findings for modified files). Zero sorry, zero new axioms, only the two intended files modified."
@@ -1116,7 +1117,8 @@
       "next_artifact_number": 1,
       "artifacts": [],
       "dependencies": [
-        426
+        426,
+        542
       ],
       "parent_task": 301
     },
@@ -1275,7 +1277,14 @@
       "topic": "Propositional Logic",
       "description": "Reconcile 'imp' vs 'impl' naming in Cslib/Logics/Propositional (Proposition.imp constructor and → notation) with the rest of the library once PR #607 lands, so the propositional connective naming is consistent library-wide (noting Modal uses 'impl'). Raised in review of PR #648 by thomaskwaring. BLOCKED until #607 (external PR, leanprover/cslib) is merged.",
       "created": "2026-07-13T15:55:03Z",
-      "last_updated": "2026-07-14T15:29:45Z"
+      "last_updated": "2026-07-14T15:29:45Z",
+      "dependencies": [
+        393,
+        425,
+        449,
+        535,
+        542
+      ]
     },
     {
       "project_number": 506,
@@ -1597,7 +1606,7 @@
     {
       "project_number": 542,
       "project_name": "strip_task_provenance_stale_claims_docstrings",
-      "status": "not_started",
+      "status": "implementing",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
@@ -1606,6 +1615,20 @@
       "dependencies": [
         544,
         546
+      ],
+      "last_updated": "2026-07-24T05:39:29Z",
+      "session_id": "sess_1784866674_c9da04_542",
+      "artifacts": [
+        {
+          "path": "specs/542_strip_task_provenance_stale_claims_docstrings/reports/01_docstring-provenance-sweep.md",
+          "type": "report",
+          "summary": "~1,299 provenance lines across ~163 files measured; items a/c/d actionable, item b already resolved by task 543; judgment-based editing, 5-phase decomposition proposed."
+        },
+        {
+          "path": "specs/542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md",
+          "type": "plan",
+          "summary": "8-phase plan: 7 disjoint-tree content phases + docBlame/CI gate."
+        }
       ]
     },
     {
@@ -1641,7 +1664,7 @@
     {
       "project_number": 544,
       "project_name": "unify_validity_derivability_naming_notation",
-      "status": "not_started",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Code Hygiene",
       "priority": "medium",
@@ -1650,19 +1673,38 @@
       "dependencies": [
         545,
         546
+      ],
+      "last_updated": "2026-07-24T05:28:06Z",
+      "session_id": "sess_1784866674_c9da04_544",
+      "artifacts": [
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/reports/01_naming-notation-uniformity-sweep.md",
+          "type": "report",
+          "summary": "All 6 items verified against post-545/546 tree; negation_complete family excluded from item 3; Option A rename-in-place recommended for item 5."
+        },
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/plans/01_naming-notation-uniformity.md",
+          "type": "plan",
+          "summary": "7-phase rename/notation plan; false-positive guards encoded; full CI gate final phase."
+        },
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/summaries/01_naming-notation-uniformity-summary.md",
+          "type": "summary",
+          "summary": "All 6 rename/notation items landed across 7 phases; full CI green; zero sorry."
+        }
       ]
     },
     {
       "project_number": 545,
       "project_name": "collapse_prop_algebra_completeness_stack_conservativity_sprawl",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "priority": "medium",
       "description": "ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consolidations in Cslib/Logics/Propositional/Semantics/Algebra/: (1) COMPLETENESS STACK: a three-layer unification stack (FragmentGeneric.lean -> BrouwerianCompletenessGeneric.lean -> CanAlgComplete.lean) was added on top of the retained piecewise completeness files (HilbertCompleteness.lean, MplConservativeChain.lean, BrouwerianCompleteness.lean); CanAlgComplete's own docstring says it bundles results 'already proved piecewise' and 'only the unifying abstraction was missing', yet the piecewise public statements were never retired — four files express one fragment-completeness fact. Pick CanAlgComplete as the terminal generic interface; demote the subsumed piecewise completeness theorems to private corollaries inside it or delete the duplicated public statements. (2) FRAGMENT-CONSERVATIVITY SPRAWL: eight sibling files each carry one fragment-conservativity result (ImpConservative.lean, ConjImpConservative.lean, ConjImpBotConservative.lean, OrImpConservative.lean, Conservative.lean, ConservativeChain.lean ~19KB, MplConservativeChain.lean ~15KB, HilbertConservativeGlivenko.lean) in a near-linear import chain with no shared generic core — consolidate into a single FragmentConservativity.lean parameterized by the fragment predicate. SCOPE GUARD: task 393 owns CROSS-FAMILY conservativity/Lindenbaum consolidation; this task is strictly the intra-Propositional Algebra fragment layer — confirm the boundary against 393's plan before starting. Zero sorry; all inputs are currently sorry-free and must remain so.",
       "created": "2026-07-23T17:20:09Z",
       "dependencies": [],
-      "last_updated": "2026-07-24T04:29:38Z",
+      "last_updated": "2026-07-24T05:00:18Z",
       "session_id": "sess_1784866674_c9da04_545",
       "artifacts": [
         {
@@ -1674,20 +1716,25 @@
           "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md",
           "type": "plan",
           "summary": "5-phase plan: FragmentConservativity generic core, per-fragment shims, CanAlgComplete terminal interface, zero-consumer chain collapse, full CI gate."
+        },
+        {
+          "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/summaries/01_consolidate-algebra-abstractions-summary.md",
+          "type": "summary",
+          "summary": "FragmentConservativity generic core + instances landed; zero-consumer chain theorems deleted; full CI green; zero sorry."
         }
       ]
     },
     {
       "project_number": 546,
       "project_name": "factor_intersystem_lattice_onto_schemaunion",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "topic": "Modal Logic",
       "priority": "medium",
       "description": "REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/InterSystem/ carries 8 near-parallel files (~890 lines): ConstructiveLatticeSubsumption.lean (108), IntuitionisticLatticeSubsumption.lean (110), MinimalLatticeSubsumption.lean (104), PropositionalStrengthSubsumption.lean (230), plus four matching *Monotonicity.lean (83-88 each) — all proving the same 'direct-edge axiom subsumption via constructor case-split' shape (their own docstrings say so: ConstructiveLatticeSubsumption.lean:16-19, MinimalLatticeSubsumption.lean:16-19). The classical track already has the generic lemma this wants — SchemaUnion.subsumption (SchemaUnion.lean:155) — and SchemaUnion.lean:46-48 explicitly flags extending the SchemaUnion mechanism to the non-classical axiom families as intended but unrealized. Work: either (a) migrate the intuitionistic/minimal/constructive axiom families onto SchemaUnion (preferred — realizes the documented intent, and shrinks the parallel Lindenbaum/prime-theory scaffolding duplication between the Intuitionistic and Minimal tracks), or (b) factor a track-generic subsumption/monotonicity combinator parameterized over the axiom-tag type, collapsing the 8 files to instantiations. Zero sorry; all 8 files are currently sorry-free.",
       "created": "2026-07-23T17:20:09Z",
       "dependencies": [],
-      "last_updated": "2026-07-24T04:30:57Z",
+      "last_updated": "2026-07-24T04:46:01Z",
       "session_id": "sess_1784866674_c9da04_546",
       "artifacts": [
         {
@@ -1699,6 +1746,11 @@
           "path": "specs/546_factor_intersystem_lattice_onto_schemaunion/plans/01_intersystem-lattice-consolidation.md",
           "type": "plan",
           "summary": "4-phase R1 plan: merge 3 Subsumption + 3 Monotonicity files into 2, keep PropositionalStrength pair, full CI gate."
+        },
+        {
+          "path": "specs/546_factor_intersystem_lattice_onto_schemaunion/summaries/01_intersystem-lattice-consolidation-summary.md",
+          "type": "summary",
+          "summary": "8 InterSystem files merged to 4; all public names preserved; full CI green; zero sorry."
         }
       ]
     },

@@ -20,7 +20,7 @@ predicate `Axioms : Proposition Atom -> Prop`, enabling use for any normal modal
 
 ## Key Components
 
-- `ModalAxiom`: An inductive type enumerating the axiom schemata of S5 (4 propositional + 4 modal).
+- `S5Axiom`: An inductive type enumerating the axiom schemata of S5 (4 propositional + 4 modal).
 - `DerivationTree Axioms`: A parameterized inductive type with 5 constructors
   representing proof trees.
 - `Deriv Axioms`: A `Prop`-level wrapper (`Nonempty (DerivationTree Axioms Gamma phi)`).
@@ -49,9 +49,9 @@ variable {Atom : Type*}
 
 /-! ## Axiom Schemata -/
 
-/-- Axiom schemata for S5 modal logic, as the schema-union combinator over `s5Tags` (Phase 8
-redefinition, task 523: the inductive is retired; `ModalAxiom` is now definitionally
-`SchemaUnion s5Tags`, preserving the name and public API via redefinition-in-place).
+/-- Axiom schemata for S5 modal logic, as the schema-union combinator over `s5Tags` (the
+original inductive presentation has been retired in favor of this definitionally-transparent
+`SchemaUnion s5Tags` form, preserving the name and public API via redefinition-in-place).
 
 The 16 axiom-schema families covered by `s5Tags` (`kCore ∪ {modalT, modalFour, modalB}`;
 S5 = T + 4 + B, carrying `modalB` and NOT `modalFive`):
@@ -59,14 +59,18 @@ S5 = T + 4 + B, carrying `modalB` and NOT `modalFive`):
   `peirce` (double negation elimination / Peirce's law)
 - **Modal** (4): `modalK` (K distribution), `modalT` (reflexivity), `modalFour` (transitivity),
   `modalB` (symmetry)
-- **And/Or/Diamond-duality characterization** (8, task 441): `andI`, `andE1`, `andE2`, `orI1`,
+- **And/Or/Diamond-duality characterization** (8): `andI`, `andE1`, `andE2`, `orI1`,
   `orI2`, `orE`, `diaDualityFwd`, `diaDualityBack` -- these characterize the native `and`/`or`/
   `diamond` constructors introduced when `Modal.Proposition` moved off the Łukasiewicz encoding
   (see `Modal/Basic.lean` module docstring and the plan's "Justification for New Axiom Schemata"
   section).
 
 Together with modus ponens and necessitation, these axioms characterize S5. -/
-abbrev ModalAxiom : Proposition Atom → Prop := SchemaUnion s5Tags
+abbrev S5Axiom : Proposition Atom → Prop := SchemaUnion s5Tags
+
+/-- Deprecated alias for `S5Axiom`, kept in place (no relocation) so existing call sites
+continue to compile. -/
+@[deprecated (since := "2026-07-23")] alias ModalAxiom := S5Axiom
 
 /-! ## Derivation Trees -/
 

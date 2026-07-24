@@ -26,7 +26,7 @@ same-language-base modal cubes -- constructive (`CK → CT → CS4 → CS5`), mi
 (`MK → MT → MS4 → MS5`), and intuitionistic (`IK → IT → IS4 → IS5`) -- mirroring the
 classical `AxiomSubsumption.lean` template (`InterSystem/AxiomSubsumption.lean`). Each lemma
 is a mechanical constructor case-split: every constructor of the weaker axiom predicate maps
-to the same-named constructor of the stronger axiom predicate, since each rung's `ModalAxiom`
+to the same-named constructor of the stronger axiom predicate, since each rung's `S5Axiom`
 is defined as the previous rung's constructors verbatim plus new ones (see each track's
 `T`/`S4`/`S5` module docstrings). This was formerly split across three files
 (`ConstructiveLatticeSubsumption.lean`, `MinimalLatticeSubsumption.lean`,

@@ -189,14 +189,14 @@ lemma D5Axiom_implies_D45Axiom {φ : Proposition Atom} (h : D5Axiom φ) : D45Axi
 
 /-! ## Top-Level Edges (into S5) -/
 
-/-- S4 axioms are subsumed by S5 (ModalAxiom): every S4-axiom instance is a ModalAxiom instance.
+/-- S4 axioms are subsumed by S5: every S4-axiom instance is an S5Axiom instance.
 S5 adds B (symmetry) to S4. -/
-lemma S4Axiom_implies_ModalAxiom {φ : Proposition Atom} (h : S4Axiom φ) : ModalAxiom φ :=
+lemma S4Axiom_implies_ModalAxiom {φ : Proposition Atom} (h : S4Axiom φ) : S5Axiom φ :=
   SchemaUnion.subsumption (by decide) h
 
-/-- TB axioms are subsumed by S5 (ModalAxiom): every TB-axiom instance is a ModalAxiom instance.
+/-- TB axioms are subsumed by S5: every TB-axiom instance is an S5Axiom instance.
 S5 adds 4 (transitivity) to TB. -/
-lemma TBAxiom_implies_ModalAxiom {φ : Proposition Atom} (h : TBAxiom φ) : ModalAxiom φ :=
+lemma TBAxiom_implies_ModalAxiom {φ : Proposition Atom} (h : TBAxiom φ) : S5Axiom φ :=
   SchemaUnion.subsumption (by decide) h
 
 end Cslib.Logic.Modal

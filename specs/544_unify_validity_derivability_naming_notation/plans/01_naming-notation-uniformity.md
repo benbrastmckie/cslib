@@ -180,20 +180,24 @@ existing turnstile pair to `scoped`, fixing any use-sites that then need `open s
 - Scoped `lake build` of the `Constructive/Labelled` subtree succeeds.
 - `grep -nw NIKTheorem Cslib/Logics/Modal` returns nothing.
 
-### Phase 4: S5 ModalAxiom → S5Axiom in place + deprecated alias (item 5, Option A) [NOT STARTED]
+### Phase 4: S5 ModalAxiom → S5Axiom in place + deprecated alias (item 5, Option A) [COMPLETED]
 
 **Goal**: Give S5 its proper `S5Axiom` name (matching all 14 siblings) with zero import
 reorganization, keeping the 57 existing sites compiling via a deprecated alias.
 
 **Tasks**:
-- [ ] In `Modal/Metalogic/DerivationTree.lean:69`, rename
+- [x] In `Modal/Metalogic/DerivationTree.lean:69`, rename
       `abbrev ModalAxiom := SchemaUnion s5Tags` → `abbrev S5Axiom := SchemaUnion s5Tags`.
-- [ ] In the same file, add `@[deprecated (since := "…")] alias ModalAxiom := S5Axiom`
+- [x] In the same file, add `@[deprecated (since := "…")] alias ModalAxiom := S5Axiom`
       (or `abbrev ModalAxiom := S5Axiom`) so all 57 sites keep compiling; do NOT relocate.
-- [ ] Migrate the primary code references to `S5Axiom` where low-churn (Soundness, MCS,
+- [x] Migrate the primary code references to `S5Axiom` where low-churn (Soundness, MCS,
       Completeness, Systems/S5/*, InterSystem/*, Bimodal ModalConservativity, ProofSystem/Instances)
-      as opportunistic cleanup; the alias covers any left behind.
-- [ ] Reword the `ModalAxiom` docstring mentions and any task-number references (e.g. "task 523")
+      as opportunistic cleanup; the alias covers any left behind *(migration was in fact complete
+      across all 15 files with standalone `ModalAxiom` references -- zero uses of the deprecated
+      alias remain outside its own declaration; compound identifiers like `IKModalAxiom`/
+      `CKModalAxiom`/the two `*Axiom_implies_ModalAxiom` lemma names were left untouched as
+      out-of-scope distinct declarations, per word-boundary matching)*.
+- [x] Reword the `ModalAxiom` docstring mentions and any task-number references (e.g. "task 523")
       in `DerivationTree.lean` / `SchemaUnion.lean` to durable anchors per
       no-task-references-in-deliverables.md.
 

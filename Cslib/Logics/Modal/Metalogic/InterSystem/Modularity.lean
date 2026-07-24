@@ -131,10 +131,10 @@ theorem ms4Derivable_implies_s4Derivable (h : Derivable (@MS4ModalAxiom Atom) φ
     Derivable (@S4Axiom Atom) φ :=
   is4Derivable_implies_s4Derivable (ms4Derivable_implies_is4Derivable h)
 
-/-- `MS5`-derivable formulas are `S5`-derivable (classical target is `ModalAxiom`): chain
+/-- `MS5`-derivable formulas are `S5`-derivable (classical target is `S5Axiom`): chain
 Axis B (`MS5 → IS5`) then the `IS5 → S5` Int→Classical bridge. -/
 theorem ms5Derivable_implies_s5Derivable (h : Derivable (@MS5ModalAxiom Atom) φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   is5Derivable_implies_s5Derivable (ms5Derivable_implies_is5Derivable h)
 
 /-- `CK`-derivable formulas are `K`-derivable: chain Axis B (`CK → IK`) then the
@@ -155,10 +155,10 @@ theorem cs4Derivable_implies_s4Derivable (h : Derivable (@CS4ModalAxiom Atom) φ
     Derivable (@S4Axiom Atom) φ :=
   is4Derivable_implies_s4Derivable (cs4Derivable_implies_is4Derivable h)
 
-/-- `CS5`-derivable formulas are `S5`-derivable (classical target is `ModalAxiom`): chain
+/-- `CS5`-derivable formulas are `S5`-derivable (classical target is `S5Axiom`): chain
 Axis B (`CS5 → IS5`) then the `IS5 → S5` Int→Classical bridge. -/
 theorem cs5Derivable_implies_s5Derivable (h : Derivable (@CS5ModalAxiom Atom) φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   is5Derivable_implies_s5Derivable (cs5Derivable_implies_is5Derivable h)
 
 /-! ## Axis C: Reused Conservativity (Not Reproved) -/

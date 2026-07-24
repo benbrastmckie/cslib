@@ -666,9 +666,9 @@ theorem is4Derivable_implies_s4Derivable {φ : Proposition Atom} (h : Derivable 
 /-! ## Rung Bridge: `IS5 → S5` -/
 
 /-- `□¬X → ¬◇X` in classical `S5` (same construction as `k_diaNegToNotBox`'s converse /
-`s4_boxNegToNotDia`, instantiated at `S := Modal.HilbertS5`, `Axioms := ModalAxiom`). -/
+`s4_boxNegToNotDia`, instantiated at `S := Modal.HilbertS5`, `Axioms := S5Axiom`). -/
 theorem s5_boxNegToNotDia {X : Proposition Atom} :
-    Derivable (@ModalAxiom Atom)
+    Derivable (@S5Axiom Atom)
       ((Proposition.box (X.imp Proposition.bot)).imp ((◇X).imp Proposition.bot)) := by
   have fwd := HasAxiomDiaDualityFwd.diaDualityFwd (S := Modal.HilbertS5) (φ := X)
   have contra := Cslib.Logic.Theorems.Propositional.Connectives.contraposition
@@ -691,7 +691,7 @@ contrapositive plus `rcp`:
 6. `contrapositive := imp_trans chain notDiaBoxPhi : ¬φ → ¬◇□φ`; `rcp contrapositive :
    ◇□φ → φ`, i.e. the goal. -/
 theorem s5_derivable_of_is5_bDia {φ : Proposition Atom} :
-    Derivable (@ModalAxiom Atom) ((◇(Proposition.box φ)).imp φ) := by
+    Derivable (@S5Axiom Atom) ((◇(Proposition.box φ)).imp φ) := by
   have dniPhi := Cslib.Logic.Theorems.Combinators.dni (S := Modal.HilbertS5)
     (F := Proposition Atom) φ
   have necDni := Necessitation.nec dniPhi
@@ -719,12 +719,12 @@ theorem s5_derivable_of_is5_bDia {φ : Proposition Atom} :
   obtain ⟨d⟩ := goal
   exact ⟨d⟩
 
-/-- Every `IS5ModalAxiom` instance is `Derivable` in classical `S5` (`ModalAxiom`): the 18
+/-- Every `IS5ModalAxiom` instance is `Derivable` in classical `S5` (`S5Axiom`): the 18
 `IS4`-inherited constructors lift via `Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom)`
 composed with `is4Axiom_derivable_in_S4`; `bBox` is `box_mono (diaDualityBack φ)` composed
 with the literal `modalB` axiom; `bDia` is `s5_derivable_of_is5_bDia`. -/
 theorem is5Axiom_derivable_in_S5 {φ : Proposition Atom} (h : IS5ModalAxiom φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   match h with
   | .implyK _ _ =>
       Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) (is4Axiom_derivable_in_S4 (.implyK _ _))
@@ -774,11 +774,11 @@ theorem is5Axiom_derivable_in_S5 {φ : Proposition Atom} (h : IS5ModalAxiom φ) 
       exact ⟨d⟩
   | .bDia _ => s5_derivable_of_is5_bDia
 
-/-- **The `IS5 → S5` bridge**: every `IS5`-derivable formula is `S5` (`ModalAxiom`)
+/-- **The `IS5 → S5` bridge**: every `IS5`-derivable formula is `S5` (`S5Axiom`)
 -derivable. This concludes the full suite of rung bridges (`IK → K`, `IT → T`, `IS4 → S4`,
 `IS5 → S5`) established in this module. -/
 theorem is5Derivable_implies_s5Derivable {φ : Proposition Atom} (h : Derivable IS5ModalAxiom φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   Derivable_of_axiom_derivable (fun _ hax => is5Axiom_derivable_in_S5 hax) h
 
 end Cslib.Logic.Modal

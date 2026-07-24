@@ -190,19 +190,19 @@ theorem d5Derivable_implies_d45Derivable (h : Derivable (@D5Axiom Atom) φ) :
 
 /-- S4-derivable formulas are S5-derivable: S5 extends S4 by adding the B axiom (symmetry). -/
 theorem s4Derivable_implies_s5Derivable (h : Derivable (@S4Axiom Atom) φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   Derivable_mono (fun _ => S4Axiom_implies_ModalAxiom) h
 
 /-- TB-derivable formulas are S5-derivable: S5 extends TB by adding the 4 axiom (transitivity). -/
 theorem tbDerivable_implies_s5Derivable (h : Derivable (@TBAxiom Atom) φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   Derivable_mono (fun _ => TBAxiom_implies_ModalAxiom) h
 
 /-! ## Transitive Chain Theorems -/
 
 /-- K-derivable formulas are S5-derivable via the chain K → T → S4 → S5. -/
 theorem kDerivable_implies_s5Derivable (h : Derivable (@KAxiom Atom) φ) :
-    Derivable (@ModalAxiom Atom) φ :=
+    Derivable (@S5Axiom Atom) φ :=
   h |> kDerivable_implies_tDerivable |> tDerivable_implies_s4Derivable
     |> s4Derivable_implies_s5Derivable
 

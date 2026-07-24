@@ -12,7 +12,7 @@ public import Cslib.Logics.Modal.ProofSystem.SchemaUnion
 /-! # Instance Registration for Modal Logic S5
 
 Registers `InferenceSystem`, inference rule, axiom, and bundled class
-instances for the modal logic S5. Reuses the existing `ModalAxiom` type.
+instances for the modal logic S5. Reuses the existing `S5Axiom` type.
 -/
 
 @[expose] public section
@@ -31,7 +31,7 @@ section ModalInstances
 
 instance : InferenceSystem Modal.HilbertS5
     (Modal.Proposition Atom) where
-  derivation φ := Modal.DerivationTree (@Modal.ModalAxiom Atom) [] φ
+  derivation φ := Modal.DerivationTree (@Modal.S5Axiom Atom) [] φ
 
 instance :
     ModusPonens Modal.HilbertS5

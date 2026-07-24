@@ -20,11 +20,11 @@ modal-specific MCS properties needed for canonical model constructions.
   and, where needed, explicit `h_implyK`/`h_implyS` for the deduction theorem.
 - **Modal-specific properties** (mcs_box_closure, mcs_box_box, etc.) take explicit
   axiom hypotheses (e.g., `h_T`, `h_4`, `h_B`, `h_K`) instead of relying on specific
-  `ModalAxiom` constructors.
+  `S5Axiom` constructors.
 
 ## Backward Compatibility
 
-All definitions are parameterized. S5-specific usage passes `ModalAxiom` and the
+All definitions are parameterized. S5-specific usage passes `S5Axiom` and the
 corresponding constructor proofs.
 
 ## References
@@ -165,7 +165,7 @@ in its canonical **raw encoded** shape `Axioms.AxiomB`).
 
 Task 441: `diamond` is now a native constructor, no longer definitionally equal to
 `(box (phi -> bot)) -> bot`. `h_B` therefore stays in raw shape (matching how every
-`ModalAxiom`/`{Sys}Axiom.modalB` constructor is stated, see `ProofSystem/Instances/*.lean`),
+`S5Axiom`/`{Sys}Axiom.modalB` constructor is stated, see `ProofSystem/Instances/*.lean`),
 and the conclusion is the raw boxed shape rather than `(□◇φ) ∈ S`. Callers bridge to native
 `◇` membership only *after* unboxing through the canonical relation, using `mcs_raw_to_dia`
 (below) -- this avoids needing a separate boxed-duality axiom or necessitation-closure

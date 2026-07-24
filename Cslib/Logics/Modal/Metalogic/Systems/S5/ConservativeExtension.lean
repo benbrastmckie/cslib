@@ -23,7 +23,7 @@ open PL Cslib.Logic.Modal
 CPL-derivable. Instantiates `modal_conservative_extension_param` with `s5_soundness`
 (reflexivity: `fun _ => trivial`, transitivity and Euclideanness: `fun _ _ _ _ _ => trivial`). -/
 theorem s5_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
-    (h : Derivable (@ModalAxiom Atom) φ.toModal) :
+    (h : Derivable (@S5Axiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
   modal_conservative_extension_param h fun _ => by
     obtain ⟨d⟩ := h

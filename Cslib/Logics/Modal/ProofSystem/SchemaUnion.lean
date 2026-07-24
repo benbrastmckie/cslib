@@ -12,7 +12,7 @@ public import Mathlib.Data.Finset.Basic
 /-! # Schema-Union Axiom Combinator for Modal Proof Systems
 
 This module introduces a compositional replacement for the 15 hand-written per-system modal
-axiom inductives (`KAxiom`, `TAxiom`, …, and S5's `ModalAxiom`) in
+axiom inductives (`KAxiom`, `TAxiom`, …, and S5's `S5Axiom`) in
 `Cslib.Logics.Modal.ProofSystem.Instances` / `Cslib.Logics.Modal.Metalogic.DerivationTree`.
 Those 15 predicates each re-list a byte-identical 13-constructor propositional + K +
 diamond-duality core and differ only in a subset of 5 modal-strength schemata
@@ -110,7 +110,7 @@ inductive ModalSchemaTag
 
 Each clause's proposition shape matches, byte-for-byte, the corresponding constructor of the
 pre-existing per-system axiom inductives (`Cslib.Logics.Modal.ProofSystem.Instances.KAxiom`
-and its 13 siblings, plus S5's `ModalAxiom` in `Cslib.Logics.Modal.Metalogic.DerivationTree`),
+and its 13 siblings, plus S5's `S5Axiom` in `Cslib.Logics.Modal.Metalogic.DerivationTree`),
 so that the future bridge equivalences `SchemaUnion sysTags φ ↔ <Sys>Axiom φ` hold. -/
 def ModalSchemaTag.Holds : ModalSchemaTag → Proposition Atom → Prop
   | .implyK, χ => ∃ φ ψ : Proposition Atom, χ = φ.imp (ψ.imp φ)

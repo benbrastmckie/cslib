@@ -14,7 +14,7 @@ public import Cslib.Logics.Modal.Metalogic.FrameCorrespondence -- shake: keep
 This module proves soundness parameterized over an axiom predicate
 `Axioms : Proposition Atom -> Prop` with a generic axiom soundness callback.
 The parameterized infrastructure supports all normal modal logics; an
-S5-specific wrapper instantiates at `ModalAxiom`.
+S5-specific wrapper instantiates at `S5Axiom`.
 
 ## Main Results
 
@@ -28,7 +28,7 @@ S5-specific wrapper instantiates at `ModalAxiom`.
 
 The parameterized `soundness` theorem takes a callback `h_ax_sound` that proves
 each axiom of `Axioms` is valid in the given model. The S5-specific `s5_axiom_sound`
-theorem handles the concrete `ModalAxiom` cases.
+theorem handles the concrete `S5Axiom` cases.
 
 ## References
 

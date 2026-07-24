@@ -32,7 +32,7 @@ hierarchy (from `ProofSystem.lean`) to the concrete parameterized `DerivationTre
 
 Each system has an axiom predicate (an inductive type enumerating its axiom schemata),
 and instances are registered mapping the tag type to `DerivationTree` parameterized
-over that predicate. For S5, the existing `ModalAxiom` is reused.
+over that predicate. For S5, the existing `S5Axiom` is reused.
 
 ## Systems
 
@@ -46,7 +46,7 @@ over that predicate. For S5, the existing `ModalAxiom` is reused.
 | K5 | `Modal.HilbertK5` | `K5Axiom` | `ModalK5Hilbert` |
 | K45 | `Modal.HilbertK45` | `K45Axiom` | `ModalK45Hilbert` |
 | S4 | `Modal.HilbertS4` | `S4Axiom` | `ModalS4Hilbert` |
-| S5 | `Modal.HilbertS5` | `ModalAxiom` | `ModalS5Hilbert` |
+| S5 | `Modal.HilbertS5` | `S5Axiom` | `ModalS5Hilbert` |
 | TB | `Modal.HilbertTB` | `TBAxiom` | `ModalTBHilbert` |
 | KB5 | `Modal.HilbertKB5` | `KB5Axiom` | `ModalKB5Hilbert` |
 | D4 | `Modal.HilbertD4` | `D4Axiom` | `ModalD4Hilbert` |

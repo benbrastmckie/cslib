@@ -13,12 +13,12 @@ public import Mathlib.Tactic.FinCases
 /-! # Soundness Theorem for Modal Logic S5
 
 This module proves soundness for modal logic S5: every formula derivable from
-`ModalAxiom` is valid on S5 frames (reflexive, transitive, Euclidean).
+`S5Axiom` is valid on S5 frames (reflexive, transitive, Euclidean).
 
 ## Main Results
 
 - `s5_axiom_sound`: Each of the 8 S5 axiom schemata is valid over S5 frames.
-- `s5_soundness`: If `Gamma |- phi` via `DerivationTree ModalAxiom`, then `phi` is
+- `s5_soundness`: If `Gamma |- phi` via `DerivationTree S5Axiom`, then `phi` is
   satisfied at every world of every S5 model where all of `Gamma` is satisfied.
 ## References
 
@@ -45,7 +45,7 @@ exists) — it is derived from `h_refl` and `h_eucl` exactly as the pre-migratio
 inline (`m.r w₂ w₁` from `m.r w₁ w₂` via Euclideanness at `w₁, w₂, w₁` with the reflexivity
 witness `m.r w₁ w₁`). -/
 theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
-    (h_ax : ModalAxiom φ) (m : Model World Atom)
+    (h_ax : S5Axiom φ) (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)
     (h_eucl : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₁ w₃ → m.r w₂ w₃)
@@ -58,11 +58,11 @@ theorem s5_axiom_sound {World : Type*} {φ : Proposition Atom}
 
 /-! ## S5 Soundness Theorems -/
 
-/-- **S5 Soundness**: If `Gamma |- phi` via `DerivationTree ModalAxiom`, then `phi` is
+/-- **S5 Soundness**: If `Gamma |- phi` via `DerivationTree S5Axiom`, then `phi` is
 satisfied at every world of every S5 model where all of `Gamma` is satisfied. -/
 theorem s5_soundness {World : Type*}
     {Γ : List (Proposition Atom)} {φ : Proposition Atom}
-    (d : DerivationTree (@ModalAxiom Atom) Γ φ)
+    (d : DerivationTree (@S5Axiom Atom) Γ φ)
     (m : Model World Atom)
     (h_refl : ∀ w, m.r w w)
     (h_trans : ∀ w₁ w₂ w₃, m.r w₁ w₂ → m.r w₂ w₃ → m.r w₁ w₃)

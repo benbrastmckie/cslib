@@ -296,8 +296,8 @@ theorem min_canonical_transitive_ms5 :
     have hdiadia_w : (◇◇φ) ∈ w.val := hwu.2 (◇φ) hdia_u
     exact min_imp_property (min_axiom_mem (MS5ModalAxiom.fourDia φ)) hdiadia_w
 
-/-- **Canonical symmetry (HIGHEST-RISK closure of task 496 -- the crux)**: the canonical relation
-`MinExt.minCanonicalR` (over `MS5ModalAxiom`) is symmetric. Verbatim port of
+/-- **Canonical symmetry**: the canonical relation `MinExt.minCanonicalR` (over `MS5ModalAxiom`)
+is symmetric. Verbatim port of
 `is5_canonical_symmetric` (`Intuitionistic/IS5.lean:341`) onto the generic `MinExt` scaffold, both
 clauses discharged positively via `min_axiom_mem`/`min_imp_property` (no `by_contra`, no
 negation):

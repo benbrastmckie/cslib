@@ -12,35 +12,34 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum
 
 /-! # Frame-Condition-Parametrized, Axioms-Generic Extensions of the Minimal Canonical Model
 
-This module is the shared scaffold for task 496 (minimal-base modal extensions `MT`/`MS4`/`MS5`
-of `MK`, mirroring task 494's `IT`/`IS4`/`IS5` extension of `IK`). It generalizes the task-495
-birelational quasi-prime canonical-model framework (`MValid`, `mk_completeness`,
+This module is the shared scaffold for the minimal-base modal extensions `MT`/`MS4`/`MS5`
+of `MK`, mirroring `IK`'s `IT`/`IS4`/`IS5` extension. It generalizes the birelational
+quasi-prime canonical-model framework (`MValid`, `mk_completeness`,
 `MinCanonicalModel.lean`/`MinTruthLemma.lean`/`MinCompleteness.lean`, all hard-coded to
 `MKModalAxiom`) to validity/completeness over an **arbitrary** axiom set `Axioms` that extends
 `MK`'s 12 core schemata (`implyK`/`implyS`/`andI`/`andE1`/`andE2`/`orI1`/`orI2`/`orE`/`k`/`kdia`/
 `cd`/`idb`), restricted to a frame-condition class `FC` on the modal relation.
 
-**Why this file is larger than a typical `Extension.lean`.** IK's own `Extension.lean`
-(task 494) is a ~150-line wrapper because IK's *base* canonical-model files
-(`Intuitionistic/CanonicalModel.lean`, `PrimeTheory.lean`, `TruthLemma.lean`) were **already**
-written generically over an abstract `Axioms : Proposition Atom → Prop` (task 480/492), each
-constructor-witness (`h_implyK`, `h_implyS`, ..., `h_dbot`) threaded explicitly through every
-canonical-model theorem (e.g. `canonical_f1`, `canonical_box_witness`, both ~14-hypothesis
-theorems in `CanonicalModel.lean`). MK's task-495 files, in contrast, were written
-**specifically** for `MKModalAxiom` (every axiom-instance is `MKModalAxiom.foo args`, not a
-threaded hypothesis), because at the time only `MK` itself needed them. This module performs the
-same genericization IK's base task already had: every place task-495's files invoke
-`MKModalAxiom.foo args` becomes a threaded hypothesis `h_foo args` (`Axioms (...)` instead of
-`MKModalAxiom (...)`), exactly mirroring IK's `canonical_f1`/`canonical_box_witness` convention.
-The efq-free "nonempty Lindenbaum-pair" combinators (`bigOr1`/`bigAnd1` and friends) are otherwise
-transcribed verbatim from `MinCanonicalModel.lean` (same proof scripts, only the axiom-instance
-sites are threaded).
+**Why this file is larger than a typical `Extension.lean`.** `IK`'s own `Extension.lean` is a
+~150-line wrapper because `IK`'s *base* canonical-model files (`Intuitionistic/CanonicalModel.lean`,
+`PrimeTheory.lean`, `TruthLemma.lean`) were **already** written generically over an abstract
+`Axioms : Proposition Atom → Prop`, each constructor-witness (`h_implyK`, `h_implyS`, ...,
+`h_dbot`) threaded explicitly through every canonical-model theorem (e.g. `canonical_f1`,
+`canonical_box_witness`, both ~14-hypothesis theorems in `CanonicalModel.lean`). `MK`'s files,
+in contrast, were written **specifically** for `MKModalAxiom` (every axiom-instance is
+`MKModalAxiom.foo args`, not a threaded hypothesis), because at the time only `MK` itself needed
+them. This module performs the same genericization `IK`'s base already had: every place `MK`'s
+files invoke `MKModalAxiom.foo args` becomes a threaded hypothesis `h_foo args`
+(`Axioms (...)` instead of `MKModalAxiom (...)`), exactly mirroring `IK`'s
+`canonical_f1`/`canonical_box_witness` convention. The efq-free "nonempty Lindenbaum-pair"
+combinators (`bigOr1`/`bigAnd1` and friends) are otherwise transcribed verbatim from
+`MinCanonicalModel.lean` (same proof scripts, only the axiom-instance sites are threaded).
 
 All declarations here live under the `MinExt` namespace (nested inside `Cslib.Logic.Modal`) to
-avoid colliding with task 495's `MKModalAxiom`-specific declarations of the same short name
+avoid colliding with `MK`'s `MKModalAxiom`-specific declarations of the same short name
 (`MinCanonicalPrimeWorld`, `minCanonicalR`, `min_canonical_f1`, ... already public in
-`Cslib.Logic.Modal`). The four names the plan requires unqualified in `Cslib.Logic.Modal` itself
-(`MValidFC`, `mkvalidFC_completeness`, `min_axiom_mem`, `min_imp_property`) are defined outside
+`Cslib.Logic.Modal`). Four names are unqualified in `Cslib.Logic.Modal` itself (`MValidFC`,
+`mkvalidFC_completeness`, `min_axiom_mem`, `min_imp_property`); they are defined outside
 `MinExt`, referencing `MinExt.*` internally.
 
 ## Main Definitions

@@ -16,15 +16,13 @@ with the axiom subsumption lemmas from `LatticeSubsumption.lean` to produce name
 derivability monotonicity theorems for each of the three same-language-base modal cubes --
 constructive (`CK → CT → CS4 → CS5`), minimal (`MK → MT → MS4 → MS5`), and intuitionistic
 (`IK → IT → IS4 → IS5`) -- plus the corresponding frame-condition inclusion lemmas witnessing
-module composition. This was formerly split across three files
-(`ConstructiveLatticeMonotonicity.lean`, `MinimalLatticeMonotonicity.lean`,
-`IntuitionisticLatticeMonotonicity.lean`); they are merged here since the tracks are
+module composition. The three tracks are proved together in a single module since they are
 structurally parallel and have no cross-base dependency (see
 `PropositionalStrengthMonotonicity.lean` for the cross-base corollaries).
 
-**Note (task 501 independence)**: like `LatticeSubsumption.lean`, this module is purely
-syntactic and does not depend on `ckvalidFC_completeness`; it is independent of the
-CS4/CS5 completeness blocker tracked in task 501.
+**Independence from semantic completeness**: like `LatticeSubsumption.lean`, this module is
+purely syntactic and does not depend on `ckvalidFC_completeness`; it is independent of the
+`CS4`/`CS5` semantic completeness status.
 
 **Framing**: these are **monotonicity** results (`_implies_` naming), not conservativity --
 the same-language converse is false on this axis (e.g. `CT`/`MT`/`IT` each prove `□φ → φ`,

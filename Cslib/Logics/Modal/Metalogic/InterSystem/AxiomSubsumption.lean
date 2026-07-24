@@ -16,16 +16,16 @@ establishing that each weaker system's axiom predicate implies the corresponding
 stronger system's axiom predicate. These lemmas are the foundational building blocks
 for the derivability monotonicity theorems in `Conservativity.lean`.
 
-## Structure (schema-union rollout, Phase 5; simplified Phase 8 sub-phase 8.4)
+## Structure (Schema-Union Rollout)
 
 Each lemma has the form `XAxiom_implies_YAxiom : XAxiom φ → YAxiom φ`, where X is
 the weaker system and Y is the stronger system. Every proof routes uniformly through
 the single generic `SchemaUnion.subsumption` lemma
 (`Cslib.Logics.Modal.ProofSystem.SchemaUnion`) applied directly to `h : XAxiom φ`, with
 `xTags ⊆ yTags` discharged by `decide` (the tag sets are concrete `Finset`s). Since each
-`<Sys>Axiom` is now `abbrev <Sys>Axiom := SchemaUnion sysTags` (Phase 8 sub-phase 8.3),
-`XAxiom φ` and `SchemaUnion xTags φ` are definitionally the same type, so no bridge
-conversion is needed on either side of `SchemaUnion.subsumption`. No hand-written
+`<Sys>Axiom` is `abbrev <Sys>Axiom := SchemaUnion sysTags`, `XAxiom φ` and
+`SchemaUnion xTags φ` are definitionally the same type, so no bridge conversion is needed
+on either side of `SchemaUnion.subsumption`. No hand-written
 per-edge `match`/`cases` on constructors remains — the modal cube IS the `⊆`-order on
 per-system tag sets (design invariant 1 of the schema-union rollout), and each subsumption
 edge is a `decide`-able `Finset.subset` fact. Every public lemma name is preserved verbatim.
@@ -64,9 +64,9 @@ edge is a `decide`-able `Finset.subset` fact. Every public lemma name is preserv
 
 Note: The edge KB5 → S5 is omitted because `kb5Tags` (`kCore ∪ {modalB, modalFive}`) is not a
 subset of `s5Tags` (`kCore ∪ {modalT, modalFour, modalB}`) — S5 = T+4+B and carries `modalB`,
-NOT `modalFive` (task 523's resolved design decision). The `decide`-able `Finset.subset` fact
-this rollout is built on makes the omission mechanically evident: no `hsub : kb5Tags ⊆ s5Tags`
-proof exists, since `modalFive ∈ kb5Tags` but `modalFive ∉ s5Tags`.
+NOT `modalFive`. The `decide`-able `Finset.subset` fact this rollout is built on makes the
+omission mechanically evident: no `hsub : kb5Tags ⊆ s5Tags` proof exists, since
+`modalFive ∈ kb5Tags` but `modalFive ∉ s5Tags`.
 
 ## References
 

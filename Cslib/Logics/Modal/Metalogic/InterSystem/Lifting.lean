@@ -18,7 +18,7 @@ the stronger system's axiom predicate subsumes the weaker one.
 This module also provides the more general `Derivable_of_axiom_derivable` lift, used when
 `Axioms1`-axiom instances are not literal `Axioms2`-axiom instances (no syntactic rename),
 but each is nonetheless *derivable* in `Axioms2` (e.g. the intuitionistic Fischer-Servi
-diamond schemata vs. classical `K`'s dual-diamond `diaDuality` schemata, task 484). This is
+diamond schemata vs. classical `K`'s dual-diamond `diaDuality` schemata). This is
 strictly more general than `Derivable_mono`: an axiom→axiom callback is a special case of an
 axiom→derivation callback (`Axioms1 φ → Axioms2 φ → Derivable Axioms2 φ` via `⟨.ax _ _ h⟩`).
 
@@ -37,7 +37,7 @@ To prove that K-derivable formulas are T-derivable, apply `Derivable_mono` with
 `KAxiom_implies_TAxiom` (from `AxiomSubsumption.lean`) as the callback.
 
 To bridge two systems whose axioms are not syntactic renames of each other (e.g.
-intuitionistic `IK` into classical `K`, task 484 `IntToClassical.lean`), apply
+intuitionistic `IK` into classical `K`, `IntToClassical.lean`), apply
 `Derivable_of_axiom_derivable` with a callback proving each `IKModalAxiom` instance
 `Derivable`-in-`KAxiom` (rather than literally a `KAxiom` instance).
 -/
@@ -126,9 +126,9 @@ axiom instance is *derivable* (not necessarily a literal axiom instance) in `Axi
 
 Strictly more general than `Derivable_mono`, which is the special case where `h_sub` produces
 a literal `Axioms2` axiom instance rather than an arbitrary derivation. Used for bridges where
-the two systems' axioms are not syntactic renames of each other (task 484,
-`IntToClassical.lean`: intuitionistic Fischer-Servi diamond schemata vs. classical `K`'s
-dual-diamond `diaDuality` schemata). -/
+the two systems' axioms are not syntactic renames of each other (`IntToClassical.lean`:
+intuitionistic Fischer-Servi diamond schemata vs. classical `K`'s dual-diamond `diaDuality`
+schemata). -/
 theorem Derivable_of_axiom_derivable
     {Axioms1 Axioms2 : Proposition Atom → Prop}
     (h_sub : ∀ φ, Axioms1 φ → Derivable Axioms2 φ)

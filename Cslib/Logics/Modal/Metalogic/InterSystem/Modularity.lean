@@ -13,8 +13,8 @@ public import Cslib.Logics.Modal.Metalogic.Systems.K.ConservativeExtension
 
 /-! # Capstone: Modularity Across the Propositional-Strength × Modal-Axiom Lattice
 
-This module is the capstone synthesis of task 484. It does not prove any new mathematics;
-it consolidates the monotonicity results of `MinimalLatticeMonotonicity.lean`,
+This module is the capstone synthesis of the modal metalogic lattice. It does not prove any
+new mathematics; it consolidates the monotonicity results of `MinimalLatticeMonotonicity.lean`,
 `IntuitionisticLatticeMonotonicity.lean`, `ConstructiveLatticeMonotonicity.lean`,
 `PropositionalStrengthMonotonicity.lean`, and the classical `Conservativity.lean` into a
 single documented lattice map, and re-exposes the already-proved Axis-C
@@ -37,21 +37,20 @@ by axiom-predicate inclusion via the generic `Derivable_mono` lift
 `intuitionistic`-derivable. Classical Axis-A edges: `AxiomSubsumption.lean` +
 `Conservativity.lean` (24 edges). Minimal/Intuitionistic/Constructive Axis-A edges:
 `MinimalLatticeMonotonicity.lean`, `IntuitionisticLatticeMonotonicity.lean`,
-`ConstructiveLatticeMonotonicity.lean` (task 484, Phases 1-3).
+`ConstructiveLatticeMonotonicity.lean`.
 
 **Axis B — propositional strength** (minimal ⊆ constructive/intuitionistic ⊆ classical,
 within one fixed modal system). Edges here are also **monotonicity only**, into the
 intuitionistic base: `MKModalAxiom_implies_IKModalAxiom`, `CKModalAxiom_implies_IKModalAxiom`,
-and per-rung analogues (`PropositionalStrengthMonotonicity.lean`, task 484 Phase 4). The
-converse is again false (classical-only principles like Peirce's law are not derivable from
-the weaker propositional bases). `MKModalAxiom` and `CKModalAxiom` are themselves
-**incomparable** (`MK` has the Fischer-Servi constructors `cd`/`idb` but no `efq`; `CK` has
-`efq` but no `cd`/`idb`); both embed into `IK`, which is exactly their union plus `dbot`.
-The Intuitionistic → Classical edge (`IK → K`) is the *one* genuinely hard direction on this
-axis (report Phase 3 / plan Phases 6-7), because intuitionistic `IK` uses a **primitive**
-diamond with Fischer-Servi axioms while classical `K` uses the **dual** diamond
-(`◇ = ¬□¬`) — not a syntactic rename, requiring the new generalized
-`Derivable_of_axiom_derivable` lift plus per-axiom classical derivations.
+and per-rung analogues (`PropositionalStrengthMonotonicity.lean`). The converse is again false
+(classical-only principles like Peirce's law are not derivable from the weaker propositional
+bases). `MKModalAxiom` and `CKModalAxiom` are themselves **incomparable** (`MK` has the
+Fischer-Servi constructors `cd`/`idb` but no `efq`; `CK` has `efq` but no `cd`/`idb`); both
+embed into `IK`, which is exactly their union plus `dbot`. The Intuitionistic → Classical edge
+(`IK → K`) is the *one* genuinely hard direction on this axis, because intuitionistic `IK` uses
+a **primitive** diamond with Fischer-Servi axioms while classical `K` uses the **dual** diamond
+(`◇ = ¬□¬`) — not a syntactic rename, requiring the generalized `Derivable_of_axiom_derivable`
+lift plus per-axiom classical derivations.
 
 **Axis C — modal-over-propositional** (a modal system vs. its underlying CPL/IPL/MPL). This
 is the **only** axis with a genuine conservativity **converse**:
@@ -73,7 +72,7 @@ converses are false.
 
 ## Consolidated Lattice Statement (Sample Composites)
 
-The theorems below are direct compositions of the Phase 1-4 monotonicity lemmas —
+The theorems below are direct compositions of the monotonicity lemmas above —
 no new proof content, only chaining across axes to witness "modularity": a formula
 derivable in the *weakest* corner of the lattice (`MK`/`CK`) is derivable at any point
 reachable by monotone edges, including the *strongest* same-language corner (`IS5`).

@@ -21,17 +21,15 @@ public import Cslib.Foundations.Logic.Theorems.Combinators
 
 /-! # The Intuitionistic → Classical Bridge (`IK → K`)
 
-This module begins the one genuinely hard direction of task 484's lattice: intuitionistic
-`IK` uses a **primitive** diamond with Fischer-Servi axiom schemata (`kdia`, `cd`, `idb`,
-`dbot`), while classical `K` uses the **dual** diamond (`◇φ := ¬□¬φ`, witnessed by the
-`diaDualityFwd`/`diaDualityBack` axiom schemata). This is not a syntactic rename — each
+This module proves the one genuinely hard direction of the same-language-base modal lattice:
+intuitionistic `IK` uses a **primitive** diamond with Fischer-Servi axiom schemata (`kdia`,
+`cd`, `idb`, `dbot`), while classical `K` uses the **dual** diamond (`◇φ := ¬□¬φ`, witnessed by
+the `diaDualityFwd`/`diaDualityBack` axiom schemata). This is not a syntactic rename — each
 `IKModalAxiom` instance must be shown *derivable* (not literally an axiom instance) in
-`KAxiom`, using the new generalized lift `Derivable_of_axiom_derivable`
+`KAxiom`, using the generalized lift `Derivable_of_axiom_derivable`
 (`InterSystem/Lifting.lean`).
 
-## This Module (Phase 6 — Tractable Schemata)
-
-Per-axiom classical `K`-derivations for the tractable `IKModalAxiom` schemata:
+## Per-Axiom Classical `K`-Derivations
 
 - The eight shared propositional constructors (`implyK`, `implyS`, `andI`, `andE1`, `andE2`,
   `orI1`, `orI2`, `orE`) and `efq`, `k` (`modalK`): **direct** — each is a literal `KAxiom`
@@ -42,12 +40,16 @@ Per-axiom classical `K`-derivations for the tractable `IKModalAxiom` schemata:
   `imp_trans` propositional combinators (`Theorems/Combinators.lean`).
 - `dbot` (`◇⊥ → ⊥`): derived from `⊢ □¬⊥` (necessitation of the tautology `⊢ ¬⊥`, i.e.
   `identity ⊥ : ⊢ ⊥ → ⊥`), `app1` (`φ → ((φ → ψ) → ψ)`), and `diaDualityFwd`.
+- `cd` (`◇(φ ∨ ψ) → (◇φ ∨ ◇ψ)`) and `idb` (`(◇φ → □ψ) → □(φ → ψ)`), the two fiddliest
+  Fischer-Servi schemata, are each derived via their contrapositive plus `rcp` (see
+  `k_derivable_of_ik_cd`/`k_derivable_of_ik_idb` for the step-by-step derivations).
 
-`cd` (`◇(φ ∨ ψ) → (◇φ ∨ ◇ψ)`) and `idb` (`(◇φ → □ψ) → □(φ → ψ)`) are deferred to Phase 7
-(`the fiddliest two Fischer-Servi schemata`); the final assembly
-`∀ φ, IKModalAxiom φ → Derivable KAxiom φ` and the concluding
-`ikDerivable_implies_kDerivable` are also deferred to Phase 7, once all 14 schemata are
-covered.
+The final assembly `∀ φ, IKModalAxiom φ → Derivable KAxiom φ`
+(`ikAxiom_derivable_in_K`) and the concluding `ikDerivable_implies_kDerivable` combine all 14
+schemata into the bridge theorem. The module also carries the analogous `IT → T`, `IS4 → S4`,
+and `IS5 → S5` bridges (`itDerivable_implies_tDerivable`, `is4Derivable_implies_s4Derivable`,
+`is5Derivable_implies_s5Derivable`), each reusing the `IK → K` derivations for the shared axioms
+and adding only the system-specific schema (`tDia`, `fourDia`, `bDia`).
 -/
 
 @[expose] public section
@@ -59,9 +61,8 @@ variable {Atom : Type*}
 /-! ## Direct Schemata (Literal `KAxiom` Instances) -/
 
 /-- `IK`'s `implyK` is a `KAxiom` instance, produced as a bare `SchemaUnion kTags` witness
-rather than the retired `KAxiom.implyK` constructor name directly -- `KAxiom` is now
-`abbrev KAxiom := SchemaUnion kTags` (Phase 8 sub-phase 8.3), so this witness typechecks
-directly by defeq. -/
+rather than a named constructor directly -- `KAxiom` is `abbrev KAxiom := SchemaUnion kTags`,
+so this witness typechecks directly by defeq. -/
 theorem k_derivable_of_ik_implyK {φ ψ : Proposition Atom} :
     Derivable (@KAxiom Atom) (φ.imp (ψ.imp φ)) :=
   ⟨.ax [] _ ⟨.implyK, by decide, φ, ψ, rfl⟩⟩
@@ -177,7 +178,7 @@ theorem k_derivable_of_ik_dbot :
   obtain ⟨d⟩ := goal
   exact ⟨d⟩
 
-/-! ## Helper Combinators (Phase 7) -/
+/-! ## Helper Combinators -/
 
 /-- Necessitated K-distribution over a two-step implication: from a closed
 `⊢ A → (B → C)`, derive `⊢ □A → (□B → □C)`. Necessitates the hypothesis and applies

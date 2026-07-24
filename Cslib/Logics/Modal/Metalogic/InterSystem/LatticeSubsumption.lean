@@ -28,18 +28,16 @@ classical `AxiomSubsumption.lean` template (`InterSystem/AxiomSubsumption.lean`)
 is a mechanical constructor case-split: every constructor of the weaker axiom predicate maps
 to the same-named constructor of the stronger axiom predicate, since each rung's `S5Axiom`
 is defined as the previous rung's constructors verbatim plus new ones (see each track's
-`T`/`S4`/`S5` module docstrings). This was formerly split across three files
-(`ConstructiveLatticeSubsumption.lean`, `MinimalLatticeSubsumption.lean`,
-`IntuitionisticLatticeSubsumption.lean`); they are merged here since the tracks are
-structurally parallel and have no cross-base dependency (see `PropositionalStrengthSubsumption.lean`
-for the cross-base embeddings).
+`T`/`S4`/`S5` module docstrings). The three tracks are proved together in a single module since
+they are structurally parallel and have no cross-base dependency (see
+`PropositionalStrengthSubsumption.lean` for the cross-base embeddings).
 
-**Note (task 501/508 independence)**: this module is purely syntactic (`cases` on the axiom
-predicates); it does not depend on `CKValidFC`/`ckvalidFC_completeness` in any way, and is
-therefore entirely independent of `CS4`/`CS5` semantic completeness (`CS4` completeness is now
-established, task 508; `CS5` completeness remains open -- see `CS5.lean`'s module docstring for
-the mechanized obstruction). Neither status affects the syntactic derivability monotonicity
-proved here.
+**Independence from semantic completeness**: this module is purely syntactic (`cases` on the
+axiom predicates); it does not depend on `CKValidFC`/`ckvalidFC_completeness` in any way, and is
+therefore entirely independent of `CS4`/`CS5` semantic completeness (`CS4` completeness is
+established; `CS5` completeness remains open -- see `CS5.lean`'s module docstring for the
+mechanized obstruction). Neither status affects the syntactic derivability monotonicity proved
+here.
 
 **Framing**: these are same-language edges within each propositional base, so the converse is
 false in each case (e.g. `CT` proves `□φ → φ`, which is not `CK`-derivable). The results here

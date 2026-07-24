@@ -14,8 +14,8 @@ public import Cslib.Logics.Modal.Metalogic.InterSystem.Lifting
 
 This module exhibits the modal-logic axiom-monotonicity combinator `liftDerivation`
 as a corollary of the generic functor `Cslib.Logic.Metalogic.Deriv.map` applied to a
-`ProofSigHom` built from the subsumption hypothesis. This is Phase 3 of the
-morphism-of-proof-systems abstraction (task 419).
+`ProofSigHom` built from the subsumption hypothesis, an instance of the
+morphism-of-proof-systems abstraction.
 
 ## Design
 

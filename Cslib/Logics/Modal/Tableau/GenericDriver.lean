@@ -20,16 +20,17 @@ the K-style FMP termination measure (`modalUniverse`/`modalWork`/`modalExpMeasur
 ## Main Definitions
 
 - `RuleApplicationSpec apply`: the structural-hypothesis bundle (eleven fields, see below --
-  seven from task 507, four more, F9-F12, from task 510's Hintikka/saturation generalization).
+  seven from the termination-lemma generalization, four more, F9-F12, from the
+  Hintikka/saturation generalization).
 - `modalApplyOne_spec`: `modalApplyOne` (K) trivially satisfies the bundle.
 - `modalStepBranchGen_preserves_outDegEq`/`_exists_rank'`/`_preserves_accTargetsKnown`/
   `_knownWorlds`/`_eClosure`/`_potential_step`/`_worldBound`/`_expMeasure_step_lt`: the
   `(apply, spec)`-bundled wrappers around `FmpMeasure.lean`'s `_gen` lemmas, available for
   downstream (T/S5/B) reuse.
 
-## Sufficiency (task 510: the Hintikka/saturation chain generalized)
+## Sufficiency (the Hintikka/Saturation Chain Generalized)
 
-Task 510 extends this bundle from seven to eleven fields to generalize the Hintikka-set/
+This extends the bundle from seven to eleven fields to generalize the Hintikka-set/
 saturation-characterisation chain (`Completeness.lean`/`CompletenessLoop.lean`) over `apply`:
 
 8. **`localShapeInvariance`** (F8): branch-independence on non-box/non-diamond shapes. Forces the
@@ -47,16 +48,17 @@ saturation-characterisation chain (`Completeness.lean`/`CompletenessLoop.lean`) 
 itself **spec-free** (no field dependency), so S4 (excluded below from discharging this spec) can
 still consume its statement shape.
 
-## Sufficiency (task 507: all three K termination lemmas generalized)
+## Sufficiency (All Three K Termination Lemmas Generalized)
 
-Task 503 Phases 1-2 delivered the generic driver and this file's three original fields
-(`freshLocal`/`outputsSubsetUniverse`/`persistentFresh`), sufficient to *state* the three K
+The generic driver and this file's three original fields
+(`freshLocal`/`outputsSubsetUniverse`/`persistentFresh`) were delivered first, sufficient to
+*state* the three K
 termination lemmas (`modalStepBranch_potential_step`/`_worldBound`, `modalExpMeasure_step_lt`)
 generically but not to *replay their proofs* -- roughly fifteen private helper lemmas in
 `FmpMeasure.lean` additionally `rcases` directly on `modalApplyOne`'s five internal rule shapes
 (propositional/boxPos/diamondNeg/diamondPos/boxNeg), not merely on the four top-level
-`RuleResult` constructor shapes (which *are* rule-agnostic and need no interface support). Task
-507 closed this gap by adding four further fields, and **all three termination lemmas are now
+`RuleResult` constructor shapes (which *are* rule-agnostic and need no interface support). Four
+further fields close this gap, and **all three termination lemmas are now
 proven generically** (`FmpMeasure.lean`'s `_gen` lemmas), confirmed sorry-free/axiom-free and
 CI-clean at every step:
 
@@ -70,20 +72,20 @@ CI-clean at every step:
 3. **`persistentFresh`** (persistence hook): whenever `apply` produces a `.persistent` result,
    the emitted formulas are nonempty and fresh (not already on the branch). Mirrors
    `modalApplyOne_persistent_props`.
-4. **`rankStep`** (task 507 Phase 1): given a `rank` map satisfying the depth-bound/edge
+4. **`rankStep`**: given a `rank` map satisfying the depth-bound/edge
    invariants pre-call, `apply` produces a `rank'` (agreeing with `rank` off `modalNextWorld b`)
    satisfying both invariants on `(apply sf b acc).snd`/`.fst`. Needed by
    `modalStepBranch_exists_rank'_gen`. Discharged by `modalApplyOne_rank_step`, whose body is the
    exact proof formerly inlined inside `modalStepBranch_exists_rank'`.
-5. **`outDegStep`** (task 507 Phase 1): given the outDeg/expanded-set counting correspondence
+5. **`outDegStep`**: given the outDeg/expanded-set counting correspondence
    pre-call, `apply` preserves it on `(apply sf b acc).snd`/`.fst`. Needed by
    `modalStepBranch_preserves_outDegEq_gen`. Discharged by `modalApplyOne_outDeg_step`.
-6. **`knownWorldsStep`** (task 507 Phase 1): the known-worlds dichotomy for a single call --
+6. **`knownWorldsStep`**: the known-worlds dichotomy for a single call --
    either `apply` leaves `acc` unchanged with all output labels already known, or it mints
    exactly one edge `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely
    labeled at the fresh point. Needed by `modalStepBranch_knownWorlds_gen`. Discharged by
    `modalApplyOne_knownWorlds_step`.
-7. **`branchingLength`** (task 507 Phase 7): every `.branching` result `apply` can produce has
+7. **`branchingLength`**: every `.branching` result `apply` can produce has
    exactly two sub-branches. A fixed-arity catalog fact (not an aggregate-behaviour fact like
    the other six), needed by `modalExpMeasure_step_lt_gen`'s `.branching` case. Discharged by
    `modalApplyOne_branching_length`.
@@ -104,26 +106,26 @@ because `RuleApplicationSpec` is defined in *this* file, which imports `FmpMeasu
 bundling would create an import cycle. This file supplies the `(apply, spec)`-bundled wrapper
 theorems (listed under Main Definitions) that unpack `spec.field` into each `_gen` lemma's raw
 parameters, giving downstream instances (T/S5/B) the ergonomic `(apply, spec)` calling
-convention the plan originally specified.
+convention this design specifies.
 
-## Downstream Reuse (tasks 504, 505; not 506)
+## Downstream Reuse
 
-- **T** (this task, `TDriver.lean`): `modalApplyOneT` agrees with `modalApplyOne` outside the
+- **T** (`TDriver.lean`): `modalApplyOneT` agrees with `modalApplyOne` outside the
   box-positive/diamond-negative self-propagation shapes
   (`modalApplyOneT_eq_of_not_boxPos_diaNeg`, `FrameRules.lean`), and those two shapes only add
   formulas at **existing** worlds drawn from the (possibly closure-enlarged) universe -- so
   `freshLocal` is discharged by agreement with `modalApplyOne` on every mint-shaped input, and
   the remaining six fields are discharged by the same agreement plus T's own catalog-membership
   facts (its own propositional/box-propagation-to-existing-successors reasoning).
-- **S5 / KB5** (task 504, universal rule): the universal rule only adds formulas at existing
+- **S5 / KB5** (universal rule): the universal rule only adds formulas at existing
   worlds (drawn from the finite catalog, since it propagates along `EqvGen`-closed pairs of
   labels already on the branch); it never mints a world itself, so `freshLocal` is discharged
   trivially (agreement with `modalApplyOne` on every mint-shaped input) and the remaining fields
   follow the same shape as T's discharge.
-- **B** (task 505, backward/symmetric rule): the backward rule only adds formulas at existing
+- **B** (backward/symmetric rule): the backward rule only adds formulas at existing
   worlds reachable via the symmetric closure `SymmGen` of already-recorded edges; likewise never
   mints a world, so the same discharge pattern as S5 applies.
-- **S4 is explicitly NOT an instance** (task 506): transitive box propagation requires
+- **S4 is explicitly NOT an instance**: transitive box propagation requires
   loop-checking (`#worlds ≤ 2^|Sf|`) rather than the depth-based `modalWorldBound` this bundle
   presupposes via `outputsSubsetUniverse`'s reliance on `modalApplyOne_outputs_subset`-style
   world-bound hypotheses; S4 needs a structurally different termination argument.
@@ -208,14 +210,14 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
       (nf : List (SignedFormula (Proposition Atom) WorldIndex)),
       (apply sf b acc).fst = .persistent nf → nf ≠ [] ∧ ∀ x ∈ nf, x ∉ b
-  /-- Branching arity (task 507 Phase 7): every `.branching` result `apply sf b acc` can
+  /-- Branching arity: every `.branching` result `apply sf b acc` can
   produce has exactly two sub-branches. Needed by the counting-measure engine
   `modalExpMeasure_step_lt`'s `.branching` case. Mirrors `modalApplyOne_branching_length`. -/
   branchingLength : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex)
       (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
       (brs : List (List (SignedFormula (Proposition Atom) WorldIndex))),
       (apply sf b acc).fst = .branching brs → brs.length = 2
-  /-- **F8** (task 510) Branch-independence on structural shapes: for a signed formula whose
+  /-- **F8** Branch-independence on structural shapes: for a signed formula whose
   formula-component is neither `box`- nor `diamond`-shaped, `apply`'s rule result does not
   depend on the branch or the accessibility relation. Forces `modalHintikkaClauseGen_lift`
   (and, through it, `modalStepBranchGen_hintikka_inv`), which lifts the expanded-set Hintikka
@@ -226,7 +228,7 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
       ∀ (b b' : List (SignedFormula (Proposition Atom) WorldIndex))
         (acc acc' : Accessibility),
       (apply ⟨s, φ, w⟩ b acc).1 = (apply ⟨s, φ, w⟩ b' acc').1
-  /-- **F9** (task 510) Box-positive is never expanding: `apply`'s result on a `T(□ψ)@w`-shaped
+  /-- **F9** Box-positive is never expanding: `apply`'s result on a `T(□ψ)@w`-shaped
   input is always `.notApplicable` or `.persistent` -- never `.linear`/`.branching`. Since
   `.persistent` leaves the expanded set unchanged (`modalStepBranchGen`, `Saturation.lean`),
   this is what makes `modalLoopGen_eBoxOnlyNeg` go through: a `boxPos`-shaped formula can never
@@ -240,7 +242,7 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
       ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
       (apply sf b acc).1 = .notApplicable ∨
         ∃ out, (apply sf b acc).1 = .persistent out
-  /-- **F10** (task 510) Diamond-negative is never expanding: dual of `boxPosNotExpanding`,
+  /-- **F10** Diamond-negative is never expanding: dual of `boxPosNotExpanding`,
   forcing `modalLoopGen_eDiamondOnlyPos`. Mirrors `modalApplyOne_diamondNeg_eq` (`Rules.lean`),
   likewise payload-weakened. -/
   diaNegNotExpanding : ∀ (sf : SignedFormula (Proposition Atom) WorldIndex),
@@ -248,7 +250,7 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
       ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility),
       (apply sf b acc).1 = .notApplicable ∨
         ∃ out, (apply sf b acc).1 = .persistent out
-  /-- **F11'** (task 515 Phase 9) Box-negative witness minting/reuse, existentially quantified
+  /-- **F11'** Box-negative witness minting/reuse, existentially quantified
   on the witness world: `apply` on `F(□ψ)@w` is *always* applicable, adds the edge
   `w → w'` for **some** world `w'`, and heads its `.linear` output with the witness
   `F(ψ)@w'`. Weaker than the eventual `RuleApplicationSpec.boxNegWitness` (which fixes
@@ -263,7 +265,7 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
         (apply (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).fst
           = RuleResult.linear
               ((⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) :: rest)
-  /-- **F12'** (task 515 Phase 9) Diamond-positive witness minting/reuse: dual of
+  /-- **F12'** Diamond-positive witness minting/reuse: dual of
   `boxNegWitness'`. Mirrors `modalApplyOne_diamondPos_witness` (`Rules.lean`), further weakened
   from `diaPosWitness`. -/
   diaPosWitness' : ∀ (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -278,13 +280,13 @@ structure RuleApplicationSpecCore (apply : RuleApply Atom) : Prop where
 /-- The structural-hypothesis bundle a rule-application function `apply` (matching
 `modalApplyOne`'s signature, see `RuleApply`) must satisfy to reuse the K-style FMP termination
 measure with the generic tableau driver. See the module docstring for the provenance of each
-field and the downstream-reuse contract for tasks 504 (S5/KB5), 505 (B), and 506 (S4, explicitly
+field and the downstream-reuse contract for S5/KB5, B, and S4 (explicitly
 excluded). Extends `RuleApplicationSpecCore` with the three fields (`rankStep`/`outDegStep`/
 `knownWorldsStep`) the K-style FMP *termination-measure* argument needs but the *completeness*
 side (`CompletenessLoop.lean`) does not -- see `RuleApplicationSpecCore`'s docstring. -/
 structure RuleApplicationSpec (apply : RuleApply Atom) : Prop extends
     RuleApplicationSpecCore apply where
-  /-- Per-call rank-step (task 507): given `rank` satisfying the depth-bound/edge invariants
+  /-- Per-call rank-step: given `rank` satisfying the depth-bound/edge invariants
   pre-call, `apply sf b acc` yields a `rank'` (agreeing with `rank` off `modalNextWorld b`)
   satisfying the edge invariant on `(apply sf b acc).snd` and the depth bound on
   `(apply sf b acc).fst`'s output. Mirrors `modalApplyOne_rank_step`. -/
@@ -302,7 +304,7 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop extends
           | .branching branches => ∀ x ∈ branches.flatten, modalDepth x.formula ≤ rank' x.label
           | .persistent formulas => ∀ x ∈ formulas, modalDepth x.formula ≤ rank' x.label
           | .notApplicable => True)
-  /-- Per-call outDeg-step (task 507): given the outDeg/expanded-set minting-count
+  /-- Per-call outDeg-step: given the outDeg/expanded-set minting-count
   correspondence pre-call, `apply sf b acc` preserves it on `(apply sf b acc).snd`, counted
   against the post-call expanded set implied by `(apply sf b acc).fst`'s shape. Mirrors
   `modalApplyOne_outDeg_step`. -/
@@ -316,7 +318,7 @@ structure RuleApplicationSpec (apply : RuleApply Atom) : Prop extends
             | .branching _ => e ++ [sf]
             | .persistent _ => e
             | .notApplicable => (e : List (SignedFormula (Proposition Atom) WorldIndex)))).length
-  /-- Per-call knownWorlds-step (task 507): either `apply sf b acc` leaves `acc` unchanged with
+  /-- Per-call knownWorlds-step: either `apply sf b acc` leaves `acc` unchanged with
   every output label already known on `b`, or it mints exactly one edge
   `sf.label → modalNextWorld b` with a nonempty `.linear` result entirely labeled at the fresh
   point. Mirrors `modalApplyOne_knownWorlds_step`. -/
@@ -373,12 +375,13 @@ theorem modalApplyOne_spec : RuleApplicationSpec (Atom := Atom) modalApplyOne wh
     ⟨modalNextWorld b, (modalApplyOne_diamondPos_witness b acc ψ w).1,
       (modalApplyOne_diamondPos_witness b acc ψ w).2⟩
 
-/-! ## Task 507 Phase 2: Generic outDeg-Preservation (spec-bundled) -/
+/-! ## Generic outDeg-Preservation (spec-bundled) -/
 
-/-- **Task 507 Phase 2**: `modalStepBranchGen apply` preserves the out-degree/expanded-set
+/-- **Generic form**: `modalStepBranchGen apply` preserves the out-degree/expanded-set
 correspondence, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalStepBranch_preserves_outDegEq_gen`, `FmpMeasure.lean`, which takes the raw `outDegStep`
-hypothesis directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+hypothesis directly to avoid the import cycle documented in the module docstring's
+"Architectural note"). -/
 theorem modalStepBranchGen_preserves_outDegEq
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -392,13 +395,13 @@ theorem modalStepBranchGen_preserves_outDegEq
   modalStepBranch_preserves_outDegEq_gen apply spec.outDegStep
     b e acc newBs newExps newAcc hstep houtdeg
 
-/-! ## Task 507 Phase 3: Generic Rank-Existence (spec-bundled) -/
+/-! ## Generic Rank-Existence (spec-bundled) -/
 
-/-- **Task 507 Phase 3**: given `rank` satisfying the rank-bound/rank-edge invariants pre-step,
+/-- **Generic form**: given `rank` satisfying the rank-bound/rank-edge invariants pre-step,
 `modalStepBranchGen apply` produces a `rank'` satisfying both invariants on every child branch,
 bundled via `RuleApplicationSpec` (thin wrapper around `modalStepBranch_exists_rank'_gen`,
 `FmpMeasure.lean`, which takes the raw `rankStep` hypothesis directly to avoid the import cycle
-documented in the plan's "Architectural Note"). -/
+documented in the module docstring's "Architectural note"). -/
 theorem modalStepBranchGen_exists_rank'
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -416,12 +419,12 @@ theorem modalStepBranchGen_exists_rank'
   modalStepBranch_exists_rank'_gen apply spec.rankStep
     b e acc newBs newExps newAcc hstep hInv rank hbound hedge
 
-/-! ## Task 507 Phase 4: Generic knownWorlds/accTargetsKnown/eClosure (spec-bundled) -/
+/-! ## Generic knownWorlds/accTargetsKnown/eClosure (spec-bundled) -/
 
-/-- **Task 507 Phase 4**: `modalStepBranchGen apply` preserves `accTargetsKnown`, bundled via
+/-- **Generic form**: `modalStepBranchGen apply` preserves `accTargetsKnown`, bundled via
 `RuleApplicationSpec` (thin wrapper around `modalStepBranch_preserves_accTargetsKnown_gen`,
 `FmpMeasure.lean`, which takes the raw `freshLocal` hypothesis directly to avoid the import
-cycle documented in the plan's "Architectural Note"). -/
+cycle documented in the module docstring's "Architectural note"). -/
 theorem modalStepBranchGen_preserves_accTargetsKnown
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -433,10 +436,11 @@ theorem modalStepBranchGen_preserves_accTargetsKnown
   modalStepBranch_preserves_accTargetsKnown_gen apply spec.freshLocal
     b e acc newBs newExps newAcc hstep hknown
 
-/-- **Task 507 Phase 4**: the known-worlds/max-world dichotomy for a single
+/-- **Generic form**: the known-worlds/max-world dichotomy for a single
 `modalStepBranchGen apply` step, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalStepBranch_knownWorlds_gen`, `FmpMeasure.lean`, which takes the raw `knownWorldsStep`
-hypothesis directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+hypothesis directly to avoid the import cycle documented in the module docstring's
+"Architectural note"). -/
 theorem modalStepBranchGen_knownWorlds
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -453,7 +457,7 @@ theorem modalStepBranchGen_knownWorlds
   modalStepBranch_knownWorlds_gen apply spec.knownWorldsStep
     b e acc newBs newExps newAcc hstep hknown
 
-/-- **Task 507 Phase 4**: the expanded set's `modalUniverse` closure is preserved across a
+/-- **Generic form**: the expanded set's `modalUniverse` closure is preserved across a
 `modalStepBranchGen apply` step, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalStepBranch_eClosure_gen`, `FmpMeasure.lean`, which needs no `spec` field at all -- see its
 docstring). -/
@@ -469,14 +473,14 @@ theorem modalStepBranchGen_eClosure
     ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverse φ0 :=
   modalStepBranch_eClosure_gen apply φ0 b e acc newBs newExps newAcc hstep hb heclosure
 
-/-! ## Task 507 Phase 5: Generic Potential-Step Crux (spec-bundled) -/
+/-! ## Generic Potential-Step Crux (spec-bundled) -/
 
-/-- **Task 507 Phase 5 (the crux, spec-bundled)**: the exact single-step potential-drop identity
+/-- **The crux (generic form, spec-bundled)**: the exact single-step potential-drop identity
 for `modalStepBranchGen apply`, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalStepBranch_potential_step_gen`, `FmpMeasure.lean`, which takes the four raw hypotheses
 `freshLocal`/`rankStep`/`outDegStep`/`knownWorldsStep` directly to avoid the import cycle
-documented in the plan's "Architectural Note"). This is the crux confirmation for the whole
-task: `RuleApplicationSpec`'s three original fields plus the three Phase-1 per-call step fields
+documented in the module docstring's "Architectural note"). This is the crux confirmation:
+`RuleApplicationSpec`'s three original fields plus the three per-call step fields
 are jointly **sufficient** to replay the EXACT `geomCap`-based potential-drop identity
 generically -- no further field is needed. -/
 theorem modalStepBranchGen_potential_step
@@ -497,12 +501,12 @@ theorem modalStepBranchGen_potential_step
   modalStepBranch_potential_step_gen apply spec.freshLocal spec.rankStep spec.outDegStep
     spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv
 
-/-! ## Task 507 Phase 6: Generic World-Bound Preservation (spec-bundled) -/
+/-! ## Generic World-Bound Preservation (spec-bundled) -/
 
-/-- **Task 507 Phase 6**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
+/-- **Generic form**: the a-priori world bound `modalWorldBound φ0` is preserved as a loop
 invariant of `modalStepBranchGen apply`, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalStepBranch_worldBound_gen`, `FmpMeasure.lean`, which takes the four raw hypotheses
-directly to avoid the import cycle documented in the plan's "Architectural Note"). -/
+directly to avoid the import cycle documented in the module docstring's "Architectural note"). -/
 theorem modalStepBranchGen_worldBound
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom)
@@ -517,13 +521,13 @@ theorem modalStepBranchGen_worldBound
   modalStepBranch_worldBound_gen apply spec.freshLocal spec.rankStep spec.outDegStep
     spec.knownWorldsStep φ0 b e acc newBs newExps newAcc rank hstep hinv hPhiBound
 
-/-! ## Task 507 Phase 7: Generic Counting-Measure Engine (spec-bundled) -/
+/-! ## Generic Counting-Measure Engine (spec-bundled) -/
 
-/-- **Task 507 Phase 7**: one `modalStepBranchGen apply` step strictly decreases the base-3
+/-- **Generic form**: one `modalStepBranchGen apply` step strictly decreases the base-3
 damped worklist measure by at least one, bundled via `RuleApplicationSpec` (thin wrapper around
 `modalExpMeasure_step_lt_gen`, `FmpMeasure.lean`, which takes the three raw hypotheses
 `branchingLength`/`persistentFresh`/`outputsSubsetUniverse` directly to avoid the import cycle
-documented in the plan's "Architectural Note"). -/
+documented in the module docstring's "Architectural note"). -/
 theorem modalStepBranchGen_expMeasure_step_lt
     (apply : RuleApply Atom) (spec : RuleApplicationSpec apply)
     (φ0 : Proposition Atom)

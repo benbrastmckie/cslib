@@ -215,7 +215,7 @@ disjoint from Phase 2.
 **Tasks**:
 - [x] `Tableau/FrameSoundness.lean` (56 hits) — includes an embedded `specs/NNN` link: delete it.
 - [x] `Tableau/FmpMeasure.lean` (52 hits).
-- [ ] `Tableau/S5Simplification.lean` (41 hits) — includes an embedded `specs/NNN` link: delete it.
+- [x] `Tableau/S5Simplification.lean` (41 hits) — includes an embedded `specs/NNN` link: delete it.
 - [ ] `Tableau/FiveSimplification.lean` (39 hits).
 - [ ] `Tableau/GenericDriver.lean` (36 hits).
 - [ ] The remaining lighter Modal/Tableau files not claimed by Phase 2.

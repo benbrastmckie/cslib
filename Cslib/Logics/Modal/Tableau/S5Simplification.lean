@@ -17,7 +17,7 @@ This module defines the S5 "propagate box to ALL branch worlds" universal rule
 (`modalApplyOneS5`), which realises S5's single-cluster model property directly, without any
 loop-checking machinery (unlike S4, `LoopChecking.lean`). It instantiates the generic tableau
 driver (`Saturation.lean`'s `modalStepBranchGen`/`modalExpandBranchesGen`/`modalTableauGen`) at
-`modalApplyOneS5`, mirroring the B-system build (`FrameRules.lean`/`BDriver.lean`, task 505)
+`modalApplyOneS5`, mirroring the B-system build (`FrameRules.lean`/`BDriver.lean`)
 declaration-for-declaration.
 
 ## Main Definitions
@@ -29,7 +29,7 @@ declaration-for-declaration.
 - `modalApplyOneS5`: apply the K rules (`modalApplyOne`) together with the S5 universal
   propagation arms, merging persistent-rule outputs. Reduces to `modalApplyOne` exactly outside
   the two S5-relevant signed-formula shapes (`T(□φ)@w`, `F(◇φ)@w`).
-- `modalApplyOneS5w`: the **witness-reuse** rule (Termination Machinery Plan v5, Phase 1). At the
+- `modalApplyOneS5w`: the **witness-reuse** rule. At the
   two mint shapes it reuses an existing witness world when the `(sign, formula)` tag is already
   present, instead of K's unconditional fresh mint, capping world creation at `modalOps φ` and so
   at K's own `modalWorldBound φ`. This is the rule the shipped decision procedure runs.
@@ -58,10 +58,9 @@ shapes (`T(◇φ)@w`, `F(□φ)@w`), `modalApplyOneS5` falls through unchanged t
 unconditional, witness-free mint -- and because the S5 propagation above keeps manufacturing
 fresh triggers for those mint shapes every cycle, this minting is **unbounded**
 (`modalApplyOneS5_hintikka_not_reachable_growth`, the R7 refutation below): `modalFuel` does
-**not** dominate the unguarded expansion, contrary to a since-corrected docstring this file used
-to carry near `modalTableauS5`. This is exactly why the witness-reuse rule `modalApplyOneS5w`
-(Phase 1) exists: it replaces minting with reuse at precisely these two shapes, leaving the
-propagation shapes above untouched.
+**not** dominate the unguarded expansion. This is exactly why the witness-reuse rule
+`modalApplyOneS5w` exists: it replaces minting with reuse at precisely these two shapes, leaving
+the propagation shapes above untouched.
 
 ## References
 
@@ -87,9 +86,9 @@ variable {Atom : Type*} [DecidableEq Atom] [Hashable Atom]
 
 Local re-derivations of `FmpMeasure.lean`'s private `modalSubfmls` structural facts (unavailable
 across files, system-agnostic). Consumed by the witness-rule counting crux below
-(`modalApplyOneS5w_step` and `modalApplyOneS5w_outputsSubsetUniverse`). The archived
-`modalUniverseS5`/`modalWorldBoundS5` membership lemmas that once shared this section were moved
-to `specs/515_.../archive/01_universe-s5-worldbound.lean` (Phase 14); these two structural facts
+(`modalApplyOneS5w_step` and `modalApplyOneS5w_outputsSubsetUniverse`). The
+`modalUniverseS5`/`modalWorldBoundS5` membership lemmas that once shared this section have been
+archived (superseded by the linear budget argument below); these two structural facts
 are rule-independent and remain live. -/
 
 omit [DecidableEq Atom] [Hashable Atom] in
@@ -224,8 +223,8 @@ lemma modalS5DiaNegAll_mem_of {b : List (SignedFormula (Proposition Atom) WorldI
 S5-relevant shapes (`T(□φ)@w`, `F(◇φ)@w`), the universal-propagation formulas are merged into
 the K rule's `persistent` output (deduplicated); for every other signed-formula shape,
 `modalApplyOneS5` reduces to exactly `modalApplyOne` (the K rule dispatch): the S5 arms are pure
-`persistent` outputs at existing (known) worlds, never `linear`/`branching`, matching the
-report's "no new worlds" classification for S5's universal-cluster simplification. -/
+`persistent` outputs at existing (known) worlds, never `linear`/`branching` -- S5's
+universal-cluster simplification mints no new worlds. -/
 def modalApplyOneS5
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
@@ -269,7 +268,7 @@ omit [Hashable Atom] in
 /-- `modalApplyOneS5`'s accessibility output is unconditionally identical to K's
 `modalApplyOne`: every match arm of `modalApplyOneS5` returns `kAcc` (the `Accessibility`
 component of `modalApplyOne sf b acc`) unchanged, regardless of which `RuleResult` case is
-merged into the `fst` component. This is the fact Phase 4's `accFresh`/`accKnown`
+merged into the `fst` component. This is the fact the linear-budget argument's `accFresh`/`accKnown`
 preservation lemmas need to reduce `modalApplyOneS5`'s accessibility reasoning to K's
 per-call lemma (`modalApplyOne_knownWorlds_step`) uniformly, without case-splitting on
 whether `sf` is one of the two S5-relevant shapes. -/
@@ -340,8 +339,8 @@ arm for the two S5-relevant shapes (`sf.sign = .pos ∧ sf.formula = .box _`,
 `sf.sign = .neg ∧ sf.formula = .diamond _`) falls through the `other => (other, kAcc)` default
 whenever `kResult` is not `.persistent`/`.notApplicable`, and every other shape is
 definitionally `(kResult, kAcc)` unconditionally. Since the two K-minting shapes
-(`F(□φ)@w`/`T(◇φ)@w`) always produce a `.linear` result, this is the fact Phase 4's
-`accFresh`/`accKnown` preservation lemmas need to identify `modalStepBranchS5gKeyed`'s
+(`F(□φ)@w`/`T(◇φ)@w`) always produce a `.linear` result, this is the fact the linear-budget
+argument's `accFresh`/`accKnown` preservation lemmas need to identify `modalStepBranchS5gKeyed`'s
 mint-case `(modalApplyOneS5 sf b acc).fst` with K's own per-call mint witness
 (`modalApplyOne_knownWorlds_step`'s mint disjunct), without knowing `sf`'s shape statically. -/
 lemma modalApplyOneS5_eq_of_linear
@@ -363,9 +362,10 @@ omit [Hashable Atom] in
 `.persistent`/`.notApplicable`) agrees between `modalApplyOneS5` and K's `modalApplyOne`, even
 though the literal `RuleResult` constructor can differ for the two S5-relevant shapes (K's
 `.notApplicable` upgraded to `.persistent` when the universal-propagation set is nonempty --
-`.persistent` either way is still bucketed with the "unchanged" case). This is the fact Phase 4's
-`outDegEq` preservation needs to identify `modalStepBranchS5gKeyed`'s (non-minting-shape)
-`e'`-output with K's own per-call `outDeg` obligation (`modalApplyOne_outDeg_step`). -/
+`.persistent` either way is still bucketed with the "unchanged" case). This is the fact the
+linear-budget argument's `outDegEq` preservation needs to identify
+`modalStepBranchS5gKeyed`'s (non-minting-shape) `e'`-output with K's own per-call `outDeg`
+obligation (`modalApplyOne_outDeg_step`). -/
 lemma modalApplyOneS5_eshape_eq
     (sf : SignedFormula (Proposition Atom) WorldIndex)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
@@ -498,7 +498,7 @@ lemma modalApplyOneS5_boxPos_diaNeg_eq
       · exact hmatch x hx
       · exact (modalS5DiaNegAll_mem hx).2.1
 
-/-! ## The Witness-Reuse Rule (Termination Machinery Plan v5, Phase 1)
+/-! ## The Witness-Reuse Rule
 
 The two S5 world-*minting* arms of `modalApplyOneS5` -- `T(◇φ)@w` (inherited from K's
 `diamondPos`) and `F(□φ)@w` (inherited from K's `boxNeg`) -- mint a fresh world unconditionally,
@@ -511,7 +511,7 @@ unconditional minting is unbounded: `modalApplyOneS5_hintikka_not_reachable` bel
 `⟨s, φ, w'⟩`, add the edge `w → w'` and emit `.linear [⟨s, φ, w'⟩]` (re-asserting the already-known
 formula, which triggers no further work); mint fresh (falling through to `modalApplyOneS5`, hence
 to K's own mint arm) only when no witness exists on the branch. This bounds world creation by a
-monotone tag-injection argument (Phase 6/7): each mint permanently consumes a distinct
+monotone tag-injection argument (the counting crux below): each mint permanently consumes a distinct
 `(sign, subformula)` tag, of which there are only `2 * |modalSubfmls φ₀|` -- **linear**, not
 exponential. -/
 
@@ -583,9 +583,9 @@ lemma modalApplyOneS5w_eq_of_not_mint_shape
   rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
     simp_all
 
-/-! ## The Hintikka Congruence Bridge (Termination Machinery Plan v5, Phase 2)
+/-! ## The Hintikka Congruence Bridge
 
-This is the single highest-value declaration in the plan: it ports the entire landed
+This is the single highest-value declaration in this section: it ports the entire landed
 countermodel half of S5 completeness **verbatim, with zero edits to `FrameCompleteness.lean`**.
 It works because `modalHintikkaSetGen`'s conjunct 2 (`Saturation.lean`) binds
 `let (result, _) := apply sf b acc` but then returns **literal `True`** at exactly the two mint
@@ -612,11 +612,11 @@ theorem hintikka_congr (b : List (SignedFormula (Proposition Atom) WorldIndex))
                     rcases hs : sf.sign with _ | _ <;>
                       rcases hf : sf.formula with _|_|_|_|_|ψ|ψ <;> simp_all [modalApplyOneS5w]
 
-/-! ## The Linear Budget Arithmetic (Termination Machinery Plan v5, Phase 4)
+/-! ## The Linear Budget Arithmetic
 
 Lets `modalUniverse` / `modalWorldBound` / `modalExpMeasure` / `modalExpMeasure_entry_le_fuel` /
 `modalFuel` (`FmpMeasure.lean`/`Saturation.lean`) be reused **verbatim at K's own universe**, and
-lets `modalWorldBoundS5`/`modalUniverseS5` be **archived** (Phase 14) rather than parametrized.
+lets `modalWorldBoundS5`/`modalUniverseS5` be **archived** rather than parametrized.
 This single-handedly retires the `(universe, worldBound)`-parametrization blocker: the S5
 termination chain retargets at K's own `modalUniverse φ` / `modalWorldBound φ`, over which
 `modalExpMeasure_entry_le_fuel` already applies verbatim. -/
@@ -664,9 +664,9 @@ lemma modalOps_lt_worldBound (φ : Proposition Atom) : modalOps φ < modalWorldB
 
 /-- The mint-tag codomain: for each `box φ`/`diamond φ` node of `φ₀`'s syntax tree, the tag a
 mint at that node would consume -- `◇ψ ↦ (pos, ψ)` (the `diamondPos` mint witness), `□ψ ↦
-(neg, ψ)` (the `boxNeg` mint witness). Used by Phase 6/7's `usedTags`-cardinality counting
-argument: each mint permanently consumes a distinct tag from this finite set, so world creation
-is bounded by `(mintTags φ₀).card`, not by any exponential pigeonhole. -/
+(neg, ψ)` (the `boxNeg` mint witness). Used by the tag invariant's `usedTags`-cardinality
+counting argument below: each mint permanently consumes a distinct tag from this finite set, so
+world creation is bounded by `(mintTags φ₀).card`, not by any exponential pigeonhole. -/
 def mintTags : Proposition Atom → Finset (Sign × Proposition Atom)
   | .atom _ => ∅
   | .bot => ∅
@@ -700,16 +700,16 @@ lemma mintTags_card_le_modalOps (φ : Proposition Atom) : (mintTags φ).card ≤
     simp only [mintTags, modalOps]
     exact le_trans (Finset.card_insert_le _ _) (by omega)
 
-/-! ## The Tag Invariant (Termination Machinery Plan v5, Phase 6)
+/-! ## The Tag Invariant
 
 `S5wTagInv` deliberately carries NO world-bound hypothesis -- this is necessary, not an
-oversight. The landed `modalApplyOneS5_outputs_subset` (part of the Phase 14 archival set) takes
+oversight. The natural universe/world-bound closure fact for `modalApplyOneS5w`'s outputs takes
 `modalMaxWorld b < modalWorldBoundS5 φ₀` as an INPUT, so it cannot be used to prove the world
 bound: that would be circular. The tag-only invariant breaks the circularity by tracking
 membership in the finite, world-independent set `signedSubfmls φ₀` instead. -/
 
 omit [Hashable Atom] in
-/-- Two subformula-closure lemmas consuming Phase 0's kill-test result: if `◇ψ` (resp. `□ψ`) is a
+/-- Two subformula-closure lemmas: if `◇ψ` (resp. `□ψ`) is a
 subformula of `φ₀`, the tag `(pos, ψ)` (resp. `(neg, ψ)`) it would mint is a member of
 `mintTags φ₀`. Proved by structural induction on `φ₀`, mirroring `mintTags`'s own recursive
 shape. -/
@@ -796,7 +796,7 @@ def S5wTagInv (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition A
   ∀ x ∈ b, (x.sign, x.formula) ∈ signedSubfmls φ₀
 
 /-- The set of mint tags already "used" (present) on branch `b`: the subset of `mintTags φ₀`
-whose witness formula already appears somewhere on `b`. Phase 7's counting crux tracks this
+whose witness formula already appears somewhere on `b`. The counting crux below tracks this
 set's cardinality across mints. -/
 def usedTags (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex)) :
     Finset (Sign × Proposition Atom) :=
@@ -816,7 +816,7 @@ lemma usedTags_mono {φ₀ : Proposition Atom}
   exact List.any_eq_true.mpr ⟨x, h x hx, hxeq⟩
 
 /-- If `T(◇φ)@w ∈ b` and `b` satisfies the tag invariant, the tag `(pos, φ)` a mint at `sf` would
-consume is a member of `mintTags φ₀`. Consumes Phase 0's kill-test result via
+consume is a member of `mintTags φ₀`, via
 `mem_mintTags_of_diamond_mem`. -/
 lemma modalApplyOneS5w_diamondPos_tag_mem {φ₀ : Proposition Atom}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {w : WorldIndex}
@@ -839,7 +839,7 @@ lemma modalApplyOneS5w_boxNeg_tag_mem {φ₀ : Proposition Atom}
 
 /-- Bundles both mint-shape tag facts: whenever `sf ∈ b` is mint-shaped and `b` satisfies the tag
 invariant, the tag `modalApplyOneS5w` would consume on a genuine mint at `sf` is a legitimate
-member of `mintTags φ₀`. This is the fact Phase 7's counting crux needs to bound `usedTags`'s
+member of `mintTags φ₀`. This is the fact the counting crux below needs to bound `usedTags`'s
 growth by `mintTags φ₀`'s finite cardinality. -/
 theorem modalApplyOneS5w_outputs_tags {φ₀ : Proposition Atom}
     {sf : SignedFormula (Proposition Atom) WorldIndex}
@@ -980,7 +980,7 @@ theorem modalExpandBranchesS5_eq
 theorem modalTableauS5_eq (φ : Proposition Atom) :
     modalTableauS5 φ = modalTableauGen modalApplyOneS5w φ := rfl
 
-/-! ## `modalKnownWorlds` Local Re-Derivations (task 515 Phase 3)
+/-! ## `modalKnownWorlds` Local Re-Derivations
 
 `FmpMeasure.lean`'s `mem_modalKnownWorlds`/`modalKnownWorlds_mono_append` are `private` (hence
 unavailable across files). Local re-derivation, mirroring `BDriver.lean`'s established pattern
@@ -1050,8 +1050,8 @@ private lemma modalKnownWorlds_mono_append_S5
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- Local re-derivation of `FmpMeasure.lean`'s `private lemma modalKnownWorlds_fold_spec`'s
 `Nodup` conjunct (unavailable across files): the dedup-guarded `foldl` accumulator stays
-`Nodup`. Relocated ahead of Phase 6 (its original site) since Phase 4's `worldsContiguous`
-preservation (below) also needs it. -/
+`Nodup`. Relocated ahead of the tag invariant (its original site) since the linear-budget
+argument's `worldsContiguous` preservation (below) also needs it. -/
 private lemma modalKnownWorlds_fold_nodup_S5
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) (ws0 : List WorldIndex)
     (hws0 : ws0.Nodup) :
@@ -1074,7 +1074,7 @@ private lemma modalKnownWorlds_nodup_S5
     (l : List (SignedFormula (Proposition Atom) WorldIndex)) : (modalKnownWorlds l).Nodup :=
   modalKnownWorlds_fold_nodup_S5 l [] List.nodup_nil
 
-/-! ## The Counting Crux (Termination Machinery Plan v5, Phase 7)
+/-! ## The Counting Crux
 
 The load-bearing new proof: replaces the birth-key pigeonhole with a linear a-priori world
 budget over `modalApplyOneS5w`. A mint fires only when `witnessWorldS5 b s φ = none`, which is
@@ -1126,7 +1126,7 @@ potential, no pigeonhole, no powerset, no birth keys.
 This is the mechanised form of S5's **linear** single-cluster model bound `|W| = 1 + m`
 ([Goré][Gore1999], TR pp.44-45; [Blackburn-de Rijke-Venema][Blackburn2001], §6.6 p.382's `m + 1`
 selection of points), with `m := modalOps φ₀` the count of distinct mint triggers -- superseding
-the exponential birth-key pigeonhole route (archived, Phase 14). -/
+the exponential birth-key pigeonhole route (archived). -/
 theorem modalMaxWorld_lt_worldBound_of_S5w {φ₀ : Proposition Atom}
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} (hW : S5wWorldInv φ₀ b) :
     modalMaxWorld b < modalWorldBound φ₀ :=
@@ -1686,8 +1686,8 @@ lemma modalApplyOneS5w_step {φ₀ : Proposition Atom}
 
 /-- The counting-crux preservation theorem: `modalStepBranchGen modalApplyOneS5w` preserves both
 `S5wTagInv` and `S5wWorldInv` across a single step, given `accTargetsKnown` as an ambient
-invariant. `accTargetsKnown` is a necessary THIRD hypothesis beyond the plan's literal two-field
-signature -- documented deviation, not an embellishment: K's own `boxPos`/`diamondNeg`
+invariant. `accTargetsKnown` is a necessary THIRD hypothesis beyond the natural two-field
+signature -- not an embellishment: K's own `boxPos`/`diamondNeg`
 propagation shapes emit at `acc.successorsOf w`, which is unbounded by `modalMaxWorld` without
 it (see the module docstring above `S5wTagInv`). Combines `modalApplyOneS5w_step`'s per-call
 dichotomy with the tag-cardinality counting argument: a mint consumes a fresh tag (`usedTags`
@@ -1809,9 +1809,9 @@ theorem modalStepBranchS5w_preserves_worldInv {φ₀ : Proposition Atom}
     exact le_trans hmaxle (le_trans hW husedge)
   · rw [hfstc] at hsf; simp at hsf
 
-/-! ## Phase 2 Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
+/-! ## Obstruction: `RuleApplicationSpec.rankStep` Is Not Dischargeable
 
-**[BLOCKED]** (Phase 2). Attempting to discharge `RuleApplicationSpec modalApplyOneS5`
+Attempting to discharge `RuleApplicationSpec modalApplyOneS5`
 (mirroring `modalApplyOneB_spec`, `BDriver.lean`) fails at the `rankStep` field
 (`GenericDriver.lean`). This section records a fully mechanized, sorry-free counterexample
 proving the field is **mathematically false** for `modalApplyOneS5`, not merely unproved.
@@ -1912,7 +1912,7 @@ exists satisfying all three conjuncts of the field's conclusion, because any suc
 forced to agree with `s5RankCounterRank` at world `3` (`≠ modalNextWorld s5RankCounterBranch`),
 and `s5RankCounterFormula`'s depth (`2`) exceeds `s5RankCounterRank 3` (`0`) while
 `T(s5RankCounterFormula)@3` is a genuine member of the rule's persistent output. This is the
-formal record of Phase 2's `[BLOCKED]` status: the universal "propagate to every known world"
+formal record that the universal "propagate to every known world"
 S5 rule cannot be discharged against the K-style FMP `rank`-potential machinery
 `RuleApplicationSpec` presupposes, for the same underlying reason `S4`'s transitive 4-rule
 cannot (`GenericDriver.lean`'s module docstring, "S4 is explicitly NOT an instance"): both
@@ -1941,11 +1941,12 @@ theorem modalApplyOneS5_rankStep_not_dischargeable :
 
 end RankStepObstruction
 
-/-! ## R7 (Fuel Domination) Refutation (Termination Machinery Plan v5, Phase 3)
+/-! ## R7 (Fuel Domination) Refutation
 
-`FrameCompleteness.lean`'s Phase 8 scope note offers exactly two routes to close the Hintikka
-lift for the (superseded, unguarded) `modalApplyOneS5`: a driver over the keyed stepper, or a
-proof that K's own `modalFuel` already dominates the unguarded S5 expansion (**R7**). This
+`FrameCompleteness.lean`'s completeness-ingredients note offers exactly two routes to close the
+Hintikka lift for the (superseded, unguarded) `modalApplyOneS5`: a driver over the keyed
+stepper, or a proof that K's own `modalFuel` already dominates the unguarded S5 expansion
+(**R7**). This
 section refutes route (b): **it is a false statement, not merely unproved.**
 
 **Mechanism.** `T(□◇p)@0` is `.persistent` (S5's box-positive universal propagation), so it never
@@ -1968,9 +1969,9 @@ of the four steps, while `modalMaxWorld` strictly climbs `0 → 1 → 2` (one ne
 box-fire/diamond-mint cycle) -- **linear in the step count, exactly the empirically-observed
 `maxWorld = fuel/2` relationship** (independently reproduced via an interactive `#eval` session
 against the built module, matching `10 ↦ 5`, `20 ↦ 10`, `40 ↦ 20`, **not** embedded here for the
-same structural reason cited above). This is the honest disposition of the
-`FrameCompleteness.lean` Phase 8 scope note's route (b): **no fuel value can dominate this
-expansion**, because it never stops manufacturing new work.
+same structural reason cited above). This is the honest disposition of
+`FrameCompleteness.lean`'s completeness-ingredients note's route (b): **no fuel value can
+dominate this expansion**, because it never stops manufacturing new work.
 
 Reference: [D. Goré, *Tableau Methods for Modal and Temporal Logics*][Gore1999], TR p.48: "it can
 lead to an infinite chain `A ∈ w, ◇A ∈ w, ◇◇A ∈ w, …` so this system cannot give a decision
@@ -2021,8 +2022,8 @@ theorem modalApplyOneS5_hintikka_not_reachable_step4 :
 the same four steps -- one new world per two-step box-fire/diamond-mint cycle, the mechanized
 witness to the `maxWorld = fuel/2` relationship. Since the branch keeps changing (never
 stabilizes) while never saturating (part 1), **no finite fuel value yields a genuine Hintikka
-set from this entry point**: this is the false statement `FrameCompleteness.lean`'s Phase 8
-scope note's route (b) rested on.
+set from this entry point**: this is the false statement `FrameCompleteness.lean`'s
+completeness-ingredients note's route (b) rested on.
 
 This is the mechanised counterpart of the divergence [Goré][Gore1999] predicts (TR p.48) for an
 unguarded universal rule under a naive modal-depth measure: without witness reuse, the loop-check
@@ -2037,7 +2038,7 @@ end R7Refutation
 /-! ## Scope Note: Pure-K5 / Pure-5 -- Delivered Elsewhere, via a Dedicated Euclidean Closure
 
 This file delivers S5 (equivalence-frame) coverage, and — for the parts independent of the
-blocked `Phase 2 Obstruction` above (`extractModelS5` and its `RightEuclidean` exposure,
+`rankStep` obstruction above (`extractModelS5` and its `RightEuclidean` exposure,
 `FrameCompleteness.lean`) — 5/KB5 coverage **via the S5/equivalence route**: every equivalence
 relation is `Relation.RightEuclidean` (`Relation.symm_rightEuclidean_iff_trans`,
 `Cslib/Foundations/Relation/Euclidean.lean`), so a countermodel extracted as an equivalence
@@ -2068,11 +2069,11 @@ below remains correct and unaffected by any of this: `EuclGen` lives in
 `SymmGen`/`EqvGen`'s placement in `Confluence.lean` -- **do not** introduce a custom `EuclGen`
 closure operator in this file. -/
 
-/-! ## `RuleApplicationSpecCore` for `modalApplyOneS5w` (task 515 Phase 9)
+/-! ## `RuleApplicationSpecCore` for `modalApplyOneS5w`
 
 Discharges `RuleApplicationSpecCore modalApplyOneS5w` (`GenericDriver.lean`): the nine
 Hintikka/saturation-forcing fields, dropping the three (`rankStep`/`outDegStep`/
-`knownWorldsStep`) the Phase 2 obstruction above proves unreachable for any S5 rule. Every field
+`knownWorldsStep`) the `rankStep` obstruction above proves unreachable for any S5 rule. Every field
 reduces along the two-layer agreement chain `modalApplyOneS5w → modalApplyOneS5 → modalApplyOne`
 (`modalApplyOneS5w_eq_of_not_mint_shape`, `modalApplyOneS5_eq_of_not_boxPos_diaNeg`): outside the
 four modal shapes (S5's own two propagation shapes `T(□φ)@w`/`F(◇φ)@w`, S5w's own two
@@ -2497,7 +2498,7 @@ At the reuse arm (`witnessWorldS5 b .pos φ = some w'`), `modalApplyOneS5w` emit
 `.linear [⟨.pos, φ, w'⟩]` with edge `w → w'` -- witnessed directly by `w'` itself. At the mint
 arm (`none`), falls through to `modalApplyOneS5` (not one of S5's own propagation shapes), hence
 to K's own `modalApplyOne_diamondPos_witness`, whose concrete `modalNextWorld b` witness
-instantiates the existential. **COMPILED IN RESEARCH** sorry-free (axioms
+instantiates the existential. Sorry-free (axioms
 `[propext, Quot.sound]`). -/
 private lemma modalApplyOneS5w_diaPosWitness'
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
@@ -2541,11 +2542,11 @@ private lemma modalApplyOneS5w_boxNegWitness'
     simp only [heq]
     exact ⟨modalNextWorld b, hsnd, rest, hfst⟩
 
-/-- **`modalApplyOneS5w` satisfies `RuleApplicationSpecCore`** (task 515 Phase 9): the
+/-- **`modalApplyOneS5w` satisfies `RuleApplicationSpecCore`**: the
 witness-reuse rule discharges every field the Hintikka/saturation machinery needs, even though
-(Phase 2's mechanized counterexample above) it cannot discharge the full `RuleApplicationSpec`
-(`rankStep` fails). This is the interface witness the eventual parametric Hintikka lift
-(Phase 12) will consume to get S5's completeness chain for free, mirroring T's/B's own
+(the mechanized counterexample above) it cannot discharge the full `RuleApplicationSpec`
+(`rankStep` fails). This is the interface witness an eventual parametric Hintikka lift
+would consume to get S5's completeness chain for free, mirroring T's/B's own
 `RuleApplicationSpec` witnesses (`TDriver.lean`/`BDriver.lean`) at the weaker Core level. -/
 theorem modalApplyOneS5w_specCore :
     RuleApplicationSpecCore (Atom := Atom) modalApplyOneS5w where

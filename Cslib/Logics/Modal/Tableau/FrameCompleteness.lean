@@ -4156,6 +4156,90 @@ instance instDecidableKb5Valid (φ₀ : Proposition Atom) : Decidable (kb5Valid 
   | .closed => .isTrue ((kb5Valid_decides φ₀).mp h)
   | .openBranch _ _ => .isFalse (fun hv => by rw [modalTableauKb5''_complete φ₀ hv] at h; cases h)
 
+/-! ## S4Keyed Completeness (`modalTableauS4Keyed_complete`)
+
+This is the completeness half of the keyed S4 loop-checking driver, retained from v2 Phase 11 (the
+decidability half, `s4Valid_decides`/`instDecidableS4Valid`, is deferred: it needs the soundness
+line, which is out of scope -- see `plans/03_completeness-line-rescope.md`).
+
+Assembled from `modalExpandBranchesS4Keyed_hintikka` (`LoopChecking.lean`, the keyed top-loop
+Hintikka lemma, already bridged to the concrete `modalHintikkaSetS4` form via
+`hintikka_congr_S4`/`modalHintikkaSetS4_eq` internally) plus `modalOpenBranchS4_countermodel`
+above. Mirrors `modalTableauS5_complete`, but needs its own initial-membership lemma (the
+`F(φ0)@0 ∈ b` fact) since `modalExpandBranchesS4Keyed` is a bespoke driver, not an instance of
+`modalExpandBranchesGen`, so `modalExpandBranchesGen_openBranch_initial_mem` does not apply. -/
+
+private lemma modalTableauS4Keyed_initial (φ₀ : Proposition Atom) :
+    S4LoopInv φ₀ [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+        Accessibility.empty [(0, (∅ : Finset (Sign × Proposition Atom)))] ∧
+      S4KeyedHintikkaInv φ₀ [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []
+        Accessibility.empty [(0, (∅ : Finset (Sign × Proposition Atom)))] ∧
+      (∀ w k, (w, k) ∈ [((0 : WorldIndex), (∅ : Finset (Sign × Proposition Atom)))] →
+        w ∈ modalKnownWorlds
+          [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)]) ∧
+      worldsContiguousS4 [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] := by
+  have hmemU : (⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalUniverseS4 φ₀ := by
+    simp only [modalUniverseS4, List.mem_flatMap, List.mem_range]
+    exact ⟨0, Nat.succ_pos _, φ₀, modalSubfmls_self_mem φ₀, by simp⟩
+  have hknownW : modalKnownWorlds
+      [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] = [0] := by
+    simp [modalKnownWorlds]
+  refine ⟨⟨?_, List.nodup_nil, ?_, accFreshInv_empty _, ?_, ?_, ?_, ?_, ?_, ?_⟩,
+      ⟨?_, ?_, ?_, ?_, ?_⟩, ?_, ?_⟩
+  · intro x hx
+    simp only [List.mem_singleton] at hx
+    subst hx
+    exact hmemU
+  · intro x hx
+    simp at hx
+  · intro w w' hedge
+    simp only [Accessibility.empty, Accessibility.hasEdge, List.any_nil] at hedge
+    exact absurd hedge (by decide)
+  · intro w
+    simp [outDeg, Accessibility.successorsOf, Accessibility.empty]
+  · intro w hw
+    rw [hknownW] at hw
+    simp only [List.mem_singleton] at hw
+    subst hw
+    exact ⟨∅, by simp⟩
+  · intro w k hwk
+    simp only [List.mem_singleton, Prod.mk.injEq] at hwk
+    obtain ⟨-, hk⟩ := hwk
+    subst hk
+    exact Finset.empty_subset _
+  · intro w w' k k' hwk hwk' hne
+    simp only [List.mem_singleton, Prod.mk.injEq] at hwk hwk'
+    exact absurd (hwk.1.trans hwk'.1.symm) hne
+  · intro w k hwk
+    simp only [List.mem_singleton, Prod.mk.injEq] at hwk
+    obtain ⟨-, hk⟩ := hwk
+    subst hk
+    exact Finset.empty_subset _
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+  · intro sf hsf
+    simp at hsf
+  · intro w k hwk
+    simp only [List.mem_singleton, Prod.mk.injEq] at hwk
+    rw [hknownW]
+    simp only [List.mem_singleton]
+    exact hwk.1
+  · intro w hw
+    have hmax : modalMaxWorld
+        [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] = 0 := by
+      simp [modalMaxWorld]
+    rw [hmax] at hw
+    rw [hknownW]
+    simp only [List.mem_singleton]
+    exact Nat.le_zero.mp hw
+
 end Cslib.Logic.Modal.Tableau
 
 end

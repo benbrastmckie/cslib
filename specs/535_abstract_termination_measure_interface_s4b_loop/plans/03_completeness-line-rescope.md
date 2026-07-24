@@ -745,7 +745,7 @@ The `Sign` constructor-order gotcha (`pos` first) applies to every new case spli
   a maybe-needed Phase 8 follow-up) was not available, so a direct territory-local
   `_none_saturated` re-derivation against the keyed 4-tuple stepper was added instead.
 
-### Phase 11: Completeness — `modalTableauS4Keyed_complete` [NOT STARTED]
+### Phase 11: Completeness — `modalTableauS4Keyed_complete` [IN PROGRESS]
 
 - **Goal:** Land the task's closing deliverable: an open branch from the keyed driver yields a
   countermodel refuting `φ`. **Scope note**: this is the completeness half of v2 Phase 11 only. The

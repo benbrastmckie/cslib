@@ -4738,16 +4738,23 @@ def modalExpandBranchesS4Keyed
     processNext branches expandedSets accs keyss [] [] [] []
 
 /-- The keyed S4 modal tableau decision procedure: the entry point for the bespoke keyed driver,
-mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with `keys := []`
-at the start (no world has been born yet). Fuel is `modalFuelS4 φ`, the S4-specific fuel bound
-(sufficiency: `modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT provably
-sufficient for the S4 keyed loop's pigeonhole world bound `modalWorldBoundS4`. The live
-`modalTableauS4` is NOT redefined; `instDecidableS4Valid` (Phase 11) points at this declaration
-instead. -/
+mirroring `modalTableauGen`/`modalTableauS4`'s entry-branch shape (`F(φ)@0`), with
+`keys := [(0, ∅)]` at the start: the root world `0` is pre-existing (not minted), so it is seeded
+with the trivial (empty) birth key rather than left absent from `keys`. **Correction (Phase 11):**
+an earlier version of this entry used `keys := []`; that violates `S4LoopInv.keysTotal` (every
+known world has a recorded key) since `0 ∈ modalKnownWorlds [F(φ)@0]` from the very first
+formula's label, and no step ever mints world `0` again to backfill a key for it. Seeding `(0, ∅)`
+satisfies `keysTotal` trivially (`∅ ⊆ relevantSetFinset φ₀ b 0` and `∅ ⊆ signedSubfmls φ₀` both
+hold unconditionally) and is invisible to every Phase 1-10 lemma, all of which are stated for an
+arbitrary `keys` list. Fuel is `modalFuelS4 φ`, the S4-specific fuel bound (sufficiency:
+`modalExpMeasure_entry_le_fuelS4`) -- K's `modalFuel φ` is confirmed NOT provably sufficient for
+the S4 keyed loop's pigeonhole world bound `modalWorldBoundS4`. The live `modalTableauS4` is NOT
+redefined; `instDecidableS4Valid` (deferred) would point at this declaration instead. -/
 def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
   let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
     [⟨.neg, φ, 0⟩]
-  modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty] [[]] (modalFuelS4 φ)
+  modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty]
+    [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)
 
 /-! ## Congruence Gate: `hintikka_congr_S4`
 

@@ -1875,6 +1875,17 @@ theorem sigAt_cons_self_imp {Atom : Type u} {G : Graph Atom} (hforest : IsDeriva
     ⟨.ax [] _ (.andE2 (P0.and boxG) C)⟩
   exact cs5_deriv_imp_and (cs5_deriv_imp_and hCd hP0d) hboxGd
 
+/-- **`NIK.impI`'s core translation.** From the IH `⊢ (sigAt G ((x∶A)::Γ) hfin x) ⊃ B` (the
+extended-context premise `NIK.impI` discharges), derive `⊢ (sigAt G Γ hfin x) ⊃ (A⊃B)`, via
+`sigAt_cons_self_imp` (building `Q` from `P` and `A`) composed with the IH under a shared prefix
+(`cs5_deriv_imp_trans_under`). -/
+theorem sigAt_impI {Atom : Type u} {G : Graph Atom} (hforest : IsDerivationForest G)
+    {Γ : List (LabelledFormula Atom)} {x : Label Atom} {A B : Proposition Atom}
+    (hfin : G.X.Finite)
+    (hIH : Derivable CS5ModalAxiom ((sigAt G ((x ∶ A) :: Γ) hfin x).imp B)) :
+    Derivable CS5ModalAxiom ((sigAt G Γ hfin x).imp (A.imp B)) :=
+  cs5_deriv_imp_trans_under (sigAt_cons_self_imp hforest hfin) (cs5_deriv_imp_of_derivable _ hIH)
+
 end Cslib.Logic.Modal.Labelled
 
 end

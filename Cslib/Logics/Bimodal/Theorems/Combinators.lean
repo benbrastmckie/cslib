@@ -54,9 +54,6 @@ Delegation to generic Foundations theorems uses:
 Ported from BimodalLogic/Theories/Bimodal/Theorems/Combinators.lean
 -/
 
-set_option linter.style.emptyLine false
-set_option linter.style.longLine false
-
 @[expose] public section
 
 namespace Cslib.Logic.Bimodal.Theorems.Combinators
@@ -79,7 +76,8 @@ def impTrans {fc : FrameClass} {A B C : Formula Atom}
     (h2 : DerivationTree fc [] (B.imp C)) : DerivationTree fc [] (A.imp C) :=
   -- bCombinator: ⊢ (B→C) → (A→B) → (A→C) at Base, lifted to fc
   let curried := DerivationTree.lift (FrameClass.base_le fc)
-    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
+    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator
+      _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
   DerivationTree.modus_ponens [] _ _
     (DerivationTree.modus_ponens [] _ _ curried h2) h1
 
@@ -105,7 +103,8 @@ B combinator (composition): `⊢ (B → C) → (A → B) → (A → C)`.
 def bCombinator {fc : FrameClass} {A B C : Formula Atom} :
     DerivationTree fc [] ((B.imp C).imp ((A.imp B).imp (A.imp C))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
+    ((@_root_.Cslib.Logic.Theorems.Combinators.b_combinator
+      _ _ _ Bimodal.HilbertTM _ _ A B C).toDerivation)
 
 /--
 Flip combinator (C): `⊢ (A → B → C) → (B → A → C)`.
@@ -137,7 +136,8 @@ Pairing combinator: `⊢ A → B → A ∧ B`.
 def pairing {fc : FrameClass} (A B : Formula Atom) :
     DerivationTree fc [] (A.imp (B.imp (A.and B))) :=
   DerivationTree.lift (FrameClass.base_le fc)
-    ((@_root_.Cslib.Logic.Theorems.Combinators.pairing _ _ _ Bimodal.HilbertTM _ _ A B).toDerivation)
+    ((@_root_.Cslib.Logic.Theorems.Combinators.pairing
+      _ _ _ Bimodal.HilbertTM _ _ A B).toDerivation)
 
 /--
 Double negation introduction: `⊢ A → ¬¬A`.
@@ -161,7 +161,8 @@ def combineImpConj {fc : FrameClass} {R A B : Formula Atom}
   -- Then ImplyS to combine with hB
   let h1 := impTrans hA (pairing A B)
   let s := DerivationTree.axiom (fc := fc) [] _ (Axiom.imp_k R B (A.and B)) (FrameClass.base_le fc)
-  let h2 := DerivationTree.modus_ponens [] (R.imp (B.imp (A.and B))) ((R.imp B).imp (R.imp (A.and B))) s h1
+  let h2 := DerivationTree.modus_ponens [] (R.imp (B.imp (A.and B)))
+    ((R.imp B).imp (R.imp (A.and B))) s h1
   DerivationTree.modus_ponens [] (R.imp B) (R.imp (A.and B)) h2 hB
 
 /--
@@ -181,8 +182,10 @@ Derived TF theorem: `□φ → G(□φ)`.
 -/
 def tempFutureDerived {fc : FrameClass} (φ : Formula Atom) :
     DerivationTree fc [] ((Formula.box φ).imp (Formula.allFuture (Formula.box φ))) :=
-  let mf_box := DerivationTree.axiom [] _ (Axiom.modal_future (Formula.box φ)) (FrameClass.base_le fc)
-  let t_G_box := DerivationTree.axiom [] _ (Axiom.modal_t (Formula.allFuture (Formula.box φ))) (FrameClass.base_le fc)
+  let mf_box := DerivationTree.axiom [] _
+    (Axiom.modal_future (Formula.box φ)) (FrameClass.base_le fc)
+  let t_G_box := DerivationTree.axiom [] _
+    (Axiom.modal_t (Formula.allFuture (Formula.box φ))) (FrameClass.base_le fc)
   let chain1 := impTrans mf_box t_G_box
   let m4 := DerivationTree.axiom [] _ (Axiom.modal_4 φ) (FrameClass.base_le fc)
   impTrans m4 chain1

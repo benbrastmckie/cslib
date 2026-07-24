@@ -114,14 +114,14 @@ the six files whose suppressions are entirely DEAD.
 
 ---
 
-### Phase 2: Combinators — wrap long lines, drop suppressions [NOT STARTED]
+### Phase 2: Combinators — wrap long lines, drop suppressions [COMPLETED]
 
 **Goal**: Wrap the 6 over-length lines in Combinators so no line exceeds 100 Unicode columns, then
 drop the `longLine` (real) and `emptyLine` (dead) file-scoped suppressions.
 
 **Tasks**:
-- [ ] Locate and wrap the 6 long lines (report original numbering: L82, L108, L140, L164, L184, L185; column counts 108/108/101/107/102/118). Break at whitespace-safe points; these lines span multiple declarations so file-scoped `longLine` cannot be narrowed to a single `... in`.
-- [ ] Delete the file-scoped `linter.style.emptyLine` (dead) and `linter.style.longLine` suppressions.
+- [x] Locate and wrap the 6 long lines (report original numbering: L82, L108, L140, L164, L184, L185; column counts 108/108/101/107/102/118). Break at whitespace-safe points; these lines span multiple declarations so file-scoped `longLine` cannot be narrowed to a single `... in`.
+- [x] Delete the file-scoped `linter.style.emptyLine` (dead) and `linter.style.longLine` suppressions.
 
 **Timing**: 30 minutes
 

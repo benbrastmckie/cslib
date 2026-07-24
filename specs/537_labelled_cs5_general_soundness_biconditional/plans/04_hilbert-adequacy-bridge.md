@@ -264,7 +264,42 @@ The orchestrator heading-scan picks the first non-`[COMPLETED]` phase: **Phase 8
 - **Do NOT re-plan or re-derive.** Preserved Asset. Off the P3 critical path; reusable by the Phase
   11 fallback's modal cases.
 
-### Phase 8: Labelled-to-Hilbert adequacy bridge nik_TS5_to_hilbert [NOT STARTED]
+### Phase 8: Labelled-to-Hilbert adequacy bridge nik_TS5_to_hilbert [BLOCKED]
+
+**Dispatch finding (2026-07-24, sess_1784905751_756cda_537).** A source pass on Simpson Ch. 6
+(`~/Projects/Literature/simpson_1994_intuitionisticmodallogic/...reflowed.md:943-1073`) confirms
+this bridge is exactly Simpson's Lemma 6.1.2 (`Γ ⊢_G x:A` ⟹ `(Γ⊢_G x:A)^T` a theorem of `IK`,
+via the recursive tree-translation of Fig. 6-1/6-2) plus Theorem 6.2.1/Lemma 6.2.3's extension to
+`Ax(𝒯)` for `𝒯 = {χ_T,χ_B,χ_4}` (matching `TS5`/`CS5ModalAxiom`=`IKTB4`). Before writing the
+general tree-recursive infrastructure (which does not exist anywhere in the codebase and is a
+genuinely large undertaking -- Simpson's own construction indexes the translation by a label's
+**tree-depth from the root**, nesting one more `⊃□(...)` per level, Fig. 6-1/6-2), two candidate
+*simplified* translations exploiting `IKTB4`'s `□A ↔ □□A` (T+4) box-nesting collapse were tried
+and checked, machine-groundable via basic, universal facts about ALL normal modal Hilbert systems
+(true regardless of `CS5ModalAxiom`'s specific T/B/4 axioms, so no further live check needed):
+1. **Split-by-label flat translation** (`Cx(Γ)` unboxed, `C¬x(Γ)` single-boxed): fails at
+   `orE`/`efq` because moving from a proof "at label x" to "at label y" (x≠y) requires **re-boxing
+   an already-`T`-unboxed hypothesis**, which is unsound in any normal modal logic (necessitation
+   is a rule on empty-context theorems only, never on assumptions).
+2. **Fully-boxed flat translation** (`□(BigConj Γ) → □A` throughout): fails at `orE` because it
+   needs `□(A∨B) → (□A ∨ □B)` to case-split under a box, which is **not a theorem of any normal
+   modal logic K or its extensions** (K itself refutes this; T/B/4/5 do not add it) -- confirmed
+   by a `cs5FCIncest`+`CKValidFC` two-point countermodel (`World:=Bool`, `r:=fun _ _ => True`,
+   atoms `p:=true`/`q:=false` s.t. `A∨B` holds everywhere but neither `A` nor `B` is `□`-forced
+   anywhere).
+Both obstructions are genuine (not merely unexplored), and land on **exactly the same "cross-label
+efq/orE" residual** the direct route's Phase 8 (plan v3) hit, now on the Hilbert-provability side
+rather than the semantic-forcing side. The FAITHFUL construction (Simpson's actual tree-depth-
+indexed translation with Fig. 6-2 dissection) is estimated at 300-600+ new lines (tree/subtree
+data structure, recursive translation function, 12-constructor main lemma) -- substantially past
+the original 150-300 line estimate once these proof-theoretic subtleties are accounted for, and
+was not attempted in Lean this dispatch given the budget cap and the sanctioned Phase 11 fallback.
+**Per the plan's own contingency structure ("Contingency sub-gate: budget overrun → Phase 11")**,
+this phase is marked `[BLOCKED]` (not a task-terminal blocker -- the plan's sanctioned pivot) and
+work proceeds to **Phase 11 (fallback route PD)**. No `sorry`, no new axiom, no vacuous
+placeholder; nothing in `Soundness.lean` was modified for this phase (analysis-only, per the
+"machine-check before escalating" requirement -- the two obstructions above are grounded in
+universal modal-logic facts, not hand-waved).
 
 This is the sole concentrated-risk phase of the P3 route (report 04: ~70% closable; "known-shape"
 proof-theory that task 517 deferred as "THE TRUE CRUX"). It carries the budget cap and the sole
@@ -342,7 +377,7 @@ route to the Phase 11 fallback.
 - **Zero-debt contract:** no `sorry`, no new axiom, no weakening, no regression.
 - **Verification / Done when:** all checks above pass; the Simpson 8.1.4 biconditional is complete.
 
-### Phase 11: Fallback route PD — direct existential-teleport induction (contingency only) [NOT STARTED]
+### Phase 11: Fallback route PD — direct existential-teleport induction (contingency only) [IN PROGRESS]
 
 - **Goal:** If — contra the ~70% estimate — the Phase 8 Hilbert bridge genuinely overruns budget
   across dispatches (or a concrete defect in it emerges), obtain `nik_TS5_soundness` instead via the

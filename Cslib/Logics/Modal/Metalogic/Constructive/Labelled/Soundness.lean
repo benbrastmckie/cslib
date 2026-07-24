@@ -489,6 +489,58 @@ theorem dia_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
   | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
   | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
 
+/-! ## `botForces` connectivity-invariance (fallback route PD, Phase 11.PD.1)
+
+`botForces` is `r`-connectivity-invariant under `cs5FCIncest` + the `CKValidFC` explosion
+conditions: it propagates FORWARD along any `r`-edge via `bf_r` (an explosion condition, not part
+of `cs5FCIncest`), and -- the genuinely new content here -- BACKWARD too, via `cs5FCIncest`'s
+`cs5Incest` conjunct. This closes the *connected* sub-case of `NIK.efq`'s cross-label soundness
+gap (see the module docstring's "The cross-label `efq`/`orE` soundness gap"): if the premise's
+`⊥`-label and the conclusion's label are `TClosure`-related, `botForces` transports between them
+and `ckforces_of_exploding` finishes. It does **not** close the case where the two labels are
+`r`-disconnected -- that residual is `Phase 11.PD.3`. -/
+
+/-- **`botForces` propagates backward along an `r`-edge.** Dual to the forward explosion
+condition `bf_r` (`botForces w → r w u → botForces u`, `CKValidFC`'s explosion clause): given
+`botForces` already at the *target* `u` of an edge `r w u`, `cs5Incest` supplies a `≤`-raised
+witness `u' ≥ u` with `r u' w` (landing back at the *source* `w`); `botForces` is upward-closed
+(`bf_uc`) so it survives the raise to `u'`, then `bf_r` propagates it forward along `r u' w` to
+land at `w`. -/
+theorem bot_backward {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {botForces : World → Prop} (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    {w u : World} (hbot : botForces u) (hwu : r w u) : botForces w := by
+  obtain ⟨_, _, _, _, hincest⟩ := hfc
+  obtain ⟨u', huu', hu'w⟩ := hincest hwu
+  exact bf_r (bf_uc huu' hbot) hu'w
+
+/-- **`botForces` is `r`-edge-invariant.** Forward via `bf_r` (the explosion condition itself);
+backward via `bot_backward`. -/
+theorem bot_iff_edge {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {botForces : World → Prop} (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    {w u : World} (hwu : r w u) : botForces w ↔ botForces u :=
+  ⟨fun hw => bf_r hw hwu, fun hu => bot_backward hfc bf_uc bf_r hu hwu⟩
+
+/-- **`botForces` is invariant over the whole `TClosure {T,B,Four}` class.** Copies
+`box_iff_TClosure`'s skeleton (`base` reduces to `bot_iff_edge` via the raw edge-cond invariant;
+`refl`/`symm`/`trans` are the trivial `Iff` closure; `eucl` is vacuous since `Five ∉ TS5`). -/
+theorem bot_iff_TClosure {Atom : Type u} {World : Type v} [Preorder World]
+    {r : World → World → Prop} (hfc : cs5FCIncest r)
+    {botForces : World → Prop} (bf_uc : ∀ {w w' : World}, w ≤ w' → botForces w → botForces w')
+    (bf_r : ∀ {w u : World}, botForces w → r w u → botForces u)
+    {R : Label Atom → Label Atom → Prop} {ρ : Label Atom → World}
+    (hedge : ∀ a b, R a b → r (ρ a) (ρ b)) {x y : Label Atom} (hxy : TClosure TS5 R x y) :
+    botForces (ρ x) ↔ botForces (ρ y) := by
+  induction hxy with
+  | base h => exact bot_iff_edge hfc bf_uc bf_r (hedge _ _ h)
+  | refl _ _ => exact Iff.rfl
+  | symm _ _ ih => exact ih.symm
+  | trans _ _ _ ihxy ihyz => exact ihxy.trans ihyz
+  | eucl h _ _ _ _ => exact absurd h (by rintro (h | h | h) <;> exact GeomAxiom.noConfusion h)
+
 /-! ## Single-node interpretation-raise step (Simpson Lifting Lemma 8.1.3 inductive step,
 chunks 0154-0155)
 

@@ -282,6 +282,10 @@ later phases share the identical definition. Two components, each with its own p
   needs (`cs5_symmetric_tail_box_gap`, `CS5.lean:686`), pre-saturated by `modalDeductiveClosure`
   (`Intuitionistic/PrimeTheory.lean:78`) so that later exclusion arguments see a deductively
   closed tail rather than the bare box-inverse set. -/
+
+/-- The two-sided seed for the pair construction over a head `H`: the left-tagged image of `H`
+itself, together with the right-tagged image of the `CS5`-deductive closure of `H`'s box-inverse.
+Every downstream seed-exclusion statement refers to this set. -/
 def cs5PairSeed (H : Set (Proposition Atom)) : Set (Proposition (Atom ⊕ Atom)) :=
   cs5PairTauL '' H ∪ cs5PairTauR '' (modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H))
 

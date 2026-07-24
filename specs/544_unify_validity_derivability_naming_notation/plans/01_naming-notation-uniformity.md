@@ -214,25 +214,31 @@ reorganization, keeping the 57 existing sites compiling via a deprecated alias.
 - Scoped `lake build Cslib.Logics.Modal` and `lake build Cslib.Logics.Bimodal` succeed.
 - No import cycle (alias stays in `DerivationTree.lean`; no new imports added).
 
-### Phase 5: Conservativity naming standardization (item 6) [NOT STARTED]
+### Phase 5: Conservativity naming standardization (item 6) [COMPLETED]
 
 **Goal**: Standardize the 18 `<sys>_conservative_extension` theorems on the more-informative
 `<extending>_conservative_over_<base>` scheme, fixing the two off-pattern names.
 
 **Tasks**:
-- [ ] Rename the 18 `<sys>_conservative_extension` theorems to `<sys>_conservative_over_cpl`,
+- [x] Rename the 18 `<sys>_conservative_extension` theorems to `<sys>_conservative_over_cpl`,
       verifying each theorem's stated base is CPL (via `Tautology`/`toModal`) before assigning
-      `_cpl`.
-- [ ] Fix the bare outlier: `Systems/K/ConservativeExtension.lean:24`
+      `_cpl` *(17 distinct theorem declarations found via repo-wide word-boundary grep across
+      the 15 Modal Systems/*/ConservativeExtension.lean files + Bimodal + Temporal; all renamed;
+      the plan's "18" count appears to be a minor overcount in the research report -- no 18th
+      site exists)*.
+- [x] Fix the bare outlier: `Systems/K/ConservativeExtension.lean:24`
       `modal_conservative_extension` → `k_conservative_over_cpl`.
-- [ ] Fix `Bimodal/…/PropositionalConservativity.lean:97` `bimodal_conservative_extension` →
+- [x] Fix `Bimodal/…/PropositionalConservativity.lean:97` `bimodal_conservative_extension` →
       `bimodal_conservative_over_cpl`.
-- [ ] Fix `Temporal/ConservativeExtension.lean:61` `temporal_conservative_extension` →
+- [x] Fix `Temporal/ConservativeExtension.lean:61` `temporal_conservative_extension` →
       `temporal_conservative_over_cpl`.
-- [ ] Update each theorem's (mostly single) references; leave the `…/ConservativeExtension.lean`
+- [x] Update each theorem's (mostly single) references; leave the `…/ConservativeExtension.lean`
       file names unchanged.
-- [ ] Do NOT rename the already-compliant Scheme 2 names landed by the fragment work
-      (`bimodal_conservative_over_s5`, `cpl_conservative_over_imp`, etc.).
+- [x] Do NOT rename the already-compliant Scheme 2 names landed by the fragment work
+      (`bimodal_conservative_over_s5`, `cpl_conservative_over_imp`, etc.) *(the generic
+      `conservative_over_cpl` combinator in ConservativityLift.lean, called by
+      `bimodal_conservative_over_cpl`'s proof, is a distinct pre-existing declaration and was
+      left untouched)*.
 
 **Timing**: 50 min
 

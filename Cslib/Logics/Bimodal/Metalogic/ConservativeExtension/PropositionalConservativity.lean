@@ -25,7 +25,7 @@ derivable in CPL.
 
 - `bimodal_truthAt_toBimodal_iff_evaluate`: Semantic bridge between Bimodal truthAt of
   propositional translations and PL evaluation.
-- `bimodal_conservative_extension`: TM is a conservative extension of CPL.
+- `bimodal_conservative_over_cpl`: TM is a conservative extension of CPL.
 
 ## Proof Strategy
 
@@ -94,7 +94,7 @@ Proof:
 3. The semantic bridge lemma `bimodal_truthAt_toBimodal_iff_evaluate` converts this to
    `PL.Evaluate v φ` for any valuation `v`.
 4. CPL completeness (`prop_completeness`) then gives CPL derivability of `φ`. -/
-theorem bimodal_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem bimodal_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Cslib.Logic.Bimodal.Bimodal.ThDerivable φ.toBimodal) :
     PL.Derivable PropositionalAxiom φ := by
   apply conservative_over_cpl

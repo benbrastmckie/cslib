@@ -18,7 +18,7 @@ it consolidates the monotonicity results of `MinimalLatticeMonotonicity.lean`,
 `IntuitionisticLatticeMonotonicity.lean`, `ConstructiveLatticeMonotonicity.lean`,
 `PropositionalStrengthMonotonicity.lean`, and the classical `Conservativity.lean` into a
 single documented lattice map, and re-exposes the already-proved Axis-C
-modal-over-propositional conservative extension (`modal_conservative_extension`,
+modal-over-propositional conservative extension (`k_conservative_over_cpl`,
 `Systems/K/ConservativeExtension.lean`) under this module for discoverability.
 
 ## The Three-Axis Framing
@@ -165,12 +165,12 @@ theorem cs5Derivable_implies_s5Derivable (h : Derivable (@CS5ModalAxiom Atom) φ
 
 /-- **Axis C reuse**: modal `K` is a conservative extension of CPL — re-exposed here from
 `Systems/K/ConservativeExtension.lean` under the modularity synthesis for discoverability.
-The proof is the reused Axis-C result verbatim (`modal_conservative_extension`); this module
+The proof is the reused Axis-C result verbatim (`k_conservative_over_cpl`); this module
 does not reprove it. -/
 theorem axisC_k_conservative_over_cpl {φ : PL.Proposition Atom}
     (h : Derivable (@KAxiom Atom) φ.toModal) :
     PL.Derivable PL.PropositionalAxiom φ :=
-  modal_conservative_extension h
+  k_conservative_over_cpl h
 
 end Cslib.Logic.Modal
 

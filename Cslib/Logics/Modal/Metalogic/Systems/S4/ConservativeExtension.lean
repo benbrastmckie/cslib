@@ -22,7 +22,7 @@ open PL Cslib.Logic.Modal
 /-- Modal S4 is a conservative extension of CPL: if `φ.toModal` is S4-derivable then `φ` is
 CPL-derivable. Instantiates `modal_conservative_extension_param` with `s4_soundness`
 (reflexivity: `fun _ => trivial`, transitivity: `fun _ _ _ _ _ => trivial`). -/
-theorem s4_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem s4_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Derivable (@S4Axiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
   modal_conservative_extension_param h fun _ => by

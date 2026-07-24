@@ -22,7 +22,7 @@ open PL Cslib.Logic.Modal
 /-- Modal B is a conservative extension of CPL: if `φ.toModal` is B-derivable then `φ` is
 CPL-derivable. Instantiates `modal_conservative_extension_param` with `b_soundness`
 (symmetry: `fun _ _ _ => trivial`). -/
-theorem b_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem b_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Derivable (@BAxiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
   modal_conservative_extension_param h fun _ => by

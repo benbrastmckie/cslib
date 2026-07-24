@@ -22,7 +22,7 @@ open PL Cslib.Logic.Modal
 /-- Modal S5 is a conservative extension of CPL: if `φ.toModal` is S5-derivable then `φ` is
 CPL-derivable. Instantiates `modal_conservative_extension_param` with `s5_soundness`
 (reflexivity: `fun _ => trivial`, transitivity and Euclideanness: `fun _ _ _ _ _ => trivial`). -/
-theorem s5_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem s5_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Derivable (@S5Axiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
   modal_conservative_extension_param h fun _ => by

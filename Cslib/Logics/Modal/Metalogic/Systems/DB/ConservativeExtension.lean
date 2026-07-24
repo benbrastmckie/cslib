@@ -22,7 +22,7 @@ open PL Cslib.Logic.Modal
 /-- Modal DB is a conservative extension of CPL: if `φ.toModal` is DB-derivable then `φ` is
 CPL-derivable. Instantiates `modal_conservative_extension_param` with `db_soundness`
 (seriality: `⟨fun w => ⟨w, trivial⟩⟩`, symmetry: `fun _ _ _ => trivial`). -/
-theorem db_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem db_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Derivable (@DBAxiom Atom) φ.toModal) :
     PL.Derivable PropositionalAxiom φ :=
   modal_conservative_extension_param h fun _ => by

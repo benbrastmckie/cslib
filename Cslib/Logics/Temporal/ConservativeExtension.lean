@@ -23,7 +23,7 @@ formula `φ` that is derivable in BX (as `φ.toTemporal`) is already derivable i
 
 - `temporal_satisfies_toTemporal_iff_evaluate`: Semantic bridge between Temporal satisfaction
   of propositional translations and PL evaluation.
-- `temporal_conservative_extension`: BX is a conservative extension of CPL.
+- `temporal_conservative_over_cpl`: BX is a conservative extension of CPL.
 
 ## References
 
@@ -58,7 +58,7 @@ If the temporal translation `φ.toTemporal` is BX-derivable, then `φ` is CPL-de
 Proof: BX soundness (on `ℤ` as a linear order with no max/min) gives temporal satisfaction
 of `φ.toTemporal`; the semantic bridge gives tautologyhood of `φ`; CPL completeness gives
 derivability. -/
-theorem temporal_conservative_extension {Atom : Type*} {φ : PL.Proposition Atom}
+theorem temporal_conservative_over_cpl {Atom : Type*} {φ : PL.Proposition Atom}
     (h : Temporal.ThDerivable φ.toTemporal) :
     Derivable PropositionalAxiom φ :=
   conservative_over_cpl

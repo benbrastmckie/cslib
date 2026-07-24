@@ -1985,6 +1985,40 @@ theorem sigAtFuel_mono_context {Atom : Type u} {G : Graph Atom}
           (bigAndL_imp_of_pointwise (fun c _ =>
             cs5_deriv_box_mono (sigAtFuel_mono_context hΓΔ hfin n c))))
 
+/-- **`sigAtFuel` monotonicity in the fuel parameter**: extra fuel only ever ADDS conjuncts
+(descends one level further before truncating), so it always DERIVABLY IMPLIES the smaller-fuel
+truncation -- `Derivable((sigAtFuel (n+1) z).imp (sigAtFuel n z))`, unconditionally, no
+sufficiency side-condition needed (unlike an *equality* between fuel values, which would need a
+genuine sufficiency bound). This is the tool that reconciles a `sigAt`-unfold's internally-used
+*reduced* fuel (one less than the global constant, for each level descended) with the *canonical*
+`sigAt` (global fuel) that `nikTrFuel`'s antecedent uses for off-spine siblings -- avoiding the
+harder fuel-sufficiency *equality* lemma flagged (but not needed) since Phase 8.1. -/
+theorem sigAtFuel_mono_fuel {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) :
+    ∀ (n : ℕ) (z : Label Atom),
+      Derivable CS5ModalAxiom ((sigAtFuel G Γ hfin (n + 1) z).imp (sigAtFuel G Γ hfin n z))
+  | 0, z => by
+      simp only [sigAtFuel]
+      exact ⟨.ax [] _ (.andE1 _ _)⟩
+  | (n + 1), z => by
+      simp only [sigAtFuel]
+      exact cs5_deriv_imp_and ⟨.ax [] _ (.andE1 _ _)⟩
+        (cs5_deriv_imp_trans ⟨.ax [] _ (.andE2 _ _)⟩
+          (bigAndL_imp_of_pointwise (fun c _ => cs5_deriv_box_mono (sigAtFuel_mono_fuel hfin n c))))
+
+/-- **`sigAtFuel` monotonicity across any fuel gap** (iterating `sigAtFuel_mono_fuel`): for
+`m ≤ n`, `Derivable((sigAtFuel n z).imp (sigAtFuel m z))`. -/
+theorem sigAtFuel_mono_fuel_le {Atom : Type u} {G : Graph Atom} {Γ : List (LabelledFormula Atom)}
+    (hfin : G.X.Finite) {m n : ℕ} (hmn : m ≤ n) (z : Label Atom) :
+    Derivable CS5ModalAxiom ((sigAtFuel G Γ hfin n z).imp (sigAtFuel G Γ hfin m z)) := by
+  induction n with
+  | zero => simpa [Nat.le_zero.mp hmn] using cs5_deriv_imp_self (sigAtFuel G Γ hfin 0 z)
+  | succ n ih =>
+    rcases Nat.lt_or_ge m (n + 1) with hlt | hge
+    · exact cs5_deriv_imp_trans (sigAtFuel_mono_fuel hfin n z) (ih (Nat.lt_succ_iff.mp hlt))
+    · have : m = n + 1 := le_antisymm hmn hge
+      simpa [this] using cs5_deriv_imp_self (sigAtFuel G Γ hfin (n + 1) z)
+
 end Cslib.Logic.Modal.Labelled
 
 end

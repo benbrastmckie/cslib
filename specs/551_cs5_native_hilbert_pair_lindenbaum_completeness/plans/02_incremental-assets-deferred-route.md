@@ -204,7 +204,7 @@ Phases within the same wave can execute in parallel. Note the deliberate structu
 (the isolation phase) depends only on Phase 3**, never on Phases 4-6. If Phase 4 blocks, Phase 7
 still executes and the plan still delivers its headline artifact.
 
-### Phase 1: Propositional-Core Extension of `CS5PairAxiom` [IN PROGRESS]
+### Phase 1: Propositional-Core Extension of `CS5PairAxiom` [COMPLETED]
 
 - **Goal:** Extend `CS5PairAxiom` with a full propositional core quantified over the **entire**
   `Proposition (Atom ⊕ Atom)` type, so the generic primeness engine's schema hypotheses become
@@ -212,19 +212,19 @@ still executes and the plan still delivers its headline artifact.
   **modal** schemata pure-tagged, so the only place left/right content mixes modally remains the
   two designated `cross1`/`cross2` bridges.
 - **Tasks:**
-  - [ ] In `CS5Completeness.lean`, add to the `CS5PairAxiom` inductive the nine propositional-core
+  - [x] In `CS5Completeness.lean`, add to the `CS5PairAxiom` inductive the nine propositional-core
     constructors, each quantified over arbitrary `Proposition (Atom ⊕ Atom)` (NOT routed through
     `τ_L`/`τ_R`): `implyK`, `implyS`, `efq`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE` —
     mirroring `CS5ModalAxiom`'s corresponding constructors (`CS5.lean:170-195`) but at the
     combined type. Reuse `Cslib.Logic.Axioms.{AndI, AndE1, AndE2, OrI1, OrI2, OrE}` formers, as
     `CS5ModalAxiom` does.
-  - [ ] Leave `left`/`right`/`cross1`/`cross2` unchanged; do NOT add any modal schema at mixed
+  - [x] Leave `left`/`right`/`cross1`/`cross2` unchanged; do NOT add any modal schema at mixed
     formulas.
-  - [ ] Update the `CS5PairAxiom` docstring to record the two-tier design (propositional core at
+  - [x] Update the `CS5PairAxiom` docstring to record the two-tier design (propositional core at
     the whole type, modal schemata pure-tagged plus the two bridges) and *why* the whole-type
     quantification is forced (the generic engine's `hOrE`/`hEFQ`/`hCut` hypotheses range over the
     ambient formula type — `PrimeExclusion.lean:229,237,346-351,435-448`).
-  - [ ] Re-verify the four landed Phase-3 lemmas still compile unchanged:
+  - [x] Re-verify the four landed Phase-3 lemmas still compile unchanged:
     `cs5PairAxiom_left_derivable`, `cs5PairAxiom_right_derivable`, `crossCond_left_stable`,
     `crossCond_right_stable`.
 - **Timing:** 2 hours

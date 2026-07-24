@@ -83,11 +83,28 @@ def cs5PairTauL : Proposition Atom → Proposition (Atom ⊕ Atom) := Propositio
 used for the box-backward pair's tail component `T`. -/
 def cs5PairTauR : Proposition Atom → Proposition (Atom ⊕ Atom) := Proposition.map Sum.inr
 
-/-- **The combined `CS5` pair axiom system.** `CS5ModalAxiom` on each tagged copy (`left`/
-`right`) plus the two cross-condition implications, internalised as *axioms* rather than as an
-externally-imposed invariant on a pair poset (the design that makes the cross-conditions
-`cl`-stable "for free" -- see `crossCond_left_stable`/`crossCond_right_stable` below). Verified
-simultaneously sound and `cl`-stable by the Phase 1 probe
+/-- **The combined `CS5` pair axiom system.** A **two-tier** design:
+
+1. **Modal tier, pure-tagged**: `CS5ModalAxiom` on each tagged copy (`left`/`right`), plus the two
+   cross-condition implications `cross1`/`cross2`, internalised as *axioms* rather than as an
+   externally-imposed invariant on a pair poset (the design that makes the cross-conditions
+   `cl`-stable "for free" -- see `crossCond_left_stable`/`crossCond_right_stable` below). This
+   tier is the only place left/right content mixes modally; every modal schema instance is either
+   entirely left-tagged, entirely right-tagged, or one of the two designated bridges.
+2. **Propositional tier, whole-type**: the nine propositional-core schemata (`implyK`, `implyS`,
+   `efq`, `andI`, `andE1`, `andE2`, `orI1`, `orI2`, `orE`), quantified over the **entire**
+   `Proposition (Atom ⊕ Atom)` type rather than routed through `cs5PairTauL`/`cs5PairTauR`. This
+   whole-type quantification is *forced*, not a stylistic choice: the generic primeness engine
+   (`Metalogic.prime_exclusion`/`Metalogic.prime_set_exclusion`,
+   `Cslib/Foundations/Logic/Metalogic/PrimeExclusion.lean`) needs its `hOrE`/`hEFQ`/`hCut`
+   hypotheses (`PrimeExclusion.lean:229,237,346-351,435-448`) discharged at *arbitrary* formulas
+   of the ambient type `F` -- including genuinely mixed formulas such as
+   `(atom (inl p)).or (atom (inr q))` that never arise as the image of `cs5PairTauL`/`cs5PairTauR`
+   -- because the engine's Zorn/Lindenbaum construction inserts and case-splits on formulas built
+   from the *T ∪ {X}*/*disjunction* combinators, not just tagged formulas. A propositional core
+   confined to the two tagged copies would leave those mixed instances undischargeable.
+
+Verified simultaneously sound and `cl`-stable by the Phase 1 probe
 (`specs/551_.../probes/cs5-pair-combined-atomsum.lean`). -/
 inductive CS5PairAxiom : Proposition (Atom ⊕ Atom) → Prop where
   /-- Every `CS5ModalAxiom` instance holds on the left-tagged copy. -/
@@ -100,6 +117,35 @@ inductive CS5PairAxiom : Proposition (Atom ⊕ Atom) → Prop where
   /-- Cross-condition realising `boxInv Y ⊆ X`. -/
   | cross2 (B : Proposition Atom) :
       CS5PairAxiom ((Proposition.box (cs5PairTauR B)).imp (cs5PairTauL B))
+  /-- Weakening, at the whole combined type: `φ → (ψ → φ)`. -/
+  | implyK (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (φ.imp (ψ.imp φ))
+  /-- Distribution, at the whole combined type:
+  `(φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))`. -/
+  | implyS (φ ψ χ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom ((φ.imp (ψ.imp χ)).imp ((φ.imp ψ).imp (φ.imp χ)))
+  /-- Ex falso quodlibet, at the whole combined type: `⊥ → φ`. -/
+  | efq (φ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Proposition.bot.imp φ)
+  /-- Conjunction introduction, at the whole combined type: `φ → (ψ → φ ∧ ψ)`. -/
+  | andI (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.AndI φ ψ)
+  /-- Left conjunction elimination, at the whole combined type: `φ ∧ ψ → φ`. -/
+  | andE1 (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.AndE1 φ ψ)
+  /-- Right conjunction elimination, at the whole combined type: `φ ∧ ψ → ψ`. -/
+  | andE2 (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.AndE2 φ ψ)
+  /-- Left disjunction introduction, at the whole combined type: `φ → φ ∨ ψ`. -/
+  | orI1 (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.OrI1 φ ψ)
+  /-- Right disjunction introduction, at the whole combined type: `ψ → φ ∨ ψ`. -/
+  | orI2 (φ ψ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.OrI2 φ ψ)
+  /-- Disjunction elimination, at the whole combined type:
+  `(φ → χ) → ((ψ → χ) → ((φ ∨ ψ) → χ))`. -/
+  | orE (φ ψ χ : Proposition (Atom ⊕ Atom)) :
+      CS5PairAxiom (Cslib.Logic.Axioms.OrE φ ψ χ)
 
 /-! ## The Easy Transport Direction
 

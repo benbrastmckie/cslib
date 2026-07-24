@@ -1749,6 +1749,132 @@ theorem sigAtFuel_congr_above_rank {Atom : Type u} {G : Graph Atom} {ht : Label 
       have hr : r < ht c := by omega
       exact congrArg Proposition.box (sigAtFuel_congr_above_rank hht hagree hfin n c hr)
 
+/-- **`factsAt` at a label other than the extended one is unchanged.** -/
+theorem factsAt_cons_ne {Atom : Type u} {Γ : List (LabelledFormula Atom)} {x y : Label Atom}
+    {C : Proposition Atom} (hxy : y ≠ x) : factsAt ((x ∶ C) :: Γ) y = factsAt Γ y := by
+  classical
+  unfold factsAt
+  have hdec : decide ((x ∶ C).lbl = y) = false := decide_eq_false (fun h => hxy h.symm)
+  simp [hdec]
+
+/-- **`factsAt` at the extended label gains exactly the new fact.** -/
+theorem factsAt_cons_self {Atom : Type u} {Γ : List (LabelledFormula Atom)} {x : Label Atom}
+    {C : Proposition Atom} : factsAt ((x ∶ C) :: Γ) x = C :: factsAt Γ x := by
+  classical
+  unfold factsAt
+  simp
+
+/-- **`P`-generic constant weakening**: from a closed theorem `⊢ Q`, derive `⊢ P ⊃ Q` for any `P`
+(`implyK` applied directly). -/
+theorem cs5_deriv_imp_of_derivable {Atom : Type u} (P : Proposition Atom) {Q : Proposition Atom}
+    (h : Derivable CS5ModalAxiom Q) : Derivable CS5ModalAxiom (P.imp Q) := by
+  obtain ⟨d⟩ := h
+  exact ⟨.modus_ponens [] Q (P.imp Q) (.ax [] _ (.implyK Q P)) d⟩
+
+/-- **Identity**: `⊢ P ⊃ P` (the standard `S K K` combinator). -/
+theorem cs5_deriv_imp_self {Atom : Type u} (P : Proposition Atom) :
+    Derivable CS5ModalAxiom (P.imp P) := by
+  have h1 : DerivationTree CS5ModalAxiom []
+      ((P.imp ((P.imp P).imp P)).imp ((P.imp (P.imp P)).imp (P.imp P))) :=
+    .ax [] _ (.implyS P (P.imp P) P)
+  have h2 : DerivationTree CS5ModalAxiom [] (P.imp ((P.imp P).imp P)) :=
+    .ax [] _ (.implyK P (P.imp P))
+  have h3 : DerivationTree CS5ModalAxiom [] ((P.imp (P.imp P)).imp (P.imp P)) :=
+    .modus_ponens [] _ _ h1 h2
+  have h4 : DerivationTree CS5ModalAxiom [] (P.imp (P.imp P)) := .ax [] _ (.implyK P P)
+  exact ⟨.modus_ponens [] _ _ h3 h4⟩
+
+/-- **`P`-generic "chained" implication transitivity under a shared prefix**: from `⊢ P⊃(A⊃Q)`
+and `⊢ P⊃(Q⊃B)`, derive `⊢ P⊃(A⊃B)`. Composes `implyK`/`implyS` under the shared antecedent `P`
+(reusing `cs5_deriv_imp_trans`/`cs5_deriv_imp_mp` twice), the "B-combinator under a binder" this
+file's `impI` case needs. -/
+theorem cs5_deriv_imp_trans_under {Atom : Type u} {P A Q B : Proposition Atom}
+    (hf : Derivable CS5ModalAxiom (P.imp (A.imp Q)))
+    (hg : Derivable CS5ModalAxiom (P.imp (Q.imp B))) :
+    Derivable CS5ModalAxiom (P.imp (A.imp B)) := by
+  have hg' : Derivable CS5ModalAxiom (P.imp (A.imp (Q.imp B))) :=
+    cs5_deriv_imp_trans hg ⟨.ax [] _ (.implyK (Q.imp B) A)⟩
+  have hg'' : Derivable CS5ModalAxiom (P.imp ((A.imp Q).imp (A.imp B))) :=
+    cs5_deriv_imp_trans hg' ⟨.ax [] _ (.implyS A Q B)⟩
+  exact cs5_deriv_imp_mp hg'' hf
+
+/-- **Uncurrying**: from `⊢ P⊃(C⊃X)`, derive `⊢ (P∧C)⊃X`. -/
+theorem cs5_deriv_uncurry {Atom : Type u} {P C X : Proposition Atom}
+    (h : Derivable CS5ModalAxiom (P.imp (C.imp X))) :
+    Derivable CS5ModalAxiom ((P.and C).imp X) := by
+  have h1 : Derivable CS5ModalAxiom ((P.and C).imp (C.imp X)) :=
+    cs5_deriv_imp_trans ⟨.ax [] _ (.andE1 P C)⟩ h
+  exact cs5_deriv_imp_mp h1 ⟨.ax [] _ (.andE2 P C)⟩
+
+/-- **Currying**: from `⊢ (P∧C)⊃X`, derive `⊢ P⊃(C⊃X)`, via `andI` composed under a binder
+(`cs5_deriv_imp_trans_under`). -/
+theorem cs5_deriv_curry {Atom : Type u} {P C X : Proposition Atom}
+    (h : Derivable CS5ModalAxiom ((P.and C).imp X)) :
+    Derivable CS5ModalAxiom (P.imp (C.imp X)) :=
+  cs5_deriv_imp_trans_under ⟨.ax [] _ (.andI P C)⟩ (cs5_deriv_imp_of_derivable P h)
+
+/-- **`bigAndL` unfolds one cons-step definitionally.** -/
+theorem bigAndL_cons {Atom : Type u} (C : Proposition Atom) (L : List (Proposition Atom)) :
+    bigAndL (C :: L) = C.and (bigAndL L) := rfl
+
+/-- **`bigAndL` monotonicity**: if every conjunct of `L` occurs in `L'`, then `⊢ (bigAndL L') ⊃
+(bigAndL L)` (pointwise `bigAndL_mem` projection, combined via `cs5_deriv_imp_and`; the empty
+case uses the closed identity `⊢ ⊥⊃⊥` weakened by `cs5_deriv_imp_of_derivable`). -/
+theorem bigAndL_mono {Atom : Type u} {L L' : List (Proposition Atom)}
+    (h : ∀ C ∈ L, C ∈ L') : Derivable CS5ModalAxiom ((bigAndL L').imp (bigAndL L)) := by
+  induction L with
+  | nil => exact cs5_deriv_imp_of_derivable (bigAndL L') (cs5_deriv_imp_self Proposition.bot)
+  | cons C L'' ih =>
+    have hCmem : C ∈ L' := h C (List.mem_cons_self ..)
+    have hCd : Derivable CS5ModalAxiom ((bigAndL L').imp C) := bigAndL_mem hCmem
+    have hLd : Derivable CS5ModalAxiom ((bigAndL L').imp (bigAndL L'')) :=
+      ih (fun D hD => h D (List.mem_cons_of_mem _ hD))
+    exact cs5_deriv_imp_and hCd hLd
+
+/-- **`sigAt` under a context extension at its own label.** Given `IsDerivationForest G` (for the
+graded-rank witness `sigAtFuel_congr_above_rank` needs), `sigAt G Γ hfin x` together with `C`
+derives `sigAt G ((x∶C)::Γ) hfin x`: the own-facts conjunct gains exactly `C`
+(`factsAt_cons_self`), and the children's box-conjunct is untouched, since every child of `x` has
+strictly greater rank than `x` (`sigAtFuel_congr_above_rank` at threshold `ht x`). -/
+theorem sigAt_cons_self_imp {Atom : Type u} {G : Graph Atom} (hforest : IsDerivationForest G)
+    {Γ : List (LabelledFormula Atom)} {x : Label Atom} {C : Proposition Atom}
+    (hfin : G.X.Finite) :
+    Derivable CS5ModalAxiom
+      ((sigAt G Γ hfin x).imp (C.imp (sigAt G ((x ∶ C) :: Γ) hfin x))) := by
+  obtain ⟨-, ⟨ht, hht⟩, -⟩ := hforest
+  obtain ⟨n, hn⟩ : ∃ n, hfin.toFinset.card = n + 1 :=
+    ⟨hfin.toFinset.card - 1, (Nat.succ_pred_eq_of_pos (hfin_toFinset_card_pos hfin)).symm⟩
+  have hu1 : sigAt G Γ hfin x = sigAtFuel G Γ hfin (n + 1) x := by unfold sigAt; rw [hn]
+  have hu2 : sigAt G ((x ∶ C) :: Γ) hfin x = sigAtFuel G ((x ∶ C) :: Γ) hfin (n + 1) x := by
+    unfold sigAt; rw [hn]
+  rw [hu1, hu2]
+  simp only [sigAtFuel, factsAt_cons_self, bigAndL_cons]
+  have hSsub : {c | G.R x c} ⊆ G.X := fun c hc => (G.edge_mem x c hc).2
+  have hSfin : {c | G.R x c}.Finite := hfin.subset hSsub
+  have hbox_eq :
+      hSfin.toFinset.toList.map (fun c => Proposition.box (sigAtFuel G ((x ∶ C) :: Γ) hfin n c)) =
+      hSfin.toFinset.toList.map (fun c => Proposition.box (sigAtFuel G Γ hfin n c)) := by
+    apply List.map_congr_left
+    intro c hc
+    have hRxc : G.R x c := hSfin.mem_toFinset.mp (Finset.mem_toList.mp hc)
+    have hrank : ht c = ht x + 1 := hht x c hRxc
+    have hagree : ∀ w, ht x < ht w → factsAt ((x ∶ C) :: Γ) w = factsAt Γ w :=
+      fun w hw => factsAt_cons_ne (fun heq => absurd (heq ▸ hw) (lt_irrefl _))
+    exact congrArg Proposition.box
+      (sigAtFuel_congr_above_rank hht hagree hfin n c (by omega))
+  rw [hbox_eq]
+  set P0 := bigAndL (factsAt Γ x) with hP0def
+  set boxG := bigAndL
+    (hSfin.toFinset.toList.map (fun c => Proposition.box (sigAtFuel G Γ hfin n c))) with hboxGdef
+  apply cs5_deriv_curry
+  have hP0d : Derivable CS5ModalAxiom (((P0.and boxG).and C).imp P0) :=
+    cs5_deriv_imp_trans ⟨.ax [] _ (.andE1 (P0.and boxG) C)⟩ ⟨.ax [] _ (.andE1 P0 boxG)⟩
+  have hboxGd : Derivable CS5ModalAxiom (((P0.and boxG).and C).imp boxG) :=
+    cs5_deriv_imp_trans ⟨.ax [] _ (.andE1 (P0.and boxG) C)⟩ ⟨.ax [] _ (.andE2 P0 boxG)⟩
+  have hCd : Derivable CS5ModalAxiom (((P0.and boxG).and C).imp C) :=
+    ⟨.ax [] _ (.andE2 (P0.and boxG) C)⟩
+  exact cs5_deriv_imp_and (cs5_deriv_imp_and hCd hP0d) hboxGd
+
 end Cslib.Logic.Modal.Labelled
 
 end

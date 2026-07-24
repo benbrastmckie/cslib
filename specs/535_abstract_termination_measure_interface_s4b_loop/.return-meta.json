@@ -1,37 +1,15 @@
 {
-  "status": "planned",
-  "artifacts": [
-    {
-      "type": "plan",
-      "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/03_completeness-line-rescope.md",
-      "summary": "v3 revision: rescopes task 535 to the completeness line only (v2 Phase 8 decomposed into three bounded phases 8/9/10, plus the completeness half of v2 Phase 11). Soundness line (v2 Phases 9, 10, and the decidability half of Phase 11) moved to an explicit Deferred/Spawned section. instDecidableS4Valid declared out of scope."
-    }
-  ],
-  "next_steps": "Run /implement 535 to execute Phase 8 (small, structural, retires the projection risk early). Separately, spawn the soundness-line task with authorization to edit the frozen task-511 blockingWorldS4Keyed guard; that task must first verify the R1 blast-radius prediction that narrowing the guard breaks S4LoopInv.keysDistinct and the modalWorldBoundS4 pigeonhole.",
-  "requires_user_review": true,
-  "review_reason": "The revision encodes the owner decision 'Phase 8 now, spawn Phase 9 separately' and formally removes instDecidableS4Valid / Decidable (s4Valid phi) as a goal of this task. Task 535 will now terminate with S4 decidability still open. A separate task must be spawned to carry the soundness line.",
+  "status": "in_progress",
+  "started_at": "2026-07-24T19:45:13Z",
+  "artifacts": [],
+  "partial_progress": {
+    "stage": "initializing",
+    "details": "Agent started, parsing delegation context for Phase 8 (4-tuple stepper projection bridge + local measure-split helpers)"
+  },
   "metadata": {
-    "session_id": "sess_1784905751_756cda_535",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
-    "revision_mode": "plan_revision",
-    "plan_version": 3,
-    "phase_count": 11,
-    "phases_completed": 7,
-    "phases_remaining": 4,
-    "estimated_hours": 9.5,
-    "dependency_waves": [[1, 2], [3, 4, 5, 6], [7], [8], [9], [10], [11]],
-    "reports_integrated": [
-      "reports/02_remaining-work-and-phase9-obstruction.md",
-      "reports/01_termination-interface-survey.md",
-      "handoffs/04_phase8-11-assessment-and-continuation.md",
-      "handoffs/01_phase3-5-continuation.md"
-    ],
-    "supersedes": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/02_keyed-s4-driver-restructured.md",
-    "deferred_scope": [
-      "v2 Phase 9: blocked-mint-redirect soundness lemma (genuine mathematical gap)",
-      "v2 Phase 10: modalTableauS4Keyed_sound",
-      "v2 Phase 11 decidability half: s4Valid_decides, instDecidableS4Valid"
-    ]
+    "session_id": "sess_1784920807_37031e_535",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
   }
 }

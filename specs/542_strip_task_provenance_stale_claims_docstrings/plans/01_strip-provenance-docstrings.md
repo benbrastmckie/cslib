@@ -1,7 +1,7 @@
 # Implementation Plan: Strip Task/Phase Provenance and Stale Claims from Logic-Tree Docstrings
 
 - **Task**: 542 - strip_task_provenance_stale_claims_docstrings
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 9 hours
 - **Dependencies**: None (coordinate tasks 543/438/226/425/301 verified non-blocking)
 - **Research Inputs**: reports/01_docstring-provenance-sweep.md
@@ -490,22 +490,39 @@ read in context.
 
 ---
 
-### Phase 8: Full CI Verification (build, test, checkInitImports, lint-style, shake/docBlame) [NOT STARTED]
+### Phase 8: Full CI Verification (build, test, checkInitImports, lint-style, shake/docBlame) [COMPLETED]
 
 **Goal**: Single whole-tree CI gate confirming the sweep introduced no regression and, critically,
 no `docBlame` failure (the primary risk of a docstring-stripping task).
 
 **Tasks**:
-- [ ] `lake build` (full).
-- [ ] `lake test`.
-- [ ] `lake exe checkInitImports`.
-- [ ] `lake exe lint-style`.
-- [ ] `lake shake` (verify no `docBlame` failure — no declaration left docstring-less by the sweep).
-- [ ] Repo-wide grep sanity: no remaining `task N` / `Phase N` / `specs/NNN` provenance and no
+- [x] `lake build` (full). *(3253/3253 jobs, green; only pre-existing style-linter info/warnings
+  in files unrelated to this sweep, e.g. `S5Simplification.lean` long-line/flexible-tactic notes)*
+- [x] `lake test`. *(exit 0; the four `declaration uses sorry` warnings are the pre-existing,
+  deliberately-untouched task-317 files `Scheme.lean`/`Completeness.lean`/
+  `Minimal/Completeness.lean`, not introduced by this task)*
+- [x] `lake exe checkInitImports`. *(exit 0, clean)*
+- [x] `lake exe lint-style`. *(exit 0, clean)*
+- [x] `lake shake` (verify no `docBlame` failure — no declaration left docstring-less by the sweep).
+  *(`lake lint` -- the docBlame-carrying linter -- ran clean with zero warnings of any kind,
+  confirming no docstring was left dangling. `lake shake --add-public --keep-implied
+  --keep-prefix` separately reported ~2958 lines of pre-existing import-minimization
+  suggestions across Propositional/Temporal; confirmed via `git diff` against this task's
+  pre-first-commit parent that zero import lines were touched by any task-542 commit -- this
+  backlog predates and is out of scope for a comment-only sweep (the plan's own Non-Goals list
+  "no import changes"). `lake exe mk_all --module` reported "No update necessary".)*
+- [x] Repo-wide grep sanity: no remaining `task N` / `Phase N` / `specs/NNN` provenance and no
   live `sorry` introduced in the five trees; confirm the advisory
   `validate-no-task-references.sh` hook surfaces nothing new.
-- [ ] If `docBlame` flags any declaration, restore a minimal mathematical docstring for it (strip
-  did not preserve enough) and re-run.
+  *(final grep for `task N`/`Task N`/`specs/[0-9]+`/`wip/task-`/`renamed from`/`formerly` across
+  all five trees, excluding the 18 deliberately-skipped live-blocker files, returns zero hits.
+  `sorry` count unchanged from pre-task baseline (verified via full diff: every "sorry"/"axiom"
+  string added by task 542's commits is prose inside a docstring, never a code declaration);
+  vacuous-def scan's one hit (`Computability/URM/Basic.lean`) is a real theorem with proof term
+  `trivial`, outside this task's five trees and pre-existing; axiom count unchanged (27, all
+  pre-existing, none added by this task).)*
+- [x] If `docBlame` flags any declaration, restore a minimal mathematical docstring for it (strip
+  did not preserve enough) and re-run. *(not needed -- zero docBlame flags)*
 
 **Timing**: 0.75 hours
 
@@ -517,18 +534,18 @@ no `docBlame` failure (the primary risk of a docstring-stripping task).
 **Verification**:
 - All five CI commands exit green; `docBlame` clean; grep sanity clean.
 
-## Testing & Validation
-
-- [ ] `lake build` green (per-phase incremental + full in Phase 8).
-- [ ] `lake test` green.
-- [ ] `lake exe checkInitImports` green.
-- [ ] `lake exe lint-style` green.
-- [ ] `lake shake` green, `docBlame` in particular (no declaration left without a docstring).
-- [ ] All diffs are comment/docstring-only — no proof, definition, or `import` line changed.
-- [ ] Zero live `sorry` in scope (none added; the Chronicle file stays sorry-free).
-- [ ] No `task N` / `Phase N` / `plan vN` / `specs/NNN` / `renamed from` / `formerly` provenance
+- [x] `lake build` green (per-phase incremental + full in Phase 8).
+- [x] `lake test` green.
+- [x] `lake exe checkInitImports` green.
+- [x] `lake exe lint-style` green.
+- [x] `lake shake` green, `docBlame` in particular (no declaration left without a docstring).
+  *(`docBlame`, carried by `lake lint`, is clean; `lake shake`'s pre-existing import-minimization
+  backlog is confirmed untouched by this task -- see Phase 8 notes)*
+- [x] All diffs are comment/docstring-only — no proof, definition, or `import` line changed.
+- [x] Zero live `sorry` in scope (none added; the Chronicle file stays sorry-free).
+- [x] No `task N` / `Phase N` / `plan vN` / `specs/NNN` / `renamed from` / `formerly` provenance
   remains in the five trees; literature/BibKey citations retained.
-- [ ] No new task-number or `specs/NNN` text introduced into any deliverable (item (c) pointer
+- [x] No new task-number or `specs/NNN` text introduced into any deliverable (item (c) pointer
   names PTL FMP only).
 
 ## Artifacts & Outputs

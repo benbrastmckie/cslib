@@ -2,9 +2,9 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "phases_completed": 3,
+  "phases_completed": 5,
   "phases_total": 15,
-  "summary": "Phases 1-3 of Route P landed and committed, each individually build/lint/lean_verify-clean: the permanent counterexample regression corpus (CslibTests/S4LoopGuardRegression.lean), the corrected blockingWorldS4Keyed/S4Keyed-completeness documentation (stating soundness is FALSE, not deferred), and the decidable, non-recursive mint-readiness predicate (modalMintShape, modalNonMintCandidates + 3 lemmas) in LoopChecking.lean. Phase 4 (ordered stepper + 3 structural lemmas) was designed in detail but not started -- see the continuation handoff for the worked-out definition and proof strategy.",
+  "summary": "Phases 1-5 of Route P landed and committed, each individually build/lint/lean_verify-clean. Phase 4 added the ordered stepper (modalStepBranchS4KeyedOrdered) plus its four structural lemmas (_eq_none_iff, _selected_mem, _mintReady, and a shared _cases helper), factoring the shared per-formula rule-application body into a new named def (modalStepBranchS4KeyedBody) bridged to the untouched modalStepBranchS4Keyed via a definitional (rfl) lemma. Phase 5 re-established the strict termination-measure decrease for the ordered stepper (modalStepBranchS4KeyedOrdered_proj, modalExpMeasure_step_lt_S4KeyedOrdered), reusing every combinatorial measure primitive and per-call rule obligation unchanged. Phase 6 (S4LoopInv preservation + fuel-sufficiency chain) was scoped in detail but not started -- it requires ordered analogues of TEN separate per-field sub-lemmas plus two proof-internal auxiliaries, each substantial; see the Phase 6 handoff for the full sub-lemma inventory, current line numbers, and two hard-won Lean elaboration lessons from Phases 4-5 that will recur throughout Phase 6.",
   "artifacts": [
     {
       "type": "plan",
@@ -12,41 +12,38 @@
     },
     {
       "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-6-handoff-20260725.md"
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
-    "CslibTests.lean",
-    "CslibTests/S4LoopGuardRegression.lean",
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-6-handoff-20260725.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "decisions_made": [
-    "Phase 1 lands the counterexample as a permanent CslibTests/S4LoopGuardRegression.lean corpus BEFORE any code change, using the #guard_msgs in #eval idiom already established by CslibTests/TableauConformance.lean. Asserts the CURRENT (unsound) CLOSED verdict marked KNOWN-UNSOUND so the checkpoint stays green; Phase 8 flips it. Confirmed green under both scoped build and a full `lake test` run (exit 0).",
-    "Risk (c) resolved by a global mint-readiness predicate (modalNonMintCandidates) rather than the report's per-world recursive one. Enabled by modalApplyOneS4Rules (FrameRules.lean:158) returning .notApplicable when a persistent rule's output is empty, so settledness is expressible even though persistent formulas never enter the expanded set. Landed as Phase 3 with three proved lemmas (subset, not_mem_expanded, eq_nil_iff).",
-    "The ordered stepper's traversal is two-stage: findSome? over the non-mint candidate list first, falling back to the LITERAL old b.findSome? traversal -- specifically by calling modalStepBranchS4Keyed itself as the fallback arm (not re-deriving a second b.findSome? inline), so modalStepBranchS4KeyedOrdered_eq_none_iff's none-case is definitional. This yields the eq_none_iff lemma that makes the completeness line's saturation step transfer definitionally. Designed in detail (see continuation handoff) but NOT YET IMPLEMENTED.",
-    "Risk (a) is expected to be tractable: modalExpMeasure_step_lt_S4Keyed (LoopChecking.lean, now offset by Phase 3's +138 lines) consumes only 'selected sf is in the branch', 'sf is not in the expanded set', and the result-shape case split -- it never uses which sf. Phase 5 replaces the projection bridge, not the measure argument. Not yet attempted.",
-    "Phase 8 is an explicit abort gate: the reordering must be shown empirically to open the counterexample, and the size-<=6 sweep must show zero open-to-closed verdict changes, BEFORE any soundness proof work is invested. Not yet reached.",
-    "The soundness invariant weakening is additive: branchSatisfiableIn (FrameSoundness.lean:111) is left exactly as is and remains what K/T/B/5 consume; branchPropAdequateIn is a new, strictly weaker sibling used only by the S4 keyed line. Not yet reached (Phase 9).",
-    "List.filter_subset (Mathlib) is NOT 'filter result subset of original list' -- that lemma is List.filter_subset' or List.filter_subset_self. Caught and fixed during Phase 3; documented in the Phase 4 handoff's watch-outs so a future dispatch does not rediscover it."
+    "Phase 4 deviation: modalStepBranchS4KeyedOrdered's shared per-formula body is factored into a new NAMED definition (modalStepBranchS4KeyedBody) rather than duplicated inline as the phase-4 handoff had sketched. modalStepBranchS4Keyed's own source is byte-for-byte unchanged; the bridge modalStepBranchS4Keyed_eq_findSome_body (rfl) relates the two. This made the three required structural lemmas provable against a named term instead of restating a six-way match inline in every statement.",
+    "Phase 4 deviation: modalStepBranchS4KeyedOrdered_mintReady's hypothesis is phrased as '∀ sf, body sf = tuple → mintShape sf = true' (universally quantified over every formula that could have produced the exact output tuple) rather than a single externally-supplied selected formula, since no cheap uniqueness argument establishes that only one formula in b can produce a given output tuple. This is the airtight, general form; verified sound via the shared _cases case split.",
+    "Phase 5 discovery (see phase-6 handoff for full writeup): a `let (a,b):=f x; body` pattern-match compiles to direct `.1`/`.2` PROJECTIONS when `f` is an ABSTRACT parameter (as modalStepBranchGen's `apply` is) but to a full `match` when `f` is a CONCRETE, already-known function (as in modalStepBranchS4KeyedBody). This determines which of two rewriting idioms (`.1`-based rcases+rw, vs. rcases-pair+rw-at-hypothesis+re-derive-`.1`-facts-via-`have`) applies to a given hypothesis, and caused two rounds of build-error debugging before the correct idiom was identified. This WILL recur in every one of Phase 6's ten sub-lemmas.",
+    "Phase 5 discovery: `Option.some.inj h` (raw term) + a bare-name `obtain ⟨rfl, name, -⟩` pattern lets rcases's internal substitution unify a free `newExp`-shaped variable with a branch-specific value (e++[sf] for linear/branching, e itself for persistent) the rest of a measure/invariant proof needs; pre-simplifying via `simp only [Option.some.injEq, Prod.mk.injEq] at h` first BLOCKS this unification and leaves the goal unsolvable. Matches the exact idiom the pre-existing (untouched) modalExpMeasure_step_lt_S4Keyed proof already relies on.",
+    "Phase 5's projection bridge (modalStepBranchS4KeyedOrdered_proj) intentionally does NOT assert the ordered stepper's result equals modalStepBranchGen's own whole-branch findSome? traversal at modalApplyOneS4Keyed φ₀ keys (that would be FALSE in general -- a different formula may genuinely be selected first, the entire point of reordering). It instead extracts the weaker existential fact the measure proof actually consumes: some sf ∈ b, sf ∉ e, whose rule application produces exactly the given result."
   ],
   "flagged_theorem_changes": [
     "Phase 14 ADDS modalTableauS4KeyedOrdered_complete beside the landed modalTableauS4Keyed_complete (FrameCompleteness.lean); the landed theorem is not weakened. Not yet reached.",
     "Phase 15 is the only destructive phase: it deletes modalStepBranchS4Keyed, modalExpandBranchesS4Keyed, modalTableauS4Keyed, modalTableauS4Keyed_complete and their stepper-specific support lemmas -- each with a proved ordered replacement. Removal-with-replacement, never weakening. Not yet reached.",
-    "Phase 6 states that if keysUpdate_preserves_keysDistinct or blockingWorldS4Keyed_none_fresh needs weakening, that contradicts the plan's central claim and must be escalated rather than worked around. Not yet reached.",
-    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-3: lean_verify on all new lemmas reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout."
+    "Phase 6 states that if keysUpdate_preserves_keysDistinct or blockingWorldS4Keyed_none_fresh needs weakening, that contradicts the plan's central claim and must be escalated rather than worked around -- flagged in the phase-6 handoff as the recommended FIRST sub-lemma to attempt (modalStepBranchS4_preserves_keysDistinct), specifically so a genuine contradiction surfaces before the other nine (larger) sub-lemmas are attempted. Not yet reached.",
+    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-5: lean_verify on all new lemmas reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout."
   ],
   "dead_ends": [
     "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
-    "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research. Confirmed Phases 1-3 made zero edits to it beyond its docstring (Phase 2)."
+    "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research. Confirmed Phases 1-5 made zero edits to it beyond its Phase 2 docstring.",
+    "Phase 5's first attempt at modalStepBranchS4KeyedOrdered_proj hand-typed a fresh let/match expression restating modalApplyOneS4Keyed's dispatch directly in the lemma's conclusion (mirroring modalStepBranchGen's shape textually). Abandoned: this elaborates via a full `match` (not projections, since the function is concrete at that elaboration site), breaking every subsequent `.1`-based rewrite the surrounding measure proof needed. Reusing the already-elaborated modalStepBranchS4KeyedBody (via Option.map to drop the keys' component) sidesteps the issue entirely -- this is now the established pattern for all future selection-agnostic bridge lemmas."
   ],
   "continuation_context": {
-    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md",
-    "phases_completed": 3,
+    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-6-handoff-20260725.md",
+    "phases_completed": 5,
     "phases_total": 15
   },
   "plan_markers_verified": true

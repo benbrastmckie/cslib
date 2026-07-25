@@ -251,25 +251,28 @@ Phases within the same wave can execute in parallel.
 
 ## Stage A — Statement Repair and Route Closure
 
-### Phase 1: Correct the obligation statement and land the refutation [IN PROGRESS]
+### Phase 1: Correct the obligation statement and land the refutation [COMPLETED]
 
 **Goal**: Replace the refutable obligation with the corrected one and make the refutation a
 permanent regression theorem.
 
 **Tasks**:
-- [ ] Add `CS5PairSeedRightExclusion (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
+- [x] Add `CS5PairSeedRightExclusion (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
       A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) →
         cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)`
-- [ ] Promote `probes/seed_refutation.lean`'s `probe_refute_disjunctionProperty` as
+- [x] Promote `probes/seed_refutation.lean`'s `probe_refute_disjunctionProperty` as
       `cs5PairSeedDisjunctionProperty_false : ∀ H, ¬ CS5PairSeedDisjunctionProperty H
       (Proposition.bot.imp Proposition.bot)`, with a docstring stating the mechanism (every `CS5`
       theorem lies in `modalDeductiveClosure CS5ModalAxiom S` for every `S`, so `τ_R A` is
       literally in `cs5PairSeed H`)
-- [ ] Promote `probe_refute_hR_of_boxMem` as the `H`-driven companion refutation
-- [ ] Mark `CS5PairSeedDisjunctionProperty` deprecated in its docstring, pointing at
+- [x] Promote `probe_refute_hR_of_boxMem` as the `H`-driven companion refutation *(landed as
+      `cs5PairSeed_tauR_mem_closure_of_boxMem` plus a disjunction-property corollary
+      `cs5PairSeedDisjunctionProperty_false_of_boxMem`, mirroring the ⊤-witness refutation's
+      structure but seeded from `□A ∈ H` instead of `A` being a theorem)*
+- [x] Mark `CS5PairSeedDisjunctionProperty` deprecated in its docstring, pointing at
       `CS5PairSeedRightExclusion`; leave the definition and
       `cs5Pair_derivExcludes_of_disjunctionProperty` textually unchanged
-- [ ] `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Completeness`
+- [x] `lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Completeness`
 
 **Timing**: 1.5 hours
 

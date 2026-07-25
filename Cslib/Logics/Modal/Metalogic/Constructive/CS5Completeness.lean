@@ -368,7 +368,17 @@ a purely syntactic separation fact.
 
 **Status.** Open here. A correct proof is expected to require a cut-free/nested-sequent argument
 ([Marin2021]) rather than a direct Hilbert derivation. Stated as a definition, not asserted: this
-module contains no `sorry`. -/
+module contains no `sorry`.
+
+**DEPRECATED (superseded).** This statement carries **no hypothesis relating `A` to `H`**, and is
+**refutable for every `H`** -- see `cs5PairSeedDisjunctionProperty_false` below (witness
+`A := ⊥ → ⊥`): every `CS5` theorem lies in `modalDeductiveClosure CS5ModalAxiom S` for *every* set
+`S`, so `τ_R A` is already a member of `cs5PairSeed H` itself whenever `A` is `CS5`-provable, well
+before any deductive closure is taken. The corrected statement is `CS5PairSeedRightExclusion`
+below, which adds the missing hypothesis `A ∉ modalDeductiveClosure CS5ModalAxiom (boxInv H)`. This
+definition and `cs5Pair_derivExcludes_of_disjunctionProperty` are kept, unchanged, only because
+they remain true (conditionally) statements about a `Prop` that is never asserted; new work should
+target `CS5PairSeedRightExclusion` and `cs5Pair_derivExcludes_of_rightExclusion`. -/
 def CS5PairSeedDisjunctionProperty (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
   (cs5PairTauL (Proposition.box A)).or (cs5PairTauR A) ∉
     modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)
@@ -464,6 +474,103 @@ theorem cs5Pair_derivExcludes_of_disjunctionProperty {H : Set (Proposition Atom)
     exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS
       [Metalogic.bigOr (x :: y :: rest)] ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
       (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hbig) hd
+
+/-! ## The Corrected Obligation (Round 2) and Its Refutation
+
+`CS5PairSeedDisjunctionProperty` above is **false as literally stated, for every `H`** -- it
+carries no hypothesis relating `A` to `H`, so it fails already at any `CS5`-provable `A` (witness
+`A := ⊥ → ⊥`, since every `CS5` theorem lies in `modalDeductiveClosure CS5ModalAxiom S` for
+*every* `S`, in particular `S := boxInv H`, putting `τ_R A` in `cs5PairSeed H` itself). The
+refutations below make this a permanent, machine-checked regression: the unconditioned form can
+never silently return. `CS5PairSeedRightExclusion` repairs the statement by adding exactly the
+missing hypothesis. -/
+
+/-- **The corrected obligation (Round 2).** The right-exclusion form of the pair-seed
+obligation, guarded by the hypothesis `CS5PairSeedDisjunctionProperty` was missing: `A` must not
+already lie in the `CS5`-deductive closure of `H`'s box-inverse. Equivalent, by round 1's
+reduction (`hOpen ↔ hR`), to the disjunction-property form under the same guard; stated directly
+in right-exclusion form since that is what every downstream consumer
+(`cs5Pair_derivExcludes_of_rightExclusion`) actually needs. -/
+def CS5PairSeedRightExclusion (H : Set (Proposition Atom)) (A : Proposition Atom) : Prop :=
+  A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) →
+    cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)
+
+/-- Every `CS5` theorem lies in the `CS5`-deductive closure of *every* set `S` -- in particular
+`⊥ → ⊥` (an `efq ⊥` axiom instance), witnessed by the empty premise list. Feeds
+`cs5PairSeedDisjunctionProperty_false`: instantiated at `S := boxInv H`, this is exactly why the
+seed's right component already contains `τ_R (⊥ → ⊥)` before any closure is taken. -/
+theorem cs5_botImpBot_mem_closure (S : Set (Proposition Atom)) :
+    (Proposition.bot.imp Proposition.bot) ∈ modalDeductiveClosure (@CS5ModalAxiom Atom) S := by
+  refine ⟨[], ?_, ?_⟩
+  · intro x hx; exact nomatch hx
+  · exact ⟨.ax [] _ (CS5ModalAxiom.efq Proposition.bot)⟩
+
+/-- Consequently `τ_R (⊥ → ⊥)` is already a member of the two-sided seed itself, for every `H` --
+before any deductive closure is taken. -/
+theorem cs5PairSeed_botImpBot_mem (H : Set (Proposition Atom)) :
+    cs5PairTauR (Proposition.bot.imp Proposition.bot) ∈ (@cs5PairSeed Atom) H :=
+  Set.mem_union_right _ (Set.mem_image_of_mem _ (cs5_botImpBot_mem_closure _))
+
+/-- **Refutation of the right-exclusion component.** `τ_R (⊥ → ⊥)` lies in the `CS5PairAxiom`
+closure of the seed, for every `H`. -/
+theorem cs5PairSeed_tauR_botImpBot_mem_closure (H : Set (Proposition Atom)) :
+    cs5PairTauR (Proposition.bot.imp Proposition.bot) ∈
+      modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H) :=
+  modal_subset_deductive_closure _ _ (cs5PairSeed_botImpBot_mem H)
+
+/-- **Refutation of the named open obligation (permanent regression).**
+`CS5PairSeedDisjunctionProperty H (⊥ → ⊥)` is FALSE for every `H`, in particular for `H = ∅`.
+Mechanism: `⊥ → ⊥` is a `CS5` theorem, hence lies in `modalDeductiveClosure CS5ModalAxiom S` for
+every `S` (`cs5_botImpBot_mem_closure`), in particular `S := boxInv H`; so
+`τ_R (⊥ → ⊥) ∈ cs5PairSeed H` already, and `orI2` through deductive closure puts the disjunction
+`τ_L (□(⊥ → ⊥)) ⊔ τ_R (⊥ → ⊥)` in `modalDeductiveClosure CS5PairAxiom (cs5PairSeed H)`, which is
+exactly what `CS5PairSeedDisjunctionProperty H (⊥ → ⊥)` denies. This landed theorem is the reason
+`CS5PairSeedDisjunctionProperty` is deprecated above in favor of `CS5PairSeedRightExclusion`: the
+unconditioned statement can never be reintroduced without contradicting this regression. -/
+theorem cs5PairSeedDisjunctionProperty_false (H : Set (Proposition Atom)) :
+    ¬ CS5PairSeedDisjunctionProperty H (Proposition.bot.imp Proposition.bot) := by
+  intro hOpen
+  apply hOpen
+  set A : Proposition Atom := Proposition.bot.imp Proposition.bot with hA
+  have hR := cs5PairSeed_tauR_botImpBot_mem_closure (Atom := Atom) H
+  have hd : (modalDerivationSystem (@CS5PairAxiom Atom)).Deriv [cs5PairTauR A]
+      ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A)) :=
+    mp_deriv (weakening_deriv (cs5Pair_hOrI2 (cs5PairTauL (Proposition.box A)) (cs5PairTauR A))
+        (by simp)) (assumption_deriv (List.mem_singleton_self _))
+  exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS [cs5PairTauR A]
+    ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
+    (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hR) hd
+
+/-- **The `H`-driven companion refutation.** Unlike `cs5PairSeedDisjunctionProperty_false`, this
+does not rely on `A` being a `CS5` theorem: whenever `□A ∈ H`, `A` is already a member of
+`boxInv H`, so `τ_R A` lands in the seed's right component directly. Feeds
+`cs5PairSeedDisjunctionProperty_false_of_boxMem`. -/
+theorem cs5PairSeed_tauR_mem_closure_of_boxMem {H : Set (Proposition Atom)}
+    {A : Proposition Atom} (h : Proposition.box A ∈ H) :
+    cs5PairTauR A ∈ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H) :=
+  modal_subset_deductive_closure _ _
+    (Set.mem_union_right _
+      (Set.mem_image_of_mem _ (modal_subset_deductive_closure _ _ h)))
+
+/-- **The `H`-driven companion refutation, disjunction-property form.** Whenever `□A ∈ H`, the
+named open obligation `CS5PairSeedDisjunctionProperty H A` also fails -- by the identical `orI2`
+argument as `cs5PairSeedDisjunctionProperty_false`, but seeded from
+`cs5PairSeed_tauR_mem_closure_of_boxMem` instead of `A` being a `CS5` theorem. Confirms the
+refutation is not an artifact of the particular witness `⊥ → ⊥`: it holds uniformly whenever the
+seed already contains `τ_R A` directly, for whatever reason. -/
+theorem cs5PairSeedDisjunctionProperty_false_of_boxMem {H : Set (Proposition Atom)}
+    {A : Proposition Atom} (h : Proposition.box A ∈ H) :
+    ¬ CS5PairSeedDisjunctionProperty H A := by
+  intro hOpen
+  apply hOpen
+  have hR := cs5PairSeed_tauR_mem_closure_of_boxMem h
+  have hd : (modalDerivationSystem (@CS5PairAxiom Atom)).Deriv [cs5PairTauR A]
+      ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A)) :=
+    mp_deriv (weakening_deriv (cs5Pair_hOrI2 (cs5PairTauL (Proposition.box A)) (cs5PairTauR A))
+        (by simp)) (assumption_deriv (List.mem_singleton_self _))
+  exact modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS [cs5PairTauR A]
+    ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
+    (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hR) hd
 
 /-! ## Open Obligations
 

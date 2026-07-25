@@ -1,28 +1,18 @@
 {
-  "status": "planned",
-  "artifacts": [
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"
-  ],
+  "status": "in_progress",
+  "started_at": "2026-07-25T15:09:14Z",
+  "artifacts": [],
   "partial_progress": {
-    "stage": "plan_delivered",
-    "details": "32-phase plan written. Route recommendation: cut-free nested sequents (Arisaka-Das-Strassburger) as primary; product-model-over-IS5 route closed because its residual R-b is equivalent to the CS5=IS5 collapse. Two-label bridge planned explicitly as a separate stage and flagged as the larger risk."
+    "stage": "phase_1_complete",
+    "details": "Phase 1 landed: CS5PairSeedRightExclusion (corrected statement), cs5PairSeedDisjunctionProperty_false (permanent refutation, witness bot->bot), cs5PairSeedDisjunctionProperty_false_of_boxMem (H-driven companion refutation via cs5PairSeed_tauR_mem_closure_of_boxMem). CS5PairSeedDisjunctionProperty and cs5Pair_derivExcludes_of_disjunctionProperty left textually unchanged apart from a deprecation docstring paragraph. Module builds green, no sorry, lean_verify clean on both new refutation theorems.",
+    "lint_count_start": null,
+    "lint_count_current": null,
+    "phases_completed": 1
   },
   "metadata": {
     "session_id": "sess_1784987428_4cc3f0_554",
-    "agent_type": "planner-agent",
+    "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "plan", "planner-agent"],
-    "phase_count": 32,
-    "estimated_hours": 86,
-    "dependency_waves": [[1,5,6],[2,3,4,7],[8,9],[10],[11,14,16,19],[12,17,18],[13,20],[15,21],[22],[23],[24],[25,26],[27],[28],[29],[30],[31],[32]]
-  },
-  "memory_candidates": [
-    {
-      "content": "Formalising a cut-free sequent/nested-sequent system in Lean decomposes into a stable 12-step chain, each step one agent run: (1) syntax as separate mutual inductives per polarity so well-formedness invariants hold by construction rather than as predicates; (2) contexts encoded in their structural normal form (e.g. a List of layers) so context well-formedness is definitional and the paper's 'every context has shape X' observation needs no proof; (3) compositionality lemmas for the corresponding-formula translation over contexts; (4) rule inductive plus a height measure; (5) axiom-set extension rules; (6) soundness auxiliaries; (7) soundness; (8) completeness with cut; (9) super-rules and their mutual derivability; (10) height-preserving admissibility of structural rules; (11) a well-founded cut-value measure; (12) principal cases one lemma per connective, then commutative cases, then assembly. CSLib's Cslib/Logics/Propositional/SequentCalculus/LJ/CutElimination.lean is a proven in-repo template of exactly this shape (711 lines, sorry-free), and SubformulaProperty.lean the follow-on. Stage boundaries after 'cut-free completeness' and 'subformula property' are natural task-split points and give real partial payoff even when a later extension stage is blocked.",
-      "category": "PATTERN",
-      "source_artifact": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
-      "confidence": 0.8,
-      "suggested_keywords": ["cut-elimination", "nested-sequent", "lean-formalisation", "phase-decomposition", "proof-theory", "subformula-property"]
-    }
-  ]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+  }
 }

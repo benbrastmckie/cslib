@@ -1,7 +1,7 @@
 # Implementation Plan: Task #438
 
 - **Task**: 438 - Upstream comment/docstring cleanups via a CSLib PR (pr_task431_comment_cleanups)
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Effort**: 0.75 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/438_pr_task431_comment_cleanups/reports/01_pr-prep-comment-cleanups.md

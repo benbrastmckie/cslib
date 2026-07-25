@@ -1,0 +1,205 @@
+{
+  "tasks_vetted": [539, 540, 541, 543, 547],
+  "files_analyzed": [
+    "Cslib/Logics/Modal/Metalogic/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/MCS.lean",
+    "Cslib/Logics/Modal/ProofSystem/SchemaTags.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/B/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K4/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K5/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/K45/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/KB5/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/T/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S4/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/S5/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/TB/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D4/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D5/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/D45/Completeness.lean",
+    "Cslib/Logics/Modal/Metalogic/Systems/DB/Completeness.lean",
+    "Cslib/Foundations/Logic/Theorems/DerivationCombinators.lean",
+    "Cslib.lean",
+    "Cslib/Logics/Bimodal/Embedding/PropositionalEmbedding.lean",
+    "Cslib/Logics/Bimodal/Metalogic/Core/MCSProperties.lean",
+    "Cslib/Logics/Bimodal/Theorems/Combinators.lean",
+    "Cslib/Logics/Bimodal/Theorems/Perpetuity/Helpers.lean",
+    "Cslib/Logics/Bimodal/Theorems/Perpetuity/Principles.lean",
+    "Cslib/Logics/Bimodal/Theorems/Propositional/Connectives.lean",
+    "Cslib/Logics/Bimodal/Theorems/Propositional/Core.lean",
+    "Cslib/Logics/Bimodal/Theorems/TemporalDerived.lean",
+    "Cslib/Logics/Modal/FromPropositional.lean",
+    "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
+    "Cslib/Logics/Temporal/FromPropositional.lean",
+    "Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean",
+    "Cslib/Logics/Temporal/Metalogic/PropositionalHelpers.lean",
+    "Cslib/Logics/LTL/EmbeddingSemantics.lean",
+    "Cslib/Foundations/Logic/Tableau/PropositionalRules.lean",
+    "Cslib/Foundations/Logic/Tableau/Sign.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/Bridge.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra/KripkeBridge.lean",
+    "Cslib/Logics/Propositional/Semantics/Algebra.lean",
+    "Cslib/Logics/Propositional/Semantics/Bool.lean",
+    "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+    "Cslib/Logics/Propositional/SequentCalculus.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/Basic.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM.lean",
+    "Cslib/Logics/Propositional/SequentCalculus/LM/Soundness.lean"
+  ],
+  "ci_passed": false,
+  "ci_results": {
+    "lake_build": "PASS",
+    "lake_test": "PASS",
+    "checkInitImports": "PASS",
+    "lake_lint": "PASS",
+    "lint_style": "PASS",
+    "lake_shake": "FAIL"
+  },
+  "ci_notes": "lake shake --add-public --keep-implied --keep-prefix exits 1 across the whole repository (~2956 lines of output, hundreds of files). The overwhelming majority of hits are a pre-existing, repo-wide pattern unrelated to tasks 539/540/541/543/547: shake recommends removing `import Cslib.Init` from files where it sees no directly-referenced declaration, even though CONTRIBUTING.md/checkInitImports (which passed cleanly) mandates the import on every file -- a structural tension between the two required CI checks, not a defect introduced by these tasks. Of the changed files in this vet's scope, 4 are flagged: Cslib/Logics/Propositional/ProofSystemEquivalence.lean, Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean, and Cslib/Logics/Propositional/SequentCalculus/LM/Soundness.lean (all task 547) show only the universal Cslib.Init false positive; Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean (task 540) additionally shows two substantive, task-540-attributable redundant imports (`public import Cslib.Logics.Modal.Metalogic.MCS`, `public import Cslib.Logics.Modal.Semantics.Birelational`) that appear only in docstring prose, never as used identifiers, once task 540 added `GenericMCSBridge`/`DerivationCombinators` imports to the same file. lake build, checkInitImports, lake lint, lake exe lint-style, and lake test all pass cleanly with zero warnings attributable to any of the 46 files above. Pre-existing sorries (Tableau/Intuitionistic/{Completeness,Scheme}.lean, Tableau/Minimal/Completeness.lean) and pre-existing longLine warnings (Tableau/Intuitionistic/Soundness.lean) surfaced by lake build/lake test belong to files outside this vet's scope and are unrelated to tasks 539-547.",
+  "categories": [
+    {
+      "name": "CI Failures",
+      "severity": "Medium",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean",
+          "line": 10,
+          "check": "lake shake",
+          "standard": "CONTRIBUTING.md (CI > Imports)",
+          "description": "`lake shake --add-public --keep-implied --keep-prefix` flags `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused (both `BFrame`/`BForces`/`MCS`-named identifiers appear only in this file's docstring prose, never as used Lean terms). Task 540 added two new imports (`GenericMCSBridge`, `DerivationCombinators`) to this file without re-running import minimization, plausibly making the older imports newly redundant.",
+          "task_number": 540,
+          "fix_hint": "Run `lake shake --add-public --keep-implied --keep-prefix --fix` (or manually drop the two flagged imports) and re-verify with `lake build`."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/ProofSystemEquivalence.lean",
+          "line": 9,
+          "check": "lake shake",
+          "standard": "CONTRIBUTING.md (CI > Imports)",
+          "description": "`lake shake` flags `import Cslib.Init` as unused. This is the universal, repo-wide false-positive pattern (shake does not credit Cslib.Init's role in enabling default linting/tactics per CONTRIBUTING.md, even though checkInitImports requires it and passed). Listed for completeness, not attributable specifically to task 547's logic.",
+          "task_number": 547,
+          "fix_hint": "No action recommended in isolation; this pattern affects hundreds of pre-existing files repo-wide and any fix should be a repo-wide policy decision, not a per-task edit."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/SequentCalculus/LM/Completeness.lean",
+          "line": 9,
+          "check": "lake shake",
+          "standard": "CONTRIBUTING.md (CI > Imports)",
+          "description": "Same universal `Cslib.Init` shake false-positive as above.",
+          "task_number": 547,
+          "fix_hint": "No action recommended in isolation; see repo-wide note above."
+        },
+        {
+          "file": "Cslib/Logics/Propositional/SequentCalculus/LM/Soundness.lean",
+          "line": 9,
+          "check": "lake shake",
+          "standard": "CONTRIBUTING.md (CI > Imports)",
+          "description": "Same universal `Cslib.Init` shake false-positive as above.",
+          "task_number": 547,
+          "fix_hint": "No action recommended in isolation; see repo-wide note above."
+        }
+      ]
+    },
+    {
+      "name": "Design Improvements",
+      "severity": "Low",
+      "violations": [
+        {
+          "file": "Cslib/Logics/Bimodal/Metalogic/Core/MCSProperties.lean",
+          "line": 48,
+          "description": "File-scoped `set_option linter.style.emptyLine false`, `set_option linter.style.setOption false`, `set_option linter.flexible false` (ported verbatim from the external BimodalLogic repo). These disable three style/environment linters at file scope rather than fixing the underlying formatting, including disabling the linter that would otherwise flag the `set_option` usage itself.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "When touching these files again, consider reformatting to satisfy the disabled linters and dropping the `set_option` lines, rather than perpetuating the ported suppression."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/Combinators.lean",
+          "line": 57,
+          "description": "File-scoped `set_option linter.style.emptyLine false`, `set_option linter.style.longLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/Perpetuity/Helpers.lean",
+          "line": 30,
+          "description": "File-scoped `set_option linter.style.longLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/Perpetuity/Principles.lean",
+          "line": 31,
+          "description": "File-scoped `set_option linter.style.longLine false`, `set_option linter.style.emptyLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/Propositional/Connectives.lean",
+          "line": 26,
+          "description": "File-scoped `set_option linter.style.setOption false`, `set_option linter.flexible false`, `set_option linter.style.emptyLine false`, `set_option linter.style.longLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/Propositional/Core.lean",
+          "line": 28,
+          "description": "File-scoped `set_option linter.style.emptyLine false`, `set_option linter.style.longLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Bimodal/Theorems/TemporalDerived.lean",
+          "line": 24,
+          "description": "File-scoped `set_option linter.unusedSimpArgs false`, `set_option linter.style.emptyLine false`, `set_option linter.style.longLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/GeneralizedNecessitation.lean",
+          "line": 24,
+          "description": "File-scoped `set_option linter.style.emptyLine false`, plus two scoped `set_option linter.flexible false in` / `set_option linter.unusedSimpArgs false in` on individual declarations.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above; the per-declaration `in` form is preferable to file-scoping when only one declaration needs it."
+        },
+        {
+          "file": "Cslib/Logics/Temporal/Metalogic/PropositionalHelpers.lean",
+          "line": 28,
+          "description": "File-scoped `set_option linter.style.emptyLine false`.",
+          "standard": "CONTRIBUTING.md (Linting)",
+          "task_number": 540,
+          "fix_hint": "Same as above."
+        }
+      ]
+    }
+  ],
+  "suggested_fix_tasks": [
+    {
+      "title": "Prune shake-flagged redundant imports in CanonicalModel.lean (task 540 follow-up)",
+      "slug": "prune_canonicalmodel_redundant_imports",
+      "description": "lake shake --add-public --keep-implied --keep-prefix flags Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean's `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused now that task 540 added GenericMCSBridge/DerivationCombinators imports to the same file. Verify with `lake shake --fix` or manual removal, then `lake build` the module to confirm no regression (the MCS/Birelational names are referenced only in docstring prose, not as used Lean identifiers, per current inspection).",
+      "task_type": "cslib",
+      "severity": "Medium",
+      "category": "CI Failures",
+      "violation_count": 1,
+      "parent_task_numbers": [540]
+    },
+    {
+      "title": "Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files",
+      "slug": "remove_bimodal_temporal_linter_suppressions",
+      "description": "Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSProperties.lean, Bimodal/Theorems/{Combinators,Perpetuity/Helpers,Perpetuity/Principles,Propositional/Connectives,Propositional/Core,TemporalDerived}.lean, Temporal/Metalogic/{GeneralizedNecessitation,PropositionalHelpers}.lean) carry file-scoped `set_option linter.style.{emptyLine,longLine,setOption} false` / `set_option linter.{flexible,unusedSimpArgs} false`, inherited verbatim from the external BimodalLogic port. Reformat each file to satisfy the disabled linters (wrap long lines, remove stray blank lines, resolve flexible/unused-simp-arg findings) and drop the suppressions, or narrow them to per-declaration `set_option ... in` where only one declaration is affected.",
+      "task_type": "cslib",
+      "severity": "Low",
+      "category": "Design Improvements",
+      "violation_count": 9,
+      "parent_task_numbers": [540]
+    }
+  ]
+}

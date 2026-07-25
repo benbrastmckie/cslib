@@ -9045,6 +9045,785 @@
       "detected_artifacts": [
         "reports/"
       ]
+    },
+    {
+      "project_number": 550,
+      "project_name": "remove_bimodal_temporal_linter_suppressions",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Remove ported set_option linter suppressions in Bimodal/Temporal propositional-reasoning files",
+      "description": "Nine files touched by task 540 (Bimodal/Metalogic/Core/MCSProperties.lean, Bimodal/Theorems/{Combinators,Perpetuity/Helpers,Perpetuity/Principles,Propositional/Connectives,Propositional/Core,TemporalDerived}.lean, Temporal/Metalogic/{GeneralizedNecessitation,PropositionalHelpers}.lean) carry file-scoped `set_option linter.style.{emptyLine,longLine,setOption} false` / `set_option linter.{flexible,unusedSimpArgs} false`, inherited verbatim from the external BimodalLogic port. Reformat each file to satisfy the disabled linters (wrap long lines, remove stray blank lines, resolve flexible/unused-simp-arg findings) and drop the suppressions, or narrow them to per-declaration `set_option ... in` where only one declaration is affected.",
+      "created": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:30:56Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/reports/01_linter-suppression-inventory.md",
+          "type": "report",
+          "summary": "Per-file suppression inventory with empirical DEAD/REAL classification, finding line numbers, linter mechanics, fix ordering, verification steps."
+        },
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/plans/01_drop-linter-suppressions.md",
+          "type": "plan",
+          "summary": "5-phase plan: drop dead suppressions, wrap Combinators long lines, remove Principles blank lines, narrow Connectives flexible, full verification gate."
+        },
+        {
+          "path": "specs/550_remove_bimodal_temporal_linter_suppressions/summaries/01_drop-linter-suppressions-summary.md",
+          "type": "summary",
+          "summary": "Dropped/narrowed all inherited linter suppressions across nine Bimodal/Temporal files; wrapped long lines, removed stray blanks, scoped flexible; full CI green."
+        }
+      ],
+      "session_id": "sess_1784858753_022fa6_550",
+      "completion_summary": "Removed all inherited file-scoped linter suppressions across nine Bimodal/Temporal files: dropped 13 dead suppressions, wrapped 6 long lines in Combinators, removed 5 stray blank lines in Perpetuity/Principles, narrowed Connectives flexible to per-declaration set_option ... in; full build, lint, lint-style, test, mk_all, shake all green.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 549,
+      "project_name": "prune_canonicalmodel_redundant_imports",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Prune shake-flagged redundant imports in CanonicalModel.lean (task 540 follow-up)",
+      "description": "lake shake --add-public --keep-implied --keep-prefix flags Cslib/Logics/Modal/Metalogic/Intuitionistic/CanonicalModel.lean's `public import Cslib.Logics.Modal.Metalogic.MCS` and `public import Cslib.Logics.Modal.Semantics.Birelational` as unused now that task 540 added GenericMCSBridge/DerivationCombinators imports to the same file. Verify with `lake shake --fix` or manual removal, then `lake build` the module to confirm no regression (the MCS/Birelational names are referenced only in docstring prose, not as used Lean identifiers, per current inspection).",
+      "created": "2026-07-24T02:04:32Z",
+      "last_updated": "2026-07-24T02:30:51Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/reports/01_prune-redundant-imports.md",
+          "type": "report",
+          "summary": "Import-hygiene analysis: shake output, two-file change set (remove MCS+Birelational from CanonicalModel, add Birelational to TruthLemma), verification via Completeness build."
+        },
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/plans/01_prune-redundant-imports.md",
+          "type": "plan",
+          "summary": "Single-phase atomic plan: remove MCS+Birelational imports from CanonicalModel, add Birelational to TruthLemma, verify via Completeness build."
+        },
+        {
+          "path": "specs/549_prune_canonicalmodel_redundant_imports/summaries/01_prune-redundant-imports-summary.md",
+          "type": "summary",
+          "summary": "Removed MCS+Birelational imports from CanonicalModel, added Birelational to TruthLemma; full verification green (build, lint, shake, mk_all, test)."
+        }
+      ],
+      "session_id": "sess_1784858753_022fa6_549",
+      "completion_summary": "Pruned redundant public imports (MCS, Birelational) from Intuitionistic/CanonicalModel.lean and added the compensating public import of Birelational to TruthLemma.lean; verified with scoped Completeness build, checkInitImports, lint-style, mk_all, shake, and full lake test (all green).",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 474,
+      "project_name": "draft_zulip_replies_meeting_fragments",
+      "status": "completed",
+      "task_type": "general",
+      "topic": "PR & Upstreaming",
+      "description": "Draft Zulip replies confirming CSLib meeting attendance to Montesi and opening the fragment-design discussion Doty proposed",
+      "created": "2026-07-02T16:08:19Z",
+      "last_updated": "2026-07-24T15:31:37Z",
+      "session_id": "sess_1784907081_statusfix",
+      "completion_summary": "Drafted Zulip replies for meeting fragments; deliverable zulip-drafts.md produced (Draft A/B plus fact-checked reminder notes) for user review and personalization before posting.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 393,
+      "project_name": "reuse_consolidation_lindenbaum_classical",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Consolidate duplicated Lindenbaum/Classical/conservativity constructions (Zulip first)",
+      "description": "Consolidate duplicated Lindenbaum / MCS / conservativity constructions across the logic families. Duplication confirmed present: multiple parallel Lindenbaum algebra variants (HilbertLindenbaumAlgebra, ImpLindenbaumAlgebra, RelLindenbaumAlgebra, LindenbaumAlg) and MCS-extension variants (lindenbaumMCS/lindenbaumMCSSet/bimodal_lindenbaum); GenericMCSBridge.lean duplicated x4 (Propositional/Modal/Bimodal.Core/Temporal Metalogic dirs) as thin per-family re-instantiations of one Foundations pattern; LiftViaMorphism.lean x3 (Modal InterSystem, Propositional Semantics/Algebra, Bimodal ConservativeExtension). Consolidate onto the shared Foundations generic-MCS and morphism-lift machinery, retiring the per-family copies where they add no value. (Dependency on the archived-completed docstring task dropped.)",
+      "created": "2026-06-28T12:53:27Z",
+      "last_updated": "2026-07-24T11:04:34Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/393_reuse_consolidation_lindenbaum_classical/reports/01_reuse-consolidation-survey.md",
+          "type": "report",
+          "summary": "Four-cluster consolidation survey with per-cluster action (keep / retire / partial-generalize / defer), evidence (reverse-dep and symbol greps, delegation bodies), a 4-phase zero-debt ordering, and lint notes."
+        },
+        {
+          "path": "specs/393_reuse_consolidation_lindenbaum_classical/plans/01_reuse-consolidation-plan.md",
+          "type": "plan",
+          "summary": "4-phase zero-debt consolidation plan (baseline+Cluster A doc; retire Cluster B x3; narrow Cluster C deriv-glue hoist with fallback; full CI + Cluster D deferral), with dependency-wave table, risks/mitigations, and per-phase lake build gates."
+        },
+        {
+          "path": "specs/393_reuse_consolidation_lindenbaum_classical/summaries/01_reuse-consolidation-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary covering all 4 phases, decisions, impacts, and the deferred Cluster D follow-up."
+        }
+      ],
+      "session_id": "sess_1784888487_837ef1_393",
+      "dependencies": [
+        545,
+        546,
+        542
+      ],
+      "topic": "Code Hygiene",
+      "completion_summary": "Consolidated Lindenbaum/MCS/conservativity duplication: retired 3 LiftViaMorphism.lean overlays (~607 lines), wired GenericMCS.deriv_iff_algebraic_of_forward into Propositional+Modal bridges, documented Cluster A adapters; Cluster D deferred. Full CI green.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 405,
+      "project_name": "proof_style_cleanup_modal_soundness",
+      "status": "completed",
+      "task_type": "cslib",
+      "description": "Simplify the proof machinery in the task-402 modal tableau soundness redesign before any upstream PR. Targets in Cslib/Logics/Modal/Tableau/Soundness.lean: modalApplyOne_fresh (uses unfold + extract_lets + `repeat first | Or.inl rfl | Or.inr ... | split` plus an apply_ite/ite_self cleanup) and the modalExpandBranches_closed_unsat per-branch accs/Forall2 reformulation. Improve readability/robustness without changing statements. Verify scoped + full lake build green, zero sorry, lint-style pass. Touches the same file as task 404 (sequence after it); overlaps code-hygiene task 321.",
+      "dependencies": [
+        404
+      ],
+      "parent_task": 402,
+      "last_updated": "2026-07-24T15:31:21Z",
+      "topic": "Modal Logic",
+      "session_id": "sess_1784907081_statusfix",
+      "artifacts": [
+        {
+          "type": "report",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/reports/01_proof-style-cleanup-modal-soundness.md"
+        },
+        {
+          "type": "plan",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/plans/01_proof-style-cleanup-modal-soundness.md"
+        },
+        {
+          "type": "summary",
+          "path": "specs/405_proof_style_cleanup_modal_soundness/summaries/01_proof-style-cleanup-modal-soundness-summary.md"
+        }
+      ],
+      "completion_summary": "Applied 3 verified stylistic edits (R1 structured split-proof, R2 merged cases-result arms, R3 omit [Hashable Atom]) to Cslib/Logics/Modal/Tableau/Soundness.lean. No signature changes; full lake build, lake test, lint-style, lake lint, and shake all clean; zero sorry; no new axioms.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 407,
+      "project_name": "mpl_base_structure_first_redesign",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Research & design: make MPL the structure-first base logic (⊥ as nullary connective; explosion/leastness/initiality as independent property modules)",
+      "description": "DESIGN SOURCE: user's ChatGPT design conversation (specs/tmp/chat.md) + codebase synthesis. Adopt the STRUCTURE-FIRST account: one fixed language ⟨Atom,⊥,∧,∨,→⟩; ⊥ is a primitive NULLARY connective whose meaning is intentionally underdetermined (a Johansson 'designated constant' supplied by every model, no intrinsic proof rule). MPL is the BASE proof theory (no rule/axiom mentions ⊥; ¬A:=A→⊥; A,A→⊥⊢⊥ is just impE). IPL = MPL + explosion (⊥/A) as an INDEPENDENT module; CPL = IPL + classical principles. Semantically, leastness (⊥≤a), initiality (universal property 0→A), and explosion-soundness are INDEPENDENT properties added by conservative strengthening, not changes to syntax or recursive clauses. Modularity organized around PROPERTIES (typeclasses/mixins), not connectives, so structural metatheory (weakening, substitution, admissibility, cut) is proved ONCE at MPL. RELATION TO 398: this is the deeper redesign 398 postponed (398 report §5). 398 took the OPPOSITE commitment (IPL-as-base via a gated ND efq constructor). Recommendation (report §5) is option (C): re-frame 398's gate as the explosion PROPERTY MODULE rather than revert it. FINDINGS (report 01): codebase is already ~70-80% structure-first. ALIGNED: algebraic semantics (AlgEvaluate with arbitrary bot_val; BrouwerianBot vs PointedBrouwerian; IsBotFree; conservativity chains) and Hilbert axioms (MinPropAxiom→IntPropAxiom+efq→PropositionalAxiom+peirce; IsIntuitionistic/MinimalAxioms typeclasses). GAPS: (1) ND inverted by 398 (gated efq = IPL-base); (2) sequent calculus LARGE gap (LJ/LK hard-code botL; no minimal LM; structural results per-system); (3) metalogic ~50% Min*/Int* duplication, Lindenbaum hard-wires EFQ; (4) semantic leastness/initiality/explosion present only implicitly (OrderBot + per-axiom proofs), not as a NAMED property hierarchy. SCOPE: research+design done (report 01). Plan should cover the cheap additive waves first: W1 design canonicalization+ND re-framing (C), W2 named semantic property hierarchy, W3 metalogic genericization, W4 tableau unification; and SPAWN W5 (minimal sequent calculus LM) and optional W6 (literal ⊥-rule-free ND, option B) as separate --hard tasks. Preserve ALL MPL/conservativity assets (do not revert 398). --hard recommended for planning. Honor Zulip AI policy. See OPEN QUESTIONS in report §9 (ND reconciliation C vs B; task scope; categorical/initiality timing; property naming; relation to task 400).",
+      "created": "2026-06-29T00:00:00Z",
+      "last_updated": "2026-07-24T15:31:25Z",
+      "next_artifact_number": 5,
+      "artifacts": [
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md",
+          "type": "report",
+          "summary": "Structure-first MPL-base design distilled from chat.md; full 6-layer current-state map with anchors; gap analysis; ND reconciliation decision (option C); target module map; 6-wave phasing; open questions"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md",
+          "type": "report",
+          "summary": "Zulip-grounded MPL-with-bot vs without-bot dispute (Design A vs B); faithful reconstruction of the Waring/Doty/Benjamin debate with msg IDs; comparison table; recommends Design A + fragment-genericity as the headline ambition"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/reports/03_design-verification-plan-readiness.md",
+          "type": "report",
+          "summary": "Adversarial verification of MPL-base design (option C, 70-80%-done, four gap claims) against current code; plan-readiness verdict SOUND-AS-IS with three non-blocking sharpenings S1-S3."
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/plans/04_mpl-base-waves-1-4-v2.md",
+          "type": "plan",
+          "summary": "Waves 1-4 v2 plan: carries prior Option C plan forward, decomposed into 9 small phases, integrating report 03 sharpenings S1 (pin MinimalDerivation/IsBotRuleFree), S2 (reuse IsIntuitionistic/OrderBot, no HasExplosion), S3 (fragment-genericity spike with research-or-defer gate)."
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/summaries/04_mpl-base-waves-1-4-v2-summary.md",
+          "type": "summary",
+          "summary": "Phase 9 CI verification complete; design note finalized; task 410 spawned for fragment-generic algebraic completeness follow-on research."
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/mpl-base-design-note.md",
+          "type": "design_note",
+          "summary": "MPL-base design note: structure-first account, named property hierarchy, generic Lindenbaum substrate, Phase 7 residual (fragment-generic algebraic completeness, open research task 410)"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/summaries/05_initial-object-witness-summary.md",
+          "type": "summary",
+          "summary": "HasInitialBot initial-object witness added to BotProperties/BrouwerianBot/PointedBrouwerianCompleteness; explosion-soundness re-expressed via named categorical universal property; zero sorries, zero axioms, all touched modules green"
+        },
+        {
+          "path": "specs/407_mpl_base_structure_first_redesign/plans/01_mpl-base-waves-1-4.md",
+          "type": "plan",
+          "summary": "mpl base waves 1 4 (backfilled by --sync)"
+        }
+      ],
+      "session_id": "sess_1784907081_statusfix",
+      "dependencies": [],
+      "topic": "Propositional Logic",
+      "plan_metadata": {
+        "phases": 9,
+        "total_effort_hours": 18,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 2,
+        "dependency_waves": [
+          {
+            "wave": 1,
+            "phases": [
+              1
+            ]
+          },
+          {
+            "wave": 2,
+            "phases": [
+              2,
+              3,
+              5,
+              7,
+              8
+            ]
+          },
+          {
+            "wave": 3,
+            "phases": [
+              4,
+              6
+            ]
+          },
+          {
+            "wave": 4,
+            "phases": [
+              9
+            ]
+          }
+        ],
+        "reports_integrated": [
+          {
+            "path": "specs/407_mpl_base_structure_first_redesign/reports/01_mpl-base-structure-first.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-06-29"
+          },
+          {
+            "path": "specs/407_mpl_base_structure_first_redesign/reports/02_mpl-base-with-vs-without-bot.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-06-29"
+          },
+          {
+            "path": "specs/407_mpl_base_structure_first_redesign/reports/03_design-verification-plan-readiness.md",
+            "integrated_in_plan_version": 2,
+            "integrated_date": "2026-06-29"
+          }
+        ]
+      },
+      "note": "Ready for /pr 407. All 5 pre-submission decisions resolved 2026-06-30 (decisions.md). Q3 (categorical/initiality) implemented as HasInitialBot witness, committed 569f6ac5, green. pr-description.md finalized. PR submission is user-only: run /pr 407.",
+      "completion_summary": "Redesigned MPL base structure (structure-first): added HasInitialBot to BotProperties.lean, bridge lemmas to BrouwerianBot.lean, and initial-object witness in PointedBrouwerianCompleteness.lean. All four phases completed; scoped and full lake build green (pre-existing Intuitionistic Completeness sorry unrelated); zero new sorry.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 412,
+      "project_name": "simplify_proofs_normalization_foundations",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "parent_task": 278,
+      "description": "[Split from task 278.] Simplify proofs in Foundations/Logic/ that use manual `simp only [listImp_nil, listImp_cons, bigconj_nil, bigconj_singleton, bigconj_cons_cons, negBigconj_def, ...]` or verbose tactic chains over the task-268 normalization lemmas; replace with `grind`/`simp` where the @[simp, scoped grind =] co-tags (ListImplication.lean, Theorems/BigConj.lean) make the explicit lemma lists redundant. Audit ListImplication, BigConj, and downstream Foundations/Logic proof sites. Sequence after the Foundations completeness-infra abstraction (41) and the Logics/Foundations file-structure pass (321) to avoid re-sweeping moved code. Must pass lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake.",
+      "depends_on": [
+        41,
+        321
+      ],
+      "dependencies": [
+        41
+      ],
+      "created": "2026-06-29T22:13:39Z",
+      "last_updated": "2026-07-24T04:36:20Z",
+      "session_id": "sess_1784866674_c9da04_412",
+      "artifacts": [
+        {
+          "path": "specs/412_simplify_proofs_normalization_foundations/reports/01_simplify-normalization-proof-sites.md",
+          "type": "report",
+          "summary": "Research: stale premise — verbose simp-only lists already gone; modest collapses only; task 41 unstarted is soft blocker."
+        },
+        {
+          "path": "specs/412_simplify_proofs_normalization_foundations/plans/01_narrow-normalization-collapses.md",
+          "type": "plan",
+          "summary": "2-phase narrow plan: BigConj + ListDeduction grind collapses, then full CI gate."
+        },
+        {
+          "path": "specs/412_simplify_proofs_normalization_foundations/summaries/01_narrow-normalization-collapses-summary.md",
+          "type": "summary",
+          "summary": "Both grind collapses applied; full CI gate green; zero sorry."
+        }
+      ],
+      "completion_summary": "Applied both research-confirmed grind collapses (BigConj.lean singleton branch; ListDeduction.lean listImp_axiom_k branch), deleting dead follow-on tactic lines. Full CSLib CI gate green: lake build (3255/3255), lake test (9247/9247), checkInitImports, lint-style, lake lint, lake shake (no findings for modified files). Zero sorry, zero new axioms, only the two intended files modified.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 438,
+      "project_name": "pr_task431_comment_cleanups",
+      "status": "completed",
+      "task_type": "cslib",
+      "priority": "low",
+      "description": "Upstream the comment/docstring cleanups identified by the task 431 audit via a CSLib PR. The edits are already applied and committed locally at 35436d7e (chore): (1) deleted the commented-out Term.subst_comm TODO stub in Cslib/Languages/LambdaCalculus/Named/Untyped/Basic.lean, (2) reworded the stale 'removing the sorry' docstring in Cslib/Logics/LTL/Semantics/GNBA.lean:37 to past tense. Both are comment-only (no proof/build impact). Remaining work: submit to leanprover/cslib via /pr (user-only command) with a 'chore'/'doc' prefixed title. Optionally bundle any further doc-hygiene found in those two modules. Source: task 431 audit.",
+      "created": "2026-06-30T16:29:40Z",
+      "last_updated": "2026-07-24T15:31:29Z",
+      "session_id": "sess_1784907081_statusfix",
+      "dependencies": [],
+      "parent_task": 431,
+      "topic": "PR & Upstreaming",
+      "artifacts": [
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/reports/01_pr-prep-comment-cleanups.md",
+          "type": "report",
+          "summary": "PR-prep research: verified committed edits, corrected scope (drop GNBA.lean as moot), confirmed zero build impact, recommended chore(LambdaCalculus) title and fresh-branch construction for /pr."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/plans/01_pr-prep-comment-cleanups.md",
+          "type": "plan",
+          "summary": "Two-phase PR-prep plan: verify Basic.lean stub deletion + upstream diff (Phase 1), author pr-description.md with chore(LambdaCalculus) title and transition to PR READY (Phase 2)."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/pr-description.md",
+          "type": "pr_description",
+          "summary": "PR title chore(LambdaCalculus): remove stale Term.subst_comm sorry stub; comment-only single-file scope, AI disclosure, task 431 reference, fresh-branch construction recipe."
+        },
+        {
+          "path": "specs/438_pr_task431_comment_cleanups/summaries/01_pr-prep-comment-cleanups-summary.md",
+          "type": "summary",
+          "summary": "PR-prep complete: verified single-file comment-only Basic.lean deletion vs upstream/main, authored pr-description.md, transitioned to PR READY."
+        }
+      ],
+      "completion_summary": "PR-preparation task (no proof/code edits): verified the stale Term.subst_comm commented stub was already removed from Basic.lean and authored the PR description. Verification phase completed; upstream fetch and grep confirmations clean.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 449,
+      "project_name": "define_bxplus_metric_tense_base",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Define BX+ (metric tense logic): temporal uniformity axioms, Metric frame class, and soundness over ordered-abelian-group flows",
+      "description": "Foundation for the corrected TM-over-temporal conservativity result. Supersedes abandoned task 445; inherits its research at specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/01_domain-mismatch-transfer-feasibility.md and 02_literature-grounded-conservativity-obstruction.md.\n\nBACKGROUND: Deep, machine-verified research established that bimodal_conservative_over_temporal as originally stated is FALSE. Bimodal TM's FrameClass.Base carries five \"uniformity\" axioms (discrete_symm_fwd/bwd, discrete_propagate_fwd/bwd, discrete_box_necessity at Cslib/Logics/Bimodal/ProofSystem/Axioms.lean:248-273) encoding the translation-homogeneity and negation-symmetry of ordered-abelian-group time, whereas pure Burgess/Xu Temporal FrameClass.Base (complete over ALL serial linear orders) has none of them. TM is genuinely non-conservative over plain BX (witness phi_T = (untl bot top) -> G(untl bot top), refuted on the doubled rationals Lex(Q x Bool)). The fix is to state conservativity over the matching metric temporal base BX+.\n\nGOAL: Introduce BX+ = the metric tense logic sound over ordered-abelian-group time.\n\n1. Add a new Temporal frame class FrameClass.Metric with Base < Metric (extend the FrameClass inductive plus its LE / PartialOrder / DecidableRel instances and minFrameClass in Cslib/Logics/Temporal/ProofSystem/Axioms.lean, mirroring how Dense is handled). Do NOT add uniformity axioms to Base: Temporal Base must remain sound over all serial linear orders (Cslib/Logics/Temporal/Metalogic/Soundness.lean:409); breaking that is out of scope.\n\n2. Add the FOUR pure-temporal uniformity axioms to the Temporal Axiom inductive, each gated to minFrameClass = .Metric:\n   - discrete_symm_fwd:      U(bot,top) -> S(bot,top)\n   - discrete_symm_bwd:      S(bot,top) -> U(bot,top)\n   - discrete_propagate_fwd: U(bot,top) -> G(U(bot,top))\n   - discrete_propagate_bwd: U(bot,top) -> H(U(bot,top))\n   (The bimodal discrete_box_necessity chi -> box chi has no pure-temporal form; it erases to a tautology and is handled in task 450, NOT here.)\n\n3. Define the semantic frame class of \"metric\" / ordered-abelian-group temporal frames (time D an ordered abelian group, matching the bimodal TaskFrame domain constraints AddCommGroup + LinearOrder + IsOrderedAddMonoid). Prove SOUNDNESS of each new axiom over this class: they are exactly the frame-validities of group-ordered time (propagation from translation-invariance, symmetry from negation). Extend the Temporal soundness result to FrameClass.Metric over the metric frame class.\n\n4. Provide the Derivable / DerivationTree plumbing and a BX+ derivability abbreviation (DerivationTree FrameClass.Metric).\n\nZero-debt: no sorry, no vacuous defs (def X := True / trivial are prohibited). Verify with lean_verify; full lake build / lake lint / lake exe lint-style / lake test green. Docstrings in house style on every new declaration.\n\nDefinition of done: FrameClass.Metric and the 4 temporal uniformity axioms defined and gated; metric temporal frame semantics defined; soundness of BX+ over ordered-abelian-group flows proved sorry-free; CI green.\n",
+      "parent_task": 180,
+      "created": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-24T11:04:43Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/449_define_bxplus_metric_tense_base/reports/01_bxplus-metric-tense-survey.md",
+          "type": "report",
+          "summary": "Survey of the four BX+ foundation extension points with verified code sketches, the exhaustive-match ripple surface, module wiring, zero-debt/lint notes, a 4-phase implementation suggestion, and machine-verified soundness proofs ported from the bimodal uniformity axioms."
+        },
+        {
+          "path": "specs/449_define_bxplus_metric_tense_base/plans/01_bxplus-metric-tense-plan.md",
+          "type": "plan",
+          "summary": "4-phase BX+ metric tense base implementation plan (sequential waves 1-4), ~4 hours, zero-debt: FrameClass.Metric + four axioms + exhaustive-match repair (P1), MetricSoundness.lean soundness proofs (P2), derivation soundness + BXPlusDerivable (P3), barrel wiring + CI (P4)."
+        },
+        {
+          "path": "specs/449_define_bxplus_metric_tense_base/summaries/01_bxplus-metric-tense-summary.md",
+          "type": "summary",
+          "summary": "4-phase BX+ metric tense base implementation summary: FrameClass.Metric + four uniformity axioms + exhaustive-match repair (P1); MetricSoundness.lean four soundness proofs + axiom_sound_metric (P2); derivation soundness at Metric + BXPlusDerivable (P3); barrel wiring + full CI (P4). Two import-only deviations documented inline."
+        }
+      ],
+      "dependencies": [],
+      "topic": "Bimodal Logic",
+      "session_id": "sess_1784888487_837ef1_449",
+      "completion_summary": "Introduced BX+ metric tense base: FrameClass.Metric with Base < Metric, four uniformity axioms gated to Metric, new MetricSoundness.lean with soundness over ordered-abelian-group time, BXPlusDerivable abbreviation. Full CI green (3251 jobs).",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 451,
+      "project_name": "bxplus_completeness_over_group_flows",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "BX+ completeness over ordered-abelian-group time flows",
+      "description": "Deeper metatheory for the metric tense logic BX+ (defined in task 449). Optional-but-desired for rigor; also unlocks the semantic proof route for task 450. Depends on task 449.\n\nGOAL: Prove BX+ (Temporal FrameClass.Metric) COMPLETE over the class of ordered-abelian-group temporal frames: every formula valid on all group-ordered flows is BX+-derivable (equivalently, every BX+-consistent formula has a group-ordered countermodel).\n\nResearch must decide the construction. Candidate routes (see specs/445_fix_temporal_conservativity_domain_mismatch_sorry/reports/02_literature-grounded-conservativity-obstruction.md):\n- Adapt the existing Temporal completeness machinery (Chronicle / MCS construction under Cslib/Logics/Temporal/Metalogic/Chronicle/) to yield a countermodel whose order embeds into an ordered abelian group.\n- Loewenheim-Skolem to a countable model, then Cantor (Order.iso_of_countable_dense) for the dense case plus a discreteness case-split, transporting satisfaction along the sound Satisfies.orderIso transport lemma sketched in the 445 report section 7.\nLiterature grounding: Xu1988, Burgess1984 sec 6.1, Gabbay1993 (irreflexivity rule), Reynolds. Confirm exactly which frame class BX+ is genuinely complete over before committing.\n\nZero-debt: no sorry, no vacuous defs; full CI green. If completeness turns out to need an open / research-level lemma, escalate with the exact goal rather than papering over it.\n",
+      "parent_task": 180,
+      "created": "2026-07-01T07:00:00Z",
+      "last_updated": "2026-07-24T16:00:30Z",
+      "next_artifact_number": 1,
+      "artifacts": [
+        {
+          "path": "specs/451_bxplus_completeness_over_group_flows/reports/01_bxplus-completeness-frame-class.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/451_bxplus_completeness_over_group_flows/plans/01_bxplus-completeness-uniform-class.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/451_bxplus_completeness_over_group_flows/summaries/01_bxplus-completeness-uniform-class-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "dependencies": [
+        449
+      ],
+      "topic": "Bimodal Logic",
+      "session_id": "sess_1784905751_756cda_451",
+      "completion_summary": "Implemented BX+ completeness over the uniform class U with dense->Q Cantor bridge (MetricCompleteness.lean): Satisfies_orderIso transport, soundness_uniform + oag corollary, chronicleUniformMetric, completeness_metric, denseCountermodel_transport_rat (unlocks task 450 semantic route). Literal discrete-case oag-completeness escalated as open/likely-false per research. All 6 phases sorry-free, full CI green (3253 jobs).",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 522,
+      "project_name": "uniform_frame_condition_axiom_correspondence_library",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "description": "Uniform frame-condition to axiom correspondence library for modal soundness. RECONCILED: Phase 1 delivered sorry-free - Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean provides the five explicit-hypothesis correspondence lemmas (Satisfies.modalT_axiom/modalFour_axiom/modalB_axiom/modalD_axiom/modalFive_axiom), registered in the barrel and re-exported via Soundness.lean. REMAINING (the actual dedup payoff): wire the 14 downstream Cslib/Logics/Modal/Metalogic/Systems/*/Soundness.lean consumers to delegate to this library instead of reproving axiom-frame correspondence case-by-case; they are currently still byte-identical case-by-case proofs. Was gated pending a Zulip design decision on the library shape. DESIGN DECISION (resolved, user 2026-07-18): Public signature form = EXPLICIT-HYPOTHESIS primary — lemmas like Satisfies.modalT_axiom' m (h_refl : ∀ w, m.r w w) w φ; the 14 downstream Systems/*/Soundness.lean consumers delegate via one-line exact-delegation passing their existing h_refl/h_trans/… (zero other downstream edits). Additionally expose instance-arg [Std.Refl m.r] forms for new systems. Scope: one coherent PR = additive lemmas (already landed in FrameCorrespondence.lean) + wire the 14 consumers; defer completeness-FC re-expression and birelational dedup to follow-ups. Post a Zulip heads-up before the multi-file PR lands.",
+      "created": "2026-07-17T20:46:47Z",
+      "last_updated": "2026-07-24T15:31:33Z",
+      "session_id": "sess_1784907081_statusfix",
+      "artifacts": [
+        {
+          "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/reports/01_frame-condition-correspondence-survey.md",
+          "type": "report",
+          "summary": "Research report"
+        },
+        {
+          "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/plans/01_frame-correspondence-library.md",
+          "type": "plan",
+          "summary": "Implementation plan"
+        },
+        {
+          "path": "specs/522_uniform_frame_condition_axiom_correspondence_library/summaries/01_frame-correspondence-library-summary.md",
+          "type": "summary",
+          "summary": "frame correspondence library summary (backfilled by --sync)"
+        }
+      ],
+      "blockers": null,
+      "file_scope": [
+        "Cslib/Logics/Modal/Metalogic/Systems/",
+        "Cslib/Logics/Modal/Metalogic/FrameCorrespondence.lean"
+      ],
+      "completion_summary": "Uniform frame-condition axiom-correspondence library: executed Phases 3-5 across 14 consumer modules and 15 touched/new files. Full lake build 3243/3243 jobs with no regressions; zero sorry; no Completeness.lean adapter changes needed.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 535,
+      "project_name": "abstract_termination_measure_interface_s4b_loop",
+      "status": "completed",
+      "task_type": "cslib",
+      "title": "Abstract termination-measure interface for S4/B loop lemma (task 511 Phase 7 follow-on)",
+      "description": "Task 511 (S4 loop-checking termination) is BLOCKED at Phase 7 (decidability) because of a driver/shadow-invariant mismatch, precisely documented in specs/511_s4_loop_checking_termination/handoffs/07_phase7-blocked-driver-mismatch.md. ROOT CAUSE: s4Valid's Decidable instance must run the REAL driver modalTableauS4 := modalTableauGen (modalApplyOneS4 phi) phi, whose minting guard blockingWorldS4 compares a prospective successor's birth content against the CURRENT LIVE relevantSetFinset of every existing known world. The landed termination machinery (S4LoopInv, modalStepBranchS4_worldBound, task 511 Phases 4-6, LoopChecking.lean, all sorry-free) is proven only for the keyed SHADOW stepper modalStepBranchS4Keyed, guarded by blockingWorldS4Keyed -- a comparison against a stable, birth-frozen keys list instead. This is directly visible in the step hypothesis of modalStepBranchS4_preserves_S4LoopInv, which takes modalStepBranchS4Keyed ... = some (...), not modalStepBranchS4. The two guards are NOT interchangeable: S4LoopInv.keyLowerBd gives only keys subset-of relevantSetFinset (a subset, not equality), so the live-set freshness guarantee blockingWorldS4_none_fresh does not imply a keys-freshness guarantee -- the world-bound guarantee is proven about a driver modalTableauS4 does not actually run. TARGET: close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4. RESOLUTION PATHS (either is acceptable; survey first, then choose): (a) 9-A, generalize the shared driver framework (RuleApply/Accessibility in GenericDriver.lean, and/or the Aux-parametrized top-loop lemma modalExpandBranchesHintikka/AuxStepPreserved/AuxBounds/ModalLoopInvHintikka already landed in CompletenessLoop.lean for S5's ModalLoopAuxS5w) to support extra opaque per-branch threaded state generically (the S4 keys : List (WorldIndex x Finset (Sign x Proposition Atom)) list), not just a Prop-valued Aux. Note: wrapping keys inside an existential Aux(b,e,acc) := exists keys, S4LoopInv-fields does NOT avoid the mismatch by itself, because AuxStepPreserved would still need to re-derive keysDistinct preservation using the real (live-set) guard's contract -- the same insufficient argument; the generic interface's apply : RuleApply Atom is a single fixed function per call with no mechanism for extra per-branch threaded state to evolve across steps. (b) 9-B, build a bespoke S4-specific top-level driver (e.g. modalExpandBranchesS4Keyed/modalTableauS4Keyed) directly around the already-landed modalStepBranchS4Keyed, with its own full processNext-style fuel induction (mirroring the ~700-line modalExpandBranchesHintikka/modalExpandBranchesGen_hintikka precedent), plus re-verification that soundness (modalTableauS4_sound) and the truth lemma (modalTruthLemmaS4) reconnect against the keyed guard's Hintikka witnesses. Either path must also redefine modalTableauS4 (or add a new modalTableauS4Keyed and repoint s4Valid's Decidable instance to it) since the currently-shipped modalTableauS4 runs the live-set-guarded modalApplyOneS4, not the keyed guard the termination proof is about. SHARED FILES: Cslib/Logics/Modal/Tableau/CompletenessLoop.lean and Cslib/Logics/Modal/Tableau/GenericDriver.lean (the interface-generalization side), and Cslib/Logics/Modal/Tableau/LoopChecking.lean (the S4-consuming side, where modalTableauS4/modalStepBranchS4Keyed/S4LoopInv live). SHARED BENEFICIARIES: this is a shared-file change explicitly identified (Planner Decision 2, specs/511_s4_loop_checking_termination/plans/01_s4-termination-bound-decidability.md) as benefiting the B-system decidability line (archived task 505_b_symmetric_decidability_via_generic_tableau_driver) and the generalized-tableau-soundness-over-spec line (archived task 513_generalize_tableau_soundness_chain_over_spec) in addition to unblocking task 511 -- survey both for reusable patterns before designing the interface. Task 515's already-landed modalExpandBranchesHintikka/Aux-parametrized machinery (CompletenessLoop.lean, built for S5) is a strong entry point for path (a) but is confirmed NOT sufficient by itself (see mismatch note above). HARD CONSTRAINTS: zero sorry, zero new axiom declarations, every new public declaration lean_verify-clean. If a phase genuinely cannot close, mark it [BLOCKED] with the exact reached lean_goal state -- never insert a sorry/admit/vacuous placeholder to force a green build. Do not modify the frozen, sorry-free task 511 Phases 1-6 deliverables in LoopChecking.lean (S4LoopInv, modalStepBranchS4Keyed, modalStepBranchS4_worldBound, modalHintikkaSetS4_eq) except as needed to wire the new interface/driver against them. Do not modify S5's ModalLoopAuxS5w/modalExpandBranchesHintikka call site in a way that regresses task 515's already-landed S5 decidability. Upon completion, task 511 Phase 7 should be resumed by wiring the new interface (or bespoke driver) against the Phases 1-6 machinery to close Decidable (s4Valid phi) and s4Valid completeness against Cube.S4.",
+      "effort": "10-16 hours",
+      "parent_task": 511,
+      "dependencies": [],
+      "file_scope": [
+        "Cslib/Logics/Modal/Tableau/CompletenessLoop.lean",
+        "Cslib/Logics/Modal/Tableau/GenericDriver.lean",
+        "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+        "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
+      ],
+      "created": "2026-07-18T21:19:09Z",
+      "last_updated": "2026-07-24T22:07:42Z",
+      "next_artifact_number": 2,
+      "artifacts": [
+        {
+          "type": "research",
+          "path": "specs/511_s4_loop_checking_termination/reports/02_spawn-analysis.md",
+          "summary": "Spawn analysis from parent task 511 (Phase 7 driver-mismatch blocker)"
+        },
+        {
+          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/summaries/01_keyed-s4-driver-summary.md",
+          "type": "summary",
+          "summary": "keyed s4 driver summary (backfilled by --sync)"
+        },
+        {
+          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/reports/02_remaining-work-and-phase9-obstruction.md",
+          "type": "report",
+          "summary": "Remaining work; Phase 9 soundness obstruction (guard likely unsound as stated)"
+        },
+        {
+          "path": "specs/535_abstract_termination_measure_interface_s4b_loop/plans/03_completeness-line-rescope.md",
+          "type": "plan",
+          "summary": "Completeness-line rescope; Phase 8 split into P8/P9/P10; soundness line spawned"
+        }
+      ],
+      "topic": "Modal Logic",
+      "session_id": "sess_1784920807_37031e_535",
+      "completion_summary": "Completeness line COMPLETE (11/11 rescoped phases, all sorry-free, full build green at 3253 jobs). Landed modalTableauS4Keyed_complete in FrameCompleteness.lean: if a formula is s4Valid the keyed S4 tableau closes on it; contrapositively an open branch yields a genuine reflexive-transitive-frame countermodel. Supporting chain: P8 4-tuple-to-3-tuple projection bridge plus local re-derivations of three private FmpMeasure helpers; P9 modalExpMeasure_step_lt_S4Keyed (transcribed rather than instantiated, since the generic lemma is hardwired to K modalUniverse); P10 modalExpandBranchesS4Keyed_hintikka top-loop induction. Also fixed a latent entry-point defect: modalTableauS4Keyed seeded keys := [] which made S4LoopInv.keysTotal unsatisfiable (world 0 is known from the entry formula label but never minted); reseeded to [(0, empty)], invisible to all Phase 1-10 lemmas which are generic in keys. DECIDABILITY IS NOT ACHIEVED AND WAS NOT ATTEMPTED: instDecidableS4Valid needs BOTH the completeness and soundness lines, and the soundness line was deferred because modalTableauS4Keyed_sound is likely FALSE as currently stated (the loop-check guard matches birth-content across all recorded worlds with no reachability restriction, and S4 lacks the symmetry the S5 precedent relies on). That question is tracked separately, with authorization to edit the otherwise-frozen guard, and must first verify whether narrowing the guard breaks termination via keysDistinct rather than merely completeness. Verified absent by grep: instDecidableS4Valid and s4Valid_decides were not declared or stubbed.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 539,
+      "project_name": "consolidate_modal_truth_lemma_single_generic_route",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "high",
+      "description": "TRUTH-LEMMA CONSOLIDATION (review 2026-07-23, H1). The canonical-model truth lemma is proved three times: k_truth_lemma (Systems/K/Completeness.lean:163, fully generic — box case needs only EFQ+K from kCore), truth_lemma (Metalogic/Completeness.lean:274, demands a semantically unnecessary h_T), d_truth_lemma (Systems/D/Completeness.lean:241, unnecessary h_D). Since every one of the 15 axiom predicates contains kCore, all 15 systems can use k_truth_lemma. Work: (1) promote k_truth_lemma into Metalogic/Completeness.lean as THE truth lemma (rename canonical_truth_lemma); (2) relocate the shared machinery out of the K/D leaf files (k_derive_box_from_inconsistency, k_mcs_box_witness, d_canonical_serial) so K/D shrink to the ~180-line instance shape of their 13 siblings; (3) delete truth_lemma, mcs_box_witness, mcs_box_closure, and the D-route box block (~545 duplicated lines); (4) repoint all 15 *_truth_lemma_applied at the promoted lemma; (5) dedupe the 13-tag schema-witness blocks — 432 `by decide` invocations copy-pasted across the 15 Systems/*/Completeness.lean files and re-listed inside each *_strong_completeness and *_compactness — via one generic core-witness lemma discharged from Finset.subset facts (SchemaUnion.insert_iff / SchemaUnion.subsumption, SchemaUnion.lean:155,179). Zero sorry, zero semantic change; the tree is currently sorry-free and must stay so.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T19:29:37Z",
+      "session_id": "sess_1784830583_796850_539",
+      "artifacts": [
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/reports/01_truth-lemma-consolidation.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/plans/01_consolidate-truth-lemma.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/539_consolidate_modal_truth_lemma_single_generic_route/summaries/01_consolidate-truth-lemma-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "Completed all 8 phases: promoted k_truth_lemma into Metalogic/Completeness.lean as the single generic truth_lemma route (reusing the vacated name, not canonical_truth_lemma), deleted the two redundant families (old T-requiring truth_lemma, D-route block) and their dead support code, relocated d_canonical_serial, added 13 holds* witness helpers plus the canonicalTruthLemmaOfKCore wrapper, repointed all 15 *_truth_lemma_applied, and deduped by-decide witness blocks from 432 to 141. Zero sorry in the classical Systems/ subtree, zero new axioms, full CSLib CI pipeline green (lake build 3254 jobs, checkInitImports, lake lint clean, lint-style clean, lake shake no findings, mk_all no update needed, lake test green).",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 540,
+      "project_name": "retire_wrap_unwrap_combinator_bridge_layers",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Foundations",
+      "priority": "high",
+      "description": "BRIDGE-LEMMA ELIMINATION (review 2026-07-23, H2). The same 8-10 propositional combinators (doubleNegation, impTrans, lceImp, rceImp, dni, identity, pairing, ...) are re-declared statement-for-statement behind local wrap/unwrap bridges in THREE places: Temporal/Metalogic/PropositionalHelpers.lean (wrap:51, unwrap:56), Bimodal/Theorems/Perpetuity/Helpers.lean (wrap:56, unwrap:60), Bimodal/Theorems/Propositional/{Core,Connectives}.lean (28 defs, ~58 unwrap uses). These bridges exist solely because DerivationTree-style derivability and the Foundations InferenceSystem-indexed derivability share no definitional surface. Meanwhile Modal bypasses Foundations/Logic/Theorems entirely and reproves combinators locally (e.g. private imp_trans0 at Modal/Metalogic/Intuitionistic/CanonicalModel.lean:223). Work: (1) prove the wrapper family ONCE, generic over a Hilbert/InferenceSystem typeclass instance — the same pattern GenericMCS already uses for the deduction theorem — and have Temporal/Bimodal/Modal obtain the combinators by instance resolution; (2) delete the three wrap/unwrap wrapper layers; (3) route Modal's local combinator reproofs through the generic layer; (4) drop the 34 per-target rfl embedding-commutation restatements (toModal_atom/bot/imp at Modal/FromPropositional.lean:50-60; toTemporal_* at Temporal/FromPropositional.lean:49-59; Bimodal/Embedding/PropositionalEmbedding.lean:61-71 and the TemporalEmbedding/ModalEmbedding rfl blocks) in favor of the generic embed_* @[simp] lemmas already in Propositional/Embedding.lean:92-104, keeping only genuinely per-target lemmas (_and/_or/_neg/_box/_untl). SCOPE GUARD: tasks 393 (Lindenbaum/MCS consolidation) and 41 (completeness infra) own the MCS/deduction-theorem seams — this task owns only the combinator-wrapper and embedding-rfl layers; coordinate before touching GenericMCSBridge files.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T20:19:22Z",
+      "session_id": "sess_1784830583_796850_540",
+      "artifacts": [
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/reports/01_bridge-lemma-elimination.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/plans/01_retire-bridge-layers.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/540_retire_wrap_unwrap_combinator_bridge_layers/summaries/01_retire-bridge-layers-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 541,
+      "project_name": "ltl_temporal_semantic_preservation_bridge",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Temporal Logic",
+      "priority": "high",
+      "description": "SEMANTIC GAP (review 2026-07-23, H3). Cslib/Logics/LTL/Embedding.lean:48 defines Formula.toTemporal (LTL -> Priorean tense logic) but the file contains ZERO theorems; its docstring (lines 22-27, 44-47) asserts the map is chosen 'to preserve semantics' — including a reflexive-until vs strict-until reconciliation — that is never proven. No file imports the module: LTL is a disconnected island despite complete, sorry-free GNBA correctness (gnba_language_eq, Baier-Katoen 5.39), omega-regularity (Formula.isRegular), and ltlModelChecking results that currently cannot transfer to the Temporal tree. Work: prove the satisfaction-preservation theorem LTL.Satisfies phi v <-> Temporal.Satisfies phi.toTemporal over the corresponding nat-indexed flow, settling the until-convention reconciliation, and wire at least one LTL result across the bridge (e.g. satisfiability transfer) so the module has a consumer. If the bridge is unprovable as currently stated, correct the translation and document the discrepancy — do not leave the unverified docstring claim standing. Zero sorry.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:52:55Z",
+      "session_id": "sess_1784830583_796850_541",
+      "artifacts": [
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/reports/01_ltl-temporal-bridge-research.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/plans/01_temporal-preservation-bridge.md",
+          "type": "summary",
+          "summary": ""
+        },
+        {
+          "path": "specs/541_ltl_temporal_semantic_preservation_bridge/summaries/01_temporal-preservation-bridge-summary.md",
+          "type": "summary",
+          "summary": "temporal preservation bridge summary (backfilled by --sync)"
+        }
+      ],
+      "completion_summary": "All 4 phases complete. Created Cslib/Logics/LTL/EmbeddingSemantics.lean (semantics-only bridge, no Metalogic import): toTemporalModel def, local sat_and_iff/sat_or_iff classical helpers, theorem satisfies_toTemporal (induction on formula generalizing time index n, all 5 cases atom/bot/imp/next/untl discharged per research's verified strategy -- next case uses omega-backed ℕ discreteness forcing witness s=n+1, untl case reconciles LTL reflexive-until against reflexiveUntl via j=0/j>=1 split with r=n+k index bijection closed by omega), and corollary satisfiable_toTemporal (LTL satisfiability -> Temporal satisfiability, wired at n=0 via drop_zero). Both theorems sorry-free with only standard axioms (propext, Classical.choice, Quot.sound). Registered Cslib.Logics.LTL.EmbeddingSemantics in Cslib.lean barrel via targeted single-line Edit insertion (not mk_all regeneration, per concurrent-checkout instruction; a concurrent task's later mk_all run also incorporated the same line). Full CSLib CI pipeline passed: lake build (full project, 3254 jobs), lake exe checkInitImports, lake lint (\"Linting passed for Cslib\", zero warnings on new file), lake exe lint-style (zero violations on new file), lake shake (no entry for new file -- imports already minimal), lake test (full CslibTests/ suite, exit 0). Zero sorry, zero new axioms, zero vacuous definitions introduced. No changes to Formula.toTemporal or its docstring -- translation confirmed correct as written.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 542,
+      "project_name": "strip_task_provenance_stale_claims_docstrings",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "priority": "medium",
+      "description": "DOCSTRING HYGIENE (review 2026-07-23, M4/L8-L10). ~918 docstring references to 'Task N' / 'Phase M' / 'now-deleted ...' / rollout narratives across the Modal tree — concentrated in Metalogic/GenericMCSBridge.lean, MCS.lean, SchemaSoundness.lean, SchemaTags.lean:18-30, Constructive/Labelled/PrimeLemma.lean:49-51,844,1684-1696, Constructive/Labelled/Soundness.lean:238-355, Intuitionistic/TruthLemma.lean:29,152,305 — documenting how the code was built rather than what it proves, and violating .claude/rules/no-task-references-in-deliverables.md. Sweep all four logic trees (Modal, Propositional, Temporal, Bimodal) plus Foundations/Logic: keep mathematical contracts and literature references, delete task/phase/implementation-history provenance. Also fix the specific stale/dead items: (a) Bimodal/Metalogic/BXCanonical/Chronicle/ChronicleToCountermodelBasic.lean:51 claims 'one remaining sorry' but the file is now sorry-free; (b) Propositional/Semantics/Algebra/Bridge.lean:16 claims to be 'the single canonical home of the ONE evaluation story' while imported by nothing (soften or make true — coordinate with task 543 which decides that file's fate); (c) delete the ~40-line commented-out proof carcass with commented sorry markers in Temporal/Tableau/Completeness.lean:962-1005 (live gap owned by tasks 425/301 — leave a one-line pointer); (d) Propositional/Semantics/Bool.lean:40 forward-references 'Matthew Doty's forthcoming work' — verify covered by task 226 and remove the rot-prone reference. Coordinate with task 438 (comment-cleanup PR already committed) to avoid re-editing its files.",
+      "created": "2026-07-23T17:20:09Z",
+      "dependencies": [
+        544,
+        546
+      ],
+      "last_updated": "2026-07-24T10:19:36Z",
+      "session_id": "sess_1784866674_c9da04_542",
+      "artifacts": [
+        {
+          "path": "specs/542_strip_task_provenance_stale_claims_docstrings/reports/01_docstring-provenance-sweep.md",
+          "type": "report",
+          "summary": "~1,299 provenance lines across ~163 files measured; items a/c/d actionable, item b already resolved by task 543; judgment-based editing, 5-phase decomposition proposed."
+        },
+        {
+          "path": "specs/542_strip_task_provenance_stale_claims_docstrings/plans/01_strip-provenance-docstrings.md",
+          "type": "plan",
+          "summary": "8-phase plan: 7 disjoint-tree content phases + docBlame/CI gate."
+        },
+        {
+          "path": "specs/542_strip_task_provenance_stale_claims_docstrings/summaries/01_strip-provenance-docstrings-summary.md",
+          "type": "summary",
+          "summary": "Provenance sweep complete 8/8 phases; ~1,299 hits addressed across 5 trees; 18 justified live-blocker skips; full CI green."
+        }
+      ],
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 543,
+      "project_name": "remove_dead_logic_modules_and_dead_end_bridges",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "priority": "medium",
+      "description": "DEAD CODE (review 2026-07-23, M5-M7). Three dead or dead-end module groups in the logic trees: (1) Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines) — header literally reads 'DEPRECATED: superseded by Cslib.Foundations.Logic.Tableau'; zero real imports (the two grep hits are docstring prose); sole build entry is the root barrel Cslib.lean:104. Delete the file and drop the barrel line. (2) Foundations/Logic/Automation/HilbertSearch.lean (268-line hilbert_search proof-search tactic) — imported by nothing; the two references (Bimodal AxiomMatcher.lean:48, ProofExtraction.lean:222) are 'when ported' comments. Either wire it into the Modal/Bimodal Hilbert derivations that hand-roll combinator proofs, or remove it (removal is acceptable; git preserves it). (3) Propositional/Semantics/Algebra/Bridge.lean (boolEvaluateEq/propEvaluateEq bridge, imported by nothing despite Semantics/Bool.lean:38-42 telling future work to reuse it) and KripkeBridge.lean (Kripke-algebraic Heyting duality, consumed by no completeness chain): either route Semantics/Bool.lean and the IPL completeness chain through them so their canonical-status docstrings become true, or explicitly mark both as independent showcase developments. Decision per module documented in the summary; net LOC should go down.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:53:03Z",
+      "session_id": "sess_1784830583_796850_543",
+      "artifacts": [
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/reports/01_dead-logic-modules-triage.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/plans/01_remove-dead-logic-modules.md",
+          "type": "summary",
+          "summary": ""
+        },
+        {
+          "path": "specs/543_remove_dead_logic_modules_and_dead_end_bridges/summaries/01_remove-dead-logic-modules-summary.md",
+          "type": "summary",
+          "summary": "remove dead logic modules summary (backfilled by --sync)"
+        }
+      ],
+      "completion_summary": "All 3 phases complete. Phase 1: deleted Cslib/Foundations/Logic/PropositionalTableau.lean (212 lines, Group 1 DELETE) plus its barrel line and reworded 2 dangling provenance docstrings. Phase 2: truth-fixed 4 Group-3 overclaiming docstrings (Bool.lean, Algebra.lean, Bridge.lean, KripkeBridge.lean) declaring them independent showcases with no in-tree consumer -- no code/proof changes. Phase 3: full lake build (3249 jobs) green, lake test exit 0 with CslibTests.HilbertSearch built directly as targeted confirmation of the Group-2 KEEP decision (premise refuted), checkInitImports clean, lake shake has no findings tied to any touched file. Net LOC delta: 8 files changed, 24 insertions(+), 228 deletions(-) = -204 lines. No new sorry or axiom introduced.",
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 544,
+      "project_name": "unify_validity_derivability_naming_notation",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Code Hygiene",
+      "priority": "medium",
+      "description": "NAMING/NOTATION UNIFORMITY (review 2026-07-23, M10/M11 + L1-L3/L11). Mechanical rename sweep across the four logic families: (1) VALIDITY VOCABULARY: Propositional uses Tautology (Semantics/Bool.lean:90); Modal has no top-level validity predicate (only pointed Modal[m,w |= phi] at Modal/Basic.lean:277); Temporal uses capitalized Valid/ValidSerial/ValidDense/ValidDiscrete (Semantics/Validity.lean:74-94); Bimodal uses lowercase valid/validDense/validDiscrete (Semantics/Validity.lean:49,117,129). Align on ONE convention (lowercase valid* suggested), starting with the Temporal-Bimodal pair which share identical FrameClass vocabulary and differ only in capitalization. (2) Add the missing turnstile notation to Temporal: Bimodal defines |= phi and Gamma |= phi (Semantics/Validity.lean:60,81); Temporal has none — add the same scoped notation. (3) COMPLETENESS SUFFIX: Algebra layer uses _complete (44 uses: alg_complete, brouwerian_complete, ...) vs Metalogic layer _completeness (prop_completeness, int_completeness, min_completeness, ...) — standardize on _completeness (Mathlib longer-form convention). (4) NIKTheorem (Modal/Metalogic/Constructive/Labelled/Deduction.lean:316) breaks the otherwise-uniform Derivable naming (Propositional/ProofSystem/Derivation.lean:128, Modal/Metalogic/DerivationTree.lean:152, Bimodal/ProofSystem/Derivable.lean:38, Temporal/ProofSystem/Derivable.lean:35) — rename to NIKDerivable or NIK.Derivable. (5) S5 keeps legacy abbrev ModalAxiom := SchemaUnion s5Tags in Metalogic/DerivationTree.lean:69 while all 14 siblings define <Sys>Axiom in ProofSystem/Instances/<Sys>.lean — rename S5Axiom and relocate to Instances/S5.lean (keep a deprecated alias if churn is wide). (6) Conservativity names split between <x>_conservative_extension (Temporal:61, Modal:54, Bimodal PropositionalConservativity:97) and bimodal_conservative_over_<y> (ModalConservativity:246, TemporalConservativity:289) — standardize one scheme across all five. DISTINCT from task 497 (imp vs impl constructor naming) — do not touch that seam. Sequence AFTER tasks 539/540 land to avoid rebasing renames across those refactors.",
+      "created": "2026-07-23T17:20:09Z",
+      "dependencies": [
+        545,
+        546
+      ],
+      "last_updated": "2026-07-24T05:28:06Z",
+      "session_id": "sess_1784866674_c9da04_544",
+      "artifacts": [
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/reports/01_naming-notation-uniformity-sweep.md",
+          "type": "report",
+          "summary": "All 6 items verified against post-545/546 tree; negation_complete family excluded from item 3; Option A rename-in-place recommended for item 5."
+        },
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/plans/01_naming-notation-uniformity.md",
+          "type": "plan",
+          "summary": "7-phase rename/notation plan; false-positive guards encoded; full CI gate final phase."
+        },
+        {
+          "path": "specs/544_unify_validity_derivability_naming_notation/summaries/01_naming-notation-uniformity-summary.md",
+          "type": "summary",
+          "summary": "All 6 rename/notation items landed across 7 phases; full CI green; zero sorry."
+        }
+      ],
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 545,
+      "project_name": "collapse_prop_algebra_completeness_stack_conservativity_sprawl",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "priority": "medium",
+      "description": "ABSTRACTION CONSOLIDATION (review 2026-07-23, M8/M9). Two consolidations in Cslib/Logics/Propositional/Semantics/Algebra/: (1) COMPLETENESS STACK: a three-layer unification stack (FragmentGeneric.lean -> BrouwerianCompletenessGeneric.lean -> CanAlgComplete.lean) was added on top of the retained piecewise completeness files (HilbertCompleteness.lean, MplConservativeChain.lean, BrouwerianCompleteness.lean); CanAlgComplete's own docstring says it bundles results 'already proved piecewise' and 'only the unifying abstraction was missing', yet the piecewise public statements were never retired — four files express one fragment-completeness fact. Pick CanAlgComplete as the terminal generic interface; demote the subsumed piecewise completeness theorems to private corollaries inside it or delete the duplicated public statements. (2) FRAGMENT-CONSERVATIVITY SPRAWL: eight sibling files each carry one fragment-conservativity result (ImpConservative.lean, ConjImpConservative.lean, ConjImpBotConservative.lean, OrImpConservative.lean, Conservative.lean, ConservativeChain.lean ~19KB, MplConservativeChain.lean ~15KB, HilbertConservativeGlivenko.lean) in a near-linear import chain with no shared generic core — consolidate into a single FragmentConservativity.lean parameterized by the fragment predicate. SCOPE GUARD: task 393 owns CROSS-FAMILY conservativity/Lindenbaum consolidation; this task is strictly the intra-Propositional Algebra fragment layer — confirm the boundary against 393's plan before starting. Zero sorry; all inputs are currently sorry-free and must remain so.",
+      "created": "2026-07-23T17:20:09Z",
+      "dependencies": [],
+      "last_updated": "2026-07-24T05:00:18Z",
+      "session_id": "sess_1784866674_c9da04_545",
+      "artifacts": [
+        {
+          "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/reports/01_algebra-consolidation-research.md",
+          "type": "report",
+          "summary": "Research: Part B clean generic FragmentConservativity win; Part A premise partially incorrect — keep load-bearing names public, collapse zero-consumer chain restatements."
+        },
+        {
+          "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/plans/01_consolidate-algebra-abstractions.md",
+          "type": "plan",
+          "summary": "5-phase plan: FragmentConservativity generic core, per-fragment shims, CanAlgComplete terminal interface, zero-consumer chain collapse, full CI gate."
+        },
+        {
+          "path": "specs/545_collapse_prop_algebra_completeness_stack_conservativity_sprawl/summaries/01_consolidate-algebra-abstractions-summary.md",
+          "type": "summary",
+          "summary": "FragmentConservativity generic core + instances landed; zero-consumer chain theorems deleted; full CI green; zero sorry."
+        }
+      ],
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 546,
+      "project_name": "factor_intersystem_lattice_onto_schemaunion",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Modal Logic",
+      "priority": "medium",
+      "description": "REDUNDANCY (review 2026-07-23, M2). Cslib/Logics/Modal/Metalogic/InterSystem/ carries 8 near-parallel files (~890 lines): ConstructiveLatticeSubsumption.lean (108), IntuitionisticLatticeSubsumption.lean (110), MinimalLatticeSubsumption.lean (104), PropositionalStrengthSubsumption.lean (230), plus four matching *Monotonicity.lean (83-88 each) — all proving the same 'direct-edge axiom subsumption via constructor case-split' shape (their own docstrings say so: ConstructiveLatticeSubsumption.lean:16-19, MinimalLatticeSubsumption.lean:16-19). The classical track already has the generic lemma this wants — SchemaUnion.subsumption (SchemaUnion.lean:155) — and SchemaUnion.lean:46-48 explicitly flags extending the SchemaUnion mechanism to the non-classical axiom families as intended but unrealized. Work: either (a) migrate the intuitionistic/minimal/constructive axiom families onto SchemaUnion (preferred — realizes the documented intent, and shrinks the parallel Lindenbaum/prime-theory scaffolding duplication between the Intuitionistic and Minimal tracks), or (b) factor a track-generic subsumption/monotonicity combinator parameterized over the axiom-tag type, collapsing the 8 files to instantiations. Zero sorry; all 8 files are currently sorry-free.",
+      "created": "2026-07-23T17:20:09Z",
+      "dependencies": [],
+      "last_updated": "2026-07-24T04:46:01Z",
+      "session_id": "sess_1784866674_c9da04_546",
+      "artifacts": [
+        {
+          "path": "specs/546_factor_intersystem_lattice_onto_schemaunion/reports/01_intersystem-lattice-onto-schemaunion.md",
+          "type": "report",
+          "summary": "Research report: SchemaUnion migration vs confined consolidation for InterSystem lattice files."
+        },
+        {
+          "path": "specs/546_factor_intersystem_lattice_onto_schemaunion/plans/01_intersystem-lattice-consolidation.md",
+          "type": "plan",
+          "summary": "4-phase R1 plan: merge 3 Subsumption + 3 Monotonicity files into 2, keep PropositionalStrength pair, full CI gate."
+        },
+        {
+          "path": "specs/546_factor_intersystem_lattice_onto_schemaunion/summaries/01_intersystem-lattice-consolidation-summary.md",
+          "type": "summary",
+          "summary": "8 InterSystem files merged to 4; all public names preserved; full CI green; zero sorry."
+        }
+      ],
+      "archived_at": "2026-07-25T06:09:43Z"
+    },
+    {
+      "project_number": 547,
+      "project_name": "minimal_sequent_calculus_lm_close_tfae_matrix",
+      "status": "completed",
+      "task_type": "cslib",
+      "topic": "Propositional Logic",
+      "priority": "medium",
+      "description": "GAP FILL (review 2026-07-23, L5). The proof-system x logic matrix has a documented hole at (SequentCalculus, Minimal): Propositional/Metalogic/ProofSystemEquivalence.lean:19 states minimal logic gets only the two-way mplHilbertIffNd because 'no minimal sequent calculus exists in CSLib', while classical and intuitionistic get three-way TFAE (cplProofSystemsTfae, iplProofSystemsTfae). Work: add Cslib/Logics/Propositional/SequentCalculus/LM/ mirroring the existing LJ tree structure — rules (LJ minus ex falso / with restricted right rules per the standard minimal-logic sequent presentation), soundness against the minimal Kripke semantics (the min_soundness/min_completeness semantic layer already exists sorry-free), completeness, and equivalence with the minimal Hilbert system — then extend the equivalence to a symmetric three-way mplProofSystemsTfae. Cut elimination for LM may follow the LJ development where applicable but is not required for the TFAE. SCOPE GUARD: tableau membership in the TFAE stays out of scope (task 375 owns folding tableau systems into the TFAE). Zero sorry.",
+      "created": "2026-07-23T17:20:09Z",
+      "last_updated": "2026-07-23T18:53:13Z",
+      "session_id": "sess_1784830583_796850_547",
+      "artifacts": [
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/reports/01_minimal-sequent-calculus-lm.md",
+          "type": "report",
+          "summary": ""
+        },
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/plans/01_lm-sequent-calculus-tfae.md",
+          "type": "plan",
+          "summary": ""
+        },
+        {
+          "path": "specs/547_minimal_sequent_calculus_lm_close_tfae_matrix/summaries/01_lm-sequent-calculus-tfae-summary.md",
+          "type": "summary",
+          "summary": ""
+        }
+      ],
+      "completion_summary": "All 4 phases completed and committed. LM/Basic.lean (LMProof alias + not_isIntuitionistic_mpl), LM/Soundness.lean (SeqProofMinimal.sound over arbitrary bot_forces + lm_msemantic_entails), LM/Completeness.lean (8 lmAxiom schemata, lmOfMinAxiom, ndToLM, nd_iff_lm/hilbert_iff_lm/lm_iff_mvalid), LM.lean barrel + SequentCalculus.lean wiring + mplProofSystemsTfae/mplProofSystemsTfaeClosed in ProofSystemEquivalence.lean + stale docstring fixes. Cslib.lean registered via 4 targeted Edit-tool insertions (not mk_all, to avoid clobbering concurrent tasks 541/543 barrel edits). Zero sorry, zero new axioms (lean_verify confirmed only propext/Classical.choice/Quot.sound on both TFAE theorems). Full CI order (cache get, build, checkInitImports, lint, lint-style, shake, test) all green.",
+      "archived_at": "2026-07-25T06:09:43Z"
     }
   ],
   "archived_at": "2026-07-23T17:00:30Z",

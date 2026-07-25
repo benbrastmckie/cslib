@@ -1,7 +1,7 @@
 # Implementation Plan: Uniform Frame-Condition-to-Axiom Correspondence Library
 
 - **Task**: 522 - Uniform frame-condition-to-axiom correspondence library
-- **Status**: [PR READY]
+- **Status**: [COMPLETED]
 - **Effort**: 6 hours (Phase 1 complete ~1.5h; Phases 3-5 ~4.5h — unblocked, design decision resolved 2026-07-18)
 - **Dependencies**: None (research complete)
 - **Research Inputs**: reports/01_frame-condition-correspondence-survey.md

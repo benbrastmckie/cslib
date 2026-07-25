@@ -324,7 +324,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 6: Loop Invariant and Fuel-Sufficiency Chain (risk a, part 2) [NOT STARTED]
+### Phase 6: Loop Invariant and Fuel-Sufficiency Chain (risk a, part 2) [IN PROGRESS]
 
 - **Goal:** Re-establish `S4LoopInv` preservation and the world-bound / fuel chain against the
   ordered stepper. The report argues these survive because the candidate set stays global and only

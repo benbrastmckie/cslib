@@ -3169,6 +3169,52 @@ lemma modalStepBranchS4_preserves_keysDistinct (φ₀ : Proposition Atom)
   case neg.pos.diamond =>
     exact keysUpdate_preserves_keysDistinct φ₀ b keys .pos ψ sf.label hKD w1 w2 k1 k2 h1 h2 hne
 
+/-- **`keysDistinct`'s ordered-driver preservation (Phase 6, escalation-trigger sub-lemma).**
+Identical statement and proof shape to `modalStepBranchS4_preserves_keysDistinct`, transcribed
+against the ordered stepper via `modalStepBranchS4KeyedOrdered_selected_mem` in place of the
+direct `findSome?` extraction from `modalStepBranchS4Keyed`. The plan flags this sub-lemma as the
+escalation trigger: if it required ANY weakening of `keysUpdate_preserves_keysDistinct`, that
+would contradict the plan's central claim that reordering only changes *timing*, never producing
+a duplicate key. It does not need any such weakening -- the argument is verbatim
+selection-independent, since `modalStepBranchS4Keyed_result_keys_eq` and
+`keysUpdate_preserves_keysDistinct` only ever consume "some formula `sf` fired, producing this
+key list", never "`sf` is the first such formula in `b`". -/
+lemma modalStepBranchS4KeyedOrdered_preserves_keysDistinct (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ w1 w2 k1 k2, (w1, k1) ∈ keys' → (w2, k2) ∈ keys' → w1 ≠ w2 → k1 ≠ k2 := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro w1 w2 k1 k2 h1 h2 hne
+  rw [hkeq] at h1 h2
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at h1 h2
+  all_goals first
+    | exact hKD w1 w2 k1 k2 h1 h2 hne
+    | skip
+  case neg.box =>
+    exact keysUpdate_preserves_keysDistinct φ₀ b keys .neg ψ sf.label hKD w1 w2 k1 k2 h1 h2 hne
+  case pos.diamond =>
+    exact keysUpdate_preserves_keysDistinct φ₀ b keys .pos ψ sf.label hKD w1 w2 k1 k2 h1 h2 hne
+
 /-- **Composite `.snd = acc` fact for `modalApplyOneS4Keyed`'s 12 non-minting leaves**: mirrors
 `modalApplyOneS4Keyed_nonMint_known_S4`'s exact case-split (same three underlying pieces --
 `modalApplyOneS4Rules_boxPos_diaNeg_known_S4`/`modalApplyOne_nonModal_known_S4`, both of which

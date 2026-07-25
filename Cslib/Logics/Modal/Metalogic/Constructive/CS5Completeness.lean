@@ -24,18 +24,20 @@ This module instead completes the *original* symmetric-tail construction of `CS5
 technique `CS5.lean`'s module docstring identifies as the way forward: encode the box-backward
 pair as a single quasi-prime theory over the doubled atom space `Atom ⊕ Atom`, under a combined
 axiom system (`CS5PairAxiom`) that internalises the two cross-condition implications as axioms
-rather than as an externally-imposed, non-`cl`-stable side predicate on a pair poset (the gap the
-archived probe `specs/archive/509_.../probes/cs5-pair-primeness.lean` diagnoses).
+rather than as an externally-imposed, non-`cl`-stable side predicate on a pair poset (the gap an
+externally-fixed predicate such as `Cons_Y Z := boxInv Z ⊆ Y` runs into: `Y` is fixed outside `Z`,
+so nothing forces the predicate to survive `Z`'s deductive closure -- see the "`cl`-Stability of
+the Cross-Conditions" section below for why the axiomatic design avoids this).
 
 **Distinct from the discarded `CS5Combined` scaffold.** `CS5Canonical.lean`'s module docstring
 records that an earlier `Atom ⊕ Atom` attempt (`CS5Combined`) re-entered Pacheco's unsound
 negation-completeness move (`ϕ ∉ Θ ⟹ ¬ϕ ∈ Θ`, unsound for a poset-maximal quasi-prime `Θ`) and
 was discarded. This module's construction never invokes negation-completeness: the
 cross-conditions are *axioms*, available to any deductively-closed set via a single `modus_ponens`
-step, not something derived from maximality. The de-risking probe
-(`specs/551_.../probes/cs5-pair-combined-atomsum.lean`) confirms this mechanically: both
-soundness and `cl`-stability of `CS5PairAxiom` close sorry-free, with no negation-completeness
-step anywhere.
+step, not something derived from maximality. This module's own `crossCond_left_stable`/
+`crossCond_right_stable` below confirm this mechanically: both soundness (the `CS5PairAxiom`
+constructors themselves) and `cl`-stability of the cross-conditions close sorry-free, with no
+negation-completeness step anywhere.
 
 ## Main Definitions (this phase)
 
@@ -56,8 +58,9 @@ step anywhere.
   `cs5_symmetric_tail_box_gap`, `cs5_axiom_sound''`.
 * `Cslib/Logics/Modal/Metalogic/DerivationTree.lean` -- `Derivable.map` (atom-relabeling
   functoriality).
-* `specs/551_.../probes/cs5-pair-combined-atomsum.lean` -- the de-risking probe this module's
-  definitions and `cl`-stability lemma promote to the library.
+* `crossCond_left_stable`/`crossCond_right_stable` below -- the `cl`-stability lemmas this
+  module's axiomatic (as opposed to externally-imposed) cross-condition design was chosen to
+  make provable in the first place.
 * [L. Pacheco, *Collapsing Constructive and Intuitionistic Modal Logics*][Pacheco2024] -- source of
   the pair-construction *technique* (Lemma 18's skeleton only; its primeness step, Lemma 16, is
   unsound as written -- see `CS5.lean`'s module docstring).
@@ -104,8 +107,9 @@ def cs5PairTauR : Proposition Atom → Proposition (Atom ⊕ Atom) := Propositio
    from the *T ∪ {X}*/*disjunction* combinators, not just tagged formulas. A propositional core
    confined to the two tagged copies would leave those mixed instances undischargeable.
 
-Verified simultaneously sound and `cl`-stable by the Phase 1 probe
-(`specs/551_.../probes/cs5-pair-combined-atomsum.lean`). -/
+Verified simultaneously sound (by construction: every constructor names a `CS5ModalAxiom`
+instance or a cross-condition) and `cl`-stable (`crossCond_left_stable`/`crossCond_right_stable`
+below). -/
 inductive CS5PairAxiom : Proposition (Atom ⊕ Atom) → Prop where
   /-- Every `CS5ModalAxiom` instance holds on the left-tagged copy. -/
   | left (ψ : Proposition Atom) (h : CS5ModalAxiom ψ) : CS5PairAxiom (cs5PairTauL ψ)
@@ -360,15 +364,25 @@ poset-maximal quasi-prime theory (see this module's opening docstring, "Distinct
 discarded `CS5Combined` scaffold"). The identical obligation defeated the earlier `CS5Combined`
 atom-sum scaffold (`cs5Combined_seed_excludes`, never closed, since removed).
 
-**No semantic witness exists.** `CS5PairAxiom`'s cross-axioms are sound only under a *common*
-valuation for both copies, which identifies `τ_L X` with `τ_R X` and collapses `cross1` to
-`□B → B`; in every such model `τ_R A` is forced whenever `A ∈ H`. So no sound model separates the
-seed from the excluded set, and a soundness/countermodel argument cannot discharge this -- it is
-a purely syntactic separation fact.
+**Corrected (round 2): no *independent* semantic witness exists via a common-valuation model,
+but the product-model reading is a genuine candidate, closed separately.** A single common
+valuation for both copies identifies `τ_L X` with `τ_R X` and collapses `cross1` to `□B → B`,
+under which `τ_R A` is forced whenever `A ∈ H`; that particular semantic route is circular, not
+because no semantics exists, but because any semantic witness for the two-sided seed is
+equivalent to the pair's own *joint satisfiability* -- exactly what a truth lemma for the
+box-backward pair this module is building towards would need to presuppose. The genuinely
+distinct candidate is a **product model** over two copies of `IS5`'s semantics (not a common
+valuation): this is a real, independently-motivated route, and it is closed on its own terms
+(not dismissed as circular) by the governing plan's Phase 5, which shows its residual side
+condition is equivalent to the `CS5 = IS5` collapse the mandate has not adopted.
 
 **Status.** Open here. A correct proof is expected to require a cut-free/nested-sequent argument
-([Marin2021]) rather than a direct Hilbert derivation. Stated as a definition, not asserted: this
-module contains no `sorry`.
+rather than a direct Hilbert derivation -- specifically Arisaka, Das and Straßburger's nested
+sequents for constructive modal logics (`doc_id:
+arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics`), which covers exactly
+CSLib's `CS5` axiom set (safe pair `X = {t,4}`, `Y = {b}`); Marin-Morales-Straßburger's `labIK≤`
+does **not** apply here, since its base logic is `IK`, not `CK` -- it settles `IS5`, not `CS5`.
+Stated as a definition, not asserted: this module contains no `sorry`.
 
 **DEPRECATED (superseded).** This statement carries **no hypothesis relating `A` to `H`**, and is
 **refutable for every `H`** -- see `cs5PairSeedDisjunctionProperty_false` below (witness
@@ -791,6 +805,104 @@ theorem cs5_notMem_boxInv_closure_of_boxNotMem {H : Set (Proposition Atom)}
     {A : Proposition Atom} (h : Proposition.box A ∉ H) :
     A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) :=
   fun hmem => h (cs5_box_mem_of_mem_boxInv_closure hH hmem)
+
+/-! ## Retraction Functoriality (the Signature-Collapse Route, Corrected)
+
+The task mandate records a non-goal: the signature-collapse route via a sum-elimination
+retraction `Sum.elim id id : Atom ⊕ Atom → Atom`, collapsing the two tagged copies back onto a
+single `Atom`. Its recorded rationale was that the retraction is **not schema-compatible** --
+that the image of the first cross axiom, `□B → B`, is not an instance of the `CS5ModalAxiom`
+schema. **That reason is wrong.** `CS5ModalAxiom.tBox` is exactly `□φ → φ` (`CS5` contains `T`),
+so `□B → B` *is* a `CS5ModalAxiom` instance; the retraction below is schema-compatible at every
+`CS5PairAxiom` constructor, both cross axioms landing on `tBox`. The route's Non-Goal
+*conclusion* is still correct, but for a different reason: the bound the retraction yields
+(`τ_R A ∈ cl(seed) → A ∈ cl_CS5(H ∪ cl_CS5(boxInv H))`) is compatible with `□A ∉ H` (that bound
+does not give `A ∈ H`), so it is too weak to discharge the seed-exclusion obligation; and no
+atom relabeling can do better, since every retraction identifying the two tagged copies is
+forced to identify the copies at the atom level too (`Sum.elim g g`'s image of `cross1`'s atom
+instance is `⊢ □(g p) → g p`, already a `tBox` instance for *any* `g`, so schema-compatibility
+alone cannot rule out weaker bounds either). -/
+
+/-- **The sum-elimination retraction.** Collapses the two tagged copies of `Atom ⊕ Atom` back
+onto a single `Atom`, identifying `Sum.inl`- and `Sum.inr`-tagged atoms. -/
+def cs5PairRetract (x : Atom ⊕ Atom) : Atom := Sum.elim id id x
+
+@[simp] theorem cs5PairRetract_tauL (φ : Proposition Atom) :
+    Proposition.map cs5PairRetract (cs5PairTauL φ) = φ := by
+  rw [cs5PairTauL, Proposition.map_map]
+  have h : (cs5PairRetract ∘ Sum.inl : Atom → Atom) = id := rfl
+  rw [h, Proposition.map_id]
+
+@[simp] theorem cs5PairRetract_tauR (φ : Proposition Atom) :
+    Proposition.map cs5PairRetract (cs5PairTauR φ) = φ := by
+  rw [cs5PairTauR, Proposition.map_map]
+  have h : (cs5PairRetract ∘ Sum.inr : Atom → Atom) = id := rfl
+  rw [h, Proposition.map_id]
+
+/-- **The retraction is schema-compatible (corrected Non-Goal 2).** Every `CS5PairAxiom`
+instance maps to a genuine `CS5ModalAxiom` instance under `cs5PairRetract`. Both cross axioms
+land on `CS5ModalAxiom.tBox` (`□B → B`), which *is* a `CS5` schema instance since `CS5` contains
+`T` -- contradicting the mandate's recorded reason for the Non-Goal (see the section docstring
+above for the corrected reason the route still fails). -/
+theorem cs5PairRetract_schema_compatible (ψ : Proposition (Atom ⊕ Atom)) (h : CS5PairAxiom ψ) :
+    CS5ModalAxiom (Proposition.map cs5PairRetract ψ) := by
+  cases h with
+  | left ψ h => rwa [cs5PairRetract_tauL]
+  | right ψ h => rwa [cs5PairRetract_tauR]
+  | cross1 B => simpa [cs5PairRetract_tauL, cs5PairRetract_tauR] using CS5ModalAxiom.tBox B
+  | cross2 B => simpa [cs5PairRetract_tauL, cs5PairRetract_tauR] using CS5ModalAxiom.tBox B
+  | implyK φ ψ =>
+      exact CS5ModalAxiom.implyK
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | implyS φ ψ χ =>
+      exact CS5ModalAxiom.implyS (Proposition.map cs5PairRetract φ)
+        (Proposition.map cs5PairRetract ψ) (Proposition.map cs5PairRetract χ)
+  | efq φ => exact CS5ModalAxiom.efq (Proposition.map cs5PairRetract φ)
+  | andI φ ψ =>
+      exact CS5ModalAxiom.andI
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | andE1 φ ψ =>
+      exact CS5ModalAxiom.andE1
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | andE2 φ ψ =>
+      exact CS5ModalAxiom.andE2
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | orI1 φ ψ =>
+      exact CS5ModalAxiom.orI1
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | orI2 φ ψ =>
+      exact CS5ModalAxiom.orI2
+        (Proposition.map cs5PairRetract φ) (Proposition.map cs5PairRetract ψ)
+  | orE φ ψ χ =>
+      exact CS5ModalAxiom.orE (Proposition.map cs5PairRetract φ)
+        (Proposition.map cs5PairRetract ψ) (Proposition.map cs5PairRetract χ)
+
+/-- The retraction sends the two-sided seed into `H ∪ cl_CS5(boxInv H)`. -/
+theorem cs5PairRetract_seed {H : Set (Proposition Atom)} {x : Proposition (Atom ⊕ Atom)}
+    (hx : x ∈ cs5PairSeed H) :
+    Proposition.map cs5PairRetract x ∈
+      H ∪ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) := by
+  rcases cs5PairSeed_mem_iff.mp hx with ⟨φ, hφ, rfl⟩ | ⟨ψ, hψ, rfl⟩
+  · exact Or.inl (by rwa [cs5PairRetract_tauL])
+  · exact Or.inr (by rwa [cs5PairRetract_tauR])
+
+/-- **The collapse bound (best obtainable from any atom relabeling).** If `τ_R A` is in the
+combined closure of the seed then `A` is in the plain `CS5` closure of `H ∪ cl_CS5(boxInv H)`.
+Since `□A ∉ H` does **not** give `A ∉ H`, this bound is too weak to discharge the bare right
+exclusion `hR` -- the route fails for this reason (a bound too weak to be useful), not for
+schema-incompatibility (`cs5PairRetract_schema_compatible` above shows the retraction *is*
+schema-compatible). -/
+theorem cs5PairRetract_bound {H : Set (Proposition Atom)} {A : Proposition Atom}
+    (h : cs5PairTauR A ∈ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)) :
+    A ∈ modalDeductiveClosure (@CS5ModalAxiom Atom)
+      (H ∪ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H)) := by
+  obtain ⟨L, hL, hd⟩ := h
+  refine ⟨L.map (Proposition.map cs5PairRetract), ?_, ?_⟩
+  · intro x hx
+    obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
+    exact cs5PairRetract_seed (hL y hy)
+  · have := Deriv.map cs5PairRetract cs5PairRetract_schema_compatible hd
+    rwa [cs5PairRetract_tauR] at this
 
 /-! ## Open Obligations
 

@@ -5382,6 +5382,199 @@ lemma modalStepBranchS4_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
     intro w hw
     exact hold b' hb' w (le_trans hw hmaxle)
 
+/-- **`worldsContiguousS4`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_worldsContiguousS4` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem`/`modalStepBranchS4KeyedOrdered_branch_superset` in
+place of their unordered counterparts; the top-level minting/non-minting split and its
+sub-arguments are otherwise unchanged. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hWC : worldsContiguousS4 b) (hknown : accTargetsKnown b acc)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, worldsContiguousS4 b' := by
+  have hsuper := modalStepBranchS4KeyedOrdered_branch_superset φ₀ b e acc keys newBs newExps
+    newAcc keys' hstep
+  have hold : ∀ b' ∈ newBs, ∀ w ≤ modalMaxWorld b, w ∈ modalKnownWorlds b' := by
+    intro b' hb' w hw
+    obtain ⟨sf', hsf'mem, hlab⟩ := (mem_modalKnownWorlds_S4 b w).mp (hWC w hw)
+    exact (mem_modalKnownWorlds_S4 b' w).mpr ⟨sf', hsuper b' hb' sf' hsf'mem, hlab⟩
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .neg ψ
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb'
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        have hle : w ≤ modalNextWorld b := le_trans hw (by
+          apply modalMaxWorld_le_of_forall_label_le
+          intro sf'' hsf''
+          rcases List.mem_append.mp hsf'' with hnew | holdmem
+          · rw [hlabel sf'' hnew]
+          · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
+              (Nat.lt_succ_self _)))
+        have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
+          have hnw : modalNextWorld b = modalMaxWorld b + 1 := rfl
+          rw [hnw] at hle
+          rcases Nat.le_add_one_iff.mp hle with hcase | hcase
+          · exact Or.inl hcase
+          · exact Or.inr (hcase.trans hnw.symm)
+        rcases hwle with hwle | rfl
+        · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
+        · rw [mem_modalKnownWorlds_S4]
+          exact ⟨⟨.neg, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb'
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hw
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hlabel := mintGroup_label_eq_freshWorld_S4 b sf.label .pos ψ
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb'
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        have hle : w ≤ modalNextWorld b := le_trans hw (by
+          apply modalMaxWorld_le_of_forall_label_le
+          intro sf'' hsf''
+          rcases List.mem_append.mp hsf'' with hnew | holdmem
+          · rw [hlabel sf'' hnew]
+          · exact le_of_lt (lt_of_le_of_lt (label_le_modalMaxWorld holdmem)
+              (Nat.lt_succ_self _)))
+        have hwle : w ≤ modalMaxWorld b ∨ w = modalNextWorld b := by
+          have hnw : modalNextWorld b = modalMaxWorld b + 1 := rfl
+          rw [hnw] at hle
+          rcases Nat.le_add_one_iff.mp hle with hcase | hcase
+          · exact Or.inl hcase
+          · exact Or.inr (hcase.trans hnw.symm)
+        rcases hwle with hwle | rfl
+        · exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hwle
+        · rw [mem_modalKnownWorlds_S4]
+          exact ⟨⟨.pos, ψ, modalNextWorld b⟩, List.mem_append_left _ List.mem_cons_self, rfl⟩
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb'
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        intro w hw
+        exact hold _ (by rw [← hsf.1]; exact List.mem_singleton_self _) w hw
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnm := modalApplyOneS4Keyed_nonMint_known_S4 φ₀ keys sf b acc hsfmem hknown hnbd
+    rw [hpair] at hnm
+    dsimp only at hnm
+    intro b' hb'
+    have hmaxle : modalMaxWorld b' ≤ modalMaxWorld b := by
+      rcases hres : result with lf | brs | lf | -
+      · rw [hres] at hsf hnm
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        apply modalMaxWorld_le_of_forall_label_le
+        intro sf'' hsf''
+        rcases List.mem_append.mp hsf'' with hnew | holdmem
+        · obtain ⟨sf3, hsf3mem, hsf3lab⟩ :=
+            (mem_modalKnownWorlds_S4 b sf''.label).mp (hnm sf'' hnew)
+          rw [← hsf3lab]
+          exact label_le_modalMaxWorld hsf3mem
+        · exact label_le_modalMaxWorld holdmem
+      · rw [hres] at hsf hnm
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+        apply modalMaxWorld_le_of_forall_label_le
+        intro sf'' hsf''
+        rcases List.mem_append.mp hsf'' with hnew | holdmem
+        · obtain ⟨sf3, hsf3mem, hsf3lab⟩ := (mem_modalKnownWorlds_S4 b sf''.label).mp
+            (hnm sf'' (List.mem_flatten.mpr ⟨br, hbr, hnew⟩))
+          rw [← hsf3lab]
+          exact label_le_modalMaxWorld hsf3mem
+        · exact label_le_modalMaxWorld holdmem
+      · rw [hres] at hsf hnm
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        apply modalMaxWorld_le_of_forall_label_le
+        intro sf'' hsf''
+        rcases List.mem_append.mp hsf'' with hnew | holdmem
+        · obtain ⟨sf3, hsf3mem, hsf3lab⟩ :=
+            (mem_modalKnownWorlds_S4 b sf''.label).mp (hnm sf'' hnew)
+          rw [← hsf3lab]
+          exact label_le_modalMaxWorld hsf3mem
+        · exact label_le_modalMaxWorld holdmem
+      · rw [hres] at hsf; simp at hsf
+    intro w hw
+    exact hold b' hb' w (le_trans hw hmaxle)
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `modalKnownWorlds`'s dedup-guarded `foldl` never produces duplicates. Local re-derivation of
 `FmpMeasure.lean`'s file-private `modalKnownWorlds_nodup` (unavailable across files). -/

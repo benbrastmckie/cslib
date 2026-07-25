@@ -364,27 +364,27 @@ no residual burden downstream.
 
 ---
 
-### Phase 4: Retraction functoriality and docstring corrections [IN PROGRESS]
+### Phase 4: Retraction functoriality and docstring corrections [COMPLETED]
 
 **Goal**: Land the sharpest bound obtainable by relabeling, and correct two mis-argued docstring
 claims.
 
 **Tasks**:
-- [ ] Land `cs5PairRetract`, `cs5PairRetract_schema_compatible` (`Sum.elim id id` maps every
+- [x] Land `cs5PairRetract`, `cs5PairRetract_schema_compatible` (`Sum.elim id id` maps every
       `CS5PairAxiom` constructor to a genuine `CS5ModalAxiom` instance, both cross axioms landing
       on `tBox`), and `cs5PairRetract_bound` from `probes/retraction_bound.lean`
-- [ ] Correct Non-Goal 2's stated reason: the retraction *is* schema-compatible; the route fails
+- [x] Correct Non-Goal 2's stated reason: the retraction *is* schema-compatible; the route fails
       because the bound it yields (`τ_R A ∈ Θ → A ∈ H`) is compatible with `□A ∉ H`, and because
       every relabeling retraction is forced to identify the two copies (the atom instance forces
       `⊢ □q → q'`, a theorem only when `q = q'`)
-- [ ] Correct the "No semantic witness exists" claim to "any semantic witness is equivalent to the
+- [x] Correct the "No semantic witness exists" claim to "any semantic witness is equivalent to the
       pair's joint satisfiability, hence circular", and record the product-model reading as a
       genuine candidate that Phase 5 closes
-- [ ] Correct the "expected to require a cut-free/nested-sequent argument ([Marin2021])" pointer:
+- [x] Correct the "expected to require a cut-free/nested-sequent argument ([Marin2021])" pointer:
       `labIK≤`'s base is `IK`, not `CK`; the applicable cut-free system is Arisaka–Das–Straßburger
-- [ ] Replace `specs/NNN_.../probes/...` citations in the module docstring with durable anchors
+- [x] Replace `specs/NNN_.../probes/...` citations in the module docstring with durable anchors
       (declaration names, section titles), per `.claude/rules/no-task-references-in-deliverables.md`
-- [ ] `lake build` the module
+- [x] `lake build` the module
 
 **Timing**: 2 hours
 
@@ -399,7 +399,7 @@ claims.
 
 ---
 
-### Phase 5: Close the product-model route (machine-checked) [NOT STARTED]
+### Phase 5: Close the product-model route (machine-checked) [IN PROGRESS]
 
 **Goal**: Turn the plan-time argument that the product-model residual R-b is the `CS5 = IS5`
 collapse into a repository theorem, and land the `CS5 → IS5` transport lemmas.

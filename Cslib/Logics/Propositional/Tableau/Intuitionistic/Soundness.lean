@@ -139,8 +139,29 @@ lemma intRule_preserves_sat {World : Type*} [Preorder World]
     | atom x => trivial
     | bot => trivial
     | imp φ ψ =>
-      -- T(φ → ψ): intApplyRuleFull returns .notApplicable
-      trivial
+      -- T(φ → ψ): .branchingResult [[F(φ)], [T(ψ)]] nw (Deliverable 6, Fitting `T(→)` split).
+      -- Reflexively at `label`: either φ fails at `label` (pick the F(φ) branch), or φ holds
+      -- at `label` and `hpos` (applied reflexively via `le_rfl`) forces ψ at `label` too
+      -- (pick the T(ψ) branch). Either way some branch stays satisfied.
+      simp only [show intApplyRuleFull (⟨.pos, φ → ψ, label⟩ : ISF Atom) nw b =
+        .branchingResult [[⟨.neg, φ, label⟩], [⟨.pos, ψ, label⟩]] nw from rfl]
+      rw [IForces_imp] at hpos
+      by_cases hφ : IForces val botForces (worldOf label) φ
+      · have hψ : IForces val botForces (worldOf label) ψ := hpos (worldOf label) le_rfl hφ
+        exact ⟨[⟨.pos, ψ, label⟩], by simp,
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun _ => hψ, fun h => absurd h (Sign.noConfusion)⟩)
+            hsat⟩
+      · exact ⟨[⟨.neg, φ, label⟩], List.mem_cons_self,
+          extend_sat _ worldOf
+            (fun sf' hmem' => by
+              simp only [List.mem_cons, List.mem_nil_iff, or_false] at hmem'
+              subst hmem'
+              exact ⟨fun h => absurd h (Sign.noConfusion), fun _ => hφ⟩)
+            hsat⟩
     | and φ ψ =>
       -- T(φ ∧ ψ): .linearResult [T(φ), T(ψ)] nw none; worldOf unchanged
       simp only [show intApplyRuleFull (⟨.pos, φ ∧ ψ, label⟩ : ISF Atom) nw b =
@@ -376,35 +397,61 @@ private lemma applyAllTImpRules_sat
       | or _ _ => simp only at houter; exact absurd houter (by simp)
       | imp φ ψ =>
         simp only [] at houter
-        by_cases hemp : (intTImpRule φ ψ label_o edges b).isEmpty = true
+        by_cases hemp :
+            (intTImpRule φ ψ label_o edges b ++
+              List.filterMap
+                (fun x =>
+                  if (List.any b fun y =>
+                      y.sign == Sign.pos && y.formula == (φ → ψ) && y.label == x) = true
+                    then none
+                  else some (⟨.pos, φ → ψ, x⟩ : ISF Atom))
+                (List.filter (fun x => isAccessible edges label_o x)
+                  (List.map (fun x => x.label) b).eraseDups)).isEmpty = true
         · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
         · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
-          rw [← houter] at hmem_inner
-          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
-          obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
-          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
-          obtain ⟨_, hw'_access⟩ := hw'_acc
-          by_cases hphi : (b.any fun sf =>
-              sf.sign == .pos && sf.formula == φ && sf.label == w') = true
-          · by_cases hpsi : (b.any fun sf =>
-                sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
-            · simp [hphi, hpsi] at hw'_sf
-            · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq] at hw'_sf
-              -- hw'_sf : ⟨.pos, ψ, w'⟩ = sf
-              rw [← hw'_sf]
-              have himpimp := (hsat ⟨.pos, .imp φ ψ, label_o⟩ hmem_outer).1 rfl
-              simp only [IForces_imp] at himpimp
-              have hle : worldOf label_o ≤ worldOf w' := hmono _ _ hw'_access
-              have hphi_forces : IForces val botForces (worldOf w') φ := by
-                rw [List.any_eq_true] at hphi
-                obtain ⟨sf', hmem', hcond⟩ := hphi
-                simp only [Bool.and_eq_true, beq_iff_eq] at hcond
-                obtain ⟨⟨hsign, hform⟩, hlabel⟩ := hcond
-                have := (hsat sf' hmem').1 hsign
-                rw [hform, hlabel] at this; exact this
-              exact ⟨fun _ => himpimp (worldOf w') hle hphi_forces,
-                    fun h => by simp at h⟩
-          · simp [hphi] at hw'_sf
+          rw [← houter, List.mem_append] at hmem_inner
+          rcases hmem_inner with hmem_toAdd | hmem_copy
+          · -- Existing T(ψ)-consequence case, unchanged.
+            simp only [intTImpRule, List.mem_filterMap] at hmem_toAdd
+            obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_toAdd
+            simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
+            obtain ⟨_, hw'_access⟩ := hw'_acc
+            by_cases hphi : (b.any fun sf =>
+                sf.sign == .pos && sf.formula == φ && sf.label == w') = true
+            · by_cases hpsi : (b.any fun sf =>
+                  sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
+              · simp [hphi, hpsi] at hw'_sf
+              · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq]
+                  at hw'_sf
+                -- hw'_sf : ⟨.pos, ψ, w'⟩ = sf
+                rw [← hw'_sf]
+                have himpimp := (hsat ⟨.pos, .imp φ ψ, label_o⟩ hmem_outer).1 rfl
+                simp only [IForces_imp] at himpimp
+                have hle : worldOf label_o ≤ worldOf w' := hmono _ _ hw'_access
+                have hphi_forces : IForces val botForces (worldOf w') φ := by
+                  rw [List.any_eq_true] at hphi
+                  obtain ⟨sf', hmem', hcond⟩ := hphi
+                  simp only [Bool.and_eq_true, beq_iff_eq] at hcond
+                  obtain ⟨⟨hsign, hform⟩, hlabel⟩ := hcond
+                  have := (hsat sf' hmem').1 hsign
+                  rw [hform, hlabel] at this; exact this
+                exact ⟨fun _ => himpimp (worldOf w') hle hphi_forces,
+                      fun h => by simp at h⟩
+            · simp [hphi] at hw'_sf
+          · -- New case: a copy of T(φ → ψ) itself at an accessible world `w'`. Sound by
+            -- persistence of forcing for the WHOLE formula `φ → ψ` (`iforces_persistence`
+            -- applies to any formula, `imp` included), not just its consequent.
+            simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+              List.mem_map] at hmem_copy
+            obtain ⟨w', hw'_acc, hcopy⟩ := hmem_copy
+            obtain ⟨_, hw'_access⟩ := hw'_acc
+            split_ifs at hcopy with hcond
+            simp only [Option.some.injEq] at hcopy
+            rw [← hcopy]
+            have himpimp := (hsat ⟨.pos, .imp φ ψ, label_o⟩ hmem_outer).1 rfl
+            have hle : worldOf label_o ≤ worldOf w' := hmono _ _ hw'_access
+            have hpersist := iforces_persistence _v_uc _bf_uc hle himpimp
+            exact ⟨fun _ => hpersist, fun h => by simp at h⟩
 
 omit [Hashable Atom] in
 /-- Persistence fixpoint preserves satisfiability when `worldOf` is monotone. -/
@@ -760,14 +807,24 @@ private lemma freshAbove_applyAllTImpRules (b : IBranch Atom) (edges : IEdges) (
         simp only [hsign, hform] at houter
         split_ifs at houter with hemp
         · simp only [Option.some.injEq] at houter
-          rw [← houter] at hmem_inner
-          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
-          obtain ⟨w', hw'_mem, hw'_sf⟩ := hmem_inner
-          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_mem
-          obtain ⟨⟨sf'', hmem'', hlab⟩, _⟩ := hw'_mem
-          split_ifs at hw'_sf with hany1 hany2
-          · simp only [Option.some.injEq] at hw'_sf
-            rw [← hw'_sf]; simp only; rw [← hlab]
+          rw [← houter, List.mem_append] at hmem_inner
+          rcases hmem_inner with hmem_toAdd | hmem_copy
+          · simp only [intTImpRule, List.mem_filterMap] at hmem_toAdd
+            obtain ⟨w', hw'_mem, hw'_sf⟩ := hmem_toAdd
+            simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_mem
+            obtain ⟨⟨sf'', hmem'', hlab⟩, _⟩ := hw'_mem
+            split_ifs at hw'_sf with hany1 hany2
+            · simp only [Option.some.injEq] at hw'_sf
+              rw [← hw'_sf]; simp only; rw [← hlab]
+              exact hbounds sf'' hmem''
+          · -- New: a copy of T(φ → ψ) itself at an accessible world `w'` already present on
+            -- the branch, so it is bounded exactly like any other pre-existing label.
+            simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+              List.mem_map] at hmem_copy
+            obtain ⟨w', ⟨⟨sf'', hmem'', hlab⟩, _⟩, hcopy⟩ := hmem_copy
+            split_ifs at hcopy with hcond
+            simp only [Option.some.injEq] at hcopy
+            rw [← hcopy]; simp only; rw [← hlab]
             exact hbounds sf'' hmem''
 
 omit [Hashable Atom] in
@@ -931,6 +988,15 @@ private lemma intApplyRuleFull_branching_labels
       rcases hbr with rfl | rfl
       · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
       · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+    | imp φ ψ =>
+      -- T(φ → ψ): .branchingResult [[F(φ)], [T(ψ)]] nwH (Deliverable 6), same label shape.
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨rfl, _⟩ := h
+      intro br hbr sf' hsf'
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      rcases hbr with rfl | rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
+      · simp only [List.mem_cons, List.mem_nil_iff, or_false] at hsf'; rcases hsf' with rfl; rfl
     | _ => simp at h
   | neg =>
     cases form with
@@ -1011,6 +1077,9 @@ private lemma intApplyRuleFull_branching_nw
   | pos =>
     cases form with
     | or φ ψ =>
+      simp only [IntRuleResult.branchingResult.injEq] at h
+      obtain ⟨_, rfl⟩ := h; rfl
+    | imp φ ψ =>
       simp only [IntRuleResult.branchingResult.injEq] at h
       obtain ⟨_, rfl⟩ := h; rfl
     | _ => simp at h

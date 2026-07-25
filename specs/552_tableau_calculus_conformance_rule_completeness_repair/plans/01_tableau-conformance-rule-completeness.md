@@ -241,66 +241,135 @@ Rollback/Contingency.
 
 ---
 
-### Phase 3: Propositional saturation record and truth lemma (P1-b) [NOT STARTED]
+### Phase 3: Propositional saturation record and truth lemma (P1-b) [PARTIAL]
 
 **Goal**: Extend the saturation record with `sat_timp`, prove the new rule case of
 `intRule_preserves_sat`, and close `truthLemma`'s T-implication case. This is the semantic half of
 Deliverable 6 that the truth lemma actually blocks on.
 
 **Tasks**:
-- [ ] Add `sat_timp` as a **6th field** to `IBranchSaturation` (`Scheme.lean:74`), stating that for
-      every `T(φ→ψ)@w` on the branch and every `w' ≥ w`, either `F(φ)@w'` or `T(ψ)@w'` is present.
-- [ ] Extend `intRule_preserves_sat` (`Soundness.lean:83-107`) with the new case. The
+- [x] Extend `intRule_preserves_sat` (`Soundness.lean:83-107`) with the new case. The
       `.branchingResult` case already has the right shape (`∃ br ∈ branches, intBranchSatisfied …`);
       the new obligation is the classical meta-disjunction "`¬(w' ⊩ φ)` or `w' ⊩ ψ`" at `w'`.
-- [ ] Close `truthLemma`'s T-imp case (`Scheme.lean:556`) using `sat_timp`.
-- [ ] Update every construction site of `IBranchSaturation` to supply the new field; do not weaken
-      the record to make old sites compile.
-- [ ] Confirm `intClosed_unsatisfiable` (`Soundness.lean:284`) is untouched — it is rule-independent.
+      **Done**, using `by_cases hφ : IForces … φ` (classical excluded middle) reflexively at
+      `sf.label`, then `IForces_imp` applied at `le_rfl`. Sorry-free.
+      *(Necessary side effect, not scope creep: adding the new `intApplyRuleFull` case is a
+      non-exhaustive-match BREAK, not merely an unproved goal, at five further sites in
+      `Soundness.lean` — `intClosed_unsatisfiable`'s untouched proof stayed intact, but
+      `freshAbove_applyAllTImpRules`, `intApplyRuleFull_branching_labels`,
+      `intApplyRuleFull_branching_nw`, and the `applyAllTImpRules`/`applyPersistenceFixpoint`
+      copy-propagation containment lemmas all needed a matching new case or a restated `happend`
+      body to keep `lake build`/`Cslib.lean` green. All fixed; see the Phase 2 commit and this
+      phase's commit for the full list. This IS "whatever is needed to keep the file compiling" —
+      Phase 2's own charter — just discovered to be broader than the plan's file list named.)*
+- [ ] **BLOCKED**: Add `sat_timp` as a **6th field** to `IBranchSaturation` (`Scheme.lean:74`).
+      *(deviation: blocked, not skipped — see BLOCKER below.)*
+- [ ] **BLOCKED**: Close `truthLemma`'s T-imp case (`Scheme.lean:556`) using `sat_timp`.
+      *(deviation: blocked, not skipped — see BLOCKER below.)*
+- [ ] **BLOCKED** (moot while `sat_timp` is not added): Update every `IBranchSaturation`
+      construction site to supply the new field.
+- [x] Confirm `intClosed_unsatisfiable` (`Soundness.lean:284`) is untouched — it is rule-independent.
+      **Confirmed**: zero diff to this lemma.
 
-**Timing**: 2 hours
+**BLOCKER** (Phase 3, `sat_timp` field + `truthLemma` T-imp case):
+- **What failed**: `sat_timp` (stated per the plan as "for every `T(φ→ψ)@w` on the branch and every
+  `w' ≥ w`, either `F(φ)@w'` or `T(ψ)@w'` is present") cannot be discharged at
+  `IExpandedConsistent_sat` (`Scheme.lean`, the sole `IBranchSaturation` construction site) without
+  a fuel-sufficiency invariant that does not exist at HEAD.
+- **What was tried**: (1) Added the `.pos, .imp` branching arm to `intApplyRuleFull` (Phase 2) so
+  the rule genuinely plants `F(φ)@w' | T(ψ)@w'` — this resolves the determinacy half of the
+  problem (see below). (2) Extended `applyAllTImpRules` to also copy `T(φ→ψ)` itself to every
+  accessible world lacking a copy, so each accessible world gets an independent chance at the
+  branching arm. (3) Traced `IExpandedConsistent_sat`'s proof pattern (identical structure to the
+  existing 4 fields) to confirm the mechanism *would* work — IF every accessible world's copy is
+  guaranteed to exist by the time `intStepBranch` reports no more rules apply.
+- **Why it's stuck**: (3)'s "IF" is false in general. The copy-propagation runs inside
+  `applyPersistenceFixpoint`'s fuel-bounded fixpoint loop (`Expansion.lean:133-139`), which reuses
+  the OUTER expansion loop's remaining step-count as its OWN fuel. If that fuel is exhausted before
+  persistence reaches a **genuine** fixpoint of `applyAllTImpRules`, some accessible world never
+  receives its copy — and `sat_timp`'s disjunction is then genuinely **false** for that world on
+  that branch, not merely unproved. This is a real mathematical gap, not a proof-technique gap.
+  This exact problem (there labeled "Gap 1: fuel entanglement") is independently, pre-existingly
+  documented in `Scheme.lean`'s own "`sat_timp` discharge — STOP-gate finding (task 317 phase 9)"
+  comment block, predating this task; task 317 phase 9 hit the identical wall under the OLD
+  (positive-only) rule design and scoped its resolution to a dedicated future phase "comparable in
+  size to Phase 7 itself." This task's Phase 2 redesign (the branching arm) resolves that STOP-gate
+  note's *other* half — "Gap 2: determinacy" — cleanly and completely (no bivalence/determinacy
+  fact is needed any more, since the rule directly plants the disjunction); Gap 1 is orthogonal and
+  untouched by the redesign.
+- **What is needed**: a new step-lt-style measure lemma bounding `applyPersistenceFixpoint`'s OWN
+  recursion (distinct from `intExpMeasure_step_lt`, which bounds only the outer alpha/beta/
+  world-creation loop), threaded through to `intExpandBranches_openBranch_sat`'s own pre-existing
+  `sorry` (the same gap, one level up, predating this task). This is new, substantial proof
+  engineering — a phase-sized undertaking in its own right, not a Phase 3 sub-task.
+- **Prohibited workarounds** (not used): `sorry`, an axiom, or restating `sat_timp` in a weakened
+  form that `truthLemma` cannot actually use. `Scheme.lean`'s STOP-gate comment block was updated
+  in place (not deleted) to record exactly which half is now resolved and which remains, so a
+  future dispatch does not re-derive this analysis from scratch.
+
+**Timing**: 2 hours (spent; see commit for the full compilation-restoration scope this phase
+absorbed from Phase 2)
 
 **Depends on**: 2
 
 **Files to modify**:
-- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - `IBranchSaturation` at `:74`, `truthLemma` at `:556`
-- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` - `intRule_preserves_sat` at `:83-107`
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - STOP-gate documentation updated
+  in place at `IBranchSaturation`/`truthLemma`'s T-imp case; `sfSatisfied` gains a `.pos, .imp`
+  case; `IExpandedConsistent`/`ILabelBound`/measure-containment/fuel-sufficiency lemmas extended
+  for the new rule case (the "whatever is needed to keep the file compiling" fallout)
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` - `intRule_preserves_sat` at
+  `:83-107` (new case, done); five further non-exhaustive-match sites fixed (fallout)
 
 **Verification**:
 - `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Scheme` green with no `sorry` in
-  `truthLemma` or `intRule_preserves_sat`.
+  `intRule_preserves_sat`. **Confirmed.** `truthLemma`'s pre-existing T-imp `sorry` remains (was
+  already `sorry` at HEAD before this task; still `sorry` — not newly introduced, not newly closed).
 - Conformance gate: the three flipped rows from Phase 2 remain CLOSED and the five IPC-invalid rows
-  remain OPEN (the record change must not alter verdicts at all).
-- `sat_timp` is discharged, not assumed, at every `IBranchSaturation` construction site.
+  remain OPEN (the record change must not alter verdicts at all). **Confirmed** — no `Scheme.lean`
+  change affects `intApplyRuleFull`'s runtime behavior; the harness result is unchanged from Phase 2.
+- `sat_timp` is discharged, not assumed, at every `IBranchSaturation` construction site. **N/A**:
+  `sat_timp` is not added (BLOCKED above), so nothing is assumed in its name.
 
 ---
 
-### Phase 4: Propositional soundness re-proof (P1-c) [NOT STARTED]
+### Phase 4: Propositional soundness re-proof (P1-c) [COMPLETED]
 
 **Goal**: Re-prove the two currently sorry-free propositional soundness theorems against the
 enlarged rule set. Per Finding 7 this is the heaviest proof burden in the task and gets a phase to
 itself with nothing else competing for the run.
 
-**Tasks**:
-- [ ] Re-prove `intExpandBranches_closed_unsat` (`Soundness.lean:1039`) with the `.pos, .imp` arm in
-      scope. It is sorry-free at HEAD; it must be sorry-free after.
-- [ ] Re-prove `intuitionisticTableau_sound` (`Soundness.lean:1714`), likewise sorry-free before and
-      after.
-- [ ] Do not introduce `sorry`, `admit`, or an axiom to close either theorem. If a genuine gap
-      appears, stop and record it rather than admitting it.
-- [ ] Re-run the full 19-row propositional corpus after the re-proof to confirm the proofs did not
-      require a behavioral concession.
+**Note on how this landed**: both target theorems turned out to be sound-direction only
+(`intBranchSatisfied`/`intRule_preserves_sat`/`intClosed_unsatisfiable`) — they never reference
+`IBranchSaturation`/`truthLemma`/`sat_timp` at all, so they are **independent of Phase 3's BLOCKER**.
+Because `intApplyRuleFull`'s new case is a non-exhaustive-match break (not a mere unproved goal),
+`Soundness.lean` could not build AT ALL after Phase 2 landed until every dependent proof — including
+these two theorems' own dependency chain through `intRule_preserves_sat` — was restored. That
+restoration (done as part of Phase 3's fallout, see above) already satisfies every task and
+verification item below; no additional, separate re-proof pass was needed.
 
-**Timing**: 2 hours
+**Tasks**:
+- [x] Re-prove `intExpandBranches_closed_unsat` (`Soundness.lean`) with the `.pos, .imp` arm in
+      scope. Sorry-free at HEAD; confirmed sorry-free after (builds transitively through the fixed
+      `intRule_preserves_sat`; the theorem's own body required no edits — it was never broken, only
+      blocked from building by its upstream dependency).
+- [x] Re-prove `intuitionisticTableau_sound` (`Soundness.lean`), likewise sorry-free before and
+      after (same situation: theorem body unedited, builds once its dependency chain is restored).
+- [x] Do not introduce `sorry`, `admit`, or an axiom to close either theorem. **Confirmed**: zero
+      new `sorry`/`axiom` anywhere in `Soundness.lean` (diffed against the pre-Phase-2 baseline).
+- [x] Re-run the full 19-row propositional corpus after the re-proof to confirm the proofs did not
+      require a behavioral concession. **Confirmed** via the harness (see below).
+
+**Timing**: 0 hours additional (fully absorbed into Phase 3's compilation-restoration work)
 
 **Depends on**: 3
 
 **Files to modify**:
-- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` - `:1039`, `:1714`
+- `Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` - no additional edits beyond
+  Phase 3's fallout fixes; both target theorem bodies are byte-identical to HEAD
 
 **Verification**:
-- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness` green.
-- `grep -c sorry` on `Soundness.lean` is unchanged from HEAD (no new admissions).
+- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Soundness` green. **Confirmed.**
+- `grep -c sorry` on `Soundness.lean` is unchanged from HEAD (no new admissions). **Confirmed: 0 = 0.**
 - Conformance gate: all 19 propositional rows report their expected verdicts — 14 CLOSED
   (11 originally green + 3 flipped) and 5 OPEN.
 

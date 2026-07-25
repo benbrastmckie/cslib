@@ -482,55 +482,54 @@ alongside `sat_timp`, discharged only once `measure ≤ fuel` is available), or 
 orchestrator re-plan Phase 2/4/10's dependency edges to reflect this inversion before further
 dispatch. Do NOT attempt to force monotonicity via a weakened/vacuous statement or a `sorry`. -/
 
-/-! ### `sat_timp` discharge — STOP-gate finding (task 317 phase 9)
+/-! ### `sat_timp` discharge — STOP-gate finding (task 317 phase 9), UPDATED (Deliverable 6
+branching-rule redesign)
 
-**Blocker (documented, not a `sorry`; no field/lemma is stated below).** Phase 9's mandate ("add
-`sat_timp` to `IBranchSaturation`, discharge it in `IExpandedConsistent_sat`") is **entangled with
-the SAME fuel-sufficiency gap as the monotonicity STOP-gate above**, plus a SECOND, independent gap
-(determinacy). Both are verified against source, not assumed; neither is completable within this
-phase's scope.
+**Gap 2 (determinacy) is RESOLVED as of the `.pos, .imp` branching arm added to
+`intApplyRuleFull` (`Rules.lean:245-268`).** The STOP-gate below (task 317 phase 9) was written
+against the OLD design, where `intTImpRule` was the ONLY `T(φ→ψ)` rule and only ever ADDED
+`T(ψ)@w'` under `T(φ)@w' ∈ b` — never planting `F(φ)@w'`, so the needed disjunction
+`F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` was unreachable without an independent determinacy/bivalence fact
+(Gap 2, below). The new design instead adds a genuine branching rule, `T(φ→ψ)@w' →
+[F(φ)@w'] | [T(ψ)@w']`, firing reflexively at whatever label its own signed-formula copy
+carries; `sfSatisfied`'s new `.pos, .imp` case (above `IExpandedConsistent`) states exactly this
+disjunction, and `IExpandedConsistent_sat` (`:897-967`) discharges it the same mechanical way as
+every other field (`sat_tand`/`sat_fand`/`sat_tor`/`sat_for_`) — via `intStepBranch b e nw = none`
+plus `IExpandedConsistent b e`, **with no determinacy/bivalence argument needed at all**. This is
+exactly the "restate as a branching rule" move Finding 6c / Decision D2 of the calculus-repair
+task recommend, and it is now landed.
 
-**Gap 1 (fuel entanglement, shared with monotonicity).** `IExpandedConsistent_sat`
-(`:840-…`) is called ONLY at `intExpandBranches_openBranch_sat`'s `none`-leaf case (`:1467`), on
-`bPers := applyPersistenceFixpoint bh edgesH (fuel'+1)` (`:1438`) — i.e. `fuel'+1` IS the outer
-`intExpandBranches.go` recursion's own remaining step-count (the SAME `Nat` `intExpMeasure_step_lt`
-bounds), reused verbatim as the inner persistence loop's fuel. `applyPersistenceFixpoint`
-(`Expansion.lean:133-139`) exits via exactly one of two paths: (a) the `b'.length == b.length`
-check succeeds, in which case `b' = b` **literally** (append of an empty `newForms.flatten`), a
-GENUINE, self-certifying fixpoint of `applyAllTImpRules`; or (b) fuel hits `0` before (a) ever
-fires, returning whatever intermediate branch was reached, with **no fixpoint guarantee at all**.
-Distinguishing (a) from (b) at a given call site requires an explicit numeric bound — "rounds
-needed (≤ `|intUniverse φ0|` by `applyPersistenceFixpoint_subset`, since each non-terminating
-round strictly grows `b` and stays inside the finite universe) ≤ remaining fuel at that point" —
-which is exactly the kind of `intExpMeasure ≤ fuel` INVARIANT-MAINTAINED-THROUGHOUT-THE-INDUCTION
-fact task 317 Phase 10 is scoped to build (`intExpandBranches_openBranch_sat`'s own `:1388` `sorry`
-is this same gap, one level up). No such invariant is threaded into `IExpandedConsistent_sat`'s
-signature today, and threading it requires a NEW step-lt-style lemma for
-`applyPersistenceFixpoint`'s OWN recursion (distinct from `intExpMeasure_step_lt`, which bounds
-outer alpha/beta/world-creation steps and says nothing about inner persistence rounds) — out of
-this phase's scope, comparable in size to Phase 7 itself.
+**Gap 1 (fuel entanglement) is UNCHANGED and remains the sole blocker.** The disjunction above
+only holds for a world `w'` that actually carries its OWN `⟨.pos, φ → ψ, w'⟩` copy on the
+branch. `applyAllTImpRules` (`Expansion.lean:118-…`) now ALSO copies `T(φ→ψ)` itself to every
+world accessible from its source that lacks a copy — but this copying, like the original
+`T(ψ)`-consequence propagation, runs inside `applyPersistenceFixpoint`'s fuel-bounded fixpoint
+loop (`Expansion.lean:133-139`), reusing the OUTER expansion loop's remaining step-count
+(`fuel'+1` at the `intExpandBranches_openBranch_sat` call site, `:1438` era). If that fuel is
+exhausted before a GENUINE fixpoint of `applyAllTImpRules` is reached, some accessible world may
+never receive its copy, and the `sat_timp` disjunction is then genuinely FALSE for that world on
+that specific (low-fuel) branch — not merely unproved, but false as a fact about the branch.
+Establishing "fuel is always sufficient for persistence's OWN recursion to reach a genuine
+fixpoint" needs a NEW step-lt-style measure lemma for `applyPersistenceFixpoint`'s recursion
+(distinct from `intExpMeasure_step_lt`, which bounds the OUTER alpha/beta/world-creation loop and
+says nothing about inner persistence rounds) threaded through `intExpandBranches_openBranch_sat`'s
+own `:1388`-era `sorry` (the SAME gap, one level up) — out of proportion for this phase, and
+comparable in size to a full additional phase on its own, exactly as task 317 phase 10 already
+scoped it.
 
-**Gap 2 (determinacy, independent of Gap 1 — NOT previously documented in reports 08/09).** Even
-GRANTING a genuine fixpoint of `applyAllTImpRules` on `bPers`, `intTImpRule`
-(`Rules.lean:174-187`) only ever ADDS `T(ψ)@w'` when `T(φ)@w'` is already present; a fixpoint
-therefore certifies exactly `T(φ)@w' ∈ b → T(ψ)@w' ∈ b` for every accessible `w'` — **not**
-`F(φ)@w' ∈ b ∨ T(ψ)@w' ∈ b` (report 09 §a.4's proposed `sat_timp` signature, needed by
-`truthLemma`'s T-imp case: the goal supplies `IForces val w' φ'` semantically, not
-`T(φ')@w' ∈ b`, so the disjunction must hold unconditionally, not merely under `T(φ)@w' ∈ b`).
-Bridging `¬(T(φ)@w' ∈ b)` to `F(φ)@w' ∈ b` needs a determinacy/bivalence fact — "every subformula
-of `Sub(φ0)` is either `T`- or `F`-tagged at every branch-accessible world" — that no existing
-`IBranchSaturation` field or invariant in this file establishes (the `sat_tand`/`sat_fand`/…
-fields are all per-world decompositions of compounds already ON the branch, not a cross-world
-bivalence guarantee for arbitrary `Sub(φ0)` members). No lemma toward this exists at HEAD.
-
-**Recommendation for continuation**: fold `sat_timp`'s field + discharge into Phase 10 alongside
-monotonicity (same recommendation (a) as the STOP-gate above), with Phase 10 additionally scoped
-to either (i) prove the determinacy fact as a byproduct of full Hintikka saturation once the
-`measure ≤ fuel` invariant lets the induction reach every world, or (ii) restate `sat_timp` in the
-strictly-provable-at-fixpoint form `T(φ)@w' ∈ b → T(ψ)@w' ∈ b` and re-derive `truthLemma`'s T-imp
-case from THAT shape instead (would need re-deriving `T(φ')@w' ∈ b` from `IForces val w' φ'` via
-a separate completeness/adequacy argument — itself nontrivial). Do NOT attempt to force `sat_timp`
-via a weakened/vacuous statement or a `sorry`. -/
+**Consequence for this task's Phase 3.** `sat_timp` is NOT added as an `IBranchSaturation` field
+and `truthLemma`'s T-imp `sorry` (below) is NOT closed: doing either would require discharging
+`sat_timp` at `IExpandedConsistent_sat`, the sole construction site, which needs Gap 1's
+fuel-sufficiency invariant — a genuine, substantial, pre-existing gap this phase's 2-hour budget
+cannot responsibly absorb without forcing a `sorry`, an axiom, or a weakened/vacuous restatement,
+all of which are prohibited. `intRule_preserves_sat`'s new `.pos, .imp` case (Soundness.lean) IS
+landed and sorry-free — that lemma reasons about a REAL Kripke model's forcing relation directly
+(classical excluded middle on `IForces`), not about branch-syntactic saturation, so it does not
+depend on Gap 1 at all. Recommendation for continuation: build the persistence fuel-sufficiency
+measure (Gap 1) as its own phase, then revisit `sat_timp`/`truthLemma`'s T-imp case together with
+`intExpandBranches_openBranch_sat`'s own `sorry` in one pass, since both bottom out in the same
+missing invariant. Do NOT attempt to force `sat_timp` via a weakened/vacuous statement or a
+`sorry`. -/
 
 /-! ## Parametric Truth Lemma -/
 
@@ -578,9 +577,17 @@ lemma truthLemma (S : IntMinScheme Atom) (b : IBranch Atom) (edges : IEdges)
     simp only [IForces_imp]
     constructor
     · -- T(φ'→ψ')@w ∈ b → ∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
-      -- Requires a T-modus ponens saturation (sat_timp) together with backward reasoning
-      -- from IForces to branch membership, neither of which is available without the
-      -- fuel-sufficiency fixpoint. Deferred: task 317 phase 9 (`sat_timp` over the edge frame).
+      -- Needs `sat_timp : ∀ w' accessible from w, F(φ')@w' ∈ b ∨ T(ψ')@w' ∈ b`. The
+      -- determinacy obstruction that used to block this (task 317 phase 9 Gap 2) is RESOLVED
+      -- by the `.pos, .imp` branching arm added to `intApplyRuleFull` -- see the updated
+      -- "`sat_timp` discharge" STOP-gate note above this lemma. What remains, UNCHANGED, is
+      -- Gap 1: the disjunction only holds at worlds that actually carry their own
+      -- `T(φ'→ψ')` copy, which `applyAllTImpRules`'s copy-propagation only guarantees at a
+      -- GENUINE fixpoint of the fuel-bounded persistence loop -- an invariant not yet built
+      -- (comparable in size to a full phase; see the STOP-gate note for the exact call-site
+      -- analysis). `sat_timp` is therefore deliberately NOT added as an `IBranchSaturation`
+      -- field and this case stays `sorry` rather than being forced via a weakened or vacuous
+      -- statement.
       intro _
       sorry
     · -- F(φ'→ψ')@w ∈ b → ¬∀ w' accessible from w, IForces val w' φ' → IForces val w' ψ'.
@@ -755,6 +762,13 @@ private def sfSatisfied (b : IBranch Atom) (sf : ISF Atom) : Prop :=
     ∃ w' : Nat, sf.label ≤ w' ∧
       b.any (fun x => x.sign == .pos && x.formula == φ && x.label == w') = true ∧
       b.any (fun x => x.sign == .neg && x.formula == ψ && x.label == w') = true
+  | .pos, .imp φ ψ =>
+    -- Deliverable 6, Fitting `T(→)` split: `intApplyRuleFull`'s `.pos, .imp` branching arm
+    -- resolves reflexively at `sf.label`, so the output condition is the same-label
+    -- disjunction `sat_timp` needs (this is the loop-invariant analogue of `IBranchSaturation`'s
+    -- `sat_timp` field added below for the global saturation certificate).
+    b.any (fun x => x.sign == .neg && x.formula == φ && x.label == sf.label) = true ∨
+    b.any (fun x => x.sign == .pos && x.formula == ψ && x.label == sf.label) = true
   | _, _ => True
 
 /-- The expanded-set invariant: every formula in `e` has its rule outputs present on `b`. -/
@@ -1151,7 +1165,34 @@ private lemma intStepBranch_branch_preserves
     cases ff with
     | atom x => simp [intApplyRuleFull] at hint
     | bot => simp [intApplyRuleFull] at hint
-    | imp φ ψ => simp [intApplyRuleFull] at hint
+    | imp φ ψ =>
+      -- Deliverable 6: T(φ → ψ) → [F(φ)@l] | [T(ψ)@l], reflexively at `l`. Same shape as the
+      -- `.pos, .or` case below, with mixed signs on the two disjuncts.
+      simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+      obtain ⟨hbrs, hnw'⟩ := hint
+      subst hnw'; subst hnewExp
+      rw [← hbrs] at hbr
+      simp only [List.mem_cons, List.mem_nil_iff, or_false] at hbr
+      refine ⟨?_, ?_, ?_⟩
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfSatisfied_mono hmemOld (hIC sf' hsf')
+        · rcases hbr with rfl | rfl
+          · exact Or.inl (List.any_eq_true.mpr
+              ⟨⟨.neg, φ, l⟩, by simp [Branch.extendMany], by simp⟩)
+          · exact Or.inr (List.any_eq_true.mpr
+              ⟨⟨.pos, ψ, l⟩, by simp [Branch.extendMany], by simp⟩)
+      · intro sf' hsf'
+        rcases hbr with rfl | rfl <;>
+          simp only [Branch.extendMany, List.mem_cons, List.mem_nil_iff, List.mem_append,
+            or_false] at hsf' <;>
+          rcases hsf' with rfl | hsf' <;> first | exact hsfl | exact hLB sf' hsf'
+      · intro sf' hsf'
+        rw [List.mem_append, List.mem_singleton] at hsf'
+        rcases hsf' with hsf' | rfl
+        · exact sfAccessSat_mono hmemOld (hACC sf' hsf')
+        · rcases hbr with rfl | rfl <;> simp [sfAccessSat]
     | and φ ψ => simp [intApplyRuleFull] at hint
     | or φ ψ =>
       simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
@@ -1235,23 +1276,42 @@ private lemma ILabelBound_applyAllTImpRules {b : IBranch Atom} {edges : IEdges} 
       | or _ _ => simp only at houter; exact absurd houter (by simp)
       | imp φ ψ =>
         simp only [] at houter
-        by_cases hemp : (intTImpRule φ ψ label_o edges b).isEmpty = true
+        by_cases hemp :
+            (intTImpRule φ ψ label_o edges b ++
+              List.filterMap
+                (fun x =>
+                  if (List.any b fun y =>
+                      y.sign == Sign.pos && y.formula == (φ → ψ) && y.label == x) = true
+                    then none
+                  else some (⟨.pos, φ → ψ, x⟩ : ISF Atom))
+                (List.filter (fun x => isAccessible edges label_o x)
+                  (List.map (fun x => x.label) b).eraseDups)).isEmpty = true
         · simp only [hemp, ite_true] at houter; exact absurd houter (by simp)
         · simp only [Bool.false_eq_true, hemp, ite_false, Option.some.injEq] at houter
-          rw [← houter] at hmem_inner
-          simp only [intTImpRule, List.mem_filterMap] at hmem_inner
-          obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_inner
-          simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
-          obtain ⟨⟨x, hxb, hxeq⟩, -⟩ := hw'_acc
-          by_cases hphi : (b.any fun sf =>
-              sf.sign == .pos && sf.formula == φ && sf.label == w') = true
-          · by_cases hpsi : (b.any fun sf =>
-                sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
-            · simp [hphi, hpsi] at hw'_sf
-            · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq] at hw'_sf
-              rw [← hw'_sf]
-              simpa [← hxeq] using h x hxb
-          · simp [hphi] at hw'_sf
+          rw [← houter, List.mem_append] at hmem_inner
+          rcases hmem_inner with hmem_toAdd | hmem_copy
+          · simp only [intTImpRule, List.mem_filterMap] at hmem_toAdd
+            obtain ⟨w', hw'_acc, hw'_sf⟩ := hmem_toAdd
+            simp only [List.mem_filter, List.mem_eraseDups, List.mem_map] at hw'_acc
+            obtain ⟨⟨x, hxb, hxeq⟩, -⟩ := hw'_acc
+            by_cases hphi : (b.any fun sf =>
+                sf.sign == .pos && sf.formula == φ && sf.label == w') = true
+            · by_cases hpsi : (b.any fun sf =>
+                  sf.sign == .pos && sf.formula == ψ && sf.label == w') = true
+              · simp [hphi, hpsi] at hw'_sf
+              · simp only [hphi, ↓reduceIte, hpsi, Bool.false_eq_true, Option.some.injEq]
+                  at hw'_sf
+                rw [← hw'_sf]
+                simpa [← hxeq] using h x hxb
+            · simp [hphi] at hw'_sf
+          · -- New copy case: `w'` is an existing branch label, bounded by `h` directly.
+            simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+              List.mem_map] at hmem_copy
+            obtain ⟨w', ⟨⟨x, hxb, hxeq⟩, -⟩, hcopy⟩ := hmem_copy
+            split_ifs at hcopy with hcond
+            simp only [Option.some.injEq] at hcopy
+            rw [← hcopy]
+            simpa [← hxeq] using h x hxb
 
 omit [Hashable Atom] in
 /-- `ILabelBound` is preserved by `applyPersistenceFixpoint` (any number of fixpoint
@@ -2164,8 +2224,21 @@ private lemma applyAllTImpRules_subset {φ0 : Proposition Atom} {b : IBranch Ato
         split at hsfeq
         · simp at hsfeq
         · simp only [Option.some.injEq] at hsfeq
-          rw [← hsfeq] at hxmem
-          exact intTImpRule_outputs_subset hb hsfmem x hxmem
+          rw [← hsfeq, List.mem_append] at hxmem
+          rcases hxmem with hxmem | hxcopy
+          · exact intTImpRule_outputs_subset hb hsfmem x hxmem
+          · -- New copy case: the copy `⟨.pos, φ → ψ, w'⟩` at an existing branch label `w'`.
+            simp only [List.mem_filterMap, List.mem_filter, List.mem_eraseDups,
+              List.mem_map] at hxcopy
+            obtain ⟨w', ⟨⟨y, hymem, hyeq⟩, -⟩, hxeq⟩ := hxcopy
+            have hφψsub : (Proposition.imp φ ψ) ∈ intSubfmls φ0 :=
+              intUniverse_mem_formula (hb _ hsfmem)
+            have hwle : w' ≤ φ0.complexity + 1 := by
+              subst hyeq; exact intUniverse_mem_label (hb y hymem)
+            split at hxeq
+            · simp at hxeq
+            · simp only [Option.some.injEq] at hxeq
+              exact hxeq ▸ mem_intUniverse_of hwle hφψsub
 
 omit [Hashable Atom] in
 /-- Containment is a loop invariant of `applyPersistenceFixpoint` (`Expansion.lean:133-139`):
@@ -2212,7 +2285,17 @@ lemma intApplyRuleFull_outputs_subset {φ0 : Proposition Atom} {sf : ISF Atom}
     cases ff with
     | atom p => trivial
     | bot => trivial
-    | imp φ ψ => trivial
+    | imp φ ψ =>
+      -- Deliverable 6, branching arm: same shape as `.pos, .or` below (both φ and ψ are
+      -- subformulas of `φ → ψ`, labels stay at `l`).
+      have hsub : (Proposition.imp φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
+      have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
+      intro x hx
+      simp only [List.mem_flatten, List.mem_cons, List.not_mem_nil, or_false] at hx
+      obtain ⟨t, (rfl | rfl), hxt⟩ := hx <;>
+        simp only [List.mem_cons, List.not_mem_nil, or_false] at hxt <;>
+        (subst hxt
+         exact mem_intUniverse_of hlab (intSubfmls_trans (by simp [intSubfmls]) hsub))
     | and φ ψ =>
       have hsub : (Proposition.and φ ψ) ∈ intSubfmls φ0 := intUniverse_mem_formula hsfU
       have hlab : l ≤ φ0.complexity + 1 := intUniverse_mem_label hsfU
@@ -2560,7 +2643,26 @@ lemma intExpMeasure_step_lt_branch
       cases ff with
       | atom x => simp [intApplyRuleFull] at hint
       | bot => simp [intApplyRuleFull] at hint
-      | imp φ ψ => simp [intApplyRuleFull] at hint
+      | imp φ ψ =>
+        -- Deliverable 6, branching arm: same shape as `.pos, .or` below, mixed signs.
+        simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
+        obtain ⟨hbrs, hnw'eq⟩ := hint
+        subst hbrs
+        simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+        have hdrop0 : intWork U (Branch.extendMany bh [⟨.neg, φ, l⟩])
+            (e ++ [⟨.pos, .imp φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.neg, φ, l⟩]) e ⟨.pos, .imp φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hdrop1 : intWork U (Branch.extendMany bh [⟨.pos, ψ, l⟩])
+            (e ++ [⟨.pos, .imp φ ψ, l⟩]) + 1 ≤ intWork U bh e :=
+          intWork_drop U bh (Branch.extendMany bh [⟨.pos, ψ, l⟩]) e ⟨.pos, .imp φ ψ, l⟩ hsfU hany
+            (fun z hz => by simp only [Branch.extendMany, List.mem_append]; exact Or.inr hz)
+        have hC : 1 ≤ intWork U bh e := by omega
+        have h0 : intWork U (Branch.extendMany bh [⟨.neg, φ, l⟩])
+            (e ++ [⟨.pos, .imp φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        have h1 : intWork U (Branch.extendMany bh [⟨.pos, ψ, l⟩])
+            (e ++ [⟨.pos, .imp φ ψ, l⟩]) ≤ intWork U bh e - 1 := by omega
+        exact pow3_two_add_one_le hC h0 h1
       | and φ ψ => simp [intApplyRuleFull] at hint
       | or φ ψ =>
         simp only [intApplyRuleFull, IntRuleResult.branchingResult.injEq] at hint
@@ -2669,6 +2771,35 @@ least this count suffices for a genuine fixpoint. GAP 2 (determinacy) is NOT add
 the investigation note after `applyPersistenceFixpoint_genuine_of_count_le_fuel` below. -/
 
 omit [Hashable Atom] in
+/-- The `applyAllTImpRules` copy-propagation output (the `T(φ → ψ)` self-copy at an accessible
+world `w'` lacking one) is never already on the branch: the `if b.any … then none else …` guard
+in its construction is exactly this fact, restated as membership. -/
+private lemma applyAllTImpRules_copy_notMem {φ ψ : Proposition Atom} {l : Nat} {edges : IEdges}
+    {b : IBranch Atom} {x : ISF Atom}
+    (hx : x ∈ List.filterMap
+        (fun w' =>
+          if (List.any b fun y => y.sign == Sign.pos && y.formula == (φ → ψ) && y.label == w')
+              = true then none
+          else some (⟨.pos, φ → ψ, w'⟩ : ISF Atom))
+        (List.filter (fun w => isAccessible edges l w)
+          (List.map (fun y => y.label) b).eraseDups)) :
+    b.any (· == x) = false := by
+  simp only [List.mem_filterMap] at hx
+  obtain ⟨w', -, hxeq⟩ := hx
+  split at hxeq
+  · simp at hxeq
+  · simp only [Option.some.injEq] at hxeq
+    rw [← hxeq, Bool.eq_false_iff]
+    intro hcon
+    rename_i hnotmem
+    apply hnotmem
+    rw [List.any_eq_true] at hcon ⊢
+    obtain ⟨sf, hsfmem, hsfeq⟩ := hcon
+    refine ⟨sf, hsfmem, ?_⟩
+    rw [beq_iff_eq] at hsfeq
+    simp [hsfeq]
+
+omit [Hashable Atom] in
 /-- Every output of `intTImpRule` is, by construction, NOT already on the branch it fires from
 (the rule's inner guard `if b.any (… ψ …) then none else some …` only ever fires on the `else`
 branch, i.e. exactly when `ψ@w'` is absent). -/
@@ -2692,6 +2823,7 @@ private lemma intTImpRule_output_notMem {φ ψ : Proposition Atom} {w : Nat} {ed
       simp [hsfeq]
   · simp at hxeq
 
+omit [Hashable Atom] in
 /-- One non-fixpoint round of `applyAllTImpRules` strictly drops the count of `intUniverse φ0`
 cells not yet on the branch, given branch-containment `hb` (task 317 phase 10, gap 1
 continuation; mirrors `intWork_drop`'s combinatorial core, restricted to the branch-membership
@@ -2707,13 +2839,27 @@ private lemma applyAllTImpRules_count_drop
         match sf.sign, sf.formula with
         | .pos, .imp φ ψ =>
           let toAdd := intTImpRule φ ψ sf.label edges b
-          if toAdd.isEmpty then none else some toAdd
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          let combined := toAdd ++ copies
+          if combined.isEmpty then none else some combined
         | _, _ => none).flatten := rfl
   set nf := (b.filterMap fun sf =>
         match sf.sign, sf.formula with
         | .pos, .imp φ ψ =>
           let toAdd := intTImpRule φ ψ sf.label edges b
-          if toAdd.isEmpty then none else some toAdd
+          let accessibleWorlds :=
+            (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+          let copies := accessibleWorlds.filterMap fun w' =>
+            if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+              none
+            else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+          let combined := toAdd ++ copies
+          if combined.isEmpty then none else some combined
         | _, _ => none) with hnf_def
   have hne' : nf.flatten ≠ [] := by
     intro hcontra
@@ -2742,8 +2888,10 @@ private lemma applyAllTImpRules_count_drop
         split at hsfeq
         · simp at hsfeq
         · simp only [Option.some.injEq] at hsfeq
-          rw [← hsfeq] at hxmem
-          exact intTImpRule_output_notMem hxmem
+          rw [← hsfeq, List.mem_append] at hxmem
+          rcases hxmem with hxmem | hxcopy
+          · exact intTImpRule_output_notMem hxmem
+          · exact applyAllTImpRules_copy_notMem hxcopy
   have hdrop := intCount_notMem_append_drop (intUniverse φ0) b x hxU hxnotb
   have hmono := intCount_notMem_mono (intUniverse φ0) (b ++ [x]) (applyAllTImpRules b edges)
     (by
@@ -2755,6 +2903,7 @@ private lemma applyAllTImpRules_count_drop
       · exact List.mem_append_right _ hxmem)
   omega
 
+omit [Hashable Atom] in
 /-- **Genuine-fixpoint sufficiency** (task 317 phase 10, closes `sat_timp` STOP-gate GAP 1):
 `applyPersistenceFixpoint b edges fuel` is a genuine fixpoint of `applyAllTImpRules` — applying
 one more round changes nothing — whenever the fuel is at least the count of `intUniverse φ0`
@@ -2778,14 +2927,26 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
             match sf.sign, sf.formula with
             | .pos, .imp φ ψ =>
               let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
+              let accessibleWorlds :=
+                (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+              let copies := accessibleWorlds.filterMap fun w' =>
+                if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w')
+                then none else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+              let combined := toAdd ++ copies
+              if combined.isEmpty then none else some combined
             | _, _ => none).flatten := rfl
       rw [happend] at hlen ⊢
       have hflat : (b.filterMap fun sf =>
             match sf.sign, sf.formula with
             | .pos, .imp φ ψ =>
               let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
+              let accessibleWorlds :=
+                (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+              let copies := accessibleWorlds.filterMap fun w' =>
+                if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w')
+                then none else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+              let combined := toAdd ++ copies
+              if combined.isEmpty then none else some combined
             | _, _ => none).flatten = [] := by
         have hlen2 := hlen
         rw [List.length_append] at hlen2
@@ -2802,14 +2963,26 @@ private lemma applyPersistenceFixpoint_genuine_of_count_le_fuel
             match sf.sign, sf.formula with
             | .pos, .imp φ ψ =>
               let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
+              let accessibleWorlds :=
+                (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+              let copies := accessibleWorlds.filterMap fun w' =>
+                if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w')
+                then none else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+              let combined := toAdd ++ copies
+              if combined.isEmpty then none else some combined
             | _, _ => none).flatten := rfl
       rw [happend] at hlenb
       have hflat : (b.filterMap fun sf =>
             match sf.sign, sf.formula with
             | .pos, .imp φ ψ =>
               let toAdd := intTImpRule φ ψ sf.label edges b
-              if toAdd.isEmpty then none else some toAdd
+              let accessibleWorlds :=
+                (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+              let copies := accessibleWorlds.filterMap fun w' =>
+                if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w')
+                then none else some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+              let combined := toAdd ++ copies
+              if combined.isEmpty then none else some combined
             | _, _ => none).flatten = [] := by
         have hlen2 := hlenb
         rw [List.length_append] at hlen2

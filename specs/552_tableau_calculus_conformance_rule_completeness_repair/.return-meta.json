@@ -3,14 +3,19 @@
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
     "CslibTests/TableauConformance.lean",
-    "CslibTests.lean"
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 (conformance harness gate) landed and verified: CslibTests/TableauConformance.lean with dual-import header, temporalVerdict/intVerdict String adapters, 43 #guard_msgs-in-#eval rows (27 green, 16 red) matching Finding 0 exactly. Registered in CslibTests.lean barrel. Full CI pipeline (build, checkInitImports, lint, lint-style, shake, mk_all, test) clean for this file. No Cslib/ file touched. Row count is 43 not the plan's rounded 44 (documented deviation, same defect set). Phases 2-8 (propositional T-imp branching rule, temporal seriality/duality/transitivity/cap/fuel/tracker repairs, soundness re-audits) remain -- large remaining scope (~13h of the 15h estimate), each requiring nontrivial Lean proof work in Cslib/Logics/{Propositional,Temporal}/Tableau/.",
+    "stage": "phase_4_complete_propositional_column_done",
+    "details": "Phases 1-2 fully complete. Phase 3 PARTIAL: intRule_preserves_sat extended and sorry-free (done), but sat_timp field + truthLemma T-imp closure BLOCKED on a genuine, pre-existing, well-documented fuel-sufficiency gap (Gap 1, 'task 317 phase 9 STOP-gate', now updated in-place in Scheme.lean to record that Phase 2's branching-rule redesign resolves the OTHER half, Gap 2/determinacy, cleanly). Phase 4 COMPLETE: both soundness theorems (intExpandBranches_closed_unsat, intuitionisticTableau_sound) are sorry-free and independent of the Phase 3 blocker (soundness-direction only, no truthLemma/sat_timp dependency); their build was restored as necessary fallout of fixing intApplyRuleFull's non-exhaustive-match break across Soundness.lean/Scheme.lean. Whole-project `lake build`/`lake test` GREEN. Conformance harness: propositional column fully green (19/19 rows correct: 14 CLOSED + 5 OPEN). Zero new sorry/axiom anywhere (diffed against pre-Phase-2 baseline). The propositional front (Deliverable 6) is functionally complete except for the documented Gap 1 blocker on truthLemma's completeness-direction sorry, which was ALREADY sorry at HEAD before this task and remains a pre-existing, separately-scoped gap. Remaining work: Phases 5-8, the entire temporal front (Deliverables 2/3/4/5 -- tracker redesign, seriality/duality/transitivity rules, cap removal, fuel raise, soundness re-audit) plus Phase 8's scope-record cleanup. These are file-disjoint from the propositional work just completed and represent the majority of remaining scope (~9-10h of the original 15h estimate).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1
+    "phases_completed": 4,
+    "phases_partial": [3]
   },
   "metadata": {
     "session_id": "sess_1784959340_e4ceeb_552",

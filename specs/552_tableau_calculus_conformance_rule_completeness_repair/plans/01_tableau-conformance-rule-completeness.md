@@ -453,7 +453,7 @@ gate (`isTemporallyBlocked`) reads the tracker and is untrustworthy until the tr
 
 ---
 
-### Phase 6: Temporal rule arms — seriality, `𝐆`/`𝐇` duality, transitive propagation (P3-a) [NOT STARTED]
+### Phase 6: Temporal rule arms — seriality, `𝐆`/`𝐇` duality, transitive propagation (P3-a) [COMPLETED]
 
 **Goal**: Land the three coordinated `Rules.lean` edits of Deliverable 2 plus the Finding 2b/2c
 seventh defect, and re-prove the two `_preserves` lemmas.
@@ -520,7 +520,19 @@ Rollback/Contingency.
 
 ---
 
-### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [NOT STARTED]
+### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [IN PROGRESS]
+
+**User-directed strategy override (continuation dispatch)**: per explicit user decision, Deliverable
+4 is realized as **deduplication** (wiring the pre-existing `isTemporallyBlocked` subset-blocking
+device, already used as the seriality termination gate in Phase 6, into the `untlNeg`/`snceNeg`
+fresh-time-creation sites at `Rules.lean:365,391`) instead of raising `temporalFuel`'s constant. The
+research report's Finding 4 already names this exact wiring as the non-viable-at-the-time
+alternative to raising the constant (blocked only on Deliverable 5, which has since landed in Phase
+5) — see report `Finding 4`/`D4`. Mechanically, `!blocked` replacing `ord.timeCount > 0 &&
+ord.timeCount < 4` **is** the cap-removal edit at the same two sites, so Deliverables 3 and 4
+resolve to a single coupled code change; the two are measured as sequential checkpoints (dedup
+wiring measured first, cap-removal verdict flips measured second) rather than landed as physically
+separate diffs, since the code has only one guard condition to change per site.
 
 **Goal**: Remove the time-creation cap at both duplicated sites and raise the fuel constant, then
 **measure** headroom rather than assuming one raise suffices. Completes the D3 wave.

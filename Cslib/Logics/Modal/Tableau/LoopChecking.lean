@@ -803,6 +803,144 @@ lemma modalApplyOneS4Keyed_diaPos_unblocked_eq (φ₀ : Proposition Atom)
   unfold modalApplyOneS4Keyed
   simp [hblock]
 
+/-! ## Mint-Readiness: A Global, Non-Recursive Settledness Predicate
+
+The repair for the keyed guard's unsoundness (`blockingWorldS4Keyed`'s docstring above) does
+**not** edit this comparison predicate. Instead it restricts *when* a minting shape
+(`F(□φ)@w`, `T(◇φ)@w`) is allowed to fire: only once every other rule that could still fire
+anywhere on the branch has already fired. Delaying a mint until the branch has propagated
+everything it currently can is what prevents a later sibling expansion from adding formulas to
+a world's *live* content after that world's *recorded* key was already compared against -- the
+exact mechanism the counterexample exploits.
+
+**Design decision (deviation from the research report, deliberate).** A per-world formulation
+("no unexpanded formula at `w`, and every predecessor of `w` is itself settled") would need a
+well-foundedness argument that the accessibility record cannot supply: mint edges point to
+strictly larger fresh worlds, but redirect edges (the very edges `blockingWorldS4Keyed`
+licenses) may point to *smaller* worlds, and a reflexive self-block `w → w` is explicitly
+permitted, so the predecessor relation can cycle. `modalNonMintCandidates` below instead states
+settledness **globally**: a minting shape may fire only when no non-minting rule can fire
+*anywhere* on the branch, not just at `w`. This is strictly stronger than the per-world
+condition (it implies it), decidable by direct computation on `(b, e, acc, keys)` with no
+recursion and no well-foundedness obligation at all. The key enabling fact is that
+`modalApplyOneS4Rules` (`FrameRules.lean`) returns `.notApplicable` when a persistent rule's
+output would be empty (nothing new to propagate), so "settled" is expressible as a plain
+`RuleResult.isApplicable` check even though persistent formulas never leave the branch to enter
+`e`. -/
+
+/-- `true` exactly at the two minting shapes the keyed guard consults: `F(□φ)@w`
+(box-negative) and `T(◇φ)@w` (diamond-positive) -- the two signed-formula shapes at which
+`modalApplyOneS4Keyed` consults `blockingWorldS4Keyed` before falling through to the ordinary
+rule set. -/
+def modalMintShape (sf : SignedFormula (Proposition Atom) WorldIndex) : Bool :=
+  match sf.sign, sf.formula with
+  | .neg, .box _ => true
+  | .pos, .diamond _ => true
+  | _, _ => false
+
+/-- `modalMintShape` characterisation, box-negative shape (`F(□φ)@w`). -/
+@[simp]
+lemma modalMintShape_boxNeg (φ : Proposition Atom) (w : WorldIndex) :
+    modalMintShape (⟨.neg, .box φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
+  rfl
+
+/-- `modalMintShape` characterisation, diamond-positive shape (`T(◇φ)@w`). -/
+@[simp]
+lemma modalMintShape_diaPos (φ : Proposition Atom) (w : WorldIndex) :
+    modalMintShape (⟨.pos, .diamond φ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) = true :=
+  rfl
+
+/-- `modalMintShape` is `false` at every signed-formula shape other than the two minting
+shapes: the complement of the two characterisation lemmas above. -/
+lemma modalMintShape_eq_false_of_not_boxNeg_diaPos
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (h : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+         ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)) :
+    modalMintShape sf = false := by
+  obtain ⟨h1, h2⟩ := h
+  unfold modalMintShape
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | φ | φ <;>
+    simp_all
+
+/-- The non-minting candidate sublist of `b`: formulas that (1) are not one of the two minting
+shapes, (2) have not yet been expanded, and (3) have some applicable rule under
+`modalApplyOneS4Keyed φ₀ keys` (evaluated against the current `(b, acc)`, mirroring exactly the
+per-formula call `modalStepBranchGen`'s own selection makes). This is the ordered stepper's
+(companion phase) primary traversal list: consulting it before falling back to the old
+`b.findSome?` traversal is what "settled-context scheduling" means -- a minting shape only
+fires once this list is empty, i.e. once every non-minting rule that could still fire on the
+branch has already fired. -/
+def modalNonMintCandidates (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    List (SignedFormula (Proposition Atom) WorldIndex) :=
+  b.filter (fun sf =>
+    !modalMintShape sf && !(e.any (· == sf)) &&
+      (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable)
+
+/-- Every non-minting candidate is drawn from the branch `b`. -/
+lemma modalNonMintCandidates_subset (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalNonMintCandidates φ₀ keys b e acc ⊆ b := by
+  unfold modalNonMintCandidates
+  exact List.filter_subset' _
+
+/-- Every non-minting candidate lies outside the expanded set `e`. -/
+lemma modalNonMintCandidates_not_mem_expanded (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (h : sf ∈ modalNonMintCandidates φ₀ keys b e acc) : sf ∉ e := by
+  unfold modalNonMintCandidates at h
+  have hpred := (List.mem_filter.mp h).2
+  simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+  intro hmem
+  exact absurd (show (sf == sf) = true by simp) (List.any_eq_false.mp hpred.1.2 sf hmem)
+
+/-- **The settledness characterisation.** The non-minting candidate list is empty exactly when
+no non-minting rule can fire anywhere on the branch: every branch formula is either a minting
+shape, already expanded, or has no applicable rule under `modalApplyOneS4Keyed φ₀ keys`. Later
+phases consume this as "the branch's propagation has settled". -/
+lemma modalNonMintCandidates_eq_nil_iff (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
+    modalNonMintCandidates φ₀ keys b e acc = [] ↔
+      ∀ sf ∈ b, modalMintShape sf = true ∨ sf ∈ e ∨
+        (modalApplyOneS4Keyed φ₀ keys sf b acc).1 = .notApplicable := by
+  unfold modalNonMintCandidates
+  rw [List.filter_eq_nil_iff]
+  refine forall_congr' fun sf => imp_congr_right fun _ => ?_
+  constructor
+  · intro hnp
+    by_cases hshape : modalMintShape sf = true
+    · exact Or.inl hshape
+    by_cases hexp : sf ∈ e
+    · exact Or.inr (Or.inl hexp)
+    refine Or.inr (Or.inr ?_)
+    by_contra hne
+    apply hnp
+    simp only [Bool.not_eq_true] at hshape
+    have hany : e.any (· == sf) = false := by
+      rw [List.any_eq_false]
+      intro x hx heq
+      rw [beq_iff_eq] at heq
+      subst heq
+      exact hexp hx
+    have happ : (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+      cases hr : (modalApplyOneS4Keyed φ₀ keys sf b acc).1 with
+      | notApplicable => exact absurd hr hne
+      | linear _ => rfl
+      | branching _ => rfl
+      | persistent _ => rfl
+    simp [hshape, hany, happ]
+  · intro h hnp
+    rcases h with hshape | hexp | hnotapp
+    · simp [hshape] at hnp
+    · have hany : e.any (· == sf) = true := List.any_eq_true.mpr ⟨sf, hexp, by simp⟩
+      simp [hany] at hnp
+    · simp [hnotapp, RuleResult.isApplicable] at hnp
+
 /-- The S4-specific keyed one-step branch expansion: same selected formula (`b.findSome?` over
 the same "already expanded" guard) and same rule application (`modalApplyOneS4Keyed φ₀ keys`,
 above) as the `(newBranches, newExpandedSets, newAcc)` triple -- additionally threads

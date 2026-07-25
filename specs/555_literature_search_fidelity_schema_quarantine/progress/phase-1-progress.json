@@ -1,0 +1,16 @@
+{
+  "phase": 1,
+  "phase_name": "Four-site key-derivation fix in literature-search.sh",
+  "started_at": "2026-07-25T00:00:00Z",
+  "last_updated": "2026-07-25T00:10:00Z",
+  "objectives": [
+    {"id": 1, "description": "Baseline harness (old keys: 95)", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Patch load_fidelity_map at all 4 sites (doc_id fallback branch)", "status": "done", "files_touched": [".claude/scripts/literature-search.sh"]},
+    {"id": 3, "description": "Update docstring + secondary comments", "status": "done", "files_touched": [".claude/scripts/literature-search.sh"]},
+    {"id": 4, "description": "Verify get_fidelity unchanged at all 4 sites", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Run map-diff harness: old 95/new 97, added=Group A pair, removed/changed empty", "status": "done", "files_touched": []}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0
+}

@@ -1,5 +1,5 @@
 {
-  "status": "partial",
+  "status": "in_progress",
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
     "CslibTests/TableauConformance.lean",
@@ -8,38 +8,32 @@
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
+    "Cslib/Logics/Temporal/Tableau/Completeness.lean",
+    "Cslib/Logics/Temporal/Tableau/Rules.lean",
     "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md",
     "specs/552_tableau_calculus_conformance_rule_completeness_repair/.orchestrator-handoff.json"
   ],
-  "requires_user_review": true,
-  "review_reason": "Phase 3's sat_timp field / truthLemma T-imp sorry closure is BLOCKED on a genuine, pre-existing fuel-sufficiency gap (task 317 phase 9 STOP-gate 'Gap 1'), documented in place rather than forced. Phases 5-8 (entire temporal front) are not started -- majority of the original 15h scope remains, file-disjoint from the propositional work completed here.",
   "partial_progress": {
-    "stage": "propositional_column_done_temporal_front_remaining",
-    "details": "Phases 1, 2, 4 COMPLETED and verified. Phase 3 PARTIAL (intRule_preserves_sat done and sorry-free; sat_timp/truthLemma BLOCKED, documented precisely, not forced). Phases 5-8 NOT STARTED. Whole-project lake build and lake test GREEN. Full CI pipeline run: lake build (green), lake exe checkInitImports (pass), lake lint (1 pre-existing unrelated finding in Temporal/Saturation.lean, zero in touched files), lake exe lint-style (clean), lake shake (zero new findings in touched files), lake exe mk_all (no update needed), lake test (green, includes new TableauConformance harness).",
+    "stage": "phase_6_rules_landed_pending_conformance_verification",
+    "details": "Phases 1,2,4,5 COMPLETED (committed). Phase 3 PARTIAL/BLOCKED (pre-existing fuel-sufficiency gap, inherited unchanged). Phase 6 rule work landed in Rules.lean: (i) seriality arms added to temporalApplyPos's allFuture/allPast cases, gated on isTemporallyBlocked (threaded as a plain Bool 'blocked' parameter into temporalApplyPos/temporalApplyOne, computed by the caller in Saturation.lean's temporalStepBranch, since Rules.lean cannot import Branch.lean); (ii) F(Gpsi)/F(Hpsi) duality arms added to temporalApplyNeg (previously fell through to notApplicable); (iii) allFuturePosAt/allPastPosAt extended with TimeOrdering.ancestorTimes-based transitive membership check (option iii-a). temporalApplyPos_preserves/temporalApplyNeg_preserves/temporalApplyOne_preserves re-proved for the enlarged case set -- all sorry-free. Whole-project lake build green. Conformance harness run in progress to verify verdict flips (𝐆p→𝐅p, 𝐇p→𝐏p, ¬𝐆p→𝐅¬p, 𝐆¬p→(𝐆p→𝐆⊥), 𝐆p→𝐅^1 p expected to flip to CLOSED per Phase 6's plan checkpoint) -- NOT YET CONFIRMED, harness's guard_msgs strings not yet updated to match. temporalApplyPos_preserves/temporalApplyNeg_preserves proof re-proofs done but NOT YET COMMITTED pending conformance confirmation. Phase 7 (cap removal + fuel raise + headroom measurement) and Phase 8 (scope record + full corpus close-out) not started.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 4,
-    "phases_partial": [3],
-    "phases_remaining": [5, 6, 7, 8]
+    "phases_completed": 5,
+    "phases_partial": [3, 6],
+    "phases_remaining": [7, 8]
   },
   "verification": {
-    "verification_passed": true,
-    "sorry_count_precise_tactic_usage": 5,
-    "sorry_count_precise_tactic_usage_baseline": 5,
-    "sorry_count_delta": 0,
-    "sorry_count_note": "The naive 'grep -rn \\bsorry\\b | grep -v comment-prefixes' metric reports 147 (current) vs 143 (baseline) -- a +4 delta entirely explained by prose mentions of the word 'sorry' inside the updated blocker-documentation docstring (multi-line, so not caught by single-line comment filters), not by new sorry tactics. Precise tactic-usage grep (matches only actual `sorry` as a tactic) confirms exact 5=5 parity.",
-    "vacuous_count": 1,
-    "vacuous_count_baseline": 1,
-    "axiom_count": 26,
-    "axiom_count_baseline": 26,
+    "verification_passed": null,
     "build_passed": true,
-    "ci_pipeline_passed": true
+    "ci_pipeline_passed": null,
+    "note": "Whole-project lake build green after Rules.lean/Saturation.lean edits. Conformance harness (lake test / CslibTests.TableauConformance) run pending completion; guard_msgs strings in the harness not yet updated for any newly-flipped row, so lake test will currently FAIL until harness rows are updated to match verified new verdicts -- this is expected mid-phase-6 state, not a regression."
   },
   "metadata": {
     "session_id": "sess_1784959340_e4ceeb_552",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "passed"
+    "compliance_check": "in_progress"
   }
 }

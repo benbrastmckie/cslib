@@ -1,0 +1,19 @@
+{
+  "status": "researched",
+  "artifacts": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4probe.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4driver.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+  ],
+  "partial_progress": {
+    "stage": "done",
+    "details": "Report written. One optional sweep (live-set driver over the size<=6 corpus) left unfinished; not load-bearing for any verdict."
+  },
+  "metadata": {
+    "session_id": "sess_1784959340_e4ceeb_553",
+    "agent_type": "cslib-research-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
+  }
+}

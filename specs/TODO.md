@@ -11,7 +11,7 @@ next_project_number: 555
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,465,466,511,519,530,534,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 1 | 36,37,181,226,400,409,440,465,466,511,530,534,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
 | 2 | 39,40,215,317,425,450,506,537,548,551 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,301,375,430,456,497 | 39,40,317,425,506 | foundations, propositional logic, modal logic, ... |
 | 4 | 413,414 | 181,215,300,301,375 | code hygiene |
@@ -39,7 +39,7 @@ next_project_number: 555
     └─ 300 [BLOCKED] — Umbrella task for modal frame extensions T/S4/S5 (and the derived
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
-552 [IMPLEMENTING] — Shared calculus-conformance and rule-completeness repair unblocki
+552 [PARTIAL] — Shared calculus-conformance and rule-completeness repair unblocki
 553 [RESEARCHED] — Determine whether the S4 keyed loop-check guard can be made sound
 554 [RESEARCHED] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
@@ -78,10 +78,6 @@ next_project_number: 555
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
-### Literature
-
-519 [IMPLEMENTING] — Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
-
 ## Tasks
 
 ### 554. Cs5 pair seed disjunction property cutfree research
@@ -107,7 +103,7 @@ next_project_number: 555
 ---
 
 ### 552. Tableau calculus conformance rule completeness repair
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -191,12 +187,13 @@ next_project_number: 555
 
 ### 519. Fix literature ocr chunking and wijesekera
 - **Effort**: 3-5 hours
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: general
 - **Topic**: Literature
 - **Dependencies**: Task 518
 - **Research**: [519_fix_literature_ocr_chunking_and_wijesekera/reports/01_wijesekera-ocr-chunking-fix.md]
 - **Plan**: [519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md]
+- **Summary**: [519_fix_literature_ocr_chunking_and_wijesekera/summaries/01_wijesekera-reingest-summary.md]
 
 **Description**: Follow-up to task 518 (Simpson re-ingest). TWO PARTS.
 

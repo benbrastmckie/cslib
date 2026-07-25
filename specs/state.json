@@ -1126,7 +1126,7 @@
     {
       "project_number": 519,
       "project_name": "fix_literature_ocr_chunking_and_wijesekera",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "general",
       "topic": "Literature",
       "description": "Follow-up to task 518 (Simpson re-ingest). TWO PARTS.\n\n(1) RE-INGEST wijesekera_1990_constructivemodallogicsi (BibKey Wijesekera1990). Task 518's corpus audit found it has the IDENTICAL over-fragmentation signature that made Simpson unusable: 154 chunks, 468B mean, 62% under 300B. This document matters -- Wijesekera 1990 is THE source for CSLib's constructive (fallible-world) DIAMOND semantics, cited in Cslib/Logics/Modal/Metalogic/Constructive/ (CS4.lean and CS5.lean docstrings reference it for Definition 1.1.4 and Section 2), and is directly relevant to in-flight task 517. Apply task 518's proven fix (documented in specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md): bypass the font-size heading heuristic, extract via pdftotext -layout, apply paragraph-reflow to repair OCR line-break noise, insert chapter/section-level headings only, then feed the existing unmodified literature-chunk.sh Pass-2 merge. VALIDATE that Definition 1.1.4 and the Section 2 diamond / fallible-world definitions return COMPLETE statements via literature-search.sh. Preserve the old chunk set as rollback, as 518 did.\n\n(2) HARDEN THE ROOT CAUSE (the general fix that 518 deliberately left undone). literature-convert.sh's PyMuPDF path falls back to a FONT-SIZE heading-detection heuristic when a PDF has no embedded TOC. On OCRmyPDF/Tesseract scans the per-line font metrics are noisy, so it emits spurious markdown headings mid-sentence and mid-word, and literature-chunk.sh then splits at every one -- shredding lemma statements. Fix so it does not fire on OCR'd scans: detect the OCR producer (Tesseract / OCRmyPDF metadata), require corroborating cues (line length, position, numbering, blank-line context) before accepting a font-size heading, and/or add a post-check rejecting headings that split mid-sentence. ALSO add a guard so any future ingest yielding a pathological mean chunk size (under roughly 600B) warns loudly rather than silently landing a shredded corpus. Task 518 scoped its fix to Simpson only and left the shared scripts untouched; this task does the general repair so all future --lit work benefits.\n\nNOTE the honest ceiling from 518: prose is recoverable but math symbols are frequently garbled by Tesseract. Do NOT attempt to fix OCR quality itself -- only the chunking/heading pathology. Do not touch Cslib/ Lean source. Low risk, high leverage.",
@@ -1135,7 +1135,7 @@
       ],
       "parent_task": 518,
       "created": "2026-07-15T15:41:21Z",
-      "last_updated": "2026-07-25T07:01:54Z",
+      "last_updated": "2026-07-25T07:50:49Z",
       "priority": "medium",
       "effort": "3-5 hours",
       "artifacts": [
@@ -1148,6 +1148,11 @@
           "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md",
           "type": "plan",
           "summary": "8-phase plan: Wijesekera re-ingest via pdftotext -layout section headings + OCR heading hardening and mean-chunk-size guard; corrects the Tesseract-only premise"
+        },
+        {
+          "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/summaries/01_wijesekera-reingest-summary.md",
+          "type": "summary",
+          "summary": "Wijesekera re-ingest 154->38 chunks (468B->1669.5B mean, 62.3%->5.3% under 300B); OCR heading hardening with broadened producer family + structural cues; non-blocking mean-chunk-size guard"
         }
       ],
       "session_id": "sess_1784959340_e4ceeb_519",
@@ -1393,7 +1398,7 @@
     {
       "project_number": 552,
       "project_name": "tableau_calculus_conformance_rule_completeness_repair",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [
@@ -1404,7 +1409,7 @@
       ],
       "description": "Shared calculus-conformance and rule-completeness repair unblocking BOTH the temporal PTL FMP/decidability front and the propositional tableau completeness front, which independently converged on the same class of defect: a rule set too weak to close valid formulas, combined with fuel machinery justified by a bound that does not hold. DELIVERABLE 1 (shared, do first): a CONFORMANCE HARNESS that executes each tableau on a corpus of known-valid and known-invalid formulas and asserts the verdict. This class of defect is invisible to type-checking and was found only by execution, so the harness is the asset that prevents recurrence. DELIVERABLE 2 (temporal, seriality): the G and H rules propagate only to ord.futureOf t and return .notApplicable when it is empty (Rules.lean approx 227-244), and the only fresh-time path from a negative until is gated on ord.timeCount greater than 0 (Rules.lean approx 312), which is false at the root. Add the missing seriality rule. DELIVERABLE 3 (temporal, time cap): the same timeCount gate hard-caps times at 4; on the valid family with iterated F the verdict flips to OPEN at exactly k=4. Remove the cap. DELIVERABLE 4 (temporal, fuel): temporalFuel equals 4n^2+12n+10 (Saturation.lean approx 78), which is quadratic, while its own docstring justifies it by a 2^n type-count bound. Measured minimal sufficient fuel on a tautology family fits 1.5*2^k-2, so the bound is FALSE at the current constant and merely restating it is not available. Either raise the constant or add the missing deduplication. DELIVERABLE 5 (temporal, trackers): Saturation.lean approx 156-158 returns the tracker unchanged on the .branching arm, so recurring untlPos and sncePos copies are never registered pending. Saturation.lean approx 303 replicates one tracker across all output branches, but untlPos's two branches have genuinely different pending sets, so the return type must become a list of EventualityTracker. DELIVERABLE 6 (propositional): the persistent T-implication rule is positive-only and never plants F-tags, leaving subformula determinacy and bivalence unprovable in the current 6-rule calculus. Add the missing branching rule. Every rule addition requires a soundness re-audit of the affected calculus. Evidence: the executed counterexamples and the measured fuel table are recorded in the temporal task's report on the island-versus-periodic strategic decision.",
       "blockers": null,
-      "last_updated": "2026-07-25T06:03:16Z",
+      "last_updated": "2026-07-25T07:49:57Z",
       "session_id": "sess_1784959340_e4ceeb_552",
       "next_artifact_number": 2,
       "artifacts": [

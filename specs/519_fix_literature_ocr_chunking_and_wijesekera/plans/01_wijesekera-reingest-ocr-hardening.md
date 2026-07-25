@@ -1,7 +1,7 @@
 # Implementation Plan: Fix literature OCR chunking and re-ingest Wijesekera 1990
 
 - **Task**: 519 - Fix literature OCR chunking and re-ingest Wijesekera 1990
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Effort**: 7.5 hours
 - **Dependencies**: 518 (Simpson 1994 re-ingest — the procedure this task adapts; archived)
 - **Research Inputs**: `specs/519_fix_literature_ocr_chunking_and_wijesekera/reports/01_wijesekera-ocr-chunking-fix.md`

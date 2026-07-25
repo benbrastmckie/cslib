@@ -1,0 +1,21 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "implemented",
+  "summary": "Added missing Tableau/ entries to both ORGANISATION.md tree sketches (Foundations/Logic/: 8-file block + barrel; Logics/Modal/: terse collapsed line) and rewrote 4 ephemeral task-number docstring citations in LoopChecking.lean to durable S4LoopInv-structure anchors. Comment-only diff; lake build verified.",
+  "artifacts": [
+    {"type": "summary", "path": "specs/463_vet_299_455_doc_touchups/summaries/01_organisation-tableau-docstring-anchors-summary.md"}
+  ],
+  "blockers": [],
+  "next_action_hint": "none",
+  "files_modified": [
+    "ORGANISATION.md",
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
+  ],
+  "decisions_made": [
+    "Tableau.lean+Tableau/ placed as last Logic/ block after Automation/, mirroring Theorems.lean-before-Theorems/ convention",
+    "CompletenessLoop.lean left untouched (already clean per research)"
+  ],
+  "dead_ends": [],
+  "plan_markers_verified": true
+}

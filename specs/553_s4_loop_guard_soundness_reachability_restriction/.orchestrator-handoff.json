@@ -1,0 +1,35 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "The keyed S4 soundness theorem is FALSE, not merely hard: a machine-checked counterexample was found (a formula of node-size 19 that modalTableauS4Keyed closes but which has an explicit 3-world reflexive-transitive countermodel). The candidate fix (restricting the guard to ReflTransGen-reachable candidates) is rejected: measurement shows 96.7% of all blocking decisions target non-reachable worlds, so the restriction makes the world bound false, not merely unproven. No local guard edit reconciles termination with soundness; the driver definition must change.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "modalTableauS4Keyed_sound cannot be proved because it is false. Its downstream consumers (successor phase, and the decidability half of instDecidableS4Valid) are therefore unreachable via this driver and must not be attempted. Repairing the algorithm requires a driver re-architecture (Route P: settled-context scheduling plus a weakened propagation-adequacy soundness invariant), which carries a re-proof obligation on the already-landed keyed completeness line. This exceeds a guard patch and should be scoped as its own task.",
+      "phase": "research",
+      "severity": "hard"
+    }
+  ],
+  "next_action_hint": "plan",
+  "files_modified": [],
+  "decisions_made": [
+    "Rejected the reachability restriction: at mint time acc edges point parent-to-child, so ReflTransGen-from-source yields only the source and its own descendants, which is the complement of the set loop-checking must block against.",
+    "Established that the termination obligation (guard 'none' must imply global key freshness) and the soundness obligation (guard 'some' must imply the target absorbs all future propagation from the source) demand incompatible comparison objects, so no conjunct added to blockingWorldS4Keyed can work.",
+    "Identified the counterexample's mechanism as two independent defects: staleness (comparison against recorded birth keys rather than live content) and absence of a reachability restriction; fixing staleness alone does not fix the edge's semantic justification.",
+    "Recommended keeping modalTableauS4Keyed_complete (an over-eager guard only helps completeness) and landing a documentation correction that records the counterexample, since FrameCompleteness.lean currently mis-describes the soundness half as merely 'deferred'.",
+    "Discovered a new verification channel: #eval works from a plain importing file outside the Tableau directory's module boundary, which is what made the empirical falsification possible."
+  ],
+  "dead_ends": [
+    "Restricting blockingWorldS4Keyed to ReflTransGen acc.hasEdge candidates: guard fires on ~3% of current blocks; world bound becomes false.",
+    "Restricting to ancestors of the source: soundness needs r(f lbl)(f wBlock) but an ancestor supplies the converse, and S4 is not symmetric.",
+    "Conjunctive guard (recorded key AND live set must both match): kills the found counterexample but weakens the 'none' contract, so keysDistinct and the pigeonhole bound die.",
+    "Blocking without adding the redirect edge: sound and termination-preserving, but modalHintikkaSetGen conjuncts 3 and 4 demand an acc.hasEdge witness for every F(box phi)@w, so no open branch is ever Hintikka and the completeness line becomes vacuous.",
+    "Relocating f in the given arbitrary model to justify the redirect edge: f wBlock is pinned by wBlock's own formulas and pre-existing edges; relocation requires rebuilding f over wBlock's whole subtree, i.e. a filtration/bisimulation re-architecture."
+  ]
+}

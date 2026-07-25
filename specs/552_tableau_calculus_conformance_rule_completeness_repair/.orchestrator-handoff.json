@@ -1,0 +1,71 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "implement",
+  "status": "partial",
+  "phases_completed": 6,
+  "phases_total": 8,
+  "summary": "Phases 1-6 of 8 complete. Propositional column (Phases 1-4): 43-row conformance harness gate landed (Deliverable 1), Fitting T(->) branching rule added (Deliverable 6), soundness re-proved sorry-free. Phase 3 remains PARTIAL with the sat_timp/truthLemma STOP-gate blocked (pre-existing fuel-sufficiency gap, not forced). Temporal column (Phases 5-6): per-branch eventuality tracker landed as e12c7cf5 (Deliverable 5); seriality, G/H duality, and transitive propagation rules landed as a7d98727 (Deliverable 2), with temporalApplyPos_preserves/temporalApplyNeg_preserves/temporalApplyOne_preserves fully re-proved sorry-free over enlarged 11-way and 9-way case splits. Whole-project lake build GREEN (3253/3253) at a7d98727. Zero new sorry/axiom, verified independently. Phases 7-8 (Deliverables 3 and 4: timeCount cap removal and fuel constant, plus temporal soundness re-audit) NOT STARTED. NOTE: this handoff was written by the orchestrator, not the implementing agent, which exhausted its capacity before wrap-up; every claim here is either a committed artifact or independently verified.",
+  "artifacts": [
+    {"type": "plan", "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md"}
+  ],
+  "blockers": [
+    {
+      "description": "IBranchSaturation's sat_timp field (and truthLemma's pre-existing T-imp sorry) cannot be discharged without a new step-lt-style fuel-sufficiency measure for applyPersistenceFixpoint's own recursion (Scheme.lean, 'sat_timp discharge STOP-gate' comment block, updated in place). Phase 2's branching-rule redesign resolved the determinacy half (Gap 2); the fuel half (Gap 1) is untouched, pre-existing, and scoped as a full-phase-sized undertaking on its own. Carried forward unchanged.",
+      "phase": "phase-3",
+      "severity": "soft"
+    },
+    {
+      "description": "HARNESS RECONCILIATION INCOMPLETE - highest-priority open item for the next dispatch. CslibTests/TableauConformance.lean still encodes PRE-Phase-6 expected verdicts (file last touched at commit 317235ae, Phase 2); no guard_msgs string has been updated for the Phase 5-6 rule changes. Consequence: `lake test` as literally written will FAIL on every genuinely-flipped row. This is known mid-flight state, NOT a regression. See continuation_context.harness_reconciliation for the confirmed flips and the unanswered regression question.",
+      "phase": "phase-6",
+      "severity": "hard"
+    }
+  ],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "CslibTests/TableauConformance.lean",
+    "CslibTests.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "Cslib/Logics/Temporal/Tableau/Rules.lean",
+    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
+    "Cslib/Logics/Temporal/Tableau/Completeness.lean"
+  ],
+  "decisions_made": [
+    "Reflexive branching arm + persistence copy-propagation realizes 'for every accessible w'' without changing intApplyRuleFull's signature",
+    "sat_timp deliberately NOT added as a field; forcing it would need Gap 1's fuel-sufficiency invariant, out of Phase 3 scope",
+    "Seriality blocked-state threaded into Rules.lean as a Bool computed by the caller in Saturation.lean, because Rules.lean cannot import Branch.lean (which imports Rules.lean) - avoids restructuring the module graph",
+    "Transitive propagation reuses the pre-existing but previously-unused TimeOrdering.ancestorTimes hook (plan option iii-a)",
+    "guard_msgs strings deliberately left untouched pending empirical output, under the rule that expected values must be justified by each formula's mathematical validity and never by what the implementation printed"
+  ],
+  "dead_ends": [],
+  "continuation_context": {
+    "phases_completed": 6,
+    "phases_total": 8,
+    "orchestrator_mode": true,
+    "resume_at": "Close harness reconciliation first, then Phase 7 (Deliverables 3 and 4)",
+    "harness_reconciliation": {
+      "state": "INCOMPLETE - do this before starting Phase 7",
+      "confirmed_flips_open_to_closed": [
+        "Gp -> Fp (seriality) - Deliverable 2 item (i)",
+        "Hp -> Pp (past seriality) - Deliverable 2 item (i)",
+        "Gp -> G(Gp) (future transitivity) - item (iii); flipped WITHOUT Phase 7 because k=2 stays under the timeCount<4 cap",
+        "Hp -> H(Hp) (past transitivity) - item (iii)",
+        "p -> G(Pp) (conversion) - item (iii)",
+        "p -> H(Fp) (conversion) - item (iii)"
+      ],
+      "each_flip_verified_against": "the formula's own mathematical validity under branchSat's NoMaxOrder frame class, not against implementation output",
+      "unanswered_and_load_bearing": "Whether any of the 27 previously-green temporal rows or the 19 propositional rows regressed green->red is UNKNOWN. The verification run was killed before printing them. This MUST be answered before any guard_msgs edit: six new greens alongside one silent green->red would be a net loss disguised as progress, which is precisely the defect class this harness exists to catch.",
+      "also_unobserved": "K-for-G/duality row completion, the not-Gp -> F-not-p duality row, and the Gp -> F^k p family for k=1..5 (plan expects only k=1 to flip at Phase 6; k>=2 should remain red pending Phase 7 cap removal)",
+      "rule_for_updating": "Update a guard_msgs string ONLY when the new expected value is justified by the formula's mathematical validity/invalidity - known-valid expects CLOSED, known-invalid expects OPEN. A row moving away from its correct verdict is a stop-the-line regression to report, never a string to rewrite."
+    },
+    "phase_7_risk": "The ancestorTimes-based allFuturePosAt/allPastPosAt lookup added in Phase 6 appears to add real per-step cost (the 43-row harness build now takes 7+ minutes). Deliverables 3 and 4 are coupled: removing the timeCount<4 cap raises fuel demand, and measurement already shows the current temporalFuel constant (4n^2+12n+10) is FALSE against the observed 1.5*2^k-2 requirement. Cost-per-step multiplied by required-fuel could compound badly. Assess this interaction before committing to a fuel constant; the plan's alternative is adding the missing deduplication instead of raising the constant.",
+    "verified_invariants": {
+      "sorry_tactic_lines_cslib_repo_wide": "5 at baseline 49bc979a, 5 at HEAD - unchanged",
+      "sorry_tactic_lines_tableau_subtree": "4 at baseline, 4 at HEAD - unchanged",
+      "note": "Scheme.lean's raw word-count of 'sorry' rose only because blocker DOCUMENTATION prose expanded; sorry tactics there are 2 -> 2."
+    }
+  },
+  "plan_markers_verified": false
+}

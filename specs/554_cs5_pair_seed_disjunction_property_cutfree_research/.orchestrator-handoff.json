@@ -1,0 +1,41 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "research",
+  "status": "researched",
+  "summary": "Result (c): the property is open, but radically re-characterized. Two sorry-free probes prove the named Prop CS5PairSeedDisjunctionProperty is EQUIVALENT to the single right exclusion tau_R A not in cl(seed), that hL follows from it, and hence DerivExcludes at the seed follows from that one hypothesis alone. Also refuted the stated reason for Non-Goal 2 (the Sum.elim retraction IS schema-compatible, since both cross axioms map to CS5ModalAxiom.tBox) and gave the sharpest relabeling bound. The residual obligation is a two-label conservativity statement; the obstruction is named (box over disjunction), the same wall as the labelled-soundness task.",
+  "artifacts": [
+    {
+      "type": "report",
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "CS5PairSeedRightExclusion (tau_R A not in modalDeductiveClosure CS5PairAxiom (cs5PairSeed H)) is a conservativity statement requiring a cut-free or fully labelled sequent calculus for CS5 with cut admissibility. No Hilbert-level route exists: every atom relabeling retraction is forced to identify the two tagged copies, and every separating translation needs the non-theorem box(A or B) implies (box A or box B).",
+      "phase": "research",
+      "severity": "hard"
+    },
+    {
+      "description": "Literature corpus search returned degraded with zero results; Marin-Morales-Strassburger 2021 and Arisaka-Das-Strassburger 2015 are NOT retrievable via literature-search.sh despite the task brief asserting they are present. Ingestion via /literature is needed before any labelled-calculus planning.",
+      "phase": "research",
+      "severity": "soft"
+    }
+  ],
+  "next_action_hint": "plan",
+  "files_modified": [
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/cross1_collapse.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/retraction_bound.lean"
+  ],
+  "decisions_made": [
+    "Did NOT adopt the deferred idb/CS5-to-IS5 collapse fallback; flagged as requiring explicit user authorization.",
+    "Recommend an immediately landable, zero-research-risk change to CS5Completeness.lean: promote the five collapse lemmas plus the retraction lemmas, replace CS5PairSeedDisjunctionProperty with CS5PairSeedRightExclusion, and correct two false docstring claims.",
+    "Recommend the real research target be restated as two-label conservativity for CS5 via a fully labelled sequent calculus with cut admissibility, not as a disjunction property."
+  ],
+  "dead_ends": [
+    "Semantic route via pair-axiom soundness: confirmed circular. The docstring's stated reason (no semantic witness exists) is itself mis-argued; a product/two-label model is not ruled out, but its existence is equivalent to the pair's joint satisfiability, which is what completeness is proving.",
+    "Sum-elimination retraction: schema-compatibility HOLDS (contra the recorded Non-Goal reason), but the collapse bound only yields A in H, and box A not in H is compatible with A in H. No atom relabeling can do better.",
+    "Generalized translation theta with box B implies theta B: fails at disjunction (box over disjunction non-theorem), at diamond, and at implication (needs a contravariant companion that cannot manufacture boxes).",
+    "Repairing task 537's sigAt context-fold to split compound facts: relocates rather than discharges the obligation, since the split form is a strictly stronger antecedent."
+  ]
+}

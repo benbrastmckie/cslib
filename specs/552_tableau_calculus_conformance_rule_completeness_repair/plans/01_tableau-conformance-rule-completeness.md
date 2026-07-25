@@ -520,7 +520,54 @@ Rollback/Contingency.
 
 ---
 
-### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [IN PROGRESS]
+### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [BLOCKED]
+
+**BLOCKER (root cause found, dedup wiring landed and committed at `53eeabf2`)**:
+- **What failed**: the dedup-based termination gate (`isTemporallyBlocked`) does not deliver
+  headroom beyond depth 1. `𝐆p → 𝐅^1 p`, the K-row, and the duality row all flip to CLOSED as
+  expected, but `𝐆p → 𝐅^2 p` (and by the same mechanism, presumably `k = 3..5`) stays OPEN even
+  at fuel = 5000 (17x the natural `temporalFuel` bound of 290) -- ruling out fuel exhaustion.
+- **What was tried**: isolated the open branch produced by `𝐆p → 𝐅^2 p` via a throwaway scratch
+  harness (`lake env lean`, deleted after use). The saturated branch has exactly 2 time points
+  (0, 1); the second `untlNeg` co-decomposition needed to reach a 3rd time never fires. Directly
+  re-applying `temporalApplyOne` to the stuck signed formula returns `.notApplicable`. Traced to
+  the `blocked` gate: `isSubsetBlocked b 1 0 = false` (correctly: time 1's content is genuinely
+  not a subset of time 0's) but `isTemporallyBlocked b 1 ord = true` -- only possible if `1`
+  appears in its own `ancestorTimes`. Confirmed directly: `ancestorTimes ord 1 = [0, 1]`.
+- **Why it's stuck**: `Branch.lean`'s `ancestorTimes` (distinct from `TimeOrdering.lean`'s
+  same-named, future-only helper) collects **both** `directPredecessors` and `directSuccessors`
+  at every recursion step, i.e. it treats the time-ordering constraint graph as **undirected**.
+  Once a single edge `(0,1)` exists, `ancestorTimes ord 1` walks `1 → 0 → 1 → 0 → ...` and its
+  own `.eraseDups` includes `1` itself in the final list. `isTemporallyBlocked` then finds
+  `t_anc = t` as a trivially-satisfying "ancestor" (`isSubsetBlocked b t t` and
+  `allEventualitiesFulfilledOrDuplicated tracker t t` are both reflexively true), so any time
+  point connected to at least one other time point is spuriously blocked. This is a pre-existing
+  bug in `Branch.lean` (ported from bimodal before this task; already used by Phase 6's seriality
+  arm, which happened not to trigger it because every row that needed seriality to re-fire more
+  than once reached its witness via the *unconditional* `someFuturePos`/persistent-propagation
+  path instead, not via a second seriality application). It is not something this phase's edit
+  introduced, but this phase's cap-removal is the first rule-application site whose correctness
+  actually depends on `isTemporallyBlocked` staying false past a single time-creation step, so it
+  is the first place the bug bites.
+- **What is needed**: a fix to `Branch.lean`'s `ancestorTimes` (likely: drop
+  `directSuccessors` from the traversal, keeping only `directPredecessors`, matching the
+  "ancestor" semantics `isTemporallyBlocked`'s docstring and the bimodal source it was ported
+  from actually intend) plus re-verification of every conformance row Phase 6 already flipped
+  (since they all route through the same, now-to-be-changed, device) and of `_preserves`-style
+  lemmas that reference it. This is outside Phase 7's stated file scope (`Rules.lean`,
+  `Saturation.lean`, `Completeness.lean`) and touches a device the already-proven, already-landed
+  Phase 6 seriality arm depends on -- a correctness fix there has blast radius beyond this phase,
+  so per the plan-compliance escalation protocol this is raised to the user rather than patched
+  unilaterally.
+- **Prohibited workarounds** (not used): raising `temporalFuel`'s constant to paper over this
+  (ruled out both by the user's explicit strategy decision and by the diagnostic itself, which
+  shows the stall is not fuel-shaped); weakening `isTemporallyBlocked`'s call site with an ad hoc
+  local patch instead of fixing the shared device; `sorry`, an axiom, or a vacuous placeholder.
+- **What is landed and safe**: the `blocked`-based gate wiring in `Rules.lean`/`TimeOrdering.lean`
+  (commit `53eeabf2`) is mechanically correct integration work, independent of this bug -- it
+  correctly flips the K-row, the duality row, and `k = 1`, and the whole-project build is green
+  with the `Cslib/` bare-sorry count unchanged at 5. It should not be reverted; the bug is in the
+  device it correctly wires in, not in the wiring itself.
 
 **User-directed strategy override (continuation dispatch)**: per explicit user decision, Deliverable
 4 is realized as **deduplication** (wiring the pre-existing `isTemporallyBlocked` subset-blocking

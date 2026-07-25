@@ -280,19 +280,43 @@ metadata and a rebuilt search index.
 
 ---
 
-### Phase 6: Wijesekera retrieval acceptance validation [NOT STARTED]
+### Phase 6: Wijesekera retrieval acceptance validation [COMPLETED]
 
 **Goal**: Confirm via the actual retrieval path that the target passages return complete,
 correctly-titled statements.
 
 **Tasks**:
-- [ ] Query Definition 1.1.4 (the intuitionistic modal frame quintuple `(K, ≤, D, R, ⊩)`) via `literature-search.sh`; confirm the returned chunk carries the **complete** definition and a real section title.
-- [ ] Query the Section 2 diamond / fallible-world material (diamond does not distribute over disjunction; independent, non-interdefinable box and diamond); confirm complete return.
-- [ ] Confirm Definitions 1.1.1-1.1.3 — genuinely split across `chunk_0018`/`chunk_0019` in the old set — are now contiguous within a single chunk or across a clean boundary that does not cut a definition.
-- [ ] Spot-check that breadcrumb/section-path fields are real headings and do not self-duplicate.
-- [ ] Use word-based queries plus `--read <chunk_id>` to work around the known pre-existing `literature-search.sh` FTS5 sanitizer bug on queries containing periods (`"Definition 1.1.4"`) or hyphens; note the workaround, do not fix the sanitizer.
-- [ ] Record the acceptance results in a table (query target, chunk id, status), following 518's summary format.
-- [ ] Frame acceptance as "clean, correctly-titled, non-duplicated-breadcrumb chunks with intact atomic blocks" — **not** "recovers previously inaccessible content", since research §2 established that Definition 1.1.4 and the diamond passage were already intact, just badly titled.
+- [x] Query Definition 1.1.4 (the intuitionistic modal frame quintuple `(K, ≤, D, R, ⊩)`) via `literature-search.sh`; confirm the returned chunk carries the **complete** definition and a real section title. *(completed: chunk `ecabd94d9eea5595`, title "1.1. Introduction (cont.)", complete from "A quintuple..." through clause "(viii)")*
+- [x] Query the Section 2 diamond / fallible-world material (diamond does not distribute over disjunction; independent, non-interdefinable box and diamond); confirm complete return. *(completed: chunk `dea76c3d5f47bab5`, complete abstract paragraph with the full motivational statement)*
+- [x] Confirm Definitions 1.1.1-1.1.3 — genuinely split across `chunk_0018`/`chunk_0019` in the old set — are now contiguous within a single chunk or across a clean boundary that does not cut a definition. *(completed: 1.1.1 is the last statement in chunk `9a516cc669419db0`; 1.1.2 and 1.1.3, both complete, open the very next chunk `48acf544f5554286` — a clean inter-definition boundary, no definition cut)*
+- [x] Spot-check that breadcrumb/section-path fields are real headings and do not self-duplicate. *(completed: all 38 chunks listed via `--doc` carry real headings or `{heading} (cont.)`; zero `"X > X"` patterns)*
+- [x] Use word-based queries plus `--read <chunk_id>` to work around the known pre-existing `literature-search.sh` FTS5 sanitizer bug on queries containing periods (`"Definition 1.1.4"`) or hyphens; note the workaround, do not fix the sanitizer. *(completed — see deviation note on a second, previously-undocumented pre-existing bug found and worked around the same way)*
+- [x] Record the acceptance results in a table (query target, chunk id, status), following 518's summary format. *(completed, see table below)*
+- [x] Frame acceptance as "clean, correctly-titled, non-duplicated-breadcrumb chunks with intact atomic blocks" — **not** "recovers previously inaccessible content", since research §2 established that Definition 1.1.4 and the diamond passage were already intact, just badly titled. *(completed)*
+
+**Deviation note (found, not fixed — pre-existing, out of scope)**: default `literature-search.sh`
+queries returned zero results for Wijesekera even with a correct word-based query. Root cause:
+`load_fidelity_map()` only recognizes `index.json` entries using the OLDER `path: "sources/..."`
+schema (it derives a doc-directory name by stripping a `sources/` prefix); entries using the
+newer `doc_id`/`chunks_dir` schema — which `wijesekera_1990_constructivemodallogicsi`'s entry
+uses, and which the pre-existing `simpson_1994_intuitionisticmodallogic` entry ALSO uses,
+confirmed by reproducing the identical symptom on it — have no `path` field, so the function
+silently `continue`s past them and the doc's real `provenance_fidelity` is never added to the
+lookup map. `get_fidelity()`'s fail-open default then reports `unverified_summary` regardless of
+the actual stamped value, and `unverified_summary` is one of `QUARANTINED_FIDELITY_VALUES`, so
+default `do_search()` silently excludes the whole document. Workaround used throughout this
+phase: `--include-unverified` (in addition to the already-documented word-based-query
+workaround for the FTS5 sanitizer bug). Not fixed here — outside this task's scope (`derive_toc_markdown`/`is_heading_candidate`/`literature-ingest.sh` were the sanctioned surfaces) and pre-dates this task (it affects Simpson's entry from a prior task too); recorded here for whoever picks up `literature-search.sh` next.
+
+**Acceptance Table**:
+
+| Query target | Chunk ID | Status |
+|---|---|---|
+| Definition 1.1.4 (intuitionistic modal frame quintuple) | `ecabd94d9eea5595` | Complete, real title ("1.1. Introduction (cont.)") |
+| Box/diamond independence, diamond-non-distribution motivational statement | `dea76c3d5f47bab5` | Complete |
+| Definition 1.1.1 | end of `9a516cc669419db0` | Complete, clean boundary to next chunk |
+| Definitions 1.1.2-1.1.3 | `48acf544f5554286` | Complete, contiguous, clean boundary from 1.1.1 |
+| Breadcrumb/title self-duplication scan (all 38 chunks) | n/a | Zero `"X > X"` patterns; zero mid-sentence-fragment titles |
 
 **Timing**: 0.75 hours
 

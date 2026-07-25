@@ -1,0 +1,20 @@
+{
+  "phase": 6,
+  "phase_name": "Wijesekera retrieval acceptance validation",
+  "started_at": "2026-07-25T13:05:00Z",
+  "last_updated": "2026-07-25T13:45:00Z",
+  "objectives": [
+    {"id": 1, "description": "Query Definition 1.1.4 via literature-search.sh", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Query diamond/box-independence motivational statement", "status": "done", "files_touched": []},
+    {"id": 3, "description": "Confirm Definitions 1.1.1-1.1.3 contiguous/clean boundary", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Spot-check breadcrumb/title fields for self-duplication", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Use FTS5-sanitizer workaround for queries with periods/hyphens", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Record acceptance results table", "status": "done", "files_touched": []},
+    {"id": 7, "description": "Frame acceptance honestly (not overclaiming recovery of inaccessible content)", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 7,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "notes": "Found (not fixed, out of scope) a second pre-existing literature-search.sh bug: load_fidelity_map() only recognizes the older index.json 'path: sources/...' schema, silently skipping newer doc_id/chunks_dir-schema entries (including Wijesekera's and the pre-existing Simpson entry from a prior task), causing get_fidelity()'s fail-open default (unverified_summary) to wrongly quarantine both documents from default search results. Reproduced identically on Simpson to confirm it predates this task. Workaround: --include-unverified flag, used throughout this phase's validation queries."
+}

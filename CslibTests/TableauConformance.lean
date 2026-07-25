@@ -58,21 +58,15 @@ distinction stays visible rather than being asserted only in a docstring elsewhe
 
 ## Corpus provenance
 
-Every row's expected verdict and every row currently marked as a defect is transcribed from
-Finding 0 of the task's research report. Finding 0's summary table groups some rows into
-`k`-indexed families (`𝐆p → 𝐅^k p` for `k = 1..5`; `𝐅^k p → 𝐅^k p` for `k = 0..6`); expanding
-those families into individually-asserted formulas — required so Phase 7's `k = 4` cut is its
-own detector, not folded into a family average — yields **43** individually-executed rows here
-at Phase 1 landing time (27 green, 16 red), rather than the plan's rounded "44 rows / 32 green /
-12 red" summary figures, which count some multi-formula families as a single row. The set of
-*which* formulas were originally red is unaffected by this counting difference; only the row
-arithmetic differs. Rows are repaired by the implementation phases named inline below as they
-land: Phase 2 flipped the 3 propositional rows (30 green / 13 red as of Phase 2); Phase 6/7
-flipped all 13 remaining temporal rows (43 green / 0 red as of this reconciliation), the last one
-(`𝐇p → 𝐇𝐇p`, past transitivity) via a direction fix to `allPastPosAt` discovered while
-re-verifying the Deliverable 3/4 cap-removal work. Row-by-row annotations record which phase
-flipped each row; Phase 8 removes those annotations once the whole corpus's green status is
-stable, converting this file into a pure regression guard.
+Every row's expected verdict is transcribed from Finding 0 of the task's research report, and
+justified below by the formula's own mathematical validity — never by what the decision
+procedure happens to print. Finding 0's summary table groups some rows into `k`-indexed families
+(`𝐆p → 𝐅^k p` for `k = 1..5`; `𝐅^k p → 𝐅^k p` for `k = 0..6`); expanding those families into
+individually-asserted formulas yields **43** individually-executed rows (24 temporal, 19
+propositional), rather than the plan's rounded "44 rows" summary figure, which counts some
+multi-formula families as a single row. All 43 rows are green: the rule-completeness repairs
+this task landed are complete, and this file is now a pure regression guard — a future edit that
+reopens any row here is a real defect, not an expected transitional state.
 -/
 
 namespace CslibTests.TableauConformance
@@ -95,8 +89,7 @@ def intVerdict : IntTableauResult Nat → String
 
 /-! ## Temporal Corpus (`temporalTableau`, `Formula Nat`)
 
-24 rows: originally 11 green, 13 red (defects named in the task's six deliverables plus the
-Finding 2b/2c seventh defect). As of this reconciliation: all 24 rows green. -/
+24 rows, all green. -/
 
 section TemporalCorpus
 
@@ -131,58 +124,49 @@ def someFutureN : Nat → Formula Nat → Formula Nat
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐅 tp → 𝐅 tp))
 
--- Future seriality, Deliverable 2(i): CLOSED (flipped in Phase 6).
--- validDiscrete-only per D1 (not Temporal.valid): sound because branchSat mandates
--- NoMaxOrder/NoMinOrder.
+-- Future seriality: CLOSED. validDiscrete-only per D1 (not Temporal.valid): sound because
+-- branchSat mandates NoMaxOrder/NoMinOrder.
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐆 tp → 𝐅 tp))
 
--- Past seriality, Deliverable 2(i): CLOSED (flipped in Phase 6).
+-- Past seriality: CLOSED, symmetric to future seriality (NoMinOrder).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐇 tp → 𝐏 tp))
 
--- Future transitivity, Deliverable 2(iii): CLOSED (flipped in Phase 6, via someFuturePos plus
--- transitive TimeOrdering.ancestorTimes propagation in allFuturePosAt).
+-- Future transitivity: CLOSED (𝐆φ holds at t entails 𝐆φ holds at every future time of t too).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐆 tp → 𝐆 (𝐆 tp)))
 
--- Past transitivity, Deliverable 2(iii): CLOSED (flipped in Phase 7, via the allPastPosAt
--- direction fix: it previously reused the future-only TimeOrdering.ancestorTimes exactly as
--- allFuturePosAt does, checking whether `t` is in `t_anc`'s forward light-cone; propagating a
--- past obligation T(Hφ)@t_anc backward instead needs the reversed check, whether `t_anc` is in
--- `t`'s forward light-cone).
+-- Past transitivity: CLOSED, dual of future transitivity.
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐇 tp → 𝐇 (𝐇 tp)))
 
--- Conversion, Deliverable 2(iii): CLOSED (flipped in Phase 6).
+-- Conversion (𝐆/𝐏 duality): CLOSED (p now entails Pp at every future time).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (tp → 𝐆 (𝐏 tp)))
 
--- Conversion, Deliverable 2(iii): CLOSED (flipped in Phase 6).
+-- Conversion (𝐇/𝐅 duality): CLOSED (p now entails Fp at every past time).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (tp → 𝐇 (𝐅 tp)))
 
--- K for G, Finding 2b: CLOSED (flipped by the Phase 7 dedup wiring, commit 53eeabf2).
+-- K for 𝐆: CLOSED (standard K-axiom instance for the future-necessity modality).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐆 (¬ tp) → (𝐆 tp → 𝐆 (⊥ : Formula Nat))))
 
--- G/F duality, Finding 2b: CLOSED (flipped by the Phase 7 dedup wiring, commit 53eeabf2).
+-- 𝐆/𝐅 duality: CLOSED (¬𝐆p is equivalent to 𝐅¬p).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (¬ (𝐆 tp) → 𝐅 (¬ tp)))
 
--- Family (Deliverables 3+4, dedup-based termination): Gp → F^k p for k = 1..5, all CLOSED.
--- Realized via the isTemporallyBlocked dedup gate (Rules.lean:365,391, commit 53eeabf2) plus
--- the Branch.lean ancestorTimes fix (undirected-traversal bug, commit 8b3e8df7) that unblocked
--- k >= 2; k = 1 duplicates the seriality row above by construction (𝐅^1 = 𝐅) and is kept for
--- the family's own record.
+-- Family: Gp → F^k p for k = 1..5, all CLOSED (seriality composed k times; k = 1 duplicates the
+-- seriality row above by construction, 𝐅^1 = 𝐅, and is kept for the family's own record).
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐆 tp → someFutureN 1 tp))
@@ -237,8 +221,7 @@ end TemporalCorpus
 
 /-! ## Propositional Corpus (`intuitionisticTableau`, `Proposition Nat`)
 
-19 rows, all green as of Phase 2: 14 closed (11 originally green + 3 flipped by the Fitting
-`T(→)` split, Deliverable 6) + 5 IPC-invalid open rows. -/
+19 rows, all green: 14 closed (IPC-valid) + 5 open (IPC-invalid). -/
 
 section PropositionalCorpus
 
@@ -304,18 +287,16 @@ def ic : Proposition Nat := .atom 2
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau ((ia → ib) → ((ib → ic) → (ia → ic))))
 
--- FIXED in Phase 2 (Deliverable 6: T(→) branching rule added to intApplyRuleFull).
 -- IPC-valid: from b, weakening gives a→b, hence a→c, with a gives c.
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau (((ia → ib) → (ia → ic)) → (ia → (ib → ic))))
 
--- FIXED in Phase 2 (Deliverable 6). IPC-valid: textbook ¬¬¬a → ¬a.
+-- IPC-valid: textbook ¬¬¬a → ¬a.
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau (¬ (¬ (¬ ia)) → ¬ ia))
 
--- FIXED in Phase 2 (Deliverable 6).
 -- IPC-valid: from b, weakening gives a→b, hence c.
 /-- info: "CLOSED" -/
 #guard_msgs in

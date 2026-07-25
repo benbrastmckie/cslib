@@ -1,5 +1,5 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
     "CslibTests/TableauConformance.lean",
@@ -7,20 +7,39 @@
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean"
+    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
+    "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md",
+    "specs/552_tableau_calculus_conformance_rule_completeness_repair/.orchestrator-handoff.json"
   ],
+  "requires_user_review": true,
+  "review_reason": "Phase 3's sat_timp field / truthLemma T-imp sorry closure is BLOCKED on a genuine, pre-existing fuel-sufficiency gap (task 317 phase 9 STOP-gate 'Gap 1'), documented in place rather than forced. Phases 5-8 (entire temporal front) are not started -- majority of the original 15h scope remains, file-disjoint from the propositional work completed here.",
   "partial_progress": {
-    "stage": "phase_4_complete_propositional_column_done",
-    "details": "Phases 1-2 fully complete. Phase 3 PARTIAL: intRule_preserves_sat extended and sorry-free (done), but sat_timp field + truthLemma T-imp closure BLOCKED on a genuine, pre-existing, well-documented fuel-sufficiency gap (Gap 1, 'task 317 phase 9 STOP-gate', now updated in-place in Scheme.lean to record that Phase 2's branching-rule redesign resolves the OTHER half, Gap 2/determinacy, cleanly). Phase 4 COMPLETE: both soundness theorems (intExpandBranches_closed_unsat, intuitionisticTableau_sound) are sorry-free and independent of the Phase 3 blocker (soundness-direction only, no truthLemma/sat_timp dependency); their build was restored as necessary fallout of fixing intApplyRuleFull's non-exhaustive-match break across Soundness.lean/Scheme.lean. Whole-project `lake build`/`lake test` GREEN. Conformance harness: propositional column fully green (19/19 rows correct: 14 CLOSED + 5 OPEN). Zero new sorry/axiom anywhere (diffed against pre-Phase-2 baseline). The propositional front (Deliverable 6) is functionally complete except for the documented Gap 1 blocker on truthLemma's completeness-direction sorry, which was ALREADY sorry at HEAD before this task and remains a pre-existing, separately-scoped gap. Remaining work: Phases 5-8, the entire temporal front (Deliverables 2/3/4/5 -- tracker redesign, seriality/duality/transitivity rules, cap removal, fuel raise, soundness re-audit) plus Phase 8's scope-record cleanup. These are file-disjoint from the propositional work just completed and represent the majority of remaining scope (~9-10h of the original 15h estimate).",
+    "stage": "propositional_column_done_temporal_front_remaining",
+    "details": "Phases 1, 2, 4 COMPLETED and verified. Phase 3 PARTIAL (intRule_preserves_sat done and sorry-free; sat_timp/truthLemma BLOCKED, documented precisely, not forced). Phases 5-8 NOT STARTED. Whole-project lake build and lake test GREEN. Full CI pipeline run: lake build (green), lake exe checkInitImports (pass), lake lint (1 pre-existing unrelated finding in Temporal/Saturation.lean, zero in touched files), lake exe lint-style (clean), lake shake (zero new findings in touched files), lake exe mk_all (no update needed), lake test (green, includes new TableauConformance harness).",
     "lint_count_start": null,
     "lint_count_current": null,
     "phases_completed": 4,
-    "phases_partial": [3]
+    "phases_partial": [3],
+    "phases_remaining": [5, 6, 7, 8]
+  },
+  "verification": {
+    "verification_passed": true,
+    "sorry_count_precise_tactic_usage": 5,
+    "sorry_count_precise_tactic_usage_baseline": 5,
+    "sorry_count_delta": 0,
+    "sorry_count_note": "The naive 'grep -rn \\bsorry\\b | grep -v comment-prefixes' metric reports 147 (current) vs 143 (baseline) -- a +4 delta entirely explained by prose mentions of the word 'sorry' inside the updated blocker-documentation docstring (multi-line, so not caught by single-line comment filters), not by new sorry tactics. Precise tactic-usage grep (matches only actual `sorry` as a tactic) confirms exact 5=5 parity.",
+    "vacuous_count": 1,
+    "vacuous_count_baseline": 1,
+    "axiom_count": 26,
+    "axiom_count_baseline": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true
   },
   "metadata": {
     "session_id": "sess_1784959340_e4ceeb_552",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"]
+    "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
+    "compliance_check": "passed"
   }
 }

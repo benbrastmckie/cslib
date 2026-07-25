@@ -1,6 +1,6 @@
 {
   "status": "partial",
-  "started_at": "2026-07-25T00:00:00Z",
+  "started_at": "2026-07-25T20:16:59Z",
   "requires_user_review": false,
   "artifacts": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
@@ -9,20 +9,20 @@
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "phase_5_complete_phase_6_scoped",
-    "details": "Phases 1-5 of 15 implemented, verified, and committed individually (task 553 phase 1/2/3/4/5 commits). Phase 4 added the ordered stepper and its structural lemmas; Phase 5 re-established the termination measure decrease. Phase 6 (S4LoopInv preservation across ten per-field sub-lemmas plus two proof-internal auxiliaries) was scoped in full detail (sub-lemma inventory with current line numbers, two Lean elaboration lessons from Phases 4-5, recommended attack order starting with the escalation-trigger keysDistinct sub-lemma) and written to handoffs/phase-6-handoff-20260725.md, but not started -- stopping at this clean, fully green phase boundary rather than beginning a ten-sub-lemma phase that could not be finished and committed in this dispatch.",
+    "stage": "phase_6_complete",
+    "details": "Phase 6 (S4LoopInv preservation and fuel-sufficiency chain against the ordered stepper) is now COMPLETE and committed: all ten ordered per-field sub-lemmas (keysDistinct, keyLowerBd, keysInUniverse, keysTotal, eNodup, outDegEq, accFresh, accKnown, eClosure, bClosure), the two proof-internal auxiliaries (keysWorldsKnown, worldsContiguousS4), two additional prerequisite auxiliaries not named in the plan text (modalStepBranchS4KeyedOrdered_branch_superset, modalStepBranchS4KeyedOrdered_keys_subset), and the final wrapper (modalStepBranchS4KeyedOrdered_preserves_S4LoopInv) all landed across thirteen individually-committed dispatches. The escalation-trigger sub-lemma (keysDistinct, attempted first per the handoff's recommendation) PASSED with no weakening of keysUpdate_preserves_keysDistinct -- the plan's central claim (reordering only changes timing, never producing a duplicate key) is confirmed, not just assumed. modalKnownWorlds_length_le_worldBoundS4/modalStepBranchS4_worldBound/modalExpMeasure_entry_le_fuelS4 all apply verbatim to the ordered driver (no ordered analogues needed), also confirmed rather than assumed. Phase 6 marked [COMPLETED] in the plan file with explicit written confirmation. Phases 1-6 of 15 now complete. Phases 7-15 remain (ordered driver/entry point, decidability re-derivation, soundness re-verification via settled-context scheduling, completeness, and the final destructive retirement of the unordered stepper).",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5
+    "phases_completed": 6
   },
   "verification": {
     "verification_passed": true,
-    "sorry_count": 0,
+    "sorry_count": 5,
     "vacuous_count": 0,
-    "axiom_count": 0,
+    "axiom_count": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "lake build (scoped, per phase), lake exe checkInitImports, and lake exe lint-style run and green after each of Phases 4-5. Repo-wide bare `sorry` count in Cslib/ unchanged at 5 throughout. Downstream consumers (FrameCompleteness.lean, FrameSoundness.lean) confirmed to still build unchanged after each phase. Full `lake test`/`lake lint` (whole-project) were not re-run in this dispatch beyond the scoped builds and targeted checkInitImports/lint-style passes documented above; the one pre-existing lake lint error found (Cslib/Logics/Temporal/Tableau/Saturation.lean) is unrelated to this task's file scope."
+    "note": "Repo-wide bare sorry count in Cslib/ unchanged at 5 throughout Phase 6 (baseline, pre-existing, in unrelated files -- none in LoopChecking.lean). axiom_count (26, `grep -rn '^axiom '`) unchanged from baseline; zero new axioms introduced. vacuous_count grep hits one pre-existing, unrelated match (Cslib/Computability/URM/Basic.lean:92, a genuine non-vacuous theorem whose statement happens to reduce to `trivial`) -- not introduced by this dispatch and outside this task's file scope. Full CI pipeline run and green after Phase 6's final commit: whole-project `lake build` (3256/3256 jobs), `lake exe checkInitImports` (clean), `lake exe lint-style` (clean), `lake lint` (one pre-existing error in Cslib/Logics/Temporal/Tableau/Saturation.lean, unrelated to this task's scope; zero issues in LoopChecking.lean), `lake shake --add-public --keep-implied --keep-prefix` (zero import changes needed for LoopChecking.lean), `lake test` (9250/9250, including CslibTests.S4LoopGuardRegression). Downstream consumers FrameCompleteness.lean/FrameSoundness.lean confirmed to still build. lean_verify on all thirteen new declarations from this phase: axiom-clean (propext/Classical.choice/Quot.sound only), no sorryAx."
   },
   "metadata": {
     "session_id": "sess_1785007897_038307_553",

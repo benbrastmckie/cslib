@@ -1,5 +1,5 @@
 ---
-next_project_number: 555
+next_project_number: 556
 ---
 
 # TODO
@@ -11,7 +11,7 @@ next_project_number: 555
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,400,409,440,465,466,511,530,534,552,553,554 | -- | propositional logic, modal logic, bimodal logic, ... |
+| 1 | 36,37,181,226,400,409,440,465,466,511,530,534,552,553,554,555 | -- | propositional logic, modal logic, bimodal logic, ... |
 | 2 | 39,40,215,317,425,450,506,537,548,551 | 36,37,181,511,552,554 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,300,301,375,430,456,497 | 39,40,317,425,506 | foundations, propositional logic, modal logic, ... |
 | 4 | 413,414 | 181,215,300,301,375 | code hygiene |
@@ -40,8 +40,8 @@ next_project_number: 555
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 552 [PARTIAL] — Shared calculus-conformance and rule-completeness repair unblocki
-553 [RESEARCHED] — Determine whether the S4 keyed loop-check guard can be made sound
-554 [RESEARCHED] — Research-only task: establish or refute the CS5 pair-seed disjunc
+553 [PLANNING] — Determine whether the S4 keyed loop-check guard can be made sound
+554 [RESEARCHING] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
@@ -78,10 +78,23 @@ next_project_number: 555
 
 456 [NOT STARTED] — Generalize the Sfor-containment / subset-blocking device recurrin
 
+### Uncategorized
+
+555 [NOT STARTED] — Repair the literature search visibility split that silently quara
+
 ## Tasks
 
+### 555. Literature search fidelity schema quarantine
+- **Status**: [NOT STARTED]
+- **Task Type**: general
+- **Dependencies**: None
+
+**Description**: Repair the literature search visibility split that silently quarantines 18 documents from default retrieval. ROOT CAUSE (confirmed by direct measurement): the global Literature index.json carries TWO entry schemas. The older schema uses id + path="sources/<dir>/" (273 entries, 157 stamped with provenance_fidelity). A second ingestion pipeline writes doc_id + chunks_dir=<absolute path> with provenance_fidelity=null (18 entries). literature-search.sh's load_fidelity_map() derives its key exclusively from a path prefix of "sources/", so every chunks_dir-schema entry gets no fidelity record; get_fidelity() then fails open to unverified_summary and default search drops them. literature-fidelity-audit.sh cannot repair this because it documents (own header, the sources/<dir> matching section) that chunks_dir-schema entries are deliberately never matched or written. IMPACT: default literature-search.sh returns degraded=true with zero results for the entire second-pipeline corpus, which is essentially this repo's whole constructive/intuitionistic modal working set -- arisakadasstrassburger_2015, marinmoralesstrassburger_2021, pacheco_2024 (the source of the very lemma one task is trying to repair), simpson_1994 and wijesekera_1990 (both recently re-ingested at real cost, their improvements currently invisible to default search), biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997, massacci_2000, plus 8 unrelated hyperproperty/verification documents. Consequence: --lit runs on this repo have been silently operating without their most relevant sources. WORKAROUND that proves the diagnosis: literature-search.sh --include-unverified returns correct hits for these documents right now. SCOPE: (1) make load_fidelity_map() derive its directory key from chunks_dir basename when path is absent, keeping the existing sources/ prefix behaviour for the older schema; note load_fidelity_map is duplicated at four sites in literature-search.sh (lines ~227, ~527, ~764, ~908) -- fix all four or factor to one. (2) Extend literature-fidelity-audit.sh to classify and stamp chunks_dir-schema entries, or add a sibling path that does, so the 18 entries acquire a real provenance_fidelity rather than staying null. (3) Preserve fail-open semantics: a missing map entry must still default to unverified, never to verified_conversion. (4) Verify by running default (no-flag) literature-search.sh for each of the 18 doc_ids and confirming non-degraded results. Do not touch Cslib/ Lean source.
+
+---
+
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [RESEARCHED]
+- **Status**: [RESEARCHING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
@@ -92,7 +105,7 @@ next_project_number: 555
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535

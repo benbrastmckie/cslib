@@ -1,6 +1,19 @@
 {
-  "next_project_number": 555,
+  "next_project_number": 556,
   "active_projects": [
+    {
+      "project_number": 555,
+      "project_name": "literature_search_fidelity_schema_quarantine",
+      "status": "not_started",
+      "task_type": "general",
+      "description": "Repair the literature search visibility split that silently quarantines 18 documents from default retrieval. ROOT CAUSE (confirmed by direct measurement): the global Literature index.json carries TWO entry schemas. The older schema uses id + path=\"sources/<dir>/\" (273 entries, 157 stamped with provenance_fidelity). A second ingestion pipeline writes doc_id + chunks_dir=<absolute path> with provenance_fidelity=null (18 entries). literature-search.sh's load_fidelity_map() derives its key exclusively from a path prefix of \"sources/\", so every chunks_dir-schema entry gets no fidelity record; get_fidelity() then fails open to unverified_summary and default search drops them. literature-fidelity-audit.sh cannot repair this because it documents (own header, the sources/<dir> matching section) that chunks_dir-schema entries are deliberately never matched or written. IMPACT: default literature-search.sh returns degraded=true with zero results for the entire second-pipeline corpus, which is essentially this repo's whole constructive/intuitionistic modal working set -- arisakadasstrassburger_2015, marinmoralesstrassburger_2021, pacheco_2024 (the source of the very lemma one task is trying to repair), simpson_1994 and wijesekera_1990 (both recently re-ingested at real cost, their improvements currently invisible to default search), biermandepaiva_2000, alechinamendlerdepaivaritter_2001, chagrovzakharyaschev_1997, massacci_2000, plus 8 unrelated hyperproperty/verification documents. Consequence: --lit runs on this repo have been silently operating without their most relevant sources. WORKAROUND that proves the diagnosis: literature-search.sh --include-unverified returns correct hits for these documents right now. SCOPE: (1) make load_fidelity_map() derive its directory key from chunks_dir basename when path is absent, keeping the existing sources/ prefix behaviour for the older schema; note load_fidelity_map is duplicated at four sites in literature-search.sh (lines ~227, ~527, ~764, ~908) -- fix all four or factor to one. (2) Extend literature-fidelity-audit.sh to classify and stamp chunks_dir-schema entries, or add a sibling path that does, so the 18 entries acquire a real provenance_fidelity rather than staying null. (3) Preserve fail-open semantics: a missing map entry must still default to unverified, never to verified_conversion. (4) Verify by running default (no-flag) literature-search.sh for each of the 18 doc_ids and confirming non-degraded results. Do not touch Cslib/ Lean source.",
+      "dependencies": [],
+      "file_scope": [
+        ".claude/scripts/literature-search.sh",
+        ".claude/scripts/literature-fidelity-audit.sh"
+      ],
+      "created": "2026-07-25T13:50:28Z"
+    },
     {
       "project_number": 530,
       "project_name": "consolidate_chronicle_construction_bimodal_temporal",
@@ -1506,7 +1519,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "dependencies": [
         535
@@ -1517,8 +1530,8 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-07-25T06:32:54Z",
-      "session_id": "sess_1784959340_e4ceeb_553",
+      "last_updated": "2026-07-25T13:50:40Z",
+      "session_id": "sess_1784987428_4cc3f0_553",
       "topic": "Modal Logic",
       "artifacts": [
         {
@@ -1531,14 +1544,14 @@
     {
       "project_number": 554,
       "project_name": "cs5_pair_seed_disjunction_property_cutfree_research",
-      "status": "researched",
+      "status": "researching",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": null,
       "description": "Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.  SECOND CONSUMER (widened brief): this research also gates the labelled CS5 general-soundness biconditional task, which hit the SAME obstruction family from an independent direction. Its Phase 9 probe gate failed definitively after three dispatches on the non-theorem box(A-or-B) implies (box-A or box-B) -- box failing to distribute over disjunction, which is the same constructive-disjunction-property wall as the pair-seed obligation above. Machine-checked evidence lives in that task under probes/theta_place_validation.lean, probes/theta_place_layered.lean, and probes/theta_place_final_gate.lean; all three compile clean with no sorryAx and are durable assets for this research. Because two independent formalization fronts converged on the same wall, a cut-free or nested-sequent treatment that recovers disjunction-property reasoning would unblock BOTH. When reporting, state explicitly what each consumer would gain: for the pair-seed task, whether the named open Prop can be discharged; for the labelled-soundness task, whether a context-fold that splits compound context facts is derivable without the box-over-disjunction bridge.",
       "blockers": null,
-      "last_updated": "2026-07-25T06:16:39Z",
-      "session_id": "sess_1784959340_e4ceeb_554",
+      "last_updated": "2026-07-25T13:50:44Z",
+      "session_id": "sess_1784987428_4cc3f0_554",
       "topic": "Modal Logic",
       "artifacts": [
         {

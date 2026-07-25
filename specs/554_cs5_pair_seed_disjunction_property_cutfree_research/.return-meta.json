@@ -1,20 +1,15 @@
 {
-  "status": "researched",
-  "artifacts": [
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/cross1_collapse.lean",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/retraction_bound.lean"
-  ],
+  "status": "in_progress",
+  "started_at": "2026-07-25T00:00:00Z",
+  "artifacts": [],
   "partial_progress": {
-    "stage": "research_delivered",
-    "details": "Deliverable class (c): open with named obstruction, plus machine-checked reduction of three open obligations to one and refutation of Non-Goal 2's stated reason."
+    "stage": "initializing",
+    "details": "Round 2 research started; reading round 1 report and locating literature chunks"
   },
   "metadata": {
-    "session_id": "sess_1784959340_e4ceeb_554",
+    "session_id": "sess_1784987428_4cc3f0_554",
     "agent_type": "cslib-research-agent",
     "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "cslib-research-agent"],
-    "probes_sorry_free": true,
-    "literature_corpus_degraded": true
+    "delegation_path": ["orchestrator", "research", "cslib-research-agent"]
   }
 }

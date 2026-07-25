@@ -364,7 +364,7 @@ no residual burden downstream.
 
 ---
 
-### Phase 4: Retraction functoriality and docstring corrections [NOT STARTED]
+### Phase 4: Retraction functoriality and docstring corrections [IN PROGRESS]
 
 **Goal**: Land the sharpest bound obtainable by relabeling, and correct two mis-argued docstring
 claims.

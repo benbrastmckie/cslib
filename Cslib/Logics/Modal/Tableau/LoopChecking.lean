@@ -6847,6 +6847,95 @@ def modalTableauS4Keyed (φ : Proposition Atom) : ModalTableauResult Atom :=
   modalExpandBranchesS4Keyed φ [initialBranch] [[]] [Accessibility.empty]
     [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)
 
+/-! ## Ordered Keyed S4 Driver and Entry Point (Successor to the Bespoke Driver Above)
+
+Structural copies of `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` above, with the reordered
+stepper `modalStepBranchS4KeyedOrdered` (settled-context scheduling: non-minting candidates
+first, minting fallback only once the branch has settled) substituted for
+`modalStepBranchS4Keyed` at the single per-branch step call. Termination of the copied `fuel'`
+recursion is not a new obligation here: Phase 5's own measure lemma
+(`modalExpMeasure_step_lt_S4KeyedOrdered`) already establishes strict decrease for the ordered
+stepper's `some` case, and the `processNext` recursion shape (structural recursion on the outer
+`fuel`, exactly as in `modalExpandBranchesS4Keyed`) is unchanged from the original, so Lean's
+termination checker accepts the copy identically. `modalStepBranchS4Keyed`,
+`modalExpandBranchesS4Keyed`, and `modalTableauS4Keyed` themselves are left untouched pending
+Phase 15's destructive retirement, once every consumer below has an ordered replacement. -/
+
+/-- The ordered-stepper analogue of `modalExpandBranchesS4Keyed`: identical `processNext`
+worklist shape and `keys` threading via `keyss`, with `modalStepBranchS4KeyedOrdered φ₀` stepping
+each open branch in place of `modalStepBranchS4Keyed φ₀`. At `fuel = 0`, mirrors the base case of
+`modalExpandBranchesS4Keyed` exactly (`keyss` again plays no role, since `ModalTableauResult`
+never carries `keys`). At `fuel = fuel' + 1`, `processNext` closes/expands branches identically to
+its predecessor, threading `keys'` across every one of a `.branching` split's children exactly as
+before. Successor to `modalExpandBranchesS4Keyed`, which Phase 15 retires once this driver has a
+proved soundness/completeness pair of its own. -/
+def modalExpandBranchesS4KeyedOrdered
+    (φ₀ : Proposition Atom)
+    (branches expandedSets : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (accs : List Accessibility)
+    (keyss : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+    (fuel : Nat) : ModalTableauResult Atom :=
+  match fuel with
+  | 0 =>
+    -- Fuel exhausted: return first open branch with its local accessibility relation
+    -- (mirrors `modalExpandBranchesS4Keyed`'s base case exactly).
+    match (branches.zip accs) |>.findSome? (fun (b, a) =>
+        if isModalClosed b then none else some (b, a)) with
+    | some (b, a) => .openBranch b a
+    | none => .closed
+  | fuel' + 1 =>
+    -- processNext: iterate through branches, finding the first open one to expand, threading
+    -- `keys` alongside `acc` for every entry -- identical shape to
+    -- `modalExpandBranchesS4Keyed`'s `processNext`, with the ordered stepper substituted at the
+    -- single per-branch call site below.
+    let rec @[nolint docBlame] processNext
+        (pending : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (pendingAccs : List Accessibility)
+        (pendingKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        (done : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneExp : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+        (doneAccs : List Accessibility)
+        (doneKeys : List (List (WorldIndex × Finset (Sign × Proposition Atom))))
+        : ModalTableauResult Atom :=
+      match pending, pendingExp, pendingAccs, pendingKeys with
+      | [], _, _, _ => .closed  -- All branches closed
+      | b :: restBs, e :: restEs, a :: restAs, k :: restKs =>
+        if isModalClosed b then
+          -- Branch is closed: skip it, carry its acc/keys to done
+          processNext restBs restEs restAs restKs (done ++ [b]) (doneExp ++ [e]) (doneAccs ++ [a])
+            (doneKeys ++ [k])
+        else
+          match modalStepBranchS4KeyedOrdered φ₀ b e a k with
+          | none =>
+            -- Branch is saturated and open: return with this branch's local acc
+            .openBranch b a
+          | some (newBs, newExps, newAcc, keys') =>
+            -- Expanded: recurse with new branches using newAcc/keys' for each child
+            modalExpandBranchesS4KeyedOrdered φ₀
+              (done ++ newBs ++ restBs)
+              (doneExp ++ newExps ++ restEs)
+              (doneAccs ++ List.replicate newBs.length newAcc ++ restAs)
+              (doneKeys ++ List.replicate newBs.length keys' ++ restKs)
+              fuel'
+      | _, _, _, _ => .closed  -- malformed (length invariant rules this out)
+    processNext branches expandedSets accs keyss [] [] [] []
+
+/-- The ordered-stepper analogue of `modalTableauS4Keyed`: the entry point for the settled-context
+scheduling driver, mirroring its predecessor's entry-branch shape (`F(φ)@0`) and seeding exactly
+`keys := [(0, ∅)]` -- **not** `keys := []`, per the Phase 11 correction at `modalTableauS4Keyed`
+above (an empty `keys` list violates `S4LoopInv.keysTotal`, since `0 ∈ modalKnownWorlds [F(φ)@0]`
+from the first formula's label and no step re-mints world `0` to backfill a key for it). Fuel is
+the same S4-specific bound `modalFuelS4 φ` used by `modalTableauS4Keyed`
+(`modalExpMeasure_entry_le_fuelS4` was confirmed in Phase 6 to apply verbatim to the ordered
+driver, independent of traversal order). Successor to `modalTableauS4Keyed`, which Phase 15
+retires once this entry point has a proved soundness/completeness pair of its own. -/
+def modalTableauS4KeyedOrdered (φ : Proposition Atom) : ModalTableauResult Atom :=
+  let initialBranch : List (SignedFormula (Proposition Atom) WorldIndex) :=
+    [⟨.neg, φ, 0⟩]
+  modalExpandBranchesS4KeyedOrdered φ [initialBranch] [[]] [Accessibility.empty]
+    [[(0, (∅ : Finset (Sign × Proposition Atom)))]] (modalFuelS4 φ)
+
 /-! ## Congruence Gate: `hintikka_congr_S4`
 
 The sole genuinely-novel obligation of the keyed-driver path: the keyed rule

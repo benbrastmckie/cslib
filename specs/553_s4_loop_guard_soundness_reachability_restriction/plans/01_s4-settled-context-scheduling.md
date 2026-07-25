@@ -389,18 +389,18 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 7: Ordered Driver and Entry Point [NOT STARTED]
+### Phase 7: Ordered Driver and Entry Point [COMPLETED]
 
 - **Goal:** Build the fuel loop and tableau entry point over the ordered stepper, parallel to
   `modalExpandBranchesS4Keyed` (LoopChecking.lean:4689) and `modalTableauS4Keyed` (:4753).
 - **Tasks:**
-  - [ ] Define `modalExpandBranchesS4KeyedOrdered` as a structural copy of
+  - [x] Define `modalExpandBranchesS4KeyedOrdered` as a structural copy of
     `modalExpandBranchesS4Keyed` (same `processNext` worklist shape, same `keys` threading) with
     the ordered stepper substituted. Termination is discharged by Phase 5's measure lemma.
-  - [ ] Define `modalTableauS4KeyedOrdered φ`, mirroring `modalTableauS4Keyed`'s entry: initial
+  - [x] Define `modalTableauS4KeyedOrdered φ`, mirroring `modalTableauS4Keyed`'s entry: initial
     branch `[F(φ)@0]`, `keys := [(0, ∅)]` (an empty `keys` list violates `S4LoopInv.keysTotal` —
     see the note at LoopChecking.lean:4744), fuel `modalFuelS4 φ`.
-  - [ ] Docstring both as the successors to the existing pair, with the retirement phase named.
+  - [x] Docstring both as the successors to the existing pair, with the retirement phase named.
 - **Timing:** 2 hours
 - **Depends on:** 6
 - **Files to modify:**
@@ -408,6 +408,25 @@ critical path, because each proof layer consumes the previous one's statement sh
 - **Verification:**
   - `lake build Cslib.Logics.Modal.Tableau.LoopChecking` succeeds, including the termination
     obligation for the new fuel loop
+
+**Phase 7 completion note:** `modalExpandBranchesS4KeyedOrdered` and `modalTableauS4KeyedOrdered`
+landed as structural copies with `modalStepBranchS4KeyedOrdered` substituted at the single
+`processNext` call site; Lean's termination checker accepted the copied `fuel'` recursion
+unchanged, with no `termination_by`/`decreasing_by` workaround needed -- confirming the handoff's
+prediction that Phase 5's measure lemma alone suffices. `modalTableauS4KeyedOrdered` seeds
+`keys := [(0, ∅)]` (not `[]`), matching the Phase 11 correction at `modalTableauS4Keyed`. Full CI
+green after this phase's commit: whole-project `lake build` (3256/3256), `lake exe
+checkInitImports` (clean), `lake exe lint-style` (clean), `lake lint` (one pre-existing,
+out-of-scope error in `Temporal/Tableau/Saturation.lean`; zero issues in `LoopChecking.lean`),
+`lake shake --add-public --keep-implied --keep-prefix` (zero import changes needed for
+`LoopChecking.lean`), `lake test` (9250/9250, including `CslibTests.S4LoopGuardRegression`).
+Repo-wide `sorry` count unchanged at 5; `axiom` count unchanged at 26. `lean_verify` on both new
+declarations: axiom-clean (`propext`/`Classical.choice`/`Quot.sound` only), no `sorryAx`.
+`modalStepBranchS4Keyed`, `modalExpandBranchesS4Keyed`, `modalTableauS4Keyed`, and everything from
+Phases 1-6 remain byte-for-byte unchanged. No termination or fuel-sufficiency gap surfaced --
+the escalation concern (narrowing the guard breaking termination rather than completeness)
+remains not yet triggered as of this phase; Phase 8's empirical gate is the next point where a
+real regression could still surface.
 
 ---
 

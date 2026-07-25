@@ -3,11 +3,11 @@
   "started_at": "2026-07-25T15:09:14Z",
   "artifacts": [],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 landed: CS5PairSeedRightExclusion (corrected statement), cs5PairSeedDisjunctionProperty_false (permanent refutation, witness bot->bot), cs5PairSeedDisjunctionProperty_false_of_boxMem (H-driven companion refutation via cs5PairSeed_tauR_mem_closure_of_boxMem). CS5PairSeedDisjunctionProperty and cs5Pair_derivExcludes_of_disjunctionProperty left textually unchanged apart from a deprecation docstring paragraph. Module builds green, no sorry, lean_verify clean on both new refutation theorems.",
+    "stage": "phase_2_complete",
+    "details": "Phase 2 landed: cs5Pair_or_imp_right, cs5Pair_disjunctionProperty_of_rightExclusion / cs5Pair_rightExclusion_of_disjunctionProperty (the hOpen <-> hR equivalence), cs5Pair_leftExclusion_of_rightExclusion, and the corrected entry point cs5Pair_derivExcludes_of_rightExclusion composing all of it into the landed cs5Pair_derivExcludes_of_disjunctionProperty. Module builds green, no sorry, lean_verify clean.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 1
+    "phases_completed": 2
   },
   "metadata": {
     "session_id": "sess_1784987428_4cc3f0_554",

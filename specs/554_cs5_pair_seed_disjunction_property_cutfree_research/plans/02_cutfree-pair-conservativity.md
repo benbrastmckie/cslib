@@ -289,25 +289,27 @@ permanent regression theorem.
 
 ---
 
-### Phase 2: Reduction lemmas under the corrected statement [NOT STARTED]
+### Phase 2: Reduction lemmas under the corrected statement [COMPLETED]
 
 **Goal**: Collapse three open obligations plus one blocked lemma to the single corrected
 obligation.
 
 **Tasks**:
-- [ ] Land `cs5Pair_or_imp_right : Deriv CS5PairAxiom [] (((cs5PairTauL (Proposition.box A)).or
+- [x] Land `cs5Pair_or_imp_right : Deriv CS5PairAxiom [] (((cs5PairTauL (Proposition.box A)).or
       (cs5PairTauR A)).imp (cs5PairTauR A))` from `probes/cross1_collapse.lean`, using
       `Proposition.map_box` definitional equality (`Modal/Basic.lean:164`) so that
       `cs5PairTauL (□A)` is literally the antecedent of `CS5PairAxiom.cross1 A`
-- [ ] Land the equivalence: right exclusion ↔ the disjunction form, at fixed `H`, `A`
-- [ ] Land `cs5Pair_leftExclusion_of_rightExclusion` (round 1 R3, via `modus_ponens` against
+- [x] Land the equivalence: right exclusion ↔ the disjunction form, at fixed `H`, `A`
+      *(landed as the two directions `cs5Pair_disjunctionProperty_of_rightExclusion` and
+      `cs5Pair_rightExclusion_of_disjunctionProperty`)*
+- [x] Land `cs5Pair_leftExclusion_of_rightExclusion` (round 1 R3, via `modus_ponens` against
       `cross1`)
-- [ ] Land `cs5Pair_derivExcludes_of_rightExclusion (hA : A ∉ modalDeductiveClosure CS5ModalAxiom
+- [x] Land `cs5Pair_derivExcludes_of_rightExclusion (hA : A ∉ modalDeductiveClosure CS5ModalAxiom
       (boxInv H)) (hExcl : CS5PairSeedRightExclusion H A) : Metalogic.DerivExcludes …`, composing
       the above into the existing `cs5Pair_derivExcludes_of_disjunctionProperty`
-- [ ] Docstring: record that the new entry point carries the `hA` side condition the old one
+- [x] Docstring: record that the new entry point carries the `hA` side condition the old one
       lacked, and forward-reference Phase 3's bridge as its discharge
-- [ ] `lake build` the module
+- [x] `lake build` the module
 
 **Timing**: 2 hours
 

@@ -572,6 +572,107 @@ theorem cs5PairSeedDisjunctionProperty_false_of_boxMem {H : Set (Proposition Ato
     ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
     (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hR) hd
 
+/-! ## Reduction Lemmas Under the Corrected Statement (Round 2)
+
+Round 1's reduction survives the Round 2 repair unchanged: `CS5PairSeedDisjunctionProperty H A`
+(the disjunction form) and the bare right exclusion `cs5PairTauR A ∉ cl(cs5PairSeed H)` are
+**equivalent at every fixed `H`, `A`** -- no guard is needed for the equivalence itself, only for
+`CS5PairSeedRightExclusion`'s use of it (round 2 §1.1's counterexample defeats the bare right
+exclusion, not the equivalence between it and the disjunction form). This section collapses the
+module's three open obligations (`hL`, `hR`, `CS5PairSeedDisjunctionProperty`) plus the blocked
+cross-inertness lemma to the single corrected obligation `CS5PairSeedRightExclusion`, by deriving
+`hL` and the disjunction form from `hR` alone via `cross1`. -/
+
+/-- **`cross1`, restated with the box pulled outside the tag.** `⊢ (τ_L (□A) ⊔ τ_R A) → τ_R A`,
+via `orE` against `CS5PairAxiom.cross1` and identity. `cs5PairTauL (Proposition.box A)` and
+`Proposition.box (cs5PairTauL A)` coincide definitionally (`Proposition.map`'s `box` case is
+`rfl`, `Basic.lean`), so `CS5PairAxiom.cross1 A` -- whose stated conclusion is
+`(Proposition.box (cs5PairTauL A)).imp (cs5PairTauR A)` -- is already an axiom instance of the
+antecedent shape used here. -/
+theorem cs5Pair_or_imp_right (A : Proposition Atom) :
+    Deriv (@CS5PairAxiom Atom) []
+      (((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A)).imp (cs5PairTauR A)) := by
+  have hcross : Deriv (@CS5PairAxiom Atom) []
+      ((cs5PairTauL (Proposition.box A)).imp (cs5PairTauR A)) :=
+    ⟨.ax [] _ (CS5PairAxiom.cross1 A)⟩
+  have hid : Deriv (@CS5PairAxiom Atom) [] ((cs5PairTauR A).imp (cs5PairTauR A)) :=
+    Metalogic.empty_imp_id (modalDerivationSystem CS5PairAxiom) cs5Pair_hCut _
+  exact mp_deriv (mp_deriv (cs5Pair_hOrE _ _ _) hcross) hid
+
+/-- **The disjunction form follows from the bare right exclusion.** If `τ_R A ∉ cl(seed)`, then
+`CS5PairSeedDisjunctionProperty H A` holds: were the disjunction `τ_L (□A) ⊔ τ_R A` in the
+closure, `cs5Pair_or_imp_right` would put `τ_R A` there too, via `modus_ponens` through closure
+(`modalDeductiveClosure_closed`). Round 1's `hOpen ⟸ hR` direction. -/
+theorem cs5Pair_disjunctionProperty_of_rightExclusion {H : Set (Proposition Atom)}
+    {A : Proposition Atom}
+    (hR : cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)) :
+    CS5PairSeedDisjunctionProperty H A := by
+  intro hor
+  apply hR
+  refine modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS
+    [(cs5PairTauL (Proposition.box A)).or (cs5PairTauR A)] (cs5PairTauR A)
+    (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hor) ?_
+  exact mp_deriv (weakening_deriv (cs5Pair_or_imp_right A) (by simp))
+    (assumption_deriv (List.mem_singleton_self _))
+
+/-- **The bare right exclusion follows from the disjunction form.** Converse of
+`cs5Pair_disjunctionProperty_of_rightExclusion`, via `orI2`: `hOpen` excludes the disjunction from
+the closure, and `τ_R A` implies the disjunction, so `τ_R A` is excluded too. Round 1's
+`hOpen ⟹ hR` direction. Together the two directions give `CS5PairSeedDisjunctionProperty H A ↔
+τ_R A ∉ cl(seed)` at fixed `H`, `A`, unconditionally -- the equivalence needs no guard; only
+`CS5PairSeedRightExclusion`'s *use* of the right-hand side does (round 2 §1.1). -/
+theorem cs5Pair_rightExclusion_of_disjunctionProperty {H : Set (Proposition Atom)}
+    {A : Proposition Atom} (hOpen : CS5PairSeedDisjunctionProperty H A) :
+    cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H) := by
+  intro hR
+  apply hOpen
+  refine modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS
+    [cs5PairTauR A] ((cs5PairTauL (Proposition.box A)).or (cs5PairTauR A))
+    (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hR) ?_
+  exact mp_deriv (weakening_deriv (cs5Pair_hOrI2 (cs5PairTauL (Proposition.box A))
+    (cs5PairTauR A)) (by simp)) (assumption_deriv (List.mem_singleton_self _))
+
+/-- **The left exclusion follows from the bare right exclusion.** Round 1 R3: if
+`τ_R A ∉ cl(seed)`, then `τ_L (□A) ∉ cl(seed)` too, again via `cross1` through closure -- were
+`τ_L (□A)` in the closure, `cross1` would place `τ_R A` there as well. -/
+theorem cs5Pair_leftExclusion_of_rightExclusion {H : Set (Proposition Atom)}
+    {A : Proposition Atom}
+    (hR : cs5PairTauR A ∉ modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)) :
+    cs5PairTauL (Proposition.box A) ∉
+      modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H) := by
+  intro hL
+  apply hR
+  refine modalDeductiveClosure_closed cs5Pair_hImplyK cs5Pair_hImplyS
+    [cs5PairTauL (Proposition.box A)] (cs5PairTauR A)
+    (fun z hz => by rw [List.mem_singleton] at hz; rw [hz]; exact hL) ?_
+  exact mp_deriv (weakening_deriv (⟨.ax [] _ (CS5PairAxiom.cross1 A)⟩ :
+      Deriv (@CS5PairAxiom Atom) [] ((cs5PairTauL (Proposition.box A)).imp (cs5PairTauR A)))
+    (by simp)) (assumption_deriv (List.mem_singleton_self _))
+
+/-- **The corrected entry point.** Collapses the module's three open obligations (`hL`, `hR`,
+`CS5PairSeedDisjunctionProperty`) plus the blocked cross-inertness lemma to the single corrected
+obligation `CS5PairSeedRightExclusion`: given `hA : A ∉ cl_CS5(boxInv H)` (Phase 3 discharges
+this from the caller's actual hypothesis `□A ∉ H`) and `hExcl : CS5PairSeedRightExclusion H A`,
+`hExcl hA` is the bare right exclusion `hR`, from which `hL` and the disjunction form both follow
+(`cs5Pair_leftExclusion_of_rightExclusion`/`cs5Pair_disjunctionProperty_of_rightExclusion`),
+composing into the landed `cs5Pair_derivExcludes_of_disjunctionProperty`. Note that this entry
+point carries the extra hypothesis `hA` the old `cs5Pair_derivExcludes_of_disjunctionProperty`
+did not have -- flagged in the plan's Goals & Non-Goals as the one place this repair is not a
+strict strengthening in isolation; Phase 3 shows it is not a net weakening in practice, since
+`hA` is discharged for free whenever `H` is `CS5`-deductively closed and `□A ∉ H`, which every
+caller of this module already has. -/
+theorem cs5Pair_derivExcludes_of_rightExclusion {H : Set (Proposition Atom)}
+    {A : Proposition Atom}
+    (hA : A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H))
+    (hExcl : CS5PairSeedRightExclusion H A) :
+    Metalogic.DerivExcludes (modalDerivationSystem (@CS5PairAxiom Atom))
+      {cs5PairTauL (Proposition.box A), cs5PairTauR A}
+      (modalDeductiveClosure (@CS5PairAxiom Atom) (cs5PairSeed H)) :=
+  cs5Pair_derivExcludes_of_disjunctionProperty
+    (cs5Pair_leftExclusion_of_rightExclusion (hExcl hA))
+    (hExcl hA)
+    (cs5Pair_disjunctionProperty_of_rightExclusion (hExcl hA))
+
 /-! ## Open Obligations
 
 **Proved, this module:**

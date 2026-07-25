@@ -673,6 +673,125 @@ theorem cs5Pair_derivExcludes_of_rightExclusion {H : Set (Proposition Atom)}
     (hExcl hA)
     (cs5Pair_disjunctionProperty_of_rightExclusion (hExcl hA))
 
+/-! ## Caller-Side Bridge From `□A ∉ H` to the Side Condition
+
+`cs5Pair_derivExcludes_of_rightExclusion` above needs `hA : A ∉ modalDeductiveClosure
+CS5ModalAxiom (boxInv H)`, which round 2 §1.1's counterexample shape shows is **not** free in
+general (its counterexample is `□(B → A), □B ∈ H` with `□A ∉ H` -- a set `H` that is *not*
+`CS5`-deductively closed). This section shows the counterexample shape cannot occur once `H`
+**is** `CS5`-deductively closed: `k` applied to `□(B → A)` and `□B` already puts `□A ∈ H`, so a
+deductively closed `H` can never witness `□A ∉ H` together with `□(B → A), □B ∈ H`. Consequently
+`hA` is free for every caller with a deductively closed `H` and `□A ∉ H` -- exactly the
+hypotheses every real caller of this module already carries, per the plan's Goals & Non-Goals
+discussion of why Phase 2's added `hA` hypothesis is not a net weakening in practice. -/
+
+/-- **Box-over-finite-conjunction.** If every element of `L` has its box in a `CS5`-deductively
+closed `H`, so does the box of their conjunction `bigAnd L` (`SegmentLindenbaum.lean`'s dual of
+`bigAnd_mem_of_forall_mem`, but boxed): necessitate the `andI` axiom instance for the head
+element and the recursive conjunction, then apply `k` twice -- once against the head's box,
+once against the tail conjunction's box (by the induction hypothesis) -- landing
+`□(head ∧ tail) ∈ H` since `H` is deductively closed and both premises are already in `H`. -/
+theorem cs5_box_bigAnd_mem_of_forall_boxMem {H : Set (Proposition Atom)}
+    (hH : Metalogic.DeductivelyClosed (modalDerivationSystem (@CS5ModalAxiom Atom)) H) :
+    ∀ (L : List (Proposition Atom)), (∀ B ∈ L, Proposition.box B ∈ H) →
+      Proposition.box (bigAnd L) ∈ H
+  | [], _ => by
+      have hd : Deriv (@CS5ModalAxiom Atom) []
+          (Proposition.box (Proposition.bot.imp Proposition.bot)) := by
+        obtain ⟨d⟩ : Deriv (@CS5ModalAxiom Atom) [] (Proposition.bot.imp Proposition.bot) :=
+          ⟨.ax [] _ (CS5ModalAxiom.efq Proposition.bot)⟩
+        exact ⟨.necessitation _ d⟩
+      exact hH [] _ (fun _ h => nomatch h) hd
+  | B :: Bs, hmem => by
+      have hB : Proposition.box B ∈ H := hmem B (List.mem_cons.mpr (Or.inl rfl))
+      have hBs : Proposition.box (bigAnd Bs) ∈ H :=
+        cs5_box_bigAnd_mem_of_forall_boxMem hH Bs
+          (fun C hC => hmem C (List.mem_cons.mpr (Or.inr hC)))
+      have hax : Deriv (@CS5ModalAxiom Atom) []
+          (B.imp ((bigAnd Bs).imp (B.and (bigAnd Bs)))) :=
+        ⟨.ax [] _ (CS5ModalAxiom.andI B (bigAnd Bs))⟩
+      have hnec : Deriv (@CS5ModalAxiom Atom) []
+          (Proposition.box (B.imp ((bigAnd Bs).imp (B.and (bigAnd Bs))))) := by
+        obtain ⟨dax⟩ := hax
+        exact ⟨.necessitation _ dax⟩
+      have hk1 : Deriv (@CS5ModalAxiom Atom) []
+          ((Proposition.box (B.imp ((bigAnd Bs).imp (B.and (bigAnd Bs))))).imp
+            ((Proposition.box B).imp (Proposition.box ((bigAnd Bs).imp (B.and (bigAnd Bs)))))) :=
+        ⟨.ax [] _ (CS5ModalAxiom.k B ((bigAnd Bs).imp (B.and (bigAnd Bs))))⟩
+      have hstep1 : Deriv (@CS5ModalAxiom Atom) []
+          ((Proposition.box B).imp (Proposition.box ((bigAnd Bs).imp (B.and (bigAnd Bs))))) :=
+        mp_deriv hk1 hnec
+      have hk2 : Deriv (@CS5ModalAxiom Atom) []
+          ((Proposition.box ((bigAnd Bs).imp (B.and (bigAnd Bs)))).imp
+            ((Proposition.box (bigAnd Bs)).imp (Proposition.box (B.and (bigAnd Bs))))) :=
+        ⟨.ax [] _ (CS5ModalAxiom.k (bigAnd Bs) (B.and (bigAnd Bs)))⟩
+      have hBoxBmem : Deriv (@CS5ModalAxiom Atom) [Proposition.box B, Proposition.box (bigAnd Bs)]
+          (Proposition.box B) := assumption_deriv (List.mem_cons.mpr (Or.inl rfl))
+      have hBoxRestmem : Deriv (@CS5ModalAxiom Atom)
+          [Proposition.box B, Proposition.box (bigAnd Bs)] (Proposition.box (bigAnd Bs)) :=
+        assumption_deriv (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
+      have hstep1' : Deriv (@CS5ModalAxiom Atom)
+          [Proposition.box B, Proposition.box (bigAnd Bs)]
+          (Proposition.box ((bigAnd Bs).imp (B.and (bigAnd Bs)))) :=
+        mp_deriv (weakening_deriv hstep1 (by simp)) hBoxBmem
+      have hk2' : Deriv (@CS5ModalAxiom Atom) [Proposition.box B, Proposition.box (bigAnd Bs)]
+          ((Proposition.box ((bigAnd Bs).imp (B.and (bigAnd Bs)))).imp
+            ((Proposition.box (bigAnd Bs)).imp (Proposition.box (B.and (bigAnd Bs))))) :=
+        weakening_deriv hk2 (by simp)
+      have hd : Deriv (@CS5ModalAxiom Atom) [Proposition.box B, Proposition.box (bigAnd Bs)]
+          (Proposition.box (B.and (bigAnd Bs))) :=
+        mp_deriv (mp_deriv hk2' hstep1') hBoxRestmem
+      exact hH [Proposition.box B, Proposition.box (bigAnd Bs)] _
+        (fun x hx => by
+          rcases List.mem_cons.mp hx with rfl | hx'
+          · exact hB
+          · rcases List.mem_cons.mp hx' with rfl | hx''
+            · exact hBs
+            · nomatch hx'')
+        hd
+
+/-- **The finite witness list of `A`'s membership in `cl_CS5(boxInv H)` transports `box A` into
+`H`.** The witness list `L` lies in `boxInv H` by hypothesis, so `box (bigAnd L) ∈ H`
+(`cs5_box_bigAnd_mem_of_forall_boxMem`); necessitating the `L ⊢ A` derivation packed via
+`derivImpBigAndOfAppend` into `⊢ bigAnd L → A` and applying `k` against `box (bigAnd L) ∈ H`
+transports the derivation to `box A ∈ H`, using that `H` is deductively closed. -/
+theorem cs5_box_mem_of_mem_boxInv_closure {H : Set (Proposition Atom)}
+    (hH : Metalogic.DeductivelyClosed (modalDerivationSystem (@CS5ModalAxiom Atom)) H)
+    {A : Proposition Atom}
+    (hA : A ∈ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H)) :
+    Proposition.box A ∈ H := by
+  obtain ⟨L, hL, hd⟩ := hA
+  obtain ⟨d⟩ := hd
+  have hBoxBigAnd : Proposition.box (bigAnd L) ∈ H :=
+    cs5_box_bigAnd_mem_of_forall_boxMem hH L hL
+  have dImp : DerivationTree (@CS5ModalAxiom Atom) [] ((bigAnd L).imp A) :=
+    derivImpBigAndOfAppend (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+      (fun φ ψ => .andE1 φ ψ) (fun φ ψ => .andE2 φ ψ) [] L A d
+  have hNec : Deriv (@CS5ModalAxiom Atom) [] (Proposition.box ((bigAnd L).imp A)) :=
+    ⟨.necessitation _ dImp⟩
+  have hk : Deriv (@CS5ModalAxiom Atom) []
+      ((Proposition.box ((bigAnd L).imp A)).imp
+        ((Proposition.box (bigAnd L)).imp (Proposition.box A))) :=
+    ⟨.ax [] _ (CS5ModalAxiom.k (bigAnd L) A)⟩
+  have hstep : Deriv (@CS5ModalAxiom Atom) []
+      ((Proposition.box (bigAnd L)).imp (Proposition.box A)) := mp_deriv hk hNec
+  have hd2 : Deriv (@CS5ModalAxiom Atom) [Proposition.box (bigAnd L)] (Proposition.box A) :=
+    mp_deriv (weakening_deriv hstep (by simp)) (assumption_deriv (List.mem_singleton_self _))
+  exact hH [Proposition.box (bigAnd L)] _
+    (fun x hx => by rw [List.mem_singleton] at hx; rw [hx]; exact hBoxBigAnd) hd2
+
+/-- **The named caller-side discharge.** Contrapositive of `cs5_box_mem_of_mem_boxInv_closure`:
+whenever `H` is `CS5`-deductively closed and `□A ∉ H`, the side condition
+`cs5Pair_derivExcludes_of_rightExclusion` needs is free. This is what makes Phase 2's added `hA`
+hypothesis not a net weakening in practice -- round 2 §1.1's counterexample shape
+(`□(B → A), □B ∈ H` with `□A ∉ H`) cannot arise once `H` is deductively closed, since `k` applied
+to `□(B → A)` and `□B` already forces `□A ∈ H`. -/
+theorem cs5_notMem_boxInv_closure_of_boxNotMem {H : Set (Proposition Atom)}
+    (hH : Metalogic.DeductivelyClosed (modalDerivationSystem (@CS5ModalAxiom Atom)) H)
+    {A : Proposition Atom} (h : Proposition.box A ∉ H) :
+    A ∉ modalDeductiveClosure (@CS5ModalAxiom Atom) (boxInv H) :=
+  fun hmem => h (cs5_box_mem_of_mem_boxInv_closure hH hmem)
+
 /-! ## Open Obligations
 
 **Proved, this module:**

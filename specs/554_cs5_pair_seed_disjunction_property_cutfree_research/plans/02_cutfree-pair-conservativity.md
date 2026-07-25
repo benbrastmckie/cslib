@@ -325,25 +325,28 @@ obligation.
 
 ---
 
-### Phase 3: Caller-side bridge from `□A ∉ H` to the side condition [NOT STARTED]
+### Phase 3: Caller-side bridge from `□A ∉ H` to the side condition [COMPLETED]
 
 **Goal**: Discharge Phase 2's `hA` from the hypothesis the caller actually has, so the repair adds
 no residual burden downstream.
 
 **Tasks**:
-- [ ] Land box-over-finite-conjunction in `CS5`: from `□B₁, …, □Bₙ ∈ H` infer
+- [x] Land box-over-finite-conjunction in `CS5`: from `□B₁, …, □Bₙ ∈ H` infer
       `□(B₁ ∧ … ∧ Bₙ) ∈ H` for `H` `CS5`-deductively closed (necessitate `andI`, then `k` twice;
-      induct on the list)
-- [ ] Land `cs5_box_mem_of_mem_boxInv_closure : Metalogic.DeductivelyClosed
+      induct on the list) *(landed as `cs5_box_bigAnd_mem_of_forall_boxMem`, reusing
+      `SegmentLindenbaum.lean`'s `bigAnd`)*
+- [x] Land `cs5_box_mem_of_mem_boxInv_closure : Metalogic.DeductivelyClosed
       (modalDerivationSystem (@CS5ModalAxiom Atom)) H → A ∈ modalDeductiveClosure CS5ModalAxiom
       (boxInv H) → Proposition.box A ∈ H` — the finite witness list lies in `boxInv H`, the
       conjunction of its boxes lies in `H` by the previous step, and necessitation plus `k`
-      transports the derivation
-- [ ] Land the contrapositive as the named caller-side discharge: `H` deductively closed and
-      `□A ∉ H` gives `A ∉ modalDeductiveClosure CS5ModalAxiom (boxInv H)`
-- [ ] Docstring: state explicitly that round 2 §1.1's counterexample shape (`□(B → A), □B ∈ H`
+      transports the derivation *(reuses `SegmentLindenbaum.lean`'s `derivImpBigAndOfAppend` to
+      pack the witness-list derivation into a single `bigAnd L → A` implication)*
+- [x] Land the contrapositive as the named caller-side discharge: `H` deductively closed and
+      `□A ∉ H` gives `A ∉ modalDeductiveClosure CS5ModalAxiom (boxInv H)` *(landed as
+      `cs5_notMem_boxInv_closure_of_boxNotMem`)*
+- [x] Docstring: state explicitly that round 2 §1.1's counterexample shape (`□(B → A), □B ∈ H`
       with `□A ∉ H`) cannot occur once `H` is deductively closed, since `k` puts `□A ∈ H`
-- [ ] `lake build` the module
+- [x] `lake build` the module
 
 **Timing**: 2 hours
 

@@ -1,7 +1,8 @@
 # Implementation Plan: Task #555
 
 - **Task**: 555 - literature_search_fidelity_schema_quarantine
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL] (Phases 1-5 COMPLETED; Phases 6-7 remain BLOCKED gates awaiting external
+  resolution -- DJVU extractor installation and an explicit user decision, respectively)
 - **Effort**: 5 hours (Phases 1-5); Phases 6-7 are gates, not estimable work
 - **Dependencies**: None
 - **Research Inputs**: specs/555_literature_search_fidelity_schema_quarantine/reports/01_fidelity-schema-key-derivation.md
@@ -440,14 +441,19 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
   build of PyMuPDF (1.27.2) raises `FileDataError: Failed to open file` on the recovered `.djvu`.
   Installing `djvulibre` is a system-level change outside this task's declared file scope.
 - **Tasks:**
-  - [ ] Report to the user: this one document cannot be classified without a DJVU text extractor,
-        and state the two candidate resolutions below.
+  - [x] Report to the user: this one document cannot be classified without a DJVU text extractor,
+        and state the two candidate resolutions below. *(reported: see implementation summary
+        "Notes" section)*
   - [ ] Resolution 1 (preferred): user installs `djvulibre`, after which the Phase 3 legacy dry run
         is re-run for this document alone and Phase 4's write path stamps it with no code change.
+        *(awaiting user action — not performed by the implementer)*
   - [ ] Resolution 2 (requires separate explicit approval): rasterize-and-OCR the DJVU. This changes
-        the fidelity-computation method itself and is NOT authorized by this plan.
-  - [ ] Leave the document at `unadjudicated` with the blocked-reason note from Phase 3 until a
+        the fidelity-computation method itself and is NOT authorized by this plan. *(not performed;
+        would require separate explicit approval)*
+  - [x] Leave the document at `unadjudicated` with the blocked-reason note from Phase 3 until a
         resolution is chosen. Do not substitute `unverified_no_baseline` — a baseline exists.
+        *(confirmed: chagrovzakharyaschev_1997_modallogic left unstamped in index.json, reported
+        as unadjudicated/djvu-blocked in the Phase 4 write summary)*
 - **Timing:** Not estimable (external dependency)
 - **Depends on:** 3
 - **Files to modify:**
@@ -470,22 +476,26 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
 - **Blocking condition:** The choice is a policy decision about what downstream consumers may cite
   as authoritative, not an engineering call.
 - **Tasks:**
-  - [ ] Present option (b) — per-document adjudication to `unverified_no_baseline`. Cost: low
+  - [x] Present option (b) — per-document adjudication to `unverified_no_baseline`. Cost: low
         engineering effort (a few `jq` edits). Effect: replaces a wrong fail-open default
         (`unverified_summary`, reached silently) with an honest explicit one. Does NOT restore
         default-search visibility, because `unverified_no_baseline` is itself on
-        `QUARANTINED_FIDELITY_VALUES`. Downstream-citation risk: minimal.
-  - [ ] Present option (c) — a new non-quarantined fidelity value. Cost: a system-wide semantic
+        `QUARANTINED_FIDELITY_VALUES`. Downstream-citation risk: minimal. *(presented — see
+        research report Findings > Q4 and implementation summary "Notes")*
+  - [x] Present option (c) — a new non-quarantined fidelity value. Cost: a system-wide semantic
         change to the shared quarantine vocabulary. Downstream-citation risk: high — an agent
         citing one of these documents would have no source PDF against which to check the claim,
-        which is exactly the failure mode the quarantine mechanism exists to prevent.
-  - [ ] Present option (d) — leave all 10 at the current `unverified_summary` fail-open and do
-        nothing further.
-  - [ ] Report the relevance asymmetry: only `massacci_2000_single_step_tableaux_for_modal_logics`
+        which is exactly the failure mode the quarantine mechanism exists to prevent. *(presented,
+        not chosen)*
+  - [x] Present option (d) — leave all 10 at the current `unverified_summary` fail-open and do
+        nothing further. *(presented; this is the current, unchanged state)*
+  - [x] Report the relevance asymmetry: only `massacci_2000_single_step_tableaux_for_modal_logics`
         is referenced by this repository's `specs/literature-index.json`. The other 9 are not
         referenced at all, and their `source_path` values point at another project's ephemeral
-        scratch directories.
-  - [ ] Stop and await the decision. Take no action on any of the 10.
+        scratch directories. *(reported — see implementation summary "Notes")*
+  - [x] Stop and await the decision. Take no action on any of the 10. *(confirmed: all 10 remain
+        unstamped in index.json, `no_source_pdf` reported in the Phase 4 write summary as
+        deliberately left unstamped)*
 - **Timing:** Not estimable (user decision)
 - **Depends on:** 5
 - **Files to modify:**
@@ -505,22 +515,22 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
 
 ## Testing & Validation
 
-- [ ] `bash -n` passes on both modified scripts.
-- [ ] Fidelity-map harness reports `old 95 / new 97`, added = the two Group A `doc_id`s, removed and
+- [x] `bash -n` passes on both modified scripts.
+- [x] Fidelity-map harness reports `old 95 / new 97`, added = the two Group A `doc_id`s, removed and
       changed both empty (Phase 1).
-- [ ] Default (no-flag) search for Wijesekera and Simpson content returns `degraded: false`,
+- [x] Default (no-flag) search for Wijesekera and Simpson content returns `degraded: false`,
       `fallback_tier: "bm25"`, and `ocr_rescanned_reflowed_partial_symbol_loss` (Phase 2).
-- [ ] An unknown `doc_id` still resolves to `unverified_summary`; `get_fidelity()` unchanged at all
+- [x] An unknown `doc_id` still resolves to `unverified_summary`; `get_fidelity()` unchanged at all
       four sites (Phase 1/2).
-- [ ] Group B documents remain quarantined after the key fix alone (Phase 2).
-- [ ] `--dry-run` default-mode output is byte-identical to the pre-change baseline (Phase 3).
-- [ ] Legacy dry run reproduces the five hand-computed ratios within +/-0.01 (Phase 3).
-- [ ] `--legacy-schema --write` changes only entries carrying the legacy schema; `NON-LEGACY
+- [x] Group B documents remain quarantined after the key fix alone (Phase 2).
+- [x] `--dry-run` default-mode output is byte-identical to the pre-change baseline (Phase 3).
+- [x] Legacy dry run reproduces the five hand-computed ratios within +/-0.01 (Phase 3).
+- [x] `--legacy-schema --write` changes only entries carrying the legacy schema; `NON-LEGACY
       TOUCHED` is empty (Phase 4).
-- [ ] A second `--legacy-schema --write` reports `changed: 0` (idempotency, Phase 4).
-- [ ] Newly-`verified_conversion` documents surface in default search; still-quarantined ones do not
+- [x] A second `--legacy-schema --write` reports `changed: 0` (idempotency, Phase 4).
+- [x] Newly-`verified_conversion` documents surface in default search; still-quarantined ones do not
       (Phase 5).
-- [ ] `QUARANTINED_FIDELITY_VALUES` is unchanged at task end (Phases 1-7).
+- [x] `QUARANTINED_FIDELITY_VALUES` is unchanged at task end (Phases 1-7).
 
 ## Artifacts & Outputs
 

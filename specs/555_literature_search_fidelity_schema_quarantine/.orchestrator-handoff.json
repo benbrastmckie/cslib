@@ -1,41 +1,42 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "summary": "Wrote a 7-phase plan. Phases 1-2 (Stage A) are the self-contained, independently-committable four-site load_fidelity_map() doc_id-fallback fix in literature-search.sh plus Group A verification. Phases 3-5 (Stage B) add a --legacy-schema classification and write mode to literature-fidelity-audit.sh for the 6 source-recoverable Group B docs. Phases 6-7 are BLOCKED gates: the DJVU extractor prerequisite, and the user decision on the 10 unrecoverable docs.",
+  "phase": "implement",
+  "status": "partial",
+  "summary": "Completed Phases 1-5 of 7. Fixed load_fidelity_map() key derivation at all 4 sites in literature-search.sh (restores default-search visibility for Wijesekera/Simpson). Added --legacy-schema classify+write mode to literature-fidelity-audit.sh; stamped verified_conversion on 4 recoverable Group B docs and unadjudicated on arisakadasstrassburger_2015 (honest quarantined outcome). Phases 6-7 remain BLOCKED soft gates awaiting external resolution (djvulibre install; user decision on 10 unrecoverable docs) -- not implementer failures.",
   "phases_total": 7,
   "artifacts": [
     {
-      "type": "plan",
-      "path": "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md"
+      "type": "summary",
+      "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md"
     }
   ],
   "blockers": [
     {
-      "description": "Phase 6 gate: chagrovzakharyaschev_1997_modallogic cannot be classified -- no djvutxt/djvups installed and PyMuPDF 1.27.2 fails on the recovered .djvu. Needs user authorization to install djvulibre; an OCR workaround is explicitly NOT authorized. Gates phase 6 only; phases 1-5 proceed.",
+      "description": "Phase 6 gate: chagrovzakharyaschev_1997_modallogic cannot be classified -- no djvutxt/djvups installed and PyMuPDF 1.27.2 fails on the recovered .djvu. Needs user authorization to install djvulibre; an OCR workaround is explicitly NOT authorized. Gates phase 6 only; phases 1-5 are complete.",
       "phase": "phase-6",
       "severity": "soft"
     },
     {
-      "description": "Phase 7 gate: disposition of the 10 unrecoverable docs is an explicit USER DECISION between option (b) per-doc adjudication to unverified_no_baseline, option (c) a new non-quarantined fidelity value, and option (d) leave as-is. The implementer MUST NOT choose. Gates phase 7 only; phases 1-5 proceed.",
+      "description": "Phase 7 gate: disposition of the 10 unrecoverable docs is an explicit USER DECISION between option (b) per-doc adjudication to unverified_no_baseline, option (c) a new non-quarantined fidelity value, and option (d) leave as-is. The implementer did not choose. Gates phase 7 only; phases 1-5 are complete.",
       "phase": "phase-7",
       "severity": "soft"
     }
   ],
-  "next_action_hint": "implement",
+  "next_action_hint": "none",
   "files_modified": [
-    "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md"
+    ".claude/scripts/literature-search.sh",
+    ".claude/scripts/literature-fidelity-audit.sh",
+    "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md",
+    "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md"
   ],
   "decisions_made": [
-    "Patch load_fidelity_map() in place at all four sites; do NOT factor into a shared module (separate subprocess heredocs, no shared import path)",
-    "Stage A (phases 1-2) commits independently before Stage B starts, so the tractable half ships first",
-    "QUARANTINED_FIDELITY_VALUES is never modified; fail-open-to-unverified is preserved as-is",
-    "arisakadasstrassburger_2015 landing on a quarantined value is an honest outcome -- thresholds must not be loosened",
-    "File scope is literature-search.sh and literature-fidelity-audit.sh only; no Cslib/ Lean source"
+    "Patched load_fidelity_map() in place at all four sites; did not factor into a shared module",
+    "Added a SIX_VALUE_ENUM guard to the legacy write loop after catching a real regression: the first write attempt clobbered Group A's pre-existing ocr_rescanned_reflowed_partial_symbol_loss value with the generic verified_conversion classification",
+    "arisakadasstrassburger_2015 landed on unadjudicated (quarantined) -- honest outcome, thresholds untouched",
+    "QUARANTINED_FIDELITY_VALUES never modified; fail-open-to-unverified preserved and verified explicitly"
   ],
   "dead_ends": [
-    "Pointing literature-fidelity-audit.sh at the legacy schema unmodified -- its sources/ root, chunk_*.md exclusion filter, and id-presence requirement in resolve_targets() each independently prevent a match",
-    "Zotero re-acquisition for the 10 unrecoverable docs -- zotero-library.json is a stale 400-record export containing none of the 18",
-    "PyMuPDF 1.27.2 as a djvu fallback -- fitz.open() raises FileDataError on the recovered .djvu"
-  ]
+    "Stamping every enumerated legacy entry unconditionally -- overwrites Group A's already-honest out-of-band fidelity value; fixed via SIX_VALUE_ENUM guard"
+  ],
+  "plan_markers_verified": false
 }

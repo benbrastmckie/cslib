@@ -1,11 +1,47 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "agent_type": "general-implementation-agent",
   "task_number": 555,
   "task_name": "literature_search_fidelity_schema_quarantine",
   "session_id": "sess_1785007897_038307_555",
   "delegation_path": ["orchestrator", "implement", "general-implementation-agent"],
   "plan_path": "specs/555_literature_search_fidelity_schema_quarantine/plans/01_fidelity-key-derivation-and-legacy-audit.md",
-  "phases_completed": 0,
-  "phases_total": 7
+  "phases_completed": 5,
+  "phases_total": 7,
+  "partial_progress": {
+    "stage": "gates_awaiting_external_resolution",
+    "details": "Phases 1-5 (Stage A + Stage B) complete and verified against the live corpus. Phase 6 is a BLOCKED gate: no DJVU text extractor installed on this machine, cannot classify chagrovzakharyaschev_1997_modallogic without user-authorized djvulibre install. Phase 7 is a BLOCKED gate: disposition of 10 unrecoverable documents is an explicit user decision (option b/c/d), not chosen by the implementer. Both gates were reported per plan instructions, not resolved.",
+    "phases_completed": 5,
+    "phases_total": 7
+  },
+  "artifacts": [
+    {
+      "type": "summary",
+      "path": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md",
+      "summary": "Implementation summary covering Phases 1-5, fidelity outcomes table, and the Phase 6/7 gate reports"
+    }
+  ],
+  "modified_files": [
+    ".claude/scripts/literature-search.sh",
+    ".claude/scripts/literature-fidelity-audit.sh"
+  ],
+  "completion_data": {
+    "completion_summary": "Restored default-search visibility for legacy-schema literature entries by fixing load_fidelity_map() key derivation at all four sites in literature-search.sh, and extended literature-fidelity-audit.sh with a --legacy-schema mode that classified and honestly stamped 5 of 6 source-recoverable Group B documents (4 verified_conversion, 1 arisakadasstrassburger_2015 quarantined as unadjudicated). Caught and fixed a real regression mid-implementation where the write path clobbered Group A's pre-existing honest fidelity value. Two gates (DJVU extractor, 10-document disposition) remain open pending external/user action."
+  },
+  "memory_candidates": [
+    {
+      "content": "When a bash heredoc uses an UNQUOTED delimiter (<< PYEOF, not << 'PYEOF'), bash performs backtick command substitution on the heredoc body before handing it to the interpreter reading stdin. Markdown-style backticks in a Python docstring/comment inside such a heredoc (e.g. `sources/`, `doc_id`) get executed as shell commands, producing 'command not found' stderr noise even though the consuming program's stdout is unaffected. Check heredoc quoting style before adding backtick-quoted identifiers to any comment/docstring inside it.",
+      "category": "PATTERN",
+      "source_artifact": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md",
+      "confidence": 0.9,
+      "suggested_keywords": ["bash", "heredoc", "backtick", "command substitution", "PYEOF", "shell quoting"]
+    },
+    {
+      "content": "When extending a fidelity/classification audit script to a second data schema, guard the write path against re-stamping entries that already carry a value OUTSIDE the script's own computed enum -- such a value likely came from a more specific, out-of-band assessment (manual curation, a different pipeline) and blanket-stamping with the generic detector's coarser classification silently downgrades information. Gate on 'is the current value one of MY possible outputs' before overwriting, not just 'does this entry match my target-selection criteria.'",
+      "category": "PATTERN",
+      "source_artifact": "specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md",
+      "confidence": 0.85,
+      "suggested_keywords": ["idempotency", "write-path", "classification", "data-schema", "provenance", "regression"]
+    }
+  ]
 }

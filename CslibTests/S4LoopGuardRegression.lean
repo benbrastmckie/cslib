@@ -56,16 +56,20 @@ correctly reject this specific block; no-reachability-restriction: the redirect 
 counterexample exercises both at once. See `blockingWorldS4Keyed`'s docstring
 (`LoopChecking.lean`) for the corrected account of both defects.
 
-## KNOWN-UNSOUND row, temporary
+## KNOWN-UNSOUND row, historical
 
 The row asserting `modalExpandBranchesS4Keyed cex ... = CLOSED` below records the **current,
-unsound** verdict of the shipped driver, not the semantically correct verdict (`OPEN`, since
-`cex` is not `s4Valid`). Asserting the correct verdict now would leave this phase red before any
-repair exists; asserting the actual verdict keeps this checkpoint green while still locking the
-defect under test, so that any future change to `modalStepBranchS4Keyed`/`blockingWorldS4Keyed`
-that silently reopens this exact closure is caught immediately. This inversion is temporary:
-once a repaired keyed driver lands, the corresponding row is flipped to `OPEN` and this
-docstring paragraph is removed. -/
+unsound** verdict of the shipped (unordered) driver, not the semantically correct verdict
+(`OPEN`, since `cex` is not `s4Valid`). This row is kept exactly as-is -- `modalStepBranchS4Keyed`
+/ `modalExpandBranchesS4Keyed` are not touched or retired until the destructive Phase 15, so
+their behaviour on `cex` remains what it always was and this row still correctly documents it.
+Any future change to `modalStepBranchS4Keyed`/`blockingWorldS4Keyed` that silently reopens this
+exact closure is caught immediately.
+
+**The successor driver fixes this.** `modalExpandBranchesS4KeyedOrdered` (settled-context
+scheduling: non-minting candidates are exhausted before any minting fallback fires) does **not**
+close `cex` -- see the "Ordered driver" section below. It is the sound-on-this-example successor
+that the rest of this task's soundness line is built against. -/
 
 namespace CslibTests.S4LoopGuardRegression
 
@@ -114,13 +118,31 @@ def cexInitKeys : List (WorldIndex × Finset (Sign × P)) :=
 
 /-! ## KNOWN-UNSOUND: the shipped keyed driver closes `cex`
 
-See the file docstring's "KNOWN-UNSOUND row, temporary" section: this is the current, unsound
-verdict, recorded deliberately so the checkpoint stays green while the defect stays locked
-under test. -/
+See the file docstring's "KNOWN-UNSOUND row, historical" section: this is the shipped
+(unordered) driver's current, unsound verdict, recorded deliberately so the checkpoint stays
+green while the defect stays locked under test. `modalStepBranchS4Keyed`/
+`modalExpandBranchesS4Keyed` are unchanged and unretired, so this row still correctly documents
+their behaviour. -/
 
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval s4Verdict (modalExpandBranchesS4Keyed cex [cexInitBranch] [[]] [Accessibility.empty]
+  [cexInitKeys] 400)
+
+/-! ## Ordered driver: `modalExpandBranchesS4KeyedOrdered` does not close `cex`
+
+The Phase 8 empirical gate. Settled-context scheduling (`modalStepBranchS4KeyedOrdered`:
+non-minting candidates are exhausted before any minting fallback fires) means world `3`'s
+`F(¬¬◇p1)@1`-driven expansion of world `1`'s box context is no longer deferred behind a minting
+race -- see the file docstring's "expected mechanism" note in the Phase 8 plan section. The
+prospective birth content computed for `F(□p0)@3` therefore already reflects world `1`'s `p1`,
+so it no longer matches world `2`'s recorded key, no redirect edge is created, and the branch
+stays open. This is the fixed, sound-on-this-example successor named in the "KNOWN-UNSOUND row,
+historical" section above. -/
+
+/-- info: "OPEN" -/
+#guard_msgs in
+#eval s4Verdict (modalExpandBranchesS4KeyedOrdered cex [cexInitBranch] [[]] [Accessibility.empty]
   [cexInitKeys] 400)
 
 /-! ## The live-set (non-keyed) driver does not close `cex`
@@ -154,6 +176,22 @@ def tAxiom : P := .imp (.box p0) p0
 /-- info: "CLOSED" -/
 #guard_msgs in
 #eval s4Verdict (modalExpandBranchesS4Keyed tAxiom [[⟨.neg, tAxiom, 0⟩]] [[]]
+  [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × P)))]] 400)
+
+/-! ## Controls, ordered driver
+
+The same B/T-axiom controls against `modalExpandBranchesS4KeyedOrdered`: reordering must not
+change completeness on valid/invalid axiom schemas. Both rows must agree with their unordered
+counterparts immediately above. -/
+
+/-- info: "OPEN" -/
+#guard_msgs in
+#eval s4Verdict (modalExpandBranchesS4KeyedOrdered bAxiom [[⟨.neg, bAxiom, 0⟩]] [[]]
+  [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × P)))]] 400)
+
+/-- info: "CLOSED" -/
+#guard_msgs in
+#eval s4Verdict (modalExpandBranchesS4KeyedOrdered tAxiom [[⟨.neg, tAxiom, 0⟩]] [[]]
   [Accessibility.empty] [[((0 : WorldIndex), (∅ : Finset (Sign × P)))]] 400)
 
 end CslibTests.S4LoopGuardRegression

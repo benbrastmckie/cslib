@@ -430,7 +430,7 @@ real regression could still surface.
 
 ---
 
-### Phase 8: Empirical Gate — Counterexample Must Not Close [NOT STARTED]
+### Phase 8: Empirical Gate — Counterexample Must Not Close [COMPLETED]
 
 - **Goal:** Confirm the reordering actually kills the counterexample **before** any soundness proof
   work is invested. If it does not, the whole soundness line ahead is unprovable and the plan must
@@ -441,19 +441,23 @@ real regression could still surface.
   `{(neg,p0), (pos,p1)}`, which does not match world 2's recorded key `{(neg,p0)}`, so no redirect
   edge is created and the spurious closure never happens.
 - **Tasks:**
-  - [ ] Add rows to `CslibTests/S4LoopGuardRegression.lean` for
+  - [x] Add rows to `CslibTests/S4LoopGuardRegression.lean` for
     `modalExpandBranchesS4KeyedOrdered` on `cex` at fuel 400, asserting `OPEN`.
-  - [ ] **Flip the Phase 1 `KNOWN-UNSOUND` row**: keep the shipped-driver row as documentation of
-    the defect if the old driver still exists at this point, and update the file docstring so the
-    inversion note no longer applies to the ordered driver.
-  - [ ] Assert the B-axiom control still returns `OPEN` and the T/4/K-axiom controls still return
-    `CLOSED` under the ordered driver — the reordering must not break completeness on valid
-    formulas.
-  - [ ] Re-run the size-<=6 exhaustive sweep from
+  - [x] **Flip the Phase 1 `KNOWN-UNSOUND` row**: kept the shipped-driver row as documentation of
+    the defect (`modalStepBranchS4Keyed`/`modalExpandBranchesS4Keyed` are untouched until Phase
+    15), and updated the file docstring so the inversion note no longer applies to the ordered
+    driver, naming `modalExpandBranchesS4KeyedOrdered` as the fixed successor.
+  - [x] Assert the B-axiom control still returns `OPEN` under the ordered driver *(deviation:
+    altered -- the plan also names T/4/K-axiom controls, but the file has never had K/4 rows for
+    either driver; only B and T exist at Phase 1's baseline, so only those two were mirrored,
+    per the Phase 8 handoff's explicit instruction to grep first rather than assume)* and the
+    T-axiom control still returns `CLOSED` under the ordered driver — the reordering does not
+    break completeness on either control.
+  - [x] Re-run the size-<=6 exhaustive sweep from
     `specs/553_.../artifacts/s4probe.lean`, adapted to the ordered stepper, and record the
     verdict-change census. **Every** verdict change must be closed-to-open. A single open-to-closed
     change is a completeness regression and blocks the phase.
-  - [ ] Record the sweep numbers in the phase notes (the pre-change baseline is 8532 formulas:
+  - [x] Record the sweep numbers in the phase notes (the pre-change baseline is 8532 formulas:
     1650 closed, 6882 open, 0 fuel-exhausted).
 - **Timing:** 2.5 hours
 - **Depends on:** 7
@@ -465,6 +469,49 @@ real regression could still surface.
   - `lake test` passes with the ordered-driver rows
   - Sweep census recorded, with zero open-to-closed changes
   - **Gate:** if `cex` still closes, stop and escalate; do not proceed to Phase 9
+
+**Phase 8 completion note:** All four tests machine-checked green.
+
+1. **`cex` itself (the direct empirical claim):** `#eval s4Verdict (modalExpandBranchesS4KeyedOrdered
+   cex ...) = "OPEN"` passes as a `#guard_msgs`-checked row (`CslibTests/S4LoopGuardRegression.lean`).
+   Standalone confirmation via `lake env lean` on the adapted probe script:
+   `KEYED (unordered) closes cex = (some true)`, `KEYED (ordered) closes cex = (some false)` --
+   the ordered driver does NOT close the known-unsound countermodel that the unordered driver
+   closes. This is the primary soundness-direction result of the phase.
+2. **B/T-axiom controls:** ordered driver agrees with unordered on both -- B axiom `(some false)`
+   (open, not S4-valid) on both drivers; T axiom `(some true)` (closed, S4-valid) on both drivers.
+   Reordering does not change completeness on either control.
+3. **Exhaustive size-<=6, 2-atom sweep** (`s4probe.lean`, `allUpTo 2 6`, fuel 100 per formula,
+   8532 formulas total): the unordered-driver leg of the rewritten sweep reproduces the Phase 1
+   baseline exactly -- **1650 closed, 6882 open, 0 fuel-exhausted**. The ordered-driver leg over
+   the SAME 8532 formulas is **verdict-for-verdict identical**: **1650 closed, 6882 open, 0
+   fuel-exhausted**, with `closedToOpen = 0` and `openToClosed = 0`. Read plainly: within this
+   sweep's formula-size class (size <= 6, 2 atoms), the settled-context reordering changes
+   *nothing* -- the specific stale-birth-content interaction that unsoundly closes `cex` does not
+   arise for any formula this small. This is an honest negative result at this scope, not a
+   confirmation of the fix by this sweep; the fix is confirmed instead by item 1 above, on `cex`
+   directly (a larger formula, outside the size-<=6 enumeration).
+4. **STOP-condition check, both halves clear:** `openToClosed = 0` (no completeness regression)
+   and `fuelInvolved = 0` with `newFuel(0) == oldFuel(0)` (no termination regression at this
+   sweep's scope). The task's standing central prediction -- that narrowing the guard might break
+   TERMINATION rather than merely completeness -- is **not corroborated** by this phase's evidence:
+   fuel exhaustion stayed at 0 for both drivers across the full sweep, and Phase 7's termination
+   checker already accepted the copied recursion without a measure-lemma change. This does not
+   retire the prediction (the sweep only reaches size 6, and the soundness proof obligations in
+   Phases 9-14 are the real test of whether key-distinctness survives the narrower guard), but no
+   empirical counter-evidence has appeared yet.
+
+Full CI green: `lake build` (848 jobs for `CslibTests.S4LoopGuardRegression`, whole-project build
+otherwise unaffected since no `Cslib/` source changed this phase), `lake exe checkInitImports`
+(clean), `lake exe lint-style` (clean), `lake lint` (same one pre-existing, out-of-scope error in
+`Temporal/Tableau/Saturation.lean`; zero new issues), `lake shake --add-public --keep-implied
+--keep-prefix` (zero import changes needed), `lake test` (includes
+`CslibTests.S4LoopGuardRegression` with the new ordered-driver rows, all `#guard_msgs` green).
+Repo-wide `axiom` count unchanged at 26 (verified via `grep -rn '^axiom ' Cslib/ | wc -l`). No
+`Cslib/` source files were touched this phase (only the test file and the task-artifact probe
+script), so `modalStepBranchS4Keyed`/`modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` and all of
+Phases 1-7's declarations remain byte-for-byte unchanged (confirmed: `git diff` on
+`Cslib/Logics/Modal/Tableau/LoopChecking.lean` is empty for this phase).
 
 ---
 

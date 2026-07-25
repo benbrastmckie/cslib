@@ -2,9 +2,9 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "phases_completed": 7,
+  "phases_completed": 8,
   "phases_total": 15,
-  "summary": "Phases 1-7 of Route P landed and committed, each individually build/lint/lean_verify-clean. Phase 4 added the ordered stepper (modalStepBranchS4KeyedOrdered) plus its four structural lemmas. Phase 5 re-established the strict termination-measure decrease for the ordered stepper. Phase 6 (S4LoopInv preservation + fuel-sufficiency chain) landed ordered analogues of all TEN per-field sub-lemmas, TWO proof-internal auxiliaries, TWO additional prerequisite auxiliaries (branch_superset, keys_subset), and the final wrapper (modalStepBranchS4KeyedOrdered_preserves_S4LoopInv) across thirteen individually-committed dispatches. The escalation-trigger sub-lemma (keysDistinct, attempted first) PASSED with no weakening of keysUpdate_preserves_keysDistinct -- the plan's central claim (reordering only changes timing, never a duplicate key) is machine-checked. Phase 7 (Ordered Driver and Entry Point) is now COMPLETE: modalExpandBranchesS4KeyedOrdered and modalTableauS4KeyedOrdered landed as structural copies of the unordered pair with modalStepBranchS4KeyedOrdered substituted at the single processNext call site; Lean's termination checker accepted the copied fuel' recursion unchanged, with no termination_by/decreasing_by workaround needed. modalTableauS4KeyedOrdered seeds keys := [(0, ∅)] per the Phase 11 correction. Full CI pipeline green after Phase 7's commit: whole-project lake build (3256/3256, confirms FrameSoundness.lean/FrameCompleteness.lean still build), checkInitImports, lint-style, lake lint (one pre-existing unrelated error outside this task's scope), lake shake (zero import changes needed for LoopChecking.lean), lake test (9250/9250 including CslibTests.S4LoopGuardRegression). Repo-wide sorry count unchanged at 5, axiom count unchanged at 26.",
+  "summary": "Phases 1-8 of Route P landed and committed, each individually build/lint/lean_verify-clean. Phases 1-7: see prior handoffs (ordered stepper, termination measure, S4LoopInv preservation with keysDistinct machine-checked unweakened, ordered driver + entry point). Phase 8 (Empirical Gate) is now COMPLETE: this is the empirical proof-search test, not mere type-checking. RESULT: modalExpandBranchesS4KeyedOrdered does NOT close the known-unsound countermodel cex (machine-checked via #guard_msgs), while the shipped modalExpandBranchesS4Keyed (unordered) DOES close it -- the soundness fix is confirmed on the exact motivating example, both via the test-suite row and an independent lake env lean run of the adapted probe script. B/T-axiom controls agree between drivers (no completeness change on those two schemas; no K/4 rows exist for either driver, so none were added). Exhaustive size<=6, 2-atom sweep (8532 formulas, matching the Phase 1 baseline methodology) is verdict-for-verdict IDENTICAL between the two drivers: 1650 closed, 6882 open, 0 fuel-exhausted on BOTH legs -- zero closed-to-open, zero open-to-closed, zero fuel-exhausted deltas. STOP condition clears on both halves (no completeness regression, no termination regression observed at this sweep's scope). The task's standing central prediction -- that narrowing the guard may break TERMINATION rather than merely completeness -- is NOT corroborated by this phase's evidence, though not yet retired: the sweep only reaches size 6, and Phases 9-14's proof-level soundness/completeness re-derivation is the real test of whether key-distinctness survives at the proof level. No Cslib/ source files were touched this phase (only CslibTests/S4LoopGuardRegression.lean and the task-artifact s4probe.lean); all of Phases 1-7's declarations remain byte-for-byte unchanged. Full CI pipeline green: lake build CslibTests.S4LoopGuardRegression (848 jobs), checkInitImports, lint-style, lake lint (same one pre-existing unrelated error, zero new issues), lake shake (zero import changes needed), mk_all (no update necessary), lake test (exit 0, no errors). Repo-wide axiom count unchanged at 26; this phase adds no Lean proofs so the sorry inventory is unaffected by it.",
   "artifacts": [
     {
       "type": "plan",
@@ -12,19 +12,20 @@
     },
     {
       "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md"
     },
     {
       "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-9-handoff-20260725.md"
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "CslibTests/S4LoopGuardRegression.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4probe.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-9-handoff-20260725.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "decisions_made": [
@@ -41,7 +42,8 @@
     "Phase 6 required TWO additional ordered-form auxiliaries not named in the plan text: modalStepBranchS4KeyedOrdered_branch_superset (prerequisite for keyLowerBd/keysWorldsKnown/worldsContiguousS4) and modalStepBranchS4KeyedOrdered_keys_subset (prerequisite for keysTotal). Both are verbatim transcriptions of their unordered counterparts via modalStepBranchS4KeyedOrdered_selected_mem, following the same case-split shape.",
     "modalKnownWorlds_length_le_worldBoundS4/modalStepBranchS4_worldBound/modalExpMeasure_entry_le_fuelS4 all apply VERBATIM to the ordered driver with no ordered analogue needed: all three are stated purely over the pre-step b/keys or the entry-point modalUniverseS4 φ₀/modalFuelS4 φ₀, with no reference to which stepper (modalStepBranchS4Keyed vs. modalStepBranchS4KeyedOrdered) produced a given step. Confirmed, not assumed, per the plan's own instruction to prefer reuse and only re-derive if verbatim application genuinely fails.",
     "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-7: lean_verify on all new lemmas/defs reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout.",
-    "Phase 7 confirmed (not merely assumed) that the copied processNext fuel' recursion type-checks under Lean's own termination checker with zero changes to the recursion shape -- this is evidence against (not proof against) a termination gap at the driver-wiring level; the escalation concern remains formally live until Phase 8's empirical proof-search test and Phases 9-13's soundness/completeness re-derivation are complete."
+    "Phase 7 confirmed (not merely assumed) that the copied processNext fuel' recursion type-checks under Lean's own termination checker with zero changes to the recursion shape -- this is evidence against (not proof against) a termination gap at the driver-wiring level; the escalation concern remains formally live until Phase 8's empirical proof-search test and Phases 9-13's soundness/completeness re-derivation are complete.",
+    "Phase 8 confirmed (machine-checked, not assumed) that modalExpandBranchesS4KeyedOrdered does not close cex while modalExpandBranchesS4Keyed does, on both the #guard_msgs test row and an independent lake env lean run. The exhaustive size<=6 sweep found zero verdict changes of either direction between the two drivers -- an honest negative result at that scope (cex itself is larger than size 6), not further confirmation of the fix. The termination-regression prediction is not corroborated by this phase (fuel-exhausted stayed at 0 for both drivers across the full sweep) but remains formally open pending Phases 9-14's proof-level work."
   ],
   "dead_ends": [
     "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
@@ -49,8 +51,8 @@
     "Phase 5's first attempt at modalStepBranchS4KeyedOrdered_proj hand-typed a fresh let/match expression restating modalApplyOneS4Keyed's dispatch directly in the lemma's conclusion (mirroring modalStepBranchGen's shape textually). Abandoned: this elaborates via a full `match` (not projections, since the function is concrete at that elaboration site), breaking every subsequent `.1`-based rewrite the surrounding measure proof needed. Reusing the already-elaborated modalStepBranchS4KeyedBody (via Option.map to drop the keys' component) sidesteps the issue entirely -- this is now the established pattern for all future selection-agnostic bridge lemmas."
   ],
   "continuation_context": {
-    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md",
-    "phases_completed": 7,
+    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-9-handoff-20260725.md",
+    "phases_completed": 8,
     "phases_total": 15
   },
   "plan_markers_verified": true

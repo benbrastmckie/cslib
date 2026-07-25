@@ -1,19 +1,20 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-25T20:16:59Z",
   "requires_user_review": false,
   "artifacts": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "CslibTests/S4LoopGuardRegression.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4probe.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-9-handoff-20260725.md"
   ],
   "partial_progress": {
-    "stage": "phase_7_complete",
-    "details": "Phase 7 (Ordered Driver and Entry Point) is COMPLETE and committed: modalExpandBranchesS4KeyedOrdered and modalTableauS4KeyedOrdered landed as structural copies of modalExpandBranchesS4Keyed/modalTableauS4Keyed with modalStepBranchS4KeyedOrdered substituted at the single processNext call site. Lean's termination checker accepted the copied fuel' recursion unchanged -- no termination_by/decreasing_by workaround needed, confirming Phase 5's measure lemma alone suffices for the ordered driver. modalTableauS4KeyedOrdered seeds keys := [(0, ∅)] per the Phase 11 correction (not keys := []). modalStepBranchS4Keyed/modalExpandBranchesS4Keyed/modalTableauS4Keyed and everything from Phases 1-6 remain byte-for-byte unchanged. Phases 1-7 of 15 now complete. Phases 8-15 remain (empirical gate, propagation-adequacy, redirect-inertness, soundness, Hintikka invariant, top-loop induction, completeness, final retirement).",
+    "stage": "phase_8_complete",
+    "details": "Phase 8 (Empirical Gate) is COMPLETE and committed. Result: modalExpandBranchesS4KeyedOrdered does NOT close cex (machine-checked via #guard_msgs), while modalExpandBranchesS4Keyed (unordered) does -- confirming the soundness fix on the exact motivating example. B/T-axiom controls agree between drivers. Exhaustive size<=6, 2-atom sweep (8532 formulas) is verdict-for-verdict IDENTICAL between unordered and ordered drivers (1650 closed, 6882 open, 0 fuel-exhausted, both legs) -- zero closed-to-open, zero open-to-closed, zero fuel-exhausted changes. STOP condition clears on both halves: no completeness regression, no termination regression observed at this sweep's scope. The task's standing central prediction (narrowing the guard may break termination) is NOT corroborated by this phase's evidence, though not yet retired -- Phases 9-14's proof-level re-derivation is the real test. No Cslib/ source files touched this phase (only the test file and task-artifact probe script); all of Phases 1-7's declarations remain byte-for-byte unchanged. Phases 1-8 of 15 now complete.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 7
+    "phases_completed": 8
   },
   "verification": {
     "verification_passed": true,
@@ -22,7 +23,7 @@
     "axiom_count": 26,
     "build_passed": true,
     "ci_pipeline_passed": true,
-    "note": "Repo-wide bare sorry count in Cslib/ unchanged at 5 (baseline, pre-existing, none in LoopChecking.lean). axiom_count (26, grep -rn '^axiom ') unchanged; zero new axioms introduced. Full CI pipeline green after Phase 7's commit: whole-project `lake build` (3256/3256 jobs, confirms FrameSoundness.lean/FrameCompleteness.lean still build), `lake exe checkInitImports` (clean), `lake exe lint-style` (clean), `lake lint` (one pre-existing error in Cslib/Logics/Temporal/Tableau/Saturation.lean, unrelated to this task; zero issues in LoopChecking.lean), `lake shake --add-public --keep-implied --keep-prefix` (zero import changes needed for LoopChecking.lean), `lake test` (9250/9250, including CslibTests.S4LoopGuardRegression). lean_verify on both new declarations (modalExpandBranchesS4KeyedOrdered, modalTableauS4KeyedOrdered): axiom-clean (propext/Classical.choice/Quot.sound only), no sorryAx."
+    "note": "Repo-wide bare sorry count in Cslib/ unchanged at 5 (baseline, pre-existing, none in LoopChecking.lean or this phase's changes). axiom_count (26, grep -rn '^axiom ' Cslib/ | wc -l) unchanged; zero new axioms introduced. Full CI pipeline green: lake build CslibTests.S4LoopGuardRegression (848 jobs, clean), lake exe checkInitImports (clean), lake exe lint-style (clean), lake lint (one pre-existing, out-of-scope error in Cslib/Logics/Temporal/Tableau/Saturation.lean, unrelated to this task; zero new issues), lake shake --add-public --keep-implied --keep-prefix (zero import changes needed for the test file), lake exe mk_all --module (no update necessary), lake test (exit 0, no errors, full repo replay). Direct standalone confirmation via lake env lean on the adapted s4probe.lean: cex closes under unordered driver (some true), does NOT close under ordered driver (some false); exhaustive size<=6 sweep reproduces the Phase 1 baseline exactly for the unordered leg (1650 closed, 6882 open, 0 fuel-exhausted) and is identical for the ordered leg."
   },
   "metadata": {
     "session_id": "sess_1785007897_038307_553",

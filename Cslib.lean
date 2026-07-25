@@ -373,6 +373,7 @@ public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Soundness
 public import Cslib.Logics.Modal.Metalogic.Constructive.Labelled.Syntax
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Context
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Syntax
+public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Translation
 public import Cslib.Logics.Modal.Metalogic.Constructive.Segment
 public import Cslib.Logics.Modal.Metalogic.Constructive.SegmentLindenbaum
 public import Cslib.Logics.Modal.Metalogic.DeductionTheorem

@@ -541,18 +541,33 @@ define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 
 ---
 
-### Phase 8: `fm` compositionality over contexts [NOT STARTED]
+### Phase 8: `fm` compositionality over contexts [COMPLETED]
 
 **Goal**: The workhorse lemmas relating `fm (Γ{∆})` to `fm ∆`, which every soundness case consumes.
 
 **Tasks**:
-- [ ] For each context kind, prove by induction on the `OutputCtx` list (the Lean form of
+- [x] For each context kind, prove by induction on the `OutputCtx` list (the Lean form of
       "induction on the structure of `Γ{ }` (see Observation 2.2)") that `CS5`-derivability of
       `fm ∆ → fm ∆'` lifts to `fm (Γ{∆}) → fm (Γ{∆'})`, in the appropriate variance
-- [ ] Prove the pruning relation: how `fm (Γ⇓{∆})` relates to `fm (Γ{∆})`
-- [ ] Prove the monotonicity/anti-monotonicity direction facts each context kind needs (output
+      *(landed as `buildRhsChain_fm_mono`, `OutputCtx.fillRhs_fm_mono`,
+      `OutputCtx.fillLhs_fm_mono` (all covariant), and `InputCtx.fillLhs_fm_antitone`
+      (contravariant), all fully general -- no restriction on `ctx`)*
+- [x] Prove the pruning relation: how `fm (Γ⇓{∆})` relates to `fm (Γ{∆})`
+      *(deviation: altered -- landed `InputCtx.fillEmpty_imp_outputPruning_fillRhs`, restricted to
+      `ctx.Λ = []` (every `InputCtx` example this development has built, e.g. Phase 7's `γ₂Ctx`,
+      has this shape). The unrestricted (arbitrary `ctx.Λ`) version is genuinely **not**
+      `CS5`-Hilbert-derivable, not merely unproved: the general induction step needs either
+      `□(A → B) → (A → □B)` or `(◇A → B) → □(A → B)`, and both are invalid already in bare `K`
+      (two-world countermodels for each are given in `Translation.lean`'s module docstring). Since
+      the `Λ = []` case is the only shape actually consumed and the general case is false as a
+      Hilbert schema, restricting the hypothesis is the correct, honest resolution -- landing an
+      unprovable general claim, or a claim proved by an invalid box-distribution step, would be
+      strictly worse. Per `plan-compliance.md`, this is raised here as an explicit, fully
+      documented deviation rather than silently narrowed.)*
+- [x] Prove the monotonicity/anti-monotonicity direction facts each context kind needs (output
       contexts are covariant in the hole, input contexts contravariant)
-- [ ] `lake build`
+      *(subsumed by the task-1 lemmas above, which state the variance directly)*
+- [x] `lake build`
 
 **Timing**: 3 hours
 

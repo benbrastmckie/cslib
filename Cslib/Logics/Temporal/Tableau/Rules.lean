@@ -120,19 +120,35 @@ lemma branchNextTime_gt (b : TBranch Atom) (sf : TSF Atom)
 
 /-! ## Helper: Propagation Collectors -/
 
-/-- Collect T(Gφ) formulas from the branch at time `t`. -/
-def allFuturePosAt (b : TBranch Atom) (t : TimeIndex) : List (Formula Atom) :=
+/-- Fuel bound for `TimeOrdering.ancestorTimes` lookups inside `allFuturePosAt`/`allPastPosAt`.
+Generous relative to the tiny time counts the tableau ever reaches (bounded by `temporalFuel`);
+not itself a termination-critical bound (see `Rules.lean`'s cap-removal history, Phase 7). -/
+def ancestorLookupFuel : Nat := 50
+
+/-- Collect T(Gφ) formulas from the branch relevant to propagating into the future of `t`:
+either directly at time `t`, or at any time `t_anc` whose forward light-cone
+(`ord.ancestorTimes`) transitively reaches `t` -- i.e. `t` is a (possibly indirect) future time
+of `t_anc`, so `T(Gφ)@t_anc` constrains `t` too. This is the option-(iii)-a transitive-closure
+fix (Finding 2b/2c): the old direct-time-only filter missed propagating `T(Gφ)@t_anc` across a
+chain of `someFuture`-created intermediate times (e.g. `𝐆p → 𝐆𝐆p`). -/
+def allFuturePosAt (b : TBranch Atom) (ord : TimeOrdering) (t : TimeIndex) : List (Formula Atom) :=
   b.filterMap fun sf =>
-    if sf.sign == .pos && sf.label == t then
+    if sf.sign == .pos &&
+        (sf.label == t || (ord.ancestorTimes sf.label ancestorLookupFuel).contains t) then
       match asAllFuture? sf.formula with
       | some φ => some φ
       | none => none
     else none
 
-/-- Collect T(Hφ) formulas from the branch at time `t`. -/
-def allPastPosAt (b : TBranch Atom) (t : TimeIndex) : List (Formula Atom) :=
+/-- Collect T(Hφ) formulas from the branch relevant to propagating into the past of `t`.
+Symmetric to `allFuturePosAt`: `T(Hφ)@t_anc` propagates to `t` whenever `t = t_anc` or `t` is
+transitively in `t_anc`'s forward light-cone (since `T(Hφ)@t_anc` constrains every time in
+`t_anc`'s own past, and if `t` is transitively future of `t_anc`, `t_anc` is transitively past
+of `t`). -/
+def allPastPosAt (b : TBranch Atom) (ord : TimeOrdering) (t : TimeIndex) : List (Formula Atom) :=
   b.filterMap fun sf =>
-    if sf.sign == .pos && sf.label == t then
+    if sf.sign == .pos &&
+        (sf.label == t || (ord.ancestorTimes sf.label ancestorLookupFuel).contains t) then
       match asAllPast? sf.formula with
       | some φ => some φ
       | none => none
@@ -182,8 +198,9 @@ Propagates:
 - F(Fφ)@t → F(φ)@t' (negative someFuture propagates)
 - F(U(...))@t → F(U(...))@t' (negative until propagates)
 -/
-def propagateToFuture (b : TBranch Atom) (t t' : TimeIndex) : List (TSF Atom) :=
-  let gProps := (allFuturePosAt b t).filterMap fun φ =>
+def propagateToFuture (b : TBranch Atom) (ord : TimeOrdering) (t t' : TimeIndex) :
+    List (TSF Atom) :=
+  let gProps := (allFuturePosAt b ord t).filterMap fun φ =>
     let sf : TSF Atom := ⟨.pos, φ, t'⟩
     if b.any (· == sf) then none else some sf
   let fNegProps := (someFutureNegAt b t).filterMap fun φ =>
@@ -201,8 +218,9 @@ Propagates:
 - F(Pφ)@t → F(φ)@t' (negative somePast propagates)
 - F(S(...))@t → F(S(...))@t' (negative since propagates)
 -/
-def propagateToPast (b : TBranch Atom) (t t' : TimeIndex) : List (TSF Atom) :=
-  let hProps := (allPastPosAt b t).filterMap fun φ =>
+def propagateToPast (b : TBranch Atom) (ord : TimeOrdering) (t t' : TimeIndex) :
+    List (TSF Atom) :=
+  let hProps := (allPastPosAt b ord t).filterMap fun φ =>
     let sf : TSF Atom := ⟨.pos, φ, t'⟩
     if b.any (· == sf) then none else some sf
   let pNegProps := (somePastNegAt b t).filterMap fun φ =>
@@ -215,11 +233,17 @@ def propagateToPast (b : TBranch Atom) (t t' : TimeIndex) : List (TSF Atom) :=
 
 /-! ## Main Rule Application -/
 
-/-- Apply positive temporal rules to a signed formula. -/
+/-- Apply positive temporal rules to a signed formula.
+
+`blocked` is `isTemporallyBlocked b sf.label ord tracker`, precomputed by the caller
+(`temporalStepBranch`, `Saturation.lean`): `Rules.lean` cannot depend on `Branch.lean` (which
+depends on `Rules.lean`), so the blocking fact -- needed only by the seriality arm below -- is
+passed in as a plain `Bool` rather than recomputed from an `EventualityTracker`. -/
 def temporalApplyPos
     (sf : TSF Atom)
     (b : TBranch Atom)
-    (ord : TimeOrdering) :
+    (ord : TimeOrdering)
+    (blocked : Bool) :
     RuleResult (Formula Atom) TimeIndex × TimeOrdering :=
   let t := sf.label
   let φ := sf.formula
@@ -230,8 +254,18 @@ def temporalApplyPos
       (ord.futureOf t).filterMap fun t' =>
         let sf' : TSF Atom := ⟨.pos, inner, t'⟩
         if b.any (· == sf') then none else some sf'
-    if newForms.isEmpty then (.notApplicable, ord)
-    else (.persistent newForms, ord)
+    if !newForms.isEmpty then (.persistent newForms, ord)
+    else if (ord.futureOf t).isEmpty && !blocked then
+      -- Seriality (Deliverable 2, item i): `t` has no future point at all yet, and no
+      -- rule creates one on its own (`someFuturePos` only fires on a *positive* `Fφ`).
+      -- Force one via addFuture so `NoMaxOrder`-sound rows like `𝐆p → 𝐅p` can close.
+      -- Persistent (not linear): `sf` must stay live in case another rule later adds a
+      -- *different* future point this arm also needs to propagate to.
+      let t' := branchNextTime b
+      let newOrd := ord.addFuture t t'
+      let props := propagateToFuture b ord t t'
+      (.persistent (⟨.pos, inner, t'⟩ :: props), newOrd)
+    else (.notApplicable, ord)
   | none =>
   -- T(Hφ)@t → T(φ)@t' for each t' in pastOf(t) [persistent]
   match asAllPast? φ with
@@ -240,8 +274,14 @@ def temporalApplyPos
       (ord.pastOf t).filterMap fun t' =>
         let sf' : TSF Atom := ⟨.pos, inner, t'⟩
         if b.any (· == sf') then none else some sf'
-    if newForms.isEmpty then (.notApplicable, ord)
-    else (.persistent newForms, ord)
+    if !newForms.isEmpty then (.persistent newForms, ord)
+    else if (ord.pastOf t).isEmpty && !blocked then
+      -- Past-seriality, symmetric to the future case above.
+      let t' := branchNextTime b
+      let newOrd := ord.addPast t t'
+      let props := propagateToPast b ord t t'
+      (.persistent (⟨.pos, inner, t'⟩ :: props), newOrd)
+    else (.notApplicable, ord)
   | none =>
   -- T(Fφ)@t → create fresh t', T(φ)@t', propagate universals [linear]
   match asSomeFuture? φ with
@@ -249,7 +289,7 @@ def temporalApplyPos
     let t' := branchNextTime b
     let newOrd := ord.addFuture t t'
     let witness : TSF Atom := ⟨.pos, inner, t'⟩
-    let props := propagateToFuture b t t'
+    let props := propagateToFuture b ord t t'
     (.linear (witness :: props), newOrd)
   | none =>
   -- T(Pφ)@t → create fresh t', T(φ)@t', propagate universals [linear]
@@ -258,7 +298,7 @@ def temporalApplyPos
     let t' := branchNextTime b
     let newOrd := ord.addPast t t'
     let witness : TSF Atom := ⟨.pos, inner, t'⟩
-    let props := propagateToPast b t t'
+    let props := propagateToPast b ord t t'
     (.linear (witness :: props), newOrd)
   | none =>
   -- T(U(guard,event))@t → branch: T(event)@t' | T(guard)@t' + T(U)@t' [branching]
@@ -266,7 +306,7 @@ def temporalApplyPos
   | some (event, guard) =>
     let t' := branchNextTime b
     let newOrd := ord.addFuture t t'
-    let props := propagateToFuture b t t'
+    let props := propagateToFuture b ord t t'
     let branch1 : List (TSF Atom) := [⟨.pos, event, t'⟩] ++ props
     let branch2 : List (TSF Atom) := [⟨.pos, guard, t'⟩, ⟨.pos, φ, t'⟩] ++ props
     (.branching [branch1, branch2], newOrd)
@@ -276,14 +316,15 @@ def temporalApplyPos
   | some (event, guard) =>
     let t' := branchNextTime b
     let newOrd := ord.addPast t t'
-    let props := propagateToPast b t t'
+    let props := propagateToPast b ord t t'
     let branch1 : List (TSF Atom) := [⟨.pos, event, t'⟩] ++ props
     let branch2 : List (TSF Atom) := [⟨.pos, guard, t'⟩, ⟨.pos, φ, t'⟩] ++ props
     (.branching [branch1, branch2], newOrd)
   | none =>
   (.notApplicable, ord)
 
-/-- Apply negative temporal rules (Reynolds co-decomposition for Until/Since). -/
+/-- Apply negative temporal rules: `allFuture`/`allPast` duality (Deliverable 2, item ii) plus
+Reynolds co-decomposition for Until/Since. -/
 def temporalApplyNeg
     (sf : TSF Atom)
     (b : TBranch Atom)
@@ -291,6 +332,18 @@ def temporalApplyNeg
     RuleResult (Formula Atom) TimeIndex × TimeOrdering :=
   let t := sf.label
   let φ := sf.formula
+  -- F(Gψ)@t → T(F¬ψ)@t [linear]: ¬𝐆ψ ≡ 𝐅¬ψ (the rule table's "allFutureNeg" row,
+  -- `Rules.lean`'s module doc), previously missing entirely -- `asAllFuture?`/`asAllPast?`
+  -- don't overlap `asUntl?`/`asSnce?`, so a bare `F(Gψ)@t`/`F(Hψ)@t` fell straight through to
+  -- `.notApplicable` and was permanently inert. No new time point; the witness time for the
+  -- resulting `T(F¬ψ)@t` is created later by the existing `asSomeFuture?` positive rule.
+  match asAllFuture? φ with
+  | some ψ => (.linear [⟨.pos, Formula.someFuture (Formula.neg ψ), t⟩], ord)
+  | none =>
+  -- F(Hψ)@t → T(P¬ψ)@t [linear]: ¬𝐇ψ ≡ 𝐏¬ψ ("allPastNeg"), symmetric to the above.
+  match asAllPast? φ with
+  | some ψ => (.linear [⟨.pos, Formula.somePast (Formula.neg ψ), t⟩], ord)
+  | none =>
   -- F(U(guard,event))@t → Reynolds co-decomposition at future times [branching]
   match asUntl? φ with
   | some (event, guard) =>
@@ -312,7 +365,7 @@ def temporalApplyNeg
       if futureTimes.isEmpty && ord.timeCount > 0 && ord.timeCount < 4 then
         let t' := branchNextTime b
         let newOrd := ord.addFuture t t'
-        let props := propagateToFuture b t t'
+        let props := propagateToFuture b ord t t'
         let branch1 : List (TSF Atom) := [⟨.neg, event, t'⟩, sf] ++ props
         let branch2 : List (TSF Atom) :=
           [⟨.neg, guard, t'⟩, ⟨.neg, φ, t'⟩, sf] ++ props
@@ -338,7 +391,7 @@ def temporalApplyNeg
       if pastTimes.isEmpty && ord.timeCount > 0 && ord.timeCount < 4 then
         let t' := branchNextTime b
         let newOrd := ord.addPast t t'
-        let props := propagateToPast b t t'
+        let props := propagateToPast b ord t t'
         let branch1 : List (TSF Atom) := [⟨.neg, event, t'⟩, sf] ++ props
         let branch2 : List (TSF Atom) :=
           [⟨.neg, guard, t'⟩, ⟨.neg, φ, t'⟩, sf] ++ props
@@ -354,12 +407,17 @@ Returns `(result, newTimeOrd)` where:
 - `result` is the `RuleResult` (linear, branching, persistent, or notApplicable)
 - `newTimeOrd` is the updated time ordering (modified only by existential rules)
 
+`blocked` is `isTemporallyBlocked b sf.label ord tracker`; see `temporalApplyPos`'s docstring
+for why it is threaded in as a `Bool` rather than an `EventualityTracker`. Only the positive
+seriality arm reads it.
+
 See `temporalApplyPos` and `temporalApplyNeg` for the rule cases.
 -/
 def temporalApplyOne
     (sf : TSF Atom)
     (b : TBranch Atom)
-    (ord : TimeOrdering) :
+    (ord : TimeOrdering)
+    (blocked : Bool) :
     RuleResult (Formula Atom) TimeIndex × TimeOrdering :=
   -- Step 1: Try propositional rules first
   let propResult := tryAllPropRules tempAndOf? tempOrOf? tempImpOf? tempNegOf? sf
@@ -367,7 +425,7 @@ def temporalApplyOne
     (propResult, ord)
   else
     match sf.sign with
-    | .pos => temporalApplyPos sf b ord
+    | .pos => temporalApplyPos sf b ord blocked
     | .neg => temporalApplyNeg sf b ord
 
 /-! ## OrdFreshWRT: Constraint-Endpoint Freshness Invariant
@@ -500,9 +558,10 @@ For every case of `temporalApplyPos sf b ord`:
 - The new ordering is `InstantStrict`
 - Every output branch `bi = nf ++ b` satisfies `OrdFreshWRT bi newOrd` -/
 lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeOrdering)
+    (blocked : Bool)
     (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord) (hmem : sf ∈ b)
     (result : RuleResult (Formula Atom) TimeIndex) (newOrd : TimeOrdering)
-    (h : temporalApplyPos sf b ord = (result, newOrd)) :
+    (h : temporalApplyPos sf b ord blocked = (result, newOrd)) :
     TimeOrdering.InstantStrict newOrd ∧
     ∀ nf ∈ (match result with
       | .linear newForms => [newForms]
@@ -515,27 +574,47 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
   -- `rcases X with _ | y` idiom does not propagate into `h` (it only generalizes the goal
   -- target, not the hypothesis), so every subsequent `simp only at h` silently made no
   -- progress. `split at h` correctly case-splits on the `match`/`if` inside `h` itself;
-  -- chained via `<;>` it fully unfolds the 9-way case tree (mirroring the original bullet
-  -- structure) regardless of branch depth.
+  -- chained via `<;>` it fully unfolds the 11-way case tree (mirroring the source's bullet
+  -- structure, now including the two new seriality sub-cases) regardless of branch depth.
   split at h <;> try split at h <;> try split at h <;> try split at h <;> try split at h <;>
     try split at h <;> try split at h
-  -- 1. allFuture, no fresh future obligations: notApplicable
-  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
-    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-  -- 2. allFuture, some fresh future obligations: persistent, ord unchanged
+  -- 1. allFuture, fresh future obligations already pending: persistent, ord unchanged
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by
       simp only [List.mem_singleton] at hnf; subst hnf
       exact ordFreshWRT_append_left _ b ord hOFW⟩
-  -- 3. allPast, no fresh past obligations: notApplicable
+  -- 2. allFuture, no obligations pending, seriality fires: persistent, addFuture
+  · rename_i _x inner _heq _hne1 _hne2
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_singleton] at hnf; subst hnf
+      exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
+        ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 3. allFuture, no obligations pending, seriality blocked: notApplicable
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-  -- 4. allPast, some fresh past obligations: persistent, ord unchanged
+  -- 4. allPast, fresh past obligations already pending: persistent, ord unchanged
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by
       simp only [List.mem_singleton] at hnf; subst hnf
       exact ordFreshWRT_append_left _ b ord hOFW⟩
-  -- 5. someFuturePos: addFuture, linear result
+  -- 5. allPast, no obligations pending, past-seriality fires: persistent, addPast
+  · rename_i _x1 _heq1 _x2 inner _heq2 _hne1 _hne2
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
+            fun nf hnf => ?_⟩
+    · exact Nat.ne_of_lt (branchNextTime_gt b sf hmem)
+    · intro a c hac; exact ordFreshWRT_ne b ord hOFW a c hac
+    · simp only [List.mem_singleton] at hnf; subst hnf
+      exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
+        ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
+  -- 6. allPast, no obligations pending, past-seriality blocked: notApplicable
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact ⟨hIS, fun nf hnf => by simp at hnf⟩
+  -- 7. someFuturePos: addFuture, linear result
   · rename_i inner heq
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -550,7 +629,7 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       subst hnf
       exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
         ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 6. somePastPos: addPast, linear result
+  -- 8. somePastPos: addPast, linear result
   · rename_i inner heq
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -560,7 +639,7 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
     · simp only [List.mem_singleton] at hnf; subst hnf
       exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
         ⟨⟨.pos, inner, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 7. untlPos: addFuture, branching result
+  -- 9. untlPos: addFuture, branching result
   · rename_i event guard heq
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -575,7 +654,7 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       · -- branch2 = [⟨.pos, guard, t'⟩, ...] ++ props
         exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
           ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 8. sncePos: addPast, branching result
+  -- 10. sncePos: addPast, branching result
   · rename_i event guard heq
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -588,7 +667,7 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
           ⟨⟨.pos, event, branchNextTime b⟩, List.mem_cons_self, rfl⟩
       · exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
           ⟨⟨.pos, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 9. notApplicable: ord unchanged, no output branches
+  -- 11. notApplicable: ord unchanged, no output branches
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by simp at hnf⟩
 
@@ -612,15 +691,26 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
   simp only [temporalApplyNeg] at h
   -- See `temporalApplyPos_preserves` for why `split at h` replaces the broken
   -- `rcases X with _ | y` idiom (which does not propagate its case split into `h`).
-  split at h <;> try split at h <;> try split at h <;> try split at h
-  -- 1. untlNeg, co-decomposition at an already-unprocessed future time: branching, ord unchanged
+  split at h <;> try split at h <;> try split at h <;> try split at h <;> try split at h <;>
+    try split at h
+  -- 1. allFutureNeg duality: F(Gψ)@t → T(F¬ψ)@t, linear, ord unchanged
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨hIS, fun nf hnf => ?_⟩
+    simp only [List.mem_singleton] at hnf; subst hnf
+    exact ordFreshWRT_append_left _ b ord hOFW
+  -- 2. allPastNeg duality: F(Hψ)@t → T(P¬ψ)@t, linear, ord unchanged
+  · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    refine ⟨hIS, fun nf hnf => ?_⟩
+    simp only [List.mem_singleton] at hnf; subst hnf
+    exact ordFreshWRT_append_left _ b ord hOFW
+  -- 3. untlNeg, co-decomposition at an already-unprocessed future time: branching, ord unchanged
   · rename_i event guard _heqUntl _unprocessed _t' _tail _heqFilter
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨hIS, fun nf hnf => ?_⟩
     simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
     rcases hnf with rfl | rfl
     all_goals exact ordFreshWRT_append_left _ b ord hOFW
-  -- 2. untlNeg, no unprocessed future time, fresh time created: branching, addFuture
+  -- 4. untlNeg, no unprocessed future time, fresh time created: branching, addFuture
   · rename_i event guard _heqUntl _unprocessed _heqFilter _hcond
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addFuture ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -635,17 +725,17 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
         exact ordFreshWRT_addFuture_of_witness b ord sf.label sf hmem rfl hOFW _
           ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 3. untlNeg, no unprocessed future time, depth limit reached: notApplicable
+  -- 5. untlNeg, no unprocessed future time, depth limit reached: notApplicable
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-  -- 4. snceNeg, co-decomposition at an already-unprocessed past time: branching, ord unchanged
+  -- 6. snceNeg, co-decomposition at an already-unprocessed past time: branching, ord unchanged
   · rename_i event guard _heqSnce _unprocessed _t' _tail _heqFilter
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨hIS, fun nf hnf => ?_⟩
     simp only [List.mem_cons, List.not_mem_nil, or_false] at hnf
     rcases hnf with rfl | rfl
     all_goals exact ordFreshWRT_append_left _ b ord hOFW
-  -- 5. snceNeg, no unprocessed past time, fresh time created: branching, addPast
+  -- 7. snceNeg, no unprocessed past time, fresh time created: branching, addPast
   · rename_i event guard _heqSnce _unprocessed _heqFilter _hcond
     obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     refine ⟨TimeOrdering.instantStrict_addPast ord sf.label (branchNextTime b) hIS ?_ ?_,
@@ -660,10 +750,10 @@ lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
       · -- branch2: [⟨.neg, guard, t'⟩, ...] ++ props
         exact ordFreshWRT_addPast_of_witness b ord sf.label sf hmem rfl hOFW _
           ⟨⟨.neg, guard, branchNextTime b⟩, List.mem_cons_self, rfl⟩
-  -- 6. snceNeg, no unprocessed past time, depth limit reached: notApplicable
+  -- 8. snceNeg, no unprocessed past time, depth limit reached: notApplicable
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by simp at hnf⟩
-  -- 7. neither untl nor snce: notApplicable
+  -- 9. neither allFutureNeg/allPastNeg/untl/snce: notApplicable
   · obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
     exact ⟨hIS, fun nf hnf => by simp at hnf⟩
 
@@ -673,9 +763,10 @@ omit [Hashable Atom] in
 Combines `temporalApplyPos_preserves` and `temporalApplyNeg_preserves` for propositional and
 temporal rules. -/
 lemma temporalApplyOne_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeOrdering)
+    (blocked : Bool)
     (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord) (hmem : sf ∈ b)
     (result : RuleResult (Formula Atom) TimeIndex) (newOrd : TimeOrdering)
-    (h : temporalApplyOne sf b ord = (result, newOrd)) :
+    (h : temporalApplyOne sf b ord blocked = (result, newOrd)) :
     TimeOrdering.InstantStrict newOrd ∧
     ∀ nf ∈ (match result with
       | .linear newForms => [newForms]
@@ -700,7 +791,7 @@ lemma temporalApplyOne_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
     -- `temporalApplyPos_preserves`); `split at h` correctly reduces `h`'s `match sf.sign with ...`.
     split at h
     · -- Positive: temporalApplyPos
-      exact temporalApplyPos_preserves sf b ord hIS hOFW hmem result newOrd h
+      exact temporalApplyPos_preserves sf b ord blocked hIS hOFW hmem result newOrd h
     · -- Negative: temporalApplyNeg
       exact temporalApplyNeg_preserves sf b ord hIS hOFW hmem result newOrd h
 

@@ -151,7 +151,14 @@ def temporalStepBranch
   b.findSome? fun sf =>
     if expanded.any (· == sf) then none
     else
-      let (result, newOrd) := temporalApplyOne sf b ord
+      -- `isTemporallyBlocked b sf.label ord tracker` feeds the seriality termination gate in
+      -- `temporalApplyPos`'s allFuture/allPast arms (Deliverable 2, item i); passed as a plain
+      -- `Bool` (not inlined via `let`, so downstream `rw`/pattern-matching proofs about
+      -- `temporalApplyOne` see it as a single syntactic argument) since `Rules.lean` cannot
+      -- import `Branch.lean` (which imports `Rules.lean`), so `isTemporallyBlocked` isn't
+      -- callable from inside `temporalApplyOne`/`temporalApplyPos` itself.
+      let (result, newOrd) :=
+        temporalApplyOne sf b ord (isTemporallyBlocked b sf.label ord tracker)
       match result with
       | .linear newForms =>
         let newB := newForms ++ b
@@ -199,10 +206,12 @@ lemma temporalStepBranch_preserves
   · rw [if_pos hexp] at hsfeq
     exact absurd hsfeq (by simp)
   · rw [if_neg hexp] at hsfeq
-    rcases htA : temporalApplyOne sf b ord with ⟨result, newOrd'⟩
+    rcases htA : temporalApplyOne sf b ord (isTemporallyBlocked b sf.label ord tracker) with
+      ⟨result, newOrd'⟩
     rw [htA] at hsfeq
     obtain ⟨hISnew, hCase⟩ :=
-      temporalApplyOne_preserves sf b ord hIS hOFW hsfmem result newOrd' htA
+      temporalApplyOne_preserves sf b ord (isTemporallyBlocked b sf.label ord tracker)
+        hIS hOFW hsfmem result newOrd' htA
     cases result with
     | linear newForms =>
       simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
@@ -790,7 +799,8 @@ lemma temporalStepBranch_preserves_faithful
   · rw [if_pos hexp] at hsfeq
     exact absurd hsfeq (by simp)
   · rw [if_neg hexp] at hsfeq
-    rcases htA : temporalApplyOne sf b ord with ⟨result, newOrd'⟩
+    rcases htA : temporalApplyOne sf b ord (isTemporallyBlocked b sf.label ord tracker) with
+      ⟨result, newOrd'⟩
     rw [htA] at hsfeq
     cases result with
     | linear newForms =>
@@ -1039,7 +1049,7 @@ def temporalHintikkaSet
     (tracker : EventualityTracker Atom) : Prop :=
   isTemporalClosed b ord tracker = false ∧
   ∀ sf ∈ b,
-    let (result, _) := temporalApplyOne sf b ord
+    let (result, _) := temporalApplyOne sf b ord (isTemporallyBlocked b sf.label ord tracker)
     match result with
     | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
     | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b

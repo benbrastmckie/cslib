@@ -520,7 +520,7 @@ Rollback/Contingency.
 
 ---
 
-### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [BLOCKED]
+### Phase 7: Cap removal, fuel raise, and headroom measurement (P3-b / Deliverables 3 + 4) [COMPLETED]
 
 **BLOCKER 1 (RESOLVED this dispatch, commits `8b3e8df7`/`89a748d7`)**: the `ancestorTimes`
 undirected-traversal bug described below is fixed. `Branch.lean:129-142`'s `ancestorTimes` now
@@ -537,8 +537,9 @@ only proof-relevant consumer, `Saturation.lean:669`'s `expandBranchWithFuel_soun
 reconciled in `CslibTests/TableauConformance.lean` (commit `8d1689f7`) per the pre-existing rule:
 update only when the new expected value is justified by the formula's own validity.
 
-**BLOCKER 2 (NEW, discovered while re-verifying Blocker 1's fix — still open, root cause found,
-not fixed)**: `𝐇p → 𝐇𝐇p` (past transitivity) is explicitly listed in this phase's own
+**BLOCKER 2 (RESOLVED this dispatch, commit `95940a01`, after team-lead authorization that
+`Rules.lean` is in-scope per the task's `file_scope` and this dispatch's own Phase 6/7 edit
+history)**: `𝐇p → 𝐇𝐇p` (past transitivity) is explicitly listed in this phase's own
 verification criteria below (D3: "all remaining red temporal rows flip to CLOSED") but did
 **not** flip alongside its future-direction dual `𝐆p → 𝐆𝐆p`, which did flip (already CLOSED via
 Phase 6, confirmed unaffected by Blocker 1's fix since it routes through a different function,
@@ -560,18 +561,20 @@ Phase 6, confirmed unaffected by Blocker 1's fix since it routes through a diffe
   which sits in `t_anc`'s future, not its past. This is an asymmetry bug distinct from and
   unrelated to Blocker 1 (a different function, `TimeOrdering.ancestorTimes`, not
   `Branch.ancestorTimes`, and a different file, `Rules.lean`, not `Branch.lean`).
-- **What is needed**: `allPastPosAt` needs a genuine past-direction transitive closure from
-  `t_anc` (walking `pastOf` transitively, i.e. "is `t_anc` reachable from `t` via `futureOf`"
-  equivalently "is `t` reachable from `t_anc` via `pastOf`"), not a reuse of the future-direction
-  `TimeOrdering.ancestorTimes`. This is outside this dispatch's authorized file scope
-  (`Rules.lean` was not authorized — only `Branch.lean` and
-  `Cslib/Logics/Bimodal/Metalogic/Decidability/SignedFormula.lean`), so per the plan-compliance
-  escalation protocol it is raised here rather than patched unilaterally.
-- **Prohibited workarounds** (not used): `sorry`, an axiom, weakening the row's own `guard_msgs`
-  to claim a flip that did not happen, or silently dropping this row from D3's verification list.
-- **Corpus state**: `guard_msgs` for this row is left as `"OPEN"` (matching actual output) with an
-  inline comment documenting this exact finding — see `CslibTests/TableauConformance.lean`'s
-  `𝐇p → 𝐇𝐇p` row and header provenance note (commit `8d1689f7`).
+- **Fix applied**: swapped the arguments so `allPastPosAt` checks whether `t_anc` is in `t`'s
+  future light-cone (`(ord.ancestorTimes t ancestorLookupFuel).contains sf.label`), equivalently
+  that `t` is in `t_anc`'s past — the reversed relation from `allFuturePosAt`'s check, matching
+  that `T(𝐆φ)` propagates forward while `T(𝐇φ)` propagates backward. Rewrote the docstring, which
+  previously stated the same directionally-wrong justification.
+- **Verification**: `lake build Cslib.Logics.Temporal.Tableau.Completeness` green. A full
+  `CslibTests.TableauConformance` build against the (Blocker-1-fixed, pre-Blocker-2-fix)
+  `guard_msgs` produced **exactly one** mismatch — `𝐇p → 𝐇𝐇p`, OPEN to CLOSED — and no others,
+  confirming zero regressions across the 13 rows Blocker 1 already flipped plus the 30
+  originally-green rows. Whole-project `lake build` (3253/3253) and `lake test` (9247/9247) both
+  green; `Cslib/` bare-sorry count unchanged at 5; axiom count unchanged at 26 (0 new).
+  `guard_msgs` reconciled to `"CLOSED"` for this row, commit `8af87207`.
+- **Corpus state**: all 43 individually-executed corpus rows are now green; 0 red rows remain in
+  Phase 7's D3 scope.
 
 **Original BLOCKER (Branch.lean root cause, superseded by Blocker 1's resolution above — kept
 for history)**:
@@ -680,18 +683,18 @@ separate diffs, since the code has only one guard condition to change per site.
 **Verification**:
 - Conformance gate (D3, verdict flip): all remaining red temporal rows flip to **CLOSED** —
   `𝐆p → 𝐆𝐆p`, `𝐇p → 𝐇𝐇p`, `p → 𝐆𝐏p`, `p → 𝐇𝐅p`, and `𝐆p → 𝐅^k p` for `k = 1..5` (the `k = 4`
-  cut is the specific detector that both cap sites were removed). **NOT fully met**: 5 of 6 flip
-  (`𝐆p → 𝐆𝐆p`, `p → 𝐆𝐏p`, `p → 𝐇𝐅p`, and `𝐆p → 𝐅^k p` k = 1..5 all CLOSED); `𝐇p → 𝐇𝐇p` remains
-  OPEN — see BLOCKER 2 above.
+  cut is the specific detector that both cap sites were removed). **FULLY MET** (as of Blocker 2's
+  resolution, commit `95940a01`): all 6 rows CLOSED, including `𝐇p → 𝐇𝐇p`.
 - Conformance gate (D4, independent from D3): under the dedup strategy override, no new fuel
   bound was introduced, so a headroom-table measurement against "the new fuel bound" does not
   apply as originally scoped; the dedup gate's own correctness (unblocked past depth 1) is
   verified instead via the D3 verdict flips above.
-- Conformance gate: all previously-green rows still green (verified: the full
-  `CslibTests.TableauConformance` build against pre-fix `guard_msgs` produced mismatches on
-  exactly the 12 rows expected to flip, and no others — commit `8b3e8df7`'s message).
-- `lake build Cslib.Logics.Temporal.Tableau.Completeness` green (confirmed).
-- `lake build` (whole project, 3253 jobs) and `lake test` (9247 jobs) both green (confirmed).
+- Conformance gate: all previously-green rows still green, both across Blocker 1's fix (commit
+  `8b3e8df7`: exactly 12 rows flipped, no others) and Blocker 2's fix (commit `95940a01`: exactly
+  1 row flipped, no others).
+- `lake build Cslib.Logics.Temporal.Tableau.Completeness` green (confirmed after both fixes).
+- `lake build` (whole project, 3253 jobs) and `lake test` (9247 jobs) both green (confirmed after
+  both fixes). `Cslib/` bare-sorry count 5, axiom count 26, both unchanged from baseline.
 
 ---
 

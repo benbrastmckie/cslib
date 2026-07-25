@@ -740,11 +740,7 @@ def ancestorTimes (ord : TimeOrdering) (t : TimeIndex)
   | fuel + 1 =>
     let directPredecessors := ord.constraints.filterMap fun (a, b) =>
       if b == t then some a else none
-    let directSuccessors := ord.constraints.filterMap fun (a, b) =>
-      if a == t then some b else none
-    let immediateAncestors :=
-      (directPredecessors ++ directSuccessors).eraseDups
-    let transitiveAncestors := immediateAncestors.flatMap fun anc =>
+    let transitiveAncestors := directPredecessors.flatMap fun anc =>
       anc :: ancestorTimes ord anc fuel
     transitiveAncestors.eraseDups
 

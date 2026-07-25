@@ -40,7 +40,7 @@ next_project_number: 556
   └─ 548 [NOT STARTED] — COMPLETENESS-MATRIX GAP (review 2026-07-23, M3). Tableau decidabi
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 552 [PARTIAL] — Shared calculus-conformance and rule-completeness repair unblocki
-553 [IMPLEMENTING] — Determine whether the S4 keyed loop-check guard can be made sound
+553 [PARTIAL] — Determine whether the S4 keyed loop-check guard can be made sound
 554 [RESEARCHED] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
@@ -105,7 +105,7 @@ next_project_number: 556
 ---
 
 ### 553. S4 loop guard soundness reachability restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: Task 535

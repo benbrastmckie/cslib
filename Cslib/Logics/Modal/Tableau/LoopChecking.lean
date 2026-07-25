@@ -4662,9 +4662,9 @@ theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
 
 /-! ## Keyed S4 Driver (Bespoke, Path (b))
 
-Task 535 closes `Decidable (s4Valid φ)` via a bespoke, S4-specific `keys`-threaded driver, rather
-than generalizing the shared generic driver (`Saturation.lean`'s `modalExpandBranchesGen`) to
-thread opaque per-branch state -- that path would serve only S4 (K/T/B/S5/Five have all already
+This section closes `Decidable (s4Valid φ)` via a bespoke, S4-specific `keys`-threaded driver,
+rather than generalizing the shared generic driver (`Saturation.lean`'s `modalExpandBranchesGen`)
+to thread opaque per-branch state -- that path would serve only S4 (K/T/B/S5/Five have all already
 reached decidability via the state-free generic driver) while risking every one of their landed
 proofs. `modalExpandBranchesS4Keyed`/`modalTableauS4Keyed` below mirror
 `modalExpandBranchesGen`/`processNext`/`modalTableauGen` structurally (copy-and-thread), with
@@ -5478,12 +5478,13 @@ lemma modalExpMeasure_entry_le_fuelS4 (φ₀ : Proposition Atom) :
 /-! ## Phase 6 (handoff 3d-i): Keys-Threaded Hintikka-Tracking Invariant Bundle
 
 The bespoke keys-threaded analogue of the `ModalLoopInvHintikka` bundle
-(`CompletenessLoop.lean:293-325`), for `modalApplyOneS4Keyed φ₀ keys`. `S4LoopInv` (task 511,
-frozen, above) already carries the universe-closure/keys-bookkeeping conjuncts
-(`bClosure`/`eClosure`/`eNodup`/`accFresh`/`accKnown`), so this bundle carries ONLY the five
-Hintikka-specific conjuncts (`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/
-`eDiamondPosWitness`), threaded alongside `S4LoopInv` as a separate ambient hypothesis at each
-call site rather than duplicating its fields. -/
+(`CompletenessLoop.lean:293-325`), for `modalApplyOneS4Keyed φ₀ keys`. The frozen `S4LoopInv`
+structure (defined above in this file) already carries the universe-closure/keys-bookkeeping
+conjuncts (`bClosure`/`eClosure`/`eNodup`/`accFresh`/`accKnown`), so this bundle carries ONLY
+the five Hintikka-specific conjuncts
+(`hintikkaInv`/`eBoxOnlyNeg`/`eBoxNegWitness`/`eDiamondOnlyPos`/`eDiamondPosWitness`), threaded
+alongside `S4LoopInv` as a separate ambient hypothesis at each call site rather than duplicating
+its fields. -/
 
 /-- **F8 discharge for `modalApplyOneS4Keyed`** (local shape invariance): outside the two
 minting shapes (`F(□φ)@w`/`T(◇φ)@w`, both signs excluded by `hnb`/`hnd`),
@@ -5693,8 +5694,9 @@ lemma modalApplyOneS4Keyed_hasEdge_mono (φ₀ : Proposition Atom)
 /-- **Keys-threaded Hintikka-tracking invariant bundle** for `modalApplyOneS4Keyed φ₀ keys`: the
 bespoke analogue of `ModalLoopInvHintikka`'s five Hintikka-specific conjuncts
 (`CompletenessLoop.lean:310-325`), carrying ONLY those five fields. The universe-closure/
-keys-bookkeeping conjuncts already live in the frozen `S4LoopInv` (task 511) and are threaded as
-a separate ambient hypothesis at each call site rather than duplicated here. -/
+keys-bookkeeping conjuncts already live in the frozen `S4LoopInv` structure (defined above in this
+file) and are threaded as a separate ambient hypothesis at each call site rather than duplicated
+here. -/
 structure S4KeyedHintikkaInv (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop where
@@ -5946,7 +5948,8 @@ private lemma S4KeyedHintikkaInv_append (φ₀ : Proposition Atom)
 
 /-- **Phase 7 — single-step preservation of `S4KeyedHintikkaInv`**: every
 `modalStepBranchS4Keyed` step preserves the keys-threaded Hintikka-tracking invariant bundle,
-given the ambient `S4LoopInv` (task 511, consumed for `keyLowerBd`'s blocked-witness argument).
+given the ambient frozen `S4LoopInv` structure (defined above in this file, consumed for
+`keyLowerBd`'s blocked-witness argument).
 Mirrors `modalStepBranchS4_preserves_bClosure`'s case-split shape (mint-unblocked / mint-blocked
 / non-mint), composing `S4KeyedHintikkaInv_weaken` (Phase 6, old `e`'s facts lifted across
 branch/`acc` growth) with `S4KeyedHintikkaInv_append`'s per-field assembly for the just-selected

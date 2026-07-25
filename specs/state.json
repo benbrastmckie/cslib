@@ -182,18 +182,28 @@
     {
       "project_number": 463,
       "project_name": "vet_299_455_doc_touchups",
-      "status": "researched",
+      "status": "completed",
       "task_type": "markdown",
       "title": "Docs: update ORGANISATION.md Tableau/ tree sketches + strip internal task refs from public docstrings (task 299/455 vet)",
       "description": "Vet found low-severity documentation gaps (code placement itself is correct/idiomatic): (1) ORGANISATION.md:148 Modal/ tree sketch omits the `Tableau/` subdirectory; ORGANISATION.md:26 Foundations/Logic/ tree sketch omits `Tableau/` (Sign.lean, SignedFormula.lean, RuleResult.lean, Branch.lean, Closure.lean, ClosureCondition.lean, Measure.lean, PropositionalRules.lean) — add these entries to document existing placement. (2) Cslib/Logics/Modal/Tableau/CompletenessLoop.lean:1178 and nearby: permanent public docstrings for `modalTableau_complete`/`modalTableau_decides` embed ephemeral internal notes like '(task 442 Phase 6, FINAL)', '(task 442 Phase 5a)' — replace with plain, durable mathematical descriptions.",
       "created": "2026-07-01T15:46:37Z",
-      "last_updated": "2026-07-25T06:08:37Z",
+      "last_updated": "2026-07-25T07:06:42Z",
       "next_artifact_number": 1,
       "artifacts": [
         {
           "path": "specs/463_vet_299_455_doc_touchups/reports/01_organisation-tableau-and-docstring-cleanup.md",
           "type": "report",
           "summary": "ORGANISATION.md:26/148 confirmed missing Tableau/; CompletenessLoop.lean already clean; LoopChecking.lean has 4 task-number citations remaining"
+        },
+        {
+          "path": "specs/463_vet_299_455_doc_touchups/plans/01_organisation-tableau-docstring-anchors.md",
+          "type": "plan",
+          "summary": "Two-phase documentation-only plan: ORGANISATION.md Tableau/ tree entries + LoopChecking.lean durable-anchor rewrites; CompletenessLoop.lean out of scope"
+        },
+        {
+          "path": "specs/463_vet_299_455_doc_touchups/summaries/01_organisation-tableau-docstring-anchors-summary.md",
+          "type": "summary",
+          "summary": "Implementation summary: ORGANISATION.md Tableau/ entries added, LoopChecking.lean task-number citations rewritten to durable anchors, build verified"
         }
       ],
       "parent_task": 299,
@@ -210,7 +220,8 @@
       "file_scope": [
         "ORGANISATION.md",
         "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
-      ]
+      ],
+      "completion_summary": "Added Tableau/ tree-sketch entries to ORGANISATION.md for Foundations/Logic/ (8-file block + barrel) and Logics/Modal/ (terse collapsed entry), and rewrote 4 ephemeral task-number docstring citations in LoopChecking.lean to durable S4LoopInv-structure anchors."
     },
     {
       "project_number": 456,
@@ -232,7 +243,7 @@
     {
       "project_number": 440,
       "project_name": "review_pr_leanprover_cslib_648",
-      "status": "planned",
+      "status": "pr_ready",
       "task_type": "pr",
       "description": "PR review: GitHub PR https://github.com/leanprover/cslib/pull/648 — address ctchou CHANGES_REQUESTED feedback (Gentzen/Avigad references, Semantics restructuring confirmation, reviewer reply, coordinate #587/#607)",
       "sources": [
@@ -254,7 +265,7 @@
         }
       ],
       "created": "2026-06-30T17:38:50Z",
-      "last_updated": "2026-07-25T06:07:57Z",
+      "last_updated": "2026-07-25T07:01:13Z",
       "next_artifact_number": 2,
       "artifacts": [
         {
@@ -266,6 +277,11 @@
           "path": "specs/440_review_pr_leanprover_cslib_648/plans/01_ctchou-review-response.md",
           "type": "plan",
           "summary": "5-phase plan for ctchou CHANGES_REQUESTED reply on PR #648; terminus [PR READY], no code changes, no rebase"
+        },
+        {
+          "path": "specs/440_review_pr_leanprover_cslib_648/pr-response.md",
+          "type": "pr_response",
+          "summary": "Response to ctchou CHANGES_REQUESTED on PR #648: all 4 review bullets answered; Gentzen citation posed as open question; references.bib conflict acknowledged with rebase commitment"
         }
       ],
       "topic": "PR & Upstreaming",
@@ -1110,7 +1126,7 @@
     {
       "project_number": 519,
       "project_name": "fix_literature_ocr_chunking_and_wijesekera",
-      "status": "researched",
+      "status": "implementing",
       "task_type": "general",
       "topic": "Literature",
       "description": "Follow-up to task 518 (Simpson re-ingest). TWO PARTS.\n\n(1) RE-INGEST wijesekera_1990_constructivemodallogicsi (BibKey Wijesekera1990). Task 518's corpus audit found it has the IDENTICAL over-fragmentation signature that made Simpson unusable: 154 chunks, 468B mean, 62% under 300B. This document matters -- Wijesekera 1990 is THE source for CSLib's constructive (fallible-world) DIAMOND semantics, cited in Cslib/Logics/Modal/Metalogic/Constructive/ (CS4.lean and CS5.lean docstrings reference it for Definition 1.1.4 and Section 2), and is directly relevant to in-flight task 517. Apply task 518's proven fix (documented in specs/518_reingest_simpson1994_literature_corpus/summaries/01_reingest-summary.md): bypass the font-size heading heuristic, extract via pdftotext -layout, apply paragraph-reflow to repair OCR line-break noise, insert chapter/section-level headings only, then feed the existing unmodified literature-chunk.sh Pass-2 merge. VALIDATE that Definition 1.1.4 and the Section 2 diamond / fallible-world definitions return COMPLETE statements via literature-search.sh. Preserve the old chunk set as rollback, as 518 did.\n\n(2) HARDEN THE ROOT CAUSE (the general fix that 518 deliberately left undone). literature-convert.sh's PyMuPDF path falls back to a FONT-SIZE heading-detection heuristic when a PDF has no embedded TOC. On OCRmyPDF/Tesseract scans the per-line font metrics are noisy, so it emits spurious markdown headings mid-sentence and mid-word, and literature-chunk.sh then splits at every one -- shredding lemma statements. Fix so it does not fire on OCR'd scans: detect the OCR producer (Tesseract / OCRmyPDF metadata), require corroborating cues (line length, position, numbering, blank-line context) before accepting a font-size heading, and/or add a post-check rejecting headings that split mid-sentence. ALSO add a guard so any future ingest yielding a pathological mean chunk size (under roughly 600B) warns loudly rather than silently landing a shredded corpus. Task 518 scoped its fix to Simpson only and left the shared scripts untouched; this task does the general repair so all future --lit work benefits.\n\nNOTE the honest ceiling from 518: prose is recoverable but math symbols are frequently garbled by Tesseract. Do NOT attempt to fix OCR quality itself -- only the chunking/heading pathology. Do not touch Cslib/ Lean source. Low risk, high leverage.",
@@ -1119,7 +1135,7 @@
       ],
       "parent_task": 518,
       "created": "2026-07-15T15:41:21Z",
-      "last_updated": "2026-07-25T06:10:04Z",
+      "last_updated": "2026-07-25T07:01:54Z",
       "priority": "medium",
       "effort": "3-5 hours",
       "artifacts": [
@@ -1127,6 +1143,11 @@
           "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/reports/01_wijesekera-ocr-chunking-fix.md",
           "type": "report",
           "summary": "Wijesekera over-fragmentation confirmed (154 chunks, 468B mean); OCR producer is Acrobat Capture not Tesseract, so producer allowlist must broaden; pdftotext -layout surfaces clean numbered section headings"
+        },
+        {
+          "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md",
+          "type": "plan",
+          "summary": "8-phase plan: Wijesekera re-ingest via pdftotext -layout section headings + OCR heading hardening and mean-chunk-size guard; corrects the Tesseract-only premise"
         }
       ],
       "session_id": "sess_1784959340_e4ceeb_519",
@@ -1480,7 +1501,7 @@
     {
       "project_number": 553,
       "project_name": "s4_loop_guard_soundness_reachability_restriction",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [
         535
@@ -1491,22 +1512,36 @@
       ],
       "description": "Determine whether the S4 keyed loop-check guard can be made sound, and if so repair it. This task carries EXPLICIT authorization to edit the otherwise-frozen blockingWorldS4Keyed code that the completeness-line task holds constant. FRAMING MATTERS: this is not 'apply the reachability restriction', it is 'determine whether the guard can be narrowed at all without collapsing the termination argument'. THE DEFECT: blockingWorldS4Keyed (LoopChecking.lean approx 469) picks its blocking world by matching birth-content across ALL recorded worlds, with no reachability restriction to the current label. The redirect then adds a bare edge whose soundness needs the two labels to be related in an arbitrary model. Since the S4 frame condition is reflexive and transitive but NOT symmetric, common-ancestor reachability does not yield relatedness, and the S5 precedent relies on symmetry so it does not transfer. As stated, the keyed S4 soundness theorem is likely FALSE. CANDIDATE FIX: restrict candidates to those reachable via ReflTransGen of the accessibility edge relation. CRITICAL PREDICTION TO VERIFY FIRST, derived from hypothesis shapes and NOT yet confirmed: narrowing the guard may break TERMINATION, not merely completeness. The S4 outputs-subset-universe lemma consumes the world-bound lemma, whose hypotheses are exactly the pigeonhole facts that distinct worlds have distinct keys and that keys are contained in the signed subformulas of the root. Key-distinctness is precisely what the UNRESTRICTED guard buys: under a reachability restriction, two mutually-unreachable worlds with the same birth content could both be born, breaking key-distinctness, the world bound, and hence the termination line. Verify this before committing to any fix; if it holds, the guard cannot simply be narrowed and a different soundness route is required. DOWNSTREAM CONSUMERS deferred here from the completeness-line task: the keyed S4 soundness theorem, its successor phase, and the decidability half of the S4 validity decidability instance, which needs BOTH the soundness and completeness lines and is therefore not achievable until this lands. Evidence: the completeness-line task's report on remaining work and the Phase 9 obstruction, plus the carry-forward risk section of its rescope plan.",
       "blockers": null,
-      "last_updated": "2026-07-25T06:03:25Z",
+      "last_updated": "2026-07-25T06:32:54Z",
       "session_id": "sess_1784959340_e4ceeb_553",
-      "topic": "Modal Logic"
+      "topic": "Modal Logic",
+      "artifacts": [
+        {
+          "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md",
+          "type": "report",
+          "summary": "Keyed S4 soundness theorem is FALSE: machine-checked counterexample (node-size 19 formula closed by modalTableauS4Keyed with explicit 3-world refl-trans countermodel). Reachability restriction rejected — 96.7% of blocking decisions target non-reachable worlds, so the world bound fails. Driver re-architecture required."
+        }
+      ]
     },
     {
       "project_number": 554,
       "project_name": "cs5_pair_seed_disjunction_property_cutfree_research",
-      "status": "researching",
+      "status": "researched",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": null,
       "description": "Research-only task: establish or refute the CS5 pair-seed disjunction property, which is the single remaining obligation of the native-Hilbert CS5 completeness route. THE OBLIGATION, already isolated sorry-free as a named Prop in Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean, is the seed-exclusion statement that the left-tagged box of A joined with the right-tagged A is not in the closure of the two-sided seed. Equivalently it is the constructive disjunction property of the pair axiom set under the box-inverse cross-constraint. This is Pacheco 2024 Lemma 16, which is UNSOUND AS PUBLISHED, and it has NO semantic witness. TWO DEAD ENDS, recorded as Non-Goals, must not be re-proposed: the semantic route via pair-axiom soundness is circular because it presupposes the truth lemma being built; and the signature-collapse route via a sum-elimination retraction fails because the first cross axiom's image, box B implies B, is not an instance of the modal axiom schema, so the retraction is not schema-compatible. RECOMMENDED APPROACH: a cut-free or nested-sequent proof system for CS5, following Marin, Morales and Strassburger 2021 on fully labelled proof systems for intuitionistic modal logics, and Arisaka, Das and Strassburger 2015 on nested sequents for constructive modal logics. Both are present in the literature corpus. The aim is to repair Pacheco Lemma 16 and 17, or to establish that the property fails. REPORTING CONTRACT: deliver either (a) a proof strategy concrete enough to discharge the named Prop, or (b) a refutation with a countermodel, or (c) a reasoned statement that the property is open, with the specific obstruction named. A negative or open result is a valid and useful deliverable. FALLBACK if the property is refuted or judged unreachable: the deferred collapse route, which proves that CS5 derives the idb axiom (currently absent from every constructive CS5 file), then the CS5-to-IS5 derivability and validity bridges, composing the already-landed IS5 completeness theorem. Adopting that route is a mandate change requiring explicit user authorization. Evidence: the parent task's reports on the conservativity blocker route decision and on remaining obligations and path.  SECOND CONSUMER (widened brief): this research also gates the labelled CS5 general-soundness biconditional task, which hit the SAME obstruction family from an independent direction. Its Phase 9 probe gate failed definitively after three dispatches on the non-theorem box(A-or-B) implies (box-A or box-B) -- box failing to distribute over disjunction, which is the same constructive-disjunction-property wall as the pair-seed obligation above. Machine-checked evidence lives in that task under probes/theta_place_validation.lean, probes/theta_place_layered.lean, and probes/theta_place_final_gate.lean; all three compile clean with no sorryAx and are durable assets for this research. Because two independent formalization fronts converged on the same wall, a cut-free or nested-sequent treatment that recovers disjunction-property reasoning would unblock BOTH. When reporting, state explicitly what each consumer would gain: for the pair-seed task, whether the named open Prop can be discharged; for the labelled-soundness task, whether a context-fold that splits compound context facts is derivable without the box-over-disjunction bridge.",
       "blockers": null,
-      "last_updated": "2026-07-25T06:03:21Z",
+      "last_updated": "2026-07-25T06:16:39Z",
       "session_id": "sess_1784959340_e4ceeb_554",
-      "topic": "Modal Logic"
+      "topic": "Modal Logic",
+      "artifacts": [
+        {
+          "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md",
+          "type": "report",
+          "summary": "Result (c): property open but re-characterized — reduces to single right exclusion tau_R A not in cl(seed); Non-Goal 2 rationale refuted (Sum.elim retraction IS schema-compatible); residual obligation is two-label conservativity, obstruction = box over disjunction"
+        }
+      ]
     }
   ],
   "repository_health": {

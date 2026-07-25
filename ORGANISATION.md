@@ -44,8 +44,18 @@ Foundations/
 │   ├── Metalogic/
 │   │   ├── Consistency.lean       -- Consistency and maximal consistency
 │   │   └── DeductionHelpers.lean  -- Deduction theorem helpers
-│   └── Automation/
-│       └── HilbertSearch.lean     -- Bounded DFS proof-search tactic for InferenceSystem
+│   ├── Automation/
+│   │   └── HilbertSearch.lean     -- Bounded DFS proof-search tactic for InferenceSystem
+│   ├── Tableau.lean           -- Tableau barrel (re-exports Tableau/ modules)
+│   └── Tableau/
+│       ├── Sign.lean                 -- Two-valued sign type for analytic tableau calculi
+│       ├── SignedFormula.lean        -- Signed formula: sign + formula + label
+│       ├── RuleResult.lean           -- Result type for applying a single tableau rule
+│       ├── Branch.lean               -- Label-generic branch type (list of signed formulas)
+│       ├── Closure.lean              -- ClosureReason: why a tableau branch is closed
+│       ├── ClosureCondition.lean     -- Typeclass abstracting the branch closure criterion
+│       ├── Measure.lean              -- Logic-agnostic termination-measure arithmetic
+│       └── PropositionalRules.lean   -- Classical propositional expansion rules
 ├── Data/                      -- General-purpose data structures
 │   ├── HasFresh.lean          -- Fresh name generation
 │   ├── Relation.lean          -- Relation utilities
@@ -150,12 +160,13 @@ Modal/
 ├── Denotation.lean            -- Denotational semantics
 ├── Cube.lean                  -- Modal logic cube (K, T, S4, S5)
 ├── FromPropositional.lean     -- Embedding from propositional
-└── Metalogic/                 -- Soundness, completeness, MCS
-    ├── Soundness.lean
-    ├── Completeness.lean
-    ├── MCS.lean
-    ├── DeductionTheorem.lean
-    └── DerivationTree.lean
+├── Metalogic/                 -- Soundness, completeness, MCS
+│   ├── Soundness.lean
+│   ├── Completeness.lean
+│   ├── MCS.lean
+│   ├── DeductionTheorem.lean
+│   └── DerivationTree.lean
+└── Tableau/                   -- Tableau decision procedures (K/T/B/S4/S5 drivers, saturation, soundness/completeness)
 ```
 
 ### Temporal Logic (`Logics/Temporal/`)

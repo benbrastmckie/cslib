@@ -1,10 +1,13 @@
 {
-  "status": "in_progress",
-  "started_at": "2026-07-25T00:00:00Z",
-  "artifacts": [],
+  "status": "researched",
+  "artifacts": [
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/seed_refutation.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/cs5_subset_is5.lean"
+  ],
   "partial_progress": {
-    "stage": "initializing",
-    "details": "Round 2 research started; reading round 1 report and locating literature chunks"
+    "stage": "research_delivered",
+    "details": "Round 2 delivered outcome (b): machine-checked refutation of the named obligation as stated, plus literature-grounded answers to all three brief questions and a fourth route with named residual gaps."
   },
   "metadata": {
     "session_id": "sess_1784987428_4cc3f0_554",

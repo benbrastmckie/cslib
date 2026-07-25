@@ -2,40 +2,46 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "research",
   "status": "researched",
-  "summary": "Result (c): the property is open, but radically re-characterized. Two sorry-free probes prove the named Prop CS5PairSeedDisjunctionProperty is EQUIVALENT to the single right exclusion tau_R A not in cl(seed), that hL follows from it, and hence DerivExcludes at the seed follows from that one hypothesis alone. Also refuted the stated reason for Non-Goal 2 (the Sum.elim retraction IS schema-compatible, since both cross axioms map to CS5ModalAxiom.tBox) and gave the sharpest relabeling bound. The residual obligation is a two-label conservativity statement; the obstruction is named (box over disjunction), the same wall as the labelled-soundness task.",
+  "summary": "Round 2 (literature-grounded). Result (b) REFUTATION plus a corrected target. Machine-checked, sorry-free: CS5PairSeedDisjunctionProperty is FALSE as literally stated, for every H, because it carries no hypothesis relating A to H and every CS5 theorem is already in cl_CS5(boxInv H), hence tau_R A is literally in cs5PairSeed H. Minimal witness A := bot -> bot. The statement must gain the hypothesis A not in cl_CS5(boxInv H). Literature answers: (1) Marin-Morales-Strassburger's labIK-le + box-g_klmn (Thm 3.3, 6.1, 7.1, 7.2) is cut-free sound and complete for IK plus one-sided Scott-Lemmon axioms, and every CS5 modal axiom beyond k/kdia IS such an axiom -- but its base is IK not CK (it derives k3, k4, k5 in section 4), so it gives the result for IS5 and NOT for CS5. (2) Arisaka-Das-Strassburger DO give a genuine cut-free system covering CSLib's exact CS5 axiom set: HCK+t+4+b is a safe pair (X={t,4}, Y={b}) under Definition 6.2, so Theorems 5.2 and 6.3 apply verbatim; their Kripke-semantics disclaimer does NOT undercut the route since their soundness and completeness are Hilbert-relative, which is exactly the currency the obligation needs. But it covers single-signature CS5 only, not the two-label mixed-signature CS5Pair, and formalising it is an 18-page cut-elimination with no partial payoff. (3) Their section 4.3 result b entails k3 and k5 does NOT bear on the obstruction: k3 is DIAMOND over disjunction, while the obstruction box(A or B) -> (box A or box B) is not a theorem of even classical S5, so no strengthening of the base logic can supply it. A fourth route is identified: a product model over IS5 (CS5 subset IS5 is a literal schema inclusion, now machine-checked) which interprets ALL of Proposition (Atom + Atom) including mixed formulas, breaking round 1's circularity because IS5 completeness is already landed. Its two residual obligations are named explicitly.",
   "artifacts": [
     {
       "type": "report",
-      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md"
+      "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md"
     }
   ],
   "blockers": [
     {
-      "description": "CS5PairSeedRightExclusion (tau_R A not in modalDeductiveClosure CS5PairAxiom (cs5PairSeed H)) is a conservativity statement requiring a cut-free or fully labelled sequent calculus for CS5 with cut admissibility. No Hilbert-level route exists: every atom relabeling retraction is forced to identify the two tagged copies, and every separating translation needs the non-theorem box(A or B) implies (box A or box B).",
+      "description": "The named obligation CS5PairSeedDisjunctionProperty (CS5Completeness.lean:373) is refutable as stated: no hypothesis relates A to H, and tau_R A is already an element of cs5PairSeed H whenever A is CS5-provable or box A is in H. Machine-checked in probes/seed_refutation.lean. The module's hL/hR hypotheses in cs5Pair_derivExcludes_of_disjunctionProperty are equally unsatisfiable at theorem-instances of A. Must be repaired with the hypothesis A not in modalDeductiveClosure CS5ModalAxiom (boxInv H) before any proof attempt.",
       "phase": "research",
       "severity": "hard"
     },
     {
-      "description": "Literature corpus search returned degraded with zero results; Marin-Morales-Strassburger 2021 and Arisaka-Das-Strassburger 2015 are NOT retrievable via literature-search.sh despite the task brief asserting they are present. Ingestion via /literature is needed before any labelled-calculus planning.",
+      "description": "Product-model route residual (R-a): cross1/cross2 must be valid at EVERY world of the product model because necessitation is a rule, which forces the base model's accessibility relation to be total. Restricting to the set of r-related pairs is closed under r' but NOT under the product preorder, because CSLib's f2 moves the first coordinate to a le-successor. Open question: does every IS5-consistent set have an is5FC model with total r? Unverified against a local source; must be probed before planning.",
+      "phase": "research",
+      "severity": "soft"
+    },
+    {
+      "description": "Product-model route residual (R-b): the construction discharges the exclusion from box A not in cl_IS5(H), while the caller supplies box A not in H with H only CS5-prime. Bridging is a single-signature conservativity statement (H CS5-closed, box A not in H implies box A not in cl_IS5(H)). This is weaker and better-shaped than the two-label statement round 1 isolated, but it is adjacent to the forbidden collapse route. Flagged for the task owner; NOT pursued.",
       "phase": "research",
       "severity": "soft"
     }
   ],
   "next_action_hint": "plan",
   "files_modified": [
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/01_pair-seed-disjunction-collapse.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/cross1_collapse.lean",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/retraction_bound.lean"
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/seed_refutation.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/probes/cs5_subset_is5.lean"
   ],
   "decisions_made": [
-    "Did NOT adopt the deferred idb/CS5-to-IS5 collapse fallback; flagged as requiring explicit user authorization.",
-    "Recommend an immediately landable, zero-research-risk change to CS5Completeness.lean: promote the five collapse lemmas plus the retraction lemmas, replace CS5PairSeedDisjunctionProperty with CS5PairSeedRightExclusion, and correct two false docstring claims.",
-    "Recommend the real research target be restated as two-label conservativity for CS5 via a fully labelled sequent calculus with cut admissibility, not as a disjunction property."
+    "Did NOT adopt the deferred idb/CS5-to-IS5 collapse fallback. Added an independent reason to be wary of it: Pacheco's headline CKB = IKB result, whose section 4 explicitly extends to CS5 = IS5, rests on the same unsound Lemma 16 this task exists to repair, so the collapse route is not citable as published.",
+    "Recommend NOT opening a nested-sequent or labelled-calculus formalisation task. Cost table in report section 5.4: ADS15 needs nested sequents plus soundness plus completeness plus an 18-page cut-elimination plus an unpublished pair extension; MMS is for IK not CK so no CS5 version exists; the product model needs roughly 200-400 lines of standard induction.",
+    "Recommend the immediate landable set: repair the refutable statement per report section 1.1, land probe_refute_disjunctionProperty as a regression test, land round 1's collapse lemmas under the corrected statement, land cs5Axiom_to_is5Axiom / cs5_deriv_to_is5 / cs5_closure_subset_is5_closure, and correct three docstring claims (the [Marin2021] pointer is wrong -- that paper is for IK not CK; 'no semantic witness exists' is refuted by the product model; Non-Goal 2's reason was already refuted in round 1).",
+    "Recommend the next research step be a single focused probe on residual (R-a) -- totality of r in is5FC models -- because its answer determines whether the entire product-model route is viable, and it is cheap to settle."
   ],
   "dead_ends": [
-    "Semantic route via pair-axiom soundness: confirmed circular. The docstring's stated reason (no semantic witness exists) is itself mis-argued; a product/two-label model is not ruled out, but its existence is equivalent to the pair's joint satisfiability, which is what completeness is proving.",
-    "Sum-elimination retraction: schema-compatibility HOLDS (contra the recorded Non-Goal reason), but the collapse bound only yields A in H, and box A not in H is compatible with A in H. No atom relabeling can do better.",
-    "Generalized translation theta with box B implies theta B: fails at disjunction (box over disjunction non-theorem), at diamond, and at implication (needs a contravariant companion that cannot manufacture boxes).",
-    "Repairing task 537's sigAt context-fold to split compound facts: relocates rather than discharges the obligation, since the split form is a strictly stronger antecedent."
+    "Arisaka-Das-Strassburger section 4.3 (b entails k3 and k5) as a route to the box-over-disjunction obstruction: definitively dead. k3 is diamond over disjunction; the obstruction box(A or B) -> (box A or box B) is invalid in classical S5 (two-world universal frame, A at one world and B at the other). No constructive-vs-intuitionistic result can supply it. This also upgrades round 1's answer for the labelled-soundness consumer from 'not as a repair to the fold' to 'never': the sigAt context-fold cannot be repaired by strengthening the logic.",
+    "Marin-Morales-Strassburger labIK-le as a direct source for a CS5 system: the base logic is IK. Section 4 contains explicit derivations of k3, k4, k5 in the system. Restricting labIK-le to recover CK is not addressed by the paper and is not obviously possible, since the le-mediated id/impL/boxL rules together with F1/F2 are precisely what force k3 and k4.",
+    "Relying on Marin-Morales-Strassburger for a conservativity or theory-exclusion theorem: the paper states none. What it does supply is methodological -- Remark 7.3 is a worked demonstration that the system is precise enough to FAIL on a non-theorem, which is the shape an exclusion argument needs, and Theorem 7.2 item 4 makes syntax and semantics coincide exactly for the IK family.",
+    "Round 1's judgement that a product/two-label semantic witness is circular: correct for cs5FC models, but NOT for IS5 models, because IS5 completeness is already landed in CSLib and CS5 subset IS5 is a literal schema inclusion (machine-checked). The product model also handles the whole-type propositional core over Proposition (Atom + Atom), including genuinely mixed formulas, which is exactly what every relabeling retraction of round 1 could not."
   ]
 }

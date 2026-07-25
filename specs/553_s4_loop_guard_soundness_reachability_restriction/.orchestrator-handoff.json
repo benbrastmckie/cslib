@@ -1,35 +1,37 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "research",
-  "status": "researched",
-  "summary": "The keyed S4 soundness theorem is FALSE, not merely hard: a machine-checked counterexample was found (a formula of node-size 19 that modalTableauS4Keyed closes but which has an explicit 3-world reflexive-transitive countermodel). The candidate fix (restricting the guard to ReflTransGen-reachable candidates) is rejected: measurement shows 96.7% of all blocking decisions target non-reachable worlds, so the restriction makes the world bound false, not merely unproven. No local guard edit reconciles termination with soundness; the driver definition must change.",
+  "phase": "plan",
+  "status": "planned",
+  "phases_completed": 0,
+  "phases_total": 15,
+  "summary": "Route P (settled-context scheduling) planned across 15 phases, 42 hours. The plan does not edit blockingWorldS4Keyed's comparison predicate at all; it changes when a minting shape may fire. Research risk (c) is discharged by replacing the report's recursive per-world settledness predicate with a global, non-recursive one: a mint fires only when no non-minting rule can fire anywhere on the branch. That is decidable by direct computation, strictly stronger than the per-world condition, and carries no well-foundedness obligation -- which matters because the accessibility record cannot supply one (mint edges point to strictly larger fresh worlds but redirect edges may point to smaller ones, and reflexive self-blocks are permitted, so the predecessor relation can cycle). The ordered stepper is built as a parallel definition so the landed completeness line stays green at every checkpoint; the superseded driver is retired only in the final phase, with a proved replacement for every deletion.",
   "artifacts": [
     {
-      "type": "report",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/01_s4-keyed-guard-soundness-falsified.md"
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
     }
   ],
-  "blockers": [
-    {
-      "description": "modalTableauS4Keyed_sound cannot be proved because it is false. Its downstream consumers (successor phase, and the decidability half of instDecidableS4Valid) are therefore unreachable via this driver and must not be attempted. Repairing the algorithm requires a driver re-architecture (Route P: settled-context scheduling plus a weakened propagation-adequacy soundness invariant), which carries a re-proof obligation on the already-landed keyed completeness line. This exceeds a guard patch and should be scoped as its own task.",
-      "phase": "research",
-      "severity": "hard"
-    }
+  "blockers": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
   ],
-  "next_action_hint": "plan",
-  "files_modified": [],
   "decisions_made": [
-    "Rejected the reachability restriction: at mint time acc edges point parent-to-child, so ReflTransGen-from-source yields only the source and its own descendants, which is the complement of the set loop-checking must block against.",
-    "Established that the termination obligation (guard 'none' must imply global key freshness) and the soundness obligation (guard 'some' must imply the target absorbs all future propagation from the source) demand incompatible comparison objects, so no conjunct added to blockingWorldS4Keyed can work.",
-    "Identified the counterexample's mechanism as two independent defects: staleness (comparison against recorded birth keys rather than live content) and absence of a reachability restriction; fixing staleness alone does not fix the edge's semantic justification.",
-    "Recommended keeping modalTableauS4Keyed_complete (an over-eager guard only helps completeness) and landing a documentation correction that records the counterexample, since FrameCompleteness.lean currently mis-describes the soundness half as merely 'deferred'.",
-    "Discovered a new verification channel: #eval works from a plain importing file outside the Tableau directory's module boundary, which is what made the empirical falsification possible."
+    "Phase 1 lands the counterexample as a permanent CslibTests/S4LoopGuardRegression.lean corpus BEFORE any code change, using the #guard_msgs in #eval idiom already established by CslibTests/TableauConformance.lean. #eval works from CslibTests/ but not from inside the Tableau directory, so the test surface, not a chained-rfl proof term, is the right home. Phase 1 asserts the CURRENT (unsound) CLOSED verdict marked KNOWN-UNSOUND so the checkpoint stays green; Phase 8 flips it.",
+    "Risk (c) resolved by a global mint-readiness predicate rather than the report's per-world recursive one. Enabled by modalApplyOneS4Rules (FrameRules.lean:158) returning .notApplicable when a persistent rule's output is empty, so settledness is expressible even though persistent formulas never enter the expanded set.",
+    "The ordered stepper's traversal is two-stage: findSome? over the non-mint candidate list first, falling back to the LITERAL old b.findSome? traversal. This yields modalStepBranchS4KeyedOrdered_eq_none_iff, which makes the completeness line's saturation step transfer definitionally instead of needing the modalHintikkaSetGen conjuncts re-derived from scratch. That lemma is the single largest cost reduction on risk (b).",
+    "Risk (a) is expected to be tractable: modalExpMeasure_step_lt_S4Keyed (LoopChecking.lean:6455) consumes only 'selected sf is in the branch', 'sf is not in the expanded set', and the result-shape case split -- it never uses which sf. The traversal shape matters in exactly one place, the projection bridge modalStepBranchS4Keyed_proj_stepBranchGen (:6345), which has exactly one consumer. Phase 5 replaces the bridge, not the measure argument.",
+    "Phase 8 is an explicit abort gate: the reordering must be shown empirically to open the counterexample, and the size-<=6 sweep must show zero open-to-closed verdict changes, BEFORE any soundness proof work is invested.",
+    "The soundness invariant weakening is additive: branchSatisfiableIn (FrameSoundness.lean:111) is left exactly as is and remains what K/T/B/5 consume; branchPropAdequateIn is a new, strictly weaker sibling used only by the S4 keyed line."
+  ],
+  "flagged_theorem_changes": [
+    "Phase 14 ADDS modalTableauS4KeyedOrdered_complete beside the landed modalTableauS4Keyed_complete (FrameCompleteness.lean:4249); the landed theorem is not weakened.",
+    "Phase 15 is the only destructive phase: it deletes modalStepBranchS4Keyed, modalExpandBranchesS4Keyed, modalTableauS4Keyed, modalTableauS4Keyed_complete and their stepper-specific support lemmas -- each with a proved ordered replacement. Removal-with-replacement, never weakening. If any consumer lacks a counterpart, the declaration is retained and the gap reported.",
+    "Phase 6 states that if keysUpdate_preserves_keysDistinct or blockingWorldS4Keyed_none_fresh needs weakening, that contradicts the plan's central claim and must be escalated rather than worked around.",
+    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement; Phase 10 in particular names its hardest obligation and mandates [BLOCKED] escalation over a stub."
   ],
   "dead_ends": [
-    "Restricting blockingWorldS4Keyed to ReflTransGen acc.hasEdge candidates: guard fires on ~3% of current blocks; world bound becomes false.",
-    "Restricting to ancestors of the source: soundness needs r(f lbl)(f wBlock) but an ancestor supplies the converse, and S4 is not symmetric.",
-    "Conjunctive guard (recorded key AND live set must both match): kills the found counterexample but weakens the 'none' contract, so keysDistinct and the pigeonhole bound die.",
-    "Blocking without adding the redirect edge: sound and termination-preserving, but modalHintikkaSetGen conjuncts 3 and 4 demand an acc.hasEdge witness for every F(box phi)@w, so no open branch is ever Hintikka and the completeness line becomes vacuous.",
-    "Relocating f in the given arbitrary model to justify the redirect edge: f wBlock is pinned by wBlock's own formulas and pre-existing edges; relocation requires rebuilding f over wBlock's whole subtree, i.e. a filtration/bisimulation re-architecture."
+    "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
+    "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research."
   ]
 }

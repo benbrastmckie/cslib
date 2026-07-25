@@ -3771,6 +3771,57 @@ lemma modalStepBranchS4_preserves_eNodup (φ₀ : Proposition Atom)
     exact hnodup
   · rw [hres] at hsf; simp at hsf
 
+/-- **`eNodup`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_eNodup`: fully rule-agnostic (only the top-level `RuleResult`
+constructor shape matters), so the selected formula's identity plays no role beyond `sf ∉ e`,
+which `modalStepBranchS4KeyedOrdered_selected_mem` supplies directly. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_eNodup (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys'))
+    (hnodup : e.Nodup) :
+    ∀ e' ∈ newExps, e'.Nodup := by
+  obtain ⟨sf, hsfmem, hsfnotmem, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsfnotmem hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    obtain ⟨x, -, rfl⟩ := List.mem_map.mp he'
+    exact List.Nodup.append hnodup (List.nodup_singleton sf)
+      (fun a ha hmem => by simp only [List.mem_singleton] at hmem; exact hsfnotmem (hmem ▸ ha))
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact hnodup
+  · rw [hres] at hsf; simp at hsf
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- `outDeg` under `addEdge` at the matching source: local re-derivation of `FmpMeasure.lean`'s
 `private lemma outDeg_addEdge_self` (unavailable across files). -/

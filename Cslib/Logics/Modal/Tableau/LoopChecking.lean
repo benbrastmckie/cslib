@@ -1849,6 +1849,57 @@ lemma modalStepBranchS4Keyed_branch_superset (φ₀ : Proposition Atom)
   · rw [hres] at hsf
     simp at hsf
 
+/-- **Ordered-driver form of `modalStepBranchS4Keyed_branch_superset`.** Every branch the
+ordered stepper produces is still a superset of the pre-step branch, by the identical
+argument: the shared body's output always has the literal shape `X ++ b`, regardless of which
+formula was selected or which of the four result shapes fired. Extracted via
+`modalStepBranchS4KeyedOrdered_selected_mem` in place of the direct `findSome?` extraction;
+the case split on `result` below is otherwise verbatim. -/
+lemma modalStepBranchS4KeyedOrdered_branch_superset (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ x ∈ b, x ∈ b' := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_map] at hb'
+    obtain ⟨br, -, rfl⟩ := hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨rfl, -, -, -⟩ := hsf
+    intro b' hb' x hx
+    simp only [List.mem_singleton] at hb'
+    subst hb'
+    exact List.mem_append_right _ hx
+  · rw [hres] at hsf
+    simp at hsf
+
 omit [DecidableEq Atom] [Hashable Atom] in
 /-- **Reusable result-shape-agnostic `keys'` extraction**: whatever `result` turns out to be
 (linear/branching/persistent/notApplicable), the 4th tuple component of
@@ -1950,6 +2001,121 @@ lemma modalStepBranchS4_preserves_keyLowerBd (φ₀ : Proposition Atom)
       simp only [hblock] at hwk
       exact hold b' hb' w k hwk
   case neg.pos.diamond =>
+    have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · -- unblocked: minting shape, `keys'` gains the new key
+      simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hmint := modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label
+        rw [hresulteq.trans hmint] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hsub := successorBirthContent_diamondPos_subset_relevantSetFinset φ₀ b acc sf.label ψ
+          hb hsfmem' _ hmint
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, hkeq2⟩ := hwk
+        subst hweq
+        subst hkeq2
+        rw [hb']
+        exact hsub
+    · -- blocked: no new key, old-key argument suffices
+      simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+
+/-- **`keyLowerBd`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_keyLowerBd` against the ordered stepper: the argument never uses
+"`sf` is the first applicable formula in `b`", only "`sf ∈ b`, `sf ∉ e`, and this specific rule
+application produced `keys'`" -- exactly what `modalStepBranchS4KeyedOrdered_selected_mem`
+supplies. Uses the ordered form of the branch-superset fact
+(`modalStepBranchS4KeyedOrdered_branch_superset`) for the OLD-key half of the argument. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_keyLowerBd (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hLB : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → k ⊆ relevantSetFinset φ₀ b' w := by
+  have hsuper := modalStepBranchS4KeyedOrdered_branch_superset φ₀ b e acc keys newBs newExps
+    newAcc keys' hstep
+  have hold : ∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b' w :=
+    fun b' hb' w k hwk => (hLB w k hwk).trans (relevantSetFinset_mono φ₀ b b' w (hsuper b' hb'))
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro b' hb' w k hwk
+  rw [hkeq] at hwk
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at hwk
+  all_goals first
+    | exact hold b' hb' w k hwk
+    | skip
+  case neg.box =>
+    have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · -- unblocked: minting shape, `keys'` gains the new key
+      simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hold b' hb' w k hwk
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hmint := modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label
+        rw [hresulteq.trans hmint] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hsub := successorBirthContent_boxNeg_subset_relevantSetFinset φ₀ b acc sf.label ψ
+          hb hsfmem' _ hmint
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨hweq, hkeq2⟩ := hwk
+        subst hweq
+        subst hkeq2
+        rw [hb']
+        exact hsub
+    · -- blocked: no new key, old-key argument suffices
+      simp only [hblock] at hwk
+      exact hold b' hb' w k hwk
+  case pos.diamond =>
     have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
         SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
     rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock

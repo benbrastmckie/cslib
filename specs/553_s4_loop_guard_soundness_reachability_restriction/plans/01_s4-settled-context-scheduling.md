@@ -111,7 +111,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 1: Counterexample Regression Corpus [IN PROGRESS]
+### Phase 1: Counterexample Regression Corpus [COMPLETED]
 
 - **Goal:** Make the falsified behaviour a permanent, executable repository test so it can never
   silently reappear. This lands **before** any code change, so the test documents the defect
@@ -150,7 +150,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 2: Documentation Correction [NOT STARTED]
+### Phase 2: Documentation Correction [COMPLETED]
 
 - **Goal:** Stop the next reader from re-attempting a false theorem. `FrameCompleteness.lean:4162`
   currently describes the decidability half as merely "deferred: it needs the soundness line,
@@ -179,7 +179,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 3: Decidable Mint-Readiness Predicate [NOT STARTED]
+### Phase 3: Decidable Mint-Readiness Predicate [COMPLETED]
 
 - **Goal:** Discharge research risk (c) by giving "all propagation into `w` has settled" a
   decidable, non-recursive formulation with no well-foundedness obligation.

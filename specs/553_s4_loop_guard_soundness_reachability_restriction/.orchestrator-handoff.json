@@ -1,37 +1,53 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "plan",
-  "status": "planned",
-  "phases_completed": 0,
+  "phase": "implement",
+  "status": "partial",
+  "phases_completed": 3,
   "phases_total": 15,
-  "summary": "Route P (settled-context scheduling) planned across 15 phases, 42 hours. The plan does not edit blockingWorldS4Keyed's comparison predicate at all; it changes when a minting shape may fire. Research risk (c) is discharged by replacing the report's recursive per-world settledness predicate with a global, non-recursive one: a mint fires only when no non-minting rule can fire anywhere on the branch. That is decidable by direct computation, strictly stronger than the per-world condition, and carries no well-foundedness obligation -- which matters because the accessibility record cannot supply one (mint edges point to strictly larger fresh worlds but redirect edges may point to smaller ones, and reflexive self-blocks are permitted, so the predecessor relation can cycle). The ordered stepper is built as a parallel definition so the landed completeness line stays green at every checkpoint; the superseded driver is retired only in the final phase, with a proved replacement for every deletion.",
+  "summary": "Phases 1-3 of Route P landed and committed, each individually build/lint/lean_verify-clean: the permanent counterexample regression corpus (CslibTests/S4LoopGuardRegression.lean), the corrected blockingWorldS4Keyed/S4Keyed-completeness documentation (stating soundness is FALSE, not deferred), and the decidable, non-recursive mint-readiness predicate (modalMintShape, modalNonMintCandidates + 3 lemmas) in LoopChecking.lean. Phase 4 (ordered stepper + 3 structural lemmas) was designed in detail but not started -- see the continuation handoff for the worked-out definition and proof strategy.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md"
     }
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
+    "CslibTests.lean",
+    "CslibTests/S4LoopGuardRegression.lean",
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md"
   ],
   "decisions_made": [
-    "Phase 1 lands the counterexample as a permanent CslibTests/S4LoopGuardRegression.lean corpus BEFORE any code change, using the #guard_msgs in #eval idiom already established by CslibTests/TableauConformance.lean. #eval works from CslibTests/ but not from inside the Tableau directory, so the test surface, not a chained-rfl proof term, is the right home. Phase 1 asserts the CURRENT (unsound) CLOSED verdict marked KNOWN-UNSOUND so the checkpoint stays green; Phase 8 flips it.",
-    "Risk (c) resolved by a global mint-readiness predicate rather than the report's per-world recursive one. Enabled by modalApplyOneS4Rules (FrameRules.lean:158) returning .notApplicable when a persistent rule's output is empty, so settledness is expressible even though persistent formulas never enter the expanded set.",
-    "The ordered stepper's traversal is two-stage: findSome? over the non-mint candidate list first, falling back to the LITERAL old b.findSome? traversal. This yields modalStepBranchS4KeyedOrdered_eq_none_iff, which makes the completeness line's saturation step transfer definitionally instead of needing the modalHintikkaSetGen conjuncts re-derived from scratch. That lemma is the single largest cost reduction on risk (b).",
-    "Risk (a) is expected to be tractable: modalExpMeasure_step_lt_S4Keyed (LoopChecking.lean:6455) consumes only 'selected sf is in the branch', 'sf is not in the expanded set', and the result-shape case split -- it never uses which sf. The traversal shape matters in exactly one place, the projection bridge modalStepBranchS4Keyed_proj_stepBranchGen (:6345), which has exactly one consumer. Phase 5 replaces the bridge, not the measure argument.",
-    "Phase 8 is an explicit abort gate: the reordering must be shown empirically to open the counterexample, and the size-<=6 sweep must show zero open-to-closed verdict changes, BEFORE any soundness proof work is invested.",
-    "The soundness invariant weakening is additive: branchSatisfiableIn (FrameSoundness.lean:111) is left exactly as is and remains what K/T/B/5 consume; branchPropAdequateIn is a new, strictly weaker sibling used only by the S4 keyed line."
+    "Phase 1 lands the counterexample as a permanent CslibTests/S4LoopGuardRegression.lean corpus BEFORE any code change, using the #guard_msgs in #eval idiom already established by CslibTests/TableauConformance.lean. Asserts the CURRENT (unsound) CLOSED verdict marked KNOWN-UNSOUND so the checkpoint stays green; Phase 8 flips it. Confirmed green under both scoped build and a full `lake test` run (exit 0).",
+    "Risk (c) resolved by a global mint-readiness predicate (modalNonMintCandidates) rather than the report's per-world recursive one. Enabled by modalApplyOneS4Rules (FrameRules.lean:158) returning .notApplicable when a persistent rule's output is empty, so settledness is expressible even though persistent formulas never enter the expanded set. Landed as Phase 3 with three proved lemmas (subset, not_mem_expanded, eq_nil_iff).",
+    "The ordered stepper's traversal is two-stage: findSome? over the non-mint candidate list first, falling back to the LITERAL old b.findSome? traversal -- specifically by calling modalStepBranchS4Keyed itself as the fallback arm (not re-deriving a second b.findSome? inline), so modalStepBranchS4KeyedOrdered_eq_none_iff's none-case is definitional. This yields the eq_none_iff lemma that makes the completeness line's saturation step transfer definitionally. Designed in detail (see continuation handoff) but NOT YET IMPLEMENTED.",
+    "Risk (a) is expected to be tractable: modalExpMeasure_step_lt_S4Keyed (LoopChecking.lean, now offset by Phase 3's +138 lines) consumes only 'selected sf is in the branch', 'sf is not in the expanded set', and the result-shape case split -- it never uses which sf. Phase 5 replaces the projection bridge, not the measure argument. Not yet attempted.",
+    "Phase 8 is an explicit abort gate: the reordering must be shown empirically to open the counterexample, and the size-<=6 sweep must show zero open-to-closed verdict changes, BEFORE any soundness proof work is invested. Not yet reached.",
+    "The soundness invariant weakening is additive: branchSatisfiableIn (FrameSoundness.lean:111) is left exactly as is and remains what K/T/B/5 consume; branchPropAdequateIn is a new, strictly weaker sibling used only by the S4 keyed line. Not yet reached (Phase 9).",
+    "List.filter_subset (Mathlib) is NOT 'filter result subset of original list' -- that lemma is List.filter_subset' or List.filter_subset_self. Caught and fixed during Phase 3; documented in the Phase 4 handoff's watch-outs so a future dispatch does not rediscover it."
   ],
   "flagged_theorem_changes": [
-    "Phase 14 ADDS modalTableauS4KeyedOrdered_complete beside the landed modalTableauS4Keyed_complete (FrameCompleteness.lean:4249); the landed theorem is not weakened.",
-    "Phase 15 is the only destructive phase: it deletes modalStepBranchS4Keyed, modalExpandBranchesS4Keyed, modalTableauS4Keyed, modalTableauS4Keyed_complete and their stepper-specific support lemmas -- each with a proved ordered replacement. Removal-with-replacement, never weakening. If any consumer lacks a counterpart, the declaration is retained and the gap reported.",
-    "Phase 6 states that if keysUpdate_preserves_keysDistinct or blockingWorldS4Keyed_none_fresh needs weakening, that contradicts the plan's central claim and must be escalated rather than worked around.",
-    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement; Phase 10 in particular names its hardest obligation and mandates [BLOCKED] escalation over a stub."
+    "Phase 14 ADDS modalTableauS4KeyedOrdered_complete beside the landed modalTableauS4Keyed_complete (FrameCompleteness.lean); the landed theorem is not weakened. Not yet reached.",
+    "Phase 15 is the only destructive phase: it deletes modalStepBranchS4Keyed, modalExpandBranchesS4Keyed, modalTableauS4Keyed, modalTableauS4Keyed_complete and their stepper-specific support lemmas -- each with a proved ordered replacement. Removal-with-replacement, never weakening. Not yet reached.",
+    "Phase 6 states that if keysUpdate_preserves_keysDistinct or blockingWorldS4Keyed_none_fresh needs weakening, that contradicts the plan's central claim and must be escalated rather than worked around. Not yet reached.",
+    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-3: lean_verify on all new lemmas reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout."
   ],
   "dead_ends": [
     "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
-    "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research."
-  ]
+    "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research. Confirmed Phases 1-3 made zero edits to it beyond its docstring (Phase 2)."
+  ],
+  "continuation_context": {
+    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-4-handoff-20260725.md",
+    "phases_completed": 3,
+    "phases_total": 15
+  },
+  "plan_markers_verified": true
 }

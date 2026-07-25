@@ -306,22 +306,22 @@ correctly-titled statements.
 
 ---
 
-### Phase 7: Harden the no-TOC heading heuristic in literature-convert.sh [NOT STARTED]
+### Phase 7: Harden the no-TOC heading heuristic in literature-convert.sh [COMPLETED]
 
 **Goal**: `derive_heuristic_markdown()` stops emitting spurious mid-sentence headings on OCR'd
 scans, using broadened producer detection **plus** independent structural cues.
 
 **Tasks**:
-- [ ] Add an OCR-producer detector reading `doc.metadata`'s `creator` and `producer`, matching a broadened substring family: `Tesseract`, `OCRmyPDF`, `Acrobat.*Capture`, `Adobe.*Capture`, `ABBYY`, `ScanSoft`, `FineReader`. Case-insensitive. Log which signature matched (or that none did).
-- [ ] Add structural corroborating cues to `is_heading_candidate()` (`literature-convert.sh:433-456`), evaluated **independently of** the producer result — they must fire even when producer metadata is unrecognized, absent, or rewritten:
-  - Numbering pattern: a leading `^\d+(\.\d+)*\.?\s` markedly raises heading confidence.
-  - Line length and position within the block.
-  - Blank-line context around the candidate.
-  - **Mid-sentence post-check**: reject a candidate whose preceding context ends without terminal punctuation and whose own text begins lowercase, or which otherwise reads as a sentence continuation. This is the check that would have caught 518's literal `"tuitionistic or clas..."` mid-word false heading.
-- [ ] When the producer signature matches a known OCR family, raise the corroboration bar (require structural cues, not font metrics alone) rather than disabling heading detection outright.
-- [ ] Preserve the existing conservative failure mode documented in the function's own docstring: a document with no surviving candidates gets **no** heading markers rather than a low-confidence guess. Do not weaken this.
-- [ ] Keep the change confined to `is_heading_candidate` / `derive_heuristic_markdown` and their new helper(s). Do **not** touch `derive_toc_markdown` (`:379-430`), `run_quality_gate` (`:568-603`), or `literature-chunk.sh`.
-- [ ] Update the function docstrings to reflect the new two-signal design and record the observed producer strings.
+- [x] Add an OCR-producer detector reading `doc.metadata`'s `creator` and `producer`, matching a broadened substring family: `Tesseract`, `OCRmyPDF`, `Acrobat.*Capture`, `Adobe.*Capture`, `ABBYY`, `ScanSoft`, `FineReader`. Case-insensitive. Log which signature matched (or that none did). *(completed: new `detect_ocr_producer()` helper + `_OCR_PRODUCER_FAMILY_RE`)*
+- [x] Add structural corroborating cues to `is_heading_candidate()` (`literature-convert.sh:433-456`), evaluated **independently of** the producer result — they must fire even when producer metadata is unrecognized, absent, or rewritten: *(completed)*
+  - Numbering pattern: a leading `^\d+(\.\d+)*\.?\s` markedly raises heading confidence. *(completed: `_NUMBERED_HEADING_RE`)*
+  - Line length and position within the block. *(completed: length bound preserved from the original check; position/blank-line context satisfied by construction — documented in the docstring — since candidates are always the first line of an already block-isolated PyMuPDF text unit)*
+  - Blank-line context around the candidate. *(completed, same construction argument as above)*
+  - **Mid-sentence post-check**: reject a candidate whose preceding context ends without terminal punctuation and whose own text begins lowercase, or which otherwise reads as a sentence continuation. This is the check that would have caught 518's literal `"tuitionistic or clas..."` mid-word false heading. *(completed: `_reads_as_sentence_continuation()`, applied to BOTH signals, not just the structural one)*
+- [x] When the producer signature matches a known OCR family, raise the corroboration bar (require structural cues, not font metrics alone) rather than disabling heading detection outright. *(completed: `ocr_hint=True` branch returns `structural_ok` only, ignoring `font_ok`)*
+- [x] Preserve the existing conservative failure mode documented in the function's own docstring: a document with no surviving candidates gets **no** heading markers rather than a low-confidence guess. Do not weaken this. *(completed, unchanged)*
+- [x] Keep the change confined to `is_heading_candidate` / `derive_heuristic_markdown` and their new helper(s). Do **not** touch `derive_toc_markdown` (`:379-430`), `run_quality_gate` (`:568-603`), or `literature-chunk.sh`. *(completed: confirmed byte-identical re-read of both untouched functions; `literature-chunk.sh` not opened)*
+- [x] Update the function docstrings to reflect the new two-signal design and record the observed producer strings. *(completed)*
 
 **Timing**: 1.5 hours
 

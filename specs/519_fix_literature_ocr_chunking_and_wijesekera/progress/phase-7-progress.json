@@ -1,0 +1,19 @@
+{
+  "phase": 7,
+  "phase_name": "Harden the no-TOC heading heuristic in literature-convert.sh",
+  "started_at": "2026-07-25T08:10:00Z",
+  "last_updated": "2026-07-25T08:50:00Z",
+  "objectives": [
+    {"id": 1, "description": "Add OCR-producer detector (broadened family)", "status": "done", "files_touched": [".claude/scripts/literature-convert.sh"]},
+    {"id": 2, "description": "Add structural corroborating cues to is_heading_candidate", "status": "done", "files_touched": [".claude/scripts/literature-convert.sh"]},
+    {"id": 3, "description": "Raise corroboration bar when producer matches known OCR family", "status": "done", "files_touched": [".claude/scripts/literature-convert.sh"]},
+    {"id": 4, "description": "Preserve conservative no-candidates failure mode", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Confine changes; leave derive_toc_markdown/run_quality_gate/literature-chunk.sh untouched", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Update docstrings for two-signal design", "status": "done", "files_touched": [".claude/scripts/literature-convert.sh"]}
+  ],
+  "current_objective": 6,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "notes": "9-case standalone unit test suite run against extracted function definitions (bypassing the env-var-gated MAIN block) confirmed: Acrobat Capture + OCRmyPDF/Tesseract detection, non-OCR non-detection, structural-only heading acceptance, mid-sentence bold/large rejection with NO producer metadata (proves cue path not producer-gated -- explicit Phase 7 verification criterion), font-only rejection under ocr_hint=True without numbering, structural acceptance under ocr_hint=True, font-only acceptance preserved for non-OCR docs, and empty-line rejection. bash -n and py_compile both pass. derive_toc_markdown and run_quality_gate/column_interleaving_flagged/sentence_boundary_glue_count re-read byte-identical to pre-edit content (line numbers unchanged, only shifted down by the insertion)."
+}

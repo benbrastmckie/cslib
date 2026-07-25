@@ -68,12 +68,11 @@ at Phase 1 landing time (27 green, 16 red), rather than the plan's rounded "44 r
 *which* formulas were originally red is unaffected by this counting difference; only the row
 arithmetic differs. Rows are repaired by the implementation phases named inline below as they
 land: Phase 2 flipped the 3 propositional rows (30 green / 13 red as of Phase 2); Phase 6/7
-flipped 12 of the remaining 13 temporal rows (42 green / 1 red as of this reconciliation). The
-one still-red row (`𝐇p → 𝐇𝐇p`, past transitivity) is a newly discovered defect, independent of
-the Deliverable 3/4 cap-removal work Phase 7 was scoped to, and is documented inline at its row
-below rather than silently left under a stale "flips in Phase 7" annotation. Row-by-row
-annotations record which phase flipped (or will flip) each row; Phase 8 removes those
-annotations once the whole corpus is green, converting this file into a pure regression guard.
+flipped all 13 remaining temporal rows (43 green / 0 red as of this reconciliation), the last one
+(`𝐇p → 𝐇𝐇p`, past transitivity) via a direction fix to `allPastPosAt` discovered while
+re-verifying the Deliverable 3/4 cap-removal work. Row-by-row annotations record which phase
+flipped each row; Phase 8 removes those annotations once the whole corpus's green status is
+stable, converting this file into a pure regression guard.
 -/
 
 namespace CslibTests.TableauConformance
@@ -97,9 +96,7 @@ def intVerdict : IntTableauResult Nat → String
 /-! ## Temporal Corpus (`temporalTableau`, `Formula Nat`)
 
 24 rows: originally 11 green, 13 red (defects named in the task's six deliverables plus the
-Finding 2b/2c seventh defect). As of this reconciliation: 23 green, 1 red (`𝐇p → 𝐇𝐇p`, a newly
-discovered past-transitivity defect in `allPastPosAt`, out of scope for this dispatch — see its
-row below). -/
+Finding 2b/2c seventh defect). As of this reconciliation: all 24 rows green. -/
 
 section TemporalCorpus
 
@@ -152,14 +149,12 @@ def someFutureN : Nat → Formula Nat → Formula Nat
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐆 tp → 𝐆 (𝐆 tp)))
 
--- DEFECT (past transitivity): mathematically valid (dual of Gp → GGp) but still OPEN, a newly
--- discovered defect distinct from the Branch.lean/SignedFormula.lean ancestorTimes bug fixed
--- alongside this reconciliation. Root cause: Rules.lean's allPastPosAt reuses the future-only
--- TimeOrdering.ancestorTimes to decide T(Hφ) propagation, checking whether `t` is in `t_anc`'s
--- forward light-cone instead of whether `t_anc` is in `t`'s forward light-cone (the direction
--- needed to propagate a past-obligation backward). Out of this dispatch's authorized scope
--- (Branch.lean/SignedFormula.lean only); raised as a new blocker, not fixed here.
-/-- info: "OPEN" -/
+-- Past transitivity, Deliverable 2(iii): CLOSED (flipped in Phase 7, via the allPastPosAt
+-- direction fix: it previously reused the future-only TimeOrdering.ancestorTimes exactly as
+-- allFuturePosAt does, checking whether `t` is in `t_anc`'s forward light-cone; propagating a
+-- past obligation T(Hφ)@t_anc backward instead needs the reversed check, whether `t_anc` is in
+-- `t`'s forward light-cone).
+/-- info: "CLOSED" -/
 #guard_msgs in
 #eval temporalVerdict (temporalTableau (𝐇 tp → 𝐇 (𝐇 tp)))
 

@@ -324,35 +324,68 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 6: Loop Invariant and Fuel-Sufficiency Chain (risk a, part 2) [IN PROGRESS]
+### Phase 6: Loop Invariant and Fuel-Sufficiency Chain (risk a, part 2) [COMPLETED]
 
 - **Goal:** Re-establish `S4LoopInv` preservation and the world-bound / fuel chain against the
   ordered stepper. The report argues these survive because the candidate set stays global and only
   the *timing* changes (delaying a mint can produce a different key, never a duplicate one).
   **Verify this; do not assume it.**
 - **Tasks:**
-  - [ ] Derive `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`, mirroring
+  - [x] Derive `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`, mirroring
     `modalStepBranchS4_preserves_S4LoopInv` (LoopChecking.lean:4624), including the two
     proof-internal auxiliaries it threads (`keysWorldsKnown` at :2858 and `worldsContiguousS4`
-    at :3553).
-  - [ ] Confirm `keysUpdate_preserves_keysDistinct` (LoopChecking.lean:529) and
+    at :3553). *(deviation: the plan undersold this as a single task -- it required ordered
+    analogues of TEN separate per-field sub-lemmas plus two proof-internal auxiliaries, each
+    landed and committed individually across ten dispatches: `keysDistinct` (escalation trigger,
+    attempted first, PASSED), `keyLowerBd`, `keysInUniverse`, `keysTotal`, `eNodup`,
+    `keysWorldsKnown`, `outDegEq`, `accFresh`, `accKnown`, `worldsContiguousS4`, `eClosure`,
+    `bClosure`, then the wrapper theorem itself -- see the Phase 6 handoff
+    (`handoffs/phase-6-handoff-20260725.md`) for the full sub-lemma inventory this was scoped
+    against. Two additional ordered-form auxiliaries not named in the plan text were also
+    required as prerequisites: `modalStepBranchS4KeyedOrdered_branch_superset` (needed by
+    `keyLowerBd`/`keysWorldsKnown`/`worldsContiguousS4`) and
+    `modalStepBranchS4KeyedOrdered_keys_subset` (needed by `keysTotal`).)*
+  - [x] Confirm `keysUpdate_preserves_keysDistinct` (LoopChecking.lean:529) and
     `blockingWorldS4Keyed_none_fresh` (LoopChecking.lean:501) are consumed unchanged — the guard
     predicate is untouched by this plan, so their statements must not need weakening. If either
     does need weakening, stop: that would contradict the plan's central claim and must be
-    escalated, not worked around.
-  - [ ] Re-derive the ordered analogues of `modalKnownWorlds_length_le_worldBoundS4`
+    escalated, not worked around. *(Confirmed: `modalStepBranchS4KeyedOrdered_preserves_
+    keysDistinct` — the escalation-trigger sub-lemma, attempted first per the handoff's
+    recommendation — calls `keysUpdate_preserves_keysDistinct` with its EXACT original signature,
+    no new hypothesis, no weakened conclusion. `blockingWorldS4Keyed_none_fresh` is likewise
+    consumed unchanged by the minting-shape sub-lemmas. No contradiction surfaced; the plan's
+    central claim holds.)*
+  - [x] Re-derive the ordered analogues of `modalKnownWorlds_length_le_worldBoundS4`
     (LoopChecking.lean:3778) and `modalStepBranchS4_worldBound` (LoopChecking.lean:3816) only if
-    their existing statements do not apply verbatim; prefer reuse.
-  - [ ] Confirm `modalExpMeasure_entry_le_fuelS4` (LoopChecking.lean:5433) applies unchanged —
+    their existing statements do not apply verbatim; prefer reuse. *(Not needed: both are stated
+    purely over the pre-step `b`/`keys` — a pigeonhole cardinality argument with no reference to
+    `modalStepBranchS4Keyed`/`modalStepBranchS4KeyedOrdered` at all — so
+    `modalStepBranchS4KeyedOrdered_preserves_bClosure` consumes `modalStepBranchS4_worldBound`
+    directly, unchanged, as its minting-case pigeonhole prerequisite.)*
+  - [x] Confirm `modalExpMeasure_entry_le_fuelS4` (LoopChecking.lean:5433) applies unchanged —
     it is stated at the entry point over `modalUniverseS4 φ₀`, independent of traversal.
-- **Timing:** 3 hours
+    *(Confirmed: its statement and proof mention neither `modalStepBranchS4Keyed` nor
+    `modalStepBranchS4KeyedOrdered` — it bounds the measure of the SINGLE-formula entry worklist
+    `[[⟨.neg, φ₀, 0⟩]]`, a fact about `modalUniverseS4 φ₀`/`modalWorldBoundS4 φ₀` alone. Applies
+    verbatim to the ordered driver.)*
+- **Timing:** 3 hours (actual: substantially longer, per the handoff's own sizing warning --
+  ten sub-lemmas plus two auxiliaries plus the wrapper, twelve individually-committed dispatches)
 - **Depends on:** 5
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/LoopChecking.lean`
 - **Verification:**
-  - `lake build Cslib.Logics.Modal.Tableau.LoopChecking` succeeds
-  - Every new declaration sorry-free
-  - Explicit written confirmation in the phase notes that no landed statement was weakened
+  - `lake build Cslib.Logics.Modal.Tableau.LoopChecking` succeeds — confirmed after every one of
+    the twelve dispatches, and again after the final wrapper
+  - Every new declaration sorry-free — confirmed via `lean_verify` after every dispatch
+    (axiom list: `propext`/`Classical.choice`/`Quot.sound` only, no `sorryAx`) and via the
+    repo-wide `sorry` count (`git grep -c '^\s*sorry\s*$' -- Cslib`), unchanged at 5 throughout
+  - Explicit written confirmation in the phase notes that no landed statement was weakened —
+    see the two task-level confirmations above; no `S4LoopInv` field, no proof-internal
+    auxiliary, and neither `keysUpdate_preserves_keysDistinct` nor
+    `blockingWorldS4Keyed_none_fresh` required any weakening. `modalStepBranchS4Keyed` and all of
+    Phases 1-5's landed declarations remain byte-for-byte unchanged; whole-project consumers
+    `FrameCompleteness.lean`/`FrameSoundness.lean` still build (confirmed via scoped `lake build`
+    on both after the final wrapper).
 
 ---
 

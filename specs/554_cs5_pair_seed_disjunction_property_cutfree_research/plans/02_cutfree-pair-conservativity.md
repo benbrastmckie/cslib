@@ -440,24 +440,33 @@ collapse into a repository theorem, and land the `CS5 → IS5` transport lemmas.
 
 ## Stage B — Nested Sequent Syntax
 
-### Phase 6: Nested sequent structures and the `fm` translation [NOT STARTED]
+### Phase 6: Nested sequent structures and the `fm` translation [COMPLETED]
 
 **Goal**: Encode Arisaka–Das–Straßburger §2 eq. (2.1) and the corresponding-formula translation.
 
 **Tasks**:
-- [ ] Verify eq. (2.1) and the `fm` clauses against the recovered PDF before writing
-- [ ] Define mutual inductives `NestedLhs (Atom)` (`∅ | A• | [Φ] | Φ, Φ`) and `NestedRhs (Atom)`
+- [x] Verify eq. (2.1) and the `fm` clauses against the recovered PDF before writing *(verified
+      via both a direct PDF render and an independent `pdftotext -layout` extraction of the same
+      page; the latter drops the `□` glyph throughout, cross-checked against the former)*
+- [x] Define mutual inductives `NestedLhs (Atom)` (`∅ | A• | [Φ] | Φ, Φ`) and `NestedRhs (Atom)`
       (`A◦ | [Φ, Ψ]`) over `Cslib.Logic.Modal.Proposition Atom`, and `NestedFull := NestedLhs ×
       NestedRhs`. Two separate types, not one type with a well-formedness predicate: the
-      "exactly one output formula" invariant then holds by construction
-- [ ] Define `fm` on each: `fm(A•) = fm(A◦) = A`, `fm([Φ]) = ◇ fm(Φ)`, `fm([Φ, Ψ]) = □ (fm(Φ, Ψ))`,
+      "exactly one output formula" invariant then holds by construction *(landed as two ordinary
+      successive inductives, not a Lean `mutual` block, since `Ψ`'s grammar depends on `Φ` but not
+      conversely -- documented in the module docstring)*
+- [x] Define `fm` on each: `fm(A•) = fm(A◦) = A`, `fm([Φ]) = ◇ fm(Φ)`, `fm([Φ, Ψ]) = □ (fm(Φ, Ψ))`,
       `fm(∅) = ⊤`, `fm(Φ₁, Φ₂) = fm(Φ₁) ∧ fm(Φ₂)`, `fm(Φ, Ψ) = fm(Φ) → fm(Ψ)`
-- [ ] Land the Example 2.1 / Example 2.2 computations as `example`s, as executable documentation
-      that the encoding matches the source
-- [ ] Decide and document the comma treatment: `Φ, Φ` is a syntactic constructor, with
+- [x] Land the Example 2.1 / Example 2.2 computations as `example`s, as executable documentation
+      that the encoding matches the source *(deviation: the source has no separate "Example 2.2"
+      -- what follows Example 2.1 is Observation 2.2, whose own `Γ{∅}` computations are Phase 7's
+      explicit verification criterion, not Phase 6's; landed Example 2.1's two well-formed
+      computations plus the ill-formed-pairing non-expressibility note here)*
+- [x] Decide and document the comma treatment: `Φ, Φ` is a syntactic constructor, with
       associativity/commutativity/unit handled by explicit permutation lemmas rather than a
       quotient (matching how `Deriv`'s `List` contexts are handled elsewhere in the modal library)
-- [ ] `lake build` the new module
+      *(documented in the module docstring; no permutation lemmas landed yet since no downstream
+      phase consumes them, avoiding speculative unused declarations)*
+- [x] `lake build` the new module
 
 **Timing**: 2 hours
 

@@ -134,14 +134,20 @@ def fulfillEventualities (b : TBranch Atom) (ord : TimeOrdering)
 
 /-- Apply one expansion step to a branch, using the time ordering and eventuality tracker.
 
-Returns `some (newBranches, newExpandedSets, newOrd, newTracker)` if a formula was expanded,
-or `none` if the branch is saturated. -/
+Returns `some (newBranches, newExpandedSets, newOrd, newTrackers)` if a formula was expanded,
+or `none` if the branch is saturated. `newTrackers` carries one tracker per element of
+`newBranches` (same length, same order): for `.linear`/`.persistent` this is the singleton
+list of the one updated tracker; for `.branching` each output branch gets its **own**
+`registerEventualities`/`fulfillEventualities` pass over just that branch's new formulas, since
+e.g. `untlPos`'s two branches (`Rules.lean`) genuinely differ in which eventualities they
+fulfil vs. defer. -/
 def temporalStepBranch
     (b : TBranch Atom)
     (expanded : TBranch Atom)
     (ord : TimeOrdering)
     (tracker : EventualityTracker Atom) :
-    Option (List (TBranch Atom) × List (TBranch Atom) × TimeOrdering × EventualityTracker Atom) :=
+    Option (List (TBranch Atom) × List (TBranch Atom) × TimeOrdering ×
+      List (EventualityTracker Atom)) :=
   b.findSome? fun sf =>
     if expanded.any (· == sf) then none
     else
@@ -152,17 +158,19 @@ def temporalStepBranch
         let newTracker :=
           registerEventualities newForms tracker
           |> fulfillEventualities newB newOrd
-        some ([newB], [expanded ++ [sf]], newOrd, newTracker)
+        some ([newB], [expanded ++ [sf]], newOrd, [newTracker])
       | .branching branches =>
         let newBranches := branches.map (· ++ b)
-        some (newBranches, newBranches.map (fun _ => expanded ++ [sf]), newOrd, tracker)
+        let newTrackers := branches.map (fun br =>
+          registerEventualities br tracker |> fulfillEventualities (br ++ b) newOrd)
+        some (newBranches, newBranches.map (fun _ => expanded ++ [sf]), newOrd, newTrackers)
       | .persistent newForms =>
         -- Persistent: keep sf on branch (don't add to expanded), add consequences
         let newB := newForms ++ b
         let newTracker :=
           registerEventualities newForms tracker
           |> fulfillEventualities newB newOrd
-        some ([newB], [expanded], newOrd, newTracker)
+        some ([newB], [expanded], newOrd, [newTracker])
       | .notApplicable => none
 
 /-! ## Branch/Ordering Coupling: Single-Step Preservation -/
@@ -182,8 +190,8 @@ lemma temporalStepBranch_preserves
     (b expanded : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
     (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord)
     (newBs newExps : List (TBranch Atom)) (newOrd : TimeOrdering)
-    (newTracker : EventualityTracker Atom)
-    (h : temporalStepBranch b expanded ord tracker = some (newBs, newExps, newOrd, newTracker)) :
+    (newTrackers : List (EventualityTracker Atom))
+    (h : temporalStepBranch b expanded ord tracker = some (newBs, newExps, newOrd, newTrackers)) :
     TimeOrdering.InstantStrict newOrd ∧ ∀ nb ∈ newBs, OrdFreshWRT nb newOrd := by
   unfold temporalStepBranch at h
   obtain ⟨sf, hsfmem, hsfeq⟩ := List.exists_of_findSome?_eq_some h
@@ -294,13 +302,14 @@ def processNext
       | none =>
         -- Branch is saturated and open: return countermodel
         .openBranch b ord
-      | some (newBs, newExps, newOrd, newTracker) =>
-        -- Expanded: recurse with new branches
+      | some (newBs, newExps, newOrd, newTrackers) =>
+        -- Expanded: recurse with new branches (newTrackers is already one tracker per newBs
+        -- element, in order -- see temporalStepBranch's docstring)
         temporalExpandBranches
           (done ++ newBs ++ restBs)
           (doneExp ++ newExps ++ restEs)
           (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
-          (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks)
+          (doneTrack ++ newTrackers ++ restTracks)
           fuel'
   | _ :: restBs, [], _, _ =>
     processNext restBs [] [] [] done doneExp doneOrd doneTrack fuel'
@@ -504,10 +513,10 @@ private lemma run_level_P1 : ∀ fuel : Nat, P1 (Atom := Atom) fuel := by
                   cases hstep : temporalStepBranch b e ord tracker with
                   | none => simp only [ResultInv]; exact hIS
                   | some x =>
-                    obtain ⟨newBs, newExps, newOrd, newTracker⟩ := x
+                    obtain ⟨newBs, newExps, newOrd, newTrackers⟩ := x
                     obtain ⟨hISnew, hOFWnew⟩ :=
                       temporalStepBranch_preserves b e ord tracker hIS hOFW
-                        newBs newExps newOrd newTracker hstep
+                        newBs newExps newOrd newTrackers hstep
                     have hWorklistNew : WorklistInv (done ++ newBs ++ restBs)
                         (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds) :=
                       worklistInv_append
@@ -516,7 +525,7 @@ private lemma run_level_P1 : ∀ fuel : Nat, P1 (Atom := Atom) fuel := by
                         hpInvRest
                     exact hP1fuel' (done ++ newBs ++ restBs) (doneExp ++ newExps ++ restEs)
                       (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
-                      (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks) hWorklistNew
+                      (doneTrack ++ newTrackers ++ restTracks) hWorklistNew
       intro branches expandedSets orderings trackers hInv
       show ResultInv (temporalExpandBranches branches expandedSets orderings trackers (fuel' + 1))
       simp only [temporalExpandBranches]
@@ -699,25 +708,82 @@ lemma registerEventualities_new_or_old (nf : TBranch Atom) (tracker : Eventualit
   unfold registerEventualities at he
   exact registerFold_new_or_old nf tracker e he
 
-omit [Hashable Atom] in
-/-- `temporalStepBranch` preserves `TrackerBranchFaithful`: whenever one expansion step
-succeeds, every produced branch/tracker pair `(nb, newTracker)` is again faithful.
+/-- Faithfulness worklist invariant: every `(branch, ordering, tracker)` triple in the
+parallel worklists satisfies `TrackerBranchFaithful`. Three-list analogue of `WorklistInv`
+(the tracker worklist is threaded explicitly since faithfulness is a branch/tracker relation,
+unlike `InstantStrict`/`OrdFreshWRT` which only relate branch/ordering). Defined ahead of
+`temporalStepBranch_preserves_faithful` below so that lemma can state its `.branching`
+conclusion directly in terms of this invariant, rather than the weaker "same tracker for every
+branch" shape the old (pre-per-branch-tracker) design used. -/
+def WorklistInvFaithful :
+    List (TBranch Atom) → List TimeOrdering → List (EventualityTracker Atom) → Prop
+  | [], [], [] => True
+  | b :: bs, ord :: ords, tracker :: trackers =>
+      TrackerBranchFaithful b ord tracker ∧ WorklistInvFaithful bs ords trackers
+  | _, _, _ => False
 
-- `.branching`: the tracker is unchanged and every output branch is `br ++ b` for the
-  original `b`, so faithfulness carries over by branch-append monotonicity.
-- `.linear`/`.persistent`: the new tracker is `fulfillEventualities newB newOrd
-  (registerEventualities newForms tracker)`. `fulfillEventualities` only shrinks pending
-  (`fulfillEventualities_pending_subset`), and `registerEventualities` either preserves an
-  already-faithful pending entry or introduces one backed by an actual positive member of
-  `newForms` (`registerEventualities_new_or_old`); either way the witness lands in
-  `newB = newForms ++ b`. -/
+omit [Hashable Atom] in
+/-- Core faithfulness step: registering the new formulas `nf` into `tracker` and then
+fulfilling against `nf ++ b` yields a tracker faithful to `nf ++ b`, given `tracker` was
+already faithful to `b`. `fulfillEventualities` only shrinks pending
+(`fulfillEventualities_pending_subset`), and `registerEventualities` either preserves an
+already-faithful pending entry or introduces one backed by an actual positive member of `nf`
+(`registerEventualities_new_or_old`); either way the witness lands in `nf ++ b`. This is the
+per-branch building block for both the `.linear`/`.persistent` cases (a single `nf`) and the
+`.branching` case (one `nf` per output branch, since e.g. `untlPos`'s two branches
+genuinely differ in which eventualities they fulfil vs. defer) of
+`temporalStepBranch_preserves_faithful` below. -/
+private lemma faithful_register_fulfill (b : TBranch Atom) (ord : TimeOrdering)
+    (tracker : EventualityTracker Atom) (hFaith : TrackerBranchFaithful b ord tracker)
+    (nf : TBranch Atom) (newOrd : TimeOrdering) :
+    TrackerBranchFaithful (nf ++ b) newOrd
+      (fulfillEventualities (nf ++ b) newOrd (registerEventualities nf tracker)) := by
+  intro e he
+  have he' : e ∈ (registerEventualities nf tracker).pending :=
+    fulfillEventualities_pending_subset _ _ _ he
+  rcases registerEventualities_new_or_old nf tracker e he' with
+      hold | ⟨sf', hsf'mem, hsign, hform, hlab⟩
+  · exact List.mem_append_right _ (hFaith e hold)
+  · have hEq : sf' = (⟨.pos, e.formula, e.label⟩ : TSF Atom) := by
+      cases sf'; simp_all
+    exact List.mem_append_left _ (hEq ▸ hsf'mem)
+
+omit [Hashable Atom] in
+/-- `List.map`-shaped instance of `faithful_register_fulfill`, threaded through
+`WorklistInvFaithful`: mapping `(· ++ b)` over `l` for the branches and mapping the
+register-then-fulfil computation over `l` for the trackers produces a faithful worklist. This
+is exactly the shape `temporalStepBranch`'s `.branching` arm produces (`l = branches`). -/
+private lemma worklistInvFaithful_map_zip (l : List (TBranch Atom)) (b : TBranch Atom)
+    (ord : TimeOrdering) (tracker : EventualityTracker Atom)
+    (hFaith : TrackerBranchFaithful b ord tracker) (newOrd : TimeOrdering) :
+    WorklistInvFaithful (l.map (· ++ b))
+      ((l.map (· ++ b)).map (fun _ => newOrd))
+      (l.map (fun br =>
+        registerEventualities br tracker |> fulfillEventualities (br ++ b) newOrd)) := by
+  induction l with
+  | nil => simp [WorklistInvFaithful]
+  | cons hd tl ih =>
+    simp only [List.map_cons, WorklistInvFaithful]
+    exact ⟨faithful_register_fulfill b ord tracker hFaith hd newOrd, ih⟩
+
+omit [Hashable Atom] in
+/-- `temporalStepBranch` preserves tracker-branch faithfulness across the whole output
+worklist slice: assuming `tracker` is faithful to `b`, the returned `(newBranches, newOrd,
+newTrackers)` triple satisfies `WorklistInvFaithful` (each output branch paired
+positionally with its own updated tracker).
+
+- `.branching`: each output branch gets its own register-then-fulfil pass
+  (`worklistInvFaithful_map_zip`) -- this is the fix over the old design, which passed
+  `tracker` through every branch unchanged.
+- `.linear`/`.persistent`: the singleton-list case of the same building block
+  (`faithful_register_fulfill`). -/
 lemma temporalStepBranch_preserves_faithful
     (b expanded : TBranch Atom) (ord : TimeOrdering) (tracker : EventualityTracker Atom)
     (hFaith : TrackerBranchFaithful b ord tracker)
     (newBs newExps : List (TBranch Atom)) (newOrd : TimeOrdering)
-    (newTracker : EventualityTracker Atom)
-    (h : temporalStepBranch b expanded ord tracker = some (newBs, newExps, newOrd, newTracker)) :
-    ∀ nb ∈ newBs, TrackerBranchFaithful nb newOrd newTracker := by
+    (newTrackers : List (EventualityTracker Atom))
+    (h : temporalStepBranch b expanded ord tracker = some (newBs, newExps, newOrd, newTrackers)) :
+    WorklistInvFaithful newBs (newBs.map (fun _ => newOrd)) newTrackers := by
   unfold temporalStepBranch at h
   obtain ⟨sf, hsfmem, hsfeq⟩ := List.exists_of_findSome?_eq_some h
   by_cases hexp : expanded.any (· == sf) = true
@@ -730,56 +796,21 @@ lemma temporalStepBranch_preserves_faithful
     | linear newForms =>
       simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
       obtain ⟨rfl, -, rfl, rfl⟩ := hsfeq
-      intro nb hnb
-      simp only [List.mem_singleton] at hnb
-      subst hnb
-      intro e he
-      have he' : e ∈ (registerEventualities newForms tracker).pending :=
-        fulfillEventualities_pending_subset _ _ _ he
-      rcases registerEventualities_new_or_old newForms tracker e he' with
-          hold | ⟨sf', hsf'mem, hsign, hform, hlab⟩
-      · exact List.mem_append_right _ (hFaith e hold)
-      · have hEq : sf' = (⟨.pos, e.formula, e.label⟩ : TSF Atom) := by
-          cases sf'; simp_all
-        exact List.mem_append_left _ (hEq ▸ hsf'mem)
+      simp only [List.map_cons, List.map_nil, WorklistInvFaithful]
+      exact ⟨faithful_register_fulfill b ord tracker hFaith newForms newOrd', trivial⟩
     | branching branches =>
       simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
       obtain ⟨rfl, -, rfl, rfl⟩ := hsfeq
-      intro nb hnb
-      simp only [List.mem_map] at hnb
-      obtain ⟨br, -, rfl⟩ := hnb
-      intro e he
-      exact List.mem_append_right _ (hFaith e he)
+      exact worklistInvFaithful_map_zip branches b ord tracker hFaith newOrd'
     | persistent newForms =>
       simp only [Option.some.injEq, Prod.mk.injEq] at hsfeq
       obtain ⟨rfl, -, rfl, rfl⟩ := hsfeq
-      intro nb hnb
-      simp only [List.mem_singleton] at hnb
-      subst hnb
-      intro e he
-      have he' : e ∈ (registerEventualities newForms tracker).pending :=
-        fulfillEventualities_pending_subset _ _ _ he
-      rcases registerEventualities_new_or_old newForms tracker e he' with
-          hold | ⟨sf', hsf'mem, hsign, hform, hlab⟩
-      · exact List.mem_append_right _ (hFaith e hold)
-      · have hEq : sf' = (⟨.pos, e.formula, e.label⟩ : TSF Atom) := by
-          cases sf'; simp_all
-        exact List.mem_append_left _ (hEq ▸ hsf'mem)
+      simp only [List.map_cons, List.map_nil, WorklistInvFaithful]
+      exact ⟨faithful_register_fulfill b ord tracker hFaith newForms newOrd', trivial⟩
     | notApplicable =>
       simp only [reduceCtorEq] at hsfeq
 
 /-! ## Run-Level Threading: Tracker-Branch Faithfulness -/
-
-/-- Faithfulness worklist invariant: every `(branch, ordering, tracker)` triple in the
-parallel worklists satisfies `TrackerBranchFaithful`. Three-list analogue of `WorklistInv`
-(the tracker worklist is threaded explicitly since faithfulness is a branch/tracker relation,
-unlike `InstantStrict`/`OrdFreshWRT` which only relate branch/ordering). -/
-def WorklistInvFaithful :
-    List (TBranch Atom) → List TimeOrdering → List (EventualityTracker Atom) → Prop
-  | [], [], [] => True
-  | b :: bs, ord :: ords, tracker :: trackers =>
-      TrackerBranchFaithful b ord tracker ∧ WorklistInvFaithful bs ords trackers
-  | _, _, _ => False
 
 /-- Result invariant for faithfulness: `.closed` is vacuously fine; `.openBranch b ord`
 requires some tracker (not carried by the `TemporalTableauResult` type) witnessing
@@ -811,19 +842,6 @@ lemma worklistInvFaithful_append {l1 l2 : List (TBranch Atom)} {o1 o2 : List Tim
       | cons tracker ts =>
         obtain ⟨hFaith, hrest⟩ := h1
         exact ⟨hFaith, ih hrest⟩
-
-omit [DecidableEq Atom] [Hashable Atom] in
-/-- `WorklistInvFaithful` holds for a list paired with constant-ordering/tracker replication,
-given every branch in the list is faithful with respect to that constant pair. -/
-lemma worklistInvFaithful_map_const (bs : List (TBranch Atom)) (ord : TimeOrdering)
-    (tracker : EventualityTracker Atom)
-    (hFaith : ∀ nb ∈ bs, TrackerBranchFaithful nb ord tracker) :
-    WorklistInvFaithful bs (bs.map (fun _ => ord)) (bs.map (fun _ => tracker)) := by
-  induction bs with
-  | nil => simp [WorklistInvFaithful]
-  | cons b bs ih =>
-    simp only [List.map_cons, WorklistInvFaithful]
-    exact ⟨hFaith b List.mem_cons_self, ih (fun nb hnb => hFaith nb (List.mem_cons_of_mem _ hnb))⟩
 
 omit [Hashable Atom] in
 /-- The `fuel = 0` base case: if `WorklistInvFaithful` holds for the worklist and the
@@ -967,20 +985,19 @@ private lemma run_level_faithful : ∀ fuel : Nat, P1Faithful (Atom := Atom) fue
                   cases hstep : temporalStepBranch b e ord tracker with
                   | none => simp only [ResultInvFaithful]; exact ⟨tracker, hFaith⟩
                   | some x =>
-                    obtain ⟨newBs, newExps, newOrd, newTracker⟩ := x
+                    obtain ⟨newBs, newExps, newOrd, newTrackers⟩ := x
                     have hFaithNew :=
                       temporalStepBranch_preserves_faithful b e ord tracker hFaith
-                        newBs newExps newOrd newTracker hstep
+                        newBs newExps newOrd newTrackers hstep
                     have hWorklistNew : WorklistInvFaithful (done ++ newBs ++ restBs)
                         (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
-                        (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks) :=
+                        (doneTrack ++ newTrackers ++ restTracks) :=
                       worklistInvFaithful_append
-                        (worklistInvFaithful_append hdInv
-                          (worklistInvFaithful_map_const newBs newOrd newTracker hFaithNew))
+                        (worklistInvFaithful_append hdInv hFaithNew)
                         hpInvRest
                     exact hP1fuel' (done ++ newBs ++ restBs) (doneExp ++ newExps ++ restEs)
                       (doneOrd ++ newBs.map (fun _ => newOrd) ++ restOrds)
-                      (doneTrack ++ newBs.map (fun _ => newTracker) ++ restTracks) hWorklistNew
+                      (doneTrack ++ newTrackers ++ restTracks) hWorklistNew
       intro branches expandedSets orderings trackers hInv
       show ResultInvFaithful (temporalExpandBranches branches expandedSets orderings trackers
         (fuel' + 1))

@@ -375,31 +375,52 @@ verification item below; no additional, separate re-proof pass was needed.
 
 ---
 
-### Phase 5: Per-branch eventuality tracker (P2 / Deliverable 5) [NOT STARTED]
+### Phase 5: Per-branch eventuality tracker (P2 / Deliverable 5) [COMPLETED]
 
 **Goal**: Change `temporalStepBranch` to return a per-branch tracker list so the `.branching` arm
 stops returning the tracker unchanged. This must land before Phase 6, because Phase 6's termination
 gate (`isTemporallyBlocked`) reads the tracker and is untrustworthy until the tracker is correct.
 
 **Tasks**:
-- [ ] Change the return type at `Saturation.lean:139-144` to
+- [x] Change the return type at `Saturation.lean:139-144` to
       `Option (List (TBranch Atom) × List (TBranch Atom) × TimeOrdering × List (EventualityTracker Atom))`.
-- [ ] Fix the `.branching` arm (`Saturation.lean:156-158`), which currently returns `tracker`
+- [x] Fix the `.branching` arm (`Saturation.lean:156-158`), which currently returns `tracker`
       unchanged; because `untlPos`/`sncePos` are branching (`Rules.lean:265-282`), the recurring copy
       `⟨.pos, φ, t'⟩` emitted as `branch2`'s second element (`Rules.lean:271`, `:281`) is never
       registered pending. Run `registerEventualities … |> fulfillEventualities …` per branch, as
       `.linear` (`:150-155`) and `.persistent` (`:159-165`) already do. `branch1` fulfils the
       eventuality and `branch2` defers it, so their pending sets genuinely differ.
-- [ ] Replace the replication `newBs.map (fun _ => newTracker)` in `processNext`
-      (`Saturation.lean:300-303`) with the returned list.
-- [ ] Update the remaining call sites from Finding 5: `temporalStepBranch_preserves` (`:181-221`,
+      **Done**: each element of `branches` gets its own
+      `registerEventualities br tracker |> fulfillEventualities (br ++ b) newOrd` pass, returned as
+      `newTrackers` positionally aligned with `newBranches`.
+- [x] Replace the replication `newBs.map (fun _ => newTracker)` in `processNext`
+      (`Saturation.lean:300-303`) with the returned list. **Done.**
+- [x] Update the remaining call sites from Finding 5: `temporalStepBranch_preserves` (`:181-221`,
       hypothesis shape and the `obtain ⟨rfl, -, rfl, -⟩` destructuring in all four `cases result`
       arms), `run_level_P1` (`:504-509`), `temporalStepBranch_preserves_faithful` (`:703-776`),
       `WorklistInvFaithful`/`ResultInvFaithful` (`:777-791`), and
       `processNext_mismatch_closed_faithful`/`run_level_faithful`/`temporalTableau_trackerBranchFaithful`
-      (`:885-1006`).
-- [ ] Update the docstring-only references at `Soundness.lean:36,44` and
+      (`:885-1006`). **Done**, with one deliberate strengthening beyond a mechanical type-rename:
+      `temporalStepBranch_preserves_faithful`'s conclusion changed from "every output branch is
+      faithful w.r.t. the *same* tracker" (only ever true because the old `.branching` arm passed
+      `tracker` through unchanged) to `WorklistInvFaithful newBs (newBs.map (fun _ => newOrd))
+      newTrackers` — each output branch paired with its *own* tracker. Two new private helper
+      lemmas (`faithful_register_fulfill`, `worklistInvFaithful_map_zip`) factor the shared
+      register-then-fulfil argument out of the old `.linear`/`.persistent` proof bodies so the
+      `.branching` case reuses it per-branch instead of asserting "unchanged". The now-dead
+      `worklistInvFaithful_map_const` (constant-tracker replication) was removed rather than left
+      unused, since `worklistInvFaithful_map_zip` strictly generalizes it and no other call site
+      remained. `WorklistInvFaithful`'s definition was relocated earlier in the file (before
+      `temporalStepBranch_preserves_faithful`) since the new conclusion needs to name it.
+- [x] Update the docstring-only references at `Soundness.lean:36,44` and
       `Completeness.lean:69,78,87,102,646` — text edits, not proof work.
+      *(deviation: altered — `Soundness.lean:36,44` describe a not-yet-existing lemma
+      (`temporalStepBranch_preserves_sat`, a named "Blocked Obligation") whose prose is accurate
+      independent of the tracker-list change, so left as-is; `Completeness.lean`'s "secondary,
+      narrower observation" block (the passage this task's Phase 5 literally resolves) was
+      rewritten in place to record the fix, plus a companion "Remaining Work" item 2a marking it
+      done — this is the substantive version of "text edits, not proof work" the plan called for,
+      not a mechanical line-number touch-up.)*
 
 **Timing**: 2 hours
 
@@ -411,11 +432,24 @@ gate (`isTemporallyBlocked`) reads the tracker and is untrustworthy until the tr
 - `Cslib/Logics/Temporal/Tableau/Completeness.lean` - docstrings at `:69,78,87,102,646`
 
 **Verification**:
-- `lake build Cslib.Logics.Temporal.Tableau.Saturation` green, no new `sorry`.
+- `lake build Cslib.Logics.Temporal.Tableau.Saturation` green, no new `sorry`. **Confirmed**, plus
+  whole-project `lake build` green (3253/3253 jobs), `lake exe checkInitImports` clean, `lake lint`
+  shows the same single pre-existing `TrackerBranchFaithful` unused-argument finding recorded in
+  the Phase 4 metadata (no new finding), `lake exe lint-style` clean, `lake exe mk_all --module`
+  reports no update needed, `lake shake` shows no new finding for any Temporal/Tableau file, and
+  `lake test` green (`CslibTests.TableauConformance` built and all guard_msgs assertions matched).
 - Conformance gate: **zero verdict change** across all 32 green rows. This is the specific detector
   for R1 — registering eventualities makes `findEventualityDefect` (`Closure.lean`) start firing,
-  which can change which branches close.
+  which can change which branches close. **Confirmed** via `lake test`: since the harness encodes
+  expected verdicts as literal `#guard_msgs` strings, any verdict flip would have failed the build;
+  it did not.
 - Conformance gate: the 12 red rows remain red (this phase fixes no rule, only the tracker).
+  **Confirmed** (same `lake test` run; no rule-behavior file — `Rules.lean` — was touched by this
+  phase).
+- Zero new `sorry`/`axiom` in `Saturation.lean`/`Completeness.lean`. **Confirmed**: `grep sorry`
+  on `Saturation.lean` is empty; `Completeness.lean`'s four `sorry` word occurrences are all
+  pre-existing prose (`sorry-free`/`None use sorry`), none newly introduced; `grep '^axiom'` on
+  both files is empty.
 
 ---
 

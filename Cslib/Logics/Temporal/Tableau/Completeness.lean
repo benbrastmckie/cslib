@@ -99,16 +99,23 @@ for two compounding reasons:
    independent from (and a prerequisite to) the periodic-model *definition* work landed in Phase
    4a/4b above.
 
-   A secondary, narrower observation on the same theme: `temporalStepBranch`'s `.branching` case
-   (which `untlPos`/`sncePos`/`untlNeg`/`snceNeg`/all propositional branching rules use) passes
-   `tracker` through **unchanged** — `registerEventualities`/`fulfillEventualities` are only
-   called from the `.linear`/`.persistent` arms. So a positive Until/Since formula's *primary*
-   recurring copy (`untlPos`'s `branch2`, `Rules.lean:271`) is never itself registered into
-   `EventualityTracker.pending` by that call site; only Until/Since formulas that arrive via
-   `.linear`/`.persistent` outputs (e.g. nested inside a propagated `G(U(…))`) are tracked this
-   way. This narrows, but does not close, the gap in (3): it means `tracker.hasPending` may
-   already fail to reflect the "some Until copy is still live" fact the fuel-sufficiency argument
-   needs, independent of the pigeonhole question itself.
+   A secondary, narrower observation on the same theme, **now resolved**: `temporalStepBranch`'s
+   `.branching` case (which `untlPos`/`sncePos`/`untlNeg`/`snceNeg`/all propositional branching
+   rules use) used to pass `tracker` through **unchanged** — `registerEventualities`/
+   `fulfillEventualities` were only called from the `.linear`/`.persistent` arms, so a positive
+   Until/Since formula's *primary* recurring copy (`untlPos`'s `branch2`, `Rules.lean:271`) was
+   never itself registered into `EventualityTracker.pending` by that call site. This is fixed:
+   `temporalStepBranch` now returns one tracker **per output branch** (`Saturation.lean`'s
+   `temporalStepBranch`/`temporalStepBranch_preserves_faithful`/`WorklistInvFaithful`), with each
+   branch running its own `registerEventualities`/`fulfillEventualities` pass over exactly that
+   branch's new formulas — so `untlPos`'s `branch1` (which fulfils the eventuality) and `branch2`
+   (which defers it) now genuinely diverge in their pending sets, as they must. This narrows, but
+   does not by itself close, the gap in (3): the fuel-sufficiency/pigeonhole theorem itself
+   (bounding how long a genuinely-pending eventuality can survive before `isSubsetBlocked` must
+   fire) remains unformalized; what changes is that `tracker.hasPending` now correctly reflects
+   the "some Until copy is still live" fact for branching-rule outputs, removing what was
+   previously an *additional*, independent source of unsoundness in that fact on top of the
+   pigeonhole gap itself.
 
 4. `temporalTruthLemma_untl`, `temporalTruthLemma_snce`: blocked by (2)/(3) — the periodic model
    these consume is not yet wired in generically, pending the fuel-sufficiency theorem.
@@ -120,10 +127,13 @@ for two compounding reasons:
 1. ~~Complete the propositional truth lemma (imp case).~~ **Done.**
 2. ~~Factor out `processNext` to enable loop invariant induction (unblocks the run-level
    `InstantStrict` proof).~~ **Done** (`temporalTableau_instantStrict`, `Saturation.lean`).
+2a. ~~Extend `EventualityTracker` registration to cover `.branching` outputs
+    (`untlPos`/`sncePos`/`untlNeg`/`snceNeg`).~~ **Done**: `temporalStepBranch` now returns a
+    per-output-branch tracker list, each independently registered/fulfilled
+    (`Saturation.lean`'s `temporalStepBranch`/`temporalStepBranch_preserves_faithful`).
 3. Prove the fuel-sufficiency/pigeonhole theorem documented above (item 3 in "Blocked
    Obligations"): that `temporalFuel` guarantees `isSubsetBlocked` holds among a fuel-exhausted
-   branch's own labels whenever pending eventualities remain, extending `EventualityTracker`
-   registration to cover `.branching` outputs first if needed. This is the prerequisite for
+   branch's own labels whenever pending eventualities remain. This is the prerequisite for
    wiring `extractModelℤPeriodic`/`periodicReducePast` in as the real `extractModelℤ` (Phase 4c)
    and completing Phases 5-7 (`temporalTruthLemma_untl`/`_snce`, `openBranch_branchSat`,
    `temporalTableau_complete`). Recommend a dedicated research pass before further planning; see

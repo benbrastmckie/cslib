@@ -2,9 +2,9 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "phases_completed": 6,
+  "phases_completed": 7,
   "phases_total": 15,
-  "summary": "Phases 1-6 of Route P landed and committed, each individually build/lint/lean_verify-clean. Phase 4 added the ordered stepper (modalStepBranchS4KeyedOrdered) plus its four structural lemmas. Phase 5 re-established the strict termination-measure decrease for the ordered stepper. Phase 6 (S4LoopInv preservation + fuel-sufficiency chain) is now COMPLETE: ordered analogues of all TEN per-field sub-lemmas, TWO proof-internal auxiliaries, TWO additional prerequisite auxiliaries (branch_superset, keys_subset), and the final wrapper (modalStepBranchS4KeyedOrdered_preserves_S4LoopInv) landed across thirteen individually-committed dispatches. The escalation-trigger sub-lemma (keysDistinct, attempted first) PASSED with no weakening of keysUpdate_preserves_keysDistinct -- the plan's central claim (reordering only changes timing, never a duplicate key) is now machine-checked. modalKnownWorlds_length_le_worldBoundS4/modalStepBranchS4_worldBound/modalExpMeasure_entry_le_fuelS4 all apply verbatim to the ordered driver, confirmed rather than assumed. Full CI pipeline green after Phase 6's final commit: whole-project lake build (3256/3256), checkInitImports, lint-style, lake lint (one pre-existing unrelated error outside this task's scope), lake shake (zero import changes needed), lake test (9250/9250 including CslibTests.S4LoopGuardRegression). Repo-wide sorry count unchanged at 5.",
+  "summary": "Phases 1-7 of Route P landed and committed, each individually build/lint/lean_verify-clean. Phase 4 added the ordered stepper (modalStepBranchS4KeyedOrdered) plus its four structural lemmas. Phase 5 re-established the strict termination-measure decrease for the ordered stepper. Phase 6 (S4LoopInv preservation + fuel-sufficiency chain) landed ordered analogues of all TEN per-field sub-lemmas, TWO proof-internal auxiliaries, TWO additional prerequisite auxiliaries (branch_superset, keys_subset), and the final wrapper (modalStepBranchS4KeyedOrdered_preserves_S4LoopInv) across thirteen individually-committed dispatches. The escalation-trigger sub-lemma (keysDistinct, attempted first) PASSED with no weakening of keysUpdate_preserves_keysDistinct -- the plan's central claim (reordering only changes timing, never a duplicate key) is machine-checked. Phase 7 (Ordered Driver and Entry Point) is now COMPLETE: modalExpandBranchesS4KeyedOrdered and modalTableauS4KeyedOrdered landed as structural copies of the unordered pair with modalStepBranchS4KeyedOrdered substituted at the single processNext call site; Lean's termination checker accepted the copied fuel' recursion unchanged, with no termination_by/decreasing_by workaround needed. modalTableauS4KeyedOrdered seeds keys := [(0, ∅)] per the Phase 11 correction. Full CI pipeline green after Phase 7's commit: whole-project lake build (3256/3256, confirms FrameSoundness.lean/FrameCompleteness.lean still build), checkInitImports, lint-style, lake lint (one pre-existing unrelated error outside this task's scope), lake shake (zero import changes needed for LoopChecking.lean), lake test (9250/9250 including CslibTests.S4LoopGuardRegression). Repo-wide sorry count unchanged at 5, axiom count unchanged at 26.",
   "artifacts": [
     {
       "type": "plan",
@@ -12,11 +12,11 @@
     },
     {
       "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-6-handoff-20260725.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md"
     },
     {
       "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md"
     }
   ],
   "blockers": [],
@@ -24,7 +24,7 @@
   "files_modified": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "decisions_made": [
@@ -40,7 +40,8 @@
     "Phase 6's escalation trigger (modalStepBranchS4KeyedOrdered_preserves_keysDistinct, attempted first per the handoff's recommendation) PASSED: keysUpdate_preserves_keysDistinct and blockingWorldS4Keyed_none_fresh are both consumed with their EXACT original signatures, no weakening. The plan's central claim -- reordering only changes timing, never producing a duplicate key -- is now machine-checked rather than assumed. No contradiction surfaced.",
     "Phase 6 required TWO additional ordered-form auxiliaries not named in the plan text: modalStepBranchS4KeyedOrdered_branch_superset (prerequisite for keyLowerBd/keysWorldsKnown/worldsContiguousS4) and modalStepBranchS4KeyedOrdered_keys_subset (prerequisite for keysTotal). Both are verbatim transcriptions of their unordered counterparts via modalStepBranchS4KeyedOrdered_selected_mem, following the same case-split shape.",
     "modalKnownWorlds_length_le_worldBoundS4/modalStepBranchS4_worldBound/modalExpMeasure_entry_le_fuelS4 all apply VERBATIM to the ordered driver with no ordered analogue needed: all three are stated purely over the pre-step b/keys or the entry-point modalUniverseS4 φ₀/modalFuelS4 φ₀, with no reference to which stepper (modalStepBranchS4Keyed vs. modalStepBranchS4KeyedOrdered) produced a given step. Confirmed, not assumed, per the plan's own instruction to prefer reuse and only re-derive if verbatim application genuinely fails.",
-    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-6: lean_verify on all new lemmas reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout."
+    "No phase may discharge an obligation with sorry, an axiom, or a vacuous statement. Verified true of Phases 1-7: lean_verify on all new lemmas/defs reports only propext/Classical.choice/Quot.sound, and the repo-wide bare `sorry` count in Cslib/ is unchanged at 5 throughout.",
+    "Phase 7 confirmed (not merely assumed) that the copied processNext fuel' recursion type-checks under Lean's own termination checker with zero changes to the recursion shape -- this is evidence against (not proof against) a termination gap at the driver-wiring level; the escalation concern remains formally live until Phase 8's empirical proof-search test and Phases 9-13's soundness/completeness re-derivation are complete."
   ],
   "dead_ends": [
     "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
@@ -48,8 +49,8 @@
     "Phase 5's first attempt at modalStepBranchS4KeyedOrdered_proj hand-typed a fresh let/match expression restating modalApplyOneS4Keyed's dispatch directly in the lemma's conclusion (mirroring modalStepBranchGen's shape textually). Abandoned: this elaborates via a full `match` (not projections, since the function is concrete at that elaboration site), breaking every subsequent `.1`-based rewrite the surrounding measure proof needed. Reusing the already-elaborated modalStepBranchS4KeyedBody (via Option.map to drop the keys' component) sidesteps the issue entirely -- this is now the established pattern for all future selection-agnostic bridge lemmas."
   ],
   "continuation_context": {
-    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-7-handoff-20260725.md",
-    "phases_completed": 6,
+    "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-8-handoff-20260725.md",
+    "phases_completed": 7,
     "phases_total": 15
   },
   "plan_markers_verified": true

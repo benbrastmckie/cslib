@@ -6489,6 +6489,156 @@ lemma modalStepBranchS4_preserves_bClosure (φ₀ : Proposition Atom)
       · exact hb x hxold
     · rw [hres] at hsf; simp at hsf
 
+/-- **`bClosure`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_bClosure` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem` in place of the direct `findSome?` extraction. The
+pigeonhole world-bound prerequisite `modalStepBranchS4_worldBound` is consumed UNCHANGED: it is
+stated purely over the pre-step `b`/`keys`, independent of which traversal produced the step, so
+no ordered analogue of it is needed. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_bClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hWC : worldsContiguousS4 b)
+    (hKT : ∀ w ∈ modalKnownWorlds b, ∃ k, (w, k) ∈ keys)
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hknown : accTargetsKnown b acc)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, ∀ x ∈ b', x ∈ modalUniverseS4 φ₀ := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
+        have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hcontent := modalApplyOne_boxNeg_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem' hW
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb' x hx
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rcases List.mem_append.mp hx with hxnew | hxold
+        · exact hcontent x hxnew
+        · exact hb x hxold
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb' x hx
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact hb x hx
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        have hresulteq2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hW := modalStepBranchS4_worldBound φ₀ b keys hWC hKT hKD hKI
+        have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hcontent := modalApplyOne_diamondPos_outputs_subset_S4 φ₀ b ψ sf.label hb hsfmem'
+          hW
+        rw [hresulteq2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        intro b' hb' x hx
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rcases List.mem_append.mp hx with hxnew | hxold
+        · exact hcontent x hxnew
+        · exact hb x hxold
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hresulteq : result = RuleResult.linear [] :=
+          congrArg Prod.fst (hpair.symm.trans heq2)
+        intro b' hb' x hx
+        rw [hresulteq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        rw [← hsf.1] at hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        exact hb x hx
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have hnm := modalApplyOneS4Keyed_nonMint_universe_S4 φ₀ keys sf b acc hb hsfmem hknown hnbd
+    rw [hpair] at hnm
+    dsimp only at hnm
+    intro b' hb' x hx
+    rcases hres : result with lf | brs | lf | -
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x hxnew
+      · exact hb x hxold
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      obtain ⟨br, hbr, rfl⟩ := List.mem_map.mp hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x (List.mem_flatten.mpr ⟨br, hbr, hxnew⟩)
+      · exact hb x hxold
+    · rw [hres] at hsf hnm
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      rw [← hsf.1] at hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      rcases List.mem_append.mp hx with hxnew | hxold
+      · exact hnm x hxnew
+      · exact hb x hxold
+    · rw [hres] at hsf; simp at hsf
+
 /-- **`modalStepBranchS4_preserves_S4LoopInv`**: every `modalStepBranchS4Keyed` step preserves
 `S4LoopInv`, over every
 branch/expanded-set pair it produces (any `b' ∈ newBs` paired with any `e' ∈ newExps` -- valid

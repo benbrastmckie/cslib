@@ -1,0 +1,26 @@
+{
+  "$schema": "orchestrator-handoff-v1",
+  "phase": "plan",
+  "status": "planned",
+  "summary": "8-phase plan (7.5h, 4 waves) covering both parts. Part 1 (phases 1,2,4,5,6): backup the 154-chunk set, derive Wijesekera's own numbered section headings via pdftotext -layout, rebuild a reflow tool, chunk in scratch, promote, validate Definition 1.1.4 and the Section 2 diamond material. Part 2 (phases 3,7,8): non-blocking mean-chunk-size guard in literature-ingest.sh after line 268, two-signal OCR heading hardening in literature-convert.sh, plus a before/after corpus regression audit. Plan explicitly corrects the task's Tesseract/OCRmyPDF-only premise.",
+  "artifacts": [
+    {
+      "type": "plan",
+      "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md"
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "implement",
+  "files_modified": [
+    "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md"
+  ],
+  "decisions_made": [
+    "OCR detection is two independent signals: a broadened producer family (Tesseract, OCRmyPDF, Acrobat/Adobe Capture, ABBYY, ScanSoft, FineReader) AND structural cues that fire regardless of producer metadata -- cues are NOT producer-gated",
+    "Task 518's reflow tooling was verified NOT preserved (absent from .claude/scripts and from the archived task dir); phase 4 rebuilds it as a durable script, which is why effort exceeds the original 3-5h estimate",
+    "Part 2 hardening does not make Part 1 redundant: suppressing false headings leaves Wijesekera with few/no headings, so bespoke heading insertion is still required for retrieval quality",
+    "literature-chunk.sh and Cslib/ are explicitly out of scope; the chunk-size guard warns and continues rather than hard-failing like run_quality_gate's exit-3",
+    "Parts are independently revertible: if the reflow cannot reach a healthy profile, phase 5 is blocked and Part 2 ships alone"
+  ],
+  "dead_ends": [],
+  "plan_markers_verified": false
+}

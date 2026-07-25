@@ -2247,6 +2247,86 @@ lemma modalStepBranchS4_preserves_keysInUniverse (φ₀ : Proposition Atom)
     · simp only [hblock] at hwk
       exact hIU w k hwk
 
+/-- **`keysInUniverse`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_keysInUniverse` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem` in place of the direct `findSome?` extraction. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_keysInUniverse (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hIU : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ w k, (w, k) ∈ keys' → k ⊆ signedSubfmls φ₀ := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  have hkeq := modalStepBranchS4Keyed_result_keys_eq result newAcc0 b e sf _ newBs newExps
+    newAcc keys' hsf
+  intro w k hwk
+  rw [hkeq] at hwk
+  rcases hs : sf.sign with _ | _ <;> rcases hf : sf.formula with _ | _ | _ | _ | _ | ψ | ψ <;>
+    simp only [hs, hf] at hwk
+  all_goals first
+    | exact hIU w k hwk
+    | skip
+  case neg.box =>
+    have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hIU w k hwk
+      · have hsfmem' : (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hφsub : ψ ∈ modalSubfmls φ₀ := by
+          have h1 : (Proposition.box ψ) ∈ modalSubfmls φ₀ :=
+            modalUniverseS4_mem_formula (hb _ hsfmem')
+          have h2 : ψ ∈ modalSubfmls (Proposition.box ψ) :=
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
+          exact modalSubfmls_trans_S4 h2 h1
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨-, hkeq2⟩ := hwk
+        subst hkeq2
+        exact successorBirthContent_subset_signedSubfmls φ₀ b .neg ψ sf.label hφsub
+    · simp only [hblock] at hwk
+      exact hIU w k hwk
+  case pos.diamond =>
+    have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+    rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+    · simp only [hblock] at hwk
+      simp only [List.mem_append, List.mem_singleton] at hwk
+      rcases hwk with hwk | hwk
+      · exact hIU w k hwk
+      · have hsfmem' : (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) ∈ b := hsfeq ▸ hsfmem
+        have hφsub : ψ ∈ modalSubfmls φ₀ := by
+          have h1 : (Proposition.diamond ψ) ∈ modalSubfmls φ₀ :=
+            modalUniverseS4_mem_formula (hb _ hsfmem')
+          have h2 : ψ ∈ modalSubfmls (Proposition.diamond ψ) :=
+            List.mem_cons_of_mem _ (modalSubfmls_self_mem ψ)
+          exact modalSubfmls_trans_S4 h2 h1
+        rw [Prod.mk.injEq] at hwk
+        obtain ⟨-, hkeq2⟩ := hwk
+        subst hkeq2
+        exact successorBirthContent_subset_signedSubfmls φ₀ b .pos ψ sf.label hφsub
+    · simp only [hblock] at hwk
+      exact hIU w k hwk
+
 /-! ## Assembling `keysTotal`'s Preservation -/
 
 omit [DecidableEq Atom] [Hashable Atom] in

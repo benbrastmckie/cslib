@@ -482,23 +482,43 @@ collapse into a repository theorem, and land the `CS5 → IS5` transport lemmas.
 
 ---
 
-### Phase 7: Contexts, hole filling, and output pruning [NOT STARTED]
+### Phase 7: Contexts, hole filling, and output pruning [COMPLETED]
 
 **Goal**: Encode contexts in Observation 2.2 normal form so well-formedness is definitional, and
 define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 
 **Tasks**:
-- [ ] Define `OutputCtx := List NestedLhs` with the reading `Γ•₁, [Γ•₂, [… , [Γ•ₙ, { }] …]]`
+- [x] Define `OutputCtx := List NestedLhs` with the reading `Γ•₁, [Γ•₂, [… , [Γ•ₙ, { }] …]]`
       (Observation 2.2, eq. (2.2))
-- [ ] Define `InputCtx` as the triple `⟨Γ' : OutputCtx, Λ : OutputCtx, Π : Proposition⟩` per
-      eq. (2.3) `Γ'{Λ{ }, Π◦}`
-- [ ] Define hole filling for both context kinds at each admissible filler type (RHS, full, LHS,
+- [x] Define `InputCtx` as the triple `⟨Γ' : OutputCtx, Λ : OutputCtx, Π : Proposition⟩` per
+      eq. (2.3) `Γ'{Λ{ }, Π◦}` *(deviation: altered -- `Π : NestedRhs Atom`, not `Proposition`.
+      The source's own notational convention (capital Greek letters denote arbitrary sequents,
+      not necessarily atomic formulas, unlike roman-letter `A•`/`A◦`) forces this: Example 2.1's
+      `Γ₂{ }`, decomposed per eq. (2.3), gives `Π = [B•,C◦]` (compound), not a bare atom. Typing
+      `Π : Proposition` would make this phase's own cited verification example inexpressible.
+      Full derivation and cross-checks documented in `Nested/Context.lean`'s module docstring.
+      The Lean field is spelled `π` (lowercase) rather than `Π`: Mathlib's `Delaborators.lean`
+      binds capital `Π` as a Pi-type delaborator token, unusable as a plain identifier --
+      confirmed by a parse failure when first attempted.)*
+- [x] Define hole filling for both context kinds at each admissible filler type (RHS, full, LHS,
       and `∅`), with the result type determined statically per Observation 2.2's typing statement
-- [ ] Define output pruning `Γ⇓ { } := Γ'{Λ{ }}` (Definition 2.3) on `InputCtx`, returning an
-      `OutputCtx`
-- [ ] Land the basic equational lemmas: filling with `∅`, nesting/associativity of filling,
-      and `(Γ⇓){∆}` versus `Γ{∆}` relationships used later
-- [ ] `lake build`
+      *(deviation: altered -- `InputCtx` lands only `fillLhs` and `fillEmpty` (the two cases the
+      source explicitly discusses), not also `fillRhs`/`fillFull`; the source never states a
+      typing rule for filling an input context with RHS/full-sequent fillers, and inventing an
+      unmotivated formula seemed worse than scoping to what's textually grounded and actually
+      needed by the landed examples. `OutputCtx` itself lands all four, as specified.)*
+- [x] Define output pruning `Γ⇓ { } := Γ'{Λ{ }}` (Definition 2.3) on `InputCtx`, returning an
+      `OutputCtx` *(landed as `ctx.Γ' ++ ctx.Λ`, i.e. list append -- verified against Example
+      2.1's `Γ2{ }`)*
+- [x] Land the basic equational lemmas: filling with `∅`, nesting/associativity of filling,
+      and `(Γ⇓){∆}` versus `Γ{∆}` relationships used later *(deviation: partial -- landed
+      `buildRhsChain_append` and `OutputCtx.fillRhs_append` (the nesting/associativity facts);
+      the `(Γ⇓){∆}` vs `Γ{∆}` relationship is deferred to Phase 8, since the natural candidate
+      equations don't hold as bare structural equalities (they differ by exactly the
+      `box ∅ ·`-vs-direct-substitution distinction documented in the module), and Phase 8 is
+      where the `fm`-level compositionality apparatus needed to state the correct relationship
+      is built. See module docstring for the reasoning.)*
+- [x] `lake build`
 
 **Timing**: 2.5 hours
 
@@ -506,12 +526,18 @@ define `Γ{∆}`, `Γ{∅}`, and `Γ⇓`.
 
 **Files to modify**:
 - `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Syntax.lean` (extend) or a sibling
-  `Nested/Context.lean` if the file exceeds ~350 lines
+  `Nested/Context.lean` if the file exceeds ~350 lines *(landed as the sibling
+  `Nested/Context.lean`: `Syntax.lean` was already 173 lines and Phase 7's content would have
+  pushed it well past the 350-line threshold)*
 
 **Verification**:
-- Module builds, no `sorry`
+- Module builds, no `sorry` -- confirmed
 - Observation 2.2's uniqueness claim holds by construction (documented, not proved as a lemma)
+  -- confirmed (`OutputCtx := List (NestedLhs Atom)`)
 - Example 2.1's `Γ₁{ }`, `Γ₂{ }` are expressible and their `Γ{∅}` computations match the paper
+  -- confirmed by `rfl`; additionally, `Γ1{Δ1}` (via `OutputCtx.fillFull`) and `Γ2{Δ2}` (via
+  `InputCtx.fillLhs`) independently reproduce the Phase 6 module's already-landed, already-`rfl`-
+  verified concrete terms exactly, cross-validating both constructions
 
 ---
 

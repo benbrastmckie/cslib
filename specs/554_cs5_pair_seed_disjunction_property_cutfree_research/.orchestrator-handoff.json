@@ -2,51 +2,53 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "phases_completed": 6,
+  "phases_completed": 7,
   "phases_total": 32,
-  "summary": "Stage A (Phases 1-5) now fully COMPLETE and committed: Phase 5 landed the CS5 -> IS5 route-closure theorem (Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean), showing the product-model-over-IS5 route's residual is exactly the unadopted CS5=IS5 collapse. Phase 6 (Stage B's first phase) also COMPLETE: nested sequent syntax (NestedLhs/NestedRhs/NestedFull) and the fm corresponding-formula translation, verified against the recovered source PDF via two independent extraction methods, landed in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Syntax.lean. 6/32 phases done. Stages C-G (rule systems, soundness, completeness-with-cut, cut elimination, two-label bridge) not started.",
+  "summary": "Phase 7 (Stage B's second phase) landed: contexts, hole filling, and output pruning, in a new Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean module. OutputCtx (List NestedLhs, Observation 2.2 eq. 2.2) with all four fill operations (empty/LHS/RHS/full); InputCtx (eq. 2.3) with fillLhs/fillEmpty; output pruning (Definition 2.3, landed as list append); two equational lemmas. Example 2.1's Gamma1{}/Gamma2{} land as OutputCtx/InputCtx values with Gamma{empty} verified by rfl against the paper, plus cross-validation against Phase 6's already-landed concrete terms. Documented, forced deviation: InputCtx's Pi field is typed NestedRhs Atom (not Proposition, per the plan sketch) -- the source's own Greek-vs-roman-letter convention forces this, verified by full derivation against the cited Example 2.1 Gamma2{} case. Lean field spelled lowercase pi (Mathlib binds capital Pi as a delaborator token). 7/32 phases done. Stages C-G not started.",
   "artifacts": [
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "report", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-7-handoff-20260725.md"},
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
     "Cslib.lean",
-    "Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Syntax.lean"
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Context.lean"
   ],
   "decisions_made": [
-    "Placed the CS5->IS5 route-closure module under Cslib/Logics/Modal/Metalogic/InterSystem/ (CS5ToIS5.lean) -- no existing cross-import conflict between Constructive.CS5 and Intuitionistic.IS5, confirmed before writing.",
-    "NestedLhs/NestedRhs are two ordinary successive Lean inductives, not a genuine `mutual` block: Psi's grammar production [Phi,Psi] depends on Phi, but Phi's productions never mention Psi.",
-    "Comma (Phi,Phi) is a raw binary constructor, not a List or a quotient by assoc/comm/unit; no permutation lemmas landed yet since no downstream phase consumes them (avoids speculative unused declarations).",
-    "For literature verification, reading the recovered source PDF directly via Read(pages=...) cross-checked against `pdftotext -layout` is more reliable than the unverified_summary literature-search.sh index chunks; pdftotext silently drops the box glyph throughout this specific PDF (confirmed), so box symbols must be mentally restored when cross-checking.",
-    "Example 2.1's printed corresponding-formula for Gamma_1{Delta_1} informally simplifies an innermost (top implies B) subformula to B; the fm clauses as literally stated do not perform this simplification. The landed Lean example computes the literal mechanical fm output and documents the discrepancy rather than force-matching the paper's prose gloss."
+    "InputCtx.pi typed NestedRhs Atom, not Proposition (plan's original sketch): the source's own notational convention (capital Greek letters denote arbitrary sequents, roman letters denote atomic formulas) forces this -- Example 2.1's Gamma2{} decomposed per eq. (2.3) gives a compound pi = [B,C], not a bare atom. Typing pi as Proposition would make Phase 7's own cited verification example inexpressible. Full derivation documented in Context.lean's module docstring.",
+    "InputCtx's field spelled lowercase 'pi' (Greek), not capital 'Pi': Mathlib's Delaborators.lean binds capital Pi as a Pi-type delaborator token, confirmed unusable as a plain identifier by a parse failure.",
+    "InputCtx lands only fillLhs and fillEmpty (not also fillRhs/fillFull): the source never states a typing rule for filling an input context with RHS/full-sequent fillers; scoped to what's textually grounded rather than inventing an unmotivated formula.",
+    "The '(Gamma-pruned){Delta} vs Gamma{Delta}' equational relationship (part of Phase 7's own task list) is deferred to Phase 8: natural candidate structural equalities don't hold as bare equalities, and Phase 8's fm-compositionality apparatus is where the correct (likely fm-level, not raw-term) form of this relationship should emerge.",
+    "Landed as a new sibling file Nested/Context.lean rather than extending Syntax.lean: Syntax.lean was already 173 lines and Phase 7's content would have pushed well past the plan's own 350-line splitting threshold."
   ],
   "dead_ends": [
     "Marin-Morales-Strassburger labIK-le: base is IK not CK, settles IS5 not CS5. Not planned.",
     "Any route needing box(A or B) -> (box A or box B): not a theorem of classical S5. No phase attempts it.",
     "Relabeling retractions: every one is forced to identify the two tag copies. Bound landed as an asset only.",
-    "Product model over IS5: closed by the CS5ToIS5.lean route-closure theorem -- it reduces to the unadopted CS5=IS5 collapse (now machine-checked, not just plan-time asserted)."
+    "Product model over IS5: closed by the CS5ToIS5.lean route-closure theorem (Phase 5) -- reduces to the unadopted CS5=IS5 collapse, machine-checked.",
+    "InputCtx.pi as Proposition (bare atomic formula): forced compound by Example 2.1's Gamma2{} -- see decisions_made above. Do not re-attempt this typing without re-deriving against the source."
   ],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-6-handoff-20260725.md",
-    "phases_completed": 6,
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-7-handoff-20260725.md",
+    "phases_completed": 7,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage B, Phase 7 (contexts, hole filling, and output pruning -- Observation 2.2, eq. (2.2)/(2.3), Definition 2.3). Depends on Phase 6 (done).",
+    "resume_at": "Stage B, Phase 8 (fm compositionality over contexts). Depends on Phase 7 (done). New file: Nested/Translation.lean.",
     "stage_map": {
       "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
-      "B": "Phases 6-8 - nested sequent syntax - Phase 6 COMPLETE, Phases 7-8 NOT STARTED",
+      "B": "Phases 6-8 - nested sequent syntax - Phases 6-7 COMPLETE, Phase 8 NOT STARTED",
       "C": "Phases 9-10 - the rule systems - NOT STARTED",
       "D": "Phases 11-13 - soundness (Theorem 4.1) - NOT STARTED",
       "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
       "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
       "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Prefer Read(file_path=~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf, pages=\"N-M\") over literature-search.sh --include-unverified: the latter is unverified_summary fidelity and its FTS5 index errors on punctuation. Cross-check any Read render against `pdftotext -f N -l N -layout <path>` -- pdftotext drops the box glyph throughout this PDF, so a box must be mentally restored wherever a parenthesized group looks box-free in pdftotext but the direct render shows one. Pages 5-6 (source PDF) cover eq. 2.1, fm, Example 2.1, Observation 2.2, Definition 2.3, and Figure 2 (System NCK) -- everything Phases 7 and 9 need; already read and transcribed this session, see the handoff_path markdown for the full transcription.",
-    "invariants": "Cslib/ bare-sorry count must stay exactly 5 (git grep -hE '^\\s*sorry\\s*$' -- 'Cslib/**/*.lean' | wc -l). Axiom count must stay exactly 26 (git grep -c '^axiom ' -- 'Cslib/**/*.lean' | awk -F: '{s+=$2} END {print s}'). Zero new axioms. No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- a concurrent session owns those files."
+    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable. Page 5 covers eq. 2.1, fm, Example 2.1, Observation 2.2, Definition 2.3 (already fully transcribed and verified). Page 6 has Figure 2 (System NCK, needed for Phase 9). Phase 8's exact fm-compositionality lemma statements were not located this session -- search nearby pages for lemma numbering before starting.",
+    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. Derivable-relation idiom and possibly-reusable monotonicity-lifting patterns may exist in Cslib/Logics/Modal/Metalogic/InterSystem/PropositionalStrengthMonotonicity.lean and LatticeMonotonicity.lean (found via grep, not read in depth this session -- check before inventing new lemma shapes).",
+    "invariants": "Cslib/ bare-sorry count must stay exactly 5. Axiom count must stay exactly 26. Zero new axioms. No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) as a Lean identifier in this codebase (Mathlib Pi-type delaborator conflict) -- use lowercase pi (π) instead."
   },
   "plan_markers_verified": true
 }

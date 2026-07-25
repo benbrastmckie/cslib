@@ -4158,16 +4158,32 @@ instance instDecidableKb5Valid (φ₀ : Proposition Atom) : Decidable (kb5Valid 
 
 /-! ## S4Keyed Completeness (`modalTableauS4Keyed_complete`)
 
-This is the completeness half of the keyed S4 loop-checking driver, retained from v2 Phase 11 (the
-decidability half, `s4Valid_decides`/`instDecidableS4Valid`, is deferred: it needs the soundness
-line, which is out of scope -- see `plans/03_completeness-line-rescope.md`).
+This is the completeness half of the keyed S4 loop-checking driver. **The soundness half is
+FALSE AS STATED, not merely unproven or deferred.** `blockingWorldS4Keyed`'s docstring
+(`LoopChecking.lean`) carries a machine-checked counterexample:
+`CslibTests/S4LoopGuardRegression.lean` witnesses a formula that closes under
+`modalExpandBranchesS4Keyed` while having an explicit 3-world reflexive-transitive
+countermodel, so it is not `s4Valid`. Do not attempt to prove `modalTableauS4Keyed_sound` for
+the driver below; it cannot be proved, because it is not true. Two independent defects are
+responsible -- comparing prospective minting content against each world's *recorded* birth key
+rather than its *live* content ("staleness"), and admitting a redirect edge with no restriction
+that the target be reachable from the source at all ("no reachability restriction") -- and
+repairing the first does not repair the second. The repair route under development changes
+*when* a minting shape may fire rather than the guard's comparison predicate, landing as a
+parallel "ordered" driver before this one is retired; consult `blockingWorldS4Keyed`'s docstring
+for the full account. The decidability half (`s4Valid_decides`/`instDecidableS4Valid`) remains
+out of scope until both a genuine soundness theorem and this completeness theorem exist for the
+same driver.
 
-Assembled from `modalExpandBranchesS4Keyed_hintikka` (`LoopChecking.lean`, the keyed top-loop
-Hintikka lemma, already bridged to the concrete `modalHintikkaSetS4` form via
-`hintikka_congr_S4`/`modalHintikkaSetS4_eq` internally) plus `modalOpenBranchS4_countermodel`
-above. Mirrors `modalTableauS5_complete`, but needs its own initial-membership lemma (the
-`F(φ0)@0 ∈ b` fact) since `modalExpandBranchesS4Keyed` is a bespoke driver, not an instance of
-`modalExpandBranchesGen`, so `modalExpandBranchesGen_openBranch_initial_mem` does not apply. -/
+`modalTableauS4Keyed_complete` below is assembled from `modalExpandBranchesS4Keyed_hintikka`
+(`LoopChecking.lean`, the keyed top-loop Hintikka lemma, already bridged to the concrete
+`modalHintikkaSetS4` form via `hintikka_congr_S4`/`modalHintikkaSetS4_eq` internally) plus
+`modalOpenBranchS4_countermodel` above. Mirrors `modalTableauS5_complete`, but needs its own
+initial-membership lemma (the `F(φ0)@0 ∈ b` fact) since `modalExpandBranchesS4Keyed` is a
+bespoke driver, not an instance of `modalExpandBranchesGen`, so
+`modalExpandBranchesGen_openBranch_initial_mem` does not apply. This completeness result itself
+remains correct and is not weakened by the soundness defect above -- it says nothing about
+which formulas close, only that every valid formula does. -/
 
 private lemma modalTableauS4Keyed_initial (φ₀ : Proposition Atom) :
     S4LoopInv φ₀ [(⟨.neg, φ₀, 0⟩ : SignedFormula (Proposition Atom) WorldIndex)] []

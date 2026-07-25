@@ -465,7 +465,44 @@ at the two minting shapes. -/
 
 /-- The keys-aware minting guard: the least world `w'` **recorded** in `keys` whose recorded
 birth key already equals the PROSPECTIVE successor's birth content, if any exists. Unlike
-`blockingWorldS4` (live `relevantSetFinset`), this compares against the stable `keys` list. -/
+`blockingWorldS4` (live `relevantSetFinset`), this compares against the stable `keys` list.
+
+**This guard, consumed unmodified by `modalStepBranchS4Keyed`, makes `modalTableauS4Keyed`
+UNSOUND.** This is not an open conjecture: `CslibTests/S4LoopGuardRegression.lean` is a
+machine-checked counterexample. Over two atoms `p0`, `p1` with `¬X := X → ⊥`, let
+`αA := □p0 ∨ ¬¬◇p1`, `αL := □p0 ∨ ¬□p1`, `cex := □αA ∨ □αL`. `cex` has a 3-world
+reflexive-transitive countermodel (`R = {(0,0),(0,1),(0,2),(1,1),(2,2)}`, `p1` true at world 1
+only, `p0` false everywhere), so `cex` is not `s4Valid`; nonetheless the driver built on this
+guard closes it.
+
+The counterexample exercises two independent defects, and fixing one does **not** fix the
+other:
+
+- **Staleness.** This guard compares a prospective birth content against `keys` -- each world's
+  content **as recorded at its minting**, not its current live content. In the trace, a world
+  is minted with recorded key `{(neg, p0)}` before its later-minted sibling's own expansion has
+  even started; that sibling's expansion subsequently adds formulas to the *first* world's live
+  content, but its recorded key never moves. A second, unrelated world later computes the SAME
+  prospective birth content `{(neg, p0)}` (evaluated before its own sibling formula has
+  expanded, so it is also stale) and this guard reports a match against the first world's
+  stale key. `blockingWorldS4` (the live-set guard) would instead compare against the live
+  `relevantSetFinset`, which by then differs, and would correctly reject the block: this
+  specific defect is unique to the keyed guard.
+- **No reachability restriction.** The redirect edge this guard licenses connects the
+  *source* world of the new minting attempt to the *blocking* world `w'`, with no constraint
+  that `w'` be reachable from the source at all. In the trace this adds an edge between two
+  worlds that are siblings under a common ancestor, not related to each other in any model.
+  Soundness needs `m.r (f src) (f w')` in an arbitrary S4 frame, and nothing here supplies it.
+  Persistent (box-positive) propagation then flows along this unjustified edge and manufactures
+  a contradiction that no genuine countermodel has.
+
+Fixing staleness alone (comparing against live content instead of recorded keys) does not fix
+the reachability defect: the redirect edge is still unrestricted, so a live-set comparison that
+happens to match is exposed to the same attack with different timing. The repair route under
+development changes **when** a minting shape may fire (only once no non-minting rule can still
+fire anywhere on the branch) rather than editing this comparison predicate -- an ordered
+successor to the driver built on this guard, scheduled to land beside it as a parallel
+definition before this one is retired. -/
 def blockingWorldS4Keyed (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))

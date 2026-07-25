@@ -140,15 +140,19 @@ def allFuturePosAt (b : TBranch Atom) (ord : TimeOrdering) (t : TimeIndex) : Lis
       | none => none
     else none
 
-/-- Collect T(Hφ) formulas from the branch relevant to propagating into the past of `t`.
-Symmetric to `allFuturePosAt`: `T(Hφ)@t_anc` propagates to `t` whenever `t = t_anc` or `t` is
-transitively in `t_anc`'s forward light-cone (since `T(Hφ)@t_anc` constrains every time in
-`t_anc`'s own past, and if `t` is transitively future of `t_anc`, `t_anc` is transitively past
-of `t`). -/
+/-- Collect T(Hφ) formulas from the branch relevant to propagating into the past of `t`:
+either directly at time `t`, or at any time `t_anc` in `t`'s own forward light-cone
+(`ord.ancestorTimes t`) -- i.e. `t_anc` is a (possibly indirect) future time of `t`, equivalently
+`t` is a (possibly indirect) past time of `t_anc`, so `T(Hφ)@t_anc` (which constrains every time
+strictly before `t_anc`) constrains `t` too. Note the arguments are reversed relative to
+`allFuturePosAt`: `T(Gφ)@t_anc` propagates *forward* to times in `t_anc`'s future, so that
+collector asks "is `t` in `t_anc`'s future light-cone"; `T(Hφ)@t_anc` propagates *backward* to
+times in `t_anc`'s past, so this collector must ask "is `t_anc` in `t`'s future light-cone"
+instead -- checking `t`'s future reachability, not `t_anc`'s. -/
 def allPastPosAt (b : TBranch Atom) (ord : TimeOrdering) (t : TimeIndex) : List (Formula Atom) :=
   b.filterMap fun sf =>
     if sf.sign == .pos &&
-        (sf.label == t || (ord.ancestorTimes sf.label ancestorLookupFuel).contains t) then
+        (sf.label == t || (ord.ancestorTimes t ancestorLookupFuel).contains sf.label) then
       match asAllPast? sf.formula with
       | some φ => some φ
       | none => none

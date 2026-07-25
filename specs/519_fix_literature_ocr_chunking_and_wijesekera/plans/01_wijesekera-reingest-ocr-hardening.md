@@ -422,19 +422,19 @@ Part 2 regression conclusion.
 
 ## Testing & Validation
 
-- [ ] `bash -n` passes on `literature-convert.sh`, `literature-ingest.sh`, and the new reflow script.
-- [ ] Wijesekera production chunk profile: well under 50 chunks, multi-KB mean, near-zero chunks under 300B.
-- [ ] `chunks.json` titles are real section headings; zero mid-sentence fragments; zero self-duplicating breadcrumbs.
-- [ ] Definition 1.1.4 returns complete via `literature-search.sh`.
-- [ ] Section 2 diamond / fallible-world material returns complete via `literature-search.sh`.
-- [ ] Definitions 1.1.1-1.1.3 are no longer split mid-sequence.
-- [ ] `index.json` `chunk_count` matches on-disk reality; `bib_key: Wijesekera1990` preserved.
-- [ ] Global FTS5 index rebuilt with a chunk delta consistent with the re-chunk.
-- [ ] Chunk-size guard warns without failing; ingest exit status unchanged on both paths.
-- [ ] Corpus regression diff clean on all currently-acceptable no-TOC documents.
-- [ ] Backup directory `wijesekera_1990_constructivemodallogicsi.bak-pre-reingest-154chunks/` intact with `chunks.json.bak-inactive`.
-- [ ] No `Cslib/` file modified (`git status` confirms).
-- [ ] No change to `literature-chunk.sh` (`git status` confirms).
+- [x] `bash -n` passes on `literature-convert.sh`, `literature-ingest.sh`, and the new reflow script. *(verified)*
+- [x] Wijesekera production chunk profile: well under 50 chunks, multi-KB mean, near-zero chunks under 300B. *(38 chunks / 1669.5B mean / 5.3% under 300B)*
+- [x] `chunks.json` titles are real section headings; zero mid-sentence fragments; zero self-duplicating breadcrumbs. *(verified)*
+- [x] Definition 1.1.4 returns complete via `literature-search.sh`. *(chunk `ecabd94d9eea5595`, --include-unverified workaround)*
+- [x] Section 2 diamond / fallible-world material returns complete via `literature-search.sh`. *(chunk `dea76c3d5f47bab5`)*
+- [x] Definitions 1.1.1-1.1.3 are no longer split mid-sequence. *(clean boundary, both complete)*
+- [x] `index.json` `chunk_count` matches on-disk reality; `bib_key: Wijesekera1990` preserved. *(38 = 38; bib_key confirmed)*
+- [x] Global FTS5 index rebuilt with a chunk delta consistent with the re-chunk. *(rebuilt; 38 rows for this doc_id confirmed directly; corpus-wide before/after total not directly comparable -- see Phase 5 note)*
+- [x] Chunk-size guard warns without failing; ingest exit status unchanged on both paths. *(unit-tested in Phase 3)*
+- [x] Corpus regression diff clean on all currently-acceptable no-TOC documents. *(structurally + empirically confirmed in Phase 8; djvu doc untestable in this environment, noted)*
+- [x] Backup directory `wijesekera_1990_constructivemodallogicsi.bak-pre-reingest-154chunks/` intact with `chunks.json.bak-inactive`. *(verified post-promotion)*
+- [x] No `Cslib/` file modified (`git status` confirms). *(verified: `git status --short Cslib/` empty)*
+- [x] No change to `literature-chunk.sh` (`git status` confirms). *(verified: file mtime unchanged from before this task, Jul 18 vs. the three modified scripts' Jul 25 mtimes)*
 
 ## Artifacts & Outputs
 

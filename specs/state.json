@@ -1411,7 +1411,7 @@
     {
       "project_number": 552,
       "project_name": "tableau_calculus_conformance_rule_completeness_repair",
-      "status": "implementing",
+      "status": "partial",
       "task_type": "cslib",
       "dependencies": [],
       "file_scope": [

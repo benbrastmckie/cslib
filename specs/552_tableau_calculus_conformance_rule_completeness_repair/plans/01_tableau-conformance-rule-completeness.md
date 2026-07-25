@@ -1,7 +1,7 @@
 # Implementation Plan: Task #552
 
 - **Task**: 552 - Tableau calculus conformance and rule-completeness repair
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 15 hours
 - **Dependencies**: None
 - **Research Inputs**: specs/552_tableau_calculus_conformance_rule_completeness_repair/reports/01_tableau-conformance-rule-completeness.md
@@ -98,34 +98,41 @@ The two columns are file-disjoint: Phases 2-4 touch only
 
 ---
 
-### Phase 1: Conformance harness gate (P0 / Deliverable 1) [NOT STARTED]
+### Phase 1: Conformance harness gate (P0 / Deliverable 1) [COMPLETED]
 
 **Goal**: Land the 44-row executable conformance corpus as a permanent test file that is green on
 32 rows and **red on 12**. Per D5 this is a gate, not a peer deliverable: no other phase can be
 validated until it exists.
 
 **Tasks**:
-- [ ] Create `CslibTests/TableauConformance.lean` with the **dual-import header**: both plain
+- [x] Create `CslibTests/TableauConformance.lean` with the **dual-import header**: both plain
       `import X` and `public meta import X` for each of `Cslib.Logics.Temporal.Tableau.Saturation`,
       `Cslib.Logics.Temporal.Syntax.Formula`,
       `Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion`, `Cslib.Logics.Propositional.Defs`.
       Without the plain form: `Invalid definition 'p', may not access declaration 'Formula.atom'
       imported as 'meta'`. Without the meta form: `Invalid 'meta' definition '_eval',
-      'temporalTableau' is not accessible here`.
-- [ ] Define two `String`-valued verdict adapters **in the harness file only** (never in `Cslib/`),
-      e.g. `def verdict : TemporalTableauResult Atom → String | .closed => "CLOSED" | .openBranch _ _ => "OPEN"`
-      and its `IntTableauResult` counterpart. `TemporalTableauResult` (`Saturation.lean:63-67`) and
-      `IntTableauResult` (`Expansion.lean:75-79`) derive neither `Repr` nor `BEq`, so plain `#guard`
-      is unusable.
-- [ ] Encode all 44 rows as `#guard_msgs in #eval` assertions (the in-repo idiom, cf.
+      'temporalTableau' is not accessible here`. Verified via a throwaway `lake env lean` scratch
+      probe before landing the full file, matching the report's own reproduction method.
+- [x] Define two `String`-valued verdict adapters **in the harness file only** (never in `Cslib/`):
+      `temporalVerdict : TemporalTableauResult Nat → String` and
+      `intVerdict : IntTableauResult Nat → String`. `TemporalTableauResult` (`Saturation.lean:63-67`)
+      and `IntTableauResult` (`Expansion.lean:75-79`) derive neither `Repr` nor `BEq`, so plain
+      `#guard` is unusable.
+- [x] Encode all rows as `#guard_msgs in #eval` assertions (the in-repo idiom, cf.
       `CslibTests/LTS.lean:125-139`). Do **not** use `decide`, `native_decide`, or `rfl` — they stall
       on `WellFounded.fix` via the nested `let rec` in `intExpandBranches` (`Expansion.lean:357`).
-- [ ] Label the `𝐆p → 𝐅p` row explicitly as `validDiscrete` (not `Temporal.valid`) in a comment
+      *(deviation: altered — expanding Finding 0's two `k`-indexed families into individually
+      asserted formulas yields 43 rows (27 green / 16 red), not the plan summary's rounded "44 rows
+      / 32 green / 12 red"; see the harness's own "Corpus provenance" docstring section for the
+      reconciliation. The set of which formulas are defective is unchanged — only the row count
+      arithmetic differs, and per-`k` assertions are required for Phase 7's `k = 4` cut to be its
+      own detector.)*
+- [x] Label the `𝐆p → 𝐅p` row explicitly as `validDiscrete` (not `Temporal.valid`) in a comment
       adjacent to the assertion, per D1.
-- [ ] Annotate each of the 12 red rows with the expected verdict and the phase that will flip it, so
+- [x] Annotate each red row with the expected verdict and the phase that will flip it, so
       the file documents the defect rather than hiding it.
-- [ ] Register in `CslibTests.lean` as `public import CslibTests.TableauConformance`, alphabetically
-      after `CslibTests.Reduction`.
+- [x] Register in `CslibTests.lean` as `public import CslibTests.TableauConformance`, alphabetically
+      after `CslibTests.Reduction` (last entry in the barrel, so also last overall).
 
 **Timing**: 2 hours
 
@@ -136,12 +143,19 @@ validated until it exists.
 - `CslibTests.lean` - barrel registration
 
 **Verification**:
-- `lake test` runs the harness and reports exactly 32 passing rows.
-- Exactly 12 rows fail, and each failure is the documented expected-vs-actual mismatch: the 3
-  propositional rows (`((a→b)→(a→c)) → (a→(b→c))`, `¬¬¬a → ¬a`, `((a→b)→c) → (b→c)`) and the 9
-  temporal families (`𝐆p → 𝐅p`, `𝐇p → 𝐏p`, `𝐆p → 𝐆𝐆p`, `𝐇p → 𝐇𝐇p`, `p → 𝐆𝐏p`, `p → 𝐇𝐅p`,
-  `𝐆¬p → (𝐆p → 𝐆⊥)`, `¬𝐆p → 𝐅¬p`, `𝐆p → 𝐅^k p` for `k = 1..5`).
-- No file under `Cslib/` is modified by this phase.
+- `lake test` runs the harness. **Result**: 27 of 43 rows pass; 16 fail, matching Finding 0
+  exactly — the 3 propositional rows (`((a→b)→(a→c)) → (a→(b→c))`, `¬¬¬a → ¬a`,
+  `((a→b)→c) → (b→c)`) and the 13 temporal rows (`𝐆p → 𝐅p`, `𝐇p → 𝐏p`, `𝐆p → 𝐆𝐆p`, `𝐇p → 𝐇𝐇p`,
+  `p → 𝐆𝐏p`, `p → 𝐇𝐅p`, `𝐆¬p → (𝐆p → 𝐆⊥)`, `¬𝐆p → 𝐅¬p`, and `𝐆p → 𝐅^k p` for each `k = 1..5`
+  individually). This is the row-count deviation recorded above — same defect set as the plan's
+  "12 rows fail" language, counted per-formula instead of per-family.
+- `lake build`, `lake exe checkInitImports`, `lake lint`, `lake exe lint-style`,
+  `lake shake --add-public --keep-implied --keep-prefix`, and `lake exe mk_all --module` all ran
+  clean against the new file (zero warnings/findings attributable to it; the pre-existing
+  project-wide `lake shake` backlog and pre-existing `sorry`s elsewhere are unrelated to this
+  phase and unchanged by it).
+- No file under `Cslib/` is modified by this phase (confirmed: `CslibTests/TableauConformance.lean`
+  new, `CslibTests.lean` one-line barrel addition only).
 
 ---
 

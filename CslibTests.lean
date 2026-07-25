@@ -16,3 +16,4 @@ public import CslibTests.MLL
 public import CslibTests.ModalFrameSeparation
 public import CslibTests.Propositional
 public import CslibTests.Reduction
+public import CslibTests.TableauConformance

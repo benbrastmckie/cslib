@@ -2,6 +2,8 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "implemented",
+  "phases_completed": 8,
+  "phases_total": 8,
   "summary": "All 8 phases complete. Wijesekera re-ingested via new reflow tool: 154 shredded chunks -> 38 clean chunks. Definitions 1.1.1-1.1.4 and box/diamond independence statement verified complete via literature-search.sh. literature-convert.sh hardened with two-signal OCR heading detection; literature-ingest.sh gained a non-blocking mean-chunk-size guard. Corpus regression: zero regression, structurally confirmed (5/6 sample docs; one djvu untestable here).",
   "artifacts": [
     {"type": "plan", "path": "specs/519_fix_literature_ocr_chunking_and_wijesekera/plans/01_wijesekera-reingest-ocr-hardening.md"},

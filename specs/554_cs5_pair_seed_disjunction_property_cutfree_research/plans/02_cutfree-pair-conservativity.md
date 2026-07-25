@@ -399,26 +399,28 @@ claims.
 
 ---
 
-### Phase 5: Close the product-model route (machine-checked) [IN PROGRESS]
+### Phase 5: Close the product-model route (machine-checked) [COMPLETED]
 
 **Goal**: Turn the plan-time argument that the product-model residual R-b is the `CS5 = IS5`
 collapse into a repository theorem, and land the `CS5 → IS5` transport lemmas.
 
 **Tasks**:
-- [ ] Land `cs5Axiom_to_is5Axiom`, `cs5_deriv_to_is5`, `cs5_closure_subset_is5_closure` from
+- [x] Land `cs5Axiom_to_is5Axiom`, `cs5_deriv_to_is5`, `cs5_closure_subset_is5_closure` from
       `probes/cs5_subset_is5.lean` (`CS5ModalAxiom`'s constructors are a literal subset of
       `IS5ModalAxiom`'s; `IS5ModalAxiom` adds `kdisj`, `kfs`, `kbot`)
-- [ ] Land the route-closure theorem: from the hypothesis
+- [x] Land the route-closure theorem: from the hypothesis
       `∀ S A, Proposition.box A ∉ modalDeductiveClosure CS5ModalAxiom S →
         Proposition.box A ∉ modalDeductiveClosure IS5ModalAxiom S`
       derive `∀ φ, Derivable IS5ModalAxiom φ → Derivable CS5ModalAxiom φ`, using necessitation and
-      `tBox` in both systems to interderive `⊢ A` and `⊢ □A`
-- [ ] Corollary: that hypothesis together with `cs5_closure_subset_is5_closure` gives
-      `Derivable IS5ModalAxiom φ ↔ Derivable CS5ModalAxiom φ`
-- [ ] Docstring: state that this is why the product-model-over-`IS5` route is not adopted — its
+      `tBox` in both systems to interderive `⊢ A` and `⊢ □A` *(landed as
+      `is5_derivable_of_boxNotMem_transport`)*
+- [x] Corollary: that hypothesis together with `cs5_closure_subset_is5_closure` gives
+      `Derivable IS5ModalAxiom φ ↔ Derivable CS5ModalAxiom φ` *(landed as
+      `is5_iff_cs5_derivable_of_boxNotMem_transport`)*
+- [x] Docstring: state that this is why the product-model-over-`IS5` route is not adopted — its
       residual is the collapse, not a weaker statement — and that the collapse's only published
       basis (Pacheco's `CKB = IKB`, §4) rests on the same unsound Lemma 16 this module repairs
-- [ ] `lake build` the new/host module
+- [x] `lake build` the new/host module
 
 **Timing**: 2 hours
 

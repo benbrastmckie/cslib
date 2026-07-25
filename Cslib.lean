@@ -378,6 +378,7 @@ public import Cslib.Logics.Modal.Metalogic.DerivationTree
 public import Cslib.Logics.Modal.Metalogic.FrameCorrespondence
 public import Cslib.Logics.Modal.Metalogic.GenericMCSBridge
 public import Cslib.Logics.Modal.Metalogic.InterSystem.AxiomSubsumption
+public import Cslib.Logics.Modal.Metalogic.InterSystem.CS5ToIS5
 public import Cslib.Logics.Modal.Metalogic.InterSystem.Conservativity
 public import Cslib.Logics.Modal.Metalogic.InterSystem.IntToClassical
 public import Cslib.Logics.Modal.Metalogic.InterSystem.LatticeMonotonicity

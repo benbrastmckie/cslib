@@ -1,0 +1,18 @@
+{
+  "phase": 2,
+  "phase_name": "Derive and validate the Wijesekera heading list",
+  "started_at": "2026-07-25T07:20:00Z",
+  "last_updated": "2026-07-25T07:40:00Z",
+  "objectives": [
+    {"id": 1, "description": "pdftotext -layout extraction", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Extract candidate headings via regex", "status": "done", "files_touched": []},
+    {"id": 3, "description": "Filter false positives", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Manually confirm expected set and investigate gap", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Record page/offset per heading", "status": "done", "files_touched": ["specs/519_fix_literature_ocr_chunking_and_wijesekera/headings-wijesekera.txt"]},
+    {"id": 6, "description": "Save validated list to scratch file", "status": "done", "files_touched": ["specs/519_fix_literature_ocr_chunking_and_wijesekera/headings-wijesekera.txt"]}
+  ],
+  "current_objective": 6,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": []
+}

@@ -164,18 +164,18 @@ the corpus-wide audit table that Phase 8's regression check diffs against.
 
 ---
 
-### Phase 2: Derive and validate the Wijesekera heading list [NOT STARTED]
+### Phase 2: Derive and validate the Wijesekera heading list [COMPLETED]
 
 **Goal**: Produce a manually verified list of the ~13 numbered section/subsection headings that
 Phase 4 will insert, with bibliography false positives excluded.
 
 **Tasks**:
-- [ ] Run `pdftotext -layout` on `/home/benjamin/Documents/Zotero/storage/HDH8YF7H/Wijesekera - 1990 - Constructive modal logics I.pdf` into a scratch file.
-- [ ] Extract candidate headings with `^\d+(\.\d+)*\.?\s+[A-Z]`.
-- [ ] Filter false positives: require short lines (comparable to the existing 80-char bound in `is_heading_candidate`), and exclude pages at or after the bibliography (detect via `\x0c` page markers plus the references heading).
-- [ ] Manually compare the surviving list against the source PDF's own section numbering; confirm the expected set (`1.`, `1.1.`-`1.5.`, `2.`, `2.1.`-`2.4.`, `3.2.`, `3.3.`) and investigate any gap (notably whether a `3.` / `3.1.` exists and was missed).
-- [ ] Record each heading with the page and character offset where it occurs, so Phase 4 can insert at the right position rather than by fuzzy re-matching.
-- [ ] Save the validated list to a scratch file under the task directory.
+- [x] Run `pdftotext -layout` on `/home/benjamin/Documents/Zotero/storage/HDH8YF7H/Wijesekera - 1990 - Constructive modal logics I.pdf` into a scratch file. *(completed)*
+- [x] Extract candidate headings with `^\d+(\.\d+)*\.?\s+[A-Z]`. *(completed)*
+- [x] Filter false positives: require short lines (comparable to the existing 80-char bound in `is_heading_candidate`), and exclude pages at or after the bibliography (detect via `\x0c` page markers plus the references heading). *(completed: filtered by column-0 match, leading-integer-in-{1,2,3}, and line-precedes-References — see headings-wijesekera.txt header comment for the full rule derivation and each excluded false-positive example)*
+- [x] Manually compare the surviving list against the source PDF's own section numbering; confirm the expected set (`1.`, `1.1.`-`1.5.`, `2.`, `2.1.`-`2.4.`, `3.2.`, `3.3.`) and investigate any gap (notably whether a `3.` / `3.1.` exists and was missed). *(completed: exact 13-heading set confirmed; 3./3.1. do exist in the paper's own numbering (Definition 3.1.1, Lemma 3.1.2-3.1.6, Theorem 3.1.3/3.1.7, and an explicit "Section 3.1" back-reference) but their heading lines fall on a severely OCR-corrupted, mirrored/reversed page region that pdftotext -layout could not recover — documented as a genuine gap, not fabricated)*
+- [x] Record each heading with the page and character offset where it occurs, so Phase 4 can insert at the right position rather than by fuzzy re-matching. *(completed)*
+- [x] Save the validated list to a scratch file under the task directory. *(completed)*
 
 **Timing**: 0.5 hours
 

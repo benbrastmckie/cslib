@@ -1,0 +1,19 @@
+{
+  "phase": 5,
+  "phase_name": "Promote to production and reindex",
+  "started_at": "2026-07-25T12:35:00Z",
+  "last_updated": "2026-07-25T13:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Replace production chunk set with Phase 4 scratch chunks + reflowed source", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Update metadata.json", "status": "done", "files_touched": []},
+    {"id": 3, "description": "Update index.json entry (chunk_count, ingested_at, provenance_fidelity, summary)", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Confirm bib_key preserved", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Rebuild global FTS5 index and record delta", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Confirm specs/literature-index.json needs no change", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 6,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [],
+  "notes": "Production files (~/Projects/Literature/wijesekera_1990_constructivemodallogicsi/, index.json, .literature.db) are outside the cslib git repo entirely -- no git commit applies to them. Verified: 38 chunks on disk = index.json chunk_count = chunks_data FTS row count for this doc_id. Backup directory (wijesekera_1990_constructivemodallogicsi.bak-pre-reingest-154chunks/) confirmed still intact with 154 chunk files and chunks.json.bak-inactive after promotion."
+}

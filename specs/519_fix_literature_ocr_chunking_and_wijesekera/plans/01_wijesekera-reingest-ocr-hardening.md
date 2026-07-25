@@ -250,18 +250,18 @@ with a healthy size profile, production untouched.
 
 ---
 
-### Phase 5: Promote to production and reindex [NOT STARTED]
+### Phase 5: Promote to production and reindex [COMPLETED]
 
 **Goal**: The validated scratch chunk set becomes the live Wijesekera corpus with consistent
 metadata and a rebuilt search index.
 
 **Tasks**:
-- [ ] Replace the contents of `~/Projects/Literature/wijesekera_1990_constructivemodallogicsi/` with the Phase 4 scratch chunks + `chunks.json`, preserving the reflowed markdown source alongside them (as 518 did for Simpson).
-- [ ] Update `metadata.json` in that directory: new `chunk_count`, refreshed `ingested_at`.
-- [ ] Update the `wijesekera_1990_constructivemodallogicsi` entry in `~/Projects/Literature/index.json`: new `chunk_count`, refreshed `ingested_at`, add `provenance_fidelity: "ocr_rescanned_reflowed_partial_symbol_loss"` (matching the Simpson entry's convention), and an honest `summary` note about the OCR math-notation ceiling.
-- [ ] Confirm `bib_key: Wijesekera1990` is preserved unchanged.
-- [ ] Rebuild the global FTS5 index: `bash .claude/scripts/literature-build-index.sh --global`. Record the total-chunk delta.
-- [ ] Confirm `specs/literature-index.json` needs no change (it references documents by `doc_id`, which is unchanged) — verify rather than assume.
+- [x] Replace the contents of `~/Projects/Literature/wijesekera_1990_constructivemodallogicsi/` with the Phase 4 scratch chunks + `chunks.json`, preserving the reflowed markdown source alongside them (as 518 did for Simpson). *(completed: old 154 chunk_*.md + chunks.json removed, 38 new ones copied in, reflowed markdown saved as wijesekera-reflowed-source.md)*
+- [x] Update `metadata.json` in that directory: new `chunk_count`, refreshed `ingested_at`. *(completed: chunk_count 38, ingested_at 2026-07-25T07:40:22Z; also refreshed the stale source_path, which pointed at a dead prior-session scratchpad directory, to the durable Zotero storage path)*
+- [x] Update the `wijesekera_1990_constructivemodallogicsi` entry in `~/Projects/Literature/index.json`: new `chunk_count`, refreshed `ingested_at`, add `provenance_fidelity: "ocr_rescanned_reflowed_partial_symbol_loss"` (matching the Simpson entry's convention), and an honest `summary` note about the OCR math-notation ceiling. *(completed — the summary note deliberately omits a task-number citation, unlike the Simpson entry's precedent, in the spirit of the no-task-references convention even though `~/Projects/Literature/` is a separate repository outside that rule's literal scope)*
+- [x] Confirm `bib_key: Wijesekera1990` is preserved unchanged. *(completed, verified)*
+- [x] Rebuild the global FTS5 index: `bash .claude/scripts/literature-build-index.sh --global`. Record the total-chunk delta. *(completed: 7774 chunks reported by the build script across 126 manifests; `chunks_data` query confirms exactly 38 rows for `doc_id = 'wijesekera_1990_constructivemodallogicsi'` post-rebuild. A precise corpus-wide before/after total delta could not be computed — Phase 1's baseline table was built from `index.json`'s entries array, a smaller/different inventory than `literature-build-index.sh`'s own `find`-based manifest discovery (126 manifests vs. 257 resolvable baseline rows), so the two totals are not directly comparable. The verifiable, apples-to-apples fact is reported instead: Wijesekera's own indexed chunk count is 38 (down from 154), and no other document's `chunks.json` was touched by this task.)*
+- [x] Confirm `specs/literature-index.json` needs no change (it references documents by `doc_id`, which is unchanged) — verify rather than assume. *(completed: verified — the sub-index entry only stores `doc_id`/`relevance`, no cached chunk metadata, `doc_id` unchanged)*
 
 **Timing**: 0.75 hours
 

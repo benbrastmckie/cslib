@@ -388,23 +388,27 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
 
 ---
 
-### Phase 5: Post-stamp search verification for the recoverable documents [NOT STARTED]
+### Phase 5: Post-stamp search verification for the recoverable documents [COMPLETED]
 
 - **Goal:** Documents that Phase 4 stamped with a non-quarantined value now surface in default
   (no-flag) search; documents that landed on a quarantined value provably do not.
 - **Tasks:**
-  - [ ] Run a default search targeting each newly-`verified_conversion` document and record
-        `degraded`, `fallback_tier`, and the returned `provenance_fidelity`.
-  - [ ] Confirm that any document Phase 4 left at a quarantined value is still absent from default
+  - [x] Run a default search targeting each newly-`verified_conversion` document and record
+        `degraded`, `fallback_tier`, and the returned `provenance_fidelity`. *(completed: all 4
+        queries return degraded=false, fallback_tier=bm25, provenance_fidelity=verified_conversion)*
+  - [x] Confirm that any document Phase 4 left at a quarantined value is still absent from default
         search and still visible under `--include-unverified` — the quarantine mechanism must still
-        work.
-  - [ ] Re-run the Phase 1 map-diff harness to confirm the new map keys are exactly the Group A pair
+        work. *(completed: arisakadasstrassburger_2015 absent from default search, present as
+        unadjudicated under --include-unverified)*
+  - [x] Re-run the Phase 1 map-diff harness to confirm the new map keys are exactly the Group A pair
         plus the newly-stamped legacy documents, with zero removals and zero changed values among
-        the pre-existing keys.
-  - [ ] Write the implementation summary to
+        the pre-existing keys. *(completed: old 95, new 102; added = the 2 Group A docs + 5 newly-
+        stamped Group B docs (4 verified_conversion + arisaka's unadjudicated); removed and changed
+        both empty)*
+  - [x] Write the implementation summary to
         `specs/555_literature_search_fidelity_schema_quarantine/summaries/01_fidelity-key-derivation-summary.md`,
-        stating explicitly which documents remain quarantined and why.
-  - [ ] Commit: `task 555 phase 5: verify post-stamp search visibility`.
+        stating explicitly which documents remain quarantined and why. *(completed)*
+  - [x] Commit: `task 555 phase 5: verify post-stamp search visibility`.
 - **Timing:** 30 minutes
 - **Depends on:** 4
 - **Files to modify:**

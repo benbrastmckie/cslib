@@ -191,17 +191,17 @@ Phase 4 will insert, with bibliography false positives excluded.
 
 ---
 
-### Phase 3: Pathological mean-chunk-size guard in literature-ingest.sh [NOT STARTED]
+### Phase 3: Pathological mean-chunk-size guard in literature-ingest.sh [COMPLETED]
 
 **Goal**: Any future ingest producing a shredded corpus warns loudly instead of landing silently.
 
 **Tasks**:
-- [ ] Insert the guard in `.claude/scripts/literature-ingest.sh` immediately after line 268 (`log "Created $CHUNK_COUNT chunks in $DOC_DIR"`), where `$DOC_DIR/chunks.json` exists with `token_count` populated.
-- [ ] Compute `mean_bytes` as `mean(token_count) * 4` across the chunk manifest.
-- [ ] Compare against `LITERATURE_MIN_MEAN_CHUNK_BYTES` (env-overridable, default `600`), mirroring the `LITERATURE_SPARSE_THRESHOLD` convention already used in this extension.
-- [ ] On breach, emit via the existing `log()` helper a banner in the established loud-but-non-blocking family (`[SPARSE COVERAGE ...]`, `[UNVERIFIED ...]`, `[DEGRADED RETRIEVAL ...]`): `[PATHOLOGICAL CHUNK SIZE - N chunks, mean MB, threshold TB]`.
-- [ ] **Warn and continue** — do not exit, do not increment `FAILED`, do not `continue` the loop. This is deliberately unlike `run_quality_gate()`'s exit-3 hard block: a low mean is a strong signal, not a provably-wrong condition.
-- [ ] Verify the guard is safe under `set -e` (no bare non-zero arithmetic or command substitution that could abort the ingest loop).
+- [x] Insert the guard in `.claude/scripts/literature-ingest.sh` immediately after line 268 (`log "Created $CHUNK_COUNT chunks in $DOC_DIR"`), where `$DOC_DIR/chunks.json` exists with `token_count` populated. *(completed)*
+- [x] Compute `mean_bytes` as `mean(token_count) * 4` across the chunk manifest. *(completed)*
+- [x] Compare against `LITERATURE_MIN_MEAN_CHUNK_BYTES` (env-overridable, default `600`), mirroring the `LITERATURE_SPARSE_THRESHOLD` convention already used in this extension. *(completed)*
+- [x] On breach, emit via the existing `log()` helper a banner in the established loud-but-non-blocking family (`[SPARSE COVERAGE ...]`, `[UNVERIFIED ...]`, `[DEGRADED RETRIEVAL ...]`): `[PATHOLOGICAL CHUNK SIZE - N chunks, mean MB, threshold TB]`. *(completed)*
+- [x] **Warn and continue** — do not exit, do not increment `FAILED`, do not `continue` the loop. This is deliberately unlike `run_quality_gate()`'s exit-3 hard block: a low mean is a strong signal, not a provably-wrong condition. *(completed)*
+- [x] Verify the guard is safe under `set -e` (no bare non-zero arithmetic or command substitution that could abort the ingest loop). *(completed: tested guard logic in isolation against synthetic chunks.json fixtures for healthy/breach/forced-breach-via-env-override — all three preserve exit status 0)*
 
 **Timing**: 0.5 hours
 

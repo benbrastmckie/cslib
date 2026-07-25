@@ -41,7 +41,7 @@ next_project_number: 556
 534 [NOT STARTED] — COMPLETENESS GAP. The 5/Euclidean decidability currently in-tree 
 552 [PARTIAL] — Shared calculus-conformance and rule-completeness repair unblocki
 553 [PARTIAL] — Determine whether the S4 keyed loop-check guard can be made sound
-554 [IMPLEMENTING] — Research-only task: establish or refute the CS5 pair-seed disjunc
+554 [PARTIAL] — Research-only task: establish or refute the CS5 pair-seed disjunc
   └─ 537 [BLOCKED] — Prove the general labelled SOUNDNESS direction nik_TS5_soundness 
   └─ 551 [BLOCKED] — Deliver NATIVE Hilbert canonical-model completeness for construct
 
@@ -94,7 +94,7 @@ next_project_number: 556
 ---
 
 ### 554. Cs5 pair seed disjunction property cutfree research
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None

@@ -273,7 +273,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 5: Termination Measure Re-Verification (risk a, part 1) [NOT STARTED]
+### Phase 5: Termination Measure Re-Verification (risk a, part 1) [COMPLETED]
 
 - **Goal:** Re-establish the strict measure decrease for the ordered stepper. This is the first
   half of research risk (a).
@@ -285,17 +285,35 @@ critical path, because each proof layer consumes the previous one's statement sh
   traversal shape matters, and it has exactly one consumer. Expect to replace the bridge, not the
   measure argument.
 - **Tasks:**
-  - [ ] Restate the projection bridge selection-agnostically:
+  - [x] Restate the projection bridge selection-agnostically:
     `modalStepBranchS4KeyedOrdered_proj`, concluding the same `(newBs, newExps, newAcc)` shape
     facts from Phase 4's `_selected_mem` rather than from `modalStepBranchGen`'s `findSome?`.
-  - [ ] Derive `modalExpMeasure_step_lt_S4KeyedOrdered` as a line-by-line transcription of
+    *(deviation: altered -- the conclusion is phrased via `Option.map` dropping
+    `modalStepBranchS4KeyedBody`'s `keys'` component (`(modalStepBranchS4KeyedBody ... sf).map
+    (fun p => (p.1,p.2.1,p.2.2.1)) = some (newBs,newExps,newAcc)`) rather than a hand-typed
+    `let`/`match` expression restating `modalApplyOneS4Keyed`'s dispatch inline. An inline
+    restatement was tried first and abandoned: Lean elaborates a fresh `let (a,b) := f x; ...`
+    written directly in a theorem's conclusion differently from the same syntax appearing inside
+    an existing `def`'s unfolded body (the former compiles to a `match`, blocking the
+    `.1`/`.2`-projection-based rewrites the rest of the file's proofs about `modalStepBranchGen`
+    rely on, since `modalStepBranchGen`'s `apply` parameter is abstract at definition time and
+    is elaborated via direct projections). Reusing the already-elaborated `modalStepBranchS4KeyedBody`
+    (from Phase 4) sidesteps the discrepancy entirely.)*
+  - [x] Derive `modalExpMeasure_step_lt_S4KeyedOrdered` as a line-by-line transcription of
     `modalExpMeasure_step_lt_S4Keyed`, substituting the new bridge for the old one. Reuse
     `modalExpMeasure_split_S4`, `modalExpMeasure_append_S4`, `modalExpMeasure_const_exp_S4`,
     `modalWork_drop_linear_S4`, `pow3_add_one_le`, and the three Phase 4 per-call obligations
     (`modalApplyOneS4Keyed_branchingLength_S4` / `_persistentFresh_S4` /
-    `_outputsSubsetUniverse_S4`) unchanged — these are all selection-independent.
-  - [ ] If the transcription does not close, do **not** substitute a different measure. Mark the
-    phase [BLOCKED] and report the exact goal state, per `.claude/rules/plan-compliance.md`.
+    `_outputsSubsetUniverse_S4`) unchanged — these are all selection-independent. *(deviation:
+    altered -- the extraction step feeding the four-way result-shape case split uses
+    `Option.some.inj` (raw, unsimplified) rather than `simp only [Option.some.injEq,
+    Prod.mk.injEq]`, matching the exact idiom the untouched `modalExpMeasure_step_lt_S4Keyed`
+    above already uses; the `simp only [...]`-based variant was tried first and left `newExp`
+    unidentified with the branch-specific expanded-set value the goal needs, whereas
+    `Option.some.inj` + a bare-name `obtain` pattern lets `rcases`'s substitution succeed exactly
+    as it does in the pre-existing lemma.)*
+  - The transcription closed on the first attempt after the two adaptations above; the
+    [BLOCKED]-on-non-closure escalation path was not needed.
 - **Timing:** 3 hours
 - **Depends on:** 4
 - **Files to modify:**

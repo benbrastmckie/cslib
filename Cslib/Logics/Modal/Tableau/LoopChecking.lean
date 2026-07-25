@@ -6968,6 +6968,155 @@ lemma modalExpMeasure_step_lt_S4Keyed
     exact pow3_add_one_le hC h0
   · rw [hca] at hfound; simp at hfound
 
+/-! ## Ordered Stepper: Termination Measure Re-Verification
+
+Re-establishes the strict per-step measure decrease just proved against
+`modalStepBranchS4Keyed` above, this time for the ordered stepper. The projection bridge
+`modalStepBranchS4Keyed_proj_stepBranchGen` is replaced by a selection-agnostic form,
+`modalStepBranchS4KeyedOrdered_proj`: rather than asserting the ordered stepper's result equals
+the UNordered generic driver's own whole-branch `b.findSome?` traversal (false in general -- a
+different formula may genuinely be selected first, that being the entire point of reordering),
+it extracts the weaker existential fact `modalExpMeasure_step_lt_S4Keyed`'s proof actually
+consumes: SOME formula `sf ∈ b`, `sf ∉ e`, whose rule application produces exactly the result
+the ordered stepper returned. That proof never uses more than this existential (it never needs
+`sf` to be the FIRST such formula in `b`), so the measure argument below transcribes unchanged
+once fed this replacement bridge -- every other ingredient (the four combinatorial measure
+primitives, the three per-call rule-application obligations) is selection-independent and reused
+exactly as is. -/
+
+/-- **The projection lemma, ordered form.** Selection-agnostic replacement for
+`modalStepBranchS4Keyed_proj_stepBranchGen`, built directly from
+`modalStepBranchS4KeyedOrdered_selected_mem` rather than from `modalStepBranchGen`'s own
+`findSome?`. The conclusion drops the `keys'` component of `modalStepBranchS4KeyedBody`'s output
+via `Option.map`, matching the 3-tuple shape `modalStepBranchGen` itself would have produced. -/
+lemma modalStepBranchS4KeyedOrdered_proj (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∃ sf ∈ b, sf ∉ e ∧
+      (modalStepBranchS4KeyedBody φ₀ b e acc keys sf).map (fun p => (p.1, p.2.1, p.2.2.1)) =
+        some (newBs, newExps, newAcc) := by
+  obtain ⟨sf, hsf_mem, hsf_ne, hsf_body⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  exact ⟨sf, hsf_mem, hsf_ne, by rw [hsf_body]; rfl⟩
+
+/-- **The keyed engine, ordered form.** One `modalStepBranchS4KeyedOrdered` step strictly
+decreases the base-3 damped worklist measure over `modalUniverseS4 φ₀` by at least one.
+Line-by-line transcription of `modalExpMeasure_step_lt_S4Keyed` above, substituting
+`modalStepBranchS4KeyedOrdered_proj` for `modalStepBranchS4Keyed_proj_stepBranchGen`. -/
+lemma modalExpMeasure_step_lt_S4KeyedOrdered
+    (φ₀ : Proposition Atom) (keys keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (done bt newBs : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (doneExp es : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newExp : List (SignedFormula (Proposition Atom) WorldIndex))
+    (bh e : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc newAcc : Accessibility)
+    (hdlen : done.length = doneExp.length)
+    (hb : ∀ x ∈ bh, x ∈ modalUniverseS4 φ₀)
+    (hknown : accTargetsKnown bh acc)
+    (hWC : worldsContiguousS4 bh)
+    (hKT : ∀ w ∈ modalKnownWorlds bh, ∃ k, (w, k) ∈ keys)
+    (hKD : ∀ w1 w2 k1 k2, (w1, k1) ∈ keys → (w2, k2) ∈ keys → w1 ≠ w2 → k1 ≠ k2)
+    (hKI : ∀ w k, (w, k) ∈ keys → k ⊆ signedSubfmls φ₀)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ bh e acc keys =
+      some (newBs, newBs.map (fun _ => newExp), newAcc, keys')) :
+    modalExpMeasure (modalUniverseS4 φ₀) (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) + 1
+      ≤ modalExpMeasure (modalUniverseS4 φ₀) (done ++ bh :: bt) (doneExp ++ e :: es) := by
+  obtain ⟨sf, hsfmem, hsf_ne, hfound⟩ :=
+    modalStepBranchS4KeyedOrdered_proj φ₀ bh e acc keys newBs (newBs.map (fun _ => newExp))
+      newAcc keys' hstep
+  set U := modalUniverseS4 φ₀ with hUdef
+  have hrhs : modalExpMeasure U (done ++ bh :: bt) (doneExp ++ e :: es) =
+      modalExpMeasure U done doneExp + 3 ^ modalWork U bh e + modalExpMeasure U bt es :=
+    modalExpMeasure_split_S4 U done doneExp bh e bt es hdlen
+  have hlhs : modalExpMeasure U (done ++ newBs ++ bt)
+        (doneExp ++ newBs.map (fun _ => newExp) ++ es) =
+      modalExpMeasure U done doneExp +
+        (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum +
+        modalExpMeasure U bt es := by
+    have hlen1 : (done ++ newBs).length = (doneExp ++ newBs.map (fun _ => newExp)).length := by
+      simp [List.length_append, hdlen]
+    rw [modalExpMeasure_append_S4 U (done ++ newBs) bt
+          (doneExp ++ newBs.map (fun _ => newExp)) es hlen1,
+        modalExpMeasure_append_S4 U done newBs doneExp (newBs.map (fun _ => newExp)) hdlen,
+        modalExpMeasure_const_exp_S4 U newBs newExp]
+  rw [hrhs, hlhs]
+  suffices h : (newBs.map (fun child => 3 ^ modalWork U child newExp)).sum + 1 ≤
+      3 ^ modalWork U bh e by omega
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  have hsfU : sf ∈ U := hb sf hsfmem
+  unfold modalStepBranchS4KeyedBody at hfound
+  rw [if_neg (by simp [hany])] at hfound
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf bh acc with ⟨result, newAcc0⟩
+  rw [hpair] at hfound
+  rcases hres : result with nf | brs | nf | -
+  · -- linear
+    rw [hres] at hfound
+    simp only [Option.map_some] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    have hdrop : modalWork U (nf ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (nf ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (nf ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · -- branching
+    have hca : (modalApplyOneS4Keyed φ₀ keys sf bh acc).1 = RuleResult.branching brs := by
+      rw [hpair, hres]
+    have hlen2 : brs.length = 2 :=
+      modalApplyOneS4Keyed_branchingLength_S4 φ₀ keys sf bh acc brs hca
+    obtain ⟨b0, b1, hbrs⟩ : ∃ b0 b1, brs = [b0, b1] := by
+      match brs, hlen2 with
+      | [b0, b1], _ => exact ⟨b0, b1, rfl⟩
+    subst hbrs
+    rw [hres] at hfound
+    simp only [Option.map_some] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    simp only [List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, Nat.add_zero]
+    have hdrop0 : modalWork U (b0 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (b0 ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right b0 hz)
+    have hdrop1 : modalWork U (b1 ++ bh) (e ++ [sf]) + 1 ≤ modalWork U bh e :=
+      modalWork_drop_linear_S4 U bh (b1 ++ bh) e sf hsfU hany
+        (fun z hz => List.mem_append_right b1 hz)
+    have hC : 1 ≤ modalWork U bh e := by omega
+    have h0 : modalWork U (b0 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    have h1 : modalWork U (b1 ++ bh) (e ++ [sf]) ≤ modalWork U bh e - 1 := by omega
+    exact pow3_two_add_one_le hC h0 h1
+  · -- persistent
+    have hca : (modalApplyOneS4Keyed φ₀ keys sf bh acc).1 = RuleResult.persistent nf := by
+      rw [hpair, hres]
+    rw [hres] at hfound
+    simp only [Option.map_some] at hfound
+    obtain ⟨rfl, hne, -⟩ := Option.some.inj hfound
+    obtain ⟨hnfne, hnffresh⟩ :=
+      modalApplyOneS4Keyed_persistentFresh_S4 φ₀ keys sf bh acc nf hca
+    obtain ⟨x0, hx0mem⟩ := List.exists_mem_of_ne_nil nf hnfne
+    have hclosure := modalApplyOneS4Keyed_outputsSubsetUniverse_S4 φ₀ keys sf bh acc hb hsfmem
+      hknown hWC hKT hKD hKI
+    rw [hca] at hclosure
+    have hx0U : x0 ∈ U := hclosure x0 hx0mem
+    have hx0b : x0 ∉ bh := hnffresh x0 hx0mem
+    have hx0b' : x0 ∈ nf ++ bh := List.mem_append_left bh hx0mem
+    have hdrop : modalWork U (nf ++ bh) newExp + 1 ≤ modalWork U bh newExp :=
+      modalWork_drop_persistent_S4 U bh (nf ++ bh) newExp x0 hx0U hx0b hx0b'
+        (fun z hz => List.mem_append_right nf hz)
+    have hC : 1 ≤ modalWork U bh newExp := by omega
+    have h0 : modalWork U (nf ++ bh) newExp ≤ modalWork U bh newExp - 1 := by omega
+    simp only [List.map_singleton, List.sum_singleton]
+    exact pow3_add_one_le hC h0
+  · rw [hres] at hfound; simp at hfound
+
 /-! ## Phase 10: Top-Loop Induction — `modalExpandBranchesS4Keyed_hintikka`
 
 Assembles the termination top-loop: an open branch produced by the keyed driver is a Hintikka

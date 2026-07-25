@@ -340,19 +340,45 @@ scans, using broadened producer detection **plus** independent structural cues.
 
 ---
 
-### Phase 8: Part 2 regression validation and OCR signature documentation [NOT STARTED]
+### Phase 8: Part 2 regression validation and OCR signature documentation [COMPLETED]
 
 **Goal**: Prove the hardened heuristic improves OCR'd documents without regressing ones that
 currently convert acceptably, and record the design rationale for future maintainers.
 
 **Tasks**:
-- [ ] Select the regression sample from Phase 1's baseline table: all no-TOC documents, prioritizing `chagrovzakharyaschev_1997_modallogic` (997 chunks, 1434B mean, 7% under 300B — currently OK, the primary regression risk) and `proofs_and_types` (176 chunks, 1662B mean, 7%).
-- [ ] Re-convert each sample document through the hardened `literature-convert.sh` into a **scratch** directory; chunk with the unmodified `literature-chunk.sh`.
-- [ ] Compute the after-table (chunk count, mean bytes, % under 300B) and diff against `baseline-audit.md`. Any material degradation on a currently-OK document blocks Part 2 — fix or revert before proceeding.
-- [ ] Re-convert the raw Wijesekera PDF through the hardened path into scratch and record the outcome. Expect improvement over 154 shreds; **a result with few or no headings is an acceptable pass**, not a failure — Pass 2 subdivides by size, and this is exactly why Part 1's bespoke heading insertion remains necessary. Do not promote this output; production comes from Phase 5.
-- [ ] Confirm the Phase 3 guard fires as expected on any scratch conversion that lands below the 600B threshold.
-- [ ] Document the observed OCR producer signatures (`OCRmyPDF 17.4.2 / Tesseract 5.5.2` for Simpson; `Acrobat 3.0 Capture Plug-in` / `Acrobat 3.0 Import Plug-in` for Wijesekera) and the two-independent-signals rationale in `.claude/context/project/literature/domain/format-decision.md` (or a new sibling file), so a future third OCR family is an append rather than a re-derivation.
-- [ ] Per `.claude/rules/no-task-references-in-deliverables.md`, the documentation must cite durable anchors (script/function names, producer strings) and **must not** reference task numbers.
+- [x] Select the regression sample from Phase 1's baseline table: all no-TOC documents, prioritizing `chagrovzakharyaschev_1997_modallogic` (997 chunks, 1434B mean, 7% under 300B — currently OK, the primary regression risk) and `proofs_and_types` (176 chunks, 1662B mean, 7%). *(completed: full sample = the 4 confirmed-absent-TOC docs (`alechinamendlerdepaivaritter_2001`, `biermandepaiva_2000`, `marinmoralesstrassburger_2021`, `simpson_1994`) + both named priority docs)*
+- [x] Re-convert each sample document through the hardened `literature-convert.sh` into a **scratch** directory; chunk with the unmodified `literature-chunk.sh`. *(completed for 5/6 — see deviation note)*
+- [x] Compute the after-table (chunk count, mean bytes, % under 300B) and diff against `baseline-audit.md`. Any material degradation on a currently-OK document blocks Part 2 — fix or revert before proceeding. *(completed: zero degradation found — see deviation note for why the mechanism is structural, not just empirically observed)*
+- [x] Re-convert the raw Wijesekera PDF through the hardened path into scratch and record the outcome. Expect improvement over 154 shreds; **a result with few or no headings is an acceptable pass**, not a failure — Pass 2 subdivides by size, and this is exactly why Part 1's bespoke heading insertion remains necessary. Do not promote this output; production comes from Phase 5. *(completed: forced-fallback conversion produced 62 chunks / no 154-shred signature; not promoted — see deviation note on `auto`-mode now resolving to the primary tier for this document)*
+- [x] Confirm the Phase 3 guard fires as expected on any scratch conversion that lands below the 600B threshold. *(completed: none of the fresh regression conversions landed below 600B in this environment, so the guard's exact formula (`mean(token_count) * 4`) was applied directly to the real historical 154-chunk Wijesekera set — 461B, confirmed below threshold, confirming the guard would have fired loudly had it existed at that ingest)*
+- [x] Document the observed OCR producer signatures (`OCRmyPDF 17.4.2 / Tesseract 5.5.2` for Simpson; `Acrobat 3.0 Capture Plug-in` / `Acrobat 3.0 Import Plug-in` for Wijesekera) and the two-independent-signals rationale in `.claude/context/project/literature/domain/format-decision.md` (or a new sibling file), so a future third OCR family is an append rather than a re-derivation. *(completed: new sibling file `.claude/context/project/literature/domain/ocr-heading-hardening.md` — kept separate from `format-decision.md` since that file's own scope is the unrelated markdown-vs-typst decision)*
+- [x] Per `.claude/rules/no-task-references-in-deliverables.md`, the documentation must cite durable anchors (script/function names, producer strings) and **must not** reference task numbers. *(completed, grep-verified clean)*
+
+**Deviation note**: `chagrovzakharyaschev_1997_modallogic`'s source is a DJVU file, and this
+environment has neither `djvutxt` nor `djvups`/`ps2pdf` installed — `literature-convert.sh`'s
+`try_djvu()` fails both methods (exit 2), a pre-existing environmental gap unrelated to this
+hardening pass. It could not be re-converted here; noted rather than silently dropped from the
+sample.
+
+A more important finding, discovered empirically rather than assumed: re-running the 5
+convertible sample documents under `auto` mode showed **all 5 resolve to the PRIMARY engine tier**
+(`pymupdf4llm.to_markdown()`) or, for `proofs_and_types`, to `derive_toc_markdown()` (embedded
+TOC) — neither code path calls the hardened `is_heading_candidate()` / `derive_heuristic_markdown()`
+functions at all. This means the regression risk these 5 documents represent is not merely
+"empirically zero this run" but **structurally zero** — the modified functions are provably
+unreachable for them under real `auto`-mode operation, confirmed by the log line `[convert]
+Engine used: pymupdf4llm` (or `pymupdf-fallback-toc` for `proofs_and_types`) on every run. Forcing
+the fallback tier (`LITERATURE_CONVERTER=fallback`) to directly exercise the modified code against
+`biermandepaiva_2000` and the raw Wijesekera PDF confirmed: (a) the OCR-producer detector
+correctly identifies `Acrobat 3.0 Capture Plug-in` on Wijesekera and logs the raised corroboration
+bar; (b) `proofs_and_types` forced through the fallback path produces **byte-identical** output
+before and after the Phase 7 change (it takes the TOC path even when the primary tier is skipped);
+(c) neither the pre- nor post-hardening fallback heuristic reproduces anything resembling the
+154-shred pathology on Wijesekera under forced-fallback (59 vs. 62 chunks, ~1300B mean either
+way) — the original 154-chunk corpus was evidently produced under different conditions (a prior
+environment/library-version state) than either heuristic version reproduces today, an observation
+recorded in `ocr-heading-hardening.md` rather than chased further, since it does not change the
+Part 2 regression conclusion.
 
 **Timing**: 1.25 hours
 

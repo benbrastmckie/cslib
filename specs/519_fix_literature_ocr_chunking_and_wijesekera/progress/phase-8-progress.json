@@ -1,0 +1,28 @@
+{
+  "phase": 8,
+  "phase_name": "Part 2 regression validation and OCR signature documentation",
+  "started_at": "2026-07-25T11:00:00Z",
+  "last_updated": "2026-07-25T12:30:00Z",
+  "objectives": [
+    {"id": 1, "description": "Select regression sample from baseline table", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Re-convert each sample through hardened literature-convert.sh into scratch, chunk unmodified", "status": "done", "files_touched": []},
+    {"id": 3, "description": "Compute after-table, diff against baseline-audit.md", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Re-convert raw Wijesekera PDF through hardened path into scratch", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Confirm Phase 3 guard fires on sub-600B scratch conversions", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Document OCR producer signatures and two-signal rationale", "status": "done", "files_touched": [".claude/context/project/literature/domain/ocr-heading-hardening.md"]},
+    {"id": 7, "description": "Verify no task-number references in documentation", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 7,
+  "approaches_tried": [],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "8.2",
+      "description": "Re-convert chagrovzakharyaschev_1997_modallogic (djvu source)",
+      "type": "skipped",
+      "reason": "Environment lacks djvutxt and djvups/ps2pdf; literature-convert.sh's try_djvu() fails both methods (exit 2). Pre-existing environmental gap unrelated to Phase 7.",
+      "annotation": "*(deviation: skipped -- djvu toolchain unavailable in this environment)*"
+    }
+  ],
+  "notes": "Key finding: all 5 convertible regression-sample documents resolve to code paths (primary pymupdf4llm tier, or derive_toc_markdown for the one TOC-present doc) that never call the modified is_heading_candidate()/derive_heuristic_markdown() functions under real auto-mode operation -- confirmed via [convert] Engine used: log lines on every run, not assumed. This makes the no-regression finding structural, not merely empirical. Forced-fallback testing (LITERATURE_CONVERTER=fallback) against a reconstructed pre-Phase-7 copy of literature-convert.sh (saved at scratchpad literature-convert-OLD.sh, spliced from the exact pre-edit function bodies) directly confirmed byte-identical output for proofs_and_types (TOC path, untouched) and confirmed the OCR-producer detector and raised corroboration bar fire correctly on Wijesekera's real PDF metadata."
+}

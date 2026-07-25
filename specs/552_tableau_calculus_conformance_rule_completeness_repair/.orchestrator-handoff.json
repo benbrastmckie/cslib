@@ -4,7 +4,7 @@
   "status": "partial",
   "phases_completed": 6,
   "phases_total": 8,
-  "summary": "Phases 1-6 of 8 complete. Propositional column (Phases 1-4): 43-row conformance harness gate landed (Deliverable 1), Fitting T(->) branching rule added (Deliverable 6), soundness re-proved sorry-free. Phase 3 remains PARTIAL with the sat_timp/truthLemma STOP-gate blocked (pre-existing fuel-sufficiency gap, not forced). Temporal column (Phases 5-6): per-branch eventuality tracker landed as e12c7cf5 (Deliverable 5); seriality, G/H duality, and transitive propagation rules landed as a7d98727 (Deliverable 2), with temporalApplyPos_preserves/temporalApplyNeg_preserves/temporalApplyOne_preserves fully re-proved sorry-free over enlarged 11-way and 9-way case splits. Whole-project lake build GREEN (3253/3253) at a7d98727. Zero new sorry/axiom, verified independently. Phases 7-8 (Deliverables 3 and 4: timeCount cap removal and fuel constant, plus temporal soundness re-audit) NOT STARTED. NOTE: this handoff was written by the orchestrator, not the implementing agent, which exhausted its capacity before wrap-up; every claim here is either a committed artifact or independently verified.",
+  "summary": "Phases 1-6 of 8 complete and committed. Phase 7 (Deliverables 3+4, cap removal/dedup) is BLOCKED: the dedup-based termination gate was correctly wired (commit 53eeabf2) per the user's explicit strategy (deduplication instead of raising temporalFuel), and it correctly flips 3 rows (K-row, G/F duality row, k=1 of the Gp->F^k p family), but stalls at k=2 due to a pre-existing bug in Branch.lean's ancestorTimes (treats the time-ordering constraint graph as undirected, so a time point includes itself in its own ancestor list once any edge connects it to another time point, making isTemporallyBlocked spuriously true). Confirmed via a throwaway scratch harness (deleted after use): ancestorTimes ord 1 = [0, 1] once a single time-creation edge exists; the k=2 open branch stalls at exactly 2 time points even at fuel=5000 (17x the natural bound of 290), ruling out fuel exhaustion as the cause. Fixing this is out of Phase 7's stated file scope and touches a device the already-landed, already-proven Phase 6 seriality arm depends on, so it is raised as a blocker rather than patched unilaterally, per the plan-compliance escalation protocol. Regression question (outstanding across prior dispatches) is now answered: 0 regressions. All 30 previously-green rows (11 temporal + 19 propositional, the Phase-2-baseline green count) pass with their original expected verdicts, confirmed twice via an isolated split-harness measurement (13 red rows commented out, restored after each run, never committed in mutilated form) -- once against pure Phase-6 state, once again after the Phase 7 dedup-wiring edit landed.",
   "artifacts": [
     {"type": "plan", "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md"}
   ],
@@ -15,12 +15,12 @@
       "severity": "soft"
     },
     {
-      "description": "HARNESS RECONCILIATION INCOMPLETE - highest-priority open item for the next dispatch. CslibTests/TableauConformance.lean still encodes PRE-Phase-6 expected verdicts (file last touched at commit 317235ae, Phase 2); no guard_msgs string has been updated for the Phase 5-6 rule changes. Consequence: `lake test` as literally written will FAIL on every genuinely-flipped row. This is known mid-flight state, NOT a regression. See continuation_context.harness_reconciliation for the confirmed flips and the unanswered regression question.",
-      "phase": "phase-6",
+      "description": "Phase 7's dedup-based cap removal is capped at depth 1 by a pre-existing bug in Branch.lean's ancestorTimes: it collects both directPredecessors and directSuccessors at every recursion step (undirected traversal), so once any time-creation edge exists, a time point ends up in its own ancestor list via the eraseDups'd transitive closure, making isTemporallyBlocked spuriously true for any non-isolated time point. This blocks Gp->F^k p for k>=2 (and presumably every other row needing >1 chained time creation via untlNeg/snceNeg) from flipping. Diagnosed empirically (ancestorTimes ord 1 = [0, 1]; open branch stalls at exactly 2 time points even at fuel=5000, 17x natural bound, ruling out fuel exhaustion). The likely fix -- drop directSuccessors from the traversal, keeping only directPredecessors -- is outside Phase 7's stated file scope (Rules.lean/Saturation.lean/Completeness.lean) and touches a device the already-landed Phase 6 seriality arm depends on, so a fix has blast radius beyond this phase (would require re-verifying every conformance row Phase 6 already flipped). Raised to the user rather than patched unilaterally. The already-landed dedup wiring itself (commit 53eeabf2) is correct and should not be reverted -- the bug is in the device it wires in, not in the wiring.",
+      "phase": "phase-7",
       "severity": "hard"
     }
   ],
-  "next_action_hint": "implement",
+  "next_action_hint": "user_decision_needed",
   "files_modified": [
     "CslibTests/TableauConformance.lean",
     "CslibTests.lean",
@@ -30,42 +30,53 @@
     "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
     "Cslib/Logics/Temporal/Tableau/Rules.lean",
     "Cslib/Logics/Temporal/Tableau/Saturation.lean",
-    "Cslib/Logics/Temporal/Tableau/Completeness.lean"
+    "Cslib/Logics/Temporal/Tableau/Completeness.lean",
+    "Cslib/Logics/Temporal/Tableau/TimeOrdering.lean"
   ],
   "decisions_made": [
     "Reflexive branching arm + persistence copy-propagation realizes 'for every accessible w'' without changing intApplyRuleFull's signature",
     "sat_timp deliberately NOT added as a field; forcing it would need Gap 1's fuel-sufficiency invariant, out of Phase 3 scope",
     "Seriality blocked-state threaded into Rules.lean as a Bool computed by the caller in Saturation.lean, because Rules.lean cannot import Branch.lean (which imports Rules.lean) - avoids restructuring the module graph",
     "Transitive propagation reuses the pre-existing but previously-unused TimeOrdering.ancestorTimes hook (plan option iii-a)",
-    "guard_msgs strings deliberately left untouched pending empirical output, under the rule that expected values must be justified by each formula's mathematical validity and never by what the implementation printed"
+    "guard_msgs strings deliberately left untouched pending empirical output, under the rule that expected values must be justified by each formula's mathematical validity and never by what the implementation printed",
+    "Phase 7 Deliverable 4 realized as deduplication (isTemporallyBlocked wired into temporalApplyNeg's untlNeg/snceNeg fresh-time-creation sites) instead of raising temporalFuel's constant, per explicit user strategy; this mechanically doubles as Deliverable 3's cap removal since both resolve to the same guard condition at Rules.lean:365,391",
+    "Diagnosed the Phase 7 stall with a throwaway scratch harness (CslibTests/Scratch552Phase7.lean) rather than editing Cslib/ further; deleted after use per the team lead's explicit instruction not to leave a 'Scratch' file untracked"
   ],
-  "dead_ends": [],
+  "dead_ends": [
+    "Assuming dedup alone (without fixing ancestorTimes) would deliver sufficient headroom for k>=2 -- disproven empirically, not merely under-measured"
+  ],
   "continuation_context": {
     "phases_completed": 6,
     "phases_total": 8,
     "orchestrator_mode": true,
-    "resume_at": "Close harness reconciliation first, then Phase 7 (Deliverables 3 and 4)",
+    "resume_at": "User decision needed on Branch.lean's ancestorTimes bug before Phase 7 can proceed: (a) authorize the fix (drop directSuccessors from the traversal, keeping only directPredecessors) and accept the re-verification cost across Phase 6's already-flipped rows, or (b) descope Phase 7 to the k=1/K-row/duality-row flips already achieved and leave k=2..5 red with the bug documented, or (c) some other direction. Phase 8 (temporal soundness re-audit + scope record + full-corpus close-out) is blocked on Phase 7's resolution per the plan's own dependency table (Phase 8 depends on 4, 7).",
     "harness_reconciliation": {
-      "state": "INCOMPLETE - do this before starting Phase 7",
+      "state": "STILL NOT APPLIED to CslibTests/TableauConformance.lean's guard_msgs strings -- deliberately deferred until Phase 7's scope is settled (updating guard_msgs now would need a second pass once the ancestorTimes decision lands, since k=2..5's eventual verdicts are still unknown pending that decision).",
       "confirmed_flips_open_to_closed": [
-        "Gp -> Fp (seriality) - Deliverable 2 item (i)",
-        "Hp -> Pp (past seriality) - Deliverable 2 item (i)",
-        "Gp -> G(Gp) (future transitivity) - item (iii); flipped WITHOUT Phase 7 because k=2 stays under the timeCount<4 cap",
-        "Hp -> H(Hp) (past transitivity) - item (iii)",
-        "p -> G(Pp) (conversion) - item (iii)",
-        "p -> H(Fp) (conversion) - item (iii)"
+        "Gp -> Fp (seriality) - Deliverable 2 item (i) - CONFIRMED CLOSED",
+        "Hp -> Pp (past seriality) - Deliverable 2 item (i) - inferred symmetric to Gp->Fp, not independently re-verified this dispatch",
+        "Gp -> G(Gp) (future transitivity) - item (iii) - CONFIRMED CLOSED (via someFuturePos + transitive ancestorTimes propagation, independent of the untlNeg dedup gate and its bug)",
+        "Hp -> H(Hp) (past transitivity) - item (iii) - inferred symmetric, not independently re-verified this dispatch",
+        "p -> G(Pp) (conversion) - item (iii) - not independently re-verified this dispatch",
+        "p -> H(Fp) (conversion) - item (iii) - not independently re-verified this dispatch",
+        "G(not p) -> (Gp -> G bot) (K for G) - CONFIRMED CLOSED this dispatch",
+        "not(Gp) -> F(not p) (G/F duality) - CONFIRMED CLOSED this dispatch",
+        "Gp -> F^1 p - CONFIRMED CLOSED this dispatch (duplicate of the seriality row by construction)"
       ],
+      "confirmed_still_open": [
+        "Gp -> F^2 p - CONFIRMED OPEN even at fuel=5000, root-caused to the ancestorTimes bug (see phase-7 blocker)",
+        "Gp -> F^3 p, F^4 p, F^5 p - not independently tested this dispatch but expected OPEN by the same mechanism (all route through the same untlNeg co-decomposition chain)"
+      ],
+      "regression_check": "ANSWERED. 0 regressions. All 30 previously-green rows (11 temporal + 19 propositional) pass their original expected verdicts, confirmed via an isolated split-harness run (13 red rows temporarily commented out via Edit, restored verbatim afterward, never committed in mutilated form) -- once before the Phase 7 edit (pure Phase 6 state) and once after (current committed state). Both runs: exit 0, zero guard_msgs mismatches.",
       "each_flip_verified_against": "the formula's own mathematical validity under branchSat's NoMaxOrder frame class, not against implementation output",
-      "unanswered_and_load_bearing": "Whether any of the 27 previously-green temporal rows or the 19 propositional rows regressed green->red is UNKNOWN. The verification run was killed before printing them. This MUST be answered before any guard_msgs edit: six new greens alongside one silent green->red would be a net loss disguised as progress, which is precisely the defect class this harness exists to catch.",
-      "also_unobserved": "K-for-G/duality row completion, the not-Gp -> F-not-p duality row, and the Gp -> F^k p family for k=1..5 (plan expects only k=1 to flip at Phase 6; k>=2 should remain red pending Phase 7 cap removal)",
       "rule_for_updating": "Update a guard_msgs string ONLY when the new expected value is justified by the formula's mathematical validity/invalidity - known-valid expects CLOSED, known-invalid expects OPEN. A row moving away from its correct verdict is a stop-the-line regression to report, never a string to rewrite."
     },
-    "phase_7_risk": "The ancestorTimes-based allFuturePosAt/allPastPosAt lookup added in Phase 6 appears to add real per-step cost (the 43-row harness build now takes 7+ minutes). Deliverables 3 and 4 are coupled: removing the timeCount<4 cap raises fuel demand, and measurement already shows the current temporalFuel constant (4n^2+12n+10) is FALSE against the observed 1.5*2^k-2 requirement. Cost-per-step multiplied by required-fuel could compound badly. Assess this interaction before committing to a fuel constant; the plan's alternative is adding the missing deduplication instead of raising the constant.",
     "verified_invariants": {
-      "sorry_tactic_lines_cslib_repo_wide": "5 at baseline 49bc979a, 5 at HEAD - unchanged",
-      "sorry_tactic_lines_tableau_subtree": "4 at baseline, 4 at HEAD - unchanged",
+      "sorry_tactic_lines_cslib_repo_wide": "5 at baseline 49bc979a, 5 at current HEAD (4a14cb7b) - unchanged",
+      "axiom_count_edited_files": "0 new axioms in Rules.lean/TimeOrdering.lean",
+      "build_status": "whole-project lake build GREEN (3253/3253) at commit 53eeabf2 and unchanged since (only a plan-doc commit followed)",
       "note": "Scheme.lean's raw word-count of 'sorry' rose only because blocker DOCUMENTATION prose expanded; sorry tactics there are 2 -> 2."
     }
   },
-  "plan_markers_verified": false
+  "plan_markers_verified": true
 }

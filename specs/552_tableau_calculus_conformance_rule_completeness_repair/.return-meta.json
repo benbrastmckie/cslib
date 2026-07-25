@@ -1,5 +1,5 @@
 {
-  "status": "in_progress",
+  "status": "partial",
   "started_at": "2026-07-24T00:00:00Z",
   "artifacts": [
     "CslibTests/TableauConformance.lean",
@@ -11,29 +11,36 @@
     "Cslib/Logics/Temporal/Tableau/Saturation.lean",
     "Cslib/Logics/Temporal/Tableau/Completeness.lean",
     "Cslib/Logics/Temporal/Tableau/Rules.lean",
+    "Cslib/Logics/Temporal/Tableau/TimeOrdering.lean",
     "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md",
     "specs/552_tableau_calculus_conformance_rule_completeness_repair/.orchestrator-handoff.json"
   ],
   "partial_progress": {
-    "stage": "phase_6_rules_landed_pending_conformance_verification",
-    "details": "Phases 1,2,4,5 COMPLETED (committed). Phase 3 PARTIAL/BLOCKED (pre-existing fuel-sufficiency gap, inherited unchanged). Phase 6 rule work landed in Rules.lean: (i) seriality arms added to temporalApplyPos's allFuture/allPast cases, gated on isTemporallyBlocked (threaded as a plain Bool 'blocked' parameter into temporalApplyPos/temporalApplyOne, computed by the caller in Saturation.lean's temporalStepBranch, since Rules.lean cannot import Branch.lean); (ii) F(Gpsi)/F(Hpsi) duality arms added to temporalApplyNeg (previously fell through to notApplicable); (iii) allFuturePosAt/allPastPosAt extended with TimeOrdering.ancestorTimes-based transitive membership check (option iii-a). temporalApplyPos_preserves/temporalApplyNeg_preserves/temporalApplyOne_preserves re-proved for the enlarged case set -- all sorry-free. Whole-project lake build green. Conformance harness run in progress to verify verdict flips (𝐆p→𝐅p, 𝐇p→𝐏p, ¬𝐆p→𝐅¬p, 𝐆¬p→(𝐆p→𝐆⊥), 𝐆p→𝐅^1 p expected to flip to CLOSED per Phase 6's plan checkpoint) -- NOT YET CONFIRMED, harness's guard_msgs strings not yet updated to match. temporalApplyPos_preserves/temporalApplyNeg_preserves proof re-proofs done but NOT YET COMMITTED pending conformance confirmation. Phase 7 (cap removal + fuel raise + headroom measurement) and Phase 8 (scope record + full corpus close-out) not started.",
+    "stage": "phase_7_blocked_ancestorTimes_bug",
+    "details": "Phases 1,2,4,5,6 COMPLETED (committed). Phase 3 PARTIAL/BLOCKED (pre-existing fuel-sufficiency gap, inherited unchanged). Phase 7 dedup wiring landed and committed (53eeabf2): isTemporallyBlocked threaded into temporalApplyNeg, replacing the raw timeCount<4 cap at both untlNeg/snceNeg fresh-time-creation sites with a !blocked dedup gate, per user-directed strategy (dedup instead of raising temporalFuel). Correctly flips 3 rows (K-row, G/F duality row, k=1 of Gp->F^k p). BLOCKED beyond depth 1: k=2 stays OPEN even at fuel=5000 (17x natural bound), root-caused to a pre-existing bug in Branch.lean's ancestorTimes (undirected traversal causes a time point to include itself in its own ancestor list once connected to another time, making isTemporallyBlocked spuriously true). Diagnosed via a throwaway scratch harness (CslibTests/Scratch552Phase7.lean), deleted after use. Regression question answered: 0 regressions across all 30 previously-green rows, confirmed twice (pre- and post-Phase-7-edit). Phase 8 blocked on Phase 7 per plan dependency table.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 5,
-    "phases_partial": [3, 6],
-    "phases_remaining": [7, 8]
+    "phases_completed": 6,
+    "phases_partial": [3],
+    "phases_blocked": [7],
+    "phases_remaining": [8]
   },
   "verification": {
-    "verification_passed": null,
+    "verification_passed": false,
     "build_passed": true,
-    "ci_pipeline_passed": null,
-    "note": "Whole-project lake build green after Rules.lean/Saturation.lean edits. Conformance harness (lake test / CslibTests.TableauConformance) run pending completion; guard_msgs strings in the harness not yet updated for any newly-flipped row, so lake test will currently FAIL until harness rows are updated to match verified new verdicts -- this is expected mid-phase-6 state, not a regression."
+    "ci_pipeline_passed": false,
+    "sorry_count": 5,
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "note": "Whole-project lake build green (3253/3253) at commit 53eeabf2, unchanged since (only a plan-doc commit followed). Cslib/ bare-sorry count unchanged at 5 (baseline). lake test not run to green this dispatch: CslibTests/TableauConformance.lean's guard_msgs strings are deliberately not yet updated for Phase 6's flips, pending resolution of the Phase 7 ancestorTimes blocker (updating now would need a second pass once k=2..5's eventual verdicts are known). This is expected mid-flight state, not a regression -- see .orchestrator-handoff.json's harness_reconciliation section for the full row-by-row status."
   },
   "metadata": {
-    "session_id": "sess_1784959340_e4ceeb_552",
+    "session_id": "sess_1784987428_4cc3f0_552",
     "agent_type": "cslib-implementation-agent",
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "skill-cslib-implementation"],
-    "compliance_check": "in_progress"
-  }
+    "compliance_check": "blocked_pending_user_decision"
+  },
+  "requires_user_review": true,
+  "review_reason": "Phase 7 (Deliverable 3+4 cap removal/dedup) is BLOCKED on a pre-existing bug in Branch.lean's ancestorTimes (undirected traversal). Fixing it is outside Phase 7's stated file scope and touches a device the already-landed Phase 6 seriality arm depends on. See .orchestrator-handoff.json blockers[1] (phase-7, severity hard) for full diagnosis and the three options put to the user."
 }

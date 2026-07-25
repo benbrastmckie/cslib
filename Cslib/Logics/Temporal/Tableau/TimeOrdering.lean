@@ -106,8 +106,12 @@ def allTimes (ord : TimeOrdering) : List Nat :=
 
 /-- The total number of distinct time points recorded in the ordering.
 
-Used as a gating condition to bound Reynolds co-decomposition (`untlNeg`/`snceNeg`):
-new future points are created only when `0 < timeCount < 4`. -/
+**Historical note** (task 552 continuation, Phase 7): this was previously read directly by
+`Rules.lean`'s `untlNeg`/`snceNeg` Reynolds co-decomposition arms as a raw numeric cap
+(`0 < timeCount < 4`) bounding fresh future/past point creation. That cap has been replaced by
+the `isTemporallyBlocked` dedup-based termination gate (`Branch.lean`), the same device already
+used by the seriality arm (`temporalApplyPos`); `timeCount` itself is no longer consulted by any
+rule-application site. Retained as a general-purpose branch-size query. -/
 def timeCount (ord : TimeOrdering) : Nat :=
   ord.allTimes.length
 

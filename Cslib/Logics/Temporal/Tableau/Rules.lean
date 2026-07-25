@@ -324,11 +324,17 @@ def temporalApplyPos
   (.notApplicable, ord)
 
 /-- Apply negative temporal rules: `allFuture`/`allPast` duality (Deliverable 2, item ii) plus
-Reynolds co-decomposition for Until/Since. -/
+Reynolds co-decomposition for Until/Since.
+
+`blocked` is `isTemporallyBlocked b sf.label ord tracker`, precomputed by the caller -- see
+`temporalApplyPos`'s docstring for why it is threaded in as a `Bool`. Used by the `untlNeg`/
+`snceNeg` fresh-time-creation arms (Deliverable 3/4, Phase 7) as the dedup-based termination
+gate, replacing the old raw `timeCount < 4` numeric cap. -/
 def temporalApplyNeg
     (sf : TSF Atom)
     (b : TBranch Atom)
-    (ord : TimeOrdering) :
+    (ord : TimeOrdering)
+    (blocked : Bool) :
     RuleResult (Formula Atom) TimeIndex × TimeOrdering :=
   let t := sf.label
   let φ := sf.formula
@@ -361,8 +367,13 @@ def temporalApplyNeg
         [⟨.neg, guard, t'⟩, ⟨.neg, φ, t'⟩, sf]
       (.branching [branch1, branch2], ord)
     | [] =>
-      -- No unprocessed future times: create fresh one if depth limit allows
-      if futureTimes.isEmpty && ord.timeCount > 0 && ord.timeCount < 4 then
+      -- No unprocessed future times: create fresh one unless `t` is already dedup-blocked
+      -- (Deliverable 3/4, Phase 7): the old raw `0 < timeCount < 4` cap is replaced by the same
+      -- `isTemporallyBlocked` subset-blocking device the seriality arm already uses
+      -- (`temporalApplyPos`), now wired here as a fresh-time *suppressor* per the research
+      -- report's Finding 4 (dedup device existed but was previously consulted only at closure
+      -- time, never here).
+      if futureTimes.isEmpty && !blocked then
         let t' := branchNextTime b
         let newOrd := ord.addFuture t t'
         let props := propagateToFuture b ord t t'
@@ -388,7 +399,8 @@ def temporalApplyNeg
         [⟨.neg, guard, t'⟩, ⟨.neg, φ, t'⟩, sf]
       (.branching [branch1, branch2], ord)
     | [] =>
-      if pastTimes.isEmpty && ord.timeCount > 0 && ord.timeCount < 4 then
+      -- Symmetric to the `untlNeg` case above (Deliverable 3/4, Phase 7).
+      if pastTimes.isEmpty && !blocked then
         let t' := branchNextTime b
         let newOrd := ord.addPast t t'
         let props := propagateToPast b ord t t'
@@ -426,7 +438,7 @@ def temporalApplyOne
   else
     match sf.sign with
     | .pos => temporalApplyPos sf b ord blocked
-    | .neg => temporalApplyNeg sf b ord
+    | .neg => temporalApplyNeg sf b ord blocked
 
 /-! ## OrdFreshWRT: Constraint-Endpoint Freshness Invariant
 
@@ -674,13 +686,14 @@ lemma temporalApplyPos_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
 omit [Hashable Atom] in
 /-- `temporalApplyNeg` preserves `InstantStrict` and `OrdFreshWRT`.
 
-For every case of `temporalApplyNeg sf b ord`:
+For every case of `temporalApplyNeg sf b ord blocked`:
 - The new ordering is `InstantStrict`
 - Every output branch satisfies `OrdFreshWRT` -/
 lemma temporalApplyNeg_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeOrdering)
+    (blocked : Bool)
     (hIS : TimeOrdering.InstantStrict ord) (hOFW : OrdFreshWRT b ord) (hmem : sf ∈ b)
     (result : RuleResult (Formula Atom) TimeIndex) (newOrd : TimeOrdering)
-    (h : temporalApplyNeg sf b ord = (result, newOrd)) :
+    (h : temporalApplyNeg sf b ord blocked = (result, newOrd)) :
     TimeOrdering.InstantStrict newOrd ∧
     ∀ nf ∈ (match result with
       | .linear newForms => [newForms]
@@ -793,7 +806,7 @@ lemma temporalApplyOne_preserves (sf : TSF Atom) (b : TBranch Atom) (ord : TimeO
     · -- Positive: temporalApplyPos
       exact temporalApplyPos_preserves sf b ord blocked hIS hOFW hmem result newOrd h
     · -- Negative: temporalApplyNeg
-      exact temporalApplyNeg_preserves sf b ord hIS hOFW hmem result newOrd h
+      exact temporalApplyNeg_preserves sf b ord blocked hIS hOFW hmem result newOrd h
 
 end Cslib.Logic.Temporal.Tableau
 

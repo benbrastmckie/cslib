@@ -4649,6 +4649,187 @@ lemma modalStepBranchS4_preserves_accFresh (φ₀ : Proposition Atom)
       exact accFreshInv_append_S4 hFresh nf
     · rw [hres] at hsf; simp at hsf
 
+/-- **`accFresh`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_accFresh` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem` in place of the direct `findSome?` extraction; the
+three-regime case split (non-minting / minting-unblocked / minting-blocked) and its
+`keysWorldsKnown` dependency at the blocked sub-case are otherwise unchanged. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_accFresh (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hknown : accTargetsKnown b acc)
+    (hKW : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
+    (hFresh : accFreshInv b acc)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ b' ∈ newBs, accFreshInv b' newAcc := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  by_cases hmint : (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∨
+      (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ)
+  · rcases hmint with ⟨hs, ψ, hf⟩ | ⟨hs, ψ, hf⟩
+    · have hsfeq : sf = (⟨Sign.neg, .box ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .neg ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_boxNeg_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst hpaireq
+        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
+          congrArg Prod.snd hpaireq
+        have hmintfst2 := hresulteq.trans (modalApplyOne_boxNeg_mint_fst_S4 b acc ψ sf.label)
+        have hsndeq := haccnew0.trans (modalApplyOne_boxNeg_mint_snd_S4 b acc ψ sf.label)
+        rw [hmintfst2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, -, hacceq3, -⟩ := hsf
+        intro b' hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rw [← hacceq3, hsndeq]
+        intro w w' hedge
+        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
+              (modalNextWorld_le_append _ b),
+            modalNextWorld_gt _ (⟨.neg, ψ, modalNextWorld b⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
+              List.mem_cons_self)⟩
+        · obtain ⟨ha, ha'⟩ := hFresh w w' hold
+          exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
+            Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.neg, .box ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_boxNeg_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+          hpair.symm.trans heq2
+        have hreseq : result = RuleResult.linear [] := congrArg Prod.fst hpaireq
+        have hacceq : newAcc0 = acc.addEdge sf.label wBlock := congrArg Prod.snd hpaireq
+        rw [hreseq, hacceq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, -, rfl, -⟩ := hsf
+        intro b' hb'
+        simp only [List.mem_singleton] at hb'
+        subst b'
+        intro w w' hedge
+        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
+          obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
+            (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .neg ψ sf.label w'
+              hblock))
+          exact hsf''lab ▸ modalNextWorld_gt b sf'' hsf''mem
+        · exact hFresh w w' hold
+    · have hsfeq : sf = (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) := by rw [← hs, ← hf]
+      rcases hblock : blockingWorldS4Keyed φ₀ b keys .pos ψ sf.label with _ | wBlock
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc :=
+          modalApplyOneS4Keyed_diaPos_unblocked_eq φ₀ b acc keys ψ sf.label hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc := hpair.symm.trans heq2
+        have hresulteq : result = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).fst :=
+          congrArg Prod.fst hpaireq
+        have haccnew0 : newAcc0 = (modalApplyOne (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc).snd :=
+          congrArg Prod.snd hpaireq
+        have hmintfst2 := hresulteq.trans (modalApplyOne_diamondPos_mint_fst_S4 b acc ψ sf.label)
+        have hsndeq := haccnew0.trans (modalApplyOne_diamondPos_mint_snd_S4 b acc ψ sf.label)
+        rw [hmintfst2] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, -, hacceq3, -⟩ := hsf
+        intro b' hb'
+        simp only [List.mem_singleton] at hb'
+        subst hb'
+        rw [← hacceq3, hsndeq]
+        intro w w' hedge
+        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        · exact ⟨Nat.lt_of_lt_of_le (modalNextWorld_gt b sf hsfmem)
+              (modalNextWorld_le_append _ b),
+            modalNextWorld_gt _ (⟨.pos, ψ, modalNextWorld b⟩ :
+                SignedFormula (Proposition Atom) WorldIndex) (List.mem_append_left _
+              List.mem_cons_self)⟩
+        · obtain ⟨ha, ha'⟩ := hFresh w w' hold
+          exact ⟨Nat.lt_of_lt_of_le ha (modalNextWorld_le_append _ b),
+            Nat.lt_of_lt_of_le ha' (modalNextWorld_le_append _ b)⟩
+      · have heq2 : modalApplyOneS4Keyed φ₀ keys (⟨Sign.pos, .diamond ψ, sf.label⟩ :
+            SignedFormula (Proposition Atom) WorldIndex) b acc
+            = (.linear [], acc.addEdge sf.label wBlock) :=
+          modalApplyOneS4Keyed_diaPos_blocked_eq φ₀ b acc keys ψ sf.label wBlock hblock
+        rw [hsfeq] at hpair
+        have hpaireq : (result, newAcc0) = (RuleResult.linear [], acc.addEdge sf.label wBlock) :=
+          hpair.symm.trans heq2
+        have hreseq : result = RuleResult.linear [] := congrArg Prod.fst hpaireq
+        have hacceq : newAcc0 = acc.addEdge sf.label wBlock := congrArg Prod.snd hpaireq
+        rw [hreseq, hacceq] at hsf
+        simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+        obtain ⟨rfl, -, rfl, -⟩ := hsf
+        intro b' hb'
+        simp only [List.mem_singleton] at hb'
+        subst b'
+        intro w w' hedge
+        rcases hasEdge_addEdge_cases_S4 hedge with ⟨rfl, rfl⟩ | hold
+        · refine ⟨modalNextWorld_gt b sf hsfmem, ?_⟩
+          obtain ⟨sf'', hsf''mem, hsf''lab⟩ := (mem_modalKnownWorlds_S4 b w').mp
+            (hKW w' _ (blockingWorldS4Keyed_eq_birthContent φ₀ b keys .pos ψ sf.label w'
+              hblock))
+          exact hsf''lab ▸ modalNextWorld_gt b sf'' hsf''mem
+        · exact hFresh w w' hold
+  · have hnbd : ¬ (sf.sign = .neg ∧ ∃ φ, sf.formula = .box φ) ∧
+        ¬ (sf.sign = .pos ∧ ∃ φ, sf.formula = .diamond φ) :=
+      ⟨fun hc => hmint (Or.inl hc), fun hc => hmint (Or.inr hc)⟩
+    have haccunchanged : newAcc0 = acc := by
+      have hthis := modalApplyOneS4Keyed_nonMint_snd_eq_acc φ₀ keys sf b acc hsfmem hknown hnbd
+      rw [hpair] at hthis
+      exact hthis
+    subst haccunchanged
+    rcases hres : result with nf | brs | nf | -
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl, -⟩ := hsf
+      intro b' hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact accFreshInv_append_S4 hFresh nf
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl, -⟩ := hsf
+      intro b' hb'
+      obtain ⟨x, -, rfl⟩ := List.mem_map.mp hb'
+      exact accFreshInv_append_S4 hFresh x
+    · rw [hres] at hsf
+      simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+      obtain ⟨rfl, -, rfl, -⟩ := hsf
+      intro b' hb'
+      simp only [List.mem_singleton] at hb'
+      subst hb'
+      exact accFreshInv_append_S4 hFresh nf
+    · rw [hres] at hsf; simp at hsf
+
 /-- **`accKnown`'s driver-level preservation**: every `acc`-edge target stays a known branch
 world across an S4Keyed step. Mirrors `accFresh`'s case split exactly (same three regimes,
 same `keysWorldsKnown` dependency at the BLOCKED sub-case), but concludes membership in

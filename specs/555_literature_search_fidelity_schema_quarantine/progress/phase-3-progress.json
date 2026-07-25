@@ -1,0 +1,18 @@
+{
+  "phase": 3,
+  "phase_name": "--legacy-schema classification mode (read-only)",
+  "started_at": "2026-07-25T00:20:00Z",
+  "last_updated": "2026-07-25T00:35:00Z",
+  "objectives": [
+    {"id": 1, "description": "Capture pre-change default-mode baseline", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Add --legacy-schema arg + LEGACY_SCHEMA env var", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 3, "description": "Relax startup guards: require .sources-recovered/ in legacy mode", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 4, "description": "Add enumerate_legacy_entries()", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 5, "description": "Add classify_legacy()", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 6, "description": "DJVU zero-word case -> unadjudicated with blocked-reason note, not unverified_no_baseline", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 7, "description": "Print legacy report in same TSV shape keyed by doc_id; verify default mode unchanged and ratios match", "status": "done", "files_touched": []}
+  ],
+  "current_objective": null,
+  "approaches_tried": [],
+  "handoff_count": 0
+}

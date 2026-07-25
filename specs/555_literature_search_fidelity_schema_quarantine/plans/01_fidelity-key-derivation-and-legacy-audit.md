@@ -249,34 +249,40 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
 
 ---
 
-### Phase 3: --legacy-schema classification mode (read-only) [NOT STARTED]
+### Phase 3: --legacy-schema classification mode (read-only) [COMPLETED]
 
 - **Goal:** `literature-fidelity-audit.sh --legacy-schema --dry-run` classifies the 18 legacy-schema
   entries and reproduces the report's hand-computed ratios, with the default mode's output
   bit-for-bit unchanged.
 - **Tasks:**
-  - [ ] Capture the pre-change default-mode baseline:
+  - [x] Capture the pre-change default-mode baseline:
         `bash .claude/scripts/literature-fidelity-audit.sh --dry-run > "$SCRATCH/audit-baseline.tsv"`.
-  - [ ] Add `--legacy-schema` to the argument loop and export a `LEGACY_SCHEMA` env var into the
-        python heredoc. Keep `--dry-run`/`--write` orthogonal to it.
-  - [ ] Relax the startup guards for legacy mode: `sources/` must still exist for default mode, but
+        *(completed: reconstructed the pre-edit file verbatim from the research-phase full read
+        since the file predates any git-tracked commit, ran --dry-run, got 97 directories)*
+  - [x] Add `--legacy-schema` to the argument loop and export a `LEGACY_SCHEMA` env var into the
+        python heredoc. Keep `--dry-run`/`--write` orthogonal to it. *(completed)*
+  - [x] Relax the startup guards for legacy mode: `sources/` must still exist for default mode, but
         legacy mode additionally requires `$LITERATURE_DIR/.sources-recovered/` and must error
-        clearly if it is absent.
-  - [ ] Add `enumerate_legacy_entries(idx)`: select entries where `doc_id` and `chunks_dir` are both
+        clearly if it is absent. *(completed)*
+  - [x] Add `enumerate_legacy_entries(idx)`: select entries where `doc_id` and `chunks_dir` are both
         present AND `path` is absent-or-null AND `id` is absent-or-null. This gate is the entire
-        safety boundary between the two schemas — implement it exactly.
-  - [ ] Add `classify_legacy(entry)`: resolve the source as
+        safety boundary between the two schemas — implement it exactly. *(completed)*
+  - [x] Add `classify_legacy(entry)`: resolve the source as
         `$LITERATURE_DIR/.sources-recovered/<doc_id>.pdf` (or `.djvu`); compute `pdf_words` via the
         existing `pdf_word_count()`; compute `md_words` by summing `word_count_text()` over ALL
         `chunk_*.md` in `chunks_dir` (the chunk-exclusion filter is deliberately NOT applied — for
         this schema the chunks are the document). Reuse `disclosure_check()` and the proof-
-        completeness path unchanged for ratios below 0.75.
-  - [ ] Classify a legacy entry with no recovered source as `no_source_pdf` and one whose
+        completeness path unchanged for ratios below 0.75. *(completed)*
+  - [x] Classify a legacy entry with no recovered source as `no_source_pdf` and one whose
         `pdf_word_count` returns 0 (DJVU) as `unadjudicated`, reported with an explicit
         blocked-reason note on stderr. Do not silently emit `unverified_no_baseline` for the DJVU
-        case — the baseline exists, the extractor does not.
-  - [ ] Print the legacy report to stdout in the same TSV shape as the default mode, keyed by
-        `doc_id` instead of `dir`. No `index.json` write in this phase.
+        case — the baseline exists, the extractor does not. *(completed: tracked via a
+        `djvu_blocked` flag on the classification result, distinct from the `frac is None`
+        unadjudicated path so Phase 4's write loop can key its skip decision off it precisely)*
+  - [x] Print the legacy report to stdout in the same TSV shape as the default mode, keyed by
+        `doc_id` instead of `dir`. No `index.json` write in this phase. *(completed: factored the
+        print/summary loop into a shared print_report() used by both modes; no write occurred in
+        this phase's testing)*
 - **Timing:** 1.5 hours
 - **Depends on:** 2
 - **Files to modify:**
@@ -307,29 +313,43 @@ sequencing decision (ship the tractable half first), not a code-level coupling.
 
 ---
 
-### Phase 4: --legacy-schema write path with strict schema gating [NOT STARTED]
+### Phase 4: --legacy-schema write path with strict schema gating [COMPLETED]
 
 - **Goal:** `--legacy-schema --write` stamps `provenance_fidelity` and `word_ratio` onto matched
   legacy entries by `doc_id` equality, and provably touches zero `sources/`-schema entries.
 - **Tasks:**
-  - [ ] Snapshot the index before writing: `cp "$LITERATURE_DIR/index.json" "$SCRATCH/index.before.json"`.
-  - [ ] Add `resolve_legacy_targets(idx, doc_id)`: return the single entry whose `doc_id` equals the
+  - [x] Snapshot the index before writing: `cp "$LITERATURE_DIR/index.json" "$SCRATCH/index.before.json"`.
+        *(completed)*
+  - [x] Add `resolve_legacy_targets(idx, doc_id)`: return the single entry whose `doc_id` equals the
         classified `doc_id` AND which passes the Phase 3 legacy gate. Never call
         `resolve_targets()` in legacy mode — its `path`-prefix and `id`-presence logic is for the
-        other schema.
-  - [ ] Route the write loop by mode so legacy mode iterates legacy classifications only and default
+        other schema. *(completed)*
+  - [x] Route the write loop by mode so legacy mode iterates legacy classifications only and default
         mode iterates directory classifications only. The two write paths must not interleave.
-  - [ ] Confirm the existing backup-and-`cmp` step runs before the legacy write (it is mode-
-        independent; verify, do not duplicate).
-  - [ ] Stamp only entries whose computed value is a real classification; leave `no_source_pdf` and
+        *(completed: split into main_default()/main_legacy(), dispatched from main())*
+  - [x] Confirm the existing backup-and-`cmp` step runs before the legacy write (it is mode-
+        independent; verify, do not duplicate). *(completed: unchanged, mode-independent bash code
+        at lines ~195-206)*
+  - [x] Stamp only entries whose computed value is a real classification; leave `no_source_pdf` and
         the DJVU `unadjudicated` rows' handling explicit in the write summary rather than silently
-        skipping them.
-  - [ ] Run `--legacy-schema --write`, then run it a second time to confirm idempotency (second run
-        reports `changed: 0`).
-  - [ ] Record the outcome for `arisakadasstrassburger_2015`. If it lands on `unverified_summary`,
+        skipping them. *(completed. Also caught and fixed a real regression here: the first write
+        attempt clobbered Group A's pre-existing, more specific
+        `ocr_rescanned_reflowed_partial_symbol_loss` value with the generic detector's
+        `verified_conversion`, producing 7 changed entries instead of the expected <=6. Restored
+        Group A from the pre-write scratchpad snapshot and added a `SIX_VALUE_ENUM` guard: any
+        legacy entry whose current `provenance_fidelity` is already set to a value outside this
+        script's own six-value enum is left untouched and reported separately as "already honestly
+        stamped" rather than being overwritten.)*
+  - [x] Run `--legacy-schema --write`, then run it a second time to confirm idempotency (second run
+        reports `changed: 0`). *(completed: first write stamped 5/5 changed; second write reported
+        changed: 0, unchanged: 5)*
+  - [x] Record the outcome for `arisakadasstrassburger_2015`. If it lands on `unverified_summary`,
         that is the honest result — record it and move on. Do NOT adjust `RATIO_THRESHOLD` or
-        `PROOF_ADEQUACY_THRESHOLD`, and do NOT hand-stamp a better value.
-  - [ ] Commit: `task 555 phase 4: add legacy-schema mode to fidelity audit`.
+        `PROOF_ADEQUACY_THRESHOLD`, and do NOT hand-stamp a better value. *(completed: landed on
+        `unadjudicated` (word_ratio 0.539, undisclosed, no numbered statements to check) — a
+        quarantined value per `QUARANTINED_FIDELITY_VALUES`. Recorded as-is; thresholds
+        untouched.)*
+  - [x] Commit: `task 555 phase 4: add legacy-schema mode to fidelity audit`.
 - **Timing:** 1.25 hours
 - **Depends on:** 3
 - **Files to modify:**

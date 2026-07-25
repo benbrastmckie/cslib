@@ -1,0 +1,19 @@
+{
+  "phase": 4,
+  "phase_name": "--legacy-schema write path with strict schema gating",
+  "started_at": "2026-07-25T00:40:00Z",
+  "last_updated": "2026-07-25T01:00:00Z",
+  "objectives": [
+    {"id": 1, "description": "Snapshot index.json before writing", "status": "done", "files_touched": []},
+    {"id": 2, "description": "Add resolve_legacy_targets()", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 3, "description": "Route write loop by mode (main_default/main_legacy)", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 4, "description": "Stamp only real classifications; add SIX_VALUE_ENUM guard after catching Group A clobber regression", "status": "done", "files_touched": [".claude/scripts/literature-fidelity-audit.sh"]},
+    {"id": 5, "description": "Run --write twice, confirm idempotency (changed: 0 on second run)", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Record arisakadasstrassburger_2015 honest outcome (unadjudicated, quarantined)", "status": "done", "files_touched": []}
+  ],
+  "current_objective": null,
+  "approaches_tried": [
+    {"approach": "Stamp every enumerated legacy entry unconditionally (Group A + Group B)", "result": "failed", "reason": "Clobbered Group A's pre-existing out-of-band ocr_rescanned_reflowed_partial_symbol_loss value with the generic verified_conversion classification -- 7 changed entries instead of the plan's expected <=6. Restored from scratchpad snapshot and gated on SIX_VALUE_ENUM."}
+  ],
+  "handoff_count": 0
+}

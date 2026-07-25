@@ -217,7 +217,7 @@ critical path, because each proof layer consumes the previous one's statement sh
 
 ---
 
-### Phase 4: Ordered Stepper and its Two Structural Lemmas [NOT STARTED]
+### Phase 4: Ordered Stepper and its Two Structural Lemmas [COMPLETED]
 
 - **Goal:** Introduce the reordered stepper as a **parallel** definition (the existing
   `modalStepBranchS4Keyed` LoopChecking.lean:780 is left untouched so the landed completeness line
@@ -229,22 +229,39 @@ critical path, because each proof layer consumes the previous one's statement sh
   old traversal — only when the first returns `none`. Note that the branch argument passed to the
   rule stays `b` in both traversals; only the candidate list changes.
 - **Tasks:**
-  - [ ] Define `modalStepBranchS4KeyedOrdered` with the two-stage traversal above.
-  - [ ] Prove `modalStepBranchS4KeyedOrdered_eq_none_iff`:
+  - [x] Define `modalStepBranchS4KeyedOrdered` with the two-stage traversal above. *(deviation:
+    altered -- the shared per-formula body is factored into a new named definition
+    `modalStepBranchS4KeyedBody`, used by BOTH the ordered stepper's primary scan and (via the
+    bridge lemma `modalStepBranchS4Keyed_eq_findSome_body`, proved by `rfl`) referenced against
+    the untouched `modalStepBranchS4Keyed`, rather than duplicating the body as an inline lambda
+    in the ordered stepper as the phase-4 handoff sketched. `modalStepBranchS4Keyed`'s own source
+    is byte-for-byte unchanged. This made the structural lemmas below provable against a named
+    term instead of restating a six-way match inline in every lemma statement.)*
+  - [x] Prove `modalStepBranchS4KeyedOrdered_eq_none_iff`:
     `modalStepBranchS4KeyedOrdered ... = none ↔ modalStepBranchS4Keyed ... = none`.
     The forward direction is immediate from the fallback being the old traversal; this is the
     linchpin that lets Phase 13's saturation step transfer without re-deriving the Hintikka
     conjuncts from scratch.
-  - [ ] Prove `modalStepBranchS4KeyedOrdered_selected_mem`: whenever the ordered stepper returns
+  - [x] Prove `modalStepBranchS4KeyedOrdered_selected_mem`: whenever the ordered stepper returns
     `some`, the selected formula is in `b` and not in `e`, and the returned tuple has one of the
     same four result shapes. State it so that Phase 5 can consume it directly in place of the
     `List.exists_of_findSome?_eq_some` extraction that the current measure proof performs.
-  - [ ] Prove `modalStepBranchS4KeyedOrdered_mintReady`: whenever the *selected* formula is a mint
+  - [x] Prove `modalStepBranchS4KeyedOrdered_mintReady`: whenever the *selected* formula is a mint
     shape, `modalNonMintCandidates φ₀ keys b e acc = []`. This is the fact that carries
     settled-context scheduling into the soundness argument (Phases 9-11) and is the entire point
-    of the reordering.
-  - [ ] Docstring the ordered stepper as the successor to `modalStepBranchS4Keyed`, naming the
+    of the reordering. *(deviation: altered -- since two distinct formulas could in principle
+    produce the identical output tuple (no cheap uniqueness argument is available), the
+    hypothesis is phrased as "every formula whose shared body produces this exact output tuple is
+    a minting shape" (a `∀ sf, body sf = tuple → mintShape sf = true` premise) rather than a
+    single externally-supplied selected formula. This is a sound, general way to express "the
+    selected formula is a mint shape" without assuming unprovable uniqueness, flagged as an open
+    question in the phase-4 handoff and resolved here in favour of the airtight statement.)*
+  - [x] Docstring the ordered stepper as the successor to `modalStepBranchS4Keyed`, naming the
     retirement of the latter as planned work.
+  - [x] (Additional, not in original task list) Proved `modalStepBranchS4KeyedOrdered_cases`, the
+    shared case-split helper (primary-scan hit vs. empty-candidates fallback) that
+    `_eq_none_iff`, `_selected_mem`, and `_mintReady` all factor through, matching the phase-4
+    handoff's recommendation to avoid three independent ad hoc derivations.
 - **Timing:** 3 hours
 - **Depends on:** 3
 - **Files to modify:**

@@ -884,7 +884,7 @@ lemma modalNonMintCandidates_subset (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     modalNonMintCandidates φ₀ keys b e acc ⊆ b := by
   unfold modalNonMintCandidates
-  exact List.filter_subset' _
+  exact List.filter_subset_self _
 
 /-- Every non-minting candidate lies outside the expanded set `e`. -/
 lemma modalNonMintCandidates_not_mem_expanded (φ₀ : Proposition Atom)
@@ -980,6 +980,251 @@ def modalStepBranchS4Keyed (φ₀ : Proposition Atom)
         some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
       | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
       | .notApplicable => none
+
+/-! ## Ordered Stepper: Settled-Context Scheduling
+
+`modalStepBranchS4KeyedOrdered` is the reordered successor to `modalStepBranchS4Keyed` above: it
+consults the non-minting candidates (`modalNonMintCandidates`) FIRST, falling back to the
+literal old `b.findSome?` traversal only once no non-minting rule can fire. This is
+"settled-context scheduling": a minting shape (`F(□φ)@w` or `T(◇φ)@w`) only fires once every
+non-minting rule on the branch has already fired, which is the reachability-restriction
+prerequisite the S4-keyed guard's soundness argument needs (Phases 9-11 of this task's plan).
+`modalStepBranchS4Keyed` itself is left completely untouched -- its source above this comment is
+unchanged, and it is the literal fallback branch of the ordered stepper below -- so the landed
+completeness line (`modalTableauS4Keyed_complete`) stays green throughout this retrofit.
+Retirement of `modalStepBranchS4Keyed` in favour of this ordered successor is planned future
+work, once the ordered driver and its own completeness/soundness theorems land. -/
+
+/-- The per-formula rule-application body shared, verbatim, by `modalStepBranchS4Keyed`'s
+`b.findSome?` traversal and `modalStepBranchS4KeyedOrdered`'s two-stage traversal below: the same
+`modalApplyOneS4Keyed` call, the same `keys'` computation re-deriving the `blockingWorldS4Keyed`
+decision, and the same four-way result-shape packaging. Factored out under its own name purely
+so the structural lemmas below can name it directly; `modalStepBranchS4Keyed` itself does not use
+this definition and is not touched by its introduction (see
+`modalStepBranchS4Keyed_eq_findSome_body` for the bridge between the two). -/
+def modalStepBranchS4KeyedBody (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility ×
+            List (WorldIndex × Finset (Sign × Proposition Atom))) :=
+  if e.any (· == sf) then none
+  else
+    let (result, newAcc) := modalApplyOneS4Keyed φ₀ keys sf b acc
+    let keys' :=
+      match sf.sign, sf.formula with
+      | .neg, .box φ =>
+        match blockingWorldS4Keyed φ₀ b keys .neg φ sf.label with
+        | some _ => keys
+        | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .neg φ sf.label)]
+      | .pos, .diamond φ =>
+        match blockingWorldS4Keyed φ₀ b keys .pos φ sf.label with
+        | some _ => keys
+        | none => keys ++ [(modalNextWorld b, successorBirthContent φ₀ b .pos φ sf.label)]
+      | _, _ => keys
+    match result with
+    | .linear newForms => some ([newForms ++ b], [e ++ [sf]], newAcc, keys')
+    | .branching branches =>
+      some (branches.map (· ++ b), branches.map (fun _ => e ++ [sf]), newAcc, keys')
+    | .persistent newForms => some ([newForms ++ b], [e], newAcc, keys')
+    | .notApplicable => none
+
+/-- `modalStepBranchS4Keyed`'s `b.findSome?` traversal is literally `b.findSome?` applied to
+`modalStepBranchS4KeyedBody`: this bridges the untouched original definition to the named body
+above, so later lemmas can be stated once against the named body and reused for both
+traversals. -/
+lemma modalStepBranchS4Keyed_eq_findSome_body (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    modalStepBranchS4Keyed φ₀ b e acc keys =
+      b.findSome? (modalStepBranchS4KeyedBody φ₀ b e acc keys) := rfl
+
+/-- Every non-minting candidate makes the shared per-formula body evaluate to `some`, never
+`none`: unfolding `modalNonMintCandidates`'s filter gives `sf ∉ e` (ruling out the body's
+`if e.any ... then none` guard) and `(modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable`
+(ruling out the body's `.notApplicable => none` result arm) -- the body's only two
+`none`-producing arms. Private: only the two public corollaries below (`_eq_none_iff` and the
+`_cases` helper feeding `_selected_mem`/`_mintReady`) consume it directly. -/
+private lemma modalStepBranchS4KeyedBody_isSome_of_mem_nonMintCandidates (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (sf : SignedFormula (Proposition Atom) WorldIndex)
+    (h : sf ∈ modalNonMintCandidates φ₀ keys b e acc) :
+    (modalStepBranchS4KeyedBody φ₀ b e acc keys sf).isSome := by
+  have hne : sf ∉ e := modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf h
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hne hx
+  have happ : (modalApplyOneS4Keyed φ₀ keys sf b acc).1.isApplicable = true := by
+    unfold modalNonMintCandidates at h
+    have hpred := (List.mem_filter.mp h).2
+    simp only [Bool.and_eq_true] at hpred
+    exact hpred.2
+  unfold modalStepBranchS4KeyedBody
+  rw [if_neg (by simp [hany])]
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc⟩
+  rw [hpair] at happ
+  cases hr : result with
+  | notApplicable => rw [hr] at happ; simp [RuleResult.isApplicable] at happ
+  | linear _ => simp
+  | branching _ => simp
+  | persistent _ => simp
+
+/-- **Corollary A.** The non-minting candidate list is empty exactly when the primary
+`findSome?` scan over it (using the shared body) finds nothing -- the empty-list case is
+`List.findSome?_nil`; the nonempty case uses the key fact above (every candidate makes the body
+`isSome`) together with `List.findSome?_isSome_iff`. -/
+private lemma modalNonMintCandidates_eq_nil_iff_findSome_eq_none (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    modalNonMintCandidates φ₀ keys b e acc = [] ↔
+      (modalNonMintCandidates φ₀ keys b e acc).findSome?
+        (modalStepBranchS4KeyedBody φ₀ b e acc keys) = none := by
+  constructor
+  · intro h
+    rw [h]
+    rfl
+  · intro h
+    by_contra hne
+    rw [List.findSome?_eq_none_iff] at h
+    obtain ⟨sf, hsf⟩ := List.exists_mem_of_ne_nil _ hne
+    have hsome := modalStepBranchS4KeyedBody_isSome_of_mem_nonMintCandidates φ₀ b e acc keys sf hsf
+    rw [h sf hsf] at hsome
+    simp at hsome
+
+/-- The reordered one-step branch expansion: same per-formula rule application as
+`modalStepBranchS4Keyed` (`modalStepBranchS4KeyedBody`, above), but a different traversal order.
+`findSome?` first scans `modalNonMintCandidates φ₀ keys b e acc` -- the non-minting, not-yet
+-expanded, currently applicable formulas -- and only falls back to the literal old `b.findSome?`
+traversal (`modalStepBranchS4Keyed φ₀ b e acc keys`) once that scan returns `none`, i.e. once the
+branch has settled (no non-minting rule can still fire anywhere on it). Successor to
+`modalStepBranchS4Keyed`, which this definition will eventually retire. -/
+def modalStepBranchS4KeyedOrdered (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    Option (List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            List (List (SignedFormula (Proposition Atom) WorldIndex)) ×
+            Accessibility ×
+            List (WorldIndex × Finset (Sign × Proposition Atom))) :=
+  match (modalNonMintCandidates φ₀ keys b e acc).findSome?
+      (modalStepBranchS4KeyedBody φ₀ b e acc keys) with
+  | some r => some r
+  | none => modalStepBranchS4Keyed φ₀ b e acc keys
+
+/-- **Structural case split.** Whenever the ordered stepper returns `some`, either (1) the
+result came from the primary candidate scan -- some non-minting candidate's body evaluates to
+exactly that result -- or (2) the candidate list was already empty and the result came from the
+literal fallback traversal. This is the single case split every other structural lemma below
+factors through. -/
+lemma modalStepBranchS4KeyedOrdered_cases (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    (∃ sf ∈ modalNonMintCandidates φ₀ keys b e acc,
+        modalStepBranchS4KeyedBody φ₀ b e acc keys sf = some (newBs, newExps, newAcc, keys')) ∨
+    (modalNonMintCandidates φ₀ keys b e acc = [] ∧
+        modalStepBranchS4Keyed φ₀ b e acc keys = some (newBs, newExps, newAcc, keys')) := by
+  unfold modalStepBranchS4KeyedOrdered at hstep
+  cases hcase : (modalNonMintCandidates φ₀ keys b e acc).findSome?
+      (modalStepBranchS4KeyedBody φ₀ b e acc keys) with
+  | none =>
+    rw [hcase] at hstep
+    right
+    exact ⟨(modalNonMintCandidates_eq_nil_iff_findSome_eq_none φ₀ b e acc keys).mpr hcase, hstep⟩
+  | some r =>
+    rw [hcase] at hstep
+    left
+    obtain ⟨sf, hsf_mem, hsf_body⟩ := List.exists_of_findSome?_eq_some hcase
+    exact ⟨sf, hsf_mem, hsf_body.trans hstep⟩
+
+/-- `modalStepBranchS4KeyedOrdered ... = none ↔ modalStepBranchS4Keyed ... = none`. The linchpin
+that lets later phases (Phase 13's saturation step in particular) transfer facts about the old
+stepper's termination condition to the new one without re-deriving anything: if the ordered
+stepper reaches the fallback, both sides are the literal same expression; if it does not, both
+sides are provably `some _ ≠ none` (a primary-scan hit forces the old traversal to also find
+something, since `sf` is in `b` and the shared body applied to it is not `none`). -/
+lemma modalStepBranchS4KeyedOrdered_eq_none_iff (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) :
+    modalStepBranchS4KeyedOrdered φ₀ b e acc keys = none ↔
+      modalStepBranchS4Keyed φ₀ b e acc keys = none := by
+  unfold modalStepBranchS4KeyedOrdered
+  cases hcase : (modalNonMintCandidates φ₀ keys b e acc).findSome?
+      (modalStepBranchS4KeyedBody φ₀ b e acc keys) with
+  | none => rfl
+  | some r =>
+    obtain ⟨sf, hsf_mem, hsf_body⟩ := List.exists_of_findSome?_eq_some hcase
+    have hsf_b : sf ∈ b := modalNonMintCandidates_subset φ₀ keys b e acc hsf_mem
+    have hne : modalStepBranchS4Keyed φ₀ b e acc keys ≠ none := by
+      rw [modalStepBranchS4Keyed_eq_findSome_body]
+      intro hcontra
+      rw [List.findSome?_eq_none_iff] at hcontra
+      have := hcontra sf hsf_b
+      rw [hsf_body] at this
+      simp at this
+    simp only [reduceCtorEq, false_iff]
+    exact hne
+
+/-- Whenever the ordered stepper returns `some`, the selected formula is in `b`, not in `e`, and
+the returned tuple has one of the same four result shapes the shared body's match produces.
+Stated so that later phases (the termination-measure re-verification in particular) can consume
+it directly in place of the `List.exists_of_findSome?_eq_some` extraction the old measure proof
+performs against `modalStepBranchS4Keyed`. -/
+lemma modalStepBranchS4KeyedOrdered_selected_mem (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∃ sf ∈ b, sf ∉ e ∧
+      modalStepBranchS4KeyedBody φ₀ b e acc keys sf = some (newBs, newExps, newAcc, keys') := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hsf_mem, hsf_body⟩ | ⟨-, hfallback⟩
+  · refine ⟨sf, modalNonMintCandidates_subset φ₀ keys b e acc hsf_mem,
+      modalNonMintCandidates_not_mem_expanded φ₀ keys b e acc sf hsf_mem, hsf_body⟩
+  · rw [modalStepBranchS4Keyed_eq_findSome_body] at hfallback
+    obtain ⟨sf, hsf_mem, hsf_body⟩ := List.exists_of_findSome?_eq_some hfallback
+    refine ⟨sf, hsf_mem, ?_, hsf_body⟩
+    intro hmem
+    have : modalStepBranchS4KeyedBody φ₀ b e acc keys sf = none := by
+      unfold modalStepBranchS4KeyedBody
+      rw [if_pos (List.any_eq_true.mpr ⟨sf, hmem, by simp⟩)]
+    rw [this] at hsf_body
+    simp at hsf_body
+
+/-- **Settled-context scheduling, soundness form.** If a step's result could only have arisen
+from a minting-shaped formula (i.e. every formula whose shared body produces that exact result
+is a minting shape), the non-minting candidate list must already have been empty at the time of
+selection: a minting shape can only fire once every non-minting rule on the branch has already
+fired. This is the fact that carries settled-context scheduling into the soundness argument
+(Phases 9-11 of this task's plan) and is the entire point of the reordering. -/
+lemma modalStepBranchS4KeyedOrdered_mintReady (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys'))
+    (hmint : ∀ sf, modalStepBranchS4KeyedBody φ₀ b e acc keys sf =
+        some (newBs, newExps, newAcc, keys') → modalMintShape sf = true) :
+    modalNonMintCandidates φ₀ keys b e acc = [] := by
+  rcases modalStepBranchS4KeyedOrdered_cases φ₀ b e acc keys newBs newExps newAcc keys' hstep with
+    ⟨sf, hsf_mem, hsf_body⟩ | ⟨hcandidates, -⟩
+  · exact absurd (hmint sf hsf_body) (by
+      unfold modalNonMintCandidates at hsf_mem
+      have hpred := (List.mem_filter.mp hsf_mem).2
+      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hpred
+      simp [hpred.1.1])
+  · exact hcandidates
 
 /-! ## Minting-Content Groundwork: towards `successorBirthContent` matching the actual
 K-minting payload

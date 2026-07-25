@@ -1,38 +1,28 @@
 {
   "status": "partial",
-  "started_at": "2026-07-24T00:00:00Z",
+  "started_at": "2026-07-25T00:00:00Z",
   "artifacts": [
-    "CslibTests/TableauConformance.lean",
-    "CslibTests.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Expansion.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean",
-    "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
-    "Cslib/Logics/Temporal/Tableau/Saturation.lean",
-    "Cslib/Logics/Temporal/Tableau/Completeness.lean",
-    "Cslib/Logics/Temporal/Tableau/Rules.lean",
-    "Cslib/Logics/Temporal/Tableau/TimeOrdering.lean",
-    "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md",
-    "specs/552_tableau_calculus_conformance_rule_completeness_repair/.orchestrator-handoff.json"
+    {"type": "commit", "path": "8b3e8df7 - Branch.lean ancestorTimes fix"},
+    {"type": "commit", "path": "89a748d7 - Bimodal SignedFormula.lean ancestorTimes fix"},
+    {"type": "commit", "path": "8d1689f7 - CslibTests/TableauConformance.lean guard_msgs reconciliation"},
+    {"type": "commit", "path": "52799c1f - plan doc: Blocker 1 resolved, Blocker 2 (new) documented"},
+    {"type": "plan", "path": "specs/552_tableau_calculus_conformance_rule_completeness_repair/plans/01_tableau-conformance-rule-completeness.md"}
   ],
   "partial_progress": {
-    "stage": "phase_7_blocked_ancestorTimes_bug",
-    "details": "Phases 1,2,4,5,6 COMPLETED (committed). Phase 3 PARTIAL/BLOCKED (pre-existing fuel-sufficiency gap, inherited unchanged). Phase 7 dedup wiring landed and committed (53eeabf2): isTemporallyBlocked threaded into temporalApplyNeg, replacing the raw timeCount<4 cap at both untlNeg/snceNeg fresh-time-creation sites with a !blocked dedup gate, per user-directed strategy (dedup instead of raising temporalFuel). Correctly flips 3 rows (K-row, G/F duality row, k=1 of Gp->F^k p). BLOCKED beyond depth 1: k=2 stays OPEN even at fuel=5000 (17x natural bound), root-caused to a pre-existing bug in Branch.lean's ancestorTimes (undirected traversal causes a time point to include itself in its own ancestor list once connected to another time, making isTemporallyBlocked spuriously true). Diagnosed via a throwaway scratch harness (CslibTests/Scratch552Phase7.lean), deleted after use. Regression question answered: 0 regressions across all 30 previously-green rows, confirmed twice (pre- and post-Phase-7-edit). Phase 8 blocked on Phase 7 per plan dependency table.",
+    "stage": "phase_7_blocker1_resolved_blocker2_new",
+    "details": "Authorized fix landed: Branch.lean's ancestorTimes (undirected-traversal bug, collected both directPredecessors and directSuccessors) fixed to predecessors-only, plus the identical duplicate in Bimodal Metalogic/Decidability/SignedFormula.lean. This unblocked the Phase 7 dedup gate past depth 1: Gp -> F^k p now flips CLOSED for all k = 1..5 (previously stalled at k = 1), K-row and G/F-duality row remain CLOSED, seriality/conversion/future-transitivity rows remain CLOSED. guard_msgs reconciled in CslibTests/TableauConformance.lean for all 12 rows that flip. Whole-project lake build (3253 jobs) and lake test (9247 jobs) both green; Cslib/ bare-sorry count unchanged at 5; no new axioms. Bimodal Decidability.Saturation's only proof-relevant consumer of findBlockedTime (expandBranchWithFuel_sound, by_cases at :669) is insensitive to the ancestorTimes definition change (opaque Bool case split); full Decidability barrel (792 jobs) builds green with no proof edits needed. NEW BLOCKER discovered during re-verification: Hp -> HHp (past transitivity), explicitly named in Phase 7's own D3 verification list, remains OPEN -- root-caused to Rules.lean's allPastPosAt reusing the future-only TimeOrdering.ancestorTimes for past-direction T(Hphi) propagation (checks t in t_anc's future light-cone instead of t_anc in t's future light-cone). This is a distinct bug, unrelated to the Branch.lean/SignedFormula.lean fix, in a file (Rules.lean) outside this dispatch's authorized scope. Not fixed; documented in the plan's Phase 7 section (BLOCKER 2) and inline in the test file. Phase 7 heading kept [BLOCKED] rather than marked complete, since one of its own stated D3 rows is unresolved.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 6,
-    "phases_partial": [3],
-    "phases_blocked": [7],
-    "phases_remaining": [8]
+    "phases_completed": 6
   },
   "verification": {
     "verification_passed": false,
     "build_passed": true,
-    "ci_pipeline_passed": false,
+    "ci_pipeline_passed": null,
     "sorry_count": 5,
     "vacuous_count": 0,
-    "axiom_count": 0,
-    "note": "Whole-project lake build green (3253/3253) at commit 53eeabf2, unchanged since (only a plan-doc commit followed). Cslib/ bare-sorry count unchanged at 5 (baseline). lake test not run to green this dispatch: CslibTests/TableauConformance.lean's guard_msgs strings are deliberately not yet updated for Phase 6's flips, pending resolution of the Phase 7 ancestorTimes blocker (updating now would need a second pass once k=2..5's eventual verdicts are known). This is expected mid-flight state, not a regression -- see .orchestrator-handoff.json's harness_reconciliation section for the full row-by-row status."
+    "axiom_count_note": "26 total in Cslib/ (unchanged from baseline); 0 new axioms introduced this dispatch",
+    "note": "lake build (whole project, 3253/3253) and lake test (9247/9247) both green. Full CI pipeline (checkInitImports, lake lint, lint-style, shake, mk_all) not run this dispatch -- scope was a targeted bug fix plus test reconciliation, not a PR-readiness pass. verification_passed is false only because Phase 7 remains BLOCKED on the newly discovered Hp->HHp defect (out of authorized scope to fix), not because of any build/test failure."
   },
   "metadata": {
     "session_id": "sess_1784987428_4cc3f0_552",
@@ -42,5 +32,5 @@
     "compliance_check": "blocked_pending_user_decision"
   },
   "requires_user_review": true,
-  "review_reason": "Phase 7 (Deliverable 3+4 cap removal/dedup) is BLOCKED on a pre-existing bug in Branch.lean's ancestorTimes (undirected traversal). Fixing it is outside Phase 7's stated file scope and touches a device the already-landed Phase 6 seriality arm depends on. See .orchestrator-handoff.json blockers[1] (phase-7, severity hard) for full diagnosis and the three options put to the user."
+  "review_reason": "Phase 7's originally-authorized blocker (Branch.lean/SignedFormula.lean ancestorTimes undirected-traversal bug) is RESOLVED and committed. A NEW, distinct blocker was discovered while re-verifying the fix: Hp -> HHp (past transitivity), one of Phase 7's own D3 verification rows, remains OPEN due to an asymmetry bug in Rules.lean's allPastPosAt (out of this dispatch's authorized file scope). User decision needed: (a) authorize a follow-up fix to Rules.lean's allPastPosAt (add a genuine past-direction transitive closure, distinct from TimeOrdering.ancestorTimes's future-only closure), or (b) descope this row from Phase 7/D3 and record it as a known, first-class gap for a future task, or (c) some other direction. See plan Phase 7 section, BLOCKER 2, for full diagnosis."
 }

@@ -2,9 +2,9 @@
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
   "status": "partial",
-  "phases_completed": 4,
+  "phases_completed": 6,
   "phases_total": 32,
-  "summary": "Stage A (Phases 1-4) COMPLETE and committed. Phase 1 corrected the refutable obligation statement and landed the refutation (a2098d13). Phase 2 landed the reduction lemmas under the corrected statement (3958eb88). Phase 3 landed the caller-side bridge from box A not in H to the side condition (393e565d). Phase 4 landed retraction functoriality and docstring corrections (c7d2d87b): specs/ probe-path citations replaced with in-module references to crossCond_left_stable/crossCond_right_stable, and the round-2 correction that no *independent* semantic witness exists via a common-valuation model. Stages B-G (nested sequent syntax, rule systems, soundness, completeness-with-cut, cut elimination, and the two-label bridge) NOT STARTED. NOTE: Phase 4 was recovered and committed by the orchestrator after the implementing agent stalled mid-phase without committing; the work was independently verified before commit (lake build Cslib.Logics.Modal.Metalogic.Constructive.CS5Completeness green at 730 jobs; Cslib/ bare-sorry count unchanged at 5; zero new sorry or axiom in the diff; zero specs/ or task-number citations remaining in the file).",
+  "summary": "Stage A (Phases 1-5) now fully COMPLETE and committed: Phase 5 landed the CS5 -> IS5 route-closure theorem (Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean), showing the product-model-over-IS5 route's residual is exactly the unadopted CS5=IS5 collapse. Phase 6 (Stage B's first phase) also COMPLETE: nested sequent syntax (NestedLhs/NestedRhs/NestedFull) and the fm corresponding-formula translation, verified against the recovered source PDF via two independent extraction methods, landed in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Syntax.lean. 6/32 phases done. Stages C-G (rule systems, soundness, completeness-with-cut, cut elimination, two-label bridge) not started.",
   "artifacts": [
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
     {"type": "report", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/reports/02_cutfree-literature-grounded.md"}
@@ -13,38 +13,40 @@
   "next_action_hint": "implement",
   "files_modified": [
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
-    "Cslib/Logics/Modal/Metalogic/Constructive/CS5Completeness.lean"
+    "Cslib.lean",
+    "Cslib/Logics/Modal/Metalogic/InterSystem/CS5ToIS5.lean",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Syntax.lean"
   ],
   "decisions_made": [
-    "Primary route is cut-free nested sequents, not the product model: the product route's residual R-b instantiated at H := cl_CS5(empty) yields IS5 subset CS5, i.e. the CS5=IS5 collapse the mandate has not adopted. Phase 5 machine-checks this reduction.",
-    "Cut-elimination alone is not sufficient; the two-label bridge (Stage G) is planned explicitly and flagged as the larger risk, with Phase 28 (cross-rule permutation) named as the crux.",
-    "Cross rules are designed via axioms-as-rules (Negri) rather than fed by cut, to maximise the chance Phase 28 succeeds.",
-    "In-repo LJ/CutElimination.lean (711 lines, sorry-free) is the architectural template for Stage F; contexts use Observation 2.2 normal form so well-formedness is definitional.",
-    "Landed cs5Pair_derivExcludes_of_disjunctionProperty is left textually unchanged; the new entry point's extra hypothesis hA is flagged and discharged by Phase 3.",
-    "Phase 4 removed all specs/ probe-path citations from CS5Completeness.lean docstrings in favour of in-module lemma references, satisfying the no-task-references-in-deliverables rule."
+    "Placed the CS5->IS5 route-closure module under Cslib/Logics/Modal/Metalogic/InterSystem/ (CS5ToIS5.lean) -- no existing cross-import conflict between Constructive.CS5 and Intuitionistic.IS5, confirmed before writing.",
+    "NestedLhs/NestedRhs are two ordinary successive Lean inductives, not a genuine `mutual` block: Psi's grammar production [Phi,Psi] depends on Phi, but Phi's productions never mention Psi.",
+    "Comma (Phi,Phi) is a raw binary constructor, not a List or a quotient by assoc/comm/unit; no permutation lemmas landed yet since no downstream phase consumes them (avoids speculative unused declarations).",
+    "For literature verification, reading the recovered source PDF directly via Read(pages=...) cross-checked against `pdftotext -layout` is more reliable than the unverified_summary literature-search.sh index chunks; pdftotext silently drops the box glyph throughout this specific PDF (confirmed), so box symbols must be mentally restored when cross-checking.",
+    "Example 2.1's printed corresponding-formula for Gamma_1{Delta_1} informally simplifies an innermost (top implies B) subformula to B; the fm clauses as literally stated do not perform this simplification. The landed Lean example computes the literal mechanical fm output and documents the discrepancy rather than force-matching the paper's prose gloss."
   ],
   "dead_ends": [
     "Marin-Morales-Strassburger labIK-le: base is IK not CK, settles IS5 not CS5. Not planned.",
     "Any route needing box(A or B) -> (box A or box B): not a theorem of classical S5. No phase attempts it.",
     "Relabeling retractions: every one is forced to identify the two tag copies. Bound landed as an asset only.",
-    "Product model over IS5: closed by the R-b/collapse equivalence -- it reduces to the unadopted CS5=IS5 collapse."
+    "Product model over IS5: closed by the CS5ToIS5.lean route-closure theorem -- it reduces to the unadopted CS5=IS5 collapse (now machine-checked, not just plan-time asserted)."
   ],
   "continuation_context": {
-    "phases_completed": 4,
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-6-handoff-20260725.md",
+    "phases_completed": 6,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage B, Phase 5 (nested sequent syntax). Phase 5 also machine-checks the R-b/collapse reduction that closed the product-model route.",
+    "resume_at": "Stage B, Phase 7 (contexts, hole filling, and output pruning -- Observation 2.2, eq. (2.2)/(2.3), Definition 2.3). Depends on Phase 6 (done).",
     "stage_map": {
-      "A": "Phases 1-4 - statement repair and route closure - COMPLETE",
-      "B": "Nested sequent syntax - NOT STARTED",
-      "C": "The rule systems - NOT STARTED",
-      "D": "Soundness (Theorem 4.1) - NOT STARTED",
-      "E": "Completeness with cut (Theorem 5.1) - NOT STARTED",
-      "F": "Cut elimination (section 6) - NOT STARTED",
-      "G": "The two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
+      "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
+      "B": "Phases 6-8 - nested sequent syntax - Phase 6 COMPLETE, Phases 7-8 NOT STARTED",
+      "C": "Phases 9-10 - the rule systems - NOT STARTED",
+      "D": "Phases 11-13 - soundness (Theorem 4.1) - NOT STARTED",
+      "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
+      "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
+      "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Every literature-search.sh invocation MUST pass --include-unverified or it returns degraded=true with zero results. Relevant doc_ids: arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics (the safe-pair source, X={t,4} Y={b}, Theorems 5.2 and 6.3), pacheco_2024_collapsingconstructiveandintuitionisticmodallogics, marinmoralesstrassburger_2021_fully_labelled_proof_system_intuitionistic_modal. Source PDFs recovered to ~/Projects/Literature/.sources-recovered/.",
-    "invariants": "Cslib/ bare-sorry count must stay exactly 5 (git grep -hE '^\\s*sorry\\s*$' -- 'Cslib/**/*.lean' | wc -l). Zero new axioms. No weakened or vacuous restatements. Whole-project lake build green at every commit."
+    "literature_access": "Prefer Read(file_path=~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf, pages=\"N-M\") over literature-search.sh --include-unverified: the latter is unverified_summary fidelity and its FTS5 index errors on punctuation. Cross-check any Read render against `pdftotext -f N -l N -layout <path>` -- pdftotext drops the box glyph throughout this PDF, so a box must be mentally restored wherever a parenthesized group looks box-free in pdftotext but the direct render shows one. Pages 5-6 (source PDF) cover eq. 2.1, fm, Example 2.1, Observation 2.2, Definition 2.3, and Figure 2 (System NCK) -- everything Phases 7 and 9 need; already read and transcribed this session, see the handoff_path markdown for the full transcription.",
+    "invariants": "Cslib/ bare-sorry count must stay exactly 5 (git grep -hE '^\\s*sorry\\s*$' -- 'Cslib/**/*.lean' | wc -l). Axiom count must stay exactly 26 (git grep -c '^axiom ' -- 'Cslib/**/*.lean' | awk -F: '{s+=$2} END {print s}'). Zero new axioms. No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- a concurrent session owns those files."
   },
-  "plan_markers_verified": false
+  "plan_markers_verified": true
 }

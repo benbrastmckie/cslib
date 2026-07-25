@@ -159,7 +159,7 @@ validated until it exists.
 
 ---
 
-### Phase 2: Propositional `T(→)` branching arm (P1-a / Deliverable 6) [NOT STARTED]
+### Phase 2: Propositional `T(→)` branching arm (P1-a / Deliverable 6) [COMPLETED]
 
 **Goal**: Add the Fitting `T(→)` split to `intApplyRuleFull` and re-derive the termination
 measure, so the three red propositional rows flip. Proof obligations are deferred to Phases 3-4;
@@ -175,17 +175,41 @@ never re-branches on formulas persistence is about to add. The "replace" alterna
 Rollback/Contingency.
 
 **Tasks**:
-- [ ] Add a `.pos, .imp` arm to `intApplyRuleFull`
+- [x] Add a `.pos, .imp` arm to `intApplyRuleFull`
       (`Cslib/Logics/Propositional/Tableau/Intuitionistic/Rules.lean:245-268`) producing the two
-      branches `[F(φ)@w'] | [T(ψ)@w']`.
-- [ ] Use the existing `IntRuleResult.branchingResult` constructor — no new constructor is needed.
-- [ ] Confirm `intStepBranch_result_ne_notApplicable` (`Expansion.lean:163-180`) still compiles
+      branches `[F(φ)@w'] | [T(ψ)@w']`. *(deviation: altered — `intApplyRuleFull` takes a single
+      `sf : ISF Atom` with one fixed label and no `edges` parameter, so it cannot itself range
+      over "every `w'` accessible from `w`"; it fires reflexively at `w' = sf.label`. The universal
+      quantification over accessible worlds is instead realized by extending
+      `applyAllTImpRules` (`Expansion.lean`) to also copy `T(φ→ψ)` itself to every world
+      accessible from `w` lacking its own copy — each copy is then an independent `ISF` that
+      `intStepBranch`/`expanded` resolves reflexively on its own turn. This keeps
+      `intApplyRuleFull`'s signature unchanged, matches every other arm's `l = sf.label`-only
+      shape, and keeps the `intUniverse`-containment proof shape analogous to the existing
+      `.and`/`.or` cases — an unavoidable elaboration of the plan's literal text, not a
+      substitution of a different design.)*
+- [x] Use the existing `IntRuleResult.branchingResult` constructor — no new constructor is needed.
+- [x] Confirm `intStepBranch_result_ne_notApplicable` (`Expansion.lean:163-180`) still compiles
       unchanged: its `cases hint : intApplyRuleFull` is over the three *constructors*, not the cases,
-      so `.branchingResult` needs no new bullet.
-- [ ] Re-derive `intFuel` (`Expansion.lean:468`) and the `intExpMeasure_*` chain for the enlarged
+      so `.branchingResult` needs no new bullet. **Confirmed**: `lake build` of `Expansion.lean`
+      succeeds with zero changes to that lemma.
+- [~] Re-derive `intFuel` (`Expansion.lean:468`) and the `intExpMeasure_*` chain for the enlarged
       rule set; the split adds one branching step per T-implication per world.
-- [ ] Guard the arm so it fires at most once per `(implication, world)` pair, so the enlarged rule
-      set does not reintroduce a fuel blow-up.
+      *(deviation: deferred — `intFuel`'s formula is unchanged: the new arm's outputs (`F(φ)@l`,
+      `T(ψ)@l`) stay within the existing `intUniverse φ0` bound (same subformulas, same label),
+      the same shape as the pre-existing `.and`/`.or` beta-rule cases the bound already covers, so
+      no numeric increase is anticipated. The `intExpMeasure_*` *proof* chain lives in
+      `Scheme.lean`, which imports `Soundness.lean`; `Soundness.lean` does not currently
+      typecheck against the new `intApplyRuleFull` case (new non-exhaustive-match failures at
+      five sites, `:143,380-381,765,934,1016`), so `Scheme.lean` cannot be elaborated at all until
+      that is fixed. Continued into Phase 3, which already owns `Soundness.lean`'s
+      `intRule_preserves_sat` and is the natural place to add the new case to every broken match
+      site in the same pass.)*
+- [x] Guard the arm so it fires at most once per `(implication, world)` pair, so the enlarged rule
+      set does not reintroduce a fuel blow-up. **Satisfied structurally, not by a separate guard**:
+      each `(implication, world)` pair is a distinct `ISF` (since `applyAllTImpRules` only adds a
+      copy where none exists yet), and `intStepBranch`'s `expanded` set already tracks exact `ISF`
+      membership, so each copy resolves at most once by construction.
 
 **Timing**: 2 hours
 
@@ -197,14 +221,23 @@ Rollback/Contingency.
 - `Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean` - `intExpMeasure_*` chain
 
 **Verification**:
-- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion` green.
+- `lake build Cslib.Logics.Propositional.Tableau.Intuitionistic.Expansion` green. **Confirmed.**
 - Conformance gate: `((a→b)→(a→c)) → (a→(b→c))`, `¬¬¬a → ¬a`, and `((a→b)→c) → (b→c)` all report
-  **CLOSED**.
+  **CLOSED**. **Confirmed** via `lake env lean CslibTests/TableauConformance.lean` (independent of
+  `Soundness.lean`, since the harness imports only `Expansion.lean`): all three flipped, zero other
+  mismatches.
 - Conformance gate: `((a→b)→a) → a` (Peirce), `(a→b) ∨ (b→a)` (Dummett), `¬(a∧b) → (¬a ∨ ¬b)`,
-  `¬a ∨ ¬¬a`, and Kreisel-Putnam all still report **OPEN**.
+  `¬a ∨ ¬¬a`, and Kreisel-Putnam all still report **OPEN**. **Confirmed** (same run).
 - Conformance gate: all 12 currently-green propositional rows still report CLOSED (the
-  coexistence check for `applyPersistenceFixpoint`).
-- No new `sorry` introduced; any newly-unproved goal is surfaced, not admitted.
+  coexistence check for `applyPersistenceFixpoint`). **Confirmed** (same run; zero regressions on
+  any of the other 40 harness rows).
+- No new `sorry` introduced; any newly-unproved goal is surfaced, not admitted. **Confirmed**: zero
+  `sorry`/`axiom` in `Rules.lean`/`Expansion.lean`. **Known, expected, not-yet-fixed fallout**: the
+  new `intApplyRuleFull` case is a genuine non-exhaustive-match break (not `sorry`) at five sites
+  in `Soundness.lean` (`:143,380-381,765,934,1016`), so `Cslib.lean`/`lake build` (whole project)
+  and `lake test` do **not** pass until Phase 3 lands — this is the expected, by-design
+  intermediate state between two sequential, file-disjoint-from-temporal phases (see
+  Rollback/Contingency, which anticipates evaluating Phase 2 before Phase 3 begins).
 
 ---
 

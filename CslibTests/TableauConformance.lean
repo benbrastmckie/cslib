@@ -63,13 +63,13 @@ Finding 0 of the task's research report. Finding 0's summary table groups some r
 `k`-indexed families (`𝐆p → 𝐅^k p` for `k = 1..5`; `𝐅^k p → 𝐅^k p` for `k = 0..6`); expanding
 those families into individually-asserted formulas — required so Phase 7's `k = 4` cut is its
 own detector, not folded into a family average — yields **43** individually-executed rows here
-(27 green, 16 red), rather than the plan's rounded "44 rows / 32 green / 12 red" summary
-figures, which count some multi-formula families as a single row. The set of *which* formulas
-are red is unaffected by this counting difference; only the row arithmetic differs. Red rows
-are exactly the ones repaired by the implementation phases named inline below. Row-by-row
-annotations record which phase is expected to flip each currently-red row; Phase 8 removes
-those annotations once the whole corpus is green, converting this file into a pure regression
-guard.
+at Phase 1 landing time (27 green, 16 red), rather than the plan's rounded "44 rows / 32 green /
+12 red" summary figures, which count some multi-formula families as a single row. The set of
+*which* formulas were originally red is unaffected by this counting difference; only the row
+arithmetic differs. Rows are repaired by the implementation phases named inline below as they
+land (Phase 2 has already flipped the 3 propositional rows, so 30 green / 13 red as of Phase 2).
+Row-by-row annotations record which phase flipped (or will flip) each row; Phase 8 removes those
+annotations once the whole corpus is green, converting this file into a pure regression guard.
 -/
 
 namespace CslibTests.TableauConformance
@@ -230,8 +230,8 @@ end TemporalCorpus
 
 /-! ## Propositional Corpus (`intuitionisticTableau`, `Proposition Nat`)
 
-19 rows: 16 green (11 IPC-valid closed rows + 5 IPC-invalid open rows), 3 red (Deliverable 6,
-the missing Fitting `T(→)` split). -/
+19 rows, all green as of Phase 2: 14 closed (11 originally green + 3 flipped by the Fitting
+`T(→)` split, Deliverable 6) + 5 IPC-invalid open rows. -/
 
 section PropositionalCorpus
 
@@ -297,20 +297,20 @@ def ic : Proposition Nat := .atom 2
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau ((ia → ib) → ((ib → ic) → (ia → ic))))
 
--- DEFECT (Deliverable 6: missing T(→) branching rule) -- expect CLOSED; flips in Phase 2.
+-- FIXED in Phase 2 (Deliverable 6: T(→) branching rule added to intApplyRuleFull).
 -- IPC-valid: from b, weakening gives a→b, hence a→c, with a gives c.
-/-- info: "OPEN" -/
+/-- info: "CLOSED" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau (((ia → ib) → (ia → ic)) → (ia → (ib → ic))))
 
--- DEFECT (Deliverable 6) -- expect CLOSED; flips in Phase 2. IPC-valid: textbook ¬¬¬a → ¬a.
-/-- info: "OPEN" -/
+-- FIXED in Phase 2 (Deliverable 6). IPC-valid: textbook ¬¬¬a → ¬a.
+/-- info: "CLOSED" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau (¬ (¬ (¬ ia)) → ¬ ia))
 
--- DEFECT (Deliverable 6) -- expect CLOSED; flips in Phase 2.
+-- FIXED in Phase 2 (Deliverable 6).
 -- IPC-valid: from b, weakening gives a→b, hence c.
-/-- info: "OPEN" -/
+/-- info: "CLOSED" -/
 #guard_msgs in
 #eval intVerdict (intuitionisticTableau (((ia → ib) → ic) → (ib → ic)))
 

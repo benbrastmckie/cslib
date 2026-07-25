@@ -262,7 +262,17 @@ def intApplyRuleFull (sf : ISF Atom) (nextWorld : Nat) (b : IBranch Atom) :
   | .neg, .imp φ ψ =>
     let (newForms, nextWorld', edge) := intFImpRule φ ψ l nextWorld b
     .linearResult newForms nextWorld' (some edge)
-  -- T(φ → ψ) and T(¬φ): handled separately (persistent rule, not a standard step)
+  -- T(φ → ψ) and T(¬φ): beta-rule (Fitting Ch. 4 split), branch to F(φ)@l or T(ψ)@l, at the
+  -- SAME world `l = sf.label` this specific copy of T(φ → ψ) is labeled at. This coexists with
+  -- (does not replace) the persistent positive-propagation rule `intTImpRule`/
+  -- `applyAllTImpRules`, which now also copies T(φ → ψ) itself to every world accessible from
+  -- `l` lacking its own copy (`applyAllTImpRules` below), so each accessible world eventually
+  -- gets an independent reflexive resolution here -- realizing "for every w' accessible from w"
+  -- without this rule itself needing an `edges` parameter. Guarded to fire at most once per
+  -- (implication, world) pair for free: `intStepBranch`'s `expanded` set tracks the exact
+  -- `⟨.pos, φ → ψ, l⟩` triple, and each accessible world's copy is a distinct triple.
+  | .pos, .imp φ ψ =>
+    .branchingResult [[⟨.neg, φ, l⟩], [⟨.pos, ψ, l⟩]] nextWorld
   -- T(⊥): closed by IntuitionisticClosure -- not expanded
   -- All others: atoms, bot, etc.
   | _, _ => .notApplicable

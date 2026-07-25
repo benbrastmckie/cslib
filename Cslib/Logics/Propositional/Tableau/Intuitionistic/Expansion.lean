@@ -114,6 +114,17 @@ For each T(φ → ψ) formula at world w on the branch, and for each accessible 
 w' (reachable via the edge list from w) with T(φ) at w', if T(ψ) is not yet at w',
 add T(ψ) at w'.
 
+Also copies T(φ → ψ) **itself** to every world w' accessible from w that does not
+already carry its own copy (Deliverable 6 companion to the `.pos, .imp` branching arm in
+`intApplyRuleFull`). That arm only ever fires reflexively, at the label of the specific
+signed-formula copy it is given, so realizing the source's "for every w' accessible from
+w, either F(φ)@w' or T(ψ)@w'" obligation requires each accessible w' to eventually carry
+its own `⟨.pos, φ → ψ, w'⟩` copy, which `intStepBranch`/`intApplyRuleFull` can then resolve
+independently (and which `expanded` then tracks per-`(implication, world)` pair, since each
+copy is a distinct `ISF`). This mirrors `intTImpRule`'s own accessibility scan; termination
+is unaffected since the number of distinct `(implication, world)` copies is bounded by
+`intUniverse φ0`.
+
 Returns the updated branch with all pending persistence applications. -/
 def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
   let newForms :=
@@ -122,7 +133,16 @@ def applyAllTImpRules (b : IBranch Atom) (edges : IEdges) : IBranch Atom :=
       | .pos, .imp φ ψ =>
         -- Get all accessible worlds w' with T(φ) at w' but not yet T(ψ)
         let toAdd := intTImpRule φ ψ sf.label edges b
-        if toAdd.isEmpty then none else some toAdd
+        -- Copy T(φ → ψ) itself to every accessible world lacking its own copy.
+        let accessibleWorlds :=
+          (b.map (·.label)).eraseDups.filter (isAccessible edges sf.label ·)
+        let copies := accessibleWorlds.filterMap fun w' =>
+          if b.any (fun y => y.sign == .pos && y.formula == sf.formula && y.label == w') then
+            none
+          else
+            some (⟨.pos, sf.formula, w'⟩ : ISF Atom)
+        let combined := toAdd ++ copies
+        if combined.isEmpty then none else some combined
       | _, _ => none
   b ++ newForms.flatten
 

@@ -6286,6 +6286,65 @@ lemma modalStepBranchS4_preserves_eClosure (φ₀ : Proposition Atom)
     exact heclosure
   · rw [hres] at hsf; simp at hsf
 
+/-- **`eClosure`'s ordered-driver preservation.** Verbatim transcription of
+`modalStepBranchS4_preserves_eClosure` against the ordered stepper, via
+`modalStepBranchS4KeyedOrdered_selected_mem` in place of the direct `findSome?` extraction. -/
+lemma modalStepBranchS4KeyedOrdered_preserves_eClosure (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (newBs newExps : List (List (SignedFormula (Proposition Atom) WorldIndex)))
+    (newAcc : Accessibility) (keys' : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hb : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (heclosure : ∀ x ∈ e, x ∈ modalUniverseS4 φ₀)
+    (_hknown : accTargetsKnown b acc)
+    (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
+      some (newBs, newExps, newAcc, keys')) :
+    ∀ e' ∈ newExps, ∀ x ∈ e', x ∈ modalUniverseS4 φ₀ := by
+  obtain ⟨sf, hsfmem, hsf_ne, hsf⟩ :=
+    modalStepBranchS4KeyedOrdered_selected_mem φ₀ b e acc keys newBs newExps newAcc keys' hstep
+  have hany : e.any (· == sf) = false := by
+    rw [List.any_eq_false]
+    intro x hx heq
+    rw [beq_iff_eq] at heq
+    subst heq
+    exact hsf_ne hx
+  unfold modalStepBranchS4KeyedBody at hsf
+  rw [if_neg (by simp [hany])] at hsf
+  have hsfbound : sf ∈ modalUniverseS4 φ₀ := hb sf hsfmem
+  rcases hpair : modalApplyOneS4Keyed φ₀ keys sf b acc with ⟨result, newAcc0⟩
+  rw [hpair] at hsf
+  dsimp only at hsf
+  rcases hres : result with nf | brs | nf | -
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfbound
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    obtain ⟨x0, -, rfl⟩ := List.mem_map.mp he'
+    intro x hx
+    simp only [List.mem_append, List.mem_singleton] at hx
+    rcases hx with hx | rfl
+    · exact heclosure x hx
+    · exact hsfbound
+  · rw [hres] at hsf
+    simp only [Option.some.injEq, Prod.mk.injEq] at hsf
+    obtain ⟨-, rfl, -, -⟩ := hsf
+    intro e' he'
+    simp only [List.mem_singleton] at he'
+    subst he'
+    exact heclosure
+  · rw [hres] at hsf; simp at hsf
+
 /-- **`bClosure`'s driver-level preservation**: at the 12 non-minting shapes, the "Non-Minting
 Universe-Membership Composite" section's `modalApplyOneS4Keyed_nonMint_universe_S4` bounds
 emitted content directly; at the 2 minting shapes, the pigeonhole world-bound

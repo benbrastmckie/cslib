@@ -1,0 +1,45 @@
+{
+  "phase": 4,
+  "phase_name": "Build the reflow tool and produce scratch chunks",
+  "started_at": "2026-07-25T09:00:00Z",
+  "last_updated": "2026-07-25T10:30:00Z",
+  "objectives": [
+    {"id": 1, "description": "Write durable reflow script", "status": "done", "files_touched": [".claude/scripts/literature-reflow-ocr.sh"]},
+    {"id": 2, "description": "Implement paragraph-reflow pass with indent window + atomic/enum cues", "status": "done", "files_touched": [".claude/scripts/literature-reflow-ocr.sh"]},
+    {"id": 3, "description": "Spot-check indentation profile against source", "status": "done", "files_touched": []},
+    {"id": 4, "description": "Insert only Phase 2 headings at recorded offsets", "status": "done", "files_touched": []},
+    {"id": 5, "description": "Run unmodified literature-chunk.sh into scratch dir", "status": "done", "files_touched": []},
+    {"id": 6, "description": "Compute scratch stats vs baseline", "status": "done", "files_touched": []},
+    {"id": 7, "description": "Inspect chunks.json titles for real headings, no self-dup breadcrumbs", "status": "done", "files_touched": []},
+    {"id": 8, "description": "Iterate if profile not healthy", "status": "done", "files_touched": []}
+  ],
+  "current_objective": 8,
+  "approaches_tried": [
+    {
+      "approach": "Enumerated-list markers (i)/(ii)/(a)/Stage-N always force a new paragraph, per literal task wording",
+      "result": "failed",
+      "reason": "Split Definition 1.1.4's own nested (1)/(2)/(3)/(i)-(viii) sub-items into many small paragraphs, exposing it to a mid-definition chunk cut by literature-chunk.sh's Pass-2 size merge (no atomic-block awareness below top-level heading-chunk boundary)."
+    },
+    {
+      "approach": "Flip enum markers to never force a new paragraph (stay glued to preceding text)",
+      "result": "partial",
+      "reason": "Fixed most of the fragmentation but Definition 1.1.4 was still split, because a single blank line surrounding a centered math-display insert (pure typesetting) still triggered a flush between the definition's own sub-clauses."
+    },
+    {
+      "approach": "One-line-lookahead blank-line suppression inside atomic-keyword-opened paragraphs, plus fixing an ENUM_RE regex bug that failed to match the OCR-fused adjacent marker '(l)(i)'",
+      "result": "success",
+      "reason": "Definition 1.1.4 verified complete in a single scratch chunk (opening 'quintuple' phrase through closing '(viii)' clause); aggregate profile stayed healthy (38 chunks / 1669.5B mean / 5.3% under 300B)."
+    }
+  ],
+  "handoff_count": 0,
+  "deviations": [
+    {
+      "task_id": "4.2",
+      "description": "Enumerated-list-start cues as new-paragraph triggers",
+      "type": "altered",
+      "reason": "Empirically required the opposite polarity (never a paragraph trigger, always glued to the preceding text) to keep atomic Definition/Lemma/Theorem statements intact against literature-chunk.sh's paragraph-level Pass-2 merge, which has no sub-heading-chunk atomic-block awareness.",
+      "annotation": "*(deviation: altered — see phase-4 deviation note in the plan file)*"
+    }
+  ],
+  "notes": "End-to-end reproducibility verified: running the reflow script directly against the raw PDF (pdftotext -layout re-extraction inside the script) produced a byte-identical reflowed markdown to the pre-extracted-layout-txt shortcut path. Production ~/Projects/Literature/wijesekera_1990_constructivemodallogicsi/ confirmed byte-identical to its Phase 1 backup (md5sum match) -- untouched by this phase."
+}

@@ -1162,6 +1162,87 @@ lemma modalFourDiaNegProp_sound [DecidableEq Atom] [Hashable Atom]
     subst hsf
     exact branchSatisfiableIn_s4FC_diaNeg_trans_mem h hmem (mem_successorsOf_hasEdge' hw')
 
+/-! ### Ancestor-Redirect Decision Gate (Phase 2, plan v3, ancestor-only blocking)
+
+**The obligation.** The ancestor-only-blocking route (task 553 plan v3) redirects a would-be
+mint at `src` onto an EXISTING ancestor `a` (reached by an already-recorded chain of `acc`
+edges) whenever `a`'s recorded key equals the prospective successor's birth content. The
+single load-bearing risk the whole route rests on is whether *adding the back-edge `src → a`
+to `acc`* preserves `branchSatisfiableIn s4FC` — stated here as a standalone lemma with no
+dependence on any driver definition (`blockingWorldS4Anc`, `keys`, `spine`, etc. are never
+named; the two abstract hypotheses `hboxback`/`hdianeg` below are exactly what
+`S4LoopInv.keyLowerBd` composed with the guard's key-equality check would hand a caller).
+
+**Attempt and verdict.** Local re-derivation of `Soundness.lean`'s private
+`hasEdge_addEdge_cases` (unavailable across files, same pattern as this file's
+`hasEdge_mem_successorsOf_origin`) lets the added edge be case-split against the old one. The
+"reuse the ambient witness model unchanged" case is fine when `m.r (f src) (f a)` already
+holds. The general case forces extending `m.r` (S4's `IsTrans` field is a genuine structural
+property of the *concrete* relation, not a derivable notion, so `acc.hasEdge` growth cannot be
+absorbed by an unrelated model without enlarging `m.r` to remain transitive). But
+`branchSatisfiableIn`'s witness model is *existentially arbitrary*: nothing constrains `m.r` to
+equal the transitive closure of `acc`, so `m.r` may already relate `f src` to models of
+*other* worlds (not just those on the recorded spine) in ways `hboxback`/`hdianeg` — stated only
+about the single edge's endpoints `src`/`a` — cannot control. Any predecessor `x` of `f src` in
+the (unconstrained) ambient relation with its own box-positive branch formula would, after the
+closure forced by transitivity, need that formula's content to transfer to `f a` too, and no
+hypothesis available to a *standalone* (no-driver, no-Hintikka-completeness) lemma can supply
+this for an unbounded family of such `x`. This is not a new discovery: it is exactly what this
+file's own `branchPropAdequateIn` module comment (two sections below) already documents for
+Route P's identical redirect-to-an-existing-world shape ("breaks `branchSatisfiableIn`'s edge
+conjunct ... outright for such an edge"). The sorry below marks precisely this point; see
+`#### Phase 2 Verdict` in the plan for the recorded [BLOCKED] disposition. -/
+
+/-- Local re-derivation of `Soundness.lean`'s `private lemma hasEdge_addEdge_cases`
+(unavailable across files) -- same proof, same pattern as `hasEdge_mem_successorsOf_origin`
+above. -/
+private lemma hasEdge_addEdge_cases_anc {acc : Accessibility} {w w' u u' : WorldIndex}
+    (h : (acc.addEdge w w').hasEdge u u' = true) :
+    (u = w ∧ u' = w') ∨ acc.hasEdge u u' = true := by
+  simp only [Accessibility.addEdge, Accessibility.hasEdge, List.any_cons, Bool.or_eq_true,
+    Bool.and_eq_true, beq_iff_eq] at h
+  rcases h with ⟨hw, hw'⟩ | h
+  · exact Or.inl ⟨hw.symm, hw'.symm⟩
+  · exact Or.inr h
+
+/-- **Phase 2 decision-gate lemma (task 553 plan v3).** `a` an already-recorded ancestor of
+`src` (`acc.hasEdge a src`), with `a`'s current content already containing, UNWRAPPED, every
+box-positive/diamond-negative fact recorded at `src` (`hboxback`/`hdianeg` -- the semantic
+payoff of `S4LoopInv.keyLowerBd` composed with the guard's key-equality check, stated here with
+no reference to `keys`/`successorBirthContent`/`spine`). **Attempted; BLOCKED** -- see the
+module comment above and `#### Phase 2 Verdict` in
+`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md`
+for the exact obstruction. The `sorry` marks the one case genuinely not dischargeable from
+these hypotheses: an arbitrary `branchSatisfiableIn` witness need not have `m.r (f src) (f a)`,
+and extending `m.r` to add it (forced to close transitively, since `IsTrans` binds the concrete
+relation) requires box/diamond content transfer for *every* ambient predecessor of `f src`, not
+just `src` itself -- a fact no standalone, driver-independent hypothesis set can supply. -/
+lemma branchSatisfiableIn_s4FC_ancestor_redirect
+    {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
+    (h : branchSatisfiableIn s4FC b acc)
+    {src a : WorldIndex}
+    (hanc : acc.hasEdge a src = true)
+    (hboxback : ∀ ψ, (⟨.pos, .box ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (⟨.pos, ψ, a⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hdianeg : ∀ ψ, (⟨.neg, .diamond ψ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        (⟨.neg, ψ, a⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    branchSatisfiableIn s4FC b (acc.addEdge src a) := by
+  obtain ⟨W, m, f, ⟨hrefl, htrans⟩, hedges, hb⟩ := h
+  by_cases hdirect : m.r (f src) (f a)
+  · -- The ambient witness already relates the two points: no model change needed.
+    refine ⟨W, m, f, ⟨hrefl, htrans⟩, ?_, hb⟩
+    intro u u' hedge
+    rcases hasEdge_addEdge_cases_anc hedge with ⟨rfl, rfl⟩ | hold
+    · exact hdirect
+    · exact hedges u u' hold
+  · -- General case: `m.r` must be extended to relate `f src`, `f a`. Since `IsTrans` binds the
+    -- concrete relation, the extension must be closed transitively, which (per the module
+    -- comment above) requires controlling box/diamond content at every ambient predecessor of
+    -- `f src` -- not just at `src` itself. `hboxback`/`hdianeg` only speak about `src`, so this
+    -- case is not dischargeable from the stated (standalone, driver-independent) hypotheses.
+    -- See `#### Phase 2 Verdict` in the plan: this is the recorded [BLOCKED] obstruction.
+    sorry
+
 /-! ### Propagation-Adequacy Invariant (S4-Keyed)
 
 The S4-keyed ordered driver's loop guard (`LoopChecking.lean`'s `blockingWorldS4Keyed`) can add a

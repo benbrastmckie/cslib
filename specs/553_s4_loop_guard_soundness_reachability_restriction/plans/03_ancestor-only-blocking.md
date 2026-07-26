@@ -1,7 +1,8 @@
 # Implementation Plan: Ancestor-Only Blocking for the S4 Keyed Loop Guard (v3)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: BLOCKED (Phase 2 decision gate refuted the route; see Phase 2 Verdict; escalation to
+  user required before any further phase)
 - **Effort**: 26-34 hours (14 phases, two of which are decision gates that may terminate the route)
 - **Dependencies**: None (no other task blocks this)
 - **Research Inputs**:
@@ -409,27 +410,34 @@ completeness or soundness regressions (with a small, ordering-dependent terminat
 disappears under settled-context scheduling), and the box-propagation obligation Phase 2 must
 prove held in every one of 1374 observed instances.
 
-### Phase 2: Decision gate — the ancestor back-edge justification lemma [NOT STARTED]
+### Phase 2: Decision gate — the ancestor back-edge justification lemma [BLOCKED]
 
 - **Goal:** Prove, or fail to prove, the one obligation the whole route rests on, as a **standalone
   lemma with no driver dependency**: adding an edge `src -> a` where `a` is a spine ancestor of
   `src` and `a`'s recorded key equals the prospective successor's birth content preserves
   `branchSatisfiableIn s4FC`.
 - **Tasks:**
-  - [ ] State the lemma in `FrameSoundness.lean` over abstract hypotheses (a spine chain from `a`
+  - [x] State the lemma in `FrameSoundness.lean` over abstract hypotheses (a spine chain from `a`
         to `src`, key equality, `keyLowerBd`), with **no** dependence on any driver definition.
-  - [ ] Attempt the cluster construction: S4 frames admit cycles, so take the model's relation to
+        Landed as `branchSatisfiableIn_s4FC_ancestor_redirect` (`FrameSoundness.lean:1220`),
+        single-hop case (`hanc : acc.hasEdge a src = true`; the general multi-hop spine case is a
+        strict generalization and is foreclosed a fortiori by this base case's blocker).
+  - [x] Attempt the cluster construction: S4 frames admit cycles, so take the model's relation to
         be the reflexive-transitive closure of the spine edges **plus** the back-edge, collapsing
         `a..src` into a cluster, and discharge the resulting box-propagation obligation.
-  - [ ] Evaluate `blockedRedirect_boxctx_mem_of_boxOrigin` (`:1466`) and
+        Attempted (case split on whether the ambient witness already relates `f src`/`f a`); see
+        `#### Phase 2 Verdict` below for exactly where it breaks.
+  - [x] Evaluate `blockedRedirect_boxctx_mem_of_boxOrigin` (`LoopChecking.lean:1466`) and
         `blockedRedirect_diaNeg_mem_of_diaOrigin` (`:1506`) as starting points before writing a
         fresh lemma — both are true, sorry-free, and conditional on exactly a box-origin fact.
-  - [ ] If the unwrapped box-context blocks the discharge (the predicted failure mode:
-        `keyLowerBd` yields `T(ψ)@a`, not `T(□ψ)@a`), record that finding and **adopt boxed birth
-        content as a sub-component of this route** — state the boxed variant of the lemma and prove
-        that instead, adding a Phase 2b to this plan for the `successorBirthContent` /
-        mint-payload change in the S4-keyed layer only (never `Rules.lean`).
-  - [ ] Record the verdict in this plan under `#### Phase 2 Verdict`, resolving the two
+        Evaluated (read in full): both require the edge `u → wBlock` to be **already recorded**
+        in `acc` before they can fire, so they characterize *syntactic* branch-content transfer
+        available *after* a redirect edge exists, not a route to justifying the edge's own
+        addition to `acc` in the first place. Not reusable for this lemma's actual obligation.
+  - [ ] **Not reached** — the predicted "unwrapped box-context" failure mode did not occur; the
+        proof reached a **deeper, prior obstruction** (see verdict below) that boxed birth
+        content does not fix, so no Phase 2b is added.
+  - [x] Record the verdict in this plan under `#### Phase 2 Verdict`, resolving the two
         NOT-YET-VERIFIED rows of the mapping table.
 - **Estimated output:** ~150-300 lines of Lean.
 - **Done when:** the lemma is sorry-free and `lake build Cslib.Logics.Modal.Tableau.FrameSoundness`
@@ -442,6 +450,100 @@ prove held in every one of 1374 observed instances.
   an explicit new phase** rather than proceeding on a guess.
 - **Timing:** 3-4 hours
 - **Depends on:** 1
+
+#### Phase 2 Verdict
+
+**BLOCKED. The ancestor-only route does not close.** The decision-gate lemma
+`branchSatisfiableIn_s4FC_ancestor_redirect` (`Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1220`)
+is stated over abstract, driver-independent hypotheses (a recorded ancestor edge `a → src`, and
+`hboxback`/`hdianeg`: `a` already contains, unwrapped, every box-positive/diamond-negative fact
+recorded at `src` — the exact semantic content `S4LoopInv.keyLowerBd` composed with the guard's
+key-equality check would hand a caller). It is **not sorry-free**; one `sorry` remains at
+`FrameSoundness.lean:1244`, and `lake build Cslib.Logics.Modal.Tableau.FrameSoundness` is
+otherwise clean (this is the only new sorry; the file had zero before this dispatch).
+
+**Exact goal state at the blocker** (`lean_goal` at `FrameSoundness.lean:1244`, case `hdirect :
+¬m.r (f src) (f a)`, i.e. the ambient witness model does *not* already relate the two points):
+
+```
+case neg
+Atom : Type v
+b : List (SignedFormula (Proposition Atom) WorldIndex)
+acc : Accessibility
+src a : WorldIndex
+hanc : acc.hasEdge a src = true
+hboxback :
+  ∀ (ψ : Proposition Atom),
+    { sign := Sign.pos, formula := □ψ, label := src } ∈ b → { sign := Sign.pos, formula := ψ, label := a } ∈ b
+hdianeg :
+  ∀ (ψ : Proposition Atom),
+    { sign := Sign.neg, formula := ◇ψ, label := src } ∈ b → { sign := Sign.neg, formula := ψ, label := a } ∈ b
+W : Type
+m : Model W Atom
+f : WorldIndex → W
+hrefl : Std.Refl m.r
+htrans : IsTrans W m.r
+hedges : ∀ (w w' : WorldIndex), acc.hasEdge w w' = true → m.r (f w) (f w')
+hb :
+  ∀ sf ∈ b,
+    (sf.sign = Sign.pos → Satisfies m (f sf.label) sf.formula) ∧
+      (sf.sign = Sign.neg → ¬Satisfies m (f sf.label) sf.formula)
+hdirect : ¬m.r (f src) (f a)
+⊢ branchSatisfiableIn (fun {World} => s4FC) b (acc.addEdge src a)
+```
+
+**Why this is not dischargeable, and why it is a deeper obstruction than the predicted
+"unwrapped box-context" failure mode.** The predicted failure (boxed vs. unboxed `keyLowerBd`
+content) never actually arises, because the proof gets stuck one step earlier:
+
+1. `branchSatisfiableIn`'s witness `(W, m, f)` is **existentially arbitrary** — nothing in its
+   definition constrains `m.r` to equal the transitive closure of `acc`. The `hdirect` case
+   (the ambient model does not already relate `f src`/`f a`) is therefore not vacuous and must
+   be handled by genuinely extending `m.r`.
+2. `s4FC`'s `IsTrans` conjunct binds the **concrete relation** `m.r`, not some derived
+   provability notion, so any extension of `m.r` that adds the pair `(f src, f a)` must be
+   closed under transitivity to remain a valid witness. That closure is forced to include, for
+   *every* `x` with `m.r x (f src)` (not just `x = f src` itself) and every `y` with
+   `m.r (f a) y`, the new pair `(x, y)`.
+3. Because `m.r` is unconstrained beyond the (one-directional) `hedges` lower bound, the set of
+   such `x` is not limited to `src`'s recorded spine ancestors — the ambient model may relate
+   `f src` to images of *other* worlds via relatedness `acc` never records. Discharging `hb` for
+   the closure's new pairs would require box/diamond content transfer from *every* such `x` to
+   `a`, and `hboxback`/`hdianeg` (the only hypotheses a standalone, no-driver lemma can carry)
+   speak only about `src` itself. No enrichment of those two hypotheses closes this gap without
+   either (a) a full Hintikka/canonical-model truth lemma built from the branch's own
+   saturation invariants (driver-dependent, and exactly the scope this lemma was required to
+   exclude), or (b) an assumption that the witness model is canonical/minimal, which
+   `branchSatisfiableIn`'s existential definition does not provide.
+4. **This is not a new phenomenon.** It is the same obstruction already documented in this file's
+   own module comment introducing `branchPropAdequateIn` (`FrameSoundness.lean`, ~30 lines below
+   the new lemma): a redirect edge to an **existing, reused** world "breaks
+   `branchSatisfiableIn`'s edge conjunct... outright", which is precisely why `branchPropAdequateIn`
+   (a strictly weaker invariant) was invented for Route P. Ancestor-only blocking redirects to an
+   existing world in exactly the same shape Route P did; restricting the *target* to a spine
+   ancestor changes nothing about *this* obstruction, which is about the existential looseness of
+   the witness model, not about which world is targeted.
+
+**Mapping table resolution** (the two `NOT-YET-VERIFIED — Phase 2 gate` rows, originally at
+lines 178-179):
+
+| Claim | Verdict |
+|---|---|
+| An ancestor back-edge `src -> wBlock` is model-justifiable, i.e. `branchSatisfiableIn s4FC` survives adding it | **REFUTED (as a standalone, driver-independent lemma).** `branchSatisfiableIn_s4FC_ancestor_redirect` reaches an unresolvable proof obligation (see goal state above); the "upward relation" gap the plan's overview flagged (§"The Single Load-Bearing Risk") is real and is not closed by the abstract hypotheses available. Measurement D(iv)'s 1374/1374 empirical pass (Phase 1) was correctly flagged there as non-binding at size <=6, and does not survive contact with the general proof obligation. |
+| The ancestor route closes without the boxed-birth-content refinement | **MOOT.** The boxed-birth-content refinement (Phase 2b) was never reached: the proof does not get far enough for the boxed-vs-unboxed distinction to matter. Adopting boxed birth content would strengthen `hboxback`/`hdianeg` to already-boxed conclusions, but does nothing about the actual blocker (arbitrary ambient predecessors of `src` outside the recorded spine), so Phase 2b would not unblock this route either. |
+
+**Consequence for the plan.** Per this phase's own "Done when" clause, `[BLOCKED]` here means
+**the route does not close and must be escalated to the user before Phase 3.** Phases 3-14 (the
+spine data component, guard, depth/branching bounds, driver, invariant, and cleanup) are **not
+sequenced** — none of that work is scaffolded around this unresolved gate, consistent with the
+instruction not to soften a `[BLOCKED]` verdict into a partial success. The `Gore1999` escalation
+branch (missing paywalled reference) does **not** apply: the blocker is not that Massacci's
+treatment is insufficient as a literature basis (Massacci's Prop 8.1 / Technique 8.2 / Pruning
+Lemma 8.2 were read and are exactly what this plan's overview already correctly characterized as
+supplying only the *free* ancestor->descendant direction); it is a structural fact about how
+`branchSatisfiableIn` is encoded here (existentially arbitrary witness models), independent of
+which paper is consulted. Escalating to the user is the appropriate next step, not a literature
+acquisition phase.
 
 ### Phase 3: Spine data component, ancestor computation, and its tying invariant [NOT STARTED]
 

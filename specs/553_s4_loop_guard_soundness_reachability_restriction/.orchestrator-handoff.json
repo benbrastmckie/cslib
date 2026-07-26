@@ -1,38 +1,60 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "skeleton": false,
+  "status": "blocked",
+  "skeleton": true,
   "phases_completed": 11,
   "phases_total": 17,
-  "sorry_inventory": [],
-  "summary": "Phase 11 (Origin-Edge Invariant -- Step Preservation) COMPLETE against the v2 plan. Landed in Cslib/Logics/Modal/Tableau/LoopChecking.lean: (1) modalStepBranchS4Keyed_preserves_keysOriginS4 -- the unordered single-step preservation lemma for keysOriginS4 (Phase 10's origin-edge invariant), covering all 14 sf.sign/sf.formula combinations: the 12 non-minting shapes uniformly via modalApplyOneS4Keyed_nonMint_snd_eq_acc (newAcc=acc) composed with keysOriginS4_mono_branch/_mono_acc, and the box-negative/diamond-positive minting shapes' blocked (edge added, no new key, same monotonicity argument) and unblocked (a genuinely new key established by direct construction from successorBirthContent's insert-head witness pair) sub-cases, each proved individually. (2) modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 -- verbatim ordered-driver transcription via modalStepBranchS4KeyedOrdered_selected_mem/_branch_superset. (3) modalStepBranchS4Keyed_result_acc_eq -- one small new reusable private helper mirroring the existing modalStepBranchS4Keyed_result_keys_eq, extracting the accessibility component result-shape-agnostically. (4) modalStepBranchS4KeyedOrdered_preserves_S4LoopInv extended with a fourth hypothesis (keysOriginS4 b acc keys) and fourth conclusion conjunct (keysOriginS4 b' newAcc keys' over every produced branch), threaded exactly like keysWorldsKnown/worldsContiguousS4. The S4LoopInv struct and the unordered wrapper modalStepBranchS4_preserves_S4LoopInv are byte-for-byte unchanged. No external call sites of the ordered wrapper existed yet to update. Full breadth covered in a single dispatch (no contingency split needed). No empirical termination-vs-completeness signal surfaced this phase -- purely structural proof, no fuel/measure argument touched; the standing central prediction stays live and unconfirmed.",
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "line": 2080,
+      "declaration": "blockedRedirect_boxctx_mem",
+      "reason": "Witness-collision sub-case: (s', phi') = (Sign.pos, psi) means the origin mint of wBlock was itself diamond-positive on this same psi (T(diamond psi)@u permanent), which does not give T(box psi)@u -- no landed invariant connects the two. Documented with a concrete reachable configuration in the inline comment and in the plan's Phase 12 completion notes."
+    },
+    {
+      "file": "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+      "line": 2125,
+      "declaration": "blockedRedirect_diaNeg_mem",
+      "reason": "Mirror-image witness collision for the dual (box-negative origin mint, diamond-negative query). Same root cause as the box-context sorry above."
+    }
+  ],
+  "summary": "Phase 12 (Redirect-Inertness) attempted against the v2 plan and BLOCKED, per the phase's own escalation criterion. Landed and fully proved, sorry-free: keysRootEmpty/keysRootEmpty_entry (new small auxiliary in LoopChecking.lean, threaded like keysOriginS4, ruling out keysOriginS4's root disjunct once wBlock's recorded key is shown non-empty); the case-(b) route and root-world case in both blockedRedirect_boxctx_mem and blockedRedirect_diaNeg_mem; blockedRedirect_propAdequate (FrameSoundness.lean, new public import of LoopChecking.lean added -- confirmed acyclic -- the full mechanical composition into branchPropAdequateIn's edge-conjunct shape, itself sorry-free). BLOCKED: Phase 10's R1 verdict ('case (a), the witness collision, does not bite') does not survive direct proof attempt -- confirmed via lean_goal at the actual sorry site, not just manual analysis. A concrete, reachable configuration is documented (an unrelated redirect source v happening to share both its own diamond-positive mint trigger AND an independently-true box-positive formula with wBlock's origin mint's witness formula) under which nothing in the landed invariants (S4KeyedHintikkaInv, keysOriginS4, S4LoopInv) forces T(box psi)@wBlock. Per the plan's own instruction, the conclusion was NOT weakened to the unwrapped form; the gap is discharged via two documented sorry placeholders instead. This is a Route-P-level finding requiring R2 (strengthen keysOriginS4) or R3 (a scheduling side condition, reopening the termination-vs-completeness question) before Phase 12 can close, or reconsideration of Route P itself.",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md"
     }
   ],
-  "blockers": [],
-  "next_action_hint": "implement",
+  "blockers": [
+    {
+      "phase": 12,
+      "declaration": "blockedRedirect_boxctx_mem / blockedRedirect_diaNeg_mem",
+      "goal_verbatim": "case inr.inl ... hwitness : (s', phi') = (Sign.pos, psi) ... hkey : (wBlock, successorBirthContent phi0 b s phi v) in keys ... hedge : acc.hasEdge u wBlock = true ... heBoxOnlyNeg, hmint (modalNonMintCandidates = []) ... goal: { sign := Sign.pos, formula := box psi, label := wBlock } in b",
+      "root_cause": "keysOriginS4's witness disjunct ((s', phi') = (Sign.pos, psi)) records only that the origin mint's trigger was T(diamond psi)@u, which is independent of T(box psi)@u. No landed invariant ties a world's diamond-positive mint trigger to its own box-positive status for the same formula.",
+      "what_was_tried": "Direct case-split assembly using keysOriginS4 + a direct filter-membership derivation of (pos,psi) in key(wBlock) from v's own box-context; confirmed via lean_goal that no available hypothesis closes the goal; considered a semantic (rather than syntactic) bridge via branchPropAdequateIn's model but the plan's own framing (and Phase 9's hb-based consumption pattern) requires the syntactic T(box psi)@wBlock membership.",
+      "what_is_needed": "Either R2 (a strengthened keysOriginS4 that also pins down box-status at the witness formula) or R3 (a scheduling-side condition excluding this redirect configuration, which would require re-running Phase 8's empirical termination gate), or a decision to re-examine Route P itself per the phase's own third-strike criterion."
+    }
+  ],
+  "requires_user_review": true,
+  "next_action_hint": "spawn-or-revise",
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
   "decisions_made": [
-    "keysOriginS4's extended wrapper hypothesis/conjunct carries no phi_0 parameter, matching Phase 10's already-landed phi_0-free signature for keysOriginS4 itself (unusedArguments-linter-forced). The plan's literal task text proposed `keysOriginS4 phi_0 b' newAcc keys'`; the landed shape is `keysOriginS4 b' newAcc keys'`. Shape adjustment only, not a weakening.",
-    "The 12 non-minting shapes were closed via modalApplyOneS4Keyed_nonMint_snd_eq_acc (needs accTargetsKnown b acc, threaded as a new haK hypothesis on both preservation lemmas) rather than the later-defined modalApplyOneS4Keyed_hasEdge_mono, to avoid a forward-reference ordering problem: the wrapper theorem this phase extends (line ~7529) sits BEFORE modalApplyOneS4Keyed_hasEdge_mono (line ~8157) in the file. Using the nonMint_snd_eq_acc route (defined earlier, ~line 4026) let the new preservation lemmas land at the natural insertion point (immediately after keysWorldsKnown's ordered preservation lemma) without relocating any existing declaration.",
-    "Added one new small private helper, modalStepBranchS4Keyed_result_acc_eq (dual of the existing modalStepBranchS4Keyed_result_keys_eq), to extract the accessibility component result-shape-agnostically for the non-mint branch, avoiding a 3-way case split on RuleResult purely for that fact."
+    "Added keysRootEmpty (new auxiliary invariant, def + entry lemma only, no step-preservation proved yet) to close the keysOriginS4 root-disjunct case -- threaded the same way as keysOriginS4 itself (extra hypothesis, not an S4LoopInv field). Its single-step preservation is not yet proved and will be needed by whichever phase does the full inductive threading (Phase 13).",
+    "blockedRedirect_propAdequate placed in FrameSoundness.lean per the plan's own suggestion; added a new public import of LoopChecking.lean there (previously no import relationship existed in either direction between the two files) -- confirmed acyclic by a full green lake build.",
+    "Did NOT weaken blockedRedirect_boxctx_mem/_diaNeg_mem's conclusions to the unwrapped form despite the residual gap -- per the plan's explicit prohibition on this. Used documented sorry instead."
   ],
   "flagged_theorem_changes": [
-    "No landed declaration (Phases 1-10) modified. modalStepBranchS4KeyedOrdered_preserves_S4LoopInv gained a new hypothesis and a new conclusion conjunct (additive signature change, no existing conjunct altered); its own body was re-derived accordingly. modalStepBranchS4_preserves_S4LoopInv (unordered) and the S4LoopInv struct itself are untouched, confirmed via grep and direct reading."
+    "No landed declaration (Phases 1-11) modified. All changes are additive: two new small LoopChecking.lean declarations (keysRootEmpty/_entry), two new LoopChecking.lean lemmas each carrying one documented sorry (blockedRedirect_boxctx_mem, blockedRedirect_diaNeg_mem), one new sorry-free FrameSoundness.lean lemma (blockedRedirect_propAdequate) plus a new import line."
   ],
   "dead_ends": [
-    "Do not call modalApplyOneS4Keyed_hasEdge_mono (line ~8157) from a lemma placed before it in the file -- Lean has no forward references. Use modalApplyOneS4Keyed_nonMint_snd_eq_acc (line ~4026) instead for the non-mint newAcc=acc fact, which is available earlier.",
-    "Do not do `rw [hpair] at hsf; dsimp only at hsf` once, globally, right after `rcases hpair`, before the by_cases on mint shape -- this consumes the substitution opportunity the mint branches need AFTER rewriting sf to its concrete literal form via hsfeq. Each branch (both mint sub-branches and the non-mint branch) must do its own local `rw [hpair] at hsf; dsimp only at hsf` at the point where sf is already in its final (possibly still-abstract, for non-mint) form.",
-    "Do not `subst hb'` naively when `hb' : b' = b` (both sides plain local variables, as in the blocked-mint sub-case where the branch is unchanged) -- Lean's subst may eliminate the OUTER variable `b` instead of `b'`, breaking every later reference to `b`. Fix: `symm at hb'` first, forcing subst to eliminate `b'` and keep `b`."
+    "Phase 10's R1 verdict ('case (a) does not bite') cannot be used as-is; the docstring's own reasoning ('the consumer only ever queries the witness case through the same unwrapped-membership fact') does not correspond to any actual discharge path once the full generality of blockedRedirect_boxctx_mem's conclusion (quantified over all psi, not just the mint's own trigger) is taken literally, as the plan's task list requires.",
+    "Do not attempt to derive T(box psi)@u from T(diamond psi)@u (the origin mint's trigger persisting on the branch) -- these are independent facts about u; no S4KeyedHintikkaInv/keysOriginS4 field connects diamond-positive and box-positive status for the same formula at the same world."
   ],
   "continuation_context": {
     "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
@@ -40,10 +62,11 @@
     "phases_total": 17,
     "next_phase": 12,
     "next_phase_name": "Redirect-Inertness",
-    "requires_user_review": false,
+    "requires_user_review": true,
     "read_first": [
-      "plans/02_origin-edge-invariant-revision.md Phase 11's own completion notes (deviation, dead ends, verification)",
-      "Phase 12's own section for the box-context/mint-readiness argument this phase's keysOriginS4 preservation now fully supports"
+      "plans/02_origin-edge-invariant-revision.md Phase 12's completion notes (this dispatch) -- the full R1 retraction, the concrete counterexample configuration, and the R2/R3 options",
+      "Cslib/Logics/Modal/Tableau/LoopChecking.lean:2059-2130 -- the two documented sorry sites with inline configuration writeups",
+      "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1448-1478 -- blockedRedirect_propAdequate, the sorry-free assembly consuming the two blocked lemmas"
     ]
   },
   "plan_markers_verified": true

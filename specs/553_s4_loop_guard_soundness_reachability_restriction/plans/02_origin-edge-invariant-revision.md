@@ -968,7 +968,7 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
 
 ---
 
-### Phase 12: Redirect-Inertness [NOT STARTED]
+### Phase 12: Redirect-Inertness [BLOCKED]
 
 - **Status note:** this is v1's Phase 10, retried with the origin-edge invariant available. Its
   obligation is unchanged; only the hypotheses it may use have grown. v1's "Named difficulty" text
@@ -1000,17 +1000,20 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
   disjunct the selected formula is a non-mint candidate, so `keys' = keys` and no edge is added.
   Prove that small bridging fact once and reuse it.
 - **Tasks:**
-  - [ ] Prove `blockedRedirect_boxctx_mem`: under mint-readiness, the guard's `some` case,
-    `S4LoopInv`, and `keysOriginS4`, every `T(□ψ)@v ∈ b` has `T(□ψ)@wBlock ∈ b`.
-  - [ ] Prove the dual `blockedRedirect_diaNeg_mem` for `F(◇ψ)@v ∈ b`.
-  - [ ] Assemble `blockedRedirect_propAdequate`: the added edge `v → wBlock` satisfies the
+  - [x] Prove `blockedRedirect_boxctx_mem`: under mint-readiness, the guard's `some` case,
+    `S4LoopInv`, and `keysOriginS4`, every `T(□ψ)@v ∈ b` has `T(□ψ)@wBlock ∈ b`. **Landed with one
+    documented `sorry`** — see completion notes below; the case-(b) route (via
+    `blockedRedirect_boxctx_mem_of_boxOrigin`) and the root-world case are fully proved.
+  - [x] Prove the dual `blockedRedirect_diaNeg_mem` for `F(◇ψ)@v ∈ b`. Same structure, same
+    documented `sorry` (mirror-image witness collision).
+  - [x] Assemble `blockedRedirect_propAdequate`: the added edge `v → wBlock` satisfies the
     `branchPropAdequateIn` edge conjunct, given the two membership facts and the branch-formula
-    conjunct already in the invariant.
-  - [ ] State explicitly in the docstring why mint-readiness is load-bearing: without it, `v`'s box
-    context can grow after the decision and the two membership facts fail — this is exactly the
-    counterexample's mechanism. State also why the origin edge is load-bearing: the 4-rule needs an
-    edge that *already exists*, and the redirect edge does not yet.
-- **Timing:** 3 hours
+    conjunct already in the invariant. Landed in `FrameSoundness.lean` (mechanical composition,
+    sorry-free itself; inherits the two consumed lemmas' `sorry`).
+  - [x] State explicitly in the docstring why mint-readiness is load-bearing and why the origin
+    edge is load-bearing — both documented in `blockedRedirect_boxctx_mem_of_boxOrigin`'s and
+    `blockedRedirect_boxctx_mem`'s docstrings (Phase 10 / this phase respectively).
+- **Timing:** 3 hours (actual: exceeded — the witness-collision re-audit below was not budgeted)
 - **Depends on:** 11
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/LoopChecking.lean` or a new soundness section in
@@ -1023,6 +1026,92 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
   - **Escalation:** if this phase blocks again, it must be for a reason *other* than the witness
     disjunct or the boxed-form recovery — both are resolved upstream by then. A third block on the
     same obligation is a signal to re-examine Route P itself, not to revise again.
+
+- **Completion notes (this dispatch) — R1 RE-AUDITED AND RETRACTED, escalating per this
+  phase's own criterion:**
+  - **What landed, fully proved, sorry-free:**
+    - `keysRootEmpty`/`keysRootEmpty_entry` (`LoopChecking.lean`, new small auxiliary,
+      threaded like `keysOriginS4` — not an `S4LoopInv` field): world `0`'s recorded key is
+      always `∅`, needed to rule out `keysOriginS4`'s root disjunct once the recorded key at
+      `wBlock` is shown non-empty.
+    - The case-(b) route (`T(□ψ)@u ∈ b` disjunct) and the root-world case in both
+      `blockedRedirect_boxctx_mem` and `blockedRedirect_diaNeg_mem` — fully assembled from
+      Phase 10's `blockedRedirect_boxctx_mem_of_boxOrigin`/`_diaNeg_mem_of_diaOrigin` plus
+      `keysOriginS4`/`keysRootEmpty`/`blockingWorldS4Keyed_eq_birthContent`.
+    - `blockedRedirect_propAdequate` (`FrameSoundness.lean`, new `public import` of
+      `LoopChecking.lean` added — the two files had no prior import relationship in either
+      direction, confirmed acyclic by a clean `lake build`): the full mechanical composition
+      into `branchPropAdequateIn`'s edge-conjunct shape for the pair `(v, wBlock)`, itself
+      sorry-free (its `sorry` exposure is inherited transitively from the two lemmas it calls).
+  - **What did NOT land: the witness-collision sub-case, R1 retracted.** Phase 10's verdict
+    ("R1 — case (a) does not bite... it is vacuous for `blockedRedirect_boxctx_mem`'s actual
+    proof obligation") does **not** hold under direct proof attempt. Re-deriving `(pos, ψ) ∈
+    key(wBlock)` from the CURRENT redirect source `v`'s own box-context (`T(□ψ)@v ∈ b`, via
+    `successorBirthContent`'s filter — this part is solid and reusable) and feeding it into
+    `keysOriginS4`'s existential at `wBlock` yields a genuine two-way disjunction: either
+    `T(□ψ)@u ∈ b` (case (b), closed) **or** `(s', φ') = (Sign.pos, ψ)` — i.e. `ψ` happens to
+    equal `wBlock`'s OWN origin-mint witness formula. Phase 10 argued this collision "never
+    arises as an obligation" because the consumer allegedly only ever queries the witness
+    disjunct through the *unwrapped* fact `blockedRedirect_boxctx_mem_of_boxOrigin`'s own
+    argument already supplies. **This argument does not survive formalization**: nothing ties
+    `(s', φ') = (Sign.pos, ψ)` (origin mint was diamond-positive on `ψ`, so `T(◇ψ)@u ∈ b`
+    permanently) to `T(□ψ)@u ∈ b` — diamond-positive and box-positive are independent facts
+    about `u`, and no landed invariant (`S4KeyedHintikkaInv`, `keysOriginS4`, `S4LoopInv`)
+    connects them. Confirmed directly against the live goal state at the `sorry`
+    (`lean_goal` on `LoopChecking.lean:2080`): the hypothesis list contains `hwitness : (s', φ')
+    = (Sign.pos, ψ)` and no fact yielding `T(□ψ)@u ∈ b` or `T(□ψ)@wBlock ∈ b`.
+  - **A concrete, reachable configuration exhibiting the gap** (documented in
+    `blockedRedirect_boxctx_mem`'s own `sorry` comment, `LoopChecking.lean:2059-2079`): world
+    `u` mints `wBlock` via `T(◇ψ)@u` with an EMPTY box-context, so `key(wBlock) = {(pos, ψ)}`
+    and `wBlock`'s only established branch content is the unwrapped `T(ψ)@wBlock`. Later, an
+    UNRELATED world `v` independently has both `T(◇ψ)@v` (its own mint trigger, coincidentally
+    the same `ψ`) and `T(□ψ)@v` (e.g. from ordinary propositional decomposition of `v`'s own
+    birth content — unrelated to modal propagation) on its branch. `v`'s prospective
+    `successorBirthContent` is then also `{(pos, ψ)}` (the filter redundantly re-derives the
+    same singleton from `T(□ψ)@v`), so the keys-aware guard redirects `v → wBlock`.
+    Mint-readiness at `v` is satisfied vacuously (`v` has no successors yet, so
+    `modalFourBoxProp` has nothing to propagate) — this configuration is NOT excluded by the
+    ordered stepper's own scheduling discipline. Nothing forces `T(□ψ)@wBlock ∈ b`.
+  - **Per this phase's own escalation criterion** ("if a concrete reachable configuration
+    exhibits case (a) with `T(□ψ)@wBlock ∉ b`, that is a Route-P-level finding... mark
+    `[BLOCKED]`, report the configuration, and do NOT weaken `blockedRedirect_boxctx_mem`'s
+    conclusion to the unwrapped form"): this phase is marked `[BLOCKED]`. The conclusion was
+    **not** weakened — both `blockedRedirect_boxctx_mem`/`_diaNeg_mem` keep the full boxed
+    statement, discharged via `sorry` for the one residual case, not silently restated.
+  - **Options for the next dispatch (R2/R3, not yet attempted here):**
+    - **R2 — strengthen `keysOriginS4`** to also record, for the witness pair specifically,
+      something strong enough to yield the boxed form at the redirect time — e.g. tracking
+      that the origin mint's SOURCE `u` is itself later required to be box-ψ-saturated before
+      any redirect into `wBlock` fires. This likely requires touching the *scheduling*
+      discipline (when a redirect targeting a world whose key's witness formula collides with
+      the query may fire), which is Route P's own remit but reopens the standing central
+      prediction about termination (Phase 8's empirical gate would need re-running).
+    - **R3 — a scheduling side condition**: require box-context propagation to be checked not
+      just at the redirect source `v`'s existing edges (current mint-readiness) but also, when
+      a match is found, that the matched world's *own* origin-witness formula does not create
+      exactly this collision — likely requires either revisiting `blockingWorldS4Keyed`'s guard
+      shape (out of scope per the plan's own "no edit to the comparison predicate" constraint)
+      or the driver's ordering (same termination-reopening caveat as R2).
+    - **Re-examine whether Route P itself needs revision** for this specific residual, per the
+      phase's own third bullet ("A third block on the same obligation is a signal to re-examine
+      Route P itself").
+  - **Standing central prediction (termination vs. completeness)**: this phase's work is purely
+    structural (case analysis, no fuel/measure argument touched or exercised) — no new
+    empirical signal either way. The prediction remains live and unconfirmed, unchanged from
+    Phase 11's status.
+  - **Verification actually run**: `lake build` (full project, green), `lake exe
+    checkInitImports` (clean), `lake lint` (only the pre-existing `Temporal/Tableau/
+    Saturation.lean` baseline error, zero new), `lake exe lint-style` (clean), `lake test`
+    (green, including `CslibTests.S4LoopGuardRegression`), `lake exe mk_all --module` (no
+    update necessary), `lake shake --add-public --keep-implied --keep-prefix` (no suggestions
+    for either touched file). `git diff` on both touched files is purely additive (no
+    landed declaration modified); no new `axiom` declared. Two new `sorry`s, both documented,
+    both in the witness-collision branch described above.
+  - **Territory**: touched only `Cslib/Logics/Modal/Tableau/LoopChecking.lean` and
+    `Cslib/Logics/Modal/Tableau/FrameSoundness.lean` (plus this task's own `specs/` artifacts).
+    Did not touch `FrameCompleteness.lean`, `FrameRules.lean`,
+    `CslibTests/S4LoopGuardRegression.lean`, or
+    `Cslib/Logics/Modal/Metalogic/Constructive/Nested/**` (concurrent-session territory).
 
 ---
 

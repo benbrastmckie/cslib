@@ -10,6 +10,7 @@ public import Cslib.Logics.Modal.Tableau.Soundness
 public import Cslib.Logics.Modal.Tableau.FrameRules
 public import Cslib.Logics.Modal.Tableau.S5Simplification
 public import Cslib.Logics.Modal.Tableau.FiveSimplification
+public import Cslib.Logics.Modal.Tableau.LoopChecking
 import Cslib.Foundations.Relation.Euclidean
 import Mathlib.Data.List.Forall2
 
@@ -1443,6 +1444,44 @@ lemma modalClosed_unsat_propAdequateIn [DecidableEq Atom]
       · cases hsf : sf.sign with
         | pos => exact absurd hsf hpos
         | neg => simp [hsf, Sign.isPos] at hsfcond
+
+/-- **`blockedRedirect_propAdequate`** (Phase 12 assembly): the redirect edge `v → wBlock`
+licensed by the keys-aware guard's `some` output satisfies `branchPropAdequateIn`'s edge
+conjunct for this specific pair, given an ambient `branchPropAdequateIn s4FC b acc` witness.
+Composes `blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem`
+(`LoopChecking.lean`, Phase 12) with the ambient model's branch-formula conjunct `hb`, exactly
+as `branchSatisfiableIn_imp_branchPropAdequateIn` composes the analogous mint-edge case.
+**Inherits `blockedRedirect_boxctx_mem`/`_diaNeg_mem`'s documented witness-collision `sorry`** --
+this assembly itself is a complete, mechanical composition; the residual gap is entirely in the
+two consumed lemmas (see their docstrings/phase notes for the full analysis and the R1 re-audit
+this phase surfaced). -/
+lemma blockedRedirect_propAdequate [DecidableEq Atom] [Hashable Atom] (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (v wBlock : WorldIndex)
+    (hbClosure : ∀ x ∈ b, x ∈ modalUniverseS4 φ₀)
+    (hKO : keysOriginS4 b acc keys)
+    (hK0 : keysRootEmpty keys)
+    (heBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ', sf.formula = .box ψ' → sf.sign = .neg)
+    (heDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ', sf.formula = .diamond ψ' → sf.sign = .pos)
+    (hmint : modalNonMintCandidates φ₀ keys b e acc = [])
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ v = some wBlock)
+    (h : branchPropAdequateIn s4FC b acc) :
+    ∃ (W : Type) (m : Model W Atom) (f : WorldIndex → W), s4FC m.r ∧
+      (∀ ψ, (⟨.pos, .box ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        Satisfies m (f wBlock) (.box ψ)) ∧
+      (∀ ψ, (⟨.neg, .diamond ψ, v⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+        ¬ Satisfies m (f wBlock) (.diamond ψ)) := by
+  obtain ⟨W, m, f, hFC, _, hb⟩ := h
+  refine ⟨W, m, f, hFC, ?_, ?_⟩
+  · intro ψ hbox
+    have hmem := blockedRedirect_boxctx_mem φ₀ b e acc keys s φ v wBlock hbClosure hKO hK0
+      heBoxOnlyNeg hmint hblock ψ hbox
+    exact (hb _ hmem).1 rfl
+  · intro ψ hdia
+    have hmem := blockedRedirect_diaNeg_mem φ₀ b e acc keys s φ v wBlock hbClosure hKO hK0
+      heDiamondOnlyPos hmint hblock ψ hdia
+    exact (hb _ hmem).2 rfl
 
 /-! ## B (Symmetric Frame) -/
 

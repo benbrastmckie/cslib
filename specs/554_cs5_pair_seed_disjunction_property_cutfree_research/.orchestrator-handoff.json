@@ -3,47 +3,48 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": false,
-  "phases_completed": 10,
+  "phases_completed": 11,
   "phases_total": 32,
   "sorry_inventory": [],
-  "summary": "Phase 10 (Stage C's second phase, closing Stage C) landed: five additional NestedProof constructors on the same Rules.lean inductive from Phase 9 -- tR/tL (t deg/t-input, Figure 3), fourR/fourL (4 deg/4-input, Figure 3), bStruct (b structural rule, Figure 4) -- realising CS5's safe pair X={t,4}, Y={b}, verified against Theorem 5.2's exact statement (page 14) rather than just the plan's paraphrase. NestedProof.height extended with the five new cases. NestedProof.mono (index-equality transport) + NestedProof.mono_height (height-non-increasing) landed as the documented precursor to Phase 19's full weakening admissibility. Stage C now COMPLETE (2/2).",
+  "summary": "Phase 11 (Soundness auxiliary lemmas, opening Stage D) landed a new Nested/Soundness.lean module with a local Hilbert-combinator toolkit plus Lemma 4.2 (id/bot-perp axioms through an output context, by induction on OutputCtx.fillFull), Lemma 4.3(i)-(v) (propositional/modal congruence, thin restatements), Lemma 4.4 (general OutputCtx.fillFull congruence, new induction with an and-uncurry combinator for the singleton case), Lemma 4.5 (restated InputCtx.fillLhs_fm_antitone from Phase 8), Lemma 4.6 for the seven one-premise rules whose sides share a single filling shape (w, c, orRLeft/orRRight, boxR, andL, diaL), Lemma 4.7(i)-(iv) (branching congruence, documenting that the source displays 4.7(i)/(ii) with the same conclusion formula), Lemma 4.8 (OutputCtx.fillFull branching lift via 4.7(i)/(iii)), and Lemma 4.9's OutputCtx.fillRhs branching lift plus its concrete andR (conjunction-output) corollary. Three rules (diaR, impR, boxL's case-split) and three more (orL, impL, cut) are explicitly documented as deferred to Phase 12/13/14 rather than silently narrowed: they need a genuinely separate fillRhs-vs-fillFull empty-layer bridging induction, a branching contravariant InputCtx lift, or the source's own induction-on-n Lambda-chain argument (and cut is not yet a landed constructor).",
   "artifacts": [
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md"},
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-11-handoff-20260726.md"},
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"}
   ],
   "blockers": [],
   "next_action_hint": "implement",
   "files_modified": [
     "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md",
-    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-10-progress.json",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-11-progress.json",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean",
+    "Cslib.lean"
   ],
   "decisions_made": [
-    "CS5's safe pair is X={t,4}, Y={b}, confirmed against Theorem 5.2's exact side conditions (page 14): X subset {d,t,4}, Y subset {d,b,5} are disjoint domains; 't in X and 5 in Y implies b in Y' is vacuous (5 not in Y); 'b in Y implies 4 in X' holds. Only tR/tL/fourR/fourL/bStruct are landed -- d^[], t^[], 4^[], 5^[] (Figure 4) and the naive eq.(3.2)/(3.3) b-rules are out of scope for this instance.",
-    "4-degree/4-input (fourR/fourL) are genuinely distinct rules from NCK's own diamond-output/box-input (diaR/boxL, Phase 9), not duplicates: Figure 2's rules build the modal formula fresh from a bare leaf, Figure 3's 4-rules reposition an already-formed modal formula out of a shared box -- confirmed by re-rendering page 6 and comparing premises directly.",
-    "bStruct's sigma/Delta are generic NestedLhs, not Proposition: Figure 4 is genuinely structural (no polarity marker in the source), unlike Figure 2/3's formula-building rules. Spelled lowercase sigma, not capital Sigma: Mathlib binds capital Sigma as sigma-type binder notation, unusable as a plain identifier -- same clash class as Pi/pi documented in Context.lean (Phase 7).",
-    "NestedProof.mono is landed as the index-equality transport precursor (Eq-cast, height-preserving hence non-increasing), not yet Figure (3.1)'s full content-weakening admissible rule -- the plan's own Phase 19 explicitly says its first task is to 'extend Phase 10's .mono to the height-preserving statement', confirming this is the intended narrower scope for this phase's 2.5-hour budget, not a premature attempt at the 18-constructor admissibility induction. Documented as an inline plan-file annotation, not a silent substitution."
+    "Lemma 4.7(i) and (ii) are landed as ONE Lean fact (lemma4_7_i_ii): the source page 10 displays both parts with the same visible conclusion formula, verified against a direct render (not just pdftotext, which independently corrupts this exact region, consistent with this PDF's already-documented glyph unreliability). Both of Lemma 4.9's citations to 4.7(i) and 4.7(ii) are discharged by the one lemma.",
+    "fillRhs vs fillFull is a genuine fault line, not laziness: rules whose premise and conclusion straddle the two filling operations (diaR, impR, boxL's case-split, orL, impL, cut) need a dedicated bridging argument not built this phase -- documented per-rule in the plan file's Phase 11 Deviation note and the handoff, rather than silently narrowing Lemma 4.6/4.9's coverage.",
+    "lemma4_9_fillRhs mirrors OutputCtx.fillRhs_fm_mono's two-case shape (only ctx=[] is special, against a fixed top antecedent), not Lemma 4.8's three-case fillFull shape -- fillRhs's uniform recursion avoids the singleton-case and-uncurry step fillFull's Lemma 4.4/4.8 needed.",
+    "Whole-project lake build currently fails only in Cslib/Logics/Modal/Tableau/{CompletenessLoop,FiveSimplification}.lean, confirmed (via git status) to be caused by a concurrent session's uncommitted, actively-being-modified LoopChecking.lean -- not a regression from this phase and outside this phase's territory to fix."
   ],
   "dead_ends": [],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md",
-    "phases_completed": 10,
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-11-handoff-20260726.md",
+    "phases_completed": 11,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage D, Phase 11 (Soundness auxiliary lemmas, Theorem 4.1's Lemma 4.2-4.9 family). Depends on Phases 8 and 10 (both done). New file per the plan (check Phase 11's exact filename before starting).",
+    "resume_at": "Stage D, Phase 12 (Theorem 4.1, propositional and k cases). Depends on Phase 11 (this phase, done). Same file, Nested/Soundness.lean. Build nested_sound's case analysis, deciding per-case which landed Lemma applies directly and which of the six deferred rules (diaR, impR, boxL, orL, impL, cut -- cut is Phase 14's) need a fresh targeted derivation.",
     "stage_map": {
       "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
       "B": "Phases 6-8 - nested sequent syntax - COMPLETE (all 3 phases)",
       "C": "Phases 9-10 - the rule systems - COMPLETE (both phases)",
-      "D": "Phases 11-13 - soundness (Theorem 4.1) - NOT STARTED",
+      "D": "Phases 11-13 - soundness (Theorem 4.1) - IN PROGRESS (1/3, Phase 11 done)",
       "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
       "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
       "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops/garbles box and diamond glyphs in this PDF's font encoding (reconfirmed this session) -- direct page render is authoritative for any modal-glyph-bearing rule. Pages 6 (Figure 2), 7 (Figure 3), 8 (Figure 4), and 14 (Theorem 5.1/5.2) rendered this session.",
-    "existing_infra_pointers": "CS5ModalAxiom is defined at Cslib/Logics/Modal/Metalogic/Constructive/CS5.lean:168. NestedProof.height and NestedProof.mono (this phase) are what Phase 19's height-preserving weakening/contraction admissibility will build on. Phase 11 will need Hilbert-derivability facts about contexts, likely consuming Phase 6's fm translation and Phase 8's context-compositionality lemmas.",
-    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39; grep -rn '^axiom ' Cslib/ | wc -l reports 26 -- both unchanged this session). No weakened or vacuous restatements. Whole-project lake build/lake test/lake lint/lake exe checkInitImports/lake exe lint-style/lake exe mk_all --module/scoped lake shake green at every commit. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) or capital Sigma (Σ) as a Lean identifier in this codebase (Mathlib binder-notation conflicts) -- use lowercase π/σ instead."
+    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext -f N -l N -layout of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops/garbles box and diamond glyphs (and, newly confirmed this phase, corrupts Lemma 4.7's operators too) in this PDF's font encoding -- direct page render is authoritative. Pages 6 (Figure 2, re-confirmed), 9, and 10 (Lemmas 4.2-4.9, Theorem 4.1) rendered this session.",
+    "existing_infra_pointers": "Nested/Soundness.lean (this phase) has: lemma4_2_id, lemma4_2_bot, lemma4_3_i..v, lemma4_4, lemma4_5, lemma4_6_w/c/orRLeft/orRRight/boxR/andL/diaL, lemma4_7_i_ii/iii/iv, lemma4_8, lemma4_9_fillRhs, lemma4_9_andR, plus private toolkit (cs5DerivImpTrans, cs5DerivBoxMono, cs5DerivDiaMono, cs5DerivImpCongrRight/Left, cs5DerivAndCongrRight, cs5DerivUncurry/UncurrySwap/Curry, cs5DerivAndImpCongr/2, cs5DerivBoxAndDistrib, cs5DerivBoxDiaDistrib, buildFullChain_fm, buildRhsChain_fm_and). CS5ModalAxiom is at Constructive/CS5.lean:168.",
+    "invariants": "Cslib/ sorry count and axiom count must not increase from this commit's baseline (lean-sorry-census.sh Cslib/ reports 39; grep -rn '^axiom ' Cslib/ | wc -l reports 26 -- both unchanged this session). No weakened or vacuous restatements. Scoped lake build/lint/lint-style/mk_all green at every commit for this file; whole-project lake build currently blocked by concurrent Tableau/ WIP (not this phase's fault, do not attempt to fix). Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) or capital Sigma (Σ) as a Lean identifier in this codebase (Mathlib binder-notation conflicts) -- use lowercase π/σ, or a different letter (this phase used Θ for the paper's Σ) instead."
   },
   "plan_markers_verified": true
 }

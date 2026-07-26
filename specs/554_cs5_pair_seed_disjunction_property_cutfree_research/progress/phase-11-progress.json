@@ -1,0 +1,54 @@
+{
+  "phase": 11,
+  "phase_name": "Soundness auxiliary lemmas",
+  "started_at": "2026-07-26T00:00:00Z",
+  "last_updated": "2026-07-26T00:00:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Verify Lemmas 4.2-4.9 against the PDF (pages 9-10, direct render, not pdftotext)",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 2,
+      "description": "Land Lemma 4.2 (id/bot axioms through an output context) and Lemma 4.3(i)-(v) (propositional/modal congruence)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Land Lemma 4.4 (OutputCtx.fillFull congruence) and Lemma 4.5 (restated InputCtx.fillLhs_fm_antitone)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 4,
+      "description": "Land Lemma 4.6 for the seven single-filling-shape rules (w, c, orRLeft/orRRight, boxR, andL, diaL)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 5,
+      "description": "Land Lemma 4.7(i)/(ii)/(iii)/(iv) (branching congruence) and Lemma 4.8 (OutputCtx.fillFull branching lift)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 6,
+      "description": "Land Lemma 4.9's OutputCtx.fillRhs branching lift and the concrete andR (^) corollary",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 7,
+      "description": "lake build (scoped and whole-project, modulo concurrent Tableau/ WIP)",
+      "status": "done",
+      "files_touched": []
+    }
+  ],
+  "deferred_to_successor": [
+    "Lemma 4.6: diaR (dia^), impR (imp^), boxL (box-bullet) case-split -- mix fillRhs- and fillFull-shaped sides within one rule, need a dedicated empty-layer bridging induction",
+    "Lemma 4.9: orL (or-bullet), impL (imp-bullet), cut -- orL needs a branching contravariant InputCtx.fillLhs lift; impL/cut need the source's induction-on-n Lambda-chain argument; cut is not yet a landed NestedProof constructor (Phase 14)"
+  ]
+}

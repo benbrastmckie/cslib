@@ -687,15 +687,41 @@ later inductions need.
 
 ## Stage D — Soundness (Theorem 4.1)
 
-### Phase 11: Soundness auxiliary lemmas [NOT STARTED]
+### Phase 11: Soundness auxiliary lemmas [COMPLETED]
 
 **Goal**: The Lemma 4.2–4.9 family, as Hilbert-derivability facts about contexts.
 
 **Tasks**:
-- [ ] Verify Lemmas 4.2–4.9 against the PDF
-- [ ] Land each as a statement about `Derivable (@CS5ModalAxiom Atom)`, proved by induction on the
-      `OutputCtx` list using Phase 8's compositionality lemmas
-- [ ] `lake build`
+- [x] Verify Lemmas 4.2–4.9 against the PDF -- direct-rendered pages 9-10 (`pdftotext` corrupts
+      Lemma 4.7 at exactly the same operator positions its box/diamond-glyph unreliability was
+      already known to affect); found Lemma 4.7(i)/(ii) display the **same** conclusion formula on
+      the page, documented as an observed source duplication (module docstring), not a silent
+      invention
+- [x] Land each as a statement about `Derivable (@CS5ModalAxiom Atom)`, proved by induction on the
+      `OutputCtx` list using Phase 8's compositionality lemmas -- landed Lemma 4.2 (`id`/`⊥•`
+      axioms through an output context), 4.3(i)-(v) (propositional/modal congruence, thin restate
+      of a local Hilbert toolkit mirroring `Translation.lean`'s), 4.4 (`OutputCtx.fillFull`
+      congruence, new induction), 4.5 (restated `InputCtx.fillLhs_fm_antitone`), 4.6 for the seven
+      rules whose premise/conclusion share one filling shape (`w, c, ∨°, □°, ∧•, ◇•`), 4.7(i)-(iv)
+      (branching congruence) and 4.8 (`OutputCtx.fillFull` branching lift), and 4.9's
+      `OutputCtx.fillRhs` branching lift plus its concrete `∧°` (`andR`) corollary
+- [x] `lake build` -- scoped module green; whole-project `lake build` currently fails only in
+      `Cslib/Logics/Modal/Tableau/{CompletenessLoop,FiveSimplification}.lean`, outside this
+      phase's territory and caused by a concurrent session's uncommitted, actively-being-modified
+      `LoopChecking.lean` (confirmed via `git status`) -- not a regression from this phase
+
+**Deviation (documented, not a silent narrowing)**: three rules are deferred rather than landed as
+Lemma 4.6/4.9 corollaries here: `◇°` (`diaR`), `⊃°` (`impR`), `□•`'s case-split (`boxL`), `∨•`
+(`orL`), `⊃•` (`impL`), and `cut`. The first three mix `OutputCtx.fillRhs`-shaped and
+`OutputCtx.fillFull`-shaped sides within one rule, needing a dedicated `∅`-layer bridging
+induction (the same family of obstruction `Nested/Translation.lean`'s
+`InputCtx.fillEmpty_imp_outputPruning_fillRhs` already documented as a genuinely separate
+sub-project). `orL` needs a *branching, contravariant* `InputCtx.fillLhs` lift, a new combinator
+beyond this phase's covariant `OutputCtx.fillRhs` branching lift. `impL`/`cut` need the source's
+own induction-on-`n` argument over the `Λ{ }` chain (page 10's `L_X, L_Y, L_Z` construction); `cut`
+is additionally not yet a landed `NestedProof` constructor (Phase 14's territory). Phase 12/13
+build `nested_sound`'s actual case analysis directly against the constructors and are better
+positioned to close these with whatever derivation each concrete instantiation admits.
 
 **Timing**: 3 hours
 
@@ -705,7 +731,11 @@ later inductions need.
 - `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean` (new)
 
 **Verification**: Module builds, no `sorry`; each lemma's statement is cross-referenced to its
-source number in its docstring
+source number in its docstring -- confirmed: zero `sorry` in the new file, `Cslib/` sorry census
+unchanged at 39, axiom count unchanged at 26, `lake exe checkInitImports` and `lake lint` clean
+for this file (`lake lint`'s one reported error is in `Temporal/Tableau/Saturation.lean`, a
+different concurrent-session file, pre-existing per Phase 10's own note), `lake exe lint-style`
+clean, `mk_all --module` updated `Cslib.lean` for the new file.
 
 ---
 

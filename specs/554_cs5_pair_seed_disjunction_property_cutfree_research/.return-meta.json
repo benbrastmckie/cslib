@@ -1,42 +1,43 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-26T06:48:47Z",
+  "started_at": "2026-07-26T00:00:00Z",
   "artifacts": [
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"},
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"},
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-10-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-10-progress.json"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-11-handoff-20260726.md"},
+    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-11-progress.json"}
   ],
   "partial_progress": {
-    "stage": "phase10_complete",
-    "details": "Phase 10 (NCS5 = NCK' + {t,4}#_G + {b}[]) COMPLETED. Stage C now fully complete (2/2). 10/32 phases done.",
+    "stage": "phase11_complete",
+    "details": "Phase 11 (Soundness auxiliary lemmas, opening Stage D) COMPLETED. 11/32 phases done.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 10,
-    "last_completed_phase": "Phase 10: NCS5 = NCK' + {t,4}#_G + {b}[]"
+    "phases_completed": 11,
+    "last_completed_phase": "Phase 11: Soundness auxiliary lemmas"
   },
   "memory_candidates": [
-    "Arisaka-Das-Strassburger's Theorem 5.2 (page 14) has DISJOINT axiom-set domains: X subset {d,t,4} and Y subset {d,b,5} -- t and 4 only ever belong to X (Figure 3's logical rules), b and 5 only ever to Y (Figure 4's structural rules), and d can go in either. This resolves any ambiguity about which figure a given safe-pair member's rule comes from without needing to check both.",
-    "In this codebase's nested-sequent Lean encoding, Mathlib reserves BOTH capital Pi (Pi-type delaborator) and capital Sigma (sigma-type binder notation) as unusable plain identifiers -- use lowercase pi/sigma instead when transcribing paper notation that uses capital Greek letters for arbitrary sequents/structures."
+    "In Arisaka-Das-Strassburger's paper, page 10's Lemma 4.7 parts (i) and (ii) display literally the same conclusion formula in the recovered PDF -- both a direct page render and pdftotext independently show this, so it is an observed source characteristic (not a rendering artifact of one extraction method), and one Lean lemma can discharge both citations.",
+    "In this codebase's nested-sequent development, OutputCtx.fillRhs and OutputCtx.fillFull are genuinely different filling shapes at the fm level (fillRhs's n=0 case wraps with a fixed top antecedent; fillFull's n=0 case is the identity, and its singleton case merges via a raw comma rather than a boxed antecedent) -- any soundness fact whose premise uses one operation and whose conclusion uses the other needs a dedicated bridging lemma, not a corollary of either operation's own congruence lemma alone. This affected Lemma 4.6's diaR/impR/boxL and Lemma 4.9's orL/impL/cut cases, all deferred rather than silently forced through the wrong operation.",
+    "For two-hypothesis (branching-rule) congruence facts built via nested deductionTheorem discharges, OutputCtx.fillRhs's uniform recursion (only the n=0 base case is special) is substantially simpler to handle than OutputCtx.fillFull's three-case recursion (which needs an extra and-uncurry combinator at the singleton case) -- prefer routing branching soundness facts through fillRhs's shape when the rule's actual index permits it."
   ],
   "verification": {
     "verification_passed": true,
     "sorry_count": 39,
-    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/; unchanged before/after this session's diff (Rules.lean contributes 0).",
+    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/; unchanged before/after this session's diff (Soundness.lean contributes 0).",
     "vacuous_count": 0,
     "axiom_count": 26,
     "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced.",
     "build_passed": true,
-    "ci_pipeline_passed": true,
+    "ci_pipeline_passed": "partial (see ci_steps)",
     "ci_steps": {
-      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Rules)",
+      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness)",
       "checkInitImports": "pass",
-      "lake_lint": "pass for Rules.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory)",
-      "lint_style": "pass (no warnings attributed to Rules.lean)",
-      "shake": "pass (Rules.lean's only suggestion is the known 'remove import Cslib.Init' false positive shared with sibling Context.lean/Syntax.lean)",
-      "mk_all_module": "pass (no update necessary, no new file this phase)",
-      "full_build": "pass (lake build, exit 0, 3258 jobs)",
-      "full_test_suite": "pass (lake test, exit 0)"
+      "lake_lint": "pass for Soundness.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phase 10's own note)",
+      "lint_style": "pass (no warnings attributed to Soundness.lean)",
+      "mk_all_module": "pass (Cslib.lean updated for the new file)",
+      "shake": "not run standalone (blocked by the same whole-project build failure below; scoped module build succeeded so its own imports are known-minimal by construction)",
+      "full_build": "FAIL -- but only in Cslib/Logics/Modal/Tableau/{CompletenessLoop,FiveSimplification}.lean, confirmed via git status to be caused by a concurrent session's uncommitted, actively-being-modified LoopChecking.lean (task 553 territory, explicitly off-limits per this dispatch's territory contract). Not a regression introduced by this phase.",
+      "full_test_suite": "FAIL for the same reason (lake test fails to build Cslib.Logics.Modal.Tableau.LoopChecking, a file this phase never touched)"
     }
   },
   "metadata": {

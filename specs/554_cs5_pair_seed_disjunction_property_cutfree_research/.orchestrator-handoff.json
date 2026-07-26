@@ -1,10 +1,9 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "skeleton": true,
+  "status": "partial",
   "trigger": "phase_dispatch",
-  "target": "Phase 13: Theorem 4.1, modal and structural cases",
+  "target": "Phase 14: Nested derivations of the CS5 axioms",
   "phases_completed": 13,
   "phases_total": 32,
   "sorry_inventory": [
@@ -13,52 +12,70 @@
       "line": 1315,
       "statement": "theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom) (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm) (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.imp B))).fm",
       "strategic": true,
-      "assumption": "Soundness of the `⊃•` (impL) NestedProof constructor holds for an arbitrary InputCtx ctx, i.e. fm(ctx.outputPruning.fillRhs A°) and fm(ctx.fillLhs B•) together derive fm(ctx.fillLhs (A⊃B)•).",
-      "why_deferred": "Needs the source's own induction-on-n argument over the Lambda{ } chain (Arisaka-Das-Strassburger 2015, page 10's L_X, L_Y, L_Z construction), which is not reducible to the already-landed Lemma 4.4/4.5/4.8 congruence lemmas alone. Not in Phase 13's own task list (Phase 11's deviation note already deferred impL alongside cut); genuinely more machinery than Phase 13's scope.",
-      "follow_up_task": "not yet numbered -- a dedicated later phase (after Phase 14/15) building the Lambda-chain induction; cut is a related but separate follow-up since it is not yet a landed NestedProof constructor at all"
+      "assumption": "Soundness of the impL NestedProof constructor holds for an arbitrary InputCtx ctx.",
+      "why_deferred": "Needs the source's induction-on-n argument over the Lambda chain (page 10); not Phase 13's own task; carried forward unchanged this dispatch.",
+      "follow_up_task": "not yet numbered -- unaffected by this dispatch, carried forward from Phase 13"
     }
   ],
-  "blockers": [],
-  "summary": "Phase 13 (Theorem 4.1, modal and structural cases) dispatch. Discharged all nine of the phase's own target constructors as fully-proven per-case lemmas: nested_sound_boxL/_boxR/_diaL/_diaR/_tR/_tL/_fourR/_fourL/_bStruct. boxL's anticipated 'case-split' (flagged by Phase 11's docstring as a possible obstruction similar to id/orL) did NOT manifest: it closes directly via Lemma 4.5 (InputCtx.fillLhs_fm_antitone) composed with Lemma 4.7(iv)'s cs5DerivBoxDiaDistrib, already landed for Lemma 4.8 -- no case-split, no new axiom, no diamond ever appears. fourL/bStruct needed one extra fourBox/bBox lift first (two new small combinators, cs5DerivFourBoxDiaDistrib/cs5DerivBStructDistrib). diaR/fourR needed a genuinely new kdia-flavoured fillRhs-vs-fillFull bridge (analogous to Phase 12's tBox-flavoured impR bridge); the bridge's inner recursive helper had to be indexed by an explicit head/tail pair (Gamma2, rest) rather than a bare list, since the bare-list l=[] case is genuinely FALSE for this bridge direction (confirmed via direct semantic counterexample reasoning) -- a first draft hit this and was corrected before committing. fourR additionally composes one fourDia step to descend from double-diamond to single-diamond. Assembled the top-level nested_sound as a structurally-recursive function over all 19 NestedProof constructors (mirroring NestedProof.height's own recursion shape), plus the nested_sound_provable corollary (NestedProof (empty,A degree) -> Derivable CS5ModalAxiom A). impL was NOT in Phase 13's own task list (Phase 11 already deferred it alongside cut) and is landed as a single, tightly-scoped, documented strategic sorry in its own top-level lemma (nested_sound_impL), isolated from the other 18 fully-proven cases. Also added a missing `public import ...Nested.Rules` to Soundness.lean (needed for NestedProof itself; Phases 11/12 never required it). Verified: lean_verify on nested_sound reports exactly {propext, sorryAx, Classical.choice, Quot.sound} -- the sorryAx is the one documented impL hole, no other new axiom. Full CI green: lake build 3259/3259, lake test 9253/9253 (exit 0), lake lint (one pre-existing, out-of-territory error in Temporal/Tableau/Saturation.lean), lake exe checkInitImports (exit 0), lake exe lint-style (clean), lake exe mk_all --module (no update necessary), scoped lake shake (only the known Cslib.Init false positive). Axiom count unchanged at 26.",
-  "artifacts": [
-    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"},
-    {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-13-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-13-progress.json"}
+  "blockers": [
+    {
+      "phase": 14,
+      "target": "Derive each of the nine propositional constructors, k, kdia, tBox, tDia, fourBox, fourDia, bBox, bDia as NestedProof (psi-circ)",
+      "verbatim_goal": "Derive each of the nine propositional constructors, `k`, `kdia`, `tBox`, `tDia`, `fourBox`, `fourDia`, `bBox`, `bDia` as `NestedProof (ψ◦)`",
+      "what_was_tried": "Attempted to build Proposition 3.1's general id (NestedProof (ctx.fillFull (A-bullet, A-circ)) for arbitrary formula A, not just atomic) by induction on A, as reusable machinery every one of the 17 axiom derivations needs (each schema is or reduces to an impR application, whose premise needs this fact).",
+      "why_it_failed": "Verified in Lean (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box, now landed sorry-free in Rules.lean) that every InputCtx-shaped constructor (botL is the sole introduction rule for bottom) produces a conclusion whose RHS is unconditionally .box-shaped, never .atom-shaped, at any context length. impR's premise needs a bare .atom-shaped RHS. Hence NestedProof (bottom-bullet, pi) bare is unreachable from the current 20 constructors for any context choice, blocking efq directly and, transitively (since general id is needed for every schema, each universally quantified over formulas that could syntactically be bottom), all 17 axioms. Full analysis: handoffs/phase-14-handoff-20260726.md."
+    },
+    {
+      "phase": 14,
+      "target": "Cross-check against §5's Proofs of the axioms d, t, b, 4, and 5 in our system",
+      "verbatim_goal": "Cross-check against §5's \"Proofs of the axioms d, t, b, 4, and 5 in our system\"",
+      "what_was_tried": "Read Figure 5 (page 13) directly from the source PDF; confirmed its t/4/b-axiom derivations do not use w/cut/comma-swap themselves, only id + the logical rules.",
+      "why_it_failed": "Not reached as a completed derivation: Figure 5's own recipes still depend on general id for an arbitrary formula A, which is blocked per the blocker above. Not fully re-verified whether Figure 5's specific axioms are unblocked once general id's A != bottom cases are handled -- out of remaining budget this dispatch."
+    }
   ],
-  "next_action_hint": "implement",
+  "summary": "Phase 14 (Nested derivations of the CS5 axioms) dispatch. Landed and committed: (1) the cut rule (eq. 3.1) as a genuine NestedProof constructor, InputCtx-shaped mirroring impL's output-pruning pattern, plus NestedProof.CutFree gating it out (mirrors SeqProof.cut/CutFree in LJ/Basic.lean) -- scoped build green, no sorry, no new axiom. (2) A rigorous, Lean-verified structural finding: every InputCtx-shaped NestedProof constructor (botL, cut, contract, andL, boxL, diaL, tL, fourL, bStruct, and w per eq 3.1's own stated shape if later added) produces a conclusion whose RHS is unconditionally box-shaped, never atom-shaped, at any context length -- landed as three sorry-free, axiom-free theorems (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box). This blocks Proposition 3.1's general id at A = bottom (since botL is the sole bottom-introduction rule and cannot supply the bare .atom-shaped RHS impR's premise needs), hence blocks efq directly, and transitively blocks every other CS5ModalAxiom schema whose derivation needs general id for an arbitrary (universally-quantified, possibly-bottom) formula -- i.e. all 17 target constructors. No Completeness.lean file was created since a file of 17 non-strategic sorries (all sharing one unresolved root cause, not 17 independent deliberate skeleton points) would violate the anti-analysis strategic-sorry policy. Full writeup, evidence, and what-not-to-try guidance in the phase-14 handoff. A planning decision is needed before further dispatch: either land Phase 19's weakening/exchange admissibility (or equivalent) ahead of this phase, or get a second look at whether Proposition 3.1 has a formalization this dispatch missed (the source calls it straightforward, which is in tension with the wall found).",
+  "artifacts": [
+    {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"},
+    {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md"},
+    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-14-progress.json"}
+  ],
+  "next_action_hint": "requires_user_review",
+  "requires_user_review": true,
   "modified_files": [
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean",
+    "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"
   ],
   "decisions_made": [
-    "boxL closes via lemma4_5 + cs5DerivBoxDiaDistrib A Delta.fm directly, no case-split -- the anticipated obstruction from Phase 11's docstring did not materialize.",
-    "fourL/bStruct each need one extra fourBox/bBox lift (cs5DerivAndCongrLeft, a new left-conjunct congruence combinator mirroring the existing cs5DerivAndCongrRight) before the same cs5DerivBoxDiaDistrib pattern applies; landed as cs5DerivFourBoxDiaDistrib/cs5DerivBStructDistrib.",
-    "diaR/fourR's fillRhs-vs-fillFull bridge is kdia-flavoured (not tBox-flavoured like impR): the new schema cs5DerivKdiaUncurrySwapSchema (Gamma Delta A : Proposition) : (Gamma imp box(Delta imp A)) imp ((dia Delta and Gamma) imp dia A), built via deductionTheorem discharge, is the singleton-ctx case; the general-ctx case routes through a NEW inner recursive helper indexed by an explicit (Gamma2 : NestedLhs, rest : List NestedLhs) pair -- never a bare l : List, because the bare-list empty case is mathematically false for this bridge (unlike impR's tBox-flavoured bridge, whose analogous base case genuinely holds).",
-    "fourR reuses the same schema instantiated with A := diamond A_target, then composes one extra cs5DerivImpCongrRight _ (fourDia A_target) step at every level to descend from double-diamond to single-diamond.",
-    "impL is landed as its own top-level lemma (nested_sound_impL) with a documented sorry, not an inline sorry inside nested_sound's match arm -- keeps the hole isolated and independently trackable, matching this file's per-constructor-lemma convention.",
-    "Soundness.lean now imports Nested.Rules directly (previously only Nested.Translation) since nested_sound needs the NestedProof inductive type itself."
+    "Added cut as a genuine primitive NestedProof constructor (not proved admissible), mirroring SeqProof.cut, exactly per the plan's own task wording.",
+    "Did not add w (weakening) as an extra primitive: verified it shares InputCtx.fillLhs/fillEmpty's own unconditional .box shape, so it would not resolve the efq/general-id wall (a different obstruction than what w addresses).",
+    "Did not create Completeness.lean with placeholder sorries: all 17 axioms share one unresolved root cause, which fails the strategic-sorry policy's per-theorem, independently-justified scoping requirement.",
+    "Marked Phase 14 [BLOCKED] in the plan file rather than silently narrowing scope or fabricating a proof."
   ],
   "dead_ends": [
-    "A first draft of the diaR/fourR bridge helper was indexed by a bare l : List (NestedLhs Atom) with three match arms ([], [Gamma], Gamma::(Gamma2::rest)), mirroring buildFullChain_imp_buildRhsChain's own shape literally. The l=[] arm required proving box(Delta.fm imp A) imp box(dia Delta.fm imp A), which is NOT a K-valid schema (necessitation cannot distribute an assumed, not closed, antecedent implication this way; confirmed via direct possible-worlds counterexample reasoning during this dispatch). Corrected by re-indexing the helper as an explicit head/tail pair (Gamma2, rest), which never needs an empty-list case at all, since a nonempty list is baked into the parameter shape."
+    "genId as a uniform induction on A targeting OutputCtx.fillFull (A, A): the A = bottom case is a proven dead end (botL is InputCtx-shaped, unconditionally .box-shaped RHS), not a matter of trying harder tactics.",
+    "Using boxR to shed botL's box wrapping: boxR's premise needs an .empty LHS component; botL's output always has bottom (or Lambda.fillLhs bottom) there, never .empty.",
+    "Using the newly-landed cut to bridge a botL-derived boxed fact down to a bare fact: cut's own conclusion (ctx.fillEmpty) is InputCtx-shaped and subject to the exact same box-shape proof.",
+    "A nonempty-length OutputCtx for id (which can itself produce a .box-shaped result) superficially looks promising for matching an InputCtx-shaped premise elsewhere, but id's own comma order (filled-formula first) does not match InputCtx.fillLhs's recursion order (context-head first) at the position needed -- a second, independent obstruction (NestedLhs.comma is a raw, non-quotiented constructor per Syntax.lean's own documented design note)."
   ],
   "continuation_context": {
-    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/.orchestrator-handoff.json",
+    "handoff_path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-14-handoff-20260726.md",
     "phases_completed": 13,
     "phases_total": 32,
     "orchestrator_mode": true,
-    "resume_at": "Stage E, Phase 14 (Nested derivations of the CS5 axioms). Stage D (Theorem 4.1, soundness) is now complete for 18 of 19 constructors; impL remains a documented strategic sorry (nested_sound_impL), not blocking Phase 14. A dedicated, not-yet-numbered later phase should build the Lambda-chain induction-on-n to close it; cut's introduction as a NestedProof constructor is Phase 14's own territory per the plan and is a separate concern from impL's soundness gap.",
+    "resume_at": "Stage E, Phase 14 (Nested derivations of the CS5 axioms) is BLOCKED pending a planning decision -- see the handoff's 'Immediate Next Action'. Do not re-dispatch Phase 14 with the same approach without first reading 'What Was Tried' / 'What NOT to Try' in the handoff.",
     "stage_map": {
       "A": "Phases 1-5 - statement repair and route closure - COMPLETE",
       "B": "Phases 6-8 - nested sequent syntax - COMPLETE (all 3 phases)",
       "C": "Phases 9-10 - the rule systems - COMPLETE (both phases)",
       "D": "Phases 11-13 - soundness (Theorem 4.1) - COMPLETE (18/19 constructors fully proven; impL is a tracked strategic sorry, not blocking downstream phases)",
-      "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - NOT STARTED",
+      "E": "Phases 14-15 - completeness with cut (Theorem 5.1) - Phase 14 BLOCKED (cut landed; axiom derivations blocked on general id / efq, see handoff)",
       "F": "Phases 16-25 - cut elimination (section 6) - NOT STARTED",
       "G": "Phases 26-32 - the two-label bridge - NOT STARTED - highest risk, Phase 28 (cross-rule permutation) is the crux"
     },
-    "literature_access": "Direct PDF render (Read with pages param) cross-checked against pdftotext of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains reliable; pdftotext silently drops/garbles box and diamond glyphs. No new pages rendered this dispatch (all needed facts -- Figure 2/3/4, Lemmas 4.2-4.9, Theorem 4.1 -- were already verified against the PDF in Phases 9-12).",
-    "existing_infra_pointers": "Nested/Soundness.lean's nested_sound is now the fully-assembled Theorem 4.1, sorry-free except for impL's tracked hole. nested_sound_provable is the formula-level corollary. cs5DerivKdiaUncurrySwapSchema/cs5DerivAndCongrLeft/cs5DerivBoxDiaDistrib/cs5DerivFourBoxDiaDistrib/cs5DerivBStructDistrib are reusable Hilbert-combinator building blocks that a future impL-closing phase should check before inventing new ones. CS5ModalAxiom is at Constructive/CS5.lean:168.",
-    "invariants": "Cslib/ sorry count: Nested/Soundness.lean has exactly 1 sorry (nested_sound_impL, tracked, strategic), down from the file's own zero-sorry state entering this phase but expected per Phase 11's own deferral. Whole-repo sorry census baseline unaffected elsewhere (SuccRelation.lean's task-37-blocked sorries, Tableau/LoopChecking.lean's 2 concurrent-session sorries -- never touched, out of territory --, Tableau/Intuitionistic/Scheme.lean's, Tableau/Intuitionistic/Completeness.lean's, Tableau/Minimal/Completeness.lean's, all pre-existing and unrelated). Axiom count unchanged at 26 (grep -rn '^axiom ' Cslib/ | wc -l). No weakened or vacuous restatements. Whole-project lake build/test/lint/lint-style/checkInitImports/mk_all --module all green; scoped lake shake clean apart from the known Cslib.Init false positive. Never touch Cslib/Logics/Modal/Tableau/ -- concurrent sessions own those files. Never use capital Pi (Π) or capital Sigma as a Lean identifier in this codebase."
+    "literature_access": "Direct PDF render (Read with pages param) of ~/Projects/Literature/.sources-recovered/arisakadasstrassburger_2015_onnestedsequentsforconstructivemodallogics.pdf remains authoritative; pdftotext drops/garbles box and diamond glyphs. This dispatch rendered pages 7 (Proposition 3.1, eq 3.1, Figure 3), 8-9 (Figure 4, Theorem 4.1, Lemmas 4.2-4.6), 11-13 (Lemma 4.11 proof, Lemma 4.12, Figure 5) directly.",
+    "existing_infra_pointers": "Rules.lean now has NestedProof.cut, NestedProof.CutFree, and the three box-shape verification theorems (buildRhsChain_box_shape, InputCtx_fillLhs_snd_box, InputCtx_fillEmpty_snd_box) -- reusable evidence for whoever resolves the blocker. Nested/Soundness.lean unchanged this dispatch.",
+    "invariants": "Cslib/ sorry count unchanged (Nested/Soundness.lean's one impL sorry, untouched); axiom count unchanged at 26; no weakened or vacuous restatements; whole-project lake build/lake exe checkInitImports green (verified this dispatch); never touch Cslib/Logics/Modal/Tableau/; never use capital Pi (Π) or capital Sigma as a Lean identifier."
   },
   "plan_markers_verified": true
 }

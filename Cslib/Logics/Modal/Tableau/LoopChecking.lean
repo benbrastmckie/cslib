@@ -9042,6 +9042,79 @@ lemma hintikkaS4_dia_neg_reflTransGen_boxed
     intro hmem
     exact ih (hintikkaS4_dia_neg_step φ₀ b acc hH ψ _ _ hmem hedge)
 
+/-! ## Subtractive Route (3), Phase 3 (Decision Gate B): the Redirect Forward-Cone Transfer
+
+`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
+04_subtractive-blocking-red-channel.md`, Phase 3. Establishes (or refutes) that conjuncts 5/6
+of `modalHintikkaSetS4Sub` actually hold at a blocked step. -/
+
+omit [Hashable Atom] in
+/-- **Free transfer, box-context half (condition (c))**: near-transcription of
+`modalStepBranchS4Keyed_blocked_witness_mem`'s proof. When a minting attempt at `src` is
+blocked to `wBlock`, every box-positive formula `T(□χ)@src` already on the branch (with `χ`
+`φ₀`-relevant) transfers, UNWRAPPED, to `wBlock`: `T(χ)@wBlock ∈ b`. This is the reflexive
+(`u = wBlock`) base case of the forward-cone obligation (conjunct 5, G*) -- it does **not** by
+itself extend to `u` strictly beyond `wBlock` in the cone; see the cone-extension lemma below
+for that harder obligation. **Measured 0 failures / 24,314** (condition (c),
+`specs/553_.../artifacts/s4subtractive3.lean`). -/
+lemma blockedRedirect_unwrapped_boxPos_mem (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock)
+    (χ : Proposition Atom) (hsf : (Sign.pos, χ) ∈ signedSubfmls φ₀)
+    (hmem : (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.pos, χ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ src wBlock hblock
+  have hsub := hkL wBlock (successorBirthContent φ₀ b s φ src) hkey
+  have hmemSet : (Sign.pos, χ) ∈ successorBirthContent φ₀ b s φ src := by
+    unfold successorBirthContent
+    refine Finset.mem_insert_of_mem ?_
+    rw [Finset.mem_filter]
+    refine ⟨hsf, Or.inl ⟨rfl, ?_⟩⟩
+    simp only [List.any_eq_true, beq_iff_eq]
+    exact ⟨_, hmem, rfl⟩
+  have hrel := hsub hmemSet
+  unfold relevantSetFinset at hrel
+  rw [Finset.mem_filter] at hrel
+  simp only [List.any_eq_true, beq_iff_eq] at hrel
+  obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
+  rw [heq] at hsf'mem
+  exact hsf'mem
+
+omit [Hashable Atom] in
+/-- **Free transfer, diamond-context half (condition (e))**: dual of
+`blockedRedirect_unwrapped_boxPos_mem`. When a minting attempt at `src` is blocked to `wBlock`,
+every diamond-negative formula `F(◇χ)@src` already on the branch (with `χ` `φ₀`-relevant)
+transfers, UNWRAPPED, to `wBlock`: `F(χ)@wBlock ∈ b`. **Measured 0 failures / 24,314**
+(condition (e)). -/
+lemma blockedRedirect_unwrapped_diaNeg_mem (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (s : Sign) (φ : Proposition Atom) (src wBlock : WorldIndex)
+    (hkL : ∀ w k, (w, k) ∈ keys → k ⊆ relevantSetFinset φ₀ b w)
+    (hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock)
+    (χ : Proposition Atom) (hsf : (Sign.neg, χ) ∈ signedSubfmls φ₀)
+    (hmem : (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
+    (⟨.neg, χ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  have hkey := blockingWorldS4Keyed_eq_birthContent φ₀ b keys s φ src wBlock hblock
+  have hsub := hkL wBlock (successorBirthContent φ₀ b s φ src) hkey
+  have hmemSet : (Sign.neg, χ) ∈ successorBirthContent φ₀ b s φ src := by
+    unfold successorBirthContent
+    refine Finset.mem_insert_of_mem ?_
+    rw [Finset.mem_filter]
+    refine ⟨hsf, Or.inr ⟨rfl, ?_⟩⟩
+    simp only [List.any_eq_true, beq_iff_eq]
+    exact ⟨_, hmem, rfl⟩
+  have hrel := hsub hmemSet
+  unfold relevantSetFinset at hrel
+  rw [Finset.mem_filter] at hrel
+  simp only [List.any_eq_true, beq_iff_eq] at hrel
+  obtain ⟨sf', hsf'mem, heq⟩ := hrel.2
+  rw [heq] at hsf'mem
+  exact hsf'mem
+
 /-! ## Phase 7: Single-Step Invariant Preservation -/
 
 omit [Hashable Atom] in

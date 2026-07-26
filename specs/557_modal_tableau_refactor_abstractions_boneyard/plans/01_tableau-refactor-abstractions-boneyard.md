@@ -354,7 +354,7 @@ must therefore **never** run concurrently with any phase owning those files.
 
 ---
 
-### Phase 1: Abstraction Decision Record [IN PROGRESS]
+### Phase 1: Abstraction Decision Record [NOT STARTED]
 
 **Goal**: Produce the explicit decision record the task description requires before any file is
 moved or split and before any abstraction is implemented. This is the review gate.

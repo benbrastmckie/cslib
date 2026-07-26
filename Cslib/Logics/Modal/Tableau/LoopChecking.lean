@@ -7512,20 +7512,25 @@ theorem modalStepBranchS4_preserves_S4LoopInv (φ₀ : Proposition Atom)
       keysInUniverse := modalStepBranchS4_preserves_keysInUniverse φ₀ b e acc keys newBs newExps
         newAcc keys' hbC hkI hstep }
 
-/-- **`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`** (Phase 6's deliverable): every
-`modalStepBranchS4KeyedOrdered` step preserves `S4LoopInv`, mirroring
-`modalStepBranchS4_preserves_S4LoopInv` exactly -- a `refine`+`exact` assembly with no
-independent proof content of its own, just twelve calls to this section's ordered per-field
-sub-lemmas (`modalStepBranchS4KeyedOrdered_preserves_{bClosure,eNodup,eClosure,accFresh,
-accKnown,outDegEq,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}` plus the two
-proof-internal auxiliaries `modalStepBranchS4KeyedOrdered_preserves_{keysWorldsKnown,
-worldsContiguousS4}`), each of which was itself verified against the ordered stepper via
-`modalStepBranchS4KeyedOrdered_selected_mem` in place of the unordered `findSome?` extraction.
-No landed statement (`keysUpdate_preserves_keysDistinct`, `blockingWorldS4Keyed_none_fresh`, or
-any individual `S4LoopInv` field) required ANY weakening to reach this point -- the plan's
-escalation trigger (`keysDistinct`, attempted first) did not fire, confirming settled-context
-scheduling changes only *timing*, never producing a duplicate key or otherwise degrading any
-invariant. -/
+/-- **`modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`** (Phase 6's deliverable, extended in
+Phase 11 with the origin-edge invariant's fourth conjunct): every `modalStepBranchS4KeyedOrdered`
+step preserves `S4LoopInv`, mirroring `modalStepBranchS4_preserves_S4LoopInv` exactly -- a
+`refine`+`exact` assembly with no independent proof content of its own, just twelve calls to this
+section's ordered per-field sub-lemmas (`modalStepBranchS4KeyedOrdered_preserves_{bClosure,
+eNodup,eClosure,accFresh,accKnown,outDegEq,keysTotal,keyLowerBd,keysDistinct,keysInUniverse}`
+plus the three proof-internal auxiliaries `modalStepBranchS4KeyedOrdered_preserves_{
+keysWorldsKnown,worldsContiguousS4,keysOriginS4}`), each of which was itself verified against the
+ordered stepper via `modalStepBranchS4KeyedOrdered_selected_mem` in place of the unordered
+`findSome?` extraction. No landed statement (`keysUpdate_preserves_keysDistinct`,
+`blockingWorldS4Keyed_none_fresh`, or any individual `S4LoopInv` field) required ANY weakening to
+reach this point -- the plan's escalation trigger (`keysDistinct`, attempted first) did not fire,
+confirming settled-context scheduling changes only *timing*, never producing a duplicate key or
+otherwise degrading any invariant.
+
+**Phase 11 note**: `keysOriginS4` (like `keysWorldsKnown`/`worldsContiguousS4` before it) is
+threaded as an extra hypothesis/conclusion, NOT an `S4LoopInv` field -- the struct itself is
+untouched, and the unordered wrapper `modalStepBranchS4_preserves_S4LoopInv` is byte-for-byte
+unchanged (this extension applies to the ordered driver only). -/
 theorem modalStepBranchS4KeyedOrdered_preserves_S4LoopInv (φ₀ : Proposition Atom)
     (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
@@ -7534,16 +7539,20 @@ theorem modalStepBranchS4KeyedOrdered_preserves_S4LoopInv (φ₀ : Proposition A
     (hinv : S4LoopInv φ₀ b e acc keys)
     (hKW : ∀ w k, (w, k) ∈ keys → w ∈ modalKnownWorlds b)
     (hWC : worldsContiguousS4 b)
+    (hKO : keysOriginS4 b acc keys)
     (hstep : modalStepBranchS4KeyedOrdered φ₀ b e acc keys =
       some (newBs, newExps, newAcc, keys')) :
     (∀ b' ∈ newBs, ∀ e' ∈ newExps, S4LoopInv φ₀ b' e' newAcc keys') ∧
     (∀ b' ∈ newBs, ∀ w k, (w, k) ∈ keys' → w ∈ modalKnownWorlds b') ∧
-    (∀ b' ∈ newBs, worldsContiguousS4 b') := by
+    (∀ b' ∈ newBs, worldsContiguousS4 b') ∧
+    (∀ b' ∈ newBs, keysOriginS4 b' newAcc keys') := by
   obtain ⟨hbC, heN, heC, haF, haK, hoD, hkT, hkL, hkD, hkI⟩ := hinv
   refine ⟨?_, modalStepBranchS4KeyedOrdered_preserves_keysWorldsKnown φ₀ b e acc keys newBs
     newExps newAcc keys' hKW hstep,
     modalStepBranchS4KeyedOrdered_preserves_worldsContiguousS4 φ₀ b e acc keys newBs newExps
-    newAcc keys' hWC haK hstep⟩
+    newAcc keys' hWC haK hstep,
+    modalStepBranchS4KeyedOrdered_preserves_keysOriginS4 φ₀ b e acc keys newBs newExps newAcc
+    keys' haK hKO hstep⟩
   intro b' hb' e' he'
   exact
     { bClosure := modalStepBranchS4KeyedOrdered_preserves_bClosure φ₀ b e acc keys newBs newExps

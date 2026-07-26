@@ -6570,6 +6570,40 @@ theorem modalHintikkaSetS4_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     modalHintikkaSetS4 φ₀ b acc = modalHintikkaSetGen (modalApplyOneS4 φ₀) b acc := rfl
 
+/-- **The bare saturation conjunct** (conjunct 2 of `modalHintikkaSetS4`/
+`modalHintikkaSetS4Sub`, byte-identical in both): every non-minting-shaped formula's
+`modalApplyOneS4 φ₀` output is already present on `b`. Named so the six S4 Hintikka bridges
+below (`hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}`) can be stated against this
+alone rather than the full four-conjunct predicate -- report 04's plan-time verification
+(`plans/04_subtractive-blocking-red-channel.md`, "Design Decision Derived at Plan Time") reads
+each bridge's proof as consuming only this conjunct (`obtain ⟨_, hrule, _⟩ := hH`), and
+conjuncts 3/4 over bare `acc` are FALSE for the subtractive driver, so the bridges cannot keep
+requiring the full `modalHintikkaSetS4`/`modalHintikkaSetS4Sub` predicate. This is a strictly
+weaker hypothesis than either predicate, so it is derivable from both:
+`modalHintikkaSetS4_saturated` / `modalHintikkaSetS4Sub_saturated` below. -/
+def modalS4Saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop :=
+  ∀ sf ∈ b,
+    let (result, _) := modalApplyOneS4 φ₀ sf b acc
+    match sf.sign, sf.formula with
+    | .neg, .box _ => True    -- F(□φ): minting-guarded rule; handled by conjunct 3
+    | .pos, .diamond _ => True  -- T(◇φ): minting-guarded rule; handled by conjunct 4
+    | _, _ =>
+      match result with
+      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .notApplicable => True
+
+/-- `modalHintikkaSetS4`'s conjunct 2 is exactly `modalS4Saturated`. (The dual bridge for
+`modalHintikkaSetS4Sub`, `modalHintikkaSetS4Sub_saturated`, is stated later in this file,
+right after `modalHintikkaSetS4Sub`'s own definition, since `modalS4Saturated` is deliberately
+defined early -- before the six S4 Hintikka bridges that consume it -- while
+`modalHintikkaSetS4Sub` is defined much later, in the Phase 1 subtractive-route section.) -/
+theorem modalHintikkaSetS4_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (hH : modalHintikkaSetS4 φ₀ b acc) : modalS4Saturated φ₀ b acc := hH.2.1
+
 /-! ## S4 Hintikka Bridges -/
 
 /-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership: the converse of
@@ -6598,13 +6632,12 @@ in `modalFourBoxProp`'s output (`htarget_mem_fourNew`), and a generic two-case a
 lands in the final merged list regardless of what the K/T layers themselves produced. -/
 lemma hintikkaS4_box_pos_step
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w w' : WorldIndex)
     (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hr : acc.hasEdge w w' = true) :
     (⟨.pos, .box ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.pos, .box ψ, w⟩ hmem
+  have hcond := hH ⟨.pos, .box ψ, w⟩ hmem
   simp only at hcond
   have hshape : modalApplyOneS4 φ₀ ⟨.pos, .box ψ, w⟩ b acc =
       modalApplyOneS4Rules ⟨.pos, .box ψ, w⟩ b acc :=
@@ -6685,13 +6718,12 @@ arm computes its propagation list inline (no named `boxPropagation`-style helper
 it), so the `hk` step restates that inline computation directly. -/
 lemma hintikkaS4_dia_neg_step
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w w' : WorldIndex)
     (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hr : acc.hasEdge w w' = true) :
     (⟨.neg, .diamond ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.neg, .diamond ψ, w⟩ hmem
+  have hcond := hH ⟨.neg, .diamond ψ, w⟩ hmem
   simp only at hcond
   have hshape : modalApplyOneS4 φ₀ ⟨.neg, .diamond ψ, w⟩ b acc =
       modalApplyOneS4Rules ⟨.neg, .diamond ψ, w⟩ b acc :=
@@ -6778,12 +6810,11 @@ across each edge, and `self` discharges the endpoint (including the reflexive `w
 case) into `T(ψ)@·`. -/
 lemma hintikkaS4_box_pos_self
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w : WorldIndex)
     (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
     (⟨.pos, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.pos, .box ψ, w⟩ hmem
+  have hcond := hH ⟨.pos, .box ψ, w⟩ hmem
   simp only at hcond
   have hshape : modalApplyOneS4 φ₀ ⟨.pos, .box ψ, w⟩ b acc =
       modalApplyOneS4Rules ⟨.pos, .box ψ, w⟩ b acc :=
@@ -6862,12 +6893,11 @@ lemma hintikkaS4_box_pos_self
 `hintikkaS4_box_pos_self`'s proof. -/
 lemma hintikkaS4_dia_neg_self
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w : WorldIndex)
     (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) :
     (⟨.neg, ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  obtain ⟨_, hrule, _⟩ := hH
-  have hcond := hrule ⟨.neg, .diamond ψ, w⟩ hmem
+  have hcond := hH ⟨.neg, .diamond ψ, w⟩ hmem
   simp only at hcond
   have hshape : modalApplyOneS4 φ₀ ⟨.neg, .diamond ψ, w⟩ b acc =
       modalApplyOneS4Rules ⟨.neg, .diamond ψ, w⟩ b acc :=
@@ -6984,7 +7014,7 @@ beyond those already related by the path; the induction recurses on the *path wi
 (`hpath`'s structure), not on the graph, so it terminates regardless of cycles in `acc`. -/
 lemma hintikkaS4_box_pos_reflTransGen
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w w' : WorldIndex)
     (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
@@ -7000,7 +7030,7 @@ lemma hintikkaS4_box_pos_reflTransGen
 and a `ReflTransGen`-path `w ⤳ w'` in `acc.hasEdge` together imply `F(ψ)@w' ∈ b`. -/
 lemma hintikkaS4_dia_neg_reflTransGen
     (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalHintikkaSetS4 φ₀ b acc)
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
     (ψ : Proposition Atom) (w w' : WorldIndex)
     (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
     (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
@@ -8880,6 +8910,14 @@ def modalHintikkaSetS4Sub (φ₀ : Proposition Atom)
            (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
       (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
 
+/-- `modalHintikkaSetS4Sub`'s conjunct 2 is exactly `modalS4Saturated` (over `acc` alone, never
+`accWithReds acc red` -- see the module doc above `modalHintikkaSetS4Sub`). Dual of
+`modalHintikkaSetS4_saturated`. -/
+theorem modalHintikkaSetS4Sub_saturated (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (red : Reds Atom) (hH : modalHintikkaSetS4Sub φ₀ b acc red) : modalS4Saturated φ₀ b acc :=
+  hH.2.1
+
 /-- **Keys-and-`red`-threaded Hintikka-tracking invariant bundle** for the subtractive route:
 the `S4KeyedHintikkaInv` fields, with the two witness fields (`eBoxNegWitness`/
 `eDiamondPosWitness`) restated over `accWithReds acc red`, plus two additional fields mirroring
@@ -8921,6 +8959,48 @@ structure S4KeyedSubHintikkaInv (φ₀ : Proposition Atom)
     ∀ u, Relation.ReflTransGen
            (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
       (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+
+/-! ## Subtractive Route (3), Phase 2 (Decision Gate A): the `ReflTransGen` Path Decomposition
+
+`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
+04_subtractive-blocking-red-channel.md`, Phase 2 task (b). -/
+
+/-- **Path decomposition** for `ReflTransGen (accWithReds acc red)`: a path `w ⤳ u` either stays
+entirely inside `acc.hasEdge`, or its first `red`-hop can be isolated -- it decomposes as an
+`acc`-only prefix `w ⤳ x`, a recorded redirect `(x, wB, s, φ) ∈ red`, and a residual
+`ReflTransGen (accWithReds acc red)`-suffix `wB ⤳ u`. This is Phase 2's path-decomposition
+lemma: `modalTruthLemmaS4Sub`'s box-positive/diamond-negative cases case on this disjunction,
+using the weakened S4 bridges (`hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_dia_neg_reflTransGen`,
+now over `modalS4Saturated`) on the `acc`-only prefix, and conjuncts 5/6 (the forward cones,
+`redBoxForwardCone`/`redDiaForwardCone`) on the residual suffix. Proved by
+`Relation.ReflTransGen.head_induction_on` plus `hasEdge_accWithReds_iff`: the `head` case's own
+edge splits (via the bridge) into an `acc`-edge or a `red`-edge; a `red`-edge terminates the
+prefix immediately (the residual is exactly the induction's own tail path, no recursion needed),
+while an `acc`-edge prepends onto whichever disjunct the inductive hypothesis already produced. -/
+lemma reflTransGen_accWithReds_first_red (acc : Accessibility) (red : Reds Atom)
+    (w u : WorldIndex)
+    (hpath : Relation.ReflTransGen (fun x y => (accWithReds acc red).hasEdge x y = true) w u) :
+    Relation.ReflTransGen (fun x y => acc.hasEdge x y = true) w u ∨
+    ∃ (x wB : WorldIndex) (s : Sign) (φ : Proposition Atom),
+      Relation.ReflTransGen (fun x y => acc.hasEdge x y = true) w x ∧
+      (x, wB, s, φ) ∈ red ∧
+      Relation.ReflTransGen (fun x y => (accWithReds acc red).hasEdge x y = true) wB u := by
+  induction hpath using Relation.ReflTransGen.head_induction_on with
+  | refl => exact Or.inl Relation.ReflTransGen.refl
+  | head hedge htail ih =>
+    rename_i w' x
+    rw [hasEdge_accWithReds_iff] at hedge
+    simp only [Bool.or_eq_true] at hedge
+    rcases hedge with hacc | hred
+    · rcases ih with hleft | ⟨x', wB, s, φ, hpre, hmemred, hsuf⟩
+      · exact Or.inl (Relation.ReflTransGen.head hacc hleft)
+      · exact Or.inr ⟨x', wB, s, φ, Relation.ReflTransGen.head hacc hpre, hmemred, hsuf⟩
+    · obtain ⟨r, hr_mem, hr_eq⟩ := List.any_eq_true.mp hred
+      obtain ⟨rw', rx, rs, rphi⟩ := r
+      simp only [Bool.and_eq_true, beq_iff_eq] at hr_eq
+      obtain ⟨hrw_eq, hrx_eq⟩ := hr_eq
+      rw [hrw_eq, hrx_eq] at hr_mem
+      exact Or.inr ⟨w', x, rs, rphi, Relation.ReflTransGen.refl, hr_mem, htail⟩
 
 /-! ## Phase 7: Single-Step Invariant Preservation -/
 

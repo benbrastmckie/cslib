@@ -8,6 +8,7 @@ module
 
 import Cslib.Init
 public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Translation
+public import Cslib.Logics.Modal.Metalogic.Constructive.Nested.Rules
 
 /-! # Soundness Auxiliary Lemmas (Theorem 4.1's Lemma 4.2–4.9 Family)
 
@@ -1020,5 +1021,340 @@ theorem nested_sound_orL (ctx : OutputCtx Atom) (A B : Proposition Atom) (π : N
       ((ctx.fillFull (.atom A, π)).fm.and (ctx.fillFull (.atom B, π)).fm) :=
     .modus_ponens _ _ _ (.modus_ponens _ _ _ (.ax [] _ (.andI _ _)) dA) dB
   exact ⟨.modus_ponens _ _ _ dimp hand⟩
+
+/-! ## `□•`, `4•`, `b^[]`: `InputCtx.fillLhs`-Shaped Cases via Lemma 4.5
+
+`boxL`, `fourL`, and `bStruct` all share the same shape as `contract`/`andL`/`diaL`/`tL`: both
+premise and conclusion fill the *same* `InputCtx` via `.fillLhs`, differing only in the LHS
+filler, so each closes via Lemma 4.5 (`InputCtx.fillLhs_fm_antitone`) composed with a single
+closed propositional/modal fact. Despite the plan's anticipation of a `boxL` "case-split" (the
+same kind of obstruction Phase 12 hit for `id`/`orL`), no case-split or new axiom is actually
+needed: `boxL`'s premise-to-conclusion step is exactly Lemma 4.7(iv)'s `(□A ∧ ◇B) ⊃ ◇(A ∧ B)`
+(`cs5DerivBoxDiaDistrib`, already landed for Lemma 4.7(iv)/Lemma 4.8), evaluated with `B :=
+Δ.fm`. `fourL`/`bStruct` need the same fact with an extra `fourBox`/`bBox` step first (to turn
+the already-boxed/bare leaf into the shape `cs5DerivBoxDiaDistrib` expects), landed below as two
+small combinators reusing `cs5DerivBoxDiaDistrib` directly -- no `kdisj`, no new axiom, box-only
+throughout (matching the `id`/`orL` repair's own "no diamond appears" pattern). -/
+
+/-- **Congruence in the left conjunct**: from `⊢ a ⊃ a'`, derive `⊢ (a ∧ b) ⊃ (a' ∧ b)` (the
+left-conjunct analogue of `cs5DerivAndCongrRight`, built by the identical proof shape with the
+projections swapped). -/
+private theorem cs5DerivAndCongrLeft {a a' : Proposition Atom} (b : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (a.imp a')) :
+    Derivable (@CS5ModalAxiom Atom) ((a.and b).imp (a'.and b)) := by
+  have h1 : Derivable (@CS5ModalAxiom Atom) ((a.and b).imp a') :=
+    cs5DerivImpTrans ⟨.ax [] _ (.andE1 a b)⟩ h
+  have h2 : Derivable (@CS5ModalAxiom Atom) ((a.and b).imp b) := ⟨.ax [] _ (.andE2 a b)⟩
+  have step1 : Derivable (@CS5ModalAxiom Atom) ((a.and b).imp (b.imp (a'.and b))) :=
+    cs5DerivImpTrans h1 ⟨.ax [] _ (.andI a' b)⟩
+  obtain ⟨d1⟩ := step1
+  obtain ⟨d2⟩ := h2
+  exact ⟨.modus_ponens [] _ _
+    (.modus_ponens [] _ _ (.ax [] _ (.implyS (a.and b) b (a'.and b))) d1) d2⟩
+
+/-- **`4`-lifted `□`-`◇` distributivity**: `⊢ (□A ∧ ◇B) ⊃ ◇(□A ∧ B)`, for `fourL`'s already-boxed
+leaf: lift `□A` to `□□A` via `fourBox` (congruence in the left conjunct), then apply
+`cs5DerivBoxDiaDistrib` at `□A` (not `A`). -/
+private theorem cs5DerivFourBoxDiaDistrib (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((Proposition.box A).and (◇B)).imp (◇((Proposition.box A).and B))) :=
+  cs5DerivImpTrans (cs5DerivAndCongrLeft (◇B) ⟨.ax [] _ (.fourBox A)⟩)
+    (cs5DerivBoxDiaDistrib (Proposition.box A) B)
+
+/-- **`b`-lifted `□`-`◇` distributivity**: `⊢ (σ ∧ ◇D) ⊃ ◇(◇σ ∧ D)`, for `bStruct`'s symmetric
+structural step: lift `σ` to `□◇σ` via `bBox` (congruence in the left conjunct), then apply
+`cs5DerivBoxDiaDistrib` at `◇σ`. -/
+private theorem cs5DerivBStructDistrib (σ D : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) ((σ.and (◇D)).imp (◇((◇σ).and D))) :=
+  cs5DerivImpTrans (cs5DerivAndCongrLeft (◇D) ⟨.ax [] _ (.bBox σ)⟩)
+    (cs5DerivBoxDiaDistrib (◇σ) D)
+
+/-- **Soundness of `□•`** (`boxL`): from the premise's soundness fact, `modus_ponens` against
+Lemma 4.5 instantiated with `cs5DerivBoxDiaDistrib A Δ.fm`. No case-split needed (see the section
+docstring above). -/
+theorem nested_sound_boxL (ctx : InputCtx Atom) (A : Proposition Atom) (Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.dia (.comma (.atom A) Δ))).fm) :
+    Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillLhs (.comma (.atom (Proposition.box A)) (.dia Δ))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_5 ctx
+    (Δ := .dia (.comma (.atom A) Δ)) (Θ := .comma (.atom (Proposition.box A)) (.dia Δ))
+    (cs5DerivBoxDiaDistrib A Δ.fm)
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `4•`**: from the premise's soundness fact, `modus_ponens` against Lemma 4.5
+instantiated with `cs5DerivFourBoxDiaDistrib A Δ.fm`. -/
+theorem nested_sound_fourL (ctx : InputCtx Atom) (A : Proposition Atom) (Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillLhs (.dia (.comma (.atom (Proposition.box A)) Δ))).fm) :
+    Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillLhs (.comma (.atom (Proposition.box A)) (.dia Δ))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_5 ctx
+    (Δ := .dia (.comma (.atom (Proposition.box A)) Δ))
+    (Θ := .comma (.atom (Proposition.box A)) (.dia Δ))
+    (cs5DerivFourBoxDiaDistrib A Δ.fm)
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `b^[]`**: from the premise's soundness fact, `modus_ponens` against Lemma 4.5
+instantiated with `cs5DerivBStructDistrib σ.fm Δ.fm`. -/
+theorem nested_sound_bStruct (ctx : InputCtx Atom) (σ Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.dia (.comma (.dia σ) Δ))).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.comma σ (.dia Δ))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_5 ctx
+    (Δ := .dia (.comma (.dia σ) Δ)) (Θ := .comma σ (.dia Δ))
+    (cs5DerivBStructDistrib σ.fm Δ.fm)
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `□°`, `♦•`: Closing Phase 11's Landed Lemma 4.6 Cases
+
+`lemma4_6_boxR`/`lemma4_6_diaL` were already landed in Phase 11; this section supplies their
+`nested_sound` wrappers. -/
+
+/-- **Soundness of `□°`** (`boxR`): from the premise's soundness fact, `modus_ponens` against
+`lemma4_6_boxR`. -/
+theorem nested_sound_boxR (ctx : OutputCtx Atom) (A : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.box .empty (.atom A))).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (Proposition.box A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_boxR ctx A
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `♦•`** (`diaL`): from the premise's soundness fact, `modus_ponens` against
+`lemma4_6_diaL`. -/
+theorem nested_sound_diaL (ctx : InputCtx Atom) (A : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.dia (.atom A))).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (Proposition.diamond A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_diaL ctx A
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `t°`, `t•`: the `NCS5` `T`-Axiom Rules
+
+Both are single-filling-operation rules (`OutputCtx.fillRhs` for `t°`, `InputCtx.fillLhs` for
+`t•`), closing directly from `tDia`/`tBox` via `OutputCtx.fillRhs_fm_mono`/Lemma 4.5, the same
+pattern `orRLeft`/`andL`'s family already established. -/
+
+/-- **Soundness of `t°`** (`tR`): from the premise's soundness fact, `modus_ponens` against
+`OutputCtx.fillRhs_fm_mono` instantiated with `tDia`. -/
+theorem nested_sound_tR (ctx : OutputCtx Atom) (A : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom A)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (Proposition.diamond A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := OutputCtx.fillRhs_fm_mono
+    (show Derivable (@CS5ModalAxiom Atom)
+      ((NestedRhs.atom A).fm.imp (NestedRhs.atom (Proposition.diamond A)).fm)
+      from ⟨.ax [] _ (.tDia A)⟩) ctx
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `t•`** (`tL`): from the premise's soundness fact, `modus_ponens` against Lemma
+4.5 instantiated with `tBox`. -/
+theorem nested_sound_tL (ctx : InputCtx Atom) (A : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (Proposition.box A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_5 ctx (Δ := .atom A) (Θ := .atom (Proposition.box A))
+    ⟨.ax [] _ (.tBox A)⟩
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `◇°` (`diaR`) and `4°` (`fourR`): the `fillRhs`-vs-`fillFull` Bridge, `kdia`-Flavoured
+
+Both rules mix an `OutputCtx.fillRhs`-shaped premise (`Γ{[Δ,A°]}` / `Γ{[Δ,◇A°]}`) against a
+`OutputCtx.fillFull`-shaped conclusion (`Γ{◇A°,[Δ]}`), the same family of obstruction Phase 11
+deferred `impR` for (closed in this file's earlier section via `tBox` + curry/uncurry). Here the
+modal content is `kdia` (`□(φ⊃ψ) ⊃ (◇φ⊃◇ψ)`) rather than `tBox`, since the leaf is genuinely
+being *lifted* through a `◇` (not merely unwrapped): `Γ{[Δ,A°]}` (bare `A` reachable behind the
+bracket) implies `Γ{◇A°,[Δ]}` (`◇A` reachable directly), matching `kdia`'s own shape exactly.
+`fourR` additionally needs one `fourDia` (`◇◇A ⊃ ◇A`) step, since its leaf is already `◇A`
+(`kdia` alone would only reach `◇◇A`). Neither needs a case-split or new axiom. -/
+
+/-- **`kdia`-flavoured uncurry-swap schema**: `⊢ (Γ ⊃ □(Δ ⊃ A)) ⊃ ((◇Δ ∧ Γ) ⊃ ◇A)`, for arbitrary
+`Γ, Δ, A` -- the closed schema `diaR`'s (and `fourR`'s) singleton-`ctx` case reduces to, built by
+discharging the antecedent `Γ ⊃ □(Δ⊃A)` and the conjunction `◇Δ ∧ Γ` in turn, then composing the
+projected `Γ` through the antecedent and `kdia` in sequence. -/
+private theorem cs5DerivKdiaUncurrySwapSchema (Γ Δ A : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((Γ.imp (Proposition.box (Δ.imp A))).imp (((◇Δ).and Γ).imp (◇A))) := by
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] (Γ.imp (Proposition.box (Δ.imp A))) (((◇Δ).and Γ).imp (◇A)) ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [Γ.imp (Proposition.box (Δ.imp A))] ((◇Δ).and Γ) (◇A) ?_
+  -- context: [(◇Δ).and Γ, Γ.imp (Proposition.box (Δ.imp A))]
+  set H := Γ.imp (Proposition.box (Δ.imp A))
+  have hAnd : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] ((◇Δ).and Γ) :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hDiaΔ : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] (◇Δ) :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 (◇Δ) Γ)) (fun _ h => nomatch h)) hAnd
+  have hΓ : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] Γ :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 (◇Δ) Γ)) (fun _ h => nomatch h)) hAnd
+  have hH : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] H :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))
+  have hBox : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] (Proposition.box (Δ.imp A)) :=
+    .modus_ponens _ _ _ hH hΓ
+  have hKdia : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H]
+      ((Proposition.box (Δ.imp A)).imp ((◇Δ).imp (◇A))) :=
+    .weakening [] _ _ (.ax [] _ (.kdia Δ A)) (fun _ h => nomatch h)
+  have hDiaImp : DerivationTree (@CS5ModalAxiom Atom) [(◇Δ).and Γ, H] ((◇Δ).imp (◇A)) :=
+    .modus_ponens _ _ _ hKdia hBox
+  exact .modus_ponens _ _ _ hDiaImp hDiaΔ
+
+/-- **`buildRhsChain`/`buildFullChain` bridge, `diaR`'s inner recursion**: for every nonempty
+tail `Γ₂ :: rest`, `⊢ (buildRhsChain (Γ₂::rest) [Δ,A°]).fm ⊃ (buildFullChain (Γ₂::rest) (◇Δ,A°)).fm`
+(with the conclusion's leaf already diamond-wrapped as `◇A`, since this bridges into `diaR`'s
+own conclusion). Indexed by an explicit head/tail pair (never a bare `l`, which would force an
+unneeded and false
+`l = []` case -- see the module's design note): the base case (`rest = []`) is
+`cs5DerivKdiaUncurrySwapSchema` under one `□` (`cs5DerivBoxMono`); the general case lifts the
+(structurally shorter) inductive hypothesis through congruence-in-the-consequent then `□`,
+mirroring `buildFullChain_imp_buildRhsChain`'s own recursion shape. -/
+private theorem buildRhsChain_imp_buildFullChain_dia (Δ : NestedLhs Atom) (A : Proposition Atom) :
+    ∀ (Γ₂ : NestedLhs Atom) (rest : List (NestedLhs Atom)),
+      Derivable (@CS5ModalAxiom Atom)
+        ((buildRhsChain (Γ₂ :: rest) (.box Δ (.atom A))).fm.imp
+          (buildFullChain (Γ₂ :: rest) (.dia Δ, .atom (Proposition.diamond A))).fm)
+  | Γ₂, [] => cs5DerivBoxMono (cs5DerivKdiaUncurrySwapSchema Γ₂.fm Δ.fm A)
+  | Γ₂, (Γ₃ :: rest) =>
+      cs5DerivBoxMono
+        (cs5DerivImpCongrRight Γ₂.fm (buildRhsChain_imp_buildFullChain_dia Δ A Γ₃ rest))
+
+/-- **`fillRhs` implies `fillFull`, `◇°`-flavoured**: for every output context `ctx`,
+`⊢ fm(ctx.fillRhs [Δ,A°]) ⊃ fm(ctx.fillFull (◇Δ°,A°))`. Matches `ctx`'s three-way case split
+exactly like `fillFull_imp_fillRhs`: `n = 0` composes `cs5DerivTopImpElim` with `kdia` directly;
+`n = 1` is `cs5DerivKdiaUncurrySwapSchema` directly (no box yet); `n ≥ 2` routes through
+`buildRhsChain_imp_buildFullChain_dia`, lifted through the shared head layer via
+`cs5DerivImpCongrRight`. -/
+private theorem fillRhs_imp_fillFull_dia (ctx : OutputCtx Atom) (Δ : NestedLhs Atom)
+    (A : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillRhs (.box Δ (.atom A))).fm.imp
+        (ctx.fillFull (.dia Δ, .atom (Proposition.diamond A))).fm) :=
+  match ctx with
+  | [] => cs5DerivImpTrans cs5DerivTopImpElim ⟨.ax [] _ (.kdia Δ.fm A)⟩
+  | [Γ] => cs5DerivKdiaUncurrySwapSchema Γ.fm Δ.fm A
+  | Γ :: (Γ₂ :: rest) =>
+      cs5DerivImpCongrRight Γ.fm (buildRhsChain_imp_buildFullChain_dia Δ A Γ₂ rest)
+
+/-- **Soundness of `◇°`** (`diaR`): from the premise's soundness fact, `modus_ponens` against
+`fillRhs_imp_fillFull_dia`. -/
+theorem nested_sound_diaR (ctx : OutputCtx Atom) (A : Proposition Atom) (Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.box Δ (.atom A))).fm) :
+    Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillFull (.dia Δ, .atom (Proposition.diamond A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := fillRhs_imp_fillFull_dia ctx Δ A
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **`buildRhsChain`/`buildFullChain` bridge, `fourR`'s inner recursion**: identical shape to
+`buildRhsChain_imp_buildFullChain_dia`, with the leaf fixed at `◇A` (already diamond-wrapped): the
+base case additionally composes `fourDia` (`◇◇A ⊃ ◇A`) after `cs5DerivKdiaUncurrySwapSchema`'s
+`◇◇A`-ending conclusion, descending to plain `◇A`. -/
+private theorem buildRhsChain_imp_buildFullChain_four (Δ : NestedLhs Atom) (A : Proposition Atom) :
+    ∀ (Γ₂ : NestedLhs Atom) (rest : List (NestedLhs Atom)),
+      Derivable (@CS5ModalAxiom Atom)
+        ((buildRhsChain (Γ₂ :: rest) (.box Δ (.atom (Proposition.diamond A)))).fm.imp
+          (buildFullChain (Γ₂ :: rest) (.dia Δ, .atom (Proposition.diamond A))).fm)
+  | Γ₂, [] =>
+      cs5DerivBoxMono
+        (cs5DerivImpTrans (cs5DerivKdiaUncurrySwapSchema Γ₂.fm Δ.fm (Proposition.diamond A))
+          (cs5DerivImpCongrRight ((◇Δ.fm).and Γ₂.fm) ⟨.ax [] _ (.fourDia A)⟩))
+  | Γ₂, (Γ₃ :: rest) =>
+      cs5DerivBoxMono
+        (cs5DerivImpCongrRight Γ₂.fm (buildRhsChain_imp_buildFullChain_four Δ A Γ₃ rest))
+
+/-- **`fillRhs` implies `fillFull`, `4°`-flavoured**: for every output context `ctx`,
+`⊢ fm(ctx.fillRhs [Δ,◇A°]) ⊃ fm(ctx.fillFull (◇Δ°,◇A°))`. Same three-way case split as
+`fillRhs_imp_fillFull_dia`, each arm additionally composing `fourDia` to descend from `◇◇A` to
+`◇A`. -/
+private theorem fillRhs_imp_fillFull_four (ctx : OutputCtx Atom) (Δ : NestedLhs Atom)
+    (A : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillRhs (.box Δ (.atom (Proposition.diamond A)))).fm.imp
+        (ctx.fillFull (.dia Δ, .atom (Proposition.diamond A))).fm) :=
+  match ctx with
+  | [] => cs5DerivImpTrans cs5DerivTopImpElim
+      (cs5DerivImpTrans ⟨.ax [] _ (.kdia Δ.fm (Proposition.diamond A))⟩
+        (cs5DerivImpCongrRight (◇Δ.fm) ⟨.ax [] _ (.fourDia A)⟩))
+  | [Γ] => cs5DerivImpTrans (cs5DerivKdiaUncurrySwapSchema Γ.fm Δ.fm (Proposition.diamond A))
+      (cs5DerivImpCongrRight ((◇Δ.fm).and Γ.fm) ⟨.ax [] _ (.fourDia A)⟩)
+  | Γ :: (Γ₂ :: rest) =>
+      cs5DerivImpCongrRight Γ.fm (buildRhsChain_imp_buildFullChain_four Δ A Γ₂ rest)
+
+/-- **Soundness of `4°`** (`fourR`): from the premise's soundness fact, `modus_ponens` against
+`fillRhs_imp_fillFull_four`. -/
+theorem nested_sound_fourR (ctx : OutputCtx Atom) (A : Proposition Atom) (Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillRhs (.box Δ (.atom (Proposition.diamond A)))).fm) :
+    Derivable (@CS5ModalAxiom Atom)
+      (ctx.fillFull (.dia Δ, .atom (Proposition.diamond A))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := fillRhs_imp_fillFull_four ctx Δ A
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `⊃•` (`impL`): Deferred, Strategic Sorry
+
+Per Phase 11's deviation note (restated in this module's docstring): `impL` needs the source's own
+induction-on-`n` argument over the `Λ{ }` chain (page 10's `L_X, L_Y, L_Z` construction), which
+mixes `ctx.outputPruning.fillRhs`-shaped and `ctx.fillLhs`-shaped premises against a `ctx.fillLhs`-
+shaped conclusion in a way that does not reduce to Lemma 4.4/4.5/4.8's already-landed congruence
+lemmas alone -- genuinely more machinery than this phase's remaining scope (not in Phase 13's own
+task list, which names only `□•, □◦, ♦•, ♦◦, t•, t◦, 4•, 4◦, b[]`). Landed as a single,
+tightly-scoped, documented `sorry` (the anti-analysis contract's strategic-sorry policy), tracked
+in this dispatch's `sorry_inventory` with a follow-up to a later, not-yet-numbered phase. -/
+
+/-- **Soundness of `⊃•`** (`impL`): deferred, see the section docstring above. -/
+theorem nested_sound_impL (ctx : InputCtx Atom) (A B : Proposition Atom)
+    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.outputPruning.fillRhs (.atom A)).fm)
+    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.imp B))).fm := by
+  -- sorry: assumes the `⊃•`/`impL` soundness fact holds for an arbitrary `InputCtx`; deferred
+  -- because it needs the source's page-10 induction-on-`n` over the `Λ{ }` chain (the
+  -- `L_X, L_Y, L_Z` construction), not yet formalized as of this dispatch; follow-up: a
+  -- dedicated later phase building that induction (not yet numbered in the plan; flagged
+  -- forward alongside Phase 13's `cut` non-target in the handoff)
+  sorry
+
+/-! ## Theorem 4.1, Assembled: `nested_sound`
+
+The top-level soundness theorem, structurally recursive on the `NestedProof` term itself
+(mirroring `NestedProof.height`'s own recursion shape), dispatching to each constructor's case
+lemma above and threading the recursive soundness facts of its premises through. Every
+constructor except `impL` is fully discharged; `impL` routes through the strategic `sorry` in
+`nested_sound_impL` above (see that theorem's docstring). -/
+
+/-- **Theorem 4.1** (page 9): every `NestedProof` derivation is sound with respect to `CS5`'s
+Hilbert system -- `NestedProof Γ → Derivable (@CS5ModalAxiom Atom) (fm Γ)`. -/
+theorem nested_sound :
+    ∀ {Γ : NestedFull Atom}, NestedProof Γ → Derivable (@CS5ModalAxiom Atom) Γ.fm
+  | _, .botL ctx => nested_sound_botL ctx
+  | _, .id ctx a => nested_sound_id ctx a
+  | _, .andL ctx A B p => nested_sound_andL ctx A B (nested_sound p)
+  | _, .andR ctx A B p q => nested_sound_andR ctx A B (nested_sound p) (nested_sound q)
+  | _, .orL ctx A B π p q => nested_sound_orL ctx A B π (nested_sound p) (nested_sound q)
+  | _, .orRLeft ctx A B p => nested_sound_orRLeft ctx A B (nested_sound p)
+  | _, .orRRight ctx A B p => nested_sound_orRRight ctx A B (nested_sound p)
+  | _, .impL ctx A B p q => nested_sound_impL ctx A B (nested_sound p) (nested_sound q)
+  | _, .impR ctx A B p => nested_sound_impR ctx A B (nested_sound p)
+  | _, .boxL ctx A Δ p => nested_sound_boxL ctx A Δ (nested_sound p)
+  | _, .boxR ctx A p => nested_sound_boxR ctx A (nested_sound p)
+  | _, .diaL ctx A p => nested_sound_diaL ctx A (nested_sound p)
+  | _, .diaR ctx A Δ p => nested_sound_diaR ctx A Δ (nested_sound p)
+  | _, .contract ctx Δ p => nested_sound_contract ctx Δ (nested_sound p)
+  | _, .tR ctx A p => nested_sound_tR ctx A (nested_sound p)
+  | _, .tL ctx A p => nested_sound_tL ctx A (nested_sound p)
+  | _, .fourR ctx A Δ p => nested_sound_fourR ctx A Δ (nested_sound p)
+  | _, .fourL ctx A Δ p => nested_sound_fourL ctx A Δ (nested_sound p)
+  | _, .bStruct ctx σ Δ p => nested_sound_bStruct ctx σ Δ (nested_sound p)
+
+/-- **Corollary to Theorem 4.1**: a cut-free `NestedProof` of `(∅, A°)` -- the source's own
+convention for "a proof of the formula `A`" (see `Rules.lean`'s `NestedProof` docstring) -- gives
+`CS5`-Hilbert-derivability of `A` directly, discharging the fixed `⊤` antecedent via
+`cs5DerivTopImpElim`. -/
+theorem nested_sound_provable {A : Proposition Atom}
+    (d : NestedProof ((NestedLhs.empty, NestedRhs.atom A) : NestedFull Atom)) :
+    Derivable (@CS5ModalAxiom Atom) A := by
+  obtain ⟨dtop⟩ := nested_sound d
+  obtain ⟨delim⟩ := cs5DerivTopImpElim (X := A)
+  exact ⟨.modus_ponens _ _ _ delim dtop⟩
 
 end Cslib.Logic.Modal

@@ -1,44 +1,43 @@
 {
   "status": "implemented",
-  "started_at": "2026-07-26T13:00:00Z",
+  "started_at": "2026-07-26T14:00:00Z",
+  "completed_at": "2026-07-26T16:00:00Z",
   "artifacts": [
     {"type": "code", "path": "Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"},
     {"type": "plan", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"},
-    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-12-handoff-20260726.md"},
-    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-12-progress.json"}
+    {"type": "handoff", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/handoffs/phase-13-handoff-20260726.md"},
+    {"type": "progress", "path": "specs/554_cs5_pair_seed_disjunction_property_cutfree_research/progress/phase-13-progress.json"}
   ],
   "partial_progress": {
-    "stage": "phase12_complete_skeleton",
-    "details": "Phase 12 (Theorem 4.1, propositional and k cases) COMPLETED as a skeleton: 7/10 target constructors fully proven, 2 landed as documented strategic sorries (nested_sound_id, nested_sound_orL) with a confirmed mathematical obstruction and a concrete counterexample for id. 12/32 phases done.",
+    "stage": "phase13_complete_skeleton",
+    "details": "Phase 13 (Theorem 4.1, modal and structural cases) COMPLETED as a skeleton: all 9 of the phase's own target constructors (boxL, boxR, diaL, diaR, tR, tL, fourR, fourL, bStruct) fully proven; nested_sound assembled over all 19 NestedProof constructors; impL landed as one documented strategic sorry (not in this phase's own task list, deferred per Phase 11's note). 13/32 phases done.",
     "lint_count_start": null,
     "lint_count_current": null,
-    "phases_completed": 12,
-    "last_completed_phase": "Phase 12: Theorem 4.1, propositional and k cases (skeleton)"
+    "phases_completed": 13,
+    "last_completed_phase": "Phase 13: Theorem 4.1, modal and structural cases (skeleton)"
   },
   "memory_candidates": [
-    "In CS5ModalAxiom (Constructive/CS5.lean), there is no dual of tBox (box-X imp X) for the diamond -- dia-X imp X is not a theorem and is false in general (would force every accessible world to agree with the root on every atom). Any soundness proof that needs to 'shed' an outer diamond wrapping an arbitrary formula (not just bot, which is absorbing under efq) is blocked in bare CS5; this affects any nested-sequent rule whose InputCtx.fillLhs recursion inserts unbounded dia layers, e.g. the id and orL constructors in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean when their surrounding OutputCtx (Lambda) has length >= 2.",
-    "dia(X or Y) imp (dia X or dia Y) (disjunction distributing over diamond) is exactly IS5ModalAxiom's kdisj (Intuitionistic/IS5.lean:121), deliberately absent from CS5ModalAxiom -- this is not an oversight but a genuine strength difference between IS5 and CS5, confirmed by failed derivation attempts using k/kdia/tBox/tDia/fourBox/fourDia/bBox/bDia.",
-    "When bridging two different OutputCtx filling operations (fillFull vs fillRhs) whose recursions BOTH bottom out through .box (not .dia), the bridge is generally resolvable via tBox (for the base-case box-vs-no-box mismatch) plus curry/uncurry combinators (for the singleton-case comma-order mismatch) -- this resolved Nested/Soundness.lean's impR case (Phase 12), which Phase 11 had flagged as needing 'a genuinely separate bridging induction' but which turned out to need no new axiom at all. This is a materially easier class of bridge than one involving InputCtx.fillLhs's .dia-based recursion (id/orL's blocked cases), where no such box-collapsing trick (tBox) has a diamond-side dual.",
-    "A useful diagnostic for whether a nested-sequent soundness case is tractable in CS5: does its Lean encoding route the unbounded ambient context through OutputCtx.fillFull/fillRhs (both .box-based recursion, tBox-bridgeable) or through InputCtx.fillLhs (dia-based recursion past depth 1, generally NOT bridgeable for a non-absorbing target)? Zero-premise 'axiom' rules (like id) and branching rules (like orL) that route through the latter are structurally at risk of needing an axiom CS5 does not have."
+    "Nested-sequent fillRhs-vs-fillFull bridge lemmas (impR/diaR/fourR family) must index their inner recursive helper by an explicit head/tail pair (e.g. Gamma2 : NestedLhs, rest : List NestedLhs), never a bare l : List NestedLhs -- the bare-list empty case can be mathematically FALSE for kdia-flavoured bridges even though the analogous case is true for tBox-flavoured ones (impR), since Lean's exhaustiveness checker forces a proof attempt at l=[] regardless of whether that value is ever reached by the caller. Confirmed the hard way: a first draft indexed by bare l required box(Delta.fm imp A) imp box(dia Delta.fm imp A), which is not K-valid.",
+    "Anticipated proof obstructions flagged in a plan/docstring (e.g. Phase 11's 'boxL case-split' speculation) should still be checked directly against already-landed lemmas before assuming they hold -- boxL turned out to need no case-split at all, closing via the same Lemma-4.5-plus-cs5DerivBoxDiaDistrib pattern already used for contract/andL/diaL/tL."
   ],
   "verification": {
     "verification_passed": true,
-    "sorry_count": 43,
-    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/. Breakdown: 39 (Phase 11 baseline, unchanged elsewhere) + 2 (this phase's documented strategic sorries in Soundness.lean, nested_sound_id line 983 and nested_sound_orL line 997) + 2 (a concurrent session's Tableau/LoopChecking.lean WIP at lines 2080/2125, outside this task's territory, not this phase's contribution).",
+    "sorry_count": 42,
+    "sorry_count_note": "Comment-aware census via .claude/scripts/lean-sorry-census.sh Cslib/. Breakdown: 41 (repo baseline entering this dispatch, per the delegation briefing) + 1 (this phase's single documented strategic sorry, nested_sound_impL, Soundness.lean:1315). No other file touched.",
     "vacuous_count": 0,
     "axiom_count": 26,
-    "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced.",
+    "axiom_count_note": "Unchanged from baseline (grep -rn '^axiom ' Cslib/ | wc -l); zero new axioms introduced. lean_verify on nested_sound reports exactly {propext, sorryAx, Classical.choice, Quot.sound}.",
     "build_passed": true,
-    "ci_pipeline_passed": "partial (see ci_steps)",
+    "ci_pipeline_passed": true,
     "ci_steps": {
-      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness), 2 documented sorry warnings only",
-      "checkInitImports": "pass",
-      "lake_lint": "pass for Soundness.lean (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phase 10/11's own note)",
-      "lint_style": "pass (no warnings attributed to Soundness.lean)",
-      "mk_all_module": "pass (no update necessary -- file already registered in Cslib.lean by Phase 11)",
-      "shake": "pass for this file specifically (only the 2 expected sorry warnings surfaced, no import-minimization issues); the whole-project shake invocation itself failed with an out-of-date-oleans error, matching Phase 11's note that whole-project operations are currently blocked by a concurrent session's uncommitted Tableau/ WIP",
-      "full_build": "not re-verified whole-project this phase (same concurrent-session blocker Phase 11 documented, outside this phase's territory to fix)",
-      "full_test_suite": "not re-verified whole-project this phase for the same reason"
+      "scoped_build": "pass (lake build Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness), 1 documented sorry warning only",
+      "full_build": "pass (3259/3259 jobs)",
+      "checkInitImports": "pass (exit 0)",
+      "lake_lint": "pass for Nested/ (1 unrelated pre-existing error reported in Temporal/Tableau/Saturation.lean, outside this phase's territory, same as Phases 10-12's own note)",
+      "lint_style": "pass (no warnings)",
+      "mk_all_module": "pass (no update necessary)",
+      "shake": "pass for this file specifically (only the known Cslib.Init false-positive pattern already documented by every prior phase in this file)",
+      "full_test_suite": "pass (lake test, exit 0)"
     }
   },
   "metadata": {
@@ -47,8 +46,8 @@
     "delegation_depth": 1,
     "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "compliance_check": "passed",
-    "phase_number": 12,
-    "phases_completed": 12,
+    "phase_number": 13,
+    "phases_completed": 13,
     "phases_total": 32
   }
 }

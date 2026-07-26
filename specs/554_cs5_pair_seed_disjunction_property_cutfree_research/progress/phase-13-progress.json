@@ -1,0 +1,62 @@
+{
+  "phase": 13,
+  "phase_name": "Theorem 4.1, modal and structural cases",
+  "started_at": "2026-07-26T14:00:00Z",
+  "last_updated": "2026-07-26T15:30:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Add missing Rules.lean import to Soundness.lean (needed for NestedProof itself, not required by Phases 11/12)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 2,
+      "description": "Land nested_sound_boxL, nested_sound_fourL, nested_sound_bStruct via lemma4_5 plus new combinators cs5DerivAndCongrLeft, cs5DerivFourBoxDiaDistrib, cs5DerivBStructDistrib; determine boxL's anticipated case-split does not manifest",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 3,
+      "description": "Land nested_sound_boxR, nested_sound_diaL as thin modus-ponens wrappers over Phase 11's already-landed lemma4_6_boxR/lemma4_6_diaL",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 4,
+      "description": "Land nested_sound_tR, nested_sound_tL via OutputCtx.fillRhs_fm_mono/lemma4_5 instantiated with tDia/tBox",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 5,
+      "description": "Land nested_sound_diaR, nested_sound_fourR via a new kdia-flavoured fillRhs-vs-fillFull bridge (cs5DerivKdiaUncurrySwapSchema plus head/tail-indexed inner recursions), fourR additionally composing fourDia",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 6,
+      "description": "Land nested_sound_impL as a single documented strategic sorry (not in this phase's own task list; deferred per Phase 11's note)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 7,
+      "description": "Assemble nested_sound (all 19 NestedProof constructors) and nested_sound_provable corollary",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean"]
+    },
+    {
+      "id": 8,
+      "description": "Scoped lake build green; lean_verify on nested_sound reports only {propext, sorryAx, Classical.choice, Quot.sound}; whole-project lake build/test/lint/lint-style/checkInitImports/mk_all --module/scoped shake all clean for this file",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 9,
+      "description": "Update plan phase 13 heading to [COMPLETED (skeleton)] with documented deviation; commit",
+      "status": "done",
+      "files_touched": ["specs/554_cs5_pair_seed_disjunction_property_cutfree_research/plans/02_cutfree-pair-conservativity.md"]
+    }
+  ]
+}

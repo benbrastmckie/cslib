@@ -167,6 +167,21 @@ blocker. A dispatch reaching this condition writes that as a `state_updates_pend
 `.orchestrator-handoff.json` and escalates; it does **not** edit `specs/state.json` itself, and it
 does **not** start a fifth route.
 
+> **RECORD CORRECTION (2026-07-26) — the inversion has been APPLIED, unconditionally and by explicit
+> user decision, not as the contingent consequence of a failed gate.** `specs/state.json` now records
+> 557 with `dependencies: []` (wave 1, unblocked) and 553 with `dependencies: [535, 557]` (wave 2).
+> The refactor runs **first**, before any phase of this plan is dispatched. Two consequences a
+> resuming dispatch must respect:
+>
+> 1. **Do not re-propose the inversion** — it is done. The `state_updates_pending` contingency
+>    described above and at the Terminal Condition is discharged.
+> 2. **This plan was authored against the PRE-refactor factoring.** Its line anchors, and parts of
+>    its mechanism analysis that reference current structure (`modalHintikkaClauseGen`'s
+>    sign-insensitive shape match, the ten-bridge adapter cluster, the placement of `accPinnedBy`),
+>    are stated against code that task 557 is expected to restructure. Re-validate them — and expect
+>    `/revise 553` to be needed for a v6 — once the refactor lands. Locate declarations by
+>    `grep -n '^lemma\|^def\|^theorem\|^structure\|^abbrev'`, never by this plan's line numbers.
+
 ### Preserved Assets
 
 Sorry-free, axiom-clean landed work that **must not regress**. Nothing in this table is retired by

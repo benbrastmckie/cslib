@@ -1,0 +1,50 @@
+{
+  "status": "implemented",
+  "summary": "Corrected the four adjudicated documentation defects (keysOriginS4 false-removal claim, stale _boxed reflTransGen bridge references, keysRootEmpty 'possibly orphaned' hedge, and the branchSatisfiableIn_s4FC_ancestor_redirect zero-consumer + Massacci Theorem 8.1 never-proved finding), and landed the measured baseline table with reproduction commands into LoopChecking.lean's module documentation. Documentation-only: no declaration, proof, or definition was altered. Both modified modules build clean under scoped lake build; the repo-wide build gate remains red for an unrelated reason.",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "skeleton": false,
+  "blockers": [],
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "line": 1270,
+      "declaration": "branchSatisfiableIn_s4FC_ancestor_redirect",
+      "status": "pre-existing, retained by explicit user decision; not introduced or moved by this task (line number shifted from 1244 to 1270 solely by the docstring addition above it)"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "specs/559_tableau_measured_baseline_doc_corrections/summaries/01_measured-baseline-doc-corrections-summary.md",
+      "type": "summary",
+      "summary": "Implementation summary: four defect corrections, baseline table landing, verification status"
+    }
+  ],
+  "next_action_hint": "Nothing blocked on this task. When Soundness.lean:1329 is repaired by the owner of tasks 554/570, re-run the full `lake build` and `lake exe checkInitImports` to close the repo-wide gate; no re-work of these documentation edits is expected, since both modified modules already build clean scoped.",
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+  ],
+  "build_verified": false,
+  "build_blocker": "Soundness.lean:1329 non-exhaustive match, tasks 554/570",
+  "build_verification_detail": {
+    "repo_wide_lake_build": "RED (unchanged, pre-existing, unrelated subtree: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329 'Missing cases', from commit 88b198bf)",
+    "checkInitImports": "NOT RUN as a gate - it is vacuous while the above holds, and is not reported as passing",
+    "scoped_builds_passed": [
+      "lake build Cslib.Logics.Modal.Tableau.LoopChecking -> Build completed successfully (847 jobs)",
+      "lake build Cslib.Logics.Modal.Tableau.FrameSoundness -> Build completed successfully (876 jobs)"
+    ],
+    "note": "The failing module is in a different subtree from the two modified modules, so scoped builds of both edited files were possible and both pass. This is stronger than the anticipated build-unverified status, but it is NOT a repo-wide green build and is not claimed as one."
+  },
+  "structural_checks": {
+    "block_comment_nesting_balanced": true,
+    "nesting_min_depth": 0,
+    "nesting_final_depth": 0,
+    "declaration_lines_in_diff": 0,
+    "removed_lines_all_prose_inside_docstrings": true,
+    "tableau_sorry_census": 1,
+    "axiom_declarations_in_modified_files": 0
+  },
+  "defects_corrected": [1, 2, 3, 4],
+  "true_claims_touched": 0
+}

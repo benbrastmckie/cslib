@@ -1,0 +1,52 @@
+{
+  "status": "implemented",
+  "started_at": "2026-07-26T00:00:00Z",
+  "completed_at": "2026-07-26T00:00:00Z",
+  "phases_completed": 1,
+  "phases_total": 1,
+  "artifacts": [
+    {
+      "path": "specs/559_tableau_measured_baseline_doc_corrections/summaries/01_measured-baseline-doc-corrections-summary.md",
+      "type": "summary",
+      "summary": "Four documentation defect corrections plus the measured baseline table landed in LoopChecking.lean module docs"
+    },
+    {
+      "path": "specs/559_tableau_measured_baseline_doc_corrections/.orchestrator-handoff.json",
+      "type": "handoff",
+      "summary": "Orchestrator handoff with sorry_inventory, structural checks, and build verification detail"
+    }
+  ],
+  "modified_files": [
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 1,
+    "sorry_note": "Pre-existing, user-decided, immovable sorry in branchSatisfiableIn_s4FC_ancestor_redirect; unchanged by this task (line shifted 1244 -> 1270 by the docstring addition above it). No sorry introduced.",
+    "vacuous_count": 0,
+    "axiom_count": 0,
+    "build_passed": false,
+    "build_note": "Repo-wide lake build remains RED on a pre-existing, unrelated failure: Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329 'Missing cases' (commit 88b198bf). Not repaired, not worked around. Scoped builds of BOTH modified modules pass: Cslib.Logics.Modal.Tableau.LoopChecking (847 jobs) and Cslib.Logics.Modal.Tableau.FrameSoundness (876 jobs).",
+    "ci_pipeline_passed": false,
+    "ci_pipeline_note": "lake exe checkInitImports NOT run as a gate and NOT reported as passing - it is vacuous while the above build blocker holds. Remaining CI steps (lake lint, lint-style, shake, mk_all, lake test) likewise not claimed.",
+    "structural_checks_passed": true,
+    "block_comment_nesting_balanced": true,
+    "declaration_lines_in_diff": 0,
+    "true_claims_touched": 0
+  },
+  "defects_corrected": [1, 2, 3, 4],
+  "memory_candidates": [
+    "Lean block comments NEST: a literal `/-` inside a `/-! ... -/` docstring opens a nested comment and swallows the rest of the file. When embedding grep commands containing comment markers into Lean docstrings, use bracketed character classes and verify the rewritten command reproduces the same figure before landing it.",
+    "A figure being non-reproducible does not imply the conclusion drawn from it is wrong. keysOriginS4's '22 consumers' was unreproducible (actual: 61 textual / 55 non-comment-leading), but the conclusion 'not zero-consumer, so the removal claim is false' held with a large margin. Correct the figure, re-check the conclusion separately.",
+    "A red repo-wide `lake build` does not always block per-module verification. When the failing module is in a different import subtree, `lake build <Module.Name>` on the edited modules still gives genuine compile verification - check the subtree relationship before declaring work build-unverified.",
+    "Massacci (2000), 'Single Step Tableaux for Modal Logics': Theorem 8.1 (blocking preserves satisfiability) is STATED AND NEVER PROVED. Appendix B.2 ('PROOFS OF SECTION 8') proves only Theorem 8.4; the Section 8 extension is deferred to references [7] (prefixed tableaux) and [20] (completeness via model graphs). Do not cite it as a proved source for a blocking-soundness argument.",
+    "Landing a measured baseline is only drift-proof if each figure ships with its reproduction command AND the measurement DEFINITION is named. Three different 'sorry counts' (code-position 29, CI-grep 158, incremental-build warnings 5) coexist in this repo and disagree; the incremental-build warning count is always an undercount because cached modules never re-emit warnings."
+  ],
+  "metadata": {
+    "session_id": "sess_1785105096_50f3c7",
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
+  }
+}

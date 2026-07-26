@@ -11,10 +11,10 @@ next_project_number: 572
 **Dependency Waves**:
 | Wave | Tasks | Blocked by | Topics |
 |------|-------|------------|--------|
-| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,557,558,559,560,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
+| 1 | 36,37,181,226,317,409,425,440,465,466,530,534,554,555,557,558,560,562,563,569,570 | -- | propositional logic, modal logic, temporal logic, ... |
 | 2 | 39,40,215,301,375,400,430,450,456,497,511,537,551,553,564,568,571 | 36,37,181,317,425,465,530,554,562,563 | propositional logic, modal logic, temporal logic, ... |
 | 3 | 41,413,506,548,565,566 | 39,40,375,511,564 | foundations, modal logic, code hygiene |
-| 4 | 300,567 | 506,558,559,565,566 | modal logic |
+| 4 | 300,567 | 506,558,565,566 | modal logic |
 | 5 | 414 | 181,215,300,301 | code hygiene |
 
 **Grouped by Topic** (indented = depends on parent):
@@ -26,7 +26,7 @@ next_project_number: 572
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [RESEARCHED] — Fill the remaining propositional/intuitionistic tableau completen
+317 [PLANNING] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -42,8 +42,6 @@ next_project_number: 572
 557 [BLOCKED] — Refactor and restructure the modal Tableau subsystem to library-p
 558 [NOT STARTED] — [Task A of the modal-tableau refactor programme; P0, highest valu
   └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept
-559 [IMPLEMENTING] — [Task B of the modal-tableau refactor programme; P0, no dependenc
-  └─ 567 [NOT STARTED] — [Task I of the modal-tableau refactor programme; P4, final accept (see above)
 562 [NOT STARTED] — [Task D of the modal-tableau refactor programme; P2. Gated on the
   └─ 564 [NOT STARTED] — [Task F of the modal-tableau refactor programme; P3.] Migrate the
     └─ 565 [NOT STARTED] — [Task G of the modal-tableau refactor programme; P3. Depends on t
@@ -235,10 +233,11 @@ All 9 require axioms that were REMOVED AS UNSOUND (BX8/BX9 and the temporal-T ax
 ---
 
 ### 559. Land the measured Tableau baseline and correct four documentation defects
-- **Status**: [IMPLEMENTING]
+- **Status**: [COMPLETED]
 - **Task Type**: cslib
 - **Topic**: Modal Logic
 - **Dependencies**: None
+- **Summary**: [559_tableau_measured_baseline_doc_corrections/summaries/01_measured-baseline-doc-corrections-summary.md]
 
 **Description**: [Task B of the modal-tableau refactor programme; P0, no dependency, runs in parallel with the Support dedup task.] Land the measured baseline table (with its exact reproduction commands) into the modal Tableau subsystem's module documentation, so the asserted-vs-actual drift that this programme's research found cannot recur. Measured figures: LoopChecking.lean 10,540 lines / 230 declarations; FrameSoundness.lean 5,317; FrameCompleteness.lean 4,307; three-file total 20,164; redirect semantic surface 4 clauses / 14 code lines at LoopChecking.lean:6557-6562; the hintikkaS4 bridge set is 8, not ten; subsystem axiom declarations 0; subsystem sorry census exactly 1. CORRECT EXACTLY FOUR ADJUDICATED DEFECTS, leaving the seven verified-TRUE claims alone: (1) LoopChecking.lean:2001-2002 -- the claim that keysOriginS4 was removed is FALSE (it has 22 code consumers); (2) LoopChecking.lean:8911-8912 -- stale references to the two _boxed reflTransGen bridge variants, removed in commit c4b33f63; (3) LoopChecking.lean:2000-2004 -- resolve the 'possibly orphaned' hedge on keysRootEmpty using the consumer audit as evidence; (4) FrameSoundness.lean:1215-1219 -- add BOTH the zero-consumer fact AND the finding that Massacci2000 Theorem 8.1 (blocking preserves satisfiability) is STATED AND NEVER PROVED there (Appendix B.2 proves only Theorem 8.4; section 10.2 defers 8.1 to Gore's model graphs), because that changes how a future reader assesses the obstruction and prevents another route from trying to reconstruct a proof its cited source does not contain. Documentation-only: no proof or definition may change.
 
@@ -706,7 +705,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [RESEARCHED]
+- **Status**: [PLANNING]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 552

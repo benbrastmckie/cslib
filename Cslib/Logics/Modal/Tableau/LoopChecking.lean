@@ -74,6 +74,117 @@ pigeonhole argument now injects (see `S4LoopInv`).
 Do **not** import `LoopInduction.lean`: despite the name, it is a `Forall2` list lemma
 about the *fuel* loop in the generic driver, unrelated to modal loop-checking.
 
+## Measured Baseline (modal Tableau subsystem)
+
+Recorded here because several size and inventory figures for this subsystem drifted between
+prose descriptions and the tree. **Every row below carries the command that reproduces it.**
+The rule this section exists to enforce: if a figure is quoted anywhere in this subsystem's
+documentation, quote the command with it, and re-run the command rather than trusting the
+stored number.
+
+Captured at commit `7eb51f69`, toolchain Lake 5.0.0-src+68218e8 (Lean 4.31.0), and re-confirmed
+against the working tree when this section landed.
+
+### Size and declaration density
+
+```
+wc -l Cslib/Logics/Modal/Tableau/LoopChecking.lean
+wc -l Cslib/Logics/Modal/Tableau/FrameSoundness.lean
+wc -l Cslib/Logics/Modal/Tableau/FrameCompleteness.lean
+grep -cE '^(private )?(protected )?(noncomputable )?(theorem|lemma|def|abbrev|instance|structure|inductive) ' Cslib/Logics/Modal/Tableau/LoopChecking.lean
+```
+
+At `7eb51f69`: `LoopChecking.lean` 10,540 lines, `FrameSoundness.lean` 5,317,
+`FrameCompleteness.lean` 4,307 -- 20,164 across the three. `LoopChecking.lean` declares 230
+top-level items. The three line-count rows are pinned to that commit and are the one part of
+this table that moves under ordinary documentation edits (landing this very section moved two of
+them); the declaration count does not. Re-run `wc -l` rather than citing the stored figure.
+
+### Sorry census
+
+```
+{ grep -rnE '^[[:space:]]*sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/ ; \
+  grep -rnE '(:=|\bby)[[:space:]]+sorry([[:space:]]*--.*)?$' --include='*.lean' Cslib/ ; } \
+  | sort -u | grep 'Modal/Tableau/'
+```
+
+**1** in this subsystem: `branchSatisfiableIn_s4FC_ancestor_redirect` in `FrameSoundness.lean`,
+the retained, user-decided, immovable obstruction (see that lemma's docstring). Dropping the
+final `grep` gives **29** code-position sorries repo-wide.
+
+Three different definitions of "sorry count" circulate and they do not agree, so state which one
+is meant. The 29 above counts sorries in *code position*. The CI-pipeline grep
+(`grep -rn "\bsorry\b" Cslib/`, minus comment-leading lines) returns 158 because it also matches
+docstring prose such as "sorry-free". The `declaration uses 'sorry'` warning count from an
+incremental `lake build` is an **undercount** and must never be used as a census: cached modules
+do not re-elaborate and so never re-emit their warnings.
+
+### Axiom census -- a scope distinction, not a corrected number
+
+```
+grep -rnE '^axiom ' Cslib/Logics/Modal/Tableau/ | wc -l    # 0
+grep -rnE '^axiom ' Cslib/ | wc -l                         # 26
+grep -row 'axiom' Cslib/Logics/Modal/Tableau/ | wc -l      # 3
+grep -row 'axiom' Cslib/ | wc -l                           # 1701
+```
+
+These are **two scopes, not two candidate values for one quantity, and neither supersedes the
+other**: this subsystem declares **0** axioms; the repository declares **26**, none of them here.
+The 3 and 1,701 figures are raw word occurrences in prose and identifiers, not declarations, and
+are recorded only to show why a naive word-count grep diverges. A previously-noted "26 vs 47"
+discrepancy was a scope confusion of exactly this kind, not a drift.
+
+### Inventory figures that drifted
+
+```
+grep -rho 'Local re-derivation' Cslib/ | wc -l                                    # 55
+grep -rl 'ModalTableauResult' --include='*.lean' Cslib/Logics/Modal/Tableau/ | wc -l   # 8
+grep -rl 'ModalTableauResult' --include='*.lean' . --exclude-dir=.lake | wc -l    # 9
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l   # 8
+grep -n 'structure S4LoopInv' Cslib/Logics/Modal/Tableau/LoopChecking.lean
+wc -l CslibTests/S4LoopGuardRegression.lean                                       # 197
+```
+
+* **Local re-derivation sites: 55**, not the 77 previously carried. 77 is not reproducible by
+  any obvious command (`-i 're-derivation'` gives 80, `-i 're-deriv'` gives 106) and is retired.
+  **The smaller headline does not mean less work.** Every per-lemma spot-check behind the old
+  figure was an undercount (`modalSubfmls_trans` 4 sites not 3, `modalKnownWorlds_fold_spec` 6
+  not 4, `hasEdge_addEdge_cases` 7 not 4), and the old per-file distribution omitted
+  `LoopChecking.lean`'s **14** sites entirely -- the largest file in the subsystem. The
+  de-duplication work is larger, not smaller.
+* **`ModalTableauResult` spans 8 modules here, 9 repo-wide** (the ninth is
+  `CslibTests/S4LoopGuardRegression.lean`). A previously reported span of 11 is drift.
+* **`hintikkaS4_*` bridge set: 8 declarations.** Counting *distinct identifiers* instead returns
+  11, because three further names occur only in call positions or prose. See the
+  "Redirect Forward-Cone Free Transfer" section for what was removed and when.
+* No `FIX:`/`NOTE:`/`TODO:`/`QUESTION:` tags in `LoopChecking.lean`, `FrameSoundness.lean`, or
+  `FrameCompleteness.lean` (0 each). Repo-wide: 11 `TODO:`, 8 `NOTE:`.
+* There is no `Boneyard/` directory (`find . -type d -name 'Boneyard' -not -path './.lake/*'`
+  returns nothing).
+
+### Figures deliberately NOT re-measured
+
+Recorded as gaps rather than filled with substitutes. **No number has been fabricated for any of
+these, and none should be quoted as measured.**
+
+* The two amplification figures inherited from earlier analysis -- **4 declarations / 1,036
+  lines**, and **43 declarations / 1,983 lines reachable from `modalTableauS4Keyed_complete`** --
+  are unverified inheritances. Re-measuring them needs a transitive-dependency closure over the
+  elaborated environment, which needs built `.olean`s for these modules.
+* The redirect semantic surface (reported as 4 clauses / 14 code lines) is likewise an inherited
+  figure, not a row of this capture.
+
+Anything depending on these must re-measure them, or say plainly that it is relying on an
+unverified inheritance.
+
+### Build gate at capture
+
+`lake build` failed at capture, and the failure is **outside this subsystem**: a non-exhaustive
+match in `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean` (introduced by
+commit `88b198bf`, belonging to in-flight work on the constructive nested-sequent development).
+`lake exe checkInitImports` then fails downstream as a consequence, not as an independent defect.
+While that holds, `checkInitImports` verifies nothing and must not be reported as passing.
+
 ## References
 
 * [M. Fitting, *Proof Methods for Modal and Intuitionistic Logics*][Fitting1983], Chapter 2
@@ -1997,11 +2108,37 @@ always `(modalNextWorld b, ...)`, strictly greater than every existing label, he
 means `0`'s recorded key is *always* `∅`. Threaded the same way as `keysOriginS4` itself: an
 extra hypothesis, never an `S4LoopInv` field.
 
-**Now possibly orphaned**: this fact's sole consumer, `blockedRedirect_boxctx_mem`, was removed
-above (it was false as stated -- see the "Redirect-Inertness Assembly" section) along with
-`keysOriginS4` and its supporting lemmas. Left in place, not deleted, pending the re-plan
-(Route P is being reconsidered in favour of ancestor-only blocking); see the removal comment
-above and the task's orchestrator handoff for the full orphan inventory. -/
+**Consumer audit (measured; supersedes an earlier hedge).** An earlier revision of this comment
+stated that this fact's sole consumer `blockedRedirect_boxctx_mem` was removed "along with
+`keysOriginS4` and its supporting lemmas", and marked `keysRootEmpty` itself "possibly orphaned".
+Both halves are corrected here against a measured consumer audit. Only
+`blockedRedirect_boxctx_mem`/`blockedRedirect_diaNeg_mem` were in fact removed (they were false as
+stated -- see the "Redirect-Inertness Assembly" section below).
+
+`keysOriginS4` was **not** removed and is **not** orphaned. It is still declared in this file
+(`keysOriginS4`, together with `keysOriginS4_entry`, `keysOriginS4_mono_branch` and
+`keysOriginS4_mono_acc`) and is referenced pervasively:
+
+```
+grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | wc -l
+grep -rn 'keysOriginS4' --include='*.lean' Cslib/ | grep -vE ':[[:space:]]*(--|[/][-]|[-][|]|[*])' | wc -l
+```
+
+61 textual references, 55 of them on lines that do not begin with a comment marker, all inside
+this file. Any future claim that `keysOriginS4` was deleted is false and should not be
+reintroduced.
+
+`keysRootEmpty` **is** orphaned -- audited, no longer hedged:
+
+```
+grep -rn 'keysRootEmpty' --include='*.lean' Cslib/ CslibTests/ | wc -l
+```
+
+6 hits, all in this file: this section heading, the two declarations below (`keysRootEmpty` and
+`keysRootEmpty_entry`) with their docstrings, and one prose mention in the "Redirect-Inertness
+Assembly" section. Outside its own entry lemma the definition has **zero** consumers. It is
+retained deliberately rather than pending any re-plan: it is small, sorry-free, and a true
+statement about the driver's seed state that a route (1) successor may want. -/
 
 /-- **`keysRootEmpty`**: every key recorded for world `0` is empty. -/
 def keysRootEmpty
@@ -8908,11 +9045,28 @@ lemma reflTransGen_accWithReds_first_red (acc : Accessibility) (red : Reds Atom)
 
 Route (3)'s Decision Gate B (`plans/04_subtractive-blocking-red-channel.md`, `#### Phase 3
 Verdict`) refuted the cone-extension lemma that would have let the two free transfers below
-propagate beyond the redirect target `wBlock` itself; `hintikkaS4_box_pos_reflTransGen_boxed`/
-`hintikkaS4_dia_neg_reflTransGen_boxed` and the forward-cone conjuncts they fed
-(`S4KeyedSubHintikkaInv.redBoxForwardCone`/`redDiaForwardCone`) were removed in the post-Gate-B
-triage as dead machinery. The two lemmas below are the surviving reflexive-case fragment: sorry-
-free, standard-axioms-only, true statements about the guard, kept because they are genuinely
+propagate beyond the redirect target `wBlock` itself. The two boxed bridge variants
+`hintikkaS4_box_pos_reflTransGen_boxed`/`hintikkaS4_dia_neg_reflTransGen_boxed`, and the
+forward-cone conjuncts they fed (`S4KeyedSubHintikkaInv.redBoxForwardCone`/`redDiaForwardCone`),
+were deleted from the repository in the post-Gate-B triage by commit `c4b33f63` ("revert
+red-channel machinery orphaned by Gate B, retain route-independent assets"). **They no longer
+exist**: the only remaining occurrences of all four identifiers anywhere under `Cslib/` are the
+two prose mentions in this paragraph, so nothing below may be read as depending on them.
+
+Consequence for the bridge count: the `hintikkaS4_*` bridge set in this file is now **8**
+declarations, not the ten that existed when this paragraph was first written (the figure of ten
+was correct then; `c4b33f63` removed two of them).
+
+```
+grep -nE '^(private )?(theorem|lemma) hintikkaS4_' Cslib/Logics/Modal/Tableau/LoopChecking.lean | wc -l
+```
+
+Beware a near-miss measurement: counting *distinct identifiers* over the same file returns 11,
+because three further `hintikkaS4_*` names occur only in call positions or prose. The declared
+bridge set is 8.
+
+The two lemmas below are the surviving reflexive-case fragment: sorry-free,
+standard-axioms-only, true statements about the guard, kept because they are genuinely
 route-independent and may be reused by the route (1) successor plan. -/
 
 omit [Hashable Atom] in

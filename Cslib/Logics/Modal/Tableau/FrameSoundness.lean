@@ -1216,7 +1216,33 @@ for the exact obstruction. The `sorry` marks the one case genuinely not discharg
 these hypotheses: an arbitrary `branchSatisfiableIn` witness need not have `m.r (f src) (f a)`,
 and extending `m.r` to add it (forced to close transitively, since `IsTrans` binds the concrete
 relation) requires box/diamond content transfer for *every* ambient predecessor of `f src`, not
-just `src` itself -- a fact no standalone, driver-independent hypothesis set can supply. -/
+just `src` itself -- a fact no standalone, driver-independent hypothesis set can supply.
+
+**Consumer audit: zero consumers.** This lemma is referenced exactly once anywhere in the
+repository, by its own declaration:
+
+```
+grep -rn 'branchSatisfiableIn_s4FC_ancestor_redirect' --include='*.lean' Cslib/ CslibTests/ | wc -l
+```
+
+1 hit. Nothing consumes it, so the `sorry` below propagates into no other result: it is a
+recorded obstruction rather than load-bearing debt. It is also the modal Tableau subsystem's sole
+`sorry`, and it is retained by explicit user decision.
+
+**The cited source does not contain the proof this obstruction keeps being measured against.**
+Successive soundness routes for this guard have appealed to Massacci (2000), *Single Step Tableaux
+for Modal Logics*, Theorem 8.1 -- "if the L-tableau with local assumptions U and global
+assumptions G starting with `1 : A` terminates with a π-completed branch, then A is L-satisfiable
+for U and G" -- i.e. to the claim that blocking preserves satisfiability. **In that paper
+Theorem 8.1 is stated and never proved.** Its Appendix B.2, headed "PROOFS OF SECTION 8",
+contains a proof of Theorem 8.4 only; and where the section-8 (π-modal-completed) extension is
+discussed, the paper explicitly defers it to the completeness proofs of its references [7]
+(prefixed tableaux) and [20] (completeness via model graphs) rather than establishing it.
+
+This is recorded here because it changes how the obstruction above should be read. It is not a
+failure to transcribe an available argument: the argument is absent from the cited source. Any
+further attempt to close this `sorry` by following that citation will find nothing to follow, and
+would need to import the model-graph construction from the deferred references instead. -/
 lemma branchSatisfiableIn_s4FC_ancestor_redirect
     {b : List (SignedFormula (Proposition Atom) WorldIndex)} {acc : Accessibility}
     (h : branchSatisfiableIn s4FC b acc)

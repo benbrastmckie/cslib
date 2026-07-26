@@ -326,12 +326,12 @@
     {
       "project_number": 317,
       "project_name": "propositional_tableau_completeness",
-      "status": "researched",
+      "status": "planning",
       "task_type": "cslib",
       "topic": "Propositional Logic",
       "description": "Fill the remaining propositional/intuitionistic tableau completeness sorries. BOTH HISTORIC BLOCKERS ARE NOW CLOSED (verified 2026-07-26 against the code, not against prior notes): Gap 2 (Sub(phi0) determinacy/bivalence) is RESOLVED -- the shared conformance/rule-completeness repair landed the `.pos, .imp` branching arm at Rules.lean:274-275 producing [[F(phi)], [T(psi)]], and Scheme.lean:581 records the resolution in-code. Gap 1 (fuel sufficiency for the persistence fixpoint) is RESOLVED -- `applyPersistenceFixpoint_genuine_of_count_le_fuel` is landed sorry-free at Scheme.lean:2907, with `intUniverse_length_le` giving the polynomial fuel bound. REMAINING SCOPE IS ASSEMBLY ONLY, and now also absorbs the separately-tracked sat_timp task (removed as a duplicate; its file pointer was wrong): (1) add the `sat_timp` field to `IBranchSaturation` and discharge it at its sole construction site `IExpandedConsistent_sat`, consuming the genuine-fixpoint lemma; (2) close truthLemma's T-imp case at Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean:592; (3) close the fuel=0 base case of `intExpandBranches_openBranch_sat` at Scheme.lean:1498; (4) close the two IValid/MValid bridges at Intuitionistic/Completeness.lean:133 and Minimal/Completeness.lean:125. Because the int and min tableaux are parameterized over (closurePred, modelBot), discharge the truth-lemma/countermodel pair ONCE parametrically rather than duplicating. MANDATORY DOCSTRING REPAIR: the block at Scheme.lean:~3000 ('GAP 2 investigation ... determinacy remains BLOCKED') is STALE and contradicts line 581; it predates the branching-rule landing and will re-block a future dispatch that reads it. Correct or delete it as part of this task. The tableau Decidable instances become genuinely sorry-free once these land. No new axioms; Cslib/ bare-sorry count must go DOWN; CI green (lake build, lake test, lake exe checkInitImports, lake exe lint-style, lake shake); the 43-row CslibTests/TableauConformance.lean regression guard must stay green.",
       "created": "2026-06-23T19:55:52Z",
-      "last_updated": "2026-07-26T23:05:31Z",
+      "last_updated": "2026-07-26T23:15:09Z",
       "next_artifact_number": 12,
       "artifacts": [
         {
@@ -479,7 +479,7 @@
         552
       ],
       "parent_task": 298,
-      "session_id": "sess_1785106431_e662fa",
+      "session_id": "sess_1785107692_362f1e",
       "blockers": [],
       "file_scope": [
         "Cslib/Logics/Propositional/Tableau/Intuitionistic/Scheme.lean",
@@ -1971,7 +1971,7 @@
     {
       "project_number": 559,
       "project_name": "tableau_measured_baseline_doc_corrections",
-      "status": "implementing",
+      "status": "completed",
       "task_type": "cslib",
       "title": "Land the measured Tableau baseline and correct four documentation defects",
       "topic": "Modal Logic",
@@ -1982,13 +1982,20 @@
         "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
         "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
       ],
-      "artifacts": [],
+      "artifacts": [
+        {
+          "path": "specs/559_tableau_measured_baseline_doc_corrections/summaries/01_measured-baseline-doc-corrections-summary.md",
+          "type": "summary",
+          "summary": "Four documentation defect corrections plus the measured baseline table landed in LoopChecking.lean module docs"
+        }
+      ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:13:42Z",
-      "next_artifact_number": 1,
+      "last_updated": "2026-07-26T00:00:00Z",
+      "next_artifact_number": 2,
       "session_id": "sess_1785105096_50f3c7",
-      "parent_task": null
+      "parent_task": null,
+      "completion_summary": "Corrected the four adjudicated Tableau documentation defects (keysOriginS4 false-removal claim, stale _boxed reflTransGen bridge references, keysRootEmpty orphan hedge, and the branchSatisfiableIn_s4FC_ancestor_redirect zero-consumer fact plus the finding that Massacci2000 Theorem 8.1 is stated and never proved in that source) and landed the measured baseline table with reproduction commands into LoopChecking.lean module documentation. Documentation-only: no declaration or proof altered; the seven verified-TRUE claims left untouched. Scoped lake build of both modified modules passes; the repo-wide build gate remains red for an unrelated reason (Nested/Soundness.lean:1329)."
     },
     {
       "project_number": 560,

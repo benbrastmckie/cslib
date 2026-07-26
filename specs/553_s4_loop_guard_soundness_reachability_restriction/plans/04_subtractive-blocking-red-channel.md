@@ -1,7 +1,7 @@
 # Implementation Plan: Massacci-Style Subtractive Blocking with a Completeness-Only Redirect Channel (v4)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 32-40 hours (12 phases; two of them are front-loaded decision gates that may
   terminate the route)
 - **Dependencies**: 535 (completeness-line task; its landed keyed completeness results are inputs)
@@ -546,19 +546,29 @@ section.
 
 ---
 
-### Phase 1: The `red` channel type, `accWithReds`, and the bifurcated Hintikka predicate `modalHintikkaSetS4Sub` [NOT STARTED]
+### Phase 1: The `red` channel type, `accWithReds`, and the bifurcated Hintikka predicate `modalHintikkaSetS4Sub` [COMPLETED]
 
 - **Goal:** Fix the exact Lean statement shapes the whole route rests on, with **no proofs
   attempted**, and re-validate them against the probe in their *final* form.
 - **Tasks:**
-  - [ ] `abbrev Reds := List (WorldIndex × WorldIndex × Sign × Proposition Atom)` in
+  - [x] `abbrev Reds := List (WorldIndex × WorldIndex × Sign × Proposition Atom)` in
         `LoopChecking.lean`, matching `artifacts/s4subtractive3.lean:43`'s working type
-        (source, target, sign, formula).
-  - [ ] `def accWithReds (acc : Accessibility) (red : Reds) : Accessibility :=
+        (source, target, sign, formula). **Landed as `abbrev Reds (Atom : Type*) [DecidableEq
+        Atom] [Hashable Atom] := List (...)`** rather than the plan's bare zero-argument form:
+        unlike the probe's `P := Proposition Nat` (a concrete type), `LoopChecking.lean`'s
+        `Atom` is an ambient section `variable`, and a zero-argument `abbrev` referencing it
+        fails to elaborate at every use site (`don't know how to synthesize implicit argument
+        Atom` -- confirmed by a minimal reproduction before landing). Every use site writes
+        `Reds Atom` explicitly; this is a mechanical Lean-elaboration necessity, not a design
+        change -- the type is byte-identical in content to the plan's spec.
+  - [x] `def accWithReds (acc : Accessibility) (red : Reds) : Accessibility :=
         ⟨acc.edges ++ red.map (fun r => (r.1, r.2.1))⟩`, plus the single `simp` bridge
         `hasEdge_accWithReds_iff : (accWithReds acc red).hasEdge x y = (acc.hasEdge x y ||
-        red.any (fun r => r.1 == x && r.2.1 == y))` (by `List.any_append`).
-  - [ ] `def modalHintikkaSetS4Sub (φ₀) (b) (acc : Accessibility) (red : Reds) : Prop` with the six
+        red.any (fun r => r.1 == x && r.2.1 == y))` (by `List.any_append`). Landed proof:
+        `simp only [accWithReds, Accessibility.hasEdge, List.any_append, List.any_map,
+        Function.comp_def]` (verified `List.any_map`'s stated form needs `Function.comp_def` to
+        close the resulting `∘`-vs-`fun` goal; confirmed via `lean_run_code` before landing).
+  - [x] `def modalHintikkaSetS4Sub (φ₀) (b) (acc : Accessibility) (red : Reds) : Prop` with the six
         conjuncts of the Overview's bifurcation table. Conjunct 2 is stated over **`acc`**;
         conjuncts 3/4 over **`accWithReds acc red`**; conjuncts 5/6 are:
         ```lean
@@ -577,13 +587,13 @@ section.
                  (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
             (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
         ```
-  - [ ] `structure S4KeyedSubHintikkaInv` — **field statements only, no preservation proof**: the
+  - [x] `structure S4KeyedSubHintikkaInv` — **field statements only, no preservation proof**: the
         `S4KeyedHintikkaInv` fields (`:8752-8766`) with `eBoxNegWitness`/`eDiamondPosWitness`
         restated over `accWithReds acc red`, plus two fields mirroring conjuncts 5/6.
-  - [ ] Extend `artifacts/s4subtractive3.lean` so `condGStar`/`condFStar` (`:226-239`) are
+  - [x] Extend `artifacts/s4subtractive3.lean` so `condGStar`/`condFStar` (`:226-239`) are
         **syntactically aligned** with the final conjunct 5/6 statements — same quantifier order,
         same `red`-membership premise, same cone relation — and re-run all three corpora.
-  - [ ] Record the re-run's verbatim `#eval` output in this plan under
+  - [x] Record the re-run's verbatim `#eval` output in this plan under
         `#### Phase 1 Statement Validation`.
 - **Estimated output:** ~120 lines of Lean plus a ~60-line probe delta plus a ~25-line measurement
   record.
@@ -594,6 +604,69 @@ section.
   statement shape is falsified and the route must be escalated before any proof work.
 - **Timing:** 2-3 hours
 - **Depends on:** none
+
+#### Phase 1 Statement Validation
+
+Landed declarations (`Cslib/Logics/Modal/Tableau/LoopChecking.lean`, inserted after
+`S4KeyedHintikkaInv_weaken`, before "## Phase 7: Single-Step Invariant Preservation"):
+`Reds`, `accWithReds`, `hasEdge_accWithReds_iff`, `modalHintikkaSetS4Sub`,
+`S4KeyedSubHintikkaInv`. `lake build Cslib.Logics.Modal.Tableau.LoopChecking` is clean (exit 0,
+zero errors). `lake exe checkInitImports` clean. Sorry census over
+`Cslib/Logics/Modal/Tableau/*.lean` unchanged at exactly 1 (`FrameSoundness.lean:1244`, untouched
+per user decision) -- no new `sorry`, no proof beyond the single `simp only` bridge. No new
+axioms (no `axiom` keyword used anywhere in this phase's output).
+
+`condGStar`/`condFStar` (`specs/553_.../artifacts/s4subtractive3.lean`) carry a doc comment
+cross-referencing `modalHintikkaSetS4Sub` conjuncts 5/6 field-by-field (red-membership premise,
+box/diamond-shaped antecedent, `accWithReds`-cone-via-`reachEdges`/`augEdges`, conclusion) and
+were re-run on all three corpora via `lake env lean
+specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean`
+(exit 0). Verbatim output for the three sweep corpora:
+
+```
+C6.2: formulas=8532 openLeavesVisited=11139 recordedRedirects=1652
+C6.2: (a) witness present at wBlock      -- FAILURES = 0
+C6.2: (b) T(□χ)@src -> T(□χ)@wBlock      -- FAILURES = 0   <-- LOAD-BEARING
+C6.2: (c) T(□χ)@src -> T(χ)@wBlock       -- FAILURES = 0
+C6.2: (d) F(◇χ)@src -> F(◇χ)@wBlock      -- FAILURES = 0
+C6.2: (e) F(◇χ)@src -> F(χ)@wBlock       -- FAILURES = 0
+C6.2: (g) T(□χ)@src -> T(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C6.2: (f) F(◇χ)@src -> F(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C6.2: (G*) box obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C6.2: (F*) dia obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C6.2: redirects whose source ALREADY had a genuine acc-successor witness = 24
+C7.1: formulas=16850 openLeavesVisited=21750 recordedRedirects=6303
+C7.1: (a) witness present at wBlock      -- FAILURES = 0
+C7.1: (b) T(□χ)@src -> T(□χ)@wBlock      -- FAILURES = 0   <-- LOAD-BEARING
+C7.1: (c) T(□χ)@src -> T(χ)@wBlock       -- FAILURES = 0
+C7.1: (d) F(◇χ)@src -> F(◇χ)@wBlock      -- FAILURES = 16
+C7.1: (e) F(◇χ)@src -> F(χ)@wBlock       -- FAILURES = 0
+C7.1: (g) T(□χ)@src -> T(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C7.1: (f) F(◇χ)@src -> F(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C7.1: (G*) box obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C7.1: (F*) dia obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C7.1: redirects whose source ALREADY had a genuine acc-successor witness = 253
+C7.2: formulas=55299 openLeavesVisited=77852 recordedRedirects=16359
+C7.2: (a) witness present at wBlock      -- FAILURES = 0
+C7.2: (b) T(□χ)@src -> T(□χ)@wBlock      -- FAILURES = 0   <-- LOAD-BEARING
+C7.2: (c) T(□χ)@src -> T(χ)@wBlock       -- FAILURES = 0
+C7.2: (d) F(◇χ)@src -> F(◇χ)@wBlock      -- FAILURES = 24
+C7.2: (e) F(◇χ)@src -> F(χ)@wBlock       -- FAILURES = 0
+C7.2: (g) T(□χ)@src -> T(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C7.2: (f) F(◇χ)@src -> F(χ)@u for ALL u acc-reachable from wBlock -- FAILURES = 0   <-- EXACT TRUTH-LEMMA OBLIGATION
+C7.2: (G*) box obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C7.2: (F*) dia obligation over ALL u reachable in acc UNION red -- FAILURES = 0   <-- FULL OBLIGATION
+C7.2: redirects whose source ALREADY had a genuine acc-successor witness = 490
+```
+
+**Verdict: PASS.** `failGStar = 0` and `failFStar = 0` on all three corpora
+(1652 + 6303 + 16359 = **24,314** recorded redirects, matching report 04's baseline exactly).
+The forward-cone conjuncts 5/6 -- the ones actually landed in `modalHintikkaSetS4Sub` and
+`S4KeyedSubHintikkaInv` -- have **zero measured counterexamples** in their final statement form.
+(d), the forbidden wrapped-at-target form, still fails (16 + 24 = 40 total, matching report 04's
+previously-recorded count) -- expected and correctly NOT used anywhere in the landed statements,
+confirming the bifurcation was necessary. Per the phase's done-when criterion, Phase 1 proceeds
+to `[COMPLETED]`; Phases 2 and 3 (the two decision gates) are unblocked for wave 2.
 
 ---
 

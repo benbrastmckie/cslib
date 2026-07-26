@@ -223,6 +223,29 @@ partial def reachEdges (edges : List (WorldIndex × WorldIndex)) (w : WorldIndex
 def augEdges (acc : Accessibility) (red : Reds) : List (WorldIndex × WorldIndex) :=
   acc.edges ++ red.map (fun r => (r.1, r.2.1))
 
+/-- **Phase 1 realignment**: this is the decidable mirror of `LoopChecking.lean`'s
+`modalHintikkaSetS4Sub` **conjunct 5** (`redBoxForwardCone`, G*), landed verbatim as:
+
+```
+∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign) (φ : Proposition Atom),
+  (src, wBlock, s, φ) ∈ red →
+  (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+  ∀ u, Relation.ReflTransGen
+         (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
+    (⟨.pos, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+```
+
+Alignment, checked field-by-field: the `(src, wBlock, s, φ) ∈ red` premise is the caller's
+`red.filter (fun r => …)` iteration below (`r.1 = src`, `r.2.1 = wBlock`, `r.2.2 = (s, φ)`); the
+box-positive antecedent `T(□χ)@src ∈ b` is `b.any (· == ⟨.pos, .box χ, r.1⟩)`; the cone relation
+`Relation.ReflTransGen (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u` is
+decided by `reachEdges (augEdges acc red) r.2.1`, since `augEdges acc red` is definitionally
+`(accWithReds acc red).edges` and `reachEdges` computes the reflexive-transitive closure of a
+raw edge list (the same relation `Accessibility.hasEdge` decides pointwise); the conclusion
+`T(χ)@u ∈ b` is `b.any (· == ⟨.pos, χ, u⟩)`. The leading `∀ χ` / `∀ (src wBlock s φ)` order in
+the Lean statement is immaterial to this Boolean decision procedure (leading universals commute
+freely); the STATISTICS below are still counted per-redirect (one `red` entry = one measured
+decision), matching every prior corpus run so the numbers stay comparable to reports 02/04. -/
 def condGStar (φ₀ : P) (b : List (SignedFormula P WorldIndex)) (acc : Accessibility) (red : Reds)
     (r : WorldIndex × WorldIndex × Sign × P) : Bool :=
   (probeFmls φ₀).all (fun χ =>
@@ -230,6 +253,9 @@ def condGStar (φ₀ : P) (b : List (SignedFormula P WorldIndex)) (acc : Accessi
       (reachEdges (augEdges acc red) r.2.1).all (fun u =>
         b.any (· == (⟨.pos, χ, u⟩ : SignedFormula P WorldIndex))))
 
+/-- **Phase 1 realignment**: the decidable mirror of `LoopChecking.lean`'s
+`modalHintikkaSetS4Sub` **conjunct 6** (`redDiaForwardCone`, F*), the diamond-negative dual of
+`condGStar` above -- same alignment argument, substituting `F(◇χ)@src ∈ b` / `F(χ)@u ∈ b`. -/
 def condFStar (φ₀ : P) (b : List (SignedFormula P WorldIndex)) (acc : Accessibility) (red : Reds)
     (r : WorldIndex × WorldIndex × Sign × P) : Bool :=
   (probeFmls φ₀).all (fun χ =>

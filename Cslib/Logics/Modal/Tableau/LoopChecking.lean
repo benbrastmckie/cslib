@@ -8793,6 +8793,135 @@ lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
     obtain ⟨w', hedge, hwit⟩ := hinv.eDiamondPosWitness sf hsf ψ w hsfeq
     exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
 
+/-! ## Subtractive Route (3): the `red` Channel and the Bifurcated Hintikka Predicate
+
+Route (3) (`Massacci2000` Technique 8.2, subtractive blocking; see this task's plan
+`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
+04_subtractive-blocking-red-channel.md`) moves the redirect a blocked minting step would
+otherwise justify OUT of `acc` (the soundness-tracked structure) and into a separate,
+completeness-only channel `red`. Soundness never reads `red` (`branchSatisfiableIn`'s edge
+conjunct quantifies over `acc.hasEdge` only, `FrameSoundness.lean:113`); completeness reads
+`acc ∪ red` via `accWithReds`.
+
+**Why the Hintikka predicate below is bifurcated rather than simply substituting `accWithReds
+acc red` into `modalHintikkaSetS4`'s conjunct 2**: that conjunct evaluates `modalApplyOneS4`,
+whose box-positive/diamond-negative saturation arms propagate along *every* edge of whatever
+`acc` they are handed. Handing them the union would demand the wrapped-at-target Hintikka forms
+`T(□χ)@src ∈ b → T(□χ)@wBlock ∈ b` / `F(◇χ)@src ∈ b → F(◇χ)@wBlock ∈ b`, which have **40**
+measured counterexamples out of 24,314 recorded blocking decisions
+(`specs/553_.../artifacts/s4subtractive3.lean`, condition (d)). Conjunct 2 below is therefore
+stated over `acc` alone (unchanged from `modalHintikkaSetS4`); only the witness conjuncts (3/4)
+and the two forward-cone conjuncts (5/6, G*/F*) read `accWithReds acc red`. -/
+
+/-- A recorded blocking decision under subtractive blocking: `(source, blockTarget, sign,
+witnessFormula)`. Threaded alongside `keys`, read only by the completeness direction. Matches
+the probe's working type
+(`specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean:43`).
+-/
+abbrev Reds (Atom : Type*) [DecidableEq Atom] [Hashable Atom] :=
+  List (WorldIndex × WorldIndex × Sign × Proposition Atom)
+
+/-- `acc` augmented with every recorded redirect edge from `red`, materialized as a genuine
+`Accessibility`. Since `Accessibility` is a bare edge list (`Branch.lean:55-57`), this lets
+`extractModelS4` and its five lemmas (`FrameCompleteness.lean:143-189`) be reused verbatim at
+`accWithReds acc red` -- no `extractModelS4Sub` is needed. -/
+def accWithReds (acc : Accessibility) (red : Reds Atom) : Accessibility :=
+  ⟨acc.edges ++ red.map (fun r => (r.1, r.2.1))⟩
+
+/-- Bridge: `accWithReds acc red` has an edge `x → y` iff `acc` already has it, or some recorded
+redirect in `red` targets `y` from `x`. -/
+theorem hasEdge_accWithReds_iff (acc : Accessibility) (red : Reds Atom) (x y : WorldIndex) :
+    (accWithReds acc red).hasEdge x y =
+      (acc.hasEdge x y || red.any (fun r => r.1 == x && r.2.1 == y)) := by
+  simp only [accWithReds, Accessibility.hasEdge, List.any_append, List.any_map,
+    Function.comp_def]
+
+/-- The bifurcated S4 Hintikka-set characterization for the subtractive route: the
+`modalHintikkaSetS4` shape, with conjunct 2 (saturation) kept over `acc` alone -- the
+subtractive driver *does* saturate over `acc`, since a blocked step adds no `acc` edge -- and
+conjuncts 3/4 (the existential witnesses) restated over `accWithReds acc red`, plus two
+additional forward-cone conjuncts (G*)/(F*) closing the redirect chain. See the module doc above
+for why conjunct 2 must NOT be evaluated at `accWithReds acc red`. -/
+def modalHintikkaSetS4Sub (φ₀ : Proposition Atom)
+    (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (red : Reds Atom) : Prop :=
+  isModalClosed b = false ∧
+  (∀ sf ∈ b,
+    let (result, _) := modalApplyOneS4 φ₀ sf b acc
+    match sf.sign, sf.formula with
+    | .neg, .box _ => True    -- F(□φ): minting-guarded rule; handled by conjunct 3
+    | .pos, .diamond _ => True  -- T(◇φ): minting-guarded rule; handled by conjunct 4
+    | _, _ =>
+      match result with
+      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
+      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
+      | .notApplicable => True) ∧
+  -- 3. Box-negative witness, over `accWithReds acc red`.
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.neg, .box φ, w⟩ ∈ b → ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
+      ⟨.neg, φ, w'⟩ ∈ b) ∧
+  -- 4. Diamond-positive witness, over `accWithReds acc red`.
+  (∀ (φ : Proposition Atom) (w : WorldIndex),
+    ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
+      ⟨.pos, φ, w'⟩ ∈ b) ∧
+  -- 5. redBoxForwardCone (G*): NEVER the wrapped-at-target form (40 counterexamples / 24,314).
+  (∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign) (φ : Proposition Atom),
+    (src, wBlock, s, φ) ∈ red →
+    (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+    ∀ u, Relation.ReflTransGen
+           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
+      (⟨.pos, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) ∧
+  -- 6. redDiaForwardCone (F*): NEVER the wrapped-at-target form (40 counterexamples / 24,314).
+  (∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign) (φ : Proposition Atom),
+    (src, wBlock, s, φ) ∈ red →
+    (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+    ∀ u, Relation.ReflTransGen
+           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
+      (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+
+/-- **Keys-and-`red`-threaded Hintikka-tracking invariant bundle** for the subtractive route:
+the `S4KeyedHintikkaInv` fields, with the two witness fields (`eBoxNegWitness`/
+`eDiamondPosWitness`) restated over `accWithReds acc red`, plus two additional fields mirroring
+`modalHintikkaSetS4Sub`'s forward-cone conjuncts 5/6. **Field statements only** -- no
+preservation lemma is proved in this phase; threading this invariant through the subtractive
+ordered stepper is a later phase's task. -/
+structure S4KeyedSubHintikkaInv (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) (red : Reds Atom) : Prop where
+  /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
+  hintikkaInv : ∀ sf ∈ e,
+    modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys) sf.sign sf.formula sf.label b acc
+  /-- Every box-shaped formula in the expanded set `e` has sign `.neg`. -/
+  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
+  /-- Every `boxNeg`-shaped formula already has a witness successor on `accWithReds acc red`. -/
+  eBoxNegWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
+      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos`. -/
+  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
+  /-- Every `diamondPos`-shaped formula already has a witness successor on `accWithReds acc
+  red`. -/
+  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
+    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
+    ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
+      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Forward-cone box obligation (mirrors `modalHintikkaSetS4Sub` conjunct 5, G*). -/
+  redBoxForwardCone : ∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign)
+      (φ : Proposition Atom), (src, wBlock, s, φ) ∈ red →
+    (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+    ∀ u, Relation.ReflTransGen
+           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
+      (⟨.pos, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+  /-- Forward-cone diamond obligation (mirrors `modalHintikkaSetS4Sub` conjunct 6, F*). -/
+  redDiaForwardCone : ∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign)
+      (φ : Proposition Atom), (src, wBlock, s, φ) ∈ red →
+    (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
+    ∀ u, Relation.ReflTransGen
+           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
+      (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
+
 /-! ## Phase 7: Single-Step Invariant Preservation -/
 
 omit [Hashable Atom] in

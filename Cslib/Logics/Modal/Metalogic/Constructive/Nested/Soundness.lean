@@ -390,4 +390,84 @@ theorem lemma4_5 (ctx : InputCtx Atom) {Δ Θ : NestedLhs Atom}
     Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs Δ).fm.imp (ctx.fillLhs Θ).fm) :=
   InputCtx.fillLhs_fm_antitone ctx h
 
+/-! ## Lemma 4.6 (page 9): Soundness of the One-Premise Rules
+
+The source's proof handles nine named rules (`w, c, ∨°, □°, ◇°, ⊃°, ∧•, ◇•, □•`) via Lemma 4.4 or
+Lemma 4.5, plus a case distinction for `□•`. This module lands the seven rules whose premise and
+conclusion share a single filling operation (`InputCtx.fillLhs` throughout, or `OutputCtx.fillRhs`
+throughout): `w` (Figure `(3.1)`'s weakening, stated generically since it is not yet a landed
+`NestedProof` constructor -- Phase 19's `Admissibility.lean` territory), `c` (`contract`), `∨°`
+(`orRLeft`/`orRRight`), `□°` (`boxR`), `∧•` (`andL`), and `◇•` (`diaL`).
+
+**Deferred to Phase 12/13** (not landed here): `◇°` (`diaR`), `⊃°` (`impR`), and `□•`'s
+case-split (`boxL`) all mix `OutputCtx.fillRhs`-shaped and `OutputCtx.fillFull`-shaped sides
+within the *same* rule (the premise uses one filling operation, the conclusion the other, or the
+rule's own components straddle the `Γ'{ }`/`Λ{ }` boundary of `Definition 2.3`). Bridging
+`fillRhs`'s "no extra `∅`-layer" shape against `fillFull`'s "`∅`-comma-inserted" shape needs its
+own induction (mirroring the `Λ = []`-restricted pattern `Nested/Translation.lean`'s
+`InputCtx.fillEmpty_imp_outputPruning_fillRhs` already documents as a genuinely separate
+sub-project, not a corollary of Lemma 4.4/4.5 alone) -- landing a half-finished or silently
+restricted version here would misrepresent this phase's scope. Phase 12/13 build the actual
+`nested_sound` case analysis directly against the `NestedProof` constructors and are better
+positioned to close these three rules with whatever derivation their concrete instantiation
+admits, rather than needing the fully general Lemma 4.6 statement first. -/
+
+/-- **Self-and**: `⊢ P ⊃ (P ∧ P)`. -/
+private theorem cs5DerivSelfAnd (P : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) (P.imp (P.and P)) := by
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ) [] P (P.and P) ?_⟩
+  have hP : DerivationTree (@CS5ModalAxiom Atom) [P] P :=
+    .assumption [P] _ (List.mem_singleton.mpr rfl)
+  exact .modus_ponens _ _ _
+    (.modus_ponens _ _ _ (.weakening [] [P] _ (.ax [] _ (.andI P P)) (fun _ h => nomatch h)) hP) hP
+
+/-- **Lemma 4.6, `w`**: `fm(Γ{∅}) ⊃ fm(Γ{Δ})`, for any input context `Γ{ }` and LHS-sequent `Δ`
+(Figure `(3.1)`'s weakening rule; not yet a landed `NestedProof` constructor, see the module
+docstring's "`NestedProof.mono`" discussion in `Rules.lean` -- Phase 19's job). -/
+theorem lemma4_6_w (ctx : InputCtx Atom) (Δ : NestedLhs Atom) :
+    Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs .empty).fm.imp (ctx.fillLhs Δ).fm) :=
+  lemma4_5 ctx (Δ := .empty) (Θ := Δ) (cs5DerivTopIntro Δ.fm)
+
+/-- **Lemma 4.6, `c`** (`contract`): `fm(Γ{Δ,Δ}) ⊃ fm(Γ{Δ})`. -/
+theorem lemma4_6_c (ctx : InputCtx Atom) (Δ : NestedLhs Atom) :
+    Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs (.comma Δ Δ)).fm.imp (ctx.fillLhs Δ).fm) :=
+  lemma4_5 ctx (Δ := .comma Δ Δ) (Θ := Δ) (cs5DerivSelfAnd Δ.fm)
+
+/-- **Lemma 4.6, `∨°`** (left injection, `orRLeft`): `fm(Γ{A°}) ⊃ fm(Γ{(A ∨ B)°})`. -/
+theorem lemma4_6_orRLeft (ctx : OutputCtx Atom) (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillRhs (.atom A)).fm.imp (ctx.fillRhs (.atom (A.or B))).fm) :=
+  OutputCtx.fillRhs_fm_mono
+    (show Derivable (@CS5ModalAxiom Atom) ((NestedRhs.atom A).fm.imp (NestedRhs.atom (A.or B)).fm)
+      from ⟨.ax [] _ (.orI1 A B)⟩) ctx
+
+/-- **Lemma 4.6, `∨°`** (right injection, `orRRight`): `fm(Γ{B°}) ⊃ fm(Γ{(A ∨ B)°})`. -/
+theorem lemma4_6_orRRight (ctx : OutputCtx Atom) (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillRhs (.atom B)).fm.imp (ctx.fillRhs (.atom (A.or B))).fm) :=
+  OutputCtx.fillRhs_fm_mono
+    (show Derivable (@CS5ModalAxiom Atom) ((NestedRhs.atom B).fm.imp (NestedRhs.atom (A.or B)).fm)
+      from ⟨.ax [] _ (.orI2 A B)⟩) ctx
+
+/-- **Lemma 4.6, `□°`** (`boxR`): `fm(Γ{[A°]}) ⊃ fm(Γ{□A°})`. -/
+theorem lemma4_6_boxR (ctx : OutputCtx Atom) (A : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillRhs (.box .empty (.atom A))).fm.imp
+        (ctx.fillRhs (.atom (Proposition.box A))).fm) :=
+  OutputCtx.fillRhs_fm_mono (cs5DerivBoxMono cs5DerivTopImpElim) ctx
+
+/-- **Lemma 4.6, `∧•`** (`andL`): `fm(Γ{A•,B•}) ⊃ fm(Γ{(A ∧ B)•})`. -/
+theorem lemma4_6_andL (ctx : InputCtx Atom) (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillLhs (.comma (.atom A) (.atom B))).fm.imp (ctx.fillLhs (.atom (A.and B))).fm) :=
+  lemma4_5 ctx (Δ := .comma (.atom A) (.atom B)) (Θ := .atom (A.and B)) (cs5DerivImpSelf (A.and B))
+
+/-- **Lemma 4.6, `◇•`** (`diaL`): `fm(Γ{[A•]}) ⊃ fm(Γ{♦A•})`. -/
+theorem lemma4_6_diaL (ctx : InputCtx Atom) (A : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillLhs (.dia (.atom A))).fm.imp
+        (ctx.fillLhs (.atom (Proposition.diamond A))).fm) :=
+  lemma4_5 ctx (Δ := .dia (.atom A)) (Θ := .atom (Proposition.diamond A))
+    (cs5DerivImpSelf (Proposition.diamond A))
+
 end Cslib.Logic.Modal

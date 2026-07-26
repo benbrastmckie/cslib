@@ -1,20 +1,20 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "blocked",
+  "phase": "revise",
+  "status": "planned",
   "skeleton": false,
   "phases_completed": 9,
-  "phases_total": 15,
+  "phases_total": 17,
   "sorry_inventory": [],
-  "summary": "Phase 10 (Redirect-Inertness) dispatch: attempted blockedRedirect_boxctx_mem exactly as scoped by the plan (blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd only, no extra hypotheses). Landed a scratch lemma with a trailing sorry, inspected the exact stuck goal via lean_goal, confirmed via lean_multi_attempt (aesop and simp_all [successorBirthContent, relevantSetFinset] both exhaust without closing), then FULLY REVERTED the scratch edit -- FrameSoundness.lean is byte-for-byte identical to its Phase-9 committed state (git diff --stat empty), no sorry or partial declaration left in place. Root cause: successorBirthContent (LoopChecking.lean:384) inserts only the unwrapped (Sign.pos, psi) pair for a T(box psi)@v on the branch, never the boxed (Sign.pos, box psi) pair; composed with keyLowerBd this yields only the unwrapped form T(psi)@wBlock, never the boxed form T(box psi)@wBlock that blockedRedirect_boxctx_mem's goal (and Phase 9's hready hypothesis) needs. The plan's own 'Named difficulty' clause anticipated exactly this failure mode ('if a world's recorded key genuinely does not entail the boxed form at that world, mark this phase [BLOCKED] and escalate with the exact goal state') and its assumption that 'S4 sends both psi and box psi forward' at mint time was checked against the actual modalApplyOne_boxNeg_mint_fst_S4/_diamondPos_mint_fst_S4 definitions and found false (they transmit only the unwrapped body; the boxed form is added later, by a separate 4-rule step, requiring an edge that in this case does not yet exist). Plan file Phase 10 heading marked [BLOCKED] with the full analysis (exact goal, root cause, and a concrete 'what would close it' proposal requiring a new S4LoopInv key-origin-edge invariant, out of this phase's 3.5-hour scope). Recommend /revise 553 to insert a new phase for that invariant before Phase 10 is re-attempted. No axiom count change (still 26), no new sorries, no code regression -- all Phases 1-9 declarations remain byte-for-byte unchanged.",
+  "summary": "Plan revised to v2 (plans/02_origin-edge-invariant-revision.md), superseding v1. Phase count 15 -> 17. Phases 1-9 preserved verbatim and remain [COMPLETED]; no Lean source touched by this revision. (1) Corrected v1's false premise -- v1 asserted S4's mint payload 'sends both psi and box-psi forward'; re-verified against source that successorBirthContent (LoopChecking.lean:384) records only the UNWRAPPED body and modalApplyOne_boxNeg_mint_fst_S4 / _diamondPos_mint_fst_S4 (:1329/:1362) transmit only the unwrapped psi. The boxed form comes solely from modalFourBoxProp (FrameRules.lean:133), which requires an already-existing edge. The false wording is deleted, not annotated; a repo-wide grep confirms NO landed deliverable encodes it, so no Lean edit is required. (2) Downstream re-check: real (minted) edges never needed the premise -- their boxed form comes from frame TRANSITIVITY, semantically, which is what Phase 9's branchPropAdequateIn_s4FC_boxPos_trans_mem already supplies. Redirect edges are the sole site of reliance. Hence v1 Phase 11 (now 13) is reshaped only in its redirect branch; the completeness line (v1 12-14, now 14-16) is unaffected; Phase 17 unaffected in substance. (3) Two new phases inserted: Phase 10 (origin-edge invariant statement, entry establishment, conditional derivation lemmas, and the witness-disjunct GATE) and Phase 11 (step preservation across all step shapes). v1 Phases 10-15 renumber to 12-17. (4) NEW FINDING not in the blocked handoff: the handoff's proposed fix closes the box-context case but NOT the witness-pair case -- successorBirthContent inserts the mint witness (s,phi) unconditionally, so (pos,psi) in key(wBlock) can hold with T(box psi)@u NOT on the branch when psi is the witness of a T(dia psi)@u mint. Narrowed to at most ONE psi per key. Phase 10 is a dedicated gate resolving this before Phase 11 invests a run.",
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md"
     },
     {
-      "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-9-handoff-20260725.md"
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md"
     },
     {
       "type": "handoff",
@@ -25,20 +25,12 @@
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-10-blocked-handoff-20260725.md"
     }
   ],
-  "blockers": [
-    {
-      "phase": 10,
-      "target": "blockedRedirect_boxctx_mem",
-      "verbatim_goal": "Prove `blockedRedirect_boxctx_mem`: under mint-readiness (Phase 4's `_mintReady`), the guard's `some` case, and `S4LoopInv`, every `T(□ψ)@v ∈ b` has `T(□ψ)@wBlock ∈ b`.",
-      "what_was_tried": "Stated the lemma with only blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd as hypotheses (matching the plan's literal Obligation text), reduced to the goal `{ sign := Sign.pos, formula := □ψ, label := wBlock } ∈ b` from `hsub : successorBirthContent φ₀ b s φ v ⊆ relevantSetFinset φ₀ b wBlock`, and tried `aesop` and `simp_all [successorBirthContent, relevantSetFinset]` via lean_multi_attempt.",
-      "why_it_failed": "successorBirthContent only ever inserts the unwrapped (Sign.pos, ψ) pair for a T(□ψ)@v member, never the boxed (Sign.pos, □ψ) pair, so hsub can only yield the unwrapped membership T(ψ)@wBlock, not the boxed T(□ψ)@wBlock the goal needs; both automation tactics exhaust without closing the gap."
-    }
-  ],
-  "next_action_hint": "revise",
+  "blockers": [],
+  "next_action_hint": "implement",
   "files_modified": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-10-blocked-handoff-20260725.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json"
   ],
   "decisions_made": [
     "Phase 4 deviation: modalStepBranchS4KeyedOrdered's shared per-formula body is factored into a new NAMED definition (modalStepBranchS4KeyedBody) rather than duplicated inline as the phase-4 handoff had sketched. modalStepBranchS4Keyed's own source is byte-for-byte unchanged; the bridge modalStepBranchS4Keyed_eq_findSome_body (rfl) relates the two. This made the three required structural lemmas provable against a named term instead of restating a six-way match inline in every statement.",
@@ -48,27 +40,46 @@
     "Phase 5's projection bridge (modalStepBranchS4KeyedOrdered_proj) intentionally does NOT assert the ordered stepper's result equals modalStepBranchGen's own whole-branch findSome? traversal -- that would be FALSE in general. It instead extracts the weaker existential fact the measure proof actually consumes.",
     "Phase 9 addition beyond the plan's literal task-list wording: `branchPropAdequateIn_s4FC_boxPos_trans_mem`/`_diaNeg_trans_mem` and `branchPropAdequateIn_boxPos_mem` each carry an explicit `hready` hypothesis. Justification: branchPropAdequateIn's edge conjunct is branch-content-driven (unlike branchSatisfiableIn's), so adding a new box/diamond-shaped formula reopens the conjunct's obligation at w''s existing outgoing edges; the hypothesis-free analogue is false for an unconstrained acc. hready is exactly what Phase 4's mint-readiness discipline guarantees at real call sites, and its redirect-edge discharge is precisely Phase 10's stated goal.",
     "Phase 9's modalClosed_unsat_propAdequateIn cannot delegate to the existing modalClosed_unsat; resolved via direct transcription of its tactic script against branchPropAdequateIn's own (identically-shaped) branch-formula conjunct.",
-    "Phase 10 dispatch: verified empirically (lean_goal + lean_multi_attempt), not merely by inspection, that blockedRedirect_boxctx_mem's stated obligation is unprovable from blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd alone. Decided this is a genuine mathematical gap (the plan's 'Named difficulty' contingency), not an automation gap, and reverted the scratch attempt rather than leave a non-strategic sorry in place. Identified a concrete, structurally-motivated fix (a new S4LoopInv key-origin-edge invariant) but judged it out of scope for this phase's stated 3.5-hour budget and recommended a plan revision instead of silently expanding scope."
+    "Phase 10 dispatch: verified empirically (lean_goal + lean_multi_attempt), not merely by inspection, that blockedRedirect_boxctx_mem's stated obligation is unprovable from blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd alone. Decided this is a genuine mathematical gap (the plan's 'Named difficulty' contingency), not an automation gap, and reverted the scratch attempt rather than leave a non-strategic sorry in place. Identified a concrete, structurally-motivated fix (a new S4LoopInv key-origin-edge invariant) but judged it out of scope for this phase's stated 3.5-hour budget and recommended a plan revision instead of silently expanding scope.",
+    "v2 revision: the origin-edge invariant is a STANDALONE AUXILIARY (keysOriginS4) threaded alongside S4LoopInv, NOT a new S4LoopInv field as the blocked handoff sketched. Rationale: adding a field leaves the ten landed per-field preservation lemmas working but gives both WRAPPER theorems an undischarged field -- including modalStepBranchS4_preserves_S4LoopInv, the UNORDERED line this plan is committed to leaving byte-for-byte unchanged until Phase 17. The codebase already sets this precedent twice in as many words: keysWorldsKnown (LoopChecking.lean:3842, 'not an S4LoopInv field: adding one would reopen the already-finalized struct design') and worldsContiguousS4 (:5187).",
+    "v2 revision: keysOriginS4 is stated over the CURRENT branch and CURRENT acc, with NO historical pre-mint branch b_birth (the blocked handoff proposed quantifying over b_birth with a b_birth subset b side condition). The consequence is baked in instead: every signed pair in a key is either the origin mint's witness pair or is currently present in box/diamond form at the origin source u. Preservation under branch growth then becomes immediate and all b_birth bookkeeping disappears.",
+    "v2 revision: Phase 12 (retried redirect-inertness) should obtain mint-readiness via modalStepBranchS4KeyedOrdered_cases (LoopChecking.lean:1124), whose SECOND disjunct hands over modalNonMintCandidates = [] directly, rather than fighting modalStepBranchS4KeyedOrdered_mintReady's awkward forall-sf premise. A step creating a redirect edge is necessarily in that second disjunct: in the primary-scan disjunct the selected formula is a non-mint candidate, so keys' = keys and no edge is added.",
+    "v2 revision: Phase 11 sized at ONE agent run (~150-350 lines) on measured evidence, not assertion -- the 12 non-minting shapes hit the body's `| _, _ => keys` arm (keys unchanged, no edge added) so they reduce to branch monotonicity; the blocked-mint shape only adds an edge, which an edge-existential invariant survives; only the unblocked mint establishes anything, and it does so by construction. Explicit contingency split named (minting vs non-minting boundary) to be taken rather than overrunning.",
+    "v2 revision: Testing checklist corrected -- v1 listed 5-axiom, McKinsey, 4-axiom and K-axiom regression controls that Phase 8 established have NEVER existed in CslibTests/S4LoopGuardRegression.lean. Only B and T rows exist. They may be added as new work, never claimed as a pre-existing baseline."
   ],
   "flagged_theorem_changes": [
     "Phase 14 ADDS modalTableauS4KeyedOrdered_complete beside the landed modalTableauS4Keyed_complete (FrameCompleteness.lean); the landed theorem is not weakened. Not yet reached.",
     "Phase 15 is the only destructive phase: it deletes modalStepBranchS4Keyed, modalExpandBranchesS4Keyed, modalTableauS4Keyed, modalTableauS4Keyed_complete and their stepper-specific support lemmas -- each with a proved ordered replacement. Removal-with-replacement, never weakening. Not yet reached.",
     "Phase 6's escalation trigger (modalStepBranchS4KeyedOrdered_preserves_keysDistinct) PASSED with EXACT original signatures, no weakening.",
     "Phase 9 confirmed the propagation-adequacy invariant is definable and its three named consumer lemmas are provable, but only with the hready side condition -- this refines (does not retire) the standing termination/completeness prediction: the redirect-edge case's actual soundness now hinges on discharging hready, which Phase 10 was designed to do and, as scoped, cannot.",
-    "Phase 10 (this dispatch) discovered the plan's own hready-discharge route (successorBirthContent + keyLowerBd) is insufficient; soundness for the redirect-edge case remains formally OPEN pending either a plan revision (new key-origin invariant) or an alternative proof route. The standing central prediction (narrowing the guard may break TERMINATION rather than completeness) is neither corroborated nor retired by this dispatch -- it stays live."
+    "Phase 10 (this dispatch) discovered the plan's own hready-discharge route (successorBirthContent + keyLowerBd) is insufficient; soundness for the redirect-edge case remains formally OPEN pending either a plan revision (new key-origin invariant) or an alternative proof route. The standing central prediction (narrowing the guard may break TERMINATION rather than completeness) is neither corroborated nor retired by this dispatch -- it stays live.",
+    "v2 revision: NO landed statement is weakened, added to, or deleted by this revision. Phases 1-9's declarations -- including Phase 9's six FrameSoundness.lean declarations and their three hready-carrying consumer lemmas -- are untouched. The S4LoopInv structure's field list is unchanged by design (see the auxiliary-not-field decision). No Lean file was modified by this revision; git diff over Cslib/ and CslibTests/ is empty.",
+    "v2 revision: Phase 11 EXTENDS the signature of the ORDERED wrapper modalStepBranchS4KeyedOrdered_preserves_S4LoopInv (one added hypothesis, one added conclusion conjunct), exactly as keysWorldsKnown/worldsContiguousS4 are already threaded. This is an extension of an ordered-line-only lemma, not a weakening, and the unordered modalStepBranchS4_preserves_S4LoopInv is NOT touched.",
+    "v2 revision: the standing central prediction (narrowing the guard may break TERMINATION rather than merely completeness) remains LIVE and UNCONFIRMED. Phase 8 neither corroborated nor retired it; the v1 blocker is an invariant gap and is not evidence about it either way. The one v2 route that would reopen it directly is Phase 10's last-resort resolution route R3 (a scheduling side condition), which is therefore explicitly gated on re-running Phase 8's empirical sweep before Phase 11 proceeds."
   ],
   "dead_ends": [
     "Route Q (split accessibility record) is not planned: the research rejects it as strictly worse, reducing to Route P's step-2 obligation with extra bookkeeping.",
     "No phase edits blockingWorldS4Keyed's comparison predicate; every local guard edit was refuted in research.",
     "Phase 5's first attempt at modalStepBranchS4KeyedOrdered_proj hand-typed a fresh let/match expression restating modalApplyOneS4Keyed's dispatch directly in the lemma's conclusion. Abandoned: elaborates via a full `match`, breaking every subsequent `.1`-based rewrite. Reusing modalStepBranchS4KeyedBody sidesteps the issue.",
     "Phase 9's first considered approach for the two 4-rule adequacy analogues was a fully unconditional restatement (no extra hypothesis). Abandoned once shown unprovable in general for an unconstrained acc; replaced by the hready-qualified versions.",
-    "Phase 10: proving blockedRedirect_boxctx_mem from blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd alone (the plan's literal Obligation text), with no extra hypotheses. Confirmed unprovable (successorBirthContent never records the boxed form). Do not retry without first adding a key-origin-edge invariant (see plan file / phase-10-blocked-handoff for the full proposal)."
+    "Phase 10: proving blockedRedirect_boxctx_mem from blockingWorldS4Keyed_eq_birthContent + S4LoopInv.keyLowerBd alone (the plan's literal Obligation text), with no extra hypotheses. Confirmed unprovable (successorBirthContent never records the boxed form). Do not retry without first adding a key-origin-edge invariant (see plan file / phase-10-blocked-handoff for the full proposal).",
+    "v2 revision: do NOT add keysOrigin as an S4LoopInv field (the blocked handoff's literal suggestion) -- it reopens the finalized struct and forces work on the unordered line that Phase 17 deletes anyway. Use a standalone threaded auxiliary.",
+    "v2 revision: do NOT state the origin invariant with a historical pre-mint branch (b_birth) existential -- unnecessary bookkeeping; bake the consequence in over the current branch instead.",
+    "v2 revision: do NOT assume the blocked handoff's proposed fix is complete. It closes the box-context case only. The witness-pair case (psi is the origin mint's own witness, from a T(dia psi)@u mint, with T(box psi)@u absent) is NOT closed by it and must be resolved by Phase 10's gate first -- otherwise Phase 12 will re-block for a second time on the same obligation."
   ],
   "continuation_context": {
     "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-10-blocked-handoff-20260725.md",
+    "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
+    "superseded_plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
     "phases_completed": 9,
-    "phases_total": 15,
-    "requires_user_review": true
+    "phases_total": 17,
+    "next_phase": 10,
+    "next_phase_name": "Origin-Edge Invariant -- Statement, Entry Establishment, and the Witness Gate",
+    "requires_user_review": false,
+    "read_first": [
+      "plans/02_origin-edge-invariant-revision.md sections 'Revision History (v1 -> v2)' and 'The Corrected Argument (read before Phases 10-12)'",
+      "Phase 10's two flagged design decisions and its 'The witness disjunct' subsection"
+    ]
   },
   "plan_markers_verified": true
 }

@@ -1,45 +1,19 @@
 {
-  "status": "partial",
-  "started_at": "2026-07-26T06:24:36Z",
+  "status": "planned",
   "artifacts": [
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
       "type": "plan",
-      "summary": "Phase 9 marked [COMPLETED] with completion note"
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-10-handoff-20260726.md",
-      "type": "handoff",
-      "summary": "Phase 10 briefing: state, hready discovery writeup, verification checklist"
-    },
-    {
-      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "type": "lean-source",
-      "summary": "Phase 9 propagation-adequacy invariant section (branchPropAdequateIn + 5 consumer lemmas), additive only"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
+      "summary": "Revised plan (v2): corrects v1's false mint-payload premise, inserts the origin-edge invariant as two new phases (10 gate, 11 preservation), re-scopes redirect-inertness to Phase 12, renumbers 15 -> 17 phases"
     }
   ],
-  "partial_progress": {
-    "stage": "phase_9_complete",
-    "details": "Phase 9 of 15 complete. Single-phase dispatch scope; stopping here per hard-mode contract."
-  },
+  "next_steps": "Run /implement 553 to dispatch Phase 10 (Origin-Edge Invariant -- Statement, Entry Establishment, and the Witness Gate)",
   "metadata": {
     "session_id": "sess_1785046950_33beb4_553",
-    "agent_type": "cslib-implementation-hard-agent",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"]
-  },
-  "phases_completed": 9,
-  "phases_total": 15,
-  "memory_candidates": [
-    "In this codebase's FrameSoundness.lean-style frame-relativized soundness proofs, a weakened invariant whose edge conjunct becomes branch-content-driven (rather than a fixed fact about the model/accessibility pair) requires an explicit readiness/ordering side-condition on any 'add a new box/diamond formula to the branch' lemma -- the analogous strong-invariant lemma needs no such condition because its edge conjunct is branch-independent.",
-    "SoundnessStep.lean's Proposition.beqToEq is `private`; other files needing the same beq-to-eq conversion for Proposition should use `LawfulBEq.eq_of_beq` directly (the DecidableEq-derived BEq/LawfulBEq instances make this available with no import needed beyond what's already in scope)."
-  ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 0,
-    "vacuous_count": 0,
-    "axiom_count": 26,
-    "build_passed": true,
-    "ci_pipeline_passed": true
+    "agent_type": "reviser-agent",
+    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "phase_count": 17,
+    "estimated_hours": 49,
+    "reports_integrated": ["phase-10-blocked-handoff-20260725.md"]
   }
 }

@@ -1,8 +1,18 @@
 # Implementation Plan: Ancestor-Only Blocking for the S4 Keyed Loop Guard (v3)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: BLOCKED (Phase 2 decision gate refuted the route; see Phase 2 Verdict; escalation to
-  user required before any further phase)
+- **Status**: [ABANDONED]
+- **Superseded by**: `plans/04_subtractive-blocking-red-channel.md` (v4). Ancestor-only blocking is
+  abandoned because this plan's own Phase 2 decision gate **refuted** it (see `#### Phase 2 Verdict`
+  below, retained verbatim): `branchSatisfiableIn_s4FC_ancestor_redirect` cannot be discharged from
+  standalone driver-independent hypotheses. Per a user-authorized route change on the evidence in
+  `reports/04_massacci-subtractive-blocking-priced.md`, v4 implements route (3) — `Massacci2000`
+  Technique 8.2 subtractive blocking with a completeness-only redirect channel — which never adds
+  the redirect edge to `acc` and so has no edge-justification obligation at all. **Phase 1 of this
+  plan remains `[COMPLETED]` and its four measurements (`#### Phase 1 Measurements`) are inherited
+  by v4 as a preserved asset**, with the explicit caveat that Measurement D(iv)'s 1374/1374 result
+  is not treated as evidence for any obligation in v4. Retained as a historical record; do not
+  implement from this file.
 - **Effort**: 26-34 hours (14 phases, two of which are decision gates that may terminate the route)
 - **Dependencies**: None (no other task blocks this)
 - **Research Inputs**:
@@ -21,7 +31,7 @@
 - **Type**: cslib
 - **Plan version**: 3 (supersedes v1 `01_s4-settled-context-scheduling.md` and v2
   `02_origin-edge-invariant-revision.md`, both stamped **[ABANDONED]** with a `Superseded by`
-  pointer to this file)
+  pointer to this file; itself superseded by v4 `04_subtractive-blocking-red-channel.md`)
 
 ---
 

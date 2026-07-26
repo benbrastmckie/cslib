@@ -576,7 +576,48 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
 
 ---
 
-### Phase 10: Redirect-Inertness [NOT STARTED]
+### Phase 10: Redirect-Inertness [BLOCKED]
+
+- **Blocker (dispatch `sess_1785046950_33beb4_553`):** the phase's own "Named difficulty" clause
+  fired. Attempted `blockedRedirect_boxctx_mem` exactly as specified (`blockingWorldS4Keyed_eq_
+  birthContent` + `S4LoopInv.keyLowerBd` only, no extra hypotheses). Landed the lemma with a
+  trailing `sorry`, inspected the exact goal via `lean_goal`, confirmed via `lean_multi_attempt`
+  (`aesop`, `simp_all [successorBirthContent, relevantSetFinset]` — both exhaust without closing),
+  then reverted the scratch edit (no `sorry` committed; `git diff --stat` on `FrameSoundness.lean`
+  is empty).
+  - **Exact stuck goal** (`hkey`, `hsub` as derived by the plan's own obligation text):
+    ```
+    hkey : (wBlock, successorBirthContent φ₀ b s φ v) ∈ keys
+    hsub : successorBirthContent φ₀ b s φ v ⊆ relevantSetFinset φ₀ b wBlock
+    hmem : { sign := Sign.pos, formula := □ψ, label := v } ∈ b
+    ⊢ { sign := Sign.pos, formula := □ψ, label := wBlock } ∈ b
+    ```
+  - **Root cause**: `successorBirthContent φ₀ b s φ v`'s definition (`LoopChecking.lean:384`)
+    inserts `(Sign.pos, ψ)` — the *unwrapped* body — for every `T(□ψ)@v ∈ b`; it never inserts
+    `(Sign.pos, .box ψ)`. Composed with `keyLowerBd`, this yields only `{ sign := pos, formula :=
+    ψ, label := wBlock } ∈ b` (unwrapped), never the boxed form the goal needs. The plan's
+    "Named difficulty" hypothesis — "`modalApplyOne`'s minting payload... S4 sends both `ψ` and
+    `□ψ` forward" — does not hold in this codebase: `modalApplyOne_boxNeg_mint_fst_S4` /
+    `_diamondPos_mint_fst_S4` (`LoopChecking.lean:1329`/`1362`) transmit only the unwrapped `ψ`
+    for each box-positive at the source (standard K box-elimination); the boxed form `T(□ψ)@w'`
+    is added only later, by a *separate* 4-rule step (`modalFourBoxProp`, Phase 9) once an edge
+    already exists — and the new redirect edge `v → wBlock` is being created by *this very step*,
+    so no such prior 4-rule firing on `(v, wBlock)` can have occurred.
+  - **What would close it (out of scope for this dispatch)**: a genuinely new invariant tracking
+    each `keys` entry's *origin edge* — i.e. that every non-root `(w, k) ∈ keys` arose from some
+    recorded mint edge `(u, w) ∈ acc` with `k = successorBirthContent φ₀ b_birth s' φ' u` for the
+    historical pre-mint branch `b_birth`. Composed with branch-monotonicity (`b_birth ⊆ b`) this
+    gives `T(□ψ)@u ∈ b` for wBlock's *real* mint source `u` (since `(pos, ψ) ∈ key(wBlock)`
+    implies `ψ` was box-positive at `u`, not merely at `v`), and mint-readiness applied to the
+    *existing* edge `(u, wBlock)` then forces `T(□ψ)@wBlock ∈ b` (else the 4-rule would still be
+    an unsettled non-mint candidate, contradicting `modalStepBranchS4KeyedOrdered_mintReady`).
+    This is a real, structurally-motivated argument, but it requires a new `S4LoopInv` field
+    (origin-edge tracking) proven preserved across all step shapes — substantially more than this
+    phase's 3.5-hour scope, and it reshapes Phase 11's induction too. Recommend a plan revision
+    (`/revise 553`) adding this as its own phase before re-attempting Phase 10.
+  - **What NOT to try again**: `aesop`/`simp`-based automation on the bare obligation (already
+    exhausted); assuming `modalApplyOne`'s mint payload carries the boxed form (empirically false
+    per the citations above).
 
 - **Goal:** The mathematical heart of Route P. Prove that a redirect edge fired under
   mint-readiness is propagation-inert: everything it can ever transmit is already on the branch.

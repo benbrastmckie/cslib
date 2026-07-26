@@ -1,7 +1,8 @@
 # Implementation Plan: Propositional/Intuitionistic Tableau Completeness — Invariant Threading and Bridge Assembly
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [IMPLEMENTING]
+- **Status**: [PARTIAL] (Phases 0-1 complete and committed; Phase 2 blocked, see
+  `handoffs/11_phase2-blocker-findings.md`; Phases 3-7 not started, transitively blocked)
 - **Effort**: 18 hours
 - **Dependencies**: 552 (completed — landed the `.pos, .imp` branching arm)
 - **Research Inputs**:
@@ -318,7 +319,25 @@ plan.**
 - **Timing:** 1.5 hours
 - **Depends on:** 0
 
-### Phase 2: Universe/measure invariant — definition and call-site threading [NOT STARTED]
+### Phase 2: Universe/measure invariant — definition and call-site threading [BLOCKED]
+
+**Blocked 2026-07-26.** Full findings recorded at
+`specs/317_propositional_tableau_completeness/handoffs/11_phase2-blocker-findings.md`. Summary:
+(1) `intUniverse`/`intExpMeasure` are declared ~450-950 lines *after*
+`intExpandBranches_openBranch_sat` in the file, so referencing them in its signature is a forward
+reference — verified via a real build error, not a typo — requiring a large (but mechanical)
+relocation of that block; (2) independent of (1), maintaining the universe-membership invariant
+across the F-imp world-creating recursive step needs a `nextWorld ≤ φ0.complexity + 1` bound
+(`intExpandBranches_world_bound`) that is explicitly documented in-file
+(`Scheme.lean:2025-2038`, `:2052-2055`, `:2536-2538`) as a known, unbuilt "continuation, see
+handoff" item — not a mechanical assembly step. No `sorry`/axiom/vacuous statement was
+introduced; the broken in-progress attempt was reverted (`git checkout --`) back to the
+Phase-1-committed green state. The handoff also records a genuine positive finding: Phase 3's
+zero case is easy once the invariant exists (a short contradiction from `intExpMeasure ≤ 0`
+forcing `branches = []`), so the *actual* remaining difficulty is narrower than Phase 3's own
+text describes, but it sits earlier (Phase 2's succ-case threading prerequisite), not in the zero
+case itself. **Recommendation: re-plan Phases 2-3 (and transitively 4-7) as a new round budgeting
+explicitly for the relocation and the new world-bound lemma.**
 
 - **Goal:** Give `intExpandBranches_openBranch_sat` the `φ0` parameter and the two invariant
   hypotheses it currently lacks, and establish them at its sole call site. No sorry closes here;

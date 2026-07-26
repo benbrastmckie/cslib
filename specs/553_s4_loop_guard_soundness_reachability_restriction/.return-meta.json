@@ -1,5 +1,5 @@
 {
-  "status": "blocked",
+  "status": "implemented",
   "agent_type": "cslib-implementation-hard-agent",
   "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "task_number": 553,
@@ -8,18 +8,13 @@
   "effort_flag": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "started_at": "2026-07-26T20:15:00Z",
-  "completed_at": "2026-07-26T21:10:00Z",
-  "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-  "plan_version": 4,
-  "phase_number": 3,
+  "started_at": "2026-07-26T19:53:25Z",
+  "completed_at": "2026-07-26T20:40:00Z",
+  "operation": "post-gate-b orphan triage (cleanup dispatch, not a plan phase)",
+  "phase_number": null,
   "phases_completed": 2,
   "phases_total": 12,
   "artifacts": [
-    {
-      "type": "summary",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md"
-    },
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
@@ -31,38 +26,22 @@
   ],
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md"
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
   ],
   "verification": {
-    "verification_passed": "partial (the two landed free-transfer lemmas verify clean; the phase's central obligation, the cone-extension lemma, was refuted rather than proved -- see errors)",
+    "verification_passed": true,
     "sorry_count": 1,
     "sorry_count_baseline": 1,
     "sorry_count_delta": 0,
     "vacuous_count": 0,
     "axiom_count_new": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "scoped only: lake build Cslib.Logics.Modal.Tableau.LoopChecking is clean; lean_verify on both new declarations (blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem) reports only standard axioms (propext, Classical.choice, Quot.sound). Full-project lake exe checkInitImports / lake shake / lake lint / lake test not attempted this dispatch: the full-project build is still blocked by the same out-of-scope, concurrently-repaired Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean noted in the Phase 2 handoff (task 554 phase 14), and in any case this phase's central deliverable was refuted rather than landed, so full-project CI would not change the verdict."
+    "ci_pipeline_passed": "scoped only, per dispatch instructions: lake build Cslib.Logics.Modal.Tableau.LoopChecking and ...FrameCompleteness both clean; lake exe lint-style clean on both touched files; lean_verify on both blockedRedirect_unwrapped_*_mem lemmas reports only standard axioms (propext, Classical.choice, Quot.sound). Full-project lake build/checkInitImports/lake lint/lake shake/lake test not attempted -- out of scope for this cleanup dispatch, and full-project build is separately blocked by concurrent, unrelated task 554 work on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean."
   },
-  "memory_candidates": [
-    {
-      "content": "In a tableau Hintikka-set apparatus where only WRAPPED box/diamond-shaped formulas persist across accessibility edges (via a dedicated 'step' bridge like hintikkaS4_box_pos_step), a 'guard redirect' mechanism that recovers only UNWRAPPED membership at its target (e.g. via a Finset lower-bound like keyLowerBd, which is definitionally incapable of distinguishing wrapped from unwrapped signed-formula membership) cannot be extended to a forward-cone persistence claim for arbitrary formulas without either (a) adding a genuine accessibility edge, or (b) inventing a new persistence mechanism. Before stating a 'forward cone' Hintikka conjunct over a redirect/loop-back channel, check whether the channel's strongest derivable fact is wrapped or unwrapped -- an unwrapped fact cannot be propagated further by any sound bridge.",
-      "category": "INSIGHT",
-      "source_artifact": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "confidence": 0.75,
-      "suggested_keywords": ["tableau", "Hintikka set", "S4", "box persistence", "forward cone", "loop guard", "redirect", "unsound bridge"]
-    },
-    {
-      "content": "When a decision-gate lemma's abstract statement seems to require an unproven fact, testing the MOST GENEROUS plausible additional hypothesis (here, hredValid: every red entry reflects a genuine guard decision) before declaring outcome (iii) is worth the extra tool calls: it either finds outcome (ii)'s nameable invariant, or it strengthens the outcome-(iii) verdict by showing even generous strengthening does not close the gap -- confirmed here via lean_multi_attempt (exact/assumption/aesop all failing) rather than by prose alone.",
-      "category": "TECHNIQUE",
-      "source_artifact": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "confidence": 0.7,
-      "suggested_keywords": ["decision gate", "hard mode", "outcome classification", "lean_multi_attempt", "adversarial verification"]
-    }
-  ],
   "partial_progress": {
-    "stage": "phase_3_blocked",
-    "details": "Phase 3 (DECISION GATE B) attempted and refuted (outcome iii). The two free/certain transfers (blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem) are landed sorry-free and committed. The cone-extension lemma -- the phase's actual gate obligation -- was attempted, found to be a genuine mathematical dead end (not a proof-search gap, confirmed via lean_goal + lean_multi_attempt), and reverted before commit (no sorry landed). Phase 3 marked [BLOCKED] in the plan with a full verdict recorded under #### Phase 3 Verdict, including the exact lean_goal state at the blocker. Route (3) is dead as planned; Phases 4-12 are not dispatched. Escalating to the user per the plan's own kill table (the honest fallback is route (1))."
+    "stage": "complete",
+    "details": "All REVERT-list declarations removed (modalHintikkaSetS4Sub, modalHintikkaSetS4Sub_saturated, S4KeyedSubHintikkaInv, hintikkaS4_box_pos_reflTransGen_boxed, hintikkaS4_dia_neg_reflTransGen_boxed, modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel). All KEEP-list declarations intact and unchanged in meaning. Reds/accWithReds retained per judgement call (a). Plan v4 annotated with #### Post-Gate-B Triage note. Both scoped builds clean, lint-style clean, sorry census exactly 1 (FrameSoundness.lean:1244, untouched), no new axioms."
   },
-  "requires_user_review": true
+  "requires_user_review": false
 }

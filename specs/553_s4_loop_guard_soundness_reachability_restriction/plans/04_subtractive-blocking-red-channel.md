@@ -945,9 +945,55 @@ unaffected by this verdict) remain in the tree. Escalating to the user per the K
 Note and outcome-(iii) protocol. Phases 4-12 are **not** dispatched, per the plan's explicit
 "not scaffolded on a positive verdict" design.
 
+#### Post-Gate-B Triage
+
+Following the Phase 3 Verdict, the user authorized route (1) (canonical/pinned-witness truth
+lemma) for a forthcoming plan v5, and separately authorized a bounded cleanup dispatch to
+disposition the machinery route (3) left behind: keep what is route-independent, revert what
+only serves the dead `red` channel. This explains why `LoopChecking.lean`/
+`FrameCompleteness.lean` still contain `Reds`/`accWithReds` machinery with no driver using it —
+it is retained infrastructure, not a loose end.
+
+**Kept** (route-independent, moved to a "Route-Independent Remnant" doc comment in
+`LoopChecking.lean`):
+- `modalS4Saturated` and its projection bridges (`modalHintikkaSetS4_saturated`, and the six
+  `hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}` bridges, whose hypotheses were
+  already weakened from `modalHintikkaSetS4` to `modalS4Saturated` prior to this triage) —
+  strictly weaker hypotheses, strictly better factoring.
+- `Reds`/`accWithReds` (`LoopChecking.lean`) — general "accessibility plus a recorded
+  extra-edge list" packaging with no route-specific content.
+- `hasEdge_accWithReds_iff` and `reflTransGen_accWithReds_first_red` (`LoopChecking.lean`) —
+  general `simp`/path-decomposition bridges over that packaging.
+- `blockedRedirect_unwrapped_boxPos_mem`/`blockedRedirect_unwrapped_diaNeg_mem`
+  (`LoopChecking.lean`) — the sorry-free, standard-axioms-only free transfers landed above;
+  true statements about the guard, independent of any route.
+- `FrameSoundness.lean:1244` and its `sorry` — retained by standing user decision; untouched,
+  remains the only `sorry` in `Cslib/Logics/Modal/Tableau/`.
+
+**Reverted** (served only the dead bifurcated Hintikka predicate / forward-cone obligation):
+`modalHintikkaSetS4Sub`, `modalHintikkaSetS4Sub_saturated`, `S4KeyedSubHintikkaInv`
+(`LoopChecking.lean`); `hintikkaS4_box_pos_reflTransGen_boxed`,
+`hintikkaS4_dia_neg_reflTransGen_boxed` (`LoopChecking.lean`); `modalTruthLemmaS4Sub`,
+`modalOpenBranchS4Sub_countermodel` (`FrameCompleteness.lean`).
+
+**Judgement call on `Reds`/`accWithReds`**: both are consumed by the two KEPT general bridges
+above (`hasEdge_accWithReds_iff`, `reflTransGen_accWithReds_first_red`), so they could not
+simply be deleted. Chose to **keep both as minimal support** for those two bridges (option (a)
+of the two offered) rather than restating the bridges over a plain `Accessibility` append and
+dropping `Reds`/`accWithReds` (option (b)): `Reds`/`accWithReds` are themselves trivial type
+packaging (a bare `abbrev`/one-line `def`) with no route-specific content, so keeping them costs
+nothing, while restating both bridges' statements and proofs over an inlined append would be
+non-trivial rework for a pure cleanup dispatch.
+
+**Verification**: scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` and
+`...FrameCompleteness` both clean; `lake exe lint-style` clean on both touched files; sorry
+census in `Cslib/Logics/Modal/Tableau/` is exactly 1 (`FrameSoundness.lean:1244`); `lean_verify`
+on both `blockedRedirect_unwrapped_*_mem` lemmas reports only `propext`, `Classical.choice`,
+`Quot.sound`.
+
 ---
 
-### Phase 4: Parallel subtractive rule and ordered stepper threading `red` [NOT STARTED]
+### Phase 4: Parallel subtractive rule and ordered stepper threading `red` [IN PROGRESS]
 
 - **Goal:** Land the subtractive rule and the ordered subtractive stepper **beside** the landed
   ones, with the landed drivers byte-for-byte unchanged.

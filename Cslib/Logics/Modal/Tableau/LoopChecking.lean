@@ -6570,17 +6570,14 @@ theorem modalHintikkaSetS4_eq (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) :
     modalHintikkaSetS4 φ₀ b acc = modalHintikkaSetGen (modalApplyOneS4 φ₀) b acc := rfl
 
-/-- **The bare saturation conjunct** (conjunct 2 of `modalHintikkaSetS4`/
-`modalHintikkaSetS4Sub`, byte-identical in both): every non-minting-shaped formula's
-`modalApplyOneS4 φ₀` output is already present on `b`. Named so the six S4 Hintikka bridges
-below (`hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}`) can be stated against this
-alone rather than the full four-conjunct predicate -- report 04's plan-time verification
-(`plans/04_subtractive-blocking-red-channel.md`, "Design Decision Derived at Plan Time") reads
-each bridge's proof as consuming only this conjunct (`obtain ⟨_, hrule, _⟩ := hH`), and
-conjuncts 3/4 over bare `acc` are FALSE for the subtractive driver, so the bridges cannot keep
-requiring the full `modalHintikkaSetS4`/`modalHintikkaSetS4Sub` predicate. This is a strictly
-weaker hypothesis than either predicate, so it is derivable from both:
-`modalHintikkaSetS4_saturated` / `modalHintikkaSetS4Sub_saturated` below. -/
+/-- **The bare saturation conjunct** (conjunct 2 of `modalHintikkaSetS4`): every non-minting-
+shaped formula's `modalApplyOneS4 φ₀` output is already present on `b`. Named so the six S4
+Hintikka bridges below (`hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}`) can be stated
+against this alone rather than the full four-conjunct predicate -- report 04's plan-time
+verification (`plans/04_subtractive-blocking-red-channel.md`, "Design Decision Derived at Plan
+Time") reads each bridge's proof as consuming only this conjunct (`obtain ⟨_, hrule, _⟩ := hH`).
+This is a strictly weaker hypothesis than `modalHintikkaSetS4`, so it is derivable from it:
+`modalHintikkaSetS4_saturated` below. -/
 def modalS4Saturated (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility) : Prop :=
   ∀ sf ∈ b,
@@ -6595,11 +6592,7 @@ def modalS4Saturated (φ₀ : Proposition Atom)
       | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
       | .notApplicable => True
 
-/-- `modalHintikkaSetS4`'s conjunct 2 is exactly `modalS4Saturated`. (The dual bridge for
-`modalHintikkaSetS4Sub`, `modalHintikkaSetS4Sub_saturated`, is stated later in this file,
-right after `modalHintikkaSetS4Sub`'s own definition, since `modalS4Saturated` is deliberately
-defined early -- before the six S4 Hintikka bridges that consume it -- while
-`modalHintikkaSetS4Sub` is defined much later, in the Phase 1 subtractive-route section.) -/
+/-- `modalHintikkaSetS4`'s conjunct 2 is exactly `modalS4Saturated`. -/
 theorem modalHintikkaSetS4_saturated (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
     (hH : modalHintikkaSetS4 φ₀ b acc) : modalS4Saturated φ₀ b acc := hH.2.1
@@ -8823,25 +8816,31 @@ lemma S4KeyedHintikkaInv_weaken (φ₀ : Proposition Atom)
     obtain ⟨w', hedge, hwit⟩ := hinv.eDiamondPosWitness sf hsf ψ w hsfeq
     exact ⟨w', haccsub w w' hedge, hbsub hwit⟩
 
-/-! ## Subtractive Route (3): the `red` Channel and the Bifurcated Hintikka Predicate
+/-! ## The `red` Channel: General Infrastructure Retained Post-Gate-B
 
 Route (3) (`Massacci2000` Technique 8.2, subtractive blocking; see this task's plan
 `specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
-04_subtractive-blocking-red-channel.md`) moves the redirect a blocked minting step would
-otherwise justify OUT of `acc` (the soundness-tracked structure) and into a separate,
-completeness-only channel `red`. Soundness never reads `red` (`branchSatisfiableIn`'s edge
-conjunct quantifies over `acc.hasEdge` only, `FrameSoundness.lean:113`); completeness reads
-`acc ∪ red` via `accWithReds`.
+04_subtractive-blocking-red-channel.md`) proposed moving the redirect a blocked minting step
+would otherwise justify OUT of `acc` (the soundness-tracked structure) and into a separate,
+completeness-only channel `red`, with a bifurcated Hintikka predicate (`modalHintikkaSetS4Sub`)
+substituting `accWithReds acc red` for `acc` in the witness/forward-cone conjuncts only.
 
-**Why the Hintikka predicate below is bifurcated rather than simply substituting `accWithReds
-acc red` into `modalHintikkaSetS4`'s conjunct 2**: that conjunct evaluates `modalApplyOneS4`,
-whose box-positive/diamond-negative saturation arms propagate along *every* edge of whatever
-`acc` they are handed. Handing them the union would demand the wrapped-at-target Hintikka forms
-`T(□χ)@src ∈ b → T(□χ)@wBlock ∈ b` / `F(◇χ)@src ∈ b → F(◇χ)@wBlock ∈ b`, which have **40**
-measured counterexamples out of 24,314 recorded blocking decisions
-(`specs/553_.../artifacts/s4subtractive3.lean`, condition (d)). Conjunct 2 below is therefore
-stated over `acc` alone (unchanged from `modalHintikkaSetS4`); only the witness conjuncts (3/4)
-and the two forward-cone conjuncts (5/6, G*/F*) read `accWithReds acc red`. -/
+**Route (3) is dead** (`#### Phase 3 Verdict`, `plans/04_subtractive-blocking-red-channel.md`):
+Decision Gate B refuted the cone-extension lemma the bifurcated predicate's forward-cone
+conjuncts require, because the free transfer below (`blockedRedirect_unwrapped_boxPos_mem`/
+`blockedRedirect_unwrapped_diaNeg_mem`) yields only an *unwrapped* branch fact at the redirect
+target, and unwrapped facts have no persistence mechanism in this tableau's Hintikka apparatus.
+`modalHintikkaSetS4Sub`, `modalHintikkaSetS4Sub_saturated`, and `S4KeyedSubHintikkaInv` were
+removed as part of the post-Gate-B triage (see plan v4's `#### Post-Gate-B Triage` note); the
+route (1) truth-lemma successor plan does not use the `red` channel at all.
+
+What remains below is genuinely route-independent: `Reds` and `accWithReds` are a plain
+"accessibility plus a recorded extra-edge list" packaging with no route-specific content, and
+`hasEdge_accWithReds_iff` / `reflTransGen_accWithReds_first_red` are general `simp`/path-
+decomposition bridges over that packaging. They are retained as minimal support for those two
+bridges and for the two sorry-free, standard-axioms-only free-transfer lemmas
+(`blockedRedirect_unwrapped_boxPos_mem`/`blockedRedirect_unwrapped_diaNeg_mem`), which route (1)
+may reuse. -/
 
 /-- A recorded blocking decision under subtractive blocking: `(source, blockTarget, sign,
 witnessFormula)`. Threaded alongside `keys`, read only by the completeness direction. Matches
@@ -8866,113 +8865,16 @@ theorem hasEdge_accWithReds_iff (acc : Accessibility) (red : Reds Atom) (x y : W
   simp only [accWithReds, Accessibility.hasEdge, List.any_append, List.any_map,
     Function.comp_def]
 
-/-- The bifurcated S4 Hintikka-set characterization for the subtractive route: the
-`modalHintikkaSetS4` shape, with conjunct 2 (saturation) kept over `acc` alone -- the
-subtractive driver *does* saturate over `acc`, since a blocked step adds no `acc` edge -- and
-conjuncts 3/4 (the existential witnesses) restated over `accWithReds acc red`, plus two
-additional forward-cone conjuncts (G*)/(F*) closing the redirect chain. See the module doc above
-for why conjunct 2 must NOT be evaluated at `accWithReds acc red`. -/
-def modalHintikkaSetS4Sub (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (red : Reds Atom) : Prop :=
-  isModalClosed b = false ∧
-  (∀ sf ∈ b,
-    let (result, _) := modalApplyOneS4 φ₀ sf b acc
-    match sf.sign, sf.formula with
-    | .neg, .box _ => True    -- F(□φ): minting-guarded rule; handled by conjunct 3
-    | .pos, .diamond _ => True  -- T(◇φ): minting-guarded rule; handled by conjunct 4
-    | _, _ =>
-      match result with
-      | .linear newForms => ∀ sf' ∈ newForms, sf' ∈ b
-      | .branching branches => ∃ br ∈ branches, ∀ sf' ∈ br, sf' ∈ b
-      | .persistent newForms => ∀ sf' ∈ newForms, sf' ∈ b
-      | .notApplicable => True) ∧
-  -- 3. Box-negative witness, over `accWithReds acc red`.
-  (∀ (φ : Proposition Atom) (w : WorldIndex),
-    ⟨.neg, .box φ, w⟩ ∈ b → ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
-      ⟨.neg, φ, w'⟩ ∈ b) ∧
-  -- 4. Diamond-positive witness, over `accWithReds acc red`.
-  (∀ (φ : Proposition Atom) (w : WorldIndex),
-    ⟨.pos, .diamond φ, w⟩ ∈ b → ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
-      ⟨.pos, φ, w'⟩ ∈ b) ∧
-  -- 5. redBoxForwardCone (G*): NEVER the wrapped-at-target form (40 counterexamples / 24,314).
-  (∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign) (φ : Proposition Atom),
-    (src, wBlock, s, φ) ∈ red →
-    (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-    ∀ u, Relation.ReflTransGen
-           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
-      (⟨.pos, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) ∧
-  -- 6. redDiaForwardCone (F*): NEVER the wrapped-at-target form (40 counterexamples / 24,314).
-  (∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign) (φ : Proposition Atom),
-    (src, wBlock, s, φ) ∈ red →
-    (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-    ∀ u, Relation.ReflTransGen
-           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
-      (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+/-! ## Path Decomposition over `accWithReds`
 
-/-- `modalHintikkaSetS4Sub`'s conjunct 2 is exactly `modalS4Saturated` (over `acc` alone, never
-`accWithReds acc red` -- see the module doc above `modalHintikkaSetS4Sub`). Dual of
-`modalHintikkaSetS4_saturated`. -/
-theorem modalHintikkaSetS4Sub_saturated (φ₀ : Proposition Atom)
-    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (red : Reds Atom) (hH : modalHintikkaSetS4Sub φ₀ b acc red) : modalS4Saturated φ₀ b acc :=
-  hH.2.1
-
-/-- **Keys-and-`red`-threaded Hintikka-tracking invariant bundle** for the subtractive route:
-the `S4KeyedHintikkaInv` fields, with the two witness fields (`eBoxNegWitness`/
-`eDiamondPosWitness`) restated over `accWithReds acc red`, plus two additional fields mirroring
-`modalHintikkaSetS4Sub`'s forward-cone conjuncts 5/6. **Field statements only** -- no
-preservation lemma is proved in this phase; threading this invariant through the subtractive
-ordered stepper is a later phase's task. -/
-structure S4KeyedSubHintikkaInv (φ₀ : Proposition Atom)
-    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
-    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) (red : Reds Atom) : Prop where
-  /-- Every already-expanded formula's Hintikka witness obligation is already met on `b`. -/
-  hintikkaInv : ∀ sf ∈ e,
-    modalHintikkaClauseGen (modalApplyOneS4Keyed φ₀ keys) sf.sign sf.formula sf.label b acc
-  /-- Every box-shaped formula in the expanded set `e` has sign `.neg`. -/
-  eBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ, sf.formula = .box ψ → sf.sign = .neg
-  /-- Every `boxNeg`-shaped formula already has a witness successor on `accWithReds acc red`. -/
-  eBoxNegWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
-    sf = (⟨.neg, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
-    ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
-      (⟨.neg, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
-  /-- Every diamond-shaped formula in the expanded set `e` has sign `.pos`. -/
-  eDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ, sf.formula = .diamond ψ → sf.sign = .pos
-  /-- Every `diamondPos`-shaped formula already has a witness successor on `accWithReds acc
-  red`. -/
-  eDiamondPosWitness : ∀ sf ∈ e, ∀ (ψ : Proposition Atom) (w : WorldIndex),
-    sf = (⟨.pos, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) →
-    ∃ w', (accWithReds acc red).hasEdge w w' = true ∧
-      (⟨.pos, ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
-  /-- Forward-cone box obligation (mirrors `modalHintikkaSetS4Sub` conjunct 5, G*). -/
-  redBoxForwardCone : ∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign)
-      (φ : Proposition Atom), (src, wBlock, s, φ) ∈ red →
-    (⟨.pos, .box χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-    ∀ u, Relation.ReflTransGen
-           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
-      (⟨.pos, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
-  /-- Forward-cone diamond obligation (mirrors `modalHintikkaSetS4Sub` conjunct 6, F*). -/
-  redDiaForwardCone : ∀ (χ : Proposition Atom) (src wBlock : WorldIndex) (s : Sign)
-      (φ : Proposition Atom), (src, wBlock, s, φ) ∈ red →
-    (⟨.neg, .diamond χ, src⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b →
-    ∀ u, Relation.ReflTransGen
-           (fun x y => (accWithReds acc red).hasEdge x y = true) wBlock u →
-      (⟨.neg, χ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b
-
-/-! ## Subtractive Route (3), Phase 2 (Decision Gate A): the `ReflTransGen` Path Decomposition
-
-`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
-04_subtractive-blocking-red-channel.md`, Phase 2 task (b). -/
+Retained per the post-Gate-B triage as a general fact about the `Reds`/`accWithReds` packaging
+above; independent of the now-dead bifurcated Hintikka predicate that originally motivated it
+(`plans/04_subtractive-blocking-red-channel.md`, former Phase 2 task (b)). -/
 
 /-- **Path decomposition** for `ReflTransGen (accWithReds acc red)`: a path `w ⤳ u` either stays
 entirely inside `acc.hasEdge`, or its first `red`-hop can be isolated -- it decomposes as an
 `acc`-only prefix `w ⤳ x`, a recorded redirect `(x, wB, s, φ) ∈ red`, and a residual
-`ReflTransGen (accWithReds acc red)`-suffix `wB ⤳ u`. This is Phase 2's path-decomposition
-lemma: `modalTruthLemmaS4Sub`'s box-positive/diamond-negative cases case on this disjunction,
-using the weakened S4 bridges (`hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_dia_neg_reflTransGen`,
-now over `modalS4Saturated`) on the `acc`-only prefix, and conjuncts 5/6 (the forward cones,
-`redBoxForwardCone`/`redDiaForwardCone`) on the residual suffix. Proved by
+`ReflTransGen (accWithReds acc red)`-suffix `wB ⤳ u`. Proved by
 `Relation.ReflTransGen.head_induction_on` plus `hasEdge_accWithReds_iff`: the `head` case's own
 edge splits (via the bridge) into an `acc`-edge or a `red`-edge; a `red`-edge terminates the
 prefix immediately (the residual is exactly the induction's own tail path, no recursion needed),
@@ -9002,61 +8904,25 @@ lemma reflTransGen_accWithReds_first_red (acc : Accessibility) (red : Reds Atom)
       rw [hrw_eq, hrx_eq] at hr_mem
       exact Or.inr ⟨w', x, rs, rphi, Relation.ReflTransGen.refl, hr_mem, htail⟩
 
-/-- **Box-preserving path bridge**: unlike `hintikkaS4_box_pos_reflTransGen` (which strips the
-`□` at the path's end via `hintikkaS4_box_pos_self`), this carries the *boxed* formula
-`T(□ψ)@·` itself across an entire `acc`-only `ReflTransGen` path, never unwrapping it. Needed by
-`modalTruthLemmaS4Sub`'s box-positive case: on a path with a first `red`-hop `(x, wB, s, φ) ∈
-red`, the forward-cone conjunct 5 (`redBoxForwardCone`) demands `T(□ψ)@x ∈ b` (the *wrapped*
-formula at the `red`-hop's source `x`), not the unwrapped `T(ψ)@x`. Proof: the exact mirror of
-`hintikkaS4_box_pos_reflTransGen`'s induction with the `refl` case returning `hmem` unchanged
-instead of invoking `hintikkaS4_box_pos_self`. -/
-lemma hintikkaS4_box_pos_reflTransGen_boxed
-    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
-    (ψ : Proposition Atom) (w w' : WorldIndex)
-    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
-    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
-    (⟨.pos, .box ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  revert hmem
-  induction hpath using Relation.ReflTransGen.head_induction_on with
-  | refl => intro hmem; exact hmem
-  | head hedge _ ih =>
-    intro hmem
-    exact ih (hintikkaS4_box_pos_step φ₀ b acc hH ψ _ _ hmem hedge)
+/-! ## Redirect Forward-Cone Free Transfer (Route-Independent Remnant)
 
-/-- Dual of `hintikkaS4_box_pos_reflTransGen_boxed` for the diamond-negative shape: carries
-`F(◇ψ)@·` itself across an entire `acc`-only `ReflTransGen` path without unwrapping it. Needed
-by `modalTruthLemmaS4Sub`'s diamond-negative case for the same reason: `redDiaForwardCone`
-demands `F(◇ψ)@x ∈ b` at the `red`-hop's source. -/
-lemma hintikkaS4_dia_neg_reflTransGen_boxed
-    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
-    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
-    (ψ : Proposition Atom) (w w' : WorldIndex)
-    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
-    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
-    (⟨.neg, .diamond ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
-  revert hmem
-  induction hpath using Relation.ReflTransGen.head_induction_on with
-  | refl => intro hmem; exact hmem
-  | head hedge _ ih =>
-    intro hmem
-    exact ih (hintikkaS4_dia_neg_step φ₀ b acc hH ψ _ _ hmem hedge)
-
-/-! ## Subtractive Route (3), Phase 3 (Decision Gate B): the Redirect Forward-Cone Transfer
-
-`specs/553_s4_loop_guard_soundness_reachability_restriction/plans/
-04_subtractive-blocking-red-channel.md`, Phase 3. Establishes (or refutes) that conjuncts 5/6
-of `modalHintikkaSetS4Sub` actually hold at a blocked step. -/
+Route (3)'s Decision Gate B (`plans/04_subtractive-blocking-red-channel.md`, `#### Phase 3
+Verdict`) refuted the cone-extension lemma that would have let the two free transfers below
+propagate beyond the redirect target `wBlock` itself; `hintikkaS4_box_pos_reflTransGen_boxed`/
+`hintikkaS4_dia_neg_reflTransGen_boxed` and the forward-cone conjuncts they fed
+(`S4KeyedSubHintikkaInv.redBoxForwardCone`/`redDiaForwardCone`) were removed in the post-Gate-B
+triage as dead machinery. The two lemmas below are the surviving reflexive-case fragment: sorry-
+free, standard-axioms-only, true statements about the guard, kept because they are genuinely
+route-independent and may be reused by the route (1) successor plan. -/
 
 omit [Hashable Atom] in
 /-- **Free transfer, box-context half (condition (c))**: near-transcription of
 `modalStepBranchS4Keyed_blocked_witness_mem`'s proof. When a minting attempt at `src` is
 blocked to `wBlock`, every box-positive formula `T(□χ)@src` already on the branch (with `χ`
 `φ₀`-relevant) transfers, UNWRAPPED, to `wBlock`: `T(χ)@wBlock ∈ b`. This is the reflexive
-(`u = wBlock`) base case of the forward-cone obligation (conjunct 5, G*) -- it does **not** by
-itself extend to `u` strictly beyond `wBlock` in the cone; see the cone-extension lemma below
-for that harder obligation. **Measured 0 failures / 24,314** (condition (c),
-`specs/553_.../artifacts/s4subtractive3.lean`). -/
+(`u = wBlock`) base case of a forward-cone obligation that does **not** extend to `u` strictly
+beyond `wBlock` in the cone (Decision Gate B refuted that extension; see the module doc above).
+**Measured 0 failures / 24,314** (condition (c), `specs/553_.../artifacts/s4subtractive3.lean`). -/
 lemma blockedRedirect_unwrapped_boxPos_mem (φ₀ : Proposition Atom)
     (b : List (SignedFormula (Proposition Atom) WorldIndex))
     (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))

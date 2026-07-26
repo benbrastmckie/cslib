@@ -1,9 +1,9 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "blocked",
+  "status": "implemented",
   "skeleton": false,
-  "summary": "Phase 3 of plan v4 (DECISION GATE B, establishment) attempted: FAIL, route (3) does not survive Gate B. Landed the two free/certain transfers (blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem), sorry-free, standard axioms only, committed as phase 3.1. Attempted the standalone cone-extension lemma over abstract (b, acc, red, keys) hypotheses (generalized induction carrying the wrapped box-positive formula, plus the most generous plausible additional hypothesis hredValid); the induction is stuck immediately past the first further hop because the free transfer only ever produces an UNWRAPPED fact, and unwrapped facts have no persistence mechanism in this Hintikka apparatus (only wrapped box/diamond formulas persist across acc-edges). Confirmed via lean_goal + lean_multi_attempt (exact/assumption/aesop all fail; aesop's exhaustive search fails outright) that this is a genuine mathematical dead end, not a search gap -- an unwrapped-to-wrapped bridge would be unsound in S4. No nameable invariant over (keys, red) bookkeeping can close this without adding the redirect to acc (forbidden -- the single defect shared by all three prior failed routes) or inventing an unprecedented persistence mechanism. Outcome (iii). Probe reverted before commit; no sorry landed. Phase 3 marked [BLOCKED] in the plan, full verdict with exact lean_goal state recorded under #### Phase 3 Verdict.",
+  "summary": "Post-Gate-B orphan triage for route (3) (subtractive blocking + red channel), authorized by the user after Decision Gate B refuted the cone-extension lemma. This is a bounded cleanup dispatch, not a plan phase: no route (1) work was started, no plan v5 was written. Removed the dead bifurcated Hintikka machinery (modalHintikkaSetS4Sub, modalHintikkaSetS4Sub_saturated, S4KeyedSubHintikkaInv, hintikkaS4_box_pos_reflTransGen_boxed, hintikkaS4_dia_neg_reflTransGen_boxed, modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel) from LoopChecking.lean and FrameCompleteness.lean. Retained all route-independent assets unchanged in meaning: modalS4Saturated and its projection bridges, the six weakened hintikkaS4_* bridges, Reds/accWithReds, hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_*_mem free transfers. Judgement call: kept Reds/accWithReds as minimal support for the two kept general bridges (option (a)) rather than restating those bridges over a plain Accessibility append (option (b)), since the packaging is trivial and restating would be non-trivial rework for a cleanup dispatch. Updated stale doc comments that referenced the removed declarations. Added a #### Post-Gate-B Triage note to plan v4 recording the disposition.",
   "phases_completed": 2,
   "phases_total": 12,
   "sorry_inventory": [
@@ -12,49 +12,67 @@
       "line": 1244,
       "statement": "branchSatisfiableIn_s4FC_ancestor_redirect (sorry body)",
       "strategic": false,
-      "assumption": "N/A -- pre-existing, not introduced by this phase or this task's v4 route",
-      "why_deferred": "Inherited from v3's Phase 2 decision gate. Retained by explicit prior user decision; unaffected by this phase's negative verdict on route (3) -- disposition remains a user decision, now more urgent given route (3)'s failure.",
+      "assumption": "N/A -- pre-existing, retained by standing user decision, untouched by this dispatch",
+      "why_deferred": "Retained by explicit prior user decision; this dispatch's mission excluded it entirely (KEEP list). Remains the only sorry in Cslib/Logics/Modal/Tableau/.",
       "follow_up_task": null
     }
   ],
-  "blockers": [
-    {
-      "phase": 3,
-      "target": "Standalone, driver-independent cone-extension lemma establishing conjuncts 5/6 (redBoxForwardCone/redDiaForwardCone) of modalHintikkaSetS4Sub at a blocked step, over abstract (b, acc, red, keys) hypotheses.",
-      "verbatim_goal": "State the cone extension as a standalone lemma over abstract hypotheses about (b, acc, red, keys) -- the guard `some` contract, `keyLowerBd`, the saturation conjunct over `acc`, and whatever additional threaded content proves necessary -- concluding conjuncts 5 and 6.",
-      "what_was_tried": "Generalized induction via Relation.ReflTransGen.head_induction_on carrying the WRAPPED box-positive formula (to feed the existing hintikkaS4_box_pos_step bridge across acc-edges), splitting each edge via hasEdge_accWithReds_iff, and re-invoking the free transfer at further red-hops under the added hypothesis hredValid (every red entry reflects a genuine guard decision -- the most generous plausible additional invariant). Verified via lean_goal (exact stuck state recorded in plan) and lean_multi_attempt (exact hunwrapped / assumption / aesop all fail).",
-      "why_it_failed": "The free transfer (blockedRedirect_unwrapped_boxPos_mem) only ever produces an UNWRAPPED fact at the redirect target; the induction's ih demands a WRAPPED fact to continue propagating across further acc-edges or red-hops. No sound bridge from unwrapped to wrapped membership exists (would be unsound in S4: chi@w does not imply box-chi@w for arbitrary chi). keyLowerBd is definitionally incapable of producing a wrapped fact (relevantSetFinset only witnesses unwrapped signed-formula membership). Closing this requires either adding the redirect edge to acc (forbidden by the Postmortem Constraints, the shared defect of all three prior failed routes) or a wholly new persistence mechanism absent from the current guard/key/red bookkeeping."
-    }
+  "blockers": [],
+  "kept": [
+    "modalS4Saturated (LoopChecking.lean)",
+    "modalHintikkaSetS4_saturated (LoopChecking.lean)",
+    "hintikkaS4_box_pos_step, hintikkaS4_dia_neg_step, hintikkaS4_box_pos_self, hintikkaS4_dia_neg_self, hintikkaS4_box_pos_reflTransGen, hintikkaS4_dia_neg_reflTransGen (LoopChecking.lean, unchanged weakened-hypothesis bridges)",
+    "Reds, accWithReds (LoopChecking.lean)",
+    "hasEdge_accWithReds_iff (LoopChecking.lean)",
+    "reflTransGen_accWithReds_first_red (LoopChecking.lean)",
+    "blockedRedirect_unwrapped_boxPos_mem (LoopChecking.lean)",
+    "blockedRedirect_unwrapped_diaNeg_mem (LoopChecking.lean)",
+    "FrameSoundness.lean:1244 sorry (untouched, standing user decision)"
   ],
-  "continuation_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md#phase-3-verdict",
-  "next_action_hint": "ESCALATE TO USER: route (3) (Massacci-style subtractive blocking with a completeness-only redirect channel) is dead per Decision Gate B's negative verdict. This is the fourth structural route to fail in this task's history (Route P/v1, origin-edge/v2, ancestor-only/v3, now subtractive/v4), all sharing the same root shape per the plan's own Postmortem Constraints analysis: something about the redirect target's forward reachability cannot be justified without adding the redirect to acc. The plan's own kill table names the honest fallback as route (1) (full canonical/pinned-witness truth lemma) if Gate A OR Gate B fails -- Gate A passed but Gate B failed, so this fallback applies. Do NOT dispatch Phases 4-12 (not scaffolded on a positive verdict, per the plan). Recommend /revise 553 to write a v5 plan around route (1), or a dedicated research dispatch to re-examine whether ANY variant of the redirect mechanism can supply forward-cone persistence without touching acc, before committing to route (1)'s cost. The two free transfers (blockedRedirect_unwrapped_{boxPos,diaNeg}_mem) remain landed and are independently true/useful regardless of route -- do not revert them.",
+  "reverted": [
+    "modalHintikkaSetS4Sub (LoopChecking.lean)",
+    "modalHintikkaSetS4Sub_saturated (LoopChecking.lean)",
+    "S4KeyedSubHintikkaInv (LoopChecking.lean)",
+    "hintikkaS4_box_pos_reflTransGen_boxed (LoopChecking.lean)",
+    "hintikkaS4_dia_neg_reflTransGen_boxed (LoopChecking.lean)",
+    "modalTruthLemmaS4Sub (FrameCompleteness.lean)",
+    "modalOpenBranchS4Sub_countermodel (FrameCompleteness.lean)"
+  ],
+  "judgement_call": "Reds/accWithReds retained (option (a): minimal support for the two kept general bridges hasEdge_accWithReds_iff and reflTransGen_accWithReds_first_red) rather than restating those bridges over a plain Accessibility append and dropping Reds/accWithReds (option (b)), per the dispatch's own preference for (a) when (b) would require non-trivial proof rework. Recorded in plan v4's #### Post-Gate-B Triage note.",
+  "continuation_path": null,
+  "next_action_hint": "Triage complete. The library now contains only route-independent assets from route (3); the route (1) truth-lemma successor plan (v5) can proceed as a fresh planning dispatch without further cleanup of this route's machinery.",
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md"
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
   ],
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "summary": "Phase 3 checklist checked off, heading -> [BLOCKED], new '#### Phase 3 Verdict' subsection recording the FAIL verdict with exact lean_goal state and rationale for outcome (iii)."
-    },
-    {
-      "type": "summary",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md",
-      "summary": "Phase 3 implementation summary: what was landed (free transfers), what was attempted and reverted (cone extension), why outcome (iii) obtains, consequence for the route."
+      "summary": "Added '#### Post-Gate-B Triage' subsection under Phase 3 Verdict recording the kept/reverted inventory and the Reds/accWithReds judgement call."
     }
   ],
+  "verification": {
+    "build_loop_checking": "clean (lake build Cslib.Logics.Modal.Tableau.LoopChecking, 847 jobs)",
+    "build_frame_completeness": "clean (lake build Cslib.Logics.Modal.Tableau.FrameCompleteness, 880 jobs)",
+    "lint_style": "clean on both touched files (lake exe lint-style)",
+    "sorry_count_tableau_dir": 1,
+    "sorry_count_expected": 1,
+    "axiom_check_blockedRedirect_unwrapped_boxPos_mem": ["propext", "Classical.choice", "Quot.sound"],
+    "axiom_check_blockedRedirect_unwrapped_diaNeg_mem": ["propext", "Classical.choice", "Quot.sound"],
+    "new_axioms": false,
+    "full_project_build_note": "Not attempted (out of scope per dispatch instructions); a full-project lake build is currently failing on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean, concurrent task 554 work, verified untouched by this session."
+  },
   "library_files_edited": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
   ],
   "territory_respected": [
-    "LoopChecking.lean: added blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem only (new declarations, additive). No existing declaration edited.",
-    "The cone-extension probe (blockedRedirect_boxPos_forwardCone_probe) was written and then fully removed in this same dispatch -- the committed tree state is identical before and after the probe; git diff confirms zero residual change from it.",
-    "FrameCompleteness.lean, Rules.lean, Saturation.lean, Branch.lean, SoundnessStep.lean: untouched.",
-    "FrameSoundness.lean:1244 sorry: untouched.",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/** and Cslib.lean: untouched.",
-    "artifacts/s4subtractive3.lean: not touched (outcome iii, not ii -- no probe extension needed)."
+    "LoopChecking.lean, FrameCompleteness.lean: only the REVERT-list declarations removed and their surrounding doc comments updated; every KEEP-list declaration's statement/proof left byte-identical.",
+    "Rules.lean, Saturation.lean, Branch.lean, SoundnessStep.lean, FrameSoundness.lean: untouched (read-only territory honored).",
+    "FrameSoundness.lean:1244 sorry: untouched, per explicit standing user decision.",
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/** and Cslib.lean: untouched."
   ],
-  "requires_user_review": true
+  "requires_user_review": false
 }

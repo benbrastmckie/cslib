@@ -1,7 +1,7 @@
 # Implementation Plan: Propositional/Intuitionistic Tableau Completeness — Invariant Threading and Bridge Assembly
 
 - **Task**: 317 - Fill the remaining propositional/intuitionistic tableau completeness sorries
-- **Status**: [NOT STARTED]
+- **Status**: [IMPLEMENTING]
 - **Effort**: 18 hours
 - **Dependencies**: 552 (completed — landed the `.pos, .imp` branching arm)
 - **Research Inputs**:
@@ -253,7 +253,7 @@ because a spike agent reading `Scheme.lean` while another agent rewrites it is e
 territory hazard R7 names. Territory contract: **one `Scheme.lean` writer at a time, for the whole
 plan.**
 
-### Phase 0: Verification spike — record the two load-bearing decisions [NOT STARTED]
+### Phase 0: Verification spike — record the two load-bearing decisions [COMPLETED]
 
 - **Goal:** Answer two questions against live Lean goal state before any phase boundary downstream
   is treated as fixed, and record the answers as a durable decision record.

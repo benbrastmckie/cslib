@@ -1,65 +1,79 @@
 {
   "$schema": "orchestrator-handoff-v1",
   "phase": "implement",
-  "status": "implemented",
-  "skeleton": false,
+  "status": "blocked",
+  "skeleton": true,
   "phases_completed": 1,
   "phases_total": 14,
-  "sorry_inventory": [],
+  "sorry_inventory": [
+    {
+      "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "line": 1244,
+      "lemma": "branchSatisfiableIn_s4FC_ancestor_redirect",
+      "reason": "Documented strategic-sorry skeleton (per this dispatch's Recovery Discipline): the ambient branchSatisfiableIn witness model is existentially arbitrary, so extending m.r to relate f(src)/f(a) forces a transitive closure over ambient predecessors of src that no standalone, driver-independent hypothesis set can control. Exact lean_goal state recorded in the plan's '#### Phase 2 Verdict' section and in handoffs/phase-2-blocked-handoff-20260726.md."
+    }
+  ],
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
   "plan_version": 3,
-  "next_phase": 2,
-  "next_phase_name": "Decision gate — the ancestor back-edge justification lemma",
-  "next_action_hint": "Dispatch Phase 2: prove the ancestor back-edge justification lemma in FrameSoundness.lean over abstract hypotheses, no driver dependency (see plan's Phase 2 section and its Gore1999/Massacci escalation branch). Phase 1's D(iv) result (1374/1374 box-propagation checks passed empirically, 0 failures) is a positive but non-binding empirical signal for that lemma's obligation -- it does not substitute for the proof and does not prove validity at all formula sizes (cex itself is size 19 and was outside the size<=6 sweep).",
-  "summary": "Phase 1 complete: an empirical-only measurement phase (no Lean proof work, no Cslib/** change). Built specs/553_.../artifacts/s4ancestor.lean -- an ancestor-restricted guard bwAnc (candidates filtered to w :: spineAncestors spine w), explicit spine (child,parent) tracking, and unordered+ordered ancestor steppers, all reusing the shipped modalApplyOne/modalApplyOneS4/Accessibility/blockingWorldS4Keyed-style machinery rather than reimplementing it. `lake env lean` on the probe runs to completion: no errors, no warnings, no sorries, no axioms. All four measurements recorded verbatim in the plan under a new '#### Phase 1 Measurements' subsection (Phase 1 heading moved [IN PROGRESS] -> [COMPLETED]): A (soundness) PASS -- cex closes under the shipped baseline (some true, confirming the known unsoundness) but is OPEN (some false) under the ancestor-ordered driver, fuel 400. B (validity) PASS -- T, 4, K axiom instances all close under the ancestor-ordered driver, fuel 400. C (differential sweep, 2 atoms, size<=6, 8532 formulas, fuel 100) PASS, gate satisfied -- baseline reproduces exactly (1650 closed/6882 open/0 fuel-exhausted); ancestor-ordered is IDENTICAL to baseline on every count (1650/6882/0, 0 open->closed, 0 closed->open); ancestor-unordered has 0/0 regressions but 9/8532 formulas newly fuel-exhausted (a mild ordering-dependent termination cost that vanishes under settled-context scheduling). D (invariant damage), as report 01/02 predicted -- global keysDistinct actually breaks in 63/8532 formulas (0.74%); max spine depth observed 6; max out-degree observed 3; but the upward box-propagation test (the exact obligation Phase 2's decision-gate lemma must prove) passed on every one of 1374 observed blocked redirects across the whole corpus, 0 failures. No BLOCKED trigger: C's completeness-regression gate (open->closed must be 0) is 0 for both orderings, so the route is empirically viable to proceed to Phase 2.",
-  "phase_1_measurements": {
-    "A_soundness": {"baseline_cex_fuel400": "some true (unsound, as expected)", "ancestor_ordered_cex_fuel400": "some false (OPEN, fix confirmed)"},
-    "B_validity": {"T_axiom": "some true", "four_axiom": "some true", "K_axiom": "some true"},
-    "C_differential_sweep": {
-      "total_formulas": 8532,
-      "baseline": {"closed": 1650, "open": 6882, "fuel_exhausted": 0},
-      "ancestor_unordered": {"closed": 1650, "open": 6873, "fuel_exhausted": 9, "open_to_closed": 0, "closed_to_open": 0},
-      "ancestor_ordered": {"closed": 1650, "open": 6882, "fuel_exhausted": 0, "open_to_closed": 0, "closed_to_open": 0},
-      "gate_verdict": "PASS -- open_to_closed is 0 for both orderings, phase not BLOCKED"
-    },
-    "D_invariant_damage": {
-      "keysDistinct_broken_formula_count": 63,
-      "keysDistinct_broken_denominator": 8532,
-      "max_spine_depth_observed": 6,
-      "max_out_degree_observed": 3,
-      "box_propagation_test": {"pass": 1374, "fail": 0}
-    }
-  },
-  "literature_note": {
-    "directive": "SUBINDEX_PRESENT this run",
-    "issue": "Nine modal-logic doc_ids in specs/literature-index.json (including massacci_2000_single_step_tableaux_for_modal_logics, simpson_1994_intuitionistic_modal_logic, chagrovzakharyaschev_1997_modallogic) are absent from the global Literature index and were NOT retrievable this run.",
-    "impact_this_phase": "None -- Phase 1 is purely empirical and needed no literature.",
-    "impact_next_phase": "Phase 2's escalation branch and the prior planning dispatch's literature_verification cite Massacci's Technique 8.2/Def 8.2/Prop 8.1/Pruning Lemma 8.2 as already-read and grounded (see this file's git history / the prior plan-phase handoff), so this gap may not block Phase 2 if that grounding is trusted from the planning dispatch -- but the next dispatch should not assume fresh retrieval will succeed."
+  "next_phase": null,
+  "next_phase_name": null,
+  "next_action_hint": "STOP. Do not dispatch Phase 3 or any later phase of plan v3 -- Phase 2 is the route's decision gate and it is BLOCKED. Escalate to the user: the ancestor-only-blocking route (audit option (c)) does not close, for reasons independent of the Gore1999 literature gap (do NOT spawn a literature-acquisition phase). The two viable next steps identified are (1) a full driver-dependent Hintikka/canonical-model truth lemma (large, out of this phase's scope by design) or (2) reopening the mandate to accept branchPropAdequateIn (closer to audit option (b)) instead of full branchSatisfiableIn -- both are user-level route decisions, not phase-level implementation work. Recommend /spawn 553 or a direct user consult, not /implement 553 again on this plan.",
+  "summary": "Phase 2 (decision gate) attempted and BLOCKED. Stated branchSatisfiableIn_s4FC_ancestor_redirect (FrameSoundness.lean:1220) as a standalone, driver-independent lemma: single-hop ancestor edge (acc.hasEdge a src), abstract hboxback/hdianeg hypotheses standing in for keyLowerBd's semantic payoff. Attempted the cluster construction (case split on whether the ambient witness already relates f(src)/f(a)); evaluated blockedRedirect_boxctx_mem_of_boxOrigin/_diaNeg_mem_of_diaOrigin (LoopChecking.lean:1466,1506) as starting points per the dispatch instruction -- both require the edge to already be recorded in acc, so neither is reusable for justifying the edge's own addition. The predicted 'unwrapped box-context' failure mode never materialized; the proof stalls one step earlier: branchSatisfiableIn's witness model is existentially arbitrary (not required to equal acc's transitive closure), so extending m.r to add the pair (f src, f a) forces (via IsTrans binding the concrete relation) a transitive closure over every ambient predecessor of f(src), a family no standalone hypothesis set can name or control. This is the same obstruction already documented in this file's own branchPropAdequateIn module comment for Route P's identical redirect-to-an-existing-world shape. lake build Cslib.Logics.Modal.Tableau.FrameSoundness is clean except for the one documented sorry (the only new sorry anywhere under Cslib/Logics/Modal/Tableau/). lake exe checkInitImports passes. Plan Phase 2 heading -> [BLOCKED], plan top-level Status -> BLOCKED, new '#### Phase 2 Verdict' subsection resolves the two NOT-YET-VERIFIED mapping-table rows as REFUTED/MOOT. Phases 3-14 are explicitly not sequenced around this gate, per the phase's own done-condition.",
+  "phase_2_verdict": {
+    "lemma": "branchSatisfiableIn_s4FC_ancestor_redirect",
+    "location": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1220",
+    "result": "BLOCKED -- one sorry at line 1244, documented",
+    "predicted_failure_mode_occurred": false,
+    "actual_obstruction": "branchSatisfiableIn's witness model is existentially arbitrary; extending m.r for the new edge forces a transitive closure over unbounded ambient predecessors of src, which no standalone hypothesis set controls. Same obstruction as the already-documented branchPropAdequateIn precedent for Route P.",
+    "starting_point_lemmas_evaluated": [
+      "blockedRedirect_boxctx_mem_of_boxOrigin (LoopChecking.lean:1466) -- not reusable, requires edge already recorded",
+      "blockedRedirect_diaNeg_mem_of_diaOrigin (LoopChecking.lean:1506) -- not reusable, same reason"
+    ],
+    "phase_2b_triggered": false,
+    "gore1999_escalation_triggered": false,
+    "mapping_table_rows_resolved": [
+      "An ancestor back-edge src -> wBlock is model-justifiable -- REFUTED (as standalone lemma)",
+      "The ancestor route closes without the boxed-birth-content refinement -- MOOT (boxed refinement would not fix the actual obstruction)"
+    ]
   },
   "territory_respected": [
-    "Only wrote specs/553_.../artifacts/s4ancestor.lean and the Phase 1 section of the plan file.",
-    "No Cslib/** file touched.",
-    "Did not touch any other phase's section of the plan file (verified via git diff --stat before editing: only Phase 1's lines changed by this dispatch)."
+    "Only wrote Cslib/Logics/Modal/Tableau/FrameSoundness.lean and the Phase 2 section (plus top-level Status field) of the plan file.",
+    "LoopChecking.lean, FrameCompleteness.lean, Rules.lean untouched -- read-only reference only.",
+    "Did not touch any other phase's section of the plan file."
   ],
   "artifacts": [
     {
-      "type": "probe",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4ancestor.lean",
-      "note": "Definitions and #eval only. No proofs, no sorry, no axioms. Compiles and runs to completion."
+      "type": "lean",
+      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "note": "New lemma branchSatisfiableIn_s4FC_ancestor_redirect (line 1220, one documented sorry at 1244) plus local helper hasEdge_addEdge_cases_anc (line ~1198). lake build clean except the one expected sorry warning."
     },
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-      "note": "Phase 1 heading [IN PROGRESS] -> [COMPLETED], all Phase 1 checklist items checked, new '#### Phase 1 Measurements' subsection added."
+      "note": "Phase 2 heading [NOT STARTED] -> [BLOCKED]; top-level Status -> BLOCKED; new '#### Phase 2 Verdict' subsection with exact lean_goal state and mapping-table resolution."
+    },
+    {
+      "type": "handoff",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
+      "note": "Full narrative handoff: current state, key decisions, what NOT to try, what would change the verdict."
     }
   ],
   "modified_files": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4ancestor.lean",
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
   ],
-  "blockers": [],
-  "requires_user_review": false,
+  "blockers": [
+    {
+      "phase": 2,
+      "phase_name": "Decision gate — the ancestor back-edge justification lemma",
+      "description": "The ancestor-only-blocking route (audit option (c)) does not close. branchSatisfiableIn_s4FC_ancestor_redirect cannot be discharged from standalone, driver-independent hypotheses: branchSatisfiableIn's witness model is existentially arbitrary, so justifying the new back-edge requires either a full driver-dependent Hintikka/canonical-model truth lemma, or accepting the weaker branchPropAdequateIn invariant instead (closer to audit option (b)) -- both are user-level route decisions.",
+      "exact_goal_state_location": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md, '#### Phase 2 Verdict' section",
+      "requires": "User decision: (1) authorize a driver-dependent canonical-model construction as a new, larger phase, or (2) reopen the mandate to accept branchPropAdequateIn instead of full branchSatisfiableIn, or (3) abandon this task's soundness-repair goal entirely."
+    }
+  ],
+  "requires_user_review": true,
   "plan_markers_verified": true,
-  "plan_markers_note": "Phase 1 heading is [COMPLETED]; Phase 2 heading is [NOT STARTED] and is the next dispatch target."
+  "plan_markers_note": "Phase 2 heading is [BLOCKED]; Phase 3 heading remains [NOT STARTED] but must NOT be dispatched -- the plan's own done-condition for Phase 2 requires escalation before Phase 3."
 }

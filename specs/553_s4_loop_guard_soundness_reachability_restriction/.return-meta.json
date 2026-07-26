@@ -1,44 +1,71 @@
 {
-  "status": "planned",
+  "status": "partial",
   "task_number": 553,
-  "agent_type": "planner-hard-agent",
-  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
-  "session_id": "sess_1785046950_33beb4_553",
+  "agent_type": "cslib-implementation-hard-agent",
+  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+  "session_id": "sess_1785084826_a33d36",
   "started": "2026-07-26",
   "completed": "2026-07-26",
-  "mode": "replan_v3_ancestor_only",
-  "trigger": "mandate_change",
+  "phase_number": 2,
+  "phases_completed": 1,
+  "phases_total": 14,
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
   "plan_version": 3,
-  "phase_count": 14,
-  "estimated_hours": 30,
-  "postmortem_rules_count": 9,
-  "settled_decisions_count": 6,
-  "dependency_waves": [[1],[2],[3,5,6],[4,7],[8],[9],[10],[11],[12],[13,14]],
-  "report_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/02_redirect-inertness-divergence-audit.md",
+  "requires_user_review": true,
+  "partial_progress": {
+    "stage": "phase_2_blocked_verdict_recorded",
+    "details": "Phase 2 decision-gate lemma stated and attempted in FrameSoundness.lean; proof reaches an unresolvable obligation one step before the plan's predicted failure mode. Verdict recorded in plan's #### Phase 2 Verdict subsection, handoff markdown, and .orchestrator-handoff.json. Phase 2 heading marked [BLOCKED]; plan top-level Status marked BLOCKED. Phases 3-14 not sequenced around this gate per the phase's own done-condition."
+  },
   "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-  "superseded_plans": [
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md"
+  "artifacts": [
+    {
+      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
+      "type": "lean",
+      "summary": "New lemma branchSatisfiableIn_s4FC_ancestor_redirect (line 1220, one documented sorry at 1244) and local helper hasEdge_addEdge_cases_anc (line ~1198)."
+    },
+    {
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
+      "type": "plan",
+      "summary": "Phase 2 heading [NOT STARTED] -> [BLOCKED]; top-level Status -> BLOCKED; new #### Phase 2 Verdict subsection with exact lean_goal state and mapping-table resolution."
+    },
+    {
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
+      "type": "handoff",
+      "summary": "Full narrative handoff: current state, key decisions, what NOT to try, what would change the verdict."
+    },
+    {
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/03_phase2-ancestor-redirect-blocked.md",
+      "type": "summary",
+      "summary": "Phase 2 implementation summary with Plan Deviations section."
+    }
   ],
-  "h8_ceiling_deviation": "14 phases vs the 8-phase complex-task ceiling; declared and justified in the plan and handoff (dispatch mandate authorised 10+; every phase passes the bounded-unit test; three phases carry pre-declared split points)",
-  "skeleton": false,
-  "follow_up_tasks": [],
-  "central_risk_verdict": "The _none_fresh -> keysDistinct -> pigeonhole -> bClosure -> fuel-sufficiency chain does NOT survive ancestor-only blocking and cannot be repaired by key enrichment; replacement is a spine-depth x branching geomCap bound (Phases 5-7). Stated at Phase 1, not deferred.",
-  "second_risk_verdict": "The audit's claim that ancestor-only 'restores branchSatisfiableIn outright' is NOT-YET-VERIFIED and likely too optimistic (the edge needs the upward relation; refl-trans closure gives only downward). Phase 2 is a hard gate with a boxed-key branch and a Gore1999-acquisition escalation branch.",
-  "literature_attribution_corrected": "Massacci 2000 Technique 8.2 / DEFINITION 8.2 is SHORTER-(modal)-copy blocking, not ancestor-only; ancestry enters via Pruning Lemma 8.2. Ancestor-restriction implies shorter-prefix, so this route is a refinement of Massacci's discipline. Verified by direct chunk reads (0030, 0031, 0065, 0066).",
-  "cslib_files_modified": [],
+  "memory_candidates": [
+    "branchSatisfiableIn's existentially-arbitrary witness model means redirect edges to an EXISTING/reused world (not a freshly minted one) cannot in general be justified by extending the model's relation -- this is a structural property of how branchSatisfiableIn is encoded in Cslib/Logics/Modal/Tableau/FrameSoundness.lean, not a case-specific gap. Any future route that redirects to an existing world (not just ancestor-only blocking) will hit the same wall; branchPropAdequateIn is the known weaker fallback.",
+    "blockedRedirect_boxctx_mem_of_boxOrigin / _diaNeg_mem_of_diaOrigin (LoopChecking.lean) both require the edge to already be recorded in acc before they fire -- they characterize post-redirect syntactic content transfer, not a way to justify a redirect edge's own addition."
+  ],
+  "cslib_files_modified": [
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
+  ],
   "files_modified": [
+    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/01_s4-settled-context-scheduling.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/state.json",
-    "specs/TODO.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/03_phase2-ancestor-redirect-blocked.md"
   ],
   "axiom_count": 26,
-  "sorry_count_tableau": 0,
-  "requires_user_review": false,
-  "next_steps": "Dispatch Phase 1 (executable ancestor-only probe, four measurements, no Cslib change). Phase 2 is a hard gate that may terminate the route; do not dispatch Phase 3 until its verdict is recorded."
+  "sorry_count_tableau": 1,
+  "verification": {
+    "verification_passed": false,
+    "sorry_count": 1,
+    "vacuous_count": 0,
+    "axiom_count_change": 0,
+    "build_passed": true,
+    "ci_pipeline_passed": "partial (scoped build + checkInitImports only; full CI not run since status is blocked, not implemented)",
+    "note": "sorry_count is 1 by design (documented strategic skeleton for a BLOCKED phase, not a defect being hidden). status is 'partial' per the escalation protocol, never 'implemented', consistent with the one remaining sorry."
+  },
+  "follow_up_tasks": [],
+  "requires_user_review": true,
+  "next_steps": "STOP. Do not dispatch Phase 3 or any later phase of plan v3. Escalate to the user: the ancestor-only-blocking route (audit option (c)) does not close. Two viable next steps: (1) authorize a driver-dependent Hintikka/canonical-model construction as a new, larger phase, or (2) reopen the mandate to accept branchPropAdequateIn (closer to audit option (b)) instead of full branchSatisfiableIn. The Gore1999 literature-acquisition escalation branch does NOT apply -- this is not a literature gap."
 }

@@ -2005,7 +2005,7 @@
     {
       "project_number": 560,
       "project_name": "repair_literature_subindex_massacci_chunks",
-      "status": "researched",
+      "status": "planned",
       "task_type": "meta",
       "title": "Repair the per-repo literature sub-index (Massacci corpus reported as 1 chunk, holds 77)",
       "topic": "Literature Infrastructure",
@@ -2019,11 +2019,16 @@
           "type": "report",
           "path": "specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md",
           "created": "2026-07-26"
+        },
+        {
+          "type": "plan",
+          "path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
+          "created": "2026-07-26"
         }
       ],
       "blockers": [],
       "created": "2026-07-26T23:30:00Z",
-      "last_updated": "2026-07-26T23:44:24Z",
+      "last_updated": "2026-07-26T23:50:32Z",
       "next_artifact_number": 2,
       "session_id": "sess_1785108997_9eb575",
       "parent_task": null

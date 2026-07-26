@@ -1,14 +1,18 @@
 {
-  "status": "researched",
-  "summary": "Mechanism/data-shape confirmed exactly as described, but true scope is 8-of-34 fixable documents (not 19) and the description's fix precedence is unsafe as literally stated -- it would regress chagrovzakharyaschev_1997_modallogic from 6 to 997 chunks; corrected precedence (child-count-first, chunk_count-field-second) given.",
+  "status": "planned",
+  "summary": "Three-phase plan repairs literature-briefing.sh per-repo chunk-count under-reporting via a corrected four-tier precedence (child count -> parent chunk_count field -> on-disk chunk_*.md glob -> literal 1), fixing 21 of 34 documents including Massacci at 77, with a chagrovzakharyaschev==6 regression sentinel in every phase.",
   "artifacts": [
     {
-      "path": "specs/560_repair_literature_subindex_massacci_chunks/reports/01_briefing-chunk-count-defect.md",
-      "type": "report",
-      "summary": "Verified mechanism (literature-briefing.sh:203-225) and Massacci data shape; corrected scope to 8-of-34 documents genuinely fixable via chunk_count field, identified a regression risk (chagrovzakharyaschev_1997_modallogic), confirmed global mode and lit-coverage marker are unaffected, confirmed no duplicate consumers elsewhere."
+      "path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
+      "type": "plan",
+      "summary": "Phase 1 Tier-2 chunk_count-field fallback (8 docs), Phase 2 Tier-3 on-disk chunk_*.md glob (11 docs), Phase 3 precedence documentation plus a full-34 self-checking verification sweep; global Literature corpus is read-only throughout."
     }
   ],
   "blockers": [],
-  "next_action_hint": "plan",
-  "modified_files": []
+  "next_action_hint": "implement",
+  "phases_total": 3,
+  "modified_files": [
+    "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
+    "specs/560_repair_literature_subindex_massacci_chunks/.return-meta.json"
+  ]
 }

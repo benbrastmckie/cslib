@@ -1,0 +1,28 @@
+{
+  "status": "planned",
+  "agent_type": "planner-hard-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
+  "task_number": 560,
+  "session_id": "sess_1785108997_9eb575",
+  "plan_path": "specs/560_repair_literature_subindex_massacci_chunks/plans/01_briefing-chunk-count-repair.md",
+  "phase_count": 3,
+  "estimated_hours": 1.5,
+  "postmortem_rules_count": 7,
+  "plan_metadata": {
+    "phases": 3,
+    "total_effort_hours": 2,
+    "complexity": "medium",
+    "research_integrated": true,
+    "plan_version": 1,
+    "dependency_waves": [[1], [2], [3]],
+    "reports_integrated": [
+      {
+        "path": "reports/01_briefing-chunk-count-defect.md",
+        "integrated_in_plan_version": 1,
+        "integrated_date": "2026-07-26"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
+  }
+}

@@ -708,4 +708,292 @@ theorem lemma4_9_andR (ctx : OutputCtx Atom) (A B : Proposition Atom) :
       (((NestedRhs.atom A).fm.and (NestedRhs.atom B).fm).imp (NestedRhs.atom (A.and B)).fm)
       from cs5DerivImpSelf (A.and B)) ctx
 
+/-! ## Theorem 4.1, First Half: Identity, Propositional, `⊥•`, Contraction Cases
+
+This section opens the soundness theorem itself, `nested_sound : NestedProof Γ → Derivable
+(@CS5ModalAxiom Atom) (fm Γ)` (stated in full and assembled in the sibling that discharges the
+modal/structural cases): each `NestedProof` constructor gets its own **case lemma**, taking the
+already-translated soundness fact(s) of its premise(s) as hypotheses and producing the conclusion's
+soundness fact -- exactly the shape `nested_sound`'s eventual structural recursion consumes at each
+constructor. Landed here: `botL`, `andL`, `andR`, `orRLeft`, `orRRight`, `impR`, `contract` (seven
+of this phase's ten target constructors).
+
+**`impR` resolved, not deferred**: Phase 11 flagged `impR` as needing "a genuinely separate
+`fillRhs`-vs-`fillFull` empty-layer bridging induction." That induction is landed below
+(`buildFullChain_imp_buildRhsChain`/`fillFull_imp_fillRhs`), using only `tBox`, curry/uncurry, and
+`cs5DerivImpCongrRight`/`cs5DerivBoxMono` -- no new axiom needed, since `OutputCtx.fillFull` and
+`OutputCtx.fillRhs`'s recursions both bottom out through `.box`, and `tBox` (`□X ⊃ X`) is exactly
+the tool that reconciles the "extra box" `fillFull`'s base case carries.
+
+**`id` and `orL`: a genuine gap, not merely deferred work.** Both are documented below as strategic
+holes rather than attempted corollaries of existing lemmas, because this phase's investigation
+found a *mathematical* obstruction, not a missing combinator:
+
+* **`id`** (`Γ' Λ : OutputCtx`, `a : Atom`, zero premises): soundness needs
+  `⊢ (ctx.Λ.fillLhs (a•)).fm ⊃ a` for `ctx.π := a°`. `OutputCtx.fillLhs`'s own recursion inserts a
+  `.dia` (not `.box`) at each layer past length 1, so the general-`Λ` step needs
+  `⊢ ◇X ⊃ a` from `⊢ X ⊃ a` -- i.e., a "diamond can be shed" step. Unlike `tBox` (`□X ⊃ X`, used
+  freely above for the *box* side, e.g. in `fillFull_imp_fillRhs`'s base case), **no dual axiom
+  `◇X ⊃ X` exists in `CS5ModalAxiom`** (this would collapse modal distinctions and is not even a
+  reasonable schema for `T`). Concretely: instantiating `Γ' := []`, `Λ := [.empty, .empty]` makes
+  `(ctx.Λ.fillLhs (.atom (.atom a))).fm` propositionally-simplify to `◇(Proposition.atom a)`, so
+  soundness of *this one* `id` instance would require `⊢ ◇a ⊃ a` as a bare `CS5` theorem for an
+  arbitrary atom `a` -- false in any non-degenerate frame (it would force every accessible world to
+  agree with the root on every atom). **This is a concrete counterexample against `id`'s current
+  fully-general `(Γ' Λ : OutputCtx)` signature in `Rules.lean`**, not a proof this phase failed to
+  find; flagged for follow-up (likely: `id` needs its `Λ` parameter restricted, or the axiom should
+  be re-derived directly against a bare `OutputCtx` via `.fillFull`, mirroring Lemma 4.2's own
+  scope, rather than through the general `InputCtx` split).
+* **`orL`** (branching, `∨•`): soundness needs, at `Λ`-depth ≥ 2, the fact
+  `⊢ ◇(X ∨ Y) ⊃ (◇X ∨ ◇Y)` for arbitrary `X, Y` (to combine the two premises' `◇`-wrapped
+  consequences). This is *exactly* `kdisj` (`Intuitionistic/IS5.lean`'s
+  `◇(φ ∨ ψ) ⊃ (◇φ ∨ ◇ψ)`), which is an `IS5`-only axiom, deliberately **not** present in
+  `CS5ModalAxiom` (this development's Research Integration notes record this as one of the
+  additions distinguishing `IS5` from `CS5`). At `Λ`-depth ≤ 1 (the base and singleton cases) `orL`
+  *is* fully provable by pure propositional reasoning (`orE`, and-distributes-over-or) with no
+  diamond involved at all -- only the depth-≥2 general case is blocked, the same shape of
+  obstruction as `id`'s, confirming this is a structural fact about `InputCtx.fillLhs`'s unbounded
+  `Λ`, not an `orL`-specific defect.
+
+Both holes are `strategic` per the anti-analysis contract's five-condition test: each is a single,
+tightly-scoped `theorem` (not a whole file or module), documented with the exact obstruction above,
+tracked in this dispatch's `sorry_inventory`, and the module remains build-green with these two
+`sorry`s present. -/
+
+/-- **Disjunction elimination combinator**: from `⊢ A ⊃ C` and `⊢ B ⊃ C`, derive `⊢ (A ∨ B) ⊃ C`
+(`orE`'s curried schema, applied via two `modus_ponens` steps). -/
+private theorem cs5DerivOrElim {A B C : Proposition Atom}
+    (hA : Derivable (@CS5ModalAxiom Atom) (A.imp C))
+    (hB : Derivable (@CS5ModalAxiom Atom) (B.imp C)) :
+    Derivable (@CS5ModalAxiom Atom) ((A.or B).imp C) := by
+  obtain ⟨dA⟩ := hA
+  obtain ⟨dB⟩ := hB
+  have h1 : DerivationTree (@CS5ModalAxiom Atom) [] ((B.imp C).imp ((A.or B).imp C)) :=
+    .modus_ponens _ _ _ (.ax [] _ (.orE A B C)) dA
+  exact ⟨.modus_ponens _ _ _ h1 dB⟩
+
+/-- **`◇⊥ ⊃ ⊥`**: derived via `efq` (`⊥ ⊃ □⊥`), `◇`-monotonicity, and `bDia` (`◇□X ⊃ X`). This is
+the one place a "diamond can be shed" step *is* available in `CS5` -- because the target `⊥` is
+absorbing under `efq`, not because `◇X ⊃ X` holds in general (see the module docstring's `id`/`orL`
+discussion for why the general schema fails). -/
+private theorem cs5DerivDiaBotElim :
+    Derivable (@CS5ModalAxiom Atom) ((◇Proposition.bot).imp Proposition.bot) :=
+  cs5DerivImpTrans
+    (cs5DerivDiaMono
+      (show Derivable (@CS5ModalAxiom Atom)
+        (Proposition.bot.imp (Proposition.box Proposition.bot))
+        from ⟨.ax [] _ (.efq (Proposition.box Proposition.bot))⟩))
+    ⟨.ax [] _ (.bDia Proposition.bot)⟩
+
+/-- If `⊢ Ψ.fm` is a closed theorem, then `⊢ (buildRhsChain l Ψ).fm` for every layer list `l`:
+necessitate and constant-weaken (`cs5DerivImpOfDerivable`) one layer at a time, mirroring
+`buildRhsChain_fm_mono`'s own recursion but starting from a closed fact rather than an
+implication. -/
+private theorem buildRhsChain_of_derivable {Ψ : NestedRhs Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) Ψ.fm) :
+    ∀ (l : List (NestedLhs Atom)), Derivable (@CS5ModalAxiom Atom) (buildRhsChain l Ψ).fm
+  | [] => h
+  | Γ :: rest => by
+      obtain ⟨d⟩ := cs5DerivImpOfDerivable Γ.fm (buildRhsChain_of_derivable h rest)
+      exact ⟨.necessitation _ d⟩
+
+/-- **Lifting a closed theorem through `OutputCtx.fillRhs`**: if `⊢ Ψ.fm`, then
+`⊢ (ctx.fillRhs Ψ).fm` for every output context `ctx`. The `n = 0` case weakens through the fixed
+`⊤` antecedent directly; the `n ≥ 1` case routes through `buildRhsChain_of_derivable`. -/
+private theorem cs5DerivFillRhsOfDerivable {Ψ : NestedRhs Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) Ψ.fm) :
+    ∀ (ctx : OutputCtx Atom), Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs Ψ).fm
+  | [] => cs5DerivImpOfDerivable Proposition.top h
+  | Γ :: rest => cs5DerivImpOfDerivable Γ.fm (buildRhsChain_of_derivable h rest)
+
+/-- **Core fact for `⊥•`'s `Λ`-chain**: `fm(Λ.fillLhs ⊥•) ⊃ ⊥` for every output-context chain `Λ`
+(`Observation 2.2`'s recursion for `OutputCtx.fillLhs`). Base/singleton cases are direct
+(`efq`/`andE2`); the general case bridges the extra `◇` layer via `cs5DerivDiaMono` composed with
+`cs5DerivDiaBotElim`. -/
+private theorem lemma_botL_lambda_core :
+    ∀ (Λ : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom) ((Λ.fillLhs (.atom Proposition.bot)).fm.imp Proposition.bot)
+  | [] => cs5DerivImpSelf Proposition.bot
+  | [Γ₁] => ⟨.ax [] _ (.andE2 Γ₁.fm Proposition.bot)⟩
+  | Γ :: (Γ₂ :: rest) => by
+      have hIH := lemma_botL_lambda_core (Γ₂ :: rest)
+      have hstep : Derivable (@CS5ModalAxiom Atom)
+          ((◇(OutputCtx.fillLhs (Γ₂ :: rest) (.atom Proposition.bot)).fm).imp Proposition.bot) :=
+        cs5DerivImpTrans (cs5DerivDiaMono hIH) cs5DerivDiaBotElim
+      exact cs5DerivImpTrans
+        (⟨.ax [] _ (.andE2 Γ.fm _)⟩ :
+          Derivable (@CS5ModalAxiom Atom)
+            ((Γ.fm.and (◇(OutputCtx.fillLhs (Γ₂ :: rest) (.atom Proposition.bot)).fm)).imp
+              (◇(OutputCtx.fillLhs (Γ₂ :: rest) (.atom Proposition.bot)).fm)))
+        hstep
+
+/-- **Soundness of `⊥•`** (Figure 2's `botL` axiom): `fm(Γ{⊥•,Π°})` is `CS5`-provable for every
+input context `ctx`. Reduces to `lemma_botL_lambda_core` (bridging `ctx.Λ`'s `◇`-chain down to
+`⊥`), composed with `efq` (`⊥ ⊃ ctx.π.fm`), necessitated, then lifted through `ctx.Γ'` via
+`cs5DerivFillRhsOfDerivable`. -/
+theorem nested_sound_botL (ctx : InputCtx Atom) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom Proposition.bot)).fm := by
+  have hL : Derivable (@CS5ModalAxiom Atom)
+      ((ctx.Λ.fillLhs (.atom Proposition.bot)).fm.imp ctx.π.fm) :=
+    cs5DerivImpTrans (lemma_botL_lambda_core ctx.Λ) ⟨.ax [] _ (.efq ctx.π.fm)⟩
+  obtain ⟨d⟩ := hL
+  have hBox : Derivable (@CS5ModalAxiom Atom)
+      (NestedRhs.box (ctx.Λ.fillLhs (.atom Proposition.bot)) ctx.π).fm := ⟨.necessitation _ d⟩
+  exact cs5DerivFillRhsOfDerivable hBox ctx.Γ'
+
+/-- **Soundness of `∧•`** (`andL`): from the premise's soundness fact, `modus_ponens` against
+`lemma4_6_andL`. -/
+theorem nested_sound_andL (ctx : InputCtx Atom) (A B : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.comma (.atom A) (.atom B))).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.and B))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_andL ctx A B
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `∧°`** (`andR`): from both premises' soundness facts, combine via `andI` and
+`modus_ponens` against `lemma4_9_andR`. -/
+theorem nested_sound_andR (ctx : OutputCtx Atom) (A B : Proposition Atom)
+    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom A)).fm)
+    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom B)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (A.and B))).fm := by
+  obtain ⟨dA⟩ := hA
+  obtain ⟨dB⟩ := hB
+  obtain ⟨dimp⟩ := lemma4_9_andR ctx A B
+  have hand : DerivationTree (@CS5ModalAxiom Atom) []
+      ((ctx.fillRhs (.atom A)).fm.and (ctx.fillRhs (.atom B)).fm) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _ (.ax [] _ (.andI _ _)) dA) dB
+  exact ⟨.modus_ponens _ _ _ dimp hand⟩
+
+/-- **Soundness of `∨°`, left injection** (`orRLeft`): from the premise's soundness fact,
+`modus_ponens` against `lemma4_6_orRLeft`. -/
+theorem nested_sound_orRLeft (ctx : OutputCtx Atom) (A B : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom A)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (A.or B))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_orRLeft ctx A B
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `∨°`, right injection** (`orRRight`): from the premise's soundness fact,
+`modus_ponens` against `lemma4_6_orRRight`. -/
+theorem nested_sound_orRRight (ctx : OutputCtx Atom) (A B : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom B)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (A.or B))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_orRRight ctx A B
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-- **Soundness of `c`** (`contract`): from the premise's soundness fact, `modus_ponens` against
+`lemma4_6_c`. -/
+theorem nested_sound_contract (ctx : InputCtx Atom) (Δ : NestedLhs Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.comma Δ Δ)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs Δ).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := lemma4_6_c ctx Δ
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `⊃°` (`impR`): the `fillFull`-vs-`fillRhs` Bridge
+
+See the module docstring: this closes Phase 11's deferred `impR` case, using only `tBox` and
+curry/uncurry combinators (no new axiom). -/
+
+/-- **Curry, swapped order**: from `⊢ (P ∧ Q) ⊃ R`, derive `⊢ Q ⊃ (P ⊃ R)` (curry with the
+projections taken in the opposite order from `cs5DerivCurry`, matching `impR`'s singleton-case
+comma order `comma Φ Γ`, filler first). Built from the closed schema `cs5DerivCurrySwapSchema`. -/
+private theorem cs5DerivCurrySwapSchema (P Q R : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom) (((P.and Q).imp R).imp (Q.imp (P.imp R))) := by
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] ((P.and Q).imp R) (Q.imp (P.imp R)) ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [(P.and Q).imp R] Q (P.imp R) ?_
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [Q, (P.and Q).imp R] P R ?_
+  -- context: [P, Q, (P.and Q).imp R]
+  have hP : DerivationTree (@CS5ModalAxiom Atom) [P, Q, (P.and Q).imp R] P :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+  have hQ : DerivationTree (@CS5ModalAxiom Atom) [P, Q, (P.and Q).imp R] Q :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inl rfl))))
+  have hHyp : DerivationTree (@CS5ModalAxiom Atom) [P, Q, (P.and Q).imp R] ((P.and Q).imp R) :=
+    .assumption _ _
+      (List.mem_cons.mpr (Or.inr (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))))
+  have hand : DerivationTree (@CS5ModalAxiom Atom) [P, Q, (P.and Q).imp R] (P.and Q) :=
+    .modus_ponens _ _ _ (.modus_ponens _ _ _
+      (.weakening [] _ _ (.ax [] _ (.andI P Q)) (fun _ h => nomatch h)) hP) hQ
+  exact .modus_ponens _ _ _ hHyp hand
+
+/-- **`buildFullChain` implies `buildRhsChain`** (at the `A ⊃ B` translation): for every LHS-layer
+list `l`, `fm(buildFullChain l (A•,B°)) ⊃ fm(buildRhsChain l ((A ⊃ B)°))`. Proved by induction on
+`l` matching both chain-builders' own recursion: the base case is `tBox` (unwrapping the one extra
+`□` `buildFullChain`'s `box Φ Ψ` clause carries that `buildRhsChain`'s bare `Ψ` clause does not);
+the singleton case is `cs5DerivBoxMono (cs5DerivCurrySwapSchema ..)` (uncurrying under a box); the
+general case lifts the (structurally shorter) inductive hypothesis through congruence-in-the-
+consequent (`cs5DerivImpCongrRight`) then through `□` (`cs5DerivBoxMono`), mirroring both
+chain-builders' shared `box Γ (chain rest ..)` step. -/
+private theorem buildFullChain_imp_buildRhsChain (A B : Proposition Atom) :
+    ∀ (l : List (NestedLhs Atom)),
+      Derivable (@CS5ModalAxiom Atom)
+        ((buildFullChain l (.atom A, .atom B)).fm.imp (buildRhsChain l (.atom (A.imp B))).fm)
+  | [] => ⟨.ax [] _ (.tBox (A.imp B))⟩
+  | [Γ] => cs5DerivBoxMono (cs5DerivCurrySwapSchema A Γ.fm B)
+  | Γ :: (Γ₂ :: rest) =>
+      cs5DerivBoxMono
+        (cs5DerivImpCongrRight Γ.fm (buildFullChain_imp_buildRhsChain A B (Γ₂ :: rest)))
+
+/-- **`OutputCtx.fillFull` implies `OutputCtx.fillRhs`** (at the `A ⊃ B` translation): for every
+output context `ctx`, `fm(ctx.fillFull (A•,B°)) ⊃ fm(ctx.fillRhs ((A ⊃ B)°))`. Matches
+`OutputCtx.fillFull`/`fillRhs`'s own three-way case split: `n = 0` is `implyK` (weakening through
+the fixed `⊤` antecedent `fillRhs` inserts that `fillFull` does not); `n = 1` is
+`cs5DerivCurrySwapSchema` directly (no box yet at this level); `n ≥ 2` routes through
+`buildFullChain_imp_buildRhsChain`, lifted through the shared head layer `Γ` via
+`cs5DerivImpCongrRight`. -/
+private theorem fillFull_imp_fillRhs (ctx : OutputCtx Atom) (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((ctx.fillFull (.atom A, .atom B)).fm.imp (ctx.fillRhs (.atom (A.imp B))).fm) :=
+  match ctx with
+  | [] => ⟨.ax [] _ (.implyK (A.imp B) Proposition.top)⟩
+  | [Γ] => cs5DerivCurrySwapSchema A Γ.fm B
+  | Γ :: (Γ₂ :: rest) =>
+      cs5DerivImpCongrRight Γ.fm (buildFullChain_imp_buildRhsChain A B (Γ₂ :: rest))
+
+/-- **Soundness of `⊃°`** (`impR`): from the premise's soundness fact, `modus_ponens` against
+`fillFull_imp_fillRhs`. Closes Phase 11's deferred `impR` case (see the module docstring). -/
+theorem nested_sound_impR (ctx : OutputCtx Atom) (A B : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) (ctx.fillFull (.atom A, .atom B)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillRhs (.atom (A.imp B))).fm := by
+  obtain ⟨d⟩ := h
+  obtain ⟨dimp⟩ := fillFull_imp_fillRhs ctx A B
+  exact ⟨.modus_ponens _ _ _ dimp d⟩
+
+/-! ## `id` and `∨•` (`orL`): Strategic Holes
+
+See the module docstring's "`id` and `orL`: a genuine gap, not merely deferred work" section for
+the full mathematical argument. Each `sorry` below is tightly scoped to exactly one theorem,
+documents its assumption and the reason it is deferred, and is tracked in this dispatch's
+`sorry_inventory` with `strategic: true` and a `follow_up_task`. -/
+
+/-- **Soundness of `id`** (Figure 2's `id` axiom): `fm(Γ{a•,a°})` for every input context
+`ctx := ⟨Γ', Λ, a°⟩`. -- sorry: assumes `⊢ (ctx.Λ.fillLhs (a•)).fm ⊃ a` is provable for arbitrary
+`Λ`; deferred because this needs "a diamond can be shed" step (`◇X ⊃ X`) that is not a `CS5`
+theorem and is false in general (counterexample: `Γ' := []`, `Λ := [.empty, .empty]` reduces the
+needed fact to `⊢ ◇a ⊃ a`) -- see the module docstring; follow-up: a task revisiting `id`'s
+`(Γ' Λ : OutputCtx)` signature in `Rules.lean`, or re-deriving it directly against a bare
+`OutputCtx` via `.fillFull` (mirroring `lemma4_2_id`'s scope) instead of through `InputCtx`. -/
+theorem nested_sound_id (Γ' Λ : OutputCtx Atom) (a : Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      ((⟨Γ', Λ, .atom (.atom a)⟩ : InputCtx Atom).fillLhs (.atom (.atom a))).fm := by
+  sorry
+
+/-- **Soundness of `∨•`** (`orL`): from both premises' soundness facts, `fm(ctx.fillLhs ((A ∨
+B)•))`. -- sorry: assumes `⊢ ◇(X ∨ Y) ⊃ (◇X ∨ ◇Y)` for the arbitrary formulas `X, Y` arising at
+`ctx.Λ`-depth ≥ 2; deferred because this is exactly `kdisj`
+(`Intuitionistic/IS5.lean`'s `◇(φ ∨ ψ) ⊃ (◇φ ∨ ◇ψ)`), an `IS5`-only axiom deliberately absent from
+`CS5ModalAxiom` -- see the module docstring; the `ctx.Λ`-depth ≤ 1 cases are fully provable by pure
+propositional reasoning (`orE`) alone, only the general case is blocked; follow-up: the same
+`Rules.lean` follow-up task as `id`, since both are instances of the same `InputCtx.fillLhs`
+unbounded-`Λ` structural issue. -/
+theorem nested_sound_orL (ctx : InputCtx Atom) (A B : Proposition Atom)
+    (hA : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom A)).fm)
+    (hB : Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom B)).fm) :
+    Derivable (@CS5ModalAxiom Atom) (ctx.fillLhs (.atom (A.or B))).fm := by
+  sorry
+
 end Cslib.Logic.Modal

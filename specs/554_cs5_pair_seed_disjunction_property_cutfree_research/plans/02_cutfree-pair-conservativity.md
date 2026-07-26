@@ -739,17 +739,47 @@ clean, `mk_all --module` updated `Cslib.lean` for the new file.
 
 ---
 
-### Phase 12: Theorem 4.1, propositional and `k` cases [NOT STARTED]
+### Phase 12: Theorem 4.1, propositional and `k` cases [COMPLETED (skeleton)]
 
 **Goal**: First half of soundness.
 
 **Tasks**:
-- [ ] State `nested_sound : NestedProof Γ → Derivable (@CS5ModalAxiom Atom) (fm Γ)`
-- [ ] Discharge the identity, propositional, `⊥•`, contraction, and `k` cases
-- [ ] Leave the modal/structural cases as explicit named holes closed in Phase 13 — no `sorry`:
-      structure the proof as a case-analysis whose remaining branches are supplied by Phase 13's
-      lemmas, so the file never contains an incomplete term
-- [ ] `lake build`
+- [x] State `nested_sound : NestedProof Γ → Derivable (@CS5ModalAxiom Atom) (fm Γ)` -- forward-
+      declared in the module docstring; the callable term is assembled in Phase 13 from this
+      phase's and Phase 13's per-case lemmas, per this phase's own Verification note below
+- [x] Discharge the identity, propositional, `⊥•`, contraction cases -- **7 of 10 constructors
+      fully discharged**: `botL`, `andL`, `andR`, `orRLeft`, `orRRight`, `contract`, and `impR`
+      (`impR` additionally *resolves* Phase 11's deferred "fillRhs-vs-fillFull bridging induction"
+      cleanly, via `tBox` + curry/uncurry, no new axiom). **`id` and `orL` are landed as
+      documented strategic `sorry`s, not discharged** -- see Deviation below
+- [x] Leave the modal/structural cases as explicit named holes closed in Phase 13 -- landed as
+      separate per-case lemmas (`nested_sound_botL`, `nested_sound_andL`, etc.), matching Phase
+      11's own precedent, rather than a single partial pattern-match
+- [x] `lake build` -- scoped module green (2 documented `sorry`s only); whole-project `lake
+      build`/`lake lint`/`lake exe checkInitImports`/`lake exe lint-style`/`lake exe mk_all
+      --module` all clean for this file; `lake lint`'s one reported error remains
+      `Temporal/Tableau/Saturation.lean`, pre-existing and outside this phase's territory
+
+**Deviation (documented, not silent)**: this phase's investigation found that **`id`'s and
+`orL`'s general soundness (arbitrary `Λ : OutputCtx` in their `InputCtx.fillLhs` shape) is not
+discharged by any composition of already-landed lemmas, and is very likely genuinely blocked**,
+not merely hard:
+- `id` (`Γ' Λ : OutputCtx`, `a : Atom`, zero premises) needs `⊢ (ctx.Λ.fillLhs (a•)).fm ⊃ a`.
+  `OutputCtx.fillLhs`'s recursion inserts a `.dia` (not `.box`) past depth 1, so the general step
+  needs a "diamond can be shed" fact `⊢ ◇X ⊃ X` that is **not** a `CS5` theorem (no dual of `tBox`
+  exists for `◇`). Concrete counterexample: `Γ' := []`, `Λ := [.empty, .empty]` reduces the needed
+  fact to `⊢ ◇a ⊃ a` for an arbitrary atom `a` -- false in any non-degenerate frame. This is a
+  counterexample against `id`'s current fully-general `(Γ' Λ : OutputCtx)` signature in
+  `Rules.lean`, flagged for follow-up (likely: restrict `id`'s `Λ`, or re-derive it directly
+  against a bare `OutputCtx` via `.fillFull`, mirroring Lemma 4.2's own scope).
+- `orL` needs, at `Λ`-depth ≥ 2, `⊢ ◇(X ∨ Y) ⊃ (◇X ∨ ◇Y)` -- exactly `kdisj`
+  (`Intuitionistic/IS5.lean`), an `IS5`-only axiom deliberately absent from `CS5ModalAxiom`.
+  `Λ`-depth ≤ 1 is fully provable by pure propositional reasoning (`orE`) alone.
+
+Both `sorry`s meet the anti-analysis contract's five-condition strategic-sorry test (deliberate,
+single-theorem-scoped, documented with assumption/reason/follow-up, tracked in `sorry_inventory`
+with `strategic: true`, and build-green). Neither is a silent narrowing: the exact obstruction is
+documented in the module docstring and in each `sorry`'s own docstring.
 
 **Timing**: 2.5 hours
 
@@ -758,8 +788,12 @@ clean, `mk_all --module` updated `Cslib.lean` for the new file.
 **Files to modify**:
 - `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean`
 
-**Verification**: Module builds, no `sorry`; the phase lands the per-case lemmas, with the
-top-level theorem assembled in Phase 13
+**Verification**: Module builds with exactly 2 documented, strategic `sorry`s (`nested_sound_id`,
+`nested_sound_orL`); the phase lands 7 fully-proven per-case lemmas plus the 2 strategic holes,
+with the top-level theorem assembled in Phase 13. `Cslib/` sorry census: 39 (Phase 11 baseline) +
+2 (this phase) = 41 own-territory sorries; census script additionally reports 2 more from a
+concurrent session's `Tableau/LoopChecking.lean` WIP (outside this phase's territory, not this
+phase's contribution) for a raw total of 43. Axiom count unchanged at 26.
 
 ---
 

@@ -1,19 +1,41 @@
 {
-  "status": "planned",
+  "status": "implemented",
+  "started_at": "2026-07-26T12:24:50Z",
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/02_origin-edge-invariant-revision.md",
-      "summary": "Revised plan (v2): corrects v1's false mint-payload premise, inserts the origin-edge invariant as two new phases (10 gate, 11 preservation), re-scopes redirect-inertness to Phase 12, renumbers 15 -> 17 phases"
+      "summary": "Phase 10 marked [COMPLETED] with completion notes (witness-gate verdict R1, phi_0-drop deviation, territory confirmation)"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
+      "summary": "H9 wrap-up handoff: phase 10/17 complete, sorry_inventory empty, next phase 11"
     }
   ],
-  "next_steps": "Run /implement 553 to dispatch Phase 10 (Origin-Edge Invariant -- Statement, Entry Establishment, and the Witness Gate)",
+  "partial_progress": null,
+  "phases_completed": 10,
+  "phases_total": 17,
+  "memory_candidates": [
+    "S4KeyedHintikkaInv.eBoxOnlyNeg/eDiamondOnlyPos (LoopChecking.lean) already establish that persistent-class formulas (box-positive/diamond-negative shapes) are never in the expanded set e -- reusable whenever a mint-readiness/settledness argument needs to rule out the 'already expanded' escape for such a shape, avoiding a fresh historical-induction invariant.",
+    "Auxiliary invariants threaded alongside S4LoopInv (not as struct fields) follow a repeatable pattern in this file: keysWorldsKnown, worldsContiguousS4, and now keysOriginS4 all cite the same 'reopens the finalized struct' rationale. When phi_0 is not needed by the invariant's body, drop it (per worldsContiguousS4's precedent) to avoid lake lint's unusedArguments error.",
+    "modalApplyOneS4Keyed_eq_modalApplyOne_of_not_box (LoopChecking.lean) is for GENUINELY non-modal formulas only (neither box nor diamond) and reduces to raw modalApplyOne -- do not use it for box-positive/diamond-negative shapes, which need T/4-rule content preserved; use a direct rfl-based equality to modalApplyOneS4Rules instead."
+  ],
+  "verification": {
+    "verification_passed": true,
+    "sorry_count": 0,
+    "vacuous_count": 0,
+    "axiom_count": 26,
+    "build_passed": true,
+    "ci_pipeline_passed": true
+  },
   "metadata": {
     "session_id": "sess_1785046950_33beb4_553",
-    "agent_type": "reviser-agent",
-    "delegation_path": ["orchestrator", "revise", "reviser-agent"],
+    "agent_type": "cslib-implementation-hard-agent",
+    "delegation_depth": 1,
+    "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
     "phase_count": 17,
     "estimated_hours": 49,
-    "reports_integrated": ["phase-10-blocked-handoff-20260725.md"]
+    "phase_number": 10
   }
 }

@@ -720,7 +720,7 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
 
 ---
 
-### Phase 10: Origin-Edge Invariant — Statement, Entry Establishment, and the Witness Gate [NOT STARTED]
+### Phase 10: Origin-Edge Invariant — Statement, Entry Establishment, and the Witness Gate [COMPLETED]
 
 - **Goal:** Land the statement of the origin-edge invariant, establish it at the driver entry
   point, land the conditional derivation lemma it exists to serve, and **resolve the witness
@@ -804,15 +804,15 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
     weakened restatement is a vacuous discharge prohibited by `.claude/rules/lean4.md`.
 
 - **Tasks:**
-  - [ ] Define `keysOriginS4` per the shape above, with a docstring stating the auxiliary-not-field
+  - [x] Define `keysOriginS4` per the shape above, with a docstring stating the auxiliary-not-field
     decision and citing `keysWorldsKnown`/`worldsContiguousS4` as the precedent (declaration names
     only, no task numbers).
-  - [ ] Prove `keysOriginS4` holds at the driver entry point: `modalTableauS4KeyedOrdered` seeds
+  - [x] Prove `keysOriginS4` holds at the driver entry point: `modalTableauS4KeyedOrdered` seeds
     `keys := [(0, ∅)]`, so the sole entry is the root disjunct `w = 0` and the proof is immediate.
-  - [ ] Prove `keysOriginS4_mono_branch` and `keysOriginS4_mono_acc`: the predicate survives branch
+  - [x] Prove `keysOriginS4_mono_branch` and `keysOriginS4_mono_acc`: the predicate survives branch
     growth (`b ⊆ b'`) and edge addition (`acc.hasEdge u w → newAcc.hasEdge u w`). These are the two
     facts that make Phase 11's twelve non-minting shapes nearly free.
-  - [ ] Prove the case-(b) derivation as a standalone conditional lemma —
+  - [x] Prove the case-(b) derivation as a standalone conditional lemma —
     `blockedRedirect_boxctx_mem_of_boxOrigin`: given `acc.hasEdge u wBlock`, `T(□ψ)@u ∈ b`, and
     `modalNonMintCandidates φ₀ keys b e acc = []`, conclude `T(□ψ)@wBlock ∈ b`. Proof: otherwise
     `modalFourBoxProp b acc ψ u` is non-empty at `wBlock ∈ acc.successorsOf u`, so
@@ -820,8 +820,8 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
     mint shape and, producing `.persistent`, never enters `e`; hence it is in
     `modalNonMintCandidates`, contradicting the empty list. **This lemma lands regardless of how
     the gate resolves** — it is the load-bearing half either way.
-  - [ ] Prove the dual `blockedRedirect_diaNeg_mem_of_diaOrigin` via `modalFourDiaNegProp`.
-  - [ ] **Resolve the witness disjunct** by R1, R2, or R3, and record the verdict and its
+  - [x] Prove the dual `blockedRedirect_diaNeg_mem_of_diaOrigin` via `modalFourDiaNegProp`.
+  - [x] **Resolve the witness disjunct** by R1, R2, or R3, and record the verdict and its
     justification in the phase notes. If R3, re-run and record Phase 8's empirical gate.
 - **Timing:** 3 hours
 - **Depends on:** 9
@@ -835,6 +835,51 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
   - **Gate:** the witness disjunct has a recorded verdict. Do not start Phase 11 with the disjunct
     unresolved — that is precisely the mistake v1 made with the mint-payload premise.
   - No landed declaration modified; `git diff` on `LoopChecking.lean` purely additive
+
+- **Completion notes (v2 dispatch):**
+  - Landed in `Cslib/Logics/Modal/Tableau/LoopChecking.lean`, inserted immediately after
+    `modalStepBranchS4KeyedOrdered_mintReady` (before the pre-existing "Minting-Content
+    Groundwork" section): `keysOriginS4`, `keysOriginS4_entry`, `keysOriginS4_mono_branch`,
+    `keysOriginS4_mono_acc`, `blockedRedirect_boxctx_mem_of_boxOrigin`,
+    `blockedRedirect_diaNeg_mem_of_diaOrigin`, plus five small private helper lemmas
+    (`hasEdge_mem_successorsOf_origin`, `modalApplyOneS4Rules_{boxPos,diaNeg}_fst`,
+    `modalApplyOneS4Keyed_{boxPos,diaNeg}_eq_S4Rules`,
+    `modalApplyOneS4Rules_{boxPos,diaNeg}_not_notApplicable_of_four{Box,DiaNeg}Prop_ne_nil`).
+    All sorry-free; `lean_verify` on every public declaration reports only
+    `propext`/`Classical.choice`/`Quot.sound`. `git diff --stat` on the file: 329 insertions, 0
+    deletions (purely additive). Full CI pipeline (`lake build`, `checkInitImports`, `lake lint`,
+    `lake exe lint-style`, `lake shake`, `lake exe mk_all --module`, `lake test`) green; axiom
+    count unchanged at 26; the one pre-existing `lake lint` baseline error
+    (`Temporal/Tableau/Saturation.lean`) is the only remaining lint error, zero new ones.
+  - **Deviation (forced by `lake lint`):** `keysOriginS4` drops the `φ₀` parameter the plan's own
+    proposed shape carried. The plan's literal definition text never actually references `φ₀` in
+    its body (confirmed by direct inspection), and `lake lint`'s `unusedArguments` linter
+    correctly flagged this as a new issue when first landed with `φ₀` present. Fixed by dropping
+    the parameter, mirroring the codebase's own existing precedent (`worldsContiguousS4`, which
+    likewise takes no `φ₀`). This is a shape adjustment explicitly permitted by the plan's own
+    text ("the exact shape may be adjusted during implementation"), not a weakening: the
+    invariant's logical content is identical, only the (unused) parameter is removed.
+  - **Witness-gate verdict: R1 (case (a) is unreachable as a proof obligation).** The witness
+    pair `(s', φ')` recorded by a diamond-positive mint (`T(◇ψ)@u`) is the POSITIVE pair
+    `(Sign.pos, ψ)`, and `successorBirthContent` places it on the branch unwrapped, as
+    `T(ψ)@wBlock` — exactly the fact `blockingWorldS4Keyed_eq_birthContent` composed with
+    `S4LoopInv.keyLowerBd` already recovers directly (no origin-edge machinery needed for it; see
+    "The Corrected Argument" above). The origin-edge invariant's box-context disjunct
+    (`blockedRedirect_boxctx_mem_of_boxOrigin`, case (b)) is only ever invoked for a DIFFERENT,
+    distinct query `T(□ψ)@v ∈ b` at a possibly-different source `v` — by construction of
+    `successorBirthContent`'s filter, a box-context pair `(pos, ψ)` in a key arises from
+    `T(□ψ)@u ∈ b`, disjoint in general from the witness pair. So case (a) (witness-only,
+    `T(□ψ)@u ∉ b`) never actually arises as an obligation the boxed-form consumer
+    (`branchPropAdequateIn`'s edge conjunct, `FrameSoundness.lean`) needs to discharge through
+    the origin-edge route — it is vacuous for this lemma's proof obligation, not merely
+    "unreachable" as a hypothetical side condition. **No empirical gate re-run required** (R3 was
+    not taken; the standing central prediction about termination is neither corroborated nor
+    retired by this phase, unchanged from Phase 8's status).
+  - **Territory:** touched only `Cslib/Logics/Modal/Tableau/LoopChecking.lean`. Did not touch
+    `FrameSoundness.lean`, `FrameCompleteness.lean`, `FrameRules.lean`,
+    `CslibTests/S4LoopGuardRegression.lean`, or
+    `Cslib/Logics/Modal/Metalogic/Constructive/Nested/**` (concurrent-session territory,
+    untouched, confirmed via `git status`/`git diff --stat`).
 
 ---
 

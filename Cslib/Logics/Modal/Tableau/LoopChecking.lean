@@ -1226,6 +1226,340 @@ lemma modalStepBranchS4KeyedOrdered_mintReady (φ₀ : Proposition Atom)
       simp [hpred.1.1])
   · exact hcandidates
 
+omit [Hashable Atom] in
+/-- Bridge from `acc.hasEdge` to `Accessibility.successorsOf` membership. Local re-derivation of
+`hasEdge_mem_successorsOf` (below, `private` and defined later in this file, past this section)
+-- same proof, mirroring the codebase's existing pattern of per-section local re-derivations of
+this exact fact (`FmpMeasure.lean`, `S5Simplification.lean`, `Completeness.lean`). -/
+private lemma hasEdge_mem_successorsOf_origin {acc : Accessibility} {w w' : WorldIndex}
+    (hr : acc.hasEdge w w' = true) : w' ∈ acc.successorsOf w := by
+  simp only [Accessibility.successorsOf, List.mem_filterMap]
+  simp only [Accessibility.hasEdge, List.any_eq_true] at hr
+  obtain ⟨⟨src, tgt⟩, hedge_mem, hbeq⟩ := hr
+  simp only [Bool.and_eq_true, beq_iff_eq] at hbeq
+  exact ⟨(src, tgt), hedge_mem, by simp [hbeq.1, hbeq.2]⟩
+
+/-! ## Origin-Edge Invariant
+
+**The gap this closes.** `S4LoopInv.keyLowerBd` gives `key(wBlock) ⊆ relevantSetFinset φ₀ b
+wBlock`, but a redirect edge `v → wBlock`'s propagation-adequacy obligation needs the actual
+*boxed* form `T(□ψ)@wBlock ∈ b` for every `T(□ψ)@v ∈ b` -- `keyLowerBd` alone only recovers the
+unwrapped `T(ψ)@wBlock ∈ b` (the recorded key stores unwrapped box-context, per
+`successorBirthContent`'s docstring). The missing step is *where `wBlock`'s key came from*: every
+non-root key was recorded at a mint, and that mint recorded an edge. `keysOriginS4` records this
+origin edge as a standalone auxiliary, letting mint-readiness act on an edge that already exists.
+
+**Design decision -- auxiliary, not an `S4LoopInv` field** (flagged deviation from the blocked
+Phase-10 handoff's `keysOrigin` sketch): adding a field to `S4LoopInv` would reopen the
+already-finalized struct design and force re-proof of the unordered line
+(`modalStepBranchS4_preserves_S4LoopInv`), which this plan is committed to leaving byte-for-byte
+unchanged until this driver's retirement. The codebase already sets this precedent twice:
+`keysWorldsKnown` ("not an `S4LoopInv` field: adding one would reopen the already-finalized
+struct design", above) and `worldsContiguousS4` (below). `keysOriginS4` is threaded the same
+way: an extra hypothesis/conclusion alongside `S4LoopInv` at call sites, never a struct field.
+
+**Design decision -- no historical branch in the statement** (flagged deviation): stated over
+the *current* branch `b` and *current* `acc`, not a historical pre-mint branch `b_birth ⊆ b`.
+This bakes in the consequence directly (`T(s)@u ∈ b` rather than `∈ b_birth` plus a subset side
+condition), which makes preservation under branch growth immediate: the `∈ b` disjunct simply
+persists as `b` grows, with no `b_birth` bookkeeping to carry. -/
+
+/-- **The origin-edge invariant.** Every non-root recorded key `(w, k) ∈ keys` has an origin
+mint source `u` with an edge `u → w` already in `acc`, and every signed pair in `k` is either
+that mint's own witness pair `(s', φ')` or is *currently* present at `u` in its box/diamond
+form. `(s', φ')` is existentially bound once per key (a key has exactly one witness pair, per
+`successorBirthContent`'s `insert (s, φ) (...)` shape). Stated over the current `b`/`acc` (see
+module docstring above for why), so `keysOriginS4_mono_branch`/`keysOriginS4_mono_acc` below are
+immediate.
+
+**No `φ₀` parameter** (deviation from the plan's proposed shape, forced by `lake lint`'s
+`unusedArguments` linter: unlike `S4LoopInv`'s fields, this invariant's statement never needs the
+fixed-formula universe `φ₀` at all). Mirrors `worldsContiguousS4` (above), the other
+proof-internal auxiliary that also takes no `φ₀`. -/
+def keysOriginS4
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom))) : Prop :=
+  ∀ w k, (w, k) ∈ keys → w = 0 ∨
+    ∃ u s' φ', acc.hasEdge u w = true ∧
+      (∀ ψ, (Sign.pos, ψ) ∈ k →
+         (s', φ') = ((Sign.pos, ψ) : Sign × Proposition Atom) ∨
+         (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b) ∧
+      (∀ ψ, (Sign.neg, ψ) ∈ k →
+         (s', φ') = ((Sign.neg, ψ) : Sign × Proposition Atom) ∨
+         (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+
+/-- **Entry establishment**: `keysOriginS4` holds at the ordered driver's seed state. The sole
+recorded key is `(0, ∅)` (`modalTableauS4KeyedOrdered`'s seed), so the only membership case is
+`w = 0`, the invariant's root disjunct, discharged immediately. -/
+lemma keysOriginS4_entry (φ : Proposition Atom) :
+    keysOriginS4
+      ([⟨.neg, φ, 0⟩] : List (SignedFormula (Proposition Atom) WorldIndex))
+      Accessibility.empty
+      [(0, (∅ : Finset (Sign × Proposition Atom)))] := by
+  intro w k hmem
+  simp only [List.mem_singleton, Prod.mk.injEq] at hmem
+  exact Or.inl hmem.1
+
+/-- **Survives branch growth**: `keysOriginS4` transports across `b ⊆ b'` at fixed `acc`/`keys`.
+Every disjunct in the invariant is either branch-independent (the edge conjunct, the root case)
+or an `∈ b` membership fact, which persists under `hsub`. -/
+lemma keysOriginS4_mono_branch
+    (b b' : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (hsub : ∀ x ∈ b, x ∈ b') (h : keysOriginS4 b acc keys) :
+    keysOriginS4 b' acc keys := by
+  intro w k hmem
+  rcases h w k hmem with hroot | ⟨u, s', φ', hedge, hpos, hneg⟩
+  · exact Or.inl hroot
+  · refine Or.inr ⟨u, s', φ', hedge, ?_, ?_⟩
+    · intro ψ hψ
+      rcases hpos ψ hψ with heq | hbox
+      · exact Or.inl heq
+      · exact Or.inr (hsub _ hbox)
+    · intro ψ hψ
+      rcases hneg ψ hψ with heq | hdia
+      · exact Or.inl heq
+      · exact Or.inr (hsub _ hdia)
+
+/-- **Survives edge addition**: `keysOriginS4` transports across accessibility growth (every
+edge of `acc` also an edge of `acc'`) at fixed `b`/`keys`. `keysOriginS4` is existential over
+edges, so this is immediate. -/
+lemma keysOriginS4_mono_acc
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc acc' : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (haccsub : ∀ u w, acc.hasEdge u w = true → acc'.hasEdge u w = true)
+    (h : keysOriginS4 b acc keys) :
+    keysOriginS4 b acc' keys := by
+  intro w k hmem
+  rcases h w k hmem with hroot | ⟨u, s', φ', hedge, hpos, hneg⟩
+  · exact Or.inl hroot
+  · exact Or.inr ⟨u, s', φ', haccsub u w hedge, hpos, hneg⟩
+
+/-! ### Case-(b) Conditional Derivation
+
+The load-bearing half of the redirect-inertness argument (Phase 12), proved standalone here so
+it lands regardless of how the witness gate below resolves: given an ALREADY-EXISTING edge
+`u → wBlock` and `T(□ψ)@u ∈ b`, mint-readiness forces `T(□ψ)@wBlock ∈ b` -- otherwise
+`modalFourBoxProp` at `(u, wBlock)` would still be an unsettled non-mint candidate, contradicting
+`modalNonMintCandidates φ₀ keys b e acc = []`. Symmetric statement for `modalFourDiaNegProp`. -/
+
+omit [Hashable Atom] in
+/-- `modalApplyOneS4Rules`'s `.fst` component at a box-positive shape, in terms of the
+underlying `modalApplyOneT` result and the 4-rule propagation `modalFourBoxProp` -- one layer
+above `modalApplyOneT_boxPos_fst` (`TDriver.lean`), same proof shape. -/
+private lemma modalApplyOneS4Rules_boxPos_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Rules (⟨.pos, .box φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOneT (⟨.pos, .box φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent tForms =>
+            .persistent (tForms ++
+              (modalFourBoxProp b acc φ w).filter (fun x => !(tForms.any (· == x))))
+          | .notApplicable =>
+            if (modalFourBoxProp b acc φ w).isEmpty then .notApplicable
+            else .persistent (modalFourBoxProp b acc φ w)
+          | other => other) := by
+  simp only [modalApplyOneS4Rules]
+  cases (modalApplyOneT (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4Rules_boxPos_fst` for the diamond-negative shape. -/
+private lemma modalApplyOneS4Rules_diaNeg_fst
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst
+      = (match (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+              SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+          | .persistent tForms =>
+            .persistent (tForms ++
+              (modalFourDiaNegProp b acc φ w).filter (fun x => !(tForms.any (· == x))))
+          | .notApplicable =>
+            if (modalFourDiaNegProp b acc φ w).isEmpty then .notApplicable
+            else .persistent (modalFourDiaNegProp b acc φ w)
+          | other => other) := by
+  simp only [modalApplyOneS4Rules]
+  cases (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst <;>
+    first | rfl | (split_ifs <;> rfl)
+
+omit [Hashable Atom] in
+/-- If the 4-rule box-positive propagation from `w` is nonempty, `modalApplyOneS4Rules` is
+applicable at `T(□φ)@w` -- regardless of what `modalApplyOneT`'s own result was (persistent,
+notApplicable, or, vacuously, other), since the `.notApplicable` arm promotes to `.persistent`
+exactly when the propagation list is nonempty and the other two arms are unconditionally not
+`.notApplicable`. -/
+private lemma modalApplyOneS4Rules_boxPos_not_notApplicable_of_fourBoxProp_ne_nil
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hne : modalFourBoxProp b acc φ w ≠ []) :
+    (modalApplyOneS4Rules (⟨.pos, .box φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst ≠ .notApplicable := by
+  rw [modalApplyOneS4Rules_boxPos_fst]
+  cases (modalApplyOneT (⟨.pos, .box φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+  | linear _ => simp
+  | branching _ => simp
+  | persistent _ => simp
+  | notApplicable =>
+    split_ifs with hemp
+    · exact absurd (List.isEmpty_iff.mp hemp) hne
+    · simp
+
+/-- `modalApplyOneS4Keyed` reduces to `modalApplyOneS4Rules` at a box-positive shape: both
+`modalApplyOneS4Keyed`'s own guard-consulting arms (`.neg, .box`/`.pos, .diamond`) and
+`modalApplyOneS4`'s (same two shapes) fail to match `.pos, .box`, so both catch-all arms fire
+in sequence, definitionally. -/
+private lemma modalApplyOneS4Keyed_boxPos_eq_S4Rules (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS4Keyed φ₀ keys (⟨.pos, .box ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS4Rules (⟨.pos, .box ψ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc := rfl
+
+/-- Dual of `modalApplyOneS4Keyed_boxPos_eq_S4Rules` for the diamond-negative shape. -/
+private lemma modalApplyOneS4Keyed_diaNeg_eq_S4Rules (φ₀ : Proposition Atom)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (ψ : Proposition Atom) (w : WorldIndex) :
+    modalApplyOneS4Keyed φ₀ keys (⟨.neg, .diamond ψ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc
+      = modalApplyOneS4Rules (⟨.neg, .diamond ψ, w⟩ :
+          SignedFormula (Proposition Atom) WorldIndex) b acc := rfl
+
+omit [Hashable Atom] in
+/-- Dual of `modalApplyOneS4Rules_boxPos_not_notApplicable_of_fourBoxProp_ne_nil` for the
+diamond-negative shape. -/
+private lemma modalApplyOneS4Rules_diaNeg_not_notApplicable_of_fourDiaNegProp_ne_nil
+    (b : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (φ : Proposition Atom) (w : WorldIndex)
+    (hne : modalFourDiaNegProp b acc φ w ≠ []) :
+    (modalApplyOneS4Rules (⟨.neg, .diamond φ, w⟩ :
+        SignedFormula (Proposition Atom) WorldIndex) b acc).fst ≠ .notApplicable := by
+  rw [modalApplyOneS4Rules_diaNeg_fst]
+  cases (modalApplyOneT (⟨.neg, .diamond φ, w⟩ :
+      SignedFormula (Proposition Atom) WorldIndex) b acc).fst with
+  | linear _ => simp
+  | branching _ => simp
+  | persistent _ => simp
+  | notApplicable =>
+    split_ifs with hemp
+    · exact absurd (List.isEmpty_iff.mp hemp) hne
+    · simp
+
+/-- **Case-(b) derivation, box-context shape.** Given an already-recorded edge `u → wBlock` and
+`T(□ψ)@u ∈ b`, mint-readiness (`modalNonMintCandidates φ₀ keys b e acc = []`) forces
+`T(□ψ)@wBlock ∈ b`. Proof: otherwise `modalFourBoxProp b acc ψ u` is non-empty (it contains
+`T(□ψ)@wBlock`, since the edge is recorded and the formula is absent), so
+`modalApplyOneS4Keyed φ₀ keys` is applicable at `T(□ψ)@u` (`_,_`-catch-all reduction to
+`modalApplyOneS4Rules`, since `T(□ψ)@u` is neither of the two keyed-guard shapes); `T(□ψ)@u` is
+not a mint shape, so `modalNonMintCandidates`'s emptiness forces it into the expanded set `e` --
+but `S4KeyedHintikkaInv.eBoxOnlyNeg` (`sf ∈ e, sf.formula = .box _ → sf.sign = .neg`) rules that
+out for a POSITIVE box formula. This lemma lands regardless of how the witness gate below
+resolves -- it is the load-bearing half either way. -/
+lemma blockedRedirect_boxctx_mem_of_boxOrigin (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (u wBlock : WorldIndex) (ψ : Proposition Atom)
+    (hedge : acc.hasEdge u wBlock = true)
+    (hbox : (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (heBoxOnlyNeg : ∀ sf ∈ e, ∀ ψ', sf.formula = .box ψ' → sf.sign = .neg)
+    (hmint : modalNonMintCandidates φ₀ keys b e acc = []) :
+    (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hcontra
+  have hne_any : b.any (· == (⟨.pos, .box ψ, wBlock⟩ :
+      SignedFormula (Proposition Atom) WorldIndex)) = false := by
+    by_contra hne
+    rw [Bool.not_eq_false, List.any_eq_true] at hne
+    obtain ⟨x, hxmem, hxeq⟩ := hne
+    rw [beq_iff_eq] at hxeq
+    exact hcontra (hxeq ▸ hxmem)
+  have hfourmem : (⟨.pos, .box ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFourBoxProp b acc ψ u := by
+    unfold modalFourBoxProp
+    rw [List.mem_filterMap]
+    refine ⟨wBlock, hasEdge_mem_successorsOf_origin hedge, ?_⟩
+    rw [if_neg (by simp [hne_any])]
+  have hfourne : modalFourBoxProp b acc ψ u ≠ [] := List.ne_nil_of_mem hfourmem
+  have hnotapp : (modalApplyOneS4Keyed φ₀ keys
+      (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1
+      ≠ .notApplicable := by
+    rw [modalApplyOneS4Keyed_boxPos_eq_S4Rules]
+    exact modalApplyOneS4Rules_boxPos_not_notApplicable_of_fourBoxProp_ne_nil b acc ψ u hfourne
+  have hcand := (modalNonMintCandidates_eq_nil_iff φ₀ keys b e acc).mp hmint
+    (⟨.pos, .box ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) hbox
+  rcases hcand with hshape | he | hna
+  · exact absurd hshape (by simp [modalMintShape])
+  · exact absurd (heBoxOnlyNeg _ he ψ rfl) (by simp)
+  · exact hnotapp hna
+
+/-- **Case-(b) derivation, diamond-context shape** (dual of
+`blockedRedirect_boxctx_mem_of_boxOrigin`). Given an already-recorded edge `u → wBlock` and
+`F(◇ψ)@u ∈ b`, mint-readiness forces `F(◇ψ)@wBlock ∈ b`, via `modalFourDiaNegProp` and
+`S4KeyedHintikkaInv.eDiamondOnlyPos`. -/
+lemma blockedRedirect_diaNeg_mem_of_diaOrigin (φ₀ : Proposition Atom)
+    (b e : List (SignedFormula (Proposition Atom) WorldIndex)) (acc : Accessibility)
+    (keys : List (WorldIndex × Finset (Sign × Proposition Atom)))
+    (u wBlock : WorldIndex) (ψ : Proposition Atom)
+    (hedge : acc.hasEdge u wBlock = true)
+    (hdia : (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (heDiamondOnlyPos : ∀ sf ∈ e, ∀ ψ', sf.formula = .diamond ψ' → sf.sign = .pos)
+    (hmint : modalNonMintCandidates φ₀ keys b e acc = []) :
+    (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  by_contra hcontra
+  have hne_any : b.any (· == (⟨.neg, .diamond ψ, wBlock⟩ :
+      SignedFormula (Proposition Atom) WorldIndex)) = false := by
+    by_contra hne
+    rw [Bool.not_eq_false, List.any_eq_true] at hne
+    obtain ⟨x, hxmem, hxeq⟩ := hne
+    rw [beq_iff_eq] at hxeq
+    exact hcontra (hxeq ▸ hxmem)
+  have hfourmem : (⟨.neg, .diamond ψ, wBlock⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈
+      modalFourDiaNegProp b acc ψ u := by
+    unfold modalFourDiaNegProp
+    rw [List.mem_filterMap]
+    refine ⟨wBlock, hasEdge_mem_successorsOf_origin hedge, ?_⟩
+    rw [if_neg (by simp [hne_any])]
+  have hfourne : modalFourDiaNegProp b acc ψ u ≠ [] := List.ne_nil_of_mem hfourmem
+  have hnotapp : (modalApplyOneS4Keyed φ₀ keys
+      (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) b acc).1
+      ≠ .notApplicable := by
+    rw [modalApplyOneS4Keyed_diaNeg_eq_S4Rules]
+    exact modalApplyOneS4Rules_diaNeg_not_notApplicable_of_fourDiaNegProp_ne_nil b acc ψ u hfourne
+  have hcand := (modalNonMintCandidates_eq_nil_iff φ₀ keys b e acc).mp hmint
+    (⟨.neg, .diamond ψ, u⟩ : SignedFormula (Proposition Atom) WorldIndex) hdia
+  rcases hcand with hshape | he | hna
+  · exact absurd hshape (by simp [modalMintShape])
+  · exact absurd (heDiamondOnlyPos _ he ψ rfl) (by simp)
+  · exact hnotapp hna
+
+/-! ### The Witness Disjunct (Gate)
+
+`successorBirthContent φ₀ b s φ w = insert (s, φ) (filter ...)` inserts the witness pair `(s, φ)`
+**unconditionally**, so `(Sign.pos, ψ) ∈ key(wBlock)` splits into case (b) (closed above, via
+`blockedRedirect_boxctx_mem_of_boxOrigin`) and case (a): `(pos, ψ)` is the origin mint's own
+witness, i.e. the origin shape was `T(◇ψ)@u`, and `T(□ψ)@u` need not be on the branch. Resolution
+(**R1 -- case (a) is unreachable**): the origin mint's witness pair recorded at `wBlock` is
+`(s', φ')` in `keysOriginS4`'s existential. A diamond-positive mint (`T(◇ψ)@u`) records the
+POSITIVE witness `(Sign.pos, ψ)`; per `successorBirthContent`, this is placed on the branch
+UNWRAPPED as `T(ψ)@wBlock`, exactly the content `blockingWorldS4Keyed_eq_birthContent` +
+`S4LoopInv.keyLowerBd` already recover (see "The Corrected Argument" in the plan) -- the witness
+disjunct of `keysOriginS4` never needs to supply the BOXED form `T(□ψ)@wBlock`, because the
+consumer (`branchPropAdequateIn`'s edge conjunct, `FrameSoundness.lean`) only ever queries the
+witness case through the SAME unwrapped-membership fact `blockedRedirect_boxctx_mem`'s case-(b)
+argument establishes; the boxed form is required only when a DISTINCT `T(□ψ)@v ∈ b` is queried at
+`v`, which routes through case (b) (a box-context pair, not the witness pair) by definition of
+`successorBirthContent`'s filter. Hence case (a) never arises as an obligation on the boxed form
+in the first place -- it is vacuous for `blockedRedirect_boxctx_mem`'s actual proof obligation,
+not merely "unreachable" as a separate side lemma. **Verdict: R1, case (a) does not bite.** No
+empirical gate re-run is needed (R3 was not taken). -/
+
 /-! ## Minting-Content Groundwork: towards `successorBirthContent` matching the actual
 K-minting payload
 

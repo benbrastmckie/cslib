@@ -1,0 +1,34 @@
+{
+  "phase": 14,
+  "phase_name": "Nested derivations of the CS5 axioms",
+  "started_at": "2026-07-26T16:00:00Z",
+  "last_updated": "2026-07-26T18:00:00Z",
+  "objectives": [
+    {
+      "id": 1,
+      "description": "Add the cut rule (eq. (3.1)) to NestedProof, InputCtx-shaped mirroring impL's output-pruning pattern, plus NestedProof.CutFree gating it out (mirroring SeqProof.cut/CutFree in LJ/Basic.lean)",
+      "status": "done",
+      "files_touched": ["Cslib/Logics/Modal/Metalogic/Constructive/Nested/Rules.lean"]
+    },
+    {
+      "id": 2,
+      "description": "Verify (in Lean) the exact shape of eq. (3.1)'s nec/w/cut rules against page 7 of the source, and Figure 5 (page 13) / Proposition 3.1 (page 7, general id) against direct PDF render",
+      "status": "done",
+      "files_touched": []
+    },
+    {
+      "id": 3,
+      "description": "Prove Proposition 3.1 (general id: Gamma{A-bullet,A-circ} derivable for arbitrary formula A, not just atomic) as reusable machinery for all 17 axiom derivations",
+      "status": "blocked",
+      "files_touched": [],
+      "blocker": "See handoffs/phase-14-handoff-20260726.md. Rigorously verified (two Lean lemmas, buildRhsChain_box_shape / InputCtx_fillLhs_snd_box / InputCtx_fillEmpty_snd_box) that every InputCtx-shaped NestedProof constructor (botL, w if added, cut, contract, andL, boxL, diaL, tL, fourL, bStruct) produces a conclusion whose RHS component is unconditionally `.box`-shaped, never `.atom`-shaped -- regardless of context length. The bare, top-level target needed by impR's premise (and hence by every axiom whose Hilbert schema is an implication, which is all 17) requires an `.atom`-shaped RHS at context length 0 or 1. The only rule producing `.atom`-shaped RHS at that length is `id`, restricted to a base-type Atom on both sides (not usable when a schema variable is instantiated at `Proposition.bot` or any compound formula). This blocks the A = bot base case of general id in particular, hence efq directly, and -- because implyK/andE1/etc. are universally quantified over arbitrary formulas that could syntactically be `Proposition.bot` -- transitively blocks every other axiom depending on general id."
+    },
+    {
+      "id": 4,
+      "description": "Derive the 9 propositional constructors (implyK, implyS, efq, andI, andE1, andE2, orI1, orI2, orE), k, kdia, tBox, tDia, fourBox, fourDia, bBox, bDia as NestedProof (psi-circ)",
+      "status": "blocked",
+      "files_touched": [],
+      "blocker": "Depends on objective 3 (general id)."
+    }
+  ]
+}

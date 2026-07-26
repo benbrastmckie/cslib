@@ -856,15 +856,16 @@ builds; whole-project CI pipeline green.
 
 ## Stage E — Completeness with Cut (Theorem 5.1)
 
-### Phase 14: Nested derivations of the `CS5` axioms [NOT STARTED]
+### Phase 14: Nested derivations of the `CS5` axioms [BLOCKED]
 
 **Goal**: Every `CS5ModalAxiom` constructor is `NCS5 + cut`-provable.
 
 **Tasks**:
-- [ ] Add the `cut` rule (eq. (3.1)) to the proof-tree inductive, gated so `CutFree` can exclude it
-      (mirror `LJ/Basic.lean`'s `SeqProof.CutFree` treatment of `.cut`)
+- [x] Add the `cut` rule (eq. (3.1)) to the proof-tree inductive, gated so `CutFree` can exclude it
+      (mirror `LJ/Basic.lean`'s `SeqProof.CutFree` treatment of `.cut`) -- landed in `Rules.lean`,
+      scoped build green, committed (commit `969bf2bb`)
 - [ ] Derive each of the nine propositional constructors, `k`, `kdia`, `tBox`, `tDia`, `fourBox`,
-      `fourDia`, `bBox`, `bDia` as `NestedProof (ψ◦)`
+      `fourDia`, `bBox`, `bDia` as `NestedProof (ψ◦)` -- **BLOCKED**, see below
 - [ ] Cross-check against §5's "Proofs of the axioms d, t, b, 4, and 5 in our system"
 - [ ] `lake build`
 
@@ -877,6 +878,34 @@ builds; whole-project CI pipeline green.
   `Nested/Rules.lean` (add `cut`, `CutFree`)
 
 **Verification**: Module builds, no `sorry`; one named theorem per axiom constructor
+
+**Blocker (verified in Lean, not a hand-wave)**: every one of the 17 `CS5ModalAxiom` schemas is
+(or reduces to, via a nested nested-sequent proof-tree) an implication, so its `NestedProof`
+witness must ultimately go through `impR`, whose premise needs an `.atom`-shaped RHS at an
+`OutputCtx` of length 0 or 1 (bare or single-comma). Two lemmas proved directly in Lean this
+phase (`buildRhsChain_box_shape`, `InputCtx_fillLhs_snd_box`/`InputCtx_fillEmpty_snd_box`, kept in
+the session transcript, not yet landed in the repo since they document a blocker rather than
+progress) show that **every** `InputCtx`-shaped constructor (`botL`, `cut`, `contract`, `andL`,
+`boxL`, `diaL`, `tL`, `fourL`, `bStruct` -- and `w`, if added, since eq (3.1) states it with the
+same `Γ{∅}/Γ{Δ•}` `InputCtx.fillLhs`/`fillEmpty` shape) has a conclusion whose RHS component is
+*unconditionally* `.box`-shaped, never `.atom`-shaped, regardless of context length. `botL` is the
+only rule introducing `⊥`, and it is `InputCtx`-shaped; hence `NestedProof (⊥•, π)` **bare** (an
+`.atom`-shaped RHS, needed as `impR`'s premise for `efq`) is unreachable from the current 20
+constructors (18 `NCS5` + `cut` landed this phase), for **any** choice of context. Since
+`Proposition 3.1`'s general `id` (needed as reusable machinery behind every one of the 17 axiom
+derivations, since each schema is universally quantified over formulas that could syntactically
+be `Proposition.bot`) requires this exact same fact at its `A = ⊥` base case, the blocker is not
+scoped to `efq` alone: it transitively blocks `implyK`, `implyS`, `andI`, `andE1`, `andE2`,
+`orI1`, `orI2`, `orE`, `k`, `kdia`, `tBox`, `tDia`, `fourBox`, `fourDia`, `bBox`, `bDia` too, since
+none of their proofs can be built and remain sorry-free while `genId` (or any equivalent
+general-id fact) has an unresolved case. A **separate, independent** issue (also found, not yet
+resolved) is that `NestedLhs.comma` is a non-quotiented raw constructor (`Syntax.lean`'s own
+documented "Comma Treatment" design choice), and several of the natural derivations (e.g.
+`implyK`) need a specific comma order that does not match what `OutputCtx.fillFull`'s single-
+element case produces, requiring either a dedicated comma-commutativity admissibility lemma or a
+more careful re-derivation -- likely Phase-19-scale work (`w`/exchange admissibility), not a
+quick fix. See `handoffs/phase-14-handoff-20260726.md` for the full writeup and recommended next
+steps.
 
 ---
 

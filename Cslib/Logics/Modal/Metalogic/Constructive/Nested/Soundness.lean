@@ -653,4 +653,59 @@ theorem lemma4_8 {Δ₁ Δ₂ Θ : NestedFull Atom}
       rw [buildFullChain_fm, buildFullChain_fm, buildFullChain_fm]
       exact lemma4_7_i_ii Γ.fm (lemma4_7_iii hIH)
 
+/-! ## Lemma 4.9 (page 10): Soundness of the Branching Rules
+
+The source's proof covers `∧°, ∨•, ⊃•, cut` uniformly via Lemma 4.8. This module lands the
+`OutputCtx.fillRhs` branching lift (`buildRhsChain_fm_and`/`lemma4_9_fillRhs`, mirroring
+`Nested/Translation.lean`'s `buildRhsChain_fm_mono`/`OutputCtx.fillRhs_fm_mono` shape exactly --
+`fillRhs`'s single, uniform base case avoids the `fillFull`-style singleton-case and-uncurry step
+Lemma 4.8 needed) and its concrete `∧°` (`andR`) corollary.
+
+**Deferred to Phase 12/13/14** (not landed here): `∨•` (`orL`) needs a *branching, contravariant*
+`InputCtx.fillLhs` lift -- a genuinely new combinator beyond `lemma4_9_fillRhs`'s covariant
+`OutputCtx.fillRhs` shape, not a corollary of it. `⊃•` (`impL`) needs the source's own
+induction-on-`n` argument over the `Λ{ }` chain (page 10's `L_X, L_Y, L_Z` construction),
+substantially more machinery than this phase's remaining scope. `cut` is not yet a landed
+`NestedProof` constructor (Phase 14's `Completeness.lean` territory) -- Lemma 4.9's `cut` case has
+no consumer to serve yet. All three are better closed by Phase 12/13 (which build `nested_sound`'s
+actual case analysis and can tailor the derivation to each rule's concrete instantiation) and
+Phase 14 (which introduces `cut` itself). -/
+
+/-- **Branching congruence for `buildRhsChain`**: from `⊢ (Ψ₁ ∧ Ψ₂) ⊃ Θ` (at the `fm` level),
+derive `⊢ ((buildRhsChain l Ψ₁) ∧ (buildRhsChain l Ψ₂)) ⊃ (buildRhsChain l Θ)`, by induction on
+`l` matching `buildRhsChain`'s own recursion (mirrors `Translation.lean`'s
+`buildRhsChain_fm_mono`, using Lemma 4.7(i) in place of plain congruence-in-the-consequent since
+this is the two-hypothesis case). -/
+private theorem buildRhsChain_fm_and {Ψ₁ Ψ₂ Θ : NestedRhs Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((Ψ₁.fm.and Ψ₂.fm).imp Θ.fm)) :
+    ∀ (l : List (NestedLhs Atom)),
+      Derivable (@CS5ModalAxiom Atom)
+        (((buildRhsChain l Ψ₁).fm.and (buildRhsChain l Ψ₂).fm).imp (buildRhsChain l Θ).fm)
+  | [] => h
+  | Γ :: rest => lemma4_7_iii (lemma4_7_i_ii Γ.fm (buildRhsChain_fm_and h rest))
+
+/-- **`OutputCtx.fillRhs` branching lift**: from `⊢ (fm(Ψ₁) ∧ fm(Ψ₂)) ⊃ fm(Θ)`, derive
+`⊢ (fm(Γ{Ψ₁}) ∧ fm(Γ{Ψ₂})) ⊃ fm(Γ{Θ})`, for every output context `Γ{ }`. Mirrors
+`OutputCtx.fillRhs_fm_mono`'s two-case shape exactly (`ctx = []` against the fixed `⊤`
+antecedent via Lemma 4.7(i); `ctx = Γ :: rest` via `buildRhsChain_fm_and` then Lemma 4.7(i)),
+with no singleton special case needed (unlike Lemma 4.8's `OutputCtx.fillFull` version). -/
+theorem lemma4_9_fillRhs {Ψ₁ Ψ₂ Θ : NestedRhs Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) ((Ψ₁.fm.and Ψ₂.fm).imp Θ.fm)) :
+    ∀ (ctx : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom)
+        (((ctx.fillRhs Ψ₁).fm.and (ctx.fillRhs Ψ₂).fm).imp (ctx.fillRhs Θ).fm)
+  | [] => lemma4_7_i_ii Proposition.top h
+  | Γ :: rest => lemma4_7_i_ii Γ.fm (buildRhsChain_fm_and h rest)
+
+/-- **Lemma 4.9, `∧°`** (`andR`): `(fm(Γ{A°}) ∧ fm(Γ{B°})) ⊃ fm(Γ{(A ∧ B)°})`, via
+`lemma4_9_fillRhs` and the trivially-provable `(A ∧ B) ⊃ (A ∧ B)`. -/
+theorem lemma4_9_andR (ctx : OutputCtx Atom) (A B : Proposition Atom) :
+    Derivable (@CS5ModalAxiom Atom)
+      (((ctx.fillRhs (.atom A)).fm.and (ctx.fillRhs (.atom B)).fm).imp
+        (ctx.fillRhs (.atom (A.and B))).fm) :=
+  lemma4_9_fillRhs
+    (show Derivable (@CS5ModalAxiom Atom)
+      (((NestedRhs.atom A).fm.and (NestedRhs.atom B).fm).imp (NestedRhs.atom (A.and B)).fm)
+      from cs5DerivImpSelf (A.and B)) ctx
+
 end Cslib.Logic.Modal

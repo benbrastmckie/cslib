@@ -375,7 +375,8 @@ lemma modalTruthLemmaS4
         have hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w' :=
           extractModelS4_r b acc ▸ hr
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').1
-          (hintikkaS4_box_pos_reflTransGen φ₀ b acc hH ψ w w' hmem hpath)
+          (hintikkaS4_box_pos_reflTransGen φ₀ b acc (modalHintikkaSetS4_saturated φ₀ b acc hH)
+            ψ w w' hmem hpath)
       · intro hmem hall
         obtain ⟨w', hw', hF⟩ := hintikkaS4_box_neg φ₀ b acc hH ψ w hmem
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_box]; omega) w').2 hF
@@ -391,7 +392,8 @@ lemma modalTruthLemmaS4
         have hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w' :=
           extractModelS4_r b acc ▸ hw'
         exact (IH ψ (by rw [← hφ]; simp only [modalComplexity_diamond]; omega) w').2
-          (hintikkaS4_dia_neg_reflTransGen φ₀ b acc hH ψ w w' hmem hpath) hsψ
+          (hintikkaS4_dia_neg_reflTransGen φ₀ b acc (modalHintikkaSetS4_saturated φ₀ b acc hH)
+            ψ w w' hmem hpath) hsψ
 
 /-- An open S4 Hintikka branch with `F(φ₀)@0 ∈ b` yields a reflexive-transitive Kripke
 countermodel to `φ₀`. The extracted model `extractModelS4 b acc` falsifies `φ₀` at world

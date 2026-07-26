@@ -3,8 +3,8 @@
   "phase": "implement",
   "status": "implemented",
   "skeleton": false,
-  "summary": "Phase 1 of plan v4 (route (3), Massacci-style subtractive blocking) landed cleanly: Reds, accWithReds, hasEdge_accWithReds_iff, the bifurcated modalHintikkaSetS4Sub (conjunct 2 over acc, conjuncts 3/4 over accWithReds acc red, conjuncts 5/6 forward-cone G*/F*), and S4KeyedSubHintikkaInv (field statements only, no preservation proof) -- all in Cslib/Logics/Modal/Tableau/LoopChecking.lean, inserted after S4KeyedHintikkaInv_weaken and before the pre-existing '## Phase 7: Single-Step Invariant Preservation' doc section. No proofs beyond one simp-only bridge. Realigned artifacts/s4subtractive3.lean's condGStar/condFStar with a field-by-field alignment doc comment against the final conjunct 5/6 shapes and re-ran all three corpora (lake env lean, exit 0): 0 failures for G*/F* across 24,314 recorded redirects (1652+6303+16359), matching report 04's baseline exactly. Phase 1 [COMPLETED] in the plan; the Phase 1 Statement Validation subsection records verbatim #eval output. lake build Cslib.Logics.Modal.Tableau.LoopChecking and lake exe checkInitImports and lake exe lint-style (scoped to LoopChecking.lean) all clean. Sorry census over Cslib/Logics/Modal/Tableau/*.lean unchanged at exactly 1 (FrameSoundness.lean:1244, untouched). No new axioms.",
-  "phases_completed": 1,
+  "summary": "Phase 2 of plan v4 (DECISION GATE A) landed: PASS, route (3) survives the consumption gate. Added modalS4Saturated + two .2.1 projection bridges, weakened the six hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} bridges to modalS4Saturated, added reflTransGen_accWithReds_first_red (path decomposition) and two new box/diamond-preserving path bridges (hintikkaS4_{box_pos,dia_neg}_reflTransGen_boxed) in LoopChecking.lean; adjusted modalTruthLemmaS4's two call sites and landed modalTruthLemmaS4Sub + modalOpenBranchS4Sub_countermodel in FrameCompleteness.lean. Both touched modules build clean in isolation; lean_verify on both new declarations reports only standard axioms; sorry count in Cslib/Logics/Modal/Tableau/ unchanged at exactly 1 (FrameSoundness.lean:1244, untouched). Full-project lake build fails solely on the explicitly out-of-scope, concurrently-being-repaired Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean (task 554 phase 14) -- confirmed unrelated (never touched, and a tree-wide grep shows no caller outside the two touched files references the weakened bridges). lake exe checkInitImports and lake shake could not complete as a consequence (both require full up-to-date oleans); lake exe lint-style, scoped to the two touched files, is clean. Phase 2 [COMPLETED] in the plan; full verdict recorded under #### Phase 2 Verdict.",
+  "phases_completed": 2,
   "phases_total": 12,
   "sorry_inventory": [
     {
@@ -19,30 +19,36 @@
   ],
   "blockers": [],
   "continuation_path": null,
-  "next_action_hint": "Dispatch wave 2: Phase 2 (GATE A, consumption -- modalTruthLemmaS4Sub over ReflTransGen (accWithReds acc red)) and Phase 3 (GATE B, establishment -- the forward-cone transfer lemmas) IN PARALLEL, per the plan's territory table (Phase 2 owns FrameCompleteness.lean's new truth-lemma section + the six hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} hypothesis-weakenings in LoopChecking.lean; Phase 3 owns a new 'redirect transfer' section in LoopChecking.lean). LINE-NUMBER DRIFT WARNING: this phase's ~130-line insertion shifted every LoopChecking.lean declaration from the old '## Phase 7: Single-Step Invariant Preservation' heading onward by +129 lines (e.g. modalStepBranchS4Keyed_blocked_witness_mem moved from :8806-8824 to :8935-8953). The plan text still cites the OLD line numbers throughout Phases 2-12's task descriptions -- re-locate every cited declaration by name (grep -n '^lemma NAME\\|^def NAME\\|^theorem NAME') rather than trusting the plan's line numbers. Neither gate may be closed with a sorry (postmortem Do-NOT list); if either gate's obligation does not close, revert the attempt (commit no sorry), mark [BLOCKED], and record the exact lean_goal state in the plan's verdict subsection per the kill-criteria table in the Overview.",
+  "next_action_hint": "Dispatch Phase 3 (GATE B, establishment -- the standalone redirect forward-cone transfer lemma) as a SEPARATE dispatch, per the plan's 'Do NOT compress Phases 2 and 3' postmortem rule; Gate A passing does not license skipping or compressing Gate B. Phase 3's territory is a new 'redirect transfer' section appended to LoopChecking.lean (do not touch modalS4Saturated, the six weakened bridges, the two new boxed path bridges, or reflTransGen_accWithReds_first_red -- all landed this phase). CONCURRENT-BUILD CAVEAT: before Phase 3's dispatch runs lake exe checkInitImports/lake shake (which need full project oleans), check whether task 554's Nested/Soundness.lean repair has landed; if not, those two CI steps will still fail on that unrelated file and Phase 3 should scope its own verification to lake build Cslib.Logics.Modal.Tableau.LoopChecking plus lean_verify on its new declarations, exactly as this phase did. LINE-NUMBER WARNING (inherited from Phase 1, still applies): LoopChecking.lean line numbers in the plan's Phase 4-12 task descriptions predate the Phase 1 (+~129 lines) AND Phase 2 (+~65 lines) insertions; re-locate every cited declaration by name (grep -n '^lemma NAME\\|^def NAME\\|^theorem NAME') rather than trusting the plan's line numbers. Phase 3 may NOT be closed with a sorry (postmortem Do-NOT list, gate rule); if its obligation does not close, revert the attempt (commit no sorry), mark [BLOCKED], and record the exact lean_goal state in the plan's #### Phase 3 Verdict subsection.",
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/TODO.md",
-    "specs/state.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md"
   ],
   "artifacts": [
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "summary": "Phase 1 checklist items checked off, phase heading -> [COMPLETED], and a new '#### Phase 1 Statement Validation' subsection recording the realigned probe's verbatim #eval output and PASS verdict."
+      "summary": "Phase 2 checklist items checked off, phase heading -> [COMPLETED], and a new '#### Phase 2 Verdict' subsection recording the PASS verdict, what was landed, verification results, and the full-project-build caveat."
+    },
+    {
+      "type": "summary",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md",
+      "summary": "Phase 2 implementation summary with Plan Deviations section (modalS4Saturated indirection; the two new boxed path bridges)."
     }
   ],
   "library_files_edited": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean"
+    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
   ],
   "territory_respected": [
-    "Wrote only new declarations in LoopChecking.lean (Reds, accWithReds, hasEdge_accWithReds_iff, modalHintikkaSetS4Sub, S4KeyedSubHintikkaInv) plus the required task-dir artifacts (plan, probe). No existing declaration was edited in place.",
+    "LoopChecking.lean: added modalS4Saturated, modalHintikkaSetS4_saturated, modalHintikkaSetS4Sub_saturated, reflTransGen_accWithReds_first_red, hintikkaS4_box_pos_reflTransGen_boxed, hintikkaS4_dia_neg_reflTransGen_boxed (all new declarations); the ONE sanctioned in-place edit was the six hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen} hypothesis weakenings, strictly weaker, confirmed by clean scoped rebuild.",
+    "FrameCompleteness.lean: added modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel (new declarations); the only edit to a landed declaration was the two call-site projections inside modalTruthLemmaS4's box/diamond cases, required to accommodate the weakened bridge signatures -- zero change to modalTruthLemmaS4's statement or any other case.",
     "Rules.lean, Saturation.lean, Branch.lean, SoundnessStep.lean: untouched (read-only per plan).",
     "FrameSoundness.lean:1244 sorry: untouched.",
-    "blockingWorldS4Keyed and its three contract lemmas: untouched (byte-for-byte, verified by the successful scoped build with no regressions).",
-    "No file outside this task's declared scope (LoopChecking.lean, s4subtractive3.lean, the v4 plan, TODO.md/state.json) was modified."
+    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/** and Cslib.lean: untouched (concurrent-session territory, explicitly out of scope).",
+    "No file outside this task's declared scope (LoopChecking.lean, FrameCompleteness.lean, the v4 plan, the new Phase 2 summary) was modified."
   ],
   "requires_user_review": false
 }

@@ -9002,6 +9002,46 @@ lemma reflTransGen_accWithReds_first_red (acc : Accessibility) (red : Reds Atom)
       rw [hrw_eq, hrx_eq] at hr_mem
       exact Or.inr ⟨w', x, rs, rphi, Relation.ReflTransGen.refl, hr_mem, htail⟩
 
+/-- **Box-preserving path bridge**: unlike `hintikkaS4_box_pos_reflTransGen` (which strips the
+`□` at the path's end via `hintikkaS4_box_pos_self`), this carries the *boxed* formula
+`T(□ψ)@·` itself across an entire `acc`-only `ReflTransGen` path, never unwrapping it. Needed by
+`modalTruthLemmaS4Sub`'s box-positive case: on a path with a first `red`-hop `(x, wB, s, φ) ∈
+red`, the forward-cone conjunct 5 (`redBoxForwardCone`) demands `T(□ψ)@x ∈ b` (the *wrapped*
+formula at the `red`-hop's source `x`), not the unwrapped `T(ψ)@x`. Proof: the exact mirror of
+`hintikkaS4_box_pos_reflTransGen`'s induction with the `refl` case returning `hmem` unchanged
+instead of invoking `hintikkaS4_box_pos_self`. -/
+lemma hintikkaS4_box_pos_reflTransGen_boxed
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.pos, .box ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.pos, .box ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  revert hmem
+  induction hpath using Relation.ReflTransGen.head_induction_on with
+  | refl => intro hmem; exact hmem
+  | head hedge _ ih =>
+    intro hmem
+    exact ih (hintikkaS4_box_pos_step φ₀ b acc hH ψ _ _ hmem hedge)
+
+/-- Dual of `hintikkaS4_box_pos_reflTransGen_boxed` for the diamond-negative shape: carries
+`F(◇ψ)@·` itself across an entire `acc`-only `ReflTransGen` path without unwrapping it. Needed
+by `modalTruthLemmaS4Sub`'s diamond-negative case for the same reason: `redDiaForwardCone`
+demands `F(◇ψ)@x ∈ b` at the `red`-hop's source. -/
+lemma hintikkaS4_dia_neg_reflTransGen_boxed
+    (φ₀ : Proposition Atom) (b : List (SignedFormula (Proposition Atom) WorldIndex))
+    (acc : Accessibility) (hH : modalS4Saturated φ₀ b acc)
+    (ψ : Proposition Atom) (w w' : WorldIndex)
+    (hmem : (⟨.neg, .diamond ψ, w⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b)
+    (hpath : Relation.ReflTransGen (fun a c => acc.hasEdge a c = true) w w') :
+    (⟨.neg, .diamond ψ, w'⟩ : SignedFormula (Proposition Atom) WorldIndex) ∈ b := by
+  revert hmem
+  induction hpath using Relation.ReflTransGen.head_induction_on with
+  | refl => intro hmem; exact hmem
+  | head hedge _ ih =>
+    intro hmem
+    exact ih (hintikkaS4_dia_neg_step φ₀ b acc hH ψ _ _ hmem hedge)
+
 /-! ## Phase 7: Single-Step Invariant Preservation -/
 
 omit [Hashable Atom] in

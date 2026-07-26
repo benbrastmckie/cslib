@@ -8,17 +8,17 @@
   "effort_flag": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "started_at": "2026-07-26T18:45:00Z",
-  "completed_at": "2026-07-26T19:40:00Z",
+  "started_at": "2026-07-26T19:06:49Z",
+  "completed_at": "2026-07-26T20:05:00Z",
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
   "plan_version": 4,
-  "phase_number": 1,
-  "phases_completed": 1,
+  "phase_number": 2,
+  "phases_completed": 2,
   "phases_total": 12,
   "artifacts": [
     {
       "type": "summary",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/04_phase1-red-channel-bifurcated-hintikka-summary.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md"
     },
     {
       "type": "plan",
@@ -27,11 +27,9 @@
   ],
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/artifacts/s4subtractive3.lean",
+    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/04_phase1-red-channel-bifurcated-hintikka-summary.md",
-    "specs/TODO.md",
-    "specs/state.json"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md"
   ],
   "verification": {
     "verification_passed": true,
@@ -41,15 +39,15 @@
     "vacuous_count": 0,
     "axiom_count_new": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (module-scoped build, checkInitImports, lint-style all clean; full-project lake lint/lake test/lake shake/mk_all not run this dispatch -- see partial_progress note)"
+    "ci_pipeline_passed": "partial (module-scoped builds of LoopChecking.lean and FrameCompleteness.lean, and lake exe lint-style scoped to both, all clean; lean_verify on both new top-level declarations reports only standard axioms; full-project lake build / lake exe checkInitImports / lake shake / lake lint / lake test could not be completed this dispatch -- see partial_progress note)"
   },
   "memory_candidates": [
-    "Lean4 gotcha: a zero-argument `abbrev Foo := List (... Atom ...)` referencing an ambient section `variable {Atom : Type*}` fails to elaborate at every use site with 'don't know how to synthesize implicit argument Atom', because autoBound only scans the syntax of the declaration that *directly* mentions the variable, not nested uses through an already-elaborated abbrev. Fix: give the abbrev an explicit `(Atom : Type*) [...]` parameter and apply it (`Foo Atom`) at every use site.",
-    "`List.any_map`'s stated form leaves a `p ∘ f` vs `fun a => p (f a)` residual goal after `simp only [List.any_map]`; `Function.comp_def` closes it (needed alongside `List.any_append`, `List.any_map` for an `(l1 ++ l2.map f).any p` unfolding bridge)."
+    "Lean4 pattern: when weakening a bridge lemma's hypothesis from a full N-conjunct predicate `P` to a single named conjunct `Q` (strictly weaker), prefer introducing `Q` as a standalone named `def` plus a one-line `.k` projection theorem from `P` to `Q`, rather than editing `P`'s own body in place. This avoids any risk to `P`'s existing `rfl`-based bridge lemmas (e.g. an `_eq` bridge to a generic-driver form) and lets both `P` and any structurally-parallel sibling predicate (e.g. a bifurcated variant) share `Q` verbatim.",
+    "Lean4 gotcha: when a `ReflTransGen`-path bridge lemma unwraps a modal formula at the path's endpoint (e.g. strips `□`/`◇` via a `_self`-style base case), a caller that needs the *wrapped* formula preserved at some intermediate point on the path (not the endpoint) needs a separate 'preserving' bridge -- the exact same induction skeleton, but with the `refl` case returning the hypothesis unchanged instead of invoking the unwrapping step. The two bridges are not interchangeable even though both consume the same underlying single-step lemma."
   ],
   "partial_progress": {
-    "stage": "phase_1_complete",
-    "details": "Phase 1 (statement shapes) landed and validated. Full-project CI steps (lake lint, lake test, lake exe mk_all --module, lake shake) were not run this dispatch: lake shake attempted a whole-project rebuild and failed on unrelated out-of-date oleans from concurrent sessions (task 552-554 all active), not from this phase's own files. Module-scoped build (lake build Cslib.Logics.Modal.Tableau.LoopChecking), lake exe checkInitImports, and lake exe lint-style (scoped to LoopChecking.lean) all passed clean, satisfying the plan's own Phase 1 done-when criterion."
+    "stage": "phase_2_complete",
+    "details": "Phase 2 (DECISION GATE A) landed, verified, and recorded PASS. Full-project CI steps (lake exe checkInitImports, lake shake, lake lint, lake test) could not be run to completion this dispatch: whole-project lake build fails with exactly one error, in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean ('Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)'), a file this plan's own Overview declares out of scope and which is under active concurrent repair (task 554 phase 14). Confirmed unrelated to this phase's work: neither touched file was ever read or edited by this dispatch, and a tree-wide grep shows no caller outside LoopChecking.lean/FrameCompleteness.lean references any of the six weakened bridge lemmas. Module-scoped builds of both touched files, plus lake exe lint-style scoped to both, all passed clean; lean_verify on both new top-level declarations (modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel) reports only standard axioms (propext, Classical.choice, Quot.sound)."
   },
   "requires_user_review": false
 }

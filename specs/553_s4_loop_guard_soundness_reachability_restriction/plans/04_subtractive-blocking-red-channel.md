@@ -1,7 +1,20 @@
 # Implementation Plan: Massacci-Style Subtractive Blocking with a Completeness-Only Redirect Channel (v4)
 
 - **Task**: 553 - s4_loop_guard_soundness_reachability_restriction
-- **Status**: [IMPLEMENTING]
+- **Status**: [ABANDONED]
+- **Superseded by**: `plans/05_pinned-witness-truth-lemma.md` (v5). Route (3) is abandoned because
+  this plan's own Phase 3 decision gate (Gate B) **refuted** it — see `#### Phase 3 Verdict` below,
+  retained verbatim: the free transfer at a redirect target yields only an **unwrapped** branch
+  fact, and unwrapped facts have no persistence mechanism in this tableau's Hintikka apparatus, so
+  the forward-cone conjuncts cannot be established from any invariant over `(keys, red)` short of
+  adding the redirect edge to `acc` (forbidden as the shared defect of the prior routes). This was
+  the **fourth** route to fail, all four at the same obligation. Per a user-authorized route change
+  the successor plan implements **route (1)**: a driver-dependent Hintikka/canonical-model truth
+  lemma with a **pinned** witness model, at full `branchSatisfiableIn s4FC` strength. **Phases 1 and
+  2 remain `[COMPLETED]`**, `#### Phase 3 Verdict` and `#### Post-Gate-B Triage` are retained
+  verbatim, and the route-independent assets recorded in the triage are inherited by v5 as preserved
+  assets. Phases 4-12 were never dispatched. Retained as a historical record; do not implement from
+  this file.
 - **Effort**: 32-40 hours (12 phases; two of them are front-loaded decision gates that may
   terminate the route)
 - **Dependencies**: 535 (completeness-line task; its landed keyed completeness results are inputs)
@@ -993,7 +1006,13 @@ on both `blockedRedirect_unwrapped_*_mem` lemmas reports only `propext`, `Classi
 
 ---
 
-### Phase 4: Parallel subtractive rule and ordered stepper threading `red` [IN PROGRESS]
+### Phase 4: Parallel subtractive rule and ordered stepper threading `red` [NOT STARTED]
+
+> **Record correction (made when this plan was stamped `[ABANDONED]`)**: this heading previously
+> read `[IN PROGRESS]`, which was never accurate — Phase 4 was **never dispatched**. Per this
+> plan's own design ("Phases 4-12 are not scaffolded on a positive verdict"), the Phase 3 Gate B
+> `[BLOCKED]` verdict terminated the route before Phase 4 began. No work exists in the tree from
+> Phases 4-12.
 
 - **Goal:** Land the subtractive rule and the ordered subtractive stepper **beside** the landed
   ones, with the landed drivers byte-for-byte unchanged.

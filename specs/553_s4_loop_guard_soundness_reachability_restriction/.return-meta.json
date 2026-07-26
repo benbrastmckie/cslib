@@ -1,47 +1,36 @@
 {
-  "status": "implemented",
-  "agent_type": "cslib-implementation-hard-agent",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
+  "status": "planned",
+  "agent_type": "planner-hard-agent",
+  "delegation_path": ["orchestrator", "plan", "planner-hard-agent"],
   "task_number": 553,
   "task_type": "cslib",
   "session_id": "sess_1785084826_a33d36",
   "effort_flag": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "started_at": "2026-07-26T19:53:25Z",
-  "completed_at": "2026-07-26T20:40:00Z",
-  "operation": "post-gate-b orphan triage (cleanup dispatch, not a plan phase)",
-  "phase_number": null,
-  "phases_completed": 2,
-  "phases_total": 12,
+  "plan_version": 5,
+  "supersedes": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
+  "started_at": "2026-07-26T20:45:00Z",
+  "completed_at": "2026-07-26T21:35:00Z",
+  "operation": "create plan v5 -- route (1) pinned-witness truth lemma",
+  "phase_count": 12,
+  "estimated_hours": 42,
+  "postmortem_rules_count": 17,
   "artifacts": [
     {
       "type": "plan",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
+      "summary": "v5 route (1): driver-dependent Hintikka/canonical-model truth lemma with a PINNED witness model, at full branchSatisfiableIn s4FC strength. 12 phases, 8 waves, FOUR kill gates (three in wave 1, disjoint files, fully parallel). Two mechanisms: accPinnedBy (an upper bound on m.r over branch labels, closing the backward/ambient-predecessor direction that killed routes P/origin-edge/ancestor-only) and boxed birth content + boxed mint payload (report 02's R-new, closing the forward/unwrapped-persistence direction that killed route (3)). Explicit terminal condition: if any gate fails, do NOT propose a fifth route -- hand off to task 557 with a dependency inversion recorded in state_updates_pending."
     },
     {
-      "type": "handoff",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
+      "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
+      "summary": "[ABANDONED] v4 subtractive blocking + red channel; stamped with Superseded-by pointer to v5. Phases 1-2 [COMPLETED], Phase 3 Verdict and Post-Gate-B Triage preserved verbatim; Phase 4's stale [IN PROGRESS] corrected to [NOT STARTED] with a record-correction note (it was never dispatched)."
     }
   ],
   "modified_files": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
   ],
-  "verification": {
-    "verification_passed": true,
-    "sorry_count": 1,
-    "sorry_count_baseline": 1,
-    "sorry_count_delta": 0,
-    "vacuous_count": 0,
-    "axiom_count_new": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "scoped only, per dispatch instructions: lake build Cslib.Logics.Modal.Tableau.LoopChecking and ...FrameCompleteness both clean; lake exe lint-style clean on both touched files; lean_verify on both blockedRedirect_unwrapped_*_mem lemmas reports only standard axioms (propext, Classical.choice, Quot.sound). Full-project lake build/checkInitImports/lake lint/lake shake/lake test not attempted -- out of scope for this cleanup dispatch, and full-project build is separately blocked by concurrent, unrelated task 554 work on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean."
-  },
-  "partial_progress": {
-    "stage": "complete",
-    "details": "All REVERT-list declarations removed (modalHintikkaSetS4Sub, modalHintikkaSetS4Sub_saturated, S4KeyedSubHintikkaInv, hintikkaS4_box_pos_reflTransGen_boxed, hintikkaS4_dia_neg_reflTransGen_boxed, modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel). All KEEP-list declarations intact and unchanged in meaning. Reds/accWithReds retained per judgement call (a). Plan v4 annotated with #### Post-Gate-B Triage note. Both scoped builds clean, lint-style clean, sorry census exactly 1 (FrameSoundness.lean:1244, untouched), no new axioms."
-  },
   "requires_user_review": false
 }

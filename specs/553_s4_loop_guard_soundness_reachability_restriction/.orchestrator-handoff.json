@@ -1,78 +1,118 @@
 {
   "$schema": "orchestrator-handoff-v1",
-  "phase": "implement",
-  "status": "implemented",
+  "phase": "plan",
+  "status": "planned",
   "skeleton": false,
-  "summary": "Post-Gate-B orphan triage for route (3) (subtractive blocking + red channel), authorized by the user after Decision Gate B refuted the cone-extension lemma. This is a bounded cleanup dispatch, not a plan phase: no route (1) work was started, no plan v5 was written. Removed the dead bifurcated Hintikka machinery (modalHintikkaSetS4Sub, modalHintikkaSetS4Sub_saturated, S4KeyedSubHintikkaInv, hintikkaS4_box_pos_reflTransGen_boxed, hintikkaS4_dia_neg_reflTransGen_boxed, modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel) from LoopChecking.lean and FrameCompleteness.lean. Retained all route-independent assets unchanged in meaning: modalS4Saturated and its projection bridges, the six weakened hintikkaS4_* bridges, Reds/accWithReds, hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, and the two sorry-free blockedRedirect_unwrapped_*_mem free transfers. Judgement call: kept Reds/accWithReds as minimal support for the two kept general bridges (option (a)) rather than restating those bridges over a plain Accessibility append (option (b)), since the packaging is trivial and restating would be non-trivial rework for a cleanup dispatch. Updated stale doc comments that referenced the removed declarations. Added a #### Post-Gate-B Triage note to plan v4 recording the disposition.",
-  "phases_completed": 2,
+  "summary": "Created plan v5 for route (1): a driver-dependent Hintikka/canonical-model truth lemma with a PINNED witness model, at full branchSatisfiableIn s4FC strength. v4 stamped [ABANDONED] with a Superseded-by pointer, preserving its Phase 1/2 [COMPLETED] status, its Phase 3 Verdict, and its Post-Gate-B Triage note (Phase 4's stale [IN PROGRESS] marker corrected to [NOT STARTED] with a record-correction note, since it was never dispatched). Route (1) rests on two mechanisms, neither of which any prior route had: (1) accPinnedBy, an upper bound on the witness relation over branch labels, which turns 'ambient predecessor of f src' -- the uncontrollable set that killed Route P, the origin-edge revision, and ancestor-only blocking -- into 'acc-ancestor of src'; and (2) boxed birth content plus a boxed mint payload (report 02 section 4's R-new, never yet tested against this obligation), which makes the transfer at the redirect target WRAPPED rather than unwrapped, dissolving the exact defect that killed route (3). Grounded in ChagrovZakharyaschev1997: the interval theorem S_min subset S subset S_max (chunk_0246), whose explicit warning that a relation in the interval may be nontransitive even when R is transitive PREDICTS route (3)'s failure; the Lemmon filtration's box-plus (chunk_0248), which is exactly wrapped-plus-unwrapped; and Theorem 5.51 (chunk_0267/0268), whose model relation IS the reflexive-transitive closure of generated edges with the containment S_{n+1} subset R_ambient -- the literature form of accPinnedBy. Risk is front-loaded into FOUR kill gates: three in wave 1 with fully disjoint territory (Phase 1 owns FrameSoundness.lean, Phase 2 owns LoopChecking.lean, Phase 3 owns specs artifacts), Gate D in wave 2. Each has a written kill table, a one-dispatch attempt budget, and a no-sorry-at-a-gate rule. Phases 5-12 are explicitly NOT scaffolded on a positive verdict. Honest terminal condition stated in the plan: if any gate fails, do NOT propose a fifth route -- conclude the apparatus needs restructuring and hand off to task 557, which requires inverting 557's dependency on 553.",
+  "phases_completed": 0,
   "phases_total": 12,
+  "next_phase": 1,
+  "next_action_hint": "Dispatch wave 1 -- Phases 1, 2 and 3 in parallel; their territory is fully disjoint (FrameSoundness.lean / LoopChecking.lean / specs artifacts respectively) so no same-file serialisation is needed. Running all three maximises the probability of an EARLY KILL, which is the goal given four prior route failures. All three must return positive verdicts before Phase 4, and all four gates must pass before any of Phases 5-12 is dispatched. Gate B (Phase 2) is the likeliest to fail: modalHintikkaClauseGen returns True for every box/diamond-shaped formula regardless of sign, so the landed S4KeyedHintikkaInv.hintikkaInv supplies nothing for T(box psi) / F(dia psi) -- precisely the shapes Gate A consumes. Do not let Phase 3's measurements, however clean, license a reordering or a softened kill criterion: v3 measured 1374/1374 and died at its gate, and route (3) measured 0/24314 and died at its gate.",
   "sorry_inventory": [
     {
       "file": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
       "line": 1244,
       "statement": "branchSatisfiableIn_s4FC_ancestor_redirect (sorry body)",
       "strategic": false,
-      "assumption": "N/A -- pre-existing, retained by standing user decision, untouched by this dispatch",
-      "why_deferred": "Retained by explicit prior user decision; this dispatch's mission excluded it entirely (KEEP list). Remains the only sorry in Cslib/Logics/Modal/Tableau/.",
+      "assumption": "N/A -- pre-existing, retained by standing user decision, untouched by this planning dispatch and forbidden to every phase of plan v5",
+      "why_deferred": "Retained by explicit standing user decision. Plan v5's Postmortem Constraints forbid any phase from touching it, and require the sorry census in Cslib/Logics/Modal/Tableau/ to be exactly 1 at every phase boundary. Gate A's lemma is a NEW declaration, not a retargeting of this one.",
       "follow_up_task": null
     }
   ],
   "blockers": [],
-  "kept": [
-    "modalS4Saturated (LoopChecking.lean)",
-    "modalHintikkaSetS4_saturated (LoopChecking.lean)",
-    "hintikkaS4_box_pos_step, hintikkaS4_dia_neg_step, hintikkaS4_box_pos_self, hintikkaS4_dia_neg_self, hintikkaS4_box_pos_reflTransGen, hintikkaS4_dia_neg_reflTransGen (LoopChecking.lean, unchanged weakened-hypothesis bridges)",
-    "Reds, accWithReds (LoopChecking.lean)",
-    "hasEdge_accWithReds_iff (LoopChecking.lean)",
-    "reflTransGen_accWithReds_first_red (LoopChecking.lean)",
-    "blockedRedirect_unwrapped_boxPos_mem (LoopChecking.lean)",
-    "blockedRedirect_unwrapped_diaNeg_mem (LoopChecking.lean)",
-    "FrameSoundness.lean:1244 sorry (untouched, standing user decision)"
+  "state_updates_pending": [
+    {
+      "field": "active_projects[project_number=553].status",
+      "current": "planning",
+      "proposed": "planned",
+      "reason": "Plan v5 written. Postflight status transition; the planning agent does not edit state.json."
+    },
+    {
+      "field": "active_projects[project_number=553].plan_metadata",
+      "proposed": {
+        "phases": 12,
+        "total_effort_hours": 42,
+        "complexity": "complex",
+        "research_integrated": true,
+        "plan_version": 5,
+        "dependency_waves": [[1, 2, 3], [4], [5], [6], [7, 8], [9], [10], [11, 12]],
+        "reports_integrated": [
+          {
+            "path": "reports/01_s4-keyed-guard-soundness-falsified.md",
+            "integrated_in_plan_version": 5,
+            "integrated_date": "2026-07-26"
+          },
+          {
+            "path": "reports/02_redirect-inertness-divergence-audit.md",
+            "integrated_in_plan_version": 5,
+            "integrated_date": "2026-07-26"
+          },
+          {
+            "path": "reports/03_soundness-strength-necessity.md",
+            "integrated_in_plan_version": 5,
+            "integrated_date": "2026-07-26"
+          },
+          {
+            "path": "reports/04_massacci-subtractive-blocking-priced.md",
+            "integrated_in_plan_version": 5,
+            "integrated_date": "2026-07-26"
+          }
+        ],
+        "skeleton": false,
+        "follow_up_tasks": []
+      },
+      "reason": "Records v5's 12 phases and 8 dependency waves, superseding the v4 plan_metadata block."
+    },
+    {
+      "field": "active_projects[project_number=553].artifacts",
+      "proposed": "append {type: plan, path: specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md, summary: v5 route (1) pinned-witness truth lemma, 12 phases, 4 kill gates, full branchSatisfiableIn s4FC strength}; and update the existing v4 artifact entry's summary to record [ABANDONED] and the Superseded-by pointer to v5",
+      "reason": "Artifact linking; v4's entry should mirror the pattern already used for the v2 and v3 entries."
+    },
+    {
+      "field": "CONTINGENT -- apply ONLY if a kill gate fails",
+      "proposed": {
+        "active_projects[project_number=553].status": "blocked",
+        "active_projects[project_number=553].blockers": "Route (1) (pinned witness model) failed at gate {A|B|C|D}, the same obligation on which four prior routes died. Per plan v5's Terminal Condition, no fifth route is proposed: the tableau apparatus must be restructured before this soundness obligation can be discharged. Blocked on specs/557_modal_tableau_refactor_abstractions_boneyard.",
+        "active_projects[project_number=557].dependencies": "REMOVE 553 -- the dependency must be INVERTED so 557 can run first. 557 currently declares dependencies: [553]; leaving that in place while 553 blocks on 557 creates a cycle."
+      },
+      "reason": "Plan v5 states this handoff explicitly rather than leaving a failing dispatch to improvise it. Requires user confirmation of the dependency inversion; the orchestrator must not apply it silently."
+    }
   ],
-  "reverted": [
-    "modalHintikkaSetS4Sub (LoopChecking.lean)",
-    "modalHintikkaSetS4Sub_saturated (LoopChecking.lean)",
-    "S4KeyedSubHintikkaInv (LoopChecking.lean)",
-    "hintikkaS4_box_pos_reflTransGen_boxed (LoopChecking.lean)",
-    "hintikkaS4_dia_neg_reflTransGen_boxed (LoopChecking.lean)",
-    "modalTruthLemmaS4Sub (FrameCompleteness.lean)",
-    "modalOpenBranchS4Sub_countermodel (FrameCompleteness.lean)"
-  ],
-  "judgement_call": "Reds/accWithReds retained (option (a): minimal support for the two kept general bridges hasEdge_accWithReds_iff and reflTransGen_accWithReds_first_red) rather than restating those bridges over a plain Accessibility append and dropping Reds/accWithReds (option (b)), per the dispatch's own preference for (a) when (b) would require non-trivial proof rework. Recorded in plan v4's #### Post-Gate-B Triage note.",
   "continuation_path": null,
-  "next_action_hint": "Triage complete. The library now contains only route-independent assets from route (3); the route (1) truth-lemma successor plan (v5) can proceed as a fresh planning dispatch without further cleanup of this route's machinery.",
   "modified_files": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
   ],
   "artifacts": [
     {
       "type": "plan",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/05_pinned-witness-truth-lemma.md",
+      "summary": "Plan v5, route (1): pinned-witness truth lemma at full branchSatisfiableIn s4FC strength. 12 phases / 8 waves / 4 kill gates. Includes a Postmortem Constraints section with 17 explicit do-not rules, a 16-row Preserved Assets table with re-derived line numbers, a source-to-implementation mapping table citing verbatim ChagrovZakharyaschev1997, Massacci2000 and Simpson1994 chunk paths, per-phase territory contracts with zero same-file parallelism, a declared H8 deviation justified per phase group, and an explicit no-fifth-route terminal condition."
+    },
+    {
+      "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-      "summary": "Added '#### Post-Gate-B Triage' subsection under Phase 3 Verdict recording the kept/reverted inventory and the Reds/accWithReds judgement call."
+      "summary": "Stamped [ABANDONED] with a Superseded-by pointer to v5. Phases 1-2 [COMPLETED], Phase 3 Verdict and Post-Gate-B Triage preserved verbatim."
     }
   ],
   "verification": {
-    "build_loop_checking": "clean (lake build Cslib.Logics.Modal.Tableau.LoopChecking, 847 jobs)",
-    "build_frame_completeness": "clean (lake build Cslib.Logics.Modal.Tableau.FrameCompleteness, 880 jobs)",
-    "lint_style": "clean on both touched files (lake exe lint-style)",
-    "sorry_count_tableau_dir": 1,
-    "sorry_count_expected": 1,
-    "axiom_check_blockedRedirect_unwrapped_boxPos_mem": ["propext", "Classical.choice", "Quot.sound"],
-    "axiom_check_blockedRedirect_unwrapped_diaNeg_mem": ["propext", "Classical.choice", "Quot.sound"],
-    "new_axioms": false,
-    "full_project_build_note": "Not attempted (out of scope per dispatch instructions); a full-project lake build is currently failing on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean, concurrent task 554 work, verified untouched by this session."
+    "plan_format": "Metadata block (Task, Status, Effort, Dependencies, Research Inputs, Artifacts, Standards, Type) plus all seven required sections present; every phase heading carries a [NOT STARTED] marker; Dependency Analysis wave table precedes the first phase heading.",
+    "hard_mode_additions": "Postmortem Constraints section present immediately after the Overview; Preserved Assets subsection present with 16 rows; source-to-implementation mapping present (Tier 1 literature + Tier 3 implementation); explicit wave map plus a per-wave territory table; every phase states estimated output lines and a Done-when criterion.",
+    "h8_sizing": "12 phases, each one bounded unit; the two phases approaching or exceeding ~400 lines (10, 11) carry declared sub-phase split rules (10.1/10.2, 11.1/11.2), and Phase 6 carries a conditional 6.1/6.2 split rule; each gate phase carries a one-dispatch attempt budget as its stopping condition, so no phase has an open-ended attempt surface.",
+    "h8_deviation_declared": "Yes -- 12 exceeds the 8-phase ceiling for 'complex'; justified per phase group in a dedicated note, cross-checked against two independent pricings (report 02 section 4's 4-6 phases for R-new, report 04 section 7.2's 9 phases for the analogous line).",
+    "no_sorry_at_gates": "Explicit Do NOT rule; each of Phases 1, 2 and 4 has a revert-rather-than-commit clause and a recorded-verdict requirement.",
+    "skeleton_rejected": "Yes, with a stated reason: the four riskiest obligations are Phases 1-4, so there is no long green prefix to skeletonise, and a strategic sorry at a gate would stand in for a possibly-false statement -- the exact failure this task has suffered twice.",
+    "literature_grounding": "BibKeys verified in this planning run: ChagrovZakharyaschev1997 at references.bib:75, Simpson1994 at :86, Massacci2000 at :1010, Gore1999 at :1023. Chunks read and quoted verbatim with paths. Recorded gap: Massacci chunk_0054 defers the blocked-branch model construction to Gore1999, which has no corpus; per the dispatch this is settled and NOT a blocker, and ChagrovZakharyaschev1997 Theorem 5.51 supplies the same content in full. No literature-acquisition phase planned. Also recorded: literature-search.sh returns zero hits on the Chagrov-Zakharyaschev corpus because its index.json entry lacks provenance_fidelity -- noted for the refactoring task, reachable by direct grep/Read.",
+    "scope_boundary": "No refactoring planned. A dedicated Notes for the Refactoring Task section records six findings for specs/557 (including that the wrapped-vs-unwrapped distinction is the literature's box-plus / Lemmon filtration, and that the S5/S4 relatedness asymmetry is the real abstraction seam) rather than acting on any of them.",
+    "no_task_references_in_deliverables": "No Cslib/ or CslibTests/ file was written by this dispatch. Plan phase text instructs docstrings to cite declaration names and source labels, never task numbers.",
+    "builds_run": "None -- this was a planning dispatch and no Lean file was modified. The plan mandates scoped builds throughout and records that a full-project lake build currently fails on Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean (concurrent work, unrelated and untouched)."
   },
-  "library_files_edited": [
-    "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean"
-  ],
   "territory_respected": [
-    "LoopChecking.lean, FrameCompleteness.lean: only the REVERT-list declarations removed and their surrounding doc comments updated; every KEEP-list declaration's statement/proof left byte-identical.",
-    "Rules.lean, Saturation.lean, Branch.lean, SoundnessStep.lean, FrameSoundness.lean: untouched (read-only territory honored).",
-    "FrameSoundness.lean:1244 sorry: untouched, per explicit standing user decision.",
-    "Cslib/Logics/Modal/Metalogic/Constructive/Nested/** and Cslib.lean: untouched."
+    "Only specs/553_s4_loop_guard_soundness_reachability_restriction/ was written: plans/05_pinned-witness-truth-lemma.md (new), plans/04_subtractive-blocking-red-channel.md (metadata stamp + one stale phase marker corrected), .return-meta.json, .orchestrator-handoff.json.",
+    "No Cslib/** or CslibTests/** file touched.",
+    "specs/state.json NOT edited -- all proposed changes are in state_updates_pending.",
+    "plans/01, plans/02, plans/03 untouched.",
+    "v4's Phase 1/2 [COMPLETED] headings, its #### Phase 3 Verdict, and its #### Post-Gate-B Triage note preserved verbatim."
   ],
   "requires_user_review": false
 }

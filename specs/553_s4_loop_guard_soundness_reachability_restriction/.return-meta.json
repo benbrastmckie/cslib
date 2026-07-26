@@ -1,71 +1,48 @@
 {
-  "status": "partial",
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
   "task_number": 553,
-  "agent_type": "cslib-implementation-hard-agent",
-  "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "session_id": "sess_1785084826_a33d36",
-  "started": "2026-07-26",
-  "completed": "2026-07-26",
-  "phase_number": 2,
-  "phases_completed": 1,
-  "phases_total": 14,
-  "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-  "plan_version": 3,
-  "requires_user_review": true,
-  "partial_progress": {
-    "stage": "phase_2_blocked_verdict_recorded",
-    "details": "Phase 2 decision-gate lemma stated and attempted in FrameSoundness.lean; proof reaches an unresolvable obligation one step before the plan's predicted failure mode. Verdict recorded in plan's #### Phase 2 Verdict subsection, handoff markdown, and .orchestrator-handoff.json. Phase 2 heading marked [BLOCKED]; plan top-level Status marked BLOCKED. Phases 3-14 not sequenced around this gate per the phase's own done-condition."
-  },
-  "handoff_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
   "artifacts": [
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/reports/03_soundness-strength-necessity.md"
+  ],
+  "findings_count": 12,
+  "adversarial_verification_triggered": true,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "all_verified",
+  "bibkeys_verified": [
+    "Massacci2000",
+    "Gore1999",
+    "Blackburn2001",
+    "ChagrovZakharyaschev1997",
+    "Fitting1983"
+  ],
+  "files_edited": [],
+  "verdict": "WEAKENING IS SAFE for every enumerated consumer. Evidence-supported route is (2') -- the branchPropAdequateIn target entered via the disjunctive edge conjunct, with the report-02 section-5.1 hready repair as mandatory Phase 1.",
+  "key_measurements": {
+    "branchPropAdequateIn_occurrences_outside_FrameSoundness": 0,
+    "branchSatisfiableIn_s4FC_occurrences_outside_FrameSoundness": 0,
+    "landed_decidability_instances_referencing_any_branch_invariant": 0,
+    "landed_decidability_instances_total": 6,
+    "branchSatisfiableIn_imp_branchPropAdequateIn_axioms": [],
+    "modalClosed_unsat_propAdequateIn_axioms": ["propext", "Quot.sound"]
+  },
+  "memory_candidates": [
     {
-      "path": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-      "type": "lean",
-      "summary": "New lemma branchSatisfiableIn_s4FC_ancestor_redirect (line 1220, one documented sorry at 1244) and local helper hasEdge_addEdge_cases_anc (line ~1198)."
+      "title": "Branch-invariant strength is proof-internal in the CSLib modal tableau line",
+      "content": "All six landed Decidable (xValid phi) instances (K, T, B, S5, Five, KB5) consume only 'modalTableauX phi = .closed <-> xValid phi'. Any branch satisfiability invariant is existentially quantified inside the soundness proof and never appears in an exported type, so 'does a downstream consumer need the stronger invariant?' is answerable by grep on the invariant name.",
+      "keywords": ["cslib", "modal", "tableau", "soundness", "invariant", "decidability"]
     },
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-      "type": "plan",
-      "summary": "Phase 2 heading [NOT STARTED] -> [BLOCKED]; top-level Status -> BLOCKED; new #### Phase 2 Verdict subsection with exact lean_goal state and mapping-table resolution."
+      "title": "Massacci2000 loop-checking is subtractive, not additive",
+      "content": "Massacci2000 Technique 8.2 blocks by WITHHOLDING the pi-rule at a copy prefix; it adds no formula, world, or edge. Its loop-checking theorem (Thm 8.1) is completeness-side only, because a blocked branch is a subset of an unblocked one. A driver that instead adds a redirect edge to the accessibility relation manufactures a soundness obligation the source calculus does not have.",
+      "keywords": ["massacci", "loop-checking", "tableau", "soundness", "blocking", "literature"]
     },
     {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
-      "type": "handoff",
-      "summary": "Full narrative handoff: current state, key decisions, what NOT to try, what would change the verdict."
-    },
-    {
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/03_phase2-ancestor-redirect-blocked.md",
-      "type": "summary",
-      "summary": "Phase 2 implementation summary with Plan Deviations section."
+      "title": "S5 witness-reuse soundness is symmetry-driven and does not transfer to S4",
+      "content": "accReachableInv_related_s5 (FrameSoundness.lean:1858) relates any two known worlds via Relation.RightEuclidean, so S5 redirect/reuse edges are genuine model edges for free. s4FC = Std.Refl and IsTrans has no symmetry conjunct, so the S5 reuse pattern never transfers to S4 by structural analogy.",
+      "keywords": ["s5", "s4", "euclidean", "symmetry", "witness-reuse", "frame-condition"]
     }
   ],
-  "memory_candidates": [
-    "branchSatisfiableIn's existentially-arbitrary witness model means redirect edges to an EXISTING/reused world (not a freshly minted one) cannot in general be justified by extending the model's relation -- this is a structural property of how branchSatisfiableIn is encoded in Cslib/Logics/Modal/Tableau/FrameSoundness.lean, not a case-specific gap. Any future route that redirects to an existing world (not just ancestor-only blocking) will hit the same wall; branchPropAdequateIn is the known weaker fallback.",
-    "blockedRedirect_boxctx_mem_of_boxOrigin / _diaNeg_mem_of_diaOrigin (LoopChecking.lean) both require the edge to already be recorded in acc before they fire -- they characterize post-redirect syntactic content transfer, not a way to justify a redirect edge's own addition."
-  ],
-  "cslib_files_modified": [
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean"
-  ],
-  "files_modified": [
-    "Cslib/Logics/Modal/Tableau/FrameSoundness.lean",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/03_ancestor-only-blocking.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/.return-meta.json",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/handoffs/phase-2-blocked-handoff-20260726.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/03_phase2-ancestor-redirect-blocked.md"
-  ],
-  "axiom_count": 26,
-  "sorry_count_tableau": 1,
-  "verification": {
-    "verification_passed": false,
-    "sorry_count": 1,
-    "vacuous_count": 0,
-    "axiom_count_change": 0,
-    "build_passed": true,
-    "ci_pipeline_passed": "partial (scoped build + checkInitImports only; full CI not run since status is blocked, not implemented)",
-    "note": "sorry_count is 1 by design (documented strategic skeleton for a BLOCKED phase, not a defect being hidden). status is 'partial' per the escalation protocol, never 'implemented', consistent with the one remaining sorry."
-  },
-  "follow_up_tasks": [],
-  "requires_user_review": true,
-  "next_steps": "STOP. Do not dispatch Phase 3 or any later phase of plan v3. Escalate to the user: the ancestor-only-blocking route (audit option (c)) does not close. Two viable next steps: (1) authorize a driver-dependent Hintikka/canonical-model construction as a new, larger phase, or (2) reopen the mandate to accept branchPropAdequateIn (closer to audit option (b)) instead of full branchSatisfiableIn. The Gore1999 literature-acquisition escalation branch does NOT apply -- this is not a literature gap."
+  "next_steps": "Run /plan 553 to create implementation plan for route (2') -- disjunctive edge conjunct first"
 }

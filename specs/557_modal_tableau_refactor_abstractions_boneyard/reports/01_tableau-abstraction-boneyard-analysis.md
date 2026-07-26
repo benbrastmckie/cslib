@@ -974,6 +974,112 @@ forbids attempting the soundness obligation.
 - The per-repo literature index reports `massacci_2000...` as having **1 chunk**; it actually has
   **77** plus a full-text file. The index is wrong and `/literature --validate` should be run.
 
+### Claim Verification Table
+
+Second H4 pass, run as a dedicated divergence-audit dispatch against the repository at
+`ff315ea5`. Every load-bearing claim a downstream plan would act on was re-extracted from the
+sections above and re-verified against the tree **as it stands now** — the §2/§6 audits are dated
+and the task description mandates re-verification at execution time. Line-number citations were
+re-resolved, not assumed. Verdicts: **CONFIRMED** (claim and its anchor both still hold),
+**REVISED** (conclusion holds, stated figure or anchor corrected), **REFUTED** (claim does not
+reproduce), **STALE** (was true when written, anchor has drifted).
+
+| Claim | Source/Counterexample | Verdict | Evidence command |
+|---|---|---|---|
+| **Scope A — abstraction** | | | |
+| `successorBirthContent` (`LoopChecking.lean:384-393`) records only the **unwrapped** `(pos, ψ)` from a box context | Body filters `signedSubfmls φ₀` on `b.any (· == ⟨.pos, .box p.2, w⟩)` and inserts `p` (unwrapped), never `(pos, .box p.2)` | CONFIRMED | `grep -n 'def successorBirthContent' LoopChecking.lean` → 384; `sed -n '384,391p'` |
+| Box-plus is **free in the world bound** because `modalSubfmls (.box a) = .box a :: modalSubfmls a` (`FmpMeasure.lean:79`) | Line 79 is exactly `\| .box a   => .box a :: modalSubfmls a` | CONFIRMED | `sed -n '79p' Cslib/Logics/Modal/Tableau/FmpMeasure.lean` |
+| Blocked minting returns `(.linear [], acc.addEdge sf.label wBlock)` at `LoopChecking.lean:753` and `:757` — the 2-line structural defect of §3 | Both arms (`.neg, .box φ` and `.pos, .diamond φ`) verbatim at those exact lines | CONFIRMED | `sed -n '745,760p' LoopChecking.lean` |
+| `blockingWorldS4Keyed` at `:506`; the "**No reachability restriction**" docstring at `:491-493` | Docstring verbatim: "with no constraint that `w'` be reachable from the source at all… nothing here supplies it" | CONFIRMED | `grep -n 'def blockingWorldS4Keyed'` → 506; `sed -n '488,512p'` |
+| `RuleApply` (`Saturation.lean:107-111`) has no per-driver state slot — the root cause of the S4-Keyed fork | `@[nolint unusedArguments]` at 107, `abbrev RuleApply` at 108, return type `RuleResult × Accessibility` at 111 | CONFIRMED | `sed -n '105,112p' Saturation.lean` |
+| The stepper **re-derives** the guard decision `modalApplyOneS4Keyed` already made (`LoopChecking.lean:951-953`) | Comment verbatim at those lines; `def modalStepBranchS4Keyed` at 955 | CONFIRMED | `sed -n '949,955p' LoopChecking.lean` |
+| The two correspondence lemmas that become `rfl` under `RuleApplySt`: `_result_keys_eq` `:2288`, `_result_acc_eq` `:2315` | Both declared privately at exactly those lines | CONFIRMED | `grep -nE '(lemma) modalStepBranchS4Keyed_result_(keys\|acc)_eq'` |
+| **Exactly one** driver family forks off `modalTableauGen`; the *unkeyed* S4 driver is already generic (`LoopChecking.lean:711`, `:719`) | `:711` = `modalExpandBranchesGen (modalApplyOneS4 φ₀) …`; `:719` = `modalTableauGen (modalApplyOneS4 φ) φ`. `modalExpandBranchesS4Keyed` `:7670`, `modalTableauS4Keyed` `:7734`, `…Ordered` `:7762`/`:7823` are all bespoke | CONFIRMED | `sed -n '711,712p;718,720p;7670,7671p;7734,7735p;7762,7763p;7823,7824p'` |
+| Six true-`rfl` driver bridges break if `modalExpandBranchesGen` changes shape (the §5 step-2/3 additive constraint) | All six exist; **declaration** lines are `BDriver.lean:847` (`modalExpandBranchesB_eq`) and `:854` (`modalTableauB_eq`), `S5Simplification.lean:980`, `FiveSimplification.lean:725`/`:1491`/`:2042` | REVISED — the report cites the `:= rfl` body lines (`BDriver:851,855`, `S5:975,981`); use the declaration lines above | `grep -rnE '(theorem) (modalExpandBranchesB_eq\|modalTableauB_eq\|modalTableauS5_eq\|modalTableauFive_eq\|modalTableauKb5_eq\|modalTableauKb5..\_eq)' Cslib/Logics/Modal/Tableau/*.lean` |
+| Completeness **constructs** its model: `extractModelS4 b acc = extractModelWith Relation.ReflTransGen b acc` (`FrameCompleteness.lean:143-146`) | `def extractModelS4` at 143, body `extractModelWith (Relation.ReflTransGen) b acc` at 146; `extractModelS4_r` at 150 proves the relation **is** the RTC by `rfl` | CONFIRMED | `sed -n '141,155p' FrameCompleteness.lean` |
+| Soundness **quantifies existentially**: `branchSatisfiableIn` (`FrameSoundness.lean:110`) is `∃ W m f, FC m.r ∧ (∀ w w', acc.hasEdge w w' → m.r (f w) (f w')) ∧ …` | Verbatim at 110-115 | CONFIRMED | `sed -n '106,115p' FrameSoundness.lean` |
+| The mechanism is recorded in-code at `FrameSoundness.lean:1183-1190` ("witness model is *existentially arbitrary*") | Quote resolves exactly; block runs 1183-1194 | CONFIRMED | `sed -n '1183,1194p' FrameSoundness.lean` |
+| The content-half obstruction is recorded at `LoopChecking.lean:8830-8832` ("only an *unwrapped* branch fact… no persistence mechanism") | Quote resolves exactly at 8830-8832 | CONFIRMED | `sed -n '8828,8834p' LoopChecking.lean` |
+| The `hintikkaS4_*` bridge set is **8**, at `:6626, :6712, :6804, :6887, :6972, :6984, :7008, :7024` | All eight resolve to those exact lines; no `_boxed` variants remain | CONFIRMED (exact) | `grep -nE '^\s*(private )*(theorem\|lemma\|def)\s+hintikkaS4' LoopChecking.lean` |
+| `modalTableauS4Keyed_complete` at `FrameCompleteness.lean:4267` is the behaviour-preservation target | Declared at exactly 4267 | CONFIRMED | `grep -nE '(theorem) modalTableauS4Keyed_complete' FrameCompleteness.lean` |
+| **Exactly six** landed `Decidable` instances (K/T/B/S5/Five/Kb5), no `instDecidableS4Valid` | `CompletenessLoop.lean:2293`, `FrameCompleteness.lean:1313/1927/2420/3210/4156` — all six at the asserted lines; `instDecidableS4Valid` matches nothing | CONFIRMED (exact) | `grep -rnE '^\s*(noncomputable )?instance\s+instDecidable(K\|T\|B\|S5\|Five\|Kb5\|S4)Valid' Cslib/Logics/Modal/Tableau/` |
+| Prior art (rule level): `modalFourBoxProp` at `FrameRules.lean:133-138` | `def modalFourBoxProp` at 133, body through 138 | CONFIRMED | `sed -n '133,139p' FrameRules.lean` |
+| Prior art (rule level): `boxDiamondPersistence` at `Bimodal/…/Tableau.lean:344` | The `def` is at **:345**; :344 is the docstring's closing `-/`. Substance unaffected | STALE (off-by-one) | `sed -n '342,348p' Cslib/Logics/Bimodal/Metalogic/Decidability/Tableau.lean` |
+| Prior art (invariant level): `MonotoneEdges` at `Intuitionistic/Soundness.lean:367-369` | `def MonotoneEdges` 367, signature 368, body 369 — exact | CONFIRMED (exact) | `sed -n '365,371p' Cslib/Logics/Propositional/Tableau/Intuitionistic/Soundness.lean` |
+| Redirect semantic surface is **4 clauses** at `LoopChecking.lean:6557-6562`, `:8779-8782`, `:8786-8789` | Box-negative/diamond-positive witness conjuncts at 6557-6562; `eBoxNegWitness` 8779-8782; `eDiamondPosWitness` 8786-8789 | CONFIRMED (exact) | `sed -n '6555,6565p;8777,8792p' LoopChecking.lean` |
+| **Scope B — module division** | | | |
+| **77** comment-attested "local re-derivation" sites in the Tableau subsystem | The exact phrase `Local re-derivation` occurs **55** times, not 77. Broader patterns give different figures again (`-i 're-derivation'` → 80; `-i 're-deriv'` → 106), so 77 is not reproducible by any obvious command. | **REFUTED as a count** — the count is **55** for the phrase the report names. Restate the finding as "55 comment-attested `Local re-derivation` sites". The *phenomenon* is unaffected and the P0 Task A recommendation stands. | `grep -rn 'Local re-derivation' Cslib/Logics/Modal/Tableau/*.lean \| wc -l` → 55 |
+| Distribution: `S5Simplification` 15+, `FiveSimplification` 11+, `BDriver` 6, `FrameCompleteness` 5, `FrameSoundness` 3 | Measured: `S5Simplification` 14, **`LoopChecking` 14**, `FiveSimplification` 10, `BDriver` 6, `FrameSoundness` 6, `FrameCompleteness` 5 | REVISED — `LoopChecking.lean` contributes 14 sites the report's distribution **omits entirely**, and it is one of the three files the task targets for splitting | `grep -rc 'Local re-derivation' Cslib/Logics/Modal/Tableau/*.lean \| grep -v ':0'` |
+| `modalSubfmls_trans` re-derived in **three** files | **Four**: `BDriver.lean:211` (`_B`), `S5Simplification.lean:97` (`_S5`), `FiveSimplification.lean:738` (`_Five`), **`LoopChecking.lean:1576` (`_S4`)**. Original private at `FmpMeasure.lean:393` | REVISED — undercount; the report also cites `FiveSimplification:736`, which is the docstring line (decl at 738) | `grep -rn 'modalSubfmls_trans' Cslib/Logics/Modal/Tableau/*.lean` |
+| `modalKnownWorlds_fold_spec` re-derived in **four** files | **Six** re-derivations: `BDriver:918`, `S5Simplification:993`, `LoopChecking:2757`, `FrameSoundness:2032`, `FrameCompleteness:3745`, `FiveSimplification:777` (plus a second S5 site at `:1051` re-deriving its *proof*). Original at `FmpMeasure.lean:1710` | REVISED — undercount; the report's four cited line numbers are all docstring lines, not declaration lines | `grep -rnE '(lemma) modalKnownWorlds_fold_spec' Cslib/Logics/Modal/Tableau/*.lean` |
+| `hasEdge_addEdge_cases` re-derived in **four** files | **Seven** re-derivations: `BDriver:906`, `LoopChecking:5323`, `FmpMeasure:1063` (`_local`), `FrameSoundness:1199` (`_anc`), `FrameSoundness:2109` (`_FS`), `FrameCompleteness:2919` (`_Five`), `FrameCompleteness:3842` (`_C`). Original at `Soundness.lean:75` | REVISED — undercount; note the original lives in `Soundness.lean`, **not** `FmpMeasure.lean`, so Task A must extract from two source files | `grep -rnE '(lemma) hasEdge_addEdge_cases' Cslib/Logics/Modal/Tableau/*.lean` |
+| `FmpMeasure.lean` has **50** private declarations (the root cause) | Exactly 50 | CONFIRMED | `grep -cE '^private ' Cslib/Logics/Modal/Tableau/FmpMeasure.lean` |
+| Baseline: `LoopChecking` 10,540 lines / 230 decls; `FrameSoundness` 5,317; `FrameCompleteness` 4,307; `S4LoopGuardRegression` 197 | All four reproduce exactly at `ff315ea5` | CONFIRMED (exact) | `wc -l` on the four files; `grep -cE '^(private \|protected \|noncomputable \|partial \|@\[[^]]*\] )*(theorem\|lemma\|def\|abbrev\|instance\|structure\|inductive\|class) '` |
+| `ModalTableauResult` textual refs span **11** Tableau modules (the report's correction of the description's "8") | **8** files under `Cslib/Logics/Modal/Tableau/`; **9** repo-wide (the ninth is `CslibTests/S4LoopGuardRegression.lean`) | **REFUTED** — the report's "11" does not reproduce, and **the task description's original figure of 8 was correct**. The description's "asserted 8 / measured 11" note should be reverted to 8 (9 counting the test) | `grep -rl 'ModalTableauResult' Cslib/Logics/Modal/Tableau/*.lean \| wc -l` → 8; `grep -rl 'ModalTableauResult' Cslib/ CslibTests/ \| wc -l` → 9 |
+| **Scope C — Boneyard consumer audit (re-run at execution time, as mandated)** | | | |
+| `blockedRedirect_diaNeg_mem_of_diaOrigin` (`LoopChecking.lean:1506`), zero consumers → ELIGIBLE | Declared at exactly 1506; no reference outside its own declaration | CONFIRMED | `grep -nE '(lemma) blockedRedirect_diaNeg_mem_of_diaOrigin' LoopChecking.lean` |
+| `blockedRedirect_boxctx_mem_of_boxOrigin` (`LoopChecking.lean:1466`), zero consumers → ELIGIBLE | Declared at exactly 1466; only comment mentions elsewhere | CONFIRMED | `grep -nE '(lemma) blockedRedirect_boxctx_mem_of_boxOrigin' LoopChecking.lean` |
+| `keysRootEmpty` (`:2007`) / `keysRootEmpty_entry` (`:2013`) pair, zero external consumers → ELIGIBLE | Both at exactly those lines; `keysRootEmpty`'s only consumer remains `keysRootEmpty_entry` | CONFIRMED | `grep -nE '(def\|lemma) keysRootEmpty' LoopChecking.lean` |
+| The two `outDegEq` preservation lemmas at `:4917-5105` (189 lines) and `:5111-5307` (197 lines), **386 lines total** — eligible only once the field removal lands | Both declared at exactly 4917 and 5111 | CONFIRMED | `grep -nE '(lemma) modalStepBranchS4(KeyedOrdered)?_preserves_outDegEq' LoopChecking.lean` |
+| `S4LoopInv.outDegEq` field at `:7084`; `S4LoopInv` has exactly ten fields | Field `outDegEq` at exactly 7084. The **structure header is at `:7070`**, not `:7072` as §8 states; ten fields confirmed (`bClosure, eNodup, eClosure, accFresh, accKnown, outDegEq, keysTotal, keyLowerBd, keysDistinct, keysInUniverse`) | REVISED — field line exact, §8's "`:7072-7101`" structure range is off by 2 at the start | `grep -n 'structure S4LoopInv' LoopChecking.lean` → 7070; `sed -n '7070,7101p'` |
+| `S4LoopInv.outDegEq` has **zero code consumers** | The only `.outDegEq` projections outside `LoopChecking`/`FmpMeasure`/`GenericDriver` are `CompletenessLoop.lean:1403` and `:1782`, both on `hpot : ModalPotentialInv` (the K/generic line). Confirmed by reading both | CONFIRMED | `grep -rn 'outDegEq' Cslib/ CslibTests/ \| grep -v LoopChecking \| grep -v FmpMeasure \| grep -v GenericDriver` |
+| **Three** provision sites, including the positional one inside the landed capstone's entry lemma | `LoopChecking.lean:7569` and `:7633` are named-field provisions; `FrameCompleteness.lean:4217-4218` is the 4th positional goal of `modalTableauS4Keyed_initial`'s `refine ⟨⟨?_, List.nodup_nil, …⟩⟩` (at `:4206-4207`), discharged by `simp [outDeg, Accessibility.successorsOf, Accessibility.empty]` | CONFIRMED (exact, all three) | `sed -n '7565,7572p;7630,7636p' LoopChecking.lean`; `sed -n '4204,4220p' FrameCompleteness.lean` |
+| **Carve-out 1**: `branchSatisfiableIn_s4FC_ancestor_redirect` (`FrameSoundness.lean:1220-1244`) is zero-consumer but IMMOVABLE — it carries the retained `sorry` at `:1244` | Lemma at exactly 1220; the bare `sorry` at exactly 1244; it is the subsystem's **only** sorry | CONFIRMED | `grep -n 'lemma branchSatisfiableIn_s4FC_ancestor_redirect' FrameSoundness.lean`; `sed -n '1240,1248p'` |
+| **Carve-out 2**: `keysOriginS4` is NOT eligible — it is still declared and heavily consumed, so `LoopChecking.lean:2001-2002`'s removal claim is FALSE | Declared at `:1279`. Consumer count: the report's "22" is not reproducible by a simple command — measured **61** textual references across `Cslib/` + `CslibTests/` (55 on non-comment-leading lines). Either way it is emphatically **not** zero-consumer | REVISED (figure), CONFIRMED (conclusion) — the carve-out holds; drop the unreproducible "22" and cite the range | `grep -rn 'keysOriginS4' Cslib/ CslibTests/ \| wc -l` → 61 |
+| Sorry census: Tableau exactly **1**; repo-wide `Cslib/` **10**. Axioms: Tableau **0**; `Cslib/` **26** | All four reproduce exactly | CONFIRMED (exact) | `grep -rn '^\s*sorry\s*$\|:= sorry\|exact sorry' Cslib/Logics/Modal/Tableau/` → 1 hit; same over `Cslib/` → 10; `grep -rnE '^(private \|protected )*axiom '` → 0 / 26 |
+| `Boneyard/` does not exist at the repository root | Absent | CONFIRMED | `ls -d Boneyard` → No such file or directory |
+| **Scope D — documentation defect sites** | | | |
+| Defect 1 — `LoopChecking.lean:2001-2002`: the claim that `keysOriginS4` "and its supporting lemmas" were removed | Text resolves at exactly 2001-2002 ("…was removed above… along with `keysOriginS4` and its supporting lemmas"); `keysOriginS4` is alive at `:1279` with 61 references | CONFIRMED as a FALSE claim needing correction | `sed -n '1998,2005p' LoopChecking.lean` |
+| Defect 2 — `LoopChecking.lean:8911-8912`: stale references to `hintikkaS4_box_pos_reflTransGen_boxed` / `_dia_neg_reflTransGen_boxed` | Both names appear at exactly 8911-8912; neither is declared anywhere in the tree | CONFIRMED | `sed -n '8905,8915p' LoopChecking.lean`; `grep -rn '_reflTransGen_boxed' Cslib/` → comment hits only |
+| Defect 3 — `LoopChecking.lean:2000-2004`: the "**Now possibly orphaned**" hedge on `keysRootEmpty` | Text resolves at exactly 2000-2004; the audit above resolves the hedge definitively (zero external consumers) | CONFIRMED | `sed -n '1998,2005p' LoopChecking.lean` |
+| Defect 4 — `FrameSoundness.lean:1215-1219`: the obstruction comment omits the zero-consumer fact and the `Massacci2000` Theorem 8.1 gap | Text resolves at exactly 1215-1219 ("The `sorry` marks the one case genuinely not dischargeable from these hypotheses…") | CONFIRMED | `sed -n '1213,1222p' FrameSoundness.lean` |
+| **Retired premises (a)-(d) — re-checked for silent dependence** | | | |
+| (a) No recommendation depends on the unnumbered "interval theorem" prose | §1's row and Challenge 1 both retire it explicitly; §4's justification for box-plus rests on `chunk_0248.md:9-16` (composability) + Corollary 5.32; §3 rests on Massacci Def. 10.2 / Pruning Lemma 8.2 + C&Z Thm 5.51's containment discharge. **No P0-P4 recommendation cites the interval passage** | CONFIRMED ABSENT | Read of §§1, 3, 4, Recommendations; `grep -n 'interval' report 01` → §1 row, Challenge 1, and the citation-safety note only |
+| (b) No recommendation assumes `Massacci2000` Theorem 8.1 is proved | §1 records it as stated-and-never-proved with the deferral quote (`chunk_0054.md:3-7`). P0 Task B's action is to **document the gap**, not to rely on the theorem. No recommendation reconstructs a proof from it | CONFIRMED ABSENT | Read of §1 row, Risks table row 6, Recommendation P0 Task B |
+| (c) No recommendation treats Theorem 5.51 as covering S4 via filtration | §1's row states 5.51 is **Grz** via **selective** filtration; the S4 licence throughout §4 is **Corollary 5.32**. §3 uses 5.51 only for its *containment-by-construction pattern* (`S_{n+1} ⊆ R_Grz`), which is a legitimate structural analogy, not an S4 coverage claim | CONFIRMED ABSENT | Read of §1 (5.51 row and 5.32 row), §3, §4 |
+| (d) No recommendation places box-plus in `chunk_0248` | §1's `□⁺` row states verbatim "**Not in `chunk_0248` as the task description states**" and locates it at `chunk_0173.md:11-14`, print p. 98, Chapter 3, as the syntactic analogue of reflexivization. `chunk_0248` is cited only for the Lemmon filtration itself | CONFIRMED ABSENT | Read of §1 `□⁺` row and Lemmon-filtration row |
+| **Prerequisite** | | | |
+| `lake exe checkInitImports` fails on a stale build (missing `Constructive/Nested/Soundness.olean`) | **Still fails, same cause**: `uncaught exception: object file '…/Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.olean' … does not exist`. Unrelated to the Tableau subsystem; a full `lake build` must clear it before the stated acceptance gate is meaningful | CONFIRMED (still failing) | `lake exe checkInitImports` |
+| Massacci corpus is 77 chunks + a full text (the per-repo index reports 1 chunk) | The corpus directory holds **81** entries. The index's own chunk-count field was **not** re-extracted in this dispatch | REVISED / partially unverified — the "index understates the corpus" conclusion stands; the exact 77 does not. `/literature --validate` still warranted | `ls ~/Projects/Literature/sources/massacci_2000_single_step_tableaux_for_modal_logics/ \| wc -l` → 81 |
+
+**Notes on the REVISED and REFUTED rows.**
+
+1. **The "77 re-derivation sites" figure is refuted, and the finding is *stronger* than the
+   report states, not weaker.** The exact phrase the report names occurs **55** times. But every
+   per-lemma spot-check came back an **undercount**: `modalSubfmls_trans` is re-derived four
+   times (not three), `modalKnownWorlds_fold_spec` six (not four), `hasEdge_addEdge_cases` seven
+   (not four). The report also omitted `LoopChecking.lean`'s **14** sites from its distribution —
+   which matters because `LoopChecking.lean` is one of the three files Scope B targets for
+   splitting, so Task A shrinks it too. **Action for the planner**: state the figure as
+   "55 comment-attested `Local re-derivation` sites" with the exact command, and note that
+   `hasEdge_addEdge_cases`'s original lives in `Soundness.lean:75`, not `FmpMeasure.lean` — so
+   Task A extracts from **two** source files, not one.
+2. **The `ModalTableauResult` "11 modules" figure is refuted and the task description's
+   original "8" was right.** Measured 8 files in `Cslib/Logics/Modal/Tableau/`, 9 counting
+   `CslibTests/S4LoopGuardRegression.lean`. The report's §2 row "asserted 8 / measured 11" is the
+   one place this audit found the report having *introduced* drift rather than removed it. The
+   description's measured-baseline paragraph should be corrected back to 8.
+3. **`keysOriginS4`'s "22 consumers" is not reproducible, but the carve-out is unaffected.**
+   Measured 61 textual references (55 on non-comment-leading lines) against the report's 22. The
+   discrepancy is a counting-method difference (the report's audit script classified
+   comment-adjacent and structure-field lines separately). The load-bearing conclusion —
+   `keysOriginS4` is **not** zero-consumer, therefore **not** Boneyard-eligible, therefore
+   `LoopChecking.lean:2001-2002` is FALSE — is confirmed with a large margin. Drop the bare "22"
+   in favour of "not zero-consumer; 61 textual references".
+4. **Two off-by-N anchors, both cosmetic**: `boxDiamondPersistence` is at
+   `Bimodal/…/Tableau.lean:345` (report says 344, the docstring terminator), and `S4LoopInv`'s
+   structure header is at `LoopChecking.lean:7070` (§8 says 7072). The `outDegEq` field line
+   `:7084` is exact, as are all three provision sites.
+5. **Nothing in Scope A was refuted.** Every anchor underpinning the edge-vs-identification
+   diagnosis (§3), the box-plus recommendation (§4), and the `RuleApplySt` unification (§5)
+   re-resolves exactly: `:753`/`:757`, `:384`, `FmpMeasure:79`, `Saturation:107-111`,
+   `:951-953`, `:2288`/`:2315`, `FrameCompleteness:143-146`, `FrameSoundness:110` and
+   `:1183-1190`, `LoopChecking:8830-8832`, all eight bridges, all six `Decidable` instances, and
+   the full 4-clause redirect surface. **The plan may act on §§3-5 as written.**
+6. **All four retired premises are confirmed absent** from the report's recommendations. No
+   recommendation depends on the interval prose, on Theorem 8.1 being proved, on Theorem 5.51
+   covering S4, or on box-plus living in `chunk_0248`.
+
 ---
 
 ## Context Extension Recommendations

@@ -1,0 +1,20 @@
+{
+  "status": "researched",
+  "summary": "H4 adversarial verification dispatch for task 557. Re-extracted 49 load-bearing claims from report 01 (the claims a downstream plan would act on across Scopes A-D, plus the four retired premises and the checkInitImports prerequisite) and re-verified each against the tree at ff315ea5. Appended the required `### Claim Verification Table` (header `| Claim | Source/Counterexample | Verdict | Evidence command |`) inside the existing `## Adversarial Self-Verification` section; no existing section was rewritten and no .lean file was touched. Result: 38 CONFIRMED, 9 REVISED (8 REVISED + 1 STALE off-by-one anchor), 2 REFUTED. Scope A is fully intact -- every anchor underpinning the edge-vs-identification diagnosis (SS3), the box-plus recommendation (SS4) and the RuleApplySt unification (SS5) re-resolves exactly, so the plan may act on SS3-5 as written. The two REFUTED claims are both counts, not conclusions. (1) The '77 comment-attested local re-derivation sites' figure does not reproduce: the exact phrase occurs 55 times. But every per-lemma spot-check came back an UNDERCOUNT (modalSubfmls_trans re-derived 4x not 3x; modalKnownWorlds_fold_spec 6x not 4x; hasEdge_addEdge_cases 7x not 4x), and the report's distribution omits LoopChecking.lean's 14 sites entirely -- so P0 Task A is stronger than stated, and it must extract from TWO source files (hasEdge_addEdge_cases originates in Soundness.lean:75, not FmpMeasure.lean). (2) 'ModalTableauResult spans 11 Tableau modules' does not reproduce: measured 8 in the Tableau directory, 9 repo-wide. The task description's ORIGINAL assertion of 8 was correct and the report's SS2 'measured 11' row is the one place this audit found the report introducing drift rather than removing it; the description's measured-baseline paragraph should be corrected back to 8. Notable REVISED rows: keysOriginS4's '22 consumers' is not reproducible (measured 61 textual references, 55 on non-comment-leading lines) but the carve-out conclusion -- not zero-consumer, therefore not Boneyard-eligible, therefore LoopChecking.lean:2001-2002 is FALSE -- is confirmed with a large margin; the six true-rfl driver bridges are cited at their `:= rfl` body lines rather than declaration lines (BDriver.lean:847/854, S5Simplification.lean:980, FiveSimplification.lean:725/1491/2042); S4LoopInv's structure header is at :7070 not :7072 (the outDegEq field line :7084 and all three provision sites are exact). All four RETIRED PREMISES (a)-(d) are confirmed ABSENT from the report's recommendations: nothing depends on the unnumbered interval prose, on Massacci2000 Theorem 8.1 being proved, on ChagrovZakharyaschev1997 Theorem 5.51 covering S4 via filtration, or on box-plus living in chunk_0248. PREREQUISITE re-verified: `lake exe checkInitImports` still fails with the same stale-build cause (missing Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.olean), unrelated to the Tableau subsystem -- a full lake build must precede any verification against that acceptance gate.",
+  "artifacts": [
+    {
+      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/reports/01_tableau-abstraction-boneyard-analysis.md",
+      "type": "report",
+      "summary": "Research report 01, now carrying the H4 gate artifact: a 49-row `### Claim Verification Table` appended inside `## Adversarial Self-Verification`, one row per load-bearing claim across Scopes A-D plus the retired premises and the checkInitImports prerequisite, each with an evidence command and a CONFIRMED/REVISED/REFUTED/STALE verdict, followed by six explanatory notes covering the two refuted counts, the unreproducible keysOriginS4 figure, two cosmetic off-by-N anchors, the intactness of Scope A, and the absence of all four retired premises."
+    }
+  ],
+  "blockers": [],
+  "next_action_hint": "plan",
+  "modified_files": [
+    "specs/557_modal_tableau_refactor_abstractions_boneyard/reports/01_tableau-abstraction-boneyard-analysis.md",
+    "specs/557_modal_tableau_refactor_abstractions_boneyard/.orchestrator-handoff.json"
+  ],
+  "claims_confirmed": 38,
+  "claims_revised": 9,
+  "claims_refuted": 2
+}

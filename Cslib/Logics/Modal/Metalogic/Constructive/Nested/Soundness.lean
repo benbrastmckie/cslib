@@ -303,4 +303,91 @@ theorem lemma4_3_v {A B : Proposition Atom} (h : Derivable (@CS5ModalAxiom Atom)
     Derivable (@CS5ModalAxiom Atom) ((◇A).imp (◇B)) :=
   cs5DerivDiaMono h
 
+/-! ## Lemma 4.4 (page 9): `OutputCtx.fillFull` Congruence -/
+
+/-- **Congruence between a curried implication and its and-uncurried instances, under a shared
+extra conjunct `D`**: from `⊢ (Φ ⊃ Ψ) ⊃ (Φ' ⊃ Ψ')`, derive `⊢ ((Φ ∧ D) ⊃ Ψ) ⊃ ((Φ' ∧ D) ⊃ Ψ')`.
+This is Lemma 4.4's singleton-context step, isolated as a standalone propositional fact: the
+`(Φ ∧ D) ⊃ Ψ` shape is exactly `OutputCtx.fillFull [Γ₁] (Φ, Ψ)`'s `fm`-image (`D := Γ₁.fm`).
+Built directly via three nested `deductionTheorem` discharges (the two and-hypotheses, then the
+inner `Φ` needed to re-derive the curried antecedent `Φ ⊃ Ψ` from the assumed `(Φ ∧ D) ⊃ Ψ` and
+the projected `D`). -/
+private theorem cs5DerivAndImpCongr {Φ Ψ Φ' Ψ' : Proposition Atom} (D : Proposition Atom)
+    (h : Derivable (@CS5ModalAxiom Atom) ((Φ.imp Ψ).imp (Φ'.imp Ψ'))) :
+    Derivable (@CS5ModalAxiom Atom) (((Φ.and D).imp Ψ).imp ((Φ'.and D).imp Ψ')) := by
+  obtain ⟨dh⟩ := h
+  refine ⟨deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [] ((Φ.and D).imp Ψ) ((Φ'.and D).imp Ψ') ?_⟩
+  refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+    [(Φ.and D).imp Ψ] (Φ'.and D) Ψ' ?_
+  -- context: [Φ'.and D, (Φ.and D).imp Ψ]
+  have hΦ' : DerivationTree (@CS5ModalAxiom Atom) [Φ'.and D, (Φ.and D).imp Ψ] Φ' :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE1 Φ' D)) (fun _ h => nomatch h))
+      (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+  have hD : DerivationTree (@CS5ModalAxiom Atom) [Φ'.and D, (Φ.and D).imp Ψ] D :=
+    .modus_ponens _ _ _ (.weakening [] _ _ (.ax [] _ (.andE2 Φ' D)) (fun _ h => nomatch h))
+      (.assumption _ _ (List.mem_cons.mpr (Or.inl rfl)))
+  have hAntFact : DerivationTree (@CS5ModalAxiom Atom)
+      [Φ'.and D, (Φ.and D).imp Ψ] ((Φ.and D).imp Ψ) :=
+    .assumption _ _ (List.mem_cons.mpr (Or.inr (List.mem_singleton.mpr rfl)))
+  have hΦImpΨ : DerivationTree (@CS5ModalAxiom Atom) [Φ'.and D, (Φ.and D).imp Ψ] (Φ.imp Ψ) := by
+    refine deductionTheorem (fun φ ψ => .implyK φ ψ) (fun φ ψ χ => .implyS φ ψ χ)
+      [Φ'.and D, (Φ.and D).imp Ψ] Φ Ψ ?_
+    -- context: [Φ, Φ'.and D, (Φ.and D).imp Ψ]
+    have hΦassum : DerivationTree (@CS5ModalAxiom Atom) [Φ, Φ'.and D, (Φ.and D).imp Ψ] Φ :=
+      .assumption _ _ (List.mem_cons.mpr (Or.inl rfl))
+    have hDweak : DerivationTree (@CS5ModalAxiom Atom) [Φ, Φ'.and D, (Φ.and D).imp Ψ] D :=
+      .weakening [Φ'.and D, (Φ.and D).imp Ψ] _ _ hD (fun x hx => List.mem_cons_of_mem _ hx)
+    have hAndΦD : DerivationTree (@CS5ModalAxiom Atom) [Φ, Φ'.and D, (Φ.and D).imp Ψ] (Φ.and D) :=
+      .modus_ponens _ _ _ (.modus_ponens _ _ _
+        (.weakening [] _ _ (.ax [] _ (.andI Φ D)) (fun _ h => nomatch h)) hΦassum) hDweak
+    have hAntFactWeak : DerivationTree (@CS5ModalAxiom Atom)
+        [Φ, Φ'.and D, (Φ.and D).imp Ψ] ((Φ.and D).imp Ψ) :=
+      .weakening [Φ'.and D, (Φ.and D).imp Ψ] _ _ hAntFact (fun x hx => List.mem_cons_of_mem _ hx)
+    exact .modus_ponens _ _ _ hAntFactWeak hAndΦD
+  have hdWeak : DerivationTree (@CS5ModalAxiom Atom) [Φ'.and D, (Φ.and D).imp Ψ]
+      ((Φ.imp Ψ).imp (Φ'.imp Ψ')) := .weakening [] _ _ dh (fun _ h => nomatch h)
+  have hΦ'ImpΨ' : DerivationTree (@CS5ModalAxiom Atom) [Φ'.and D, (Φ.and D).imp Ψ] (Φ'.imp Ψ') :=
+    .modus_ponens _ _ _ hdWeak hΦImpΨ
+  exact .modus_ponens _ _ _ hΦ'ImpΨ' hΦ'
+
+/-- **Lemma 4.4** (page 9): let `Δ, Σ` be full sequents and `Γ{ }` an output context. If
+`fm(Δ) ⊃ fm(Σ)` is provable, so is `fm(Γ{Δ}) ⊃ fm(Γ{Σ})`. Proved by induction on the structure of
+`Γ{ }` (`OutputCtx.fillFull`'s three-way recursion), matching the source's proof exactly: the base
+case (`Γ = { }`) is `h` itself; the singleton case (`Γ = [Γ₁]`) is `cs5DerivAndImpCongr`
+(Lemma 4.3(i)'s congruence pattern specialised to the and-uncurried shape `fillFull` produces); the
+general case lifts the (structurally shorter) inductive hypothesis through `□`
+(Lemma 4.3(iv)/`cs5DerivBoxMono`) and then through the new head layer via congruence-in-the-
+consequent (Lemma 4.3(i)/`cs5DerivImpCongrRight`), mirroring `buildFullChain`'s own
+`box Γ (buildFullChain rest ΦΨ)` step (via the `buildFullChain_fm` bridge from Lemma 4.2). -/
+theorem lemma4_4 {Δ Θ : NestedFull Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) (Δ.fm.imp Θ.fm)) :
+    ∀ (Γ : OutputCtx Atom),
+      Derivable (@CS5ModalAxiom Atom) ((Γ.fillFull Δ).fm.imp (Γ.fillFull Θ).fm)
+  | [] => h
+  | [Γ₁] => cs5DerivAndImpCongr Γ₁.fm h
+  | Γ :: (Γ₂ :: rest) => by
+      have hIH := lemma4_4 h (Γ₂ :: rest)
+      change Derivable (@CS5ModalAxiom Atom)
+        ((Γ.fm.imp (buildFullChain (Γ₂ :: rest) Δ).fm).imp
+          (Γ.fm.imp (buildFullChain (Γ₂ :: rest) Θ).fm))
+      rw [buildFullChain_fm, buildFullChain_fm]
+      exact cs5DerivImpCongrRight Γ.fm (cs5DerivBoxMono hIH)
+
+/-! ## Lemma 4.5 (page 9): `InputCtx.fillLhs` Contravariant Congruence -/
+
+/-- **Lemma 4.5** (page 9): let `Γ{ }` be an input context and `Δ, Σ` be LHS-sequents. If
+`fm(Σ) ⊃ fm(Δ)` is provable, so is `fm(Γ{Δ}) ⊃ fm(Γ{Σ})`. This is *exactly* Phase 8's
+`InputCtx.fillLhs_fm_antitone`: the source's own proof ("`Γ{ } = Γ'{Λ{ },Π}`... induction on
+`Λ{ }`, using Lemma 4.3(iii) and (v) ... [then] Lemma 4.3(ii) ... [then] Lemma 4.4") is precisely
+what `fillLhs_fm_antitone` already carries out, composed from `OutputCtx.fillLhs_fm_mono`
+(Lemma 4.3(iii)/(v) induction on `Λ{ }`), `cs5DerivImpCongrLeft`-shaped reasoning
+(Lemma 4.3(ii)), and `OutputCtx.fillRhs_fm_mono` (the outer `Γ'{ }` lift -- an RHS-typed
+specialisation of this phase's own Lemma 4.4). Restated here under this phase's source
+cross-reference, per this phase's task list ("using Phase 8's compositionality lemmas"). -/
+theorem lemma4_5 (ctx : InputCtx Atom) {Δ Θ : NestedLhs Atom}
+    (h : Derivable (@CS5ModalAxiom Atom) (Θ.fm.imp Δ.fm)) :
+    Derivable (@CS5ModalAxiom Atom) ((ctx.fillLhs Δ).fm.imp (ctx.fillLhs Θ).fm) :=
+  InputCtx.fillLhs_fm_antitone ctx h
+
 end Cslib.Logic.Modal

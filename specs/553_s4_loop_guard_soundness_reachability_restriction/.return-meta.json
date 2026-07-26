@@ -1,5 +1,5 @@
 {
-  "status": "implemented",
+  "status": "blocked",
   "agent_type": "cslib-implementation-hard-agent",
   "delegation_path": ["orchestrator", "implement", "cslib-implementation-hard-agent"],
   "task_number": 553,
@@ -8,46 +8,61 @@
   "effort_flag": "hard",
   "lit_flag": true,
   "orchestrator_mode": true,
-  "started_at": "2026-07-26T19:06:49Z",
-  "completed_at": "2026-07-26T20:05:00Z",
+  "started_at": "2026-07-26T20:15:00Z",
+  "completed_at": "2026-07-26T21:10:00Z",
   "plan_path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
   "plan_version": 4,
-  "phase_number": 2,
+  "phase_number": 3,
   "phases_completed": 2,
   "phases_total": 12,
   "artifacts": [
     {
       "type": "summary",
-      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md"
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md"
     },
     {
       "type": "plan",
       "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md"
+    },
+    {
+      "type": "handoff",
+      "path": "specs/553_s4_loop_guard_soundness_reachability_restriction/.orchestrator-handoff.json"
     }
   ],
   "modified_files": [
     "Cslib/Logics/Modal/Tableau/LoopChecking.lean",
-    "Cslib/Logics/Modal/Tableau/FrameCompleteness.lean",
     "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
-    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/05_phase2-decision-gate-a-truth-lemma-summary.md"
+    "specs/553_s4_loop_guard_soundness_reachability_restriction/summaries/06_phase3-decision-gate-b-forward-cone-blocked-summary.md"
   ],
   "verification": {
-    "verification_passed": true,
+    "verification_passed": "partial (the two landed free-transfer lemmas verify clean; the phase's central obligation, the cone-extension lemma, was refuted rather than proved -- see errors)",
     "sorry_count": 1,
     "sorry_count_baseline": 1,
     "sorry_count_delta": 0,
     "vacuous_count": 0,
     "axiom_count_new": 0,
     "build_passed": true,
-    "ci_pipeline_passed": "partial (module-scoped builds of LoopChecking.lean and FrameCompleteness.lean, and lake exe lint-style scoped to both, all clean; lean_verify on both new top-level declarations reports only standard axioms; full-project lake build / lake exe checkInitImports / lake shake / lake lint / lake test could not be completed this dispatch -- see partial_progress note)"
+    "ci_pipeline_passed": "scoped only: lake build Cslib.Logics.Modal.Tableau.LoopChecking is clean; lean_verify on both new declarations (blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem) reports only standard axioms (propext, Classical.choice, Quot.sound). Full-project lake exe checkInitImports / lake shake / lake lint / lake test not attempted this dispatch: the full-project build is still blocked by the same out-of-scope, concurrently-repaired Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean noted in the Phase 2 handoff (task 554 phase 14), and in any case this phase's central deliverable was refuted rather than landed, so full-project CI would not change the verdict."
   },
   "memory_candidates": [
-    "Lean4 pattern: when weakening a bridge lemma's hypothesis from a full N-conjunct predicate `P` to a single named conjunct `Q` (strictly weaker), prefer introducing `Q` as a standalone named `def` plus a one-line `.k` projection theorem from `P` to `Q`, rather than editing `P`'s own body in place. This avoids any risk to `P`'s existing `rfl`-based bridge lemmas (e.g. an `_eq` bridge to a generic-driver form) and lets both `P` and any structurally-parallel sibling predicate (e.g. a bifurcated variant) share `Q` verbatim.",
-    "Lean4 gotcha: when a `ReflTransGen`-path bridge lemma unwraps a modal formula at the path's endpoint (e.g. strips `□`/`◇` via a `_self`-style base case), a caller that needs the *wrapped* formula preserved at some intermediate point on the path (not the endpoint) needs a separate 'preserving' bridge -- the exact same induction skeleton, but with the `refl` case returning the hypothesis unchanged instead of invoking the unwrapping step. The two bridges are not interchangeable even though both consume the same underlying single-step lemma."
+    {
+      "content": "In a tableau Hintikka-set apparatus where only WRAPPED box/diamond-shaped formulas persist across accessibility edges (via a dedicated 'step' bridge like hintikkaS4_box_pos_step), a 'guard redirect' mechanism that recovers only UNWRAPPED membership at its target (e.g. via a Finset lower-bound like keyLowerBd, which is definitionally incapable of distinguishing wrapped from unwrapped signed-formula membership) cannot be extended to a forward-cone persistence claim for arbitrary formulas without either (a) adding a genuine accessibility edge, or (b) inventing a new persistence mechanism. Before stating a 'forward cone' Hintikka conjunct over a redirect/loop-back channel, check whether the channel's strongest derivable fact is wrapped or unwrapped -- an unwrapped fact cannot be propagated further by any sound bridge.",
+      "category": "INSIGHT",
+      "source_artifact": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
+      "confidence": 0.75,
+      "suggested_keywords": ["tableau", "Hintikka set", "S4", "box persistence", "forward cone", "loop guard", "redirect", "unsound bridge"]
+    },
+    {
+      "content": "When a decision-gate lemma's abstract statement seems to require an unproven fact, testing the MOST GENEROUS plausible additional hypothesis (here, hredValid: every red entry reflects a genuine guard decision) before declaring outcome (iii) is worth the extra tool calls: it either finds outcome (ii)'s nameable invariant, or it strengthens the outcome-(iii) verdict by showing even generous strengthening does not close the gap -- confirmed here via lean_multi_attempt (exact/assumption/aesop all failing) rather than by prose alone.",
+      "category": "TECHNIQUE",
+      "source_artifact": "specs/553_s4_loop_guard_soundness_reachability_restriction/plans/04_subtractive-blocking-red-channel.md",
+      "confidence": 0.7,
+      "suggested_keywords": ["decision gate", "hard mode", "outcome classification", "lean_multi_attempt", "adversarial verification"]
+    }
   ],
   "partial_progress": {
-    "stage": "phase_2_complete",
-    "details": "Phase 2 (DECISION GATE A) landed, verified, and recorded PASS. Full-project CI steps (lake exe checkInitImports, lake shake, lake lint, lake test) could not be run to completion this dispatch: whole-project lake build fails with exactly one error, in Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean ('Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)'), a file this plan's own Overview declares out of scope and which is under active concurrent repair (task 554 phase 14). Confirmed unrelated to this phase's work: neither touched file was ever read or edited by this dispatch, and a tree-wide grep shows no caller outside LoopChecking.lean/FrameCompleteness.lean references any of the six weakened bridge lemmas. Module-scoped builds of both touched files, plus lake exe lint-style scoped to both, all passed clean; lean_verify on both new top-level declarations (modalTruthLemmaS4Sub, modalOpenBranchS4Sub_countermodel) reports only standard axioms (propext, Classical.choice, Quot.sound)."
+    "stage": "phase_3_blocked",
+    "details": "Phase 3 (DECISION GATE B) attempted and refuted (outcome iii). The two free/certain transfers (blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem) are landed sorry-free and committed. The cone-extension lemma -- the phase's actual gate obligation -- was attempted, found to be a genuine mathematical dead end (not a proof-search gap, confirmed via lean_goal + lean_multi_attempt), and reverted before commit (no sorry landed). Phase 3 marked [BLOCKED] in the plan with a full verdict recorded under #### Phase 3 Verdict, including the exact lean_goal state at the blocker. Route (3) is dead as planned; Phases 4-12 are not dispatched. Escalating to the user per the plan's own kill table (the honest fallback is route (1))."
   },
-  "requires_user_review": false
+  "requires_user_review": true
 }

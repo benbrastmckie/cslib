@@ -812,12 +812,12 @@ outcome, consistent with the plan's risk mitigation.
 
 ---
 
-### Phase 3: DECISION GATE B — the standalone redirect forward-cone transfer lemma [NOT STARTED]
+### Phase 3: DECISION GATE B — the standalone redirect forward-cone transfer lemma [BLOCKED]
 
 - **Goal:** Prove, standalone and with **no driver dependency**, that conjuncts 5/6 hold at a
   blocked step; or name the exact missing fact.
 - **Tasks:**
-  - [ ] Land the two **free** transfers first, as near-transcriptions of
+  - [x] Land the two **free** transfers first, as near-transcriptions of
         `modalStepBranchS4Keyed_blocked_witness_mem`'s 15-line proof (`:8806-8824`):
         - `blockedRedirect_unwrapped_boxPos_mem`: from `hkL : keyLowerBd`-shaped and
           `hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some wBlock`, for every `χ` with
@@ -829,31 +829,121 @@ outcome, consistent with the plan's risk mitigation.
           `relevantSetFinset φ₀ b wBlock` (`:333-337`), whose membership *is* `⟨.pos, χ, wBlock⟩ ∈ b`.
           This is condition (c), measured **0 failures / 24,314**.
         - `blockedRedirect_unwrapped_diaNeg_mem`: the dual, condition (e), also **0 / 24,314**.
-  - [ ] State the cone extension as a standalone lemma over abstract hypotheses about
+  - [x] State the cone extension as a standalone lemma over abstract hypotheses about
         `(b, acc, red, keys)` — the guard `some` contract, `keyLowerBd`, the saturation conjunct
         over `acc`, and whatever additional threaded content proves necessary — concluding
         conjuncts 5 and 6. Follow v3 Phase 2's pattern of a driver-independent statement: it is what
         made that gate return a decisive verdict in one dispatch.
-  - [ ] Attempt the proof. **Record explicitly** which of the following the cone extension needs,
+  - [x] Attempt the proof. **Record explicitly** which of the following the cone extension needs,
         because this determines the verdict: (i) nothing beyond the free transfers plus
         `acc`-saturation → gate passes outright; (ii) a nameable additional invariant on recorded
         redirects → gate passes with a Phase 3b; (iii) a fact about the ambient branch that no
-        threaded invariant can supply → gate fails.
-  - [ ] Record the verdict, with the exact `lean_goal` state at any blocker, under
+        threaded invariant can supply → gate fails. **Outcome (iii) — see verdict below.**
+  - [x] Record the verdict, with the exact `lean_goal` state at any blocker, under
         `#### Phase 3 Verdict`.
 - **Estimated output:** ~250 lines. **Split rule:** if the two free transfers plus the cone lemma
   exceed 300 lines, split into 3.1 (the two unwrapped transfers, which are the certain part) and
-  3.2 (the cone extension, which is the gate) rather than growing the phase.
+  3.2 (the cone extension, which is the gate) rather than growing the phase. **Not triggered**:
+  the free transfers landed at 73 lines; the cone extension was refuted, not landed.
 - **Done when:** the two unwrapped-transfer lemmas **and** the cone lemma are sorry-free and the
-  scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` is clean.
+  scoped `lake build Cslib.Logics.Modal.Tableau.LoopChecking` is clean. **Partially met**: the two
+  free transfers are landed sorry-free and the scoped build is clean; the cone lemma is refuted
+  (outcome iii), so it is not landed at all — no `sorry` was committed for it.
 - **Kill / branch criterion:** outcome (i) → proceed. Outcome (ii) → **do not proceed to Phase 4**;
   add Phase 3b with the named invariant's exact statement, and check that statement against the
   probe (extending `s4subtractive3.lean`) before dispatching it. Outcome (iii) → **revert the
   attempt (commit no `sorry`)**, mark `[BLOCKED]`, escalate. If only the box half closes and the
   diamond half does not, that is outcome (iii): **do not** fall back to the wrapped (d) form, which
-  has 40 measured counterexamples.
+  has 40 measured counterexamples. **Outcome (iii) obtains — attempt reverted, phase `[BLOCKED]`,
+  escalating per this criterion.**
 - **Timing:** 4-5 hours
 - **Depends on:** 1
+
+#### Phase 3 Verdict
+
+**Verdict: FAIL — route (3) does not survive Decision Gate B as stated. The forward-cone
+conjuncts (5/6) of `modalHintikkaSetS4Sub` cannot be established from `keyLowerBd` +
+`modalS4Saturated` + the guard's `some` contract, nor from any nameable strengthening of
+`red`'s bookkeeping invariant that stops short of adding the redirect edge to `acc` (which the
+Postmortem Constraints forbid absolutely, as the shared defect of all three prior failed
+routes).**
+
+**What was landed (kept)**: the two free transfers, sorry-free, committed at `task 553 phase
+3.1`:
+- `blockedRedirect_unwrapped_boxPos_mem` (`LoopChecking.lean:9060-9090` in the post-edit file):
+  from `hkL : keyLowerBd`-shaped, `hblock : blockingWorldS4Keyed φ₀ b keys s φ src = some
+  wBlock`, `(pos, χ) ∈ signedSubfmls φ₀`, `⟨.pos, .box χ, src⟩ ∈ b`, concludes the **unwrapped**
+  `⟨.pos, χ, wBlock⟩ ∈ b`. This is exactly condition (c) (0/24,314), and it is the reflexive
+  (`u = wBlock`) base case of conjunct 5 only.
+- `blockedRedirect_unwrapped_diaNeg_mem`: the dual for condition (e) (0/24,314), the reflexive
+  base case of conjunct 6.
+
+**What was attempted and reverted**: a standalone cone-extension lemma
+`blockedRedirect_boxPos_forwardCone_probe`, generalized over the induction's current point,
+carrying `⟨.pos, .box χ, w⟩ ∈ b` (the **wrapped** shape) so it could be pushed across further
+`acc`-edges via the existing bridge `hintikkaS4_box_pos_step`, and re-invoking the free transfer
+at any further `red`-hop under the most generous plausible additional hypothesis available,
+`hredValid : ∀ r ∈ red, blockingWorldS4Keyed φ₀ b keys r.2.2.1 r.2.2.2 r.1 = some r.2.1` (every
+recorded `red` entry reflects a genuine guard decision — itself a nameable invariant the driver
+could maintain). Proof by `Relation.ReflTransGen.head_induction_on`, splitting each edge via
+`hasEdge_accWithReds_iff` into an `acc`-edge or a `red`-edge, mirroring
+`reflTransGen_accWithReds_first_red`'s decomposition.
+
+**Exact blocker, `lean_goal` at the stuck point** (case `head.inr`, the red-hop branch, after
+the induction has advanced through zero-or-more `acc`-edges and hit a first further `red`-hop
+`(a✝, c✝, rs, rphi) ∈ red` past the original `wBlock`):
+
+```
+ih : { sign := Sign.pos, formula := □χ, label := c✝ } ∈ b →
+     { sign := Sign.pos, formula := χ, label := u } ∈ b
+hunwrapped : { sign := Sign.pos, formula := χ, label := c✝ } ∈ b
+⊢ { sign := Sign.pos, formula := χ, label := u } ∈ b
+```
+
+`ih` demands the **wrapped** fact `⟨.pos, .box χ, c✝⟩ ∈ b` to continue propagating (exactly
+mirroring `hintikkaS4_box_pos_step`'s requirement — only wrapped `.box`-shaped formulas persist
+across `acc`-edges in this Hintikka apparatus). `hunwrapped` — the strongest fact the free
+transfer can produce at a redirect target, even granting `hredValid` — is only the **unwrapped**
+`⟨.pos, χ, c✝⟩ ∈ b`. There is no bridge from unwrapped `χ`-membership back to wrapped
+`.box χ`-membership: `exact hunwrapped` fails on a genuine type mismatch (not a search-tactic
+gap), `assumption` fails, and `aesop`'s exhaustive search fails outright on the goal with every
+available hypothesis in context. This is not a proof-search shortfall: asserting such a bridge
+(`χ@w ∈ b → □χ@w ∈ b`, unconditionally) would be **unsound** — an ordinary formula being true at
+a world does not make it necessary there in S4 (only `□χ → χ` and `□χ → □□χ` are valid; the
+converse fails for arbitrary formulas), so no sound lemma of this shape can exist anywhere in
+the library, threaded or not.
+
+**Why no nameable invariant on `(keys, red)` can close this**, generalizing the specific
+blocker: keyLowerBd (`k ⊆ relevantSetFinset φ₀ b w`, `relevantSetFinset` a `Finset (Sign ×
+Proposition Atom)` of *unwrapped* signed-formula membership) is definitionally incapable of
+producing a *wrapped* fact `⟨.pos, .box χ, wBlock⟩ ∈ b` — the Finset apparatus only ever
+witnesses `⟨p.1, p.2, w⟩ ∈ b` for `p.2` literally equal to the recorded element, and the only
+element the box-context-transfer branch of `successorBirthContent` ever records is the
+*unwrapped* `(pos, χ)`, never `(pos, .box χ)` (that would need `T(□□χ)@src ∈ b`, a strictly
+stronger hypothesis this lemma is not given, and nothing in `modalApplyOneS4`'s rules derives
+`T(□□χ)` from `T(□χ)` at the same world without an actual `acc`-edge — which is precisely the
+thing route (3) forbids adding). The only mechanism this codebase has for making a formula
+persist forward at all is `acc`-edge propagation of an already-wrapped formula
+(`hintikkaS4_box_pos_step`/`_dia_neg_step`); the redirect, by design, is never an `acc`-edge.
+So establishing the forward cone beyond the immediate (reflexive) blocking target would require
+either (a) adding the redirect to `acc` — the single defect shared by all three prior failed
+routes, explicitly forbidden — or (b) a wholly new persistence mechanism with no basis in the
+current guard/key/red bookkeeping. Neither is a "nameable additional invariant on recorded
+redirects" in the sense outcome (ii) contemplates; both are re-openings of settled, forbidden
+ground. This is outcome **(iii)**.
+
+**Consistency with the measured 0/24,314**: the measurement is over conditions (c)/(e) only
+(the reflexive base case established by the free transfers), not over the full forward cone for
+arbitrary `u`. It is not in tension with this verdict — it is exactly the part of conjuncts 5/6
+this dispatch confirms holds, and the plan's own caution ("a measurement can never license a
+design, only kill it") is what this verdict acts on for the remaining, unmeasured part.
+
+**Consequence**: per the Overview's kill table (row 2) and this phase's kill/branch criterion,
+**route (3) is dead as planned.** The probe attempt was reverted before commit (no `sorry`
+landed); only the two free transfers (the certain, already-true part, independently useful and
+unaffected by this verdict) remain in the tree. Escalating to the user per the Kill Criterion
+Note and outcome-(iii) protocol. Phases 4-12 are **not** dispatched, per the plan's explicit
+"not scaffolded on a positive verdict" design.
 
 ---
 

@@ -670,47 +670,145 @@ to `[COMPLETED]`; Phases 2 and 3 (the two decision gates) are unblocked for wave
 
 ---
 
-### Phase 2: DECISION GATE A — `modalTruthLemmaS4Sub` over `ReflTransGen (acc ∪ red)` [NOT STARTED]
+### Phase 2: DECISION GATE A — `modalTruthLemmaS4Sub` over `ReflTransGen (acc ∪ red)` [COMPLETED]
 
 - **Goal:** Prove, standalone and with **no driver dependency**, that the Phase 1 predicate feeds a
   truth lemma. This is report 04 §9's mandatory viability condition.
 - **Tasks:**
-  - [ ] Weaken the hypotheses of the six landed bridges `hintikkaS4_box_pos_self` (`:6779`),
+  - [x] Weaken the hypotheses of the six landed bridges `hintikkaS4_box_pos_self` (`:6779`),
         `_step` (`:6599`), `_reflTransGen` (`:6985-6998`), `hintikkaS4_dia_neg_self` (`:6863`),
         `_step` (`:6686`), `_reflTransGen` (`:7001-7013`) from `modalHintikkaSetS4 φ₀ b acc` to the
         bare **saturation conjunct**. Verified prerequisite: `hintikkaS4_box_pos_step` destructures
         `hH` as `⟨_, hrule, _⟩`, so it uses conjunct 2 only. This is **mandatory**, not cosmetic:
         conjuncts 3/4 over bare `acc` are false for the subtractive driver. Strictly weaker
         hypotheses cannot break any existing caller — confirm with a clean project-wide
-        `lake build`.
-  - [ ] `lemma reflTransGen_accWithReds_first_red` (the path decomposition): a
+        `lake build`. **Landed as new `def modalS4Saturated` (the named bare saturation conjunct,
+        shared verbatim by `modalHintikkaSetS4` and `modalHintikkaSetS4Sub`) plus two one-line
+        projection bridges `modalHintikkaSetS4_saturated`/`modalHintikkaSetS4Sub_saturated`
+        (`hH.2.1` off either predicate), rather than editing `modalHintikkaSetS4`'s own body** —
+        this is a Plan Deviation from the literal "weaken the hypotheses" wording (see Plan
+        Deviations in the Phase 2 summary): the six bridges' signatures were changed exactly as
+        specified, but the two existing callers in `modalTruthLemmaS4`
+        (`FrameCompleteness.lean`, box/diamond cases) needed their `hH` argument adjusted to
+        `modalHintikkaSetS4_saturated φ₀ b acc hH` — a one-line, semantically-inert accommodation
+        of the strictly-weaker parameter type, confirmed by a clean scoped rebuild of both files.
+  - [x] `lemma reflTransGen_accWithReds_first_red` (the path decomposition): a
         `ReflTransGen (accWithReds acc red)`-path `w ⤳ u` either stays entirely inside
         `acc.hasEdge`, or splits as `w ⤳_acc x`, a `red` entry `(x, wB, s, φ)`, and a residual
         `ReflTransGen (accWithReds acc red)`-path `wB ⤳ u`. Prove by
-        `Relation.ReflTransGen.head_induction_on` plus `hasEdge_accWithReds_iff`.
-  - [ ] `lemma modalTruthLemmaS4Sub (φ₀) (b) (acc) (red) (hH : modalHintikkaSetS4Sub φ₀ b acc red) :
+        `Relation.ReflTransGen.head_induction_on` plus `hasEdge_accWithReds_iff`. **Landed
+        verbatim to spec** in `LoopChecking.lean`.
+  - [x] `lemma modalTruthLemmaS4Sub (φ₀) (b) (acc) (red) (hH : modalHintikkaSetS4Sub φ₀ b acc red) :
         ∀ φ w, (⟨.pos, φ, w⟩ ∈ b → Satisfies (extractModelS4 b (accWithReds acc red)) w φ) ∧
         (⟨.neg, φ, w⟩ ∈ b → ¬ Satisfies (extractModelS4 b (accWithReds acc red)) w φ)`. Transcribe
         `modalTruthLemmaS4`'s complexity induction (`FrameCompleteness.lean:232-394`), replacing
         exactly the box-positive and diamond-negative cases (`:375-394`) with: decompose the path;
         the `acc`-only case uses the weakened bridge; the first-`red`-hop case uses the weakened
-        bridge to reach `x`, then conjunct 5 (resp. 6) on the residual cone.
-  - [ ] `theorem modalOpenBranchS4Sub_countermodel` — a ~12-line transcription of
+        bridge to reach `x`, then conjunct 5 (resp. 6) on the residual cone. **Landed with one
+        necessary refinement** (see Plan Deviations): the "weakened bridge" that carries the
+        formula from `w` to the `red`-hop's source `x` must preserve the *wrapped* shape
+        (`T(□ψ)@x`/`F(◇ψ)@x`), since conjuncts 5/6 require the wrapped antecedent at the source —
+        `hintikkaS4_box_pos_reflTransGen`/`hintikkaS4_dia_neg_reflTransGen` instead *unwrap* at the
+        endpoint (that is their entire purpose for the `acc`-only case), so two new box/diamond-
+        **preserving** path bridges (`hintikkaS4_box_pos_reflTransGen_boxed`/
+        `hintikkaS4_dia_neg_reflTransGen_boxed`, `LoopChecking.lean`) were added, mirroring the
+        existing bridges' induction with the `refl` case returning `hmem` unchanged instead of
+        invoking `_self`.
+  - [x] `theorem modalOpenBranchS4Sub_countermodel` — a ~12-line transcription of
         `modalOpenBranchS4_countermodel` (`FrameCompleteness.lean:401-408`) at
         `accWithReds acc red`, reusing `extractModelS4_refl`/`_trans` (`FC:160-178`) **verbatim**.
-  - [ ] Record the verdict under `#### Phase 2 Verdict`, whether positive or negative.
+        **Landed verbatim to spec.**
+  - [x] Record the verdict under `#### Phase 2 Verdict`, whether positive or negative.
 - **Estimated output:** ~300 lines. **Split rule:** if the path-decomposition lemma plus the two
   replaced truth-lemma cases exceed 300 lines, split into 2.1 (hypothesis-weakening + path
-  decomposition) and 2.2 (truth lemma + countermodel) rather than growing the phase.
+  decomposition) and 2.2 (truth lemma + countermodel) rather than growing the phase. **Not
+  triggered**: total new/changed Lean is ~230 lines across the two files.
 - **Done when:** `modalTruthLemmaS4Sub` and `modalOpenBranchS4Sub_countermodel` are **sorry-free**,
   `lake build` is clean project-wide, and `lean_verify` on both reports only standard axioms.
+  **Met, with one documented scope caveat**: see `#### Phase 2 Verdict` for the full-project
+  `lake build` caveat (a concurrent, explicitly out-of-scope failure in
+  `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean`).
 - **Kill criterion:** if either the box-positive or the diamond-negative case cannot be derived from
   conjuncts 5/6, **revert the attempt (commit no `sorry`)**, mark the phase `[BLOCKED]`, record the
   exact `lean_goal` state and the tactics tried under `#### Phase 2 Verdict`, and **escalate to the
   user**. The honest fallback is route (1), **not** route (2′). Do not weaken conjuncts 5/6 towards
-  the wrapped (b)/(d) forms to make the induction go through.
+  the wrapped (b)/(d) forms to make the induction go through. **Not triggered — both cases derive
+  cleanly from conjuncts 5/6 once the box/diamond-preserving path bridges supply the correctly
+  wrapped antecedent at the `red`-hop's source.**
 - **Timing:** 4-5 hours
 - **Depends on:** 1
+
+#### Phase 2 Verdict
+
+**Verdict: PASS — route (3) survives Decision Gate A.** The Phase 1 bifurcated predicate
+`modalHintikkaSetS4Sub` does feed a truth lemma over `ReflTransGen (accWithReds acc red)`, proved
+without weakening conjuncts 5/6 toward the forbidden wrapped-at-target form and without any
+`sorry`.
+
+**What was landed** (`Cslib/Logics/Modal/Tableau/LoopChecking.lean` and
+`Cslib/Logics/Modal/Tableau/FrameCompleteness.lean`):
+
+- `modalS4Saturated` (`LoopChecking.lean`): the bare saturation conjunct, named so it can be
+  shared by `modalHintikkaSetS4` and `modalHintikkaSetS4Sub` alike.
+- `modalHintikkaSetS4_saturated` / `modalHintikkaSetS4Sub_saturated` (`LoopChecking.lean`):
+  one-line `.2.1` projection bridges from either full predicate to `modalS4Saturated`.
+- The six bridges `hintikkaS4_{box_pos,dia_neg}_{self,step,reflTransGen}` (`LoopChecking.lean`):
+  hypothesis re-stated from `modalHintikkaSetS4 φ₀ b acc` to `modalS4Saturated φ₀ b acc` —
+  strictly weaker, confirmed by a clean scoped rebuild; the two existing callers in
+  `modalTruthLemmaS4` (`FrameCompleteness.lean`) updated to project via
+  `modalHintikkaSetS4_saturated`.
+- `reflTransGen_accWithReds_first_red` (`LoopChecking.lean`): the path-decomposition lemma, to
+  spec.
+- `hintikkaS4_box_pos_reflTransGen_boxed` / `hintikkaS4_dia_neg_reflTransGen_boxed`
+  (`LoopChecking.lean`, new — see Plan Deviations): box/diamond-*preserving* path bridges,
+  needed because conjuncts 5/6 require the wrapped antecedent `T(□ψ)@x`/`F(◇ψ)@x` at the
+  `red`-hop's source `x`, not the unwrapped `T(ψ)@x`/`F(ψ)@x` the existing (unwrapping) bridges
+  produce.
+- `modalTruthLemmaS4Sub` (`FrameCompleteness.lean`): the full complexity induction, to spec —
+  every non-modal case transcribed verbatim (they depend only on conjunct 2, which is identical
+  in shape between the two predicates and evaluated over `acc` in both); the box-positive and
+  diamond-negative cases case-split on `reflTransGen_accWithReds_first_red`, using the ordinary
+  (unwrapping) bridge on the `acc`-only disjunct and the new boxed bridge plus conjunct 5/6 on
+  the `red`-hop disjunct.
+- `modalOpenBranchS4Sub_countermodel` (`FrameCompleteness.lean`): to spec, verbatim transcription.
+
+**Verification**:
+- `lake build Cslib.Logics.Modal.Tableau.LoopChecking` — clean, zero errors.
+- `lake build Cslib.Logics.Modal.Tableau.FrameCompleteness` — clean, zero errors.
+- `lean_verify` on `modalTruthLemmaS4Sub`: `{"axioms":["propext","Classical.choice","Quot.sound"]}`
+  — standard axioms only (the one `"opaque"` source-scan hit is a pre-existing docstring mention
+  at `FrameCompleteness.lean:2514`, unrelated to this phase's code, not a real `opaque`
+  declaration).
+- `lean_verify` on `modalOpenBranchS4Sub_countermodel`: identical result, standard axioms only.
+- `grep -rn '\bsorry\b' Cslib/Logics/Modal/Tableau/*.lean` (discounting doc/comment mentions):
+  exactly one hit, `FrameSoundness.lean:1244`, unchanged from before this phase (the
+  user-retained marker; untouched, per the Postmortem Constraints and Preserved Assets P12).
+- `lake exe lint-style Cslib/Logics/Modal/Tableau/{LoopChecking,FrameCompleteness}.lean` — clean.
+- `grep -rln` for all six bridge names across `Cslib/` and `CslibTests/` confirms the only two
+  files referencing them are `LoopChecking.lean` and `FrameCompleteness.lean` — no hidden caller
+  elsewhere in the tree could have broken.
+
+**Caveat — full-project `lake build` is currently blocked by a concurrent, explicitly
+out-of-scope failure, not by this phase's work**: `lake build` (whole project) fails with exactly
+one target error, `Cslib/Logics/Modal/Metalogic/Constructive/Nested/Soundness.lean:1329:2:
+Missing cases: _, (NestedProof.cut (InputCtx.mk _ _ _) _ _ _)`. This file is explicitly
+out-of-scope for this task (Overview: *"The concurrent session's
+`Cslib/Logics/Modal/Metalogic/Constructive/Nested/**` and `Cslib.lean` are out of scope"*), was
+never touched by this phase, and is actively being repaired by a concurrent session (task 554,
+phase 14, "general id / efq" blocker — same session's `task554-id-repair` dispatch). Because the
+full-project `.olean` set is consequently incomplete, `lake exe checkInitImports` and
+`lake shake` (both of which require a fully up-to-date project build) could not be run to
+completion this dispatch; `lake exe lint-style`, scoped to the two touched files, was run
+directly and is clean. This is recorded here rather than treated as a Phase 2 failure because
+(a) the plan itself declares this file out of scope, (b) both files this phase actually wrote to
+build cleanly in isolation, and (c) no caller anywhere in the tree references the six weakened
+bridges outside those two files (verified above). Re-run `lake exe checkInitImports` and
+`lake shake` once the concurrent Nested/Soundness fix lands.
+
+**Consequence**: Gate A does not kill route (3). Phase 3 (Gate B, establishment) remains
+independently gated and is unblocked for a separate wave-2 dispatch, per the plan's own
+"Gates A and B are independent" statement. No phase after 2 was scaffolded around this positive
+outcome, consistent with the plan's risk mitigation.
 
 ---
 

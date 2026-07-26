@@ -1,0 +1,166 @@
+{
+  "status": "researched",
+  "agent_type": "cslib-research-hard-agent",
+  "session_id": "sess_1785102481_d21814",
+  "task_number": 557,
+  "task_name": "modal_tableau_refactor_abstractions_boneyard",
+  "task_type": "cslib",
+  "artifact_number": "01",
+  "started": "2026-07-26T00:00:00Z",
+  "completed": "2026-07-26T00:00:00Z",
+  "report_path": "specs/557_modal_tableau_refactor_abstractions_boneyard/reports/01_tableau-abstraction-boneyard-analysis.md",
+  "findings_count": 8,
+  "adversarial_verification_triggered": true,
+  "adversarial_revisions": 6,
+  "reference_grounding_tier": 1,
+  "bibkey_verification_status": "verified",
+  "bibkeys_verified": [
+    {
+      "key": "Massacci2000",
+      "references_bib_line": 1010,
+      "load_bearing": true,
+      "verbatim_read": true
+    },
+    {
+      "key": "ChagrovZakharyaschev1997",
+      "references_bib_line": 75,
+      "load_bearing": true,
+      "verbatim_read": true
+    },
+    {
+      "key": "Blackburn2001",
+      "references_bib_line": 65,
+      "load_bearing": false,
+      "verbatim_read": false,
+      "note": "corpus doc_id is blackburn_2002; repository BibKey is Blackburn2001"
+    },
+    {
+      "key": "ArisakaDasStrassburger2015",
+      "references_bib_line": 939,
+      "load_bearing": false,
+      "verbatim_read": false,
+      "note": "corpus entry UNVERIFIED provenance_fidelity; deliberately not cited"
+    }
+  ],
+  "bibkeys_absent": [
+    "Hughes & Cresswell 1996 - no BibKey in references.bib; corpus entry unused"
+  ],
+  "soundness_obligation_attempted": false,
+  "files_written_outside_specs": [],
+  "measured_baseline": {
+    "loopchecking_lines": 10540,
+    "loopchecking_declarations": 230,
+    "framesoundness_lines": 5317,
+    "framecompleteness_lines": 4307,
+    "three_file_total_lines": 20164,
+    "hintikkaS4_bridges": 8,
+    "hintikkaS4_bridges_asserted": 10,
+    "hintikkaS4_bridges_removed_in_commit": "c4b33f63",
+    "sorry_count_tableau_dir": 1,
+    "sorry_location": "Cslib/Logics/Modal/Tableau/FrameSoundness.lean:1244",
+    "sorry_count_cslib_repo_wide": 10,
+    "axiom_declarations_tableau_dir": 0,
+    "axiom_raw_word_matches_tableau_dir": 3,
+    "axiom_declarations_cslib_repo_wide": 26,
+    "axiom_raw_word_matches_cslib_repo_wide": 1701,
+    "tags_in_three_target_files": {
+      "FIX": 0,
+      "TODO": 0,
+      "NOTE": 0,
+      "QUESTION": 0
+    },
+    "tags_cslib_repo_wide": {
+      "FIX": 0,
+      "TODO": 11,
+      "NOTE": 8,
+      "QUESTION": 0
+    },
+    "outDegEq_s4_code_consumers": 0,
+    "outDegEq_s4_provision_sites": 3,
+    "outDegEq_preservation_lines_total": 386,
+    "outDegEq_preservation_lines_asserted": 188,
+    "local_rederivation_comment_sites": 77,
+    "decidable_instances_landed": 6,
+    "redirect_semantic_clauses": 4,
+    "redirect_semantic_code_lines": 14,
+    "boneyard_exists": false,
+    "checkInitImports_status": "FAILS on stale build (missing olean for Cslib.Logics.Modal.Metalogic.Constructive.Nested.Soundness) - unrelated to Tableau; requires full lake build first",
+    "not_remeasured": [
+      "4-decl/1036-line and 43-decl/1983-line amplification from modalTableauS4Keyed_complete - requires a transitive-dependency query over the elaborated environment, not a text scan; no substitute number fabricated"
+    ]
+  },
+  "primary_finding": "The mis-factoring is edge-addition where both source calculi identify worlds. A blocked minting step records acc.addEdge src wBlock, creating an obligation m.r (f src) (f wBlock) against branchSatisfiableIn's existentially-arbitrary model, whereas Massacci2000 Def 10.2 identifies worlds under a non-injective interpretation and ChagrovZakharyaschev1997 Thm 5.51 discharges the same condition by constructing S as a subset of the ambient relation. The completeness side already constructs its model (extractModelS4 = extractModelWith Relation.ReflTransGen); the soundness side quantifies existentially. That asymmetry, not file size or bridge count, is the real seam.",
+  "recommendations_summary": [
+    "Task A (P0, no deps): private-visibility deduplication - 77 comment-attested local re-derivations rooted in FmpMeasure.lean's 50 private declarations",
+    "Task B (P0, no deps): land the measured baseline; correct 2 FALSE and 1 STALE documentation sites",
+    "Task B2 (P0, no deps): repair specs/literature-index.json - Massacci entry reports 1 chunk, corpus has 77",
+    "Task C (P1, REVIEW GATE): abstraction decision record for box-plus birth keys and RuleApplySt",
+    "Task D (P2, after C): additive RuleApplySt introduction, zero risk by construction",
+    "Task E (P2, after C): box-plus birth keys, gated on modalTableauS4Keyed_complete staying green",
+    "Task F (P3, after D+E): migrate S4 Keyed onto the St ladder, retire the duplicated keys' re-derivation",
+    "Task G (P3, after C+E+F): split LoopChecking.lean into six S4/*.lean modules",
+    "Task H (P3, after F): create Boneyard/ and move only the re-verified zero-consumer declarations",
+    "Task I (P4, after all): CSLib vetting pipeline as acceptance gate"
+  ],
+  "review_gate_task": "Task C - abstraction decision record. No file may be moved or split and no abstraction implemented until Task C is reviewed and accepted, per the task description's explicit sequencing requirement.",
+  "boneyard_eligible_verified": [
+    "blockedRedirect_diaNeg_mem_of_diaOrigin (LoopChecking.lean:1506) - 0 code consumers",
+    "blockedRedirect_boxctx_mem_of_boxOrigin (LoopChecking.lean:1466) - 0 code consumers",
+    "keysRootEmpty + keysRootEmpty_entry pair (LoopChecking.lean:2007,2013) - 0 external consumers",
+    "modalStepBranchS4_preserves_outDegEq + _KeyedOrdered_ variant (386 lines) - conditional on Task F removing the S4LoopInv field; NOT a pure deletion (3 provision sites including a positional one at FrameCompleteness.lean:4217)"
+  ],
+  "boneyard_carve_outs": [
+    "FrameSoundness.lean:1220-1244 (branchSatisfiableIn_s4FC_ancestor_redirect) - zero consumers, but contains the sorry retained by explicit user decision. IMMOVABLE. The 'nothing proven and consumed may be moved' rule does not by itself protect it.",
+    "keysOriginS4 (LoopChecking.lean:1279) - NOT eligible, 22 code consumers. The removal claim at LoopChecking.lean:2001-2002 is FALSE.",
+    "Task-declared preserved assets confirmed present and correctly excluded: modalS4Saturated, the six strictly-weakened hintikkaS4 bridges, hasEdge_accWithReds_iff, reflTransGen_accWithReds_first_red, blockedRedirect_unwrapped_boxPos_mem, blockedRedirect_unwrapped_diaNeg_mem"
+  ],
+  "zero_debt_compliance": "No recommendation introduces a sorry or an axiom. Where no sorry-free path exists (branchSatisfiableIn's edge conjunct at a redirect edge), the report says so and stops rather than proposing deferral.",
+  "memory_candidates": [
+    {
+      "title": "CSLib Tableau: private lemmas cause cross-file re-derivation at scale",
+      "content": "In Cslib/Logics/Modal/Tableau/, 77 comment-attested 'Local re-derivation of X (unavailable across files)' sites exist because FmpMeasure.lean marks 50 declarations private. modalSubfmls_trans is re-derived in three files (S5Simplification.lean:97, FiveSimplification.lean:736, BDriver.lean:211); modalKnownWorlds_fold_spec in four; hasEdge_addEdge_cases in four. Prefer private only for genuinely file-local helpers; a lemma another module will need must be public. Deduplicating this is mechanical and behaviour-preserving by construction, and it shrinks oversized files before anyone splits them.",
+      "keywords": [
+        "cslib",
+        "lean4",
+        "private",
+        "duplication",
+        "module-organisation",
+        "tableau"
+      ]
+    },
+    {
+      "title": "Tableau loop-check blocking: record an identification, not an edge",
+      "content": "When a modal tableau loop-check blocks a minting step, adding an accessibility edge src -> wBlock creates a soundness obligation m.r (f src) (f wBlock) that an existentially-quantified witness model cannot supply. Both source calculi avoid this: Massacci2000 Definition 10.2's SST-interpretation is explicitly not required injective, so the blocked world is identified with its shorter modal copy, and Pruning Lemma 8.2 deletes the descendant-closed subtree rather than linking to it; ChagrovZakharyaschev1997 Theorem 5.51 constructs the relation as a subset of the ambient one (S_{n+1} subset R_Grz) so the box-propagation condition (HSm1) is immediate. Diagnostic: if the completeness side constructs its model (extractModelWith Relation.ReflTransGen) while the soundness side quantifies existentially over an arbitrary model, the two disagree about what a model is, and a loop-back edge is harmless to one and fatal to the other.",
+      "keywords": [
+        "modal-logic",
+        "tableau",
+        "loop-checking",
+        "soundness",
+        "filtration",
+        "S4",
+        "massacci"
+      ]
+    },
+    {
+      "title": "Lemmon box-plus keys are free in a subformula-indexed world bound",
+      "content": "Enriching filtration or birth keys from the unwrapped psi to the Lemmon box-plus pair {psi, box psi} costs nothing in a world bound of the form 2^(2*|Sub phi|), because modalSubfmls (.box a) = .box a :: modalSubfmls a makes box psi already a member of Sub phi whenever T(box psi)@w sits on a universe-closed branch. Why box-plus rather than psi alone: y satisfying psi AND box psi makes the filtration constraint composable across a further step, whereas psi alone tells you nothing about the next world (ChagrovZakharyaschev1997, print p. 142). Corollary 5.32 names S4 explicitly as admitting filtration via the Lemmon construction. The source never iterates box-plus beyond depth 1; where more discriminating power is needed it enlarges the filter Sigma instead (Theorems 5.34/5.35 use {box theta -> theta, dia box theta}), which DOES change the codomain and is therefore expensive. Enrich with box-plus, not with the filter. Caveat: the Lemmon filtration is defined for transitive models only, so this is not a Foundations-level abstraction.",
+      "keywords": [
+        "modal-logic",
+        "filtration",
+        "box-plus",
+        "lemmon",
+        "finite-model-property",
+        "S4",
+        "chagrov-zakharyaschev"
+      ]
+    }
+  ],
+  "next_steps": "Run /plan 557 to create implementation plan",
+  "artifacts": [
+    {
+      "path": "specs/557_modal_tableau_refactor_abstractions_boneyard/reports/01_tableau-abstraction-boneyard-analysis.md",
+      "type": "report",
+      "summary": "The mis-factoring is edge-addition where both source calculi identify worlds. A blocked minting step records acc.addEdge src wBlock, creating an obligation m.r (f src) (f wBlock) against branchSatisfiableIn's existentially-arbitrary model, whereas Massacci2000 Def 10.2 identifies worlds under a non-injective interpretation and ChagrovZakharyaschev1997 Thm 5.51 discharges the same condition by constructing S as a subset of the ambient relation. The completeness side already constructs its model (extractModelS4 = extractModelWith Relation.ReflTransGen); the soundness side quantifies existentially. That asymmetry, not file size or bridge count, is the real seam."
+    }
+  ]
+}

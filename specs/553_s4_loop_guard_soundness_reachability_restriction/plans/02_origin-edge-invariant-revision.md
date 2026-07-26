@@ -883,7 +883,7 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
 
 ---
 
-### Phase 11: Origin-Edge Invariant — Step Preservation [NOT STARTED]
+### Phase 11: Origin-Edge Invariant — Step Preservation [COMPLETED]
 
 - **Goal:** Prove `modalStepBranchS4KeyedOrdered_preserves_keysOriginS4` across every step shape,
   and thread it into the `_preserves_S4LoopInv` wrapper's conclusion tuple.
@@ -911,18 +911,50 @@ declaration in the file (K/T/S4/4-rule/B sections) is byte-for-byte unchanged.
   run's single objective. Say explicitly in the handoff which half landed.
 
 - **Tasks:**
-  - [ ] Prove `modalStepBranchS4KeyedOrdered_preserves_keysOriginS4`, case-split via
+  - [x] Prove `modalStepBranchS4KeyedOrdered_preserves_keysOriginS4`, case-split via
     `modalStepBranchS4KeyedOrdered_selected_mem` exactly as all twelve Phase 6 sub-lemmas do
     (`unfold modalStepBranchS4KeyedBody at hsf`, then the sign/formula split).
-  - [ ] Extend `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`'s conclusion with a fourth
+  - [x] Extend `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv`'s conclusion with a fourth
     conjunct `∀ b' ∈ newBs, keysOriginS4 φ₀ b' newAcc keys'`, and its hypotheses with
     `keysOriginS4 φ₀ b acc keys` — threaded exactly like the existing `hKW`/`hWC`. **The
     `S4LoopInv` structure itself is not touched, and `modalStepBranchS4_preserves_S4LoopInv` (the
     unordered wrapper) is not touched.** Confirm both in writing in the phase notes.
-  - [ ] Update every call site of the ordered wrapper to thread the new conjunct. Enumerate them
+  - [x] Update every call site of the ordered wrapper to thread the new conjunct. Enumerate them
     first (`grep -n "modalStepBranchS4KeyedOrdered_preserves_S4LoopInv"`); at the time of writing
     the only consumers are inside this plan's own remaining phases.
 - **Timing:** 4 hours
+
+- **Phase 11 completion notes:**
+  - Landed both `modalStepBranchS4Keyed_preserves_keysOriginS4` (unordered) and
+    `modalStepBranchS4KeyedOrdered_preserves_keysOriginS4` (ordered), covering **all fourteen**
+    `sf.sign`/`sf.formula` combinations (the twelve non-minting shapes uniformly via
+    `modalApplyOneS4Keyed_nonMint_snd_eq_acc` + `keysOriginS4_mono_branch`/`_mono_acc`, plus the
+    box-neg and diamond-pos minting shapes' blocked and unblocked sub-cases individually) — no
+    representative subset taken, matching the H8 sizing note's full-breadth requirement.
+  - **Deviation from the plan's literal signature**: `keysOriginS4` (Phase 10) takes no `φ₀`
+    parameter (already-landed deviation, `unusedArguments`-linter-forced), so the extended
+    wrapper's fourth conjunct and new hypothesis are `keysOriginS4 b' newAcc keys'` /
+    `keysOriginS4 b acc keys` (no `φ₀` argument), not `keysOriginS4 φ₀ b' newAcc keys'` as the
+    plan's task text literally proposed. Shape adjustment only, consistent with Phase 10.
+  - **Confirmed in writing**: the `S4LoopInv` struct definition is untouched, and
+    `modalStepBranchS4_preserves_S4LoopInv` (the unordered wrapper) is byte-for-byte unchanged —
+    only `modalStepBranchS4KeyedOrdered_preserves_S4LoopInv` (the ordered wrapper) gained the new
+    hypothesis and fourth conjunct.
+  - **Call sites**: none existed yet outside this file at dispatch time (confirmed via grep); no
+    external call sites required updating.
+  - Added one small reusable private helper, `modalStepBranchS4Keyed_result_acc_eq`, mirroring the
+    existing `modalStepBranchS4Keyed_result_keys_eq`, to extract the accessibility component
+    result-shape-agnostically for the 12 non-minting shapes.
+  - Verification: `lake build Cslib.Logics.Modal.Tableau.LoopChecking` green; `lean_verify` on both
+    new preservation lemmas and the extended wrapper shows only the standard
+    `{propext, Classical.choice, Quot.sound}` axioms (no new axioms); `lake exe checkInitImports`,
+    `lake lint` (1 pre-existing baseline error, `Temporal/Tableau/Saturation.lean`, unchanged),
+    `lake exe lint-style` on the touched file, and `lake build CslibTests.S4LoopGuardRegression`
+    all pass. Zero sorries introduced.
+  - **Termination-vs-completeness signal**: no empirical evidence either way surfaced in this
+    phase — the proof is purely structural (case analysis + monotonicity + direct construction),
+    with no fuel/measure argument touched or exercised. The standing central prediction remains
+    live and unconfirmed.
 - **Depends on:** 10
 - **Files to modify:**
   - `Cslib/Logics/Modal/Tableau/LoopChecking.lean`

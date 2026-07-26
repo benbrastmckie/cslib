@@ -26,7 +26,7 @@ next_project_number: 572
 ### Propositional Logic
 
 226 [RESEARCHED] — Cherry-pick propositional semantics from the local codebase into 
-317 [PLANNING] — Fill the remaining propositional/intuitionistic tableau completen
+317 [PLANNED] — Fill the remaining propositional/intuitionistic tableau completen
   └─ 375 [NOT STARTED] — Fold the TABLEAU decision systems into the propositional proof-sy
   └─ 430 [PLANNED] — Prove the atom-persistence / upward-closure structural lemma for 
 409 [RESEARCHED] — SPAWNED from task 407 (MPL structure-first redesign), Wave 6 -- O
@@ -705,7 +705,7 @@ After implementation:
 ---
 
 ### 317. Propositional tableau completeness
-- **Status**: [PLANNING]
+- **Status**: [PLANNED]
 - **Task Type**: cslib
 - **Topic**: Propositional Logic
 - **Dependencies**: Task 552
@@ -717,6 +717,7 @@ After implementation:
   - [317_propositional_tableau_completeness/plans/04_sfor-dedup-fuel-sufficiency.md]
   - [317_propositional_tableau_completeness/plans/05_frame-change-and-fuel-raise.md]
   - [317_propositional_tableau_completeness/plans/06_route-a-frame-plumbing.md]
+  - [317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md]
 - **Summary**:
   - [317_propositional_tableau_completeness/handoffs/01_phase1-continuation.md]
   - [317_propositional_tableau_completeness/summaries/03_b2-fuel-sufficiency-phase1-summary.md]

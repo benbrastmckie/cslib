@@ -1,64 +1,61 @@
 {
-  "status": "researched",
-  "summary": "Team research completed with 4 teammates. Verified the 4-sorry baseline and both resolved-blocker claims, but refuted the 'assembly only' framing: items (2)/(3) share a missing measure/fuel invariant not threaded through intExpandBranches_openBranch_sat, and item (4) likely needs an additional upward-closure argument the task's four-item list does not name. The mandated parametric abstraction (IntMinScheme) already exists and needs no refactor budget.",
+  "status": "planned",
+  "summary": "Hard-mode plan v7 written to plans/11_tableau-completeness-assembly.md. Eight H8-sized phases (0-7) opening with a mandated lean_goal verification spike, explicitly superseding plan v6's [BLOCKED] Phases 9/10 with a preserved-assets table of 17 landed components. Refutes the task description's 'assembly only' framing: items (2)/(3) require new universe/measure invariant threading through intExpandBranches_openBranch_sat (split across Phases 2-3 per research guidance), and item (4) needs an atom-persistence obligation plus a premise narrowing on tableau_complete. Surfaces a new load-bearing finding the research missed: tableau_complete's hvalid premise quantifies over arbitrary edges/b, making both bridge sorries unprovable at their current statement independent of persistence machinery. Not a skeleton plan; rationale for declining the strategic-sorry route is recorded in Rollback/Contingency.",
   "artifacts": [
     {
-      "type": "research",
-      "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
-      "summary": "Synthesized research from 4 teammates"
-    },
-    {
-      "type": "research",
-      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-a-findings.md",
-      "summary": "Primary route, phase decomposition, claim verification"
-    },
-    {
-      "type": "research",
-      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-b-findings.md",
-      "summary": "Prior art, alternatives, Mathlib leverage assessment"
-    },
-    {
-      "type": "research",
-      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-c-findings.md",
-      "summary": "Adversarial claim audit, territory risk, conformance-guard gap"
-    },
-    {
-      "type": "research",
-      "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-d-findings.md",
-      "summary": "Downstream consumer analysis and strategic sequencing"
+      "type": "plan",
+      "path": "specs/317_propositional_tableau_completeness/plans/11_tableau-completeness-assembly.md",
+      "summary": "Hard-mode implementation plan v7: 8 phases, verification spike first, invariant threading split, preserved-assets accounting against v6, 12 postmortem constraints, measurable sorry baseline (4 in-tree / 29 repo-wide via strict scan)"
     }
   ],
-  "team_execution": {
-    "enabled": true,
-    "wave_count": 1,
-    "teammates_spawned": 4,
-    "teammates_completed": 4,
-    "teammates_failed": 0,
-    "token_usage_multiplier": 5.0,
-    "degraded_to_single": false
-  },
-  "teammate_results": [
-    { "letter": "a", "angle": "primary", "status": "completed", "confidence": "medium-high" },
-    { "letter": "b", "angle": "alternatives", "status": "completed", "confidence": "high" },
-    { "letter": "c", "angle": "critic", "status": "completed", "confidence": "medium" },
-    { "letter": "d", "angle": "horizons", "status": "completed", "confidence": "medium" }
-  ],
-  "synthesis": {
-    "conflicts_found": 4,
-    "conflicts_resolved": 4,
-    "gaps_identified": 5,
-    "wave_2_triggered": false
+  "postmortem_rules_count": 12,
+  "plan_metadata": {
+    "phases": 8,
+    "total_effort_hours": 18,
+    "complexity": "complex",
+    "research_integrated": true,
+    "plan_version": 7,
+    "dependency_waves": [[0], [1], [2], [3], [4], [5], [6], [7]],
+    "reports_integrated": [
+      {
+        "path": "specs/317_propositional_tableau_completeness/reports/11_team-research.md",
+        "integrated_in_plan_version": 7,
+        "integrated_date": "2026-07-26"
+      },
+      {
+        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-a-findings.md",
+        "integrated_in_plan_version": 7,
+        "integrated_date": "2026-07-26"
+      },
+      {
+        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-b-findings.md",
+        "integrated_in_plan_version": 7,
+        "integrated_date": "2026-07-26"
+      },
+      {
+        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-c-findings.md",
+        "integrated_in_plan_version": 7,
+        "integrated_date": "2026-07-26"
+      },
+      {
+        "path": "specs/317_propositional_tableau_completeness/reports/11_teammate-d-findings.md",
+        "integrated_in_plan_version": 7,
+        "integrated_date": "2026-07-26"
+      }
+    ],
+    "skeleton": false,
+    "follow_up_tasks": []
   },
   "memory_candidates": [
-    "Mathlib has no formalization of intuitionistic Kripke semantics, tableau calculi, or fuel/fixpoint-sufficiency measures -- Heyting algebras exist but connect to nothing Kripke- or tableau-shaped. Do not budget research time searching for a Mathlib shortcut on these.",
-    "A lemma being locally sorry-free does not mean it is usable: applyPersistenceFixpoint_genuine_of_count_le_fuel is sorry-free but dead code, and its hb/hfuel hypotheses require invariant plumbing that does not exist in the caller's signature. Check call sites, not just sorry-freeness, when assessing whether a landed lemma closes a gap.",
-    "When two docstrings in one file contradict each other about whether a gap is blocked, git blame settles it: the later commit wins, and the commit that landed the enabling code is the authoritative one."
+    "A sorry-free Lean lemma with zero call sites is not usable work: check whether its hypotheses can be supplied at the intended use point before treating it as closing an obligation. Task 317's intExpMeasure_* family and applyPersistenceFixpoint_genuine_of_count_le_fuel were all sorry-free and all dead code.",
+    "Contradictory in-file Lean docstrings are settled by `git blame` commit ordering, not by judgment about which reads more authoritative. In Scheme.lean the 'RESOLVED' note at :488 postdates the 'BLOCKED' note at :3001 by fifteen hours and was written by the commit that landed the missing rule.",
+    "When a completeness theorem's validity premise is universally quantified over arbitrary structures (e.g. `forall edges b, IForces ...`), the caller's bridge obligation may be outright false; the premise must be narrowed with the witness the proof actually produces before the bridge sorry becomes provable.",
+    "Read-only import dependencies are a real territory hazard under concurrent sessions: pin the dependency file's SHA and re-check it at every phase start, rather than assuming a file is inert because the task never writes to it.",
+    "Repo-wide `grep -rn sorry` over a Lean codebase conflates tactic uses with prose; a strict scan (`^[[:space:]]+sorry[[:space:]]*(--.*)?$` plus `(:=|by|<;>|;)[[:space:]]+sorry`) plus a `#print axioms` sorryAx check is the usable measurement."
   ],
   "metadata": {
-    "session_id": "sess_1785106431_e662fa",
-    "agent_type": "skill-team-research",
-    "delegation_depth": 1,
-    "delegation_path": ["orchestrator", "research", "skill-team-research"]
-  },
-  "session_id": "sess_1785106431_e662fa"
+    "session_id": "sess_1785107692_362f1e",
+    "agent_type": "planner-hard-agent",
+    "delegation_path": ["orchestrator", "plan", "planner-hard-agent"]
+  }
 }

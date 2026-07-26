@@ -287,6 +287,18 @@ inductive NestedProof : NestedFull Atom → Type u where
   | bStruct (ctx : InputCtx Atom) (σ Δ : NestedLhs Atom) :
       NestedProof (ctx.fillLhs (.dia (.comma (.dia σ) Δ))) →
       NestedProof (ctx.fillLhs (.comma σ (.dia Δ)))
+  /-- `cut` (eq. (3.1), page 7): from a proof of `Γ⇓{A°}` (the output-pruned context filled with
+  `A°`, exactly the `⊃•`/`impL`-style output pruning) and a proof of `Γ{A•}`, derive `Γ{∅}` --
+  cutting the formula `A` away entirely. Landed as a genuine primitive constructor (not proved
+  admissible here -- admissibility/elimination is Stage F's separate concern, §6), mirroring
+  `SeqProof.cut`'s treatment in `Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean`. The
+  source explicitly notes this rule "is not part of the system" (`NCK` proper) "but we will later
+  see that they are all admissible" -- for this phase's purposes (`NCK + cut`, not bare `NCK`) it
+  is added directly, gated out of `CutFree` below exactly as `SeqProof.cut` is gated out of
+  `SeqProof.CutFree`. -/
+  | cut (ctx : InputCtx Atom) (A : Proposition Atom) :
+      NestedProof (ctx.outputPruning.fillRhs (.atom A)) → NestedProof (ctx.fillLhs (.atom A)) →
+      NestedProof ctx.fillEmpty
 
 /-! ## Proof Height -/
 
@@ -314,6 +326,7 @@ def NestedProof.height : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Nat
   | _, .fourR _ _ _ p => p.height + 1
   | _, .fourL _ _ _ p => p.height + 1
   | _, .bStruct _ _ _ p => p.height + 1
+  | _, .cut _ _ p q => max p.height q.height + 1
 
 /-! ## `NestedProof.mono`: Index-Transport Precursor to Phase 19's Weakening
 
@@ -335,6 +348,37 @@ theorem NestedProof.mono_height {Γ Γ' : NestedFull Atom} (h : Γ = Γ') (d : N
     (d.mono h).height ≤ d.height := by
   subst h
   exact Nat.le_refl _
+
+/-! ## `NestedProof.CutFree`
+
+Mirrors `SeqProof.CutFree`'s treatment in
+`Cslib/Logics/Propositional/SequentCalculus/LJ/Basic.lean`: a predicate on `NestedProof` that is
+`False` exactly at a `cut` step and propagates conjunctively through every other constructor,
+gating `cut` out of the cut-free fragment `NCS5` (as opposed to `NCS5 + cut`) without needing a
+second inductive family. -/
+
+/-- A predicate asserting that a `NestedProof` contains no `cut` steps. -/
+def NestedProof.CutFree : ∀ {Γ : NestedFull Atom}, NestedProof Γ → Prop
+  | _, .botL _ => True
+  | _, .id .. => True
+  | _, .andL _ _ _ p => p.CutFree
+  | _, .andR _ _ _ p q => p.CutFree ∧ q.CutFree
+  | _, .orL _ _ _ _ p q => p.CutFree ∧ q.CutFree
+  | _, .orRLeft _ _ _ p => p.CutFree
+  | _, .orRRight _ _ _ p => p.CutFree
+  | _, .impL _ _ _ p q => p.CutFree ∧ q.CutFree
+  | _, .impR _ _ _ p => p.CutFree
+  | _, .boxL _ _ _ p => p.CutFree
+  | _, .boxR _ _ p => p.CutFree
+  | _, .diaL _ _ p => p.CutFree
+  | _, .diaR _ _ _ p => p.CutFree
+  | _, .contract _ _ p => p.CutFree
+  | _, .tR _ _ p => p.CutFree
+  | _, .tL _ _ p => p.CutFree
+  | _, .fourR _ _ _ p => p.CutFree
+  | _, .fourL _ _ _ p => p.CutFree
+  | _, .bStruct _ _ _ p => p.CutFree
+  | _, .cut _ _ _ _ => False
 
 /-! ## Smoke-Test Derivations
 
